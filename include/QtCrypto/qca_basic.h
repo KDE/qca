@@ -53,7 +53,12 @@ namespace QCA
 		 * How much entropy to use for the random numbers that
 		 * are required.
 		 */
-		enum Quality { Nonce, PublicValue, SessionKey, LongTermKey };
+		enum Quality {
+			Nonce,      ///< Low quality, will become public
+			PublicValue,///< Will become public
+			SessionKey, ///< Intended to remain private
+			LongTermKey ///< Best available quality
+		};
 
 		/**
 		 * Standard Constructor
