@@ -37,6 +37,7 @@ PUBLIC_HEADERS += \
 	$$QCA_INC/qca_publickey.h \
 	$$QCA_INC/qca_cert.h \
 	$$QCA_INC/qca_securelayer.h \
+	$$QCA_INC/qca_securemessage.h \
 	$$QCA_INC/qcaprovider.h \
 
 HEADERS += $$PRIVATE_HEADERS $$PUBLIC_HEADERS
@@ -50,6 +51,7 @@ SOURCES += \
 	$$QCA_CPP/qca_publickey.cpp \
 	$$QCA_CPP/qca_cert.cpp \
 	$$QCA_CPP/qca_securelayer.cpp \
+	$$QCA_CPP/qca_securemessage.cpp \
 	$$QCA_CPP/qca_default.cpp
 
 DEFINES += QCA_NO_SYSTEMSTORE
