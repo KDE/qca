@@ -32,8 +32,16 @@ struct cipherTestValues {
     QCString ciphertext;
     QCString key;
 };
+
+struct cipherIVTestValues {
+    QCString plaintext;
+    QCString ciphertext;
+    QCString key;
+    QCString iv;
+};
+
 // These are from the Botan test suite
-static struct cipherTestValues aes128TestValues[] = {
+static struct cipherTestValues aes128ecbTestValues[] = {
 
 
     { "506812a45f08c889b97f5980038b8359",
@@ -96,7 +104,31 @@ static struct cipherTestValues aes128TestValues[] = {
 };
 
 // These are from the Botan test suite
-static struct cipherTestValues aes192TestValues[] = {
+static struct cipherIVTestValues aes128cbcTestValues[] = {
+
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "7649abac8119b246cee98e9b12e9197d5086cb9b507219ee95db113a917678b273bed6b8e3c1743b7116e69e222295163ff1caa1681fac09120eca307586e1a7",
+      "2b7e151628aed2a6abf7158809cf4f3c",
+      "000102030405060708090a0b0c0d0e0f" },
+
+    { 0, 0, 0, 0 }
+};
+
+
+// These are from the Botan test suite
+static struct cipherIVTestValues aes128cfbTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "3b3fd92eb72dad20333449f8e83cfb4ac8a64537a0b3a93fcde3cdad9f1ce58b26751f67a3cbb140b1808cf187a4f4dfc04b05357c5d1c0eeac4c66f9ff7f2e6",
+      "2b7e151628aed2a6abf7158809cf4f3c",
+      "000102030405060708090a0b0c0d0e0f" },
+
+    { 0, 0, 0, 0 }
+};
+
+// These are from the Botan test suite
+static struct cipherTestValues aes192ecbTestValues[] = {
 
     { "fec1c04f529bbd17d8cecfcc4718b17f",
       "62564c738f3efe186e1a127a0c4d3c61",
@@ -146,8 +178,29 @@ static struct cipherTestValues aes192TestValues[] = {
     { 0, 0, 0 }
 };
 
+static struct cipherIVTestValues aes192cbcTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "4f021db243bc633d7178183a9fa071e8b4d9ada9ad7dedf4e5e738763f69145a571b242012fb7ae07fa9baac3df102e008b0e27988598881d920a9e64f5615cd",
+      "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
+      "000102030405060708090a0b0c0d0e0f" },
+    { 0, 0, 0, 0 }
+};
+
 // These are from the Botan test suite
-static struct cipherTestValues aes256TestValues[] = {
+static struct cipherIVTestValues aes192cfbTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "cdc80d6fddf18cab34c25909c99a417467ce7f7f81173621961a2b70171d3d7a2e1e8a1dd59b88b1c8e60fed1efac4c9c05f9f9ca9834fa042ae8fba584b09ff",
+      "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
+      "000102030405060708090a0b0c0d0e0f" },
+
+    { 0, 0, 0, 0 }
+};
+
+
+// These are from the Botan test suite
+static struct cipherTestValues aes256ecbTestValues[] = {
     { "e51aa0b135dba566939c3b6359a980c5",
       "8cd9423dfc459e547155c5d1d522e540",
       "e0e1e2e3e5e6e7e8eaebecedeff0f1f2f4f5f6f7f9fafbfcfefe010103040506" },
@@ -235,6 +288,118 @@ static struct cipherTestValues aes256TestValues[] = {
     { 0, 0, 0 }
 };
 
+static struct cipherIVTestValues aes256cbcTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b",
+      "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
+      "000102030405060708090a0b0c0d0e0f" },
+
+    { 0, 0, 0, 0 }
+};
+
+// These are from the Botan test suite
+static struct cipherIVTestValues aes256cfbTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "dc7e84bfda79164b7ecd8486985d386039ffed143b28b1c832113c6331e5407bdf10132415e54b92a13ed0a8267ae2f975a385741ab9cef82031623d55b1e471",
+      "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
+      "000102030405060708090a0b0c0d0e0f" },
+
+    { 0, 0, 0, 0 }
+};
+
+// These are from the Botan test suite
+static struct cipherTestValues blowfishTestValues[] = {
+
+  { "0000000000000000", "245946885754369a", "0123456789abcdef" },
+  { "0000000000000000", "4ef997456198dd78", "0000000000000000" },
+  { "0000000000000000", "f21e9a77b71c49bc", "ffffffffffffffff" },
+  { "004bd6ef09176062", "452031c1e4fada8e", "584023641aba6176" },
+  { "0123456789abcdef", "0aceab0fc6a0a28d", "fedcba9876543210" },
+  { "0123456789abcdef", "7d0cc630afda1ec7", "1111111111111111" },
+  { "0123456789abcdef", "a790795108ea3cae", "1f1f1f1f0e0e0e0e" },
+  { "0123456789abcdef", "c39e072d9fac631d", "e0fee0fef1fef1fe" },
+  { "0123456789abcdef", "fa34ec4847b268b2", "0101010101010101" },
+  { "01a1d6d039776742", "59c68245eb05282b", "7ca110454a1a6e57" },
+  { "0248d43806f67172", "1730e5778bea1da4", "07a1133e4a0b2686" },
+  { "02fe55778117f12a", "cf9c5d7a4986adb5", "49e95d6d4ca229bf" },
+  { "059b5e0851cf143a", "48f4d0884c379918", "0113b970fd34f2ce" },
+  { "072d43a077075292", "7a8e7bfa937e89a3", "4fb05e1515ab73a7" },
+  { "0756d8e0774761d2", "432193b78951fc98", "0170f175468fb5e6" },
+  { "1000000000000001", "7d856f9a613063f2", "3000000000000000" },
+  { "1111111111111111", "2466dd878b963c9d", "1111111111111111" },
+  { "1111111111111111", "61f9c3802281b096", "0123456789abcdef" },
+  { "164d5e404f275232", "5f99d04f5b163969", "37d06bb516cb7546" },
+  { "1d9d5c5018f728c2", "d1abb290658bc778", "018310dc409b26d6" },
+  { "26955f6835af609a", "d887e0393c2da6e3", "04689104c2fd3b2f" },
+  { "305532286d6f295a", "55cb3774d13ef201", "1c587f1c13924fef" },
+  { "3bdd119049372802", "2eedda93ffd39c79", "07a7137045da2a16" },
+  { "42fd443059577fa2", "353882b109ce8f1a", "04b915ba43feb5b6" },
+  { "437540c8698f3cfa", "53c55f9cb49fc019", "49793ebc79b3258f" },
+  { "480d39006ee762f2", "7555ae39f59b87bd", "025816164629b007" },
+  { "51454b582ddf440a", "a25e7856cf2651eb", "3849674c2602319e" },
+  { "5cd54ca83def57da", "b1b8cc0b250f09a0", "0131d9619dc1376e" },
+  { "6b056e18759f5cca", "4a057a3b24d3977b", "1f08260d1ac2465e" },
+  { "762514b829bf486a", "13f04154d69d1ae5", "43297fad38e373fe" },
+  { "ffffffffffffffff", "014933e0cdaff6e4", "0000000000000000" },
+  { "ffffffffffffffff", "51866fd5b85ecb8a", "ffffffffffffffff" },
+  { "ffffffffffffffff", "6b5c5a9c5d9e0a5a", "fedcba9876543210" },
+  { "0123456789abcdef1111111111111111", "7d0cc630afda1ec72466dd878b963c9d", "1111111111111111" },
+  { "fedcba9876543210", "cc91732b8022f684", "57686f206973204a6f686e2047616c743f" },
+  { "424c4f5746495348", "324ed0fef413a203", "6162636465666768696a6b6c6d6e6f707172737475767778797a" },
+  { "fedcba9876543210", "f9ad597c49db005e", "f0" },
+  { "fedcba9876543210", "e91d21c1d961a6d6", "f0e1" },
+  { "fedcba9876543210", "e9c2b70a1bc65cf3", "f0e1d2" },
+  { "fedcba9876543210", "be1e639408640f05", "f0e1d2c3" },
+  { "fedcba9876543210", "b39e44481bdb1e6e", "f0e1d2c3b4" },
+  { "fedcba9876543210", "9457aa83b1928c0d", "f0e1d2c3b4a5" },
+  { "fedcba9876543210", "8bb77032f960629d", "f0e1d2c3b4a596" },
+  { "fedcba9876543210", "e87a244e2cc85e82", "f0e1d2c3b4a59687" },
+  { "fedcba9876543210", "15750e7a4f4ec577", "f0e1d2c3b4a5968778" },
+  { "fedcba9876543210", "122ba70b3ab64ae0", "f0e1d2c3b4a596877869" },
+  { "fedcba9876543210", "3a833c9affc537f6", "f0e1d2c3b4a5968778695a" },
+  { "fedcba9876543210", "9409da87a90f6bf2", "f0e1d2c3b4a5968778695a4b" },
+  { "fedcba9876543210", "884f80625060b8b4", "f0e1d2c3b4a5968778695a4b3c" },
+  { "fedcba9876543210", "1f85031c19e11968", "f0e1d2c3b4a5968778695a4b3c2d" },
+  { "fedcba9876543210", "79d9373a714ca34f", "f0e1d2c3b4a5968778695a4b3c2d1e" },
+  { "fedcba9876543210", "93142887ee3be15c", "f0e1d2c3b4a5968778695a4b3c2d1e0f" },
+  { "fedcba9876543210", "03429e838ce2d14b", "f0e1d2c3b4a5968778695a4b3c2d1e0f00" },
+  { "fedcba9876543210", "a4299e27469ff67b", "f0e1d2c3b4a5968778695a4b3c2d1e0f0011" },
+  { "fedcba9876543210", "afd5aed1c1bc96a8", "f0e1d2c3b4a5968778695a4b3c2d1e0f001122" },
+  { "fedcba9876543210", "10851c0e3858da9f", "f0e1d2c3b4a5968778695a4b3c2d1e0f00112233" },
+  { "fedcba9876543210", "e6f51ed79b9db21f", "f0e1d2c3b4a5968778695a4b3c2d1e0f0011223344" },
+  { "fedcba9876543210", "64a6e14afd36b46f", "f0e1d2c3b4a5968778695a4b3c2d1e0f001122334455" },
+  { "fedcba9876543210", "80c7d7d45a5479ad", "f0e1d2c3b4a5968778695a4b3c2d1e0f00112233445566" },
+  { "fedcba9876543210", "05044b62fa52d080", "f0e1d2c3b4a5968778695a4b3c2d1e0f0011223344556677" },
+  { 0, 0, 0 }
+};
+
+// These are from the Botan test suite
+static struct cipherTestValues tripledesTestValues[] = {
+// Botan includes these, but the key length is wrong. Beats me.
+//  { "0123456789abcde7", "7f1d0a77826b8aff", "123456789abcdeffedcba9876543210" },
+//  { "4e6f772069732074", "3fa40e8a984d4815", "123456789abcdef0123456789abcdef" },
+//  { "42fd443059577fa2", "af37fb421f8c4095", "4b915ba43feb5b604b915ba43feb5b6" },
+
+    { "42fd443059577fa2", "af37fb421f8c4095", "04b915ba43feb5b604b915ba43feb5b604b915ba43feb5b6" },
+    { "736f6d6564617461", "18d748e563620572", "0123456789abcdef5555555555555555fedcba9876543210" },
+    { "7371756967676c65", "c07d2a0fa566fa30", "0352020767208217860287665908219864056abdfea93457" },
+    { "0123456789abcde7", "de0b7c06ae5e0ed5", "0123456789abcdeffedcba987654321089abcdef01234567" },
+    { "0123456789abcde7", "7f1d0a77826b8aff", "0123456789abcdeffedcba98765432100123456789abcdef" },
+    { "4115e551299a5c4b", "f7a0822fc310686c", "1ef743a68d629f68a5e3136c36ad7953a835cf849bb4ec3c" },
+    { "d5ab44e0fe46e1b5", "02aed9bf72eca222", "b7d560be49c3936728ef0bf57b602d2eb7e5c631dd7f753e" },
+    { "b4077dfdb721d88c", "f76aba838b1c4372", "d2d98706e9ab867647d244bdcdbcd5ef8b4dbc9cf4f35493" },
+    { "890e98ab385fa1a1", "187087c77790c3b2", "153b963004101d12683e8f87116001b8c5526475510b5036" },
+    { "02d5da6d5f247cd2", "89fc7df1e7913163", "45e4275dccc5d8b5a27993c16d9960ca939c023e2763216a" },
+    { "5af9e5a3525e3f7d", "8fcc7a8bc337e484", "f6c2474b33934ea76e6c841d9b1e86e37189095a895a3e5a" },
+    { "12864dde8e694bd1", "5b4dde8f000a5a9b", "5b4f6d3185efbae97d58ed9cc75e2bae655d2cefb2dd09cd" },
+    { "0123456789abcde7", "c95744256a5ed31d", "0123456789abcdef0123456789abcdef0123456789abcdef" },
+    { "68652074696d6520", "6a271787ab8883f9", "0123456789abcdef0123456789abcdef0123456789abcdef" },
+    { "4e6f772069732074", "3fa40e8a984d4815", "0123456789abcdef0123456789abcdef0123456789abcdef" },
+    { 0, 0, 0 }
+};
+
 CipherUnitTest::CipherUnitTest()
     : Tester()
 {
@@ -253,6 +418,7 @@ void CipherUnitTest::allTests()
 	CHECK( QCA::arrayToHex( inter ), QString( "d8f532538289ef7d06b506a4fd5be9c9") );
 	CHECK( QCA::arrayToHex( cipherObj1.final() ), QString( "d8f532538289ef7d06b506a4fd5be9c9") );
 
+	CHECK( cipherObj1.blockSize(), 16 );
 
 	// From the NIST rijndael-vals.zip set, see ecb_iv.txt
 	QCA::SymmetricKey key2(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F" ) );
@@ -276,15 +442,50 @@ void CipherUnitTest::allTests()
 	cipherObj5.update( QCA::hexToArray( "69c4e0d86a7b0430d8cdb78070b4c55a" ) );
 	CHECK( QCA::arrayToHex( cipherObj5.final() ), QString( "00112233445566778899aabbccddeeff" ) );
 
-	for (int n = 0; aes128TestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128TestValues[n].key ) );
+	for (int n = 0; aes128ecbTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes128ecbTestValues[n].key ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::ECB, QCA::Encode, key );
-	    forwardCipher.update( QCA::hexToArray( aes128TestValues[n].plaintext ) );
-	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes128TestValues[n].ciphertext ) );
+	    forwardCipher.update( QCA::hexToArray( aes128ecbTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes128ecbTestValues[n].ciphertext ) );
 
 	    QCA::AES128 reverseCipher( QCA::Cipher::ECB, QCA::Decode, key );
-	    reverseCipher.update( QCA::hexToArray( aes128TestValues[n].ciphertext ) );
-	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes128TestValues[n].plaintext ) );
+	    reverseCipher.update( QCA::hexToArray( aes128ecbTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes128ecbTestValues[n].plaintext ) );
+        }
+
+	for (int n = 0; aes128ecbTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes128ecbTestValues[n].key ) );
+	    QCA::AES128 forwardCipher( QCA::Cipher::ECB, QCA::Encode, key );
+	    forwardCipher.update( QCA::hexToArray( aes128ecbTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes128ecbTestValues[n].ciphertext ) );
+
+	    QCA::AES128 reverseCipher( QCA::Cipher::ECB, QCA::Decode, key );
+	    reverseCipher.update( QCA::hexToArray( aes128ecbTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes128ecbTestValues[n].plaintext ) );
+        }
+
+	for (int n = 0; aes128cbcTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes128cbcTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes128cbcTestValues[n].iv ) );
+	    QCA::AES128 forwardCipher( QCA::Cipher::CBC, QCA::Encode, key, iv );
+	    forwardCipher.update( QCA::hexToArray( aes128cbcTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes128cbcTestValues[n].ciphertext ) );
+
+	    QCA::AES128 reverseCipher( QCA::Cipher::CBC, QCA::Decode, key, iv );
+	    reverseCipher.update( QCA::hexToArray( aes128cbcTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes128cbcTestValues[n].plaintext ) );
+        }
+
+	for (int n = 0; aes128cfbTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes128cfbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes128cfbTestValues[n].iv ) );
+	    QCA::AES128 forwardCipher( QCA::Cipher::CFB, QCA::Encode, key, iv );
+	    forwardCipher.update( QCA::hexToArray( aes128cfbTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes128cfbTestValues[n].ciphertext ) );
+
+	    QCA::AES128 reverseCipher( QCA::Cipher::CFB, QCA::Decode, key, iv );
+	    reverseCipher.update( QCA::hexToArray( aes128cfbTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes128cfbTestValues[n].plaintext ) );
         }
     }
 
@@ -298,19 +499,45 @@ void CipherUnitTest::allTests()
 	cipherObj1.update( data1 );
 	CHECK( QCA::arrayToHex( cipherObj1.final() ), QString( "dda97ca4864cdfe06eaf70a0ec0d7191") );
 
+	CHECK( cipherObj1.blockSize(), 16 );
+
 	QCA::AES192 cipherObj2(QCA::Cipher::ECB, QCA::Decode, key1, QCA::InitializationVector(), false );
 	cipherObj2.update( QCA::hexToArray( "dda97ca4864cdfe06eaf70a0ec0d7191") );
 	CHECK( QCA::arrayToHex( cipherObj2.final() ), QString( "00112233445566778899aabbccddeeff" ) );
 
-	for (int n = 0; aes192TestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes192TestValues[n].key ) );
+	for (int n = 0; aes192ecbTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes192ecbTestValues[n].key ) );
 	    QCA::AES192 forwardCipher( QCA::Cipher::ECB, QCA::Encode, key );
-	    forwardCipher.update( QCA::hexToArray( aes192TestValues[n].plaintext ) );
-	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes192TestValues[n].ciphertext ) );
+	    forwardCipher.update( QCA::hexToArray( aes192ecbTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes192ecbTestValues[n].ciphertext ) );
 
 	    QCA::AES192 reverseCipher( QCA::Cipher::ECB, QCA::Decode, key );
-	    reverseCipher.update( QCA::hexToArray( aes192TestValues[n].ciphertext ) );
-	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes192TestValues[n].plaintext ) );
+	    reverseCipher.update( QCA::hexToArray( aes192ecbTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes192ecbTestValues[n].plaintext ) );
+        }
+
+	for (int n = 0; aes192cbcTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes192cbcTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes192cbcTestValues[n].iv ) );
+	    QCA::AES192 forwardCipher( QCA::Cipher::CBC, QCA::Encode, key, iv );
+	    forwardCipher.update( QCA::hexToArray( aes192cbcTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes192cbcTestValues[n].ciphertext ) );
+
+	    QCA::AES192 reverseCipher( QCA::Cipher::CBC, QCA::Decode, key, iv );
+	    reverseCipher.update( QCA::hexToArray( aes192cbcTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes192cbcTestValues[n].plaintext ) );
+        }
+
+	for (int n = 0; aes192cfbTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes192cfbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes192cfbTestValues[n].iv ) );
+	    QCA::AES192 forwardCipher( QCA::Cipher::CFB, QCA::Encode, key, iv );
+	    forwardCipher.update( QCA::hexToArray( aes192cfbTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes192cfbTestValues[n].ciphertext ) );
+
+	    QCA::AES192 reverseCipher( QCA::Cipher::CFB, QCA::Decode, key, iv );
+	    reverseCipher.update( QCA::hexToArray( aes192cfbTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes192cfbTestValues[n].plaintext ) );
         }
     }
 
@@ -325,30 +552,85 @@ void CipherUnitTest::allTests()
 	cipherObj1.update( data1 );
 	CHECK( QCA::arrayToHex( cipherObj1.final() ), QString( "8ea2b7ca516745bfeafc49904b496089") );
 
+	CHECK( cipherObj1.blockSize(), 16 );
+
 	QCA::AES256 cipherObj2(QCA::Cipher::ECB, QCA::Decode, key1, QCA::InitializationVector(), false );
 	cipherObj2.update( QCA::hexToArray( "8EA2B7CA516745BFEAFC49904B496089") );
 	CHECK( QCA::arrayToHex( cipherObj2.final() ), QString( "00112233445566778899aabbccddeeff" ) );
 
-	for (int n = 0; aes256TestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes256TestValues[n].key ) );
+	for (int n = 0; aes256ecbTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes256ecbTestValues[n].key ) );
 	    QCA::AES256 forwardCipher( QCA::Cipher::ECB, QCA::Encode, key );
-	    forwardCipher.update( QCA::hexToArray( aes256TestValues[n].plaintext ) );
-	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes256TestValues[n].ciphertext ) );
+	    forwardCipher.update( QCA::hexToArray( aes256ecbTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes256ecbTestValues[n].ciphertext ) );
 
 	    QCA::AES256 reverseCipher( QCA::Cipher::ECB, QCA::Decode, key );
-	    reverseCipher.update( QCA::hexToArray( aes256TestValues[n].ciphertext ) );
-	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes256TestValues[n].plaintext ) );
+	    reverseCipher.update( QCA::hexToArray( aes256ecbTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes256ecbTestValues[n].plaintext ) );
         }
+
+	for (int n = 0; aes256cbcTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes256cbcTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes256cbcTestValues[n].iv ) );
+	    QCA::AES256 forwardCipher( QCA::Cipher::CBC, QCA::Encode, key, iv );
+	    forwardCipher.update( QCA::hexToArray( aes256cbcTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes256cbcTestValues[n].ciphertext ) );
+
+	    QCA::AES256 reverseCipher( QCA::Cipher::CBC, QCA::Decode, key, iv );
+	    reverseCipher.update( QCA::hexToArray( aes256cbcTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes256cbcTestValues[n].plaintext ) );
+        }
+
+	for (int n = 0; aes256cfbTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes256cfbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes256cfbTestValues[n].iv ) );
+	    QCA::AES256 forwardCipher( QCA::Cipher::CFB, QCA::Encode, key, iv );
+	    forwardCipher.update( QCA::hexToArray( aes256cfbTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( aes256cfbTestValues[n].ciphertext ) );
+
+	    QCA::AES256 reverseCipher( QCA::Cipher::CFB, QCA::Decode, key, iv );
+	    reverseCipher.update( QCA::hexToArray( aes256cfbTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( aes256cfbTestValues[n].plaintext ) );
+        }
+
     }
 
     if (!QCA::isSupported("tripledes") )
 	SKIP("Triple DES not supported!\n");
     else {
+	QCA::TripleDES cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 24 ) );
+	CHECK( cipherObj1.keyLength().minimum(), 24 );
+	CHECK( cipherObj1.keyLength().maximum(), 24 );
+	CHECK( cipherObj1.blockSize(), 8 );
+
+	for (int n = 0; tripledesTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( tripledesTestValues[n].key ) );
+	    QCA::TripleDES forwardCipher( QCA::Cipher::ECB, QCA::Encode, key );
+	    forwardCipher.update( QCA::hexToArray( tripledesTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( tripledesTestValues[n].ciphertext ) );
+
+	    QCA::TripleDES reverseCipher( QCA::Cipher::ECB, QCA::Decode, key );
+	    reverseCipher.update( QCA::hexToArray( tripledesTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( tripledesTestValues[n].plaintext ) );
+        }
     }
 
     if (!QCA::isSupported("blowfish") )
 	SKIP("Blowfish not supported!\n");
     else {
+	QCA::BlowFish cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 16 ) );
+	CHECK( cipherObj1.blockSize(), 8 );
+
+	for (int n = 0; blowfishTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( blowfishTestValues[n].key ) );
+	    QCA::BlowFish forwardCipher( QCA::Cipher::ECB, QCA::Encode, key );
+	    forwardCipher.update( QCA::hexToArray( blowfishTestValues[n].plaintext ) );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( blowfishTestValues[n].ciphertext ) );
+
+	    QCA::BlowFish reverseCipher( QCA::Cipher::ECB, QCA::Decode, key );
+	    reverseCipher.update( QCA::hexToArray( blowfishTestValues[n].ciphertext ) );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( blowfishTestValues[n].plaintext ) );
+        }
     }
 }
 
