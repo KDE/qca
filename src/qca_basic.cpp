@@ -320,4 +320,54 @@ QString MessageAuthenticationCode::withAlgorithm(const QString &macType, const Q
 	return (macType + '(' + algType + ')');
 }
 
+//----------------------------------------------------------------------------
+// Key Derivation Function
+//----------------------------------------------------------------------------
+class KeyDerivationFunction::Private
+{
+public:
+    QSecureArray secret;
+    InitializationVector salt;
+    int keyLength;
+    int iterationCount;
+
+    SymmetricKey buf;
+};
+
+KeyDerivationFunction::KeyDerivationFunction(const QString &type, const QString &provider)
+:Algorithm(type, provider)
+{
+	d = new Private;
+}
+
+KeyDerivationFunction::KeyDerivationFunction(const KeyDerivationFunction &from)
+:Algorithm(from)
+{
+	d = new Private;
+	*this = from;
+}
+
+KeyDerivationFunction::~KeyDerivationFunction()
+{
+	delete d;
+}
+
+SymmetricKey KeyDerivationFunction::makeKey(const QSecureArray &secret,
+				     const InitializationVector &salt,
+				     unsigned int keyLength,
+				     unsigned int iterationCount)
+{
+	d->secret = secret;
+	d->salt = salt;
+	d->keyLength = keyLength;
+	d->iterationCount = iterationCount;
+
+	return d->buf;
+}
+
+QString KeyDerivationFunction::withAlgorithm(const QString &kdfType, const QString &algType)
+{
+	return (kdfType + '(' + algType + ')');
+}
+
 }
