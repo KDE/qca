@@ -66,6 +66,7 @@ static struct hashTestValues md4TestValues[] = {
 };
 
 // These are as specified in RFC 1321
+// They also match Australian Standard (AS) 2805.1.3.2-2000 Appendix A
 static struct hashTestValues md5TestValues[] = {
 	{ "", "d41d8cd98f00b204e9800998ecf8427e" },
 	{ "a", "0cc175b9c0f1b6a831c399e269772661" },
@@ -89,6 +90,7 @@ static struct hashTestValues sha0TestValues[] = {
 };
 
 // These are as specfied in FIPS 180-2. Matches RFC3174
+// Some additions from Australian Standard (AS) 2805.13.3-2000
 static struct hashTestValues sha1TestValues[] = {
 
 	// FIPS 180-2, Appendix A.1
@@ -97,7 +99,15 @@ static struct hashTestValues sha1TestValues[] = {
 	// FIPS 180-2, Appendix A.2
 	{ "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 	  "84983e441c3bd26ebaae4aa1f95129e5e54670f1" },
-	
+
+	// AS 2805.13.3-200 Appendix A
+	// has some duplicates from FIPS 180-2
+	{ "", "da39a3ee5e6b4b0d3255bfef95601890afd80709" },
+	{ "a", "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8" },
+	{ "abc",  "a9993e364706816aba3e25717850c26c9cd0d89d" },
+	{ "abcdefghijklmnopqrstuvwxyz", "32d10c7b8cf96570ca04ce37f2a19d84240d3a89" },
+	{ "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+	  "84983e441c3bd26ebaae4aa1f95129e5e54670f1" },
 	{ 0, 0 }
 };
 
@@ -203,6 +213,7 @@ void HashUnitTest::allTests()
 
 	// This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
 	// It basically reflects FIPS 180-2, Appendix A.3
+	// Also as per AS 2805.13.3-2000 Appendix A
 	QCA::SHA1 shaHash;
 	for (int i=0; i<1000; i++)
 	    shaHash.update(fillerString);
