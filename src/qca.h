@@ -387,6 +387,7 @@ namespace QCA
 		QString arrayToString(const QSecureArray &a);
 		QSecureArray stringToArray(const QString &s);
 		QString encodeString(const QString &s);
+		QString decodeString(const QString &s);
 
 	protected:
 		Direction _dir;
@@ -417,6 +418,10 @@ namespace QCA
 		virtual QSecureArray update(const QSecureArray &a);
 		virtual QSecureArray final();
 		virtual bool ok() const;
+
+	private:
+		QSecureArray partial;
+		bool _ok;
 	};
 
 	class QCA_EXPORT Algorithm
