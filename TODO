@@ -1,4 +1,6 @@
 * Additional unit tests
+* Bundle root certificates to be used on platforms without a system store
+  (we need to choose a reliable source, maybe mozilla or debian?)
 
 * API documentation
   clean up Algorithm
@@ -15,7 +17,9 @@
   cert: turn Info into an enum
   cert/pkey: fingerprints (is there a standard for this?)
   cert: subjectAltName
-  qcaprovider.h -> qca_provider ?
+  store: ability to combine stores, iterate over certs?
+  openpgp: be sure to support key expiration and validity
+  smime
 
 * finish code for APIs:
   cipher - needs to handling padding
@@ -24,7 +28,8 @@
   cert/crl/store (don't forget to call detach())
   tls
   sasl
-  store: system rootcerts (win, mac, debian)
+  openpgp
+  smime
   default provider should have built-in sha1 and md5 (?)
 
 * examples
@@ -42,8 +47,6 @@
   figure out why Valgrind reports so many memory leaks
 
 * consider new APIs:
-  pgp (go beyond cutestuff and support key expiration, validity, etc)
-  smime
   extra x509 stuff discussed in the summer with kiko
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
@@ -58,6 +61,10 @@
   cert/crl: path limit, subject/issuer ids (only useful for create/validate)
   cert: constraints, ex_constraints, policies (same as above)
   crl: revoked list (serial, time, reason) (same as above)
+
+* build system:
+  on non-win/mac, allow specifying of flatfile store, else install/use built-in
+  make sure it installs properly
 
 * qt 4 upgrade:
   new include styles
