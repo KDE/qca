@@ -9,9 +9,9 @@ OBJECTS_DIR    = .obj
 UI_DIR         = .ui
 
 # make DLL
-win:{
+win32:{
 	CONFIG += dll
-	win:DEFINES += QCA_MAKEDLL
+	DEFINES += QCA_MAKEDLL
 }
 
 QCA_CPP = src
