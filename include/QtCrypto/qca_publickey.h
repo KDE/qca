@@ -156,7 +156,7 @@ namespace QCA
 
 		// encrypt / verify
 		int maximumEncryptSize(EncryptionAlgorithm alg) const;
-		QSecureArray encrypt(EncryptionAlgorithm alg, const QSecureArray &a);
+		QSecureArray encrypt(EncryptionAlgorithm alg, const QSecureArray &a) const;
 		void startVerify(SignatureAlgorithm alg);
 		void update(const QSecureArray &a);
 		bool validSignature(const QSecureArray &sig);
@@ -188,12 +188,12 @@ namespace QCA
 		bool canSign() const;
 
 		// decrypt / sign / key agreement
-		bool decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out);
+		bool decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out) const;
 		void startSign(SignatureAlgorithm alg);
 		void update(const QSecureArray &);
 		QSecureArray signature();
 		QSecureArray signMessage(SignatureAlgorithm alg, const QSecureArray &a);
-		SymmetricKey deriveKey(const PublicKey &theirs);
+		SymmetricKey deriveKey(const PublicKey &theirs) const;
 
 		// import / export
 		static QList<PBEAlgorithm> supportedPBEAlgorithms(const QString &provider = QString());

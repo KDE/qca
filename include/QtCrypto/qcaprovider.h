@@ -127,8 +127,8 @@ public:
 
 	// encrypt/decrypt
 	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const;
-	virtual QSecureArray encrypt(EncryptionAlgorithm alg, const QSecureArray &in);
-	virtual bool decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out);
+	virtual QSecureArray encrypt(EncryptionAlgorithm alg, const QSecureArray &in) const;
+	virtual bool decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out) const;
 
 	// sign / verify
 	virtual void startSign(SignatureAlgorithm alg);
@@ -138,7 +138,7 @@ public:
 	virtual bool endVerify(const QSecureArray &sig);
 
 	// key agreement
-	virtual SymmetricKey deriveKey(const PKeyBase &theirs);
+	virtual SymmetricKey deriveKey(const PKeyBase &theirs) const;
 
 signals:
 	void finished();

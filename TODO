@@ -30,13 +30,13 @@
 
 * finish code for APIs:
   cert/crl/store/csr/ca/etc
+  system store: all added certs need to be flagged as trusted
   tls
   sasl
   securemessagesystem (consider thread issues)
   openpgp
   smime
   default provider should have built-in sha1 and md5 (?)
-  system store: all added certs need to be flagged as trusted
 
 * examples
   create example for BigInteger
