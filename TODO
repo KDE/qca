@@ -1,12 +1,10 @@
-* plugins: thread safety ?
-
-* dsa
-* diffie-hellman
-* entropy
-
 * Additional unit tests
-
 * API documentation
+
+* securearray: do copy-on-write instead of all the time, don't use SecureVector
+* base64 filter code
+* default provider with random, sha1, and md5 ??
+* wrap the Botan namespace in the QCA namespace (to avoid symbol conflict)
 
 QCA 2 TODO:
 * plugins: thread safety ?
@@ -14,7 +12,6 @@ QCA 2 TODO:
 * ssl: compression yes/no
 * ssl: set/get ciphers
 * ssl: get connection info (cipher name and bits, etc)
-* ciphers should be 'filters', not BufferedComputations
 * other modes: ofb, etc?
 * pkey: ability to choose sign algorithm
 * pkey: ability to choose cipher for toDER/PEM passphrase
@@ -23,14 +20,10 @@ QCA 2 TODO:
 * cert: constraints, ex_constraints, policies, pathLimit, isCA, isSelfSigned
 * cert: other functions?
 * crl: add functions
-* base64 filter code
+* store: support read-only access of system rootcerts (win, mac, debian)
 * blocking mode for ssl/sasl ?
-* pgp
-* xmlsec
+* pgp api
 * pgp: understand gpg KEYEXPIRED
-* securearray: do copy-on-write instead of all the time, don't use SecureVector
-* built-in sha1 and md5
-* botan init cleanup
+* xmlsec
 * install on top of Qt.  usage then is simply LIBS += -lqca
-* wrap the Botan namespace in the QCA namespace (to avoid symbol conflict)
 
