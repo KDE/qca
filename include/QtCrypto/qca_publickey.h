@@ -73,6 +73,16 @@ namespace QCA
 	};
 
 	/**
+	   Signature formats (DSA only)
+	*/
+	enum SignatureFormat
+	{
+		DefaultFormat, ///< For DSA, this is the same as IEEE_1363
+		IEEE_1363,     ///< 40-byte format from IEEE 1363 (Botan/.NET)
+		DERSequence    ///< Signature wrapped in DER formatting (OpenSSL/Java)
+	};
+
+	/**
 	   Password-based encryption
 	*/
 	enum PBEAlgorithm
@@ -159,11 +169,11 @@ namespace QCA
 
 		// encrypt / verify
 		int maximumEncryptSize(EncryptionAlgorithm alg) const;
-		QSecureArray encrypt(EncryptionAlgorithm alg, const QSecureArray &a) const;
-		void startVerify(SignatureAlgorithm alg);
+		QSecureArray encrypt(const QSecureArray &a, EncryptionAlgorithm alg) const;
+		void startVerify(SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 		void update(const QSecureArray &a);
 		bool validSignature(const QSecureArray &sig);
-		bool verifyMessage(SignatureAlgorithm alg, const QSecureArray &a, const QSecureArray &sig);
+		bool verifyMessage(const QSecureArray &a, const QSecureArray &sig, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 
 		// import / export
 		QSecureArray toDER() const;
@@ -191,11 +201,11 @@ namespace QCA
 		bool canSign() const;
 
 		// decrypt / sign / key agreement
-		bool decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out) const;
-		void startSign(SignatureAlgorithm alg);
-		void update(const QSecureArray &);
+		bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const;
+		void startSign(SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+		void update(const QSecureArray &a);
 		QSecureArray signature();
-		QSecureArray signMessage(SignatureAlgorithm alg, const QSecureArray &a);
+		QSecureArray signMessage(const QSecureArray &a, SignatureAlgorithm alg, SignatureFormat = DefaultFormat);
 		SymmetricKey deriveKey(const PublicKey &theirs) const;
 
 		// import / export

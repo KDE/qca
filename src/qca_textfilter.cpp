@@ -151,7 +151,7 @@ QSecureArray Hex::update(const QSecureArray &a)
 			flag = true;
 		}
 
-		QByteArray out(a.size() / 2, 0);
+		QSecureArray out(a.size() / 2);
 		int at = 0;
 		int c;
 		for(int n = 0; n < (int)a.size(); ++n)

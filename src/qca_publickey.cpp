@@ -307,14 +307,16 @@ int PublicKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 	return static_cast<const PKeyContext *>(context())->key()->maximumEncryptSize(alg);
 }
 
-QSecureArray PublicKey::encrypt(EncryptionAlgorithm alg, const QSecureArray &a) const
+QSecureArray PublicKey::encrypt(const QSecureArray &a, EncryptionAlgorithm alg) const
 {
-	return static_cast<const PKeyContext *>(context())->key()->encrypt(alg, a);
+	return static_cast<const PKeyContext *>(context())->key()->encrypt(a, alg);
 }
 
-void PublicKey::startVerify(SignatureAlgorithm alg)
+void PublicKey::startVerify(SignatureAlgorithm alg, SignatureFormat format)
 {
-	static_cast<PKeyContext *>(context())->key()->startVerify(alg);
+	if(isDSA() && format == DefaultFormat)
+		format = IEEE_1363;
+	static_cast<PKeyContext *>(context())->key()->startVerify(alg, format);
 }
 
 void PublicKey::update(const QSecureArray &a)
@@ -327,9 +329,9 @@ bool PublicKey::validSignature(const QSecureArray &sig)
 	return static_cast<PKeyContext *>(context())->key()->endVerify(sig);
 }
 
-bool PublicKey::verifyMessage(SignatureAlgorithm alg, const QSecureArray &a, const QSecureArray &sig)
+bool PublicKey::verifyMessage(const QSecureArray &a, const QSecureArray &sig, SignatureAlgorithm alg, SignatureFormat format)
 {
-	startVerify(alg);
+	startVerify(alg, format);
 	update(a);
 	return validSignature(sig);
 }
@@ -427,14 +429,16 @@ bool PrivateKey::canSign() const
 	return (isRSA() || isDSA());
 }
 
-bool PrivateKey::decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out) const
+bool PrivateKey::decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const
 {
-	return static_cast<const PKeyContext *>(context())->key()->decrypt(alg, in, out);
+	return static_cast<const PKeyContext *>(context())->key()->decrypt(in, out, alg);
 }
 
-void PrivateKey::startSign(SignatureAlgorithm alg)
+void PrivateKey::startSign(SignatureAlgorithm alg, SignatureFormat format)
 {
-	static_cast<PKeyContext *>(context())->key()->startSign(alg);
+	if(isDSA() && format == DefaultFormat)
+		format = IEEE_1363;
+	static_cast<PKeyContext *>(context())->key()->startSign(alg, format);
 }
 
 void PrivateKey::update(const QSecureArray &a)
@@ -447,9 +451,9 @@ QSecureArray PrivateKey::signature()
 	return static_cast<PKeyContext *>(context())->key()->endSign();
 }
 
-QSecureArray PrivateKey::signMessage(SignatureAlgorithm alg, const QSecureArray &a)
+QSecureArray PrivateKey::signMessage(const QSecureArray &a, SignatureAlgorithm alg, SignatureFormat format)
 {
-	startSign(alg);
+	startSign(alg, format);
 	update(a);
 	return signature();
 }

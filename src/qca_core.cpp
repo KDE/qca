@@ -393,21 +393,21 @@ int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const
 	return 0;
 }
 
-QSecureArray PKeyBase::encrypt(EncryptionAlgorithm, const QSecureArray &) const
+QSecureArray PKeyBase::encrypt(const QSecureArray &, EncryptionAlgorithm) const
 {
 	return QSecureArray();
 }
 
-bool PKeyBase::decrypt(EncryptionAlgorithm, const QSecureArray &, QSecureArray *) const
+bool PKeyBase::decrypt(const QSecureArray &, QSecureArray *, EncryptionAlgorithm) const
 {
 	return false;
 }
 
-void PKeyBase::startSign(SignatureAlgorithm)
+void PKeyBase::startSign(SignatureAlgorithm, SignatureFormat)
 {
 }
 
-void PKeyBase::startVerify(SignatureAlgorithm)
+void PKeyBase::startVerify(SignatureAlgorithm, SignatureFormat)
 {
 }
 
