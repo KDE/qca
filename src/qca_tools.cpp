@@ -381,6 +381,12 @@ Q_INT32 QBigInteger::cmp(const QBigInteger &n, bool checkSign) const
 	return ( (d->n).cmp( n.d->n, checkSign ) );
 }
 
+QTextStream &operator<<(QTextStream &stream, const QBigInteger& b)
+{
+	stream << b.toString();
+	return stream;
+}
+
 QSecureArray QBigInteger::toArray() const
 {
 	int size = d->n.encoded_size(Botan::BigInt::Binary);

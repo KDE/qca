@@ -66,7 +66,13 @@ void BigIntUnitTest::allTests()
     CHECK( c.cmp(a), -1 );
     CHECK( c.cmp(a, true), -1);
     CHECK( c.cmp(a, false), -1);
-    
+
+    // Check if the stream operator is any good
+    QString testString;
+    QTextStream ts( &testString, IO_WriteOnly);
+    ts << a << b << c << endl;
+    CHECK( testString, QString( "4000000000000-40000000000002000000000000\n") );
+
     // Botan's addition tests
     CHECK( QBigInteger( 255 ) += QBigInteger ( 1 ), QBigInteger( 256 ) );
     result = QBigInteger( 255 ) += QBigInteger( 1 );

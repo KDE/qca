@@ -28,6 +28,7 @@
 #include <qmap.h>
 #include <qptrlist.h>
 #include <qobject.h>
+#include <qtextstream.h>
 
 #ifdef Q_OS_WIN32
 # ifndef QCA_STATIC
@@ -341,6 +342,9 @@ inline bool operator>(const QBigInteger &a, const QBigInteger &b)
 {
 	return (a.cmp( b ) > 0 );
 }
+
+QTextStream &operator<<(QTextStream &stream, const QBigInteger &b);
+
 
 namespace QCA
 {
