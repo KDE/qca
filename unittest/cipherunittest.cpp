@@ -127,6 +127,16 @@ static struct cipherIVTestValues aes128cfbTestValues[] = {
     { 0, 0, 0, 0 }
 };
 
+// This is from the Botan test suite
+static struct cipherIVTestValues aes128ofbTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710", 
+      "3b3fd92eb72dad20333449f8e83cfb4a7789508d16918f03f53c52dac54ed8259740051e9c5fecf64344f7a82260edcc304c6528f659c77866a510d9c1d6ae5e",
+      "2b7e151628aed2a6abf7158809cf4f3c",
+      "000102030405060708090a0b0c0d0e0f" },
+    { 0, 0, 0, 0 }
+};
+
 // These are from the Botan test suite
 static struct cipherTestValues aes192ecbTestValues[] = {
 
@@ -195,6 +205,16 @@ static struct cipherIVTestValues aes192cfbTestValues[] = {
       "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
       "000102030405060708090a0b0c0d0e0f" },
 
+    { 0, 0, 0, 0 }
+};
+
+// This is from the Botan test suite
+static struct cipherIVTestValues aes192ofbTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "cdc80d6fddf18cab34c25909c99a4174fcc28b8d4c63837c09e81700c11004018d9a9aeac0f6596f559c6d4daf59a5f26d9f200857ca6c3e9cac524bd9acc92a",
+      "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b", 
+      "000102030405060708090a0b0c0d0e0f" },
     { 0, 0, 0, 0 }
 };
 
@@ -306,6 +326,16 @@ static struct cipherIVTestValues aes256cfbTestValues[] = {
       "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
       "000102030405060708090a0b0c0d0e0f" },
 
+    { 0, 0, 0, 0 }
+};
+
+// This is from the Botan test suite
+static struct cipherIVTestValues aes256ofbTestValues[] = {
+
+    { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
+      "dc7e84bfda79164b7ecd8486985d38604febdc6740d20b3ac88f6ad82a4fb08d71ab47a086e86eedf39d1c5bba97c4080126141d67f37be8538f5a8be740e484",
+      "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
+      "000102030405060708090a0b0c0d0e0f" },
     { 0, 0, 0, 0 }
 };
 
@@ -723,8 +753,9 @@ static struct cipherIVTestValues descfbTestValues[] = {
     { 0, 0, 0, 0 }
 };
 
-// These are from the Botan test suite
 static struct cipherIVTestValues desofbTestValues[] = {
+
+// These are from the Botan test suite
     { "4e6f77206973207468652074696d6520666f7220616c6c20", "f3096249c7f46e5135f24a242eeb3d3f3d6d5be3255af8c3", "0123456789abcdef", "1234567890abcdef" },
     { "b25330d1cab11fddff278192aa2c935a9c7745733e6da8", "39b9bf284d6da6e639b8040b8da01e469dba4c6e50b1ab", "f871822c7fd1d6a3", "b311792c8bc02ee8" },
     { "73ad356623a1d6e0717e838b9344b4fff21bda", "0c06e63e9e81d9976e16d2009255f917797d51", "5860f4a413de6c68", "527a1e050a9d71f0" },
@@ -842,6 +873,29 @@ void CipherUnitTest::allTests()
         }
     }
 
+    if (!QCA::isSupported("aes128-ofb") )
+	SKIP("AES128-OFB not supported!");
+    else {
+	for (int n = 0; (0 != aes128ofbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes128ofbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes128ofbTestValues[n].iv ) );
+	    QCA::AES128 forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128ofbTestValues[n].plaintext ) ) ),
+		   QString( aes128ofbTestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::AES128 reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128ofbTestValues[n].ciphertext ) ) ),
+		   QString( aes128ofbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
     if (!QCA::isSupported("aes192-ecb") )
 	SKIP("AES192-ECB not supported!");
     else {
@@ -923,6 +977,29 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes192cfbTestValues[n].ciphertext ) ) ),
 		   QString( aes192cfbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("aes192-ofb") )
+	SKIP("AES192-OFB not supported!");
+    else {
+	for (int n = 0; (0 != aes192ofbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes192ofbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes192ofbTestValues[n].iv ) );
+	    QCA::AES192 forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes192ofbTestValues[n].plaintext ) ) ),
+		   QString( aes192ofbTestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::AES192 reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes192ofbTestValues[n].ciphertext ) ) ),
+		   QString( aes192ofbTestValues[n].plaintext ) );
 	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
@@ -1015,6 +1092,30 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
     }
+
+    if (!QCA::isSupported("aes256-ofb") )
+	SKIP("AES256-OFB not supported!");
+    else {
+	for (int n = 0; (0 != aes256ofbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( aes256ofbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( aes256ofbTestValues[n].iv ) );
+	    QCA::AES256 forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes256ofbTestValues[n].plaintext ) ) ),
+		   QString( aes256ofbTestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::AES256 reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes256ofbTestValues[n].ciphertext ) ) ),
+		   QString( aes256ofbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
 
     if (!QCA::isSupported("tripledes-ecb") )
 	SKIP("Triple DES, ECB not supported!");
@@ -1132,7 +1233,7 @@ void CipherUnitTest::allTests()
 	QCA::DES cipherObj1( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 8 ) );
 	CHECK( cipherObj1.keyLength().minimum(), 8 );
 	CHECK( cipherObj1.keyLength().maximum(), 8 );
-	CHECK( cipherObj1.blockSize(), (unsigned)8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)1 );
 
 	for (int n = 0; (0 != desofbTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( desofbTestValues[n].key ) );
