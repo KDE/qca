@@ -29,17 +29,20 @@ namespace QCA
 	class Hash
 	{
 	public:
-		Hash() {}
-		virtual ~Hash() {}
+		Hash();
+		virtual ~Hash();
 
 		virtual void clear()=0;
-		virtual void update(const QByteArray &)=0;
+		virtual void update(const QByteArray &a)=0;
 		virtual QByteArray final()=0;
 	};
 
-	template <class T> class HashStatic
+	template <class T>
+	class HashStatic
 	{
 	public:
+		HashStatic<T>() {}
+
 		static QByteArray hash(const QByteArray &a)
 		{
 			T obj;
@@ -65,6 +68,24 @@ namespace QCA
 		}
 	};
 
+	class Cipher
+	{
+	public:
+		Cipher();
+		virtual ~Cipher();
+
+		QByteArray key() const;
+		QByteArray iv() const;
+		void setKey(const QByteArray &a);
+		void setIV(const QByteArray &a);
+
+		virtual bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true)=0;
+		virtual bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true)=0;
+
+	private:
+		QByteArray v_key, v_iv;
+	};
+
 	class SHA1 : public Hash, public HashStatic<SHA1>
 	{
 	public:
@@ -72,7 +93,18 @@ namespace QCA
 		~SHA1();
 
 		void clear();
-		void update(const QByteArray &);
+		void update(const QByteArray &a);
+		QByteArray final();
+	};
+
+	class SHA256 : public Hash, public HashStatic<SHA256>
+	{
+	public:
+		SHA256();
+		~SHA256();
+
+		void clear();
+		void update(const QByteArray &a);
 		QByteArray final();
 	};
 
@@ -83,8 +115,38 @@ namespace QCA
 		~MD5();
 
 		void clear();
-		void update(const QByteArray &);
+		void update(const QByteArray &a);
 		QByteArray final();
+	};
+
+	class TripleDES : public Cipher
+	{
+	public:
+		TripleDES();
+		~TripleDES();
+
+		bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true);
+		bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true);
+	};
+
+	class AES128 : public Cipher
+	{
+	public:
+		AES128();
+		~AES128();
+
+		bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true);
+		bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true);
+	};
+
+	class AES256 : public Cipher
+	{
+	public:
+		AES256();
+		~AES256();
+
+		bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true);
+		bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true);
 	};
 };
 
