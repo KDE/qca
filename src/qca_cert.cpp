@@ -145,6 +145,11 @@ PublicKey Certificate::subjectPublicKey() const
 	return key;
 }
 
+SignAlgo Certificate::signatureAlgorithm() const
+{
+	return SignUnknown;
+}
+
 QSecureArray Certificate::toDER() const
 {
 	return ((CertContext *)context())->toDER();

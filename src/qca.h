@@ -693,6 +693,22 @@ namespace QCA
 		IETF_4096
 	};
 
+	enum EncAlgo
+	{
+		EME_PKCS1v15,
+		EME_PKCS1_OAEP
+	};
+
+	enum SignAlgo
+	{
+		SignUnknown,
+		EMSA1_SHA1, // usual dsa
+		EMSA3_SHA1,
+		EMSA3_MD5, // usual rsa
+		EMSA3_MD2,
+		EMSA3_RIPEMD160
+	};
+
 	enum CertValidity
 	{
 		Valid,
@@ -1564,7 +1580,7 @@ namespace QCA
 		/**
 		 * return the block size for the cipher object
 		 */
-		unsigned int blockSize() const;
+		uint blockSize() const;
 
 		/**
 		 * reset the cipher object, to allow re-use
@@ -2355,12 +2371,12 @@ namespace QCA
 		bool canVerify() const;
 
 		// encrypt / verify
-		int maximumEncryptSize() const;
-		QSecureArray encrypt(const QSecureArray &a);
-		void startVerify();
-		void update(const QSecureArray &);
+		int maximumEncryptSize(EncAlgo alg) const;
+		QSecureArray encrypt(EncAlgo alg, const QSecureArray &a);
+		void startVerify(SignAlgo alg);
+		void update(const QSecureArray &a);
 		bool validSignature(const QSecureArray &sig);
-		bool verifyMessage(const QSecureArray &a, const QSecureArray &sig);
+		bool verifyMessage(SignAlgo alg, const QSecureArray &a, const QSecureArray &sig);
 
 		// import / export
 		QSecureArray toDER() const;
@@ -2389,11 +2405,11 @@ namespace QCA
 		bool canSign() const;
 
 		// decrypt / sign / key agreement
-		bool decrypt(const QSecureArray &in, QSecureArray *out);
-		void startSign();
+		bool decrypt(EncAlgo alg, const QSecureArray &in, QSecureArray *out);
+		void startSign(SignAlgo alg);
 		void update(const QSecureArray &);
 		QSecureArray signature();
-		QSecureArray signMessage(const QSecureArray &a);
+		QSecureArray signMessage(SignAlgo alg, const QSecureArray &a);
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
@@ -2522,6 +2538,7 @@ namespace QCA
 		QString commonName() const;
 		QBigInteger serialNumber() const;
 		PublicKey subjectPublicKey() const;
+		SignAlgo signatureAlgorithm() const;
 
 		// import / export
 		QSecureArray toDER() const;

@@ -3,10 +3,7 @@
 * Threading consideration (safety, usability) in API and plugins
 
 * finish API:
-  pkey: ability to choose sign algorithm
-  pkey: ability to choose cipher for toDER/PEM passphrase
   cert: Distinguished Names (Botan has X509_DN)
-  cert: get signature algorithm
   cert: constraints, ex_constraints, policies, pathLimit, isCA, isSelfSigned
   crl: add functions
 
@@ -34,6 +31,8 @@
             pre-padded last block.
   Key wrapping - RFC3217 and RFC3394
   Password based key derivation functions - RFC2898
+  pkey: ability to choose cipher for toDER/PEM passphrase ?
+    - botan doesn't seem to allow this, but kiko wanted it...
 
 * qt 4 upgrade:
   new include styles

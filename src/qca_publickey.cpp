@@ -255,12 +255,12 @@ bool PublicKey::canVerify() const
 	return (isRSA() || isDSA());
 }
 
-int PublicKey::maximumEncryptSize() const
+int PublicKey::maximumEncryptSize(EncAlgo) const
 {
 	return ((PKeyContext *)context())->key()->maximumEncryptSize();
 }
 
-QSecureArray PublicKey::encrypt(const QSecureArray &a)
+QSecureArray PublicKey::encrypt(EncAlgo, const QSecureArray &a)
 {
 	PKeyContext *pc = (PKeyContext *)context();
 	RSAContext *rc = (RSAContext *)(pc->key());
@@ -273,7 +273,7 @@ QSecureArray PublicKey::encrypt(const QSecureArray &a)
 	return ((PKeyContext *)context())->key()->encrypt(a);
 }
 
-void PublicKey::startVerify()
+void PublicKey::startVerify(SignAlgo)
 {
 	((PKeyContext *)context())->key()->startVerify();
 }
@@ -288,9 +288,9 @@ bool PublicKey::validSignature(const QSecureArray &sig)
 	return ((PKeyContext *)context())->key()->endVerify(sig);
 }
 
-bool PublicKey::verifyMessage(const QSecureArray &a, const QSecureArray &sig)
+bool PublicKey::verifyMessage(SignAlgo alg, const QSecureArray &a, const QSecureArray &sig)
 {
-	startVerify();
+	startVerify(alg);
 	update(a);
 	return validSignature(sig);
 }
@@ -361,13 +361,13 @@ bool PrivateKey::canSign() const
 	return (isRSA() || isDSA());
 }
 
-bool PrivateKey::decrypt(const QSecureArray &in, QSecureArray *out)
+bool PrivateKey::decrypt(EncAlgo, const QSecureArray &in, QSecureArray *out)
 {
 	detach();
 	return ((PKeyContext *)context())->key()->decrypt(in, out);
 }
 
-void PrivateKey::startSign()
+void PrivateKey::startSign(SignAlgo)
 {
 	((PKeyContext *)context())->key()->startSign();
 }
@@ -382,9 +382,9 @@ QSecureArray PrivateKey::signature()
 	return ((PKeyContext *)context())->key()->endSign();
 }
 
-QSecureArray PrivateKey::signMessage(const QSecureArray &a)
+QSecureArray PrivateKey::signMessage(SignAlgo alg, const QSecureArray &a)
 {
-	startSign();
+	startSign(alg);
 	update(a);
 	return signature();
 }
