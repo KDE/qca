@@ -4,7 +4,7 @@
 #include<qstring.h>
 #include<qcstring.h>
 
-class QCAProvider;
+class QCA_SHA1Functions;
 
 namespace QCA
 {
@@ -35,9 +35,6 @@ namespace QCA
 		virtual void clear()=0;
 		virtual void update(const QByteArray &a)=0;
 		virtual QByteArray final()=0;
-
-	protected:
-		QCAProvider *p;
 	};
 
 	template <class T>
@@ -100,6 +97,7 @@ namespace QCA
 		QByteArray final();
 
 	private:
+		struct QCA_SHA1Functions *f;
 		int ctx;
 	};
 

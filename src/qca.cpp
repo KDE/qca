@@ -7,7 +7,7 @@
 #define USE_OPENSSL
 
 #ifdef USE_OPENSSL
-#include"qcaopenssl.h"
+#include"qcaopenssl_p.h"
 #endif
 
 using namespace QCA;
@@ -30,7 +30,7 @@ void QCA::init()
 {
 	providerList.clear();
 #ifdef USE_OPENSSL
-	providerList.append(new QCAOpenSSL);
+	providerList.append(new _QCAOpenSSL);
 #endif
 }
 
@@ -43,12 +43,12 @@ bool QCA::isSupported(int capabilities)
 	return caps;
 }
 
-static QCAProvider * getp(int cap)
+static void *getFunctions(int cap)
 {
 	QPtrListIterator<QCAProvider> it(providerList);
 	for(QCAProvider *p; (p = it.current()); ++it) {
 		if(p->capabilities() & cap)
-			return p;
+			return p->functions(cap);
 	}
 	return 0;
 }
@@ -59,7 +59,6 @@ static QCAProvider * getp(int cap)
 //----------------------------------------------------------------------------
 Hash::Hash()
 {
-	p = 0;
 }
 
 Hash::~Hash()
@@ -104,35 +103,35 @@ void Cipher::setIV(const QByteArray &a)
 //----------------------------------------------------------------------------
 SHA1::SHA1()
 {
-	p = getp(CAP_SHA1);
-	if(!p) {
+	f = (QCA_SHA1Functions *)getFunctions(CAP_SHA1);
+	if(!f) {
 		printf("SHA1: can't initialize!\n");
 		return;
 	}
 
-	ctx = p->sha1_create();
+	ctx = f->create();
 }
 
 SHA1::~SHA1()
 {
-	p->sha1_destroy(ctx);
+	f->destroy(ctx);
 }
 
 void SHA1::clear()
 {
-	p->sha1_destroy(ctx);
-	ctx = p->sha1_create();
+	f->destroy(ctx);
+	ctx = f->create();
 }
 
 void SHA1::update(const QByteArray &a)
 {
-	p->sha1_update(ctx, a.data(), a.size());
+	f->update(ctx, a.data(), a.size());
 }
 
 QByteArray SHA1::final()
 {
 	QByteArray buf(20);
-	p->sha1_final(ctx, buf.data());
+	f->final(ctx, buf.data());
 	return buf;
 }
 
@@ -202,10 +201,12 @@ TripleDES::~TripleDES()
 
 bool TripleDES::encrypt(const QByteArray &in, QByteArray *out, bool pad)
 {
+	return false;
 }
 
 bool TripleDES::decrypt(const QByteArray &in, QByteArray *out, bool pad)
 {
+	return false;
 }
 
 
@@ -222,10 +223,12 @@ AES128::~AES128()
 
 bool AES128::encrypt(const QByteArray &in, QByteArray *out, bool pad)
 {
+	return false;
 }
 
 bool AES128::decrypt(const QByteArray &in, QByteArray *out, bool pad)
 {
+	return false;
 }
 
 
@@ -242,8 +245,10 @@ AES256::~AES256()
 
 bool AES256::encrypt(const QByteArray &in, QByteArray *out, bool pad)
 {
+	return false;
 }
 
 bool AES256::decrypt(const QByteArray &in, QByteArray *out, bool pad)
 {
+	return false;
 }
