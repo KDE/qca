@@ -139,13 +139,11 @@ namespace QCA
 		static bool canCompress(const QString &provider = QString());
 		void setCompressionEnabled(bool b);
 
-		static bool canSessionCache(const QString &provider = QString());
-		void setSessionCachingEnabled(bool b);
-
 		bool startClient(const QString &host = QString());
 		bool startServer();
 
 		bool isHandshaken() const;
+		bool isCompressed() const;
 		Version version() const;
 		QString cipherSuite() const;
 		int cipherBits() const;
