@@ -34,6 +34,7 @@ void showCertInfo(const QCA::Cert &cert)
 	printf(" Valid from: %s, until %s\n",
 		cert.notBefore().toString().latin1(),
 		cert.notAfter().toString().latin1());
+	printf(" PEM:\n%s\n", cert.toPEM().latin1());
 }
 
 int main()

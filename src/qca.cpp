@@ -636,7 +636,17 @@ QDateTime Cert::notAfter() const
 
 QByteArray Cert::toDER() const
 {
-	return QByteArray();
+	char *out;
+	unsigned int len;
+	d->c->toDER(&out, &len);
+	if(!out)
+		return QByteArray();
+	else {
+		QByteArray buf(len);
+		memcpy(buf.data(), out, len);
+		free(out);
+		return buf;
+	}
 }
 
 bool Cert::fromDER(const QByteArray &a)
@@ -646,7 +656,18 @@ bool Cert::fromDER(const QByteArray &a)
 
 QString Cert::toPEM() const
 {
-	return "";
+	char *out;
+	unsigned int len;
+	d->c->toPEM(&out, &len);
+	if(!out)
+		return QByteArray();
+	else {
+		QCString cs;
+		cs.resize(len+1);
+		memcpy(cs.data(), out, len);
+		free(out);
+		return QString::fromLatin1(cs);
+	}
 }
 
 bool Cert::fromPEM(const QString &str)

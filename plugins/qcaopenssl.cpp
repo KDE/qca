@@ -74,6 +74,24 @@ static void appendArray(QByteArray *a, const QByteArray &b)
 	memcpy(a->data() + oldsize, b.data(), b.size());
 }
 
+static char *bio2buf(BIO *b, unsigned int *len)
+{
+	char *buf = (char *)malloc(1);
+	int size = 0;
+	while(1) {
+		char block[1024];
+		int ret = BIO_read(b, block, 1024);
+		buf = (char *)realloc(buf, size + ret);
+		memcpy(buf + size, block, ret);
+		size += ret;
+		if(ret != 1024)
+			break;
+	}
+	BIO_free(b);
+
+	*len = size;
+	return buf;
+}
 
 class SHA1Context : public QCA_HashContext
 {
@@ -524,20 +542,7 @@ public:
 			return;
 		}
 
-		char *buf = (char *)malloc(1);
-		int size = 0;
-		while(1) {
-			char block[1024];
-			int ret = BIO_read(bo, block, 1024);
-			buf = (char *)realloc(buf, size + ret);
-			memcpy(buf + size, block, ret);
-			size += ret;
-			if(ret != 1024)
-				break;
-		}
-		BIO_free(bo);
-		*out = buf;
-		*outlen = size;
+		*out = bio2buf(bo, outlen);
 	}
 
 	bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)
@@ -714,26 +719,32 @@ public:
 
 	bool createFromPEM(const char *in, unsigned int len)
 	{
-		return false;
+		BIO *bi = BIO_new(BIO_s_mem());
+		BIO_write(bi, in, len);
+		X509 *t = PEM_read_bio_X509(bi, NULL, NULL, NULL);
+		BIO_free(bi);
+		if(!t)
+			return false;
+		fromX509(t);
+		return true;
 	}
 
-	void toDER(char **out, unsigned int *len)
+	void toDER(char **out, unsigned int *outlen)
 	{
-		// extract the raw data
-		//int len = i2d_X509(x, NULL);
-		//QByteArray dat(len);
-		//unsigned char *p = (unsigned char *)dat.data();
-		//i2d_X509(x, &p);
-		//d->dat = dat;
-
-		*out = 0;
-		*len = 0;
+		int len = i2d_X509(x, NULL);
+		unsigned char *buf, *p;
+		buf = (unsigned char *)malloc(len);
+		p = buf;
+		i2d_X509(x, &p);
+		*out = (char *)buf;
+		*outlen = len;
 	}
 
-	void toPEM(char **out, unsigned int *len)
+	void toPEM(char **out, unsigned int *outlen)
 	{
-		*out = 0;
-		*len = 0;
+		BIO *bo = BIO_new(BIO_s_mem());
+		PEM_write_bio_X509(bo, x);
+		*out = bio2buf(bo, outlen);
 	}
 
 	void fromX509(X509 *t)
