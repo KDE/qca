@@ -341,6 +341,24 @@ void ProviderManager::changePriority(const QString &name, int priority)
 	addItem(i, priority);
 }
 
+int ProviderManager::getPriority(const QString &name)
+{
+	QPtrListIterator<ProviderItem> it(providerItemList);
+	ProviderItem *i = 0;
+	for(ProviderItem *pi; (pi = it.current()); ++it)
+	{
+		if(pi->p && pi->p->name() == name)
+		{
+			i = pi;
+			break;
+		}
+	}
+	if(!i)
+		return -1;
+
+	return i->priority;
+}
+
 QStringList ProviderManager::allFeatures(bool includeOld) const
 {
 	QStringList list;
