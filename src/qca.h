@@ -804,7 +804,7 @@ namespace QCA
 	{
 	public:
 		enum Quality { Nonce, PublicValue, SessionKey, LongTermKey };
-		Random(const QString &provider="");
+		Random(const QString &provider = "");
 
 		uchar nextByte(Quality q = SessionKey);
 		QSecureArray nextBytes(int size, Quality q = SessionKey);
@@ -1363,8 +1363,7 @@ namespace QCA
 		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = "") : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
 	};
 
-	// v2 public key handling
-	/*class PublicKey;
+	class PublicKey;
 	class PrivateKey;
 	class KeyGenerator;
 	class RSAPublicKey;
@@ -1403,7 +1402,7 @@ namespace QCA
 		friend class KeyGenerator;
 
 	protected:
-		PKey(int cap, const QString &provider);
+		PKey(const QString &type, const QString &provider);
 		void set(const PKey &k);
 
 		RSAPublicKey toRSAPublicKey() const;
@@ -1442,11 +1441,14 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
-		static PublicKey fromDER(const QSecureArray &a, const QString &provider="");
-		static PublicKey fromPEM(const QString &s, const QString &provider="");
+		static PublicKey fromDER(const QSecureArray &a, const QString &provider = "");
+		static PublicKey fromPEM(const QString &s, const QString &provider = "");
 
 	protected:
-		PublicKey(int cap, const QString &provider);
+		PublicKey(const QString &type, const QString &provider);
+
+	private:
+		friend class PrivateKey;
 	};
 
 	class QCA_EXPORT PrivateKey : public PKey
@@ -1470,29 +1472,29 @@ namespace QCA
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
-		QSecureArray toDER(const QString &passphrase="") const;
-		QString toPEM(const QString &passphrase="") const;
-		static PrivateKey fromDER(const QSecureArray &a, const QString &passphrase="", const QString &provider="");
-		static PrivateKey fromPEM(const QString &s, const QString &passphrase="", const QString &provider="");
+		QSecureArray toDER(const QString &passphrase = "") const;
+		QString toPEM(const QString &passphrase = "") const;
+		static PrivateKey fromDER(const QSecureArray &a, const QString &passphrase = "", const QString &provider = "");
+		static PrivateKey fromPEM(const QString &s, const QString &passphrase = "", const QString &provider = "");
 
 	protected:
-		PrivateKey(int cap, const QString &provider);
+		PrivateKey(const QString &type, const QString &provider);
 	};
 
 	class QCA_EXPORT KeyGenerator : public QObject
 	{
 		Q_OBJECT
 	public:
-		KeyGenerator(QObject *parent=0, const char *name=0);
+		KeyGenerator(QObject *parent = 0, const char *name = 0);
 		~KeyGenerator();
 
 		bool blocking() const;
 		void setBlocking(bool b);
 		bool isBusy() const;
 
-		void generateRSA(int bits, int exp=65537, const QString &provider="");
-		void generateDSA(DL_Group group, const QString &provider="");
-		void generateDH(DL_Group group, const QString &provider="");
+		void generateRSA(int bits, int exp = 65537, const QString &provider = "");
+		void generateDSA(DL_Group group, const QString &provider = "");
+		void generateDH(DL_Group group, const QString &provider = "");
 		PrivateKey result() const;
 
 	signals:
@@ -1509,7 +1511,7 @@ namespace QCA
 	{
 	public:
 		RSAPublicKey();
-		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider="");
+		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider = "");
 		RSAPublicKey(const RSAPrivateKey &k);
 
 		QBigInteger n() const;
@@ -1520,7 +1522,7 @@ namespace QCA
 	{
 	public:
 		RSAPrivateKey();
-		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider="");
+		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider = "");
 
 		QBigInteger p() const;
 		QBigInteger q() const;
@@ -1533,7 +1535,7 @@ namespace QCA
 	{
 	public:
 		DSAPublicKey();
-		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider="");
+		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = "");
 		DSAPublicKey(const DSAPrivateKey &k);
 
 		DL_Group domain() const;
@@ -1544,7 +1546,7 @@ namespace QCA
 	{
 	public:
 		DSAPrivateKey();
-		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider="");
+		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = "");
 
 		DL_Group domain() const;
 		QBigInteger x() const;
@@ -1555,7 +1557,7 @@ namespace QCA
 	{
 	public:
 		DHPublicKey();
-		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider="");
+		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = "");
 		DHPublicKey(const DHPrivateKey &k);
 
 		DL_Group domain() const;
@@ -1566,12 +1568,13 @@ namespace QCA
 	{
 	public:
 		DHPrivateKey();
-		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider="");
+		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = "");
 
 		DL_Group domain() const;
 		QBigInteger x() const;
 		QBigInteger y() const;
-	};*/
+	};
+
 #if 0
 	typedef QMap<QString, QString> CertProperties;
 
