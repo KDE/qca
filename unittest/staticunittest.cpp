@@ -94,5 +94,9 @@ void StaticUnitTest::allTests()
     capList.clear();
     capList.append("noSuch");
     CHECK( QCA::isSupported(capList), false );
+
+
+    // this should be reliably true
+    CHECK( QCA::haveSecureMemory(), true );
 }
 

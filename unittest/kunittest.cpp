@@ -31,6 +31,9 @@
 #include "bigintunittest.h"
 #include "securearrayunittest.h"
 #include "macunittest.h"
+#include "keylengthunittest.h"
+#include "symmetrickeyunittest.h"
+#include "randomunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -48,6 +51,9 @@ void KUnitTest::registerTests()
     ADD_TEST( BigIntUnitTest );
     ADD_TEST( SecureArrayUnitTest );
     ADD_TEST( MACUnitTest );
+    ADD_TEST( KeyLengthUnitTest );
+    ADD_TEST( SymmetricKeyUnitTest );
+    ADD_TEST( RandomUnitTest );
 }
 
 KUnitTest::KUnitTest()
