@@ -28,7 +28,7 @@
 HashUnitTest::HashUnitTest()
     : Tester()
 {
-    QCA::init();
+
 }
 
 struct hashTestValues {
@@ -144,40 +144,42 @@ static struct hashTestValues ripemd160TestValues[] = {
 
 void HashUnitTest::allTests()
 {
+    QCA::Initializer init;
+
     QCString hashResult; // used as the actual result
 
-    if(!QCA::isSupported(QCA::CAP_MD2))
+    if(!QCA::isSupported("md2"))
 	SKIP("MD2 not supported!\n");
     else {
 	for (int n = 0; md2TestValues[n].inputString; n++) {
-	    hashResult = QCA::MD2::hashToString(md2TestValues[n].inputString);
+	    hashResult = QCA::MD2().hashToString(md2TestValues[n].inputString);
 	    CHECK( hashResult, md2TestValues[n].expectedHash );
         }
     }
 
-    if(!QCA::isSupported(QCA::CAP_MD4))
+    if(!QCA::isSupported("md4"))
 	SKIP("MD4 not supported!\n");
     else {
 	for (int n = 0; md4TestValues[n].inputString; n++) {
-	    hashResult = QCA::MD4::hashToString(md4TestValues[n].inputString);
+	    hashResult = QCA::MD4().hashToString(md4TestValues[n].inputString);
 	    CHECK( hashResult, md4TestValues[n].expectedHash );
         }
     }
     
-    if(!QCA::isSupported(QCA::CAP_MD5))
+    if(!QCA::isSupported("md5"))
 	SKIP("MD5 not supported!\n");
     else {
 	for (int n = 0; md5TestValues[n].inputString; n++) {
-	    hashResult = QCA::MD5::hashToString(md5TestValues[n].inputString);
+	    hashResult = QCA::MD5().hashToString(md5TestValues[n].inputString);
 	    CHECK( hashResult, md5TestValues[n].expectedHash );
         }
     }
 
-    if(!QCA::isSupported(QCA::CAP_SHA0))
+    if(!QCA::isSupported("sha0"))
 	SKIP("SHA0 not supported!\n");
     else {
 	for (int n = 0; sha0TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA0::hashToString(sha0TestValues[n].inputString);
+	    hashResult = QCA::SHA0().hashToString(sha0TestValues[n].inputString);
 	    CHECK( hashResult, sha0TestValues[n].expectedHash );
 	}
                 
@@ -200,11 +202,11 @@ void HashUnitTest::allTests()
     }
 
 
-    if(!QCA::isSupported(QCA::CAP_SHA1))
+    if(!QCA::isSupported("sha1"))
 	SKIP("SHA1 not supported!\n");
     else {
 	for (int n = 0; sha1TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA1::hashToString(sha1TestValues[n].inputString);
+	    hashResult = QCA::SHA1().hashToString(sha1TestValues[n].inputString);
 	    CHECK( hashResult, sha1TestValues[n].expectedHash );
 	}
                 
@@ -221,11 +223,11 @@ void HashUnitTest::allTests()
 	       QString("34aa973cd4c4daa4f61eeb2bdbad27316534016f") );
     }
 
-    if(!QCA::isSupported(QCA::CAP_SHA256))
+    if(!QCA::isSupported("sha256"))
 	SKIP("SHA256 not supported!\n");
     else {
 	for (int n = 0; sha256TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA256::hashToString(sha256TestValues[n].inputString);
+	    hashResult = QCA::SHA256().hashToString(sha256TestValues[n].inputString);
 	    CHECK( hashResult, sha256TestValues[n].expectedHash );
 	}
                 
@@ -240,11 +242,11 @@ void HashUnitTest::allTests()
 	       QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39cc046d39ccc7122cd0") );
     }
 
-    if(!QCA::isSupported(QCA::CAP_RIPEMD160))
+    if(!QCA::isSupported("ripemd160"))
 	SKIP("RIPEMD160 not supported!\n");
     else {
 	for (int n = 0; ripemd160TestValues[n].inputString; n++) {
-	    hashResult = QCA::RIPEMD160::hashToString(ripemd160TestValues[n].inputString);
+	    hashResult = QCA::RIPEMD160().hashToString(ripemd160TestValues[n].inputString);
 	    CHECK( hashResult, ripemd160TestValues[n].expectedHash );
 	}
                 

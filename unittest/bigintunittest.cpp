@@ -29,11 +29,13 @@
 BigIntUnitTest::BigIntUnitTest()
     : Tester()
 {
-    QCA::Initializer init; // allocates locked memory
+
 }
 
 void BigIntUnitTest::allTests()
 {
+    QCA::Initializer init; // allocates locked memory
+
     QBigInteger result;
 
     // Some string conversion tests

@@ -30,11 +30,12 @@
 StaticUnitTest::StaticUnitTest()
     : Tester()
 {
-    QCA::init();
+
 }
 
 void StaticUnitTest::allTests()
 {
+    QCA::Initializer init;
 
     QByteArray test(10);
     test.fill('a');
