@@ -28,6 +28,30 @@
 #include<qptrlist.h>
 #include<qobject.h>
 
+#ifdef Q_OS_WIN32
+#  ifndef QCA_STATIC
+#    ifdef QCA_MAKEDLL
+#      define QCA_EXPORT __declspec(dllexport)
+#    else
+#      define QCA_EXPORT __declspec(dllimport)
+#    endif
+#  endif
+#endif
+#ifndef QCA_EXPORT
+#define QCA_EXPORT
+#endif
+
+#ifdef Q_OS_WIN32
+#  ifdef QCA_PLUGIN_DLL
+#    define QCA_PLUGIN_EXPORT extern "C" __declspec(dllexport)
+#  else
+#    define QCA_PLUGIN_EXPORT extern "C" __declspec(dllimport)
+#  endif
+#endif
+#ifndef QCA_PLUGIN_EXPORT
+#define QCA_PLUGIN_EXPORT extern "C"
+#endif
+
 class QHostAddress;
 class QStringList;
 
@@ -62,15 +86,15 @@ namespace QCA
 		Decrypt = 0x0002,
 	};
 
-	void init();
-	bool isSupported(int capabilities);
-	void insertProvider(QCAProvider *);
-	void unloadAllPlugins();
+	QCA_EXPORT void init();
+	QCA_EXPORT bool isSupported(int capabilities);
+	QCA_EXPORT void insertProvider(QCAProvider *);
+	QCA_EXPORT void unloadAllPlugins();
 
-	QString arrayToHex(const QByteArray &);
-	QByteArray hexToArray(const QString &);
+	QCA_EXPORT QString arrayToHex(const QByteArray &);
+	QCA_EXPORT QByteArray hexToArray(const QString &);
 
-	class Hash
+	class QCA_EXPORT Hash
 	{
 	public:
 		Hash(const Hash &);
@@ -90,7 +114,7 @@ namespace QCA
 	};
 
 	template <class T>
-	class HashStatic
+	class QCA_EXPORT HashStatic
 	{
 	public:
 		HashStatic<T>() {}
@@ -120,7 +144,7 @@ namespace QCA
 		}
 	};
 
-	class Cipher
+	class QCA_EXPORT Cipher
 	{
 	public:
 		Cipher(const Cipher &);
@@ -142,7 +166,7 @@ namespace QCA
 	};
 
 	template <class T>
-	class CipherStatic
+	class QCA_EXPORT CipherStatic
 	{
 	public:
 		CipherStatic<T>() {}
@@ -160,50 +184,50 @@ namespace QCA
 		}
 	};
 
-	class SHA1 : public Hash, public HashStatic<SHA1>
+	class QCA_EXPORT SHA1 : public Hash, public HashStatic<SHA1>
 	{
 	public:
 		SHA1();
 	};
 
-	class SHA256 : public Hash, public HashStatic<SHA256>
+	class QCA_EXPORT SHA256 : public Hash, public HashStatic<SHA256>
 	{
 	public:
 		SHA256();
 	};
 
-	class MD5 : public Hash, public HashStatic<MD5>
+	class QCA_EXPORT MD5 : public Hash, public HashStatic<MD5>
 	{
 	public:
 		MD5();
 	};
 
-	class BlowFish : public Cipher, public CipherStatic<BlowFish>
+	class QCA_EXPORT BlowFish : public Cipher, public CipherStatic<BlowFish>
 	{
 	public:
 		BlowFish(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
-	class TripleDES : public Cipher, public CipherStatic<TripleDES>
+	class QCA_EXPORT TripleDES : public Cipher, public CipherStatic<TripleDES>
 	{
 	public:
 		TripleDES(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
-	class AES128 : public Cipher, public CipherStatic<AES128>
+	class QCA_EXPORT AES128 : public Cipher, public CipherStatic<AES128>
 	{
 	public:
 		AES128(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
-	class AES256 : public Cipher, public CipherStatic<AES256>
+	class QCA_EXPORT AES256 : public Cipher, public CipherStatic<AES256>
 	{
 	public:
 		AES256(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
 	class RSA;
-	class RSAKey
+	class QCA_EXPORT RSAKey
 	{
 	public:
 		RSAKey();
@@ -235,7 +259,7 @@ namespace QCA
 		bool generate(unsigned int bits);
 	};
 
-	class RSA
+	class QCA_EXPORT RSA
 	{
 	public:
 		RSA();
@@ -254,7 +278,7 @@ namespace QCA
 	};
 
 	typedef QMap<QString, QString> CertProperties;
-	class Cert
+	class QCA_EXPORT Cert
 	{
 	public:
 		Cert();
@@ -287,7 +311,7 @@ namespace QCA
 		void fromContext(QCA_CertContext *);
 	};
 
-	class TLS : public QObject
+	class QCA_EXPORT TLS : public QObject
 	{
 		Q_OBJECT
 	public:
@@ -347,7 +371,7 @@ namespace QCA
 		Private *d;
 	};
 
-	class SASL : public QObject
+	class QCA_EXPORT SASL : public QObject
 	{
 		Q_OBJECT
 	public:

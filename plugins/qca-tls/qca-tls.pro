@@ -12,7 +12,13 @@ HEADERS += ($$Q_PREFIX)qcaprovider.h
 
 HEADERS = qca-tls.h
 SOURCES = qca-tls.cpp
+
 DEFINES += QCA_PLUGIN
+win:{
+	DEFINES += QCA_PLUGIN_DLL OSS_097
+	INCLUDEPATH += c:\local\include
+	LIBS += c:\local\lib\libeay32.lib c:\local\lib\ssleay32.lib
+}
 
 include(conf.pri)
 include(extra.pri)

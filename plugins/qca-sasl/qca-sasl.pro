@@ -12,7 +12,13 @@ HEADERS += ($$Q_PREFIX)qcaprovider.h
 
 HEADERS = qca-sasl.h
 SOURCES = qca-sasl.cpp
+
 DEFINES += QCA_PLUGIN
+win:{
+	DEFINES += QCA_PLUGIN_DLL
+	INCLUDEPATH += c:\local\include
+	LIBS += c:\local\lib\libsasl.lib
+}
 
 include(conf.pri)
 include(extra.pri)

@@ -30,12 +30,6 @@
 
 #define QCA_PLUGIN_VERSION 1
 
-#ifdef Q_WS_WIN
-#define QCA_EXPORT extern "C" __declspec(dllexport)
-#else
-#define QCA_EXPORT extern "C"
-#endif
-
 class QCAProvider
 {
 public:

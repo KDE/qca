@@ -8,6 +8,12 @@ MOC_DIR        = .moc
 OBJECTS_DIR    = .obj
 UI_DIR         = .ui
 
+# make DLL
+win:{
+	CONFIG += dll
+	win:DEFINES += QCA_MAKEDLL
+}
+
 QCA_CPP = src
 INCLUDEPATH += $$QCA_CPP
 

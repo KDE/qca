@@ -640,7 +640,7 @@ public:
 	RSA *pub, *sec;
 };
 
-static QValueList<QCA_CertProperty> nameToProperties(X509_NAME *name)
+static QValueList<QCA_CertProperty> nameToProperties(struct X509_name_st *name)
 {
 	QValueList<QCA_CertProperty> list;
 
@@ -871,8 +871,8 @@ public:
 		na = ASN1_UTCTIME_QDateTime(X509_get_notAfter(x), NULL);
 
 		// extract the subject/issuer strings
-		X509_NAME *sn = X509_get_subject_name(x);
-		X509_NAME *in = X509_get_issuer_name(x);
+		struct X509_name_st *sn = X509_get_subject_name(x);
+		struct X509_name_st *in = X509_get_issuer_name(x);
 		char buf[1024];
 		X509_NAME_oneline(sn, buf, 1024);
 		v_subject = buf;
