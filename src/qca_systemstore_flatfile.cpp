@@ -28,7 +28,8 @@ namespace QCA {
 
 bool qca_have_systemstore()
 {
-	return QFileInfo(QCA_SYSTEMSTORE_PATH).exists();
+	QFile f(QCA_SYSTEMSTORE_PATH);
+	return f.open(IO_ReadOnly);
 }
 
 static QString readNextPem(QTextStream *ts)
@@ -75,7 +76,8 @@ Store qca_get_systemstore(const QString &provider)
 		if(pem.isNull())
 			break;
 		Certificate cert = Certificate::fromPEM(pem, provider);
-		store.addCertificate(cert);
+		if(!cert.isNull())
+			store.addCertificate(cert);
 	}
 	return store;
 }
