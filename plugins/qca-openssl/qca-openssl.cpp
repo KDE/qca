@@ -859,7 +859,11 @@ static QCA::Validity convert_verify_error(int err)
 class opensslHashContext : public QCA::HashContext
 {
 public:
-    opensslHashContext(QCA::Provider *p, const QString &type) : QCA::HashContext(p, type) {};
+	opensslHashContext(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
+	{
+		m_algorithm = algorithm;
+		clear();
+	};
 
     void clear()
     {
@@ -877,130 +881,17 @@ public:
 	EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
 	return a;
     }
+
+    Context *clone() const
+    {
+	return new opensslHashContext(*this);
+    }
     
 protected:
     const EVP_MD *m_algorithm;
     EVP_MD_CTX m_context;
 };	
 
-class SHA1Context : public opensslHashContext
-{
-public:
-    SHA1Context(QCA::Provider *p) : opensslHashContext(p, "sha1")
-    {
-	m_algorithm = EVP_get_digestbyname("sha1");
-	clear();
-    }
-
-    ~SHA1Context()
-    {
-    }
-
-    Context *clone() const
-    {
-	return new SHA1Context(*this);
-    }
-};
-
-
-class SHA0Context : public opensslHashContext
-{
-public:
-    SHA0Context(QCA::Provider *p) : opensslHashContext(p, "sha")
-    {
-	m_algorithm = EVP_sha();
-	clear();
-    }
-
-    ~SHA0Context()
-    {
-    }
-
-    Context *clone() const
-    {
-	return new SHA0Context(*this);
-    }
-};
-
-
-class MD2Context : public opensslHashContext
-{
-public:
-    MD2Context(QCA::Provider *p) : opensslHashContext(p, "md2")
-    {
-	m_algorithm = EVP_md2();
-	clear();
-    }
-
-    ~MD2Context()
-    {
-    }
-
-    Context *clone() const
-    {
-	return new MD2Context(*this);
-    }
-};
-
-
-class MD4Context : public opensslHashContext
-{
-public:
-    MD4Context(QCA::Provider *p) : opensslHashContext(p, "md4")
-    {
-	m_algorithm = EVP_md4();
-	clear();
-    }
-
-    ~MD4Context()
-    {
-    }
-
-    Context *clone() const
-    {
-	return new MD4Context(*this);
-    }
-};
-
-
-class MD5Context : public opensslHashContext
-{
-public:
-    MD5Context(QCA::Provider *p) : opensslHashContext(p, "md5")
-    {
-	m_algorithm = EVP_md5();
-	clear();
-    }
-
-    ~MD5Context()
-    {
-    }
-
-    Context *clone() const
-    {
-	return new MD5Context(*this);
-    }
-};
-
-
-class RIPEMD160Context : public opensslHashContext
-{
-public:
-    RIPEMD160Context(QCA::Provider *p) : opensslHashContext(p, "ripemd160")
-    {
-	m_algorithm = EVP_ripemd160();
-	clear();
-    }
-
-    ~RIPEMD160Context()
-    {
-    }
-
-    Context *clone() const
-    {
-	return new RIPEMD160Context(*this);
-    }
-};
 
 
 class opensslHMACContext : public QCA::MACContext
@@ -3435,17 +3326,17 @@ public:
 	{
 		//OpenSSL_add_all_digests();
 		if ( type == "sha1" )
-			return new SHA1Context( this );
+			return new opensslHashContext( EVP_sha1(), this, type);
 		else if ( type == "sha0" )
-			return new SHA0Context( this );
+			return new opensslHashContext( EVP_sha(), this, type);
 		else if ( type == "ripemd160" )
-			return new RIPEMD160Context( this );
+			return new opensslHashContext( EVP_ripemd160(), this, type);
 		else if ( type == "md2" )
-			return new MD2Context( this );
+			return new opensslHashContext( EVP_md2(), this, type);
 		else if ( type == "md4" )
-			return new MD4Context( this );
+			return new opensslHashContext( EVP_md4(), this, type);
 		else if ( type == "md5" )
-			return new MD5Context( this );
+			return new opensslHashContext( EVP_md5(), this, type);
 		else if ( type == "hmac(md5)" )
 			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )
