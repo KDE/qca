@@ -2555,10 +2555,17 @@ public:
 
 	MyCertContext(QCA::Provider *p) : QCA::CertContext(p)
 	{
+		//printf("[%p] ** created\n", this);
 	}
 
 	MyCertContext(const MyCertContext &from) : QCA::CertContext(from), item(from.item), _props(from._props)
 	{
+		//printf("[%p] ** created as copy (from [%p])\n", this, &from);
+	}
+
+	~MyCertContext()
+	{
+		//printf("[%p] ** deleted\n", this);
 	}
 
 	virtual Context *clone() const
@@ -2702,6 +2709,7 @@ public:
 
 	virtual const QCA::CertContextProps *props() const
 	{
+		//printf("[%p] grabbing props\n", this);
 		return &_props;
 	}
 
@@ -2786,6 +2794,7 @@ public:
 		//SignatureAlgorithm sigalgo;
 
 		_props = p;
+		//printf("[%p] made props: [%s]\n", this, _props.subject[QCA::CommonName].toLatin1().data());
 	}
 };
 
@@ -3188,6 +3197,7 @@ public:
 			MyCertContext *cc = new MyCertContext(provider());
 			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
 			cc->item.cert = x;
+			cc->make_props();
 			list.append(cc);
 		}
 		for(n = 0; n < sk_X509_num(untrusted); ++n)
@@ -3197,6 +3207,7 @@ public:
 			MyCertContext *cc = new MyCertContext(provider());
 			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
 			cc->item.cert = x;
+			cc->make_props();
 			list.append(cc);
 		}
 
