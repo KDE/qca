@@ -21,8 +21,7 @@
 
 #include "qca_core.h"
 
-#include <qdatetime.h>
-#include <qstringlist.h>
+#include <QtCore>
 #include <stdlib.h>
 #include "qcaprovider.h"
 
@@ -189,7 +188,7 @@ public:
 		if (padding.size() > 0 ) {
 			padding[0] = 0x80;
 			if (padding.size() > 1 ) {
-				for (i = 1; i < padding.size(); ++i) {
+				for (i = 1; i < (unsigned int)padding.size(); ++i) {
 					padding[i] = 0x00;
 				}
 			}
@@ -220,69 +219,69 @@ public:
 private:
 
         /* Define the state of the MD5 Algorithm. */
-	Q_UINT64 m_count;	        /* message length in bits */
-	Q_UINT32 a, b, c, d;		/* digest buffer */
+	quint64 m_count;	        /* message length in bits */
+	quint32 a, b, c, d;		/* digest buffer */
 	QSecureArray  buf;		/* accumulate block */
 
-	Q_UINT32 rotateLeft(Q_UINT32 x, Q_UINT32 n)
+	quint32 rotateLeft(quint32 x, quint32 n)
 	{
 		return (((x) << (n)) | ((x) >> (32 - (n))));
 	}
 
-	Q_UINT32 F(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	quint32 F(quint32 x, quint32 y, quint32 z)
 	{
 		return (((x) & (y)) | (~(x) & (z)));
 	}
 
-	Q_UINT32 G(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	quint32 G(quint32 x, quint32 y, quint32 z)
 	{
 		return (((x) & (z)) | ((y) & ~(z)));
 	}
 
-	Q_UINT32 H(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	quint32 H(quint32 x, quint32 y, quint32 z)
 	{
 		return ((x) ^ (y) ^ (z));
 	}
 
-	Q_UINT32 I(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	quint32 I(quint32 x, quint32 y, quint32 z)
 	{
 		return ((y) ^ ((x) | ~(z)));
 	}
 
-	Q_UINT32 round1(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	quint32 round1(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
 	{
-		Q_UINT32 t = a + F(b,c,d) + Xk + Ti;
+		quint32 t = a + F(b,c,d) + Xk + Ti;
 		return ( rotateLeft(t, s) + b );
 	}
 
-	Q_UINT32 round2(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	quint32 round2(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
 	{
-		Q_UINT32 t = a + G(b,c,d) + Xk + Ti;
+		quint32 t = a + G(b,c,d) + Xk + Ti;
 		return ( rotateLeft(t, s) + b );
 	}
 
-	Q_UINT32 round3(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	quint32 round3(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
 	{
-		Q_UINT32 t = a + H(b,c,d) + Xk + Ti;
+		quint32 t = a + H(b,c,d) + Xk + Ti;
 		return ( rotateLeft(t, s) + b );
 	}
 
-	Q_UINT32 round4(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	quint32 round4(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
 	{
-		Q_UINT32 t = a + I(b,c,d) + Xk + Ti;
+		quint32 t = a + I(b,c,d) + Xk + Ti;
 		return ( rotateLeft(t, s) + b );
 	}
 
 	void md5_process(QSecureArray data)
 	{
-		Q_UINT32 aSaved, bSaved, cSaved, dSaved;
+		quint32 aSaved, bSaved, cSaved, dSaved;
 		aSaved = a;
 		bSaved = b;
 		cSaved = c;
 		dSaved = d;
 		
-		Q_UINT32 xbuf[16];
-		const Q_UINT32 *X;
+		quint32 xbuf[16];
+		const quint32 *X;
 		
 		if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
 		{
@@ -292,7 +291,7 @@ private:
 			 */
 			if (!((data.data() - (const char *)0) & 3)) {
 				/* data are properly aligned */
-				X = (const Q_UINT32 *)data.data();
+				X = (const quint32 *)data.data();
 			} else {
 				/* not aligned */
 				memcpy(xbuf, data.data(), 64);

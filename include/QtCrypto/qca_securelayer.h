@@ -22,12 +22,12 @@
 #ifndef QCA_SECURELAYER_H
 #define QCA_SECURELAYER_H
 
-#include <qobject.h>
+#include <QObject>
 #include "qca_core.h"
 #include "qca_publickey.h"
 #include "qca_cert.h"
 
-class QHostAddress;
+//class QHostAddress;
 
 namespace QCA
 {
@@ -80,7 +80,7 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		SecureLayer(QObject *parent = 0, const char *name = 0);
+		SecureLayer(QObject *parent = 0);
 
 		void setStatefulOnly(bool b);
 
@@ -123,7 +123,7 @@ namespace QCA
 			NoCert        ///< identity unknown
 		};
 
-		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = QString());
+		TLS(QObject *parent = 0, const QString &provider = QString());
 		~TLS();
 
 		void reset();
@@ -211,7 +211,7 @@ namespace QCA
 			RequireAuthzidSupport  = 0x20  // server-only
 		};
 
-		SASL(QObject *parent = 0, const char *name = 0, const QString &provider = QString());
+		SASL(QObject *parent = 0, const QString &provider = QString());
 		~SASL();
 
 		void reset();
@@ -219,8 +219,8 @@ namespace QCA
 		// configuration
 		void setConstraints(AuthFlags f, SecurityLevel s = SL_None);
 		void setConstraints(AuthFlags f, int minSSF, int maxSSF);
-		void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
-		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
+		//void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
+		//void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
 		void setExternalAuthId(const QString &authid);
 		void setExternalSSF(int);
 

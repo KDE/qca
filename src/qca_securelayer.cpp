@@ -21,11 +21,8 @@
 
 #include "qca_securelayer.h"
 
-#include <qtimer.h>
-#include <qhostaddress.h>
-#include <qguardedptr.h>
-#include "qca_publickey.h"
-#include "qca_cert.h"
+#include <QtCore>
+//#include <qhostaddress.h>
 #include "qcaprovider.h"
 
 namespace QCA {
@@ -59,8 +56,8 @@ QSecureArray SecureFilter::readUnprocessed()
 //----------------------------------------------------------------------------
 // SecureLayer
 //----------------------------------------------------------------------------
-SecureLayer::SecureLayer(QObject *parent, const char *name)
-:QObject(parent, name)
+SecureLayer::SecureLayer(QObject *parent)
+:QObject(parent)
 {
 	_signals = true;
 }
@@ -143,8 +140,8 @@ public:
 	Store *store;
 };
 
-TLS::TLS(QObject *parent, const char *name, const QString &provider)
-:SecureLayer(parent, name), Algorithm("tls", provider)
+TLS::TLS(QObject *parent, const QString &provider)
+:SecureLayer(parent), Algorithm("tls", provider)
 {
 	d = new Private;
 	d->c = (TLSContext *)context();
@@ -333,7 +330,7 @@ void TLS::write(const QSecureArray &a)
 
 QSecureArray TLS::read()
 {
-	QByteArray a = d->in.copy();
+	QByteArray a = d->in;
 	d->in.resize(0);
 	return a;
 }
@@ -347,14 +344,14 @@ void TLS::writeIncoming(const QByteArray &a)
 QByteArray TLS::readOutgoing(int *plainBytes)
 {
 	Q_UNUSED(plainBytes);
-	QByteArray a = d->to_net.copy();
+	QByteArray a = d->to_net;
 	d->to_net.resize(0);
 	return a;
 }
 
 QSecureArray TLS::readUnprocessed()
 {
-	QByteArray a = d->from_net.copy();
+	QByteArray a = d->from_net;
 	d->from_net.resize(0);
 	return a;
 }
@@ -379,7 +376,7 @@ public:
 
 	bool tried;
 	SASLContext *c;
-	QHostAddress localAddr, remoteAddr;
+	//QHostAddress localAddr, remoteAddr;
 	int localPort, remotePort;
 	QByteArray stepData;
 	bool allowCSF;
@@ -389,8 +386,8 @@ public:
 	QByteArray inbuf, outbuf;
 };
 
-SASL::SASL(QObject *parent, const char *name, const QString &provider)
-:SecureLayer(parent, name), Algorithm("sasl", provider)
+SASL::SASL(QObject *parent, const QString &provider)
+:SecureLayer(parent), Algorithm("sasl", provider)
 {
 	d = new Private;
 	d->c = (SASLContext *)context();
@@ -466,7 +463,7 @@ void SASL::setExternalSSF(int x)
 	d->ext_ssf = x;
 }
 
-void SASL::setLocalAddr(const QHostAddress &addr, Q_UINT16 port)
+/*void SASL::setLocalAddr(const QHostAddress &addr, Q_UINT16 port)
 {
 	d->localAddr = addr;
 	d->localPort = port;
@@ -476,19 +473,19 @@ void SASL::setRemoteAddr(const QHostAddress &addr, Q_UINT16 port)
 {
 	d->remoteAddr = addr;
 	d->remotePort = port;
-}
+}*/
 
 bool SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst)
 {
 	SASLContext::HostPort la, ra;
-	if(d->localPort != -1) {
+	/*if(d->localPort != -1) {
 		la.addr = d->localAddr;
 		la.port = d->localPort;
 	}
 	if(d->remotePort != -1) {
 		ra.addr = d->remoteAddr;
 		ra.port = d->remotePort;
-	}
+	}*/
 
 	d->allowCSF = allowClientSendFirst;
 	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
@@ -508,14 +505,14 @@ bool SASL::startServer(const QString &service, const QString &host, const QStrin
 	Q_UNUSED(allowServerSendLast);
 
 	SASLContext::HostPort la, ra;
-	if(d->localPort != -1) {
+	/*if(d->localPort != -1) {
 		la.addr = d->localAddr;
 		la.port = d->localPort;
 	}
 	if(d->remotePort != -1) {
 		ra.addr = d->remoteAddr;
 		ra.port = d->remotePort;
-	}
+	}*/
 
 	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
 	d->setSecurityProps();
@@ -548,7 +545,7 @@ void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
 
 void SASL::putStep(const QByteArray &stepData)
 {
-	d->stepData = stepData.copy();
+	d->stepData = stepData;
 	//tryAgain();
 }
 

@@ -22,9 +22,13 @@
 #ifndef QCA_TOOLS_H
 #define QCA_TOOLS_H
 
+#include <QSharedData>
+#include <QSharedDataPointer>
 #include "qca_export.h"
-#include <qcstring.h>
-#include <qstring.h>
+
+class QString;
+class QByteArray;
+class QTextStream;
 
 // Direct secure memory access.  For interfacing with C libraries if needed.
 QCA_EXPORT void *qca_secure_alloc(int bytes);
@@ -43,7 +47,7 @@ QCA_EXPORT void qca_secure_free(void *p);
  cleared first.
  
  Note that this class is implicitly shared (that is, copy on write).
- **/ 
+ **/
 class QCA_EXPORT QSecureArray
 {
 public:
@@ -60,6 +64,13 @@ public:
 	QSecureArray(int size);
 
 	/**
+	 * Construct a secure byte array from a string
+	 *
+	 * Note that this copies, rather than references the source array
+	 */
+	QSecureArray(const char *str);
+
+	/**
 	 * Construct a secure byte array from a QByteArray
 	 *
 	 * Note that this copies, rather than references the source array
@@ -67,15 +78,6 @@ public:
 	 * \sa operator=()
 	 */
 	QSecureArray(const QByteArray &a);
-
-	/**
-	 * Construct a secure byte array from a string
-	 *
-	 * Note that this copies, rather than references the source array
-	 *
-	 * \sa operator=()
-	 */
-	QSecureArray(const QCString &cs);
 
 	/**
 	 * Construct a (shallow) copy of another secure byte array
@@ -101,11 +103,9 @@ public:
 	QSecureArray & operator=(const QByteArray &a);
 
 	/**
-	 * Creates a copy, rather than references
-	 *
-	 * \param cs the string to copy from
+	 * Clears the contents of the array and makes it empty
 	 */
-	QSecureArray & operator=(const QCString &cs);
+	void clear();
 
 	/**
 	 * Returns a reference to the byte at the index position
@@ -129,6 +129,16 @@ public:
 	 * at() or operator[]
 	 *
 	 */
+	char *data();
+
+	/**
+	 * Pointer to the data in the secure array
+	 * 
+	 * You can use this for memcpy and similar functions. If you are trying
+	 * to obtain data at a particular offset, you might be better off using
+	 * at() or operator[]
+	 *
+	 */
 	const char *data() const;
 
 	/**
@@ -139,26 +149,26 @@ public:
 	 * at() or operator[]
 	 *
 	 */
-	char *data();
+	const char *constData() const;
 
 	/**
 	 * Returns a reference to the byte at the index position
 	 *
 	 * \param index the zero-based offset to obtain
 	 */
-	const char & at(uint index) const;
+	char & at(int index);
 
 	/**
 	 * Returns a reference to the byte at the index position
 	 *
 	 * \param index the zero-based offset to obtain
 	 */
-	char & at(uint index);
+	const char & at(int index) const;
 
 	/**
 	 * Returns the number of bytes in the array
 	 */
-	uint size() const;
+	int size() const;
 
 	/**
 	 * Test if the array contains any bytes.
@@ -179,7 +189,7 @@ public:
 	 *
 	 * \param size the new length
 	 */
-	bool resize(uint size);
+	bool resize(int size);
 
         /**
          * Fill the data array with a specified character
@@ -198,26 +208,7 @@ public:
          */
         void fill(char fillChar, int fillToPosition = -1);
 
-	/** 
-	 * creates a deep copy, rather than a reference
-	 * if you want a reference then you should use operator=()
-	 */
-	QSecureArray copy() const;
-
 	/**
-	 * If the current array is shared, this conducts a deep copy, 
-	 * otherwise it has no effect.
-	 *
-	 * \code
-	 * QSecureArray myArray = anotherArray; // currently the same
-	 * myArray.detach(); // no longer the same data, but a copy
-	 * // anything here that affects anotherArray does not affect
-	 * // myArray; and vice versa.
-	 * \endcode
-	 */
-	void detach();
-
-	 /**
 	  * Copy the contents of the secure array out to a 
 	  * standard QByteArray. Note that this performs a deep copy
 	  * of the data.
@@ -228,6 +219,7 @@ public:
 	 * Append a secure byte array to the end of this array
 	 */
 	QSecureArray & append(const QSecureArray &a);
+
 protected:
 	/**
 	 * Assign the contents of a provided byte array to this
@@ -236,19 +228,18 @@ protected:
 	 * \param from the byte array to copy
 	 */
 	void set(const QSecureArray &from);
+
 	/**
-	 * Assign the contents of a provided string to this
+	 * Assign the contents of a provided byte array to this
 	 * object.
 	 *
-	 * \param cs the QCString to copy
+	 * \param from the byte array to copy
 	 */
-	void set(const QCString &cs);
+	void set(const QByteArray &from);
 
 private:
 	class Private;
-	Private *d;
-
-	void reset();
+	QSharedDataPointer<Private> d;
 };
 
 /**
@@ -450,7 +441,7 @@ public:
 
 private:
 	class Private;
-	Private *d;
+	QSharedDataPointer<Private> d;
 };
 
 /**

@@ -1,8 +1,9 @@
 # qca qmake profile
 
 TEMPLATE = lib
-CONFIG += qt thread release
-TARGET = qca
+CONFIG  += release
+QT      -= gui
+TARGET   = qca
 
 MOC_DIR        = .moc
 OBJECTS_DIR    = .obj

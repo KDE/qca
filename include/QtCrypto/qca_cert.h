@@ -22,7 +22,7 @@
 #ifndef QCA_CERT_H
 #define QCA_CERT_H
 
-#include <qmap.h>
+#include <QMap>
 #include "qca_core.h"
 #include "qca_publickey.h"
 
@@ -112,7 +112,7 @@ namespace QCA
 	};
 
 	typedef QMap<CertificateInfoType, QString> CertificateInfo;
-	typedef QValueList<ConstraintType> Constraints;
+	typedef QList<ConstraintType> Constraints;
 
 	// note: in SPKAC mode, all options are ignored except for challenge
 	class QCA_EXPORT CertificateOptions
@@ -195,7 +195,7 @@ namespace QCA
 		friend class TLS;
 	};
 
-	class QCA_EXPORT CertificateChain : public QValueList<Certificate>
+	class QCA_EXPORT CertificateChain : public QList<Certificate>
 	{
 	public:
 		CertificateChain();
@@ -278,7 +278,7 @@ namespace QCA
 		QDateTime thisUpdate() const;
 		QDateTime nextUpdate() const;
 
-		QValueList<CRLEntry> revoked() const;
+		QList<CRLEntry> revoked() const;
 
 		SignatureAlgorithm signatureAlgorithm() const;
 
@@ -302,7 +302,7 @@ namespace QCA
 		Certificate signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const;
 		Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
 		CRL createCRL(const QDateTime &nextUpdate) const;
-		CRL updateCRL(const CRL &crl, const QValueList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
+		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 	};
 
 	class QCA_EXPORT Store : public Algorithm
@@ -314,8 +314,8 @@ namespace QCA
 		void addCRL(const CRL &crl);
 		Validity validate(const Certificate &cert, UsageMode u = UsageAny) const;
 
-		QValueList<Certificate> certificates() const;
-		QValueList<CRL> crls() const;
+		QList<Certificate> certificates() const;
+		QList<CRL> crls() const;
 
 		// import / export
 		static bool canUsePKCS7(const QString &provider = QString());

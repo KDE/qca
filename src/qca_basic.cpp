@@ -21,6 +21,7 @@
 
 #include "qca_basic.h"
 
+#include <QtCore>
 #include "qcaprovider.h"
 
 namespace QCA {
@@ -93,10 +94,7 @@ void Hash::update(const char *data, int len)
 	if ( 0 == len )
 		return;
 
-	QByteArray bArray;
-	bArray.setRawData( data, len );
-	update( bArray );
-	bArray.resetRawData( data, len );
+	update(QByteArray::fromRawData(data, len));
 }
 
 // Reworked from KMD5, from KDE's kdelibs
@@ -105,7 +103,7 @@ void Hash::update(QIODevice &file)
 	char buffer[1024];
 	int len;
 
-	while ((len=file.readBlock(reinterpret_cast<char*>(buffer), sizeof(buffer))) > 0)
+	while ((len=file.read(reinterpret_cast<char*>(buffer), sizeof(buffer))) > 0)
 		update(buffer, len);
 }
 
@@ -120,21 +118,9 @@ QSecureArray Hash::hash(const QSecureArray &a)
 	return process(a);
 }
 
-QSecureArray Hash::hash(const QCString &cs)
-{
-	QByteArray a(cs.length());
-	memcpy(a.data(), cs.data(), a.size());
-	return hash(a);
-}
-
 QString Hash::hashToString(const QSecureArray &a)
 {
 	return arrayToHex(hash(a));
-}
-
-QString Hash::hashToString(const QCString &cs)
-{
-	return arrayToHex(hash(cs));
 }
 
 //----------------------------------------------------------------------------

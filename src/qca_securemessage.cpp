@@ -21,9 +21,7 @@
 
 #include "qca_securemessage.h"
 
-#include <qdatetime.h>
-#include "qca_publickey.h"
-#include "qca_cert.h"
+#include <QtCore>
 
 namespace QCA {
 
@@ -285,8 +283,8 @@ SecureMessageSignatureList SecureMessage::signers() const
 //----------------------------------------------------------------------------
 // SecureMessageSystem
 //----------------------------------------------------------------------------
-SecureMessageSystem::SecureMessageSystem(QObject *parent, const char *name)
-:QObject(parent, name)
+SecureMessageSystem::SecureMessageSystem(QObject *parent)
+:QObject(parent)
 {
 }
 
@@ -297,8 +295,8 @@ SecureMessageSystem::~SecureMessageSystem()
 //----------------------------------------------------------------------------
 // OpenPGP
 //----------------------------------------------------------------------------
-OpenPGP::OpenPGP(QObject *parent, const char *name, const QString &provider)
-:SecureMessageSystem(parent, name), Algorithm("openpgp", provider)
+OpenPGP::OpenPGP(QObject *parent, const QString &provider)
+:SecureMessageSystem(parent), Algorithm("openpgp", provider)
 {
 }
 
@@ -333,8 +331,8 @@ QString OpenPGP::diagnosticText() const
 //----------------------------------------------------------------------------
 // SMIME
 //----------------------------------------------------------------------------
-SMIME::SMIME(QObject *parent, const char *name, const QString &provider)
-:SecureMessageSystem(parent, name), Algorithm("smime", provider)
+SMIME::SMIME(QObject *parent, const QString &provider)
+:SecureMessageSystem(parent), Algorithm("smime", provider)
 {
 }
 
@@ -347,7 +345,7 @@ void SMIME::setStore(const Store &store)
 	Q_UNUSED(store);
 }
 
-void SMIME::setPrivateKeys(const QValueList<PrivateKey> &keys)
+void SMIME::setPrivateKeys(const QList<PrivateKey> &keys)
 {
 	Q_UNUSED(keys);
 }

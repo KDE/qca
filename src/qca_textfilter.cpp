@@ -21,6 +21,8 @@
 
 #include "qca_textfilter.h"
 
+#include <QtCore>
+
 namespace QCA {
 
 //----------------------------------------------------------------------------
@@ -50,40 +52,24 @@ QSecureArray TextFilter::decode(const QSecureArray &a)
 
 QString TextFilter::arrayToString(const QSecureArray &a)
 {
-	QByteArray b = encode(a).toByteArray();
-	QCString c;
-	c.resize(b.size() + 1);
-	memcpy(c.data(), b.data(), b.size());
-	return QString::fromLatin1(c);
+	return QString::fromLatin1(encode(a).toByteArray());
 }
 
 QSecureArray TextFilter::stringToArray(const QString &s)
 {
 	if(s.isEmpty())
 		return QSecureArray();
-	const char *c = s.latin1();
-	int len = strlen(c);
-	QSecureArray b(len);
-	memcpy(b.data(), c, len);
-	return decode(b);
+	return decode(s.toLatin1());
 }
 
 QString TextFilter::encodeString(const QString &s)
 {
-	QCString c = s.utf8();
-	int len = c.length();
-	QSecureArray b(len);
-	memcpy(b.data(), c.data(), len);
-	return arrayToString(b);
+	return arrayToString(s.toUtf8());
 }
 
 QString TextFilter::decodeString(const QString &s)
 {
-	QSecureArray a = stringToArray(s);
-	QCString c;
-	c.resize(a.size() + 1);
-	memcpy(c.data(), a.data(), a.size());
-	return QString::fromUtf8(c);
+	return QString::fromUtf8(stringToArray(s).toByteArray());
 }
 
 //----------------------------------------------------------------------------
@@ -165,7 +151,7 @@ QSecureArray Hex::update(const QSecureArray &a)
 			flag = true;
 		}
 
-		QByteArray out(a.size() / 2);
+		QByteArray out(a.size() / 2, 0);
 		int at = 0;
 		int c;
 		for(int n = 0; n < (int)a.size(); ++n)

@@ -20,16 +20,14 @@
 
 #include "qca_systemstore.h"
 
-#include <qfile.h>
-#include <qfileinfo.h>
-#include <qtextstream.h>
+#include <QtCore>
 
 namespace QCA {
 
 bool qca_have_systemstore()
 {
 	QFile f(QCA_SYSTEMSTORE_PATH);
-	return f.open(IO_ReadOnly);
+	return f.open(QFile::ReadOnly);
 }
 
 static QString readNextPem(QTextStream *ts)
@@ -67,7 +65,7 @@ Store qca_get_systemstore(const QString &provider)
 {
 	Store store(provider);
 	QFile f(QCA_SYSTEMSTORE_PATH);
-	if(!f.open(IO_ReadOnly))
+	if(!f.open(QFile::ReadOnly))
 		return store;
 	QTextStream ts(&f);
 	while(1)

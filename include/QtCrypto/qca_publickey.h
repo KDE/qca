@@ -22,7 +22,7 @@
 #ifndef QCA_PUBLICKEY_H
 #define QCA_PUBLICKEY_H
 
-#include <qobject.h>
+#include <QObject>
 #include "qca_core.h"
 
 namespace QCA
@@ -104,7 +104,7 @@ namespace QCA
 
 		PKey & operator=(const PKey &from);
 
-		static QValueList<Type> supportedTypes(const QString &provider = QString());
+		static QList<Type> supportedTypes(const QString &provider = QString());
 
 		bool isNull() const;
 		Type type() const;
@@ -218,7 +218,7 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		KeyGenerator(QObject *parent = 0, const char *name = 0);
+		KeyGenerator(QObject *parent = 0);
 		~KeyGenerator();
 
 		bool blocking() const;

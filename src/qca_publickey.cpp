@@ -21,7 +21,7 @@
 
 #include "qca_publickey.h"
 
-#include <qptrdict.h>
+#include <QtCore>
 #include "qcaprovider.h"
 
 namespace QCA {
@@ -72,10 +72,10 @@ void PKey::set(const PKey &k)
 	*this = k;
 }
 
-QValueList<PKey::Type> PKey::supportedTypes(const QString &provider)
+QList<PKey::Type> PKey::supportedTypes(const QString &provider)
 {
 	Q_UNUSED(provider);
-	return QValueList<PKey::Type>();
+	return QList<PKey::Type>();
 }
 
 bool PKey::isNull() const
@@ -499,7 +499,7 @@ public:
 	QString provider;
 	PKeyBase *k;
 
-	static QPtrDict<KeyGenerator> *list;
+	static QHash<PKeyBase*, KeyGenerator*> *list;
 
 	Private(KeyGenerator *_parent)
 	{
@@ -508,23 +508,28 @@ public:
 
 	~Private()
 	{
-		list_del();
-		delete k;
+		if(k)
+		{
+			list_del(k);
+			delete k;
+		}
 	}
 
 	void list_add(PKeyBase *c)
 	{
 		if(!list)
-			list = new QPtrDict<KeyGenerator>;
+			list = new QHash<PKeyBase*, KeyGenerator*>;
 		list->insert(c, parent);
 	}
 
-	void list_del()
+	void list_del(PKeyBase *c)
 	{
 		if(!list)
 			return;
-		list->remove(parent);
-		if(list->isEmpty()) {
+		if(list->contains(c))
+			list->remove(c);
+		if(list->isEmpty())
+		{
 			delete list;
 			list = 0;
 		}
@@ -532,33 +537,36 @@ public:
 
 	static void rsa_cb(RSAContext *c)
 	{
-		KeyGenerator *self = list->find(c);
-		if(!self)
-			return;
-		self->done();
+		if(list->contains(c))
+		{
+			KeyGenerator *self = list->value(c);
+			self->done();
+		}
 	}
 
 	static void dsa_cb(DSAContext *c)
 	{
-		KeyGenerator *self = list->find(c);
-		if(!self)
-			return;
-		self->done();
+		if(list->contains(c))
+		{
+			KeyGenerator *self = list->value(c);
+			self->done();
+		}
 	}
 
 	static void dh_cb(DHContext *c)
 	{
-		KeyGenerator *self = list->find(c);
-		if(!self)
-			return;
-		self->done();
+		if(list->contains(c))
+		{
+			KeyGenerator *self = list->value(c);
+			self->done();
+		}
 	}
 };
 
-QPtrDict<KeyGenerator> *KeyGenerator::Private::list = 0;
+QHash<PKeyBase*, KeyGenerator*> *KeyGenerator::Private::list = 0;
 
-KeyGenerator::KeyGenerator(QObject *parent, const char *name)
-:QObject(parent, name)
+KeyGenerator::KeyGenerator(QObject *parent)
+:QObject(parent)
 {
 	d = new Private(this);
 	d->blocking = true;
@@ -646,7 +654,7 @@ PrivateKey KeyGenerator::result() const
 void KeyGenerator::done()
 {
 	if(!d->wasBlocking)
-		d->list_del();
+		d->list_del(d->k);
 
 	PrivateKey key;
 

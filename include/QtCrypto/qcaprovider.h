@@ -22,10 +22,7 @@
 #ifndef QCAPROVIDER_H
 #define QCAPROVIDER_H
 
-#include <qstring.h>
-#include <qdatetime.h>
-#include <qobject.h>
-#include <qhostaddress.h>
+#include <QtCore>
 #include "qca_core.h"
 #include "qca_basic.h"
 #include "qca_cert.h"
@@ -264,8 +261,8 @@ class SASLContext : public Provider::Context
 public:
 	struct HostPort
 	{
-		QHostAddress addr;
-		Q_UINT16 port;
+		//QHostAddress addr;
+		//Q_UINT16 port;
 	};
 	struct AuthParams
 	{

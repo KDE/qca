@@ -21,7 +21,7 @@
 
 #include "qca_core.h"
 
-#include "qca_tools.h"
+#include <QtCore>
 #include "qca_plugin.h"
 #include "qca_textfilter.h"
 #include "qca_cert.h"
@@ -133,7 +133,7 @@ bool isSupported(const QStringList &features)
 
 bool isSupported(const char *features)
 {
-	return isSupported(QStringList::split(',', QString(features)));
+	return isSupported(QString(features).split(',', QString::SkipEmptyParts));
 }
 
 QStringList supportedFeatures()
@@ -265,7 +265,7 @@ Provider::Context *getContext(const QString &type, const QString &provider)
 	if(!p)
 	{
 		// try using some other provider
-		p = manager->findFor(QString::null, type);
+		p = manager->findFor(QString(), type);
 		if((!p || p->name() == "default") && !scanned)
 		{
 			// maybe there are new providers, so scan and try again
@@ -591,11 +591,6 @@ SymmetricKey::SymmetricKey(const QSecureArray &a)
 	set(a);
 }
 
-SymmetricKey::SymmetricKey(const QCString &cs)
-{
-	set(cs);
-}
-
 /* from libgcrypt-1.2.0 */
 static unsigned char desWeakKeyTable[64][8] =
 {
@@ -697,11 +692,6 @@ InitializationVector::InitializationVector(int size)
 InitializationVector::InitializationVector(const QSecureArray &a)
 {
 	set(a);
-}
-
-InitializationVector::InitializationVector(const QCString &cs)
-{
-	set(cs);
 }
 
 }

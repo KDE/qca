@@ -1,6 +1,6 @@
 * Additional unit tests
 * Bundle root certificates to be used on platforms without a system store
-  (we need to choose a reliable source, maybe mozilla or debian?)
+  (we need to choose a reliable source, maybe mozilla or debian?  kde??)
 
 * API documentation
   clean up Algorithm
@@ -13,20 +13,25 @@
   think about documenting the various providers (qcaprovider.h)
 
 * Considerations
-  threading (safety, usability) in API and plugins
+  threading (safety, usability) in API and plugins.  look for singletons
   it's possible we use QSecureArray in some unnecessary places
   don't forget to QCA_EXPORT everything
+  ensure plugin system is upgradable this time. no createProvider3(), please..
+  standardize on count() vs size() when iterating?
 
 * finish API:
+  do something about qhostaddress in SASL. try to remove QtNetwork dependency?
   move to qt 4
+    use qplugin
+    use qshareddata for thread-safe objects
+    turn ambiguous bool args into enums
+    create include files for all class names?
 
-* qt 4 upgrade:
-  new include styles
-  qobject has no name parameter
-  use qmake .prf for auto-discovery by applications
-  use qplugin
-  use qshareddata for thread-safe objects
-  turn ambiguous bool args into enums
+* build system:
+  get qt 4 support into qconf
+  on non-win/mac, allow specifying of flatfile store, else install/use built-in
+  make sure it installs properly
+  create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
   cipher - needs to handling padding
@@ -39,10 +44,6 @@
   smime
   default provider should have built-in sha1 and md5 (?)
   system store: all added certs need to be flagged as trusted
-
-* build system:
-  on non-win/mac, allow specifying of flatfile store, else install/use built-in
-  make sure it installs properly
 
 * examples
   create example for BigInteger

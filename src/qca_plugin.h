@@ -24,11 +24,7 @@
 
 // NOTE: this API is private to QCA
 
-#include <qptrlist.h>
-#include <qstringlist.h>
 #include "qca_core.h"
-
-class QCAProvider;
 
 namespace QCA
 {
@@ -42,24 +38,20 @@ namespace QCA
 
 		void scan();
 		bool add(QCA::Provider *p, int priority);
-		void add(QCAProvider *p); // to be obsoleted
 		void unload(const QString &name);
 		void unloadAll();
 		void setDefault(QCA::Provider *p);
 		QCA::Provider *find(const QString &name) const;
 		QCA::Provider *findFor(const QString &name, const QString &type) const;
-		QCAProvider *findFor(int cap) const; // to be obsoleted
 		void changePriority(const QString &name, int priority);
 		int getPriority(const QString &name);
-		QStringList allFeatures(bool includeOld = true) const;
-		int caps() const; // to be obsoleted
+		QStringList allFeatures() const;
 		const ProviderList & providers() const;
 
 		static void mergeFeatures(QStringList *a, const QStringList &b);
-		static QStringList capsToStringList(int cap);
 
 	private:
-		QPtrList<ProviderItem> providerItemList;
+		QList<ProviderItem*> providerItemList;
 		QCA::ProviderList providerList;
 		QCA::Provider *def;
 		void addItem(ProviderItem *i, int priority);

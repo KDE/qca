@@ -22,7 +22,7 @@
 #ifndef QCA_SECUREMESSAGE_H
 #define QCA_SECUREMESSAGE_H
 
-#include <qobject.h>
+#include <QObject>
 #include "qca_core.h"
 #include "qca_publickey.h"
 #include "qca_cert.h"
@@ -70,7 +70,7 @@ namespace QCA
 		class Private;
 		Private *d;
 	};
-	typedef QValueList<SecureMessageKey> SecureMessageKeyList;
+	typedef QList<SecureMessageKey> SecureMessageKeyList;
 
 	class SecureMessageSignature
 	{
@@ -80,7 +80,7 @@ namespace QCA
 			Valid,   // indentity is verified, matches signature
 			Invalid, // valid key provided, but signature failed
 			BadKey,  // invalid key provided
-			NoKey,   // identity unknown
+			NoKey    // identity unknown
 		};
 
 		SecureMessageSignature();
@@ -97,7 +97,7 @@ namespace QCA
 		class Private;
 		Private *d;
 	};
-	typedef QValueList<SecureMessageSignature> SecureMessageSignatureList;
+	typedef QList<SecureMessageSignature> SecureMessageSignatureList;
 
 	class SecureMessage : public QObject
 	{
@@ -188,7 +188,7 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		SecureMessageSystem(QObject *parent = 0, const char *name = 0);
+		SecureMessageSystem(QObject *parent = 0);
 		~SecureMessageSystem();
 	};
 
@@ -196,7 +196,7 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		OpenPGP(QObject *parent = 0, const char *name = 0, const QString &provider = QString());
+		OpenPGP(QObject *parent = 0, const QString &provider = QString());
 		~OpenPGP();
 
 		void setAllowAgent(bool);
@@ -216,11 +216,11 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		SMIME(QObject *parent = 0, const char *name = 0, const QString &provider = QString());
+		SMIME(QObject *parent = 0, const QString &provider = QString());
 		~SMIME();
 
 		void setStore(const Store &store);
-		void setPrivateKeys(const QValueList<PrivateKey> &keys);
+		void setPrivateKeys(const QList<PrivateKey> &keys);
 	};
 }
 

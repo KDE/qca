@@ -24,8 +24,9 @@
 
 #define QCA_VERSION 0x020000
 
-#include <qptrlist.h>
-#include <qstringlist.h>
+#include <QString>
+#include <QStringList>
+#include <QList>
 #include "qca_export.h"
 #include "qca_tools.h"
 
@@ -47,7 +48,7 @@ namespace QCA
 	 * \sa ProviderListIterator
 	 * \sa providers()
 	 */
-	typedef QPtrList<Provider> ProviderList;
+	typedef QList<Provider*> ProviderList;
 
 	/**
 	 * Convenience representation for iterator for the plugin providers
@@ -66,7 +67,7 @@ namespace QCA
 	 * \sa ProviderList
 	 * \sa providers()
 	 */
-	typedef QPtrListIterator<Provider> ProviderListIterator;
+	//typedef QPtrListIterator<Provider> ProviderListIterator;
 
 	/**
 	 * Mode settings for memory allocation
@@ -817,13 +818,6 @@ namespace QCA
 		SymmetricKey(const QSecureArray &a);
 
 		/**
-		 * Construct a key from a provided string
-		 *
-		 * \param cs the QCString to copy
-		 */
-		SymmetricKey(const QCString &cs);
-
-		/**
 		 * Test for weak DES keys
 		 *
 		 * \return true if the key is a weak key for DES
@@ -857,13 +851,6 @@ namespace QCA
 		   \param a the byte array to copy
 		 */
 		InitializationVector(const QSecureArray &a);
-
-		/**
-		   Construct an initialisaton vector from a provided string
-
-		   \param cs the QCString to copy
-		 */
-		InitializationVector(const QCString &cs);
 	};
 }
 

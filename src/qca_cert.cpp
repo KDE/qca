@@ -21,8 +21,7 @@
 
 #include "qca_cert.h"
 
-#include <qdatetime.h>
-#include <qregexp.h>
+#include <QtCore>
 #include "qca_publickey.h"
 #include "qcaprovider.h"
 
@@ -155,11 +154,11 @@ void CertificateOptions::setValidityPeriod(const QDateTime &start, const QDateTi
 // (adapted from kdelibs) -- Justin
 static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
 {
-	QString cn = _cn.stripWhiteSpace().lower();
+	QString cn = _cn.trimmed().toLower();
 	QRegExp rx;
 
 	// Check for invalid characters
-	if(QRegExp("[^a-zA-Z0-9\\.\\*\\-]").search(cn) >= 0)
+	if(QRegExp("[^a-zA-Z0-9\\.\\*\\-]").indexIn(cn) >= 0)
 		return false;
 
 	// Domains can legally end with '.'s.  We don't need them though.
@@ -180,28 +179,27 @@ static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
 	if(rx.exactMatch(peerHost))
 		return peerHost == cn;
 
-	if(cn.contains('*')) {
+	if(cn.contains('*'))
+	{
 		// First make sure that there are at least two valid parts
 		// after the wildcard (*).
-		QStringList parts = QStringList::split('.', cn, false);
+		QStringList parts = cn.split('.', QString::SkipEmptyParts);
 
 		while(parts.count() > 2)
-			parts.remove(parts.begin());
+			parts.removeFirst();
 
-		if(parts.count() != 2) {
+		if(parts.count() != 2)
 			return false;  // we don't allow *.root - that's bad
-		}
 
-		if(parts[0].contains('*') || parts[1].contains('*')) {
+		if(parts[0].contains('*') || parts[1].contains('*'))
 			return false;
-		}
 
 		// RFC2818 says that *.example.com should match against
 		// foo.example.com but not bar.foo.example.com
 		// (ie. they must have the same number of parts)
-		if(QRegExp(cn, false, true).exactMatch(peerHost) &&
-			QStringList::split('.', cn, false).count() ==
-			QStringList::split('.', peerHost, false).count())
+		if(QRegExp(cn, Qt::CaseInsensitive, QRegExp::Wildcard).exactMatch(peerHost) &&
+			cn.split('.', QString::SkipEmptyParts).count() ==
+			peerHost.split('.', QString::SkipEmptyParts).count())
 			return true;
 
 		return false;
@@ -347,10 +345,10 @@ Certificate Certificate::fromPEMFile(const QString &fileName, ConvertResult *res
 
 bool Certificate::matchesHostname(const QString &realHost) const
 {
-	QString peerHost = realHost.stripWhiteSpace();
+	QString peerHost = realHost.trimmed();
 	while(peerHost.endsWith("."))
 		peerHost.truncate(peerHost.length()-1);
-	peerHost = peerHost.lower();
+	peerHost = peerHost.toLower();
 
 	if(cnMatchesAddress(commonName(), peerHost))
 		return true;
@@ -570,9 +568,9 @@ QDateTime CRL::nextUpdate() const
 	return QDateTime();
 }
 
-QValueList<CRLEntry> CRL::revoked() const
+QList<CRLEntry> CRL::revoked() const
 {
-	return QValueList<CRLEntry>();
+	return QList<CRLEntry>();
 }
 
 SignatureAlgorithm CRL::signatureAlgorithm() const
@@ -636,7 +634,7 @@ CRL CertificateAuthority::createCRL(const QDateTime &nextUpdate) const
 	return CRL();
 }
 
-CRL CertificateAuthority::updateCRL(const CRL &crl, const QValueList<CRLEntry> &entries, const QDateTime &nextUpdate) const
+CRL CertificateAuthority::updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const
 {
 	Q_UNUSED(crl);
 	Q_UNUSED(entries);
@@ -667,14 +665,14 @@ Validity Store::validate(const Certificate &cert, UsageMode u) const
 	return ((StoreContext *)context())->validate(*((CertContext *)cert.context()), u);
 }
 
-QValueList<Certificate> Store::certificates() const
+QList<Certificate> Store::certificates() const
 {
-	return QValueList<Certificate>();
+	return QList<Certificate>();
 }
 
-QValueList<CRL> Store::crls() const
+QList<CRL> Store::crls() const
 {
-	return QValueList<CRL>();
+	return QList<CRL>();
 }
 
 bool Store::canUsePKCS7(const QString &provider)

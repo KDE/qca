@@ -20,10 +20,7 @@
 
 #include "qca_plugin.h"
 
-#include <qapplication.h>
-#include <qdir.h>
-#include <qfileinfo.h>
-#include <qlibrary.h>
+#include <QtCore>
 #include "qcaprovider.h"
 
 #if defined(Q_OS_WIN32)
@@ -117,16 +114,9 @@ public:
 		return i;
 	}
 
-	static ProviderItem *fromClass(QCAProvider *p)
-	{
-		ProviderItem *i = new ProviderItem(0, p);
-		return i;
-	}
-
 	~ProviderItem()
 	{
 		delete p;
-		//delete p_old;
 		delete lib;
 	}
 
@@ -135,10 +125,7 @@ public:
 		if(init_done)
 			return;
 		init_done = true;
-		if(p)
-			p->init();
-		//else
-		//	p_old->init();
+		p->init();
 	}
 
 private:
@@ -149,22 +136,12 @@ private:
 	{
 		lib = _lib;
 		p = _p;
-		//p_old = 0;
-		init_done = false;
-	}
-
-	ProviderItem(QLibrary *_lib, QCAProvider *_p_old)
-	{
-		lib = _lib;
-		p = 0;
-		//p_old = _p_old;
 		init_done = false;
 	}
 };
 
 ProviderManager::ProviderManager()
 {
-	providerItemList.setAutoDelete(true);
 	def = 0;
 }
 
@@ -175,7 +152,7 @@ ProviderManager::~ProviderManager()
 
 void ProviderManager::scan()
 {
-	QStringList dirs = QApplication::libraryPaths();
+	QStringList dirs = QCoreApplication::libraryPaths();
 	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
 		QDir libpath(*it);
@@ -189,14 +166,14 @@ void ProviderManager::scan()
 			QFileInfo fi(dir.filePath(*it));
 			if(fi.isDir())
 				continue;
-			if(fi.extension() != PLUGIN_EXT)
+			if(fi.suffix() != PLUGIN_EXT)
 				continue;
 			QString fname = fi.filePath();
 
 			ProviderItem *i = ProviderItem::load(fname);
 			if(!i)
 				continue;
-			if(i->version != QCA_PLUGIN_VERSION)// && i->version != 1)
+			if(i->version != QCA_PLUGIN_VERSION)
 			{
 				delete i;
 				continue;
@@ -223,30 +200,24 @@ bool ProviderManager::add(QCA::Provider *p, int priority)
 	return true;
 }
 
-void ProviderManager::add(QCAProvider *p)
-{
-	ProviderItem *i = ProviderItem::fromClass(p);
-	addItem(i, 0); // prepend
-}
-
 void ProviderManager::unload(const QString &name)
 {
-	QPtrListIterator<ProviderItem> it(providerItemList);
-	ProviderListIterator pit(providerList);
-	for(ProviderItem *i; (i = it.current()); ++it)
+	for(int n = 0; n < providerItemList.count(); ++n)
 	{
+		ProviderItem *i = providerItemList[n];
 		if(i->p && i->p->name() == name)
 		{
-			providerItemList.removeRef(i);
-			providerList.removeRef(*pit);
+			delete i;
+			providerItemList.removeAt(n);
+			providerList.removeAt(n);
 			return;
 		}
-		++pit;
 	}
 }
 
 void ProviderManager::unloadAll()
 {
+	qDeleteAll(providerItemList);
 	providerItemList.clear();
 	providerList.clear();
 }
@@ -265,9 +236,9 @@ QCA::Provider *ProviderManager::find(const QString &name) const
 	if(def && name == def->name())
 		return def;
 
-	QPtrListIterator<ProviderItem> it(providerItemList);
-	for(ProviderItem *i; (i = it.current()); ++it)
+	for(int n = 0; n < providerItemList.count(); ++n)
 	{
+		ProviderItem *i = providerItemList[n];
 		if(i->p && i->p->name() == name)
 		{
 			i->ensureInit();
@@ -282,9 +253,9 @@ QCA::Provider *ProviderManager::findFor(const QString &name, const QString &type
 	if(name.isEmpty())
 	{
 		// find the first one that can do it
-		QPtrListIterator<ProviderItem> it(providerItemList);
-		for(ProviderItem *i; (i = it.current()); ++it)
+		for(int n = 0; n < providerItemList.count(); ++n)
 		{
+			ProviderItem *i = providerItemList[n];
 			i->ensureInit();
 			if(i->p && i->p->features().contains(type))
 				return i->p;
@@ -305,25 +276,13 @@ QCA::Provider *ProviderManager::findFor(const QString &name, const QString &type
 	}
 }
 
-QCAProvider *ProviderManager::findFor(int) const
-{
-	// find the first one that can do it
-	QPtrListIterator<ProviderItem> it(providerItemList);
-	for(ProviderItem *i; (i = it.current()); ++it)
-	{
-		i->ensureInit();
-		//if(i->p_old && i->p_old->capabilities() & cap)
-		//	return i->p_old;
-	}
-	return 0;
-}
-
 void ProviderManager::changePriority(const QString &name, int priority)
 {
-	QPtrListIterator<ProviderItem> it(providerItemList);
 	ProviderItem *i = 0;
-	for(ProviderItem *pi; (pi = it.current()); ++it)
+	int n = 0;
+	for(; n < providerItemList.count(); ++n)
 	{
+		ProviderItem *pi = providerItemList[n];
 		if(pi->p && pi->p->name() == name)
 		{
 			i = pi;
@@ -333,20 +292,18 @@ void ProviderManager::changePriority(const QString &name, int priority)
 	if(!i)
 		return;
 
-	providerItemList.setAutoDelete(false);
-	providerItemList.removeRef(i);
-	providerItemList.setAutoDelete(true);
-	providerList.removeRef(i->p);
+	providerItemList.removeAt(n);
+	providerList.removeAt(n);
 
 	addItem(i, priority);
 }
 
 int ProviderManager::getPriority(const QString &name)
 {
-	QPtrListIterator<ProviderItem> it(providerItemList);
 	ProviderItem *i = 0;
-	for(ProviderItem *pi; (pi = it.current()); ++it)
+	for(int n = 0; n < providerItemList.count(); ++n)
 	{
+		ProviderItem *pi = providerItemList[n];
 		if(pi->p && pi->p->name() == name)
 		{
 			i = pi;
@@ -359,36 +316,21 @@ int ProviderManager::getPriority(const QString &name)
 	return i->priority;
 }
 
-QStringList ProviderManager::allFeatures(bool includeOld) const
+QStringList ProviderManager::allFeatures() const
 {
 	QStringList list;
 
 	if(def)
 		list = def->features();
 
-	QPtrListIterator<ProviderItem> it(providerItemList);
-	for(ProviderItem *i; (i = it.current()); ++it)
+	for(int n = 0; n < providerItemList.count(); ++n)
 	{
+		ProviderItem *i = providerItemList[n];
 		if(i->p)
 			mergeFeatures(&list, i->p->features());
 	}
 
-	if(includeOld)
-		mergeFeatures(&list, capsToStringList(caps()));
-
 	return list;
-}
-
-int ProviderManager::caps() const
-{
-	int caps = 0;
-	QPtrListIterator<ProviderItem> it(providerItemList);
-	for(ProviderItem *i; (i = it.current()); ++it)
-	{
-		//if(i->p_old)
-		//	caps |= i->p_old->capabilities();
-	}
-	return caps;
 }
 
 const ProviderList & ProviderManager::providers() const
@@ -401,9 +343,11 @@ void ProviderManager::addItem(ProviderItem *item, int priority)
 	if(priority < 0)
 	{
 		// for -1, make the priority the same as the last item
-		ProviderItem *last = providerItemList.getLast();
-		if(last)
+		if(!providerItemList.isEmpty())
+		{
+			ProviderItem *last = providerItemList.last();
 			item->priority = last->priority;
+		}
 		else
 			item->priority = 0;
 
@@ -413,18 +357,17 @@ void ProviderManager::addItem(ProviderItem *item, int priority)
 	else
 	{
 		// place the item before any other items with same or greater priority
-		int at = 0;
-		QPtrListIterator<ProviderItem> it(providerItemList);
-		for(ProviderItem *i; (i = it.current()); ++it)
+		int n = 0;
+		for(; n < providerItemList.count(); ++n)
 		{
+			ProviderItem *i = providerItemList[n];
 			if(i->priority >= priority)
 				break;
-			++at;
 		}
 
 		item->priority = priority;
-		providerItemList.insert(at, item);
-		providerList.insert(at, item->p);
+		providerItemList.insert(n, item);
+		providerList.insert(n, item->p);
 	}
 }
 
@@ -440,26 +383,6 @@ void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 		if(!a->contains(*it))
 			a->append(*it);
 	}
-}
-
-QStringList ProviderManager::capsToStringList(int)
-{
-	QStringList list;
-	/*if(cap & CAP_SHA0)
-		list.append("sha0");
-	if(cap & CAP_SHA1)
-		list.append("sha1");
-	if(cap & CAP_SHA256)
-		list.append("sha256");
-	if(cap & CAP_MD2)
-		list.append("md2");
-	if(cap & CAP_MD4)
-		list.append("md4");
-	if(cap & CAP_MD5)
-		list.append("md5");
-	if(cap & CAP_RIPEMD160)
-		list.append("ripemd160");*/
-	return list;
 }
 
 }

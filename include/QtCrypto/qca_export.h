@@ -21,7 +21,7 @@
 #ifndef QCA_EXPORT_H
 #define QCA_EXPORT_H
 
-#include <qglobal.h>
+#include <QtGlobal>
 
 #ifdef Q_OS_WIN32
 # ifndef QCA_STATIC

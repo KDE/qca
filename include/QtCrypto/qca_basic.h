@@ -53,7 +53,8 @@ namespace QCA
 		 * How much entropy to use for the random numbers that
 		 * are required.
 		 */
-		enum Quality {
+		enum Quality
+		{
 			Nonce,      ///< Low quality, will become public
 			PublicValue,///< Will become public
 			SessionKey, ///< Intended to remain private
@@ -298,13 +299,6 @@ namespace QCA
 		QSecureArray hash(const QSecureArray &array);
 
 		/**
-		 * \overload
-		 *
-		 * \param cs the QCString to hash
-		 */
-		QSecureArray hash(const QCString &cs);
-
-		/**
 		 * %Hash a byte array, returning it as a printable
 		 * string
 		 * 
@@ -320,13 +314,6 @@ namespace QCA
 		 * the static arrayToHex() method.
 		 */
 		QString hashToString(const QSecureArray &array);
-
-		/**
-		 * \overload
-		 *
-		 * \param cs the QCString to hash		 
-		 */
-		QString hashToString(const QCString &cs);
 
 	protected:
 		/**
@@ -497,6 +484,7 @@ namespace QCA
 		   the length of the plaintext.
 		*/
 		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, Padding pad, const QString &provider);
+
 	private:
 		class Private;
 		Private *d;
