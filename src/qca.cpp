@@ -28,6 +28,7 @@
 #include<qtimer.h>
 #include<qhostaddress.h>
 #include<qapplication.h>
+#include<stdlib.h>
 #include"qcaprovider.h"
 
 #if defined(Q_OS_WIN32)
