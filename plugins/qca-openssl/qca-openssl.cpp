@@ -3361,7 +3361,7 @@ public:
 		// Change cipher names
 		QCA::KeyLength keyLength() const
 		{
-			if (m_type == "des-ecb") {
+			if (m_type.left(4) == "des-") {
 				return QCA::KeyLength( 8, 8, 1);
 			} else if (m_type.left(6) == "aes128") {
 				return QCA::KeyLength( 16, 16, 1);
@@ -3443,6 +3443,11 @@ public:
 		// list += "blowfish-ecb";
 		list += "tripledes-ecb";
 		list += "des-ecb";
+		list += "des-ecb-pkcs7";
+		list += "des-cbc";
+		list += "des-cbc-pkcs7";
+		list += "des-cfb";
+		list += "des-ofb";
 		list += "pkey";
 		list += "dlgroup";
 		list += "rsa";
@@ -3503,6 +3508,16 @@ public:
 			return new opensslCipherContext( EVP_des_ede3(), 0, this, type);
 		else if ( type == "des-ecb" )
 			return new opensslCipherContext( EVP_des_ecb(), 0, this, type);
+		else if ( type == "des-ecb-pkcs7" )
+			return new opensslCipherContext( EVP_des_ecb(), 1, this, type);
+		else if ( type == "des-cbc" )
+			return new opensslCipherContext( EVP_des_cbc(), 0, this, type);
+		else if ( type == "des-cbc-pkcs7" )
+			return new opensslCipherContext( EVP_des_cbc(), 1, this, type);
+		else if ( type == "des-cfb" )
+			return new opensslCipherContext( EVP_des_cfb(), 0, this, type);
+		else if ( type == "des-ofb" )
+			return new opensslCipherContext( EVP_des_ofb(), 0, this, type);
 		else if ( type == "pkey" )
 			return new MyPKeyContext( this );
 		else if ( type == "dlgroup" )
