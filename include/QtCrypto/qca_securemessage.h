@@ -33,11 +33,17 @@ namespace QCA
 	class Certificate;
 	class Store;
 	class SecureMessageSystem;
+	typedef QValueList<Certificate> CertificateChain;
 
 	class SecureMessageKey
 	{
 	public:
-		enum Type { None, PGP, X509 };
+		enum Type
+		{
+			None,
+			PGP,
+			X509
+		};
 		SecureMessageKey();
 		SecureMessageKey(const SecureMessageKey &from);
 		~SecureMessageKey();
@@ -52,9 +58,9 @@ namespace QCA
 		void setPGPSecretKey(const QString &id);
 
 		// x509
-		Certificate x509Certificate() const;
+		CertificateChain x509CertificateChain() const;
 		PrivateKey x509PrivateKey() const;
-		void setX509Certificate(const Certificate &c);
+		void setX509CertificateChain(const CertificateChain &c);
 		void setX509PrivateKey(const PrivateKey &k);
 
 		// generic
@@ -72,32 +78,67 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		enum Mode { EncryptThenSign, SignThenEncrypt };
-		enum Error { ErrBadPassphrase, ErrUnknown };
-		enum VerifyResult { VerifyGood, VerifyBad, VerifyNoKey, VerifyError };
+		enum Order
+		{
+			EncryptThenSign,
+			SignThenEncrypt
+		};
+		enum Format
+		{
+			Binary, // DER/binary
+			Ascii   // PEM/ascii-armored
+		};
+		enum Error
+		{
+			ErrPassphrase, // passphrase was either wrong or not provided
+			ErrFormat,     // input format was bad
+			ErrSigner,     // signing key is expired or invalid
+			ErrUnknown     // other error
+		};
+		enum VerifyResult
+		{
+			Valid,   // indentity is verified, matches signature
+			Invalid, // valid key provided, but signature failed
+			BadKey,  // invalid key provided
+			NoKey,   // identity unknown
+		};
 		SecureMessage(SecureMessageSystem *system);
 		~SecureMessage();
 
-		bool canEncryptMultiple() const; // can smime do multiple?
-		void encrypt(const QSecureArray &in, const SecureMessageKey &key);
-		void encrypt(const QSecureArray &in, const SecureMessageKeyList &keys);
-		void encryptAndSign(const QSecureArray &in, const SecureMessageKey &key, const SecureMessageKey &signer, Mode m = EncryptThenSign);
-		void encryptAndSign(const QSecureArray &in, const SecureMessageKeyList &keys, const SecureMessageKey &signer, Mode m = EncryptThenSign);
-		void decrypt(const QString &in);
-		void sign(const QSecureArray &in, const SecureMessageKey &signer);
-		void verify(const QSecureArray &in, const QString &sig);
+		bool canSignMultiple() const;     // PGP can't sign multiple
+		void setEnableBundleSigner(bool); // Bundle S/MIME certificate chain (default true)
+		void setFormat(Format f);         // (default Binary)
+		void setRecipient(const SecureMessageKey &key);
+		void setRecipients(const SecureMessageKeyList &keys);
+		void setSigner(const SecureMessageKey &key);
+		void setSigners(const SecureMessageKeyList &keys);
+
+		void startEncrypt();
+		void startDecrypt();
+		void startSign(bool detachedSignature = true);
+		void startVerify(const QSecureArray &sig = QSecureArray());
+		void startEncryptAndSign(Order o = EncryptThenSign);
+		void startDecryptAndVerify(Order o = EncryptThenSign);
+		void update(const QSecureArray &in);
+		QSecureArray read(int size = -1);
+		int bytesAvailable() const;
+		void end();
 		bool waitForFinished();
 
 		bool success() const;
 		Error errorCode() const;
-		QString encrypted() const;
-		QSecureArray decrypted() const;
-		QString signature() const;
+
+		// sign
+		QSecureArray signature() const;
+
+		// verify
+		VerifyResult verifyResult() const;
+		CertValidity keyValidity() const;
 		SecureMessageKey key() const;
 		QDateTime timestamp() const;
-		VerifyResult verifyResult();
 
 	signals:
+		void readyRead();
 		void finished();
 
 	public:
@@ -141,6 +182,7 @@ namespace QCA
 		~SMIME();
 
 		void setStore(const Store &store);
+		void setPrivateKeys(const QValueList<PrivateKey> &keys);
 	};
 }
 

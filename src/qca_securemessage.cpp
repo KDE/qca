@@ -75,9 +75,9 @@ void SecureMessageKey::setPGPSecretKey(const QString &id)
 	Q_UNUSED(id);
 }
 
-Certificate SecureMessageKey::x509Certificate() const
+CertificateChain SecureMessageKey::x509CertificateChain() const
 {
-	return Certificate();
+	return CertificateChain();
 }
 
 PrivateKey SecureMessageKey::x509PrivateKey() const
@@ -85,7 +85,7 @@ PrivateKey SecureMessageKey::x509PrivateKey() const
 	return PrivateKey();
 }
 
-void SecureMessageKey::setX509Certificate(const Certificate &c)
+void SecureMessageKey::setX509CertificateChain(const CertificateChain &c)
 {
 	Q_UNUSED(c);
 }
@@ -122,12 +122,7 @@ SecureMessage::~SecureMessage()
 {
 }
 
-bool SecureMessage::canEncryptMultiple() const
-{
-	return false;
-}
-
-void SecureMessage::encrypt(const QSecureArray &in, const SecureMessageKey &key)
+/*void SecureMessage::encrypt(const QSecureArray &in, const SecureMessageKey &key)
 {
 	Q_UNUSED(in);
 	Q_UNUSED(key);
@@ -170,6 +165,89 @@ void SecureMessage::verify(const QSecureArray &in, const QString &sig)
 {
 	Q_UNUSED(in);
 	Q_UNUSED(sig);
+}*/
+
+bool SecureMessage::canSignMultiple() const
+{
+	return false;
+}
+
+void SecureMessage::setEnableBundleSigner(bool b)
+{
+	Q_UNUSED(b);
+}
+
+void SecureMessage::setFormat(Format f)
+{
+	Q_UNUSED(f);
+}
+
+void SecureMessage::setRecipient(const SecureMessageKey &key)
+{
+	Q_UNUSED(key);
+}
+
+void SecureMessage::setRecipients(const SecureMessageKeyList &keys)
+{
+	Q_UNUSED(keys);
+}
+
+void SecureMessage::setSigner(const SecureMessageKey &key)
+{
+	Q_UNUSED(key);
+}
+
+void SecureMessage::setSigners(const SecureMessageKeyList &keys)
+{
+	Q_UNUSED(keys);
+}
+
+void SecureMessage::startEncrypt()
+{
+}
+
+void SecureMessage::startDecrypt()
+{
+}
+
+void SecureMessage::startSign(bool detachedSignature)
+{
+	Q_UNUSED(detachedSignature);
+}
+
+void SecureMessage::startVerify(const QSecureArray &sig)
+{
+	Q_UNUSED(sig);
+}
+
+void SecureMessage::startEncryptAndSign(Order o)
+{
+	Q_UNUSED(o);
+}
+
+void SecureMessage::startDecryptAndVerify(Order o)
+{
+	Q_UNUSED(o);
+}
+
+void SecureMessage::update(const QSecureArray &in)
+{
+	Q_UNUSED(in);
+}
+
+QSecureArray SecureMessage::read(int size)
+{
+	Q_UNUSED(size);
+	return QSecureArray();
+}
+
+int SecureMessage::bytesAvailable() const
+{
+	return 0;
+}
+
+void SecureMessage::end()
+{
 }
 
 bool SecureMessage::waitForFinished()
@@ -187,19 +265,19 @@ SecureMessage::Error SecureMessage::errorCode() const
 	return ErrUnknown;
 }
 
-QString SecureMessage::encrypted() const
-{
-	return QString();
-}
-
-QSecureArray SecureMessage::decrypted() const
+QSecureArray SecureMessage::signature() const
 {
 	return QSecureArray();
 }
 
-QString SecureMessage::signature() const
+SecureMessage::VerifyResult SecureMessage::verifyResult() const
 {
-	return QString();
+	return Invalid;
+}
+
+CertValidity SecureMessage::keyValidity() const
+{
+	return QCA::Valid;
 }
 
 SecureMessageKey SecureMessage::key() const
@@ -210,11 +288,6 @@ SecureMessageKey SecureMessage::key() const
 QDateTime SecureMessage::timestamp() const
 {
 	return QDateTime();
-}
-
-SecureMessage::VerifyResult SecureMessage::verifyResult()
-{
-	return VerifyError;
 }
 
 //----------------------------------------------------------------------------
@@ -275,6 +348,11 @@ SMIME::~SMIME()
 void SMIME::setStore(const Store &store)
 {
 	Q_UNUSED(store);
+}
+
+void SMIME::setPrivateKeys(const QValueList<PrivateKey> &keys)
+{
+	Q_UNUSED(keys);
 }
 
 }

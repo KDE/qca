@@ -10,7 +10,9 @@
   add Base64
   add QCA::systemStore() and haveSystemStore()
 
-* Threading consideration (safety, usability) in API and plugins
+* Considerations
+  threading (safety, usability) in API and plugins
+  smart cards, external keyring drives
 
 * finish API:
   cert/crl: Distinguished Names (Botan has X509_DN)
@@ -20,6 +22,7 @@
   store: ability to combine stores, iterate over certs?
   openpgp: be sure to support key expiration and validity
   smime
+  pkcs12 format support
 
 * finish code for APIs:
   cipher - needs to handling padding
