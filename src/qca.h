@@ -83,6 +83,8 @@ class QCA_CertContext;
  *       - QCA::MD5
  *       - QCA::RIPEMD160
  *       - QCA::SHA256
+ *       - QCA::SHA384
+ *       - QCA::SHA512
  *   - Ciphers (TBC)
  *       - BlowFish
  *       - TripleDES
@@ -1690,6 +1692,74 @@ namespace QCA
 		 * from qca-gcrypt, you would use SHA256("qca-gcrypt")
 		 */
 		SHA256(const QString &provider = "") : Hash("sha256", provider) {}
+	};
+
+	/**
+	 * SHA-384 cryptographic message digest hash algorithm.
+	 *
+	 * This algorithm takes an arbitrary data stream, known as the
+	 * message (up to \f$2^{128}\f$ bits in length) and outputs a
+	 * condensed 384 bit (48 byte) representation of that data
+	 * stream, known as the message digest.
+	 *
+	 * This algorithm is considered secure in that it is considered
+	 * computationally infeasible to find the message that
+	 * produced the message digest.
+	 *
+	 * For more information, see Federal Information Processing
+	 * Standard Publication 180-2 "Specifications for the Secure
+	 * %Hash Standard", available from http://csrc.nist.gov/publications/
+	 */
+	class QCA_EXPORT SHA384 : public Hash
+	{
+	public:
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a SHA384 hash,
+		 * although if you have the whole message in memory at
+		 * one time, you may be better off using
+		 * QCA::SHA384().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the SHA384 implementation
+		 * from qca-gcrypt, you would use SHA384("qca-gcrypt")
+		 */
+		SHA384(const QString &provider = "") : Hash("sha384", provider) {}
+	};
+
+	/**
+	 * SHA-512 cryptographic message digest hash algorithm.
+	 *
+	 * This algorithm takes an arbitrary data stream, known as the
+	 * message (up to \f$2^{128}\f$ bits in length) and outputs a
+	 * condensed 512 bit (64 byte) representation of that data
+	 * stream, known as the message digest.
+	 *
+	 * This algorithm is considered secure in that it is considered
+	 * computationally infeasible to find the message that
+	 * produced the message digest.
+	 *
+	 * For more information, see Federal Information Processing
+	 * Standard Publication 180-2 "Specifications for the Secure
+	 * %Hash Standard", available from http://csrc.nist.gov/publications/
+	 */
+	class QCA_EXPORT SHA512 : public Hash
+	{
+	public:
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a SHA512 hash,
+		 * although if you have the whole message in memory at
+		 * one time, you may be better off using
+		 * QCA::SHA512().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the SHA512 implementation
+		 * from qca-gcrypt, you would use SHA512("qca-gcrypt")
+		 */
+		SHA512(const QString &provider = "") : Hash("sha512", provider) {}
 	};
 
 	/**
