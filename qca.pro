@@ -6,7 +6,6 @@ TARGET = qca
 
 MOC_DIR        = .moc
 OBJECTS_DIR    = .obj
-UI_DIR         = .ui
 
 VER_MAJ = 2
 VER_MIN = 0
