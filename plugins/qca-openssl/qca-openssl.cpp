@@ -3301,15 +3301,18 @@ public:
 		{
 			m_direction = dir;
 			if (QCA::Encode == m_direction) {
-				EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0,
+				EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
+				EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
+				EVP_EncryptInit_ex(&m_context, 0, 0,
 						   (const unsigned char*)(key.data()),
 						   (const unsigned char*)(iv.data()));
 			} else {
-				EVP_DecryptInit_ex(&m_context, m_cryptoAlgorithm, 0,
+				EVP_DecryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
+				EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
+				EVP_DecryptInit_ex(&m_context, 0, 0,
 						   (const unsigned char*)(key.data()),
 						   (const unsigned char*)(iv.data()));
 			}
-			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
 			EVP_CIPHER_CTX_set_padding(&m_context, m_pad);
 		}
 
@@ -3450,8 +3453,7 @@ public:
 		list += "aes256-ecb";
 		list += "aes256-cbc";
 		list += "aes256-cfb";
-		// Blowfish ECB is failing unit test.
-		// list += "blowfish-ecb";
+		list += "blowfish-ecb";
 		list += "tripledes-ecb";
 		list += "des-ecb";
 		list += "des-ecb-pkcs7";
