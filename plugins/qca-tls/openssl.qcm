@@ -1,6 +1,6 @@
 /*
 -----BEGIN QCMOD-----
-name: openssl
+name: OpenSSL
 arg: with-openssl-inc=[path],Path to OpenSSL include files
 arg: with-openssl-lib=[path],Path to OpenSSL library files
 -----END QCMOD-----

@@ -1,5 +1,0 @@
-fixmes and todos
-rename SSL to TLS
-clean TLSContext, and make sure it reports crypt errors
-take out non-TLS stuff (ciphers/hash/rsa) and put it in a separate plugin
-

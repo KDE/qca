@@ -1,6 +1,6 @@
 /*
 -----BEGIN QCMOD-----
-name: cyrussasl
+name: Cyrus SASL2
 arg: with-sasl-inc=[path],Path to Cyrus SASL2 include files
 arg: with-sasl-lib=[path],Path to Cyrus SASL2 library files
 -----END QCMOD-----

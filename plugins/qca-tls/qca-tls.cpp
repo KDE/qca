@@ -32,45 +32,23 @@
 #include<openssl/x509v3.h>
 #include<openssl/ssl.h>
 #include<openssl/err.h>
+#include<openssl/rand.h>
 
 #ifndef OSSL_097
 #define NO_AES
 #endif
 
-// FIXME: use openssl for entropy instead of stdlib
-// FIXME: handle return value of BIO_new
-#include<stdlib.h>
-static bool seeded = false;
-class QRandom
+static QByteArray lib_randomArray(int size)
 {
-public:
-	static uchar randomChar();
-	static uint randomInt();
-	static QByteArray randomArray(uint size);
-};
-
-uchar QRandom::randomChar()
-{
-	if(!seeded) {
+	if(RAND_status() == 0) {
 		srand(time(NULL));
-		seeded = true;
+		char buf[128];
+		for(int n = 0; n < 128; ++n)
+			buf[n] = rand();
+		RAND_seed(buf, 128);
 	}
-	return rand();
-}
-
-uint QRandom::randomInt()
-{
-	QByteArray a = randomArray(sizeof(uint));
-	uint x;
-	memcpy(&x, a.data(), a.size());
-	return x;
-}
-
-QByteArray QRandom::randomArray(uint size)
-{
 	QByteArray a(size);
-	for(uint n = 0; n < size; ++n)
-		a[n] = randomChar();
+	RAND_bytes((unsigned char *)a.data(), a.size());
 	return a;
 }
 
@@ -225,7 +203,7 @@ public:
 	bool generateKey(char *out, int keysize)
 	{
 		QByteArray a;
-		if(!lib_generateKeyIV(getType(QCA::CBC), QRandom::randomArray(128), QRandom::randomArray(2), &a, 0, keysize))
+		if(!lib_generateKeyIV(getType(QCA::CBC), lib_randomArray(128), lib_randomArray(2), &a, 0, keysize))
 			return false;
 		memcpy(out, a.data(), a.size());
 		return true;
@@ -234,7 +212,7 @@ public:
 	bool generateIV(char *out)
 	{
 		QByteArray a;
-		if(!lib_generateKeyIV(getType(QCA::CBC), QRandom::randomArray(128), QRandom::randomArray(2), 0, &a))
+		if(!lib_generateKeyIV(getType(QCA::CBC), lib_randomArray(128), lib_randomArray(2), 0, &a))
 			return false;
 		memcpy(out, a.data(), a.size());
 		return true;
@@ -790,7 +768,6 @@ static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
 	return false;
 }
 
-class SSLContext;
 class CertContext : public QCA_CertContext
 {
 public:
@@ -961,7 +938,6 @@ public:
 		return false;
 	}
 
-	friend class SSLContext;
 	X509 *x;
 	QString serial, v_subject, v_issuer;
 	QValueList<QCA_CertProperty> cp_subject, cp_issuer;
@@ -1185,10 +1161,10 @@ public:
 		appendArray(&sendQueue, plain);
 
 		if(sendQueue.size() > 0) {
-			// since we are using memory BIOs, the whole thing can be written successfully
-			SSL_write(ssl, sendQueue.data(), sendQueue.size());
-			// TODO: error?
+			int ret = SSL_write(ssl, sendQueue.data(), sendQueue.size());
 			sendQueue.resize(0);
+			if(ret <= 0)
+				return false;
 		}
 
 		*to_net = readOutgoing();
@@ -1204,12 +1180,17 @@ public:
 
 		QByteArray a;
 		while(1) {
-			a.resize(4096);
-			int x = SSL_read(ssl, a.data(), a.size());
-			if(x <= 0)
-				break;
-			if(x != (int)a.size())
-				a.resize(x);
+			a.resize(8192);
+			int ret = SSL_read(ssl, a.data(), a.size());
+			if(ret <= 0) {
+				int x = SSL_get_error(ssl, ret);
+				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+					break;
+				else
+					return false;
+			}
+			if(ret != (int)a.size())
+				a.resize(ret);
 			appendArray(&recvQueue, a);
 		}
 
@@ -1419,5 +1400,3 @@ QCAProvider *createProviderTLS()
 {
 	return (new QCAOpenSSL);
 }
-
-//#include"qcaopenssl.moc"

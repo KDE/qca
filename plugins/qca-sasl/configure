@@ -44,7 +44,7 @@ while [ $# -gt 0 ]; do
 done
 
 
-echo Configuring qca-sasl ...
+echo "Configuring qca-sasl ..."
 
 if [ "$QC_DEBUG" == "Y" ]; then
 echo
@@ -54,9 +54,12 @@ echo QC_WITH_SASL_LIB=$QC_WITH_SASL_LIB
 echo
 fi
 
+echo -n "Verifying Qt 3.x Multithreaded (MT) build environment ... "
+
 if [ -z "$QTDIR" ]; then
-	echo
-	echo \$QTDIR not set... trying to find Qt manually
+	if [ "$QC_DEBUG" == "Y" ]; then
+		echo \$QTDIR not set... trying to find Qt manually
+	fi
 	for p in /usr/lib/qt /usr/share/qt /usr/share/qt3 /usr/local/lib/qt /usr/local/share/qt /usr/lib/qt3 /usr/local/lib/qt3 /usr/X11R6/share/qt /usr/qt/3 ; do
 		if [ -d "$p/mkspecs" ]; then
 			QTDIR=$p
@@ -64,6 +67,8 @@ if [ -z "$QTDIR" ]; then
 		fi;
 	done
 	if [ -z "$QTDIR" ]; then
+		echo fail
+		echo
 		echo Unable to find Qt 'mkspecs'. Please set QTDIR
 		echo manually. Perhaps you need to install Qt 3
 		echo development utilities. You may download them either
@@ -75,12 +80,17 @@ if [ -z "$QTDIR" ]; then
 fi
 
 if [ ! -x "$QTDIR/bin/qmake" ]; then
-	echo Warning: qmake not in \$QTDIR/bin/qmake
-	echo trying to find it in \$PATH
+	if [ "$QC_DEBUG" == "Y" ]; then
+		echo Warning: qmake not in \$QTDIR/bin/qmake
+		echo trying to find it in \$PATH
+	fi
 	qm=`type -p qmake`
 	if [ -x "$qm" ]; then
-		echo qmake found in $qm
+		if [ "$QC_DEBUG" == "Y" ]; then
+			echo qmake found in $qm
+		fi
 	else
+		echo fail
 		echo
 		echo Sorry, you seem to have a very unusual setup,
 		echo or I missdetected \$QTDIR=$QTDIR
@@ -98,7 +108,7 @@ gen_files() {
 cat >$1/modules.cpp <<EOT
 /*
 -----BEGIN QCMOD-----
-name: cyrussasl
+name: Cyrus SASL2
 arg: with-sasl-inc=[path],Path to Cyrus SASL2 include files
 arg: with-sasl-lib=[path],Path to Cyrus SASL2 library files
 -----END QCMOD-----
@@ -241,7 +251,7 @@ public:
 			else
 				printf(" no\n");
 			if(!ok && o->required) {
-				printf("\nError: need %s!\n\n", o->name().latin1());
+				printf("\nError: need %s!\n", o->name().latin1());
 				return false;
 			}
 		}
@@ -418,6 +428,7 @@ int main()
 	o = 0;
 #include"modules_new.cpp"
 
+	printf("ok\n");
 	bool success = false;
 	if(conf->exec()) {
 		QFile f("conf.pri");
@@ -489,6 +500,8 @@ fi
 
 if [ "$?" != "0" ]; then
 	rm -rf .qconftemp
+	echo fail
+	echo
 	echo "There was an error compiling 'conf'.  Be sure you have a proper"
 	echo "Qt 3.x Multithreaded (MT) build environment set up."
 	if [ ! -f "$QTDIR/lib/libqt-mt.so.3" ]; then
@@ -501,9 +514,20 @@ if [ "$?" != "0" ]; then
 fi
 
 .qconftemp/conf
-if [ "$?" != "0" ]; then
+ret="$?"
+if [ "$ret" == "1" ]; then
 	rm -rf .qconftemp
+	echo
 	exit 1;
+else
+	if [ "$ret" != "0" ]; then
+		rm -rf .qconftemp
+		echo fail
+		echo
+		echo Unexpected error launching 'conf'
+		echo
+		exit 1;
+	fi
 fi
 rm -rf .qconftemp
 
@@ -513,6 +537,7 @@ fi
 # run qmake
 $qm qca-sasl.pro
 if [ "$?" != "0" ]; then
+	echo
 	exit 1;
 fi
 cat >Makefile.tmp <<EOT
