@@ -24,6 +24,13 @@ between QSecureArray and QString.
 
 */
 
+/** \example hextest.cpp
+
+The code below shows some simple operations on a Hex object, converting
+between QSecureArray and QString.
+
+*/
+
 
 /** \example randomtest.cpp
 
