@@ -37,7 +37,28 @@ struct kdfTestValues {
 
 
 // These are from Botan's test suite
-static struct kdfTestValues pbkdf1TestValues[] = {
+static struct kdfTestValues pbkdf1MD2TestValues[] = {
+    { "71616c7a73656774",
+      "7c1991f3f38a09d70cf3b1acadb70bc6",
+      "40cf117c3865e0cf", 16, 1000 },
+
+    { "766e68617a6a66736978626f6d787175",
+      "677500eda9f0c5e96e0a11f90fb9",
+      "3a2484ce5d3e1b4d", 14, 1 },
+
+    { "66686565746e657162646d7171716e797977696f716a666c6f6976636371756a",
+      "91a5b689156b441bf27dd2bdd276",
+      "5d838b0f4fa22bfa2157f9083d87f8752e0495bb2113012761ef11b66e87c3cb", 14, 15 },
+
+    { "736e6279696e6a7075696b7176787867726c6b66",
+      "49516935cc9f438bafa30ff038fb",
+      "f22d341361b47e3390107bd973fdc0d3e0bc02a3", 14, 2 },
+
+    { 0, 0, 0, 0, 0 }
+};
+
+// These are from Botan's test suite
+static struct kdfTestValues pbkdf1SHA1TestValues[] = {
     { "66746c6b6662786474626a62766c6c7662776977",
       "768b277dc970f912dbdd3edad48ad2f065d25d",
       "40ac5837560251c275af5e30a6a3074e57ced38e", 19, 6 },
@@ -92,17 +113,31 @@ void KDFUnitTest::allTests()
 void KDFUnitTest::pbkdf1Tests()
 {
 
+    if(!QCA::isSupported("pbkdf1(md2)"))
+	SKIP("PBKDF version 1 with MD2 not supported");
+    else {
+	for (int n = 0; (0 != pbkdf1MD2TestValues[n].secret); n++) {
+	    QSecureArray password = QCA::hexToArray( pbkdf1MD2TestValues[n].secret );
+	    QCA::InitializationVector salt( QCA::hexToArray( pbkdf1MD2TestValues[n].salt) );
+	    QCA::SymmetricKey key = QCA::PBKDF1("md2").makeKey( password,
+							   salt,
+							   pbkdf1MD2TestValues[n].outputLength,
+							   pbkdf1MD2TestValues[n].iterationCount);
+	    CHECK( QCA::arrayToHex( key ), QString( pbkdf1MD2TestValues[n].output ) );
+	}
+    }
+
     if(!QCA::isSupported("pbkdf1(sha1)"))
 	SKIP("PBKDF version 1 with SHA1 not supported");
     else {
-	for (int n = 0; (0 != pbkdf1TestValues[n].secret); n++) {
-	    QSecureArray password = QCA::hexToArray( pbkdf1TestValues[n].secret );
-	    QCA::InitializationVector salt( QCA::hexToArray( pbkdf1TestValues[n].salt) );
+	for (int n = 0; (0 != pbkdf1SHA1TestValues[n].secret); n++) {
+	    QSecureArray password = QCA::hexToArray( pbkdf1SHA1TestValues[n].secret );
+	    QCA::InitializationVector salt( QCA::hexToArray( pbkdf1SHA1TestValues[n].salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF1().makeKey( password,
 							   salt,
-							   pbkdf1TestValues[n].outputLength,
-							   pbkdf1TestValues[n].iterationCount);
-	    CHECK( QCA::arrayToHex( key ), QString( pbkdf1TestValues[n].output ) );
+							   pbkdf1SHA1TestValues[n].outputLength,
+							   pbkdf1SHA1TestValues[n].iterationCount);
+	    CHECK( QCA::arrayToHex( key ), QString( pbkdf1SHA1TestValues[n].output ) );
 	}
     }
 }
