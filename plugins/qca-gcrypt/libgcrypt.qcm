@@ -41,7 +41,7 @@ public:
 			return false;
 
 		do {
-			sleep(1);
+			usleep(100000);
 		} while (proc->isRunning());
 
 		QString cflags = proc->readStdout();
