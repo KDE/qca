@@ -127,7 +127,7 @@ public:
 	}
 
 	Certificate cert;
-	CertValidity certValidity;
+	Validity certValidity;
 	TLSContext *c;
 	QByteArray in, out, to_net, from_net;
 	int bytesEncoded;
@@ -265,8 +265,8 @@ TLS::IdentityResult TLS::peerIdentityResult() const
 	if(d->cert.isNull())
 		return NoCert;
 
-	if(d->certValidity != QCA::Valid)
-		return BadCert;
+	//if(d->certValidity != QCA::Valid)
+	//	return BadCert;
 
 	if(d->hostMismatch)
 		return HostMismatch;
@@ -274,7 +274,7 @@ TLS::IdentityResult TLS::peerIdentityResult() const
 	return Valid;
 }
 
-CertValidity TLS::peerCertificateValidity() const
+Validity TLS::peerCertificateValidity() const
 {
 	return d->certValidity;
 }

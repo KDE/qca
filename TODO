@@ -11,7 +11,6 @@
   threading (safety, usability) in API and plugins
   it's possible we use QSecureArray in some unnecessary places
   don't forget to QCA_EXPORT everything
-  expand "Cert" abbreviations?
 
 * finish API:
   quoted-printable TextFilter

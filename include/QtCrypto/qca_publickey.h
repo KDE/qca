@@ -87,10 +87,10 @@ namespace QCA
 
 	enum ConvertResult
 	{
-		Convert_Good,
-		Convert_ErrorDecode,
-		Convert_ErrorPassphrase,
-		Convert_ErrorFile
+		ConvertGood,
+		ErrorDecode,
+		ErrorPassphrase,
+		ErrorFile
 	};
 
 	class QCA_EXPORT PKey : public Algorithm

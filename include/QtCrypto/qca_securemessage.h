@@ -72,6 +72,33 @@ namespace QCA
 	};
 	typedef QValueList<SecureMessageKey> SecureMessageKeyList;
 
+	class SecureMessageSignature
+	{
+	public:
+		enum IdentityResult
+		{
+			Valid,   // indentity is verified, matches signature
+			Invalid, // valid key provided, but signature failed
+			BadKey,  // invalid key provided
+			NoKey,   // identity unknown
+		};
+
+		SecureMessageSignature();
+		SecureMessageSignature(const SecureMessageSignature &from);
+		~SecureMessageSignature();
+		SecureMessageSignature & operator=(const SecureMessageSignature &from);
+
+		IdentityResult identityResult() const;
+		Validity keyValidity() const;
+		SecureMessageKey key() const;
+		QDateTime timestamp() const;
+
+	private:
+		class Private;
+		Private *d;
+	};
+	typedef QValueList<SecureMessageSignature> SecureMessageSignatureList;
+
 	class SecureMessage : public QObject
 	{
 		Q_OBJECT
@@ -102,22 +129,15 @@ namespace QCA
 		*/
 		enum Error
 		{
-			ErrPassphrase,     ///< passphrase was either wrong or not provided
-			ErrFormat,         ///< input format was bad
-			ErrSignerExpired,  ///< signing key is expired
-			ErrSignerInvalid,  ///< signing key is invalid in some way
-			ErrEncryptExpired, ///< encrypting key is expired
-			ErrEncryptInvalid, ///< encrypting key is invalid in some way
-			ErrUnknown         ///< other error
+			ErrorPassphrase,     ///< passphrase was either wrong or not provided
+			ErrorFormat,         ///< input format was bad
+			ErrorSignerExpired,  ///< signing key is expired
+			ErrorSignerInvalid,  ///< signing key is invalid in some way
+			ErrorEncryptExpired, ///< encrypting key is expired
+			ErrorEncryptInvalid, ///< encrypting key is invalid in some way
+			ErrorUnknown         ///< other error
 		};
-		enum VerifyResult
-		{
-			Valid,      // indentity is verified, matches signature
-			Invalid,    // valid key provided, but signature failed
-			KeyExpired, // expired key provided
-			KeyInvalid, // invalid key provided
-			NoKey,      // identity unknown
-		};
+
 		SecureMessage(SecureMessageSystem *system);
 		~SecureMessage();
 
@@ -149,10 +169,9 @@ namespace QCA
 		QSecureArray signature() const;
 
 		// verify
-		VerifyResult verifyResult() const;
-		CertValidity keyValidity() const;
-		SecureMessageKey key() const;
-		QDateTime timestamp() const;
+		bool verifySuccess() const;
+		SecureMessageSignature signer() const;
+		SecureMessageSignatureList signers() const;
 
 	signals:
 		void readyRead();

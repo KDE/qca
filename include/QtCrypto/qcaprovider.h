@@ -201,8 +201,8 @@ public:
 	virtual QDateTime notValidBefore() const = 0;
 	virtual QDateTime notValidAfter() const = 0;
 
-	virtual CertInfo subjectInfo() const = 0;
-	virtual CertInfo issuerInfo() const = 0;
+	virtual CertificateInfo subjectInfo() const = 0;
+	virtual CertificateInfo issuerInfo() const = 0;
 
 	virtual QString commonName() const = 0;
 	virtual QBigInteger serialNumber() const = 0;
@@ -235,7 +235,7 @@ public:
 
 	virtual void addCertificate(const CertContext &cert, bool trusted) = 0;
 	virtual void addCRL(const CRLContext &crl) = 0;
-	virtual CertValidity validate(const CertContext &cert, CertUsage u) const = 0;
+	virtual Validity validate(const CertContext &cert, UsageMode u) const = 0;
 };
 
 class TLSContext : public Provider::Context
@@ -255,7 +255,7 @@ public:
 	virtual bool eof() const = 0;
 	virtual QSecureArray unprocessed() = 0;
 
-	virtual CertValidity peerCertificateValidity() const = 0;
+	virtual Validity peerCertificateValidity() const = 0;
 	virtual CertContext *peerCertificate() const = 0;
 };
 

@@ -151,7 +151,7 @@ namespace QCA
 		Error errorCode() const;
 
 		IdentityResult peerIdentityResult() const;
-		CertValidity peerCertificateValidity() const;
+		Validity peerCertificateValidity() const;
 		CertificateChain localCertificateChain() const;
 		CertificateChain peerCertificateChain() const;
 

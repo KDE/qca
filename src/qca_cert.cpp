@@ -55,7 +55,7 @@ CertificateOptions & CertificateOptions::operator=(const CertificateOptions &fro
 
 CertificateRequestFormat CertificateOptions::format() const
 {
-	return CSR_PKCS10;
+	return PKCS10;
 }
 
 void CertificateOptions::setFormat(CertificateRequestFormat f)
@@ -73,14 +73,14 @@ QString CertificateOptions::challenge() const
 	return QString();
 }
 
-CertInfo CertificateOptions::info() const
+CertificateInfo CertificateOptions::info() const
 {
-	return CertInfo();
+	return CertificateInfo();
 }
 
-CertConstraints CertificateOptions::constraints() const
+Constraints CertificateOptions::constraints() const
 {
-	return CertConstraints();
+	return Constraints();
 }
 
 QStringList CertificateOptions::policies() const
@@ -118,12 +118,12 @@ void CertificateOptions::setChallenge(const QString &s)
 	Q_UNUSED(s);
 }
 
-void CertificateOptions::setInfo(const CertInfo &info)
+void CertificateOptions::setInfo(const CertificateInfo &info)
 {
 	Q_UNUSED(info);
 }
 
-void CertificateOptions::setConstraints(const CertConstraints &constraints)
+void CertificateOptions::setConstraints(const Constraints &constraints)
 {
 	Q_UNUSED(constraints);
 }
@@ -245,19 +245,19 @@ QDateTime Certificate::notValidAfter() const
 	return ((CertContext *)context())->notValidAfter();
 }
 
-CertInfo Certificate::subjectInfo() const
+CertificateInfo Certificate::subjectInfo() const
 {
 	return ((CertContext *)context())->subjectInfo();
 }
 
-CertInfo Certificate::issuerInfo() const
+CertificateInfo Certificate::issuerInfo() const
 {
 	return ((CertContext *)context())->issuerInfo();
 }
 
-CertConstraints Certificate::constraints() const
+Constraints Certificate::constraints() const
 {
-	return CertConstraints();
+	return Constraints();
 }
 
 QStringList Certificate::policies() const
@@ -417,17 +417,17 @@ bool CertificateRequest::canUseFormat(CertificateRequestFormat f, const QString 
 
 CertificateRequestFormat CertificateRequest::format() const
 {
-	return CSR_PKCS10;
+	return PKCS10;
 }
 
-CertInfo CertificateRequest::subjectInfo() const
+CertificateInfo CertificateRequest::subjectInfo() const
 {
-	return CertInfo();
+	return CertificateInfo();
 }
 
-CertConstraints CertificateRequest::constraints() const
+Constraints CertificateRequest::constraints() const
 {
-	return CertConstraints();
+	return Constraints();
 }
 
 QStringList CertificateRequest::policies() const
@@ -550,9 +550,9 @@ bool CRL::isNull() const
 	return (!context() ? true : false);
 }
 
-CertInfo CRL::issuerInfo() const
+CertificateInfo CRL::issuerInfo() const
 {
-	return CertInfo();
+	return CertificateInfo();
 }
 
 int CRL::number() const
@@ -662,7 +662,7 @@ void Store::addCRL(const CRL &crl)
 	((StoreContext *)context())->addCRL(*((CRLContext *)crl.context()));
 }
 
-CertValidity Store::validate(const Certificate &cert, CertUsage u) const
+Validity Store::validate(const Certificate &cert, UsageMode u) const
 {
 	return ((StoreContext *)context())->validate(*((CertContext *)cert.context()), u);
 }

@@ -35,90 +35,90 @@ namespace QCA
 	*/
 	enum CertificateRequestFormat
 	{
-		CSR_PKCS10, ///< standard PKCS#10 format
-		CSR_SPKAC   ///< Signed Public Key and Challenge (Netscape) format
+		PKCS10, ///< standard PKCS#10 format
+		SPKAC   ///< Signed Public Key and Challenge (Netscape) format
 	};
 
-	enum CertInfoType
+	enum CertificateInfoType
 	{
-		Info_Name,
-		Info_Email,
-		Info_Organization,
-		Info_OrganizationalUnit,
-		Info_Locality,
-		Info_State,
-		Info_Country,
-		Info_URI,
-		Info_DNS,
-		Info_XMPP
+		Name,
+		Email,
+		Organization,
+		OrganizationalUnit,
+		Locality,
+		State,
+		Country,
+		URI,
+		DNS,
+		XMPP
 	};
 
-	enum CertConstraintType
+	enum ConstraintType
 	{
 		// basic
-		Constraint_DigitalSignature,
-		Constraint_NonRepudiation,
-		Constraint_KeyEncipherment,
-		Constraint_DataEncipherment,
-		Constraint_KeyAgreement,
-		Constraint_KeyCertificateSign,
-		Constraint_CRLSign,
-		Constraint_EncipherOnly,
-		Constraint_DecipherOnly,
+		DigitalSignature,
+		NonRepudiation,
+		KeyEncipherment,
+		DataEncipherment,
+		KeyAgreement,
+		KeyCertificateSign,
+		CRLSign,
+		EncipherOnly,
+		DecipherOnly,
 
 		// extended
-		Constraint_ServerAuth,
-		Constraint_ClientAuth,
-		Constraint_CodeSigning,
-		Constraint_EmailProtection,
-		Constraint_IPsecEndSystem,
-		Constraint_IPsecTunnel,
-		Constraint_IPsecUser,
-		Constraint_TimeStamping,
-		Constraint_OCSPSigning
+		ServerAuth,
+		ClientAuth,
+		CodeSigning,
+		EmailProtection,
+		IPsecEndSystem,
+		IPsecTunnel,
+		IPsecUser,
+		TimeStamping,
+		OCSPSigning
 	};
 
 	/**
 	   Specify the intended usage of a certificate
 	*/
-	enum CertUsage
+	enum UsageMode
 	{
-		Usage_Any             = 0x00, ///< Any application, or unspecified
-		Usage_TLSServer       = 0x01, ///< server side of a TLS or SSL connection
-		Usage_TLSClient       = 0x02, ///< client side of a TLS or SSL connection
-		Usage_CodeSigning     = 0x04, ///< code signing certificate
-		Usage_EmailProtection = 0x08, ///< email (S/MIME) certificate
-		Usage_TimeStamping    = 0x10, ///< time stamping certificate
-		Usage_CRLSigning      = 0x20  ///< certificate revocation list signing certificate
+		UsageAny             = 0x00, ///< Any application, or unspecified
+		UsageTLSServer       = 0x01, ///< server side of a TLS or SSL connection
+		UsageTLSClient       = 0x02, ///< client side of a TLS or SSL connection
+		UsageCodeSigning     = 0x04, ///< code signing certificate
+		UsageEmailProtection = 0x08, ///< email (S/MIME) certificate
+		UsageTimeStamping    = 0x10, ///< time stamping certificate
+		UsageCRLSigning      = 0x20  ///< certificate revocation list signing certificate
 	};
 
 	/**
 	   The validity (or otherwise) of a certificate
 	*/
-	enum CertValidity
+	enum Validity
 	{
-		Valid,              ///< The certificate is valid
-		Rejected,           ///< The root CA rejected the certificate purpose
-		Untrusted,          ///< The certificate is not trusted
-		SignatureFailed,    ///< The signature does not match
-		InvalidCA,          ///< The Certificate Authority is invalid
-		InvalidPurpose,     ///< The purpose does not match the intended usage
-		SelfSigned,         ///< The certificate is self-signed, and is not
-		                    ///< found in the list of trusted certificates
-		Revoked,            ///< The certificate has been revoked
-		PathLengthExceeded, ///< The path length from the root CA to this certificate is too long
-		Expired,            ///< The certificate has expired
-		Unknown             ///< Validity is unknown
+		ValidityGood,            ///< The certificate is valid
+		ErrorRejected,           ///< The root CA rejected the certificate purpose
+		ErrorUntrusted,          ///< The certificate is not trusted
+		ErrorSignatureFailed,    ///< The signature does not match
+		ErrorInvalidCA,          ///< The Certificate Authority is invalid
+		ErrorInvalidPurpose,     ///< The purpose does not match the intended usage
+		ErrorSelfSigned,         ///< The certificate is self-signed, and is not found in the list of trusted certificates
+		ErrorRevoked,            ///< The certificate has been revoked
+		ErrorPathLengthExceeded, ///< The path length from the root CA to this certificate is too long
+		ErrorExpired,            ///< The certificate has expired
+		ErrorExpiredCA,          ///< The Certificate Authority has expired
+		ErrorValidityUnknown     ///< Validity is unknown
 	};
 
-	typedef QMap<CertInfoType, QString> CertInfo;
-	typedef QValueList<CertConstraintType> CertConstraints;
+	typedef QMap<CertificateInfoType, QString> CertificateInfo;
+	typedef QValueList<ConstraintType> Constraints;
 
 	// note: in SPKAC mode, all options are ignored except for challenge
 	class QCA_EXPORT CertificateOptions
 	{
 	public:
-		CertificateOptions(CertificateRequestFormat = CSR_PKCS10);
+		CertificateOptions(CertificateRequestFormat = PKCS10);
 		CertificateOptions(const CertificateOptions &from);
 		~CertificateOptions();
 		CertificateOptions & operator=(const CertificateOptions &from);
@@ -128,19 +128,19 @@ namespace QCA
 
 		bool isValid() const;
 
-		QString challenge() const;           // request
-		CertInfo info() const;               // request or create
-		CertConstraints constraints() const; // request or create
-		QStringList policies() const;        // request or create
-		bool isCA() const;                   // request or create
-		int pathLimit() const;               // request or create
-		QBigInteger serialNumber() const;    // create
-		QDateTime notValidBefore() const;    // create
-		QDateTime notValidAfter() const;     // create
+		QString challenge() const;        // request
+		CertificateInfo info() const;     // request or create
+		Constraints constraints() const;  // request or create
+		QStringList policies() const;     // request or create
+		bool isCA() const;                // request or create
+		int pathLimit() const;            // request or create
+		QBigInteger serialNumber() const; // create
+		QDateTime notValidBefore() const; // create
+		QDateTime notValidAfter() const;  // create
 
 		void setChallenge(const QString &s);
-		void setInfo(const CertInfo &info);
-		void setConstraints(const CertConstraints &constraints);
+		void setInfo(const CertificateInfo &info);
+		void setConstraints(const Constraints &constraints);
 		void setPolicies(const QStringList &policies);
 		void setAsCA(int pathLimit);
 		void setSerialNumber(const QBigInteger &i);
@@ -163,9 +163,9 @@ namespace QCA
 		QDateTime notValidBefore() const;
 		QDateTime notValidAfter() const;
 
-		CertInfo subjectInfo() const;
-		CertInfo issuerInfo() const;
-		CertConstraints constraints() const;
+		CertificateInfo subjectInfo() const;
+		CertificateInfo issuerInfo() const;
+		Constraints constraints() const;
 		QStringList policies() const;
 
 		QString commonName() const;
@@ -217,8 +217,8 @@ namespace QCA
 
 		CertificateRequestFormat format() const;
 
-		CertInfo subjectInfo() const;        // PKCS#10 only
-		CertConstraints constraints() const; // PKCS#10 only
+		CertificateInfo subjectInfo() const; // PKCS#10 only
+		Constraints constraints() const;     // PKCS#10 only
 		QStringList policies() const;        // PKCS#10 only
 
 		PublicKey subjectPublicKey() const;
@@ -272,7 +272,7 @@ namespace QCA
 
 		bool isNull() const;
 
-		CertInfo issuerInfo() const;
+		CertificateInfo issuerInfo() const;
 
 		int number() const;
 		QDateTime thisUpdate() const;
@@ -312,7 +312,7 @@ namespace QCA
 
 		void addCertificate(const Certificate &cert, bool trusted = false);
 		void addCRL(const CRL &crl);
-		CertValidity validate(const Certificate &cert, CertUsage u = Usage_Any) const;
+		Validity validate(const Certificate &cert, UsageMode u = UsageAny) const;
 
 		QValueList<Certificate> certificates() const;
 		QValueList<CRL> crls() const;

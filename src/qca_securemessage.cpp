@@ -111,6 +111,48 @@ QString SecureMessageKey::name() const
 }
 
 //----------------------------------------------------------------------------
+// SecureMessageSignature
+//----------------------------------------------------------------------------
+SecureMessageSignature::SecureMessageSignature()
+{
+}
+
+SecureMessageSignature::SecureMessageSignature(const SecureMessageSignature &from)
+{
+	Q_UNUSED(from);
+}
+
+SecureMessageSignature::~SecureMessageSignature()
+{
+}
+
+SecureMessageSignature & SecureMessageSignature::operator=(const SecureMessageSignature &from)
+{
+	Q_UNUSED(from);
+	return *this;
+}
+
+SecureMessageSignature::IdentityResult SecureMessageSignature::identityResult() const
+{
+	return Invalid;
+}
+
+Validity SecureMessageSignature::keyValidity() const
+{
+	return ErrorValidityUnknown;
+}
+
+SecureMessageKey SecureMessageSignature::key() const
+{
+	return SecureMessageKey();
+}
+
+QDateTime SecureMessageSignature::timestamp() const
+{
+	return QDateTime();
+}
+
+//----------------------------------------------------------------------------
 // SecureMessage
 //----------------------------------------------------------------------------
 SecureMessage::SecureMessage(SecureMessageSystem *system)
@@ -217,7 +259,7 @@ bool SecureMessage::success() const
 
 SecureMessage::Error SecureMessage::errorCode() const
 {
-	return ErrUnknown;
+	return ErrorUnknown;
 }
 
 QSecureArray SecureMessage::signature() const
@@ -225,24 +267,19 @@ QSecureArray SecureMessage::signature() const
 	return QSecureArray();
 }
 
-SecureMessage::VerifyResult SecureMessage::verifyResult() const
+bool SecureMessage::verifySuccess() const
 {
-	return Invalid;
+	return false;
 }
 
-CertValidity SecureMessage::keyValidity() const
+SecureMessageSignature SecureMessage::signer() const
 {
-	return QCA::Valid;
+	return SecureMessageSignature();
 }
 
-SecureMessageKey SecureMessage::key() const
+SecureMessageSignatureList SecureMessage::signers() const
 {
-	return SecureMessageKey();
-}
-
-QDateTime SecureMessage::timestamp() const
-{
-	return QDateTime();
+	return SecureMessageSignatureList();
 }
 
 //----------------------------------------------------------------------------
