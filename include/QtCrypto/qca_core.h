@@ -697,17 +697,52 @@ namespace QCA
 	 algorithm take input data in an incremental way, with results
 	 delivered for each input, or block of input. Some internal
 	 state may be managed, with the transformation completed
-	 when final() is called. 
+	 when final() is called.
+
+	 If this seems a big vague, then you might try deriving
+	 your class from a subclass with stronger semantics. 
 	*/
 	class QCA_EXPORT Filter
 	{
 	public:
 		virtual ~Filter();
 
+		/**
+		   Reset the internal state
+		*/
 		virtual void clear() = 0;
+
+		/**
+		   Process more data, returning the corresponding
+		   filtered version of the data.
+
+		   \param a the array containing data to process
+		*/
 		virtual QSecureArray update(const QSecureArray &a) = 0;
+
+		/**
+		   Complete the algorithm, returning any 
+		   additional results.
+		*/
 		virtual QSecureArray final() = 0;
+
+		/**
+		 Test if an update() or final() call succeeded.
+		 
+		 \return true if the previous call succeeded
+		*/
 		virtual bool ok() const = 0;
+
+		/**
+		   Perform an "all in one" update, returning
+		   the result. This is appropriate if you
+		   have all the data in one array - just
+		   call process on that array, and you will
+		   get back the results of the computation.
+
+		   \note This will invalidate any previous
+		   computation using this object.
+		*/
 		QSecureArray process(const QSecureArray &a);
 	};
 
@@ -717,6 +752,11 @@ namespace QCA
 	class QCA_EXPORT Algorithm
 	{
 	public:
+		/**
+		   Standard copy constructor
+
+		   \param from the Algorithm to copy from
+		*/
 		Algorithm(const Algorithm &from);
 		virtual ~Algorithm();
 
@@ -741,11 +781,47 @@ namespace QCA
 		Provider *provider() const;
 
 	protected:
+		/**
+		   Constructor for empty algorithm
+		*/
 		Algorithm();
+
+		/**
+		   Constructor of a particular algorithm.
+
+		   \param type the algorithm to construct
+		   \param provider the name of a particular Provider
+		*/
 		Algorithm(const QString &type, const QString &provider);
+
+		/**
+		   The context associated with this algorithm
+		*/
 		Provider::Context *context() const;
+
+		/**
+		   Set the Provider for this algorithm
+
+		   \param c the context for the Provider to use
+		*/
 		void change(Provider::Context *c);
+
+		/**
+		   \overload
+
+		   \param type the name of the algorithm to use
+		   \param provider the name of the preferred provider
+		*/
 		void change(const QString &type, const QString &provider);
+
+		/**
+		   Perform a deep copy of this algorithm
+
+		   QCA makes all Algorithms implicitly shared
+		   (that is, copy on write). If you need to make
+		   sure that the internal data is not being shared,
+		   call this method.
+		*/
 		void detach();
 
 	private:
