@@ -472,7 +472,7 @@ namespace QCA
 		 */
 		static QString hashToString(const QByteArray &array)
 		{
-			return arrayToHex(hash(a));
+			return arrayToHex(hash(array));
 		}
 
 		/**
