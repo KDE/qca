@@ -1,4 +1,6 @@
-* x509
+* cert: toDER
+* cert: toPEM / fromPEM
+
 * ssl/tls (also server support)
 * sasl (also server support)
 

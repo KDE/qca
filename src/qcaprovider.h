@@ -2,6 +2,8 @@
 #define QCAPROVIDER_H
 
 #include<qglobal.h>
+#include<qstring.h>
+#include<qdatetime.h>
 #include"qca.h"
 
 #ifdef Q_WS_WIN
@@ -52,6 +54,7 @@ class QCA_RSAKeyContext
 public:
 	virtual ~QCA_RSAKeyContext() {}
 
+	virtual QCA_RSAKeyContext *clone()=0;
 	virtual bool isNull() const=0;
 	virtual bool havePublic() const=0;
 	virtual bool havePrivate() const=0;
@@ -59,12 +62,38 @@ public:
 	virtual bool createFromPEM(const char *in, unsigned int len)=0;
 	virtual bool createFromNative(void *in)=0;
 	virtual bool generate(unsigned int bits)=0;
-	virtual QCA_RSAKeyContext *clone()=0;
 	virtual void toDER(char **out, unsigned int *len, bool publicOnly)=0;
 	virtual void toPEM(char **out, unsigned int *len, bool publicOnly)=0;
 
 	virtual bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)=0;
 	virtual bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)=0;
+};
+
+struct QCA_CertProperty
+{
+	QString var;
+	QString val;
+};
+
+class QCA_CertContext
+{
+public:
+	virtual ~QCA_CertContext() {}
+
+	virtual QCA_CertContext *clone()=0;
+	virtual bool isNull() const=0;
+	virtual bool createFromDER(const char *in, unsigned int len)=0;
+	virtual bool createFromPEM(const char *in, unsigned int len)=0;
+	virtual void toDER(char **out, unsigned int *len)=0;
+	virtual void toPEM(char **out, unsigned int *len)=0;
+
+	virtual QString serialNumber() const=0;
+	virtual QString subjectString() const=0;
+	virtual QString issuerString() const=0;
+	virtual QValueList<QCA_CertProperty> subject() const=0;
+	virtual QValueList<QCA_CertProperty> issuer() const=0;
+	virtual QDateTime notBefore() const=0;
+	virtual QDateTime notAfter() const=0;
 };
 
 #endif

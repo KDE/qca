@@ -379,7 +379,7 @@ class RSAKey::Private
 public:
 	Private()
 	{
-		c = (QCA_RSAKeyContext *)getContext(CAP_RSA);
+		c = 0;
 	}
 
 	~Private()
@@ -393,6 +393,7 @@ public:
 RSAKey::RSAKey()
 {
 	d = new Private;
+	d->c = (QCA_RSAKeyContext *)getContext(CAP_RSA);
 }
 
 RSAKey::RSAKey(const RSAKey &from)
@@ -403,11 +404,8 @@ RSAKey::RSAKey(const RSAKey &from)
 
 RSAKey & RSAKey::operator=(const RSAKey &from)
 {
-	if(d->c)
-		delete d->c;
-	*d = *from.d;
-	d->c = d->c->clone();
-
+	delete d->c;
+	d->c = from.d->c->clone();
 	return *this;
 }
 
@@ -550,4 +548,111 @@ RSAKey RSA::generateKey(unsigned int bits)
 	RSAKey k;
 	k.generate(bits);
 	return k;
+}
+
+
+//----------------------------------------------------------------------------
+// Cert
+//----------------------------------------------------------------------------
+class Cert::Private
+{
+public:
+	Private()
+	{
+		c = 0;
+	}
+
+	~Private()
+	{
+		delete c;
+	}
+
+	QCA_CertContext *c;
+};
+
+Cert::Cert()
+{
+	d = new Private;
+	d->c = (QCA_CertContext *)getContext(CAP_X509);
+}
+
+Cert::Cert(const Cert &from)
+{
+	d = new Private;
+	*this = from;
+}
+
+Cert & Cert::operator=(const Cert &from)
+{
+	delete d->c;
+	d->c = from.d->c->clone();
+	return *this;
+}
+
+Cert::~Cert()
+{
+	delete d;
+}
+
+bool Cert::isNull() const
+{
+	return d->c->isNull();
+}
+
+QString Cert::serialNumber() const
+{
+	return d->c->serialNumber();
+}
+
+QString Cert::subjectString() const
+{
+	return d->c->subjectString();
+}
+
+QString Cert::issuerString() const
+{
+	return d->c->issuerString();
+}
+
+QValueList<QCA_CertProperty> Cert::subject() const
+{
+	return d->c->subject();
+}
+
+QValueList<QCA_CertProperty> Cert::issuer() const
+{
+	return d->c->issuer();
+}
+
+QDateTime Cert::notBefore() const
+{
+	return d->c->notBefore();
+}
+
+QDateTime Cert::notAfter() const
+{
+	return d->c->notAfter();
+}
+
+QByteArray Cert::toDER() const
+{
+	return QByteArray();
+}
+
+bool Cert::fromDER(const QByteArray &a)
+{
+	return d->c->createFromDER(a.data(), a.size());
+}
+
+QString Cert::toPEM() const
+{
+	return "";
+}
+
+bool Cert::fromPEM(const QString &str)
+{
+	QCString cs = str.latin1();
+	QByteArray a(cs.length());
+	memcpy(a.data(), cs.data(), a.size());
+	return d->c->createFromPEM(a.data(), a.size());
 }

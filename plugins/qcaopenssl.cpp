@@ -1,6 +1,5 @@
 #include"qcaopenssl.h"
 
-#include<qptrlist.h>
 #include<openssl/sha.h>
 #include<openssl/md5.h>
 #include<openssl/evp.h>
@@ -8,6 +7,7 @@
 #include<openssl/pem.h>
 #include<openssl/rsa.h>
 #include<openssl/x509.h>
+#include<openssl/x509v3.h>
 
 // FIXME: use openssl for entropy instead of stdlib
 #include<stdlib.h>
@@ -593,6 +593,221 @@ public:
 	RSA *pub, *sec;
 };
 
+static QValueList<QCA_CertProperty> nameToProperties(X509_NAME *name)
+{
+	QValueList<QCA_CertProperty> list;
+
+	for(int n = 0; n < X509_NAME_entry_count(name); ++n) {
+		X509_NAME_ENTRY *ne = X509_NAME_get_entry(name, n);
+		QCA_CertProperty p;
+
+		ASN1_OBJECT *ao = X509_NAME_ENTRY_get_object(ne);
+		int nid = OBJ_obj2nid(ao);
+		if(nid == NID_undef)
+			continue;
+		p.var = OBJ_nid2sn(nid);
+
+		ASN1_STRING *as = X509_NAME_ENTRY_get_data(ne);
+		QCString c;
+		c.resize(as->length+1);
+		strncpy(c.data(), (char *)as->data, as->length);
+		p.val = QString::fromLatin1(c);
+		list += p;
+	}
+
+	return list;
+}
+
+// (taken from kdelibs) -- Justin
+//
+// This code is mostly taken from OpenSSL v0.9.5a
+// by Eric Young
+QDateTime ASN1_UTCTIME_QDateTime(ASN1_UTCTIME *tm, int *isGmt)
+{
+	QDateTime qdt;
+	char *v;
+	int gmt=0;
+	int i;
+	int y=0,M=0,d=0,h=0,m=0,s=0;
+	QDate qdate;
+	QTime qtime;
+
+	i = tm->length;
+	v = (char *)tm->data;
+
+	if (i < 10) goto auq_err;
+	if (v[i-1] == 'Z') gmt=1;
+	for (i=0; i<10; i++)
+		if ((v[i] > '9') || (v[i] < '0')) goto auq_err;
+	y = (v[0]-'0')*10+(v[1]-'0');
+	if (y < 50) y+=100;
+	M = (v[2]-'0')*10+(v[3]-'0');
+	if ((M > 12) || (M < 1)) goto auq_err;
+	d = (v[4]-'0')*10+(v[5]-'0');
+	h = (v[6]-'0')*10+(v[7]-'0');
+	m =  (v[8]-'0')*10+(v[9]-'0');
+	if (    (v[10] >= '0') && (v[10] <= '9') &&
+		(v[11] >= '0') && (v[11] <= '9'))
+		s = (v[10]-'0')*10+(v[11]-'0');
+
+	// localize the date and display it.
+	qdate.setYMD(y+1900, M, d);
+	qtime.setHMS(h,m,s);
+	qdt.setDate(qdate); qdt.setTime(qtime);
+auq_err:
+	if (isGmt) *isGmt = gmt;
+	return qdt;
+}
+
+class CertContext : public QCA_CertContext
+{
+public:
+	CertContext()
+	{
+		x = 0;
+	}
+
+	~CertContext()
+	{
+		reset();
+	}
+
+	QCA_CertContext *clone()
+	{
+		CertContext *c = new CertContext(*this);
+		if(x) {
+			++(x->references);
+			c->x = x;
+		}
+		return c;
+	}
+
+	void reset()
+	{
+		serial = "";
+		v_subject = "";
+		v_issuer = "";
+		cp_subject.clear();
+		cp_issuer.clear();
+		na = QDateTime();
+		nb = QDateTime();
+		if(x) {
+			X509_free(x);
+			x = 0;
+		}
+	}
+
+	bool isNull() const
+	{
+		return (x ? false: true);
+	}
+
+	bool createFromDER(const char *in, unsigned int len)
+	{
+		unsigned char *p = (unsigned char *)in;
+		X509 *t = d2i_X509(NULL, &p, len);
+		if(!t)
+			return false;
+		fromX509(t);
+		return true;
+	}
+
+	bool createFromPEM(const char *in, unsigned int len)
+	{
+		return false;
+	}
+
+	void toDER(char **out, unsigned int *len)
+	{
+		// extract the raw data
+		//int len = i2d_X509(x, NULL);
+		//QByteArray dat(len);
+		//unsigned char *p = (unsigned char *)dat.data();
+		//i2d_X509(x, &p);
+		//d->dat = dat;
+
+		*out = 0;
+		*len = 0;
+	}
+
+	void toPEM(char **out, unsigned int *len)
+	{
+		*out = 0;
+		*len = 0;
+	}
+
+	void fromX509(X509 *t)
+	{
+		reset();
+		++(t->references);
+		x = t;
+
+		// serial number
+		ASN1_INTEGER *ai = X509_get_serialNumber(x);
+		if(ai) {
+			char *rep = i2s_ASN1_INTEGER(NULL, ai);
+			serial = rep;
+			OPENSSL_free(rep);
+		}
+
+		// validity dates
+		nb = ASN1_UTCTIME_QDateTime(X509_get_notBefore(x), NULL);
+		na = ASN1_UTCTIME_QDateTime(X509_get_notAfter(x), NULL);
+
+		// extract the subject/issuer strings
+		X509_NAME *sn = X509_get_subject_name(x);
+		X509_NAME *in = X509_get_issuer_name(x);
+		char buf[1024];
+		X509_NAME_oneline(sn, buf, 1024);
+		v_subject = buf;
+		X509_NAME_oneline(in, buf, 1024);
+		v_issuer = buf;
+
+		// extract the subject/issuer contents
+		cp_subject = nameToProperties(sn);
+		cp_issuer  = nameToProperties(in);
+	}
+
+	QString serialNumber() const
+	{
+		return serial;
+	}
+
+	QString subjectString() const
+	{
+		return v_subject;
+	}
+
+	QString issuerString() const
+	{
+		return v_issuer;
+	}
+
+	QValueList<QCA_CertProperty> subject() const
+	{
+		return cp_subject;
+	}
+
+	QValueList<QCA_CertProperty> issuer() const
+	{
+		return cp_issuer;
+	}
+
+	QDateTime notBefore() const
+	{
+		return nb;
+	}
+
+	QDateTime notAfter() const
+	{
+		return na;
+	}
+
+	X509 *x;
+	QString serial, v_subject, v_issuer;
+	QValueList<QCA_CertProperty> cp_subject, cp_issuer;
+	QDateTime nb, na;
+};
 
 class QCAOpenSSL : public QCAProvider
 {
@@ -602,7 +817,7 @@ public:
 
 	int capabilities() const
 	{
-		return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_BlowFish | QCA::CAP_TripleDES | QCA::CAP_AES128 | QCA::CAP_AES256 | QCA::CAP_RSA);
+		return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_BlowFish | QCA::CAP_TripleDES | QCA::CAP_AES128 | QCA::CAP_AES256 | QCA::CAP_RSA | QCA::CAP_X509);
 	}
 
 	void *context(int cap)
@@ -621,6 +836,8 @@ public:
 			return new AES256Context;
 		else if(cap == QCA::CAP_RSA)
 			return new RSAKeyContext;
+		else if(cap == QCA::CAP_X509)
+			return new CertContext;
 		return 0;
 	}
 };

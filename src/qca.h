@@ -3,9 +3,12 @@
 
 #include<qstring.h>
 #include<qcstring.h>
+#include<qdatetime.h>
+#include<qvaluelist.h>
 
 class QCA_HashContext;
 class QCA_CipherContext;
+struct QCA_CertProperty;
 
 namespace QCA
 {
@@ -18,10 +21,10 @@ namespace QCA
 		CAP_AES128    = 0x0020,
 		CAP_AES256    = 0x0040,
 		CAP_RSA       = 0x0080,
+		CAP_X509      = 0x0100,
 
-		//CAP_X509      = 0x0040,
-		//CAP_TLS       = 0x0080,
-		//CAP_SASL      = 0x0100,
+		//CAP_TLS       = 0x0200,
+		//CAP_SASL      = 0x0400,
 	};
 
 	enum {
@@ -220,6 +223,41 @@ namespace QCA
 
 	private:
 		RSAKey v_key;
+	};
+
+	struct CertProperty
+	{
+		QString var;
+		QString val;
+	};
+
+	class Cert
+	{
+	public:
+		Cert();
+		Cert(const Cert &);
+		Cert & operator=(const Cert &);
+		~Cert();
+
+		bool isNull() const;
+
+		QString serialNumber() const;
+		QString subjectString() const;
+		QString issuerString() const;
+		QValueList<QCA_CertProperty> subject() const;
+		QValueList<QCA_CertProperty> issuer() const;
+		QDateTime notBefore() const;
+		QDateTime notAfter() const;
+
+		QByteArray toDER() const;
+		bool fromDER(const QByteArray &a);
+
+		QString toPEM() const;
+		bool fromPEM(const QString &);
+
+	private:
+		class Private;
+		Private *d;
 	};
 };
 
