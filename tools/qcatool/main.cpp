@@ -299,7 +299,7 @@ int main(int argc, char **argv)
 
 	QCoreApplication app(argc, argv);
 
-	QCA::scanForPlugins();
+	//QCA::scanForPlugins();
 
 	if(!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
 	{
@@ -911,6 +911,23 @@ int main(int argc, char **argv)
 		}
 		else
 			printf("   No policies\n");
+
+		// TODO: printf("Signature algorithm: %s\n");
+
+		QByteArray id;
+		printf("Issuer Key ID: ");
+		id = cert.issuerKeyId();
+		if(!id.isEmpty())
+			printf("%s\n", qPrintable(QCA::arrayToHex(id)));
+		else
+			printf("None\n");
+
+		printf("Subject Key ID: ");
+		id = cert.subjectKeyId();
+		if(!id.isEmpty())
+			printf("%s\n", qPrintable(QCA::arrayToHex(id)));
+		else
+			printf("None\n");
 
 		QCA::PublicKey key = cert.subjectPublicKey();
 		printf("Public Key:\n%s", key.toPEM().toLatin1().data());

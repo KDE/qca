@@ -799,6 +799,22 @@ static QStringList get_cert_policies(X509_EXTENSION *ex)
 	return out;
 }
 
+static QByteArray get_cert_subject_key_id(X509_EXTENSION *ex)
+{
+	ASN1_OCTET_STRING *skid = (ASN1_OCTET_STRING *)X509V3_EXT_d2i(ex);
+	QByteArray out((const char *)ASN1_STRING_data(skid), ASN1_STRING_length(skid));
+	ASN1_OCTET_STRING_free(skid);
+	return out;
+}
+
+static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
+{
+	AUTHORITY_KEYID *akid = (AUTHORITY_KEYID *)X509V3_EXT_d2i(ex);
+	QByteArray out((const char *)ASN1_STRING_data(akid->keyid), ASN1_STRING_length(akid->keyid));
+	AUTHORITY_KEYID_free(akid);
+	return out;
+}
+
 static QCA::Validity convert_verify_error(int err)
 {
 	// TODO: ErrorExpiredCA
@@ -2875,6 +2891,22 @@ public:
 		// TODO:
 		//QSecureArray sig;
 		//SignatureAlgorithm sigalgo;
+
+		pos = X509_get_ext_by_NID(x, NID_subject_key_identifier, -1);
+		if(pos != -1)
+		{
+			X509_EXTENSION *ex = X509_get_ext(x, pos);
+			if(ex)
+				p.subjectId += get_cert_subject_key_id(ex);
+		}
+
+		pos = X509_get_ext_by_NID(x, NID_authority_key_identifier, -1);
+		if(pos != -1)
+		{
+			X509_EXTENSION *ex = X509_get_ext(x, pos);
+			if(ex)
+				p.issuerId += get_cert_issuer_key_id(ex);
+		}
 
 		_props = p;
 		//printf("[%p] made props: [%s]\n", this, _props.subject[QCA::CommonName].toLatin1().data());
