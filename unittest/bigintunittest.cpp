@@ -43,7 +43,7 @@ void BigIntUnitTest::allTests()
     CHECK( QBigInteger("-255").toString(), QString("-255") );
 
     CHECK( QBigInteger("0377").toString(), QBigInteger(255).toString() );
-    CHECK( QBigInteger("-0377").toString(), QBigInteger(255).toString() );
+    CHECK( QBigInteger("-0377").toString(), QBigInteger(-255).toString() );
     CHECK( QBigInteger("0377").toString(), QString("255") );
     CHECK( QBigInteger("-0377").toString(), QString("-255") );
 
