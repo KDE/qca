@@ -700,7 +700,9 @@ namespace QCA
 	 when final() is called.
 
 	 If this seems a big vague, then you might try deriving
-	 your class from a subclass with stronger semantics. 
+	 your class from a subclass with stronger semantics. If your
+	 update() function is always returning null results, and
+	 everything comes out at final(), try BufferedComputation.
 	*/
 	class QCA_EXPORT Filter
 	{

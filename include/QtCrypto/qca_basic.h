@@ -403,6 +403,11 @@ namespace QCA
 		Cipher(const Cipher &from);
 		~Cipher();
 
+		/**
+		   Assignment operator
+		   
+		   \param from the Cipher to copy state from
+		*/
 		Cipher & operator=(const Cipher &from);
 
 		/**
@@ -443,13 +448,43 @@ namespace QCA
 		 */
 		virtual QSecureArray final();
 
+		/**
+
+		 Test if an update() or final() call succeeded.
+		 
+		 \return true if the previous call succeeded
+		*/
 		virtual bool ok() const;
 
-		// note: padding only applies to CBC and ECB.  CFB ciphertext is
-		//   always the length of the plaintext.
+		/**
+		   Reset / reconfigure the Cipher
+
+		   \param m the Mode for the Cipher algorithm (eg Cipher Block Chaining)
+		   \param dir the Direction that this Cipher should use (Encode for encryption, Decode for decryption)
+		   \param key the SymmetricKey array that is the key
+		   \param iv the InitializationVector to use
+		   \param pad the type of Padding to use.
+
+		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
+		   the length of the plaintext.
+		*/
 		void setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7);
 
 	protected:
+		/**
+		   Standard constructor
+
+		   \param type the name of the cipher specialisation to use
+		   \param m the Mode for the Cipher algorithm (eg Cipher Block Chaining)
+		   \param dir the Direction that this Cipher should use (Encode for encryption, Decode for decryption)
+		   \param key the SymmetricKey array that is the key
+		   \param iv the InitializationVector to use
+		   \param pad the type of Padding to use
+		   \param provider the name of the Provider to use
+
+		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
+		   the length of the plaintext.
+		*/
 		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, Padding pad, const QString &provider);
 	private:
 		class Private;
