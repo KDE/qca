@@ -1,3 +1,6 @@
+* plugins: thread safety ?
+* make qca into a real installable library
+
 * dsa
 * diffie-hellman
 * entropy
