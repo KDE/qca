@@ -246,7 +246,7 @@ public:
 
 	QCA::KeyLength keyLength() const
 	{
-
+		return anyKeyLength();
 	}
 
 	void update(const QSecureArray &a)
@@ -286,7 +286,7 @@ public:
 
 	QCA::KeyLength keyLength() const
 	{
-
+		return anyKeyLength();
 	}
 
 	void update(const QSecureArray &a)
@@ -325,7 +325,7 @@ public:
 
 	QCA::KeyLength keyLength() const
 	{
-
+		return anyKeyLength();
 	}
 
 	void update(const QSecureArray &a)
