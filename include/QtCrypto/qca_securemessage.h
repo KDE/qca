@@ -89,17 +89,25 @@ namespace QCA
 			EncryptThenSign,
 			SignThenEncrypt
 		};
+
+		/**
+		   Formats for secure messages
+		*/
 		enum Format
 		{
-			Binary, // DER/binary
-			Ascii   // PEM/ascii-armored
+			Binary, ///< DER/binary
+			Ascii   ///< PEM/ascii-armored
 		};
+
+		/**
+		   Errors for secure messages
+		*/
 		enum Error
 		{
-			ErrPassphrase, // passphrase was either wrong or not provided
-			ErrFormat,     // input format was bad
-			ErrSigner,     // signing key is expired or invalid
-			ErrUnknown     // other error
+			ErrPassphrase, ///< passphrase was either wrong or not provided
+			ErrFormat,     ///< input format was bad
+			ErrSigner,     ///< signing key is expired or invalid
+			ErrUnknown     ///< other error
 		};
 		enum VerifyResult
 		{

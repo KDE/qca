@@ -118,46 +118,59 @@ namespace QCA
 		IETF_4096
 	};
 
+	/**
+	   Encryption algorithms
+	*/
 	enum EncAlgo
 	{
-		EME_PKCS1v15,
-		EME_PKCS1_OAEP
+		EME_PKCS1v15,  ///< Block type 2 (PKCD1, Version 1.5)
+		EME_PKCS1_OAEP ///< Optimal asymmetric encryption padding (PKCS1, Version 2.0)
 	};
 
+	/**
+	   Signature algorithm variants
+	*/
 	enum SignAlgo
 	{
-		SignUnknown,
-		EMSA1_SHA1, // usual dsa
-		EMSA3_SHA1,
-		EMSA3_MD5, // usual rsa
-		EMSA3_MD2,
-		EMSA3_RIPEMD160
+		SignUnknown, ///< Unknown signing algorithm
+		EMSA1_SHA1,  ///< SHA1, with EMSA1 (IEEE1363-2000) encoding (this is the usual DSA algorithm - FIPS186)
+		EMSA3_SHA1,  ///< SHA1, with EMSA3 (ie PKCS1 Version 1.5) encoding
+		EMSA3_MD5,   ///< MD5, with EMSA3 (ie PKCS1 Version 1.5) encoding (this is the usual RSA algorithm)
+		EMSA3_MD2,   ///< MD2, with EMSA3 (ie PKCS1 Version 1.5) encoding
+		EMSA3_RIPEMD160 ///< RIPEMD160, with EMSA3 (ie PKCS1 Version 1.5) encoding
 	};
 
+	/**
+	   The validity (or otherwise) of a certificate
+	*/
 	enum CertValidity
 	{
-		Valid,
-		Rejected,
-		Untrusted,
-		SignatureFailed,
-		InvalidCA,
-		InvalidPurpose,
-		SelfSigned,
-		Revoked,
-		PathLengthExceeded,
-		Expired,
-		Unknown
+		Valid,              ///< The certificate is valid
+		Rejected,           ///< The root CA rejected the certificate purpose
+		Untrusted,          ///< The certificate is not trusted
+		SignatureFailed,    ///< The signature does not match
+		InvalidCA,          ///< The Certificate Authority is invalid
+		InvalidPurpose,     ///< The purpose does not match the intended usage
+		SelfSigned,         ///< The certificate is self-signed, and is not
+		                    ///< found in the list of trusted certificates
+		Revoked,            ///< The certificate has been revoked
+		PathLengthExceeded, ///< The path length from the root CA to this certificate is too long
+		Expired,            ///< The certificate has expired
+		Unknown             ///< Validity is unknown
 	};
 
+	/**
+	   Specify the intended usage of a certificate
+	*/
 	enum CertUsage
 	{
-		Any             = 0x00,
-		TLSServer       = 0x01,
-		TLSClient       = 0x02,
-		CodeSigning     = 0x04,
-		EmailProtection = 0x08,
-		TimeStamping    = 0x10,
-		CRLSigning      = 0x20
+		Any             = 0x00, ///< Any application, or unspecified
+		TLSServer       = 0x01, ///< server side of a TLS or SSL connection
+		TLSClient       = 0x02, ///< client side of a TLS or SSL connection
+		CodeSigning     = 0x04, ///< code signing certificate
+		EmailProtection = 0x08, ///< email (S/MIME) certificate
+		TimeStamping    = 0x10, ///< time stamping certificate
+		CRLSigning      = 0x20  ///< certificate revocation list signing certificate
 	};
 
 	/**
