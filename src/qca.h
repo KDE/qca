@@ -602,7 +602,7 @@ namespace QCA
 	 * restrict the amount of memory that can be pinned by user
 	 * applications, to prevent a denial-of-service attack. 
 	 *
-	 * QCA support two approaches to getting memory - the mlock
+	 * QCA supports two approaches to getting memory - the mlock
 	 * method, which generally requires root (administrator) level
 	 * privileges, and the mmap method which is not as secure, but
 	 * which should be able to be used by any process.
@@ -669,7 +669,7 @@ namespace QCA
 	 * \overload
 	 *
 	 * \param m the MemoryMode to use
-	 * \param prealloc the amount of memory in bytes to allocate
+	 * \param prealloc the amount of memory in kilobytes to allocate
 	 *                 for secure storage
 	 */
 	QCA_EXPORT void init(MemoryMode m, int prealloc);
@@ -772,6 +772,9 @@ namespace QCA
 	 * if required.
 	 */
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
+
+	QCA_EXPORT QString appName();
+	QCA_EXPORT void setAppName(const QString &name);
 
 	/**
 	 * Convert a byte array to printable hexadecimal
@@ -1390,7 +1393,7 @@ namespace QCA
 		KeyLength keyLength() const;
 
 		/**
-		 * Test if a key length is valid for the MAC algorithm
+		 * Test if a key length is valid for the cipher algorithm
 		 *
 		 * \param n the key length in bytes
 		 * \return true if the key would be valid for the current algorithm
@@ -2275,26 +2278,29 @@ namespace QCA
 		virtual void write(const QSecureArray &a);
 		virtual QSecureArray read();
 		virtual void writeIncoming(const QByteArray &a);
-		virtual QByteArray readOutgoing();
+		virtual QByteArray readOutgoing(int *plainBytes = 0);
 		virtual QSecureArray readUnprocessed();
 
 	signals:
 		void handshaken();
 
-	private:
+	public:
 		class Private;
+	private:
+		friend class Private;
 		Private *d;
-
-		void update();
 	};
 
-#if 0
-	//class QCA_EXPORT SASL : public QObject
-	//{
-		//Q_OBJECT
+	class QCA_EXPORT SASL : public SecureLayer, public Algorithm
+	{
+		Q_OBJECT
 	public:
-		enum Error { ErrAuth, ErrCrypt };
-		enum ErrorCond
+		enum Error
+		{
+			ErrAuth,
+			ErrCrypt
+		};
+		enum AuthCondition
 		{
 			NoMech,
 			BadProto,
@@ -2308,78 +2314,68 @@ namespace QCA
 			NoUser,
 			RemoteUnavail
 		};
-		SASL(QObject *parent=0);
+		enum SecurityFlags
+		{
+			SAllowPlain             = 0x01,
+			SAllowAnonymous         = 0x02,
+			SRequireForwardSecrecy  = 0x04,
+			SRequirePassCredentials = 0x08,
+			SRequireMutualAuth      = 0x10
+		};
+
+		SASL(QObject *parent = 0, const char *name = 0, const QString &provider = "");
 		~SASL();
 
-		static void setAppName(const QString &name);
-
 		void reset();
-		int errorCondition() const;
 
-		// options
-		void setAllowPlain(bool);
-		void setAllowAnonymous(bool);
-		void setAllowActiveVulnerable(bool);
-		void setAllowDictionaryVulnerable(bool);
-		void setRequireForwardSecrecy(bool);
-		void setRequirePassCredentials(bool);
-		void setRequireMutualAuth(bool);
-
-		void setMinimumSSF(int);
-		void setMaximumSSF(int);
+		// configuration
+		void setConstraints(SecurityFlags f, int minSSF = 0, int maxSSF = 256);
+		void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
+		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
 		void setExternalAuthID(const QString &authid);
 		void setExternalSSF(int);
 
-		void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
-		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
-
-		// initialize
-		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst=true);
+		// main
+		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst = true);
 		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist);
-
-		// authentication
 		void putStep(const QByteArray &stepData);
 		void putServerFirstStep(const QString &mech);
 		void putServerFirstStep(const QString &mech, const QByteArray &clientInit);
+		int ssf() const;
+		Error errorCode() const;
+		AuthCondition authCondition() const;
+
+		// authentication
 		void setUsername(const QString &user);
 		void setAuthzid(const QString &auth);
-		void setPassword(const QString &pass);
+		void setPassword(const QSecureArray &pass);
 		void setRealm(const QString &realm);
 		void continueAfterParams();
 		void continueAfterAuthCheck();
 
-		// security layer
-		int ssf() const;
-		void write(const QByteArray &a);
-		QByteArray read();
-		void writeIncoming(const QByteArray &a);
-		QByteArray readOutgoing();
+		// reimplemented
+		virtual bool haveError() const;
+		virtual int bytesAvailable() const;
+		virtual int bytesOutgoingAvailable() const;
+		virtual void close();
+		virtual void write(const QSecureArray &a);
+		virtual QSecureArray read();
+		virtual void writeIncoming(const QByteArray &a);
+		virtual QByteArray readOutgoing(int *plainBytes = 0);
 
 	signals:
-		// for authentication
 		void clientFirstStep(const QString &mech, const QByteArray *clientInit);
 		void nextStep(const QByteArray &stepData);
 		void needParams(bool user, bool authzid, bool pass, bool realm);
 		void authCheck(const QString &user, const QString &authzid);
 		void authenticated();
 
-		// for security layer
-		void readyRead();
-		void readyReadOutgoing(int plainBytes);
-
-		// error
-		void error(int);
-
-	private slots:
-		void tryAgain();
-
-	private:
+	public:
 		class Private;
+	private:
+		friend class Private;
 		Private *d;
-
-		void handleServerFirstStep(int r);
 	};
-#endif
 };
 
 #endif

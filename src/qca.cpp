@@ -205,6 +205,15 @@ void setGlobalRNG(const QString &provider)
 	global_rng = new Random(provider);
 }
 
+QString appName()
+{
+	return "";
+}
+
+void setAppName(const QString &)
+{
+}
+
 QString arrayToHex(const QSecureArray &a)
 {
 	return Hex().arrayToString(a);

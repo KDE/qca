@@ -228,7 +228,7 @@ int TLS::bytesOutgoingAvailable() const
 void TLS::write(const QSecureArray &a)
 {
 	d->appendArray(&d->out, a.toByteArray());
-	update();
+	//update();
 }
 
 QSecureArray TLS::read()
@@ -241,11 +241,12 @@ QSecureArray TLS::read()
 void TLS::writeIncoming(const QByteArray &a)
 {
 	d->appendArray(&d->from_net, a);
-	update();
+	//update();
 }
 
-QByteArray TLS::readOutgoing()
+QByteArray TLS::readOutgoing(int *plainBytes)
 {
+	Q_UNUSED(plainBytes);
 	QByteArray a = d->to_net.copy();
 	d->to_net.resize(0);
 	return a;
@@ -286,7 +287,7 @@ Certificate TLS::peerCertificate() const
 {
 	return d->cert;
 }
-
+#if 0
 void TLS::update()
 {
 	bool force_read = false;
@@ -408,11 +409,11 @@ void TLS::update()
 		closed();
 	}
 }
-
+#endif
 //----------------------------------------------------------------------------
 // SASL
 //----------------------------------------------------------------------------
-/*QString *saslappname = 0;
+QString *saslappname = 0;
 class SASL::Private
 {
 public:
@@ -440,7 +441,7 @@ public:
 };
 
 SASL::SASL(QObject *parent, const char *name, const QString &provider)
-:SecureLayer(parent, name), Algorithm(F_SASL, provider)
+:SecureLayer(parent, name), Algorithm("sasl", provider)
 {
 	d = new Private;
 	d->c = (SASLContext *)context();
@@ -452,12 +453,12 @@ SASL::~SASL()
 	delete d;
 }
 
-void SASL::setAppName(const QString &name)
+/*void SASL::setAppName(const QString &name)
 {
 	if(!saslappname)
 		saslappname = new QString;
 	*saslappname = name;
-}
+}*/
 
 void SASL::reset()
 {
@@ -487,17 +488,17 @@ SASL::Error SASL::errorCode() const
 	return d->errorCode;
 }
 
-SASL::AuthCond SASL::authCondition() const
+SASL::AuthCondition SASL::authCondition() const
 {
-	return d->c->authCond();
+	return (AuthCondition)d->c->authError();
 }
 
 void SASL::setConstraints(SecurityFlags f, int minSSF, int maxSSF)
 {
 	d->noPlain    = (f & SAllowPlain) ? false: true;
 	d->noAnon     = (f & SAllowAnonymous) ? false: true;
-	d->noActive   = (f & SAllowActiveVulnerable) ? false: true;
-	d->noDict     = (f & SAllowDictVulnerable) ? false: true;
+	//d->noActive   = (f & SAllowActiveVulnerable) ? false: true;
+	//d->noDict     = (f & SAllowDictVulnerable) ? false: true;
 	d->reqForward = (f & SRequireForwardSecrecy) ? true : false;
 	d->reqCreds   = (f & SRequirePassCredentials) ? true : false;
 	d->reqMutual  = (f & SRequireMutualAuth) ? true : false;
@@ -530,7 +531,7 @@ void SASL::setRemoteAddr(const QHostAddress &addr, Q_UINT16 port)
 
 bool SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst)
 {
-	QCA_SASLHostPort la, ra;
+	SASLContext::HostPort la, ra;
 	if(d->localPort != -1) {
 		la.addr = d->localAddr;
 		la.port = d->localPort;
@@ -555,7 +556,7 @@ bool SASL::startClient(const QString &service, const QString &host, const QStrin
 
 bool SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist)
 {
-	QCA_SASLHostPort la, ra;
+	SASLContext::HostPort la, ra;
 	if(d->localPort != -1) {
 		la.addr = d->localAddr;
 		la.port = d->localPort;
@@ -584,17 +585,17 @@ bool SASL::startServer(const QString &service, const QString &host, const QStrin
 
 void SASL::putServerFirstStep(const QString &mech)
 {
-	int r = d->c->serverFirstStep(mech, 0);
-	handleServerFirstStep(r);
+	/*int r =*/ d->c->serverFirstStep(mech, 0);
+	//handleServerFirstStep(r);
 }
 
 void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
 {
-	int r = d->c->serverFirstStep(mech, &clientInit);
-	handleServerFirstStep(r);
+	/*int r =*/ d->c->serverFirstStep(mech, &clientInit);
+	//handleServerFirstStep(r);
 }
 
-void SASL::handleServerFirstStep(int r)
+/*void SASL::handleServerFirstStep(int r)
 {
 	if(r == SASLContext::Success)
 		authenticated();
@@ -606,12 +607,12 @@ void SASL::handleServerFirstStep(int r)
 		d->errorCode = ErrAuth;
 		error();
 	}
-}
+}*/
 
 void SASL::putStep(const QByteArray &stepData)
 {
 	d->stepData = stepData.copy();
-	tryAgain();
+	//tryAgain();
 }
 
 void SASL::setUsername(const QString &user)
@@ -624,7 +625,7 @@ void SASL::setAuthzid(const QString &authzid)
 	d->c->setClientParams(0, &authzid, 0, 0);
 }
 
-void SASL::setPassword(const QString &pass)
+void SASL::setPassword(const QSecureArray &pass)
 {
 	d->c->setClientParams(0, 0, &pass, 0);
 }
@@ -636,15 +637,15 @@ void SASL::setRealm(const QString &realm)
 
 void SASL::continueAfterParams()
 {
-	tryAgain();
+	//tryAgain();
 }
 
 void SASL::continueAfterAuthCheck()
 {
-	tryAgain();
+	//tryAgain();
 }
 
-void SASL::tryAgain()
+/*void SASL::tryAgain()
 {
 	int r;
 
@@ -733,14 +734,14 @@ void SASL::tryAgain()
 		d->errorCode = ErrAuth;
 		error();
 	}
-}
+}*/
 
 int SASL::ssf() const
 {
 	return d->c->security();
 }
 
-void SASL::write(const QByteArray &a)
+/*void SASL::write(const QByteArray &a)
 {
 	QByteArray b;
 	if(!d->c->encode(a, &b)) {
@@ -782,4 +783,45 @@ QByteArray SASL::readOutgoing()
 	return a;
 }
 */
+
+bool SASL::haveError() const
+{
+	return false;
+}
+
+int SASL::bytesAvailable() const
+{
+	return 0;
+}
+
+int SASL::bytesOutgoingAvailable() const
+{
+	return 0;
+}
+
+void SASL::close()
+{
+}
+
+void SASL::write(const QSecureArray &a)
+{
+	Q_UNUSED(a);
+}
+
+QSecureArray SASL::read()
+{
+	return QSecureArray();
+}
+
+void SASL::writeIncoming(const QByteArray &a)
+{
+	Q_UNUSED(a);
+}
+
+QByteArray SASL::readOutgoing(int *plainBytes)
+{
+	Q_UNUSED(plainBytes);
+	return QByteArray();
+}
+
 }
