@@ -24,6 +24,8 @@
 #include <gcrypt.h>
 #include <iostream>
 
+namespace gcryptQCAPlugin {
+
 void check_error( gcry_error_t err )
 {
     // we ignore the case where it is not an error, and
@@ -351,6 +353,9 @@ protected:
     bool m_pad;
 };
 
+}
+
+using namespace gcryptQCAPlugin;
 
 class gcryptProvider : public QCA::Provider
 {
