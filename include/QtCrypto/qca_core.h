@@ -822,6 +822,13 @@ namespace QCA
 		SymmetricKey(const QSecureArray &a);
 
 		/**
+		 * Construct a key from a provided byte array
+		 *
+		 * \param a the byte array to copy
+		 */
+		SymmetricKey(const QByteArray &a);
+
+		/**
 		 * Test for weak DES keys
 		 *
 		 * \return true if the key is a weak key for DES
@@ -855,6 +862,13 @@ namespace QCA
 		   \param a the byte array to copy
 		 */
 		InitializationVector(const QSecureArray &a);
+
+		/**
+		   Construct an initialisation vector from a provided byte array
+
+		   \param a the byte array to copy
+		 */
+		InitializationVector(const QByteArray &a);
 	};
 }
 

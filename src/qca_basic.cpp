@@ -126,20 +126,19 @@ QString Hash::hashToString(const QSecureArray &a)
 class Cipher::Private
 {
 public:
-	Mode mode;
 	Direction dir;
 	SymmetricKey key;
 	InitializationVector iv;
-	Padding pad;
 
 	bool ok, done;
 };
 
-Cipher::Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, Padding pad, const QString &provider)
+Cipher::Cipher(const QString &type, Direction dir, const SymmetricKey &key, const InitializationVector &iv, const QString &provider)
 :Algorithm(type, provider)
 {
 	d = new Private;
-	setup(m, dir, key, iv, pad);
+	if(!key.isEmpty())
+		setup(dir, key, iv);
 }
 
 Cipher::Cipher(const Cipher &from)
@@ -178,7 +177,7 @@ unsigned int Cipher::blockSize() const
 void Cipher::clear()
 {
 	d->done = false;
-	((CipherContext *)context())->setup(d->key, (CipherContext::Mode)d->mode, d->dir, d->iv);
+	((CipherContext *)context())->setup(d->dir, d->key, d->iv);
 }
 
 QSecureArray Cipher::update(const QSecureArray &a)
@@ -205,14 +204,45 @@ bool Cipher::ok() const
 	return d->ok;
 }
 
-void Cipher::setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv,  Padding pad)
+void Cipher::setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv)
 {
-	d->mode = m;
 	d->dir = dir;
 	d->key = key;
 	d->iv = iv;
-	d->pad = pad;
 	clear();
+}
+
+QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding paddingType)
+{
+	QString mode;
+	if(modeType == CBC)
+		mode = "cbc";
+	else if(modeType == CFB)
+		mode = "cfb";
+	else
+		mode = "ecb";
+
+	// do the default
+	if(paddingType == DefaultPadding)
+	{
+		// logic from Botan
+		if(modeType == CBC)
+			paddingType = PKCS7;
+		else
+			paddingType = NoPadding;
+	}
+
+	QString pad;
+	if(paddingType == NoPadding)
+		pad = "";
+	else
+		pad = "pkcs7";
+
+	QString result = cipherType + '-' + mode;
+	if(!pad.isEmpty())
+		result += QString("-") + pad;
+
+	return result;
 }
 
 //----------------------------------------------------------------------------

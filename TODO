@@ -4,6 +4,7 @@
 * Update to latest Botan, and remake the botantools patch as appropriate
 
 * API documentation
+  update cipher docs according to new args/ordering
   clean up Algorithm
   clean up Filter
   add QCA::systemStore() and haveSystemStore()
@@ -28,13 +29,12 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
-  deal with thread issues at central points:
-    secure memory, qca_plugin, keygen, securemessagesystem
-  cipher - needs to handling padding
-  pkey
-  cert/crl/store/csr/ca/etc (don't forget to call detach())
+  consider thread issues in secure memory and qca_plugin
+  pkey (consider keygen thread issues)
+  cert/crl/store/csr/ca/etc
   tls
   sasl
+  securemessagesystem (consider thread issues)
   openpgp
   smime
   default provider should have built-in sha1 and md5 (?)

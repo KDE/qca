@@ -535,6 +535,11 @@ SymmetricKey::SymmetricKey(const QSecureArray &a)
 	set(a);
 }
 
+SymmetricKey::SymmetricKey(const QByteArray &a)
+{
+	set(QSecureArray(a));
+}
+
 /* from libgcrypt-1.2.0 */
 static unsigned char desWeakKeyTable[64][8] =
 {
@@ -636,6 +641,11 @@ InitializationVector::InitializationVector(int size)
 InitializationVector::InitializationVector(const QSecureArray &a)
 {
 	set(a);
+}
+
+InitializationVector::InitializationVector(const QByteArray &a)
+{
+	set(QSecureArray(a));
 }
 
 }

@@ -80,7 +80,7 @@ class CipherContext : public Provider::Context
 public:
 	enum Mode { CBC, CFB, ECB };
 	CipherContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
-	virtual void setup(const SymmetricKey &key, Mode m, Direction dir, const InitializationVector &iv) = 0;
+	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv) = 0;
 	virtual KeyLength keyLength() const = 0;
 	virtual unsigned int blockSize() const = 0;
 

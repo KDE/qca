@@ -391,8 +391,9 @@ namespace QCA
 		 */
 		enum Padding
 		{
-			NoPadding, ///< Do no padding
-			PKCS7     ///< Pad using the scheme in PKCS#7
+			DefaultPadding, ///< Default for cipher-mode
+			NoPadding,      ///< Do no padding
+			PKCS7           ///< Pad using the scheme in PKCS#7
 		};
 
 		/** 
@@ -466,7 +467,9 @@ namespace QCA
 		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
 		   the length of the plaintext.
 		*/
-		void setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7);
+		void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector());
+
+		static QString withAlgorithms(const QString &cipherType, Mode modeType, Padding paddingType);
 
 	protected:
 		/**
@@ -483,7 +486,7 @@ namespace QCA
 		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
 		   the length of the plaintext.
 		*/
-		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, Padding pad, const QString &provider);
+		Cipher(const QString &type, Direction dir, const SymmetricKey &key, const InitializationVector &iv, const QString &provider);
 
 	private:
 		class Private;
@@ -1008,8 +1011,8 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
-		:Cipher("blowfish", m, dir, key, iv, pad, provider) {}
+		BlowFish(Mode m, Padding pad = DefaultPadding, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), const QString &provider = QString())
+		:Cipher(withAlgorithms("blowfish", m, pad), dir, key, iv, provider) {}
 	};
 
 	/**
@@ -1036,8 +1039,8 @@ namespace QCA
 		 *
 		 */
 	public:
-		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
-		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
+		TripleDES(Mode m, Padding pad = DefaultPadding, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), const QString &provider = QString())
+		:Cipher(withAlgorithms("tripledes", m, pad), dir, key, iv, provider) {}
 	};
 
 	/**
@@ -1064,8 +1067,8 @@ namespace QCA
 		 *
 		 */
 	public:
-		DES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
-		:Cipher("des", m, dir, key, iv, pad, provider) {}
+		DES(Mode m, Padding pad = DefaultPadding, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), const QString &provider = QString())
+		:Cipher(withAlgorithms("des", m, pad), dir, key, iv, provider) {}
 	};
 
 	/**
@@ -1092,8 +1095,8 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
-		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
+		AES128(Mode m, Padding pad = DefaultPadding, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), const QString &provider = QString())
+		:Cipher(withAlgorithms("aes128", m, pad), dir, key, iv, provider) {}
 	};
 
 	/**
@@ -1120,8 +1123,8 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
-		:Cipher("aes192", m, dir, key, iv, pad, provider) {}
+		AES192(Mode m, Padding pad = DefaultPadding, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), const QString &provider = QString())
+		:Cipher(withAlgorithms("aes192", m, pad), dir, key, iv, provider) {}
 	};
 
 	/**
@@ -1148,8 +1151,8 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
-		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
+		AES256(Mode m, Padding pad = DefaultPadding, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), const QString &provider = QString())
+		:Cipher(withAlgorithms("aes256", m, pad), dir, key, iv, provider) {}
 	};
 
 	/**
