@@ -209,9 +209,9 @@ public:
 	check_error( err ); 
     }
 
-    int blockSize() const
+    unsigned int blockSize() const
     {
-	int blockSize;
+	unsigned int blockSize;
 	gcry_cipher_algo_info( cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
 	return blockSize;
     }
@@ -351,6 +351,26 @@ public:
     }
 };
 
+class DESContext : public gcryCipherContext
+{
+public:
+    DESContext(QCA::Provider *p) : gcryCipherContext( p, "des" )
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	cryptoAlgorithm = GCRY_CIPHER_DES;
+    }
+	
+    Context *clone() const
+    {
+	return new DESContext( *this );
+    }
+    
+    QCA::KeyLength keyLength() const
+    {
+	return QCA::KeyLength( 8, 8, 1);
+    }
+};
+
 
 class gcryptProvider : public QCA::Provider
 {
@@ -376,6 +396,7 @@ public:
 		list += "aes256";
 		list += "blowfish";
 		list += "tripledes";
+		list += "des";
 		return list;
 	}
 
@@ -399,6 +420,8 @@ public:
 			return new BlowFishContext( this );
 		else if ( type == "tripledes" )
 			return new TripleDESContext( this );
+		else if ( type == "des" )
+			return new DESContext( this );
 		else
 			return 0;
 	}
