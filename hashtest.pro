@@ -1,4 +1,5 @@
 TEMPLATE = app
+CONFIG += thread
 INCLUDEPATH += src
 INCLUDEPATH += plugins
 HEADERS += src/qca.h
