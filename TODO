@@ -1,5 +1,4 @@
 * plugins: thread safety ?
-* make qca into a real installable library
 * tls: support shutting down the session
 
 * dsa

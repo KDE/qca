@@ -1,0 +1,11 @@
+#!/bin/sh
+
+cat >extra.pri <<EOT
+target.path=$PREFIX/lib
+INSTALLS += target
+
+incfiles.path=$PREFIX/include
+incfiles.files=src/qca.h
+INSTALLS += incfiles
+
+EOT
