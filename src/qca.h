@@ -254,14 +254,17 @@ public:
 	 * // myArray; and vice versa.
 	 * \endcode
 	 */
-	 void detach();
+	void detach();
 
 	 /**
 	  * Copy the contents of the secure array out to a 
 	  * standard QByteArray. Note that this performs a deep copy
 	  * of the data.
 	  */
-	 QByteArray toByteArray() const;
+	QByteArray toByteArray() const;
+
+protected:
+	void set(const QSecureArray &from);
 
 private:
 	class Private;
@@ -967,8 +970,6 @@ namespace QCA
 		SymmetricKey();
 		SymmetricKey(int size);
 		SymmetricKey(const QSecureArray &a);
-
-		SymmetricKey & operator=(const QSecureArray &a);
 	};
 
 	class QCA_EXPORT InitializationVector : public QSecureArray
@@ -977,8 +978,6 @@ namespace QCA
 		InitializationVector();
 		InitializationVector(int size);
 		InitializationVector(const QSecureArray &a);
-
-		InitializationVector & operator=(const QSecureArray &a);
 	};
 
 	/**

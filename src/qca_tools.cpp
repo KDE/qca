@@ -289,6 +289,11 @@ QByteArray QSecureArray::toByteArray() const
 	return buf;
 }
 
+void QSecureArray::set(const QSecureArray &from)
+{
+	*this = from;
+}
+
 bool operator==(const QSecureArray &a, const QSecureArray &b)
 {
 	if(&a == &b)
