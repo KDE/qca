@@ -1466,6 +1466,11 @@ public:
 		sec = false;
 	}
 
+	virtual int bits() const
+	{
+		return 0; // FIXME
+	}
+
 	virtual int maximumEncryptSize(QCA::EncryptionAlgorithm alg) const
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
@@ -1780,6 +1785,11 @@ public:
 		sec = false;
 	}
 
+	virtual int bits() const
+	{
+		return 0; // FIXME
+	}
+
 	virtual void startSign(QCA::SignatureAlgorithm, QCA::SignatureFormat format)
 	{
 		// openssl native format is DER, so transform otherwise
@@ -2023,6 +2033,11 @@ public:
 		evp.pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DH(evp.pkey, dh);
 		sec = false;
+	}
+
+	virtual int bits() const
+	{
+		return 0; // FIXME
 	}
 
 	virtual QCA::SymmetricKey deriveKey(const PKeyBase &theirs) const

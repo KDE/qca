@@ -142,6 +142,7 @@ namespace QCA
 
 		bool isNull() const;
 		Type type() const;
+		int bitSize() const;
 
 		bool isRSA() const;
 		bool isDSA() const;

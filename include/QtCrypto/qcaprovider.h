@@ -138,6 +138,7 @@ public:
 	virtual bool isNull() const = 0;
 	virtual bool isPrivate() const = 0;
 	virtual void convertToPublic() = 0;
+	virtual int bits() const = 0;
 
 	// encrypt/decrypt
 	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const;

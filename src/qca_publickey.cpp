@@ -231,6 +231,11 @@ PKey::Type PKey::type() const
 	return static_cast<const PKeyContext *>(context())->type();
 }
 
+int PKey::bitSize() const
+{
+	return static_cast<const PKeyContext *>(context())->bits();
+}
+
 bool PKey::isRSA() const
 {
 	return (type() == RSA);
