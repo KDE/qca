@@ -17,7 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-#include "QtCrypto/qcaprovider.h"
+#include <QtCore>
+#include <QtCrypto>
+
 #include <qstringlist.h>
 #include <gcrypt.h>
 #include <iostream>
@@ -517,4 +519,15 @@ public:
 	}
 };
 
-QCA_EXPORT_PLUGIN(gcryptProvider);
+class gcryptPlugin : public QCAPlugin
+{
+        Q_OBJECT
+public:
+        virtual int version() const { return QCA_PLUGIN_VERSION; }
+        virtual QCA::Provider *createProvider() { return new gcryptProvider; }
+};
+
+#include "qca-gcrypt.moc"
+
+Q_EXPORT_PLUGIN(gcryptPlugin);
+
