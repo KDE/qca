@@ -27,8 +27,6 @@
 #include "qca_publickey.h"
 #include "qca_cert.h"
 
-//class QHostAddress;
-
 namespace QCA
 {
 	/**
@@ -235,8 +233,8 @@ namespace QCA
 		// configuration
 		void setConstraints(AuthFlags f, SecurityLevel s = SL_None);
 		void setConstraints(AuthFlags f, int minSSF, int maxSSF);
-		//void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
-		//void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
+		void setLocalAddr(const QString &addr, quint16 port);
+		void setRemoteAddr(const QString &addr, quint16 port);
 		void setExternalAuthId(const QString &authid);
 		void setExternalSSF(int);
 

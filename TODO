@@ -19,7 +19,6 @@
   standardize on count() vs size() when iterating?
 
 * finish API:
-  do something about qhostaddress in SASL. try to remove QtNetwork dependency?
   algorithm: qshareddata?
   qcaprovider.h
 

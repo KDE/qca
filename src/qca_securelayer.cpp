@@ -463,17 +463,19 @@ void SASL::setExternalSSF(int x)
 	d->ext_ssf = x;
 }
 
-/*void SASL::setLocalAddr(const QHostAddress &addr, Q_UINT16 port)
+void SASL::setLocalAddr(const QString &addr, quint16 port)
 {
-	d->localAddr = addr;
+	Q_UNUSED(addr);
+	//d->localAddr = addr;
 	d->localPort = port;
 }
 
-void SASL::setRemoteAddr(const QHostAddress &addr, Q_UINT16 port)
+void SASL::setRemoteAddr(const QString &addr, quint16 port)
 {
-	d->remoteAddr = addr;
+	Q_UNUSED(addr);
+	//d->remoteAddr = addr;
 	d->remotePort = port;
-}*/
+}
 
 bool SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode)
 {
