@@ -392,7 +392,7 @@ namespace QCA
 		enum Padding
 		{
 			DefaultPadding, ///< Default for cipher-mode
-			NoPadding,      ///< Do no padding
+			NoPadding,      ///< Do not use padding
 			PKCS7           ///< Pad using the scheme in PKCS#7
 		};
 
