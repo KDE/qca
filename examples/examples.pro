@@ -6,6 +6,7 @@ SUBDIRS += \
 	providertest \
 	randomtest \
 	base64test \
+	hextest \
 	ciphertest
 
 #	rsatest \
