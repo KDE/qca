@@ -11,13 +11,20 @@
   threading (safety, usability) in API and plugins
   it's possible we use QSecureArray in some unnecessary places
   don't forget to QCA_EXPORT everything
-  expand abbreviations? ("Algo" "Cert")
+  expand "Cert" abbreviations?
 
 * finish API:
-  tls: session reuse
   shortcuts for reading/writing certs, etc, directly to files?
   quoted-printable TextFilter
   move to qt 4
+
+* qt 4 upgrade:
+  new include styles
+  qobject has no name parameter
+  use qmake .prf for auto-discovery by applications
+  use qplugin
+  use qshareddata for thread-safe objects
+  turn ambiguous bool args into enums
 
 * finish code for APIs:
   cipher - needs to handling padding
@@ -34,12 +41,6 @@
 * build system:
   on non-win/mac, allow specifying of flatfile store, else install/use built-in
   make sure it installs properly
-
-* qt 4 upgrade:
-  new include styles
-  use qmake .prf for auto-discovery by applications
-  use qplugin
-  use qshareddata for thread-safe objects
 
 * examples
   create example for BigInteger

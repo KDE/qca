@@ -293,9 +293,9 @@ int Certificate::pathLimit() const
 	return 0;
 }
 
-SignAlgo Certificate::signatureAlgorithm() const
+SignatureAlgorithm Certificate::signatureAlgorithm() const
 {
-	return SignUnknown;
+	return SignatureUnknown;
 }
 
 QSecureArray Certificate::toDER() const
@@ -431,9 +431,9 @@ QString CertificateRequest::challenge() const
 	return QString();
 }
 
-SignAlgo CertificateRequest::signatureAlgorithm() const
+SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 {
-	return SignUnknown;
+	return SignatureUnknown;
 }
 
 QSecureArray CertificateRequest::toDER() const
@@ -537,9 +537,9 @@ QValueList<CRLEntry> CRL::revoked() const
 	return QValueList<CRLEntry>();
 }
 
-SignAlgo CRL::signatureAlgorithm() const
+SignatureAlgorithm CRL::signatureAlgorithm() const
 {
-	return SignUnknown;
+	return SignatureUnknown;
 }
 
 QSecureArray CRL::toDER() const

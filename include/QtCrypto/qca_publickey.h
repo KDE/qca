@@ -53,7 +53,7 @@ namespace QCA
 	/**
 	   Encryption algorithms
 	*/
-	enum EncAlgo
+	enum EncryptionAlgorithm
 	{
 		EME_PKCS1v15,  ///< Block type 2 (PKCD1, Version 1.5)
 		EME_PKCS1_OAEP ///< Optimal asymmetric encryption padding (PKCS1, Version 2.0)
@@ -62,9 +62,9 @@ namespace QCA
 	/**
 	   Signature algorithm variants
 	*/
-	enum SignAlgo
+	enum SignatureAlgorithm
 	{
-		SignUnknown, ///< Unknown signing algorithm
+		SignatureUnknown, ///< Unknown signing algorithm
 		EMSA1_SHA1,  ///< SHA1, with EMSA1 (IEEE1363-2000) encoding (this is the usual DSA algorithm - FIPS186)
 		EMSA3_SHA1,  ///< SHA1, with EMSA3 (ie PKCS1 Version 1.5) encoding
 		EMSA3_MD5,   ///< MD5, with EMSA3 (ie PKCS1 Version 1.5) encoding (this is the usual RSA algorithm)
@@ -75,7 +75,7 @@ namespace QCA
 	/**
 	   Password-based encryption
 	*/
-	enum PBEAlgo
+	enum PBEAlgorithm
 	{
 		PBEDefault,           ///< Use modern default (same as PBES2_TripleDES_SHA1)
 		PBES2_DES_SHA1,       ///< PKCS#5 v2.0 DES/CBC,SHA1
@@ -95,6 +95,8 @@ namespace QCA
 		~PKey();
 
 		PKey & operator=(const PKey &from);
+
+		static QValueList<Type> supportedTypes(const QString &provider = QString());
 
 		bool isNull() const;
 		Type type() const;
@@ -143,12 +145,12 @@ namespace QCA
 		bool canVerify() const;
 
 		// encrypt / verify
-		int maximumEncryptSize(EncAlgo alg) const;
-		QSecureArray encrypt(EncAlgo alg, const QSecureArray &a);
-		void startVerify(SignAlgo alg);
+		int maximumEncryptSize(EncryptionAlgorithm alg) const;
+		QSecureArray encrypt(EncryptionAlgorithm alg, const QSecureArray &a);
+		void startVerify(SignatureAlgorithm alg);
 		void update(const QSecureArray &a);
 		bool validSignature(const QSecureArray &sig);
-		bool verifyMessage(SignAlgo alg, const QSecureArray &a, const QSecureArray &sig);
+		bool verifyMessage(SignatureAlgorithm alg, const QSecureArray &a, const QSecureArray &sig);
 
 		// import / export
 		QSecureArray toDER() const;
@@ -177,17 +179,17 @@ namespace QCA
 		bool canSign() const;
 
 		// decrypt / sign / key agreement
-		bool decrypt(EncAlgo alg, const QSecureArray &in, QSecureArray *out);
-		void startSign(SignAlgo alg);
+		bool decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out);
+		void startSign(SignatureAlgorithm alg);
 		void update(const QSecureArray &);
 		QSecureArray signature();
-		QSecureArray signMessage(SignAlgo alg, const QSecureArray &a);
+		QSecureArray signMessage(SignatureAlgorithm alg, const QSecureArray &a);
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
-		static bool canUsePBEAlgo(PBEAlgo algo, const QString &provider = QString());
-		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray(), PBEAlgo pbe = PBEDefault) const;
-		QString toPEM(const QSecureArray &passphrase = QSecureArray(), PBEAlgo pbe = PBEDefault) const;
+		static bool canUsePBEAlgorithm(PBEAlgorithm algo, const QString &provider = QString());
+		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
+		QString toPEM(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
 		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
 		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
 

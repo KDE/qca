@@ -174,7 +174,7 @@ namespace QCA
 		bool isSelfSigned() const;
 		int pathLimit() const;
 
-		SignAlgo signatureAlgorithm() const;
+		SignatureAlgorithm signatureAlgorithm() const;
 
 		// import / export
 		QSecureArray toDER() const;
@@ -222,7 +222,7 @@ namespace QCA
 		int pathLimit() const;               // PKCS#10 only
 		QString challenge() const;
 
-		SignAlgo signatureAlgorithm() const;
+		SignatureAlgorithm signatureAlgorithm() const;
 
 		// import / export - PKCS#10 only
 		QSecureArray toDER() const;
@@ -274,7 +274,7 @@ namespace QCA
 
 		QValueList<CRLEntry> revoked() const;
 
-		SignAlgo signatureAlgorithm() const;
+		SignatureAlgorithm signatureAlgorithm() const;
 
 		// import / export
 		QSecureArray toDER() const;

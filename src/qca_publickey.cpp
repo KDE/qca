@@ -72,6 +72,12 @@ void PKey::set(const PKey &k)
 	*this = k;
 }
 
+QValueList<PKey::Type> PKey::supportedTypes(const QString &provider)
+{
+	Q_UNUSED(provider);
+	return QValueList<PKey::Type>();
+}
+
 bool PKey::isNull() const
 {
 	PKeyContext *c = (PKeyContext *)context();
@@ -256,12 +262,12 @@ bool PublicKey::canVerify() const
 	return (isRSA() || isDSA());
 }
 
-int PublicKey::maximumEncryptSize(EncAlgo) const
+int PublicKey::maximumEncryptSize(EncryptionAlgorithm) const
 {
 	return ((PKeyContext *)context())->key()->maximumEncryptSize();
 }
 
-QSecureArray PublicKey::encrypt(EncAlgo, const QSecureArray &a)
+QSecureArray PublicKey::encrypt(EncryptionAlgorithm, const QSecureArray &a)
 {
 	PKeyContext *pc = (PKeyContext *)context();
 	RSAContext *rc = (RSAContext *)(pc->key());
@@ -274,7 +280,7 @@ QSecureArray PublicKey::encrypt(EncAlgo, const QSecureArray &a)
 	return ((PKeyContext *)context())->key()->encrypt(a);
 }
 
-void PublicKey::startVerify(SignAlgo)
+void PublicKey::startVerify(SignatureAlgorithm)
 {
 	((PKeyContext *)context())->key()->startVerify();
 }
@@ -289,7 +295,7 @@ bool PublicKey::validSignature(const QSecureArray &sig)
 	return ((PKeyContext *)context())->key()->endVerify(sig);
 }
 
-bool PublicKey::verifyMessage(SignAlgo alg, const QSecureArray &a, const QSecureArray &sig)
+bool PublicKey::verifyMessage(SignatureAlgorithm alg, const QSecureArray &a, const QSecureArray &sig)
 {
 	startVerify(alg);
 	update(a);
@@ -362,13 +368,13 @@ bool PrivateKey::canSign() const
 	return (isRSA() || isDSA());
 }
 
-bool PrivateKey::decrypt(EncAlgo, const QSecureArray &in, QSecureArray *out)
+bool PrivateKey::decrypt(EncryptionAlgorithm, const QSecureArray &in, QSecureArray *out)
 {
 	detach();
 	return ((PKeyContext *)context())->key()->decrypt(in, out);
 }
 
-void PrivateKey::startSign(SignAlgo)
+void PrivateKey::startSign(SignatureAlgorithm)
 {
 	((PKeyContext *)context())->key()->startSign();
 }
@@ -383,7 +389,7 @@ QSecureArray PrivateKey::signature()
 	return ((PKeyContext *)context())->key()->endSign();
 }
 
-QSecureArray PrivateKey::signMessage(SignAlgo alg, const QSecureArray &a)
+QSecureArray PrivateKey::signMessage(SignatureAlgorithm alg, const QSecureArray &a)
 {
 	startSign(alg);
 	update(a);
@@ -396,20 +402,20 @@ SymmetricKey PrivateKey::deriveKey(const PublicKey &theirs)
 	return ((PKeyContext *)context())->key()->deriveKey(*(theirContext->key()));
 }
 
-bool PrivateKey::canUsePBEAlgo(PBEAlgo algo, const QString &provider)
+bool PrivateKey::canUsePBEAlgorithm(PBEAlgorithm algo, const QString &provider)
 {
 	Q_UNUSED(algo);
 	Q_UNUSED(provider);
 	return false;
 }
 
-QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgo pbe) const
+QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const
 {
 	Q_UNUSED(pbe);
 	return ((PKeyContext *)context())->privateToDER(passphrase);
 }
 
-QString PrivateKey::toPEM(const QSecureArray &passphrase, PBEAlgo pbe) const
+QString PrivateKey::toPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const
 {
 	Q_UNUSED(pbe);
 	return ((PKeyContext *)context())->privateToPEM(passphrase);

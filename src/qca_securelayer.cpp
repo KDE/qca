@@ -204,6 +204,17 @@ void TLS::setCompressionEnabled(bool b)
 	Q_UNUSED(b);
 }
 
+bool TLS::canSessionCache(const QString &provider)
+{
+	Q_UNUSED(provider);
+	return false;
+}
+
+void TLS::setSessionCachingEnabled(bool b)
+{
+	Q_UNUSED(b);
+}
+
 bool TLS::startClient(const QString &host)
 {
 	d->reset();
