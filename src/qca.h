@@ -1958,7 +1958,7 @@ namespace QCA
 		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
 	};
 
-	class QCA_EXPORT AES256 : public %Cipher
+	class QCA_EXPORT AES256 : public Cipher
 	{
 	public:
 		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
