@@ -1,5 +1,3 @@
-* cert: do something about QCA_CertProperty
-
 * ssl/tls (also server support)
 * sasl (also server support)
 

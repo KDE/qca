@@ -614,14 +614,22 @@ QString Cert::issuerString() const
 	return d->c->issuerString();
 }
 
-QValueList<QCA_CertProperty> Cert::subject() const
+CertProperties Cert::subject() const
 {
-	return d->c->subject();
+	QValueList<QCA_CertProperty> list = d->c->subject();
+	CertProperties props;
+	for(QValueList<QCA_CertProperty>::ConstIterator it = list.begin(); it != list.end(); ++it)
+		props[(*it).var] = (*it).val;
+	return props;
 }
 
-QValueList<QCA_CertProperty> Cert::issuer() const
+CertProperties Cert::issuer() const
 {
-	return d->c->issuer();
+	QValueList<QCA_CertProperty> list = d->c->issuer();
+	CertProperties props;
+	for(QValueList<QCA_CertProperty>::ConstIterator it = list.begin(); it != list.end(); ++it)
+		props[(*it).var] = (*it).val;
+	return props;
 }
 
 QDateTime Cert::notBefore() const

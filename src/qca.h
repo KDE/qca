@@ -4,11 +4,10 @@
 #include<qstring.h>
 #include<qcstring.h>
 #include<qdatetime.h>
-#include<qvaluelist.h>
+#include<qmap.h>
 
 class QCA_HashContext;
 class QCA_CipherContext;
-struct QCA_CertProperty;
 
 namespace QCA
 {
@@ -225,12 +224,7 @@ namespace QCA
 		RSAKey v_key;
 	};
 
-	struct CertProperty
-	{
-		QString var;
-		QString val;
-	};
-
+	typedef QMap<QString, QString> CertProperties;
 	class Cert
 	{
 	public:
@@ -244,8 +238,8 @@ namespace QCA
 		QString serialNumber() const;
 		QString subjectString() const;
 		QString issuerString() const;
-		QValueList<QCA_CertProperty> subject() const;
-		QValueList<QCA_CertProperty> issuer() const;
+		CertProperties subject() const;
+		CertProperties issuer() const;
 		QDateTime notBefore() const;
 		QDateTime notAfter() const;
 

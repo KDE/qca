@@ -13,24 +13,9 @@ QCA::Cert readCertXml(const QDomElement &e)
 	return cert;
 }
 
-struct QCA_CertProperty
-{
-	QString var;
-	QString val;
-};
-
 void showCertInfo(const QCA::Cert &cert)
 {
-	QValueList<QCA_CertProperty> list = cert.subject();
-	QString cn;
-	for(QValueList<QCA_CertProperty>::ConstIterator it = list.begin(); it != list.end(); ++it) {
-		if((*it).var == "CN") {
-			cn = (*it).val;
-			break;
-		}
-	}
-
-	printf(" CN: %s\n", cn.latin1());
+	printf(" CN: %s\n", cert.subject()["CN"].latin1());
 	printf(" Valid from: %s, until %s\n",
 		cert.notBefore().toString().latin1(),
 		cert.notAfter().toString().latin1());
