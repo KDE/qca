@@ -40,7 +40,6 @@ uchar Random::nextByte(Quality q)
 QSecureArray Random::nextBytes(int size, Quality q)
 {
 	return ((RandomContext *)context())->nextBytes(size, q);
-	return QSecureArray();
 }
 
 uchar Random::randomChar(Quality q)
