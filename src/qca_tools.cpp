@@ -291,11 +291,11 @@ QByteArray QSecureArray::toByteArray() const
 
 bool operator==(const QSecureArray &a, const QSecureArray &b)
 {
-	if ( ( a.size() == b.size() ) &&
-	     ( 0 == memcmp( a.data(), b.data(), a.size() ) ) )
+	if(&a == &b)
 		return true;
-	else
-		return false;
+	if(a.size() == b.size() && memcmp(a.data(), b.data(), a.size()) == 0)
+		return true;
+	return false;
 }
 
 bool operator!=(const QSecureArray &a, const QSecureArray &b)

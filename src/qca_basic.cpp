@@ -71,16 +71,19 @@ Hash::Hash(const QString &type, const QString &provider)
 
 void Hash::clear()
 {
+	detach();
 	((HashContext *)context())->clear();
 }
 
 void Hash::update(const QSecureArray &a)
 {
+	detach();
 	((HashContext *)context())->update(a);
 }
 
 QSecureArray Hash::final()
 {
+	detach();
 	return ((HashContext *)context())->final();
 }
 
@@ -142,6 +145,7 @@ Cipher::~Cipher()
 
 Cipher & Cipher::operator=(const Cipher &from)
 {
+	Algorithm::operator=(from);
 	*d = *from.d;
 	return *this;
 }
@@ -163,12 +167,14 @@ int Cipher::blockSize() const
 
 void Cipher::clear()
 {
+	detach();
 	d->done = false;
 	((CipherContext *)context())->setup(d->key, (CipherContext::Mode)d->mode, d->dir, d->iv, d->pad);
 }
 
 QSecureArray Cipher::update(const QSecureArray &a)
 {
+	detach();
 	QSecureArray out;
 	if(d->done)
 		return out;
@@ -178,6 +184,7 @@ QSecureArray Cipher::update(const QSecureArray &a)
 
 QSecureArray Cipher::final()
 {
+	detach();
 	QSecureArray out;
 	if(d->done)
 		return out;
@@ -250,12 +257,14 @@ bool MessageAuthenticationCode::validKeyLength(int n) const
 
 void MessageAuthenticationCode::clear()
 {
+	detach();
 	d->done = false;
 	((MACContext *)context())->setup(d->key);
 }
 
 void MessageAuthenticationCode::update(const QSecureArray &a)
 {
+	detach();
 	if(d->done)
 		return;
 	((MACContext *)context())->update(a);
@@ -263,6 +272,7 @@ void MessageAuthenticationCode::update(const QSecureArray &a)
 
 QSecureArray MessageAuthenticationCode::final()
 {
+	detach();
 	if(!d->done)
 	{
 		d->done = true;

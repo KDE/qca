@@ -930,7 +930,6 @@ namespace QCA
 
 		QString type() const;
 		Provider *provider() const;
-		void detach();
 
 	protected:
 		Algorithm();
@@ -938,6 +937,7 @@ namespace QCA
 		Provider::Context *context() const;
 		void change(Provider::Context *c);
 		void change(const QString &type, const QString &provider);
+		void detach();
 
 	private:
 		class Private;
@@ -1577,6 +1577,9 @@ namespace QCA
 	class DHPublicKey;
 	class DHPrivateKey;
 	class Certificate;
+	class CRL;
+	class Store;
+	class TLS;
 
 	class QCA_EXPORT PKey : public Algorithm
 	{
@@ -1685,6 +1688,9 @@ namespace QCA
 
 	protected:
 		PrivateKey(const QString &type, const QString &provider);
+
+	private:
+		friend class TLS;
 	};
 
 	class QCA_EXPORT KeyGenerator : public QObject
@@ -1781,8 +1787,6 @@ namespace QCA
 		QBigInteger y() const;
 	};
 
-	class Store;
-
 	class QCA_EXPORT Certificate : public Algorithm
 	{
 	public:
@@ -1813,6 +1817,7 @@ namespace QCA
 
 	private:
 		friend class Store;
+		friend class TLS;
 	};
 
 	class QCA_EXPORT CRL : public Algorithm
@@ -1840,16 +1845,18 @@ namespace QCA
 		void addCertificate(const Certificate &cert, bool trusted = false);
 		void addCRL(const CRL &crl);
 		CertValidity validate(const Certificate &cert, CertUsage u = Any) const;
+
+	private:
+		friend class TLS;
 	};
 
 	// securefilter basic rule: after calling a function that might
 	//  affect something, call others to get the results.
 	//
 	// write: call readOutgoing
-	// writeIncoming: call status, read, and readOutgoing
-	// close: call status and readOutgoing
-	// status: if Closed, call readUnprocessed
-	//
+	// writeIncoming: call haveClosed/haveError, read, and readOutgoing
+	// close: call haveClosed/haveError and readOutgoing
+	// haveClosed: if Closed, call readUnprocessed
 	class QCA_EXPORT SecureFilter
 	{
 	public:
@@ -1873,7 +1880,8 @@ namespace QCA
 	};
 
 	// securelayer - "nicer" interface, using signals.  subclass
-	//  should call layerUpdate after write, writeIncoming, or close.
+	//  should call layerUpdateBegin/End before and after write,
+	//  writeIncoming, or close.
 	class QCA_EXPORT SecureLayer : public QObject, public SecureFilter
 	{
 		Q_OBJECT
@@ -1895,7 +1903,7 @@ namespace QCA
 		bool _closed, _error;
 	};
 
-	/*class QCA_EXPORT TLS : public SecureLayer, public Algorithm
+	class QCA_EXPORT TLS : public SecureLayer, public Algorithm
 	{
 		Q_OBJECT
 	public:
@@ -1908,7 +1916,7 @@ namespace QCA
 		void reset();
 
 		void setCertificate(const Certificate &cert, const PrivateKey &key);
-		void setStore(Store *store); // note: must persist
+		void setStore(const Store &store);
 
 		bool startClient(const QString &host = "");
 		bool startServer();
@@ -1939,71 +1947,11 @@ namespace QCA
 	private:
 		class Private;
 		Private *d;
-	};*/
 
-#if 0
-	//class QCA_EXPORT TLS : public QObject
-	//{
-		//Q_OBJECT
-	public:
-		enum Validity
-		{
-			NoCert,
-			Valid,
-			HostMismatch,
-			Rejected,
-			Untrusted,
-			SignatureFailed,
-			InvalidCA,
-			InvalidPurpose,
-			SelfSigned,
-			Revoked,
-			PathLengthExceeded,
-			Expired,
-			Unknown
-		};
-		enum Error { ErrHandshake, ErrCrypt };
-
-		TLS(QObject *parent=0);
-		~TLS();
-
-		void setCertificate(const Cert &cert, const RSAKey &key);
-		void setCertificateStore(const QPtrList<Cert> &store);  // note: store must persist
-
-		void reset();
-		bool startClient(const QString &host="");
-		bool startServer();
-		void close();
-		bool isHandshaken() const;
-
-		// plain (application side)
-		void write(const QByteArray &a);
-		QByteArray read();
-
-		// encoded (socket side)
-		void writeIncoming(const QByteArray &a);
-		QByteArray readOutgoing();
-		QByteArray readUnprocessed();
-
-		// cert related
-		const Cert & peerCertificate() const;
-		int certificateValidityResult() const;
-
-	signals:
-		void handshaken();
-		void readyRead();
-		void readyReadOutgoing(int plainBytes);
-		void closed();
-		void error(int);
-
-	private slots:
 		void update();
-
-	private:
-		class Private;
-		Private *d;
 	};
 
+#if 0
 	//class QCA_EXPORT SASL : public QObject
 	//{
 		//Q_OBJECT

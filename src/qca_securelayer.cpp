@@ -75,16 +75,16 @@ void SecureLayer::layerUpdateEnd()
 		QTimer::singleShot(0, this, SIGNAL(readyRead()));
 	if(_readout > bytesOutgoingAvailable())
 		QTimer::singleShot(0, this, SIGNAL(readyReadOutgoing()));
-	if(_closed != haveClosed())
+	if(!_closed && haveClosed())
 		QTimer::singleShot(0, this, SIGNAL(closed()));
-	if(_error != haveError())
+	if(!_error && haveError())
 		QTimer::singleShot(0, this, SIGNAL(error()));
 }
 
 //----------------------------------------------------------------------------
 // TLS
 //----------------------------------------------------------------------------
-/*class TLS::Private
+class TLS::Private
 {
 public:
 	Private()
@@ -132,7 +132,7 @@ public:
 };
 
 TLS::TLS(QObject *parent, const char *name, const QString &provider)
-:SecureLayer(parent, name), Algorithm(F_TLS, provider)
+:SecureLayer(parent, name), Algorithm("tls", provider)
 {
 	d = new Private;
 	d->c = (TLSContext *)context();
@@ -149,9 +149,9 @@ void TLS::setCertificate(const Certificate &cert, const PrivateKey &key)
 	d->ourKey = key;
 }
 
-void TLS::setStore(Store *store)
+void TLS::setStore(const Store &store)
 {
-	d->store = store;
+	d->store = new Store(store);
 }
 
 void TLS::reset()
@@ -165,7 +165,7 @@ bool TLS::startClient(const QString &host)
 	d->reset();
 	d->host = host;
 
-	if(!d->c->startClient(d->store, d->ourCert, d->ourKey))
+	if(!d->c->startClient(*((StoreContext *)d->store->context()), *((CertContext *)d->ourCert.context()), *((PKeyContext *)d->ourKey.context())))
 		return false;
 	QTimer::singleShot(0, this, SLOT(update()));
 	return true;
@@ -175,7 +175,7 @@ bool TLS::startServer()
 {
 	d->reset();
 
-	if(!d->c->startServer(d->store, d->ourCert, d->ourKey))
+	if(!d->c->startServer(*((StoreContext *)d->store->context()), *((CertContext *)d->ourCert.context()), *((PKeyContext *)d->ourKey.context())))
 		return false;
 	QTimer::singleShot(0, this, SLOT(update()));
 	return true;
@@ -205,13 +205,33 @@ bool TLS::isClosable() const
 	return true;
 }
 
-void TLS::write(const QByteArray &a)
+bool TLS::haveClosed() const
 {
-	d->appendArray(&d->out, a);
+	return false;
+}
+
+bool TLS::haveError() const
+{
+	return false;
+}
+
+int TLS::bytesAvailable() const
+{
+	return 0;
+}
+
+int TLS::bytesOutgoingAvailable() const
+{
+	return 0;
+}
+
+void TLS::write(const QSecureArray &a)
+{
+	d->appendArray(&d->out, a.toByteArray());
 	update();
 }
 
-QByteArray TLS::read()
+QSecureArray TLS::read()
 {
 	QByteArray a = d->in.copy();
 	d->in.resize(0);
@@ -231,7 +251,7 @@ QByteArray TLS::readOutgoing()
 	return a;
 }
 
-QByteArray TLS::readUnprocessed()
+QSecureArray TLS::readUnprocessed()
 {
 	QByteArray a = d->from_net.copy();
 	d->from_net.resize(0);
@@ -285,7 +305,7 @@ void TLS::update()
 			return;
 		}
 		if(r == TLSContext::Success) {
-			d->from_net = d->c->unprocessed().copy();
+			d->from_net = d->c->unprocessed().toByteArray().copy();
 			done = true;
 		}
 		d->appendArray(&d->to_net, a);
@@ -303,13 +323,13 @@ void TLS::update()
 			}
 			d->appendArray(&d->to_net, a);
 			if(r == TLSContext::Success) {
-				Certificate cert = d->c->peerCertificate();
+				/*Certificate cert = d->c->peerCertificate();
 				d->certValidity = d->c->peerCertificateValidity();
 				if(!cert.isNull() && !d->host.isEmpty() && d->certValidity == QCA::Valid) {
 					if(!cert.matchesAddress(d->host))
 						d->hostMismatch = true;
 				}
-				d->cert = cert;
+				d->cert = cert;*/
 				d->handshaken = true;
 				handshaken();
 				if(!self)
@@ -345,7 +365,8 @@ void TLS::update()
 				}
 			}
 			if(!d->from_net.isEmpty() || force_read) {
-				QByteArray a, b;
+				QSecureArray a;
+				QByteArray b;
 				bool ok = d->c->decode(d->from_net, &a, &b);
 				eof = d->c->eof();
 				d->from_net.resize(0);
@@ -355,7 +376,7 @@ void TLS::update()
 					error();
 					return;
 				}
-				d->appendArray(&d->in, a);
+				d->appendArray(&d->in, a.toByteArray());
 				d->appendArray(&d->to_net, b);
 			}
 
@@ -368,9 +389,9 @@ void TLS::update()
 	}
 
 	if(!d->to_net.isEmpty()) {
-		int bytes = d->bytesEncoded;
+		//int bytes = d->bytesEncoded;
 		d->bytesEncoded = 0;
-		readyReadOutgoing(bytes);
+		readyReadOutgoing();
 		if(!self)
 			return;
 	}
@@ -391,7 +412,7 @@ void TLS::update()
 //----------------------------------------------------------------------------
 // SASL
 //----------------------------------------------------------------------------
-QString *saslappname = 0;
+/*QString *saslappname = 0;
 class SASL::Private
 {
 public:
