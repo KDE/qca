@@ -26,12 +26,11 @@
 
 int main(int argc, char **argv)
 {
-    Q_UNUSED( argc );
-    Q_UNUSED( argv );
-
     // the Initializer object sets things up, and 
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
+
+    QCoreApplication app(argc, argv);
 
     // get all the available providers loaded.
     QCA::scanForPlugins();
