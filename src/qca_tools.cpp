@@ -320,6 +320,15 @@ void QSecureArray::set(const QCString &cs)
 	*this = cs;
 }
 
+QSecureArray & QSecureArray::append(const QSecureArray &a)
+{
+	detach();
+	int oldsize = size();
+	resize( oldsize + a.size() );
+	memcpy( data() + oldsize, a.data(), a.size() );
+	return *this;
+}
+
 bool operator==(const QSecureArray &a, const QSecureArray &b)
 {
 	if(&a == &b)

@@ -284,6 +284,10 @@ public:
 	  */
 	QByteArray toByteArray() const;
 
+	/**
+	 * Append a secure byte array to the end of this array
+	 */
+	QSecureArray & append(const QSecureArray &a);
 protected:
 	/**
 	 * Assign the contents of a provided byte array to this
@@ -1380,7 +1384,8 @@ namespace QCA
 		enum Mode
 		{
 			CBC, /**< operate in %Cipher Block Chaining mode */
-			CFB  /**< operate in %Cipher FeedBack mode */
+			CFB, /**< operate in %Cipher FeedBack mode */
+			ECB  /**< operate in Electronic Code Book mode */
 		};
 
 		Cipher(const Cipher &from);
@@ -1838,6 +1843,10 @@ namespace QCA
 		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
 	};
 
+	/**
+	 * Advanced Encryption Standard Cipher - 128 bits
+	 *
+	 */
 	class QCA_EXPORT AES128 : public Cipher
 	{
 	public:
