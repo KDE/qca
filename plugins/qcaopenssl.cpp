@@ -13,7 +13,9 @@
 #include<openssl/ssl.h>
 #include<openssl/err.h>
 
-#ifndef EVP_aes_128_cbc
+#ifdef EVP_aes_128_cbc
+#define OSSL_097
+#else
 #define NO_AES
 #endif
 
@@ -391,7 +393,11 @@ public:
 			p = buf;
 			i2d_RSAPublicKey(r, &p);
 			p = buf;
+#ifdef OSSL_097
+			*pub = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
+#else
 			*pub = d2i_RSAPublicKey(NULL, (unsigned char **)&p, len);
+#endif
 			free(buf);
 		}
 
@@ -401,7 +407,11 @@ public:
 			p = buf;
 			i2d_RSAPrivateKey(r, &p);
 			p = buf;
+#ifdef OSSL_097
+			*sec = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
+#else
 			*sec = d2i_RSAPrivateKey(NULL, (unsigned char **)&p, len);
+#endif
 			free(buf);
 		}
 	}
@@ -430,7 +440,11 @@ public:
 
 		// private?
 		p = (void *)in;
+#ifdef OSSL_097
+		r = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
+#else
 		r = d2i_RSAPrivateKey(NULL, (unsigned char **)&p, len);
+#endif
 		if(r) {
 			reset();
 
@@ -441,7 +455,11 @@ public:
 		else {
 			// public?
 			p = (void *)in;
+#ifdef OSSL_097
+			r = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
+#else
 			r = d2i_RSAPublicKey(NULL, (unsigned char **)&p, len);
+#endif
 			if(!r) {
 				// try this other public function, for whatever reason
 				p = (void *)in;
