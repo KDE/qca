@@ -1,7 +1,7 @@
 /**
  * kdfunittest.cpp
  *
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -97,14 +97,12 @@ void KDFUnitTest::pbkdf2Tests()
     if(!QCA::isSupported("pbkdf2(sha1)"))
 	SKIP("PBKDF version 2 with SHA1 not supported");
     else {
-#if 0
-	Q3CString salt("what do ya want for nothing?");
-	Q3CString password("Jefe");
+	QCA::InitializationVector salt(QSecureArray("what do ya want for nothing?"));
+	QSecureArray password("Jefe");
 	int iterations = 1000;
 
-	QByteArray passwordOut = QCA::PBKDF2::makeKey (password, salt, iterations, 16);
+	QCA::SymmetricKey passwordOut = QCA::PBKDF2().makeKey (password, salt, 16, iterations);
 	CHECK( QCA::arrayToHex(passwordOut), QString( "6349e09cb6b8c1485cfa9780ee3264df" ) );
-#endif
     }
 
 }
