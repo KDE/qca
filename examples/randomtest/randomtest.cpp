@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 
 	// To make this viewable, we convert to hexadecimal.
 	std::cout << "A random 10 byte array (in hex): ";
-	std::cout << QCA::Hex().arrayToString(tenBytes) << std::endl;
+	std::cout << QCA::Hex().arrayToString(tenBytes).toAscii().data() << std::endl;
 
 	// Under some circumstances, you may want to create a
 	// Random object, rather than a static public member function.
