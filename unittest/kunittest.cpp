@@ -38,6 +38,7 @@
 #include "cipherunittest.h"
 #include "kdfunittest.h"
 #include "base64unittest.h"
+#include "certunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -62,6 +63,7 @@ void KUnitTest::registerTests()
     ADD_TEST( CipherUnitTest );
     ADD_TEST( KDFUnitTest );
     ADD_TEST( Base64UnitTest );
+    ADD_TEST( CertUnitTest );
 }
 
 KUnitTest::KUnitTest()
