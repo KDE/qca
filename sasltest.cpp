@@ -80,7 +80,7 @@ private slots:
 	{
 		QString s;
 		if(x == QSocket::ErrConnectionRefused)
-			s = "connection refused / timed out";
+			s = "connection refused or timed out";
 		else if(x == QSocket::ErrHostNotFound)
 			s = "host not found";
 		else if(x == QSocket::ErrSocketRead)
@@ -124,7 +124,9 @@ private slots:
 
 	void sasl_needParams(bool auth, bool user, bool pass, bool realm)
 	{
-		QString username = prompt("Username:");
+		QString username;
+		if(auth || user)
+			username = prompt("Username:");
 		if(user) {
 			sasl->setUsername(username);
 		}
@@ -299,7 +301,7 @@ private slots:
 	{
 		QString s;
 		if(x == QSocket::ErrConnectionRefused)
-			s = "connection refused / timed out";
+			s = "connection refused or timed out";
 		else if(x == QSocket::ErrHostNotFound)
 			s = "host not found";
 		else if(x == QSocket::ErrSocketRead)

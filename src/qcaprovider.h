@@ -138,8 +138,9 @@ public:
 	virtual ~QCA_SASLContext() {}
 
 	// common
+	virtual void reset()=0;
 	virtual void setCoreProps(const QString &service, const QString &host, QCA_SASLHostPort *local, QCA_SASLHostPort *remote)=0;
-	virtual void setSecurityProps(bool allowPlain)=0;
+	virtual void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax)=0;
 
 	// client
 	virtual bool clientStart(const QStringList &mechlist)=0;

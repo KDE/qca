@@ -8,16 +8,16 @@ extern "C"
 #include<qhostaddress.h>
 #include<qstringlist.h>
 
+#define SASL_BUFSIZE 8192
+
 static bool client_init = false;
 static bool server_init = false;
 
 /*
   TODO:
-    - check for memory leaks
-    - security layer
-    - ability to set fields in advance
-    - public function to reset the state
-    - advanced security parameters
+    - security layer, and support fetching the security layer strength
+    - clean up the whole need-params junk
+    - clean the rest and check for memory leaks
 */
 
 sasl_callback_t clientcbs[] =
@@ -108,7 +108,8 @@ public:
 	QString localAddr, remoteAddr;
 
 	// security props
-	bool allowPlain;
+	int secflags;
+	int ssf_min, ssf_max;
 
 	// params
 	QString auth, user, pass, realm;
@@ -133,10 +134,16 @@ public:
 	void reset()
 	{
 		if(con) {
+			if(need) {
+				// free any results we may have allocated
+				for(int n = 0; need[n].id != SASL_CB_LIST_END; ++n) {
+					if(need[n].result)
+						free((void *)(need[n].result));
+				}
+			}
 			sasl_dispose(&con);
 			con = 0;
 		}
-		// TODO: destroy 'need' ?  what about the allocated sub-results?
 
 		localAddr = "";
 		remoteAddr = "";
@@ -145,7 +152,9 @@ public:
 		pass = QString::null;
 		realm = QString::null;
 		mechlist.clear();
-		allowPlain = true;
+		secflags = 0;
+		ssf_min = 0;
+		ssf_max = 0;
 	}
 
 	void setCoreProps(const QString &_service, const QString &_host, QCA_SASLHostPort *la, QCA_SASLHostPort *ra)
@@ -156,9 +165,58 @@ public:
 		remoteAddr = ra ? addrString(*ra) : "";
 	}
 
-	void setSecurityProps(bool _allowPlain)
+	void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax)
 	{
-		allowPlain = _allowPlain;
+		int sf = 0;
+		if(noPlain)
+			sf |= SASL_SEC_NOPLAINTEXT;
+		if(noActive)
+			sf |= SASL_SEC_NOACTIVE;
+		if(noDict)
+			sf |= SASL_SEC_NODICTIONARY;
+		if(noAnon)
+			sf |= SASL_SEC_NOANONYMOUS;
+		if(reqForward)
+			sf |= SASL_SEC_FORWARD_SECRECY;
+		if(reqCreds)
+			sf |= SASL_SEC_PASS_CREDENTIALS;
+		if(reqMutual)
+			sf |= SASL_SEC_MUTUAL_AUTH;
+		secflags = sf;
+		ssf_min = ssfMin;
+		ssf_max = ssfMax;
+	}
+
+	void setsecprops()
+	{
+		sasl_security_properties_t secprops;
+		secprops.min_ssf = ssf_min;
+		secprops.max_ssf = ssf_max;
+		secprops.maxbufsize = SASL_BUFSIZE;
+		secprops.property_names = NULL;
+		secprops.property_values = NULL;
+		secprops.security_flags = secflags;
+		sasl_setprop(con, SASL_SEC_PROPS, &secprops);
+	}
+
+	void fillparams(QCA_SASLNeedParams *np)
+	{
+		if(np->auth && !auth.isNull()) {
+			setInteract(need, SASL_CB_AUTHNAME, auth);
+			np->auth = false;
+		}
+		if(np->user && !user.isNull()) {
+			setInteract(need, SASL_CB_USER, user);
+			np->user = false;
+		}
+		if(np->pass && !pass.isNull()) {
+			setInteract(need, SASL_CB_PASS, pass);
+			np->pass = false;
+		}
+		if(np->realm && !realm.isNull()) {
+			setInteract(need, SASL_CB_GETREALM, realm);
+			np->realm = false;
+		}
 	}
 
 	bool clientStart(const QStringList &_mechlist)
@@ -167,19 +225,7 @@ public:
 		if(r != SASL_OK)
 			return false;
 
-		int sf = 0;
-		if(!allowPlain)
-			sf |= SASL_SEC_NOPLAINTEXT;
-
-		// set security properties
-		sasl_security_properties_t secprops;
-		secprops.min_ssf = 0;
-		secprops.max_ssf = 256;
-		secprops.maxbufsize = 8192;
-		secprops.property_names = NULL;
-		secprops.property_values = NULL;
-		secprops.security_flags = sf;
-		sasl_setprop(con, SASL_SEC_PROPS, &secprops);
+		setsecprops();
 
 		mechlist = _mechlist;
 		servermode = false;
@@ -192,19 +238,7 @@ public:
 		if(r != SASL_OK)
 			return false;
 
-		int sf = 0;
-		if(!allowPlain)
-			sf |= SASL_SEC_NOPLAINTEXT;
-
-		// set security properties
-		sasl_security_properties_t secprops;
-		secprops.min_ssf = 0;
-		secprops.max_ssf = 256;
-		secprops.maxbufsize = 8192;
-		secprops.property_names = NULL;
-		secprops.property_values = NULL;
-		secprops.security_flags = sf;
-		sasl_setprop(con, SASL_SEC_PROPS, &secprops);
+		setsecprops();
 
 		const char *ml;
 		r = sasl_listmech(con, 0, NULL, " ", NULL, &ml, 0, 0);
@@ -218,7 +252,7 @@ public:
 	int clientFirstStep(QString *mech, QByteArray **out, QCA_SASLNeedParams *np)
 	{
 		clearNeedParams(np);
-		bool supportClientSendFirst = true;
+		bool supportClientSendFirst = out ? true: false;
 
 		const char *clientout, *m;
 		unsigned int clientoutlen;
@@ -226,15 +260,20 @@ public:
 		need = 0;
 		QString list = methodsToString(mechlist);
 		int r;
-		if(supportClientSendFirst)
-			r = sasl_client_start(con, list.latin1(), &need, &clientout, &clientoutlen, &m);
-		else
-			r = sasl_client_start(con, list.latin1(), &need, NULL, NULL, &m);
-		if(r == SASL_INTERACT) {
+		while(1) {
+			if(supportClientSendFirst)
+				r = sasl_client_start(con, list.latin1(), &need, &clientout, &clientoutlen, &m);
+			else
+				r = sasl_client_start(con, list.latin1(), &need, NULL, NULL, &m);
+			if(r != SASL_INTERACT)
+				break;
+
 			*np = interactToNeedParams(need);
-			return NeedParams;
+			fillparams(np);
+			if(np->auth || np->user || np->pass || np->realm)
+				return NeedParams;
 		}
-		else if(r != SASL_OK && r != SASL_CONTINUE)
+		if(r != SASL_OK && r != SASL_CONTINUE)
 			return Error;
 
 		*mech = m;
@@ -274,12 +313,18 @@ public:
 		clearNeedParams(np);
 		const char *clientout;
 		unsigned int clientoutlen;
-		int r = sasl_client_step(con, in.data(), in.size(), &need, &clientout, &clientoutlen);
-		if(r == SASL_INTERACT) {
+		int r;
+		while(1) {
+			r = sasl_client_step(con, in.data(), in.size(), &need, &clientout, &clientoutlen);
+			if(r != SASL_INTERACT)
+				break;
+
 			*np = interactToNeedParams(need);
-			return NeedParams;
+			fillparams(np);
+			if(np->auth || np->user || np->pass || np->realm)
+				return NeedParams;
 		}
-		else if(r != SASL_OK && r != SASL_CONTINUE)
+		if(r != SASL_OK && r != SASL_CONTINUE)
 			return Error;
 		*out = makeByteArray(clientout, clientoutlen);
 		if(r == SASL_OK)
@@ -450,10 +495,5 @@ void QSASL::bs_readyRead()
 		appendRead(a);
 		readyRead();
 	}
-}
-
-bool QSASL::isSecure() const
-{
-	return (d->security > 0 ? true: false);
 }
 */
