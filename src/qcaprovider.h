@@ -44,7 +44,7 @@ public:
 	virtual bool generateKey(char *out)=0;
 	virtual bool generateIV(char *out)=0;
 
-	virtual bool setup(int dir, int mode, const char *key, const char *iv, bool pad)=0;
+	virtual bool setup(int dir, int mode, const char *key, int keysize, const char *iv, bool pad)=0;
 	virtual bool update(const char *in, unsigned int len)=0;
 	virtual bool final(char **out, unsigned int *outlen)=0;
 };

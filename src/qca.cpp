@@ -266,16 +266,12 @@ QByteArray Cipher::dyn_generateIV() const
 void Cipher::reset(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
 {
 	d->reset();
-	if((int)key.size() != d->c->keySize())
-		return;
-	if(!iv.isEmpty() && (int)iv.size() != d->c->blockSize())
-		return;
 
 	d->dir = dir;
 	d->mode = mode;
 	d->key = key.copy();
 	d->iv = iv.copy();
-	if(!d->c->setup(d->dir, d->mode, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data(), pad)) {
+	if(!d->c->setup(d->dir, d->mode, d->key.isEmpty() ? 0: d->key.data(), d->key.size(), d->iv.isEmpty() ? 0 : d->iv.data(), pad)) {
 		d->err = true;
 		return;
 	}

@@ -209,7 +209,7 @@ public:
 		return true;
 	}
 
-	bool setup(int _dir, int mode, const char *key, const char *iv, bool _pad)
+	bool setup(int _dir, int mode, const char *key, int keysize, const char *iv, bool _pad)
 	{
 		dir = _dir;
 		pad = _pad;
@@ -218,11 +218,19 @@ public:
 		EVP_CIPHER_CTX_init(&c);
 
 		if(dir == QCA::Encrypt) {
-			if(!EVP_EncryptInit(&c, type, (unsigned char *)key, (unsigned char *)iv))
+			if(!EVP_EncryptInit(&c, type, NULL, NULL))
+				return false;
+			if(keysize != type->key_len)
+				EVP_CIPHER_CTX_set_key_length(&c, keysize);
+			if(!EVP_EncryptInit(&c, NULL, (unsigned char *)key, (unsigned char *)iv))
 				return false;
 		}
 		else {
-			if(!EVP_DecryptInit(&c, type, (unsigned char *)key, (unsigned char *)iv))
+			if(!EVP_DecryptInit(&c, type, NULL, NULL))
+				return false;
+			if(keysize != type->key_len)
+				EVP_CIPHER_CTX_set_key_length(&c, keysize);
+			if(!EVP_DecryptInit(&c, NULL, (unsigned char *)key, (unsigned char *)iv))
 				return false;
 		}
 		return true;
