@@ -43,8 +43,23 @@ void RandomUnitTest::allTests()
     CHECK( randObject.nextBytes(4) == randObject.nextBytes(4), false );
     CHECK( randObject.randomChar() == randObject.randomChar(), false );
     CHECK( QCA::Random().randomChar() == QCA::Random().randomChar(), false );
+    CHECK( QCA::Random::randomChar() == QCA::Random::randomChar(), false );
     CHECK( QCA::Random().randomInt() == QCA::Random().randomInt(), false );
+    CHECK( QCA::Random::randomInt() == QCA::Random::randomInt(), false );
     CHECK( QCA::Random().randomArray(3) == QCA::Random().randomArray(3), false );
+    CHECK( QCA::Random::randomArray(3) == QCA::Random::randomArray(3), false );
+
+    CHECK( randObject.nextByte(QCA::Random::Nonce) == randObject.nextByte(QCA::Random::SessionKey),
+	   false );
+    CHECK( QCA::Random().nextByte(QCA::Random::PublicValue) == QCA::Random().nextByte(), false );
+    CHECK( randObject.nextBytes(4) == randObject.nextBytes(4, QCA::Random::Nonce), false );
+    CHECK( randObject.randomChar(QCA::Random::LongTermKey) == randObject.randomChar(), false );
+    CHECK( QCA::Random().randomChar() == QCA::Random().randomChar(QCA::Random::PublicValue), false );
+    CHECK( QCA::Random::randomChar(QCA::Random::PublicValue) == QCA::Random::randomChar(QCA::Random::Nonce), false );
+    CHECK( QCA::Random().randomInt(QCA::Random::Nonce) == QCA::Random().randomInt(), false );
+    CHECK( QCA::Random::randomInt(QCA::Random::Nonce) == QCA::Random::randomInt(QCA::Random::Nonce), false );
+    CHECK( QCA::Random().randomArray(3, QCA::Random::Nonce) == QCA::Random().randomArray(3), false );
+    CHECK( QCA::Random::randomArray(3, QCA::Random::SessionKey) == QCA::Random::randomArray(3, QCA::Random::PublicValue), false );
 
 }
 

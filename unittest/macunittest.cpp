@@ -41,11 +41,16 @@ void MACUnitTest::allTests()
     if(!QCA::isSupported("hmac(md5)"))
 	SKIP("HMAC(MD5) not supported!\n");
     else {
+	QCA::HMAC md5hmacLenTest( "md5" );
+	CHECK( md5hmacLenTest.validKeyLength( 0 ), true );
+	CHECK( md5hmacLenTest.validKeyLength( 1 ), true );
+	CHECK( md5hmacLenTest.validKeyLength( 848888 ), true );
+	CHECK( md5hmacLenTest.validKeyLength( -2 ), false );
+
 	// These tests are from RFC2202, Section 2.
 	// The first three are also in the Appendix to RFC2104
 	QCA::HMAC md5hmac1( "md5" );
-	QCA::SymmetricKey key1;
-	key1 = QCString( "Jefe" );
+	QCA::SymmetricKey key1( QCString( "Jefe" ) );
 	md5hmac1.setup( key1 );
 	QSecureArray data1 = QCString( "what do ya want for nothing?" );
 	md5hmac1.update( data1 );
@@ -68,9 +73,8 @@ void MACUnitTest::allTests()
 	md5hmac2.update( data3 );
 	CHECK( QCA::arrayToHex( md5hmac2.final() ), QString( "56be34521d144c88dbb8c733f0e8b3f6" ) );
 
-	QCA::HMAC md5hmac4( "md5" );
 	QCA::SymmetricKey key4 ( QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819") );
-	md5hmac4.setup( key4 );
+	QCA::HMAC md5hmac4( "md5", key4 );
 	QSecureArray data4( 50 );
 	for (unsigned int i = 0; i < data4.size(); i++ )
 	    data4[ i ] = 0xcd;
@@ -93,16 +97,21 @@ void MACUnitTest::allTests()
     	md5hmac6.update( data6 );
 	CHECK( QCA::arrayToHex( md5hmac6.final() ), QString( "6b1ab7fe4bd7bf8f0b62e6ce61b9d0cd" ) );
 
-	QCA::HMAC md5hmac7( "md5" );
-	md5hmac7.setup( key6 ); // same as previous test, so just reuse
+	md5hmac6.clear(); // reuse the same key
 	QSecureArray data7 = QCString( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
-    	md5hmac7.update( data7 );
-	CHECK( QCA::arrayToHex( md5hmac7.final() ), QString( "6f630fad67cda0ee1fb1f562db3aa53e" ) );
+    	md5hmac6.update( data7 );
+	CHECK( QCA::arrayToHex( md5hmac6.final() ), QString( "6f630fad67cda0ee1fb1f562db3aa53e" ) );
     }
 
     if(!QCA::isSupported("hmac(sha1)"))
 	SKIP("HMAC(SHA1) not supported!\n");
     else {
+	QCA::HMAC sha1hmacLenTest( "sha1" );
+	CHECK( sha1hmacLenTest.validKeyLength( 0 ), true );
+	CHECK( sha1hmacLenTest.validKeyLength( 1 ), true );
+	CHECK( sha1hmacLenTest.validKeyLength( 848888 ), true );
+	CHECK( sha1hmacLenTest.validKeyLength( -2 ), false );
+
 	// These tests are from RFC2202, Section 3.
 	QCA::HMAC test1; // should be default
 	QCA::SymmetricKey key1 ( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
@@ -111,9 +120,8 @@ void MACUnitTest::allTests()
     	test1.update( data1 );
 	CHECK( QCA::arrayToHex( test1.final() ), QString( "b617318655057264e28bc0b6fb378c8ef146be00" ) );
 
-	QCA::HMAC test2( "sha1" ); 
-	QCA::SymmetricKey key2;
-	key2 = QCString( "Jefe" );
+	QCA::HMAC test2( "sha1");
+	QCA::SymmetricKey key2( QCString( "Jefe" ) );
 	test2.setup( key2 );
 	QSecureArray data2 = QCString( "what do ya want for nothing?" );
     	test2.update( data2 );
@@ -153,8 +161,7 @@ void MACUnitTest::allTests()
     	test6.update( data6 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "aa4ae5e15272d00e95705637ce8a3b55ed402112" ) );
 
-	test6.clear();
-	test6.setup( key6 ); // reuse test, same key
+	test6.clear(); // this should reuse the same key
 	QSecureArray data7 = QCString( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
     	test6.update( data7 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "e8e99d0f45237d786d6bbaa7965c7808bbff1a91" ) );
@@ -164,6 +171,12 @@ void MACUnitTest::allTests()
     if(!QCA::isSupported("hmac(ripemd160)"))
 	SKIP("HMAC(RIPEMD160) not supported!\n");
     else {
+	QCA::HMAC ripemd160hmacLenTest( "ripemd160" );
+	CHECK( ripemd160hmacLenTest.validKeyLength( 0 ), true );
+	CHECK( ripemd160hmacLenTest.validKeyLength( 1 ), true );
+	CHECK( ripemd160hmacLenTest.validKeyLength( 848888 ), true );
+	CHECK( ripemd160hmacLenTest.validKeyLength( -2 ), false );
+
 	// These tests are from RFC2286, Section 2.
 	QCA::HMAC test1( "ripemd160" ); 
 	QCA::SymmetricKey key1 ( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
@@ -173,8 +186,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( test1.final() ), QString( "24cb4bd67d20fc1a5d2ed7732dcc39377f0a5668" ) );
 
 	QCA::HMAC test2( "ripemd160" ); 
-	QCA::SymmetricKey key2;
-	key2 = QCString( "Jefe" );
+	QCA::SymmetricKey key2( QCString( "Jefe" ) );
 	test2.setup( key2 );
 	QSecureArray data2 = QCString( "what do ya want for nothing?" );
     	test2.update( data2 );
@@ -189,9 +201,8 @@ void MACUnitTest::allTests()
 	test3.update( data3 );
 	CHECK( QCA::arrayToHex( test3.final() ), QString( "b0b105360de759960ab4f35298e116e295d8e7c1" ) );
 
-	QCA::HMAC test4( "ripemd160" );
 	QCA::SymmetricKey key4( QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819" ) );
-	test4.setup( key4 );
+	QCA::HMAC test4( "ripemd160", key4 );
 	QSecureArray data4( 50 );
 	for ( unsigned int i = 0; i < data4.size(); i++ )
 	    data4[ i ] = 0xcd;
@@ -214,8 +225,7 @@ void MACUnitTest::allTests()
     	test6.update( data6 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "6466ca07ac5eac29e1bd523e5ada7605b791fd8b" ) );
 
-	test6.clear();
-	test6.setup( key6 ); // reuse test, same key
+	test6.clear(); // reuse the key
 	QSecureArray data7 = QCString( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
     	test6.update( data7 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "69ea60798d71616cce5fd0871e23754cd75d5a0a" ) );
