@@ -52,7 +52,7 @@ public:
 	QBigInteger serial;
 	QDateTime start, end;
 
-	Private() : isCA(false), pathLimit(-1)
+	Private() : isCA(false), pathLimit(0)
 	{
 	}
 };
@@ -753,9 +753,9 @@ Store::Store(const QString &provider)
 {
 }
 
-void Store::addCertificate(const Certificate &cert, bool trusted)
+void Store::addCertificate(const Certificate &cert, TrustMode t)
 {
-	static_cast<StoreContext *>(context())->addCertificate(*(static_cast<const CertContext *>(cert.context())), trusted);
+	static_cast<StoreContext *>(context())->addCertificate(*(static_cast<const CertContext *>(cert.context())), t);
 }
 
 void Store::addCRL(const CRL &crl)
@@ -778,7 +778,6 @@ QList<Certificate> Store::certificates() const
 		cert.change(in[n]);
 		out.append(cert);
 	}
-	qDeleteAll(in);
 	return out;
 }
 
@@ -792,7 +791,6 @@ QList<CRL> Store::crls() const
 		crl.change(in[n]);
 		out.append(crl);
 	}
-	qDeleteAll(in);
 	return out;
 }
 
@@ -823,7 +821,7 @@ bool Store::toFlatTextFile(const QString &fileName) const
 	return true;
 }
 
-Store Store::fromPKCS7File(const QString &fileName, ConvertResult *result, const QString &provider)
+Store Store::fromPKCS7File(const QString &fileName, TrustMode t, ConvertResult *result, const QString &provider)
 {
 	QByteArray der;
 	if(!arrayFromFile(fileName, &der))
@@ -835,7 +833,7 @@ Store Store::fromPKCS7File(const QString &fileName, ConvertResult *result, const
 
 	Store store;
 	StoreContext *c = static_cast<StoreContext *>(getContext("store", provider));
-	ConvertResult r = c->fromPKCS7(der);
+	ConvertResult r = c->fromPKCS7(der, t);
 	if(result)
 		*result = r;
 	if(r == ConvertGood)
@@ -843,7 +841,7 @@ Store Store::fromPKCS7File(const QString &fileName, ConvertResult *result, const
 	return store;
 }
 
-Store Store::fromFlatTextFile(const QString &fileName, ConvertResult *result, const QString &provider)
+Store Store::fromFlatTextFile(const QString &fileName, TrustMode t, ConvertResult *result, const QString &provider)
 {
 	QFile f(fileName);
 	if(!f.open(QFile::ReadOnly))
@@ -862,7 +860,7 @@ Store Store::fromFlatTextFile(const QString &fileName, ConvertResult *result, co
 			break;
 		Certificate cert = Certificate::fromPEM(pem, 0, store.provider()->name());
 		if(!cert.isNull())
-			store.addCertificate(cert, true);
+			store.addCertificate(cert, t);
 	}
 	return store;
 }

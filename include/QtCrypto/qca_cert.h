@@ -71,25 +71,11 @@ namespace QCA
 		ClientAuth,
 		CodeSigning,
 		EmailProtection,
-		IPsecEndSystem,
-		IPsecTunnel,
-		IPsecUser,
+		IPSecEndSystem,
+		IPSecTunnel,
+		IPSecUser,
 		TimeStamping,
 		OCSPSigning
-	};
-
-	/**
-	   Specify the intended usage of a certificate
-	*/
-	enum UsageMode
-	{
-		UsageAny             = 0x00, ///< Any application, or unspecified
-		UsageTLSServer       = 0x01, ///< server side of a TLS or SSL connection
-		UsageTLSClient       = 0x02, ///< client side of a TLS or SSL connection
-		UsageCodeSigning     = 0x04, ///< code signing certificate
-		UsageEmailProtection = 0x08, ///< email (S/MIME) certificate
-		UsageTimeStamping    = 0x10, ///< time stamping certificate
-		UsageCRLSigning      = 0x20  ///< certificate revocation list signing certificate
 	};
 
 	/**
@@ -142,7 +128,7 @@ namespace QCA
 		void setInfo(const CertificateInfo &info);
 		void setConstraints(const Constraints &constraints);
 		void setPolicies(const QStringList &policies);
-		void setAsCA(int pathLimit);
+		void setAsCA(int pathLimit = 8); // value from Botan
 		void setSerialNumber(const QBigInteger &i);
 		void setValidityPeriod(const QDateTime &start, const QDateTime &end);
 
@@ -296,9 +282,29 @@ namespace QCA
 	class QCA_EXPORT Store : public Algorithm
 	{
 	public:
+		enum TrustMode
+		{
+			Trusted,
+			Untrusted
+		};
+
+		/**
+		   Specify the intended usage of a certificate
+		*/
+		enum UsageMode
+		{
+			UsageAny             = 0x00, ///< Any application, or unspecified
+			UsageTLSServer       = 0x01, ///< server side of a TLS or SSL connection
+			UsageTLSClient       = 0x02, ///< client side of a TLS or SSL connection
+			UsageCodeSigning     = 0x04, ///< code signing certificate
+			UsageEmailProtection = 0x08, ///< email (S/MIME) certificate
+			UsageTimeStamping    = 0x10, ///< time stamping certificate
+			UsageCRLSigning      = 0x20  ///< certificate revocation list signing certificate
+		};
+
 		Store(const QString &provider = QString());
 
-		void addCertificate(const Certificate &cert, bool trusted = false);
+		void addCertificate(const Certificate &cert, TrustMode t = Untrusted);
 		void addCRL(const CRL &crl);
 		Validity validate(const Certificate &cert, UsageMode u = UsageAny) const;
 
@@ -309,8 +315,8 @@ namespace QCA
 		static bool canUsePKCS7(const QString &provider = QString());
 		bool toPKCS7File(const QString &fileName) const;
 		bool toFlatTextFile(const QString &fileName) const;
-		static Store fromPKCS7File(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
-		static Store fromFlatTextFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+		static Store fromPKCS7File(const QString &fileName, TrustMode t = Untrusted, ConvertResult *result = 0, const QString &provider = QString());
+		static Store fromFlatTextFile(const QString &fileName, TrustMode t = Untrusted, ConvertResult *result = 0, const QString &provider = QString());
 
 		void append(const Store &a);
 		Store operator+(const Store &a) const;

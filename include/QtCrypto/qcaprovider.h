@@ -302,9 +302,9 @@ class StoreContext : public Provider::Context
 public:
 	StoreContext(Provider *p) : Provider::Context(p, "store") {}
 
-	virtual void addCertificate(const CertContext &cert, bool trusted) = 0;
+	virtual void addCertificate(const CertContext &cert, Store::TrustMode t) = 0;
 	virtual void addCRL(const CRLContext &crl) = 0;
-	virtual Validity validate(const CertContext &cert, UsageMode u) const = 0;
+	virtual Validity validate(const CertContext &cert, Store::UsageMode u) const = 0;
 	virtual QList<CertContext*> certificates() const = 0; // caller must delete
 	virtual QList<CRLContext*> crls() const = 0;          // caller must delete
 	virtual void append(const StoreContext &s) = 0;
@@ -312,7 +312,7 @@ public:
 	// import / export
 	virtual bool canUsePKCS7() const = 0;
 	virtual QByteArray toPKCS7() const = 0;
-	virtual ConvertResult fromPKCS7(const QByteArray &a) = 0;
+	virtual ConvertResult fromPKCS7(const QByteArray &a, Store::TrustMode t) = 0;
 };
 
 class CAContext : public Provider::Context
