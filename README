@@ -1,5 +1,7 @@
 Qt Cryptographic Architecture
 -----------------------------
+Author: Justin Karneges <justin@affinix.com>
+Date: July 10th 2003
 
 This library provides a skeleton API for the following features:
 
@@ -13,4 +15,23 @@ Your application will compile and link in all cases, regardless of
 whether or not the installed QCA actually supports the features you
 need.  Functionality is provided via plugins, which are loaded
 automatically.
+
+This solves several issues surrounding security:
+  1) Compilation.  No more "./configure --with-ssl" stupidity.  Your
+     program can always support SSL, changable at runtime.
+  2) Crypto export.  As neither QCA nor your application contain any
+     actual crypto routines, export hassles are safely dodged.
+  3) Licenses.  As OpenSSL is not GPL-compatible, many secure GPL
+     programs are violating their own license (and possibly the libraries
+     they link to).  While QCA does not remove this incompatibility, it
+     does defer it to the plugin space, making your application "clean."
+  4) No need to roll your own plugins to achieve these things.  QCA
+     does it all for you.
+
+And of course, you get a very simple crypto API for Qt, where you can
+do things like:
+
+  QString hash = QCA::SHA1::hashToString(blockOfData);
+
+Have fun!
 
