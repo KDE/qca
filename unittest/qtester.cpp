@@ -1,3 +1,7 @@
+
+//Added by the Qt porting tool:
+#include <QTextStream>
+
 /*
  * Copyright (C)  2004  Zack Rusin <zack@kde.org>
  *
@@ -39,7 +43,7 @@ void QTester::check( const char *file, int line, const char *str,
 {
     if ( result != expectedResult ) {
         QString error;
-        QTextStream ts( &error, IO_WriteOnly );
+        QTextStream ts( &error, QIODevice::WriteOnly );
         ts << file << "["<< line <<"]:"
            <<" failed on \""<<  str <<"\""
            << "\n\t\t result = "
@@ -55,7 +59,7 @@ void QTester::check( const char *file, int line, const char *str,
 	// we were expecting a failure
 	if (expectedFailure) {
 	    QString error;
-	    QTextStream ts( &error, IO_WriteOnly );
+	    QTextStream ts( &error, QIODevice::WriteOnly );
 	    ts << file << "["<< line <<"]:"
 	       <<" unexpectedly passed on \""
 	       <<  str <<"\"";

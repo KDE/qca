@@ -39,19 +39,19 @@ void SecureArrayUnitTest::allTests()
     QCA::Initializer init;
 
     QSecureArray emptyArray;
-    CHECK( emptyArray.size(), (unsigned int)0 );
+    CHECK( emptyArray.size(), 0 );
     CHECK( emptyArray.isEmpty(), true );
 
     QSecureArray testArray(10);
-    CHECK( testArray.size(), (unsigned int) 10 );
+    CHECK( testArray.size(), 10 );
     CHECK( testArray.isEmpty(), false );
 
     QSecureArray testArray64(64);
-    CHECK( testArray64.size(), (unsigned int) 64 );
+    CHECK( testArray64.size(), 64 );
     CHECK( testArray64.isEmpty(), false );
 
     //testArray.fill( 'a' );
-    for (unsigned int i = 0; i < testArray.size(); i++) {
+    for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x61;
     }
     CHECK( QCA::arrayToHex( testArray ), QString( "61616161616161616161" ) );
@@ -60,10 +60,9 @@ void SecureArrayUnitTest::allTests()
     testArray[7] = 0x00;
     CHECK( QCA::arrayToHex( testArray ), QString( "62626262626262006262" ) );
 
-    QByteArray byteArray(10);
-    byteArray.fill( 'c' );
+    QByteArray byteArray(10, 'c');
     QSecureArray secureArray( byteArray );
-    CHECK( secureArray.size(), (unsigned int) 10 );
+    CHECK( secureArray.size(), 10 );
     CHECK( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     byteArray.fill( 'd' );
     // it should be a copy, so no effect
@@ -78,7 +77,7 @@ void SecureArrayUnitTest::allTests()
     // test for detaching
     QSecureArray detachArray1 = secureArray; // currently the same
     CHECK( QCA::arrayToHex ( detachArray1 ), QString( "63636363636363636363" ) );
-    for (unsigned int i = 0; i < detachArray1.size(); i++) {
+    for (int i = 0; i < detachArray1.size(); i++) {
 	detachArray1[i] = 0x66; // implicit detach
     }
     CHECK( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
@@ -86,16 +85,16 @@ void SecureArrayUnitTest::allTests()
 
     QSecureArray detachArray2 = secureArray; // currently the same
     CHECK( QCA::arrayToHex ( detachArray2 ), QString( "63636363636363636363" ) );
-    detachArray2.detach(); //explicit detach
-    for (unsigned int i = 0; i < detachArray2.size(); i++) {
+    //implicit detach
+    for (int i = 0; i < detachArray2.size(); i++) {
 	detachArray2.data()[i] = 0x67; 
     }
     CHECK( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     CHECK( QCA::arrayToHex ( detachArray2 ), QString( "67676767676767676767" ) );
 
-    QSecureArray detachArray3 = secureArray.copy(); // assign and detach in one
+    QSecureArray detachArray3 = secureArray; // implicitly shared copy
     CHECK( QCA::arrayToHex ( detachArray3 ), QString( "63636363636363636363" ) );
-    for (unsigned int i = 0; i < detachArray3.size(); i++) {
+    for (int i = 0; i < detachArray3.size(); i++) {
 	detachArray3.data()[i] = 0x68; 
     }
     CHECK( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
@@ -104,13 +103,13 @@ void SecureArrayUnitTest::allTests()
 
     // test for resizing
     QSecureArray resizeArray = emptyArray;
-    CHECK( resizeArray.size(), (unsigned int)0 );
+    CHECK( resizeArray.size(), 0 );
     resizeArray.resize(20);
-    CHECK( resizeArray.size(), (unsigned int)20 );
+    CHECK( resizeArray.size(), 20 );
     resizeArray.resize(40);
-    CHECK( resizeArray.size(), (unsigned int)40 );
+    CHECK( resizeArray.size(), 40 );
     resizeArray.resize(10);
-    CHECK( resizeArray.size(), (unsigned int)10 );
+    CHECK( resizeArray.size(), 10 );
 
 
     // test for append

@@ -27,7 +27,8 @@
 #ifndef TESTER_H
 #define TESTER_H
 
-#include <qstringlist.h>
+#include <QTextStream>
+#include <QStringList>
 
 #define CHECK( x, y ) check( __FILE__, __LINE__, #x, x, y, false )
 #define XFAIL( x, y ) check( __FILE__, __LINE__, #x, x, y, true )
@@ -37,9 +38,12 @@ class Tester
 {
 public:
     Tester()
-        : m_tests( 0 )
-    {}
-    virtual ~Tester() {}
+      : m_tests( 0 )
+    {
+    }
+    virtual ~Tester()
+    {
+    }
 
 public:
     virtual void allTests() = 0;
@@ -47,22 +51,6 @@ public:
 public:
     int testsFinished() const {
         return m_tests;
-    }
-
-    int testsFailed() const {
-        return m_errorList.count();
-    }
-
-    int testsXFail() const {
-	return m_xfailList.count();
-    }
-
-    int testsXPass() const {
-	return m_xpassList.count();
-    }
-
-    int testsSkipped() const {
-	return m_skipList.count();
     }
 
     QStringList errorList() const {
@@ -84,7 +72,7 @@ public:
     void skip( const char *file, int line, QString msg )
     {
 	QString skipEntry;
-	QTextStream ts( &skipEntry, IO_WriteOnly );
+	QTextStream ts( &skipEntry, QIODevice::WriteOnly );
 	ts << file << "["<< line <<"]: " << msg;
 	m_skipList.append( skipEntry );
 
@@ -99,7 +87,7 @@ protected:
     {
 	if ( result != expectedResult ) {
             QString error;
-            QTextStream ts( &error, IO_WriteOnly );
+            QTextStream ts( &error, QIODevice::WriteOnly );
             ts << file << "["<< line <<"]:"
                <<" failed on \""<<  str <<"\""
                << "\n\t\t result = '"
@@ -115,7 +103,7 @@ protected:
 	    // we were expecting a failure
 	    if (expectedFailure) {
 		QString error;
-		QTextStream ts( &error, IO_WriteOnly );
+		QTextStream ts( &error, QIODevice::WriteOnly );
 		ts << file << "["<< line <<"]:"
 		   <<" unexpectedly passed on \""
 		   <<  str <<"\"";

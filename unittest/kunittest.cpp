@@ -26,15 +26,15 @@
  */
 #include "kunittest.h"
 
-#include "hexunittest.h"
-#include "staticunittest.h"
-#include "hashunittest.h"
-#include "bigintunittest.h"
 #include "securearrayunittest.h"
-#include "macunittest.h"
+#include "hexunittest.h"
+#include "bigintunittest.h"
+#include "randomunittest.h"
 #include "keylengthunittest.h"
 #include "symmetrickeyunittest.h"
-#include "randomunittest.h"
+#include "staticunittest.h"
+#include "hashunittest.h"
+#include "macunittest.h"
 #include "cipherunittest.h"
 #include "kdfunittest.h"
 #include "base64unittest.h"
@@ -43,8 +43,7 @@
 #include "qtester.h"
 #include "tester.h"
 
-#include <qapplication.h>
-#include <qtimer.h>
+#include <QtCore>
 
 #include <iostream>
 using namespace std;
@@ -68,18 +67,7 @@ void KUnitTest::registerTests()
 
 KUnitTest::KUnitTest()
 {
-    QTimer::singleShot( 0, this, SLOT(checkRun()) );
-
-    m_tests.setAutoDelete( TRUE );
-    m_qtests.setAutoDelete( TRUE );
-
     registerTests();
-}
-
-void KUnitTest::checkRun()
-{
-    if ( m_qtests.isEmpty() )
-        qApp->exit();
 }
 
 int KUnitTest::runTests()
@@ -92,12 +80,11 @@ int KUnitTest::runTests()
     int globalSkipped = 0;
 
     cout << "# Running normal tests... #" << endl << endl;
-    QAsciiDictIterator<Tester> it( m_tests );
-
-    for( ; it.current(); ++it ) {
-        Tester* test = it.current();
+    
+    Tester* test;
+    foreach( test, m_tests ) {
         test->allTests();
-	cout << it.currentKey() << " - ";
+	cout << m_tests.key(test).toLatin1().data() << " - ";
 	int numPass = test->testsFinished() - ( test->errorList().count() + test->xfailList().count() + test->skipList().count() );
 	int numFail = test->errorList().count() + test->xfailList().count();
 	int numXFail = test->xfailList().count();
@@ -125,34 +112,35 @@ int KUnitTest::runTests()
 	cout  << endl;
 
 	if ( 0 < numXPass  ) {
-	  cout << "    Unexpected pass" << ( ( 1 == numXPass )?"":"es") << ":" << endl;
-	  QStringList list = test->xpassList();
-	  for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
-	    cout << "\t" << (*itr).latin1() << endl;
-	  }
+	    cout << "    Unexpected pass" << ( ( 1 == numXPass )?"":"es") << ":" << endl;
+	    QStringList list = test->xpassList();
+	    for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
+		cout << "\t" << (*itr).toLatin1().data() << endl;
+	    }
 	}
 	if ( 0 < (numFail - numXFail) ) {
-	  cout << "    Unexpected failure" << ( ( 1 == numFail )?"":"s") << ":" << endl;
-	  QStringList list = test->errorList();
-	  for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
-	    cout << "\t" << (*itr).latin1() << endl;
-	  }
+	    cout << "    Unexpected failure" << ( ( 1 == numFail )?"":"s") << ":" << endl;
+	    QStringList list = test->errorList();
+	    for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
+		cout << "\t" << (*itr).toLatin1().data() << endl;
+	    }
 	}
 	if ( 0 < numXFail ) {
-	  cout << "    Expected failure" << ( ( 1 == numXFail)?"":"s") << ":" << endl;
-	  QStringList list = test->xfailList();
-	  for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
-	    cout << "\t" << (*itr).latin1() << endl;
-	  }
+	    cout << "    Expected failure" << ( ( 1 == numXFail)?"":"s") << ":" << endl;
+	    QStringList list = test->xfailList();
+	    for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
+		cout << "\t" << (*itr).toLatin1().data() << endl;
+	    }
 	}
 	if ( 0 < numSkip ) {
 	    cout << "    Skipped test" << ( ( 1 == numSkip )?"":"s") << ":" << endl;
 	    QStringList list = test->skipList();
 	    for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
-		cout << "\t" << (*itr).latin1() << endl;
+		cout << "\t" << (*itr).toLatin1().data() << endl;
 	    }
 	}
 	cout << endl;
+	free(test);
     }
 
     cout << "# Done with normal tests:" << endl;
@@ -165,20 +153,6 @@ int KUnitTest::runTests()
     cout << "    Total skipped test steps                       :  " << globalSkipped << endl;
 
     return m_tests.count();
-}
-
-void KUnitTest::addTester( QTester *test )
-{
-    m_qtests.insert( test, test );
-    connect( test, SIGNAL(destroyed(QObject*)),
-             SLOT(qtesterDone(QObject* )) );
-}
-
-void KUnitTest::qtesterDone( QObject *obj )
-{
-    m_qtests.remove( obj );
-    if ( m_qtests.isEmpty() )
-        qApp->quit();
 }
 
 // #include "kunittest.moc"

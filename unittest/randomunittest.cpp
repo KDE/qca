@@ -35,8 +35,6 @@ RandomUnitTest::RandomUnitTest()
 
 void RandomUnitTest::allTests()
 {
-    QCA::Initializer init;
-
     QCA::Random rng = QCA::globalRNG( );
     CHECK( rng.provider()->name(), QString( "qca-botan" ) );
 
@@ -69,7 +67,7 @@ void RandomUnitTest::allTests()
 	CHECK( QCA::Random().randomArray(3, QCA::Random::Nonce) == QCA::Random().randomArray(3), false );
 	CHECK( QCA::Random::randomArray(3, QCA::Random::SessionKey) == QCA::Random::randomArray(3, QCA::Random::PublicValue), false );
 
-	for (unsigned int len = 1; len <= 1024; len*=2 ) {
+	for (int len = 1; len <= 1024; len*=2 ) {
 	    CHECK( QCA::globalRNG().nextBytes(len, QCA::Random::SessionKey).size(), len );
 	}
     }
@@ -103,7 +101,7 @@ void RandomUnitTest::allTests()
 	CHECK( QCA::Random().randomArray(3, QCA::Random::Nonce) == QCA::Random().randomArray(3), false );
 	CHECK( QCA::Random::randomArray(3, QCA::Random::SessionKey) == QCA::Random::randomArray(3, QCA::Random::PublicValue), false );
 
-	for (unsigned int len = 1; len <= 1024; len*=2 ) {
+	for (int len = 1; len <= 1024; len*=2 ) {
 	    CHECK( QCA::globalRNG().nextBytes(len, QCA::Random::SessionKey).size(), len );
 	}
 

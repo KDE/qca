@@ -28,16 +28,16 @@
 #include <QtCrypto>
 
 struct cipherTestValues {
-    QCString plaintext;
-    QCString ciphertext;
-    QCString key;
+    QString plaintext;
+    QString ciphertext;
+    QString key;
 };
 
 struct cipherIVTestValues {
-    QCString plaintext;
-    QCString ciphertext;
-    QCString key;
-    QCString iv;
+    QString plaintext;
+    QString ciphertext;
+    QString key;
+    QString iv;
 };
 
 // These are from the Botan test suite
@@ -628,7 +628,7 @@ void CipherUnitTest::allTests()
     if (!QCA::isSupported("aes128") )
 	SKIP("AES128 not supported!");
     else {
-	QCA::SymmetricKey key1(QCA::hexToArray( "00010203050607080A0B0C0D0F101112" ) );
+	QCA::SymmetricKey key1(QSecureArray(QCA::hexToArray( "00010203050607080A0B0C0D0F101112" ) ) );
 	QCA::AES128 cipherObj1(QCA::Cipher::ECB, QCA::Encode, key1, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	QSecureArray inter = cipherObj1.update( QCA::hexToArray( "506812A45F08C889B97F5980038B8359" ) );
 	CHECK( QCA::arrayToHex( inter ), QString( "d8f532538289ef7d06b506a4fd5be9c9") );
@@ -637,7 +637,7 @@ void CipherUnitTest::allTests()
 	CHECK( cipherObj1.blockSize(), (unsigned)16 );
 
 	// From the NIST rijndael-vals.zip set, see ecb_iv.txt
-	QCA::SymmetricKey key2(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F" ) );
+	QCA::SymmetricKey key2(QSecureArray(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F" ) ) );
 	QCA::AES128 cipherObj2(QCA::Cipher::ECB, QCA::Encode, key2, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	CHECK( QCA::arrayToHex( cipherObj2.update( QCA::hexToArray( "000102030405060708090A0B0C0D0E0F" ) ) ),
 	       QString( "0a940bb5416ef045f1c39458c653ea5a" ) );
@@ -662,8 +662,8 @@ void CipherUnitTest::allTests()
 	       QString( "00112233445566778899aabbccddeeff" ) );
 	CHECK( QCA::arrayToHex( cipherObj5.final() ), QString( "" ) );
 
-	for (int n = 0; aes128ecbTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128ecbTestValues[n].key ) );
+	for (int n = 0; (0 != aes128ecbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes128ecbTestValues[n].key ) ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::ECB, QCA::Encode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128ecbTestValues[n].plaintext ) ) ),
 		   QString( aes128ecbTestValues[n].ciphertext ) );
@@ -680,9 +680,9 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
 
-	for (int n = 0; aes128cbcTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128cbcTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes128cbcTestValues[n].iv ) );
+	for (int n = 0; (0 != aes128cbcTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes128cbcTestValues[n].key ) ) );
+	    QCA::InitializationVector iv( QSecureArray(QCA::hexToArray( aes128cbcTestValues[n].iv ) ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::CBC, QCA::Encode, key, iv, QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128cbcTestValues[n].plaintext ) ) ),
 		   QString( aes128cbcTestValues[n].ciphertext ) );
@@ -699,9 +699,9 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
 
-	for (int n = 0; aes128cfbTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128cfbTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes128cfbTestValues[n].iv ) );
+	for (int n = 0; (0 != aes128cfbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes128cfbTestValues[n].key ) ) );
+	    QCA::InitializationVector iv( QSecureArray(QCA::hexToArray( aes128cfbTestValues[n].iv ) ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::CFB, QCA::Encode, key, iv, QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128cfbTestValues[n].plaintext ) ) ),
 		   QString( aes128cfbTestValues[n].ciphertext ) );
@@ -723,7 +723,7 @@ void CipherUnitTest::allTests()
 	SKIP("AES192 not supported!");
     else {
 	// FIPS 197, Appendix C.2
-	QCA::SymmetricKey key1(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F1011121314151617" ) );
+	QCA::SymmetricKey key1(QSecureArray(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F1011121314151617" ) ) );
 	QCA::AES192 cipherObj1(QCA::Cipher::ECB, QCA::Encode, key1, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	QSecureArray data1 = QCA::hexToArray( "00112233445566778899AABBCCDDEEFF" );
 	CHECK( QCA::arrayToHex( cipherObj1.update( data1 ) ), QString( "dda97ca4864cdfe06eaf70a0ec0d7191") );
@@ -741,8 +741,8 @@ void CipherUnitTest::allTests()
 	CHECK( QCA::arrayToHex( cipherObj2.final() ), QString( "" ) );
 	CHECK( cipherObj2.ok(), true );
 
-	for (int n = 0; aes192ecbTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes192ecbTestValues[n].key ) );
+	for (int n = 0; (0 != aes192ecbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes192ecbTestValues[n].key ) ) );
 	    QCA::AES192 forwardCipher( QCA::Cipher::ECB, QCA::Encode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes192ecbTestValues[n].plaintext ) ) ),
 		   QString( aes192ecbTestValues[n].ciphertext ) );
@@ -759,9 +759,9 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
 
-	for (int n = 0; aes192cbcTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes192cbcTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes192cbcTestValues[n].iv ) );
+	for (int n = 0; (0 != aes192cbcTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes192cbcTestValues[n].key ) ) );
+	    QCA::InitializationVector iv( QSecureArray(QCA::hexToArray( aes192cbcTestValues[n].iv ) ) );
 	    QCA::AES192 forwardCipher( QCA::Cipher::CBC, QCA::Encode, key, iv, QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes192cbcTestValues[n].plaintext ) ) ),
 		   QString( aes192cbcTestValues[n].ciphertext ) );
@@ -778,9 +778,9 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
 
-	for (int n = 0; aes192cfbTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes192cfbTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes192cfbTestValues[n].iv ) );
+	for (int n = 0; (0 != aes192cfbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes192cfbTestValues[n].key ) ) );
+	    QCA::InitializationVector iv( QSecureArray(QCA::hexToArray( aes192cfbTestValues[n].iv ) ) );
 	    QCA::AES192 forwardCipher( QCA::Cipher::CFB, QCA::Encode, key, iv, QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes192cfbTestValues[n].plaintext ) ) ),
 		   QString( aes192cfbTestValues[n].ciphertext ) );
@@ -803,7 +803,7 @@ void CipherUnitTest::allTests()
 	SKIP("AES256 not supported!");
     else {
 	// FIPS 197, Appendix C.3
-	QCA::SymmetricKey key1(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F" ) );
+	QCA::SymmetricKey key1(QSecureArray(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F" ) ) );
 	QCA::AES256 cipherObj1(QCA::Cipher::ECB, QCA::Encode, key1, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	QSecureArray data1 = QCA::hexToArray( "00112233445566778899AABBCCDDEEFF" );
 	CHECK( QCA::arrayToHex( cipherObj1.update( data1 ) ), QString( "8ea2b7ca516745bfeafc49904b496089") );
@@ -820,8 +820,8 @@ void CipherUnitTest::allTests()
 	CHECK( QCA::arrayToHex( cipherObj2.final() ), QString( "" ) );
 	CHECK( cipherObj2.ok(), true );
 
-	for (int n = 0; aes256ecbTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes256ecbTestValues[n].key ) );
+	for (int n = 0; (0 != aes256ecbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes256ecbTestValues[n].key ) ) );
 	    QCA::AES256 forwardCipher( QCA::Cipher::ECB, QCA::Encode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes256ecbTestValues[n].plaintext ) ) ),
 		   QString( aes256ecbTestValues[n].ciphertext ) );
@@ -838,9 +838,9 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
 
-	for (int n = 0; aes256cbcTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes256cbcTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes256cfbTestValues[n].iv ) );
+	for (int n = 0; (0 != aes256cbcTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray( QCA::hexToArray( aes256cbcTestValues[n].key ) ) );
+	    QCA::InitializationVector iv( QSecureArray(QCA::hexToArray( aes256cfbTestValues[n].iv ) ) );
 	    QCA::AES256 forwardCipher( QCA::Cipher::CBC, QCA::Encode, key, iv, QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes256cbcTestValues[n].plaintext ) ) ),
 		   QString( aes256cbcTestValues[n].ciphertext ) );
@@ -857,9 +857,9 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
 
-	for (int n = 0; aes256cfbTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes256cfbTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes256cfbTestValues[n].iv ) );
+	for (int n = 0; (0 != aes256cfbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( aes256cfbTestValues[n].key ) ) );
+	    QCA::InitializationVector iv( QSecureArray(QCA::hexToArray( aes256cfbTestValues[n].iv ) ) );
 	    QCA::AES256 forwardCipher( QCA::Cipher::CFB, QCA::Encode, key, iv, QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes256cfbTestValues[n].plaintext ) ) ),
 		   QString( aes256cfbTestValues[n].ciphertext ) );
@@ -885,8 +885,8 @@ void CipherUnitTest::allTests()
 	CHECK( cipherObj1.keyLength().maximum(), 24 );
 	CHECK( cipherObj1.blockSize(), (unsigned)8 );
 
-	for (int n = 0; tripledesTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( tripledesTestValues[n].key ) );
+	for (int n = 0; (0 != tripledesTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( tripledesTestValues[n].key ) ) );
 	    QCA::TripleDES forwardCipher( QCA::Cipher::ECB, QCA::Encode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( tripledesTestValues[n].plaintext ) ) ),
 		   QString( tripledesTestValues[n].ciphertext ) );
@@ -912,8 +912,8 @@ void CipherUnitTest::allTests()
 	CHECK( cipherObj1.keyLength().maximum(), 8 );
 	CHECK( cipherObj1.blockSize(), (unsigned)8 );
 
-	for (int n = 0; desTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( desTestValues[n].key ) );
+	for (int n = 0; (0 != desTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( desTestValues[n].key ) ) );
 	    QCA::DES forwardCipher( QCA::Cipher::ECB, QCA::Encode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( desTestValues[n].plaintext ) ) ),
 		   QString( desTestValues[n].ciphertext ) );
@@ -937,8 +937,8 @@ void CipherUnitTest::allTests()
 	QCA::BlowFish cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 16 ) );
 	CHECK( cipherObj1.blockSize(), (unsigned)8 );
 
-	for (int n = 0; blowfishTestValues[n].plaintext; n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( blowfishTestValues[n].key ) );
+	for (int n = 0; (0 != blowfishTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QSecureArray(QCA::hexToArray( blowfishTestValues[n].key ) ) );
 	    QCA::BlowFish forwardCipher( QCA::Cipher::ECB, QCA::Encode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( blowfishTestValues[n].plaintext ) ) ),
 		   QString( blowfishTestValues[n].ciphertext ) );

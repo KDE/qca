@@ -27,15 +27,12 @@
 #ifndef KUNITTEST_H
 #define KUNITTEST_H
 
-#include "qtester.h"
 #include "tester.h"
 
 #include <qobject.h>
-#include <qasciidict.h>
-#include <qptrdict.h>
+#include <QtCore>
 
 #define ADD_TEST(x) addTester( #x, new x )
-#define ADD_QTEST(x) addTester( new x )
 
 class KUnitTest : public QObject
 {
@@ -45,22 +42,16 @@ public:
 
     int runTests();
 public:
-    void addTester( const char *name, Tester* test )
+    void addTester( QString name, Tester* test )
     {
-        m_tests.insert( name, test );
+        m_tests[name] = test;
     }
-    void addTester( QTester *test );
-
-private slots:
-    void qtesterDone( QObject *obj );
-    void checkRun();
 
 private:
     void registerTests();
 
 private:
-    QAsciiDict<Tester> m_tests;
-    QPtrDict<QTester> m_qtests;
+    QMap<QString,Tester*> m_tests;
     int globalTests;
     int globalPasses;
     int globalFails;

@@ -33,8 +33,8 @@ HashUnitTest::HashUnitTest()
 }
 
 struct hashTestValues {
-    QCString inputString;
-    QCString expectedHash;
+    QByteArray inputString;
+    QString expectedHash;
 };
 
 
@@ -178,7 +178,7 @@ void HashUnitTest::allTests()
 {
     QCA::Initializer init;
 
-    QCString hashResult; // used as the actual result
+    QString hashResult; // used as the actual result
 
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
@@ -189,7 +189,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("md2"))
 	    SKIP("MD2 not supported" );
 	else {
-	    for (int n = 0; md2TestValues[n].inputString; n++) {
+	    for (int n = 0;  (0 != md2TestValues[n].expectedHash); n++) {
 		hashResult = QCA::MD2(*it).hashToString(md2TestValues[n].inputString);
 		CHECK( hashResult, md2TestValues[n].expectedHash );
 	    }
@@ -198,7 +198,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("md4"))
 	    SKIP("MD4 not supported");
 	else {
-	    for (int n = 0; md4TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != md4TestValues[n].expectedHash); n++) {
 	    hashResult = QCA::MD4(*it).hashToString(md4TestValues[n].inputString);
 	    CHECK( hashResult, md4TestValues[n].expectedHash );
 	    }
@@ -208,13 +208,13 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("md5"))
 	    SKIP("MD5 not supported");
 	else {
-	    for (int n = 0; md5TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != md5TestValues[n].expectedHash); n++) {
 		hashResult = QCA::MD5(*it).hashToString(md5TestValues[n].inputString);
 		CHECK( hashResult, md5TestValues[n].expectedHash );
 	    }
 	    
 	    QFile f1( "./data/empty" );
-	    if ( f1.open( IO_ReadOnly ) ) {
+	    if ( f1.open( QIODevice::ReadOnly ) ) {
 		QCA::MD5 hashObj(*it);
 		hashObj.update( f1 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -224,7 +224,7 @@ void HashUnitTest::allTests()
 	    }
 
 	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
-	    if ( f2.open( IO_ReadOnly ) ) {
+	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::MD5 hashObj(*it);
 		hashObj.update( f2 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -235,7 +235,7 @@ void HashUnitTest::allTests()
 	    
 
 	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
-	    if ( f3.open( IO_ReadOnly ) ) {
+	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::MD5 hashObj(*it);
 		hashObj.update( f3 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -245,7 +245,7 @@ void HashUnitTest::allTests()
 	    }
 	    
 	    QFile f4( "./data/scribus-1.2.tar.bz2" );
-	    if ( f4.open( IO_ReadOnly ) ) {
+	    if ( f4.open( QIODevice::ReadOnly ) ) {
 		QCA::MD5 hashObj(*it);
 		hashObj.update( f4 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -259,7 +259,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("sha0"))
 	    SKIP("SHA0 not supported");
 	else {
-	    for (int n = 0; sha0TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != sha0TestValues[n].expectedHash); n++) {
 		hashResult = QCA::SHA0(*it).hashToString(sha0TestValues[n].inputString);
 		CHECK( hashResult, sha0TestValues[n].expectedHash );
 	    }
@@ -286,7 +286,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("sha1"))
 	    SKIP("SHA1 not supported");
 	else {
-	    for (int n = 0; sha1TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != sha1TestValues[n].expectedHash); n++) {
 		hashResult = QCA::SHA1(*it).hashToString(sha1TestValues[n].inputString);
 		CHECK( hashResult, sha1TestValues[n].expectedHash );
 	    }
@@ -304,7 +304,7 @@ void HashUnitTest::allTests()
 		   QString("34aa973cd4c4daa4f61eeb2bdbad27316534016f") );
 
 	    QFile f1( "./data/empty" );
-	    if ( f1.open( IO_ReadOnly ) ) {
+	    if ( f1.open( QIODevice::ReadOnly ) ) {
 		QCA::SHA1 hashObj(*it);
 		hashObj.update( f1 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -314,7 +314,7 @@ void HashUnitTest::allTests()
 	    }
 	    
 	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
-	    if ( f2.open( IO_ReadOnly ) ) {
+	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::SHA1 hashObj(*it);
 		hashObj.update( f2 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -324,7 +324,7 @@ void HashUnitTest::allTests()
 	    }
 
 	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
-	    if ( f3.open( IO_ReadOnly ) ) {
+	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::SHA1 hashObj(*it);
 		hashObj.update( f3 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -334,7 +334,7 @@ void HashUnitTest::allTests()
 	    }
 	    
 	    QFile f4( "./data/scribus-1.2.tar.bz2" );
-	    if ( f4.open( IO_ReadOnly ) ) {
+	    if ( f4.open( QIODevice::ReadOnly ) ) {
 		QCA::SHA1 hashObj(*it);
 		hashObj.update( f4 );
 		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
@@ -348,7 +348,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("sha256"))
 	    SKIP("SHA256 not supported");
 	else {
-	    for (int n = 0; sha256TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != sha256TestValues[n].expectedHash); n++) {
 		hashResult = QCA::SHA256(*it).hashToString(sha256TestValues[n].inputString);
 		CHECK( hashResult, sha256TestValues[n].expectedHash );
 	    }
@@ -367,7 +367,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("sha384"))
 	    SKIP("SHA384 not supported");
 	else {
-	    for (int n = 0; sha384TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != sha384TestValues[n].expectedHash); n++) {
 		hashResult = QCA::SHA384(*it).hashToString(sha384TestValues[n].inputString);
 		CHECK( hashResult, sha384TestValues[n].expectedHash );
 	    }
@@ -388,7 +388,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("sha512"))
 	    SKIP("SHA512 not supported");
 	else {
-	    for (int n = 0; sha512TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != sha512TestValues[n].expectedHash); n++) {
 		hashResult = QCA::SHA512(*it).hashToString(sha512TestValues[n].inputString);
 		CHECK( hashResult, sha512TestValues[n].expectedHash );
 	    }
@@ -408,7 +408,7 @@ void HashUnitTest::allTests()
 	if(!QCA::isSupported("ripemd160"))
 	    SKIP("RIPEMD160 not supported");
 	else {
-	    for (int n = 0; ripemd160TestValues[n].inputString; n++) {
+	    for (int n = 0; (0 != ripemd160TestValues[n].expectedHash); n++) {
 		hashResult = QCA::RIPEMD160(*it).hashToString(ripemd160TestValues[n].inputString);
 		CHECK( hashResult, ripemd160TestValues[n].expectedHash );
 	    }
@@ -426,12 +426,10 @@ void HashUnitTest::allTests()
 	    // This is the "8 rounds of 1234567890" test.
 	    // It also ensure that we can re-use hash objects correctly.
 	    static char bindata[] = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30 };
-	    fillerString.resize(10);
-	    fillerString.setRawData( bindata, sizeof(bindata) ); // "1234567890"
+	    QByteArray fillerArray( bindata, sizeof(bindata) ); // "1234567890"
 	    shaHash.clear();
 	    for (int i=0; i<8; i++)
-		shaHash.update(fillerString);
-	    fillerString.resetRawData( bindata, sizeof(bindata) );
+		shaHash.update(fillerArray);
 	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
 		   QString("9b752e45573d4b39f4dbd3323cab82bf63326bfb") );
 	}

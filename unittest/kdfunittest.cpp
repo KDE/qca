@@ -28,9 +28,9 @@
 #include <QtCrypto>
 
 struct kdfTestValues {
-    QCString secret; // usually a password or passphrase
-    QCString output; // the key you get back
-    QCString salt;   // a salt or initialisation vector
+    QString secret; // usually a password or passphrase
+    QString output; // the key you get back
+    QString salt;   // a salt or initialisation vector
     unsigned int outputLength; // if the algo supports variable length keys, len
     unsigned int iterationCount; // number of iterations
 };
@@ -79,9 +79,9 @@ void KDFUnitTest::pbkdf1Tests()
     if(!QCA::isSupported("pbkdf1(sha1)"))
 	SKIP("PBKDF version 1 with SHA1 not supported");
     else {
-	for (int n = 0; pbkdf1TestValues[n].secret; n++) {
+      for (int n = 0; (0 != pbkdf1TestValues[n].secret); n++) {
 	    QSecureArray password = QCA::hexToArray( pbkdf1TestValues[n].secret );
-	    QCA::InitializationVector salt( QCA::hexToArray( pbkdf1TestValues[n].salt) );
+	    QCA::InitializationVector salt( QSecureArray(QCA::hexToArray( pbkdf1TestValues[n].salt) ) );
 	    QCA::SymmetricKey key = QCA::PBKDF1().makeKey( password,
 							   salt,
 							   pbkdf1TestValues[n].outputLength,
@@ -98,8 +98,8 @@ void KDFUnitTest::pbkdf2Tests()
 	SKIP("PBKDF version 2 with SHA1 not supported");
     else {
 #if 0
-	QCString salt("what do ya want for nothing?");
-	QCString password("Jefe");
+	Q3CString salt("what do ya want for nothing?");
+	Q3CString password("Jefe");
 	int iterations = 1000;
 
 	QByteArray passwordOut = QCA::PBKDF2::makeKey (password, salt, iterations, 16);

@@ -79,14 +79,14 @@ void Base64UnitTest::allTests()
     QCA::Base64 base64Object;
     QSecureArray encoded;
 
-    for (int n = 0; base64TestValues[n].raw; n++) {
+    for (int n = 0; (0 != base64TestValues[n].raw); n++) {
 	encoded = base64Object.encode(QCA::hexToArray(base64TestValues[n].raw));
 	CHECK( QCA::arrayToHex(encoded), base64TestValues[n].encoded);
 	encoded = base64Object.decode(QCA::hexToArray(base64TestValues[n].encoded));
 	CHECK( QCA::arrayToHex(encoded), base64TestValues[n].raw);
     }
 
-    for (int n = 0; base64TestValues2[n].raw; n++) {
+    for (int n = 0; (0 != base64TestValues2[n].raw); n++) {
 	CHECK( base64Object.encodeString(base64TestValues2[n].raw), base64TestValues2[n].encoded);
 	CHECK( base64Object.decodeString(base64TestValues2[n].encoded), base64TestValues2[n].raw);
     }

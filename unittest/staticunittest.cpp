@@ -37,9 +37,7 @@ void StaticUnitTest::allTests()
 {
     QCA::Initializer init;
 
-
-    QByteArray test(10);
-    test.fill('a');
+    QByteArray test(10, 'a');
 
     CHECK( QCA::arrayToHex(test), QString("61616161616161616161") );
 
@@ -50,12 +48,12 @@ void StaticUnitTest::allTests()
 
     QSecureArray testArray(10);
     //testArray.fill( 'a' );
-    for (unsigned int i = 0; i < testArray.size(); i++) {
+    for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x61;
     }
     CHECK( QCA::arrayToHex( testArray ), QString( "61616161616161616161" ) );
     //testArray.fill( 'b' );
-    for (unsigned int i = 0; i < testArray.size(); i++) {
+    for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x62;
     }
     testArray[6] = 0x00;
@@ -66,16 +64,16 @@ void StaticUnitTest::allTests()
     // doing a direct comparison, since they change
     // We try to work around that using contains()
     QStringList supportedCapabilities = QCA::supportedFeatures();
-    CHECK( supportedCapabilities.contains("random"), (size_t)1 );
-    CHECK( supportedCapabilities.contains("sha1"), (size_t)1 );
-    CHECK( supportedCapabilities.contains("sha0"), (size_t)1 );
-    CHECK( supportedCapabilities.contains("md2"), (size_t)1 );
-    CHECK( supportedCapabilities.contains("md4"), (size_t)1 );
-    CHECK( supportedCapabilities.contains("md5"), (size_t)1 );
-    CHECK( supportedCapabilities.contains("ripemd160"), (size_t)1 );
+    CHECK( supportedCapabilities.contains("random"), (QBool)true );
+    CHECK( supportedCapabilities.contains("sha1"), (QBool)true );
+    CHECK( supportedCapabilities.contains("sha0"), (QBool)true );
+    CHECK( supportedCapabilities.contains("md2"),(QBool) true );
+    CHECK( supportedCapabilities.contains("md4"), (QBool)true );
+    CHECK( supportedCapabilities.contains("md5"), (QBool)true );
+    CHECK( supportedCapabilities.contains("ripemd160"), (QBool)true );
 
     QStringList defaultCapabilities = QCA::defaultFeatures();
-    CHECK( defaultCapabilities.contains("random"), (size_t)1 );
+    CHECK( defaultCapabilities.contains("random"), (QBool)true );
 
     CHECK( QCA::isSupported("random"), true );
     CHECK( QCA::isSupported("sha0"), true );
@@ -88,7 +86,7 @@ void StaticUnitTest::allTests()
 
     QString caps( "random,sha1,md5,ripemd160");
     QStringList capList;
-    capList.split( caps, "," );
+    capList = caps.split( "," );
     CHECK( QCA::isSupported(capList), true );
     capList.append("noSuch");
     CHECK( QCA::isSupported(capList), false );
@@ -103,15 +101,12 @@ void StaticUnitTest::allTests()
     // providers are obviously variable, this might be a bit brittle
     QStringList providerNames;
     QCA::ProviderList qcaProviders = QCA::providers();
-    QCA::ProviderListIterator it( qcaProviders );
-    QCA::Provider *provider;
-    while ( 0 != (provider = it.current() ) ) {
-	++it;
-	providerNames.append( provider->name() );
+    for (int i = 0; i < qcaProviders.size(); ++i) {
+	providerNames.append( qcaProviders[i]->name() );
     }
-    CHECK( providerNames.contains("qca-openssl"), (size_t)1 );
-    CHECK( providerNames.contains("qca-gcrypt"), (size_t)1 );
-    CHECK( providerNames.contains("qca-botan"), (size_t)1 );
+    CHECK( providerNames.contains("qca-openssl"), (QBool)true );
+    CHECK( providerNames.contains("qca-gcrypt"), (QBool)true );
+    CHECK( providerNames.contains("qca-botan"), (QBool)true );
 
     QCA::setProviderPriority("qca-openssl", 4);
     QCA::setProviderPriority("qca-botan", 2);

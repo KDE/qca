@@ -59,7 +59,7 @@ void HexUnitTest::allTests()
 
     QCA::Hex hexObject;
     QString result;
-    for (int n = 0; hexTestValues[n].raw; n++) {
+    for (int n = 0; (0 != hexTestValues[n].raw); n++) {
       result = hexObject.encodeString(hexTestValues[n].raw);
       CHECK( result, hexTestValues[n].encoded);
       result = hexObject.decodeString(hexTestValues[n].encoded);
