@@ -458,18 +458,12 @@ namespace QCA
 		/**
 		   Reset / reconfigure the Cipher
 
-		   You are supposed to call this after constructing the cipher, as shown in
-		   the following example:
-		   \code
-		   QCA::AES128 cipher(QCA::CBC, QCA::NoPadding);
-		   cipher.setup(...);
-		   \endcode
+		   You can use this to re-use an existing Cipher, rather than creating a new object
+		   with a slightly different configuration.
 
 		   \param dir the Direction that this Cipher should use (Encode for encryption, Decode for decryption)
 		   \param key the SymmetricKey array that is the key
 		   \param iv the InitializationVector to use
-		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
-		   the length of the plaintext.
 		*/
 		void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector());
 		/**
@@ -1299,6 +1293,26 @@ namespace QCA
 		   \param provider the name of the provider to use, if available
 		*/
 		PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
+	};
+
+	/**
+	   \class PBKDF2 qca_basic.h QtCrypto
+
+	   Password based key derivation function version 2
+
+	   This class implements Password Based Key Derivation Function version 2,
+	   as specified in RFC2898, and also in PKCS#5.
+	 */
+	class QCA_EXPORT PBKDF2 : public KeyDerivationFunction
+	{
+	public:
+		/**
+		   Standard constructor
+		   
+		   \param algorithm the name of the hashing algorithm to use
+		   \param provider the name of the provider to use, if available
+		*/
+		PBKDF2(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf2", algorithm), provider) {}
 	};
 }
 
