@@ -26,41 +26,94 @@
 
 int main(int argc, char **argv)
 {
-	// the Initializer object sets things up, and 
-	// also does cleanup when it goes out of scope
-	QCA::Initializer init;
+    // the Initializer object sets things up, and 
+    // also does cleanup when it goes out of scope
+    QCA::Initializer init;
+    
+    QCoreApplication app(argc, argv);
+    
+    // we use the first argument if provided, or
+    // use "hello" if no arguments
+    QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
+    
+    // AES128 testing
+    if(!QCA::isSupported("des-cbc-pkcs7"))
+	printf("AES128-CBC not supported!\n");
+    else {
+	// Create a dummy key - you'd use a real key normally.
+	QCA::SymmetricKey key(16);
 
-	QCoreApplication app(argc, argv);
+	// Create a dummy initialisation vector
+	QCA::InitializationVector iv(16);
 
-	// we use the first argument if provided, or
-	// use "hello" if no arguments
-	QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
+	// create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
+	QCA::AES128 cipher(QCA::Cipher::CBC, 
+			   // use Default padding, which is equivalent to PKCS7 for CBC
+			   QCA::Cipher::DefaultPadding,
+			   // this object will encrypt
+			   QCA::Encode,
+			   key, iv);
 
-	// AES128 test
-	if(!QCA::isSupported("aes128-cbc-pkcs7"))
-		printf("AES128-CBC not supported!\n");
-	else {
-		// encrypt
-		QCA::AES128 c(QCA::Cipher::CBC, QCA::Cipher::DefaultPadding, QCA::Encode);
-		c.setup(QCA::Encode, QCA::SymmetricKey(16));
-		QSecureArray u = c.update(arg);
-		if (c.ok()) {
-		  printf("Update OK\n");
-		} else {
-		  printf("Update failed\n");
-		}
-		QString result = QCA::arrayToHex(u);
-		printf(">aes128(\"%s\") = [%s]\n", arg.data(),qPrintable(result) );
-		QSecureArray f = c.final();
-		if (c.ok()) {
-		  printf("Final OK\n");
-		} else {
-		  printf("Final failed\n");
-		}
-		result = QCA::arrayToHex(f);
-		printf(">aes128(\"%s\") = [%s]\n", arg.data(),qPrintable(result) );
+	// we use the cipher object to encrypt the argument we passed in
+	// the result of that is returned - note that if there is less than
+	// 16 bytes (1 block), then nothing will be returned - it is buffered
+	// update() can be called as many times as required.
+	QSecureArray u = cipher.update(arg);
+	
+	// We need to check if that update() call worked.
+	if (!cipher.ok()) {
+	    printf("Update failed\n");
+	}
+	// output the results of that stage
+	printf("AES128 encryption of %s is [%s]\n",
+	       arg.data(),
+	       qPrintable(QCA::arrayToHex(u)) );
+
+
+	// Because we are using PKCS7 padding, we need to output the final (padded) block
+	// Note that we should always call final() even with no padding, to clean up
+	QSecureArray f = cipher.final();
+
+	// Check if the final() call worked
+	if (!cipher.ok()) {
+	    printf("Final failed\n");
+	}
+	// and output the resulting block. The ciphertext is the results of update()
+	// and the result of final()
+	printf("Final block for AES128 encryption is [0x%s]\n", qPrintable(QCA::arrayToHex(f)) );
+
+	// re-use the Cipher t decrypt. We need to use the same key and
+	// initialisation vector as in the encryption.
+	cipher.setup( QCA::Decode, key, iv );
+
+	// Build a single cipher text array. You could also call update() with
+	// each block as you receive it, if that is more useful.
+	QSecureArray cipherText = u.append(f);
+
+	// take that cipher text, and decrypt it
+	QSecureArray plainText = cipher.update(cipherText);
+
+	// check if the update() call worked
+	if (!cipher.ok()) {
+	    printf("Update failed\n");
 	}
 
-	return 0;
+	// output results
+	printf("Decryption using AES128 of [0x%s] is %s\n", 
+	       qPrintable(QCA::arrayToHex(cipherText)), plainText.data());
+
+	// Again we need to call final(), to get the last block (with its padding removed)
+	plainText = cipher.final();
+
+	// check if the final() call worked
+	if (!cipher.ok()) {
+	    printf("Final failed\n");
+	}
+
+	// output results
+	printf("Final decryption block using AES128 is %s\n", plainText.data());
+    }
+
+    return 0;
 }
 
