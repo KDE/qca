@@ -59,7 +59,6 @@ static void add_mmap()
 // Botan shouldn't throw any exceptions in our init/deinit.
 
 static const Botan::SecureAllocator *alloc = 0;
-static QHash<void *, int> *memtable = 0;
 
 bool botan_init(int prealloc, bool mmap)
 {
@@ -88,16 +87,11 @@ bool botan_init(int prealloc, bool mmap)
 	}
 	alloc = Botan::get_allocator("default");
 
-	memtable = new QHash<void *, int>;
-
 	return secmem;
 }
 
 void botan_deinit()
 {
-	delete memtable;
-	memtable = 0;
-
 	alloc = 0;
 	Botan::Init::shutdown_memory_subsystem();
 	Botan::Init::set_mutex_type(0);
@@ -117,19 +111,19 @@ void botan_secure_free(void *p, int bytes)
 
 void *qca_secure_alloc(int bytes)
 {
-	void *p = QCA::botan_secure_alloc(bytes);
-	QCA::memtable->insert(p, bytes);
-	return p;
+	// allocate enough room to store a size value in front, return a pointer after it
+	char *c = (char *)QCA::botan_secure_alloc(bytes + sizeof(int));
+	((int *)c)[0] = bytes;
+	return c + sizeof(int);
 }
 
 void qca_secure_free(void *p)
 {
-	if(QCA::memtable->contains(p))
-	{
-		int bytes = QCA::memtable->value(p);
-		QCA::botan_secure_free(p, bytes);
-		QCA::memtable->remove(p);
-	}
+	// backtrack to read the size value
+	char *c = (char *)p;
+	c -= sizeof(int);
+	int bytes = ((int *)c)[0];
+	QCA::botan_secure_free(c, bytes);
 }
 
 using namespace QCA;
