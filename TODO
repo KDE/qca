@@ -1,5 +1,15 @@
 * Additional unit tests
+  Hex
+  Base64
+
 * API documentation
+  clean up Algorithm
+  clean up Filter
+  add TextFilter
+  add Hex
+  add Base64
+  add QCA::systemStore() and haveSystemStore()
+
 * Threading consideration (safety, usability) in API and plugins
 
 * finish API:
@@ -9,7 +19,7 @@
   cert: subjectAltName
 
 * finish code for APIs:
-  cipher
+  cipher - needs to handling padding
   mac
   pkey
   cert/crl/store (don't forget to call detach())
@@ -18,10 +28,20 @@
   store: system rootcerts (win, mac, debian)
   default provider should have built-in sha1 and md5 (?)
 
+* examples
+  create example for Hex
+  create example for Base64
+  create example for Random
+  create example for BigInteger
+  update cipher example (after API sorted out)
+  add systemStore() example
+
 * write plugin support
   qca-tls: do something about the cert check lag.  maybe a thread?
   qca-botan: implement
+  qca-egads (or qca-egd): implement for Random support
   qca-openssl: need to implement locking callbacks.
+  figure out why Valgrind reports so many memory leaks
 
 * consider new APIs:
   pgp (go beyond cutestuff and support key expiration, validity, etc)
