@@ -116,7 +116,7 @@ SecureAllocator* get_allocator(const std::string& type)
    {
    SecureAllocator* alloc;
 
-   if(type != "")
+   if( !type.empty() )
       {
       alloc = try_alloc(type);
       if(alloc) return alloc;
@@ -146,7 +146,7 @@ std::string set_default_allocator(const std::string& type)
 *************************************************/
 bool add_allocator_type(const std::string& type, SecureAllocator* alloc)
    {
-   if(type == "" || factory->get(type))
+   if(type.empty() || factory->get(type))
       return false;
    factory->add(type, alloc);
    return true;
