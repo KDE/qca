@@ -266,6 +266,8 @@ public:
 	SignatureAlgorithm sigalgo;
 };
 
+class CRLContext;
+
 class CertContext : public CertBase
 {
 public:
@@ -274,6 +276,9 @@ public:
 	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) = 0;
 	virtual const CertContextProps *props() const = 0;
 	virtual PKeyContext *subjectPublicKey() const = 0; // caller must delete
+
+	// ownership of items IS NOT passed
+	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u) const = 0;
 };
 
 class CSRContext : public CertBase
@@ -297,22 +302,16 @@ public:
 	virtual const CRLContextProps *props() const = 0;
 };
 
-class StoreContext : public Provider::Context
+class CertCollectionContext : public Provider::Context
 {
 public:
-	StoreContext(Provider *p) : Provider::Context(p, "store") {}
+	CertCollectionContext(Provider *p) : Provider::Context(p, "certcollection") {}
 
-	virtual void addCertificate(const CertContext &cert, Store::TrustMode t) = 0;
-	virtual void addCRL(const CRLContext &crl) = 0;
-	virtual Validity validate(const CertContext &cert, Store::UsageMode u) const = 0;
-	virtual QList<CertContext*> certificates() const = 0; // caller must delete
-	virtual QList<CRLContext*> crls() const = 0;          // caller must delete
-	virtual void append(const StoreContext &s) = 0;
+	// ownership of items IS NOT passed
+	virtual QByteArray toPKCS7(const QList<CertContext*> &certs, const QList<CRLContext*> &crls) const = 0;
 
-	// import / export
-	virtual bool canUsePKCS7() const = 0;
-	virtual QByteArray toPKCS7() const = 0;
-	virtual ConvertResult fromPKCS7(const QByteArray &a, Store::TrustMode t) = 0;
+	// ownership of items IS passed
+	virtual ConvertResult fromPKCS7(const QByteArray &a, QList<CertContext*> *certs, QList<CRLContext*> *crls) const = 0;
 };
 
 class CAContext : public Provider::Context
@@ -341,6 +340,18 @@ public:
 	virtual ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const = 0;
 };
 
+class KeyStoreContext : public Provider::Context
+{
+public:
+	KeyStoreContext(Provider *p) : Provider::Context(p, "keystore") {}
+};
+
+class KeyStoreListContext : public Provider::Context
+{
+public:
+	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
+};
+
 class TLSContext : public Provider::Context
 {
 public:
@@ -348,8 +359,8 @@ public:
 	TLSContext(Provider *p) : Provider::Context(p, "tls") {}
 
 	virtual void reset() = 0;
-	virtual bool startClient(const StoreContext &store, const CertContext &cert, const PKeyContext &key) = 0;
-	virtual bool startServer(const StoreContext &store, const CertContext &cert, const PKeyContext &key) = 0;
+	virtual bool startClient(const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, const CertContext &cert, const PKeyContext &key) = 0;
+	virtual bool startServer(const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, const CertContext &cert, const PKeyContext &key) = 0;
 
 	virtual int handshake(const QByteArray &in, QByteArray *out) = 0;
 	virtual int shutdown(const QByteArray &in, QByteArray *out) = 0;

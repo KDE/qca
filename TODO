@@ -22,9 +22,12 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
+  make systemstore work via keystore
   pkey: ability to get the bitsize of a key
   cert: subject/issuer key ids?
   cert: use info as a multi-map?
+  pgp: get key types and bits?
+  dlgroup, symmetric key -> make these into provider objects, for smartcards?
   qcaprovider.h
 
 * build system:
@@ -36,6 +39,7 @@
 
 * finish code for APIs:
   cert: rfc 2818 hostname validation
+  keystore
   tls
   sasl
   securemessagesystem (consider thread issues)
@@ -56,10 +60,8 @@
   figure out why Valgrind reports so many memory leaks
 
 * possibilities for the future:
-  smart cards (pkcs11/15)
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
-  advanced pgp functionality (full key info and ability to manipulate keyrings)
   Key wrapping - RFC3217 and RFC3394
   dtls (secure UDP)
   quoted-printable TextFilter

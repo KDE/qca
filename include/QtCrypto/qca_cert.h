@@ -29,6 +29,8 @@
 
 namespace QCA
 {
+	class CertificateCollection;
+
 	/**
 	   Certificate Request Format
 	*/
@@ -76,6 +78,20 @@ namespace QCA
 		IPSecUser,
 		TimeStamping,
 		OCSPSigning
+	};
+
+	/**
+	   Specify the intended usage of a certificate
+	*/
+	enum UsageMode
+	{
+		UsageAny             = 0x00, ///< Any application, or unspecified
+		UsageTLSServer       = 0x01, ///< server side of a TLS or SSL connection
+		UsageTLSClient       = 0x02, ///< client side of a TLS or SSL connection
+		UsageCodeSigning     = 0x04, ///< code signing certificate
+		UsageEmailProtection = 0x08, ///< email (S/MIME) certificate
+		UsageTimeStamping    = 0x10, ///< time stamping certificate
+		UsageCRLSigning      = 0x20  ///< certificate revocation list signing certificate
 	};
 
 	/**
@@ -163,6 +179,8 @@ namespace QCA
 
 		QSecureArray signature() const;
 		SignatureAlgorithm signatureAlgorithm() const;
+
+		Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u = UsageAny) const;
 
 		// import / export
 		QSecureArray toDER() const;
@@ -279,48 +297,35 @@ namespace QCA
 		static CRL fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
-	class QCA_EXPORT Store : public Algorithm
+	// a bundle of Certificates and CRLs
+	class CertificateCollection
 	{
 	public:
-		enum TrustMode
-		{
-			Trusted,
-			Untrusted
-		};
+		CertificateCollection();
+		CertificateCollection(const CertificateCollection &from);
+		~CertificateCollection();
+		CertificateCollection & operator=(const CertificateCollection &from);
 
-		/**
-		   Specify the intended usage of a certificate
-		*/
-		enum UsageMode
-		{
-			UsageAny             = 0x00, ///< Any application, or unspecified
-			UsageTLSServer       = 0x01, ///< server side of a TLS or SSL connection
-			UsageTLSClient       = 0x02, ///< client side of a TLS or SSL connection
-			UsageCodeSigning     = 0x04, ///< code signing certificate
-			UsageEmailProtection = 0x08, ///< email (S/MIME) certificate
-			UsageTimeStamping    = 0x10, ///< time stamping certificate
-			UsageCRLSigning      = 0x20  ///< certificate revocation list signing certificate
-		};
-
-		Store(const QString &provider = QString());
-
-		void addCertificate(const Certificate &cert, TrustMode t = Untrusted);
+		void addCertificate(const Certificate &cert);
 		void addCRL(const CRL &crl);
-		Validity validate(const Certificate &cert, UsageMode u = UsageAny) const;
 
 		QList<Certificate> certificates() const;
 		QList<CRL> crls() const;
 
+		void append(const CertificateCollection &other);
+		CertificateCollection operator+(const CertificateCollection &other) const;
+		CertificateCollection & operator+=(const CertificateCollection &other);
+
 		// import / export
 		static bool canUsePKCS7(const QString &provider = QString());
-		bool toPKCS7File(const QString &fileName) const;
-		bool toFlatTextFile(const QString &fileName) const;
-		static Store fromPKCS7File(const QString &fileName, TrustMode t = Untrusted, ConvertResult *result = 0, const QString &provider = QString());
-		static Store fromFlatTextFile(const QString &fileName, TrustMode t = Untrusted, ConvertResult *result = 0, const QString &provider = QString());
+		bool toFlatTextFile(const QString &fileName);
+		bool toPKCS7File(const QString &fileName, const QString &provider = QString());
+		static CertificateCollection fromFlatTextFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+		static CertificateCollection fromPKCS7File(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
-		void append(const Store &a);
-		Store operator+(const Store &a) const;
-		Store & operator+=(const Store &a);
+	private:
+		class Private;
+		QSharedDataPointer<Private> d;
 	};
 
 	class QCA_EXPORT CertificateAuthority : public Algorithm
@@ -336,14 +341,15 @@ namespace QCA
 		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 	};
 
-	class QCA_EXPORT PersonalBundle
+	// holds a certificate chain and an associated private key
+	class QCA_EXPORT KeyBundle
 	{
 	public:
-		PersonalBundle();
-		PersonalBundle(const QString &fileName, const QSecureArray &passphrase);
-		PersonalBundle(const PersonalBundle &from);
-		~PersonalBundle();
-		PersonalBundle & operator=(const PersonalBundle &from);
+		KeyBundle();
+		KeyBundle(const QString &fileName, const QSecureArray &passphrase);
+		KeyBundle(const KeyBundle &from);
+		~KeyBundle();
+		KeyBundle & operator=(const KeyBundle &from);
 
 		bool isNull() const;
 
@@ -356,12 +362,49 @@ namespace QCA
 		// import / export
 		QByteArray toArray(const QSecureArray &passphrase, const QString &provider = QString()) const;
 		bool toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider = QString()) const;
-		static PersonalBundle fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
-		static PersonalBundle fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
+		static KeyBundle fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
+		static KeyBundle fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
 
 	private:
 		class Private;
-		Private *d;
+		QSharedDataPointer<Private> d;
+	};
+
+	// PGPKey can either reference an item in a real PGP keyring or can
+	// be made by calling a "from" function.  Note that with the latter
+	// method, the key is of no use besides being informational.  The
+	// key must be in a keyring (inKeyring() == true) to actually do
+	// crypto with it.
+	class QCA_EXPORT PGPKey : public Algorithm
+	{
+	public:
+		PGPKey();
+		PGPKey(const QString &fileName);
+		PGPKey(const PGPKey &from);
+		~PGPKey();
+		PGPKey & operator=(const PGPKey &from);
+
+		bool isNull() const;
+
+		QString keyId() const;
+		QString primaryUserId() const;
+		QStringList userIds() const;
+
+		bool havePrivate() const;
+		QDateTime creationDate() const;
+		QDateTime expirationDate() const;
+		QString fingerprint() const;
+
+		bool inKeyring() const;
+		bool isTrusted() const;
+
+		// import / export
+		QSecureArray toArray() const;
+		QString toString() const;
+		bool toFile(const QString &fileName) const;
+		static PGPKey fromArray(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static PGPKey fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+		static PGPKey fromFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 	};
 }
 

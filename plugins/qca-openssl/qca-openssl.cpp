@@ -2723,6 +2723,9 @@ public:
 		return kc;
 	}
 
+	// implemented later because it depends on MyCRLContext
+	virtual QCA::Validity validate(const QList<QCA::CertContext*> &trusted, const QList<QCA::CertContext*> &untrusted, const QList<QCA::CRLContext *> &crls, QCA::UsageMode u) const;
+
 	void make_props()
 	{
 		X509 *x = item.cert;
@@ -3074,10 +3077,88 @@ public:
 	}
 };
 
+static bool usage_check(const MyCertContext &cc, QCA::UsageMode u)
+{
+	// TODO: check usage
+	Q_UNUSED(cc);
+	Q_UNUSED(u);
+	return true;
+}
+
+QCA::Validity MyCertContext::validate(const QList<QCA::CertContext*> &trusted, const QList<QCA::CertContext*> &untrusted, const QList<QCA::CRLContext *> &crls, QCA::UsageMode u) const
+{
+	STACK_OF(X509) *trusted_list = sk_X509_new_null();
+	STACK_OF(X509) *untrusted_list = sk_X509_new_null();
+	QList<X509_CRL*> crl_list;
+
+	int n;
+	for(n = 0; n < trusted.count(); ++n)
+	{
+		const MyCertContext *cc = static_cast<const MyCertContext *>(trusted[n]);
+		X509 *x = cc->item.cert;
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+		sk_X509_push(trusted_list, x);
+	}
+	for(n = 0; n < untrusted.count(); ++n)
+	{
+		const MyCertContext *cc = static_cast<const MyCertContext *>(untrusted[n]);
+		X509 *x = cc->item.cert;
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+		sk_X509_push(untrusted_list, x);
+	}
+	for(n = 0; n < crls.count(); ++n)
+	{
+		const MyCRLContext *cc = static_cast<const MyCRLContext *>(crls[n]);
+		X509_CRL *x = cc->item.crl;
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+		crl_list.append(x);
+	}
+
+	const MyCertContext *cc = this;
+	X509 *x = cc->item.cert;
+
+	// verification happens through a store "context"
+	X509_STORE_CTX *ctx = X509_STORE_CTX_new();
+
+	// make a store of crls
+	X509_STORE *store = X509_STORE_new();
+	for(int n = 0; n < crl_list.count(); ++n)
+		X509_STORE_add_crl(store, crl_list[n]);
+
+	// the first initialization handles untrusted certs, crls, and target cert
+	X509_STORE_CTX_init(ctx, store, x, untrusted_list);
+
+	// this initializes the trusted certs
+	X509_STORE_CTX_trusted_stack(ctx, trusted_list);
+
+	// verify!
+	int ret = X509_verify_cert(ctx);
+	int err = -1;
+	if(!ret)
+		err = ctx->error;
+
+	// cleanup
+	X509_STORE_CTX_free(ctx);
+	X509_STORE_free(store);
+
+	sk_X509_pop_free(trusted_list, X509_free);
+	sk_X509_pop_free(untrusted_list, X509_free);
+	for(int n = 0; n < crl_list.count(); ++n)
+		X509_CRL_free(crl_list[n]);
+
+	if(!ret)
+		return convert_verify_error(err);
+
+	if(!usage_check(*cc, u))
+		return QCA::ErrorInvalidPurpose;
+
+	return QCA::ValidityGood;
+}
+
 //----------------------------------------------------------------------------
 // MyStoreContext
 //----------------------------------------------------------------------------
-class MyStoreContext : public QCA::StoreContext
+/*class MyStoreContext : public QCA::StoreContext
 {
 public:
 	STACK_OF(X509) *trusted, *untrusted;
@@ -3282,7 +3363,7 @@ public:
 		Q_UNUSED(u);
 		return true;
 	}
-};
+};*/
 
 class opensslCipherContext : public QCA::CipherContext
 {
@@ -3547,8 +3628,8 @@ public:
 			return new MyCSRContext( this );
 		else if ( type == "crl" )
 			return new MyCRLContext( this );
-		else if ( type == "store" )
-			return new MyStoreContext( this );
+		//else if ( type == "store" )
+		//	return new MyStoreContext( this );
 		return 0;
 	}
 };

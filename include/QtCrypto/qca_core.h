@@ -39,7 +39,8 @@ namespace QCA
 {
 	class Provider;
 	class Random;
-	class Store;
+	class CertificateCollection;
+	class KeyStoreManager;
 
 	/**
 	 * Convenience representation for the plugin providers
@@ -324,10 +325,15 @@ namespace QCA
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
 	/**
+	   Return a reference to the KeyStoreManager, which is used to interface with
+	   system storage, PGP keyrings, and smart cards.
+	*/
+	QCA_EXPORT KeyStoreManager *keyStoreManager();
+
+	/**
 	   Test if QCA can access the root CA certificates
 
-	   QCA supports the concept of a Store, containing certificates.
-	   If those certificates are available, this function returns true,
+	   If root certificates are available, this function returns true,
 	   otherwise it returns false.
 	  
 	   \sa systemStore
@@ -337,11 +343,11 @@ namespace QCA
 	/**
 	   Get system-wide root CA certificates
 
-	   \param provider a specific provider to generate the Store, if required
+	   \param provider a specific provider to generate the CertificateCollection, if required
 
 	   \sa haveSystemStore
 	*/
-	QCA_EXPORT Store systemStore(const QString &provider = QString());
+	QCA_EXPORT CertificateCollection systemStore(const QString &provider = QString());
 
 	/**
 	 * Get the application name that will be used by SASL server mode

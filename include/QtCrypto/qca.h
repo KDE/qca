@@ -27,6 +27,7 @@
 #include "qca_basic.h"
 #include "qca_publickey.h"
 #include "qca_cert.h"
+#include "qca_keystore.h"
 #include "qca_securelayer.h"
 #include "qca_securemessage.h"
 #include "qcaprovider.h"

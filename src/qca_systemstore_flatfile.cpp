@@ -34,12 +34,12 @@ bool qca_have_systemstore()
 #endif
 }
 
-Store qca_get_systemstore(const QString &provider)
+CertificateCollection qca_get_systemstore(const QString &provider)
 {
 #ifndef QCA_NO_SYSTEMSTORE
-	return Store::fromFlatTextFile(QCA_SYSTEMSTORE_PATH, Store::Trusted, 0, provider);
+	return CertificateCollection::fromFlatTextFile(QCA_SYSTEMSTORE_PATH, 0, provider);
 #else
-	return Store(provider);
+	return CertificateCollection();
 #endif
 }
 

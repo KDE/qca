@@ -343,6 +343,36 @@ SignatureAlgorithm Certificate::signatureAlgorithm() const
 	return static_cast<const CertContext *>(context())->props()->sigalgo;
 }
 
+Validity Certificate::validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u) const
+{
+	QList<CertContext*> trusted_list;
+	QList<CertContext*> untrusted_list;
+	QList<CRLContext*> crl_list;
+
+	QList<Certificate> trusted_certs = trusted.certificates();
+	QList<Certificate> untrusted_certs = untrusted.certificates();
+	QList<CRL> crls = trusted.crls() + untrusted.crls();
+
+	int n;
+	for(n = 0; n < trusted_certs.count(); ++n)
+	{
+		CertContext *c = static_cast<CertContext *>(trusted_certs[n].context());
+		trusted_list += c;
+	}
+	for(n = 0; n < untrusted_certs.count(); ++n)
+	{
+		CertContext *c = static_cast<CertContext *>(untrusted_certs[n].context());
+		untrusted_list += c;
+	}
+	for(n = 0; n < crls.count(); ++n)
+	{
+		CRLContext *c = static_cast<CRLContext *>(crls[n].context());
+		crl_list += c;
+	}
+
+	return static_cast<const CertContext *>(context())->validate(trusted_list, untrusted_list, crl_list, u);
+}
+
 QSecureArray Certificate::toDER() const
 {
 	return static_cast<const CertContext *>(context())->toDER();
@@ -717,11 +747,15 @@ CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provide
 //----------------------------------------------------------------------------
 // Store
 //----------------------------------------------------------------------------
-static QString readNextPem(QTextStream *ts)
+// TODO: support CRLs
+// CRL / X509 CRL
+// CERTIFICATE / X509 CERTIFICATE
+static QString readNextPem(QTextStream *ts, bool *isCRL)
 {
 	QString pem;
 	bool found = false;
 	bool done = false;
+	*isCRL = false;
 	while(!ts->atEnd())
 	{
 		QString line = ts->readLine();
@@ -748,139 +782,190 @@ static QString readNextPem(QTextStream *ts)
 	return pem;
 }
 
-Store::Store(const QString &provider)
-:Algorithm("store", provider)
+class CertificateCollection::Private : public QSharedData
+{
+public:
+	QList<Certificate> certs;
+	QList<CRL> crls;
+};
+
+CertificateCollection::CertificateCollection()
+:d(new Private)
 {
 }
 
-void Store::addCertificate(const Certificate &cert, TrustMode t)
+CertificateCollection::CertificateCollection(const CertificateCollection &from)
+:d(from.d)
 {
-	static_cast<StoreContext *>(context())->addCertificate(*(static_cast<const CertContext *>(cert.context())), t);
 }
 
-void Store::addCRL(const CRL &crl)
+CertificateCollection::~CertificateCollection()
 {
-	static_cast<StoreContext *>(context())->addCRL(*(static_cast<const CRLContext *>(crl.context())));
 }
 
-Validity Store::validate(const Certificate &cert, UsageMode u) const
+CertificateCollection & CertificateCollection::operator=(const CertificateCollection &from)
 {
-	return static_cast<const StoreContext *>(context())->validate(*(static_cast<const CertContext *>(cert.context())), u);
+	d = from.d;
+	return *this;
 }
 
-QList<Certificate> Store::certificates() const
+void CertificateCollection::addCertificate(const Certificate &cert)
 {
-	QList<CertContext *> in = static_cast<const StoreContext *>(context())->certificates();
-	QList<Certificate> out;
-	for(int n = 0; n < in.count(); ++n)
-	{
-		Certificate cert;
-		cert.change(in[n]);
-		out.append(cert);
-	}
-	return out;
+	d->certs.append(cert);
 }
 
-QList<CRL> Store::crls() const
+void CertificateCollection::addCRL(const CRL &crl)
 {
-	QList<CRLContext *> in = static_cast<const StoreContext *>(context())->crls();
-	QList<CRL> out;
-	for(int n = 0; n < in.count(); ++n)
-	{
-		CRL crl;
-		crl.change(in[n]);
-		out.append(crl);
-	}
-	return out;
+	d->crls.append(crl);
 }
 
-bool Store::canUsePKCS7(const QString &provider)
+QList<Certificate> CertificateCollection::certificates() const
 {
-	StoreContext *c = static_cast<StoreContext *>(getContext("store", provider));
-	bool ok = c->canUsePKCS7();
+	return d->certs;
+}
+
+QList<CRL> CertificateCollection::crls() const
+{
+	return d->crls;
+}
+
+void CertificateCollection::append(const CertificateCollection &other)
+{
+	d->certs += other.d->certs;
+	d->crls += other.d->crls;
+}
+
+CertificateCollection CertificateCollection::operator+(const CertificateCollection &other) const
+{
+	CertificateCollection c = *this;
+	c.append(other);
+	return c;
+}
+
+CertificateCollection & CertificateCollection::operator+=(const CertificateCollection &other)
+{
+	append(other);
+	return *this;
+}
+
+bool CertificateCollection::canUsePKCS7(const QString &provider)
+{
+	CertCollectionContext *c = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
+	bool ok = c ? true : false;
 	delete c;
 	return ok;
 }
 
-bool Store::toPKCS7File(const QString &fileName) const
-{
-	return arrayToFile(fileName, static_cast<const StoreContext *>(context())->toPKCS7());
-}
-
-bool Store::toFlatTextFile(const QString &fileName) const
+bool CertificateCollection::toFlatTextFile(const QString &fileName)
 {
 	QFile f(fileName);
 	if(!f.open(QFile::WriteOnly))
 		return false;
 
-	QList<CertContext *> in = static_cast<const StoreContext *>(context())->certificates();
 	QTextStream ts(&f);
-	for(int n = 0; n < in.count(); ++n)
-		ts << in[n]->toPEM();
-	qDeleteAll(in);
+	int n;
+	for(n = 0; n < d->certs.count(); ++n)
+		ts << d->certs[n].toPEM();
+	for(n = 0; n < d->crls.count(); ++n)
+		ts << d->crls[n].toPEM();
 	return true;
 }
 
-Store Store::fromPKCS7File(const QString &fileName, TrustMode t, ConvertResult *result, const QString &provider)
+bool CertificateCollection::toPKCS7File(const QString &fileName, const QString &provider)
 {
-	QByteArray der;
-	if(!arrayFromFile(fileName, &der))
+	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
+
+	QList<CertContext*> cert_list;
+	QList<CRLContext*> crl_list;
+	int n;
+	for(n = 0; n < d->certs.count(); ++n)
 	{
-		if(result)
-			*result = ErrorFile;
-		return Store();
+		CertContext *c = static_cast<CertContext *>(d->certs[n].context());
+		cert_list += c;
+	}
+	for(n = 0; n < d->crls.count(); ++n)
+	{
+		CRLContext *c = static_cast<CRLContext *>(d->crls[n].context());
+		crl_list += c;
 	}
 
-	Store store;
-	StoreContext *c = static_cast<StoreContext *>(getContext("store", provider));
-	ConvertResult r = c->fromPKCS7(der, t);
-	if(result)
-		*result = r;
-	if(r == ConvertGood)
-		store.change(c);
-	return store;
+	QByteArray result = col->toPKCS7(cert_list, crl_list);
+	delete col;
+
+	return arrayToFile(fileName, result);
 }
 
-Store Store::fromFlatTextFile(const QString &fileName, TrustMode t, ConvertResult *result, const QString &provider)
+CertificateCollection CertificateCollection::fromFlatTextFile(const QString &fileName, ConvertResult *result, const QString &provider)
 {
 	QFile f(fileName);
 	if(!f.open(QFile::ReadOnly))
 	{
 		if(result)
 			*result = ErrorFile;
-		return Store();
+		return CertificateCollection();
 	}
 
-	Store store(provider);
+	CertificateCollection certs;
 	QTextStream ts(&f);
 	while(1)
 	{
-		QString pem = readNextPem(&ts);
+		bool isCRL;
+		QString pem = readNextPem(&ts, &isCRL);
 		if(pem.isNull())
 			break;
-		Certificate cert = Certificate::fromPEM(pem, 0, store.provider()->name());
-		if(!cert.isNull())
-			store.addCertificate(cert, t);
+		if(isCRL)
+		{
+			CRL c = CRL::fromPEM(pem, 0, provider);
+			if(!c.isNull())
+				certs.addCRL(c);
+		}
+		else
+		{
+			Certificate c = Certificate::fromPEM(pem, 0, provider);
+			if(!c.isNull())
+				certs.addCertificate(c);
+		}
 	}
-	return store;
+	return certs;
 }
 
-void Store::append(const Store &a)
+CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileName, ConvertResult *result, const QString &provider)
 {
-	static_cast<StoreContext *>(context())->append(*(static_cast<const StoreContext *>(a.context())));
-}
+	QByteArray der;
+	if(!arrayFromFile(fileName, &der))
+	{
+		if(result)
+			*result = ErrorFile;
+		return CertificateCollection();
+	}
 
-Store Store::operator+(const Store &a) const
-{
-	Store s = *this;
-	s.append(a);
-	return s;
-}
+	CertificateCollection certs;
 
-Store & Store::operator+=(const Store &a)
-{
-	append(a);
-	return *this;
+	QList<CertContext*> cert_list;
+	QList<CRLContext*> crl_list;
+	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
+	ConvertResult r = col->fromPKCS7(der, &cert_list, &crl_list);
+	delete col;
+
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+	{
+		int n;
+		for(n = 0; n < cert_list.count(); ++n)
+		{
+			Certificate c;
+			c.change(cert_list[n]);
+			certs.addCertificate(c);
+		}
+		for(n = 0; n < crl_list.count(); ++n)
+		{
+			CRL c;
+			c.change(crl_list[n]);
+			certs.addCRL(c);
+		}
+	}
+	return certs;
 }
 
 //----------------------------------------------------------------------------
@@ -927,9 +1012,9 @@ CRL CertificateAuthority::updateCRL(const CRL &crl, const QList<CRLEntry> &entri
 }
 
 //----------------------------------------------------------------------------
-// PersonalBundle
+// KeyBundle
 //----------------------------------------------------------------------------
-class PersonalBundle::Private
+class KeyBundle::Private : public QSharedData
 {
 public:
 	QString name;
@@ -937,65 +1022,64 @@ public:
 	PrivateKey key;
 };
 
-PersonalBundle::PersonalBundle()
+KeyBundle::KeyBundle()
+:d(new Private)
 {
-	d = new Private;
 }
 
-PersonalBundle::PersonalBundle(const QString &fileName, const QSecureArray &passphrase)
+KeyBundle::KeyBundle(const QString &fileName, const QSecureArray &passphrase)
+:d(new Private)
 {
-	d = new Private;
 	*this = fromFile(fileName, passphrase, 0, QString());
 }
 
-PersonalBundle::PersonalBundle(const PersonalBundle &from)
+KeyBundle::KeyBundle(const KeyBundle &from)
+:d(from.d)
 {
-	d = new Private(*from.d);
 }
 
-PersonalBundle::~PersonalBundle()
+KeyBundle::~KeyBundle()
 {
-	delete d;
 }
 
-PersonalBundle & PersonalBundle::operator=(const PersonalBundle &from)
+KeyBundle & KeyBundle::operator=(const KeyBundle &from)
 {
-	*d = *from.d;
+	d = from.d;
 	return *this;
 }
 
-bool PersonalBundle::isNull() const
+bool KeyBundle::isNull() const
 {
 	return d->chain.isEmpty();
 }
 
-QString PersonalBundle::name() const
+QString KeyBundle::name() const
 {
 	return d->name;
 }
 
-CertificateChain PersonalBundle::certificateChain() const
+CertificateChain KeyBundle::certificateChain() const
 {
 	return d->chain;
 }
 
-PrivateKey PersonalBundle::privateKey() const
+PrivateKey KeyBundle::privateKey() const
 {
 	return d->key;
 }
 
-void PersonalBundle::setName(const QString &s)
+void KeyBundle::setName(const QString &s)
 {
 	d->name = s;
 }
 
-void PersonalBundle::setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key)
+void KeyBundle::setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key)
 {
 	d->chain = c;
 	d->key = key;
 }
 
-QByteArray PersonalBundle::toArray(const QSecureArray &passphrase, const QString &provider) const
+QByteArray KeyBundle::toArray(const QSecureArray &passphrase, const QString &provider) const
 {
 	PIXContext *pix = static_cast<PIXContext *>(getContext("pix", provider));
 
@@ -1008,18 +1092,18 @@ QByteArray PersonalBundle::toArray(const QSecureArray &passphrase, const QString
 	return buf;
 }
 
-bool PersonalBundle::toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider) const
+bool KeyBundle::toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider) const
 {
 	return arrayToFile(fileName, toArray(passphrase, provider));
 }
 
-PersonalBundle PersonalBundle::fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+KeyBundle KeyBundle::fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
 	QString name;
 	QList<CertContext *> list;
 	PKeyContext *kc = 0;
 
-	PersonalBundle bundle;
+	KeyBundle bundle;
 	PIXContext *pix = static_cast<PIXContext *>(getContext("pix", provider));
 	ConvertResult r = pix->fromPKCS12(a, passphrase, &name, &list, &kc);
 	if(result)
@@ -1038,16 +1122,134 @@ PersonalBundle PersonalBundle::fromArray(const QByteArray &a, const QSecureArray
 	return bundle;
 }
 
-PersonalBundle PersonalBundle::fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+KeyBundle KeyBundle::fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
 	QByteArray der;
 	if(!arrayFromFile(fileName, &der))
 	{
 		if(result)
 			*result = ErrorFile;
-		return PersonalBundle();
+		return KeyBundle();
 	}
 	return fromArray(der, passphrase, result, provider);
+}
+
+//----------------------------------------------------------------------------
+// PGPKey
+//----------------------------------------------------------------------------
+// TODO
+PGPKey::PGPKey()
+{
+}
+
+PGPKey::PGPKey(const QString &fileName)
+{
+	Q_UNUSED(fileName);
+}
+
+PGPKey::PGPKey(const PGPKey &from)
+:Algorithm(from)
+{
+}
+
+PGPKey::~PGPKey()
+{
+}
+
+PGPKey & PGPKey::operator=(const PGPKey &from)
+{
+	Algorithm::operator=(from);
+	return *this;
+}
+
+bool PGPKey::isNull() const
+{
+	return false;
+}
+
+QString PGPKey::keyId() const
+{
+	return QString();
+}
+
+QString PGPKey::primaryUserId() const
+{
+	return QString();
+}
+
+QStringList PGPKey::userIds() const
+{
+	return QStringList();
+}
+
+bool PGPKey::havePrivate() const
+{
+	return false;
+}
+
+QDateTime PGPKey::creationDate() const
+{
+	return QDateTime();
+}
+
+QDateTime PGPKey::expirationDate() const
+{
+	return QDateTime();
+}
+
+QString PGPKey::fingerprint() const
+{
+	return QString();
+}
+
+bool PGPKey::inKeyring() const
+{
+	return false;
+}
+
+bool PGPKey::isTrusted() const
+{
+	return false;
+}
+
+QSecureArray PGPKey::toArray() const
+{
+	return QSecureArray();
+}
+
+QString PGPKey::toString() const
+{
+	return QString();
+}
+
+bool PGPKey::toFile(const QString &fileName) const
+{
+	Q_UNUSED(fileName);
+	return false;
+}
+
+PGPKey PGPKey::fromArray(const QSecureArray &a, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(a);
+	Q_UNUSED(result);
+	Q_UNUSED(provider);
+	return PGPKey();
+}
+
+PGPKey PGPKey::fromString(const QString &s, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(s);
+	Q_UNUSED(result);
+	Q_UNUSED(provider);
+	return PGPKey();
+}
+
+PGPKey PGPKey::fromFile(const QString &fileName, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(fileName);
+	Q_UNUSED(result);
+	Q_UNUSED(provider);
+	return PGPKey();
 }
 
 }

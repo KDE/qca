@@ -98,7 +98,7 @@ class TLS::Private
 public:
 	Private()
 	{
-		store = 0;
+		//store = 0;
 	}
 
 	void reset()
@@ -137,7 +137,7 @@ public:
 
 	Certificate ourCert;
 	PrivateKey ourKey;
-	Store *store;
+	//Store *store;
 };
 
 TLS::TLS(QObject *parent, const QString &provider)
@@ -171,9 +171,10 @@ void TLS::setCertificate(const CertificateChain &cert, const PrivateKey &key)
 	d->ourKey = key;
 }
 
-void TLS::setStore(const Store &store)
+void TLS::setTrustedCertificates(const CertificateCollection &trusted)
 {
-	d->store = new Store(store);
+	Q_UNUSED(trusted);
+	//d->store = new Store(store);
 }
 
 void TLS::setConstraints(SecurityLevel s)
@@ -206,9 +207,9 @@ bool TLS::startClient(const QString &host)
 	d->reset();
 	d->host = host;
 
-	if(!d->c->startClient(*((StoreContext *)d->store->context()), *((CertContext *)d->ourCert.context()), *((PKeyContext *)d->ourKey.context())))
+	/*if(!d->c->startClient(*((StoreContext *)d->store->context()), *((CertContext *)d->ourCert.context()), *((PKeyContext *)d->ourKey.context())))
 		return false;
-	QTimer::singleShot(0, this, SLOT(update()));
+	QTimer::singleShot(0, this, SLOT(update()));*/
 	return true;
 }
 
@@ -216,9 +217,9 @@ bool TLS::startServer()
 {
 	d->reset();
 
-	if(!d->c->startServer(*((StoreContext *)d->store->context()), *((CertContext *)d->ourCert.context()), *((PKeyContext *)d->ourKey.context())))
+	/*if(!d->c->startServer(*((StoreContext *)d->store->context()), *((CertContext *)d->ourCert.context()), *((PKeyContext *)d->ourKey.context())))
 		return false;
-	QTimer::singleShot(0, this, SLOT(update()));
+	QTimer::singleShot(0, this, SLOT(update()));*/
 	return true;
 }
 

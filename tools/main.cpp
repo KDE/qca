@@ -289,7 +289,7 @@ static void usage()
 	printf("  --makereq [priv.pem] (passphrase)\n");
 	printf("  --showcert [cert.pem]\n");
 	printf("  --showreq [certreq.pem]\n");
-	printf("  --validate [cert.pem] (nonrootstore.pem)\n");
+	printf("  --validate [cert.pem] (nonroots.pem)\n");
 	printf("\n");
 }
 
@@ -968,13 +968,14 @@ int main(int argc, char **argv)
 		}
 
 		// get roots
-		QCA::Store store = QCA::systemStore();
+		QCA::CertificateCollection roots = QCA::systemStore();
 
 		// get nonroots
+		QCA::CertificateCollection nonroots;
 		if(args.count() >= 3)
-			store += QCA::Store::fromFlatTextFile(args[2]);
+			nonroots = QCA::CertificateCollection::fromFlatTextFile(args[2]);
 
-		QCA::Validity v = store.validate(target);
+		QCA::Validity v = target.validate(roots, nonroots);
 		if(v == QCA::ValidityGood)
 			printf("Certificate is valid\n");
 		else

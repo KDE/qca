@@ -25,6 +25,7 @@
 #include "qca_plugin.h"
 #include "qca_textfilter.h"
 #include "qca_cert.h"
+#include "qca_keystore.h"
 #include "qcaprovider.h"
 
 #ifndef QCA_NO_SYSTEMSTORE
@@ -43,12 +44,30 @@ Provider *create_default_provider();
 //----------------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------------
-static QMutex *manager_mutex = 0;
-static QString *app_name = 0;
-static QCA::ProviderManager *manager = 0;
-static QCA::Random *global_rng = 0;
-static bool qca_init = false;
-static bool qca_secmem = false;
+class Global
+{
+public:
+	bool secmem;
+	QString app_name;
+	QMutex manager_mutex;
+	ProviderManager manager;
+	Random *rng;
+	KeyStoreManager *ksm;
+
+	Global()
+	{
+		rng = 0;
+		ksm = 0;
+		secmem = false;
+	}
+
+	~Global()
+	{
+		delete rng;
+	}
+};
+
+static Global *global = 0;
 
 static bool features_have(const QStringList &have, const QStringList &want)
 {
@@ -62,7 +81,7 @@ static bool features_have(const QStringList &have, const QStringList &want)
 
 void init()
 {
-	if(qca_init)
+	if(global)
 		return;
 
 	init(Practical, 64);
@@ -70,10 +89,8 @@ void init()
 
 void init(MemoryMode mode, int prealloc)
 {
-	if(qca_init)
+	if(global)
 		return;
-
-	qca_init = true;
 
 	bool allow_mmap_fallback = false;
 	bool drop_root = false;
@@ -85,7 +102,7 @@ void init(MemoryMode mode, int prealloc)
 	else if(mode == Locking)
 		drop_root = true;
 
-	qca_secmem = botan_init(prealloc, allow_mmap_fallback);
+	bool secmem = botan_init(prealloc, allow_mmap_fallback);
 
 	if(drop_root)
 	{
@@ -94,55 +111,43 @@ void init(MemoryMode mode, int prealloc)
 #endif
 	}
 
-	manager_mutex = new QMutex;
-
-	manager = new ProviderManager;
-	manager->setDefault(create_default_provider()); // manager owns it
-
-	app_name = new QString;
+	global = new Global;
+	global->secmem = secmem;
+	global->manager.setDefault(create_default_provider()); // manager owns it
 }
 
 void deinit()
 {
-	if(!qca_init)
+	if(!global)
 		return;
 
-	delete global_rng;
-	global_rng = 0;
-
-	delete app_name;
-	app_name = 0;
-
-	delete manager;
-	manager = 0;
-
-	delete manager_mutex;
-	manager_mutex = 0;
-
+	delete global;
+	global = 0;
 	botan_deinit();
-	qca_secmem = false;
-	qca_init = false;
 }
 
 bool haveSecureMemory()
 {
-	return qca_secmem;
+	if(!global)
+		return false;
+
+	return global->secmem;
 }
 
 bool isSupported(const QStringList &features)
 {
-	if(!qca_init)
+	if(!global)
 		return false;
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
-	if(features_have(manager->allFeatures(), features))
+	if(features_have(global->manager.allFeatures(), features))
 		return true;
 
 	// ok, try scanning for new stuff
-	manager->scan();
+	global->manager.scan();
 
-	if(features_have(manager->allFeatures(), features))
+	if(features_have(global->manager.allFeatures(), features))
 		return true;
 
 	return false;
@@ -157,95 +162,100 @@ QStringList supportedFeatures()
 {
 	init();
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
 	// query all features
-	manager->scan();
-	return manager->allFeatures();
+	global->manager.scan();
+	return global->manager.allFeatures();
 }
 
 QStringList defaultFeatures()
 {
 	init();
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
-	return manager->find("default")->features();
+	return global->manager.find("default")->features();
 }
 
 bool insertProvider(Provider *p, int priority)
 {
 	init();
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
-	return manager->add(p, priority);
+	return global->manager.add(p, priority);
 }
 
 void setProviderPriority(const QString &name, int priority)
 {
-	if(!qca_init)
+	if(!global)
 		return;
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
-	manager->changePriority(name, priority);
+	global->manager.changePriority(name, priority);
 }
 
 int providerPriority(const QString &name)
 {
-	if(!qca_init)
+	if(!global)
 		return -1;
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
-	return manager->getPriority(name);
+	return global->manager.getPriority(name);
 }
 
 const ProviderList & providers()
 {
 	init();
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
-	return manager->providers();
+	return global->manager.providers();
 }
 
 void scanForPlugins()
 {
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
-	manager->scan();
+	global->manager.scan();
 }
 
 void unloadAllPlugins()
 {
-	if(!qca_init)
+	if(!global)
 		return;
 
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
 	// if the global_rng was owned by a plugin, then delete it
-	if(global_rng && (global_rng->provider() != manager->find("default")))
+	if(global->rng && (global->rng->provider() != global->manager.find("default")))
 	{
-		delete global_rng;
-		global_rng = 0;
+		delete global->rng;
+		global->rng = 0;
 	}
 
-	manager->unloadAll();
+	global->manager.unloadAll();
 }
 
 Random & globalRNG()
 {
-	if(!global_rng)
-		global_rng = new Random;
-	return *global_rng;
+	if(!global->rng)
+		global->rng = new Random;
+	return *global->rng;
 }
 
 void setGlobalRNG(const QString &provider)
 {
-	delete global_rng;
-	global_rng = new Random(provider);
+	delete global->rng;
+	global->rng = new Random(provider);
+}
+
+KeyStoreManager *keyStoreManager()
+{
+	return global->ksm;
 }
 
 bool haveSystemStore()
@@ -257,27 +267,27 @@ bool haveSystemStore()
 #endif
 }
 
-Store systemStore(const QString &provider)
+CertificateCollection systemStore(const QString &provider)
 {
 #ifndef QCA_NO_SYSTEMSTORE
 	return qca_get_systemstore(provider);
 #else
-	return Store(provider);
+	return CertificateCollection();
 #endif
 }
 
 QString appName()
 {
-	if(!qca_init)
+	if(!global)
 		return QString();
-	return *app_name;
+	return global->app_name;
 }
 
 void setAppName(const QString &s)
 {
-	if(!qca_init)
+	if(!global)
 		return;
-	*app_name = s;
+	global->app_name = s;
 }
 
 QString arrayToHex(const QSecureArray &a)
@@ -292,33 +302,33 @@ QByteArray hexToArray(const QString &str)
 
 static Provider *getProviderForType(const QString &type, const QString &provider)
 {
-	QMutexLocker lock(manager_mutex);
+	QMutexLocker lock(&global->manager_mutex);
 
 	Provider *p = 0;
 	bool scanned = false;
 	if(!provider.isEmpty())
 	{
 		// try using specific provider
-		p = manager->findFor(provider, type);
+		p = global->manager.findFor(provider, type);
 		if(!p)
 		{
 			// maybe this provider is new, so scan and try again
-			manager->scan();
+			global->manager.scan();
 			scanned = true;
-			p = manager->findFor(provider, type);
+			p = global->manager.findFor(provider, type);
 		}
 	}
 	if(!p)
 	{
 		// try using some other provider
-		p = manager->findFor(QString(), type);
+		p = global->manager.findFor(QString(), type);
 		if((!p || p->name() == "default") && !scanned)
 		{
 			// maybe there are new providers, so scan and try again
 			//   before giving up or using default
-			manager->scan();
+			global->manager.scan();
 			scanned = true;
-			p = manager->findFor(QString::null, type);
+			p = global->manager.findFor(QString(), type);
 		}
 	}
 

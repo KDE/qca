@@ -340,9 +340,9 @@ SMIME::~SMIME()
 {
 }
 
-void SMIME::setStore(const Store &store)
+void SMIME::setTrustedCertificates(const CertificateCollection &trusted)
 {
-	Q_UNUSED(store);
+	Q_UNUSED(trusted);
 }
 
 void SMIME::setPrivateKeys(const QList<PrivateKey> &keys)

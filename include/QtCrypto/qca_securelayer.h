@@ -129,7 +129,7 @@ namespace QCA
 		static QStringList supportedCipherSuites(const QString &provider = QString());
 
 		void setCertificate(const CertificateChain &cert, const PrivateKey &key);
-		void setStore(const Store &store);
+		void setTrustedCertificates(const CertificateCollection &trusted);
 		void setConstraints(SecurityLevel s);
 		void setConstraints(int minSSF, int maxSSF);
 		void setConstraints(const QStringList &cipherSuiteList);

@@ -219,7 +219,7 @@ namespace QCA
 		SMIME(QObject *parent = 0, const QString &provider = QString());
 		~SMIME();
 
-		void setStore(const Store &store);
+		void setTrustedCertificates(const CertificateCollection &trusted); // todo: untrusted?
 		void setPrivateKeys(const QList<PrivateKey> &keys);
 	};
 }
