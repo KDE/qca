@@ -74,6 +74,7 @@ static bool tdes_final(int ctx, char *out);
 static unsigned int tdes_finalSize(int ctx);
 
 static int rsa_keyCreateFromDER(const char *in, unsigned int len, bool sec);
+static int rsa_keyCreateGenerate(unsigned int bits);
 static int rsa_keyClone(int ctx);
 static void rsa_keyDestroy(int ctx);
 static void rsa_keyToDER(int ctx, char **out, unsigned int *len);
@@ -232,6 +233,7 @@ void *_QCAOpenSSL::functions(int cap)
 	else if(cap == QCA::CAP_RSA) {
 		QCA_RSAFunctions *f = new QCA_RSAFunctions;
 		f->keyCreateFromDER = rsa_keyCreateFromDER;
+		f->keyCreateGenerate = rsa_keyCreateGenerate;
 		f->keyClone = rsa_keyClone;
 		f->keyDestroy = rsa_keyDestroy;
 		f->keyToDER = rsa_keyToDER;
@@ -468,7 +470,7 @@ int rsa_keyCreateFromDER(const char *in, unsigned int len, bool sec)
 	i->ctx = counter++;
 	i->r = r;
 	map_rsakey->append(i);
-	printf("created %d\n", i->ctx);
+	//printf("created %d\n", i->ctx);
 	return i->ctx;
 }
 
@@ -480,13 +482,13 @@ int rsa_keyClone(int ctx)
 	++from->r->references;
 	i->r = from->r;
 	map_rsakey->append(i);
-	printf("cloned %d to %d\n", from->ctx, i->ctx);
+	//printf("cloned %d to %d\n", from->ctx, i->ctx);
 	return i->ctx;
 }
 
 void rsa_keyDestroy(int ctx)
 {
-	printf("destroying %d\n", ctx);
+	//printf("destroying %d\n", ctx);
 	pair_rsakey *i = find_rsakey(ctx);
 	RSA_free(i->r);
 	map_rsakey->removeRef(i);
@@ -503,7 +505,7 @@ bool rsa_encrypt(int ctx, const char *in, unsigned int len, char **out, unsigned
 {
 	pair_rsakey *i = find_rsakey(ctx);
 
-	printf("using context %d [r=%p]\n", ctx, i->r);
+	//printf("using context %d [r=%p]\n", ctx, i->r);
 	int size = RSA_size(i->r);
 	int flen = len;
 	if(flen >= size - 11)
@@ -526,19 +528,19 @@ bool rsa_decrypt(int ctx, const char *in, unsigned int len, char **out, unsigned
 {
 	pair_rsakey *i = find_rsakey(ctx);
 	if(!i) {
-		printf("no key!!\n");
+		//printf("no key!!\n");
 		return false;
 	}
-	printf("using context %d [r=%p]\n", ctx, i->r);
+	//printf("using context %d [r=%p]\n", ctx, i->r);
 
 	int size = RSA_size(i->r);
 	int flen = len;
 	QByteArray result(size);
 	unsigned char *from = (unsigned char *)in;
 	unsigned char *to = (unsigned char *)result.data();
-	printf("about to decrypt\n");
+	//printf("about to decrypt\n");
 	int r = RSA_private_decrypt(flen, from, to, i->r, RSA_PKCS1_PADDING);
-	printf("done decrypt\n");
+	//printf("done decrypt\n");
 	if(r == -1)
 		return false;
 	result.resize(r);
@@ -549,11 +551,15 @@ bool rsa_decrypt(int ctx, const char *in, unsigned int len, char **out, unsigned
 	return true;
 }
 
-/*bool RSAKey::generateKey(int bits)
+int rsa_keyCreateGenerate(unsigned int bits)
 {
 	RSA *r = RSA_generate_key(bits, RSA_F4, NULL, NULL);
 	if(!r)
-		return false;
-	d->r = r;
-	return true;
-}*/
+		return -1;
+
+	pair_rsakey *i = new pair_rsakey;
+	i->ctx = counter++;
+	i->r = r;
+	map_rsakey->append(i);
+	return i->ctx;
+}

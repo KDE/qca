@@ -7,6 +7,7 @@ This library provides a skeleton API for the following features:
 
   Hashing (SHA1, MD5)
   Ciphers (3DES, AES)
+  RSA
   X509
   SSL/TLS
   SASL

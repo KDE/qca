@@ -177,6 +177,7 @@ namespace QCA
 
 		friend class RSA;
 		int internalContext() const;
+		bool generate(unsigned int bits);
 	};
 
 	class RSA
@@ -191,7 +192,7 @@ namespace QCA
 		bool encrypt(const QByteArray &a, QByteArray *out) const;
 		bool decrypt(const QByteArray &a, QByteArray *out) const;
 
-		static RSAKey generateKey(int bits);
+		static RSAKey generateKey(unsigned int bits);
 
 	private:
 		RSAKey v_key;

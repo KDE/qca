@@ -1,13 +1,16 @@
-* flesh out rsa and rsakey
+* rsakey: to/from PEM
 * rsa: choice of pad
 * make 'cipherkey' class?
-* better handling of errors ('empty' arrays are not a good idea)
-* ability to disable pkcs padding on ciphers
-* better entropy?
-* clean up plugin system
+* cipher: better handling of errors ('empty' arrays are not a good idea)
+* cipher: ability to disable pkcs padding
+* cipher: better entropy for keygen?
+* clean up openssl plugin
 
 * ssl/tls/x509 (also server support)
 * sasl (also server support)
+* dsa
+
+* dh?
 
 * figure out where to install the lib and plugins. maybe Qt plugin path?
 

@@ -47,6 +47,7 @@ struct QCA_CipherFunctions
 struct QCA_RSAFunctions
 {
 	int (*keyCreateFromDER)(const char *in, unsigned int len, bool sec);
+	int (*keyCreateGenerate)(unsigned int bits);
 	int (*keyClone)(int ctx);
 	void (*keyDestroy)(int ctx);
 	void (*keyToDER)(int ctx, char **out, unsigned int *len);

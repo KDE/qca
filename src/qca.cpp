@@ -419,6 +419,15 @@ bool RSAKey::fromDER(const QByteArray &a, bool sec)
 	return true;
 }
 
+bool RSAKey::generate(unsigned int bits)
+{
+	int ctx = d->f->keyCreateGenerate(bits);
+	if(ctx == -1)
+		return false;
+	d->ctx = ctx;
+	return true;
+}
+
 int RSAKey::internalContext() const
 {
 	return d->ctx;
@@ -480,7 +489,9 @@ bool RSA::decrypt(const QByteArray &a, QByteArray *b) const
 	return true;
 }
 
-RSAKey RSA::generateKey(int bits)
+RSAKey RSA::generateKey(unsigned int bits)
 {
-	return RSAKey();
+	RSAKey k;
+	k.generate(bits);
+	return k;
 }

@@ -30,12 +30,16 @@ int main(int argc, char **argv)
 	if(!QCA::isSupported(QCA::CAP_RSA))
 		printf("RSA not supported!\n");
 	else {
-		QCA::RSAKey pubkey = readKeyFile("keypublic.der");
+		/*QCA::RSAKey pubkey = readKeyFile("keypublic.der");
 		if(pubkey.isNull())
 			return 1;
 		QCA::RSAKey seckey = readKeyFile("keyprivate.der", true);
 		if(seckey.isNull())
+			return 1;*/
+		QCA::RSAKey seckey = QCA::RSA::generateKey(1024);
+		if(seckey.isNull())
 			return 1;
+		QCA::RSAKey pubkey = seckey;
 
 		// encrypt some data
 		QByteArray a(cs.length());
