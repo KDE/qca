@@ -63,7 +63,7 @@ class QCA_CipherContext;
 class QCA_CertContext;
 
 /**
- * Qt Cryptographic Architecture
+ * \mainpage Qt Cryptographic Architecture
  *
  * This library provides an easy API for the following features:
  *   - SSL/TLS
