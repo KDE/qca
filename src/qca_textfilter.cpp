@@ -205,7 +205,8 @@ bool Hex::ok() const
 Base64::Base64(Direction dir)
 :TextFilter(dir)
 {
-	_linebreak = 0;
+	_lb_enabled = false;
+	_lb_column = 76;
 }
 
 void Base64::clear()
@@ -215,12 +216,17 @@ void Base64::clear()
 	col = 0;
 }
 
-void Base64::setLineBreaks(int column)
+void Base64::setLineBreaksEnabled(bool b)
+{
+	_lb_enabled = b;
+}
+
+void Base64::setLineBreaksColumn(int column)
 {
 	if(column > 0)
-		_linebreak = column;
+		_lb_column = column;
 	else
-		_linebreak = 0;
+		_lb_column = 76;
 }
 
 static QSecureArray b64encode(const QSecureArray &s)
@@ -415,7 +421,7 @@ static void appendArray(QSecureArray *a, const QSecureArray &b)
 QSecureArray Base64::update(const QSecureArray &a)
 {
 	QSecureArray in;
-	if(_dir == Decode && _linebreak > 0)
+	if(_dir == Decode && _lb_enabled)
 		in = remove_linebreaks(a);
 	else
 		in = a;
@@ -448,8 +454,8 @@ QSecureArray Base64::update(const QSecureArray &a)
 
 	if(_dir == Encode)
 	{
-		if(_linebreak > 0)
-			return insert_linebreaks(b64encode(s), &col, _linebreak);
+		if(_lb_enabled)
+			return insert_linebreaks(b64encode(s), &col, _lb_column);
 		else
 			return b64encode(s);
 	}
@@ -467,8 +473,8 @@ QSecureArray Base64::final()
 {
 	if(_dir == Encode)
 	{
-		if(_linebreak > 0)
-			return insert_linebreaks(b64encode(partial), &col, _linebreak);
+		if(_lb_enabled)
+			return insert_linebreaks(b64encode(partial), &col, _lb_column);
 		else
 			return b64encode(partial);
 	}

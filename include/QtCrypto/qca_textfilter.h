@@ -219,14 +219,18 @@ namespace QCA
 		Base64(Direction dir = Encode);
 
 		/**
-		   Sets link break mode.  If enabled, linebreaks every
-		   column characters will be generated during encoding, and
-		   linebreaks will be skipped during decoding.  If
-		   disabled, linebreaks will not be generated during
-		   encode and will cause an error if found during decode.
-		   Set to 0 to disable.  The default is disabled.
+		   Sets line break mode.  If enabled, linebreaks will be
+		   added to encoded output or accepted in encoded input.
+		   If disabled, linebreaks in encoded input will cause
+		   a failure to decode.  The default is disabled.
 		*/
-		void setLineBreaks(int column);
+		void setLineBreaksEnabled(bool b);
+
+		/**
+		   Sets the column that linebreaks should be inserted at
+		   when encoding.
+		*/
+		void setLineBreaksColumn(int column);
 
 		/**
 		 Reset the internal state. This is useful to 
@@ -270,7 +274,9 @@ namespace QCA
 	private:
 		QSecureArray partial;
 		bool _ok;
-		int _linebreak, col;
+		int col;
+		bool _lb_enabled;
+		int _lb_column;
 	};
 }
 
