@@ -48,6 +48,25 @@ void BigIntUnitTest::allTests()
     CHECK( QBigInteger("256") != QBigInteger(255), true );
     CHECK( QBigInteger("-256") != QBigInteger(-255), true );
 
+    // Some comparison tests
+    QBigInteger a( "4000000000000" );
+    QBigInteger b( "-4000000000000" );
+    QBigInteger c( "2000000000000" );
+    CHECK( a < b, false );
+    CHECK( a <= b, false );
+    CHECK( a.cmp(b), 1 );
+    CHECK( a.cmp(b, true), 1 );
+    CHECK( a.cmp(b, false), 0 );
+    CHECK( a > b, true );
+    CHECK( a >= b, true );
+    CHECK( a > c, true );
+    CHECK( c.cmp(b), 1 );
+    CHECK( c.cmp(b, true), 1);
+    CHECK( c.cmp(b, false), -1);
+    CHECK( c.cmp(a), -1 );
+    CHECK( c.cmp(a, true), -1);
+    CHECK( c.cmp(a, false), -1);
+    
     // Botan's addition tests
     CHECK( QBigInteger( 255 ) += QBigInteger ( 1 ), QBigInteger( 256 ) );
     result = QBigInteger( 255 ) += QBigInteger( 1 );
