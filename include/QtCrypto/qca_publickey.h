@@ -37,19 +37,6 @@ namespace QCA
 	class DHPublicKey;
 	class DHPrivateKey;
 
-	enum DL_Group
-	{
-		DSA_512,
-		DSA_768,
-		DSA_1024,
-		IETF_768,
-		IETF_1024,
-		IETF_1536,
-		IETF_2048,
-		IETF_3072,
-		IETF_4096
-	};
-
 	/**
 	   Encryption algorithms
 	*/
@@ -101,6 +88,42 @@ namespace QCA
 		ErrorDecode,
 		ErrorPassphrase,
 		ErrorFile
+	};
+
+	enum DLGroupSet
+	{
+		DSA_512,
+		DSA_768,
+		DSA_1024,
+		IETF_768,
+		IETF_1024,
+		IETF_1536,
+		IETF_2048,
+		IETF_3072,
+		IETF_4096
+	};
+
+	class DLGroup
+	{
+	public:
+		DLGroup();
+		DLGroup(const QBigInteger &p, const QBigInteger &q, const QBigInteger &g);
+		DLGroup(const QBigInteger &p, const QBigInteger &g);
+		DLGroup(const DLGroup &from);
+		~DLGroup();
+		DLGroup & operator=(const DLGroup &from);
+
+		static QList<DLGroupSet> supportedGroupSets(const QString &provider = QString());
+
+		bool isNull() const;
+
+		QBigInteger p() const;
+		QBigInteger q() const;
+		QBigInteger g() const;
+
+	private:
+		class Private;
+		Private *d;
 	};
 
 	class QCA_EXPORT PKey : public Algorithm
@@ -233,9 +256,12 @@ namespace QCA
 		bool isBusy() const;
 
 		PrivateKey createRSA(int bits, int exp = 65537, const QString &provider = QString());
-		PrivateKey createDSA(DL_Group group, const QString &provider = QString());
-		PrivateKey createDH(DL_Group group, const QString &provider = QString());
-		PrivateKey result() const;
+		PrivateKey createDSA(const DLGroup &domain, const QString &provider = QString());
+		PrivateKey createDH(const DLGroup &domain, const QString &provider = QString());
+		PrivateKey key() const;
+
+		DLGroup createDLGroup(QCA::DLGroupSet set, const QString &provider = QString());
+		DLGroup dlGroup() const;
 
 	signals:
 		void finished();
@@ -262,23 +288,23 @@ namespace QCA
 	{
 	public:
 		RSAPrivateKey();
-		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider = QString());
+		RSAPrivateKey(const QBigInteger &n, const QBigInteger &e, const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QString &provider = QString());
 
+		QBigInteger n() const;
+		QBigInteger e() const;
 		QBigInteger p() const;
 		QBigInteger q() const;
 		QBigInteger d() const;
-		QBigInteger n() const;
-		QBigInteger e() const;
 	};
 
 	class QCA_EXPORT DSAPublicKey : public PublicKey
 	{
 	public:
 		DSAPublicKey();
-		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString());
+		DSAPublicKey(const DLGroup &domain, const QBigInteger &y, const QString &provider = QString());
 		DSAPublicKey(const DSAPrivateKey &k);
 
-		DL_Group domain() const;
+		DLGroup domain() const;
 		QBigInteger y() const;
 	};
 
@@ -286,21 +312,21 @@ namespace QCA
 	{
 	public:
 		DSAPrivateKey();
-		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString());
+		DSAPrivateKey(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x, const QString &provider = QString());
 
-		DL_Group domain() const;
-		QBigInteger x() const;
+		DLGroup domain() const;
 		QBigInteger y() const;
+		QBigInteger x() const;
 	};
 
 	class QCA_EXPORT DHPublicKey : public PublicKey
 	{
 	public:
 		DHPublicKey();
-		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString());
+		DHPublicKey(const DLGroup &domain, const QBigInteger &y, const QString &provider = QString());
 		DHPublicKey(const DHPrivateKey &k);
 
-		DL_Group domain() const;
+		DLGroup domain() const;
 		QBigInteger y() const;
 	};
 
@@ -308,11 +334,11 @@ namespace QCA
 	{
 	public:
 		DHPrivateKey();
-		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString());
+		DHPrivateKey(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x, const QString &provider = QString());
 
-		DL_Group domain() const;
-		QBigInteger x() const;
+		DLGroup domain() const;
 		QBigInteger y() const;
+		QBigInteger x() const;
 	};
 }
 

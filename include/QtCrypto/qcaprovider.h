@@ -116,6 +116,20 @@ public:
 	virtual SymmetricKey makeKey(const QSecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount) = 0;
 };
 
+class DLGroupContext : public QObject, public Provider::Context
+{
+	Q_OBJECT
+public:
+	DLGroupContext(Provider *p) : Provider::Context(p, "dlgroup") {}
+	virtual QList<DLGroupSet> supportedGroupSets() const = 0;
+	virtual bool isNull() const = 0;
+	virtual void fetchGroup(DLGroupSet set, bool block) = 0;
+	virtual void getResult(QBigInteger *p, QBigInteger *q, QBigInteger *g) const = 0;
+
+signals:
+	void finished();
+};
+
 class PKeyBase : public QObject, public Provider::Context
 {
 	Q_OBJECT
@@ -150,13 +164,13 @@ class RSAContext : public PKeyBase
 public:
 	RSAContext(Provider *p) : PKeyBase(p, "rsa") {}
 	virtual void createPrivate(int bits, int exp, bool block) = 0;
-	virtual void createPrivate(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e) = 0;
+	virtual void createPrivate(const QBigInteger &n, const QBigInteger &e, const QBigInteger &p, const QBigInteger &q, const QBigInteger &d) = 0;
 	virtual void createPublic(const QBigInteger &n, const QBigInteger &e) = 0;
+	virtual QBigInteger n() const = 0;
+	virtual QBigInteger e() const = 0;
 	virtual QBigInteger p() const = 0;
 	virtual QBigInteger q() const = 0;
 	virtual QBigInteger d() const = 0;
-	virtual QBigInteger n() const = 0;
-	virtual QBigInteger e() const = 0;
 };
 
 class DSAContext : public PKeyBase
@@ -164,12 +178,12 @@ class DSAContext : public PKeyBase
 	Q_OBJECT
 public:
 	DSAContext(Provider *p) : PKeyBase(p, "dsa") {}
-	virtual void createPrivate(DL_Group group, bool block) = 0;
-	virtual void createPrivate(DL_Group group, const QBigInteger &x, const QBigInteger &y) = 0;
-	virtual void createPublic(DL_Group group, const QBigInteger &y) = 0;
-	virtual DL_Group domain() const = 0;
-	virtual QBigInteger x() const = 0;
+	virtual void createPrivate(const DLGroup &domain, bool block) = 0;
+	virtual void createPrivate(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x) = 0;
+	virtual void createPublic(const DLGroup &domain, const QBigInteger &y) = 0;
+	virtual DLGroup domain() const = 0;
 	virtual QBigInteger y() const = 0;
+	virtual QBigInteger x() const = 0;
 };
 
 class DHContext : public PKeyBase
@@ -177,12 +191,12 @@ class DHContext : public PKeyBase
 	Q_OBJECT
 public:
 	DHContext(Provider *p) : PKeyBase(p, "dh") {}
-	virtual void createPrivate(DL_Group group, bool block) = 0;
-	virtual void createPrivate(DL_Group group, const QBigInteger &x, const QBigInteger &y) = 0;
-	virtual void createPublic(DL_Group group, const QBigInteger &y) = 0;
-	virtual DL_Group domain() const = 0;
-	virtual QBigInteger x() const = 0;
+	virtual void createPrivate(const DLGroup &domain, bool block) = 0;
+	virtual void createPrivate(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x) = 0;
+	virtual void createPublic(const DLGroup &domain, const QBigInteger &y) = 0;
+	virtual DLGroup domain() const = 0;
 	virtual QBigInteger y() const = 0;
+	virtual QBigInteger x() const = 0;
 };
 
 class PKeyContext : public Provider::Context

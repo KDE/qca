@@ -22,6 +22,7 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
+  pkey: ability to get the bitsize of a key
   qcaprovider.h
 
 * build system:

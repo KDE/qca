@@ -67,6 +67,85 @@ bool arrayFromFile(const QString &fileName, QByteArray *a)
 }
 
 //----------------------------------------------------------------------------
+// DLGroup
+//----------------------------------------------------------------------------
+class DLGroup::Private
+{
+public:
+	QBigInteger p, q, g;
+
+	Private(const QBigInteger &p1, const QBigInteger &q1, const QBigInteger &g1)
+	:p(p1), q(q1), g(g1)
+	{
+	}
+};
+
+DLGroup::DLGroup()
+{
+	d = 0;
+}
+
+DLGroup::DLGroup(const QBigInteger &p, const QBigInteger &q, const QBigInteger &g)
+{
+	d = new Private(p, q, g);
+}
+
+DLGroup::DLGroup(const QBigInteger &p, const QBigInteger &g)
+{
+	d = new Private(p, 0, g);
+}
+
+DLGroup::DLGroup(const DLGroup &from)
+{
+	d = 0;
+	*this = from;
+}
+
+DLGroup::~DLGroup()
+{
+	delete d;
+}
+
+DLGroup & DLGroup::operator=(const DLGroup &from)
+{
+	delete d;
+	d = 0;
+
+	if(from.d)
+		d = new Private(*from.d);
+
+	return *this;
+}
+
+QList<DLGroupSet> DLGroup::supportedGroupSets(const QString &provider)
+{
+	DLGroupContext *c = static_cast<DLGroupContext *>(getContext("dlgroup", provider));
+	QList<DLGroupSet> list = c->supportedGroupSets();
+	delete c;
+	return list;
+}
+
+bool DLGroup::isNull() const
+{
+	return (d ? false: true);
+}
+
+QBigInteger DLGroup::p() const
+{
+	return d->p;
+}
+
+QBigInteger DLGroup::q() const
+{
+	return d->q;
+}
+
+QBigInteger DLGroup::g() const
+{
+	return d->g;
+}
+
+//----------------------------------------------------------------------------
 // PKey
 //----------------------------------------------------------------------------
 class PKey::Private
@@ -533,21 +612,25 @@ public:
 	KeyGenerator *parent;
 	bool blocking, wasBlocking;
 	PrivateKey key;
+	DLGroup group;
 
 	PKeyBase *k;
 	PKeyContext *dest;
+	DLGroupContext *dc;
 
 	Private(KeyGenerator *_parent)
 	{
 		parent = _parent;
 		k = 0;
 		dest = 0;
+		dc = 0;
 	}
 
 	~Private()
 	{
 		delete k;
 		delete dest;
+		delete dc;
 	}
 
 public slots:
@@ -568,6 +651,21 @@ public slots:
 			delete dest;
 			dest = 0;
 		}
+
+		if(!wasBlocking)
+			emit parent->finished();
+	}
+
+	void done_group()
+	{
+		if(!dc->isNull())
+		{
+			QBigInteger p, q, g;
+			dc->getResult(&p, &q, &g);
+			group = DLGroup(p, q, g);
+		}
+		delete dc;
+		dc = 0;
 
 		if(!wasBlocking)
 			emit parent->finished();
@@ -625,7 +723,7 @@ PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 	return d->key;
 }
 
-PrivateKey KeyGenerator::createDSA(DL_Group group, const QString &provider)
+PrivateKey KeyGenerator::createDSA(const DLGroup &domain, const QString &provider)
 {
 	if(isBusy())
 		return PrivateKey();
@@ -638,18 +736,18 @@ PrivateKey KeyGenerator::createDSA(DL_Group group, const QString &provider)
 	if(!d->blocking)
 	{
 		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
-		static_cast<DSAContext *>(d->k)->createPrivate(group, false);
+		static_cast<DSAContext *>(d->k)->createPrivate(domain, false);
 	}
 	else
 	{
-		static_cast<DSAContext *>(d->k)->createPrivate(group, true);
+		static_cast<DSAContext *>(d->k)->createPrivate(domain, true);
 		d->done();
 	}
 
 	return d->key;
 }
 
-PrivateKey KeyGenerator::createDH(DL_Group group, const QString &provider)
+PrivateKey KeyGenerator::createDH(const DLGroup &domain, const QString &provider)
 {
 	if(isBusy())
 		return PrivateKey();
@@ -662,20 +760,48 @@ PrivateKey KeyGenerator::createDH(DL_Group group, const QString &provider)
 	if(!d->blocking)
 	{
 		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
-		static_cast<DHContext *>(d->k)->createPrivate(group, false);
+		static_cast<DHContext *>(d->k)->createPrivate(domain, false);
 	}
 	else
 	{
-		static_cast<DHContext *>(d->k)->createPrivate(group, true);
+		static_cast<DHContext *>(d->k)->createPrivate(domain, true);
 		d->done();
 	}
 
 	return d->key;
 }
 
-PrivateKey KeyGenerator::result() const
+PrivateKey KeyGenerator::key() const
 {
 	return d->key;
+}
+
+DLGroup KeyGenerator::createDLGroup(QCA::DLGroupSet set, const QString &provider)
+{
+	if(isBusy())
+		return DLGroup();
+
+	d->group = DLGroup();
+	d->wasBlocking = d->blocking;
+	d->dc = static_cast<DLGroupContext *>(getContext("dlgroup", provider));
+
+	if(!d->blocking)
+	{
+		connect(d->dc, SIGNAL(finished()), d, SLOT(done_group()));
+		d->dc->fetchGroup(set, false);
+	}
+	else
+	{
+		d->dc->fetchGroup(set, true);
+		d->done_group();
+	}
+
+	return d->group;
+}
+
+DLGroup KeyGenerator::dlGroup() const
+{
+	return d->group;
 }
 
 //----------------------------------------------------------------------------
@@ -687,9 +813,9 @@ RSAPublicKey::RSAPublicKey()
 
 RSAPublicKey::RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider)
 {
-	RSAContext *k = (RSAContext *)getContext("rsa", provider);
+	RSAContext *k = static_cast<RSAContext *>(getContext("rsa", provider));
 	k->createPublic(n, e);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()->name()));
 	c->setKey(k);
 	change(c);
 }
@@ -701,12 +827,12 @@ RSAPublicKey::RSAPublicKey(const RSAPrivateKey &k)
 
 QBigInteger RSAPublicKey::n() const
 {
-	return ((RSAContext *)((PKeyContext *)context())->key())->n();
+	return static_cast<const RSAContext *>(static_cast<const PKeyContext *>(context())->key())->n();
 }
 
 QBigInteger RSAPublicKey::e() const
 {
-	return ((RSAContext *)((PKeyContext *)context())->key())->e();
+	return static_cast<const RSAContext *>(static_cast<const PKeyContext *>(context())->key())->e();
 }
 
 //----------------------------------------------------------------------------
@@ -716,38 +842,38 @@ RSAPrivateKey::RSAPrivateKey()
 {
 }
 
-RSAPrivateKey::RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider)
+RSAPrivateKey::RSAPrivateKey(const QBigInteger &n, const QBigInteger &e, const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QString &provider)
 {
-	RSAContext *k = (RSAContext *)getContext("rsa", provider);
-	k->createPrivate(p, q, d, n, e);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
+	RSAContext *k = static_cast<RSAContext *>(getContext("rsa", provider));
+	k->createPrivate(n, e, p, q, d);
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()->name()));
 	c->setKey(k);
 	change(c);
 }
 
-QBigInteger RSAPrivateKey::p() const
-{
-	return ((RSAContext *)((PKeyContext *)context())->key())->p();
-}
-
-QBigInteger RSAPrivateKey::q() const
-{
-	return ((RSAContext *)((PKeyContext *)context())->key())->q();
-}
-
-QBigInteger RSAPrivateKey::d() const
-{
-	return ((RSAContext *)((PKeyContext *)context())->key())->d();
-}
-
 QBigInteger RSAPrivateKey::n() const
 {
-	return ((RSAContext *)((PKeyContext *)context())->key())->n();
+	return static_cast<const RSAContext *>(static_cast<const PKeyContext *>(context())->key())->n();
 }
 
 QBigInteger RSAPrivateKey::e() const
 {
-	return ((RSAContext *)((PKeyContext *)context())->key())->e();
+	return static_cast<const RSAContext *>(static_cast<const PKeyContext *>(context())->key())->e();
+}
+
+QBigInteger RSAPrivateKey::p() const
+{
+	return static_cast<const RSAContext *>(static_cast<const PKeyContext *>(context())->key())->p();
+}
+
+QBigInteger RSAPrivateKey::q() const
+{
+	return static_cast<const RSAContext *>(static_cast<const PKeyContext *>(context())->key())->q();
+}
+
+QBigInteger RSAPrivateKey::d() const
+{
+	return static_cast<const RSAContext *>(static_cast<const PKeyContext *>(context())->key())->d();
 }
 
 //----------------------------------------------------------------------------
@@ -757,11 +883,11 @@ DSAPublicKey::DSAPublicKey()
 {
 }
 
-DSAPublicKey::DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider)
+DSAPublicKey::DSAPublicKey(const DLGroup &domain, const QBigInteger &y, const QString &provider)
 {
-	DSAContext *k = (DSAContext *)getContext("dsa", provider);
-	k->createPublic(group, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
+	DSAContext *k = static_cast<DSAContext *>(getContext("dsa", provider));
+	k->createPublic(domain, y);
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()->name()));
 	c->setKey(k);
 	change(c);
 }
@@ -771,14 +897,14 @@ DSAPublicKey::DSAPublicKey(const DSAPrivateKey &k)
 {
 }
 
-DL_Group DSAPublicKey::domain() const
+DLGroup DSAPublicKey::domain() const
 {
-	return ((DSAContext *)((PKeyContext *)context())->key())->domain();
+	return static_cast<const DSAContext *>(static_cast<const PKeyContext *>(context())->key())->domain();
 }
 
 QBigInteger DSAPublicKey::y() const
 {
-	return ((DSAContext *)((PKeyContext *)context())->key())->y();
+	return static_cast<const DSAContext *>(static_cast<const PKeyContext *>(context())->key())->y();
 }
 
 //----------------------------------------------------------------------------
@@ -788,28 +914,28 @@ DSAPrivateKey::DSAPrivateKey()
 {
 }
 
-DSAPrivateKey::DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider)
+DSAPrivateKey::DSAPrivateKey(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x, const QString &provider)
 {
-	DSAContext *k = (DSAContext *)getContext("dsa", provider);
-	k->createPrivate(group, x, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
+	DSAContext *k = static_cast<DSAContext *>(getContext("dsa", provider));
+	k->createPrivate(domain, y, x);
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()->name()));
 	c->setKey(k);
 	change(c);
 }
 
-DL_Group DSAPrivateKey::domain() const
+DLGroup DSAPrivateKey::domain() const
 {
-	return ((DSAContext *)((PKeyContext *)context())->key())->domain();
-}
-
-QBigInteger DSAPrivateKey::x() const
-{
-	return ((DSAContext *)((PKeyContext *)context())->key())->x();
+	return static_cast<const DSAContext *>(static_cast<const PKeyContext *>(context())->key())->domain();
 }
 
 QBigInteger DSAPrivateKey::y() const
 {
-	return ((DSAContext *)((PKeyContext *)context())->key())->y();
+	return static_cast<const DSAContext *>(static_cast<const PKeyContext *>(context())->key())->y();
+}
+
+QBigInteger DSAPrivateKey::x() const
+{
+	return static_cast<const DSAContext *>(static_cast<const PKeyContext *>(context())->key())->x();
 }
 
 //----------------------------------------------------------------------------
@@ -819,11 +945,11 @@ DHPublicKey::DHPublicKey()
 {
 }
 
-DHPublicKey::DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider)
+DHPublicKey::DHPublicKey(const DLGroup &domain, const QBigInteger &y, const QString &provider)
 {
-	DHContext *k = (DHContext *)getContext("dh", provider);
-	k->createPublic(group, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
+	DHContext *k = static_cast<DHContext *>(getContext("dh", provider));
+	k->createPublic(domain, y);
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()->name()));
 	c->setKey(k);
 	change(c);
 }
@@ -833,14 +959,14 @@ DHPublicKey::DHPublicKey(const DHPrivateKey &k)
 {
 }
 
-DL_Group DHPublicKey::domain() const
+DLGroup DHPublicKey::domain() const
 {
-	return ((DHContext *)((PKeyContext *)context())->key())->domain();
+	return static_cast<const DHContext *>(static_cast<const PKeyContext *>(context())->key())->domain();
 }
 
 QBigInteger DHPublicKey::y() const
 {
-	return ((DHContext *)((PKeyContext *)context())->key())->y();
+	return static_cast<const DHContext *>(static_cast<const PKeyContext *>(context())->key())->y();
 }
 
 //----------------------------------------------------------------------------
@@ -850,28 +976,28 @@ DHPrivateKey::DHPrivateKey()
 {
 }
 
-DHPrivateKey::DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider)
+DHPrivateKey::DHPrivateKey(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x, const QString &provider)
 {
-	DHContext *k = (DHContext *)getContext("dh", provider);
-	k->createPrivate(group, x, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
+	DHContext *k = static_cast<DHContext *>(getContext("dh", provider));
+	k->createPrivate(domain, y, x);
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()->name()));
 	c->setKey(k);
 	change(c);
 }
 
-DL_Group DHPrivateKey::domain() const
+DLGroup DHPrivateKey::domain() const
 {
-	return ((DHContext *)((PKeyContext *)context())->key())->domain();
-}
-
-QBigInteger DHPrivateKey::x() const
-{
-	return ((DHContext *)((PKeyContext *)context())->key())->x();
+	return static_cast<const DHContext *>(static_cast<const PKeyContext *>(context())->key())->domain();
 }
 
 QBigInteger DHPrivateKey::y() const
 {
-	return ((DHContext *)((PKeyContext *)context())->key())->y();
+	return static_cast<const DHContext *>(static_cast<const PKeyContext *>(context())->key())->y();
+}
+
+QBigInteger DHPrivateKey::x() const
+{
+	return static_cast<const DHContext *>(static_cast<const PKeyContext *>(context())->key())->x();
 }
 
 }
