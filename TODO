@@ -26,6 +26,7 @@
   cert/csr: constraints, ex_constraints, policies (same as above)
   cert/csr: subjectAltName
   crl: issuer info, authority_key_id
+  quoted-printable TextFilter
 
 * finish code for APIs:
   cipher - needs to handling padding
@@ -54,8 +55,6 @@
   figure out why Valgrind reports so many memory leaks
 
 * consider new APIs:
-  quoted-printable TextFilter?
-  Key wrapping - RFC3217 and RFC3394
   cert/pkey: fingerprints (is there a standard for this?)
   rsa: toSPKAC (kiko)
   pkey: ability to choose cipher for toDER/PEM passphrase?
@@ -74,4 +73,5 @@
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
   advanced pgp functionality (full key info and ability to manipulate keyrings)
+  Key wrapping - RFC3217 and RFC3394
 
