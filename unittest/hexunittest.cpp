@@ -39,8 +39,17 @@ struct hexTestStruct {
     QString encoded;
 } hexTestValues[] = {
   { "abcd", "61626364" },
+  { "ABCD", "41424344" },
   { "", "" },
   { "abcddef", "61626364646566" },
+  { "\0", "" },   // Empty QString.
+  { "\a", "07" }, // BEL
+  { "\b", "08" }, // BS
+  { "\t", "09" }, // HT
+  { "\n", "0a" }, // LF
+  { "\v", "0b" }, // VT
+  { "\f", "0c" }, // FF
+  { "\r", "0d" }, // CR
   { 0, 0 }
 };
 
@@ -60,11 +69,19 @@ void HexUnitTest::allTests()
     // test incremental updates
     hexObject.setup(QCA::Encode);
     hexObject.clear();
-    hexObject.update(QSecureArray("ab"));
+    QSecureArray result1 = hexObject.update(QSecureArray("ab"));
     CHECK( hexObject.ok(), true );
-    hexObject.update(QSecureArray("cd"));
+    CHECK( result1[0], '6' );
+    CHECK( result1[1], '1' );
+    CHECK( result1[2], '6' );
+    CHECK( result1[3], '2' );
+    QSecureArray result2 = hexObject.update(QSecureArray("cd"));
     CHECK( hexObject.ok(), true );
-    hexObject.final();
+    CHECK( result2[0], '6' );
+    CHECK( result2[1], '3' );
+    CHECK( result2[2], '6' );
+    CHECK( result2[3], '4' );
+    CHECK( QSecureArray(), hexObject.final() );
     CHECK( hexObject.ok(), true );
 
     //test broken input
