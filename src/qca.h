@@ -110,6 +110,8 @@ QCA_EXPORT void qca_secure_free(void *p);
  * be held in pages that are free'd without being cleared first. This means
  * that a malicious application can just repeatedly request pages of memory,
  * searching for something that could be of value.
+ *
+ * Note that this class is implicitly shared (that is, copy on write).
  **/ 
 QCA_EXPORT class QSecureArray
 {
@@ -131,46 +133,122 @@ public:
 	 *
 	 * Note that this copies, rather than references the source array
 	 *
-	 * \sa operator=
+	 * \sa operator=()
 	 */
 	QSecureArray(const QByteArray &a);
 
+	/**
+	 * Construct a (shallow) copy of another secure byte array
+	 *
+	 * \param from the source of the data and length.
+	 */
 	QSecureArray(const QSecureArray &from);
 
 	~QSecureArray();
 
 	/** 
-	 * creates a reference, rather than a copy.
-	 * if you want a copy, call detach()
+	 * Creates a reference, rather than a deep copy.
+	 * if you want a deep copy then you should use copy()
+	 * instead, or use operator=(), then call detach() when required.
 	 */
 	QSecureArray & operator=(const QSecureArray &from);
 
 	/**
-	 * creates a copy, rather than references
+	 * Creates a copy, rather than references
+	 *
+	 * \param a the array to copy from
 	 */
 	QSecureArray & operator=(const QByteArray &a);
 
+	/**
+	 * Returns a reference to the byte at the index position
+	 *
+	 * \param index the zero-based offset to obtain
+	 */
 	char & operator[](int index);
 
+	/**
+	 * Returns a reference to the byte at the index position
+	 *
+	 * \param index the zero-based offset to obtain
+	 */
 	const char & operator[](int index) const;
 
+	/**
+	 * Pointer the data in the secure array
+	 * 
+	 * You can use this for memcpy and similar functions. If you are trying
+	 * to obtain data at a particular offset, you might be better off using
+	 * at() or operator[]
+	 *
+	 */
 	char *data() const;
 
+	/**
+	 * Returns a reference to the byte at the index position
+	 *
+	 * \param index the zero-based offset to obtain
+	 */
 	const char & at(uint index) const;
 
+	/**
+	 * Returns a reference to the byte at the index position
+	 *
+	 * \param index the zero-based offset to obtain
+	 */
 	char & at(uint index);
 
+	/**
+	 * Return the number of bytes in the array
+	 */
 	uint size() const;
 
+	/**
+	 * Test if the array contains any bytes.
+	 * 
+	 * This is equivalent to testing (size() != 0). Note that if
+	 * the array is allocated, isEmpty() is false (even if no data
+	 * has been added)
+	 *
+	 * \return true if the array has zero length, otherwise false
+	 */
 	bool isEmpty() const;
 
+	/**
+	 * Change the length of this array
+	 * If the new length is less than the old length, the extra information
+	 * is (safely) discarded. If the new length is equal to or greater than
+	 * the old length, the existing data is copied into the array.
+	 *
+	 * \param size the new length
+	 */
 	bool resize(uint size);
 
+	/** 
+	 * creates a deep copy, rather than a reference
+	 * if you want a reference then you should use operator=()
+	 */
 	QSecureArray copy() const;
 
-	void detach();
+	/**
+	 * If the current array is shared, this conducts a deep copy, 
+	 * otherwise it has no effect.
+	 *
+	 * \code
+	 * QSecureArray myArray = anotherArray; // currently the same
+	 * myArray.detach(); // no longer the same data, but a copy
+	 * // anything here that affects anotherArray does not affect
+	 * // myArray; and vice versa.
+	 * \endcode
+	 */
+	 void detach();
 
-	QByteArray toByteArray() const;
+	 /**
+	  * Copy the contents of the secure array out to a 
+	  * standard QByteArray. Note that this performs a deep copy
+	  * of the data.
+	  */
+	 QByteArray toByteArray() const;
 
 private:
 	class Private;
