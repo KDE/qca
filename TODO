@@ -9,23 +9,18 @@
 
 * Considerations
   threading (safety, usability) in API and plugins
-  smart cards, external keyring drives
   it's possible we use QSecureArray in some unnecessary places
   don't forget to QCA_EXPORT everything
+  expand abbreviations? ("Algo" "Cert")
 
 * finish API:
-  cert/crl: Distinguished Names (Botan has X509_DN)
-  cert: turn Info into an enum
-  cert: extensions
-  cert fingerprints (sha1 and md5)
-  cert/csr/crl: path limit, subject/issuer ids (useful for create/validate)
-  cert/csr: constraints, ex_constraints, policies (same as above)
-  cert/csr: subjectAltName
-  crl: issuer info, authority_key_id
+  tls: ciphersuites
+  tls: cipher max bits
+  tls: ssl version
   tls: session reuse
-  openpgp: be sure to support key expiration and validity
   shortcuts for reading/writing certs, etc, directly to files?
   quoted-printable TextFilter
+  move to qt 4
 
 * finish code for APIs:
   cipher - needs to handling padding
@@ -47,6 +42,7 @@
   new include styles
   use qmake .prf for auto-discovery by applications
   use qplugin
+  use qshareddata for thread-safe objects
 
 * examples
   create example for BigInteger
@@ -61,10 +57,10 @@
   figure out why Valgrind reports so many memory leaks
 
 * possibilities for the future:
+  smart cards (pkcs11/15)
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
   advanced pgp functionality (full key info and ability to manipulate keyrings)
   Key wrapping - RFC3217 and RFC3394
   dtls (secure UDP)
-  aes pbe algos
 

@@ -102,17 +102,21 @@ namespace QCA
 		*/
 		enum Error
 		{
-			ErrPassphrase, ///< passphrase was either wrong or not provided
-			ErrFormat,     ///< input format was bad
-			ErrSigner,     ///< signing key is expired or invalid
-			ErrUnknown     ///< other error
+			ErrPassphrase,     ///< passphrase was either wrong or not provided
+			ErrFormat,         ///< input format was bad
+			ErrSignerExpired,  ///< signing key is expired
+			ErrSignerInvalid,  ///< signing key is invalid in some way
+			ErrEncryptExpired, ///< encrypting key is expired
+			ErrEncryptInvalid, ///< encrypting key is invalid in some way
+			ErrUnknown         ///< other error
 		};
 		enum VerifyResult
 		{
-			Valid,   // indentity is verified, matches signature
-			Invalid, // valid key provided, but signature failed
-			BadKey,  // invalid key provided
-			NoKey,   // identity unknown
+			Valid,      // indentity is verified, matches signature
+			Invalid,    // valid key provided, but signature failed
+			KeyExpired, // expired key provided
+			KeyInvalid, // invalid key provided
+			NoKey,      // identity unknown
 		};
 		SecureMessage(SecureMessageSystem *system);
 		~SecureMessage();
@@ -181,6 +185,8 @@ namespace QCA
 
 		SecureMessageKeyList secretKeys() const;
 		SecureMessageKeyList publicKeys() const;
+
+		QString diagnosticText() const;
 
 	signals:
 		void keysUpdated();

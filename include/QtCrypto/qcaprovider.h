@@ -195,15 +195,14 @@ public:
 class CertContext : public Provider::Context
 {
 public:
-	typedef QMap<QString, QString> Info;
 	enum ConvertResult { Good, ErrDecode };
 	CertContext(Provider *p) : Provider::Context(p, "cert") {}
 
 	virtual QDateTime notValidBefore() const = 0;
 	virtual QDateTime notValidAfter() const = 0;
 
-	virtual Info subjectInfo() const = 0;
-	virtual Info issuerInfo() const = 0;
+	virtual CertInfo subjectInfo() const = 0;
+	virtual CertInfo issuerInfo() const = 0;
 
 	virtual QString commonName() const = 0;
 	virtual QBigInteger serialNumber() const = 0;

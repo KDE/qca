@@ -39,6 +39,59 @@ namespace QCA
 		CSR_SPKAC   ///< Signed Public Key and Challenge (Netscape) format
 	};
 
+	enum CertInfoType
+	{
+		Info_Name,
+		Info_Email,
+		Info_Organization,
+		Info_OrganizationalUnit,
+		Info_Locality,
+		Info_State,
+		Info_Country,
+		Info_URI,
+		Info_DNS,
+		Info_XMPP
+	};
+
+	enum CertConstraintType
+	{
+		// basic
+		Constraint_DigitalSignature,
+		Constraint_NonRepudiation,
+		Constraint_KeyEncipherment,
+		Constraint_DataEncipherment,
+		Constraint_KeyAgreement,
+		Constraint_KeyCertificateSign,
+		Constraint_CRLSign,
+		Constraint_EncipherOnly,
+		Constraint_DecipherOnly,
+
+		// extended
+		Constraint_ServerAuth,
+		Constraint_ClientAuth,
+		Constraint_CodeSigning,
+		Constraint_EmailProtection,
+		Constraint_IPsecEndSystem,
+		Constraint_IPsecTunnel,
+		Constraint_IPsecUser,
+		Constraint_TimeStamping,
+		Constraint_OCSPSigning
+	};
+
+	/**
+	   Specify the intended usage of a certificate
+	*/
+	enum CertUsage
+	{
+		Usage_Any             = 0x00, ///< Any application, or unspecified
+		Usage_TLSServer       = 0x01, ///< server side of a TLS or SSL connection
+		Usage_TLSClient       = 0x02, ///< client side of a TLS or SSL connection
+		Usage_CodeSigning     = 0x04, ///< code signing certificate
+		Usage_EmailProtection = 0x08, ///< email (S/MIME) certificate
+		Usage_TimeStamping    = 0x10, ///< time stamping certificate
+		Usage_CRLSigning      = 0x20  ///< certificate revocation list signing certificate
+	};
+
 	/**
 	   The validity (or otherwise) of a certificate
 	*/
@@ -58,67 +111,49 @@ namespace QCA
 		Unknown             ///< Validity is unknown
 	};
 
-	/**
-	   Specify the intended usage of a certificate
-	*/
-	enum CertUsage
-	{
-		Any             = 0x00, ///< Any application, or unspecified
-		TLSServer       = 0x01, ///< server side of a TLS or SSL connection
-		TLSClient       = 0x02, ///< client side of a TLS or SSL connection
-		CodeSigning     = 0x04, ///< code signing certificate
-		EmailProtection = 0x08, ///< email (S/MIME) certificate
-		TimeStamping    = 0x10, ///< time stamping certificate
-		CRLSigning      = 0x20  ///< certificate revocation list signing certificate
-	};
+	typedef QMap<CertInfoType, QString> CertInfo;
+	typedef QValueList<CertConstraintType> CertConstraints;
 
 	// note: in SPKAC mode, all options are ignored except for challenge
 	class QCA_EXPORT CertificateOptions
 	{
 	public:
 		CertificateOptions(CertificateRequestFormat = CSR_PKCS10);
+		CertificateOptions(const CertificateOptions &from);
+		~CertificateOptions();
+		CertificateOptions & operator=(const CertificateOptions &from);
 
 		CertificateRequestFormat format() const;
 		void setFormat(CertificateRequestFormat f);
 
 		bool isValid() const;
 
-		QString commonName() const;
-		QString country() const;
-		QString organization() const;
-		QString organizationalUnit() const;
-		QString locality() const;
-		QString state() const;
-		QBigInteger serialNumber() const;
-		QString email() const;
-		QString uri() const;
-		QString dns() const;
-		QString challenge() const;
-		QDateTime notValidBefore() const;
-		QDateTime notValidAfter() const;
-		bool isCA() const;
-		int pathLimit() const;
+		QString challenge() const;           // request
+		CertInfo info() const;               // request or create
+		CertConstraints constraints() const; // request or create
+		QStringList policies() const;        // request or create
+		bool isCA() const;                   // request or create
+		int pathLimit() const;               // request or create
+		QBigInteger serialNumber() const;    // create
+		QDateTime notValidBefore() const;    // create
+		QDateTime notValidAfter() const;     // create
 
-		void setCommonName(const QString &s);
-		void setCountry(const QString &s);
-		void setOrganization(const QString &s);
-		void setOrganizationalUnit(const QString &s);
-		void setLocality(const QString &s);
-		void setState(const QString &s);
-		void setSerialNumber(const QBigInteger &i);
-		void setEmail(const QString &s);
-		void setURI(const QString &s);
-		void setDNS(const QString &s);
 		void setChallenge(const QString &s);
-		void setValidityPeriod(const QDateTime &start, const QDateTime &end);
+		void setInfo(const CertInfo &info);
+		void setConstraints(const CertConstraints &constraints);
+		void setPolicies(const QStringList &policies);
 		void setAsCA(int pathLimit);
+		void setSerialNumber(const QBigInteger &i);
+		void setValidityPeriod(const QDateTime &start, const QDateTime &end);
+
+	private:
+		class Private;
+		Private *d;
 	};
 
 	class QCA_EXPORT Certificate : public Algorithm
 	{
 	public:
-		typedef QMap<QString, QString> Info;
-
 		Certificate();
 		Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
@@ -127,14 +162,17 @@ namespace QCA
 		QDateTime notValidBefore() const;
 		QDateTime notValidAfter() const;
 
-		Info subjectInfo() const;
-		Info issuerInfo() const;
+		CertInfo subjectInfo() const;
+		CertInfo issuerInfo() const;
+		CertConstraints constraints() const;
+		QStringList policies() const;
 
 		QString commonName() const;
 		QBigInteger serialNumber() const;
 		PublicKey subjectPublicKey() const;
 		bool isCA() const;
 		bool isSelfSigned() const;
+		int pathLimit() const;
 
 		SignAlgo signatureAlgorithm() const;
 
@@ -171,10 +209,17 @@ namespace QCA
 
 		bool isNull() const;
 
+		static bool canUseFormat(CertificateRequestFormat f, const QString &provider = QString());
+
 		CertificateRequestFormat format() const;
+
+		CertInfo subjectInfo() const;        // PKCS#10 only
+		CertConstraints constraints() const; // PKCS#10 only
+		QStringList policies() const;        // PKCS#10 only
+
 		PublicKey subjectPublicKey() const;
-		bool isCA() const; // PKCS#10 only
-		int pathLimit() const; // PKCS#10 only
+		bool isCA() const;                   // PKCS#10 only
+		int pathLimit() const;               // PKCS#10 only
 		QString challenge() const;
 
 		SignAlgo signatureAlgorithm() const;
@@ -193,7 +238,19 @@ namespace QCA
 	class QCA_EXPORT CRLEntry
 	{
 	public:
-		enum Reason { Unspecified };
+		enum Reason
+		{
+			Unspecified,
+			KeyCompromise,
+			CACompromise,
+			AffiliationChanged,
+			Superceded,
+			CessationOfOperation,
+			CertificateHold,
+			RemoveFromCRL,
+			PrivilegeWithdrawn,
+			AACompromise
+		};
 		CRLEntry();
 		CRLEntry(const Certificate &c, Reason r = Unspecified);
 
@@ -208,6 +265,8 @@ namespace QCA
 		CRL();
 
 		bool isNull() const;
+
+		CertInfo issuerInfo() const;
 
 		int number() const;
 		QDateTime thisUpdate() const;
@@ -235,6 +294,7 @@ namespace QCA
 		Certificate certificate() const;
 
 		Certificate signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const;
+		Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
 		CRL createCRL(const QDateTime &nextUpdate) const;
 		CRL updateCRL(const CRL &crl, const QValueList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 	};
@@ -246,12 +306,13 @@ namespace QCA
 
 		void addCertificate(const Certificate &cert, bool trusted = false);
 		void addCRL(const CRL &crl);
-		CertValidity validate(const Certificate &cert, CertUsage u = Any) const;
+		CertValidity validate(const Certificate &cert, CertUsage u = Usage_Any) const;
 
 		QValueList<Certificate> certificates() const;
 		QValueList<CRL> crls() const;
 
 		// import / export
+		static bool canUsePKCS7(const QString &provider = QString());
 		QByteArray toPKCS7() const;
 		QString toFlatText() const;
 		bool fromPKCS7(const QByteArray &a);

@@ -122,51 +122,6 @@ SecureMessage::~SecureMessage()
 {
 }
 
-/*void SecureMessage::encrypt(const QSecureArray &in, const SecureMessageKey &key)
-{
-	Q_UNUSED(in);
-	Q_UNUSED(key);
-}
-
-void SecureMessage::encrypt(const QSecureArray &in, const SecureMessageKeyList &keys)
-{
-	Q_UNUSED(in);
-	Q_UNUSED(keys);
-}
-
-void SecureMessage::encryptAndSign(const QSecureArray &in, const SecureMessageKey &key, const SecureMessageKey &signer, Mode m)
-{
-	Q_UNUSED(in);
-	Q_UNUSED(key);
-	Q_UNUSED(signer);
-	Q_UNUSED(m);
-}
-
-void SecureMessage::encryptAndSign(const QSecureArray &in, const SecureMessageKeyList &keys, const SecureMessageKey &signer, Mode m)
-{
-	Q_UNUSED(in);
-	Q_UNUSED(keys);
-	Q_UNUSED(signer);
-	Q_UNUSED(m);
-}
-
-void SecureMessage::decrypt(const QString &in)
-{
-	Q_UNUSED(in);
-}
-
-void SecureMessage::sign(const QSecureArray &in, const SecureMessageKey &signer)
-{
-	Q_UNUSED(in);
-	Q_UNUSED(signer);
-}
-
-void SecureMessage::verify(const QSecureArray &in, const QString &sig)
-{
-	Q_UNUSED(in);
-	Q_UNUSED(sig);
-}*/
-
 bool SecureMessage::canSignMultiple() const
 {
 	return false;
@@ -331,6 +286,11 @@ SecureMessageKeyList OpenPGP::secretKeys() const
 SecureMessageKeyList OpenPGP::publicKeys() const
 {
 	return SecureMessageKeyList();
+}
+
+QString OpenPGP::diagnosticText() const
+{
+	return QString();
 }
 
 //----------------------------------------------------------------------------
