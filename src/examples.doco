@@ -24,3 +24,10 @@ between QSecureArray and QString.
 
 */
 
+
+/** \example randomtest.cpp
+
+The code below shows the normal way to use the Random class.
+
+*/
+
