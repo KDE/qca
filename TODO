@@ -30,6 +30,9 @@
   extra x509 stuff discussed in the summer with kiko
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
+  padding - a way to do any possible padding approach, so advanced users
+            can turn off the default padding scheme, and pass in a 
+            pre-padded last block.
 
 * qt 4 upgrade:
   new include styles
