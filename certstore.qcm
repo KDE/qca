@@ -1,0 +1,53 @@
+#include <qprocess.h>
+#include <qstringlist.h>
+/*
+-----BEGIN QCMOD-----
+name: certstore
+arg: certstore-path=[path],Path to the SSL Certificate store
+-----END QCMOD-----
+*/
+
+class qc_certstore : public ConfObj
+{
+public:
+	qc_certstore(Conf *c) : ConfObj(c) {}
+	QString name() const { return "certstore"; }
+	QString shortname() const { return "certstore"; }
+
+	bool exec()
+	{
+		QStringList pathsToTry;
+
+		pathsToTry.append(conf->getenv("QC_CERTSTORE_PATH"));
+
+		// This is from Debian
+		pathsToTry.append( QString("/etc/ssl/certs/ca-certificates.crt") );
+
+		// Fedora Core 2 uses these
+		pathsToTry.append( QString("/usr/share/ssl/cert.pem") );
+		pathsToTry.append( QString("/usr/share/ssl/certs/ca-bundle.crt") );
+
+		for ( QStringList::Iterator path = pathsToTry.begin(); path != pathsToTry.end(); ++path ) {
+        		if ( QFile::exists( *path ) ) {
+				m_firstGoodPath = *path;
+				break;
+			}
+		}
+
+		QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + m_firstGoodPath + "\"'";
+		conf->addDefine(certPathString);
+
+		if ( m_firstGoodPath.isEmpty() )
+			return false;
+		else
+			return true;
+	}
+
+	QString resultString() const
+	{
+		return m_firstGoodPath;
+	}
+
+private:
+	QString m_firstGoodPath;
+};

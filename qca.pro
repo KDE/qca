@@ -57,8 +57,6 @@ SOURCES += \
 DEFINES += QCA_NO_SYSTEMSTORE
 
 unix:!mac: {
-	# debian cert store
-	DEFINES += QCA_SYSTEMSTORE_PATH='"/etc/ssl/certs/ca-certificates.crt"'
 	SOURCES += $$QCA_CPP/qca_systemstore_flatfile.cpp
 }
 win: {
