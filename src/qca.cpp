@@ -948,6 +948,8 @@ void SASL::handleServerFirstStep(int r)
 		authenticated(true);
 	else if(r == QCA_SASLContext::Continue)
 		nextStep(d->c->result());
+	else if(r == QCA_SASLContext::AuthCheck)
+		tryAgain();
 	else
 		authenticated(false);
 }
@@ -992,8 +994,9 @@ void SASL::tryAgain()
 			r = d->c->nextStep(d->stepData);
 			d->tried = true;
 		}
-		else
+		else {
 			r = d->c->tryAgain();
+		}
 
 		if(r == QCA_SASLContext::Error) {
 			authenticated(false);
@@ -1003,6 +1006,10 @@ void SASL::tryAgain()
 			d->tried = false;
 			nextStep(d->c->result());
 			return;
+		}
+		else if(r == QCA_SASLContext::AuthCheck) {
+			// TODO: authcheck
+			tryAgain();
 		}
 	}
 	else {
@@ -1019,7 +1026,7 @@ void SASL::tryAgain()
 				return;
 			}
 			else if(r == QCA_SASLContext::NeedParams) {
-				d->tried = false;
+				//d->tried = false;
 				QCA_SASLNeedParams np = d->c->clientParamsNeeded();
 				needParams(np.auth, np.user, np.pass, np.realm);
 				return;
@@ -1045,11 +1052,12 @@ void SASL::tryAgain()
 				return;
 			}
 			else if(r == QCA_SASLContext::NeedParams) {
-				d->tried = false;
+				//d->tried = false;
 				QCA_SASLNeedParams np = d->c->clientParamsNeeded();
 				needParams(np.auth, np.user, np.pass, np.realm);
 				return;
 			}
+			d->tried = false;
 			//else if(r == QCA_SASLContext::Continue) {
 				nextStep(d->c->result());
 			//	return;
@@ -1057,8 +1065,10 @@ void SASL::tryAgain()
 		}
 	}
 
-	if(r == QCA_SASLContext::Success)
+	if(r == QCA_SASLContext::Success) {
+		printf("SSF: %d\n", d->c->security());
 		authenticated(true);
+	}
 	else if(r == QCA_SASLContext::Error)
 		authenticated(false);
 }

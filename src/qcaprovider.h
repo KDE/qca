@@ -154,7 +154,6 @@ public:
 	virtual void setClientParams(const QString *auth, const QString *user, const QString *pass, const QString *realm)=0;
 	virtual QString authname() const=0;
 	virtual QString username() const=0;
-	virtual void setAuth(bool)=0;
 
 	// continue steps
 	virtual int nextStep(const QByteArray &in)=0;
