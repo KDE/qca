@@ -92,7 +92,7 @@ class QCA_CertContext;
  * And of course, you get a very simple crypto API for Qt, where you can
  * do things like:
  * \code
- * QString hash = QCA::SHA1::hashToString(blockOfData);
+ * QString hash = QCA::SHA1().hashToString(blockOfData);
  * \endcode
  */
 
@@ -114,26 +114,62 @@ QCA_EXPORT void qca_secure_free(void *p);
 QCA_EXPORT class QSecureArray
 {
 public:
+	/**
+	 * Construct a secure byte array, zero length
+	 */
 	QSecureArray();
+
+	/**
+	 * Construct a secure byte array of the specified length
+	 *
+	 * \param size the number of bytes in the array
+	 */
 	QSecureArray(int size);
+
+	/**
+	 * Construct a secure byte array from a QByteArray
+	 *
+	 * Note that this copies, rather than references the source array
+	 *
+	 * \sa operator=
+	 */
 	QSecureArray(const QByteArray &a);
+
 	QSecureArray(const QSecureArray &from);
+
 	~QSecureArray();
 
+	/** 
+	 * creates a reference, rather than a copy.
+	 * if you want a copy, call detach()
+	 */
 	QSecureArray & operator=(const QSecureArray &from);
+
+	/**
+	 * creates a copy, rather than references
+	 */
 	QSecureArray & operator=(const QByteArray &a);
+
 	char & operator[](int index);
+
 	const char & operator[](int index) const;
 
 	char *data() const;
+
 	const char & at(uint index) const;
+
 	char & at(uint index);
+
 	uint size() const;
+
 	bool isEmpty() const;
+
 	bool resize(uint size);
 
 	QSecureArray copy() const;
+
 	void detach();
+
 	QByteArray toByteArray() const;
 
 private:
@@ -404,7 +440,9 @@ inline bool operator>(const QBigInteger &a, const QBigInteger &b)
  **/
 QTextStream &operator<<(QTextStream &stream, const QBigInteger &b);
 
-
+/** 
+ * QCA - the Qt Cryptographic Architecture
+ */
 namespace QCA
 {
 	class Provider;
@@ -412,37 +450,23 @@ namespace QCA
 	typedef QPtrList<Provider> ProviderList;
 	typedef QPtrListIterator<Provider> ProviderListIterator;
 #if 0
-	/** 
-	 * A list of the capabilities available within QCA
-	 *
-	 * If you are adding another capability to QCA, note that the
-	 * bit mask approach needs to be maintained, since the plugins
-	 * return the capabilities that they support as a single
-	 * integer value, where each support capability is represented
-	 * by a bit set to true.
-	 */
 	enum
 	{
-		CAP_SHA1      = 0x0001, /**< SHA-1 digest hash (SHA1) */
-		CAP_SHA256    = 0x0002, /**< SHA-256 digest hash, per
-					 * FIPS 180-2 (SHA256) */
-		CAP_MD5       = 0x0004, /**< %MD5 digest hash, per
-					 * RFC1321 (MD5) */
-		CAP_BlowFish  = 0x0008, /**< %BlowFish cipher (BlowFish)*/
-		CAP_TripleDES = 0x0010, /**< Triple DES cipher (TripleDES) */
-		CAP_AES128    = 0x0020, /**< AES cipher, 128 bits (AES128)*/
-		CAP_AES256    = 0x0040, /**< AES cipher, 256 bits (AES256)*/
-		CAP_RSA       = 0x0080, /**< RSA */
-		CAP_X509      = 0x0100, /**< X509 certificate*/
-		CAP_TLS       = 0x0200, /**< Secure Socket Layer */
-		CAP_SASL      = 0x0400, /**< Simple Authentication and
-					 * Security Layer, per RFC2222 (SASL) */
-		CAP_SHA0      = 0x0800, /**< SHA-0 digest hash (SHA0)*/
-		CAP_MD2       = 0x1000, /**< %MD2 digest hash, per
-					 * RFC1319 (MD2) */
-		CAP_MD4       = 0x2000, /**< %MD4 digest hash, per
-					 * RFC1320 (MD4) */
-		CAP_RIPEMD160 = 0x4000, /**< RIPEMD digest hash, 160 bits (RIPEMD160)*/
+		CAP_SHA1      = 0x0001,
+		CAP_SHA256    = 0x0002,
+		CAP_MD5       = 0x0004,
+		CAP_BlowFish  = 0x0008,
+		CAP_TripleDES = 0x0010,
+		CAP_AES128    = 0x0020,
+		CAP_AES256    = 0x0040,
+		CAP_RSA       = 0x0080,
+		CAP_X509      = 0x0100,
+		CAP_TLS       = 0x0200,
+		CAP_SASL      = 0x0400,
+		CAP_SHA0      = 0x0800,
+		CAP_MD2       = 0x1000,
+		CAP_MD4       = 0x2000,
+		CAP_RIPEMD160 = 0x4000,
 	}; // to be obsoleted
 #endif
 	/**
@@ -464,6 +488,20 @@ namespace QCA
 		Decrypt = 0x0002  /**< cipher algorithm should decrypt */
 	};
 #endif
+	/**
+	 * Mode settings for memory allocation
+	 *
+	 * QCA can use secure memory, however most operating systems
+	 * restrict the amount of memory that can be pinned by user
+	 * applications, to prevent a denial-of-service attack. 
+	 *
+	 * QCA support two approaches to getting memory - the mlock
+	 * method, which generally requires root (administrator) level
+	 * privileges, and the mmap method which is not as secure, but
+	 * which should be able to be used by any process.
+	 * 
+	 * \sa Initializer
+	 */
 	enum MemoryMode
 	{
 		Practical, /**< mlock and drop root if available, else mmap */
@@ -516,18 +554,16 @@ namespace QCA
 		CRLSigning      = 0x20
 	};
 
-	/**
-	 * Initialise the QCA plugin system.
-	 *
-	 * This must be the first QCA call that you make in your
-	 * application.
-	 */
 	QCA_EXPORT void init();
 	QCA_EXPORT void init(MemoryMode m, int prealloc);
 
 	QCA_EXPORT void deinit();
 	QCA_EXPORT bool haveSecureMemory();
 
+	//QCA_EXPORT bool isSupported(int capabilities); // to be obsoleted
+	//QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
+
+	// version 2 global functions
 	/**
 	 * Test if a capability (algorithm) is available.
 	 *
@@ -536,21 +572,74 @@ namespace QCA
 	 * time, as shown below.
 	 * \code
 	 * QCA::init();
-         * if(!QCA::isSupported(QCA::CAP_SHA1))
+         * if(!QCA::isSupported("sha1"))
          *     printf("SHA1 not supported!\n");
 	 * else {
          *     QString result = QCA::SHA1::hashToString(myString);
          *     printf("sha1(\"%s\") = [%s]\n", myString.data(), result.latin1());
 	 * }
 	 * \endcode
+	 * 
+	 * \param features the name of the capability to test for
+	 *
+	 * \return true if the capability is available, otherwise false
+	 *
+	 * Note that you can test for a combination of capabilities,
+	 * using a comma delimited list:
+	 * \code
+	 * QCA::isSupported("sha1,md5"):
+	 * \endcode
+	 * which will return true if all of the capabilities listed
+	 * are present.
+	 *
 	 */
-	//QCA_EXPORT bool isSupported(int capabilities); // to be obsoleted
-	//QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
-
-	// version 2 global functions
-	QCA_EXPORT bool isSupported(const QStringList &features);
 	QCA_EXPORT bool isSupported(const char *features);
+
+	/**
+	 * \overload
+	 *
+	 * \param features a list of features to test for
+	 */
+	QCA_EXPORT bool isSupported(const QStringList &features);
+
+	/**
+	 * Generate a list of all the supported features in plugins,
+	 * and in built in capabilities
+	 *
+	 * \return a list containing the names of the features
+	 *
+	 * The following code writes a list of features to standard out
+	 * \code 
+	 * QStringList capabilities;
+	 * capabilities = QCA::supportedFeatures();
+	 * std::cout << "Supported:" << capabilities.join(",") << std::endl;
+	 * \endcode
+	 *
+	 * \sa isSupported(const char *features)
+	 * \sa isSupported(const QStringList &features)
+	 * \sa defaultFeatures()
+	 */
 	QCA_EXPORT QStringList supportedFeatures();
+
+	//TODO: figure out if defaultFeatures() could be const
+	/**
+	 * Generate a list of the built in features. This differs from
+	 * supportedFeatures() in that it does not include features provided
+	 * by plugins.
+	 *
+	 * \return a list containing the names of the features
+	 *
+	 * The following code writes a list of features to standard out
+	 * \code 
+	 * QStringList capabilities;
+	 * capabilities = QCA::defaultFeatures();
+	 * std::cout << "Default:" << capabilities.join(",") << std::endl;
+	 * \endcode
+	 *
+	 * \sa isSupported(const char *features)
+	 * \sa isSupported(const QStringList &features)
+	 * \sa supportedFeatures()
+	 */
 	QCA_EXPORT QStringList defaultFeatures();
 	QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
 	QCA_EXPORT void setProviderPriority(const QString &name, int priority);
@@ -560,16 +649,16 @@ namespace QCA
 	QCA_EXPORT Random & globalRNG();
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
+	QCA_EXPORT QString arrayToHex(const QByteArray &array); // to be obsoleted
 	/** 
-	 * Convert a QByteArray to printable hexadecimal
+	 * Convert a byte array to printable hexadecimal
 	 * representation.
 	 *
 	 * This is a convenience function to convert an arbitrary
-	 * QByteArray to a printable representation.
+	 * QSecureArray to a printable representation.
 	 *
 	 * \code
-	 * 	QCA::init();
-	 * 	QByteArray test(10);
+	 * 	QSecureArray test(10);
 	 *	test.fill('a');
 	 * 	// 0x61 is 'a' in ASCII
 	 *	if (QString("61616161616161616161") == QCA::arrayToHex(test) ) {
@@ -577,10 +666,9 @@ namespace QCA
 	 *	}
 	 * \endcode
 	 *
-	 * \param array an array to be converted
+	 * \param array the array to be converted
 	 * \return a printable representation
 	 */
-	QCA_EXPORT QString arrayToHex(const QByteArray &array); // to be obsoleted
 	QCA_EXPORT QString arrayToHex(const QSecureArray &array);
 
 	/**
@@ -793,22 +881,6 @@ namespace QCA
 		InitializationVector & operator=(const QSecureArray &a);
 	};
 
-	class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
-	{
-	public:
-		virtual void clear();
-		virtual void update(const QSecureArray &a);
-		virtual QSecureArray final();
-
-		QSecureArray hash(const QSecureArray &a);
-		QSecureArray hash(const QCString &cs);
-		QString hashToString(const QSecureArray &a);
-		QString hashToString(const QCString &cs);
-
-	protected:
-		Hash(const QString &type, const QString &provider);
-	};
-
 	/**
 	 * General superclass for hashing algorithms.
 	 *
@@ -818,9 +890,7 @@ namespace QCA
 	 * using a sub-class. SHA1 or RIPEMD160 are recommended for
 	 * new applications, although MD2, MD4, MD5 or SHA0 may be
 	 * applicable (for interoperability reasons) for some
-	 * applications. If you are adding another hashing algorithm,
-	 * you need to derive from both this class and from
-	 * HashStatic.
+	 * applications. 
 	 *
 	 * To perform a hash, you create an object (of one of the
 	 * sub-classes of Hash), call update() with the data that
@@ -828,7 +898,7 @@ namespace QCA
 	 * a QByteArray of the hash result. An example (using the SHA1
 	 * hash, with 1000 updates of a 1000 byte string) is shown below:
 	 * \code
-	 *        if(!QCA::isSupported(QCA::CAP_SHA1))
+	 *        if(!QCA::isSupported("sha1"))
 	 *                printf("SHA1 not supported!\n");
 	 *        else {
 	 *                QByteArray fillerString;
@@ -848,34 +918,16 @@ namespace QCA
 	 *
 	 * If you only have a simple hash requirement - a single
 	 * string that is fully available in memory at one time - 
-	 * then you may be better off with one of the static
+	 * then you may be better off with one of the convenience
 	 * methods. So, for example, instead of creating a QCA::SHA1
 	 * or QCA::MD5 object, then doing a single update() and the final()
-	 * call; you simply call QCA::SHA1::hash() or
-	 * QCA::MD5::hash() with the data that you would otherwise
+	 * call; you simply call QCA::SHA1().hash() or
+	 * QCA::MD5().hash() with the data that you would otherwise
 	 * have provided to the update() call.
 	 */
-#if 0
-	class QCA_EXPORT Hash
+	class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
 	{
 	public:
-		/**
-		 * Constructs a copy of the Hash parameter.
-		 *
-		 * \param fromHash a Hash (or Hash sub-class) to copy
-		 */
-		Hash(const Hash &fromHash);
-
-		/**
-		 * Assigns the internal state data from the fromHash
-		 * parameter to this Hash. 
-		 *
-		 * \param fromHash a Hash (or Hash sub-class) to copy
-		 */
-		Hash & operator=(const Hash &fromHash);
-
-		~Hash();
-
 		/**
 		 * Reset a hash, dumping all previous parts of the
 		 * message.
@@ -886,7 +938,7 @@ namespace QCA
 		 * a Hash sub-class object to calculate additional
 		 * hashes.
 		 */
-		void clear();
+		virtual void clear();
 
 		/**
 		 * Update a hash, adding more of the message contents
@@ -894,11 +946,11 @@ namespace QCA
 		 * using this method before you call final(). 
 		 *
 		 * If you find yourself only calling update() once,
-		 * you may be better off using a static method
-		 * instead.
+		 * you may be better off using a convenience method
+		 * such as hash() or hashToString() instead.
 		 *
 		 */
-		void update(const QByteArray &array);
+		virtual void update(const QSecureArray &a);
 
 		/**
 		 * Finalises input and returns the hash result
@@ -913,6 +965,83 @@ namespace QCA
 		 * reuse the Hash object, you should call clear() and
 		 * start to update() again.
 		 */
+		virtual QSecureArray final();
+
+		/**
+		 * %Hash a byte array, returning it as another
+		 * byte array.
+		 * 
+		 * This is a convenience method that returns the
+		 * hash of a QSecureArray.
+		 * 
+		 * \code
+		 * QSecureArray sampleArray(3);
+		 * sampleArray.fill('a');
+		 * QSecureArray outputArray = QCA::MD2::hash(sampleArray);
+		 * \endcode
+		 * 
+		 * \param array the QByteArray to hash
+		 *
+		 * If you need more flexibility (e.g. you are constructing
+		 * a large byte array object just to pass it to hash(), then
+		 * consider creating an Hash sub-class object, and calling
+		 * update() and final().
+		 */
+		QSecureArray hash(const QSecureArray &array);
+
+		/**
+		 * \overload
+		 *
+		 * \param cs the QCString to hash
+		 */
+		QSecureArray hash(const QCString &cs);
+
+		/**
+		 * %Hash a byte array, returning it as a printable
+		 * string
+		 * 
+		 * This is a convenience method that returns the
+		 * hash of a QSeecureArray as a hexadecimal
+		 * representation encoded in a QString.
+		 * 
+		 * \param array the QByteArray to hash
+		 *
+		 * If you need more flexibility, you can create a Hash
+		 * sub-class object, call Hash::update() as
+		 * required, then call Hash::final(), before using
+		 * the static arrayToHex() method.
+		 */
+		QString hashToString(const QSecureArray &array);
+
+		/**
+		 * \overload
+		 *
+		 * \param cs the QCString to hash		 
+		 */
+		QString hashToString(const QCString &cs);
+
+	protected:
+		/**
+		 *  Constructor to override in sub-classes.
+		 *
+		 * \param type label for the type of hash to be
+		 * implemented (eg "sha1" or "md2")
+		 * \param provider the name of the provider plugin
+		 * for the subclass (eg "qca-openssl")
+		 */
+		Hash(const QString &type, const QString &provider);
+	};
+
+#if 0
+	class QCA_EXPORT Hash
+	{
+	public:
+		Hash(const Hash &fromHash);
+		Hash & operator=(const Hash &fromHash);
+		~Hash();
+
+		void clear();
+		void update(const QByteArray &array);
 		QByteArray final();
 
 	protected:
@@ -923,45 +1052,12 @@ namespace QCA
 		Private *d;
 	};
 
-	/**
-	 * General superclass for static methods for hashing
-	 * algorithms
-	 *
-	 * %HashStatic is a superclass for the various hashing algorithms
-	 * within QCA. You should not need to use it directly unless you are
-	 * adding another hashing capability to QCA - you should be
-	 * using a sub-class. SHA1 or RIPEMD160 are recommended for
-	 * new applications, although MD2, MD4, MD5 or SHA0 may be
-	 * applicable (for interoperability reasons) for some
-	 * applications.  If you are adding another hashing algorithm,
-	 * you need to derive from both this class and from
-	 * Hash.
-	 */
 	template <class T>
 	class QCA_EXPORT HashStatic
 	{
 	public:
 		HashStatic<T>() {}
 
-		/**
-		 * %Hash a QByteArray, returning it as another
-		 * QByteArray.
-		 * 
-		 * This is a convenience static method that returns the
-		 * hash of a QByteArray.
-		 * 
-		 * \code
-		 * QByteArray sampleArray(3);
-		 * sampleArray.fill('a');
-		 * QByteArray outputArray = QCA::MD2::hash(sampleArray);
-		 * \endcode
-		 * 
-		 * \param array the QByteArray to hash
-		 *
-		 * If you need more flexibility,
-		 * consider creating an Hash sub-class object, and calling
-		 * update() and final().
-		 */
 		static QByteArray hash(const QByteArray &array)
 		{
 			T obj;
@@ -969,11 +1065,6 @@ namespace QCA
 			return obj.final();
 		}
 
-		/**
-		 * \overload
-		 *
-		 * \param cs the QCString to hash
-		 */
 		static QByteArray hash(const QCString &cs)
 		{
 			QByteArray a(cs.length());
@@ -981,46 +1072,11 @@ namespace QCA
 			return hash(a);
 		}
 
-		/**
-		 * %Hash a QByteArray, returning it as a printable
-		 * string
-		 * 
-		 * This is a convenience method that returns the
-		 * hash of a QByteArray as a hexadecimal
-		 * representation encoded in a QString.
-		 * 
-		 * \param array the QByteArray to hash
-		 *
-		 * If you need more flexibility, you can create a Hash
-		 * sub-class object, call Hash::update() as
-		 * required, then call Hash::final(), before using the static arrayToHex() method.
-		 */
 		static QString hashToString(const QByteArray &array)
 		{
 			return arrayToHex(hash(array));
 		}
 
-		/**
-		 * \overload
-		 *
-		 * \code
-		 *        QCA::init();
-		 *        QCString cs = (argc >= 2) ? argv[1] : "hello";
-		 *
-		 *        if(!QCA::isSupported(QCA::CAP_SHA1))
-		 *                printf("SHA1 not supported!\n");
-		 *        else {
-		 *                QString result = QCA::SHA1::hashToString(cs);
-		 *                printf("sha1(\"%s\") = [%s]\n", cs.data(), result.latin1());
-		 *        }
-		 * \endcode
-		 *
-		 * which will produce:
-		 *
-		 * \verbatim sha1("hello") = [aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d] \endverbatim
-		 *
-		 * \param cs the QCString to hash		 
-		 */
 		static QString hashToString(const QCString &cs)
 		{
 			return arrayToHex(hash(cs));
@@ -1092,55 +1148,6 @@ namespace QCA
 		Private *d;
 	};
 #endif
-	class QCA_EXPORT SHA0 : public Hash
-	{
-	public:
-		SHA0(const QString &provider="") : Hash("sha0", provider) {}
-	};
-
-	class QCA_EXPORT SHA1 : public Hash
-	{
-	public:
-		SHA1(const QString &provider="") : Hash("sha1", provider) {}
-	};
-
-	class QCA_EXPORT SHA256 : public Hash
-	{
-	public:
-		SHA256(const QString &provider="") : Hash("sha256", provider) {}
-	};
-
-	class QCA_EXPORT MD2 : public Hash
-	{
-	public:
-		MD2(const QString &provider="") : Hash("md2", provider) {}
-	};
-
-	class QCA_EXPORT MD4 : public Hash
-	{
-	public:
-		MD4(const QString &provider="") : Hash("md4", provider) {}
-	};
-
-	class QCA_EXPORT MD5 : public Hash
-	{
-	public:
-		MD5(const QString &provider="") : Hash("md5", provider) {}
-	};
-
-	class QCA_EXPORT RIPEMD160 : public Hash
-	{
-	public:
-		RIPEMD160(const QString &provider="") : Hash("ripemd160", provider) {}
-	};
-
-	// macs
-	//class QCA_EXPORT HMAC : public MessageAuthenticationCode
-	//{
-	//public:
-	//	HMAC(const Hash &h = SHA1(), const SymmetricKey &key = SymmetricKey(), const QString &provider="") : MessageAuthenticationCode(subAlg("hmac", h.type()), key, provider) {}
-	//};
-#if 0
 	/**
 	 * SHA-0 cryptographic message digest hash algorithm.
 	 *
@@ -1149,17 +1156,15 @@ namespace QCA
 	 * against it.
 	 *
 	 * You can use this class in two basic ways - standard member
-	 * methods, and static convenience methods. Both are shown in
+	 * methods, and convenience methods. Both are shown in
 	 * the example below.
 	 *
 	 * \code
-	 *        if(!QCA::isSupported(QCA::CAP_SHA0))
+	 *        if(!QCA::isSupported("sha0"))
 	 *                printf("SHA0 not supported!\n");
 	 *        else {
-	 *                // Static convenience method.
-	 *                // QCA::SHA0::hash() might be handy too.
 	 *                QCString actualResult;
-	 *                actualResult = QCA::SHA0::hashToString(message);
+	 *                actualResult = QCA::SHA0().hashToString(message);
 	 *
 	 *                // normal methods - update() and final()
 	 *                QByteArray fillerString;
@@ -1171,9 +1176,8 @@ namespace QCA
 	 *        }
 	 * \endcode
 	 *
-	 * \since QCA 1.1
 	 */
-	class QCA_EXPORT SHA0 : public Hash, public HashStatic<SHA0>
+	class QCA_EXPORT SHA0 : public Hash
 	{
 	public:
 		/**
@@ -1181,10 +1185,13 @@ namespace QCA
 		 *
 		 * This is the normal way of creating a SHA-0 hash,
 		 * although if you have the whole message in memory at
-		 * one time, you may be better off using a static
-		 * method, such as QCA::SHA0::hash()
+		 * one time, you may be better off using QCA::SHA0().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the SHA0 implementation
+		 * from qca-openssl, you would use SHA0("qca-openssl")
 		 */
-		SHA0();
+		SHA0(const QString &provider="") : Hash("sha0", provider) {}
 	};
 
 	/**
@@ -1200,17 +1207,15 @@ namespace QCA
 	 * produced the message digest.
 	 *
 	 * You can use this class in two basic ways - standard member
-	 * methods, and static convenience methods. Both are shown in
+	 * methods, and convenience methods. Both are shown in
 	 * the example below.
 	 *
 	 * \code
-	 *        if(!QCA::isSupported(QCA::CAP_SHA1))
+	 *        if(!QCA::isSupported("sha1"))
 	 *                printf("SHA1 not supported!\n");
 	 *        else {
-	 *                // Static convenience method.
-	 *                // QCA::SHA1::hash() might be handy too.
 	 *                QCString actualResult;
-	 *                actualResult = QCA::SHA1::hashToString(message);
+	 *                actualResult = QCA::SHA1().hashToString(message);
 	 *
 	 *                // normal methods - update() and final()
 	 *                QByteArray fillerString;
@@ -1226,7 +1231,7 @@ namespace QCA
 	 * Standard Publication 180-2 "Specifications for the Secure
 	 * %Hash Standard", available from http://csrc.nist.gov/publications/
 	 */
-	class QCA_EXPORT SHA1 : public Hash, public HashStatic<SHA1>
+	class QCA_EXPORT SHA1 : public Hash
 	{
 	public:
 		/**
@@ -1234,10 +1239,13 @@ namespace QCA
 		 *
 		 * This is the normal way of creating a SHA-1 hash,
 		 * although if you have the whole message in memory at
-		 * one time, you may be better off using a static
-		 * method, such as QCA::SHA1::hash()
+		 * one time, you may be better off using QCA::SHA1().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the SHA1 implementation
+		 * from qca-openssl, you would use SHA1("qca-openssl")
 		 */
-		SHA1();
+		SHA1(const QString &provider="") : Hash("sha1", provider) {}
 	};
 
 	/**
@@ -1256,18 +1264,10 @@ namespace QCA
 	 * Standard Publication 180-2 "Specifications for the Secure
 	 * %Hash Standard", available from http://csrc.nist.gov/publications/
 	 */
-	class QCA_EXPORT SHA256 : public Hash, public HashStatic<SHA256>
+	class QCA_EXPORT SHA256 : public Hash
 	{
 	public:
-		/**
-		 * Standard constructor
-		 *
-		 * This is the normal way of creating a SHA-256 hash,
-		 * although if you have the whole message in memory at
-		 * one time, you may be better off using a static
-		 * method, such as QCA::SHA256::hash()
-		 */
-		SHA256();
+		SHA256(const QString &provider="") : Hash("sha256", provider) {}
 	};
 
 	/**
@@ -1286,18 +1286,21 @@ namespace QCA
 	 * For more information, see B. Kalinski RFC1319 "The %MD2
 	 * Message-Digest Algorithm".
 	 */
-	class QCA_EXPORT MD2 : public Hash, public HashStatic<MD2>
+	class QCA_EXPORT MD2 : public Hash
 	{
 	public:
 		/**
 		 * Standard constructor
 		 *
-		 * This is the normal way of creating a MD2 hash,
+		 * This is the normal way of creating an MD-2 hash,
 		 * although if you have the whole message in memory at
-		 * one time, you may be better off using a static
-		 * method, such as QCA::MD2::hash().
+		 * one time, you may be better off using QCA::MD2().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the MD2 implementation
+		 * from qca-openssl, you would use MD2("qca-openssl")
 		 */
-		MD2();
+		MD2(const QString &provider="") : Hash("md2", provider) {}
 	};
 
 	/**
@@ -1320,18 +1323,21 @@ namespace QCA
 	 * For more information, see R. Rivest RFC1320 "The %MD4
 	 * Message-Digest Algorithm".
 	 */
-	class QCA_EXPORT MD4 : public Hash, public HashStatic<MD4>
+	class QCA_EXPORT MD4 : public Hash
 	{
 	public:
 		/**
 		 * Standard constructor
 		 *
-		 * This is the normal way of creating a MD4 hash,
+		 * This is the normal way of creating an MD-4 hash,
 		 * although if you have the whole message in memory at
-		 * one time, you may be better off using a static
-		 * method, such as QCA::MD4::hash().
+		 * one time, you may be better off using QCA::MD4().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the MD4 implementation
+		 * from qca-openssl, you would use MD4("qca-openssl")
 		 */
-		MD4();
+		MD4(const QString &provider="") : Hash("md4", provider) {}
 	};
 
 	/**
@@ -1352,18 +1358,21 @@ namespace QCA
 	 * For more information, see R. Rivest RFC1321 "The %MD5
 	 * Message-Digest Algorithm".
 	 */
-	class QCA_EXPORT MD5 : public Hash, public HashStatic<MD5>
+	class QCA_EXPORT MD5 : public Hash
 	{
 	public:
 		/**
 		 * Standard constructor
 		 *
-		 * This is the normal way of creating a MD5 hash,
+		 * This is the normal way of creating an MD-5 hash,
 		 * although if you have the whole message in memory at
-		 * one time, you may be better off using a static
-		 * method, such as QCA::MD5::hash()
+		 * one time, you may be better off using QCA::MD5().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the MD5 implementation
+		 * from qca-openssl, you would use MD5("qca-openssl")
 		 */
-		MD5();
+		MD5(const QString &provider="") : Hash("md5", provider) {}
 	};
 
 	/**
@@ -1379,17 +1388,15 @@ namespace QCA
 	 * produced the message digest.
 	 *
 	 * You can use this class in two basic ways - standard member
-	 * methods, and static convenience methods. Both are shown in
+	 * methods, and convenience methods. Both are shown in
 	 * the example below.
 	 *
 	 * \code
-	 *        if(!QCA::isSupported(QCA::CAP_RIPEMD160))
+	 *        if(!QCA::isSupported("ripemd160")
 	 *                printf("RIPEMD-160 not supported!\n");
 	 *        else {
-	 *                // Static convenience method.
-	 *                // QCA::RIPEMD160::hash() might be handy too.
 	 *                QCString actualResult;
-	 *                actualResult = QCA::RIPEMD160::hashToString(message);
+	 *                actualResult = QCA::RIPEMD160().hashToString(message);
 	 *
 	 *                // normal methods - update() and final()
 	 *                QByteArray fillerString;
@@ -1402,7 +1409,7 @@ namespace QCA
 	 * \endcode
 	 *
 	 */
-	class QCA_EXPORT RIPEMD160 : public Hash, public HashStatic<RIPEMD160>
+	class QCA_EXPORT RIPEMD160 : public Hash
 	{
 	public:
 		/**
@@ -1410,9 +1417,63 @@ namespace QCA
 		 *
 		 * This is the normal way of creating a RIPEMD160 hash,
 		 * although if you have the whole message in memory at
-		 * one time, you may be better off using a static
-		 * method, such as QCA::RIPEMD160::hash()
+		 * one time, you may be better off using
+		 * QCA::RIPEMD160().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use. For example if you wanted the RIPEMD160
+		 * implementation from qca-openssl, you would use 
+		 * RIPEMD160("qca-openssl")
 		 */
+		RIPEMD160(const QString &provider="") : Hash("ripemd160", provider) {}
+	};
+
+	// macs
+	//class QCA_EXPORT HMAC : public MessageAuthenticationCode
+	//{
+	//public:
+	//	HMAC(const Hash &h = SHA1(), const SymmetricKey &key = SymmetricKey(), const QString &provider="") : MessageAuthenticationCode(subAlg("hmac", h.type()), key, provider) {}
+	//};
+#if 0
+	class QCA_EXPORT SHA0 : public Hash, public HashStatic<SHA0>
+	{
+	public:
+		SHA0();
+	};
+
+	class QCA_EXPORT SHA1 : public Hash, public HashStatic<SHA1>
+	{
+	public:
+		SHA1();
+	};
+
+	class QCA_EXPORT SHA256 : public Hash, public HashStatic<SHA256>
+	{
+	public:
+		SHA256();
+	};
+
+	class QCA_EXPORT MD2 : public Hash, public HashStatic<MD2>
+	{
+	public:
+		MD2();
+	};
+
+	class QCA_EXPORT MD4 : public Hash, public HashStatic<MD4>
+	{
+	public:
+		MD4();
+	};
+
+	class QCA_EXPORT MD5 : public Hash, public HashStatic<MD5>
+	{
+	public:
+		MD5();
+	};
+
+	class QCA_EXPORT RIPEMD160 : public Hash, public HashStatic<RIPEMD160>
+	{
+	public:
 		RIPEMD160();
 	};
 #endif
