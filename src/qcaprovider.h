@@ -93,7 +93,7 @@ public:
 	virtual bool endVerify(const QSecureArray &sig);
 
 	// key agreement
-	virtual SymmetricKey deriveKey(PKeyBase *theirs);
+	virtual SymmetricKey deriveKey(const PKeyBase &theirs);
 };
 
 class RSAContext : public PKeyBase
@@ -156,22 +156,23 @@ public:
 	virtual ConvertResult privateFromPEM(const QString &s, const QString &passphrase) = 0;
 };
 
-/*class CertContext : public Provider::Context
+class CertContext : public Provider::Context
 {
 public:
+	typedef QMap<QString, QString> Info;
 	enum ConvertResult { Good, ErrDecode };
-	CertContext(Provider *p) : Provider::Context(p, X_Cert) {}
+	CertContext(Provider *p) : Provider::Context(p, "cert") {}
 
 	virtual int version() const = 0;
 	virtual QDateTime notValidBefore() const = 0;
 	virtual QDateTime notValidAfter() const = 0;
 
-	virtual Certificate::Info subjectInfo() const = 0;
-	virtual Certificate::Info issuerInfo() const = 0;
+	virtual Info subjectInfo() const = 0;
+	virtual Info issuerInfo() const = 0;
 
 	virtual QString commonName() const = 0;
 	virtual QBigInteger serialNumber() const = 0;
-	virtual PublicKey subjectPublicKey() const = 0;
+	virtual PKeyContext *subjectPublicKey() const = 0;
 
 	// import / export
 	virtual QSecureArray toDER() const = 0;
@@ -184,7 +185,7 @@ class CRLContext : public Provider::Context
 {
 public:
 	enum ConvertResult { Good, ErrDecode };
-	CRLContext(Provider *p) : Provider::Context(p, X_CRL) {}
+	CRLContext(Provider *p) : Provider::Context(p, "crl") {}
 
 	// import / export
 	virtual QSecureArray toDER() const = 0;
@@ -196,57 +197,76 @@ public:
 class StoreContext : public Provider::Context
 {
 public:
-	StoreContext(Provider *p) : Provider::Context(p, X_Store) {}
+	StoreContext(Provider *p) : Provider::Context(p, "store") {}
 
-	virtual void addCertificate(const Certificate &cert, bool trusted) = 0;
-	virtual void addCRL(const CRL &crl) = 0;
-	virtual CertValidity validate(const Certificate &cert, CertUsage u) const = 0;
-};*/
+	virtual void addCertificate(const CertContext &cert, bool trusted) = 0;
+	virtual void addCRL(const CRLContext &crl) = 0;
+	virtual CertValidity validate(const CertContext &cert, CertUsage u) const = 0;
+};
 
-/*class TLSContext : public Provider::Context
+class TLSContext : public Provider::Context
 {
 public:
 	enum Result { Success, Error, Continue };
-	TLSContext(Provider *p) : Provider::Context(p, F_TLS) {}
+	TLSContext(Provider *p) : Provider::Context(p, "tls") {}
 
 	virtual void reset() = 0;
-	virtual bool startClient(Store *store, const Certificate &cert, const PrivateKey &key) = 0;
-	virtual bool startServer(Store *store, const Certificate &cert, const PrivateKey &key) = 0;
+	virtual bool startClient(const StoreContext &store, const CertContext &cert, const PKeyContext &key) = 0;
+	virtual bool startServer(const StoreContext &store, const CertContext &cert, const PKeyContext &key) = 0;
 
 	virtual int handshake(const QByteArray &in, QByteArray *out) = 0;
 	virtual int shutdown(const QByteArray &in, QByteArray *out) = 0;
-	virtual bool encode(const QByteArray &plain, QByteArray *to_net, int *encoded) = 0;
-	virtual bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net) = 0;
+	virtual bool encode(const QSecureArray &plain, QByteArray *to_net, int *encoded) = 0;
+	virtual bool decode(const QByteArray &from_net, QSecureArray *plain, QByteArray *to_net) = 0;
 	virtual bool eof() const = 0;
-	virtual QByteArray unprocessed() = 0;
+	virtual QSecureArray unprocessed() = 0;
 
 	virtual CertValidity peerCertificateValidity() const = 0;
-	virtual Certificate peerCertificate() const = 0;
-};
-
-struct QCA_SASLHostPort
-{
-	QHostAddress addr;
-	Q_UINT16 port;
-};
-
-struct QCA_SASLNeedParams
-{
-	bool user, authzid, pass, realm;
+	virtual CertContext *peerCertificate() const = 0;
 };
 
 class SASLContext : public Provider::Context
 {
 public:
-	enum Result { Success, Error, NeedParams, AuthCheck, Continue };
-	SASLContext(Provider *p) : Provider::Context(p, F_SASL) {}
+	struct HostPort
+	{
+		QHostAddress addr;
+		Q_UINT16 port;
+	};
+	struct AuthParams
+	{
+		bool user, authzid, pass, realm;
+	};
+	enum Result
+	{
+		Success,
+		Error,
+		NeedParams,
+		AuthCheck,
+		Continue
+	};
+	enum AuthError
+	{
+		NoMech,
+		BadProto,
+		BadServ,
+		BadAuth,
+		NoAuthzid,
+		TooWeak,
+		NeedEncrypt,
+		Expired,
+		Disabled,
+		NoUser,
+		RemoteUnavail
+	};
+	SASLContext(Provider *p) : Provider::Context(p, "sasl") {}
 
 	// common
 	virtual void reset() = 0;
-	virtual void setCoreProps(const QString &service, const QString &host, QCA_SASLHostPort *local, QCA_SASLHostPort *remote) = 0;
+	virtual void setCoreProps(const QString &service, const QString &host, HostPort *local, HostPort *remote) = 0;
 	virtual void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax, const QString &_ext_authid, int _ext_ssf) = 0;
 	virtual int security() const = 0;
-	virtual SASL::AuthCond authCond() const = 0;
+	virtual AuthError authError() const = 0;
 
 	// init / first step
 	virtual bool clientStart(const QStringList &mechlist) = 0;
@@ -255,10 +275,10 @@ public:
 	virtual int serverFirstStep(const QString &mech, const QByteArray *in) = 0;
 
 	// get / set params
-	virtual QCA_SASLNeedParams clientParamsNeeded() const = 0;
-	virtual void setClientParams(const QString *user, const QString *authzid, const QString *pass, const QString *realm) = 0;
-	virtual QString username() const=0;
-	virtual QString authzid() const=0;
+	virtual AuthParams clientParamsNeeded() const = 0;
+	virtual void setClientParams(const QString *user, const QString *authzid, const QSecureArray *pass, const QString *realm) = 0;
+	virtual QString username() const = 0;
+	virtual QString authzid() const = 0;
 
 	// continue steps
 	virtual int nextStep(const QByteArray &in) = 0;
@@ -270,9 +290,9 @@ public:
 	virtual QByteArray result() const = 0;
 
 	// security layer
-	virtual bool encode(const QByteArray &in, QByteArray *out) = 0;
-	virtual bool decode(const QByteArray &in, QByteArray *out) = 0;
-};*/
+	virtual bool encode(const QSecureArray &in, QByteArray *out) = 0;
+	virtual bool decode(const QByteArray &in, QSecureArray *out) = 0;
+};
 
 }
 

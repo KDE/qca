@@ -462,7 +462,8 @@ namespace QCA
 		Decode
 	};
 
-	enum DL_Group {
+	enum DL_Group
+	{
 		DSA_512,
 		DSA_768,
 		DSA_1024,
@@ -472,6 +473,32 @@ namespace QCA
 		IETF_2048,
 		IETF_3072,
 		IETF_4096
+	};
+
+	enum CertValidity
+	{
+		Valid,
+		Rejected,
+		Untrusted,
+		SignatureFailed,
+		InvalidCA,
+		InvalidPurpose,
+		SelfSigned,
+		Revoked,
+		PathLengthExceeded,
+		Expired,
+		Unknown
+	};
+
+	enum CertUsage
+	{
+		Any             = 0x00,
+		TLSServer       = 0x01,
+		TLSClient       = 0x02,
+		CodeSigning     = 0x04,
+		EmailProtection = 0x08,
+		TimeStamping    = 0x10,
+		CRLSigning      = 0x20
 	};
 
 	/**
@@ -1388,6 +1415,216 @@ namespace QCA
 	private:
 		RSAKey v_key;
 	};
+
+	// v2 public key handling
+	/*class PublicKey;
+	class PrivateKey;
+	class KeyGenerator;
+	class RSAPublicKey;
+	class RSAPrivateKey;
+	class DSAPublicKey;
+	class DSAPrivateKey;
+	class DHPublicKey;
+	class DHPrivateKey;
+
+	class QCA_EXPORT PKey : public Algorithm
+	{
+	public:
+		enum Type { RSA, DSA, DH };
+
+		PKey();
+		PKey(const PKey &from);
+		~PKey();
+
+		PKey & operator=(const PKey &from);
+
+		bool isNull() const;
+		Type type() const;
+
+		bool isRSA() const;
+		bool isDSA() const;
+		bool isDH() const;
+
+		bool isPublic() const;
+		bool isPrivate() const;
+
+		bool canKeyAgree() const;
+
+		PublicKey toPublicKey() const;
+		PrivateKey toPrivateKey() const;
+
+		friend class KeyGenerator;
+
+	protected:
+		PKey(int cap, const QString &provider);
+		void set(const PKey &k);
+
+		RSAPublicKey toRSAPublicKey() const;
+		RSAPrivateKey toRSAPrivateKey() const;
+		DSAPublicKey toDSAPublicKey() const;
+		DSAPrivateKey toDSAPrivateKey() const;
+		DHPublicKey toDHPublicKey() const;
+		DHPrivateKey toDHPrivateKey() const;
+
+	private:
+		class Private;
+		Private *d;
+	};
+
+	class QCA_EXPORT PublicKey : public PKey
+	{
+	public:
+		PublicKey();
+		PublicKey(const PrivateKey &k);
+
+		RSAPublicKey toRSA() const;
+		DSAPublicKey toDSA() const;
+		DHPublicKey toDH() const;
+
+		bool canEncrypt() const;
+		bool canVerify() const;
+
+		// encrypt / verify
+		int maximumEncryptSize() const;
+		QSecureArray encrypt(const QSecureArray &a);
+		void startVerify();
+		void update(const QSecureArray &);
+		bool validSignature(const QSecureArray &sig);
+		bool verifyMessage(const QSecureArray &a, const QSecureArray &sig);
+
+		// import / export
+		QSecureArray toDER() const;
+		QString toPEM() const;
+		static PublicKey fromDER(const QSecureArray &a, const QString &provider="");
+		static PublicKey fromPEM(const QString &s, const QString &provider="");
+
+	protected:
+		PublicKey(int cap, const QString &provider);
+	};
+
+	class QCA_EXPORT PrivateKey : public PKey
+	{
+	public:
+		PrivateKey();
+
+		RSAPrivateKey toRSA() const;
+		DSAPrivateKey toDSA() const;
+		DHPrivateKey toDH() const;
+
+		bool canDecrypt() const;
+		bool canSign() const;
+
+		// decrypt / sign / key agreement
+		bool decrypt(const QSecureArray &in, QSecureArray *out);
+		void startSign();
+		void update(const QSecureArray &);
+		QSecureArray signature();
+		QSecureArray signMessage(const QSecureArray &a);
+		SymmetricKey deriveKey(const PublicKey &theirs);
+
+		// import / export
+		QSecureArray toDER(const QString &passphrase="") const;
+		QString toPEM(const QString &passphrase="") const;
+		static PrivateKey fromDER(const QSecureArray &a, const QString &passphrase="", const QString &provider="");
+		static PrivateKey fromPEM(const QString &s, const QString &passphrase="", const QString &provider="");
+
+	protected:
+		PrivateKey(int cap, const QString &provider);
+	};
+
+	class QCA_EXPORT KeyGenerator : public QObject
+	{
+		Q_OBJECT
+	public:
+		KeyGenerator(QObject *parent=0, const char *name=0);
+		~KeyGenerator();
+
+		bool blocking() const;
+		void setBlocking(bool b);
+		bool isBusy() const;
+
+		void generateRSA(int bits, int exp=65537, const QString &provider="");
+		void generateDSA(DL_Group group, const QString &provider="");
+		void generateDH(DL_Group group, const QString &provider="");
+		PrivateKey result() const;
+
+	signals:
+		void finished();
+
+	private:
+		void done();
+
+		class Private;
+		Private *d;
+	};
+
+	class QCA_EXPORT RSAPublicKey : public PublicKey
+	{
+	public:
+		RSAPublicKey();
+		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider="");
+		RSAPublicKey(const RSAPrivateKey &k);
+
+		QBigInteger n() const;
+		QBigInteger e() const;
+	};
+
+	class QCA_EXPORT RSAPrivateKey : public PrivateKey
+	{
+	public:
+		RSAPrivateKey();
+		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider="");
+
+		QBigInteger p() const;
+		QBigInteger q() const;
+		QBigInteger d() const;
+		QBigInteger n() const;
+		QBigInteger e() const;
+	};
+
+	class QCA_EXPORT DSAPublicKey : public PublicKey
+	{
+	public:
+		DSAPublicKey();
+		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider="");
+		DSAPublicKey(const DSAPrivateKey &k);
+
+		DL_Group domain() const;
+		QBigInteger y() const;
+	};
+
+	class QCA_EXPORT DSAPrivateKey : public PrivateKey
+	{
+	public:
+		DSAPrivateKey();
+		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider="");
+
+		DL_Group domain() const;
+		QBigInteger x() const;
+		QBigInteger y() const;
+	};
+
+	class QCA_EXPORT DHPublicKey : public PublicKey
+	{
+	public:
+		DHPublicKey();
+		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider="");
+		DHPublicKey(const DHPrivateKey &k);
+
+		DL_Group domain() const;
+		QBigInteger y() const;
+	};
+
+	class QCA_EXPORT DHPrivateKey : public PrivateKey
+	{
+	public:
+		DHPrivateKey();
+		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider="");
+
+		DL_Group domain() const;
+		QBigInteger x() const;
+		QBigInteger y() const;
+	};*/
 
 	typedef QMap<QString, QString> CertProperties;
 

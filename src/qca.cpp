@@ -364,7 +364,7 @@ bool PKeyBase::endVerify(const QSecureArray &)
 	return false;
 }
 
-SymmetricKey PKeyBase::deriveKey(PKeyBase *)
+SymmetricKey PKeyBase::deriveKey(const PKeyBase &)
 {
 	return SymmetricKey();
 }
