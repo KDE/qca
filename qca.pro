@@ -24,18 +24,22 @@ INCLUDEPATH += $$QCA_INC $$QCA_CPP
 # botantools
 include(src/botantools/botantools.pri)
 
-HEADERS += \
+PRIVATE_HEADERS += \
+	$$QCA_CPP/qca_plugin.h \
+	$$QCA_CPP/qca_systemstore.h
+
+PUBLIC_HEADERS += \
 	$$QCA_INC/qca_export.h \
 	$$QCA_INC/qca_tools.h \
 	$$QCA_INC/qca_core.h \
 	$$QCA_INC/qca_textfilter.h \
-	$$QCA_CPP/qca_plugin.h \
 	$$QCA_INC/qca_basic.h \
 	$$QCA_INC/qca_publickey.h \
 	$$QCA_INC/qca_cert.h \
 	$$QCA_INC/qca_securelayer.h \
 	$$QCA_INC/qcaprovider.h \
-	$$QCA_CPP/qca_systemstore.h
+
+HEADERS += $$PRIVATE_HEADERS $$PUBLIC_HEADERS
 
 SOURCES += \
 	$$QCA_CPP/qca_tools.cpp \

@@ -4,8 +4,8 @@ cat >extra.pri <<EOT
 target.path=$PREFIX/lib
 INSTALLS += target
 
-incfiles.path=$PREFIX/include
-incfiles.files=src/qca.h
+incfiles.path=$PREFIX/include/QtCrypto
+incfiles.files=\$\$PUBLIC_HEADERS
 INSTALLS += incfiles
 
 INSTALL_ROOT = $PREFIX
