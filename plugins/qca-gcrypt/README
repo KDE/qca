@@ -1,0 +1,17 @@
+QCA libgcrypt plugin
+------------------
+Author: Brad Hards <bradh@frogmouth.net>
+
+This plugin provides features based on libgcrypt. It implements:
+* Hashing - SHA1, SHA256, SHA384, SHA512
+* Symmetric encryption - AES128
+
+
+Requirements:
+  libgcrypt 1.2.0 or later
+
+Installation procedure:
+  ./configure
+  make
+  su -c "make install"
+
