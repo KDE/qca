@@ -111,6 +111,13 @@ private:
 };
 
 static QPtrList<ProviderItem> providerList;
+
+// TODO
+//static QPtrList<ProviderItem> *providerItemList = 0;
+//static QCA::ProviderList *providerList = 0;
+//static QCA::Provider *default_provider = 0;
+static QCA::Random *global_rng = 0;
+
 static bool qca_init = false;
 
 static bool plugin_have(const QString &fname)
@@ -181,26 +188,7 @@ static int plugin_caps()
 
 QString QCA::arrayToHex(const QByteArray &a)
 {
-	QString out;
-	for(int n = 0; n < (int)a.size(); ++n) {
-		QString str;
-		str.sprintf("%02x", (uchar)a[n]);
-		out.append(str);
-	}
-	return out;
-}
-
-QByteArray QCA::hexToArray(const QString &str)
-{
-	QByteArray out(str.length() / 2);
-	int at = 0;
-	for(int n = 0; n + 1 < (int)str.length(); n += 2) {
-		uchar a = str[n];
-		uchar b = str[n+1];
-		uchar c = ((a & 0x0f) << 4) + (b & 0x0f);
-		out[at++] = c;
-	}
-	return out;
+	return arrayToHex(QSecureArray(a));
 }
 
 void QCA::init()
@@ -300,6 +288,34 @@ static void *getContext(int cap)
 	return 0;
 }
 
+namespace QCA {
+
+//----------------------------------------------------------------------------
+// Global
+//----------------------------------------------------------------------------
+QString arrayToHex(const QSecureArray &a)
+{
+	return Hex().arrayToString(a);
+}
+
+QByteArray hexToArray(const QString &str)
+{
+	return Hex().stringToArray(str).toByteArray();
+}
+
+Random & globalRNG()
+{
+	if(!global_rng)
+		global_rng = new Random;
+	return *global_rng;
+}
+
+void setGlobalRNG(const QString &provider)
+{
+	delete global_rng;
+	global_rng = new Random(provider);
+}
+
 //----------------------------------------------------------------------------
 // Initializer
 //----------------------------------------------------------------------------
@@ -311,6 +327,275 @@ Initializer::Initializer(MemoryMode m, int prealloc)
 Initializer::~Initializer()
 {
 	deinit();
+}
+
+//----------------------------------------------------------------------------
+// Provider
+//----------------------------------------------------------------------------
+Provider::~Provider()
+{
+}
+
+void Provider::init()
+{
+}
+
+Provider::Context::Context(Provider *parent, const QString &type)
+{
+	_provider = parent;
+	_type = type;
+	refs = 0;
+}
+
+Provider::Context::~Context()
+{
+}
+
+Provider *Provider::Context::provider() const
+{
+	return _provider;
+}
+
+QString Provider::Context::type() const
+{
+	return _type;
+}
+
+bool Provider::Context::sameProvider(Context *c)
+{
+	return (c->provider() == _provider);
+}
+
+//----------------------------------------------------------------------------
+// BufferedComputation
+//----------------------------------------------------------------------------
+BufferedComputation::~BufferedComputation()
+{
+}
+
+QSecureArray BufferedComputation::process(const QSecureArray &a)
+{
+	clear();
+	update(a);
+	return final();
+}
+
+//----------------------------------------------------------------------------
+// Filter
+//----------------------------------------------------------------------------
+Filter::~Filter()
+{
+}
+
+QSecureArray Filter::process(const QSecureArray &a)
+{
+	clear();
+	QSecureArray buf = update(a);
+	if(!ok())
+		return QSecureArray();
+	QSecureArray fin = final();
+	if(!ok())
+		return QSecureArray();
+	int oldsize = buf.size();
+	buf.resize(oldsize + fin.size());
+	memcpy(buf.data() + oldsize, fin.data(), fin.size());
+	return buf;
+}
+
+//----------------------------------------------------------------------------
+// Algorithm
+//----------------------------------------------------------------------------
+class Algorithm::Private
+{
+public:
+	Provider::Context *c;
+
+	Private()
+	{
+		c = 0;
+	}
+
+	~Private()
+	{
+		delContext();
+	}
+
+	void setContext(Provider::Context *nc)
+	{
+		delContext();
+		++(nc->refs);
+		c = nc;
+	}
+
+	void delContext()
+	{
+		if(!c)
+			return;
+
+		--(c->refs);
+		if(c->refs == 0)
+			delete c;
+		c = 0;
+	}
+
+	void detach()
+	{
+		if(!c)
+			return;
+
+		if(c->refs > 1) {
+			Provider::Context *nc = c->clone();
+			nc->refs = 0;
+			setContext(nc);
+		}
+	}
+};
+
+Algorithm::Algorithm()
+{
+	d = new Private;
+}
+
+Algorithm::Algorithm(const QString &type, const QString &provider)
+{
+	d = new Private;
+	change(type, provider);
+}
+
+Algorithm::Algorithm(const Algorithm &from)
+{
+	printf("algo copy\n");
+	d = new Private;
+	*this = from;
+}
+
+Algorithm::~Algorithm()
+{
+	delete d;
+}
+
+Algorithm & Algorithm::operator=(const Algorithm &from)
+{
+	printf("algo=\n");
+	d->delContext();
+	if(from.d->c)
+		d->setContext(from.d->c);
+	return *this;
+}
+
+QString Algorithm::type() const
+{
+	if(d->c)
+		return d->c->type();
+	else
+		return QString();
+}
+
+Provider *Algorithm::provider() const
+{
+	if(d->c)
+		return d->c->provider();
+	else
+		return 0;
+}
+
+void Algorithm::detach()
+{
+	d->detach();
+}
+
+Provider::Context *Algorithm::context() const
+{
+	return d->c;
+}
+
+void Algorithm::change(Provider::Context *c)
+{
+	d->setContext(c);
+}
+
+void Algorithm::change(const QString &type, const QString &provider)
+{
+	Q_UNUSED(type);
+	Q_UNUSED(provider);
+	d->delContext();
+	// TODO
+	//if(!type.isEmpty())
+	//	d->setContext(getContext(type, provider));
+}
+
+//----------------------------------------------------------------------------
+// SymmetricKey
+//----------------------------------------------------------------------------
+SymmetricKey::SymmetricKey()
+{
+}
+
+SymmetricKey::SymmetricKey(int size)
+{
+	*this = globalRNG().nextBytes(size, Random::SessionKey);
+}
+
+SymmetricKey::SymmetricKey(const QSecureArray &a)
+{
+	*this = a;
+}
+
+SymmetricKey & SymmetricKey::operator=(const QSecureArray &a)
+{
+	resize(a.size());
+	memcpy(data(), a.data(), size());
+	return *this;
+}
+
+bool operator==(const SymmetricKey &a, const SymmetricKey &b)
+{
+	int as = a.size();
+	int bs = b.size();
+	if(as != bs)
+		return false;
+	char *ap = a.data();
+	char *bp = b.data();
+	int n = 0;
+	while(n < as) {
+		if((*ap) != (*bp))
+			return false;
+		++ap;
+		++bp;
+		++n;
+	}
+	return true;
+}
+
+bool operator!=(const SymmetricKey &a, const SymmetricKey &b)
+{
+	return !(a == b);
+}
+
+//----------------------------------------------------------------------------
+// InitializationVector
+//----------------------------------------------------------------------------
+InitializationVector::InitializationVector()
+{
+}
+
+InitializationVector::InitializationVector(int size)
+{
+	*this = globalRNG().nextBytes(size, Random::Nonce);
+}
+
+InitializationVector::InitializationVector(const QSecureArray &a)
+{
+	*this = a;
+}
+
+InitializationVector & InitializationVector::operator=(const QSecureArray &a)
+{
+	resize(a.size());
+	memcpy(data(), a.data(), size());
+	return *this;
+}
+
 }
 
 //----------------------------------------------------------------------------

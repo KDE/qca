@@ -149,6 +149,11 @@ private:
 
 namespace QCA
 {
+	class Provider;
+	class Random;
+	typedef QPtrList<Provider> ProviderList;
+	typedef QPtrListIterator<Provider> ProviderListIterator;
+
 	/** 
 	 * A list of the capabilities available within QCA
 	 *
@@ -200,6 +205,12 @@ namespace QCA
 		Decrypt = 0x0002  /**< cipher algorithm should decrypt */
 	};
 
+	enum Direction
+	{
+		Encode,
+		Decode
+	};
+
 	enum MemoryMode
 	{
 		Practical, /**< mlock and drop root if available, else mmap */
@@ -241,6 +252,9 @@ namespace QCA
 	QCA_EXPORT void insertProvider(QCAProvider *);
 	QCA_EXPORT void unloadAllPlugins();
 
+	QCA_EXPORT Random & globalRNG();
+	QCA_EXPORT void setGlobalRNG(const QString &provider);
+
 	/** 
 	 * Convert a QByteArray to printable hexadecimal
 	 * representation.
@@ -262,6 +276,7 @@ namespace QCA
 	 * \return a printable representation
 	 */
 	QCA_EXPORT QString arrayToHex(const QByteArray &array);
+	QCA_EXPORT QString arrayToHex(const QSecureArray &array);
 
 	/**
 	 * Convert a QString containing a hexadecimal representation
@@ -297,6 +312,162 @@ namespace QCA
 		// botan prefers mmap over locking, so we will too
 		Initializer(MemoryMode m = Practical, int prealloc = 64);
 		~Initializer();
+	};
+
+	// version 2 stuff
+	class QCA_EXPORT Provider
+	{
+	public:
+		virtual ~Provider();
+
+		class Context
+		{
+		public:
+			Context(Provider *parent, const QString &type);
+			virtual ~Context();
+
+			Provider *provider() const;
+			QString type() const;
+			virtual Context *clone() const = 0;
+			bool sameProvider(Context *c);
+
+			int refs;
+
+		private:
+			Provider *_provider;
+			QString _type;
+		};
+
+		virtual void init();
+		virtual QString name() const = 0;
+		virtual QStringList features() const = 0;
+		virtual Context *createContext(const QString &type) = 0;
+	};
+
+	class QCA_EXPORT BufferedComputation
+	{
+	public:
+		virtual ~BufferedComputation();
+
+		virtual void clear() = 0;
+		virtual void update(const QSecureArray &a) = 0;
+		virtual QSecureArray final() = 0;
+		QSecureArray process(const QSecureArray &a);
+	};
+
+	class QCA_EXPORT Filter
+	{
+	public:
+		virtual ~Filter();
+
+		virtual void clear() = 0;
+		virtual QSecureArray update(const QSecureArray &a) = 0;
+		virtual QSecureArray final() = 0;
+		virtual bool ok() const = 0;
+		QSecureArray process(const QSecureArray &a);
+	};
+
+	class QCA_EXPORT TextFilter : public Filter
+	{
+	public:
+		TextFilter(Direction dir);
+
+		void setup(Direction dir);
+		QSecureArray encode(const QSecureArray &a);
+		QSecureArray decode(const QSecureArray &a);
+		QString arrayToString(const QSecureArray &a);
+		QSecureArray stringToArray(const QString &s);
+		QString encodeString(const QString &s);
+
+	protected:
+		Direction _dir;
+	};
+
+	class QCA_EXPORT Hex : public TextFilter
+	{
+	public:
+		Hex(Direction dir = Encode);
+
+		virtual void clear();
+		virtual QSecureArray update(const QSecureArray &a);
+		virtual QSecureArray final();
+		virtual bool ok() const;
+
+	private:
+		uchar val;
+		bool partial;
+		bool _ok;
+	};
+
+	class QCA_EXPORT Base64 : public TextFilter
+	{
+	public:
+		Base64(Direction dir = Encode);
+
+		virtual void clear();
+		virtual QSecureArray update(const QSecureArray &a);
+		virtual QSecureArray final();
+		virtual bool ok() const;
+	};
+
+	class QCA_EXPORT Algorithm
+	{
+	public:
+		Algorithm(const Algorithm &from);
+		virtual ~Algorithm();
+
+		Algorithm & operator=(const Algorithm &from);
+
+		QString type() const;
+		Provider *provider() const;
+		void detach();
+
+	protected:
+		Algorithm();
+		Algorithm(const QString &type, const QString &provider);
+		Provider::Context *context() const;
+		void change(Provider::Context *c);
+		void change(const QString &type, const QString &provider);
+
+	private:
+		class Private;
+		Private *d;
+	};
+
+	class QCA_EXPORT Random : public Algorithm
+	{
+	public:
+		enum Quality { Nonce, PublicValue, SessionKey, LongTermKey };
+		Random(const QString &provider="");
+
+		uchar nextByte(Quality q = SessionKey);
+		QSecureArray nextBytes(int size, Quality q = SessionKey);
+
+		static uchar randomChar(Quality q = SessionKey);
+		static uint randomInt(Quality q = SessionKey);
+		static QSecureArray randomArray(int size, Quality q = SessionKey);
+	};
+
+	class QCA_EXPORT SymmetricKey : public QSecureArray
+	{
+	public:
+		SymmetricKey();
+		SymmetricKey(int size);
+		SymmetricKey(const QSecureArray &a);
+
+		SymmetricKey & operator=(const QSecureArray &a);
+	};
+	bool operator==(const SymmetricKey &a, const SymmetricKey &b);
+	bool operator!=(const SymmetricKey &a, const SymmetricKey &b);
+
+	class QCA_EXPORT InitializationVector : public QSecureArray
+	{
+	public:
+		InitializationVector();
+		InitializationVector(int size);
+		InitializationVector(const QSecureArray &a);
+
+		InitializationVector & operator=(const QSecureArray &a);
 	};
 
 	/**

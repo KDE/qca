@@ -29,7 +29,9 @@ HEADERS += \
 
 SOURCES += \
 	$$QCA_CPP/qca.cpp \
-	$$QCA_CPP/qca_tools.cpp
+	$$QCA_CPP/qca_tools.cpp \
+	$$QCA_CPP/qca_basic.cpp \
+	$$QCA_CPP/qca_textfilter.cpp
 
 include(conf.pri)
 include(extra.pri)
