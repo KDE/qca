@@ -2,6 +2,7 @@
 
 #include<qptrlist.h>
 #include<qdir.h>
+#include<qfileinfo.h>
 #include<qstringlist.h>
 #include<qlibrary.h>
 #include"qcaprovider.h"
@@ -9,6 +10,14 @@
 
 #ifdef USE_OPENSSL
 #include"qcaopenssl_p.h"
+#endif
+
+#if defined(Q_OS_WIN32)
+#define PLUGIN_EXT "dll"
+#elif defined(Q_OS_MAC)
+#define PLUGIN_EXT "dylib"
+#else
+#define PLUGIN_EXT "so"
 #endif
 
 using namespace QCA;
@@ -36,9 +45,14 @@ void QCA::init()
 
 	// load plugins
 	QDir dir("plugins");
-	QStringList list = dir.entryList("*.so");
+	QStringList list = dir.entryList();
 	for(QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-		QLibrary *lib = new QLibrary(dir.filePath(*it));
+		QFileInfo fi(dir.filePath(*it));
+		//printf("f=[%s]\n", fi.filePath().latin1());
+		if(fi.extension() != PLUGIN_EXT)
+			continue;
+
+		QLibrary *lib = new QLibrary(fi.filePath());
 		if(!lib->load()) {
 			delete lib;
 			continue;
