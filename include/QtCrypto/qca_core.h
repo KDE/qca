@@ -386,7 +386,24 @@ namespace QCA
 	 */
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
+	/**
+	   Test if QCA can access the root CA certificates
+
+	   QCA supports the concept of a Store, containing certificates.
+	   If those certificates are available, this function returns true,
+	   otherwise it returns false.
+	  
+	   \sa systemStore
+	*/
 	QCA_EXPORT bool haveSystemStore();
+
+	/**
+	   Get system-wide root CA certificates
+
+	   \param provider a specific provider to generate the Store, if required
+
+	   \sa haveSystemStore
+	*/
 	QCA_EXPORT Store systemStore(const QString &provider = QString() );
 
 	/**
@@ -700,7 +717,7 @@ namespace QCA
 	 when final() is called.
 
 	 If this seems a big vague, then you might try deriving
-	 your class from a subclass with stronger semantics. If your
+	 your class from a subclass with stronger semantics, or if your
 	 update() function is always returning null results, and
 	 everything comes out at final(), try BufferedComputation.
 	*/
