@@ -8,6 +8,26 @@ incfiles.path=$PREFIX/include/QtCrypto
 incfiles.files=\$\$PUBLIC_HEADERS
 INSTALLS += incfiles
 
+pcfiles.path=$PREFIX/lib/pkgconfig
+pcfiles.files=qca.pc
+INSTALLS += pcfiles
+
 INSTALL_ROOT = $PREFIX
 
 EOT
+
+cat >qca.pc <<EOF
+prefix= $PREFIX
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib
+includedir=\${prefix}/include/QtCrypto
+
+Name: QCA
+Description: Qt Cryptographic Architecture library
+Version: 2.0.0 #maybe this shouldn't be literal...
+Requires: qt-mt
+Libs: -L\${libdir}
+Cflags: -I\${includedir}
+
+
+EOF
