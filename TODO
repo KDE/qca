@@ -7,3 +7,30 @@
 * Additional unit tests
 
 * API documentation
+
+QCA 2 TODO:
+* plugins: thread safety ?
+* sasl: server last (SASL_SUCCESS_DATA)
+* ssl: compression yes/no
+* ssl: set/get ciphers
+* ssl: get connection info (cipher name and bits, etc)
+* ciphers should be 'filters', not BufferedComputations
+* other modes: ofb, etc?
+* pkey: ability to choose sign algorithm
+* pkey: ability to choose cipher for toDER/PEM passphrase
+* cert: Distinguished Names (Botan has X509_DN)
+* cert: get signature algorithm
+* cert: constraints, ex_constraints, policies, pathLimit, isCA, isSelfSigned
+* cert: other functions?
+* crl: add functions
+* base64 filter code
+* blocking mode for ssl/sasl ?
+* pgp
+* xmlsec
+* pgp: understand gpg KEYEXPIRED
+* securearray: do copy-on-write instead of all the time, don't use SecureVector
+* built-in sha1 and md5
+* botan init cleanup
+* install on top of Qt.  usage then is simply LIBS += -lqca
+* wrap the Botan namespace in the QCA namespace (to avoid symbol conflict)
+
