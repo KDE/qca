@@ -3,7 +3,7 @@
 #include"qca.h"
 #include<stdio.h>
 
-#define USE_FILE
+//#define USE_FILE
 
 QCA::RSAKey readKeyFile(const QString &name)
 {

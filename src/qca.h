@@ -99,12 +99,12 @@ namespace QCA
 
 		QByteArray dyn_generateKey() const;
 		QByteArray dyn_generateIV() const;
-		void reset(int dir, int mode, const QByteArray &key, const QByteArray &iv);
+		void reset(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad=true);
 		bool update(const QByteArray &a);
-		QByteArray final();
+		QByteArray final(bool *ok=0);
 
 	protected:
-		Cipher(QCA_CipherContext *, int dir, int mode, const QByteArray &key, const QByteArray &iv);
+		Cipher(QCA_CipherContext *, int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad);
 
 	private:
 		class Private;
@@ -151,25 +151,25 @@ namespace QCA
 	class BlowFish : public Cipher, public CipherStatic<BlowFish>
 	{
 	public:
-		BlowFish(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		BlowFish(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
 	class TripleDES : public Cipher, public CipherStatic<TripleDES>
 	{
 	public:
-		TripleDES(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		TripleDES(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
 	class AES128 : public Cipher, public CipherStatic<AES128>
 	{
 	public:
-		AES128(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		AES128(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
 	class AES256 : public Cipher, public CipherStatic<AES256>
 	{
 	public:
-		AES256(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		AES256(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
 	};
 
 	class RSA;

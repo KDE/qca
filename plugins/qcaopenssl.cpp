@@ -168,19 +168,20 @@ public:
 		return true;
 	}
 
-	bool setup(int _dir, int mode, const char *key, const char *iv)
+	bool setup(int _dir, int mode, const char *key, const char *iv, bool _pad)
 	{
 		dir = _dir;
+		pad = _pad;
 		type = getType(mode);
 		r.resize(0);
 		EVP_CIPHER_CTX_init(&c);
 
 		if(dir == QCA::Encrypt) {
-			if(!EVP_EncryptInit_ex(&c, type, NULL, (unsigned char *)key, (unsigned char *)iv))
+			if(!EVP_EncryptInit(&c, type, (unsigned char *)key, (unsigned char *)iv))
 				return false;
 		}
 		else {
-			if(!EVP_DecryptInit_ex(&c, type, NULL, (unsigned char *)key, (unsigned char *)iv))
+			if(!EVP_DecryptInit(&c, type, (unsigned char *)key, (unsigned char *)iv))
 				return false;
 		}
 		return true;
@@ -190,7 +191,7 @@ public:
 	{
 		QByteArray result(len + type->block_size);
 		int olen;
-		if(dir == QCA::Encrypt) {
+		if(dir == QCA::Encrypt || !pad) {
 			if(!EVP_EncryptUpdate(&c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len))
 				return false;
 		}
@@ -205,18 +206,20 @@ public:
 
 	bool final(char **out, unsigned int *outlen)
 	{
-		QByteArray result(type->block_size);
-		int olen;
-		if(dir == QCA::Encrypt) {
-			if(!EVP_EncryptFinal(&c, (unsigned char *)result.data(), &olen))
-				return false;
+		if(pad) {
+			QByteArray result(type->block_size);
+			int olen;
+			if(dir == QCA::Encrypt) {
+				if(!EVP_EncryptFinal(&c, (unsigned char *)result.data(), &olen))
+					return false;
+			}
+			else {
+				if(!EVP_DecryptFinal(&c, (unsigned char *)result.data(), &olen))
+					return false;
+			}
+			result.resize(olen);
+			appendArray(&r, result);
 		}
-		else {
-			if(!EVP_DecryptFinal(&c, (unsigned char *)result.data(), &olen))
-				return false;
-		}
-		result.resize(olen);
-		appendArray(&r, result);
 
 		*outlen = r.size();
 		unsigned char *outbuf = (unsigned char *)malloc(*outlen);
@@ -231,6 +234,7 @@ public:
 	const EVP_CIPHER *type;
 	QByteArray r;
 	int dir;
+	bool pad;
 };
 
 class BlowFishContext : public EVPCipherContext

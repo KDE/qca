@@ -1,12 +1,13 @@
-* cipher: better handling of errors ('empty' arrays are not a good idea)
-* cipher: ability to disable pkcs padding
-* cipher: better entropy for keygen?
+* hash cloning
+* cipher cloning
+* openssl plugin: use openssl entropy for cipher keygen
 
-* ssl/tls/x509 (also server support)
+* x509
+* ssl/tls (also server support)
 * sasl (also server support)
-* dsa
 
-* dh?
+* dsa
+* diffie-hellman
 
 * figure out where to install the lib and plugins. maybe Qt plugin path?
 

@@ -206,10 +206,10 @@ public:
 	bool err;
 };
 
-Cipher::Cipher(QCA_CipherContext *c, int dir, int mode, const QByteArray &key, const QByteArray &iv)
+Cipher::Cipher(QCA_CipherContext *c, int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
 {
 	d = new Private(c);
-	reset(dir, mode, key, iv);
+	reset(dir, mode, key, iv, pad);
 }
 
 Cipher::Cipher(const Cipher &from)
@@ -245,7 +245,7 @@ QByteArray Cipher::dyn_generateIV() const
 	return buf;
 }
 
-void Cipher::reset(int dir, int mode, const QByteArray &key, const QByteArray &iv)
+void Cipher::reset(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
 {
 	d->reset();
 	if((int)key.size() != d->c->keySize())
@@ -257,7 +257,7 @@ void Cipher::reset(int dir, int mode, const QByteArray &key, const QByteArray &i
 	d->mode = mode;
 	d->key = key.copy();
 	d->iv = iv.copy();
-	if(!d->c->setup(d->dir, d->mode, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data())) {
+	if(!d->c->setup(d->dir, d->mode, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data(), pad)) {
 		d->err = true;
 		return;
 	}
@@ -268,15 +268,19 @@ bool Cipher::update(const QByteArray &a)
 	if(d->err)
 		return false;
 
-	if(!d->c->update(a.data(), a.size())) {
-		d->err = true;
-		return false;
+	if(!a.isEmpty()) {
+		if(!d->c->update(a.data(), a.size())) {
+			d->err = true;
+			return false;
+		}
 	}
 	return true;
 }
 
-QByteArray Cipher::final()
+QByteArray Cipher::final(bool *ok)
 {
+	if(ok)
+		*ok = false;
 	if(d->err)
 		return QByteArray();
 
@@ -289,6 +293,8 @@ QByteArray Cipher::final()
 	QByteArray buf(len);
 	memcpy(buf.data(), out, len);
 	free(out);
+	if(ok)
+		*ok = true;
 	return buf;
 }
 
@@ -323,8 +329,8 @@ MD5::MD5()
 //----------------------------------------------------------------------------
 // BlowFish
 //----------------------------------------------------------------------------
-BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_BlowFish), dir, mode, key, iv)
+BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_BlowFish), dir, mode, key, iv, pad)
 {
 }
 
@@ -332,8 +338,8 @@ BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &i
 //----------------------------------------------------------------------------
 // TripleDES
 //----------------------------------------------------------------------------
-TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_TripleDES), dir, mode, key, iv)
+TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_TripleDES), dir, mode, key, iv, pad)
 {
 }
 
@@ -341,8 +347,8 @@ TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray 
 //----------------------------------------------------------------------------
 // AES128
 //----------------------------------------------------------------------------
-AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_AES128), dir, mode, key, iv)
+AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_AES128), dir, mode, key, iv, pad)
 {
 }
 
@@ -350,8 +356,8 @@ AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv)
 //----------------------------------------------------------------------------
 // AES256
 //----------------------------------------------------------------------------
-AES256::AES256(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_AES256), dir, mode, key, iv)
+AES256::AES256(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_AES256), dir, mode, key, iv, pad)
 {
 }
 
