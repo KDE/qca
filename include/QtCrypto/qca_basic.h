@@ -371,7 +371,8 @@ namespace QCA
 	   low level encryption and decryption within %QCA. You should
 	   not need to use it directly unless you are
 	   adding another capability to %QCA - you should be
-	   using a sub-class. AES is recommended for new applications.
+	   using a sub-class. AES128, AES192 and AES256 are recommended for
+	   new applications.
 	 */
 	class QCA_EXPORT Cipher : public Algorithm, public Filter
 	{
@@ -486,7 +487,7 @@ namespace QCA
 		   \param iv the InitializationVector to use
 		   \param provider the name of the Provider to use
 
-		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
+		   \note Padding only applies to CBC and ECB modes.  CFB and OFB ciphertext is always
 		   the length of the plaintext.
 		*/
 		Cipher(const QString &type, Direction dir, const SymmetricKey &key, const InitializationVector &iv, const QString &provider);
