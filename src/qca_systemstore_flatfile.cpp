@@ -26,13 +26,21 @@ namespace QCA {
 
 bool qca_have_systemstore()
 {
+#ifndef QCA_NO_SYSTEMSTORE
 	QFile f(QCA_SYSTEMSTORE_PATH);
 	return f.open(QFile::ReadOnly);
+#else
+	return false;
+#endif
 }
 
 Store qca_get_systemstore(const QString &provider)
 {
+#ifndef QCA_NO_SYSTEMSTORE
 	return Store::fromFlatTextFile(QCA_SYSTEMSTORE_PATH, Store::Trusted, 0, provider);
+#else
+	return Store(provider);
+#endif
 }
 
 }
