@@ -134,31 +134,36 @@ struct QCA_SASLNeedParams
 class QCA_SASLContext
 {
 public:
-	enum { Success, Error, NeedParams, Continue };
+	enum { Success, Error, NeedParams, AuthCheck, Continue };
 	virtual ~QCA_SASLContext() {}
 
 	// common
 	virtual void reset()=0;
 	virtual void setCoreProps(const QString &service, const QString &host, QCA_SASLHostPort *local, QCA_SASLHostPort *remote)=0;
-	virtual void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax)=0;
+	virtual void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax, const QString &_ext_authid, int _ext_ssf)=0;
 	virtual int security() const=0;
 
-	// client
+	// init / first step
 	virtual bool clientStart(const QStringList &mechlist)=0;
-	virtual int clientFirstStep(QString *mech, QByteArray **out, QCA_SASLNeedParams *np)=0;
-	virtual int clientNextStep(const QByteArray &in, QByteArray *out, QCA_SASLNeedParams *np)=0;
-
-	// server
+	virtual int clientFirstStep(bool allowClientSendFirst)=0;
 	virtual bool serverStart(const QString &realm, QStringList *mechlist, const QString &name)=0;
-	virtual int serverFirstStep(const QString &mech, const QByteArray *in, QByteArray *out)=0;
-	virtual int serverNextStep(const QByteArray &in, QByteArray *out)=0;
-	virtual void setAuthCallback(bool (*auth)(const QString &authname, const QString &username, QCA_SASLContext *c))=0;
+	virtual int serverFirstStep(const QString &mech, const QByteArray *in)=0;
 
-	// client params
-	virtual void setAuthname(const QString &)=0;
-	virtual void setUsername(const QString &)=0;
-	virtual void setPassword(const QString &)=0;
-	virtual void setRealm(const QString &)=0;
+	// get / set params
+	virtual QCA_SASLNeedParams clientParamsNeeded() const=0;
+	virtual void setClientParams(const QString *auth, const QString *user, const QString *pass, const QString *realm)=0;
+	virtual QString authname() const=0;
+	virtual QString username() const=0;
+	virtual void setAuth(bool)=0;
+
+	// continue steps
+	virtual int nextStep(const QByteArray &in)=0;
+	virtual int tryAgain()=0;
+
+	// results
+	virtual QString mech() const=0;
+	virtual const QByteArray *clientInit() const=0;
+	virtual QByteArray result() const=0;
 
 	// security layer
 	virtual bool encode(const QByteArray &in, QByteArray *out)=0;

@@ -372,7 +372,7 @@ namespace QCA
 		class Private;
 		Private *d;
 
-		void handleServerFirstStep(int r, const QByteArray &buf);
+		void handleServerFirstStep(int r);
 	};
 };
 

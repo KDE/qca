@@ -1,14 +1,11 @@
 * cipher: option to specify size for genkey
 * cert: properly check hostnames with wildcards
 * ssl: error signal
-* sasl: option to not support client-send-first
-* sasl: other security options
-* sasl: server auth callback
-* sasl: security layer
+* sasl: bring API up to speed with the plugin
 
 * openssl plugin: fixmes and todos
+* cyrussasl plugin: serverstepthread
 
-* sasl: external auth
 * dsa
 * diffie-hellman
 

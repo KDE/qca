@@ -29,6 +29,7 @@ extern "C"
 #include<qstringlist.h>
 #include<qptrlist.h>
 #include<qfile.h>
+#include<qthread.h>
 
 #define SASL_BUFSIZE 8192
 
@@ -185,10 +186,25 @@ static QString methodsToString(const QStringList &methods)
 	return list;
 }
 
+// needed to give interactive behavior to a callback-based function
+class ServerStepThread : public QThread
+{
+public:
+	ServerStepThread()
+	{
+	}
+
+	void run()
+	{
+		//int r = sasl_server_start(con, in_mech.latin1(), clientin, clientinlen, &serverout, &serveroutlen);
+	}
+};
+
 class SASLContext : public QCA_SASLContext
 {
 public:
 	QCACyrusSASL *g;
+	ServerStepThread *sst;
 
 	// core props
 	QString service, host;
@@ -197,25 +213,37 @@ public:
 	// security props
 	int secflags;
 	int ssf_min, ssf_max;
-
-	// params
-	SASLParams params;
-	int ssf, maxoutbuf;
+	QString ext_authid;
+	int ext_ssf;
 
 	sasl_conn_t *con;
 	sasl_interact_t *need;
+	int ssf, maxoutbuf;
 	QStringList mechlist;
-	bool servermode;
 	sasl_callback_t *callbacks;
-	bool (*authCallback)(const QString &authname, const QString &username, QCA_SASLContext *c);
+
+	// state
+	bool servermode;
+	int step;
+	bool in_sendFirst;
+	QByteArray in_buf;
+	QString in_mech;
+	bool in_useClientInit;
+	QByteArray in_clientInit;
+	QString out_mech;
+	bool out_useClientInit;
+	QByteArray out_clientInit;
+	QByteArray out_buf;
+
+	SASLParams params;
+	QString sc_authname, sc_username;
 
 	SASLContext(QCACyrusSASL *_g)
 	{
 		g = _g;
 		con = 0;
-		need = 0;
 		callbacks = 0;
-		authCallback = 0;
+		sst = 0;
 
 		reset();
 	}
@@ -233,6 +261,10 @@ public:
 
 	void resetState()
 	{
+		if(sst) {
+			// only would happen if the user forgot to call setAuth, so let's do it now
+			setAuth(false);
+		}
 		if(con) {
 			sasl_dispose(&con);
 			con = 0;
@@ -248,6 +280,8 @@ public:
 		mechlist.clear();
 		ssf = 0;
 		maxoutbuf = 0;
+		sc_authname = "";
+		sc_username = "";
 	}
 
 	void resetParams()
@@ -256,6 +290,8 @@ public:
 		secflags = 0;
 		ssf_min = 0;
 		ssf_max = 0;
+		ext_authid = "";
+		ext_ssf = 0;
 	}
 
 	void setCoreProps(const QString &_service, const QString &_host, QCA_SASLHostPort *la, QCA_SASLHostPort *ra)
@@ -266,7 +302,7 @@ public:
 		remoteAddr = ra ? addrString(*ra) : "";
 	}
 
-	void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax)
+	void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax, const QString &_ext_authid, int _ext_ssf)
 	{
 		int sf = 0;
 		if(noPlain)
@@ -286,11 +322,8 @@ public:
 		secflags = sf;
 		ssf_min = ssfMin;
 		ssf_max = ssfMax;
-	}
-
-	void setAuthCallback(bool (*auth)(const QString &authname, const QString &username, QCA_SASLContext *c))
-	{
-		authCallback = auth;
+		ext_authid = _ext_authid;
+		ext_ssf = _ext_ssf;
 	}
 
 	static int scb_checkauth(sasl_conn_t *, void *context, const char *requested_user, unsigned, const char *auth_identity, unsigned, const char *, unsigned, struct propctx *)
@@ -298,17 +331,17 @@ public:
 		SASLContext *that = (SASLContext *)context;
 		QString authname = auth_identity;
 		QString username = requested_user;
-		if(that->authCallback) {
+		/*if(that->authCallback) {
 			if(that->authCallback(authname, username, that))
 				return SASL_OK;
 			else
 				return SASL_NOAUTHZ;
 		}
-		else
+		else*/
 			return SASL_OK;
 	}
 
-	void setsecprops()
+	bool setsecprops()
 	{
 		sasl_security_properties_t secprops;
 		secprops.min_ssf = ssf_min;
@@ -317,7 +350,22 @@ public:
 		secprops.property_names = NULL;
 		secprops.property_values = NULL;
 		secprops.security_flags = secflags;
-		sasl_setprop(con, SASL_SEC_PROPS, &secprops);
+		int r = sasl_setprop(con, SASL_SEC_PROPS, &secprops);
+		if(r != SASL_OK)
+			return false;
+
+		if(!ext_authid.isEmpty()) {
+			const char *authid = ext_authid.latin1();
+			sasl_ssf_t ssf = ext_ssf;
+			r = sasl_setprop(con, SASL_SSF_EXTERNAL, &ssf);
+			if(r != SASL_OK)
+				return false;
+			r = sasl_setprop(con, SASL_AUTH_EXTERNAL, &authid);
+			if(r != SASL_OK)
+				return false;
+		}
+
+		return true;
 	}
 
 	void getssfparams()
@@ -369,11 +417,19 @@ public:
 		if(r != SASL_OK)
 			return false;
 
-		setsecprops();
+		if(!setsecprops())
+			return false;
 
 		mechlist = _mechlist;
 		servermode = false;
+		step = 0;
 		return true;
+	}
+
+	int clientFirstStep(bool allowClientSendFirst)
+	{
+		in_sendFirst = allowClientSendFirst;
+		return clientTryAgain();
 	}
 
 	bool serverStart(const QString &realm, QStringList *mechlist, const QString &name)
@@ -400,7 +456,8 @@ public:
 		if(r != SASL_OK)
 			return false;
 
-		setsecprops();
+		if(!setsecprops())
+			return false;
 
 		const char *ml;
 		r = sasl_listmech(con, 0, NULL, " ", NULL, &ml, 0, 0);
@@ -408,138 +465,201 @@ public:
 			return false;
 		*mechlist = QStringList::split(' ', ml);
 		servermode = true;
+		step = 0;
 		return true;
 	}
 
-	int clientFirstStep(QString *mech, QByteArray **out, QCA_SASLNeedParams *np)
+	int serverFirstStep(const QString &mech, const QByteArray *in)
 	{
-		bool supportClientSendFirst = out ? true: false;
-
-		const char *clientout, *m;
-		unsigned int clientoutlen;
-
-		need = 0;
-		QString list = methodsToString(mechlist);
-		int r;
-		while(1) {
-			if(need)
-				params.extractHave(need);
-			if(supportClientSendFirst)
-				r = sasl_client_start(con, list.latin1(), &need, &clientout, &clientoutlen, &m);
-			else
-				r = sasl_client_start(con, list.latin1(), &need, NULL, NULL, &m);
-			if(r != SASL_INTERACT)
-				break;
-
-			params.applyInteract(need);
-			if(params.missingAny()) {
-				*np = params.need;
-				return NeedParams;
-			}
-		}
-		if(r != SASL_OK && r != SASL_CONTINUE)
-			return Error;
-
-		*mech = m;
-		if(supportClientSendFirst && clientout)
-			*out = new QByteArray(makeByteArray(clientout, clientoutlen));
-		else
-			*out = 0;
-
-		if(r == SASL_OK) {
-			getssfparams();
-			return Success;
-		}
-		else
-			return Continue;
-	}
-
-	int serverFirstStep(const QString &mech, const QByteArray *in, QByteArray *out)
-	{
-		const char *clientin = 0;
-		unsigned int clientinlen = 0;
+		in_mech = mech;
 		if(in) {
-			clientin = in->data();
-			clientinlen = in->size();
-		}
-		const char *serverout;
-		unsigned int serveroutlen;
-		int r = sasl_server_start(con, mech.latin1(), clientin, clientinlen, &serverout, &serveroutlen);
-		if(r != SASL_OK && r != SASL_CONTINUE)
-			return Error;
-		*out = makeByteArray(serverout, serveroutlen);
-		if(r == SASL_OK) {
-			getssfparams();
-			return Success;
+			in_useClientInit = true;
+			in_clientInit = in->copy();
 		}
 		else
-			return Continue;
+			in_useClientInit = false;
+		return serverTryAgain();
 	}
 
-	int clientNextStep(const QByteArray &in, QByteArray *out, QCA_SASLNeedParams *np)
+	QCA_SASLNeedParams clientParamsNeeded() const
 	{
-		//clearNeedParams(np);
-		const char *clientout;
-		unsigned int clientoutlen;
-		int r;
-		while(1) {
-			if(need)
-				params.extractHave(need);
-			r = sasl_client_step(con, in.data(), in.size(), &need, &clientout, &clientoutlen);
-			if(r != SASL_INTERACT)
-				break;
+		return params.need;
+	}
 
-			params.applyInteract(need);
-			if(params.missingAny()) {
-				*np = params.need;
-				return NeedParams;
+	void setClientParams(const QString *auth, const QString *user, const QString *pass, const QString *realm)
+	{
+		if(auth)
+			params.setAuthname(*auth);
+		if(user)
+			params.setUsername(*user);
+		if(pass)
+			params.setPassword(*pass);
+		if(realm)
+			params.setRealm(*realm);
+	}
+
+	QString authname() const
+	{
+		return sc_authname;
+	}
+
+	QString username() const
+	{
+		return sc_username;
+	}
+
+	void setAuth(bool)
+	{
+		if(!sst)
+			return;
+
+		// TODO: send the decision to the thread
+		sst->wait();
+		delete sst;
+		sst = 0;
+	}
+
+	int nextStep(const QByteArray &in)
+	{
+		in_buf = in.copy();
+		return tryAgain();
+	}
+
+	int tryAgain()
+	{
+		if(servermode)
+			return serverTryAgain();
+		else
+			return clientTryAgain();
+	}
+
+	QString mech() const
+	{
+		return out_mech;
+	}
+
+	const QByteArray *clientInit() const
+	{
+		if(out_useClientInit)
+			return &out_clientInit;
+		else
+			return 0;
+	}
+
+	QByteArray result() const
+	{
+		return out_buf;
+	}
+
+	int clientTryAgain()
+	{
+		if(step == 0) {
+			const char *clientout, *m;
+			unsigned int clientoutlen;
+
+			need = 0;
+			QString list = methodsToString(mechlist);
+			int r;
+			while(1) {
+				if(need)
+					params.extractHave(need);
+				if(in_sendFirst)
+					r = sasl_client_start(con, list.latin1(), &need, &clientout, &clientoutlen, &m);
+				else
+					r = sasl_client_start(con, list.latin1(), &need, NULL, NULL, &m);
+				if(r != SASL_INTERACT)
+					break;
+
+				params.applyInteract(need);
+				if(params.missingAny())
+					return NeedParams;
 			}
+			if(r != SASL_OK && r != SASL_CONTINUE)
+				return Error;
+
+			out_mech = m;
+			if(in_sendFirst && clientout) {
+				out_clientInit = makeByteArray(clientout, clientoutlen);
+				out_useClientInit = true;
+			}
+			else
+				out_useClientInit = false;
+
+			++step;
+
+			if(r == SASL_OK) {
+				getssfparams();
+				return Success;
+			}
+			else
+				return Continue;
 		}
-		if(r != SASL_OK && r != SASL_CONTINUE)
-			return Error;
-		*out = makeByteArray(clientout, clientoutlen);
-		if(r == SASL_OK) {
-			getssfparams();
-			return Success;
+		else {
+			const char *clientout;
+			unsigned int clientoutlen;
+			int r;
+			while(1) {
+				if(need)
+					params.extractHave(need);
+				r = sasl_client_step(con, in_buf.data(), in_buf.size(), &need, &clientout, &clientoutlen);
+				if(r != SASL_INTERACT)
+					break;
+
+				params.applyInteract(need);
+				if(params.missingAny())
+					return NeedParams;
+			}
+			if(r != SASL_OK && r != SASL_CONTINUE)
+				return Error;
+			out_buf = makeByteArray(clientout, clientoutlen);
+			if(r == SASL_OK) {
+				getssfparams();
+				return Success;
+			}
+			else
+				return Continue;
 		}
-		else
+	}
+
+	int serverTryAgain()
+	{
+		if(step == 0) {
+			const char *clientin = 0;
+			unsigned int clientinlen = 0;
+			if(in_useClientInit) {
+				clientin = in_clientInit.data();
+				clientinlen = in_clientInit.size();
+			}
+			const char *serverout;
+			unsigned int serveroutlen;
+			int r = sasl_server_start(con, in_mech.latin1(), clientin, clientinlen, &serverout, &serveroutlen);
+			if(r != SASL_OK && r != SASL_CONTINUE)
+				return Error;
+			out_buf = makeByteArray(serverout, serveroutlen);
+
+			++step;
+
+			if(r == SASL_OK) {
+				getssfparams();
+				return Success;
+			}
+			else
+				return Continue;
+		}
+		else {
+			const char *serverout;
+			unsigned int serveroutlen;
+			int r = sasl_server_step(con, in_buf.data(), in_buf.size(), &serverout, &serveroutlen);
+			if(r != SASL_OK && r != SASL_CONTINUE)
+				return Error;
+			if(r == SASL_OK) {
+				out_buf.resize(0);
+				getssfparams();
+				return Success;
+			}
+			out_buf = makeByteArray(serverout, serveroutlen);
 			return Continue;
-	}
-
-	int serverNextStep(const QByteArray &in, QByteArray *out)
-	{
-		const char *serverout;
-		unsigned int serveroutlen;
-		int r = sasl_server_step(con, in.data(), in.size(), &serverout, &serveroutlen);
-		if(r != SASL_OK && r != SASL_CONTINUE)
-			return Error;
-		if(r == SASL_OK) {
-			out->resize(0);
-			getssfparams();
-			return Success;
 		}
-		*out = makeByteArray(serverout, serveroutlen);
-		return Continue;
-	}
-
-	void setAuthname(const QString &s)
-	{
-		params.setAuthname(s);
-	}
-
-	void setUsername(const QString &s)
-	{
-		params.setUsername(s);
-	}
-
-	void setPassword(const QString &s)
-	{
-		params.setPassword(s);
-	}
-
-	void setRealm(const QString &s)
-	{
-		params.setRealm(s);
 	}
 
 	bool encode(const QByteArray &in, QByteArray *out)
