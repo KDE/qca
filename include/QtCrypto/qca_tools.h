@@ -27,16 +27,18 @@
 #include <qstring.h>
 
 /**
- * Secure array of bytes
- *
- * The %QSecureArray provides an array of memory from a pool that is,
- * at least partly, secure. In this sense, secure means that the contents
- * of the memory should not be made available to other applications. By
- * comparison, a QMemArray (or subclass such as QCString or QByteArray) may
- * be held in pages that might be swapped to disk or free'd without being
- * cleared first.
- *
- * Note that this class is implicitly shared (that is, copy on write).
+ \class QSecureArray qca_tools.h QtCrypto
+
+ Secure array of bytes
+
+ The %QSecureArray provides an array of memory from a pool that is,
+ at least partly, secure. In this sense, secure means that the contents
+ of the memory should not be made available to other applications. By
+ comparison, a QMemArray (or subclass such as QCString or QByteArray) may
+ be held in pages that might be swapped to disk or free'd without being
+ cleared first.
+ 
+ Note that this class is implicitly shared (that is, copy on write).
  **/ 
 class QCA_EXPORT QSecureArray
 {
@@ -263,17 +265,18 @@ QCA_EXPORT bool operator==(const QSecureArray &a, const QSecureArray &b);
 QCA_EXPORT bool operator!=(const QSecureArray &a, const QSecureArray &b);
 
 /**
- * Arbitrary precision integer
- *
- * %QBigInteger provides arbitrary precision integers.
- * \code
- * if ( QBigInteger("3499543804349") == 
- *      QBigInteger("38493290803248") + QBigInteger( 343 ) )
- * {
- *       // do something
- * }
- * \endcode
- *       
+   \class QBigInteger qca_tools.h QtCrypto
+
+   Arbitrary precision integer
+
+   QBigInteger provides arbitrary precision integers.
+   \code
+   if ( QBigInteger("3499543804349") == 
+       QBigInteger("38493290803248") + QBigInteger( 343 ) )
+   {
+       // do something
+   }
+   \endcode
  **/
 class QCA_EXPORT QBigInteger
 {

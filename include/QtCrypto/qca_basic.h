@@ -27,22 +27,24 @@
 namespace QCA
 {
 	/**
-	 * Source of random numbers
-	 *
-	 * QCA provides a built in source of random numbers, which
-	 * can be accessed through this class. You can also use
-	 * an alternative random number source, by implementing
-	 * another provider.
-	 *
-	 * You can select the "quality" of the random numbers. For 
-	 * best results, you should use Nonce or PublicValue for values
-	 * that are likely to become public, and SessionKey or LongTermKey
-	 * for those values that are more critical. All that said, please
-	 * note that this is only a hint to the provider - it may make
-	 * no difference at all.
-	 *
-	 * The normal use of this class is expected to be through the
-	 * static members - randomChar(), randomInt() and randomArray().
+	   \class Random qca_basic.h QtCrypto
+
+	   Source of random numbers
+
+	   QCA provides a built in source of random numbers, which
+	   can be accessed through this class. You can also use
+	   an alternative random number source, by implementing
+	   another provider.
+	 
+	   You can select the "quality" of the random numbers. For 
+	   best results, you should use Nonce or PublicValue for values
+	   that are likely to become public, and SessionKey or LongTermKey
+	   for those values that are more critical. All that said, please
+	   note that this is only a hint to the provider - it may make
+	   no difference at all.
+	 
+	   The normal use of this class is expected to be through the
+	   static members - randomChar(), randomInt() and randomArray().
 	 */
 	class QCA_EXPORT Random : public Algorithm
 	{
@@ -134,48 +136,50 @@ namespace QCA
 	};
 
 	/**
-	 * General superclass for hashing algorithms.
-	 *
-	 * %Hash is a superclass for the various hashing algorithms
-	 * within %QCA. You should not need to use it directly unless you are
-	 * adding another hashing capability to %QCA - you should be
-	 * using a sub-class. SHA1 or RIPEMD160 are recommended for
-	 * new applications, although MD2, MD4, MD5 or SHA0 may be
-	 * applicable (for interoperability reasons) for some
-	 * applications. 
-	 *
-	 * To perform a hash, you create an object (of one of the
-	 * sub-classes of %Hash), call update() with the data that
-	 * needs to be hashed, and then call final(), which returns
-	 * a QByteArray of the hash result. An example (using the SHA1
-	 * hash, with 1000 updates of a 1000 byte string) is shown below:
-	 * \code
-	 *        if(!QCA::isSupported("sha1"))
-	 *                printf("SHA1 not supported!\n");
-	 *        else {
-	 *                QByteArray fillerString;
-	 *                fillerString.fill('a', 1000);
-	 *
-	 *                QCA::SHA1 shaHash;
-	 *                for (int i=0; i<1000; i++)
-	 *                        shaHash.update(fillerString);
-	 *                QByteArray hashResult = shaHash.final();
-	 *                if ( "34aa973cd4c4daa4f61eeb2bdbad27316534016f" == QCA::arrayToHex(hashResult) ) {
-	 *                        printf("big SHA1 is OK\n");
-	 *                } else {
-	 *                        printf("big SHA1 failed\n");
-	 *                }
-	 *        }
-	 * \endcode
-	 *
-	 * If you only have a simple hash requirement - a single
-	 * string that is fully available in memory at one time - 
-	 * then you may be better off with one of the convenience
-	 * methods. So, for example, instead of creating a QCA::SHA1
-	 * or QCA::MD5 object, then doing a single update() and the final()
-	 * call; you simply call QCA::SHA1().hash() or
-	 * QCA::MD5().hash() with the data that you would otherwise
-	 * have provided to the update() call.
+	   \class Hash qca_basic.h QtCrypto
+
+	   General superclass for hashing algorithms.
+
+	   Hash is a superclass for the various hashing algorithms
+	   within %QCA. You should not need to use it directly unless you are
+	   adding another hashing capability to %QCA - you should be
+	   using a sub-class. SHA1 or RIPEMD160 are recommended for
+	   new applications, although MD2, MD4, MD5 or SHA0 may be
+	   applicable (for interoperability reasons) for some
+	   applications. 
+
+	   To perform a hash, you create an object (of one of the
+	   sub-classes of %Hash), call update() with the data that
+	   needs to be hashed, and then call final(), which returns
+	   a QByteArray of the hash result. An example (using the SHA1
+	   hash, with 1000 updates of a 1000 byte string) is shown below:
+	   \code
+	   if(!QCA::isSupported("sha1"))
+	       printf("SHA1 not supported!\n");
+	   else {
+	       QByteArray fillerString;
+	       fillerString.fill('a', 1000);
+
+	       QCA::SHA1 shaHash;
+	       for (int i=0; i<1000; i++)
+	           shaHash.update(fillerString);
+	       QByteArray hashResult = shaHash.final();
+	       if ( "34aa973cd4c4daa4f61eeb2bdbad27316534016f" == QCA::arrayToHex(hashResult) ) {
+	           printf("big SHA1 is OK\n");
+	       } else {
+                   printf("big SHA1 failed\n");
+	       }
+	   }
+	   \endcode
+
+	   If you only have a simple hash requirement - a single
+	   string that is fully available in memory at one time - 
+	   then you may be better off with one of the convenience
+	   methods. So, for example, instead of creating a QCA::SHA1
+	   or QCA::MD5 object, then doing a single update() and the final()
+	   call; you simply call QCA::SHA1().hash() or
+	   QCA::MD5().hash() with the data that you would otherwise
+	   have provided to the update() call.
 	 */
 	class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
 	{
@@ -367,13 +371,15 @@ namespace QCA
 	*/
 
 	/**
-	 * General superclass for cipher (encryption / decryption) algorithms.
-	 *
-	 * %Cipher is a superclass for the various algorithms that perform
-	 * low level encryption and decryption within %QCA. You should
-	 * not need to use it directly unless you are
-	 * adding another capability to %QCA - you should be
-	 * using a sub-class. AES is recommended for new applications.
+	   \class Cipher qca_basic.h QtCrypto
+
+	   General superclass for cipher (encryption / decryption) algorithms.
+
+	   Cipher is a superclass for the various algorithms that perform
+	   low level encryption and decryption within %QCA. You should
+	   not need to use it directly unless you are
+	   adding another capability to %QCA - you should be
+	   using a sub-class. AES is recommended for new applications.
 	 */
 	class QCA_EXPORT Cipher : public Algorithm, public Filter
 	{
@@ -492,13 +498,15 @@ namespace QCA
 	};
 
 	/**
-	 * General superclass for message authentication code (MAC) algorithms.
-	 *
-	 * %MessageAuthenticationCode is a superclass for the various 
-	 * message authentication code algorithms within %QCA. You should
-	 * not need to use it directly unless you are
-	 * adding another message authentication code capability to %QCA - you should be
-	 * using a sub-class. HMAC using SHA1 is recommended for new applications.
+	   \class MessageAuthenticationCode  qca_basic.h QtCrypto
+
+	   General superclass for message authentication code (MAC) algorithms.
+
+	   MessageAuthenticationCode is a superclass for the various 
+	   message authentication code algorithms within %QCA. You should
+	   not need to use it directly unless you are
+	   adding another message authentication code capability to %QCA - you should be
+	   using a sub-class. HMAC using SHA1 is recommended for new applications.
 	 */
 	class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
 	{
@@ -607,6 +615,8 @@ namespace QCA
 
 
 	/**
+	 * \class SHA0  qca_basic.h QtCrypto
+	 *
 	 * SHA-0 cryptographic message digest hash algorithm.
 	 *
 	 * %SHA0 is a 160 bit hashing function, no longer recommended
@@ -653,6 +663,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class SHA1  qca_basic.h QtCrypto
+	 *
 	 * SHA-1 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -707,6 +719,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class SHA256  qca_basic.h QtCrypto
+	 *
 	 * SHA-256 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -741,6 +755,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class SHA384  qca_basic.h QtCrypto
+	 *
 	 * SHA-384 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -775,6 +791,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class SHA512  qca_basic.h QtCrypto
+	 *
 	 * SHA-512 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -809,6 +827,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class MD2  qca_basic.h QtCrypto
+	 *
 	 * %MD2 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -842,6 +862,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class MD4  qca_basic.h QtCrypto
+	 *
 	 * %MD4 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -879,6 +901,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class MD5  qca_basic.h QtCrypto
+	 *
 	 * %MD5 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -914,6 +938,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class RIPEMD160  qca_basic.h QtCrypto
+	 *
 	 * %RIPEMD160 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -967,6 +993,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class Blowfish qca_basic.h QtCrypto
+	 *
 	 * Bruce Schneier's Blowfish %Cipher
 	 *
 	 */
@@ -992,6 +1020,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class TripleDES qca_basic.h QtCrypto
+	 *
 	 * Triple %DES %Cipher
 	 *
 	 */
@@ -1018,6 +1048,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class DES  qca_basic.h QtCrypto
+	 *
 	 * %DES %Cipher
 	 *
 	 */
@@ -1044,6 +1076,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class AES128 qca_basic.h QtCrypto
+	 *
 	 * Advanced Encryption Standard %Cipher - 128 bits
 	 *
 	 */
@@ -1070,6 +1104,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class AES192 qca_basic.h QtCrypto
+	 *
 	 * Advanced Encryption Standard %Cipher - 192 bits
 	 *
 	 */
@@ -1096,6 +1132,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class AES256 qca_basic.h QtCrypto
+	 *
 	 * Advanced Encryption Standard %Cipher - 256 bits
 	 *
 	 */
@@ -1122,6 +1160,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class HMAC  qca_basic.h QtCrypto
+	 *
 	 * Keyed %Hash message authentication codes
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
@@ -1176,6 +1216,8 @@ namespace QCA
 	};
 
 	/**
+	 * \class KeyDerivationFunction  qca_basic.h QtCrypto
+	 *
 	 * General superclass for key derivation algorithms.
 	 *
 	 * %KeyDerivationFunction is a superclass for the various 
@@ -1227,9 +1269,23 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   \class PBKDF1 qca_basic.h QtCrypto
+
+	   Password based key derivation function version 1
+
+	   This class implements Password Based Key Derivation Function version 1,
+	   as specified in RFC2898, and also in PKCS#5.
+	 */
 	class QCA_EXPORT PBKDF1 : public KeyDerivationFunction
 	{
 	public:
+		/**
+		   Standard constructor
+		   
+		   \param algorithm the name of the hashing algorithm to use
+		   \param provider the name of the provider to use, if available
+		*/
 		PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString() ) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
 	};
 }

@@ -27,6 +27,8 @@
 namespace QCA
 {
 	/**
+	   \class TextFilter qca_textfilter.h QtCrypto
+
 	   Superclass for text based filtering algorithms
 
 	   This differs from Filter in that it has the concept
@@ -135,6 +137,8 @@ namespace QCA
 	};
 
 	/**
+	   \class Hex qca_textfilter.h QtCrypto
+
 	   Hexadecimal encoding / decoding
 	*/
 	class QCA_EXPORT Hex : public TextFilter
@@ -197,7 +201,9 @@ namespace QCA
 	};
 
 	/**
-	 %Base64 encoding / decoding
+	   \class Base64 qca_textfilter.h QtCrypto
+
+	   Base64 encoding / decoding
 	*/
 	class QCA_EXPORT Base64 : public TextFilter
 	{

@@ -488,11 +488,13 @@ namespace QCA
 	QCA_EXPORT QByteArray hexToArray(const QString &hexString);
 
 	/**
-	 * Convenience method for initialising and cleaning up %QCA
-	 *
-	 * To ensure that QCA is properly initialised and cleaned up,
-	 * it is convenient to create an Initializer object, and let it
-	 * go out of scope at the end of %QCA usage.
+	   \class Initializer qca_core.h QtCrypto
+	   
+	   Convenience method for initialising and cleaning up %QCA
+
+	   To ensure that QCA is properly initialised and cleaned up,
+	   it is convenient to create an Initializer object, and let it
+	   go out of scope at the end of %QCA usage.
 	 */
 	class QCA_EXPORT Initializer
 	{
@@ -509,24 +511,26 @@ namespace QCA
 	};
 
 	/**
-	 * Simple container for acceptable key lengths
-	 *
-	 * The KeyLength specifies the minimum and maximum byte sizes
-	 * allowed for a key, as well as a "multiple" which the key
-	 * size must evenly divide into.
-	 * 
-	 * As an example, if the key can be 4, 8 or 12 bytes, you can
-	 * express this as 
-	 * \code
-	 * KeyLength keyLen( 4, 12, 4 );
-	 * \endcode
-	 * 
-	 * If you want to express a KeyLength that takes any number
-	 * of bytes (including zero), you may want to use
-	 * \code
-	 * #include<limits>
-	 * KeyLength( 0, std::numeric_limits<int>::max(), 1 );
-	 * \endcode
+	   \class KeyLength qca_core.h QtCrypto
+
+	   Simple container for acceptable key lengths
+
+	   The KeyLength specifies the minimum and maximum byte sizes
+	   allowed for a key, as well as a "multiple" which the key
+	   size must evenly divide into.
+
+	   As an example, if the key can be 4, 8 or 12 bytes, you can
+	   express this as 
+	   \code
+	   KeyLength keyLen( 4, 12, 4 );
+	   \endcode
+
+	   If you want to express a KeyLength that takes any number
+	   of bytes (including zero), you may want to use
+	   \code
+	   #include<limits>
+	   KeyLength( 0, std::numeric_limits<int>::max(), 1 );
+	   \endcode
 	 */
 	class QCA_EXPORT KeyLength
 	{
@@ -565,15 +569,17 @@ namespace QCA
 	};
 
 	/**
-	 * Algorithm provider
-	 *
-	 * %Provider represents a plugin provider (or as a special case, the
-	 * built-in provider). This is the class you need to inherit
-	 * from to create your own plugin. You don't normally need to 
-	 * worry about this class if you are just using existing 
-	 * QCA capabilities and plugins, however there is nothing stopping
-	 * you from using it to obtain information about specific plugins,
-	 * as shown in the example below.
+	   \class Provider qca_core.h QtCrypto
+
+	   Algorithm provider
+
+	   Provider represents a plugin provider (or as a special case, the
+	   built-in provider). This is the class you need to inherit
+	   from to create your own plugin. You don't normally need to 
+	   worry about this class if you are just using existing 
+	   QCA capabilities and plugins, however there is nothing stopping
+	   you from using it to obtain information about specific plugins,
+	   as shown in the example below.
 	 */
 	class QCA_EXPORT Provider
 	{
@@ -675,14 +681,16 @@ namespace QCA
 	};
 
 	/**
-	 General superclass for buffered computation algorithms
+	   \class BufferedComputation qca_core.h QtCrypto
 
-	 A buffered computation is characterised by having the
-	 algorithm take data in an incremental way, then having
-	 the results delivered at the end. Conceptually, the
-	 algorithm has some internal state that is modified
-	 when you call update() and returned when you call
-	 final().
+	   General superclass for buffered computation algorithms
+
+	   A buffered computation is characterised by having the
+	   algorithm take data in an incremental way, then having
+	   the results delivered at the end. Conceptually, the
+	   algorithm has some internal state that is modified
+	   when you call update() and returned when you call
+	   final().
 	*/
 	class QCA_EXPORT BufferedComputation
 	{
@@ -721,18 +729,20 @@ namespace QCA
 	};
 
 	/**
-	 General superclass for filtering transformation algorithms
+	   \class Filter qca_core.h QtCrypto
 
-	 A filtering computation is characterised by having the
-	 algorithm take input data in an incremental way, with results
-	 delivered for each input, or block of input. Some internal
-	 state may be managed, with the transformation completed
-	 when final() is called.
+	   General superclass for filtering transformation algorithms
 
-	 If this seems a big vague, then you might try deriving
-	 your class from a subclass with stronger semantics, or if your
-	 update() function is always returning null results, and
-	 everything comes out at final(), try BufferedComputation.
+	   A filtering computation is characterised by having the
+	   algorithm take input data in an incremental way, with results
+	   delivered for each input, or block of input. Some internal
+	   state may be managed, with the transformation completed
+	   when final() is called.
+
+	   If this seems a big vague, then you might try deriving
+	   your class from a subclass with stronger semantics, or if your
+	   update() function is always returning null results, and
+	   everything comes out at final(), try BufferedComputation.
 	*/
 	class QCA_EXPORT Filter
 	{
@@ -779,7 +789,9 @@ namespace QCA
 	};
 
 	/**
-	 General superclass for an algorithm
+	   \class Algorithm qca_core.h QtCrypto
+
+	   General superclass for an algorithm
 	*/
 	class QCA_EXPORT Algorithm
 	{
@@ -862,7 +874,9 @@ namespace QCA
 	};
 
 	/**
-	 * Container for keys for symmetric encryption algorithms.
+	   \class SymmmetricKey qca_core.h QtCrypto
+
+	   Container for keys for symmetric encryption algorithms.
 	 */
 	class QCA_EXPORT SymmetricKey : public QSecureArray
 	{
@@ -905,34 +919,36 @@ namespace QCA
 	};
 
 	/**
-	 * Container for initialisation vectors and nonces
+	   \class InitializationVector qca_core.h QtCrypto
+
+	   Container for initialisation vectors and nonces
 	 */
 	class QCA_EXPORT InitializationVector : public QSecureArray
 	{
 	public:
 		/** 
-		 * Construct an empty (zero length) initisation vector
+		    Construct an empty (zero length) initisation vector
 		 */
 		InitializationVector();
 
 		/**
-		 * Construct an initialisation vector of the specified size
-		 *
-		 * \param size the length of the initialisation vector, in bytes
+		   Construct an initialisation vector of the specified size
+
+		   \param size the length of the initialisation vector, in bytes
 		 */
 		InitializationVector(int size);
 
 		/**
-		 * Construct an initialisation vector from a provided byte array
-		 *
-		 * \param a the byte array to copy
+		   Construct an initialisation vector from a provided byte array
+
+		   \param a the byte array to copy
 		 */
 		InitializationVector(const QSecureArray &a);
 
 		/**
-		 * Construct an initialisaton vector from a provided string
-		 *
-		 * \param cs the QCString to copy
+		   Construct an initialisaton vector from a provided string
+
+		   \param cs the QCString to copy
 		 */
 		InitializationVector(const QCString &cs);
 	};

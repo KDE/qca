@@ -32,10 +32,13 @@ namespace QCA
 	class PublicKey;
 	class PrivateKey;
 
+	/**
+	   Certificate Request Format
+	*/
 	enum CertificateRequestFormat
 	{
-		CSR_PKCS10, // standard PKCS#10 format
-		CSR_SPKAC   // Netscape format
+		CSR_PKCS10, ///< standard PKCS#10 format
+		CSR_SPKAC   ///< Signed Public Key and Challenge (Netscape) format
 	};
 
 	// note: in SPKAC mode, all options are ignored except for challenge
