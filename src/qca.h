@@ -337,7 +337,7 @@ private:
  *
  * \relates QSecureArray
  **/
-bool operator==(const QSecureArray &a, const QSecureArray &b);
+QCA_EXPORT bool operator==(const QSecureArray &a, const QSecureArray &b);
 
 /**
  * Inequality operator. Returns true if the two QSecureArray
@@ -346,7 +346,7 @@ bool operator==(const QSecureArray &a, const QSecureArray &b);
  *
  * \relates QSecureArray
  **/
-bool operator!=(const QSecureArray &a, const QSecureArray &b);
+QCA_EXPORT bool operator!=(const QSecureArray &a, const QSecureArray &b);
 
 /**
  * Arbitrary precision integer
@@ -616,6 +616,7 @@ namespace QCA
 {
 	class Provider;
 	class Random;
+	class Store;
 
 	/**
 	 * Convenience representation for the plugin providers
@@ -883,6 +884,9 @@ namespace QCA
 	 * if required.
 	 */
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
+
+	QCA_EXPORT bool haveSystemStore();
+	QCA_EXPORT Store systemStore(const QString &provider = "");
 
 	/**
 	 * Get the application name that will be used by SASL server mode
@@ -2310,7 +2314,6 @@ namespace QCA
 	class DHPrivateKey;
 	class Certificate;
 	class CRL;
-	class Store;
 	class TLS;
 
 	class QCA_EXPORT PKey : public Algorithm
@@ -2528,7 +2531,6 @@ namespace QCA
 
 		bool isNull() const;
 
-		int version() const;
 		QDateTime notValidBefore() const;
 		QDateTime notValidAfter() const;
 
@@ -2550,6 +2552,9 @@ namespace QCA
 
 		bool matchesHostname(const QString &host) const;
 
+		bool operator==(const Certificate &a) const;
+		bool operator!=(const Certificate &a) const;
+
 	private:
 		friend class Store;
 		friend class TLS;
@@ -2561,6 +2566,10 @@ namespace QCA
 		CRL();
 
 		bool isNull() const;
+
+		int number() const;
+		QDateTime thisUpdate() const;
+		QDateTime nextUpdate() const;
 
 		// import / export
 		QSecureArray toDER() const;
@@ -2667,7 +2676,9 @@ namespace QCA
 		void setStore(const Store &store);
 		void setConstraints(SecurityLevel s);
 		void setConstraints(int minSSF, int maxSSF);
-		void setCompressionEnabled(bool b); // only a 'hint'
+
+		bool canCompress() const;
+		void setCompressionEnabled(bool b);
 
 		bool startClient(const QString &host = "");
 		bool startServer();

@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include "qcaprovider.h"
 #include "qca_plugin.h"
+#include "qca_systemstore.h"
 
 namespace QCA {
 
@@ -205,6 +206,24 @@ void setGlobalRNG(const QString &provider)
 {
 	delete global_rng;
 	global_rng = new Random(provider);
+}
+
+bool haveSystemStore()
+{
+#ifndef QCA_NO_SYSTEMSTORE
+	return qca_have_systemstore();
+#else
+	return false;
+#endif
+}
+
+Store systemStore(const QString &provider)
+{
+#ifndef QCA_NO_SYSTEMSTORE
+	return qca_get_systemstore(provider);
+#else
+	return Store(provider);
+#endif
 }
 
 QString appName()

@@ -196,7 +196,6 @@ public:
 	enum ConvertResult { Good, ErrDecode };
 	CertContext(Provider *p) : Provider::Context(p, "cert") {}
 
-	virtual int version() const = 0;
 	virtual QDateTime notValidBefore() const = 0;
 	virtual QDateTime notValidAfter() const = 0;
 

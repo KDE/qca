@@ -102,11 +102,6 @@ bool Certificate::isNull() const
 	return (!context() ? true : false);
 }
 
-int Certificate::version() const
-{
-	return ((CertContext *)context())->version();
-}
-
 QDateTime Certificate::notValidBefore() const
 {
 	return ((CertContext *)context())->notValidBefore();
@@ -200,6 +195,16 @@ bool Certificate::matchesHostname(const QString &realHost) const
 	return false;
 }
 
+bool Certificate::operator==(const Certificate &) const
+{
+	return false;
+}
+
+bool Certificate::operator!=(const Certificate &a) const
+{
+	return !(*this == a);
+}
+
 //----------------------------------------------------------------------------
 // CRL
 //----------------------------------------------------------------------------
@@ -210,6 +215,21 @@ CRL::CRL()
 bool CRL::isNull() const
 {
 	return (!context() ? true : false);
+}
+
+int CRL::number() const
+{
+	return -1;
+}
+
+QDateTime CRL::thisUpdate() const
+{
+	return QDateTime();
+}
+
+QDateTime CRL::nextUpdate() const
+{
+	return QDateTime();
 }
 
 QSecureArray CRL::toDER() const

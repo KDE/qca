@@ -26,7 +26,8 @@ include(src/botantools/botantools.pri)
 HEADERS += \
 	$$QCA_CPP/qca.h \
 	$$QCA_CPP/qcaprovider.h \
-	$$QCA_CPP/qca_plugin.h
+	$$QCA_CPP/qca_plugin.h \
+	$$QCA_CPP/qca_systemstore.h
 
 SOURCES += \
 	$$QCA_CPP/qca.cpp \
@@ -38,6 +39,12 @@ SOURCES += \
 	$$QCA_CPP/qca_cert.cpp \
 	$$QCA_CPP/qca_securelayer.cpp \
 	$$QCA_CPP/qca_default.cpp
+
+#DEFINES += QCA_NO_SYSTEMSTORE
+
+# debian cert store
+DEFINES += QCA_SYSTEMSTORE_PATH='"/etc/ssl/certs/ca-certificates.crt"'
+SOURCES += $$QCA_CPP/qca_systemstore_flatfile.cpp
 
 include(conf.pri)
 include(extra.pri)
