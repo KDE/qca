@@ -210,9 +210,9 @@ void SecureMessage::startDecrypt()
 {
 }
 
-void SecureMessage::startSign(bool detachedSignature)
+void SecureMessage::startSign(SignMode m = Message);
 {
-	Q_UNUSED(detachedSignature);
+	Q_UNUSED(m);
 }
 
 void SecureMessage::startVerify(const QSecureArray &sig)
