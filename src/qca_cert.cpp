@@ -29,43 +29,11 @@ namespace QCA {
 
 Provider::Context *getContext(const QString &type, const QString &provider);
 
-static bool stringToFile(const QString &fileName, const QString &content)
-{
-	QFile f(fileName);
-	if(!f.open(QFile::WriteOnly))
-		return false;
-	QTextStream ts(&f);
-	ts << content;
-	return true;
-}
-
-static bool stringFromFile(const QString &fileName, QString *s)
-{
-	QFile f(fileName);
-	if(!f.open(QFile::ReadOnly))
-		return false;
-	QTextStream ts(&f);
-	*s = ts.readAll();
-	return true;
-}
-
-static bool arrayToFile(const QString &fileName, const QByteArray &content)
-{
-	QFile f(fileName);
-	if(!f.open(QFile::WriteOnly))
-		return false;
-	f.write(content.data(), content.size());
-	return true;
-}
-
-static bool arrayFromFile(const QString &fileName, QByteArray *a)
-{
-	QFile f(fileName);
-	if(!f.open(QFile::ReadOnly))
-		return false;
-	*a = f.readAll();
-	return true;
-}
+// from qca_publickey.cpp
+bool stringToFile(const QString &fileName, const QString &content);
+bool stringFromFile(const QString &fileName, QString *s);
+bool arrayToFile(const QString &fileName, const QByteArray &content);
+bool arrayFromFile(const QString &fileName, QByteArray *a);
 
 //----------------------------------------------------------------------------
 // CertificateOptions
@@ -123,8 +91,14 @@ void CertificateOptions::setFormat(CertificateRequestFormat f)
 
 bool CertificateOptions::isValid() const
 {
-	// TODO: check the content
-	return false;
+	// logic from Botan
+	if(d->info.value(CommonName).isEmpty() || d->info.value(Country).isEmpty())
+		return false;
+	if(d->info.value(Country).length() != 2)
+		return false;
+	if(d->start >= d->end)
+		return false;
+	return true;
 }
 
 QString CertificateOptions::challenge() const
@@ -359,6 +333,11 @@ int Certificate::pathLimit() const
 	return static_cast<const CertContext *>(context())->props()->pathLimit;
 }
 
+QSecureArray Certificate::signature() const
+{
+	return static_cast<const CertContext *>(context())->props()->sig;
+}
+
 SignatureAlgorithm Certificate::signatureAlgorithm() const
 {
 	return static_cast<const CertContext *>(context())->props()->sigalgo;
@@ -428,10 +407,21 @@ bool Certificate::matchesHostname(const QString &realHost) const
 	return false;
 }
 
-bool Certificate::operator==(const Certificate &) const
+bool Certificate::operator==(const Certificate &cert) const
 {
-	// TODO
-	return false;
+	const CertContextProps *a = static_cast<const CertContext *>(context())->props();
+	const CertContextProps *b = static_cast<const CertContext *>(cert.context())->props();
+
+	// logic from Botan
+	if(a->sig != b->sig || a->sigalgo != b->sigalgo || subjectPublicKey() != cert.subjectPublicKey())
+		return false;
+	if(a->issuer != b->issuer || a->subject != b->subject)
+		return false;
+	if(a->serial != b->serial || a->version != b->version)
+		return false;
+	if(a->start != b->start || a->end != b->end)
+		return false;
+	return true;
 }
 
 bool Certificate::operator!=(const Certificate &a) const
@@ -533,6 +523,11 @@ int CertificateRequest::pathLimit() const
 QString CertificateRequest::challenge() const
 {
 	return static_cast<const CSRContext *>(context())->props()->challenge;
+}
+
+QSecureArray CertificateRequest::signature() const
+{
+	return static_cast<const CSRContext *>(context())->props()->sig;
 }
 
 SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
@@ -673,6 +668,11 @@ QDateTime CRL::nextUpdate() const
 QList<CRLEntry> CRL::revoked() const
 {
 	return static_cast<const CRLContext *>(context())->props()->revoked;
+}
+
+QSecureArray CRL::signature() const
+{
+	return static_cast<const CRLContext *>(context())->props()->sig;
 }
 
 SignatureAlgorithm CRL::signatureAlgorithm() const

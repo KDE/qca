@@ -224,6 +224,7 @@ public:
 class CertContextProps
 {
 public:
+	int version;                     // cert only
 	QDateTime start, end;            // cert only
 	CertificateInfo subject;
 	CertificateInfo issuer;          // cert only
@@ -233,6 +234,7 @@ public:
 	bool isCA;
 	bool isSelfSigned;               // cert only
 	int pathLimit;
+	QSecureArray sig;
 	SignatureAlgorithm sigalgo;
 	QString challenge;               // csr only
 	CertificateRequestFormat format; // csr only
@@ -245,6 +247,7 @@ public:
 	int number;
 	QDateTime thisUpdate, nextUpdate;
 	QList<CRLEntry> revoked;
+	QSecureArray sig;
 	SignatureAlgorithm sigalgo;
 };
 

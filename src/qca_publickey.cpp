@@ -28,7 +28,7 @@ namespace QCA {
 
 Provider::Context *getContext(const QString &type, const QString &provider);
 
-static bool stringToFile(const QString &fileName, const QString &content)
+bool stringToFile(const QString &fileName, const QString &content)
 {
 	QFile f(fileName);
 	if(!f.open(QFile::WriteOnly))
@@ -38,13 +38,31 @@ static bool stringToFile(const QString &fileName, const QString &content)
 	return true;
 }
 
-static bool stringFromFile(const QString &fileName, QString *str)
+bool stringFromFile(const QString &fileName, QString *s)
 {
 	QFile f(fileName);
 	if(!f.open(QFile::ReadOnly))
 		return false;
 	QTextStream ts(&f);
-	*str = ts.readAll();
+	*s = ts.readAll();
+	return true;
+}
+
+bool arrayToFile(const QString &fileName, const QByteArray &content)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::WriteOnly))
+		return false;
+	f.write(content.data(), content.size());
+	return true;
+}
+
+bool arrayFromFile(const QString &fileName, QByteArray *a)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::ReadOnly))
+		return false;
+	*a = f.readAll();
 	return true;
 }
 

@@ -29,9 +29,6 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
-  redundant global static functions in publickey / cert
-  CertificateOptions: isValid
-  Certificate: operator==
   cert: rfc 2818 hostname validation
   tls
   sasl
