@@ -862,12 +862,12 @@ static QCA::Validity convert_verify_error(int err)
 class opensslHashContext : public QCA::HashContext
 {
 public:
-	opensslHashContext(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
-	{
-		m_algorithm = algorithm;
-		clear();
-	};
-
+    opensslHashContext(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
+    {
+	    m_algorithm = algorithm;
+	    clear();
+    };
+    
     void clear()
     {
 	EVP_DigestInit( &m_context, m_algorithm );
@@ -896,6 +896,71 @@ protected:
 };	
 
 
+class opensslPbkdf1Context : public QCA::KDFContext
+{
+public:
+    opensslPbkdf1Context(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
+    {
+	m_algorithm = algorithm;
+	EVP_DigestInit( &m_context, m_algorithm );
+    }
+
+    Context *clone() const
+    {
+	return new opensslPbkdf1Context( *this );
+    }
+    
+    QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
+			      unsigned int keyLength, unsigned int iterationCount)
+    {
+	/* from RFC2898:
+	   Steps:
+	   
+	   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
+	   "derived key too long" and stop.
+	*/
+	if ( keyLength > (unsigned int)EVP_MD_size( m_algorithm ) ) {
+	    std::cout << "derived key too long" << std::endl;
+	    return QCA::SymmetricKey();
+	}
+
+	/*
+	   2. Apply the underlying hash function Hash for c iterations to the
+	   concatenation of the password P and the salt S, then extract
+	   the first dkLen octets to produce a derived key DK:
+	   
+	   T_1 = Hash (P || S) ,
+	   T_2 = Hash (T_1) ,
+	   ...
+	   T_c = Hash (T_{c-1}) ,
+	   DK = Tc<0..dkLen-1>
+	*/
+	// calculate T_1
+	EVP_DigestUpdate( &m_context, (unsigned char*)secret.data(), secret.size() );
+	EVP_DigestUpdate( &m_context, (unsigned char*)salt.data(), salt.size() );
+	QSecureArray a( EVP_MD_size( m_algorithm ) );
+	EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+
+	// calculate T_2 up to T_c
+	for ( unsigned int i = 2; i <= iterationCount; ++i ) {
+	    EVP_DigestInit( &m_context, m_algorithm );
+	    EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
+	    EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+	}
+
+	// shrink a to become DK, of the required length
+	a.resize(keyLength);
+
+	/*
+	   3. Output the derived key DK.
+	*/
+	return a;
+    }
+
+protected:
+    const EVP_MD *m_algorithm;
+    EVP_MD_CTX m_context;
+};
 
 class opensslHMACContext : public QCA::MACContext
 {
@@ -3524,6 +3589,8 @@ public:
 		list += "hmac(md5)";
 		list += "hmac(sha1)";
 		list += "hmac(ripemd160)";
+		list += "pbkdf1(md2)";
+		list += "pbkdf1(sha1)";
 		list += "aes128-ecb";
 		list += "aes128-cfb";
 		list += "aes128-cbc";
@@ -3577,6 +3644,10 @@ public:
 			return new opensslHashContext( EVP_md4(), this, type);
 		else if ( type == "md5" )
 			return new opensslHashContext( EVP_md5(), this, type);
+		else if ( type == "pbkdf1(sha1)" )
+			return new opensslPbkdf1Context( EVP_sha1(), this, type );
+		else if ( type == "pbkdf1(md2)" )
+			return new opensslPbkdf1Context( EVP_md2(), this, type );
 		else if ( type == "hmac(md5)" )
 			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )
