@@ -1,6 +1,6 @@
 QT -= gui
 
-INCLUDEPATH += ../include/QtCrypto
+INCLUDEPATH += ../../include/QtCrypto
 LIBS += -L../.. -lqca
 
 SOURCES += main.cpp
