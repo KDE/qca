@@ -335,31 +335,29 @@ QString QBigInteger::toString() const
 	return QString::fromLatin1(cs);
 }
 
-// this should be able to handle octal and hex, but the 
-// lower level Botan code appears to barf on hex chars.
-// octal looks OK.
+// this could handle hex as well as decimal and octal,
+// but we're using a restricted form of Botan without
+// hex support...
 bool QBigInteger::fromString(const QString &s)
 {
 	Botan::BigInt::Base base = Botan::BigInt::Decimal;
 	unsigned int numPrelimChars = 0;
 	bool isNegative = false;
+
+	s.stripWhiteSpace(); // removes whitespace from start / end
+	                     // gives us a better chance
+
 	if ( (! s.isEmpty()) && (s.left(1) == QString("-")  ) ) {
 		numPrelimChars++;
 		isNegative = true;
 	}
-	if ( ( numPrelimChars + 2 < s.length() ) &&
-	     ( s.mid( numPrelimChars, 2) == QString("0x") ) ) {
-		base = Botan::BigInt::Hexadecimal;
-		numPrelimChars += 2;
-	} else if ( ( numPrelimChars + 1 < s.length() ) &&
+	if ( ( numPrelimChars + 1 < s.length() ) &&
 		    ( s.mid( numPrelimChars, 1) == QString("0") ) ) {
 		base = Botan::BigInt::Octal;
-		numPrelimChars += 1;
+		numPrelimChars++;
 	}
 	// this takes all the characters, except for the:
-	//   - negative sign,
-	//   - hexadecimal signature (0x), and/or
-	//   - octal signature (0)
+	// negative sign and/or octal signature (0)
 	QCString cs = s.mid(numPrelimChars).latin1();
 
 	//try {
