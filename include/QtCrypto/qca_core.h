@@ -792,7 +792,7 @@ namespace QCA
 	};
 
 	/**
-	   \class SymmmetricKey qca_core.h QtCrypto
+	   \class SymmetricKey qca_core.h QtCrypto
 
 	   Container for keys for symmetric encryption algorithms.
 	 */
