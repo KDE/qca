@@ -1,7 +1,7 @@
 * Additional unit tests
 * API documentation
 
-more stuff:
+immediate:
 * cipher: other modes: ofb, etc?
 * pkey: ability to choose sign algorithm
 * pkey: ability to choose cipher for toDER/PEM passphrase
@@ -9,21 +9,19 @@ more stuff:
 * cert: get signature algorithm
 * cert: constraints, ex_constraints, policies, pathLimit, isCA, isSelfSigned
 * crl: add functions
-
-QCA 2 TODO:
-* store: support read-only access of system rootcerts (win, mac, debian)
-* add new user-APIs as necessary
-* default provider should have built-in sha1 and md5 (?)
-* qca: thread safety ?
-* plugins: thread safety ?
 * tls: compression yes/no
 * tls: set/get ciphers
 * tls: get connection info (cipher name and bits, etc)
 * sasl: server last (cyrus' SASL_SUCCESS_DATA)
-* tls/sasl: blocking modes?
+* tls/sasl: blocking mode?
+
+later:
+* new api's: pgp, smime, xmlsec
+* store: support read-only access of system rootcerts (win, mac, debian)
+* default provider should have built-in sha1 and md5 (?)
+* qca: thread safety ?
+* plugins: thread safety ?
 * qca-tls: do something about the cert check lag.  maybe a thread?
-* pgp api
 * pgp: understand gpg KEYEXPIRED
-* xmlsec
 * install on top of Qt.  usage then is simply LIBS += -lqca
 
