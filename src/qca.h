@@ -87,10 +87,10 @@ class QCA_CertContext;
      - Secure byte arrays (QSecureArray)
      - Arbitrary precision integers (QBigInteger)
      - Random number generation (QCA::Random)
-     - SSL/TLS (TBC)
-     - X509 certificate (Cert) (TBC)
-     - Simple Authentication and Security Layer (SASL) (TBC)
-     - RSA (TBC)
+     - SSL/TLS (ToDo)
+     - X509 certificate (Cert) (ToDo)
+     - Simple Authentication and Security Layer (SASL) (ToDo)
+     - RSA (ToDo)
      - Hashing (QCA::Hash)
          - QCA::SHA0
          - QCA::SHA1
