@@ -1,6 +1,6 @@
 /*
- * qca_systemstore.h - Qt Cryptographic Architecture
- * Copyright (C) 2004  Justin Karneges
+ * qca_export.h - Qt Cryptographic Architecture
+ * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,17 +18,33 @@
  *
  */
 
-#ifndef QCA_SYSTEMSTORE_H
-#define QCA_SYSTEMSTORE_H
+#ifndef QCA_EXPORT_H
+#define QCA_EXPORT_H
 
-// NOTE: this API is private to QCA
+#include <qglobal.h>
 
-#include "qca_cert.h"
+#ifdef Q_OS_WIN32
+# ifndef QCA_STATIC
+#  ifdef QCA_MAKEDLL
+#   define QCA_EXPORT __declspec(dllexport)
+#  else
+#   define QCA_EXPORT __declspec(dllimport)
+#  endif
+# endif
+#endif
+#ifndef QCA_EXPORT
+# define QCA_EXPORT
+#endif
 
-namespace QCA
-{
-	bool qca_have_systemstore();
-	Store qca_get_systemstore(const QString &provider);
-}
+#ifdef Q_OS_WIN32
+# ifdef QCA_PLUGIN_DLL
+#  define QCA_PLUGIN_EXPORT extern "C" __declspec(dllexport)
+# else
+#  define QCA_PLUGIN_EXPORT extern "C" __declspec(dllimport)
+# endif
+#endif
+#ifndef QCA_PLUGIN_EXPORT
+# define QCA_PLUGIN_EXPORT extern "C"
+#endif
 
 #endif

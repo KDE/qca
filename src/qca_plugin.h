@@ -1,6 +1,7 @@
 /*
  * qca_plugin.h - Qt Cryptographic Architecture
- * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +26,9 @@
 
 #include <qptrlist.h>
 #include <qstringlist.h>
-#include "qca.h"
+#include "qca_core.h"
+
+class QCAProvider;
 
 namespace QCA
 {

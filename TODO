@@ -17,6 +17,7 @@
   cert: turn Info into an enum
   cert/pkey: fingerprints (is there a standard for this?)
   cert: subjectAltName
+  qcaprovider.h -> qca_provider ?
 
 * finish code for APIs:
   cipher - needs to handling padding
