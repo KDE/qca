@@ -803,6 +803,7 @@ public:
 		if(!t)
 			return false;
 		fromX509(t);
+		X509_free(t);
 		return true;
 	}
 
@@ -815,6 +816,7 @@ public:
 		if(!t)
 			return false;
 		fromX509(t);
+		X509_free(t);
 		return true;
 	}
 
