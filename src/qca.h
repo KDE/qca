@@ -313,36 +313,81 @@ private:
 	Private *d;
 };
 
+/**
+ * Equality operator. Returns true if the two QBigInteger values
+ * are the same, including having the same sign. 
+ *
+ * \relates QBigInteger
+ **/
 inline bool operator==(const QBigInteger &a, const QBigInteger &b)
 {
 	return (0 == a.cmp( b ) );
 }
 
+/**
+ * Inqquality operator. Returns true if the two QBigInteger values
+ * are different in magnitude, sign or both  
+ *
+ * \relates QBigInteger
+ **/
 inline bool operator!=(const QBigInteger &a, const QBigInteger &b)
 {
 	return (0 != a.cmp( b ) );
 }
 
+/**
+ * Less than or equal operator. Returns true if the QBigInteger value
+ * on the left hand side is equal to or less than the QBigInteger value
+ * on the right hand side.
+ *
+ * \relates QBigInteger
+ **/
 inline bool operator<=(const QBigInteger &a, const QBigInteger &b)
 {
 	return (a.cmp( b ) <= 0 );
 }
 
+/**
+ * Greater than or equal operator. Returns true if the QBigInteger value
+ * on the left hand side is equal to or greater than the QBigInteger value
+ * on the right hand side.
+ *
+ * \relates QBigInteger
+ **/
 inline bool operator>=(const QBigInteger &a, const QBigInteger &b)
 {
 	return (a.cmp( b ) >= 0 );
 }
 
+/**
+ * Less than operator. Returns true if the QBigInteger value
+ * on the left hand side is less than the QBigInteger value
+ * on the right hand side.
+ *
+ * \relates QBigInteger
+ **/
 inline bool operator<(const QBigInteger &a, const QBigInteger &b)
 {
 	return (a.cmp( b ) < 0 );
 }
 
+/**
+ * Greater than operator. Returns true if the QBigInteger value
+ * on the left hand side is greater than the QBigInteger value
+ * on the right hand side.
+ *
+ * \relates QBigInteger
+ **/
 inline bool operator>(const QBigInteger &a, const QBigInteger &b)
 {
 	return (a.cmp( b ) > 0 );
 }
 
+/**
+ * Stream operator.
+ *
+ * \relates QBigInteger
+ **/
 QTextStream &operator<<(QTextStream &stream, const QBigInteger &b);
 
 
