@@ -317,6 +317,8 @@ namespace QCA
 		Private *d;
 	};
 
+	// TODO: server authcheck
+	//       security layer
 	class SASL : public QObject
 	{
 		Q_OBJECT
@@ -326,9 +328,22 @@ namespace QCA
 
 		static void setAppName(const QString &name);
 
+		void reset();
+
 		// options
-		bool allowPlainText() const;
-		void setAllowPlainText(bool);
+		void setAllowPlain(bool);
+		void setAllowAnonymous(bool);
+		void setAllowActiveVulnerable(bool);
+		void setAllowDictionaryVulnerable(bool);
+		void setRequireForwardSecrecy(bool);
+		void setRequirePassCredentials(bool);
+		void setRequireMutualAuth(bool);
+
+		void setMinimumSSF(int);
+		void setMaximumSSF(int);
+		void setExternalAuthID(const QString &authid);
+		void setExternalSSF(int);
+
 		void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
 		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
 
@@ -346,13 +361,12 @@ namespace QCA
 		void setRealm(const QString &realm);
 		void continueAfterParams();
 
-		// plain (application side)
-		/*void write(const QByteArray &a);
+		// security layer
+		int ssf() const;
+		void write(const QByteArray &a);
 		QByteArray read();
-
-		// encoded (socket side)
 		void writeIncoming(const QByteArray &a);
-		QByteArray readOutgoing();*/
+		QByteArray readOutgoing();
 
 	signals:
 		// for authentication
@@ -362,8 +376,9 @@ namespace QCA
 		void authenticated(bool);
 
 		// for security layer
-		//void readyRead();
-		//void readyReadOutgoing();
+		void readyRead();
+		void readyReadOutgoing();
+		void error();
 
 	private slots:
 		void tryAgain();

@@ -1,11 +1,17 @@
 * cipher: option to specify size for genkey
 * cert: properly check hostnames with wildcards
+* ssl: rename to tls
+* ssl: change plugin API to not need Q_OBJECT
 * ssl: error signal
-* sasl: bring API up to speed with the plugin
 
 * openssl plugin: fixmes and todos
-* cyrussasl plugin: serverstepthread
+* more optimal plugin loading:
+    plugins should have versions and names
+    load on demand
+    ability to add classes as plugins
+    ability to set priorities to plugins by name and feature
 
+* ssl: client-specified cert
 * dsa
 * diffie-hellman
 

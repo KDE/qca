@@ -827,9 +827,6 @@ public:
 	Private()
 	{
 		c = (QCA_SASLContext *)getContext(CAP_SASL);
-		localPort = -1;
-		remotePort = -1;
-		allowPlain = true;
 	}
 
 	~Private()
@@ -837,19 +834,32 @@ public:
 		delete c;
 	}
 
+	void setSecurityProps()
+	{
+		c->setSecurityProps(noPlain, noActive, noDict, noAnon, reqForward, reqCreds, reqMutual, ssfmin, ssfmax, ext_authid, ext_ssf);
+	}
+
+	// security opts
+	bool noPlain, noActive, noDict, noAnon, reqForward, reqCreds, reqMutual;
+	int ssfmin, ssfmax;
+	QString ext_authid;
+	int ext_ssf;
+
 	bool tried;
 	QCA_SASLContext *c;
-	bool allowPlain;
 	QHostAddress localAddr, remoteAddr;
 	int localPort, remotePort;
 	QByteArray stepData;
 	bool first, server;
+
+	QByteArray inbuf, outbuf;
 };
 
 SASL::SASL(QObject *parent)
 :QObject(parent)
 {
 	d = new Private;
+	reset();
 }
 
 SASL::~SASL()
@@ -862,15 +872,82 @@ void SASL::setAppName(const QString &name)
 	saslappname = name;
 }
 
-// options
-bool SASL::allowPlainText() const
+void SASL::reset()
 {
-	return d->allowPlain;
+	d->localPort = -1;
+	d->remotePort = -1;
+
+	d->noPlain = false;
+	d->noActive = false;
+	d->noDict = false;
+	d->noAnon = false;
+	d->reqForward = false;
+	d->reqCreds = false;
+	d->reqMutual = false;
+	d->ssfmin = 0;
+	d->ssfmax = 0;
+	d->ext_authid = "";
+	d->ext_ssf = 0;
+
+	d->inbuf.resize(0);
+	d->outbuf.resize(0);
+
+	d->c->reset();
 }
 
-void SASL::setAllowPlainText(bool b)
+void SASL::setAllowPlain(bool b)
 {
-	d->allowPlain = b;
+	d->noPlain = !b;
+}
+
+void SASL::setAllowAnonymous(bool b)
+{
+	d->noAnon = !b;
+}
+
+void SASL::setAllowActiveVulnerable(bool b)
+{
+	d->noActive = !b;
+}
+
+void SASL::setAllowDictionaryVulnerable(bool b)
+{
+	d->noDict = !b;
+}
+
+void SASL::setRequireForwardSecrecy(bool b)
+{
+	d->reqForward = b;
+}
+
+void SASL::setRequirePassCredentials(bool b)
+{
+	d->reqCreds = b;
+}
+
+void SASL::setRequireMutualAuth(bool b)
+{
+	d->reqMutual = b;
+}
+
+void SASL::setMinimumSSF(int x)
+{
+	d->ssfmin = x;
+}
+
+void SASL::setMaximumSSF(int x)
+{
+	d->ssfmax = x;
+}
+
+void SASL::setExternalAuthID(const QString &authid)
+{
+	d->ext_authid = authid;
+}
+
+void SASL::setExternalSSF(int x)
+{
+	d->ext_ssf = x;
 }
 
 void SASL::setLocalAddr(const QHostAddress &addr, Q_UINT16 port)
@@ -898,7 +975,8 @@ bool SASL::startClient(const QString &service, const QString &host, const QStrin
 	}
 
 	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
-	d->c->setSecurityProps(!d->allowPlain, false, false, false, false, false, false, 0, 256, "", 0);
+	d->setSecurityProps();
+
 	if(!d->c->clientStart(mechlist))
 		return false;
 	d->first = true;
@@ -921,7 +999,8 @@ bool SASL::startServer(const QString &service, const QString &host, const QStrin
 	}
 
 	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
-	d->c->setSecurityProps(!d->allowPlain, false, false, false, false, false, false, 0, 256, "", 0);
+	d->setSecurityProps();
+
 	if(!d->c->serverStart(realm, mechlist, saslappname))
 		return false;
 	d->first = true;
@@ -1065,26 +1144,53 @@ void SASL::tryAgain()
 		}
 	}
 
-	if(r == QCA_SASLContext::Success) {
-		printf("SSF: %d\n", d->c->security());
+	if(r == QCA_SASLContext::Success)
 		authenticated(true);
-	}
 	else if(r == QCA_SASLContext::Error)
 		authenticated(false);
 }
 
-/*void SASL::write(const QByteArray &a)
+int SASL::ssf() const
 {
+	return d->c->security();
+}
+
+void SASL::write(const QByteArray &a)
+{
+	QByteArray b;
+	if(!d->c->encode(a, &b)) {
+		error();
+		return;
+	}
+	int oldsize = d->outbuf.size();
+	d->outbuf.resize(oldsize + b.size());
+	memcpy(d->outbuf.data() + oldsize, b.data(), b.size());
+	readyReadOutgoing();
 }
 
 QByteArray SASL::read()
 {
+	QByteArray a = d->inbuf.copy();
+	d->inbuf.resize(0);
+	return a;
 }
 
 void SASL::writeIncoming(const QByteArray &a)
 {
+	QByteArray b;
+	if(!d->c->decode(a, &b)) {
+		error();
+		return;
+	}
+	int oldsize = d->inbuf.size();
+	d->inbuf.resize(oldsize + b.size());
+	memcpy(d->inbuf.data() + oldsize, b.data(), b.size());
+	readyRead();
 }
 
 QByteArray SASL::readOutgoing()
 {
-}*/
+	QByteArray a = d->outbuf.copy();
+	d->outbuf.resize(0);
+	return a;
+}

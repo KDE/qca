@@ -39,6 +39,8 @@ public:
 		connect(sasl, SIGNAL(nextStep(const QByteArray &)), SLOT(sasl_nextStep(const QByteArray &)));
 		connect(sasl, SIGNAL(needParams(bool, bool, bool, bool)), SLOT(sasl_needParams(bool, bool, bool, bool)));
 		connect(sasl, SIGNAL(authenticated(bool)), SLOT(sasl_authenticated(bool)));
+		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
+		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
 	}
 
 	~ClientTest()
@@ -52,6 +54,8 @@ public:
 		mode = 0;
 		host = _host;
 		sock->connectToHost(host, port);
+		sasl->setMinimumSSF(0);
+		sasl->setMaximumSSF(256);
 
 		if(!user.isEmpty()) {
 			sasl->setUsername(user);
@@ -92,10 +96,20 @@ private slots:
 
 	void sock_readyRead()
 	{
-		if(sock->canReadLine()) {
-			QString line = sock->readLine();
-			line.truncate(line.length()-1); // chop the newline
-			handleLine(line);
+		if(mode == 2) {
+			int avail = sock->bytesAvailable();
+			QByteArray a(avail);
+			int n = sock->readBlock(a.data(), a.size());
+			a.resize(n);
+			printf("Read %d bytes\n", a.size());
+			sasl->writeIncoming(a);
+		}
+		else {
+			if(sock->canReadLine()) {
+				QString line = sock->readLine();
+				line.truncate(line.length()-1); // chop the newline
+				handleLine(line);
+			}
 		}
 	}
 
@@ -145,8 +159,26 @@ private slots:
 	void sasl_authenticated(bool ok)
 	{
 		printf("SASL %s!\n", ok ? "success" : "failed");
-		if(!ok)
+		if(!ok) {
 			quit();
+			return;
+		}
+		printf("SSF: %d\n", sasl->ssf());
+	}
+
+	void sasl_readyRead()
+	{
+		QByteArray a = sasl->read();
+		int oldsize = inbuf.size();
+		inbuf.resize(oldsize + a.size());
+		memcpy(inbuf.data() + oldsize, a.data(), a.size());
+		processInbuf();
+	}
+
+	void sasl_readyReadOutgoing()
+	{
+		QByteArray a = sasl->readOutgoing();
+		sock->writeBlock(a.data(), a.size());
 	}
 
 private:
@@ -154,6 +186,28 @@ private:
 	QCA::SASL *sasl;
 	int mode;
 	QString host;
+	QByteArray inbuf;
+
+	void processInbuf()
+	{
+		QStringList list;
+		for(int n = 0; n < (int)inbuf.size(); ++n) {
+			if(inbuf[n] == '\n') {
+				QCString cs(inbuf.data(), n+1);
+				char *p = inbuf.data();
+				++n;
+				int x = inbuf.size() - n;
+				memmove(p, p + n, x);
+				inbuf.resize(x);
+				list += QString::fromUtf8(cs);
+				// start over, basically
+				n = -1;
+			}
+		}
+
+		for(QStringList::ConstIterator it = list.begin(); it != list.end(); ++it)
+			handleLine(*it);
+	}
 
 	void handleLine(const QString &line)
 	{
@@ -194,6 +248,8 @@ private:
 			}
 			else if(type == "A") {
 				printf("Authentication success.\n");
+				++mode;
+				sock_readyRead(); // any extra data?
 				return;
 			}
 			else {
@@ -202,6 +258,8 @@ private:
 				return;
 			}
 		}
+		else {
+		}
 	}
 
 	void sendLine(const QString &line)
@@ -209,7 +267,13 @@ private:
 		printf("Writing: {%s}\n", line.latin1());
 		QString s = line + '\n';
 		QCString cs = s.latin1();
-		sock->writeBlock(cs.data(), cs.length());
+		if(mode == 2) {
+			QByteArray a(cs.length());
+			memcpy(a.data(), cs.data(), a.size());
+			sasl->write(a);
+		}
+		else
+			sock->writeBlock(cs.data(), cs.length());
 	}
 };
 
@@ -217,11 +281,12 @@ class ServerTest : public QServerSocket
 {
 	Q_OBJECT
 public:
-	ServerTest(int _port) : QServerSocket(_port), port(_port)
+	ServerTest(const QString &_str, int _port) : QServerSocket(_port), port(_port)
 	{
 		sock = 0;
 		sasl = 0;
 		realm = QString::null;
+		str = _str;
 	}
 
 	~ServerTest()
@@ -264,13 +329,21 @@ public:
 		connect(sock, SIGNAL(connectionClosed()), SLOT(sock_connectionClosed()));
 		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
 		connect(sock, SIGNAL(error(int)), SLOT(sock_error(int)));
+		connect(sock, SIGNAL(bytesWritten(int)), SLOT(sock_bytesWritten(int)));
 
 		sasl = new QCA::SASL;
 		connect(sasl, SIGNAL(nextStep(const QByteArray &)), SLOT(sasl_nextStep(const QByteArray &)));
 		connect(sasl, SIGNAL(authenticated(bool)), SLOT(sasl_authenticated(bool)));
+		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
+		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
 
 		sock->setSocket(s);
 		mode = 0;
+		inbuf.resize(0);
+
+		sasl->setMinimumSSF(0);
+		sasl->setMaximumSSF(256);
+
 		QStringList mechlist;
 		if(!sasl->startServer(PROTO_NAME, host, realm, &mechlist)) {
 			printf("Error starting server!\n");
@@ -320,6 +393,17 @@ private slots:
 		}
 	}
 
+	void sock_bytesWritten(int x)
+	{
+		if(mode == 2) {
+			toWrite -= x;
+			if(toWrite <= 0) {
+				printf("Sent, closing.\n");
+				close();
+			}
+		}
+	}
+
 	void sasl_nextStep(const QByteArray &stepData)
 	{
 		QCString cs(stepData.data(), stepData.size()+1);
@@ -338,6 +422,27 @@ private slots:
 		else
 			sendLine("E");
 		printf("Authentication %s.\n", ok ? "success" : "failed");
+		if(ok) {
+			++mode;
+			printf("SSF: %d\n", sasl->ssf());
+			sendLine(str);
+		}
+	}
+
+	void sasl_readyRead()
+	{
+		QByteArray a = sasl->read();
+		int oldsize = inbuf.size();
+		inbuf.resize(oldsize + a.size());
+		memcpy(inbuf.data() + oldsize, a.data(), a.size());
+		processInbuf();
+	}
+
+	void sasl_readyReadOutgoing()
+	{
+		QByteArray a = sasl->readOutgoing();
+		toWrite = a.size();
+		sock->writeBlock(a.data(), a.size());
 	}
 
 private:
@@ -346,6 +451,13 @@ private:
 	QString host, realm;
 	int port;
 	int mode;
+	QString str;
+	QByteArray inbuf;
+	int toWrite;
+
+	void processInbuf()
+	{
+	}
 
 	void handleLine(const QString &line)
 	{
@@ -394,7 +506,13 @@ private:
 		printf("Writing: {%s}\n", line.latin1());
 		QString s = line + '\n';
 		QCString cs = s.latin1();
-		sock->writeBlock(cs.data(), cs.length());
+		if(mode == 2) {
+			QByteArray a(cs.length());
+			memcpy(a.data(), cs.data(), a.size());
+			sasl->write(a);
+		}
+		else
+			sock->writeBlock(cs.data(), cs.length());
 	}
 
 	void close()
@@ -411,7 +529,7 @@ private:
 void usage()
 {
 	printf("usage: sasltest client [host] [user] [pass]\n");
-	printf("       sasltest server\n\n");
+	printf("       sasltest server [string]\n\n");
 }
 
 int main(int argc, char **argv)
@@ -419,6 +537,7 @@ int main(int argc, char **argv)
 	QApplication app(argc, argv, false);
 
 	QString host, user, pass;
+	QString str = "Hello, World";
 	bool server;
 	if(argc < 2) {
 		usage();
@@ -438,6 +557,8 @@ int main(int argc, char **argv)
 		server = false;
 	}
 	else if(arg == "server") {
+		if(argc >= 3)
+			str = argv[2];
 		server = true;
 	}
 	else {
@@ -451,7 +572,7 @@ int main(int argc, char **argv)
 	}
 
 	if(server) {
-		ServerTest *s = new ServerTest(PROTO_PORT);
+		ServerTest *s = new ServerTest(str, PROTO_PORT);
 		QObject::connect(s, SIGNAL(quit()), &app, SLOT(quit()));
 		s->start();
 		app.exec();
