@@ -31,10 +31,40 @@ void check_error( gcry_error_t err )
     }
 }
 
-class SHA1Context : public QCA::HashContext
+class gcryHashContext : public QCA::HashContext
 {
 public:
-	SHA1Context(QCA::Provider *p) : HashContext(p, "sha1")
+    gcryHashContext(QCA::Provider *p, const QString &type) : QCA::HashContext(p, type) {};
+
+    void clear()
+    {
+	gcry_md_reset( context );
+    }
+    
+    void update(const QSecureArray &a)
+    {
+	gcry_md_write( context, a.data(), a.size() );
+    }
+    
+    QSecureArray final()
+    {
+	unsigned char *md;
+	QSecureArray a( gcry_md_get_algo_dlen( hashAlgorithm ) );
+	md = gcry_md_read( context, hashAlgorithm );
+	memcpy( a.data(), md, a.size() );
+	return a;
+    }
+    
+protected:
+    gcry_md_hd_t context;
+    gcry_error_t err;
+    int hashAlgorithm;
+};	
+
+class SHA1Context : public gcryHashContext
+{
+public:
+	SHA1Context(QCA::Provider *p) : gcryHashContext(p, "sha1")
 	{
 		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_SHA1;
@@ -55,87 +85,39 @@ public:
 	{
 		return new SHA1Context(*this);
 	}
-
-	void clear()
-	{
-		gcry_md_reset( context );
-	}
-
-	void update(const QSecureArray &a)
-	{
-		gcry_md_write( context, a.data(), a.size() );
-	}
-
-	QSecureArray final()
-	{
-		unsigned char *md;
-		QSecureArray a( gcry_md_get_algo_dlen( hashAlgorithm ) );
-		md = gcry_md_read( context, hashAlgorithm );
-		memcpy( a.data(), md, a.size() );
-		return a;
-	}
-
-protected:
-	gcry_md_hd_t context;
-	gcry_error_t err;
-	int hashAlgorithm;
 };
 
 
-class SHA256Context : public QCA::HashContext
+class SHA256Context : public gcryHashContext
 {
 public:
-	SHA256Context(QCA::Provider *p) : HashContext(p, "sha256")
-	{
-		gcry_check_version("GCRYPT_VERSION");
-		hashAlgorithm = GCRY_MD_SHA256;
-		err =  gcry_md_open( &context, hashAlgorithm, 0 );
-		if ( GPG_ERR_NO_ERROR != err ) {
-			std::cout << "Failure: " ;
-			std::cout << gcry_strsource(err) << "/";
-			std::cout << gcry_strerror(err) << std::endl;
-		}
+    SHA256Context(QCA::Provider *p) : gcryHashContext(p, "sha256")
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	hashAlgorithm = GCRY_MD_SHA256;
+	err =  gcry_md_open( &context, hashAlgorithm, 0 );
+	if ( GPG_ERR_NO_ERROR != err ) {
+	    std::cout << "Failure: " ;
+	    std::cout << gcry_strsource(err) << "/";
+	    std::cout << gcry_strerror(err) << std::endl;
 	}
+    }
+	
+    ~SHA256Context()
+    {
+	gcry_md_close( context );
+    }
 
-	~SHA256Context()
-	{
-		gcry_md_close( context );
-	}
-
-	Context *clone() const
-	{
-		return new SHA256Context(*this);
-	}
-
-	void clear()
-	{
-		gcry_md_reset( context );
-	}
-
-	void update(const QSecureArray &a)
-	{
-		gcry_md_write( context, a.data(), a.size() );
-	}
-
-	QSecureArray final()
-	{
-		unsigned char *md;
-		QSecureArray a( gcry_md_get_algo_dlen( hashAlgorithm ) );
-		md = gcry_md_read( context, hashAlgorithm );
-		memcpy( a.data(), md, a.size() );
-		return a;
-	}
-
-protected:
-	gcry_md_hd_t context;
-	gcry_error_t err;
-	int hashAlgorithm;
+    Context *clone() const
+    {
+	return new SHA256Context(*this);
+    }
 };
 
-class SHA384Context : public QCA::HashContext
+class SHA384Context : public gcryHashContext
 {
 public:
-	SHA384Context(QCA::Provider *p) : HashContext(p, "sha384")
+	SHA384Context(QCA::Provider *p) : gcryHashContext(p, "sha384")
 	{
 		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_SHA384;
@@ -156,39 +138,15 @@ public:
 	{
 		return new SHA384Context(*this);
 	}
-
-	void clear()
-	{
-		gcry_md_reset( context );
-	}
-
-	void update(const QSecureArray &a)
-	{
-		gcry_md_write( context, a.data(), a.size() );
-	}
-
-	QSecureArray final()
-	{
-		unsigned char *md;
-		QSecureArray a( gcry_md_get_algo_dlen( hashAlgorithm ) );
-		md = gcry_md_read( context, hashAlgorithm );
-		memcpy( a.data(), md, a.size() );
-		return a;
-	}
-
-protected:
-	gcry_md_hd_t context;
-	gcry_error_t err;
-	int hashAlgorithm;
 };
 
 
 
 
-class SHA512Context : public QCA::HashContext
+class SHA512Context : public gcryHashContext
 {
 public:
-	SHA512Context(QCA::Provider *p) : HashContext(p, "sha512")
+	SHA512Context(QCA::Provider *p) : gcryHashContext(p, "sha512")
 	{
 		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_SHA512;
@@ -209,33 +167,9 @@ public:
 	{
 		return new SHA512Context(*this);
 	}
-
-	void clear()
-	{
-		gcry_md_reset( context );
-	}
-
-	void update(const QSecureArray &a)
-	{
-		gcry_md_write( context, a.data(), a.size() );
-	}
-
-	QSecureArray final()
-	{
-		unsigned char *md;
-		QSecureArray a( gcry_md_get_algo_dlen( hashAlgorithm ) );
-		md = gcry_md_read( context, hashAlgorithm );
-		memcpy( a.data(), md, a.size() );
-		return a;
-	}
-
-protected:
-	gcry_md_hd_t context;
-	gcry_error_t err;
-	int hashAlgorithm;
 };
 
-int gcry_mode( QCA::CipherContext::Mode mode )
+static int gcry_mode( QCA::CipherContext::Mode mode )
 {
     int retmode;
     switch (mode)
@@ -253,22 +187,13 @@ int gcry_mode( QCA::CipherContext::Mode mode )
 	retmode = GCRY_CIPHER_MODE_NONE;
     }
     return retmode;
-}
+};
 
-class AES128Context : public QCA::CipherContext
+
+class gcryCipherContext : public QCA::CipherContext
 {
 public:
-    AES128Context(QCA::Provider *p) : CipherContext( p, "aes128" )
-    {
-	gcry_check_version("GCRYPT_VERSION");
-	cryptoAlgorithm = GCRY_CIPHER_AES128;
-    }
-	
-    Context *clone() const
-    {
-	return new AES128Context( *this );
-    }
-    
+    gcryCipherContext(QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type) {}
 
     void setup(const QCA::SymmetricKey &key,
 	       QCA::CipherContext::Mode m,
@@ -285,16 +210,11 @@ public:
 	check_error( err ); 
     }
 
-    QCA::KeyLength keyLength() const
-    {
-	// Must be 128 bits
-	return QCA::KeyLength( 16, 16, 1);
-    }
-    
     int blockSize() const
     {
-	// TODO: this needs more work!
-	return 32;
+	int blockSize;
+	gcry_cipher_algo_info( cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
+	return blockSize;
     }
     
     bool update(const QSecureArray &in, QSecureArray *out)
@@ -326,6 +246,114 @@ protected:
     QSecureArray runningResult;
 };
 
+class AES128Context : public gcryCipherContext
+{
+public:
+    AES128Context(QCA::Provider *p) : gcryCipherContext( p, "aes128" )
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	cryptoAlgorithm = GCRY_CIPHER_AES128;
+    }
+	
+    Context *clone() const
+    {
+	return new AES128Context( *this );
+    }
+    
+    QCA::KeyLength keyLength() const
+    {
+	// Must be 128 bits
+	return QCA::KeyLength( 16, 16, 1);
+    }
+    
+
+};
+
+class AES192Context : public gcryCipherContext
+{
+public:
+    AES192Context(QCA::Provider *p) : gcryCipherContext( p, "aes192" )
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	cryptoAlgorithm = GCRY_CIPHER_AES192;
+    }
+	
+    Context *clone() const
+    {
+	return new AES192Context( *this );
+    }
+
+    QCA::KeyLength keyLength() const
+    {
+	// Must be 192 bits
+	return QCA::KeyLength( 24, 24, 1);
+    }
+};
+
+
+class AES256Context : public gcryCipherContext
+{
+public:
+    AES256Context(QCA::Provider *p) : gcryCipherContext( p, "aes256" )
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	cryptoAlgorithm = GCRY_CIPHER_AES256;
+    }
+	
+    Context *clone() const
+    {
+	return new AES256Context( *this );
+    }
+    
+    QCA::KeyLength keyLength() const
+    {
+	// Must be 256 bits
+	return QCA::KeyLength( 32, 32, 1);
+    }
+};
+
+
+class BlowFishContext : public gcryCipherContext
+{
+public:
+    BlowFishContext(QCA::Provider *p) : gcryCipherContext( p, "blowfish" )
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	cryptoAlgorithm = GCRY_CIPHER_BLOWFISH;
+    }
+	
+    Context *clone() const
+    {
+	return new BlowFishContext( *this );
+    }
+    
+    QCA::KeyLength keyLength() const
+    {
+	// Don't know - TODO
+	return QCA::KeyLength( 1, 32, 1);
+    }
+};
+
+class TripleDESContext : public gcryCipherContext
+{
+public:
+    TripleDESContext(QCA::Provider *p) : gcryCipherContext( p, "tripledes" )
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	cryptoAlgorithm = GCRY_CIPHER_3DES;
+    }
+	
+    Context *clone() const
+    {
+	return new TripleDESContext( *this );
+    }
+    
+    QCA::KeyLength keyLength() const
+    {
+	return QCA::KeyLength( 24, 24, 1);
+    }
+};
+
 
 class gcryptProvider : public QCA::Provider
 {
@@ -347,6 +375,10 @@ public:
 		list += "sha384";
 		list += "sha512";
 		list += "aes128";
+		list += "aes192";
+		list += "aes256";
+		list += "blowfish";
+		list += "tripledes";
 		return list;
 	}
 
@@ -362,6 +394,14 @@ public:
 			return new SHA512Context( this );
 		else if ( type == "aes128" )
 			return new AES128Context( this );
+		else if ( type == "aes192" )
+			return new AES192Context( this );
+		else if ( type == "aes256" )
+			return new AES256Context( this );
+		else if ( type == "blowfish" )
+			return new BlowFishContext( this );
+		else if ( type == "tripledes" )
+			return new TripleDESContext( this );
 		else
 			return 0;
 	}
