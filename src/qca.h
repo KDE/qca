@@ -54,6 +54,8 @@
 # define QCA_PLUGIN_EXPORT extern "C"
 #endif
 
+#define QCA_VERSION 0x020000
+
 class QHostAddress;
 class QStringList;
 
