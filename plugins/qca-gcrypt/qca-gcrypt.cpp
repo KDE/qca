@@ -192,7 +192,6 @@ class pbkdf2Context : public QCA::KDFContext
 public:
     pbkdf2Context(int algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {
-	gcry_control (GCRYCTL_INIT_SECMEM, 16384, 0);
 	m_algorithm = algorithm;
     }
 
@@ -287,6 +286,7 @@ public:
 					 qca_func_realloc,
 					 qca_func_free);
 	    #endif
+	    gcry_control (GCRYCTL_INIT_SECMEM, 16384, 0);
 	    gcry_control (GCRYCTL_INITIALIZATION_FINISHED);
 	}
     }
