@@ -10,6 +10,7 @@
 
 class QCA_HashContext;
 class QCA_CipherContext;
+class QCA_CertContext;
 
 namespace QCA
 {
@@ -254,6 +255,9 @@ namespace QCA
 	private:
 		class Private;
 		Private *d;
+
+		friend class SSL;
+		void fromContext(QCA_CertContext *);
 	};
 
 	class SSL : public QObject
@@ -297,6 +301,11 @@ namespace QCA
 		void handshaken(bool);
 		void readyRead();
 		void readyReadOutgoing();
+
+	private slots:
+		void ctx_handshaken(bool);
+		void ctx_readyRead();
+		void ctx_readyReadOutgoing();
 
 	private:
 		class Private;

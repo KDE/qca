@@ -13,6 +13,8 @@
 #include<openssl/ssl.h>
 #include<openssl/err.h>
 
+#define NO_AES
+
 // FIXME: use openssl for entropy instead of stdlib
 #include<stdlib.h>
 static bool seeded = false;
@@ -316,6 +318,7 @@ public:
 	}
 };
 
+#ifndef NO_AES
 class AES128Context : public EVPCipherContext
 {
 public:
@@ -345,6 +348,7 @@ public:
 			return 0;
 	}
 };
+#endif
 
 class RSAKeyContext : public QCA_RSAKeyContext
 {
@@ -751,7 +755,7 @@ public:
 		reset();
 	}
 
-	QCA_CertContext *clone()
+	QCA_CertContext *clone() const
 	{
 		CertContext *c = new CertContext(*this);
 		if(x) {
@@ -915,6 +919,7 @@ public:
 static bool ssl_init = false;
 class SSLContext : public QCA_SSLContext
 {
+	Q_OBJECT
 public:
 	enum { Success, TryAgain, Error };
 	enum { Idle, Connect, Handshake, Active };
@@ -951,6 +956,7 @@ public:
 		recvQueue.resize(0);
 		mode = Idle;
 		cc.reset();
+		vr = QCA::SSL::Unknown;
 	}
 
 	bool begin(const QString &_host, const QPtrList<QCA_CertContext> &list)
@@ -1045,7 +1051,7 @@ public:
 			}
 			else if(ret == Error) {
 				reset();
-				// FIXME: handshaken(false);
+				handshaken(false);
 				return;
 			}
 		}
@@ -1073,27 +1079,28 @@ public:
 					cc.reset();
 					code = QCA::SSL::NoCert;
 				}
-				validityResult = code;
+				vr = code;
 
 				mode = Active;
-				// FIXME: handshaken(true);
+				handshaken(true);
 			}
 			else if(ret == Error) {
 				reset();
-				// FIXME: handshaken(false);
+				handshaken(false);
 				return;
 			}
 		}
 
-		//if(isOutgoingSSLData()) {
-		//	outgoingSSLDataReady();
-		//}
+		if(outgoingDataReady()) {
+			readyReadOutgoing();
+		}
 
 		// try to read incoming unencrypted data
 		sslReadAll();
 
-		//if(isRecvData())
-		//	readyRead();
+		if(dataReady()) {
+			readyRead();
+		}
 	}
 
 	int resultToCV(int ret) const
@@ -1154,9 +1161,14 @@ public:
 		return rc;
 	}
 
-	QCA_CertContext *peerCertificate()
+	QCA_CertContext *peerCertificate() const
 	{
 		return cc.clone();
+	}
+
+	int validityResult() const
+	{
+		return vr;
 	}
 
 	bool dataReady() const
@@ -1169,27 +1181,22 @@ public:
 		return (BIO_pending(wbio) > 0) ? true: false;
 	}
 
-	/*void putIncomingSSLData(const QByteArray &a)
+	void writeIncoming(const QByteArray &a)
 	{
-		BIO_write(d->rbio, a.data(), a.size());
+		BIO_write(rbio, a.data(), a.size());
 		sslUpdate();
 	}
 
-	bool isOutgoingSSLData()
-	{
-		return (BIO_pending(d->wbio) > 0) ? true: false;
-	}
-
-	QByteArray getOutgoingSSLData()
+	QByteArray readOutgoing()
 	{
 		QByteArray a;
 
-		int size = BIO_pending(d->wbio);
+		int size = BIO_pending(wbio);
 		if(size <= 0)
 			return a;
 		a.resize(size);
 
-		int r = BIO_read(d->wbio, a.data(), size);
+		int r = BIO_read(wbio, a.data(), size);
 		if(r <= 0) {
 			a.resize(0);
 			return a;
@@ -1200,30 +1207,20 @@ public:
 		return a;
 	}
 
-	void send(const QByteArray &a)
+	void write(const QByteArray &a)
 	{
-		if(d->mode != Active)
+		if(mode != Active)
 			return;
-
-		int oldsize = d->sendQueue.size();
-		d->sendQueue.resize(oldsize + a.size());
-		memcpy(d->sendQueue.data() + oldsize, a.data(), a.size());
-
+		appendArray(&sendQueue, a);
 		processSendQueue();
 	}
 
-	bool isRecvData()
+	QByteArray read()
 	{
-		return (d->recvQueue.size() > 0) ? true: false;
-	}
-
-	QByteArray recv()
-	{
-		QByteArray a = d->recvQueue;
-		a.detach();
-		d->recvQueue.resize(0);
+		QByteArray a = recvQueue.copy();
+		recvQueue.resize(0);
 		return a;
-	}*/
+	}
 
 	void sslReadAll()
 	{
@@ -1258,7 +1255,7 @@ public:
 	BIO *rbio, *wbio;
 	QString host;
 	CertContext cc;
-	int validityResult;
+	int vr;
 };
 
 class QCAOpenSSL : public QCAProvider
@@ -1274,8 +1271,10 @@ public:
 			QCA::CAP_MD5 |
 			QCA::CAP_BlowFish |
 			QCA::CAP_TripleDES |
+#ifndef NO_AES
 			QCA::CAP_AES128 |
 			QCA::CAP_AES256 |
+#endif
 			QCA::CAP_RSA |
 			QCA::CAP_X509 |
 			QCA::CAP_SSL;
@@ -1292,10 +1291,12 @@ public:
 			return new BlowFishContext;
 		else if(cap == QCA::CAP_TripleDES)
 			return new TripleDESContext;
+#ifndef NO_AES
 		else if(cap == QCA::CAP_AES128)
 			return new AES128Context;
 		else if(cap == QCA::CAP_AES256)
 			return new AES256Context;
+#endif
 		else if(cap == QCA::CAP_RSA)
 			return new RSAKeyContext;
 		else if(cap == QCA::CAP_X509)
@@ -1314,3 +1315,5 @@ QCAProvider *createProviderOpenSSL()
 {
 	return (new QCAOpenSSL);
 }
+
+#include"qcaopenssl.moc"

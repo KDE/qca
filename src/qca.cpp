@@ -599,6 +599,12 @@ Cert::~Cert()
 	delete d;
 }
 
+void Cert::fromContext(QCA_CertContext *ctx)
+{
+	delete d->c;
+	d->c = ctx;
+}
+
 bool Cert::isNull() const
 {
 	return d->c->isNull();
@@ -715,6 +721,9 @@ public:
 SSL::SSL()
 {
 	d = new Private;
+	connect(d->c, SIGNAL(handshaken(bool)), SLOT(ctx_handshaken(bool)));
+	connect(d->c, SIGNAL(readyRead()), SLOT(ctx_readyRead()));
+	connect(d->c, SIGNAL(readyReadOutgoing()), SLOT(ctx_readyReadOutgoing()));
 }
 
 SSL::~SSL()
@@ -724,25 +733,41 @@ SSL::~SSL()
 
 bool SSL::begin(const QString &host, const QPtrList<Cert> &store)
 {
-	return false;
+	d->cert = Cert();
+
+	// convert the cert list into a context list
+	QPtrList<QCA_CertContext> list;
+	QPtrListIterator<Cert> it(store);
+	for(Cert *cert; (cert = it.current()); ++it)
+		list.append(cert->d->c);
+
+	// begin!
+	if(!d->c->begin(host, list))
+		return false;
+
+	// we don't need this anymore
+	list.setAutoDelete(true);
+	return true;
 }
 
 void SSL::write(const QByteArray &a)
 {
+	d->c->write(a);
 }
 
 QByteArray SSL::read()
 {
-	return QByteArray();
+	return d->c->read();
 }
 
 void SSL::writeIncoming(const QByteArray &a)
 {
+	d->c->writeIncoming(a);
 }
 
 QByteArray SSL::readOutgoing()
 {
-	return QByteArray();
+	return d->c->readOutgoing();
 }
 
 const Cert & SSL::peerCertificate() const
@@ -752,5 +777,25 @@ const Cert & SSL::peerCertificate() const
 
 int SSL::certificateValidityResult() const
 {
-	return NoCert;
+	return d->c->validityResult();
+}
+
+void SSL::ctx_handshaken(bool b)
+{
+	if(b) {
+		// read the cert
+		QCA_CertContext *cc = d->c->peerCertificate();
+		d->cert.fromContext(cc);
+	}
+	handshaken(b);
+}
+
+void SSL::ctx_readyRead()
+{
+	readyRead();
+}
+
+void SSL::ctx_readyReadOutgoing()
+{
+	readyReadOutgoing();
 }

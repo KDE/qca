@@ -6,16 +6,13 @@ TARGET   = qcaopenssl
 
 INCLUDEPATH += ../src
 
-# Justin
-INCLUDEPATH += /usr/local/include
-
 # RH 9
 INCLUDEPATH += /usr/kerberos/include
 
-HEADERS = qcaopenssl.h
+HEADERS = ../src/qcaprovider.h qcaopenssl.h
 SOURCES = qcaopenssl.cpp
 DEFINES += QCA_PLUGIN
 
 # link with OpenSSL
-LIBS += -L/usr/local/lib -lcrypto
+LIBS += -lcrypto -lssl
 

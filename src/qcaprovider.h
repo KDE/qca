@@ -4,6 +4,7 @@
 #include<qglobal.h>
 #include<qstring.h>
 #include<qdatetime.h>
+#include<qobject.h>
 #include"qca.h"
 
 #ifdef Q_WS_WIN
@@ -80,7 +81,7 @@ class QCA_CertContext
 public:
 	virtual ~QCA_CertContext() {}
 
-	virtual QCA_CertContext *clone()=0;
+	virtual QCA_CertContext *clone() const=0;
 	virtual bool isNull() const=0;
 	virtual bool createFromDER(const char *in, unsigned int len)=0;
 	virtual bool createFromPEM(const char *in, unsigned int len)=0;
@@ -96,12 +97,25 @@ public:
 	virtual QDateTime notAfter() const=0;
 };
 
-class QCA_SSLContext
+class QCA_SSLContext : public QObject
 {
+	Q_OBJECT
 public:
 	virtual ~QCA_SSLContext() {}
 
 	virtual bool begin(const QString &host, const QPtrList<QCA_CertContext> &store)=0;
+
+	virtual void writeIncoming(const QByteArray &a)=0;
+	virtual QByteArray readOutgoing()=0;
+	virtual void write(const QByteArray &a)=0;
+	virtual QByteArray read()=0;
+	virtual QCA_CertContext *peerCertificate() const=0;
+	virtual int validityResult() const=0;
+
+signals:
+	void handshaken(bool);
+	void readyRead();
+	void readyReadOutgoing();
 };
 
 #endif

@@ -8,6 +8,10 @@ UI_DIR      = .ui
 
 INCLUDEPATH += src
 INCLUDEPATH += plugins
-HEADERS += src/qca.h
+HEADERS += src/qca.h src/qcaprovider.h
 SOURCES += hashtest.cpp src/qca.cpp
+
+#DEFINES += USE_OPENSSL
+#SOURCES += plugins/qcaopenssl.cpp
+#LIBS += -lcrypto -lssl
 
