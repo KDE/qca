@@ -30,39 +30,38 @@ int main(int argc, char **argv)
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
 
-	// we use the first argument if provided, or
-	// use "hello" if no arguments
+	// we use the first argument as the data to authenticate
+	// if an argument is provided. Use "hello" if no argument
 	QCString cs = (argc >= 2) ? argv[1] : "hello";
 
-	// must always check that an algorithm is supported before using it
-	if( !QCA::isSupported("sha1") )
-		printf("SHA1 not supported!\n");
-	else {
-		// this shows the "all in one" approach
-		QString result = QCA::SHA1().hashToString(cs);
-		printf("sha1(\"%s\") = [%s]\n", cs.data(), result.latin1());
-	}
+	// we use the second argument as the key to authenticate
+	// with, if two arguments are provided. Use "secret" as
+	// the key if less than two arguments.
+	QCString key = (argc >= 3) ? argv[2] : "secret";
 
 	// must always check that an algorithm is supported before using it
-	if( !QCA::isSupported("md5") )
-		printf("MD5 not supported!\n");
-	else {
-		// this shows the incremental approach. Naturally
-		// for this simple job, we could use the "all in one"
-		// approach - this is an example, after all :-)
-		QSecureArray part1(cs.left(3)); // three chars - "hel"
-		QSecureArray part2(cs.mid(3)); // the rest - "lo"
+	if( !QCA::isSupported("hmac(sha1)") ) {
+		printf("HMAC(SHA1) not supported!\n");
+	} else {
+		// create the required object. This is equivalent
+		// to QCA::HMAC hmacObject("sha1").
+		QCA::HMAC hmacObject;
 
-		// create the required object.
-		QCA::MD5 hashObject;
+		// create the key
+		QCA::SymmetricKey keyObject(key);
+
 		// we split it into two parts to show incremental update
-		hashObject.update(part1);
-		hashObject.update(part2);
+                QSecureArray part1(cs.left(3)); // three chars - "hel"
+                QSecureArray part2(cs.mid(3)); // the rest - "lo"
+		hmacObject.update(part1);
+		hmacObject.update(part2);
+
 		// no more updates after calling final.
-		QSecureArray resultArray = hashObject.final();
+		QSecureArray resultArray = hmacObject.final();
+
 		// convert the result into printable hexadecimal.
 		QString result = QCA::arrayToHex(resultArray);
-		printf("md5(\"%s\") = [%s]\n", cs.data(), result.latin1());
+		printf("HMAC(SHA1) of \"%s\" with \"%s\" = [%s]\n", cs.data(), key.data(), result.latin1());
 	}
 
 	return 0;

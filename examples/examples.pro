@@ -2,10 +2,13 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
 	hashtest \
-	ciphertest \
-	rsatest \
-	certtest \
-	ssltest \
-	sslservtest \
-	sasltest
+	mactest \
+	providertest
+
+#	ciphertest \
+#	rsatest \
+#	certtest \
+#	ssltest \
+#	sslservtest \
+#	sasltest
 
