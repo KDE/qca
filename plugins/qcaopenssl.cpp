@@ -54,20 +54,23 @@ QByteArray QRandom::randomArray(uint size)
 	return a;
 }
 
-static bool lib_generateKeyIV(const EVP_CIPHER *type, const QByteArray &data, const QByteArray &salt, QByteArray *key, QByteArray *iv)
+static bool lib_generateKeyIV(const EVP_CIPHER *_type, const QByteArray &data, const QByteArray &salt, QByteArray *key, QByteArray *iv, int keysize=-1)
 {
 	QByteArray k, i;
 	unsigned char *kp = 0;
 	unsigned char *ip = 0;
+	EVP_CIPHER type = *_type;
+	if(keysize != -1)
+		type.key_len = keysize;
 	if(key) {
-		k.resize(type->key_len);
+		k.resize(type.key_len);
 		kp = (unsigned char *)k.data();
 	}
 	if(iv) {
-		i.resize(type->iv_len);
+		i.resize(type.iv_len);
 		ip = (unsigned char *)i.data();
 	}
-	if(!EVP_BytesToKey(type, EVP_sha1(), (unsigned char *)salt.data(), (unsigned char *)data.data(), data.size(), 1, kp, ip))
+	if(!EVP_BytesToKey(&type, EVP_sha1(), (unsigned char *)salt.data(), (unsigned char *)data.data(), data.size(), 1, kp, ip))
 		return false;
 	if(key)
 		*key = k;
@@ -199,10 +202,10 @@ public:
 	int keySize() { return getType(QCA::CBC)->key_len; }
 	int blockSize() { return getType(QCA::CBC)->block_size; }
 
-	bool generateKey(char *out)
+	bool generateKey(char *out, int keysize)
 	{
 		QByteArray a;
-		if(!lib_generateKeyIV(getType(QCA::CBC), QRandom::randomArray(128), QRandom::randomArray(2), &a, 0))
+		if(!lib_generateKeyIV(getType(QCA::CBC), QRandom::randomArray(128), QRandom::randomArray(2), &a, 0, keysize))
 			return false;
 		memcpy(out, a.data(), a.size());
 		return true;
@@ -708,7 +711,7 @@ auq_err:
 // (adapted from kdelibs) -- Justin
 static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
 {
-	QString cn = _cn;
+	QString cn = _cn.stripWhiteSpace().lower();
 	QRegExp rx;
 
 	// Check for invalid characters
@@ -753,7 +756,8 @@ static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
 		// foo.example.com but not bar.foo.example.com
 		// (ie. they must have the same number of parts)
 		if(QRegExp(cn, false, true).exactMatch(peerHost) &&
-			parts.count() == QStringList::split('.', peerHost, false).count())
+			QStringList::split('.', cn, false).count() ==
+			QStringList::split('.', peerHost, false).count())
 			return true;
 
 		return false;
@@ -925,12 +929,15 @@ public:
 			peerHost.truncate(peerHost.length()-1);
 		peerHost = peerHost.lower();
 
+		QString cn;
 		for(QValueList<QCA_CertProperty>::ConstIterator it = cp_subject.begin(); it != cp_subject.end(); ++it) {
 			if((*it).var == "CN") {
-				if(cnMatchesAddress((*it).val.stripWhiteSpace().lower(), peerHost))
-					return true;
+				cn = (*it).val;
+				break;
 			}
 		}
+		if(cnMatchesAddress(cn, peerHost))
+			return true;
 		return false;
 	}
 

@@ -43,7 +43,7 @@ public:
 	virtual QCA_CipherContext *clone()=0;
 	virtual int keySize()=0;
 	virtual int blockSize()=0;
-	virtual bool generateKey(char *out)=0;
+	virtual bool generateKey(char *out, int keysize=-1)=0;
 	virtual bool generateIV(char *out)=0;
 
 	virtual bool setup(int dir, int mode, const char *key, int keysize, const char *iv, bool pad)=0;

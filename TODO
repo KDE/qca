@@ -1,5 +1,4 @@
-* rename qcaopenssl to qca-ssl and qcacyrussasl to qca-sasl and move them.
-* cipher: option to specify size for genkey
+* rename qcaopenssl to qca-ssl and qcacyrussasl to qca-sasl and move them
 
 * more optimal plugin loading:
     plugins should have versions and names

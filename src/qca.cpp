@@ -265,7 +265,7 @@ QByteArray Cipher::dyn_generateKey(int size) const
 		buf.resize(size);
 	else
 		buf.resize(d->c->keySize());
-	if(!d->c->generateKey(buf.data()))
+	if(!d->c->generateKey(buf.data(), size))
 		return QByteArray();
 	return buf;
 }
