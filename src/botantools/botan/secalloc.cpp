@@ -32,8 +32,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_NO_CONF_H
 # include <botan/conf.h>
 #else
+namespace Botan {
 int botan_memory_chunk = 65536;
 int botan_prealloc = 2;
+}
 #endif
 #include <botan/util.h>
 

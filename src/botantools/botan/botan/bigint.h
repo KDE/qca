@@ -181,10 +181,12 @@ std::istream& operator>>(std::istream&, BigInt&);
 
 }
 
+#ifndef BOTAN_MINIMAL_BIGINT
 namespace std {
 
 inline void swap(Botan::BigInt& a, Botan::BigInt& b) { a.swap(b); }
 
 }
+#endif
 
 #endif
