@@ -7,9 +7,8 @@ SUBDIRS += \
 	randomtest \
 	base64test \
 	hextest \
-	ciphertest
-
-#	rsatest \
+	ciphertest \
+	rsatest
 #	certtest \
 #	ssltest \
 #	sslservtest \
