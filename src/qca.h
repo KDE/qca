@@ -100,6 +100,17 @@ class QCA_CertContext;
 QCA_EXPORT void *qca_secure_alloc(int bytes);
 QCA_EXPORT void qca_secure_free(void *p);
 
+/**
+ * Secure array of bytes
+ *
+ * The %QSecureArray provides an array of memory from a pool that is, 
+ * at least partly, secure. In this sense, secure means that the contents
+ * of the memory should not be made available to other applications. By
+ * comparison, a QMemArray (or subclass such as QCString or QByteArray) may
+ * be held in pages that are free'd without being cleared first. This means
+ * that a malicious application can just repeatedly request pages of memory,
+ * searching for something that could be of value.
+ **/ 
 QCA_EXPORT class QSecureArray
 {
 public:
