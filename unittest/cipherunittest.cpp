@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "cipherunittest.h"
-#include "qca.h"
+#include <QtCrypto/QtCrypto>
 
 struct cipherTestValues {
     QCString plaintext;
@@ -626,7 +626,7 @@ void CipherUnitTest::allTests()
     QCA::Initializer init;
 
     if (!QCA::isSupported("aes128") )
-	SKIP("AES128 not supported!\n");
+	SKIP("AES128 not supported!");
     else {
 	QCA::SymmetricKey key1(QCA::hexToArray( "00010203050607080A0B0C0D0F101112" ) );
 	QCA::AES128 cipherObj1(QCA::Cipher::ECB, QCA::Encode, key1, QCA::InitializationVector(), QCA::Cipher::NoPadding );
@@ -720,7 +720,7 @@ void CipherUnitTest::allTests()
     }
 
     if (!QCA::isSupported("aes192") )
-	SKIP("AES192 not supported!\n");
+	SKIP("AES192 not supported!");
     else {
 	// FIPS 197, Appendix C.2
 	QCA::SymmetricKey key1(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F1011121314151617" ) );
@@ -800,7 +800,7 @@ void CipherUnitTest::allTests()
 
 
     if (!QCA::isSupported("aes256") )
-	SKIP("AES256 not supported!\n");
+	SKIP("AES256 not supported!");
     else {
 	// FIPS 197, Appendix C.3
 	QCA::SymmetricKey key1(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F" ) );
@@ -878,7 +878,7 @@ void CipherUnitTest::allTests()
     }
 
     if (!QCA::isSupported("tripledes") )
-	SKIP("Triple DES not supported!\n");
+	SKIP("Triple DES not supported!");
     else {
 	QCA::TripleDES cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 24 ) );
 	CHECK( cipherObj1.keyLength().minimum(), 24 );
@@ -905,7 +905,7 @@ void CipherUnitTest::allTests()
     }
 
     if (!QCA::isSupported("des") )
-	SKIP("DES not supported!\n");
+	SKIP("DES not supported!");
     else {
 	QCA::DES cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 8 ) );
 	CHECK( cipherObj1.keyLength().minimum(), 8 );
@@ -932,7 +932,7 @@ void CipherUnitTest::allTests()
     }
 
     if (!QCA::isSupported("blowfish") )
-	SKIP("Blowfish not supported!\n");
+	SKIP("Blowfish not supported!");
     else {
 	QCA::BlowFish cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 16 ) );
 	CHECK( cipherObj1.blockSize(), (unsigned)8 );

@@ -26,6 +26,7 @@
  */
 #include "kunittest.h"
 
+#include "hexunittest.h"
 #include "staticunittest.h"
 #include "hashunittest.h"
 #include "bigintunittest.h"
@@ -48,6 +49,7 @@ using namespace std;
 
 void KUnitTest::registerTests()
 {
+    ADD_TEST( HexUnitTest );
     ADD_TEST( StaticUnitTest );
     ADD_TEST( HashUnitTest );
     ADD_TEST( BigIntUnitTest );

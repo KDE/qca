@@ -23,7 +23,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "macunittest.h"
-#include "qca.h"
+#include <QtCrypto/QtCrypto>
 #include <iostream>
 
 MACUnitTest::MACUnitTest()

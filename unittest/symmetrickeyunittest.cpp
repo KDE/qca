@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "symmetrickeyunittest.h"
-#include "qca.h"
+#include <QtCrypto/QtCrypto>
 
 SymmetricKeyUnitTest::SymmetricKeyUnitTest()
     : Tester()

@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "randomunittest.h"
-#include "qca.h"
+#include <QtCrypto/QtCrypto>
 
 RandomUnitTest::RandomUnitTest()
     : Tester()
@@ -37,11 +37,15 @@ void RandomUnitTest::allTests()
 {
     QCA::Initializer init;
 
-    QCA::Random rng = QCA::globalRNG();
+    QCA::Random rng = QCA::globalRNG( );
+    CHECK( rng.provider()->name(), QString( "qca-botan" ) );
+
+    QCA::setGlobalRNG( "default" );
+    rng = QCA::globalRNG( );
     CHECK( rng.provider()->name(), QString( "default" ) );
 
     {
-	QCA::Random randObject;
+	QCA::Random randObject ("default");
 	CHECK( randObject.nextByte() == randObject.nextByte(), false );
 	CHECK( QCA::Random().nextByte() == QCA::Random().nextByte(), false );
 	CHECK( randObject.nextBytes(4) == randObject.nextBytes(4), false );
@@ -75,7 +79,7 @@ void RandomUnitTest::allTests()
     CHECK( rng1.provider()->name(), QString( "qca-botan" ) );
 
     {
-	QCA::Random randObject;
+	QCA::Random randObject ( "qca-botan" );
 	CHECK( randObject.nextByte() == randObject.nextByte(), false );
 	CHECK( QCA::Random().nextByte() == QCA::Random().nextByte(), false );
 	CHECK( randObject.nextBytes(4) == randObject.nextBytes(4), false );
@@ -107,7 +111,44 @@ void RandomUnitTest::allTests()
 	testkey = QCA::globalRNG().nextBytes(10, QCA::Random::SessionKey);
     }
 
-    // TODO: taking this out causes problems. Why doesn't it work with qca-botan?
-    //QCA::setGlobalRNG( "default" );
+#if 0
+    QCA::setGlobalRNG( "qca-egads" );
+    QCA::Random rng2 = QCA::globalRNG();
+    CHECK( rng2.provider()->name(), QString( "qca-egads" ) );
+
+    {
+	QCA::Random randObject ( "qca-egads" );
+	CHECK( randObject.nextByte() == randObject.nextByte(), false );
+	CHECK( QCA::Random("qca-egads").nextByte() == QCA::Random("qca-egads").nextByte(), false );
+	CHECK( randObject.nextBytes(4) == randObject.nextBytes(4), false );
+	CHECK( randObject.nextBytes(100) == randObject.nextBytes(100), false );
+	CHECK( randObject.randomChar() == randObject.randomChar(), false );
+	CHECK( QCA::Random("qca-egads").randomChar() == QCA::Random("qca-egads").randomChar(), false );
+	CHECK( QCA::Random::randomChar() == QCA::Random::randomChar(), false );
+	CHECK( QCA::Random("qca-egads").randomInt() == QCA::Random().randomInt(), false );
+	CHECK( QCA::Random::randomInt() == QCA::Random::randomInt(), false );
+	CHECK( QCA::Random().randomArray(3) == QCA::Random().randomArray(3), false );
+	CHECK( QCA::Random::randomArray(3) == QCA::Random::randomArray(3), false );
+
+	CHECK( randObject.nextByte(QCA::Random::Nonce) == randObject.nextByte(QCA::Random::SessionKey), false );
+	CHECK( QCA::Random().nextByte(QCA::Random::PublicValue) == QCA::Random().nextByte(), false );
+	CHECK( randObject.nextBytes(4) == randObject.nextBytes(4, QCA::Random::Nonce), false );
+	CHECK( randObject.randomChar(QCA::Random::LongTermKey) == randObject.randomChar(), false );
+	CHECK( QCA::Random().randomChar() == QCA::Random().randomChar(QCA::Random::PublicValue), false );
+	CHECK( QCA::Random::randomChar(QCA::Random::PublicValue) == QCA::Random::randomChar(QCA::Random::Nonce), false );
+	CHECK( QCA::Random().randomInt(QCA::Random::Nonce) == QCA::Random().randomInt(), false );
+	CHECK( QCA::Random::randomInt(QCA::Random::Nonce) == QCA::Random::randomInt(QCA::Random::Nonce), false );
+	CHECK( QCA::Random().randomArray(3, QCA::Random::Nonce) == QCA::Random().randomArray(3), false );
+	CHECK( QCA::Random::randomArray(3, QCA::Random::SessionKey) == QCA::Random::randomArray(3, QCA::Random::PublicValue), false );
+
+	for (unsigned int len = 1; len <= 1024; len*=2 ) {
+	    CHECK( QCA::globalRNG().nextBytes(len, QCA::Random::SessionKey).size(), len );
+	}
+
+	QCA::SymmetricKey testkey;
+	testkey = QCA::globalRNG().nextBytes(10, QCA::Random::SessionKey);
+    }
+#endif
+
 }
 

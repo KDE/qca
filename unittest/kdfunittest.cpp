@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "kdfunittest.h"
-#include "qca.h"
+#include <QtCrypto/QtCrypto>
 
 struct kdfTestValues {
     QCString secret; // usually a password or passphrase

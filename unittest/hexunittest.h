@@ -1,6 +1,4 @@
 /**
- * keylengthunittest.cpp
- *
  * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,35 +22,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "keylengthunittest.h"
-#include <QtCrypto/QtCrypto>
+#ifndef HEXUNITTEST_H
+#define HEXUNITTEST_H
 
-#include <limits>
+#include "tester.h"
 
-KeyLengthUnitTest::KeyLengthUnitTest()
-    : Tester()
+class HexUnitTest : public Tester
 {
+public:
+    HexUnitTest();
 
-}
+public:
+    void allTests();
+};
 
-void KeyLengthUnitTest::allTests()
-{
-    QCA::Initializer init;
-
-    QCA::KeyLength keylen1( 0, 0, 0 );
-    CHECK( keylen1.minimum(), 0 );
-    CHECK( keylen1.maximum(), 0 );
-    CHECK( keylen1.multiple(), 0 );
-
-    QCA::KeyLength keylen2( 3, 40, 1 );
-    CHECK( keylen2.minimum(), 3 );
-    CHECK( keylen2.maximum(), 40 );
-    CHECK( keylen2.multiple(), 1 );
-
-    QCA::KeyLength keylen3( 1, std::numeric_limits<int>::max(), 1 );
-    CHECK( keylen3.minimum(), 1 );
-    CHECK( keylen3.maximum(), std::numeric_limits<int>::max() );
-    CHECK( keylen3.multiple(), 1 );
-
-}
-
+#endif
