@@ -26,7 +26,7 @@
 
 namespace gcryptQCAPlugin {
 
-  // #include "pkcs5.c"
+#include "pkcs5.c"
 
 void check_error( gcry_error_t err )
 {
@@ -74,7 +74,6 @@ class SHA1Context : public gcryHashContext
 public:
 	SHA1Context(QCA::Provider *p) : gcryHashContext(p, "sha1")
 	{
-		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_SHA1;
 		err =  gcry_md_open( &context, hashAlgorithm, 0 );
 		if ( GPG_ERR_NO_ERROR != err ) {
@@ -100,7 +99,6 @@ class MD4Context : public gcryHashContext
 public:
 	MD4Context(QCA::Provider *p) : gcryHashContext(p, "md4")
 	{
-		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_MD4;
 		err =  gcry_md_open( &context, hashAlgorithm, 0 );
 		if ( GPG_ERR_NO_ERROR != err ) {
@@ -127,7 +125,6 @@ class MD5Context : public gcryHashContext
 public:
 	MD5Context(QCA::Provider *p) : gcryHashContext(p, "md5")
 	{
-		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_MD5;
 		err =  gcry_md_open( &context, hashAlgorithm, 0 );
 		if ( GPG_ERR_NO_ERROR != err ) {
@@ -153,7 +150,6 @@ class RIPEMD160Context : public gcryHashContext
 public:
 	RIPEMD160Context(QCA::Provider *p) : gcryHashContext(p, "ripemd160")
 	{
-		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_RMD160;
 		err =  gcry_md_open( &context, hashAlgorithm, 0 );
 		if ( GPG_ERR_NO_ERROR != err ) {
@@ -180,7 +176,6 @@ class SHA256Context : public gcryHashContext
 public:
     SHA256Context(QCA::Provider *p) : gcryHashContext(p, "sha256")
     {
-	gcry_check_version("GCRYPT_VERSION");
 	hashAlgorithm = GCRY_MD_SHA256;
 	err =  gcry_md_open( &context, hashAlgorithm, 0 );
 	if ( GPG_ERR_NO_ERROR != err ) {
@@ -206,7 +201,6 @@ class SHA384Context : public gcryHashContext
 public:
 	SHA384Context(QCA::Provider *p) : gcryHashContext(p, "sha384")
 	{
-		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_SHA384;
 		err =  gcry_md_open( &context, hashAlgorithm, 0 );
 		if ( GPG_ERR_NO_ERROR != err ) {
@@ -235,7 +229,6 @@ class SHA512Context : public gcryHashContext
 public:
 	SHA512Context(QCA::Provider *p) : gcryHashContext(p, "sha512")
 	{
-		gcry_check_version("GCRYPT_VERSION");
 		hashAlgorithm = GCRY_MD_SHA512;
 		err =  gcry_md_open( &context, hashAlgorithm, 0 );
 		if ( GPG_ERR_NO_ERROR != err ) {
@@ -261,7 +254,6 @@ class gcryCipherContext : public QCA::CipherContext
 public:
     gcryCipherContext(int algorithm, int mode, bool pad, QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
     {
-	gcry_check_version("GCRYPT_VERSION");
 	m_cryptoAlgorithm = algorithm;
  	m_mode = mode;
 	m_pad = pad;
@@ -360,8 +352,8 @@ class pbkdf2Context : public QCA::KDFContext
 public:
     pbkdf2Context(int algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {
-	//gcry_check_version("GCRYPT_VERSION");
-	//m_algorithm = algorithm;
+	gcry_control (GCRYCTL_INIT_SECMEM, 16384, 0);
+	m_algorithm = algorithm;
     }
 
     Context *clone() const
@@ -372,8 +364,16 @@ public:
     QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
 			 unsigned int keyLength, unsigned int iterationCount)
     {
-	QSecureArray result("Hello");
-	return result;
+	QCA::SymmetricKey result(keyLength);
+	int retval = gcry_pbkdf2(m_algorithm, secret.data(), secret.size(),
+				     salt.data(), salt.size(),
+				     iterationCount, keyLength, result.data());
+	if (retval == GPG_ERR_NO_ERROR) {
+	    return result;
+	} else {
+	    std::cout << "got: " << retval << std::endl;
+	    return QCA::SymmetricKey();
+	}
     }
 
 protected:
@@ -382,11 +382,73 @@ protected:
 
 }
 
+// #define I_WANT_TO_CRASH 1
+#ifdef I_WANT_TO_CRASH
+static void * qca_func_malloc(size_t n)
+{
+    return qca_secure_alloc(n);
+};
+
+static void * qca_func_secure_malloc(size_t n)
+{
+    return qca_secure_alloc(n);
+};
+
+static void * qca_func_realloc(void *oldBlock, size_t newBlockSize)
+{
+    std::cout << "re-alloc: " << newBlockSize << std::endl;
+    if (oldBlock == NULL) {
+	return qca_secure_alloc(newBlockSize);
+    }
+
+    // backtrack to read the size value
+    char *c = (char *)oldBlock;
+    c -= sizeof(int);
+    size_t oldBlockSize = ((size_t *)c)[0];
+
+    char *newBlock = (char *)qca_secure_alloc(newBlockSize);
+    if (newBlockSize < oldBlockSize) {
+	memcpy(newBlock, oldBlock, newBlockSize);
+    } else { // oldBlock is smaller
+	memcpy(newBlock, oldBlock, oldBlockSize);
+    }
+    qca_secure_free(oldBlock);
+    return newBlock;
+};
+
+static void qca_func_free(void *mem)
+{
+    qca_secure_free(mem);
+};
+
+int qca_func_secure_check (const void *)
+{
+    return (int)QCA::haveSecureMemory();
+};
+#endif
+
 class gcryptProvider : public QCA::Provider
 {
 public:
     void init()
     {
+	if (!gcry_control (GCRYCTL_ANY_INITIALIZATION_P))
+	{ /* No other library has already initialized libgcrypt. */
+
+	    if (!gcry_check_version (GCRYPT_VERSION) )
+	    {
+		std::cout << "libgcrypt is too old (need " << GCRYPT_VERSION;
+		std::cout << ", have " << gcry_check_version(NULL) << ")" << std::endl;
+	    }
+	    #ifdef I_WANT_TO_CRASH
+	    gcry_set_allocation_handler (qca_func_malloc,
+					 qca_func_secure_malloc,
+					 qca_func_secure_check,
+					 qca_func_realloc,
+					 qca_func_free);
+	    #endif
+	    gcry_control (GCRYCTL_INITIALIZATION_FINISHED);
+	}
     }
     
     QString name() const
