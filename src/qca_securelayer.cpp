@@ -475,7 +475,7 @@ void SASL::setRemoteAddr(const QHostAddress &addr, Q_UINT16 port)
 	d->remotePort = port;
 }*/
 
-bool SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst)
+bool SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode)
 {
 	SASLContext::HostPort la, ra;
 	/*if(d->localPort != -1) {
@@ -487,7 +487,7 @@ bool SASL::startClient(const QString &service, const QString &host, const QStrin
 		ra.port = d->remotePort;
 	}*/
 
-	d->allowCSF = allowClientSendFirst;
+	//d->allowCSF = allowClientSendFirst;
 	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
 	d->setSecurityProps();
 
@@ -500,9 +500,9 @@ bool SASL::startClient(const QString &service, const QString &host, const QStrin
 	return true;
 }
 
-bool SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, bool allowServerSendLast)
+bool SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, ServerSendMode)
 {
-	Q_UNUSED(allowServerSendLast);
+	//Q_UNUSED(allowServerSendLast);
 
 	SASLContext::HostPort la, ra;
 	/*if(d->localPort != -1) {

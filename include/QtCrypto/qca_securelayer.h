@@ -210,6 +210,22 @@ namespace QCA
 			RequireMutualAuth      = 0x10,
 			RequireAuthzidSupport  = 0x20  // server-only
 		};
+		enum ClientSendMode
+		{
+			AllowClientSendFirst,
+			DisableClientSendFirst
+		};
+		enum ServerSendMode
+		{
+			AllowServerSendLast,
+			DisableServerSendLast
+		};
+
+		class Params
+		{
+		public:
+			bool user, authzid, pass, realm;
+		};
 
 		SASL(QObject *parent = 0, const QString &provider = QString());
 		~SASL();
@@ -225,8 +241,8 @@ namespace QCA
 		void setExternalSSF(int);
 
 		// main
-		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst = true);
-		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, bool allowServerSendLast = false);
+		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode = AllowClientSendFirst);
+		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, ServerSendMode = DisableServerSendLast);
 		void putStep(const QByteArray &stepData);
 		void putServerFirstStep(const QString &mech);
 		void putServerFirstStep(const QString &mech, const QByteArray &clientInit);
@@ -255,7 +271,7 @@ namespace QCA
 	signals:
 		void clientFirstStep(const QString &mech, const QByteArray *clientInit);
 		void nextStep(const QByteArray &stepData);
-		void needParams(bool user, bool authzid, bool pass, bool realm);
+		void needParams(const Params &params);
 		void authCheck(const QString &user, const QString &authzid);
 		void authenticated();
 
