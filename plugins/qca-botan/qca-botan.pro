@@ -12,7 +12,6 @@ DEFINES += QCA_PLUGIN
 
 INCLUDEPATH += ../src
 SOURCES = qca-botan.cpp
-LIBS += -L/usr/local/lib -lm -lpthread -lrt -lbotan
 
-#include(conf.pri)
-#include(extra.pri)
+include(conf.pri)
+include(extra.pri)
