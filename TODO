@@ -1,6 +1,7 @@
 * Additional unit tests
 * Bundle root certificates to be used on platforms without a system store
   (we need to choose a reliable source, maybe mozilla or debian?  kde??)
+* Update to latest Botan, and remake the botantools patch as appropriate
 
 * API documentation
   clean up Algorithm
@@ -16,13 +17,11 @@
   threading (safety, usability) in API and plugins.  look for singletons
   it's possible we use QSecureArray in some unnecessary places
   don't forget to QCA_EXPORT everything
-  ensure plugin system is upgradable this time. no createProvider3(), please..
   standardize on count() vs size() when iterating?
 
 * finish API:
   do something about qhostaddress in SASL. try to remove QtNetwork dependency?
   move to qt 4
-    use qplugin
     use qshareddata for thread-safe objects
     turn ambiguous bool args into enums
     create include files for all class names?

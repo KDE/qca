@@ -179,6 +179,11 @@ const ProviderList & providers()
 	return manager->providers();
 }
 
+void scanForPlugins()
+{
+	manager->scan();
+}
+
 void unloadAllPlugins()
 {
 	if(!qca_init)

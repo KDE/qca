@@ -31,10 +31,6 @@
 
 #define QCA_PLUGIN_VERSION 2
 
-#define QCA_EXPORT_PLUGIN(P) \
-	QCA_PLUGIN_EXPORT QCA::Provider *createProvider2() { return new P; } \
-	QCA_PLUGIN_EXPORT int version() { return QCA_PLUGIN_VERSION; }
-
 /** \page providers Providers
 
 QCA works on the concept of a "provider". There is a limited
@@ -52,6 +48,14 @@ So the only way to get the default provider is to either have no other support
 whatsoever, or to specify the default provider directly (this goes for the
 algorithm constructors as well as setGlobalRNG()).
 */
+
+class QCAPlugin : public QObject
+{
+	Q_OBJECT
+public:
+	virtual int version() const = 0;
+	virtual QCA::Provider *createProvider() = 0;
+};
 
 namespace QCA {
 

@@ -288,6 +288,12 @@ namespace QCA
 	QCA_EXPORT const ProviderList & providers();
 
 	/**
+	 * Scan for new plugins
+	 *
+	 */
+	QCA_EXPORT void scanForPlugins();
+
+	/**
 	 * Unload the current plugins
 	 *
 	 */

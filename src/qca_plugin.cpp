@@ -23,14 +23,6 @@
 #include <QtCore>
 #include "qcaprovider.h"
 
-#if defined(Q_OS_WIN32)
-# define PLUGIN_EXT "dll"
-#elif defined(Q_OS_MAC)
-# define PLUGIN_EXT "dylib"
-#else
-# define PLUGIN_EXT "so"
-#endif
-
 #define PLUGIN_SUBDIR "crypto"
 
 namespace QCA {
@@ -38,73 +30,43 @@ namespace QCA {
 class ProviderItem
 {
 public:
-	QCA::Provider *p;
+	Provider *p;
 	QString fname;
-	int version;
 	int priority;
 
 	static ProviderItem *load(const QString &fname)
 	{
-		QLibrary *lib = new QLibrary(fname);
-		if(!lib->load())
+		QPluginLoader *lib = new QPluginLoader(fname);
+		QCAPlugin *plugin = qobject_cast<QCAPlugin*>(lib->instance());
+		if(!plugin || plugin->version() != QCA_PLUGIN_VERSION)
 		{
 			delete lib;
 			return 0;
 		}
 
-		int ver = 0;
-		bool old;
-		void *s = lib->resolve("version");
-		if(s)
-		{
-			old = false;
-			int (*versionfunc)() = (int (*)())s;
-			ver = versionfunc();
-		}
-		else
-		{
-			old = true;
-		}
-
-		if(old)
-			s = lib->resolve("createProvider");
-		else
-			s = lib->resolve("createProvider2");
-		if(!s)
+		Provider *p = plugin->createProvider();
+		if(!p)
 		{
 			delete lib;
 			return 0;
 		}
 
-		ProviderItem *i;
-		if(old)
-		{
-			// old method
-			//QCAProvider *(*createProvider)() = (QCAProvider *(*)())s;
-			//QCAProvider *p = createProvider();
-			//if(!p)
-			//{
-				delete lib;
-				return 0;
-			//}
-			//ver = p->qcaVersion();
-			//i = new ProviderItem(lib, p);
-		}
-		else
-		{
-			// new method
-			QCA::Provider *(*createProvider)() = (QCA::Provider *(*)())s;
-			QCA::Provider *p = createProvider();
-			if(!p)
-			{
-				delete lib;
-				return 0;
-			}
-			i = new ProviderItem(lib, p);
-		}
-
+		ProviderItem *i = new ProviderItem(lib, p);
 		i->fname = fname;
-		i->version = ver;
+		return i;
+	}
+
+	static ProviderItem *loadStatic(QObject *instance)
+	{
+		QCAPlugin *plugin = qobject_cast<QCAPlugin*>(instance);
+		if(!plugin || plugin->version() != QCA_PLUGIN_VERSION)
+			return 0;
+
+		Provider *p = plugin->createProvider();
+		if(!p)
+			return 0;
+
+		ProviderItem *i = new ProviderItem(0, p);
 		return i;
 	}
 
@@ -129,10 +91,10 @@ public:
 	}
 
 private:
-	QLibrary *lib;
+	QPluginLoader *lib;
 	bool init_done;
 
-	ProviderItem(QLibrary *_lib, QCA::Provider *_p)
+	ProviderItem(QPluginLoader *_lib, QCA::Provider *_p)
 	{
 		lib = _lib;
 		p = _p;
@@ -143,6 +105,7 @@ private:
 ProviderManager::ProviderManager()
 {
 	def = 0;
+	scanned_static = false;
 }
 
 ProviderManager::~ProviderManager()
@@ -152,6 +115,29 @@ ProviderManager::~ProviderManager()
 
 void ProviderManager::scan()
 {
+	// check static first, but only once
+	if(!scanned_static)
+	{
+		QObjectList list = QPluginLoader::staticInstances();
+		for(int n = 0; n < list.count(); ++n)
+		{
+			QObject *instance = list[n];
+			ProviderItem *i = ProviderItem::loadStatic(instance);
+			if(!i)
+				continue;
+
+			if(i->p && haveAlready(i->p->name()))
+			{
+				delete i;
+				continue;
+			}
+
+			addItem(i, -1);
+		}
+		scanned_static = true;
+	}
+
+	// check plugin files
 	QStringList dirs = QCoreApplication::libraryPaths();
 	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
@@ -166,18 +152,11 @@ void ProviderManager::scan()
 			QFileInfo fi(dir.filePath(*it));
 			if(fi.isDir())
 				continue;
-			if(fi.suffix() != PLUGIN_EXT)
-				continue;
 			QString fname = fi.filePath();
 
 			ProviderItem *i = ProviderItem::load(fname);
 			if(!i)
 				continue;
-			if(i->version != QCA_PLUGIN_VERSION)
-			{
-				delete i;
-				continue;
-			}
 
 			if(i->p && haveAlready(i->p->name()))
 			{

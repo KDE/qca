@@ -54,6 +54,7 @@ namespace QCA
 		QList<ProviderItem*> providerItemList;
 		QCA::ProviderList providerList;
 		QCA::Provider *def;
+		bool scanned_static;
 		void addItem(ProviderItem *i, int priority);
 		bool haveAlready(const QString &name) const;
 	};
