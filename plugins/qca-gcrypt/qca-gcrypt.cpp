@@ -28,12 +28,12 @@ namespace gcryptQCAPlugin {
 
 #include "pkcs5.c"
 
-void check_error( gcry_error_t err )
+void check_error( QString label, gcry_error_t err )
 {
     // we ignore the case where it is not an error, and
     // we also don't flag weak keys.
     if ( ( GPG_ERR_NO_ERROR != err ) && ( GPG_ERR_WEAK_KEY  != gpg_err_code(err) ) ) {
-	std::cout << "Failure: " ;
+	std::cout << "Failure (" << qPrintable(label) << "): ";
 		std::cout << gcry_strsource(err) << "/";
 		std::cout << gcry_strerror(err) << std::endl;
     }
@@ -42,7 +42,26 @@ void check_error( gcry_error_t err )
 class gcryHashContext : public QCA::HashContext
 {
 public:
-    gcryHashContext(QCA::Provider *p, const QString &type) : QCA::HashContext(p, type) {};
+    gcryHashContext(int hashAlgorithm, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
+    {
+	m_hashAlgorithm = hashAlgorithm;
+	err =  gcry_md_open( &context, m_hashAlgorithm, 0 );
+	if ( GPG_ERR_NO_ERROR != err ) {
+	    std::cout << "Failure: " ;
+	    std::cout << gcry_strsource(err) << "/";
+	    std::cout << gcry_strerror(err) << std::endl;
+	}
+    }
+
+    ~gcryHashContext()
+    {
+	gcry_md_close( context );
+    }
+
+    Context *clone() const
+    {
+	return new gcryHashContext(*this);
+    }
 
     void clear()
     {
@@ -57,8 +76,8 @@ public:
     QSecureArray final()
     {
 	unsigned char *md;
-	QSecureArray a( gcry_md_get_algo_dlen( hashAlgorithm ) );
-	md = gcry_md_read( context, hashAlgorithm );
+	QSecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
+	md = gcry_md_read( context, m_hashAlgorithm );
 	memcpy( a.data(), md, a.size() );
 	return a;
     }
@@ -66,188 +85,9 @@ public:
 protected:
     gcry_md_hd_t context;
     gcry_error_t err;
-    int hashAlgorithm;
+    int m_hashAlgorithm;
 };	
 
-class SHA1Context : public gcryHashContext
-{
-public:
-	SHA1Context(QCA::Provider *p) : gcryHashContext(p, "sha1")
-	{
-		hashAlgorithm = GCRY_MD_SHA1;
-		err =  gcry_md_open( &context, hashAlgorithm, 0 );
-		if ( GPG_ERR_NO_ERROR != err ) {
-			std::cout << "Failure: " ;
-			std::cout << gcry_strsource(err) << "/";
-			std::cout << gcry_strerror(err) << std::endl;
-		}
-	}
-
-	~SHA1Context()
-	{
-		gcry_md_close( context );
-	}
-
-	Context *clone() const
-	{
-		return new SHA1Context(*this);
-	}
-};
-
-class MD4Context : public gcryHashContext
-{
-public:
-	MD4Context(QCA::Provider *p) : gcryHashContext(p, "md4")
-	{
-		hashAlgorithm = GCRY_MD_MD4;
-		err =  gcry_md_open( &context, hashAlgorithm, 0 );
-		if ( GPG_ERR_NO_ERROR != err ) {
-			std::cout << "Failure: " ;
-			std::cout << gcry_strsource(err) << "/";
-			std::cout << gcry_strerror(err) << std::endl;
-		}
-	}
-
-	~MD4Context()
-	{
-		gcry_md_close( context );
-	}
-
-	Context *clone() const
-	{
-		return new MD4Context(*this);
-	}
-};
-
-
-class MD5Context : public gcryHashContext
-{
-public:
-	MD5Context(QCA::Provider *p) : gcryHashContext(p, "md5")
-	{
-		hashAlgorithm = GCRY_MD_MD5;
-		err =  gcry_md_open( &context, hashAlgorithm, 0 );
-		if ( GPG_ERR_NO_ERROR != err ) {
-			std::cout << "Failure: " ;
-			std::cout << gcry_strsource(err) << "/";
-			std::cout << gcry_strerror(err) << std::endl;
-		}
-	}
-
-	~MD5Context()
-	{
-		gcry_md_close( context );
-	}
-
-	Context *clone() const
-	{
-		return new MD5Context(*this);
-	}
-};
-
-class RIPEMD160Context : public gcryHashContext
-{
-public:
-	RIPEMD160Context(QCA::Provider *p) : gcryHashContext(p, "ripemd160")
-	{
-		hashAlgorithm = GCRY_MD_RMD160;
-		err =  gcry_md_open( &context, hashAlgorithm, 0 );
-		if ( GPG_ERR_NO_ERROR != err ) {
-			std::cout << "Failure: " ;
-			std::cout << gcry_strsource(err) << "/";
-			std::cout << gcry_strerror(err) << std::endl;
-		}
-	}
-
-	~RIPEMD160Context()
-	{
-		gcry_md_close( context );
-	}
-
-	Context *clone() const
-	{
-		return new RIPEMD160Context(*this);
-	}
-};
-
-
-class SHA256Context : public gcryHashContext
-{
-public:
-    SHA256Context(QCA::Provider *p) : gcryHashContext(p, "sha256")
-    {
-	hashAlgorithm = GCRY_MD_SHA256;
-	err =  gcry_md_open( &context, hashAlgorithm, 0 );
-	if ( GPG_ERR_NO_ERROR != err ) {
-	    std::cout << "Failure: " ;
-	    std::cout << gcry_strsource(err) << "/";
-	    std::cout << gcry_strerror(err) << std::endl;
-	}
-    }
-	
-    ~SHA256Context()
-    {
-	gcry_md_close( context );
-    }
-
-    Context *clone() const
-    {
-	return new SHA256Context(*this);
-    }
-};
-
-class SHA384Context : public gcryHashContext
-{
-public:
-	SHA384Context(QCA::Provider *p) : gcryHashContext(p, "sha384")
-	{
-		hashAlgorithm = GCRY_MD_SHA384;
-		err =  gcry_md_open( &context, hashAlgorithm, 0 );
-		if ( GPG_ERR_NO_ERROR != err ) {
-			std::cout << "Failure: " ;
-			std::cout << gcry_strsource(err) << "/";
-			std::cout << gcry_strerror(err) << std::endl;
-		}
-	}
-
-	~SHA384Context()
-	{
-		gcry_md_close( context );
-	}
-
-	Context *clone() const
-	{
-		return new SHA384Context(*this);
-	}
-};
-
-
-
-
-class SHA512Context : public gcryHashContext
-{
-public:
-	SHA512Context(QCA::Provider *p) : gcryHashContext(p, "sha512")
-	{
-		hashAlgorithm = GCRY_MD_SHA512;
-		err =  gcry_md_open( &context, hashAlgorithm, 0 );
-		if ( GPG_ERR_NO_ERROR != err ) {
-			std::cout << "Failure: " ;
-			std::cout << gcry_strsource(err) << "/";
-			std::cout << gcry_strerror(err) << std::endl;
-		}
-	}
-
-	~SHA512Context()
-	{
-		gcry_md_close( context );
-	}
-
-	Context *clone() const
-	{
-		return new SHA512Context(*this);
-	}
-};
 
 class gcryCipherContext : public QCA::CipherContext
 {
@@ -265,11 +105,11 @@ public:
     {
 	m_direction = dir;
 	err =  gcry_cipher_open( &context, m_cryptoAlgorithm, m_mode, 0 );
-	check_error( err );
+	check_error( "gcry_cipher_open", err );
 	err = gcry_cipher_setkey( context, key.data(), key.size() );
-	check_error( err );
+	check_error( "gcry_cipher_setkey", err );
 	err = gcry_cipher_setiv( context, iv.data(), iv.size() );
-	check_error( err ); 
+	check_error( "gcry_cipher_setiv", err ); 
     }
 
     Context *clone() const
@@ -292,7 +132,7 @@ public:
 	} else {
 	    err = gcry_cipher_decrypt( context, (unsigned char*)result.data(), result.size(), (unsigned char*)in.data(), in.size() );
 	}
-	check_error(err );
+	check_error( "update cipher encrypt/decrypt", err );
 	result.resize( in.size() );
 	*out = result;
 	return true;
@@ -308,7 +148,7 @@ public:
 	    } else {
 		err = gcry_cipher_decrypt( context, (unsigned char*)result.data(), result.size(), NULL, 0 );
 	    }
-	    check_error(err );
+	    check_error( "final cipher encrypt/decrypt", err );
 	} else {
 	    // just return null
 	}
@@ -469,8 +309,10 @@ public:
 	list += "aes128-ecb";
 	list += "aes128-cfb";
 	list += "aes128-cbc";
+	//list += "aes128-ofb";
 	list += "aes192-ecb";
 	list += "aes192-cfb";
+	//list += "aes192-ofb";
 	list += "aes192-cbc";
 	list += "aes256-ecb";
 	list += "aes256-cfb";
@@ -478,6 +320,9 @@ public:
 	list += "blowfish-ecb";
 	list += "tripledes-ecb";
 	list += "des-ecb";
+	list += "des-cbc";
+	list += "des-cfb";
+	//list += "des-ofb";
 	list += "pbkdf2(sha1)";
 	return list;
     }
@@ -486,29 +331,33 @@ public:
     {
         // std::cout << "type: " << qPrintable(type) << std::endl; 
 	if ( type == "sha1" )
-	    return new gcryptQCAPlugin::SHA1Context( this );
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA1, this, type );
 	else if ( type == "md4" )
-	    return new gcryptQCAPlugin::MD4Context( this );
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_MD4, this, type );
 	else if ( type == "md5" )
-	    return new gcryptQCAPlugin::MD5Context( this );
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_MD5, this, type );
 	else if ( type == "ripemd160" )
-	    return new gcryptQCAPlugin::RIPEMD160Context( this );
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_RMD160, this, type );
 	else if ( type == "sha256" )
-	    return new gcryptQCAPlugin::SHA256Context( this );
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA256, this, type );
 	else if ( type == "sha384" )
-	    return new gcryptQCAPlugin::SHA384Context( this );
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA384, this, type );
 	else if ( type == "sha512" )
-	    return new gcryptQCAPlugin::SHA512Context( this );
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA512, this, type );
 	else if ( type == "aes128-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes128-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CFB, false, this, type );
 	else if ( type == "aes128-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, false, this, type );
+	else if ( type == "aes128-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "aes192-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes192-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "aes192-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "aes192-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "aes256-ecb" )
@@ -523,6 +372,12 @@ public:
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "des-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "des-cbc" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CBC, false, this, type );
+	else if ( type == "des-cfb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "des-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "pbkdf2(sha1)" )
 	    return new gcryptQCAPlugin::pbkdf2Context( GCRY_MD_SHA1, this, type );
 	else
