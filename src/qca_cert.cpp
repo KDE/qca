@@ -218,6 +218,11 @@ Certificate::Certificate()
 {
 }
 
+Certificate::Certificate(const QString &fileName)
+{
+	Q_UNUSED(fileName);
+}
+
 Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
 {
 	Q_UNUSED(opts);
@@ -308,6 +313,12 @@ QString Certificate::toPEM() const
 	return ((CertContext *)context())->toPEM();
 }
 
+bool Certificate::toPEMFile(const QString &fileName) const
+{
+	Q_UNUSED(fileName);
+	return false;
+}
+
 Certificate Certificate::fromDER(const QSecureArray &a, const QString &provider)
 {
 	Certificate c;
@@ -324,6 +335,14 @@ Certificate Certificate::fromPEM(const QString &s, const QString &provider)
 	if(cc->fromPEM(s) == CertContext::Good)
 		c.change(cc);
 	return c;
+}
+
+Certificate Certificate::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(fileName);
+	Q_UNUSED(result);
+	Q_UNUSED(provider);
+	return Certificate();
 }
 
 bool Certificate::matchesHostname(const QString &realHost) const
@@ -370,6 +389,11 @@ const Certificate & CertificateChain::primary() const
 //----------------------------------------------------------------------------
 CertificateRequest::CertificateRequest()
 {
+}
+
+CertificateRequest::CertificateRequest(const QString &fileName)
+{
+	Q_UNUSED(fileName);
 }
 
 CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
@@ -446,6 +470,12 @@ QString CertificateRequest::toPEM() const
 	return QString();
 }
 
+bool CertificateRequest::toPEMFile(const QString &fileName) const
+{
+	Q_UNUSED(fileName);
+	return false;
+}
+
 CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, const QString &provider)
 {
 	Q_UNUSED(a);
@@ -456,6 +486,14 @@ CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, const QStr
 CertificateRequest CertificateRequest::fromPEM(const QString &s, const QString &provider)
 {
 	Q_UNUSED(s);
+	Q_UNUSED(provider);
+	return CertificateRequest();
+}
+
+CertificateRequest CertificateRequest::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(fileName);
+	Q_UNUSED(result);
 	Q_UNUSED(provider);
 	return CertificateRequest();
 }

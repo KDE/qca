@@ -14,7 +14,6 @@
   expand "Cert" abbreviations?
 
 * finish API:
-  shortcuts for reading/writing certs, etc, directly to files?
   quoted-printable TextFilter
   move to qt 4
 

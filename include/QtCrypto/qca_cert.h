@@ -155,6 +155,7 @@ namespace QCA
 	{
 	public:
 		Certificate();
+		Certificate(const QString &fileName);
 		Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
 		bool isNull() const;
@@ -179,8 +180,10 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
+		bool toPEMFile(const QString &fileName) const;
 		static Certificate fromDER(const QSecureArray &a, const QString &provider = QString());
 		static Certificate fromPEM(const QString &s, const QString &provider = QString());
+		static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 		bool matchesHostname(const QString &host) const;
 
@@ -205,6 +208,7 @@ namespace QCA
 	{
 	public:
 		CertificateRequest();
+		CertificateRequest(const QString &fileName);
 		CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
 		bool isNull() const;
@@ -227,8 +231,10 @@ namespace QCA
 		// import / export - PKCS#10 only
 		QSecureArray toDER() const;
 		QString toPEM() const;
+		bool toPEMFile(const QString &fileName) const;
 		static CertificateRequest fromDER(const QSecureArray &a, const QString &provider = QString());
 		static CertificateRequest fromPEM(const QString &s, const QString &provider = QString());
+		static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 		// import / export - SPKAC only
 		QString toString() const;
