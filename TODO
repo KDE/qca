@@ -34,8 +34,6 @@
   Certificate: operator==
   cert: rfc 2818 hostname validation
   ca
-  store
-  system store: all added certs need to be flagged as trusted
   personal bundle
   tls
   sasl

@@ -47,7 +47,7 @@ Store qca_get_systemstore(const QString &provider)
 
 		Certificate cert = Certificate::fromDER(der, 0, provider);
 		if(!cert.isNull())
-			store.addCertificate(cert);
+			store.addCertificate(cert, true);
 	}
 	CFRelease(anchors);
 	return store;

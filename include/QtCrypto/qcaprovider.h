@@ -287,6 +287,14 @@ public:
 	virtual void addCertificate(const CertContext &cert, bool trusted) = 0;
 	virtual void addCRL(const CRLContext &crl) = 0;
 	virtual Validity validate(const CertContext &cert, UsageMode u) const = 0;
+	virtual QList<CertContext*> certificates() const = 0;
+	virtual QList<CRLContext*> crls() const = 0;
+	virtual void append(const StoreContext &s) = 0;
+
+	// import / export
+	virtual bool canUsePKCS7() const = 0;
+	virtual QByteArray toPKCS7() const = 0;
+	virtual ConvertResult fromPKCS7(const QByteArray &a) = 0;
 };
 
 class TLSContext : public Provider::Context

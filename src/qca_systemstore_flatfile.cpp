@@ -30,54 +30,9 @@ bool qca_have_systemstore()
 	return f.open(QFile::ReadOnly);
 }
 
-static QString readNextPem(QTextStream *ts)
-{
-	QString pem;
-	bool found = false;
-	bool done = false;
-	while(!ts->atEnd())
-	{
-		QString line = ts->readLine();
-		if(!found)
-		{
-			if(line == "-----BEGIN CERTIFICATE-----")
-			{
-				found = true;
-				pem += line + '\n';
-			}
-		}
-		else
-		{
-			pem += line + '\n';
-			if(line == "-----END CERTIFICATE-----")
-			{
-				done = true;
-				break;
-			}
-		}
-	}
-	if(!done)
-		return QString::null;
-	return pem;
-}
-
 Store qca_get_systemstore(const QString &provider)
 {
-	Store store(provider);
-	QFile f(QCA_SYSTEMSTORE_PATH);
-	if(!f.open(QFile::ReadOnly))
-		return store;
-	QTextStream ts(&f);
-	while(1)
-	{
-		QString pem = readNextPem(&ts);
-		if(pem.isNull())
-			break;
-		Certificate cert = Certificate::fromPEM(pem, 0, provider);
-		if(!cert.isNull())
-			store.addCertificate(cert);
-	}
-	return store;
+	return Store::fromFlatTextFile(QCA_SYSTEMSTORE_PATH, 0, provider);
 }
 
 }

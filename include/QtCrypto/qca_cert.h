@@ -290,19 +290,6 @@ namespace QCA
 		static CRL fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
-	class QCA_EXPORT CertificateAuthority : public Algorithm
-	{
-	public:
-		CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
-
-		Certificate certificate() const;
-
-		Certificate signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const;
-		Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
-		CRL createCRL(const QDateTime &nextUpdate) const;
-		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
-	};
-
 	class QCA_EXPORT Store : public Algorithm
 	{
 	public:
@@ -317,14 +304,27 @@ namespace QCA
 
 		// import / export
 		static bool canUsePKCS7(const QString &provider = QString());
-		QByteArray toPKCS7() const;
-		QString toFlatText() const;
-		bool fromPKCS7(const QByteArray &a);
-		bool fromFlatText(const QString &s);
+		bool toPKCS7File(const QString &fileName) const;
+		bool toFlatTextFile(const QString &fileName) const;
+		static Store fromPKCS7File(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+		static Store fromFlatTextFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 		void append(const Store &a);
 		Store operator+(const Store &a) const;
 		Store & operator+=(const Store &a);
+	};
+
+	class QCA_EXPORT CertificateAuthority : public Algorithm
+	{
+	public:
+		CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
+
+		Certificate certificate() const;
+
+		Certificate signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const;
+		Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
+		CRL createCRL(const QDateTime &nextUpdate) const;
+		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 	};
 
 	class QCA_EXPORT PersonalBundle : public Algorithm

@@ -39,13 +39,31 @@ static bool stringToFile(const QString &fileName, const QString &content)
 	return true;
 }
 
-static bool stringFromFile(const QString &fileName, QString *str)
+static bool stringFromFile(const QString &fileName, QString *s)
 {
 	QFile f(fileName);
 	if(!f.open(QFile::ReadOnly))
 		return false;
 	QTextStream ts(&f);
-	*str = ts.readAll();
+	*s = ts.readAll();
+	return true;
+}
+
+static bool arrayToFile(const QString &fileName, const QByteArray &content)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::WriteOnly))
+		return false;
+	f.write(content.data(), content.size());
+	return true;
+}
+
+static bool arrayFromFile(const QString &fileName, QByteArray *a)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::ReadOnly))
+		return false;
+	*a = f.readAll();
 	return true;
 }
 
@@ -697,6 +715,174 @@ CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provide
 }
 
 //----------------------------------------------------------------------------
+// Store
+//----------------------------------------------------------------------------
+static QString readNextPem(QTextStream *ts)
+{
+	QString pem;
+	bool found = false;
+	bool done = false;
+	while(!ts->atEnd())
+	{
+		QString line = ts->readLine();
+		if(!found)
+		{
+			if(line == "-----BEGIN CERTIFICATE-----")
+			{
+				found = true;
+				pem += line + '\n';
+			}
+		}
+		else
+		{
+			pem += line + '\n';
+			if(line == "-----END CERTIFICATE-----")
+			{
+				done = true;
+				break;
+			}
+		}
+	}
+	if(!done)
+		return QString::null;
+	return pem;
+}
+
+Store::Store(const QString &provider)
+:Algorithm("store", provider)
+{
+}
+
+void Store::addCertificate(const Certificate &cert, bool trusted)
+{
+	static_cast<StoreContext *>(context())->addCertificate(*(static_cast<const CertContext *>(cert.context())), trusted);
+}
+
+void Store::addCRL(const CRL &crl)
+{
+	static_cast<StoreContext *>(context())->addCRL(*(static_cast<const CRLContext *>(crl.context())));
+}
+
+Validity Store::validate(const Certificate &cert, UsageMode u) const
+{
+	return static_cast<const StoreContext *>(context())->validate(*(static_cast<const CertContext *>(cert.context())), u);
+}
+
+QList<Certificate> Store::certificates() const
+{
+	QList<CertContext *> in = static_cast<const StoreContext *>(context())->certificates();
+	QList<Certificate> out;
+	for(int n = 0; n < in.count(); ++n)
+	{
+		Certificate cert;
+		cert.change(in[n]);
+		out.append(cert);
+	}
+	return out;
+}
+
+QList<CRL> Store::crls() const
+{
+	QList<CRLContext *> in = static_cast<const StoreContext *>(context())->crls();
+	QList<CRL> out;
+	for(int n = 0; n < in.count(); ++n)
+	{
+		CRL crl;
+		crl.change(in[n]);
+		out.append(crl);
+	}
+	return out;
+}
+
+bool Store::canUsePKCS7(const QString &provider)
+{
+	StoreContext *c = static_cast<StoreContext *>(getContext("store", provider));
+	bool ok = c->canUsePKCS7();
+	delete c;
+	return ok;
+}
+
+bool Store::toPKCS7File(const QString &fileName) const
+{
+	return arrayToFile(fileName, static_cast<const StoreContext *>(context())->toPKCS7());
+}
+
+bool Store::toFlatTextFile(const QString &fileName) const
+{
+	QFile f(fileName);
+	if(!f.open(QFile::WriteOnly))
+		return false;
+
+	QList<CertContext *> in = static_cast<const StoreContext *>(context())->certificates();
+	QTextStream ts(&f);
+	for(int n = 0; n < in.count(); ++n)
+		ts << in[n]->toPEM();
+	return true;
+}
+
+Store Store::fromPKCS7File(const QString &fileName, ConvertResult *result, const QString &provider)
+{
+	QByteArray der;
+	if(!arrayFromFile(fileName, &der))
+	{
+		if(result)
+			*result = ErrorFile;
+		return Store();
+	}
+
+	Store store;
+	StoreContext *c = static_cast<StoreContext *>(getContext("store", provider));
+	ConvertResult r = c->fromPKCS7(der);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+		store.change(c);
+	return store;
+}
+
+Store Store::fromFlatTextFile(const QString &fileName, ConvertResult *result, const QString &provider)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::ReadOnly))
+	{
+		if(result)
+			*result = ErrorFile;
+		return Store();
+	}
+
+	Store store;
+	QTextStream ts(&f);
+	while(1)
+	{
+		QString pem = readNextPem(&ts);
+		if(pem.isNull())
+			break;
+		Certificate cert = Certificate::fromPEM(pem, 0, provider);
+		if(!cert.isNull())
+			store.addCertificate(cert, true);
+	}
+	return store;
+}
+
+void Store::append(const Store &a)
+{
+	static_cast<StoreContext *>(context())->append(*(static_cast<const StoreContext *>(a.context())));
+}
+
+Store Store::operator+(const Store &a) const
+{
+	Store s = *this;
+	s.append(a);
+	return s;
+}
+
+Store & Store::operator+=(const Store &a)
+{
+	append(a);
+	return *this;
+}
+
+//----------------------------------------------------------------------------
 // CertificateAuthority
 //----------------------------------------------------------------------------
 CertificateAuthority::CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider)
@@ -730,85 +916,6 @@ CRL CertificateAuthority::updateCRL(const CRL &crl, const QList<CRLEntry> &entri
 	Q_UNUSED(entries);
 	Q_UNUSED(nextUpdate);
 	return CRL();
-}
-
-//----------------------------------------------------------------------------
-// Store
-//----------------------------------------------------------------------------
-Store::Store(const QString &provider)
-:Algorithm("store", provider)
-{
-}
-
-void Store::addCertificate(const Certificate &cert, bool trusted)
-{
-	((StoreContext *)context())->addCertificate(*((CertContext *)cert.context()), trusted);
-}
-
-void Store::addCRL(const CRL &crl)
-{
-	((StoreContext *)context())->addCRL(*((CRLContext *)crl.context()));
-}
-
-Validity Store::validate(const Certificate &cert, UsageMode u) const
-{
-	return ((StoreContext *)context())->validate(*((CertContext *)cert.context()), u);
-}
-
-QList<Certificate> Store::certificates() const
-{
-	return QList<Certificate>();
-}
-
-QList<CRL> Store::crls() const
-{
-	return QList<CRL>();
-}
-
-bool Store::canUsePKCS7(const QString &provider)
-{
-	Q_UNUSED(provider);
-	return false;
-}
-
-QByteArray Store::toPKCS7() const
-{
-	return QByteArray();
-}
-
-QString Store::toFlatText() const
-{
-	return QString();
-}
-
-bool Store::fromPKCS7(const QByteArray &a)
-{
-	Q_UNUSED(a);
-	return false;
-}
-
-bool Store::fromFlatText(const QString &s)
-{
-	Q_UNUSED(s);
-	return false;
-}
-
-void Store::append(const Store &a)
-{
-	Q_UNUSED(a);
-}
-
-Store Store::operator+(const Store &a) const
-{
-	Store s = *this;
-	s.append(a);
-	return s;
-}
-
-Store & Store::operator+=(const Store &a)
-{
-	append(a);
-	return *this;
 }
 
 //----------------------------------------------------------------------------
