@@ -68,22 +68,25 @@ class QCA_CertContext;
  * \mainpage Qt Cryptographic Architecture
  *
  * This library provides an easy API for the following features:
- *   - SSL/TLS
- *   - X509 certificate (Cert)
- *   - Simple Authentication and Security Layer (SASL)
- *   - RSA
+ *   - Secure byte arrays (QSecureArray)
+ *   - Arbitrary precision integers (QBigInteger)
+ *   - Random number generation (QCA::Random)
+ *   - SSL/TLS (TBC)
+ *   - X509 certificate (Cert) (TBC)
+ *   - Simple Authentication and Security Layer (SASL) (TBC)
+ *   - RSA (TBC)
  *   - Hashing 
- *       - SHA0
- *       - SHA1
- *       - MD2
- *       - MD4
- *       - MD5
- *       - RIPEMD160
- *   - Ciphers
+ *       - QCA::SHA0
+ *       - QCA::SHA1
+ *       - QCA::MD2
+ *       - QCA::MD4
+ *       - QCA::MD5
+ *       - QCA::RIPEMD160
+ *   - Ciphers (TBC)
  *       - BlowFish
  *       - TripleDES
  *       - AES (AES128, AES256)
- *   - Keyed Hash Message Authentication Code (HMAC)
+ *   - Keyed Hash Message Authentication Code (QCA::HMAC)
  *       - SHA1
  *       - MD5
  *       - RIPEMD160
@@ -634,10 +637,25 @@ namespace QCA
 		CRLSigning      = 0x20
 	};
 
+	/**
+	 * Initialise QCA
+	 */
 	QCA_EXPORT void init();
+	/**
+	 * \overload
+	 *
+	 * \param m the MemoryMode to use
+	 * \param prealloc the amount of memory in bytes to allocate
+	 *                 for secure storage
+	 */
 	QCA_EXPORT void init(MemoryMode m, int prealloc);
 
 	QCA_EXPORT void deinit();
+	/**
+	 * Test if secure storage memory is available
+	 *
+	 * \return true if secure storage memory is available
+	 */ 
 	QCA_EXPORT bool haveSecureMemory();
 
 	/**
@@ -722,6 +740,13 @@ namespace QCA
 	QCA_EXPORT void unloadAllPlugins();
 
 	QCA_EXPORT Random & globalRNG();
+	/**
+	 * Change the global random generation provider
+	 *
+	 * The Random capabilities of %QCA are provided as part of the
+	 * built in capabilities, however the generator can be changed
+	 * if required.
+	 */
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
 	/**
@@ -781,7 +806,7 @@ namespace QCA
 	};
 
 	/**
-	 * Key length
+	 * Simple container for acceptable key lengths
 	 *
 	 * The KeyLength specifies the minimum and maximum byte sizes
 	 * allowed for a key, as well as a "multiple" which the key
@@ -791,6 +816,13 @@ namespace QCA
 	 * express this as 
 	 * \code
 	 * KeyLength keyLen( 4, 12, 4 );
+	 * \endcode
+	 * 
+	 * If you want to express a KeyLength that takes any number
+	 * of bytes (including zero), you may want to use
+	 * \code
+	 * #include<limits>
+	 * KeyLength( 0, std::numeric_limits<int>::max(), 1 );
 	 * \endcode
 	 */
 	class QCA_EXPORT KeyLength
@@ -804,7 +836,9 @@ namespace QCA
 		 * \param multiple the number of bytes that the key must be a 
 		 * multiple of.
 		 */
-		KeyLength(int min, int max, int multiple) { _min = min, _max = max, _multiple = multiple; }
+		KeyLength(int min, int max, int multiple)
+			: _min( min ), _max(max), _multiple( multiple )
+		{ }
 		/**
 		 * Obtain the minimum length for the key, in bytes
 		 */
@@ -824,7 +858,7 @@ namespace QCA
 		int multiple() const { return _multiple; }
 
 	private:
-		int _min, _max, _multiple;
+		int const _min, _max, _multiple;
 	};
 
 	class QCA_EXPORT Provider
@@ -927,9 +961,6 @@ namespace QCA
 		bool _ok;
 	};
 
-	/**
-	 * Generic superclass for algorithms
-	 */
 	class QCA_EXPORT Algorithm
 	{
 	public:
@@ -954,17 +985,61 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	 * Source of random numbers
+	 */
 	class QCA_EXPORT Random : public Algorithm
 	{
 	public:
+		/**
+		 * How much entropy to use for the random numbers that
+		 * are required.
+		 */
 		enum Quality { Nonce, PublicValue, SessionKey, LongTermKey };
+
+		/**
+		 * Standard Constructor
+		 *
+		 * \param provider the provider library for the random
+		 *                 number generation
+		 */ 
 		Random(const QString &provider = "");
 
+		/**
+		 * Provide a random byte
+		 * 
+		 * \param q the quality of the random byte that is required
+		 */
 		uchar nextByte(Quality q = SessionKey);
+
+		/**
+		 * Provide a specified number of random bytes
+		 * 
+		 * \param size the number of bytes to provide
+		 * \param q the quality of the random bytes that are required
+		 */
 		QSecureArray nextBytes(int size, Quality q = SessionKey);
 
+		/**
+		 * Provide a random character
+		 * 
+		 * \param q the quality of the random character that is required
+		 */
 		static uchar randomChar(Quality q = SessionKey);
+
+		/**
+		 * Provide a random integer
+		 * 
+		 * \param q the quality of the random integer that is required
+		 */
 		static uint randomInt(Quality q = SessionKey);
+
+		/**
+		 * Provide a specified number of random bytes
+		 * 
+		 * \param size the number of bytes to provide
+		 * \param q the quality of the random bytes that are required
+		 */
 		static QSecureArray randomArray(int size, Quality q = SessionKey);
 	};
 
@@ -974,9 +1049,33 @@ namespace QCA
 	class QCA_EXPORT SymmetricKey : public QSecureArray
 	{
 	public:
+		/**
+		 * Construct an empty (zero length) key
+		 */
 		SymmetricKey();
+
+		/**
+		 * Construct an key of specified size, with random contents
+		 *
+		 * This is intended to be used as a random session key.
+		 *
+		 * \param size the number of bytes for the key
+		 *
+		 */
 		SymmetricKey(int size);
+
+		/**
+		 * Construct a key from a provided byte array
+		 *
+		 * \param a the byte array to copy
+		 */
 		SymmetricKey(const QSecureArray &a);
+
+		/**
+		 * Assignment operator
+		 */
+		SymmetricKey & operator=(const QSecureArray &a);
+
 		SymmetricKey(const QCString &cs);
 	};
 
@@ -1156,7 +1255,17 @@ namespace QCA
 		~Cipher();
 		Cipher & operator=(const Cipher &from);
 
+		/**
+		 * Return acceptable key lengths
+		 */
 		KeyLength keyLength() const;
+
+		/**
+		 * Test if a key length is valid for the MAC algorithm
+		 *
+		 * \param n the key length in bytes
+		 * \return true if the key would be valid for the current algorithm
+		 */
 		bool validKeyLength(int n) const;
 
 		int blockSize() const;
@@ -1190,13 +1299,28 @@ namespace QCA
 	class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
 	{
 	public:
+		/**
+		 * Standard copy constructor
+		 */
 		MessageAuthenticationCode(const MessageAuthenticationCode &from);
+
 		~MessageAuthenticationCode();
+
 		MessageAuthenticationCode & operator=(const MessageAuthenticationCode &from);
 
+		/**
+		 * Return acceptable key lengths
+		 */
 		KeyLength keyLength() const;
-		bool validKeyLength(int n) const;
 
+		/**
+		 * Test if a key length is valid for the MAC algorithm
+		 *
+		 * \param n the key length in bytes
+		 * \return true if the key would be valid for the current algorithm
+		 */
+		bool validKeyLength(int n) const;
+		
 		/**
 		 * Reset a MessageAuthenticationCode, dumping all
 		 * previous parts of the message.
@@ -1205,7 +1329,9 @@ namespace QCA
 		 * effectively undoing any previous update()
 		 * calls. You should use this call if you are re-using
 		 * a %MessageAuthenticationCode sub-class object
-		 * to calculate additional MACs.
+		 * to calculate additional MACs. Note that if the key
+		 * doesn't need to be changed, you don't need to call
+		 * setup() again, since the key can just be reused.
 		 */
 		virtual void clear();
 
@@ -1238,9 +1364,30 @@ namespace QCA
 		 */
 		void setup(const SymmetricKey &key);
 
+		/**
+		 * Construct the name of the algorithm
+		 *
+		 * You can use this to build a standard name string.
+		 * You probably only need this method if you are 
+		 * creating a new subclass.
+		 */
 		static QString withAlgorithm(const QString &macType, const QString &algType);
 
 	protected:
+		/**
+		 * Special constructor for subclass initialisation
+		 *
+		 * To create HMAC with a default algorithm of "sha1", you would use something like:
+		 * \code
+		 * HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = "")
+		 * : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider)
+		 * {
+		 * }
+		 * \endcode
+		 *
+		 * \note The HMAC subclass is already provided in QCA - you don't need to create
+		 * your own.
+		 */
 		MessageAuthenticationCode(const QString &type, const SymmetricKey &key, const QString &provider);
 
 	private:
@@ -1367,6 +1514,17 @@ namespace QCA
 	class QCA_EXPORT SHA256 : public Hash
 	{
 	public:
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a SHA256 hash,
+		 * although if you have the whole message in memory at
+		 * one time, you may be better off using
+		 * QCA::RIPEMD160().hash()
+		 *
+		 * \param provider specify a particular provider 
+		 * to use.
+		 */
 		SHA256(const QString &provider = "") : Hash("sha256", provider) {}
 	};
 
@@ -1566,12 +1724,48 @@ namespace QCA
 	 * such a way that the authentication code shows that the 
 	 * message has not be altered.
 	 *
+	 * As an example, to create a MAC using HMAC with SHA1, you
+	 * could do the following:
+	 * \code
+	 * if( QCA::isSupported( "hmac(sha1)" ) ) {
+	 *      QCA::HMAC hmacObj; // don't need to specify, "sha1" is default
+	 *	hmacObj.setup( key ); // key is a QCA::SymmetricKey, set elsewhere
+	 *                            // could also be done in constructor
+	 *    	hmacObj.update( dataArray ); // dataArray is a QSecureArray, set elsewhere
+	 *	output = hmacObj.final();
+	 * }
+	 * \endcode
+	 *
+	 * Note that if your application is potentially susceptable to "replay attacks"
+	 * where the message is sent more than once, you should include a counter in
+	 * the message that is covered by the MAC, and check that the counter is always
+	 * incremented every time you recieve a message and MAC.
+	 *
 	 * For more information, see H. Krawczyk et al. RFC2104 
 	 * "HMAC: Keyed-Hashing for Message Authentication"
 	 */
 	class QCA_EXPORT HMAC : public MessageAuthenticationCode
 	{
 	public:
+		/**
+		 * %HMAC constructor
+		 *
+		 * To create a simple HMAC object
+		 * \param hash the type of the hash (eg "sha1", "md5" or "ripemd160" )
+		 * \param key the key to use for the HMAC algorithm.
+		 * \param provider the name of the provider to use (eg "qca-openssl")
+		 *
+		 * To construct a keyed-hash message authentication code object, you
+		 * can do one of the following variations.
+		 * \code
+		 * QCA::HMAC sha1HMAC; // defaults to SHA1
+		 * QCA::HMAC sha1HMAC( "sha1" ); // explicitly SHA1, but same as above
+		 * QCA::HMAC md5HMAC( "md5" );  // MD5 algorithm
+		 * QCA::HMAC sha1HMAC( "sha1", key ); // key is a QCA::SymmetricKey
+		 * // next line uses RIPEMD160, empty key, implementation from qca-openssl provider
+		 * QCA::HMAC ripemd160HMAC( "ripemd160", QCA::SymmetricKey(), "qca-openssl" );
+		 * \endcode
+		 */
 		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = "") : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
 	};
 
