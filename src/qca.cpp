@@ -270,9 +270,10 @@ Provider::Context *getContext(const QString &type, const QString &provider)
 	{
 		// try using some other provider
 		p = manager->findFor(QString::null, type);
-		if(!p && !scanned)
+		if((!p || p->name() == "default") && !scanned)
 		{
 			// maybe there are new providers, so scan and try again
+			//   before giving up or using default
 			manager->scan();
 			scanned = true;
 			p = manager->findFor(QString::null, type);
