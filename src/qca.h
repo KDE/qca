@@ -4,9 +4,8 @@
 #include<qstring.h>
 #include<qcstring.h>
 
-struct QCA_SHA1Functions;
-struct QCA_MD5Functions;
-struct QCA_TripleDESFunctions;
+struct QCA_HashFunctions;
+struct QCA_CipherFunctions;
 
 namespace QCA
 {
@@ -34,12 +33,20 @@ namespace QCA
 	class Hash
 	{
 	public:
-		Hash();
-		virtual ~Hash();
+		Hash(const Hash &);
+		Hash & operator=(const Hash &);
+		~Hash();
 
-		virtual void clear()=0;
-		virtual void update(const QByteArray &a)=0;
-		virtual QByteArray final()=0;
+		void clear();
+		void update(const QByteArray &a);
+		QByteArray final();
+
+	protected:
+		Hash(QCA_HashFunctions *);
+
+	private:
+		class Private;
+		Private *d;
 	};
 
 	template <class T>
@@ -76,108 +83,78 @@ namespace QCA
 	class Cipher
 	{
 	public:
-		Cipher();
-		virtual ~Cipher();
+		Cipher(const Cipher &);
+		Cipher & operator=(const Cipher &);
+		~Cipher();
 
-		QByteArray key() const;
-		QByteArray iv() const;
-		void setKey(const QByteArray &a);
-		void setIV(const QByteArray &a);
+		QByteArray dyn_generateKey() const;
+		QByteArray dyn_generateIV() const;
+		void reset(int dir, const QByteArray &key, const QByteArray &iv);
+		void update(const QByteArray &a);
+		QByteArray final();
 
-		virtual uint blockSize() const=0;
-		virtual uint keySize() const=0;
-		virtual void clear()=0;
-		virtual void update(const QByteArray &a)=0;
-		virtual QByteArray final()=0;
-
-		//virtual QByteArray encrypt(const QByteArray &in, const QByteArray &iv=QByteArray())=0;
-		//virtual QByteArray decrypt(const QByteArray &in, const QByteArray &iv=QByteArray())=0;
-
-		//bool encrypt(const QByteArray &in, QByteArray *out);
-		//bool decrypt(const QByteArray &in, QByteArray *out);
+	protected:
+		Cipher(QCA_CipherFunctions *, int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
 
 	private:
-		QByteArray v_key, v_iv;
+		class Private;
+		Private *d;
+	};
+
+	template <class T>
+	class CipherStatic
+	{
+	public:
+		CipherStatic<T>() {}
+
+		static QByteArray generateKey()
+		{
+			T obj;
+			return obj.dyn_generateKey();
+		}
+
+		static QByteArray generateIV()
+		{
+			T obj;
+			return obj.dyn_generateKey();
+		}
 	};
 
 	class SHA1 : public Hash, public HashStatic<SHA1>
 	{
 	public:
 		SHA1();
-		~SHA1();
-
-		void clear();
-		void update(const QByteArray &a);
-		QByteArray final();
-
-	private:
-		struct QCA_SHA1Functions *f;
-		int ctx;
 	};
 
 	class SHA256 : public Hash, public HashStatic<SHA256>
 	{
 	public:
 		SHA256();
-		~SHA256();
-
-		void clear();
-		void update(const QByteArray &a);
-		QByteArray final();
 	};
 
 	class MD5 : public Hash, public HashStatic<MD5>
 	{
 	public:
 		MD5();
-		~MD5();
-
-		void clear();
-		void update(const QByteArray &a);
-		QByteArray final();
-
-	private:
-		struct QCA_MD5Functions *f;
-		int ctx;
 	};
 
-	class TripleDES : public Cipher
+	class TripleDES : public Cipher, public CipherStatic<TripleDES>
 	{
 	public:
-		TripleDES(int dir, const QByteArray &key=QByteArray());
-		~TripleDES();
-
-		uint blockSize() const;
-		uint keySize() const;
-		void clear();
-		void update(const QByteArray &a);
-		QByteArray final();
-
-	private:
-		struct QCA_TripleDESFunctions *f;
-		int ctx;
-		int v_dir;
+		TripleDES(int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
 	};
 
-	/*class AES128 : public Cipher
+	class AES128 : public Cipher, public CipherStatic<AES128>
 	{
 	public:
-		AES128();
-		~AES128();
-
-		bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true);
-		bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true);
+		AES128(int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
 	};
 
-	class AES256 : public Cipher
+	class AES256 : public Cipher, public CipherStatic<AES128>
 	{
 	public:
-		AES256();
-		~AES256();
-
-		bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true);
-		bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true);
-	};*/
+		AES256(int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+	};
 };
 
 #endif

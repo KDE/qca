@@ -1,0 +1,16 @@
+Qt Cryptographic Architecture
+-----------------------------
+
+This library provides a skeleton API for the following features:
+
+  Hashing (SHA1, MD5)
+  Ciphers (3DES, AES)
+  X509
+  SSL/TLS
+  SASL
+
+Your application will compile and link in all cases, regardless of
+whether or not the installed QCA actually supports the features you
+need.  Functionality is provided via plugins, which are loaded
+automatically.
+

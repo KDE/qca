@@ -13,11 +13,8 @@ int main(int argc, char **argv)
 		printf("TripleDES not supported!\n");
 	else {
 		// encrypt
-		QCA::TripleDES c(QCA::Encrypt);
-		QByteArray key(c.keySize());
-		for(uint n = 0; n < key.size(); ++n)
-			key[n] = (uchar)n;
-		c.setKey(key);
+		QByteArray key = QCA::TripleDES::generateKey();
+		QCA::TripleDES c(QCA::Encrypt, key);
 		c.update(cstringToArray(cs));
 		QByteArray f = c.final();
 		QString result = QCA::arrayToHex(f);
@@ -28,6 +25,24 @@ int main(int argc, char **argv)
 		d.update(f);
 		QCString dec = arrayToCString(d.final());
 		printf("<3des(\"%s\") = [%s]\n", result.latin1(), dec.data());
+	}
+
+	if(!QCA::isSupported(QCA::CAP_AES128))
+		printf("AES128 not supported!\n");
+	else {
+		// encrypt
+		QByteArray key = QCA::AES128::generateKey();
+		QCA::AES128 c(QCA::Encrypt, key);
+		c.update(cstringToArray(cs));
+		QByteArray f = c.final();
+		QString result = QCA::arrayToHex(f);
+		printf(">aes128(\"%s\") = [%s]\n", cs.data(), result.latin1());
+
+		// decrypt
+		QCA::AES128 d(QCA::Decrypt, key);
+		d.update(f);
+		QCString dec = arrayToCString(d.final());
+		printf("<aes128(\"%s\") = [%s]\n", result.latin1(), dec.data());
 	}
 
 	return 0;

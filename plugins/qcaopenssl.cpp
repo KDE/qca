@@ -16,11 +16,13 @@ static int sha1_create();
 static void sha1_destroy(int ctx);
 static void sha1_update(int ctx, const char *in, unsigned int len);
 static void sha1_final(int ctx, char *out);
+static unsigned int sha1_finalSize(int ctx);
 
 static int md5_create();
 static void md5_destroy(int ctx);
 static void md5_update(int ctx, const char *in, unsigned int len);
 static void md5_final(int ctx, char *out);
+static unsigned int md5_finalSize(int ctx);
 
 static int tdes_create();
 static void tdes_destroy(int ctx);
@@ -124,23 +126,25 @@ int _QCAOpenSSL::capabilities() const
 void *_QCAOpenSSL::functions(int cap)
 {
 	if(cap == QCA::CAP_SHA1) {
-		QCA_SHA1Functions *f = new QCA_SHA1Functions;
+		QCA_HashFunctions *f = new QCA_HashFunctions;
 		f->create = sha1_create;
 		f->destroy = sha1_destroy;
 		f->update = sha1_update;
 		f->final = sha1_final;
+		f->finalSize = sha1_finalSize;
 		return f;
 	}
 	else if(cap == QCA::CAP_MD5) {
-		QCA_MD5Functions *f = new QCA_MD5Functions;
+		QCA_HashFunctions *f = new QCA_HashFunctions;
 		f->create = md5_create;
 		f->destroy = md5_destroy;
 		f->update = md5_update;
 		f->final = md5_final;
+		f->finalSize = md5_finalSize;
 		return f;
 	}
 	else if(cap == QCA::CAP_TripleDES) {
-		QCA_TripleDESFunctions *f = new QCA_TripleDESFunctions;
+		QCA_CipherFunctions *f = new QCA_CipherFunctions;
 		f->create = tdes_create;
 		f->destroy = tdes_destroy;
 		f->setup = tdes_setup;
@@ -179,6 +183,11 @@ void sha1_final(int ctx, char *out)
 	SHA1_Final((unsigned char *)out, &i->c);
 }
 
+unsigned int sha1_finalSize(int)
+{
+	return 20;
+}
+
 int md5_create()
 {
 	pair_md5 *i = new pair_md5;
@@ -204,6 +213,11 @@ void md5_final(int ctx, char *out)
 {
 	pair_md5 *i = find_md5(ctx);
 	MD5_Final((unsigned char *)out, &i->c);
+}
+
+unsigned int md5_finalSize(int)
+{
+	return 16;
 }
 
 int tdes_create()

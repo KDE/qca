@@ -110,254 +110,206 @@ static void *getFunctions(int cap)
 //----------------------------------------------------------------------------
 // Hash
 //----------------------------------------------------------------------------
-Hash::Hash()
+class Hash::Private
 {
+public:
+	Private(QCA_HashFunctions *_f)
+	{
+		f = _f;
+		ctx = f->create();
+	}
+
+	~Private()
+	{
+		f->destroy(ctx);
+	}
+
+	void reset()
+	{
+		f->destroy(ctx);
+		ctx = f->create();
+	}
+
+	QCA_HashFunctions *f;
+	int ctx;
+};
+
+Hash::Hash(QCA_HashFunctions *f)
+{
+	d = new Private(f);
+}
+
+Hash::Hash(const Hash &from)
+{
+	d = new Private(from.d->f);
+	*this = from;
+}
+
+Hash & Hash::operator=(const Hash &)
+{
+	clear();
+	return *this;
 }
 
 Hash::~Hash()
 {
+	delete d;
+}
+
+void Hash::clear()
+{
+	d->reset();
+}
+
+void Hash::update(const QByteArray &a)
+{
+	d->f->update(d->ctx, a.data(), a.size());
+}
+
+QByteArray Hash::final()
+{
+	QByteArray buf(d->f->finalSize(d->ctx));
+	d->f->final(d->ctx, buf.data());
+	return buf;
 }
 
 
 //----------------------------------------------------------------------------
 // Cipher
 //----------------------------------------------------------------------------
-Cipher::Cipher()
+class Cipher::Private
 {
+public:
+	Private(QCA_CipherFunctions *_f)
+	{
+		f = _f;
+		ctx = f->create();
+	}
+
+	~Private()
+	{
+		f->destroy(ctx);
+	}
+
+	void reset()
+	{
+		f->destroy(ctx);
+		ctx = f->create();
+		dir = Encrypt;
+		key.resize(0);
+		iv.resize(0);
+	}
+
+	QCA_CipherFunctions *f;
+	int ctx;
+	int dir;
+	QByteArray key, iv;
+};
+
+Cipher::Cipher(QCA_CipherFunctions *f, int dir, const QByteArray &key, const QByteArray &iv)
+{
+	d = new Private(f);
+	reset(dir, key, iv);
+}
+
+Cipher::Cipher(const Cipher &from)
+{
+	d = new Private(from.d->f);
+	*this = from;
+}
+
+Cipher & Cipher::operator=(const Cipher &from)
+{
+	reset(from.d->dir, from.d->key, from.d->iv);
+	return *this;
 }
 
 Cipher::~Cipher()
 {
+	delete d;
 }
 
-QByteArray Cipher::key() const
+QByteArray Cipher::dyn_generateKey() const
 {
-	return v_key.copy();
+	return QByteArray(24);
 }
 
-QByteArray Cipher::iv() const
+QByteArray Cipher::dyn_generateIV() const
 {
-	return v_iv.copy();
+	return QByteArray(8);
 }
 
-void Cipher::setKey(const QByteArray &a)
+void Cipher::reset(int dir, const QByteArray &key, const QByteArray &iv)
 {
-	v_key = a.copy();
+	d->reset();
+	d->dir = dir;
+	d->key = key.copy();
+	d->iv = iv.copy();
 }
 
-void Cipher::setIV(const QByteArray &a)
+void Cipher::update(const QByteArray &a)
 {
-	v_iv = a.copy();
+	d->f->setup(d->ctx, d->dir, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data());
+	d->f->update(d->ctx, a.data(), a.size());
 }
 
-/*bool Cipher::encrypt(const QByteArray &in, QByteArray *out)
+QByteArray Cipher::final()
 {
-	return false;
+	QByteArray buf(d->f->finalSize(d->ctx));
+	d->f->final(d->ctx, buf.data());
+	return buf;
 }
-
-bool Cipher::decrypt(const QByteArray &in, QByteArray *out)
-{
-	return false;
-}*/
 
 
 //----------------------------------------------------------------------------
 // SHA1
 //----------------------------------------------------------------------------
 SHA1::SHA1()
+:Hash((QCA_HashFunctions *)getFunctions(CAP_SHA1))
 {
-	f = (QCA_SHA1Functions *)getFunctions(CAP_SHA1);
-	ctx = f->create();
 }
 
-SHA1::~SHA1()
-{
-	f->destroy(ctx);
-}
 
-void SHA1::clear()
-{
-	f->destroy(ctx);
-	ctx = f->create();
-}
-
-void SHA1::update(const QByteArray &a)
-{
-	f->update(ctx, a.data(), a.size());
-}
-
-QByteArray SHA1::final()
-{
-	QByteArray buf(20);
-	f->final(ctx, buf.data());
-	return buf;
-}
-
-/*
 //----------------------------------------------------------------------------
 // SHA256
 //----------------------------------------------------------------------------
 SHA256::SHA256()
+:Hash((QCA_HashFunctions *)getFunctions(CAP_SHA256))
 {
 }
-
-SHA256::~SHA256()
-{
-}
-
-void SHA256::clear()
-{
-}
-
-void SHA256::update(const QByteArray &a)
-{
-}
-
-QByteArray SHA256::final()
-{
-	return QByteArray();
-}*/
 
 
 //----------------------------------------------------------------------------
 // MD5
 //----------------------------------------------------------------------------
 MD5::MD5()
+:Hash((QCA_HashFunctions *)getFunctions(CAP_MD5))
 {
-	f = (QCA_MD5Functions *)getFunctions(CAP_MD5);
-	ctx = f->create();
-}
-
-MD5::~MD5()
-{
-	f->destroy(ctx);
-}
-
-void MD5::clear()
-{
-	f->destroy(ctx);
-	ctx = f->create();
-}
-
-void MD5::update(const QByteArray &a)
-{
-	f->update(ctx, a.data(), a.size());
-}
-
-QByteArray MD5::final()
-{
-	QByteArray buf(16);
-	f->final(ctx, buf.data());
-	return buf;
 }
 
 
 //----------------------------------------------------------------------------
 // TripleDES
 //----------------------------------------------------------------------------
-TripleDES::TripleDES(int dir, const QByteArray &key)
+TripleDES::TripleDES(int dir, const QByteArray &key, const QByteArray &iv)
+:Cipher((QCA_CipherFunctions *)getFunctions(CAP_TripleDES), dir, key, iv)
 {
-	f = (QCA_TripleDESFunctions *)getFunctions(CAP_TripleDES);
-	ctx = f->create();
-	v_dir = dir;
-	if(!key.isEmpty())
-		setKey(key);
 }
 
-TripleDES::~TripleDES()
-{
-	f->destroy(ctx);
-}
 
-uint TripleDES::blockSize() const
-{
-	return 8;
-}
-
-uint TripleDES::keySize() const
-{
-	return 24;
-}
-
-void TripleDES::clear()
-{
-	f->destroy(ctx);
-	setKey(QByteArray(0));
-	setIV(QByteArray(0));
-	ctx = f->create();
-}
-
-void TripleDES::update(const QByteArray &a)
-{
-	QByteArray i = iv();
-	f->setup(ctx, v_dir, key().data(), i.isEmpty() ? 0 : i.data());
-	f->update(ctx, a.data(), a.size());
-}
-
-QByteArray TripleDES::final()
-{
-	QByteArray buf(f->finalSize(ctx));
-	f->final(ctx, buf.data());
-	return buf;
-}
-
-/*QByteArray TripleDES::encryptBlock(const QByteArray &in)
-{
-	QByteArray result(blockSize());
-	f->encryptBlock(in.data(), result.data());
-	return result;
-}
-
-QByteArray TripleDES::decryptBlock(const QByteArray &in)
-{
-	QByteArray result(blockSize());
-	f->decryptBlock(in.data(), result.data());
-	return result;
-}*/
-
-
-/*
 //----------------------------------------------------------------------------
 // AES128
 //----------------------------------------------------------------------------
-AES128::AES128()
+AES128::AES128(int dir, const QByteArray &key, const QByteArray &iv)
+:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES128), dir, key, iv)
 {
-}
-
-AES128::~AES128()
-{
-}
-
-bool AES128::encrypt(const QByteArray &in, QByteArray *out, bool pad)
-{
-	return false;
-}
-
-bool AES128::decrypt(const QByteArray &in, QByteArray *out, bool pad)
-{
-	return false;
 }
 
 
 //----------------------------------------------------------------------------
 // AES256
 //----------------------------------------------------------------------------
-AES256::AES256()
+AES256::AES256(int dir, const QByteArray &key, const QByteArray &iv)
+:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES256), dir, key, iv)
 {
 }
-
-AES256::~AES256()
-{
-}
-
-bool AES256::encrypt(const QByteArray &in, QByteArray *out, bool pad)
-{
-	return false;
-}
-
-bool AES256::decrypt(const QByteArray &in, QByteArray *out, bool pad)
-{
-	return false;
-}
-*/
-

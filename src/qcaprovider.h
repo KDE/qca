@@ -20,23 +20,16 @@ public:
 	virtual void *functions(int cap)=0;
 };
 
-struct QCA_SHA1Functions
+struct QCA_HashFunctions
 {
 	int (*create)();
 	void (*destroy)(int ctx);
 	void (*update)(int ctx, const char *in, unsigned int len);
-	void (*final)(int ctx, char *out); // 20 bytes output
+	void (*final)(int ctx, char *out);
+	unsigned int (*finalSize)(int ctx);
 };
 
-struct QCA_MD5Functions
-{
-	int (*create)();
-	void (*destroy)(int ctx);
-	void (*update)(int ctx, const char *in, unsigned int len);
-	void (*final)(int ctx, char *out); // 16 bytes output
-};
-
-struct QCA_TripleDESFunctions
+struct QCA_CipherFunctions
 {
 	int (*create)();
 	void (*destroy)(int ctx);
