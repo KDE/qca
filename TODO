@@ -19,9 +19,13 @@
   store: ability to combine stores, iterate over certs?
   openpgp: be sure to support key expiration and validity
   shortcuts for reading/writing certs, etc, directly to files?
-  cert: version
   cert: extensions
   many functions that take provider names have an extra space at the end
+  tls: session reuse
+  cert/csr/crl: path limit, subject/issuer ids (useful for create/validate)
+  cert/csr: constraints, ex_constraints, policies (same as above)
+  cert/csr: subjectAltName
+  crl: issuer info, authority_key_id
 
 * finish code for APIs:
   cipher - needs to handling padding
@@ -52,24 +56,12 @@
 * consider new APIs:
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
-  padding - a way to do any possible padding approach, so advanced users
-            can turn off the default padding scheme, and pass in a 
-            pre-padded last block.
-  Key wrapping - RFC3217 and RFC3394
-  Password based key derivation functions - RFC2898
-  pkey: ability to choose cipher for toDER/PEM passphrase ?
-    - botan doesn't seem to allow this, but kiko wanted it...
-    - jack looking into it
-  cert/csr/crl: path limit, subject/issuer ids (useful for create/validate)
-  cert/csr: constraints, ex_constraints, policies (same as above)
-  cert/csr: subjectAltName
-  cert/pkey: fingerprints (is there a standard for this?)
-  crl: issuer info, authority_key_id
+  advanced pgp functionality (full key info and ability to manipulate keyrings)
   quoted-printable TextFilter?
+  Key wrapping - RFC3217 and RFC3394
+  cert/pkey: fingerprints (is there a standard for this?)
   rsa: toSPKAC (kiko)
-  tls: enable_session_cache = false (kiko)
-  pgp: provide more key info (bits, trust values, photo)
-  pgp: ability to manipulate keyrings? (create, add, delete, sign)
+  pkey: ability to choose cipher for toDER/PEM passphrase?
   personalbundle: cert chain vs cert + trusted certs?
 
 * build system:
