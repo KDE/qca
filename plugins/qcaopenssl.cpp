@@ -3,6 +3,13 @@
 #include<qptrlist.h>
 #include<openssl/sha.h>
 
+#ifdef QCA_PLUGIN
+QCAProvider *createProvider()
+{
+	return (new _QCAOpenSSL);
+}
+#endif
+
 static int sha1_create();
 static void sha1_destroy(int ctx);
 static void sha1_update(int ctx, const char *in, unsigned int len);

@@ -1,7 +1,14 @@
 #ifndef QCAPROVIDER_H
 #define QCAPROVIDER_H
 
+#include<qglobal.h>
 #include"qca.h"
+
+#ifdef Q_WS_WIN
+#define QCA_EXPORT extern "C" __declspec(dllexport)
+#else
+#define QCA_EXPORT extern "C"
+#endif
 
 class QCAProvider
 {

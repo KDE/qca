@@ -3,6 +3,10 @@
 
 #include"qcaprovider.h"
 
+#ifdef QCA_PLUGIN
+QCA_EXPORT QCAProvider *createProvider();
+#endif
+
 class QCAOpenSSL : public QCAProvider
 {
 public:

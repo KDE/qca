@@ -1,6 +1,9 @@
 #include"qca.h"
 
 #include<qptrlist.h>
+#include<qdir.h>
+#include<qstringlist.h>
+#include<qlibrary.h>
 #include"qcaprovider.h"
 #include<stdio.h>
 
@@ -30,6 +33,29 @@ void QCA::init()
 #ifdef USE_OPENSSL
 	providerList.append(new _QCAOpenSSL);
 #endif
+
+	// load plugins
+	QDir dir("plugins");
+	QStringList list = dir.entryList("*.so");
+	for(QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
+		QLibrary *lib = new QLibrary(dir.filePath(*it));
+		if(!lib->load()) {
+			delete lib;
+			continue;
+		}
+		void *s = lib->resolve("createProvider");
+		if(!s) {
+			delete lib;
+			continue;
+		}
+		QCAProvider *(*createProvider)() = (QCAProvider *(*)())s;
+		QCAProvider *p = createProvider();
+		if(!p) {
+			delete lib;
+			continue;
+		}
+		providerList.append(p);
+	}
 }
 
 bool QCA::isSupported(int capabilities)
@@ -105,11 +131,6 @@ void Cipher::setIV(const QByteArray &a)
 SHA1::SHA1()
 {
 	f = (QCA_SHA1Functions *)getFunctions(CAP_SHA1);
-	if(!f) {
-		printf("SHA1: can't initialize!\n");
-		return;
-	}
-
 	ctx = f->create();
 }
 
@@ -158,7 +179,6 @@ void SHA256::update(const QByteArray &a)
 
 QByteArray SHA256::final()
 {
-	printf("sha256 finalizing\n");
 	return QByteArray();
 }
 
@@ -168,7 +188,6 @@ QByteArray SHA256::final()
 //----------------------------------------------------------------------------
 MD5::MD5()
 {
-	printf("MD5: initialized\n");
 }
 
 MD5::~MD5()
