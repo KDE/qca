@@ -224,6 +224,19 @@ DHPrivateKey PKey::toDHPrivateKey() const
 	return k;
 }
 
+bool PKey::operator==(const PKey &a) const
+{
+	if(a.isPrivate())
+		return (toPrivateKey().toDER() == a.toPrivateKey().toDER());
+	else
+		return (toPublicKey().toDER() == a.toPublicKey().toDER());
+}
+
+bool PKey::operator!=(const PKey &a) const
+{
+	return !(*this == a);
+}
+
 //----------------------------------------------------------------------------
 // PublicKey
 //----------------------------------------------------------------------------

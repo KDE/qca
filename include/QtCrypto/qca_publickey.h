@@ -121,6 +121,9 @@ namespace QCA
 		PublicKey toPublicKey() const;
 		PrivateKey toPrivateKey() const;
 
+		bool operator==(const PKey &a) const;
+		bool operator!=(const PKey &a) const;
+
 	protected:
 		PKey(const QString &type, const QString &provider);
 		void set(const PKey &k);
