@@ -19,6 +19,7 @@
  *
  */
 
+#include "qtextstream.h"
 #include "qca_tools.h"
 
 #ifdef Q_OS_UNIX
