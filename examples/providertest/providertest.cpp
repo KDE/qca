@@ -20,7 +20,7 @@
 */
 
 // QtCrypto/QtCrypto has the declarations for all of QCA
-#include <QtCrypto/QtCrypto>
+#include <QtCrypto>
 #include <iostream>
 #include <qstringlist.h>
 
