@@ -625,6 +625,12 @@ bool Cert::isNull() const
 	return d->c->isNull();
 }
 
+QString Cert::commonName() const
+{
+	CertProperties props = subject();
+	return props["CN"];
+}
+
 QString Cert::serialNumber() const
 {
 	return d->c->serialNumber();

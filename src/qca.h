@@ -241,6 +241,7 @@ namespace QCA
 
 		bool isNull() const;
 
+		QString commonName() const;
 		QString serialNumber() const;
 		QString subjectString() const;
 		QString issuerString() const;
