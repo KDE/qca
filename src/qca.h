@@ -131,27 +131,181 @@ private:
 	void reset();
 };
 
+/**
+ * Arbitrary precision integer
+ *
+ * %QBigInteger provides arbitrary precision integers.
+ * \code
+ * if ( QBigInteger("3499543804349") == 
+ *      QBigInteger("38493290803248") + QBigInteger( 343 ) )
+ * {
+ *       // do something
+ * }
+ * \endcode
+ *       
+ **/
 QCA_EXPORT class QBigInteger
 {
 public:
+	/**
+	 * Constructor. Creates a new QBigInteger, initialised to zero.
+	 */
 	QBigInteger();
+
+	/**
+	 * \overload
+	 *
+	 * \param n an alternative integer initialisation value.
+	 */
 	QBigInteger(int n);
+
+	/**
+	 * \overload
+	 *
+	 * \param s an alternative initialisation value, encoded as a string
+	 *
+	 * \code
+	 * QBigInteger b ( "9890343" );
+	 * \endcode
+	 */
 	QBigInteger(const QString &s);
+
+	/**
+	 * \overload
+	 *
+	 * \param a an alternative initialisation value, encoded as QSecureArray
+	 */
 	QBigInteger(const QSecureArray &a);
+
+	/**
+	 * \overload
+	 *
+	 * \param from an alternative initialisation value, encoded as a %QBigInteger
+	 */
 	QBigInteger(const QBigInteger &from);
+
 	~QBigInteger();
 
+	/**
+	 * Assignment operator
+	 * 
+	 * \param from the QBigInteger to copy from
+	 *
+	 * \code
+	 * QBigInteger a; // a is zero
+	 * QBigInteger b( 500 );
+	 * a = b; // a is now 500
+	 * \endcode
+	 */
 	QBigInteger & operator=(const QBigInteger &from);
-	QBigInteger & operator=(const QString &s);
-	QBigInteger & operator+=(const QBigInteger &);
-	QBigInteger & operator-=(const QBigInteger &);
 
+	/**
+	 * \overload
+	 *
+	 * \param s the QString containing an integer representation
+	 *
+	 * \sa bool fromString(const QString &s)
+	 *
+	 * \note it is the application's responsibility to make sure
+	 * that the QString represents a valid integer (ie it only
+	 * contains numbers and an optional minus sign at the start)
+	 * 
+	 **/
+	QBigInteger & operator=(const QString &s);
+
+	/**
+	 * Increment in place operator
+	 *
+	 * \param b the amount to increment by
+	 *
+	 * \code
+	 * QBigInteger a; // a is zero
+	 * QBigInteger b( 500 );
+	 * a += b; // a is now 500
+	 * a += b; // a is now 1000
+	 * \endcode
+	 **/
+	QBigInteger & operator+=(const QBigInteger &b);
+
+	/**
+	 * Decrement in place operator
+	 *
+	 * \param b the amount to decrement by
+	 *
+	 * \code
+	 * QBigInteger a; // a is zero
+	 * QBigInteger b( 500 );
+	 * a -= b; // a is now -500
+	 * a -= b; // a is now -1000
+	 * \endcode
+	 **/
+	QBigInteger & operator-=(const QBigInteger &b);
+
+	/** 
+	 * Output %QBigInteger as a QSecureArray
+	 */
 	QSecureArray toArray() const;
+
+	/**
+	 * Assign from a QSecureArray
+	 *
+	 * \param a a QSecureArray that represents an integer
+	 * 
+	 * \sa QBigInteger(const QSecureArray &a);
+	 */
 	void fromArray(const QSecureArray &a);
 
+	/** 
+	 * Convert %QBigInteger to a QString
+	 *
+	 * \code
+	 * QString aString;
+	 * QBigInteger aBiggishInteger( 5878990 );
+	 * aString = aBiggishInteger.toString(); // aString is now "5878990"
+	 * \endcode
+	 */
 	QString toString() const;
+
+	/**
+	 * Assign from a QString
+	 *
+	 * \param s a QString that represents an integer
+	 *
+	 * \note it is the application's responsibility to make sure
+	 * that the QString represents a valid integer (ie it only
+	 * contains numbers and an optional minus sign at the start)
+	 * 
+	 * \sa QBigInteger(const QString &s)
+	 * \sa QBigInteger & operator=(const QString &s)
+	 */
 	bool fromString(const QString &s);
 
+	/** 
+	 * Compare this value with another %QBigInteger
+	 *
+	 * Normally it is more readable to use one of the operator overloads,
+	 * so you don't need to use this method directly.
+	 *
+	 * \param n the QBigInteger to compare with
+	 * \param checkSign if true, signs are meaningful; if false, only
+	 * magnitude (absolute value) is checked
+	 *
+	 * \return zero if the values are the same, negative if the argument
+	 * is less than the value of this QBigInteger, and positive if the argument
+	 * value is greater than this QBigInteger
+	 *
+	 * \code
+	 * QBigInteger a( "400" );
+	 * QBigInteger b( "-400" );
+	 * QBigInteger c( " 200 " );
+	 * int result;
+	 * result = a.cmp( b );        // return positive 400 > -400
+	 * retult = a.cmp( b, false ); // return zero, magnitudes are the same
+	 * result = a.cmp( c );        // return positive,  400 > 200
+	 * result = b.cmp( c, true );  // return negative, -400 < 200
+	 * result = b.cmp( c, false ); // return positive, abs(-400) > abs(-200)
+	 * \endcode
+	 **/
 	Q_INT32 cmp(const QBigInteger &n, bool checkSign = true) const;
 private:
 	class Private;
@@ -167,6 +321,7 @@ inline bool operator!=(const QBigInteger &a, const QBigInteger &b)
 {
 	return (0 != a.cmp( b ) );
 }
+
 
 namespace QCA
 {
@@ -1041,7 +1196,7 @@ namespace QCA
 	};
 
 	/**
-	 * This is the docs for the RIPEMD 160 bit hash algorithm.
+	 * %RIPEMD160 cryptographic message digest hash algorithm.
 	 *
 	 * This algorithm takes an arbitrary data stream, known as the
 	 * message (up to \f$2^{64}\f$ bits in length) and outputs a
