@@ -121,8 +121,6 @@ namespace QCA
 		PublicKey toPublicKey() const;
 		PrivateKey toPrivateKey() const;
 
-		friend class KeyGenerator;
-
 	protected:
 		PKey(const QString &type, const QString &provider);
 		void set(const PKey &k);
@@ -174,10 +172,6 @@ namespace QCA
 
 	protected:
 		PublicKey(const QString &type, const QString &provider);
-
-	private:
-		friend class PrivateKey;
-		friend class Certificate;
 	};
 
 	class QCA_EXPORT PrivateKey : public PKey
@@ -212,9 +206,6 @@ namespace QCA
 
 	protected:
 		PrivateKey(const QString &type, const QString &provider);
-
-	private:
-		friend class TLS;
 	};
 
 	class QCA_EXPORT KeyGenerator : public QObject

@@ -29,8 +29,6 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
-  core: app name
-  now that algorithm::context is public, get rid of many friend declarations
   cert/crl/store/csr/ca/etc
   tls
   sasl

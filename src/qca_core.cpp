@@ -44,6 +44,7 @@ Provider *create_default_provider();
 // Global
 //----------------------------------------------------------------------------
 static QMutex *manager_mutex = 0;
+static QString *app_name = 0;
 static QCA::ProviderManager *manager = 0;
 static QCA::Random *global_rng = 0;
 static bool qca_init = false;
@@ -97,6 +98,8 @@ void init(MemoryMode mode, int prealloc)
 
 	manager = new ProviderManager;
 	manager->setDefault(create_default_provider()); // manager owns it
+
+	app_name = new QString;
 }
 
 void deinit()
@@ -106,6 +109,9 @@ void deinit()
 
 	delete global_rng;
 	global_rng = 0;
+
+	delete app_name;
+	app_name = 0;
 
 	delete manager;
 	manager = 0;
@@ -262,11 +268,16 @@ Store systemStore(const QString &provider)
 
 QString appName()
 {
-	return QString();
+	if(!qca_init)
+		return QString();
+	return *app_name;
 }
 
-void setAppName(const QString &)
+void setAppName(const QString &s)
 {
+	if(!qca_init)
+		return;
+	*app_name = s;
 }
 
 QString arrayToHex(const QSecureArray &a)

@@ -189,10 +189,6 @@ namespace QCA
 
 		bool operator==(const Certificate &a) const;
 		bool operator!=(const Certificate &a) const;
-
-	private:
-		friend class Store;
-		friend class TLS;
 	};
 
 	class QCA_EXPORT CertificateChain : public QList<Certificate>
@@ -287,9 +283,6 @@ namespace QCA
 		QString toPEM() const;
 		static CRL fromDER(const QSecureArray &a, const QString &provider = QString());
 		static CRL fromPEM(const QString &s, const QString &provider = QString());
-
-	private:
-		friend class Store;
 	};
 
 	class QCA_EXPORT CertificateAuthority : public Algorithm
@@ -327,9 +320,6 @@ namespace QCA
 		void append(const Store &a);
 		Store operator+(const Store &a) const;
 		Store & operator+=(const Store &a);
-
-	private:
-		friend class TLS;
 	};
 
 	class QCA_EXPORT PersonalBundle : public Algorithm
