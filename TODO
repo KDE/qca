@@ -20,7 +20,6 @@
   openpgp: be sure to support key expiration and validity
   shortcuts for reading/writing certs, etc, directly to files?
   cert: extensions
-  many functions that take provider names have an extra space at the end
   tls: session reuse
   cert/csr/crl: path limit, subject/issuer ids (useful for create/validate)
   cert/csr: constraints, ex_constraints, policies (same as above)
