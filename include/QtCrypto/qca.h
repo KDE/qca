@@ -29,6 +29,7 @@
 #include "qca_cert.h"
 #include "qca_securelayer.h"
 #include "qca_securemessage.h"
+#include "qcaprovider.h"
 
 /**
    \mainpage %Qt Cryptographic Architecture
