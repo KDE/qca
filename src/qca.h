@@ -85,14 +85,14 @@ class QCA_CertContext;
  *       - QCA::SHA256
  *       - QCA::SHA384
  *       - QCA::SHA512
- *   - Ciphers (TBC)
- *       - BlowFish
- *       - TripleDES
- *       - AES (AES128, AES256)
+ *   - Ciphers
+ *       - BlowFish  (QCA::BlowFish)
+ *       - Triple DES (QCA::TripleDES)
+ *       - AES (QCA::AES128, QCA::AES192, QCA::AES256)
  *   - Keyed Hash Message Authentication Code (QCA::HMAC)
- *       - SHA1
- *       - MD5
- *       - RIPEMD160
+ *       - QCA::SHA1
+ *       - QCA::MD5
+ *       - QCA::RIPEMD160
  *
  * Functionality is supplied via plugins.  This is useful for avoiding
  * dependence on a particular crypto library and makes upgrading easier,
@@ -812,6 +812,7 @@ namespace QCA
 	 * \sa supportedFeatures()
 	 */
 	QCA_EXPORT QStringList defaultFeatures();
+
 	QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
 	QCA_EXPORT void setProviderPriority(const QString &name, int priority);
 
@@ -825,9 +826,22 @@ namespace QCA
 	 * \sa ProviderListIterator
 	 */
 	QCA_EXPORT const ProviderList & providers();
+
 	QCA_EXPORT void unloadAllPlugins();
 
+	/**
+	 * Return the Random provider that is currently set to be the
+	 * global random number generator.
+	 *
+	 * For example, to get the name of the provider that is currently
+	 * providing the Random capability, you could use:
+	 * \code
+	 * QCA::Random rng = QCA::globalRNG();
+         * std::cout << "Provider name: " << rng.provider()->name() << std::endl;
+	 * \endcode
+	 */
 	QCA_EXPORT Random & globalRNG();
+
 	/**
 	 * Change the global random generation provider
 	 *
@@ -1456,7 +1470,7 @@ namespace QCA
 	{
 	public:
 		/**
-		* Mode settings for cipher algorithms
+		 * Mode settings for cipher algorithms
 		 */
 		enum Mode
 		{
@@ -1465,8 +1479,12 @@ namespace QCA
 			ECB  ///< operate in Electronic Code Book mode
 		};
 
+		/** 
+		 * Standard copy constructor
+		 */
 		Cipher(const Cipher &from);
 		~Cipher();
+
 		Cipher & operator=(const Cipher &from);
 
 		/**
@@ -1482,13 +1500,31 @@ namespace QCA
 		 */
 		bool validKeyLength(int n) const;
 
+		/**
+		 * return the block size for the cipher object
+		 */
 		int blockSize() const;
 
+		/**
+		 * reset the cipher object, to allow re-use
+		 */
 		virtual void clear();
 
+		/** 
+		 * pass in a byte array of data, which will be encrypted or decrypted
+		 * (according to the Direction that was set in the constructor or in
+		 * setup() ) and returned.
+		 *
+		 * \param a the array of data to encrypt / decrypt
+		 */
 		virtual QSecureArray update(const QSecureArray &a);
 
+		/**
+		 * complete the block of data, padding as required, and returning
+		 * the completed block
+		 */
 		virtual QSecureArray final();
+
 		virtual bool ok() const;
 
 		// note: padding only applies to CBC and ECB.  CFB ciphertext is
@@ -1977,15 +2013,50 @@ namespace QCA
 		RIPEMD160(const QString &provider = "") : Hash("ripemd160", provider) {}
 	};
 
+	/**
+	 * Bruce Schneier Blowfish %Cipher
+	 *
+	 */
 	class QCA_EXPORT BlowFish : public Cipher
 	{
 	public:
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a %BlowFish encryption or decryption object.
+		 *
+		 * \param m the Mode to operate in
+		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
+		 * \param key the key to use. 
+		 * \param iv the initialisation vector to use. Ignored for ECB mode.
+		 * \param pad whether to apply padding, or not.
+		 * \param provider the provider to use (eg "qca-gcrypt" )
+		 *
+		 */
 		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
 		:Cipher("blowfish", m, dir, key, iv, pad, provider) {}
 	};
 
+	/**
+	 * Triple DES %Cipher
+	 *
+	 */
 	class QCA_EXPORT TripleDES : public Cipher
 	{
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a triple DES encryption or decryption object.
+		 *
+		 * \param m the Mode to operate in
+		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
+		 * \param key the key to use. Note that triple DES requires a 24 byte (192 bit) key,
+		 * even though the effective key length is 168 bits.
+		 * \param iv the initialisation vector to use. Ignored for ECB mode.
+		 * \param pad whether to apply padding, or not.
+		 * \param provider the provider to use (eg "qca-gcrypt" )
+		 *
+		 */
 	public:
 		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
 		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
@@ -1998,6 +2069,20 @@ namespace QCA
 	class QCA_EXPORT AES128 : public Cipher
 	{
 	public:
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a 128 bit 
+		 * AES encryption or decryption object.
+		 *
+		 * \param m the Mode to operate in
+		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
+		 * \param key the key to use. Note that AES128 requires a 16 byte (128 bit) key.
+		 * \param iv the initialisation vector to use. Ignored for ECB mode.
+		 * \param pad whether to apply padding, or not.
+		 * \param provider the provider to use (eg "qca-gcrypt" )
+		 *
+		 */
 		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
 		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
 	};
@@ -2009,13 +2094,45 @@ namespace QCA
 	class QCA_EXPORT AES192 : public Cipher
 	{
 	public:
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a 192 bit 
+		 * AES encryption or decryption object.
+		 *
+		 * \param m the Mode to operate in
+		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
+		 * \param key the key to use. Note that AES192 requires a 24 byte (192 bit) key.
+		 * \param iv the initialisation vector to use. Ignored for ECB mode.
+		 * \param pad whether to apply padding, or not.
+		 * \param provider the provider to use (eg "qca-gcrypt" )
+		 *
+		 */
 		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
 		:Cipher("aes192", m, dir, key, iv, pad, provider) {}
 	};
 
+	/**
+	 * Advanced Encryption Standard %Cipher - 256 bits
+	 *
+	 */
 	class QCA_EXPORT AES256 : public Cipher
 	{
 	public:
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a 256 bit 
+		 * AES encryption or decryption object.
+		 *
+		 * \param m the Mode to operate in
+		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
+		 * \param key the key to use. Note that AES256 requires a 32 byte (256 bit) key.
+		 * \param iv the initialisation vector to use. Ignored for ECB mode.
+		 * \param pad whether to apply padding, or not.
+		 * \param provider the provider to use (eg "qca-gcrypt" )
+		 *
+		 */
 		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
 		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
 	};
@@ -2420,15 +2537,15 @@ namespace QCA
 	public:
 		enum Error
 		{
-			ErrHandshake, // problem during the negotiation
-			ErrCrypt      // problem at anytime after
+			ErrHandshake, ///< problem during the negotiation
+			ErrCrypt      ///< problem at anytime after
 		};
 		enum IdentityResult
 		{
-			Valid,        // identity is verified
-			HostMismatch, // valid cert provided, but wrong owner
-			BadCert,      // invalid cert
-			NoCert        // identity unknown
+			Valid,        ///< identity is verified
+			HostMismatch, ///< valid cert provided, but wrong owner
+			BadCert,      ///< invalid cert
+			NoCert        ///< identity unknown
 		};
 
 		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = "");
@@ -2483,8 +2600,8 @@ namespace QCA
 	public:
 		enum Error
 		{
-			ErrAuth, // problem during the authentication process
-			ErrCrypt // problem at anytime after
+			ErrAuth, ///< problem during the authentication process
+			ErrCrypt ///< problem at anytime after
 		};
 		enum AuthCondition
 		{
