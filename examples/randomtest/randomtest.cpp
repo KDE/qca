@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	// Random object, rather than a static public member function.
 	// This isn't normally the easiest way, but it does work
 	QCA::Random myRandomObject;
-	unsigned char randChar = myRandomObject.nextByte();
+	randChar = myRandomObject.nextByte();
 	tenBytes = myRandomObject.nextBytes(10, QCA::Random::Nonce);
 	return 0;
 }
