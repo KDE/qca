@@ -91,7 +91,8 @@ void StaticUnitTest::allTests()
     CHECK( QCA::isSupported(capList), true );
     capList.append("noSuch");
     CHECK( QCA::isSupported(capList), false );
-
-
+    capList.clear();
+    capList.append("noSuch");
+    CHECK( QCA::isSupported(capList), false );
 }
 
