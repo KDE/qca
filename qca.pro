@@ -12,7 +12,7 @@ VER_MAJ = 2
 VER_MIN = 0
 
 # make DLL
-win32:{
+win: {
 	CONFIG += dll
 	DEFINES += QCA_MAKEDLL
 }
