@@ -1,7 +1,8 @@
-* proper cipher key generation algorithms
-* deal with cipher errors
 * clean up plugin system
+* better entropy?
 
 * ssl/tls/x509
 * sasl
+
+* figure out where to install the lib and plugins. maybe Qt plugin path?
 

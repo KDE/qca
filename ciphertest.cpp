@@ -14,14 +14,17 @@ int main(int argc, char **argv)
 	else {
 		// encrypt
 		QByteArray key = QCA::TripleDES::generateKey();
-		QCA::TripleDES c(QCA::Encrypt, key);
+		QByteArray iv = QCA::TripleDES::generateIV();
+		printf("3des:key:%s\n", QCA::arrayToHex(key).latin1());
+		printf("3des:iv:%s\n", QCA::arrayToHex(iv).latin1());
+		QCA::TripleDES c(QCA::Encrypt, key, iv);
 		c.update(cstringToArray(cs));
 		QByteArray f = c.final();
 		QString result = QCA::arrayToHex(f);
 		printf(">3des(\"%s\") = [%s]\n", cs.data(), result.latin1());
 
 		// decrypt
-		QCA::TripleDES d(QCA::Decrypt, key);
+		QCA::TripleDES d(QCA::Decrypt, key, iv);
 		d.update(f);
 		QCString dec = arrayToCString(d.final());
 		printf("<3des(\"%s\") = [%s]\n", result.latin1(), dec.data());
@@ -32,14 +35,15 @@ int main(int argc, char **argv)
 	else {
 		// encrypt
 		QByteArray key = QCA::AES128::generateKey();
-		QCA::AES128 c(QCA::Encrypt, key);
+		QByteArray iv = QCA::AES128::generateIV();
+		QCA::AES128 c(QCA::Encrypt, key, iv);
 		c.update(cstringToArray(cs));
 		QByteArray f = c.final();
 		QString result = QCA::arrayToHex(f);
 		printf(">aes128(\"%s\") = [%s]\n", cs.data(), result.latin1());
 
 		// decrypt
-		QCA::AES128 d(QCA::Decrypt, key);
+		QCA::AES128 d(QCA::Decrypt, key, iv);
 		d.update(f);
 		QCString dec = arrayToCString(d.final());
 		printf("<aes128(\"%s\") = [%s]\n", result.latin1(), dec.data());

@@ -31,11 +31,16 @@ struct QCA_HashFunctions
 
 struct QCA_CipherFunctions
 {
+	int (*keySize)();
+	int (*blockSize)();
+	bool (*generateKey)(char *out);
+	bool (*generateIV)(char *out);
+
 	int (*create)();
 	void (*destroy)(int ctx);
-	void (*setup)(int ctx, int dir, const char *key, const char *iv);
-	void (*update)(int ctx, const char *in, unsigned int len);
-	void (*final)(int ctx, char *out);
+	bool (*setup)(int ctx, int dir, const char *key, const char *iv);
+	bool (*update)(int ctx, const char *in, unsigned int len);
+	bool (*final)(int ctx, char *out);
 	unsigned int (*finalSize)(int ctx);
 };
 

@@ -16,10 +16,10 @@ namespace QCA
 		CAP_TripleDES = 0x0008,
 		CAP_AES128    = 0x0010,
 		CAP_AES256    = 0x0020,
-		CAP_X509      = 0x0040,
-		CAP_TLS       = 0x0080,
-		CAP_SASL      = 0x0100,
-		CAP_PGP       = 0x0200,
+
+		//CAP_X509      = 0x0040,
+		//CAP_TLS       = 0x0080,
+		//CAP_SASL      = 0x0100,
 	};
 
 	enum { Encrypt, Decrypt };
@@ -90,7 +90,7 @@ namespace QCA
 		QByteArray dyn_generateKey() const;
 		QByteArray dyn_generateIV() const;
 		void reset(int dir, const QByteArray &key, const QByteArray &iv);
-		void update(const QByteArray &a);
+		bool update(const QByteArray &a);
 		QByteArray final();
 
 	protected:
@@ -116,7 +116,7 @@ namespace QCA
 		static QByteArray generateIV()
 		{
 			T obj;
-			return obj.dyn_generateKey();
+			return obj.dyn_generateIV();
 		}
 	};
 

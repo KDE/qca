@@ -198,12 +198,14 @@ public:
 		dir = Encrypt;
 		key.resize(0);
 		iv.resize(0);
+		err = false;
 	}
 
 	QCA_CipherFunctions *f;
 	int ctx;
 	int dir;
 	QByteArray key, iv;
+	bool err;
 };
 
 Cipher::Cipher(QCA_CipherFunctions *f, int dir, const QByteArray &key, const QByteArray &iv)
@@ -231,12 +233,18 @@ Cipher::~Cipher()
 
 QByteArray Cipher::dyn_generateKey() const
 {
-	return QByteArray(24);
+	QByteArray buf(d->f->keySize());
+	if(!d->f->generateKey(buf.data()))
+		return QByteArray();
+	return buf;
 }
 
 QByteArray Cipher::dyn_generateIV() const
 {
-	return QByteArray(8);
+	QByteArray buf(d->f->blockSize());
+	if(!d->f->generateIV(buf.data()))
+		return QByteArray();
+	return buf;
 }
 
 void Cipher::reset(int dir, const QByteArray &key, const QByteArray &iv)
@@ -245,18 +253,35 @@ void Cipher::reset(int dir, const QByteArray &key, const QByteArray &iv)
 	d->dir = dir;
 	d->key = key.copy();
 	d->iv = iv.copy();
+	if(!d->f->setup(d->ctx, d->dir, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data())) {
+		d->err = true;
+		return;
+	}
 }
 
-void Cipher::update(const QByteArray &a)
+bool Cipher::update(const QByteArray &a)
 {
-	d->f->setup(d->ctx, d->dir, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data());
-	d->f->update(d->ctx, a.data(), a.size());
+	if(d->err)
+		return false;
+
+	if(!d->f->update(d->ctx, a.data(), a.size())) {
+		d->err = true;
+		return false;
+	}
+	return true;
 }
 
 QByteArray Cipher::final()
 {
+	if(d->err)
+		return QByteArray();
+
 	QByteArray buf(d->f->finalSize(d->ctx));
-	d->f->final(d->ctx, buf.data());
+	if(!d->f->final(d->ctx, buf.data())) {
+		d->err = true;
+		return QByteArray();
+	}
+
 	return buf;
 }
 

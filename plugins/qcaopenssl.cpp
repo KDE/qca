@@ -12,6 +12,41 @@ QCAProvider *createProvider()
 }
 #endif
 
+#include<stdlib.h>
+static bool seeded = false;
+class QRandom
+{
+public:
+	static uchar randomChar();
+	static uint randomInt();
+	static QByteArray randomArray(uint size);
+};
+
+uchar QRandom::randomChar()
+{
+	if(!seeded) {
+		srand(time(NULL));
+		seeded = true;
+	}
+	return rand();
+}
+
+uint QRandom::randomInt()
+{
+	QByteArray a = randomArray(sizeof(uint));
+	uint x;
+	memcpy(&x, a.data(), a.size());
+	return x;
+}
+
+QByteArray QRandom::randomArray(uint size)
+{
+	QByteArray a(size);
+	for(uint n = 0; n < size; ++n)
+		a[n] = randomChar();
+	return a;
+}
+
 static int sha1_create();
 static void sha1_destroy(int ctx);
 static void sha1_update(int ctx, const char *in, unsigned int len);
@@ -24,11 +59,16 @@ static void md5_update(int ctx, const char *in, unsigned int len);
 static void md5_final(int ctx, char *out);
 static unsigned int md5_finalSize(int ctx);
 
+static int tdes_keySize() { return 24; }
+static int tdes_blockSize() { return 8; }
+static bool tdes_generateKey(char *out);
+static bool tdes_generateIV(char *out);
+
 static int tdes_create();
 static void tdes_destroy(int ctx);
-static void tdes_setup(int ctx, int dir, const char *key, const char *iv);
-static void tdes_update(int ctx, const char *in, unsigned int len);
-static void tdes_final(int ctx, char *out);
+static bool tdes_setup(int ctx, int dir, const char *key, const char *iv);
+static bool tdes_update(int ctx, const char *in, unsigned int len);
+static bool tdes_final(int ctx, char *out);
 static unsigned int tdes_finalSize(int ctx);
 
 static void appendArray(QByteArray *a, const QByteArray &b)
@@ -64,6 +104,7 @@ struct pair_tdes
 	QByteArray r;
 	int dir;
 	bool done;
+	bool err;
 };
 typedef QPtrList<pair_tdes> MAP_TDES;
 MAP_TDES *map_tdes = 0;
@@ -145,6 +186,10 @@ void *_QCAOpenSSL::functions(int cap)
 	}
 	else if(cap == QCA::CAP_TripleDES) {
 		QCA_CipherFunctions *f = new QCA_CipherFunctions;
+		f->keySize = tdes_keySize;
+		f->blockSize = tdes_blockSize;
+		f->generateKey = tdes_generateKey;
+		f->generateIV = tdes_generateIV;
 		f->create = tdes_create;
 		f->destroy = tdes_destroy;
 		f->setup = tdes_setup;
@@ -220,6 +265,48 @@ unsigned int md5_finalSize(int)
 	return 16;
 }
 
+static bool lib_generateKeyIV(const EVP_CIPHER *type, const QByteArray &data, const QByteArray &salt, QByteArray *key, QByteArray *iv)
+{
+	QByteArray k, i;
+	unsigned char *kp = 0;
+	unsigned char *ip = 0;
+	if(key) {
+		k.resize(type->key_len);
+		kp = (unsigned char *)k.data();
+	}
+	if(iv) {
+		i.resize(type->iv_len);
+		ip = (unsigned char *)i.data();
+	}
+	if(!EVP_BytesToKey(type, EVP_sha1(), (unsigned char *)salt.data(), (unsigned char *)data.data(), data.size(), 1, kp, ip))
+		return false;
+	if(key)
+		*key = k;
+	if(iv)
+		*iv = i;
+	return true;
+}
+
+bool tdes_generateKey(char *out)
+{
+	const EVP_CIPHER *type = EVP_des_ede3_cbc();
+	QByteArray a;
+	if(!lib_generateKeyIV(type, QRandom::randomArray(128), QRandom::randomArray(2), &a, 0))
+		return false;
+	memcpy(out, a.data(), a.size());
+	return true;
+}
+
+bool tdes_generateIV(char *out)
+{
+	const EVP_CIPHER *type = EVP_des_ede3_cbc();
+	QByteArray a;
+	if(!lib_generateKeyIV(type, QRandom::randomArray(128), QRandom::randomArray(2), 0, &a))
+		return false;
+	memcpy(out, a.data(), a.size());
+	return true;
+}
+
 int tdes_create()
 {
 	pair_tdes *i = new pair_tdes;
@@ -227,6 +314,7 @@ int tdes_create()
 	i->type = EVP_des_ede3_cbc();
 	i->dir = 0;
 	i->done = false;
+	i->err = false;
 	EVP_CIPHER_CTX_init(&i->c);
 	map_tdes->append(i);
 	return i->ctx;
@@ -239,30 +327,43 @@ void tdes_destroy(int ctx)
 	map_tdes->removeRef(i);
 }
 
-void tdes_setup(int ctx, int dir, const char *key, const char *iv)
+bool tdes_setup(int ctx, int dir, const char *key, const char *iv)
 {
 	pair_tdes *i = find_tdes(ctx);
 	i->dir = dir;
 
-	if(i->dir == 0)
-		EVP_EncryptInit_ex(&i->c, i->type, NULL, (const unsigned char *)key, (const unsigned char *)iv);
-	else
-		EVP_DecryptInit_ex(&i->c, i->type, NULL, (const unsigned char *)key, (const unsigned char *)iv);
+	if(i->dir == 0) {
+		if(!EVP_EncryptInit_ex(&i->c, i->type, NULL, (const unsigned char *)key, (const unsigned char *)iv)) {
+			return false;
+		}
+	}
+	else {
+		if(!EVP_DecryptInit_ex(&i->c, i->type, NULL, (const unsigned char *)key, (const unsigned char *)iv)) {
+			return false;
+		}
+	}
+	return true;
 }
 
-void tdes_update(int ctx, const char *in, unsigned int len)
+bool tdes_update(int ctx, const char *in, unsigned int len)
 {
 	pair_tdes *i = find_tdes(ctx);
 
 	i->done = false;
+	i->err = false;
 	QByteArray result(len + i->type->block_size);
 	int olen;
-	if(i->dir == 0)
-		EVP_EncryptUpdate(&i->c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len);
-	else
-		EVP_DecryptUpdate(&i->c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len);
+	if(i->dir == 0) {
+		if(!EVP_EncryptUpdate(&i->c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len))
+			return false;
+	}
+	else {
+		if(!EVP_DecryptUpdate(&i->c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len))
+			return false;
+	}
 	result.resize(olen);
 	appendArray(&i->r, result);
+	return true;
 }
 
 static void tdes_ensureFinal(pair_tdes *i)
@@ -272,20 +373,32 @@ static void tdes_ensureFinal(pair_tdes *i)
 
 	QByteArray result(i->type->block_size);
 	int olen;
-	if(i->dir == 0)
-		EVP_EncryptFinal(&i->c, (unsigned char *)result.data(), &olen);
-	else
-		EVP_DecryptFinal(&i->c, (unsigned char *)result.data(), &olen);
+	if(i->dir == 0) {
+		if(!EVP_EncryptFinal(&i->c, (unsigned char *)result.data(), &olen)) {
+			i->err = true;
+			return;
+		}
+	}
+	else {
+		if(!EVP_DecryptFinal(&i->c, (unsigned char *)result.data(), &olen)) {
+			i->err = true;
+			return;
+		}
+	}
 	result.resize(olen);
 	appendArray(&i->r, result);
 	i->done = true;
 }
 
-void tdes_final(int ctx, char *out)
+bool tdes_final(int ctx, char *out)
 {
 	pair_tdes *i = find_tdes(ctx);
+	if(i->err)
+		return false;
+
 	tdes_ensureFinal(i);
 	memcpy(out, i->r.data(), i->r.size());
+	return true;
 }
 
 unsigned int tdes_finalSize(int ctx)
