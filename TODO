@@ -3,9 +3,11 @@
 * Threading consideration (safety, usability) in API and plugins
 
 * finish API:
-  cert: Distinguished Names (Botan has X509_DN)
-  cert: constraints, ex_constraints, policies, pathLimit, isCA, isSelfSigned
-  crl: add functions
+  cert: constraints, ex_constraints, policies
+  cert: operator ==,!=
+  crl: crl_number, this_update, next_update, revoked list (serial,time,reason)
+  cert/crl: Distinguished Names (Botan has X509_DN)
+  cert/pkey: fingerprints
 
 * finish code for APIs:
   cipher
@@ -33,8 +35,11 @@
   Password based key derivation functions - RFC2898
   pkey: ability to choose cipher for toDER/PEM passphrase ?
     - botan doesn't seem to allow this, but kiko wanted it...
+    - jack looking into it
+  cert/crl: path limit, subject/issuer ids // i believe these are not needed
 
 * qt 4 upgrade:
   new include styles
   use qmake .prf for auto-discovery by applications
+  use qplugin
 

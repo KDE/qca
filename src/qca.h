@@ -2539,6 +2539,8 @@ namespace QCA
 		QBigInteger serialNumber() const;
 		PublicKey subjectPublicKey() const;
 		SignAlgo signatureAlgorithm() const;
+		bool isCA() const;
+		bool isSelfSigned() const;
 
 		// import / export
 		QSecureArray toDER() const;

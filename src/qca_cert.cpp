@@ -150,6 +150,16 @@ SignAlgo Certificate::signatureAlgorithm() const
 	return SignUnknown;
 }
 
+bool Certificate::isCA() const
+{
+	return false;
+}
+
+bool Certificate::isSelfSigned() const
+{
+	return false;
+}
+
 QSecureArray Certificate::toDER() const
 {
 	return ((CertContext *)context())->toDER();
