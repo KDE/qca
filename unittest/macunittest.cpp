@@ -173,6 +173,73 @@ void MACUnitTest::allTests()
 
     }
 
+    if(!QCA::isSupported("hmac(ripemd160)"))
+	SKIP("HMAC(RIPEMD160) not supported!\n");
+    else {
+	// These tests are from RFC2286, Section 2.
+	QCA::HMAC test1( "ripemd160" ); 
+	QCA::SymmetricKey key1 ( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
+	test1.setup( key1 );
+	QSecureArray data1 = QCString( "Hi There" );
+	data1.resize( 8 );
+    	test1.update( data1 );
+	CHECK( QCA::arrayToHex( test1.final() ), QString( "24cb4bd67d20fc1a5d2ed7732dcc39377f0a5668" ) );
+
+	QCA::HMAC test2( "ripemd160" ); 
+	QCA::SymmetricKey key2;
+	key2 = QCString( "Jefe" );
+	key2.resize( 4 );
+	test2.setup( key2 );
+	QSecureArray data2 = QCString( "what do ya want for nothing?" );
+	data2.resize( 28 );
+    	test2.update( data2 );
+	CHECK( QCA::arrayToHex( test2.final() ), QString( "dda6c0213a485a9e24f4742064a7f033b43c4069" ) );
+
+	QCA::HMAC test3( "ripemd160" );
+	QCA::SymmetricKey key3( QCA::hexToArray( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ) );
+	test3.setup( key3 );
+	QSecureArray data3( 50 );
+	for ( unsigned int i = 0; i < data3.size(); i++ )
+	    data3[ i ] = 0xDD;
+	test3.update( data3 );
+	CHECK( QCA::arrayToHex( test3.final() ), QString( "b0b105360de759960ab4f35298e116e295d8e7c1" ) );
+
+	QCA::HMAC test4( "ripemd160" );
+	QCA::SymmetricKey key4( QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819" ) );
+	test4.setup( key4 );
+	QSecureArray data4( 50 );
+	for ( unsigned int i = 0; i < data4.size(); i++ )
+	    data4[ i ] = 0xcd;
+	test4.update( data4 );
+	CHECK( QCA::arrayToHex( test4.final() ), QString( "d5ca862f4d21d5e610e18b4cf1beb97a4365ecf4" ) );
+
+	QCA::HMAC test5( "ripemd160" );
+	QCA::SymmetricKey key5 ( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
+	test5.setup( key5 );
+	QSecureArray data5 = QCString( "Test With Truncation" );
+	data5.resize( 20 );
+    	test5.update( data5 );
+	CHECK( QCA::arrayToHex( test5.final() ), QString( "7619693978f91d90539ae786500ff3d8e0518e39" ) );
+
+	QCA::HMAC test6( "ripemd160" );
+	QCA::SymmetricKey key6( 80 );
+	for ( unsigned int i = 0; i < key6.size(); i++ )
+	    key6[i] = 0xAA;
+	test6.setup( key6 );
+	QSecureArray data6 = QCString( "Test Using Larger Than Block-Size Key - Hash Key First" );
+	data6.resize( 54 );
+    	test6.update( data6 );
+	CHECK( QCA::arrayToHex( test6.final() ), QString( "6466ca07ac5eac29e1bd523e5ada7605b791fd8b" ) );
+
+	test6.clear();
+	test6.setup( key6 ); // reuse test, same key
+	QSecureArray data7 = QCString( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
+	data7.resize( 73 );
+    	test6.update( data7 );
+	CHECK( QCA::arrayToHex( test6.final() ), QString( "69ea60798d71616cce5fd0871e23754cd75d5a0a" ) );
+
+    }
+
 }
 
 
