@@ -252,39 +252,17 @@ public:
 	}
 };
 
-static int gcry_mode( QCA::CipherContext::Mode mode )
-{
-    int retmode;
-    switch (mode)
-    {
-    case QCA::CipherContext::ECB :
-	retmode = GCRY_CIPHER_MODE_ECB;
-	break;
-    case QCA::CipherContext::CBC :
-	retmode = GCRY_CIPHER_MODE_CBC;
-	break;
-    case QCA::CipherContext::CFB :
-	retmode = GCRY_CIPHER_MODE_CFB;
-	break;
-    default:
-	retmode = GCRY_CIPHER_MODE_NONE;
-    }
-    return retmode;
-};
-
-
 class gcryCipherContext : public QCA::CipherContext
 {
 public:
     gcryCipherContext(QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type) {}
 
-    void setup(const QCA::SymmetricKey &key,
-	       QCA::CipherContext::Mode m,
-	       QCA::Direction dir,
+    void setup(QCA::Direction dir,
+	       const QCA::SymmetricKey &key,
 	       const QCA::InitializationVector &iv)
     {
 	m_direction = dir;
-	err =  gcry_cipher_open( &context, cryptoAlgorithm, gcry_mode(m), 0 );
+	err =  gcry_cipher_open( &context, cryptoAlgorithm, m_mode, 0 );
 	check_error( err );
 	err = gcry_cipher_setkey( context, key.data(), key.size() );
 	check_error( err );
@@ -324,29 +302,29 @@ protected:
     gcry_error_t err;
     int cryptoAlgorithm;
     QCA::Direction m_direction;
+    int m_mode;
 };
 
-class AES128Context : public gcryCipherContext
+class AES128CBCContext : public gcryCipherContext
 {
 public:
-    AES128Context(QCA::Provider *p) : gcryCipherContext( p, "aes128" )
+    AES128CBCContext(QCA::Provider *p) : gcryCipherContext( p, "aes128-cbc" )
     {
 	gcry_check_version("GCRYPT_VERSION");
 	cryptoAlgorithm = GCRY_CIPHER_AES128;
+ 	m_mode = GCRY_CIPHER_MODE_CBC;
     }
 	
     Context *clone() const
     {
-	return new AES128Context( *this );
+	return new AES128CBCContext( *this );
     }
-    
+
     QCA::KeyLength keyLength() const
     {
 	// Must be 128 bits
 	return QCA::KeyLength( 16, 16, 1);
     }
-    
-
 };
 
 class AES192Context : public gcryCipherContext
@@ -477,7 +455,7 @@ public:
 		list += "sha256";
 		list += "sha384";
 		list += "sha512";
-		list += "aes128";
+		list += "aes128-cbc";
 		list += "aes192";
 		list += "aes256";
 		list += "blowfish";
@@ -502,8 +480,8 @@ public:
 			return new SHA384Context( this );
 		else if ( type == "sha512" )
 			return new SHA512Context( this );
-		else if ( type == "aes128" )
-			return new AES128Context( this );
+		else if ( type == "aes128-cbc" )
+			return new AES128CBCContext( this );
 		else if ( type == "aes192" )
 			return new AES192Context( this );
 		else if ( type == "aes256" )
