@@ -76,6 +76,8 @@
          - SHA1
          - MD5
          - RIPEMD160
+     - Encoding and decoding of hexadecimal (QCA::Hex) and 
+     Base64 (QCA::Base64)
   
    Functionality is supplied via plugins.  This is useful for avoiding
    dependence on a particular crypto library and makes upgrading easier,
