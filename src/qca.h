@@ -87,7 +87,8 @@ class QCA_CertContext;
  *       - QCA::SHA512
  *   - Ciphers (QCA::Cipher)
  *       - BlowFish  (QCA::BlowFish)
- *       - Triple DES (QCA::TripleDES)
+ *       - Triple %DES (QCA::TripleDES)
+ *       - %DES (QCA:DES)
  *       - AES (QCA::AES128, QCA::AES192, QCA::AES256)
  *   - Keyed Hash Message Authentication Code (QCA::HMAC)
  *       - QCA::SHA1
@@ -341,7 +342,7 @@ QCA_EXPORT bool operator==(const QSecureArray &a, const QSecureArray &b);
 
 /**
  * Inequality operator. Returns true if the two QSecureArray
- * arguments have different length, or the same lengh but
+ * arguments have different length, or the same length but
  * different data
  *
  * \relates QSecureArray
@@ -750,9 +751,12 @@ namespace QCA
 	};
 
 	/**
-	 * Initialise QCA
+	 * Initialise %QCA.
+	 * This call is not normally required, because it is cleaner
+	 * to use an Initializer.
 	 */
 	QCA_EXPORT void init();
+
 	/**
 	 * \overload
 	 *
@@ -762,7 +766,15 @@ namespace QCA
 	 */
 	QCA_EXPORT void init(MemoryMode m, int prealloc);
 
+	/**
+	 * Clean up routine
+	 *
+	 * This routine cleans up %QCA, including memory allocations
+	 * This call is not normally required, because it is cleaner
+	 * to use an Initializer
+	 */
 	QCA_EXPORT void deinit();
+
 	/**
 	 * Test if secure storage memory is available
 	 *
@@ -847,8 +859,70 @@ namespace QCA
 	 */
 	QCA_EXPORT QStringList defaultFeatures();
 
+	/**
+	 * Add a provider to the current list of providers
+	 * 
+	 * This function allows you to add a provider to the 
+	 * current plugin providers at a specified priority. If
+	 * a provider with the name already exists, this call fails.
+	 *
+	 * \param p a pointer to a Provider object, which must be
+	 *        set up.
+	 * \param priority the priority level to set the provider to
+	 *
+	 * \return true if the provider is added, and false if the 
+	 *         provider is not added (failure)
+	 *
+	 * \sa setProviderPriority for a description of the provider priority system
+	 */
 	QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
+
+	/**
+	 * Change the priority of a specified provider
+	 *
+	 * QCA supports a number of providers, and if a number of providers
+	 * support the same algorithm, it needs to choose between them. You
+	 * can do this at object instantiation time (by specifying the name
+	 * of the provider that should be used). Alternatively, you can provide a
+	 * relative priority level at an application level, using this call.
+	 * 
+	 * Priority is used at object instantiation time. The provider is selected
+	 * according to the following logic:
+	 * - if a particular provider is nominated, and that provider supports
+	 *   the required algorithm, then the nominated provider is used
+	 * - if no provider is nominated, or it doesn't support the required
+	 *   algorithm, then the provider with the lowest priority number will be used,
+	 *   if that provider supports the algorithm.
+	 * - if the provider with the lowest priority number doesn't support 
+	 *   the required algorithm, the provider with the next lowest priority number
+	 *   will be tried,and so on through to the provider with the largest priority number
+	 * - if none of the plugin providers support the required algorithm, then
+	 *   the default (built-in) provider will be tried.
+	 * 
+	 * \param name the name of the provider
+	 * \param priority the new priority of the provider. As a special case, if
+	 *        you pass in -1, then this provider gets the same priority as the
+	 *        the last provider that was added or had its priority set using this
+	 *        call.
+	 *
+	 * \sa providerPriority
+	 */
 	QCA_EXPORT void setProviderPriority(const QString &name, int priority);
+
+	/**
+	 * Return the priority of a specified provider
+	 *
+	 * The name of the provider (eg "qca-openssl") is used to look up the 
+	 * current priority associated with that provider. If the provider
+	 * is not found (or something else went wrong), -1 is returned.
+	 *
+	 * \param name the name of the provider
+	 *
+	 * \return the current priority level
+	 *
+	 * \sa setProviderPriority for a description of the provider priority system
+	 */
+	QCA_EXPORT int providerPriority(const QString &name);
 
 	/**
 	 * Return a list of the current providers
@@ -861,6 +935,10 @@ namespace QCA
 	 */
 	QCA_EXPORT const ProviderList & providers();
 
+	/**
+	 * Unload the current plugins
+	 *
+	 */
 	QCA_EXPORT void unloadAllPlugins();
 
 	/**
@@ -956,10 +1034,23 @@ namespace QCA
 	 */
 	QCA_EXPORT QByteArray hexToArray(const QString &hexString);
 
+	/**
+	 * Convenience method for initialising and cleaning up %QCA
+	 *
+	 * To ensure that QCA is properly initialised and cleaned up,
+	 * it is convenient to create an Initializer object, and let it
+	 * go out of scope at the end of %QCA usage.
+	 */
 	class QCA_EXPORT Initializer
 	{
 	public:
-		// botan prefers mmap over locking, so we will too
+		/**
+		 * Standard constructor
+		 *
+		 * \param m the MemoryMode to use for secure memory
+		 * \param prealloc the amount of secure memory to pre-allocate,
+		 *        in units of 1024 bytes (1K).
+		 */
 		Initializer(MemoryMode m = Practical, int prealloc = 64);
 		~Initializer();
 	};
@@ -1020,6 +1111,17 @@ namespace QCA
 		int const _min, _max, _multiple;
 	};
 
+	/**
+	 * Algorithm provider
+	 *
+	 * %Provider represents a plugin provider (or as a special case, the
+	 * built-in provider). This is the class you need to inherit
+	 * from to create your own plugin. You don't normally need to 
+	 * worry about this class if you are just using existing 
+	 * QCA capabilities and plugins, however there is nothing stopping
+	 * you from using it to obtain information about specific plugins,
+	 * as shown in the example below.
+	 */
 	class QCA_EXPORT Provider
 	{
 	public:
@@ -1043,9 +1145,79 @@ namespace QCA
 			QString _type;
 		};
 
+		/**
+		 * Initialisation routine.
+		 * 
+		 * This routine will be called when your plugin
+		 * is loaded, so this is a good place to do any
+		 * one-off initialisation tasks. If you don't need
+		 * any initialisation, just implement it as an empty
+		 * routine.
+		 */
 		virtual void init();
+
+		/**
+		 * The name of the provider.
+		 * 
+		 * Typically you just return a string containing a 
+		 * convenient name.
+		 *
+		 * \code
+		 * QString name() const
+		 * {
+		 *        return "qca-myplugin";
+		 * }
+		 * \endcode
+		 *
+		 * \note  The name is used to tell if a provider is
+		 * already loaded, so you need to make sure it is
+		 * unique amongst the various plugins.
+		 */
 		virtual QString name() const = 0;
+
+		/**
+		 * The capabilities (algorithms) of the provider.
+		 *
+		 * Typically you just return a fixed QStringList:
+		 * \code
+		 * QStringList features() const
+		 * {
+		 *      QStringList list;
+		 *      list += "sha1";
+		 *      list += "sha256";
+		 *      list += "hmac(md5)";
+		 *      return list;
+		 * }
+		 * \endcode
+		 */
 		virtual QStringList features() const = 0;
+
+		/**
+		 * Routine to create a plugin context
+		 *
+		 * You need to return a pointer to an algorithm
+		 * Context that corresponds with the algorithm
+		 * name specified. 
+		 *
+		 * \param type the name of the algorithm required
+		 *
+		 * \code
+		 * Context *createContext(const QString &type)
+		 * {
+		 * if ( type == "sha1" )
+		 *     return new SHA1Context( this );
+		 * else if ( type == "sha256" )
+		 *     return new SHA0256Context( this );
+		 * else if ( type == "hmac(sha1)" )
+		 *     return new HMACSHA1Context( this );
+		 * else
+		 *     return 0;
+		 * }
+		 * \endcode
+		 * 
+		 * Naturally you also need to implement
+		 * the specified Context subclasses as well.
+		 */
 		virtual Context *createContext(const QString &type) = 0;
 	};
 
@@ -1285,14 +1457,46 @@ namespace QCA
 		 * \param cs the QCString to copy
 		 */
 		SymmetricKey(const QCString &cs);
+
+		/**
+		 * Test for weak DES keys
+		 *
+		 * \return true if the key is a weak key for DES
+		 */
+		bool isWeakDESKey();
 	};
 
+
+	/**
+	 * Container for initialisation vectors and nonces
+	 */
 	class QCA_EXPORT InitializationVector : public QSecureArray
 	{
 	public:
+		/** 
+		 * Construct an empty (zero length) initisation vector
+		 */
 		InitializationVector();
+
+		/**
+		 * Construct an initialisation vector of the specified size
+		 *
+		 * \param size the length of the initialisation vector, in bytes
+		 */
 		InitializationVector(int size);
+
+		/**
+		 * Construct an initialisation vector from a provided byte array
+		 *
+		 * \param a the byte array to copy
+		 */
 		InitializationVector(const QSecureArray &a);
+
+		/**
+		 * Construct an initialisaton vector from a provided string
+		 *
+		 * \param cs the QCString to copy
+		 */
 		InitializationVector(const QCString &cs);
 	};
 
@@ -1733,6 +1937,7 @@ namespace QCA
 		Private *d;
 	};
 
+
 	/**
 	 * SHA-0 cryptographic message digest hash algorithm.
 	 *
@@ -2094,7 +2299,7 @@ namespace QCA
 	};
 
 	/**
-	 * Bruce Schneier Blowfish %Cipher
+	 * Bruce Schneier's Blowfish %Cipher
 	 *
 	 */
 	class QCA_EXPORT BlowFish : public Cipher
@@ -2119,7 +2324,7 @@ namespace QCA
 	};
 
 	/**
-	 * Triple DES %Cipher
+	 * Triple %DES %Cipher
 	 *
 	 */
 	class QCA_EXPORT TripleDES : public Cipher
@@ -2127,11 +2332,11 @@ namespace QCA
 		/**
 		 * Standard constructor
 		 *
-		 * This is the normal way of creating a triple DES encryption or decryption object.
+		 * This is the normal way of creating a triple %DES encryption or decryption object.
 		 *
 		 * \param m the Mode to operate in
 		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
-		 * \param key the key to use. Note that triple DES requires a 24 byte (192 bit) key,
+		 * \param key the key to use. Note that triple %DES requires a 24 byte (192 bit) key,
 		 * even though the effective key length is 168 bits.
 		 * \param iv the initialisation vector to use. Ignored for ECB mode.
 		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
@@ -2145,7 +2350,7 @@ namespace QCA
 	};
 
 	/**
-	 *DES %Cipher
+	 * %DES %Cipher
 	 *
 	 */
 	class QCA_EXPORT DES : public Cipher
@@ -2153,12 +2358,12 @@ namespace QCA
 		/**
 		 * Standard constructor
 		 *
-		 * This is the normal way of creating a DES encryption or decryption object.
+		 * This is the normal way of creating a %DES encryption or decryption object.
 		 *
 		 * \param m the Mode to operate in
 		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
-		 * \param key the key to use. Note that triple DES requires a 24 byte (192 bit) key,
-		 * even though the effective key length is 168 bits.
+		 * \param key the key to use. Note that %DES requires a 8 byte (64 bit) key,
+		 * even though the effective key length is 56 bits.
 		 * \param iv the initialisation vector to use. Ignored for ECB mode.
 		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
 		 *        Mode does not require padding
@@ -2301,6 +2506,69 @@ namespace QCA
 		 * \endcode
 		 */
 		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = "") : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
+	};
+
+
+	/**
+	 * General superclass for key derivation algorithms.
+	 *
+	 * %KeyDerivationFunction is a superclass for the various 
+	 * key derivation function algorithms within %QCA. You should
+	 * not need to use it directly unless you are
+	 * adding another key derivation capability to %QCA - you should be
+	 * using a sub-class. PBKDF2 using SHA1 is recommended for new applications.
+	 */
+	class QCA_EXPORT KeyDerivationFunction : public Algorithm
+	{
+	public:
+		/**
+		 * Standard copy constructor
+		 */
+		KeyDerivationFunction(const KeyDerivationFunction &from);
+
+		~KeyDerivationFunction();
+
+		/**
+		 * Generate the key from a specified secret and salt value.
+		 * 
+		 * \note key length is ignored for some functions
+		 *
+		 * \param secret the secret (password or passphrase)
+		 * \param salt the salt to use
+		 * \param keyLength the length of key to return
+		 * \param iterationCount the number of iterations to perform
+		 *
+		 * \return the derived key
+		 */
+		SymmetricKey makeKey(const QSecureArray &secret,
+				     const InitializationVector &salt,
+				     unsigned int keyLength,
+				     unsigned int iterationCount);
+
+		/**
+		 * Construct the name of the algorithm
+		 *
+		 * You can use this to build a standard name string.
+		 * You probably only need this method if you are 
+		 * creating a new subclass.
+		 */
+		static QString withAlgorithm(const QString &kdfType, const QString &algType);
+
+	protected:
+		/**
+		 * Special constructor for subclass initialisation
+ 		 */
+		KeyDerivationFunction(const QString &type, const QString &provider);
+
+	private:
+		class Private;
+		Private *d;
+	};
+
+	class QCA_EXPORT PBKDF1 : public KeyDerivationFunction
+	{
+	public:
+	    PBKDF1(const QString &algorithm = "sha1", const QString &provider = "") : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
 	};
 
 	class PublicKey;
