@@ -305,8 +305,6 @@ public:
 	 * so you don't need to use this method directly.
 	 *
 	 * \param n the QBigInteger to compare with
-	 * \param checkSign if true, signs are meaningful; if false, only
-	 * magnitude (absolute value) is checked
 	 *
 	 * \return zero if the values are the same, negative if the argument
 	 * is less than the value of this QBigInteger, and positive if the argument
@@ -317,14 +315,12 @@ public:
 	 * QBigInteger b( "-400" );
 	 * QBigInteger c( " 200 " );
 	 * int result;
-	 * result = a.cmp( b );        // return positive 400 > -400
-	 * retult = a.cmp( b, false ); // return zero, magnitudes are the same
-	 * result = a.cmp( c );        // return positive,  400 > 200
-	 * result = b.cmp( c, true );  // return negative, -400 < 200
-	 * result = b.cmp( c, false ); // return positive, abs(-400) > abs(-200)
+	 * result = a.compare( b );        // return positive 400 > -400
+	 * result = a.compare( c );        // return positive,  400 > 200
+	 * result = b.compare( c );        // return negative, -400 < 200
 	 * \endcode
 	 **/
-	Q_INT32 cmp(const QBigInteger &n, bool checkSign = true) const;
+	int compare(const QBigInteger &n) const;
 private:
 	class Private;
 	Private *d;
@@ -338,18 +334,18 @@ private:
  **/
 inline bool operator==(const QBigInteger &a, const QBigInteger &b)
 {
-	return (0 == a.cmp( b ) );
+	return (0 == a.compare( b ) );
 }
 
 /**
- * Inqquality operator. Returns true if the two QBigInteger values
+ * Inequality operator. Returns true if the two QBigInteger values
  * are different in magnitude, sign or both  
  *
  * \relates QBigInteger
  **/
 inline bool operator!=(const QBigInteger &a, const QBigInteger &b)
 {
-	return (0 != a.cmp( b ) );
+	return (0 != a.compare( b ) );
 }
 
 /**
@@ -361,7 +357,7 @@ inline bool operator!=(const QBigInteger &a, const QBigInteger &b)
  **/
 inline bool operator<=(const QBigInteger &a, const QBigInteger &b)
 {
-	return (a.cmp( b ) <= 0 );
+	return (a.compare( b ) <= 0 );
 }
 
 /**
@@ -373,7 +369,7 @@ inline bool operator<=(const QBigInteger &a, const QBigInteger &b)
  **/
 inline bool operator>=(const QBigInteger &a, const QBigInteger &b)
 {
-	return (a.cmp( b ) >= 0 );
+	return (a.compare( b ) >= 0 );
 }
 
 /**
@@ -385,7 +381,7 @@ inline bool operator>=(const QBigInteger &a, const QBigInteger &b)
  **/
 inline bool operator<(const QBigInteger &a, const QBigInteger &b)
 {
-	return (a.cmp( b ) < 0 );
+	return (a.compare( b ) < 0 );
 }
 
 /**
@@ -397,7 +393,7 @@ inline bool operator<(const QBigInteger &a, const QBigInteger &b)
  **/
 inline bool operator>(const QBigInteger &a, const QBigInteger &b)
 {
-	return (a.cmp( b ) > 0 );
+	return (a.compare( b ) > 0 );
 }
 
 /**

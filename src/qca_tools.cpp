@@ -376,9 +376,9 @@ QBigInteger & QBigInteger::operator=(const QString &s)
 	return *this;
 }
 
-Q_INT32 QBigInteger::cmp(const QBigInteger &n, bool checkSign) const
+int QBigInteger::compare(const QBigInteger &n) const
 {
-	return ( (d->n).cmp( n.d->n, checkSign ) );
+	return ( (d->n).cmp( n.d->n, true) );
 }
 
 QTextStream &operator<<(QTextStream &stream, const QBigInteger& b)
