@@ -34,6 +34,7 @@
 #include "keylengthunittest.h"
 #include "symmetrickeyunittest.h"
 #include "randomunittest.h"
+#include "cipherunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -54,6 +55,7 @@ void KUnitTest::registerTests()
     ADD_TEST( KeyLengthUnitTest );
     ADD_TEST( SymmetricKeyUnitTest );
     ADD_TEST( RandomUnitTest );
+    ADD_TEST( CipherUnitTest );
 }
 
 KUnitTest::KUnitTest()
@@ -74,7 +76,6 @@ void KUnitTest::checkRun()
 
 int KUnitTest::runTests()
 {
-    int result = 0;
     int globalSteps = 0;
     int globalPasses = 0;
     int globalFails = 0;
@@ -88,79 +89,59 @@ int KUnitTest::runTests()
     for( ; it.current(); ++it ) {
         Tester* test = it.current();
         test->allTests();
-        QStringList errorList = test->errorList();
-        QStringList xfailList = test->xfailList();
-	QStringList xpassList = test->xpassList();
-	QStringList skipList = test->skipList();
 	cout << it.currentKey() << " - ";
-	if ( !errorList.empty() || !xfailList.empty() ) {
-            ++result;
-	    int numPass = test->testsFinished() - ( test->testsFailed() + test->testsXFail() );
-	    globalSteps += test->testsFinished();
-	    globalPasses += numPass;
-	    int numFail = test->testsFailed() + test->testsXFail();
-	    globalFails += numFail;
-	    int numXFail = test->testsXFail();
-	    globalXFails += numXFail;
-	    globalXPasses += test->testsXPass();
+	int numPass = test->testsFinished() - ( test->errorList().count() + test->xfailList().count() + test->skipList().count() );
+	int numFail = test->errorList().count() + test->xfailList().count();
+	int numXFail = test->xfailList().count();
+	int numXPass = test->xpassList().count();
+	int numSkip = test->skipList().count();
 
-	    cout << numPass << " test" << ( ( 1 == numPass )?"":"s") << " passed ";
-	    if ( 0 < test->testsXPass() ) {
-		cout << "(" << test->testsXPass() << " unexpected pass" << ( ( 1 == test->testsXPass() )?"":"es") << ")";
-	    }
-            cout << ", " << numFail << " test" << ( ( 1 == numFail )?"":"s") << " failed";
-	    if ( 0 < numXFail  ) {
-		cout << " (" << numXFail << " expected failure" << ( ( 1 == numXFail )?"":"s") << ")";
-	    }
-	    cout  << endl;
+	globalSteps += test->testsFinished();
+	globalPasses += numPass;
+	globalFails += numFail;
+	globalXFails += numXFail;
+	globalXPasses += numXPass;
+	globalSkipped += numSkip;
 
-	    if ( 0 < test->testsXPass() ) {
-		cout << "    Unexpected pass" << ( ( 1 == test->testsXPass() )?"":"es") << ":" << endl;
-		for ( QStringList::Iterator itr = xpassList.begin(); itr != xpassList.end(); ++itr ) {
-		    cout << "\t" << (*itr).latin1() << endl;
-		}
-	    }
-	    if ( !errorList.empty() ) {
-		cout << "    Unexpected failure" << ( ( 1 == test->testsFailed() )?"":"s") << ":" << endl;
-		for ( QStringList::Iterator itr = errorList.begin(); itr != errorList.end(); ++itr ) {
-		    cout << "\t" << (*itr).latin1() << endl;
-		}
-	    }
-	    if ( 0 < numXFail ) {
-		cout << "    Expected failure" << ( ( 1 == numXFail)?"":"s") << ":" << endl;
-		for ( QStringList::Iterator itr = xfailList.begin(); itr != xfailList.end(); ++itr ) {
-		    cout << "\t" << (*itr).latin1() << endl;
-		}
-	    }
-        } else {
-	    // then we are dealing with no failures, but perhaps some skipped
-	    int numSkipped = test->testsSkipped();
-	    int numPass = test->testsFinished() - numSkipped;
+	cout << numPass << " test" << ( ( 1 == numPass )?"":"s") << " passed";
+	if ( 0 < test->xpassList().count() ) {
+	    cout << " (" << numXPass << " unexpected pass" << ( ( 1 == numXPass )?"":"es") << ")";
+	}
+	cout << ", " << numFail << " test" << ( ( 1 == numFail )?"":"s") << " failed";
+	if ( 0 < numXFail  ) {
+	    cout << " (" << numXFail << " expected failure" << ( ( 1 == numXFail )?"":"s") << ")";
+	}
+	if ( 0 < numSkip ) {
+	    cout << "; also " << numSkip << " skipped";
+	}	
+	cout  << endl;
 
-            cout << numPass << " test" << ((1 == numPass)?",":"s, all") << " passed";
-	    globalPasses += numPass;
-	    globalSkipped += numSkipped;
-	    globalSteps += test->testsFinished();
-
-	    if ( 0 < test->testsXPass() ) {
-		cout << " (" << test->testsXPass() << " unexpected pass" << ( ( 1 == test->testsXPass() )?"":"es") << ")";
-		globalXPasses += test->testsXPass();
-	    }
-	    if ( 0 < numSkipped ) {
-		cout << "; also " << numSkipped << " skipped";
-	    }	
-	    cout << endl;
-	    if ( 0 < test->testsXPass() ) {
-		cout << "    Unexpected pass" << ( ( 1 == test->testsXPass() )?"":"es") << ":" << endl;
-		for ( QStringList::Iterator itr = xpassList.begin(); itr != xpassList.end(); ++itr ) {
-		    cout << "\t" << (*itr).latin1() << endl;
-		}
-	    }
-	    if ( 0 < numSkipped ) {
-		cout << "    Skipped test" << ( ( 1 == numSkipped )?"":"s") << ":" << endl;
-		for ( QStringList::Iterator itr = skipList.begin(); itr != skipList.end(); ++itr ) {
-		    cout << "\t" << (*itr).latin1() << endl;
-		}
+	if ( 0 < numXPass  ) {
+	  cout << "    Unexpected pass" << ( ( 1 == numXPass )?"":"es") << ":" << endl;
+	  QStringList list = test->xpassList();
+	  for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
+	    cout << "\t" << (*itr).latin1() << endl;
+	  }
+	}
+	if ( 0 < (numFail - numXFail) ) {
+	  cout << "    Unexpected failure" << ( ( 1 == numFail )?"":"s") << ":" << endl;
+	  QStringList list = test->errorList();
+	  for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
+	    cout << "\t" << (*itr).latin1() << endl;
+	  }
+	}
+	if ( 0 < numXFail ) {
+	  cout << "    Expected failure" << ( ( 1 == numXFail)?"":"s") << ":" << endl;
+	  QStringList list = test->xfailList();
+	  for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
+	    cout << "\t" << (*itr).latin1() << endl;
+	  }
+	}
+	if ( 0 < numSkip ) {
+	    cout << "    Skipped test" << ( ( 1 == numSkip )?"":"s") << ":" << endl;
+	    QStringList list = test->skipList();
+	    for ( QStringList::Iterator itr = list.begin(); itr != list.end(); ++itr ) {
+		cout << "\t" << (*itr).latin1() << endl;
 	    }
 	}
 	cout << endl;
@@ -175,7 +156,7 @@ int KUnitTest::runTests()
     cout << "      Total expected failed test steps             :  " << globalXFails << endl;
     cout << "    Total skipped test steps                       :  " << globalSkipped << endl;
 
-    return result;
+    return m_tests.count();
 }
 
 void KUnitTest::addTester( QTester *test )
