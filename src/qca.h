@@ -599,7 +599,35 @@ namespace QCA
 {
 	class Provider;
 	class Random;
+
+	/**
+	 * Convenience representation for the plugin providers
+	 * 
+	 * You can get a list of providers using the providers()
+	 * function
+	 *
+	 * \sa ProviderListIterator
+	 * \sa providers()
+	 */
 	typedef QPtrList<Provider> ProviderList;
+
+	/**
+	 * Convenience representation for iterator for the plugin providers
+	 *
+	 * You would use this something like the following:
+	 * \code
+	 * QCA::ProviderList qcaProviders = QCA::providers();
+	 * QCA::ProviderListIterator it( qcaProviders );
+	 * QCA::Provider *provider;
+	 * while ( 0 != (provider = it.current() ) ) {
+	 *     ++it;
+	 *     cout << provider->name();
+	 * }
+	 * \endcode
+	 *
+	 * \sa ProviderList
+	 * \sa providers()
+	 */
 	typedef QPtrListIterator<Provider> ProviderListIterator;
 
 	/**
@@ -623,10 +651,16 @@ namespace QCA
 		LockingKeepPrivileges ///< mlock, retaining root privileges
 	};
 
+	/**
+	 * Direction settings for symmetric algorithms
+	 *
+	 * For some algorithms, it makes sense to have a "direction", such
+	 * as Cipher algorithms which can be used to encrypt or decrypt.
+	 */
 	enum Direction
 	{
-		Encode,
-		Decode
+		Encode, ///< Operate in the "forward" direction; for example, encrypting
+		Decode  ///< Operate in the "reverse" direction; for example, decrypting
 	};
 
 	enum DL_Group
@@ -780,6 +814,16 @@ namespace QCA
 	QCA_EXPORT QStringList defaultFeatures();
 	QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
 	QCA_EXPORT void setProviderPriority(const QString &name, int priority);
+
+	/**
+	 * Return a list of the current providers
+	 *
+	 * The current plugin providers are provided as a list, which you
+	 * can iterate over using ProviderListIterator.
+	 *
+	 * \sa ProviderList
+	 * \sa ProviderListIterator
+	 */
 	QCA_EXPORT const ProviderList & providers();
 	QCA_EXPORT void unloadAllPlugins();
 
@@ -1956,6 +2000,17 @@ namespace QCA
 	public:
 		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
 		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
+	};
+
+	/**
+	 * Advanced Encryption Standard %Cipher - 192 bits
+	 *
+	 */
+	class QCA_EXPORT AES192 : public Cipher
+	{
+	public:
+		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		:Cipher("aes192", m, dir, key, iv, pad, provider) {}
 	};
 
 	class QCA_EXPORT AES256 : public Cipher
