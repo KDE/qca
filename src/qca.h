@@ -1285,7 +1285,6 @@ namespace QCA
 	 when you call update() and returned when you call
 	 final().
 	*/
-	
 	class QCA_EXPORT BufferedComputation
 	{
 	public:
@@ -1311,11 +1310,26 @@ namespace QCA
 
 		/**
 		   Perform an "all in one" update, returning
-		   the result
+		   the result. This is appropriate if you
+		   have all the data in one array - just
+		   call process on that array, and you will
+		   get back the results of the computation.
+
+		   \note This will invalidate any previous
+		   computation using this object.
 		*/
 		QSecureArray process(const QSecureArray &a);
 	};
 
+	/**
+	 General superclass for filtering transformation algorithms
+
+	 A filtering computation is characterised by having the
+	 algorithm take input data in an incremental way, with results
+	 delivered for each input, or block of input. Some internal
+	 state may be managed, with the transformation completed
+	 when final() is called. 
+	*/
 	class QCA_EXPORT Filter
 	{
 	public:
@@ -1376,15 +1390,33 @@ namespace QCA
 		bool _ok;
 	};
 
+	/**
+	 General superclass for an algorithm
+	*/
 	class QCA_EXPORT Algorithm
 	{
 	public:
 		Algorithm(const Algorithm &from);
 		virtual ~Algorithm();
 
+		/**
+		   Assignment operator
+		   
+		   \param from the Algorithm to copy state from
+		*/
 		Algorithm & operator=(const Algorithm &from);
 
+		/**
+		   The type of algorithm
+		*/
 		QString type() const;
+
+		/**
+		 The name of the provider
+
+		 Each algorithm is implemented by a provider. This
+		 allows you to figure out which provider is associated
+		*/
 		Provider *provider() const;
 
 	protected:
