@@ -33,8 +33,19 @@ Provider::Context *getContext(const QString &type, const QString &provider);
 //----------------------------------------------------------------------------
 // CertificateOptions
 //----------------------------------------------------------------------------
-CertificateOptions::CertificateOptions()
+CertificateOptions::CertificateOptions(CertificateRequestFormat f)
 {
+	Q_UNUSED(f);
+}
+
+CertificateRequestFormat CertificateOptions::format() const
+{
+	return CSR_PKCS10;
+}
+
+void CertificateOptions::setFormat(CertificateRequestFormat f)
+{
+	Q_UNUSED(f);
 }
 
 bool CertificateOptions::isValid() const
@@ -403,6 +414,11 @@ bool CertificateRequest::isNull() const
 	return false;
 }
 
+CertificateRequestFormat CertificateRequest::format() const
+{
+	return CSR_PKCS10;
+}
+
 PublicKey CertificateRequest::subjectPublicKey() const
 {
 	return PublicKey();
@@ -446,6 +462,18 @@ CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, const QStr
 }
 
 CertificateRequest CertificateRequest::fromPEM(const QString &s, const QString &provider)
+{
+	Q_UNUSED(s);
+	Q_UNUSED(provider);
+	return CertificateRequest();
+}
+
+QString CertificateRequest::toString() const
+{
+	return QString();
+}
+
+CertificateRequest CertificateRequest::fromString(const QString &s, const QString &provider)
 {
 	Q_UNUSED(s);
 	Q_UNUSED(provider);

@@ -32,10 +32,20 @@ namespace QCA
 	class PublicKey;
 	class PrivateKey;
 
+	enum CertificateRequestFormat
+	{
+		CSR_PKCS10, // standard PKCS#10 format
+		CSR_SPKAC   // Netscape format
+	};
+
+	// note: in SPKAC mode, all options are ignored except for challenge
 	class QCA_EXPORT CertificateOptions
 	{
 	public:
-		CertificateOptions();
+		CertificateOptions(CertificateRequestFormat = CSR_PKCS10);
+
+		CertificateRequestFormat format() const;
+		void setFormat(CertificateRequestFormat f);
 
 		bool isValid() const;
 
@@ -127,18 +137,23 @@ namespace QCA
 
 		bool isNull() const;
 
+		CertificateRequestFormat format() const;
 		PublicKey subjectPublicKey() const;
-		bool isCA() const;
-		int pathLimit() const;
+		bool isCA() const; // PKCS#10 only
+		int pathLimit() const; // PKCS#10 only
 		QString challenge() const;
 
 		SignAlgo signatureAlgorithm() const;
 
-		// import / export
+		// import / export - PKCS#10 only
 		QSecureArray toDER() const;
 		QString toPEM() const;
 		static CertificateRequest fromDER(const QSecureArray &a, const QString &provider = QString());
 		static CertificateRequest fromPEM(const QString &s, const QString &provider = QString());
+
+		// import / export - SPKAC only
+		QString toString() const;
+		static CertificateRequest fromString(const QString &s, const QString &provider = QString());
 	};
 
 	class QCA_EXPORT CRLEntry
