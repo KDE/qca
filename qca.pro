@@ -8,6 +8,9 @@ MOC_DIR        = .moc
 OBJECTS_DIR    = .obj
 UI_DIR         = .ui
 
+VER_MAJ = 1
+VER_MIN = 0
+
 # make DLL
 win32:{
 	CONFIG += dll
