@@ -11,6 +11,15 @@ extern "C"
 static bool client_init = false;
 static bool server_init = false;
 
+/*
+  TODO:
+    - check for memory leaks
+    - security layer
+    - ability to set fields in advance
+    - public function to reset the state
+    - advanced security parameters
+*/
+
 sasl_callback_t clientcbs[] =
 {
 	{ SASL_CB_GETREALM, NULL, NULL },
@@ -286,11 +295,12 @@ public:
 		int r = sasl_server_step(con, in.data(), in.size(), &serverout, &serveroutlen);
 		if(r != SASL_OK && r != SASL_CONTINUE)
 			return Error;
-		*out = makeByteArray(serverout, serveroutlen);
-		if(r == SASL_OK)
+		if(r == SASL_OK) {
+			out->resize(0);
 			return Success;
-		else
-			return Continue;
+		}
+		*out = makeByteArray(serverout, serveroutlen);
+		return Continue;
 	}
 
 	void setAuthname(const QString &s)

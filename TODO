@@ -2,12 +2,11 @@
 * cert: properly check hostnames with wildcards
 * ssl: error signal
 * sasl: option to not support client-send-first
+* sasl: other security options
 * sasl: security layer
 
 * openssl plugin: fixmes and todos
-* cyrussasl plugin
-    fixmes and todos
-    extra sasl options and parameters?
+* cyrussasl plugin: fixmes and todos
 
 * dsa
 * diffie-hellman

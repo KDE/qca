@@ -947,7 +947,7 @@ void SASL::handleServerFirstStep(int r, const QByteArray &buf)
 
 void SASL::putStep(const QByteArray &stepData)
 {
-	d->stepData = stepData;
+	d->stepData = stepData.copy();
 	tryAgain();
 }
 
@@ -982,9 +982,7 @@ void SASL::tryAgain()
 
 	if(d->server) {
 		QByteArray out;
-		printf("serverNextStep\n");
 		r = d->c->serverNextStep(d->stepData, &out);
-		printf("finished\n");
 		if(r == QCA_SASLContext::Error) {
 			authenticated(false);
 			return;
@@ -1025,10 +1023,10 @@ void SASL::tryAgain()
 				needParams(np.auth, np.user, np.pass, np.realm);
 				return;
 			}
-			else if(r == QCA_SASLContext::Continue) {
+			//else if(r == QCA_SASLContext::Continue) {
 				nextStep(out);
-				return;
-			}
+			//	return;
+			//}
 		}
 	}
 
