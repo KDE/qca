@@ -964,6 +964,7 @@ public:
 	BIO *rbio, *wbio;
 	CertContext cc;
 	int vr;
+	bool v_eof;
 
 	TLSContext()
 	{
@@ -1009,6 +1010,12 @@ public:
 		mode = Idle;
 		cc.reset();
 		vr = QCA::TLS::Unknown;
+		v_eof = false;
+	}
+
+	bool eof() const
+	{
+		return v_eof;
 	}
 
 	bool startClient(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)
@@ -1154,20 +1161,49 @@ public:
 		vr = code;
 	}
 
-	bool encode(const QByteArray &plain, QByteArray *to_net)
+	bool encode(const QByteArray &plain, QByteArray *to_net, int *enc)
 	{
 		if(mode != Active)
 			return false;
 		appendArray(&sendQueue, plain);
 
+		int encoded = 0;
 		if(sendQueue.size() > 0) {
 			int ret = SSL_write(ssl, sendQueue.data(), sendQueue.size());
-			sendQueue.resize(0);
-			if(ret <= 0)
+
+			enum { Good, Continue, Done, Error };
+			int m;
+			if(ret <= 0) {
+				int x = SSL_get_error(ssl, ret);
+				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+					m = Continue;
+				else if(x == SSL_ERROR_ZERO_RETURN)
+					m = Done;
+				else
+					m = Error;
+			}
+			else {
+				m = Good;
+				encoded = ret;
+				int newsize = sendQueue.size() - encoded;
+				char *r = sendQueue.data();
+				memmove(r, r + encoded, newsize);
+				sendQueue.resize(newsize);
+			}
+
+			if(m == Done) {
+				sendQueue.resize(0);
+				v_eof = true;
 				return false;
+			}
+			if(m == Error) {
+				sendQueue.resize(0);
+				return false;
+			}
 		}
 
 		*to_net = readOutgoing();
+		*enc = encoded;
 		return true;
 	}
 
@@ -1186,6 +1222,10 @@ public:
 				int x = SSL_get_error(ssl, ret);
 				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
 					break;
+				else if(x == SSL_ERROR_ZERO_RETURN) {
+					v_eof = true;
+					return false;
+				}
 				else
 					return false;
 			}
@@ -1200,6 +1240,24 @@ public:
 		// could be outgoing data also
 		*to_net = readOutgoing();
 		return true;
+	}
+
+	QByteArray unprocessed()
+	{
+		QByteArray a;
+		int size = BIO_pending(rbio);
+		if(size <= 0)
+			return a;
+		a.resize(size);
+
+		int r = BIO_read(rbio, a.data(), size);
+		if(r <= 0) {
+			a.resize(0);
+			return a;
+		}
+		if(r != size)
+			a.resize(r);
+		return a;
 	}
 
 	QByteArray readOutgoing()

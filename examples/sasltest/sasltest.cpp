@@ -40,7 +40,7 @@ public:
 		connect(sasl, SIGNAL(needParams(bool, bool, bool, bool)), SLOT(sasl_needParams(bool, bool, bool, bool)));
 		connect(sasl, SIGNAL(authenticated()), SLOT(sasl_authenticated()));
 		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
-		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
+		connect(sasl, SIGNAL(readyReadOutgoing(int)), SLOT(sasl_readyReadOutgoing(int)));
 		connect(sasl, SIGNAL(error(int)), SLOT(sasl_error(int)));
 	}
 
@@ -172,7 +172,7 @@ private slots:
 		processInbuf();
 	}
 
-	void sasl_readyReadOutgoing()
+	void sasl_readyReadOutgoing(int)
 	{
 		QByteArray a = sasl->readOutgoing();
 		sock->writeBlock(a.data(), a.size());
@@ -341,7 +341,7 @@ public:
 		connect(sasl, SIGNAL(nextStep(const QByteArray &)), SLOT(sasl_nextStep(const QByteArray &)));
 		connect(sasl, SIGNAL(authenticated()), SLOT(sasl_authenticated()));
 		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
-		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
+		connect(sasl, SIGNAL(readyReadOutgoing(int)), SLOT(sasl_readyReadOutgoing(int)));
 		connect(sasl, SIGNAL(error(int)), SLOT(sasl_error(int)));
 
 		sock->setSocket(s);
@@ -446,7 +446,7 @@ private slots:
 		processInbuf();
 	}
 
-	void sasl_readyReadOutgoing()
+	void sasl_readyReadOutgoing(int)
 	{
 		QByteArray a = sasl->readOutgoing();
 		toWrite = a.size();

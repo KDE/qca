@@ -130,7 +130,7 @@ public:
 		ssl = new QCA::TLS;
 		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
-		connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
+		connect(ssl, SIGNAL(readyReadOutgoing(int)), SLOT(ssl_readyReadOutgoing(int)));
 		connect(ssl, SIGNAL(error(int)), SLOT(ssl_error(int)));
 
 		rootCerts.setAutoDelete(true);
@@ -222,7 +222,7 @@ private slots:
 		printf("%s", cs.data());
 	}
 
-	void ssl_readyReadOutgoing()
+	void ssl_readyReadOutgoing(int)
 	{
 		QByteArray a = ssl->readOutgoing();
 		sock->writeBlock(a.data(), a.size());

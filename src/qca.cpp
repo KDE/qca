@@ -865,6 +865,9 @@ public:
 		to_net.resize(0);
 		host = "";
 		hostMismatch = false;
+		cert = Cert();
+		bytesEncoded = 0;
+		tryMore = false;
 	}
 
 	void appendArray(QByteArray *a, const QByteArray &b)
@@ -877,6 +880,8 @@ public:
 	Cert cert;
 	QCA_TLSContext *c;
 	QByteArray in, out, to_net, from_net;
+	int bytesEncoded;
+	bool tryMore;
 	bool handshaken;
 	QString host;
 	bool hostMismatch;
@@ -912,6 +917,11 @@ void TLS::setCertificateStore(const QPtrList<Cert> &store)
 		d->store.append(cert->d->c);
 }
 
+void TLS::reset()
+{
+	d->reset();
+}
+
 bool TLS::startClient(const QString &host)
 {
 	d->reset();
@@ -931,6 +941,11 @@ bool TLS::startServer()
 		return false;
 	QTimer::singleShot(0, this, SLOT(update()));
 	return true;
+}
+
+bool TLS::isHandshaken() const
+{
+	return d->handshaken;
 }
 
 void TLS::write(const QByteArray &a)
@@ -981,6 +996,7 @@ void TLS::update()
 		int r = d->c->handshake(d->from_net, &a);
 		d->from_net.resize(0);
 		if(r == QCA_TLSContext::Error) {
+			reset();
 			error(ErrHandshake);
 			return;
 		}
@@ -1001,21 +1017,37 @@ void TLS::update()
 	}
 
 	if(d->handshaken) {
-		if(!d->out.isEmpty()) {
+		if(!d->out.isEmpty() || d->tryMore) {
+			d->tryMore = false;
 			QByteArray a;
-			bool ok = d->c->encode(d->out, &a);
+			int enc;
+			bool more = false;
+			bool ok = d->c->encode(d->out, &a, &enc);
+			bool eof = d->c->eof();
+			if(ok && enc < (int)d->out.size())
+				more = true;
 			d->out.resize(0);
+			if(eof)
+				return;
 			if(!ok) {
+				reset();
 				error(ErrCrypt);
 				return;
 			}
+			d->bytesEncoded += enc;
+			if(more)
+				d->tryMore = true;
 			d->appendArray(&d->to_net, a);
 		}
 		if(!d->from_net.isEmpty() || force_read) {
 			QByteArray a, b;
 			bool ok = d->c->decode(d->from_net, &a, &b);
+			bool eof = d->c->eof();
 			d->from_net.resize(0);
+			if(eof)
+				return;
 			if(!ok) {
+				reset();
 				error(ErrCrypt);
 				return;
 			}
@@ -1027,8 +1059,11 @@ void TLS::update()
 			readyRead();
 	}
 
-	if(!d->to_net.isEmpty())
-		readyReadOutgoing();
+	if(!d->to_net.isEmpty()) {
+		int bytes = d->bytesEncoded;
+		d->bytesEncoded = 0;
+		readyReadOutgoing(bytes);
+	}
 }
 
 
@@ -1387,7 +1422,7 @@ void SASL::write(const QByteArray &a)
 	int oldsize = d->outbuf.size();
 	d->outbuf.resize(oldsize + b.size());
 	memcpy(d->outbuf.data() + oldsize, b.data(), b.size());
-	readyReadOutgoing();
+	readyReadOutgoing(a.size());
 }
 
 QByteArray SASL::read()

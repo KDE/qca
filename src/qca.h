@@ -314,8 +314,10 @@ namespace QCA
 		void setCertificate(const Cert &cert, const RSAKey &key);
 		void setCertificateStore(const QPtrList<Cert> &store);  // note: store must persist
 
+		void reset();
 		bool startClient(const QString &host="");
 		bool startServer();
+		bool isHandshaken() const;
 
 		// plain (application side)
 		void write(const QByteArray &a);
@@ -332,7 +334,7 @@ namespace QCA
 	signals:
 		void handshaken();
 		void readyRead();
-		void readyReadOutgoing();
+		void readyReadOutgoing(int plainBytes);
 		void error(int);
 
 	private slots:
@@ -404,7 +406,7 @@ namespace QCA
 
 		// for security layer
 		void readyRead();
-		void readyReadOutgoing();
+		void readyReadOutgoing(int plainBytes);
 
 		// error
 		void error(int);

@@ -60,7 +60,7 @@ public:
 		ssl = new QCA::TLS;
 		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
-		connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
+		connect(ssl, SIGNAL(readyReadOutgoing(int)), SLOT(ssl_readyReadOutgoing(int)));
 		connect(ssl, SIGNAL(error(int)), SLOT(ssl_error(int)));
 
 		cert.fromPEM(pemdata_cert);
@@ -163,7 +163,7 @@ private slots:
 		ssl->write(b);
 	}
 
-	void ssl_readyReadOutgoing()
+	void ssl_readyReadOutgoing(int)
 	{
 		QByteArray a = ssl->readOutgoing();
 

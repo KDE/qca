@@ -134,8 +134,9 @@ public:
 	virtual bool startServer(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)=0;
 
 	virtual int handshake(const QByteArray &in, QByteArray *out)=0;
-	virtual bool encode(const QByteArray &plain, QByteArray *to_net)=0;
+	virtual bool encode(const QByteArray &plain, QByteArray *to_net, int *encoded)=0;
 	virtual bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net)=0;
+	virtual bool eof() const=0;
 
 	virtual QCA_CertContext *peerCertificate() const=0;
 	virtual int validityResult() const=0;
