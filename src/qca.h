@@ -254,16 +254,22 @@ public:
 	QBigInteger & operator-=(const QBigInteger &b);
 
 	/** 
-	 * Output %QBigInteger as a QSecureArray
+	 * Output %QBigInteger as a byte array, useful for storage or
+	 * transmission.  The format is a binary integer in sign-extended
+	 * network-byte-order.
+	 *
+	 * \sa void fromArray(const QSecureArray &a);
 	 */
 	QSecureArray toArray() const;
 
 	/**
-	 * Assign from a QSecureArray
+	 * Assign from an array.  The input is expected to be a binary integer
+	 * in sign-extended network-byte-order.
 	 *
 	 * \param a a QSecureArray that represents an integer
-	 * 
+	 *
 	 * \sa QBigInteger(const QSecureArray &a);
+	 * \sa QSecureArray toArray() const;
 	 */
 	void fromArray(const QSecureArray &a);
 
