@@ -1365,7 +1365,7 @@ public:
 
 	int qcaVersion() const
 	{
-		return 1;
+		return QCA_PLUGIN_VERSION;
 	}
 
 	int capabilities() const

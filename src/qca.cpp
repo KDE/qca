@@ -1,3 +1,23 @@
+/*
+ * qca.cpp - Qt Cryptographic Architecture
+ * Copyright (C) 2003  Justin Karneges
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #include"qca.h"
 
 #include<qptrlist.h>
@@ -18,14 +38,13 @@
 #define PLUGIN_EXT "so"
 #endif
 
-#define QCA_PLUGIN_VERSION 1
-
 using namespace QCA;
 
 class ProviderItem
 {
 public:
 	QCAProvider *p;
+	QString fname;
 
 	static ProviderItem *load(const QString &fname)
 	{
@@ -46,6 +65,7 @@ public:
 			return 0;
 		}
 		ProviderItem *i = new ProviderItem(lib, p);
+		i->fname = fname;
 		return i;
 	}
 
@@ -84,6 +104,16 @@ private:
 static QPtrList<ProviderItem> providerList;
 static bool qca_init = false;
 
+static bool plugin_have(const QString &fname)
+{
+	QPtrListIterator<ProviderItem> it(providerList);
+	for(ProviderItem *i; (i = it.current()); ++it) {
+		if(i->fname == fname)
+			return true;
+	}
+	return false;
+}
+
 static void plugin_scan()
 {
 	QStringList dirs = QApplication::libraryPaths();
@@ -100,9 +130,14 @@ static void plugin_scan()
 				continue;
 			if(fi.extension() != PLUGIN_EXT)
 				continue;
-			//printf("f=[%s]\n", fi.filePath().latin1());
+			QString fname = fi.filePath();
 
-			ProviderItem *i = ProviderItem::load(fi.filePath());
+			// don't load the same plugin again!
+			if(plugin_have(fname))
+				continue;
+			//printf("f=[%s]\n", fname.latin1());
+
+			ProviderItem *i = ProviderItem::load(fname);
 			if(!i)
 				continue;
 			if(i->p->qcaVersion() != QCA_PLUGIN_VERSION) {
