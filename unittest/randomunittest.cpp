@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "randomunittest.h"
-#include <QtCrypto/QtCrypto>
+#include <QtCrypto>
 
 RandomUnitTest::RandomUnitTest()
     : Tester()

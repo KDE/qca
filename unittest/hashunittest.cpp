@@ -23,7 +23,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "hashunittest.h"
-#include <QtCrypto/QtCrypto>
+#include <QtCrypto>
 #include <qfile.h>
 
 HashUnitTest::HashUnitTest()

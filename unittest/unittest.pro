@@ -2,7 +2,7 @@ TEMPLATE = app
 CONFIG += qt warn_on console debug
 TARGET = qca-unittest
 
-INCLUDEPATH += ../include
+INCLUDEPATH += ../include/QtCrypto
 LIBS += -L..
 
 HEADERS += kunittest.h qtester.h tester.h 

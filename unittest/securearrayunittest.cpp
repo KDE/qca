@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "securearrayunittest.h"
-#include <QtCrypto/QtCrypto>
+#include <QtCrypto>
 
 
 SecureArrayUnitTest::SecureArrayUnitTest()

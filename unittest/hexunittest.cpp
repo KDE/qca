@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "hexunittest.h"
-#include <QtCrypto/QtCrypto>
+#include <QtCrypto>
 
 HexUnitTest::HexUnitTest()
     : Tester()
@@ -56,5 +56,21 @@ void HexUnitTest::allTests()
       result = hexObject.decodeString(hexTestValues[n].encoded);
       CHECK( result, hexTestValues[n].raw);
     }
+
+    // test incremental updates
+    hexObject.setup(QCA::Encode);
+    hexObject.clear();
+    hexObject.update(QSecureArray("ab"));
+    CHECK( hexObject.ok(), true );
+    hexObject.update(QSecureArray("cd"));
+    CHECK( hexObject.ok(), true );
+    hexObject.final();
+    CHECK( hexObject.ok(), true );
+
+    //test broken input
+    hexObject.setup(QCA::Decode);
+    hexObject.clear();
+    hexObject.update(QSecureArray("-="));
+    CHECK(hexObject.ok(), false);
 }
 

@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "staticunittest.h"
-#include <QtCrypto/QtCrypto>
+#include <QtCrypto>
 
 StaticUnitTest::StaticUnitTest()
     : Tester()
