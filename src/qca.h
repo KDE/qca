@@ -317,6 +317,7 @@ namespace QCA
 		void reset();
 		bool startClient(const QString &host="");
 		bool startServer();
+		void close();
 		bool isHandshaken() const;
 
 		// plain (application side)
@@ -335,6 +336,7 @@ namespace QCA
 		void handshaken();
 		void readyRead();
 		void readyReadOutgoing(int plainBytes);
+		void closed(const QByteArray &leftover);
 		void error(int);
 
 	private slots:

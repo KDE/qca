@@ -1,5 +1,4 @@
 * plugins: thread safety ?
-* tls: support shutting down the session
 
 * dsa
 * diffie-hellman

@@ -860,6 +860,7 @@ public:
 	void reset()
 	{
 		handshaken = false;
+		closing = false;
 		in.resize(0);
 		out.resize(0);
 		from_net.resize(0);
@@ -886,6 +887,7 @@ public:
 	bool handshaken;
 	QString host;
 	bool hostMismatch;
+	bool closing;
 
 	Cert ourCert;
 	RSAKey ourKey;
@@ -944,6 +946,15 @@ bool TLS::startServer()
 	return true;
 }
 
+void TLS::close()
+{
+	if(!d->handshaken || d->closing)
+		return;
+
+	d->closing = true;
+	QTimer::singleShot(0, this, SLOT(update()));
+}
+
 bool TLS::isHandshaken() const
 {
 	return d->handshaken;
@@ -991,79 +1002,107 @@ int TLS::certificateValidityResult() const
 void TLS::update()
 {
 	bool force_read = false;
+	bool eof = false;
+	bool done = false;
+	QByteArray leftover;
 
-	if(!d->handshaken) {
+	if(d->closing) {
 		QByteArray a;
-		int r = d->c->handshake(d->from_net, &a);
+		int r = d->c->shutdown(d->from_net, &a);
 		d->from_net.resize(0);
 		if(r == QCA_TLSContext::Error) {
 			reset();
 			error(ErrHandshake);
 			return;
 		}
-		d->appendArray(&d->to_net, a);
 		if(r == QCA_TLSContext::Success) {
-			QCA_CertContext *cc = d->c->peerCertificate();
-			if(cc && !d->host.isEmpty() && d->c->validityResult() == QCA::TLS::Valid) {
-				if(!cc->matchesAddress(d->host))
-					d->hostMismatch = true;
-			}
-			d->cert.fromContext(cc);
-			d->handshaken = true;
-			handshaken();
-
-			// there is a teeny tiny possibility that incoming data awaits.  let us get it.
-			force_read = true;
+			leftover = d->c->unprocessed().copy();
+			done = true;
 		}
+		d->appendArray(&d->to_net, a);
 	}
-
-	if(d->handshaken) {
-		if(!d->out.isEmpty() || d->tryMore) {
-			d->tryMore = false;
+	else {
+		if(!d->handshaken) {
 			QByteArray a;
-			int enc;
-			bool more = false;
-			bool ok = d->c->encode(d->out, &a, &enc);
-			bool eof = d->c->eof();
-			if(ok && enc < (int)d->out.size())
-				more = true;
-			d->out.resize(0);
-			if(eof)
-				return;
-			if(!ok) {
-				reset();
-				error(ErrCrypt);
-				return;
-			}
-			d->bytesEncoded += enc;
-			if(more)
-				d->tryMore = true;
-			d->appendArray(&d->to_net, a);
-		}
-		if(!d->from_net.isEmpty() || force_read) {
-			QByteArray a, b;
-			bool ok = d->c->decode(d->from_net, &a, &b);
-			bool eof = d->c->eof();
+			int r = d->c->handshake(d->from_net, &a);
 			d->from_net.resize(0);
-			if(eof)
-				return;
-			if(!ok) {
+			if(r == QCA_TLSContext::Error) {
 				reset();
-				error(ErrCrypt);
+				error(ErrHandshake);
 				return;
 			}
-			d->appendArray(&d->in, a);
-			d->appendArray(&d->to_net, b);
+			d->appendArray(&d->to_net, a);
+			if(r == QCA_TLSContext::Success) {
+				QCA_CertContext *cc = d->c->peerCertificate();
+				if(cc && !d->host.isEmpty() && d->c->validityResult() == QCA::TLS::Valid) {
+					if(!cc->matchesAddress(d->host))
+						d->hostMismatch = true;
+				}
+				d->cert.fromContext(cc);
+				d->handshaken = true;
+				handshaken();
+
+				// there is a teeny tiny possibility that incoming data awaits.  let us get it.
+				force_read = true;
+			}
 		}
 
-		if(!d->in.isEmpty())
-			readyRead();
+		if(d->handshaken) {
+			if(!d->out.isEmpty() || d->tryMore) {
+				d->tryMore = false;
+				QByteArray a;
+				int enc;
+				bool more = false;
+				bool ok = d->c->encode(d->out, &a, &enc);
+				eof = d->c->eof();
+				if(ok && enc < (int)d->out.size())
+					more = true;
+				d->out.resize(0);
+				if(!eof) {
+					if(!ok) {
+						reset();
+						error(ErrCrypt);
+						return;
+					}
+					d->bytesEncoded += enc;
+					if(more)
+						d->tryMore = true;
+					d->appendArray(&d->to_net, a);
+				}
+			}
+			if(!d->from_net.isEmpty() || force_read) {
+				QByteArray a, b;
+				bool ok = d->c->decode(d->from_net, &a, &b);
+				eof = d->c->eof();
+				d->from_net.resize(0);
+				if(!ok) {
+					reset();
+					error(ErrCrypt);
+					return;
+				}
+				d->appendArray(&d->in, a);
+				d->appendArray(&d->to_net, b);
+			}
+
+			if(!d->in.isEmpty())
+				readyRead();
+		}
 	}
 
 	if(!d->to_net.isEmpty()) {
 		int bytes = d->bytesEncoded;
 		d->bytesEncoded = 0;
 		readyReadOutgoing(bytes);
+	}
+
+	if(eof) {
+		close();
+		return;
+	}
+
+	if(d->closing && done) {
+		reset();
+		closed(leftover);
 	}
 }
 

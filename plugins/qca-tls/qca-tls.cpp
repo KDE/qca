@@ -949,7 +949,7 @@ class TLSContext : public QCA_TLSContext
 {
 public:
 	enum { Good, TryAgain, Bad };
-	enum { Idle, Connect, Accept, Handshake, Active };
+	enum { Idle, Connect, Accept, Handshake, Active, Closing };
 
 	bool serv;
 	int mode;
@@ -988,7 +988,6 @@ public:
 	void reset()
 	{
 		if(ssl) {
-			SSL_shutdown(ssl);
 			SSL_free(ssl);
 			ssl = 0;
 		}
@@ -1140,6 +1139,29 @@ public:
 			return Continue;
 	}
 
+	int shutdown(const QByteArray &in, QByteArray *out)
+	{
+		if(!in.isEmpty())
+			BIO_write(rbio, in.data(), in.size());
+
+		int ret = doShutdown();
+		if(ret == Bad) {
+			reset();
+			return Error;
+		}
+
+		*out = readOutgoing();
+
+		if(ret == Good) {
+			mode = Idle;
+			return Success;
+		}
+		else {
+			mode = Closing;
+			return Continue;
+		}
+	}
+
 	void getCert()
 	{
 		// verify the certificate
@@ -1215,23 +1237,23 @@ public:
 			BIO_write(rbio, from_net.data(), from_net.size());
 
 		QByteArray a;
-		while(1) {
+		while(!v_eof) {
 			a.resize(8192);
 			int ret = SSL_read(ssl, a.data(), a.size());
-			if(ret <= 0) {
+			if(ret > 0) {
+				if(ret != (int)a.size())
+					a.resize(ret);
+				appendArray(&recvQueue, a);
+			}
+			else if(ret <= 0) {
 				int x = SSL_get_error(ssl, ret);
 				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
 					break;
-				else if(x == SSL_ERROR_ZERO_RETURN) {
+				else if(x == SSL_ERROR_ZERO_RETURN)
 					v_eof = true;
-					return false;
-				}
 				else
 					return false;
 			}
-			if(ret != (int)a.size())
-				a.resize(ret);
-			appendArray(&recvQueue, a);
 		}
 
 		*plain = recvQueue.copy();
@@ -1321,6 +1343,21 @@ public:
 		else if(ret == 0)
 			return Bad;
 		return Good;
+	}
+
+	int doShutdown()
+	{
+		int ret = SSL_shutdown(ssl);
+		if(ret >= 1)
+			return Good;
+		else {
+			if(ret == 0)
+				return TryAgain;
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			return Bad;
+		}
 	}
 
 	QCA_CertContext *peerCertificate() const

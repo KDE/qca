@@ -2,6 +2,7 @@
 #include<qfile.h>
 #include<qsocket.h>
 #include<qserversocket.h>
+#include<qvaluelist.h>
 #include<qtimer.h>
 #include"qca.h"
 
@@ -45,10 +46,72 @@ char pemdata_privkey[] =
 	"Or+AL56/EKfiogNnFipgaXIbb/xj785Cob6v96XoW1I=\n"
 	"-----END RSA PRIVATE KEY-----\n";
 
+class LayerTracker
+{
+public:
+	struct Item
+	{
+		int plain;
+		int encoded;
+	};
+
+	LayerTracker()
+	{
+		p = 0;
+	}
+
+	void reset()
+	{
+		p = 0;
+		list.clear();
+	}
+
+	void addPlain(int plain)
+	{
+		p += plain;
+	}
+
+	void specifyEncoded(int encoded, int plain)
+	{
+		// can't specify more bytes than we have
+		if(plain > p)
+			plain = p;
+		p -= plain;
+		Item i;
+		i.plain = plain;
+		i.encoded = encoded;
+		list += i;
+	}
+
+	int finished(int encoded)
+	{
+		int plain = 0;
+		for(QValueList<Item>::Iterator it = list.begin(); it != list.end();) {
+			Item &i = *it;
+
+			// not enough?
+			if(encoded < i.encoded) {
+				i.encoded -= encoded;
+				break;
+			}
+
+			encoded -= i.encoded;
+			plain += i.plain;
+			it = list.remove(it);
+		}
+		return plain;
+	}
+
+	int p;
+	QValueList<Item> list;
+};
+
 class SecureServerTest : public QServerSocket
 {
 	Q_OBJECT
 public:
+	enum { Idle, Handshaking, Active, Closing };
+
 	SecureServerTest(int _port) : QServerSocket(_port), port(_port)
 	{
 		sock = new QSocket;
@@ -61,12 +124,13 @@ public:
 		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 		connect(ssl, SIGNAL(readyReadOutgoing(int)), SLOT(ssl_readyReadOutgoing(int)));
+		connect(ssl, SIGNAL(closed(const QByteArray &)), SLOT(ssl_closed(const QByteArray &)));
 		connect(ssl, SIGNAL(error(int)), SLOT(ssl_error(int)));
 
 		cert.fromPEM(pemdata_cert);
 		privkey.fromPEM(pemdata_privkey);
 
-		fin_mode = 0;
+		mode = Idle;
 	}
 
 	~SecureServerTest()
@@ -99,6 +163,7 @@ public:
 			printf("throwing away extra connection\n");
 			return;
 		}
+		mode = Handshaking;
 		sock->setSocket(s);
 		printf("Connection received!  Starting TLS handshake...\n");
 		ssl->setCertificate(cert, privkey);
@@ -125,13 +190,14 @@ private slots:
 
 	void sock_bytesWritten(int x)
 	{
-		if(fin_mode == 2) {
-			fin_bytes -= x;
-			// last of the bytes written that we care about?
-			if(fin_bytes == 0) {
-				printf("Closing.\n");
-				sock->close();
-				fin_mode = 0;
+		if(mode == Active && sent) {
+			int bytes = layer.finished(x);
+			bytesLeft -= bytes;
+
+			if(bytesLeft == 0) {
+				mode = Closing;
+				printf("SSL shutdown\n");
+				ssl->close();
 			}
 		}
 	}
@@ -144,6 +210,10 @@ private slots:
 	void ssl_handshaken()
 	{
 		printf("Successful SSL handshake.  Waiting for newline.\n");
+		layer.reset();
+		bytesLeft = 0;
+		sent = false;
+		mode = Active;
 	}
 
 	void ssl_readyRead()
@@ -159,21 +229,22 @@ private slots:
 		memcpy(b.data(), cs.data(), b.size());
 
 		printf("Sending test response...\n");
-		fin_mode = 1; // we want to shut down after this block is written
+		sent = true;
+		layer.addPlain(b.size());
 		ssl->write(b);
 	}
 
-	void ssl_readyReadOutgoing(int)
+	void ssl_readyReadOutgoing(int plainBytes)
 	{
 		QByteArray a = ssl->readOutgoing();
-
-		// The readyReadOutgoing signal following a write will have ALL written data encrypted,
-		// so to ensure data is sent, just ensure the whole encrypted data is sent.
-		if(fin_mode == 1) {
-			fin_bytes = a.size(); // we want to make sure all of it is sent
-			fin_mode = 2;
-		}
+		layer.specifyEncoded(a.size(), plainBytes);
 		sock->writeBlock(a.data(), a.size());
+	}
+
+	void ssl_closed(const QByteArray &)
+	{
+		printf("Closing.\n");
+		sock->close();
 	}
 
 	void ssl_error(int x)
@@ -195,8 +266,10 @@ private:
 	QCA::Cert cert;
 	QCA::RSAKey privkey;
 
-	int fin_mode;
-	int fin_bytes;
+	bool sent;
+	int mode;
+	int bytesLeft;
+	LayerTracker layer;
 };
 
 #include"sslservtest.moc"
