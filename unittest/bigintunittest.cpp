@@ -25,7 +25,7 @@
 #include "bigintunittest.h"
 #include "qca.h"
 
-#define BUILD_WITH_NEGATIVE_CONSTRUCTOR 0
+#define BUILD_WITH_NEGATIVE_CONSTRUCTOR 1
 BigIntUnitTest::BigIntUnitTest()
     : Tester()
 {
@@ -34,8 +34,15 @@ BigIntUnitTest::BigIntUnitTest()
 
 void BigIntUnitTest::allTests()
 {
-    // Botan's addition tests
     QBigInteger result;
+
+    // Some string conversion tests
+    CHECK( QBigInteger("255").toString(), QBigInteger(255).toString() );
+    CHECK( QBigInteger("-255").toString(), QBigInteger(-255).toString() );
+    CHECK( QBigInteger("255").toString(), QString("255") );
+    CHECK( QBigInteger("-255").toString(), QString("-255") );
+
+    // Botan's addition tests
     result = QBigInteger( 255 ) += QBigInteger( 1 );
     CHECK( result.toString(), QBigInteger( 256 ).toString() );
 
