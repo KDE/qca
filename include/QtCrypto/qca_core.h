@@ -27,6 +27,8 @@
 #include <QString>
 #include <QStringList>
 #include <QList>
+#include <QSharedData>
+#include <QSharedDataPointer>
 #include "qca_export.h"
 #include "qca_tools.h"
 
@@ -722,6 +724,7 @@ namespace QCA
 		   \param from the Algorithm to copy from
 		*/
 		Algorithm(const Algorithm &from);
+
 		virtual ~Algorithm();
 
 		/**
@@ -761,7 +764,12 @@ namespace QCA
 		/**
 		   The context associated with this algorithm
 		*/
-		Provider::Context *context() const;
+		Provider::Context *context();
+
+		/**
+		   The context associated with this algorithm
+		*/
+		const Provider::Context *context() const;
 
 		/**
 		   Set the Provider for this algorithm
@@ -778,19 +786,9 @@ namespace QCA
 		*/
 		void change(const QString &type, const QString &provider);
 
-		/**
-		   Perform a deep copy of this algorithm
-
-		   QCA makes all Algorithms implicitly shared
-		   (that is, copy on write). If you need to make
-		   sure that the internal data is not being shared,
-		   call this method.
-		*/
-		void detach();
-
 	private:
 		class Private;
-		Private *d;
+		QSharedDataPointer<Private> d;
 	};
 
 	/**

@@ -145,7 +145,7 @@ PublicKey PKey::toPublicKey() const
 	if(!k.isNull() && k.isPrivate())
 	{
 		printf("before detach: %d\n", ((PKeyContext *)k.context())->key()->isNull());
-		k.detach();
+		//k.detach();
 		printf("before convert: %d\n", ((PKeyContext *)k.context())->key()->isNull());
 		((PKeyContext *)k.context())->key()->convertToPublic();
 		printf("after convert: %d\n", ((PKeyContext *)k.context())->key()->isNull());
@@ -280,7 +280,7 @@ QSecureArray PublicKey::encrypt(EncryptionAlgorithm, const QSecureArray &a)
 	printf("rc->isnull=%d\n", rc->isNull());
 	printf("pkey.isnull=%d\n", isNull());
 	printf("Detaching\n");
-	detach();
+	//detach();
 	printf("done\n");
 	return ((PKeyContext *)context())->key()->encrypt(a);
 }
@@ -397,7 +397,7 @@ bool PrivateKey::canSign() const
 
 bool PrivateKey::decrypt(EncryptionAlgorithm, const QSecureArray &in, QSecureArray *out)
 {
-	detach();
+	//detach();
 	return ((PKeyContext *)context())->key()->decrypt(in, out);
 }
 

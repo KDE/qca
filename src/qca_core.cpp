@@ -419,164 +419,103 @@ QSecureArray Filter::process(const QSecureArray &a)
 //----------------------------------------------------------------------------
 // Algorithm
 //----------------------------------------------------------------------------
-class Algorithm::Private
+class Algorithm::Private : public QSharedData
 {
 public:
-	// combine Provider::Context with a reference count
-	class Item
+	Provider::Context *c;
+
+	Private(Provider::Context *context)
 	{
-	public:
-		Provider::Context *c;
-		int refs;
-
-		Item(Provider::Context *_c)
-		{
-			c = _c;
-			refs = 1;
-		}
-
-		~Item()
-		{
-			--refs;
-			if(refs == 0)
-				delete c;
-		}
-
-		void addRef()
-		{
-			++refs;
-		}
-	};
-
-	Item *i;
-
-	Private()
-	{
-		i = 0;
+		c = context;
+		//printf("** [%p] Algorithm Created\n", c);
 	}
 
-	Private(const Private &from)
+	Private(const Private &from) : QSharedData(from)
 	{
-		*this = from;
+		c = from.c->clone();
+		//printf("** [%p] Algorithm Copied (to [%p])\n", from.c, c);
 	}
 
 	~Private()
 	{
-		delItem();
-	}
-
-	Private & operator=(const Private &from)
-	{
-		setItem(from.i);
-		return *this;
-	}
-
-	void setItem(Item *ni)
-	{
-		delItem();
-		if(ni)
-		{
-			ni->addRef();
-			i = ni;
-		}
-	}
-
-	void delItem()
-	{
-		delete i;
-		i = 0;
-	}
-
-	void setContext(Provider::Context *c)
-	{
-		delItem();
-		if(c)
-			i = new Item(c);
-	}
-
-	void detach()
-	{
-		if(!i)
-			return;
-
-		if(i->refs > 1)
-		{
-			Item *ni = new Item(i->c->clone());
-			delItem();
-			i = ni;
-		}
+		//printf("** [%p] Algorithm Destroyed\n", c);
+		delete c;
 	}
 };
 
 Algorithm::Algorithm()
 {
-	d = new Private;
+	d = 0;
 }
 
 Algorithm::Algorithm(const QString &type, const QString &provider)
 {
-	d = new Private;
+	d = 0;
 	change(type, provider);
 }
 
 Algorithm::Algorithm(const Algorithm &from)
 {
-	printf("algo copy\n");
-	d = new Private(*from.d);
+	d = 0;
+	*this = from;
 }
 
 Algorithm::~Algorithm()
 {
-	delete d;
 }
 
 Algorithm & Algorithm::operator=(const Algorithm &from)
 {
-	printf("algo=\n");
-	*d = *from.d;
+	d = from.d;
 	return *this;
 }
 
 QString Algorithm::type() const
 {
-	if(d->i)
-		return d->i->c->type();
+	if(d)
+		return d->c->type();
 	else
 		return QString();
 }
 
 Provider *Algorithm::provider() const
 {
-	if(d->i)
-		return d->i->c->provider();
+	if(d)
+		return d->c->provider();
 	else
 		return 0;
 }
 
-void Algorithm::detach()
+Provider::Context *Algorithm::context()
 {
-	d->detach();
+	if(d)
+		return d->c;
+	else
+		return 0;
 }
 
-Provider::Context *Algorithm::context() const
+const Provider::Context *Algorithm::context() const
 {
-	if(d->i)
-		return d->i->c;
+	if(d)
+		return d->c;
 	else
 		return 0;
 }
 
 void Algorithm::change(Provider::Context *c)
 {
-	d->setContext(c);
+	if(c)
+		d = new Private(c);
+	else
+		d = 0;
 }
 
 void Algorithm::change(const QString &type, const QString &provider)
 {
 	if(!type.isEmpty())
-		d->setContext(getContext(type, provider));
+		change(getContext(type, provider));
 	else
-		d->setContext(0);
+		change(0);
 }
 
 //----------------------------------------------------------------------------

@@ -19,7 +19,6 @@
   standardize on count() vs size() when iterating?
 
 * finish API:
-  algorithm: qshareddata?
   qcaprovider.h
 
 * build system:
