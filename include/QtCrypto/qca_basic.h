@@ -1086,7 +1086,6 @@ namespace QCA
 		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
 	};
 
-
 	/**
 	 * Keyed %Hash message authentication codes
 	 *
@@ -1141,7 +1140,6 @@ namespace QCA
 		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = QString() ) : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
 	};
 
-
 	/**
 	 * General superclass for key derivation algorithms.
 	 *
@@ -1158,7 +1156,6 @@ namespace QCA
 		 * Standard copy constructor
 		 */
 		KeyDerivationFunction(const KeyDerivationFunction &from);
-
 		~KeyDerivationFunction();
 
 		/**
@@ -1173,10 +1170,7 @@ namespace QCA
 		 *
 		 * \return the derived key
 		 */
-		SymmetricKey makeKey(const QSecureArray &secret,
-				     const InitializationVector &salt,
-				     unsigned int keyLength,
-				     unsigned int iterationCount);
+		SymmetricKey makeKey(const QSecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount);
 
 		/**
 		 * Construct the name of the algorithm
@@ -1201,7 +1195,7 @@ namespace QCA
 	class QCA_EXPORT PBKDF1 : public KeyDerivationFunction
 	{
 	public:
-	    PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString() ) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
+		PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString() ) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
 	};
 }
 
