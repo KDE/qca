@@ -1372,6 +1372,7 @@ namespace QCA
 	class DSAPrivateKey;
 	class DHPublicKey;
 	class DHPrivateKey;
+	class Certificate;
 
 	class QCA_EXPORT PKey : public Algorithm
 	{
@@ -1449,6 +1450,7 @@ namespace QCA
 
 	private:
 		friend class PrivateKey;
+		friend class Certificate;
 	};
 
 	class QCA_EXPORT PrivateKey : public PKey
@@ -1573,6 +1575,67 @@ namespace QCA
 		DL_Group domain() const;
 		QBigInteger x() const;
 		QBigInteger y() const;
+	};
+
+	class Store;
+
+	class QCA_EXPORT Certificate : public Algorithm
+	{
+	public:
+		typedef QMap<QString, QString> Info;
+
+		Certificate();
+
+		bool isNull() const;
+
+		int version() const;
+		QDateTime notValidBefore() const;
+		QDateTime notValidAfter() const;
+
+		Info subjectInfo() const;
+		Info issuerInfo() const;
+
+		QString commonName() const;
+		QBigInteger serialNumber() const;
+		PublicKey subjectPublicKey() const;
+
+		// import / export
+		QSecureArray toDER() const;
+		QString toPEM() const;
+		static Certificate fromDER(const QSecureArray &a, const QString &provider = "");
+		static Certificate fromPEM(const QString &s, const QString &provider = "");
+
+		bool matchesAddress(const QString &realHost) const;
+
+	private:
+		friend class Store;
+	};
+
+	class QCA_EXPORT CRL : public Algorithm
+	{
+	public:
+		CRL();
+
+		bool isNull() const;
+
+		// import / export
+		QSecureArray toDER() const;
+		QString toPEM() const;
+		static CRL fromDER(const QSecureArray &a, const QString &provider = "");
+		static CRL fromPEM(const QString &s, const QString &provider = "");
+
+	private:
+		friend class Store;
+	};
+
+	class QCA_EXPORT Store : public Algorithm
+	{
+	public:
+		Store(const QString &provider = "");
+
+		void addCertificate(const Certificate &cert, bool trusted = false);
+		void addCRL(const CRL &crl);
+		CertValidity validate(const Certificate &cert, CertUsage u = Any) const;
 	};
 
 #if 0
