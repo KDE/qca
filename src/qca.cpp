@@ -33,7 +33,7 @@
 namespace QCA {
 
 // from qca_tools
-void botan_init(int prealloc, bool mmap);
+bool botan_init(int prealloc, bool mmap);
 void botan_deinit();
 
 //----------------------------------------------------------------------------
@@ -43,6 +43,7 @@ static QCA::ProviderManager *manager = 0;
 static QCA::Provider *default_provider = 0;
 static QCA::Random *global_rng = 0;
 static bool qca_init = false;
+static bool qca_secmem = false;
 
 static bool features_have(const QStringList &have, const QStringList &want)
 {
@@ -66,19 +67,17 @@ void init(MemoryMode mode, int prealloc)
 
 	qca_init = true;
 
-	// FIXME: Practical should test for mlock before resorting to mmap
-	// FIXME: make haveSecureMemory() return the right answer
-	bool use_mmap = false;
+	bool allow_mmap_fallback = false;
 	bool drop_root = false;
 	if(mode == Practical)
 	{
-		use_mmap = true;
+		allow_mmap_fallback = true;
 		drop_root = true;
 	}
 	else if(mode == Locking)
 		drop_root = true;
 
-	botan_init(prealloc, use_mmap);
+	qca_secmem = botan_init(prealloc, allow_mmap_fallback);
 
 	if(drop_root)
 	{
@@ -99,13 +98,13 @@ void deinit()
 	manager = 0;
 
 	botan_deinit();
+	qca_secmem = false;
 	qca_init = false;
 }
 
 bool haveSecureMemory()
 {
-	// FIXME
-	return true;
+	return qca_secmem;
 }
 
 bool isSupported(int capabilities)

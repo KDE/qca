@@ -20,7 +20,30 @@
 
 #include "qca.h"
 
+#ifdef Q_OS_UNIX
+# include <stdlib.h>
+# include <sys/mman.h>
+#endif
 #include "botantools/botantools.h"
+
+using namespace QCA;
+
+static bool can_lock()
+{
+#ifdef Q_OS_UNIX
+	bool ok = false;
+	void *d = malloc(256);
+	if(mlock(d, 256) == 0)
+	{
+		munlock(d, 256);
+		ok = true;
+	}
+	free(d);
+	return ok;
+#else
+	return true;
+#endif
+}
 
 static void add_mmap()
 {
@@ -34,23 +57,32 @@ namespace QCA {
 
 // Botan shouldn't throw any exceptions in our init/deinit.
 
-void botan_init(int prealloc, bool mmap)
+bool botan_init(int prealloc, bool mmap)
 {
 	// 64k minimum
 	if(prealloc < 64)
 		prealloc = 64;
 
-	botan_memory_chunk = 64 * 1024;
-	botan_prealloc = prealloc / 64;
+	Botan::botan_memory_chunk = 64 * 1024;
+	Botan::botan_prealloc = prealloc / 64;
 	if(prealloc % 64 != 0)
-		++botan_prealloc;
+		++Botan::botan_prealloc;
 
 	Botan::Init::set_mutex_type(new Botan::Qt_Mutex);
 	Botan::Init::startup_memory_subsystem();
 
-	Botan::set_default_allocator("locking");
-	if(mmap)
+	bool secmem = false;
+	if(can_lock())
+	{
+		Botan::set_default_allocator("locking");
+		secmem = true;
+	}
+	else if(mmap)
+	{
 		add_mmap();
+		secmem = true;
+	}
+	return secmem;
 }
 
 void botan_deinit()
