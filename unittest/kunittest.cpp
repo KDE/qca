@@ -35,6 +35,7 @@
 #include "symmetrickeyunittest.h"
 #include "randomunittest.h"
 #include "cipherunittest.h"
+#include "kdfunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -56,6 +57,7 @@ void KUnitTest::registerTests()
     ADD_TEST( SymmetricKeyUnitTest );
     ADD_TEST( RandomUnitTest );
     ADD_TEST( CipherUnitTest );
+    ADD_TEST( KDFUnitTest );
 }
 
 KUnitTest::KUnitTest()
