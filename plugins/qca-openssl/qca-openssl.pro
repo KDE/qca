@@ -3,14 +3,9 @@ CONFIG  += qt thread debug plugin
 #CONFIG  += qt thread release plugin
 TARGET   = qca-openssl
 
-!exists(qcaprovider.h) {
-  Q_PREFIX = ../../src
-  INCLUDEPATH += $$Q_PREFIX
-}
-
 DEFINES += QCA_PLUGIN
 
-INCLUDEPATH += ../src
+INCLUDEPATH += ../../include
 SOURCES = qca-openssl.cpp
 
 include(conf.pri)
