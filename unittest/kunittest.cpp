@@ -140,7 +140,7 @@ int KUnitTest::runTests()
 	    }
 	}
 	cout << endl;
-	free(test);
+	delete(test);
     }
 
     cout << "# Done with normal tests:" << endl;
