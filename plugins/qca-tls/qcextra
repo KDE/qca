@@ -1,6 +1,6 @@
 #!/bin/sh
 
 cat >extra.pri <<EOT
-target.path=\$\$QT_PATH_PLUGINS
+target.path=\$\$QT_PATH_PLUGINS/crypto
 INSTALLS += target
 EOT
