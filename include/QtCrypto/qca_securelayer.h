@@ -104,6 +104,12 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
+		enum Version
+		{
+			TLS_v1,
+			SSL_v3,
+			SSL_v2
+		};
 		enum Error
 		{
 			ErrHandshake, ///< problem during the negotiation
@@ -122,10 +128,13 @@ namespace QCA
 
 		void reset();
 
+		static QStringList supportedCipherSuites(const QString &provider = QString());
+
 		void setCertificate(const CertificateChain &cert, const PrivateKey &key);
 		void setStore(const Store &store);
 		void setConstraints(SecurityLevel s);
 		void setConstraints(int minSSF, int maxSSF);
+		void setConstraints(const QStringList &cipherSuiteList);
 
 		static bool canCompress(const QString &provider = QString());
 		void setCompressionEnabled(bool b);
@@ -133,8 +142,10 @@ namespace QCA
 		bool startClient(const QString &host = QString());
 		bool startServer();
 		bool isHandshaken() const;
-		QString cipherName() const;
+		Version version() const;
+		QString cipherSuite() const;
 		int cipherBits() const;
+		int cipherMaxBits() const;
 		Error errorCode() const;
 
 		IdentityResult peerIdentityResult() const;

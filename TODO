@@ -14,9 +14,6 @@
   expand abbreviations? ("Algo" "Cert")
 
 * finish API:
-  tls: ciphersuites
-  tls: cipher max bits
-  tls: ssl version
   tls: session reuse
   shortcuts for reading/writing certs, etc, directly to files?
   quoted-printable TextFilter

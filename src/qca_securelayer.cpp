@@ -155,6 +155,18 @@ TLS::~TLS()
 	delete d;
 }
 
+void TLS::reset()
+{
+	d->reset();
+	// TODO: d->c->reset ??
+}
+
+QStringList TLS::supportedCipherSuites(const QString &provider)
+{
+	Q_UNUSED(provider);
+	return QStringList();
+}
+
 void TLS::setCertificate(const CertificateChain &cert, const PrivateKey &key)
 {
 	Q_UNUSED(cert);
@@ -176,6 +188,11 @@ void TLS::setConstraints(int, int)
 {
 }
 
+void TLS::setConstraints(const QStringList &cipherSuiteList)
+{
+	Q_UNUSED(cipherSuiteList);
+}
+
 bool TLS::canCompress(const QString &provider)
 {
 	Q_UNUSED(provider);
@@ -185,12 +202,6 @@ bool TLS::canCompress(const QString &provider)
 void TLS::setCompressionEnabled(bool b)
 {
 	Q_UNUSED(b);
-}
-
-void TLS::reset()
-{
-	d->reset();
-	// TODO: d->c->reset ??
 }
 
 bool TLS::startClient(const QString &host)
@@ -214,21 +225,17 @@ bool TLS::startServer()
 	return true;
 }
 
-void TLS::close()
-{
-	if(!d->handshaken || d->closing)
-		return;
-
-	d->closing = true;
-	QTimer::singleShot(0, this, SLOT(update()));
-}
-
 bool TLS::isHandshaken() const
 {
 	return d->handshaken;
 }
 
-QString TLS::cipherName() const
+TLS::Version TLS::version() const
+{
+	return TLS_v1;
+}
+
+QString TLS::cipherSuite() const
 {
 	return QString();
 }
@@ -238,9 +245,45 @@ int TLS::cipherBits() const
 	return 0;
 }
 
+int TLS::cipherMaxBits() const
+{
+	return 0;
+}
+
 TLS::Error TLS::errorCode() const
 {
 	return d->errorCode;
+}
+
+TLS::IdentityResult TLS::peerIdentityResult() const
+{
+	if(d->cert.isNull())
+		return NoCert;
+
+	if(d->certValidity != QCA::Valid)
+		return BadCert;
+
+	if(d->hostMismatch)
+		return HostMismatch;
+
+	return Valid;
+}
+
+CertValidity TLS::peerCertificateValidity() const
+{
+	return d->certValidity;
+}
+
+CertificateChain TLS::localCertificateChain() const
+{
+	return CertificateChain();
+	//return d->ourCert;
+}
+
+CertificateChain TLS::peerCertificateChain() const
+{
+	return CertificateChain();
+	//return d->cert;
 }
 
 bool TLS::isClosable() const
@@ -266,6 +309,15 @@ int TLS::bytesAvailable() const
 int TLS::bytesOutgoingAvailable() const
 {
 	return 0;
+}
+
+void TLS::close()
+{
+	if(!d->handshaken || d->closing)
+		return;
+
+	d->closing = true;
+	QTimer::singleShot(0, this, SLOT(update()));
 }
 
 void TLS::write(const QSecureArray &a)
@@ -302,159 +354,6 @@ QSecureArray TLS::readUnprocessed()
 	return a;
 }
 
-TLS::IdentityResult TLS::peerIdentityResult() const
-{
-	if(d->cert.isNull())
-		return NoCert;
-
-	if(d->certValidity != QCA::Valid)
-		return BadCert;
-
-	if(d->hostMismatch)
-		return HostMismatch;
-
-	return Valid;
-}
-
-CertValidity TLS::peerCertificateValidity() const
-{
-	return d->certValidity;
-}
-
-CertificateChain TLS::localCertificateChain() const
-{
-	return CertificateChain();
-	//return d->ourCert;
-}
-
-CertificateChain TLS::peerCertificateChain() const
-{
-	return CertificateChain();
-	//return d->cert;
-}
-#if 0
-void TLS::update()
-{
-	bool force_read = false;
-	bool eof = false;
-	bool done = false;
-	QGuardedPtr<TLS> self = this;
-
-	if(d->closing) {
-		QByteArray a;
-		int r = d->c->shutdown(d->from_net, &a);
-		d->from_net.resize(0);
-		if(r == TLSContext::Error) {
-			reset();
-			d->errorCode = ErrHandshake;
-			error();
-			return;
-		}
-		if(r == TLSContext::Success) {
-			d->from_net = d->c->unprocessed().toByteArray().copy();
-			done = true;
-		}
-		d->appendArray(&d->to_net, a);
-	}
-	else {
-		if(!d->handshaken) {
-			QByteArray a;
-			int r = d->c->handshake(d->from_net, &a);
-			d->from_net.resize(0);
-			if(r == TLSContext::Error) {
-				reset();
-				d->errorCode = ErrHandshake;
-				error();
-				return;
-			}
-			d->appendArray(&d->to_net, a);
-			if(r == TLSContext::Success) {
-				/*Certificate cert = d->c->peerCertificate();
-				d->certValidity = d->c->peerCertificateValidity();
-				if(!cert.isNull() && !d->host.isEmpty() && d->certValidity == QCA::Valid) {
-					if(!cert.matchesAddress(d->host))
-						d->hostMismatch = true;
-				}
-				d->cert = cert;*/
-				d->handshaken = true;
-				handshaken();
-				if(!self)
-					return;
-
-				// there is a teeny tiny possibility that incoming data awaits.  let us get it.
-				force_read = true;
-			}
-		}
-
-		if(d->handshaken) {
-			if(!d->out.isEmpty() || d->tryMore) {
-				d->tryMore = false;
-				QByteArray a;
-				int enc;
-				bool more = false;
-				bool ok = d->c->encode(d->out, &a, &enc);
-				eof = d->c->eof();
-				if(ok && enc < (int)d->out.size())
-					more = true;
-				d->out.resize(0);
-				if(!eof) {
-					if(!ok) {
-						reset();
-						d->errorCode = ErrCrypt;
-						error();
-						return;
-					}
-					d->bytesEncoded += enc;
-					if(more)
-						d->tryMore = true;
-					d->appendArray(&d->to_net, a);
-				}
-			}
-			if(!d->from_net.isEmpty() || force_read) {
-				QSecureArray a;
-				QByteArray b;
-				bool ok = d->c->decode(d->from_net, &a, &b);
-				eof = d->c->eof();
-				d->from_net.resize(0);
-				if(!ok) {
-					reset();
-					d->errorCode = ErrCrypt;
-					error();
-					return;
-				}
-				d->appendArray(&d->in, a.toByteArray());
-				d->appendArray(&d->to_net, b);
-			}
-
-			if(!d->in.isEmpty()) {
-				readyRead();
-				if(!self)
-					return;
-			}
-		}
-	}
-
-	if(!d->to_net.isEmpty()) {
-		//int bytes = d->bytesEncoded;
-		d->bytesEncoded = 0;
-		readyReadOutgoing();
-		if(!self)
-			return;
-	}
-
-	if(eof) {
-		close();
-		if(!self)
-			return;
-		return;
-	}
-
-	if(d->closing && done) {
-		reset();
-		closed();
-	}
-}
-#endif
 //----------------------------------------------------------------------------
 // SASL
 //----------------------------------------------------------------------------
@@ -497,13 +396,6 @@ SASL::~SASL()
 {
 	delete d;
 }
-
-/*void SASL::setAppName(const QString &name)
-{
-	if(!saslappname)
-		saslappname = new QString;
-	*saslappname = name;
-}*/
 
 void SASL::reset()
 {
@@ -649,20 +541,6 @@ void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
 	//handleServerFirstStep(r);
 }
 
-/*void SASL::handleServerFirstStep(int r)
-{
-	if(r == SASLContext::Success)
-		authenticated();
-	else if(r == SASLContext::Continue)
-		nextStep(d->c->result());
-	else if(r == SASLContext::AuthCheck)
-		tryAgain();
-	else {
-		d->errorCode = ErrAuth;
-		error();
-	}
-}*/
-
 void SASL::putStep(const QByteArray &stepData)
 {
 	d->stepData = stepData.copy();
@@ -699,144 +577,10 @@ void SASL::continueAfterAuthCheck()
 	//tryAgain();
 }
 
-/*void SASL::tryAgain()
-{
-	int r;
-
-	if(d->server) {
-		if(!d->tried) {
-			r = d->c->nextStep(d->stepData);
-			d->tried = true;
-		}
-		else {
-			r = d->c->tryAgain();
-		}
-
-		if(r == SASLContext::Error) {
-			d->errorCode = ErrAuth;
-			error();
-			return;
-		}
-		else if(r == SASLContext::Continue) {
-			d->tried = false;
-			nextStep(d->c->result());
-			return;
-		}
-		else if(r == SASLContext::AuthCheck) {
-			authCheck(d->c->username(), d->c->authzid());
-			return;
-		}
-	}
-	else {
-		if(d->first) {
-			if(!d->tried) {
-				r = d->c->clientFirstStep(d->allowCSF);
-				d->tried = true;
-			}
-			else
-				r = d->c->tryAgain();
-
-			if(r == SASLContext::Error) {
-				d->errorCode = ErrAuth;
-				error();
-				return;
-			}
-			else if(r == SASLContext::NeedParams) {
-				//d->tried = false;
-				QCA_SASLNeedParams np = d->c->clientParamsNeeded();
-				needParams(np.user, np.authzid, np.pass, np.realm);
-				return;
-			}
-
-			QString mech = d->c->mech();
-			const QByteArray *clientInit = d->c->clientInit();
-
-			d->first = false;
-			d->tried = false;
-			clientFirstStep(mech, clientInit);
-		}
-		else {
-			if(!d->tried) {
-				r = d->c->nextStep(d->stepData);
-				d->tried = true;
-			}
-			else
-				r = d->c->tryAgain();
-
-			if(r == SASLContext::Error) {
-				d->errorCode = ErrAuth;
-				error();
-				return;
-			}
-			else if(r == SASLContext::NeedParams) {
-				//d->tried = false;
-				QCA_SASLNeedParams np = d->c->clientParamsNeeded();
-				needParams(np.user, np.authzid, np.pass, np.realm);
-				return;
-			}
-			d->tried = false;
-			//else if(r == QCA_SASLContext::Continue) {
-				nextStep(d->c->result());
-			//	return;
-			//}
-		}
-	}
-
-	if(r == SASLContext::Success)
-		authenticated();
-	else if(r == SASLContext::Error) {
-		d->errorCode = ErrAuth;
-		error();
-	}
-}*/
-
 int SASL::ssf() const
 {
 	return d->c->security();
 }
-
-/*void SASL::write(const QByteArray &a)
-{
-	QByteArray b;
-	if(!d->c->encode(a, &b)) {
-		d->errorCode = ErrCrypt;
-		error();
-		return;
-	}
-	int oldsize = d->outbuf.size();
-	d->outbuf.resize(oldsize + b.size());
-	memcpy(d->outbuf.data() + oldsize, b.data(), b.size());
-	readyReadOutgoing(a.size());
-}
-
-QByteArray SASL::read()
-{
-	QByteArray a = d->inbuf.copy();
-	d->inbuf.resize(0);
-	return a;
-}
-
-void SASL::writeIncoming(const QByteArray &a)
-{
-	QByteArray b;
-	if(!d->c->decode(a, &b)) {
-		d->errorCode = ErrCrypt;
-		error();
-		return;
-	}
-	int oldsize = d->inbuf.size();
-	d->inbuf.resize(oldsize + b.size());
-	memcpy(d->inbuf.data() + oldsize, b.data(), b.size());
-	readyRead();
-}
-
-QByteArray SASL::readOutgoing()
-{
-	QByteArray a = d->outbuf.copy();
-	d->outbuf.resize(0);
-	return a;
-}
-*/
 
 bool SASL::haveError() const
 {
