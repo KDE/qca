@@ -38,7 +38,7 @@ public:
 		if(!s.isEmpty()) {
 			if(!conf->checkLibrary(s, "ssl"))
 				return false;
-			lib = QString("-L") + s;
+			lib = s;
 		}
 		else {
 			if(!conf->findLibrary("ssl", &s))

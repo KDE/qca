@@ -146,7 +146,7 @@ public:
 		if(!s.isEmpty()) {
 			if(!conf->checkLibrary(s, "ssl"))
 				return false;
-			lib = QString("-L") + s;
+			lib = s;
 		}
 		else {
 			if(!conf->findLibrary("ssl", &s))
@@ -500,7 +500,8 @@ int main()
 
 EOT
 cat >$1/conf.pro <<EOT
-CONFIG += qt x11 thread
+TEMPLATE = app
+CONFIG += qt x11 thread console
 TARGET = conf
 
 DEFINES += X11_INC='"\$\$QMAKE_INCDIR_X11"'
@@ -569,7 +570,7 @@ if [ "$?" != "0" ]; then
 	exit 1;
 fi
 cat >Makefile.tmp <<EOT
-QTDIR = $QTDIR
+export QTDIR = $QTDIR
 EOT
 cat Makefile >> Makefile.tmp
 rm -f Makefile

@@ -32,7 +32,7 @@ public:
 		if(!s.isEmpty()) {
 			if(!conf->checkLibrary(s, "sasl2"))
 				return false;
-			lib = QString("-L") + s;
+			lib = s;
 		}
 		else {
 			if(!conf->findLibrary("sasl2", &s))
