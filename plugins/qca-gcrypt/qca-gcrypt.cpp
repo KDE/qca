@@ -309,10 +309,8 @@ public:
 	list += "aes128-ecb";
 	list += "aes128-cfb";
 	list += "aes128-cbc";
-	//list += "aes128-ofb";
 	list += "aes192-ecb";
 	list += "aes192-cfb";
-	//list += "aes192-ofb";
 	list += "aes192-cbc";
 	list += "aes256-ecb";
 	list += "aes256-cfb";
@@ -322,7 +320,6 @@ public:
 	list += "des-ecb";
 	list += "des-cbc";
 	list += "des-cfb";
-	//list += "des-ofb";
 	list += "pbkdf2(sha1)";
 	return list;
     }
@@ -350,14 +347,10 @@ public:
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CFB, false, this, type );
 	else if ( type == "aes128-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, false, this, type );
-	else if ( type == "aes128-ofb" )
-	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "aes192-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes192-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CFB, false, this, type );
-	else if ( type == "aes192-ofb" )
-	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "aes192-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "aes256-ecb" )
@@ -376,8 +369,6 @@ public:
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "des-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CFB, false, this, type );
-	else if ( type == "des-ofb" )
-	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "pbkdf2(sha1)" )
 	    return new gcryptQCAPlugin::pbkdf2Context( GCRY_MD_SHA1, this, type );
 	else
