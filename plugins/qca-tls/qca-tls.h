@@ -24,7 +24,7 @@
 #include"qcaprovider.h"
 
 #ifdef QCA_PLUGIN
-QCA_EXPORT QCAProvider *createProvider();
+QCA_PLUGIN_EXPORT QCAProvider *createProvider();
 #else
 QCAProvider *createProviderTLS();
 #endif

@@ -15,7 +15,7 @@ SOURCES = qca-tls.cpp
 
 DEFINES += QCA_PLUGIN
 win32:{
-	DEFINES += QCA_PLUGIN_DLL OSS_097
+	DEFINES += QCA_PLUGIN_DLL OSSL_097
 	INCLUDEPATH += c:\local\include
 	LIBS += c:\local\lib\libeay32.lib c:\local\lib\ssleay32.lib
 }
