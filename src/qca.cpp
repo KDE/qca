@@ -27,7 +27,6 @@
 #include <qguardedptr.h>
 #include <qptrdict.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include "qcaprovider.h"
 #include "qca_plugin.h"
 

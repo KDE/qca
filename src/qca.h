@@ -1457,6 +1457,41 @@ namespace QCA
 		Hash(const QString &type, const QString &provider);
 	};
 
+        /** \page padding Padding
+
+	For those Cipher sub-classes that are block based, there are modes
+	that require a full block on encryption and decryption - %Cipher Block
+	Chaining mode and Electronic Code Book modes are good examples. 
+	
+	Since real world messages are not always a convenient multiple of a
+	block size, we have to adding <i>padding</i>. There are a number of
+	padding modes that %QCA supports, including not doing any padding
+	at all.
+	
+	If you are not going to use padding, then you can pass 
+	QCA::Cipher::NoPadding as the pad argument to the Cipher sub-class, however
+	it is then your responsibility to pass in appropriate data for
+	the mode that you are using.
+
+	The most common padding scheme is known as PKCS#7 (also PKCS#1), and
+	it specifies that the pad bytes are all equal to the length of the 
+	padding ( for example, if you need three pad bytes to complete the block, then
+	the padding is 0x03 0x03 0x03 ).
+
+	On encryption, for algorithm / mode combinations that require
+	padding, you will get a block of ciphertext when the input plain text block
+	is complete. When you call final(), you will get out the ciphertext that
+	corresponds to the last bit of plain text, plus any padding. If you had
+	provided plaintext that matched up with a block size, then the cipher
+	text block is generated from pure padding - you always get at least some
+	padding, to ensure that the padding can be safely removed on decryption.
+	
+	On decryption, for algorithm / mode combinations that use padding,
+	you will get back a block of plaintext when the input ciphertext block
+	is complete. When you call final(), you will a block that has been stripped
+	of ciphertext.
+	*/
+
 	/**
 	 * General superclass for cipher (encryption / decryption) algorithms.
 	 *
@@ -1512,7 +1547,7 @@ namespace QCA
 		/**
 		 * return the block size for the cipher object
 		 */
-		int blockSize() const;
+		unsigned int blockSize() const;
 
 		/**
 		 * reset the cipher object, to allow re-use
@@ -1542,7 +1577,6 @@ namespace QCA
 
 	protected:
 		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, Padding pad, const QString &provider);
-
 	private:
 		class Private;
 		Private *d;
@@ -2038,7 +2072,8 @@ namespace QCA
 		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
 		 * \param key the key to use. 
 		 * \param iv the initialisation vector to use. Ignored for ECB mode.
-		 * \param pad whether to apply padding, or not.
+		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
+		 *        Mode does not require padding
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
@@ -2062,13 +2097,40 @@ namespace QCA
 		 * \param key the key to use. Note that triple DES requires a 24 byte (192 bit) key,
 		 * even though the effective key length is 168 bits.
 		 * \param iv the initialisation vector to use. Ignored for ECB mode.
-		 * \param pad whether to apply padding, or not.
+		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
+		 *        Mode does not require padding
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
 	public:
 		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
 		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
+	};
+
+	/**
+	 *DES %Cipher
+	 *
+	 */
+	class QCA_EXPORT DES : public Cipher
+	{
+		/**
+		 * Standard constructor
+		 *
+		 * This is the normal way of creating a DES encryption or decryption object.
+		 *
+		 * \param m the Mode to operate in
+		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
+		 * \param key the key to use. Note that triple DES requires a 24 byte (192 bit) key,
+		 * even though the effective key length is 168 bits.
+		 * \param iv the initialisation vector to use. Ignored for ECB mode.
+		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
+		 *        Mode does not require padding
+		 * \param provider the provider to use (eg "qca-gcrypt" )
+		 *
+		 */
+	public:
+		DES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
+		:Cipher("des", m, dir, key, iv, pad, provider) {}
 	};
 
 	/**
@@ -2088,7 +2150,8 @@ namespace QCA
 		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
 		 * \param key the key to use. Note that AES128 requires a 16 byte (128 bit) key.
 		 * \param iv the initialisation vector to use. Ignored for ECB mode.
-		 * \param pad whether to apply padding, or not.
+		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
+		 *        Mode does not require padding
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
@@ -2113,7 +2176,8 @@ namespace QCA
 		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
 		 * \param key the key to use. Note that AES192 requires a 24 byte (192 bit) key.
 		 * \param iv the initialisation vector to use. Ignored for ECB mode.
-		 * \param pad whether to apply padding, or not.
+		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
+		 *        Mode does not require padding
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
@@ -2138,7 +2202,8 @@ namespace QCA
 		 * \param dir whether this object should encrypt (QCA::Encode) or decypt (QCA::Decode)
 		 * \param key the key to use. Note that AES256 requires a 32 byte (256 bit) key.
 		 * \param iv the initialisation vector to use. Ignored for ECB mode.
-		 * \param pad whether to apply padding, or not.
+		 * \param pad the type of padding to apply (or remove, for decryption). Ignored if the 
+		 *        Mode does not require padding
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */

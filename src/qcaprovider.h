@@ -78,7 +78,7 @@ public:
 	CipherContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 	virtual void setup(const SymmetricKey &key, Mode m, Direction dir, const InitializationVector &iv) = 0;
 	virtual KeyLength keyLength() const = 0;
-	virtual int blockSize() const = 0;
+	virtual unsigned int blockSize() const = 0;
 
 	virtual bool update(const QSecureArray &in, QSecureArray *out) = 0;
 	virtual bool final(QSecureArray *out) = 0;
