@@ -101,7 +101,7 @@ namespace QCA
 		int ctx;
 	};
 
-	class SHA256 : public Hash, public HashStatic<SHA256>
+	/*class SHA256 : public Hash, public HashStatic<SHA256>
 	{
 	public:
 		SHA256();
@@ -151,7 +151,7 @@ namespace QCA
 
 		bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true);
 		bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true);
-	};
+	};*/
 };
 
 #endif
