@@ -59,6 +59,10 @@ void StaticUnitTest::allTests()
     testArray[6] = 0x00;
     CHECK( testArray == QCA::hexToArray(QString("62626262626200626262")), true );
 
+    CHECK( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
+
+    testArray[9] = 0x00;
+    CHECK( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
 
     // capabilities are reported as a list - that is a problem for
     // doing a direct comparison, since they change
