@@ -411,7 +411,7 @@ namespace QCA
 	class Random;
 	typedef QPtrList<Provider> ProviderList;
 	typedef QPtrListIterator<Provider> ProviderListIterator;
-
+#if 0
 	/** 
 	 * A list of the capabilities available within QCA
 	 *
@@ -444,7 +444,7 @@ namespace QCA
 					 * RFC1320 (MD4) */
 		CAP_RIPEMD160 = 0x4000, /**< RIPEMD digest hash, 160 bits (RIPEMD160)*/
 	}; // to be obsoleted
-
+#endif
 	/**
 	 * Mode settings for cipher algorithms
 	 */
@@ -454,6 +454,7 @@ namespace QCA
 		CFB = 0x0002  /**< operate in %Cipher FeedBack mode */
 	};
 
+#if 0
 	/**
 	 * Direction settings for cipher algorithms
 	 */
@@ -462,7 +463,7 @@ namespace QCA
 		Encrypt = 0x0001, /**< cipher algorithm should encrypt */
 		Decrypt = 0x0002  /**< cipher algorithm should decrypt */
 	};
-
+#endif
 	enum MemoryMode
 	{
 		Practical, /**< mlock and drop root if available, else mmap */
@@ -543,17 +544,17 @@ namespace QCA
 	 * }
 	 * \endcode
 	 */
-	QCA_EXPORT bool isSupported(int capabilities); // to be obsoleted
-	QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
+	//QCA_EXPORT bool isSupported(int capabilities); // to be obsoleted
+	//QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
 
 	// version 2 global functions
-	//QCA_EXPORT bool isSupported(const QStringList &features);
-	//QCA_EXPORT bool isSupported(const QString &features);
-	//QCA_EXPORT QStringList supportedFeatures();
-	//QCA_EXPORT QStringList defaultFeatures();
-	//QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
-	//QCA_EXPORT void setProviderPriority(const QString &name, int priority);
-	//QCA_EXPORT const ProviderList & providers();
+	QCA_EXPORT bool isSupported(const QStringList &features);
+	QCA_EXPORT bool isSupported(const char *features);
+	QCA_EXPORT QStringList supportedFeatures();
+	QCA_EXPORT QStringList defaultFeatures();
+	QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
+	QCA_EXPORT void setProviderPriority(const QString &name, int priority);
+	QCA_EXPORT const ProviderList & providers();
 	QCA_EXPORT void unloadAllPlugins();
 
 	QCA_EXPORT Random & globalRNG();
@@ -792,6 +793,22 @@ namespace QCA
 		InitializationVector & operator=(const QSecureArray &a);
 	};
 
+	class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
+	{
+	public:
+		virtual void clear();
+		virtual void update(const QSecureArray &a);
+		virtual QSecureArray final();
+
+		QSecureArray hash(const QSecureArray &a);
+		QSecureArray hash(const QCString &cs);
+		QString hashToString(const QSecureArray &a);
+		QString hashToString(const QCString &cs);
+
+	protected:
+		Hash(const QString &type, const QString &provider);
+	};
+
 	/**
 	 * General superclass for hashing algorithms.
 	 *
@@ -838,6 +855,7 @@ namespace QCA
 	 * QCA::MD5::hash() with the data that you would otherwise
 	 * have provided to the update() call.
 	 */
+#if 0
 	class QCA_EXPORT Hash
 	{
 	public:
@@ -1008,7 +1026,8 @@ namespace QCA
 			return arrayToHex(hash(cs));
 		}
 	};
-
+#endif
+#if 0
 	class QCA_EXPORT Cipher
 	{
 	public:
@@ -1072,13 +1091,56 @@ namespace QCA
 		class Private;
 		Private *d;
 	};
+#endif
+	class QCA_EXPORT SHA0 : public Hash
+	{
+	public:
+		SHA0(const QString &provider="") : Hash("sha0", provider) {}
+	};
 
+	class QCA_EXPORT SHA1 : public Hash
+	{
+	public:
+		SHA1(const QString &provider="") : Hash("sha1", provider) {}
+	};
+
+	class QCA_EXPORT SHA256 : public Hash
+	{
+	public:
+		SHA256(const QString &provider="") : Hash("sha256", provider) {}
+	};
+
+	class QCA_EXPORT MD2 : public Hash
+	{
+	public:
+		MD2(const QString &provider="") : Hash("md2", provider) {}
+	};
+
+	class QCA_EXPORT MD4 : public Hash
+	{
+	public:
+		MD4(const QString &provider="") : Hash("md4", provider) {}
+	};
+
+	class QCA_EXPORT MD5 : public Hash
+	{
+	public:
+		MD5(const QString &provider="") : Hash("md5", provider) {}
+	};
+
+	class QCA_EXPORT RIPEMD160 : public Hash
+	{
+	public:
+		RIPEMD160(const QString &provider="") : Hash("ripemd160", provider) {}
+	};
+
+	// macs
 	//class QCA_EXPORT HMAC : public MessageAuthenticationCode
 	//{
 	//public:
 	//	HMAC(const Hash &h = SHA1(), const SymmetricKey &key = SymmetricKey(), const QString &provider="") : MessageAuthenticationCode(subAlg("hmac", h.type()), key, provider) {}
 	//};
-
+#if 0
 	/**
 	 * SHA-0 cryptographic message digest hash algorithm.
 	 *
@@ -1353,7 +1415,8 @@ namespace QCA
 		 */
 		RIPEMD160();
 	};
-
+#endif
+#if 0
 	class QCA_EXPORT BlowFish : public Cipher, public CipherStatic<BlowFish>
 	{
 	public:
@@ -1429,7 +1492,7 @@ namespace QCA
 	private:
 		RSAKey v_key;
 	};
-
+#endif
 	// v2 public key handling
 	/*class PublicKey;
 	class PrivateKey;
@@ -1639,7 +1702,7 @@ namespace QCA
 		QBigInteger x() const;
 		QBigInteger y() const;
 	};*/
-
+#if 0
 	typedef QMap<QString, QString> CertProperties;
 
 	class QCA_EXPORT Cert
@@ -1675,9 +1738,9 @@ namespace QCA
 		void fromContext(QCA_CertContext *);
 	};
 
-	class QCA_EXPORT TLS : public QObject
-	{
-		Q_OBJECT
+	//class QCA_EXPORT TLS : public QObject
+	//{
+		//Q_OBJECT
 	public:
 		enum Validity
 		{
@@ -1737,9 +1800,9 @@ namespace QCA
 		Private *d;
 	};
 
-	class QCA_EXPORT SASL : public QObject
-	{
-		Q_OBJECT
+	//class QCA_EXPORT SASL : public QObject
+	//{
+		//Q_OBJECT
 	public:
 		enum Error { ErrAuth, ErrCrypt };
 		enum ErrorCond
@@ -1827,6 +1890,7 @@ namespace QCA
 
 		void handleServerFirstStep(int r);
 	};
+#endif
 };
 
 #endif

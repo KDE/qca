@@ -121,7 +121,7 @@ bool haveSecureMemory()
 }
 
 bool isSupported(const QStringList &features);
-
+#if 0
 bool isSupported(int capabilities)
 {
 	init();
@@ -139,7 +139,7 @@ bool isSupported(int capabilities)
 
 	return false;*/
 }
-
+#endif
 bool isSupported(const QStringList &features)
 {
 	if(!qca_init)
@@ -157,9 +157,9 @@ bool isSupported(const QStringList &features)
 	return false;
 }
 
-/*bool isSupported(const QString &features)
+bool isSupported(const char *features)
 {
-	return isSupported(QStringList::split(',', features));
+	return isSupported(QStringList::split(',', QString(features)));
 }
 
 QStringList supportedFeatures()
@@ -175,15 +175,15 @@ QStringList defaultFeatures()
 {
 	init();
 	return manager->find("default")->features();
-}*/
+}
 
-void insertProvider(QCAProvider *p)
+/*void insertProvider(QCAProvider *p)
 {
 	init();
 	manager->add(p);
-}
+}*/
 
-/*bool insertProvider(Provider *p, int priority)
+bool insertProvider(Provider *p, int priority)
 {
 	init();
 	return manager->add(p, priority);
@@ -201,7 +201,7 @@ const ProviderList & providers()
 {
 	init();
 	return manager->providers();
-}*/
+}
 
 void unloadAllPlugins()
 {
@@ -267,7 +267,7 @@ void qca_secure_free(void *p)
 
 namespace QCA {
 
-static void *getContext(int cap)
+/*static void *getContext(int cap)
 {
 	init();
 
@@ -276,7 +276,7 @@ static void *getContext(int cap)
 		return 0;
 
 	return manager->findFor(cap)->context(cap);
-}
+}*/
 
 static Provider::Context *getContext(const QString &type, const QString &provider)
 {
@@ -313,7 +313,7 @@ static Provider::Context *getContext(const QString &type, const QString &provide
 
 	return p->createContext(type);
 }
-
+#if 0
 static bool detectContext(void *in, Provider::Context **z, void **c)
 {
 	// format is 'J' + type
@@ -331,7 +331,7 @@ static bool detectContext(void *in, Provider::Context **z, void **c)
 
 	// try old plugin
 	void *oc = 0;
-	if(type == "sha0")
+	/*if(type == "sha0")
 		oc = getContext(CAP_SHA0);
 	else if(type == "sha1")
 		oc = getContext(CAP_SHA1);
@@ -344,7 +344,7 @@ static bool detectContext(void *in, Provider::Context **z, void **c)
 	else if(type == "md5")
 		oc = getContext(CAP_MD5);
 	else if(type == "ripemd160")
-		oc = getContext(CAP_RIPEMD160);
+		oc = getContext(CAP_RIPEMD160);*/
 	if(oc)
 	{
 		*z = 0;
@@ -354,7 +354,7 @@ static bool detectContext(void *in, Provider::Context **z, void **c)
 
 	return false;
 }
-
+#endif
 //----------------------------------------------------------------------------
 // Initializer
 //----------------------------------------------------------------------------
@@ -601,12 +601,9 @@ void Algorithm::change(Provider::Context *c)
 
 void Algorithm::change(const QString &type, const QString &provider)
 {
-	Q_UNUSED(type);
-	Q_UNUSED(provider);
 	d->delContext();
-	// TODO
-	//if(!type.isEmpty())
-	//	d->setContext(getContext(type, provider));
+	if(!type.isEmpty())
+		d->setContext(getContext(type, provider));
 }
 
 //----------------------------------------------------------------------------
@@ -689,7 +686,7 @@ using namespace QCA;
 //----------------------------------------------------------------------------
 // Hash
 //----------------------------------------------------------------------------
-class Hash::Private
+/*class Hash::Private
 {
 public:
 	Private()
@@ -770,13 +767,13 @@ QByteArray Hash::final()
 	else
 		buf = d->z->final().toByteArray();
 	return buf;
-}
+}*/
 
 
 //----------------------------------------------------------------------------
 // Cipher
 //----------------------------------------------------------------------------
-class Cipher::Private
+/*class Cipher::Private
 {
 public:
 	Private()
@@ -898,8 +895,8 @@ QByteArray Cipher::final(bool *ok)
 		*ok = true;
 	return out;
 }
-
-
+*/
+/*
 //----------------------------------------------------------------------------
 // SHA0
 //----------------------------------------------------------------------------
@@ -960,8 +957,8 @@ RIPEMD160::RIPEMD160()
 :Hash((QCA_HashContext *)"Jripemd160")//getContext(CAP_RIPEMD160))
 {
 }
-
-
+*/
+#if 0
 //----------------------------------------------------------------------------
 // BlowFish
 //----------------------------------------------------------------------------
@@ -1969,3 +1966,4 @@ QByteArray SASL::readOutgoing()
 	d->outbuf.resize(0);
 	return a;
 }
+#endif

@@ -194,7 +194,7 @@ void ProviderManager::scan()
 			ProviderItem *i = ProviderItem::load(fname);
 			if(!i)
 				continue;
-			if(i->version != QCA_PLUGIN_VERSION && i->version != 1)
+			if(i->version != QCA_PLUGIN_VERSION)// && i->version != 1)
 			{
 				delete i;
 				continue;
@@ -422,10 +422,10 @@ void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 	}
 }
 
-QStringList ProviderManager::capsToStringList(int cap)
+QStringList ProviderManager::capsToStringList(int)
 {
 	QStringList list;
-	if(cap & CAP_SHA0)
+	/*if(cap & CAP_SHA0)
 		list.append("sha0");
 	if(cap & CAP_SHA1)
 		list.append("sha1");
@@ -438,7 +438,7 @@ QStringList ProviderManager::capsToStringList(int cap)
 	if(cap & CAP_MD5)
 		list.append("md5");
 	if(cap & CAP_RIPEMD160)
-		list.append("ripemd160");
+		list.append("ripemd160");*/
 	return list;
 }
 

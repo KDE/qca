@@ -60,12 +60,12 @@ QSecureArray Random::randomArray(int size, Quality q)
 {
 	return globalRNG().nextBytes(size, q);
 }
-/*
+
 //----------------------------------------------------------------------------
 // Hash
 //----------------------------------------------------------------------------
-Hash::Hash(int cap, const QString &provider)
-:Algorithm(cap, provider)
+Hash::Hash(const QString &type, const QString &provider)
+:Algorithm(type, provider)
 {
 }
 
@@ -105,7 +105,7 @@ QString Hash::hashToString(const QCString &cs)
 {
 	return arrayToHex(hash(cs));
 }
-
+/*
 //----------------------------------------------------------------------------
 // Cipher
 //----------------------------------------------------------------------------
