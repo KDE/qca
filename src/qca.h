@@ -1360,7 +1360,7 @@ namespace QCA
 	class QCA_EXPORT HMAC : public MessageAuthenticationCode
 	{
 	public:
-		HMAC(const Hash &h = SHA1(), const SymmetricKey &key = SymmetricKey(), const QString &provider = "") : MessageAuthenticationCode(withAlgorithm("hmac", h.type()), key, provider) {}
+		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = "") : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
 	};
 
 	// v2 public key handling
