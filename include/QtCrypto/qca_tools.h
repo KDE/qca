@@ -291,11 +291,18 @@ public:
 	/**
 	 * \overload
 	 *
-	 * \param s an alternative initialisation value, encoded as a string
+	 * \param c an alternative initialisation value, encoded as a character array
 	 *
 	 * \code
 	 * QBigInteger b ( "9890343" );
 	 * \endcode
+	 */
+	QBigInteger(const char *c);
+
+	/**
+	 * \overload
+	 *
+	 * \param s an alternative initialisation value, encoded as a string
 	 */
 	QBigInteger(const QString &s);
 

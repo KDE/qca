@@ -411,6 +411,12 @@ QBigInteger::QBigInteger(int i)
 	}
 }
 
+QBigInteger::QBigInteger(const char *c)
+{
+	d = new Private;
+	fromString(QString(c));
+}
+
 QBigInteger::QBigInteger(const QString &s)
 {
 	d = new Private;
