@@ -4,8 +4,6 @@
 #include"qcaprovider.h"
 #include<stdio.h>
 
-#define USE_OPENSSL
-
 #ifdef USE_OPENSSL
 #include"qcaopenssl_p.h"
 #endif
