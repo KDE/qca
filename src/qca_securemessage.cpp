@@ -210,7 +210,7 @@ void SecureMessage::startDecrypt()
 {
 }
 
-void SecureMessage::startSign(SignMode m = Message);
+void SecureMessage::startSign(SignMode m)
 {
 	Q_UNUSED(m);
 }
