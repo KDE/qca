@@ -27,6 +27,8 @@
 #include <qhostaddress.h>
 #include "qca.h"
 
+#include <limits>
+
 #define QCA_PLUGIN_VERSION 2
 
 #define QCA_EXPORT_PLUGIN(P) \
@@ -73,6 +75,16 @@ public:
 
 	virtual void update(const QSecureArray &in) = 0;
 	virtual void final(QSecureArray *out) = 0;
+protected:
+	KeyLength anyKeyLength() const
+	{
+		// this is used instead of a default implementation to make sure that
+		// provider authors think about it, at least a bit.
+		// See Meyers, Effective C++, Effective C++ (2nd Ed), Item 36
+		return KeyLength( 0, std::numeric_limits<int>::max(), 1 );
+	}
+
+
 };
 
 class PKeyBase : public Provider::Context
