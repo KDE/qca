@@ -4,7 +4,7 @@
 #include<qstring.h>
 #include<qcstring.h>
 
-#include<stdio.h>
+class QCAProvider;
 
 namespace QCA
 {
@@ -35,6 +35,9 @@ namespace QCA
 		virtual void clear()=0;
 		virtual void update(const QByteArray &a)=0;
 		virtual QByteArray final()=0;
+
+	protected:
+		QCAProvider *p;
 	};
 
 	template <class T>
@@ -64,7 +67,7 @@ namespace QCA
 
 		static QString hashToString(const QCString &cs)
 		{
-			return arrayToHex(hash(a));
+			return arrayToHex(hash(cs));
 		}
 	};
 
@@ -95,6 +98,9 @@ namespace QCA
 		void clear();
 		void update(const QByteArray &a);
 		QByteArray final();
+
+	private:
+		int ctx;
 	};
 
 	class SHA256 : public Hash, public HashStatic<SHA256>

@@ -1,8 +1,20 @@
 #include"qca.h"
 
+#include<qptrlist.h>
+#include"qcaprovider.h"
+#include<stdio.h>
+
+#define USE_OPENSSL
+
+#ifdef USE_OPENSSL
+#include"qcaopenssl.h"
+#endif
+
 using namespace QCA;
 
-QString arrayToHex(const QByteArray &a)
+static QPtrList<QCAProvider> providerList;
+
+QString QCA::arrayToHex(const QByteArray &a)
 {
 	QString out;
 	for(int n = 0; n < (int)a.size(); ++n) {
@@ -14,12 +26,40 @@ QString arrayToHex(const QByteArray &a)
 	return out;
 }
 
+void QCA::init()
+{
+	providerList.clear();
+#ifdef USE_OPENSSL
+	providerList.append(new QCAOpenSSL);
+#endif
+}
+
+bool QCA::isSupported(int capabilities)
+{
+	int caps = 0;
+	QPtrListIterator<QCAProvider> it(providerList);
+	for(QCAProvider *p; (p = it.current()); ++it)
+		caps |= p->capabilities();
+	return caps;
+}
+
+static QCAProvider * getp(int cap)
+{
+	QPtrListIterator<QCAProvider> it(providerList);
+	for(QCAProvider *p; (p = it.current()); ++it) {
+		if(p->capabilities() & cap)
+			return p;
+	}
+	return 0;
+}
+
 
 //----------------------------------------------------------------------------
 // Hash
 //----------------------------------------------------------------------------
 Hash::Hash()
 {
+	p = 0;
 }
 
 Hash::~Hash()
@@ -64,23 +104,36 @@ void Cipher::setIV(const QByteArray &a)
 //----------------------------------------------------------------------------
 SHA1::SHA1()
 {
+	p = getp(CAP_SHA1);
+	if(!p) {
+		printf("SHA1: can't initialize!\n");
+		return;
+	}
+
+	ctx = p->sha1_create();
 }
 
 SHA1::~SHA1()
 {
+	p->sha1_destroy(ctx);
 }
 
 void SHA1::clear()
 {
+	p->sha1_destroy(ctx);
+	ctx = p->sha1_create();
 }
 
 void SHA1::update(const QByteArray &a)
 {
+	p->sha1_update(ctx, a.data(), a.size());
 }
 
 QByteArray SHA1::final()
 {
-	printf("sha1 finalizing\n");
+	QByteArray buf(20);
+	p->sha1_final(ctx, buf.data());
+	return buf;
 }
 
 
@@ -115,6 +168,7 @@ QByteArray SHA256::final()
 //----------------------------------------------------------------------------
 MD5::MD5()
 {
+	printf("MD5: initialized\n");
 }
 
 MD5::~MD5()
@@ -131,7 +185,6 @@ void MD5::update(const QByteArray &a)
 
 QByteArray MD5::final()
 {
-	printf("md5 finalizing\n");
 	return QByteArray();
 }
 
