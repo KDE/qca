@@ -31,7 +31,7 @@
 #define QCA_PLUGIN_VERSION 2
 
 #define QCA_EXPORT_PLUGIN(P) \
-	QCA_PLUGIN_EXPORT QCA::Provider *createProvider() { return new P; } \
+	QCA_PLUGIN_EXPORT QCA::Provider *createProvider2() { return new P; } \
 	QCA_PLUGIN_EXPORT int version() { return QCA_PLUGIN_VERSION; }
 
 // v2 contexts

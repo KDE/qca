@@ -70,7 +70,10 @@ public:
 			old = true;
 		}
 
-		s = lib->resolve("createProvider");
+		if(old)
+			s = lib->resolve("createProvider");
+		else
+			s = lib->resolve("createProvider2");
 		if(!s)
 		{
 			delete lib;
