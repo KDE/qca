@@ -1,0 +1,528 @@
+#!/bin/sh
+
+show_usage() {
+cat <<EOT
+Usage: ./configure [OPTION]...
+
+This script creates necessary configuration files to build/install.
+
+Main options:
+  --qtdir=[path]    Directory where Qt is installed.
+  --help            This help text.
+
+Dependency options:
+  --with-sasl-inc=[path]    Path to Cyrus SASL2 include files
+  --with-sasl-lib=[path]    Path to Cyrus SASL2 library files
+
+EOT
+}
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--qtdir=*)
+			QTDIR=`expr "${1}" : "--qtdir=\(.*\)"`
+			shift
+			;;
+
+		--with-sasl-inc=*)
+			QC_WITH_SASL_INC=`expr "${1}" : "--with-sasl-inc=\(.*\)"`
+			shift
+			;;
+
+		--with-sasl-lib=*)
+			QC_WITH_SASL_LIB=`expr "${1}" : "--with-sasl-lib=\(.*\)"`
+			shift
+			;;
+
+		--debug)
+			QC_DEBUG="Y"
+			shift
+			;;
+		--help) show_usage; exit ;;
+		*) show_usage; exit ;;
+	esac
+done
+
+
+echo Configuring qca-sasl ...
+
+if [ "$QC_DEBUG" == "Y" ]; then
+echo
+echo QTDIR=$QTDIR
+echo QC_WITH_SASL_INC=$QC_WITH_SASL_INC
+echo QC_WITH_SASL_LIB=$QC_WITH_SASL_LIB
+echo
+fi
+
+if [ -z "$QTDIR" ]; then
+	echo
+	echo \$QTDIR not set... trying to find Qt manually
+	for p in /usr/lib/qt /usr/share/qt /usr/share/qt3 /usr/local/lib/qt /usr/local/share/qt /usr/lib/qt3 /usr/local/lib/qt3 /usr/X11R6/share/qt /usr/qt/3 ; do
+		if [ -d "$p/mkspecs" ]; then
+			QTDIR=$p
+			break;
+		fi;
+	done
+	if [ -z "$QTDIR" ]; then
+		echo Unable to find Qt 'mkspecs'. Please set QTDIR
+		echo manually. Perhaps you need to install Qt 3
+		echo development utilities. You may download them either
+		echo from the vendor of your operating system or from
+		echo www.trolltech.com
+		echo
+		exit 1;
+	fi
+fi
+
+if [ ! -x "$QTDIR/bin/qmake" ]; then
+	echo Warning: qmake not in \$QTDIR/bin/qmake
+	echo trying to find it in \$PATH
+	qm=`type -p qmake`
+	if [ -x "$qm" ]; then
+		echo qmake found in $qm
+	else
+		echo
+		echo Sorry, you seem to have a very unusual setup,
+		echo or I missdetected \$QTDIR=$QTDIR
+		echo
+		echo Please set \$QTDIR manually and make sure that
+		echo \$QTDIR/bin/qmake exists.
+		echo
+		exit 1;
+	fi
+else
+	qm=$QTDIR/bin/qmake
+fi
+
+gen_files() {
+cat >$1/modules.cpp <<EOT
+/*
+-----BEGIN QCMOD-----
+name: cyrussasl
+arg: with-sasl-inc=[path],Path to Cyrus SASL2 include files
+arg: with-sasl-lib=[path],Path to Cyrus SASL2 library files
+-----END QCMOD-----
+*/
+class qc_cyrussasl : public ConfObj
+{
+public:
+	qc_cyrussasl(Conf *c) : ConfObj(c) {}
+	QString name() const { return "Cyrus SASL2"; }
+	QString shortname() const { return "cyrussasl"; }
+	bool exec()
+	{
+		QString inc, lib;
+		QString s;
+
+		s = conf->getenv("QC_WITH_SASL_INC");
+		if(!s.isEmpty()) {
+			if(!conf->checkHeader(s, "sasl/sasl.h"))
+				return false;
+			inc = s;
+		}
+		else {
+			if(!conf->findHeader("sasl/sasl.h", QStringList(), &s))
+				return false;
+			inc = s;
+		}
+
+		s = conf->getenv("QC_WITH_SASL_LIB");
+		if(!s.isEmpty()) {
+			if(!conf->checkLibrary(s, "sasl2"))
+				return false;
+			lib = QString("-L") + s;
+		}
+		else {
+			if(!conf->findLibrary("sasl2", &s))
+				return false;
+			lib = s;
+		}
+
+		if(!inc.isEmpty())
+			conf->addIncludePath(inc);
+		if(!lib.isEmpty())
+			conf->addLib(QString("-L") + s);
+		conf->addLib("-lsasl2");
+		return true;
+	}
+};
+
+EOT
+cat >$1/modules_new.cpp <<EOT
+    o = new qc_cyrussasl(conf);
+    o->required = true;
+    o->disabled = false;
+
+EOT
+cat >$1/conf.cpp <<EOT
+#include<stdio.h>
+#include<stdlib.h>
+#include<qstring.h>
+#include<qdict.h>
+#include<qptrlist.h>
+#include<qfileinfo.h>
+#include<qfile.h>
+#include<qdir.h>
+#include<qstringlist.h>
+
+class Conf;
+
+class ConfObj
+{
+public:
+	ConfObj(Conf *c);
+	virtual ~ConfObj();
+
+	virtual QString name() const=0;
+	virtual QString shortname() const=0;
+	virtual bool exec()=0;
+
+	Conf *conf;
+	bool required;
+	bool disabled;
+};
+
+typedef QPtrList<ConfObj> ConfObjList;
+typedef QPtrListIterator<ConfObj> ConfObjListIt;
+
+class Conf
+{
+public:
+	Conf() : vars(17)
+	{
+		list.setAutoDelete(true);
+		vars.setAutoDelete(true);
+
+		vars.insert("QMAKE_INCDIR_X11", new QString(X11_INC));
+		vars.insert("QMAKE_LIBDIR_X11", new QString(X11_LIBDIR));
+		vars.insert("QMAKE_LIBS_X11",   new QString(X11_LIB));
+		vars.insert("QMAKE_CC",         new QString(CC));
+	}
+
+	~Conf()
+	{
+	}
+
+	void added(ConfObj *o)
+	{
+		list.append(o);
+	}
+
+	QString getenv(const QString &var)
+	{
+		char *p = ::getenv(var.latin1());
+		if(!p)
+			return QString::null;
+		return QString(p);
+	}
+
+	bool exec()
+	{
+		ConfObjListIt it(list);
+		for(ConfObj *o; (o = it.current()); ++it) {
+			// if this was a disabled-by-default option, check if it was enabled
+			if(o->disabled) {
+				QString v = QString("QC_ENABLE_") + o->shortname();
+				if(getenv(v) != "Y")
+					continue;
+			}
+			// and the opposite?
+			else {
+				QString v = QString("QC_DISABLE_") + o->shortname();
+				if(getenv(v) == "Y")
+					continue;
+			}
+
+			printf("Checking for %s ...", o->name().latin1());
+			fflush(stdout);
+			bool ok = o->exec();
+			if(ok)
+				printf(" yes\n");
+			else
+				printf(" no\n");
+			if(!ok && o->required) {
+				printf("\nError: need %s!\n\n", o->name().latin1());
+				return false;
+			}
+		}
+		return true;
+	}
+
+	const QString & qvar(const QString &s)
+	{
+		QString *p = vars.find(s);
+		if(p)
+			return *p;
+		else
+			return blank;
+	}
+
+	QString expandIncludes(const QString &inc)
+	{
+		return QString("-I") + inc;
+	}
+
+	QString expandLibs(const QString &lib)
+	{
+		return QString("-L") + lib;
+	}
+
+	int doCommand(const QString &s)
+	{
+		//printf("[%s]\n", s.latin1());
+		int r = system((s + " 1>/dev/null 2>/dev/null").latin1());
+		//printf("returned: %d\n", r);
+		return r;
+	}
+
+	bool doCompileAndLink(const QString &filedata, const QString &flags, int *retcode=0)
+	{
+		QDir dir(".");
+		QString fname = "atest.c";
+		QString out = "atest";
+		QFile f(fname);
+		QCString cs = filedata.latin1();
+		if(!f.open(IO_WriteOnly | IO_Truncate))
+			return false;
+		f.writeBlock(cs.data(), cs.length());
+		f.close();
+
+		QString str = qvar("QMAKE_CC") + ' ' + fname + " -o " + out + ' ' + flags;
+		int r = doCommand(str);
+		if(r == 0 && retcode)
+			*retcode = doCommand(QString("./") + out);
+		dir.remove(fname);
+		dir.remove(out);
+		if(r != 0)
+			return false;
+		return true;
+	}
+
+	bool checkHeader(const QString &path, const QString &h)
+	{
+		QFileInfo fi(path + '/' + h);
+		if(fi.exists())
+			return true;
+		return false;
+	}
+
+	bool findHeader(const QString &h, const QStringList &ext, QString *inc)
+	{
+		if(checkHeader("/usr/include", h)) {
+			*inc = "";
+			return true;
+		}
+		QStringList dirs;
+		dirs += "/usr/local/include";
+		dirs += ext;
+		for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it) {
+			if(checkHeader(*it, h)) {
+				*inc = *it;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool checkLibrary(const QString &path, const QString &name)
+	{
+		QString str =
+			"int main()\n"
+			"{\n"
+			"    return 0;\n"
+			"}\n";
+
+		QString extra;
+		if(!path.isEmpty())
+			extra += QString("-L") + path + ' ';
+		extra += QString("-l") + name;
+		if(!doCompileAndLink(str, extra))
+			return false;
+		return true;
+	}
+
+	bool findLibrary(const QString &name, QString *lib)
+	{
+		if(checkLibrary("", name)) {
+			*lib = "";
+			return true;
+		}
+		if(checkLibrary("/usr/local/lib", name)) {
+			*lib = "/usr/local/lib";
+			return true;
+		}
+		return false;
+	}
+
+	void addDefine(const QString &str)
+	{
+		if(DEFINES.isEmpty())
+			DEFINES = str;
+		else
+			DEFINES += QString(" ") + str;
+	}
+
+	void addLib(const QString &str)
+	{
+		if(LIBS.isEmpty())
+			LIBS = str;
+		else
+			LIBS += QString(" ") + str;
+	}
+
+	void addIncludePath(const QString &str)
+	{
+		if(INCLUDEPATH.isEmpty())
+			INCLUDEPATH = str;
+		else
+			INCLUDEPATH += QString(" ") + str;
+	}
+
+	void addExtra(const QString &str)
+	{
+		extra += str + '\n';
+	}
+
+	QString DEFINES;
+	QString INCLUDEPATH;
+	QString LIBS;
+	QString extra;
+
+private:
+	ConfObjList list;
+	QDict<QString> vars;
+	QString blank;
+};
+
+ConfObj::ConfObj(Conf *c)
+{
+	conf = c;
+	conf->added(this);
+	required = false;
+	disabled = false;
+}
+
+ConfObj::~ConfObj()
+{
+}
+
+#include"modules.cpp"
+
+//----------------------------------------------------------------------------
+// main
+//----------------------------------------------------------------------------
+int main()
+{
+	Conf *conf = new Conf;
+	ConfObj *o;
+	o = 0;
+#include"modules_new.cpp"
+
+	bool success = false;
+	if(conf->exec()) {
+		QFile f("conf.pri");
+		if(!f.open(IO_WriteOnly | IO_Truncate)) {
+			printf("Error writing %s\n", f.name().latin1());
+			return 1;
+		}
+
+		QString str;
+		str += "# qconf\n";
+		if(!conf->DEFINES.isEmpty())
+			str += "DEFINES += " + conf->DEFINES + '\n';
+		if(!conf->INCLUDEPATH.isEmpty())
+			str += "INCLUDEPATH += " + conf->INCLUDEPATH + '\n';
+		if(!conf->LIBS.isEmpty())
+			str += "LIBS += " + conf->LIBS + '\n';
+		if(!conf->extra.isEmpty())
+			str += conf->extra;
+		str += '\n';
+
+		char *p = getenv("BINDIR");
+		if(p) {
+			str += QString("target.path = ") + p + '\n';
+			str += "INSTALLS += target\n";
+		}
+
+		QCString cs = str.latin1();
+		f.writeBlock(cs.data(), cs.length());
+		f.close();
+		success = true;
+	}
+	delete conf;
+
+	if(success)
+		return 0;
+	else
+		return 1;
+}
+
+EOT
+cat >$1/conf.pro <<EOT
+CONFIG += qt x11 thread
+TARGET = conf
+
+DEFINES += X11_INC='"\$\$QMAKE_INCDIR_X11"'
+DEFINES += X11_LIBDIR='"\$\$QMAKE_LIBDIR_X11"'
+DEFINES += X11_LIB='"\$\$QMAKE_LIBS_X11"'
+DEFINES += CC='"\$\$QMAKE_CC"'
+
+SOURCES += conf.cpp
+
+EOT
+}
+
+export QTDIR
+export QC_WITH_SASL_INC
+export QC_WITH_SASL_LIB
+if [ -e ".qconftemp" ]; then
+	rm -rf .qconftemp
+fi
+(
+	mkdir .qconftemp
+	gen_files .qconftemp
+	cd .qconftemp
+	$qm conf.pro >/dev/null
+	QTDIR=$QTDIR make clean >/dev/null 2>&1
+	QTDIR=$QTDIR make >../conf.log 2>&1
+)
+
+if [ "$?" != "0" ]; then
+	rm -rf .qconftemp
+	echo "There was an error compiling 'conf'.  Be sure you have a proper"
+	echo "Qt 3.x Multithreaded (MT) build environment set up."
+	if [ ! -f "$QTDIR/lib/libqt-mt.so.3" ]; then
+		echo
+		echo "One possible reason is that you don't have"
+		echo "libqt-mt.so.3 installed in $QTDIR/lib/."
+	fi
+	echo
+	exit 1;
+fi
+
+.qconftemp/conf
+if [ "$?" != "0" ]; then
+	rm -rf .qconftemp
+	exit 1;
+fi
+rm -rf .qconftemp
+
+if [ -x "./qcextra" ]; then
+	./qcextra
+fi
+# run qmake
+$qm qca-sasl.pro
+if [ "$?" != "0" ]; then
+	exit 1;
+fi
+cat >Makefile.tmp <<EOT
+QTDIR = $QTDIR
+EOT
+cat Makefile >> Makefile.tmp
+rm -f Makefile
+cp -f Makefile.tmp Makefile
+rm -f Makefile.tmp
+
+echo
+echo Good, your configure finished.  Now run \'make\'.
+echo
