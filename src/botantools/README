@@ -17,7 +17,8 @@ your code.
 
 The 'botan' subfolder consists of files just from Botan.  Inside are source
 files (originally from Botan's 'src' folder) as well as some modules (from
-'modules').  The further 'botan' subfolder contains headers (from 'include' and modules).
+'modules').  The further 'botan' subfolder contains headers (from 'include'
+and modules).
 
 Files used:
 
