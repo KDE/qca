@@ -26,12 +26,11 @@
 
 int main(int argc, char **argv)
 {
-	Q_UNUSED( argv );
-	Q_UNUSED( argc );
-
 	// the Initializer object sets things up, and 
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
+
+	QCoreApplication app(argc, argv);
 
 	int randInt;
 	// This is the standard way to generate a random integer.
