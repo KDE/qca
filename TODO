@@ -1,10 +1,7 @@
 * Additional unit tests
 * API documentation
 
-* securearray: do copy-on-write instead of all the time, don't use SecureVector
-* base64 filter code
 * default provider with random, sha1, and md5 ??
-* wrap the Botan namespace in the QCA namespace (to avoid symbol conflict)
 
 QCA 2 TODO:
 * plugins: thread safety ?

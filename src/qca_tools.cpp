@@ -101,10 +101,11 @@ void botan_deinit()
 class QSecureArray::Private
 {
 public:
-	Private(uint size) : buf((Botan::u32bit)size) {}
-	Private(const Botan::SecureVector<Botan::byte> &a) : buf(a) {}
+	Private(uint size) : buf((Botan::u32bit)size), refs(1) {}
+	Private(const Botan::SecureVector<Botan::byte> &a) : buf(a), refs(1) {}
 
 	Botan::SecureVector<Botan::byte> buf;
+	int refs;
 };
 
 QSecureArray::QSecureArray()
@@ -134,26 +135,38 @@ QSecureArray::QSecureArray(const QSecureArray &from)
 
 QSecureArray::~QSecureArray()
 {
-	delete d;
+	reset();
+}
+
+void QSecureArray::reset()
+{
+	if(d)
+	{
+		--d->refs;
+		if(d->refs == 0)
+			delete d;
+		d = 0;
+	}
 }
 
 QSecureArray & QSecureArray::operator=(const QSecureArray &from)
 {
-	delete d;
-	d = 0;
+	reset();
 
 	if(from.d)
-		d = new Private(from.d->buf);
-
+	{
+		d = from.d;
+		++d->refs;
+	}
 	return *this;
 }
 
 QSecureArray & QSecureArray::operator=(const QByteArray &from)
 {
-	delete d;
-	d = 0;
+	reset();
 
-	if(!from.isEmpty()) {
+	if(!from.isEmpty())
+	{
 		d = new Private(from.size());
 		Botan::byte *p = (Botan::byte *)d->buf;
 		memcpy(p, from.data(), from.size());
@@ -162,8 +175,24 @@ QSecureArray & QSecureArray::operator=(const QByteArray &from)
 	return *this;
 }
 
-char & QSecureArray::operator[](int index) const
+char & QSecureArray::operator[](int index)
 {
+	return at(index);
+}
+
+const char & QSecureArray::operator[](int index) const
+{
+	return at(index);
+}
+
+const char & QSecureArray::at(uint index) const
+{
+	return (char &)(*((Botan::byte *)d->buf + index));
+}
+
+char & QSecureArray::at(uint index)
+{
+	detach();
 	return (char &)(*((Botan::byte *)d->buf + index));
 }
 
@@ -191,10 +220,14 @@ bool QSecureArray::resize(uint size)
 	if(cur_size == (int)size)
 		return true;
 
-	if(size > 0) {
+	detach();
+
+	if(size > 0)
+	{
 		Private *d2 = new Private(size);
 		Botan::byte *p2 = (Botan::byte *)d2->buf;
-		if(d) {
+		if(d)
+		{
 			Botan::byte *p = (Botan::byte *)d->buf;
 			memcpy(p2, p, cur_size);
 			delete d;
@@ -210,7 +243,17 @@ bool QSecureArray::resize(uint size)
 
 QSecureArray QSecureArray::copy() const
 {
-	return *this;
+	QSecureArray a = *this;
+	a.detach();
+	return a;
+}
+
+void QSecureArray::detach()
+{
+	if(!d || d->refs <= 1)
+		return;
+	--d->refs;
+	d = new Private(d->buf);
 }
 
 QByteArray QSecureArray::toByteArray() const

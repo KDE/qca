@@ -106,19 +106,25 @@ public:
 
 	QSecureArray & operator=(const QSecureArray &from);
 	QSecureArray & operator=(const QByteArray &a);
-	char & operator[](int index) const;
+	char & operator[](int index);
+	const char & operator[](int index) const;
 
 	char *data() const;
+	const char & at(uint index) const;
+	char & at(uint index);
 	uint size() const;
 	bool isEmpty() const;
 	bool resize(uint size);
 
 	QSecureArray copy() const;
+	void detach();
 	QByteArray toByteArray() const;
 
 private:
 	class Private;
 	Private *d;
+
+	void reset();
 };
 
 class QBigInteger
