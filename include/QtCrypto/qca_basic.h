@@ -458,17 +458,27 @@ namespace QCA
 		/**
 		   Reset / reconfigure the Cipher
 
-		   \param m the Mode for the Cipher algorithm (eg Cipher Block Chaining)
+		   You are supposed to call this after constructing the cipher, as shown in
+		   the following example:
+		   \code
+		   QCA::AES128 cipher(QCA::CBC, QCA::NoPadding);
+		   cipher.setup(...);
+		   \endcode
+
 		   \param dir the Direction that this Cipher should use (Encode for encryption, Decode for decryption)
 		   \param key the SymmetricKey array that is the key
 		   \param iv the InitializationVector to use
-		   \param pad the type of Padding to use.
-
 		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
 		   the length of the plaintext.
 		*/
 		void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector());
+		/**
+		   Construct a Cipher type string
 
+		   \param cipherType the name of the algorithm (eg AES128, DES)
+		   \param modeType the mode to operate the cipher in (eg QCA::CBC, QCA::CFB)
+		   \param paddingType the padding required (eg QCA::NoPadding, QCA::PCKS7)
+		*/
 		static QString withAlgorithms(const QString &cipherType, Mode modeType, Padding paddingType);
 
 	protected:
@@ -476,11 +486,9 @@ namespace QCA
 		   Standard constructor
 
 		   \param type the name of the cipher specialisation to use
-		   \param m the Mode for the Cipher algorithm (eg Cipher Block Chaining)
 		   \param dir the Direction that this Cipher should use (Encode for encryption, Decode for decryption)
 		   \param key the SymmetricKey array that is the key
 		   \param iv the InitializationVector to use
-		   \param pad the type of Padding to use
 		   \param provider the name of the Provider to use
 
 		   \note Padding only applies to CBC and ECB modes.  CFB ciphertext is always
