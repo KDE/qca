@@ -3,4 +3,7 @@
 cat >extra.pri <<EOT
 target.path=$QTDIR/plugins/crypto
 INSTALLS += target
+
+INSTALL_ROOT = $PREFIX
+
 EOT

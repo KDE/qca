@@ -8,4 +8,6 @@ incfiles.path=$PREFIX/include
 incfiles.files=src/qca.h
 INSTALLS += incfiles
 
+INSTALL_ROOT = $PREFIX
+
 EOT
