@@ -323,6 +323,12 @@ void QBigInteger::fromArray(const QSecureArray &a)
 
 QString QBigInteger::toString() const
 {
+	QString leader;
+	if ( d->n.is_negative() ) {
+		leader = QString( "-" );
+		d->n.set_sign( Botan::BigInt::Positive );
+	}
+
 	QCString cs;
 	try {
 		QByteArray a(d->n.encoded_size(Botan::BigInt::Decimal));
@@ -332,7 +338,10 @@ QString QBigInteger::toString() const
 	catch(std::exception &e) {
 		//std::cout << "toString error: " << e.what() << std::endl;
 	}
-	return QString::fromLatin1(cs);
+	while (cs.left(1) == QCString("0") ) {
+		cs.remove( 0, 1 );
+	}
+	return ( leader + QString::fromLatin1(cs) );
 }
 
 // this could handle hex as well as decimal and octal,
