@@ -1,11 +1,12 @@
 TEMPLATE = lib
 CONFIG  += qt thread debug plugin
 #CONFIG  += qt thread release plugin
+QT -= gui
 TARGET   = qca-openssl
 
 DEFINES += QCA_PLUGIN
 
-INCLUDEPATH += ../../include
+INCLUDEPATH += ../../include/QtCrypto
 SOURCES = qca-openssl.cpp
 
 #temp hack until build system is fixed.

@@ -17,7 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-#include "QtCrypto/qcaprovider.h"
+#include <QtCore>
+#include <QtCrypto>
 #include <qstringlist.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
@@ -311,3 +312,8 @@ public:
 	virtual int version() const { return QCA_PLUGIN_VERSION; }
 	virtual QCA::Provider *createProvider() { return new opensslProvider; }
 };
+
+#include "qca-openssl.moc"
+
+Q_EXPORT_PLUGIN(opensslPlugin);
+
