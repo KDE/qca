@@ -127,10 +127,10 @@ public:
 		buf.resize(64);
 		buf.fill(0);
 		m_count = 0;
-		abcd[0] = 0x67452301;
-		abcd[1] = 0xefcdab89;
-		abcd[2] = 0x98badcfe;
-		abcd[3] = 0x10325476;
+		a = 0x67452301;
+		b = 0xefcdab89;
+		c = 0x98badcfe;
+		d = 0x10325476;
 	}
 
         void update(const QSecureArray &a)
@@ -171,7 +171,7 @@ public:
 
         QSecureArray final()
         {
-		QSecureArray a(16);
+		QSecureArray result(16);
 		QSecureArray data(8);
 		unsigned int i;
     
@@ -197,16 +197,31 @@ public:
 		}
 		/* Append the length. */
 		update(data);
-		for (i = 0; i < 16; ++i)
-			a[i] = (abcd[i >> 2] >> ((i & 3) << 3));
-		return a;
+
+		result[0] = (a >> 0);
+		result[1] = (a >> 8);
+		result[2] = (a >> 16);
+		result[3] = (a >> 24);
+		result[4] = (b >> 0);
+		result[5] = (b >> 8);
+		result[6] = (b >> 16);
+		result[7] = (b >> 24);
+		result[8] = (c >> 0);
+		result[9] = (c >> 8);
+		result[10] = (c >> 16);
+		result[11] = (c >> 24);
+		result[12] = (d >> 0);
+		result[13] = (d >> 8);
+		result[14] = (d >> 16);
+		result[15] = (d >> 24);
+		return result;
         }
 
 private:
 
         /* Define the state of the MD5 Algorithm. */
 	Q_UINT64 m_count;	        /* message length in bits */
-	Q_UINT32 abcd[4];		/* digest buffer */
+	Q_UINT32 a, b, c, d;		/* digest buffer */
 	QSecureArray  buf;		/* accumulate block */
 
 	Q_UINT32 rotateLeft(Q_UINT32 x, Q_UINT32 n)
@@ -260,11 +275,11 @@ private:
 
 	void md5_process(QSecureArray data)
 	{
-		Q_UINT32 a,b,c,d;
-		a = abcd[0];
-		b = abcd[1];
-		c = abcd[2];
-		d = abcd[3];
+		Q_UINT32 aSaved, bSaved, cSaved, dSaved;
+		aSaved = a;
+		bSaved = b;
+		cSaved = c;
+		dSaved = d;
 		
 		Q_UINT32 xbuf[16];
 		const Q_UINT32 *X;
@@ -373,10 +388,10 @@ private:
 		/* Then perform the following additions. (That is increment each
 		   of the four registers by the value it had before this block
 		   was started.) */
-		abcd[0] += a;
-		abcd[1] += b;
-		abcd[2] += c;
-		abcd[3] += d;
+		a += aSaved;
+		b += bSaved;
+		c += cSaved;
+		d += dSaved;
 	}
 	
 };
