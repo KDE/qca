@@ -3,7 +3,11 @@
 #include<qsocket.h>
 #include<qserversocket.h>
 #include<stdio.h>
+
+#ifdef Q_OS_UNIX
 #include<unistd.h>
+#endif
+
 #include"base64.h"
 #include"qca.h"
 

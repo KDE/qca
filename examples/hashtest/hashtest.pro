@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += thread
+CONFIG += thread console
 TARGET = hashtest
 
 SOURCES += hashtest.cpp
