@@ -81,6 +81,10 @@ class QCA_CertContext;
  *       - BlowFish
  *       - TripleDES
  *       - AES (AES128, AES256)
+ *   - Keyed Hash Message Authentication Code (HMAC)
+ *       - SHA1
+ *       - MD5
+ *       - RIPEMD160
  *
  * Functionality is supplied via plugins.  This is useful for avoiding
  * dependence on a particular crypto library and makes upgrading easier,
@@ -755,7 +759,6 @@ namespace QCA
 	 * representation to be converted
 	 * \return the equivalent QByteArray
 	 *
-		
 	 */
 	QCA_EXPORT QByteArray hexToArray(const QString &hexString);
 
@@ -767,13 +770,47 @@ namespace QCA
 		~Initializer();
 	};
 
+	/**
+	 * Key length
+	 *
+	 * The KeyLength specifies the minimum and maximum byte sizes
+	 * allowed for a key, as well as a "multiple" which the key
+	 * size must evenly divide into.
+	 * 
+	 * As an example, if the key can be 4, 8 or 12 bytes, you can
+	 * express this as 
+	 * \code
+	 * KeyLength keyLen( 4, 12, 4 );
+	 * \endcode
+	 */
 	class QCA_EXPORT KeyLength
 	{
 	public:
+		/**
+		 * Construct a %KeyLength object
+		 *
+		 * \param min the minimum length of the key, in bytes
+		 * \param max the maximum length of the key, in bytes
+		 * \param multiple the number of bytes that the key must be a 
+		 * multiple of.
+		 */
 		KeyLength(int min, int max, int multiple) { _min = min, _max = max, _multiple = multiple; }
-
+		/**
+		 * Obtain the minimum length for the key, in bytes
+		 */
 		int minimum() const { return _min; }
+
+		/**
+		 * Obtain the maximum length for the key, in bytes
+		 */
 		int maximum() const { return _max; }
+
+		/**
+		 * Return the number of bytes that the key must be a multiple of
+		 *
+		 * If this is one, then anything between minumum and maximum (inclusive)
+		 * is acceptable.
+		 */
 		int multiple() const { return _multiple; }
 
 	private:
@@ -880,6 +917,9 @@ namespace QCA
 		bool _ok;
 	};
 
+	/**
+	 * Generic superclass for algorithms
+	 */
 	class QCA_EXPORT Algorithm
 	{
 	public:
@@ -918,6 +958,9 @@ namespace QCA
 		static QSecureArray randomArray(int size, Quality q = SessionKey);
 	};
 
+	/**
+	 * Container for keys for symmetric encryption algorithms.
+	 */
 	class QCA_EXPORT SymmetricKey : public QSecureArray
 	{
 	public:
@@ -942,15 +985,15 @@ namespace QCA
 	 * General superclass for hashing algorithms.
 	 *
 	 * %Hash is a superclass for the various hashing algorithms
-	 * within QCA. You should not need to use it directly unless you are
-	 * adding another hashing capability to QCA - you should be
+	 * within %QCA. You should not need to use it directly unless you are
+	 * adding another hashing capability to %QCA - you should be
 	 * using a sub-class. SHA1 or RIPEMD160 are recommended for
 	 * new applications, although MD2, MD4, MD5 or SHA0 may be
 	 * applicable (for interoperability reasons) for some
 	 * applications. 
 	 *
 	 * To perform a hash, you create an object (of one of the
-	 * sub-classes of Hash), call update() with the data that
+	 * sub-classes of %Hash), call update() with the data that
 	 * needs to be hashed, and then call final(), which returns
 	 * a QByteArray of the hash result. An example (using the SHA1
 	 * hash, with 1000 updates of a 1000 byte string) is shown below:
@@ -1111,7 +1154,9 @@ namespace QCA
 		int blockSize() const;
 
 		virtual void clear();
+
 		virtual QSecureArray update(const QSecureArray &a);
+
 		virtual QSecureArray final();
 		virtual bool ok() const;
 
@@ -1125,6 +1170,15 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	 * General superclass for message authentication code (MAC) algorithms.
+	 *
+	 * %MessageAuthenticationCode is a superclass for the various 
+	 * message authentication code algorithms within %QCA. You should
+	 * not need to use it directly unless you are
+	 * adding another message authentication code capability to %QCA - you should be
+	 * using a sub-class. HMAC using SHA1 is recommended for new applications.
+	 */
 	class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
 	{
 	public:
@@ -1135,10 +1189,45 @@ namespace QCA
 		KeyLength keyLength() const;
 		bool validKeyLength(int n) const;
 
+		/**
+		 * Reset a MessageAuthenticationCode, dumping all
+		 * previous parts of the message.
+		 *
+		 * This method clears (or resets) the algorithm,
+		 * effectively undoing any previous update()
+		 * calls. You should use this call if you are re-using
+		 * a %MessageAuthenticationCode sub-class object
+		 * to calculate additional MACs.
+		 */
 		virtual void clear();
-		virtual void update(const QSecureArray &a);
+
+		/**
+		 * Update the MAC, adding more of the message contents
+		 * to the digest. The whole message needs to be added
+		 * using this method before you call final(). 
+		 *
+		 * \param array the message contents
+		 */
+		virtual void update(const QSecureArray &array);
+
+		/**
+		 * Finalises input and returns the MAC result
+		 *
+		 * After calling update() with the required data, the
+		 * hash results are finalised and produced.
+		 *
+		 * Note that it is not possible to add further data (with
+		 * update()) after calling final(). If you want to
+		 * reuse the %MessageAuthenticationCode object, you
+		 * should call clear() and start to update() again.
+		 */
 		virtual QSecureArray final();
 
+		/**
+		 * Initialise the MAC algorithm.
+		 *
+		 * \param key the key to use for the algorithm
+		 */
 		void setup(const SymmetricKey &key);
 
 		static QString withAlgorithm(const QString &macType, const QString &algType);
@@ -1459,6 +1548,19 @@ namespace QCA
 		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
 	};
 
+
+	/**
+	 * Keyed %Hash message authentication codes
+	 *
+	 * This algorithm takes an arbitrary data stream, known as the
+	 * message and outputs an authentication code for that message.
+	 * The authentication code is generated using a secret key in
+	 * such a way that the authentication code shows that the 
+	 * message has not be altered.
+	 *
+	 * For more information, see H. Krawczyk et al. RFC2104 
+	 * "HMAC: Keyed-Hashing for Message Authentication"
+	 */
 	class QCA_EXPORT HMAC : public MessageAuthenticationCode
 	{
 	public:
