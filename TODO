@@ -20,6 +20,8 @@
 
 * write plugin support
   qca-tls: do something about the cert check lag.  maybe a thread?
+  qca-botan: implement
+  qca-openssl: need to implement locking callbacks.
 
 * consider new APIs:
   pgp (go beyond cutestuff and support key expiration, validity, etc)
