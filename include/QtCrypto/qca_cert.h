@@ -208,6 +208,10 @@ namespace QCA
 		bool fromPKCS7(const QByteArray &a);
 		bool fromFlatText(const QString &s);
 
+		void append(const Store &a);
+		Store operator+(const Store &a) const;
+		Store & operator+=(const Store &a);
+
 	private:
 		friend class TLS;
 	};

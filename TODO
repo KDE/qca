@@ -17,7 +17,6 @@
   make public C functions to init in qca_tools.h, that qca_core will use
   cert/crl: Distinguished Names (Botan has X509_DN)
   cert: turn Info into an enum
-  store: ability to combine stores, iterate over certs?
   openpgp: be sure to support key expiration and validity
   shortcuts for reading/writing certs, etc, directly to files?
   cert: extensions

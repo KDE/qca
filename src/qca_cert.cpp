@@ -636,6 +636,24 @@ bool Store::fromFlatText(const QString &s)
 	return false;
 }
 
+void Store::append(const Store &a)
+{
+	Q_UNUSED(a);
+}
+
+Store Store::operator+(const Store &a) const
+{
+	Store s = *this;
+	s.append(a);
+	return s;
+}
+
+Store & Store::operator+=(const Store &a)
+{
+	append(a);
+	return *this;
+}
+
 //----------------------------------------------------------------------------
 // PersonalBundle
 //----------------------------------------------------------------------------
