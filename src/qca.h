@@ -158,7 +158,8 @@ namespace QCA
 	 * integer value, where each support capability is represented
 	 * by a bit set to true.
 	 */
-	enum {
+	enum
+	{
 		CAP_SHA1      = 0x0001, /**< SHA-1 digest hash (SHA1) */
 		CAP_SHA256    = 0x0002, /**< SHA-256 digest hash, per
 					 * FIPS 180-2 (SHA256) */
@@ -184,7 +185,8 @@ namespace QCA
 	/**
 	 * Mode settings for cipher algorithms
 	 */
-	enum {
+	enum
+	{
 		CBC = 0x0001, /**< operate in %Cipher Block Chaining mode */
 		CFB = 0x0002  /**< operate in %Cipher FeedBack mode */
 	};
@@ -192,9 +194,17 @@ namespace QCA
 	/**
 	 * Direction settings for cipher algorithms
 	 */
-	enum {
+	enum
+	{
 		Encrypt = 0x0001, /**< cipher algorithm should encrypt */
 		Decrypt = 0x0002  /**< cipher algorithm should decrypt */
+	};
+
+	enum MemoryMode
+	{
+		Practical, /**< mlock and drop root if available, else mmap */
+		Locking, /**< mlock and drop root */
+		LockingKeepPrivileges /**< mlock */
 	};
 
 	/**
@@ -204,8 +214,11 @@ namespace QCA
 	 * application.
 	 */
 	QCA_EXPORT void init();
+	QCA_EXPORT void init(MemoryMode m, int prealloc);
 
 	QCA_EXPORT void deinit();
+
+	QCA_EXPORT bool haveSecureMemory();
 
 	/**
 	 * Test if a capability (algorithm) is available.
@@ -281,7 +294,8 @@ namespace QCA
 	class QCA_EXPORT Initializer
 	{
 	public:
-		Initializer();
+		// botan prefers mmap over locking, so we will too
+		Initializer(MemoryMode m = Practical, int prealloc = 64);
 		~Initializer();
 	};
 
@@ -932,7 +946,8 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		enum Validity {
+		enum Validity
+		{
 			NoCert,
 			Valid,
 			HostMismatch,
@@ -994,7 +1009,8 @@ namespace QCA
 		Q_OBJECT
 	public:
 		enum Error { ErrAuth, ErrCrypt };
-		enum ErrorCond {
+		enum ErrorCond
+		{
 			NoMech,
 			BadProto,
 			BadServ,

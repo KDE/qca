@@ -22,21 +22,35 @@
 
 #include "botantools/botantools.h"
 
+static void add_mmap()
+{
+#ifdef Q_OS_UNIX
+	Botan::add_allocator_type("mmap", new Botan::MemoryMapping_Allocator);
+	Botan::set_default_allocator("mmap");
+#endif
+}
+
 namespace QCA {
 
 // Botan shouldn't throw any exceptions in our init/deinit.
 
-void botan_init()
+void botan_init(int prealloc, bool mmap)
 {
+	// 64k minimum
+	if(prealloc < 64)
+		prealloc = 64;
+
+	botan_memory_chunk = 64 * 1024;
+	botan_prealloc = prealloc / 64;
+	if(prealloc % 64 != 0)
+		++botan_prealloc;
+
 	Botan::Init::set_mutex_type(new Botan::Qt_Mutex);
 	Botan::Init::startup_memory_subsystem();
 
 	Botan::set_default_allocator("locking");
-#ifdef Q_OS_UNIX
-	// botan prefers mmap over locking, so we will too
-	Botan::add_allocator_type("mmap", new Botan::MemoryMapping_Allocator);
-	Botan::set_default_allocator("mmap");
-#endif
+	if(mmap)
+		add_mmap();
 }
 
 void botan_deinit()

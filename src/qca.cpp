@@ -30,6 +30,7 @@
 #include<qapplication.h>
 #include<qguardedptr.h>
 #include<stdlib.h>
+#include<unistd.h>
 #include"qcaprovider.h"
 
 #if defined(Q_OS_WIN32)
@@ -44,7 +45,7 @@ using namespace QCA;
 
 namespace QCA
 {
-	void botan_init();
+	void botan_init(int prealloc, bool mmap);
 	void botan_deinit();
 }
 
@@ -204,11 +205,37 @@ QByteArray QCA::hexToArray(const QString &str)
 
 void QCA::init()
 {
+	init(Practical, 64);
+}
+
+void QCA::init(MemoryMode mode, int prealloc)
+{
 	if(qca_init)
 		return;
 
 	qca_init = true;
-	botan_init();
+
+	// FIXME: Practical should test for mlock before resorting to mmap
+	// FIXME: make haveSecureMemory() return the right answer
+	bool use_mmap = false;
+	bool drop_root = false;
+	if(mode == Practical)
+	{
+		use_mmap = true;
+		drop_root = true;
+	}
+	else if(mode == Locking)
+		drop_root = true;
+
+	botan_init(prealloc, use_mmap);
+
+	if(drop_root)
+	{
+#ifdef Q_OS_UNIX
+		setuid(getuid());
+#endif
+	}
+
 	providerList.setAutoDelete(true);
 }
 
@@ -220,6 +247,12 @@ void QCA::deinit()
 	unloadAllPlugins();
 	botan_deinit();
 	qca_init = false;
+}
+
+bool QCA::haveSecureMemory()
+{
+	// FIXME
+	return true;
 }
 
 bool QCA::isSupported(int capabilities)
@@ -270,9 +303,9 @@ static void *getContext(int cap)
 //----------------------------------------------------------------------------
 // Initializer
 //----------------------------------------------------------------------------
-Initializer::Initializer()
+Initializer::Initializer(MemoryMode m, int prealloc)
 {
-	init();
+	init(m, prealloc);
 }
 
 Initializer::~Initializer()
