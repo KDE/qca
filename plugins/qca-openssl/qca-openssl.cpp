@@ -19,337 +19,237 @@
  */
 #include "qcaprovider.h"
 #include <qstringlist.h>
-#include <openssl/sha.h>
-#include <openssl/md2.h>
-#include <openssl/md4.h>
-#include <openssl/md5.h>
-#include <openssl/ripemd.h>
+#include <openssl/evp.h>
 #include <openssl/hmac.h>
 
-class MD2Context : public QCA::HashContext
+class opensslHashContext : public QCA::HashContext
 {
 public:
-	MD2Context(QCA::Provider *p) : HashContext(p, "md2")
-	{
-		clear();
-	}
+    opensslHashContext(QCA::Provider *p, const QString &type) : QCA::HashContext(p, type) {};
 
-	Context *clone() const
-	{
-		return new MD2Context(*this);
-	}
-
-	void clear()
-	{
-		MD2_Init(&c);
-	}
-
-	void update(const QSecureArray &a)
-	{
-		MD2_Update(&c, (unsigned char *)a.data(), a.size());
-	}
-
-	QSecureArray final()
-	{
-		QSecureArray a(MD2_DIGEST_LENGTH);
-		MD2_Final((unsigned char *)a.data(), &c);
-		return a;
-	}
-
+    void clear()
+    {
+	EVP_DigestInit( &m_context, m_algorithm );
+    }
+    
+    void update(const QSecureArray &a)
+    {
+	EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
+    }
+    
+    QSecureArray final()
+    {
+	QSecureArray a( EVP_MD_size( m_algorithm ) );
+	EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+	return a;
+    }
+    
 protected:
-	MD2_CTX c;
-};
+    const EVP_MD *m_algorithm;
+    EVP_MD_CTX m_context;
+};	
 
-class MD4Context : public QCA::HashContext
+class SHA1Context : public opensslHashContext
 {
 public:
-	MD4Context(QCA::Provider *p) : HashContext(p, "md4")
-	{
-		clear();
-	}
+    SHA1Context(QCA::Provider *p) : opensslHashContext(p, "sha1")
+    {
+	m_algorithm = EVP_get_digestbyname("sha1");
+	clear();
+    }
 
-	Context *clone() const
-	{
-		return new MD4Context(*this);
-	}
+    ~SHA1Context()
+    {
+    }
 
-	void clear()
-	{
-		MD4_Init(&c);
-	}
-
-	void update(const QSecureArray &a)
-	{
-		MD4_Update(&c, (unsigned char *)a.data(), a.size());
-	}
-
-	QSecureArray final()
-	{
-		QSecureArray a(MD4_DIGEST_LENGTH);
-		MD4_Final((unsigned char *)a.data(), &c);
-		return a;
-	}
-
-protected:
-	MD4_CTX c;
-};
-
-class MD5Context : public QCA::HashContext
-{
-public:
-	MD5Context(QCA::Provider *p) : HashContext(p, "md5")
-	{
-		clear();
-	}
-
-	Context *clone() const
-	{
-		return new MD5Context(*this);
-	}
-
-	void clear()
-	{
-		MD5_Init(&c);
-	}
-
-	void update(const QSecureArray &a)
-	{
-		MD5_Update(&c, (unsigned char *)a.data(), a.size());
-	}
-
-	QSecureArray final()
-	{
-		QSecureArray a(MD5_DIGEST_LENGTH);
-		MD5_Final((unsigned char *)a.data(), &c);
-		return a;
-	}
-
-protected:
-	MD5_CTX c;
-};
-
-class SHA0Context : public QCA::HashContext
-{
-public:
-	SHA0Context(QCA::Provider *p) : HashContext(p, "sha0")
-	{
-		clear();
-	}
-
-	Context *clone() const
-	{
-		return new SHA0Context(*this);
-	}
-
-	void clear()
-	{
-		SHA_Init(&c);
-	}
-
-	void update(const QSecureArray &a)
-	{
-		SHA_Update(&c, (unsigned char *)a.data(), a.size());
-	}
-
-	QSecureArray final()
-	{
-		QSecureArray a(SHA_DIGEST_LENGTH);
-		SHA_Final((unsigned char *)a.data(), &c);
-		return a;
-	}
-
-protected:
-	SHA_CTX c;
-};
-
-class SHA1Context : public QCA::HashContext
-{
-public:
-	SHA1Context(QCA::Provider *p) : HashContext(p, "sha1")
-	{
-		clear();
-	}
-
-	Context *clone() const
-	{
-		return new SHA1Context(*this);
-	}
-
-	void clear()
-	{
-		SHA1_Init(&c);
-	}
-
-	void update(const QSecureArray &a)
-	{
-		SHA1_Update(&c, (unsigned char *)a.data(), a.size());
-	}
-
-	QSecureArray final()
-	{
-		QSecureArray a(SHA_DIGEST_LENGTH);
-		SHA1_Final((unsigned char *)a.data(), &c);
-		return a;
-	}
-
-protected:
-	SHA_CTX c;
-};
-
-class RIPEMD160Context : public QCA::HashContext
-{
-public:
-	RIPEMD160Context(QCA::Provider *p) : HashContext(p, "ripemd160")
-	{
-		clear();
-	}
-
-	Context *clone() const
-	{
-		return new RIPEMD160Context(*this);
-	}
-
-	void clear()
-	{
-		RIPEMD160_Init(&c);
-	}
-
-	void update(const QSecureArray &a)
-	{
-		RIPEMD160_Update(&c, (unsigned char *)a.data(), a.size());
-	}
-
-	QSecureArray final()
-	{
-		QSecureArray result(RIPEMD160_DIGEST_LENGTH);
-		RIPEMD160_Final((unsigned char *)result.data(), &c);
-		return result;
-	}
-
-protected:
-	RIPEMD160_CTX c;
-};
-
-class HMACMD5Context : public QCA::MACContext
-{
-public:
-	HMACMD5Context(QCA::Provider *p) : MACContext( p, "hmac(md5)" )
-	{
-		HMAC_CTX_init( &c );
-	}
-
-	Context *clone() const
-	{
-		return new HMACMD5Context(*this);
-	}
-
-	void setup(const QCA::SymmetricKey &key)
-	{
-		HMAC_Init_ex( &c, key.data(), key.size(), EVP_md5(), 0 );
-	}
-
-	QCA::KeyLength keyLength() const
-	{
-		return anyKeyLength();
-	}
-
-	void update(const QSecureArray &a)
-	{
-		HMAC_Update( &c, (unsigned char *)a.data(), a.size() );
-	}
-
-	void final( QSecureArray *out)
-	{
-		unsigned int outSize;
-		out->resize( MD5_DIGEST_LENGTH );
-		HMAC_Final(&c, (unsigned char *)out->data(), &(outSize) );
-		HMAC_CTX_cleanup(&c);
-	}
-
-protected:
-	HMAC_CTX c;
+    Context *clone() const
+    {
+	return new SHA1Context(*this);
+    }
 };
 
 
-class HMACSHA1Context : public QCA::MACContext
+class SHA0Context : public opensslHashContext
 {
 public:
-	HMACSHA1Context(QCA::Provider *p) : MACContext( p, "hmac(sha1)" )
-	{
-		HMAC_CTX_init( &c );
-	}
+    SHA0Context(QCA::Provider *p) : opensslHashContext(p, "sha")
+    {
+	m_algorithm = EVP_sha();
+	clear();
+    }
 
-	Context *clone() const
-	{
-		return new HMACSHA1Context(*this);
-	}
+    ~SHA0Context()
+    {
+    }
 
-	void setup(const QCA::SymmetricKey &key)
-	{
-		HMAC_Init_ex( &c, key.data(), key.size(), EVP_sha1(), 0 );
-	}
-
-	QCA::KeyLength keyLength() const
-	{
-		return anyKeyLength();
-	}
-
-	void update(const QSecureArray &a)
-	{
-		HMAC_Update( &c, (unsigned char *)a.data(), a.size() );
-	}
-
-	void final( QSecureArray *out)
-	{
-		unsigned int outSize;
-		out->resize( SHA_DIGEST_LENGTH );
-		HMAC_Final(&c, (unsigned char *)out->data(), &(outSize) );
-		HMAC_CTX_cleanup(&c);
-	}
-
-protected:
-	HMAC_CTX c;
+    Context *clone() const
+    {
+	return new SHA0Context(*this);
+    }
 };
 
-class HMACRIPEMD160Context : public QCA::MACContext
+
+class MD2Context : public opensslHashContext
 {
 public:
-	HMACRIPEMD160Context(QCA::Provider *p) : MACContext( p, "hmac(ripemd160)" )
-	{
-		HMAC_CTX_init( &c );
-	}
+    MD2Context(QCA::Provider *p) : opensslHashContext(p, "md2")
+    {
+	m_algorithm = EVP_md2();
+	clear();
+    }
 
-	Context *clone() const
-	{
-		return new HMACRIPEMD160Context(*this);
-	}
+    ~MD2Context()
+    {
+    }
 
-	void setup(const QCA::SymmetricKey &key)
-	{
-		HMAC_Init_ex( &c, key.data(), key.size(), EVP_ripemd160(), 0 );
-	}
+    Context *clone() const
+    {
+	return new MD2Context(*this);
+    }
+};
 
-	QCA::KeyLength keyLength() const
-	{
-		return anyKeyLength();
-	}
 
-	void update(const QSecureArray &a)
-	{
-		HMAC_Update( &c, (unsigned char *)a.data(), a.size() );
-	}
+class MD4Context : public opensslHashContext
+{
+public:
+    MD4Context(QCA::Provider *p) : opensslHashContext(p, "md4")
+    {
+	m_algorithm = EVP_md4();
+	clear();
+    }
 
-	void final( QSecureArray *out)
-	{
-		unsigned int outSize;
-		out->resize( RIPEMD160_DIGEST_LENGTH );
-		HMAC_Final(&c, (unsigned char *)out->data(), &(outSize) );
-		HMAC_CTX_cleanup(&c);
-	}
+    ~MD4Context()
+    {
+    }
+
+    Context *clone() const
+    {
+	return new MD4Context(*this);
+    }
+};
+
+
+class MD5Context : public opensslHashContext
+{
+public:
+    MD5Context(QCA::Provider *p) : opensslHashContext(p, "md5")
+    {
+	m_algorithm = EVP_md5();
+	clear();
+    }
+
+    ~MD5Context()
+    {
+    }
+
+    Context *clone() const
+    {
+	return new MD5Context(*this);
+    }
+};
+
+
+class RIPEMD160Context : public opensslHashContext
+{
+public:
+    RIPEMD160Context(QCA::Provider *p) : opensslHashContext(p, "ripemd160")
+    {
+	m_algorithm = EVP_ripemd160();
+	clear();
+    }
+
+    ~RIPEMD160Context()
+    {
+    }
+
+    Context *clone() const
+    {
+	return new RIPEMD160Context(*this);
+    }
+};
+
+
+class opensslHMACContext : public QCA::MACContext
+{
+public:
+    opensslHMACContext(QCA::Provider *p, const QString &type) : QCA::MACContext(p, type) {};
+
+    void setup(const QCA::SymmetricKey &key)
+    {
+	HMAC_Init_ex( &m_context, key.data(), key.size(), m_algorithm, 0 );
+    }
+    
+    QCA::KeyLength keyLength() const
+    {
+	return anyKeyLength();
+    }
+
+    void update(const QSecureArray &a)
+    {
+	HMAC_Update( &m_context, (unsigned char *)a.data(), a.size() );
+    }
+    
+    void final( QSecureArray *out)
+    {
+	out->resize( EVP_MD_size( m_algorithm ) );
+	HMAC_Final(&m_context, (unsigned char *)out->data(), 0 );
+	HMAC_CTX_cleanup(&m_context);
+    }
 
 protected:
-	HMAC_CTX c;
+    HMAC_CTX m_context;
+    const EVP_MD *m_algorithm;
 };
+
+class HMACMD5Context : public opensslHMACContext
+{
+public:
+    HMACMD5Context(QCA::Provider *p) : opensslHMACContext( p, "hmac(md5)" )
+    {
+	m_algorithm = EVP_md5();
+	HMAC_CTX_init( &m_context );
+    }
+	
+    Context *clone() const
+    {
+	return new HMACMD5Context(*this);
+    }
+    
+};
+
+class HMACSHA1Context : public opensslHMACContext
+{
+public:
+    HMACSHA1Context(QCA::Provider *p) : opensslHMACContext( p, "hmac(sha1)" )
+    {
+	m_algorithm = EVP_sha1();
+	HMAC_CTX_init( &m_context );
+    }
+	
+    Context *clone() const
+    {
+	return new HMACSHA1Context(*this);
+    }
+    
+};
+
+class HMACRIPEMD160Context : public opensslHMACContext
+{
+public:
+    HMACRIPEMD160Context(QCA::Provider *p) : opensslHMACContext( p, "hmac(ripemd160)" )
+    {
+	m_algorithm = EVP_ripemd160();
+	HMAC_CTX_init( &m_context );
+    }
+	
+    Context *clone() const
+    {
+	return new HMACRIPEMD160Context(*this);
+    }
+    
+};
+
+
 
 class opensslProvider : public QCA::Provider
 {
@@ -366,8 +266,8 @@ public:
 	QStringList features() const
 	{
 		QStringList list;
-		list += "sha0";
 		list += "sha1";
+		list += "sha0";
 		list += "ripemd160";
 		list += "md2";
 		list += "md4";
@@ -380,26 +280,27 @@ public:
 
 	Context *createContext(const QString &type)
 	{
-		if ( type == "sha0" )
-			return new SHA0Context( this );
-		else if ( type == "sha1" )
-			return new SHA1Context( this );
-		else if ( type == "ripemd160" )
-			return new RIPEMD160Context( this );
-		else if ( type == "md2" )
-			return new MD2Context( this );
-		else if ( type == "md4" )
-			return new MD4Context( this );
-		else if ( type == "md5" )
-			return new MD5Context( this );
-		else if ( type == "hmac(md5)" )
-			return new HMACMD5Context( this );
-		else if ( type == "hmac(sha1)" )
-			return new HMACSHA1Context( this );
-		else if ( type == "hmac(ripemd160)" )
-			return new HMACRIPEMD160Context( this );
-		else
-			return 0;
+	    OpenSSL_add_all_digests();
+	    if ( type == "sha1" )
+		return new SHA1Context( this );
+	    else if ( type == "sha0" )
+		return new SHA0Context( this );
+	    else if ( type == "ripemd160" )
+		return new RIPEMD160Context( this );
+	    else if ( type == "md2" )
+		return new MD2Context( this );
+	    else if ( type == "md4" )
+		return new MD4Context( this );
+	    else if ( type == "md5" )
+		return new MD5Context( this );
+	    else if ( type == "hmac(md5)" )
+		return new HMACMD5Context( this );
+	    else if ( type == "hmac(sha1)" )
+		return new HMACSHA1Context( this );
+	    else if ( type == "hmac(ripemd160)" )
+		return new HMACRIPEMD160Context( this );
+	    else
+		return 0;
 	}
 };
 
