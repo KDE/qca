@@ -220,6 +220,8 @@ QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding
 		mode = "cbc";
 	else if(modeType == CFB)
 		mode = "cfb";
+	else if(modeType == OFB)
+		mode = "ofb";
 	else
 		mode = "ecb";
 
