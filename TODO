@@ -20,7 +20,6 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
-  cert: use info as a multi-map?
   dlgroup: make it a provider object? (for smartcards)
   symmetrickey: make it a provider object? (for smartcards)
   finish qcaprovider.h

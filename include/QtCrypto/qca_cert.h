@@ -113,7 +113,7 @@ namespace QCA
 		ErrorValidityUnknown     ///< Validity is unknown
 	};
 
-	typedef QMap<CertificateInfoType, QString> CertificateInfo;
+	typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
 	typedef QList<ConstraintType> Constraints;
 
 	// note: in SPKAC mode, all options are ignored except for challenge

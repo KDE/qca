@@ -770,10 +770,10 @@ int main(int argc, char **argv)
 		QCA::CertificateOptions opts;
 		//opts.setSerialNumber(QBigInteger("1000000000000"));
 		QCA::CertificateInfo info;
-		info[QCA::CommonName] = prompt_for("Common Name");
-		info[QCA::Country] = prompt_for("Country Code (2 letters)");
-		info[QCA::Organization] = prompt_for("Organization");
-		info[QCA::Email] = prompt_for("Email");
+		info.insert(QCA::CommonName, prompt_for("Common Name"));
+		info.insert(QCA::Country, prompt_for("Country Code (2 letters)"));
+		info.insert(QCA::Organization, prompt_for("Organization"));
+		info.insert(QCA::Email, prompt_for("Email"));
 
 		//info[QCA::URI] = "http://psi.affinix.com/";
 		//info[QCA::DNS] = "psi.affinix.com";
@@ -833,10 +833,10 @@ int main(int argc, char **argv)
 
 		QCA::CertificateOptions opts;
 		QCA::CertificateInfo info;
-		info[QCA::CommonName] = prompt_for("Common Name");
-		info[QCA::Country] = prompt_for("Country Code (2 letters)");
-		info[QCA::Organization] = prompt_for("Organization");
-		info[QCA::Email] = prompt_for("Email");
+		info.insert(QCA::CommonName, prompt_for("Common Name"));
+		info.insert(QCA::Country, prompt_for("Country Code (2 letters)"));
+		info.insert(QCA::Organization, prompt_for("Organization"));
+		info.insert(QCA::Email, prompt_for("Email"));
 
 		opts.setInfo(info);
 

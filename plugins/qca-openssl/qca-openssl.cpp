@@ -2643,6 +2643,7 @@ auq_err:
 	return qdt;
 }
 
+// TODO: support read/write of multiple info values with the same name
 class MyCertContext : public QCA::CertContext
 {
 public:

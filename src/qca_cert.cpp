@@ -302,7 +302,7 @@ QStringList Certificate::policies() const
 
 QString Certificate::commonName() const
 {
-	return static_cast<const CertContext *>(context())->props()->subject[CommonName];
+	return static_cast<const CertContext *>(context())->props()->subject.value(CommonName);
 }
 
 QBigInteger Certificate::serialNumber() const
