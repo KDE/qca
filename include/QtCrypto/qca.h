@@ -46,7 +46,8 @@
    implementations without even needing to recompile the
    application!
 
-   %QCA should work everywhere %Qt does, including Windows/Unix/MacOSX.
+   %QCA should work everywhere %Qt does, including Windows/Unix/MacOSX. This
+   version of %QCA is for Qt4, and requires no Qt3 compatibility code.
 
    \section features Features
 
@@ -120,7 +121,8 @@
 
    \subsection qca1code Previous versions
    
-   A previous version of %QCA (sometimes referred to as QCA1) is still available.
+   A previous version of %QCA (sometimes referred to as QCA1) which
+   works with Qt3, is still available.
    You will need to get the main library 
    (<a href="src/qca1/qca-1.0.tar.bz2">qca-1.0.tar.bz2</a>) and one or
    more providers

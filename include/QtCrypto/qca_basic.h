@@ -989,9 +989,9 @@ namespace QCA
 	};
 
 	/**
-	 * \class Blowfish qca_basic.h QtCrypto
+	 * \class BlowFish qca_basic.h QtCrypto
 	 *
-	 * Bruce Schneier's Blowfish %Cipher
+	 * Bruce Schneier's BlowFish %Cipher
 	 *
 	 */
 	class QCA_EXPORT BlowFish : public Cipher
@@ -1230,6 +1230,13 @@ namespace QCA
 		 */
 		KeyDerivationFunction(const KeyDerivationFunction &from);
 		~KeyDerivationFunction();
+
+		/**
+		   Assignment operator.
+
+		   Copies the state (including key) from one KeyDerivationFunction
+		   to another
+		 */
 		KeyDerivationFunction & operator=(const KeyDerivationFunction &from);
 
 		/**
