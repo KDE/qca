@@ -21,14 +21,15 @@
 
 // QtCrypto/QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
-// needed for printf
-#include<stdio.h>
+#include <stdio.h>
 
 int main(int argc, char **argv)
 {
 	// the Initializer object sets things up, and 
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
+
+	QCoreApplication app(argc, argv);
 
 	// we use the first argument if provided, or
 	// use "hello" if no arguments
@@ -50,7 +51,7 @@ int main(int argc, char **argv)
 		// this shows the incremental approach. Naturally
 		// for this simple job, we could use the "all in one"
 		// approach - this is an example, after all :-)
-	        QSecureArray part1(arg.toByteArray().left(3)); // three chars - "hel"
+		QSecureArray part1(arg.toByteArray().left(3)); // three chars - "hel"
 		QSecureArray part2(arg.toByteArray().mid(3)); // the rest - "lo"
 
 		// create the required object.
