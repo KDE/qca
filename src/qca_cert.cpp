@@ -604,6 +604,38 @@ CertValidity Store::validate(const Certificate &cert, CertUsage u) const
 	return ((StoreContext *)context())->validate(*((CertContext *)cert.context()), u);
 }
 
+QValueList<Certificate> Store::certificates() const
+{
+	return QValueList<Certificate>();
+}
+
+QValueList<CRL> Store::crls() const
+{
+	return QValueList<CRL>();
+}
+
+QByteArray Store::toPKCS7() const
+{
+	return QByteArray();
+}
+
+QString Store::toFlatText() const
+{
+	return QString();
+}
+
+bool Store::fromPKCS7(const QByteArray &a)
+{
+	Q_UNUSED(a);
+	return false;
+}
+
+bool Store::fromFlatText(const QString &s)
+{
+	Q_UNUSED(s);
+	return false;
+}
+
 //----------------------------------------------------------------------------
 // PersonalBundle
 //----------------------------------------------------------------------------

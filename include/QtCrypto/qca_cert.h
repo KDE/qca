@@ -199,6 +199,15 @@ namespace QCA
 		void addCRL(const CRL &crl);
 		CertValidity validate(const Certificate &cert, CertUsage u = Any) const;
 
+		QValueList<Certificate> certificates() const;
+		QValueList<CRL> crls() const;
+
+		// import / export
+		QByteArray toPKCS7() const;
+		QString toFlatText() const;
+		bool fromPKCS7(const QByteArray &a);
+		bool fromFlatText(const QString &s);
+
 	private:
 		friend class TLS;
 	};

@@ -10,6 +10,7 @@
 * Considerations
   threading (safety, usability) in API and plugins
   smart cards, external keyring drives
+  it's possible we use QSecureArray in some unnecessary places
 
 * finish API:
   move secure memory C functions to qca_tools.h
