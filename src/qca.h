@@ -11,6 +11,7 @@
 class QHostAddress;
 class QStringList;
 
+class QCAProvider;
 class QCA_HashContext;
 class QCA_CipherContext;
 class QCA_CertContext;
@@ -43,6 +44,8 @@ namespace QCA
 
 	void init();
 	bool isSupported(int capabilities);
+	void insertProvider(QCAProvider *);
+	void unloadAllPlugins();
 
 	QString arrayToHex(const QByteArray &);
 	QByteArray hexToArray(const QString &);

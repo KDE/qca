@@ -1,17 +1,3 @@
-* rename qcaopenssl to qca-ssl and qcacyrussasl to qca-sasl and move them
-
-* more optimal plugin loading:
-    plugins should have versions and names
-    load on demand
-    ability to add classes as plugins
-    ability to set priorities to plugins by name and feature
-    read plugins from QApplication::libraryPaths() - $DIR/crypto
-
-* openssl plugin:
-    fixmes and todos
-    rename SSL to TLS
-    clean TLSContext, and make sure it reports crypt errors
-
 * dsa
 * diffie-hellman
 * entropy

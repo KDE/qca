@@ -20,6 +20,8 @@ public:
 	QCAProvider() {}
 	virtual ~QCAProvider() {}
 
+	virtual void init()=0;
+	virtual int qcaVersion() const=0;
 	virtual int capabilities() const=0;
 	virtual void *context(int cap)=0;
 };

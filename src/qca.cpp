@@ -7,17 +7,8 @@
 #include<qlibrary.h>
 #include<qtimer.h>
 #include<qhostaddress.h>
+#include<qapplication.h>
 #include"qcaprovider.h"
-#include<stdio.h>
-#include<stdlib.h>
-
-#ifdef USE_OPENSSL
-#include"qcaopenssl.h"
-#endif
-
-#ifdef USE_CYRUSSASL
-#include"qcacyrussasl.h"
-#endif
 
 #if defined(Q_OS_WIN32)
 #define PLUGIN_EXT "dll"
@@ -27,10 +18,122 @@
 #define PLUGIN_EXT "so"
 #endif
 
+#define QCA_PLUGIN_VERSION 1
+
 using namespace QCA;
 
-static QPtrList<QCAProvider> providerList;
+class ProviderItem
+{
+public:
+	QCAProvider *p;
+
+	static ProviderItem *load(const QString &fname)
+	{
+		QLibrary *lib = new QLibrary(fname);
+		if(!lib->load()) {
+			delete lib;
+			return 0;
+		}
+		void *s = lib->resolve("createProvider");
+		if(!s) {
+			delete lib;
+			return 0;
+		}
+		QCAProvider *(*createProvider)() = (QCAProvider *(*)())s;
+		QCAProvider *p = createProvider();
+		if(!p) {
+			delete lib;
+			return 0;
+		}
+		ProviderItem *i = new ProviderItem(lib, p);
+		return i;
+	}
+
+	static ProviderItem *fromClass(QCAProvider *p)
+	{
+		ProviderItem *i = new ProviderItem(0, p);
+		return i;
+	}
+
+	~ProviderItem()
+	{
+		delete p;
+		delete lib;
+	}
+
+	void ensureInit()
+	{
+		if(init_done)
+			return;
+		init_done = true;
+		p->init();
+	}
+
+private:
+	QLibrary *lib;
+	bool init_done;
+
+	ProviderItem(QLibrary *_lib, QCAProvider *_p)
+	{
+		lib = _lib;
+		p = _p;
+		init_done = false;
+	}
+};
+
+static QPtrList<ProviderItem> providerList;
 static bool qca_init = false;
+
+static void plugin_scan()
+{
+	QStringList dirs = QApplication::libraryPaths();
+	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it) {
+		QDir libpath(*it);
+		QDir dir(libpath.filePath("crypto"));
+		if(!dir.exists())
+			continue;
+
+		QStringList list = dir.entryList();
+		for(QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
+			QFileInfo fi(dir.filePath(*it));
+			if(fi.isDir())
+				continue;
+			if(fi.extension() != PLUGIN_EXT)
+				continue;
+			//printf("f=[%s]\n", fi.filePath().latin1());
+
+			ProviderItem *i = ProviderItem::load(fi.filePath());
+			if(!i)
+				continue;
+			if(i->p->qcaVersion() != QCA_PLUGIN_VERSION) {
+				delete i;
+				continue;
+			}
+
+			providerList.append(i);
+		}
+	}
+}
+
+static void plugin_addClass(QCAProvider *p)
+{
+	ProviderItem *i = ProviderItem::fromClass(p);
+	providerList.prepend(i);
+}
+
+static void plugin_unloadall()
+{
+	providerList.clear();
+}
+
+static int plugin_caps()
+{
+	int caps = 0;
+	QPtrListIterator<ProviderItem> it(providerList);
+	for(ProviderItem *i; (i = it.current()); ++it)
+		caps |= i->p->capabilities();
+	return caps;
+}
 
 QString QCA::arrayToHex(const QByteArray &a)
 {
@@ -61,67 +164,50 @@ void QCA::init()
 	if(qca_init)
 		return;
 	qca_init = true;
-
-	providerList.clear();
-#ifdef USE_OPENSSL
-	providerList.append(createProviderOpenSSL());
-#endif
-#ifdef USE_CYRUSSASL
-	providerList.append(createProviderCyrusSASL());
-#endif
-
-	// load plugins
-	QDir dir("plugins");
-	QStringList list = dir.entryList();
-	for(QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-		QFileInfo fi(dir.filePath(*it));
-		//printf("f=[%s]\n", fi.filePath().latin1());
-		if(fi.extension() != PLUGIN_EXT)
-			continue;
-
-		QLibrary *lib = new QLibrary(fi.filePath());
-		if(!lib->load()) {
-			delete lib;
-			//printf("can't load\n");
-			continue;
-		}
-		void *s = lib->resolve("createProvider");
-		if(!s) {
-			delete lib;
-			continue;
-		}
-		QCAProvider *(*createProvider)() = (QCAProvider *(*)())s;
-		QCAProvider *p = createProvider();
-		if(!p) {
-			delete lib;
-			continue;
-		}
-		providerList.append(p);
-	}
+	providerList.setAutoDelete(true);
 }
 
 bool QCA::isSupported(int capabilities)
 {
 	init();
 
-	int caps = 0;
-	QPtrListIterator<QCAProvider> it(providerList);
-	for(QCAProvider *p; (p = it.current()); ++it)
-		caps |= p->capabilities();
+	int caps = plugin_caps();
 	if(caps & capabilities)
 		return true;
-	else
-		return false;
+
+	// ok, try scanning for new stuff
+	plugin_scan();
+	caps = plugin_caps();
+	if(caps & capabilities)
+		return true;
+
+	return false;
+}
+
+void QCA::insertProvider(QCAProvider *p)
+{
+	plugin_addClass(p);
+}
+
+void QCA::unloadAllPlugins()
+{
+	plugin_unloadall();
 }
 
 static void *getContext(int cap)
 {
 	init();
 
-	QPtrListIterator<QCAProvider> it(providerList);
-	for(QCAProvider *p; (p = it.current()); ++it) {
-		if(p->capabilities() & cap)
-			return p->context(cap);
+	// this call will also trip a scan for new plugins if needed
+	if(!QCA::isSupported(cap))
+		return 0;
+
+	QPtrListIterator<ProviderItem> it(providerList);
+	for(ProviderItem *i; (i = it.current()); ++it) {
+		if(i->p->capabilities() & cap) {
+			i->ensureInit();
+			return i->p->context(cap);
+		}
 	}
 	return 0;
 }
