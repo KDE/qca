@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2004 Brad Hards <bradh@frogmouth.net>
+ Copyright (C) 2004-2005 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// QtCrypto/QtCrypto has the declarations for all of QCA
+// QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
 
 #include <iostream>
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 	QCoreApplication(argc, argv);
 
-	// we use the first argument as the data to authenticate
+	// we use the first argument as the data to encode
 	// if an argument is provided. Use "hello" if no argument
 	QByteArray arg; // empty array
 	arg.append((argc >= 2) ? argv[1] : "hello");
@@ -41,6 +41,7 @@ int main(int argc, char **argv)
 	// QCA::Base64 encoder(QCA::Encode); is equivalent
 	QCA::Base64 encoder;
 
+	// This does the actual conversion (encoding).
 	// You might prefer to use encoder.encode(); and have
 	// it return a QSecureArray, depending on your needs
 	QString encoded = encoder.arrayToString(arg);
