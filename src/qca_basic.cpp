@@ -18,9 +18,9 @@
  *
  */
 
-#include"qca.h"
+#include "qca.h"
 
-#include"qcaprovider.h"
+#include "qcaprovider.h"
 
 namespace QCA {
 
@@ -39,10 +39,7 @@ uchar Random::nextByte(Quality q)
 
 QSecureArray Random::nextBytes(int size, Quality q)
 {
-	Q_UNUSED(size);
-	Q_UNUSED(q);
-	// TODO
-	//return ((RandomContext *)context())->nextBytes(size, q);
+	return ((RandomContext *)context())->nextBytes(size, q);
 	return QSecureArray();
 }
 

@@ -1,6 +1,6 @@
 /*
  * qca.cpp - Qt Cryptographic Architecture
- * Copyright (C) 2003  Justin Karneges
+ * Copyright (C) 2003,2004  Justin Karneges
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -370,7 +370,8 @@ public:
 		if(!c)
 			return;
 
-		if(c->refs > 1) {
+		if(c->refs > 1)
+		{
 			Provider::Context *nc = c->clone();
 			nc->refs = 0;
 			setContext(nc);
@@ -484,7 +485,8 @@ bool operator==(const SymmetricKey &a, const SymmetricKey &b)
 	char *ap = a.data();
 	char *bp = b.data();
 	int n = 0;
-	while(n < as) {
+	while(n < as)
+	{
 		if((*ap) != (*bp))
 			return false;
 		++ap;

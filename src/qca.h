@@ -22,35 +22,35 @@
 #ifndef QCA_H
 #define QCA_H
 
-#include<qstring.h>
-#include<qcstring.h>
-#include<qdatetime.h>
-#include<qmap.h>
-#include<qptrlist.h>
-#include<qobject.h>
+#include <qstring.h>
+#include <qcstring.h>
+#include <qdatetime.h>
+#include <qmap.h>
+#include <qptrlist.h>
+#include <qobject.h>
 
 #ifdef Q_OS_WIN32
-#  ifndef QCA_STATIC
-#    ifdef QCA_MAKEDLL
-#      define QCA_EXPORT __declspec(dllexport)
-#    else
-#      define QCA_EXPORT __declspec(dllimport)
-#    endif
+# ifndef QCA_STATIC
+#  ifdef QCA_MAKEDLL
+#   define QCA_EXPORT __declspec(dllexport)
+#  else
+#   define QCA_EXPORT __declspec(dllimport)
 #  endif
+# endif
 #endif
 #ifndef QCA_EXPORT
-#define QCA_EXPORT
+# define QCA_EXPORT
 #endif
 
 #ifdef Q_OS_WIN32
-#  ifdef QCA_PLUGIN_DLL
-#    define QCA_PLUGIN_EXPORT extern "C" __declspec(dllexport)
-#  else
-#    define QCA_PLUGIN_EXPORT extern "C" __declspec(dllimport)
-#  endif
+# ifdef QCA_PLUGIN_DLL
+#  define QCA_PLUGIN_EXPORT extern "C" __declspec(dllexport)
+# else
+#  define QCA_PLUGIN_EXPORT extern "C" __declspec(dllimport)
+# endif
 #endif
 #ifndef QCA_PLUGIN_EXPORT
-#define QCA_PLUGIN_EXPORT extern "C"
+# define QCA_PLUGIN_EXPORT extern "C"
 #endif
 
 class QHostAddress;
@@ -253,9 +253,7 @@ namespace QCA
 	 * \endcode
 	 */
 	QCA_EXPORT bool isSupported(int capabilities); // to be obsoleted
-
 	QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
-	//QCA_EXPORT void unloadAllPlugins(); // declared below
 
 	// version 2 global functions
 	QCA_EXPORT bool isSupported(const QStringList &features);
@@ -1285,7 +1283,6 @@ namespace QCA
 
 		void handleServerFirstStep(int r);
 	};
-
 };
 
 #endif

@@ -82,7 +82,7 @@ QString TextFilter::decodeString(const QString &s)
 	QCString c;
 	c.resize(a.size() + 1);
 	memcpy(c.data(), a.data(), a.size());
-	return QString::fromLatin1(c);
+	return QString::fromUtf8(c);
 }
 
 //----------------------------------------------------------------------------

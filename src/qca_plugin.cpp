@@ -373,7 +373,8 @@ const ProviderList & ProviderManager::providers() const
 
 void ProviderManager::addItem(ProviderItem *item, int priority)
 {
-	if(priority < 0) {
+	if(priority < 0)
+	{
 		// for -1, make the priority the same as the last item
 		ProviderItem *last = providerItemList.getLast();
 		if(last)
@@ -384,11 +385,13 @@ void ProviderManager::addItem(ProviderItem *item, int priority)
 		providerItemList.append(item);
 		providerList.append(item->p);
 	}
-	else {
+	else
+	{
 		// place the item before any other items with same or greater priority
 		int at = 0;
 		QPtrListIterator<ProviderItem> it(providerItemList);
-		for(ProviderItem *i; (i = it.current()); ++it) {
+		for(ProviderItem *i; (i = it.current()); ++it)
+		{
 			if(i->priority >= priority)
 				break;
 			++at;
