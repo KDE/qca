@@ -85,7 +85,7 @@ void SymmetricKeyUnitTest::allTests()
     CHECK( anotherKey.size(), 0 );
 
     for (int n = 0; (0 != DESTestValues[n].weak); n++) {
-      QCA::SymmetricKey key(QSecureArray(QCA::hexToArray(DESTestValues[n].key)));
+      QCA::SymmetricKey key(QCA::hexToArray(DESTestValues[n].key));
       CHECK( key.isWeakDESKey(), DESTestValues[n].weak );
     }
 }

@@ -81,7 +81,7 @@ void KDFUnitTest::pbkdf1Tests()
     else {
       for (int n = 0; (0 != pbkdf1TestValues[n].secret); n++) {
 	    QSecureArray password = QCA::hexToArray( pbkdf1TestValues[n].secret );
-	    QCA::InitializationVector salt( QSecureArray(QCA::hexToArray( pbkdf1TestValues[n].salt) ) );
+	    QCA::InitializationVector salt( QCA::hexToArray( pbkdf1TestValues[n].salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF1().makeKey( password,
 							   salt,
 							   pbkdf1TestValues[n].outputLength,

@@ -57,7 +57,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( md5hmac1.final() ), QString( "750c783e6ab0b503eaa86e310a5db738" ) );
 
 	QCA::HMAC md5hmac2( "md5" );
-	QCA::SymmetricKey key2( QSecureArray(QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) ) );
+	QCA::SymmetricKey key2( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	md5hmac2.setup( key2 );
 	QSecureArray data2 = QSecureArray( "Hi There" );
 	md5hmac2.update( data2 );
@@ -65,7 +65,7 @@ void MACUnitTest::allTests()
 
 	// test reuse
 	md5hmac2.clear();
-	QCA::SymmetricKey key3( QSecureArray(QCA::hexToArray( "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ) ) );
+	QCA::SymmetricKey key3( QCA::hexToArray( "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ) );
 	md5hmac2.setup ( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
@@ -73,7 +73,7 @@ void MACUnitTest::allTests()
 	md5hmac2.update( data3 );
 	CHECK( QCA::arrayToHex( md5hmac2.final() ), QString( "56be34521d144c88dbb8c733f0e8b3f6" ) );
 
-	QCA::SymmetricKey key4( QSecureArray(QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819") ) );
+	QCA::SymmetricKey key4( QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819") );
 	QCA::HMAC md5hmac4( "md5", key4 );
 	QSecureArray data4( 50 );
 	for (int i = 0; i < data4.size(); i++ )
@@ -82,7 +82,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( md5hmac4.final() ), QString( "697eaf0aca3a3aea3a75164746ffaa79" ) );
 
 	QCA::HMAC md5hmac5( "md5" );
-	QCA::SymmetricKey key5( QSecureArray(QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) ) );
+	QCA::SymmetricKey key5( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	md5hmac5.setup( key5 );
 	QSecureArray data5( "Test With Truncation" );
     	md5hmac5.update( data5 );
@@ -114,7 +114,7 @@ void MACUnitTest::allTests()
 
 	// These tests are from RFC2202, Section 3.
 	QCA::HMAC test1; // should be default
-	QCA::SymmetricKey key1( QSecureArray(QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) ) );
+	QCA::SymmetricKey key1( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	test1.setup( key1 );
 	QSecureArray data1( "Hi There" );
     	test1.update( data1 );
@@ -128,7 +128,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( test2.final() ), QString( "effcdf6ae5eb2fa2d27416d5f184df9c259a7c79" ) );
 
 	QCA::HMAC test3;
-	QCA::SymmetricKey key3( QSecureArray(QCA::hexToArray( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ) ) );
+	QCA::SymmetricKey key3( QCA::hexToArray( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ) );
 	test3.setup( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
@@ -137,7 +137,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( test3.final() ), QString( "125d7342b9ac11cd91a39af48aa17b4f63f175d3" ) );
 
 	QCA::HMAC test4;
-	QCA::SymmetricKey key4( QSecureArray(QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819" ) ) );
+	QCA::SymmetricKey key4( QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819" ) );
 	test4.setup( key4 );
 	QSecureArray data4( 50 );
 	for ( int i = 0; i < data4.size(); i++ )
@@ -146,7 +146,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( test4.final() ), QString( "4c9007f4026250c6bc8414f9bf50c86c2d7235da" ) );
 
 	QCA::HMAC test5; // should be default
-	QCA::SymmetricKey key5 ( QSecureArray(QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) ) );
+	QCA::SymmetricKey key5 ( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	test5.setup( key5 );
 	QSecureArray data5( "Test With Truncation" );
     	test5.update( data5 );
@@ -179,7 +179,7 @@ void MACUnitTest::allTests()
 
 	// These tests are from RFC2286, Section 2.
 	QCA::HMAC test1( "ripemd160" ); 
-	QCA::SymmetricKey key1 ( QSecureArray(QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) ) );
+	QCA::SymmetricKey key1 ( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	test1.setup( key1 );
 	QSecureArray data1( "Hi There" );
     	test1.update( data1 );
@@ -193,7 +193,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( test2.final() ), QString( "dda6c0213a485a9e24f4742064a7f033b43c4069" ) );
 
 	QCA::HMAC test3( "ripemd160" );
-	QCA::SymmetricKey key3( QSecureArray( QCA::hexToArray( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ) ) );
+	QCA::SymmetricKey key3( QCA::hexToArray( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ) );
 	test3.setup( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
@@ -201,7 +201,7 @@ void MACUnitTest::allTests()
 	test3.update( data3 );
 	CHECK( QCA::arrayToHex( test3.final() ), QString( "b0b105360de759960ab4f35298e116e295d8e7c1" ) );
 
-	QCA::SymmetricKey key4( QSecureArray(QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819" ) ) );
+	QCA::SymmetricKey key4( QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819" ) );
 	QCA::HMAC test4( "ripemd160", key4 );
 	QSecureArray data4( 50 );
 	for ( int i = 0; i < data4.size(); i++ )
@@ -210,7 +210,7 @@ void MACUnitTest::allTests()
 	CHECK( QCA::arrayToHex( test4.final() ), QString( "d5ca862f4d21d5e610e18b4cf1beb97a4365ecf4" ) );
 
 	QCA::HMAC test5( "ripemd160" );
-	QCA::SymmetricKey key5 ( QSecureArray(QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) ) );
+	QCA::SymmetricKey key5 ( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	test5.setup( key5 );
 	QSecureArray data5( "Test With Truncation" );
     	test5.update( data5 );
