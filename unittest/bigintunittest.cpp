@@ -42,6 +42,11 @@ void BigIntUnitTest::allTests()
     CHECK( QBigInteger("255").toString(), QString("255") );
     CHECK( QBigInteger("-255").toString(), QString("-255") );
 
+    CHECK( QBigInteger("0377").toString(), QBigInteger(255).toString() );
+    CHECK( QBigInteger("-0377").toString(), QBigInteger(255).toString() );
+    CHECK( QBigInteger("0377").toString(), QString("255") );
+    CHECK( QBigInteger("-0377").toString(), QString("-255") );
+
     // Botan's addition tests
     result = QBigInteger( 255 ) += QBigInteger( 1 );
     CHECK( result.toString(), QBigInteger( 256 ).toString() );
