@@ -16,6 +16,7 @@ namespace QCA
 		CAP_TripleDES = 0x0008,
 		CAP_AES128    = 0x0010,
 		CAP_AES256    = 0x0020,
+		CAP_RSA       = 0x0040,
 
 		//CAP_X509      = 0x0040,
 		//CAP_TLS       = 0x0080,
@@ -154,6 +155,46 @@ namespace QCA
 	{
 	public:
 		AES256(int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+	};
+
+	class RSA;
+	class RSAKey
+	{
+	public:
+		RSAKey();
+		RSAKey(const RSAKey &from);
+		RSAKey & operator=(const RSAKey &from);
+		~RSAKey();
+
+		bool isNull() const;
+
+		QByteArray toDER() const;
+		bool fromDER(const QByteArray &a, bool sec=false);
+
+	private:
+		class Private;
+		Private *d;
+
+		friend class RSA;
+		int internalContext() const;
+	};
+
+	class RSA
+	{
+	public:
+		RSA();
+		~RSA();
+
+		RSAKey key() const;
+		void setKey(const RSAKey &);
+
+		bool encrypt(const QByteArray &a, QByteArray *out) const;
+		bool decrypt(const QByteArray &a, QByteArray *out) const;
+
+		static RSAKey generateKey(int bits);
+
+	private:
+		RSAKey v_key;
 	};
 };
 

@@ -4,6 +4,8 @@
 #include<openssl/sha.h>
 #include<openssl/md5.h>
 #include<openssl/evp.h>
+#include<openssl/rsa.h>
+#include<openssl/x509.h>
 
 #ifdef QCA_PLUGIN
 QCAProvider *createProvider()
@@ -71,6 +73,13 @@ static bool tdes_update(int ctx, const char *in, unsigned int len);
 static bool tdes_final(int ctx, char *out);
 static unsigned int tdes_finalSize(int ctx);
 
+static int rsa_keyCreateFromDER(const char *in, unsigned int len, bool sec);
+static int rsa_keyClone(int ctx);
+static void rsa_keyDestroy(int ctx);
+static void rsa_keyToDER(int ctx, char **out, unsigned int *len);
+static bool rsa_encrypt(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen);
+static bool rsa_decrypt(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen);
+
 static void appendArray(QByteArray *a, const QByteArray &b)
 {
 	int oldsize = a->size();
@@ -109,6 +118,14 @@ struct pair_tdes
 typedef QPtrList<pair_tdes> MAP_TDES;
 MAP_TDES *map_tdes = 0;
 
+struct pair_rsakey
+{
+	int ctx;
+	RSA *r;
+};
+typedef QPtrList<pair_rsakey> MAP_RSAKEY;
+MAP_RSAKEY *map_rsakey = 0;
+
 static pair_sha1 *find(int ctx)
 {
 	QPtrListIterator<pair_sha1> it(*map);
@@ -139,6 +156,16 @@ static pair_tdes *find_tdes(int ctx)
 	return 0;
 }
 
+static pair_rsakey *find_rsakey(int ctx)
+{
+	QPtrListIterator<pair_rsakey> it(*map_rsakey);
+	for(pair_rsakey *p; (p = it.current()); ++it) {
+		if(p->ctx == ctx)
+			return p;
+	}
+	return 0;
+}
+
 _QCAOpenSSL::_QCAOpenSSL()
 {
 	map = new MAP_SHA1;
@@ -147,6 +174,8 @@ _QCAOpenSSL::_QCAOpenSSL()
 	map_md5->setAutoDelete(true);
 	map_tdes = new MAP_TDES;
 	map_tdes->setAutoDelete(true);
+	map_rsakey = new MAP_RSAKEY;
+	map_rsakey->setAutoDelete(true);
 }
 
 _QCAOpenSSL::~_QCAOpenSSL()
@@ -157,11 +186,13 @@ _QCAOpenSSL::~_QCAOpenSSL()
 	map_md5 = 0;
 	delete map_tdes;
 	map_tdes = 0;
+	delete map_rsakey;
+	map_rsakey = 0;
 }
 
 int _QCAOpenSSL::capabilities() const
 {
-	return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_TripleDES);
+	return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_TripleDES | QCA::CAP_RSA);
 }
 
 void *_QCAOpenSSL::functions(int cap)
@@ -198,6 +229,17 @@ void *_QCAOpenSSL::functions(int cap)
 		f->finalSize = tdes_finalSize;
 		return f;
 	}
+	else if(cap == QCA::CAP_RSA) {
+		QCA_RSAFunctions *f = new QCA_RSAFunctions;
+		f->keyCreateFromDER = rsa_keyCreateFromDER;
+		f->keyClone = rsa_keyClone;
+		f->keyDestroy = rsa_keyDestroy;
+		f->keyToDER = rsa_keyToDER;
+		f->encrypt = rsa_encrypt;
+		f->decrypt = rsa_decrypt;
+		return f;
+	}
+
 	return 0;
 }
 
@@ -408,3 +450,110 @@ unsigned int tdes_finalSize(int ctx)
 	return i->r.size();
 }
 
+int rsa_keyCreateFromDER(const char *in, unsigned int len, bool sec)
+{
+	RSA *r;
+	if(sec) {
+		const unsigned char *p = (const unsigned char *)in;
+		r = d2i_RSAPrivateKey(NULL, &p, len);
+	}
+	else {
+		unsigned char *p = (unsigned char *)in;
+		r = d2i_RSA_PUBKEY(NULL, &p,len);
+	}
+	if(!r)
+		return -1;
+
+	pair_rsakey *i = new pair_rsakey;
+	i->ctx = counter++;
+	i->r = r;
+	map_rsakey->append(i);
+	printf("created %d\n", i->ctx);
+	return i->ctx;
+}
+
+int rsa_keyClone(int ctx)
+{
+	pair_rsakey *from = find_rsakey(ctx);
+	pair_rsakey *i = new pair_rsakey;
+	i->ctx = counter++;
+	++from->r->references;
+	i->r = from->r;
+	map_rsakey->append(i);
+	printf("cloned %d to %d\n", from->ctx, i->ctx);
+	return i->ctx;
+}
+
+void rsa_keyDestroy(int ctx)
+{
+	printf("destroying %d\n", ctx);
+	pair_rsakey *i = find_rsakey(ctx);
+	RSA_free(i->r);
+	map_rsakey->removeRef(i);
+}
+
+void rsa_keyToDER(int ctx, char **out, unsigned int *len)
+{
+	ctx = -1;
+	*out = 0;
+	*len = 0;
+}
+
+bool rsa_encrypt(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen)
+{
+	pair_rsakey *i = find_rsakey(ctx);
+
+	printf("using context %d [r=%p]\n", ctx, i->r);
+	int size = RSA_size(i->r);
+	int flen = len;
+	if(flen >= size - 11)
+		flen = size - 11;
+	QByteArray result(size);
+	unsigned char *from = (unsigned char *)in;
+	unsigned char *to = (unsigned char *)result.data();
+	int r = RSA_public_encrypt(flen, from, to, i->r, RSA_PKCS1_PADDING);
+	if(r == -1)
+		return false;
+	result.resize(r);
+
+	*out = (char *)malloc(result.size());
+	memcpy((*out), result.data(), result.size());
+	*outlen = result.size();
+	return true;
+}
+
+bool rsa_decrypt(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen)
+{
+	pair_rsakey *i = find_rsakey(ctx);
+	if(!i) {
+		printf("no key!!\n");
+		return false;
+	}
+	printf("using context %d [r=%p]\n", ctx, i->r);
+
+	int size = RSA_size(i->r);
+	int flen = len;
+	QByteArray result(size);
+	unsigned char *from = (unsigned char *)in;
+	unsigned char *to = (unsigned char *)result.data();
+	printf("about to decrypt\n");
+	int r = RSA_private_decrypt(flen, from, to, i->r, RSA_PKCS1_PADDING);
+	printf("done decrypt\n");
+	if(r == -1)
+		return false;
+	result.resize(r);
+
+	*out = (char *)malloc(result.size());
+	memcpy((*out), result.data(), result.size());
+	*outlen = result.size();
+	return true;
+}
+
+/*bool RSAKey::generateKey(int bits)
+{
+	RSA *r = RSA_generate_key(bits, RSA_F4, NULL, NULL);
+	if(!r)
+		return false;
+	d->r = r;
+	return true;
+}*/

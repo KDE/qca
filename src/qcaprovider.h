@@ -44,4 +44,15 @@ struct QCA_CipherFunctions
 	unsigned int (*finalSize)(int ctx);
 };
 
+struct QCA_RSAFunctions
+{
+	int (*keyCreateFromDER)(const char *in, unsigned int len, bool sec);
+	int (*keyClone)(int ctx);
+	void (*keyDestroy)(int ctx);
+	void (*keyToDER)(int ctx, char **out, unsigned int *len);
+
+	bool (*encrypt)(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen);
+	bool (*decrypt)(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen);
+};
+
 #endif

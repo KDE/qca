@@ -338,3 +338,149 @@ AES256::AES256(int dir, const QByteArray &key, const QByteArray &iv)
 :Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES256), dir, key, iv)
 {
 }
+
+
+//----------------------------------------------------------------------------
+// RSAKey
+//----------------------------------------------------------------------------
+class RSAKey::Private
+{
+public:
+	Private()
+	{
+		f = (QCA_RSAFunctions *)getFunctions(CAP_RSA);
+		ctx = -1;
+	}
+
+	~Private()
+	{
+		reset();
+	}
+
+	void reset()
+	{
+		if(ctx != -1) {
+			f->keyDestroy(ctx);
+			ctx = -1;
+		}
+	}
+
+	QCA_RSAFunctions *f;
+	int ctx;
+};
+
+RSAKey::RSAKey()
+{
+	d = new Private;
+}
+
+RSAKey::RSAKey(const RSAKey &from)
+{
+	d = new Private;
+	*this = from;
+}
+
+RSAKey & RSAKey::operator=(const RSAKey &from)
+{
+	d->reset();
+	*d = *from.d;
+	if(d->ctx != -1)
+		d->ctx = d->f->keyClone(d->ctx);
+	return *this;
+}
+
+RSAKey::~RSAKey()
+{
+	delete d;
+}
+
+bool RSAKey::isNull() const
+{
+	return (d->ctx == -1 ? true: false);
+}
+
+QByteArray RSAKey::toDER() const
+{
+	char *out;
+	unsigned int len;
+	d->f->keyToDER(d->ctx, &out, &len);
+	QByteArray buf(len);
+	memcpy(buf.data(), out, len);
+	free(out);
+	return buf;
+}
+
+bool RSAKey::fromDER(const QByteArray &a, bool sec)
+{
+	int ctx = d->f->keyCreateFromDER(a.data(), a.size(), sec);
+	if(ctx == -1)
+		return false;
+	d->ctx = ctx;
+	return true;
+}
+
+int RSAKey::internalContext() const
+{
+	return d->ctx;
+}
+
+
+//----------------------------------------------------------------------------
+// RSA
+//----------------------------------------------------------------------------
+RSA::RSA()
+{
+}
+
+RSA::~RSA()
+{
+}
+
+RSAKey RSA::key() const
+{
+	return v_key;
+}
+
+void RSA::setKey(const RSAKey &k)
+{
+	v_key = k;
+}
+
+bool RSA::encrypt(const QByteArray &a, QByteArray *b) const
+{
+	if(v_key.isNull())
+		return false;
+
+	QCA_RSAFunctions *f = (QCA_RSAFunctions *)getFunctions(CAP_RSA);
+	char *out;
+	unsigned int len;
+	if(!f->encrypt(v_key.internalContext(), a.data(), a.size(), &out, &len))
+		return false;
+
+	b->resize(len);
+	memcpy(b->data(), out, len);
+	free(out);
+	return true;
+}
+
+bool RSA::decrypt(const QByteArray &a, QByteArray *b) const
+{
+	if(v_key.isNull())
+		return false;
+
+	QCA_RSAFunctions *f = (QCA_RSAFunctions *)getFunctions(CAP_RSA);
+	char *out;
+	unsigned int len;
+	if(!f->decrypt(v_key.internalContext(), a.data(), a.size(), &out, &len))
+		return false;
+
+	b->resize(len);
+	memcpy(b->data(), out, len);
+	free(out);
+	return true;
+}
+
+RSAKey RSA::generateKey(int bits)
+{
+	return RSAKey();
+}
