@@ -1156,6 +1156,11 @@ void SASL::reset()
 	d->c->reset();
 }
 
+int SASL::errorCondition() const
+{
+	return d->c->errorCond();
+}
+
 void SASL::setAllowPlain(bool b)
 {
 	d->noPlain = !b;

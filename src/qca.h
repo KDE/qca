@@ -377,12 +377,26 @@ namespace QCA
 		Q_OBJECT
 	public:
 		enum Error { ErrAuth, ErrCrypt };
+		enum ErrorCond {
+			NoMech,
+			BadProto,
+			BadServ,
+			BadAuth,
+			NoAuthzid,
+			TooWeak,
+			NeedEncrypt,
+			Expired,
+			Disabled,
+			NoUser,
+			RemoteUnavail,
+		};
 		SASL(QObject *parent=0);
 		~SASL();
 
 		static void setAppName(const QString &name);
 
 		void reset();
+		int errorCondition() const;
 
 		// options
 		void setAllowPlain(bool);

@@ -160,6 +160,7 @@ public:
 	virtual void setCoreProps(const QString &service, const QString &host, QCA_SASLHostPort *local, QCA_SASLHostPort *remote)=0;
 	virtual void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax, const QString &_ext_authid, int _ext_ssf)=0;
 	virtual int security() const=0;
+	virtual int errorCond() const=0;
 
 	// init / first step
 	virtual bool clientStart(const QStringList &mechlist)=0;

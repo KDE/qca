@@ -221,6 +221,7 @@ public:
 	int ssf, maxoutbuf;
 	QStringList mechlist;
 	sasl_callback_t *callbacks;
+	int err;
 
 	// state
 	bool servermode;
@@ -279,6 +280,7 @@ public:
 		maxoutbuf = 0;
 		sc_username = "";
 		sc_authzid = "";
+		err = -1;
 	}
 
 	void resetParams()
@@ -373,6 +375,37 @@ public:
 		return ssf;
 	}
 
+	int errorCond() const
+	{
+		return err;
+	}
+
+	int saslErrorCond(int r)
+	{
+		int x;
+		switch(r) {
+			// common
+			case SASL_NOMECH:    x = QCA::SASL::NoMech; break;
+			case SASL_BADPROT:   x = QCA::SASL::BadProto; break;
+
+			// client
+			case SASL_BADSERV:   x = QCA::SASL::BadServ; break;
+
+			// server
+			case SASL_BADAUTH:   x = QCA::SASL::BadAuth; break;
+			case SASL_NOAUTHZ:   x = QCA::SASL::NoAuthzid; break;
+			case SASL_TOOWEAK:   x = QCA::SASL::TooWeak; break;
+			case SASL_ENCRYPT:   x = QCA::SASL::NeedEncrypt; break;
+			case SASL_EXPIRED:   x = QCA::SASL::Expired; break;
+			case SASL_DISABLED:  x = QCA::SASL::Disabled; break;
+			case SASL_NOUSER:    x = QCA::SASL::NoUser; break;
+			case SASL_UNAVAIL:   x = QCA::SASL::RemoteUnavail; break;
+
+			default: x = -1; break;
+		}
+		return x;
+	}
+
 	bool clientStart(const QStringList &_mechlist)
 	{
 		resetState();
@@ -405,8 +438,10 @@ public:
 		callbacks[4].context = 0;
 
 		int r = sasl_client_new(service.latin1(), host.latin1(), localAddr.isEmpty() ? 0 : localAddr.latin1(), remoteAddr.isEmpty() ? 0 : remoteAddr.latin1(), callbacks, 0, &con);
-		if(r != SASL_OK)
+		if(r != SASL_OK) {
+			err = saslErrorCond(r);
 			return false;
+		}
 
 		if(!setsecprops())
 			return false;
@@ -444,8 +479,10 @@ public:
 		callbacks[1].context = 0;
 
 		int r = sasl_server_new(service.latin1(), host.latin1(), realm.latin1(), localAddr.isEmpty() ? 0 : localAddr.latin1(), remoteAddr.isEmpty() ? 0 : remoteAddr.latin1(), callbacks, 0, &con);
-		if(r != SASL_OK)
+		if(r != SASL_OK) {
+			err = saslErrorCond(r);
 			return false;
+		}
 
 		if(!setsecprops())
 			return false;
@@ -556,8 +593,10 @@ public:
 				if(params.missingAny())
 					return NeedParams;
 			}
-			if(r != SASL_OK && r != SASL_CONTINUE)
+			if(r != SASL_OK && r != SASL_CONTINUE) {
+				err = saslErrorCond(r);
 				return Error;
+			}
 
 			out_mech = m;
 			if(in_sendFirst && clientout) {
@@ -593,8 +632,10 @@ public:
 				if(params.missingAny())
 					return NeedParams;
 			}
-			if(r != SASL_OK && r != SASL_CONTINUE)
+			if(r != SASL_OK && r != SASL_CONTINUE) {
+				err = saslErrorCond(r);
 				return Error;
+			}
 			out_buf = makeByteArray(clientout, clientoutlen);
 			if(r == SASL_OK) {
 				getssfparams();
@@ -618,8 +659,10 @@ public:
 				unsigned int serveroutlen;
 				ca_flag = false;
 				int r = sasl_server_start(con, in_mech.latin1(), clientin, clientinlen, &serverout, &serveroutlen);
-				if(r != SASL_OK && r != SASL_CONTINUE)
+				if(r != SASL_OK && r != SASL_CONTINUE) {
+					err = saslErrorCond(r);
 					return Error;
+				}
 				out_buf = makeByteArray(serverout, serveroutlen);
 				last_r = r;
 				if(ca_flag && !ca_done) {
@@ -642,8 +685,10 @@ public:
 				const char *serverout;
 				unsigned int serveroutlen;
 				int r = sasl_server_step(con, in_buf.data(), in_buf.size(), &serverout, &serveroutlen);
-				if(r != SASL_OK && r != SASL_CONTINUE)
+				if(r != SASL_OK && r != SASL_CONTINUE) {
+					err = saslErrorCond(r);
 					return Error;
+				}
 				if(r == SASL_OK)
 					out_buf.resize(0);
 				else
