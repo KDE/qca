@@ -41,7 +41,7 @@ uchar Random::nextByte(Quality q)
 
 QSecureArray Random::nextBytes(int size, Quality q)
 {
-	return ((RandomContext *)context())->nextBytes(size, q);
+	return static_cast<RandomContext *>(context())->nextBytes(size, q);
 }
 
 uchar Random::randomChar(Quality q)
@@ -72,12 +72,12 @@ Hash::Hash(const QString &type, const QString &provider)
 
 void Hash::clear()
 {
-	((HashContext *)context())->clear();
+	static_cast<HashContext *>(context())->clear();
 }
 
 void Hash::update(const QSecureArray &a)
 {
-	((HashContext *)context())->update(a);
+	static_cast<HashContext *>(context())->update(a);
 }
 
 void Hash::update(const QByteArray &a)
@@ -107,7 +107,7 @@ void Hash::update(QIODevice &file)
 
 QSecureArray Hash::final()
 {
-	return ((HashContext *)context())->final();
+	return static_cast<HashContext *>(context())->final();
 }
 
 QSecureArray Hash::hash(const QSecureArray &a)
@@ -161,23 +161,24 @@ Cipher & Cipher::operator=(const Cipher &from)
 
 KeyLength Cipher::keyLength() const
 {
-	return ((CipherContext *)context())->keyLength();
+	return static_cast<const CipherContext *>(context())->keyLength();
 }
 
 bool Cipher::validKeyLength(int n) const
 {
-	return ((n >= keyLength().minimum()) && (n <= keyLength().maximum()) && (n % keyLength().multiple() == 0));
+	KeyLength len = keyLength();
+	return ((n >= len.minimum()) && (n <= len.maximum()) && (n % len.multiple() == 0));
 }
 
 unsigned int Cipher::blockSize() const
 {
-	return ((CipherContext *)context())->blockSize();
+	return static_cast<const CipherContext *>(context())->blockSize();
 }
 
 void Cipher::clear()
 {
 	d->done = false;
-	((CipherContext *)context())->setup(d->dir, d->key, d->iv);
+	static_cast<CipherContext *>(context())->setup(d->dir, d->key, d->iv);
 }
 
 QSecureArray Cipher::update(const QSecureArray &a)
@@ -185,7 +186,7 @@ QSecureArray Cipher::update(const QSecureArray &a)
 	QSecureArray out;
 	if(d->done)
 		return out;
-	d->ok = ((CipherContext *)context())->update(a, &out);
+	d->ok = static_cast<CipherContext *>(context())->update(a, &out);
 	return out;
 }
 
@@ -195,7 +196,7 @@ QSecureArray Cipher::final()
 	if(d->done)
 		return out;
 	d->done = true;
-	d->ok = ((CipherContext *)context())->final(&out);
+	d->ok = static_cast<CipherContext *>(context())->final(&out);
 	return out;
 }
 
@@ -283,25 +284,26 @@ MessageAuthenticationCode & MessageAuthenticationCode::operator=(const MessageAu
 
 KeyLength MessageAuthenticationCode::keyLength() const
 {
-	return ((MACContext *)context())->keyLength();
+	return static_cast<const MACContext *>(context())->keyLength();
 }
 
 bool MessageAuthenticationCode::validKeyLength(int n) const
 {
-	return ((n >= keyLength().minimum()) && (n <= keyLength().maximum()) && (n % keyLength().multiple() == 0));
+	KeyLength len = keyLength();
+	return ((n >= len.minimum()) && (n <= len.maximum()) && (n % len.multiple() == 0));
 }
 
 void MessageAuthenticationCode::clear()
 {
 	d->done = false;
-	((MACContext *)context())->setup(d->key);
+	static_cast<MACContext *>(context())->setup(d->key);
 }
 
 void MessageAuthenticationCode::update(const QSecureArray &a)
 {
 	if(d->done)
 		return;
-	((MACContext *)context())->update(a);
+	static_cast<MACContext *>(context())->update(a);
 }
 
 QSecureArray MessageAuthenticationCode::final()
@@ -309,7 +311,7 @@ QSecureArray MessageAuthenticationCode::final()
 	if(!d->done)
 	{
 		d->done = true;
-		((MACContext *)context())->final(&d->buf);
+		static_cast<MACContext *>(context())->final(&d->buf);
 	}
 	return d->buf;
 }
@@ -373,7 +375,7 @@ SymmetricKey KeyDerivationFunction::makeKey(const QSecureArray &secret, const In
 
 	//return d->buf;
 
-	return ((KDFContext *)context())->makeKey(secret, salt, keyLength, iterationCount);
+	return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, iterationCount);
 }
 
 QString KeyDerivationFunction::withAlgorithm(const QString &kdfType, const QString &algType)
