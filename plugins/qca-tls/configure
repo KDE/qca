@@ -17,9 +17,6 @@ Dependency options:
 EOT
 }
 
-# save environment variable
-ORIG_QTDIR=$QTDIR
-
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--qtdir=*)
@@ -59,8 +56,8 @@ fi
 
 if [ -z "$QTDIR" ]; then
 	echo
-	echo \$QTDIR not set... trying to find qt manually
-	for p in /usr/lib/qt /usr/share/qt /usr/share/qt3 /usr/local/lib/qt /usr/local/share/qt /usr/lib/qt3 /usr/local/lib/qt3 /usr/X11R6/share/qt ; do
+	echo \$QTDIR not set... trying to find Qt manually
+	for p in /usr/lib/qt /usr/share/qt /usr/share/qt3 /usr/local/lib/qt /usr/local/share/qt /usr/lib/qt3 /usr/local/lib/qt3 /usr/X11R6/share/qt /usr/qt/3 ; do
 		if [ -d "$p/mkspecs" ]; then
 			QTDIR=$p
 			break;
@@ -72,6 +69,7 @@ if [ -z "$QTDIR" ]; then
 		echo development utilities. You may download them either
 		echo from the vendor of your operating system or from
 		echo www.trolltech.com
+		echo
 		exit 1;
 	fi
 fi
@@ -89,6 +87,7 @@ if [ ! -x "$QTDIR/bin/qmake" ]; then
 		echo
 		echo Please set \$QTDIR manually and make sure that
 		echo \$QTDIR/bin/qmake exists.
+		echo
 		exit 1;
 	fi
 else
@@ -97,29 +96,6 @@ fi
 
 gen_files() {
 cat >$1/modules.cpp <<EOT
-/*
------BEGIN QCMOD-----
-name: Qt
------END QCMOD-----
-*/
-
-//----------------------------------------------------------------------------
-// qc_qt
-//----------------------------------------------------------------------------
-class qc_qt : public ConfObj
-{
-public:
-	qc_qt(Conf *c) : ConfObj(c) {}
-	QString name() const { return "Qt (Multithreaded) >= 3.0"; }
-	QString shortname() const { return "qt"; }
-	bool exec()
-	{
-		if(QT_VERSION >= 0x030000 && QT_THREAD_SUPPORT)
-			return true;
-		else
-			return false;
-	}
-};
 /*
 -----BEGIN QCMOD-----
 name: openssl
@@ -137,6 +113,12 @@ public:
 	{
 		QString inc, lib;
 		QString s;
+		bool kb = false;
+		QString kbdir = "/usr/kerberos/include";
+
+		// Redhat 9?
+		if(QFileInfo(kbdir).exists())
+			kb = true;
 
 		s = conf->getenv("QC_WITH_OPENSSL_INC");
 		if(!s.isEmpty()) {
@@ -145,9 +127,7 @@ public:
 			inc = s;
 		}
 		else {
-			QStringList extra;
-			extra += "/usr/kerberos/include"; // Redhat 9?
-			if(!conf->findHeader("/openssl/ssl.h", extra, &s))
+			if(!conf->findHeader("/openssl/ssl.h", QStringList(), &s))
 				return false;
 			inc = s;
 		}
@@ -175,6 +155,8 @@ public:
 		QString ext;
 		if(!inc.isEmpty())
 			ext += QString("-I") + inc + ' ';
+		if(kb)
+			ext += QString("-I") + kbdir + ' ';
 		if(!lib.isEmpty())
 			ext += QString("-L") + lib + " -lssl -lcrypto ";
 		int ret;
@@ -185,6 +167,8 @@ public:
 
 		if(!inc.isEmpty())
 			conf->addIncludePath(inc);
+		if(kb)
+			conf->addIncludePath(kbdir);
 		if(!lib.isEmpty())
 			conf->addLib(QString("-L") + s);
 		conf->addLib("-lssl -lcrypto");
@@ -195,9 +179,6 @@ public:
 
 EOT
 cat >$1/modules_new.cpp <<EOT
-    o = new qc_qt(conf);
-    o->required = true;
-    o->disabled = false;
     o = new qc_openssl(conf);
     o->required = true;
     o->disabled = false;
@@ -538,13 +519,14 @@ fi
 
 if [ "$?" != "0" ]; then
 	rm -rf .qconftemp
-	echo There was an error compiling 'conf'.  Be sure you have a proper
-	echo Qt 3.x build environment set up.
+	echo "There was an error compiling 'conf'.  Be sure you have a proper"
+	echo "Qt 3.x Multithreaded (MT) build environment set up."
 	if [ ! -f "$QTDIR/lib/libqt-mt.so.3" ]; then
 		echo
 		echo "One possible reason is that you don't have"
 		echo "libqt-mt.so.3 installed in $QTDIR/lib/."
 	fi
+	echo
 	exit 1;
 fi
 
@@ -559,15 +541,16 @@ if [ -x "./qcextra" ]; then
 	./qcextra
 fi
 # run qmake
-$qm qca-tls.pro
+$qm qca-tls.pro -o Makefile.tmp
 if [ "$?" != "0" ]; then
 	exit 1;
 fi
+cat >Makefile <<EOT
+QTDIR = $QTDIR
+EOT
+cat Makefile.tmp >> Makefile
+rm Makefile.tmp
 
 echo
-if [ "$QTDIR" != "$ORIG_QTDIR" ]; then
-	echo Good, your configure finished.  Now run \'QTDIR=$QTDIR make\'.
-else
-	echo Good, your configure finished.  Now run \'make\'.
-fi
+echo Good, your configure finished.  Now run \'make\'.
 echo

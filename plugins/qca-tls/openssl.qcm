@@ -15,6 +15,12 @@ public:
 	{
 		QString inc, lib;
 		QString s;
+		bool kb = false;
+		QString kbdir = "/usr/kerberos/include";
+
+		// Redhat 9?
+		if(QFileInfo(kbdir).exists())
+			kb = true;
 
 		s = conf->getenv("QC_WITH_OPENSSL_INC");
 		if(!s.isEmpty()) {
@@ -23,9 +29,7 @@ public:
 			inc = s;
 		}
 		else {
-			QStringList extra;
-			extra += "/usr/kerberos/include"; // Redhat 9?
-			if(!conf->findHeader("/openssl/ssl.h", extra, &s))
+			if(!conf->findHeader("/openssl/ssl.h", QStringList(), &s))
 				return false;
 			inc = s;
 		}
@@ -53,6 +57,8 @@ public:
 		QString ext;
 		if(!inc.isEmpty())
 			ext += QString("-I") + inc + ' ';
+		if(kb)
+			ext += QString("-I") + kbdir + ' ';
 		if(!lib.isEmpty())
 			ext += QString("-L") + lib + " -lssl -lcrypto ";
 		int ret;
@@ -63,6 +69,8 @@ public:
 
 		if(!inc.isEmpty())
 			conf->addIncludePath(inc);
+		if(kb)
+			conf->addIncludePath(kbdir);
 		if(!lib.isEmpty())
 			conf->addLib(QString("-L") + s);
 		conf->addLib("-lssl -lcrypto");
