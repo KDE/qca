@@ -13,17 +13,26 @@ namespace QCA
 		CAP_SHA1      = 0x0001,
 		CAP_SHA256    = 0x0002,
 		CAP_MD5       = 0x0004,
-		CAP_TripleDES = 0x0008,
-		CAP_AES128    = 0x0010,
-		CAP_AES256    = 0x0020,
-		CAP_RSA       = 0x0040,
+		CAP_BlowFish  = 0x0008,
+		CAP_TripleDES = 0x0010,
+		CAP_AES128    = 0x0020,
+		CAP_AES256    = 0x0040,
+		CAP_RSA       = 0x0080,
 
 		//CAP_X509      = 0x0040,
 		//CAP_TLS       = 0x0080,
 		//CAP_SASL      = 0x0100,
 	};
 
-	enum { Encrypt, Decrypt };
+	enum {
+		CBC = 0x0001,
+		CFB = 0x0002,
+	};
+
+	enum {
+		Encrypt = 0x0001,
+		Decrypt = 0x0002,
+	};
 
 	void init();
 	bool isSupported(int capabilities);
@@ -90,12 +99,12 @@ namespace QCA
 
 		QByteArray dyn_generateKey() const;
 		QByteArray dyn_generateIV() const;
-		void reset(int dir, const QByteArray &key, const QByteArray &iv);
+		void reset(int dir, int mode, const QByteArray &key, const QByteArray &iv);
 		bool update(const QByteArray &a);
 		QByteArray final();
 
 	protected:
-		Cipher(QCA_CipherFunctions *, int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		Cipher(QCA_CipherFunctions *, int dir, int mode, const QByteArray &key, const QByteArray &iv);
 
 	private:
 		class Private;
@@ -139,22 +148,28 @@ namespace QCA
 		MD5();
 	};
 
+	class BlowFish : public Cipher, public CipherStatic<BlowFish>
+	{
+	public:
+		BlowFish(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+	};
+
 	class TripleDES : public Cipher, public CipherStatic<TripleDES>
 	{
 	public:
-		TripleDES(int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		TripleDES(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
 	};
 
 	class AES128 : public Cipher, public CipherStatic<AES128>
 	{
 	public:
-		AES128(int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		AES128(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
 	};
 
-	class AES256 : public Cipher, public CipherStatic<AES128>
+	class AES256 : public Cipher, public CipherStatic<AES256>
 	{
 	public:
-		AES256(int dir=Encrypt, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
+		AES256(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray());
 	};
 
 	class RSA;
@@ -170,6 +185,9 @@ namespace QCA
 
 		QByteArray toDER() const;
 		bool fromDER(const QByteArray &a, bool sec=false);
+
+		// only call if you know what you are doing
+		bool fromNative(void *);
 
 	private:
 		class Private;

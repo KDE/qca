@@ -204,14 +204,15 @@ public:
 	QCA_CipherFunctions *f;
 	int ctx;
 	int dir;
+	int mode;
 	QByteArray key, iv;
 	bool err;
 };
 
-Cipher::Cipher(QCA_CipherFunctions *f, int dir, const QByteArray &key, const QByteArray &iv)
+Cipher::Cipher(QCA_CipherFunctions *f, int dir, int mode, const QByteArray &key, const QByteArray &iv)
 {
 	d = new Private(f);
-	reset(dir, key, iv);
+	reset(dir, mode, key, iv);
 }
 
 Cipher::Cipher(const Cipher &from)
@@ -247,13 +248,14 @@ QByteArray Cipher::dyn_generateIV() const
 	return buf;
 }
 
-void Cipher::reset(int dir, const QByteArray &key, const QByteArray &iv)
+void Cipher::reset(int dir, int mode, const QByteArray &key, const QByteArray &iv)
 {
 	d->reset();
 	d->dir = dir;
+	d->mode = mode;
 	d->key = key.copy();
 	d->iv = iv.copy();
-	if(!d->f->setup(d->ctx, d->dir, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data())) {
+	if(!d->f->setup(d->ctx, d->dir, d->mode, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data())) {
 		d->err = true;
 		return;
 	}
@@ -314,10 +316,19 @@ MD5::MD5()
 
 
 //----------------------------------------------------------------------------
+// BlowFish
+//----------------------------------------------------------------------------
+BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &iv)
+:Cipher((QCA_CipherFunctions *)getFunctions(CAP_BlowFish), dir, mode, key, iv)
+{
+}
+
+
+//----------------------------------------------------------------------------
 // TripleDES
 //----------------------------------------------------------------------------
-TripleDES::TripleDES(int dir, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherFunctions *)getFunctions(CAP_TripleDES), dir, key, iv)
+TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray &iv)
+:Cipher((QCA_CipherFunctions *)getFunctions(CAP_TripleDES), dir, mode, key, iv)
 {
 }
 
@@ -325,8 +336,8 @@ TripleDES::TripleDES(int dir, const QByteArray &key, const QByteArray &iv)
 //----------------------------------------------------------------------------
 // AES128
 //----------------------------------------------------------------------------
-AES128::AES128(int dir, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES128), dir, key, iv)
+AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv)
+:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES128), dir, mode, key, iv)
 {
 }
 
@@ -334,8 +345,8 @@ AES128::AES128(int dir, const QByteArray &key, const QByteArray &iv)
 //----------------------------------------------------------------------------
 // AES256
 //----------------------------------------------------------------------------
-AES256::AES256(int dir, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES256), dir, key, iv)
+AES256::AES256(int dir, int mode, const QByteArray &key, const QByteArray &iv)
+:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES256), dir, mode, key, iv)
 {
 }
 
@@ -413,6 +424,15 @@ QByteArray RSAKey::toDER() const
 bool RSAKey::fromDER(const QByteArray &a, bool sec)
 {
 	int ctx = d->f->keyCreateFromDER(a.data(), a.size(), sec);
+	if(ctx == -1)
+		return false;
+	d->ctx = ctx;
+	return true;
+}
+
+bool RSAKey::fromNative(void *p)
+{
+	int ctx = d->f->keyCreateFromNative(p);
 	if(ctx == -1)
 		return false;
 	d->ctx = ctx;

@@ -68,12 +68,13 @@ static bool tdes_generateIV(char *out);
 
 static int tdes_create();
 static void tdes_destroy(int ctx);
-static bool tdes_setup(int ctx, int dir, const char *key, const char *iv);
+static bool tdes_setup(int ctx, int dir, int mode, const char *key, const char *iv);
 static bool tdes_update(int ctx, const char *in, unsigned int len);
 static bool tdes_final(int ctx, char *out);
 static unsigned int tdes_finalSize(int ctx);
 
 static int rsa_keyCreateFromDER(const char *in, unsigned int len, bool sec);
+static int rsa_keyCreateFromNative(void *in);
 static int rsa_keyCreateGenerate(unsigned int bits);
 static int rsa_keyClone(int ctx);
 static void rsa_keyDestroy(int ctx);
@@ -233,6 +234,7 @@ void *_QCAOpenSSL::functions(int cap)
 	else if(cap == QCA::CAP_RSA) {
 		QCA_RSAFunctions *f = new QCA_RSAFunctions;
 		f->keyCreateFromDER = rsa_keyCreateFromDER;
+		f->keyCreateFromNative = rsa_keyCreateFromNative;
 		f->keyCreateGenerate = rsa_keyCreateGenerate;
 		f->keyClone = rsa_keyClone;
 		f->keyDestroy = rsa_keyDestroy;
@@ -371,7 +373,7 @@ void tdes_destroy(int ctx)
 	map_tdes->removeRef(i);
 }
 
-bool tdes_setup(int ctx, int dir, const char *key, const char *iv)
+bool tdes_setup(int ctx, int dir, int mode, const char *key, const char *iv)
 {
 	pair_tdes *i = find_tdes(ctx);
 	i->dir = dir;
@@ -471,6 +473,17 @@ int rsa_keyCreateFromDER(const char *in, unsigned int len, bool sec)
 	i->r = r;
 	map_rsakey->append(i);
 	//printf("created %d\n", i->ctx);
+	return i->ctx;
+}
+
+int rsa_keyCreateFromNative(void *in)
+{
+	RSA *r = (RSA *)in;
+
+	pair_rsakey *i = new pair_rsakey;
+	i->ctx = counter++;
+	i->r = r;
+	map_rsakey->append(i);
 	return i->ctx;
 }
 

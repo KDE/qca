@@ -38,7 +38,7 @@ struct QCA_CipherFunctions
 
 	int (*create)();
 	void (*destroy)(int ctx);
-	bool (*setup)(int ctx, int dir, const char *key, const char *iv);
+	bool (*setup)(int ctx, int dir, int mode, const char *key, const char *iv);
 	bool (*update)(int ctx, const char *in, unsigned int len);
 	bool (*final)(int ctx, char *out);
 	unsigned int (*finalSize)(int ctx);
@@ -47,6 +47,7 @@ struct QCA_CipherFunctions
 struct QCA_RSAFunctions
 {
 	int (*keyCreateFromDER)(const char *in, unsigned int len, bool sec);
+	int (*keyCreateFromNative)(void *in);
 	int (*keyCreateGenerate)(unsigned int bits);
 	int (*keyClone)(int ctx);
 	void (*keyDestroy)(int ctx);

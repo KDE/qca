@@ -1,4 +1,5 @@
 * rsakey: to/from PEM
+* rsakey: detect for private/public capability (get rid of 'bool sec')
 * rsa: choice of pad
 * make 'cipherkey' class?
 * cipher: better handling of errors ('empty' arrays are not a good idea)
