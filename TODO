@@ -23,6 +23,8 @@
 
 * finish API:
   pkey: ability to get the bitsize of a key
+  cert: subject/issuer key ids?
+  cert: use info as a multi-map?
   qcaprovider.h
 
 * build system:
