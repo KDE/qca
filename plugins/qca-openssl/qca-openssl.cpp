@@ -29,8 +29,6 @@
 class MD2Context : public QCA::HashContext
 {
 public:
-	MD2_CTX c;
-
 	MD2Context(QCA::Provider *p) : HashContext(p, "md2")
 	{
 		clear();
@@ -57,13 +55,14 @@ public:
 		MD2_Final((unsigned char *)a.data(), &c);
 		return a;
 	}
+
+protected:
+	MD2_CTX c;
 };
 
 class MD4Context : public QCA::HashContext
 {
 public:
-	MD4_CTX c;
-
 	MD4Context(QCA::Provider *p) : HashContext(p, "md4")
 	{
 		clear();
@@ -90,13 +89,14 @@ public:
 		MD4_Final((unsigned char *)a.data(), &c);
 		return a;
 	}
+
+protected:
+	MD4_CTX c;
 };
 
 class MD5Context : public QCA::HashContext
 {
 public:
-	MD5_CTX c;
-
 	MD5Context(QCA::Provider *p) : HashContext(p, "md5")
 	{
 		clear();
@@ -123,13 +123,14 @@ public:
 		MD5_Final((unsigned char *)a.data(), &c);
 		return a;
 	}
+
+protected:
+	MD5_CTX c;
 };
 
 class SHA0Context : public QCA::HashContext
 {
 public:
-	SHA_CTX c;
-
 	SHA0Context(QCA::Provider *p) : HashContext(p, "sha0")
 	{
 		clear();
@@ -156,13 +157,14 @@ public:
 		SHA_Final((unsigned char *)a.data(), &c);
 		return a;
 	}
+
+protected:
+	SHA_CTX c;
 };
 
 class SHA1Context : public QCA::HashContext
 {
 public:
-	SHA_CTX c;
-
 	SHA1Context(QCA::Provider *p) : HashContext(p, "sha1")
 	{
 		clear();
@@ -189,13 +191,14 @@ public:
 		SHA1_Final((unsigned char *)a.data(), &c);
 		return a;
 	}
+
+protected:
+	SHA_CTX c;
 };
 
 class RIPEMD160Context : public QCA::HashContext
 {
 public:
-	RIPEMD160_CTX c;
-
 	RIPEMD160Context(QCA::Provider *p) : HashContext(p, "ripemd160")
 	{
 		clear();
@@ -222,13 +225,14 @@ public:
 		RIPEMD160_Final((unsigned char *)result.data(), &c);
 		return result;
 	}
+
+protected:
+	RIPEMD160_CTX c;
 };
 
 class HMACMD5Context : public QCA::MACContext
 {
 public:
-	HMAC_CTX c;
-
 	HMACMD5Context(QCA::Provider *p) : MACContext( p, "hmac(md5)" )
 	{
 		HMAC_CTX_init( &c );
@@ -261,14 +265,15 @@ public:
 		HMAC_Final(&c, (unsigned char *)out->data(), &(outSize) );
 		HMAC_CTX_cleanup(&c);
 	}
+
+protected:
+	HMAC_CTX c;
 };
 
 
 class HMACSHA1Context : public QCA::MACContext
 {
 public:
-	HMAC_CTX c;
-
 	HMACSHA1Context(QCA::Provider *p) : MACContext( p, "hmac(sha1)" )
 	{
 		HMAC_CTX_init( &c );
@@ -301,13 +306,14 @@ public:
 		HMAC_Final(&c, (unsigned char *)out->data(), &(outSize) );
 		HMAC_CTX_cleanup(&c);
 	}
+
+protected:
+	HMAC_CTX c;
 };
 
 class HMACRIPEMD160Context : public QCA::MACContext
 {
 public:
-	HMAC_CTX c;
-
 	HMACRIPEMD160Context(QCA::Provider *p) : MACContext( p, "hmac(ripemd160)" )
 	{
 		HMAC_CTX_init( &c );
@@ -340,9 +346,10 @@ public:
 		HMAC_Final(&c, (unsigned char *)out->data(), &(outSize) );
 		HMAC_CTX_cleanup(&c);
 	}
+
+protected:
+	HMAC_CTX c;
 };
-
-
 
 class opensslProvider : public QCA::Provider
 {
@@ -368,6 +375,7 @@ public:
 		list += "hmac(md5)";
 		list += "hmac(sha1)";
 		list += "hmac(ripemd160)";
+		list += "aes128";
 		return list;
 	}
 
