@@ -316,6 +316,8 @@ public:
 	list += "aes256-cfb";
 	list += "aes256-cbc";
 	list += "blowfish-ecb";
+	list += "blowfish-cbc";
+	list += "blowfish-cfb";
 	list += "tripledes-ecb";
 	list += "des-ecb";
 	list += "des-cbc";
@@ -361,6 +363,10 @@ public:
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "blowfish-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "blowfish-cbc" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CBC, false, this, type );
+	else if ( type == "blowfish-cfb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, false, this, type );
 	else if ( type == "tripledes-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "des-ecb" )
