@@ -50,7 +50,7 @@ public:
 	virtual QCA_HashContext *clone()=0;
 	virtual void reset()=0;
 	virtual void update(const char *in, unsigned int len)=0;
-	virtual void final(char **out, unsigned int *outlen)=0;
+	virtual void final(QByteArray *out)=0;
 };
 
 class QCA_CipherContext
@@ -66,7 +66,7 @@ public:
 
 	virtual bool setup(int dir, int mode, const char *key, int keysize, const char *iv, bool pad)=0;
 	virtual bool update(const char *in, unsigned int len)=0;
-	virtual bool final(char **out, unsigned int *outlen)=0;
+	virtual bool final(QByteArray *out)=0;
 };
 
 class QCA_RSAKeyContext
@@ -82,11 +82,11 @@ public:
 	virtual bool createFromPEM(const char *in, unsigned int len)=0;
 	virtual bool createFromNative(void *in)=0;
 	virtual bool generate(unsigned int bits)=0;
-	virtual void toDER(char **out, unsigned int *len, bool publicOnly)=0;
-	virtual void toPEM(char **out, unsigned int *len, bool publicOnly)=0;
+	virtual bool toDER(QByteArray *out, bool publicOnly)=0;
+	virtual bool toPEM(QByteArray *out, bool publicOnly)=0;
 
-	virtual bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)=0;
-	virtual bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)=0;
+	virtual bool encrypt(const QByteArray &in, QByteArray *out, bool oaep)=0;
+	virtual bool decrypt(const QByteArray &in, QByteArray *out, bool oaep)=0;
 };
 
 struct QCA_CertProperty
@@ -104,8 +104,8 @@ public:
 	virtual bool isNull() const=0;
 	virtual bool createFromDER(const char *in, unsigned int len)=0;
 	virtual bool createFromPEM(const char *in, unsigned int len)=0;
-	virtual void toDER(char **out, unsigned int *len)=0;
-	virtual void toPEM(char **out, unsigned int *len)=0;
+	virtual bool toDER(QByteArray *out)=0;
+	virtual bool toPEM(QByteArray *out)=0;
 
 	virtual QString serialNumber() const=0;
 	virtual QString subjectString() const=0;

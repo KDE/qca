@@ -309,12 +309,8 @@ void Hash::update(const QByteArray &a)
 
 QByteArray Hash::final()
 {
-	char *out;
-	unsigned int len;
-	d->c->final(&out, &len);
-	QByteArray buf(len);
-	memcpy(buf.data(), out, len);
-	free(out);
+	QByteArray buf;
+	d->c->final(&buf);
 	return buf;
 }
 
@@ -435,18 +431,14 @@ QByteArray Cipher::final(bool *ok)
 	if(d->err)
 		return QByteArray();
 
-	char *out;
-	unsigned int len;
-	if(!d->c->final(&out, &len)) {
+	QByteArray out;
+	if(!d->c->final(&out)) {
 		d->err = true;
 		return QByteArray();
 	}
-	QByteArray buf(len);
-	memcpy(buf.data(), out, len);
-	free(out);
 	if(ok)
 		*ok = true;
-	return buf;
+	return out;
 }
 
 
@@ -573,17 +565,10 @@ bool RSAKey::havePrivate() const
 
 QByteArray RSAKey::toDER(bool publicOnly) const
 {
-	char *out;
-	unsigned int len;
-	d->c->toDER(&out, &len, publicOnly);
-	if(!out)
+	QByteArray out;
+	if(!d->c->toDER(&out, publicOnly))
 		return QByteArray();
-	else {
-		QByteArray buf(len);
-		memcpy(buf.data(), out, len);
-		free(out);
-		return buf;
-	}
+	return out;
 }
 
 bool RSAKey::fromDER(const QByteArray &a)
@@ -593,18 +578,14 @@ bool RSAKey::fromDER(const QByteArray &a)
 
 QString RSAKey::toPEM(bool publicOnly) const
 {
-	char *out;
-	unsigned int len;
-	d->c->toPEM(&out, &len, publicOnly);
-	if(!out)
+	QByteArray out;
+	if(!d->c->toPEM(&out, publicOnly))
 		return QByteArray();
-	else {
-		QCString cs;
-		cs.resize(len+1);
-		memcpy(cs.data(), out, len);
-		free(out);
-		return QString::fromLatin1(cs);
-	}
+
+	QCString cs;
+	cs.resize(out.size()+1);
+	memcpy(cs.data(), out.data(), out.size());
+	return QString::fromLatin1(cs);
 }
 
 bool RSAKey::fromPEM(const QString &str)
@@ -622,25 +603,19 @@ bool RSAKey::fromNative(void *p)
 
 bool RSAKey::encrypt(const QByteArray &a, QByteArray *b, bool oaep) const
 {
-	char *out;
-	unsigned int len;
-	if(!d->c->encrypt(a.data(), a.size(), &out, &len, oaep))
+	QByteArray out;
+	if(!d->c->encrypt(a, &out, oaep))
 		return false;
-	b->resize(len);
-	memcpy(b->data(), out, len);
-	free(out);
+	*b = out;
 	return true;
 }
 
 bool RSAKey::decrypt(const QByteArray &a, QByteArray *b, bool oaep) const
 {
-	char *out;
-	unsigned int len;
-	if(!d->c->decrypt(a.data(), a.size(), &out, &len, oaep))
+	QByteArray out;
+	if(!d->c->decrypt(a, &out, oaep))
 		return false;
-	b->resize(len);
-	memcpy(b->data(), out, len);
-	free(out);
+	*b = out;
 	return true;
 }
 
@@ -798,17 +773,10 @@ QDateTime Cert::notAfter() const
 
 QByteArray Cert::toDER() const
 {
-	char *out;
-	unsigned int len;
-	d->c->toDER(&out, &len);
-	if(!out)
+	QByteArray out;
+	if(!d->c->toDER(&out))
 		return QByteArray();
-	else {
-		QByteArray buf(len);
-		memcpy(buf.data(), out, len);
-		free(out);
-		return buf;
-	}
+	return out;
 }
 
 bool Cert::fromDER(const QByteArray &a)
@@ -818,18 +786,14 @@ bool Cert::fromDER(const QByteArray &a)
 
 QString Cert::toPEM() const
 {
-	char *out;
-	unsigned int len;
-	d->c->toPEM(&out, &len);
-	if(!out)
+	QByteArray out;
+	if(!d->c->toPEM(&out))
 		return QByteArray();
-	else {
-		QCString cs;
-		cs.resize(len+1);
-		memcpy(cs.data(), out, len);
-		free(out);
-		return QString::fromLatin1(cs);
-	}
+
+	QCString cs;
+	cs.resize(out.size()+1);
+	memcpy(cs.data(), out.data(), out.size());
+	return QString::fromLatin1(cs);
 }
 
 bool Cert::fromPEM(const QString &str)

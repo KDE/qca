@@ -84,22 +84,19 @@ static void appendArray(QByteArray *a, const QByteArray &b)
 	memcpy(a->data() + oldsize, b.data(), b.size());
 }
 
-static char *bio2buf(BIO *b, unsigned int *len)
+static QByteArray bio2buf(BIO *b)
 {
-	char *buf = (char *)malloc(1);
-	int size = 0;
+	QByteArray buf;
 	while(1) {
 		char block[1024];
 		int ret = BIO_read(b, block, 1024);
-		buf = (char *)realloc(buf, size + ret);
-		memcpy(buf + size, block, ret);
-		size += ret;
+		int oldsize = buf.size();
+		buf.resize(oldsize + ret);
+		memcpy(buf.data() + oldsize, block, ret);
 		if(ret != 1024)
 			break;
 	}
 	BIO_free(b);
-
-	*len = size;
 	return buf;
 }
 
@@ -126,12 +123,11 @@ public:
 		SHA1_Update(&c, in, len);
 	}
 
-	void final(char **out, unsigned int *outlen)
+	void final(QByteArray *out)
 	{
-		*outlen = 20;
-		unsigned char *outbuf = (unsigned char *)malloc(*outlen);
-		SHA1_Final(outbuf, &c);
-		*out = (char *)outbuf;
+		QByteArray buf(20);
+		SHA1_Final((unsigned char *)buf.data(), &c);
+		*out = buf;
 	}
 
 	SHA_CTX c;
@@ -160,12 +156,11 @@ public:
 		MD5_Update(&c, in, len);
 	}
 
-	void final(char **out, unsigned int *outlen)
+	void final(QByteArray *out)
 	{
-		*outlen = 16;
-		unsigned char *outbuf = (unsigned char *)malloc(*outlen);
-		MD5_Final(outbuf, &c);
-		*out = (char *)outbuf;
+		QByteArray buf(16);
+		MD5_Final((unsigned char *)buf.data(), &c);
+		*out = buf;
 	}
 
 	MD5_CTX c;
@@ -262,7 +257,7 @@ public:
 		return true;
 	}
 
-	bool final(char **out, unsigned int *outlen)
+	bool final(QByteArray *out)
 	{
 		if(pad) {
 			QByteArray result(type->block_size);
@@ -279,11 +274,7 @@ public:
 			appendArray(&r, result);
 		}
 
-		*outlen = r.size();
-		unsigned char *outbuf = (unsigned char *)malloc(*outlen);
-		*out = (char *)outbuf;
-		memcpy(outbuf, r.data(), r.size());
-
+		*out = r.copy();
 		r.resize(0);
 		return true;
 	}
@@ -541,59 +532,56 @@ public:
 		return c;
 	}
 
-	void toDER(char **out, unsigned int *outlen, bool publicOnly)
+	bool toDER(QByteArray *out, bool publicOnly)
 	{
 		if(sec && !publicOnly) {
 			int len = i2d_RSAPrivateKey(sec, NULL);
-			unsigned char *buf, *p;
-			buf = (unsigned char *)malloc(len);
-			p = buf;
+			QByteArray buf(len);
+			unsigned char *p;
+			p = (unsigned char *)buf.data();
 			i2d_RSAPrivateKey(sec, &p);
-			*out = (char *)buf;
-			*outlen = len;
+			*out = buf;
+			return true;
 		}
 		else if(pub) {
 			int len = i2d_RSAPublicKey(pub, NULL);
-			unsigned char *buf, *p;
-			buf = (unsigned char *)malloc(len);
-			p = buf;
+			QByteArray buf(len);
+			unsigned char *p;
+			p = (unsigned char *)buf.data();
 			i2d_RSAPublicKey(pub, &p);
-			*out = (char *)buf;
-			*outlen = len;
+			*out = buf;
+			return true;
 		}
-		else {
-			*out = 0;
-			*outlen = 0;
-		}
+		else
+			return false;
 	}
 
-	void toPEM(char **out, unsigned int *outlen, bool publicOnly)
+	bool toPEM(QByteArray *out, bool publicOnly)
 	{
-		BIO *bo;
 		if(sec && !publicOnly) {
-			bo = BIO_new(BIO_s_mem());
+			BIO *bo = BIO_new(BIO_s_mem());
 			PEM_write_bio_RSAPrivateKey(bo, sec, NULL, NULL, 0, NULL, NULL);
+			*out = bio2buf(bo);
+			return true;
 		}
 		else if(pub) {
-			bo = BIO_new(BIO_s_mem());
+			BIO *bo = BIO_new(BIO_s_mem());
 			PEM_write_bio_RSAPublicKey(bo, pub);
+			*out = bio2buf(bo);
+			return true;
 		}
-		else {
-			*out = 0;
-			*outlen = 0;
-			return;
-		}
+		else
+			return false;
 
-		*out = bio2buf(bo, outlen);
 	}
 
-	bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)
+	bool encrypt(const QByteArray &in, QByteArray *out, bool oaep)
 	{
 		if(!pub)
 			return false;
 
 		int size = RSA_size(pub);
-		int flen = len;
+		int flen = in.size();
 		if(oaep) {
 			if(flen >= size - 41)
 				flen = size - 41;
@@ -603,37 +591,33 @@ public:
 				flen = size - 11;
 		}
 		QByteArray result(size);
-		unsigned char *from = (unsigned char *)in;
+		unsigned char *from = (unsigned char *)in.data();
 		unsigned char *to = (unsigned char *)result.data();
 		int ret = RSA_public_encrypt(flen, from, to, pub, oaep ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING);
 		if(ret == -1)
 			return false;
 		result.resize(ret);
 
-		*out = (char *)malloc(result.size());
-		memcpy((*out), result.data(), result.size());
-		*outlen = result.size();
+		*out = result;
 		return true;
 	}
 
-	bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)
+	bool decrypt(const QByteArray &in, QByteArray *out, bool oaep)
 	{
 		if(!sec)
 			return false;
 
 		int size = RSA_size(sec);
-		int flen = len;
+		int flen = in.size();
 		QByteArray result(size);
-		unsigned char *from = (unsigned char *)in;
+		unsigned char *from = (unsigned char *)in.data();
 		unsigned char *to = (unsigned char *)result.data();
 		int ret = RSA_private_decrypt(flen, from, to, sec, oaep ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING);
 		if(ret == -1)
 			return false;
 		result.resize(ret);
 
-		*out = (char *)malloc(result.size());
-		memcpy((*out), result.data(), result.size());
-		*outlen = result.size();
+		*out = result;
 		return true;
 	}
 
@@ -834,22 +818,22 @@ public:
 		return true;
 	}
 
-	void toDER(char **out, unsigned int *outlen)
+	bool toDER(QByteArray *out)
 	{
 		int len = i2d_X509(x, NULL);
-		unsigned char *buf, *p;
-		buf = (unsigned char *)malloc(len);
-		p = buf;
+		QByteArray buf(len);
+		unsigned char *p = (unsigned char *)buf.data();
 		i2d_X509(x, &p);
-		*out = (char *)buf;
-		*outlen = len;
+		*out = buf;
+		return true;
 	}
 
-	void toPEM(char **out, unsigned int *outlen)
+	bool toPEM(QByteArray *out)
 	{
 		BIO *bo = BIO_new(BIO_s_mem());
 		PEM_write_bio_X509(bo, x);
-		*out = bio2buf(bo, outlen);
+		*out = bio2buf(bo);
+		return true;
 	}
 
 	void fromX509(X509 *t)
