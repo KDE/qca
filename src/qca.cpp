@@ -547,31 +547,6 @@ SymmetricKey & SymmetricKey::operator=(const QSecureArray &a)
 	return *this;
 }
 
-bool operator==(const SymmetricKey &a, const SymmetricKey &b)
-{
-	int as = a.size();
-	int bs = b.size();
-	if(as != bs)
-		return false;
-	char *ap = a.data();
-	char *bp = b.data();
-	int n = 0;
-	while(n < as)
-	{
-		if((*ap) != (*bp))
-			return false;
-		++ap;
-		++bp;
-		++n;
-	}
-	return true;
-}
-
-bool operator!=(const SymmetricKey &a, const SymmetricKey &b)
-{
-	return !(a == b);
-}
-
 //----------------------------------------------------------------------------
 // InitializationVector
 //----------------------------------------------------------------------------

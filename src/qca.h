@@ -103,13 +103,12 @@ QCA_EXPORT void qca_secure_free(void *p);
 /**
  * Secure array of bytes
  *
- * The %QSecureArray provides an array of memory from a pool that is, 
+ * The %QSecureArray provides an array of memory from a pool that is,
  * at least partly, secure. In this sense, secure means that the contents
  * of the memory should not be made available to other applications. By
  * comparison, a QMemArray (or subclass such as QCString or QByteArray) may
- * be held in pages that are free'd without being cleared first. This means
- * that a malicious application can just repeatedly request pages of memory,
- * searching for something that could be of value.
+ * be held in pages that might be swapped to disk or free'd without being
+ * cleared first.
  *
  * Note that this class is implicitly shared (that is, copy on write).
  **/ 
@@ -182,7 +181,17 @@ public:
 	 * at() or operator[]
 	 *
 	 */
-	char *data() const;
+	const char *data() const;
+
+	/**
+	 * Pointer the data in the secure array
+	 * 
+	 * You can use this for memcpy and similar functions. If you are trying
+	 * to obtain data at a particular offset, you might be better off using
+	 * at() or operator[]
+	 *
+	 */
+	char *data();
 
 	/**
 	 * Returns a reference to the byte at the index position
@@ -264,6 +273,8 @@ private:
  * \relates QSecureArray
  **/
 bool operator==(const QSecureArray &a, const QSecureArray &b);
+
+bool operator!=(const QSecureArray &a, const QSecureArray &b);
 
 /**
  * Arbitrary precision integer
@@ -909,8 +920,6 @@ namespace QCA
 
 		SymmetricKey & operator=(const QSecureArray &a);
 	};
-	bool operator==(const SymmetricKey &a, const SymmetricKey &b);
-	bool operator!=(const SymmetricKey &a, const SymmetricKey &b);
 
 	class QCA_EXPORT InitializationVector : public QSecureArray
 	{

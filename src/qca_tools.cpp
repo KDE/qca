@@ -209,8 +209,17 @@ char & QSecureArray::at(uint index)
 	return (char &)(*((Botan::byte *)d->buf + index));
 }
 
-char *QSecureArray::data() const
+const char *QSecureArray::data() const
 {
+	if(!d)
+		return 0;
+	const Botan::byte *p = (const Botan::byte *)d->buf;
+	return ((const char *)p);
+}
+
+char *QSecureArray::data()
+{
+	detach();
 	if(!d)
 		return 0;
 	Botan::byte *p = (Botan::byte *)d->buf;
@@ -288,8 +297,12 @@ bool operator==(const QSecureArray &a, const QSecureArray &b)
 	else
 		return false;
 }
-		
-		       
+
+bool operator!=(const QSecureArray &a, const QSecureArray &b)
+{
+	return !(a == b);
+}
+       
 //----------------------------------------------------------------------------
 // QBigInteger
 //----------------------------------------------------------------------------
