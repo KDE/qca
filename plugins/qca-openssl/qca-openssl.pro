@@ -12,7 +12,6 @@ DEFINES += QCA_PLUGIN
 
 INCLUDEPATH += ../src
 SOURCES = qca-openssl.cpp
-LIBS += -L .. -lqca -lcrypto
 
 include(conf.pri)
 include(extra.pri)
