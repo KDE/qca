@@ -24,7 +24,9 @@
 
 void check_error( gcry_error_t err )
 {
-    if ( GPG_ERR_NO_ERROR != err ) {
+    // we ignore the case where it is not an error, and
+    // we also don't flag weak keys.
+    if ( ( GPG_ERR_NO_ERROR != err ) && ( GPG_ERR_WEAK_KEY  != gpg_err_code(err) ) ) {
 	std::cout << "Failure: " ;
 		std::cout << gcry_strsource(err) << "/";
 		std::cout << gcry_strerror(err) << std::endl;
@@ -84,6 +86,85 @@ public:
 	Context *clone() const
 	{
 		return new SHA1Context(*this);
+	}
+};
+
+class MD4Context : public gcryHashContext
+{
+public:
+	MD4Context(QCA::Provider *p) : gcryHashContext(p, "md4")
+	{
+		gcry_check_version("GCRYPT_VERSION");
+		hashAlgorithm = GCRY_MD_MD4;
+		err =  gcry_md_open( &context, hashAlgorithm, 0 );
+		if ( GPG_ERR_NO_ERROR != err ) {
+			std::cout << "Failure: " ;
+			std::cout << gcry_strsource(err) << "/";
+			std::cout << gcry_strerror(err) << std::endl;
+		}
+	}
+
+	~MD4Context()
+	{
+		gcry_md_close( context );
+	}
+
+	Context *clone() const
+	{
+		return new MD4Context(*this);
+	}
+};
+
+
+class MD5Context : public gcryHashContext
+{
+public:
+	MD5Context(QCA::Provider *p) : gcryHashContext(p, "md5")
+	{
+		gcry_check_version("GCRYPT_VERSION");
+		hashAlgorithm = GCRY_MD_MD5;
+		err =  gcry_md_open( &context, hashAlgorithm, 0 );
+		if ( GPG_ERR_NO_ERROR != err ) {
+			std::cout << "Failure: " ;
+			std::cout << gcry_strsource(err) << "/";
+			std::cout << gcry_strerror(err) << std::endl;
+		}
+	}
+
+	~MD5Context()
+	{
+		gcry_md_close( context );
+	}
+
+	Context *clone() const
+	{
+		return new MD5Context(*this);
+	}
+};
+
+class RIPEMD160Context : public gcryHashContext
+{
+public:
+	RIPEMD160Context(QCA::Provider *p) : gcryHashContext(p, "ripemd160")
+	{
+		gcry_check_version("GCRYPT_VERSION");
+		hashAlgorithm = GCRY_MD_RMD160;
+		err =  gcry_md_open( &context, hashAlgorithm, 0 );
+		if ( GPG_ERR_NO_ERROR != err ) {
+			std::cout << "Failure: " ;
+			std::cout << gcry_strsource(err) << "/";
+			std::cout << gcry_strerror(err) << std::endl;
+		}
+	}
+
+	~RIPEMD160Context()
+	{
+		gcry_md_close( context );
+	}
+
+	Context *clone() const
+	{
+		return new RIPEMD160Context(*this);
 	}
 };
 
@@ -388,6 +469,9 @@ public:
 	{
 		QStringList list;
 		list += "sha1";
+		list += "md4";
+		list += "md5";
+		list += "ripemd160";
 		list += "sha256";
 		list += "sha384";
 		list += "sha512";
@@ -404,6 +488,12 @@ public:
 	{
 		if ( type == "sha1" )
 			return new SHA1Context( this );
+		else if ( type == "md4" )
+			return new MD4Context( this );
+		else if ( type == "md5" )
+			return new MD5Context( this );
+		else if ( type == "ripemd160" )
+			return new RIPEMD160Context( this );
 		else if ( type == "sha256" )
 			return new SHA256Context( this );
 		else if ( type == "sha384" )
