@@ -141,6 +141,7 @@ public:
 	virtual void reset()=0;
 	virtual void setCoreProps(const QString &service, const QString &host, QCA_SASLHostPort *local, QCA_SASLHostPort *remote)=0;
 	virtual void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax)=0;
+	virtual int security() const=0;
 
 	// client
 	virtual bool clientStart(const QStringList &mechlist)=0;
@@ -148,15 +149,20 @@ public:
 	virtual int clientNextStep(const QByteArray &in, QByteArray *out, QCA_SASLNeedParams *np)=0;
 
 	// server
-	virtual bool serverStart(const QString &realm, QStringList *mechlist)=0;
+	virtual bool serverStart(const QString &realm, QStringList *mechlist, const QString &name)=0;
 	virtual int serverFirstStep(const QString &mech, const QByteArray *in, QByteArray *out)=0;
 	virtual int serverNextStep(const QByteArray &in, QByteArray *out)=0;
+	virtual void setAuthCallback(bool (*auth)(const QString &authname, const QString &username, QCA_SASLContext *c))=0;
 
 	// client params
 	virtual void setAuthname(const QString &)=0;
 	virtual void setUsername(const QString &)=0;
 	virtual void setPassword(const QString &)=0;
 	virtual void setRealm(const QString &)=0;
+
+	// security layer
+	virtual bool encode(const QByteArray &in, QByteArray *out)=0;
+	virtual bool decode(const QByteArray &in, QByteArray *out)=0;
 };
 
 #endif

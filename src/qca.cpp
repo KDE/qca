@@ -820,6 +820,7 @@ void SSL::ctx_readyReadOutgoing()
 //----------------------------------------------------------------------------
 // SASL
 //----------------------------------------------------------------------------
+QString saslappname = "qca";
 class SASL::Private
 {
 public:
@@ -853,6 +854,11 @@ SASL::SASL(QObject *parent)
 SASL::~SASL()
 {
 	delete d;
+}
+
+void SASL::setAppName(const QString &name)
+{
+	saslappname = name;
 }
 
 // options
@@ -914,7 +920,7 @@ bool SASL::startServer(const QString &service, const QString &host, const QStrin
 
 	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
 	d->c->setSecurityProps(!d->allowPlain, false, false, false, false, false, false, 0, 256);
-	if(!d->c->serverStart(realm, mechlist))
+	if(!d->c->serverStart(realm, mechlist, saslappname))
 		return false;
 	d->first = true;
 	d->server = true;

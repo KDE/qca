@@ -324,6 +324,8 @@ namespace QCA
 		SASL(QObject *parent=0);
 		~SASL();
 
+		static void setAppName(const QString &name);
+
 		// options
 		bool allowPlainText() const;
 		void setAllowPlainText(bool);

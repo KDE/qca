@@ -1,3 +1,23 @@
+/*
+ * qcacyrussasl.cpp - Cyrus SASL 2 plugin for QCA
+ * Copyright (C) 2003  Justin Karneges
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #include"qcaopenssl.h"
 
 extern "C"
@@ -7,31 +27,136 @@ extern "C"
 
 #include<qhostaddress.h>
 #include<qstringlist.h>
+#include<qptrlist.h>
+#include<qfile.h>
 
 #define SASL_BUFSIZE 8192
 
-static bool client_init = false;
-static bool server_init = false;
-
-/*
-  TODO:
-    - security layer, and support fetching the security layer strength
-    - clean up the whole need-params junk
-    - clean the rest and check for memory leaks
-*/
-
-sasl_callback_t clientcbs[] =
+class QCACyrusSASL : public QCAProvider
 {
-	{ SASL_CB_GETREALM, NULL, NULL },
-	{ SASL_CB_USER, NULL, NULL },
-	{ SASL_CB_AUTHNAME, NULL, NULL },
-	{ SASL_CB_PASS, NULL, NULL },
-	{ SASL_CB_LIST_END, NULL, NULL },
+public:
+	QCACyrusSASL();
+	~QCACyrusSASL();
+
+	int capabilities() const;
+	void *context(int cap);
+
+	bool client_init;
+	bool server_init;
+	QString appname;
 };
 
-sasl_callback_t servercbs[] =
+class SASLParams
 {
-	{ SASL_CB_LIST_END, NULL, NULL },
+public:
+	SASLParams()
+	{
+		results.setAutoDelete(true);
+		reset();
+	}
+
+	void reset()
+	{
+		resetNeed();
+		resetHave();
+		results.clear();
+	}
+
+	void resetNeed()
+	{
+		need.auth = false;
+		need.user = false;
+		need.pass = false;
+		need.realm = false;
+	}
+
+	void resetHave()
+	{
+		have.auth = false;
+		have.user = false;
+		have.pass = false;
+		have.realm = false;
+	}
+
+	void setAuthname(const QString &s)
+	{
+		have.auth = true;
+		auth = s;
+	}
+
+	void setUsername(const QString &s)
+	{
+		have.user = true;
+		user = s;
+	}
+
+	void setPassword(const QString &s)
+	{
+		have.pass = true;
+		pass = s;
+	}
+
+	void setRealm(const QString &s)
+	{
+		have.realm = true;
+		realm = s;
+	}
+
+	void applyInteract(sasl_interact_t *needp)
+	{
+		for(int n = 0; needp[n].id != SASL_CB_LIST_END; ++n) {
+			if(needp[n].id == SASL_CB_AUTHNAME)
+				need.auth = true;
+			if(needp[n].id == SASL_CB_USER)
+				need.user = true;
+			if(needp[n].id == SASL_CB_PASS)
+				need.pass = true;
+			if(needp[n].id == SASL_CB_GETREALM)
+				need.realm = true;
+		}
+	}
+
+	void extractHave(sasl_interact_t *need)
+	{
+		for(int n = 0; need[n].id != SASL_CB_LIST_END; ++n) {
+			if(need[n].id == SASL_CB_AUTHNAME && have.auth)
+				setValue(&need[n], auth);
+			if(need[n].id == SASL_CB_USER && have.user)
+				setValue(&need[n], user);
+			if(need[n].id == SASL_CB_PASS && have.pass)
+				setValue(&need[n], pass);
+			if(need[n].id == SASL_CB_GETREALM && have.realm)
+				setValue(&need[n], realm);
+		}
+	}
+
+	bool missingAny() const
+	{
+		if((need.auth && !have.auth) || (need.user && !have.user) || (need.pass && !have.pass) || (need.realm && !have.realm))
+			return true;
+		return false;
+	}
+
+	void setValue(sasl_interact_t *i, const QString &s)
+	{
+		if(i->result)
+			return;
+		QCString cs = s.utf8();
+		int len = cs.length();
+		char *p = new char[len+1];
+		memcpy(p, cs.data(), len);
+		p[len] = 0;
+		i->result = p;
+		i->len = len;
+
+		// record this
+		results.append(p);
+	}
+
+	QPtrList<void> results;
+	QCA_SASLNeedParams need;
+	QCA_SASLNeedParams have;
+	QString auth, user, pass, realm;
 };
 
 static QByteArray makeByteArray(const void *in, unsigned int len)
@@ -39,31 +164,6 @@ static QByteArray makeByteArray(const void *in, unsigned int len)
 	QByteArray buf(len);
 	memcpy(buf.data(), in, len);
 	return buf;
-}
-
-static void clearNeedParams(QCA_SASLNeedParams *np)
-{
-	np->auth = false;
-	np->user = false;
-	np->pass = false;
-	np->realm = false;
-}
-
-static QCA_SASLNeedParams interactToNeedParams(sasl_interact_t *need)
-{
-	QCA_SASLNeedParams np;
-	clearNeedParams(&np);
-	for(int n = 0; need[n].id != SASL_CB_LIST_END; ++n) {
-		if(need[n].id == SASL_CB_AUTHNAME)
-			np.auth = true;
-		if(need[n].id == SASL_CB_USER)
-			np.user = true;
-		if(need[n].id == SASL_CB_PASS)
-			np.pass = true;
-		if(need[n].id == SASL_CB_GETREALM)
-			np.realm = true;
-	}
-	return np;
 }
 
 static QString addrString(const QCA_SASLHostPort &hp)
@@ -85,24 +185,11 @@ static QString methodsToString(const QStringList &methods)
 	return list;
 }
 
-static void setInteract(sasl_interact_t *need, unsigned int type, const QString &s)
-{
-	QCString cs = s.utf8();
-	for(int n = 0; need[n].id != SASL_CB_LIST_END; ++n) {
-		if(need[n].id == type) {
-			int len = cs.length();
-			char *p = (char *)malloc(len+1);
-			memcpy(p, cs.data(), len);
-			p[len] = 0;
-			need[n].result = p;
-			need[n].len = len;
-		}
-	}
-}
-
 class SASLContext : public QCA_SASLContext
 {
 public:
+	QCACyrusSASL *g;
+
 	// core props
 	QString service, host;
 	QString localAddr, remoteAddr;
@@ -112,17 +199,24 @@ public:
 	int ssf_min, ssf_max;
 
 	// params
-	QString auth, user, pass, realm;
+	SASLParams params;
+	int ssf, maxoutbuf;
 
 	sasl_conn_t *con;
 	sasl_interact_t *need;
 	QStringList mechlist;
 	bool servermode;
+	sasl_callback_t *callbacks;
+	bool (*authCallback)(const QString &authname, const QString &username, QCA_SASLContext *c);
 
-	SASLContext()
+	SASLContext(QCACyrusSASL *_g)
 	{
+		g = _g;
 		con = 0;
 		need = 0;
+		callbacks = 0;
+		authCallback = 0;
+
 		reset();
 	}
 
@@ -133,25 +227,32 @@ public:
 
 	void reset()
 	{
+		resetState();
+		resetParams();
+	}
+
+	void resetState()
+	{
 		if(con) {
-			if(need) {
-				// free any results we may have allocated
-				for(int n = 0; need[n].id != SASL_CB_LIST_END; ++n) {
-					if(need[n].result)
-						free((void *)(need[n].result));
-				}
-			}
 			sasl_dispose(&con);
 			con = 0;
+		}
+		need = 0;
+		if(callbacks) {
+			delete callbacks;
+			callbacks = 0;
 		}
 
 		localAddr = "";
 		remoteAddr = "";
-		auth = QString::null;
-		user = QString::null;
-		pass = QString::null;
-		realm = QString::null;
 		mechlist.clear();
+		ssf = 0;
+		maxoutbuf = 0;
+	}
+
+	void resetParams()
+	{
+		params.reset();
 		secflags = 0;
 		ssf_min = 0;
 		ssf_max = 0;
@@ -187,6 +288,26 @@ public:
 		ssf_max = ssfMax;
 	}
 
+	void setAuthCallback(bool (*auth)(const QString &authname, const QString &username, QCA_SASLContext *c))
+	{
+		authCallback = auth;
+	}
+
+	static int scb_checkauth(sasl_conn_t *, void *context, const char *requested_user, unsigned, const char *auth_identity, unsigned, const char *, unsigned, struct propctx *)
+	{
+		SASLContext *that = (SASLContext *)context;
+		QString authname = auth_identity;
+		QString username = requested_user;
+		if(that->authCallback) {
+			if(that->authCallback(authname, username, that))
+				return SASL_OK;
+			else
+				return SASL_NOAUTHZ;
+		}
+		else
+			return SASL_OK;
+	}
+
 	void setsecprops()
 	{
 		sasl_security_properties_t secprops;
@@ -199,29 +320,52 @@ public:
 		sasl_setprop(con, SASL_SEC_PROPS, &secprops);
 	}
 
-	void fillparams(QCA_SASLNeedParams *np)
+	void getssfparams()
 	{
-		if(np->auth && !auth.isNull()) {
-			setInteract(need, SASL_CB_AUTHNAME, auth);
-			np->auth = false;
-		}
-		if(np->user && !user.isNull()) {
-			setInteract(need, SASL_CB_USER, user);
-			np->user = false;
-		}
-		if(np->pass && !pass.isNull()) {
-			setInteract(need, SASL_CB_PASS, pass);
-			np->pass = false;
-		}
-		if(np->realm && !realm.isNull()) {
-			setInteract(need, SASL_CB_GETREALM, realm);
-			np->realm = false;
-		}
+		const int *ssfp;
+		int r = sasl_getprop(con, SASL_SSF, (const void **)&ssfp);
+		if(r == SASL_OK)
+			ssf = *ssfp;
+		sasl_getprop(con, SASL_MAXOUTBUF, (const void **)&maxoutbuf);
+	}
+
+	int security() const
+	{
+		return ssf;
 	}
 
 	bool clientStart(const QStringList &_mechlist)
 	{
-		int r = sasl_client_new(service.latin1(), host.latin1(), localAddr.isEmpty() ? 0 : localAddr.latin1(), remoteAddr.isEmpty() ? 0 : remoteAddr.latin1(), clientcbs, 0, &con);
+		resetState();
+
+		if(!g->client_init) {
+			sasl_client_init(NULL);
+			g->client_init = true;
+		}
+
+		callbacks = new sasl_callback_t[5];
+
+		callbacks[0].id = SASL_CB_GETREALM;
+		callbacks[0].proc = 0;
+		callbacks[0].context = 0;
+
+		callbacks[1].id = SASL_CB_USER;
+		callbacks[1].proc = 0;
+		callbacks[1].context = 0;
+
+		callbacks[2].id = SASL_CB_AUTHNAME;
+		callbacks[2].proc = 0;
+		callbacks[2].context = 0;
+
+		callbacks[3].id = SASL_CB_PASS;
+		callbacks[3].proc = 0;
+		callbacks[3].context = 0;
+
+		callbacks[4].id = SASL_CB_LIST_END;
+		callbacks[4].proc = 0;
+		callbacks[4].context = 0;
+
+		int r = sasl_client_new(service.latin1(), host.latin1(), localAddr.isEmpty() ? 0 : localAddr.latin1(), remoteAddr.isEmpty() ? 0 : remoteAddr.latin1(), callbacks, 0, &con);
 		if(r != SASL_OK)
 			return false;
 
@@ -232,9 +376,27 @@ public:
 		return true;
 	}
 
-	bool serverStart(const QString &realm, QStringList *mechlist)
+	bool serverStart(const QString &realm, QStringList *mechlist, const QString &name)
 	{
-		int r = sasl_server_new(service.latin1(), host.latin1(), realm.latin1(), localAddr.isEmpty() ? 0 : localAddr.latin1(), remoteAddr.isEmpty() ? 0 : remoteAddr.latin1(), servercbs, 0, &con);
+		resetState();
+
+		g->appname = name;
+		if(!g->server_init) {
+			sasl_server_init(NULL, QFile::encodeName(g->appname));
+			g->server_init = true;
+		}
+
+		callbacks = new sasl_callback_t[2];
+
+		callbacks[0].id = SASL_CB_PROXY_POLICY;
+		callbacks[0].proc = (int(*)())scb_checkauth;
+		callbacks[0].context = this;
+
+		callbacks[1].id = SASL_CB_LIST_END;
+		callbacks[1].proc = 0;
+		callbacks[1].context = 0;
+
+		int r = sasl_server_new(service.latin1(), host.latin1(), realm.latin1(), localAddr.isEmpty() ? 0 : localAddr.latin1(), remoteAddr.isEmpty() ? 0 : remoteAddr.latin1(), callbacks, 0, &con);
 		if(r != SASL_OK)
 			return false;
 
@@ -251,7 +413,6 @@ public:
 
 	int clientFirstStep(QString *mech, QByteArray **out, QCA_SASLNeedParams *np)
 	{
-		clearNeedParams(np);
 		bool supportClientSendFirst = out ? true: false;
 
 		const char *clientout, *m;
@@ -261,6 +422,8 @@ public:
 		QString list = methodsToString(mechlist);
 		int r;
 		while(1) {
+			if(need)
+				params.extractHave(need);
 			if(supportClientSendFirst)
 				r = sasl_client_start(con, list.latin1(), &need, &clientout, &clientoutlen, &m);
 			else
@@ -268,10 +431,11 @@ public:
 			if(r != SASL_INTERACT)
 				break;
 
-			*np = interactToNeedParams(need);
-			fillparams(np);
-			if(np->auth || np->user || np->pass || np->realm)
+			params.applyInteract(need);
+			if(params.missingAny()) {
+				*np = params.need;
 				return NeedParams;
+			}
 		}
 		if(r != SASL_OK && r != SASL_CONTINUE)
 			return Error;
@@ -282,8 +446,10 @@ public:
 		else
 			*out = 0;
 
-		if(r == SASL_OK)
+		if(r == SASL_OK) {
+			getssfparams();
 			return Success;
+		}
 		else
 			return Continue;
 	}
@@ -302,33 +468,40 @@ public:
 		if(r != SASL_OK && r != SASL_CONTINUE)
 			return Error;
 		*out = makeByteArray(serverout, serveroutlen);
-		if(r == SASL_OK)
+		if(r == SASL_OK) {
+			getssfparams();
 			return Success;
+		}
 		else
 			return Continue;
 	}
 
 	int clientNextStep(const QByteArray &in, QByteArray *out, QCA_SASLNeedParams *np)
 	{
-		clearNeedParams(np);
+		//clearNeedParams(np);
 		const char *clientout;
 		unsigned int clientoutlen;
 		int r;
 		while(1) {
+			if(need)
+				params.extractHave(need);
 			r = sasl_client_step(con, in.data(), in.size(), &need, &clientout, &clientoutlen);
 			if(r != SASL_INTERACT)
 				break;
 
-			*np = interactToNeedParams(need);
-			fillparams(np);
-			if(np->auth || np->user || np->pass || np->realm)
+			params.applyInteract(need);
+			if(params.missingAny()) {
+				*np = params.need;
 				return NeedParams;
+			}
 		}
 		if(r != SASL_OK && r != SASL_CONTINUE)
 			return Error;
 		*out = makeByteArray(clientout, clientoutlen);
-		if(r == SASL_OK)
+		if(r == SASL_OK) {
+			getssfparams();
 			return Success;
+		}
 		else
 			return Continue;
 	}
@@ -342,6 +515,7 @@ public:
 			return Error;
 		if(r == SASL_OK) {
 			out->resize(0);
+			getssfparams();
 			return Success;
 		}
 		*out = makeByteArray(serverout, serveroutlen);
@@ -350,67 +524,93 @@ public:
 
 	void setAuthname(const QString &s)
 	{
-		auth = s;
-		if(need)
-			setInteract(need, SASL_CB_AUTHNAME, s);
+		params.setAuthname(s);
 	}
 
 	void setUsername(const QString &s)
 	{
-		user = s;
-		if(need)
-			setInteract(need, SASL_CB_USER, s);
+		params.setUsername(s);
 	}
 
 	void setPassword(const QString &s)
 	{
-		pass = s;
-		if(need)
-			setInteract(need, SASL_CB_PASS, s);
+		params.setPassword(s);
 	}
 
 	void setRealm(const QString &s)
 	{
-		realm = s;
-		if(need)
-			setInteract(need, SASL_CB_GETREALM, s);
+		params.setRealm(s);
+	}
+
+	bool encode(const QByteArray &in, QByteArray *out)
+	{
+		return sasl_endecode(in, out, true);
+	}
+
+	bool decode(const QByteArray &in, QByteArray *out)
+	{
+		return sasl_endecode(in, out, false);
+	}
+
+	bool sasl_endecode(const QByteArray &in, QByteArray *out, bool enc)
+	{
+		// no security
+		if(ssf == 0) {
+			*out = in.copy();
+			return true;
+		}
+
+		int at = 0;
+		out->resize(0);
+		while(1) {
+			int size = in.size() - at;
+			if(size == 0)
+				break;
+			if(size > maxoutbuf)
+				size = maxoutbuf;
+			const char *outbuf;
+			unsigned len;
+			int r;
+			if(enc)
+				r = sasl_encode(con, in.data() + at, size, &outbuf, &len);
+			else
+				r = sasl_decode(con, in.data() + at, size, &outbuf, &len);
+			if(r != SASL_OK)
+				return false;
+			int oldsize = out->size();
+			out->resize(oldsize + len);
+			memcpy(out->data() + oldsize, outbuf, len);
+			at += size;
+		}
+		return true;
 	}
 };
 
-class QCACyrusSASL : public QCAProvider
+
+QCACyrusSASL::QCACyrusSASL()
 {
-public:
-	QCACyrusSASL()
-	{
-		if(!client_init) {
-			sasl_client_init(NULL);
-			client_init = true;
-		}
-		if(!server_init) {
-			sasl_server_init(NULL, "qca");
-			server_init = true;
-		}
-	}
+	client_init = false;
+	server_init = false;
+}
 
-	~QCACyrusSASL()
-	{
+QCACyrusSASL::~QCACyrusSASL()
+{
+	if(client_init || server_init)
 		sasl_done();
-		client_init = false;
-		server_init = false;
-	}
+}
 
-	int capabilities() const
-	{
-		return QCA::CAP_SASL;
-	}
+int QCACyrusSASL::capabilities() const
+{
+	return QCA::CAP_SASL;
+}
 
-	void *context(int cap)
-	{
-		if(cap == QCA::CAP_SASL)
-			return new SASLContext;
-		return 0;
-	}
-};
+void *QCACyrusSASL::context(int cap)
+{
+	if(cap == QCA::CAP_SASL)
+		return new SASLContext(this);
+	return 0;
+}
+
 
 #ifdef QCA_PLUGIN
 QCAProvider *createProvider()
@@ -420,80 +620,3 @@ QCAProvider *createProviderCyrusSASL()
 {
 	return (new QCACyrusSASL);
 }
-
-/*
-	int security;
-	int sasl_maxoutbuf;
-
-	d->security = 0;
-	d->sasl_maxoutbuf = 0;
-
-void QSASL::handle_step(int code, const char *clientout, unsigned int len)
-{
-	if(code == SASL_OK) {
-		fprintf(stderr, "QSASL: Success\n");
-		const int *ssfp;
-		int r = sasl_getprop(d->con, SASL_SSF, (const void **)&ssfp);
-		if(r == SASL_OK)
-			d->security = *ssfp;
-		sasl_getprop(d->con, SASL_MAXOUTBUF, (const void **)&d->sasl_maxoutbuf);
-		authenticated();
-	}
-}
-
-int QSASL::tryWrite()
-{
-	if(!d->bs)
-		return -1;
-
-	// take a section of the write buffer
-	int size = d->sasl_maxoutbuf;
-	QByteArray a = takeWrite(size);
-
-	if(d->security > 0) {
-		const char *out;
-		unsigned int len;
-		int r = sasl_encode(d->con, a.data(), a.size(), &out, &len);
-		if(r != SASL_OK) {
-			error(ErrWrite);
-			return -1;
-		}
-		QByteArray b(len);
-		memcpy(b.data(), out, len);
-		d->bs->write(b);
-	}
-	else
-		d->bs->write(a);
-
-	bytesWritten(size);
-	return size;
-}
-
-void QSASL::bs_readyRead()
-{
-	if(!d->bs)
-		return;
-
-	QByteArray a = d->bs->read(8192);
-	if(d->security > 0) {
-		const char *out;
-		unsigned int len;
-		int r = sasl_decode(d->con, a.data(), a.size(), &out, &len);
-		if(r != SASL_OK) {
-			reset();
-			error(ErrRead);
-			return;
-		}
-		QByteArray b(len);
-		memcpy(b.data(), out, len);
-		if(!b.isEmpty()) {
-			appendRead(b);
-			readyRead();
-		}
-	}
-	else {
-		appendRead(a);
-		readyRead();
-	}
-}
-*/

@@ -3,11 +3,12 @@
 * ssl: error signal
 * sasl: option to not support client-send-first
 * sasl: other security options
+* sasl: server auth callback
 * sasl: security layer
 
 * openssl plugin: fixmes and todos
-* cyrussasl plugin: fixmes and todos
 
+* sasl: external auth
 * dsa
 * diffie-hellman
 
