@@ -37,14 +37,26 @@ int main(int argc, char **argv)
 	QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
 
 	// AES128 test
-	if(!QCA::isSupported("aes128-cbc"))
+	if(!QCA::isSupported("aes128-cbc-pkcs7"))
 		printf("AES128-CBC not supported!\n");
 	else {
 		// encrypt
 		QCA::AES128 c(QCA::Cipher::CBC, QCA::Cipher::DefaultPadding, QCA::Encode);
-		c.update(arg);
+		QSecureArray u = c.update(arg);
+		if (c.ok()) {
+		  printf("Update OK\n");
+		} else {
+		  printf("Update failed\n");
+		}
+		QString result = QCA::arrayToHex(u);
+		printf(">aes128(\"%s\") = [%s]\n", arg.data(),qPrintable(result) );
 		QSecureArray f = c.final();
-		QString result = QCA::arrayToHex(f);
+		if (c.ok()) {
+		  printf("Final OK\n");
+		} else {
+		  printf("Final failed\n");
+		}
+		result = QCA::arrayToHex(f);
 		printf(">aes128(\"%s\") = [%s]\n", arg.data(),qPrintable(result) );
 	}
 
