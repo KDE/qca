@@ -95,7 +95,11 @@ class QCA_CertContext;
  * \endcode
  */
 
-class QSecureArray
+// Direct secure memory access.  For interfacing with C libraries if needed.
+QCA_EXPORT void *qca_secure_alloc(int bytes);
+QCA_EXPORT void qca_secure_free(void *p);
+
+QCA_EXPORT class QSecureArray
 {
 public:
 	QSecureArray();
@@ -127,7 +131,7 @@ private:
 	void reset();
 };
 
-class QBigInteger
+QCA_EXPORT class QBigInteger
 {
 public:
 	QBigInteger();
@@ -196,7 +200,7 @@ namespace QCA
 	/**
 	 * Mode settings for cipher algorithms
 	 */
-	enum
+	enum Mode
 	{
 		CBC = 0x0001, /**< operate in %Cipher Block Chaining mode */
 		CFB = 0x0002  /**< operate in %Cipher FeedBack mode */
@@ -211,17 +215,29 @@ namespace QCA
 		Decrypt = 0x0002  /**< cipher algorithm should decrypt */
 	};
 
+	enum MemoryMode
+	{
+		Practical, /**< mlock and drop root if available, else mmap */
+		Locking, /**< mlock and drop root */
+		LockingKeepPrivileges /**< mlock */
+	};
+
 	enum Direction
 	{
 		Encode,
 		Decode
 	};
 
-	enum MemoryMode
-	{
-		Practical, /**< mlock and drop root if available, else mmap */
-		Locking, /**< mlock and drop root */
-		LockingKeepPrivileges /**< mlock */
+	enum DL_Group {
+		DSA_512,
+		DSA_768,
+		DSA_1024,
+		IETF_768,
+		IETF_1024,
+		IETF_1536,
+		IETF_2048,
+		IETF_3072,
+		IETF_4096
 	};
 
 	/**
@@ -328,6 +344,19 @@ namespace QCA
 	};
 
 	// version 2 stuff
+	class QCA_EXPORT KeyLength
+	{
+	public:
+		KeyLength(int min, int max, int multiple) { _min = min, _max = max, _multiple = multiple; }
+
+		int minimum() const { return _min; }
+		int maximum() const { return _max; }
+		int multiple() const { return _multiple; }
+
+	private:
+		int _min, _max, _multiple;
+	};
+
 	class QCA_EXPORT Provider
 	{
 	public:
@@ -744,6 +773,36 @@ namespace QCA
 			return obj.dyn_generateIV();
 		}
 	};
+
+	class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
+	{
+	public:
+		MessageAuthenticationCode(const MessageAuthenticationCode &from);
+		~MessageAuthenticationCode();
+		MessageAuthenticationCode & operator=(const MessageAuthenticationCode &from);
+
+		KeyLength keyLength() const;
+		bool validKeyLength(int n) const;
+
+		virtual void clear();
+		virtual void update(const QSecureArray &a);
+		virtual QSecureArray final();
+
+		void setup(const SymmetricKey &key);
+
+	protected:
+		MessageAuthenticationCode(const QString &type, const SymmetricKey &key, const QString &provider);
+
+	private:
+		class Private;
+		Private *d;
+	};
+
+	//class QCA_EXPORT HMAC : public MessageAuthenticationCode
+	//{
+	//public:
+	//	HMAC(const Hash &h = SHA1(), const SymmetricKey &key = SymmetricKey(), const QString &provider="") : MessageAuthenticationCode(subAlg("hmac", h.type()), key, provider) {}
+	//};
 
 	/**
 	 * SHA-0 cryptographic message digest hash algorithm.

@@ -25,6 +25,7 @@
 #include <qtimer.h>
 #include <qhostaddress.h>
 #include <qguardedptr.h>
+#include <qptrdict.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "qcaprovider.h"
@@ -35,6 +36,8 @@ namespace QCA {
 // from qca_tools
 bool botan_init(int prealloc, bool mmap);
 void botan_deinit();
+void *botan_secure_alloc(int bytes);
+void botan_secure_free(void *p, int bytes);
 
 // from qca_default
 Provider *create_default_provider();
@@ -44,6 +47,7 @@ Provider *create_default_provider();
 //----------------------------------------------------------------------------
 static QCA::ProviderManager *manager = 0;
 static QCA::Random *global_rng = 0;
+static QPtrDict<int> *memtable = 0;
 static bool qca_init = false;
 static bool qca_secmem = false;
 
@@ -88,6 +92,9 @@ void init(MemoryMode mode, int prealloc)
 #endif
 	}
 
+	memtable = new QPtrDict<int>;
+	memtable->setAutoDelete(true);
+
 	manager = new ProviderManager;
 	manager->setDefault(create_default_provider()); // manager owns it
 }
@@ -99,6 +106,9 @@ void deinit()
 
 	delete manager;
 	manager = 0;
+
+	delete memtable;
+	memtable = 0;
 
 	botan_deinit();
 	qca_secmem = false;
@@ -243,6 +253,27 @@ static void *getContext(int cap)
 	return manager->findFor(cap)->context(cap);
 }
 
+}
+
+void *qca_secure_alloc(int bytes)
+{
+	void *p = QCA::botan_secure_alloc(bytes);
+	QCA::memtable->insert(p, new int(bytes));
+	return p;
+}
+
+void qca_secure_free(void *p)
+{
+	int *bytes = QCA::memtable->find(p);
+	if(bytes)
+	{
+		QCA::botan_secure_free(p, *bytes);
+		QCA::memtable->remove(p);
+	}
+}
+
+namespace QCA {
+
 //----------------------------------------------------------------------------
 // Initializer
 //----------------------------------------------------------------------------
@@ -291,6 +322,51 @@ QString Provider::Context::type() const
 bool Provider::Context::sameProvider(Context *c)
 {
 	return (c->provider() == _provider);
+}
+
+//----------------------------------------------------------------------------
+// PKeyBase
+//----------------------------------------------------------------------------
+int PKeyBase::maximumEncryptSize() const
+{
+	return 0;
+}
+
+QSecureArray PKeyBase::encrypt(const QSecureArray &)
+{
+	return QSecureArray();
+}
+
+bool PKeyBase::decrypt(const QSecureArray &, QSecureArray *)
+{
+	return false;
+}
+
+void PKeyBase::startSign()
+{
+}
+
+void PKeyBase::startVerify()
+{
+}
+
+void PKeyBase::update(const QSecureArray &)
+{
+}
+
+QSecureArray PKeyBase::endSign()
+{
+	return QSecureArray();
+}
+
+bool PKeyBase::endVerify(const QSecureArray &)
+{
+	return false;
+}
+
+SymmetricKey PKeyBase::deriveKey(PKeyBase *)
+{
+	return SymmetricKey();
 }
 
 //----------------------------------------------------------------------------

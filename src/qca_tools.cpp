@@ -57,6 +57,8 @@ namespace QCA {
 
 // Botan shouldn't throw any exceptions in our init/deinit.
 
+static const Botan::SecureAllocator *alloc = 0;
+
 bool botan_init(int prealloc, bool mmap)
 {
 	// 64k minimum
@@ -82,13 +84,26 @@ bool botan_init(int prealloc, bool mmap)
 		add_mmap();
 		secmem = true;
 	}
+	alloc = Botan::get_allocator("default");
+
 	return secmem;
 }
 
 void botan_deinit()
 {
+	alloc = 0;
 	Botan::Init::shutdown_memory_subsystem();
 	Botan::Init::set_mutex_type(0);
+}
+
+void *botan_secure_alloc(int bytes)
+{
+	return alloc->allocate((Botan::u32bit)bytes);
+}
+
+void botan_secure_free(void *p, int bytes)
+{
+	alloc->deallocate(p, (Botan::u32bit)bytes);
 }
 
 }
