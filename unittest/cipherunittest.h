@@ -34,6 +34,13 @@ public:
 
 public:
     void allTests();
+private:
+    void aes128Tests();
+    void aes192Tests();
+    void aes256Tests();
+    void tripleDESTests();
+    void DESTests();
+    void blowfishTests();
 };
 
 #endif

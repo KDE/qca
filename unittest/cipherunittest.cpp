@@ -767,10 +767,8 @@ CipherUnitTest::CipherUnitTest()
 {
 }
 
-void CipherUnitTest::allTests()
+void CipherUnitTest::aes128Tests()
 {
-    QCA::Initializer init;
-
     if (!QCA::isSupported("aes128-ecb") )
 	SKIP("AES128-ECB not supported!");
     else {
@@ -895,7 +893,11 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
     }
+}
 
+
+void CipherUnitTest::aes192Tests()
+{
     if (!QCA::isSupported("aes192-ecb") )
 	SKIP("AES192-ECB not supported!");
     else {
@@ -1005,8 +1007,10 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
     }
+}
 
-
+void CipherUnitTest::aes256Tests()
+{
     if (!QCA::isSupported("aes256-ecb") )
 	SKIP("AES256-ECB not supported!");
     else {
@@ -1115,9 +1119,11 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
     }
+}
 
-
-    if (!QCA::isSupported("tripledes-ecb") )
+void CipherUnitTest::tripleDESTests()
+{
+   if (!QCA::isSupported("tripledes-ecb") )
 	SKIP("Triple DES, ECB not supported!");
     else {
 	QCA::TripleDES cipherObj1( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 24 ) );
@@ -1143,7 +1149,11 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
     }
+}
 
+
+void CipherUnitTest::DESTests()
+{
     if (!QCA::isSupported("des-ecb") )
 	SKIP("DES, ECB not supported!");
     else {
@@ -1309,7 +1319,10 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
     }
+}
 
+void CipherUnitTest::blowfishTests()
+{
     if (!QCA::isSupported("blowfish-ecb") )
 	SKIP("Blowfish-ECB not supported!");
     else {
@@ -1334,5 +1347,17 @@ void CipherUnitTest::allTests()
 	    CHECK( reverseCipher.ok(), true );
         }
     }
+}
+
+void CipherUnitTest::allTests()
+{
+    QCA::Initializer init;
+
+    aes128Tests();
+    aes192Tests();
+    aes256Tests();
+    tripleDESTests();
+    DESTests();
+    blowfishTests();
 }
 
