@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += qt warn_on console
+CONFIG += qt warn_on console debug
 TARGET = qca-unittest
 
 INCLUDEPATH += ../src
