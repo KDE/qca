@@ -47,11 +47,12 @@ namespace QCA
 		QCA::Provider *findFor(const QString &name, const QString &type) const;
 		QCAProvider *findFor(int cap) const; // to be obsoleted
 		void changePriority(const QString &name, int priority);
-		QStringList allFeatures() const;
+		QStringList allFeatures(bool includeOld = true) const;
 		int caps() const; // to be obsoleted
 		const ProviderList & providers() const;
 
 		static void mergeFeatures(QStringList *a, const QStringList &b);
+		static QStringList capsToStringList(int cap);
 
 	private:
 		QPtrList<ProviderItem> providerItemList;

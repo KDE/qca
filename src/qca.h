@@ -547,13 +547,13 @@ namespace QCA
 	QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
 
 	// version 2 global functions
-	QCA_EXPORT bool isSupported(const QStringList &features);
-	QCA_EXPORT bool isSupported(const QString &features);
-	QCA_EXPORT QStringList supportedFeatures();
-	QCA_EXPORT QStringList defaultFeatures();
-	QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
-	QCA_EXPORT void setProviderPriority(const QString &name, int priority);
-	QCA_EXPORT const ProviderList & providers();
+	//QCA_EXPORT bool isSupported(const QStringList &features);
+	//QCA_EXPORT bool isSupported(const QString &features);
+	//QCA_EXPORT QStringList supportedFeatures();
+	//QCA_EXPORT QStringList defaultFeatures();
+	//QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
+	//QCA_EXPORT void setProviderPriority(const QString &name, int priority);
+	//QCA_EXPORT const ProviderList & providers();
 	QCA_EXPORT void unloadAllPlugins();
 
 	QCA_EXPORT Random & globalRNG();

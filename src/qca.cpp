@@ -120,11 +120,15 @@ bool haveSecureMemory()
 	return qca_secmem;
 }
 
+bool isSupported(const QStringList &features);
+
 bool isSupported(int capabilities)
 {
 	init();
 
-	if(manager->caps() & capabilities)
+	return isSupported(ProviderManager::capsToStringList(capabilities));
+
+	/*if(manager->caps() & capabilities)
 		return true;
 
 	// ok, try scanning for new stuff
@@ -133,7 +137,7 @@ bool isSupported(int capabilities)
 	if(manager->caps() & capabilities)
 		return true;
 
-	return false;
+	return false;*/
 }
 
 bool isSupported(const QStringList &features)
@@ -153,7 +157,7 @@ bool isSupported(const QStringList &features)
 	return false;
 }
 
-bool isSupported(const QString &features)
+/*bool isSupported(const QString &features)
 {
 	return isSupported(QStringList::split(',', features));
 }
@@ -171,7 +175,7 @@ QStringList defaultFeatures()
 {
 	init();
 	return manager->find("default")->features();
-}
+}*/
 
 void insertProvider(QCAProvider *p)
 {
@@ -179,7 +183,7 @@ void insertProvider(QCAProvider *p)
 	manager->add(p);
 }
 
-bool insertProvider(Provider *p, int priority)
+/*bool insertProvider(Provider *p, int priority)
 {
 	init();
 	return manager->add(p, priority);
@@ -197,7 +201,7 @@ const ProviderList & providers()
 {
 	init();
 	return manager->providers();
-}
+}*/
 
 void unloadAllPlugins()
 {

@@ -339,7 +339,7 @@ void ProviderManager::changePriority(const QString &name, int priority)
 	addItem(i, priority);
 }
 
-QStringList ProviderManager::allFeatures() const
+QStringList ProviderManager::allFeatures(bool includeOld) const
 {
 	QStringList list;
 
@@ -352,6 +352,9 @@ QStringList ProviderManager::allFeatures() const
 		if(i->p)
 			mergeFeatures(&list, i->p->features());
 	}
+
+	if(includeOld)
+		mergeFeatures(&list, capsToStringList(caps()));
 
 	return list;
 }
@@ -417,6 +420,26 @@ void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 		if(!a->contains(*it))
 			a->append(*it);
 	}
+}
+
+QStringList ProviderManager::capsToStringList(int cap)
+{
+	QStringList list;
+	if(cap & CAP_SHA0)
+		list.append("sha0");
+	if(cap & CAP_SHA1)
+		list.append("sha1");
+	if(cap & CAP_SHA256)
+		list.append("sha256");
+	if(cap & CAP_MD2)
+		list.append("md2");
+	if(cap & CAP_MD4)
+		list.append("md4");
+	if(cap & CAP_MD5)
+		list.append("md5");
+	if(cap & CAP_RIPEMD160)
+		list.append("ripemd160");
+	return list;
 }
 
 }
