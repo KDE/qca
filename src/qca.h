@@ -145,6 +145,13 @@ public:
 	 */
 	QSecureArray(const QByteArray &a);
 
+	/**
+	 * Construct a secure byte array from a string
+	 *
+	 * Note that this copies, rather than references the source array
+	 *
+	 * \sa operator=()
+	 */
 	QSecureArray(const QCString &cs);
 
 	/**
@@ -170,6 +177,11 @@ public:
 	 */
 	QSecureArray & operator=(const QByteArray &a);
 
+	/**
+	 * Creates a copy, rather than references
+	 *
+	 * \param cs the string to copy from
+	 */
 	QSecureArray & operator=(const QCString &cs);
 
 	/**
@@ -273,7 +285,19 @@ public:
 	QByteArray toByteArray() const;
 
 protected:
+	/**
+	 * Assign the contents of a provided byte array to this
+	 * object.
+	 *
+	 * \param from the byte array to copy
+	 */
 	void set(const QSecureArray &from);
+	/**
+	 * Assign the contents of a provided string to this
+	 * object.
+	 *
+	 * \param cs the QCString to copy
+	 */
 	void set(const QCString &cs);
 
 private:
@@ -987,6 +1011,21 @@ namespace QCA
 
 	/**
 	 * Source of random numbers
+	 *
+	 * QCA provides a built in source of random numbers, which
+	 * can be accessed through this class. You can also use
+	 * an alternative random number source, by implementing
+	 * another provider.
+	 *
+	 * You can select the "quality" of the random numbers. For 
+	 * best results, you should use Nonce or PublicValue for values
+	 * that are likely to become public, and SessionKey or LongTermKey
+	 * for those values that are more critical. All that said, please
+	 * note that this is only a hint to the provider - it may make
+	 * no difference at all.
+	 *
+	 * The normal use of this class is expected to be through the
+	 * static members - randomChar(), randomInt() and randomArray().
 	 */
 	class QCA_EXPORT Random : public Algorithm
 	{
@@ -1006,30 +1045,57 @@ namespace QCA
 		Random(const QString &provider = "");
 
 		/**
-		 * Provide a random byte
+		 * Provide a random byte.
+		 *
+		 * This method isn't normally required - you should use
+		 * the static randomChar() method instead.
 		 * 
 		 * \param q the quality of the random byte that is required
+		 *
+		 * \sa randomChar
 		 */
 		uchar nextByte(Quality q = SessionKey);
 
 		/**
 		 * Provide a specified number of random bytes
-		 * 
+		 *
+		 * This method isn't normally required - you should use
+		 * the static randomArray() method instead.
+		 *
 		 * \param size the number of bytes to provide
 		 * \param q the quality of the random bytes that are required
+		 *
+		 * \sa randomArray
 		 */
 		QSecureArray nextBytes(int size, Quality q = SessionKey);
 
 		/**
-		 * Provide a random character
+		 * Provide a random character (byte)
+		 *
+		 * This is the normal way of obtaining a single random char
+		 * (ie. 8 bit byte), of the default quality, as shown below:
+		 * \code
+		 * myRandomChar = QCA::Random::randomChar();
+		 * \endcode
 		 * 
 		 * \param q the quality of the random character that is required
+		 *
+		 * If you need a number of bytes, perhaps randomArray() may be of use
 		 */
 		static uchar randomChar(Quality q = SessionKey);
 
 		/**
 		 * Provide a random integer
-		 * 
+		 *
+		 * This is the normal way of obtaining a single random integer,
+		 * as shown below:
+		 * \code
+		 * // default quality
+		 * myRandomInt = QCA::Random::randomInt();
+		 * // cheap integer
+		 * myCheapInt = QCA::Random::randomInt( QCA::Random::Nonce );
+		 * \endcode
+		 *
 		 * \param q the quality of the random integer that is required
 		 */
 		static uint randomInt(Quality q = SessionKey);
@@ -1037,6 +1103,13 @@ namespace QCA
 		/**
 		 * Provide a specified number of random bytes
 		 * 
+		 * \code
+		 * // build a 30 byte secure array.
+		 * QSecureArray arry = QCA::Random::randomArray(30);
+		 * // take 20 bytes, as high a quality as we can get
+		 * QSecureArray newKey = QCA::Random::randomArray(20, QCA::Random::LongTermKey);
+		 * \endcode
+		 *
 		 * \param size the number of bytes to provide
 		 * \param q the quality of the random bytes that are required
 		 */
@@ -1072,10 +1145,10 @@ namespace QCA
 		SymmetricKey(const QSecureArray &a);
 
 		/**
-		 * Assignment operator
+		 * Construct a key from a provided string
+		 *
+		 * \param cs the QCString to copy
 		 */
-		SymmetricKey & operator=(const QSecureArray &a);
-
 		SymmetricKey(const QCString &cs);
 	};
 
@@ -1306,6 +1379,12 @@ namespace QCA
 
 		~MessageAuthenticationCode();
 
+		/**
+		 * Assignment operator.
+		 *
+		 * Copies the state (including key) from one MessageAuthenticationCode
+		 * to another
+		 */
 		MessageAuthenticationCode & operator=(const MessageAuthenticationCode &from);
 
 		/**
