@@ -125,6 +125,37 @@ static struct hashTestValues sha256TestValues[] = {
 	{ 0, 0 }
 };
 
+// These are as specfied in FIPS 180-2, and from Aaron Gifford's SHA2 tests
+static struct hashTestValues sha384TestValues[] = {
+
+	// FIPS 180-2, Appendix D.1
+	{ "abc", "cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7" },
+
+	// FIPS 180-2, Appendix D.2
+	{ "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+	  "09330c33f71147e83d192fc782cd1b4753111b173b3b05d22fa08086e3b0f712fcc7c71a557e2db966c3e9fa91746039" },
+
+	// Aaron Gifford, vector002.info
+	{ "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+	  "3391fdddfc8dc7393707a65b1b4709397cf8b1d162af05abfe8f450de5f36bc6b0455a8520bc4e6f5fe95b1fe3c8452b" },
+
+	{ 0, 0 }
+};
+
+// These are as specfied in FIPS 180-2, and from Aaron Gifford's SHA2 tests
+static struct hashTestValues sha512TestValues[] = {
+
+	// FIPS 180-2, Appendix C.1
+	{ "abc", "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f" },
+	// FIPS 180-2, Appendix C.2
+	{ "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+	  "8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909" },
+	// Aaron Gifford, vector002.info
+	{ "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+	  "204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596fd15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445" },
+	{ 0, 0 }
+};
+
 // These are as specified in http://www.esat.kuleuven.ac.be/~bosselae/ripemd160.html
 // ISO/IEC 10118-3 costs a bit of money.
 static struct hashTestValues ripemd160TestValues[] = {
@@ -326,6 +357,47 @@ void HashUnitTest::allTests()
 	CHECK( QString(QCA::arrayToHex(shaHash.final())),
 	       QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") );
     }
+
+    if(!QCA::isSupported("sha384"))
+	SKIP("SHA384 not supported!\n");
+    else {
+	for (int n = 0; sha384TestValues[n].inputString; n++) {
+	    hashResult = QCA::SHA384().hashToString(sha384TestValues[n].inputString);
+	    CHECK( hashResult, sha384TestValues[n].expectedHash );
+	}
+
+	QByteArray fillerString;
+	fillerString.fill('a', 1000);
+
+	// This basically reflects FIPS 180-2, Appendix D.3
+	QCA::SHA384 shaHash;
+	for (int i=0; i<1000; i++)
+	    shaHash.update(fillerString);
+	CHECK( QString(QCA::arrayToHex(shaHash.final())),
+	       QString("9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985") );
+
+    }
+
+
+    if(!QCA::isSupported("sha512"))
+	SKIP("SHA512 not supported!\n");
+    else {
+	for (int n = 0; sha512TestValues[n].inputString; n++) {
+	    hashResult = QCA::SHA512().hashToString(sha512TestValues[n].inputString);
+	    CHECK( hashResult, sha512TestValues[n].expectedHash );
+	}
+
+	QByteArray fillerString;
+	fillerString.fill('a', 1000);
+
+	// This basically reflects FIPS 180-2, Appendix C.3
+	QCA::SHA512 shaHash;
+	for (int i=0; i<1000; i++)
+	    shaHash.update(fillerString);
+	CHECK( QString(QCA::arrayToHex(shaHash.final())),
+	       QString("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") );
+    }
+
 
     if(!QCA::isSupported("ripemd160"))
 	SKIP("RIPEMD160 not supported!\n");
