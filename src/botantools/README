@@ -23,6 +23,7 @@ Files used:
 
  '*' indicates modification.  botantools.diff contains the differences.
 
+   doc/license.txt
    include/allocate.h
  * include/bigint.h
    include/defalloc.h
