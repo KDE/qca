@@ -29,123 +29,166 @@ namespace QCA {
 
 Provider::Context *getContext(const QString &type, const QString &provider);
 
+static bool stringToFile(const QString &fileName, const QString &content)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::WriteOnly))
+		return false;
+	QTextStream ts(&f);
+	ts << content;
+	return true;
+}
+
+static bool stringFromFile(const QString &fileName, QString *str)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::ReadOnly))
+		return false;
+	QTextStream ts(&f);
+	*str = ts.readAll();
+	return true;
+}
+
 //----------------------------------------------------------------------------
 // CertificateOptions
 //----------------------------------------------------------------------------
+class CertificateOptions::Private
+{
+public:
+	CertificateRequestFormat format;
+
+	QString challenge;
+	CertificateInfo info;
+	Constraints constraints;
+	QStringList policies;
+	bool isCA;
+	int pathLimit;
+	QBigInteger serial;
+	QDateTime start, end;
+
+	Private() : isCA(false), pathLimit(-1)
+	{
+	}
+};
+
 CertificateOptions::CertificateOptions(CertificateRequestFormat f)
 {
-	Q_UNUSED(f);
+	d = new Private;
+	d->format = f;
 }
 
 CertificateOptions::CertificateOptions(const CertificateOptions &from)
 {
-	*this = from;
+	d = new Private(*from.d);
 }
 
 CertificateOptions::~CertificateOptions()
 {
+	delete d;
 }
 
 CertificateOptions & CertificateOptions::operator=(const CertificateOptions &from)
 {
-	Q_UNUSED(from);
+	*d = *from.d;
 	return *this;
 }
 
 CertificateRequestFormat CertificateOptions::format() const
 {
-	return PKCS10;
+	return d->format;
 }
 
 void CertificateOptions::setFormat(CertificateRequestFormat f)
 {
-	Q_UNUSED(f);
+	d->format = f;
 }
 
 bool CertificateOptions::isValid() const
 {
+	// TODO: check the content
 	return false;
 }
 
 QString CertificateOptions::challenge() const
 {
-	return QString();
+	return d->challenge;
 }
 
 CertificateInfo CertificateOptions::info() const
 {
-	return CertificateInfo();
+	return d->info;
 }
 
 Constraints CertificateOptions::constraints() const
 {
-	return Constraints();
+	return d->constraints;
 }
 
 QStringList CertificateOptions::policies() const
 {
-	return QStringList();
+	return d->policies;
 }
 
 bool CertificateOptions::isCA() const
 {
-	return false;
+	return d->isCA;
 }
 
 int CertificateOptions::pathLimit() const
 {
-	return 0;
+	return d->pathLimit;
 }
 
 QBigInteger CertificateOptions::serialNumber() const
 {
-	return QBigInteger();
+	return d->serial;
 }
 
 QDateTime CertificateOptions::notValidBefore() const
 {
-	return QDateTime();
+	return d->start;
 }
 
 QDateTime CertificateOptions::notValidAfter() const
 {
-	return QDateTime();
+	return d->end;
 }
 
 void CertificateOptions::setChallenge(const QString &s)
 {
-	Q_UNUSED(s);
+	d->challenge = s;
 }
 
 void CertificateOptions::setInfo(const CertificateInfo &info)
 {
-	Q_UNUSED(info);
+	d->info = info;
 }
 
 void CertificateOptions::setConstraints(const Constraints &constraints)
 {
-	Q_UNUSED(constraints);
+	d->constraints = constraints;
 }
 
 void CertificateOptions::setPolicies(const QStringList &policies)
 {
-	Q_UNUSED(policies);
+	d->policies = policies;
 }
 
 void CertificateOptions::setAsCA(int pathLimit)
 {
-	Q_UNUSED(pathLimit);
+	d->isCA = true;
+	d->pathLimit = pathLimit;
 }
 
 void CertificateOptions::setSerialNumber(const QBigInteger &i)
 {
-	Q_UNUSED(i);
+	d->serial = i;
 }
 
 void CertificateOptions::setValidityPeriod(const QDateTime &start, const QDateTime &end)
 {
-	Q_UNUSED(start);
-	Q_UNUSED(end);
+	d->start = start;
+	d->end = end;
 }
 
 //----------------------------------------------------------------------------
@@ -218,14 +261,16 @@ Certificate::Certificate()
 
 Certificate::Certificate(const QString &fileName)
 {
-	Q_UNUSED(fileName);
+	*this = fromPEMFile(fileName, 0, QString());
 }
 
 Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
 {
-	Q_UNUSED(opts);
-	Q_UNUSED(key);
-	Q_UNUSED(provider);
+	CertContext *c = static_cast<CertContext *>(getContext("cert", provider));
+	if(c->createSelfSigned(opts, *(static_cast<const PKeyContext *>(key.context()))))
+		change(c);
+	else
+		delete c;
 }
 
 bool Certificate::isNull() const
@@ -235,47 +280,47 @@ bool Certificate::isNull() const
 
 QDateTime Certificate::notValidBefore() const
 {
-	return ((CertContext *)context())->notValidBefore();
+	return static_cast<const CertContext *>(context())->props()->start;
 }
 
 QDateTime Certificate::notValidAfter() const
 {
-	return ((CertContext *)context())->notValidAfter();
+	return static_cast<const CertContext *>(context())->props()->end;
 }
 
 CertificateInfo Certificate::subjectInfo() const
 {
-	return ((CertContext *)context())->subjectInfo();
+	return static_cast<const CertContext *>(context())->props()->subject;
 }
 
 CertificateInfo Certificate::issuerInfo() const
 {
-	return ((CertContext *)context())->issuerInfo();
+	return static_cast<const CertContext *>(context())->props()->issuer;
 }
 
 Constraints Certificate::constraints() const
 {
-	return Constraints();
+	return static_cast<const CertContext *>(context())->props()->constraints;
 }
 
 QStringList Certificate::policies() const
 {
-	return QStringList();
+	return static_cast<const CertContext *>(context())->props()->policies;
 }
 
 QString Certificate::commonName() const
 {
-	return QString();
+	return static_cast<const CertContext *>(context())->props()->subject[CommonName];
 }
 
 QBigInteger Certificate::serialNumber() const
 {
-	return ((CertContext *)context())->serialNumber();
+	return static_cast<const CertContext *>(context())->props()->serial;
 }
 
 PublicKey Certificate::subjectPublicKey() const
 {
-	PKeyContext *c = ((CertContext *)context())->subjectPublicKey();
+	PKeyContext *c = static_cast<const CertContext *>(context())->subjectPublicKey();
 	PublicKey key;
 	key.change(c);
 	return key;
@@ -283,68 +328,78 @@ PublicKey Certificate::subjectPublicKey() const
 
 bool Certificate::isCA() const
 {
-	return false;
+	return static_cast<const CertContext *>(context())->props()->isCA;
 }
 
 bool Certificate::isSelfSigned() const
 {
-	return false;
+	return static_cast<const CertContext *>(context())->props()->isSelfSigned;
 }
 
 int Certificate::pathLimit() const
 {
-	return 0;
+	return static_cast<const CertContext *>(context())->props()->pathLimit;
 }
 
 SignatureAlgorithm Certificate::signatureAlgorithm() const
 {
-	return SignatureUnknown;
+	return static_cast<const CertContext *>(context())->props()->sigalgo;
 }
 
 QSecureArray Certificate::toDER() const
 {
-	return ((CertContext *)context())->toDER();
+	return static_cast<const CertContext *>(context())->toDER();
 }
 
 QString Certificate::toPEM() const
 {
-	return ((CertContext *)context())->toPEM();
+	return static_cast<const CertContext *>(context())->toPEM();
 }
 
 bool Certificate::toPEMFile(const QString &fileName) const
 {
-	Q_UNUSED(fileName);
-	return false;
+	return stringToFile(fileName, toPEM());
 }
 
-Certificate Certificate::fromDER(const QSecureArray &a, const QString &provider)
+Certificate Certificate::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
 	Certificate c;
-	CertContext *cc = (CertContext *)getContext("cert", provider);
-	if(cc->fromDER(a) == CertContext::Good)
+	CertContext *cc = static_cast<CertContext *>(getContext("cert", provider));
+	ConvertResult r = cc->fromDER(a);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		c.change(cc);
 	return c;
 }
 
-Certificate Certificate::fromPEM(const QString &s, const QString &provider)
+Certificate Certificate::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
 	Certificate c;
-	CertContext *cc = (CertContext *)getContext("cert", provider);
-	if(cc->fromPEM(s) == CertContext::Good)
+	CertContext *cc = static_cast<CertContext *>(getContext("cert", provider));
+	ConvertResult r = cc->fromPEM(s);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		c.change(cc);
 	return c;
 }
 
 Certificate Certificate::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(fileName);
-	Q_UNUSED(result);
-	Q_UNUSED(provider);
-	return Certificate();
+	QString pem;
+	if(!stringFromFile(fileName, &pem))
+	{
+		if(result)
+			*result = ErrorFile;
+		return Certificate();
+	}
+	return fromPEM(pem, result, provider);
 }
 
 bool Certificate::matchesHostname(const QString &realHost) const
 {
+	// TODO
 	QString peerHost = realHost.trimmed();
 	while(peerHost.endsWith("."))
 		peerHost.truncate(peerHost.length()-1);
@@ -357,6 +412,7 @@ bool Certificate::matchesHostname(const QString &realHost) const
 
 bool Certificate::operator==(const Certificate &) const
 {
+	// TODO
 	return false;
 }
 
@@ -391,121 +447,147 @@ CertificateRequest::CertificateRequest()
 
 CertificateRequest::CertificateRequest(const QString &fileName)
 {
-	Q_UNUSED(fileName);
+	*this = fromPEMFile(fileName, 0, QString());
 }
 
 CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
 {
-	Q_UNUSED(opts);
-	Q_UNUSED(key);
-	Q_UNUSED(provider);
+	CSRContext *c = static_cast<CSRContext *>(getContext("csr", provider));
+	if(c->createRequest(opts, *(static_cast<const PKeyContext *>(key.context()))))
+		change(c);
+	else
+		delete c;
 }
 
 bool CertificateRequest::isNull() const
 {
-	return false;
+	return (!context() ? true : false);
 }
 
 bool CertificateRequest::canUseFormat(CertificateRequestFormat f, const QString &provider)
 {
-	Q_UNUSED(f);
-	Q_UNUSED(provider);
-	return false;
+	CSRContext *c = static_cast<CSRContext *>(getContext("csr", provider));
+	bool ok = c->canUseFormat(f);
+	delete c;
+	return ok;
 }
 
 CertificateRequestFormat CertificateRequest::format() const
 {
-	return PKCS10;
+	if(isNull())
+		return PKCS10; // some default so we don't explode
+	return static_cast<const CSRContext *>(context())->props()->format;
 }
 
 CertificateInfo CertificateRequest::subjectInfo() const
 {
-	return CertificateInfo();
+	return static_cast<const CSRContext *>(context())->props()->subject;
 }
 
 Constraints CertificateRequest::constraints() const
 {
-	return Constraints();
+	return static_cast<const CSRContext *>(context())->props()->constraints;
 }
 
 QStringList CertificateRequest::policies() const
 {
-	return QStringList();
+	return static_cast<const CSRContext *>(context())->props()->policies;
 }
 
 PublicKey CertificateRequest::subjectPublicKey() const
 {
-	return PublicKey();
+	PKeyContext *c = static_cast<const CSRContext *>(context())->subjectPublicKey();
+	PublicKey key;
+	key.change(c);
+	return key;
 }
 
 bool CertificateRequest::isCA() const
 {
-	return false;
+	return static_cast<const CSRContext *>(context())->props()->isCA;
 }
 
 int CertificateRequest::pathLimit() const
 {
-	return 0;
+	return static_cast<const CSRContext *>(context())->props()->pathLimit;
 }
 
 QString CertificateRequest::challenge() const
 {
-	return QString();
+	return static_cast<const CSRContext *>(context())->props()->challenge;
 }
 
 SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 {
-	return SignatureUnknown;
+	return static_cast<const CSRContext *>(context())->props()->sigalgo;
 }
 
 QSecureArray CertificateRequest::toDER() const
 {
-	return QSecureArray();
+	return static_cast<const CSRContext *>(context())->toDER();
 }
 
 QString CertificateRequest::toPEM() const
 {
-	return QString();
+	return static_cast<const CSRContext *>(context())->toPEM();
 }
 
 bool CertificateRequest::toPEMFile(const QString &fileName) const
 {
-	Q_UNUSED(fileName);
-	return false;
+	return stringToFile(fileName, toPEM());
 }
 
-CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, const QString &provider)
+CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(a);
-	Q_UNUSED(provider);
-	return CertificateRequest();
+	CertificateRequest c;
+	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
+	ConvertResult r = csr->fromDER(a);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+		c.change(csr);
+	return c;
 }
 
-CertificateRequest CertificateRequest::fromPEM(const QString &s, const QString &provider)
+CertificateRequest CertificateRequest::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(s);
-	Q_UNUSED(provider);
-	return CertificateRequest();
+	CertificateRequest c;
+	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
+	ConvertResult r = csr->fromPEM(s);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+		c.change(csr);
+	return c;
 }
 
 CertificateRequest CertificateRequest::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(fileName);
-	Q_UNUSED(result);
-	Q_UNUSED(provider);
-	return CertificateRequest();
+	QString pem;
+	if(!stringFromFile(fileName, &pem))
+	{
+		if(result)
+			*result = ErrorFile;
+		return CertificateRequest();
+	}
+	return fromPEM(pem, result, provider);
 }
 
 QString CertificateRequest::toString() const
 {
-	return QString();
+	return static_cast<const CSRContext *>(context())->toSPKAC();
 }
 
-CertificateRequest CertificateRequest::fromString(const QString &s, const QString &provider)
+CertificateRequest CertificateRequest::fromString(const QString &s, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(s);
-	Q_UNUSED(provider);
-	return CertificateRequest();
+	CertificateRequest c;
+	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
+	ConvertResult r = csr->fromSPKAC(s);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+		c.change(csr);
+	return c;
 }
 
 //----------------------------------------------------------------------------
@@ -513,27 +595,29 @@ CertificateRequest CertificateRequest::fromString(const QString &s, const QStrin
 //----------------------------------------------------------------------------
 CRLEntry::CRLEntry()
 {
+	_reason = Unspecified;
 }
 
 CRLEntry::CRLEntry(const Certificate &c, Reason r)
 {
-	Q_UNUSED(c);
-	Q_UNUSED(r);
+	_serial = c.serialNumber();
+	_time = QDateTime::currentDateTime();
+	_reason = r;
 }
 
 QBigInteger CRLEntry::serialNumber() const
 {
-	return QBigInteger();
+	return _serial;
 }
 
 QDateTime CRLEntry::time() const
 {
-	return QDateTime();
+	return _time;
 }
 
 CRLEntry::Reason CRLEntry::reason() const
 {
-	return Unspecified;
+	return _reason;
 }
 
 //----------------------------------------------------------------------------
@@ -550,58 +634,64 @@ bool CRL::isNull() const
 
 CertificateInfo CRL::issuerInfo() const
 {
-	return CertificateInfo();
+	return static_cast<const CRLContext *>(context())->props()->issuer;
 }
 
 int CRL::number() const
 {
-	return -1;
+	return static_cast<const CRLContext *>(context())->props()->number;
 }
 
 QDateTime CRL::thisUpdate() const
 {
-	return QDateTime();
+	return static_cast<const CRLContext *>(context())->props()->thisUpdate;
 }
 
 QDateTime CRL::nextUpdate() const
 {
-	return QDateTime();
+	return static_cast<const CRLContext *>(context())->props()->nextUpdate;
 }
 
 QList<CRLEntry> CRL::revoked() const
 {
-	return QList<CRLEntry>();
+	return static_cast<const CRLContext *>(context())->props()->revoked;
 }
 
 SignatureAlgorithm CRL::signatureAlgorithm() const
 {
-	return SignatureUnknown;
+	return static_cast<const CRLContext *>(context())->props()->sigalgo;
 }
 
 QSecureArray CRL::toDER() const
 {
-	return ((CRLContext *)context())->toDER();
+	return static_cast<const CRLContext *>(context())->toDER();
 }
 
 QString CRL::toPEM() const
 {
-	return ((CRLContext *)context())->toPEM();
+	return static_cast<const CRLContext *>(context())->toPEM();
 }
 
-CRL CRL::fromDER(const QSecureArray &a, const QString &provider)
+CRL CRL::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
 	CRL c;
-	CRLContext *cc = (CRLContext *)getContext("crl", provider);
-	if(cc->fromDER(a) == CRLContext::Good)
+	CRLContext *cc = static_cast<CRLContext *>(getContext("crl", provider));
+	ConvertResult r = cc->fromDER(a);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		c.change(cc);
 	return c;
 }
 
-CRL CRL::fromPEM(const QString &s, const QString &provider)
+CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
 	CRL c;
-	CRLContext *cc = (CRLContext *)getContext("crl", provider);
-	if(cc->fromPEM(s) == CRLContext::Good)
+	CRLContext *cc = static_cast<CRLContext *>(getContext("crl", provider));
+	ConvertResult r = cc->fromPEM(s);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		c.change(cc);
 	return c;
 }

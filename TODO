@@ -29,8 +29,14 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
-  cert/crl/store/csr/ca/etc
+  redundant global static functions in publickey / cert
+  CertificateOptions: isValid
+  Certificate: operator==
+  cert: rfc 2818 hostname validation
+  ca
+  store
   system store: all added certs need to be flagged as trusted
+  personal bundle
   tls
   sasl
   securemessagesystem (consider thread issues)

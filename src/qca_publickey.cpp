@@ -116,11 +116,7 @@ QList<PKey::Type> PKey::supportedTypes(const QString &provider)
 
 bool PKey::isNull() const
 {
-	const PKeyContext *c = static_cast<const PKeyContext *>(context());
-	if(!c)
-		return true;
-	else
-		return false;
+	return (!context() ? true : false);
 }
 
 PKey::Type PKey::type() const

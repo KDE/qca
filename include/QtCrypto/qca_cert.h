@@ -23,10 +23,9 @@
 #define QCA_CERT_H
 
 #include <QMap>
+#include <QDateTime>
 #include "qca_core.h"
 #include "qca_publickey.h"
-
-class QDateTime;
 
 namespace QCA
 {
@@ -41,7 +40,7 @@ namespace QCA
 
 	enum CertificateInfoType
 	{
-		Name,
+		CommonName,
 		Email,
 		Organization,
 		OrganizationalUnit,
@@ -50,6 +49,7 @@ namespace QCA
 		Country,
 		URI,
 		DNS,
+		IPAddress,
 		XMPP
 	};
 
@@ -181,8 +181,8 @@ namespace QCA
 		QSecureArray toDER() const;
 		QString toPEM() const;
 		bool toPEMFile(const QString &fileName) const;
-		static Certificate fromDER(const QSecureArray &a, const QString &provider = QString());
-		static Certificate fromPEM(const QString &s, const QString &provider = QString());
+		static Certificate fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static Certificate fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 		static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 		bool matchesHostname(const QString &host) const;
@@ -228,13 +228,13 @@ namespace QCA
 		QSecureArray toDER() const;
 		QString toPEM() const;
 		bool toPEMFile(const QString &fileName) const;
-		static CertificateRequest fromDER(const QSecureArray &a, const QString &provider = QString());
-		static CertificateRequest fromPEM(const QString &s, const QString &provider = QString());
+		static CertificateRequest fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static CertificateRequest fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 		static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 		// import / export - SPKAC only
 		QString toString() const;
-		static CertificateRequest fromString(const QString &s, const QString &provider = QString());
+		static CertificateRequest fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
 	class QCA_EXPORT CRLEntry
@@ -259,6 +259,11 @@ namespace QCA
 		QBigInteger serialNumber() const;
 		QDateTime time() const;
 		Reason reason() const;
+
+	private:
+		QBigInteger _serial;
+		QDateTime _time;
+		Reason _reason;
 	};
 
 	class QCA_EXPORT CRL : public Algorithm
@@ -281,8 +286,8 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
-		static CRL fromDER(const QSecureArray &a, const QString &provider = QString());
-		static CRL fromPEM(const QString &s, const QString &provider = QString());
+		static CRL fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static CRL fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
 	class QCA_EXPORT CertificateAuthority : public Algorithm

@@ -209,21 +209,10 @@ public:
 	virtual ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase) = 0;
 };
 
-class CertContext : public Provider::Context
+class CertBase : public Provider::Context
 {
 public:
-	enum ConvertResult { Good, ErrDecode };
-	CertContext(Provider *p) : Provider::Context(p, "cert") {}
-
-	virtual QDateTime notValidBefore() const = 0;
-	virtual QDateTime notValidAfter() const = 0;
-
-	virtual CertificateInfo subjectInfo() const = 0;
-	virtual CertificateInfo issuerInfo() const = 0;
-
-	virtual QString commonName() const = 0;
-	virtual QBigInteger serialNumber() const = 0;
-	virtual PKeyContext *subjectPublicKey() const = 0;
+	CertBase(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
 	// import / export
 	virtual QSecureArray toDER() const = 0;
@@ -232,17 +221,62 @@ public:
 	virtual ConvertResult fromPEM(const QString &s) = 0;
 };
 
-class CRLContext : public Provider::Context
+class CertContextProps
 {
 public:
-	enum ConvertResult { Good, ErrDecode };
-	CRLContext(Provider *p) : Provider::Context(p, "crl") {}
+	QDateTime start, end;            // cert only
+	CertificateInfo subject;
+	CertificateInfo issuer;          // cert only
+	Constraints constraints;
+	QStringList policies;
+	QBigInteger serial;              // cert only
+	bool isCA;
+	bool isSelfSigned;               // cert only
+	int pathLimit;
+	SignatureAlgorithm sigalgo;
+	QString challenge;               // csr only
+	CertificateRequestFormat format; // csr only
+};
 
-	// import / export
-	virtual QSecureArray toDER() const = 0;
-	virtual QString toPEM() const = 0;
-	virtual ConvertResult fromDER(const QSecureArray &a) = 0;
-	virtual ConvertResult fromPEM(const QString &s) = 0;
+class CRLContextProps
+{
+public:
+	CertificateInfo issuer;
+	int number;
+	QDateTime thisUpdate, nextUpdate;
+	QList<CRLEntry> revoked;
+	SignatureAlgorithm sigalgo;
+};
+
+class CertContext : public CertBase
+{
+public:
+	CertContext(Provider *p) : CertBase(p, "cert") {}
+
+	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) = 0;
+	virtual const CertContextProps *props() const = 0;
+	virtual PKeyContext *subjectPublicKey() const = 0;
+};
+
+class CSRContext : public CertBase
+{
+public:
+	CSRContext(Provider *p) : CertBase(p, "csr") {}
+
+	virtual bool canUseFormat(CertificateRequestFormat f) const = 0;
+	virtual bool createRequest(const CertificateOptions &opts, const PKeyContext &priv) = 0;
+	virtual const CertContextProps *props() const = 0;
+	virtual PKeyContext *subjectPublicKey() const = 0;
+	virtual QString toSPKAC() const = 0;
+	virtual ConvertResult fromSPKAC(const QString &s) = 0;
+};
+
+class CRLContext : public CertBase
+{
+public:
+	CRLContext(Provider *p) : CertBase(p, "crl") {}
+
+	virtual const CRLContextProps *props() const = 0;
 };
 
 class StoreContext : public Provider::Context

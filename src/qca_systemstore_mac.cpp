@@ -45,7 +45,7 @@ Store qca_get_systemstore(const QString &provider)
 		QByteArray der(cssm.Length);
 		memcpy(der.data(), cssm.Data, cssm.Length);
 
-		Certificate cert = Certificate::fromDER(der, provider);
+		Certificate cert = Certificate::fromDER(der, 0, provider);
 		if(!cert.isNull())
 			store.addCertificate(cert);
 	}

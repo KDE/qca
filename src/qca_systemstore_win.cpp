@@ -62,7 +62,7 @@ Store qca_get_systemstore(const QString &provider)
 		QByteArray der(size);
 		memcpy(der.data(), pc->pbCertEncoded, size);
 
-		Certificate cert = Certificate::fromDER(der, provider);
+		Certificate cert = Certificate::fromDER(der, 0, provider);
 		if(!cert.isNull())
 			store.addCertificate(cert);
 	}

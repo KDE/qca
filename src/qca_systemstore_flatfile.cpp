@@ -73,7 +73,7 @@ Store qca_get_systemstore(const QString &provider)
 		QString pem = readNextPem(&ts);
 		if(pem.isNull())
 			break;
-		Certificate cert = Certificate::fromPEM(pem, provider);
+		Certificate cert = Certificate::fromPEM(pem, 0, provider);
 		if(!cert.isNull())
 			store.addCertificate(cert);
 	}
