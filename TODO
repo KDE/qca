@@ -18,6 +18,8 @@
   it's possible we use QSecureArray in some unnecessary places
   don't forget to QCA_EXPORT everything
   standardize on count() vs size() when iterating?
+  add more "getters" to the library?
+  give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
   qcaprovider.h

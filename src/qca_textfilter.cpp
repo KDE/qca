@@ -205,12 +205,22 @@ bool Hex::ok() const
 Base64::Base64(Direction dir)
 :TextFilter(dir)
 {
+	_linebreak = 0;
 }
 
 void Base64::clear()
 {
 	partial.resize(0);
 	_ok = true;
+	col = 0;
+}
+
+void Base64::setLineBreaks(int column)
+{
+	if(column > 0)
+		_linebreak = column;
+	else
+		_linebreak = 0;
 }
 
 static QSecureArray b64encode(const QSecureArray &s)
@@ -319,6 +329,82 @@ static QSecureArray b64decode(const QSecureArray &s, bool *ok)
 	return p;
 }
 
+static int findLF(const QSecureArray &in, int offset)
+{
+	for(int n = offset; n < in.size(); ++n)
+	{
+		if(in[n] == '\n')
+			return n;
+	}
+	return -1;
+}
+
+static QSecureArray insert_linebreaks(const QSecureArray &s, int *col, int lfAt)
+{
+	QSecureArray out = s;
+
+	int needed = (out.size() + *col) / lfAt;   // how many newlines needed?
+	if(needed > 0)
+	{
+		int firstlen = lfAt - *col;                // length of first chunk
+		int at = firstlen + (lfAt * (needed - 1)); // position of last newline
+		int lastlen = out.size() - at;             // length of last chunk
+
+		//printf("size=%d,needed=%d,firstlen=%d,at=%d,lastlen=%d\n", out.size(), needed, firstlen, at, lastlen);
+
+		// make room
+		out.resize(out.size() + needed);
+
+		// move backwards
+		for(int n = 0; n < needed; ++n)
+		{
+			char *p = out.data() + at;
+			int len;
+			if(n == 0)
+				len = lastlen;
+			else
+				len = lfAt;
+			memmove(p + needed - n, p, len);
+			p[needed - n - 1] = '\n';
+			at -= lfAt;
+		}
+
+		*col = lastlen;
+	}
+	else
+		*col += out.size();
+
+	return out;
+}
+
+static QSecureArray remove_linebreaks(const QSecureArray &s)
+{
+	QSecureArray out = s;
+
+	int removed = 0;
+	int at = findLF(out, 0);
+	while(at != -1)
+	{
+		int next = findLF(out, at + 1);
+		int len;
+		if(next != -1)
+			len = next - at;
+		else
+			len = out.size() - at;
+
+		if(len > 1)
+		{
+			char *p = out.data() + at;
+			memmove(p - removed, p + 1, len - 1);
+		}
+		++removed;
+		at = next;
+	}
+	out.resize(out.size() - removed);
+
+	return out;
+}
+
 static void appendArray(QSecureArray *a, const QSecureArray &b)
 {
 	int oldsize = a->size();
@@ -328,7 +414,13 @@ static void appendArray(QSecureArray *a, const QSecureArray &b)
 
 QSecureArray Base64::update(const QSecureArray &a)
 {
-	if(a.isEmpty())
+	QSecureArray in;
+	if(_dir == Decode && _linebreak > 0)
+		in = remove_linebreaks(a);
+	else
+		in = a;
+
+	if(in.isEmpty())
 		return QSecureArray();
 
 	int chunk;
@@ -337,26 +429,29 @@ QSecureArray Base64::update(const QSecureArray &a)
 	else
 		chunk = 4;
 
-	int size = partial.size() + a.size();
+	int size = partial.size() + in.size();
 	if(size < chunk)
 	{
-		appendArray(&partial, a);
+		appendArray(&partial, in);
 		return QSecureArray();
 	}
 
 	int eat = size % chunk;
 
 	// s = partial + a - eat
-	QSecureArray s(partial.size() + a.size() - eat);
+	QSecureArray s(partial.size() + in.size() - eat);
 	memcpy(s.data(), partial.data(), partial.size());
-	memcpy(s.data() + partial.size(), a.data(), a.size() - eat);
+	memcpy(s.data() + partial.size(), in.data(), in.size() - eat);
 
 	partial.resize(eat);
-	memcpy(partial.data(), a.data() + a.size() - eat, eat);
+	memcpy(partial.data(), in.data() + in.size() - eat, eat);
 
 	if(_dir == Encode)
 	{
-		return b64encode(s);
+		if(_linebreak > 0)
+			return insert_linebreaks(b64encode(s), &col, _linebreak);
+		else
+			return b64encode(s);
 	}
 	else
 	{
@@ -372,7 +467,10 @@ QSecureArray Base64::final()
 {
 	if(_dir == Encode)
 	{
-		return b64encode(partial);
+		if(_linebreak > 0)
+			return insert_linebreaks(b64encode(partial), &col, _linebreak);
+		else
+			return b64encode(partial);
 	}
 	else
 	{
