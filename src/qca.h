@@ -616,9 +616,9 @@ namespace QCA
 	 */
 	enum MemoryMode
 	{
-		Practical, /**< mlock and drop root if available, else mmap */
-		Locking, /**< mlock and drop root */
-		LockingKeepPrivileges /**< mlock */
+		Practical, ///< mlock and drop root if available, else mmap
+		Locking, ///< mlock and drop root
+		LockingKeepPrivileges ///< mlock, retaining root privileges
 	};
 
 	enum Direction
@@ -671,12 +671,12 @@ namespace QCA
 	 */
 	enum SecurityLevel
 	{
-		SL_None,      /**< indicates that no security is ok */
-		SL_Integrity, /**< must at least get integrity protection */
-		SL_Export,    /**< must be export level bits or more */
-		SL_Baseline,  /**< must be 128 bit or more */
-		SL_High,      /**< must be more than 128 bit */
-		SL_Highest    /**< SL_High or max possible, whichever is greater */
+		SL_None,      ///< indicates that no security is ok
+		SL_Integrity, ///< must at least get integrity protection
+		SL_Export,    ///< must be export level bits or more
+		SL_Baseline,  ///< must be 128 bit or more
+		SL_High,      ///< must be more than 128 bit
+		SL_Highest    ///< SL_High or max possible, whichever is greater
 	};
 
 	/**
@@ -1401,9 +1401,9 @@ namespace QCA
 		 */
 		enum Mode
 		{
-			CBC, /**< operate in %Cipher Block Chaining mode */
-			CFB, /**< operate in %Cipher FeedBack mode */
-			ECB  /**< operate in Electronic Code Book mode */
+			CBC, ///< operate in %Cipher Block Chaining mode
+			CFB, ///< operate in %Cipher FeedBack mode
+			ECB  ///< operate in Electronic Code Book mode
 		};
 
 		Cipher(const Cipher &from);
