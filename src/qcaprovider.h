@@ -17,7 +17,7 @@ public:
 	virtual ~QCAProvider() {}
 
 	virtual int capabilities() const=0;
-	virtual void *functions(int cap)=0;
+	virtual void *context(int cap)=0;
 };
 
 class QCA_HashContext
@@ -25,6 +25,7 @@ class QCA_HashContext
 public:
 	virtual ~QCA_HashContext() {}
 
+	virtual QCA_HashContext *clone()=0;
 	virtual void reset()=0;
 	virtual void update(const char *in, unsigned int len)=0;
 	virtual void final(char **out, unsigned int *outlen)=0;
@@ -35,6 +36,7 @@ class QCA_CipherContext
 public:
 	virtual ~QCA_CipherContext() {}
 
+	virtual QCA_CipherContext *clone()=0;
 	virtual int keySize()=0;
 	virtual int blockSize()=0;
 	virtual bool generateKey(char *out)=0;

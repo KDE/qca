@@ -9,6 +9,7 @@
 #include<openssl/rsa.h>
 #include<openssl/x509.h>
 
+// FIXME: use openssl for entropy instead of stdlib
 #include<stdlib.h>
 static bool seeded = false;
 class QRandom
@@ -82,6 +83,11 @@ public:
 		reset();
 	}
 
+	QCA_HashContext *clone()
+	{
+		return new SHA1Context(*this);
+	}
+
 	void reset()
 	{
 		SHA1_Init(&c);
@@ -109,6 +115,11 @@ public:
 	MD5Context()
 	{
 		reset();
+	}
+
+	QCA_HashContext *clone()
+	{
+		return new MD5Context(*this);
 	}
 
 	void reset()
@@ -145,6 +156,14 @@ public:
 		memset(&c, 0, sizeof(EVP_CIPHER_CTX));
 	}
 
+	QCA_CipherContext *clone()
+	{
+		EVPCipherContext *c = cloneSelf();
+		c->r = r.copy();
+		return c;
+	}
+
+	virtual EVPCipherContext *cloneSelf() const=0;
 	virtual const EVP_CIPHER *getType(int mode) const=0;
 
 	int keySize() { return getType(QCA::CBC)->key_len; }
@@ -240,6 +259,7 @@ public:
 class BlowFishContext : public EVPCipherContext
 {
 public:
+	EVPCipherContext *cloneSelf() const { return new BlowFishContext(*this); }
 	const EVP_CIPHER *getType(int mode) const
 	{
 		if(mode == QCA::CBC)
@@ -254,6 +274,7 @@ public:
 class TripleDESContext : public EVPCipherContext
 {
 public:
+	EVPCipherContext *cloneSelf() const { return new TripleDESContext(*this); }
 	const EVP_CIPHER *getType(int mode) const
 	{
 		if(mode == QCA::CBC)
@@ -268,6 +289,7 @@ public:
 class AES128Context : public EVPCipherContext
 {
 public:
+	EVPCipherContext *cloneSelf() const { return new AES128Context(*this); }
 	const EVP_CIPHER *getType(int mode) const
 	{
 		if(mode == QCA::CBC)
@@ -282,6 +304,7 @@ public:
 class AES256Context : public EVPCipherContext
 {
 public:
+	EVPCipherContext *cloneSelf() const { return new AES256Context(*this); }
 	const EVP_CIPHER *getType(int mode) const
 	{
 		if(mode == QCA::CBC)
@@ -582,7 +605,7 @@ public:
 		return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_BlowFish | QCA::CAP_TripleDES | QCA::CAP_AES128 | QCA::CAP_AES256 | QCA::CAP_RSA);
 	}
 
-	void *functions(int cap)
+	void *context(int cap)
 	{
 		if(cap == QCA::CAP_SHA1)
 			return new SHA1Context;

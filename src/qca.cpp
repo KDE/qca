@@ -96,12 +96,12 @@ bool QCA::isSupported(int capabilities)
 		return false;
 }
 
-static void *getFunctions(int cap)
+static void *getContext(int cap)
 {
 	QPtrListIterator<QCAProvider> it(providerList);
 	for(QCAProvider *p; (p = it.current()); ++it) {
 		if(p->capabilities() & cap)
-			return p->functions(cap);
+			return p->context(cap);
 	}
 	return 0;
 }
@@ -113,9 +113,9 @@ static void *getFunctions(int cap)
 class Hash::Private
 {
 public:
-	Private(QCA_HashContext *_c)
+	Private()
 	{
-		c = _c;
+		c = 0;
 	}
 
 	~Private()
@@ -133,18 +133,20 @@ public:
 
 Hash::Hash(QCA_HashContext *c)
 {
-	d = new Private(c);
+	d = new Private;
+	d->c = c;
 }
 
 Hash::Hash(const Hash &from)
 {
-	d = new Private(from.d->c);
+	d = new Private;
 	*this = from;
 }
 
-Hash & Hash::operator=(const Hash &)
+Hash & Hash::operator=(const Hash &from)
 {
-	clear();
+	delete d->c;
+	d->c = from.d->c->clone();
 	return *this;
 }
 
@@ -181,9 +183,9 @@ QByteArray Hash::final()
 class Cipher::Private
 {
 public:
-	Private(QCA_CipherContext *_c)
+	Private()
 	{
-		c = _c;
+		c = 0;
 	}
 
 	~Private()
@@ -208,19 +210,26 @@ public:
 
 Cipher::Cipher(QCA_CipherContext *c, int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
 {
-	d = new Private(c);
+	d = new Private;
+	d->c = c;
 	reset(dir, mode, key, iv, pad);
 }
 
 Cipher::Cipher(const Cipher &from)
 {
-	d = new Private(from.d->c);
+	d = new Private;
 	*this = from;
 }
 
 Cipher & Cipher::operator=(const Cipher &from)
 {
-	reset(from.d->dir, from.d->mode, from.d->key, from.d->iv);
+	delete d->c;
+	d->c = from.d->c->clone();
+	d->dir = from.d->dir;
+	d->mode = from.d->mode;
+	d->key = from.d->key.copy();
+	d->iv = from.d->iv.copy();
+	d->err = from.d->err;
 	return *this;
 }
 
@@ -303,7 +312,7 @@ QByteArray Cipher::final(bool *ok)
 // SHA1
 //----------------------------------------------------------------------------
 SHA1::SHA1()
-:Hash((QCA_HashContext *)getFunctions(CAP_SHA1))
+:Hash((QCA_HashContext *)getContext(CAP_SHA1))
 {
 }
 
@@ -312,7 +321,7 @@ SHA1::SHA1()
 // SHA256
 //----------------------------------------------------------------------------
 SHA256::SHA256()
-:Hash((QCA_HashContext *)getFunctions(CAP_SHA256))
+:Hash((QCA_HashContext *)getContext(CAP_SHA256))
 {
 }
 
@@ -321,7 +330,7 @@ SHA256::SHA256()
 // MD5
 //----------------------------------------------------------------------------
 MD5::MD5()
-:Hash((QCA_HashContext *)getFunctions(CAP_MD5))
+:Hash((QCA_HashContext *)getContext(CAP_MD5))
 {
 }
 
@@ -330,7 +339,7 @@ MD5::MD5()
 // BlowFish
 //----------------------------------------------------------------------------
 BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_BlowFish), dir, mode, key, iv, pad)
+:Cipher((QCA_CipherContext *)getContext(CAP_BlowFish), dir, mode, key, iv, pad)
 {
 }
 
@@ -339,7 +348,7 @@ BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &i
 // TripleDES
 //----------------------------------------------------------------------------
 TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_TripleDES), dir, mode, key, iv, pad)
+:Cipher((QCA_CipherContext *)getContext(CAP_TripleDES), dir, mode, key, iv, pad)
 {
 }
 
@@ -348,7 +357,7 @@ TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray 
 // AES128
 //----------------------------------------------------------------------------
 AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_AES128), dir, mode, key, iv, pad)
+:Cipher((QCA_CipherContext *)getContext(CAP_AES128), dir, mode, key, iv, pad)
 {
 }
 
@@ -357,7 +366,7 @@ AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv, b
 // AES256
 //----------------------------------------------------------------------------
 AES256::AES256(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad)
-:Cipher((QCA_CipherContext *)getFunctions(CAP_AES256), dir, mode, key, iv, pad)
+:Cipher((QCA_CipherContext *)getContext(CAP_AES256), dir, mode, key, iv, pad)
 {
 }
 
@@ -370,7 +379,7 @@ class RSAKey::Private
 public:
 	Private()
 	{
-		c = (QCA_RSAKeyContext *)getFunctions(CAP_RSA);
+		c = (QCA_RSAKeyContext *)getContext(CAP_RSA);
 	}
 
 	~Private()

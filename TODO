@@ -1,7 +1,3 @@
-* hash cloning
-* cipher cloning
-* openssl plugin: use openssl entropy for cipher keygen
-
 * x509
 * ssl/tls (also server support)
 * sasl (also server support)
