@@ -40,10 +40,13 @@ int main(int argc, char **argv)
     if(!QCA::isSupported("des-cbc-pkcs7"))
 	printf("AES128-CBC not supported!\n");
     else {
-	// Create a dummy key - you'd use a real key normally.
+	// Create a random key - you'd probably use one from another
+	// source in a real application
 	QCA::SymmetricKey key(16);
 
-	// Create a dummy initialisation vector
+	// Create a random initialisation vector - you need this
+	// value to decrypt the resulting cipher text, but it
+	// need not be kept secret (unlike the key).
 	QCA::InitializationVector iv(16);
 
 	// create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
@@ -112,6 +115,11 @@ int main(int argc, char **argv)
 
 	// output results
 	printf("Final decryption block using AES128 is %s\n", plainText.data());
+	// instead of update() and final(), you can do the whole thing
+	// in one step, using process() 
+	printf("One step decryption using AES128: %s\n",
+	       (cipher.process(cipherText)).data() );
+
     }
 
     return 0;
