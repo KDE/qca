@@ -322,6 +322,25 @@ inline bool operator!=(const QBigInteger &a, const QBigInteger &b)
 	return (0 != a.cmp( b ) );
 }
 
+inline bool operator<=(const QBigInteger &a, const QBigInteger &b)
+{
+	return (a.cmp( b ) <= 0 );
+}
+
+inline bool operator>=(const QBigInteger &a, const QBigInteger &b)
+{
+	return (a.cmp( b ) >= 0 );
+}
+
+inline bool operator<(const QBigInteger &a, const QBigInteger &b)
+{
+	return (a.cmp( b ) < 0 );
+}
+
+inline bool operator>(const QBigInteger &a, const QBigInteger &b)
+{
+	return (a.cmp( b ) > 0 );
+}
 
 namespace QCA
 {
