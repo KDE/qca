@@ -211,6 +211,14 @@ QList<PKey::Type> PKey::supportedTypes(const QString &provider)
 	return list;
 }
 
+QList<PKey::Type> PKey::supportedIOTypes(const QString &provider)
+{
+	const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", provider));
+	QList<Type> list = c->supportedIOTypes();
+	delete c;
+	return list;
+}
+
 bool PKey::isNull() const
 {
 	return (!context() ? true : false);

@@ -138,6 +138,7 @@ namespace QCA
 		PKey & operator=(const PKey &from);
 
 		static QList<Type> supportedTypes(const QString &provider = QString());
+		static QList<Type> supportedIOTypes(const QString &provider = QString());
 
 		bool isNull() const;
 		Type type() const;

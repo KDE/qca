@@ -205,6 +205,7 @@ public:
 	PKeyContext(Provider *p) : Provider::Context(p, "pkey") {}
 
 	virtual QList<PKey::Type> supportedTypes() const = 0;
+	virtual QList<PKey::Type> supportedIOTypes() const = 0;
 	virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const = 0;
 
 	virtual PKeyBase *key() = 0;
