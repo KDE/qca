@@ -1018,7 +1018,7 @@ namespace QCA
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
 	QCA_EXPORT bool haveSystemStore();
-	QCA_EXPORT Store systemStore(const QString &provider = "");
+	QCA_EXPORT Store systemStore(const QString &provider = QString() );
 
 	/**
 	 * Get the application name that will be used by SASL server mode
@@ -1433,7 +1433,7 @@ namespace QCA
 		 * \param provider the provider library for the random
 		 *                 number generation
 		 */ 
-		Random(const QString &provider = "");
+		Random(const QString &provider = QString() );
 
 		/**
 		 * Provide a random byte.
@@ -2005,7 +2005,7 @@ namespace QCA
 		 *
 		 * To create HMAC with a default algorithm of "sha1", you would use something like:
 		 * \code
-		 * HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = "")
+		 * HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = QString() )
 		 * : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider)
 		 * {
 		 * }
@@ -2065,7 +2065,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA0 implementation
 		 * from qca-openssl, you would use SHA0("qca-openssl")
 		 */
-		SHA0(const QString &provider = "") : Hash("sha0", provider) {}
+		SHA0(const QString &provider = QString() ) : Hash("sha0", provider) {}
 	};
 
 	/**
@@ -2119,7 +2119,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA1 implementation
 		 * from qca-openssl, you would use SHA1("qca-openssl")
 		 */
-		SHA1(const QString &provider = "") : Hash("sha1", provider) {}
+		SHA1(const QString &provider = QString() ) : Hash("sha1", provider) {}
 	};
 
 	/**
@@ -2153,7 +2153,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA256 implementation
 		 * from qca-gcrypt, you would use SHA256("qca-gcrypt")
 		 */
-		SHA256(const QString &provider = "") : Hash("sha256", provider) {}
+		SHA256(const QString &provider = QString() ) : Hash("sha256", provider) {}
 	};
 
 	/**
@@ -2187,7 +2187,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA384 implementation
 		 * from qca-gcrypt, you would use SHA384("qca-gcrypt")
 		 */
-		SHA384(const QString &provider = "") : Hash("sha384", provider) {}
+		SHA384(const QString &provider = QString() ) : Hash("sha384", provider) {}
 	};
 
 	/**
@@ -2221,7 +2221,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA512 implementation
 		 * from qca-gcrypt, you would use SHA512("qca-gcrypt")
 		 */
-		SHA512(const QString &provider = "") : Hash("sha512", provider) {}
+		SHA512(const QString &provider = QString() ) : Hash("sha512", provider) {}
 	};
 
 	/**
@@ -2254,7 +2254,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD2 implementation
 		 * from qca-openssl, you would use MD2("qca-openssl")
 		 */
-		MD2(const QString &provider = "") : Hash("md2", provider) {}
+		MD2(const QString &provider = QString() ) : Hash("md2", provider) {}
 	};
 
 	/**
@@ -2291,7 +2291,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD4 implementation
 		 * from qca-openssl, you would use MD4("qca-openssl")
 		 */
-		MD4(const QString &provider = "") : Hash("md4", provider) {}
+		MD4(const QString &provider = QString() ) : Hash("md4", provider) {}
 	};
 
 	/**
@@ -2326,7 +2326,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD5 implementation
 		 * from qca-openssl, you would use MD5("qca-openssl")
 		 */
-		MD5(const QString &provider = "") : Hash("md5", provider) {}
+		MD5(const QString &provider = QString() ) : Hash("md5", provider) {}
 	};
 
 	/**
@@ -2379,7 +2379,7 @@ namespace QCA
 		 * implementation from qca-openssl, you would use 
 		 * RIPEMD160("qca-openssl")
 		 */
-		RIPEMD160(const QString &provider = "") : Hash("ripemd160", provider) {}
+		RIPEMD160(const QString &provider = QString() ) : Hash("ripemd160", provider) {}
 	};
 
 	/**
@@ -2403,7 +2403,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
+		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
 		:Cipher("blowfish", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2429,7 +2429,7 @@ namespace QCA
 		 *
 		 */
 	public:
-		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
+		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
 		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2455,7 +2455,7 @@ namespace QCA
 		 *
 		 */
 	public:
-		DES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
+		DES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
 		:Cipher("des", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2481,7 +2481,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
+		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
 		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2507,7 +2507,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
+		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
 		:Cipher("aes192", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2533,7 +2533,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
+		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
 		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2589,7 +2589,7 @@ namespace QCA
 		 * QCA::HMAC ripemd160HMAC( "ripemd160", QCA::SymmetricKey(), "qca-openssl" );
 		 * \endcode
 		 */
-		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = "") : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
+		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = QString() ) : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
 	};
 
 
@@ -2652,7 +2652,7 @@ namespace QCA
 	class QCA_EXPORT PBKDF1 : public KeyDerivationFunction
 	{
 	public:
-	    PBKDF1(const QString &algorithm = "sha1", const QString &provider = "") : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
+	    PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString() ) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
 	};
 
 	class PublicKey;
@@ -2736,8 +2736,8 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
-		static PublicKey fromDER(const QSecureArray &a, const QString &provider = "");
-		static PublicKey fromPEM(const QString &s, const QString &provider = "");
+		static PublicKey fromDER(const QSecureArray &a, const QString &provider = QString() );
+		static PublicKey fromPEM(const QString &s, const QString &provider = QString() );
 
 	protected:
 		PublicKey(const QString &type, const QString &provider);
@@ -2768,10 +2768,10 @@ namespace QCA
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
-		QSecureArray toDER(const QString &passphrase = "") const;
-		QString toPEM(const QString &passphrase = "") const;
-		static PrivateKey fromDER(const QSecureArray &a, const QString &passphrase = "", const QString &provider = "");
-		static PrivateKey fromPEM(const QString &s, const QString &passphrase = "", const QString &provider = "");
+		QSecureArray toDER(const QString &passphrase = QString() ) const;
+		QString toPEM(const QString &passphrase = QString() ) const;
+		static PrivateKey fromDER(const QSecureArray &a, const QString &passphrase = QString(), const QString &provider = QString() );
+		static PrivateKey fromPEM(const QString &s, const QString &passphrase = QString(), const QString &provider = QString() );
 
 	protected:
 		PrivateKey(const QString &type, const QString &provider);
@@ -2791,9 +2791,9 @@ namespace QCA
 		void setBlocking(bool b);
 		bool isBusy() const;
 
-		void generateRSA(int bits, int exp = 65537, const QString &provider = "");
-		void generateDSA(DL_Group group, const QString &provider = "");
-		void generateDH(DL_Group group, const QString &provider = "");
+		void generateRSA(int bits, int exp = 65537, const QString &provider = QString() );
+		void generateDSA(DL_Group group, const QString &provider = QString() );
+		void generateDH(DL_Group group, const QString &provider = QString() );
 		PrivateKey result() const;
 
 	signals:
@@ -2810,7 +2810,7 @@ namespace QCA
 	{
 	public:
 		RSAPublicKey();
-		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider = "");
+		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider = QString() );
 		RSAPublicKey(const RSAPrivateKey &k);
 
 		QBigInteger n() const;
@@ -2821,7 +2821,7 @@ namespace QCA
 	{
 	public:
 		RSAPrivateKey();
-		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider = "");
+		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider = QString() );
 
 		QBigInteger p() const;
 		QBigInteger q() const;
@@ -2834,7 +2834,7 @@ namespace QCA
 	{
 	public:
 		DSAPublicKey();
-		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = "");
+		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString() );
 		DSAPublicKey(const DSAPrivateKey &k);
 
 		DL_Group domain() const;
@@ -2845,7 +2845,7 @@ namespace QCA
 	{
 	public:
 		DSAPrivateKey();
-		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = "");
+		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString() );
 
 		DL_Group domain() const;
 		QBigInteger x() const;
@@ -2856,7 +2856,7 @@ namespace QCA
 	{
 	public:
 		DHPublicKey();
-		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = "");
+		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString() );
 		DHPublicKey(const DHPrivateKey &k);
 
 		DL_Group domain() const;
@@ -2867,7 +2867,7 @@ namespace QCA
 	{
 	public:
 		DHPrivateKey();
-		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = "");
+		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString() );
 
 		DL_Group domain() const;
 		QBigInteger x() const;
@@ -2899,8 +2899,8 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
-		static Certificate fromDER(const QSecureArray &a, const QString &provider = "");
-		static Certificate fromPEM(const QString &s, const QString &provider = "");
+		static Certificate fromDER(const QSecureArray &a, const QString &provider = QString() );
+		static Certificate fromPEM(const QString &s, const QString &provider = QString() );
 
 		bool matchesHostname(const QString &host) const;
 
@@ -2926,8 +2926,8 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
-		static CRL fromDER(const QSecureArray &a, const QString &provider = "");
-		static CRL fromPEM(const QString &s, const QString &provider = "");
+		static CRL fromDER(const QSecureArray &a, const QString &provider = QString() );
+		static CRL fromPEM(const QString &s, const QString &provider = QString() );
 
 	private:
 		friend class Store;
@@ -2936,7 +2936,7 @@ namespace QCA
 	class QCA_EXPORT Store : public Algorithm
 	{
 	public:
-		Store(const QString &provider = "");
+		Store(const QString &provider = QString() );
 
 		void addCertificate(const Certificate &cert, bool trusted = false);
 		void addCRL(const CRL &crl);
@@ -3019,7 +3019,7 @@ namespace QCA
 			NoCert        ///< identity unknown
 		};
 
-		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = "");
+		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = QString() );
 		~TLS();
 
 		void reset();
@@ -3032,7 +3032,7 @@ namespace QCA
 		bool canCompress() const;
 		void setCompressionEnabled(bool b);
 
-		bool startClient(const QString &host = "");
+		bool startClient(const QString &host = QString() );
 		bool startServer();
 		bool isHandshaken() const;
 		QString cipherName() const;
@@ -3100,7 +3100,7 @@ namespace QCA
 			RequireAuthzidSupport  = 0x20  // server-only
 		};
 
-		SASL(QObject *parent = 0, const char *name = 0, const QString &provider = "");
+		SASL(QObject *parent = 0, const char *name = 0, const QString &provider = QString() );
 		~SASL();
 
 		void reset();
