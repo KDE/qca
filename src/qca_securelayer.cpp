@@ -176,6 +176,12 @@ void TLS::setConstraints(int, int)
 {
 }
 
+bool TLS::canCompress(const QString &provider)
+{
+	Q_UNUSED(provider);
+	return false;
+}
+
 void TLS::setCompressionEnabled(bool b)
 {
 	Q_UNUSED(b);

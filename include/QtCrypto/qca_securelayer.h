@@ -127,7 +127,7 @@ namespace QCA
 		void setConstraints(SecurityLevel s);
 		void setConstraints(int minSSF, int maxSSF);
 
-		bool canCompress() const;
+		static bool canCompress(const QString &provider = QString());
 		void setCompressionEnabled(bool b);
 
 		bool startClient(const QString &host = QString());

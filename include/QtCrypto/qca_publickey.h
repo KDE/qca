@@ -77,9 +77,12 @@ namespace QCA
 	*/
 	enum PBEAlgo
 	{
-		PBEDefault,         ///< Use modern default (same as PBE2_TripleDES_SHA1)
-		PBE2_DES_SHA1,      ///< PKCS#5 v2.0 DES/CBC/SHA1
-		PBE2_TripleDES_SHA1 ///< PKCS#5 v2.0 TripleDES/CBC/SHA1
+		PBEDefault,           ///< Use modern default (same as PBES2_TripleDES_SHA1)
+		PBES2_DES_SHA1,       ///< PKCS#5 v2.0 DES/CBC,SHA1
+		PBES2_TripleDES_SHA1, ///< PKCS#5 v2.0 TripleDES/CBC,SHA1
+		PBES2_AES128_SHA1,    ///< PKCS#5 v2.0 AES-128/CBC,SHA1
+		PBES2_AES192_SHA1,    ///< PKCS#5 v2.0 AES-192/CBC,SHA1
+		PBES2_AES256_SHA1     ///< PKCS#5 v2.0 AES-256/CBC,SHA1
 	};
 
 	class QCA_EXPORT PKey : public Algorithm
@@ -182,6 +185,7 @@ namespace QCA
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
+		static bool canUsePBEAlgo(PBEAlgo algo, const QString &provider = QString());
 		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray(), PBEAlgo pbe = PBEDefault) const;
 		QString toPEM(const QSecureArray &passphrase = QSecureArray(), PBEAlgo pbe = PBEDefault) const;
 		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());

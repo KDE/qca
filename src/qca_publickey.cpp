@@ -396,6 +396,13 @@ SymmetricKey PrivateKey::deriveKey(const PublicKey &theirs)
 	return ((PKeyContext *)context())->key()->deriveKey(*(theirContext->key()));
 }
 
+bool PrivateKey::canUsePBEAlgo(PBEAlgo algo, const QString &provider)
+{
+	Q_UNUSED(algo);
+	Q_UNUSED(provider);
+	return false;
+}
+
 QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgo pbe) const
 {
 	Q_UNUSED(pbe);
