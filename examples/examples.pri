@@ -1,6 +1,7 @@
-QCA_CPP = ../../src
+# change/remove these entries, depending on the installation prefix
+INCLUDEPATH += /usr/local/include
+LIBS += -L/usr/local/lib
 
-INCLUDEPATH += $$QCA_CPP
-HEADERS += $$QCA_CPP/qca.h $$QCA_CPP/qcaprovider.h
-SOURCES += $$QCA_CPP/qca.cpp
+# link
+LIBS += -lqca
 
