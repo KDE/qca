@@ -1,6 +1,7 @@
 /*
  * qca-tls.cpp - TLS plugin for QCA
  * Copyright (C) 2003  Justin Karneges
+ * Copyright (C) 2004  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +24,8 @@
 #include<qregexp.h>
 
 #include<openssl/sha.h>
+#include<openssl/md2.h>
+#include<openssl/md4.h>
 #include<openssl/md5.h>
 #include<openssl/evp.h>
 #include<openssl/bio.h>
@@ -33,6 +36,7 @@
 #include<openssl/ssl.h>
 #include<openssl/err.h>
 #include<openssl/rand.h>
+#include<openssl/ripemd.h>
 
 #ifndef OSSL_097
 #define NO_AES
@@ -100,6 +104,41 @@ static QByteArray bio2buf(BIO *b)
 	return buf;
 }
 
+
+class SHA0Context : public QCA_HashContext
+{
+public:
+        SHA0Context()
+        {
+                reset();
+        }
+
+        QCA_HashContext *clone()
+        {
+                return new SHA0Context(*this);
+        }
+
+        void reset()
+        {
+                SHA_Init(&c);
+        }
+
+        void update(const char *in, unsigned int len)
+        {
+                SHA_Update(&c, in, len);
+        }
+
+        void final(QByteArray *out)
+        {
+                QByteArray buf(SHA_DIGEST_LENGTH);
+                SHA_Final((unsigned char *)buf.data(), &c);
+                *out = buf;
+        }
+
+        SHA_CTX c;
+};
+
+
 class SHA1Context : public QCA_HashContext
 {
 public:
@@ -133,6 +172,75 @@ public:
 	SHA_CTX c;
 };
 
+
+class MD2Context : public QCA_HashContext
+{
+public:
+        MD2Context()
+        {
+                reset();
+        }
+
+        QCA_HashContext *clone()
+        {
+                return new MD2Context(*this);
+        }
+
+        void reset()
+        {
+                MD2_Init(&c);
+        }
+
+        void update(const char *in, unsigned int len)
+        {
+                MD2_Update(&c, (unsigned char*)in, len);
+        }
+
+        void final(QByteArray *out)
+        {
+                QByteArray buf(MD2_DIGEST_LENGTH);
+                MD2_Final((unsigned char *)buf.data(), &c);
+                *out = buf;
+        }
+
+        MD2_CTX c;
+};
+
+
+class MD4Context : public QCA_HashContext
+{
+public:
+        MD4Context()
+        {
+                reset();
+        }
+
+        QCA_HashContext *clone()
+        {
+                return new MD4Context(*this);
+        }
+
+        void reset()
+        {
+                MD4_Init(&c);
+        }
+
+        void update(const char *in, unsigned int len)
+        {
+                MD4_Update(&c, (unsigned char*)in, len);
+        }
+
+        void final(QByteArray *out)
+        {
+                QByteArray buf(MD4_DIGEST_LENGTH);
+                MD4_Final((unsigned char *)buf.data(), &c);
+                *out = buf;
+        }
+
+        MD4_CTX c;
+};
+
+
 class MD5Context : public QCA_HashContext
 {
 public:
@@ -158,13 +266,48 @@ public:
 
 	void final(QByteArray *out)
 	{
-		QByteArray buf(16);
+		QByteArray buf(MD5_DIGEST_LENGTH);
 		MD5_Final((unsigned char *)buf.data(), &c);
 		*out = buf;
 	}
 
 	MD5_CTX c;
 };
+
+
+class RIPEMD160Context : public QCA_HashContext
+{
+public:
+	RIPEMD160Context()
+	{
+		reset();
+	}
+
+	QCA_HashContext *clone()
+	{
+		return new RIPEMD160Context(*this);
+	}
+
+	void reset()
+	{
+		RIPEMD160_Init(&c);
+	}
+
+	void update(const char *in, unsigned int len)
+	{
+		RIPEMD160_Update(&c, in, len);
+	}
+
+	void final(QByteArray *out)
+	{
+		QByteArray buf(RIPEMD160_DIGEST_LENGTH);
+		RIPEMD160_Final((unsigned char *)buf.data(), &c);
+		*out = buf;
+	}
+
+	RIPEMD160_CTX c;
+};
+
 
 class EVPCipherContext : public QCA_CipherContext
 {
@@ -1415,6 +1558,7 @@ public:
 	}
 };
 
+
 class QCAOpenSSL : public QCAProvider
 {
 public:
@@ -1433,8 +1577,12 @@ public:
 	int capabilities() const
 	{
 		int caps =
+			QCA::CAP_SHA0 |
 			QCA::CAP_SHA1 |
+			QCA::CAP_MD2 |
+			QCA::CAP_MD4 |
 			QCA::CAP_MD5 |
+			QCA::CAP_RIPEMD160 |
 			QCA::CAP_BlowFish |
 			QCA::CAP_TripleDES |
 #ifndef NO_AES
@@ -1449,10 +1597,18 @@ public:
 
 	void *context(int cap)
 	{
-		if(cap == QCA::CAP_SHA1)
+		if(cap == QCA::CAP_SHA0)
+			return new SHA0Context;
+		else if(cap == QCA::CAP_SHA1)
 			return new SHA1Context;
+		else if(cap == QCA::CAP_MD2)
+			return new MD2Context;
+		else if(cap == QCA::CAP_MD4)
+			return new MD4Context;
 		else if(cap == QCA::CAP_MD5)
 			return new MD5Context;
+		else if(cap == QCA::CAP_RIPEMD160)
+			return new RIPEMD160Context;
 		else if(cap == QCA::CAP_BlowFish)
 			return new BlowFishContext;
 		else if(cap == QCA::CAP_TripleDES)
