@@ -180,254 +180,261 @@ void HashUnitTest::allTests()
 
     QCString hashResult; // used as the actual result
 
-    if(!QCA::isSupported("md2"))
-	SKIP("MD2 not supported!\n");
-    else {
-	for (int n = 0; md2TestValues[n].inputString; n++) {
-	    hashResult = QCA::MD2().hashToString(md2TestValues[n].inputString);
-	    CHECK( hashResult, md2TestValues[n].expectedHash );
-        }
-    }
-
-    if(!QCA::isSupported("md4"))
-	SKIP("MD4 not supported!\n");
-    else {
-	for (int n = 0; md4TestValues[n].inputString; n++) {
-	    hashResult = QCA::MD4().hashToString(md4TestValues[n].inputString);
-	    CHECK( hashResult, md4TestValues[n].expectedHash );
-        }
-    }
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("default");
     
-    if(!QCA::isSupported("md5"))
-	SKIP("MD5 not supported!\n");
-    else {
-	for (int n = 0; md5TestValues[n].inputString; n++) {
-	    hashResult = QCA::MD5().hashToString(md5TestValues[n].inputString);
-	    CHECK( hashResult, md5TestValues[n].expectedHash );
-        }
-
-
-	QFile f1( "./data/empty" );
-	if ( f1.open( IO_ReadOnly ) ) {
-	    QCA::MD5 hashObj;
-	    hashObj.update( f1 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
-	} else {
-	    SKIP( "./data/empty could not be opened - do you need to create it?");
+    for ( QStringList::Iterator it = providersToTest.begin(); it != providersToTest.end(); ++it ) {
+	if(!QCA::isSupported("md2"))
+	    SKIP("MD2 not supported" );
+	else {
+	    for (int n = 0; md2TestValues[n].inputString; n++) {
+		hashResult = QCA::MD2(*it).hashToString(md2TestValues[n].inputString);
+		CHECK( hashResult, md2TestValues[n].expectedHash );
+	    }
 	}
 
-	QFile f2( "./data/Botan-1.4.1.tar.bz2" );
-	if ( f2.open( IO_ReadOnly ) ) {
-	    QCA::MD5 hashObj;
-	    hashObj.update( f2 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "7c4b3d8a360c6c3cb647160fa9adfe71" ) );
-	} else {
-	    SKIP( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
+	if(!QCA::isSupported("md4"))
+	    SKIP("MD4 not supported");
+	else {
+	    for (int n = 0; md4TestValues[n].inputString; n++) {
+	    hashResult = QCA::MD4(*it).hashToString(md4TestValues[n].inputString);
+	    CHECK( hashResult, md4TestValues[n].expectedHash );
+	    }
+	}
+    
+
+	if(!QCA::isSupported("md5"))
+	    SKIP("MD5 not supported");
+	else {
+	    for (int n = 0; md5TestValues[n].inputString; n++) {
+		hashResult = QCA::MD5(*it).hashToString(md5TestValues[n].inputString);
+		CHECK( hashResult, md5TestValues[n].expectedHash );
+	    }
+	    
+	    QFile f1( "./data/empty" );
+	    if ( f1.open( IO_ReadOnly ) ) {
+		QCA::MD5 hashObj(*it);
+		hashObj.update( f1 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
+	    } else {
+		SKIP( "./data/empty could not be opened - do you need to create it?");
+	    }
+
+	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
+	    if ( f2.open( IO_ReadOnly ) ) {
+		QCA::MD5 hashObj(*it);
+		hashObj.update( f2 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "7c4b3d8a360c6c3cb647160fa9adfe71" ) );
+	    } else {
+		SKIP( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
+	    }
+	    
+
+	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
+	    if ( f3.open( IO_ReadOnly ) ) {
+		QCA::MD5 hashObj(*it);
+		hashObj.update( f3 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "a74671ea68b0e3c609e8785ed8497c14" ) );
+	    } else {
+		SKIP( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
+	    }
+	    
+	    QFile f4( "./data/scribus-1.2.tar.bz2" );
+	    if ( f4.open( IO_ReadOnly ) ) {
+		QCA::MD5 hashObj(*it);
+		hashObj.update( f4 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "7d2c2b228f9a6ff82c9401fd54bdbe16" ) );
+	    } else {
+		SKIP( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
+	    }
+	    
+	}
+	
+	if(!QCA::isSupported("sha0"))
+	    SKIP("SHA0 not supported");
+	else {
+	    for (int n = 0; sha0TestValues[n].inputString; n++) {
+		hashResult = QCA::SHA0(*it).hashToString(sha0TestValues[n].inputString);
+		CHECK( hashResult, sha0TestValues[n].expectedHash );
+	    }
+	    
+	    QByteArray fillerString;
+	    fillerString.fill('a', 1000);
+
+
+	    // This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
+	    QCA::SHA0 shaHash(*it);
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("3232affa48628a26653b5aaa44541fd90d690603" ) );
+	    
+	    shaHash.clear();
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("3232affa48628a26653b5aaa44541fd90d690603" ) );
+	}
+	
+	
+	if(!QCA::isSupported("sha1"))
+	    SKIP("SHA1 not supported");
+	else {
+	    for (int n = 0; sha1TestValues[n].inputString; n++) {
+		hashResult = QCA::SHA1(*it).hashToString(sha1TestValues[n].inputString);
+		CHECK( hashResult, sha1TestValues[n].expectedHash );
+	    }
+	    
+	    QByteArray fillerString;
+	    fillerString.fill('a', 1000);
+	    
+	    // This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
+	    // It basically reflects FIPS 180-2, Appendix A.3
+	    // Also as per AS 2805.13.3-2000 Appendix A
+	    QCA::SHA1 shaHash(*it);
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("34aa973cd4c4daa4f61eeb2bdbad27316534016f") );
+
+	    QFile f1( "./data/empty" );
+	    if ( f1.open( IO_ReadOnly ) ) {
+		QCA::SHA1 hashObj(*it);
+		hashObj.update( f1 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
+	    } else {
+		SKIP( "./data/empty could not be opened - do you need to create it?");
+	    }
+	    
+	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
+	    if ( f2.open( IO_ReadOnly ) ) {
+		QCA::SHA1 hashObj(*it);
+		hashObj.update( f2 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "cda343591428a68e22bd2e349b890cbafb642cf7" ) );
+	    } else {
+		SKIP( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
+	    }
+
+	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
+	    if ( f3.open( IO_ReadOnly ) ) {
+		QCA::SHA1 hashObj(*it);
+		hashObj.update( f3 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "a030a9c6dcd10c5d90a86f915ad4710084cbca71" ) );
+	    } else {
+		SKIP( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
+	    }
+	    
+	    QFile f4( "./data/scribus-1.2.tar.bz2" );
+	    if ( f4.open( IO_ReadOnly ) ) {
+		QCA::SHA1 hashObj(*it);
+		hashObj.update( f4 );
+		CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
+		       QString( "a1fb6ed6acfd92381055b310d926d6e83e76ff1e" ) );
+	    } else {
+		SKIP( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
+	    }
+	    
+	}
+
+	if(!QCA::isSupported("sha256"))
+	    SKIP("SHA256 not supported");
+	else {
+	    for (int n = 0; sha256TestValues[n].inputString; n++) {
+		hashResult = QCA::SHA256(*it).hashToString(sha256TestValues[n].inputString);
+		CHECK( hashResult, sha256TestValues[n].expectedHash );
+	    }
+	    
+	    QByteArray fillerString;
+	    fillerString.fill('a', 1000);
+
+	    // This basically reflects FIPS 180-2, Appendix B.3
+	    QCA::SHA256 shaHash(*it);
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") );
+	}
+	
+	if(!QCA::isSupported("sha384"))
+	    SKIP("SHA384 not supported");
+	else {
+	    for (int n = 0; sha384TestValues[n].inputString; n++) {
+		hashResult = QCA::SHA384(*it).hashToString(sha384TestValues[n].inputString);
+		CHECK( hashResult, sha384TestValues[n].expectedHash );
+	    }
+	    
+	    QByteArray fillerString;
+	    fillerString.fill('a', 1000);
+
+	    // This basically reflects FIPS 180-2, Appendix D.3
+	    QCA::SHA384 shaHash(*it);
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985") );
+
 	}
 
 
-	QFile f3( "./data/linux-2.6.7.tar.bz2" );
-	if ( f3.open( IO_ReadOnly ) ) {
-	    QCA::MD5 hashObj;
-	    hashObj.update( f3 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "a74671ea68b0e3c609e8785ed8497c14" ) );
-	} else {
-	    SKIP( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
+	if(!QCA::isSupported("sha512"))
+	    SKIP("SHA512 not supported");
+	else {
+	    for (int n = 0; sha512TestValues[n].inputString; n++) {
+		hashResult = QCA::SHA512(*it).hashToString(sha512TestValues[n].inputString);
+		CHECK( hashResult, sha512TestValues[n].expectedHash );
+	    }
+	    
+	    QByteArray fillerString;
+	    fillerString.fill('a', 1000);
+	    
+	    // This basically reflects FIPS 180-2, Appendix C.3
+	    QCA::SHA512 shaHash;
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") );
 	}
-
-	QFile f4( "./data/scribus-1.2.tar.bz2" );
-	if ( f4.open( IO_ReadOnly ) ) {
-	    QCA::MD5 hashObj;
-	    hashObj.update( f4 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "7d2c2b228f9a6ff82c9401fd54bdbe16" ) );
-	} else {
-	    SKIP( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
+	
+	
+	if(!QCA::isSupported("ripemd160"))
+	    SKIP("RIPEMD160 not supported");
+	else {
+	    for (int n = 0; ripemd160TestValues[n].inputString; n++) {
+		hashResult = QCA::RIPEMD160(*it).hashToString(ripemd160TestValues[n].inputString);
+		CHECK( hashResult, ripemd160TestValues[n].expectedHash );
+	    }
+	    
+	    // This is the "million times 'a' test"
+	    QByteArray fillerString;
+	    fillerString.fill('a', 1000);
+	    
+	    QCA::RIPEMD160 shaHash(*it);
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("52783243c1697bdbe16d37f97f68f08325dc1528") );
+	    
+	    // This is the "8 rounds of 1234567890" test.
+	    // It also ensure that we can re-use hash objects correctly.
+	    static char bindata[] = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30 };
+	    fillerString.resize(10);
+	    fillerString.setRawData( bindata, sizeof(bindata) ); // "1234567890"
+	    shaHash.clear();
+	    for (int i=0; i<8; i++)
+		shaHash.update(fillerString);
+	    fillerString.resetRawData( bindata, sizeof(bindata) );
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("9b752e45573d4b39f4dbd3323cab82bf63326bfb") );
 	}
-
-    }
-
-    if(!QCA::isSupported("sha0"))
-	SKIP("SHA0 not supported!\n");
-    else {
-	for (int n = 0; sha0TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA0().hashToString(sha0TestValues[n].inputString);
-	    CHECK( hashResult, sha0TestValues[n].expectedHash );
-	}
-                
-	QByteArray fillerString;
-	fillerString.fill('a', 1000);
-
-
-	// This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
-	QCA::SHA0 shaHash;
-	for (int i=0; i<1000; i++)
-	    shaHash.update(fillerString);
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("3232affa48628a26653b5aaa44541fd90d690603" ) );
-
-	shaHash.clear();
-	for (int i=0; i<1000; i++)
-	    shaHash.update(fillerString);
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("3232affa48628a26653b5aaa44541fd90d690603" ) );
-    }
-
-
-    if(!QCA::isSupported("sha1"))
-	SKIP("SHA1 not supported!\n");
-    else {
-	for (int n = 0; sha1TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA1().hashToString(sha1TestValues[n].inputString);
-	    CHECK( hashResult, sha1TestValues[n].expectedHash );
-	}
-                
-	QByteArray fillerString;
-	fillerString.fill('a', 1000);
-
-	// This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
-	// It basically reflects FIPS 180-2, Appendix A.3
-	// Also as per AS 2805.13.3-2000 Appendix A
-	QCA::SHA1 shaHash;
-	for (int i=0; i<1000; i++)
-	    shaHash.update(fillerString);
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("34aa973cd4c4daa4f61eeb2bdbad27316534016f") );
-
-	QFile f1( "./data/empty" );
-	if ( f1.open( IO_ReadOnly ) ) {
-	    QCA::SHA1 hashObj;
-	    hashObj.update( f1 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
-	} else {
-	    SKIP( "./data/empty could not be opened - do you need to create it?");
-	}
-
-	QFile f2( "./data/Botan-1.4.1.tar.bz2" );
-	if ( f2.open( IO_ReadOnly ) ) {
-	    QCA::SHA1 hashObj;
-	    hashObj.update( f2 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "cda343591428a68e22bd2e349b890cbafb642cf7" ) );
-	} else {
-	    SKIP( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
-	}
-
-	QFile f3( "./data/linux-2.6.7.tar.bz2" );
-	if ( f3.open( IO_ReadOnly ) ) {
-	    QCA::SHA1 hashObj;
-	    hashObj.update( f3 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "a030a9c6dcd10c5d90a86f915ad4710084cbca71" ) );
-	} else {
-	    SKIP( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
-	}
-
-	QFile f4( "./data/scribus-1.2.tar.bz2" );
-	if ( f4.open( IO_ReadOnly ) ) {
-	    QCA::SHA1 hashObj;
-	    hashObj.update( f4 );
-	    CHECK( QString( QCA::arrayToHex( hashObj.final() ) ),
-		   QString( "a1fb6ed6acfd92381055b310d926d6e83e76ff1e" ) );
-	} else {
-	    SKIP( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
-	}
-
-    }
-
-    if(!QCA::isSupported("sha256"))
-	SKIP("SHA256 not supported!\n");
-    else {
-	for (int n = 0; sha256TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA256().hashToString(sha256TestValues[n].inputString);
-	    CHECK( hashResult, sha256TestValues[n].expectedHash );
-	}
-                
-	QByteArray fillerString;
-	fillerString.fill('a', 1000);
-
-	// This basically reflects FIPS 180-2, Appendix B.3
-	QCA::SHA256 shaHash;
-	for (int i=0; i<1000; i++)
-	    shaHash.update(fillerString);
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") );
-    }
-
-    if(!QCA::isSupported("sha384"))
-	SKIP("SHA384 not supported!\n");
-    else {
-	for (int n = 0; sha384TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA384().hashToString(sha384TestValues[n].inputString);
-	    CHECK( hashResult, sha384TestValues[n].expectedHash );
-	}
-
-	QByteArray fillerString;
-	fillerString.fill('a', 1000);
-
-	// This basically reflects FIPS 180-2, Appendix D.3
-	QCA::SHA384 shaHash;
-	for (int i=0; i<1000; i++)
-	    shaHash.update(fillerString);
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985") );
-
-    }
-
-
-    if(!QCA::isSupported("sha512"))
-	SKIP("SHA512 not supported!\n");
-    else {
-	for (int n = 0; sha512TestValues[n].inputString; n++) {
-	    hashResult = QCA::SHA512().hashToString(sha512TestValues[n].inputString);
-	    CHECK( hashResult, sha512TestValues[n].expectedHash );
-	}
-
-	QByteArray fillerString;
-	fillerString.fill('a', 1000);
-
-	// This basically reflects FIPS 180-2, Appendix C.3
-	QCA::SHA512 shaHash;
-	for (int i=0; i<1000; i++)
-	    shaHash.update(fillerString);
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") );
-    }
-
-
-    if(!QCA::isSupported("ripemd160"))
-	SKIP("RIPEMD160 not supported!\n");
-    else {
-	for (int n = 0; ripemd160TestValues[n].inputString; n++) {
-	    hashResult = QCA::RIPEMD160().hashToString(ripemd160TestValues[n].inputString);
-	    CHECK( hashResult, ripemd160TestValues[n].expectedHash );
-	}
-                
-	// This is the "million times 'a' test"
-	QByteArray fillerString;
-	fillerString.fill('a', 1000);
-
-	QCA::RIPEMD160 shaHash;
-	for (int i=0; i<1000; i++)
-	    shaHash.update(fillerString);
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("52783243c1697bdbe16d37f97f68f08325dc1528") );
-
-	// This is the "8 rounds of 1234567890" test.
-	// It also ensure that we can re-use hash objects correctly.
-	static char bindata[] = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30 };
-	fillerString.resize(10);
-	fillerString.setRawData( bindata, sizeof(bindata) ); // "1234567890"
-	shaHash.clear();
-	for (int i=0; i<8; i++)
-	    shaHash.update(fillerString);
-	fillerString.resetRawData( bindata, sizeof(bindata) );
-	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("9b752e45573d4b39f4dbd3323cab82bf63326bfb") );
     }
 }
 

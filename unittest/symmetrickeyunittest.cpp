@@ -33,6 +33,24 @@ SymmetricKeyUnitTest::SymmetricKeyUnitTest()
 
 }
 
+struct weakKey {
+    QCString key;
+    bool weak;
+};
+
+// These are from the Botan test suite
+static struct weakKey DESTestValues[] = {
+  { "ffffffffffffffff" , true },
+  { "0000000000000000" , true },
+  { "d5d44ff720683d0d" , false },
+  { "d5d44ff720683d0d" , false },
+  { "1046913489980131" , false },
+  { "1007103489988020" , false },
+  { "10071034c8980120" , false },
+  { "1046103489988020" , false },
+  { 0, 0 }
+};
+
 void SymmetricKeyUnitTest::allTests()
 {
     QCA::Initializer init;
@@ -66,5 +84,10 @@ void SymmetricKeyUnitTest::allTests()
     CHECK( anotherKey.size(), (unsigned int) 10 );
     anotherKey = emptyKey;
     CHECK( anotherKey.size(), (unsigned int) 0 );
+
+    for (int n = 0; DESTestValues[n].key; n++) {
+	QCA::SymmetricKey key(QCA::hexToArray(DESTestValues[n].key));
+	CHECK( key.isWeakDESKey(), DESTestValues[n].weak );
+    }
 }
 

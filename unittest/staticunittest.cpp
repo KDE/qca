@@ -111,5 +111,18 @@ void StaticUnitTest::allTests()
     }
     CHECK( providerNames.contains("qca-openssl"), (size_t)1 );
     CHECK( providerNames.contains("qca-gcrypt"), (size_t)1 );
+    CHECK( providerNames.contains("qca-botan"), (size_t)1 );
+
+    QCA::setProviderPriority("qca-openssl", 4);
+    QCA::setProviderPriority("qca-botan", 2);
+    CHECK( QCA::providerPriority( "qca-openssl"), 4 );
+    CHECK( QCA::providerPriority( "qca-gcrypt"), 0 );
+    CHECK( QCA::providerPriority( "qca-botan"), 2 );
+    QCA::setProviderPriority("qca-openssl", 3);
+    // reuse last
+    QCA::setProviderPriority("qca-botan", -1);
+    CHECK( QCA::providerPriority( "qca-botan"), 3 );
+
+    QCA::unloadAllPlugins();
 }
 

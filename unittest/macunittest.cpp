@@ -39,7 +39,7 @@ void MACUnitTest::allTests()
     QCString macResult; // used as the actual result
 
     if(!QCA::isSupported("hmac(md5)"))
-	SKIP("HMAC(MD5) not supported!\n");
+	SKIP("HMAC(MD5) not supported!");
     else {
 	QCA::HMAC md5hmacLenTest( "md5" );
 	CHECK( md5hmacLenTest.validKeyLength( 0 ), true );
@@ -104,7 +104,7 @@ void MACUnitTest::allTests()
     }
 
     if(!QCA::isSupported("hmac(sha1)"))
-	SKIP("HMAC(SHA1) not supported!\n");
+	SKIP("HMAC(SHA1) not supported!");
     else {
 	QCA::HMAC sha1hmacLenTest( "sha1" );
 	CHECK( sha1hmacLenTest.validKeyLength( 0 ), true );
@@ -169,7 +169,7 @@ void MACUnitTest::allTests()
     }
 
     if(!QCA::isSupported("hmac(ripemd160)"))
-	SKIP("HMAC(RIPEMD160) not supported!\n");
+	SKIP("HMAC(RIPEMD160) not supported!");
     else {
 	QCA::HMAC ripemd160hmacLenTest( "ripemd160" );
 	CHECK( ripemd160hmacLenTest.validKeyLength( 0 ), true );
