@@ -1339,6 +1339,16 @@ public:
 	QCAOpenSSL() {}
 	~QCAOpenSSL() {}
 
+	QString name() const
+	{
+		return "openssl";
+	}
+
+	int qcaVersion() const
+	{
+		return 1;
+	}
+
 	int capabilities() const
 	{
 		int caps =
