@@ -131,7 +131,7 @@ public:
 		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 		connect(ssl, SIGNAL(readyReadOutgoing(int)), SLOT(ssl_readyReadOutgoing(int)));
-		connect(ssl, SIGNAL(closed(const QByteArray &)), SLOT(ssl_closed(const QByteArray &)));
+		connect(ssl, SIGNAL(closed()), SLOT(ssl_closed()));
 		connect(ssl, SIGNAL(error(int)), SLOT(ssl_error(int)));
 
 		rootCerts.setAutoDelete(true);
@@ -229,7 +229,7 @@ private slots:
 		sock->writeBlock(a.data(), a.size());
 	}
 
-	void ssl_closed(const QByteArray &)
+	void ssl_closed()
 	{
 		printf("SSL session closed\n");
 	}

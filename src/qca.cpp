@@ -950,6 +950,13 @@ QByteArray TLS::readOutgoing()
 	return a;
 }
 
+QByteArray TLS::readUnprocessed()
+{
+	QByteArray a = d->from_net.copy();
+	d->from_net.resize(0);
+	return a;
+}
+
 const Cert & TLS::peerCertificate() const
 {
 	return d->cert;
@@ -968,7 +975,6 @@ void TLS::update()
 	bool force_read = false;
 	bool eof = false;
 	bool done = false;
-	QByteArray leftover;
 
 	if(d->closing) {
 		QByteArray a;
@@ -980,7 +986,7 @@ void TLS::update()
 			return;
 		}
 		if(r == QCA_TLSContext::Success) {
-			leftover = d->c->unprocessed().copy();
+			d->from_net = d->c->unprocessed().copy();
 			done = true;
 		}
 		d->appendArray(&d->to_net, a);
@@ -1066,7 +1072,7 @@ void TLS::update()
 
 	if(d->closing && done) {
 		reset();
-		closed(leftover);
+		closed();
 	}
 }
 

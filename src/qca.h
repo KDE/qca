@@ -351,6 +351,7 @@ namespace QCA
 		// encoded (socket side)
 		void writeIncoming(const QByteArray &a);
 		QByteArray readOutgoing();
+		QByteArray readUnprocessed();
 
 		// cert related
 		const Cert & peerCertificate() const;
@@ -360,7 +361,7 @@ namespace QCA
 		void handshaken();
 		void readyRead();
 		void readyReadOutgoing(int plainBytes);
-		void closed(const QByteArray &leftover);
+		void closed();
 		void error(int);
 
 	private slots:
