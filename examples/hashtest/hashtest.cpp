@@ -32,15 +32,15 @@ int main(int argc, char **argv)
 
 	// we use the first argument if provided, or
 	// use "hello" if no arguments
-	QCString cs = (argc >= 2) ? argv[1] : "hello";
+	QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
 
 	// must always check that an algorithm is supported before using it
 	if( !QCA::isSupported("sha1") )
 		printf("SHA1 not supported!\n");
 	else {
 		// this shows the "all in one" approach
-		QString result = QCA::SHA1().hashToString(cs);
-		printf("sha1(\"%s\") = [%s]\n", cs.data(), result.latin1());
+		QString result = QCA::SHA1().hashToString(arg);
+		printf("sha1(\"%s\") = [%s]\n", arg.data(), result.toAscii().data());
 	}
 
 	// must always check that an algorithm is supported before using it
@@ -50,8 +50,8 @@ int main(int argc, char **argv)
 		// this shows the incremental approach. Naturally
 		// for this simple job, we could use the "all in one"
 		// approach - this is an example, after all :-)
-		QSecureArray part1(cs.left(3)); // three chars - "hel"
-		QSecureArray part2(cs.mid(3)); // the rest - "lo"
+	        QSecureArray part1(arg.toByteArray().left(3)); // three chars - "hel"
+		QSecureArray part2(arg.toByteArray().mid(3)); // the rest - "lo"
 
 		// create the required object.
 		QCA::MD5 hashObject;
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 		QSecureArray resultArray = hashObject.final();
 		// convert the result into printable hexadecimal.
 		QString result = QCA::arrayToHex(resultArray);
-		printf("md5(\"%s\") = [%s]\n", cs.data(), result.latin1());
+		printf("md5(\"%s\") = [%s]\n", arg.data(), result.toAscii().data());
 	}
 
 	return 0;
