@@ -35,6 +35,24 @@
 	QCA_PLUGIN_EXPORT QCA::Provider *createProvider2() { return new P; } \
 	QCA_PLUGIN_EXPORT int version() { return QCA_PLUGIN_VERSION; }
 
+/** \page providers Providers
+
+QCA works on the concept of a "provider". There is a limited
+internal provider (named "default"), but most of the work is
+done in plugin modules.
+
+The logic to selection of a provider is fairly simple. The user can 
+specify a provider name - if that name exists, and the provider supports
+the requested feature, then the named provider is used. If that
+didn't work, then the available plugins are searched (based on a
+priority order) for the requested feature. If that doesn't work,
+then the default provider is searched for the requested feature.
+
+So the only way to get the default provider is to either have no other support
+whatsoever, or to specify the default provider directly (this goes for the
+algorithm constructors as well as setGlobalRNG()).
+*/
+
 namespace QCA {
 
 class RandomContext : public Provider::Context
