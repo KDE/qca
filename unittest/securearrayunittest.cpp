@@ -46,15 +46,17 @@ void SecureArrayUnitTest::allTests()
     CHECK( testArray.size(), (unsigned int) 10 );
     CHECK( testArray.isEmpty(), false );
 
+    QSecureArray testArray64(64);
+    CHECK( testArray64.size(), (unsigned int) 64 );
+    CHECK( testArray64.isEmpty(), false );
+
     //testArray.fill( 'a' );
     for (unsigned int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x61;
     }
     CHECK( QCA::arrayToHex( testArray ), QString( "61616161616161616161" ) );
-    //testArray.fill( 'b' );
-    for (unsigned int i = 0; i < testArray.size(); i++) {
-	testArray[ i ] = 0x62;
-    }
+
+    testArray.fill( 'b' );
     testArray[7] = 0x00;
     CHECK( QCA::arrayToHex( testArray ), QString( "62626262626262006262" ) );
 
@@ -69,9 +71,7 @@ void SecureArrayUnitTest::allTests()
 
     QSecureArray copyArray( secureArray );
     CHECK( QCA::arrayToHex ( copyArray ), QString( "63636363636363636363" ) );
-    for (unsigned int i = 0; i < copyArray.size(); i++) {
-	copyArray[ i ] = 0x64;
-    }
+    copyArray.fill(0x64);
     CHECK( QCA::arrayToHex ( copyArray ), QString( "64646464646464646464" ) );
     CHECK( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
 
@@ -122,5 +122,8 @@ void SecureArrayUnitTest::allTests()
     CHECK( QCA::arrayToHex ( appendArray ), QString( "6363636363636363636363636363636363636363" ) );
     QSecureArray appendArray2 = secureArray;
     CHECK( QCA::arrayToHex ( appendArray2.append(secureArray) ), QString( "6363636363636363636363636363636363636363" ) );
+
+    // test for a possible problem with operator[]
+    CHECK( (secureArray[0] == (char)0x63), true );
 }
 
