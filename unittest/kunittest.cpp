@@ -50,6 +50,9 @@ KUnitTest::KUnitTest()
 {
     QTimer::singleShot( 0, this, SLOT(checkRun()) );
 
+    m_tests.setAutoDelete( TRUE );
+    m_qtests.setAutoDelete( TRUE );
+
     registerTests();
 }
 
