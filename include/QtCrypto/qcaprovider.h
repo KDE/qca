@@ -25,6 +25,7 @@
 #include <QtCore>
 #include "qca_core.h"
 #include "qca_basic.h"
+#include "qca_publickey.h"
 #include "qca_cert.h"
 
 #include <limits>
@@ -115,8 +116,9 @@ public:
 	virtual SymmetricKey makeKey(const QSecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount) = 0;
 };
 
-class PKeyBase : public Provider::Context
+class PKeyBase : public QObject, public Provider::Context
 {
+	Q_OBJECT
 public:
 	PKeyBase(Provider *p, const QString &type) : Provider::Context(p, type) {}
 	virtual bool isNull() const = 0;
@@ -124,26 +126,30 @@ public:
 	virtual void convertToPublic() = 0;
 
 	// encrypt/decrypt
-	virtual int maximumEncryptSize() const;
-	virtual QSecureArray encrypt(const QSecureArray &in);
-	virtual bool decrypt(const QSecureArray &in, QSecureArray *out);
+	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const;
+	virtual QSecureArray encrypt(EncryptionAlgorithm alg, const QSecureArray &in);
+	virtual bool decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out);
 
 	// sign / verify
-	virtual void startSign();
-	virtual void startVerify();
+	virtual void startSign(SignatureAlgorithm alg);
+	virtual void startVerify(SignatureAlgorithm alg);
 	virtual void update(const QSecureArray &in);
 	virtual QSecureArray endSign();
 	virtual bool endVerify(const QSecureArray &sig);
 
 	// key agreement
 	virtual SymmetricKey deriveKey(const PKeyBase &theirs);
+
+signals:
+	void finished();
 };
 
 class RSAContext : public PKeyBase
 {
+	Q_OBJECT
 public:
 	RSAContext(Provider *p) : PKeyBase(p, "rsa") {}
-	virtual void createPrivate(int bits, int exp, void (*cb)(RSAContext *c)) = 0;
+	virtual void createPrivate(int bits, int exp, bool block) = 0;
 	virtual void createPrivate(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e) = 0;
 	virtual void createPublic(const QBigInteger &n, const QBigInteger &e) = 0;
 	virtual QBigInteger p() const = 0;
@@ -155,9 +161,10 @@ public:
 
 class DSAContext : public PKeyBase
 {
+	Q_OBJECT
 public:
 	DSAContext(Provider *p) : PKeyBase(p, "dsa") {}
-	virtual void createPrivate(DL_Group group, void (*cb)(DSAContext *c)) = 0;
+	virtual void createPrivate(DL_Group group, bool block) = 0;
 	virtual void createPrivate(DL_Group group, const QBigInteger &x, const QBigInteger &y) = 0;
 	virtual void createPublic(DL_Group group, const QBigInteger &y) = 0;
 	virtual DL_Group domain() const = 0;
@@ -167,9 +174,10 @@ public:
 
 class DHContext : public PKeyBase
 {
+	Q_OBJECT
 public:
 	DHContext(Provider *p) : PKeyBase(p, "dh") {}
-	virtual void createPrivate(DL_Group group, void (*cb)(DHContext *c)) = 0;
+	virtual void createPrivate(DL_Group group, bool block) = 0;
 	virtual void createPrivate(DL_Group group, const QBigInteger &x, const QBigInteger &y) = 0;
 	virtual void createPublic(DL_Group group, const QBigInteger &y) = 0;
 	virtual DL_Group domain() const = 0;
@@ -180,12 +188,14 @@ public:
 class PKeyContext : public Provider::Context
 {
 public:
-	enum Type { RSA, DSA, DH };
-	enum ConvertResult { Good, ErrDecode, ErrPassphrase };
 	PKeyContext(Provider *p) : Provider::Context(p, "pkey") {}
 
-	virtual PKeyBase *key() const = 0;
-	virtual Type type() const = 0;
+	virtual QList<PKey::Type> supportedTypes() const = 0;
+	virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const = 0;
+
+	virtual PKeyBase *key() = 0;
+	virtual const PKeyBase *key() const = 0;
+	virtual PKey::Type type() const = 0;
 	virtual void setKey(PKeyBase *key) = 0;
 
 	// import / export
@@ -193,8 +203,8 @@ public:
 	virtual QString publicToPEM() const = 0;
 	virtual ConvertResult publicFromDER(const QSecureArray &a) = 0;
 	virtual ConvertResult publicFromPEM(const QString &s) = 0;
-	virtual QSecureArray privateToDER(const QSecureArray &passphrase) const = 0;
-	virtual QString privateToPEM(const QSecureArray &passphrase) const = 0;
+	virtual QSecureArray privateToDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const = 0;
+	virtual QString privateToPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const = 0;
 	virtual ConvertResult privateFromDER(const QSecureArray &a, const QSecureArray &passphrase) = 0;
 	virtual ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase) = 0;
 };

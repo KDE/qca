@@ -747,6 +747,33 @@ namespace QCA
 		*/
 		Provider *provider() const;
 
+		// Note: The next four functions are not public!
+
+		/**
+		   (NOT PUBLIC) The context associated with this algorithm
+		*/
+		Provider::Context *context();
+
+		/**
+		   (NOT PUBLIC) The context associated with this algorithm
+		*/
+		const Provider::Context *context() const;
+
+		/**
+		   (NOT PUBLIC) Set the Provider for this algorithm
+
+		   \param c the context for the Provider to use
+		*/
+		void change(Provider::Context *c);
+
+		/**
+		   \overload
+
+		   \param type the name of the algorithm to use
+		   \param provider the name of the preferred provider
+		*/
+		void change(const QString &type, const QString &provider);
+
 	protected:
 		/**
 		   Constructor for empty algorithm
@@ -760,31 +787,6 @@ namespace QCA
 		   \param provider the name of a particular Provider
 		*/
 		Algorithm(const QString &type, const QString &provider);
-
-		/**
-		   The context associated with this algorithm
-		*/
-		Provider::Context *context();
-
-		/**
-		   The context associated with this algorithm
-		*/
-		const Provider::Context *context() const;
-
-		/**
-		   Set the Provider for this algorithm
-
-		   \param c the context for the Provider to use
-		*/
-		void change(Provider::Context *c);
-
-		/**
-		   \overload
-
-		   \param type the name of the algorithm to use
-		   \param provider the name of the preferred provider
-		*/
-		void change(const QString &type, const QString &provider);
 
 	private:
 		class Private;

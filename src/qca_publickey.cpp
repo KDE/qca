@@ -28,6 +28,26 @@ namespace QCA {
 
 Provider::Context *getContext(const QString &type, const QString &provider);
 
+static bool stringToFile(const QString &fileName, const QString &content)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::WriteOnly))
+		return false;
+	QTextStream ts(&f);
+	ts << content;
+	return true;
+}
+
+static bool stringFromFile(const QString &fileName, QString *str)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::ReadOnly))
+		return false;
+	QTextStream ts(&f);
+	*str = ts.readAll();
+	return true;
+}
+
 //----------------------------------------------------------------------------
 // PKey
 //----------------------------------------------------------------------------
@@ -72,15 +92,31 @@ void PKey::set(const PKey &k)
 	*this = k;
 }
 
+void PKey::assignToPublic(PKey *dest) const
+{
+	dest->set(*this);
+
+	// converting private to public
+	if(dest->isPrivate())
+		static_cast<PKeyContext *>(dest->context())->key()->convertToPublic();
+}
+
+void PKey::assignToPrivate(PKey *dest) const
+{
+	dest->set(*this);
+}
+
 QList<PKey::Type> PKey::supportedTypes(const QString &provider)
 {
-	Q_UNUSED(provider);
-	return QList<PKey::Type>();
+	const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", provider));
+	QList<Type> list = c->supportedTypes();
+	delete c;
+	return list;
 }
 
 bool PKey::isNull() const
 {
-	PKeyContext *c = (PKeyContext *)context();
+	const PKeyContext *c = static_cast<const PKeyContext *>(context());
 	if(!c)
 		return true;
 	else
@@ -91,7 +127,7 @@ PKey::Type PKey::type() const
 {
 	if(isNull())
 		return RSA; // some default so we don't explode
-	return (PKey::Type)((PKeyContext *)context())->type();
+	return static_cast<const PKeyContext *>(context())->type();
 }
 
 bool PKey::isRSA() const
@@ -120,7 +156,7 @@ bool PKey::isPrivate() const
 {
 	if(isNull())
 		return false;
-	return ((PKeyContext *)context())->key()->isPrivate();
+	return static_cast<const PKeyContext *>(context())->key()->isPrivate();
 }
 
 bool PKey::canKeyAgree() const
@@ -130,53 +166,25 @@ bool PKey::canKeyAgree() const
 
 PublicKey PKey::toPublicKey() const
 {
-	if(isNull())
-		return PublicKey();
-
 	PublicKey k;
-	if(isRSA())
-		k = toRSAPublicKey();
-	else if(isDSA())
-		k = toDSAPublicKey();
-	else
-		k = toDHPublicKey();
-
-	// converting private to public
-	if(!k.isNull() && k.isPrivate())
-	{
-		printf("before detach: %d\n", ((PKeyContext *)k.context())->key()->isNull());
-		//k.detach();
-		printf("before convert: %d\n", ((PKeyContext *)k.context())->key()->isNull());
-		((PKeyContext *)k.context())->key()->convertToPublic();
-		printf("after convert: %d\n", ((PKeyContext *)k.context())->key()->isNull());
-	}
-
+	if(!isNull())
+		assignToPublic(&k);
 	return k;
 }
 
 PrivateKey PKey::toPrivateKey() const
 {
-	if(isNull())
-		return PrivateKey();
-
-	if(isRSA())
-		return toRSAPrivateKey();
-	else if(isDSA())
-		return toDSAPrivateKey();
-	else
-		return toDHPrivateKey();
+	PrivateKey k;
+	if(!isNull() && isPrivate())
+		assignToPrivate(&k);
+	return k;
 }
 
 RSAPublicKey PKey::toRSAPublicKey() const
 {
-	printf("to rsa public\n");
 	RSAPublicKey k;
 	if(!isNull() && isRSA())
-	{
-		printf("to rsa public set\n");
-		k.set(*this);
-	}
-	printf("to rsa public done\n");
+		assignToPublic(&k);
 	return k;
 }
 
@@ -184,7 +192,7 @@ RSAPrivateKey PKey::toRSAPrivateKey() const
 {
 	RSAPrivateKey k;
 	if(!isNull() && isRSA() && isPrivate())
-		k.set(*this);
+		assignToPrivate(&k);
 	return k;
 }
 
@@ -192,7 +200,7 @@ DSAPublicKey PKey::toDSAPublicKey() const
 {
 	DSAPublicKey k;
 	if(!isNull() && isDSA())
-		k.set(*this);
+		assignToPublic(&k);
 	return k;
 }
 
@@ -200,7 +208,7 @@ DSAPrivateKey PKey::toDSAPrivateKey() const
 {
 	DSAPrivateKey k;
 	if(!isNull() && isDSA() && isPrivate())
-		k.set(*this);
+		assignToPrivate(&k);
 	return k;
 }
 
@@ -208,7 +216,7 @@ DHPublicKey PKey::toDHPublicKey() const
 {
 	DHPublicKey k;
 	if(!isNull() && isDH())
-		k.set(*this);
+		assignToPublic(&k);
 	return k;
 }
 
@@ -216,7 +224,7 @@ DHPrivateKey PKey::toDHPrivateKey() const
 {
 	DHPrivateKey k;
 	if(!isNull() && isDH() && isPrivate())
-		k.set(*this);
+		assignToPrivate(&k);
 	return k;
 }
 
@@ -239,7 +247,7 @@ PublicKey::PublicKey(const PrivateKey &k)
 
 PublicKey::PublicKey(const QString &fileName)
 {
-	Q_UNUSED(fileName);
+	*this = fromPEMFile(fileName, 0, QString());
 }
 
 RSAPublicKey PublicKey::toRSA() const
@@ -267,37 +275,29 @@ bool PublicKey::canVerify() const
 	return (isRSA() || isDSA());
 }
 
-int PublicKey::maximumEncryptSize(EncryptionAlgorithm) const
+int PublicKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 {
-	return ((PKeyContext *)context())->key()->maximumEncryptSize();
+	return static_cast<const PKeyContext *>(context())->key()->maximumEncryptSize(alg);
 }
 
-QSecureArray PublicKey::encrypt(EncryptionAlgorithm, const QSecureArray &a)
+QSecureArray PublicKey::encrypt(EncryptionAlgorithm alg, const QSecureArray &a)
 {
-	PKeyContext *pc = (PKeyContext *)context();
-	RSAContext *rc = (RSAContext *)(pc->key());
-	printf("rc=%p\n", rc);
-	printf("rc->isnull=%d\n", rc->isNull());
-	printf("pkey.isnull=%d\n", isNull());
-	printf("Detaching\n");
-	//detach();
-	printf("done\n");
-	return ((PKeyContext *)context())->key()->encrypt(a);
+	return static_cast<PKeyContext *>(context())->key()->encrypt(alg, a);
 }
 
-void PublicKey::startVerify(SignatureAlgorithm)
+void PublicKey::startVerify(SignatureAlgorithm alg)
 {
-	((PKeyContext *)context())->key()->startVerify();
+	static_cast<PKeyContext *>(context())->key()->startVerify(alg);
 }
 
 void PublicKey::update(const QSecureArray &a)
 {
-	((PKeyContext *)context())->key()->update(a);
+	static_cast<PKeyContext *>(context())->key()->update(a);
 }
 
 bool PublicKey::validSignature(const QSecureArray &sig)
 {
-	return ((PKeyContext *)context())->key()->endVerify(sig);
+	return static_cast<PKeyContext *>(context())->key()->endVerify(sig);
 }
 
 bool PublicKey::verifyMessage(SignatureAlgorithm alg, const QSecureArray &a, const QSecureArray &sig)
@@ -309,46 +309,53 @@ bool PublicKey::verifyMessage(SignatureAlgorithm alg, const QSecureArray &a, con
 
 QSecureArray PublicKey::toDER() const
 {
-	return ((PKeyContext *)context())->publicToDER();
+	return static_cast<const PKeyContext *>(context())->publicToDER();
 }
 
 QString PublicKey::toPEM() const
 {
-	return ((PKeyContext *)context())->publicToPEM();
+	return static_cast<const PKeyContext *>(context())->publicToPEM();
 }
 
 bool PublicKey::toPEMFile(const QString &fileName) const
 {
-	Q_UNUSED(fileName);
-	return false;
+	return stringToFile(fileName, toPEM());
 }
 
 PublicKey PublicKey::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(result);
 	PublicKey k;
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
-	if(c->publicFromDER(a) == PKeyContext::Good)
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
+	ConvertResult r = c->publicFromDER(a);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		k.change(c);
 	return k;
 }
 
 PublicKey PublicKey::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(result);
 	PublicKey k;
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
-	if(c->publicFromPEM(s) == PKeyContext::Good)
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
+	ConvertResult r = c->publicFromPEM(s);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		k.change(c);
 	return k;
 }
 
 PublicKey PublicKey::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(result);
-	Q_UNUSED(fileName);
-	Q_UNUSED(provider);
-	return PublicKey();
+	QString pem;
+	if(!stringFromFile(fileName, &pem))
+	{
+		if(result)
+			*result = ErrorFile;
+		return PublicKey();
+	}
+	return fromPEM(pem, result, provider);
 }
 
 //----------------------------------------------------------------------------
@@ -365,14 +372,12 @@ PrivateKey::PrivateKey(const QString &type, const QString &provider)
 
 PrivateKey::PrivateKey(const QString &fileName, const QSecureArray &passphrase)
 {
-	Q_UNUSED(fileName);
-	Q_UNUSED(passphrase);
+	*this = fromPEMFile(fileName, passphrase, 0, QString());
 }
 
 RSAPrivateKey PrivateKey::toRSA() const
 {
-	RSAPrivateKey key = toRSAPrivateKey();
-	return key;
+	return toRSAPrivateKey();
 }
 
 DSAPrivateKey PrivateKey::toDSA() const
@@ -395,25 +400,24 @@ bool PrivateKey::canSign() const
 	return (isRSA() || isDSA());
 }
 
-bool PrivateKey::decrypt(EncryptionAlgorithm, const QSecureArray &in, QSecureArray *out)
+bool PrivateKey::decrypt(EncryptionAlgorithm alg, const QSecureArray &in, QSecureArray *out)
 {
-	//detach();
-	return ((PKeyContext *)context())->key()->decrypt(in, out);
+	return static_cast<PKeyContext *>(context())->key()->decrypt(alg, in, out);
 }
 
-void PrivateKey::startSign(SignatureAlgorithm)
+void PrivateKey::startSign(SignatureAlgorithm alg)
 {
-	((PKeyContext *)context())->key()->startSign();
+	static_cast<PKeyContext *>(context())->key()->startSign(alg);
 }
 
 void PrivateKey::update(const QSecureArray &a)
 {
-	((PKeyContext *)context())->key()->update(a);
+	static_cast<PKeyContext *>(context())->key()->update(a);
 }
 
 QSecureArray PrivateKey::signature()
 {
-	return ((PKeyContext *)context())->key()->endSign();
+	return static_cast<PKeyContext *>(context())->key()->endSign();
 }
 
 QSecureArray PrivateKey::signMessage(SignatureAlgorithm alg, const QSecureArray &a)
@@ -425,145 +429,119 @@ QSecureArray PrivateKey::signMessage(SignatureAlgorithm alg, const QSecureArray 
 
 SymmetricKey PrivateKey::deriveKey(const PublicKey &theirs)
 {
-	PKeyContext *theirContext = (PKeyContext *)theirs.context();
-	return ((PKeyContext *)context())->key()->deriveKey(*(theirContext->key()));
+	const PKeyContext *theirContext = static_cast<const PKeyContext *>(theirs.context());
+	return static_cast<PKeyContext *>(context())->key()->deriveKey(*(theirContext->key()));
 }
 
-bool PrivateKey::canUsePBEAlgorithm(PBEAlgorithm algo, const QString &provider)
+QList<PBEAlgorithm> PrivateKey::supportedPBEAlgorithms(const QString &provider)
 {
-	Q_UNUSED(algo);
-	Q_UNUSED(provider);
-	return false;
+	const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", provider));
+	QList<PBEAlgorithm> list = c->supportedPBEAlgorithms();
+	delete c;
+	return list;
 }
 
 QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const
 {
-	Q_UNUSED(pbe);
-	return ((PKeyContext *)context())->privateToDER(passphrase);
+	return static_cast<const PKeyContext *>(context())->privateToDER(passphrase, pbe);
 }
 
 QString PrivateKey::toPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const
 {
-	Q_UNUSED(pbe);
-	return ((PKeyContext *)context())->privateToPEM(passphrase);
+	return static_cast<const PKeyContext *>(context())->privateToPEM(passphrase, pbe);
 }
 
 bool PrivateKey::toPEMFile(const QString &fileName, const QSecureArray &passphrase, PBEAlgorithm pbe) const
 {
-	Q_UNUSED(fileName);
-	Q_UNUSED(passphrase);
-	Q_UNUSED(pbe);
-	return false;
+	return stringToFile(fileName, toPEM(passphrase, pbe));
 }
 
 PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(result);
 	PrivateKey k;
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
-	if(c->privateFromDER(a, passphrase) == PKeyContext::Good)
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
+	ConvertResult r = c->privateFromDER(a, passphrase);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		k.change(c);
 	return k;
 }
 
 PrivateKey PrivateKey::fromPEM(const QString &s, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(result);
 	PrivateKey k;
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
-	if(c->privateFromPEM(s, passphrase) == PKeyContext::Good)
+	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
+	ConvertResult r = c->privateFromPEM(s, passphrase);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
 		k.change(c);
 	return k;
 }
 
 PrivateKey PrivateKey::fromPEMFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(result);
-	Q_UNUSED(fileName);
-	Q_UNUSED(passphrase);
-	Q_UNUSED(provider);
-	return PrivateKey();
+	QString pem;
+	if(!stringFromFile(fileName, &pem))
+	{
+		if(result)
+			*result = ErrorFile;
+		return PrivateKey();
+	}
+	return fromPEM(pem, passphrase, result, provider);
 }
 
 //----------------------------------------------------------------------------
 // KeyGenerator
 //----------------------------------------------------------------------------
-class KeyGenerator::Private
+class KeyGenerator::Private : public QObject
 {
+	Q_OBJECT
 public:
 	KeyGenerator *parent;
 	bool blocking, wasBlocking;
 	PrivateKey key;
-	int type;
 
-	QString provider;
 	PKeyBase *k;
-
-	static QHash<PKeyBase*, KeyGenerator*> *list;
+	PKeyContext *dest;
 
 	Private(KeyGenerator *_parent)
 	{
 		parent = _parent;
+		k = 0;
+		dest = 0;
 	}
 
 	~Private()
 	{
-		if(k)
+		delete k;
+		delete dest;
+	}
+
+public slots:
+	void done()
+	{
+		if(!k->isNull())
 		{
-			list_del(k);
+			dest->setKey(k);
+			k = 0;
+
+			key.change(dest);
+			dest = 0;
+		}
+		else
+		{
 			delete k;
+			k = 0;
+			delete dest;
+			dest = 0;
 		}
-	}
 
-	void list_add(PKeyBase *c)
-	{
-		if(!list)
-			list = new QHash<PKeyBase*, KeyGenerator*>;
-		list->insert(c, parent);
-	}
-
-	void list_del(PKeyBase *c)
-	{
-		if(!list)
-			return;
-		if(list->contains(c))
-			list->remove(c);
-		if(list->isEmpty())
-		{
-			delete list;
-			list = 0;
-		}
-	}
-
-	static void rsa_cb(RSAContext *c)
-	{
-		if(list->contains(c))
-		{
-			KeyGenerator *self = list->value(c);
-			self->done();
-		}
-	}
-
-	static void dsa_cb(DSAContext *c)
-	{
-		if(list->contains(c))
-		{
-			KeyGenerator *self = list->value(c);
-			self->done();
-		}
-	}
-
-	static void dh_cb(DHContext *c)
-	{
-		if(list->contains(c))
-		{
-			KeyGenerator *self = list->value(c);
-			self->done();
-		}
+		if(!wasBlocking)
+			emit parent->finished();
 	}
 };
-
-QHash<PKeyBase*, KeyGenerator*> *KeyGenerator::Private::list = 0;
 
 KeyGenerator::KeyGenerator(QObject *parent)
 :QObject(parent)
@@ -592,93 +570,81 @@ bool KeyGenerator::isBusy() const
 	return (d->k ? true: false);
 }
 
-void KeyGenerator::generateRSA(int bits, int exp, const QString &provider)
+PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 {
-	d->type = PKey::RSA;
+	if(isBusy())
+		return PrivateKey();
+
+	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
-	d->provider = provider;
-	d->k = (RSAContext *)getContext("rsa", provider);
+	d->k = static_cast<RSAContext *>(getContext("rsa", provider));
+	d->dest = static_cast<PKeyContext *>(getContext("pkey", provider));
+
 	if(!d->blocking)
 	{
-		d->list_add(d->k);
-		((RSAContext *)d->k)->createPrivate(bits, exp, Private::rsa_cb);
+		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
+		static_cast<RSAContext *>(d->k)->createPrivate(bits, exp, false);
 	}
 	else
 	{
-		((RSAContext *)d->k)->createPrivate(bits, exp, 0);
-		done();
+		static_cast<RSAContext *>(d->k)->createPrivate(bits, exp, true);
+		d->done();
 	}
+
+	return d->key;
 }
 
-void KeyGenerator::generateDSA(DL_Group group, const QString &provider)
+PrivateKey KeyGenerator::createDSA(DL_Group group, const QString &provider)
 {
-	d->type = PKey::DSA;
+	if(isBusy())
+		return PrivateKey();
+
+	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
-	d->provider = provider;
-	d->k = (DSAContext *)getContext("dsa", provider);
+	d->k = static_cast<DSAContext *>(getContext("dsa", provider));
+	d->dest = static_cast<PKeyContext *>(getContext("pkey", provider));
+
 	if(!d->blocking)
 	{
-		d->list_add(d->k);
-		((DSAContext *)d->k)->createPrivate(group, Private::dsa_cb);
+		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
+		static_cast<DSAContext *>(d->k)->createPrivate(group, false);
 	}
 	else
 	{
-		((DSAContext *)d->k)->createPrivate(group, 0);
-		done();
+		static_cast<DSAContext *>(d->k)->createPrivate(group, true);
+		d->done();
 	}
+
+	return d->key;
 }
 
-void KeyGenerator::generateDH(DL_Group group, const QString &provider)
+PrivateKey KeyGenerator::createDH(DL_Group group, const QString &provider)
 {
-	d->type = PKey::DH;
+	if(isBusy())
+		return PrivateKey();
+
+	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
-	d->provider = provider;
-	d->k = (DHContext *)getContext("dh", provider);
+	d->k = static_cast<DHContext *>(getContext("dh", provider));
+	d->dest = static_cast<PKeyContext *>(getContext("pkey", provider));
+
 	if(!d->blocking)
 	{
-		d->list_add(d->k);
-		((DHContext *)d->k)->createPrivate(group, Private::dh_cb);
+		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
+		static_cast<DHContext *>(d->k)->createPrivate(group, false);
 	}
 	else
 	{
-		((DHContext *)d->k)->createPrivate(group, 0);
-		done();
+		static_cast<DHContext *>(d->k)->createPrivate(group, true);
+		d->done();
 	}
+
+	return d->key;
 }
 
 PrivateKey KeyGenerator::result() const
 {
 	return d->key;
-}
-
-void KeyGenerator::done()
-{
-	if(!d->wasBlocking)
-		d->list_del(d->k);
-
-	PrivateKey key;
-
-	if(!d->k->isNull())
-	{
-		printf("generated key!\n");
-		PKeyContext *c = (PKeyContext *)getContext("pkey", d->provider);
-		c->setKey(d->k);
-		d->k = 0;
-
-		key.change(c);
-		printf("key.isNull = %d\n", key.isNull());
-		d->key = key;
-		printf("d->key.isNull = %d\n", d->key.isNull());
-	}
-	else
-	{
-		printf("generated null key\n");
-		delete d->k;
-		d->k = 0;
-	}
-
-	if(!d->wasBlocking)
-		emit finished();
 }
 
 //----------------------------------------------------------------------------
@@ -692,7 +658,6 @@ RSAPublicKey::RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QSt
 {
 	RSAContext *k = (RSAContext *)getContext("rsa", provider);
 	k->createPublic(n, e);
-	printf("pubkey k->isnull=%d\n", k->isNull());
 	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
 	c->setKey(k);
 	change(c);
@@ -879,3 +844,5 @@ QBigInteger DHPrivateKey::y() const
 }
 
 }
+
+#include "qca_publickey.moc"

@@ -135,6 +135,9 @@ namespace QCA
 		DHPrivateKey toDHPrivateKey() const;
 
 	private:
+		void assignToPublic(PKey *dest) const;
+		void assignToPrivate(PKey *dest) const;
+
 		class Private;
 		Private *d;
 	};
@@ -199,7 +202,7 @@ namespace QCA
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
-		static bool canUsePBEAlgorithm(PBEAlgorithm algo, const QString &provider = QString());
+		static QList<PBEAlgorithm> supportedPBEAlgorithms(const QString &provider = QString());
 		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
 		QString toPEM(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
 		bool toPEMFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
@@ -225,18 +228,18 @@ namespace QCA
 		void setBlocking(bool b);
 		bool isBusy() const;
 
-		void generateRSA(int bits, int exp = 65537, const QString &provider = QString());
-		void generateDSA(DL_Group group, const QString &provider = QString());
-		void generateDH(DL_Group group, const QString &provider = QString());
+		PrivateKey createRSA(int bits, int exp = 65537, const QString &provider = QString());
+		PrivateKey createDSA(DL_Group group, const QString &provider = QString());
+		PrivateKey createDH(DL_Group group, const QString &provider = QString());
 		PrivateKey result() const;
 
 	signals:
 		void finished();
 
-	private:
-		void done();
-
+	public:
 		class Private;
+	private:
+		friend class Private;
 		Private *d;
 	};
 

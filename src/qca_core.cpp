@@ -338,26 +338,26 @@ bool Provider::Context::sameProvider(Context *c)
 //----------------------------------------------------------------------------
 // PKeyBase
 //----------------------------------------------------------------------------
-int PKeyBase::maximumEncryptSize() const
+int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const
 {
 	return 0;
 }
 
-QSecureArray PKeyBase::encrypt(const QSecureArray &)
+QSecureArray PKeyBase::encrypt(EncryptionAlgorithm, const QSecureArray &)
 {
 	return QSecureArray();
 }
 
-bool PKeyBase::decrypt(const QSecureArray &, QSecureArray *)
+bool PKeyBase::decrypt(EncryptionAlgorithm, const QSecureArray &, QSecureArray *)
 {
 	return false;
 }
 
-void PKeyBase::startSign()
+void PKeyBase::startSign(SignatureAlgorithm)
 {
 }
 
-void PKeyBase::startVerify()
+void PKeyBase::startVerify(SignatureAlgorithm)
 {
 }
 

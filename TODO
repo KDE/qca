@@ -29,8 +29,8 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
+  now that algorithm::context is public, get rid of many friend declarations
   consider thread issues in secure memory and qca_plugin
-  pkey (consider keygen thread issues)
   cert/crl/store/csr/ca/etc
   tls
   sasl
