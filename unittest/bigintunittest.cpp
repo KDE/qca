@@ -54,18 +54,12 @@ void BigIntUnitTest::allTests()
     QBigInteger c( "2000000000000" );
     CHECK( a < b, false );
     CHECK( a <= b, false );
-    CHECK( a.cmp(b), 1 );
-    CHECK( a.cmp(b, true), 1 );
-    CHECK( a.cmp(b, false), 0 );
+    CHECK( a.compare(b), 1 );
     CHECK( a > b, true );
     CHECK( a >= b, true );
     CHECK( a > c, true );
-    CHECK( c.cmp(b), 1 );
-    CHECK( c.cmp(b, true), 1);
-    CHECK( c.cmp(b, false), -1);
-    CHECK( c.cmp(a), -1 );
-    CHECK( c.cmp(a, true), -1);
-    CHECK( c.cmp(a, false), -1);
+    CHECK( c.compare(b), 1 );
+    CHECK( c.compare(a), -1 );
 
     // Check if the stream operator is any good
     QString testString;
