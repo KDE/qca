@@ -19,4 +19,7 @@ namespace Botan {
 	}
 }
 
+extern int botan_memory_chunk;
+extern int botan_prealloc;
+
 #endif

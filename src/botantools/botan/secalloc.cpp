@@ -31,6 +31,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <botan/secalloc.h>
 #ifndef BOTAN_NO_CONF_H
 # include <botan/conf.h>
+#else
+int botan_memory_chunk = 65536;
+int botan_prealloc = 2;
 #endif
 #include <botan/util.h>
 
@@ -55,10 +58,10 @@ bool Empty_Buffer(const SecureAllocator::Buffer& block)
 *************************************************/
 SecureAllocator::SecureAllocator() :
    PREF_SIZE(
-#ifdef BOTAN_NO_CONF_H
-	65536
-#else
+#ifndef BOTAN_NO_CONF_H
 	Config::get_u32bit("base/memory_chunk")
+#else
+	botan_memory_chunk
 #endif
 	), ALIGN_TO(8)
    {
@@ -86,7 +89,11 @@ SecureAllocator::~SecureAllocator()
 *************************************************/
 void SecureAllocator::init()
    {
+#ifndef BOTAN_NO_CONF_H
    for(u32bit j = 0; j != 2; j++)
+#else
+   for(u32bit j = 0; j != (u32bit)botan_prealloc; j++)
+#endif
       {
       void* ptr = 0;
       try {
