@@ -255,14 +255,20 @@ public:
 class gcryCipherContext : public QCA::CipherContext
 {
 public:
-    gcryCipherContext(QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type) {}
+    gcryCipherContext(int algorithm, int mode, bool pad, QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+    {
+	gcry_check_version("GCRYPT_VERSION");
+	m_cryptoAlgorithm = algorithm;
+ 	m_mode = mode;
+	m_pad = pad;
+    }
 
     void setup(QCA::Direction dir,
 	       const QCA::SymmetricKey &key,
 	       const QCA::InitializationVector &iv)
     {
 	m_direction = dir;
-	err =  gcry_cipher_open( &context, cryptoAlgorithm, m_mode, 0 );
+	err =  gcry_cipher_open( &context, m_cryptoAlgorithm, m_mode, 0 );
 	check_error( err );
 	err = gcry_cipher_setkey( context, key.data(), key.size() );
 	check_error( err );
@@ -270,10 +276,15 @@ public:
 	check_error( err ); 
     }
 
+    Context *clone() const
+    {
+      return new gcryCipherContext( *this );
+    }
+
     unsigned int blockSize() const
     {
 	unsigned int blockSize;
-	gcry_cipher_algo_info( cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
+	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
 	return blockSize;
     }
     
@@ -293,216 +304,143 @@ public:
     
     bool final(QSecureArray *out)
     {
-	*out = QSecureArray();
+	QSecureArray result;
+	if (m_pad) {
+	    result.resize( blockSize() );
+	    if (QCA::Encode == m_direction) {
+		err = gcry_cipher_encrypt( context, (unsigned char*)result.data(), result.size(), NULL, 0 );
+	    } else {
+		err = gcry_cipher_decrypt( context, (unsigned char*)result.data(), result.size(), NULL, 0 );
+	    }
+	    check_error(err );
+	} else {
+	    // just return null
+	}
+	*out = result;
 	return true;
     }
+
+    QCA::KeyLength keyLength() const
+    {
+    switch (m_cryptoAlgorithm)
+	{
+	case GCRY_CIPHER_DES:
+	    return QCA::KeyLength( 8, 8, 1);
+	case GCRY_CIPHER_AES128:
+	    return QCA::KeyLength( 16, 16, 1);
+	case GCRY_CIPHER_AES192:
+	case GCRY_CIPHER_3DES:
+	    	return QCA::KeyLength( 24, 24, 1);
+	case GCRY_CIPHER_AES256:
+	    	return QCA::KeyLength( 32, 32, 1);
+	case GCRY_CIPHER_BLOWFISH:
+	    // Don't know - TODO
+	    return QCA::KeyLength( 1, 32, 1);
+	default:
+	    return QCA::KeyLength( 0, 1, 1);
+	}
+    }
+
 
 protected:
     gcry_cipher_hd_t context;
     gcry_error_t err;
-    int cryptoAlgorithm;
+    int m_cryptoAlgorithm;
     QCA::Direction m_direction;
     int m_mode;
-};
-
-class AES128CBCContext : public gcryCipherContext
-{
-public:
-    AES128CBCContext(QCA::Provider *p) : gcryCipherContext( p, "aes128-cbc" )
-    {
-	gcry_check_version("GCRYPT_VERSION");
-	cryptoAlgorithm = GCRY_CIPHER_AES128;
- 	m_mode = GCRY_CIPHER_MODE_CBC;
-    }
-	
-    Context *clone() const
-    {
-	return new AES128CBCContext( *this );
-    }
-
-    QCA::KeyLength keyLength() const
-    {
-	// Must be 128 bits
-	return QCA::KeyLength( 16, 16, 1);
-    }
-};
-
-class AES192Context : public gcryCipherContext
-{
-public:
-    AES192Context(QCA::Provider *p) : gcryCipherContext( p, "aes192" )
-    {
-	gcry_check_version("GCRYPT_VERSION");
-	cryptoAlgorithm = GCRY_CIPHER_AES192;
-    }
-	
-    Context *clone() const
-    {
-	return new AES192Context( *this );
-    }
-
-    QCA::KeyLength keyLength() const
-    {
-	// Must be 192 bits
-	return QCA::KeyLength( 24, 24, 1);
-    }
-};
-
-
-class AES256Context : public gcryCipherContext
-{
-public:
-    AES256Context(QCA::Provider *p) : gcryCipherContext( p, "aes256" )
-    {
-	gcry_check_version("GCRYPT_VERSION");
-	cryptoAlgorithm = GCRY_CIPHER_AES256;
-    }
-	
-    Context *clone() const
-    {
-	return new AES256Context( *this );
-    }
-    
-    QCA::KeyLength keyLength() const
-    {
-	// Must be 256 bits
-	return QCA::KeyLength( 32, 32, 1);
-    }
-};
-
-
-class BlowFishContext : public gcryCipherContext
-{
-public:
-    BlowFishContext(QCA::Provider *p) : gcryCipherContext( p, "blowfish" )
-    {
-	gcry_check_version("GCRYPT_VERSION");
-	cryptoAlgorithm = GCRY_CIPHER_BLOWFISH;
-    }
-	
-    Context *clone() const
-    {
-	return new BlowFishContext( *this );
-    }
-    
-    QCA::KeyLength keyLength() const
-    {
-	// Don't know - TODO
-	return QCA::KeyLength( 1, 32, 1);
-    }
-};
-
-class TripleDESContext : public gcryCipherContext
-{
-public:
-    TripleDESContext(QCA::Provider *p) : gcryCipherContext( p, "tripledes" )
-    {
-	gcry_check_version("GCRYPT_VERSION");
-	cryptoAlgorithm = GCRY_CIPHER_3DES;
-    }
-	
-    Context *clone() const
-    {
-	return new TripleDESContext( *this );
-    }
-    
-    QCA::KeyLength keyLength() const
-    {
-	return QCA::KeyLength( 24, 24, 1);
-    }
-};
-
-class DESContext : public gcryCipherContext
-{
-public:
-    DESContext(QCA::Provider *p) : gcryCipherContext( p, "des" )
-    {
-	gcry_check_version("GCRYPT_VERSION");
-	cryptoAlgorithm = GCRY_CIPHER_DES;
-    }
-	
-    Context *clone() const
-    {
-	return new DESContext( *this );
-    }
-    
-    QCA::KeyLength keyLength() const
-    {
-	return QCA::KeyLength( 8, 8, 1);
-    }
+    bool m_pad;
 };
 
 
 class gcryptProvider : public QCA::Provider
 {
 public:
-	void init()
-	{
-	}
+    void init()
+    {
+    }
+    
+    QString name() const
+    {
+	return "qca-gcrypt";
+    }
 
-	QString name() const
-	{
-		return "qca-gcrypt";
-	}
+    QStringList features() const
+    {
+	QStringList list;
+	list += "sha1";
+	list += "md4";
+	list += "md5";
+	list += "ripemd160";
+	list += "sha256";
+	list += "sha384";
+	list += "sha512";
+	list += "aes128-ecb";
+	list += "aes128-cfb";
+	list += "aes128-cbc";
+	list += "aes192-ecb";
+	list += "aes192-cfb";
+	list += "aes192-cbc";
+	list += "aes256-ecb";
+	list += "aes256-cfb";
+	list += "aes256-cbc";
+	list += "blowfish-ecb";
+	list += "tripledes-ecb";
+	list += "des-ecb";
+	return list;
+    }
 
-	QStringList features() const
-	{
-		QStringList list;
-		list += "sha1";
-		list += "md4";
-		list += "md5";
-		list += "ripemd160";
-		list += "sha256";
-		list += "sha384";
-		list += "sha512";
-		list += "aes128-cbc";
-		list += "aes192";
-		list += "aes256";
-		list += "blowfish";
-		list += "tripledes";
-		list += "des";
-		return list;
-	}
-
-	Context *createContext(const QString &type)
-	{
-		if ( type == "sha1" )
-			return new SHA1Context( this );
-		else if ( type == "md4" )
-			return new MD4Context( this );
-		else if ( type == "md5" )
-			return new MD5Context( this );
-		else if ( type == "ripemd160" )
-			return new RIPEMD160Context( this );
-		else if ( type == "sha256" )
-			return new SHA256Context( this );
-		else if ( type == "sha384" )
-			return new SHA384Context( this );
-		else if ( type == "sha512" )
-			return new SHA512Context( this );
-		else if ( type == "aes128-cbc" )
-			return new AES128CBCContext( this );
-		else if ( type == "aes192" )
-			return new AES192Context( this );
-		else if ( type == "aes256" )
-			return new AES256Context( this );
-		else if ( type == "blowfish" )
-			return new BlowFishContext( this );
-		else if ( type == "tripledes" )
-			return new TripleDESContext( this );
-		else if ( type == "des" )
-			return new DESContext( this );
-		else
-			return 0;
-	}
+    Context *createContext(const QString &type)
+    {
+	//std::cout << "type: " << qPrintable(type) << std::endl; 
+	if ( type == "sha1" )
+	    return new SHA1Context( this );
+	else if ( type == "md4" )
+	    return new MD4Context( this );
+	else if ( type == "md5" )
+	    return new MD5Context( this );
+	else if ( type == "ripemd160" )
+	    return new RIPEMD160Context( this );
+	else if ( type == "sha256" )
+	    return new SHA256Context( this );
+	else if ( type == "sha384" )
+	    return new SHA384Context( this );
+	else if ( type == "sha512" )
+	    return new SHA512Context( this );
+	else if ( type == "aes128-ecb" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "aes128-cfb" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "aes128-cbc" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, false, this, type );
+	else if ( type == "aes192-ecb" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "aes192-cfb" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "aes192-cbc" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CBC, false, this, type );
+	else if ( type == "aes256-ecb" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "aes256-cfb" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "aes256-cbc" )
+	    return new gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, false, this, type );
+	else if ( type == "blowfish-ecb" )
+	    return new gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "tripledes-ecb" )
+	    return new gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "des-ecb" )
+	    return new gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else
+	    return 0;
+    }
 };
 
 class gcryptPlugin : public QCAPlugin
 {
-        Q_OBJECT
-public:
-        virtual int version() const { return QCA_PLUGIN_VERSION; }
-        virtual QCA::Provider *createProvider() { return new gcryptProvider; }
+    Q_OBJECT
+	public:
+    virtual int version() const { return QCA_PLUGIN_VERSION; }
+    virtual QCA::Provider *createProvider() { return new gcryptProvider; }
 };
 
 #include "qca-gcrypt.moc"
