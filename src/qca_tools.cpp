@@ -335,11 +335,40 @@ QString QBigInteger::toString() const
 	return QString::fromLatin1(cs);
 }
 
+// this should be able to handle octal and hex, but the 
+// lower level Botan code appears to barf on hex chars.
+// octal looks OK.
 bool QBigInteger::fromString(const QString &s)
 {
+	Botan::BigInt::Base base = Botan::BigInt::Decimal;
+	unsigned int numPrelimChars = 0;
+	bool isNegative = false;
+	if ( (! s.isEmpty()) && (s.left(1) == QString("-")  ) ) {
+		numPrelimChars++;
+		isNegative = true;
+	}
+	if ( ( numPrelimChars + 2 < s.length() ) &&
+	     ( s.mid( numPrelimChars, 2) == QString("0x") ) ) {
+		base = Botan::BigInt::Hexadecimal;
+		numPrelimChars += 2;
+	} else if ( ( numPrelimChars + 1 < s.length() ) &&
+		    ( s.mid( numPrelimChars, 1) == QString("0") ) ) {
+		base = Botan::BigInt::Octal;
+		numPrelimChars += 1;
+	}
+	// this takes all the characters, except for the:
+	//   - negative sign,
+	//   - hexadecimal signature (0x), and/or
+	//   - octal signature (0)
+	QCString cs = s.mid(numPrelimChars).latin1();
+
 	//try {
-		QCString cs = s.latin1();
-		d->n = Botan::BigInt::decode((const Botan::byte *)cs.data(), cs.length(), Botan::BigInt::Decimal);
+	d->n = Botan::BigInt::decode((const Botan::byte *)cs.data(), cs.length(), base);
 	//}
+	if ( isNegative ) {
+		d->n.set_sign(Botan::BigInt::Negative);
+	} else {
+		d->n.set_sign(Botan::BigInt::Positive);
+	}
 	return true;
 }
