@@ -28,4 +28,12 @@ struct QCA_SHA1Functions
 	void (*final)(int ctx, char *out); // 20 bytes output
 };
 
+struct QCA_MD5Functions
+{
+	int (*create)();
+	void (*destroy)(int ctx);
+	void (*update)(int ctx, const char *in, unsigned int len);
+	void (*final)(int ctx, char *out); // 16 bytes output
+};
+
 #endif

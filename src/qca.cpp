@@ -194,7 +194,7 @@ void SHA256::update(const QByteArray &a)
 QByteArray SHA256::final()
 {
 	return QByteArray();
-}
+}*/
 
 
 //----------------------------------------------------------------------------
@@ -202,26 +202,34 @@ QByteArray SHA256::final()
 //----------------------------------------------------------------------------
 MD5::MD5()
 {
+	f = (QCA_MD5Functions *)getFunctions(CAP_MD5);
+	ctx = f->create();
 }
 
 MD5::~MD5()
 {
+	f->destroy(ctx);
 }
 
 void MD5::clear()
 {
+	f->destroy(ctx);
+	ctx = f->create();
 }
 
 void MD5::update(const QByteArray &a)
 {
+	f->update(ctx, a.data(), a.size());
 }
 
 QByteArray MD5::final()
 {
-	return QByteArray();
+	QByteArray buf(16);
+	f->final(ctx, buf.data());
+	return buf;
 }
 
-
+/*
 //----------------------------------------------------------------------------
 // TripleDES
 //----------------------------------------------------------------------------

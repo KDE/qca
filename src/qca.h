@@ -5,6 +5,7 @@
 #include<qcstring.h>
 
 class QCA_SHA1Functions;
+class QCA_MD5Functions;
 
 namespace QCA
 {
@@ -110,7 +111,7 @@ namespace QCA
 		void clear();
 		void update(const QByteArray &a);
 		QByteArray final();
-	};
+	};*/
 
 	class MD5 : public Hash, public HashStatic<MD5>
 	{
@@ -121,9 +122,13 @@ namespace QCA
 		void clear();
 		void update(const QByteArray &a);
 		QByteArray final();
+
+	private:
+		struct QCA_MD5Functions *f;
+		int ctx;
 	};
 
-	class TripleDES : public Cipher
+	/*class TripleDES : public Cipher
 	{
 	public:
 		TripleDES();
