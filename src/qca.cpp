@@ -32,7 +32,19 @@ QString QCA::arrayToHex(const QByteArray &a)
 		str.sprintf("%02x", (uchar)a[n]);
 		out.append(str);
 	}
+	return out;
+}
 
+QByteArray QCA::hexToArray(const QString &str)
+{
+	QByteArray out(str.length() / 2);
+	int at = 0;
+	for(int n = 0; n + 1 < (int)str.length(); n += 2) {
+		uchar a = str[n];
+		uchar b = str[n+1];
+		uchar c = ((a & 0x0f) << 4) + (b & 0x0f);
+		out[at++] = c;
+	}
 	return out;
 }
 
@@ -138,6 +150,16 @@ void Cipher::setIV(const QByteArray &a)
 	v_iv = a.copy();
 }
 
+/*bool Cipher::encrypt(const QByteArray &in, QByteArray *out)
+{
+	return false;
+}
+
+bool Cipher::decrypt(const QByteArray &in, QByteArray *out)
+{
+	return false;
+}*/
+
 
 //----------------------------------------------------------------------------
 // SHA1
@@ -229,29 +251,72 @@ QByteArray MD5::final()
 	return buf;
 }
 
-/*
+
 //----------------------------------------------------------------------------
 // TripleDES
 //----------------------------------------------------------------------------
-TripleDES::TripleDES()
+TripleDES::TripleDES(int dir, const QByteArray &key)
 {
+	f = (QCA_TripleDESFunctions *)getFunctions(CAP_TripleDES);
+	ctx = f->create();
+	v_dir = dir;
+	if(!key.isEmpty())
+		setKey(key);
 }
 
 TripleDES::~TripleDES()
 {
+	f->destroy(ctx);
 }
 
-bool TripleDES::encrypt(const QByteArray &in, QByteArray *out, bool pad)
+uint TripleDES::blockSize() const
 {
-	return false;
+	return 8;
 }
 
-bool TripleDES::decrypt(const QByteArray &in, QByteArray *out, bool pad)
+uint TripleDES::keySize() const
 {
-	return false;
+	return 24;
 }
 
+void TripleDES::clear()
+{
+	f->destroy(ctx);
+	setKey(QByteArray(0));
+	setIV(QByteArray(0));
+	ctx = f->create();
+}
 
+void TripleDES::update(const QByteArray &a)
+{
+	QByteArray i = iv();
+	f->setup(ctx, v_dir, key().data(), i.isEmpty() ? 0 : i.data());
+	f->update(ctx, a.data(), a.size());
+}
+
+QByteArray TripleDES::final()
+{
+	QByteArray buf(f->finalSize(ctx));
+	f->final(ctx, buf.data());
+	return buf;
+}
+
+/*QByteArray TripleDES::encryptBlock(const QByteArray &in)
+{
+	QByteArray result(blockSize());
+	f->encryptBlock(in.data(), result.data());
+	return result;
+}
+
+QByteArray TripleDES::decryptBlock(const QByteArray &in)
+{
+	QByteArray result(blockSize());
+	f->decryptBlock(in.data(), result.data());
+	return result;
+}*/
+
+
+/*
 //----------------------------------------------------------------------------
 // AES128
 //----------------------------------------------------------------------------

@@ -14,5 +14,5 @@ SOURCES = qcaopenssl.cpp
 DEFINES += QCA_PLUGIN
 
 # link with OpenSSL
-LIBS += -lssl -lcrypto
+LIBS += -L/usr/local/lib -lcrypto
 

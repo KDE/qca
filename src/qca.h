@@ -4,8 +4,9 @@
 #include<qstring.h>
 #include<qcstring.h>
 
-class QCA_SHA1Functions;
-class QCA_MD5Functions;
+struct QCA_SHA1Functions;
+struct QCA_MD5Functions;
+struct QCA_TripleDESFunctions;
 
 namespace QCA
 {
@@ -22,10 +23,13 @@ namespace QCA
 		CAP_PGP       = 0x0200,
 	};
 
+	enum { Encrypt, Decrypt };
+
 	void init();
 	bool isSupported(int capabilities);
 
 	QString arrayToHex(const QByteArray &);
+	QByteArray hexToArray(const QString &);
 
 	class Hash
 	{
@@ -80,8 +84,17 @@ namespace QCA
 		void setKey(const QByteArray &a);
 		void setIV(const QByteArray &a);
 
-		virtual bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true)=0;
-		virtual bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true)=0;
+		virtual uint blockSize() const=0;
+		virtual uint keySize() const=0;
+		virtual void clear()=0;
+		virtual void update(const QByteArray &a)=0;
+		virtual QByteArray final()=0;
+
+		//virtual QByteArray encrypt(const QByteArray &in, const QByteArray &iv=QByteArray())=0;
+		//virtual QByteArray decrypt(const QByteArray &in, const QByteArray &iv=QByteArray())=0;
+
+		//bool encrypt(const QByteArray &in, QByteArray *out);
+		//bool decrypt(const QByteArray &in, QByteArray *out);
 
 	private:
 		QByteArray v_key, v_iv;
@@ -102,7 +115,7 @@ namespace QCA
 		int ctx;
 	};
 
-	/*class SHA256 : public Hash, public HashStatic<SHA256>
+	class SHA256 : public Hash, public HashStatic<SHA256>
 	{
 	public:
 		SHA256();
@@ -111,7 +124,7 @@ namespace QCA
 		void clear();
 		void update(const QByteArray &a);
 		QByteArray final();
-	};*/
+	};
 
 	class MD5 : public Hash, public HashStatic<MD5>
 	{
@@ -128,17 +141,25 @@ namespace QCA
 		int ctx;
 	};
 
-	/*class TripleDES : public Cipher
+	class TripleDES : public Cipher
 	{
 	public:
-		TripleDES();
+		TripleDES(int dir, const QByteArray &key=QByteArray());
 		~TripleDES();
 
-		bool encrypt(const QByteArray &in, QByteArray *out, bool pad=true);
-		bool decrypt(const QByteArray &in, QByteArray *out, bool pad=true);
+		uint blockSize() const;
+		uint keySize() const;
+		void clear();
+		void update(const QByteArray &a);
+		QByteArray final();
+
+	private:
+		struct QCA_TripleDESFunctions *f;
+		int ctx;
+		int v_dir;
 	};
 
-	class AES128 : public Cipher
+	/*class AES128 : public Cipher
 	{
 	public:
 		AES128();

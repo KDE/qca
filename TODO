@@ -1,10 +1,13 @@
 Qt Cryptographic Architecture
 -----------------------------
 
-Hashing
-Ciphers
+Hashing (SHA1, MD5)
+Ciphers (3DES, AES)
 X509
 SSL/TLS
 SASL
-OpenPGP
+
+* deal with cipher errors
+* make static cipher functions for quick access?
+* clean up plugin system
 

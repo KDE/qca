@@ -3,6 +3,7 @@
 #include<qptrlist.h>
 #include<openssl/sha.h>
 #include<openssl/md5.h>
+#include<openssl/evp.h>
 
 #ifdef QCA_PLUGIN
 QCAProvider *createProvider()
@@ -21,6 +22,20 @@ static void md5_destroy(int ctx);
 static void md5_update(int ctx, const char *in, unsigned int len);
 static void md5_final(int ctx, char *out);
 
+static int tdes_create();
+static void tdes_destroy(int ctx);
+static void tdes_setup(int ctx, int dir, const char *key, const char *iv);
+static void tdes_update(int ctx, const char *in, unsigned int len);
+static void tdes_final(int ctx, char *out);
+static unsigned int tdes_finalSize(int ctx);
+
+static void appendArray(QByteArray *a, const QByteArray &b)
+{
+	int oldsize = a->size();
+	a->resize(oldsize + b.size());
+	memcpy(a->data() + oldsize, b.data(), b.size());
+}
+
 static int counter = 0;
 
 struct pair_sha1
@@ -38,6 +53,18 @@ struct pair_md5
 };
 typedef QPtrList<pair_md5> MAP_MD5;
 MAP_MD5 *map_md5 = 0;
+
+struct pair_tdes
+{
+	int ctx;
+	EVP_CIPHER_CTX c;
+	const EVP_CIPHER *type;
+	QByteArray r;
+	int dir;
+	bool done;
+};
+typedef QPtrList<pair_tdes> MAP_TDES;
+MAP_TDES *map_tdes = 0;
 
 static pair_sha1 *find(int ctx)
 {
@@ -59,12 +86,24 @@ static pair_md5 *find_md5(int ctx)
 	return 0;
 }
 
+static pair_tdes *find_tdes(int ctx)
+{
+	QPtrListIterator<pair_tdes> it(*map_tdes);
+	for(pair_tdes *p; (p = it.current()); ++it) {
+		if(p->ctx == ctx)
+			return p;
+	}
+	return 0;
+}
+
 _QCAOpenSSL::_QCAOpenSSL()
 {
 	map = new MAP_SHA1;
 	map->setAutoDelete(true);
 	map_md5 = new MAP_MD5;
 	map_md5->setAutoDelete(true);
+	map_tdes = new MAP_TDES;
+	map_tdes->setAutoDelete(true);
 }
 
 _QCAOpenSSL::~_QCAOpenSSL()
@@ -73,11 +112,13 @@ _QCAOpenSSL::~_QCAOpenSSL()
 	map = 0;
 	delete map_md5;
 	map_md5 = 0;
+	delete map_tdes;
+	map_tdes = 0;
 }
 
 int _QCAOpenSSL::capabilities() const
 {
-	return (QCA::CAP_SHA1 | QCA::CAP_MD5);
+	return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_TripleDES);
 }
 
 void *_QCAOpenSSL::functions(int cap)
@@ -96,6 +137,16 @@ void *_QCAOpenSSL::functions(int cap)
 		f->destroy = md5_destroy;
 		f->update = md5_update;
 		f->final = md5_final;
+		return f;
+	}
+	else if(cap == QCA::CAP_TripleDES) {
+		QCA_TripleDESFunctions *f = new QCA_TripleDESFunctions;
+		f->create = tdes_create;
+		f->destroy = tdes_destroy;
+		f->setup = tdes_setup;
+		f->update = tdes_update;
+		f->final = tdes_final;
+		f->finalSize = tdes_finalSize;
 		return f;
 	}
 	return 0;
@@ -153,5 +204,80 @@ void md5_final(int ctx, char *out)
 {
 	pair_md5 *i = find_md5(ctx);
 	MD5_Final((unsigned char *)out, &i->c);
+}
+
+int tdes_create()
+{
+	pair_tdes *i = new pair_tdes;
+	i->ctx = counter++;
+	i->type = EVP_des_ede3_cbc();
+	i->dir = 0;
+	i->done = false;
+	EVP_CIPHER_CTX_init(&i->c);
+	map_tdes->append(i);
+	return i->ctx;
+}
+
+void tdes_destroy(int ctx)
+{
+	pair_tdes *i = find_tdes(ctx);
+	memset(&i->c, 0, sizeof(EVP_CIPHER_CTX));
+	map_tdes->removeRef(i);
+}
+
+void tdes_setup(int ctx, int dir, const char *key, const char *iv)
+{
+	pair_tdes *i = find_tdes(ctx);
+	i->dir = dir;
+
+	if(i->dir == 0)
+		EVP_EncryptInit_ex(&i->c, i->type, NULL, (const unsigned char *)key, (const unsigned char *)iv);
+	else
+		EVP_DecryptInit_ex(&i->c, i->type, NULL, (const unsigned char *)key, (const unsigned char *)iv);
+}
+
+void tdes_update(int ctx, const char *in, unsigned int len)
+{
+	pair_tdes *i = find_tdes(ctx);
+
+	i->done = false;
+	QByteArray result(len + i->type->block_size);
+	int olen;
+	if(i->dir == 0)
+		EVP_EncryptUpdate(&i->c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len);
+	else
+		EVP_DecryptUpdate(&i->c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len);
+	result.resize(olen);
+	appendArray(&i->r, result);
+}
+
+static void tdes_ensureFinal(pair_tdes *i)
+{
+	if(i->done)
+		return;
+
+	QByteArray result(i->type->block_size);
+	int olen;
+	if(i->dir == 0)
+		EVP_EncryptFinal(&i->c, (unsigned char *)result.data(), &olen);
+	else
+		EVP_DecryptFinal(&i->c, (unsigned char *)result.data(), &olen);
+	result.resize(olen);
+	appendArray(&i->r, result);
+	i->done = true;
+}
+
+void tdes_final(int ctx, char *out)
+{
+	pair_tdes *i = find_tdes(ctx);
+	tdes_ensureFinal(i);
+	memcpy(out, i->r.data(), i->r.size());
+}
+
+unsigned int tdes_finalSize(int ctx)
+{
+	pair_tdes *i = find_tdes(ctx);
+	tdes_ensureFinal(i);
+	return i->r.size();
 }
 
