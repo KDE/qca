@@ -304,4 +304,10 @@ public:
 	}
 };
 
-QCA_EXPORT_PLUGIN(opensslProvider);
+class opensslPlugin : public QCAPlugin
+{
+	Q_OBJECT
+public:
+	virtual int version() const { return QCA_PLUGIN_VERSION; }
+	virtual QCA::Provider *createProvider() { return new opensslProvider; }
+};

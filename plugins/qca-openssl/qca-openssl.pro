@@ -8,5 +8,9 @@ DEFINES += QCA_PLUGIN
 INCLUDEPATH += ../../include
 SOURCES = qca-openssl.cpp
 
-include(conf.pri)
-include(extra.pri)
+#temp hack until build system is fixed.
+DEFINES += OSSL_097
+LIBS += -lssl -lcrypto
+
+#include(conf.pri)
+#include(extra.pri)
