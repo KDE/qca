@@ -46,7 +46,7 @@ done
 
 echo "Configuring qca-tls ..."
 
-if [ "$QC_DEBUG" == "Y" ]; then
+if [ "$QC_DEBUG" = "Y" ]; then
 echo
 echo QTDIR=$QTDIR
 echo QC_WITH_OPENSSL_INC=$QC_WITH_OPENSSL_INC
@@ -54,10 +54,10 @@ echo QC_WITH_OPENSSL_LIB=$QC_WITH_OPENSSL_LIB
 echo
 fi
 
-echo -n "Verifying Qt 3.x Multithreaded (MT) build environment ... "
+printf "Verifying Qt 3.x Multithreaded (MT) build environment ... "
 
 if [ -z "$QTDIR" ]; then
-	if [ "$QC_DEBUG" == "Y" ]; then
+	if [ "$QC_DEBUG" = "Y" ]; then
 		echo \$QTDIR not set... trying to find Qt manually
 	fi
 	for p in /usr/lib/qt /usr/share/qt /usr/share/qt3 /usr/local/lib/qt /usr/local/share/qt /usr/lib/qt3 /usr/local/lib/qt3 /usr/X11R6/share/qt /usr/qt/3 ; do
@@ -80,13 +80,13 @@ if [ -z "$QTDIR" ]; then
 fi
 
 if [ ! -x "$QTDIR/bin/qmake" ]; then
-	if [ "$QC_DEBUG" == "Y" ]; then
+	if [ "$QC_DEBUG" = "Y" ]; then
 		echo Warning: qmake not in \$QTDIR/bin/qmake
 		echo trying to find it in \$PATH
 	fi
 	qm=`type -p qmake`
 	if [ -x "$qm" ]; then
-		if [ "$QC_DEBUG" == "Y" ]; then
+		if [ "$QC_DEBUG" = "Y" ]; then
 			echo qmake found in $qm
 		fi
 	else
@@ -516,9 +516,7 @@ EOT
 export QTDIR
 export QC_WITH_OPENSSL_INC
 export QC_WITH_OPENSSL_LIB
-if [ -e ".qconftemp" ]; then
-	rm -rf .qconftemp
-fi
+rm -rf .qconftemp
 (
 	mkdir .qconftemp
 	gen_files .qconftemp
@@ -545,7 +543,7 @@ fi
 
 .qconftemp/conf
 ret="$?"
-if [ "$ret" == "1" ]; then
+if [ "$ret" = "1" ]; then
 	rm -rf .qconftemp
 	echo
 	exit 1;
