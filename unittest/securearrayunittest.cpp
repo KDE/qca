@@ -111,5 +111,16 @@ void SecureArrayUnitTest::allTests()
     CHECK( resizeArray.size(), (unsigned int)40 );
     resizeArray.resize(10);
     CHECK( resizeArray.size(), (unsigned int)10 );
+
+
+    // test for append
+    QSecureArray appendArray = secureArray;
+    appendArray.append( QSecureArray() );
+    CHECK( QCA::arrayToHex( secureArray), QCA::arrayToHex( appendArray ) );
+    appendArray.append( secureArray );
+    CHECK( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
+    CHECK( QCA::arrayToHex ( appendArray ), QString( "6363636363636363636363636363636363636363" ) );
+    QSecureArray appendArray2 = secureArray;
+    CHECK( QCA::arrayToHex ( appendArray2.append(secureArray) ), QString( "6363636363636363636363636363636363636363" ) );
 }
 
