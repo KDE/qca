@@ -1605,7 +1605,7 @@ namespace QCA
 		static Certificate fromDER(const QSecureArray &a, const QString &provider = "");
 		static Certificate fromPEM(const QString &s, const QString &provider = "");
 
-		bool matchesAddress(const QString &realHost) const;
+		bool matchesHostname(const QString &host) const;
 
 	private:
 		friend class Store;
@@ -1638,42 +1638,106 @@ namespace QCA
 		CertValidity validate(const Certificate &cert, CertUsage u = Any) const;
 	};
 
-#if 0
-	typedef QMap<QString, QString> CertProperties;
-
-	class QCA_EXPORT Cert
+	// securefilter basic rule: after calling a function that might
+	//  affect something, call others to get the results.
+	//
+	// write: call readOutgoing
+	// writeIncoming: call status, read, and readOutgoing
+	// close: call status and readOutgoing
+	// status: if Closed, call readUnprocessed
+	//
+	class QCA_EXPORT SecureFilter
 	{
 	public:
-		Cert();
-		Cert(const Cert &);
-		Cert & operator=(const Cert &);
-		~Cert();
+		virtual ~SecureFilter();
 
-		bool isNull() const;
+		virtual bool isClosable() const;
+		virtual bool haveClosed() const;
+		virtual bool haveError() const = 0;
+		virtual int bytesAvailable() const = 0;
+		virtual int bytesOutgoingAvailable() const = 0;
+		virtual void close();
 
-		QString commonName() const;
-		QString serialNumber() const;
-		QString subjectString() const;
-		QString issuerString() const;
-		CertProperties subject() const;
-		CertProperties issuer() const;
-		QDateTime notBefore() const;
-		QDateTime notAfter() const;
+		// plain (application side)
+		virtual void write(const QSecureArray &a) = 0;
+		virtual QSecureArray read() = 0;
 
-		QByteArray toDER() const;
-		bool fromDER(const QByteArray &a);
+		// encoded (network side)
+		virtual void writeIncoming(const QByteArray &a) = 0;
+		virtual QByteArray readOutgoing(int *plainBytes = 0) = 0;
+		virtual QSecureArray readUnprocessed();
+	};
 
-		QString toPEM() const;
-		bool fromPEM(const QString &);
+	// securelayer - "nicer" interface, using signals.  subclass
+	//  should call layerUpdate after write, writeIncoming, or close.
+	class QCA_EXPORT SecureLayer : public QObject, public SecureFilter
+	{
+		Q_OBJECT
+	public:
+		SecureLayer(QObject *parent = 0, const char *name = 0);
+
+	protected:
+		void layerUpdateBegin();
+		void layerUpdateEnd();
+
+	signals:
+		void readyRead();
+		void readyReadOutgoing();
+		void closed();
+		void error();
+
+	private:
+		int _read, _readout;
+		bool _closed, _error;
+	};
+
+	/*class QCA_EXPORT TLS : public SecureLayer, public Algorithm
+	{
+		Q_OBJECT
+	public:
+		enum IdentityResult { Valid, HostMismatch, BadCert, NoCert };
+		enum Error { ErrHandshake, ErrCrypt };
+
+		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = "");
+		~TLS();
+
+		void reset();
+
+		void setCertificate(const Certificate &cert, const PrivateKey &key);
+		void setStore(Store *store); // note: must persist
+
+		bool startClient(const QString &host = "");
+		bool startServer();
+		bool isHandshaken() const;
+		Error errorCode() const;
+
+		IdentityResult peerIdentityResult() const;
+		CertValidity peerCertificateValidity() const;
+		Certificate localCertificate() const;
+		Certificate peerCertificate() const;
+
+		// reimplemented
+		virtual bool isClosable() const;
+		virtual bool haveClosed() const;
+		virtual bool haveError() const;
+		virtual int bytesAvailable() const;
+		virtual int bytesOutgoingAvailable() const;
+		virtual void close();
+		virtual void write(const QSecureArray &a);
+		virtual QSecureArray read();
+		virtual void writeIncoming(const QByteArray &a);
+		virtual QByteArray readOutgoing();
+		virtual QSecureArray readUnprocessed();
+
+	signals:
+		void handshaken();
 
 	private:
 		class Private;
 		Private *d;
+	};*/
 
-		friend class TLS;
-		void fromContext(QCA_CertContext *);
-	};
-
+#if 0
 	//class QCA_EXPORT TLS : public QObject
 	//{
 		//Q_OBJECT

@@ -236,7 +236,7 @@ void qca_secure_free(void *p)
 
 namespace QCA {
 
-static Provider::Context *getContext(const QString &type, const QString &provider)
+Provider::Context *getContext(const QString &type, const QString &provider)
 {
 	init();
 

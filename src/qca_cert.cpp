@@ -173,7 +173,7 @@ Certificate Certificate::fromPEM(const QString &s, const QString &provider)
 	return c;
 }
 
-bool Certificate::matchesAddress(const QString &realHost) const
+bool Certificate::matchesHostname(const QString &realHost) const
 {
 	QString peerHost = realHost.stripWhiteSpace();
 	while(peerHost.endsWith("."))

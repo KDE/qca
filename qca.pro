@@ -36,6 +36,7 @@ SOURCES += \
 	$$QCA_CPP/qca_textfilter.cpp \
 	$$QCA_CPP/qca_publickey.cpp \
 	$$QCA_CPP/qca_cert.cpp \
+	$$QCA_CPP/qca_securelayer.cpp \
 	$$QCA_CPP/qca_default.cpp
 
 include(conf.pri)
