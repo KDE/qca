@@ -694,3 +694,67 @@ bool Cert::fromPEM(const QString &str)
 	memcpy(a.data(), cs.data(), a.size());
 	return d->c->createFromPEM(a.data(), a.size());
 }
+
+
+//----------------------------------------------------------------------------
+// SSL
+//----------------------------------------------------------------------------
+class SSL::Private
+{
+public:
+	Private()
+	{
+		c = (QCA_SSLContext *)getContext(CAP_SSL);
+	}
+
+	~Private()
+	{
+		delete c;
+	}
+
+	Cert cert;
+	QCA_SSLContext *c;
+};
+
+SSL::SSL()
+{
+	d = new Private;
+}
+
+SSL::~SSL()
+{
+	delete d;
+}
+
+bool SSL::begin(const QString &host, const QPtrList<Cert> &store)
+{
+	return false;
+}
+
+void SSL::write(const QByteArray &a)
+{
+}
+
+QByteArray SSL::read()
+{
+	return QByteArray();
+}
+
+void SSL::writeIncoming(const QByteArray &a)
+{
+}
+
+QByteArray SSL::readOutgoing()
+{
+	return QByteArray();
+}
+
+const Cert & SSL::peerCertificate() const
+{
+	return d->cert;
+}
+
+int SSL::certificateValidityResult() const
+{
+	return NoCert;
+}

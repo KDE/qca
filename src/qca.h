@@ -5,6 +5,8 @@
 #include<qcstring.h>
 #include<qdatetime.h>
 #include<qmap.h>
+#include<qptrlist.h>
+#include<qobject.h>
 
 class QCA_HashContext;
 class QCA_CipherContext;
@@ -21,8 +23,8 @@ namespace QCA
 		CAP_AES256    = 0x0040,
 		CAP_RSA       = 0x0080,
 		CAP_X509      = 0x0100,
+		CAP_SSL       = 0x0200,
 
-		//CAP_TLS       = 0x0200,
 		//CAP_SASL      = 0x0400,
 	};
 
@@ -248,6 +250,53 @@ namespace QCA
 
 		QString toPEM() const;
 		bool fromPEM(const QString &);
+
+	private:
+		class Private;
+		Private *d;
+	};
+
+	class SSL : public QObject
+	{
+		Q_OBJECT
+	public:
+		enum {
+			NoCert,
+			Valid,
+			HostMismatch,
+			Rejected,
+			Untrusted,
+			SignatureFailed,
+			InvalidCA,
+			InvalidPurpose,
+			SelfSigned,
+			Revoked,
+			PathLengthExceeded,
+			Expired,
+			Unknown
+		};
+
+		SSL();
+		~SSL();
+
+		bool begin(const QString &host="", const QPtrList<Cert> &store=QPtrList<Cert>());
+
+		// plain (application side)
+		void write(const QByteArray &a);
+		QByteArray read();
+
+		// encrypted (socket side)
+		void writeIncoming(const QByteArray &a);
+		QByteArray readOutgoing();
+
+		// cert related
+		const Cert & peerCertificate() const;
+		int certificateValidityResult() const;
+
+	signals:
+		void handshaken(bool);
+		void readyRead();
+		void readyReadOutgoing();
 
 	private:
 		class Private;

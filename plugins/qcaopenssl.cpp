@@ -1,5 +1,7 @@
 #include"qcaopenssl.h"
 
+#include<qregexp.h>
+
 #include<openssl/sha.h>
 #include<openssl/md5.h>
 #include<openssl/evp.h>
@@ -8,6 +10,8 @@
 #include<openssl/rsa.h>
 #include<openssl/x509.h>
 #include<openssl/x509v3.h>
+#include<openssl/ssl.h>
+#include<openssl/err.h>
 
 // FIXME: use openssl for entropy instead of stdlib
 #include<stdlib.h>
@@ -664,6 +668,68 @@ auq_err:
 	return qdt;
 }
 
+// (adapted from kdelibs) -- Justin
+static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
+{
+	QString cn = _cn;
+	QRegExp rx;
+
+	// Check for invalid characters
+	if(QRegExp("[^a-zA-Z0-9\\.\\*\\-]").search(cn) >= 0)
+		return false;
+
+	// Domains can legally end with '.'s.  We don't need them though.
+	while(cn.endsWith("."))
+		cn.truncate(cn.length()-1);
+
+	// Do not let empty CN's get by!!
+	if(cn.isEmpty())
+		return false;
+
+	// Check for IPv4 address
+	rx.setPattern("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}");
+	if(rx.exactMatch(peerHost))
+		return peerHost == cn;
+
+	// Check for IPv6 address here...
+	rx.setPattern("^\\[.*\\]$");
+	if(rx.exactMatch(peerHost))
+		return peerHost == cn;
+
+	if(cn.contains('*')) {
+		// First make sure that there are at least two valid parts
+		// after the wildcard (*).
+		QStringList parts = QStringList::split('.', cn, false);
+
+		while(parts.count() > 2)
+			parts.remove(parts.begin());
+
+		if(parts.count() != 2) {
+			return false;  // we don't allow *.root - that's bad
+		}
+
+		if(parts[0].contains('*') || parts[1].contains('*')) {
+			return false;
+		}
+
+		// RFC2818 says that *.example.com should match against
+		// foo.example.com but not bar.foo.example.com
+		// (ie. they must have the same number of parts)
+		if(QRegExp(cn, false, true).exactMatch(peerHost) &&
+			parts.count() == QStringList::split('.', peerHost, false).count())
+			return true;
+
+		return false;
+	}
+
+	// We must have an exact match in this case (insensitive though)
+	// (note we already did .lower())
+	if(cn == peerHost)
+		return true;
+	return false;
+}
+
+class SSLContext;
 class CertContext : public QCA_CertContext
 {
 public:
@@ -689,16 +755,17 @@ public:
 
 	void reset()
 	{
-		serial = "";
-		v_subject = "";
-		v_issuer = "";
-		cp_subject.clear();
-		cp_issuer.clear();
-		na = QDateTime();
-		nb = QDateTime();
 		if(x) {
 			X509_free(x);
 			x = 0;
+
+			serial = "";
+			v_subject = "";
+			v_issuer = "";
+			cp_subject.clear();
+			cp_issuer.clear();
+			na = QDateTime();
+			nb = QDateTime();
 		}
 	}
 
@@ -814,10 +881,376 @@ public:
 		return na;
 	}
 
+	bool matchesAddress(const QString &realHost) const
+	{
+		QString peerHost = realHost.stripWhiteSpace();
+		while(peerHost.endsWith("."))
+			peerHost.truncate(peerHost.length()-1);
+		peerHost = peerHost.lower();
+
+		for(QValueList<QCA_CertProperty>::ConstIterator it = cp_subject.begin(); it != cp_subject.end(); ++it) {
+			if((*it).var == "CN") {
+				if(cnMatchesAddress((*it).val.stripWhiteSpace().lower(), peerHost))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	friend class SSLContext;
 	X509 *x;
 	QString serial, v_subject, v_issuer;
 	QValueList<QCA_CertProperty> cp_subject, cp_issuer;
 	QDateTime nb, na;
+};
+
+static bool ssl_init = false;
+class SSLContext : public QCA_SSLContext
+{
+public:
+	enum { Success, TryAgain, Error };
+	enum { Idle, Connect, Handshake, Active };
+
+	SSLContext()
+	{
+		if(!ssl_init) {
+			SSL_library_init();
+			ssl_init = true;
+		}
+
+		ssl = 0;
+		context = 0;
+	}
+
+	~SSLContext()
+	{
+		reset();
+	}
+
+	void reset()
+	{
+		if(ssl) {
+			SSL_shutdown(ssl);
+			SSL_free(ssl);
+			ssl = 0;
+		}
+		if(context) {
+			SSL_CTX_free(context);
+			context = 0;
+		}
+
+		sendQueue.resize(0);
+		recvQueue.resize(0);
+		mode = Idle;
+		cc.reset();
+	}
+
+	bool begin(const QString &_host, const QPtrList<QCA_CertContext> &list)
+	{
+		reset();
+
+		ssl = 0;
+		method = 0;
+		context = 0;
+
+		// get our handles
+		method = TLSv1_client_method();
+		if(!method) {
+			reset();
+			return false;
+		}
+		context = SSL_CTX_new(method);
+		if(!context) {
+			reset();
+			return false;
+		}
+
+		// load the certs
+		if(!list.isEmpty()) {
+			X509_STORE *store = SSL_CTX_get_cert_store(context);
+			QPtrListIterator<QCA_CertContext> it(list);
+			for(CertContext *cc; (cc = (CertContext *)it.current()); ++it)
+				X509_STORE_add_cert(store, cc->x);
+		}
+
+		ssl = SSL_new(context);
+		if(!ssl) {
+			reset();
+			return false;
+		}
+		SSL_set_ssl_method(ssl, method); // can this return error?
+
+		// setup the memory bio
+		rbio = BIO_new(BIO_s_mem());
+		wbio = BIO_new(BIO_s_mem());
+
+		// this passes control of the bios to ssl.  we don't need to free them.
+		SSL_set_bio(ssl, rbio, wbio);
+
+		host = _host;
+		mode = Connect;
+
+		sslUpdate();
+
+		return true;
+	}
+
+	int doConnect()
+	{
+		int ret = SSL_connect(ssl);
+		if(ret < 0) {
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Error;
+		}
+		else if(ret == 0)
+			return Error;
+		return Success;
+	}
+
+	int doHandshake()
+	{
+		int ret = SSL_do_handshake(ssl);
+		if(ret < 0) {
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Error;
+		}
+		else if(ret == 0)
+			return Error;
+		return Success;
+	}
+
+	void sslUpdate()
+	{
+		if(mode == Idle)
+			return;
+
+		if(mode == Connect) {
+			int ret = doConnect();
+			if(ret == Success) {
+				mode = Handshake;
+			}
+			else if(ret == Error) {
+				reset();
+				// FIXME: handshaken(false);
+				return;
+			}
+		}
+
+		if(mode == Handshake) {
+			int ret = doHandshake();
+			if(ret == Success) {
+				// verify the certificate
+				int code = QCA::SSL::Unknown;
+				X509 *x = SSL_get_peer_certificate(ssl);
+				if(x) {
+					cc.fromX509(x);
+					X509_free(x);
+					int ret = SSL_get_verify_result(ssl);
+					if(ret == X509_V_OK) {
+						if(cc.matchesAddress(host))
+							code = QCA::SSL::Valid;
+						else
+							code = QCA::SSL::HostMismatch;
+					}
+					else
+						code = resultToCV(ret);
+				}
+				else {
+					cc.reset();
+					code = QCA::SSL::NoCert;
+				}
+				validityResult = code;
+
+				mode = Active;
+				// FIXME: handshaken(true);
+			}
+			else if(ret == Error) {
+				reset();
+				// FIXME: handshaken(false);
+				return;
+			}
+		}
+
+		//if(isOutgoingSSLData()) {
+		//	outgoingSSLDataReady();
+		//}
+
+		// try to read incoming unencrypted data
+		sslReadAll();
+
+		//if(isRecvData())
+		//	readyRead();
+	}
+
+	int resultToCV(int ret) const
+	{
+		int rc;
+
+		switch(ret) {
+			case X509_V_ERR_CERT_REJECTED:
+				rc = QCA::SSL::Rejected;
+				break;
+			case X509_V_ERR_CERT_UNTRUSTED:
+				rc = QCA::SSL::Untrusted;
+				break;
+			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
+			case X509_V_ERR_CERT_SIGNATURE_FAILURE:
+			case X509_V_ERR_CRL_SIGNATURE_FAILURE:
+			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
+			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
+				rc = QCA::SSL::SignatureFailed;
+				break;
+			case X509_V_ERR_INVALID_CA:
+			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
+			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
+				rc = QCA::SSL::InvalidCA;
+				break;
+			case X509_V_ERR_INVALID_PURPOSE:
+				rc = QCA::SSL::InvalidPurpose;
+				break;
+			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
+				rc = QCA::SSL::SelfSigned;
+				break;
+			case X509_V_ERR_CERT_REVOKED:
+				rc = QCA::SSL::Revoked;
+				break;
+			case X509_V_ERR_PATH_LENGTH_EXCEEDED:
+				rc = QCA::SSL::PathLengthExceeded;
+				break;
+			case X509_V_ERR_CERT_NOT_YET_VALID:
+			case X509_V_ERR_CERT_HAS_EXPIRED:
+			case X509_V_ERR_CRL_NOT_YET_VALID:
+			case X509_V_ERR_CRL_HAS_EXPIRED:
+			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
+			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
+			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
+			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
+				rc = QCA::SSL::Expired;
+				break;
+			case X509_V_ERR_APPLICATION_VERIFICATION:
+			case X509_V_ERR_OUT_OF_MEM:
+			case X509_V_ERR_UNABLE_TO_GET_CRL:
+			case X509_V_ERR_CERT_CHAIN_TOO_LONG:
+			default:
+				rc = QCA::SSL::Unknown;
+				break;
+		}
+		return rc;
+	}
+
+	QCA_CertContext *peerCertificate()
+	{
+		return cc.clone();
+	}
+
+	bool dataReady() const
+	{
+		return (recvQueue.size() > 0) ? true: false;
+	}
+
+	bool outgoingDataReady() const
+	{
+		return (BIO_pending(wbio) > 0) ? true: false;
+	}
+
+	/*void putIncomingSSLData(const QByteArray &a)
+	{
+		BIO_write(d->rbio, a.data(), a.size());
+		sslUpdate();
+	}
+
+	bool isOutgoingSSLData()
+	{
+		return (BIO_pending(d->wbio) > 0) ? true: false;
+	}
+
+	QByteArray getOutgoingSSLData()
+	{
+		QByteArray a;
+
+		int size = BIO_pending(d->wbio);
+		if(size <= 0)
+			return a;
+		a.resize(size);
+
+		int r = BIO_read(d->wbio, a.data(), size);
+		if(r <= 0) {
+			a.resize(0);
+			return a;
+		}
+		if(r != size)
+			a.resize(r);
+
+		return a;
+	}
+
+	void send(const QByteArray &a)
+	{
+		if(d->mode != Active)
+			return;
+
+		int oldsize = d->sendQueue.size();
+		d->sendQueue.resize(oldsize + a.size());
+		memcpy(d->sendQueue.data() + oldsize, a.data(), a.size());
+
+		processSendQueue();
+	}
+
+	bool isRecvData()
+	{
+		return (d->recvQueue.size() > 0) ? true: false;
+	}
+
+	QByteArray recv()
+	{
+		QByteArray a = d->recvQueue;
+		a.detach();
+		d->recvQueue.resize(0);
+		return a;
+	}*/
+
+	void sslReadAll()
+	{
+		QByteArray a;
+		while(1) {
+			a.resize(4096);
+			int x = SSL_read(ssl, a.data(), a.size());
+			if(x <= 0)
+				break;
+			if(x != (int)a.size())
+				a.resize(x);
+			appendArray(&recvQueue, a);
+		}
+	}
+
+	void processSendQueue()
+	{
+		if(sendQueue.size() > 0) {
+			// FIXME: is there a max size we can write?
+			SSL_write(ssl, sendQueue.data(), sendQueue.size());
+			sendQueue.resize(0);
+			sslUpdate();
+		}
+	}
+
+	int mode;
+	QByteArray sendQueue, recvQueue;
+
+	SSL *ssl;
+	SSL_METHOD *method;
+	SSL_CTX *context;
+	BIO *rbio, *wbio;
+	QString host;
+	CertContext cc;
+	int validityResult;
 };
 
 class QCAOpenSSL : public QCAProvider
@@ -828,7 +1261,17 @@ public:
 
 	int capabilities() const
 	{
-		return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_BlowFish | QCA::CAP_TripleDES | QCA::CAP_AES128 | QCA::CAP_AES256 | QCA::CAP_RSA | QCA::CAP_X509);
+		int caps =
+			QCA::CAP_SHA1 |
+			QCA::CAP_MD5 |
+			QCA::CAP_BlowFish |
+			QCA::CAP_TripleDES |
+			QCA::CAP_AES128 |
+			QCA::CAP_AES256 |
+			QCA::CAP_RSA |
+			QCA::CAP_X509 |
+			QCA::CAP_SSL;
+		return caps;
 	}
 
 	void *context(int cap)
@@ -849,6 +1292,8 @@ public:
 			return new RSAKeyContext;
 		else if(cap == QCA::CAP_X509)
 			return new CertContext;
+		else if(cap == QCA::CAP_SSL)
+			return new SSLContext;
 		return 0;
 	}
 };

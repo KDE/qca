@@ -96,4 +96,12 @@ public:
 	virtual QDateTime notAfter() const=0;
 };
 
+class QCA_SSLContext
+{
+public:
+	virtual ~QCA_SSLContext() {}
+
+	virtual bool begin(const QString &host, const QPtrList<QCA_CertContext> &store)=0;
+};
+
 #endif
