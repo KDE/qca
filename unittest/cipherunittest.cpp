@@ -1,7 +1,7 @@
 /**
  * cipherunittest.cpp
  *
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -400,7 +400,7 @@ static struct cipherTestValues tripledesTestValues[] = {
     { 0, 0, 0 }
 };
 
-// These are from the Botan test suite
+// These are from the Botan test suite - its ECB mode, no padding
 static struct cipherTestValues desTestValues[] = {
   { "059b5e0851cf143a", "86a560f10ec6d85b", "0113b970fd34f2ce" },
   { "4e6f772069732074", "3fa40e8a984d4815", "0123456789abcdef" },
@@ -615,7 +615,122 @@ static struct cipherTestValues desTestValues[] = {
   { 0, 0, 0 }
 };
 
+// These are from the Botan test suite
+static struct cipherTestValues desEcbPkcs7TestValues[] = {
+  { "", "705fdf4dc7abfbfc", "02d863a4885d417a" },
+  { "fa", "2281ac7cfa703ba9", "05add235b01bbda7" },
+  { "b895", "8c3bf9ab9d16c8cf", "93f04843afc3a191" },
+  { "8e97de", "be38bd2afe108d2a", "1f4e2c013314b55a" },
+  { "c1dae88e", "998341e8b0cce82e", "0f59c05186431e13" },
+  { "a6e0360e88", "f5e88fcc387b8883", "e68bf7b98d61fed0" },
+  { "55e67a79f043", "a868b107bd96f35c", "ae3ab00a0ba38be0" },
+  { "d77c93b63d6d5b", "19da07a34fa683c4", "9b661c7a536afc6d" },
+  { "328d09508e747ae1", "9c75845c6bff94438eb7e7e4c77342f0", "8e1c689280575f05" },
+  { "421d4bdc3869e59f07", "8df60dc27a2e2ee23360be31343fcbdb", "eb4a6b437572e1e7" },
+  { "160e525583c3e4fbc4fe", "9b649660dfe5b875cd81180ad627943f", "ffe58726b90c9f97" },
+  { "e873b3c2b31130719e6469", "6e33ae2af48cc39697800a3aa357cc5e", "560ee1ed2cc2bffb" },
+  { "405915adc0111eb8af225612", "569be1f2ae91785b0634f8dd4ec1dff2", "012a7de9cbfbd230" },
+  { "e923c535186730f309cdea6dea", "846d7314f76e00902054bd2b2ae1f580", "3d5d56ca2e8e359c" },
+  { "116053a5820f9d36650eef49a05b", "9bd56c43036485b648efe6d31e69f0c6", "2ad63a5312bf4259" },
+  { "b6dcd40077fe89138b5a2ed35e1b3d", "2fbe419bada6d4bf3f6c7bb2a1aac329", "7ff12d4d8a9ef138" },
+  { "08f0aa208f8a06c6292838a8cee9104e", "44bfca2722d274504af482e9261cdb7b16918be77a461b3b", "f71a3b1aabd660bd" },
+  { "878412f6255ff4360a22772711289fd351", "9c92fdde178d3b6c895aad1b8dc886176910b021d5b3aa77", "1ed8b08898872631" },
+  { "1399a0cd9f2778bcfba9c0f7e7c89ca069e3", "5972f89d8c161dd30a409bcdbf43b20bb104e8a293c48fdd", "0dcb3527035253a5" },
+  { "ea1cc272d3725e4c5dc56079fa3c9f26a1373a", "d1b2fcc83cbf11e022c058fcb988cbbbc3843517f5e9d900", "bf4b260909243b2f" },
+  { "098dd47ea5784d307c115824cfc3443983fdf58b", "77dfae7f46af6db0d0e5775859943e2875854a680b54b59b", "5d869f3486dfe1a1" },
+  { 0, 0, 0 }
+};
 
+// These are from the Botan test suite
+static struct cipherIVTestValues descbcTestValues[] = {
+
+
+  { "4e6f77206973207468652074696d6520666f7220616c6c20",
+    "e5c7cdde872bf27c43e934008c389c0f683788499a7c05f6",
+    "0123456789abcdef", "1234567890abcdef" },
+    { 0, 0, 0, 0 }
+};
+
+// These are from the Botan test suite
+static struct cipherIVTestValues desCbcPkcs7TestValues[] = {
+    { "4e6f77206973207468652074696d6520666f7220616c6c20",
+      "e5c7cdde872bf27c43e934008c389c0f683788499a7c05f662c16a27e4fcf277",
+      "0123456789abcdef", "1234567890abcdef" },
+    { "", "ff4903e653af83c4", "46b534fbffdae457", "297873b948a44b5f" },
+    { "69", "60fa7b46523aa51f", "d581a1d0c70f94a1", "c1ddd7447249ef80" },
+    { "02b7", "63c1c1ef79555ed8", "a415b62e7e94caf2", "57fa9b2f95f57401" },
+    { "568960", "d0321483090f524d", "5dcbe42db374090e", "b6215a095582763f" },
+    { "b6eaf23c", "88e289e1de3e6451", "8fe92291c654ec9b", "0c054bbd31a9f623" },
+    { "60a658cbbd", "89bffa9e36ff1780", "dbcee35e86088501", "11a8928bc6d0d117" },
+    { "7e10cbd9e95c", "afc5cdf559abc6d3", "72338f946012ced5", "eaaa48b0c2ee2f3f" },
+    { "d907ce88f077fa", "3476402272856ea8", "837fbb3167f0ccaa", "cd399dd3e402f8f2" },
+    { "9476e85b198c9aee", "1af298a150514ca70d252f88271b3ca7", "308d1c02e7a4e09d", "6baa74f7f1a72e1f" },
+    { "5c11285270e9606cdf", "78665abfe3def34f8bd55796825ee915", "126aff39882542ea", "51badb479de66a73" },
+    { "d1d3d8675e42a4242fba", "e77bb4a24b4ee8c9ebda4971c2e60d10", "0ae8510bb0fb3994", "6c7293a8427bcb3b" },
+    { "65026a8a41edc1d880f6c9", "45a6ef4acd49f9f1d892a808fa7b6f28", "0be9277b3504d524", "e47ec7a77db94755" },
+    { "d72e81f4130107e396d5fb27", "a88eff91876a1b6958d52f99fe9b18fb", "2f03c36de4f78e13", "99fd2e8848f33fe7" },
+    { "c8a3971efda18af1b18bfad98f", "54ff90bd90f6213d761f4b3ff89a8ded", "69329672e546c969", "294922cbe7e12341" },
+    { "bb9a90f11551531de512dd48270e", "9ba7908e56edb1bef992faee40f5b1ca", "3007d71e86d8eaf2", "d7e300e168f60063" },
+    { "77d6c182e4ddd444d614bcff98fb13", "cb50dec4728fc2f1a1a5dfb84fa1bd25", "f73c8c3355092eb6", "2e0db2552bb83ad3" },
+    { "40aed22f93dcfcb1d734b7e4657dd31a", "66d17a6e9d5be3281e857b4c7e497988ca684524fd994882", "dd006f15e727cb62", "b256dc4fdb58451b" },
+    { "bb25564c7ea1e5bd22016915805c27b51b", "b7ceb5f5ed2945f131064bbb9213694b19a04fbd1f138866", "df70ff987582ccfe", "88bb3b9bb2ea56d7" },
+    { "49dab8d85ea753cf4ae2ece7a80f0784e42b", "d7fce9e5bed161ad7d950e453677e5bee422b7542afc0bd3", "747e09fa9ba257dc", "f1bbd406191de0d1" },
+    { "dc13a6abaa35ceb3e6650f825a67942114af2e", "bafdb50e16c9ff4449bf336d410441d56e1e5335b54c9f11", "cdad411d0fa80e9d", "c83d55b1196958c4" },
+    { "a8896d88907ad77ae790828c0a3384c1614e07d9", "70a9eb1c11bfd1b1d68c20a6b72c869dac5372a8ed46aa07", "642d12c591f6a4f4", "c17d0c69067af296" },
+    { "b3fec4cc29dc1abbcf7d86f01d2c02c2a723e7c2f8", "48ed5583a04d333ffac9d6462fd96bf79222eeec70a6ae70", "62c62f54c426c59f", "cb6252ca271ff303" },
+    { "ac0b4d5752d2009bdcd42314d9723716294146424542", "8a284713f8c9873ad5f558b995c5a67a66557a52601975d1", "386dcad5eae86830", "48153b966c8d686d" },
+    { "ea331f6e518a8aeab2ef0a4e92e0d198df5dd0cc74369e", "6d3d7de9938935f9fb9af839e416ef6f842f2ed827334bfb", "782545ea65d89b01", "c2ce203020aabb0a" },
+    { "b292d3a3fdc5d709709c87ef91122761847871f9b4e33426", "21dae17d157192146b52c49d90f898b25d0d1dfe677e8cd5b568814e9c6bb6a8", "ecc650e1ed1ce8a0", "aebc43ab811ab5f1" },
+    { "65026a8a41edc1d880f6c90be9277b3504d524e47ec7a77db9", "a3b6404c4d87f72d5e0995d7cc20ece742d9705d48524cfa2820317087faf578", "4755b8639fd7c8a1", "4152e22f14baaf0a" },
+    { "d1d3d8675e42a4242fba0ae8510bb0fb39946c7293a8427bcb3b", "db621f2fac9a924c83ed0b9e8acec9f1e23bf3ff2ad6efa814903f2ce293107b", "92a18b78a25c4b7a", "c3aabc68ceeb22d9" },
+    { "c8a3971efda18af1b18bfad98f69329672e546c969294922cbe7e1", "940c610a41f04e7d9be0a74d5d00fe97a2647d3d16e9b76ff0db5bbdc197c82a", "2341239c09c73427", "c4d5b2b6863db060" },
+    { "d72e81f4130107e396d5fb272f03c36de4f78e1399fd2e8848f33fe7", "7d495cba50c4127347e3ad29e3b8c098a3312782e3d45abfa1621f64bf8b8a06", "166ea8ed9d29e1b0", "2be993c1be8fe9ed" },
+    { "77d6c182e4ddd444d614bcff98fb13f73c8c3355092eb62e0db2552bb8", "9d926142271e814ba4603509187c9020daa0d50f15af6e698e384644e9468c11", "3ad3301094b2f471", "8638489af44732f0" },
+    { "bb9a90f11551531de512dd48270e3007d71e86d8eaf2d7e300e168f60063", "44858416f946c7fbdffd720282881630803803ab91ceab1af4f68f50e9c16dce", "04bbfd95ac12e6ff", "30cb120d13391c44" },
+    { "8eb8faf49126ad5b8a0aa6df8b52dbe50dd5aed271641ef983bd650da69816", "5b4622f1c4faa817ee3ac181b969a7afed7117e23f68bc6017519a7d1399cfe9", "35501029e137d63d", "c1e0e3a06b357b51" },
+    { 0, 0, 0, 0 }
+};
+
+
+// These are from the Botan test suite
+static struct cipherIVTestValues descfbTestValues[] = {
+    { "5eef8199471c2a7ef97509623cae32c35a90245b70a21ce36e",
+      "658b25e25df23948847afa4c9ffdd5b3ddf35d801cbe945168",
+      "add9ce7bcf48c44b", "0f90e78835ba3183" },
+    { "4e6f77206973207468652074696d6520666f7220616c6c20",
+      "f3096249c7f46e51a69e839b1a92f78403467133898ea622",
+      "0123456789abcdef", "1234567890abcdef" },
+    { "d14fd67a9b4d7b0f65b7ca3da91741603da446",
+      "0cb8929a854e61ab3beb72ce0f13ba328ba73a",
+      "7132d895529a7aff", "fa1fe8f921706c75" },
+    { "16", "e1", "f51cf13fd55f33b8", "10e61c7f8276132e" },
+    { "b8f7", "9f09", "6a2306397e6399af", "6791874e16642dd8" },
+    { "914aa4", "1cddad", "08d3b08cb02e2547", "b35072a53fa36190" },
+    { "252f0616", "e22a706a", "454a9aca108ad24c", "64dadb33ccf1debd" },
+    { "f06f376c6e", "c2f054e435", "087fc9f0b8be08f3", "5e511251c063b3c7" },
+    { "9a181afec04c", "c49218c8a25b", "fe1ea0f0ac5f2c02", "a247e69ced4a2bf1" },
+    { "ac465cbd745341", "768b6f5bfa9c24", "1e7c7274307edb90", "afb634941c366c1d" },
+    { "52bdfd51e3434e94", "c5d84483756ac360", "53e241e43aad03e7", "be0a4ae59056d8fe" },
+    { "a62c02059afe67cd7f", "032a99be4df6b63f97", "487c9fbd140ef278", "43f88de155e98523" },
+    { "32d3c8a283257f6276c3", "bcfa26efe2d93a4b1364", "8b068595d5b79177", "7129287761d94d9f" },
+    { "17cb11a60f880c16d6cc3a", "3dc099d927b8aa66b2a5c8", "750c87995afd65ee", "a61398fff559faad" },
+    { "eaa91cede4efc60f02b1e0ee", "75614ea2fd5474fdfe3a5612", "08a5f56200ac9300", "9f9ed0928b8cd2dd" },
+    { "68db8992e91d759256ab373748", "9d0e14f0b2be2d3b47103da75f", "b11dfa915ad86ff9", "3885ecf48a611dc5" },
+    { "d75acdd3e4040dfda924ce09e627", "a878ce766412a9c387ad61642fb7", "fbf9e6d9344b0f2c", "6917f8fe1ac12101" },
+    { "38b667a6e4458c8732aae6f4d0ac36", "5bcfd93d6b4b45d9d0d03162fa8fb9", "8616d2ea6e6106b3", "cfe4dfa7044f56ab" },
+    { "0b439a72a4430b3d15e234034ba2c066", "1adae0a4a0d582b70b60ed1c859a07b3", "e255e4a4c3606081", "3f160dff918c3f78" },
+    { "82e27182fc22cd8918dddbdb850034a4f2", "9767881b1909db5e146caaf5fc6a118814", "b9cdd5442e1c7fd7", "5d1b1eceb7335274" },
+    { 0, 0, 0, 0 }
+};
+
+// These are from the Botan test suite
+static struct cipherIVTestValues desofbTestValues[] = {
+    { "4e6f77206973207468652074696d6520666f7220616c6c20", "f3096249c7f46e5135f24a242eeb3d3f3d6d5be3255af8c3", "0123456789abcdef", "1234567890abcdef" },
+    { "b25330d1cab11fddff278192aa2c935a9c7745733e6da8", "39b9bf284d6da6e639b8040b8da01e469dba4c6e50b1ab", "f871822c7fd1d6a3", "b311792c8bc02ee8" },
+    { "73ad356623a1d6e0717e838b9344b4fff21bda", "0c06e63e9e81d9976e16d2009255f917797d51", "5860f4a413de6c68", "527a1e050a9d71f0" },
+    { "08a6091fa2987fdc682a8199a6d6bd1f", "640b5033dcf26873fa8a34db644f2bf2", "3307042dc775035e", "99de32ff0351509b" },
+    { 0, 0, 0, 0 }
+};
 CipherUnitTest::CipherUnitTest()
     : Tester()
 {
@@ -949,6 +1064,145 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( desTestValues[n].ciphertext ) ) ),
 		   QString( desTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("des-cbc") )
+	SKIP("DES, CBC not supported!");
+    else {
+	QCA::DES cipherObj1( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 8 ) );
+	CHECK( cipherObj1.keyLength().minimum(), 8 );
+	CHECK( cipherObj1.keyLength().maximum(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
+
+	for (int n = 0; (0 != descbcTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( descbcTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( descbcTestValues[n].iv ) );
+	    QCA::DES forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( descbcTestValues[n].plaintext ) ) ),
+		   QString( descbcTestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::DES reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( descbcTestValues[n].ciphertext ) ) ),
+		   QString( descbcTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("des-cfb") )
+	SKIP("DES, CFB not supported!");
+    else {
+	QCA::DES cipherObj1( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 8 ) );
+	CHECK( cipherObj1.keyLength().minimum(), 8 );
+	CHECK( cipherObj1.keyLength().maximum(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)1 );
+
+	for (int n = 0; (0 != descfbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( descfbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( descfbTestValues[n].iv ) );
+	    QCA::DES forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( descfbTestValues[n].plaintext ) ) ),
+		   QString( descfbTestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::DES reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( descfbTestValues[n].ciphertext ) ) ),
+		   QString( descfbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("des-ofb") )
+	SKIP("DES, OFB not supported!");
+    else {
+	QCA::DES cipherObj1( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 8 ) );
+	CHECK( cipherObj1.keyLength().minimum(), 8 );
+	CHECK( cipherObj1.keyLength().maximum(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
+
+	for (int n = 0; (0 != desofbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( desofbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( desofbTestValues[n].iv ) );
+	    QCA::DES forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( desofbTestValues[n].plaintext ) ) ),
+		   QString( desofbTestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::DES reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( desofbTestValues[n].ciphertext ) ) ),
+		   QString( desofbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("des-ecb-pkcs7") )
+	SKIP("DES, ECB mode with PKCS7 padding not supported!");
+    else {
+	QCA::DES cipherObj1( QCA::Cipher::ECB, QCA::Cipher::PKCS7, QCA::Encode, QCA::SymmetricKey( 8 ) );
+	CHECK( cipherObj1.keyLength().minimum(), 8 );
+	CHECK( cipherObj1.keyLength().maximum(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
+
+	for (int n = 0; (0 != desEcbPkcs7TestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( desEcbPkcs7TestValues[n].key ) );
+	    QCA::DES forwardCipher( QCA::Cipher::ECB, QCA::Cipher::PKCS7, QCA::Encode, key);
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( desEcbPkcs7TestValues[n].plaintext ) ) ),
+		   QString( desEcbPkcs7TestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::DES reverseCipher( QCA::Cipher::ECB, QCA::Cipher::PKCS7, QCA::Decode, key);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( desEcbPkcs7TestValues[n].ciphertext ) ) ),
+		   QString( desEcbPkcs7TestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("des-cbc-pkcs7") )
+	SKIP("DES, CBC mode with PKCS7 padding not supported!");
+    else {
+	QCA::DES cipherObj1( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Encode, QCA::SymmetricKey( 8 ) );
+	CHECK( cipherObj1.keyLength().minimum(), 8 );
+	CHECK( cipherObj1.keyLength().maximum(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
+
+	for (int n = 0; (0 != desCbcPkcs7TestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( desCbcPkcs7TestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( desCbcPkcs7TestValues[n].iv ) );
+	    QCA::DES forwardCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Encode, key, iv);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( desCbcPkcs7TestValues[n].plaintext ) ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( ( update + QCA::arrayToHex( forwardCipher.final() ) ),
+		   QString( desCbcPkcs7TestValues[n].ciphertext) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::DES reverseCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( desCbcPkcs7TestValues[n].ciphertext ) ) ),
+		   QString( desCbcPkcs7TestValues[n].plaintext ) );
 	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
