@@ -20,6 +20,7 @@
 
 #include "qca.h"
 
+#include <qconfig.h>
 #include <qdatetime.h>
 #include <qstringlist.h>
 #include <stdlib.h>
@@ -125,7 +126,7 @@ public:
         {
 		buf.resize(64);
 		buf.fill(0);
-		count = 0;
+		m_count = 0;
 		abcd[0] = 0x67452301;
 		abcd[1] = 0xefcdab89;
 		abcd[2] = 0x98badcfe;
@@ -136,14 +137,13 @@ public:
         {
 		const unsigned char *p = (const unsigned char*)a.data();
 		int left = a.size();
-		int offset = (count >> 3) & 63;
-		Q_UINT32 nbits = (Q_UINT32)(a.size() << 3);
+		int offset = (m_count >> 3) & 63;
 
 		if (a.size() <= 0)
 			return;
 
 		/* Update the message length. */
-		count += nbits;
+		m_count += (a.size() << 3);
 
 		/* Process an initial partial block. */
 		if (offset) {
@@ -176,19 +176,16 @@ public:
 		unsigned int i;
     
 		/* Save the length before padding. */
-		//for (i = 0; i < 8; ++i)
-		// count[0] is lsw, count[1] is msw
-		//data[i] = (count[i >> 2] >> ((i & 3) << 3));
-		data[0] = (count >> 0);
-		data[1] = (count >> 8);
-		data[2] = (count >> 16);
-		data[3] = (count >> 24);
-		data[4] = (count >> 32);
-		data[5] = (count >> 40);
-		data[6] = (count >> 48);
-		data[7] = (count >> 56);
+		data[0] = (m_count >> 0);
+		data[1] = (m_count >> 8);
+		data[2] = (m_count >> 16);
+		data[3] = (m_count >> 24);
+		data[4] = (m_count >> 32);
+		data[5] = (m_count >> 40);
+		data[6] = (m_count >> 48);
+		data[7] = (m_count >> 56);
 		/* Pad to 56 bytes mod 64. */
-		QSecureArray padding(((55 - (count >> 3)) & 63) + 1);
+		QSecureArray padding(((55 - (m_count >> 3)) & 63) + 1);
 		if (padding.size() > 0 ) {
 			padding[0] = 0x80;
 			if (padding.size() > 1 ) {
@@ -208,7 +205,7 @@ public:
 private:
 
         /* Define the state of the MD5 Algorithm. */
-	Q_UINT64 count;	                /* message length in bits */
+	Q_UINT64 m_count;	        /* message length in bits */
 	Q_UINT32 abcd[4];		/* digest buffer */
 	QSecureArray  buf;		/* accumulate block */
 
@@ -272,42 +269,32 @@ private:
 		Q_UINT32 xbuf[16];
 		const Q_UINT32 *X;
 		
+		if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
 		{
 			/*
-			 * Determine dynamically whether this is a big-endian or
-			 * little-endian machine, since we can use a more efficient
-			 * algorithm on the latter.
+			 * On little-endian machines, we can process properly aligned
+			 * data without copying it.
 			 */
-			static const int w = 1;
-			
-			if (*((const Q_UINT8 *)&w)) /* little-endian */
-			{
-				/*
-				 * On little-endian machines, we can process properly aligned
-				 * data without copying it.
-				 */
-				if (!((data.data() - (const char *)0) & 3)) {
-					/* data are properly aligned */
-					X = (const Q_UINT32 *)data.data();
-				} else {
-					/* not aligned */
-					memcpy(xbuf, data.data(), 64);
-					X = xbuf;
-				}
-			}
-			else			/* big-endian */
-			{
-				/*
-				 * On big-endian machines, we must arrange the bytes in the
-				 * right order.
-				 */
-				const char *xp = data.data();
-				int i;
-				
+			if (!((data.data() - (const char *)0) & 3)) {
+				/* data are properly aligned */
+				X = (const Q_UINT32 *)data.data();
+			} else {
+				/* not aligned */
+				memcpy(xbuf, data.data(), 64);
 				X = xbuf;
-				for (i = 0; i < 16; ++i, xp += 4)
-					xbuf[i] = xp[0] + (xp[1] << 8) + (xp[2] << 16) + (xp[3] << 24);
 			}
+		} else			/* big-endian */
+		{
+			/*
+			 * On big-endian machines, we must arrange the bytes in the
+			 * right order.
+			 */
+			const char *xp = data.data();
+			int i;
+			
+			X = xbuf;
+			for (i = 0; i < 16; ++i, xp += 4)
+				xbuf[i] = xp[0] + (xp[1] << 8) + (xp[2] << 16) + (xp[3] << 24);
 		}
 		
 		/* Round 1. */
