@@ -541,15 +541,17 @@ if [ -x "./qcextra" ]; then
 	./qcextra
 fi
 # run qmake
-$qm qca-tls.pro -o Makefile.tmp
+$qm qca-tls.pro
 if [ "$?" != "0" ]; then
 	exit 1;
 fi
-cat >Makefile <<EOT
+cat >Makefile.tmp <<EOT
 QTDIR = $QTDIR
 EOT
-cat Makefile.tmp >> Makefile
-rm Makefile.tmp
+cat Makefile >> Makefile.tmp
+rm -f Makefile
+cp -f Makefile.tmp Makefile
+rm -f Makefile.tmp
 
 echo
 echo Good, your configure finished.  Now run \'make\'.
