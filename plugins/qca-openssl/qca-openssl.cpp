@@ -375,7 +375,6 @@ public:
 		list += "hmac(md5)";
 		list += "hmac(sha1)";
 		list += "hmac(ripemd160)";
-		list += "aes128";
 		return list;
 	}
 
