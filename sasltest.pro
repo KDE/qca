@@ -8,6 +8,11 @@ UI_DIR      = .ui
 
 INCLUDEPATH += src
 INCLUDEPATH += plugins
-HEADERS += src/qca.h
-SOURCES += sasltest.cpp src/qca.cpp
+HEADERS += src/qca.h base64.h
+SOURCES += sasltest.cpp src/qca.cpp base64.cpp
+
+DEFINES += USE_CYRUSSASL
+HEADERS += plugins/qcacyrussasl.h
+SOURCES += plugins/qcacyrussasl.cpp
+LIBS += -lsasl2
 

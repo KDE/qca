@@ -1,9 +1,14 @@
 * cipher: option to specify size for genkey
 * cert: properly check hostnames with wildcards
 * ssl: error signal
+* sasl: option to not support client-send-first
+* sasl: security layer
 
-* sasl client
-* sasl server
+* openssl plugin: fixmes and todos
+* cyrussasl plugin
+    fixmes and todos
+    extra sasl options and parameters?
+
 * dsa
 * diffie-hellman
 

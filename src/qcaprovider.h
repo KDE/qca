@@ -5,6 +5,7 @@
 #include<qstring.h>
 #include<qdatetime.h>
 #include<qobject.h>
+#include<qhostaddress.h>
 #include"qca.h"
 
 #ifdef Q_WS_WIN
@@ -119,6 +120,12 @@ signals:
 	void readyReadOutgoing();
 };
 
+struct QCA_SASLHostPort
+{
+	QHostAddress addr;
+	Q_UINT16 port;
+};
+
 struct QCA_SASLNeedParams
 {
 	bool auth, user, pass, realm;
@@ -130,9 +137,21 @@ public:
 	enum { Success, Error, NeedParams, Continue };
 	virtual ~QCA_SASLContext() {}
 
-	virtual bool startClient(const char *service, const QString &host, const QStringList &methods, const QHostAddress &localAddr, int localPort, const QHostAddress &remoteAddr, int remotePort, bool allowPlain);
-	virtual int firstStep(char **meth, char **out, unsigned int *outlen, QCA_SASLNeedParams *np)=0;
-	virtual int nextStep(const char *in, unsigned int len, char **out, unsigned int *outlen, QCA_SASLNeedParams *np)=0;
+	// common
+	virtual void setCoreProps(const QString &service, const QString &host, QCA_SASLHostPort *local, QCA_SASLHostPort *remote)=0;
+	virtual void setSecurityProps(bool allowPlain)=0;
+
+	// client
+	virtual bool clientStart(const QStringList &mechlist)=0;
+	virtual int clientFirstStep(QString *mech, QByteArray **out, QCA_SASLNeedParams *np)=0;
+	virtual int clientNextStep(const QByteArray &in, QByteArray *out, QCA_SASLNeedParams *np)=0;
+
+	// server
+	virtual bool serverStart(const QString &realm, QStringList *mechlist)=0;
+	virtual int serverFirstStep(const QString &mech, const QByteArray *in, QByteArray *out)=0;
+	virtual int serverNextStep(const QByteArray &in, QByteArray *out)=0;
+
+	// client params
 	virtual void setAuthname(const QString &)=0;
 	virtual void setUsername(const QString &)=0;
 	virtual void setPassword(const QString &)=0;

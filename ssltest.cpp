@@ -26,12 +26,12 @@ void showCertInfo(const QCA::Cert &cert)
 	printf(" PEM:\n%s\n", cert.toPEM().latin1());
 }
 
-QPtrList<QCA::Cert> getRootCerts()
+QPtrList<QCA::Cert> getRootCerts(const QString &store)
 {
 	QPtrList<QCA::Cert> list;
 
 	// open the Psi rootcerts file
-	QFile f("/usr/local/share/psi/certs/rootcert.xml");
+	QFile f(store);
 	if(!f.open(IO_ReadOnly)) {
 		printf("unable to open %s\n", f.name().latin1());
 		return list;
@@ -133,9 +133,7 @@ public:
 		connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
 
 		rootCerts.setAutoDelete(true);
-		rootCerts = getRootCerts();
-		//printf("deleting\n");
-		//rootCerts.clear();
+		rootCerts = getRootCerts("/usr/share/psi/certs/rootcert.xml");
 	}
 
 	~SecureTest()

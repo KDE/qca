@@ -13,7 +13,7 @@
 #include<openssl/ssl.h>
 #include<openssl/err.h>
 
-//#define OSSL_097
+#define OSSL_097
 
 #ifndef OSSL_097
 #define NO_AES

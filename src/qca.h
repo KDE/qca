@@ -331,16 +331,18 @@ namespace QCA
 		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
 
 		// initialize
-		bool startClient(const QString &service, const QString &host, const QStringList &methods);
-		//bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method);
-		//bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method, const QByteArray &clientInit);
+		bool startClient(const QString &service, const QString &host, const QStringList &mechlist);
+		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist);
 
 		// authentication
-		void putIncomingStep(const QByteArray &stepData);
-		void putAuthname(const QString &auth);
-		void putUsername(const QString &user);
-		void putPassword(const QString &pass);
-		void putRealm(const QString &realm);
+		void putStep(const QByteArray &stepData);
+		void putServerFirstStep(const QString &mech);
+		void putServerFirstStep(const QString &mech, const QByteArray &clientInit);
+		void setAuthname(const QString &auth);
+		void setUsername(const QString &user);
+		void setPassword(const QString &pass);
+		void setRealm(const QString &realm);
+		void continueAfterParams();
 
 		// plain (application side)
 		/*void write(const QByteArray &a);
@@ -352,14 +354,14 @@ namespace QCA
 
 	signals:
 		// for authentication
-		void clientFirstStep(const QString &method, bool useClientInit, const QByteArray &clientInit);
+		void clientFirstStep(const QString &mech, const QByteArray *clientInit);
 		void nextStep(const QByteArray &stepData);
 		void needParams(bool auth, bool user, bool pass, bool realm);
 		void authenticated(bool);
 
 		// for security layer
-		void readyRead();
-		void readyReadOutgoing();
+		//void readyRead();
+		//void readyReadOutgoing();
 
 	private slots:
 		void tryAgain();
@@ -367,6 +369,8 @@ namespace QCA
 	private:
 		class Private;
 		Private *d;
+
+		void handleServerFirstStep(int r, const QByteArray &buf);
 	};
 };
 

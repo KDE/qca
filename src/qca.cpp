@@ -15,6 +15,10 @@
 #include"qcaopenssl.h"
 #endif
 
+#ifdef USE_CYRUSSASL
+#include"qcacyrussasl.h"
+#endif
+
 #if defined(Q_OS_WIN32)
 #define PLUGIN_EXT "dll"
 #elif defined(Q_OS_MAC)
@@ -62,6 +66,9 @@ void QCA::init()
 #ifdef USE_OPENSSL
 	providerList.append(createProviderOpenSSL());
 #endif
+#ifdef USE_CYRUSSASL
+	providerList.append(createProviderCyrusSASL());
+#endif
 
 	// load plugins
 	QDir dir("plugins");
@@ -75,6 +82,7 @@ void QCA::init()
 		QLibrary *lib = new QLibrary(fi.filePath());
 		if(!lib->load()) {
 			delete lib;
+			//printf("can't load\n");
 			continue;
 		}
 		void *s = lib->resolve("createProvider");
@@ -820,6 +828,7 @@ public:
 		c = (QCA_SASLContext *)getContext(CAP_SASL);
 		localPort = -1;
 		remotePort = -1;
+		allowPlain = true;
 	}
 
 	~Private()
@@ -832,7 +841,7 @@ public:
 	QHostAddress localAddr, remoteAddr;
 	int localPort, remotePort;
 	QByteArray stepData;
-	bool first;
+	bool first, server;
 };
 
 SASL::SASL(QObject *parent)
@@ -869,96 +878,157 @@ void SASL::setRemoteAddr(const QHostAddress &addr, Q_UINT16 port)
 	d->remotePort = port;
 }
 
-bool SASL::startClient(const QString &service, const QString &host, const QStringList &methods)
+bool SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist)
 {
-	if(!d->c->startClient(service.latin1(), host, methods, d->localAddr, d->localPort, d->remoteAddr, d->remotePort, d->allowPlain))
+	QCA_SASLHostPort la, ra;
+	if(d->localPort != -1) {
+		la.addr = d->localAddr;
+		la.port = d->localPort;
+	}
+	if(d->remotePort != -1) {
+		ra.addr = d->remoteAddr;
+		ra.port = d->remotePort;
+	}
+
+	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
+	d->c->setSecurityProps(d->allowPlain);
+	if(!d->c->clientStart(mechlist))
 		return false;
 	d->first = true;
+	d->server = false;
 	QTimer::singleShot(0, this, SLOT(tryAgain()));
 	return true;
 }
 
-/*bool SASL::startServer(const QString &service, const QString &host, const QString &realm, const QString &method)
+bool SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist)
 {
-	return false;
+	QCA_SASLHostPort la, ra;
+	if(d->localPort != -1) {
+		la.addr = d->localAddr;
+		la.port = d->localPort;
+	}
+	if(d->remotePort != -1) {
+		ra.addr = d->remoteAddr;
+		ra.port = d->remotePort;
+	}
+
+	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
+	d->c->setSecurityProps(d->allowPlain);
+	if(!d->c->serverStart(realm, mechlist))
+		return false;
+	d->first = true;
+	d->server = true;
+	return true;
 }
 
-bool SASL::startServer(const QString &service, const QString &host, const QString &realm, const QString &method, const QByteArray &clientInit)
+void SASL::putServerFirstStep(const QString &mech)
 {
-	return false;
-}*/
+	QByteArray buf;
+	int r = d->c->serverFirstStep(mech, 0, &buf);
+	handleServerFirstStep(r, buf);
+}
 
-void SASL::putIncomingStep(const QByteArray &stepData)
+void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
+{
+	QByteArray buf;
+	int r = d->c->serverFirstStep(mech, &clientInit, &buf);
+	handleServerFirstStep(r, buf);
+}
+
+void SASL::handleServerFirstStep(int r, const QByteArray &buf)
+{
+	if(r == QCA_SASLContext::Success)
+		authenticated(true);
+	else if(r == QCA_SASLContext::Continue)
+		nextStep(buf);
+	else
+		authenticated(false);
+}
+
+void SASL::putStep(const QByteArray &stepData)
 {
 	d->stepData = stepData;
 	tryAgain();
 }
 
-void SASL::putAuthname(const QString &auth)
+void SASL::setAuthname(const QString &auth)
 {
 	d->c->setAuthname(auth);
-	QTimer::singleShot(0, this, SLOT(tryAgain()));
 }
 
-void SASL::putUsername(const QString &user)
+void SASL::setUsername(const QString &user)
 {
 	d->c->setUsername(user);
-	QTimer::singleShot(0, this, SLOT(tryAgain()));
 }
 
-void SASL::putPassword(const QString &pass)
+void SASL::setPassword(const QString &pass)
 {
 	d->c->setPassword(pass);
-	QTimer::singleShot(0, this, SLOT(tryAgain()));
 }
 
-void SASL::putRealm(const QString &realm)
+void SASL::setRealm(const QString &realm)
 {
 	d->c->setRealm(realm);
-	QTimer::singleShot(0, this, SLOT(tryAgain()));
+}
+
+void SASL::continueAfterParams()
+{
+	tryAgain();
 }
 
 void SASL::tryAgain()
 {
 	int r;
-	if(d->first) {
-		char *out, *meth;
-		unsigned int outlen;
-		QCA_SASLNeedParams np;
-		r = d->c->firstStep(&meth, &out, &outlen, &np);
-		if(r == QCA_SASLContext::NeedParams) {
-			needParams(np.auth, np.user, np.pass, np.realm);
-			return;
-		}
-		QString method = meth;
-		free(meth);
 
-		QByteArray buf;
-		bool useClientInit = false;
-		if(out) {
-			buf.resize(outlen);
-			memcpy(buf.data(), out, buf.size());
-			free(out);
-			useClientInit = true;
-		}
-		clientFirstStep(method, useClientInit, buf);
-		d->first = false;
-	}
-	else {
-		char *out;
-		unsigned int outlen;
-		QCA_SASLNeedParams np;
-		r = d->c->nextStep(d->stepData.data(), d->stepData.size(), &out, &outlen, &np);
-		if(r == QCA_SASLContext::NeedParams) {
-			needParams(np.auth, np.user, np.pass, np.realm);
+	if(d->server) {
+		QByteArray out;
+		printf("serverNextStep\n");
+		r = d->c->serverNextStep(d->stepData, &out);
+		printf("finished\n");
+		if(r == QCA_SASLContext::Error) {
+			authenticated(false);
 			return;
 		}
 		else if(r == QCA_SASLContext::Continue) {
-			QByteArray buf(outlen);
-			memcpy(buf.data(), out, buf.size());
-			free(out);
-			nextStep(buf);
+			nextStep(out);
 			return;
+		}
+	}
+	else {
+		if(d->first) {
+			QString mech;
+			QByteArray *clientInit;
+			QCA_SASLNeedParams np;
+			r = d->c->clientFirstStep(&mech, &clientInit, &np);
+			if(r == QCA_SASLContext::Error) {
+				authenticated(false);
+				return;
+			}
+			else if(r == QCA_SASLContext::NeedParams) {
+				needParams(np.auth, np.user, np.pass, np.realm);
+				return;
+			}
+
+			d->first = false;
+			clientFirstStep(mech, clientInit);
+			delete clientInit;
+		}
+		else {
+			QByteArray out;
+			QCA_SASLNeedParams np;
+			r = d->c->clientNextStep(d->stepData, &out, &np);
+			if(r == QCA_SASLContext::Error) {
+				authenticated(false);
+				return;
+			}
+			else if(r == QCA_SASLContext::NeedParams) {
+				needParams(np.auth, np.user, np.pass, np.realm);
+				return;
+			}
+			else if(r == QCA_SASLContext::Continue) {
+				nextStep(out);
+				return;
+			}
 		}
 	}
 
