@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include <openssl/rand.h>
 #include <openssl/evp.h>
@@ -34,6 +35,8 @@
 
 // comment this out if you'd rather use openssl 0.9.6
 //#define OSSL_097
+
+namespace opensslQCAPlugin {
 
 //----------------------------------------------------------------------------
 // Util
@@ -3270,6 +3273,124 @@ public:
 	}
 };
 
+class opensslCipherContext : public QCA::CipherContext
+{
+public:
+	opensslCipherContext(const EVP_CIPHER *algorithm, const int pad, QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+	{
+		m_cryptoAlgorithm = algorithm;
+		EVP_CIPHER_CTX_init(&m_context);
+		m_pad = pad;
+		m_type = type;
+	}
+
+		void setup(QCA::Direction dir,
+			   const QCA::SymmetricKey &key,
+			   const QCA::InitializationVector &iv)
+		{
+			m_direction = dir;
+			if (QCA::Encode == m_direction) {
+				EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0,
+						   (const unsigned char*)(key.data()),
+						   (const unsigned char*)(iv.data()));
+			} else {
+				EVP_DecryptInit_ex(&m_context, m_cryptoAlgorithm, 0,
+						   (const unsigned char*)(key.data()),
+						   (const unsigned char*)(iv.data()));
+			}
+			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
+			EVP_CIPHER_CTX_set_padding(&m_context, m_pad);
+		}
+
+		Context *clone() const
+		{
+			return new opensslCipherContext( *this );
+		}
+
+		unsigned int blockSize() const
+		{
+			return EVP_CIPHER_CTX_block_size(&m_context);
+		}
+    
+		bool update(const QSecureArray &in, QSecureArray *out)
+		{
+			out->resize(in.size()+blockSize());
+			int resultLength;
+			if (QCA::Encode == m_direction) {
+				if (0 == EVP_EncryptUpdate(&m_context,
+							   (unsigned char*)out->data(),
+							   &resultLength,
+							   (unsigned char*)in.data(),
+							   in.size())) {
+					return false;
+				}
+			} else {
+				if (0 == EVP_DecryptUpdate(&m_context,
+							   (unsigned char*)out->data(),
+							   &resultLength,
+							   (unsigned char*)in.data(),
+							   in.size())) {
+					return false;
+				}
+			}
+			out->resize(resultLength);
+			return true;
+		}
+    
+		bool final(QSecureArray *out)
+		{
+			out->resize(blockSize());
+			int resultLength;
+			if (QCA::Encode == m_direction) {
+				if (0 == EVP_EncryptFinal_ex(&m_context,
+							     (unsigned char*)out->data(),
+							     &resultLength)) {
+					return false;
+				} 
+			} else {
+				if (0 == EVP_DecryptFinal_ex(&m_context,
+							     (unsigned char*)out->data(),
+							     &resultLength)) {
+					return false;
+				} 
+			}
+			out->resize(resultLength);
+			return true;
+		}
+
+		// Change cipher names
+		QCA::KeyLength keyLength() const
+		{
+			if (m_type == "des-ecb") {
+				return QCA::KeyLength( 8, 8, 1);
+			} else if (m_type.left(6) == "aes128") {
+				return QCA::KeyLength( 16, 16, 1);
+			} else if (m_type.left(6) == "aes192") {
+				return QCA::KeyLength( 24, 24, 1);
+			} else if (m_type.left(6) == "aes256") {
+				return QCA::KeyLength( 32, 32, 1);
+			} else if (m_type.left(8) == "blowfish") {
+				// Don't know - TODO
+				return QCA::KeyLength( 1, 32, 1);
+			} else if (m_type.left(9) == "tripledes") {
+				return QCA::KeyLength( 24, 24, 1);
+			} else {
+				return QCA::KeyLength( 0, 1, 1);
+			}
+		}
+
+
+protected:
+		EVP_CIPHER_CTX m_context;
+		const EVP_CIPHER *m_cryptoAlgorithm;
+		QCA::Direction m_direction;
+		int m_pad;
+		QString m_type;
+};
+
+}
+
+using namespace opensslQCAPlugin;
 
 class opensslProvider : public QCA::Provider
 {
@@ -3308,7 +3429,20 @@ public:
 		list += "hmac(md5)";
 		list += "hmac(sha1)";
 		list += "hmac(ripemd160)";
-
+		list += "aes128-ecb";
+		list += "aes128-cfb";
+		list += "aes128-cbc";
+		list += "aes128-cbc-pkcs7";
+		list += "aes192-ecb";
+		list += "aes192-cfb";
+		list += "aes192-cbc";
+		list += "aes256-ecb";
+		list += "aes256-cbc";
+		list += "aes256-cfb";
+		// Blowfish ECB is failing unit test.
+		// list += "blowfish-ecb";
+		list += "tripledes-ecb";
+		list += "des-ecb";
 		list += "pkey";
 		list += "dlgroup";
 		list += "rsa";
@@ -3343,6 +3477,32 @@ public:
 			return new opensslHMACContext( EVP_sha1(),this, type );
 		else if ( type == "hmac(ripemd160)" )
 			return new opensslHMACContext( EVP_ripemd160(), this, type );
+		else if ( type == "aes128-ecb" )
+			return new opensslCipherContext( EVP_aes_128_ecb(), 0, this, type);
+		else if ( type == "aes128-cfb" )
+			return new opensslCipherContext( EVP_aes_128_cfb(), 0, this, type);
+		else if ( type == "aes128-cbc" )
+			return new opensslCipherContext( EVP_aes_128_cbc(), 0, this, type);
+		else if ( type == "aes128-cbc-pkcs7" )
+			return new opensslCipherContext( EVP_aes_128_cbc(), 1, this, type);
+		else if ( type == "aes192-ecb" )
+			return new opensslCipherContext( EVP_aes_192_ecb(), 0, this, type);
+		else if ( type == "aes192-cfb" )
+			return new opensslCipherContext( EVP_aes_192_cfb(), 0, this, type);
+		else if ( type == "aes192-cbc" )
+			return new opensslCipherContext( EVP_aes_192_cbc(), 0, this, type);
+		else if ( type == "aes256-ecb" )
+			return new opensslCipherContext( EVP_aes_256_ecb(), 0, this, type);
+		else if ( type == "aes256-cfb" )
+			return new opensslCipherContext( EVP_aes_256_cfb(), 0, this, type);
+		else if ( type == "aes256-cbc" )
+			return new opensslCipherContext( EVP_aes_256_cbc(), 0, this, type);
+		else if ( type == "blowfish-ecb" )
+			return new opensslCipherContext( EVP_bf_ecb(), 0, this, type);
+		else if ( type == "tripledes-ecb" )
+			return new opensslCipherContext( EVP_des_ede3(), 0, this, type);
+		else if ( type == "des-ecb" )
+			return new opensslCipherContext( EVP_des_ecb(), 0, this, type);
 		else if ( type == "pkey" )
 			return new MyPKeyContext( this );
 		else if ( type == "dlgroup" )
