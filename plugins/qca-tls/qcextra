@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cat >extra.pri <<EOT
+target.path=$QTDIR/plugins/crypto
+INSTALLS += target
+EOT

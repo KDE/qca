@@ -15,4 +15,5 @@ SOURCES = qca-tls.cpp
 DEFINES += QCA_PLUGIN
 
 include(conf.pri)
+include(extra.pri)
 
