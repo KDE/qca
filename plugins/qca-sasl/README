@@ -1,0 +1,16 @@
+QCA SASL Plugin v1.0
+-------------------
+Author: Justin Karneges <justin@affinix.com>
+Date:   September 15th, 2003
+
+This is a plugin to provide SASL capability to programs that
+utilize the Qt Cryptographic Architecture (QCA).
+
+Requirements:
+  Cyrus SASL2 Library (http://asg.web.cmu.edu/sasl/sasl-library.html)
+
+Installation procedure:
+  ./configure
+  make
+  su -c "make install"
+

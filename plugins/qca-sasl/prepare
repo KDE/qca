@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cp ../../src/qca.h .
+cp ../../src/qcaprovider.h .
+
