@@ -28,6 +28,7 @@
 #include<qtimer.h>
 #include<qhostaddress.h>
 #include<qapplication.h>
+#include<qguardedptr.h>
 #include<stdlib.h>
 #include"qcaprovider.h"
 
@@ -975,6 +976,7 @@ void TLS::update()
 	bool force_read = false;
 	bool eof = false;
 	bool done = false;
+	QGuardedPtr<TLS> self = this;
 
 	if(d->closing) {
 		QByteArray a;
@@ -1011,6 +1013,8 @@ void TLS::update()
 				d->cert.fromContext(cc);
 				d->handshaken = true;
 				handshaken();
+				if(!self)
+					return;
 
 				// there is a teeny tiny possibility that incoming data awaits.  let us get it.
 				force_read = true;
@@ -1054,8 +1058,11 @@ void TLS::update()
 				d->appendArray(&d->to_net, b);
 			}
 
-			if(!d->in.isEmpty())
+			if(!d->in.isEmpty()) {
 				readyRead();
+				if(!self)
+					return;
+			}
 		}
 	}
 
@@ -1063,10 +1070,14 @@ void TLS::update()
 		int bytes = d->bytesEncoded;
 		d->bytesEncoded = 0;
 		readyReadOutgoing(bytes);
+		if(!self)
+			return;
 	}
 
 	if(eof) {
 		close();
+		if(!self)
+			return;
 		return;
 	}
 
