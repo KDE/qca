@@ -29,7 +29,7 @@ public:
 			inc = s;
 		}
 		else {
-			if(!conf->findHeader("/openssl/ssl.h", QStringList(), &s))
+			if(!conf->findHeader("openssl/ssl.h", QStringList(), &s))
 				return false;
 			inc = s;
 		}

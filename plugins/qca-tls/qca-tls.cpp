@@ -1414,7 +1414,7 @@ public:
 #ifdef QCA_PLUGIN
 QCAProvider *createProvider()
 #else
-QCAProvider *createProviderOpenSSL()
+QCAProvider *createProviderTLS()
 #endif
 {
 	return (new QCAOpenSSL);
