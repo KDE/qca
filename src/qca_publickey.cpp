@@ -237,6 +237,11 @@ PublicKey::PublicKey(const PrivateKey &k)
 	set(k.toPublicKey());
 }
 
+PublicKey::PublicKey(const QString &fileName)
+{
+	Q_UNUSED(fileName);
+}
+
 RSAPublicKey PublicKey::toRSA() const
 {
 	return toRSAPublicKey();
@@ -312,8 +317,15 @@ QString PublicKey::toPEM() const
 	return ((PKeyContext *)context())->publicToPEM();
 }
 
-PublicKey PublicKey::fromDER(const QSecureArray &a, const QString &provider)
+bool PublicKey::toPEMFile(const QString &fileName) const
 {
+	Q_UNUSED(fileName);
+	return false;
+}
+
+PublicKey PublicKey::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(result);
 	PublicKey k;
 	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
 	if(c->publicFromDER(a) == PKeyContext::Good)
@@ -321,13 +333,22 @@ PublicKey PublicKey::fromDER(const QSecureArray &a, const QString &provider)
 	return k;
 }
 
-PublicKey PublicKey::fromPEM(const QString &s, const QString &provider)
+PublicKey PublicKey::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
+	Q_UNUSED(result);
 	PublicKey k;
 	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
 	if(c->publicFromPEM(s) == PKeyContext::Good)
 		k.change(c);
 	return k;
+}
+
+PublicKey PublicKey::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(result);
+	Q_UNUSED(fileName);
+	Q_UNUSED(provider);
+	return PublicKey();
 }
 
 //----------------------------------------------------------------------------
@@ -340,6 +361,12 @@ PrivateKey::PrivateKey()
 PrivateKey::PrivateKey(const QString &type, const QString &provider)
 :PKey(type, provider)
 {
+}
+
+PrivateKey::PrivateKey(const QString &fileName, const QSecureArray &passphrase)
+{
+	Q_UNUSED(fileName);
+	Q_UNUSED(passphrase);
 }
 
 RSAPrivateKey PrivateKey::toRSA() const
@@ -421,8 +448,17 @@ QString PrivateKey::toPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) cons
 	return ((PKeyContext *)context())->privateToPEM(passphrase);
 }
 
-PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passphrase, const QString &provider)
+bool PrivateKey::toPEMFile(const QString &fileName, const QSecureArray &passphrase, PBEAlgorithm pbe) const
 {
+	Q_UNUSED(fileName);
+	Q_UNUSED(passphrase);
+	Q_UNUSED(pbe);
+	return false;
+}
+
+PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(result);
 	PrivateKey k;
 	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
 	if(c->privateFromDER(a, passphrase) == PKeyContext::Good)
@@ -430,13 +466,23 @@ PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passph
 	return k;
 }
 
-PrivateKey PrivateKey::fromPEM(const QString &s, const QSecureArray &passphrase, const QString &provider)
+PrivateKey PrivateKey::fromPEM(const QString &s, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
+	Q_UNUSED(result);
 	PrivateKey k;
 	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
 	if(c->privateFromPEM(s, passphrase) == PKeyContext::Good)
 		k.change(c);
 	return k;
+}
+
+PrivateKey PrivateKey::fromPEMFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+{
+	Q_UNUSED(result);
+	Q_UNUSED(fileName);
+	Q_UNUSED(passphrase);
+	Q_UNUSED(provider);
+	return PrivateKey();
 }
 
 //----------------------------------------------------------------------------

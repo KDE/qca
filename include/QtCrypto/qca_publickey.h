@@ -85,6 +85,14 @@ namespace QCA
 		PBES2_AES256_SHA1     ///< PKCS#5 v2.0 AES-256/CBC,SHA1
 	};
 
+	enum ConvertResult
+	{
+		Convert_Good,
+		Convert_ErrorDecode,
+		Convert_ErrorPassphrase,
+		Convert_ErrorFile
+	};
+
 	class QCA_EXPORT PKey : public Algorithm
 	{
 	public:
@@ -136,6 +144,7 @@ namespace QCA
 	public:
 		PublicKey();
 		PublicKey(const PrivateKey &k);
+		PublicKey(const QString &fileName);
 
 		RSAPublicKey toRSA() const;
 		DSAPublicKey toDSA() const;
@@ -155,8 +164,10 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
-		static PublicKey fromDER(const QSecureArray &a, const QString &provider = QString());
-		static PublicKey fromPEM(const QString &s, const QString &provider = QString());
+		bool toPEMFile(const QString &fileName) const;
+		static PublicKey fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static PublicKey fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+		static PublicKey fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 	protected:
 		PublicKey(const QString &type, const QString &provider);
@@ -170,6 +181,7 @@ namespace QCA
 	{
 	public:
 		PrivateKey();
+		PrivateKey(const QString &fileName, const QSecureArray &passphrase = QSecureArray());
 
 		RSAPrivateKey toRSA() const;
 		DSAPrivateKey toDSA() const;
@@ -190,8 +202,10 @@ namespace QCA
 		static bool canUsePBEAlgorithm(PBEAlgorithm algo, const QString &provider = QString());
 		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
 		QString toPEM(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
-		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
-		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
+		bool toPEMFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
+		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+		static PrivateKey fromPEMFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
 	protected:
 		PrivateKey(const QString &type, const QString &provider);
