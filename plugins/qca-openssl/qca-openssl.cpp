@@ -3538,6 +3538,10 @@ public:
 		list += "aes256-cfb";
 		list += "aes256-ofb";
 		list += "blowfish-ecb";
+		list += "blowfish-cbc-pkcs7";
+		list += "blowfish-cbc";
+		list += "blowfish-cfb";
+		list += "blowfish-ofb";
 		list += "tripledes-ecb";
 		list += "des-ecb";
 		list += "des-ecb-pkcs7";
@@ -3607,6 +3611,14 @@ public:
 			return new opensslCipherContext( EVP_aes_256_ofb(), 0, this, type);
 		else if ( type == "blowfish-ecb" )
 			return new opensslCipherContext( EVP_bf_ecb(), 0, this, type);
+		else if ( type == "blowfish-cfb" )
+			return new opensslCipherContext( EVP_bf_cfb(), 0, this, type);
+		else if ( type == "blowfish-ofb" )
+			return new opensslCipherContext( EVP_bf_ofb(), 0, this, type);
+		else if ( type == "blowfish-cbc" )
+			return new opensslCipherContext( EVP_bf_cbc(), 0, this, type);
+		else if ( type == "blowfish-cbc-pkcs7" )
+			return new opensslCipherContext( EVP_bf_cbc(), 1, this, type);
 		else if ( type == "tripledes-ecb" )
 			return new opensslCipherContext( EVP_des_ede3(), 0, this, type);
 		else if ( type == "des-ecb" )
