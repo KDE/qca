@@ -321,6 +321,7 @@ public:
 	 * \endcode
 	 **/
 	int compare(const QBigInteger &n) const;
+
 private:
 	class Private;
 	Private *d;

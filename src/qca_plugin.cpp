@@ -194,7 +194,7 @@ void ProviderManager::scan()
 			ProviderItem *i = ProviderItem::load(fname);
 			if(!i)
 				continue;
-			if(i->version != QCA_PLUGIN_VERSION)
+			if(i->version != QCA_PLUGIN_VERSION && i->version != 1)
 			{
 				delete i;
 				continue;
@@ -267,7 +267,10 @@ QCA::Provider *ProviderManager::find(const QString &name) const
 	for(ProviderItem *i; (i = it.current()); ++it)
 	{
 		if(i->p && i->p->name() == name)
+		{
+			i->ensureInit();
 			return i->p;
+		}
 	}
 	return 0;
 }
@@ -280,6 +283,7 @@ QCA::Provider *ProviderManager::findFor(const QString &name, const QString &type
 		QPtrListIterator<ProviderItem> it(providerItemList);
 		for(ProviderItem *i; (i = it.current()); ++it)
 		{
+			i->ensureInit();
 			if(i->p && i->p->features().contains(type))
 				return i->p;
 		}
@@ -305,11 +309,9 @@ QCAProvider *ProviderManager::findFor(int cap) const
 	QPtrListIterator<ProviderItem> it(providerItemList);
 	for(ProviderItem *i; (i = it.current()); ++it)
 	{
+		i->ensureInit();
 		if(i->p_old && i->p_old->capabilities() & cap)
-		{
-			i->ensureInit();
 			return i->p_old;
-		}
 	}
 	return 0;
 }

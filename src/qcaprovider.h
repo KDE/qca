@@ -28,7 +28,7 @@
 #include <qhostaddress.h>
 #include "qca.h"
 
-#define QCA_PLUGIN_VERSION 1
+#define QCA_PLUGIN_VERSION 2
 
 // v2 contexts
 namespace QCA {

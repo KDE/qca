@@ -242,18 +242,7 @@ QByteArray hexToArray(const QString &str)
 	return Hex().stringToArray(str).toByteArray();
 }
 
-static void *getContext(int cap)
-{
-	init();
-
-	// this call will also trip a scan for new plugins if needed
-	if(!isSupported(cap))
-		return 0;
-
-	return manager->findFor(cap)->context(cap);
-}
-
-}
+} // namespace QCA
 
 void *qca_secure_alloc(int bytes)
 {
@@ -273,6 +262,94 @@ void qca_secure_free(void *p)
 }
 
 namespace QCA {
+
+static void *getContext(int cap)
+{
+	init();
+
+	// this call will also trip a scan for new plugins if needed
+	if(!isSupported(cap))
+		return 0;
+
+	return manager->findFor(cap)->context(cap);
+}
+
+static Provider::Context *getContext(const QString &type, const QString &provider)
+{
+	init();
+
+	Provider *p = 0;
+	bool scanned = false;
+	if(!provider.isEmpty())
+	{
+		// try using specific provider
+		p = manager->findFor(provider, type);
+		if(!p)
+		{
+			// maybe this provider is new, so scan and try again
+			manager->scan();
+			scanned = true;
+			p = manager->findFor(provider, type);
+		}
+	}
+	if(!p)
+	{
+		// try using some other provider
+		p = manager->findFor(QString::null, type);
+		if(!p && !scanned)
+		{
+			// maybe there are new providers, so scan and try again
+			manager->scan();
+			scanned = true;
+			p = manager->findFor(QString::null, type);
+		}
+	}
+	if(!p)
+		return 0;
+
+	return p->createContext(type);
+}
+
+static bool detectContext(void *in, Provider::Context **z, void **c)
+{
+	// format is 'J' + type
+	if(((char *)in)[0] != 'J')
+		return false;
+
+	QString type = ((char *)in) + 1;
+	Provider::Context *pc = getContext(type, QString::null);
+	if(pc)
+	{
+		*z = pc;
+		*c = 0;
+		return true;
+	}
+
+	// try old plugin
+	void *oc = 0;
+	if(type == "sha0")
+		oc = getContext(CAP_SHA0);
+	else if(type == "sha1")
+		oc = getContext(CAP_SHA1);
+	else if(type == "sha256")
+		oc = getContext(CAP_SHA256);
+	else if(type == "md2")
+		oc = getContext(CAP_MD2);
+	else if(type == "md4")
+		oc = getContext(CAP_MD4);
+	else if(type == "md5")
+		oc = getContext(CAP_MD5);
+	else if(type == "ripemd160")
+		oc = getContext(CAP_RIPEMD160);
+	if(oc)
+	{
+		*z = 0;
+		*c = oc;
+		return true;
+	}
+
+	return false;
+}
 
 //----------------------------------------------------------------------------
 // Initializer
@@ -614,25 +691,32 @@ public:
 	Private()
 	{
 		c = 0;
+		z = 0;
 	}
 
 	~Private()
 	{
 		delete c;
+		delete z;
 	}
 
 	void reset()
 	{
-		c->reset();
+		if(c)
+			c->reset();
+		else
+			z->clear();
 	}
 
 	QCA_HashContext *c;
+	HashContext *z;
 };
 
 Hash::Hash(QCA_HashContext *c)
 {
 	d = new Private;
-	d->c = c;
+	if(!detectContext(c, (Provider::Context **)&d->z, (void **)&d->c))
+		d->c = c;
 }
 
 Hash::Hash(const Hash &from)
@@ -643,8 +727,16 @@ Hash::Hash(const Hash &from)
 
 Hash & Hash::operator=(const Hash &from)
 {
-	delete d->c;
-	d->c = from.d->c->clone();
+	if(d->c)
+	{
+		delete d->c;
+		d->c = from.d->c->clone();
+	}
+	else
+	{
+		delete d->z;
+		d->z = (HashContext *)from.d->z->clone();
+	}
 	return *this;
 }
 
@@ -660,13 +752,19 @@ void Hash::clear()
 
 void Hash::update(const QByteArray &a)
 {
-	d->c->update(a.data(), a.size());
+	if(d->c)
+		d->c->update(a.data(), a.size());
+	else
+		d->z->update(a);
 }
 
 QByteArray Hash::final()
 {
 	QByteArray buf;
-	d->c->final(&buf);
+	if(d->c)
+		d->c->final(&buf);
+	else
+		buf = d->z->final().toByteArray();
 	return buf;
 }
 
@@ -802,7 +900,7 @@ QByteArray Cipher::final(bool *ok)
 // SHA0
 //----------------------------------------------------------------------------
 SHA0::SHA0()
-:Hash((QCA_HashContext *)getContext(CAP_SHA0))
+:Hash((QCA_HashContext *)"Jsha0")//getContext(CAP_SHA0))
 {
 }
 
@@ -811,7 +909,7 @@ SHA0::SHA0()
 // SHA1
 //----------------------------------------------------------------------------
 SHA1::SHA1()
-:Hash((QCA_HashContext *)getContext(CAP_SHA1))
+:Hash((QCA_HashContext *)"Jsha1")//getContext(CAP_SHA1))
 {
 }
 
@@ -820,7 +918,7 @@ SHA1::SHA1()
 // SHA256
 //----------------------------------------------------------------------------
 SHA256::SHA256()
-:Hash((QCA_HashContext *)getContext(CAP_SHA256))
+:Hash((QCA_HashContext *)"Jsha256")//getContext(CAP_SHA256))
 {
 }
 
@@ -829,7 +927,7 @@ SHA256::SHA256()
 // MD2
 //----------------------------------------------------------------------------
 MD2::MD2()
-:Hash((QCA_HashContext *)getContext(CAP_MD2))
+:Hash((QCA_HashContext *)"Jmd2")//getContext(CAP_MD2))
 {
 }
 
@@ -838,7 +936,7 @@ MD2::MD2()
 // MD4
 //----------------------------------------------------------------------------
 MD4::MD4()
-:Hash((QCA_HashContext *)getContext(CAP_MD4))
+:Hash((QCA_HashContext *)"Jmd4")//getContext(CAP_MD4))
 {
 }
 
@@ -847,7 +945,7 @@ MD4::MD4()
 // MD5
 //----------------------------------------------------------------------------
 MD5::MD5()
-:Hash((QCA_HashContext *)getContext(CAP_MD5))
+:Hash((QCA_HashContext *)"Jmd5")//getContext(CAP_MD5))
 {
 }
 
@@ -855,7 +953,7 @@ MD5::MD5()
 // RIPEMD160
 //----------------------------------------------------------------------------
 RIPEMD160::RIPEMD160()
-:Hash((QCA_HashContext *)getContext(CAP_RIPEMD160))
+:Hash((QCA_HashContext *)"Jripemd160")//getContext(CAP_RIPEMD160))
 {
 }
 
