@@ -28,6 +28,7 @@
 
 #include "staticunittest.h"
 #include "hashunittest.h"
+#include "bigintunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -42,6 +43,7 @@ void KUnitTest::registerTests()
 {
     ADD_TEST( StaticUnitTest );
     ADD_TEST( HashUnitTest );
+    ADD_TEST( BigIntUnitTest );
 }
 
 KUnitTest::KUnitTest()
