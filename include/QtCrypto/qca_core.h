@@ -512,8 +512,6 @@ namespace QCA
 			virtual Context *clone() const = 0;
 			bool sameProvider(Context *c);
 
-			int refs;
-
 		private:
 			Provider *_provider;
 			QString _type;
