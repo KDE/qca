@@ -1,0 +1,16 @@
+QCA Botan plugin
+------------------
+Author: Brad Hards <bradh@frogmouth.net>
+
+This plugin provides features based on Botan. It implements:
+* TBA
+
+
+Requirements:
+  Botan 1.4.1 or later
+
+Installation procedure:
+  ./configure
+  make
+  su -c "make install"
+
