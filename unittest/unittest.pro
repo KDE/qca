@@ -13,8 +13,10 @@ HEADERS += staticunittest.h hashunittest.h bigintunittest.h
 HEADERS += securearrayunittest.h macunittest.h randomunittest.h
 HEADERS += keylengthunittest.h symmetrickeyunittest.h
 HEADERS += cipherunittest.h kdfunittest.h hexunittest.h
+HEADERS += base64unittest.h
 
 SOURCES += staticunittest.cpp hashunittest.cpp bigintunittest.cpp
 SOURCES += securearrayunittest.cpp macunittest.cpp randomunittest.cpp
 SOURCES += keylengthunittest.cpp symmetrickeyunittest.cpp
 SOURCES += cipherunittest.cpp kdfunittest.cpp hexunittest.cpp
+SOURCES += base64unittest.cpp
