@@ -324,7 +324,7 @@ void HashUnitTest::allTests()
 	for (int i=0; i<1000; i++)
 	    shaHash.update(fillerString);
 	CHECK( QString(QCA::arrayToHex(shaHash.final())),
-	       QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39cc046d39ccc7122cd0") );
+	       QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") );
     }
 
     if(!QCA::isSupported("ripemd160"))
