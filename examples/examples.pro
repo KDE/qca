@@ -4,6 +4,7 @@ SUBDIRS += \
 	hashtest \
 	mactest \
 	providertest \
+	randomtest \
 	base64test
 
 #	ciphertest \

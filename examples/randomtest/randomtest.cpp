@@ -1,0 +1,72 @@
+/*
+ Copyright (C) 2004 Brad Hards <bradh@frogmouth.net>
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// QtCrypto/QtCrypto has the declarations for all of QCA
+#include <QtCrypto>
+
+#include <iostream>
+
+int main(int argc, char **argv)
+{
+	Q_UNUSED( argv );
+	Q_UNUSED( argc );
+
+	// the Initializer object sets things up, and 
+	// also does cleanup when it goes out of scope
+	QCA::Initializer init;
+
+	int randInt;
+	// This is the standard way to generate a random integer.
+	randInt = QCA::Random::randomInt();
+	std::cout << "A random number: " << randInt << std::endl;
+
+	// If this was going to be a really important random
+	// number, you migth want to ask for higher Quality:
+	randInt = QCA::Random::randomInt(QCA::Random::LongTermKey);
+	// or if this was just a junk value, you could use:
+	randInt = QCA::Random::randomInt(QCA::Random::Nonce);
+
+	// If you wanted a random character (octet), you could
+	// use something like:
+	unsigned char randChar;
+	randChar = QCA::Random::randomChar();
+	
+
+	QSecureArray tenBytes(10);
+	// If you need more random values, you may want to
+	// get an array, as shown below.
+	tenBytes = QCA::Random::randomArray(10);
+	// You can still use Quality settings, as shown below
+	tenBytes = QCA::Random::randomArray(10, QCA::Random::Nonce);
+
+	// To make this viewable, we convert to hexadecimal.
+	std::cout << "A random 10 byte array (in hex): ";
+	std::cout << QCA::Hex().arrayToString(tenBytes) << std::endl;
+
+	// Under some circumstances, you may want to create a
+	// Random object, rather than a static public member function.
+	// This isn't normally the easiest way, but it does work
+	QCA::Random myRandomObject;
+	unsigned char randChar = myRandomObject.nextByte();
+	tenBytes = myRandomObject.nextBytes(10, QCA::Random::Nonce);
+	return 0;
+}
+
