@@ -34,6 +34,8 @@
 # define PLUGIN_EXT "so"
 #endif
 
+#define PLUGIN_SUBDIR "crypto"
+
 namespace QCA {
 
 class ProviderItem
@@ -161,10 +163,12 @@ private:
 ProviderManager::ProviderManager()
 {
 	providerItemList.setAutoDelete(true);
+	def = 0;
 }
 
 ProviderManager::~ProviderManager()
 {
+	delete def;
 }
 
 void ProviderManager::scan()
@@ -173,7 +177,7 @@ void ProviderManager::scan()
 	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
 		QDir libpath(*it);
-		QDir dir(libpath.filePath("crypto"));
+		QDir dir(libpath.filePath(PLUGIN_SUBDIR));
 		if(!dir.exists())
 			continue;
 
@@ -245,8 +249,20 @@ void ProviderManager::unloadAll()
 	providerList.clear();
 }
 
+void ProviderManager::setDefault(QCA::Provider *p)
+{
+	if(def)
+		delete def;
+	def = p;
+	if(def)
+		def->init();
+}
+
 QCA::Provider *ProviderManager::find(const QString &name) const
 {
+	if(def && name == def->name())
+		return def;
+
 	QPtrListIterator<ProviderItem> it(providerItemList);
 	for(ProviderItem *i; (i = it.current()); ++it)
 	{
@@ -267,6 +283,11 @@ QCA::Provider *ProviderManager::findFor(const QString &name, const QString &type
 			if(i->p && i->p->features().contains(type))
 				return i->p;
 		}
+
+		// try the default provider as a last resort
+		if(def && def->features().contains(type))
+			return def;
+
 		return 0;
 	}
 	else
@@ -319,12 +340,17 @@ void ProviderManager::changePriority(const QString &name, int priority)
 QStringList ProviderManager::allFeatures() const
 {
 	QStringList list;
+
+	if(def)
+		list = def->features();
+
 	QPtrListIterator<ProviderItem> it(providerItemList);
 	for(ProviderItem *i; (i = it.current()); ++it)
 	{
 		if(i->p)
 			mergeFeatures(&list, i->p->features());
 	}
+
 	return list;
 }
 
@@ -376,7 +402,7 @@ void ProviderManager::addItem(ProviderItem *item, int priority)
 
 bool ProviderManager::haveAlready(const QString &name) const
 {
-	return (name == "default" || find(name));
+	return ((def && name == def->name()) || find(name));
 }
 
 void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)

@@ -1,6 +1,6 @@
 /*
  * qcaprovider.h - QCA Plugin API
- * Copyright (C) 2003  Justin Karneges
+ * Copyright (C) 2003,2004  Justin Karneges
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,15 +21,37 @@
 #ifndef QCAPROVIDER_H
 #define QCAPROVIDER_H
 
-#include<qglobal.h>
-#include<qstring.h>
-#include<qdatetime.h>
-#include<qobject.h>
-#include<qhostaddress.h>
-#include"qca.h"
+#include <qglobal.h>
+#include <qstring.h>
+#include <qdatetime.h>
+#include <qobject.h>
+#include <qhostaddress.h>
+#include "qca.h"
 
 #define QCA_PLUGIN_VERSION 1
 
+// v2 contexts
+namespace QCA {
+
+class RandomContext : public Provider::Context
+{
+public:
+	RandomContext(Provider *p) : Provider::Context(p, "random") {}
+	virtual QSecureArray nextBytes(int size, Random::Quality q) = 0;
+};
+
+class HashContext : public Provider::Context
+{
+public:
+	HashContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
+	virtual void clear() = 0;
+	virtual void update(const QSecureArray &a) = 0;
+	virtual QSecureArray final() = 0;
+};
+
+}
+
+// older v1 contexts
 class QCAProvider
 {
 public:

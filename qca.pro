@@ -33,7 +33,8 @@ SOURCES += \
 	$$QCA_CPP/qca_plugin.cpp \
 	$$QCA_CPP/qca_tools.cpp \
 	$$QCA_CPP/qca_basic.cpp \
-	$$QCA_CPP/qca_textfilter.cpp
+	$$QCA_CPP/qca_textfilter.cpp \
+	$$QCA_CPP/qca_default.cpp
 
 include(conf.pri)
 include(extra.pri)

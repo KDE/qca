@@ -42,6 +42,7 @@ namespace QCA
 		void add(QCAProvider *p); // to be obsoleted
 		void unload(const QString &name);
 		void unloadAll();
+		void setDefault(QCA::Provider *p);
 		QCA::Provider *find(const QString &name) const;
 		QCA::Provider *findFor(const QString &name, const QString &type) const;
 		QCAProvider *findFor(int cap) const; // to be obsoleted
@@ -55,6 +56,7 @@ namespace QCA
 	private:
 		QPtrList<ProviderItem> providerItemList;
 		QCA::ProviderList providerList;
+		QCA::Provider *def;
 		void addItem(ProviderItem *i, int priority);
 		bool haveAlready(const QString &name) const;
 	};

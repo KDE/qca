@@ -36,11 +36,13 @@ namespace QCA {
 bool botan_init(int prealloc, bool mmap);
 void botan_deinit();
 
+// from qca_default
+Provider *create_default_provider();
+
 //----------------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------------
 static QCA::ProviderManager *manager = 0;
-static QCA::Provider *default_provider = 0;
 static QCA::Random *global_rng = 0;
 static bool qca_init = false;
 static bool qca_secmem = false;
@@ -87,6 +89,7 @@ void init(MemoryMode mode, int prealloc)
 	}
 
 	manager = new ProviderManager;
+	manager->setDefault(create_default_provider()); // manager owns it
 }
 
 void deinit()
@@ -151,22 +154,13 @@ QStringList supportedFeatures()
 
 	// query all features
 	manager->scan();
-	QStringList list = manager->allFeatures();
-	if(default_provider)
-	{
-		QStringList deflist = default_provider->features();
-		ProviderManager::mergeFeatures(&list, deflist);
-	}
-	return list;
+	return manager->allFeatures();
 }
 
 QStringList defaultFeatures()
 {
 	init();
-	if(default_provider)
-		return default_provider->features();
-	else
-		return QStringList();
+	return manager->find("default")->features();
 }
 
 void insertProvider(QCAProvider *p)
@@ -199,6 +193,13 @@ void unloadAllPlugins()
 {
 	if(!qca_init)
 		return;
+
+	// if the global_rng was owned by a plugin, then delete it
+	if(global_rng && (global_rng->provider() != manager->find("default")))
+	{
+		delete global_rng;
+		global_rng = 0;
+	}
 
 	manager->unloadAll();
 }
