@@ -107,7 +107,7 @@ namespace QCA
 			NoCert        ///< identity unknown
 		};
 
-		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = QString() );
+		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = QString());
 		~TLS();
 
 		void reset();
@@ -120,7 +120,7 @@ namespace QCA
 		bool canCompress() const;
 		void setCompressionEnabled(bool b);
 
-		bool startClient(const QString &host = QString() );
+		bool startClient(const QString &host = QString());
 		bool startServer();
 		bool isHandshaken() const;
 		QString cipherName() const;
@@ -188,7 +188,7 @@ namespace QCA
 			RequireAuthzidSupport  = 0x20  // server-only
 		};
 
-		SASL(QObject *parent = 0, const char *name = 0, const QString &provider = QString() );
+		SASL(QObject *parent = 0, const char *name = 0, const QString &provider = QString());
 		~SASL();
 
 		void reset();

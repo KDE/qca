@@ -66,7 +66,7 @@ namespace QCA
 		 * \param provider the provider library for the random
 		 *                 number generation
 		 */ 
-		Random(const QString &provider = QString() );
+		Random(const QString &provider = QString());
 
 		/**
 		 * Provide a random byte.
@@ -602,7 +602,7 @@ namespace QCA
 		 *
 		 * To create HMAC with a default algorithm of "sha1", you would use something like:
 		 * \code
-		 * HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = QString() )
+		 * HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = QString())
 		 * : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider)
 		 * {
 		 * }
@@ -664,7 +664,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA0 implementation
 		 * from qca-openssl, you would use SHA0("qca-openssl")
 		 */
-		SHA0(const QString &provider = QString() ) : Hash("sha0", provider) {}
+		SHA0(const QString &provider = QString()) : Hash("sha0", provider) {}
 	};
 
 	/**
@@ -720,7 +720,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA1 implementation
 		 * from qca-openssl, you would use SHA1("qca-openssl")
 		 */
-		SHA1(const QString &provider = QString() ) : Hash("sha1", provider) {}
+		SHA1(const QString &provider = QString()) : Hash("sha1", provider) {}
 	};
 
 	/**
@@ -756,7 +756,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA256 implementation
 		 * from qca-gcrypt, you would use SHA256("qca-gcrypt")
 		 */
-		SHA256(const QString &provider = QString() ) : Hash("sha256", provider) {}
+		SHA256(const QString &provider = QString()) : Hash("sha256", provider) {}
 	};
 
 	/**
@@ -792,7 +792,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA384 implementation
 		 * from qca-gcrypt, you would use SHA384("qca-gcrypt")
 		 */
-		SHA384(const QString &provider = QString() ) : Hash("sha384", provider) {}
+		SHA384(const QString &provider = QString()) : Hash("sha384", provider) {}
 	};
 
 	/**
@@ -828,7 +828,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA512 implementation
 		 * from qca-gcrypt, you would use SHA512("qca-gcrypt")
 		 */
-		SHA512(const QString &provider = QString() ) : Hash("sha512", provider) {}
+		SHA512(const QString &provider = QString()) : Hash("sha512", provider) {}
 	};
 
 	/**
@@ -863,7 +863,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD2 implementation
 		 * from qca-openssl, you would use MD2("qca-openssl")
 		 */
-		MD2(const QString &provider = QString() ) : Hash("md2", provider) {}
+		MD2(const QString &provider = QString()) : Hash("md2", provider) {}
 	};
 
 	/**
@@ -902,7 +902,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD4 implementation
 		 * from qca-openssl, you would use MD4("qca-openssl")
 		 */
-		MD4(const QString &provider = QString() ) : Hash("md4", provider) {}
+		MD4(const QString &provider = QString()) : Hash("md4", provider) {}
 	};
 
 	/**
@@ -939,7 +939,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD5 implementation
 		 * from qca-openssl, you would use MD5("qca-openssl")
 		 */
-		MD5(const QString &provider = QString() ) : Hash("md5", provider) {}
+		MD5(const QString &provider = QString()) : Hash("md5", provider) {}
 	};
 
 	/**
@@ -994,7 +994,7 @@ namespace QCA
 		 * implementation from qca-openssl, you would use 
 		 * RIPEMD160("qca-openssl")
 		 */
-		RIPEMD160(const QString &provider = QString() ) : Hash("ripemd160", provider) {}
+		RIPEMD160(const QString &provider = QString()) : Hash("ripemd160", provider) {}
 	};
 
 	/**
@@ -1020,7 +1020,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
+		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
 		:Cipher("blowfish", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -1048,7 +1048,7 @@ namespace QCA
 		 *
 		 */
 	public:
-		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
+		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
 		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -1076,7 +1076,7 @@ namespace QCA
 		 *
 		 */
 	public:
-		DES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
+		DES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
 		:Cipher("des", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -1104,7 +1104,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
+		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
 		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -1132,7 +1132,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
+		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
 		:Cipher("aes192", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -1160,7 +1160,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString() )
+		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = QString())
 		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -1217,7 +1217,7 @@ namespace QCA
 		 * QCA::HMAC ripemd160HMAC( "ripemd160", QCA::SymmetricKey(), "qca-openssl" );
 		 * \endcode
 		 */
-		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = QString() ) : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
+		HMAC(const QString &hash = "sha1", const SymmetricKey &key = SymmetricKey(), const QString &provider = QString()) : MessageAuthenticationCode(withAlgorithm("hmac", hash), key, provider) {}
 	};
 
 	/**
@@ -1291,7 +1291,7 @@ namespace QCA
 		   \param algorithm the name of the hashing algorithm to use
 		   \param provider the name of the provider to use, if available
 		*/
-		PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString() ) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
+		PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
 	};
 }
 

@@ -105,8 +105,8 @@ namespace QCA
 		// import / export
 		QSecureArray toDER() const;
 		QString toPEM() const;
-		static PublicKey fromDER(const QSecureArray &a, const QString &provider = QString() );
-		static PublicKey fromPEM(const QString &s, const QString &provider = QString() );
+		static PublicKey fromDER(const QSecureArray &a, const QString &provider = QString());
+		static PublicKey fromPEM(const QString &s, const QString &provider = QString());
 
 	protected:
 		PublicKey(const QString &type, const QString &provider);
@@ -139,8 +139,8 @@ namespace QCA
 		// import / export
 		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray() ) const;
 		QString toPEM(const QSecureArray &passphrase = QSecureArray() ) const;
-		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString() );
-		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString() );
+		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
+		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
 
 	protected:
 		PrivateKey(const QString &type, const QString &provider);
@@ -160,9 +160,9 @@ namespace QCA
 		void setBlocking(bool b);
 		bool isBusy() const;
 
-		void generateRSA(int bits, int exp = 65537, const QString &provider = QString() );
-		void generateDSA(DL_Group group, const QString &provider = QString() );
-		void generateDH(DL_Group group, const QString &provider = QString() );
+		void generateRSA(int bits, int exp = 65537, const QString &provider = QString());
+		void generateDSA(DL_Group group, const QString &provider = QString());
+		void generateDH(DL_Group group, const QString &provider = QString());
 		PrivateKey result() const;
 
 	signals:
@@ -179,7 +179,7 @@ namespace QCA
 	{
 	public:
 		RSAPublicKey();
-		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider = QString() );
+		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider = QString());
 		RSAPublicKey(const RSAPrivateKey &k);
 
 		QBigInteger n() const;
@@ -190,7 +190,7 @@ namespace QCA
 	{
 	public:
 		RSAPrivateKey();
-		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider = QString() );
+		RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QBigInteger &n, const QBigInteger &e, const QString &provider = QString());
 
 		QBigInteger p() const;
 		QBigInteger q() const;
@@ -203,7 +203,7 @@ namespace QCA
 	{
 	public:
 		DSAPublicKey();
-		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString() );
+		DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString());
 		DSAPublicKey(const DSAPrivateKey &k);
 
 		DL_Group domain() const;
@@ -214,7 +214,7 @@ namespace QCA
 	{
 	public:
 		DSAPrivateKey();
-		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString() );
+		DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString());
 
 		DL_Group domain() const;
 		QBigInteger x() const;
@@ -225,7 +225,7 @@ namespace QCA
 	{
 	public:
 		DHPublicKey();
-		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString() );
+		DHPublicKey(DL_Group group, const QBigInteger &y, const QString &provider = QString());
 		DHPublicKey(const DHPrivateKey &k);
 
 		DL_Group domain() const;
@@ -236,7 +236,7 @@ namespace QCA
 	{
 	public:
 		DHPrivateKey();
-		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString() );
+		DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteger &y, const QString &provider = QString());
 
 		DL_Group domain() const;
 		QBigInteger x() const;

@@ -417,7 +417,7 @@ namespace QCA
 
 	   \sa haveSystemStore
 	*/
-	QCA_EXPORT Store systemStore(const QString &provider = QString() );
+	QCA_EXPORT Store systemStore(const QString &provider = QString());
 
 	/**
 	 * Get the application name that will be used by SASL server mode
