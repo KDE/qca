@@ -2728,7 +2728,7 @@ namespace QCA
 		void setConstraints(AuthFlags f, int minSSF, int maxSSF);
 		void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
 		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
-		void setExternalAuthID(const QString &authid);
+		void setExternalAuthId(const QString &authid);
 		void setExternalSSF(int);
 
 		// main

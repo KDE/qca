@@ -547,7 +547,7 @@ void SASL::setConstraints(AuthFlags, int, int)
 {
 }
 
-void SASL::setExternalAuthID(const QString &authid)
+void SASL::setExternalAuthId(const QString &authid)
 {
 	d->ext_authid = authid;
 }
