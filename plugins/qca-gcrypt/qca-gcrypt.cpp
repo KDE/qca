@@ -187,6 +187,88 @@ protected:
     bool m_pad;
 };
 
+
+class pbkdf1Context : public QCA::KDFContext
+{
+public:
+    pbkdf1Context(int algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
+    {
+	m_hashAlgorithm = algorithm;
+	err =  gcry_md_open( &context, m_hashAlgorithm, 0 );
+	if ( GPG_ERR_NO_ERROR != err ) {
+	    std::cout << "Failure: " ;
+	    std::cout << gcry_strsource(err) << "/";
+	    std::cout << gcry_strerror(err) << std::endl;
+	}
+    }
+
+    ~pbkdf1Context()
+    {
+	gcry_md_close( context );
+    }
+
+    Context *clone() const
+    {
+	return new pbkdf1Context( *this );
+    }
+    
+    QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
+			      unsigned int keyLength, unsigned int iterationCount)
+    {
+	/* from RFC2898:
+	   Steps:
+	   
+	   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
+	   "derived key too long" and stop.
+	*/
+	if ( keyLength > gcry_md_get_algo_dlen(m_hashAlgorithm) ) {
+	    std::cout << "derived key too long" << std::endl;
+	    return QCA::SymmetricKey();
+	}
+
+	/*
+	   2. Apply the underlying hash function Hash for c iterations to the
+	   concatenation of the password P and the salt S, then extract
+	   the first dkLen octets to produce a derived key DK:
+	   
+	   T_1 = Hash (P || S) ,
+	   T_2 = Hash (T_1) ,
+	   ...
+	   T_c = Hash (T_{c-1}) ,
+	   DK = Tc<0..dkLen-1>
+	*/
+	// calculate T_1
+	gcry_md_write( context, secret.data(), secret.size() );
+	gcry_md_write( context, salt.data(), salt.size() );
+	unsigned char *md;
+	md = gcry_md_read( context, m_hashAlgorithm );
+	QSecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
+	memcpy( a.data(), md, a.size() );
+
+	// calculate T_2 up to T_c
+	for ( unsigned int i = 2; i <= iterationCount; ++i ) {
+	    gcry_md_reset( context );
+	    gcry_md_write( context, a.data(), a.size() );
+	    md = gcry_md_read( context, m_hashAlgorithm );
+	    memcpy( a.data(), md, a.size() );
+	}
+
+	// shrink a to become DK, of the required length
+	a.resize(keyLength);
+
+	/*
+	   3. Output the derived key DK.
+	*/
+	return a;
+    }
+
+protected:
+    gcry_md_hd_t context;
+    gcry_error_t err;
+    int m_hashAlgorithm;
+};
+
+
 class pbkdf2Context : public QCA::KDFContext
 {
 public:
@@ -322,6 +404,7 @@ public:
 	list += "des-ecb";
 	list += "des-cbc";
 	list += "des-cfb";
+	list += "pbkdf1(sha1)";
 	list += "pbkdf2(sha1)";
 	return list;
     }
@@ -375,6 +458,8 @@ public:
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "des-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "pbkdf1(sha1)" )
+	    return new gcryptQCAPlugin::pbkdf1Context( GCRY_MD_SHA1, this, type );
 	else if ( type == "pbkdf2(sha1)" )
 	    return new gcryptQCAPlugin::pbkdf2Context( GCRY_MD_SHA1, this, type );
 	else
