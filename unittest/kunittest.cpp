@@ -30,6 +30,7 @@
 #include "hashunittest.h"
 #include "bigintunittest.h"
 #include "securearrayunittest.h"
+#include "macunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -46,6 +47,7 @@ void KUnitTest::registerTests()
     ADD_TEST( HashUnitTest );
     ADD_TEST( BigIntUnitTest );
     ADD_TEST( SecureArrayUnitTest );
+    ADD_TEST( MACUnitTest );
 }
 
 KUnitTest::KUnitTest()
