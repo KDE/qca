@@ -3,7 +3,7 @@ QT -= gui
 INCLUDEPATH += ../../include/QtCrypto
 SOURCES = main.cpp
 
-LIBS += -L.. -lqca
+LIBS += -L../.. -lqca
 
 # temporarily build directly against openssl
 DEFINES += QT_STATICPLUGIN
