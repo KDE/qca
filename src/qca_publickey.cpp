@@ -574,7 +574,7 @@ PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
 	d->k = static_cast<RSAContext *>(getContext("rsa", provider));
-	d->dest = static_cast<PKeyContext *>(getContext("pkey", provider));
+	d->dest = static_cast<PKeyContext *>(getContext("pkey", d->k->provider()->name()));
 
 	if(!d->blocking)
 	{
@@ -598,7 +598,7 @@ PrivateKey KeyGenerator::createDSA(DL_Group group, const QString &provider)
 	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
 	d->k = static_cast<DSAContext *>(getContext("dsa", provider));
-	d->dest = static_cast<PKeyContext *>(getContext("pkey", provider));
+	d->dest = static_cast<PKeyContext *>(getContext("pkey", d->k->provider()->name()));
 
 	if(!d->blocking)
 	{
@@ -622,7 +622,7 @@ PrivateKey KeyGenerator::createDH(DL_Group group, const QString &provider)
 	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
 	d->k = static_cast<DHContext *>(getContext("dh", provider));
-	d->dest = static_cast<PKeyContext *>(getContext("pkey", provider));
+	d->dest = static_cast<PKeyContext *>(getContext("pkey", d->k->provider()->name()));
 
 	if(!d->blocking)
 	{
@@ -654,7 +654,7 @@ RSAPublicKey::RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QSt
 {
 	RSAContext *k = (RSAContext *)getContext("rsa", provider);
 	k->createPublic(n, e);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
+	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
 	c->setKey(k);
 	change(c);
 }
@@ -685,7 +685,7 @@ RSAPrivateKey::RSAPrivateKey(const QBigInteger &p, const QBigInteger &q, const Q
 {
 	RSAContext *k = (RSAContext *)getContext("rsa", provider);
 	k->createPrivate(p, q, d, n, e);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
+	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
 	c->setKey(k);
 	change(c);
 }
@@ -726,7 +726,7 @@ DSAPublicKey::DSAPublicKey(DL_Group group, const QBigInteger &y, const QString &
 {
 	DSAContext *k = (DSAContext *)getContext("dsa", provider);
 	k->createPublic(group, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
+	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
 	c->setKey(k);
 	change(c);
 }
@@ -757,7 +757,7 @@ DSAPrivateKey::DSAPrivateKey(DL_Group group, const QBigInteger &x, const QBigInt
 {
 	DSAContext *k = (DSAContext *)getContext("dsa", provider);
 	k->createPrivate(group, x, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
+	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
 	c->setKey(k);
 	change(c);
 }
@@ -788,7 +788,7 @@ DHPublicKey::DHPublicKey(DL_Group group, const QBigInteger &y, const QString &pr
 {
 	DHContext *k = (DHContext *)getContext("dh", provider);
 	k->createPublic(group, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
+	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
 	c->setKey(k);
 	change(c);
 }
@@ -819,7 +819,7 @@ DHPrivateKey::DHPrivateKey(DL_Group group, const QBigInteger &x, const QBigInteg
 {
 	DHContext *k = (DHContext *)getContext("dh", provider);
 	k->createPrivate(group, x, y);
-	PKeyContext *c = (PKeyContext *)getContext("pkey", provider);
+	PKeyContext *c = (PKeyContext *)getContext("pkey", k->provider()->name());
 	c->setKey(k);
 	change(c);
 }

@@ -850,14 +850,14 @@ Store Store::fromFlatTextFile(const QString &fileName, ConvertResult *result, co
 		return Store();
 	}
 
-	Store store;
+	Store store(provider);
 	QTextStream ts(&f);
 	while(1)
 	{
 		QString pem = readNextPem(&ts);
 		if(pem.isNull())
 			break;
-		Certificate cert = Certificate::fromPEM(pem, 0, provider);
+		Certificate cert = Certificate::fromPEM(pem, 0, store.provider()->name());
 		if(!cert.isNull())
 			store.addCertificate(cert, true);
 	}
