@@ -246,7 +246,7 @@ private:
 
 int main(int argc, char **argv)
 {
-	QApplication app(argc, argv);
+	QApplication app(argc, argv, false);
 	QString host = argc > 1 ? argv[1] : "andbit.net";
 
 	if(!QCA::isSupported(QCA::CAP_SSL)) {

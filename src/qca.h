@@ -8,6 +8,9 @@
 #include<qptrlist.h>
 #include<qobject.h>
 
+class QHostAddress;
+class QStringList;
+
 class QCA_HashContext;
 class QCA_CipherContext;
 class QCA_CertContext;
@@ -25,8 +28,7 @@ namespace QCA
 		CAP_RSA       = 0x0080,
 		CAP_X509      = 0x0100,
 		CAP_SSL       = 0x0200,
-
-		//CAP_SASL      = 0x0400,
+		CAP_SASL      = 0x0400,
 	};
 
 	enum {
@@ -281,7 +283,7 @@ namespace QCA
 			Unknown
 		};
 
-		SSL();
+		SSL(QObject *parent=0);
 		~SSL();
 
 		// note: store must persist until SSL object is deleted!
@@ -292,7 +294,7 @@ namespace QCA
 		void write(const QByteArray &a);
 		QByteArray read();
 
-		// encrypted (socket side)
+		// encoded (socket side)
 		void writeIncoming(const QByteArray &a);
 		QByteArray readOutgoing();
 
@@ -309,6 +311,58 @@ namespace QCA
 		void ctx_handshaken(bool);
 		void ctx_readyRead();
 		void ctx_readyReadOutgoing();
+
+	private:
+		class Private;
+		Private *d;
+	};
+
+	class SASL : public QObject
+	{
+		Q_OBJECT
+	public:
+		SASL(QObject *parent=0);
+		~SASL();
+
+		// options
+		bool allowPlainText() const;
+		void setAllowPlainText(bool);
+		void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
+		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
+
+		// initialize
+		bool startClient(const QString &service, const QString &host, const QStringList &methods);
+		bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method);
+		bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method, const QByteArray &clientInit);
+
+		// authentication
+		void putIncomingStep(const QByteArray &stepData);
+		void putAuthname(const QString &auth);
+		void putUsername(const QString &user);
+		void putPassword(const QString &pass);
+		void putRealm(const QString &realm);
+
+		// plain (application side)
+		void write(const QByteArray &a);
+		QByteArray read();
+
+		// encoded (socket side)
+		void writeIncoming(const QByteArray &a);
+		QByteArray readOutgoing();
+
+	signals:
+		// for authentication
+		void clientFirstStep(const QString &method, bool useClientInit, const QByteArray &clientInit);
+		void nextStep(const QByteArray &stepData);
+		void needAuthname();
+		void needUsername();
+		void needPassword();
+		void needRealm();
+		void authenticated();
+
+		// for security layer
+		void readyRead();
+		void readyReadOutgoing();
 
 	private:
 		class Private;

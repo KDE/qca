@@ -719,7 +719,8 @@ public:
 	QCA_SSLContext *c;
 };
 
-SSL::SSL()
+SSL::SSL(QObject *parent)
+:QObject(parent)
 {
 	d = new Private;
 	connect(d->c, SIGNAL(handshaken(bool)), SLOT(ctx_handshaken(bool)));
@@ -803,4 +804,89 @@ void SSL::ctx_readyRead()
 void SSL::ctx_readyReadOutgoing()
 {
 	readyReadOutgoing();
+}
+
+
+//----------------------------------------------------------------------------
+// SASL
+//----------------------------------------------------------------------------
+class SASL::Private
+{
+public:
+};
+
+SASL::SASL(QObject *parent)
+:QObject(parent)
+{
+	d = new Private;
+}
+
+SASL::~SASL()
+{
+	delete d;
+}
+
+// options
+bool SASL::allowPlainText() const
+{
+}
+
+void SASL::setAllowPlainText(bool)
+{
+}
+
+void SASL::setLocalAddr(const QHostAddress &addr, Q_UINT16 port)
+{
+}
+
+void SASL::setRemoteAddr(const QHostAddress &addr, Q_UINT16 port)
+{
+}
+
+bool SASL::startClient(const QString &service, const QString &host, const QStringList &methods)
+{
+}
+
+bool SASL::startServer(const QString &service, const QString &host, const QString &realm, const QString &method)
+{
+}
+
+bool SASL::startServer(const QString &service, const QString &host, const QString &realm, const QString &method, const QByteArray &clientInit)
+{
+}
+
+void SASL::putIncomingStep(const QByteArray &stepData)
+{
+}
+
+void SASL::putAuthname(const QString &auth)
+{
+}
+
+void SASL::putUsername(const QString &user)
+{
+}
+
+void SASL::putPassword(const QString &pass)
+{
+}
+
+void SASL::putRealm(const QString &realm)
+{
+}
+
+void SASL::write(const QByteArray &a)
+{
+}
+
+QByteArray SASL::read()
+{
+}
+
+void SASL::writeIncoming(const QByteArray &a)
+{
+}
+
+QByteArray SASL::readOutgoing()
+{
 }

@@ -195,7 +195,7 @@ private:
 
 int main(int argc, char **argv)
 {
-	QApplication app(argc, argv);
+	QApplication app(argc, argv, false);
 	int port = argc > 1 ? QString(argv[1]).toInt() : 8000;
 
 	if(!QCA::isSupported(QCA::CAP_SSL)) {

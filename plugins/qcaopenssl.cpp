@@ -13,9 +13,9 @@
 #include<openssl/ssl.h>
 #include<openssl/err.h>
 
-#ifdef EVP_aes_128_cbc
-#define OSSL_097
-#else
+//#define OSSL_097
+
+#ifndef OSSL_097
 #define NO_AES
 #endif
 
