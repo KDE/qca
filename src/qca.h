@@ -75,7 +75,7 @@ class QCA_CertContext;
  *   - X509 certificate (Cert) (TBC)
  *   - Simple Authentication and Security Layer (SASL) (TBC)
  *   - RSA (TBC)
- *   - Hashing 
+ *   - Hashing (QCA::Hash)
  *       - QCA::SHA0
  *       - QCA::SHA1
  *       - QCA::MD2
@@ -85,7 +85,7 @@ class QCA_CertContext;
  *       - QCA::SHA256
  *       - QCA::SHA384
  *       - QCA::SHA512
- *   - Ciphers
+ *   - Ciphers (QCA::Cipher)
  *       - BlowFish  (QCA::BlowFish)
  *       - Triple DES (QCA::TripleDES)
  *       - AES (QCA::AES128, QCA::AES192, QCA::AES256)
@@ -1479,6 +1479,15 @@ namespace QCA
 			ECB  ///< operate in Electronic Code Book mode
 		};
 
+		/**
+		 * Padding variations for cipher algorithms
+		 */
+		enum Padding
+		{
+			NoPadding, ///< Do no padding
+			PKCS7     ///< Pad using the scheme in PKCS#7
+		};
+
 		/** 
 		 * Standard copy constructor
 		 */
@@ -1529,10 +1538,10 @@ namespace QCA
 
 		// note: padding only applies to CBC and ECB.  CFB ciphertext is
 		//   always the length of the plaintext.
-		void setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector(), bool pad = true);
+		void setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7);
 
 	protected:
-		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, bool pad, const QString &provider);
+		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, Padding pad, const QString &provider);
 
 	private:
 		class Private;
@@ -2033,7 +2042,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
 		:Cipher("blowfish", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2058,7 +2067,7 @@ namespace QCA
 		 *
 		 */
 	public:
-		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
 		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2083,7 +2092,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
 		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2108,7 +2117,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		AES192(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
 		:Cipher("aes192", m, dir, key, iv, pad, provider) {}
 	};
 
@@ -2133,7 +2142,7 @@ namespace QCA
 		 * \param provider the provider to use (eg "qca-gcrypt" )
 		 *
 		 */
-		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), Padding pad = PKCS7, const QString &provider = "")
 		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
 	};
 

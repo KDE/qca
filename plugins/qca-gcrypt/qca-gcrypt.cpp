@@ -198,11 +198,9 @@ public:
     void setup(const QCA::SymmetricKey &key,
 	       QCA::CipherContext::Mode m,
 	       QCA::Direction dir,
-	       const QCA::InitializationVector &iv,
-	       bool pad)
+	       const QCA::InitializationVector &iv)
     {
 	m_direction = dir;
-	m_pad = pad;
 	err =  gcry_cipher_open( &context, cryptoAlgorithm, gcry_mode(m), 0 );
 	check_error( err );
 	err = gcry_cipher_setkey( context, key.data(), key.size() );
@@ -234,20 +232,13 @@ public:
     
     bool final(QSecureArray *out)
     {
-	if (m_pad) {
-	    // TODO - we need to pad
-	    // abort();
-	} else {
-	    *out = QSecureArray();
-	} 
-
+	*out = QSecureArray();
 	return true;
     }
 
 protected:
     gcry_cipher_hd_t context;
     gcry_error_t err;
-    bool m_pad;
     int cryptoAlgorithm;
     QCA::Direction m_direction;
 };

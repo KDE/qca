@@ -145,13 +145,13 @@ public:
 	Mode mode;
 	Direction dir;
 	SymmetricKey key;
-	QSecureArray iv;
-	bool pad;
+	InitializationVector iv;
+	Padding pad;
 
 	bool ok, done;
 };
 
-Cipher::Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, bool pad, const QString &provider)
+Cipher::Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, Padding pad, const QString &provider)
 :Algorithm(type, provider)
 {
 	d = new Private;
@@ -196,7 +196,7 @@ void Cipher::clear()
 {
 	detach();
 	d->done = false;
-	((CipherContext *)context())->setup(d->key, (CipherContext::Mode)d->mode, d->dir, d->iv, d->pad);
+	((CipherContext *)context())->setup(d->key, (CipherContext::Mode)d->mode, d->dir, d->iv);
 }
 
 QSecureArray Cipher::update(const QSecureArray &a)
@@ -225,7 +225,7 @@ bool Cipher::ok() const
 	return d->ok;
 }
 
-void Cipher::setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, bool pad)
+void Cipher::setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv,  Padding pad)
 {
 	d->mode = m;
 	d->dir = dir;
