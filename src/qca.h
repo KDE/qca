@@ -180,6 +180,14 @@ private:
 };
 
 /**
+ * Equality operator. Returns true if the two QSecureArray
+ * arguments have the same data (and the same length, of course).
+ *
+ * \relates QSecureArray
+ **/
+bool operator==(const QSecureArray &a, const QSecureArray &b);
+
+/**
  * Arbitrary precision integer
  *
  * %QBigInteger provides arbitrary precision integers.

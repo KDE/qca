@@ -280,6 +280,16 @@ QByteArray QSecureArray::toByteArray() const
 	return buf;
 }
 
+bool operator==(const QSecureArray &a, const QSecureArray &b)
+{
+	if ( ( a.size() == b.size() ) &&
+	     ( 0 == memcmp( a.data(), b.data(), a.size() ) ) )
+		return true;
+	else
+		return false;
+}
+		
+		       
 //----------------------------------------------------------------------------
 // QBigInteger
 //----------------------------------------------------------------------------
