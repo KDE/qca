@@ -216,14 +216,22 @@ void Cipher::setup(Direction dir, const SymmetricKey &key, const InitializationV
 QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding paddingType)
 {
 	QString mode;
-	if(modeType == CBC)
+	switch(modeType) {
+	case CBC:
 		mode = "cbc";
-	else if(modeType == CFB)
+		break;
+	case CFB:
 		mode = "cfb";
-	else if(modeType == OFB)
+		break;
+	case OFB:
 		mode = "ofb";
-	else
+		break;
+	case ECB:
 		mode = "ecb";
+		break;
+	default:
+		abort();
+	}
 
 	// do the default
 	if(paddingType == DefaultPadding)
