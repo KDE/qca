@@ -404,20 +404,58 @@ bool RSAKey::isNull() const
 	return d->c->isNull();
 }
 
-QByteArray RSAKey::toDER() const
+bool RSAKey::havePublic() const
+{
+	return d->c->havePublic();
+}
+
+bool RSAKey::havePrivate() const
+{
+	return d->c->havePrivate();
+}
+
+QByteArray RSAKey::toDER(bool publicOnly) const
 {
 	char *out;
 	unsigned int len;
-	d->c->toDER(&out, &len);
-	QByteArray buf(len);
-	memcpy(buf.data(), out, len);
-	free(out);
-	return buf;
+	d->c->toDER(&out, &len, publicOnly);
+	if(!out)
+		return QByteArray();
+	else {
+		QByteArray buf(len);
+		memcpy(buf.data(), out, len);
+		free(out);
+		return buf;
+	}
 }
 
-bool RSAKey::fromDER(const QByteArray &a, bool sec)
+bool RSAKey::fromDER(const QByteArray &a)
 {
-	return d->c->createFromDER(a.data(), a.size(), sec);
+	return d->c->createFromDER(a.data(), a.size());
+}
+
+QString RSAKey::toPEM(bool publicOnly) const
+{
+	char *out;
+	unsigned int len;
+	d->c->toPEM(&out, &len, publicOnly);
+	if(!out)
+		return QByteArray();
+	else {
+		QCString cs;
+		cs.resize(len+1);
+		memcpy(cs.data(), out, len);
+		free(out);
+		return QString::fromLatin1(cs);
+	}
+}
+
+bool RSAKey::fromPEM(const QString &str)
+{
+	QCString cs = str.latin1();
+	QByteArray a(cs.length());
+	memcpy(a.data(), cs.data(), a.size());
+	return d->c->createFromPEM(a.data(), a.size());
 }
 
 bool RSAKey::fromNative(void *p)
@@ -425,11 +463,11 @@ bool RSAKey::fromNative(void *p)
 	return d->c->createFromNative(p);
 }
 
-bool RSAKey::encrypt(const QByteArray &a, QByteArray *b) const
+bool RSAKey::encrypt(const QByteArray &a, QByteArray *b, bool oaep) const
 {
 	char *out;
 	unsigned int len;
-	if(!d->c->encrypt(a.data(), a.size(), &out, &len))
+	if(!d->c->encrypt(a.data(), a.size(), &out, &len, oaep))
 		return false;
 	b->resize(len);
 	memcpy(b->data(), out, len);
@@ -437,11 +475,11 @@ bool RSAKey::encrypt(const QByteArray &a, QByteArray *b) const
 	return true;
 }
 
-bool RSAKey::decrypt(const QByteArray &a, QByteArray *b) const
+bool RSAKey::decrypt(const QByteArray &a, QByteArray *b, bool oaep) const
 {
 	char *out;
 	unsigned int len;
-	if(!d->c->decrypt(a.data(), a.size(), &out, &len))
+	if(!d->c->decrypt(a.data(), a.size(), &out, &len, oaep))
 		return false;
 	b->resize(len);
 	memcpy(b->data(), out, len);
@@ -476,18 +514,18 @@ void RSA::setKey(const RSAKey &k)
 	v_key = k;
 }
 
-bool RSA::encrypt(const QByteArray &a, QByteArray *b) const
+bool RSA::encrypt(const QByteArray &a, QByteArray *b, bool oaep) const
 {
 	if(v_key.isNull())
 		return false;
-	return v_key.encrypt(a, b);
+	return v_key.encrypt(a, b, oaep);
 }
 
-bool RSA::decrypt(const QByteArray &a, QByteArray *b) const
+bool RSA::decrypt(const QByteArray &a, QByteArray *b, bool oaep) const
 {
 	if(v_key.isNull())
 		return false;
-	return v_key.decrypt(a, b);
+	return v_key.decrypt(a, b, oaep);
 }
 
 RSAKey RSA::generateKey(unsigned int bits)

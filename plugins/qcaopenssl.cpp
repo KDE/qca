@@ -4,6 +4,8 @@
 #include<openssl/sha.h>
 #include<openssl/md5.h>
 #include<openssl/evp.h>
+#include<openssl/bio.h>
+#include<openssl/pem.h>
 #include<openssl/rsa.h>
 #include<openssl/x509.h>
 
@@ -261,79 +263,244 @@ class RSAKeyContext : public QCA_RSAKeyContext
 public:
 	RSAKeyContext()
 	{
-		r = 0;
+		pub = 0;
+		sec = 0;
 	}
 
 	~RSAKeyContext()
 	{
-		if(r)
-			RSA_free(r);
+		reset();
+	}
+
+	void reset()
+	{
+		if(pub) {
+			RSA_free(pub);
+			pub = 0;
+		}
+		if(sec) {
+			RSA_free(sec);
+			sec = 0;
+		}
+	}
+
+	void separate(RSA *r, RSA **pub, RSA **sec)
+	{
+		// public
+		unsigned char *buf, *p;
+		int len = i2d_RSAPublicKey(r, NULL);
+		if(len > 0) {
+			buf = (unsigned char *)malloc(len);
+			p = buf;
+			i2d_RSAPublicKey(r, &p);
+			p = buf;
+			*pub = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
+			free(buf);
+		}
+
+		len = i2d_RSAPrivateKey(r, NULL);
+		if(len > 0) {
+			buf = (unsigned char *)malloc(len);
+			p = buf;
+			i2d_RSAPrivateKey(r, &p);
+			p = buf;
+			*sec = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
+			free(buf);
+		}
 	}
 
 	bool isNull() const
 	{
-		return (r ? false: true);
+		if(!pub && !sec)
+			return true;
+		return false;
 	}
 
-	bool createFromDER(const char *in, unsigned int len, bool sec)
+	bool havePublic() const
 	{
-		RSA *t;
-		if(sec) {
-			const unsigned char *p = (const unsigned char *)in;
-			t = d2i_RSAPrivateKey(NULL, &p, len);
+		return pub ? true : false;
+	}
+
+	bool havePrivate() const
+	{
+		return sec ? true : false;
+	}
+
+	bool createFromDER(const char *in, unsigned int len)
+	{
+		RSA *r;
+		void *p;
+
+		// private?
+		p = (void *)in;
+		r = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
+		if(r) {
+			reset();
+
+			// private means both, I think, so separate them
+			separate(r, &pub, &sec);
+			return true;
 		}
 		else {
-			unsigned char *p = (unsigned char *)in;
-			t = d2i_RSA_PUBKEY(NULL, &p,len);
+			// public?
+			p = (void *)in;
+			r = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
+			if(!r) {
+				// try this other public function, for whatever reason
+				p = (void *)in;
+				r = d2i_RSA_PUBKEY(NULL, (unsigned char **)&p, len);
+			}
+			if(r) {
+				if(pub)
+					RSA_free(pub);
+				pub = r;
+				return true;
+			}
 		}
-		if(!t)
-			return false;
 
-		r = t;
-		return true;
+		return false;
+	}
+
+	bool createFromPEM(const char *in, unsigned int len)
+	{
+		BIO *bi;
+
+		// private?
+		bi = BIO_new(BIO_s_mem());
+		BIO_write(bi, in, len);
+		RSA *r = PEM_read_bio_RSAPrivateKey(bi, NULL, NULL, NULL);
+		BIO_free(bi);
+		if(r) {
+			reset();
+			separate(r, &pub, &sec);
+			return true;
+		}
+		else {
+			// public?
+			bi = BIO_new(BIO_s_mem());
+			BIO_write(bi, in, len);
+			r = PEM_read_bio_RSAPublicKey(bi, NULL, NULL, NULL);
+			BIO_free(bi);
+			if(r) {
+				if(pub)
+					RSA_free(pub);
+				pub = r;
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	bool createFromNative(void *in)
 	{
-		r = (RSA *)in;
-		++(r->references);
+		reset();
+		separate((RSA *)in, &pub, &sec);
 		return true;
 	}
 
 	bool generate(unsigned int bits)
 	{
-		RSA *t = RSA_generate_key(bits, RSA_F4, NULL, NULL);
-		if(!t)
+		RSA *r = RSA_generate_key(bits, RSA_F4, NULL, NULL);
+		if(!r)
 			return false;
-
-		r = t;
+		separate(r, &pub, &sec);
+		RSA_free(r);
 		return true;
 	}
 
 	QCA_RSAKeyContext *clone()
 	{
 		RSAKeyContext *c = new RSAKeyContext;
-		if(r)
-			c->createFromNative(r);
+		if(pub) {
+			++(pub->references);
+			c->pub = pub;
+		}
+		if(sec) {
+			++(sec->references);
+			c->sec = sec;
+		}
 		return c;
 	}
 
-	void toDER(char **out, unsigned int *len)
+	void toDER(char **out, unsigned int *outlen, bool publicOnly)
 	{
-		*out = 0;
-		*len = 0;
+		if(sec && !publicOnly) {
+			int len = i2d_RSAPrivateKey(sec, NULL);
+			unsigned char *buf, *p;
+			buf = (unsigned char *)malloc(len);
+			p = buf;
+			i2d_RSAPrivateKey(sec, &p);
+			*out = (char *)buf;
+			*outlen = len;
+		}
+		else if(pub) {
+			int len = i2d_RSAPublicKey(pub, NULL);
+			unsigned char *buf, *p;
+			buf = (unsigned char *)malloc(len);
+			p = buf;
+			i2d_RSAPublicKey(pub, &p);
+			*out = (char *)buf;
+			*outlen = len;
+		}
+		else {
+			*out = 0;
+			*outlen = 0;
+		}
 	}
 
-	bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen)
+	void toPEM(char **out, unsigned int *outlen, bool publicOnly)
 	{
-		int size = RSA_size(r);
+		BIO *bo;
+		if(sec && !publicOnly) {
+			bo = BIO_new(BIO_s_mem());
+			PEM_write_bio_RSAPrivateKey(bo, sec, NULL, NULL, 0, NULL, NULL);
+		}
+		else if(pub) {
+			bo = BIO_new(BIO_s_mem());
+			PEM_write_bio_RSAPublicKey(bo, pub);
+		}
+		else {
+			*out = 0;
+			*outlen = 0;
+			return;
+		}
+
+		char *buf = (char *)malloc(1);
+		int size = 0;
+		while(1) {
+			char block[1024];
+			int ret = BIO_read(bo, block, 1024);
+			buf = (char *)realloc(buf, size + ret);
+			memcpy(buf + size, block, ret);
+			size += ret;
+			if(ret != 1024)
+				break;
+		}
+		BIO_free(bo);
+		*out = buf;
+		*outlen = size;
+	}
+
+	bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)
+	{
+		if(!pub)
+			return false;
+
+		int size = RSA_size(pub);
 		int flen = len;
-		if(flen >= size - 11)
-			flen = size - 11;
+		if(oaep) {
+			if(flen >= size - 41)
+				flen = size - 41;
+		}
+		else {
+			if(flen >= size - 11)
+				flen = size - 11;
+		}
 		QByteArray result(size);
 		unsigned char *from = (unsigned char *)in;
 		unsigned char *to = (unsigned char *)result.data();
-		int ret = RSA_public_encrypt(flen, from, to, r, RSA_PKCS1_PADDING);
+		int ret = RSA_public_encrypt(flen, from, to, pub, oaep ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING);
 		if(ret == -1)
 			return false;
 		result.resize(ret);
@@ -344,14 +511,17 @@ public:
 		return true;
 	}
 
-	bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen)
+	bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)
 	{
-		int size = RSA_size(r);
+		if(!sec)
+			return false;
+
+		int size = RSA_size(sec);
 		int flen = len;
 		QByteArray result(size);
 		unsigned char *from = (unsigned char *)in;
 		unsigned char *to = (unsigned char *)result.data();
-		int ret = RSA_private_decrypt(flen, from, to, r, RSA_PKCS1_PADDING);
+		int ret = RSA_private_decrypt(flen, from, to, sec, oaep ? RSA_PKCS1_OAEP_PADDING : RSA_PKCS1_PADDING);
 		if(ret == -1)
 			return false;
 		result.resize(ret);
@@ -362,7 +532,7 @@ public:
 		return true;
 	}
 
-	RSA *r;
+	RSA *pub, *sec;
 };
 
 

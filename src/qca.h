@@ -182,9 +182,14 @@ namespace QCA
 		~RSAKey();
 
 		bool isNull() const;
+		bool havePublic() const;
+		bool havePrivate() const;
 
-		QByteArray toDER() const;
-		bool fromDER(const QByteArray &a, bool sec=false);
+		QByteArray toDER(bool publicOnly=false) const;
+		bool fromDER(const QByteArray &a);
+
+		QString toPEM(bool publicOnly=false) const;
+		bool fromPEM(const QString &);
 
 		// only call if you know what you are doing
 		bool fromNative(void *);
@@ -194,8 +199,8 @@ namespace QCA
 		Private *d;
 
 		friend class RSA;
-		bool encrypt(const QByteArray &a, QByteArray *out) const;
-		bool decrypt(const QByteArray &a, QByteArray *out) const;
+		bool encrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
+		bool decrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
 		bool generate(unsigned int bits);
 	};
 
@@ -208,8 +213,8 @@ namespace QCA
 		RSAKey key() const;
 		void setKey(const RSAKey &);
 
-		bool encrypt(const QByteArray &a, QByteArray *out) const;
-		bool decrypt(const QByteArray &a, QByteArray *out) const;
+		bool encrypt(const QByteArray &a, QByteArray *out, bool oaep=false) const;
+		bool decrypt(const QByteArray &a, QByteArray *out, bool oaep=false) const;
 
 		static RSAKey generateKey(unsigned int bits);
 

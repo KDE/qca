@@ -51,14 +51,18 @@ public:
 	virtual ~QCA_RSAKeyContext() {}
 
 	virtual bool isNull() const=0;
-	virtual bool createFromDER(const char *in, unsigned int len, bool sec)=0;
+	virtual bool havePublic() const=0;
+	virtual bool havePrivate() const=0;
+	virtual bool createFromDER(const char *in, unsigned int len)=0;
+	virtual bool createFromPEM(const char *in, unsigned int len)=0;
 	virtual bool createFromNative(void *in)=0;
 	virtual bool generate(unsigned int bits)=0;
 	virtual QCA_RSAKeyContext *clone()=0;
-	virtual void toDER(char **out, unsigned int *len)=0;
+	virtual void toDER(char **out, unsigned int *len, bool publicOnly)=0;
+	virtual void toPEM(char **out, unsigned int *len, bool publicOnly)=0;
 
-	virtual bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen)=0;
-	virtual bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen)=0;
+	virtual bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)=0;
+	virtual bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen, bool oaep)=0;
 };
 
 #endif

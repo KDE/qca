@@ -1,8 +1,11 @@
 #include<qfile.h>
+#include<qfileinfo.h>
 #include"qca.h"
 #include<stdio.h>
 
-QCA::RSAKey readKeyFile(const QString &name, bool sec=false)
+#define USE_FILE
+
+QCA::RSAKey readKeyFile(const QString &name)
 {
 	QCA::RSAKey k;
 	QFile f(name);
@@ -14,11 +17,19 @@ QCA::RSAKey readKeyFile(const QString &name, bool sec=false)
 	f.close();
 	printf("Read %s [%d bytes]\n", name.latin1(), der.size());
 
-	if(!k.fromDER(der, sec)) {
+	if(!k.fromDER(der)) {
 		printf("%s: Error importing DER format.\n", name.latin1());
 		return k;
 	}
-	printf("Successfully imported %s\n", name.latin1());
+	char *yes = "yes";
+	char *no = "no";
+	printf("Successfully imported %s (enc=%s, dec=%s)\n",
+		name.latin1(),
+		k.havePublic() ? yes : no,
+		k.havePrivate() ? yes : no);
+
+	printf("Converting to DER: %d bytes\n", k.toDER().size());
+	printf("Converting to PEM:\n%s\n", k.toPEM().latin1());
 	return k;
 }
 
@@ -30,18 +41,19 @@ int main(int argc, char **argv)
 	if(!QCA::isSupported(QCA::CAP_RSA))
 		printf("RSA not supported!\n");
 	else {
-		//QCA::RSAKey pubkey = readKeyFile("keypublic.der");
-		//if(pubkey.isNull())
-		//	return 1;
-		//QCA::RSAKey seckey = readKeyFile("keyprivate.der", true);
-		//if(seckey.isNull())
-		//	return 1;
-
+#ifdef USE_FILE
+		QCA::RSAKey pubkey = readKeyFile("keypublic.der");
+		if(pubkey.isNull())
+			return 1;
+		QCA::RSAKey seckey = readKeyFile("keyprivate.der");
+		if(seckey.isNull())
+			return 1;
+#else
 		QCA::RSAKey seckey = QCA::RSA::generateKey(1024);
 		if(seckey.isNull())
 			return 1;
 		QCA::RSAKey pubkey = seckey;
-
+#endif
 		// encrypt some data
 		QByteArray a(cs.length());
 		memcpy(a.data(), cs.data(), a.size());
