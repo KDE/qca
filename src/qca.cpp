@@ -236,7 +236,7 @@ Store systemStore(const QString &provider)
 
 QString appName()
 {
-	return "";
+	return QString();
 }
 
 void setAppName(const QString &)
