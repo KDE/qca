@@ -38,7 +38,10 @@ bool QCA::isSupported(int capabilities)
 	QPtrListIterator<QCAProvider> it(providerList);
 	for(QCAProvider *p; (p = it.current()); ++it)
 		caps |= p->capabilities();
-	return caps;
+	if(caps & capabilities)
+		return true;
+	else
+		return false;
 }
 
 static void *getFunctions(int cap)
