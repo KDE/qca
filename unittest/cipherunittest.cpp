@@ -625,8 +625,8 @@ void CipherUnitTest::allTests()
 {
     QCA::Initializer init;
 
-    if (!QCA::isSupported("aes128") )
-	SKIP("AES128 not supported!");
+    if (!QCA::isSupported("aes128-ecb") )
+	SKIP("AES128-ECB not supported!");
     else {
 	QCA::SymmetricKey key1(QCA::hexToArray( "00010203050607080A0B0C0D0F101112" ) );
 	QCA::AES128 cipherObj1(QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key1);
@@ -679,7 +679,11 @@ void CipherUnitTest::allTests()
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
         }
+    }
 
+    if (!QCA::isSupported("aes128-cbc") )
+	SKIP("AES128-CBC not supported!");
+    else {
 	for (int n = 0; (0 != aes128cbcTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( aes128cbcTestValues[n].key ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( aes128cbcTestValues[n].iv ) );
@@ -698,7 +702,11 @@ void CipherUnitTest::allTests()
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
         }
+    }
 
+    if (!QCA::isSupported("aes128-cfb") )
+	SKIP("AES128-CFB not supported!");
+    else {
 	for (int n = 0; (0 != aes128cfbTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( aes128cfbTestValues[n].key ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( aes128cfbTestValues[n].iv ) );
@@ -719,8 +727,8 @@ void CipherUnitTest::allTests()
         }
     }
 
-    if (!QCA::isSupported("aes192") )
-	SKIP("AES192 not supported!");
+    if (!QCA::isSupported("aes192-ecb") )
+	SKIP("AES192-ECB not supported!");
     else {
 	// FIPS 197, Appendix C.2
 	QCA::SymmetricKey key1( QCA::hexToArray( "000102030405060708090A0B0C0D0E0F1011121314151617" ) );
@@ -758,7 +766,11 @@ void CipherUnitTest::allTests()
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
         }
+    }
 
+    if (!QCA::isSupported("aes192-cbc") )
+	SKIP("AES192-CBC not supported!");
+    else {
 	for (int n = 0; (0 != aes192cbcTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( aes192cbcTestValues[n].key ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( aes192cbcTestValues[n].iv ) );
@@ -777,7 +789,11 @@ void CipherUnitTest::allTests()
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
         }
+    }
 
+    if (!QCA::isSupported("aes192-cfb") )
+	SKIP("AES192-CFB not supported!");
+    else {
 	for (int n = 0; (0 != aes192cfbTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( aes192cfbTestValues[n].key ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( aes192cfbTestValues[n].iv ) );
@@ -799,8 +815,8 @@ void CipherUnitTest::allTests()
     }
 
 
-    if (!QCA::isSupported("aes256") )
-	SKIP("AES256 not supported!");
+    if (!QCA::isSupported("aes256-ecb") )
+	SKIP("AES256-ECB not supported!");
     else {
 	// FIPS 197, Appendix C.3
 	QCA::SymmetricKey key1(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F" ) );
@@ -837,7 +853,11 @@ void CipherUnitTest::allTests()
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
         }
+    }
 
+    if (!QCA::isSupported("aes256-cbc") )
+	SKIP("AES256-CBC not supported!");
+    else {
 	for (int n = 0; (0 != aes256cbcTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( aes256cbcTestValues[n].key ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( aes256cfbTestValues[n].iv ) );
@@ -856,7 +876,11 @@ void CipherUnitTest::allTests()
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
         }
+    }
 
+    if (!QCA::isSupported("aes256-cfb") )
+	SKIP("AES256-CFB not supported!");
+    else {
 	for (int n = 0; (0 != aes256cfbTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( aes256cfbTestValues[n].key ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( aes256cfbTestValues[n].iv ) );
@@ -877,8 +901,8 @@ void CipherUnitTest::allTests()
         }
     }
 
-    if (!QCA::isSupported("tripledes") )
-	SKIP("Triple DES not supported!");
+    if (!QCA::isSupported("tripledes-ecb") )
+	SKIP("Triple DES, ECB not supported!");
     else {
 	QCA::TripleDES cipherObj1( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 24 ) );
 	CHECK( cipherObj1.keyLength().minimum(), 24 );
@@ -904,8 +928,8 @@ void CipherUnitTest::allTests()
         }
     }
 
-    if (!QCA::isSupported("des") )
-	SKIP("DES not supported!");
+    if (!QCA::isSupported("des-ecb") )
+	SKIP("DES, ECB not supported!");
     else {
 	QCA::DES cipherObj1( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 8 ) );
 	CHECK( cipherObj1.keyLength().minimum(), 8 );
@@ -931,8 +955,8 @@ void CipherUnitTest::allTests()
         }
     }
 
-    if (!QCA::isSupported("blowfish") )
-	SKIP("Blowfish not supported!");
+    if (!QCA::isSupported("blowfish-ecb") )
+	SKIP("Blowfish-ECB not supported!");
     else {
 	QCA::BlowFish cipherObj1( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 16 ) );
 	CHECK( cipherObj1.blockSize(), (unsigned)8 );
