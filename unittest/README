@@ -1,0 +1,11 @@
+This directory holds simple unit tests for QCA.
+
+Note that some of the hash tests require data files which are not
+provided with the QCA download because of their size. This is not a
+problem - the tests will simply be skipped if the files are not
+present. If you want to exercise these tests, you need to copy (or
+link) Botan-1.4.1.tar.bz2, linux-2.6.7.tar.bz2 and scribus-1.2.tar.bz2
+tarballs as distributed into the unittest/data/ directory. These files
+should be readily available on the Internet. There is also a zero
+length file (imaginatively called "empty"), which you can create with
+something like "touch ./data/empty" at the command line.
