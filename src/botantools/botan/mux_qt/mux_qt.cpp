@@ -36,7 +36,7 @@ namespace QCA {
 #include <botan/exceptn.h>
 namespace QCA {
 }
-#include <qmutex.h>
+#include <QMutex>
 namespace QCA {
 
 namespace Botan {

@@ -1,7 +1,7 @@
 #ifndef BOTANTOOLS_H
 #define BOTANTOOLS_H
 
-#include <qglobal.h>
+#include <QtGlobal>
 #include <botan/mutex.h>
 #include <botan/mux_qt.h>
 #include <botan/allocate.h>

@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef BOTAN_TYPES_QT
 }
-#include<qglobal.h>
+#include <QtGlobal>
 namespace QCA {
 #endif
 
@@ -44,9 +44,9 @@ namespace Botan {
 
 typedef uchar byte;
 typedef ushort u16bit;
-typedef Q_UINT32 u32bit;
-typedef Q_INT32 s32bit;
-typedef Q_UINT64 u64bit;
+typedef quint32 u32bit;
+typedef qint32 s32bit;
+typedef quint64 u64bit;
 
 #else
 
