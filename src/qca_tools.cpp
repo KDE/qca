@@ -93,8 +93,6 @@ void botan_deinit()
 
 }
 
-// TODO: catch exceptions for SecureVector and BigInt
-
 //----------------------------------------------------------------------------
 // QSecureArray
 //----------------------------------------------------------------------------
@@ -234,7 +232,8 @@ bool QSecureArray::resize(uint size)
 		}
 		d = d2;
 	}
-	else {
+	else
+	{
 		delete d;
 		d = 0;
 	}
@@ -269,6 +268,26 @@ QByteArray QSecureArray::toByteArray() const
 //----------------------------------------------------------------------------
 // QBigInteger
 //----------------------------------------------------------------------------
+static void negate_binary(char *a, int size)
+{
+	// negate = two's compliment + 1
+	bool done = false;
+	for(int n = size - 1; n >= 0; --n)
+	{
+		a[n] = ~a[n];
+		if(!done)
+		{
+			if((unsigned char)a[n] < 0xff)
+			{
+				++a[n];
+				done = true;
+			}
+			else
+				a[n] = 0;
+		}
+	}
+}
+
 class QBigInteger::Private
 {
 public:
@@ -283,11 +302,13 @@ QBigInteger::QBigInteger()
 QBigInteger::QBigInteger(int i)
 {
 	d = new Private;
-	if(i < 0) {
+	if(i < 0)
+	{
 		d->n = Botan::BigInt(i * (-1));
 		d->n.set_sign(Botan::BigInt::Negative);
 	}
-	else {
+	else
+	{
 		d->n = Botan::BigInt(i);
 		d->n.set_sign(Botan::BigInt::Positive);
 	}
@@ -342,83 +363,101 @@ QBigInteger & QBigInteger::operator=(const QString &s)
 
 QSecureArray QBigInteger::toArray() const
 {
-	QSecureArray a(d->n.encoded_size(Botan::BigInt::Binary) + 1);
-	if(d->n.is_negative())
-		a[0] = 1;
-	else
+	int size = d->n.encoded_size(Botan::BigInt::Binary);
+
+	// return at least 8 bits
+	if(size == 0)
+	{
+		QSecureArray a(1);
 		a[0] = 0;
-	Botan::BigInt::encode((Botan::byte *)a.data() + 1, d->n, Botan::BigInt::Binary);
+		return a;
+	}
+
+	int offset = 0;
+	QSecureArray a;
+
+	// make room for a sign bit if needed
+	if(d->n.get_bit((size * 8) - 1))
+	{
+		++size;
+		a.resize(size);
+		a[0] = 0;
+		++offset;
+	}
+	else
+		a.resize(size);
+
+	Botan::BigInt::encode((Botan::byte *)a.data() + offset, d->n, Botan::BigInt::Binary);
+
+	if(d->n.is_negative())
+		negate_binary(a.data(), a.size());
+
 	return a;
 }
 
-void QBigInteger::fromArray(const QSecureArray &a)
+void QBigInteger::fromArray(const QSecureArray &_a)
 {
-	if(a.isEmpty()) {
+	if(_a.isEmpty())
+	{
 		d->n = Botan::BigInt(0);
 		return;
 	}
+	QSecureArray a = _a;
+
 	Botan::BigInt::Sign sign = Botan::BigInt::Positive;
-	if(a[0] != 0)
+	if(a[0] & 0x80)
 		sign = Botan::BigInt::Negative;
-	d->n = Botan::BigInt::decode((const Botan::byte *)a.data() + 1, a.size() - 1, Botan::BigInt::Binary);
+
+	if(sign == Botan::BigInt::Negative)
+		negate_binary(a.data(), a.size());
+
+	d->n = Botan::BigInt::decode((const Botan::byte *)a.data(), a.size(), Botan::BigInt::Binary);
 	d->n.set_sign(sign);
 }
 
 QString QBigInteger::toString() const
 {
-	QString leader;
-	if ( d->n.is_negative() ) {
-		leader = QString( "-" );
-		d->n.set_sign( Botan::BigInt::Positive );
-	}
-
 	QCString cs;
-	try {
+	try
+	{
 		QByteArray a(d->n.encoded_size(Botan::BigInt::Decimal));
 		Botan::BigInt::encode((Botan::byte *)a.data(), d->n, Botan::BigInt::Decimal);
 		cs = QCString(a.data(), a.size() + 1);
 	}
-	catch(std::exception &e) {
-		//std::cout << "toString error: " << e.what() << std::endl;
+	catch(std::exception &)
+	{
+		return QString::null;
 	}
-	while (cs.left(1) == QCString("0") ) {
-		cs.remove( 0, 1 );
-	}
-	return ( leader + QString::fromLatin1(cs) );
+
+	QString str;
+	if(d->n.is_negative())
+		str += '-';
+	str += QString::fromLatin1(cs);
+	return str;
 }
 
-// this could handle hex as well as decimal and octal,
-// but we're using a restricted form of Botan without
-// hex support...
 bool QBigInteger::fromString(const QString &s)
 {
-	Botan::BigInt::Base base = Botan::BigInt::Decimal;
-	unsigned int numPrelimChars = 0;
-	bool isNegative = false;
+	if(s.isEmpty())
+		return false;
+	QCString cs = s.latin1();
 
-	s.stripWhiteSpace(); // removes whitespace from start / end
-	                     // gives us a better chance
+	bool neg = false;
+	if(s[0] == '-')
+		neg = true;
 
-	if ( (! s.isEmpty()) && (s.left(1) == QString("-")  ) ) {
-		numPrelimChars++;
-		isNegative = true;
+	try
+	{
+		d->n = Botan::BigInt::decode((const Botan::byte *)cs.data() + (neg ? 1 : 0), cs.length() - (neg ? 1 : 0), Botan::BigInt::Decimal);
 	}
-	if ( ( numPrelimChars + 1 < s.length() ) &&
-		    ( s.mid( numPrelimChars, 1) == QString("0") ) ) {
-		base = Botan::BigInt::Octal;
-		numPrelimChars++;
+	catch(std::exception &)
+	{
+		return false;
 	}
-	// this takes all the characters, except for the:
-	// negative sign and/or octal signature (0)
-	QCString cs = s.mid(numPrelimChars).latin1();
 
-	//try {
-	d->n = Botan::BigInt::decode((const Botan::byte *)cs.data(), cs.length(), base);
-	//}
-	if ( isNegative ) {
+	if(neg)
 		d->n.set_sign(Botan::BigInt::Negative);
-	} else {
+	else
 		d->n.set_sign(Botan::BigInt::Positive);
-	}
 	return true;
 }
