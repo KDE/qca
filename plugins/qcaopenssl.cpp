@@ -20,6 +20,7 @@
 #endif
 
 // FIXME: use openssl for entropy instead of stdlib
+// FIXME: handle return value of BIO_new
 #include<stdlib.h>
 static bool seeded = false;
 class QRandom

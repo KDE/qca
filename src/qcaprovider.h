@@ -119,4 +119,24 @@ signals:
 	void readyReadOutgoing();
 };
 
+struct QCA_SASLNeedParams
+{
+	bool auth, user, pass, realm;
+};
+
+class QCA_SASLContext
+{
+public:
+	enum { Success, Error, NeedParams, Continue };
+	virtual ~QCA_SASLContext() {}
+
+	virtual bool startClient(const char *service, const QString &host, const QStringList &methods, const QHostAddress &localAddr, int localPort, const QHostAddress &remoteAddr, int remotePort, bool allowPlain);
+	virtual int firstStep(char **meth, char **out, unsigned int *outlen, QCA_SASLNeedParams *np)=0;
+	virtual int nextStep(const char *in, unsigned int len, char **out, unsigned int *outlen, QCA_SASLNeedParams *np)=0;
+	virtual void setAuthname(const QString &)=0;
+	virtual void setUsername(const QString &)=0;
+	virtual void setPassword(const QString &)=0;
+	virtual void setRealm(const QString &)=0;
+};
+
 #endif

@@ -332,8 +332,8 @@ namespace QCA
 
 		// initialize
 		bool startClient(const QString &service, const QString &host, const QStringList &methods);
-		bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method);
-		bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method, const QByteArray &clientInit);
+		//bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method);
+		//bool startServer(const QString &service, const QString &host, const QString &realm, const QString &method, const QByteArray &clientInit);
 
 		// authentication
 		void putIncomingStep(const QByteArray &stepData);
@@ -343,26 +343,26 @@ namespace QCA
 		void putRealm(const QString &realm);
 
 		// plain (application side)
-		void write(const QByteArray &a);
+		/*void write(const QByteArray &a);
 		QByteArray read();
 
 		// encoded (socket side)
 		void writeIncoming(const QByteArray &a);
-		QByteArray readOutgoing();
+		QByteArray readOutgoing();*/
 
 	signals:
 		// for authentication
 		void clientFirstStep(const QString &method, bool useClientInit, const QByteArray &clientInit);
 		void nextStep(const QByteArray &stepData);
-		void needAuthname();
-		void needUsername();
-		void needPassword();
-		void needRealm();
-		void authenticated();
+		void needParams(bool auth, bool user, bool pass, bool realm);
+		void authenticated(bool);
 
 		// for security layer
 		void readyRead();
 		void readyReadOutgoing();
+
+	private slots:
+		void tryAgain();
 
 	private:
 		class Private;

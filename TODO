@@ -1,5 +1,6 @@
 * cipher: option to specify size for genkey
 * cert: properly check hostnames with wildcards
+* ssl: error signal
 
 * sasl client
 * sasl server
