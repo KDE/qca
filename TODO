@@ -1,8 +1,6 @@
-* make 'cipherkey' class?
 * cipher: better handling of errors ('empty' arrays are not a good idea)
 * cipher: ability to disable pkcs padding
 * cipher: better entropy for keygen?
-* cipher: aes128, aes256
 
 * ssl/tls/x509 (also server support)
 * sasl (also server support)

@@ -6,6 +6,9 @@ TARGET   = qcaopenssl
 
 INCLUDEPATH += ../src
 
+# Justin
+INCLUDEPATH += /usr/local/include
+
 # RH 9
 INCLUDEPATH += /usr/kerberos/include
 

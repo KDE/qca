@@ -71,7 +71,6 @@ void QCA::init()
 		}
 		void *s = lib->resolve("createProvider");
 		if(!s) {
-			printf("can't resolve\n");
 			delete lib;
 			continue;
 		}
@@ -194,8 +193,6 @@ public:
 
 	void reset()
 	{
-		//c->reset();
-
 		dir = Encrypt;
 		key.resize(0);
 		iv.resize(0);
@@ -251,6 +248,11 @@ QByteArray Cipher::dyn_generateIV() const
 void Cipher::reset(int dir, int mode, const QByteArray &key, const QByteArray &iv)
 {
 	d->reset();
+	if((int)key.size() != d->c->keySize())
+		return;
+	if(!iv.isEmpty() && (int)iv.size() != d->c->blockSize())
+		return;
+
 	d->dir = dir;
 	d->mode = mode;
 	d->key = key.copy();

@@ -147,8 +147,8 @@ public:
 
 	virtual const EVP_CIPHER *getType(int mode) const=0;
 
-	int keySize() { return 24; }
-	int blockSize() { return 8; }
+	int keySize() { return getType(QCA::CBC)->key_len; }
+	int blockSize() { return getType(QCA::CBC)->block_size; }
 
 	bool generateKey(char *out)
 	{
@@ -172,14 +172,15 @@ public:
 	{
 		dir = _dir;
 		type = getType(mode);
+		r.resize(0);
 		EVP_CIPHER_CTX_init(&c);
 
 		if(dir == QCA::Encrypt) {
-			if(!EVP_EncryptInit(&c, type, (unsigned char *)key, (unsigned char *)iv))
+			if(!EVP_EncryptInit_ex(&c, type, NULL, (unsigned char *)key, (unsigned char *)iv))
 				return false;
 		}
 		else {
-			if(!EVP_DecryptInit(&c, type, (unsigned char *)key, (unsigned char *)iv))
+			if(!EVP_DecryptInit_ex(&c, type, NULL, (unsigned char *)key, (unsigned char *)iv))
 				return false;
 		}
 		return true;
@@ -221,6 +222,8 @@ public:
 		unsigned char *outbuf = (unsigned char *)malloc(*outlen);
 		*out = (char *)outbuf;
 		memcpy(outbuf, r.data(), r.size());
+
+		r.resize(0);
 		return true;
 	}
 
@@ -253,6 +256,34 @@ public:
 			return EVP_des_ede3_cbc();
 		else if(mode == QCA::CFB)
 			return EVP_des_ede3_cfb();
+		else
+			return 0;
+	}
+};
+
+class AES128Context : public EVPCipherContext
+{
+public:
+	const EVP_CIPHER *getType(int mode) const
+	{
+		if(mode == QCA::CBC)
+			return EVP_aes_128_cbc();
+		else if(mode == QCA::CFB)
+			return EVP_aes_128_cfb();
+		else
+			return 0;
+	}
+};
+
+class AES256Context : public EVPCipherContext
+{
+public:
+	const EVP_CIPHER *getType(int mode) const
+	{
+		if(mode == QCA::CBC)
+			return EVP_aes_256_cbc();
+		else if(mode == QCA::CFB)
+			return EVP_aes_256_cfb();
 		else
 			return 0;
 	}
@@ -544,7 +575,7 @@ public:
 
 	int capabilities() const
 	{
-		return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_BlowFish | QCA::CAP_TripleDES | QCA::CAP_RSA);
+		return (QCA::CAP_SHA1 | QCA::CAP_MD5 | QCA::CAP_BlowFish | QCA::CAP_TripleDES | QCA::CAP_AES128 | QCA::CAP_AES256 | QCA::CAP_RSA);
 	}
 
 	void *functions(int cap)
@@ -557,6 +588,10 @@ public:
 			return new BlowFishContext;
 		else if(cap == QCA::CAP_TripleDES)
 			return new TripleDESContext;
+		else if(cap == QCA::CAP_AES128)
+			return new AES128Context;
+		else if(cap == QCA::CAP_AES256)
+			return new AES256Context;
 		else if(cap == QCA::CAP_RSA)
 			return new RSAKeyContext;
 		return 0;
