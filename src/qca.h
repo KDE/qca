@@ -671,12 +671,12 @@ namespace QCA
 	 */
 	enum SecurityLevel
 	{
-		SL_None,      //! indicates that no security is ok
-		SL_Integrity, //! must at least get integrity protection
-		SL_Export,    //! must be export level bits or more
-		SL_Baseline,  //! must be 128 bit or more
-		SL_High,      //! must be more than 128 bit
-		SL_Highest    //! SL_High or max possible, whichever is greater
+		SL_None,      /**< indicates that no security is ok */
+		SL_Integrity, /**< must at least get integrity protection */
+		SL_Export,    /**< must be export level bits or more */
+		SL_Baseline,  /**< must be 128 bit or more */
+		SL_High,      /**< must be more than 128 bit */
+		SL_Highest    /**< SL_High or max possible, whichever is greater */
 	};
 
 	/**
