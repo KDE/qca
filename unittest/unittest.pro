@@ -10,4 +10,6 @@ SOURCES += kunittest.cpp qtester.cpp main.cpp
 LIBS += -lqca
 
 HEADERS += staticunittest.h hashunittest.h bigintunittest.h
-SOURCES +=  staticunittest.cpp hashunittest.cpp bigintunittest.cpp
+HEADERS += securearrayunittest.h
+SOURCES += staticunittest.cpp hashunittest.cpp bigintunittest.cpp
+SOURCES += securearrayunittest.cpp
