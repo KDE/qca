@@ -1,6 +1,5 @@
 * Additional unit tests
 * API documentation
-* qca-botan needs to get qconf support
 * Threading consideration (safety, usability) in API and plugins
 
 * finish API:
