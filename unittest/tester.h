@@ -27,7 +27,6 @@
 #ifndef TESTER_H
 #define TESTER_H
 
-#include <kdebug.h>
 #include <qstringlist.h>
 
 #define CHECK( x, y ) check( __FILE__, __LINE__, #x, x, y, false )
