@@ -508,7 +508,7 @@ public:
 		return true;
 	}
 
-	QCA_RSAKeyContext *clone()
+	QCA_RSAKeyContext *clone() const
 	{
 		// deep copy
 		RSAKeyContext *c = new RSAKeyContext;
@@ -967,7 +967,7 @@ public:
 		vr = QCA::SSL::Unknown;
 	}
 
-	bool begin(const QString &_host, const QPtrList<QCA_CertContext> &list)
+	bool startClient(const QString &_host, const QPtrList<QCA_CertContext> &list)
 	{
 		reset();
 
@@ -1015,6 +1015,11 @@ public:
 		sslUpdate();
 
 		return true;
+	}
+
+	bool startServer(const QCA_CertContext &, const QCA_RSAKeyContext &)
+	{
+		return false;
 	}
 
 	int doConnect()

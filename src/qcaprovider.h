@@ -55,7 +55,7 @@ class QCA_RSAKeyContext
 public:
 	virtual ~QCA_RSAKeyContext() {}
 
-	virtual QCA_RSAKeyContext *clone()=0;
+	virtual QCA_RSAKeyContext *clone() const=0;
 	virtual bool isNull() const=0;
 	virtual bool havePublic() const=0;
 	virtual bool havePrivate() const=0;
@@ -103,7 +103,8 @@ class QCA_SSLContext : public QObject
 public:
 	virtual ~QCA_SSLContext() {}
 
-	virtual bool begin(const QString &host, const QPtrList<QCA_CertContext> &store)=0;
+	virtual bool startClient(const QString &host, const QPtrList<QCA_CertContext> &store)=0;
+	virtual bool startServer(const QCA_CertContext &cert, const QCA_RSAKeyContext &key)=0;
 
 	virtual void writeIncoming(const QByteArray &a)=0;
 	virtual QByteArray readOutgoing()=0;

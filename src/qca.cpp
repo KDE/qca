@@ -743,7 +743,7 @@ bool SSL::startClient(const QString &host, const QPtrList<Cert> &store)
 		list.append(cert->d->c);
 
 	// begin!
-	if(!d->c->begin(host, list))
+	if(!d->c->startClient(host, list))
 		return false;
 	return true;
 }
