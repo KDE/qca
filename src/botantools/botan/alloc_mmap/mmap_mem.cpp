@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -36,14 +37,30 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   #define _XOPEN_SOURCE_EXTENDED 1
 #endif
 
+}
 #include <botan/mmap_mem.h>
+namespace QCA {
+}
 #include <cstring>
+namespace QCA {
+}
 #include <sys/types.h>
+namespace QCA {
+}
 #include <sys/mman.h>
+namespace QCA {
+}
 #include <sys/stat.h>
+namespace QCA {
+}
 #include <unistd.h>
+namespace QCA {
+}
 #include <stdlib.h>
+namespace QCA {
+}
 #include <fcntl.h>
+namespace QCA {
 
 #ifndef MAP_FAILED
    #define MAP_FAILED -1
@@ -109,4 +126,5 @@ void MemoryMapping_Allocator::dealloc_block(void* ptr, u32bit n) const
       throw Exception("MemoryMapping_Allocator: Could not unmap file");
    }
 
+}
 }

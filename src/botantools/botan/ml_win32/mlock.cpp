@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,8 +29,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/util.h>
+namespace QCA {
+}
 #include <windows.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -49,4 +54,5 @@ void unlock_mem(void* ptr, u32bit bytes)
    VirtualUnlock(ptr, bytes);
    }
 
+}
 }

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,11 +29,17 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/mutex.h>
+namespace QCA {
+}
 #include <botan/exceptn.h>
+namespace QCA {
 
 #ifndef BOTAN_NO_INIT_H
+}
 # include <botan/init.h>
+namespace QCA {
 #endif
 
 namespace Botan {
@@ -132,4 +139,5 @@ void set_mutex_type(Mutex* mutex)
 
 }
 
+}
 }

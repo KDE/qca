@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,9 +29,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/bigint.h>
+namespace QCA {
+}
 #include <botan/numthry.h>
+namespace QCA {
+}
 #include <botan/mp_core.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -203,4 +210,5 @@ BigInt& BigInt::operator>>=(u32bit shift)
    return (*this);
    }
 
+}
 }

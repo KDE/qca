@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,7 +29,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/mp_core.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -146,4 +149,5 @@ void bigint_sub3(word z[], const word x[], u32bit x_size,
       }
    }
 
+}
 }

@@ -21,9 +21,11 @@ files (originally from Botan's 'src' folder) as well as some modules (from
 and modules).
 
 Some files had to be modified, and botantools.diff contains the differences.
-Also, license headers were added to all source files, but I don't count these
-as real modifications, and they are not included in the diff.  The
-addlicenseheaders.sh script can be used to apply them.
+Also, license headers and namespace declarations were added to all source
+files, but I don't count these as real modifications, and they are not
+included in the diff.  The addlicenseheaders.sh script can be used to apply
+the license headers.  To apply the namespace declarations, build wrapns.c and
+use the addnamespace.sh script.
 
 Files used:
 

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,7 +29,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/mp_core.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -107,4 +110,5 @@ void bigint_mul3(word z[], u32bit z_size,
       bigint_smul(z, x, x_sw, y, y_sw);
    }
 
+}
 }

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -32,7 +33,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BOTAN_TYPES_H__
 
 #ifdef BOTAN_TYPES_QT
+}
 #include<qglobal.h>
+namespace QCA {
 #endif
 
 namespace Botan {
@@ -75,3 +78,4 @@ typedef Botan::u32bit u32bit;
 }
 
 #endif
+}

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -32,11 +33,19 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BOTAN_BIGINT_H__
 
 #ifndef BOTAN_MINIMAL_BIGINT
+}
 # include <botan/base.h>
+namespace QCA {
 #endif
+}
 #include <botan/secmem.h>
+namespace QCA {
+}
 #include <botan/mp_types.h>
+namespace QCA {
+}
 #include <iosfwd>
+namespace QCA {
 
 namespace Botan {
 
@@ -182,11 +191,14 @@ std::istream& operator>>(std::istream&, BigInt&);
 }
 
 #ifndef BOTAN_MINIMAL_BIGINT
+}
 namespace std {
 
 inline void swap(Botan::BigInt& a, Botan::BigInt& b) { a.swap(b); }
 
 }
+namespace QCA {
 #endif
 
 #endif
+}

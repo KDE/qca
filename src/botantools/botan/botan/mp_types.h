@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -32,9 +33,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BOTAN_MPI_TYPES_H__
 
 #ifndef BOTAN_NO_CONF_H
+}
 # include <botan/config.h>
+namespace QCA {
 #endif
+}
 #include <botan/types.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -57,3 +62,4 @@ const word MP_WORD_MAX = MP_WORD_MASK;
 }
 
 #endif
+}

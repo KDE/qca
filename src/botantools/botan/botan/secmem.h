@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,12 +32,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_SECURE_MEMORY_BUFFERS_H__
 #define BOTAN_SECURE_MEMORY_BUFFERS_H__
 
+}
 #include <botan/allocate.h>
+namespace QCA {
 #ifndef BOTAN_NO_CONF_H
+}
 # include <botan/config.h>
+namespace QCA {
 #endif
+}
 #include <botan/mem_ops.h>
+namespace QCA {
+}
 #include <algorithm>
+namespace QCA {
 
 namespace Botan {
 
@@ -244,3 +253,4 @@ class SecureBuffer : public MemoryRegion<T>
 }
 
 #endif
+}

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,8 +29,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/mp_core.h>
+namespace QCA {
+}
 #include <botan/mp_madd.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -257,4 +262,5 @@ void bigint_comba8(word z[16], const word x[8], const word y[8])
    z[15] = w1;
    }
 
+}
 }

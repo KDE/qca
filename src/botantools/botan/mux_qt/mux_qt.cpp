@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,9 +29,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/mux_qt.h>
+namespace QCA {
+}
 #include <botan/exceptn.h>
+namespace QCA {
+}
 #include <qmutex.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -74,4 +81,5 @@ void Qt_Mutex::unlock()
    mutex->m.unlock();
    }
 
+}
 }

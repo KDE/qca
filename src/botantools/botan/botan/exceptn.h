@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,9 +32,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_EXCEPTION_H__
 #define BOTAN_EXCEPTION_H__
 
+}
 #include <botan/types.h>
+namespace QCA {
+}
 #include <exception>
+namespace QCA {
+}
 #include <string>
+namespace QCA {
 
 namespace Botan {
 
@@ -226,3 +233,4 @@ struct Self_Test_Failure : public Internal_Error
 }
 
 #endif
+}

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,12 +29,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/bigint.h>
+namespace QCA {
+}
 #include <botan/numthry.h>
+namespace QCA {
+}
 #include <botan/mp_core.h>
+namespace QCA {
+}
 #include <botan/util.h>
+namespace QCA {
 #ifndef BOTAN_MINIMAL_BIGINT
+}
 # include <botan/rng.h>
+namespace QCA {
 #endif
 
 namespace Botan {
@@ -522,4 +533,5 @@ BigInt random_safe_prime(u32bit bits, RNG_Quality level)
 
 #endif // BOTAN_MINIMAL_BIGINT
 
+}
 }

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,7 +29,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/secalloc.h>
+namespace QCA {
 
 #ifndef BOTAN_EXT_MMAP_ALLOCATOR_H__
 #define BOTAN_EXT_MMAP_ALLOCATOR_H__
@@ -48,3 +51,4 @@ class MemoryMapping_Allocator : public SecureAllocator
 }
 
 #endif
+}

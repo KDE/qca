@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,8 +29,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/exceptn.h>
+namespace QCA {
+}
 #include <botan/util.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -92,4 +97,5 @@ Config_Error::Config_Error(const std::string& err, u32bit line)
    set_msg("Config error at line " + to_string(line) + ": " + err);
    }
 
+}
 }

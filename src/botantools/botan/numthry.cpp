@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,9 +29,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/numthry.h>
+namespace QCA {
 #ifndef BOTAN_MINIMAL_BIGINT
+}
 # include <botan/ui.h>
+namespace QCA {
 #endif
 
 namespace Botan {
@@ -420,4 +425,5 @@ MillerRabin_Test::MillerRabin_Test(const BigInt& num)
 
 #endif // BOTAN_MINIMAL_BIGINT
 
+}
 }

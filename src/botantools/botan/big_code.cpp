@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,11 +29,19 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/bigint.h>
+namespace QCA {
+}
 #include <botan/numthry.h>
+namespace QCA {
+}
 #include <botan/util.h>
+namespace QCA {
 #ifndef BOTAN_MINIMAL_BIGINT
+}
 # include <botan/hex.h>
+namespace QCA {
 #endif
 
 namespace Botan {
@@ -170,4 +179,5 @@ BigInt BigInt::decode(const byte buf[], u32bit length, Base base)
    return r;
    }
 
+}
 }

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,15 +32,27 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_UTIL_H__
 #define BOTAN_UTIL_H__
 
+}
 #include <cstring>
+namespace QCA {
+}
 #include <string>
+namespace QCA {
 
 #ifdef BOTAN_TOOLS_ONLY
+}
 # include <botan/types.h>
+namespace QCA {
 #else
+}
 # include <botan/secmem.h>
+namespace QCA {
+}
 # include <botan/enums.h>
+namespace QCA {
+}
 # include <vector>
+namespace QCA {
 #endif
 
 namespace Botan {
@@ -182,3 +195,4 @@ byte ieee1363_hash_id(const std::string&);
 }
 
 #endif
+}

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,10 +29,18 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/defalloc.h>
+namespace QCA {
+}
 #include <botan/util.h>
+namespace QCA {
+}
 #include <cstdlib>
+namespace QCA {
+}
 #include <cstring>
+namespace QCA {
 
 namespace Botan {
 
@@ -94,4 +103,5 @@ void Locking_Allocator::dealloc_block(void* ptr, u32bit n) const
    do_free(ptr, n, true);
    }
 
+}
 }

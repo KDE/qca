@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,9 +32,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_SECURE_ALLOCATOR_H__
 #define BOTAN_SECURE_ALLOCATOR_H__
 
+}
 #include <botan/exceptn.h>
+namespace QCA {
+}
 #include <botan/mutex.h>
+namespace QCA {
+}
 #include <vector>
+namespace QCA {
 
 namespace Botan {
 
@@ -92,3 +99,4 @@ class SecureAllocator
 }
 
 #endif
+}

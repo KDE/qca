@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,9 +32,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_NUMBTHRY_H__
 #define BOTAN_NUMBTHRY_H__
 
+}
 #include <botan/bigint.h>
+namespace QCA {
 #ifndef BOTAN_MINIMAL_BIGINT
+}
 # include <botan/reducer.h>
+namespace QCA {
 #endif
 
 namespace Botan {
@@ -136,3 +141,4 @@ class MillerRabin_Test
 }
 
 #endif
+}

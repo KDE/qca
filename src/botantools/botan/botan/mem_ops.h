@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,8 +32,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_MEMORY_OPS_H__
 #define BOTAN_MEMORY_OPS_H__
 
+}
 #include <botan/types.h>
+namespace QCA {
+}
 #include <cstring>
+namespace QCA {
 
 namespace Botan {
 
@@ -54,3 +59,4 @@ template<typename T> inline bool same_mem(const T* p1, const T* p2, u32bit n)
 }
 
 #endif
+}

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,7 +32,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_BASIC_ALLOC_H__
 #define BOTAN_BASIC_ALLOC_H__
 
+}
 #include <botan/secalloc.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -59,3 +62,4 @@ class Locking_Allocator : public SecureAllocator
 }
 
 #endif
+}

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,8 +29,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/numthry.h>
+namespace QCA {
+}
 #include <botan/mp_core.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -122,4 +127,5 @@ void modifying_divide(BigInt& x, BigInt& y, BigInt& q)
    x >>= shifts;
    }
 
+}
 }

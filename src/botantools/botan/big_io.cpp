@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,8 +29,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/bigint.h>
+namespace QCA {
+}
 #include <iostream>
+namespace QCA {
 
 namespace Botan {
 
@@ -78,4 +83,5 @@ std::istream& operator>>(std::istream& stream, BigInt& n)
 
 #endif // BOTAN_MINIMAL_BIGINT
 
+}
 }

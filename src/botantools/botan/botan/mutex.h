@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -66,3 +67,4 @@ void initialize_mutex(Mutex*&);
 }
 
 #endif
+}

@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,14 +29,26 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/allocate.h>
+namespace QCA {
+}
 #include <botan/secalloc.h>
+namespace QCA {
+}
 #include <botan/defalloc.h>
+namespace QCA {
+}
 #include <botan/mutex.h>
+namespace QCA {
 #ifndef BOTAN_NO_INIT_H
+}
 # include <botan/init.h>
+namespace QCA {
 #endif
+}
 #include <map>
+namespace QCA {
 
 namespace Botan {
 
@@ -162,4 +175,5 @@ void shutdown_memory_subsystem()
 
 }
 
+}
 }

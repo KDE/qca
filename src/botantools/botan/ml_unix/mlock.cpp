@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -29,9 +30,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 #define _POSIX_C_SOURCE 199309
+}
 #include <botan/util.h>
+namespace QCA {
+}
 #include <sys/types.h>
+namespace QCA {
+}
 #include <sys/mman.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -51,4 +58,5 @@ void unlock_mem(void* ptr, u32bit bytes)
    munlock(ptr, bytes);
    }
 
+}
 }

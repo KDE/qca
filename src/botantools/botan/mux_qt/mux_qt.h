@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,7 +29,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/mutex.h>
+namespace QCA {
 
 #ifndef BOTAN_EXT_MUTEX_QT_H__
 #define BOTAN_EXT_MUTEX_QT_H__
@@ -54,3 +57,4 @@ class Qt_Mutex : public Mutex
 }
 
 #endif
+}

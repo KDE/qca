@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,7 +32,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_ALLOCATION_H__
 #define BOTAN_ALLOCATION_H__
 
+}
 #include <botan/secalloc.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -53,3 +56,4 @@ bool add_allocator_type(const std::string&, SecureAllocator*);
 }
 
 #endif
+}

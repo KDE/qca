@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,10 +29,18 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/mp_core.h>
+namespace QCA {
+}
 #include <botan/util.h>
+namespace QCA {
+}
 #include <botan/exceptn.h>
+namespace QCA {
+}
 #include <botan/mem_ops.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -161,4 +170,5 @@ void bigint_karat96(word z[192], const word x[96], const word y[96])
    KARATSUBA_CORE(96, bigint_karat48, z, x, y);
    }
 
+}
 }

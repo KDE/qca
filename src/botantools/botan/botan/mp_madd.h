@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,7 +32,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_MP_MADD_H__
 #define BOTAN_MP_MADD_H__
 
+}
 #include <botan/mp_core.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -61,3 +64,4 @@ inline void bigint_madd(word a, word b, word c, word d,
 }
 
 #endif
+}

@@ -11,15 +11,20 @@
 # include <botan/mmap_mem.h>
 #endif
 
-namespace Botan {
-	namespace Init {
-		void set_mutex_type(Mutex*);
-		void startup_memory_subsystem();
-		void shutdown_memory_subsystem();
+namespace QCA
+{
+	namespace Botan
+	{
+		namespace Init
+		{
+			void set_mutex_type(Mutex*);
+			void startup_memory_subsystem();
+			void shutdown_memory_subsystem();
+		}
+
+		extern int botan_memory_chunk;
+		extern int botan_prealloc;
 	}
 }
-
-extern int botan_memory_chunk;
-extern int botan_prealloc;
 
 #endif

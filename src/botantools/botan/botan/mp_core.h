@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -31,7 +32,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BOTAN_MP_CORE_H__
 #define BOTAN_MP_CORE_H__
 
+}
 #include <botan/mp_types.h>
+namespace QCA {
 
 namespace Botan {
 
@@ -105,3 +108,4 @@ word bigint_modop(word, word, word);
 }
 
 #endif
+}

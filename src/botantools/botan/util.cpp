@@ -1,3 +1,4 @@
+namespace QCA {
 /*
 Copyright (C) 1999-2004 The Botan Project. All rights reserved.
 
@@ -28,9 +29,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * (C) 1999-2004 The Botan Project                *
 *************************************************/
 
+}
 #include <botan/util.h>
+namespace QCA {
+}
 #include <botan/exceptn.h>
+namespace QCA {
+}
 #include <cmath>
+namespace QCA {
 
 namespace Botan {
 
@@ -373,4 +380,5 @@ u32bit entropy_estimate(const byte buffer[], u32bit length)
 
 #endif // BOTAN_TOOLS_ONLY
 
+}
 }
