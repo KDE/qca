@@ -56,7 +56,7 @@ public:
 class CipherContext : public Provider::Context
 {
 public:
-	enum Mode { CBC, CFB };
+	enum Mode { CBC, CFB, ECB };
 	CipherContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 	virtual void setup(const SymmetricKey &key, Mode m, Direction dir, const InitializationVector &iv, bool pad) = 0;
 	virtual KeyLength keyLength() const = 0;

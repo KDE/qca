@@ -1,27 +1,36 @@
 * Additional unit tests
 * API documentation
+* Threading consideration (safety, usability) in API and plugins
 
-immediate:
-* cipher: other modes: ofb, etc?
-* pkey: ability to choose sign algorithm
-* pkey: ability to choose cipher for toDER/PEM passphrase
-* cert: Distinguished Names (Botan has X509_DN)
-* cert: get signature algorithm
-* cert: constraints, ex_constraints, policies, pathLimit, isCA, isSelfSigned
-* crl: add functions
-* tls: compression yes/no
-* tls: set/get ciphers
-* tls: get connection info (cipher name and bits, etc)
-* sasl: server last (cyrus' SASL_SUCCESS_DATA)
-* tls/sasl: blocking mode?
+* finish API:
+  pkey: ability to choose sign algorithm
+  pkey: ability to choose cipher for toDER/PEM passphrase
+  cert: Distinguished Names (Botan has X509_DN)
+  cert: get signature algorithm
+  cert: constraints, ex_constraints, policies, pathLimit, isCA, isSelfSigned
+  crl: add functions
 
-later:
-* new api's: pgp, smime, xmlsec
-* store: support read-only access of system rootcerts (win, mac, debian)
-* default provider should have built-in sha1 and md5 (?)
-* qca: thread safety ?
-* plugins: thread safety ?
-* qca-tls: do something about the cert check lag.  maybe a thread?
-* pgp: understand gpg KEYEXPIRED
-* install on top of Qt.  usage then is simply LIBS += -lqca
+* finish code for APIs:
+  cipher
+  mac
+  pkey
+  cert/crl/store (don't forget to call detach())
+  tls
+  sasl
+  store: support read-only access of system rootcerts (win, mac, debian)
+  default provider should have built-in sha1 and md5 (?)
+
+* write plugin support
+  qca-tls: do something about the cert check lag.  maybe a thread?
+
+* consider new APIs:
+  pgp (go beyond cutestuff and support key expiration, validity, etc)
+  smime
+  extra x509 stuff discussed in the summer with kiko
+  xmldsig
+  xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
+
+* qt 4 upgrade:
+  new include styles
+  use qmake .prf for auto-discovery by applications
 

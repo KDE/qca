@@ -665,6 +665,17 @@ namespace QCA
 		CRLSigning      = 0x20
 	};
 
+	// acts as a lower-bound for TLS/SASL security layers
+	enum SecurityLevel
+	{
+		SL_None,      // indicates that no security is ok
+		SL_Integrity, // must at least get integrity protection
+		SL_Export,    // must be export level bits or more
+		SL_Baseline,  // must be 128 bit or more
+		SL_High,      // must be more than 128 bit
+		SL_Highest    // SL_High or max possible, whichever is greater
+	};
+
 	/**
 	 * Initialise QCA
 	 */
@@ -777,6 +788,10 @@ namespace QCA
 	 */
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
+	// the app name is used by sasl in server mode, as some systems might
+	//   have different security policies depending on the app.
+	//   default is 'qca'.  this should be set before using SASL objects,
+	//   and it cannot be changed later.
 	QCA_EXPORT QString appName();
 	QCA_EXPORT void setAppName(const QString &name);
 
@@ -1414,7 +1429,9 @@ namespace QCA
 		virtual QSecureArray final();
 		virtual bool ok() const;
 
-		void setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv=InitializationVector(), bool pad = true);
+		// note: padding only applies to CBC and ECB.  CFB ciphertext is
+		//   always the length of the plaintext.
+		void setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector(), bool pad = true);
 
 	protected:
 		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, bool pad, const QString &provider);
@@ -2237,6 +2254,8 @@ namespace QCA
 	public:
 		SecureLayer(QObject *parent = 0, const char *name = 0);
 
+		void setStatefulOnly(bool b);
+
 	protected:
 		void layerUpdateBegin();
 		void layerUpdateEnd();
@@ -2248,6 +2267,7 @@ namespace QCA
 		void error();
 
 	private:
+		bool _signals;
 		int _read, _readout;
 		bool _closed, _error;
 	};
@@ -2256,8 +2276,18 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		enum IdentityResult { Valid, HostMismatch, BadCert, NoCert };
-		enum Error { ErrHandshake, ErrCrypt };
+		enum Error
+		{
+			ErrHandshake, // problem during the negotiation
+			ErrCrypt      // problem at anytime after
+		};
+		enum IdentityResult
+		{
+			Valid,        // identity is verified
+			HostMismatch, // valid cert provided, but wrong owner
+			BadCert,      // invalid cert
+			NoCert        // identity unknown
+		};
 
 		TLS(QObject *parent = 0, const char *name = 0, const QString &provider = "");
 		~TLS();
@@ -2266,10 +2296,15 @@ namespace QCA
 
 		void setCertificate(const Certificate &cert, const PrivateKey &key);
 		void setStore(const Store &store);
+		void setConstraints(SecurityLevel s);
+		void setConstraints(int minSSF, int maxSSF);
+		void setCompressionEnabled(bool b); // only a 'hint'
 
 		bool startClient(const QString &host = "");
 		bool startServer();
 		bool isHandshaken() const;
+		QString cipherName() const;
+		int cipherBits() const;
 		Error errorCode() const;
 
 		IdentityResult peerIdentityResult() const;
@@ -2306,8 +2341,8 @@ namespace QCA
 	public:
 		enum Error
 		{
-			ErrAuth,
-			ErrCrypt
+			ErrAuth, // problem during the authentication process
+			ErrCrypt // problem at anytime after
 		};
 		enum AuthCondition
 		{
@@ -2323,13 +2358,14 @@ namespace QCA
 			NoUser,
 			RemoteUnavail
 		};
-		enum SecurityFlags
+		enum AuthFlags
 		{
-			SAllowPlain             = 0x01,
-			SAllowAnonymous         = 0x02,
-			SRequireForwardSecrecy  = 0x04,
-			SRequirePassCredentials = 0x08,
-			SRequireMutualAuth      = 0x10
+			AllowPlain             = 0x01,
+			AllowAnonymous         = 0x02,
+			RequireForwardSecrecy  = 0x04,
+			RequirePassCredentials = 0x08,
+			RequireMutualAuth      = 0x10,
+			RequireAuthzidSupport  = 0x20  // server-only
 		};
 
 		SASL(QObject *parent = 0, const char *name = 0, const QString &provider = "");
@@ -2338,7 +2374,8 @@ namespace QCA
 		void reset();
 
 		// configuration
-		void setConstraints(SecurityFlags f, int minSSF = 0, int maxSSF = 256);
+		void setConstraints(AuthFlags f, SecurityLevel s = SL_None);
+		void setConstraints(AuthFlags f, int minSSF, int maxSSF);
 		void setLocalAddr(const QHostAddress &addr, Q_UINT16 port);
 		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
 		void setExternalAuthID(const QString &authid);
@@ -2346,7 +2383,7 @@ namespace QCA
 
 		// main
 		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst = true);
-		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist);
+		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, bool allowServerSendLast = false);
 		void putStep(const QByteArray &stepData);
 		void putServerFirstStep(const QString &mech);
 		void putServerFirstStep(const QString &mech, const QByteArray &clientInit);

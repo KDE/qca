@@ -59,6 +59,12 @@ QSecureArray SecureFilter::readUnprocessed()
 SecureLayer::SecureLayer(QObject *parent, const char *name)
 :QObject(parent, name)
 {
+	_signals = true;
+}
+
+void SecureLayer::setStatefulOnly(bool b)
+{
+	_signals = !b;
 }
 
 void SecureLayer::layerUpdateBegin()
@@ -71,14 +77,17 @@ void SecureLayer::layerUpdateBegin()
 
 void SecureLayer::layerUpdateEnd()
 {
-	if(_read > bytesAvailable())
-		QTimer::singleShot(0, this, SIGNAL(readyRead()));
-	if(_readout > bytesOutgoingAvailable())
-		QTimer::singleShot(0, this, SIGNAL(readyReadOutgoing()));
-	if(!_closed && haveClosed())
-		QTimer::singleShot(0, this, SIGNAL(closed()));
-	if(!_error && haveError())
-		QTimer::singleShot(0, this, SIGNAL(error()));
+	if(_signals)
+	{
+		if(_read > bytesAvailable())
+			QTimer::singleShot(0, this, SIGNAL(readyRead()));
+		if(_readout > bytesOutgoingAvailable())
+			QTimer::singleShot(0, this, SIGNAL(readyReadOutgoing()));
+		if(!_closed && haveClosed())
+			QTimer::singleShot(0, this, SIGNAL(closed()));
+		if(!_error && haveError())
+			QTimer::singleShot(0, this, SIGNAL(error()));
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -154,6 +163,20 @@ void TLS::setStore(const Store &store)
 	d->store = new Store(store);
 }
 
+void TLS::setConstraints(SecurityLevel s)
+{
+	Q_UNUSED(s);
+}
+
+void TLS::setConstraints(int, int)
+{
+}
+
+void TLS::setCompressionEnabled(bool b)
+{
+	Q_UNUSED(b);
+}
+
 void TLS::reset()
 {
 	d->reset();
@@ -193,6 +216,16 @@ void TLS::close()
 bool TLS::isHandshaken() const
 {
 	return d->handshaken;
+}
+
+QString TLS::cipherName() const
+{
+	return "";
+}
+
+int TLS::cipherBits() const
+{
+	return 0;
 }
 
 TLS::Error TLS::errorCode() const
@@ -493,18 +526,25 @@ SASL::AuthCondition SASL::authCondition() const
 	return (AuthCondition)d->c->authError();
 }
 
-void SASL::setConstraints(SecurityFlags f, int minSSF, int maxSSF)
+void SASL::setConstraints(AuthFlags f, SecurityLevel s)
 {
-	d->noPlain    = (f & SAllowPlain) ? false: true;
+	Q_UNUSED(f);
+	Q_UNUSED(s);
+
+	/*d->noPlain    = (f & SAllowPlain) ? false: true;
 	d->noAnon     = (f & SAllowAnonymous) ? false: true;
 	//d->noActive   = (f & SAllowActiveVulnerable) ? false: true;
 	//d->noDict     = (f & SAllowDictVulnerable) ? false: true;
 	d->reqForward = (f & SRequireForwardSecrecy) ? true : false;
 	d->reqCreds   = (f & SRequirePassCredentials) ? true : false;
-	d->reqMutual  = (f & SRequireMutualAuth) ? true : false;
+	d->reqMutual  = (f & SRequireMutualAuth) ? true : false;*/
 
-	d->ssfmin = minSSF;
-	d->ssfmax = maxSSF;
+	//d->ssfmin = minSSF;
+	//d->ssfmax = maxSSF;
+}
+
+void SASL::setConstraints(AuthFlags, int, int)
+{
 }
 
 void SASL::setExternalAuthID(const QString &authid)
@@ -554,8 +594,10 @@ bool SASL::startClient(const QString &service, const QString &host, const QStrin
 	return true;
 }
 
-bool SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist)
+bool SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, bool allowServerSendLast)
 {
+	Q_UNUSED(allowServerSendLast);
+
 	SASLContext::HostPort la, ra;
 	if(d->localPort != -1) {
 		la.addr = d->localAddr;
