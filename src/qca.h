@@ -449,45 +449,7 @@ namespace QCA
 	class Random;
 	typedef QPtrList<Provider> ProviderList;
 	typedef QPtrListIterator<Provider> ProviderListIterator;
-#if 0
-	enum
-	{
-		CAP_SHA1      = 0x0001,
-		CAP_SHA256    = 0x0002,
-		CAP_MD5       = 0x0004,
-		CAP_BlowFish  = 0x0008,
-		CAP_TripleDES = 0x0010,
-		CAP_AES128    = 0x0020,
-		CAP_AES256    = 0x0040,
-		CAP_RSA       = 0x0080,
-		CAP_X509      = 0x0100,
-		CAP_TLS       = 0x0200,
-		CAP_SASL      = 0x0400,
-		CAP_SHA0      = 0x0800,
-		CAP_MD2       = 0x1000,
-		CAP_MD4       = 0x2000,
-		CAP_RIPEMD160 = 0x4000,
-	}; // to be obsoleted
-#endif
-	/**
-	 * Mode settings for cipher algorithms
-	 */
-	enum Mode
-	{
-		CBC = 0x0001, /**< operate in %Cipher Block Chaining mode */
-		CFB = 0x0002  /**< operate in %Cipher FeedBack mode */
-	};
 
-#if 0
-	/**
-	 * Direction settings for cipher algorithms
-	 */
-	enum
-	{
-		Encrypt = 0x0001, /**< cipher algorithm should encrypt */
-		Decrypt = 0x0002  /**< cipher algorithm should decrypt */
-	};
-#endif
 	/**
 	 * Mode settings for memory allocation
 	 *
@@ -560,10 +522,6 @@ namespace QCA
 	QCA_EXPORT void deinit();
 	QCA_EXPORT bool haveSecureMemory();
 
-	//QCA_EXPORT bool isSupported(int capabilities); // to be obsoleted
-	//QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
-
-	// version 2 global functions
 	/**
 	 * Test if a capability (algorithm) is available.
 	 *
@@ -621,7 +579,6 @@ namespace QCA
 	 */
 	QCA_EXPORT QStringList supportedFeatures();
 
-	//TODO: figure out if defaultFeatures() could be const
 	/**
 	 * Generate a list of the built in features. This differs from
 	 * supportedFeatures() in that it does not include features provided
@@ -649,8 +606,7 @@ namespace QCA
 	QCA_EXPORT Random & globalRNG();
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
-	QCA_EXPORT QString arrayToHex(const QByteArray &array); // to be obsoleted
-	/** 
+	/**
 	 * Convert a byte array to printable hexadecimal
 	 * representation.
 	 *
@@ -707,7 +663,6 @@ namespace QCA
 		~Initializer();
 	};
 
-	// version 2 stuff
 	class QCA_EXPORT KeyLength
 	{
 	public:
@@ -1032,96 +987,40 @@ namespace QCA
 		Hash(const QString &type, const QString &provider);
 	};
 
-#if 0
-	class QCA_EXPORT Hash
+	class QCA_EXPORT Cipher : public Algorithm, public Filter
 	{
 	public:
-		Hash(const Hash &fromHash);
-		Hash & operator=(const Hash &fromHash);
-		~Hash();
-
-		void clear();
-		void update(const QByteArray &array);
-		QByteArray final();
-
-	protected:
-		Hash(QCA_HashContext *);
-
-	private:
-		class Private;
-		Private *d;
-	};
-
-	template <class T>
-	class QCA_EXPORT HashStatic
-	{
-	public:
-		HashStatic<T>() {}
-
-		static QByteArray hash(const QByteArray &array)
+		/**
+		* Mode settings for cipher algorithms
+		 */
+		enum Mode
 		{
-			T obj;
-			obj.update(array);
-			return obj.final();
-		}
+			CBC, /**< operate in %Cipher Block Chaining mode */
+			CFB  /**< operate in %Cipher FeedBack mode */
+		};
 
-		static QByteArray hash(const QCString &cs)
-		{
-			QByteArray a(cs.length());
-			memcpy(a.data(), cs.data(), a.size());
-			return hash(a);
-		}
-
-		static QString hashToString(const QByteArray &array)
-		{
-			return arrayToHex(hash(array));
-		}
-
-		static QString hashToString(const QCString &cs)
-		{
-			return arrayToHex(hash(cs));
-		}
-	};
-#endif
-#if 0
-	class QCA_EXPORT Cipher
-	{
-	public:
-		Cipher(const Cipher &);
-		Cipher & operator=(const Cipher &);
+		Cipher(const Cipher &from);
 		~Cipher();
+		Cipher & operator=(const Cipher &from);
 
-		QByteArray dyn_generateKey(int size=-1) const;
-		QByteArray dyn_generateIV() const;
-		void reset(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad=true);
-		bool update(const QByteArray &a);
-		QByteArray final(bool *ok=0);
+		KeyLength keyLength() const;
+		bool validKeyLength(int n) const;
+
+		int blockSize() const;
+
+		virtual void clear();
+		virtual QSecureArray update(const QSecureArray &a);
+		virtual QSecureArray final();
+		virtual bool ok() const;
+
+		void setup(Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv=InitializationVector(), bool pad = true);
 
 	protected:
-		Cipher(QCA_CipherContext *, int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad);
+		Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, bool pad, const QString &provider);
 
 	private:
 		class Private;
 		Private *d;
-	};
-
-	template <class T>
-	class QCA_EXPORT CipherStatic
-	{
-	public:
-		CipherStatic<T>() {}
-
-		static QByteArray generateKey(int size=-1)
-		{
-			T obj;
-			return obj.dyn_generateKey(size);
-		}
-
-		static QByteArray generateIV()
-		{
-			T obj;
-			return obj.dyn_generateIV();
-		}
 	};
 
 	class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
@@ -1140,6 +1039,8 @@ namespace QCA
 
 		void setup(const SymmetricKey &key);
 
+		static QString withAlgorithm(const QString &macType, const QString &algType);
+
 	protected:
 		MessageAuthenticationCode(const QString &type, const SymmetricKey &key, const QString &provider);
 
@@ -1147,7 +1048,7 @@ namespace QCA
 		class Private;
 		Private *d;
 	};
-#endif
+
 	/**
 	 * SHA-0 cryptographic message digest hash algorithm.
 	 *
@@ -1191,7 +1092,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA0 implementation
 		 * from qca-openssl, you would use SHA0("qca-openssl")
 		 */
-		SHA0(const QString &provider="") : Hash("sha0", provider) {}
+		SHA0(const QString &provider = "") : Hash("sha0", provider) {}
 	};
 
 	/**
@@ -1245,7 +1146,7 @@ namespace QCA
 		 * to use. For example if you wanted the SHA1 implementation
 		 * from qca-openssl, you would use SHA1("qca-openssl")
 		 */
-		SHA1(const QString &provider="") : Hash("sha1", provider) {}
+		SHA1(const QString &provider = "") : Hash("sha1", provider) {}
 	};
 
 	/**
@@ -1267,7 +1168,7 @@ namespace QCA
 	class QCA_EXPORT SHA256 : public Hash
 	{
 	public:
-		SHA256(const QString &provider="") : Hash("sha256", provider) {}
+		SHA256(const QString &provider = "") : Hash("sha256", provider) {}
 	};
 
 	/**
@@ -1300,7 +1201,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD2 implementation
 		 * from qca-openssl, you would use MD2("qca-openssl")
 		 */
-		MD2(const QString &provider="") : Hash("md2", provider) {}
+		MD2(const QString &provider = "") : Hash("md2", provider) {}
 	};
 
 	/**
@@ -1337,7 +1238,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD4 implementation
 		 * from qca-openssl, you would use MD4("qca-openssl")
 		 */
-		MD4(const QString &provider="") : Hash("md4", provider) {}
+		MD4(const QString &provider = "") : Hash("md4", provider) {}
 	};
 
 	/**
@@ -1372,7 +1273,7 @@ namespace QCA
 		 * to use. For example if you wanted the MD5 implementation
 		 * from qca-openssl, you would use MD5("qca-openssl")
 		 */
-		MD5(const QString &provider="") : Hash("md5", provider) {}
+		MD5(const QString &provider = "") : Hash("md5", provider) {}
 	};
 
 	/**
@@ -1425,135 +1326,43 @@ namespace QCA
 		 * implementation from qca-openssl, you would use 
 		 * RIPEMD160("qca-openssl")
 		 */
-		RIPEMD160(const QString &provider="") : Hash("ripemd160", provider) {}
+		RIPEMD160(const QString &provider = "") : Hash("ripemd160", provider) {}
 	};
 
-	// macs
-	//class QCA_EXPORT HMAC : public MessageAuthenticationCode
-	//{
-	//public:
-	//	HMAC(const Hash &h = SHA1(), const SymmetricKey &key = SymmetricKey(), const QString &provider="") : MessageAuthenticationCode(subAlg("hmac", h.type()), key, provider) {}
-	//};
-#if 0
-	class QCA_EXPORT SHA0 : public Hash, public HashStatic<SHA0>
+	class QCA_EXPORT BlowFish : public Cipher
 	{
 	public:
-		SHA0();
+		BlowFish(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		:Cipher("blowfish", m, dir, key, iv, pad, provider) {}
 	};
 
-	class QCA_EXPORT SHA1 : public Hash, public HashStatic<SHA1>
+	class QCA_EXPORT TripleDES : public Cipher
 	{
 	public:
-		SHA1();
+		TripleDES(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		:Cipher("tripledes", m, dir, key, iv, pad, provider) {}
 	};
 
-	class QCA_EXPORT SHA256 : public Hash, public HashStatic<SHA256>
+	class QCA_EXPORT AES128 : public Cipher
 	{
 	public:
-		SHA256();
+		AES128(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
 	};
 
-	class QCA_EXPORT MD2 : public Hash, public HashStatic<MD2>
+	class QCA_EXPORT AES256 : public Cipher
 	{
 	public:
-		MD2();
+		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
+		:Cipher("aes256", m, dir, key, iv, pad, provider) {}
 	};
 
-	class QCA_EXPORT MD4 : public Hash, public HashStatic<MD4>
+	class QCA_EXPORT HMAC : public MessageAuthenticationCode
 	{
 	public:
-		MD4();
+		HMAC(const Hash &h = SHA1(), const SymmetricKey &key = SymmetricKey(), const QString &provider = "") : MessageAuthenticationCode(withAlgorithm("hmac", h.type()), key, provider) {}
 	};
 
-	class QCA_EXPORT MD5 : public Hash, public HashStatic<MD5>
-	{
-	public:
-		MD5();
-	};
-
-	class QCA_EXPORT RIPEMD160 : public Hash, public HashStatic<RIPEMD160>
-	{
-	public:
-		RIPEMD160();
-	};
-#endif
-#if 0
-	class QCA_EXPORT BlowFish : public Cipher, public CipherStatic<BlowFish>
-	{
-	public:
-		BlowFish(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
-	};
-
-	class QCA_EXPORT TripleDES : public Cipher, public CipherStatic<TripleDES>
-	{
-	public:
-		TripleDES(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
-	};
-
-	class QCA_EXPORT AES128 : public Cipher, public CipherStatic<AES128>
-	{
-	public:
-		AES128(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
-	};
-
-	class QCA_EXPORT AES256 : public Cipher, public CipherStatic<AES256>
-	{
-	public:
-		AES256(int dir=Encrypt, int mode=CBC, const QByteArray &key=QByteArray(), const QByteArray &iv=QByteArray(), bool pad=true);
-	};
-
-	class RSA;
-
-	class QCA_EXPORT RSAKey
-	{
-	public:
-		RSAKey();
-		RSAKey(const RSAKey &from);
-		RSAKey & operator=(const RSAKey &from);
-		~RSAKey();
-
-		bool isNull() const;
-		bool havePublic() const;
-		bool havePrivate() const;
-
-		QByteArray toDER(bool publicOnly=false) const;
-		bool fromDER(const QByteArray &a);
-
-		QString toPEM(bool publicOnly=false) const;
-		bool fromPEM(const QString &);
-
-		// only call if you know what you are doing
-		bool fromNative(void *);
-
-	private:
-		class Private;
-		Private *d;
-
-		friend class RSA;
-		friend class TLS;
-		bool encrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
-		bool decrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
-		bool generate(unsigned int bits);
-	};
-
-	class QCA_EXPORT RSA
-	{
-	public:
-		RSA();
-		~RSA();
-
-		RSAKey key() const;
-		void setKey(const RSAKey &);
-
-		bool encrypt(const QByteArray &a, QByteArray *out, bool oaep=false) const;
-		bool decrypt(const QByteArray &a, QByteArray *out, bool oaep=false) const;
-
-		static RSAKey generateKey(unsigned int bits);
-
-	private:
-		RSAKey v_key;
-	};
-#endif
 	// v2 public key handling
 	/*class PublicKey;
 	class PrivateKey;

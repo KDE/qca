@@ -105,7 +105,7 @@ QString Hash::hashToString(const QCString &cs)
 {
 	return arrayToHex(hash(cs));
 }
-/*
+
 //----------------------------------------------------------------------------
 // Cipher
 //----------------------------------------------------------------------------
@@ -121,8 +121,8 @@ public:
 	bool ok, done;
 };
 
-Cipher::Cipher(int cap, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, bool pad, const QString &provider)
-:Algorithm(cap, provider)
+Cipher::Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &key, const InitializationVector &iv, bool pad, const QString &provider)
+:Algorithm(type, provider)
 {
 	d = new Private;
 	setup(m, dir, key, iv, pad);
@@ -164,7 +164,7 @@ int Cipher::blockSize() const
 void Cipher::clear()
 {
 	d->done = false;
-	((CipherContext *)context())->setup(d->key, d->mode, d->dir, d->iv, d->pad);
+	((CipherContext *)context())->setup(d->key, (CipherContext::Mode)d->mode, d->dir, d->iv, d->pad);
 }
 
 QSecureArray Cipher::update(const QSecureArray &a)
@@ -207,18 +207,17 @@ void Cipher::setup(Mode m, Direction dir, const SymmetricKey &key, const Initial
 class MessageAuthenticationCode::Private
 {
 public:
-	int hash;
 	SymmetricKey key;
 
 	bool done;
 	QSecureArray buf;
 };
 
-MessageAuthenticationCode::MessageAuthenticationCode(int cap, const Hash &h, const SymmetricKey &key, const QString &provider)
-:Algorithm(cap, provider)
+MessageAuthenticationCode::MessageAuthenticationCode(const QString &type, const SymmetricKey &key, const QString &provider)
+:Algorithm(type, provider)
 {
 	d = new Private;
-	setup(h, key);
+	setup(key);
 }
 
 MessageAuthenticationCode::MessageAuthenticationCode(const MessageAuthenticationCode &from)
@@ -252,7 +251,7 @@ bool MessageAuthenticationCode::validKeyLength(int n) const
 void MessageAuthenticationCode::clear()
 {
 	d->done = false;
-	((MACContext *)context())->setup(d->hash, d->key);
+	((MACContext *)context())->setup(d->key);
 }
 
 void MessageAuthenticationCode::update(const QSecureArray &a)
@@ -272,11 +271,15 @@ QSecureArray MessageAuthenticationCode::final()
 	return d->buf;
 }
 
-void MessageAuthenticationCode::setup(const Hash &h, const SymmetricKey &key)
+void MessageAuthenticationCode::setup(const SymmetricKey &key)
 {
-	d->hash = h.cap();
 	d->key = key;
 	clear();
 }
-*/
+
+QString MessageAuthenticationCode::withAlgorithm(const QString &macType, const QString &algType)
+{
+	return (macType + '(' + algType + ')');
+}
+
 }
