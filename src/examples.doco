@@ -17,3 +17,10 @@ use of iterators and some member functions.
 
 */
 
+/** \example base64test.cpp
+
+The code below shows some simple operations on a Base64 object, converting
+between QSecureArray and QString.
+
+*/
+

@@ -3,7 +3,8 @@ TEMPLATE = subdirs
 SUBDIRS += \
 	hashtest \
 	mactest \
-	providertest
+	providertest \
+	base64test
 
 #	ciphertest \
 #	rsatest \

@@ -29,7 +29,6 @@
 
 * examples
   create example for Hex
-  create example for Base64
   create example for Random
   create example for BigInteger
   update cipher example (after API sorted out)
