@@ -52,7 +52,8 @@ public:
 
 /*
   The following code is based on L. Peter Deutsch's implementation,
-  as provided at http://sourceforge.net/projects/libmd5-rfc/
+  as provided at http://sourceforge.net/projects/libmd5-rfc/. A 
+  fair number of changes have been made to that code.
   
   The original code contained:
 
@@ -124,7 +125,7 @@ public:
         {
 		buf.resize(64);
 		buf.fill(0);
-		count[0] = count[1] = 0;
+		count = 0;
 		abcd[0] = 0x67452301;
 		abcd[1] = 0xefcdab89;
 		abcd[2] = 0x98badcfe;
@@ -135,17 +136,14 @@ public:
         {
 		const unsigned char *p = (const unsigned char*)a.data();
 		int left = a.size();
-		int offset = (count[0] >> 3) & 63;
+		int offset = (count >> 3) & 63;
 		Q_UINT32 nbits = (Q_UINT32)(a.size() << 3);
 
 		if (a.size() <= 0)
 			return;
 
 		/* Update the message length. */
-		count[1] += a.size() >> 29;
-		count[0] += nbits;
-		if (count[0] < nbits)
-			count[1]++;
+		count += nbits;
 
 		/* Process an initial partial block. */
 		if (offset) {
@@ -178,10 +176,19 @@ public:
 		unsigned int i;
     
 		/* Save the length before padding. */
-		for (i = 0; i < 8; ++i)
-			data[i] = (count[i >> 2] >> ((i & 3) << 3));
+		//for (i = 0; i < 8; ++i)
+		// count[0] is lsw, count[1] is msw
+		//data[i] = (count[i >> 2] >> ((i & 3) << 3));
+		data[0] = (count >> 0);
+		data[1] = (count >> 8);
+		data[2] = (count >> 16);
+		data[3] = (count >> 24);
+		data[4] = (count >> 32);
+		data[5] = (count >> 40);
+		data[6] = (count >> 48);
+		data[7] = (count >> 56);
 		/* Pad to 56 bytes mod 64. */
-		QSecureArray padding(((55 - (count[0] >> 3)) & 63) + 1);
+		QSecureArray padding(((55 - (count >> 3)) & 63) + 1);
 		if (padding.size() > 0 ) {
 			padding[0] = 0x80;
 			if (padding.size() > 1 ) {
@@ -200,10 +207,59 @@ public:
 
 private:
 
-/* Define the state of the MD5 Algorithm. */
-	Q_UINT32 count[2];	/* message length in bits, lsw first */
+        /* Define the state of the MD5 Algorithm. */
+	Q_UINT64 count;	                /* message length in bits */
 	Q_UINT32 abcd[4];		/* digest buffer */
 	QSecureArray  buf;		/* accumulate block */
+
+	Q_UINT32 rotateLeft(Q_UINT32 x, Q_UINT32 n)
+	{
+		return (((x) << (n)) | ((x) >> (32 - (n))));
+	}
+
+	Q_UINT32 F(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	{
+		return (((x) & (y)) | (~(x) & (z)));
+	}
+
+	Q_UINT32 G(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	{
+		return (((x) & (z)) | ((y) & ~(z)));
+	}
+
+	Q_UINT32 H(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	{
+		return ((x) ^ (y) ^ (z));
+	}
+
+	Q_UINT32 I(Q_UINT32 x, Q_UINT32 y, Q_UINT32 z)
+	{
+		return ((y) ^ ((x) | ~(z)));
+	}
+
+	Q_UINT32 round1(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	{
+		Q_UINT32 t = a + F(b,c,d) + Xk + Ti;
+		return ( rotateLeft(t, s) + b );
+	}
+
+	Q_UINT32 round2(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	{
+		Q_UINT32 t = a + G(b,c,d) + Xk + Ti;
+		return ( rotateLeft(t, s) + b );
+	}
+
+	Q_UINT32 round3(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	{
+		Q_UINT32 t = a + H(b,c,d) + Xk + Ti;
+		return ( rotateLeft(t, s) + b );
+	}
+
+	Q_UINT32 round4(Q_UINT32 a, Q_UINT32 b, Q_UINT32 c, Q_UINT32 d, Q_UINT32 Xk, Q_UINT32 s, Q_UINT32 Ti)
+	{
+		Q_UINT32 t = a + I(b,c,d) + Xk + Ti;
+		return ( rotateLeft(t, s) + b );
+	}
 
 	void md5_process(QSecureArray data)
 	{
@@ -213,7 +269,6 @@ private:
 		c = abcd[2];
 		d = abcd[3];
 		
-		Q_UINT32 t;
 		Q_UINT32 xbuf[16];
 		const Q_UINT32 *X;
 		
@@ -255,111 +310,78 @@ private:
 			}
 		}
 		
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
-		
 		/* Round 1. */
-		/* Let [abcd k s i] denote the operation
-		   a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
-#define F(x, y, z) (((x) & (y)) | (~(x) & (z)))
-#define SET(a, b, c, d, k, s, Ti)		\
-		t = a + F(b,c,d) + X[k] + Ti;	\
-		a = ROTATE_LEFT(t, s) + b
 		/* Do the following 16 operations. */
-		SET(a, b, c, d,  0,  7,  0xd76aa478);
-		SET(d, a, b, c,  1, 12,  0xe8c7b756);
-		SET(c, d, a, b,  2, 17,  0x242070db);
-		SET(b, c, d, a,  3, 22, 0xc1bdceee);
-		SET(a, b, c, d,  4,  7, 0xf57c0faf);
-		SET(d, a, b, c,  5, 12, 0x4787c62a);
-		SET(c, d, a, b,  6, 17, 0xa8304613);
-		SET(b, c, d, a,  7, 22, 0xfd469501);
-		SET(a, b, c, d,  8,  7, 0x698098d8);
-		SET(d, a, b, c,  9, 12, 0x8b44f7af);
-		SET(c, d, a, b, 10, 17, 0xffff5bb1);
-		SET(b, c, d, a, 11, 22, 0x895cd7be);
-		SET(a, b, c, d, 12,  7, 0x6b901122);
-		SET(d, a, b, c, 13, 12, 0xfd987193);
-		SET(c, d, a, b, 14, 17, 0xa679438e);
-		SET(b, c, d, a, 15, 22, 0x49b40821);
-#undef SET
+		a = round1(a, b, c, d,  X[0],  7,  0xd76aa478);
+		d = round1(d, a, b, c,  X[1], 12,  0xe8c7b756);
+		c = round1(c, d, a, b,  X[2], 17,  0x242070db);
+		b = round1(b, c, d, a,  X[3], 22, 0xc1bdceee);
+		a = round1(a, b, c, d,  X[4],  7, 0xf57c0faf);
+		d = round1(d, a, b, c,  X[5], 12, 0x4787c62a);
+		c = round1(c, d, a, b,  X[6], 17, 0xa8304613);
+		b = round1(b, c, d, a,  X[7], 22, 0xfd469501);
+		a = round1(a, b, c, d,  X[8],  7, 0x698098d8);
+		d = round1(d, a, b, c,  X[9], 12, 0x8b44f7af);
+		c = round1(c, d, a, b, X[10], 17, 0xffff5bb1);
+		b = round1(b, c, d, a, X[11], 22, 0x895cd7be);
+		a = round1(a, b, c, d, X[12],  7, 0x6b901122);
+		d = round1(d, a, b, c, X[13], 12, 0xfd987193);
+		c = round1(c, d, a, b, X[14], 17, 0xa679438e);
+		b = round1(b, c, d, a, X[15], 22, 0x49b40821);
 		
 		/* Round 2. */
-		/* Let [abcd k s i] denote the operation
-		   a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
-#define G(x, y, z) (((x) & (z)) | ((y) & ~(z)))
-#define SET(a, b, c, d, k, s, Ti)		\
-		t = a + G(b,c,d) + X[k] + Ti;	\
-		a = ROTATE_LEFT(t, s) + b
-	/* Do the following 16 operations. */
-		SET(a, b, c, d,  1,  5, 0xf61e2562);
-		SET(d, a, b, c,  6,  9, 0xc040b340);
-		SET(c, d, a, b, 11, 14, 0x265e5a51);
-		SET(b, c, d, a,  0, 20, 0xe9b6c7aa);
-		SET(a, b, c, d,  5,  5, 0xd62f105d);
-		SET(d, a, b, c, 10,  9, 0x02441453);
-		SET(c, d, a, b, 15, 14, 0xd8a1e681);
-		SET(b, c, d, a,  4, 20, 0xe7d3fbc8);
-		SET(a, b, c, d,  9,  5, 0x21e1cde6);
-		SET(d, a, b, c, 14,  9, 0xc33707d6);
-		SET(c, d, a, b,  3, 14, 0xf4d50d87);
-		SET(b, c, d, a,  8, 20, 0x455a14ed);
-		SET(a, b, c, d, 13,  5, 0xa9e3e905);
-		SET(d, a, b, c,  2,  9, 0xfcefa3f8);
-		SET(c, d, a, b,  7, 14, 0x676f02d9);
-		SET(b, c, d, a, 12, 20, 0x8d2a4c8a);
-#undef SET
+		a = round2(a, b, c, d,  X[1],  5, 0xf61e2562);
+		d = round2(d, a, b, c,  X[6],  9, 0xc040b340);
+		c = round2(c, d, a, b, X[11], 14, 0x265e5a51);
+		b = round2(b, c, d, a,  X[0], 20, 0xe9b6c7aa);
+		a = round2(a, b, c, d,  X[5],  5, 0xd62f105d);
+		d = round2(d, a, b, c, X[10],  9, 0x02441453);
+		c = round2(c, d, a, b, X[15], 14, 0xd8a1e681);
+		b = round2(b, c, d, a,  X[4], 20, 0xe7d3fbc8);
+		a = round2(a, b, c, d,  X[9],  5, 0x21e1cde6);
+		d = round2(d, a, b, c, X[14],  9, 0xc33707d6);
+		c = round2(c, d, a, b,  X[3], 14, 0xf4d50d87);
+		b = round2(b, c, d, a,  X[8], 20, 0x455a14ed);
+		a = round2(a, b, c, d, X[13],  5, 0xa9e3e905);
+		d = round2(d, a, b, c,  X[2],  9, 0xfcefa3f8);
+		c = round2(c, d, a, b,  X[7], 14, 0x676f02d9);
+		b = round2(b, c, d, a, X[12], 20, 0x8d2a4c8a);
 
 		/* Round 3. */
-		/* Let [abcd k s t] denote the operation
-		   a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
-#define H(x, y, z) ((x) ^ (y) ^ (z))
-#define SET(a, b, c, d, k, s, Ti)		\
-		t = a + H(b,c,d) + X[k] + Ti;	\
-		a = ROTATE_LEFT(t, s) + b
-		/* Do the following 16 operations. */
-		SET(a, b, c, d,  5,  4, 0xfffa3942);
-		SET(d, a, b, c,  8, 11, 0x8771f681);
-		SET(c, d, a, b, 11, 16, 0x6d9d6122);
-		SET(b, c, d, a, 14, 23, 0xfde5380c);
-		SET(a, b, c, d,  1,  4, 0xa4beea44);
-		SET(d, a, b, c,  4, 11, 0x4bdecfa9);
-		SET(c, d, a, b,  7, 16, 0xf6bb4b60);
-		SET(b, c, d, a, 10, 23, 0xbebfbc70);
-		SET(a, b, c, d, 13,  4, 0x289b7ec6);
-		SET(d, a, b, c,  0, 11, 0xeaa127fa);
-		SET(c, d, a, b,  3, 16, 0xd4ef3085);
-		SET(b, c, d, a,  6, 23, 0x04881d05);
-		SET(a, b, c, d,  9,  4, 0xd9d4d039);
-		SET(d, a, b, c, 12, 11, 0xe6db99e5);
-		SET(c, d, a, b, 15, 16, 0x1fa27cf8);
-		SET(b, c, d, a,  2, 23, 0xc4ac5665);
-#undef SET
+		a = round3(a, b, c, d,  X[5],  4, 0xfffa3942);
+		d = round3(d, a, b, c,  X[8], 11, 0x8771f681);
+		c = round3(c, d, a, b, X[11], 16, 0x6d9d6122);
+		b = round3(b, c, d, a, X[14], 23, 0xfde5380c);
+		a = round3(a, b, c, d,  X[1],  4, 0xa4beea44);
+		d = round3(d, a, b, c,  X[4], 11, 0x4bdecfa9);
+		c = round3(c, d, a, b,  X[7], 16, 0xf6bb4b60);
+		b = round3(b, c, d, a, X[10], 23, 0xbebfbc70);
+		a = round3(a, b, c, d, X[13],  4, 0x289b7ec6);
+		d = round3(d, a, b, c,  X[0], 11, 0xeaa127fa);
+		c = round3(c, d, a, b,  X[3], 16, 0xd4ef3085);
+		b = round3(b, c, d, a,  X[6], 23, 0x04881d05);
+		a = round3(a, b, c, d,  X[9],  4, 0xd9d4d039);
+		d = round3(d, a, b, c, X[12], 11, 0xe6db99e5);
+		c = round3(c, d, a, b, X[15], 16, 0x1fa27cf8);
+		b = round3(b, c, d, a,  X[2], 23, 0xc4ac5665);
 		
-	/* Round 4. */
-		/* Let [abcd k s t] denote the operation
-		   a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
-#define I(x, y, z) ((y) ^ ((x) | ~(z)))
-#define SET(a, b, c, d, k, s, Ti)		\
-		t = a + I(b,c,d) + X[k] + Ti;	\
-		a = ROTATE_LEFT(t, s) + b
-		/* Do the following 16 operations. */
-		SET(a, b, c, d,  0,  6, 0xf4292244);
-		SET(d, a, b, c,  7, 10, 0x432aff97);
-		SET(c, d, a, b, 14, 15, 0xab9423a7);
-		SET(b, c, d, a,  5, 21, 0xfc93a039);
-		SET(a, b, c, d, 12,  6, 0x655b59c3);
-		SET(d, a, b, c,  3, 10, 0x8f0ccc92);
-		SET(c, d, a, b, 10, 15, 0xffeff47d);
-		SET(b, c, d, a,  1, 21, 0x85845dd1);
-		SET(a, b, c, d,  8,  6, 0x6fa87e4f);
-		SET(d, a, b, c, 15, 10, 0xfe2ce6e0);
-		SET(c, d, a, b,  6, 15, 0xa3014314);
-		SET(b, c, d, a, 13, 21, 0x4e0811a1);
-		SET(a, b, c, d,  4,  6, 0xf7537e82);
-		SET(d, a, b, c, 11, 10, 0xbd3af235);
-		SET(c, d, a, b,  2, 15, 0x2ad7d2bb);
-		SET(b, c, d, a,  9, 21, 0xeb86d391);
-#undef SET
+		/* Round 4. */
+		a = round4(a, b, c, d,  X[0],  6, 0xf4292244);
+		d = round4(d, a, b, c,  X[7], 10, 0x432aff97);
+		c = round4(c, d, a, b, X[14], 15, 0xab9423a7);
+		b = round4(b, c, d, a,  X[5], 21, 0xfc93a039);
+		a = round4(a, b, c, d, X[12],  6, 0x655b59c3);
+		d = round4(d, a, b, c,  X[3], 10, 0x8f0ccc92);
+		c = round4(c, d, a, b, X[10], 15, 0xffeff47d);
+		b = round4(b, c, d, a,  X[1], 21, 0x85845dd1);
+		a = round4(a, b, c, d,  X[8],  6, 0x6fa87e4f);
+		d = round4(d, a, b, c, X[15], 10, 0xfe2ce6e0);
+		c = round4(c, d, a, b,  X[6], 15, 0xa3014314);
+		b = round4(b, c, d, a, X[13], 21, 0x4e0811a1);
+		a = round4(a, b, c, d,  X[4],  6, 0xf7537e82);
+		d = round4(d, a, b, c, X[11], 10, 0xbd3af235);
+		c = round4(c, d, a, b,  X[2], 15, 0x2ad7d2bb);
+		b = round4(b, c, d, a,  X[9], 21, 0xeb86d391);
 		
 		/* Then perform the following additions. (That is increment each
 		   of the four registers by the value it had before this block
