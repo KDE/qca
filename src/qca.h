@@ -204,6 +204,7 @@ namespace QCA
 		Private *d;
 
 		friend class RSA;
+		friend class SSL;
 		bool encrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
 		bool decrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
 		bool generate(unsigned int bits);
@@ -285,6 +286,7 @@ namespace QCA
 
 		// note: store must persist until SSL object is deleted!
 		bool startClient(const QString &host="", const QPtrList<Cert> &store=QPtrList<Cert>());
+		bool startServer(const Cert &cert, const RSAKey &key);
 
 		// plain (application side)
 		void write(const QByteArray &a);

@@ -748,6 +748,13 @@ bool SSL::startClient(const QString &host, const QPtrList<Cert> &store)
 	return true;
 }
 
+bool SSL::startServer(const Cert &cert, const RSAKey &key)
+{
+	if(!d->c->startServer(*cert.d->c, *key.d->c))
+		return false;
+	return true;
+}
+
 void SSL::write(const QByteArray &a)
 {
 	d->c->write(a);

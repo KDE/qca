@@ -146,9 +146,19 @@ public:
 
 	void start(const QString &_host)
 	{
-		host = _host;
-		printf("Trying %s:443...\n", host.latin1());
-		sock->connectToHost(host, 443);
+		int n = _host.find(':');
+		int port;
+		if(n != -1) {
+			host = _host.mid(0, n);
+			port = _host.mid(n+1).toInt();
+		}
+		else {
+			host = _host;
+			port = 443;
+		}
+
+		printf("Trying %s:%d...\n", host.latin1(), port);
+		sock->connectToHost(host, port);
 	}
 
 signals:

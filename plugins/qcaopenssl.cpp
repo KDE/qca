@@ -930,12 +930,13 @@ class SSLContext : public QCA_SSLContext
 	Q_OBJECT
 public:
 	enum { Success, TryAgain, Error };
-	enum { Idle, Connect, Handshake, Active };
+	enum { Idle, Connect, Accept, Handshake, Active };
 
 	SSLContext()
 	{
 		if(!ssl_init) {
 			SSL_library_init();
+			SSL_load_error_strings();
 			ssl_init = true;
 		}
 
@@ -970,17 +971,9 @@ public:
 	bool startClient(const QString &_host, const QPtrList<QCA_CertContext> &list)
 	{
 		reset();
+		serv = false;
+		method = SSLv23_client_method();
 
-		ssl = 0;
-		method = 0;
-		context = 0;
-
-		// get our handles
-		method = TLSv1_client_method();
-		if(!method) {
-			reset();
-			return false;
-		}
 		context = SSL_CTX_new(method);
 		if(!context) {
 			reset();
@@ -995,6 +988,42 @@ public:
 				X509_STORE_add_cert(store, cc->x);
 		}
 
+		if(!setup())
+			return false;
+
+		host = _host;
+		mode = Connect;
+		sslUpdate();
+		return true;
+	}
+
+	bool startServer(const QCA_CertContext &, const QCA_RSAKeyContext &)
+	{
+		reset();
+		serv = true;
+		method = SSLv23_server_method();
+
+		context = SSL_CTX_new(method);
+		if(!context) {
+			reset();
+			return false;
+		}
+
+		if(!setup())
+			return false;
+
+		if(SSL_use_certificate_file(ssl, "key.pem", SSL_FILETYPE_PEM) != 1)
+			printf("error loading cert\n");
+		if(SSL_use_RSAPrivateKey_file(ssl, "key.pem", SSL_FILETYPE_PEM) != 1)
+			printf("error loading rsa private key\n");
+
+		mode = Accept;
+		sslUpdate();
+		return true;
+	}
+
+	bool setup()
+	{
 		ssl = SSL_new(context);
 		if(!ssl) {
 			reset();
@@ -1009,17 +1038,7 @@ public:
 		// this passes control of the bios to ssl.  we don't need to free them.
 		SSL_set_bio(ssl, rbio, wbio);
 
-		host = _host;
-		mode = Connect;
-
-		sslUpdate();
-
 		return true;
-	}
-
-	bool startServer(const QCA_CertContext &, const QCA_RSAKeyContext &)
-	{
-		return false;
 	}
 
 	int doConnect()
@@ -1031,6 +1050,23 @@ public:
 				return TryAgain;
 			else
 				return Error;
+		}
+		else if(ret == 0)
+			return Error;
+		return Success;
+	}
+
+	int doAccept()
+	{
+		int ret = SSL_accept(ssl);
+		if(ret < 0) {
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else {
+				printf("ERR=%s\n", ERR_error_string(ERR_get_error(), NULL));
+				return Error;
+			}
 		}
 		else if(ret == 0)
 			return Error;
@@ -1061,6 +1097,19 @@ public:
 			int ret = doConnect();
 			if(ret == Success) {
 				mode = Handshake;
+			}
+			else if(ret == Error) {
+				reset();
+				handshaken(false);
+				return;
+			}
+		}
+
+		if(mode == Accept) {
+			int ret = doAccept();
+			if(ret == Success) {
+				mode = Active;
+				handshaken(true);
 			}
 			else if(ret == Error) {
 				reset();
@@ -1259,6 +1308,7 @@ public:
 		}
 	}
 
+	bool serv;
 	int mode;
 	QByteArray sendQueue, recvQueue;
 
