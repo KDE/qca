@@ -142,6 +142,8 @@ public:
 	 */
 	QSecureArray(const QByteArray &a);
 
+	QSecureArray(const QCString &cs);
+
 	/**
 	 * Construct a (shallow) copy of another secure byte array
 	 *
@@ -164,6 +166,8 @@ public:
 	 * \param a the array to copy from
 	 */
 	QSecureArray & operator=(const QByteArray &a);
+
+	QSecureArray & operator=(const QCString &cs);
 
 	/**
 	 * Returns a reference to the byte at the index position
@@ -267,6 +271,7 @@ public:
 
 protected:
 	void set(const QSecureArray &from);
+	void set(const QCString &cs);
 
 private:
 	class Private;
@@ -972,6 +977,7 @@ namespace QCA
 		SymmetricKey();
 		SymmetricKey(int size);
 		SymmetricKey(const QSecureArray &a);
+		SymmetricKey(const QCString &cs);
 	};
 
 	class QCA_EXPORT InitializationVector : public QSecureArray
@@ -980,6 +986,7 @@ namespace QCA
 		InitializationVector();
 		InitializationVector(int size);
 		InitializationVector(const QSecureArray &a);
+		InitializationVector(const QCString &cs);
 	};
 
 	/**

@@ -46,10 +46,8 @@ void MACUnitTest::allTests()
 	QCA::HMAC md5hmac1( "md5" );
 	QCA::SymmetricKey key1;
 	key1 = QCString( "Jefe" );
-	key1.resize( 4 );
 	md5hmac1.setup( key1 );
 	QSecureArray data1 = QCString( "what do ya want for nothing?" );
-	data1.resize( 28 );
 	md5hmac1.update( data1 );
 	CHECK( QCA::arrayToHex( md5hmac1.final() ), QString( "750c783e6ab0b503eaa86e310a5db738" ) );
 
@@ -57,7 +55,6 @@ void MACUnitTest::allTests()
 	QCA::SymmetricKey key2( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	md5hmac2.setup( key2 );
 	QSecureArray data2 = QCString( "Hi There" );
-	data2.resize( 8 );
 	md5hmac2.update( data2 );
 	CHECK( QCA::arrayToHex( md5hmac2.final() ), QString( "9294727a3638bb1c13f48ef8158bfc9d" ) );
 
@@ -84,7 +81,6 @@ void MACUnitTest::allTests()
 	QCA::SymmetricKey key5 ( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	md5hmac5.setup( key5 );
 	QSecureArray data5 = QCString( "Test With Truncation" );
-	data5.resize( 20 );
     	md5hmac5.update( data5 );
 	CHECK( QCA::arrayToHex( md5hmac5.final() ), QString( "56461ef2342edc00f9bab995690efd4c" ) );
 
@@ -94,14 +90,12 @@ void MACUnitTest::allTests()
 	    key6[ i ] = 0xaa;
 	md5hmac6.setup( key6 );
 	QSecureArray data6 = QCString( "Test Using Larger Than Block-Size Key - Hash Key First" );
-	data6.resize( 54 );
     	md5hmac6.update( data6 );
 	CHECK( QCA::arrayToHex( md5hmac6.final() ), QString( "6b1ab7fe4bd7bf8f0b62e6ce61b9d0cd" ) );
 
 	QCA::HMAC md5hmac7( "md5" );
 	md5hmac7.setup( key6 ); // same as previous test, so just reuse
 	QSecureArray data7 = QCString( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
-	data7.resize( 73 );
     	md5hmac7.update( data7 );
 	CHECK( QCA::arrayToHex( md5hmac7.final() ), QString( "6f630fad67cda0ee1fb1f562db3aa53e" ) );
     }
@@ -114,17 +108,14 @@ void MACUnitTest::allTests()
 	QCA::SymmetricKey key1 ( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	test1.setup( key1 );
 	QSecureArray data1 = QCString( "Hi There" );
-	data1.resize( 8 );
     	test1.update( data1 );
 	CHECK( QCA::arrayToHex( test1.final() ), QString( "b617318655057264e28bc0b6fb378c8ef146be00" ) );
 
 	QCA::HMAC test2( "sha1" ); 
 	QCA::SymmetricKey key2;
 	key2 = QCString( "Jefe" );
-	key2.resize( 4 );
 	test2.setup( key2 );
 	QSecureArray data2 = QCString( "what do ya want for nothing?" );
-	data2.resize( 28 );
     	test2.update( data2 );
 	CHECK( QCA::arrayToHex( test2.final() ), QString( "effcdf6ae5eb2fa2d27416d5f184df9c259a7c79" ) );
 
@@ -150,7 +141,6 @@ void MACUnitTest::allTests()
 	QCA::SymmetricKey key5 ( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	test5.setup( key5 );
 	QSecureArray data5 = QCString( "Test With Truncation" );
-	data5.resize( 20 );
     	test5.update( data5 );
 	CHECK( QCA::arrayToHex( test5.final() ), QString( "4c1a03424b55e07fe7f27be1d58bb9324a9a5a04" ) );
 
@@ -160,14 +150,12 @@ void MACUnitTest::allTests()
 	    key6[i] = 0xAA;
 	test6.setup( key6 );
 	QSecureArray data6 = QCString( "Test Using Larger Than Block-Size Key - Hash Key First" );
-	data6.resize( 54 );
     	test6.update( data6 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "aa4ae5e15272d00e95705637ce8a3b55ed402112" ) );
 
 	test6.clear();
 	test6.setup( key6 ); // reuse test, same key
 	QSecureArray data7 = QCString( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
-	data7.resize( 73 );
     	test6.update( data7 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "e8e99d0f45237d786d6bbaa7965c7808bbff1a91" ) );
 
@@ -181,17 +169,14 @@ void MACUnitTest::allTests()
 	QCA::SymmetricKey key1 ( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	test1.setup( key1 );
 	QSecureArray data1 = QCString( "Hi There" );
-	data1.resize( 8 );
     	test1.update( data1 );
 	CHECK( QCA::arrayToHex( test1.final() ), QString( "24cb4bd67d20fc1a5d2ed7732dcc39377f0a5668" ) );
 
 	QCA::HMAC test2( "ripemd160" ); 
 	QCA::SymmetricKey key2;
 	key2 = QCString( "Jefe" );
-	key2.resize( 4 );
 	test2.setup( key2 );
 	QSecureArray data2 = QCString( "what do ya want for nothing?" );
-	data2.resize( 28 );
     	test2.update( data2 );
 	CHECK( QCA::arrayToHex( test2.final() ), QString( "dda6c0213a485a9e24f4742064a7f033b43c4069" ) );
 
@@ -217,7 +202,6 @@ void MACUnitTest::allTests()
 	QCA::SymmetricKey key5 ( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	test5.setup( key5 );
 	QSecureArray data5 = QCString( "Test With Truncation" );
-	data5.resize( 20 );
     	test5.update( data5 );
 	CHECK( QCA::arrayToHex( test5.final() ), QString( "7619693978f91d90539ae786500ff3d8e0518e39" ) );
 
@@ -227,14 +211,12 @@ void MACUnitTest::allTests()
 	    key6[i] = 0xAA;
 	test6.setup( key6 );
 	QSecureArray data6 = QCString( "Test Using Larger Than Block-Size Key - Hash Key First" );
-	data6.resize( 54 );
     	test6.update( data6 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "6466ca07ac5eac29e1bd523e5ada7605b791fd8b" ) );
 
 	test6.clear();
 	test6.setup( key6 ); // reuse test, same key
 	QSecureArray data7 = QCString( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
-	data7.resize( 73 );
     	test6.update( data7 );
 	CHECK( QCA::arrayToHex( test6.final() ), QString( "69ea60798d71616cce5fd0871e23754cd75d5a0a" ) );
 

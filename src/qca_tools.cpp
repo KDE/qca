@@ -140,6 +140,12 @@ QSecureArray::QSecureArray(const QByteArray &a)
 	*this = a;
 }
 
+QSecureArray::QSecureArray(const QCString &cs)
+{
+	d = 0;
+	*this = cs;
+}
+
 QSecureArray::QSecureArray(const QSecureArray &from)
 {
 	d = 0;
@@ -183,6 +189,21 @@ QSecureArray & QSecureArray::operator=(const QByteArray &from)
 		d = new Private(from.size());
 		Botan::byte *p = (Botan::byte *)d->buf;
 		memcpy(p, from.data(), from.size());
+	}
+
+	return *this;
+}
+
+QSecureArray & QSecureArray::operator=(const QCString &cs)
+{
+	reset();
+
+	if(!cs.isEmpty())
+	{
+		int size = cs.length();
+		d = new Private(size);
+		Botan::byte *p = (Botan::byte *)d->buf;
+		memcpy(p, cs.data(), size);
 	}
 
 	return *this;
@@ -292,6 +313,11 @@ QByteArray QSecureArray::toByteArray() const
 void QSecureArray::set(const QSecureArray &from)
 {
 	*this = from;
+}
+
+void QSecureArray::set(const QCString &cs)
+{
+	*this = cs;
 }
 
 bool operator==(const QSecureArray &a, const QSecureArray &b)

@@ -540,6 +540,11 @@ SymmetricKey::SymmetricKey(const QSecureArray &a)
 	set(a);
 }
 
+SymmetricKey::SymmetricKey(const QCString &cs)
+{
+	set(cs);
+}
+
 //----------------------------------------------------------------------------
 // InitializationVector
 //----------------------------------------------------------------------------
@@ -555,6 +560,11 @@ InitializationVector::InitializationVector(int size)
 InitializationVector::InitializationVector(const QSecureArray &a)
 {
 	set(a);
+}
+
+InitializationVector::InitializationVector(const QCString &cs)
+{
+	set(cs);
 }
 
 }
