@@ -19,7 +19,8 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include"qca.h"
+// QtCrypto/QtCrypto has the declarations for all of QCA
+#include <QtCrypto/QtCrypto>
 #include <iostream>
 #include <qstringlist.h>
 

@@ -19,8 +19,8 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// qca.h has the declarations for all of QCA
-#include"qca.h"
+// QtCrypto/QtCrypto has the declarations for all of QCA
+#include <QtCrypto/QtCrypto>
 // needed for printf
 #include<stdio.h>
 
