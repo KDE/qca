@@ -96,28 +96,25 @@ public:
 	virtual QValueList<QCA_CertProperty> issuer() const=0;
 	virtual QDateTime notBefore() const=0;
 	virtual QDateTime notAfter() const=0;
+	virtual bool matchesAddress(const QString &realHost) const=0;
 };
 
-class QCA_SSLContext : public QObject
+class QCA_TLSContext
 {
-	Q_OBJECT
 public:
-	virtual ~QCA_SSLContext() {}
+	enum Result { Success, Error, Continue };
+	virtual ~QCA_TLSContext() {}
 
-	virtual bool startClient(const QString &host, const QPtrList<QCA_CertContext> &store)=0;
-	virtual bool startServer(const QCA_CertContext &cert, const QCA_RSAKeyContext &key)=0;
+	virtual void reset()=0;
+	virtual bool startClient(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)=0;
+	virtual bool startServer(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)=0;
 
-	virtual void writeIncoming(const QByteArray &a)=0;
-	virtual QByteArray readOutgoing()=0;
-	virtual void write(const QByteArray &a)=0;
-	virtual QByteArray read()=0;
+	virtual int handshake(const QByteArray &in, QByteArray *out)=0;
+	virtual bool encode(const QByteArray &plain, QByteArray *to_net)=0;
+	virtual bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net)=0;
+
 	virtual QCA_CertContext *peerCertificate() const=0;
 	virtual int validityResult() const=0;
-
-signals:
-	void handshaken(bool);
-	void readyRead();
-	void readyReadOutgoing();
 };
 
 struct QCA_SASLHostPort
@@ -128,13 +125,13 @@ struct QCA_SASLHostPort
 
 struct QCA_SASLNeedParams
 {
-	bool auth, user, pass, realm;
+	bool user, authzid, pass, realm;
 };
 
 class QCA_SASLContext
 {
 public:
-	enum { Success, Error, NeedParams, AuthCheck, Continue };
+	enum Result { Success, Error, NeedParams, AuthCheck, Continue };
 	virtual ~QCA_SASLContext() {}
 
 	// common
@@ -151,9 +148,9 @@ public:
 
 	// get / set params
 	virtual QCA_SASLNeedParams clientParamsNeeded() const=0;
-	virtual void setClientParams(const QString *auth, const QString *user, const QString *pass, const QString *realm)=0;
-	virtual QString authname() const=0;
+	virtual void setClientParams(const QString *user, const QString *authzid, const QString *pass, const QString *realm)=0;
 	virtual QString username() const=0;
+	virtual QString authzid() const=0;
 
 	// continue steps
 	virtual int nextStep(const QByteArray &in)=0;

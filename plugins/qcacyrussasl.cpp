@@ -64,30 +64,30 @@ public:
 
 	void resetNeed()
 	{
-		need.auth = false;
 		need.user = false;
+		need.authzid = false;
 		need.pass = false;
 		need.realm = false;
 	}
 
 	void resetHave()
 	{
-		have.auth = false;
 		have.user = false;
+		have.authzid = false;
 		have.pass = false;
 		have.realm = false;
-	}
-
-	void setAuthname(const QString &s)
-	{
-		have.auth = true;
-		auth = s;
 	}
 
 	void setUsername(const QString &s)
 	{
 		have.user = true;
 		user = s;
+	}
+
+	void setAuthzid(const QString &s)
+	{
+		have.authzid = true;
+		authzid = s;
 	}
 
 	void setPassword(const QString &s)
@@ -106,9 +106,9 @@ public:
 	{
 		for(int n = 0; needp[n].id != SASL_CB_LIST_END; ++n) {
 			if(needp[n].id == SASL_CB_AUTHNAME)
-				need.auth = true;
+				need.user = true;       // yes, I know these
 			if(needp[n].id == SASL_CB_USER)
-				need.user = true;
+				need.authzid = true;    // look backwards
 			if(needp[n].id == SASL_CB_PASS)
 				need.pass = true;
 			if(needp[n].id == SASL_CB_GETREALM)
@@ -116,23 +116,23 @@ public:
 		}
 	}
 
-	void extractHave(sasl_interact_t *need)
+	void extractHave(sasl_interact_t *needp)
 	{
-		for(int n = 0; need[n].id != SASL_CB_LIST_END; ++n) {
-			if(need[n].id == SASL_CB_AUTHNAME && have.auth)
-				setValue(&need[n], auth);
-			if(need[n].id == SASL_CB_USER && have.user)
-				setValue(&need[n], user);
-			if(need[n].id == SASL_CB_PASS && have.pass)
-				setValue(&need[n], pass);
-			if(need[n].id == SASL_CB_GETREALM && have.realm)
-				setValue(&need[n], realm);
+		for(int n = 0; needp[n].id != SASL_CB_LIST_END; ++n) {
+			if(needp[n].id == SASL_CB_AUTHNAME && have.user)
+				setValue(&needp[n], user);
+			if(needp[n].id == SASL_CB_USER && have.authzid)
+				setValue(&needp[n], authzid);
+			if(needp[n].id == SASL_CB_PASS && have.pass)
+				setValue(&needp[n], pass);
+			if(needp[n].id == SASL_CB_GETREALM && have.realm)
+				setValue(&needp[n], realm);
 		}
 	}
 
 	bool missingAny() const
 	{
-		if((need.auth && !have.auth) || (need.user && !have.user) || (need.pass && !have.pass) || (need.realm && !have.realm))
+		if((need.user && !have.user) || (need.authzid && !have.authzid) || (need.pass && !have.pass) || (need.realm && !have.realm))
 			return true;
 		return false;
 	}
@@ -140,10 +140,10 @@ public:
 	QCA_SASLNeedParams missing() const
 	{
 		QCA_SASLNeedParams np = need;
-		if(have.auth)
-			np.auth = false;
 		if(have.user)
 			np.user = false;
+		if(have.authzid)
+			np.authzid = false;
 		if(have.pass)
 			np.pass = false;
 		if(have.realm)
@@ -170,7 +170,7 @@ public:
 	QPtrList<void> results;
 	QCA_SASLNeedParams need;
 	QCA_SASLNeedParams have;
-	QString auth, user, pass, realm;
+	QString user, authzid, pass, realm;
 };
 
 static QByteArray makeByteArray(const void *in, unsigned int len)
@@ -234,7 +234,7 @@ public:
 	QByteArray out_buf;
 
 	SASLParams params;
-	QString sc_authname, sc_username;
+	QString sc_username, sc_authzid;
 	bool ca_flag, ca_done, ca_skip;
 	int last_r;
 
@@ -275,8 +275,8 @@ public:
 		mechlist.clear();
 		ssf = 0;
 		maxoutbuf = 0;
-		sc_authname = "";
 		sc_username = "";
+		sc_authzid = "";
 	}
 
 	void resetParams()
@@ -324,8 +324,8 @@ public:
 	static int scb_checkauth(sasl_conn_t *, void *context, const char *requested_user, unsigned, const char *auth_identity, unsigned, const char *, unsigned, struct propctx *)
 	{
 		SASLContext *that = (SASLContext *)context;
-		that->sc_authname = auth_identity;
-		that->sc_username = requested_user;
+		that->sc_username = auth_identity; // yeah yeah, it looks
+		that->sc_authzid = requested_user; // backwards, but it is right
 		that->ca_flag = true;
 		return SASL_OK;
 	}
@@ -477,26 +477,26 @@ public:
 		return params.missing();
 	}
 
-	void setClientParams(const QString *auth, const QString *user, const QString *pass, const QString *realm)
+	void setClientParams(const QString *user, const QString *authzid, const QString *pass, const QString *realm)
 	{
-		if(auth)
-			params.setAuthname(*auth);
 		if(user)
 			params.setUsername(*user);
+		if(authzid)
+			params.setAuthzid(*authzid);
 		if(pass)
 			params.setPassword(*pass);
 		if(realm)
 			params.setRealm(*realm);
 	}
 
-	QString authname() const
-	{
-		return sc_authname;
-	}
-
 	QString username() const
 	{
 		return sc_username;
+	}
+
+	QString authzid() const
+	{
+		return sc_authzid;
 	}
 
 	int nextStep(const QByteArray &in)
@@ -580,7 +580,10 @@ public:
 			while(1) {
 				if(need)
 					params.extractHave(need);
+				QCString cs(in_buf.data(), in_buf.size()+1);
+				//printf("sasl_client_step(con, {%s}, %d, &need, &clientout, &clientoutlen);\n", cs.data(), in_buf.size());
 				r = sasl_client_step(con, in_buf.data(), in_buf.size(), &need, &clientout, &clientoutlen);
+				//printf("returned: %d\n", r);
 				if(r != SASL_INTERACT)
 					break;
 

@@ -27,7 +27,7 @@ namespace QCA
 		CAP_AES256    = 0x0040,
 		CAP_RSA       = 0x0080,
 		CAP_X509      = 0x0100,
-		CAP_SSL       = 0x0200,
+		CAP_TLS       = 0x0200,
 		CAP_SASL      = 0x0400,
 	};
 
@@ -104,7 +104,7 @@ namespace QCA
 		Cipher & operator=(const Cipher &);
 		~Cipher();
 
-		QByteArray dyn_generateKey() const;
+		QByteArray dyn_generateKey(int size=-1) const;
 		QByteArray dyn_generateIV() const;
 		void reset(int dir, int mode, const QByteArray &key, const QByteArray &iv, bool pad=true);
 		bool update(const QByteArray &a);
@@ -124,10 +124,10 @@ namespace QCA
 	public:
 		CipherStatic<T>() {}
 
-		static QByteArray generateKey()
+		static QByteArray generateKey(int size=-1)
 		{
 			T obj;
-			return obj.dyn_generateKey();
+			return obj.dyn_generateKey(size);
 		}
 
 		static QByteArray generateIV()
@@ -206,7 +206,7 @@ namespace QCA
 		Private *d;
 
 		friend class RSA;
-		friend class SSL;
+		friend class TLS;
 		bool encrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
 		bool decrypt(const QByteArray &a, QByteArray *out, bool oaep) const;
 		bool generate(unsigned int bits);
@@ -259,15 +259,15 @@ namespace QCA
 		class Private;
 		Private *d;
 
-		friend class SSL;
+		friend class TLS;
 		void fromContext(QCA_CertContext *);
 	};
 
-	class SSL : public QObject
+	class TLS : public QObject
 	{
 		Q_OBJECT
 	public:
-		enum {
+		enum Validity {
 			NoCert,
 			Valid,
 			HostMismatch,
@@ -282,13 +282,16 @@ namespace QCA
 			Expired,
 			Unknown
 		};
+		enum Error { ErrHandshake, ErrCrypt };
 
-		SSL(QObject *parent=0);
-		~SSL();
+		TLS(QObject *parent=0);
+		~TLS();
 
-		// note: store must persist until SSL object is deleted!
-		bool startClient(const QString &host="", const QPtrList<Cert> &store=QPtrList<Cert>());
-		bool startServer(const Cert &cert, const RSAKey &key);
+		void setCertificate(const Cert &cert, const RSAKey &key);
+		void setCertificateStore(const QPtrList<Cert> &store);  // note: store must persist
+
+		bool startClient(const QString &host="");
+		bool startServer();
 
 		// plain (application side)
 		void write(const QByteArray &a);
@@ -303,26 +306,24 @@ namespace QCA
 		int certificateValidityResult() const;
 
 	signals:
-		void handshaken(bool);
+		void handshaken();
 		void readyRead();
 		void readyReadOutgoing();
+		void error(int);
 
 	private slots:
-		void ctx_handshaken(bool);
-		void ctx_readyRead();
-		void ctx_readyReadOutgoing();
+		void update();
 
 	private:
 		class Private;
 		Private *d;
 	};
 
-	// TODO: server authcheck
-	//       security layer
 	class SASL : public QObject
 	{
 		Q_OBJECT
 	public:
+		enum Error { ErrAuth, ErrCrypt };
 		SASL(QObject *parent=0);
 		~SASL();
 
@@ -348,18 +349,19 @@ namespace QCA
 		void setRemoteAddr(const QHostAddress &addr, Q_UINT16 port);
 
 		// initialize
-		bool startClient(const QString &service, const QString &host, const QStringList &mechlist);
+		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, bool allowClientSendFirst=true);
 		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist);
 
 		// authentication
 		void putStep(const QByteArray &stepData);
 		void putServerFirstStep(const QString &mech);
 		void putServerFirstStep(const QString &mech, const QByteArray &clientInit);
-		void setAuthname(const QString &auth);
 		void setUsername(const QString &user);
+		void setAuthzid(const QString &auth);
 		void setPassword(const QString &pass);
 		void setRealm(const QString &realm);
 		void continueAfterParams();
+		void continueAfterAuthCheck();
 
 		// security layer
 		int ssf() const;
@@ -372,13 +374,16 @@ namespace QCA
 		// for authentication
 		void clientFirstStep(const QString &mech, const QByteArray *clientInit);
 		void nextStep(const QByteArray &stepData);
-		void needParams(bool auth, bool user, bool pass, bool realm);
-		void authenticated(bool);
+		void needParams(bool user, bool authzid, bool pass, bool realm);
+		void authCheck(const QString &user, const QString &authzid);
+		void authenticated();
 
 		// for security layer
 		void readyRead();
 		void readyReadOutgoing();
-		void error();
+
+		// error
+		void error(int);
 
 	private slots:
 		void tryAgain();

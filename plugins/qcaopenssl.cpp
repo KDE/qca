@@ -13,8 +13,6 @@
 #include<openssl/ssl.h>
 #include<openssl/err.h>
 
-#define OSSL_097
-
 #ifndef OSSL_097
 #define NO_AES
 #endif
@@ -944,14 +942,27 @@ public:
 };
 
 static bool ssl_init = false;
-class SSLContext : public QCA_SSLContext
+class TLSContext : public QCA_TLSContext
 {
-	Q_OBJECT
 public:
-	enum { Success, TryAgain, Error };
+	enum { Good, TryAgain, Bad };
 	enum { Idle, Connect, Accept, Handshake, Active };
 
-	SSLContext()
+	bool serv;
+	int mode;
+	QByteArray sendQueue, recvQueue;
+
+	CertContext *cert;
+	RSAKeyContext *key;
+
+	SSL *ssl;
+	SSL_METHOD *method;
+	SSL_CTX *context;
+	BIO *rbio, *wbio;
+	CertContext cc;
+	int vr;
+
+	TLSContext()
 	{
 		if(!ssl_init) {
 			SSL_library_init();
@@ -965,7 +976,7 @@ public:
 		key = 0;
 	}
 
-	~SSLContext()
+	~TLSContext()
 	{
 		reset();
 	}
@@ -994,22 +1005,44 @@ public:
 		recvQueue.resize(0);
 		mode = Idle;
 		cc.reset();
-		vr = QCA::SSL::Unknown;
+		vr = QCA::TLS::Unknown;
 	}
 
-	bool startClient(const QString &_host, const QPtrList<QCA_CertContext> &list)
+	bool startClient(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)
 	{
 		reset();
 		serv = false;
 		method = SSLv23_client_method();
 
+		if(!setup(store, cert, key))
+			return false;
+
+		mode = Connect;
+		return true;
+	}
+
+	bool startServer(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)
+	{
+		reset();
+		serv = true;
+		method = SSLv23_server_method();
+
+		if(!setup(store, cert, key))
+			return false;
+
+		mode = Accept;
+		return true;
+	}
+
+	bool setup(const QPtrList<QCA_CertContext> &list, const QCA_CertContext &cc, const QCA_RSAKeyContext &kc)
+	{
 		context = SSL_CTX_new(method);
 		if(!context) {
 			reset();
 			return false;
 		}
 
-		// load the certs
+		// load the cert store
 		if(!list.isEmpty()) {
 			X509_STORE *store = SSL_CTX_get_cert_store(context);
 			QPtrListIterator<QCA_CertContext> it(list);
@@ -1017,48 +1050,6 @@ public:
 				X509_STORE_add_cert(store, cc->x);
 		}
 
-		if(!setup())
-			return false;
-
-		host = _host;
-		mode = Connect;
-		sslUpdate();
-		return true;
-	}
-
-	bool startServer(const QCA_CertContext &cc, const QCA_RSAKeyContext &kc)
-	{
-		reset();
-		serv = true;
-		method = SSLv23_server_method();
-
-		context = SSL_CTX_new(method);
-		if(!context) {
-			reset();
-			return false;
-		}
-
-		if(!setup())
-			return false;
-
-		cert = (CertContext *)cc.clone();
-		key = (RSAKeyContext *)kc.clone();
-		if(SSL_use_certificate(ssl, cert->x) != 1) {
-			reset();
-			return false;
-		}
-		if(SSL_use_RSAPrivateKey(ssl, key->sec) != 1) {
-			reset();
-			return false;
-		}
-
-		mode = Accept;
-		sslUpdate();
-		return true;
-	}
-
-	bool setup()
-	{
 		ssl = SSL_new(context);
 		if(!ssl) {
 			reset();
@@ -1073,221 +1064,139 @@ public:
 		// this passes control of the bios to ssl.  we don't need to free them.
 		SSL_set_bio(ssl, rbio, wbio);
 
+		// setup the cert to send
+		if(!cc.isNull() && !kc.isNull()) {
+			cert = static_cast<CertContext*>(cc.clone());
+			key = static_cast<RSAKeyContext*>(kc.clone());
+			if(SSL_use_certificate(ssl, cert->x) != 1) {
+				reset();
+				return false;
+			}
+			if(SSL_use_RSAPrivateKey(ssl, key->sec) != 1) {
+				reset();
+				return false;
+			}
+		}
+
 		return true;
 	}
 
-	int doConnect()
+	int handshake(const QByteArray &in, QByteArray *out)
 	{
-		int ret = SSL_connect(ssl);
-		if(ret < 0) {
-			int x = SSL_get_error(ssl, ret);
-			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
-				return TryAgain;
-			else
-				return Error;
-		}
-		else if(ret == 0)
-			return Error;
-		return Success;
-	}
-
-	int doAccept()
-	{
-		int ret = SSL_accept(ssl);
-		if(ret < 0) {
-			int x = SSL_get_error(ssl, ret);
-			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
-				return TryAgain;
-			else {
-				printf("ERR=%s\n", ERR_error_string(ERR_get_error(), NULL));
-				return Error;
-			}
-		}
-		else if(ret == 0)
-			return Error;
-		return Success;
-	}
-
-	int doHandshake()
-	{
-		int ret = SSL_do_handshake(ssl);
-		if(ret < 0) {
-			int x = SSL_get_error(ssl, ret);
-			if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
-				return TryAgain;
-			else
-				return Error;
-		}
-		else if(ret == 0)
-			return Error;
-		return Success;
-	}
-
-	void sslUpdate()
-	{
-		if(mode == Idle)
-			return;
+		if(!in.isEmpty())
+			BIO_write(rbio, in.data(), in.size());
 
 		if(mode == Connect) {
 			int ret = doConnect();
-			if(ret == Success) {
+			if(ret == Good) {
 				mode = Handshake;
 			}
-			else if(ret == Error) {
+			else if(ret == Bad) {
 				reset();
-				handshaken(false);
-				return;
+				return Error;
 			}
 		}
 
 		if(mode == Accept) {
 			int ret = doAccept();
-			if(ret == Success) {
+			if(ret == Good) {
+				getCert();
 				mode = Active;
-				handshaken(true);
 			}
-			else if(ret == Error) {
+			else if(ret == Bad) {
 				reset();
-				handshaken(false);
-				return;
+				return Error;
 			}
 		}
 
 		if(mode == Handshake) {
 			int ret = doHandshake();
-			if(ret == Success) {
-				// verify the certificate
-				int code = QCA::SSL::Unknown;
-				X509 *x = SSL_get_peer_certificate(ssl);
-				if(x) {
-					cc.fromX509(x);
-					X509_free(x);
-					int ret = SSL_get_verify_result(ssl);
-					if(ret == X509_V_OK) {
-						if(cc.matchesAddress(host))
-							code = QCA::SSL::Valid;
-						else
-							code = QCA::SSL::HostMismatch;
-					}
-					else
-						code = resultToCV(ret);
-				}
-				else {
-					cc.reset();
-					code = QCA::SSL::NoCert;
-				}
-				vr = code;
-
+			if(ret == Good) {
+				getCert();
 				mode = Active;
-				handshaken(true);
 			}
-			else if(ret == Error) {
+			else if(ret == Bad) {
 				reset();
-				handshaken(false);
-				return;
+				return Error;
 			}
 		}
 
-		if(outgoingDataReady()) {
-			readyReadOutgoing();
+		// process outgoing
+		*out = readOutgoing();
+
+		if(mode == Active)
+			return Success;
+		else
+			return Continue;
+	}
+
+	void getCert()
+	{
+		// verify the certificate
+		int code = QCA::TLS::Unknown;
+		X509 *x = SSL_get_peer_certificate(ssl);
+		if(x) {
+			cc.fromX509(x);
+			X509_free(x);
+			int ret = SSL_get_verify_result(ssl);
+			if(ret == X509_V_OK)
+				code = QCA::TLS::Valid;
+			else
+				code = resultToCV(ret);
+		}
+		else {
+			cc.reset();
+			code = QCA::TLS::NoCert;
+		}
+		vr = code;
+	}
+
+	bool encode(const QByteArray &plain, QByteArray *to_net)
+	{
+		if(mode != Active)
+			return false;
+		appendArray(&sendQueue, plain);
+
+		if(sendQueue.size() > 0) {
+			// since we are using memory BIOs, the whole thing can be written successfully
+			SSL_write(ssl, sendQueue.data(), sendQueue.size());
+			// TODO: error?
+			sendQueue.resize(0);
 		}
 
-		// try to read incoming unencrypted data
-		sslReadAll();
+		*to_net = readOutgoing();
+		return true;
+	}
 
-		if(dataReady()) {
-			readyRead();
+	bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net)
+	{
+		if(mode != Active)
+			return false;
+		if(!from_net.isEmpty())
+			BIO_write(rbio, from_net.data(), from_net.size());
+
+		QByteArray a;
+		while(1) {
+			a.resize(4096);
+			int x = SSL_read(ssl, a.data(), a.size());
+			if(x <= 0)
+				break;
+			if(x != (int)a.size())
+				a.resize(x);
+			appendArray(&recvQueue, a);
 		}
-	}
 
-	int resultToCV(int ret) const
-	{
-		int rc;
+		*plain = recvQueue.copy();
+		recvQueue.resize(0);
 
-		switch(ret) {
-			case X509_V_ERR_CERT_REJECTED:
-				rc = QCA::SSL::Rejected;
-				break;
-			case X509_V_ERR_CERT_UNTRUSTED:
-				rc = QCA::SSL::Untrusted;
-				break;
-			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
-			case X509_V_ERR_CERT_SIGNATURE_FAILURE:
-			case X509_V_ERR_CRL_SIGNATURE_FAILURE:
-			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
-			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
-				rc = QCA::SSL::SignatureFailed;
-				break;
-			case X509_V_ERR_INVALID_CA:
-			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
-			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
-			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
-				rc = QCA::SSL::InvalidCA;
-				break;
-			case X509_V_ERR_INVALID_PURPOSE:
-				rc = QCA::SSL::InvalidPurpose;
-				break;
-			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-				rc = QCA::SSL::SelfSigned;
-				break;
-			case X509_V_ERR_CERT_REVOKED:
-				rc = QCA::SSL::Revoked;
-				break;
-			case X509_V_ERR_PATH_LENGTH_EXCEEDED:
-				rc = QCA::SSL::PathLengthExceeded;
-				break;
-			case X509_V_ERR_CERT_NOT_YET_VALID:
-			case X509_V_ERR_CERT_HAS_EXPIRED:
-			case X509_V_ERR_CRL_NOT_YET_VALID:
-			case X509_V_ERR_CRL_HAS_EXPIRED:
-			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
-			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
-			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
-			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
-				rc = QCA::SSL::Expired;
-				break;
-			case X509_V_ERR_APPLICATION_VERIFICATION:
-			case X509_V_ERR_OUT_OF_MEM:
-			case X509_V_ERR_UNABLE_TO_GET_CRL:
-			case X509_V_ERR_CERT_CHAIN_TOO_LONG:
-			default:
-				rc = QCA::SSL::Unknown;
-				break;
-		}
-		return rc;
-	}
-
-	QCA_CertContext *peerCertificate() const
-	{
-		return cc.clone();
-	}
-
-	int validityResult() const
-	{
-		return vr;
-	}
-
-	bool dataReady() const
-	{
-		return (recvQueue.size() > 0) ? true: false;
-	}
-
-	bool outgoingDataReady() const
-	{
-		return (BIO_pending(wbio) > 0) ? true: false;
-	}
-
-	void writeIncoming(const QByteArray &a)
-	{
-		BIO_write(rbio, a.data(), a.size());
-		sslUpdate();
+		// could be outgoing data also
+		*to_net = readOutgoing();
+		return true;
 	}
 
 	QByteArray readOutgoing()
 	{
 		QByteArray a;
-
 		int size = BIO_pending(wbio);
 		if(size <= 0)
 			return a;
@@ -1300,63 +1209,121 @@ public:
 		}
 		if(r != size)
 			a.resize(r);
-
 		return a;
 	}
 
-	void write(const QByteArray &a)
+	int doConnect()
 	{
-		if(mode != Active)
-			return;
-		appendArray(&sendQueue, a);
-		processSendQueue();
+		int ret = SSL_connect(ssl);
+		if(ret < 0) {
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Bad;
+		}
+		else if(ret == 0)
+			return Bad;
+		return Good;
 	}
 
-	QByteArray read()
+	int doAccept()
 	{
-		QByteArray a = recvQueue.copy();
-		recvQueue.resize(0);
-		return a;
+		int ret = SSL_accept(ssl);
+		if(ret < 0) {
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Bad;
+		}
+		else if(ret == 0)
+			return Bad;
+		return Good;
 	}
 
-	void sslReadAll()
+	int doHandshake()
 	{
-		QByteArray a;
-		while(1) {
-			a.resize(4096);
-			int x = SSL_read(ssl, a.data(), a.size());
-			if(x <= 0)
+		int ret = SSL_do_handshake(ssl);
+		if(ret < 0) {
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Bad;
+		}
+		else if(ret == 0)
+			return Bad;
+		return Good;
+	}
+
+	QCA_CertContext *peerCertificate() const
+	{
+		return cc.clone();
+	}
+
+	int validityResult() const
+	{
+		return vr;
+	}
+
+	int resultToCV(int ret) const
+	{
+		int rc;
+
+		switch(ret) {
+			case X509_V_ERR_CERT_REJECTED:
+				rc = QCA::TLS::Rejected;
 				break;
-			if(x != (int)a.size())
-				a.resize(x);
-			appendArray(&recvQueue, a);
+			case X509_V_ERR_CERT_UNTRUSTED:
+				rc = QCA::TLS::Untrusted;
+				break;
+			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
+			case X509_V_ERR_CERT_SIGNATURE_FAILURE:
+			case X509_V_ERR_CRL_SIGNATURE_FAILURE:
+			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
+			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
+				rc = QCA::TLS::SignatureFailed;
+				break;
+			case X509_V_ERR_INVALID_CA:
+			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
+			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
+				rc = QCA::TLS::InvalidCA;
+				break;
+			case X509_V_ERR_INVALID_PURPOSE:
+				rc = QCA::TLS::InvalidPurpose;
+				break;
+			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
+				rc = QCA::TLS::SelfSigned;
+				break;
+			case X509_V_ERR_CERT_REVOKED:
+				rc = QCA::TLS::Revoked;
+				break;
+			case X509_V_ERR_PATH_LENGTH_EXCEEDED:
+				rc = QCA::TLS::PathLengthExceeded;
+				break;
+			case X509_V_ERR_CERT_NOT_YET_VALID:
+			case X509_V_ERR_CERT_HAS_EXPIRED:
+			case X509_V_ERR_CRL_NOT_YET_VALID:
+			case X509_V_ERR_CRL_HAS_EXPIRED:
+			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
+			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
+			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
+			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
+				rc = QCA::TLS::Expired;
+				break;
+			case X509_V_ERR_APPLICATION_VERIFICATION:
+			case X509_V_ERR_OUT_OF_MEM:
+			case X509_V_ERR_UNABLE_TO_GET_CRL:
+			case X509_V_ERR_CERT_CHAIN_TOO_LONG:
+			default:
+				rc = QCA::TLS::Unknown;
+				break;
 		}
+		return rc;
 	}
-
-	void processSendQueue()
-	{
-		if(sendQueue.size() > 0) {
-			// since we are using memory BIOs, the whole thing can be written successfully
-			SSL_write(ssl, sendQueue.data(), sendQueue.size());
-			sendQueue.resize(0);
-			sslUpdate();
-		}
-	}
-
-	bool serv;
-	int mode;
-	QByteArray sendQueue, recvQueue;
-
-	CertContext *cert;
-	RSAKeyContext *key;
-
-	SSL *ssl;
-	SSL_METHOD *method;
-	SSL_CTX *context;
-	BIO *rbio, *wbio;
-	QString host;
-	CertContext cc;
-	int vr;
 };
 
 class QCAOpenSSL : public QCAProvider
@@ -1378,7 +1345,7 @@ public:
 #endif
 			QCA::CAP_RSA |
 			QCA::CAP_X509 |
-			QCA::CAP_SSL;
+			QCA::CAP_TLS;
 		return caps;
 	}
 
@@ -1402,8 +1369,8 @@ public:
 			return new RSAKeyContext;
 		else if(cap == QCA::CAP_X509)
 			return new CertContext;
-		else if(cap == QCA::CAP_SSL)
-			return new SSLContext;
+		else if(cap == QCA::CAP_TLS)
+			return new TLSContext;
 		return 0;
 	}
 };
@@ -1417,4 +1384,4 @@ QCAProvider *createProviderOpenSSL()
 	return (new QCAOpenSSL);
 }
 
-#include"qcaopenssl.moc"
+//#include"qcaopenssl.moc"

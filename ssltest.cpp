@@ -72,42 +72,42 @@ QString resultToString(int result)
 {
 	QString s;
 	switch(result) {
-		case QCA::SSL::NoCert:
+		case QCA::TLS::NoCert:
 			s = QObject::tr("No certificate presented.");
 			break;
-		case QCA::SSL::Valid:
+		case QCA::TLS::Valid:
 			break;
-		case QCA::SSL::HostMismatch:
+		case QCA::TLS::HostMismatch:
 			s = QObject::tr("Hostname mismatch.");
 			break;
-		case QCA::SSL::Rejected:
+		case QCA::TLS::Rejected:
 			s = QObject::tr("Root CA rejects the specified purpose.");
 			break;
-		case QCA::SSL::Untrusted:
+		case QCA::TLS::Untrusted:
 			s = QObject::tr("Not trusted for the specified purpose.");
 			break;
-		case QCA::SSL::SignatureFailed:
+		case QCA::TLS::SignatureFailed:
 			s = QObject::tr("Invalid signature.");
 			break;
-		case QCA::SSL::InvalidCA:
+		case QCA::TLS::InvalidCA:
 			s = QObject::tr("Invalid CA certificate.");
 			break;
-		case QCA::SSL::InvalidPurpose:
+		case QCA::TLS::InvalidPurpose:
 			s = QObject::tr("Invalid certificate purpose.");
 			break;
-		case QCA::SSL::SelfSigned:
+		case QCA::TLS::SelfSigned:
 			s = QObject::tr("Certificate is self-signed.");
 			break;
-		case QCA::SSL::Revoked:
+		case QCA::TLS::Revoked:
 			s = QObject::tr("Certificate has been revoked.");
 			break;
-		case QCA::SSL::PathLengthExceeded:
+		case QCA::TLS::PathLengthExceeded:
 			s = QObject::tr("Maximum cert chain length exceeded.");
 			break;
-		case QCA::SSL::Expired:
+		case QCA::TLS::Expired:
 			s = QObject::tr("Certificate has expired.");
 			break;
-		case QCA::SSL::Unknown:
+		case QCA::TLS::Unknown:
 		default:
 			s = QObject::tr("General validation error.");
 			break;
@@ -127,13 +127,14 @@ public:
 		connect(sock, SIGNAL(connectionClosed()), SLOT(sock_connectionClosed()));
 		connect(sock, SIGNAL(error(int)), SLOT(sock_error(int)));
 
-		ssl = new QCA::SSL;
-		connect(ssl, SIGNAL(handshaken(bool)), SLOT(ssl_handshaken(bool)));
+		ssl = new QCA::TLS;
+		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 		connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
+		connect(ssl, SIGNAL(error(int)), SLOT(ssl_error(int)));
 
 		rootCerts.setAutoDelete(true);
-		rootCerts = getRootCerts("/usr/share/psi/certs/rootcert.xml");
+		rootCerts = getRootCerts("/usr/local/share/psi/certs/rootcert.xml");
 	}
 
 	~SecureTest()
@@ -166,7 +167,8 @@ private slots:
 	void sock_connected()
 	{
 		printf("Connected, starting TLS handshake...\n");
-		ssl->startClient(host, rootCerts);
+		ssl->setCertificateStore(rootCerts);
+		ssl->startClient(host);
 	}
 
 	void sock_readyRead()
@@ -190,31 +192,25 @@ private slots:
 		quit();
 	}
 
-	void ssl_handshaken(bool b)
+	void ssl_handshaken()
 	{
-		if(b) {
-			cert = ssl->peerCertificate();
-			int vr = ssl->certificateValidityResult();
+		cert = ssl->peerCertificate();
+		int vr = ssl->certificateValidityResult();
 
-			printf("Successful SSL handshake.\n");
-			if(!cert.isNull())
-				showCertInfo(cert);
-			if(vr == QCA::SSL::Valid)
-				printf("Valid certificate.\n");
-			else
-				printf("Invalid certificate: %s\n", resultToString(vr).latin1());
+		printf("Successful SSL handshake.\n");
+		if(!cert.isNull())
+			showCertInfo(cert);
+		if(vr == QCA::TLS::Valid)
+			printf("Valid certificate.\n");
+		else
+			printf("Invalid certificate: %s\n", resultToString(vr).latin1());
 
-			printf("Let's try a GET request now.\n");
-			QString req = "GET / HTTP/1.0\nHost: " + host + "\n\n";
-			QCString cs = req.latin1();
-			QByteArray buf(cs.length());
-			memcpy(buf.data(), cs.data(), buf.size());
-			ssl->write(buf);
-		}
-		else {
-			printf("SSL Handshake Error!\n");
-			quit();
-		}
+		printf("Let's try a GET request now.\n");
+		QString req = "GET / HTTP/1.0\nHost: " + host + "\n\n";
+		QCString cs = req.latin1();
+		QByteArray buf(cs.length());
+		memcpy(buf.data(), cs.data(), buf.size());
+		ssl->write(buf);
 	}
 
 	void ssl_readyRead()
@@ -232,10 +228,22 @@ private slots:
 		sock->writeBlock(a.data(), a.size());
 	}
 
+	void ssl_error(int x)
+	{
+		if(x == QCA::TLS::ErrHandshake) {
+			printf("SSL Handshake Error!\n");
+			quit();
+		}
+		else {
+			printf("SSL Error!\n");
+			quit();
+		}
+	}
+
 private:
 	QString host;
 	QSocket *sock;
-	QCA::SSL *ssl;
+	QCA::TLS *ssl;
 	QCA::Cert cert;
 	QPtrList<QCA::Cert> rootCerts;
 };
@@ -247,8 +255,8 @@ int main(int argc, char **argv)
 	QApplication app(argc, argv, false);
 	QString host = argc > 1 ? argv[1] : "andbit.net";
 
-	if(!QCA::isSupported(QCA::CAP_SSL)) {
-		printf("SSL not supported!\n");
+	if(!QCA::isSupported(QCA::CAP_TLS)) {
+		printf("TLS not supported!\n");
 		return 1;
 	}
 

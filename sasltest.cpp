@@ -38,9 +38,10 @@ public:
 		connect(sasl, SIGNAL(clientFirstStep(const QString &, const QByteArray *)), SLOT(sasl_clientFirstStep(const QString &, const QByteArray *)));
 		connect(sasl, SIGNAL(nextStep(const QByteArray &)), SLOT(sasl_nextStep(const QByteArray &)));
 		connect(sasl, SIGNAL(needParams(bool, bool, bool, bool)), SLOT(sasl_needParams(bool, bool, bool, bool)));
-		connect(sasl, SIGNAL(authenticated(bool)), SLOT(sasl_authenticated(bool)));
+		connect(sasl, SIGNAL(authenticated()), SLOT(sasl_authenticated()));
 		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
 		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
+		connect(sasl, SIGNAL(error(int)), SLOT(sasl_error(int)));
 	}
 
 	~ClientTest()
@@ -59,7 +60,7 @@ public:
 
 		if(!user.isEmpty()) {
 			sasl->setUsername(user);
-			sasl->setAuthname(user);
+			sasl->setAuthzid(user);
 		}
 		if(!pass.isEmpty())
 			sasl->setPassword(pass);
@@ -136,16 +137,16 @@ private slots:
 		sendLine(line);
 	}
 
-	void sasl_needParams(bool auth, bool user, bool pass, bool realm)
+	void sasl_needParams(bool user, bool authzid, bool pass, bool realm)
 	{
 		QString username;
-		if(auth || user)
+		if(user || authzid)
 			username = prompt("Username:");
 		if(user) {
 			sasl->setUsername(username);
 		}
-		if(auth) {
-			sasl->setAuthname(username);
+		if(authzid) {
+			sasl->setAuthzid(username);
 		}
 		if(pass) {
 			sasl->setPassword(prompt("Password (not hidden!) :"));
@@ -156,13 +157,9 @@ private slots:
 		sasl->continueAfterParams();
 	}
 
-	void sasl_authenticated(bool ok)
+	void sasl_authenticated()
 	{
-		printf("SASL %s!\n", ok ? "success" : "failed");
-		if(!ok) {
-			quit();
-			return;
-		}
+		printf("SASL success!\n");
 		printf("SSF: %d\n", sasl->ssf());
 	}
 
@@ -179,6 +176,13 @@ private slots:
 	{
 		QByteArray a = sasl->readOutgoing();
 		sock->writeBlock(a.data(), a.size());
+	}
+
+	void sasl_error(int)
+	{
+		printf("SASL error!\n");
+		quit();
+		return;
 	}
 
 private:
@@ -218,6 +222,7 @@ private:
 			++mode;
 
 			// kick off the client
+			sasl->setAllowAnonymous(false);
 			if(!sasl->startClient(PROTO_NAME, host, mechlist)) {
 				printf("Error starting client!\n");
 				quit();
@@ -332,10 +337,12 @@ public:
 		connect(sock, SIGNAL(bytesWritten(int)), SLOT(sock_bytesWritten(int)));
 
 		sasl = new QCA::SASL;
+		connect(sasl, SIGNAL(authCheck(const QString &, const QString &)), SLOT(sasl_authCheck(const QString &, const QString &)));
 		connect(sasl, SIGNAL(nextStep(const QByteArray &)), SLOT(sasl_nextStep(const QByteArray &)));
-		connect(sasl, SIGNAL(authenticated(bool)), SLOT(sasl_authenticated(bool)));
+		connect(sasl, SIGNAL(authenticated()), SLOT(sasl_authenticated()));
 		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
 		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
+		connect(sasl, SIGNAL(error(int)), SLOT(sasl_error(int)));
 
 		sock->setSocket(s);
 		mode = 0;
@@ -415,18 +422,19 @@ private slots:
 		sendLine(line);
 	}
 
-	void sasl_authenticated(bool ok)
+	void sasl_authCheck(const QString &user, const QString &authzid)
 	{
-		if(ok)
-			sendLine("A");
-		else
-			sendLine("E");
-		printf("Authentication %s.\n", ok ? "success" : "failed");
-		if(ok) {
-			++mode;
-			printf("SSF: %d\n", sasl->ssf());
-			sendLine(str);
-		}
+		printf("AuthCheck: User: [%s], Authzid: [%s]\n", user.latin1(), authzid.latin1());
+		sasl->continueAfterAuthCheck();
+	}
+
+	void sasl_authenticated()
+	{
+		sendLine("A");
+		printf("Authentication success.\n");
+		++mode;
+		printf("SSF: %d\n", sasl->ssf());
+		sendLine(str);
 	}
 
 	void sasl_readyRead()
@@ -443,6 +451,19 @@ private slots:
 		QByteArray a = sasl->readOutgoing();
 		toWrite = a.size();
 		sock->writeBlock(a.data(), a.size());
+	}
+
+	void sasl_error(int x)
+	{
+		if(x == QCA::SASL::ErrAuth) {
+			sendLine("E");
+			printf("Authentication failed.\n");
+			close();
+		}
+		else {
+			printf("SASL security layer error!\n");
+			close();
+		}
 	}
 
 private:

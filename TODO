@@ -1,19 +1,20 @@
+* rename qcaopenssl to qca-ssl and qcacyrussasl to qca-sasl and move them.
 * cipher: option to specify size for genkey
-* cert: properly check hostnames with wildcards
-* ssl: rename to tls
-* ssl: change plugin API to not need Q_OBJECT
-* ssl: error signal
 
-* openssl plugin: fixmes and todos
 * more optimal plugin loading:
     plugins should have versions and names
     load on demand
     ability to add classes as plugins
     ability to set priorities to plugins by name and feature
+    read plugins from QApplication::libraryPaths() - $DIR/crypto
 
-* ssl: client-specified cert
+* openssl plugin:
+    fixmes and todos
+    rename SSL to TLS
+    clean TLSContext, and make sure it reports crypt errors
+    fix CertContext to properly check hostnames with wildcards
+
 * dsa
 * diffie-hellman
-
-* figure out where to install the lib and plugins. maybe Qt plugin path?
+* entropy
 

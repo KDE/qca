@@ -57,10 +57,11 @@ public:
 		connect(sock, SIGNAL(error(int)), SLOT(sock_error(int)));
 		connect(sock, SIGNAL(bytesWritten(int)), SLOT(sock_bytesWritten(int)));
 
-		ssl = new QCA::SSL;
-		connect(ssl, SIGNAL(handshaken(bool)), SLOT(ssl_handshaken(bool)));
+		ssl = new QCA::TLS;
+		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 		connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
+		connect(ssl, SIGNAL(error(int)), SLOT(ssl_error(int)));
 
 		cert.fromPEM(pemdata_cert);
 		privkey.fromPEM(pemdata_privkey);
@@ -100,7 +101,8 @@ public:
 		}
 		sock->setSocket(s);
 		printf("Connection received!  Starting TLS handshake...\n");
-		ssl->startServer(cert, privkey);
+		ssl->setCertificate(cert, privkey);
+		ssl->startServer();
 	}
 
 signals:
@@ -139,15 +141,9 @@ private slots:
 		printf("Socket error.\n");
 	}
 
-	void ssl_handshaken(bool b)
+	void ssl_handshaken()
 	{
-		if(b) {
-			printf("Successful SSL handshake.  Waiting for newline.\n");
-		}
-		else {
-			printf("SSL Handshake Error!  Closing.\n");
-			sock->close();
-		}
+		printf("Successful SSL handshake.  Waiting for newline.\n");
 	}
 
 	void ssl_readyRead()
@@ -180,10 +176,22 @@ private slots:
 		sock->writeBlock(a.data(), a.size());
 	}
 
+	void ssl_error(int x)
+	{
+		if(x == QCA::TLS::ErrHandshake) {
+			printf("SSL Handshake Error!  Closing.\n");
+			sock->close();
+		}
+		else {
+			printf("SSL Error!  Closing.\n");
+			sock->close();
+		}
+	}
+
 private:
 	int port;
 	QSocket *sock;
-	QCA::SSL *ssl;
+	QCA::TLS *ssl;
 	QCA::Cert cert;
 	QCA::RSAKey privkey;
 
@@ -198,8 +206,8 @@ int main(int argc, char **argv)
 	QApplication app(argc, argv, false);
 	int port = argc > 1 ? QString(argv[1]).toInt() : 8000;
 
-	if(!QCA::isSupported(QCA::CAP_SSL)) {
-		printf("SSL not supported!\n");
+	if(!QCA::isSupported(QCA::CAP_TLS)) {
+		printf("TLS not supported!\n");
 		return 1;
 	}
 
