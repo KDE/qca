@@ -97,6 +97,7 @@ public:
 
 	virtual void update(const QSecureArray &in) = 0;
 	virtual void final(QSecureArray *out) = 0;
+
 protected:
 	KeyLength anyKeyLength() const
 	{
@@ -105,8 +106,13 @@ protected:
 		// See Meyers, Effective C++, Effective C++ (2nd Ed), Item 36
 		return KeyLength( 0, std::numeric_limits<int>::max(), 1 );
 	}
+};
 
-
+class KDFContext : public Provider::Context
+{
+public:
+	KDFContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
+	virtual SymmetricKey makeKey(const QSecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount) = 0;
 };
 
 class PKeyBase : public Provider::Context

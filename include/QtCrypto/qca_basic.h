@@ -1227,6 +1227,7 @@ namespace QCA
 		 */
 		KeyDerivationFunction(const KeyDerivationFunction &from);
 		~KeyDerivationFunction();
+		KeyDerivationFunction & operator=(const KeyDerivationFunction &from);
 
 		/**
 		 * Generate the key from a specified secret and salt value.

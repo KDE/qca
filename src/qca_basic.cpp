@@ -72,13 +72,11 @@ Hash::Hash(const QString &type, const QString &provider)
 
 void Hash::clear()
 {
-	//detach();
 	((HashContext *)context())->clear();
 }
 
 void Hash::update(const QSecureArray &a)
 {
-	//detach();
 	((HashContext *)context())->update(a);
 }
 
@@ -109,7 +107,6 @@ void Hash::update(QIODevice &file)
 
 QSecureArray Hash::final()
 {
-	//detach();
 	return ((HashContext *)context())->final();
 }
 
@@ -148,8 +145,7 @@ Cipher::Cipher(const QString &type, Mode m, Direction dir, const SymmetricKey &k
 Cipher::Cipher(const Cipher &from)
 :Algorithm(from), Filter(from)
 {
-	d = new Private;
-	*this = from;
+	d = new Private(*from.d);
 }
 
 Cipher::~Cipher()
@@ -181,14 +177,12 @@ unsigned int Cipher::blockSize() const
 
 void Cipher::clear()
 {
-	//detach();
 	d->done = false;
 	((CipherContext *)context())->setup(d->key, (CipherContext::Mode)d->mode, d->dir, d->iv);
 }
 
 QSecureArray Cipher::update(const QSecureArray &a)
 {
-	//detach();
 	QSecureArray out;
 	if(d->done)
 		return out;
@@ -198,7 +192,6 @@ QSecureArray Cipher::update(const QSecureArray &a)
 
 QSecureArray Cipher::final()
 {
-	//detach();
 	QSecureArray out;
 	if(d->done)
 		return out;
@@ -244,8 +237,7 @@ MessageAuthenticationCode::MessageAuthenticationCode(const QString &type, const 
 MessageAuthenticationCode::MessageAuthenticationCode(const MessageAuthenticationCode &from)
 :Algorithm(from), BufferedComputation(from)
 {
-	d = new Private;
-	*this = from;
+	d = new Private(*from.d);
 }
 
 MessageAuthenticationCode::~MessageAuthenticationCode()
@@ -271,14 +263,12 @@ bool MessageAuthenticationCode::validKeyLength(int n) const
 
 void MessageAuthenticationCode::clear()
 {
-	//detach();
 	d->done = false;
 	((MACContext *)context())->setup(d->key);
 }
 
 void MessageAuthenticationCode::update(const QSecureArray &a)
 {
-	//detach();
 	if(d->done)
 		return;
 	((MACContext *)context())->update(a);
@@ -286,7 +276,6 @@ void MessageAuthenticationCode::update(const QSecureArray &a)
 
 QSecureArray MessageAuthenticationCode::final()
 {
-	//detach();
 	if(!d->done)
 	{
 		d->done = true;
@@ -309,46 +298,52 @@ QString MessageAuthenticationCode::withAlgorithm(const QString &macType, const Q
 //----------------------------------------------------------------------------
 // Key Derivation Function
 //----------------------------------------------------------------------------
-class KeyDerivationFunction::Private
+/*class KeyDerivationFunction::Private
 {
 public:
-    QSecureArray secret;
-    InitializationVector salt;
-    int keyLength;
-    int iterationCount;
-
-    SymmetricKey buf;
-};
+	QSecureArray secret;
+	InitializationVector salt;
+	int keyLength;
+	int iterationCount;
+	
+	SymmetricKey buf;
+};*/
 
 KeyDerivationFunction::KeyDerivationFunction(const QString &type, const QString &provider)
 :Algorithm(type, provider)
 {
-	d = new Private;
+	//d = new Private;
 }
 
 KeyDerivationFunction::KeyDerivationFunction(const KeyDerivationFunction &from)
 :Algorithm(from)
 {
-	d = new Private;
-	*this = from;
+	Q_UNUSED(from);
+	//d = new Private(*from.d);
 }
 
 KeyDerivationFunction::~KeyDerivationFunction()
 {
-	delete d;
+	//delete d;
 }
 
-SymmetricKey KeyDerivationFunction::makeKey(const QSecureArray &secret,
-				     const InitializationVector &salt,
-				     unsigned int keyLength,
-				     unsigned int iterationCount)
+KeyDerivationFunction & KeyDerivationFunction::operator=(const KeyDerivationFunction &from)
 {
-	d->secret = secret;
-	d->salt = salt;
-	d->keyLength = keyLength;
-	d->iterationCount = iterationCount;
+	Q_UNUSED(from);
+	//*d = *from.d;
+	return *this;
+}
 
-	return d->buf;
+SymmetricKey KeyDerivationFunction::makeKey(const QSecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount)
+{
+	//d->secret = secret;
+	//d->salt = salt;
+	//d->keyLength = keyLength;
+	//d->iterationCount = iterationCount;
+
+	//return d->buf;
+
+	return ((KDFContext *)context())->makeKey(secret, salt, keyLength, iterationCount);
 }
 
 QString KeyDerivationFunction::withAlgorithm(const QString &kdfType, const QString &algType)

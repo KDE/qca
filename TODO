@@ -31,7 +31,6 @@
   deal with thread issues at central points:
     secure memory, qca_plugin, keygen, securemessagesystem
   cipher - needs to handling padding
-  mac
   pkey
   cert/crl/store/csr/ca/etc (don't forget to call detach())
   tls
