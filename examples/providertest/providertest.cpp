@@ -33,8 +33,8 @@ int main(int argc, char **argv)
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
 
-    // this is a hack to get all the available providers loaded.
-    QCA::isSupported("foo");
+    // get all the available providers loaded.
+    QCA::scanForPlugins();
 
     // this gives us all the plugin providers as a list
     QCA::ProviderList qcaProviders = QCA::providers();
