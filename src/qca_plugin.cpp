@@ -42,7 +42,6 @@ class ProviderItem
 {
 public:
 	QCA::Provider *p;
-	QCAProvider *p_old;
 	QString fname;
 	int version;
 	int priority;
@@ -84,15 +83,15 @@ public:
 		if(old)
 		{
 			// old method
-			QCAProvider *(*createProvider)() = (QCAProvider *(*)())s;
-			QCAProvider *p = createProvider();
-			if(!p)
-			{
+			//QCAProvider *(*createProvider)() = (QCAProvider *(*)())s;
+			//QCAProvider *p = createProvider();
+			//if(!p)
+			//{
 				delete lib;
 				return 0;
-			}
-			ver = p->qcaVersion();
-			i = new ProviderItem(lib, p);
+			//}
+			//ver = p->qcaVersion();
+			//i = new ProviderItem(lib, p);
 		}
 		else
 		{
@@ -127,7 +126,7 @@ public:
 	~ProviderItem()
 	{
 		delete p;
-		delete p_old;
+		//delete p_old;
 		delete lib;
 	}
 
@@ -138,8 +137,8 @@ public:
 		init_done = true;
 		if(p)
 			p->init();
-		else
-			p_old->init();
+		//else
+		//	p_old->init();
 	}
 
 private:
@@ -150,7 +149,7 @@ private:
 	{
 		lib = _lib;
 		p = _p;
-		p_old = 0;
+		//p_old = 0;
 		init_done = false;
 	}
 
@@ -158,7 +157,7 @@ private:
 	{
 		lib = _lib;
 		p = 0;
-		p_old = _p_old;
+		//p_old = _p_old;
 		init_done = false;
 	}
 };
@@ -306,15 +305,15 @@ QCA::Provider *ProviderManager::findFor(const QString &name, const QString &type
 	}
 }
 
-QCAProvider *ProviderManager::findFor(int cap) const
+QCAProvider *ProviderManager::findFor(int) const
 {
 	// find the first one that can do it
 	QPtrListIterator<ProviderItem> it(providerItemList);
 	for(ProviderItem *i; (i = it.current()); ++it)
 	{
 		i->ensureInit();
-		if(i->p_old && i->p_old->capabilities() & cap)
-			return i->p_old;
+		//if(i->p_old && i->p_old->capabilities() & cap)
+		//	return i->p_old;
 	}
 	return 0;
 }
@@ -368,8 +367,8 @@ int ProviderManager::caps() const
 	QPtrListIterator<ProviderItem> it(providerItemList);
 	for(ProviderItem *i; (i = it.current()); ++it)
 	{
-		if(i->p_old)
-			caps |= i->p_old->capabilities();
+		//if(i->p_old)
+		//	caps |= i->p_old->capabilities();
 	}
 	return caps;
 }
