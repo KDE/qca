@@ -43,6 +43,7 @@ Provider *create_default_provider();
 //----------------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------------
+static QMutex *manager_mutex = 0;
 static QCA::ProviderManager *manager = 0;
 static QCA::Random *global_rng = 0;
 static bool qca_init = false;
@@ -60,6 +61,9 @@ static bool features_have(const QStringList &have, const QStringList &want)
 
 void init()
 {
+	if(qca_init)
+		return;
+
 	init(Practical, 64);
 }
 
@@ -89,6 +93,8 @@ void init(MemoryMode mode, int prealloc)
 #endif
 	}
 
+	manager_mutex = new QMutex;
+
 	manager = new ProviderManager;
 	manager->setDefault(create_default_provider()); // manager owns it
 }
@@ -104,6 +110,9 @@ void deinit()
 	delete manager;
 	manager = 0;
 
+	delete manager_mutex;
+	manager_mutex = 0;
+
 	botan_deinit();
 	qca_secmem = false;
 	qca_init = false;
@@ -118,6 +127,8 @@ bool isSupported(const QStringList &features)
 {
 	if(!qca_init)
 		return false;
+
+	QMutexLocker lock(manager_mutex);
 
 	if(features_have(manager->allFeatures(), features))
 		return true;
@@ -140,6 +151,8 @@ QStringList supportedFeatures()
 {
 	init();
 
+	QMutexLocker lock(manager_mutex);
+
 	// query all features
 	manager->scan();
 	return manager->allFeatures();
@@ -148,12 +161,18 @@ QStringList supportedFeatures()
 QStringList defaultFeatures()
 {
 	init();
+
+	QMutexLocker lock(manager_mutex);
+
 	return manager->find("default")->features();
 }
 
 bool insertProvider(Provider *p, int priority)
 {
 	init();
+
+	QMutexLocker lock(manager_mutex);
+
 	return manager->add(p, priority);
 }
 
@@ -161,6 +180,8 @@ void setProviderPriority(const QString &name, int priority)
 {
 	if(!qca_init)
 		return;
+
+	QMutexLocker lock(manager_mutex);
 
 	manager->changePriority(name, priority);
 }
@@ -170,17 +191,24 @@ int providerPriority(const QString &name)
 	if(!qca_init)
 		return -1;
 
+	QMutexLocker lock(manager_mutex);
+
 	return manager->getPriority(name);
 }
 
 const ProviderList & providers()
 {
 	init();
+
+	QMutexLocker lock(manager_mutex);
+
 	return manager->providers();
 }
 
 void scanForPlugins()
 {
+	QMutexLocker lock(manager_mutex);
+
 	manager->scan();
 }
 
@@ -188,6 +216,8 @@ void unloadAllPlugins()
 {
 	if(!qca_init)
 		return;
+
+	QMutexLocker lock(manager_mutex);
 
 	// if the global_rng was owned by a plugin, then delete it
 	if(global_rng && (global_rng->provider() != manager->find("default")))
@@ -249,9 +279,9 @@ QByteArray hexToArray(const QString &str)
 	return Hex().stringToArray(str).toByteArray();
 }
 
-Provider::Context *getContext(const QString &type, const QString &provider)
+static Provider *getProviderForType(const QString &type, const QString &provider)
 {
-	init();
+	QMutexLocker lock(manager_mutex);
 
 	Provider *p = 0;
 	bool scanned = false;
@@ -280,6 +310,15 @@ Provider::Context *getContext(const QString &type, const QString &provider)
 			p = manager->findFor(QString::null, type);
 		}
 	}
+
+	return p;
+}
+
+Provider::Context *getContext(const QString &type, const QString &provider)
+{
+	init();
+
+	Provider *p = getProviderForType(type, provider);
 	if(!p)
 		return 0;
 
