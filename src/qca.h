@@ -174,7 +174,7 @@ public:
 	const char & operator[](int index) const;
 
 	/**
-	 * Pointer the data in the secure array
+	 * Pointer to the data in the secure array
 	 * 
 	 * You can use this for memcpy and similar functions. If you are trying
 	 * to obtain data at a particular offset, you might be better off using
@@ -184,7 +184,7 @@ public:
 	const char *data() const;
 
 	/**
-	 * Pointer the data in the secure array
+	 * Pointer to the data in the secure array
 	 * 
 	 * You can use this for memcpy and similar functions. If you are trying
 	 * to obtain data at a particular offset, you might be better off using
@@ -208,7 +208,7 @@ public:
 	char & at(uint index);
 
 	/**
-	 * Return the number of bytes in the array
+	 * Returns the number of bytes in the array
 	 */
 	uint size() const;
 
@@ -274,6 +274,13 @@ private:
  **/
 bool operator==(const QSecureArray &a, const QSecureArray &b);
 
+/**
+ * Inequality operator. Returns true if the two QSecureArray
+ * arguments have different length, or the same lengh but
+ * different data
+ *
+ * \relates QSecureArray
+ **/
 bool operator!=(const QSecureArray &a, const QSecureArray &b);
 
 /**
