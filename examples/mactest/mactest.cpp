@@ -19,25 +19,27 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// QtCrypto/QtCrypto has the declarations for all of QCA
+// QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
 // needed for printf
 #include<stdio.h>
 
 int main(int argc, char **argv)
 {
-	// the Initializer object sets things up, and 
+	// the Initializer object sets things up, and
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
 
+	QCoreApplication app(argc, argv);
+
 	// we use the first argument as the data to authenticate
 	// if an argument is provided. Use "hello" if no argument
-	QCString cs = (argc >= 2) ? argv[1] : "hello";
+	QByteArray arg = (argc >= 2) ? argv[1] : "hello";
 
 	// we use the second argument as the key to authenticate
 	// with, if two arguments are provided. Use "secret" as
 	// the key if less than two arguments.
-	QCString key = (argc >= 3) ? argv[2] : "secret";
+	QSecureArray key((argc >= 3) ? argv[2] : "secret");
 
 	// must always check that an algorithm is supported before using it
 	if( !QCA::isSupported("hmac(sha1)") ) {
@@ -51,8 +53,8 @@ int main(int argc, char **argv)
 		QCA::SymmetricKey keyObject(key);
 
 		// we split it into two parts to show incremental update
-                QSecureArray part1(cs.left(3)); // three chars - "hel"
-                QSecureArray part2(cs.mid(3)); // the rest - "lo"
+		QSecureArray part1(arg.left(3)); // three chars - "hel"
+		QSecureArray part2(arg.mid(3)); // the rest - "lo"
 		hmacObject.update(part1);
 		hmacObject.update(part2);
 
@@ -61,7 +63,7 @@ int main(int argc, char **argv)
 
 		// convert the result into printable hexadecimal.
 		QString result = QCA::arrayToHex(resultArray);
-		printf("HMAC(SHA1) of \"%s\" with \"%s\" = [%s]\n", cs.data(), key.data(), result.latin1());
+		printf("HMAC(SHA1) of \"%s\" with \"%s\" = [%s]\n", arg.data(), key.data(), result.toLatin1().data());
 	}
 
 	return 0;
