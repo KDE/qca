@@ -37,6 +37,7 @@ void StaticUnitTest::allTests()
 {
     QCA::Initializer init;
 
+
     QByteArray test(10);
     test.fill('a');
 
@@ -47,5 +48,17 @@ void StaticUnitTest::allTests()
 
     CHECK( test == QCA::hexToArray(QString("62626262626262006262")), true );
 
+    QSecureArray testArray(10);
+    //testArray.fill( 'a' );
+    for (unsigned int i = 0; i < testArray.size(); i++) {
+	testArray[ i ] = 0x61;
+    }
+    CHECK( QCA::arrayToHex( testArray ), QString( "61616161616161616161" ) );
+    //testArray.fill( 'b' );
+    for (unsigned int i = 0; i < testArray.size(); i++) {
+	testArray[ i ] = 0x62;
+    }
+    testArray[6] = 0x00;
+    CHECK( testArray == QCA::hexToArray(QString("62626262626200626262")), true );
 }
 
