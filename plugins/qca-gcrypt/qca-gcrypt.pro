@@ -12,7 +12,6 @@ DEFINES += QCA_PLUGIN
 
 INCLUDEPATH += ../src
 SOURCES = qca-gcrypt.cpp
-LIBS += -lgcrypt -lgpg-error
 
-#include(conf.pri)
-#include(extra.pri)
+include(conf.pri)
+include(extra.pri)
