@@ -1,6 +1,6 @@
 diff -ur a/include/bigint.h b/include/bigint.h
 --- a/include/bigint.h	2004-10-10 12:33:54.000000000 -0700
-+++ b/include/bigint.h	2004-10-17 14:17:36.000000000 -0700
++++ b/include/bigint.h	2004-10-28 23:58:45.000000000 -0700
 @@ -6,7 +6,10 @@
  #ifndef BOTAN_BIGINT_H__
  #define BOTAN_BIGINT_H__
@@ -33,7 +33,7 @@ diff -ur a/include/bigint.h b/include/bigint.h
     private:
        friend void modifying_divide(BigInt&, BigInt&, BigInt&);
        void grow_to(u32bit n) const { reg.grow_to(n); }
-@@ -142,8 +149,10 @@
+@@ -142,15 +149,19 @@
  /*************************************************
  * I/O Operators                                  *
  *************************************************/
@@ -44,6 +44,15 @@ diff -ur a/include/bigint.h b/include/bigint.h
  
  }
  
++#ifndef BOTAN_MINIMAL_BIGINT
+ namespace std {
+ 
+ inline void swap(Botan::BigInt& a, Botan::BigInt& b) { a.swap(b); }
+ 
+ }
++#endif
+ 
+ #endif
 Only in b/include: mmap_mem.h
 diff -ur a/include/mp_types.h b/include/mp_types.h
 --- a/include/mp_types.h	2004-10-10 12:33:54.000000000 -0700
@@ -327,7 +336,7 @@ diff -ur a/src/big_base.cpp b/src/big_base.cpp
  }
 diff -ur a/src/big_code.cpp b/src/big_code.cpp
 --- a/src/big_code.cpp	2004-10-10 12:33:53.000000000 -0700
-+++ b/src/big_code.cpp	2004-10-17 14:17:19.000000000 -0700
++++ b/src/big_code.cpp	2004-10-29 00:02:38.000000000 -0700
 @@ -5,7 +5,10 @@
  
  #include <botan/bigint.h>
@@ -356,7 +365,23 @@ diff -ur a/src/big_code.cpp b/src/big_code.cpp
     else if(base == Octal)
        {
        BigInt copy = n;
-@@ -97,6 +102,7 @@
+@@ -44,7 +49,15 @@
+          divide(copy, 10, copy, remainder);
+          output[output_size - 1 - j] = digit2char(remainder.word_at(0));
+          if(copy.is_zero())
++            {
++            if(j < output_size - 1)
++               {
++               int extra = output_size - 1 - j;
++               memmove(output, output + extra, output_size - extra);
++               memset(output + output_size - extra, 0, extra);
++               }
+             break;
++            }
+          }
+       }
+    else
+@@ -97,6 +110,7 @@
     BigInt r;
     if(base == Binary)
        r.binary_decode(buf, length);
@@ -364,7 +389,7 @@ diff -ur a/src/big_code.cpp b/src/big_code.cpp
     else if(base == Hexadecimal)
        {
        SecureVector<byte> hex;
-@@ -117,6 +123,7 @@
+@@ -117,6 +131,7 @@
           binary[j] = Hex_Decoder::decode(hex+2*j-offset);
        r.binary_decode(binary, binary.size());
        }
@@ -449,33 +474,50 @@ diff -ur a/src/numthry.cpp b/src/numthry.cpp
  }
 diff -ur a/src/secalloc.cpp b/src/secalloc.cpp
 --- a/src/secalloc.cpp	2004-10-10 12:33:53.000000000 -0700
-+++ b/src/secalloc.cpp	2004-10-17 14:17:19.000000000 -0700
-@@ -4,7 +4,9 @@
++++ b/src/secalloc.cpp	2004-10-29 00:10:38.000000000 -0700
+@@ -4,7 +4,14 @@
  *************************************************/
  
  #include <botan/secalloc.h>
 -#include <botan/conf.h>
 +#ifndef BOTAN_NO_CONF_H
 +# include <botan/conf.h>
++#else
++namespace Botan {
++int botan_memory_chunk = 65536;
++int botan_prealloc = 2;
++}
 +#endif
  #include <botan/util.h>
  
  namespace Botan {
-@@ -27,7 +29,13 @@
+@@ -27,7 +34,13 @@
  * SecureAllocator Constructor                    *
  *************************************************/
  SecureAllocator::SecureAllocator() :
 -   PREF_SIZE(Config::get_u32bit("base/memory_chunk")), ALIGN_TO(8)
 +   PREF_SIZE(
-+#ifdef BOTAN_NO_CONF_H
-+	65536
-+#else
++#ifndef BOTAN_NO_CONF_H
 +	Config::get_u32bit("base/memory_chunk")
++#else
++	botan_memory_chunk
 +#endif
 +	), ALIGN_TO(8)
     {
     if(!PREF_SIZE)
        throw Internal_Error("The base/memory_chunk option is unset");
+@@ -53,7 +66,11 @@
+ *************************************************/
+ void SecureAllocator::init()
+    {
++#ifndef BOTAN_NO_CONF_H
+    for(u32bit j = 0; j != 2; j++)
++#else
++   for(u32bit j = 0; j != (u32bit)botan_prealloc; j++)
++#endif
+       {
+       void* ptr = 0;
+       try {
 diff -ur a/src/util.cpp b/src/util.cpp
 --- a/src/util.cpp	2004-10-10 12:33:54.000000000 -0700
 +++ b/src/util.cpp	2004-10-17 14:17:19.000000000 -0700
