@@ -329,7 +329,7 @@ static struct cipherIVTestValues aes256cfbTestValues[] = {
     { 0, 0, 0, 0 }
 };
 
-// This is from the Botan test suite
+// This is from the Botan test suite. 
 static struct cipherIVTestValues aes256ofbTestValues[] = {
 
     { "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710",
@@ -339,7 +339,7 @@ static struct cipherIVTestValues aes256ofbTestValues[] = {
     { 0, 0, 0, 0 }
 };
 
-// These are from the Botan test suite
+// These are from the Botan test suite. They match the test vectors from Bruce's site
 static struct cipherTestValues blowfishTestValues[] = {
 
   { "0000000000000000", "245946885754369a", "0123456789abcdef" },
@@ -405,12 +405,13 @@ static struct cipherTestValues blowfishTestValues[] = {
   { 0, 0, 0 }
 };
 
-// These are from the Botan test suite
+
 static struct cipherTestValues tripledesTestValues[] = {
-// Botan includes these, but the key length is wrong. Beats me.
-//  { "0123456789abcde7", "7f1d0a77826b8aff", "123456789abcdeffedcba9876543210" },
-//  { "4e6f772069732074", "3fa40e8a984d4815", "123456789abcdef0123456789abcdef" },
-//  { "42fd443059577fa2", "af37fb421f8c4095", "4b915ba43feb5b604b915ba43feb5b6" },
+    // These are from the Botan test suite
+    // Two key - needs more work.
+    //  { "0123456789abcde7", "7f1d0a77826b8aff", "123456789abcdeffedcba9876543210" },
+    //  { "4e6f772069732074", "3fa40e8a984d4815", "123456789abcdef0123456789abcdef" },
+    //  { "42fd443059577fa2", "af37fb421f8c4095", "4b915ba43feb5b604b915ba43feb5b6" },
 
     { "42fd443059577fa2", "af37fb421f8c4095", "04b915ba43feb5b604b915ba43feb5b604b915ba43feb5b6" },
     { "736f6d6564617461", "18d748e563620572", "0123456789abcdef5555555555555555fedcba9876543210" },
@@ -428,6 +429,44 @@ static struct cipherTestValues tripledesTestValues[] = {
     { "68652074696d6520", "6a271787ab8883f9", "0123456789abcdef0123456789abcdef0123456789abcdef" },
     { "4e6f772069732074", "3fa40e8a984d4815", "0123456789abcdef0123456789abcdef0123456789abcdef" },
     { 0, 0, 0 }
+};
+
+// From the Eric Young test vectors on Bruce's site. I modified
+// them to remove the incomplete block.
+static struct cipherIVTestValues blowfishcbcTestValues[] = {
+
+  { "37363534333231204e6f77206973207468652074696d6520",
+    "6b77b4d63006dee605b156e27403979358deb9e7154616d9",
+    "0123456789abcdeff0e1d2c3b4a59687", "fedcba9876543210" },
+    { 0, 0, 0, 0 }
+};
+
+// From the Eric Young test vectors on Bruce's site:
+static struct cipherIVTestValues blowfishcbcPkcs7TestValues[] = {
+
+  { "37363534333231204e6f77206973207468652074696d6520666f722000",
+    "6b77b4d63006dee605b156e27403979358deb9e7154616d959f1652bd5ff92cc",
+    "0123456789abcdeff0e1d2c3b4a59687", "fedcba9876543210" },
+    { 0, 0, 0, 0 }
+};
+
+
+// From the Eric Young test vectors on Bruce's site:
+static struct cipherIVTestValues blowfishcfbTestValues[] = {
+
+  { "37363534333231204e6f77206973207468652074696d6520666f722000",
+    "e73214a2822139caf26ecf6d2eb9e76e3da3de04d1517200519d57a6c3",
+    "0123456789abcdeff0e1d2c3b4a59687", "fedcba9876543210" },
+    { 0, 0, 0, 0 }
+};
+
+// From the Eric Young test vectors on Bruce's site:
+static struct cipherIVTestValues blowfishofbTestValues[] = {
+
+  { "37363534333231204e6f77206973207468652074696d6520666f722000",
+    "e73214a2822139ca62b343cc5b65587310dd908d0c241b2263c2cf80da",
+    "0123456789abcdeff0e1d2c3b4a59687", "fedcba9876543210" },
+    { 0, 0, 0, 0 }
 };
 
 // These are from the Botan test suite - its ECB mode, no padding
@@ -767,6 +806,7 @@ CipherUnitTest::CipherUnitTest()
 {
 }
 
+// TODO: ECB-PKCS7, CBC-PKCS7
 void CipherUnitTest::aes128Tests()
 {
     if (!QCA::isSupported("aes128-ecb") )
@@ -895,7 +935,7 @@ void CipherUnitTest::aes128Tests()
     }
 }
 
-
+// TODO: ECB-PKCS7, CBC-PKCS7
 void CipherUnitTest::aes192Tests()
 {
     if (!QCA::isSupported("aes192-ecb") )
@@ -1009,6 +1049,7 @@ void CipherUnitTest::aes192Tests()
     }
 }
 
+// TODO: ECB-PKCS7, CBC-PKCS7
 void CipherUnitTest::aes256Tests()
 {
     if (!QCA::isSupported("aes256-ecb") )
@@ -1121,6 +1162,7 @@ void CipherUnitTest::aes256Tests()
     }
 }
 
+// TODO: ECB-PKCS7
 void CipherUnitTest::tripleDESTests()
 {
    if (!QCA::isSupported("tripledes-ecb") )
@@ -1150,7 +1192,6 @@ void CipherUnitTest::tripleDESTests()
         }
     }
 }
-
 
 void CipherUnitTest::DESTests()
 {
@@ -1215,7 +1256,7 @@ void CipherUnitTest::DESTests()
 	QCA::DES cipherObj1( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 8 ) );
 	CHECK( cipherObj1.keyLength().minimum(), 8 );
 	CHECK( cipherObj1.keyLength().maximum(), 8 );
-	CHECK( cipherObj1.blockSize(), (unsigned)1 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
 
 	for (int n = 0; (0 != descfbTestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( descfbTestValues[n].key ) );
@@ -1321,6 +1362,7 @@ void CipherUnitTest::DESTests()
     }
 }
 
+// TODO: ECB-PKCS7, CBC-PKCS7
 void CipherUnitTest::blowfishTests()
 {
     if (!QCA::isSupported("blowfish-ecb") )
@@ -1342,6 +1384,99 @@ void CipherUnitTest::blowfishTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( blowfishTestValues[n].ciphertext ) ) ),
 		   QString( blowfishTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("blowfish-cbc") )
+	SKIP("Blowfish, CBC mode not supported!");
+    else {
+	for (int n = 0; (0 != blowfishcbcTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( blowfishcbcTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( blowfishcbcTestValues[n].iv ) );
+	    QCA::BlowFish forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( blowfishcbcTestValues[n].plaintext ) ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( ( update + QCA::arrayToHex( forwardCipher.final() ) ),
+		   QString( blowfishcbcTestValues[n].ciphertext) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::BlowFish reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( blowfishcbcTestValues[n].ciphertext ) ) ),
+		   QString( blowfishcbcTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("blowfish-cbc-pkcs7") )
+	SKIP("Blowfish, CBC mode with PKCS7 padding not supported!");
+    else {
+	for (int n = 0; (0 != blowfishcbcPkcs7TestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( blowfishcbcPkcs7TestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( blowfishcbcPkcs7TestValues[n].iv ) );
+	    QCA::BlowFish forwardCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Encode, key, iv);
+	    QSecureArray plainText = QCA::hexToArray( blowfishcbcPkcs7TestValues[n].plaintext );
+	    QString update = QCA::arrayToHex( forwardCipher.update( plainText ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( ( update + QCA::arrayToHex( forwardCipher.final() ) ),
+		   QString( blowfishcbcPkcs7TestValues[n].ciphertext) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::BlowFish reverseCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( blowfishcbcPkcs7TestValues[n].ciphertext ) ) ),
+		   QString( blowfishcbcPkcs7TestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("blowfish-cfb") )
+	SKIP("Blowfish, CFB mode not supported!");
+    else {
+	for (int n = 0; (0 != blowfishcfbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( blowfishcfbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( blowfishcfbTestValues[n].iv ) );
+	    QCA::BlowFish forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( blowfishcfbTestValues[n].plaintext ) ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( ( update + QCA::arrayToHex( forwardCipher.final() ) ),
+		   QString( blowfishcfbTestValues[n].ciphertext) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::BlowFish reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( blowfishcfbTestValues[n].ciphertext ) ) ),
+		   QString( blowfishcfbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("blowfish-ofb") )
+	SKIP("Blowfish, OFB mode not supported!");
+    else {
+	for (int n = 0; (0 != blowfishofbTestValues[n].plaintext); n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( blowfishofbTestValues[n].key ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( blowfishofbTestValues[n].iv ) );
+	    QCA::BlowFish forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( blowfishofbTestValues[n].plaintext ) ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( ( update + QCA::arrayToHex( forwardCipher.final() ) ),
+		   QString( blowfishofbTestValues[n].ciphertext) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::BlowFish reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( blowfishofbTestValues[n].ciphertext ) ) ),
+		   QString( blowfishofbTestValues[n].plaintext ) );
 	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
 	    CHECK( reverseCipher.ok(), true );
