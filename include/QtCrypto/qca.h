@@ -91,11 +91,11 @@
 
    \section using Using QCA
 
-   The application simply includes %qca.h and links to libqca,
-   which provides the 'wrapper API' and plugin loader.  Crypto
-   functionality is determined during runtime, and plugins are
-   loaded from the 'crypto' subfolder of the %Qt library paths. There
-   are <a href="examples.html">additional examples available</a>.
+   The application simply includes &lt;QtCrypto> and links to
+   libqca, which provides the 'wrapper API' and plugin loader.  Crypto
+   functionality is determined during runtime, and plugins are loaded
+   from the 'crypto' subfolder of the %Qt library paths. There are <a
+   href="examples.html">additional examples available</a>.
 
    \section availability Availability
 
