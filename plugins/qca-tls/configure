@@ -469,6 +469,7 @@ int main()
 
 		QString str;
 		str += "# qconf\n";
+		str += "QT_PATH_PLUGINS = " + QString(qInstallPathPlugins()) + '\n';
 		if(!conf->DEFINES.isEmpty())
 			str += "DEFINES += " + conf->DEFINES + '\n';
 		if(!conf->INCLUDEPATH.isEmpty())
