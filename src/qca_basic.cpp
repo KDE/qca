@@ -81,6 +81,34 @@ void Hash::update(const QSecureArray &a)
 	((HashContext *)context())->update(a);
 }
 
+void Hash::update(const QByteArray &a)
+{
+	update( QSecureArray( a ) );
+}
+
+void Hash::update(const char *data, int len)
+{
+	if ( len < 0 )
+		len = qstrlen( data );
+	if ( 0 == len )
+		return;
+
+	QByteArray bArray;
+	bArray.setRawData( data, len );
+	update( bArray );
+	bArray.resetRawData( data, len );
+}
+
+// Reworked from KMD5, from KDE's kdelibs
+void Hash::update(QIODevice &file)
+{
+	char buffer[1024];
+	int len;
+
+	while ((len=file.readBlock(reinterpret_cast<char*>(buffer), sizeof(buffer))) > 0)
+		update(buffer, len);
+}
+
 QSecureArray Hash::final()
 {
 	detach();

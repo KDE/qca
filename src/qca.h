@@ -1229,8 +1229,55 @@ namespace QCA
 		 * you may be better off using a convenience method
 		 * such as hash() or hashToString() instead.
 		 *
+ 		 * \param a the byte array to add to the hash 
 		 */
 		virtual void update(const QSecureArray &a);
+
+		/**
+		 * \overload
+		 *
+		 * \param a the QByteArray to add to the hash 
+		 */
+		virtual void update(const QByteArray &a);
+
+		/**
+		 * \overload
+		 *
+		 * This method is provided to assist with code that
+		 * already exists, and is being ported to %QCA. You are
+		 * better off passing a QSecureArray (as shown above)
+		 * if you are writing new code.
+		 *
+		 * \param data pointer to a char array
+		 * \param len the length of the array. If not specified
+		 * (or specified as a negative number), the length will be
+		 * determined with strlen(), which may not be what you want
+		 * if the array contains a null (0x00) character.
+		 */
+		virtual void update(const char *data, int len = -1);
+
+		/**
+		 * \overload
+		 *
+		 * This allows you to read from a file or other
+		 * I/O device. Note that the device must be already
+		 * open for reading
+		 *
+		 * \param file an I/O device
+		 *
+		 * If you are trying to calculate the hash of
+		 * a whole file (and it isn't already open), you
+		 * might want to use code like this:
+		 * \code
+		 * QFile f( "file.dat" );
+		 * if ( f1.open( IO_ReadOnly ) ) {
+		 *     QCA::SHA1 hashObj;
+		 *     hashObj.update( f1 );
+		 *     QString output = hashObj.final() ) ),
+		 * }
+		 * \endcode
+		 */
+		virtual void update(QIODevice &file);
 
 		/**
 		 * Finalises input and returns the hash result
@@ -1312,6 +1359,15 @@ namespace QCA
 		Hash(const QString &type, const QString &provider);
 	};
 
+	/**
+	 * General superclass for cipher (encryption / decryption) algorithms.
+	 *
+	 * %Cipher is a superclass for the various algorithms that perform
+	 * low level encryption and decryption within %QCA. You should
+	 * not need to use it directly unless you are
+	 * adding another capability to %QCA - you should be
+	 * using a sub-class. AES is recommended for new applications.
+	 */
 	class QCA_EXPORT Cipher : public Algorithm, public Filter
 	{
 	public:
