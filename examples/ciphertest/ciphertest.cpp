@@ -42,6 +42,7 @@ int main(int argc, char **argv)
 	else {
 		// encrypt
 		QCA::AES128 c(QCA::Cipher::CBC, QCA::Cipher::DefaultPadding, QCA::Encode);
+		c.setup(QCA::Encode, QCA::SymmetricKey(16));
 		QSecureArray u = c.update(arg);
 		if (c.ok()) {
 		  printf("Update OK\n");
