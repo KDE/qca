@@ -83,7 +83,15 @@ void BigInt::encode(byte output[], const BigInt& n, Base base)
          divide(copy, 10, copy, remainder);
          output[output_size - 1 - j] = digit2char(remainder.word_at(0));
          if(copy.is_zero())
+            {
+            if(j < output_size - 1)
+               {
+               int extra = output_size - 1 - j;
+               memmove(output, output + extra, output_size - extra);
+               memset(output + output_size - extra, 0, extra);
+               }
             break;
+            }
          }
       }
    else
