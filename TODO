@@ -32,6 +32,8 @@
   padding - a way to do any possible padding approach, so advanced users
             can turn off the default padding scheme, and pass in a 
             pre-padded last block.
+  Key wrapping - RFC3217 and RFC3394
+  Password based key derivation functions - RFC2898
 
 * qt 4 upgrade:
   new include styles
