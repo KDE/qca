@@ -5,9 +5,9 @@ SUBDIRS += \
 	mactest \
 	providertest \
 	randomtest \
-	base64test
+	base64test \
+	ciphertest
 
-#	ciphertest \
 #	rsatest \
 #	certtest \
 #	ssltest \

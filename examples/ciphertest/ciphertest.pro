@@ -1,5 +1,6 @@
 TEMPLATE = app
-CONFIG += thread console
+CONFIG += thread console debug
+QT -= gui
 TARGET = ciphertest
 
 SOURCES += ciphertest.cpp
