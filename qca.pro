@@ -54,8 +54,6 @@ SOURCES += \
 	$$QCA_CPP/qca_securemessage.cpp \
 	$$QCA_CPP/qca_default.cpp
 
-DEFINES += QCA_NO_SYSTEMSTORE
-
 unix:!mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_flatfile.cpp
 }

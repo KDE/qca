@@ -28,6 +28,7 @@
 * build system:
   get qt 4 support into qconf
   on non-win/mac, allow specifying of flatfile store, else install/use built-in
+  certstore.qcm: QCA_NO_SYSTEMSTORE
   make sure it installs properly
   create qt4 qmake .prf for auto-discovery by applications
 
