@@ -26,6 +26,8 @@
 
 namespace gcryptQCAPlugin {
 
+  // #include "pkcs5.c"
+
 void check_error( gcry_error_t err )
 {
     // we ignore the case where it is not an error, and
@@ -353,9 +355,32 @@ protected:
     bool m_pad;
 };
 
-}
+class pbkdf2Context : public QCA::KDFContext
+{
+public:
+    pbkdf2Context(int algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
+    {
+	//gcry_check_version("GCRYPT_VERSION");
+	//m_algorithm = algorithm;
+    }
 
-using namespace gcryptQCAPlugin;
+    Context *clone() const
+    {
+      return new pbkdf2Context( *this );
+    }
+
+    QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
+			 unsigned int keyLength, unsigned int iterationCount)
+    {
+	QSecureArray result("Hello");
+	return result;
+    }
+
+protected:
+    int m_algorithm;
+};
+
+}
 
 class gcryptProvider : public QCA::Provider
 {
@@ -391,50 +416,53 @@ public:
 	list += "blowfish-ecb";
 	list += "tripledes-ecb";
 	list += "des-ecb";
+	list += "pbkdf2(sha1)";
 	return list;
     }
 
     Context *createContext(const QString &type)
     {
-	//std::cout << "type: " << qPrintable(type) << std::endl; 
+        // std::cout << "type: " << qPrintable(type) << std::endl; 
 	if ( type == "sha1" )
-	    return new SHA1Context( this );
+	    return new gcryptQCAPlugin::SHA1Context( this );
 	else if ( type == "md4" )
-	    return new MD4Context( this );
+	    return new gcryptQCAPlugin::MD4Context( this );
 	else if ( type == "md5" )
-	    return new MD5Context( this );
+	    return new gcryptQCAPlugin::MD5Context( this );
 	else if ( type == "ripemd160" )
-	    return new RIPEMD160Context( this );
+	    return new gcryptQCAPlugin::RIPEMD160Context( this );
 	else if ( type == "sha256" )
-	    return new SHA256Context( this );
+	    return new gcryptQCAPlugin::SHA256Context( this );
 	else if ( type == "sha384" )
-	    return new SHA384Context( this );
+	    return new gcryptQCAPlugin::SHA384Context( this );
 	else if ( type == "sha512" )
-	    return new SHA512Context( this );
+	    return new gcryptQCAPlugin::SHA512Context( this );
 	else if ( type == "aes128-ecb" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes128-cfb" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CFB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CFB, false, this, type );
 	else if ( type == "aes128-cbc" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "aes192-ecb" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_ECB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes192-cfb" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CFB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CFB, false, this, type );
 	else if ( type == "aes192-cbc" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CBC, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "aes256-ecb" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes256-cfb" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CFB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CFB, false, this, type );
 	else if ( type == "aes256-cbc" )
-	    return new gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "blowfish-ecb" )
-	    return new gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_ECB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "tripledes-ecb" )
-	    return new gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_ECB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "des-ecb" )
-	    return new gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, false, this, type );
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "pbkdf2(sha1)" )
+	    return new gcryptQCAPlugin::pbkdf2Context( GCRY_MD_SHA1, this, type );
 	else
 	    return 0;
     }
