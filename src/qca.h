@@ -73,17 +73,17 @@ namespace QCA
 		CAP_RSA       = 0x0080,
 		CAP_X509      = 0x0100,
 		CAP_TLS       = 0x0200,
-		CAP_SASL      = 0x0400,
+		CAP_SASL      = 0x0400
 	};
 
 	enum {
 		CBC = 0x0001,
-		CFB = 0x0002,
+		CFB = 0x0002
 	};
 
 	enum {
 		Encrypt = 0x0001,
-		Decrypt = 0x0002,
+		Decrypt = 0x0002
 	};
 
 	QCA_EXPORT void init();
@@ -388,7 +388,7 @@ namespace QCA
 			Expired,
 			Disabled,
 			NoUser,
-			RemoteUnavail,
+			RemoteUnavail
 		};
 		SASL(QObject *parent=0);
 		~SASL();
