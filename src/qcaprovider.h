@@ -20,41 +20,45 @@ public:
 	virtual void *functions(int cap)=0;
 };
 
-struct QCA_HashFunctions
+class QCA_HashContext
 {
-	int (*create)();
-	void (*destroy)(int ctx);
-	void (*update)(int ctx, const char *in, unsigned int len);
-	void (*final)(int ctx, char *out);
-	unsigned int (*finalSize)(int ctx);
+public:
+	virtual ~QCA_HashContext() {}
+
+	virtual void reset()=0;
+	virtual void update(const char *in, unsigned int len)=0;
+	virtual void final(char **out, unsigned int *outlen)=0;
 };
 
-struct QCA_CipherFunctions
+class QCA_CipherContext
 {
-	int (*keySize)();
-	int (*blockSize)();
-	bool (*generateKey)(char *out);
-	bool (*generateIV)(char *out);
+public:
+	virtual ~QCA_CipherContext() {}
 
-	int (*create)();
-	void (*destroy)(int ctx);
-	bool (*setup)(int ctx, int dir, int mode, const char *key, const char *iv);
-	bool (*update)(int ctx, const char *in, unsigned int len);
-	bool (*final)(int ctx, char *out);
-	unsigned int (*finalSize)(int ctx);
+	virtual int keySize()=0;
+	virtual int blockSize()=0;
+	virtual bool generateKey(char *out)=0;
+	virtual bool generateIV(char *out)=0;
+
+	virtual bool setup(int dir, int mode, const char *key, const char *iv)=0;
+	virtual bool update(const char *in, unsigned int len)=0;
+	virtual bool final(char **out, unsigned int *outlen)=0;
 };
 
-struct QCA_RSAFunctions
+class QCA_RSAKeyContext
 {
-	int (*keyCreateFromDER)(const char *in, unsigned int len, bool sec);
-	int (*keyCreateFromNative)(void *in);
-	int (*keyCreateGenerate)(unsigned int bits);
-	int (*keyClone)(int ctx);
-	void (*keyDestroy)(int ctx);
-	void (*keyToDER)(int ctx, char **out, unsigned int *len);
+public:
+	virtual ~QCA_RSAKeyContext() {}
 
-	bool (*encrypt)(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen);
-	bool (*decrypt)(int ctx, const char *in, unsigned int len, char **out, unsigned int *outlen);
+	virtual bool isNull() const=0;
+	virtual bool createFromDER(const char *in, unsigned int len, bool sec)=0;
+	virtual bool createFromNative(void *in)=0;
+	virtual bool generate(unsigned int bits)=0;
+	virtual QCA_RSAKeyContext *clone()=0;
+	virtual void toDER(char **out, unsigned int *len)=0;
+
+	virtual bool encrypt(const char *in, unsigned int len, char **out, unsigned int *outlen)=0;
+	virtual bool decrypt(const char *in, unsigned int len, char **out, unsigned int *outlen)=0;
 };
 
 #endif

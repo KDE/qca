@@ -2,7 +2,7 @@
 #include"qca.h"
 #include<stdio.h>
 
-static QCA::RSAKey readKeyFile(const QString &name, bool sec=false)
+QCA::RSAKey readKeyFile(const QString &name, bool sec=false)
 {
 	QCA::RSAKey k;
 	QFile f(name);
@@ -30,12 +30,13 @@ int main(int argc, char **argv)
 	if(!QCA::isSupported(QCA::CAP_RSA))
 		printf("RSA not supported!\n");
 	else {
-		/*QCA::RSAKey pubkey = readKeyFile("keypublic.der");
-		if(pubkey.isNull())
-			return 1;
-		QCA::RSAKey seckey = readKeyFile("keyprivate.der", true);
-		if(seckey.isNull())
-			return 1;*/
+		//QCA::RSAKey pubkey = readKeyFile("keypublic.der");
+		//if(pubkey.isNull())
+		//	return 1;
+		//QCA::RSAKey seckey = readKeyFile("keyprivate.der", true);
+		//if(seckey.isNull())
+		//	return 1;
+
 		QCA::RSAKey seckey = QCA::RSA::generateKey(1024);
 		if(seckey.isNull())
 			return 1;

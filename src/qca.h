@@ -4,8 +4,8 @@
 #include<qstring.h>
 #include<qcstring.h>
 
-struct QCA_HashFunctions;
-struct QCA_CipherFunctions;
+class QCA_HashContext;
+class QCA_CipherContext;
 
 namespace QCA
 {
@@ -52,7 +52,7 @@ namespace QCA
 		QByteArray final();
 
 	protected:
-		Hash(QCA_HashFunctions *);
+		Hash(QCA_HashContext *);
 
 	private:
 		class Private;
@@ -104,7 +104,7 @@ namespace QCA
 		QByteArray final();
 
 	protected:
-		Cipher(QCA_CipherFunctions *, int dir, int mode, const QByteArray &key, const QByteArray &iv);
+		Cipher(QCA_CipherContext *, int dir, int mode, const QByteArray &key, const QByteArray &iv);
 
 	private:
 		class Private;
@@ -194,7 +194,8 @@ namespace QCA
 		Private *d;
 
 		friend class RSA;
-		int internalContext() const;
+		bool encrypt(const QByteArray &a, QByteArray *out) const;
+		bool decrypt(const QByteArray &a, QByteArray *out) const;
 		bool generate(unsigned int bits);
 	};
 

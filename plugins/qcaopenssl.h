@@ -5,12 +5,8 @@
 
 #ifdef QCA_PLUGIN
 QCA_EXPORT QCAProvider *createProvider();
+#else
+QCAProvider *createProviderOpenSSL();
 #endif
-
-class QCAOpenSSL : public QCAProvider
-{
-public:
-	QCAOpenSSL() {}
-};
 
 #endif

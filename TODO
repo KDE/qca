@@ -1,3 +1,4 @@
+* rsakey: to DER
 * rsakey: to/from PEM
 * rsakey: detect for private/public capability (get rid of 'bool sec')
 * rsa: choice of pad
@@ -5,6 +6,7 @@
 * cipher: better handling of errors ('empty' arrays are not a good idea)
 * cipher: ability to disable pkcs padding
 * cipher: better entropy for keygen?
+* cipher: aes128, aes256
 * clean up openssl plugin
 
 * ssl/tls/x509 (also server support)

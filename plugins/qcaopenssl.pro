@@ -9,7 +9,7 @@ INCLUDEPATH += ../src
 # RH 9
 INCLUDEPATH += /usr/kerberos/include
 
-HEADERS = qcaopenssl.h qcaopenssl_p.h
+HEADERS = qcaopenssl.h
 SOURCES = qcaopenssl.cpp
 DEFINES += QCA_PLUGIN
 

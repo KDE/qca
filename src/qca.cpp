@@ -9,7 +9,7 @@
 #include<stdio.h>
 
 #ifdef USE_OPENSSL
-#include"qcaopenssl_p.h"
+#include"qcaopenssl.h"
 #endif
 
 #if defined(Q_OS_WIN32)
@@ -52,7 +52,7 @@ void QCA::init()
 {
 	providerList.clear();
 #ifdef USE_OPENSSL
-	providerList.append(new _QCAOpenSSL);
+	providerList.append(createProviderOpenSSL());
 #endif
 
 	// load plugins
@@ -71,6 +71,7 @@ void QCA::init()
 		}
 		void *s = lib->resolve("createProvider");
 		if(!s) {
+			printf("can't resolve\n");
 			delete lib;
 			continue;
 		}
@@ -113,35 +114,32 @@ static void *getFunctions(int cap)
 class Hash::Private
 {
 public:
-	Private(QCA_HashFunctions *_f)
+	Private(QCA_HashContext *_c)
 	{
-		f = _f;
-		ctx = f->create();
+		c = _c;
 	}
 
 	~Private()
 	{
-		f->destroy(ctx);
+		delete c;
 	}
 
 	void reset()
 	{
-		f->destroy(ctx);
-		ctx = f->create();
+		c->reset();
 	}
 
-	QCA_HashFunctions *f;
-	int ctx;
+	QCA_HashContext *c;
 };
 
-Hash::Hash(QCA_HashFunctions *f)
+Hash::Hash(QCA_HashContext *c)
 {
-	d = new Private(f);
+	d = new Private(c);
 }
 
 Hash::Hash(const Hash &from)
 {
-	d = new Private(from.d->f);
+	d = new Private(from.d->c);
 	*this = from;
 }
 
@@ -163,13 +161,17 @@ void Hash::clear()
 
 void Hash::update(const QByteArray &a)
 {
-	d->f->update(d->ctx, a.data(), a.size());
+	d->c->update(a.data(), a.size());
 }
 
 QByteArray Hash::final()
 {
-	QByteArray buf(d->f->finalSize(d->ctx));
-	d->f->final(d->ctx, buf.data());
+	char *out;
+	unsigned int len;
+	d->c->final(&out, &len);
+	QByteArray buf(len);
+	memcpy(buf.data(), out, len);
+	free(out);
 	return buf;
 }
 
@@ -180,50 +182,48 @@ QByteArray Hash::final()
 class Cipher::Private
 {
 public:
-	Private(QCA_CipherFunctions *_f)
+	Private(QCA_CipherContext *_c)
 	{
-		f = _f;
-		ctx = f->create();
+		c = _c;
 	}
 
 	~Private()
 	{
-		f->destroy(ctx);
+		delete c;
 	}
 
 	void reset()
 	{
-		f->destroy(ctx);
-		ctx = f->create();
+		//c->reset();
+
 		dir = Encrypt;
 		key.resize(0);
 		iv.resize(0);
 		err = false;
 	}
 
-	QCA_CipherFunctions *f;
-	int ctx;
+	QCA_CipherContext *c;
 	int dir;
 	int mode;
 	QByteArray key, iv;
 	bool err;
 };
 
-Cipher::Cipher(QCA_CipherFunctions *f, int dir, int mode, const QByteArray &key, const QByteArray &iv)
+Cipher::Cipher(QCA_CipherContext *c, int dir, int mode, const QByteArray &key, const QByteArray &iv)
 {
-	d = new Private(f);
+	d = new Private(c);
 	reset(dir, mode, key, iv);
 }
 
 Cipher::Cipher(const Cipher &from)
 {
-	d = new Private(from.d->f);
+	d = new Private(from.d->c);
 	*this = from;
 }
 
 Cipher & Cipher::operator=(const Cipher &from)
 {
-	reset(from.d->dir, from.d->key, from.d->iv);
+	reset(from.d->dir, from.d->mode, from.d->key, from.d->iv);
 	return *this;
 }
 
@@ -234,16 +234,16 @@ Cipher::~Cipher()
 
 QByteArray Cipher::dyn_generateKey() const
 {
-	QByteArray buf(d->f->keySize());
-	if(!d->f->generateKey(buf.data()))
+	QByteArray buf(d->c->keySize());
+	if(!d->c->generateKey(buf.data()))
 		return QByteArray();
 	return buf;
 }
 
 QByteArray Cipher::dyn_generateIV() const
 {
-	QByteArray buf(d->f->blockSize());
-	if(!d->f->generateIV(buf.data()))
+	QByteArray buf(d->c->blockSize());
+	if(!d->c->generateIV(buf.data()))
 		return QByteArray();
 	return buf;
 }
@@ -255,7 +255,7 @@ void Cipher::reset(int dir, int mode, const QByteArray &key, const QByteArray &i
 	d->mode = mode;
 	d->key = key.copy();
 	d->iv = iv.copy();
-	if(!d->f->setup(d->ctx, d->dir, d->mode, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data())) {
+	if(!d->c->setup(d->dir, d->mode, d->key.data(), d->iv.isEmpty() ? 0 : d->iv.data())) {
 		d->err = true;
 		return;
 	}
@@ -266,7 +266,7 @@ bool Cipher::update(const QByteArray &a)
 	if(d->err)
 		return false;
 
-	if(!d->f->update(d->ctx, a.data(), a.size())) {
+	if(!d->c->update(a.data(), a.size())) {
 		d->err = true;
 		return false;
 	}
@@ -278,12 +278,15 @@ QByteArray Cipher::final()
 	if(d->err)
 		return QByteArray();
 
-	QByteArray buf(d->f->finalSize(d->ctx));
-	if(!d->f->final(d->ctx, buf.data())) {
+	char *out;
+	unsigned int len;
+	if(!d->c->final(&out, &len)) {
 		d->err = true;
 		return QByteArray();
 	}
-
+	QByteArray buf(len);
+	memcpy(buf.data(), out, len);
+	free(out);
 	return buf;
 }
 
@@ -292,7 +295,7 @@ QByteArray Cipher::final()
 // SHA1
 //----------------------------------------------------------------------------
 SHA1::SHA1()
-:Hash((QCA_HashFunctions *)getFunctions(CAP_SHA1))
+:Hash((QCA_HashContext *)getFunctions(CAP_SHA1))
 {
 }
 
@@ -301,7 +304,7 @@ SHA1::SHA1()
 // SHA256
 //----------------------------------------------------------------------------
 SHA256::SHA256()
-:Hash((QCA_HashFunctions *)getFunctions(CAP_SHA256))
+:Hash((QCA_HashContext *)getFunctions(CAP_SHA256))
 {
 }
 
@@ -310,7 +313,7 @@ SHA256::SHA256()
 // MD5
 //----------------------------------------------------------------------------
 MD5::MD5()
-:Hash((QCA_HashFunctions *)getFunctions(CAP_MD5))
+:Hash((QCA_HashContext *)getFunctions(CAP_MD5))
 {
 }
 
@@ -319,7 +322,7 @@ MD5::MD5()
 // BlowFish
 //----------------------------------------------------------------------------
 BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherFunctions *)getFunctions(CAP_BlowFish), dir, mode, key, iv)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_BlowFish), dir, mode, key, iv)
 {
 }
 
@@ -328,7 +331,7 @@ BlowFish::BlowFish(int dir, int mode, const QByteArray &key, const QByteArray &i
 // TripleDES
 //----------------------------------------------------------------------------
 TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherFunctions *)getFunctions(CAP_TripleDES), dir, mode, key, iv)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_TripleDES), dir, mode, key, iv)
 {
 }
 
@@ -337,7 +340,7 @@ TripleDES::TripleDES(int dir, int mode, const QByteArray &key, const QByteArray 
 // AES128
 //----------------------------------------------------------------------------
 AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES128), dir, mode, key, iv)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_AES128), dir, mode, key, iv)
 {
 }
 
@@ -346,7 +349,7 @@ AES128::AES128(int dir, int mode, const QByteArray &key, const QByteArray &iv)
 // AES256
 //----------------------------------------------------------------------------
 AES256::AES256(int dir, int mode, const QByteArray &key, const QByteArray &iv)
-:Cipher((QCA_CipherFunctions *)getFunctions(CAP_AES256), dir, mode, key, iv)
+:Cipher((QCA_CipherContext *)getFunctions(CAP_AES256), dir, mode, key, iv)
 {
 }
 
@@ -359,25 +362,15 @@ class RSAKey::Private
 public:
 	Private()
 	{
-		f = (QCA_RSAFunctions *)getFunctions(CAP_RSA);
-		ctx = -1;
+		c = (QCA_RSAKeyContext *)getFunctions(CAP_RSA);
 	}
 
 	~Private()
 	{
-		reset();
+		delete c;
 	}
 
-	void reset()
-	{
-		if(ctx != -1) {
-			f->keyDestroy(ctx);
-			ctx = -1;
-		}
-	}
-
-	QCA_RSAFunctions *f;
-	int ctx;
+	QCA_RSAKeyContext *c;
 };
 
 RSAKey::RSAKey()
@@ -393,10 +386,11 @@ RSAKey::RSAKey(const RSAKey &from)
 
 RSAKey & RSAKey::operator=(const RSAKey &from)
 {
-	d->reset();
+	if(d->c)
+		delete d->c;
 	*d = *from.d;
-	if(d->ctx != -1)
-		d->ctx = d->f->keyClone(d->ctx);
+	d->c = d->c->clone();
+
 	return *this;
 }
 
@@ -407,14 +401,14 @@ RSAKey::~RSAKey()
 
 bool RSAKey::isNull() const
 {
-	return (d->ctx == -1 ? true: false);
+	return d->c->isNull();
 }
 
 QByteArray RSAKey::toDER() const
 {
 	char *out;
 	unsigned int len;
-	d->f->keyToDER(d->ctx, &out, &len);
+	d->c->toDER(&out, &len);
 	QByteArray buf(len);
 	memcpy(buf.data(), out, len);
 	free(out);
@@ -423,34 +417,41 @@ QByteArray RSAKey::toDER() const
 
 bool RSAKey::fromDER(const QByteArray &a, bool sec)
 {
-	int ctx = d->f->keyCreateFromDER(a.data(), a.size(), sec);
-	if(ctx == -1)
-		return false;
-	d->ctx = ctx;
-	return true;
+	return d->c->createFromDER(a.data(), a.size(), sec);
 }
 
 bool RSAKey::fromNative(void *p)
 {
-	int ctx = d->f->keyCreateFromNative(p);
-	if(ctx == -1)
+	return d->c->createFromNative(p);
+}
+
+bool RSAKey::encrypt(const QByteArray &a, QByteArray *b) const
+{
+	char *out;
+	unsigned int len;
+	if(!d->c->encrypt(a.data(), a.size(), &out, &len))
 		return false;
-	d->ctx = ctx;
+	b->resize(len);
+	memcpy(b->data(), out, len);
+	free(out);
+	return true;
+}
+
+bool RSAKey::decrypt(const QByteArray &a, QByteArray *b) const
+{
+	char *out;
+	unsigned int len;
+	if(!d->c->decrypt(a.data(), a.size(), &out, &len))
+		return false;
+	b->resize(len);
+	memcpy(b->data(), out, len);
+	free(out);
 	return true;
 }
 
 bool RSAKey::generate(unsigned int bits)
 {
-	int ctx = d->f->keyCreateGenerate(bits);
-	if(ctx == -1)
-		return false;
-	d->ctx = ctx;
-	return true;
-}
-
-int RSAKey::internalContext() const
-{
-	return d->ctx;
+	return d->c->generate(bits);
 }
 
 
@@ -479,34 +480,14 @@ bool RSA::encrypt(const QByteArray &a, QByteArray *b) const
 {
 	if(v_key.isNull())
 		return false;
-
-	QCA_RSAFunctions *f = (QCA_RSAFunctions *)getFunctions(CAP_RSA);
-	char *out;
-	unsigned int len;
-	if(!f->encrypt(v_key.internalContext(), a.data(), a.size(), &out, &len))
-		return false;
-
-	b->resize(len);
-	memcpy(b->data(), out, len);
-	free(out);
-	return true;
+	return v_key.encrypt(a, b);
 }
 
 bool RSA::decrypt(const QByteArray &a, QByteArray *b) const
 {
 	if(v_key.isNull())
 		return false;
-
-	QCA_RSAFunctions *f = (QCA_RSAFunctions *)getFunctions(CAP_RSA);
-	char *out;
-	unsigned int len;
-	if(!f->decrypt(v_key.internalContext(), a.data(), a.size(), &out, &len))
-		return false;
-
-	b->resize(len);
-	memcpy(b->data(), out, len);
-	free(out);
-	return true;
+	return v_key.decrypt(a, b);
 }
 
 RSAKey RSA::generateKey(unsigned int bits)

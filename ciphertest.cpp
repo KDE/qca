@@ -9,6 +9,27 @@ int main(int argc, char **argv)
 	QCA::init();
 	QCString cs = (argc >= 2) ? argv[1] : "hello";
 
+	if(!QCA::isSupported(QCA::CAP_BlowFish))
+		printf("BlowFish not supported!\n");
+	else {
+		// encrypt
+		QByteArray key = QCA::BlowFish::generateKey();
+		QByteArray iv = QCA::BlowFish::generateIV();
+		printf("bfish:key:%s\n", QCA::arrayToHex(key).latin1());
+		printf("bfish:iv:%s\n", QCA::arrayToHex(iv).latin1());
+		QCA::BlowFish c(QCA::Encrypt, QCA::CBC, key, iv);
+		c.update(cstringToArray(cs));
+		QByteArray f = c.final();
+		QString result = QCA::arrayToHex(f);
+		printf(">bfish(\"%s\") = [%s]\n", cs.data(), result.latin1());
+
+		// decrypt
+		QCA::BlowFish d(QCA::Decrypt, QCA::CBC, key, iv);
+		d.update(f);
+		QCString dec = arrayToCString(d.final());
+		printf("<bfish(\"%s\") = [%s]\n", result.latin1(), dec.data());
+	}
+
 	if(!QCA::isSupported(QCA::CAP_TripleDES))
 		printf("TripleDES not supported!\n");
 	else {
@@ -17,14 +38,14 @@ int main(int argc, char **argv)
 		QByteArray iv = QCA::TripleDES::generateIV();
 		printf("3des:key:%s\n", QCA::arrayToHex(key).latin1());
 		printf("3des:iv:%s\n", QCA::arrayToHex(iv).latin1());
-		QCA::TripleDES c(QCA::Encrypt, key, iv);
+		QCA::TripleDES c(QCA::Encrypt, QCA::CBC, key, iv);
 		c.update(cstringToArray(cs));
 		QByteArray f = c.final();
 		QString result = QCA::arrayToHex(f);
 		printf(">3des(\"%s\") = [%s]\n", cs.data(), result.latin1());
 
 		// decrypt
-		QCA::TripleDES d(QCA::Decrypt, key, iv);
+		QCA::TripleDES d(QCA::Decrypt, QCA::CBC, key, iv);
 		d.update(f);
 		QCString dec = arrayToCString(d.final());
 		printf("<3des(\"%s\") = [%s]\n", result.latin1(), dec.data());
@@ -36,14 +57,14 @@ int main(int argc, char **argv)
 		// encrypt
 		QByteArray key = QCA::AES128::generateKey();
 		QByteArray iv = QCA::AES128::generateIV();
-		QCA::AES128 c(QCA::Encrypt, key, iv);
+		QCA::AES128 c(QCA::Encrypt, QCA::CBC, key, iv);
 		c.update(cstringToArray(cs));
 		QByteArray f = c.final();
 		QString result = QCA::arrayToHex(f);
 		printf(">aes128(\"%s\") = [%s]\n", cs.data(), result.latin1());
 
 		// decrypt
-		QCA::AES128 d(QCA::Decrypt, key, iv);
+		QCA::AES128 d(QCA::Decrypt, QCA::CBC, key, iv);
 		d.update(f);
 		QCString dec = arrayToCString(d.final());
 		printf("<aes128(\"%s\") = [%s]\n", result.latin1(), dec.data());
