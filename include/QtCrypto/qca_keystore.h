@@ -110,10 +110,14 @@ namespace QCA
 		QList<KeyStore> keyStores() const;
 		int count() const;
 
+		void submitPassphrase(const QString &id, const QSecureArray &passphrase);
+		QString diagnosticText() const;
+
 	signals:
 		void keyStoreAvailable(const QString &id);
 		void keyStoreUnavailable(const QString &id);
 		void keyStoreUpdated(const QString &id);
+		void keyStoreNeedPassphrase(const QString &id);
 
 	private:
 		KeyStoreManager();

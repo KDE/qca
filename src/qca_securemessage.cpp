@@ -52,25 +52,24 @@ SecureMessageKey::Type SecureMessageKey::type() const
 	return None;
 }
 
-QString SecureMessageKey::pgpPublicKey() const
+PGPKey SecureMessageKey::pgpPublicKey() const
 {
-	return QString();
+	return PGPKey();
 }
 
-QString SecureMessageKey::pgpSecretKey() const
+PGPKey SecureMessageKey::pgpSecretKey() const
 {
-	return QString();
+	return PGPKey();
 }
 
-void SecureMessageKey::setPGPPublicKey(const QString &id, const QString &name)
+void SecureMessageKey::setPGPPublicKey(const PGPKey &pub)
 {
-	Q_UNUSED(id);
-	Q_UNUSED(name);
+	Q_UNUSED(pub);
 }
 
-void SecureMessageKey::setPGPSecretKey(const QString &id)
+void SecureMessageKey::setPGPSecretKey(const PGPKey &sec)
 {
-	Q_UNUSED(id);
+	Q_UNUSED(sec);
 }
 
 CertificateChain SecureMessageKey::x509CertificateChain() const
@@ -96,11 +95,6 @@ void SecureMessageKey::setX509PrivateKey(const PrivateKey &k)
 bool SecureMessageKey::havePrivate() const
 {
 	return false;
-}
-
-QString SecureMessageKey::id() const
-{
-	return QString();
 }
 
 QString SecureMessageKey::name() const
@@ -280,6 +274,11 @@ SecureMessageSignatureList SecureMessage::signers() const
 	return SecureMessageSignatureList();
 }
 
+QString SecureMessage::diagnosticText() const
+{
+	return QString();
+}
+
 //----------------------------------------------------------------------------
 // SecureMessageSystem
 //----------------------------------------------------------------------------
@@ -306,26 +305,6 @@ OpenPGP::~OpenPGP()
 
 void OpenPGP::setAllowAgent(bool)
 {
-}
-
-void OpenPGP::submitPassphrase(const QSecureArray &passphrase)
-{
-	Q_UNUSED(passphrase);
-}
-
-SecureMessageKeyList OpenPGP::secretKeys() const
-{
-	return SecureMessageKeyList();
-}
-
-SecureMessageKeyList OpenPGP::publicKeys() const
-{
-	return SecureMessageKeyList();
-}
-
-QString OpenPGP::diagnosticText() const
-{
-	return QString();
 }
 
 //----------------------------------------------------------------------------

@@ -214,4 +214,15 @@ int KeyStoreManager::count() const
 	return 0;
 }
 
+void KeyStoreManager::submitPassphrase(const QString &id, const QSecureArray &passphrase)
+{
+	Q_UNUSED(id);
+	Q_UNUSED(passphrase);
+}
+
+QString KeyStoreManager::diagnosticText() const
+{
+	return QString();
+}
+
 }

@@ -1,6 +1,4 @@
 * Additional unit tests
-* Bundle root certificates to be used on platforms without a system store
-  (we need to choose a reliable source, maybe mozilla or debian?  kde??)
 * Update to latest Botan, and remake the botantools patch as appropriate
 
 * API documentation
@@ -22,13 +20,13 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
-  make systemstore work via keystore
   pkey: ability to get the bitsize of a key
   cert: subject/issuer key ids?
   cert: use info as a multi-map?
   pgp: get key types and bits?
-  dlgroup, symmetric key -> make these into provider objects, for smartcards?
-  qcaprovider.h
+  dlgroup: make it a provider object? (for smartcards)
+  symmetrickey: make it a provider object? (for smartcards)
+  finish qcaprovider.h
 
 * build system:
   get qt 4 support into qconf
@@ -38,6 +36,7 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
+  make systemstore work via keystore
   cert: rfc 2818 hostname validation
   keystore
   tls
@@ -60,8 +59,6 @@
   figure out why Valgrind reports so many memory leaks
 
 * possibilities for the future:
-  xmldsig
-  xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
   Key wrapping - RFC3217 and RFC3394
   dtls (secure UDP)
   quoted-printable TextFilter

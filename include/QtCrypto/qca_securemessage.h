@@ -50,10 +50,10 @@ namespace QCA
 		Type type() const;
 
 		// pgp
-		QString pgpPublicKey() const;
-		QString pgpSecretKey() const;
-		void setPGPPublicKey(const QString &id, const QString &name);
-		void setPGPSecretKey(const QString &id);
+		PGPKey pgpPublicKey() const;
+		PGPKey pgpSecretKey() const;
+		void setPGPPublicKey(const PGPKey &pub);
+		void setPGPSecretKey(const PGPKey &sec);
 
 		// x509
 		CertificateChain x509CertificateChain() const;
@@ -63,8 +63,7 @@ namespace QCA
 
 		// generic
 		bool havePrivate() const;
-		QString id() const;
-		QString name() const;
+		QString name() const;  // pgp = primary user id, x509 = common name
 
 	private:
 		class Private;
@@ -173,6 +172,8 @@ namespace QCA
 		SecureMessageSignature signer() const;
 		SecureMessageSignatureList signers() const;
 
+		QString diagnosticText() const;
+
 	signals:
 		void readyRead();
 		void finished();
@@ -200,16 +201,6 @@ namespace QCA
 		~OpenPGP();
 
 		void setAllowAgent(bool);
-		void submitPassphrase(const QSecureArray &passphrase);
-
-		SecureMessageKeyList secretKeys() const;
-		SecureMessageKeyList publicKeys() const;
-
-		QString diagnosticText() const;
-
-	signals:
-		void keysUpdated();
-		void needPassphrase();
 	};
 
 	class SMIME : public SecureMessageSystem, public Algorithm
@@ -219,7 +210,7 @@ namespace QCA
 		SMIME(QObject *parent = 0, const QString &provider = QString());
 		~SMIME();
 
-		void setTrustedCertificates(const CertificateCollection &trusted); // todo: untrusted?
+		void setTrustedCertificates(const CertificateCollection &trusted);
 		void setPrivateKeys(const QList<PrivateKey> &keys);
 	};
 }
