@@ -252,6 +252,7 @@ public:
 	int pathLimit;
 	QSecureArray sig;
 	SignatureAlgorithm sigalgo;
+	QByteArray subjectId, issuerId;  // cert only
 	QString challenge;               // csr only
 	CertificateRequestFormat format; // csr only
 };
@@ -265,6 +266,7 @@ public:
 	QList<CRLEntry> revoked;
 	QSecureArray sig;
 	SignatureAlgorithm sigalgo;
+	QByteArray issuerId;
 };
 
 class CRLContext;

@@ -20,10 +20,7 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
-  pkey: ability to get the bitsize of a key
-  cert: subject/issuer key ids?
   cert: use info as a multi-map?
-  pgp: get key types and bits?
   dlgroup: make it a provider object? (for smartcards)
   symmetrickey: make it a provider object? (for smartcards)
   finish qcaprovider.h

@@ -180,6 +180,8 @@ namespace QCA
 		QSecureArray signature() const;
 		SignatureAlgorithm signatureAlgorithm() const;
 
+		QByteArray subjectKeyId() const;
+		QByteArray issuerKeyId() const;
 		Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u = UsageAny) const;
 
 		// import / export
@@ -289,6 +291,8 @@ namespace QCA
 
 		QSecureArray signature() const;
 		SignatureAlgorithm signatureAlgorithm() const;
+
+		QByteArray issuerKeyId() const;
 
 		// import / export
 		QSecureArray toDER() const;

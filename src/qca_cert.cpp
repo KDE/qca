@@ -343,6 +343,16 @@ SignatureAlgorithm Certificate::signatureAlgorithm() const
 	return static_cast<const CertContext *>(context())->props()->sigalgo;
 }
 
+QByteArray Certificate::subjectKeyId() const
+{
+	return static_cast<const CertContext *>(context())->props()->subjectId;
+}
+
+QByteArray Certificate::issuerKeyId() const
+{
+	return static_cast<const CertContext *>(context())->props()->issuerId;
+}
+
 Validity Certificate::validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u) const
 {
 	QList<CertContext*> trusted_list;
@@ -708,6 +718,11 @@ QSecureArray CRL::signature() const
 SignatureAlgorithm CRL::signatureAlgorithm() const
 {
 	return static_cast<const CRLContext *>(context())->props()->sigalgo;
+}
+
+QByteArray CRL::issuerKeyId() const
+{
+	return static_cast<const CRLContext *>(context())->props()->issuerId;
 }
 
 QSecureArray CRL::toDER() const
