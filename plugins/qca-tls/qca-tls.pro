@@ -6,7 +6,7 @@ TARGET   = qca-tls
 
 !exists(qcaprovider.h) {
   Q_PREFIX = ../../src
-  INCLUDEPATH += $$Q_PREFIX/
+  INCLUDEPATH += $$Q_PREFIX
 }
 HEADERS += ($$Q_PREFIX)qcaprovider.h
 
