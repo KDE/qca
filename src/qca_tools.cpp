@@ -168,6 +168,21 @@ void QSecureArray::reset()
 	}
 }
 
+void QSecureArray::fill(char fillChar, int fillToPosition)
+{
+	detach();
+	if(!d)
+		return;
+	int len;
+	if ( (fillToPosition = -1)|| (fillToPosition > (int)size() ) ) {
+		len = size();
+	} else {
+		len = fillToPosition;
+	}
+	memset( d->buf, (int)fillChar, len );
+
+}
+
 QSecureArray & QSecureArray::operator=(const QSecureArray &from)
 {
 	reset();

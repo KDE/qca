@@ -261,6 +261,23 @@ public:
 	 */
 	bool resize(uint size);
 
+        /**
+         * Fill the data array with a specified character
+	 *
+	 * \param fillChar the character to use as the fill
+	 * \param fillToPosition the number of characters to fill
+	 *        to. If not specified (or -1), fills array to
+	 *        current length.
+	 *
+	 * \note This function does not extend the array - if
+	 * you ask for fill beyond the current length, only
+	 * the current length will be used.
+	 * \note The number of characters is 1 based, so if
+	 * you ask for fill('x', 10), it will fill from
+	 * 
+         */
+        void fill(char fillChar, int fillToPosition = -1);
+
 	/** 
 	 * creates a deep copy, rather than a reference
 	 * if you want a reference then you should use operator=()
