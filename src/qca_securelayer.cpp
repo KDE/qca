@@ -109,7 +109,7 @@ public:
 		out.resize(0);
 		from_net.resize(0);
 		to_net.resize(0);
-		host = "";
+		host = QString();
 		hostMismatch = false;
 		cert = Certificate();
 		bytesEncoded = 0;
@@ -220,7 +220,7 @@ bool TLS::isHandshaken() const
 
 QString TLS::cipherName() const
 {
-	return "";
+	return QString();
 }
 
 int TLS::cipherBits() const
@@ -507,7 +507,7 @@ void SASL::reset()
 	d->reqMutual = false;
 	d->ssfmin = 0;
 	d->ssfmax = 0;
-	d->ext_authid = "";
+	d->ext_authid = QString();
 	d->ext_ssf = 0;
 
 	d->inbuf.resize(0);
