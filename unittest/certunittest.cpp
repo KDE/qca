@@ -40,8 +40,8 @@ void CertUnitTest::allTests()
     CHECK( QCA::haveSystemStore(), true );
 
     if ( QCA::haveSystemStore() ) {
-	QCA::Store store1;
-	store1 = QCA::systemStore();
+	QCA::CertificateCollection collection1;
+	collection1 = QCA::systemStore();
     }
 }
 
