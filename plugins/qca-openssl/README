@@ -1,0 +1,16 @@
+QCA OpenSSL plugin
+------------------
+Author: Brad Hards <bradh@frogmouth.net>
+
+This plugin provides features based on OpenSSL. It implements:
+* Hashing - SHA1, SHA0, RIPEMD160, MD2, MD4, MD5
+* Keyed Hash Message Authentication Code (HMAC), using SHA1, MD5, RIPEMD160
+
+Requirements:
+  OpenSSL Library (http://www.openssl.org/)
+
+Installation procedure:
+  ./configure
+  make
+  su -c "make install"
+
