@@ -1,0 +1,19 @@
+/** \example hashtest.cpp
+
+The code below shows how to use a Hash subclass
+
+*/
+
+/** \example mactest.cpp
+
+The code below shows how to use a MessageAuthenticationCode subclass
+
+*/
+
+/** \example providertest.cpp
+
+The code below shows some simple operations on a Provider object, including
+use of iterators and some member functions.
+
+*/
+

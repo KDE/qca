@@ -434,7 +434,8 @@ EXCLUDE_PATTERNS       = *.moc.* \
 # directories that contain example code fragments that are included (see 
 # the \include command).
 
-EXAMPLE_PATH           = ../examples/hashtest 
+EXAMPLE_PATH           = ../examples/hashtest ../examples/mactest \
+			../examples/providertest
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -955,7 +956,7 @@ SKIP_FUNCTION_MACROS   = YES
 # If a tag file is not located in the directory in which doxygen 
 # is run, you must also specify the path to the tagfile here.
 
-TAGFILES               = 
+TAGFILES               =  qt.tag
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create 
 # a tag file that is based on the input files it reads.
