@@ -4,8 +4,6 @@ CONFIG  += qt thread debug plugin
 QT -= gui
 TARGET   = qca-openssl
 
-DEFINES += QCA_PLUGIN
-
 INCLUDEPATH += ../../include/QtCrypto
 SOURCES = qca-openssl.cpp
 
