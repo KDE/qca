@@ -83,6 +83,7 @@ void StaticUnitTest::allTests()
     CHECK( QCA::isSupported("md2,md4,md5"), true );
     CHECK( QCA::isSupported("md5"), true );
     CHECK( QCA::isSupported("ripemd160"), true );
+    CHECK( QCA::isSupported("sha256,sha384,sha512"), true );
     CHECK( QCA::isSupported("nosuchfeature"), false );
 
     QString caps( "random,sha1,md5,ripemd160");
@@ -98,5 +99,17 @@ void StaticUnitTest::allTests()
 
     // this should be reliably true
     CHECK( QCA::haveSecureMemory(), true );
+
+    // providers are obviously variable, this might be a bit brittle
+    QStringList providerNames;
+    QCA::ProviderList qcaProviders = QCA::providers();
+    QCA::ProviderListIterator it( qcaProviders );
+    QCA::Provider *provider;
+    while ( 0 != (provider = it.current() ) ) {
+	++it;
+	providerNames.append( provider->name() );
+    }
+    CHECK( providerNames.contains("qca-openssl"), (size_t)1 );
+    CHECK( providerNames.contains("qca-gcrypt"), (size_t)1 );
 }
 
