@@ -13,7 +13,9 @@
 #include<openssl/ssl.h>
 #include<openssl/err.h>
 
+#ifndef EVP_aes_128_cbc
 #define NO_AES
+#endif
 
 // FIXME: use openssl for entropy instead of stdlib
 #include<stdlib.h>
@@ -177,7 +179,10 @@ public:
 
 	virtual ~EVPCipherContext()
 	{
-		memset(&c, 0, sizeof(EVP_CIPHER_CTX));
+		if(type) {
+			EVP_CIPHER_CTX_cleanup(&c);
+			type = 0;
+		}
 	}
 
 	QCA_CipherContext *clone()
@@ -243,11 +248,11 @@ public:
 		QByteArray result(len + type->block_size);
 		int olen;
 		if(dir == QCA::Encrypt || !pad) {
-			if(!EVP_EncryptUpdate(&c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len))
+			if(!EVP_EncryptUpdate(&c, (unsigned char *)result.data(), &olen, (unsigned char *)in, len))
 				return false;
 		}
 		else {
-			if(!EVP_DecryptUpdate(&c, (unsigned char *)result.data(), &olen, (const unsigned char *)in, len))
+			if(!EVP_DecryptUpdate(&c, (unsigned char *)result.data(), &olen, (unsigned char *)in, len))
 				return false;
 		}
 		result.resize(olen);
@@ -386,7 +391,7 @@ public:
 			p = buf;
 			i2d_RSAPublicKey(r, &p);
 			p = buf;
-			*pub = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
+			*pub = d2i_RSAPublicKey(NULL, (unsigned char **)&p, len);
 			free(buf);
 		}
 
@@ -396,7 +401,7 @@ public:
 			p = buf;
 			i2d_RSAPrivateKey(r, &p);
 			p = buf;
-			*sec = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
+			*sec = d2i_RSAPrivateKey(NULL, (unsigned char **)&p, len);
 			free(buf);
 		}
 	}
@@ -425,7 +430,7 @@ public:
 
 		// private?
 		p = (void *)in;
-		r = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
+		r = d2i_RSAPrivateKey(NULL, (unsigned char **)&p, len);
 		if(r) {
 			reset();
 
@@ -436,15 +441,16 @@ public:
 		else {
 			// public?
 			p = (void *)in;
-			r = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
+			r = d2i_RSAPublicKey(NULL, (unsigned char **)&p, len);
 			if(!r) {
 				// try this other public function, for whatever reason
 				p = (void *)in;
 				r = d2i_RSA_PUBKEY(NULL, (unsigned char **)&p, len);
 			}
 			if(r) {
-				if(pub)
+				if(pub) {
 					RSA_free(pub);
+				}
 				pub = r;
 				return true;
 			}
@@ -474,8 +480,9 @@ public:
 			r = PEM_read_bio_RSAPublicKey(bi, NULL, NULL, NULL);
 			BIO_free(bi);
 			if(r) {
-				if(pub)
+				if(pub) {
 					RSA_free(pub);
+				}
 				pub = r;
 				return true;
 			}
@@ -503,14 +510,15 @@ public:
 
 	QCA_RSAKeyContext *clone()
 	{
+		// deep copy
 		RSAKeyContext *c = new RSAKeyContext;
 		if(pub) {
 			++(pub->references);
-			c->pub = pub;
+			c->pub = pub; //RSAPublicKey_dup(pub);
 		}
 		if(sec) {
 			++(sec->references);
-			c->sec = sec;
+			c->sec = sec; //RSAPrivateKey_dup(sec);
 		}
 		return c;
 	}

@@ -1,7 +1,3 @@
-* ciphertest: segfault??
-* rsatest: segfault??
-* ssltest: segfault on exit??
-
 * cipher: option to specify size for genkey
 * cert: properly check hostnames with wildcards
 * ssl: server support
