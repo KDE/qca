@@ -1,11 +1,8 @@
-* ssl: server mode: cert and rsa key choice
-* ssl: solve the "is my data sent" / BIO issue as discussed with rob
 * cipher: option to specify size for genkey
 * cert: properly check hostnames with wildcards
 
-* sasl
-
-* sasl server support
+* sasl client
+* sasl server
 * dsa
 * diffie-hellman
 

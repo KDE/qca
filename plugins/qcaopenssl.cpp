@@ -942,6 +942,8 @@ public:
 
 		ssl = 0;
 		context = 0;
+		cert = 0;
+		key = 0;
 	}
 
 	~SSLContext()
@@ -959,6 +961,14 @@ public:
 		if(context) {
 			SSL_CTX_free(context);
 			context = 0;
+		}
+		if(cert) {
+			delete cert;
+			cert = 0;
+		}
+		if(key) {
+			delete key;
+			key = 0;
 		}
 
 		sendQueue.resize(0);
@@ -997,7 +1007,7 @@ public:
 		return true;
 	}
 
-	bool startServer(const QCA_CertContext &, const QCA_RSAKeyContext &)
+	bool startServer(const QCA_CertContext &cc, const QCA_RSAKeyContext &kc)
 	{
 		reset();
 		serv = true;
@@ -1012,10 +1022,16 @@ public:
 		if(!setup())
 			return false;
 
-		if(SSL_use_certificate_file(ssl, "key.pem", SSL_FILETYPE_PEM) != 1)
-			printf("error loading cert\n");
-		if(SSL_use_RSAPrivateKey_file(ssl, "key.pem", SSL_FILETYPE_PEM) != 1)
-			printf("error loading rsa private key\n");
+		cert = (CertContext *)cc.clone();
+		key = (RSAKeyContext *)kc.clone();
+		if(SSL_use_certificate(ssl, cert->x) != 1) {
+			reset();
+			return false;
+		}
+		if(SSL_use_RSAPrivateKey(ssl, key->sec) != 1) {
+			reset();
+			return false;
+		}
 
 		mode = Accept;
 		sslUpdate();
@@ -1301,7 +1317,7 @@ public:
 	void processSendQueue()
 	{
 		if(sendQueue.size() > 0) {
-			// FIXME: is there a max size we can write?
+			// since we are using memory BIOs, the whole thing can be written successfully
 			SSL_write(ssl, sendQueue.data(), sendQueue.size());
 			sendQueue.resize(0);
 			sslUpdate();
@@ -1311,6 +1327,9 @@ public:
 	bool serv;
 	int mode;
 	QByteArray sendQueue, recvQueue;
+
+	CertContext *cert;
+	RSAKeyContext *key;
 
 	SSL *ssl;
 	SSL_METHOD *method;
