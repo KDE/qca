@@ -400,6 +400,222 @@ static struct cipherTestValues tripledesTestValues[] = {
     { 0, 0, 0 }
 };
 
+// These are from the Botan test suite
+static struct cipherTestValues desTestValues[] = {
+  { "059b5e0851cf143a", "86a560f10ec6d85b", "0113b970fd34f2ce" },
+  { "4e6f772069732074", "3fa40e8a984d4815", "0123456789abcdef" },
+  { "666f7220616c6c20", "893d51ec4b563b53", "0123456789abcdef" },
+  { "68652074696d6520", "6a271787ab8883f9", "0123456789abcdef" },
+  { "5cd54ca83def57da", "7a389d10354bd271", "0131d9619dc1376e" },
+  { "0756d8e0774761d2", "0cd3da020021dc09", "0170f175468fb5e6" },
+  { "1d9d5c5018f728c2", "5f4c038ed12b2e41", "018310dc409b26d6" },
+  { "480d39006ee762f2", "a1f9915541020b56", "025816164629b007" },
+  { "26955f6835af609a", "5c513c9c4886c088", "04689104c2fd3b2f" },
+  { "42fd443059577fa2", "af37fb421f8c4095", "04b915ba43feb5b6" },
+  { "0248d43806f67172", "868ebb51cab4599a", "07a1133e4a0b2686" },
+  { "3bdd119049372802", "dfd64a815caf1a0f", "07a7137045da2a16" },
+  { "16393bcdd6560506", "9966adcfc53bf968", "0a3fddc8350aff39" },
+  { "dc7fc6cf0358ecc0", "a47a7485661f7085", "10dd6dcd5c89e151" },
+  { "305532286d6f295a", "63fac0d034d9f793", "1c587f1c13924fef" },
+  { "f786d02413c574fc", "54c160d369f62ae3", "1eb00767bdee584e" },
+  { "6b056e18759f5cca", "ef1bf03e5dfa575a", "1f08260d1ac2465e" },
+  { "905ea29aeea26e07", "2292e9aebee6a4b6", "28ee445d8a21c534" },
+  { "164d5e404f275232", "0a2aeeae3ff4ab77", "37d06bb516cb7546" },
+  { "51454b582ddf440a", "7178876e01f19b2a", "3849674c2602319e" },
+  { "68ff9d6068c71513", "84595f5b9d046132", "3cde816ef9ef8edb" },
+  { "762514b829bf486a", "ea676b2cb7db2b7a", "43297fad38e373fe" },
+  { "437540c8698f3cfa", "6fbf1cafcffd0556", "49793ebc79b3258f" },
+  { "02fe55778117f12a", "5a6b612cc26cce4a", "49e95d6d4ca229bf" },
+  { "1f508a50adb3d6e2", "470204969876604a", "4bb53ecfefb38dde" },
+  { "072d43a077075292", "2f22e49bab7ca1ac", "4fb05e1515ab73a7" },
+  { "004bd6ef09176062", "88bf0db6d70dee56", "584023641aba6176" },
+  { "5aa1d62806ae0ead", "6db0f280fef2b564", "5f2b51f59e781d9c" },
+  { "7e1b1c6776833772", "eb11cd3c72f7e90e", "699c920d7ce1e0b1" },
+  { "5dbfb47c5f471136", "9c8b904d4d772be7", "7ac2fdeee4c79746" },
+  { "01a1d6d039776742", "690f5b0d9a26939b", "7ca110454a1a6e57" },
+  { "4de2f0926cf598d7", "ba107655991df529", "7fc92c3098ecf14a" },
+  { "f45e6819e3108559", "f0c76ba556283b2f", "9ab645e268430854" },
+  { "51d4eaaac6d76553", "bf3c6e8fd15ba861", "a6b0ae88f980011a" },
+  { "6a89626ea8038511", "1067b36913cbcc47", "bafebafafeaeeaff" },
+  { "7b0313c0d3a866f9", "e49e15e4f46f10e9", "bb2420b5fee5a6a1" },
+  { "9d4a44aefce79965", "77b2ecc9278e9714", "bebafbeabaffeaaf" },
+  { "59bcdfc253424cb5", "0a50abbbcd07061a", "c38c6f20230d9ed5" },
+  { "d6c059a85ee2b13e", "25977533635beb5b", "c6f974504d954c7e" },
+  { "f9e4821dfcaa5466", "48ec3a79399e9a00", "cb959b7ffd94f734" },
+  { "35e8554bad60fb29", "993a3af0bc0d77a4", "cfb23034323cd19a" },
+  { "9f97210d75b7e6df", "4729e3396e57ae4e", "d4d861035745f2c8" },
+  { "ffffffffffffffff", "b5ce4f28fdeb21e8", "e36972fc4bec7587" },
+  { "323837024123c918", "7f28bf28adfa1cf0", "e91a71a7ed5eb0ef" },
+  { "37dfe527086af0a0", "5f53c6c87760256e", "ebbbbaebfbbefaba" },
+  { "20678f45b5b8ac00", "7cc8ecf2638cc808", "ebbeeeaebbbbffff" },
+  { "78481ed0c5a7c93e", "4ca3a08300ea6afc", "fbeaffeeffeeabab" },
+  { "e2ccd415ac25412a", "bd85b3b659ab7276", "fd8a675c0ed08301" },
+  // weak key
+  { "cccc5bdfd9029507", "da57553d7d55775f", "ffffffffffffffff" },
+  { "0000000000000000", "23083a3ca70dd027", "d5d44ff720683d0d" },
+  { "0100000000000000", "6f353e3388abe2ef", "d5d44ff720683d0d" },
+  //weak keys till next comment.
+  { "95f8a5e5dd31d900", "8000000000000000", "0101010101010101" },
+  { "95f8a5e5dd31d900", "8000000000000000", "0000000000000000" },
+  { "dd7f121ca5015619", "4000000000000000", "0101010101010101" },
+  { "2e8653104f3834ea", "2000000000000000", "0101010101010101" },
+  { "4bd388ff6cd81d4f", "1000000000000000", "0101010101010101" },
+  { "20b9e767b2fb1456", "0800000000000000", "0101010101010101" },
+  { "20b9e767b2fb1456", "0800000000000000", "0001010101010100" },
+  { "55579380d77138ef", "0400000000000000", "0101010101010101" },
+  { "6cc5defaaf04512f", "0200000000000000", "0101010101010101" },
+  { "0d9f279ba5d87260", "0100000000000000", "0101010101010101" },
+  { "d9031b0271bd5a0a", "0080000000000000", "0101010101010101" },
+  { "424250b37c3dd951", "0040000000000000", "0101010101010101" },
+  { "b8061b7ecd9a21e5", "0020000000000000", "0101010101010101" },
+  { "f15d0f286b65bd28", "0010000000000000", "0101010101010101" },
+  { "add0cc8d6e5deba1", "0008000000000000", "0101010101010101" },
+  { "e6d5f82752ad63d1", "0004000000000000", "0101010101010101" },
+  { "ecbfe3bd3f591a5e", "0002000000000000", "0101010101010101" },
+  { "f356834379d165cd", "0001000000000000", "0101010101010101" },
+  { "2b9f982f20037fa9", "0000800000000000", "0101010101010101" },
+  { "889de068a16f0be6", "0000400000000000", "0101010101010101" },
+  { "e19e275d846a1298", "0000200000000000", "0101010101010101" },
+  { "329a8ed523d71aec", "0000100000000000", "0101010101010101" },
+  { "e7fce22557d23c97", "0000080000000000", "0101010101010101" },
+  { "12a9f5817ff2d65d", "0000040000000000", "0101010101010101" },
+  { "a484c3ad38dc9c19", "0000020000000000", "0101010101010101" },
+  { "fbe00a8a1ef8ad72", "0000010000000000", "0101010101010101" },
+  { "750d079407521363", "0000008000000000", "0101010101010101" },
+  { "64feed9c724c2faf", "0000004000000000", "0101010101010101" },
+  { "f02b263b328e2b60", "0000002000000000", "0101010101010101" },
+  { "9d64555a9a10b852", "0000001000000000", "0101010101010101" },
+  { "d106ff0bed5255d7", "0000000800000000", "0101010101010101" },
+  { "e1652c6b138c64a5", "0000000400000000", "0101010101010101" },
+  { "e428581186ec8f46", "0000000200000000", "0101010101010101" },
+  { "aeb5f5ede22d1a36", "0000000100000000", "0101010101010101" },
+  { "e943d7568aec0c5c", "0000000080000000", "0101010101010101" },
+  { "df98c8276f54b04b", "0000000040000000", "0101010101010101" },
+  { "b160e4680f6c696f", "0000000020000000", "0101010101010101" },
+  { "fa0752b07d9c4ab8", "0000000010000000", "0101010101010101" },
+  { "ca3a2b036dbc8502", "0000000008000000", "0101010101010101" },
+  { "5e0905517bb59bcf", "0000000004000000", "0101010101010101" },
+  { "814eeb3b91d90726", "0000000002000000", "0101010101010101" },
+  { "4d49db1532919c9f", "0000000001000000", "0101010101010101" },
+  { "25eb5fc3f8cf0621", "0000000000800000", "0101010101010101" },
+  { "ab6a20c0620d1c6f", "0000000000400000", "0101010101010101" },
+  { "79e90dbc98f92cca", "0000000000200000", "0101010101010101" },
+  { "866ecedd8072bb0e", "0000000000100000", "0101010101010101" },
+  { "8b54536f2f3e64a8", "0000000000080000", "0101010101010101" },
+  { "ea51d3975595b86b", "0000000000040000", "0101010101010101" },
+  { "caffc6ac4542de31", "0000000000020000", "0101010101010101" },
+  { "8dd45a2ddf90796c", "0000000000010000", "0101010101010101" },
+  { "1029d55e880ec2d0", "0000000000008000", "0101010101010101" },
+  { "5d86cb23639dbea9", "0000000000004000", "0101010101010101" },
+  { "1d1ca853ae7c0c5f", "0000000000002000", "0101010101010101" },
+  { "ce332329248f3228", "0000000000001000", "0101010101010101" },
+  { "8405d1abe24fb942", "0000000000000800", "0101010101010101" },
+  { "e643d78090ca4207", "0000000000000400", "0101010101010101" },
+  { "48221b9937748a23", "0000000000000200", "0101010101010101" },
+  { "dd7c0bbd61fafd54", "0000000000000100", "0101010101010101" },
+  { "2fbc291a570db5c4", "0000000000000080", "0101010101010101" },
+  { "e07c30d7e4e26e12", "0000000000000040", "0101010101010101" },
+  { "0953e2258e8e90a1", "0000000000000020", "0101010101010101" },
+  { "5b711bc4ceebf2ee", "0000000000000010", "0101010101010101" },
+  { "cc083f1e6d9e85f6", "0000000000000008", "0101010101010101" },
+  { "d2fd8867d50d2dfe", "0000000000000004", "0101010101010101" },
+  { "06e7ea22ce92708f", "0000000000000002", "0101010101010101" },
+  { "166b40b44aba4bd6", "0000000000000001", "0101010101010101" },
+  { "0000000000000000", "95a8d72813daa94d", "8001010101010101" },
+  { "0000000000000000", "0eec1487dd8c26d5", "4001010101010101" },
+  { "0000000000000000", "7ad16ffb79c45926", "2001010101010101" },
+  { "0000000000000000", "d3746294ca6a6cf3", "1001010101010101" },
+  { "0000000000000000", "809f5f873c1fd761", "0801010101010101" },
+  { "0000000000000000", "c02faffec989d1fc", "0401010101010101" },
+  { "0000000000000000", "4615aa1d33e72f10", "0201010101010101" },
+  { "0000000000000000", "2055123350c00858", "0180010101010101" },
+  { "0000000000000000", "df3b99d6577397c8", "0140010101010101" },
+  { "0000000000000000", "31fe17369b5288c9", "0120010101010101" },
+  { "0000000000000000", "dfdd3cc64dae1642", "0110010101010101" },
+  { "0000000000000000", "178c83ce2b399d94", "0108010101010101" },
+  { "0000000000000000", "50f636324a9b7f80", "0104010101010101" },
+  { "0000000000000000", "a8468ee3bc18f06d", "0102010101010101" },
+  { "0000000000000000", "a2dc9e92fd3cde92", "0101800101010101" },
+  { "0000000000000000", "cac09f797d031287", "0101400101010101" },
+  { "0000000000000000", "90ba680b22aeb525", "0101200101010101" },
+  { "0000000000000000", "ce7a24f350e280b6", "0101100101010101" },
+  { "0000000000000000", "882bff0aa01a0b87", "0101080101010101" },
+  { "0000000000000000", "25610288924511c2", "0101040101010101" },
+  { "0000000000000000", "c71516c29c75d170", "0101020101010101" },
+  { "0000000000000000", "5199c29a52c9f059", "0101018001010101" },
+  { "0000000000000000", "c22f0a294a71f29f", "0101014001010101" },
+  { "0000000000000000", "ee371483714c02ea", "0101012001010101" },
+  { "0000000000000000", "a81fbd448f9e522f", "0101011001010101" },
+  { "0000000000000000", "4f644c92e192dfed", "0101010801010101" },
+  { "0000000000000000", "1afa9a66a6df92ae", "0101010401010101" },
+  { "0000000000000000", "b3c1cc715cb879d8", "0101010201010101" },
+  { "0000000000000000", "19d032e64ab0bd8b", "0101010180010101" },
+  { "0000000000000000", "3cfaa7a7dc8720dc", "0101010140010101" },
+  { "0000000000000000", "b7265f7f447ac6f3", "0101010120010101" },
+  { "0000000000000000", "9db73b3c0d163f54", "0101010110010101" },
+  { "0000000000000000", "8181b65babf4a975", "0101010108010101" },
+  { "0000000000000000", "93c9b64042eaa240", "0101010104010101" },
+  { "0000000000000000", "5570530829705592", "0101010102010101" },
+  { "0000000000000000", "8638809e878787a0", "0101010101800101" },
+  { "0000000000000000", "41b9a79af79ac208", "0101010101400101" },
+  { "0000000000000000", "7a9be42f2009a892", "0101010101200101" },
+  { "0000000000000000", "29038d56ba6d2745", "0101010101100101" },
+  { "0000000000000000", "5495c6abf1e5df51", "0101010101080101" },
+  { "0000000000000000", "ae13dbd561488933", "0101010101040101" },
+  { "0000000000000000", "024d1ffa8904e389", "0101010101020101" },
+  { "0000000000000000", "d1399712f99bf02e", "0101010101018001" },
+  { "0000000000000000", "14c1d7c1cffec79e", "0101010101014001" },
+  { "0000000000000000", "1de5279dae3bed6f", "0101010101012001" },
+  { "0000000000000000", "e941a33f85501303", "0101010101011001" },
+  { "0000000000000000", "da99dbbc9a03f379", "0101010101010801" },
+  { "0000000000000000", "b7fc92f91d8e92e9", "0101010101010401" },
+  { "0000000000000000", "ae8e5caa3ca04e85", "0101010101010201" },
+  { "0000000000000000", "9cc62df43b6eed74", "0101010101010180" },
+  { "0000000000000000", "d863dbb5c59a91a0", "0101010101010140" },
+  { "0000000000000000", "a1ab2190545b91d7", "0101010101010120" },
+  { "0000000000000000", "0875041e64c570f7", "0101010101010110" },
+  { "0000000000000000", "5a594528bebef1cc", "0101010101010108" },
+  { "0000000000000000", "fcdb3291de21f0c0", "0101010101010104" },
+  { "0000000000000000", "869efd7f9f265a09", "0101010101010102" },
+  //end of weak keys
+  { "0000000000000000", "88d55e54f54c97b4", "1046913489980131" },
+  { "0000000000000000", "0c0cc00c83ea48fd", "1007103489988020" },
+  { "0000000000000000", "83bc8ef3a6570183", "10071034c8980120" },
+  { "0000000000000000", "df725dcad94ea2e9", "1046103489988020" },
+  { "0000000000000000", "e652b53b550be8b0", "1086911519190101" },
+  { "0000000000000000", "af527120c485cbb0", "1086911519580101" },
+  { "0000000000000000", "0f04ce393db926d5", "5107b01519580101" },
+  { "0000000000000000", "c9f00ffc74079067", "1007b01519190101" },
+  { "0000000000000000", "7cfd82a593252b4e", "3107915498080101" },
+  { "0000000000000000", "cb49a2f9e91363e3", "3107919498080101" },
+  { "0000000000000000", "00b588be70d23f56", "10079115b9080140" },
+  { "0000000000000000", "406a9a6ab43399ae", "3107911598090140" },
+  { "0000000000000000", "6cb773611dca9ada", "1007d01589980101" },
+  { "0000000000000000", "67fd21c17dbb5d70", "9107911589980101" },
+  { "0000000000000000", "9592cb4110430787", "9107d01589190101" },
+  { "0000000000000000", "a6b7ff68a318ddd3", "1007d01598980120" },
+  { "0000000000000000", "4d102196c914ca16", "1007940498190101" },
+  { "0000000000000000", "2dfa9f4573594965", "0107910491190401" },
+  { "0000000000000000", "b46604816c0e0774", "0107910491190101" },
+  { "0000000000000000", "6e7e6221a4f34e87", "0107940491190401" },
+  { "0000000000000000", "aa85e74643233199", "19079210981a0101" },
+  { "0000000000000000", "2e5a19db4d1962d6", "1007911998190801" },
+  { "0000000000000000", "23a866a809d30894", "10079119981a0801" },
+  { "0000000000000000", "d812d961f017d320", "1007921098190101" },
+  { "0000000000000000", "055605816e58608f", "100791159819010b" },
+  { "0000000000000000", "abd88e8b1b7716f1", "1004801598190101" },
+  { "0000000000000000", "537ac95be69da1e1", "1004801598190102" },
+  { "0000000000000000", "aed0f6ae3c25cdd8", "1004801598190108" },
+  { "0000000000000000", "b3e35a5ee53e7b8d", "1002911598100104" },
+  { "0000000000000000", "61c79c71921a2ef8", "1002911598190104" },
+  { "0000000000000000", "e2f5728f0995013c", "1002911598100201" },
+  { "0000000000000000", "1aeac39a61f0a464", "1002911698100101" },
+  { "059b5e0851cf143a", "86a560f10ec6d85b", "0113b970fd34f2ce" },
+  { "4e6f772069732074", "3fa40e8a984d4815", "0123456789abcdef" },
+  { 0, 0, 0 }
+};
+
+
 CipherUnitTest::CipherUnitTest()
     : Tester()
 {
@@ -418,7 +634,7 @@ void CipherUnitTest::allTests()
 	CHECK( QCA::arrayToHex( inter ), QString( "d8f532538289ef7d06b506a4fd5be9c9") );
 	CHECK( QCA::arrayToHex( cipherObj1.final() ), QString( "" ) );
 
-	CHECK( cipherObj1.blockSize(), 16 );
+	CHECK( cipherObj1.blockSize(), (unsigned)16 );
 
 	// From the NIST rijndael-vals.zip set, see ecb_iv.txt
 	QCA::SymmetricKey key2(QCA::hexToArray( "000102030405060708090A0B0C0D0E0F" ) );
@@ -459,7 +675,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128ecbTestValues[n].ciphertext ) ) ),
 		   QString( aes128ecbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
 
 	for (int n = 0; aes128cbcTestValues[n].plaintext; n++) {
@@ -476,7 +694,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128cbcTestValues[n].ciphertext ) ) ),
 		   QString( aes128cbcTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
 
 	for (int n = 0; aes128cfbTestValues[n].plaintext; n++) {
@@ -493,7 +713,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128cfbTestValues[n].ciphertext ) ) ),
 		   QString( aes128cfbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
     }
 
@@ -509,7 +731,7 @@ void CipherUnitTest::allTests()
 	CHECK( QCA::arrayToHex( cipherObj1.final() ), QString( "" ) );
 	CHECK( cipherObj1.ok(), true );
 
-	CHECK( cipherObj1.blockSize(), 16 );
+	CHECK( cipherObj1.blockSize(), (unsigned)16 );
 
 	QCA::AES192 cipherObj2(QCA::Cipher::ECB, QCA::Decode, key1, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 
@@ -532,7 +754,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes192ecbTestValues[n].ciphertext ) ) ),
 		   QString( aes192ecbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
 
 	for (int n = 0; aes192cbcTestValues[n].plaintext; n++) {
@@ -549,7 +773,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes192cbcTestValues[n].ciphertext ) ) ),
 		   QString( aes192cbcTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
 
 	for (int n = 0; aes192cfbTestValues[n].plaintext; n++) {
@@ -566,7 +792,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes192cfbTestValues[n].ciphertext ) ) ),
 		   QString( aes192cfbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
     }
 
@@ -583,7 +811,7 @@ void CipherUnitTest::allTests()
 	CHECK( QCA::arrayToHex( cipherObj1.final() ), QString( "" ) );
 	CHECK( cipherObj1.ok(), true );
 
-	CHECK( cipherObj1.blockSize(), 16 );
+	CHECK( cipherObj1.blockSize(), (unsigned)16 );
 
 	QCA::AES256 cipherObj2(QCA::Cipher::ECB, QCA::Decode, key1, QCA::InitializationVector(), QCA::Cipher::NoPadding );
 	CHECK( QCA::arrayToHex( cipherObj2.update( QCA::hexToArray( "8EA2B7CA516745BFEAFC49904B496089") ) ),
@@ -605,7 +833,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes256ecbTestValues[n].ciphertext ) ) ),
 		   QString( aes256ecbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
 
 	for (int n = 0; aes256cbcTestValues[n].plaintext; n++) {
@@ -622,7 +852,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes256cbcTestValues[n].ciphertext ) ) ),
 		   QString( aes256cbcTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
 
 	for (int n = 0; aes256cfbTestValues[n].plaintext; n++) {
@@ -639,7 +871,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes256cfbTestValues[n].ciphertext ) ) ),
 		   QString( aes256cfbTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
     }
 
@@ -649,7 +883,7 @@ void CipherUnitTest::allTests()
 	QCA::TripleDES cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 24 ) );
 	CHECK( cipherObj1.keyLength().minimum(), 24 );
 	CHECK( cipherObj1.keyLength().maximum(), 24 );
-	CHECK( cipherObj1.blockSize(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
 
 	for (int n = 0; tripledesTestValues[n].plaintext; n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( tripledesTestValues[n].key ) );
@@ -664,7 +898,36 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( tripledesTestValues[n].ciphertext ) ) ),
 		   QString( tripledesTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
+        }
+    }
+
+    if (!QCA::isSupported("des") )
+	SKIP("DES not supported!\n");
+    else {
+	QCA::DES cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 8 ) );
+	CHECK( cipherObj1.keyLength().minimum(), 8 );
+	CHECK( cipherObj1.keyLength().maximum(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
+
+	for (int n = 0; desTestValues[n].plaintext; n++) {
+	    QCA::SymmetricKey key( QCA::hexToArray( desTestValues[n].key ) );
+	    QCA::DES forwardCipher( QCA::Cipher::ECB, QCA::Encode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( desTestValues[n].plaintext ) ) ),
+		   QString( desTestValues[n].ciphertext ) );
+	    CHECK( forwardCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
+	    CHECK( forwardCipher.ok(), true );
+
+	    QCA::DES reverseCipher( QCA::Cipher::ECB, QCA::Decode, key, QCA::InitializationVector(), QCA::Cipher::NoPadding );
+
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( desTestValues[n].ciphertext ) ) ),
+		   QString( desTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
+	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
     }
 
@@ -672,7 +935,7 @@ void CipherUnitTest::allTests()
 	SKIP("Blowfish not supported!\n");
     else {
 	QCA::BlowFish cipherObj1( QCA::Cipher::ECB, QCA::Encode, QCA::SymmetricKey( 16 ) );
-	CHECK( cipherObj1.blockSize(), 8 );
+	CHECK( cipherObj1.blockSize(), (unsigned)8 );
 
 	for (int n = 0; blowfishTestValues[n].plaintext; n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( blowfishTestValues[n].key ) );
@@ -687,7 +950,9 @@ void CipherUnitTest::allTests()
 
 	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( blowfishTestValues[n].ciphertext ) ) ),
 		   QString( blowfishTestValues[n].plaintext ) );
+	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
+	    CHECK( reverseCipher.ok(), true );
         }
     }
 }
