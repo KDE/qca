@@ -251,7 +251,7 @@ bool QSecureArray::resize(uint size)
 		if(d)
 		{
 			Botan::byte *p = (Botan::byte *)d->buf;
-			memcpy(p2, p, cur_size);
+			memcpy(p2, p, QMIN((int)size, cur_size));
 			delete d;
 		}
 		d = d2;
