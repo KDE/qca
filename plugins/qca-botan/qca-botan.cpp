@@ -17,9 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-#include "QtCrypto/qcaprovider.h"
+#include <QtCrypto>
+#include <QtCore>
+
 #include <qstringlist.h>
-#include <iostream>
 
 #include <botan/rng.h>
 #include <botan/md2.h>
@@ -442,4 +443,16 @@ public:
     }
 };
 
-QCA_EXPORT_PLUGIN(botanProvider);
+class botanPlugin : public QCAPlugin
+{
+	Q_OBJECT
+public:
+	virtual int version() const { return QCA_PLUGIN_VERSION; }
+	virtual QCA::Provider *createProvider() { return new botanProvider; }
+};
+
+#include "qca-botan.moc"
+
+Q_EXPORT_PLUGIN(botanPlugin);
+
+
