@@ -24,14 +24,12 @@
 
 #include <qmap.h>
 #include "qca_core.h"
+#include "qca_publickey.h"
 
 class QDateTime;
 
 namespace QCA
 {
-	class PublicKey;
-	class PrivateKey;
-
 	/**
 	   Certificate Request Format
 	*/
@@ -39,6 +37,39 @@ namespace QCA
 	{
 		CSR_PKCS10, ///< standard PKCS#10 format
 		CSR_SPKAC   ///< Signed Public Key and Challenge (Netscape) format
+	};
+
+	/**
+	   The validity (or otherwise) of a certificate
+	*/
+	enum CertValidity
+	{
+		Valid,              ///< The certificate is valid
+		Rejected,           ///< The root CA rejected the certificate purpose
+		Untrusted,          ///< The certificate is not trusted
+		SignatureFailed,    ///< The signature does not match
+		InvalidCA,          ///< The Certificate Authority is invalid
+		InvalidPurpose,     ///< The purpose does not match the intended usage
+		SelfSigned,         ///< The certificate is self-signed, and is not
+		                    ///< found in the list of trusted certificates
+		Revoked,            ///< The certificate has been revoked
+		PathLengthExceeded, ///< The path length from the root CA to this certificate is too long
+		Expired,            ///< The certificate has expired
+		Unknown             ///< Validity is unknown
+	};
+
+	/**
+	   Specify the intended usage of a certificate
+	*/
+	enum CertUsage
+	{
+		Any             = 0x00, ///< Any application, or unspecified
+		TLSServer       = 0x01, ///< server side of a TLS or SSL connection
+		TLSClient       = 0x02, ///< client side of a TLS or SSL connection
+		CodeSigning     = 0x04, ///< code signing certificate
+		EmailProtection = 0x08, ///< email (S/MIME) certificate
+		TimeStamping    = 0x10, ///< time stamping certificate
+		CRLSigning      = 0x20  ///< certificate revocation list signing certificate
 	};
 
 	// note: in SPKAC mode, all options are ignored except for challenge

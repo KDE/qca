@@ -37,6 +37,51 @@ namespace QCA
 	class DHPublicKey;
 	class DHPrivateKey;
 
+	enum DL_Group
+	{
+		DSA_512,
+		DSA_768,
+		DSA_1024,
+		IETF_768,
+		IETF_1024,
+		IETF_1536,
+		IETF_2048,
+		IETF_3072,
+		IETF_4096
+	};
+
+	/**
+	   Encryption algorithms
+	*/
+	enum EncAlgo
+	{
+		EME_PKCS1v15,  ///< Block type 2 (PKCD1, Version 1.5)
+		EME_PKCS1_OAEP ///< Optimal asymmetric encryption padding (PKCS1, Version 2.0)
+	};
+
+	/**
+	   Signature algorithm variants
+	*/
+	enum SignAlgo
+	{
+		SignUnknown, ///< Unknown signing algorithm
+		EMSA1_SHA1,  ///< SHA1, with EMSA1 (IEEE1363-2000) encoding (this is the usual DSA algorithm - FIPS186)
+		EMSA3_SHA1,  ///< SHA1, with EMSA3 (ie PKCS1 Version 1.5) encoding
+		EMSA3_MD5,   ///< MD5, with EMSA3 (ie PKCS1 Version 1.5) encoding (this is the usual RSA algorithm)
+		EMSA3_MD2,   ///< MD2, with EMSA3 (ie PKCS1 Version 1.5) encoding
+		EMSA3_RIPEMD160 ///< RIPEMD160, with EMSA3 (ie PKCS1 Version 1.5) encoding
+	};
+
+	/**
+	   Password-based encryption
+	*/
+	enum PBEAlgo
+	{
+		PBEDefault,         ///< Use modern default (same as PBE2_TripleDES_SHA1)
+		PBE2_DES_SHA1,      ///< PKCS#5 v2.0 DES/CBC/SHA1
+		PBE2_TripleDES_SHA1 ///< PKCS#5 v2.0 TripleDES/CBC/SHA1
+	};
+
 	class QCA_EXPORT PKey : public Algorithm
 	{
 	public:
@@ -137,8 +182,8 @@ namespace QCA
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
-		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray() ) const;
-		QString toPEM(const QSecureArray &passphrase = QSecureArray() ) const;
+		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray(), PBEAlgo pbe = PBEDefault) const;
+		QString toPEM(const QSecureArray &passphrase = QSecureArray(), PBEAlgo pbe = PBEDefault) const;
 		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
 		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString());
 

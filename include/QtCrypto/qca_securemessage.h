@@ -24,15 +24,13 @@
 
 #include <qobject.h>
 #include "qca_core.h"
+#include "qca_publickey.h"
+#include "qca_cert.h"
 
 class QDateTime;
 
 namespace QCA
 {
-	class PrivateKey;
-	class Certificate;
-	class CertificateChain;
-	class Store;
 	class SecureMessageSystem;
 
 	class SecureMessageKey

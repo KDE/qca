@@ -28,6 +28,7 @@
 #include <qhostaddress.h>
 #include "qca_core.h"
 #include "qca_basic.h"
+#include "qca_cert.h"
 
 #include <limits>
 

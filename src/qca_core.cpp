@@ -21,7 +21,6 @@
 
 #include "qca_core.h"
 
-#include <qptrdict.h>
 #include "qca_tools.h"
 #include "qca_plugin.h"
 #include "qca_textfilter.h"
@@ -37,8 +36,6 @@ namespace QCA {
 // from qca_tools
 bool botan_init(int prealloc, bool mmap);
 void botan_deinit();
-void *botan_secure_alloc(int bytes);
-void botan_secure_free(void *p, int bytes);
 
 // from qca_default
 Provider *create_default_provider();
@@ -48,7 +45,6 @@ Provider *create_default_provider();
 //----------------------------------------------------------------------------
 static QCA::ProviderManager *manager = 0;
 static QCA::Random *global_rng = 0;
-static QPtrDict<int> *memtable = 0;
 static bool qca_init = false;
 static bool qca_secmem = false;
 
@@ -93,9 +89,6 @@ void init(MemoryMode mode, int prealloc)
 #endif
 	}
 
-	memtable = new QPtrDict<int>;
-	memtable->setAutoDelete(true);
-
 	manager = new ProviderManager;
 	manager->setDefault(create_default_provider()); // manager owns it
 }
@@ -110,9 +103,6 @@ void deinit()
 
 	delete manager;
 	manager = 0;
-
-	delete memtable;
-	memtable = 0;
 
 	botan_deinit();
 	qca_secmem = false;
@@ -253,27 +243,6 @@ QByteArray hexToArray(const QString &str)
 {
 	return Hex().stringToArray(str).toByteArray();
 }
-
-} // namespace QCA
-
-void *qca_secure_alloc(int bytes)
-{
-	void *p = QCA::botan_secure_alloc(bytes);
-	QCA::memtable->insert(p, new int(bytes));
-	return p;
-}
-
-void qca_secure_free(void *p)
-{
-	int *bytes = QCA::memtable->find(p);
-	if(bytes)
-	{
-		QCA::botan_secure_free(p, *bytes);
-		QCA::memtable->remove(p);
-	}
-}
-
-namespace QCA {
 
 Provider::Context *getContext(const QString &type, const QString &provider)
 {

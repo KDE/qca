@@ -29,10 +29,6 @@
 #include "qca_export.h"
 #include "qca_tools.h"
 
-// Direct secure memory access.  For interfacing with C libraries if needed.
-QCA_EXPORT void *qca_secure_alloc(int bytes);
-QCA_EXPORT void qca_secure_free(void *p);
-
 /** 
  * QCA - the Qt Cryptographic Architecture
  */
@@ -103,87 +99,6 @@ namespace QCA
 	{
 		Encode, ///< Operate in the "forward" direction; for example, encrypting
 		Decode  ///< Operate in the "reverse" direction; for example, decrypting
-	};
-
-	enum DL_Group
-	{
-		DSA_512,
-		DSA_768,
-		DSA_1024,
-		IETF_768,
-		IETF_1024,
-		IETF_1536,
-		IETF_2048,
-		IETF_3072,
-		IETF_4096
-	};
-
-	/**
-	   Encryption algorithms
-	*/
-	enum EncAlgo
-	{
-		EME_PKCS1v15,  ///< Block type 2 (PKCD1, Version 1.5)
-		EME_PKCS1_OAEP ///< Optimal asymmetric encryption padding (PKCS1, Version 2.0)
-	};
-
-	/**
-	   Signature algorithm variants
-	*/
-	enum SignAlgo
-	{
-		SignUnknown, ///< Unknown signing algorithm
-		EMSA1_SHA1,  ///< SHA1, with EMSA1 (IEEE1363-2000) encoding (this is the usual DSA algorithm - FIPS186)
-		EMSA3_SHA1,  ///< SHA1, with EMSA3 (ie PKCS1 Version 1.5) encoding
-		EMSA3_MD5,   ///< MD5, with EMSA3 (ie PKCS1 Version 1.5) encoding (this is the usual RSA algorithm)
-		EMSA3_MD2,   ///< MD2, with EMSA3 (ie PKCS1 Version 1.5) encoding
-		EMSA3_RIPEMD160 ///< RIPEMD160, with EMSA3 (ie PKCS1 Version 1.5) encoding
-	};
-
-	/**
-	   The validity (or otherwise) of a certificate
-	*/
-	enum CertValidity
-	{
-		Valid,              ///< The certificate is valid
-		Rejected,           ///< The root CA rejected the certificate purpose
-		Untrusted,          ///< The certificate is not trusted
-		SignatureFailed,    ///< The signature does not match
-		InvalidCA,          ///< The Certificate Authority is invalid
-		InvalidPurpose,     ///< The purpose does not match the intended usage
-		SelfSigned,         ///< The certificate is self-signed, and is not
-		                    ///< found in the list of trusted certificates
-		Revoked,            ///< The certificate has been revoked
-		PathLengthExceeded, ///< The path length from the root CA to this certificate is too long
-		Expired,            ///< The certificate has expired
-		Unknown             ///< Validity is unknown
-	};
-
-	/**
-	   Specify the intended usage of a certificate
-	*/
-	enum CertUsage
-	{
-		Any             = 0x00, ///< Any application, or unspecified
-		TLSServer       = 0x01, ///< server side of a TLS or SSL connection
-		TLSClient       = 0x02, ///< client side of a TLS or SSL connection
-		CodeSigning     = 0x04, ///< code signing certificate
-		EmailProtection = 0x08, ///< email (S/MIME) certificate
-		TimeStamping    = 0x10, ///< time stamping certificate
-		CRLSigning      = 0x20  ///< certificate revocation list signing certificate
-	};
-
-	/**
-	 * Specify the lower-bound for acceptable TLS/SASL security layers
-	 */
-	enum SecurityLevel
-	{
-		SL_None,      ///< indicates that no security is ok
-		SL_Integrity, ///< must at least get integrity protection
-		SL_Export,    ///< must be export level bits or more
-		SL_Baseline,  ///< must be 128 bit or more
-		SL_High,      ///< must be more than 128 bit
-		SL_Highest    ///< SL_High or max possible, whichever is greater
 	};
 
 	/**

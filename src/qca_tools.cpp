@@ -19,8 +19,10 @@
  *
  */
 
-#include "qtextstream.h"
 #include "qca_tools.h"
+
+#include <qptrdict.h>
+#include <qtextstream.h>
 
 #ifdef Q_OS_UNIX
 # include <stdlib.h>
@@ -28,7 +30,7 @@
 #endif
 #include "botantools/botantools.h"
 
-using namespace QCA;
+namespace QCA {
 
 static bool can_lock()
 {
@@ -55,11 +57,10 @@ static void add_mmap()
 #endif
 }
 
-namespace QCA {
-
 // Botan shouldn't throw any exceptions in our init/deinit.
 
 static const Botan::SecureAllocator *alloc = 0;
+static QPtrDict<int> *memtable = 0;
 
 bool botan_init(int prealloc, bool mmap)
 {
@@ -88,11 +89,17 @@ bool botan_init(int prealloc, bool mmap)
 	}
 	alloc = Botan::get_allocator("default");
 
+	memtable = new QPtrDict<int>;
+	memtable->setAutoDelete(true);
+
 	return secmem;
 }
 
 void botan_deinit()
 {
+	delete memtable;
+	memtable = 0;
+
 	alloc = 0;
 	Botan::Init::shutdown_memory_subsystem();
 	Botan::Init::set_mutex_type(0);
@@ -108,7 +115,26 @@ void botan_secure_free(void *p, int bytes)
 	alloc->deallocate(p, (Botan::u32bit)bytes);
 }
 
+} // end namespace QCA
+
+void *qca_secure_alloc(int bytes)
+{
+	void *p = QCA::botan_secure_alloc(bytes);
+	QCA::memtable->insert(p, new int(bytes));
+	return p;
 }
+
+void qca_secure_free(void *p)
+{
+	int *bytes = QCA::memtable->find(p);
+	if(bytes)
+	{
+		QCA::botan_secure_free(p, *bytes);
+		QCA::memtable->remove(p);
+	}
+}
+
+using namespace QCA;
 
 //----------------------------------------------------------------------------
 // QSecureArray

@@ -396,13 +396,15 @@ SymmetricKey PrivateKey::deriveKey(const PublicKey &theirs)
 	return ((PKeyContext *)context())->key()->deriveKey(*(theirContext->key()));
 }
 
-QSecureArray PrivateKey::toDER(const QSecureArray &passphrase) const
+QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgo pbe) const
 {
+	Q_UNUSED(pbe);
 	return ((PKeyContext *)context())->privateToDER(passphrase);
 }
 
-QString PrivateKey::toPEM(const QSecureArray &passphrase) const
+QString PrivateKey::toPEM(const QSecureArray &passphrase, PBEAlgo pbe) const
 {
+	Q_UNUSED(pbe);
 	return ((PKeyContext *)context())->privateToPEM(passphrase);
 }
 

@@ -11,20 +11,20 @@
   threading (safety, usability) in API and plugins
   smart cards, external keyring drives
   it's possible we use QSecureArray in some unnecessary places
+  don't forget to QCA_EXPORT everything
 
 * finish API:
-  move secure memory C functions to qca_tools.h
-  make public C functions to init in qca_tools.h, that qca_core will use
   cert/crl: Distinguished Names (Botan has X509_DN)
   cert: turn Info into an enum
-  openpgp: be sure to support key expiration and validity
-  shortcuts for reading/writing certs, etc, directly to files?
   cert: extensions
-  tls: session reuse
+  cert fingerprints (sha1 and md5)
   cert/csr/crl: path limit, subject/issuer ids (useful for create/validate)
   cert/csr: constraints, ex_constraints, policies (same as above)
   cert/csr: subjectAltName
   crl: issuer info, authority_key_id
+  tls: session reuse
+  openpgp: be sure to support key expiration and validity
+  shortcuts for reading/writing certs, etc, directly to files?
   quoted-printable TextFilter
 
 * finish code for APIs:
@@ -39,6 +39,15 @@
   default provider should have built-in sha1 and md5 (?)
   system store: all added certs need to be flagged as trusted
 
+* build system:
+  on non-win/mac, allow specifying of flatfile store, else install/use built-in
+  make sure it installs properly
+
+* qt 4 upgrade:
+  new include styles
+  use qmake .prf for auto-discovery by applications
+  use qplugin
+
 * examples
   create example for BigInteger
   update cipher example (after API sorted out)
@@ -51,23 +60,11 @@
   qca-openssl: need to implement locking callbacks.
   figure out why Valgrind reports so many memory leaks
 
-* consider new APIs:
-  cert/pkey: fingerprints (is there a standard for this?)
-  pkey: ability to choose cipher for toDER/PEM passphrase?
-  personalbundle: cert chain vs cert + trusted certs?
-
-* build system:
-  on non-win/mac, allow specifying of flatfile store, else install/use built-in
-  make sure it installs properly
-
-* qt 4 upgrade:
-  new include styles
-  use qmake .prf for auto-discovery by applications
-  use qplugin
-
 * possibilities for the future:
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
   advanced pgp functionality (full key info and ability to manipulate keyrings)
   Key wrapping - RFC3217 and RFC3394
+  dtls (secure UDP)
+  aes pbe algos
 

@@ -26,6 +26,10 @@
 #include <qcstring.h>
 #include <qstring.h>
 
+// Direct secure memory access.  For interfacing with C libraries if needed.
+QCA_EXPORT void *qca_secure_alloc(int bytes);
+QCA_EXPORT void qca_secure_free(void *p);
+
 /**
  \class QSecureArray qca_tools.h QtCrypto
 
