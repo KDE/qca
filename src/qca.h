@@ -152,10 +152,21 @@ public:
 	QString toString() const;
 	bool fromString(const QString &s);
 
+	Q_INT32 cmp(const QBigInteger &n, bool checkSign = true) const;
 private:
 	class Private;
 	Private *d;
 };
+
+inline bool operator==(const QBigInteger &a, const QBigInteger &b)
+{
+	return (0 == a.cmp( b ) );
+}
+
+inline bool operator!=(const QBigInteger &a, const QBigInteger &b)
+{
+	return (0 != a.cmp( b ) );
+}
 
 namespace QCA
 {

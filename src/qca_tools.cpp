@@ -376,6 +376,11 @@ QBigInteger & QBigInteger::operator=(const QString &s)
 	return *this;
 }
 
+Q_INT32 QBigInteger::cmp(const QBigInteger &n, bool checkSign) const
+{
+	return ( (d->n).cmp( n.d->n, checkSign ) );
+}
+
 QSecureArray QBigInteger::toArray() const
 {
 	int size = d->n.encoded_size(Botan::BigInt::Binary);
