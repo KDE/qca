@@ -23,6 +23,7 @@
 using namespace QCA;
 
 static QPtrList<QCAProvider> providerList;
+static bool qca_init = false;
 
 QString QCA::arrayToHex(const QByteArray &a)
 {
@@ -50,6 +51,10 @@ QByteArray QCA::hexToArray(const QString &str)
 
 void QCA::init()
 {
+	if(qca_init)
+		return;
+	qca_init = true;
+
 	providerList.clear();
 #ifdef USE_OPENSSL
 	providerList.append(createProviderOpenSSL());
@@ -86,6 +91,8 @@ void QCA::init()
 
 bool QCA::isSupported(int capabilities)
 {
+	init();
+
 	int caps = 0;
 	QPtrListIterator<QCAProvider> it(providerList);
 	for(QCAProvider *p; (p = it.current()); ++it)
@@ -98,6 +105,8 @@ bool QCA::isSupported(int capabilities)
 
 static void *getContext(int cap)
 {
+	init();
+
 	QPtrListIterator<QCAProvider> it(providerList);
 	for(QCAProvider *p; (p = it.current()); ++it) {
 		if(p->capabilities() & cap)

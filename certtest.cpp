@@ -24,8 +24,6 @@ void showCertInfo(const QCA::Cert &cert)
 
 int main()
 {
-	QCA::init();
-
 	if(!QCA::isSupported(QCA::CAP_X509)) {
 		printf("X509 not supported!\n");
 		return 1;
