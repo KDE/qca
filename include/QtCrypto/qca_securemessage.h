@@ -31,9 +31,9 @@ namespace QCA
 {
 	class PrivateKey;
 	class Certificate;
+	class CertificateChain;
 	class Store;
 	class SecureMessageSystem;
-	typedef QValueList<Certificate> CertificateChain;
 
 	class SecureMessageKey
 	{
@@ -78,6 +78,12 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
+		enum SignMode
+		{
+			Message,
+			Clearsign,
+			Detached
+		};
 		enum Order
 		{
 			EncryptThenSign,
@@ -106,6 +112,7 @@ namespace QCA
 		~SecureMessage();
 
 		bool canSignMultiple() const;     // PGP can't sign multiple
+		bool canClearsign() const;        // S/MIME can't clearsign
 		void setEnableBundleSigner(bool); // Bundle S/MIME certificate chain (default true)
 		void setFormat(Format f);         // (default Binary)
 		void setRecipient(const SecureMessageKey &key);
@@ -115,8 +122,8 @@ namespace QCA
 
 		void startEncrypt();
 		void startDecrypt();
-		void startSign(bool detachedSignature = true);
-		void startVerify(const QSecureArray &sig = QSecureArray());
+		void startSign(SignMode m = Message);
+		void startVerify(const QSecureArray &detachedSig = QSecureArray());
 		void startEncryptAndSign(Order o = EncryptThenSign);
 		void startDecryptAndVerify(Order o = EncryptThenSign);
 		void update(const QSecureArray &in);

@@ -31,6 +31,159 @@ namespace QCA {
 Provider::Context *getContext(const QString &type, const QString &provider);
 
 //----------------------------------------------------------------------------
+// CertificateOptions
+//----------------------------------------------------------------------------
+CertificateOptions::CertificateOptions()
+{
+}
+
+bool CertificateOptions::isValid() const
+{
+	return false;
+}
+
+QString CertificateOptions::commonName() const
+{
+	return QString();
+}
+
+QString CertificateOptions::country() const
+{
+	return QString();
+}
+
+QString CertificateOptions::organization() const
+{
+	return QString();
+}
+
+QString CertificateOptions::organizationalUnit() const
+{
+	return QString();
+}
+
+QString CertificateOptions::locality() const
+{
+	return QString();
+}
+
+QString CertificateOptions::state() const
+{
+	return QString();
+}
+
+QBigInteger CertificateOptions::serialNumber() const
+{
+	return QBigInteger();
+}
+
+QString CertificateOptions::email() const
+{
+	return QString();
+}
+
+QString CertificateOptions::uri() const
+{
+	return QString();
+}
+
+QString CertificateOptions::dns() const
+{
+	return QString();
+}
+
+QString CertificateOptions::challenge() const
+{
+	return QString();
+}
+
+QDateTime CertificateOptions::notValidBefore() const
+{
+	return QDateTime();
+}
+
+QDateTime CertificateOptions::notValidAfter() const
+{
+	return QDateTime();
+}
+
+bool CertificateOptions::isCA() const
+{
+	return false;
+}
+
+int CertificateOptions::pathLimit() const
+{
+	return 0;
+}
+
+void CertificateOptions::setCommonName(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setCountry(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setOrganization(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setOrganizationalUnit(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setLocality(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setState(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setSerialNumber(const QBigInteger &i)
+{
+	Q_UNUSED(i);
+}
+
+void CertificateOptions::setEmail(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setURI(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setDNS(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setChallenge(const QString &s)
+{
+	Q_UNUSED(s);
+}
+
+void CertificateOptions::setValidityPeriod(const QDateTime &start, const QDateTime &end)
+{
+	Q_UNUSED(start);
+	Q_UNUSED(end);
+}
+
+void CertificateOptions::setAsCA(int pathLimit)
+{
+	Q_UNUSED(pathLimit);
+}
+
+//----------------------------------------------------------------------------
 // Certificate
 //----------------------------------------------------------------------------
 // (adapted from kdelibs) -- Justin
@@ -97,6 +250,13 @@ static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
 
 Certificate::Certificate()
 {
+}
+
+Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
+{
+	Q_UNUSED(opts);
+	Q_UNUSED(key);
+	Q_UNUSED(provider);
 }
 
 bool Certificate::isNull() const
@@ -208,6 +368,119 @@ bool Certificate::operator!=(const Certificate &a) const
 }
 
 //----------------------------------------------------------------------------
+// CertificateChain
+//----------------------------------------------------------------------------
+CertificateChain::CertificateChain()
+{
+}
+
+CertificateChain::CertificateChain(const Certificate &primary)
+{
+	append(primary);
+}
+
+const Certificate & CertificateChain::primary() const
+{
+	return first();
+}
+
+//----------------------------------------------------------------------------
+// CertificateRequest
+//----------------------------------------------------------------------------
+CertificateRequest::CertificateRequest()
+{
+}
+
+CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
+{
+	Q_UNUSED(opts);
+	Q_UNUSED(key);
+	Q_UNUSED(provider);
+}
+
+bool CertificateRequest::isNull() const
+{
+	return false;
+}
+
+PublicKey CertificateRequest::subjectPublicKey() const
+{
+	return PublicKey();
+}
+
+bool CertificateRequest::isCA() const
+{
+	return false;
+}
+
+int CertificateRequest::pathLimit() const
+{
+	return 0;
+}
+
+QString CertificateRequest::challenge() const
+{
+	return QString();
+}
+
+SignAlgo CertificateRequest::signatureAlgorithm() const
+{
+	return SignUnknown;
+}
+
+QSecureArray CertificateRequest::toDER() const
+{
+	return QSecureArray();
+}
+
+QString CertificateRequest::toPEM() const
+{
+	return QString();
+}
+
+CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, const QString &provider)
+{
+	Q_UNUSED(a);
+	Q_UNUSED(provider);
+	return CertificateRequest();
+}
+
+CertificateRequest CertificateRequest::fromPEM(const QString &s, const QString &provider)
+{
+	Q_UNUSED(s);
+	Q_UNUSED(provider);
+	return CertificateRequest();
+}
+
+//----------------------------------------------------------------------------
+// CRLEntry
+//----------------------------------------------------------------------------
+CRLEntry::CRLEntry()
+{
+}
+
+CRLEntry::CRLEntry(const Certificate &c, Reason r)
+{
+	Q_UNUSED(c);
+	Q_UNUSED(r);
+}
+
+QBigInteger CRLEntry::serialNumber() const
+{
+	return QBigInteger();
+}
+
+QDateTime CRLEntry::time() const
+{
+	return QDateTime();
+}
+
+CRLEntry::Reason CRLEntry::reason() const
+{
+	return Unspecified;
+}
+
+//----------------------------------------------------------------------------
 // CRL
 //----------------------------------------------------------------------------
 CRL::CRL()
@@ -232,6 +505,16 @@ QDateTime CRL::thisUpdate() const
 QDateTime CRL::nextUpdate() const
 {
 	return QDateTime();
+}
+
+QValueList<CRLEntry> CRL::revoked() const
+{
+	return QValueList<CRLEntry>();
+}
+
+SignAlgo CRL::signatureAlgorithm() const
+{
+	return SignUnknown;
 }
 
 QSecureArray CRL::toDER() const
@@ -263,6 +546,42 @@ CRL CRL::fromPEM(const QString &s, const QString &provider)
 }
 
 //----------------------------------------------------------------------------
+// CertificateAuthority
+//----------------------------------------------------------------------------
+CertificateAuthority::CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider)
+{
+	Q_UNUSED(cert);
+	Q_UNUSED(key);
+	Q_UNUSED(provider);
+}
+
+Certificate CertificateAuthority::certificate() const
+{
+	return Certificate();
+}
+
+Certificate CertificateAuthority::signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const
+{
+	Q_UNUSED(req);
+	Q_UNUSED(notValidAfter);
+	return Certificate();
+}
+
+CRL CertificateAuthority::createCRL(const QDateTime &nextUpdate) const
+{
+	Q_UNUSED(nextUpdate);
+	return CRL();
+}
+
+CRL CertificateAuthority::updateCRL(const CRL &crl, const QValueList<CRLEntry> &entries, const QDateTime &nextUpdate) const
+{
+	Q_UNUSED(crl);
+	Q_UNUSED(entries);
+	Q_UNUSED(nextUpdate);
+	return CRL();
+}
+
+//----------------------------------------------------------------------------
 // Store
 //----------------------------------------------------------------------------
 Store::Store(const QString &provider)
@@ -283,6 +602,50 @@ void Store::addCRL(const CRL &crl)
 CertValidity Store::validate(const Certificate &cert, CertUsage u) const
 {
 	return ((StoreContext *)context())->validate(*((CertContext *)cert.context()), u);
+}
+
+//----------------------------------------------------------------------------
+// PersonalBundle
+//----------------------------------------------------------------------------
+PersonalBundle::PersonalBundle(const QString &provider)
+{
+	Q_UNUSED(provider);
+}
+
+bool PersonalBundle::isNull() const
+{
+	return false;
+}
+
+CertificateChain PersonalBundle::certificateChain() const
+{
+	return CertificateChain();
+}
+
+PrivateKey PersonalBundle::privateKey() const
+{
+	return PrivateKey();
+}
+
+void PersonalBundle::setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key)
+{
+	Q_UNUSED(c);
+	Q_UNUSED(key);
+}
+
+QSecureArray PersonalBundle::toArray(const QString &name, const QSecureArray &passphrase) const
+{
+	Q_UNUSED(name);
+	Q_UNUSED(passphrase);
+	return QSecureArray();
+}
+
+PersonalBundle PersonalBundle::fromArray(const QSecureArray &a, const QSecureArray &passphrase, const QString &provider)
+{
+	Q_UNUSED(a);
+	Q_UNUSED(passphrase);
+	Q_UNUSED(provider);
+	return PersonalBundle();
 }
 
 }

@@ -185,10 +185,10 @@ public:
 	virtual QString publicToPEM() const = 0;
 	virtual ConvertResult publicFromDER(const QSecureArray &a) = 0;
 	virtual ConvertResult publicFromPEM(const QString &s) = 0;
-	virtual QSecureArray privateToDER(const QString &passphrase) const = 0;
-	virtual QString privateToPEM(const QString &passphrase) const = 0;
-	virtual ConvertResult privateFromDER(const QSecureArray &a, const QString &passphrase) = 0;
-	virtual ConvertResult privateFromPEM(const QString &s, const QString &passphrase) = 0;
+	virtual QSecureArray privateToDER(const QSecureArray &passphrase) const = 0;
+	virtual QString privateToPEM(const QSecureArray &passphrase) const = 0;
+	virtual ConvertResult privateFromDER(const QSecureArray &a, const QSecureArray &passphrase) = 0;
+	virtual ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase) = 0;
 };
 
 class CertContext : public Provider::Context

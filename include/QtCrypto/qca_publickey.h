@@ -137,10 +137,10 @@ namespace QCA
 		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
-		QSecureArray toDER(const QString &passphrase = QString() ) const;
-		QString toPEM(const QString &passphrase = QString() ) const;
-		static PrivateKey fromDER(const QSecureArray &a, const QString &passphrase = QString(), const QString &provider = QString() );
-		static PrivateKey fromPEM(const QString &s, const QString &passphrase = QString(), const QString &provider = QString() );
+		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray() ) const;
+		QString toPEM(const QSecureArray &passphrase = QSecureArray() ) const;
+		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString() );
+		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), const QString &provider = QString() );
 
 	protected:
 		PrivateKey(const QString &type, const QString &provider);

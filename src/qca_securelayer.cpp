@@ -155,9 +155,10 @@ TLS::~TLS()
 	delete d;
 }
 
-void TLS::setCertificate(const Certificate &cert, const PrivateKey &key)
+void TLS::setCertificate(const CertificateChain &cert, const PrivateKey &key)
 {
-	d->ourCert = cert;
+	Q_UNUSED(cert);
+	//d->ourCert = cert;
 	d->ourKey = key;
 }
 
@@ -314,14 +315,16 @@ CertValidity TLS::peerCertificateValidity() const
 	return d->certValidity;
 }
 
-Certificate TLS::localCertificate() const
+CertificateChain TLS::localCertificateChain() const
 {
-	return d->ourCert;
+	return CertificateChain();
+	//return d->ourCert;
 }
 
-Certificate TLS::peerCertificate() const
+CertificateChain TLS::peerCertificateChain() const
 {
-	return d->cert;
+	return CertificateChain();
+	//return d->cert;
 }
 #if 0
 void TLS::update()

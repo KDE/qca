@@ -12,14 +12,16 @@
   smart cards, external keyring drives
 
 * finish API:
+  move secure memory C functions to qca_tools.h
+  make public C functions to init in qca_tools.h, that qca_core will use
   cert/crl: Distinguished Names (Botan has X509_DN)
   cert: turn Info into an enum
-  cert/pkey: fingerprints (is there a standard for this?)
-  cert: subjectAltName
   store: ability to combine stores, iterate over certs?
   openpgp: be sure to support key expiration and validity
-  smime
-  pkcs12 format support
+  shortcuts for reading/writing certs, etc, directly to files?
+  cert: version
+  cert: extensions
+  many functions that take provider names have an extra space at the end
 
 * finish code for APIs:
   cipher - needs to handling padding
@@ -31,6 +33,7 @@
   openpgp
   smime
   default provider should have built-in sha1 and md5 (?)
+  system store: all added certs need to be flagged as trusted
 
 * examples
   create example for Hex
@@ -47,7 +50,6 @@
   figure out why Valgrind reports so many memory leaks
 
 * consider new APIs:
-  extra x509 stuff discussed in the summer with kiko
   xmldsig
   xmlenc (sort of done already in cutestuff/xmlsec, but need to qca-ify)
   padding - a way to do any possible padding approach, so advanced users
@@ -58,10 +60,17 @@
   pkey: ability to choose cipher for toDER/PEM passphrase ?
     - botan doesn't seem to allow this, but kiko wanted it...
     - jack looking into it
-  cert/crl: path limit, subject/issuer ids (only useful for create/validate)
-  cert: constraints, ex_constraints, policies (same as above)
-  crl: revoked list (serial, time, reason) (same as above)
+  cert/csr/crl: path limit, subject/issuer ids (useful for create/validate)
+  cert/csr: constraints, ex_constraints, policies (same as above)
+  cert/csr: subjectAltName
+  cert/pkey: fingerprints (is there a standard for this?)
+  crl: issuer info, authority_key_id
   quoted-printable TextFilter?
+  rsa: toSPKAC (kiko)
+  tls: enable_session_cache = false (kiko)
+  pgp: provide more key info (bits, trust values, photo)
+  pgp: ability to manipulate keyrings? (create, add, delete, sign)
+  personalbundle: cert chain vs cert + trusted certs?
 
 * build system:
   on non-win/mac, allow specifying of flatfile store, else install/use built-in

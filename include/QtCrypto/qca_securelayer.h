@@ -31,6 +31,7 @@ namespace QCA
 {
 	class PrivateKey;
 	class Certificate;
+	class CertificateChain;
 	class Store;
 
 	// securefilter basic rule: after calling a function that might
@@ -111,7 +112,7 @@ namespace QCA
 
 		void reset();
 
-		void setCertificate(const Certificate &cert, const PrivateKey &key);
+		void setCertificate(const CertificateChain &cert, const PrivateKey &key);
 		void setStore(const Store &store);
 		void setConstraints(SecurityLevel s);
 		void setConstraints(int minSSF, int maxSSF);
@@ -128,8 +129,8 @@ namespace QCA
 
 		IdentityResult peerIdentityResult() const;
 		CertValidity peerCertificateValidity() const;
-		Certificate localCertificate() const;
-		Certificate peerCertificate() const;
+		CertificateChain localCertificateChain() const;
+		CertificateChain peerCertificateChain() const;
 
 		// reimplemented
 		virtual bool isClosable() const;
