@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004  Justin Karneges
- * Copyright (C) 2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -1006,7 +1006,11 @@ public:
 class opensslHMACContext : public QCA::MACContext
 {
 public:
-    opensslHMACContext(QCA::Provider *p, const QString &type) : QCA::MACContext(p, type) {};
+  opensslHMACContext(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    {
+	m_algorithm = algorithm;
+	HMAC_CTX_init( &m_context );
+    };
 
     void setup(const QCA::SymmetricKey &key)
     {
@@ -1030,57 +1034,14 @@ public:
 	HMAC_CTX_cleanup(&m_context);
     }
 
+    Context *clone() const
+    {
+	return new opensslHMACContext(*this);
+    }
+    
 protected:
     HMAC_CTX m_context;
     const EVP_MD *m_algorithm;
-};
-
-class HMACMD5Context : public opensslHMACContext
-{
-public:
-    HMACMD5Context(QCA::Provider *p) : opensslHMACContext( p, "hmac(md5)" )
-    {
-	m_algorithm = EVP_md5();
-	HMAC_CTX_init( &m_context );
-    }
-	
-    Context *clone() const
-    {
-	return new HMACMD5Context(*this);
-    }
-    
-};
-
-class HMACSHA1Context : public opensslHMACContext
-{
-public:
-    HMACSHA1Context(QCA::Provider *p) : opensslHMACContext( p, "hmac(sha1)" )
-    {
-	m_algorithm = EVP_sha1();
-	HMAC_CTX_init( &m_context );
-    }
-	
-    Context *clone() const
-    {
-	return new HMACSHA1Context(*this);
-    }
-    
-};
-
-class HMACRIPEMD160Context : public opensslHMACContext
-{
-public:
-    HMACRIPEMD160Context(QCA::Provider *p) : opensslHMACContext( p, "hmac(ripemd160)" )
-    {
-	m_algorithm = EVP_ripemd160();
-	HMAC_CTX_init( &m_context );
-    }
-	
-    Context *clone() const
-    {
-	return new HMACRIPEMD160Context(*this);
-    }
-    
 };
 
 //----------------------------------------------------------------------------
@@ -3486,11 +3447,11 @@ public:
 		else if ( type == "md5" )
 			return new MD5Context( this );
 		else if ( type == "hmac(md5)" )
-			return new HMACMD5Context( this );
+			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )
-			return new HMACSHA1Context( this );
+			return new opensslHMACContext( EVP_sha1(),this, type );
 		else if ( type == "hmac(ripemd160)" )
-			return new HMACRIPEMD160Context( this );
+			return new opensslHMACContext( EVP_ripemd160(), this, type );
 		else if ( type == "pkey" )
 			return new MyPKeyContext( this );
 		else if ( type == "dlgroup" )
