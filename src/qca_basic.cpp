@@ -278,6 +278,7 @@ MessageAuthenticationCode::~MessageAuthenticationCode()
 
 MessageAuthenticationCode & MessageAuthenticationCode::operator=(const MessageAuthenticationCode &from)
 {
+	Algorithm::operator=(from);
 	*d = *from.d;
 	return *this;
 }
@@ -330,51 +331,28 @@ QString MessageAuthenticationCode::withAlgorithm(const QString &macType, const Q
 //----------------------------------------------------------------------------
 // Key Derivation Function
 //----------------------------------------------------------------------------
-/*class KeyDerivationFunction::Private
-{
-public:
-	QSecureArray secret;
-	InitializationVector salt;
-	int keyLength;
-	int iterationCount;
-	
-	SymmetricKey buf;
-};*/
-
 KeyDerivationFunction::KeyDerivationFunction(const QString &type, const QString &provider)
 :Algorithm(type, provider)
 {
-	//d = new Private;
 }
 
 KeyDerivationFunction::KeyDerivationFunction(const KeyDerivationFunction &from)
 :Algorithm(from)
 {
-	Q_UNUSED(from);
-	//d = new Private(*from.d);
 }
 
 KeyDerivationFunction::~KeyDerivationFunction()
 {
-	//delete d;
 }
 
 KeyDerivationFunction & KeyDerivationFunction::operator=(const KeyDerivationFunction &from)
 {
-	Q_UNUSED(from);
-	//*d = *from.d;
+	Algorithm::operator=(from);
 	return *this;
 }
 
 SymmetricKey KeyDerivationFunction::makeKey(const QSecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount)
 {
-	//d->secret = secret;
-	//d->salt = salt;
-	//d->keyLength = keyLength;
-	//d->iterationCount = iterationCount;
-
-	//return d->buf;
-
 	return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, iterationCount);
 }
 
