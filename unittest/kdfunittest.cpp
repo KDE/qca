@@ -64,11 +64,12 @@ static struct kdfTestValues pbkdf1TestValues[] = {
 KDFUnitTest::KDFUnitTest()
     : Tester()
 {
-    QCA::init();
 }
 
 void KDFUnitTest::allTests()
 {
+    QCA::Initializer init;
+
     pbkdf1Tests();
     pbkdf2Tests();
 }
