@@ -1039,8 +1039,8 @@ public:
 		if(!list.isEmpty()) {
 			X509_STORE *store = SSL_CTX_get_cert_store(context);
 			QPtrListIterator<QCA_CertContext> it(list);
-			for(CertContext *cert; (cert = (CertContext *)it.current()); ++it)
-				X509_STORE_add_cert(store, cert->x);
+			for(CertContext *i; (i = (CertContext *)it.current()); ++it)
+				X509_STORE_add_cert(store, i->x);
 		}
 
 		ssl = SSL_new(context);
