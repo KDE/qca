@@ -184,9 +184,9 @@ public:
 
 	QCA_CipherContext *clone()
 	{
-		EVPCipherContext *c = cloneSelf();
-		c->r = r.copy();
-		return c;
+		EVPCipherContext *cc = cloneSelf();
+		cc->r = r.copy();
+		return cc;
 	}
 
 	virtual EVPCipherContext *cloneSelf() const=0;
@@ -374,7 +374,7 @@ public:
 		}
 	}
 
-	void separate(RSA *r, RSA **pub, RSA **sec)
+	void separate(RSA *r, RSA **_pub, RSA **_sec)
 	{
 		// public
 		unsigned char *buf, *p;
@@ -385,9 +385,9 @@ public:
 			i2d_RSAPublicKey(r, &p);
 			p = buf;
 #ifdef OSSL_097
-			*pub = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
+			*_pub = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, len);
 #else
-			*pub = d2i_RSAPublicKey(NULL, (unsigned char **)&p, len);
+			*_pub = d2i_RSAPublicKey(NULL, (unsigned char **)&p, len);
 #endif
 			free(buf);
 		}
@@ -399,9 +399,9 @@ public:
 			i2d_RSAPrivateKey(r, &p);
 			p = buf;
 #ifdef OSSL_097
-			*sec = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
+			*_sec = d2i_RSAPrivateKey(NULL, (const unsigned char **)&p, len);
 #else
-			*sec = d2i_RSAPrivateKey(NULL, (unsigned char **)&p, len);
+			*_sec = d2i_RSAPrivateKey(NULL, (unsigned char **)&p, len);
 #endif
 			free(buf);
 		}
@@ -1001,33 +1001,33 @@ public:
 		return v_eof;
 	}
 
-	bool startClient(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)
+	bool startClient(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &_cert, const QCA_RSAKeyContext &_key)
 	{
 		reset();
 		serv = false;
 		method = SSLv23_client_method();
 
-		if(!setup(store, cert, key))
+		if(!setup(store, _cert, _key))
 			return false;
 
 		mode = Connect;
 		return true;
 	}
 
-	bool startServer(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &cert, const QCA_RSAKeyContext &key)
+	bool startServer(const QPtrList<QCA_CertContext> &store, const QCA_CertContext &_cert, const QCA_RSAKeyContext &_key)
 	{
 		reset();
 		serv = true;
 		method = SSLv23_server_method();
 
-		if(!setup(store, cert, key))
+		if(!setup(store, _cert, _key))
 			return false;
 
 		mode = Accept;
 		return true;
 	}
 
-	bool setup(const QPtrList<QCA_CertContext> &list, const QCA_CertContext &cc, const QCA_RSAKeyContext &kc)
+	bool setup(const QPtrList<QCA_CertContext> &list, const QCA_CertContext &_cc, const QCA_RSAKeyContext &kc)
 	{
 		context = SSL_CTX_new(method);
 		if(!context) {
@@ -1058,8 +1058,8 @@ public:
 		SSL_set_bio(ssl, rbio, wbio);
 
 		// setup the cert to send
-		if(!cc.isNull() && !kc.isNull()) {
-			cert = static_cast<CertContext*>(cc.clone());
+		if(!_cc.isNull() && !kc.isNull()) {
+			cert = static_cast<CertContext*>(_cc.clone());
 			key = static_cast<RSAKeyContext*>(kc.clone());
 			if(SSL_use_certificate(ssl, cert->x) != 1) {
 				reset();
