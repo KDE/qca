@@ -255,7 +255,7 @@ public:
 
 	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) = 0;
 	virtual const CertContextProps *props() const = 0;
-	virtual PKeyContext *subjectPublicKey() const = 0;
+	virtual PKeyContext *subjectPublicKey() const = 0; // caller must delete
 };
 
 class CSRContext : public CertBase
@@ -266,7 +266,7 @@ public:
 	virtual bool canUseFormat(CertificateRequestFormat f) const = 0;
 	virtual bool createRequest(const CertificateOptions &opts, const PKeyContext &priv) = 0;
 	virtual const CertContextProps *props() const = 0;
-	virtual PKeyContext *subjectPublicKey() const = 0;
+	virtual PKeyContext *subjectPublicKey() const = 0; // caller must delete
 	virtual QString toSPKAC() const = 0;
 	virtual ConvertResult fromSPKAC(const QString &s) = 0;
 };
@@ -287,14 +287,40 @@ public:
 	virtual void addCertificate(const CertContext &cert, bool trusted) = 0;
 	virtual void addCRL(const CRLContext &crl) = 0;
 	virtual Validity validate(const CertContext &cert, UsageMode u) const = 0;
-	virtual QList<CertContext*> certificates() const = 0;
-	virtual QList<CRLContext*> crls() const = 0;
+	virtual QList<CertContext*> certificates() const = 0; // caller must delete
+	virtual QList<CRLContext*> crls() const = 0;          // caller must delete
 	virtual void append(const StoreContext &s) = 0;
 
 	// import / export
 	virtual bool canUsePKCS7() const = 0;
 	virtual QByteArray toPKCS7() const = 0;
 	virtual ConvertResult fromPKCS7(const QByteArray &a) = 0;
+};
+
+class CAContext : public Provider::Context
+{
+public:
+	CAContext(Provider *p) : Provider::Context(p, "ca") {}
+
+	virtual void setup(const CertContext &cert, const PKeyContext &priv) = 0;
+
+	// caller must delete all return values here
+	virtual CertContext *certificate() const = 0;
+	virtual CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const = 0;
+	virtual CertContext *createCertificate(const PKeyContext &pub, const CertificateOptions &opts) const = 0;
+	virtual CRLContext *createCRL(const QDateTime &nextUpdate) const = 0;
+	virtual CRLContext *updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const = 0;
+};
+
+class PIXContext : public Provider::Context
+{
+public:
+	PIXContext(Provider *p) : Provider::Context(p, "pix") {}
+
+	virtual QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const QSecureArray &passphrase) const = 0;
+
+	// caller must delete
+	virtual ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const = 0;
 };
 
 class TLSContext : public Provider::Context

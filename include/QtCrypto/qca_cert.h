@@ -327,20 +327,32 @@ namespace QCA
 		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 	};
 
-	class QCA_EXPORT PersonalBundle : public Algorithm
+	class QCA_EXPORT PersonalBundle
 	{
 	public:
-		PersonalBundle(const QString &provider = QString());
+		PersonalBundle();
+		PersonalBundle(const QString &fileName, const QSecureArray &passphrase);
+		PersonalBundle(const PersonalBundle &from);
+		~PersonalBundle();
+		PersonalBundle & operator=(const PersonalBundle &from);
 
 		bool isNull() const;
 
+		QString name() const;
 		CertificateChain certificateChain() const;
 		PrivateKey privateKey() const;
+		void setName(const QString &s);
 		void setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key);
 
 		// import / export
-		QSecureArray toArray(const QString &name, const QSecureArray &passphrase) const;
-		static PersonalBundle fromArray(const QSecureArray &a, const QSecureArray &passphrase, const QString &provider = QString());
+		QByteArray toArray(const QSecureArray &passphrase, const QString &provider = QString()) const;
+		bool toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider = QString()) const;
+		static PersonalBundle fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
+		static PersonalBundle fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
+
+	private:
+		class Private;
+		Private *d;
 	};
 }
 

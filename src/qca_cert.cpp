@@ -778,6 +778,7 @@ QList<Certificate> Store::certificates() const
 		cert.change(in[n]);
 		out.append(cert);
 	}
+	qDeleteAll(in);
 	return out;
 }
 
@@ -791,6 +792,7 @@ QList<CRL> Store::crls() const
 		crl.change(in[n]);
 		out.append(crl);
 	}
+	qDeleteAll(in);
 	return out;
 }
 
@@ -817,6 +819,7 @@ bool Store::toFlatTextFile(const QString &fileName) const
 	QTextStream ts(&f);
 	for(int n = 0; n < in.count(); ++n)
 		ts << in[n]->toPEM();
+	qDeleteAll(in);
 	return true;
 }
 
@@ -886,80 +889,167 @@ Store & Store::operator+=(const Store &a)
 // CertificateAuthority
 //----------------------------------------------------------------------------
 CertificateAuthority::CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider)
+:Algorithm("ca", provider)
 {
-	Q_UNUSED(cert);
-	Q_UNUSED(key);
-	Q_UNUSED(provider);
+	static_cast<CAContext *>(context())->setup(*(static_cast<const CertContext *>(cert.context())), *(static_cast<const PKeyContext *>(key.context())));
 }
 
 Certificate CertificateAuthority::certificate() const
 {
-	return Certificate();
+	Certificate c;
+	c.change(static_cast<const CAContext *>(context())->certificate());
+	return c;
 }
 
 Certificate CertificateAuthority::signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const
 {
-	Q_UNUSED(req);
-	Q_UNUSED(notValidAfter);
-	return Certificate();
+	Certificate c;
+	CertContext *cc = static_cast<const CAContext *>(context())->signRequest(*(static_cast<const CSRContext *>(req.context())), notValidAfter);
+	if(cc)
+		c.change(cc);
+	return c;
 }
 
 CRL CertificateAuthority::createCRL(const QDateTime &nextUpdate) const
 {
-	Q_UNUSED(nextUpdate);
-	return CRL();
+	CRL crl;
+	CRLContext *cc = static_cast<const CAContext *>(context())->createCRL(nextUpdate);
+	if(cc)
+		crl.change(cc);
+	return crl;
 }
 
 CRL CertificateAuthority::updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const
 {
-	Q_UNUSED(crl);
-	Q_UNUSED(entries);
-	Q_UNUSED(nextUpdate);
-	return CRL();
+	CRL new_crl;
+	CRLContext *cc = static_cast<const CAContext *>(context())->updateCRL(*(static_cast<const CRLContext *>(crl.context())), entries, nextUpdate);
+	if(cc)
+		new_crl.change(cc);
+	return new_crl;
 }
 
 //----------------------------------------------------------------------------
 // PersonalBundle
 //----------------------------------------------------------------------------
-PersonalBundle::PersonalBundle(const QString &provider)
+class PersonalBundle::Private
 {
-	Q_UNUSED(provider);
+public:
+	QString name;
+	CertificateChain chain;
+	PrivateKey key;
+};
+
+PersonalBundle::PersonalBundle()
+{
+	d = new Private;
+}
+
+PersonalBundle::PersonalBundle(const QString &fileName, const QSecureArray &passphrase)
+{
+	d = new Private;
+	*this = fromFile(fileName, passphrase, 0, QString());
+}
+
+PersonalBundle::PersonalBundle(const PersonalBundle &from)
+{
+	d = new Private(*from.d);
+}
+
+PersonalBundle::~PersonalBundle()
+{
+	delete d;
+}
+
+PersonalBundle & PersonalBundle::operator=(const PersonalBundle &from)
+{
+	*d = *from.d;
+	return *this;
 }
 
 bool PersonalBundle::isNull() const
 {
-	return false;
+	return d->chain.isEmpty();
+}
+
+QString PersonalBundle::name() const
+{
+	return d->name;
 }
 
 CertificateChain PersonalBundle::certificateChain() const
 {
-	return CertificateChain();
+	return d->chain;
 }
 
 PrivateKey PersonalBundle::privateKey() const
 {
-	return PrivateKey();
+	return d->key;
+}
+
+void PersonalBundle::setName(const QString &s)
+{
+	d->name = s;
 }
 
 void PersonalBundle::setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key)
 {
-	Q_UNUSED(c);
-	Q_UNUSED(key);
+	d->chain = c;
+	d->key = key;
 }
 
-QSecureArray PersonalBundle::toArray(const QString &name, const QSecureArray &passphrase) const
+QByteArray PersonalBundle::toArray(const QSecureArray &passphrase, const QString &provider) const
 {
-	Q_UNUSED(name);
-	Q_UNUSED(passphrase);
-	return QSecureArray();
+	PIXContext *pix = static_cast<PIXContext *>(getContext("pix", provider));
+
+	QList<const CertContext*> list;
+	for(int n = 0; n < d->chain.count(); ++n)
+		list.append(static_cast<const CertContext *>(d->chain[n].context()));
+	QByteArray buf = pix->toPKCS12(d->name, list, *(static_cast<const PKeyContext *>(d->key.context())), passphrase);
+	delete pix;
+
+	return buf;
 }
 
-PersonalBundle PersonalBundle::fromArray(const QSecureArray &a, const QSecureArray &passphrase, const QString &provider)
+bool PersonalBundle::toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider) const
 {
-	Q_UNUSED(a);
-	Q_UNUSED(passphrase);
-	Q_UNUSED(provider);
-	return PersonalBundle();
+	return arrayToFile(fileName, toArray(passphrase, provider));
+}
+
+PersonalBundle PersonalBundle::fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+{
+	QString name;
+	QList<CertContext *> list;
+	PKeyContext *kc = 0;
+
+	PersonalBundle bundle;
+	PIXContext *pix = static_cast<PIXContext *>(getContext("pix", provider));
+	ConvertResult r = pix->fromPKCS12(a, passphrase, &name, &list, &kc);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+	{
+		bundle.d->name = name;
+		for(int n = 0; n < list.count(); ++n)
+		{
+			Certificate cert;
+			cert.change(list[n]);
+			bundle.d->chain.append(cert);
+		}
+		bundle.d->key.change(kc);
+	}
+	return bundle;
+}
+
+PersonalBundle PersonalBundle::fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+{
+	QByteArray der;
+	if(!arrayFromFile(fileName, &der))
+	{
+		if(result)
+			*result = ErrorFile;
+		return PersonalBundle();
+	}
+	return fromArray(der, passphrase, result, provider);
 }
 
 }

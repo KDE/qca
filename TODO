@@ -33,8 +33,6 @@
   CertificateOptions: isValid
   Certificate: operator==
   cert: rfc 2818 hostname validation
-  ca
-  personal bundle
   tls
   sasl
   securemessagesystem (consider thread issues)
