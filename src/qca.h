@@ -793,11 +793,24 @@ namespace QCA
 	 */
 	QCA_EXPORT void setGlobalRNG(const QString &provider);
 
-	// the app name is used by sasl in server mode, as some systems might
-	//   have different security policies depending on the app.
-	//   default is 'qca'.  this should be set before using SASL objects,
-	//   and it cannot be changed later.
+	/**
+	 * Get the application name that will be used by SASL server mode
+	 *
+	 * The application name is used by SASL in server mode, as some systems might
+	 * have different security policies depending on the app.
+	 * The default application name  is 'qca'
+	 */
 	QCA_EXPORT QString appName();
+
+	/**
+	 * Set the application name that will be used by SASL server mode
+	 *
+	 * The application name is used by SASL in server mode, as some systems might
+	 * have different security policies depending on the app. This should be set 
+	 * before using SASL objects, and it cannot be changed later.
+	 *
+	 * \param name the name string to use for SASL server mode
+	 */
 	QCA_EXPORT void setAppName(const QString &name);
 
 	/**
@@ -1935,7 +1948,7 @@ namespace QCA
 	};
 
 	/**
-	 * Advanced Encryption Standard Cipher - 128 bits
+	 * Advanced Encryption Standard %Cipher - 128 bits
 	 *
 	 */
 	class QCA_EXPORT AES128 : public Cipher
@@ -1945,7 +1958,7 @@ namespace QCA
 		:Cipher("aes128", m, dir, key, iv, pad, provider) {}
 	};
 
-	class QCA_EXPORT AES256 : public Cipher
+	class QCA_EXPORT AES256 : public %Cipher
 	{
 	public:
 		AES256(Mode m = CBC, Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(), bool pad = true, const QString &provider = "")
