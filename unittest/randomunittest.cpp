@@ -35,6 +35,8 @@ RandomUnitTest::RandomUnitTest()
 
 void RandomUnitTest::allTests()
 {
+    QCA::Initializer init;
+
     QCA::Random rng = QCA::globalRNG( );
     CHECK( rng.provider()->name(), QString( "qca-botan" ) );
 
