@@ -86,6 +86,7 @@ void SecureArrayUnitTest::allTests()
     // its a reference, so should be the same
     CHECK( QCA::arrayToHex ( secureArray ), QString( "65656565656565656565" ) );
 
+
     // test for detaching
     QSecureArray detachArray1 = secureArray; // currently the same
     CHECK( QCA::arrayToHex ( detachArray1 ), QString( "65656565656565656565" ) );
@@ -112,5 +113,15 @@ void SecureArrayUnitTest::allTests()
     CHECK( QCA::arrayToHex ( secureArray ), QString( "65656565656565656565" ) );
     CHECK( QCA::arrayToHex ( detachArray3 ), QString( "68686868686868686868" ) );
 
+
+    // test for resizing
+    QSecureArray resizeArray = emptyArray;
+    CHECK( resizeArray.size(), (unsigned int)0 );
+    resizeArray.resize(20);
+    CHECK( resizeArray.size(), (unsigned int)20 );
+    resizeArray.resize(40);
+    CHECK( resizeArray.size(), (unsigned int)40 );
+    resizeArray.resize(10);
+    CHECK( resizeArray.size(), (unsigned int)10 );
 }
 
