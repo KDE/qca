@@ -283,7 +283,8 @@ namespace QCA
 		SSL();
 		~SSL();
 
-		bool begin(const QString &host="", const QPtrList<Cert> &store=QPtrList<Cert>());
+		// note: store must persist until SSL object is deleted!
+		bool startClient(const QString &host="", const QPtrList<Cert> &store=QPtrList<Cert>());
 
 		// plain (application side)
 		void write(const QByteArray &a);

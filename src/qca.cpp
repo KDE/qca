@@ -7,6 +7,7 @@
 #include<qlibrary.h>
 #include"qcaprovider.h"
 #include<stdio.h>
+#include<stdlib.h>
 
 #ifdef USE_OPENSSL
 #include"qcaopenssl.h"
@@ -731,7 +732,7 @@ SSL::~SSL()
 	delete d;
 }
 
-bool SSL::begin(const QString &host, const QPtrList<Cert> &store)
+bool SSL::startClient(const QString &host, const QPtrList<Cert> &store)
 {
 	d->cert = Cert();
 
@@ -744,9 +745,6 @@ bool SSL::begin(const QString &host, const QPtrList<Cert> &store)
 	// begin!
 	if(!d->c->begin(host, list))
 		return false;
-
-	// we don't need this anymore
-	list.setAutoDelete(true);
 	return true;
 }
 

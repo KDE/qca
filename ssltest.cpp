@@ -73,18 +73,18 @@ QString resultToString(int result)
 	QString s;
 	switch(result) {
 		case QCA::SSL::NoCert:
-			s = QObject::tr("The server did not present a certificate.");
+			s = QObject::tr("No certificate presented.");
 			break;
 		case QCA::SSL::Valid:
 			break;
 		case QCA::SSL::HostMismatch:
-			s = QObject::tr("The hostname does not match the one the certificate was issued to.");
+			s = QObject::tr("Hostname mismatch.");
 			break;
 		case QCA::SSL::Rejected:
-			s = QObject::tr("Root CA is marked to reject the specified purpose.");
+			s = QObject::tr("Root CA rejects the specified purpose.");
 			break;
 		case QCA::SSL::Untrusted:
-			s = QObject::tr("Certificate not trusted for the required purpose.");
+			s = QObject::tr("Not trusted for the specified purpose.");
 			break;
 		case QCA::SSL::SignatureFailed:
 			s = QObject::tr("Invalid signature.");
@@ -102,14 +102,14 @@ QString resultToString(int result)
 			s = QObject::tr("Certificate has been revoked.");
 			break;
 		case QCA::SSL::PathLengthExceeded:
-			s = QObject::tr("Maximum certificate chain length exceeded.");
+			s = QObject::tr("Maximum cert chain length exceeded.");
 			break;
 		case QCA::SSL::Expired:
 			s = QObject::tr("Certificate has expired.");
 			break;
 		case QCA::SSL::Unknown:
 		default:
-			s = QObject::tr("General certificate validation error.");
+			s = QObject::tr("General validation error.");
 			break;
 	}
 	return s;
@@ -125,20 +125,22 @@ public:
 		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
 		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
 		connect(sock, SIGNAL(connectionClosed()), SLOT(sock_connectionClosed()));
+		connect(sock, SIGNAL(error(int)), SLOT(sock_error(int)));
 
 		ssl = new QCA::SSL;
 		connect(ssl, SIGNAL(handshaken(bool)), SLOT(ssl_handshaken(bool)));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 		connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
 
+		rootCerts.setAutoDelete(true);
 		rootCerts = getRootCerts();
+		//printf("deleting\n");
+		//rootCerts.clear();
 	}
 
 	~SecureTest()
 	{
 		delete ssl;
-		rootCerts.setAutoDelete(true);
-		rootCerts.clear();
 		delete sock;
 	}
 
@@ -156,7 +158,7 @@ private slots:
 	void sock_connected()
 	{
 		printf("Connected, starting TLS handshake...\n");
-		ssl->begin(host, rootCerts);
+		ssl->startClient(host, rootCerts);
 	}
 
 	void sock_readyRead()
@@ -171,6 +173,12 @@ private slots:
 	void sock_connectionClosed()
 	{
 		printf("\nConnection closed.\n");
+		quit();
+	}
+
+	void sock_error(int)
+	{
+		printf("\nSocket error.\n");
 		quit();
 	}
 
