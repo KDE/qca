@@ -41,8 +41,6 @@
   system store: all added certs need to be flagged as trusted
 
 * examples
-  create example for Hex
-  create example for Random
   create example for BigInteger
   update cipher example (after API sorted out)
   add systemStore() example
