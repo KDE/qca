@@ -82,6 +82,7 @@ class QCA_CertContext;
  *       - QCA::MD4
  *       - QCA::MD5
  *       - QCA::RIPEMD160
+ *       - QCA::SHA256
  *   - Ciphers (TBC)
  *       - BlowFish
  *       - TripleDES
@@ -665,15 +666,17 @@ namespace QCA
 		CRLSigning      = 0x20
 	};
 
-	// acts as a lower-bound for TLS/SASL security layers
+	/**
+	 * Specify the lower-bound for acceptable TLS/SASL security layers
+	 */
 	enum SecurityLevel
 	{
-		SL_None,      // indicates that no security is ok
-		SL_Integrity, // must at least get integrity protection
-		SL_Export,    // must be export level bits or more
-		SL_Baseline,  // must be 128 bit or more
-		SL_High,      // must be more than 128 bit
-		SL_Highest    // SL_High or max possible, whichever is greater
+		SL_None,      //! indicates that no security is ok
+		SL_Integrity, //! must at least get integrity protection
+		SL_Export,    //! must be export level bits or more
+		SL_Baseline,  //! must be 128 bit or more
+		SL_High,      //! must be more than 128 bit
+		SL_Highest    //! SL_High or max possible, whichever is greater
 	};
 
 	/**
@@ -1680,10 +1683,11 @@ namespace QCA
 		 * This is the normal way of creating a SHA256 hash,
 		 * although if you have the whole message in memory at
 		 * one time, you may be better off using
-		 * QCA::RIPEMD160().hash()
+		 * QCA::SHA256().hash()
 		 *
 		 * \param provider specify a particular provider 
-		 * to use.
+		 * to use. For example if you wanted the SHA256 implementation
+		 * from qca-gcrypt, you would use SHA256("qca-gcrypt")
 		 */
 		SHA256(const QString &provider = "") : Hash("sha256", provider) {}
 	};
