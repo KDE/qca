@@ -104,6 +104,9 @@ void deinit()
 	if(!qca_init)
 		return;
 
+	delete global_rng;
+	global_rng = 0;
+
 	delete manager;
 	manager = 0;
 
