@@ -26,7 +26,7 @@ Name: QCA
 Description: Qt Cryptographic Architecture library
 Version: 2.0.0 #maybe this shouldn't be literal...
 Requires: qt-mt
-Libs: -L\${libdir}
+Libs: -L\${libdir} -lqca
 Cflags: -I\${includedir}
 
 
