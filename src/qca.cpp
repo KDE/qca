@@ -42,6 +42,12 @@
 
 using namespace QCA;
 
+namespace QCA
+{
+	void botan_init();
+	void botan_deinit();
+}
+
 class ProviderItem
 {
 public:
@@ -200,8 +206,20 @@ void QCA::init()
 {
 	if(qca_init)
 		return;
+
 	qca_init = true;
+	botan_init();
 	providerList.setAutoDelete(true);
+}
+
+void QCA::deinit()
+{
+	if(!qca_init)
+		return;
+
+	unloadAllPlugins();
+	botan_deinit();
+	qca_init = false;
 }
 
 bool QCA::isSupported(int capabilities)
@@ -249,6 +267,18 @@ static void *getContext(int cap)
 	return 0;
 }
 
+//----------------------------------------------------------------------------
+// Initializer
+//----------------------------------------------------------------------------
+Initializer::Initializer()
+{
+	init();
+}
+
+Initializer::~Initializer()
+{
+	deinit();
+}
 
 //----------------------------------------------------------------------------
 // Hash

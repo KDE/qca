@@ -20,12 +20,16 @@ win32:{
 QCA_CPP = src
 INCLUDEPATH += $$QCA_CPP
 
+# botantools
+include(src/botantools/botantools.pri)
+
 HEADERS += \
 	$$QCA_CPP/qca.h \
 	$$QCA_CPP/qcaprovider.h
 
 SOURCES += \
-	$$QCA_CPP/qca.cpp
+	$$QCA_CPP/qca.cpp \
+	$$QCA_CPP/qca_tools.cpp
 
 include(conf.pri)
 include(extra.pri)

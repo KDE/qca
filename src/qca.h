@@ -1,6 +1,6 @@
 /*
  * qca.h - Qt Cryptographic Architecture
- * Copyright (C) 2003  Justin Karneges
+ * Copyright (C) 2003,2004  Justin Karneges
  * Copyright (C) 2004  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -94,6 +94,59 @@ class QCA_CertContext;
  * QString hash = QCA::SHA1::hashToString(blockOfData);
  * \endcode
  */
+
+class QSecureArray
+{
+public:
+	QSecureArray();
+	QSecureArray(int size);
+	QSecureArray(const QByteArray &a);
+	QSecureArray(const QSecureArray &from);
+	~QSecureArray();
+
+	QSecureArray & operator=(const QSecureArray &from);
+	QSecureArray & operator=(const QByteArray &a);
+	char & operator[](int index) const;
+
+	char *data() const;
+	uint size() const;
+	bool isEmpty() const;
+	bool resize(uint size);
+
+	QSecureArray copy() const;
+	QByteArray toByteArray() const;
+
+private:
+	class Private;
+	Private *d;
+};
+
+class QBigInteger
+{
+public:
+	QBigInteger();
+	QBigInteger(int n);
+	QBigInteger(const QString &s);
+	QBigInteger(const QSecureArray &a);
+	QBigInteger(const QBigInteger &from);
+	~QBigInteger();
+
+	QBigInteger & operator=(const QBigInteger &from);
+	QBigInteger & operator=(const QString &s);
+	QBigInteger & operator+=(const QBigInteger &);
+	QBigInteger & operator-=(const QBigInteger &);
+
+	QSecureArray toArray() const;
+	void fromArray(const QSecureArray &a);
+
+	QString toString() const;
+	bool fromString(const QString &s);
+
+private:
+	class Private;
+	Private *d;
+};
+
 namespace QCA
 {
 	/** 
@@ -152,10 +205,12 @@ namespace QCA
 	 */
 	QCA_EXPORT void init();
 
+	QCA_EXPORT void deinit();
+
 	/**
 	 * Test if a capability (algorithm) is available.
 	 *
-	 * Since capabilities are make available at runtime, you
+	 * Since capabilities are made available at runtime, you
 	 * should always check before using a capability the first
 	 * time, as shown below.
 	 * \code
@@ -222,6 +277,13 @@ namespace QCA
 		
 	 */
 	QCA_EXPORT QByteArray hexToArray(const QString &hexString);
+
+	class QCA_EXPORT Initializer
+	{
+	public:
+		Initializer();
+		~Initializer();
+	};
 
 	/**
 	 * General superclass for hashing algorithms.
