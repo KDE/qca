@@ -25,10 +25,12 @@ include(src/botantools/botantools.pri)
 
 HEADERS += \
 	$$QCA_CPP/qca.h \
-	$$QCA_CPP/qcaprovider.h
+	$$QCA_CPP/qcaprovider.h \
+	$$QCA_CPP/qca_plugin.h
 
 SOURCES += \
 	$$QCA_CPP/qca.cpp \
+	$$QCA_CPP/qca_plugin.cpp \
 	$$QCA_CPP/qca_tools.cpp \
 	$$QCA_CPP/qca_basic.cpp \
 	$$QCA_CPP/qca_textfilter.cpp

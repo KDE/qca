@@ -185,7 +185,7 @@ namespace QCA
 		CAP_MD4       = 0x2000, /**< %MD4 digest hash, per
 					 * RFC1320 (MD4) */
 		CAP_RIPEMD160 = 0x4000, /**< RIPEMD digest hash, 160 bits (RIPEMD160)*/
-};
+	}; // to be obsoleted
 
 	/**
 	 * Mode settings for cipher algorithms
@@ -228,7 +228,6 @@ namespace QCA
 	QCA_EXPORT void init(MemoryMode m, int prealloc);
 
 	QCA_EXPORT void deinit();
-
 	QCA_EXPORT bool haveSecureMemory();
 
 	/**
@@ -247,9 +246,19 @@ namespace QCA
 	 * }
 	 * \endcode
 	 */
-	QCA_EXPORT bool isSupported(int capabilities);
+	QCA_EXPORT bool isSupported(int capabilities); // to be obsoleted
 
-	QCA_EXPORT void insertProvider(QCAProvider *);
+	QCA_EXPORT void insertProvider(QCAProvider *); // to be obsoleted
+	//QCA_EXPORT void unloadAllPlugins(); // declared below
+
+	// version 2 global functions
+	QCA_EXPORT bool isSupported(const QStringList &features);
+	QCA_EXPORT bool isSupported(const QString &features);
+	QCA_EXPORT QStringList supportedFeatures();
+	QCA_EXPORT QStringList defaultFeatures();
+	QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
+	QCA_EXPORT void setProviderPriority(const QString &name, int priority);
+	QCA_EXPORT const ProviderList & providers();
 	QCA_EXPORT void unloadAllPlugins();
 
 	QCA_EXPORT Random & globalRNG();
@@ -275,7 +284,7 @@ namespace QCA
 	 * \param array an array to be converted
 	 * \return a printable representation
 	 */
-	QCA_EXPORT QString arrayToHex(const QByteArray &array);
+	QCA_EXPORT QString arrayToHex(const QByteArray &array); // to be obsoleted
 	QCA_EXPORT QString arrayToHex(const QSecureArray &array);
 
 	/**

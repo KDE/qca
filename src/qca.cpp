@@ -20,183 +20,46 @@
 
 #include"qca.h"
 
-#include<qptrlist.h>
-#include<qdir.h>
-#include<qfileinfo.h>
-#include<qstringlist.h>
-#include<qlibrary.h>
-#include<qtimer.h>
-#include<qhostaddress.h>
-#include<qapplication.h>
-#include<qguardedptr.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include"qcaprovider.h"
+#include <qptrlist.h>
+#include <qstringlist.h>
+#include <qtimer.h>
+#include <qhostaddress.h>
+#include <qguardedptr.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "qcaprovider.h"
+#include "qca_plugin.h"
 
-#if defined(Q_OS_WIN32)
-#define PLUGIN_EXT "dll"
-#elif defined(Q_OS_MAC)
-#define PLUGIN_EXT "dylib"
-#else
-#define PLUGIN_EXT "so"
-#endif
+namespace QCA {
 
-using namespace QCA;
+// from qca_tools
+void botan_init(int prealloc, bool mmap);
+void botan_deinit();
 
-namespace QCA
-{
-	void botan_init(int prealloc, bool mmap);
-	void botan_deinit();
-}
-
-class ProviderItem
-{
-public:
-	QCAProvider *p;
-	QString fname;
-
-	static ProviderItem *load(const QString &fname)
-	{
-		QLibrary *lib = new QLibrary(fname);
-		if(!lib->load()) {
-			delete lib;
-			return 0;
-		}
-		void *s = lib->resolve("createProvider");
-		if(!s) {
-			delete lib;
-			return 0;
-		}
-		QCAProvider *(*createProvider)() = (QCAProvider *(*)())s;
-		QCAProvider *p = createProvider();
-		if(!p) {
-			delete lib;
-			return 0;
-		}
-		ProviderItem *i = new ProviderItem(lib, p);
-		i->fname = fname;
-		return i;
-	}
-
-	static ProviderItem *fromClass(QCAProvider *p)
-	{
-		ProviderItem *i = new ProviderItem(0, p);
-		return i;
-	}
-
-	~ProviderItem()
-	{
-		delete p;
-		delete lib;
-	}
-
-	void ensureInit()
-	{
-		if(init_done)
-			return;
-		init_done = true;
-		p->init();
-	}
-
-private:
-	QLibrary *lib;
-	bool init_done;
-
-	ProviderItem(QLibrary *_lib, QCAProvider *_p)
-	{
-		lib = _lib;
-		p = _p;
-		init_done = false;
-	}
-};
-
-static QPtrList<ProviderItem> providerList;
-
-// TODO
-//static QPtrList<ProviderItem> *providerItemList = 0;
-//static QCA::ProviderList *providerList = 0;
-//static QCA::Provider *default_provider = 0;
+//----------------------------------------------------------------------------
+// Global
+//----------------------------------------------------------------------------
+static QCA::ProviderManager *manager = 0;
+static QCA::Provider *default_provider = 0;
 static QCA::Random *global_rng = 0;
-
 static bool qca_init = false;
 
-static bool plugin_have(const QString &fname)
+static bool features_have(const QStringList &have, const QStringList &want)
 {
-	QPtrListIterator<ProviderItem> it(providerList);
-	for(ProviderItem *i; (i = it.current()); ++it) {
-		if(i->fname == fname)
-			return true;
+	for(QStringList::ConstIterator it = want.begin(); it != want.end(); ++it)
+	{
+		if(!have.contains(*it))
+			return false;
 	}
-	return false;
+	return true;
 }
 
-static void plugin_scan()
-{
-	QStringList dirs = QApplication::libraryPaths();
-	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it) {
-		QDir libpath(*it);
-		QDir dir(libpath.filePath("crypto"));
-		if(!dir.exists())
-			continue;
-
-		QStringList list = dir.entryList();
-		for(QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-			QFileInfo fi(dir.filePath(*it));
-			if(fi.isDir())
-				continue;
-			if(fi.extension() != PLUGIN_EXT)
-				continue;
-			QString fname = fi.filePath();
-
-			// don't load the same plugin again!
-			if(plugin_have(fname))
-				continue;
-			//printf("f=[%s]\n", fname.latin1());
-
-			ProviderItem *i = ProviderItem::load(fname);
-			if(!i)
-				continue;
-			if(i->p->qcaVersion() != QCA_PLUGIN_VERSION) {
-				delete i;
-				continue;
-			}
-
-			providerList.append(i);
-		}
-	}
-}
-
-static void plugin_addClass(QCAProvider *p)
-{
-	ProviderItem *i = ProviderItem::fromClass(p);
-	providerList.prepend(i);
-}
-
-static void plugin_unloadall()
-{
-	providerList.clear();
-}
-
-static int plugin_caps()
-{
-	int caps = 0;
-	QPtrListIterator<ProviderItem> it(providerList);
-	for(ProviderItem *i; (i = it.current()); ++it)
-		caps |= i->p->capabilities();
-	return caps;
-}
-
-QString QCA::arrayToHex(const QByteArray &a)
-{
-	return arrayToHex(QSecureArray(a));
-}
-
-void QCA::init()
+void init()
 {
 	init(Practical, 64);
 }
 
-void QCA::init(MemoryMode mode, int prealloc)
+void init(MemoryMode mode, int prealloc)
 {
 	if(qca_init)
 		return;
@@ -224,83 +87,121 @@ void QCA::init(MemoryMode mode, int prealloc)
 #endif
 	}
 
-	providerList.setAutoDelete(true);
+	manager = new ProviderManager;
 }
 
-void QCA::deinit()
+void deinit()
 {
 	if(!qca_init)
 		return;
 
-	unloadAllPlugins();
+	delete manager;
+	manager = 0;
+
 	botan_deinit();
 	qca_init = false;
 }
 
-bool QCA::haveSecureMemory()
+bool haveSecureMemory()
 {
 	// FIXME
 	return true;
 }
 
-bool QCA::isSupported(int capabilities)
+bool isSupported(int capabilities)
 {
 	init();
 
-	int caps = plugin_caps();
-	if(caps & capabilities)
+	if(manager->caps() & capabilities)
 		return true;
 
 	// ok, try scanning for new stuff
-	plugin_scan();
-	caps = plugin_caps();
-	if(caps & capabilities)
+	manager->scan();
+
+	if(manager->caps() & capabilities)
 		return true;
 
 	return false;
 }
 
-void QCA::insertProvider(QCAProvider *p)
+bool isSupported(const QStringList &features)
 {
-	plugin_addClass(p);
+	if(!qca_init)
+		return false;
+
+	if(features_have(manager->allFeatures(), features))
+		return true;
+
+	// ok, try scanning for new stuff
+	manager->scan();
+
+	if(features_have(manager->allFeatures(), features))
+		return true;
+
+	return false;
 }
 
-void QCA::unloadAllPlugins()
+bool isSupported(const QString &features)
 {
-	plugin_unloadall();
+	return isSupported(QStringList::split(',', features));
 }
 
-static void *getContext(int cap)
+QStringList supportedFeatures()
 {
 	init();
 
-	// this call will also trip a scan for new plugins if needed
-	if(!QCA::isSupported(cap))
-		return 0;
-
-	QPtrListIterator<ProviderItem> it(providerList);
-	for(ProviderItem *i; (i = it.current()); ++it) {
-		if(i->p->capabilities() & cap) {
-			i->ensureInit();
-			return i->p->context(cap);
-		}
+	// query all features
+	manager->scan();
+	QStringList list = manager->allFeatures();
+	if(default_provider)
+	{
+		QStringList deflist = default_provider->features();
+		ProviderManager::mergeFeatures(&list, deflist);
 	}
-	return 0;
+	return list;
 }
 
-namespace QCA {
-
-//----------------------------------------------------------------------------
-// Global
-//----------------------------------------------------------------------------
-QString arrayToHex(const QSecureArray &a)
+QStringList defaultFeatures()
 {
-	return Hex().arrayToString(a);
+	init();
+	if(default_provider)
+		return default_provider->features();
+	else
+		return QStringList();
 }
 
-QByteArray hexToArray(const QString &str)
+void insertProvider(QCAProvider *p)
 {
-	return Hex().stringToArray(str).toByteArray();
+	init();
+	manager->add(p);
+}
+
+bool insertProvider(Provider *p, int priority)
+{
+	init();
+	return manager->add(p, priority);
+}
+
+void setProviderPriority(const QString &name, int priority)
+{
+	if(!qca_init)
+		return;
+
+	manager->changePriority(name, priority);
+}
+
+const ProviderList & providers()
+{
+	init();
+	return manager->providers();
+}
+
+void unloadAllPlugins()
+{
+	if(!qca_init)
+		return;
+
+	manager->unloadAll();
 }
 
 Random & globalRNG()
@@ -314,6 +215,32 @@ void setGlobalRNG(const QString &provider)
 {
 	delete global_rng;
 	global_rng = new Random(provider);
+}
+
+QString QCA::arrayToHex(const QByteArray &a)
+{
+	return arrayToHex(QSecureArray(a));
+}
+
+QString arrayToHex(const QSecureArray &a)
+{
+	return Hex().arrayToString(a);
+}
+
+QByteArray hexToArray(const QString &str)
+{
+	return Hex().stringToArray(str).toByteArray();
+}
+
+static void *getContext(int cap)
+{
+	init();
+
+	// this call will also trip a scan for new plugins if needed
+	if(!isSupported(cap))
+		return 0;
+
+	return manager->findFor(cap)->context(cap);
 }
 
 //----------------------------------------------------------------------------
@@ -597,6 +524,8 @@ InitializationVector & InitializationVector::operator=(const QSecureArray &a)
 }
 
 }
+
+using namespace QCA;
 
 //----------------------------------------------------------------------------
 // Hash
