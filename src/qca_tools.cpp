@@ -135,20 +135,20 @@ class QSecureArray::Private : public QSharedData
 {
 public:
 	Botan::SecureVector<Botan::byte> *buf;
+	int size;
 
-	Private()
+	Private(uint _size)
 	{
-		buf = new Botan::SecureVector<Botan::byte>;
-	}
-
-	Private(uint size)
-	{
-		buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size);
+		size = _size;
+		buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size + 1);
+		(*buf)[size] = 0;
 	}
 
 	Private(const QByteArray &from)
 	{
-		buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)from.size());
+		size = from.size();
+		buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size + 1);
+		(*buf)[size] = 0;
 		Botan::byte *p = (Botan::byte *)(*buf);
 		memcpy(p, from.data(), from.size());
 	}
@@ -156,6 +156,7 @@ public:
 	Private(const Private &from) : QSharedData(from)
 	{
 		buf = new Botan::SecureVector<Botan::byte>(*(from.buf));
+		size = from.size;
 	}
 
 	~Private()
@@ -163,14 +164,16 @@ public:
 		delete buf;
 	}
 
-	bool resize(int size)
+	bool resize(int new_size)
 	{
-		Botan::SecureVector<Botan::byte> *new_buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size);
+		Botan::SecureVector<Botan::byte> *new_buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)new_size + 1);
 		Botan::byte *new_p = (Botan::byte *)(*new_buf);
 		const Botan::byte *old_p = (const Botan::byte *)(*buf);
-		memcpy(new_p, old_p, qMin(new_buf->size(), buf->size()));
+		memcpy(new_p, old_p, qMin(new_size, size));
 		delete buf;
 		buf = new_buf;
+		size = new_size;
+		(*buf)[size] = 0;
 		return true;
 	}
 };
@@ -235,7 +238,7 @@ void QSecureArray::clear()
 
 bool QSecureArray::resize(int size)
 {
-	int cur_size = (d ? d->buf->size() : 0);
+	int cur_size = (d ? d->size : 0);
 	if(cur_size == size)
 		return true;
 
@@ -299,7 +302,7 @@ const char *QSecureArray::constData() const
 
 int QSecureArray::size() const
 {
-	return (d ? d->buf->size() : 0);
+	return (d ? d->size : 0);
 }
 
 bool QSecureArray::isEmpty() const
