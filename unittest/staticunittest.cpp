@@ -60,5 +60,38 @@ void StaticUnitTest::allTests()
     }
     testArray[6] = 0x00;
     CHECK( testArray == QCA::hexToArray(QString("62626262626200626262")), true );
+
+
+    // capabilities are reported as a list - that is a problem for
+    // doing a direct comparison, since they change
+    // We try to work around that using contains()
+    QStringList supportedCapabilities = QCA::supportedFeatures();
+    CHECK( supportedCapabilities.contains("random"), (size_t)1 );
+    CHECK( supportedCapabilities.contains("sha1"), (size_t)1 );
+    CHECK( supportedCapabilities.contains("sha0"), (size_t)1 );
+    CHECK( supportedCapabilities.contains("md2"), (size_t)1 );
+    CHECK( supportedCapabilities.contains("md4"), (size_t)1 );
+    CHECK( supportedCapabilities.contains("md5"), (size_t)1 );
+    CHECK( supportedCapabilities.contains("ripemd160"), (size_t)1 );
+
+    QStringList defaultCapabilities = QCA::defaultFeatures();
+    CHECK( defaultCapabilities.contains("random"), (size_t)1 );
+
+    CHECK( QCA::isSupported("random"), true );
+    CHECK( QCA::isSupported("sha0"), true );
+    CHECK( QCA::isSupported("sha0,sha1"), true );
+    CHECK( QCA::isSupported("md2,md4,md5"), true );
+    CHECK( QCA::isSupported("md5"), true );
+    CHECK( QCA::isSupported("ripemd160"), true );
+    CHECK( QCA::isSupported("nosuchfeature"), false );
+
+    QString caps( "random,sha1,md5,ripemd160");
+    QStringList capList;
+    capList.split( caps, "," );
+    CHECK( QCA::isSupported(capList), true );
+    capList.append("noSuch");
+    CHECK( QCA::isSupported(capList), false );
+
+
 }
 
