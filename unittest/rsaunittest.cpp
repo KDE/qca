@@ -56,14 +56,37 @@ void RSAUnitTest::allTests()
 	CHECK( rsaKey.isPublic(), false );
 	CHECK( rsaKey.canSign(), true);
 	CHECK( rsaKey.canDecrypt(), true);
+
 	QCA::RSAPrivateKey rsaPrivKey = rsaKey.toRSA();
 	CHECK( rsaPrivKey.bitSize(), 1024 );
-#if 0
+
 	QSecureArray rsaDER = rsaKey.toDER();
+	CHECK( rsaDER.isEmpty(), false );
+
+	QString rsaPEM = rsaKey.toPEM();
+	CHECK( rsaPEM.isEmpty(), false );
+
 	QCA::ConvertResult checkResult;
-	QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QSecureArray(), &checkResult);
-	CHECK( rsaKey == fromDERkey, true );
+	QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(rsaPEM, QSecureArray(), &checkResult);
 	CHECK( checkResult, QCA::ConvertGood );
+	CHECK( fromPEMkey.isNull(), false );
+	CHECK( fromPEMkey.isRSA(), true );
+	CHECK( fromPEMkey.isDSA(), false );
+	CHECK( fromPEMkey.isDH(), false );
+	CHECK( fromPEMkey.isPrivate(), true );
+	CHECK( fromPEMkey.isPublic(), false );
+	CHECK( rsaKey == fromPEMkey, true );
+	
+	QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QSecureArray(), &checkResult);
+	CHECK( checkResult, QCA::ConvertGood );
+	CHECK( fromDERkey.isNull(), false );
+	CHECK( fromDERkey.isRSA(), true );
+	CHECK( fromDERkey.isDSA(), false );
+	CHECK( fromDERkey.isDH(), false );
+	CHECK( fromDERkey.isPrivate(), true );
+	CHECK( fromDERkey.isPublic(), false );
+#if 0
+	CHECK( rsaKey == fromDERkey, true );
 #endif
     }
 }
