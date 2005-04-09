@@ -67,7 +67,7 @@ void RSAUnitTest::allTests()
 	    CHECK( rsaPEM.isEmpty(), false );
 	    
 	    QCA::ConvertResult checkResult;
-	    QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(rsaPEM, QSecureArray("foo"), &checkResult);
+	    QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(rsaPEM, QSecureArray(), &checkResult);
 	    CHECK( checkResult, QCA::ConvertGood );
 	    CHECK( fromPEMkey.isNull(), false );
 	    CHECK( fromPEMkey.isRSA(), true );
