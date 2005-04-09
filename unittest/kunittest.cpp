@@ -40,6 +40,7 @@
 #include "base64unittest.h"
 #include "certunittest.h"
 #include "rsaunittest.h"
+#include "dsaunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -65,6 +66,7 @@ void KUnitTest::registerTests()
     ADD_TEST( Base64UnitTest );
     ADD_TEST( CertUnitTest );
     ADD_TEST( RSAUnitTest );
+    ADD_TEST( DSAUnitTest );
 }
 
 KUnitTest::KUnitTest()
