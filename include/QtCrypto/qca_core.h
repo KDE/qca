@@ -40,7 +40,10 @@ namespace QCA
 	class Provider;
 	class Random;
 	class CertificateCollection;
+	class Global;
+	class KeyStore;
 	class KeyStoreManager;
+	class KeyStoreManagerPrivate;
 
 	/**
 	 * Convenience representation for the plugin providers
@@ -288,17 +291,20 @@ namespace QCA
 	 * \sa ProviderList
 	 * \sa ProviderListIterator
 	 */
-	QCA_EXPORT const ProviderList & providers();
+	QCA_EXPORT ProviderList providers();
+
+	/**
+	 * Return the default provider
+	 */
+	QCA_EXPORT Provider *defaultProvider();
 
 	/**
 	 * Scan for new plugins
-	 *
 	 */
 	QCA_EXPORT void scanForPlugins();
 
 	/**
 	 * Unload the current plugins
-	 *
 	 */
 	QCA_EXPORT void unloadAllPlugins();
 
@@ -347,7 +353,7 @@ namespace QCA
 
 	   \sa haveSystemStore
 	*/
-	QCA_EXPORT CertificateCollection systemStore(const QString &provider = QString());
+	QCA_EXPORT CertificateCollection systemStore();
 
 	/**
 	 * Get the application name that will be used by SASL server mode
@@ -753,7 +759,7 @@ namespace QCA
 		*/
 		Provider *provider() const;
 
-		// Note: The next four functions are not public!
+		// Note: The next five functions are not public!
 
 		/**
 		   (NOT PUBLIC) The context associated with this algorithm
@@ -779,6 +785,11 @@ namespace QCA
 		   \param provider the name of the preferred provider
 		*/
 		void change(const QString &type, const QString &provider);
+
+		/**
+		   (NOT PUBLIC) Take the Provider from this algorithm
+		*/
+		Provider::Context *takeContext();
 
 	protected:
 		/**

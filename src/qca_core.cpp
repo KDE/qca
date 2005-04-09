@@ -28,10 +28,6 @@
 #include "qca_keystore.h"
 #include "qcaprovider.h"
 
-#ifndef QCA_NO_SYSTEMSTORE
-# include "qca_systemstore.h"
-#endif
-
 namespace QCA {
 
 // from qca_tools
@@ -57,12 +53,13 @@ public:
 	Global()
 	{
 		rng = 0;
-		ksm = 0;
+		ksm = new KeyStoreManager;
 		secmem = false;
 	}
 
 	~Global()
 	{
+		delete ksm;
 		delete rng;
 	}
 };
@@ -207,13 +204,18 @@ int providerPriority(const QString &name)
 	return global->manager.getPriority(name);
 }
 
-const ProviderList & providers()
+ProviderList providers()
 {
 	init();
 
 	QMutexLocker lock(&global->manager_mutex);
 
 	return global->manager.providers();
+}
+
+Provider *defaultProvider()
+{
+	return global->manager.find("default");
 }
 
 void scanForPlugins()
@@ -260,20 +262,37 @@ KeyStoreManager *keyStoreManager()
 
 bool haveSystemStore()
 {
-#ifndef QCA_NO_SYSTEMSTORE
-	return qca_have_systemstore();
-#else
+	QList<KeyStore*> list = global->ksm->keyStores();
+	for(int n = 0; n < list.count(); ++n)
+	{
+		if(list[n]->type() == KeyStore::System && list[n]->holdsTrustedCertificates())
+			return true;
+	}
 	return false;
-#endif
 }
 
-CertificateCollection systemStore(const QString &provider)
+CertificateCollection systemStore()
 {
-#ifndef QCA_NO_SYSTEMSTORE
-	return qca_get_systemstore(provider);
-#else
-	return CertificateCollection();
-#endif
+	CertificateCollection col;
+	QList<KeyStore*> list = global->ksm->keyStores();
+	for(int n = 0; n < list.count(); ++n)
+	{
+		// system store
+		if(list[n]->type() == KeyStore::System && list[n]->holdsTrustedCertificates())
+		{
+			// extract contents
+			QList<KeyStoreEntry> entries = list[n]->entryList();
+			for(int i = 0; i < entries.count(); ++i)
+			{
+				if(entries[i].type() == KeyStoreEntry::TypeCertificate)
+					col.addCertificate(entries[i].certificate());
+				else if(entries[i].type() == KeyStoreEntry::TypeCRL)
+					col.addCRL(entries[i].crl());
+			}
+			break;
+		}
+	}
+	return col;
 }
 
 QString appName()
@@ -441,6 +460,71 @@ SymmetricKey PKeyBase::deriveKey(const PKeyBase &) const
 }
 
 //----------------------------------------------------------------------------
+// KeyStoreEntryContext
+//----------------------------------------------------------------------------
+KeyBundle KeyStoreEntryContext::keyBundle() const
+{
+	return KeyBundle();
+}
+
+Certificate KeyStoreEntryContext::certificate() const
+{
+	return Certificate();
+}
+
+CRL KeyStoreEntryContext::crl() const
+{
+	return CRL();
+}
+
+PGPKey KeyStoreEntryContext::pgpSecretKey() const
+{
+	return PGPKey();
+}
+
+PGPKey KeyStoreEntryContext::pgpPublicKey() const
+{
+	return PGPKey();
+}
+
+//----------------------------------------------------------------------------
+// KeyStoreContext
+//----------------------------------------------------------------------------
+bool KeyStoreContext::isReadOnly() const
+{
+	return true;
+}
+
+bool KeyStoreContext::writeEntry(const KeyBundle &)
+{
+	return false;
+}
+
+bool KeyStoreContext::writeEntry(const Certificate &)
+{
+	return false;
+}
+
+bool KeyStoreContext::writeEntry(const CRL &)
+{
+	return false;
+}
+
+PGPKey KeyStoreContext::writeEntry(const PGPKey &)
+{
+	return PGPKey();
+}
+
+bool KeyStoreContext::removeEntry(const QString &)
+{
+	return false;
+}
+
+void KeyStoreContext::submitPassphrase(const QSecureArray &)
+{
+}
+
+//----------------------------------------------------------------------------
 // BufferedComputation
 //----------------------------------------------------------------------------
 BufferedComputation::~BufferedComputation()
@@ -576,6 +660,19 @@ void Algorithm::change(const QString &type, const QString &provider)
 		change(getContext(type, provider));
 	else
 		change(0);
+}
+
+Provider::Context *Algorithm::takeContext()
+{
+	if(d)
+	{
+		Provider::Context *c = d->c; // should cause a detach
+		d->c = 0;
+		d = 0;
+		return c;
+	}
+	else
+		return 0;
 }
 
 //----------------------------------------------------------------------------

@@ -27,6 +27,7 @@
 #include "qca_basic.h"
 #include "qca_publickey.h"
 #include "qca_cert.h"
+#include "qca_keystore.h"
 
 #include <limits>
 
@@ -343,16 +344,62 @@ public:
 	virtual ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const = 0;
 };
 
-class KeyStoreContext : public Provider::Context
+class KeyStoreEntryContext : public Provider::Context
 {
 public:
-	KeyStoreContext(Provider *p) : Provider::Context(p, "keystore") {}
+	KeyStoreEntryContext(Provider *p) : Provider::Context(p, "keystoreentry") {}
+
+	virtual KeyStoreEntry::Type type() const = 0;
+	virtual QString name() const = 0;
+	virtual QString id() const = 0;
+
+	virtual KeyBundle keyBundle() const;
+	virtual Certificate certificate() const;
+	virtual CRL crl() const;
+	virtual PGPKey pgpSecretKey() const;
+	virtual PGPKey pgpPublicKey() const;
 };
 
-class KeyStoreListContext : public Provider::Context
+class KeyStoreContext : public QObject, public Provider::Context
 {
+	Q_OBJECT
+public:
+	KeyStoreContext(Provider *p) : Provider::Context(p, "keystore") {}
+
+	virtual int contextId() const = 0; // increment for each new context made
+	virtual QString deviceId() const = 0;
+
+	virtual KeyStore::Type type() const = 0;
+	virtual QString name() const = 0;
+
+	virtual QList<KeyStoreEntryContext*> entryList() const = 0; // caller must delete
+	virtual QList<KeyStoreEntry::Type> entryTypes() const = 0;
+
+	virtual bool isReadOnly() const;
+
+	virtual bool writeEntry(const KeyBundle &kb);
+	virtual bool writeEntry(const Certificate &cert);
+	virtual bool writeEntry(const CRL &crl);
+	virtual PGPKey writeEntry(const PGPKey &key);
+	virtual bool removeEntry(const QString &id);
+
+	virtual void submitPassphrase(const QSecureArray &passphrase);
+
+signals:
+	void updated();
+	void needPassphrase();
+};
+
+class KeyStoreListContext : public QObject, public Provider::Context
+{
+	Q_OBJECT
 public:
 	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
+
+	virtual QList<KeyStoreContext*> keyStores() const = 0;
+
+signals:
+	void updated(KeyStoreListContext *sender);
 };
 
 class TLSContext : public Provider::Context

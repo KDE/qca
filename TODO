@@ -32,7 +32,6 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
-  make systemstore work via keystore
   cert: rfc 2818 hostname validation
   keystore
   tls
@@ -40,7 +39,7 @@
   securemessagesystem (consider thread issues)
   openpgp
   smime
-  default provider should have built-in sha1 and md5 (?)
+  default provider: sha1
 
 * examples
   create example for BigInteger

@@ -1,6 +1,6 @@
 /*
  * qca_systemstore_win.cpp - Qt Cryptographic Architecture
- * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2004,2005  Justin Karneges
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,13 +39,13 @@ bool qca_have_systemstore()
 	return ok;
 }
 
-Store qca_get_systemstore(const QString &provider)
+CertificateCollection qca_get_systemstore(const QString &provider)
 {
-	Store store(provider);
+	CertificateCollection col;
 	HCERTSTORE hSystemStore;
 	hSystemStore = CertOpenSystemStore(0, "ROOT");
 	if(!hSystemStore)
-		return store;
+		return col;
 	PCCERT_CONTEXT pc = NULL;
 	while(1)
 	{
@@ -64,10 +64,10 @@ Store qca_get_systemstore(const QString &provider)
 
 		Certificate cert = Certificate::fromDER(der, 0, provider);
 		if(!cert.isNull())
-			store.addCertificate(cert, true);
+			col.addCertificate(cert);
 	}
 	CertCloseStore(hSystemStore, 0);
-	return store;
+	return col;
 }
 
 }

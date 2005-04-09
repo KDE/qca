@@ -338,6 +338,9 @@ DHPrivateKey PKey::toDHPrivateKey() const
 
 bool PKey::operator==(const PKey &a) const
 {
+	if(isNull() || a.isNull())
+		return false;
+
 	if(a.isPrivate())
 		return (toPrivateKey().toDER() == a.toPrivateKey().toDER());
 	else

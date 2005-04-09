@@ -1,6 +1,6 @@
 /*
  * qca_systemstore_flatfile.cpp - Qt Cryptographic Architecture
- * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2004,2005  Justin Karneges
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,21 +26,13 @@ namespace QCA {
 
 bool qca_have_systemstore()
 {
-#ifndef QCA_NO_SYSTEMSTORE
 	QFile f(QCA_SYSTEMSTORE_PATH);
 	return f.open(QFile::ReadOnly);
-#else
-	return false;
-#endif
 }
 
 CertificateCollection qca_get_systemstore(const QString &provider)
 {
-#ifndef QCA_NO_SYSTEMSTORE
 	return CertificateCollection::fromFlatTextFile(QCA_SYSTEMSTORE_PATH, 0, provider);
-#else
-	return CertificateCollection();
-#endif
 }
 
 }

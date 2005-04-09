@@ -65,8 +65,9 @@ namespace QCA
 	  smartcard:            SmartCard Identities
 	  gnupg:                PGPKeyring Identities,PGPPublicKeys
 	*/
-	class QCA_EXPORT KeyStore : public Algorithm
+	class QCA_EXPORT KeyStore : public QObject, public Algorithm
 	{
+		Q_OBJECT
 	public:
 		enum Type
 		{
@@ -77,28 +78,34 @@ namespace QCA
 			PGPKeyring   // pgp keyring
 		};
 
-		KeyStore();
-		KeyStore(const KeyStore &from);
-		~KeyStore();
-		KeyStore & operator=(const KeyStore &from);
-
-		bool isNull() const;
-
 		Type type() const;
 		QString name() const;
 		QString id() const;
 		bool isReadOnly() const;
 
 		QList<KeyStoreEntry> entryList() const;
-		bool containsTrustedCertificates() const; // Certificate and CRL
-		bool containsIdentities() const;          // KeyBundle and PGPSecretKey
-		bool containsPGPPublicKeys() const;       // PGPPublicKey
+		bool holdsTrustedCertificates() const; // Certificate and CRL
+		bool holdsIdentities() const;          // KeyBundle and PGPSecretKey
+		bool holdsPGPPublicKeys() const;       // PGPPublicKey
 
 		bool writeEntry(const KeyBundle &kb);
 		bool writeEntry(const Certificate &cert);
 		bool writeEntry(const CRL &crl);
 		PGPKey writeEntry(const PGPKey &key); // returns a ref to the key in the keyring
 		bool removeEntry(const QString &id);
+
+		void submitPassphrase(const QSecureArray &passphrase);
+
+	signals:
+		void updated();
+		void unavailable();
+		void needPassphrase();
+
+	private:
+		friend class KeyStoreManager;
+		friend class KeyStoreManagerPrivate;
+		KeyStore();
+		~KeyStore();
 	};
 
 	// use this to get access to keystores and monitor for their activity
@@ -106,22 +113,24 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		KeyStore keyStore(const QString &id) const;
-		QList<KeyStore> keyStores() const;
+		KeyStore *keyStore(const QString &id) const;
+		QList<KeyStore*> keyStores() const;
 		int count() const;
 
-		void submitPassphrase(const QString &id, const QSecureArray &passphrase);
 		QString diagnosticText() const;
 
 	signals:
 		void keyStoreAvailable(const QString &id);
-		void keyStoreUnavailable(const QString &id);
-		void keyStoreUpdated(const QString &id);
-		void keyStoreNeedPassphrase(const QString &id);
 
 	private:
+		friend class KeyStoreManagerPrivate;
+		KeyStoreManagerPrivate *d;
+
+		friend class Global;
 		KeyStoreManager();
 		~KeyStoreManager();
+
+		void scan() const;
 	};
 }
 

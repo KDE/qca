@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include "qcaprovider.h"
 
+#ifndef QCA_NO_SYSTEMSTORE
+# include "qca_systemstore.h"
+#endif
+
 namespace QCA {
 
 //----------------------------------------------------------------------------
@@ -48,7 +52,6 @@ public:
 		return buf;
 	}
 };
-
 
 /*
   The following code is based on L. Peter Deutsch's implementation,
@@ -395,6 +398,169 @@ private:
 	
 };
 
+class DefaultKeyStoreEntry : public KeyStoreEntryContext
+{
+public:
+	KeyStoreEntry::Type item_type;
+	QString item_id;
+	Certificate _cert;
+	CRL _crl;
+
+	DefaultKeyStoreEntry(const Certificate &cert, Provider *p) : KeyStoreEntryContext(p)
+	{
+		_cert = cert;
+		item_type = KeyStoreEntry::TypeCertificate;
+	}
+
+	DefaultKeyStoreEntry(const CRL &crl, Provider *p) : KeyStoreEntryContext(p)
+	{
+		_crl = crl;
+		item_type = KeyStoreEntry::TypeCRL;
+	}
+
+	DefaultKeyStoreEntry(const DefaultKeyStoreEntry &from) : KeyStoreEntryContext(from)
+	{
+	}
+
+	~DefaultKeyStoreEntry()
+	{
+	}
+
+	virtual Context *clone() const
+	{
+		return new DefaultKeyStoreEntry(*this);
+	}
+
+	virtual KeyStoreEntry::Type type() const
+	{
+		return item_type;
+	}
+
+	virtual QString name() const
+	{
+		// use the common name
+		if(item_type == KeyStoreEntry::TypeCertificate)
+			return _cert.commonName();
+		else
+			return _crl.issuerInfo().value(CommonName);
+	}
+
+	virtual QString id() const
+	{
+		return item_id;
+	}
+
+	virtual Certificate certificate() const
+	{
+		return _cert;
+	}
+
+	virtual CRL crl() const
+	{
+		return _crl;
+	}
+};
+
+class DefaultKeyStore : public KeyStoreContext
+{
+	Q_OBJECT
+public:
+	DefaultKeyStore(Provider *p) : KeyStoreContext(p) {}
+
+	virtual Context *clone() const
+	{
+		return 0;
+	}
+
+	virtual int contextId() const
+	{
+		return 0; // there is only 1 context, so this can be static
+	}
+
+	virtual QString deviceId() const
+	{
+		return "qca-default-systemstore";
+	}
+
+	virtual KeyStore::Type type() const
+	{
+		return KeyStore::System;
+	}
+
+	virtual QString name() const
+	{
+		return "System Trusted Certificates";
+	}
+
+	virtual QList<KeyStoreEntryContext*> entryList() const
+	{
+		QList<KeyStoreEntryContext*> out;
+
+		CertificateCollection col;
+#ifndef QCA_NO_SYSTEMSTORE
+		col = qca_get_systemstore(QString());
+#endif
+		QList<Certificate> certs = col.certificates();
+		QList<CRL> crls = col.crls();
+		int n;
+		for(n = 0; n < certs.count(); ++n)
+		{
+			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(certs[n], provider());
+			c->item_id = QString::number(n);
+			out.append(c);
+		}
+		for(n = 0; n < crls.count(); ++n)
+		{
+			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(crls[n], provider());
+			out.append(c);
+		}
+
+		return out;
+	}
+
+	virtual QList<KeyStoreEntry::Type> entryTypes() const
+	{
+		QList<KeyStoreEntry::Type> list;
+		list += KeyStoreEntry::TypeCertificate;
+		list += KeyStoreEntry::TypeCRL;
+		return list;
+	}
+};
+
+class DefaultKeyStoreList : public KeyStoreListContext
+{
+	Q_OBJECT
+public:
+	DefaultKeyStore *ks;
+
+	DefaultKeyStoreList(Provider *p) : KeyStoreListContext(p)
+	{
+		ks = 0;
+
+#ifndef QCA_NO_SYSTEMSTORE
+		if(qca_have_systemstore())
+			ks = new DefaultKeyStore(provider());
+#endif
+	}
+
+	~DefaultKeyStoreList()
+	{
+		delete ks;
+	}
+
+	virtual Context *clone() const
+	{
+		return 0;
+	}
+
+	virtual QList<KeyStoreContext*> keyStores() const
+	{
+		QList<KeyStoreContext*> list;
+		if(ks)
+			list.append(ks);
+		return list;
+	}
+};
 
 class DefaultProvider : public QCA::Provider
 {
@@ -416,6 +582,7 @@ public:
 		QStringList list;
 		list += "random";
 		list += "md5";
+		list += "keystorelist";
 		return list;
 	}
 
@@ -425,6 +592,8 @@ public:
 			return new DefaultRandomContext(this);
 		else if(type == "md5")
 			return new DefaultMD5Context(this);
+		else if(type == "keystorelist")
+			return new DefaultKeyStoreList(this);
 		else
 			return 0;
 	}
@@ -434,5 +603,7 @@ Provider *create_default_provider()
 {
 	return new DefaultProvider;
 }
+
+#include "qca_default.moc"
 
 }

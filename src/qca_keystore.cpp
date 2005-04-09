@@ -21,6 +21,8 @@
 
 #include "qca_keystore.h"
 
+#include "qcaprovider.h"
+
 namespace QCA {
 
 //----------------------------------------------------------------------------
@@ -47,22 +49,22 @@ KeyStoreEntry & KeyStoreEntry::operator=(const KeyStoreEntry &from)
 
 bool KeyStoreEntry::isNull() const
 {
-	return false;
+	return (!context() ? true : false);
 }
 
 KeyStoreEntry::Type KeyStoreEntry::type() const
 {
-	return TypeCertificate;
+	return static_cast<const KeyStoreEntryContext *>(context())->type();
 }
 
 QString KeyStoreEntry::name() const
 {
-	return QString();
+	return static_cast<const KeyStoreEntryContext *>(context())->name();
 }
 
 QString KeyStoreEntry::id() const
 {
-	return QString();
+	return static_cast<const KeyStoreEntryContext *>(context())->id();
 }
 
 KeyBundle KeyStoreEntry::keyBundle() const
@@ -72,12 +74,12 @@ KeyBundle KeyStoreEntry::keyBundle() const
 
 Certificate KeyStoreEntry::certificate() const
 {
-	return Certificate();
+	return static_cast<const KeyStoreEntryContext *>(context())->certificate();
 }
 
 CRL KeyStoreEntry::crl() const
 {
-	return CRL();
+	return static_cast<const KeyStoreEntryContext *>(context())->crl();
 }
 
 PGPKey KeyStoreEntry::pgpSecretKey() const
@@ -97,63 +99,65 @@ KeyStore::KeyStore()
 {
 }
 
-KeyStore::KeyStore(const KeyStore &from)
-:Algorithm(from)
-{
-}
-
 KeyStore::~KeyStore()
 {
 }
 
-KeyStore & KeyStore::operator=(const KeyStore &from)
-{
-	Algorithm::operator=(from);
-	return *this;
-}
-
-bool KeyStore::isNull() const
-{
-	return false;
-}
-
 KeyStore::Type KeyStore::type() const
 {
-	return System;
+	return static_cast<const KeyStoreContext *>(context())->type();
 }
 
 QString KeyStore::name() const
 {
-	return QString();
+	return static_cast<const KeyStoreContext *>(context())->name();
 }
 
 QString KeyStore::id() const
 {
-	return QString();
+	return static_cast<const KeyStoreContext *>(context())->deviceId();
 }
 
 bool KeyStore::isReadOnly() const
 {
-	return false;
+	return static_cast<const KeyStoreContext *>(context())->isReadOnly();
 }
 
 QList<KeyStoreEntry> KeyStore::entryList() const
 {
-	return QList<KeyStoreEntry>();
+	QList<KeyStoreEntry> out;
+	QList<KeyStoreEntryContext*> list = static_cast<const KeyStoreContext *>(context())->entryList();
+	for(int n = 0; n < list.count(); ++n)
+	{
+		KeyStoreEntry entry;
+		entry.change(list[n]);
+		out.append(entry);
+	}
+	printf("KeyStore::entryList(): %d entries\n", out.count());
+	return out;
 }
 
-bool KeyStore::containsTrustedCertificates() const
+bool KeyStore::holdsTrustedCertificates() const
 {
+	QList<KeyStoreEntry::Type> list = static_cast<const KeyStoreContext *>(context())->entryTypes();
+	if(list.contains(KeyStoreEntry::TypeCertificate) || list.contains(KeyStoreEntry::TypeCRL))
+		return true;
 	return false;
 }
 
-bool KeyStore::containsIdentities() const
+bool KeyStore::holdsIdentities() const
 {
+	QList<KeyStoreEntry::Type> list = static_cast<const KeyStoreContext *>(context())->entryTypes();
+	if(list.contains(KeyStoreEntry::TypeKeyBundle) || list.contains(KeyStoreEntry::TypePGPSecretKey))
+		return true;
 	return false;
 }
 
-bool KeyStore::containsPGPPublicKeys() const
+bool KeyStore::holdsPGPPublicKeys() const
 {
+	QList<KeyStoreEntry::Type> list = static_cast<const KeyStoreContext *>(context())->entryTypes();
+	if(list.contains(KeyStoreEntry::TypePGPPublicKey))
+		return true;
 	return false;
 }
 
@@ -187,42 +191,286 @@ bool KeyStore::removeEntry(const QString &id)
 	return false;
 }
 
+void KeyStore::submitPassphrase(const QSecureArray &passphrase)
+{
+	static_cast<const KeyStoreContext *>(context())->submitPassphrase(passphrase);
+}
+
 //----------------------------------------------------------------------------
 // KeyStoreManager
 //----------------------------------------------------------------------------
+
+/*
+  How this stuff works:
+
+  KeyStoreListContext is queried for a list of KeyStoreContexts.  A signal
+  is used to indicate when the list may have changed, so polling for changes
+  is not necessary.  Every context object created internally by the provider
+  will have a unique contextId, and this is used for detecting changes.  Even
+  if a user removes and inserts the same smart card device, which has the
+  same deviceId, the contextId will ALWAYS be different.  If a previously
+  known contextId is missing from a later queried list, then it means the
+  associated KeyStoreContext has been deleted by the provider (the manager
+  here does not delete them, it just throws away any references).  It is
+  recommended that the provider just use a counter for the contextId,
+  incrementing the value anytime a new context is made.
+*/
+
+typedef QMap<int, KeyStoreContext*> KeyStoreMap;
+
+static KeyStoreMap make_map(const QList<KeyStoreContext*> &list)
+{
+	KeyStoreMap map;
+	for(int n = 0; n < list.count(); ++n)
+		map.insert(list[n]->contextId(), list[n]);
+	return map;
+}
+
+class KeyStoreManagerPrivate : public QObject
+{
+	Q_OBJECT
+public:
+	KeyStoreManager *q;
+	QList<KeyStoreListContext*> sources;
+	QMap<KeyStoreListContext*, KeyStoreMap> stores;
+
+	class Item
+	{
+	public:
+		KeyStore *keyStore;
+		bool announced;
+
+		Item() : keyStore(0), announced(false) {}
+		Item(KeyStore *ks) : keyStore(ks), announced(false) {}
+	};
+
+	QList<Item> active;
+	QList<KeyStore*> trash;
+
+	KeyStoreManagerPrivate(KeyStoreManager *_q) : q(_q)
+	{
+	}
+
+	~KeyStoreManagerPrivate()
+	{
+		int n;
+		for(n = 0; n < trash.count(); ++n)
+			delete trash[n];
+
+		for(n = 0; n < active.count(); ++n)
+		{
+			KeyStore *ks = active[n].keyStore;
+			ks->takeContext(); // context not ours, so use this instead of change(0)
+			delete ks;
+		}
+	}
+
+	void scan()
+	{
+		// grab providers (and default)
+		ProviderList list = providers();
+		list.append(defaultProvider());
+
+		for(int n = 0; n < list.count(); ++n)
+		{
+			if(list[n]->features().contains("keystorelist") && !contextForProvider(list[n]))
+			{
+				KeyStoreListContext *c = static_cast<KeyStoreListContext *>(list[n]->createContext("keystorelist"));
+				sources.append(c);
+				connect(c, SIGNAL(updated(KeyStoreListContext *)), SLOT(updated(KeyStoreListContext *)));
+				check(c);
+			}
+		}
+	}
+
+private:
+	KeyStoreListContext *contextForProvider(Provider *p)
+	{
+		for(int n = 0; n < sources.count(); ++n)
+		{
+			if(sources[n]->provider() == p)
+				return sources[n];
+		}
+		return 0;
+	}
+
+	void check(KeyStoreListContext *source)
+	{
+		printf("KeyStore: query begin [%s]\n", qPrintable(source->provider()->name()));
+
+		QList<KeyStoreContext*> added;
+		QList<int> removed;
+
+		KeyStoreMap cur = make_map(source->keyStores());
+		if(stores.contains(source))
+		{
+			KeyStoreMap old = stores.value(source);
+
+			KeyStoreMap::ConstIterator it;
+			for(it = old.begin(); it != old.end(); ++it)
+			{
+				if(!cur.contains(it.key()))
+					removed.append(it.key());
+			}
+			for(it = cur.begin(); it != cur.end(); ++it)
+			{
+				if(!old.contains(it.key()))
+					added.append(it.value());
+			}
+		}
+		else
+		{
+			added = cur.values();
+		}
+		stores.insert(source, cur);
+
+		for(int n = 0; n < removed.count(); ++n)
+		{
+			printf("  - <%d>\n", removed[n]);
+			ctx_remove(source->provider(), removed[n]);
+		}
+
+		for(int n = 0; n < added.count(); ++n)
+		{
+			printf("  + <%d> [%s]\n", added[n]->contextId(), qPrintable(added[n]->deviceId()));
+			ctx_add(added[n]);
+		}
+
+		printf("KeyStore: query end\n");
+	}
+
+	void ctx_add(KeyStoreContext *c)
+	{
+		// skip if we have this deviceId already
+		for(int n = 0; n < active.count(); ++n)
+		{
+			KeyStoreContext *i = static_cast<KeyStoreContext *>(active[n].keyStore->context());
+			if(c->deviceId() == i->deviceId())
+			{
+				printf("KeyStore: ERROR: duplicate device id [%s], skipping\n", qPrintable(c->deviceId()));
+				return;
+			}
+		}
+
+		// add the keystore
+		KeyStore *ks = new KeyStore;
+		ks->change(c);
+		active.append(Item(ks));
+	}
+
+	void ctx_remove(Provider *p, int id)
+	{
+		// look up and remove
+		for(int n = 0; n < active.count(); ++n)
+		{
+			KeyStoreContext *i = static_cast<KeyStoreContext *>(active[n].keyStore->context());
+			if(i->provider() == p && i->contextId() == id)
+			{
+				KeyStore *ks = active[n].keyStore;
+				active.removeAt(n);
+				ks->takeContext(); // context not ours, so use this instead of change(0)
+				trash.append(ks);
+			}
+		}
+	}
+
+private slots:
+	void updated(KeyStoreListContext *sender)
+	{
+		check(sender);
+	}
+
+	void handleChanged()
+	{
+		// signal unavailable, empty trash
+		int n;
+		for(n = 0; n < trash.count(); ++n)
+		{
+			emit trash[n]->unavailable();
+			delete trash[n];
+		}
+		trash.clear();
+
+		// signal available
+		for(n = 0; n < active.count(); ++n)
+		{
+			if(!active[n].announced)
+			{
+				active[n].announced = true;
+				emit q->keyStoreAvailable(active[n].keyStore->id());
+			}
+		}
+	}
+
+	void emptyTrash()
+	{
+		trash.clear();
+	}
+};
+
 KeyStoreManager::KeyStoreManager()
 {
+	d = new KeyStoreManagerPrivate(this);
 }
 
 KeyStoreManager::~KeyStoreManager()
 {
+	delete d;
 }
 
-KeyStore KeyStoreManager::keyStore(const QString &id) const
+KeyStore *KeyStoreManager::keyStore(const QString &id) const
 {
-	Q_UNUSED(id);
-	return KeyStore();
+	int n;
+
+	// see if we have it
+	for(n = 0; n < d->active.count(); ++n)
+	{
+		if(d->active[n].keyStore->id() == id)
+			return d->active[n].keyStore;
+	}
+
+	// if not, scan for more
+	scan();
+
+	// have it now?
+	for(n = 0; n < d->active.count(); ++n)
+	{
+		if(d->active[n].keyStore->id() == id)
+			return d->active[n].keyStore;
+	}
+
+	return 0;
 }
 
-QList<KeyStore> KeyStoreManager::keyStores() const
+QList<KeyStore*> KeyStoreManager::keyStores() const
 {
-	return QList<KeyStore>();
+	scan();
+
+	QList<KeyStore*> list;
+	for(int n = 0; n < d->active.count(); ++n)
+		list.append(d->active[n].keyStore);
+	return list;
 }
 
 int KeyStoreManager::count() const
 {
-	return 0;
-}
+	scan();
 
-void KeyStoreManager::submitPassphrase(const QString &id, const QSecureArray &passphrase)
-{
-	Q_UNUSED(id);
-	Q_UNUSED(passphrase);
+	return d->active.count();
 }
 
 QString KeyStoreManager::diagnosticText() const
 {
+	// TODO
 	return QString();
 }
 
+void KeyStoreManager::scan() const
+{
+	scanForPlugins();
+	d->scan();
 }
+
+}
+
+#include "qca_keystore.moc"
