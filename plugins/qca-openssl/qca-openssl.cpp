@@ -32,6 +32,7 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
+#include <openssl/pkcs12.h>
 
 // comment this out if you'd rather use openssl 0.9.6
 //#define OSSL_097
@@ -874,6 +875,60 @@ static QCA::Validity convert_verify_error(int err)
 	return rc;
 }
 
+EVP_PKEY *qca_d2i_PKCS8PrivateKey(const QSecureArray &in, EVP_PKEY **x, pem_password_cb *cb, void *u)
+{
+	PKCS8_PRIV_KEY_INFO *p8inf;
+
+	// first try unencrypted form
+	BIO *bi = BIO_new(BIO_s_mem());
+	BIO_write(bi, in.data(), in.size());
+	p8inf = d2i_PKCS8_PRIV_KEY_INFO_bio(bi, NULL);
+	BIO_free(bi);
+	if(!p8inf)
+	{
+		X509_SIG *p8;
+
+		// now try encrypted form
+		bi = BIO_new(BIO_s_mem());
+		BIO_write(bi, in.data(), in.size());
+		p8 = d2i_PKCS8_bio(bi, NULL);
+		BIO_free(bi);
+		if(!p8)
+			return NULL;
+
+		// get passphrase
+		char psbuf[PEM_BUFSIZE];
+		int klen;
+		if(cb)
+			klen = cb(psbuf, PEM_BUFSIZE, 0, u);
+		else
+			klen = PEM_def_callback(psbuf, PEM_BUFSIZE, 0, u);
+		if(klen <= 0)
+		{
+			PEMerr(PEM_F_D2I_PKCS8PRIVATEKEY_BIO, PEM_R_BAD_PASSWORD_READ);
+			X509_SIG_free(p8);
+			return NULL;
+		}
+
+		// decrypt it
+		p8inf = PKCS8_decrypt(p8, psbuf, klen);
+		X509_SIG_free(p8);
+		if(!p8inf)
+			return NULL;
+	}
+
+	EVP_PKEY *ret = EVP_PKCS82PKEY(p8inf);
+	PKCS8_PRIV_KEY_INFO_free(p8inf);
+	if(!ret)
+		return NULL;
+	if(x)
+	{
+		if(*x)
+			EVP_PKEY_free(*x);
+		*x = ret;
+	}
+	return ret;
+}
 
 class opensslHashContext : public QCA::HashContext
 {
@@ -2423,14 +2478,11 @@ public:
 		delete k;
 		k = 0;
 
-		BIO *bi = BIO_new(BIO_s_mem());
-		BIO_write(bi, in.data(), in.size());
 		EVP_PKEY *pkey;
 		if(!passphrase.isEmpty())
-			pkey = d2i_PKCS8PrivateKey_bio(bi, NULL, NULL, (void *)passphrase.data());
+			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, NULL, (void *)passphrase.data());
 		else
-			pkey = d2i_PKCS8PrivateKey_bio(bi, NULL, &passphrase_cb, NULL);
-		BIO_free(bi);
+			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, &passphrase_cb, NULL);
 
 		if(!pkey)
 			return QCA::ErrorDecode;
