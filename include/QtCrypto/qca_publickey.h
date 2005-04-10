@@ -96,6 +96,9 @@ namespace QCA
 		ErrorFile         ///< Failure because of incorrect file
 	};
 
+	/**
+	   Well known discrete logarithm group sets
+	*/
 	enum DLGroupSet
 	{
 		DSA_512,
@@ -109,22 +112,64 @@ namespace QCA
 		IETF_4096
 	};
 
+	/**
+	   A discrete logarithm group
+	*/
 	class DLGroup
 	{
 	public:
 		DLGroup();
+
+		/**
+		   Construct a discrete logarithm group from raw parameters
+
+		   \param p
+		   \param q
+		   \param g
+		*/
 		DLGroup(const QBigInteger &p, const QBigInteger &q, const QBigInteger &g);
+
+		/**
+		   Construct a discrete logarithm group from raw parameters
+
+		   \param p
+		   \param g
+		*/
 		DLGroup(const QBigInteger &p, const QBigInteger &g);
+
+		/**
+		   Standard copy constructor
+		*/
 		DLGroup(const DLGroup &from);
 		~DLGroup();
 		DLGroup & operator=(const DLGroup &from);
 
+		/**
+		   Provide a list of the supported group sets
+
+		   \param provider the provider to report which group sets are available. If not
+		   specified, all providers will be checked
+		*/
 		static QList<DLGroupSet> supportedGroupSets(const QString &provider = QString());
 
+		/**
+		   Test if the group is empty
+		*/
 		bool isNull() const;
 
+		/**
+		   Provide the p component of the group
+		*/
 		QBigInteger p() const;
+
+		/**
+		   Provide the q component of the group
+		*/
 		QBigInteger q() const;
+
+		/**
+		   Provide the g component of the group
+		*/
 		QBigInteger g() const;
 
 	private:
@@ -201,6 +246,9 @@ namespace QCA
 		*/
 		bool isPrivate() const;
 
+		/**
+		   Test if the key can be used for key agreement
+		*/
 		bool canKeyAgree() const;
 
 		PublicKey toPublicKey() const;
@@ -274,11 +322,33 @@ namespace QCA
 		PrivateKey();
 		PrivateKey(const QString &fileName, const QSecureArray &passphrase = QSecureArray());
 
+		/**
+		   Interpret / convert the key to an RSA key
+		*/
 		RSAPrivateKey toRSA() const;
+		
+		/**
+		   Interpret / convert the key to a DSA key
+		*/
 		DSAPrivateKey toDSA() const;
+
+		/**
+		   Interpret / convert the key to a Diffie-Hellman key
+		*/
 		DHPrivateKey toDH() const;
 
+		/**
+		   Test if this key can be used for decryption
+
+		   \return true if the key can be used for decryption
+		*/
 		bool canDecrypt() const;
+
+		/**
+		   Test if this key can be used for signing
+
+		   \return true if the key can be used to make a signature
+		*/
 		bool canSign() const;
 
 		// decrypt / sign / key agreement
@@ -318,7 +388,23 @@ namespace QCA
 		void setBlocking(bool b);
 		bool isBusy() const;
 
+		/**
+		   Generate an RSA key of the specified length
+
+		   This method creates both the public key and corresponding private key. You
+		   almost certainly want to extract the public key part out - see PKey::toPublicKey
+		   for an easy way.
+
+		   Key length is a tricky judgement - using less than 2048 is probably being
+		   too liberal for long term use. Don't use less than 1024 without serious
+		   analysis.
+		   
+		   \param bits the length of key that is required
+		   \param exp the exponent - typicall 3, 17 or 65537
+		   \param provider the name of the provider to use
+		*/
 		PrivateKey createRSA(int bits, int exp = 65537, const QString &provider = QString());
+
 		PrivateKey createDSA(const DLGroup &domain, const QString &provider = QString());
 		PrivateKey createDH(const DLGroup &domain, const QString &provider = QString());
 		PrivateKey key() const;
@@ -346,7 +432,19 @@ namespace QCA
 		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider = QString());
 		RSAPublicKey(const RSAPrivateKey &k);
 
+		/**
+		   The public key value
+
+		   This value is the actual public key value (the product of p and q, the random prime numbers
+		   used to generate the RSA key), also known as the public modulus.
+		*/
 		QBigInteger n() const;
+
+		/**
+		   The public key exponent
+
+		   This value is the exponent chosen in the original key generator step
+		*/
 		QBigInteger e() const;
 	};
 
