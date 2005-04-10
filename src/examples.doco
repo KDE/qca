@@ -38,3 +38,11 @@ The code below shows the normal way to use the Random class.
 
 */
 
+/** \example rsatest.cpp
+
+The code below shows some of the capabilities for how to use
+RSA. This example also shows how to export and import a key
+to a file, using PEM encoding.
+
+*/
+
