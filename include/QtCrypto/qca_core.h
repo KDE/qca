@@ -349,8 +349,6 @@ namespace QCA
 	/**
 	   Get system-wide root CA certificates
 
-	   \param provider a specific provider to generate the CertificateCollection, if required
-
 	   \sa haveSystemStore
 	*/
 	QCA_EXPORT CertificateCollection systemStore();
