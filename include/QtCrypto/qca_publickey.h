@@ -286,11 +286,42 @@ namespace QCA
 		PublicKey(const PrivateKey &k);
 		PublicKey(const QString &fileName);
 
+		/**
+		   Convenience method to convert this key to an RSAPublicKey
+
+		   Note that if the key is not an RSA key (eg it is DSA or DH),
+		   then this will produce a null key.
+		*/
 		RSAPublicKey toRSA() const;
+
+		/**
+		   Convenience method to convert this key to a DSAPublicKey
+
+		   Note that if the key is not an DSA key (eg it is RSA or DH),
+		   then this will produce a null key.
+		*/
 		DSAPublicKey toDSA() const;
+
+		/**
+		   Convenience method to convert this key to a DHPublicKey
+
+		   Note that if the key is not an RSA key (eg it is DSA or RSA),
+		   then this will produce a null key.
+		*/
 		DHPublicKey toDH() const;
 
+		/**
+		   Test if this key can be used for encryption
+
+		   \return true if the key can be used for encryption
+		*/
 		bool canEncrypt() const;
+
+		/**
+		   Test if the key can be used for verifying signatures
+
+		   \return true of the key can be used for verification
+		*/
 		bool canVerify() const;
 
 		// encrypt / verify
@@ -301,12 +332,100 @@ namespace QCA
 		bool validSignature(const QSecureArray &sig);
 		bool verifyMessage(const QSecureArray &a, const QSecureArray &sig, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 
-		// import / export
+
+		/**
+		   Export the key in Distinguished Encoding Rules (DER) format
+		*/
 		QSecureArray toDER() const;
+
+		/**
+		   Export the key in Privacy Enhanced Mail (PEM) format
+
+		   \sa toPEMFile provides a convenient way to save the PEM encoded key to a file
+		   \sa fromPEM provides an inverse of toPEM, converting the PEM encoded key back to a PublicKey
+		*/
 		QString toPEM() const;
+
+		/**
+		   Export the key in Privacy Enhanced Mail (PEM) to a file
+
+		   \param fileName the name (and path, if necessary) of the file to save the
+		   PEM encoded key to.
+
+		   \sa toPEM for a version that exports to a QString, which may be useful if you
+		   need to do more sophisticated handling
+		   \sa fromPEMFile provides an inverse of toPEMFile, reading a PEM encoded key from a file
+		*/
 		bool toPEMFile(const QString &fileName) const;
+
+		/**
+		   Import a key in Distinguished Encoding Rules (DER) format
+
+		   This function takes a binary array, which is assumed to contain a public key
+		   in DER encoding, and returns the key. Unless you don't care whether the import
+		   succeeded, you should test the result, as shown below.
+
+		   \code
+		   QCA::ConvertResult conversionResult;
+		   QCA::PublicKey publicKey = QCA::PublicKey::fromDER(keyArray, &conversionResult);
+		   if (! QCA::ConvertGood == conversionResult) {
+		       std::cout << "Public key read failed" << std::endl;
+		   }
+		   \endcode
+
+
+		   \param a the array containing a DER encoded key
+		   \param result pointer to a variable, which returns whether the conversion succeeded (ConvertGood) or not
+		   \param provider the name of the provider to use for the import.
+		*/
 		static PublicKey fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import a key in Privacy Enhanced Mail (PEM) format
+
+		   This function takes a string, which is assumed to contain a public key
+		   in PEM encoding, and returns that key. Unless you don't care whether the import
+		   succeeded, you should test the result, as shown below.
+
+		   \code
+		   QCA::ConvertResult conversionResult;
+		   QCA::PublicKey publicKey = QCA::PublicKey::fromPEM(keyAsString, &conversionResult);
+		   if (! QCA::ConvertGood == conversionResult) {
+		       std::cout << "Public key read failed" << std::endl;
+		   }
+		   \endcode
+
+		   \param s the string containing a PEM encoded key
+		   \param result pointer to a variable, which returns whether the conversion succeeded (ConvertGood) or not
+		   \param provider the name of the provider to use for the import.
+
+		   \sa toPEM, which provides an inverse of fromPEM()
+		   \sa fromPEMFile, which provides an import direct from a file.
+		*/
 		static PublicKey fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import a key in Privacy Enhanced Mail (PEM) format from a file
+
+		   This function takes the name of a file, which is assumed to contain a public key
+		   in PEM encoding, and returns that key. Unless you don't care whether the import
+		   succeeded, you should test the result, as shown below.
+
+		   \code
+		   QCA::ConvertResult conversionResult;
+		   QCA::PublicKey publicKey = QCA::PublicKey::fromPEMFile(fileName, &conversionResult);
+		   if (! QCA::ConvertGood == conversionResult) {
+		       std::cout << "Public key read failed" << std::endl;
+		   }
+		   \endcode
+
+		   \param fileName a string containing the name of the file
+		   \param result pointer to a variable, which returns whether the conversion succeeded (ConvertGood) or not
+		   \param provider the name of the provider to use for the import.
+
+		   \sa toPEMFile, which provides an inverse of fromPEMFile()
+		   \sa fromPEM, which provides an import from a string
+		*/
 		static PublicKey fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 	protected:
