@@ -33,6 +33,7 @@ class QTextStream;
 // Direct secure memory access.  For interfacing with C libraries if needed.
 QCA_EXPORT void *qca_secure_alloc(int bytes);
 QCA_EXPORT void qca_secure_free(void *p);
+QCA_EXPORT void *qca_secure_realloc(void *p, int bytes);
 
 /**
  \class QSecureArray qca_tools.h QtCrypto

@@ -126,6 +126,32 @@ void qca_secure_free(void *p)
 	QCA::botan_secure_free(c, bytes);
 }
 
+void *qca_secure_realloc(void *p, int bytes)
+{
+	// if null, do a plain alloc (just like how realloc() works)
+	if(!p)
+		return qca_secure_alloc(bytes);
+
+	// backtrack to read the size value
+	char *c = (char *)p;
+	c -= sizeof(int);
+	int oldsize = ((int *)c)[0] - sizeof(int);
+
+	// alloc the new chunk
+	char *new_p = (char *)qca_secure_alloc(bytes);
+	if(!new_p)
+		return 0;
+
+	// move over the memory from the original block
+	memmove(new_p, p, oldsize);
+
+	// free the original
+	qca_secure_free(p);
+
+	// done
+	return new_p;
+}
+
 using namespace QCA;
 
 //----------------------------------------------------------------------------
