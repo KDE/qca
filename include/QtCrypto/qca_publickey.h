@@ -42,7 +42,7 @@ namespace QCA
 	*/
 	enum EncryptionAlgorithm
 	{
-		EME_PKCS1v15,  ///< Block type 2 (PKCD1, Version 1.5)
+		EME_PKCS1v15,  ///< Block type 2 (PKCS1, Version 1.5)
 		EME_PKCS1_OAEP ///< Optimal asymmetric encryption padding (PKCS1, Version 2.0)
 	};
 
@@ -82,12 +82,18 @@ namespace QCA
 		PBES2_AES256_SHA1     ///< PKCS#5 v2.0 AES-256/CBC,SHA1
 	};
 
+	/**
+	   Return value from a format conversion
+
+	   Note that if you are checking for any result other than ConvertGood,
+	   then you may be introducing a provider specific dependency.
+	*/
 	enum ConvertResult
 	{
-		ConvertGood,
-		ErrorDecode,
-		ErrorPassphrase,
-		ErrorFile
+		ConvertGood,      ///< Conversion succeeded, results should be valid
+		ErrorDecode,      ///< General failure in the decode stage
+		ErrorPassphrase,  ///< Failure because of incorrect pass phrase
+		ErrorFile         ///< Failure because of incorrect file
 	};
 
 	enum DLGroupSet
@@ -126,10 +132,21 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   General superclass for public (PublicKey) and private (PrivateKey) keys
+	   used with asymmetric encryption techniques.
+	*/
 	class QCA_EXPORT PKey : public Algorithm
 	{
 	public:
-		enum Type { RSA, DSA, DH };
+		/**
+		   Types of public key cryptography keys supported by QCA
+		*/
+		enum Type { 
+			RSA, ///< RSA key
+			DSA, ///< DSA key
+			DH   ///< Diffie Hellman key
+		};
 
 		PKey();
 		PKey(const PKey &from);
@@ -140,15 +157,48 @@ namespace QCA
 		static QList<Type> supportedTypes(const QString &provider = QString());
 		static QList<Type> supportedIOTypes(const QString &provider = QString());
 
+		/**
+		   Test if the key is null (empty)
+
+		   \return true if the key is null
+		*/
 		bool isNull() const;
+
+		/**
+		   Report the Type of key (eg RSA, DSA or Diffie Hellman)
+		   
+		   \sa isRSA, isDSA and isDH for boolean tests.
+		*/
 		Type type() const;
+
+		/**
+		   Report the number of bits in the key
+		*/
 		int bitSize() const;
 
+		/**
+		   Test if the key is an RSA key
+		*/
 		bool isRSA() const;
+
+		/**
+		   Test if the key is a DSA key
+		*/
 		bool isDSA() const;
+
+		/**
+		   Test if the key is a Diffie Hellman key
+		*/
 		bool isDH() const;
 
-		bool isPublic() const;
+		/**
+		   Test if the key is a public key
+		*/
+		bool isPublic() const;	
+
+		/**
+		   Test if the key is a private key
+		*/
 		bool isPrivate() const;
 
 		bool canKeyAgree() const;
@@ -178,6 +228,9 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   Generic public key
+	*/
 	class QCA_EXPORT PublicKey : public PKey
 	{
 	public:
@@ -212,6 +265,9 @@ namespace QCA
 		PublicKey(const QString &type, const QString &provider);
 	};
 
+	/**
+	   Generic private key
+	*/
 	class QCA_EXPORT PrivateKey : public PKey
 	{
 	public:
@@ -246,6 +302,11 @@ namespace QCA
 		PrivateKey(const QString &type, const QString &provider);
 	};
 
+	/**
+	   Class for generating asymmetric key pairs
+
+	   This class is used for generating asymmetric keys (public/private key pairs)
+	*/
 	class QCA_EXPORT KeyGenerator : public QObject
 	{
 		Q_OBJECT
@@ -275,6 +336,9 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   RSA Public Key
+	*/
 	class QCA_EXPORT RSAPublicKey : public PublicKey
 	{
 	public:
@@ -286,6 +350,9 @@ namespace QCA
 		QBigInteger e() const;
 	};
 
+	/**
+	   RSA Private Key
+	*/
 	class QCA_EXPORT RSAPrivateKey : public PrivateKey
 	{
 	public:
@@ -299,6 +366,9 @@ namespace QCA
 		QBigInteger d() const;
 	};
 
+	/**
+	   Digital Signature Algorithm Public Key
+	*/
 	class QCA_EXPORT DSAPublicKey : public PublicKey
 	{
 	public:
@@ -310,6 +380,9 @@ namespace QCA
 		QBigInteger y() const;
 	};
 
+	/**
+	   Digital Signature Algorithm Private Key
+	*/
 	class QCA_EXPORT DSAPrivateKey : public PrivateKey
 	{
 	public:
@@ -321,6 +394,9 @@ namespace QCA
 		QBigInteger x() const;
 	};
 
+	/**
+	   Diffie-Hellman Public Key
+	*/
 	class QCA_EXPORT DHPublicKey : public PublicKey
 	{
 	public:
@@ -332,6 +408,9 @@ namespace QCA
 		QBigInteger y() const;
 	};
 
+	/**
+	   Diffie-Hellman Private Key
+	*/
 	class QCA_EXPORT DHPrivateKey : public PrivateKey
 	{
 	public:
