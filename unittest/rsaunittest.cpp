@@ -48,7 +48,7 @@ void RSAUnitTest::allTests()
 	CHECK( keygen.blocking(), true );
 
 	QList<int> keySizes;
-	keySizes << 512 << 1024 << 768;
+	keySizes << 512 << 1024 << 768 << 2048;
 	foreach( int keysize, keySizes ) {
 	    QCA::PrivateKey rsaKey = keygen.createRSA(keysize);
 	    CHECK( rsaKey.isNull(), false );
@@ -102,9 +102,24 @@ void RSAUnitTest::allTests()
 	    CHECK( fromDERkey.isDH(), false );
 	    CHECK( fromDERkey.isPrivate(), true );
 	    CHECK( fromDERkey.isPublic(), false );
-#if 0
 	    CHECK( rsaKey == fromDERkey, true );
-#endif
+
+	    QCA::PublicKey pubKey = rsaKey.toPublicKey();
+	    CHECK( pubKey.isNull(), false );
+	    CHECK( pubKey.isRSA(), true );
+	    CHECK( pubKey.isDSA(), false );
+	    CHECK( pubKey.isDH(), false );
+	    CHECK( pubKey.isPrivate(), false );
+	    CHECK( pubKey.isPublic(), true );
+
+	    QCA::RSAPublicKey RSApubKey = pubKey.toRSA();
+	    CHECK( RSApubKey.e(), QBigInteger(65537) );
+	    CHECK( RSApubKey.isNull(), false );
+	    CHECK( RSApubKey.isRSA(), true );
+	    CHECK( RSApubKey.isDSA(), false );
+	    CHECK( RSApubKey.isDH(), false );
+	    CHECK( RSApubKey.isPrivate(), false );
+	    CHECK( RSApubKey.isPublic(), true );
 	}
     }
 }
