@@ -26,8 +26,8 @@
 
 int main(int argc, char **argv)
 {
-    // the Initializer object sets things up, and 
-    // also does cleanup when it goes out of scope
+    // The Initializer object sets things up, and also
+    // does cleanup when it goes out of scope
     QCA::Initializer init;
     
     QCoreApplication app(argc, argv);
@@ -46,6 +46,7 @@ int main(int argc, char **argv)
 	    std::cout << "Failed to make private RSA key" << std::endl;
 	    return 1;
 	}
+
 	QCA::PublicKey pubkey = seckey.toPublicKey();
 
 	// check if the key can encrypt
@@ -69,8 +70,8 @@ int main(int argc, char **argv)
 	std::cout << qPrintable(rstr) << "\"" << std::endl;
 
 	// save the private key - in a real example, make sure this goes
-	// somewhere secure! 
-	// you can use the same technique with the public key too.
+	// somewhere secure.
+	// You can use the same technique with the public key too.
 	QSecureArray passPhrase = "pass phrase";
 	seckey.toPEMFile("keyprivate.pem", passPhrase);
 
@@ -92,22 +93,6 @@ int main(int argc, char **argv)
 	// output the resulting decrypted string
 	std::cout << "\"" << qPrintable(rstr) << "\" decrypted with RSA is \"";
 	std::cout << decrypt.data() << "\"" << std::endl;
-
-
-
-
-
-
-
-
-#if 0
-	QCA::RSAKey pubkey = readKeyFile("keypublic.der");
-	if(pubkey.isNull())
-	    return 1;
-	QCA::RSAKey seckey = readKeyFile("keyprivate.der");
-	if(seckey.isNull())
-	    return 1;
-#endif
 
     }
 
