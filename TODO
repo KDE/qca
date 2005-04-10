@@ -2,7 +2,6 @@
 * Update to latest Botan, and remake the botantools patch as appropriate
 
 * API documentation
-  update cipher docs according to new args/ordering
   clean up Algorithm
   clean up Filter
   add QCA::systemStore() and haveSystemStore()
@@ -43,15 +42,17 @@
 
 * examples
   create example for BigInteger
-  update cipher example (after API sorted out)
   add systemStore() example
+  fix Cert example
+  fix SASL examples (client and server)
+  fix SSL example
 
 * write plugin support
   qca-tls: do something about the cert check lag.  maybe a thread?
   qca-botan: implement
   qca-egads (or qca-egd): implement for Random support
-  qca-openssl: need to implement locking callbacks.
   figure out why Valgrind reports so many memory leaks
+  qca-gcrypt: figure out why the secure memory plugin crashes
 
 * possibilities for the future:
   Key wrapping - RFC3217 and RFC3394
