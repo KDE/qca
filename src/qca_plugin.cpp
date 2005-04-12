@@ -70,7 +70,7 @@ public:
 		return i;
 	}
 
-	static ProviderItem *fromClass(QCA::Provider *p)
+	static ProviderItem *fromClass(Provider *p)
 	{
 		ProviderItem *i = new ProviderItem(0, p);
 		return i;
@@ -94,7 +94,7 @@ private:
 	QPluginLoader *lib;
 	bool init_done;
 
-	ProviderItem(QPluginLoader *_lib, QCA::Provider *_p)
+	ProviderItem(QPluginLoader *_lib, Provider *_p)
 	{
 		lib = _lib;
 		p = _p;
@@ -169,7 +169,7 @@ void ProviderManager::scan()
 	}
 }
 
-bool ProviderManager::add(QCA::Provider *p, int priority)
+bool ProviderManager::add(Provider *p, int priority)
 {
 	if(haveAlready(p->name()))
 		return false;
@@ -201,7 +201,7 @@ void ProviderManager::unloadAll()
 	providerList.clear();
 }
 
-void ProviderManager::setDefault(QCA::Provider *p)
+void ProviderManager::setDefault(Provider *p)
 {
 	if(def)
 		delete def;
@@ -210,7 +210,24 @@ void ProviderManager::setDefault(QCA::Provider *p)
 		def->init();
 }
 
-QCA::Provider *ProviderManager::find(const QString &name) const
+Provider *ProviderManager::find(Provider *p) const
+{
+	if(p == def)
+		return def;
+
+	for(int n = 0; n < providerItemList.count(); ++n)
+	{
+		ProviderItem *i = providerItemList[n];
+		if(i->p && i->p == p)
+		{
+			i->ensureInit();
+			return i->p;
+		}
+	}
+	return 0;
+}
+
+Provider *ProviderManager::find(const QString &name) const
 {
 	if(def && name == def->name())
 		return def;
@@ -227,7 +244,7 @@ QCA::Provider *ProviderManager::find(const QString &name) const
 	return 0;
 }
 
-QCA::Provider *ProviderManager::findFor(const QString &name, const QString &type) const
+Provider *ProviderManager::findFor(const QString &name, const QString &type) const
 {
 	if(name.isEmpty())
 	{

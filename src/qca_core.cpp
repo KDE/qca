@@ -365,6 +365,17 @@ Provider::Context *getContext(const QString &type, const QString &provider)
 	return p->createContext(type);
 }
 
+Provider::Context *getContext(const QString &type, Provider *p)
+{
+	init();
+
+	Provider *_p = global->manager.find(p);
+	if(!_p)
+		return 0;
+
+	return _p->createContext(type);
+}
+
 //----------------------------------------------------------------------------
 // Initializer
 //----------------------------------------------------------------------------

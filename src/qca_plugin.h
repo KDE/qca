@@ -37,12 +37,13 @@ namespace QCA
 		~ProviderManager();
 
 		void scan();
-		bool add(QCA::Provider *p, int priority);
+		bool add(Provider *p, int priority);
 		void unload(const QString &name);
 		void unloadAll();
-		void setDefault(QCA::Provider *p);
-		QCA::Provider *find(const QString &name) const;
-		QCA::Provider *findFor(const QString &name, const QString &type) const;
+		void setDefault(Provider *p);
+		Provider *find(Provider *p) const;
+		Provider *find(const QString &name) const;
+		Provider *findFor(const QString &name, const QString &type) const;
 		void changePriority(const QString &name, int priority);
 		int getPriority(const QString &name);
 		QStringList allFeatures() const;
@@ -52,8 +53,8 @@ namespace QCA
 
 	private:
 		QList<ProviderItem*> providerItemList;
-		QCA::ProviderList providerList;
-		QCA::Provider *def;
+		ProviderList providerList;
+		Provider *def;
 		bool scanned_static;
 		void addItem(ProviderItem *i, int priority);
 		bool haveAlready(const QString &name) const;
