@@ -2443,8 +2443,8 @@ public:
 
 	virtual QSecureArray privateToDER(const QSecureArray &passphrase, QCA::PBEAlgorithm pbe) const
 	{
-		if(pbe == QCA::PBEDefault)
-			pbe = QCA::PBES2_TripleDES_SHA1;
+		//if(pbe == QCA::PBEDefault)
+		//	pbe = QCA::PBES2_TripleDES_SHA1;
 
 		const EVP_CIPHER *cipher = 0;
 		if(pbe == QCA::PBES2_TripleDES_SHA1)
@@ -2472,8 +2472,8 @@ public:
 
 	virtual QString privateToPEM(const QSecureArray &passphrase, QCA::PBEAlgorithm pbe) const
 	{
-		if(pbe == QCA::PBEDefault)
-			pbe = QCA::PBES2_TripleDES_SHA1;
+		//if(pbe == QCA::PBEDefault)
+		//	pbe = QCA::PBES2_TripleDES_SHA1;
 
 		const EVP_CIPHER *cipher = 0;
 		if(pbe == QCA::PBES2_TripleDES_SHA1)
