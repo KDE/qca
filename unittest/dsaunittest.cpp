@@ -41,7 +41,7 @@ void DSAUnitTest::allTests()
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
-        printf("DSA not supported!\n");
+        SKIP("DSA not supported");
     else {
 	QCA::KeyGenerator keygen;
 	CHECK( keygen.isBusy(), false );

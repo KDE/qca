@@ -41,7 +41,7 @@ void RSAUnitTest::allTests()
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
-        printf("RSA not supported!\n");
+        SKIP("RSA not supported!");
     else {
 	QCA::KeyGenerator keygen;
 	CHECK( keygen.isBusy(), false );
