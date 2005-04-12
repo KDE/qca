@@ -88,6 +88,64 @@ protected:
     int m_hashAlgorithm;
 };	
 
+class gcryHMACContext : public QCA::MACContext
+{
+public:
+    gcryHMACContext(int hashAlgorithm, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    {
+        m_hashAlgorithm = hashAlgorithm;
+        err =  gcry_md_open( &context, m_hashAlgorithm, GCRY_MD_FLAG_HMAC );
+        if ( GPG_ERR_NO_ERROR != err ) {
+            std::cout << "Failure: " ;
+            std::cout << gcry_strsource(err) << "/";
+            std::cout << gcry_strerror(err) << std::endl;
+        }
+    }
+
+    ~gcryHMACContext()
+    {
+        gcry_md_close( context );
+    }
+
+    void setup(const QCA::SymmetricKey &key)
+    {
+        gcry_md_setkey( context, key.data(), key.size() );
+    }
+
+    Context *clone() const
+    {
+        return new gcryHMACContext(*this);
+    }
+
+    void clear()
+    {
+        gcry_md_reset( context );
+    }
+
+    QCA::KeyLength keyLength() const
+    {
+        return anyKeyLength();
+    }
+
+    void update(const QSecureArray &a)
+    {
+        gcry_md_write( context, a.data(), a.size() );
+    }
+
+    void final( QSecureArray *out)
+    {
+        out->resize( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
+        unsigned char *md;
+        md = gcry_md_read( context, m_hashAlgorithm );
+        memcpy( out->data(), md, out->size() );
+    }
+
+protected:
+    gcry_md_hd_t context;
+    gcry_error_t err;
+    int m_hashAlgorithm;
+};
+
 
 class gcryCipherContext : public QCA::CipherContext
 {
@@ -303,7 +361,7 @@ protected:
 
 }
 
-// #define I_WANT_TO_CRASH 1
+#define I_WANT_TO_CRASH 1
 #ifdef I_WANT_TO_CRASH
 static void * qca_func_malloc(size_t n)
 {
@@ -317,24 +375,7 @@ static void * qca_func_secure_malloc(size_t n)
 
 static void * qca_func_realloc(void *oldBlock, size_t newBlockSize)
 {
-    std::cout << "re-alloc: " << newBlockSize << std::endl;
-    if (oldBlock == NULL) {
-	return qca_secure_alloc(newBlockSize);
-    }
-
-    // backtrack to read the size value
-    char *c = (char *)oldBlock;
-    c -= sizeof(int);
-    size_t oldBlockSize = ((size_t *)c)[0];
-
-    char *newBlock = (char *)qca_secure_alloc(newBlockSize);
-    if (newBlockSize < oldBlockSize) {
-	memcpy(newBlock, oldBlock, newBlockSize);
-    } else { // oldBlock is smaller
-	memcpy(newBlock, oldBlock, oldBlockSize);
-    }
-    qca_secure_free(oldBlock);
-    return newBlock;
+    return qca_secure_realloc(oldBlock, newBlockSize);
 };
 
 static void qca_func_free(void *mem)
@@ -388,6 +429,9 @@ public:
 	list += "sha256";
 	list += "sha384";
 	list += "sha512";
+	list += "hmac(md5)";
+	list += "hmac(sha1)";
+	list += "hmac(ripemd160)";
 	list += "aes128-ecb";
 	list += "aes128-cfb";
 	list += "aes128-cbc";
@@ -426,6 +470,12 @@ public:
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA384, this, type );
 	else if ( type == "sha512" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA512, this, type );
+	else if ( type == "hmac(md5)" )
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_MD5, this, type );
+	else if ( type == "hmac(sha1)" )
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA1,this, type );
+	else if ( type == "hmac(ripemd160)" )
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_RMD160, this, type );
 	else if ( type == "aes128-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes128-cfb" )
