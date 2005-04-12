@@ -175,13 +175,13 @@ static QCA::Constraints find_constraints(const QCA::PKeyContext &key, const QCA:
 {
 	QCA::Constraints constraints;
 
-	if(key.type() == QCA::PKey::RSA)
+	if(key.key()->type() == QCA::PKey::RSA)
 		constraints += QCA::KeyEncipherment;
 
-	if(key.type() == QCA::PKey::DH)
+	if(key.key()->type() == QCA::PKey::DH)
 		constraints += QCA::KeyAgreement;
 
-	if(key.type() == QCA::PKey::RSA || key.type() == QCA::PKey::DSA)
+	if(key.key()->type() == QCA::PKey::RSA || key.key()->type() == QCA::PKey::DSA)
 	{
 		constraints += QCA::DigitalSignature;
 		constraints += QCA::NonRepudiation;
@@ -1507,9 +1507,19 @@ public:
 		return (evp.pkey ? false: true);
 	}
 
+	virtual QCA::PKey::Type type() const
+	{
+		return QCA::PKey::RSA;
+	}
+
 	virtual bool isPrivate() const
 	{
 		return sec;
+	}
+
+	virtual bool canExport() const
+	{
+		return true;
 	}
 
 	virtual void convertToPublic()
@@ -1826,9 +1836,19 @@ public:
 		return (evp.pkey ? false: true);
 	}
 
+	virtual QCA::PKey::Type type() const
+	{
+		return QCA::PKey::DSA;
+	}
+
 	virtual bool isPrivate() const
 	{
 		return sec;
+	}
+
+	virtual bool canExport() const
+	{
+		return true;
 	}
 
 	virtual void convertToPublic()
@@ -2083,9 +2103,19 @@ public:
 		return (evp.pkey ? false: true);
 	}
 
+	virtual QCA::PKey::Type type() const
+	{
+		return QCA::PKey::DH;
+	}
+
 	virtual bool isPrivate() const
 	{
 		return sec;
+	}
+
+	virtual bool canExport() const
+	{
+		return true;
 	}
 
 	virtual void convertToPublic()
@@ -2279,25 +2309,21 @@ public:
 		return k;
 	}
 
-	virtual QCA::PKey::Type type() const
-	{
-		QString str = k->type();
-		if(str == "rsa")
-			return QCA::PKey::RSA;
-		else if(str == "dsa")
-			return QCA::PKey::DSA;
-		else
-			return QCA::PKey::DH;
-	}
-
 	virtual void setKey(QCA::PKeyBase *key)
 	{
 		k = key;
 	}
 
+	virtual bool importKey(const QCA::PKeyBase *key)
+	{
+		Q_UNUSED(key);
+		printf("import key\n");
+		return false;
+	}
+
 	EVP_PKEY *get_pkey() const
 	{
-		QCA::PKey::Type t = type();
+		QCA::PKey::Type t = k->type();
 		if(t == QCA::PKey::RSA)
 			return static_cast<RSAKey *>(k)->evp.pkey;
 		else if(t == QCA::PKey::DSA)
@@ -3657,6 +3683,7 @@ class opensslProvider : public QCA::Provider
 public:
 	void init()
 	{
+		printf("init\n");
 		OpenSSL_add_all_algorithms();
 		ERR_load_crypto_strings();
 

@@ -19,8 +19,7 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
-  dlgroup: make it a provider object? (for smartcards)
-  symmetrickey: make it a provider object? (for smartcards)
+  ability to set arbitrary properties in a provider (string+variant pairs?)
   finish qcaprovider.h
 
 * build system:

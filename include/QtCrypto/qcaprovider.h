@@ -137,7 +137,9 @@ class PKeyBase : public QObject, public Provider::Context
 public:
 	PKeyBase(Provider *p, const QString &type) : Provider::Context(p, type) {}
 	virtual bool isNull() const = 0;
+	virtual PKey::Type type() const = 0;
 	virtual bool isPrivate() const = 0;
+	virtual bool canExport() const = 0;
 	virtual void convertToPublic() = 0;
 	virtual int bits() const = 0;
 
@@ -212,8 +214,8 @@ public:
 
 	virtual PKeyBase *key() = 0;
 	virtual const PKeyBase *key() const = 0;
-	virtual PKey::Type type() const = 0;
 	virtual void setKey(PKeyBase *key) = 0;
+	virtual bool importKey(const PKeyBase *key) = 0;
 
 	// import / export
 	virtual QSecureArray publicToDER() const = 0;

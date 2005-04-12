@@ -247,6 +247,12 @@ namespace QCA
 		bool isPrivate() const;
 
 		/**
+		   Test if the key data can be exported.  If the key resides on a smart
+		   card or other such device, this will likely return false.
+		*/
+		bool canExport() const;
+
+		/**
 		   Test if the key can be used for key agreement
 		*/
 		bool canKeyAgree() const;
@@ -519,7 +525,7 @@ namespace QCA
 		   analysis.
 		   
 		   \param bits the length of key that is required
-		   \param exp the exponent - typicall 3, 17 or 65537
+		   \param exp the exponent - typically 3, 17 or 65537
 		   \param provider the name of the provider to use
 		*/
 		PrivateKey createRSA(int bits, int exp = 65537, const QString &provider = QString());
