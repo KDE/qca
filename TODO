@@ -51,7 +51,6 @@
   qca-botan: implement
   qca-egads (or qca-egd): implement for Random support
   figure out why Valgrind reports so many memory leaks
-  qca-gcrypt: figure out why the secure memory plugin crashes
 
 * possibilities for the future:
   Key wrapping - RFC3217 and RFC3394
