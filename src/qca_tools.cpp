@@ -113,7 +113,7 @@ void *qca_secure_alloc(int bytes)
 {
 	// allocate enough room to store a size value in front, return a pointer after it
 	char *c = (char *)QCA::botan_secure_alloc(bytes + sizeof(int));
-	((int *)c)[0] = bytes;
+	((int *)c)[0] = bytes + sizeof(int);
 	return c + sizeof(int);
 }
 
