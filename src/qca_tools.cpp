@@ -143,7 +143,7 @@ void *qca_secure_realloc(void *p, int bytes)
 		return 0;
 
 	// move over the memory from the original block
-	memmove(new_p, p, oldsize);
+	memmove(new_p, p, qMin(oldsize, bytes));
 
 	// free the original
 	qca_secure_free(p);
