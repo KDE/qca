@@ -1486,7 +1486,7 @@ void CipherUnitTest::blowfishTests()
 
 void CipherUnitTest::allTests()
 {
-    QCA::Initializer init;
+    QCA::Initializer init(QCA::Practical, 128);
 
     aes128Tests();
     aes192Tests();
