@@ -361,8 +361,6 @@ protected:
 
 }
 
-#define I_WANT_TO_CRASH 1
-#ifdef I_WANT_TO_CRASH
 static void * qca_func_malloc(size_t n)
 {
     return qca_secure_alloc(n);
@@ -387,7 +385,6 @@ int qca_func_secure_check (const void *)
 {
     return (int)QCA::haveSecureMemory();
 };
-#endif
 
 class gcryptProvider : public QCA::Provider
 {
@@ -402,14 +399,11 @@ public:
 		std::cout << "libgcrypt is too old (need " << GCRYPT_VERSION;
 		std::cout << ", have " << gcry_check_version(NULL) << ")" << std::endl;
 	    }
-	    #ifdef I_WANT_TO_CRASH
 	    gcry_set_allocation_handler (qca_func_malloc,
 					 qca_func_secure_malloc,
 					 qca_func_secure_check,
 					 qca_func_realloc,
 					 qca_func_free);
-	    #endif
-	    gcry_control (GCRYCTL_INIT_SECMEM, 16384, 0);
 	    gcry_control (GCRYCTL_INITIALIZATION_FINISHED);
 	}
     }
