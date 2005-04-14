@@ -51,6 +51,7 @@
   qca-botan: implement
   qca-egads (or qca-egd): implement for Random support
   figure out why Valgrind reports so many memory leaks
+  qca-gnupg: NEED_PASSPHRASE_PIN, BAD_PASSPHRASE_PIN, etc
 
 * possibilities for the future:
   Key wrapping - RFC3217 and RFC3394
