@@ -327,7 +327,7 @@ static QByteArray ipaddress_string_to_bytes(const QString &)
 
 static GENERAL_NAME *new_general_name(QCA::CertificateInfoType t, const QString &val)
 {
-	GENERAL_NAME *name;
+	GENERAL_NAME *name = 0;
 	switch(t)
 	{
 		case QCA::Email:

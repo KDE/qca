@@ -823,7 +823,7 @@ QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgorithm pbe)
 	}
 	else
 	{
-		PKeyContext *pk = static_cast<const PKeyContext *>(getContext("pkey", p));
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
 		if(pk->importKey(cur->key()))
 			out = pk->privateToDER(passphrase, pbe);
 		delete pk;
@@ -848,7 +848,7 @@ QString PrivateKey::toPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) cons
 	}
 	else
 	{
-		PKeyContext *pk = static_cast<const PKeyContext *>(getContext("pkey", p));
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
 		if(pk->importKey(cur->key()))
 			out = pk->privateToPEM(passphrase, pbe);
 		delete pk;

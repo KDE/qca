@@ -1,7 +1,7 @@
 # qca qmake profile
 
 TEMPLATE = lib
-CONFIG  += release
+#CONFIG  += release
 QT      -= gui
 TARGET   = qca
 
@@ -64,7 +64,7 @@ win: {
 }
 mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_mac.cpp
-	QMAKE_LFLAGS += -framework Carbon
+	LIBS += -framework Carbon -framework Security
 }
 
 include(conf.pri)

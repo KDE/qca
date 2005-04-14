@@ -59,7 +59,7 @@ CertificateCollection qca_get_systemstore(const QString &provider)
 		if(!pc)
 			break;
 		int size = pc->cbCertEncoded;
-		QByteArray der(size);
+		QByteArray der(size, 0);
 		memcpy(der.data(), pc->pbCertEncoded, size);
 
 		Certificate cert = Certificate::fromDER(der, 0, provider);

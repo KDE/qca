@@ -20,9 +20,9 @@
 
 #include "qca_systemstore.h"
 
-#include "Carbon.h"
-#include "Security/SecTrust.h"
-#include "Security/SecCertificate.h"
+#include <Carbon/Carbon.h>
+#include <Security/SecTrust.h>
+#include <Security/SecCertificate.h>
 
 namespace QCA {
 
@@ -42,7 +42,7 @@ CertificateCollection qca_get_systemstore(const QString &provider)
 		SecCertificateRef cr = (SecCertificateRef)CFArrayGetValueAtIndex(anchors, n);
 		CSSM_DATA cssm;
 		SecCertificateGetData(cr, &cssm);
-		QByteArray der(cssm.Length);
+		QByteArray der(cssm.Length, 0);
 		memcpy(der.data(), cssm.Data, cssm.Length);
 
 		Certificate cert = Certificate::fromDER(der, 0, provider);

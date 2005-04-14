@@ -193,7 +193,7 @@ bool KeyStore::removeEntry(const QString &id)
 
 void KeyStore::submitPassphrase(const QSecureArray &passphrase)
 {
-	static_cast<const KeyStoreContext *>(context())->submitPassphrase(passphrase);
+	static_cast<KeyStoreContext *>(context())->submitPassphrase(passphrase);
 }
 
 //----------------------------------------------------------------------------
