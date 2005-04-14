@@ -268,6 +268,22 @@ void unloadAllPlugins()
 	global->manager.unloadAll();
 }
 
+void setProperty(const QString &name, const QVariant &value)
+{
+	QMutexLocker lock(&global->manager_mutex);
+
+	Q_UNUSED(name);
+	Q_UNUSED(value);
+}
+
+QVariant getProperty(const QString &name)
+{
+	QMutexLocker lock(&global->manager_mutex);
+
+	Q_UNUSED(name);
+	return QVariant();
+}
+
 Random & globalRNG()
 {
 	if(!global->rng)

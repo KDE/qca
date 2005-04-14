@@ -314,6 +314,16 @@ namespace QCA
 	QCA_EXPORT void unloadAllPlugins();
 
 	/**
+	 * Set a global property
+	 */
+	QCA_EXPORT void setProperty(const QString &name, const QVariant &value);
+
+	/**
+	 * Retrieve a global property
+	 */
+	QCA_EXPORT QVariant getProperty(const QString &name);
+
+	/**
 	 * Return the Random provider that is currently set to be the
 	 * global random number generator.
 	 *

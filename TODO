@@ -19,7 +19,6 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish API:
-  ability to set arbitrary properties in a provider (string+variant pairs?)
   finish qcaprovider.h
 
 * build system:
@@ -30,6 +29,7 @@
   create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
+  core: properties
   cert: rfc 2818 hostname validation
   keystore
   tls
