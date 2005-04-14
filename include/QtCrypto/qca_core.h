@@ -169,14 +169,14 @@ namespace QCA
 	 * are present.
 	 *
 	 */
-	QCA_EXPORT bool isSupported(const char *features);
+	QCA_EXPORT bool isSupported(const char *features, const QString &provider = QString());
 
 	/**
 	 * \overload
 	 *
 	 * \param features a list of features to test for
 	 */
-	QCA_EXPORT bool isSupported(const QStringList &features);
+	QCA_EXPORT bool isSupported(const QStringList &features, const QString &provider = QString());
 
 	/**
 	 * Generate a list of all the supported features in plugins,
@@ -292,6 +292,11 @@ namespace QCA
 	 * \sa ProviderListIterator
 	 */
 	QCA_EXPORT ProviderList providers();
+
+	/**
+	 * Return the named provider, or 0 if not found
+	 */
+	QCA_EXPORT Provider *findProvider(const QString &name);
 
 	/**
 	 * Return the default provider

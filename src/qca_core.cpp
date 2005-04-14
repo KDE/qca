@@ -131,28 +131,45 @@ bool haveSecureMemory()
 	return global->secmem;
 }
 
-bool isSupported(const QStringList &features)
+bool isSupported(const QStringList &features, const QString &provider)
 {
 	if(!global)
 		return false;
 
 	QMutexLocker lock(&global->manager_mutex);
 
-	if(features_have(global->manager.allFeatures(), features))
-		return true;
+	// single
+	if(!provider.isEmpty())
+	{
+		Provider *p = global->manager.find(provider);
+		if(!p)
+		{
+			// ok, try scanning for new stuff
+			global->manager.scan();
+			p = global->manager.find(provider);
+		}
 
-	// ok, try scanning for new stuff
-	global->manager.scan();
+		if(p && features_have(p->features(), features))
+			return true;
+	}
+	// all
+	else
+	{
+		if(features_have(global->manager.allFeatures(), features))
+			return true;
 
-	if(features_have(global->manager.allFeatures(), features))
-		return true;
+		// ok, try scanning for new stuff
+		global->manager.scan();
 
+		if(features_have(global->manager.allFeatures(), features))
+			return true;
+	}
 	return false;
 }
 
-bool isSupported(const char *features)
+bool isSupported(const char *features, const QString &provider)
 {
-	return isSupported(QString(features).split(',', QString::SkipEmptyParts));
+	return isSupported(QString(features).split(',', QString::SkipEmptyParts), provider);
 }
 
 QStringList supportedFeatures()
@@ -213,8 +230,17 @@ ProviderList providers()
 	return global->manager.providers();
 }
 
+Provider *findProvider(const QString &name)
+{
+	QMutexLocker lock(&global->manager_mutex);
+
+	return global->manager.find(name);
+}
+
 Provider *defaultProvider()
 {
+	QMutexLocker lock(&global->manager_mutex);
+
 	return global->manager.find("default");
 }
 
