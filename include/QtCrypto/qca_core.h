@@ -157,7 +157,9 @@ namespace QCA
 	 * \endcode
 	 * 
 	 * \param features the name of the capability to test for
-	 *
+	 * \param provider if specified, only check for the capability in that 
+	          specific provider. If not provided, or provided as an empty
+		  string, then check for capabilities in all available providers
 	 * \return true if the capability is available, otherwise false
 	 *
 	 * Note that you can test for a combination of capabilities,
@@ -172,10 +174,13 @@ namespace QCA
 	QCA_EXPORT bool isSupported(const char *features, const QString &provider = QString());
 
 	/**
-	 * \overload
-	 *
-	 * \param features a list of features to test for
-	 */
+	   \overload
+	 
+	   \param features a list of features to test for
+	   \param provider if specified, only check for the capability in that 
+	          specific provider. If not provided, or provided as an empty
+		  string, then check for capabilities in all available providers
+	*/
 	QCA_EXPORT bool isSupported(const QStringList &features, const QString &provider = QString());
 
 	/**

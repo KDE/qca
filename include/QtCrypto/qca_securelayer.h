@@ -176,23 +176,50 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   Simple Authentication and Security Layer protocol implementation
+
+	   This class implements the Simple Authenication and Security Layer protocol,
+	   which is described in RFC2222 - see <a href="http://www.ietf.org/rfc/rfc2222.txt">
+	   http://www.ietf.org/rfc/rfc2222.txt</a>.
+
+	   As the name suggests, %SASL provides authentication (eg, a "login" of some form), for
+	   a connection oriented protocol, and can also provide protection for the subsequent
+	   connection.
+
+	   The %SASL protocol is designed to be extensible, through a range of "mechanisms", where
+	   a mechanism is the actual authentication method. Example mechanisms include Anonymous,
+	   LOGIN, Kerberos V4, and GSSAPI. Mechanisms can be added (potentially without restarting
+	   the server application) by the system administrator.
+
+	   It is important to understand that %SASL is neither "network aware" nor "protocol aware".
+	   That means that %SASL does not understand how the client connects to the server, and %SASL
+	   does not understand the actual application protocol.
+	*/
 	class QCA_EXPORT SASL : public SecureLayer, public Algorithm
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Possible errors that may occur when using SASL
+		*/
 		enum Error
 		{
 			ErrAuth, ///< problem during the authentication process
 			ErrCrypt ///< problem at anytime after
 		};
+
+		/**
+		   Possible authentication error states
+		*/
 		enum AuthCondition
 		{
-			NoMech,
+			NoMech,       ///< No compatible/appropriate authetication mechanism
 			BadProto,
 			BadServ,
 			BadAuth,
 			NoAuthzid,
-			TooWeak,
+			TooWeak,      ///< Authentication doesn't match security constraints
 			NeedEncrypt,
 			Expired,
 			Disabled,
@@ -231,7 +258,35 @@ namespace QCA
 		void reset();
 
 		// configuration
+		/**
+		   Specify connection constraints
+
+		   SASL supports a range of authentication requirements, and
+		   a range of security levels. This method allows you to
+		   specify the requirements for your connection.
+
+		   \param f the authentication requirements, which you typically
+		   build using a binary OR function (eg AllowPlain | AllowAnonymous)
+		   \param s the security level of the encryption, if used. See
+		   SecurityLevel for details of what each level provides.
+		*/
 		void setConstraints(AuthFlags f, SecurityLevel s = SL_None);
+
+		/**
+		   \overload
+
+		   Unless you have a specific reason for directly specifying a strength
+		   factor, you probably should use the method above.
+
+		   \param f the authentication requirements, which you typically
+		   build using a binary OR function (eg AllowPlain | AllowAnonymous)
+		   \param minSSF the minimum security strength factor that is required
+		   \param maxSSF the maximum security strength factor that is required
+
+		   \note Security strength factors are a rough approximation to key
+		   length in the encryption function (eg if you are securing with plain
+		   DES, the security strength factor would be 56).
+		*/
 		void setConstraints(AuthFlags f, int minSSF, int maxSSF);
 		void setLocalAddr(const QString &addr, quint16 port);
 		void setRemoteAddr(const QString &addr, quint16 port);
