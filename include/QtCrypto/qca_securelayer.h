@@ -226,6 +226,10 @@ namespace QCA
 			NoUser,
 			RemoteUnavail
 		};
+
+		/**
+		   Authentication requirement flag values
+		*/
 		enum AuthFlags
 		{
 			AllowPlain             = 0x01,
@@ -235,11 +239,19 @@ namespace QCA
 			RequireMutualAuth      = 0x10,
 			RequireAuthzidSupport  = 0x20  // server-only
 		};
+
+		/**
+		   Mode options for client side sending
+		*/
 		enum ClientSendMode
 		{
 			AllowClientSendFirst,
 			DisableClientSendFirst
 		};
+
+		/**
+		   Mode options for server side sending
+		*/
 		enum ServerSendMode
 		{
 			AllowServerSendLast,
@@ -252,6 +264,14 @@ namespace QCA
 			bool user, authzid, pass, realm;
 		};
 
+		/**
+		   Standard constructor
+
+		   \param parent the parent object for this SASL connection
+		   \param provider if specified, the provider to use. If not 
+		   specified, or specified as empty, then any provider is 
+		   acceptable.
+		*/
 		SASL(QObject *parent = 0, const QString &provider = QString());
 		~SASL();
 
@@ -288,36 +308,151 @@ namespace QCA
 		   DES, the security strength factor would be 56).
 		*/
 		void setConstraints(AuthFlags f, int minSSF, int maxSSF);
+
+		/**
+		   Specify the local address.
+		   
+		   \param addr the address of the local part of the connection
+		   \param port the port number of the local part of the connection
+		*/
 		void setLocalAddr(const QString &addr, quint16 port);
+
+		/**
+		   Specify the peer address.
+
+		   \param addr the address of the peer side of the connection
+		   \param port the port number of the peer side of the connection
+		*/
 		void setRemoteAddr(const QString &addr, quint16 port);
+
+		/**
+		   FIXME: Justin to complete
+		   
+		*/
 		void setExternalAuthId(const QString &authid);
-		void setExternalSSF(int);
+
+		/**
+		   Specify a security strength factor for an externally secured connection
+
+		   \param strength the security strength factor of the connection
+		*/
+		void setExternalSSF(int strength);
 
 		// main
-		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode = AllowClientSendFirst);
-		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, ServerSendMode = DisableServerSendLast);
+		/**
+		   Initialise the client side of the connection
+
+		   startClient must be called on the client side of the connection
+
+		   \param service the name of the service
+		   \param host the client side host name
+		   \param mechlist the list of mechanisms which can be used
+		   \param ClientSendMode the mode to use on the client side
+		*/
+		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, enum ClientSendMode = AllowClientSendFirst);
+
+		/**
+		   Initialise the server side of the connection
+
+		   startServer must be called on the server side of the connection.
+
+		   \param service the name of the service
+		   \param host the server side host name
+		   \param realm the realm to use
+		   \param mechlist the list of available mechanisms
+		   \param ServerSendMode which mode to use on the server side
+		*/
+		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, enum ServerSendMode = DisableServerSendLast);
+
+		/**
+		   FIXME: Justin to complete
+		   
+		*/
 		void putStep(const QByteArray &stepData);
+
+		/**
+		   FIXME: Justin to complete
+		   
+		*/
 		void putServerFirstStep(const QString &mech);
+
+		/**
+		   FIXME: Justin to complete
+		   
+		*/
 		void putServerFirstStep(const QString &mech, const QByteArray &clientInit);
+
+		/**
+		   Return the security strength factor of the connection
+		*/
 		int ssf() const;
 		Error errorCode() const;
 		AuthCondition authCondition() const;
 
 		// authentication
+		/**
+		   Specify the username to use in authentication
+
+		   \param user the username to use
+		*/
 		void setUsername(const QString &user);
+
+		/**
+		   Specify the authorisation identity to use in authentication
+
+		   \param auth the authorisation identity to use
+		*/
 		void setAuthzid(const QString &auth);
+
+		/**
+		   Specify the password to use in authentication
+
+		   \param pass the password to use
+		*/
 		void setPassword(const QSecureArray &pass);
+
+		/**
+		   Specify the realm to use in authentication
+
+		   \param realm the realm to use
+		*/
 		void setRealm(const QString &realm);
+
+		/**
+		   FIXME: Justin to complete
+		   
+		*/
 		void continueAfterParams();
+
+		/**
+
 		void continueAfterAuthCheck();
 
 		// reimplemented
+
+		/**
+		   FIXME: Justin to complete
+		   
+		*/
 		virtual bool haveError() const;
+
+		/**
+		   test how many (if any) bytes are available
+		*/
 		virtual int bytesAvailable() const;
+
+		/**
+		   test how many bytes (if any) are available
+		*/
 		virtual int bytesOutgoingAvailable() const;
+
+		/**
+		   Close the current SASL connection
+		*/
 		virtual void close();
 		virtual void write(const QSecureArray &a);
 		virtual QSecureArray read();
+
 		virtual void writeIncoming(const QByteArray &a);
 		virtual QByteArray readOutgoing(int *plainBytes = 0);
 
