@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004  Justin Karneges
- * Copyright (C) 2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,7 @@
 #include <botan/sha256.h>
 #include <botan/sha_64.h>
 #include <botan/rmd160.h>
+#include <botan/hmac.h>
 
 #include <stdlib.h>
 
@@ -388,6 +389,63 @@ private:
     Botan::RIPEMD_160 *hashObj;
 };	
 
+#include <iostream>
+
+class BotanHMACContext : public QCA::MACContext
+{
+public:
+    BotanHMACContext( QString hashName, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    {
+	m_hashObj = new Botan::HMAC(hashName.toStdString());
+	if (0 == m_hashObj) {
+	    std::cout << "null context object" << std::endl;
+	}
+    }
+
+    ~BotanHMACContext()
+    {
+    }
+
+    void setup(const QCA::SymmetricKey &key)
+    {
+	// this often gets called with an empty key, because that is the default
+	// in the QCA MessageAuthenticationCode constructor. Botan doesn't like
+	// that happening.
+	if (key.size() > 0) {
+	    m_hashObj->set_key( (const Botan::byte *)key.data(), key.size() );
+	}
+    }
+
+    Context *clone() const
+    {
+	return new BotanHMACContext(*this);
+    }
+
+    void clear()
+    {
+	m_hashObj->clear();
+    }
+
+    QCA::KeyLength keyLength() const
+    {
+        return anyKeyLength();
+    }
+
+    void update(const QSecureArray &a)
+    {
+	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
+    }
+
+    void final( QSecureArray *out)
+    {
+	out->resize( m_hashObj->OUTPUT_LENGTH );
+	m_hashObj->final( (Botan::byte *)out->data() );
+    }
+
+protected:
+    Botan::HMAC *m_hashObj;
+};
+
 
 class botanProvider : public QCA::Provider
 {
@@ -415,6 +473,12 @@ public:
 	list += "sha384";
 	list += "sha512";
 	list += "ripemd160";
+	list += "hmac(md5)";
+	list += "hmac(sha1)";
+	list += "hmac(sha256)";
+	list += "hmac(sha384)";
+	list += "hmac(sha512)";
+	list += "hmac(ripemd160)";
 	return list;
     }
     
@@ -438,6 +502,18 @@ public:
 	    return new BotanSHA512Context( this );
 	else if ( type == "ripemd160" )
 	    return new BotanRIPEMD160Context( this );
+	else if ( type == "hmac(md5)" )
+	    return new BotanHMACContext( QString("MD5"), this, type );
+	else if ( type == "hmac(sha1)" )
+	    return new BotanHMACContext( QString("SHA-1"), this, type );
+	else if ( type == "hmac(sha256)" )
+	    return new BotanHMACContext( QString("SHA-256"), this, type );
+	else if ( type == "hmac(sha384)" )
+	    return new BotanHMACContext( QString("SHA-384"), this, type );
+	else if ( type == "hmac(sha512)" )
+	    return new BotanHMACContext( QString("SHA-512"), this, type );
+	else if ( type == "hmac(ripemd160)" )
+	    return new BotanHMACContext( QString("RIPEMD-160"), this, type );
 	else
 	    return 0;
     }
