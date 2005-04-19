@@ -425,7 +425,7 @@ namespace QCA
 		void continueAfterParams();
 
 		/**
-
+		*/
 		void continueAfterAuthCheck();
 
 		// reimplemented
