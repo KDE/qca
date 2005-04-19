@@ -211,21 +211,43 @@ namespace QCA
 
 		/**
 		   Possible authentication error states
+
+These don't appear to map:
+#define SASL_FAIL      (-1)  generic failure
+#define SASL_NOMEM     (-2)  memory shortage failure
+#define SASL_BUFOVER   (-3)  overflowed buffer
+#define SASL_NOTDONE   (-6)  can't request info until later in exchange
+#define SASL_BADPARAM  (-7)  invalid parameter supplied
+#define SASL_TRYAGAIN  (-8)  transient failure (e.g., weak key)
+#define SASL_BADMAC    (-9)  integrity check failed
+                             -- client only codes --
+#define SASL_INTERACT   (2)  needs user interaction
+#define SASL_WRONGMECH (-11) mechanism doesn't support requested feature
+#define SASL_NEWSECRET (-12) new secret needed
+                              -- server only codes --
+#define SASL_TRANS     (-17) One time use of a plaintext password will
+                                enable requested mechanism for user
+#define SASL_PWLOCK    (-21) password locked
+#define SASL_NOCHANGE  (-22) requested change was not needed
+#define SASL_BADVERS   (-23) version mismatch with plug-in
+
+#define SASL_NOPATH    (-25) path not set
 		*/
 		enum AuthCondition
 		{
-			NoMech,       ///< No compatible/appropriate authetication mechanism
-			BadProto,
-			BadServ,
-			BadAuth,
-			NoAuthzid,
-			TooWeak,      ///< Authentication doesn't match security constraints
-			NeedEncrypt,
-			Expired,
-			Disabled,
-			NoUser,
+			NoMech,       ///< No compatible/appropriate authentication mechanism
+			BadProto,     ///< Bad protocol or cancelled
+			BadServ,      ///< Server failed mutual authentication (client side only)
+			BadAuth,      ///< Authentication failure (server side only)
+			NoAuthzid,    ///< Authorization failure (server side only)
+			TooWeak,      ///< Mechanism too weak for this user (server side only)
+			NeedEncrypt,  ///< Encryption is needed in order to use mechanism (server side only)
+			Expired,      ///< Passphrase expired, has to be reset (server side only)
+			Disabled,     ///< Account is disabled (server side only)
+			NoUser,       ///< User not found (server side only)
 			RemoteUnavail
 		};
+
 
 		/**
 		   Authentication requirement flag values
@@ -425,6 +447,8 @@ namespace QCA
 		void continueAfterParams();
 
 		/**
+		   FIXME: Justin to complete
+		   
 		*/
 		void continueAfterAuthCheck();
 
