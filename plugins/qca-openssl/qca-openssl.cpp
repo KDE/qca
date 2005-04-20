@@ -2317,7 +2317,6 @@ public:
 	virtual bool importKey(const QCA::PKeyBase *key)
 	{
 		Q_UNUSED(key);
-		printf("import key\n");
 		return false;
 	}
 
@@ -3683,7 +3682,6 @@ class opensslProvider : public QCA::Provider
 public:
 	void init()
 	{
-		printf("init\n");
 		OpenSSL_add_all_algorithms();
 		ERR_load_crypto_strings();
 
