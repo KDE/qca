@@ -1,9 +1,7 @@
-#include <qprocess.h>
-#include <qstringlist.h>
 /*
 -----BEGIN QCMOD-----
 name: certstore
-arg: certstore-path=[path],Path to the SSL Certificate store
+arg: certstore-path=[path],Path to the SSL/X509 Certificate store
 -----END QCMOD-----
 */
 
@@ -16,9 +14,21 @@ public:
 
 	bool exec()
 	{
+		bundled = false;
+
+#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+		// use built-in
+		return true;
+#else
 		QStringList pathsToTry;
 
-		pathsToTry.append(conf->getenv("QC_CERTSTORE_PATH"));
+		path = conf->getenv("QC_CERTSTORE_PATH");
+		if(!path.isEmpty())
+		{
+			if(QFile::exists(path))
+				return true;
+			return false;
+		}
 
 		// This is from Debian
 		pathsToTry.append( QString("/etc/ssl/certs/ca-certificates.crt") );
@@ -27,27 +37,54 @@ public:
 		pathsToTry.append( QString("/usr/share/ssl/cert.pem") );
 		pathsToTry.append( QString("/usr/share/ssl/certs/ca-bundle.crt") );
 
-		for ( QStringList::Iterator path = pathsToTry.begin(); path != pathsToTry.end(); ++path ) {
-        		if ( QFile::exists( *path ) ) {
-				m_firstGoodPath = *path;
+		for(int n = 0; n < pathsToTry.count(); ++n)
+		{
+        		if(QFile::exists(pathsToTry[n]))
+			{
+				path = pathsToTry[n];
 				break;
 			}
 		}
 
-		QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + m_firstGoodPath + "\"'";
+		// fall back to bundled
+		if(path.isEmpty())
+		{
+			path = "$$DATADIR/qca/certs/rootcerts.pem";
+			QString extra =
+			"sharedfiles.path = $$DATADIR/qca\n"
+			"sharedfiles.files = certs\n"
+			"INSTALLS += sharedfiles\n";
+			conf->addExtra(extra);
+			bundled = true;
+		}
+
+		QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
 		conf->addDefine(certPathString);
 
-		if ( m_firstGoodPath.isEmpty() )
-			return false;
-		else
-			return true;
+		return true;
+#endif
 	}
 
 	QString resultString() const
 	{
-		return m_firstGoodPath;
+#if defined(Q_OS_WIN)
+		return "using Windows built-in"
+#elif defined(Q_OS_MAC)
+		return "using Mac built-in"
+#else
+		if(success)
+		{
+			if(bundled)
+				return "using bundled";
+			else
+				return path;
+		}
+		else
+			return ConfObj::resultString();
+#endif
 	}
 
 private:
-	QString m_firstGoodPath;
+	QString path;
+	bool bundled;
 };

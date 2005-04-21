@@ -1,0 +1,40 @@
+/*
+-----BEGIN QCMOD-----
+name: extra
+-----END QCMOD-----
+*/
+
+class qc_extra : public ConfObj
+{
+public:
+	qc_extra(Conf *c) : ConfObj(c) {}
+	QString name() const { return "extra"; }
+	QString shortname() const { return "extra"; }
+
+	// no output
+	QString checkString() const { return QString(); }
+
+	bool exec()
+	{
+		QString prefix = conf->getenv("PREFIX");
+		QString str = QString(
+		"prefix=%1\n"
+		"exec_prefix=${prefix}\n"
+		"libdir=${prefix}/lib\n"
+		"includedir=${prefix}/include/QtCrypto\n"
+		"\n"
+		"Name: QCA\n"
+		"Description: Qt Cryptographic Architecture library\n"
+		"Version: 2.0.0 #maybe this shouldn't be literal...\n"
+		"Requires: qt-mt\n"
+		"Libs: -L${libdir} -lqca\n"
+		"Cflags: -I${includedir}\n"
+		"\n"
+		).arg(prefix);
+
+		QFile f("qca.pc");
+		if(f.open(QFile::WriteOnly | QFile::Truncate))
+			f.write(str.toLatin1());
+		return true;
+	}
+};

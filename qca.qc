@@ -1,8 +1,14 @@
 <qconf>
  <name>Qt Cryptographic Architecture (QCA)</name>
  <profile>qca.pro</profile>
- <nobindir/>
+ <lib/>
+ <libdir/>
+ <datadir/>
  <moddir>.</moddir>
  <dep type='certstore'>
+  <required/>
+ </dep>
+ <dep type='extra'>
+  <required/>
  </dep>
 </qconf>

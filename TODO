@@ -1,5 +1,6 @@
 * Additional unit tests
 * Update to latest Botan, and remake the botantools patch as appropriate
+* create .prf for auto-discovery by qmake-based projects
 
 * API documentation
   clean up Algorithm
@@ -17,16 +18,6 @@
   standardize on count() vs size() when iterating?
   add more "getters" to the library?
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
-
-* finish API:
-  finish qcaprovider.h
-
-* build system:
-  get qt 4 support into qconf
-  on non-win/mac, allow specifying of flatfile store, else install/use built-in
-  certstore.qcm: QCA_NO_SYSTEMSTORE
-  make sure it installs properly
-  create qt4 qmake .prf for auto-discovery by applications
 
 * finish code for APIs:
   core: properties
