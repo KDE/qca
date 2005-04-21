@@ -72,7 +72,7 @@ void SecureLayer::layerUpdateBegin()
 	_read = bytesAvailable();
 	_readout = bytesOutgoingAvailable();
 	_closed = haveClosed();
-	_error = haveError();
+	_error = !ok();
 }
 
 void SecureLayer::layerUpdateEnd()
@@ -85,7 +85,7 @@ void SecureLayer::layerUpdateEnd()
 			QTimer::singleShot(0, this, SIGNAL(readyReadOutgoing()));
 		if(!_closed && haveClosed())
 			QTimer::singleShot(0, this, SIGNAL(closed()));
-		if(!_error && haveError())
+		if(!_error && !ok())
 			QTimer::singleShot(0, this, SIGNAL(error()));
 	}
 }
@@ -299,7 +299,7 @@ bool TLS::haveClosed() const
 	return false;
 }
 
-bool TLS::haveError() const
+bool TLS::ok() const
 {
 	return false;
 }
@@ -587,7 +587,7 @@ int SASL::ssf() const
 	return d->c->security();
 }
 
-bool SASL::haveError() const
+bool SASL::ok() const
 {
 	return false;
 }

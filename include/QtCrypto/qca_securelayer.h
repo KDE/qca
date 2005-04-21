@@ -46,8 +46,8 @@ namespace QCA
 	//  affect something, call others to get the results.
 	//
 	// write: call readOutgoing
-	// writeIncoming: call haveClosed/haveError, read, and readOutgoing
-	// close: call haveClosed/haveError and readOutgoing
+	// writeIncoming: call haveClosed/ok, read, and readOutgoing
+	// close: call haveClosed/ok and readOutgoing
 	// haveClosed: if Closed, call readUnprocessed
 	class QCA_EXPORT SecureFilter
 	{
@@ -56,7 +56,7 @@ namespace QCA
 
 		virtual bool isClosable() const;
 		virtual bool haveClosed() const;
-		virtual bool haveError() const = 0;
+		virtual bool ok() const = 0;
 		virtual int bytesAvailable() const = 0;
 		virtual int bytesOutgoingAvailable() const = 0;
 		virtual void close();
@@ -156,7 +156,7 @@ namespace QCA
 		// reimplemented
 		virtual bool isClosable() const;
 		virtual bool haveClosed() const;
-		virtual bool haveError() const;
+		virtual bool ok() const;
 		virtual int bytesAvailable() const;
 		virtual int bytesOutgoingAvailable() const;
 		virtual void close();
@@ -458,7 +458,7 @@ These don't appear to map:
 		   FIXME: Justin to complete
 		   
 		*/
-		virtual bool haveError() const;
+		virtual bool ok() const;
 
 		/**
 		   test how many (if any) bytes are available
