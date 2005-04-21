@@ -133,7 +133,7 @@ QList<KeyStoreEntry> KeyStore::entryList() const
 		entry.change(list[n]);
 		out.append(entry);
 	}
-	printf("KeyStore::entryList(): %d entries\n", out.count());
+	//printf("KeyStore::entryList(): %d entries\n", out.count());
 	return out;
 }
 
@@ -296,7 +296,7 @@ private:
 
 	void check(KeyStoreListContext *source)
 	{
-		printf("KeyStore: query begin [%s]\n", qPrintable(source->provider()->name()));
+		//printf("KeyStore: query begin [%s]\n", qPrintable(source->provider()->name()));
 
 		QList<KeyStoreContext*> added;
 		QList<int> removed;
@@ -326,17 +326,17 @@ private:
 
 		for(int n = 0; n < removed.count(); ++n)
 		{
-			printf("  - <%d>\n", removed[n]);
+			//printf("  - <%d>\n", removed[n]);
 			ctx_remove(source->provider(), removed[n]);
 		}
 
 		for(int n = 0; n < added.count(); ++n)
 		{
-			printf("  + <%d> [%s]\n", added[n]->contextId(), qPrintable(added[n]->deviceId()));
+			//printf("  + <%d> [%s]\n", added[n]->contextId(), qPrintable(added[n]->deviceId()));
 			ctx_add(added[n]);
 		}
 
-		printf("KeyStore: query end\n");
+		//printf("KeyStore: query end\n");
 	}
 
 	void ctx_add(KeyStoreContext *c)
@@ -347,7 +347,7 @@ private:
 			KeyStoreContext *i = static_cast<KeyStoreContext *>(active[n].keyStore->context());
 			if(c->deviceId() == i->deviceId())
 			{
-				printf("KeyStore: ERROR: duplicate device id [%s], skipping\n", qPrintable(c->deviceId()));
+				//printf("KeyStore: ERROR: duplicate device id [%s], skipping\n", qPrintable(c->deviceId()));
 				return;
 			}
 		}
