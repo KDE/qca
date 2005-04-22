@@ -17,5 +17,5 @@ INSTALLS += target
 DEFINES += QT_STATICPLUGIN
 SOURCES += ../../plugins/qca-openssl/qca-openssl.cpp
 DEFINES += OSSL_097
-LIBS += -lcrypto
+LIBS += -lcrypto -lssl
 

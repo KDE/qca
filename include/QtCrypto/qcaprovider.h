@@ -28,6 +28,8 @@
 #include "qca_publickey.h"
 #include "qca_cert.h"
 #include "qca_keystore.h"
+#include "qca_securelayer.h"
+#include "qca_securemessage.h"
 
 #include <limits>
 
@@ -80,7 +82,7 @@ public:
 class CipherContext : public Provider::Context
 {
 public:
-	enum Mode { CBC, CFB, ECB };
+	//enum Mode { CBC, CFB, ECB };
 	CipherContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv) = 0;
 	virtual KeyLength keyLength() const = 0;
@@ -407,36 +409,65 @@ signals:
 class TLSContext : public Provider::Context
 {
 public:
-	enum Result { Success, Error, Continue };
+	class SessionInfo
+	{
+	public:
+		bool isCompressed;
+		TLS::Version version;
+		QString cipherSuite;
+		int cipherBits, cipherMaxBits;
+	};
+
+	enum Result
+	{
+		Success,
+		Error,
+		Continue
+	};
+
 	TLSContext(Provider *p) : Provider::Context(p, "tls") {}
 
 	virtual void reset() = 0;
-	virtual bool startClient(const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, const CertContext &cert, const PKeyContext &key) = 0;
-	virtual bool startServer(const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, const CertContext &cert, const PKeyContext &key) = 0;
 
-	virtual int handshake(const QByteArray &in, QByteArray *out) = 0;
-	virtual int shutdown(const QByteArray &in, QByteArray *out) = 0;
+	virtual QStringList supportedCipherSuites() const = 0;
+	virtual bool canCompress() const = 0;
+
+	virtual void setConstraints(int minSSF, int maxSSF) = 0;
+	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
+	virtual void setup(const CertificateCollection &trusted, const CertificateChain &cert, const PrivateKey &key, bool compress) = 0;
+
+	virtual bool startClient() = 0;
+	virtual bool startServer() = 0;
+
+	virtual Result handshake(const QByteArray &from_net, QByteArray *to_net) = 0;
+	virtual Result shutdown(const QByteArray &from_net, QByteArray *to_net) = 0;
 	virtual bool encode(const QSecureArray &plain, QByteArray *to_net, int *encoded) = 0;
 	virtual bool decode(const QByteArray &from_net, QSecureArray *plain, QByteArray *to_net) = 0;
 	virtual bool eof() const = 0;
+	virtual SessionInfo sessionInfo() const = 0;
 	virtual QSecureArray unprocessed() = 0;
 
+	virtual TLS::IdentityResult peerIdentityResult() const = 0;
 	virtual Validity peerCertificateValidity() const = 0;
-	virtual CertContext *peerCertificate() const = 0;
+	virtual CertificateChain peerCertificateChain() const = 0;
 };
 
 class SASLContext : public Provider::Context
 {
 public:
-	struct HostPort
+	class HostPort
 	{
-		//QHostAddress addr;
-		//Q_UINT16 port;
+	public:
+		QString addr;
+		quint16 port;
 	};
-	struct AuthParams
+
+	class AuthParams
 	{
+	public:
 		bool user, authzid, pass, realm;
 	};
+
 	enum Result
 	{
 		Success,
@@ -445,6 +476,7 @@ public:
 		AuthCheck,
 		Continue
 	};
+
 	enum AuthError
 	{
 		NoMech,
@@ -459,6 +491,7 @@ public:
 		NoUser,
 		RemoteUnavail
 	};
+
 	SASLContext(Provider *p) : Provider::Context(p, "sasl") {}
 
 	// common

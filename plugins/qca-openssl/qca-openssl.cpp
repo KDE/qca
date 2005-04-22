@@ -33,6 +33,7 @@
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
 #include <openssl/pkcs12.h>
+#include <openssl/ssl.h>
 
 // comment this out if you'd rather use openssl 0.9.6
 //#define OSSL_097
@@ -2775,6 +2776,13 @@ public:
 		return r;
 	}
 
+	void fromX509(X509 *x)
+	{
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+		item.cert = x;
+		make_props();
+	}
+
 	virtual bool createSelfSigned(const QCA::CertificateOptions &opts, const QCA::PKeyContext &priv)
 	{
 		_props = QCA::CertContextProps();
@@ -3345,215 +3353,522 @@ QCA::Validity MyCertContext::validate(const QList<QCA::CertContext*> &trusted, c
 	return QCA::ValidityGood;
 }
 
-//----------------------------------------------------------------------------
-// MyStoreContext
-//----------------------------------------------------------------------------
-/*class MyStoreContext : public QCA::StoreContext
+static bool ssl_init = false;
+class MyTLSContext : public QCA::TLSContext
 {
 public:
-	STACK_OF(X509) *trusted, *untrusted;
-	QList<X509_CRL*> crl_list;
+	enum { Good, TryAgain, Bad };
+	enum { Idle, Connect, Accept, Handshake, Active, Closing };
 
-	MyStoreContext(QCA::Provider *p) : QCA::StoreContext(p)
+	bool serv;
+	int mode;
+	QSecureArray sendQueue;
+	QSecureArray recvQueue;
+
+	QCA::CertificateCollection trusted;
+	QCA::Certificate cert, peercert; // TODO: support cert chains
+	QCA::PrivateKey key;
+
+	SSL *ssl;
+	SSL_METHOD *method;
+	SSL_CTX *context;
+	BIO *rbio, *wbio;
+	QCA::TLS::IdentityResult ir;
+	QCA::Validity vr;
+	bool v_eof;
+
+	MyTLSContext(QCA::Provider *p) : QCA::TLSContext(p)
 	{
-		trusted = sk_X509_new_null();
-		untrusted = sk_X509_new_null();
+		if(!ssl_init)
+		{
+			SSL_library_init();
+			SSL_load_error_strings();
+			ssl_init = true;
+		}
+
+		ssl = 0;
+		context = 0;
+		reset();
 	}
 
-	MyStoreContext(const MyStoreContext &from) : QCA::StoreContext(from), crl_list(from.crl_list)
+	~MyTLSContext()
 	{
-		int n;
-
-		// shallow copy of list items
-		trusted = sk_X509_dup(from.trusted);
-		for(n = 0; n < sk_X509_num(trusted); ++n)
-		{
-			X509 *x = sk_X509_value(trusted, n);
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
-		}
-
-		untrusted = sk_X509_dup(from.untrusted);
-		for(n = 0; n < sk_X509_num(untrusted); ++n)
-		{
-			X509 *x = sk_X509_value(untrusted, n);
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
-		}
-
-		for(n = 0; n < crl_list.count(); ++n)
-		{
-			X509_CRL *x = crl_list[n];
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
-		}
-	}
-
-	~MyStoreContext()
-	{
-		sk_X509_pop_free(trusted, X509_free);
-		sk_X509_pop_free(untrusted, X509_free);
-		for(int n = 0; n < crl_list.count(); ++n)
-			X509_CRL_free(crl_list[n]);
+		reset();
 	}
 
 	virtual Context *clone() const
 	{
-		return new MyStoreContext(*this);
+		return 0;
 	}
 
-	virtual void addCertificate(const QCA::CertContext &cert, QCA::Store::TrustMode t)
+	virtual void reset()
 	{
-		const MyCertContext *cc = static_cast<const MyCertContext *>(&cert);
-		X509 *x = cc->item.cert;
-		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
-		if(t == QCA::Store::Trusted)
-			sk_X509_push(trusted, x);
-		else
-			sk_X509_push(untrusted, x);
-	}
-
-	virtual void addCRL(const QCA::CRLContext &crl)
-	{
-		const MyCRLContext *cc = static_cast<const MyCRLContext *>(&crl);
-		X509_CRL *x = cc->item.crl;
-		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
-		crl_list.append(x);
-	}
-
-	virtual QCA::Validity validate(const QCA::CertContext &cert, QCA::Store::UsageMode u) const
-	{
-		const MyCertContext *cc = static_cast<const MyCertContext *>(&cert);
-		X509 *x = cc->item.cert;
-
-		// verification happens through a store "context"
-		X509_STORE_CTX *ctx = X509_STORE_CTX_new();
-
-		// make a store of crls
-		X509_STORE *store = X509_STORE_new();
-		for(int n = 0; n < crl_list.count(); ++n)
-			X509_STORE_add_crl(store, crl_list[n]);
-
-		// the first initialization handles untrusted certs, crls, and target cert
-		X509_STORE_CTX_init(ctx, store, x, untrusted);
-
-		// this initializes the trusted certs
-		X509_STORE_CTX_trusted_stack(ctx, trusted);
-
-		// verify!
-		int ret = X509_verify_cert(ctx);
-		int err = -1;
-		if(!ret)
-			err = ctx->error;
-
-		// cleanup
-		X509_STORE_CTX_free(ctx);
-		X509_STORE_free(store);
-
-		if(!ret)
-			return convert_verify_error(err);
-
-		if(!usage_check(*cc, u))
-			return QCA::ErrorInvalidPurpose;
-
-		return QCA::ValidityGood;
-	}
-
-	virtual QList<QCA::CertContext*> certificates() const
-	{
-		QList<QCA::CertContext*> list;
-
-		int n;
-		for(n = 0; n < sk_X509_num(trusted); ++n)
+		if(ssl)
 		{
-			X509 *x = sk_X509_value(trusted, n);
-
-			MyCertContext *cc = new MyCertContext(provider());
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
-			cc->item.cert = x;
-			cc->make_props();
-			list.append(cc);
+			SSL_free(ssl);
+			ssl = 0;
 		}
-		for(n = 0; n < sk_X509_num(untrusted); ++n)
+		if(context)
 		{
-			X509 *x = sk_X509_value(untrusted, n);
-
-			MyCertContext *cc = new MyCertContext(provider());
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
-			cc->item.cert = x;
-			cc->make_props();
-			list.append(cc);
+			SSL_CTX_free(context);
+			context = 0;
 		}
 
-		return list;
+		cert = QCA::Certificate();
+		key = QCA::PrivateKey();
+
+		sendQueue.resize(0);
+		recvQueue.resize(0);
+		mode = Idle;
+		peercert = QCA::Certificate();
+		ir = QCA::TLS::NoCert;
+		vr = QCA::ErrorValidityUnknown;
+		v_eof = false;
 	}
 
-	virtual QList<QCA::CRLContext*> crls() const
+	virtual QStringList supportedCipherSuites() const
 	{
-		QList<QCA::CRLContext*> list;
-
-		for(int n = 0; n < crl_list.count(); ++n)
-		{
-			X509_CRL *x = crl_list[n];
-
-			MyCRLContext *cc = new MyCRLContext(provider());
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
-			cc->item.crl = x;
-			list.append(cc);
-		}
-
-		return list;
+		// TODO
+		return QStringList();
 	}
 
-	virtual void append(const QCA::StoreContext &s)
+	virtual bool canCompress() const
 	{
-		const MyStoreContext *from = static_cast<const MyStoreContext *>(&s);
-		int n;
-
-		for(n = 0; n < sk_X509_num(from->trusted); ++n)
-		{
-			X509 *x = sk_X509_value(from->trusted, n);
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
-			sk_X509_push(trusted, x);
-		}
-
-		for(n = 0; n < sk_X509_num(from->untrusted); ++n)
-		{
-			X509 *x = sk_X509_value(from->untrusted, n);
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
-			sk_X509_push(untrusted, x);
-		}
-
-		for(n = 0; n < from->crl_list.count(); ++n)
-		{
-			X509_CRL *x = from->crl_list[n];
-			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
-			crl_list.append(x);
-		}
-	}
-
-	virtual bool canUsePKCS7() const
-	{
+		// TODO
 		return false;
 	}
 
-	virtual QByteArray toPKCS7() const
+	virtual void setConstraints(int minSSF, int maxSSF)
 	{
-		return QByteArray();
+		// TODO
+		Q_UNUSED(minSSF);
+		Q_UNUSED(maxSSF);
 	}
 
-	virtual QCA::ConvertResult fromPKCS7(const QByteArray &a, QCA::Store::TrustMode t)
+	virtual void setConstraints(const QStringList &cipherSuiteList)
 	{
-		Q_UNUSED(a);
-		Q_UNUSED(t);
-		return QCA::ErrorDecode;
+		// TODO
+		Q_UNUSED(cipherSuiteList);
 	}
 
-	bool usage_check(const MyCertContext &cc, QCA::Store::UsageMode u) const
+	virtual void setup(const QCA::CertificateCollection &_trusted, const QCA::CertificateChain &_cert, const QCA::PrivateKey &_key, bool compress)
 	{
-		// TODO: check usage
-		Q_UNUSED(cc);
-		Q_UNUSED(u);
+		trusted = _trusted;
+		cert = _cert.primary(); // TODO: take the whole chain
+		key = _key;
+		Q_UNUSED(compress); // TODO
+	}
+
+	virtual bool startClient()
+	{
+		serv = false;
+		method = SSLv23_client_method();
+		if(!init())
+			return false;
+		mode = Connect;
 		return true;
 	}
-};*/
+
+	virtual bool startServer()
+	{
+		serv = true;
+		method = SSLv23_server_method();
+		if(!init())
+			return false;
+		mode = Accept;
+		return true;
+	}
+
+	virtual Result handshake(const QByteArray &from_net, QByteArray *to_net)
+	{
+		if(!from_net.isEmpty())
+			BIO_write(rbio, from_net.data(), from_net.size());
+
+		if(mode == Connect)
+		{
+			int ret = doConnect();
+			if(ret == Good)
+			{
+				mode = Handshake;
+			}
+			else if(ret == Bad)
+			{
+				reset();
+				return Error;
+			}
+		}
+
+		if(mode == Accept)
+		{
+			int ret = doAccept();
+			if(ret == Good)
+			{
+				getCert();
+				mode = Active;
+			}
+			else if(ret == Bad)
+			{
+				reset();
+				return Error;
+			}
+		}
+
+		if(mode == Handshake)
+		{
+			int ret = doHandshake();
+			if(ret == Good)
+			{
+				getCert();
+				mode = Active;
+			}
+			else if(ret == Bad)
+			{
+				reset();
+				return Error;
+			}
+		}
+
+		// process outgoing
+		*to_net = readOutgoing();
+
+		if(mode == Active)
+			return Success;
+		else
+			return Continue;
+	}
+
+	virtual Result shutdown(const QByteArray &from_net, QByteArray *to_net)
+	{
+		if(!from_net.isEmpty())
+			BIO_write(rbio, from_net.data(), from_net.size());
+
+		int ret = doShutdown();
+		if(ret == Bad)
+		{
+			reset();
+			return Error;
+		}
+
+		*to_net = readOutgoing();
+
+		if(ret == Good)
+		{
+			mode = Idle;
+			return Success;
+		}
+		else
+		{
+			mode = Closing;
+			return Continue;
+		}
+	}
+
+	virtual bool encode(const QSecureArray &plain, QByteArray *to_net, int *enc)
+	{
+		if(mode != Active)
+			return false;
+		sendQueue.append(plain);
+
+		int encoded = 0;
+		if(sendQueue.size() > 0)
+		{
+			int ret = SSL_write(ssl, sendQueue.data(), sendQueue.size());
+
+			enum { Good, Continue, Done, Error };
+			int m;
+			if(ret <= 0)
+			{
+				int x = SSL_get_error(ssl, ret);
+				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+					m = Continue;
+				else if(x == SSL_ERROR_ZERO_RETURN)
+					m = Done;
+				else
+					m = Error;
+			}
+			else
+			{
+				m = Good;
+				encoded = ret;
+				int newsize = sendQueue.size() - encoded;
+				char *r = sendQueue.data();
+				memmove(r, r + encoded, newsize);
+				sendQueue.resize(newsize);
+			}
+
+			if(m == Done)
+			{
+				sendQueue.resize(0);
+				v_eof = true;
+				return false;
+			}
+			if(m == Error)
+			{
+				sendQueue.resize(0);
+				return false;
+			}
+		}
+
+		*to_net = readOutgoing();
+		*enc = encoded;
+		return true;
+	}
+
+	virtual bool decode(const QByteArray &from_net, QSecureArray *plain, QByteArray *to_net)
+	{
+		if(mode != Active)
+			return false;
+		if(!from_net.isEmpty())
+			BIO_write(rbio, from_net.data(), from_net.size());
+
+		QByteArray a;
+		while(!v_eof) {
+			a.resize(8192);
+			int ret = SSL_read(ssl, a.data(), a.size());
+			if(ret > 0)
+			{
+				if(ret != (int)a.size())
+					a.resize(ret);
+				recvQueue.append(a);
+			}
+			else if(ret <= 0)
+			{
+				int x = SSL_get_error(ssl, ret);
+				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+					break;
+				else if(x == SSL_ERROR_ZERO_RETURN)
+					v_eof = true;
+				else
+					return false;
+			}
+		}
+
+		*plain = recvQueue;
+		recvQueue.resize(0);
+
+		// could be outgoing data also
+		*to_net = readOutgoing();
+		return true;
+	}
+
+	virtual bool eof() const
+	{
+		return v_eof;
+	}
+
+	virtual SessionInfo sessionInfo() const
+	{
+		// TODO
+		return SessionInfo();
+	}
+
+	virtual QSecureArray unprocessed()
+	{
+		QSecureArray a;
+		int size = BIO_pending(rbio);
+		if(size <= 0)
+			return a;
+		a.resize(size);
+
+		int r = BIO_read(rbio, a.data(), size);
+		if(r <= 0)
+		{
+			a.resize(0);
+			return a;
+		}
+		if(r != size)
+			a.resize(r);
+		return a;
+	}
+
+	virtual QCA::TLS::IdentityResult peerIdentityResult() const
+	{
+		return ir;
+	}
+
+	virtual QCA::Validity peerCertificateValidity() const
+	{
+		return vr;
+	}
+
+	virtual QCA::CertificateChain peerCertificateChain() const
+	{
+		// TODO: support whole chain
+		QCA::CertificateChain chain;
+		chain.append(peercert);
+		return chain;
+	}
+
+	bool init()
+	{
+		context = SSL_CTX_new(method);
+		if(!context)
+			return false;
+
+		// load the cert store
+		/*if(!list.isEmpty())
+		{
+			X509_STORE *store = SSL_CTX_get_cert_store(context);
+			QList<Certificate>
+			QPtrListIterator<QCA_CertContext> it(list);
+			for(CertContext *i; (i = (CertContext *)it.current()); ++it)
+				X509_STORE_add_cert(store, i->x);
+		}*/
+
+		ssl = SSL_new(context);
+		if(!ssl)
+		{
+			SSL_CTX_free(context);
+			context = 0;
+			return false;
+		}
+		SSL_set_ssl_method(ssl, method); // can this return error?
+
+		// setup the memory bio
+		rbio = BIO_new(BIO_s_mem());
+		wbio = BIO_new(BIO_s_mem());
+
+		// this passes control of the bios to ssl.  we don't need to free them.
+		SSL_set_bio(ssl, rbio, wbio);
+
+		// setup the cert to send
+		if(!cert.isNull() && !key.isNull())
+		{
+			const MyCertContext *cc = static_cast<const MyCertContext*>(cert.context());
+			const MyPKeyContext *kc = static_cast<const MyPKeyContext*>(key.context());
+			if(SSL_use_certificate(ssl, cc->item.cert) != 1)
+			{
+				SSL_free(ssl);
+				SSL_CTX_free(context);
+				return false;
+			}
+			if(SSL_use_PrivateKey(ssl, kc->get_pkey()) != 1)
+			{
+				SSL_free(ssl);
+				SSL_CTX_free(context);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void getCert()
+	{
+		// verify the certificate
+		QCA::Validity code = QCA::ErrorValidityUnknown;
+		X509 *x = SSL_get_peer_certificate(ssl);
+		if(x)
+		{
+			MyCertContext *cc = new MyCertContext(provider());
+			cc->fromX509(x);
+			X509_free(x);
+			peercert.change(cc);
+
+			int ret = SSL_get_verify_result(ssl);
+			if(ret == X509_V_OK)
+			{
+				ir = QCA::TLS::Valid;
+				code = QCA::ValidityGood;
+			}
+			else
+			{
+				ir = QCA::TLS::BadCert;
+				code = convert_verify_error(ret);
+			}
+		}
+		else
+		{
+			peercert = QCA::Certificate();
+			ir = QCA::TLS::NoCert;
+		}
+		vr = code;
+	}
+
+	int doConnect()
+	{
+		int ret = SSL_connect(ssl);
+		if(ret < 0)
+		{
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Bad;
+		}
+		else if(ret == 0)
+			return Bad;
+		return Good;
+	}
+
+	int doAccept()
+	{
+		int ret = SSL_accept(ssl);
+		if(ret < 0)
+		{
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_CONNECT || x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Bad;
+		}
+		else if(ret == 0)
+			return Bad;
+		return Good;
+	}
+
+	int doHandshake()
+	{
+		int ret = SSL_do_handshake(ssl);
+		if(ret < 0)
+		{
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			else
+				return Bad;
+		}
+		else if(ret == 0)
+			return Bad;
+		return Good;
+	}
+
+	int doShutdown()
+	{
+		int ret = SSL_shutdown(ssl);
+		if(ret >= 1)
+			return Good;
+		else
+		{
+			if(ret == 0)
+				return TryAgain;
+			int x = SSL_get_error(ssl, ret);
+			if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
+				return TryAgain;
+			return Bad;
+		}
+	}
+
+	QByteArray readOutgoing()
+	{
+		QByteArray a;
+		int size = BIO_pending(wbio);
+		if(size <= 0)
+			return a;
+		a.resize(size);
+
+		int r = BIO_read(wbio, a.data(), size);
+		if(r <= 0)
+		{
+			a.resize(0);
+			return a;
+		}
+		if(r != size)
+			a.resize(r);
+		return a;
+	}
+};
+
 
 class opensslCipherContext : public QCA::CipherContext
 {
@@ -3749,7 +4064,7 @@ public:
 		list += "cert";
 		list += "csr";
 		list += "crl";
-		list += "store";
+		list += "tls";
 
 		return list;
 	}
@@ -3845,8 +4160,8 @@ public:
 			return new MyCSRContext( this );
 		else if ( type == "crl" )
 			return new MyCRLContext( this );
-		//else if ( type == "store" )
-		//	return new MyStoreContext( this );
+		else if ( type == "tls" )
+			return new MyTLSContext( this );
 		return 0;
 	}
 };
