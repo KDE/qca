@@ -719,6 +719,43 @@ namespace QCA
 	};
 
 	/**
+	   \class SHA224  qca_basic.h QtCrypto
+	   
+	   SHA-224 cryptographic message digest hash algorithm.
+
+	   This algorithm takes an arbitrary data stream, known as the
+	   message (up to \f$2^{64}\f$ bits in length) and outputs a
+	   condensed 224 bit (28 byte) representation of that data
+	   stream, known as the message digest.
+	   
+	   This algorithm is considered secure in that it is considered
+	   computationally infeasible to find the message that
+	   produced the message digest.
+
+	   For more information, see Federal Information Processing
+	   Standard Publication 180-2 "Specifications for the Secure
+	   %Hash Standard", with change notice 1
+	   available from http://csrc.nist.gov/publications/
+	 */
+	class QCA_EXPORT SHA224 : public Hash
+	{
+	public:
+		/**
+		   Standard constructor
+
+		   This is the normal way of creating a SHA224 hash,
+		   although if you have the whole message in memory at
+		   one time, you may be better off using
+		   QCA::SHA224().hash()
+
+		   \param provider specify a particular provider 
+		   to use. For example if you wanted the SHA224 implementation
+		   from qca-gcrypt, you would use SHA224("qca-gcrypt")
+		 */
+		SHA224(const QString &provider = QString()) : Hash("sha224", provider) {}
+	};
+
+	/**
 	 * \class SHA256  qca_basic.h QtCrypto
 	 *
 	 * SHA-256 cryptographic message digest hash algorithm.
