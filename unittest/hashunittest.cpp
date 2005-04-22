@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -121,6 +121,19 @@ static struct hashTestValues sha256TestValues[] = {
 	// FIPS 180-2, Appendix B.2
 	{ "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 	  "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1" },
+
+	{ 0, 0 }
+};
+
+// These are as specfied in FIPS 180-2, change notice 1
+static struct hashTestValues sha224TestValues[] = {
+
+	// FIPS 180-2, Appendix B.1
+	{ "abc", "23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7" },
+
+	// FIPS 180-2, Appendix B.2
+	{ "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+	  "75388b16512776cc5dba5da1fd890150b0c6455cb4f58b1952522525" },
 
 	{ 0, 0 }
 };
@@ -343,6 +356,25 @@ void HashUnitTest::allTests()
 		SKIP( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
 	    }
 	    
+	}
+
+	if(!QCA::isSupported("sha224"))
+	    SKIP("SHA224 not supported");
+	else {
+	    for (int n = 0; (0 != sha224TestValues[n].expectedHash); n++) {
+		hashResult = QCA::SHA224(*it).hashToString(sha224TestValues[n].inputString);
+		CHECK( hashResult, sha224TestValues[n].expectedHash );
+	    }
+	    
+	    QByteArray fillerString;
+	    fillerString.fill('a', 1000);
+
+	    // This basically reflects FIPS 180-2, change notice 1, section 3
+	    QCA::SHA224 shaHash(*it);
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    CHECK( QString(QCA::arrayToHex(shaHash.final())),
+		   QString("20794655980c91d8bbb4c1ea97618a4bf03f42581948b2ee4ee7ad67") );
 	}
 
 	if(!QCA::isSupported("sha256"))
