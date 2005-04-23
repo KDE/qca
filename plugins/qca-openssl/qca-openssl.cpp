@@ -3705,15 +3705,27 @@ public:
 		if(!context)
 			return false;
 
-		// load the cert store
-		/*if(!list.isEmpty())
+		// setup the cert store
 		{
 			X509_STORE *store = SSL_CTX_get_cert_store(context);
-			QList<Certificate>
-			QPtrListIterator<QCA_CertContext> it(list);
-			for(CertContext *i; (i = (CertContext *)it.current()); ++it)
-				X509_STORE_add_cert(store, i->x);
-		}*/
+			QList<QCA::Certificate> cert_list = trusted.certificates();
+			QList<QCA::CRL> crl_list = trusted.crls();
+			int n;
+			for(n = 0; n < cert_list.count(); ++n)
+			{
+				const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
+				X509 *x = cc->item.cert;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+				X509_STORE_add_cert(store, x);
+			}
+			for(n = 0; n < crl_list.count(); ++n)
+			{
+				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
+				X509_CRL *x = cc->item.crl;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+				X509_STORE_add_crl(store, x);
+			}
+		}
 
 		ssl = SSL_new(context);
 		if(!ssl)
