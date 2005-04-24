@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +34,15 @@ public:
 
 public:
     void allTests();
+
+private:
+    void HMACMD5test( QString provider ); 
+    void HMACSHA1test( QString provider ); 
+    void HMACSHA256test( QString provider ); 
+    void HMACSHA224test( QString provider ); 
+    void HMACSHA384test( QString provider ); 
+    void HMACSHA512test( QString provider ); 
+    void HMACRMD160test( QString provider ); 
 };
 
 #endif
