@@ -1,8 +1,6 @@
-TEMPLATE = app
-CONFIG += thread console
-TARGET = ssltest
+CONFIG  -= app_bundle
+CONFIG  += console
+QT      += network
 
-INCLUDEPATH += ../common
-HEADERS += ../common/base64.h
-SOURCES += ../common/base64.cpp ssltest.cpp
+SOURCES += ssltest.cpp
 include(../examples.pri)
