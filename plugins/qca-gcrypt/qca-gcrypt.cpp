@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004  Justin Karneges
- * Copyright (C) 2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -420,11 +420,16 @@ public:
 	list += "md4";
 	list += "md5";
 	list += "ripemd160";
+	list += "sha224";
 	list += "sha256";
 	list += "sha384";
 	list += "sha512";
 	list += "hmac(md5)";
 	list += "hmac(sha1)";
+	list += "hmac(sha224)";
+	list += "hmac(sha256)";
+	list += "hmac(sha384)";
+	list += "hmac(sha512)";
 	list += "hmac(ripemd160)";
 	list += "aes128-ecb";
 	list += "aes128-cfb";
@@ -458,6 +463,8 @@ public:
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_MD5, this, type );
 	else if ( type == "ripemd160" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_RMD160, this, type );
+	else if ( type == "sha224" )
+	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA224, this, type );
 	else if ( type == "sha256" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA256, this, type );
 	else if ( type == "sha384" )
@@ -467,7 +474,15 @@ public:
 	else if ( type == "hmac(md5)" )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_MD5, this, type );
 	else if ( type == "hmac(sha1)" )
-	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA1,this, type );
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA1, this, type );
+	else if ( type == "hmac(sha224)" )
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA224, this, type );
+	else if ( type == "hmac(sha256)" )
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA256, this, type );
+	else if ( type == "hmac(sha384)" )
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA384, this, type );
+	else if ( type == "hmac(sha512)" )
+	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA512, this, type );
 	else if ( type == "hmac(ripemd160)" )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_RMD160, this, type );
 	else if ( type == "aes128-ecb" )
