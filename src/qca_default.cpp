@@ -568,6 +568,9 @@ public:
 	void init()
 	{
 		QDateTime now = QDateTime::currentDateTime();
+	        while (0 == now.time().msec()) {
+			now = QDateTime::currentDateTime();
+		}
 		time_t t = now.toTime_t() / now.time().msec();
 		srand(t);
 	}
