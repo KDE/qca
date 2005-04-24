@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003 Justin Karneges
+ Copyright (C) 2003-2005 Justin Karneges
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -18,8 +18,6 @@
  AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-
-// TODO: this code needs to be updated for QCA2
 
 #include <QtCore>
 #include <QtNetwork>
