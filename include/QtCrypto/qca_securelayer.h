@@ -68,7 +68,7 @@ namespace QCA
 		// encoded (network side)
 		virtual void writeIncoming(const QByteArray &a) = 0;
 		virtual QByteArray readOutgoing(int *plainBytes = 0) = 0;
-		virtual QSecureArray readUnprocessed();
+		virtual QByteArray readUnprocessed();
 	};
 
 	// securelayer - "nicer" interface, using signals.  subclass
@@ -110,15 +110,15 @@ namespace QCA
 		};
 		enum Error
 		{
-			ErrHandshake, ///< problem during the negotiation
-			ErrCrypt      ///< problem at anytime after
+			ErrorHandshake, ///< problem during the negotiation
+			ErrorCrypt      ///< problem at anytime after
 		};
 		enum IdentityResult
 		{
-			Valid,        ///< identity is verified
-			HostMismatch, ///< valid cert provided, but wrong owner
-			BadCert,      ///< invalid cert
-			NoCert        ///< identity unknown
+			Valid,              ///< identity is verified
+			HostMismatch,       ///< valid cert provided, but wrong owner
+			InvalidCertificate, ///< invalid cert
+			NoCertificate       ///< identity unknown
 		};
 
 		TLS(QObject *parent = 0, const QString &provider = QString());
@@ -164,7 +164,7 @@ namespace QCA
 		virtual QSecureArray read();
 		virtual void writeIncoming(const QByteArray &a);
 		virtual QByteArray readOutgoing(int *plainBytes = 0);
-		virtual QSecureArray readUnprocessed();
+		virtual QByteArray readUnprocessed();
 
 	signals:
 		void handshaken();

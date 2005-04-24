@@ -3438,6 +3438,12 @@ public:
 		return false;
 	}
 
+	virtual int maxSSF() const
+	{
+		// TODO
+		return 256;
+	}
+
 	virtual void setConstraints(int minSSF, int maxSSF)
 	{
 		// TODO
@@ -3454,7 +3460,8 @@ public:
 	virtual void setup(const QCA::CertificateCollection &_trusted, const QCA::CertificateChain &_cert, const QCA::PrivateKey &_key, bool compress)
 	{
 		trusted = _trusted;
-		cert = _cert.primary(); // TODO: take the whole chain
+		if(!_cert.isEmpty())
+			cert = _cert.primary(); // TODO: take the whole chain
 		key = _key;
 		Q_UNUSED(compress); // TODO
 	}
@@ -3662,9 +3669,9 @@ public:
 		return SessionInfo();
 	}
 
-	virtual QSecureArray unprocessed()
+	virtual QByteArray unprocessed()
 	{
-		QSecureArray a;
+		QByteArray a;
 		int size = BIO_pending(rbio);
 		if(size <= 0)
 			return a;

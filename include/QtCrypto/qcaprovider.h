@@ -431,6 +431,7 @@ public:
 
 	virtual QStringList supportedCipherSuites() const = 0;
 	virtual bool canCompress() const = 0;
+	virtual int maxSSF() const = 0;
 
 	virtual void setConstraints(int minSSF, int maxSSF) = 0;
 	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
@@ -445,7 +446,7 @@ public:
 	virtual bool decode(const QByteArray &from_net, QSecureArray *plain, QByteArray *to_net) = 0;
 	virtual bool eof() const = 0;
 	virtual SessionInfo sessionInfo() const = 0;
-	virtual QSecureArray unprocessed() = 0;
+	virtual QByteArray unprocessed() = 0;
 
 	virtual TLS::IdentityResult peerIdentityResult() const = 0;
 	virtual Validity peerCertificateValidity() const = 0;
