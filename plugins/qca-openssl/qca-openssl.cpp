@@ -3373,7 +3373,6 @@ public:
 	SSL_METHOD *method;
 	SSL_CTX *context;
 	BIO *rbio, *wbio;
-	QCA::TLS::IdentityResult ir;
 	QCA::Validity vr;
 	bool v_eof;
 
@@ -3421,7 +3420,6 @@ public:
 		recvQueue.resize(0);
 		mode = Idle;
 		peercert = QCA::Certificate();
-		ir = QCA::TLS::NoCert;
 		vr = QCA::ErrorValidityUnknown;
 		v_eof = false;
 	}
@@ -3688,11 +3686,6 @@ public:
 		return a;
 	}
 
-	virtual QCA::TLS::IdentityResult peerIdentityResult() const
-	{
-		return ir;
-	}
-
 	virtual QCA::Validity peerCertificateValidity() const
 	{
 		return vr;
@@ -3786,20 +3779,13 @@ public:
 
 			int ret = SSL_get_verify_result(ssl);
 			if(ret == X509_V_OK)
-			{
-				ir = QCA::TLS::Valid;
 				code = QCA::ValidityGood;
-			}
 			else
-			{
-				ir = QCA::TLS::BadCert;
 				code = convert_verify_error(ret);
-			}
 		}
 		else
 		{
 			peercert = QCA::Certificate();
-			ir = QCA::TLS::NoCert;
 		}
 		vr = code;
 	}

@@ -448,7 +448,6 @@ public:
 	virtual SessionInfo sessionInfo() const = 0;
 	virtual QByteArray unprocessed() = 0;
 
-	virtual TLS::IdentityResult peerIdentityResult() const = 0;
 	virtual Validity peerCertificateValidity() const = 0;
 	virtual CertificateChain peerCertificateChain() const = 0;
 };
