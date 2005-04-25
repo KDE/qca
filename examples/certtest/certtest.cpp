@@ -1,5 +1,6 @@
 /*
  Copyright (C) 2003 Justin Karneges
+ Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -19,69 +20,122 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// TODO: this code needs to be updated for QCA2
-#include<qdom.h>
-#include<qfile.h>
-#include"base64.h"
-#include"qca.h"
 
-QCA::Cert readCertXml(const QDomElement &e)
+#include <QtCore>
+
+#include <QtCrypto>
+
+#include <iostream>
+
+static void dumpCertificateInfo( QCA::CertificateInfo subject)
 {
-	QCA::Cert cert;
-	// there should be one child data tag
-	QDomElement data = e.elementsByTagName("data").item(0).toElement();
-	if(!data.isNull())
-		cert.fromDER(Base64::stringToArray(data.text()));
-	return cert;
+    std::cout << "  Common Name: " << std::endl;
+    QList<QString> commonNameList = subject.values(QCA::CommonName);
+    QString commonName;
+    foreach( commonName, commonNameList ) {
+	std::cout << "    " << qPrintable(commonName) << std::endl;
+    }
+
+    std::cout << "  Organization: " << std::endl;
+    QList<QString> orgInfo = subject.values(QCA::Organization);
+    QString organization;
+    foreach( organization, orgInfo ) {
+	std::cout << "    " << qPrintable(organization) << std::endl;
+    }
+
+    std::cout << "  Country: " << std::endl;
+    QList<QString> countryList = subject.values(QCA::Country);
+    QString country;
+    foreach( country, countryList ) {
+	std::cout << "    " << qPrintable(country) << std::endl;
+    }
 }
 
-void showCertInfo(const QCA::Cert &cert)
+static void dumpSubjectInfo( QCA::CertificateInfo subject)
 {
-	printf(" CN: %s\n", cert.subject()["CN"].latin1());
-	printf(" Valid from: %s, until %s\n",
-		cert.notBefore().toString().latin1(),
-		cert.notAfter().toString().latin1());
-	printf(" PEM:\n%s\n", cert.toPEM().latin1());
+    std::cout << "Subject: " << std::endl;
+
+    dumpCertificateInfo( subject );
 }
 
-int main()
+static void dumpIssuerInfo( QCA::CertificateInfo subject)
 {
-	if(!QCA::isSupported(QCA::CAP_X509)) {
-		printf("X509 not supported!\n");
-		return 1;
+    std::cout << "Issuer: " << std::endl;
+
+    dumpCertificateInfo( subject );
+}
+
+
+int main(int argc, char** argv)
+{
+    // the Initializer object sets things up, and 
+    // also does cleanup when it goes out of scope
+    QCA::Initializer init;
+
+    QCoreApplication app(argc, argv);
+
+    // get all the available providers loaded.
+    QCA::scanForPlugins();
+
+    if ( !QCA::isSupported( "cert" ) ) {
+	std::cout << "Sorry, no PKI certificate support" << std::endl;
+    	return 1;
+    }
+
+    QList<QCA::Certificate> certlist;
+
+    if (argc >= 2) {
+	std::cout << "Reading certificates from : " << argv[1] << std::endl;
+	QCA::CertificateCollection filecerts;
+	QCA::ConvertResult importResult;
+	filecerts = QCA::CertificateCollection::fromPKCS7File( argv[1], &importResult );
+	if ( QCA::ConvertGood == importResult) {
+	    std::cout << "Import succeeded" << std::endl;
+	    certlist == filecerts.certificates();
+	} else {
+	    std::cout << "Import failed" << std::endl;
 	}
 
-	// open the Psi rootcerts file
-	QFile f("/usr/local/share/psi/certs/rootcert.xml");
-	if(!f.open(IO_ReadOnly)) {
-		printf("unable to open %s\n", f.name().latin1());
-		return 1;
-	}
-	QDomDocument doc;
-	doc.setContent(&f);
-	f.close();
-
-	QDomElement base = doc.documentElement();
-	if(base.tagName() != "store") {
-		printf("wrong format of %s\n", f.name().latin1());
-		return 1;
-	}
-	QDomNodeList cl = base.elementsByTagName("certificate");
-	if(cl.count() == 0) {
-		printf("no certs found in %s\n", f.name().latin1());
-		return 1;
+    } else {
+	if ( !QCA::haveSystemStore() ) {
+	    std::cout << "System certificates not available" << std::endl;
+	    return 2;
 	}
 
-	for(int n = 0; n < (int)cl.count(); ++n) {
-		printf("-- Cert %d --\n", n);
-		QCA::Cert cert = readCertXml(cl.item(n).toElement());
-		if(cert.isNull()) {
-			printf("error reading cert\n");
-			continue;
-		}
-		showCertInfo(cert);
+	QCA::CertificateCollection systemcerts = QCA::systemStore();
+
+	certlist = systemcerts.certificates();
+    }
+
+    QCA::Certificate cert;
+    foreach (cert, certlist) {
+	std::cout << "Serial Number:";
+	std::cout << qPrintable(cert.serialNumber().toString()) << std::endl;
+
+	dumpSubjectInfo( cert.subjectInfo() );
+
+	dumpIssuerInfo( cert.issuerInfo() );
+
+	if ( cert.isCA() ) {
+	    std::cout << "Is certificate authority" << std::endl;
+	} else {
+	    std::cout << "Is not a certificate authority" << std::endl;
 	}
 
-	return 0;
+	if (cert.isSelfSigned() ) {
+	    std::cout << "Self signed" << std::endl;
+	} else {
+	    std::cout << "Is not self-signed!!!" << std::endl;
+	}
+
+	std::cout << "Valid from " << qPrintable(cert.notValidBefore().toString());
+	std::cout << ", until " << qPrintable(cert.notValidAfter().toString());
+	//std::cout << std::endl;
+	//std::cout << "PEM:" << std::endl;
+	//std::cout << qPrintable(cert.toPEM());
+	std::cout << std::endl << std::endl;
+   }
+
+    return 0;
 }
 

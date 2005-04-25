@@ -1,8 +1,7 @@
-TEMPLATE = app
-CONFIG += thread console
-TARGET = certtest
+TEMPLATE  = app
+CONFIG   += thread console
+TARGET    = certtest
+QT       -= gui
 
-INCLUDEPATH += ../common
-HEADERS += ../common/base64.h
-SOURCES += ../common/base64.cpp certtest.cpp
+SOURCES += certtest.cpp
 include(../examples.pri)
