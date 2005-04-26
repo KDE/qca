@@ -88,14 +88,11 @@ int main(int argc, char** argv)
 	std::cout << "Reading certificates from : " << argv[1] << std::endl;
 	QCA::CertificateCollection filecerts;
 	QCA::ConvertResult importResult;
-	filecerts = QCA::CertificateCollection::fromPKCS7File( argv[1], &importResult );
+	filecerts = QCA::CertificateCollection::fromFlatTextFile( argv[1], &importResult );
 	if ( QCA::ConvertGood == importResult) {
 	    std::cout << "Import succeeded" << std::endl;
 	    certlist == filecerts.certificates();
-	} else {
-	    std::cout << "Import failed" << std::endl;
 	}
-
     } else {
 	if ( !QCA::haveSystemStore() ) {
 	    std::cout << "System certificates not available" << std::endl;
@@ -106,6 +103,8 @@ int main(int argc, char** argv)
 
 	certlist = systemcerts.certificates();
     }
+
+    std::cout << "Cert size: " << certlist.count() << std::endl;
 
     QCA::Certificate cert;
     foreach (cert, certlist) {
