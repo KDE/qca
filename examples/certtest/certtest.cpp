@@ -74,9 +74,6 @@ int main(int argc, char** argv)
 
     QCoreApplication app(argc, argv);
 
-    // get all the available providers loaded.
-    QCA::scanForPlugins();
-
     if ( !QCA::isSupported( "cert" ) ) {
 	std::cout << "Sorry, no PKI certificate support" << std::endl;
     	return 1;
@@ -91,7 +88,7 @@ int main(int argc, char** argv)
 	filecerts = QCA::CertificateCollection::fromFlatTextFile( argv[1], &importResult );
 	if ( QCA::ConvertGood == importResult) {
 	    std::cout << "Import succeeded" << std::endl;
-	    certlist == filecerts.certificates();
+	    certlist = filecerts.certificates();
 	}
     } else {
 	if ( !QCA::haveSystemStore() ) {
