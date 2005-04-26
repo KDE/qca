@@ -9,8 +9,8 @@ SUBDIRS += \
 	hextest \
 	ciphertest \
 	rsatest
-#	certtest \
-#	ssltest \
+	certtest \
+	ssltest \
 #	sslservtest \
 #	sasltest
 
