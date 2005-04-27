@@ -46,3 +46,16 @@ to a file, using PEM encoding.
 
 */
 
+/** \example ssltest.cpp
+
+The code below shows how to create an SSL client 
+
+*/
+
+/** \example certtest.cpp
+
+This example shows how QCA::Certificate and QCA::CertificateCollection
+can be used. Note that the argument, if you provide it, must be a 
+PEM encoded file collection.
+
+*/
