@@ -8,9 +8,9 @@ SUBDIRS += \
 	base64test \
 	hextest \
 	ciphertest \
-	rsatest
 	certtest \
 	ssltest \
+	rsatest
 #	sslservtest \
 #	sasltest
 
