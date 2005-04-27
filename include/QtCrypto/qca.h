@@ -57,9 +57,11 @@
      - Arbitrary precision integers (QBigInteger)
      - Random number generation (QCA::Random)
      - SSL/TLS (ToDo)
-     - X509 certificate (Cert) (ToDo)
+     - X509 certificates (QCA::Certificate and QCA::CertificateCollection)
      - Simple Authentication and Security Layer (SASL) (ToDo)
-     - RSA (ToDo)
+     - RSA (QCA::RSAPrivateKey and QCA::RSAPublicKey)
+     - DSA (QCA::DSAPrivateKey and QCA::DSAPublicKey)
+     - Diffie-Hellman (QCA::DHPrivateKey and QCA::DHPublicKey)
      - Hashing (QCA::Hash)
          - QCA::SHA0
          - QCA::SHA1
@@ -67,6 +69,7 @@
          - QCA::MD4
          - QCA::MD5
          - QCA::RIPEMD160
+         - QCA::SHA224
          - QCA::SHA256
          - QCA::SHA384
          - QCA::SHA512
@@ -79,6 +82,10 @@
          - SHA1
          - MD5
          - RIPEMD160
+	 - SHA224
+	 - SHA256
+	 - SHA384
+	 - SHA512
      - Encoding and decoding of hexadecimal (QCA::Hex) and 
      Base64 (QCA::Base64)
   
