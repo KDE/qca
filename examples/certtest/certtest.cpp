@@ -27,30 +27,36 @@
 
 #include <iostream>
 
-static void dumpCertificateInfo( QCA::CertificateInfo subject)
+// dump out information about some part of the certificate
+// we use this same approach for information about the subject
+// of the certificate, and also about the issuer of the certificate
+static void dumpCertificateInfo( QCA::CertificateInfo info)
 {
-    std::cout << "  Common Name: " << std::endl;
-    QList<QString> commonNameList = subject.values(QCA::CommonName);
-    QString commonName;
-    foreach( commonName, commonNameList ) {
-	std::cout << "    " << qPrintable(commonName) << std::endl;
-    }
-
     std::cout << "  Organization: " << std::endl;
-    QList<QString> orgInfo = subject.values(QCA::Organization);
+
+    // Note that a single certificate can apply to more than one 
+    // organisation. QCA::Certificate is a multimap, so when you
+    // ask for the values associated with a parameter, it returns
+    // a list.
+    QList<QString> orgInfoList = info.values(QCA::Organization);
+
+    // foreach() interates over each value in the list, and we dump
+    // out each value. Note that is uncommon for a certificate to
+    // actually contain multiple values for a single parameter.
     QString organization;
-    foreach( organization, orgInfo ) {
+    foreach( organization, orgInfoList ) {
 	std::cout << "    " << qPrintable(organization) << std::endl;
     }
 
     std::cout << "  Country: " << std::endl;
-    QList<QString> countryList = subject.values(QCA::Country);
-    QString country;
-    foreach( country, countryList ) {
+    // As above, however this shows a more compact way to represent
+    // the iteration and output.
+    foreach( QString country, info.values(QCA::Country) ) {
 	std::cout << "    " << qPrintable(country) << std::endl;
     }
 }
 
+// This is just a convenience routine
 static void dumpSubjectInfo( QCA::CertificateInfo subject)
 {
     std::cout << "Subject: " << std::endl;
@@ -58,11 +64,13 @@ static void dumpSubjectInfo( QCA::CertificateInfo subject)
     dumpCertificateInfo( subject );
 }
 
-static void dumpIssuerInfo( QCA::CertificateInfo subject)
+
+// This is just a convenience routine
+static void dumpIssuerInfo( QCA::CertificateInfo issuer)
 {
     std::cout << "Issuer: " << std::endl;
 
-    dumpCertificateInfo( subject );
+    dumpCertificateInfo( issuer );
 }
 
 
@@ -74,61 +82,88 @@ int main(int argc, char** argv)
 
     QCoreApplication app(argc, argv);
 
+    // We need to ensure that we have certificate handling support
     if ( !QCA::isSupported( "cert" ) ) {
 	std::cout << "Sorry, no PKI certificate support" << std::endl;
     	return 1;
     }
 
+    // We are going to work with a number of certificates, and a 
+    // QList is a great template class for that
     QList<QCA::Certificate> certlist;
 
+    // We do two different cases - if we provide an argument, it is taken
+    // as a filename to read the keys from. If there is no argument, we just
+    // read from the system store certificates.
     if (argc >= 2) {
-	std::cout << "Reading certificates from : " << argv[1] << std::endl;
+	// we are going to read the certificates in using a single call
+	// which requires a CertificateCollection.
 	QCA::CertificateCollection filecerts;
+	// The conversion can be tested (although you don't have to) to find out if it
+	// worked.
 	QCA::ConvertResult importResult;
+	// This imports all the PEM encoded certificates from the file specified as the argument
+	// Note that you pass in a pointer to the result argument.
 	filecerts = QCA::CertificateCollection::fromFlatTextFile( argv[1], &importResult );
 	if ( QCA::ConvertGood == importResult) {
 	    std::cout << "Import succeeded" << std::endl;
+	    // this turns the CertificateCollection into a QList of Certificate objects
 	    certlist = filecerts.certificates();
 	}
     } else {
+	// we have no arguments, so just use the system certificates
 	if ( !QCA::haveSystemStore() ) {
 	    std::cout << "System certificates not available" << std::endl;
 	    return 2;
 	}
 
+	// Similar to above, except we just want the system certificates
 	QCA::CertificateCollection systemcerts = QCA::systemStore();
 
+	// this turns the CertificateCollection into a QList of Certificate objects
 	certlist = systemcerts.certificates();
     }
 
-    std::cout << "Cert size: " << certlist.count() << std::endl;
+    std::cout << "Number of certificates: " << certlist.count() << std::endl;
 
     QCA::Certificate cert;
     foreach (cert, certlist) {
 	std::cout << "Serial Number:";
+	// the serial number of the certificate is a QBigInteger, but we can
+	// just convert it to a string, and then output it.
 	std::cout << qPrintable(cert.serialNumber().toString()) << std::endl;
 
+	// The subject information shows properties of who the certificate
+	// applies to. See the convenience routines above.
 	dumpSubjectInfo( cert.subjectInfo() );
 
+	// The issuer information shows properties of who the certificate
+	// was signed by. See the convenience routines above.
 	dumpIssuerInfo( cert.issuerInfo() );
 
+	// Test if the certificate can be used as a certificate authority
 	if ( cert.isCA() ) {
 	    std::cout << "Is certificate authority" << std::endl;
 	} else {
 	    std::cout << "Is not a certificate authority" << std::endl;
 	}
 
+	// Test if the certificate is self-signed.
 	if (cert.isSelfSigned() ) {
 	    std::cout << "Self signed" << std::endl;
 	} else {
 	    std::cout << "Is not self-signed!!!" << std::endl;
 	}
 
+	// Certificate are only valid between specific dates. We can get the dates
+	// (as a QDateTime) using a couple of calls
 	std::cout << "Valid from " << qPrintable(cert.notValidBefore().toString());
 	std::cout << ", until " << qPrintable(cert.notValidAfter().toString());
-	//std::cout << std::endl;
-	//std::cout << "PEM:" << std::endl;
-	//std::cout << qPrintable(cert.toPEM());
+	std::cout << std::endl;
+
+	// You can get the certificate in PEM encoding with a simple toPEM() call
+	std::cout << "PEM:" << std::endl;
+	std::cout << qPrintable(cert.toPEM());
 	std::cout << std::endl << std::endl;
    }
 
