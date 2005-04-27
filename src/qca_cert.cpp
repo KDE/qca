@@ -941,6 +941,10 @@ CertificateCollection CertificateCollection::fromFlatTextFile(const QString &fil
 				certs.addCertificate(c);
 		}
 	}
+
+	if(result)
+		*result = ConvertGood;
+
 	return certs;
 }
 
