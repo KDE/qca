@@ -33,6 +33,8 @@ int main(int argc, char **argv)
     QCoreApplication app(argc, argv);
 
     // get all the available providers loaded.
+    // you don't normally need this (because you test using isSupported())
+    // but this is a special case.
     QCA::scanForPlugins();
 
     // this gives us all the plugin providers as a list
