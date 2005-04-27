@@ -590,7 +590,7 @@ namespace QCA
 	};
 
 	/**
-	   Digital Signature Algorithm Public Key
+	   Digital Signature %Algorithm Public Key
 	*/
 	class QCA_EXPORT DSAPublicKey : public PublicKey
 	{
@@ -604,7 +604,7 @@ namespace QCA
 	};
 
 	/**
-	   Digital Signature Algorithm Private Key
+	   Digital Signature %Algorithm Private Key
 	*/
 	class QCA_EXPORT DSAPrivateKey : public PrivateKey
 	{

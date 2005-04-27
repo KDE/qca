@@ -40,6 +40,9 @@ namespace QCA
 		SPKAC   ///< Signed Public Key and Challenge (Netscape) format
 	};
 
+	/**
+	   Certificate information types
+	*/
 	enum CertificateInfoType
 	{
 		CommonName,
@@ -55,6 +58,9 @@ namespace QCA
 		XMPP
 	};
 
+	/**
+	   Certificate constraints
+	*/
 	enum ConstraintType
 	{
 		// basic
@@ -113,10 +119,21 @@ namespace QCA
 		ErrorValidityUnknown     ///< Validity is unknown
 	};
 
+	/**
+	   Certificate properties type
+	*/
 	typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
+
+	/**
+	   %Certificate contraints type
+	*/
 	typedef QList<ConstraintType> Constraints;
 
-	// note: in SPKAC mode, all options are ignored except for challenge
+	/**
+	   %Certificate options
+
+	   \note In SPKAC mode, all options are ignored except for challenge
+	*/
 	class QCA_EXPORT CertificateOptions
 	{
 	public:
@@ -153,16 +170,50 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   Public Key (X.509) certificate
+
+	   This class contains one X.509 certificate
+	*/
 	class QCA_EXPORT Certificate : public Algorithm
 	{
 	public:
+		/**
+		   Create an empty Certificate
+		*/
 		Certificate();
+
+		/**
+		   Create a Certificate from a PEM encoded file
+
+		   \param fileName the name (and path, if required)
+		   of the file that contains the PEM encoded certificate
+		*/
 		Certificate(const QString &fileName);
+
+		/**
+		   Create a Certificate with specified options and a specified private key
+
+		   \param opts the options to use
+		   \param key the private key for this certificate
+		   \param provider the provider to use to create this key, if a particular provider is required
+		*/
 		Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
+		/**
+		   Test if the certificate is empty (null)
+		   \return true if the certificate is null
+		*/
 		bool isNull() const;
 
+		/**
+		   The earliest date that the certificate is valid
+		*/
 		QDateTime notValidBefore() const;
+
+		/**
+		   The latest date that the certificate is valid
+		*/
 		QDateTime notValidAfter() const;
 
 		CertificateInfo subjectInfo() const;
@@ -173,7 +224,19 @@ namespace QCA
 		QString commonName() const;
 		QBigInteger serialNumber() const;
 		PublicKey subjectPublicKey() const;
+
+		/**
+		   Test if the Certificate is valid as a Certificate Authority
+
+		   \return true if the Certificate is valid as a Certificate Authority
+		*/
 		bool isCA() const;
+
+		/**
+		   Test if the Certificate is self-signed
+
+		   \return true if the certificate is self-signed
+		*/
 		bool isSelfSigned() const;
 		int pathLimit() const;
 
@@ -184,17 +247,70 @@ namespace QCA
 		QByteArray issuerKeyId() const;
 		Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u = UsageAny) const;
 
-		// import / export
+		/**
+		   Export the Certificate into a DER format
+		*/
 		QSecureArray toDER() const;
+
+		/**
+		   Export the Certificate into a PEM format
+		*/
 		QString toPEM() const;
+
+		/**
+		   Export the Certificate into PEM format in a file
+
+		   \param fileName the name of the file to use
+		*/
 		bool toPEMFile(const QString &fileName) const;
+
+		/**
+		   Import the certificate from DER
+
+		   \param a the array containing the certificate in DER format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the Certificate corresponding to the certificate in the provided array
+		*/
 		static Certificate fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the certificate from PEM format
+
+		   \param s the string containing the certificate in PEM format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the Certificate corresponding to the certificate in the provided string
+		*/
 		static Certificate fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the certificate from a file
+
+		   \param fileName the name (and path, if required) of the file containing the certificate in PEM format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the Certificate corresponding to the certificate in the provided string
+		*/
 		static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 		bool matchesHostname(const QString &host) const;
 
+		/**
+		   Test for equality of two certificates
+		   
+		   \return true if the two certificates are the same
+		*/
 		bool operator==(const Certificate &a) const;
+
+		/**
+		   Test for inequality of two certificates
+		   
+		   \return true if the two certificates are not the same
+		*/
 		bool operator!=(const Certificate &a) const;
 	};
 
@@ -207,6 +323,9 @@ namespace QCA
 		const Certificate & primary() const;
 	};
 
+	/**
+	   Certificate Request
+	*/
 	class QCA_EXPORT CertificateRequest : public Algorithm
 	{
 	public:
@@ -274,6 +393,9 @@ namespace QCA
 		Reason _reason;
 	};
 
+	/**
+	   Certificate Revocation List
+	*/
 	class QCA_EXPORT CRL : public Algorithm
 	{
 	public:
@@ -294,14 +416,46 @@ namespace QCA
 
 		QByteArray issuerKeyId() const;
 
-		// import / export
+		/**
+		   Export the Certificate Revocation List (CRL) in DER format
+
+		   \return an array containing the CRL in DER format
+		*/
 		QSecureArray toDER() const;
+
+		/**
+		   Export the Certificate Revocation List (CRL) in PEM format
+
+		   \return a string containing the CRL in PEM format
+		*/
 		QString toPEM() const;
+
+		/**
+		   Import a DER encoded Certificate Revocation List (CRL)
+
+		   \param a the array containing the CRL in DER format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CRL corresponding to the contents of the array
+		*/
 		static CRL fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import a PEM encoded %Certificate Revocation List (CRL)
+
+		   \param s the string containing the CRL in PEM format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CRL corresponding to the contents of the string
+		*/
 		static CRL fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
-	// a bundle of Certificates and CRLs
+	/**
+	   Bundle of %Certificates and CRLs
+	*/
 	class CertificateCollection
 	{
 	public:
