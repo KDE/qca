@@ -252,30 +252,6 @@ static QCA::CertificateInfo get_cert_name(X509_NAME *name)
 	return info;
 }
 
-static bool info_compare_item(const QCA::CertificateInfo &a, const QCA::CertificateInfo &b, QCA::CertificateInfoType t)
-{
-	if(a.contains(t) && b.contains(t) && a.value(t) == b.value(t))
-		return true;
-	return false;
-}
-
-static bool info_compare(const QCA::CertificateInfo &a, const QCA::CertificateInfo &b)
-{
-	if(!info_compare_item(a, b, QCA::CommonName))
-		return false;
-	if(!info_compare_item(a, b, QCA::Country))
-		return false;
-	if(!info_compare_item(a, b, QCA::Locality))
-		return false;
-	if(!info_compare_item(a, b, QCA::State))
-		return false;
-	if(!info_compare_item(a, b, QCA::Organization))
-		return false;
-	if(!info_compare_item(a, b, QCA::OrganizationalUnit))
-		return false;
-	return true;
-}
-
 static X509_EXTENSION *new_subject_key_id(X509 *cert)
 {
 	X509V3_CTX ctx;
@@ -2930,7 +2906,7 @@ public:
 		p.subject = get_cert_name(X509_get_subject_name(x));
 		p.issuer = get_cert_name(X509_get_issuer_name(x));
 
-		p.isSelfSigned = info_compare(p.subject, p.issuer);
+		p.isSelfSigned = ( X509_V_OK == X509_check_issued( x, x ) );
 
 		p.isCA = false;
 		p.pathLimit = 0;
