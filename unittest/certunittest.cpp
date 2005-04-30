@@ -1,7 +1,7 @@
 /**
  * certunittest.cpp
  *
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,19 @@ CertUnitTest::CertUnitTest()
 
 }
 
+void CertUnitTest::checkCAcerts(QString provider)
+{
+    QCA::ConvertResult resultca1;
+    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/RootCAcert.pem", &resultca1, provider);
+
+    CHECK( resultca1, QCA::ConvertGood );
+    CHECK( ca1.isNull(), false );
+    CHECK( ca1.isCA(), true );
+    CHECK( ca1.isSelfSigned(), true );
+
+    CHECK( ca1.serialNumber(), QBigInteger(0) );
+}
+
 void CertUnitTest::allTests()
 {
     QCA::Initializer init;
@@ -43,5 +56,7 @@ void CertUnitTest::allTests()
 	QCA::CertificateCollection collection1;
 	collection1 = QCA::systemStore();
     }
+
+    checkCAcerts(QString());
 }
 

@@ -1,0 +1,27 @@
+Certificate Revocation List (CRL):
+        Version 1 (0x0)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: /C=de/O=InsecureTestCertificate/CN=For Tests Only/Email=insecure@test.insecure
+        Last Update: Aug 17 11:12:03 2001 GMT
+        Next Update: Aug 16 11:12:03 2006 GMT
+Revoked Certificates:
+    Serial Number: 03
+        Revocation Date: Aug 17 11:10:39 2001 GMT
+    Serial Number: 05
+        Revocation Date: Aug 17 11:11:59 2001 GMT
+    Signature Algorithm: md5WithRSAEncryption
+        78:ee:53:15:08:a9:4f:a0:10:20:2f:06:b2:ef:a7:8d:46:ad:
+        7b:e3:d8:ed:ff:b8:3f:3a:e8:74:ea:2b:0d:33:ae:bf:0a:0c:
+        d5:2f:6c:4a:48:2d:ec:d8:55:f8:c4:a8:37:db:49:e2:58:8e:
+        83:be:6e:07:dc:ce:88:ed:1b:ee:a0:2b:d9:05:5a:6e:d4:c0:
+        3c:cf:63:68:f3:d8:36:50:f5:a5:4b:15:00:be:eb:e8:d8:63:
+        86:46:0a:3e:f2:77:3f:f3:88:3c:6e:22:d4:c5:34:85:f1:5b:
+        38:4f:51:e7:82:8d:6a:ad:f7:8f:33:8a:2e:d6:eb:bb:2e:14:
+        67:47:cb:6e:21:5a:10:4f:a5:b7:45:29:44:b1:04:41:44:cd:
+        f2:f9:59:0e:3c:07:f4:18:11:b2:97:a5:86:5a:2c:a6:5c:7a:
+        ac:aa:2b:3c:d1:66:d7:e7:4b:6b:f3:9f:42:96:da:9b:bb:6c:
+        9a:14:05:fe:f8:81:01:04:30:7b:26:85:62:d5:b9:6e:9a:06:
+        ab:a9:f5:d8:92:85:16:9f:d7:77:17:ca:b2:48:d8:ec:7e:13:
+        95:eb:5d:df:5e:99:9f:5c:56:77:de:e4:c5:b0:b4:a8:8a:13:
+        fc:7f:af:82:ba:cc:76:ad:fb:86:6a:9e:e3:38:fb:fb:8f:bb:
+        23:97:66:35
