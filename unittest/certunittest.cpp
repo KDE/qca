@@ -46,6 +46,16 @@ void CertUnitTest::checkCAcerts(QString provider)
     CHECK( ca1.serialNumber(), QBigInteger(0) );
 }
 
+void CertUnitTest::checkClientCerts(QString provider)
+{
+    QCA::ConvertResult resultClient1;
+    QCA::Certificate client1 = QCA::Certificate::fromPEMFile( "certs/User.pem", &resultClient1, provider);
+    CHECK( resultClient1, QCA::ConvertGood );
+    CHECK( client1.isNull(), false );
+    CHECK( client1.isCA(), false );
+    CHECK( client1.isSelfSigned(), false );
+
+}
 void CertUnitTest::allTests()
 {
     QCA::Initializer init;
@@ -58,5 +68,6 @@ void CertUnitTest::allTests()
     }
 
     checkCAcerts(QString());
+    checkClientCerts(QString());
 }
 
