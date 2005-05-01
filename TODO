@@ -5,7 +5,6 @@
 * API documentation
   clean up Algorithm
   clean up Filter
-  add QCA::systemStore() and haveSystemStore()
   document all the stuff in qca_cert.h
   document all the stuff in qca_publickey.h
   document all the stuff in qca_securelayer.h
@@ -32,8 +31,6 @@
 
 * examples
   create example for BigInteger
-  add systemStore() example
-  fix Cert example
   fix SASL examples (client and server)
   fix SSL example
 
