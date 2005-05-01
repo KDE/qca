@@ -125,7 +125,7 @@ namespace QCA
 	typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
 
 	/**
-	   %Certificate contraints type
+	   %Certificate constraints type
 	*/
 	typedef QList<ConstraintType> Constraints;
 
@@ -216,8 +216,19 @@ namespace QCA
 		*/
 		QDateTime notValidAfter() const;
 
+		/**
+		   Properties of the subject of the certificate
+		*/
 		CertificateInfo subjectInfo() const;
+
+		/**
+		   Properties of the issuer of the certificate
+		*/
 		CertificateInfo issuerInfo() const;
+
+		/**
+		   The constraints that apply to this certificate
+		*/
 		Constraints constraints() const;
 		QStringList policies() const;
 
@@ -364,6 +375,9 @@ namespace QCA
 		static CertificateRequest fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
+	/**
+	   Part of a CRL representing a single certificate
+	*/
 	class QCA_EXPORT CRLEntry
 	{
 	public:
@@ -454,7 +468,7 @@ namespace QCA
 	};
 
 	/**
-	   Bundle of %Certificates and CRLs
+	   Bundle of Certificates and CRLs
 	*/
 	class CertificateCollection
 	{
@@ -467,7 +481,14 @@ namespace QCA
 		void addCertificate(const Certificate &cert);
 		void addCRL(const CRL &crl);
 
+		/**
+		   The Certificates in this collection
+		*/
 		QList<Certificate> certificates() const;
+
+		/**
+		   The CRLs in this collection
+		*/
 		QList<CRL> crls() const;
 
 		void append(const CertificateCollection &other);
