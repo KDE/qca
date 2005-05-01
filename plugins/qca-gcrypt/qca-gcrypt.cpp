@@ -420,13 +420,17 @@ public:
 	list += "md4";
 	list += "md5";
 	list += "ripemd160";
+#if HAVE_SHA224
 	list += "sha224";
+#endif
 	list += "sha256";
 	list += "sha384";
 	list += "sha512";
 	list += "hmac(md5)";
 	list += "hmac(sha1)";
+#if HAVE_SHA224
 	list += "hmac(sha224)";
+#endif
 	list += "hmac(sha256)";
 	list += "hmac(sha384)";
 	list += "hmac(sha512)";
@@ -463,8 +467,10 @@ public:
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_MD5, this, type );
 	else if ( type == "ripemd160" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_RMD160, this, type );
+#if HAVE_SHA224
 	else if ( type == "sha224" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA224, this, type );
+#endif
 	else if ( type == "sha256" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA256, this, type );
 	else if ( type == "sha384" )
@@ -475,8 +481,10 @@ public:
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_MD5, this, type );
 	else if ( type == "hmac(sha1)" )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA1, this, type );
+#if HAVE_SHA224
 	else if ( type == "hmac(sha224)" )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA224, this, type );
+#endif
 	else if ( type == "hmac(sha256)" )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA256, this, type );
 	else if ( type == "hmac(sha384)" )

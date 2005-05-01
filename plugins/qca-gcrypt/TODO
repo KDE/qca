@@ -1,0 +1,8 @@
+Configuration:
+* Add check for libgcrypt support for SHA224
+
+Implementation:
+* Cipher is incomplete - it can't handle cases where
+  data is not provided in blocksize chunks. Needs buffering
+  and padding to be added.
+
