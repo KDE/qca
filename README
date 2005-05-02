@@ -1,17 +1,14 @@
-Qt Cryptographic Architecture
------------------------------
-Version: API v1.0, Plugin v1
+Qt Cryptographic Architecture (QCA)
+-----------------------------------
+
 Author: Justin Karneges <justin@affinix.com>
-Date: September 10th 2003
 
-This library provides an easy API for the following features:
 
-  SSL/TLS
-  X509
-  SASL
-  RSA
-  Hashing (SHA1, MD5)
-  Ciphers (BlowFish, 3DES, AES)
+About QCA
+---------
+This library provides an easy API for a range of cryptographic
+features, including SSL/TLS, X.509 certificates, SASL, symmetric
+ciphers, public key ciphers, hashes and much more.
 
 Functionality is supplied via plugins.  This is useful for avoiding
 dependence on a particular crypto library and makes upgrading easier,
@@ -20,10 +17,31 @@ upgrading a crypto plugin.  Also, by pushing crypto functionality into
 plugins, your application is free of legal issues, such as export
 regulation.
 
-And of course, you get a very simple crypto API for Qt, where you can
-do things like:
 
-  QString hash = QCA::SHA1::hashToString(blockOfData);
+Building from CVS/SVN
+---------------------
 
-Have fun!
+First, compile and install the 'qconf' program.  You'll need the CVS
+version of it, and here are the instructions:
+
+export CVSROOT=:pserver:anonymous@cvs.anywise.org:/psi
+cvs login
+cvs co qconf
+
+Then compile qconf using the usual "./configure, make, make install"
+procedure.
+
+Finally, go into the QCA source tree and type 'qconf'.  You should now
+have a configure script to execute.
+
+When you execute that script, you should see something like the following:
+
+     Configuring Qt Cryptographic Architecture (QCA) ...
+     Verifying Qt 4 build environment ... ok
+     Checking for certstore ... using bundled
+
+     Good, your configure finished.  Now run /usr/bin/gmake.
+
+If so, you can just run (g)make to build QCA. If not, have a look at
+conf.log to see what might have gone wrong.
 
