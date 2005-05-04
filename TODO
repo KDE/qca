@@ -1,6 +1,7 @@
 * Additional unit tests
 * Update to latest Botan, and remake the botantools patch as appropriate
 * create .prf for auto-discovery by qmake-based projects
+* update the README
 
 * API documentation
   clean up Algorithm
@@ -40,6 +41,7 @@
   qca-egads (or qca-egd): implement for Random support
   figure out why Valgrind reports so many memory leaks
   qca-gnupg: NEED_PASSPHRASE_PIN, BAD_PASSPHRASE_PIN, etc
+  provider for Mozilla NSS?
 
 * possibilities for the future:
   Key wrapping - RFC3217 and RFC3394
