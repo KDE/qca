@@ -319,6 +319,12 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	if(!QCA::isSupported("cert"))
+	{
+		printf("Error: no cert support\n");
+		return 1;
+	}
+
 	QStringList args;
 	for(int n = 1; n < argc; ++n)
 		args.append(QString(argv[n]));
