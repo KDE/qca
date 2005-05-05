@@ -230,10 +230,29 @@ namespace QCA
 		   The constraints that apply to this certificate
 		*/
 		Constraints constraints() const;
+
+		/**
+		   The policies that apply to this certificate
+
+		   Policies are specified as strings containing OIDs
+		*/
 		QStringList policies() const;
 
+		/**
+		   The common name of the subject of the certificate
+
+		   Common names are normally the name of a person, company or organisation
+		*/
 		QString commonName() const;
+
+		/**
+		   The serial number of the certificate
+		*/
 		QBigInteger serialNumber() const;
+
+		/**
+		   The public key associated with the subject of the certificate
+		*/
 		PublicKey subjectPublicKey() const;
 
 		/**
@@ -249,13 +268,29 @@ namespace QCA
 		   \return true if the certificate is self-signed
 		*/
 		bool isSelfSigned() const;
+
 		int pathLimit() const;
 
 		QSecureArray signature() const;
 		SignatureAlgorithm signatureAlgorithm() const;
 
+		/**
+		   The key identifier associated with the subject
+		*/
 		QByteArray subjectKeyId() const;
+
+		/**
+		   The key identifier associated with the issuer
+		*/
 		QByteArray issuerKeyId() const;
+
+		/**
+		   Check the validity of a certificate
+
+		   \param trusted a collection of trusted certificates
+		   \param untrusted a collection of additional certificates, not necessarily trusted
+		   \param u the use required for the certificate
+		*/
 		Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u = UsageAny) const;
 
 		/**
@@ -381,13 +416,16 @@ namespace QCA
 	class QCA_EXPORT CRLEntry
 	{
 	public:
+		/**
+		   The reason why the certificate has been revoked
+		*/
 		enum Reason
 		{
-			Unspecified,
-			KeyCompromise,
-			CACompromise,
+			Unspecified,        ///< reason is unknown
+			KeyCompromise,      ///< private key has been compromised
+			CACompromise,       ///< certificate authority has been compromised
 			AffiliationChanged,
-			Superceded,
+			Superceded,         ///< certificate has been superceded
 			CessationOfOperation,
 			CertificateHold,
 			RemoveFromCRL,
