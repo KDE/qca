@@ -3253,10 +3253,32 @@ public:
 
 static bool usage_check(const MyCertContext &cc, QCA::UsageMode u)
 {
-	// TODO: check usage
-	Q_UNUSED(cc);
-	Q_UNUSED(u);
-	return true;
+	switch (u)
+	{
+	case QCA::UsageAny :
+		return true;
+		break;
+	case QCA::UsageTLSServer :
+		return cc._props.constraints.contains(QCA::ServerAuth);
+		break;
+	case QCA::UsageTLSClient :
+		return cc._props.constraints.contains(QCA::ClientAuth);
+		break;
+	case QCA::UsageCodeSigning :
+		return cc._props.constraints.contains(QCA::CodeSigning);
+		break;
+	case QCA::UsageEmailProtection :
+		return cc._props.constraints.contains(QCA::EmailProtection);
+		break;
+	case QCA::UsageTimeStamping :
+		return cc._props.constraints.contains(QCA::TimeStamping);
+		break;
+	case QCA::UsageCRLSigning :
+		return cc._props.constraints.contains(QCA::CRLSign);
+		break;
+	default:
+		return true;
+	}
 }
 
 QCA::Validity MyCertContext::validate(const QList<QCA::CertContext*> &trusted, const QList<QCA::CertContext*> &untrusted, const QList<QCA::CRLContext *> &crls, QCA::UsageMode u) const
