@@ -27,6 +27,7 @@
 #include "certunittest.h"
 #include <QtCrypto>
 
+#include <iostream>
 CertUnitTest::CertUnitTest()
     : Tester()
 {
@@ -55,7 +56,183 @@ void CertUnitTest::checkClientCerts(QString provider)
     CHECK( client1.isCA(), false );
     CHECK( client1.isSelfSigned(), false );
 
+    CHECK( client1.serialNumber(), QBigInteger(2) );
+
+    CHECK( client1.commonName(), QString("Insecure User Test Cert") );
+
+    CHECK( client1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 32, 38 ), Qt::UTC ).toString() );
+    CHECK( client1.notValidAfter().toString(), QDateTime( QDate( 2006, 8, 16 ), QTime( 8, 32, 38 ), Qt::UTC ).toString() );
+
+    CHECK( client1.constraints().contains(QCA::DigitalSignature), (QBool)true );
+    CHECK( client1.constraints().contains(QCA::NonRepudiation), (QBool)true );
+    CHECK( client1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
+    CHECK( client1.constraints().contains(QCA::DataEncipherment), (QBool)true );
+    CHECK( client1.constraints().contains(QCA::KeyAgreement), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::CRLSign), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::EncipherOnly), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::DecipherOnly), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::ServerAuth), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::ClientAuth), (QBool)true );
+    CHECK( client1.constraints().contains(QCA::CodeSigning), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::EmailProtection), (QBool)true );
+    CHECK( client1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
+    CHECK( client1.constraints().contains(QCA::IPSecUser), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::TimeStamping), (QBool)false );
+    CHECK( client1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+
+    // no policies on this cert
+    CHECK( client1.policies().count(), 0 );
+
+    QCA::CertificateInfo subject1 = client1.subjectInfo();
+    CHECK( subject1.isEmpty(), false );
+    CHECK( subject1.values(QCA::Country).contains("de"), (QBool)true );
+    CHECK( subject1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
+    CHECK( subject1.values(QCA::CommonName).contains("Insecure User Test Cert"), (QBool)true );
+
+    QCA::CertificateInfo issuer1 = client1.issuerInfo();
+    CHECK( issuer1.isEmpty(), false );
+    CHECK( issuer1.values(QCA::Country).contains("de"), (QBool)true );
+    CHECK( issuer1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
+    CHECK( issuer1.values(QCA::CommonName).contains("For Tests Only"), (QBool)true );
+
+    QByteArray subjectKeyID = QCA::Hex().stringToArray("889E7EF729719D7B280F361AAE6D00D39DE1AADB").toByteArray();
+    CHECK( client1.subjectKeyId(), subjectKeyID );
+    QByteArray authorityKeyID = QCA::Hex().stringToArray("BF53438278D09EC380E51B67CA0500DFB94883A5").toByteArray();
+    CHECK( client1.issuerKeyId(), authorityKeyID );
+
+    QCA::PublicKey pubkey1 = client1.subjectPublicKey();
+    CHECK( pubkey1.isNull(), false );
+    CHECK( pubkey1.isRSA(), true );
+    CHECK( pubkey1.isDSA(), false );
+    CHECK( pubkey1.isDH(), false );
+    CHECK( pubkey1.isPublic(), true );
+    CHECK( pubkey1.isPrivate(), false );
+    XFAIL( pubkey1.bitSize(), 1024 );
+
+    CHECK( client1.pathLimit(), 0 );
+
+    CHECK( client1.signatureAlgorithm(), QCA::EMSA3_MD5 );
+
+    QCA::CertificateCollection trusted;
+    QCA::CertificateCollection untrusted;
+    CHECK( client1.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+
+    QCA::ConvertResult resultca1;
+    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/RootCAcert.pem", &resultca1, provider);
+    CHECK( resultca1, QCA::ConvertGood );
+    trusted.addCertificate( ca1 );
+    CHECK( client1.validate( trusted, untrusted ), QCA::ValidityGood );
+    CHECK( client1.validate( trusted, untrusted, QCA::UsageAny ), QCA::ValidityGood );
+    CHECK( client1.validate( trusted, untrusted, QCA::UsageTLSServer ), QCA::ErrorInvalidPurpose );
+    CHECK( client1.validate( trusted, untrusted, QCA::UsageTLSClient ), QCA::ValidityGood );
+    CHECK( client1.validate( trusted, untrusted, QCA::UsageCodeSigning ), QCA::ErrorInvalidPurpose );
+    CHECK( client1.validate( trusted, untrusted, QCA::UsageTimeStamping ), QCA::ErrorInvalidPurpose );
+    CHECK( client1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ValidityGood );
+    CHECK( client1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorInvalidPurpose );
+
+    QSecureArray derClient1 = client1.toDER();
+    CHECK( derClient1.isEmpty(), false );
+    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derClient1, &resultClient1, provider );
+    CHECK( resultClient1, QCA::ConvertGood );
+    CHECK( fromDer1 == client1, true );
 }
+
+
+void CertUnitTest::checkServerCerts(QString provider)
+{
+    QCA::ConvertResult resultServer1;
+    QCA::Certificate server1 = QCA::Certificate::fromPEMFile( "certs/Server.pem", &resultServer1, provider);
+    CHECK( resultServer1, QCA::ConvertGood );
+    CHECK( server1.isNull(), false );
+    CHECK( server1.isCA(), false );
+    CHECK( server1.isSelfSigned(), false );
+
+    CHECK( server1.serialNumber(), QBigInteger(4) );
+
+    CHECK( server1.commonName(), QString("Insecure Server Cert") );
+
+    CHECK( server1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 46, 24 ), Qt::UTC ).toString() );
+    CHECK( server1.notValidAfter().toString(), QDateTime( QDate( 2006, 8, 16 ), QTime( 8, 46, 24 ), Qt::UTC ).toString() );
+
+    CHECK( server1.constraints().contains(QCA::DigitalSignature), (QBool)true );
+    CHECK( server1.constraints().contains(QCA::NonRepudiation), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
+    CHECK( server1.constraints().contains(QCA::DataEncipherment), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::KeyAgreement), (QBool)true );
+    CHECK( server1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::CRLSign), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::EncipherOnly), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::DecipherOnly), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::ServerAuth), (QBool)true );
+    CHECK( server1.constraints().contains(QCA::ClientAuth), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::CodeSigning), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::EmailProtection), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
+    CHECK( server1.constraints().contains(QCA::IPSecUser), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::TimeStamping), (QBool)false );
+    CHECK( server1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+
+    // no policies on this cert
+    CHECK( server1.policies().count(), 0 );
+
+    QCA::CertificateInfo subject1 = server1.subjectInfo();
+    CHECK( subject1.isEmpty(), false );
+    CHECK( subject1.values(QCA::Country).contains("de"), (QBool)true );
+    CHECK( subject1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
+    CHECK( subject1.values(QCA::CommonName).contains("Insecure Server Cert"), (QBool)true );
+
+    QCA::CertificateInfo issuer1 = server1.issuerInfo();
+    CHECK( issuer1.isEmpty(), false );
+    CHECK( issuer1.values(QCA::Country).contains("de"), (QBool)true );
+    CHECK( issuer1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
+    CHECK( issuer1.values(QCA::CommonName).contains("For Tests Only"), (QBool)true );
+
+    QByteArray subjectKeyID = QCA::Hex().stringToArray("0234E2C906F6E0B44253BE04C0CBA7823A6DB509").toByteArray();
+    CHECK( server1.subjectKeyId(), subjectKeyID );
+    QByteArray authorityKeyID = QCA::Hex().stringToArray("BF53438278D09EC380E51B67CA0500DFB94883A5").toByteArray();
+    CHECK( server1.issuerKeyId(), authorityKeyID );
+
+    QCA::PublicKey pubkey1 = server1.subjectPublicKey();
+    CHECK( pubkey1.isNull(), false );
+    CHECK( pubkey1.isRSA(), true );
+    CHECK( pubkey1.isDSA(), false );
+    CHECK( pubkey1.isDH(), false );
+    CHECK( pubkey1.isPublic(), true );
+    CHECK( pubkey1.isPrivate(), false );
+    XFAIL( pubkey1.bitSize(), 1024 );
+
+    CHECK( server1.pathLimit(), 0 );
+
+    CHECK( server1.signatureAlgorithm(), QCA::EMSA3_MD5 );
+
+    QCA::CertificateCollection trusted;
+    QCA::CertificateCollection untrusted;
+    CHECK( server1.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+
+    QCA::ConvertResult resultca1;
+    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/RootCAcert.pem", &resultca1, provider);
+    CHECK( resultca1, QCA::ConvertGood );
+    trusted.addCertificate( ca1 );
+    CHECK( server1.validate( trusted, untrusted ), QCA::ValidityGood );
+    CHECK( server1.validate( trusted, untrusted, QCA::UsageAny ), QCA::ValidityGood );
+    CHECK( server1.validate( trusted, untrusted, QCA::UsageTLSServer ), QCA::ValidityGood);
+    CHECK( server1.validate( trusted, untrusted, QCA::UsageTLSClient ), QCA::ErrorInvalidPurpose );
+    CHECK( server1.validate( trusted, untrusted, QCA::UsageCodeSigning ), QCA::ErrorInvalidPurpose );
+    CHECK( server1.validate( trusted, untrusted, QCA::UsageTimeStamping ), QCA::ErrorInvalidPurpose );
+    CHECK( server1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ErrorInvalidPurpose );
+    CHECK( server1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorInvalidPurpose );
+
+    QSecureArray derServer1 = server1.toDER();
+    CHECK( derServer1.isEmpty(), false );
+    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derServer1, &resultServer1, provider );
+    CHECK( resultServer1, QCA::ConvertGood );
+    CHECK( fromDer1 == server1, true );
+}
+
+
 void CertUnitTest::allTests()
 {
     QCA::Initializer init;
@@ -69,5 +246,6 @@ void CertUnitTest::allTests()
 
     checkCAcerts(QString());
     checkClientCerts(QString());
+    checkServerCerts(QString());
 }
 

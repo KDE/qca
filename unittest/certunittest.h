@@ -38,6 +38,7 @@ public:
 private:
     void checkCAcerts(QString provider);
     void checkClientCerts(QString provider);
+    void checkServerCerts(QString provider);
 };
 
 #endif
