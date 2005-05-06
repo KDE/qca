@@ -527,6 +527,59 @@ public:
 	virtual bool decode(const QByteArray &in, QSecureArray *out) = 0;
 };
 
+class MessageContext : public QObject, public Provider::Context
+{
+	Q_OBJECT
+public:
+	enum Operation
+	{
+		Encrypt,
+		Decrypt,
+		Sign,
+		Verify,
+		EncryptThenSign,
+		SignThenDecrypt,
+		DecryptThenVerify,
+		VerifyThenDecrypt
+	};
+
+	MessageContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
+
+	virtual SecureMessage::Type type() const = 0;
+
+	virtual void reset() = 0;
+	virtual void setupEncrypt(const SecureMessageKeyList &keys) = 0;
+	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner) = 0;
+	virtual void setupVerify(const QSecureArray &detachedSig) = 0;
+
+	virtual void start(SecureMessage::Format f, Operation op) = 0;
+	virtual void update(const QSecureArray &in) = 0;
+	virtual QSecureArray read() = 0;
+	virtual void end() = 0;
+
+	virtual bool finished() = 0;
+	virtual void waitForFinished() = 0;
+
+	virtual bool success() = 0;
+	virtual SecureMessage::Error errorCode() = 0;
+	virtual QSecureArray signature() = 0;
+	virtual bool verifySuccess() = 0;
+	virtual SecureMessageSignatureList signers() = 0;
+
+signals:
+	void updated();
+};
+
+class SMSContext : public Provider::Context
+{
+public:
+	SMSContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
+
+	virtual void setTrustedCertificates(const CertificateCollection &trusted);
+	virtual void setPrivateKeys(const QList<PrivateKey> &keys);
+	virtual MessageContext *createMessage() const = 0;
+};
+
 }
 
 #endif

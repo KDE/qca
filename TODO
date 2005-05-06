@@ -13,6 +13,7 @@
   think about documenting the various providers (qcaprovider.h)
 
 * Considerations
+  Q_DISABLE_COPY on some objects
   it's possible we use QSecureArray in some unnecessary places
   don't forget to QCA_EXPORT everything
   standardize on count() vs size() when iterating?
@@ -22,12 +23,9 @@
 * finish code for APIs:
   core: properties
   cert: rfc 2818 hostname validation
-  keystore
-  tls
+  keystore: cleanup
   sasl
-  securemessagesystem (consider thread issues)
-  openpgp
-  smime
+  securemessage
   default provider: sha1
 
 * examples

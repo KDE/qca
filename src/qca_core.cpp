@@ -578,6 +578,17 @@ void KeyStoreContext::submitPassphrase(const QSecureArray &)
 }
 
 //----------------------------------------------------------------------------
+// SMSContext
+//----------------------------------------------------------------------------
+void SMSContext::setTrustedCertificates(const CertificateCollection &)
+{
+}
+
+void SMSContext::setPrivateKeys(const QList<PrivateKey> &)
+{
+}
+
+//----------------------------------------------------------------------------
 // BufferedComputation
 //----------------------------------------------------------------------------
 BufferedComputation::~BufferedComputation()

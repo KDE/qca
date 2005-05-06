@@ -67,7 +67,7 @@ namespace QCA
 
 	private:
 		class Private;
-		Private *d;
+		QSharedDataPointer<Private> d;
 	};
 	typedef QList<SecureMessageKey> SecureMessageKeyList;
 
@@ -76,13 +76,14 @@ namespace QCA
 	public:
 		enum IdentityResult
 		{
-			Valid,   // indentity is verified, matches signature
-			Invalid, // valid key provided, but signature failed
-			BadKey,  // invalid key provided
-			NoKey    // identity unknown
+			Valid,            // indentity is verified, matches signature
+			InvalidSignature, // valid key provided, but signature failed
+			InvalidKey,       // invalid key provided
+			NoKey             // identity unknown
 		};
 
 		SecureMessageSignature();
+		SecureMessageSignature(IdentityResult r, Validity v, const SecureMessageKey &key, const QDateTime &ts);
 		SecureMessageSignature(const SecureMessageSignature &from);
 		~SecureMessageSignature();
 		SecureMessageSignature & operator=(const SecureMessageSignature &from);
@@ -94,14 +95,20 @@ namespace QCA
 
 	private:
 		class Private;
-		Private *d;
+		QSharedDataPointer<Private> d;
 	};
 	typedef QList<SecureMessageSignature> SecureMessageSignatureList;
 
-	class SecureMessage : public QObject
+	class SecureMessage : public QObject, public Algorithm
 	{
 		Q_OBJECT
 	public:
+		enum Type
+		{
+			OpenPGP,
+			SMIME
+		};
+
 		enum SignMode
 		{
 			Message,
@@ -140,8 +147,12 @@ namespace QCA
 		SecureMessage(SecureMessageSystem *system);
 		~SecureMessage();
 
+		Type type() const;
 		bool canSignMultiple() const;     // PGP can't sign multiple
 		bool canClearsign() const;        // S/MIME can't clearsign
+
+		void reset();
+
 		void setEnableBundleSigner(bool); // Bundle S/MIME certificate chain (default true)
 		void setFormat(Format f);         // (default Binary)
 		void setRecipient(const SecureMessageKey &key);
@@ -156,7 +167,7 @@ namespace QCA
 		void startEncryptAndSign(Order o = EncryptThenSign);
 		void startDecryptAndVerify(Order o = EncryptThenSign);
 		void update(const QSecureArray &in);
-		QSecureArray read(int size = -1);
+		QSecureArray read();
 		int bytesAvailable() const;
 		void end();
 		bool waitForFinished();
@@ -185,25 +196,25 @@ namespace QCA
 		Private *d;
 	};
 
-	class SecureMessageSystem : public QObject
+	class SecureMessageSystem : public QObject, public Algorithm
 	{
 		Q_OBJECT
 	public:
-		SecureMessageSystem(QObject *parent = 0);
 		~SecureMessageSystem();
+
+	protected:
+		SecureMessageSystem(QObject *parent, const QString &type, const QString &provider);
 	};
 
-	class OpenPGP : public SecureMessageSystem, public Algorithm
+	class OpenPGP : public SecureMessageSystem
 	{
 		Q_OBJECT
 	public:
 		OpenPGP(QObject *parent = 0, const QString &provider = QString());
 		~OpenPGP();
-
-		void setAllowAgent(bool);
 	};
 
-	class SMIME : public SecureMessageSystem, public Algorithm
+	class SMIME : public SecureMessageSystem
 	{
 		Q_OBJECT
 	public:
