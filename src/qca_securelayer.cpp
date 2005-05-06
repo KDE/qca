@@ -270,6 +270,7 @@ public:
 					if(peerValidity == ValidityGood && !host.isEmpty() && !peerCert.primary().matchesHostname(host))
 						hostMismatch = true;
 				}
+				sessionInfo = c->sessionInfo();
 				handshaken = true;
 				force_read = true;
 			}
