@@ -169,9 +169,8 @@ namespace QCA
 	signals:
 		void handshaken();
 
-	public:
-		class Private;
 	private:
+		class Private;
 		friend class Private;
 		Private *d;
 	};
@@ -487,9 +486,8 @@ These don't appear to map:
 		void authCheck(const QString &user, const QString &authzid);
 		void authenticated();
 
-	public:
-		class Private;
 	private:
+		class Private;
 		friend class Private;
 		Private *d;
 	};

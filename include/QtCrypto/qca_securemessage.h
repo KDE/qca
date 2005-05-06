@@ -189,9 +189,8 @@ namespace QCA
 		void readyRead();
 		void finished();
 
-	public:
-		class Private;
 	private:
+		class Private;
 		friend class Private;
 		Private *d;
 	};
