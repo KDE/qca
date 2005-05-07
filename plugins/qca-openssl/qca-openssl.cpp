@@ -3253,6 +3253,11 @@ public:
 
 static bool usage_check(const MyCertContext &cc, QCA::UsageMode u)
 {
+	if (cc._props.constraints.isEmpty() ) {
+		// then any usage is OK
+		return true;
+	}
+
 	switch (u)
 	{
 	case QCA::UsageAny :
