@@ -223,6 +223,13 @@ QDateTime SecureMessageSignature::timestamp() const
 //----------------------------------------------------------------------------
 // SecureMessage
 //----------------------------------------------------------------------------
+enum ResetMode
+{
+        ResetSession        = 0,
+        ResetSessionAndData = 1,
+        ResetAll            = 2
+};
+
 class SecureMessage::Private : public QObject
 {
 	Q_OBJECT
@@ -236,10 +243,20 @@ public:
 	SecureMessageKeyList to;
 	SecureMessageKeyList from;
 
+	QSecureArray in;
+	bool success;
+	SecureMessage::Error errorCode;
+	QSecureArray detachedSig;
+	SecureMessageSignatureList signers;
+
 	Private(SecureMessage *_q)
 	{
 		q = _q;
 		bundleSigner = false;
+		format = SecureMessage::Binary;
+
+		success = false;
+		errorCode = SecureMessage::ErrorUnknown;
 	}
 
 	void init()
@@ -247,9 +264,60 @@ public:
 		connect(c, SIGNAL(updated()), SLOT(updated()));
 	}
 
+	void reset(ResetMode mode)
+	{
+		c->reset();
+
+		if(mode >= ResetSessionAndData)
+		{
+			in.clear();
+			success = false;
+			errorCode = SecureMessage::ErrorUnknown;
+			detachedSig.clear();
+			signers.clear();
+		}
+
+		if(mode >= ResetAll)
+		{
+			bundleSigner = false;
+			format = SecureMessage::Binary;
+			to.clear();
+			from.clear();
+		}
+	}
+
 public slots:
 	void updated()
 	{
+		bool sig_read = false;
+		bool sig_done = false;
+		{
+			QSecureArray a = c->read();
+			if(!a.isEmpty())
+			{
+				sig_read = true;
+				in.append(a);
+			}
+		}
+
+		if(c->finished())
+		{
+			sig_done = true;
+
+			success = c->success();
+			errorCode = c->errorCode();
+			if(success)
+			{
+				detachedSig = c->signature();
+				signers = c->signers();
+			}
+			reset(ResetSession);
+		}
+
+		if(sig_read)
+			QTimer::singleShot(0, q, SIGNAL(readyRead()));
+		if(sig_done)
+			QTimer::singleShot(0, q, SIGNAL(finished()));
 	}
 };
 
@@ -284,7 +352,7 @@ bool SecureMessage::canClearsign() const
 
 void SecureMessage::reset()
 {
-	// TODO
+	d->reset(ResetAll);
 }
 
 void SecureMessage::setEnableBundleSigner(bool b)
@@ -319,23 +387,27 @@ void SecureMessage::setSigners(const SecureMessageKeyList &keys)
 
 void SecureMessage::startEncrypt()
 {
+	d->reset(ResetSessionAndData);
 	d->c->setupEncrypt(d->to);
 	d->c->start(d->format, MessageContext::Encrypt);
 }
 
 void SecureMessage::startDecrypt()
 {
+	d->reset(ResetSessionAndData);
 	d->c->start(d->format, MessageContext::Decrypt);
 }
 
 void SecureMessage::startSign(SignMode m)
 {
+	d->reset(ResetSessionAndData);
 	d->c->setupSign(d->from, m, d->bundleSigner);
 	d->c->start(d->format, MessageContext::Sign);
 }
 
 void SecureMessage::startVerify(const QSecureArray &sig)
 {
+	d->reset(ResetSessionAndData);
 	if(!sig.isEmpty())
 		d->c->setupVerify(sig);
 	d->c->start(d->format, MessageContext::Verify);
@@ -343,66 +415,88 @@ void SecureMessage::startVerify(const QSecureArray &sig)
 
 void SecureMessage::startEncryptAndSign(Order o)
 {
-	Q_UNUSED(o);
+	d->reset(ResetSessionAndData);
+	d->c->setupEncrypt(d->to);
+	d->c->setupSign(d->from, Message, d->bundleSigner);
+	d->c->start(d->format, o == EncryptThenSign ? MessageContext::EncryptThenSign : MessageContext::SignThenEncrypt);
 }
 
 void SecureMessage::startDecryptAndVerify(Order o)
 {
-	Q_UNUSED(o);
+	d->reset(ResetSessionAndData);
+	d->c->start(d->format, o == EncryptThenSign ? MessageContext::VerifyThenDecrypt : MessageContext::DecryptThenVerify);
 }
 
 void SecureMessage::update(const QSecureArray &in)
 {
-	Q_UNUSED(in);
+	d->c->update(in);
 }
 
 QSecureArray SecureMessage::read()
 {
-	return QSecureArray();
+	QSecureArray a = d->in;
+	d->in.clear();
+	return a;
 }
 
 int SecureMessage::bytesAvailable() const
 {
-	return 0;
+	return d->in.size();
 }
 
 void SecureMessage::end()
 {
+	d->c->end();
 }
 
-bool SecureMessage::waitForFinished()
+bool SecureMessage::waitForFinished(int msecs)
 {
-	return false;
+	d->c->waitForFinished(msecs);
+	d->updated();
+	return d->success;
 }
 
 bool SecureMessage::success() const
 {
-	return false;
+	return d->success;
 }
 
 SecureMessage::Error SecureMessage::errorCode() const
 {
-	return ErrorUnknown;
+	return d->errorCode;
 }
 
 QSecureArray SecureMessage::signature() const
 {
-	return QSecureArray();
+	return d->detachedSig;
 }
 
 bool SecureMessage::verifySuccess() const
 {
-	return false;
+	// if we're not done or there were no signers, then return false
+	if(!d->success || d->signers.isEmpty())
+		return false;
+
+	// make sure all signers have a valid signature
+	for(int n = 0; n < d->signers.count(); ++n)
+	{
+		if(d->signers[n].identityResult() != SecureMessageSignature::Valid)
+			return false;
+	}
+	return true;
 }
 
 SecureMessageSignature SecureMessage::signer() const
 {
-	return SecureMessageSignature();
+	if(d->signers.isEmpty())
+		return SecureMessageSignature();
+
+	return d->signers.first();
 }
 
 SecureMessageSignatureList SecureMessage::signers() const
 {
-	return SecureMessageSignatureList();
+	return d->signers;
 }
 
 QString SecureMessage::diagnosticText() const

@@ -538,7 +538,7 @@ public:
 		Sign,
 		Verify,
 		EncryptThenSign,
-		SignThenDecrypt,
+		SignThenEncrypt,
 		DecryptThenVerify,
 		VerifyThenDecrypt
 	};
@@ -558,12 +558,11 @@ public:
 	virtual void end() = 0;
 
 	virtual bool finished() = 0;
-	virtual void waitForFinished() = 0;
+	virtual void waitForFinished(int msecs) = 0; // -1 means wait forever
 
 	virtual bool success() = 0;
 	virtual SecureMessage::Error errorCode() = 0;
 	virtual QSecureArray signature() = 0;
-	virtual bool verifySuccess() = 0;
 	virtual SecureMessageSignatureList signers() = 0;
 
 signals:

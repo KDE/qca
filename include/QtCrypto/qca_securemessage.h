@@ -170,7 +170,7 @@ namespace QCA
 		QSecureArray read();
 		int bytesAvailable() const;
 		void end();
-		bool waitForFinished();
+		bool waitForFinished(int msecs = 30000);
 
 		bool success() const;
 		Error errorCode() const;
