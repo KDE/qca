@@ -21,6 +21,8 @@
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
 * finish code for APIs:
+  ability to disable CA mode in cert options?
+  don't allow smart card providers to be used by default
   core: properties
   cert: rfc 2818 hostname validation
   keystore: cleanup
