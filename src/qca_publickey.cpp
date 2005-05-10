@@ -260,7 +260,7 @@ T getKey(const QString &provider, const I &in, const QSecureArray &passphrase, C
 		ProviderList pl = allProviders();
 		for(int n = 0; n < pl.count(); ++n)
 		{
-			ConvertResult r;
+			ConvertResult r = ErrorDecode;
 			k = G::getKey(pl[n], in, passphrase, &r);
 			if(result)
 				*result = r;
