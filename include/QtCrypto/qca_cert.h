@@ -45,14 +45,14 @@ namespace QCA
 	*/
 	enum CertificateInfoType
 	{
-		CommonName,
-		Email,
-		Organization,
-		OrganizationalUnit,
-		Locality,
-		State,
-		Country,
-		URI,
+		CommonName,     ///< The common name (eg person)
+		Email,          ///< Email address
+		Organization,   ///< An organisation (eg company)
+		OrganizationalUnit,  ///< An part of an organisation (eg a division or branch)
+		Locality,       ///< The locality (eg a shire, or part of a state) 
+		State,          ///< The state within the country
+		Country,        ///< The country
+		URI,            
 		DNS,
 		IPAddress,
 		XMPP
@@ -130,6 +130,8 @@ namespace QCA
 	typedef QList<ConstraintType> Constraints;
 
 	/**
+	   \class CertificateOptions qca_cert.h QtCrypto
+
 	   %Certificate options
 
 	   \note In SPKAC mode, all options are ignored except for challenge
@@ -137,32 +139,126 @@ namespace QCA
 	class QCA_EXPORT CertificateOptions
 	{
 	public:
-		CertificateOptions(CertificateRequestFormat = PKCS10);
+		/**
+		   Create a Certificate options set
+
+		   \param format the format to create the certificate request in
+		*/
+		CertificateOptions(CertificateRequestFormat format = PKCS10);
+
+		/**
+		   Standard copy constructor
+		   
+		   \param from the Certificate Options to copy into this object
+		*/
 		CertificateOptions(const CertificateOptions &from);
 		~CertificateOptions();
+
+		/**
+		   Standard assignment operator
+		   
+		   \param from the Certificate Options to copy into this object
+		*/
 		CertificateOptions & operator=(const CertificateOptions &from);
 
+		/**
+		   test the format type for this certificate
+		*/
 		CertificateRequestFormat format() const;
+
+		/**
+		   Specify the format for this certificate
+
+		   \param f the format to use
+		*/
 		void setFormat(CertificateRequestFormat f);
 
+		/**
+		   Test if the certificate options object is valid
+
+		   \return true if the certificate options object is valid
+		*/
 		bool isValid() const;
 
 		QString challenge() const;        // request
 		CertificateInfo info() const;     // request or create
+
+		/**
+		   list the constraints on this certificate
+		*/
 		Constraints constraints() const;  // request or create
+
+		/**
+		   list the policies on this certificate
+		*/
 		QStringList policies() const;     // request or create
+
+		/**
+		   test if the certificate options include the certificate being a 
+		   certificate authority
+		  
+		   \sa setAsCA
+		*/
 		bool isCA() const;                // request or create
+
+		/**
+		   return the path limit on this certificate
+		*/
 		int pathLimit() const;            // request or create
+
+		/**
+		   The serial number for the certificate
+		*/
 		QBigInteger serialNumber() const; // create
+
+		/**
+		   the first time the certificate will be valid
+		*/
 		QDateTime notValidBefore() const; // create
+		
+		/**
+		   the last time the certificate is valid
+		*/
 		QDateTime notValidAfter() const;  // create
 
 		void setChallenge(const QString &s);
 		void setInfo(const CertificateInfo &info);
+
+		/**
+		   set the constraints on the certificate
+
+		   \param constraints the constraints to be used for the certificate
+		*/
 		void setConstraints(const Constraints &constraints);
+
+		/**
+		   set the policies on the certificate
+
+		   \param policies the policies to be used for the certificate
+		*/
 		void setPolicies(const QStringList &policies);
+
+		/**
+		   set the certificate options to include the certificate being
+		   a certificate authority
+
+		   \param pathLimit the number of intermediate certificates allowable
+		*/
 		void setAsCA(int pathLimit = 8); // value from Botan
+
+		/**
+		   Set the serial number property on this certificate
+
+		   \param i the serial number to use
+		*/
 		void setSerialNumber(const QBigInteger &i);
+
+		/**
+		   Set the validity period for the certificate
+
+		   \param start the first time this certificate becomes valid
+		   \param end the last time this certificate is valid
+		*/
 		void setValidityPeriod(const QDateTime &start, const QDateTime &end);
 
 	private:
@@ -171,6 +267,8 @@ namespace QCA
 	};
 
 	/**
+	   \class Certificate qca_cert.h QtCrypto
+
 	   Public Key (X.509) certificate
 
 	   This class contains one X.509 certificate
@@ -271,7 +369,14 @@ namespace QCA
 
 		int pathLimit() const;
 
+		/**
+		   The signature on the certificate
+		*/
 		QSecureArray signature() const;
+
+		/**
+		   The signature algorithm used for the signature on this certificate
+		*/
 		SignatureAlgorithm signatureAlgorithm() const;
 
 		/**
@@ -370,47 +475,198 @@ namespace QCA
 	};
 
 	/**
+	   \class CertificateRequest qca_cert.h QtCrypto
+
 	   Certificate Request
 	*/
 	class QCA_EXPORT CertificateRequest : public Algorithm
 	{
 	public:
+		/**
+		   Create an empty certificate request
+		*/
 		CertificateRequest();
-		CertificateRequest(const QString &fileName);
-		CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
+		/**
+		   Create a certificate request based on the contents of a file
+
+		   \param fileName the file (and path, if necessary) containing a PEM encoded certificate request
+		*/
+		CertificateRequest(const QString &fileName);
+
+		/**
+		   Create a certificate request based on specified options
+
+		   \param opts the options to use in the certificate request
+		   \param key the private key that matches the certificate being requested
+		   \param provider the provider to use, if a specific provider is required
+		*/
+		CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
+		/**
+		   test if the certificate request is empty
+		   
+		   \return true if the certificate request is empty, otherwise false
+		*/
 		bool isNull() const;
 
+		/**
+		   Test if the certificate request can use a specified format
+
+		   \param f the format to test for
+		   \param provider the provider to use, if a specific provider is required
+		   
+		   \return true if the certificate request can use the specified format
+		*/
 		static bool canUseFormat(CertificateRequestFormat f, const QString &provider = QString());
 
+		/**
+		   the format that this Certificate request is in
+		*/
 		CertificateRequestFormat format() const;
 
+		/**
+		   Information on the subject of the certificate being requested
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		CertificateInfo subjectInfo() const; // PKCS#10 only
+
+		/**
+		   The constraints that apply to this certificate request
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		Constraints constraints() const;     // PKCS#10 only
+
+		/**
+		   The policies that apply to this certificate request
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		QStringList policies() const;        // PKCS#10 only
 
+		/**
+		   The public key belonging to the issuer
+		*/
 		PublicKey subjectPublicKey() const;
+
+		/**
+		   Test if this Certificate Request is for a Certificate Authority certificate
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		bool isCA() const;                   // PKCS#10 only
+
+		/**
+		   The path limit for the certificate in this Certificate Request
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		int pathLimit() const;               // PKCS#10 only
+
+		/**
+		   The challenge associated with this certificate request
+		*/
 		QString challenge() const;
 
+		/**
+		   The signature on this certificate request
+		*/
 		QSecureArray signature() const;
+
+		/**
+		   The algorithm used to make the signature on this certificate request
+		*/
 		SignatureAlgorithm signatureAlgorithm() const;
 
-		// import / export - PKCS#10 only
+		/**
+		   Export the Certificate Request into a DER format
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		QSecureArray toDER() const;
+
+		/**
+		   Export the Certificate Request into a PEM format
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		QString toPEM() const;
+
+		/**
+		   Export the Certificate into PEM format in a file
+
+		   \param fileName the name of the file to use
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		bool toPEMFile(const QString &fileName) const;
+
+		/**
+		   Import the certificate request from DER
+
+		   \param a the array containing the certificate request in DER format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CertificateRequest corresponding to the certificate request in the provided array
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		static CertificateRequest fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the certificate request from PEM format
+
+		   \param s the string containing the certificate request in PEM format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CertificateRequest corresponding to the certificate request in the provided string
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		static CertificateRequest fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+		/**
+		   Import the certificate request from a file
+
+		   \param fileName the name (and path, if required) of the file containing the certificate request in PEM format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CertificateRequest corresponding to the certificate request in the provided string
+
+		   \note this only applies to PKCS#10 format certificate requests
+		*/
 		static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
-		// import / export - SPKAC only
+
+		/**
+		   Export the CertificateRequest to a string
+		 
+		   \return the string corresponding to the certificate request
+
+		   \note this only applies to SPKAC format certificate requests
+		*/
 		QString toString() const;
+
+		/**
+		   Import the CertificateRequest from a string
+		 
+		   \param s the string containing to the certificate request
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CertificateRequest corresponding to the certificate request in the provided string
+
+		   \note this only applies to SPKAC format certificate requests
+		*/
 		static CertificateRequest fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
 	/**
+	   \class CRLEntry qca_cert.h QtCrypto
+
 	   Part of a CRL representing a single certificate
 	*/
 	class QCA_EXPORT CRLEntry
@@ -432,11 +688,36 @@ namespace QCA
 			PrivilegeWithdrawn,
 			AACompromise
 		};
+
+		/**
+		   create an empty CRL entry
+		*/
 		CRLEntry();
+
+		/**
+		   create a CRL entry
+
+		   \param c the certificate to revoke
+		   \param r the reason that the certificate is being revoked
+		*/
 		CRLEntry(const Certificate &c, Reason r = Unspecified);
 
+		/**
+		   The serial number of the certificate that is the subject of this CRL entry
+		*/
 		QBigInteger serialNumber() const;
+
+		/**
+		   The time this CRL entry was created
+		*/
 		QDateTime time() const;
+
+		/**
+		   the reason that this CRL entry was created
+
+		   Alternatively, you might like to think of this as the reason that the 
+		   subject certificate has been revoked
+		*/
 		Reason reason() const;
 
 	private:
@@ -446,6 +727,8 @@ namespace QCA
 	};
 
 	/**
+	   \class CRL qca_cert.h QtCrypto
+
 	   Certificate Revocation List
 	*/
 	class QCA_EXPORT CRL : public Algorithm
@@ -453,19 +736,53 @@ namespace QCA
 	public:
 		CRL();
 
+		/**
+		   Test if the CRL is empty
+
+		   \return true if the CRL is entry, otherwise return false
+		*/
 		bool isNull() const;
 
+		/**
+		   Information on the issuer of the CRL
+		*/
 		CertificateInfo issuerInfo() const;
 
+		/**
+		   The CRL serial number
+		*/
 		int number() const;
+
+		/**
+		   the time that this CRL became (or becomes) valid
+		*/
 		QDateTime thisUpdate() const;
+
+		/**
+		   the time that this CRL will be obsoleted 
+
+		   you should obtain an updated CRL at this time
+		*/
 		QDateTime nextUpdate() const;
 
+		/** 
+		    a list of the revoked certificates in this CRL
+		*/
 		QList<CRLEntry> revoked() const;
 
+		/**
+		   The signature on this CRL
+		*/
 		QSecureArray signature() const;
+
+		/**
+		   The signature algorithm used for the signature on this CRL
+		*/
 		SignatureAlgorithm signatureAlgorithm() const;
 
+		/**
+		   The key identification of the CRL issuer
+		*/
 		QByteArray issuerKeyId() const;
 
 		/**
@@ -506,17 +823,46 @@ namespace QCA
 	};
 
 	/**
+	   \class CertificateCollection qca_cert.h QtCrypto
+
 	   Bundle of Certificates and CRLs
 	*/
 	class CertificateCollection
 	{
 	public:
+		/**
+		   Create an empty Certificate / CRL collection
+		*/
 		CertificateCollection();
+
+		/**
+		   Standard copy constructor
+
+		   \param from the CertificateCollection to copy from
+		*/
 		CertificateCollection(const CertificateCollection &from);
+
 		~CertificateCollection();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the CertificateCollection to copy from
+		*/
 		CertificateCollection & operator=(const CertificateCollection &from);
 
+		/**
+		   Append a Certificate to this collection
+
+		   \param cert the Certificate to add to this CertificateCollection
+		*/
 		void addCertificate(const Certificate &cert);
+
+		/**
+		   Append a CRL to this collection
+
+		   \param crl the certificate revokation list to add to this CertificateCollection
+		*/
 		void addCRL(const CRL &crl);
 
 		/**
@@ -529,15 +875,77 @@ namespace QCA
 		*/
 		QList<CRL> crls() const;
 
+		/**
+		   Add another CertificateCollection to this collection
+
+		   \param other the CertificateCollection to add to this collection
+		*/
 		void append(const CertificateCollection &other);
+
+		/**
+		   Add another CertificateCollection to this collection
+
+		   \param other the CertificateCollection to add to this collection
+		*/
 		CertificateCollection operator+(const CertificateCollection &other) const;
+
+		/**
+		   Add another CertificateCollection to this collection
+
+		   \param other the CertificateCollection to add to this collection
+		*/
 		CertificateCollection & operator+=(const CertificateCollection &other);
 
 		// import / export
+
+		/**
+		   test if the CertificateCollection can be imported and exported to PKCS#7 format
+
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return true if the CertificateCollection can be imported and exported to PKCS#7 format
+		*/
 		static bool canUsePKCS7(const QString &provider = QString());
+
+		/**
+		   export the CertificateCollection to a plain text file
+
+		   \param fileName the name (and path, if required) to write the contents of the CertificateCollection to
+
+		   \return true if the export succeeded, otherwise false
+		*/
 		bool toFlatTextFile(const QString &fileName);
+
+		/**
+		   export the CertificateCollection to a PKCS#7 file
+
+		   \param fileName the name (and path, if required) to write the contents of the CertificateCollection to
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return true if the export succeeded, otherwise false
+		*/
 		bool toPKCS7File(const QString &fileName, const QString &provider = QString());
+
+		/**
+		   import a CertificateCollection from a text file
+
+		   \param fileName the name (and path, if required) to read the certificate collection from
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CertificateCollection corresponding to the contents of the file specified in fileName
+		*/
 		static CertificateCollection fromFlatTextFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   import a CertificateCollection from a PKCS#7 file
+
+		   \param fileName the name (and path, if required) to read the certificate collection from
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CertificateCollection corresponding to the contents of the file specified in fileName
+		*/
 		static CertificateCollection fromPKCS7File(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 	private:
@@ -545,6 +953,9 @@ namespace QCA
 		QSharedDataPointer<Private> d;
 	};
 
+	/**
+	   \class CertificateAuthority qca_cert.h QtCrypto
+	*/
 	class QCA_EXPORT CertificateAuthority : public Algorithm
 	{
 	public:
