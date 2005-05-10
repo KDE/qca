@@ -166,7 +166,11 @@ public:
 		PublicKey k;
 		PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", p));
 		if(!c)
+		{
+			if(result)
+				*result = ErrorDecode;
 			return k;
+		}
 		ConvertResult r = fromData(c, in);
 		if(result)
 			*result = r;
@@ -197,7 +201,11 @@ public:
 		PrivateKey k;
 		PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", p));
 		if(!c)
+		{
+			if(result)
+				*result = ErrorDecode;
 			return k;
+		}
 		ConvertResult r = fromData(c, in, passphrase);
 		if(result)
 			*result = r;
@@ -260,7 +268,7 @@ T getKey(const QString &provider, const I &in, const QSecureArray &passphrase, C
 		ProviderList pl = allProviders();
 		for(int n = 0; n < pl.count(); ++n)
 		{
-			ConvertResult r = ErrorDecode;
+			ConvertResult r;
 			k = G::getKey(pl[n], in, passphrase, &r);
 			if(result)
 				*result = r;
