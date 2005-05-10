@@ -34,7 +34,7 @@ CertUnitTest::CertUnitTest()
 
 }
 
-void CertUnitTest::checkCAcerts(QString provider)
+void CertUnitTest::checkCAcerts(const QString &provider)
 {
     QCA::ConvertResult resultca1;
     QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/RootCAcert.pem", &resultca1, provider);
@@ -74,7 +74,7 @@ void CertUnitTest::checkCAcerts(QString provider)
     CHECK( ca1.policies().count(), 0 );
 }
 
-void CertUnitTest::checkClientCerts(QString provider)
+void CertUnitTest::checkClientCerts(const QString &provider)
 {
     QCA::ConvertResult resultClient1;
     QCA::Certificate client1 = QCA::Certificate::fromPEMFile( "certs/User.pem", &resultClient1, provider);
@@ -167,7 +167,7 @@ void CertUnitTest::checkClientCerts(QString provider)
 }
 
 
-void CertUnitTest::checkServerCerts(QString provider)
+void CertUnitTest::checkServerCerts(const QString &provider)
 {
     QCA::ConvertResult resultServer1;
     QCA::Certificate server1 = QCA::Certificate::fromPEMFile( "certs/Server.pem", &resultServer1, provider);

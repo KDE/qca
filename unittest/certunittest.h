@@ -36,9 +36,9 @@ public:
     void allTests();
 
 private:
-    void checkCAcerts(QString provider);
-    void checkClientCerts(QString provider);
-    void checkServerCerts(QString provider);
+    void checkCAcerts(const QString &provider);
+    void checkClientCerts(const QString &provider);
+    void checkServerCerts(const QString &provider);
 };
 
 #endif

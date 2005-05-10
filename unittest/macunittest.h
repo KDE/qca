@@ -36,13 +36,13 @@ public:
     void allTests();
 
 private:
-    void HMACMD5test( QString provider ); 
-    void HMACSHA1test( QString provider ); 
-    void HMACSHA256test( QString provider ); 
-    void HMACSHA224test( QString provider ); 
-    void HMACSHA384test( QString provider ); 
-    void HMACSHA512test( QString provider ); 
-    void HMACRMD160test( QString provider ); 
+    void HMACMD5test( const QString &provider ); 
+    void HMACSHA1test( const QString &provider ); 
+    void HMACSHA256test( const QString &provider ); 
+    void HMACSHA224test( const QString &provider ); 
+    void HMACSHA384test( const QString &provider ); 
+    void HMACSHA512test( const QString &provider ); 
+    void HMACRMD160test( const QString &provider ); 
 };
 
 #endif

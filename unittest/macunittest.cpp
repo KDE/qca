@@ -32,7 +32,7 @@ MACUnitTest::MACUnitTest()
 
 }
 
-void MACUnitTest::HMACMD5test( QString provider )
+void MACUnitTest::HMACMD5test( const QString &provider )
 {
     if(!QCA::isSupported("hmac(md5)", provider) ) {
 	skip(__FILE__, __LINE__, QString( "HMAC(MD5) not supported for provider: %1" ).arg(provider) );
@@ -101,7 +101,7 @@ void MACUnitTest::HMACMD5test( QString provider )
 }
 
 
-void MACUnitTest::HMACSHA256test( QString provider )
+void MACUnitTest::HMACSHA256test( const QString &provider )
 {
     if(!QCA::isSupported("hmac(sha256)", provider) ) {
 	skip(__FILE__, __LINE__, QString( "HMAC(SHA256) not supported for provider: %1" ).arg(provider) );
@@ -175,7 +175,7 @@ void MACUnitTest::HMACSHA256test( QString provider )
     }
 }
 
-void MACUnitTest::HMACSHA224test( QString provider )
+void MACUnitTest::HMACSHA224test( const QString &provider )
 {
     if(!QCA::isSupported("hmac(sha224)", provider) ) {
 	skip(__FILE__, __LINE__, QString( "HMAC(SHA224) not supported for provider: %1" ).arg(provider) );
@@ -249,7 +249,7 @@ void MACUnitTest::HMACSHA224test( QString provider )
     }
 }
 
-void MACUnitTest::HMACSHA384test( QString provider )
+void MACUnitTest::HMACSHA384test( const QString &provider )
 {
     if(!QCA::isSupported("hmac(sha384)", provider) ) {
 	skip(__FILE__, __LINE__, QString( "HMAC(SHA384) not supported for provider: %1" ).arg(provider) );
@@ -324,7 +324,7 @@ void MACUnitTest::HMACSHA384test( QString provider )
 }
 
 
-void MACUnitTest::HMACSHA512test( QString provider )
+void MACUnitTest::HMACSHA512test( const QString &provider )
 {
     if(!QCA::isSupported("hmac(sha512)", provider) ) {
 	skip(__FILE__, __LINE__, QString( "HMAC(SHA512) not supported for provider: %1" ).arg(provider) );
@@ -398,7 +398,7 @@ void MACUnitTest::HMACSHA512test( QString provider )
     }
 }
 
-void MACUnitTest::HMACSHA1test( QString provider )
+void MACUnitTest::HMACSHA1test( const QString &provider )
 {
     if(!QCA::isSupported( "hmac(sha1)", provider ) )
 	skip( __FILE__, __LINE__, QString("HMAC(SHA1) not supported for provider: %1").arg(provider));
@@ -465,7 +465,7 @@ void MACUnitTest::HMACSHA1test( QString provider )
     }
 }
 
-void MACUnitTest::HMACRMD160test( QString provider )
+void MACUnitTest::HMACRMD160test( const QString &provider )
 {
     if(!QCA::isSupported("hmac(ripemd160)", provider))
 	skip( __FILE__, __LINE__, QString("HMAC(RIPEMD160) not supported for provider: %1").arg(provider));
