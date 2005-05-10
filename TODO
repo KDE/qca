@@ -29,6 +29,7 @@
   sasl
   securemessage
   default provider: sha1
+  fix default md5 provider - broken on big endian.
 
 * examples
   create example for BigInteger
