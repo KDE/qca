@@ -154,6 +154,8 @@ public:
 		if(mode >= ResetSessionAndData)
 		{
 			peerCert = CertificateChain();
+			peerValidity = ErrorValidityUnknown;
+			hostMismatch = false;
 			in.clear();
 			to_net.clear();
 			from_net.clear();
