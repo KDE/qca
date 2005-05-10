@@ -1,6 +1,4 @@
 /**
- * keylengthunittest.cpp
- *
  * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without

@@ -1,6 +1,4 @@
 /**
- * main.cpp
- *
  * Copyright (C)  2004  Zack Rusin <zack@kde.org>
  *
  * Redistribution and use in source and binary forms, with or without
