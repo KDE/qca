@@ -45,6 +45,33 @@ void CertUnitTest::checkCAcerts(QString provider)
     CHECK( ca1.isSelfSigned(), true );
 
     CHECK( ca1.serialNumber(), QBigInteger(0) );
+
+    CHECK( ca1.commonName(), QString("For Tests Only") );
+
+    CHECK( ca1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
+    CHECK( ca1.notValidAfter().toString(), QDateTime( QDate( 2011, 8, 15 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
+
+    CHECK( ca1.constraints().contains(QCA::DigitalSignature), (QBool)true );
+    CHECK( ca1.constraints().contains(QCA::NonRepudiation), (QBool)true );
+    CHECK( ca1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
+    CHECK( ca1.constraints().contains(QCA::DataEncipherment), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::KeyAgreement), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::KeyCertificateSign), (QBool)true );
+    CHECK( ca1.constraints().contains(QCA::CRLSign), (QBool)true );
+    CHECK( ca1.constraints().contains(QCA::EncipherOnly), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::DecipherOnly), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::ServerAuth), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::ClientAuth), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::CodeSigning), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::EmailProtection), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
+    CHECK( ca1.constraints().contains(QCA::IPSecUser), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::TimeStamping), (QBool)false );
+    CHECK( ca1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+
+    // no policies on this cert
+    CHECK( ca1.policies().count(), 0 );
 }
 
 void CertUnitTest::checkClientCerts(QString provider)
