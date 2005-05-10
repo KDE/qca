@@ -212,25 +212,25 @@ namespace QCA
 		   Possible authentication error states
 
 These don't appear to map:
-#define SASL_FAIL      (-1)  generic failure
-#define SASL_NOMEM     (-2)  memory shortage failure
-#define SASL_BUFOVER   (-3)  overflowed buffer
-#define SASL_NOTDONE   (-6)  can't request info until later in exchange
-#define SASL_BADPARAM  (-7)  invalid parameter supplied
-#define SASL_TRYAGAIN  (-8)  transient failure (e.g., weak key)
-#define SASL_BADMAC    (-9)  integrity check failed
+SASL_FAIL      (-1)  generic failure
+SASL_NOMEM     (-2)  memory shortage failure
+SASL_BUFOVER   (-3)  overflowed buffer
+SASL_NOTDONE   (-6)  can't request info until later in exchange
+SASL_BADPARAM  (-7)  invalid parameter supplied
+SASL_TRYAGAIN  (-8)  transient failure (e.g., weak key)
+SASL_BADMAC    (-9)  integrity check failed
                              -- client only codes --
-#define SASL_INTERACT   (2)  needs user interaction
-#define SASL_WRONGMECH (-11) mechanism doesn't support requested feature
-#define SASL_NEWSECRET (-12) new secret needed
+SASL_INTERACT   (2)  needs user interaction
+SASL_WRONGMECH (-11) mechanism doesn't support requested feature
+SASL_NEWSECRET (-12) new secret needed
                               -- server only codes --
-#define SASL_TRANS     (-17) One time use of a plaintext password will
+SASL_TRANS     (-17) One time use of a plaintext password will
                                 enable requested mechanism for user
-#define SASL_PWLOCK    (-21) password locked
-#define SASL_NOCHANGE  (-22) requested change was not needed
-#define SASL_BADVERS   (-23) version mismatch with plug-in
+SASL_PWLOCK    (-21) password locked
+SASL_NOCHANGE  (-22) requested change was not needed
+SASL_BADVERS   (-23) version mismatch with plug-in
 
-#define SASL_NOPATH    (-25) path not set
+SASL_NOPATH    (-25) path not set
 		*/
 		enum AuthCondition
 		{
