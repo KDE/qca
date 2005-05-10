@@ -268,6 +268,62 @@ static QString validityToString(QCA::Validity v)
 	return s;
 }
 
+char *mime_signpart =
+	"Content-Type: text/plain; charset=ISO-8859-1\r\n"
+	"Content-Transfer-Encoding: 7bit\r\n"
+	"\r\n"
+	"%1";
+
+char *mime_signed =
+	"Content-Type: multipart/signed;\r\n"
+	"	micalg=%1;\r\n"
+	"	boundary=QCATOOL-0001;\r\n"
+	"	protocol=\"application/pkcs7-signature\"\r\n"
+	"\r\n"
+	"\r\n"
+	"--QCATOOL-0001\r\n"
+	"%2\r\n"
+	"--QCATOOL-0001\r\n"
+	"Content-Transfer-Encoding: base64\r\n"
+	"Content-Type: application/pkcs7-signature;\r\n"
+	"	name=smime.p7s\r\n"
+	"Content-Disposition: attachment;\r\n"
+	"	filename=smime.p7s\r\n"
+	"\r\n"
+	"%3\r\n"
+	"\r\n"
+	"--QCATOOL-0001--\r\n";
+
+char *mime_enveloped =
+	"Mime-Version: 1.0\r\n"
+	"Content-Transfer-Encoding: base64\r\n"
+	"Content-Type: application/pkcs7-mime;\r\n"
+	"	name=smime.p7m;\r\n"
+	"	smime-type=enveloped-data\r\n"
+	"Content-Disposition: attachment;\r\n"
+	"	filename=smime.p7m\r\n"
+	"\r\n"
+	"%1\r\n";
+
+static QString add_cr(const QString &in)
+{
+	QString out = in;
+	int at = 0;
+	while(1)
+	{
+		at = out.indexOf('\n', at);
+		if(at == -1)
+			break;
+		if(at - 1 >= 0 && out[at - 1] != '\r')
+		{
+			out.insert(at, '\r');
+			++at;
+		}
+		++at;
+	}
+	return out;
+}
+
 static void usage()
 {
 	printf("qcatool: simple qca testing tool\n");
@@ -290,6 +346,9 @@ static void usage()
 	printf("  --showcert [cert.pem]\n");
 	printf("  --showreq [certreq.pem]\n");
 	printf("  --validate [cert.pem] (nonroots.pem)\n");
+	printf("\n");
+	printf("  --smime sign [priv.pem] [messagefile] [cert.pem] [nonroots.pem] (passphrase)\n");
+	printf("  --smime encrypt [cert.pem] [messagefile]\n");
 	printf("\n");
 }
 
@@ -1004,6 +1063,174 @@ int main(int argc, char **argv)
 		else
 		{
 			printf("Certificate is NOT valid: %s\n", validityToString(v).toLatin1().data());
+			return 1;
+		}
+	}
+	else if(args[0] == "--smime")
+	{
+		if(args.count() < 2)
+		{
+			usage();
+			return 1;
+		}
+
+		if(args[1] == "sign")
+		{
+			if(args.count() < 6)
+			{
+				usage();
+				return 1;
+			}
+
+			QSecureArray passphrase;
+			if(args.count() >= 7)
+				passphrase = args[6].toLatin1();
+
+			QCA::PrivateKey key;
+			if(!passphrase.isEmpty())
+				key = QCA::PrivateKey(args[2], passphrase);
+			else
+				key = QCA::PrivateKey(args[2]);
+			if(key.isNull())
+			{
+				printf("Error reading key file\n");
+				return 1;
+			}
+
+			QCA::Certificate cert(args[4]);
+			if(cert.isNull())
+			{
+				printf("Error reading cert file\n");
+				return 1;
+			}
+
+			QCA::CertificateCollection nonroots = QCA::CertificateCollection::fromFlatTextFile(args[5]);
+
+			QFile infile(args[3]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QCA::SecureMessageKey skey;
+			{
+				QCA::CertificateChain chain;
+				chain += cert;
+				chain += nonroots.certificates();
+				skey.setX509CertificateChain(chain);
+				skey.setX509PrivateKey(key);
+			}
+
+			QString text = add_cr(QString::fromLatin1(infile.readAll()));
+			QByteArray plain = QString(mime_signpart).arg(text).toLatin1();
+
+			QCA::CMS cms;
+			QCA::SecureMessage msg(&cms);
+			msg.setSigner(skey);
+			msg.startSign(QCA::SecureMessage::Detached);
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error signing: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QFileInfo fi(infile.fileName());
+
+			QFile outfile(fi.baseName() + "_signed.txt");
+			if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
+			{
+				printf("Error opening sig file\n");
+				return 1;
+			}
+
+			QSecureArray sig = msg.signature();
+
+			QCA::Base64 enc;
+			enc.setLineBreaksEnabled(true);
+			enc.setLineBreaksColumn(76);
+			QString sigtext = add_cr(enc.arrayToString(sig));
+
+			QString str = QString(mime_signed).arg(msg.hashName()).arg(QString(plain)).arg(sigtext);
+			QTextStream ts(&outfile);
+			ts << str;
+
+			printf("Wrote %s\n", qPrintable(outfile.fileName()));
+		}
+		else if(args[1] == "encrypt")
+		{
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::Certificate cert(args[2]);
+			if(cert.isNull())
+			{
+				printf("Error reading cert file\n");
+				return 1;
+			}
+
+			QFile infile(args[3]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QCA::SecureMessageKey skey;
+			{
+				QCA::CertificateChain chain;
+				chain += cert;
+				skey.setX509CertificateChain(chain);
+			}
+
+			QByteArray plain = infile.readAll();
+
+			QCA::CMS cms;
+			QCA::SecureMessage msg(&cms);
+			msg.setRecipient(skey);
+			msg.startEncrypt();
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error encrypting: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QFileInfo fi(infile.fileName());
+
+			QFile outfile(fi.baseName() + "_encrypted.txt");
+			if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
+			{
+				printf("Error opening output file\n");
+				return 1;
+			}
+
+			QSecureArray result = msg.read();
+
+			QCA::Base64 enc;
+			enc.setLineBreaksEnabled(true);
+			enc.setLineBreaksColumn(76);
+			QString enctext = add_cr(enc.arrayToString(result));
+
+			QString str = QString(mime_enveloped).arg(enctext);
+			QTextStream ts(&outfile);
+			ts << str;
+
+			printf("Wrote %s\n", qPrintable(outfile.fileName()));
+		}
+		else
+		{
+			usage();
 			return 1;
 		}
 	}

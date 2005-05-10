@@ -785,13 +785,14 @@ static QByteArray get_cert_subject_key_id(X509_EXTENSION *ex)
 	return out;
 }
 
-static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
+// TODO: removed because it was crashing on the qualityssl intermediate ca cert
+/*static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
 {
 	AUTHORITY_KEYID *akid = (AUTHORITY_KEYID *)X509V3_EXT_d2i(ex);
 	QByteArray out((const char *)ASN1_STRING_data(akid->keyid), ASN1_STRING_length(akid->keyid));
 	AUTHORITY_KEYID_free(akid);
 	return out;
-}
+}*/
 
 static QCA::Validity convert_verify_error(int err)
 {
@@ -2962,13 +2963,14 @@ public:
 				p.subjectId += get_cert_subject_key_id(ex);
 		}
 
-		pos = X509_get_ext_by_NID(x, NID_authority_key_identifier, -1);
+		// TODO:
+		/*pos = X509_get_ext_by_NID(x, NID_authority_key_identifier, -1);
 		if(pos != -1)
 		{
 			X509_EXTENSION *ex = X509_get_ext(x, pos);
 			if(ex)
 				p.issuerId += get_cert_issuer_key_id(ex);
-		}
+		}*/
 
 		_props = p;
 		//printf("[%p] made props: [%s]\n", this, _props.subject[QCA::CommonName].toLatin1().data());
@@ -3877,6 +3879,302 @@ public:
 	}
 };
 
+/*char *mime_enveloped =
+	"From %1 Sat May  7 22:18:36 2005\r\n"
+	"Mime-Version: 1.0\r\n"
+	"Content-Type: application/pkcs7-mime;\r\n"
+	"	name=smime.p7m;\r\n"
+	"	smime-type=enveloped-data\r\n"
+	//"Message-Id: <08F8A1B4-04A3-4B6D-AF21-3AF7FD15EFE4@uci.edu>\r\n"
+	"Content-Disposition: attachment;\r\n"
+	"	filename=smime.p7m\r\n"
+	"Content-Transfer-Encoding: base64\r\n"
+	"From: %2\r\n"
+	"Subject: %3\r\n"
+	"Date: Sat, 7 May 2005 22:18:36 -0700\r\n"
+	"To: %4\r\n"
+	"\r\n"
+	"%5\r\n";*/
+
+class CMSContext : public QCA::SMSContext
+{
+public:
+	CMSContext(QCA::Provider *p) : QCA::SMSContext(p, "cms")
+	{
+	}
+
+	~CMSContext()
+	{
+	}
+
+	virtual Context *clone() const
+	{
+		return 0;
+	}
+
+	virtual void setTrustedCertificates(const QCA::CertificateCollection &trusted)
+	{
+		// TODO
+		Q_UNUSED(trusted);
+	}
+
+	virtual void setPrivateKeys(const QList<QCA::PrivateKey> &keys)
+	{
+		// TODO
+		Q_UNUSED(keys);
+	}
+
+	virtual QCA::MessageContext *createMessage() const;
+};
+
+class MyMessageContext : public QCA::MessageContext
+{
+	Q_OBJECT
+public:
+	QCA::SecureMessageKey signer;
+	QCA::SecureMessageKeyList to;
+	QCA::SecureMessage::SignMode signMode;
+	bool bundleSigner;
+	bool smime;
+	QCA::SecureMessage::Format format;
+
+	Operation op;
+
+	QSecureArray in, out;
+	QSecureArray sig;
+
+	MyMessageContext(QCA::Provider *p) : QCA::MessageContext(p, "cmsmsg")
+	{
+	}
+
+	~MyMessageContext()
+	{
+	}
+
+	virtual Context *clone() const
+	{
+		return 0;
+	}
+
+	virtual bool canSignMultiple() const
+	{
+		return false;
+	}
+
+	virtual QCA::SecureMessage::Type type() const
+	{
+		return QCA::SecureMessage::CMS;
+	}
+
+	virtual void reset()
+	{
+	}
+
+	virtual void setupEncrypt(const QCA::SecureMessageKeyList &keys)
+	{
+		to = keys;
+	}
+
+	virtual void setupSign(const QCA::SecureMessageKeyList &keys, QCA::SecureMessage::SignMode m, bool bundleSigner, bool smime)
+	{
+		signer = keys.first();
+		signMode = m;
+		this->bundleSigner = bundleSigner;
+		this->smime = smime;
+	}
+
+	virtual void setupVerify(const QSecureArray &detachedSig)
+	{
+		// TODO
+		Q_UNUSED(detachedSig);
+	}
+
+	virtual void start(QCA::SecureMessage::Format f, Operation op)
+	{
+		format = f;
+
+		// TODO: other operations
+		if(op == Sign)
+		{
+			this->op = op;
+		}
+		else if(op == Encrypt)
+		{
+			this->op = op;
+		}
+	}
+
+	virtual void update(const QSecureArray &in)
+	{
+		this->in.append(in);
+	}
+
+	virtual QSecureArray read()
+	{
+		return out;
+	}
+
+	virtual void end()
+	{
+		// sign
+		if(op == Sign)
+		{
+			QCA::CertificateChain chain = signer.x509CertificateChain();
+			QCA::Certificate cert = chain.primary();
+			QList<QCA::Certificate> nonroots;
+			if(chain.count() > 1)
+			{
+				for(int n = 1; n < chain.count(); ++n)
+					nonroots.append(chain[n]);
+			}
+			QCA::PrivateKey key = signer.x509PrivateKey();
+
+			MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
+			MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
+
+			X509 *cx = cc->item.cert;
+			EVP_PKEY *kx = kc->get_pkey();
+
+			STACK_OF(X509) *other_certs;
+			BIO *bi;
+			int flags;
+			PKCS7 *p7;
+
+			// nonroots
+			other_certs = sk_X509_new_null();
+			for(int n = 0; n < nonroots.count(); ++n)
+			{
+				X509 *x = static_cast<MyCertContext *>(nonroots[n].context())->item.cert;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+				sk_X509_push(other_certs, x);
+			}
+
+			bi = BIO_new(BIO_s_mem());
+			BIO_write(bi, in.data(), in.size());
+
+			flags = 0;
+			flags |= PKCS7_BINARY;
+			flags |= PKCS7_DETACHED; // FIXME: signmode
+			//flags |= PKCS7_NOCERTS; // FIXME: bundleSigner
+			p7 = PKCS7_sign(cx, kx, other_certs, bi, flags);
+
+			BIO_free(bi);
+			sk_X509_pop_free(other_certs, X509_free);
+
+			if(p7)
+			{
+				//printf("good\n");
+				BIO *bo;
+
+				//BIO *bo = BIO_new(BIO_s_mem());
+				//i2d_PKCS7_bio(bo, p7);
+				//PEM_write_bio_PKCS7(bo, p7);
+				//QSecureArray buf = bio2buf(bo);
+				//printf("[%s]\n", buf.data());
+
+				// FIXME: format
+				bo = BIO_new(BIO_s_mem());
+				i2d_PKCS7_bio(bo, p7);
+				sig = bio2buf(bo);
+			}
+			else
+			{
+				printf("bad\n");
+				return;
+			}
+		}
+		else if(op == Encrypt)
+		{
+			// TODO: support multiple recipients
+			QCA::Certificate target = to.first().x509CertificateChain().primary();
+
+			STACK_OF(X509) *other_certs;
+			BIO *bi;
+			int flags;
+			PKCS7 *p7;
+
+			other_certs = sk_X509_new_null();
+			X509 *x = static_cast<MyCertContext *>(target.context())->item.cert;
+			CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+			sk_X509_push(other_certs, x);
+
+			bi = BIO_new(BIO_s_mem());
+			BIO_write(bi, in.data(), in.size());
+
+			flags = 0;
+			flags |= PKCS7_BINARY;
+			p7 = PKCS7_encrypt(other_certs, bi, EVP_des_ede3_cbc(), flags); // TODO: cipher?
+
+			BIO_free(bi);
+			sk_X509_pop_free(other_certs, X509_free);
+
+			QString env;
+			if(p7)
+			{
+				// FIXME: format
+				BIO *bo = BIO_new(BIO_s_mem());
+				i2d_PKCS7_bio(bo, p7);
+				//PEM_write_bio_PKCS7(bo, p7);
+				out = bio2buf(bo);
+			}
+			else
+			{
+				printf("bad\n");
+				return;
+			}
+		}
+		else
+		{
+			// TODO
+		}
+	}
+
+	virtual bool finished() const
+	{
+		// TODO
+		return true;
+	}
+
+	virtual void waitForFinished(int msecs)
+	{
+		// TODO
+		Q_UNUSED(msecs);
+	}
+
+	virtual bool success() const
+	{
+		// TODO
+		return true;
+	}
+
+	virtual QCA::SecureMessage::Error errorCode() const
+	{
+		// TODO
+		return QCA::SecureMessage::ErrorUnknown;
+	}
+
+	virtual QSecureArray signature() const
+	{
+		return sig;
+	}
+
+	virtual QString hashName() const
+	{
+		return "sha1";
+	}
+
+	virtual QCA::SecureMessageSignatureList signers() const
+	{
+		// TODO
+		return QCA::SecureMessageSignatureList();
+	}
+};
+
+QCA::MessageContext *CMSContext::createMessage() const
+{
+	return new MyMessageContext(provider());
+}
+
 
 class opensslCipherContext : public QCA::CipherContext
 {
@@ -4073,6 +4371,7 @@ public:
 		list += "csr";
 		list += "crl";
 		list += "tls";
+		list += "cms";
 
 		return list;
 	}
@@ -4170,6 +4469,8 @@ public:
 			return new MyCRLContext( this );
 		else if ( type == "tls" )
 			return new MyTLSContext( this );
+		else if ( type == "cms" )
+			return new CMSContext( this );
 		return 0;
 	}
 };
