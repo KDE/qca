@@ -537,19 +537,18 @@ public:
 		Decrypt,
 		Sign,
 		Verify,
-		EncryptThenSign,
-		SignThenEncrypt,
-		DecryptThenVerify,
-		VerifyThenDecrypt
+		SignAndEncrypt
 	};
 
 	MessageContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
+
+	virtual bool canSignMultiple() const = 0;
 
 	virtual SecureMessage::Type type() const = 0;
 
 	virtual void reset() = 0;
 	virtual void setupEncrypt(const SecureMessageKeyList &keys) = 0;
-	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner) = 0;
+	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime) = 0;
 	virtual void setupVerify(const QSecureArray &detachedSig) = 0;
 
 	virtual void start(SecureMessage::Format f, Operation op) = 0;
@@ -557,13 +556,14 @@ public:
 	virtual QSecureArray read() = 0;
 	virtual void end() = 0;
 
-	virtual bool finished() = 0;
+	virtual bool finished() const = 0;
 	virtual void waitForFinished(int msecs) = 0; // -1 means wait forever
 
-	virtual bool success() = 0;
-	virtual SecureMessage::Error errorCode() = 0;
-	virtual QSecureArray signature() = 0;
-	virtual SecureMessageSignatureList signers() = 0;
+	virtual bool success() const = 0;
+	virtual SecureMessage::Error errorCode() const = 0;
+	virtual QSecureArray signature() const = 0;
+	virtual QString hashName() const = 0;
+	virtual SecureMessageSignatureList signers() const = 0;
 
 signals:
 	void updated();

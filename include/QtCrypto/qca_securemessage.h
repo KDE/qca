@@ -106,7 +106,7 @@ namespace QCA
 		enum Type
 		{
 			OpenPGP,
-			SMIME
+			CMS
 		};
 
 		enum SignMode
@@ -114,11 +114,6 @@ namespace QCA
 			Message,
 			Clearsign,
 			Detached
-		};
-		enum Order
-		{
-			EncryptThenSign,
-			SignThenEncrypt
 		};
 
 		/**
@@ -148,24 +143,25 @@ namespace QCA
 		~SecureMessage();
 
 		Type type() const;
-		bool canSignMultiple() const;     // PGP can't sign multiple
-		bool canClearsign() const;        // S/MIME can't clearsign
+		bool canSignMultiple() const;     // CMS feature
+		bool canClearsign() const;        // PGP feature
+		bool canSignAndEncrypt() const;   // PGP feature
 
 		void reset();
 
-		void setEnableBundleSigner(bool); // Bundle S/MIME certificate chain (default true)
-		void setFormat(Format f);         // (default Binary)
+		void setEnableBundleSigner(bool b);    // CMS: bundle X.509 certificate chain (default true)
+		void setEnableSMIMEAttributes(bool b); // CMS: include S/MIME attributes (default true)
+		void setFormat(Format f);              // (default Binary)
 		void setRecipient(const SecureMessageKey &key);
 		void setRecipients(const SecureMessageKeyList &keys);
 		void setSigner(const SecureMessageKey &key);
 		void setSigners(const SecureMessageKeyList &keys);
 
 		void startEncrypt();
-		void startDecrypt();
+		void startDecrypt(); // if decrypted result is signed (PGP only), it will be verified
 		void startSign(SignMode m = Message);
 		void startVerify(const QSecureArray &detachedSig = QSecureArray());
-		void startEncryptAndSign(Order o = EncryptThenSign);
-		void startDecryptAndVerify(Order o = EncryptThenSign);
+		void startSignAndEncrypt();
 		void update(const QSecureArray &in);
 		QSecureArray read();
 		int bytesAvailable() const;
@@ -177,8 +173,10 @@ namespace QCA
 
 		// sign
 		QSecureArray signature() const;
+		QString hashName() const;
 
 		// verify
+		bool wasSigned() const; // PGP: true if decrypted message was signed
 		bool verifySuccess() const;
 		SecureMessageSignature signer() const;
 		SecureMessageSignatureList signers() const;
@@ -213,12 +211,12 @@ namespace QCA
 		~OpenPGP();
 	};
 
-	class SMIME : public SecureMessageSystem
+	class CMS : public SecureMessageSystem
 	{
 		Q_OBJECT
 	public:
-		SMIME(QObject *parent = 0, const QString &provider = QString());
-		~SMIME();
+		CMS(QObject *parent = 0, const QString &provider = QString());
+		~CMS();
 
 		void setTrustedCertificates(const CertificateCollection &trusted);
 		void setPrivateKeys(const QList<PrivateKey> &keys);

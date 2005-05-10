@@ -238,7 +238,7 @@ public:
 	MessageContext *c;
 	SecureMessageSystem *system;
 
-	bool bundleSigner;
+	bool bundleSigner, smime;
 	SecureMessage::Format format;
 	SecureMessageKeyList to;
 	SecureMessageKeyList from;
@@ -247,16 +247,15 @@ public:
 	bool success;
 	SecureMessage::Error errorCode;
 	QSecureArray detachedSig;
+	QString hashName;
 	SecureMessageSignatureList signers;
 
 	Private(SecureMessage *_q)
 	{
 		q = _q;
-		bundleSigner = false;
-		format = SecureMessage::Binary;
-
-		success = false;
-		errorCode = SecureMessage::ErrorUnknown;
+		c = 0;
+		system = 0;
+		reset(ResetAll);
 	}
 
 	void init()
@@ -266,7 +265,8 @@ public:
 
 	void reset(ResetMode mode)
 	{
-		c->reset();
+		if(c)
+			c->reset();
 
 		if(mode >= ResetSessionAndData)
 		{
@@ -274,6 +274,7 @@ public:
 			success = false;
 			errorCode = SecureMessage::ErrorUnknown;
 			detachedSig.clear();
+			hashName = QString();
 			signers.clear();
 		}
 
@@ -309,6 +310,7 @@ public slots:
 			if(success)
 			{
 				detachedSig = c->signature();
+				hashName = c->hashName();
 				signers = c->signers();
 			}
 			reset(ResetSession);
@@ -342,10 +344,15 @@ SecureMessage::Type SecureMessage::type() const
 
 bool SecureMessage::canSignMultiple() const
 {
-	return (type() == SMIME);
+	return d->c->canSignMultiple();
 }
 
 bool SecureMessage::canClearsign() const
+{
+	return (type() == OpenPGP);
+}
+
+bool SecureMessage::canSignAndEncrypt() const
 {
 	return (type() == OpenPGP);
 }
@@ -358,6 +365,11 @@ void SecureMessage::reset()
 void SecureMessage::setEnableBundleSigner(bool b)
 {
 	d->bundleSigner = b;
+}
+
+void SecureMessage::setEnableSMIMEAttributes(bool b)
+{
+	d->smime = b;
 }
 
 void SecureMessage::setFormat(Format f)
@@ -401,7 +413,7 @@ void SecureMessage::startDecrypt()
 void SecureMessage::startSign(SignMode m)
 {
 	d->reset(ResetSessionAndData);
-	d->c->setupSign(d->from, m, d->bundleSigner);
+	d->c->setupSign(d->from, m, d->bundleSigner, d->smime);
 	d->c->start(d->format, MessageContext::Sign);
 }
 
@@ -413,18 +425,12 @@ void SecureMessage::startVerify(const QSecureArray &sig)
 	d->c->start(d->format, MessageContext::Verify);
 }
 
-void SecureMessage::startEncryptAndSign(Order o)
+void SecureMessage::startSignAndEncrypt()
 {
 	d->reset(ResetSessionAndData);
 	d->c->setupEncrypt(d->to);
-	d->c->setupSign(d->from, Message, d->bundleSigner);
-	d->c->start(d->format, o == EncryptThenSign ? MessageContext::EncryptThenSign : MessageContext::SignThenEncrypt);
-}
-
-void SecureMessage::startDecryptAndVerify(Order o)
-{
-	d->reset(ResetSessionAndData);
-	d->c->start(d->format, o == EncryptThenSign ? MessageContext::VerifyThenDecrypt : MessageContext::DecryptThenVerify);
+	d->c->setupSign(d->from, Message, d->bundleSigner, d->smime);
+	d->c->start(d->format, MessageContext::SignAndEncrypt);
 }
 
 void SecureMessage::update(const QSecureArray &in)
@@ -469,6 +475,16 @@ SecureMessage::Error SecureMessage::errorCode() const
 QSecureArray SecureMessage::signature() const
 {
 	return d->detachedSig;
+}
+
+QString SecureMessage::hashName() const
+{
+	return d->hashName;
+}
+
+bool SecureMessage::wasSigned() const
+{
+	return !d->signers.isEmpty();
 }
 
 bool SecureMessage::verifySuccess() const
@@ -530,23 +546,23 @@ OpenPGP::~OpenPGP()
 }
 
 //----------------------------------------------------------------------------
-// SMIME
+// CMS
 //----------------------------------------------------------------------------
-SMIME::SMIME(QObject *parent, const QString &provider)
-:SecureMessageSystem(parent, "smime", provider)
+CMS::CMS(QObject *parent, const QString &provider)
+:SecureMessageSystem(parent, "cms", provider)
 {
 }
 
-SMIME::~SMIME()
+CMS::~CMS()
 {
 }
 
-void SMIME::setTrustedCertificates(const CertificateCollection &trusted)
+void CMS::setTrustedCertificates(const CertificateCollection &trusted)
 {
 	static_cast<SMSContext *>(context())->setTrustedCertificates(trusted);
 }
 
-void SMIME::setPrivateKeys(const QList<PrivateKey> &keys)
+void CMS::setPrivateKeys(const QList<PrivateKey> &keys)
 {
 	static_cast<SMSContext *>(context())->setPrivateKeys(keys);
 }
