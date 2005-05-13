@@ -20,7 +20,18 @@
   add more "getters" to the library?
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
 
+* for tech preview
+  plugins:
+    qca-openssl: pix, cms verify/decrypt
+    qca-gnupg: pgp key/sign/encrypt/verify/decrypt
+  api:
+    ensure PGPKey and SASL are proper
+  other:
+    QCA_EXPORT
+
 * finish code for APIs:
+  securelayer start() functions should return void
+  functions that don't trip a scan should do so on the first try
   ability to disable CA mode in cert options?
   don't allow smart card providers to be used by default
   core: properties
