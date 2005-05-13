@@ -438,9 +438,14 @@ public:
 
 	virtual QString name() const
 	{
-		// use the common name
+		// use the common name, else orgname
 		if(item_type == KeyStoreEntry::TypeCertificate)
-			return _cert.commonName();
+		{
+			QString str = _cert.commonName();
+			if(str.isEmpty())
+				str = _cert.subjectInfo().value(Organization);
+			return str;
+		}
 		else
 			return _crl.issuerInfo().value(CommonName);
 	}
