@@ -1018,7 +1018,7 @@ namespace QCA
 		QString primaryUserId() const;
 		QStringList userIds() const;
 
-		bool havePrivate() const;
+		bool isSecret() const;
 		QDateTime creationDate() const;
 		QDateTime expirationDate() const;
 		QString fingerprint() const;

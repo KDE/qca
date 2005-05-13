@@ -55,7 +55,7 @@ namespace QCA
 		Certificate certificate() const;
 		CRL crl() const;
 		PGPKey pgpSecretKey() const;
-		PGPKey pgpPublicKey() const;
+		PGPKey pgpPublicKey() const; // works for PGPSecretKey, too
 	};
 
 	/*

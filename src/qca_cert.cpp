@@ -1183,7 +1183,7 @@ PGPKey & PGPKey::operator=(const PGPKey &from)
 
 bool PGPKey::isNull() const
 {
-	return false;
+	return true;
 }
 
 QString PGPKey::keyId() const
@@ -1201,7 +1201,7 @@ QStringList PGPKey::userIds() const
 	return QStringList();
 }
 
-bool PGPKey::havePrivate() const
+bool PGPKey::isSecret() const
 {
 	return false;
 }
