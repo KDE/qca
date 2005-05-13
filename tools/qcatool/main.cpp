@@ -324,6 +324,157 @@ static QString add_cr(const QString &in)
 	return out;
 }
 
+// first = ids, second = names
+static QPair<QStringList, QStringList> getKeyStoreStrings(const QList<QCA::KeyStore*> &list)
+{
+	QPair<QStringList, QStringList> out;
+	for(int n = 0; n < list.count(); ++n)
+	{
+		out.first.append(list[n]->id());
+		out.second.append(list[n]->name());
+	}
+	return out;
+}
+
+static QPair<QStringList, QStringList> getKeyStoreEntryStrings(const QList<QCA::KeyStoreEntry> &list)
+{
+	QPair<QStringList, QStringList> out;
+	for(int n = 0; n < list.count(); ++n)
+	{
+		out.first.append(list[n].id());
+		out.second.append(list[n].name());
+	}
+	return out;
+}
+
+static QList<int> getPartialMatches(const QStringList &list, const QString &str)
+{
+	QList<int> out;
+	for(int n = 0; n < list.count(); ++n)
+	{
+		if(list[n].contains(str, Qt::CaseInsensitive))
+			out += n;
+	}
+	return out;
+}
+
+static int findByString(const QPair<QStringList, QStringList> &in, const QString &str)
+{
+	// exact id match
+	int n = in.first.indexOf(str);
+	if(n != -1)
+		return n;
+
+	// partial id match
+	QList<int> ret = getPartialMatches(in.first, str);
+	if(!ret.isEmpty())
+		return ret.first();
+
+	// partial name match
+	ret = getPartialMatches(in.second, str);
+	if(!ret.isEmpty())
+		return ret.first();
+
+	return -1;
+}
+
+static QCA::KeyStore *getKeyStore(const QString &name)
+{
+	QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
+	QList<QCA::KeyStore*> storeList = ksm->keyStores();
+	int n = findByString(getKeyStoreStrings(storeList), name);
+	if(n != -1)
+		return storeList[n];
+	return 0;
+}
+
+static QCA::KeyStoreEntry getKeyStoreEntry(QCA::KeyStore *store, const QString &name)
+{
+	QList<QCA::KeyStoreEntry> list = store->entryList();
+	int n = findByString(getKeyStoreEntryStrings(list), name);
+	if(n != -1)
+		return list[n];
+	return QCA::KeyStoreEntry();
+}
+
+static QPair<QCA::PGPKey, QCA::PGPKey> getPGPSecretKey(const QString &name)
+{
+	QPair<QCA::PGPKey, QCA::PGPKey> key;
+	int n = name.indexOf(':');
+	if(n == -1)
+	{
+		printf("missing colon\n");
+		return key;
+	}
+	QString storeName = name.mid(0, n);
+	QString objectName = name.mid(n + 1);
+
+	QCA::KeyStore *store = getKeyStore(storeName);
+	if(!store)
+	{
+		printf("no such store\n");
+		return key;
+	}
+
+	QCA::KeyStoreEntry e = getKeyStoreEntry(store, objectName);
+	if(e.isNull())
+	{
+		printf("no such object\n");
+		return key;
+	}
+
+	if(e.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
+	{
+		printf("not a PGPSecretKey\n");
+		return key;
+	}
+
+	key.first = e.pgpSecretKey();
+	key.second = e.pgpPublicKey();
+	return key;
+}
+
+static QCA::Certificate getCertificate(const QString &name)
+{
+	QCA::Certificate cert;
+
+	int n = name.indexOf(':');
+	if(n == -1)
+	{
+		cert = QCA::Certificate::fromPEMFile(name);
+		if(cert.isNull())
+			printf("Error reading cert file\n");
+
+		return cert;
+	}
+
+	QString storeName = name.mid(0, n);
+	QString objectName = name.mid(n + 1);
+
+	QCA::KeyStore *store = getKeyStore(storeName);
+	if(!store)
+	{
+		printf("no such store\n");
+		return cert;
+	}
+
+	QCA::KeyStoreEntry e = getKeyStoreEntry(store, objectName);
+	if(e.isNull())
+	{
+		printf("no such object\n");
+		return cert;
+	}
+
+	if(e.type() != QCA::KeyStoreEntry::TypeCertificate)
+	{
+		printf("not a certificate\n");
+		return cert;
+	}
+
+	cert = e.certificate();
+	return cert;
+}
+
 static void usage()
 {
 	printf("qcatool: simple qca testing tool\n");
@@ -347,9 +498,52 @@ static void usage()
 	printf("  --showreq [certreq.pem]\n");
 	printf("  --validate [cert.pem] (nonroots.pem)\n");
 	printf("\n");
+	printf("  --list-keystores\n");
+	printf("  --list-keystore [storeName]\n");
+	printf("\n");
 	printf("  --smime sign [priv.pem] [messagefile] [cert.pem] [nonroots.pem] (passphrase)\n");
 	printf("  --smime encrypt [cert.pem] [messagefile]\n");
 	printf("\n");
+	printf("  --pgp sign [S] [messagefile]\n");
+	printf("\n");
+
+	/*printf("qcatool: simple qca utility\n");
+	printf("usage: qcatool (--pass, --noprompt) [command]\n");
+	printf("\n");
+	printf(" key [command]\n");
+	printf("   make rsa|dsa [bits]                Create a key pair\n");
+	printf("   changepass (--newpass) [priv.pem]  Add/change passphrase of a key\n");
+	printf("   removepass [priv.pem]              Remove passphrase of a key\n");
+	printf(" cert [command]\n");
+	printf("   makereq [K]                        Create certificate request (CSR)\n");
+	printf("   makeself [K] ca|user               Create self-signed certificate\n");
+	printf("   validate [C] (nonroots.pem)        Validate certificate\n");
+	printf(" keybundle [command]\n");
+	printf("   make [K] [C] (nonroots.pem)        Create a keybundle\n");
+	printf("   extract                            Extract certificate(s) and key\n");
+	printf("   changepass (--newpass)             Change passphrase of a keybundle\n");
+	printf(" keystore [command]\n");
+	printf("   list-stores                        List all available keystores\n");
+	printf("   list [storeName]                   List content of a keystore\n");
+	printf("   addcert [storeName] [cert.p12]     Add a keybundle into a keystore\n");
+	printf("   addpgp [storeName] [key.asc]       Add a PGP key into a keystore\n");
+	printf("   remove [storeName] [objectName]    Remove an object from a keystore\n");
+	printf(" show [command]\n");
+	printf("   cert [C]                           Examine a certificate\n");
+	printf("   req [req.pem]                      Examine a certificate request (CSR)\n");
+	printf("   pgp [P|S]                          Examine a PGP key\n");
+	printf(" message [command]\n");
+	printf("   sign pgp|pgpdetach|smime [X|S]     Sign a message\n");
+	printf("   encrypt pgp|smime [C|P]            Encrypt a message\n");
+	printf("   signencrypt [S] [P]                PGP sign & encrypt a message\n");
+	printf("   verify pgp|smime                   Verify a message\n");
+	printf("   decrypt pgp|smime [X|S]            Decrypt a message\n");
+	printf("\n");
+	printf("Object types: K = private key, C = certificate, X = key bundle,\n");
+	printf("  P = PGP public key, S = PGP secret key\n");
+	printf("\n");
+	printf("An object must be either a filename or a keystore reference (\"store:obj\").\n");
+	printf("\n");*/
 }
 
 int main(int argc, char **argv)
@@ -940,12 +1134,9 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		QCA::Certificate cert(args[1]);
+		QCA::Certificate cert = getCertificate(args[1]);
 		if(cert.isNull())
-		{
-			printf("Error reading cert file\n");
 			return 1;
-		}
 
 		printf("Serial Number: %s\n", cert.serialNumber().toString().toLatin1().data());
 
@@ -1227,6 +1418,118 @@ int main(int argc, char **argv)
 			ts << str;
 
 			printf("Wrote %s\n", qPrintable(outfile.fileName()));
+		}
+		else
+		{
+			usage();
+			return 1;
+		}
+	}
+	else if(args[0] == "--list-keystores")
+	{
+		QCA::scanForPlugins();
+
+		QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
+		QList<QCA::KeyStore*> storeList = ksm->keyStores();
+		for(int n = 0; n < storeList.count(); ++n)
+		{
+			QCA::KeyStore *i = storeList[n];
+			QString type;
+			switch(i->type())
+			{
+				case QCA::KeyStore::System:      type = "Sys "; break;
+				case QCA::KeyStore::User:        type = "User"; break;
+				case QCA::KeyStore::Application: type = "App "; break;
+				case QCA::KeyStore::SmartCard:   type = "Card"; break;
+				case QCA::KeyStore::PGPKeyring:  type = "PGP "; break;
+			}
+			// TODO: id field length should be uniform based on all entries
+			printf("%s %s [%s]\n", qPrintable(type), qPrintable(i->id()), qPrintable(i->name()));
+		}
+	}
+	else if(args[0] == "--list-keystore")
+	{
+		if(args.count() < 2)
+		{
+			usage();
+			return 1;
+		}
+
+		QCA::scanForPlugins();
+
+		QCA::KeyStore *store = getKeyStore(args[1]);
+		if(!store)
+		{
+			printf("no such store\n");
+			return 1;
+		}
+
+		QList<QCA::KeyStoreEntry> list = store->entryList();
+		for(int n = 0; n < list.count(); ++n)
+		{
+			QCA::KeyStoreEntry i = list[n];
+			QString type;
+			switch(i.type())
+			{
+				case QCA::KeyStoreEntry::TypeKeyBundle:    type = "Key "; break;
+				case QCA::KeyStoreEntry::TypeCertificate:  type = "Cert"; break;
+				case QCA::KeyStoreEntry::TypeCRL:          type = "CRL "; break;
+				case QCA::KeyStoreEntry::TypePGPSecretKey: type = "PSec"; break;
+				case QCA::KeyStoreEntry::TypePGPPublicKey: type = "PPub"; break;
+			}
+			// TODO: id field length should be uniform based on all entries
+			printf("%s %-2s [%s]\n", qPrintable(type), qPrintable(i.id()), qPrintable(i.name()));
+		}
+	}
+	else if(args[0] == "--pgp")
+	{
+		if(args.count() < 2)
+		{
+			usage();
+			return 1;
+		}
+
+		if(args[1] == "sign")
+		{
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			QPair<QCA::PGPKey, QCA::PGPKey> key = getPGPSecretKey(args[2]);
+			if(key.first.isNull())
+				return 1;
+
+			QFile infile(args[3]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QCA::SecureMessageKey skey;
+			skey.setPGPSecretKey(key.first);
+
+			QByteArray plain = infile.readAll();
+
+			QCA::OpenPGP pgp;
+			QCA::SecureMessage msg(&pgp);
+			msg.setSigner(skey);
+			msg.startSign(QCA::SecureMessage::Clearsign);
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error signing: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QSecureArray result = msg.read();
+
+			printf("Result: [%s]\n", result.data());
 		}
 		else
 		{
