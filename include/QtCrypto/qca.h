@@ -56,9 +56,9 @@
      - Secure byte arrays (QSecureArray)
      - Arbitrary precision integers (QBigInteger)
      - Random number generation (QCA::Random)
-     - SSL/TLS (ToDo)
+     - SSL/TLS (QCA::TLS)
      - X509 certificates (QCA::Certificate and QCA::CertificateCollection)
-     - Simple Authentication and Security Layer (SASL) (ToDo)
+     - Simple Authentication and Security Layer (SASL) (QCA::SASL)
      - RSA (QCA::RSAPrivateKey and QCA::RSAPublicKey)
      - DSA (QCA::DSAPrivateKey and QCA::DSAPublicKey)
      - Diffie-Hellman (QCA::DHPrivateKey and QCA::DHPublicKey)
@@ -114,17 +114,17 @@
 
    \subsection qca2code Current development
 
-   The latest version of the code is available from the KDE CVS
+   The latest version of the code is available from the KDE Subversion
    server (there is no formal release of the current version at this time). See
-   <a href="http://developer.kde.org/source/anoncvs.html">
-   http://developer.kde.org/source/anoncvs.html
+   <a href="http://developer.kde.org/source/anonsvn.html">
+   http://developer.kde.org/source/anonsvn.html
    </a> for general instructions. You do <i>not</i> need kdelibs or
    arts modules for %QCA - just pull down kdesupport/qca. The plugins
    are in the same tree. Naturally you will need %Qt properly set up
    and configured in order to build and use %QCA.
 
-   The CVS code can also be browsed
-   <a href="http://webcvs.kde.org/cgi-bin/cvsweb.cgi/kdesupport/qca/">
+   The Subversion code can also be browsed
+   <a href="http://websvn.kde.org/trunk/kdesupport/qca/">
    via the web</a>
 
    \subsection qca1code Previous versions

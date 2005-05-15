@@ -464,13 +464,44 @@ namespace QCA
 		*/
 		bool operator!=(const Certificate &a) const;
 	};
+	
+	/**
+	   \class CertificateChain qca_cert.h QtCrypto
 
+	   A chain of related Certificates
+
+	   CertificateChain is a list (a QList) of certificates that are related by the 
+	   signature from one to another. If Certificate C signs Certificate B, and Certificate
+	   B signs Certificate A, then C, B and A form a chain.
+
+	   The normal use of a CertificateChain is from a end-user Certificate (called
+	   the primary, equivalent to QList::first()) though some intermediate Certificates
+	   to some other Certificate (QList::last()), which might
+	   be a root Certificate Authority, but does not need to be.
+
+	   You can build up the chain using normal QList operations, such as QList::append()
+
+	   \sa QCA::CertificateCollection for an alternative way to represent a group
+	   of Certificates that do not necessarily have a chained relationship.
+	*/
 	class QCA_EXPORT CertificateChain : public QList<Certificate>
 	{
 	public:
+		/**
+		   Create an empty certificate chain
+		*/
 		CertificateChain();
+
+		/**
+		   Create a certificate chain, starting at the specified certificate
+
+		   \param primary the end-user certificate that forms one end of the chain
+		*/
 		CertificateChain(const Certificate &primary);
 
+		/**
+		   Return the primary (end-user) Certificate
+		*/
 		const Certificate & primary() const;
 	};
 
@@ -478,6 +509,8 @@ namespace QCA
 	   \class CertificateRequest qca_cert.h QtCrypto
 
 	   Certificate Request
+
+	   A Certificate Request is a unsigned request for a Certificate
 	*/
 	class QCA_EXPORT CertificateRequest : public Algorithm
 	{
@@ -826,6 +859,12 @@ namespace QCA
 	   \class CertificateCollection qca_cert.h QtCrypto
 
 	   Bundle of Certificates and CRLs
+
+	   CertificateCollection provides a bundle of Certificates and Certificate Revocation
+	   Lists (CRLs), not necessarily related.
+
+	   \sa QCA::CertificateChain for a representation of a chain of Certificates related by
+	   signatures.
 	*/
 	class CertificateCollection
 	{
@@ -955,17 +994,58 @@ namespace QCA
 
 	/**
 	   \class CertificateAuthority qca_cert.h QtCrypto
+
+	   A %Certificate Authority is used to generate Certificates and
+	   %Certificate Revocation Lists (CRLs).
 	*/
 	class QCA_EXPORT CertificateAuthority : public Algorithm
 	{
 	public:
+		/**
+		   Create a new %Certificate Authority
+
+		   \param cert the CA certificate
+		   \param key the private key associated with the CA certificate
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
 
 		Certificate certificate() const;
 
+		/**
+		   Create a new Certificate by signing the provider CertificateRequest
+
+		   \param req the CertificateRequest to sign
+		   \param notValidAfter the last date that the Certificate will be valid
+		*/
 		Certificate signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const;
+
+		/**
+		   Create a new Certificate
+
+		   \param key the Public Key to use to create the Certificate
+		   \param opts the options to use for the new Certificate
+		*/
 		Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
+
+		/**
+		   Create a new Certificate Revocation List (CRL)
+
+		   \param nextUpdate the date that the CRL will be updated
+
+		   \return an empty CRL
+		*/
 		CRL createCRL(const QDateTime &nextUpdate) const;
+
+		/**
+		   Update the CRL to include new entries
+
+		   \param crl the CRL to update
+		   \param entries the entries to add to the CRL
+		   \param nextUpdate the date that this CRL will be updated
+
+		   \return the update CRL
+		*/
 		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 	};
 
