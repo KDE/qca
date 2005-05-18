@@ -180,7 +180,18 @@ namespace QCA
 		*/
 		bool isValid() const;
 
+		/**
+		   The challenge part of the certificate
+
+		   \sa setChallenge
+		*/
 		QString challenge() const;        // request
+
+		/**
+		   Information on the subject of the certificate
+
+		   \sa setIn
+		*/
 		CertificateInfo info() const;     // request or create
 
 		/**
@@ -221,7 +232,24 @@ namespace QCA
 		*/
 		QDateTime notValidAfter() const;  // create
 
+		/**
+		   Specify the challenge associated with this
+		   certificate
+
+		   \param s the challenge string
+
+		   \sa challenge()
+		*/
 		void setChallenge(const QString &s);
+
+		/**
+		   Specify information for the the subject associated with the
+		   certificate
+		   
+		   \param info the information for the subject
+		   
+		   \sa info()
+		*/
 		void setInfo(const CertificateInfo &info);
 
 		/**
@@ -367,6 +395,10 @@ namespace QCA
 		*/
 		bool isSelfSigned() const;
 
+		/**
+		   The upper bound of the number of links in the certificate
+		   chain, if any
+		*/
 		int pathLimit() const;
 
 		/**
@@ -448,6 +480,11 @@ namespace QCA
 		*/
 		static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
+		/**
+		   Test if the subject of the certificate matches a specified host name
+
+		   \param host the name of the host to compare to
+		*/
 		bool matchesHostname(const QString &host) const;
 
 		/**
@@ -1010,6 +1047,11 @@ namespace QCA
 		*/
 		CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
 
+		/**
+		   The Certificate belonging to the %CertificateAuthority
+
+		   This is the Certificate that was passed as an argument to the constructor
+		*/
 		Certificate certificate() const;
 
 		/**

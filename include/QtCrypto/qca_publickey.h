@@ -142,6 +142,12 @@ namespace QCA
 		*/
 		DLGroup(const DLGroup &from);
 		~DLGroup();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the DLGroup to copy from
+		*/
 		DLGroup & operator=(const DLGroup &from);
 
 		/**
@@ -194,12 +200,72 @@ namespace QCA
 		};
 
 		PKey();
+
+		/**
+		   Standard copy constructor
+
+		   \param from the key to copy from
+		*/
 		PKey(const PKey &from);
 		~PKey();
 
+		/**
+		   Standard assignment operator
+
+		   \param from the PKey to copy from
+		*/
 		PKey & operator=(const PKey &from);
 
+		/**
+		   Test what types of keys are supported.
+
+		   Normally you would just test if the capability is present, however
+		   for PKey, you also need to test which types of keys are available. So
+		   if you want to figure out if RSA keys are supported, you need to 
+		   do something like:
+		   \code
+		   if(!QCA::isSupported("pkey") ||
+		      !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA)) {
+		      // then there is no RSA key support
+		   } else {
+		      // there is RSA key support
+		   }
+		   \endcode
+
+		   To make things a bit more complex, supportedTypes() only
+		   checks for basic functionality. If you want to check that 
+		   you can do operations with PEM or DER (eg toPEM(), fromPEM(), and
+		   the equivalent DER and PEMfile operations, plus anything else
+		   that uses them, including the constructor form that takes a fileName), 
+		   then you need to check for supportedIOTypes() instead.
+
+		   \sa supportedIOTypes()
+		*/
 		static QList<Type> supportedTypes(const QString &provider = QString());
+
+		/**
+		   Test what types of keys are supported for IO operations
+
+		   If you are using PKey DER or PEM operations, then you need
+		   to check for appropriate support using this method. For example,
+		   if you want to check if you can export or import an RSA key, then
+		   you need to do something like:
+		   \code
+		   if(!QCA::isSupported("pkey") ||
+		      !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA)) {
+		      // then there is no RSA key IO support
+		   } else {
+		      // there is RSA key IO support
+		   }
+		   \endcode
+
+		   Note that if you only want to check for basic functionality
+		   (ie not PEM or DER import/export), then you can use supportedTypes().
+		   There is no need to use both - if the key type is supported for 
+		   IO, then is also supported for basic operations.
+
+		   \sa supportedTypes()
+		*/
 		static QList<Type> supportedIOTypes(const QString &provider = QString());
 
 		/**
@@ -257,21 +323,105 @@ namespace QCA
 		*/
 		bool canKeyAgree() const;
 
+		/**
+		   Interpret this key as a PublicKey
+
+		   \sa toRSAPublicKey(), toDSAPublicKey() and toDHPublicKey()
+		*/
 		PublicKey toPublicKey() const;
+
+		/**
+		   Interpret this key as a PrivateKey
+
+		   \sa toRSAPrivateKey(), toDSAPrivateKey() and toDHPrivateKey()
+		*/
 		PrivateKey toPrivateKey() const;
 
+		/**
+		   test if two keys are equal
+		*/
 		bool operator==(const PKey &a) const;
+
+		/**
+		   test if two keys are not equal
+		*/
 		bool operator!=(const PKey &a) const;
 
 	protected:
+		/**
+		   Create a key of the specified type
+		*/
 		PKey(const QString &type, const QString &provider);
+
+		/**
+		   Set the key
+		*/
 		void set(const PKey &k);
 
+		/**
+		   Interpret this key as an RSAPublicKey
+
+		   \note This function is essentially a convenience cast - if the
+		   key was created as a DSA key, this function cannot turn it into 
+		   an RSA key.
+
+		   \sa toPublicKey(), toDSAPublcKey() and toDHPublicKey()
+		*/
 		RSAPublicKey toRSAPublicKey() const;
+
+		/**
+		   Interpret this key as an  RSAPrivateKey
+
+		   \note This function is essentially a convenience cast - if the
+		   key was created as a DSA key, this function cannot turn it into 
+		   a RSA key.
+
+		   \sa toPrivateKey(), toDSAPrivateKey() and toDHPrivateKey()
+		*/
 		RSAPrivateKey toRSAPrivateKey() const;
+
+		/**
+		   Interpret this key as an DSAPublicKey
+
+		   \note This function is essentially a convenience cast - if the
+		   key was created as an RSA key, this function cannot turn it into 
+		   a DSA key.
+
+		   \sa toPublicKey(), toRSAPublcKey() and toDHPublicKey()
+		*/
 		DSAPublicKey toDSAPublicKey() const;
+
+		/**
+		   Interpret this key as a DSAPrivateKey
+
+		   \note This function is essentially a convenience cast - if the
+		   key was created as an RSA key, this function cannot turn it into 
+		   a DSA key.
+
+		   \sa toPrivateKey(), toRSAPrivateKey() and toDHPrivateKey()
+		*/
 		DSAPrivateKey toDSAPrivateKey() const;
+
+		/**
+		   Interpret this key as an DHPublicKey
+
+		   \note This function is essentially a convenience cast - if the
+		   key was created as a DSA key, this function cannot turn it into 
+		   a DH key.
+
+		   \sa toPublicKey(), toRSAPublcKey() and toDSAPublicKey()
+		*/
 		DHPublicKey toDHPublicKey() const;
+
+		/**
+		   Interpret this key as a DHPrivateKey
+
+		   \note This function is essentially a convenience cast - if the
+		   key was created as a DSA key, this function cannot turn it into 
+		   a DH key.
+
+		   \sa toPrivateKey(), toDSAPrivateKey() and toRSAPrivateKey()
+		*/
 		DHPrivateKey toDHPrivateKey() const;
 
 	private:
@@ -288,8 +438,25 @@ namespace QCA
 	class QCA_EXPORT PublicKey : public PKey
 	{
 	public:
+		/**
+		   Create an empty (null) public key
+		*/
 		PublicKey();
+
+		/**
+		   Create a public key based on a specified private key
+
+		   \param k the private key to extract the public key parts from
+		*/
 		PublicKey(const PrivateKey &k);
+
+		/**
+		   Import a public key from a PEM representation in a file
+
+		   \param fileName the name of the file containing the public key
+
+		   \sa fromPEMFile for an alternative method
+		*/
 		PublicKey(const QString &fileName);
 
 		/**
@@ -311,7 +478,7 @@ namespace QCA
 		/**
 		   Convenience method to convert this key to a DHPublicKey
 
-		   Note that if the key is not an RSA key (eg it is DSA or RSA),
+		   Note that if the key is not an DH key (eg it is DSA or RSA),
 		   then this will produce a null key.
 		*/
 		DHPublicKey toDH() const;
@@ -379,7 +546,6 @@ namespace QCA
 		   }
 		   \endcode
 
-
 		   \param a the array containing a DER encoded key
 		   \param result pointer to a variable, which returns whether the conversion succeeded (ConvertGood) or not
 		   \param provider the name of the provider to use for the import.
@@ -431,6 +597,8 @@ namespace QCA
 
 		   \sa toPEMFile, which provides an inverse of fromPEMFile()
 		   \sa fromPEM, which provides an import from a string
+
+		   \note there is also a constructor form that can import from a file
 		*/
 		static PublicKey fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
@@ -445,6 +613,15 @@ namespace QCA
 	{
 	public:
 		PrivateKey();
+
+		/**
+		   Import a private key from a PEM representation in a file
+
+		   \param fileName the name of the file containing the private key
+		   \param passphrase the pass phrase for the private key
+
+		   \sa fromPEMFile for an alternative method
+		*/
 		PrivateKey(const QString &fileName, const QSecureArray &passphrase = QSecureArray());
 
 		/**
@@ -485,12 +662,89 @@ namespace QCA
 		SymmetricKey deriveKey(const PublicKey &theirs) const;
 
 		// import / export
+		/**
+		   List the supported Password Based Encryption Algorithms that can be used
+		   to protect the key.
+
+		   \param provider the provider to use, if a particular provider is required
+		*/
 		static QList<PBEAlgorithm> supportedPBEAlgorithms(const QString &provider = QString());
+
+		/**
+		   Export the key in Distinguished Encoding Rules (DER) format
+
+		   \param passphrase the pass phrase to use to protect the key
+		   \param pbe the symmetric encryption algorithm to use to protect the key
+
+		   \sa fromDER provides an inverse of toDER, converting the DER encoded key back to a PrivateKey
+		*/
 		QSecureArray toDER(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
+
+		/**
+		   Export the key in Privacy Enhanced Mail (PEM) format
+
+		   \param passphrase the pass phrase to use to protect the key
+		   \param pbe the symmetric encryption algorithm to use to protect the key
+
+		   \sa toPEMFile provides a convenient way to save the PEM encoded key to a file
+		   \sa fromPEM provides an inverse of toPEM, converting the PEM encoded key back to a PrivateKey
+		*/
 		QString toPEM(const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
+
+		/**
+		   Export the key in Privacy Enhanced Mail (PEM) format to a file
+
+		   \param fileName the name (and path, if required) that the key should be exported to.
+		   \param passphrase the pass phrase to use to protect the key
+		   \param pbe the symmetric encryption algorithm to use to protect the key
+
+		   \return true if the export succeeds
+
+		   \sa toPEM provides a convenient way to save the PEM encoded key to a file
+		   \sa fromPEM provides an inverse of toPEM, converting the PEM encoded key back to a PrivateKey
+		*/
 		bool toPEMFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), PBEAlgorithm pbe = PBEDefault) const;
+
+		/**
+		   Import the key from Distinguished Encoding Rules (DER) format
+
+		   \param a the array containing the DER representation of the key
+		   \param passphrase the pass phrase that is used to protect the key
+		   \param result a pointer to a ConvertResult, that if specified, will be set to reflect the result
+		   of the import
+		   \param provider the provider to use, if a particular provider is required
+
+		   \sa toDER provides an inverse of fromDER, exporting the key to an array
+		*/ 
 		static PrivateKey fromDER(const QSecureArray &a, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the key from Privacy Enhanced Mail (PEM) format
+
+		   \param s the string containing the PEM representation of the key
+		   \param passphrase the pass phrase that is used to protect the key
+		   \param result a pointer to a ConvertResult, that if specified, will be set to reflect the result
+		   of the import
+		   \param provider the provider to use, if a particular provider is required
+
+		   \sa toPEM provides an inverse of fromPEM, exporting the key to a string in PEM encoding.
+		*/ 
 		static PrivateKey fromPEM(const QString &s, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the key in Privacy Enhanced Mail (PEM) format from a file
+
+		   \param fileName the name (and path, if required) of the file containing the PEM representation of the key
+		   \param passphrase the pass phrase that is used to protect the key
+		   \param result a pointer to a ConvertResult, that if specified, will be set to reflect the result
+		   of the import
+		   \param provider the provider to use, if a particular provider is required
+
+		   \sa toPEMFile provides an inverse of fromPEMFile
+		   \sa fromPEM which allows import from a string
+
+		   \note there is also a constructor form, that allows you to create the key directly
+		*/ 
 		static PrivateKey fromPEMFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
 	protected:
@@ -506,11 +760,39 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Create a new key generator
+
+		   \param parent the parent object, if applicable
+		*/
 		KeyGenerator(QObject *parent = 0);
+
 		~KeyGenerator();
 
+		/**
+		   Test whether the key generator is set to operate in blocking mode, or not
+
+		   \return true if the key generator is in blocking mode
+
+		   \sa setBlocking
+		*/
 		bool blocking() const;
+
+		/**
+		   Set whether the key generator is in blocking mode, nor not
+
+		   \param b if true, the key generator will be set to operate in blocking mode,
+		   otherwise it will operate in non-blocking mode
+
+		   \sa blocking
+		*/
 		void setBlocking(bool b);
+
+		/**
+		   Test if the key generator is currently busy, or not
+
+		   \return true if the key generator is busy generating a key already
+		*/
 		bool isBusy() const;
 
 		/**
@@ -526,18 +808,54 @@ namespace QCA
 		   
 		   \param bits the length of key that is required
 		   \param exp the exponent - typically 3, 17 or 65537
-		   \param provider the name of the provider to use
+		   \param provider the name of the provider to use, if a particular provider is required
 		*/
 		PrivateKey createRSA(int bits, int exp = 65537, const QString &provider = QString());
 
+		/**
+		   Generate a DSA key
+
+		   This method creates both the public key and corresponding private key. You
+		   almost certainly want to extract the public key part out - see PKey::toPublicKey
+		   for an easy way.
+
+		   \param domain the discrete logarithm group that this key should be generated from
+		   \param provider the name of the provider to use, if a particular provider is required
+		*/
 		PrivateKey createDSA(const DLGroup &domain, const QString &provider = QString());
+
+		/**
+		   Generate a Diffie-Hellman key
+
+		   This method creates both the public key and corresponding private key. You
+		   almost certainly want to extract the public key part out - see PKey::toPublicKey
+		   for an easy way.
+
+		   \param domain the discrete logarithm group that this key should be generated from
+		   \param provider the name of the provider to use, if a particular provider is required
+		*/
 		PrivateKey createDH(const DLGroup &domain, const QString &provider = QString());
+
+		/**
+		   Return the last generated key
+
+		   This is really only useful when you are working with non-blocking key generation
+		*/
 		PrivateKey key() const;
 
 		DLGroup createDLGroup(QCA::DLGroupSet set, const QString &provider = QString());
+
+		/**
+		   The current discrete logarithm group 
+		*/
 		DLGroup dlGroup() const;
 
 	signals:
+		/**
+		   Emitted when the key generation is complete.
+
+		   This is only used in non-blocking mode
+		*/
 		void finished();
 
 	private:
