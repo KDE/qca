@@ -36,11 +36,21 @@ int main(int argc, char **argv)
     // use "hello" if no arguments
     QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
 
+    // We demonstrate PEM usage here, so we need to test for
+    // supportedIOTypes, not just supportedTypes
     if(!QCA::isSupported("pkey") ||
-       !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
 	printf("RSA not supported!\n");
     else {
+	// When creating a public / private key pair, you make the
+	// private key, and then extract the public key component from it
+	// Using RSA is very common, however DSA can provide equivalent
+	// signature/verification and DH can do encrypt/decrypt. This
+	// example applies to DSA and DH to the extent that the operations
+	// work on those key types.
+
+	// QCA provides KeyGenerator as a convenient source of new keys,
+	// however you could also import an existing key instead.
 	QCA::PrivateKey seckey = QCA::KeyGenerator().createRSA(1024);
 	if(seckey.isNull()) {
 	    std::cout << "Failed to make private RSA key" << std::endl;
@@ -50,13 +60,12 @@ int main(int argc, char **argv)
 	QCA::PublicKey pubkey = seckey.toPublicKey();
 
 	// check if the key can encrypt
-	if(!pubkey.canEncrypt())
-	{
+	if(!pubkey.canEncrypt()) {
 	    std::cout << "Error: this kind of key cannot encrypt" << std::endl;
 	    return 1;
 	}
 
-	// encrypt some data
+	// encrypt some data - note that only the public key is required
 	// you must also choose the algorithm to be used
 	QSecureArray result = pubkey.encrypt(arg, QCA::EME_PKCS1_OAEP);
 	if(result.isEmpty()) {
@@ -70,14 +79,16 @@ int main(int argc, char **argv)
 	std::cout << qPrintable(rstr) << "\"" << std::endl;
 
 	// save the private key - in a real example, make sure this goes
-	// somewhere secure.
+	// somewhere secure and has a good pass phrase
 	// You can use the same technique with the public key too.
 	QSecureArray passPhrase = "pass phrase";
 	seckey.toPEMFile("keyprivate.pem", passPhrase);
 
 	// Read that key back in, checking if the read succeeded
 	QCA::ConvertResult conversionResult;
-	QCA::PrivateKey privateKey = QCA::PrivateKey::fromPEMFile("keyprivate.pem", passPhrase, &conversionResult);
+	QCA::PrivateKey privateKey = QCA::PrivateKey::fromPEMFile( "keyprivate.pem",
+								   passPhrase,
+								   &conversionResult);
 	if (! QCA::ConvertGood == conversionResult) {
 	    std::cout << "Private key read failed" << std::endl;
 	}
@@ -94,6 +105,46 @@ int main(int argc, char **argv)
 	std::cout << "\"" << qPrintable(rstr) << "\" decrypted with RSA is \"";
 	std::cout << decrypt.data() << "\"" << std::endl;
 
+
+	// Some private keys can also be used for producing signatures
+	if(!privateKey.canSign()) {
+	    std::cout << "Error: this kind of key cannot sign" << std::endl;
+	    return 1;
+	}
+	privateKey.startSign( QCA::EMSA3_MD5 );
+	privateKey.update( arg ); // just reuse the same message
+	QSecureArray argSig = privateKey.signature();
+
+	// instead of using the startSign(), update(), signature() calls,
+	// you may be better doing the whole thing in one go, using the
+	// signMessage call. Of course you need the whole message in one
+	// hit, which may or may not be a problem
+
+	// output the resulting signature
+	rstr = QCA::arrayToHex(argSig);
+	std::cout << "Signature for \"" << arg.data() << "\" using RSA, is ";
+	std::cout << "\"" << qPrintable( rstr ) << "\"" << std::endl;
+
+	// to check a signature, we can 
+	if(pubkey.canVerify()) {
+	    pubkey.startVerify( QCA::EMSA3_MD5 );
+	    pubkey.update( arg );
+	    if ( pubkey.validSignature( argSig ) ) {
+		std::cout << "Signature is valid" << std::endl;
+	    } else {
+		std::cout << "Bad signature" << std::endl;
+	    }
+	}
+
+	// We can also do the verification in a single step if we
+	// have all the message
+	if ( pubkey.canVerify() &&
+	     pubkey.verifyMessage( arg, argSig, QCA::EMSA3_MD5 ) ) {
+	    std::cout << "Signature is valid" << std::endl;
+	} else {
+	    std::cout << "Signature could not be verified" << std::endl;
+	}
+	    
     }
 
     return 0;
