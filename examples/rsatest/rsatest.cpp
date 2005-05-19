@@ -45,9 +45,8 @@ int main(int argc, char **argv)
 	// When creating a public / private key pair, you make the
 	// private key, and then extract the public key component from it
 	// Using RSA is very common, however DSA can provide equivalent
-	// signature/verification and DH can do encrypt/decrypt. This
-	// example applies to DSA and DH to the extent that the operations
-	// work on those key types.
+	// signature/verification. This example applies to DSA to the
+	// extent that the operations work on that key type.
 
 	// QCA provides KeyGenerator as a convenient source of new keys,
 	// however you could also import an existing key instead.
