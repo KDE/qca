@@ -124,7 +124,8 @@ int main(int argc, char **argv)
 	std::cout << "Signature for \"" << arg.data() << "\" using RSA, is ";
 	std::cout << "\"" << qPrintable( rstr ) << "\"" << std::endl;
 
-	// to check a signature, we can 
+	// to check a signature, we must check that the key is
+	// appropriate
 	if(pubkey.canVerify()) {
 	    pubkey.startVerify( QCA::EMSA3_MD5 );
 	    pubkey.update( arg );
