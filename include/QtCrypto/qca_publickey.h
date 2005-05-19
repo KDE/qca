@@ -498,11 +498,72 @@ namespace QCA
 		bool canVerify() const;
 
 		// encrypt / verify
+		/**
+		   The maximum message size that can be encrypted with a specified algorithm
+
+		   \param alg the algorithm to check
+		*/
 		int maximumEncryptSize(EncryptionAlgorithm alg) const;
+
+		/**
+		   Encrypt a message using a specified algorithm
+
+		   \param a the message to encrypt
+		   \param alg the algorithm to use
+		*/
 		QSecureArray encrypt(const QSecureArray &a, EncryptionAlgorithm alg) const;
+
+		/**
+		   Initialise the signature verification process
+
+		   \param alg the algorithm to use for signing
+		   \param format the specific format to use, for DSA
+		*/
 		void startVerify(SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+
+		/**
+		   Update the signature verification process with more data
+
+		   \param a the array containing the data that should be added to the signature
+		*/
 		void update(const QSecureArray &a);
+
+		/**
+		   Check the signature is valid for the message
+
+		   The process to check that a signature is correct is shown below:
+		   \code
+		   // note that pubkey is a PublicKey
+		   if( pubkey.canVerify() ) {
+		       pubkey.startVerify( QCA::EMSA3_MD5 );
+		       pubkey.update( theMessage ); // might be called multiple times
+	               if ( pubkey.validSignature( theSignature ) ) {
+		          // then signature is valid
+		       } else {
+			   // then signature is invalid
+		       }
+                   }		   
+                   \endcode
+		   
+		   \param sig the signature to check 
+
+		   \return true if the signature is correct
+		*/
 		bool validSignature(const QSecureArray &sig);
+
+		/**
+		   Single step message verification
+
+		   If you have the whole message to be verified, then this offers a more
+		   convenient approach to verification.
+
+		   \param a the message to check the signature on
+		   \param sig the signature to be checked
+		   \param alg the algorithm to use
+		   \param format the signature format to use, for DSA
+		   
+		   \return true if the signature is valid for the message
+		*/
 		bool verifyMessage(const QSecureArray &a, const QSecureArray &sig, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 
 
@@ -603,6 +664,12 @@ namespace QCA
 		static PublicKey fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 
 	protected:
+		/**
+		   Create a new key of a specified type
+
+		   \param type the type of key to create
+		   \param provider the provider to use, if required
+		*/
 		PublicKey(const QString &type, const QString &provider);
 	};
 
@@ -612,6 +679,9 @@ namespace QCA
 	class QCA_EXPORT PrivateKey : public PKey
 	{
 	public:
+		/**
+		   Create an empty private key
+		*/
 		PrivateKey();
 
 		/**
@@ -654,11 +724,45 @@ namespace QCA
 		bool canSign() const;
 
 		// decrypt / sign / key agreement
+		/**
+		   Decrypt the message
+		   
+		   \param in the cipher (encrypted) data
+		   \param out the plain text data
+		   \param alg the algorithm to use
+		*/
 		bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const;
+
+		/**
+		   Initialise the message signature process
+
+		   \param alg the algorithm to use for the message signature process
+		   \param format the signature format to use, for DSA
+		*/
 		void startSign(SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+
+		/**
+		   Update the signature process
+
+		   \param a the message to use to update the signature
+		*/
 		void update(const QSecureArray &a);
+
+		/**
+		   The resulting signature
+		*/
 		QSecureArray signature();
-		QSecureArray signMessage(const QSecureArray &a, SignatureAlgorithm alg, SignatureFormat = DefaultFormat);
+
+		/**
+		   One step signature process
+
+		   \param a the message to sign
+		   \param alg the algorithm to use for the signature
+		   \param format the signature format to use, for DSA
+
+		   \return the signature
+		*/
+		QSecureArray signMessage(const QSecureArray &a, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 		SymmetricKey deriveKey(const PublicKey &theirs) const;
 
 		// import / export
@@ -748,6 +852,12 @@ namespace QCA
 		static PrivateKey fromPEMFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
 	protected:
+		/**
+		   Create a new private key
+
+		   \param type the type of key to create
+		   \param provider the provider to use, if a specific provider is required.
+		*/
 		PrivateKey(const QString &type, const QString &provider);
 	};
 
