@@ -69,6 +69,10 @@ namespace QCA
 		class Private;
 		QSharedDataPointer<Private> d;
 	};
+
+	/**
+	   A list of message keys
+	*/
 	typedef QList<SecureMessageKey> SecureMessageKeyList;
 
 	class SecureMessageSignature
@@ -97,6 +101,10 @@ namespace QCA
 		class Private;
 		QSharedDataPointer<Private> d;
 	};
+
+	/**
+	   A list of signatures
+	*/
 	typedef QList<SecureMessageSignature> SecureMessageSignatureList;
 
 	class SecureMessage : public QObject, public Algorithm

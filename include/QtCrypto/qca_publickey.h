@@ -763,6 +763,12 @@ namespace QCA
 		   \return the signature
 		*/
 		QSecureArray signMessage(const QSecureArray &a, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+
+		/**
+		   Derive a shared secret key from a public key
+
+		   \param theirs the public key to derive from
+		*/
 		SymmetricKey deriveKey(const PublicKey &theirs) const;
 
 		// import / export
@@ -953,6 +959,12 @@ namespace QCA
 		*/
 		PrivateKey key() const;
 
+		/**
+		   Create a new discrete logarithm group
+
+		   \param set the set of discrete logarithm parameters to generate from
+		   \param provider the name of the provider to use, if a particular provider is required.
+		*/
 		DLGroup createDLGroup(QCA::DLGroupSet set, const QString &provider = QString());
 
 		/**
@@ -980,8 +992,25 @@ namespace QCA
 	class QCA_EXPORT RSAPublicKey : public PublicKey
 	{
 	public:
+		/**
+		   Generate an empty RSA public key
+		*/
 		RSAPublicKey();
+
+		/**
+		   Generate an RSA public key from specified parameters
+
+		   \param n the public key value
+		   \param e the public key exponent
+		   \param provider the provider to use, if a particular provider is required
+		*/
 		RSAPublicKey(const QBigInteger &n, const QBigInteger &e, const QString &provider = QString());
+
+		/**
+		   Extract the public key components from an RSA private key
+
+		   \param k the private key to use as the basis for the public key
+		*/
 		RSAPublicKey(const RSAPrivateKey &k);
 
 		/**
@@ -1006,13 +1035,51 @@ namespace QCA
 	class QCA_EXPORT RSAPrivateKey : public PrivateKey
 	{
 	public:
+		/**
+		   Generate an empty RSA private key
+		*/
 		RSAPrivateKey();
+
+		/**
+		   Generate an RSA private key from specified parameters
+
+		   \param n the public key value
+		   \param e the public key exponent
+		   \param p one of the two chosen primes
+		   \param q the other of the two chosen primes
+		   \param d inverse of the exponent, modulo (p-1)(q-1)
+		   \param provider the provider to use, if a particular provider is required
+		*/
 		RSAPrivateKey(const QBigInteger &n, const QBigInteger &e, const QBigInteger &p, const QBigInteger &q, const QBigInteger &d, const QString &provider = QString());
 
+		/**
+		   The public key value
+
+		   This value is the actual public key value (the product of p and q, the random prime numbers
+		   used to generate the RSA key), also known as the public modulus.
+		*/
 		QBigInteger n() const;
+
+		/**
+		   The public key exponent
+
+		   This value is the exponent chosen in the original key generator step
+		*/
 		QBigInteger e() const;
+
+		/**
+		   One of the two random primes used to generate the private key
+		*/
 		QBigInteger p() const;
+
+		/**
+		   The second of the two random primes used to generate the private key
+		*/
 		QBigInteger q() const;
+
+		/**
+		   The inverse of the exponent, module (p-1)(q-1)
+		*/
 		QBigInteger d() const;
 	};
 
@@ -1022,11 +1089,35 @@ namespace QCA
 	class QCA_EXPORT DSAPublicKey : public PublicKey
 	{
 	public:
+		/**
+		   Create an empty DSA public key
+		*/
 		DSAPublicKey();
+
+		/**
+		   Create a DSA public key
+
+		   \param domain the discrete logarithm group to use
+		   \param y the public random value
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		DSAPublicKey(const DLGroup &domain, const QBigInteger &y, const QString &provider = QString());
+
+		/**
+		   Create a DSA public key from a specified private key
+
+		   \param k the DSA private key to use as the source
+		*/
 		DSAPublicKey(const DSAPrivateKey &k);
 
+		/**
+		   The discrete logarithm group that is being used
+		*/
 		DLGroup domain() const;
+
+		/**
+		   The public random value associated with this key
+		*/
 		QBigInteger y() const;
 	};
 
@@ -1036,11 +1127,34 @@ namespace QCA
 	class QCA_EXPORT DSAPrivateKey : public PrivateKey
 	{
 	public:
+		/**
+		   Create an empty DSA private key
+		*/
 		DSAPrivateKey();
+
+		/**
+		   Create a DSA public key
+
+		   \param domain the discrete logarithm group to use
+		   \param y the public random value
+		   \param x the private random value
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		DSAPrivateKey(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x, const QString &provider = QString());
 
+		/**
+		   The discrete logarithm group that is being used
+		*/
 		DLGroup domain() const;
+
+		/**
+		   the public random value
+		*/
 		QBigInteger y() const;
+
+		/**
+		   the private random value
+		*/
 		QBigInteger x() const;
 	};
 
@@ -1050,11 +1164,35 @@ namespace QCA
 	class QCA_EXPORT DHPublicKey : public PublicKey
 	{
 	public:
+		/** 
+		    Create an empty Diffie-Hellman public key
+		*/
 		DHPublicKey();
+
+		/**
+		   Create a Diffie-Hellman public key
+
+		   \param domain the discrete logarithm group to use
+		   \param y the public random value
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		DHPublicKey(const DLGroup &domain, const QBigInteger &y, const QString &provider = QString());
+
+		/**
+		   Create a Diffie-Hellman public key from a specified private key
+
+		   \param k the Diffie-Hellman private key to use as the source
+		*/
 		DHPublicKey(const DHPrivateKey &k);
 
+		/**
+		   The discrete logarithm group that is being used
+		*/
 		DLGroup domain() const;
+
+		/**
+		   The public random value associated with this key
+		*/
 		QBigInteger y() const;
 	};
 
@@ -1064,11 +1202,34 @@ namespace QCA
 	class QCA_EXPORT DHPrivateKey : public PrivateKey
 	{
 	public:
+		/**
+		   Create an empty Diffie-Hellman private key
+		*/
 		DHPrivateKey();
+
+		/**
+		   Create a Diffie-Hellman privat key
+
+		   \param domain the discrete logarithm group to use
+		   \param y the public random value
+		   \param x the private random value
+		   \param provider the provider to use, if a particular provider is required
+		*/
 		DHPrivateKey(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x, const QString &provider = QString());
 
+		/**
+		   The discrete logarithm group that is being used
+		*/
 		DLGroup domain() const;
+
+		/**
+		   The public random value associated with this key
+		*/
 		QBigInteger y() const;
+
+		/**
+		   The private random value associated with this key
+		*/
 		QBigInteger x() const;
 	};
 }
