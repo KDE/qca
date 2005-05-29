@@ -1,5 +1,4 @@
 /*
- * qca_publickey.cpp - Qt Cryptographic Architecture
  * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
  *

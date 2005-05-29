@@ -1,5 +1,4 @@
 /*
- * qca_plugin.cpp - Qt Cryptographic Architecture
  * Copyright (C) 2004  Justin Karneges
  *
  * This library is free software; you can redistribute it and/or
