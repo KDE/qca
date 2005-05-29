@@ -39,6 +39,7 @@
 #include "certunittest.h"
 #include "rsaunittest.h"
 #include "dsaunittest.h"
+#include "keygenunittest.h"
 
 #include "qtester.h"
 #include "tester.h"
@@ -51,6 +52,7 @@ using namespace std;
 void KUnitTest::registerTests()
 {
     ADD_TEST( HexUnitTest );
+    ADD_TEST( KeyGenUnitTest );
     ADD_TEST( StaticUnitTest );
     ADD_TEST( HashUnitTest );
     ADD_TEST( BigIntUnitTest );

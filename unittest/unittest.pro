@@ -25,6 +25,7 @@ HEADERS += cipherunittest.h kdfunittest.h
 HEADERS += base64unittest.h certunittest.h
 HEADERS += rsaunittest.h
 HEADERS += dsaunittest.h
+HEADERS += keygenunittest.h
 
 SOURCES += randomunittest.cpp hexunittest.cpp bigintunittest.cpp
 SOURCES += keylengthunittest.cpp symmetrickeyunittest.cpp
@@ -35,3 +36,4 @@ SOURCES += cipherunittest.cpp kdfunittest.cpp
 SOURCES += base64unittest.cpp certunittest.cpp
 SOURCES += rsaunittest.cpp
 SOURCES += dsaunittest.cpp
+SOURCES += keygenunittest.cpp

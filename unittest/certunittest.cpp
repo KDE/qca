@@ -124,8 +124,7 @@ void CertUnitTest::checkClientCerts(const QString &provider)
 
     QByteArray subjectKeyID = QCA::Hex().stringToArray("889E7EF729719D7B280F361AAE6D00D39DE1AADB").toByteArray();
     CHECK( client1.subjectKeyId(), subjectKeyID );
-    QByteArray authorityKeyID = QCA::Hex().stringToArray("BF53438278D09EC380E51B67CA0500DFB94883A5").toByteArray();
-    CHECK( client1.issuerKeyId(), authorityKeyID );
+    CHECK( QCA::Hex().arrayToString(client1.issuerKeyId()), QString("BF53438278D09EC380E51B67CA0500DFB94883A5") );
 
     QCA::PublicKey pubkey1 = client1.subjectPublicKey();
     CHECK( pubkey1.isNull(), false );
