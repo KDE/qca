@@ -7,10 +7,10 @@
   clean up Algorithm
   clean up Filter
   document all the stuff in qca_cert.h
-  document all the stuff in qca_publickey.h
   document all the stuff in qca_securelayer.h
   document all the stuff in qca_securemessage.h
   think about documenting the various providers (qcaprovider.h)
+  Change Doxyfile configuration to capture whole API, and to generate Latex manual.
 
 * Considerations
   Q_DISABLE_COPY on some objects
@@ -51,12 +51,14 @@
   qca-tls: do something about the cert check lag.  maybe a thread?
   qca-botan: implement
   qca-egads (or qca-egd): implement for Random support
-  figure out why Valgrind reports so many memory leaks
   qca-gnupg: NEED_PASSPHRASE_PIN, BAD_PASSPHRASE_PIN, etc
-  provider for Mozilla NSS?
 
 * possibilities for the future:
   Key wrapping - RFC3217 and RFC3394
   dtls (secure UDP)
   quoted-printable TextFilter
+  provider for Mozilla NSS
+  provider for Windows CryptoAPI
+  provider for Linux kernel crypto support, if the userspace API ever gets sorted out
+  provider for Intel Performance Primatives library
 
