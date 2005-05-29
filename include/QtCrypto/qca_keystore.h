@@ -109,17 +109,37 @@ namespace QCA
 	};
 
 	// use this to get access to keystores and monitor for their activity
+	/**
+	   Access keystores, and monitor keystores for changes
+	*/
 	class QCA_EXPORT KeyStoreManager : public QObject
 	{
 		Q_OBJECT
 	public:
+
+		/**
+		   Obtain a specific KeyStore
+
+		   \param id the identification for the key store
+		*/
 		KeyStore *keyStore(const QString &id) const;
+
+		/**
+		   A list of the all the key stores
+		*/
 		QList<KeyStore*> keyStores() const;
+
+		/**
+		   The number of key stores that are currently active
+		*/
 		int count() const;
 
 		QString diagnosticText() const;
 
 	signals:
+		/**
+		   emitted when a new key store becomes available
+		*/
 		void keyStoreAvailable(const QString &id);
 
 	private:
