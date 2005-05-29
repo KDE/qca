@@ -10,6 +10,7 @@ SUBDIRS += \
 	ciphertest \
 	certtest \
 	ssltest \
+	publickeyexample \
 	rsatest
 #	sslservtest \
 #	sasltest
