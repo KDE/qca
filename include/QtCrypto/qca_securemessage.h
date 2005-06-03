@@ -33,37 +33,108 @@ namespace QCA
 {
 	class SecureMessageSystem;
 
+	/**
+	   Key for SecureMessage system
+	*/
 	class SecureMessageKey
 	{
 	public:
+		/**
+		   The key type
+		*/
 		enum Type
 		{
-			None,
-			PGP,
-			X509
+			None, ///< no key
+			PGP,  ///< Pretty Good Privacy key
+			X509  ///< X.509 CMS key
 		};
+
+		/**
+		   Construct an empty key
+		*/
 		SecureMessageKey();
+
+		/**
+		   Standard copy constructor
+
+		   \param from the source key
+		*/
 		SecureMessageKey(const SecureMessageKey &from);
+
 		~SecureMessageKey();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the source key
+		*/
 		SecureMessageKey & operator=(const SecureMessageKey &from);
 
+		/**
+		   The key type
+		*/
 		Type type() const;
 
 		// pgp
+		/**
+		   Public key part of a PGP key
+		*/
 		PGPKey pgpPublicKey() const;
+
+		/**
+		   Private key part of a PGP key
+		*/
 		PGPKey pgpSecretKey() const;
+
+		/**
+		   Set the public key part of a PGP key
+
+		   \param pub the PGP public key
+		*/
 		void setPGPPublicKey(const PGPKey &pub);
+
+		/**
+		   Set the private key part of a PGP key
+
+		   \param sec the PGP secretkey
+		*/
 		void setPGPSecretKey(const PGPKey &sec);
 
 		// x509
+		/**
+		   The X.509 certificate chain (public part) for this key
+		*/
 		CertificateChain x509CertificateChain() const;
+
+		/**
+		   The X.509 private key part of this key
+		*/
 		PrivateKey x509PrivateKey() const;
+
+		/**
+		   Set the public key part of this X.509 key.
+		*/
 		void setX509CertificateChain(const CertificateChain &c);
+
+		/**
+		   Set the private key part of this X.509 key.
+		*/
 		void setX509PrivateKey(const PrivateKey &k);
 
 		// generic
+		/**
+		   Test if this key contains a private key part
+		*/
 		bool havePrivate() const;
-		QString name() const;  // pgp = primary user id, x509 = common name
+
+		/**
+		   The name associated with this key
+
+		   For a PGP key, this is the primary user ID
+
+		   For an X.509 key, this is the Common Name
+		*/
+		QString name() const;
 
 	private:
 		class Private;
@@ -75,26 +146,67 @@ namespace QCA
 	*/
 	typedef QList<SecureMessageKey> SecureMessageKeyList;
 
+	/**
+	   SecureMessage signature
+	*/
 	class SecureMessageSignature
 	{
 	public:
+		/**
+		   The result of identity verification
+		*/
 		enum IdentityResult
 		{
-			Valid,            // indentity is verified, matches signature
-			InvalidSignature, // valid key provided, but signature failed
-			InvalidKey,       // invalid key provided
-			NoKey             // identity unknown
+			Valid,            ///< indentity is verified, matches signature
+			InvalidSignature, ///< valid key provided, but signature failed
+			InvalidKey,       ///< invalid key provided
+			NoKey             ///< identity unknown
 		};
 
+		/**
+		   Create an empty signature check object
+		*/
 		SecureMessageSignature();
+
+		/**
+		   Create a signature check object
+		*/
 		SecureMessageSignature(IdentityResult r, Validity v, const SecureMessageKey &key, const QDateTime &ts);
+
+		/**
+		   Standard copy constructor
+
+		   \param from the source signature object
+		*/
 		SecureMessageSignature(const SecureMessageSignature &from);
+
 		~SecureMessageSignature();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the source signature object
+		*/
 		SecureMessageSignature & operator=(const SecureMessageSignature &from);
 
+		/**
+		   get the results of the identity check on this signature
+		*/
 		IdentityResult identityResult() const;
+
+		/**
+		   get the results of the key validation check on this signature
+		*/
 		Validity keyValidity() const;
+
+		/**
+		   get the key associated with this signature
+		*/
 		SecureMessageKey key() const;
+
+		/**
+		   get the timestamp associated with this signature
+		*/
 		QDateTime timestamp() const;
 
 	private:

@@ -27,10 +27,17 @@
 
 namespace QCA
 {
-	// container for any kind of object in a keystore
+	/**
+	   Single entry in a KeyStore
+
+	   This is a container for any kind of object in a KeyStore
+	*/
 	class QCA_EXPORT KeyStoreEntry : public Algorithm
 	{
 	public:
+		/**
+		   The type of entry in the KeyStore
+		*/
 		enum Type
 		{
 			TypeKeyBundle,
@@ -40,65 +47,203 @@ namespace QCA
 			TypePGPPublicKey
 		};
 
+		/**
+		   Create an empty KeyStoreEntry
+		*/
 		KeyStoreEntry();
+
+		/**
+		   Standard copy constructor
+
+		   \param from the source entry
+		*/
 		KeyStoreEntry(const KeyStoreEntry &from);
 		~KeyStoreEntry();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the source entry
+		*/
 		KeyStoreEntry & operator=(const KeyStoreEntry &from);
 
+		/**
+		   Test if this key is empty (null)
+		*/
 		bool isNull() const;
 
+		/**
+		   Determine the type of key stored in this object 
+		*/
 		Type type() const;
+
+		/**
+		   The name associated with the key stored in this object
+		*/
 		QString name() const;
+
+		/**
+		   The ID associated with the key stored in this object
+		*/
 		QString id() const;
 
+		/**
+		   If a KeyBundle is stored in this object, return that
+		   bundle.
 		KeyBundle keyBundle() const;
+
+		/**
+		   If a Certificate is stored in this object, return that
+		   certificate.
+		*/
 		Certificate certificate() const;
+
+		/**
+		   If a CRL is stored in this object, return the value
+		   of the CRL
+		*/
 		CRL crl() const;
+
+		/**
+		   If the key stored in this object is a private
+		   PGP key, return the contents of that key.
+		*/
 		PGPKey pgpSecretKey() const;
-		PGPKey pgpPublicKey() const; // works for PGPSecretKey, too
+
+		/**
+		   If the key stored in this object is either an 
+		   public or private PGP key, extract the public key
+		   part of that PGP key.
+		*/
+		PGPKey pgpPublicKey() const;
 	};
 
-	/*
-	  systemstore:          System TrustedCertificates
-	  accepted self-signed: Application TrustedCertificates
-	  apple keychain:       User Identities
-	  smartcard:            SmartCard Identities
-	  gnupg:                PGPKeyring Identities,PGPPublicKeys
+	/**
+	   General purpose key storage object
+
+	   Examples of use of this are:
+	    -  systemstore:          System TrustedCertificates
+	    -  accepted self-signed: Application TrustedCertificates
+	    -  apple keychain:       User Identities
+	    -  smartcard:            SmartCard Identities
+	    -  gnupg:                PGPKeyring Identities,PGPPublicKeys
 	*/
 	class QCA_EXPORT KeyStore : public QObject, public Algorithm
 	{
 		Q_OBJECT
 	public:
+		/**
+		   The type of keystore
+		*/
 		enum Type
 		{
-			System,      // root certs
-			User,        // Apple Keychain, KDE Wallet, and others
-			Application, // for caching accepted self-signed certs
-			SmartCard,   // smartcards
-			PGPKeyring   // pgp keyring
+			System,      ///< objects such as root certificates
+			User,        ///< objects such as  Apple Keychain, KDE Wallet
+			Application, ///< for caching accepted self-signed certificates
+			SmartCard,   ///< for smartcards
+			PGPKeyring   ///< for a PGP keyring
 		};
 
+		/**
+		   The keystore Type
+		*/
 		Type type() const;
+
+		/**
+		   The name associated with the keystore
+		*/
 		QString name() const;
+
+		/**
+		   The ID associated with the keystore
+		*/
 		QString id() const;
+
+		/**
+		   Test if the KeyStore is writeable or not
+
+		   \return true if the KeyStore is read-only
+		*/
 		bool isReadOnly() const;
 
+		/**
+		   A list of the KeyStoreEntry objects in this store
+		*/
 		QList<KeyStoreEntry> entryList() const;
-		bool holdsTrustedCertificates() const; // Certificate and CRL
-		bool holdsIdentities() const;          // KeyBundle and PGPSecretKey
-		bool holdsPGPPublicKeys() const;       // PGPPublicKey
 
+		/**
+		   test if the KeyStore holds trusted certificates (and CRLs)
+		*/
+		bool holdsTrustedCertificates() const; // Certificate and CRL
+
+		/**
+		   test if the KeyStore holds identities (eg KeyBundle or PGPSecretKey)
+		*/
+		bool holdsIdentities() const;
+
+		/**
+		   test if the KeyStore holds PGPPublicKey objects
+		*/
+		bool holdsPGPPublicKeys() const;
+
+		/**
+		   Add a entry to the KeyStore
+
+		   \param kb the KeyBundle to add to the KeyStore
+		*/
 		bool writeEntry(const KeyBundle &kb);
+
+		/**
+		   \overload
+
+		   \param cert the Certificate to add to the KeyStore
+		*/
 		bool writeEntry(const Certificate &cert);
+
+		/**
+		   \overload
+
+		   \param crl the CRL to add to the KeyStore
+		*/
 		bool writeEntry(const CRL &crl);
-		PGPKey writeEntry(const PGPKey &key); // returns a ref to the key in the keyring
+
+		/**
+		   \overload
+
+		   \param key the PGPKey to add to the KeyStore
+
+		   \return a ref to the key in the keyring
+		*/
+		PGPKey writeEntry(const PGPKey &key);
+
+		/**
+		   Delete the a specified KeyStoreEntry from this KeyStore
+
+		   \param id the ID for the entry to be deleted
+		*/
 		bool removeEntry(const QString &id);
 
+		/**
+		   Provide a passphrase for the KeyStore
+
+		   \param passphrase the passphrase to use
+		*/
 		void submitPassphrase(const QSecureArray &passphrase);
 
 	signals:
+		/**
+		   Emitted when the KeyStore is changed
+		*/
 		void updated();
+
+		/**
+		   Emitted when the KeyStore becomes unavailable
+		*/
 		void unavailable();
+
+		/**
+		   Emitted when the KeyStore requires a passphrase
+		*/
 		void needPassphrase();
 
 	private:
@@ -134,6 +279,10 @@ namespace QCA
 		*/
 		int count() const;
 
+		/**
+		   The diagnotistic result of key store operations, such as
+		   warnings and errors
+		*/
 		QString diagnosticText() const;
 
 	signals:

@@ -540,15 +540,45 @@ namespace QCA
 	public:
 		virtual ~Provider();
 
+		/**
+		   Internal context class used for the plugin
+		*/
 		class Context
 		{
 		public:
+			/**
+			   Standard constructor
+
+			   \param parent the parent provider for this 
+			   context
+			   \param type the name of the provider context type
+			*/
 			Context(Provider *parent, const QString &type);
 			virtual ~Context();
 
+			/**
+			   The Provider associated with this Context
+			*/
 			Provider *provider() const;
+
+			/**
+			   The type of context, as passed to the constructor
+			*/
 			QString type() const;
+
+			/**
+			   Create a duplicate of this Context
+			*/
 			virtual Context *clone() const = 0;
+
+			/**
+			   Test if two Contexts have the same Provider
+
+			   \param c pointer to the Context to compare to
+
+			   \return true if the argument and this COntext
+			   have the same provider.
+			*/
 			bool sameProvider(Context *c);
 
 		private:
