@@ -279,10 +279,33 @@ SASL_NOPATH    (-25) path not set
 			DisableServerSendLast
 		};
 
+		/**
+		   Parameter status for the SASL authentication
+
+		   This is used to track which parameters are currently held
+		*/
 		class Params
 		{
 		public:
-			bool user, authzid, pass, realm;
+			/**
+			   User is held
+			*/
+			bool user;
+
+			/**
+			   Authorisation ID is held
+			*/
+			bool authzid;
+
+			/**
+			   Password is held
+			*/
+			bool pass;
+
+			/**
+			   Realm is held
+			*/
+			bool realm;
 		};
 
 		/**
@@ -296,6 +319,9 @@ SASL_NOPATH    (-25) path not set
 		SASL(QObject *parent = 0, const QString &provider = QString());
 		~SASL();
 
+		/**
+		   Reset the SASL mechanism
+		*/
 		void reset();
 
 		// configuration

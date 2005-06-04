@@ -1091,28 +1091,116 @@ namespace QCA
 		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 	};
 
-	// holds a certificate chain and an associated private key
+	/**
+	   Public/private key pair
+
+	   This holds a certificate chain and an associated private key
+	*/
 	class QCA_EXPORT KeyBundle
 	{
 	public:
+		/**
+		   Create an empty KeyBundle
+		*/
 		KeyBundle();
+
+		/**
+		   Create a KeyBundle from an encoded file
+
+		   \param fileName the name of the file to read from
+		   \param passphrase the passphrase that is applicable to the file
+
+		   \sa fromFile
+		*/
 		KeyBundle(const QString &fileName, const QSecureArray &passphrase);
+
+		/**
+		   Standard copy constructor
+
+		   \param from KeyBundle to use as source
+		*/
 		KeyBundle(const KeyBundle &from);
+
 		~KeyBundle();
+
+		/**
+		   Standard assignment operator
+
+		   \param from KeyBundle to use as source
+		*/
 		KeyBundle & operator=(const KeyBundle &from);
 
+		/**
+		   Test if this key is empty (null)
+		*/
 		bool isNull() const;
 
+		/**
+		   The name associated with this key
+		*/
 		QString name() const;
+
+		/**
+		   The public certificate part of this bundle
+		*/
 		CertificateChain certificateChain() const;
+
+		/**
+		   The private key part of this bundle
+		*/
 		PrivateKey privateKey() const;
+
+		/**
+		   Specify the name of this bundle
+
+		   \param s the name to use
+		*/
 		void setName(const QString &s);
+
+		/**
+		   Set the public certificate and private key
+
+		   \param c the CertificateChain containing the public part of the Bundle
+		   \param key the private key part of the Bundle
+		*/
 		void setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key);
 
 		// import / export
+		/**
+		   Export the key bundle to an array
+
+		   \param passphrase the passphrase to use to protect the bundle
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		QByteArray toArray(const QSecureArray &passphrase, const QString &provider = QString()) const;
+
+		/**
+		   Export the key bundle to a file
+
+		   \param fileName the name of the file to save to
+		   \param passphrase the passphrase to use to protect the bundle
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		bool toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider = QString()) const;
+
+		/**
+		   Import the key bundle from an array
+
+		   \param a the array to import from
+		   \param passphrase the passphrase for the encoded bundle
+		   \param result pointer to the result of the import process
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		static KeyBundle fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the key bundle from a file
+
+		   \param fileName the name of the file to read from
+		   \param passphrase the passphrase for the encoded bundle
+		   \param result pointer to the result of the import process
+		   \param provider the provider to use, if a specific provider is required
+		*/
 		static KeyBundle fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
 
 	private:
@@ -1120,40 +1208,155 @@ namespace QCA
 		QSharedDataPointer<Private> d;
 	};
 
-	// PGPKey can either reference an item in a real PGP keyring or can
-	// be made by calling a "from" function.  Note that with the latter
-	// method, the key is of no use besides being informational.  The
-	// key must be in a keyring (inKeyring() == true) to actually do
-	// crypto with it.
+
+	/**
+	   Pretty Good Privacy key 
+
+	   This holds either a reference to an item in a real PGP keyring,
+	   or a copy made by calling a copy constructor or assignment.
+
+	   Note that with the latter method, the key is of no use besides
+	   being informational.  The key must be in a keyring
+	   (that is, inKeyring() == true) to actually do crypto with it.
+	*/
 	class QCA_EXPORT PGPKey : public Algorithm
 	{
 	public:
+		/**
+		   Create an empty PGP key
+		*/
 		PGPKey();
+
+		/**
+		   Create a PGP key from an encoded file
+
+		   \sa fromFile
+		   \sa toFile
+		*/
 		PGPKey(const QString &fileName);
+
+		/**
+		   Standard copy constructor
+
+		   \param from the PGPKey to use as the source
+		*/
 		PGPKey(const PGPKey &from);
+
 		~PGPKey();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the PGPKey to use as the source
+		*/
 		PGPKey & operator=(const PGPKey &from);
 
+		/**
+		   Test if the PGP key is empty (null)
+
+		   \return true if the PGP key is null
+		*/
 		bool isNull() const;
 
+		/**
+		   The Key identification for the PGP key
+		*/
 		QString keyId() const;
+
+		/**
+		   The primary user identification for the key
+		*/
 		QString primaryUserId() const;
+
+		/**
+		   The list of all user identifications associated with the key
+		*/
 		QStringList userIds() const;
 
+		/**
+		   Test if the PGP key is the secret key
+
+		   \return true if the PGG key is the secret key
+		*/
 		bool isSecret() const;
+
+		/**
+		   The creation date for the key
+		*/
 		QDateTime creationDate() const;
+
+		/**
+		   The expiration date for the key
+		*/
 		QDateTime expirationDate() const;
+
+		/**
+		   The key fingerpint
+		*/
 		QString fingerprint() const;
 
+		/**
+		   Test if this key is in a keyring
+
+		   \return true if the key is in a keyring
+
+		   \note keys that are not in a keyring cannot be used for encryption,
+		   decryption, signing or verification
+		*/
 		bool inKeyring() const;
+
+		/**
+		   Test if the key is trusted
+
+		   \return true if the key is trusted
+		*/
 		bool isTrusted() const;
 
 		// import / export
+
+		/**
+		   Export the key to an array
+		*/
 		QSecureArray toArray() const;
+
+		/**
+		   Export the key to a string
+		*/
 		QString toString() const;
+
+		/**
+		   Export the key to a file
+
+		   \param fileName the name of the file to save the key to
+		*/
 		bool toFile(const QString &fileName) const;
+
+		/**
+		   Import the key from an array
+
+		   \param a the array to import from
+		   \param result if not null, this will be set to the result of the import process
+		   \param provider the provider to use, if a particular provider is required
+		*/
+		   
 		static PGPKey fromArray(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the key from a string
+
+		   \param s the string to import from
+		   \param result if not null, this will be set to the result of the import process
+		   \param provider the provider to use, if a particular provider is required
+		*/
 		static PGPKey fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import the key from a file
+
+		   \param fileName string containing the name of the file to import from
+		   \param result if not null, this will be set to the result of the import process
+		   \param provider the provider to use, if a particular provider is required
+		*/
 		static PGPKey fromFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 	};
 }

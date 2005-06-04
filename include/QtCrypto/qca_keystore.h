@@ -90,6 +90,7 @@ namespace QCA
 		/**
 		   If a KeyBundle is stored in this object, return that
 		   bundle.
+		*/
 		KeyBundle keyBundle() const;
 
 		/**
