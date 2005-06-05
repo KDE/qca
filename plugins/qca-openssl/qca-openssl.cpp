@@ -1527,7 +1527,7 @@ public:
 
 	virtual int bits() const
 	{
-		return 0; // FIXME
+		return 8*RSA_size(evp.pkey->pkey.rsa);
 	}
 
 	virtual int maximumEncryptSize(QCA::EncryptionAlgorithm alg) const
