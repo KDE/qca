@@ -97,6 +97,32 @@ private slots:
 	}
 };
 
+class PassphrasePrompt : public QObject
+{
+	Q_OBJECT
+public:
+	PassphrasePrompt()
+	{
+		QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
+		QList<QCA::KeyStore*> storeList = ksm->keyStores();
+		for(int n = 0; n < storeList.count(); ++n)
+			connect(storeList[n], SIGNAL(needPassphrase()), SLOT(ks_needPassphrase()));
+	}
+
+private slots:
+	void ks_needPassphrase()
+	{
+		QCA::KeyStore *ks = static_cast<QCA::KeyStore *>(sender());
+		printf("Enter passphrase for %s: ", qPrintable(ks->name()));
+		fflush(stdout);
+		QSecureArray result(256);
+		fgets((char *)result.data(), result.size(), stdin);
+		if(result[result.size() - 1] == '\n')
+			result.resize(result.size() - 1);
+		ks->submitPassphrase(result);
+	}
+};
+
 #include "main.moc"
 
 static bool write_dhprivatekey_file(const QCA::PrivateKey &priv, const QString &fileName)
@@ -593,6 +619,8 @@ int main(int argc, char **argv)
 		usage();
 		return 1;
 	}
+
+	PassphrasePrompt passphrasePrompt;
 
 	bool genrsa = false;
 	bool gendsa = false;
