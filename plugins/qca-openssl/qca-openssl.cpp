@@ -3358,6 +3358,45 @@ QCA::Validity MyCertContext::validate(const QList<QCA::CertContext*> &trusted, c
 	return QCA::ValidityGood;
 }
 
+class MyPIXContext : public QCA::PIXContext
+{
+public:
+	MyPIXContext(QCA::Provider *p) : QCA::PIXContext(p)
+	{
+	}
+
+	~MyPIXContext()
+	{
+	}
+
+	virtual Context *clone() const
+	{
+		return 0;
+	}
+
+	virtual QByteArray toPKCS12(const QString &name, const QList<const QCA::CertContext*> &chain, const QCA::PKeyContext &priv, const QSecureArray &passphrase) const
+	{
+		// TODO
+		Q_UNUSED(name);
+		Q_UNUSED(chain);
+		Q_UNUSED(priv);
+		Q_UNUSED(passphrase);
+		return QByteArray();
+	}
+
+	virtual QCA::ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<QCA::CertContext*> *chain, QCA::PKeyContext **priv) const
+	{
+		// TODO
+		Q_UNUSED(in);
+		Q_UNUSED(passphrase);
+		Q_UNUSED(name);
+		Q_UNUSED(chain);
+		Q_UNUSED(priv);
+		return QCA::ConvertGood;
+	}
+};
+
+// TODO: test to ensure there is no cert-test lag
 static bool ssl_init = false;
 class MyTLSContext : public QCA::TLSContext
 {
@@ -3879,23 +3918,6 @@ public:
 	}
 };
 
-/*char *mime_enveloped =
-	"From %1 Sat May  7 22:18:36 2005\r\n"
-	"Mime-Version: 1.0\r\n"
-	"Content-Type: application/pkcs7-mime;\r\n"
-	"	name=smime.p7m;\r\n"
-	"	smime-type=enveloped-data\r\n"
-	//"Message-Id: <08F8A1B4-04A3-4B6D-AF21-3AF7FD15EFE4@uci.edu>\r\n"
-	"Content-Disposition: attachment;\r\n"
-	"	filename=smime.p7m\r\n"
-	"Content-Transfer-Encoding: base64\r\n"
-	"From: %2\r\n"
-	"Subject: %3\r\n"
-	"Date: Sat, 7 May 2005 22:18:36 -0700\r\n"
-	"To: %4\r\n"
-	"\r\n"
-	"%5\r\n";*/
-
 class CMSContext : public QCA::SMSContext
 {
 public:
@@ -4370,6 +4392,7 @@ public:
 		list += "cert";
 		list += "csr";
 		list += "crl";
+		list += "pix";
 		list += "tls";
 		list += "cms";
 
@@ -4467,6 +4490,8 @@ public:
 			return new MyCSRContext( this );
 		else if ( type == "crl" )
 			return new MyCRLContext( this );
+		else if ( type == "pix" )
+			return new MyPIXContext( this );
 		else if ( type == "tls" )
 			return new MyTLSContext( this );
 		else if ( type == "cms" )
