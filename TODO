@@ -27,9 +27,13 @@
   api:
     ensure PGPKey and SASL are proper
   other:
+    remove excess QSecureArray usage in securelayer/securemessage
     QCA_EXPORT
 
 * finish code for APIs:
+  "untrusted" error for SecureMessage
+  waitFor() should just spin the event loop?
+  if KeyStore::needPassphrase has no listener, submit a blank passphrase
   securelayer start() functions should return void
   functions that don't trip a scan should do so on the first try
   ability to disable CA mode in cert options?
@@ -48,17 +52,16 @@
   fix SSL example
 
 * write plugin support
-  qca-tls: do something about the cert check lag.  maybe a thread?
   qca-botan: implement
   qca-egads (or qca-egd): implement for Random support
-  qca-gnupg: NEED_PASSPHRASE_PIN, BAD_PASSPHRASE_PIN, etc
 
 * possibilities for the future:
   Key wrapping - RFC3217 and RFC3394
   dtls (secure UDP)
   quoted-printable TextFilter
-  provider for Mozilla NSS
-  provider for Windows CryptoAPI
-  provider for Linux kernel crypto support, if the userspace API ever gets sorted out
-  provider for Intel Performance Primatives library
+  providers for:
+    Mozilla NSS
+    Windows CryptoAPI
+    Linux kernel crypto support, if the userspace API ever gets sorted out
+    Intel Performance Primatives library
 
