@@ -232,7 +232,16 @@ static QSecureArray b64encode(const QSecureArray &s)
 {
 	int i;
 	int len = s.size();
-	static char tbl[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+	static char tbl[] =
+		"ABCDEFGH"
+		"IJKLMNOP"
+		"QRSTUVWX"
+		"YZabcdef"
+		"ghijklmn"
+		"opqrstuv"
+		"wxyz0123"
+		"456789+/"
+		"=";
 	int a, b, c;
 
 	QSecureArray p((len + 2) / 3 * 4);
