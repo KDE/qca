@@ -273,7 +273,7 @@ public slots:
 	void proc_finished(int x)
 	{
 		emit q->debug(QString("Process finished: %1").arg(x));
-		exitCode = 0; //x; FIXME: QProcess reports wrong exit code
+		exitCode = x;
 
 		fin_process = true;
 		fin_process_success = true;
@@ -299,10 +299,9 @@ public slots:
 		else
 			error = GPGProc::UnexpectedExit;
 
-		// FIXME: QProcess reports error when there isn't an error, ignore for now
-		//fin_process = true;
-		//fin_process_success = false;
-		//doTryDone();
+		fin_process = true;
+		fin_process_success = false;
+		doTryDone();
 	}
 
 	void doTryDone()
@@ -401,16 +400,19 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 	if(isActive())
 		d->reset(ResetSessionAndData);
 
-	if(!d->setupPipes(args.contains("-&?")))
+	if(mode == ExtendedMode)
 	{
-		d->error = FailedToStart;
+		if(!d->setupPipes(args.contains("-&?")))
+		{
+			d->error = FailedToStart;
 
-		// emit later
-		QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection, Q_ARG(GPGProc::Error, d->error));
-		return;
+			// emit later
+			QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection, Q_ARG(GPGProc::Error, d->error));
+			return;
+		}
+
+		emit debug("Pipe setup complete");
 	}
-
-	emit debug("Pipe setup complete");
 
 	QStringList fullargs;
 	fullargs += "--no-tty";
@@ -431,7 +433,7 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 	for(n = 0; n < args.count(); ++n)
 	{
 		QString a = args[n];
-		if(a == "-&?")
+		if(mode == ExtendedMode && a == "-&?")
 			fullargs += (QString("-&") + d->pipeAux.readEnd().idAsString());
 		else
 			fullargs += a;
@@ -451,9 +453,12 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 #endif
 
 	// enable the pipes we want
-	d->pipeAux.writeEnd().enable();
-	d->pipeCommand.writeEnd().enable();
-	d->pipeStatus.readEnd().enable();
+	if(d->pipeAux.writeEnd().isValid())
+		d->pipeAux.writeEnd().enable();
+	if(d->pipeCommand.writeEnd().isValid())
+		d->pipeCommand.writeEnd().enable();
+	if(d->pipeStatus.readEnd().isValid())
+		d->pipeStatus.readEnd().enable();
 
 	connect(d->proc, SIGNAL(started()), d, SLOT(proc_started()));
 	connect(d->proc, SIGNAL(readyReadStandardOutput()), d, SLOT(proc_readyReadStandardOutput()));
