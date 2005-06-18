@@ -100,6 +100,8 @@ public:
 	bool winDupHandle();
 #endif
 
+	void finalize(); // do an immediate read, and invalidate
+
 	int bytesAvailable() const;
 	int bytesToWrite() const;
 

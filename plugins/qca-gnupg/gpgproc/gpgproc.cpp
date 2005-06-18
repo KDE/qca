@@ -45,6 +45,7 @@ public:
 	QStringList statusLines;
 	GPGProc::Error error;
 	int exitCode;
+	QTimer doneTimer;
 
 	QByteArray pre_stdin, pre_aux;
 #ifdef QPIPE_SECURE
@@ -61,12 +62,16 @@ public:
 	Private(GPGProc *_q) : q(_q)
 	{
 		proc = 0;
+		doneTimer.setSingleShot(true);
+
 		connect(&pipeAux.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(aux_written(int)));
 		connect(&pipeAux.writeEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(aux_error(QPipeEnd::Error)));
 		connect(&pipeCommand.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(command_written(int)));
 		connect(&pipeCommand.writeEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(command_error(QPipeEnd::Error)));
 		connect(&pipeStatus.readEnd(), SIGNAL(readyRead()), SLOT(status_read()));
 		connect(&pipeStatus.readEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(status_error(QPipeEnd::Error)));
+		connect(&doneTimer, SIGNAL(timeout()), SLOT(doTryDone()));
+
 		reset(ResetSessionAndData);
 	}
 
@@ -94,6 +99,8 @@ public:
 			proc->deleteLater();
 			proc = 0;
 		}
+
+		doneTimer.stop();
 
 		pre_stdin.clear();
 		pre_aux.clear();
@@ -197,11 +204,7 @@ public slots:
 
 	void status_read()
 	{
-		QByteArray buf = pipeStatus.readEnd().read();
-		if(buf.isEmpty())
-			return;
-
-		if(processStatusData(buf))
+		if(readAndProcessStatusData())
 			emit q->readyReadStatusLines();
 	}
 
@@ -277,6 +280,19 @@ public slots:
 
 		fin_process = true;
 		fin_process_success = true;
+
+		if(need_status && !fin_status)
+		{
+			pipeStatus.readEnd().finalize();
+			fin_status = true;
+			if(readAndProcessStatusData())
+			{
+				doneTimer.start();
+				emit q->readyReadStatusLines();
+				return;
+			}
+		}
+
 		doTryDone();
 	}
 
@@ -301,6 +317,19 @@ public slots:
 
 		fin_process = true;
 		fin_process_success = false;
+
+		if(need_status && !fin_status)
+		{
+			pipeStatus.readEnd().finalize();
+			fin_status = true;
+			if(readAndProcessStatusData())
+			{
+				doneTimer.start();
+				emit q->readyReadStatusLines();
+				return;
+			}
+		}
+
 		doTryDone();
 	}
 
@@ -329,6 +358,15 @@ public slots:
 	}
 
 private:
+	bool readAndProcessStatusData()
+	{
+		QByteArray buf = pipeStatus.readEnd().read();
+		if(buf.isEmpty())
+			return false;
+
+		return processStatusData(buf);
+	}
+
 	// return true if there are newly parsed lines available
 	bool processStatusData(const QByteArray &buf)
 	{

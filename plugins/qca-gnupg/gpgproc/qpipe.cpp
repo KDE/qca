@@ -277,7 +277,7 @@ private:
 				if(GetLastError() == 0xE8 /*NT_STATUS_INVALID_USER_BUFFER*/)
 				{
 					// give the os a rest
-					QThread::msleep(100);
+					msleep(100);
 					continue;
 				}
 
@@ -930,6 +930,11 @@ public slots:
 
 	void doRead()
 	{
+		doReadActual(true);
+	}
+
+	void doReadActual(bool sigs)
+	{
 		int left = pendingFreeSize();
 		if(left == 0)
 		{
@@ -960,6 +965,9 @@ public slots:
 				buf += a;
 			}
 		}
+
+		if(!sigs)
+			return;
 
 		if(ret < 1)
 		{
@@ -1083,6 +1091,13 @@ bool QPipeEnd::winDupHandle()
 	return d->pipe.winDupHandle();
 }
 #endif
+
+void QPipeEnd::finalize()
+{
+	if(d->pipe.bytesAvailable())
+		d->doReadActual(false);
+	d->reset(ResetSession);
+}
 
 int QPipeEnd::bytesAvailable() const
 {
