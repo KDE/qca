@@ -62,8 +62,8 @@ namespace QCA
 		virtual void close();
 
 		// plain (application side)
-		virtual void write(const QSecureArray &a) = 0;
-		virtual QSecureArray read() = 0;
+		virtual void write(const QByteArray &a) = 0;
+		virtual QByteArray read() = 0;
 
 		// encoded (network side)
 		virtual void writeIncoming(const QByteArray &a) = 0;
@@ -160,8 +160,8 @@ namespace QCA
 		virtual int bytesAvailable() const;
 		virtual int bytesOutgoingAvailable() const;
 		virtual void close();
-		virtual void write(const QSecureArray &a);
-		virtual QSecureArray read();
+		virtual void write(const QByteArray &a);
+		virtual QByteArray read();
 		virtual void writeIncoming(const QByteArray &a);
 		virtual QByteArray readOutgoing(int *plainBytes = 0);
 		virtual QByteArray readUnprocessed();
@@ -499,8 +499,8 @@ SASL_NOPATH    (-25) path not set
 		   Close the current SASL connection
 		*/
 		virtual void close();
-		virtual void write(const QSecureArray &a);
-		virtual QSecureArray read();
+		virtual void write(const QByteArray &a);
+		virtual QByteArray read();
 
 		virtual void writeIncoming(const QByteArray &a);
 		virtual QByteArray readOutgoing(int *plainBytes = 0);

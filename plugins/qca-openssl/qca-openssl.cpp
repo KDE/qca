@@ -60,6 +60,23 @@ static QSecureArray bio2buf(BIO *b)
 	return buf;
 }
 
+static QByteArray bio2ba(BIO *b)
+{
+	QByteArray buf;
+	while(1) {
+		QByteArray block(1024, 0);
+		int ret = BIO_read(b, block.data(), block.size());
+		if(ret <= 0)
+			break;
+		block.resize(ret);
+		buf.append(block);
+		if(ret != 1024)
+			break;
+	}
+	BIO_free(b);
+	return buf;
+}
+
 static QBigInteger bn2bi(BIGNUM *n)
 {
 	QSecureArray buf(BN_num_bytes(n) + 1);
@@ -3406,8 +3423,8 @@ public:
 
 	bool serv;
 	int mode;
-	QSecureArray sendQueue;
-	QSecureArray recvQueue;
+	QByteArray sendQueue;
+	QByteArray recvQueue;
 
 	QCA::CertificateCollection trusted;
 	QCA::Certificate cert, peercert; // TODO: support cert chains
@@ -3612,7 +3629,7 @@ public:
 		}
 	}
 
-	virtual bool encode(const QSecureArray &plain, QByteArray *to_net, int *enc)
+	virtual bool encode(const QByteArray &plain, QByteArray *to_net, int *enc)
 	{
 		if(mode != Active)
 			return false;
@@ -3663,7 +3680,7 @@ public:
 		return true;
 	}
 
-	virtual bool decode(const QByteArray &from_net, QSecureArray *plain, QByteArray *to_net)
+	virtual bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net)
 	{
 		if(mode != Active)
 			return false;
@@ -3962,8 +3979,8 @@ public:
 
 	Operation op;
 
-	QSecureArray in, out;
-	QSecureArray sig;
+	QByteArray in, out;
+	QByteArray sig;
 
 	MyMessageContext(QCA::Provider *p) : QCA::MessageContext(p, "cmsmsg")
 	{
@@ -4005,7 +4022,7 @@ public:
 		this->smime = smime;
 	}
 
-	virtual void setupVerify(const QSecureArray &detachedSig)
+	virtual void setupVerify(const QByteArray &detachedSig)
 	{
 		// TODO
 		Q_UNUSED(detachedSig);
@@ -4026,12 +4043,12 @@ public:
 		}
 	}
 
-	virtual void update(const QSecureArray &in)
+	virtual void update(const QByteArray &in)
 	{
 		this->in.append(in);
 	}
 
-	virtual QSecureArray read()
+	virtual QByteArray read()
 	{
 		return out;
 	}
@@ -4097,7 +4114,7 @@ public:
 				// FIXME: format
 				bo = BIO_new(BIO_s_mem());
 				i2d_PKCS7_bio(bo, p7);
-				sig = bio2buf(bo);
+				sig = bio2ba(bo);
 			}
 			else
 			{
@@ -4137,7 +4154,7 @@ public:
 				BIO *bo = BIO_new(BIO_s_mem());
 				i2d_PKCS7_bio(bo, p7);
 				//PEM_write_bio_PKCS7(bo, p7);
-				out = bio2buf(bo);
+				out = bio2ba(bo);
 			}
 			else
 			{
@@ -4175,7 +4192,7 @@ public:
 		return QCA::SecureMessage::ErrorUnknown;
 	}
 
-	virtual QSecureArray signature() const
+	virtual QByteArray signature() const
 	{
 		return sig;
 	}

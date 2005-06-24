@@ -242,10 +242,10 @@ public:
 	SecureMessageKeyList to;
 	SecureMessageKeyList from;
 
-	QSecureArray in;
+	QByteArray in;
 	bool success;
 	SecureMessage::Error errorCode;
-	QSecureArray detachedSig;
+	QByteArray detachedSig;
 	QString hashName;
 	SecureMessageSignatureList signers;
 
@@ -292,7 +292,7 @@ public slots:
 		bool sig_read = false;
 		bool sig_done = false;
 		{
-			QSecureArray a = c->read();
+			QByteArray a = c->read();
 			if(!a.isEmpty())
 			{
 				sig_read = true;
@@ -416,7 +416,7 @@ void SecureMessage::startSign(SignMode m)
 	d->c->start(d->format, MessageContext::Sign);
 }
 
-void SecureMessage::startVerify(const QSecureArray &sig)
+void SecureMessage::startVerify(const QByteArray &sig)
 {
 	d->reset(ResetSessionAndData);
 	if(!sig.isEmpty())
@@ -432,14 +432,14 @@ void SecureMessage::startSignAndEncrypt()
 	d->c->start(d->format, MessageContext::SignAndEncrypt);
 }
 
-void SecureMessage::update(const QSecureArray &in)
+void SecureMessage::update(const QByteArray &in)
 {
 	d->c->update(in);
 }
 
-QSecureArray SecureMessage::read()
+QByteArray SecureMessage::read()
 {
-	QSecureArray a = d->in;
+	QByteArray a = d->in;
 	d->in.clear();
 	return a;
 }
@@ -471,7 +471,7 @@ SecureMessage::Error SecureMessage::errorCode() const
 	return d->errorCode;
 }
 
-QSecureArray SecureMessage::signature() const
+QByteArray SecureMessage::signature() const
 {
 	return d->detachedSig;
 }

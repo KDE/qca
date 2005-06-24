@@ -280,10 +280,10 @@ namespace QCA
 		void startEncrypt();
 		void startDecrypt(); // if decrypted result is signed (PGP only), it will be verified
 		void startSign(SignMode m = Message);
-		void startVerify(const QSecureArray &detachedSig = QSecureArray());
+		void startVerify(const QByteArray &detachedSig = QByteArray());
 		void startSignAndEncrypt();
-		void update(const QSecureArray &in);
-		QSecureArray read();
+		void update(const QByteArray &in);
+		QByteArray read();
 		int bytesAvailable() const;
 		void end();
 		bool waitForFinished(int msecs = 30000);
@@ -292,7 +292,7 @@ namespace QCA
 		Error errorCode() const;
 
 		// sign
-		QSecureArray signature() const;
+		QByteArray signature() const;
 		QString hashName() const;
 
 		// verify

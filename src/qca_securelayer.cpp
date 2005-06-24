@@ -120,7 +120,7 @@ public:
 	bool hostMismatch;
 	TLSContext::SessionInfo sessionInfo;
 
-	QSecureArray in, out;
+	QByteArray in, out;
 	QByteArray to_net, from_net;
 
 	bool handshaken, closing, closed, error;
@@ -310,7 +310,7 @@ public:
 
 			if(!from_net.isEmpty() || force_read)
 			{
-				QSecureArray a;
+				QByteArray a;
 				QByteArray b;
 				bool ok = c->decode(from_net, &a, &b);
 				eof = c->eof();
@@ -541,15 +541,15 @@ void TLS::close()
 	d->update();
 }
 
-void TLS::write(const QSecureArray &a)
+void TLS::write(const QByteArray &a)
 {
 	d->out.append(a);
 	d->update();
 }
 
-QSecureArray TLS::read()
+QByteArray TLS::read()
 {
-	QSecureArray a = d->in;
+	QByteArray a = d->in;
 	d->in.clear();
 	return a;
 }
@@ -826,14 +826,14 @@ void SASL::close()
 {
 }
 
-void SASL::write(const QSecureArray &a)
+void SASL::write(const QByteArray &a)
 {
 	Q_UNUSED(a);
 }
 
-QSecureArray SASL::read()
+QByteArray SASL::read()
 {
-	return QSecureArray();
+	return QByteArray();
 }
 
 void SASL::writeIncoming(const QByteArray &a)

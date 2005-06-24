@@ -442,8 +442,8 @@ public:
 
 	virtual Result handshake(const QByteArray &from_net, QByteArray *to_net) = 0;
 	virtual Result shutdown(const QByteArray &from_net, QByteArray *to_net) = 0;
-	virtual bool encode(const QSecureArray &plain, QByteArray *to_net, int *encoded) = 0;
-	virtual bool decode(const QByteArray &from_net, QSecureArray *plain, QByteArray *to_net) = 0;
+	virtual bool encode(const QByteArray &plain, QByteArray *to_net, int *encoded) = 0;
+	virtual bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net) = 0;
 	virtual bool eof() const = 0;
 	virtual SessionInfo sessionInfo() const = 0;
 	virtual QByteArray unprocessed() = 0;
@@ -523,8 +523,8 @@ public:
 	virtual QByteArray result() const = 0;
 
 	// security layer
-	virtual bool encode(const QSecureArray &in, QByteArray *out) = 0;
-	virtual bool decode(const QByteArray &in, QSecureArray *out) = 0;
+	virtual bool encode(const QByteArray &in, QByteArray *out) = 0;
+	virtual bool decode(const QByteArray &in, QByteArray *out) = 0;
 };
 
 class MessageContext : public QObject, public Provider::Context
@@ -549,11 +549,11 @@ public:
 	virtual void reset() = 0;
 	virtual void setupEncrypt(const SecureMessageKeyList &keys) = 0;
 	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime) = 0;
-	virtual void setupVerify(const QSecureArray &detachedSig) = 0;
+	virtual void setupVerify(const QByteArray &detachedSig) = 0;
 
 	virtual void start(SecureMessage::Format f, Operation op) = 0;
-	virtual void update(const QSecureArray &in) = 0;
-	virtual QSecureArray read() = 0;
+	virtual void update(const QByteArray &in) = 0;
+	virtual QByteArray read() = 0;
 	virtual void end() = 0;
 
 	virtual bool finished() const = 0;
@@ -561,7 +561,7 @@ public:
 
 	virtual bool success() const = 0;
 	virtual SecureMessage::Error errorCode() const = 0;
-	virtual QSecureArray signature() const = 0;
+	virtual QByteArray signature() const = 0;
 	virtual QString hashName() const = 0;
 	virtual SecureMessageSignatureList signers() const = 0;
 

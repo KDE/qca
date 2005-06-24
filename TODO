@@ -27,7 +27,6 @@
   api:
     ensure PGPKey and SASL are proper
   other:
-    remove excess QSecureArray usage in securelayer/securemessage
     QCA_EXPORT
 
 * finish code for APIs:
