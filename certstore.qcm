@@ -68,9 +68,9 @@ public:
 	QString resultString() const
 	{
 #if defined(Q_OS_WIN)
-		return "using Windows built-in"
+		return "using Windows built-in";
 #elif defined(Q_OS_MAC)
-		return "using Mac built-in"
+		return "using Mac built-in";
 #else
 		if(success)
 		{
