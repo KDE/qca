@@ -71,6 +71,11 @@ namespace QCA
 		SecureMessageKey & operator=(const SecureMessageKey &from);
 
 		/**
+		   Returns true for null object
+		*/
+		bool isNull() const;
+
+		/**
 		   The key type
 		*/
 		Type type() const;
@@ -339,7 +344,7 @@ namespace QCA
 		~CMS();
 
 		void setTrustedCertificates(const CertificateCollection &trusted);
-		void setPrivateKeys(const QList<PrivateKey> &keys);
+		void setPrivateKeys(const SecureMessageKeyList &keys);
 	};
 }
 

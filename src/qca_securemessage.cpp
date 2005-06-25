@@ -84,6 +84,11 @@ SecureMessageKey & SecureMessageKey::operator=(const SecureMessageKey &from)
 	return *this;
 }
 
+bool SecureMessageKey::isNull() const
+{
+	return (d->type == None);
+}
+
 SecureMessageKey::Type SecureMessageKey::type() const
 {
 	return d->type;
@@ -561,7 +566,7 @@ void CMS::setTrustedCertificates(const CertificateCollection &trusted)
 	static_cast<SMSContext *>(context())->setTrustedCertificates(trusted);
 }
 
-void CMS::setPrivateKeys(const QList<PrivateKey> &keys)
+void CMS::setPrivateKeys(const SecureMessageKeyList &keys)
 {
 	static_cast<SMSContext *>(context())->setPrivateKeys(keys);
 }
