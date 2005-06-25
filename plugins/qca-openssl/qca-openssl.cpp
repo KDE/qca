@@ -4007,6 +4007,9 @@ public:
 class CMSContext : public QCA::SMSContext
 {
 public:
+	QCA::CertificateCollection trustedCerts;
+	QList<QCA::SecureMessageKey> privateKeys;
+
 	CMSContext(QCA::Provider *p) : QCA::SMSContext(p, "cms")
 	{
 	}
@@ -4022,23 +4025,33 @@ public:
 
 	virtual void setTrustedCertificates(const QCA::CertificateCollection &trusted)
 	{
-		// TODO
-		Q_UNUSED(trusted);
+		trustedCerts = trusted;
 	}
 
-	virtual void setPrivateKeys(const QList<QCA::PrivateKey> &keys)
+	virtual void setPrivateKeys(const QList<QCA::SecureMessageKey> &keys)
 	{
-		// TODO
-		Q_UNUSED(keys);
+		privateKeys = keys;
 	}
 
-	virtual QCA::MessageContext *createMessage() const;
+	virtual QCA::MessageContext *createMessage();
 };
+
+STACK_OF(X509) *get_pk7_certs(PKCS7 *p7)
+{
+	int i = OBJ_obj2nid(p7->type);
+	if(i == NID_pkcs7_signed)
+		return p7->d.sign->cert;
+	else if(i == NID_pkcs7_signedAndEnveloped)
+		return p7->d.signed_and_enveloped->cert;
+	else
+		return 0;
+}
 
 class MyMessageContext : public QCA::MessageContext
 {
 	Q_OBJECT
 public:
+	CMSContext *cms;
 	QCA::SecureMessageKey signer;
 	QCA::SecureMessageKeyList to;
 	QCA::SecureMessage::SignMode signMode;
@@ -4051,8 +4064,14 @@ public:
 	QByteArray in, out;
 	QByteArray sig;
 
-	MyMessageContext(QCA::Provider *p) : QCA::MessageContext(p, "cmsmsg")
+	QCA::CertificateChain signerChain;
+	int ver_ret;
+
+	MyMessageContext(CMSContext *_cms, QCA::Provider *p) : QCA::MessageContext(p, "cmsmsg")
 	{
+		cms = _cms;
+
+		ver_ret = 0;
 	}
 
 	~MyMessageContext()
@@ -4094,7 +4113,7 @@ public:
 	virtual void setupVerify(const QByteArray &detachedSig)
 	{
 		// TODO
-		Q_UNUSED(detachedSig);
+		sig = detachedSig;
 	}
 
 	virtual void start(QCA::SecureMessage::Format f, Operation op)
@@ -4102,14 +4121,14 @@ public:
 		format = f;
 
 		// TODO: other operations
-		if(op == Sign)
-		{
+		//if(op == Sign)
+		//{
 			this->op = op;
-		}
-		else if(op == Encrypt)
-		{
-			this->op = op;
-		}
+		//}
+		//else if(op == Encrypt)
+		//{
+		//	this->op = op;
+		//}
 	}
 
 	virtual void update(const QByteArray &in)
@@ -4156,6 +4175,8 @@ public:
 				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
 				sk_X509_push(other_certs, x);
 			}
+
+			//printf("bundling %d other_certs\n", sk_X509_num(other_certs));
 
 			bi = BIO_new(BIO_s_mem());
 			BIO_write(bi, in.data(), in.size());
@@ -4231,9 +4252,126 @@ public:
 				return;
 			}
 		}
-		else
+		else if(op == Verify)
 		{
+			// TODO: support non-detached sigs
+
+			BIO *bi = BIO_new(BIO_s_mem());
+			BIO_write(bi, sig.data(), sig.size());
+			PKCS7 *p7 = d2i_PKCS7_bio(bi, NULL);
+			BIO_free(bi);
+
+			if(!p7)
+			{
+				// TODO
+				printf("bad1\n");
+				return;
+			}
+
+			QCA::CertificateChain chain;
+			//STACK_OF(X509) *xs = PKCS7_get0_signers(p7, NULL, 0);
+			STACK_OF(X509) *xs = get_pk7_certs(p7);
+			if(xs)
+			{
+				// TODO: reorder in chain-order?
+				// TODO: throw out certs that don't fit the chain?
+				for(int n = 0; n < sk_X509_num(xs); ++n)
+				{
+					MyCertContext *cc = new MyCertContext(provider());
+					cc->fromX509(sk_X509_value(xs, n));
+					QCA::Certificate cert;
+					cert.change(cc);
+					chain.append(cert);
+				}
+				//sk_X509_pop_free(xs, X509_free);
+			}
+
+			if(!chain.isEmpty())
+			{
+				//for(int n = 0; n < chain.count(); ++n)
+				//	printf("%d %s\n", n, qPrintable(chain[n].commonName()));
+			}
+			else
+				printf("no chain\n");
+
+			signerChain = chain;
+
+			// TODO: support using a signer not stored in the signature
+			if(chain.isEmpty())
+				return;
+
+			X509_STORE *store = X509_STORE_new();
+			QList<QCA::Certificate> cert_list = cms->trustedCerts.certificates();
+			QList<QCA::CRL> crl_list = cms->trustedCerts.crls();
+			int n;
+			for(n = 0; n < cert_list.count(); ++n)
+			{
+				const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
+				X509 *x = cc->item.cert;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+				X509_STORE_add_cert(store, x);
+			}
+			for(n = 0; n < crl_list.count(); ++n)
+			{
+				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
+				X509_CRL *x = cc->item.crl;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+				X509_STORE_add_crl(store, x);
+			}
+
+			bi = BIO_new(BIO_s_mem());
+			BIO_write(bi, in.data(), in.size());
+			int ret = PKCS7_verify(p7, xs, store, bi, NULL, 0);
+			BIO_free(bi);
+			X509_STORE_free(store);
+			PKCS7_free(p7);
+
+			ver_ret = ret;
 			// TODO
+		}
+		else if(op == Decrypt)
+		{
+			bool ok = false;
+			for(int n = 0; n < cms->privateKeys.count(); ++n)
+			{
+				QCA::CertificateChain chain = cms->privateKeys[n].x509CertificateChain();
+				QCA::Certificate cert = chain.primary();
+				QCA::PrivateKey key = cms->privateKeys[n].x509PrivateKey();
+
+				MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
+				MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
+
+				X509 *cx = cc->item.cert;
+				EVP_PKEY *kx = kc->get_pkey();
+
+				BIO *bi = BIO_new(BIO_s_mem());
+				BIO_write(bi, in.data(), in.size());
+				PKCS7 *p7 = d2i_PKCS7_bio(bi, NULL);
+				BIO_free(bi);
+
+				if(!p7)
+				{
+					// TODO
+					printf("bad1\n");
+					return;
+				}
+
+				BIO *bo = BIO_new(BIO_s_mem());
+				int ret = PKCS7_decrypt(p7, kx, cx, bo, 0);
+				PKCS7_free(p7);
+				if(!ret)
+					continue;
+
+				ok = true;
+				out = bio2ba(bo);
+			}
+
+			if(!ok)
+			{
+				// TODO
+				printf("bad2\n");
+				return;
+			}
 		}
 	}
 
@@ -4268,19 +4406,30 @@ public:
 
 	virtual QString hashName() const
 	{
+		// TODO
 		return "sha1";
 	}
 
 	virtual QCA::SecureMessageSignatureList signers() const
 	{
+		QCA::SecureMessageKey key;
+		if(!signerChain.isEmpty())
+			key.setX509CertificateChain(signerChain);
+
+		QCA::SecureMessageSignature s(
+			ver_ret ? QCA::SecureMessageSignature::Valid : QCA::SecureMessageSignature::InvalidSignature,
+			ver_ret ? QCA::ValidityGood : QCA::ErrorValidityUnknown,
+			key,
+			QDateTime::currentDateTime());
+
 		// TODO
-		return QCA::SecureMessageSignatureList();
+		return QCA::SecureMessageSignatureList() << s;
 	}
 };
 
-QCA::MessageContext *CMSContext::createMessage() const
+QCA::MessageContext *CMSContext::createMessage()
 {
-	return new MyMessageContext(provider());
+	return new MyMessageContext(this, provider());
 }
 
 

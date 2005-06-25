@@ -369,6 +369,70 @@ static QString add_cr(const QString &in)
 	return out;
 }
 
+static QString rem_cr(const QString &in)
+{
+	QString out = in;
+	out.replace("\r\n", "\n");
+	return out;
+}
+
+// FIXME: all of this mime stuff is a total hack
+static QString open_mime_envelope(const QString &in)
+{
+	int n = in.indexOf("\r\n\r\n");
+	if(n == -1)
+		return QString();
+	return in.mid(n + 4);
+}
+
+static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
+{
+	int n = in.indexOf("boundary=");
+	if(n == -1)
+		return false;
+	n += 9;
+	int i = in.indexOf("\r\n", n);
+	if(n == -1)
+		return false;
+	QString boundary;
+	QString bregion = in.mid(n, i - n);
+	n = bregion.indexOf(';');
+	if(n != -1)
+		boundary = bregion.mid(0, n);
+	else
+		boundary = bregion;
+
+	//printf("boundary: [%s]\n", qPrintable(boundary));
+	QString boundary_end = QString("--") + boundary;
+	boundary = QString("--") + boundary + "\r\n";
+
+	QString work = open_mime_envelope(in);
+	n = work.indexOf(boundary);
+	if(n == -1)
+		return false;
+	n += boundary.length();
+	i = work.indexOf(boundary, n);
+	if(n == -1)
+		return false;
+	QString tmp_data = work.mid(n, i - n);
+	n = i + boundary.length();
+	i = work.indexOf(boundary_end, n);
+	if(i == -1)
+		return false;
+	QString tmp_sig = work.mid(n, i - n);
+
+	// nuke some newlines
+	if(tmp_data.right(2) == "\r\n")
+		tmp_data.truncate(tmp_data.length() - 2);
+	if(tmp_sig.right(2) == "\r\n")
+		tmp_sig.truncate(tmp_sig.length() - 2);
+	tmp_sig = open_mime_envelope(tmp_sig);
+
+	*data = tmp_data;
+	*sig = tmp_sig;
+	return true;
+}
+
 // first = ids, second = names
 static QPair<QStringList, QStringList> getKeyStoreStrings(const QList<QCA::KeyStore*> &list)
 {
@@ -549,7 +613,9 @@ static void usage()
 	printf("  --list-keystore [storeName]\n");
 	printf("\n");
 	printf("  --smime sign [priv.pem] [messagefile] [cert.pem] [nonroots.pem] (passphrase)\n");
+	printf("  --smime verify [messagefile]\n");
 	printf("  --smime encrypt [cert.pem] [messagefile]\n");
+	printf("  --smime decrypt [priv.pem] [messagefile] [cert.pem] (passphrase)\n");
 	printf("\n");
 	printf("  --pgp sign [S] [messagefile]\n");
 	printf("\n");
@@ -1467,6 +1533,160 @@ int main(int argc, char **argv)
 			ts << str;
 
 			printf("Wrote %s\n", qPrintable(outfile.fileName()));
+		}
+		else if(args[1] == "decrypt")
+		{
+			if(args.count() < 5)
+			{
+				usage();
+				return 1;
+			}
+
+			QSecureArray passphrase;
+			if(args.count() >= 6)
+				passphrase = args[5].toLatin1();
+
+			QCA::PrivateKey key;
+			if(!passphrase.isEmpty())
+				key = QCA::PrivateKey(args[2], passphrase);
+			else
+				key = QCA::PrivateKey(args[2]);
+			if(key.isNull())
+			{
+				printf("Error reading key file\n");
+				return 1;
+			}
+
+			QCA::Certificate cert(args[4]);
+			if(cert.isNull())
+			{
+				printf("Error reading cert file\n");
+				return 1;
+			}
+
+			QFile infile(args[3]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QString in = QString::fromUtf8(infile.readAll());
+			QString str = open_mime_envelope(in);
+			if(str.isEmpty())
+			{
+				printf("Error parsing message file\n");
+				return 1;
+			}
+
+			QCA::Base64 dec;
+			dec.setLineBreaksEnabled(true);
+			QByteArray crypted = dec.stringToArray(rem_cr(str)).toByteArray();
+
+			QCA::SecureMessageKey skey;
+			{
+				QCA::CertificateChain chain;
+				chain += cert;
+				skey.setX509CertificateChain(chain);
+				skey.setX509PrivateKey(key);
+			}
+
+			QCA::CMS cms;
+			cms.setPrivateKeys(QCA::SecureMessageKeyList() << skey);
+			QCA::SecureMessage msg(&cms);
+			msg.startDecrypt();
+			msg.update(crypted);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error decrypting: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QByteArray result = msg.read();
+
+			QFileInfo fi(infile.fileName());
+
+			QFile outfile(fi.baseName() + "_decrypted.txt");
+			if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
+			{
+				printf("Error opening output file\n");
+				return 1;
+			}
+
+			QTextStream ts(&outfile);
+			ts << QString::fromUtf8(result);
+
+			printf("Wrote %s\n", qPrintable(outfile.fileName()));
+		}
+		else if(args[1] == "verify")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QFile infile(args[2]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QString in = QString::fromUtf8(infile.readAll());
+			QString str, sigtext;
+			if(!open_mime_data_sig(in, &str, &sigtext))
+			{
+				printf("Error parsing message file\n");
+				return 1;
+			}
+
+			QByteArray plain = str.toLatin1();
+
+			//printf("parsed: data=[%s], sig=[%s]\n", qPrintable(str), qPrintable(sigtext));
+
+			QCA::Base64 dec;
+			dec.setLineBreaksEnabled(true);
+			QByteArray sig = dec.stringToArray(rem_cr(sigtext)).toByteArray();
+
+			QCA::CMS cms;
+			cms.setTrustedCertificates(QCA::systemStore());
+			QCA::SecureMessage msg(&cms);
+			msg.startVerify(sig);
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error verifying: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QCA::SecureMessageSignature signer = msg.signer();
+			QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
+
+			str = open_mime_envelope(str);
+			printf("%s", qPrintable(str));
+			QString rs;
+			if(r == QCA::SecureMessageSignature::Valid)
+				rs = "Valid";
+			else if(r == QCA::SecureMessageSignature::InvalidSignature)
+				rs = "InvalidSignature";
+			else if(r == QCA::SecureMessageSignature::InvalidKey)
+				rs = "InvalidKey";
+			else if(r == QCA::SecureMessageSignature::NoKey)
+				rs = "NoKey";
+			printf("IdentityResult: %s\n", qPrintable(rs));
+			QCA::SecureMessageKey key = signer.key();
+			if(!key.isNull())
+			{
+				QCA::Certificate cert = key.x509CertificateChain().primary();
+				printf("From: %s (%s)\n", qPrintable(cert.commonName()), qPrintable(cert.subjectInfo().value(QCA::Email)));
+			}
 		}
 		else
 		{

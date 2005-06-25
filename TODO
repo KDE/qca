@@ -23,7 +23,6 @@
 
 * for tech preview
   plugins:
-    qca-openssl: cms verify/decrypt
     qca-gnupg: pgp key/sign/encrypt/verify/decrypt
   api:
     ensure PGPKey and SASL are proper
