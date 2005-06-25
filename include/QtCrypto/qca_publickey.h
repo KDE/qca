@@ -115,7 +115,7 @@ namespace QCA
 	/**
 	   A discrete logarithm group
 	*/
-	class DLGroup
+	class QCA_EXPORT DLGroup
 	{
 	public:
 		DLGroup();

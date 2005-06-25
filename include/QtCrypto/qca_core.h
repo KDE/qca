@@ -57,25 +57,6 @@ namespace QCA
 	typedef QList<Provider*> ProviderList;
 
 	/**
-	 * Convenience representation for iterator for the plugin providers
-	 *
-	 * You would use this something like the following:
-	 * \code
-	 * QCA::ProviderList qcaProviders = QCA::providers();
-	 * QCA::ProviderListIterator it( qcaProviders );
-	 * QCA::Provider *provider;
-	 * while ( 0 != (provider = it.current() ) ) {
-	 *     ++it;
-	 *     cout << provider->name();
-	 * }
-	 * \endcode
-	 *
-	 * \sa ProviderList
-	 * \sa providers()
-	 */
-	//typedef QPtrListIterator<Provider> ProviderListIterator;
-
-	/**
 	 * Mode settings for memory allocation
 	 *
 	 * QCA can use secure memory, however most operating systems

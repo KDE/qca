@@ -36,7 +36,7 @@ namespace QCA
 	/**
 	   Key for SecureMessage system
 	*/
-	class SecureMessageKey
+	class QCA_EXPORT SecureMessageKey
 	{
 	public:
 		/**
@@ -149,7 +149,7 @@ namespace QCA
 	/**
 	   SecureMessage signature
 	*/
-	class SecureMessageSignature
+	class QCA_EXPORT SecureMessageSignature
 	{
 	public:
 		/**
@@ -219,7 +219,7 @@ namespace QCA
 	*/
 	typedef QList<SecureMessageSignature> SecureMessageSignatureList;
 
-	class SecureMessage : public QObject, public Algorithm
+	class QCA_EXPORT SecureMessage : public QObject, public Algorithm
 	{
 		Q_OBJECT
 	public:
@@ -313,7 +313,7 @@ namespace QCA
 		Private *d;
 	};
 
-	class SecureMessageSystem : public QObject, public Algorithm
+	class QCA_EXPORT SecureMessageSystem : public QObject, public Algorithm
 	{
 		Q_OBJECT
 	public:
@@ -323,7 +323,7 @@ namespace QCA
 		SecureMessageSystem(QObject *parent, const QString &type, const QString &provider);
 	};
 
-	class OpenPGP : public SecureMessageSystem
+	class QCA_EXPORT OpenPGP : public SecureMessageSystem
 	{
 		Q_OBJECT
 	public:
@@ -331,7 +331,7 @@ namespace QCA
 		~OpenPGP();
 	};
 
-	class CMS : public SecureMessageSystem
+	class QCA_EXPORT CMS : public SecureMessageSystem
 	{
 		Q_OBJECT
 	public:

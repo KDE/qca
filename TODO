@@ -19,6 +19,7 @@
   standardize on count() vs size() when iterating?
   add more "getters" to the library?
   give all classes non-default ctors/dtors/copy/op=, and dpointers?
+  printf + latin1()/toLatin1() -> qPrintable() ? (in code, examples, docs, etc)
 
 * for tech preview
   plugins:
@@ -27,9 +28,10 @@
   api:
     ensure PGPKey and SASL are proper
   other:
-    QCA_EXPORT
+    fix the windows build
 
 * finish code for APIs:
+  securearray: operator+, operator+= (i think bytearray has these)
   "untrusted" error for SecureMessage
   waitFor() should just spin the event loop?
   if KeyStore::needPassphrase has no listener, submit a blank passphrase

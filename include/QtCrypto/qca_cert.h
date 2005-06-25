@@ -903,7 +903,7 @@ namespace QCA
 	   \sa QCA::CertificateChain for a representation of a chain of Certificates related by
 	   signatures.
 	*/
-	class CertificateCollection
+	class QCA_EXPORT CertificateCollection
 	{
 	public:
 		/**
