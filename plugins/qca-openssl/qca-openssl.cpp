@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 #include <QtCore>
 #include <QtCrypto>
 
@@ -3393,22 +3394,90 @@ public:
 
 	virtual QByteArray toPKCS12(const QString &name, const QList<const QCA::CertContext*> &chain, const QCA::PKeyContext &priv, const QSecureArray &passphrase) const
 	{
-		// TODO
-		Q_UNUSED(name);
-		Q_UNUSED(chain);
-		Q_UNUSED(priv);
-		Q_UNUSED(passphrase);
-		return QByteArray();
+		if(chain.count() < 1)
+			return QByteArray();
+
+		X509 *cert = static_cast<const MyCertContext *>(chain[0])->item.cert;
+		STACK_OF(X509) *ca = NULL;
+		if(chain.count() > 1)
+		{
+			for(int n = 1; n < chain.count(); ++n)
+			{
+				X509 *x = static_cast<const MyCertContext *>(chain[n])->item.cert;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+				sk_X509_push(ca, x);
+			}
+		}
+		const MyPKeyContext &pk = static_cast<const MyPKeyContext &>(priv);
+		PKCS12 *p12 = PKCS12_create((char *)passphrase.data(), (char *)name.toLatin1().data(), pk.get_pkey(), cert, ca, 0, 0, 0, 0, 0);
+		sk_X509_pop_free(ca, X509_free);
+
+		if(!p12)
+			return QByteArray();
+
+		BIO *bo = BIO_new(BIO_s_mem());
+		i2d_PKCS12_bio(bo, p12);
+		QByteArray out = bio2ba(bo);
+		return out;
 	}
 
 	virtual QCA::ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<QCA::CertContext*> *chain, QCA::PKeyContext **priv) const
 	{
-		// TODO
-		Q_UNUSED(in);
-		Q_UNUSED(passphrase);
-		Q_UNUSED(name);
-		Q_UNUSED(chain);
-		Q_UNUSED(priv);
+		BIO *bi = BIO_new(BIO_s_mem());
+		BIO_write(bi, in.data(), in.size());
+		PKCS12 *p12 = d2i_PKCS12_bio(bi, NULL);
+		if(!p12)
+			return QCA::ErrorDecode;
+
+		EVP_PKEY *pkey;
+		X509 *cert;
+		STACK_OF(X509) *ca = NULL;
+		if(!PKCS12_parse(p12, passphrase.data(), &pkey, &cert, &ca))
+		{
+			PKCS12_free(p12);
+			return QCA::ErrorDecode;
+		}
+		PKCS12_free(p12);
+
+		// require private key
+		if(!pkey)
+		{
+			if(cert)
+				X509_free(cert);
+			if(ca)
+				sk_X509_pop_free(ca, X509_free);
+			return QCA::ErrorDecode;
+		}
+
+		*name = QString(); // TODO: read the name out of the file?
+
+		MyPKeyContext *pk = new MyPKeyContext(provider());
+		QCA::PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+		pk->k = k;
+		*priv = pk;
+
+		QList<QCA::CertContext*> certs;
+		if(cert)
+		{
+			MyCertContext *cc = new MyCertContext(provider());
+			cc->fromX509(cert);
+			certs.append(cc);
+			X509_free(cert);
+		}
+		if(ca)
+		{
+			// TODO: reorder in chain-order?
+			// TODO: throw out certs that don't fit the chain?
+			for(int n = 0; n < sk_X509_num(ca); ++n)
+			{
+				MyCertContext *cc = new MyCertContext(provider());
+				cc->fromX509(sk_X509_value(ca, n));
+				certs.append(cc);
+			}
+			sk_X509_pop_free(ca, X509_free);
+		}
+
+		*chain = certs;
 		return QCA::ConvertGood;
 	}
 };

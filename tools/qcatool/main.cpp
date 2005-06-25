@@ -543,6 +543,8 @@ static void usage()
 	printf("  --showreq [certreq.pem]\n");
 	printf("  --validate [cert.pem] (nonroots.pem)\n");
 	printf("\n");
+	printf("  --extract-keybundle [cert.p12] [passphrase]\n");
+	printf("\n");
 	printf("  --list-keystores\n");
 	printf("  --list-keystore [storeName]\n");
 	printf("\n");
@@ -1471,6 +1473,28 @@ int main(int argc, char **argv)
 			usage();
 			return 1;
 		}
+	}
+	else if(args[0] == "--extract-keybundle")
+	{
+		if(args.count() < 3)
+		{
+			usage();
+			return 1;
+		}
+
+		QCA::KeyBundle key = QCA::KeyBundle::fromFile(args[1], args[2].toLatin1());
+		if(key.isNull())
+		{
+			printf("Error reading key file\n");
+			return 1;
+		}
+
+		printf("Certs: (first is primary)\n");
+		QCA::CertificateChain chain = key.certificateChain();
+		for(int n = 0; n < chain.count(); ++n)
+			printf("%s", qPrintable(chain[n].toPEM()));
+		printf("Private Key:\n");
+			printf("%s", qPrintable(key.privateKey().toPEM()));
 	}
 	else if(args[0] == "--list-keystores")
 	{
