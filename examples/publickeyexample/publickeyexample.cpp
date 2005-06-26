@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     msg.setRecipient(secMsgKey);
 
     // Some plain text - we use the first comamnd line argument if provided
-    QSecureArray plainText = (argc >= 2) ? argv[1] : "What do ya want for nuthin'";
+    QByteArray plainText = (argc >= 2) ? argv[1] : "What do ya want for nuthin'";
 
     // Now use the SecureMessage object to encrypt the plain text.
     msg.startEncrypt();

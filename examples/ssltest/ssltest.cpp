@@ -192,7 +192,7 @@ private slots:
 
 	void ssl_readyRead()
 	{
-		QByteArray a = ssl->read().toByteArray();
+		QByteArray a = ssl->read();
 		printf("%s", a.data());
 	}
 
