@@ -38,7 +38,7 @@ class GPGProc : public QObject
 public:
 	enum Error { FailedToStart, UnexpectedExit, ErrorWrite };
 	enum Mode { NormalMode, ExtendedMode };
-	GPGProc();
+	GPGProc(QObject *parent = 0);
 	~GPGProc();
 
 	void reset();

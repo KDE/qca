@@ -185,7 +185,7 @@ public:
 	const char *data;
 	int size;
 
-	QPipeWriter(Q_PIPE_ID id)
+	QPipeWriter(Q_PIPE_ID id, QObject *parent = 0) : QThread(parent)
 	{
 		do_quit = false;
 		data = 0;
@@ -316,7 +316,7 @@ public:
 	QSocketNotifier *sn_read, *sn_write;
 #endif
 
-	Private(QPipeDevice *_q) : q(_q), pipe(INVALID_Q_PIPE_ID)
+	Private(QPipeDevice *_q) : QObject(_q), q(_q), pipe(INVALID_Q_PIPE_ID)
 	{
 #ifdef Q_OS_WIN
 		readTimer = 0;
@@ -385,13 +385,13 @@ public:
 			setBlocking(pipe, false);
 #ifdef Q_OS_WIN
 			// polling timer
-			readTimer = new QTimer;
+			readTimer = new QTimer(this);
 			connect(readTimer, SIGNAL(timeout()), SLOT(t_timeout()));
 			readTimer->start(100);
 #endif
 #ifdef Q_OS_UNIX
 			// socket notifier
-			sn_read = new QSocketNotifier(pipe, QSocketNotifier::Read);
+			sn_read = new QSocketNotifier(pipe, QSocketNotifier::Read, this);
 			connect(sn_read, SIGNAL(activated(int)), SLOT(sn_read_activated(int)));
 #endif
 		}
@@ -401,7 +401,7 @@ public:
 			setBlocking(pipe, false);
 
 			// socket notifier
-			sn_write = new QSocketNotifier(pipe, QSocketNotifier::Write);
+			sn_write = new QSocketNotifier(pipe, QSocketNotifier::Write, this);
 			connect(sn_write, SIGNAL(activated(int)), SLOT(sn_write_activated(int)));
 			sn_write->setEnabled(false);
 #endif
@@ -485,7 +485,8 @@ public slots:
 	}
 };
 
-QPipeDevice::QPipeDevice()
+QPipeDevice::QPipeDevice(QObject *parent)
+:QObject(parent)
 {
 	d = new Private(this);
 }
@@ -681,7 +682,7 @@ int QPipeDevice::write(const char *data, int size)
 #ifdef Q_OS_WIN
 	if(!d->pipeWriter)
 	{
-		d->pipeWriter = new QPipeWriter(d->pipe);
+		d->pipeWriter = new QPipeWriter(d->pipe, d);
 		connect(d->pipeWriter, SIGNAL(canWrite()), d, SLOT(pw_canWrite()));
 		d->pipeWriter->start();
 	}
@@ -737,7 +738,7 @@ public:
 	bool closeLater;
 	bool closing;
 
-	Private(QPipeEnd *_q) : q(_q)
+	Private(QPipeEnd *_q) : QObject(_q), q(_q), pipe(this), readTrigger(this), writeTrigger(this), closeTrigger(this)
 	{
 		readTrigger.setSingleShot(true);
 		writeTrigger.setSingleShot(true);
@@ -1019,7 +1020,8 @@ public slots:
 	}
 };
 
-QPipeEnd::QPipeEnd()
+QPipeEnd::QPipeEnd(QObject *parent)
+:QObject(parent)
 {
 	d = new Private(this);
 }
@@ -1154,7 +1156,8 @@ void QPipeEnd::writeSecure(const QSecureArray &buf)
 //----------------------------------------------------------------------------
 // QPipe
 //----------------------------------------------------------------------------
-QPipe::QPipe()
+QPipe::QPipe(QObject *parent)
+:i(parent), o(parent)
 {
 }
 

@@ -44,7 +44,7 @@ class QPipeDevice : public QObject
 	Q_OBJECT
 public:
 	enum Type { Read, Write };
-	QPipeDevice();
+	QPipeDevice(QObject *parent = 0);
 	~QPipeDevice();
 
 	Type type() const;                     // Read or Write
@@ -79,7 +79,7 @@ class QPipeEnd : public QObject
 	Q_OBJECT
 public:
 	enum Error { ErrorEOF, ErrorBroken };
-	QPipeEnd();
+	QPipeEnd(QObject *parent = 0);
 	~QPipeEnd();
 
 	void reset();
@@ -131,7 +131,7 @@ private:
 class QPipe
 {
 public:
-	QPipe();
+	QPipe(QObject *parent = 0);
 	~QPipe();
 
 	void reset();

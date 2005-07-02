@@ -28,7 +28,7 @@ class SProcess : public QProcess
 {
 	Q_OBJECT
 public:
-	SProcess();
+	SProcess(QObject *parent = 0);
 	~SProcess();
 
 #ifdef Q_OS_UNIX

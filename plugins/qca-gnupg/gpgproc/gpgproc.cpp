@@ -59,7 +59,7 @@ public:
 	QByteArray leftover_stdout;
 	QByteArray leftover_stderr;
 
-	Private(GPGProc *_q) : q(_q)
+	Private(GPGProc *_q) : QObject(_q), q(_q), pipeAux(this), pipeCommand(this), pipeStatus(this), doneTimer(this)
 	{
 		proc = 0;
 		doneTimer.setSingleShot(true);
@@ -411,7 +411,8 @@ private:
 	}
 };
 
-GPGProc::GPGProc()
+GPGProc::GPGProc(QObject *parent)
+:QObject(parent)
 {
 	d = new Private(this);
 }
@@ -480,7 +481,7 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 	QString fullcmd = fullargs.join(" ");
 	emit debug(QString("Running: [") + bin + ' ' + fullcmd + ']');
 
-	d->proc = new SProcess;
+	d->proc = new SProcess(d);
 
 #ifdef Q_OS_UNIX
 	QList<int> plist;

@@ -28,8 +28,8 @@ namespace gpgQCAPlugin {
 //----------------------------------------------------------------------------
 // SProcess
 //----------------------------------------------------------------------------
-SProcess::SProcess()
-:QProcess()
+SProcess::SProcess(QObject *parent)
+:QProcess(parent)
 {
 }
 
