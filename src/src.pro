@@ -17,7 +17,7 @@ VER_MAJ = 2
 VER_MIN = 0
 
 # make DLL
-win: {
+windows: {
 	CONFIG += dll
 	DEFINES += QCA_MAKEDLL
 }
@@ -35,6 +35,7 @@ PRIVATE_HEADERS += \
 
 PUBLIC_HEADERS += \
 	$$QCA_INC/qca_export.h \
+	$$QCA_INC/qca_support.h \
 	$$QCA_INC/qca_tools.h \
 	$$QCA_INC/qca_core.h \
 	$$QCA_INC/qca_textfilter.h \
@@ -47,6 +48,10 @@ PUBLIC_HEADERS += \
 	$$QCA_INC/qcaprovider.h \
 
 HEADERS += $$PRIVATE_HEADERS $$PUBLIC_HEADERS
+
+# do support first
+SOURCES += $$QCA_CPP/support/synchronizer.cpp
+include($$QCA_SRCBASE/support/dirwatch/dirwatch.pri)
 
 SOURCES += \
 	$$QCA_CPP/qca_tools.cpp \
@@ -64,7 +69,7 @@ SOURCES += \
 unix:!mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_flatfile.cpp
 }
-win: {
+windows: {
 	SOURCES += $$QCA_CPP/qca_systemstore_win.cpp
 }
 mac: {
