@@ -28,7 +28,7 @@
 
 namespace QCA
 {
-	class Synchronizer : public QObject
+	class QCA_EXPORT Synchronizer : public QObject
 	{
 		Q_OBJECT
 	public:
@@ -43,7 +43,7 @@ namespace QCA
 		Private *d;
 	};
 
-	class DirWatch : public QObject
+	class QCA_EXPORT DirWatch : public QObject
 	{
 		Q_OBJECT
 	public:
@@ -66,7 +66,7 @@ namespace QCA
 		Private *d;
 	};
 
-	class FileWatch : public QObject
+	class QCA_EXPORT FileWatch : public QObject
 	{
 		Q_OBJECT
 	public:
