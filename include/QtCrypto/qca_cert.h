@@ -1213,7 +1213,7 @@ namespace QCA
 	   Pretty Good Privacy key 
 
 	   This holds either a reference to an item in a real PGP keyring,
-	   or a copy made by calling a copy constructor or assignment.
+	   or a standalone item created using the from*() functions.
 
 	   Note that with the latter method, the key is of no use besides
 	   being informational.  The key must be in a keyring
