@@ -469,23 +469,6 @@ bool Certificate::operator!=(const Certificate &a) const
 }
 
 //----------------------------------------------------------------------------
-// CertificateChain
-//----------------------------------------------------------------------------
-CertificateChain::CertificateChain()
-{
-}
-
-CertificateChain::CertificateChain(const Certificate &primary)
-{
-	append(primary);
-}
-
-const Certificate & CertificateChain::primary() const
-{
-	return first();
-}
-
-//----------------------------------------------------------------------------
 // CertificateRequest
 //----------------------------------------------------------------------------
 CertificateRequest::CertificateRequest()

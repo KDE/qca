@@ -521,25 +521,25 @@ namespace QCA
 	   \sa QCA::CertificateCollection for an alternative way to represent a group
 	   of Certificates that do not necessarily have a chained relationship.
 	*/
-	class QCA_EXPORT CertificateChain : public QList<Certificate>
+	class CertificateChain : public QList<Certificate>
 	{
 	public:
 		/**
 		   Create an empty certificate chain
 		*/
-		CertificateChain();
+		inline CertificateChain() {}
 
 		/**
 		   Create a certificate chain, starting at the specified certificate
 
 		   \param primary the end-user certificate that forms one end of the chain
 		*/
-		CertificateChain(const Certificate &primary);
+		inline CertificateChain(const Certificate &primary) { append(primary); }
 
 		/**
 		   Return the primary (end-user) Certificate
 		*/
-		const Certificate & primary() const;
+		inline const Certificate & primary() const { return first(); }
 	};
 
 	/**
