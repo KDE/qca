@@ -19,6 +19,11 @@
  *
  */
 
+// WARNING!
+//
+// Do not use the Plugin interface in applications!  This interface is
+// for plugin developers ONLY.  It may change between QCA versions.
+
 #ifndef QCAPROVIDER_H
 #define QCAPROVIDER_H
 
@@ -348,12 +353,29 @@ public:
 	virtual ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const = 0;
 };
 
+class QCA_EXPORT PGPKeyContextProps
+{
+public:
+	QString keyId;
+	QStringList userIds;
+	bool isSecret;
+	QDateTime creationDate, expirationDate;
+	QString fingerprint;
+	bool inKeyring;
+	bool isTrusted;
+};
+
 class QCA_EXPORT PGPKeyContext : public Provider::Context
 {
 public:
 	PGPKeyContext(Provider *p) : Provider::Context(p, "pgpkey") {}
 
-	// TODO
+	virtual const PGPKeyContextProps *props() const = 0;
+
+	virtual QSecureArray toBinary() const = 0;
+	virtual QString toAscii() const = 0;
+	virtual ConvertResult fromBinary(const QSecureArray &a) = 0;
+	virtual ConvertResult fromAscii(const QString &s) = 0;
 };
 
 class QCA_EXPORT KeyStoreEntryContext : public Provider::Context

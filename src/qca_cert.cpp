@@ -1138,14 +1138,13 @@ KeyBundle KeyBundle::fromFile(const QString &fileName, const QSecureArray &passp
 //----------------------------------------------------------------------------
 // PGPKey
 //----------------------------------------------------------------------------
-// TODO
 PGPKey::PGPKey()
 {
 }
 
 PGPKey::PGPKey(const QString &fileName)
 {
-	Q_UNUSED(fileName);
+	*this = fromFile(fileName, 0, QString());
 }
 
 PGPKey::PGPKey(const PGPKey &from)
@@ -1165,92 +1164,103 @@ PGPKey & PGPKey::operator=(const PGPKey &from)
 
 bool PGPKey::isNull() const
 {
-	return true;
+	return (!context() ? true : false);
 }
 
 QString PGPKey::keyId() const
 {
-	return QString();
+	return static_cast<const PGPKeyContext *>(context())->props()->keyId;
 }
 
 QString PGPKey::primaryUserId() const
 {
-	return QString();
+	return static_cast<const PGPKeyContext *>(context())->props()->userIds.first();
 }
 
 QStringList PGPKey::userIds() const
 {
-	return QStringList();
+	return static_cast<const PGPKeyContext *>(context())->props()->userIds;
 }
 
 bool PGPKey::isSecret() const
 {
-	return false;
+	return static_cast<const PGPKeyContext *>(context())->props()->isSecret;
 }
 
 QDateTime PGPKey::creationDate() const
 {
-	return QDateTime();
+	return static_cast<const PGPKeyContext *>(context())->props()->creationDate;
 }
 
 QDateTime PGPKey::expirationDate() const
 {
-	return QDateTime();
+	return static_cast<const PGPKeyContext *>(context())->props()->expirationDate;
 }
 
 QString PGPKey::fingerprint() const
 {
-	return QString();
+	return static_cast<const PGPKeyContext *>(context())->props()->fingerprint;
 }
 
 bool PGPKey::inKeyring() const
 {
-	return false;
+	return static_cast<const PGPKeyContext *>(context())->props()->inKeyring;
 }
 
 bool PGPKey::isTrusted() const
 {
-	return false;
+	return static_cast<const PGPKeyContext *>(context())->props()->isTrusted;
 }
 
 QSecureArray PGPKey::toArray() const
 {
-	return QSecureArray();
+	return static_cast<const PGPKeyContext *>(context())->toBinary();
 }
 
 QString PGPKey::toString() const
 {
-	return QString();
+	return static_cast<const PGPKeyContext *>(context())->toAscii();
 }
 
 bool PGPKey::toFile(const QString &fileName) const
 {
-	Q_UNUSED(fileName);
-	return false;
+	return stringToFile(fileName, toString());
 }
 
 PGPKey PGPKey::fromArray(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(a);
-	Q_UNUSED(result);
-	Q_UNUSED(provider);
-	return PGPKey();
+	PGPKey k;
+	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext("pgpkey", provider));
+	ConvertResult r = kc->fromBinary(a);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+		k.change(kc);
+	return k;
 }
 
 PGPKey PGPKey::fromString(const QString &s, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(s);
-	Q_UNUSED(result);
-	Q_UNUSED(provider);
-	return PGPKey();
+	PGPKey k;
+	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext("pgpkey", provider));
+	ConvertResult r = kc->fromAscii(s);
+	if(result)
+		*result = r;
+	if(r == ConvertGood)
+		k.change(kc);
+	return k;
 }
 
 PGPKey PGPKey::fromFile(const QString &fileName, ConvertResult *result, const QString &provider)
 {
-	Q_UNUSED(fileName);
-	Q_UNUSED(result);
-	Q_UNUSED(provider);
-	return PGPKey();
+	QString str;
+	if(!stringFromFile(fileName, &str))
+	{
+		if(result)
+			*result = ErrorFile;
+		return PGPKey();
+	}
+	return fromString(str, result, provider);
 }
 
 }

@@ -28,8 +28,12 @@
     ensure PGPKey and SASL are proper
   other:
     fix the windows build
+  default md5/sha1, resolve any endian problems
 
 * finish code for APIs:
+  proper parenting of all objects
+  dirwatch: thread safety
+  dirwatch: test on all platforms
   securearray: operator+, operator+= (i think bytearray has these)
   "untrusted" error for SecureMessage
   waitFor() should just spin the event loop?

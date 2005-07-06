@@ -68,7 +68,7 @@ QString KeyStoreEntry::id() const
 
 KeyBundle KeyStoreEntry::keyBundle() const
 {
-	return KeyBundle();
+	return static_cast<const KeyStoreEntryContext *>(context())->keyBundle();
 }
 
 Certificate KeyStoreEntry::certificate() const
@@ -83,12 +83,12 @@ CRL KeyStoreEntry::crl() const
 
 PGPKey KeyStoreEntry::pgpSecretKey() const
 {
-	return PGPKey();
+	return static_cast<const KeyStoreEntryContext *>(context())->pgpSecretKey();
 }
 
 PGPKey KeyStoreEntry::pgpPublicKey() const
 {
-	return PGPKey();
+	return static_cast<const KeyStoreEntryContext *>(context())->pgpPublicKey();
 }
 
 //----------------------------------------------------------------------------
@@ -162,30 +162,35 @@ bool KeyStore::holdsPGPPublicKeys() const
 
 bool KeyStore::writeEntry(const KeyBundle &kb)
 {
+	// TODO
 	Q_UNUSED(kb);
 	return false;
 }
 
 bool KeyStore::writeEntry(const Certificate &cert)
 {
+	// TODO
 	Q_UNUSED(cert);
 	return false;
 }
 
 bool KeyStore::writeEntry(const CRL &crl)
 {
+	// TODO
 	Q_UNUSED(crl);
 	return false;
 }
 
 PGPKey KeyStore::writeEntry(const PGPKey &key)
 {
+	// TODO
 	Q_UNUSED(key);
 	return PGPKey();
 }
 
 bool KeyStore::removeEntry(const QString &id)
 {
+	// TODO
 	Q_UNUSED(id);
 	return false;
 }
@@ -354,6 +359,7 @@ private:
 		// add the keystore
 		KeyStore *ks = new KeyStore;
 		ks->change(c);
+		connect(c, SIGNAL(needPassphrase()), ks, SIGNAL(needPassphrase()));
 		active.append(Item(ks));
 	}
 
