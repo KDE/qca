@@ -30,6 +30,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 }
+#include <algorithm>
 #include <botan/secalloc.h>
 namespace QCA {
 #ifndef BOTAN_NO_CONF_H
@@ -221,7 +222,7 @@ void SecureAllocator::deallocate(void* ptr, u32bit n) const
    if(ptr == 0 || n == 0) return;
 
    n = round_up(n, ALIGN_TO);
-   std::memset(ptr, 0, n);
+   memset(ptr, 0, n);
 
    Mutex_Holder holder(lock);
 

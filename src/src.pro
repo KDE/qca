@@ -71,6 +71,7 @@ unix:!mac: {
 }
 windows: {
 	SOURCES += $$QCA_CPP/qca_systemstore_win.cpp
+	LIBS += -lcrypt32
 }
 mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_mac.cpp

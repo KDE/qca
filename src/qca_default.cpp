@@ -33,17 +33,17 @@ namespace QCA {
 //----------------------------------------------------------------------------
 // DefaultProvider
 //----------------------------------------------------------------------------
-class DefaultRandomContext : public QCA::RandomContext
+class DefaultRandomContext : public RandomContext
 {
 public:
-	DefaultRandomContext(QCA::Provider *p) : RandomContext(p) {}
+	DefaultRandomContext(Provider *p) : RandomContext(p) {}
 
-	Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new DefaultRandomContext(provider());
 	}
 
-	QSecureArray nextBytes(int size, QCA::Random::Quality)
+	virtual QSecureArray nextBytes(int size, Random::Quality)
 	{
 		QSecureArray buf(size);
 		for(int n = 0; n < (int)buf.size(); ++n)
@@ -110,20 +110,20 @@ public:
   1999-05-03 lpd Original version.
  */
 
-class DefaultMD5Context : public QCA::HashContext
+class DefaultMD5Context : public HashContext
 {
 public:
-        DefaultMD5Context(QCA::Provider *p) : HashContext(p, "md5")
+        DefaultMD5Context(Provider *p) : HashContext(p, "md5")
         {
                 clear();
         }
 
-        Context *clone() const
+	virtual Provider::Context *clone() const
         {
                 return new DefaultMD5Context(*this);
         }
 
-        void clear()
+        virtual void clear()
         {
 		buf.resize(64);
 		buf.fill(0);
@@ -134,7 +134,7 @@ public:
 		d = 0x10325476;
 	}
 
-        void update(const QSecureArray &a)
+        virtual void update(const QSecureArray &a)
         {
 		const unsigned char *p = (const unsigned char*)a.data();
 		int left = a.size();
@@ -170,7 +170,7 @@ public:
 			memcpy(buf.data(), p, left);
 	}
 
-        QSecureArray final()
+        virtual QSecureArray final()
         {
 		QSecureArray result(16);
 		QSecureArray data(8);
@@ -188,7 +188,7 @@ public:
 		/* Pad to 56 bytes mod 64. */
 		QSecureArray padding(((55 - (m_count >> 3)) & 63) + 1);
 		if (padding.size() > 0 ) {
-			padding[0] = 0x80;
+			padding[0] = (char)0x80;
 			if (padding.size() > 1 ) {
 				for (i = 1; i < (unsigned int)padding.size(); ++i) {
 					padding[i] = 0x00;
@@ -425,7 +425,7 @@ public:
 	{
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new DefaultKeyStoreEntry(*this);
 	}
@@ -471,7 +471,7 @@ class DefaultKeyStore : public KeyStoreContext
 public:
 	DefaultKeyStore(Provider *p) : KeyStoreContext(p) {}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return 0;
 	}
@@ -552,7 +552,7 @@ public:
 		delete ks;
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return 0;
 	}
@@ -566,7 +566,7 @@ public:
 	}
 };
 
-class DefaultProvider : public QCA::Provider
+class DefaultProvider : public Provider
 {
 public:
 	void init()
@@ -593,7 +593,7 @@ public:
 		return list;
 	}
 
-	Context *createContext(const QString &type)
+	Provider::Context *createContext(const QString &type)
 	{
 		if(type == "random")
 			return new DefaultRandomContext(this);

@@ -108,7 +108,7 @@ protected:
 		// this is used instead of a default implementation to make sure that
 		// provider authors think about it, at least a bit.
 		// See Meyers, Effective C++, Effective C++ (2nd Ed), Item 36
-		return KeyLength( 0, std::numeric_limits<int>::max(), 1 );
+		return KeyLength( 0, INT_MAX, 1 );
 	}
 };
 

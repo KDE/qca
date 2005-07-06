@@ -48,7 +48,7 @@ BigInt& BigInt::operator+=(const BigInt& n)
    {
    if((sign() == n.sign()))
       {
-      const u32bit reg_size = std::max(sig_words(), n.sig_words()) + 1;
+      const u32bit reg_size = qMax(sig_words(), n.sig_words()) + 1;
       grow_to(reg_size);
       bigint_add2(get_reg(), reg_size-1, n.data(), n.sig_words());
       }
@@ -74,7 +74,7 @@ BigInt& BigInt::operator-=(const BigInt& n)
       return (*this);
       }
 
-   const u32bit reg_size = std::max(sig_words(), n.sig_words()) + 1;
+   const u32bit reg_size = qMax(sig_words(), n.sig_words()) + 1;
    grow_to(reg_size);
 
    if(relative_size == -1)

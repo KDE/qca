@@ -85,9 +85,9 @@ class MemoryRegion
          { if(this != &in) set(in); return (*this); }
 
       void copy(const T in[], u32bit n)
-         { copy_mem(buf, in, std::min(size(), n)); }
+         { copy_mem(buf, in, qMin(size(), n)); }
       void copy(u32bit off, const T in[], u32bit n)
-         { copy_mem(buf + off, in, std::min(size() - off, n)); }
+         { copy_mem(buf + off, in, qMin(size() - off, n)); }
 
       void set(const T in[], u32bit n)    { create(n); copy(in, n); }
       void set(const MemoryRegion<T>& in) { set(in.begin(), in.size()); }

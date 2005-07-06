@@ -40,7 +40,7 @@ unix:{
 		$$BOTAN_BASE/alloc_mmap/mmap_mem.cpp
 }
 
-win:{
+windows:{
 	SOURCES += \
 		$$BOTAN_BASE/ml_win32/mlock.cpp
 }

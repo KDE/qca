@@ -48,7 +48,7 @@ BigInt operator+(const BigInt& x, const BigInt& y)
    {
    if((x.sign() == y.sign()))
       {
-      BigInt z(x.sign(), std::max(x.sig_words(), y.sig_words()) + 1);
+      BigInt z(x.sign(), qMax(x.sig_words(), y.sig_words()) + 1);
       bigint_add3(z.get_reg(), x.data(), x.sig_words(),
                                y.data(), y.sig_words());
       return z;
@@ -69,7 +69,7 @@ BigInt operator-(const BigInt& x, const BigInt& y)
    if(relative_size == 0 && (x.sign() == y.sign())) return 0;
    if(relative_size == 0 && (x.sign() != y.sign())) return (x << 1);
 
-   BigInt z(BigInt::Positive, std::max(x.sig_words(), y.sig_words()) + 1);
+   BigInt z(BigInt::Positive, qMax(x.sig_words(), y.sig_words()) + 1);
 
    if(relative_size == -1)
       {

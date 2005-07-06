@@ -142,7 +142,7 @@ BigInt gcd(const BigInt& a, const BigInt& b)
    BigInt x = a, y = b;
    x.set_sign(BigInt::Positive);
    y.set_sign(BigInt::Positive);
-   u32bit shift = std::min(low_zero_bits(x), low_zero_bits(y));
+   u32bit shift = qMin(low_zero_bits(x), low_zero_bits(y));
 
    x >>= shift;
    y >>= shift;
@@ -304,7 +304,7 @@ s32bit simple_primality_tests(const BigInt& n)
       return NOT_PRIME;
       }
 
-   u32bit check_first = std::min(n.bits() / 32, PRIME_PRODUCTS_TABLE_SIZE);
+   u32bit check_first = qMin(n.bits() / 32, PRIME_PRODUCTS_TABLE_SIZE);
    for(u32bit j = 0; j != check_first; j++)
       if(gcd(n, PRIME_PRODUCTS[j]) != 1)
          return NOT_PRIME;
@@ -364,7 +364,7 @@ bool passes_mr_tests(const BigInt& n, u32bit level)
    if(level == 0)
       return true;
 
-   const u32bit NONCE_BITS = std::min(n.bits() - 1, PREF_NONCE_BITS);
+   const u32bit NONCE_BITS = qMin(n.bits() - 1, PREF_NONCE_BITS);
 
    const bool verify = (level == 2);
 

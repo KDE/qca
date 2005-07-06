@@ -51,10 +51,10 @@ namespace {
 *************************************************/
 void* do_malloc(u32bit n, bool do_lock)
    {
-   void* ptr = std::malloc(n);
+   void* ptr = malloc(n);
    if(!ptr)    return 0;
    if(do_lock) lock_mem(ptr, n);
-   std::memset(ptr, 0, n);
+   memset(ptr, 0, n);
    return ptr;
    }
 
@@ -64,9 +64,9 @@ void* do_malloc(u32bit n, bool do_lock)
 void do_free(void* ptr, u32bit n, bool do_lock)
    {
    if(!ptr) return;
-   std::memset(ptr, 0, n);
+   memset(ptr, 0, n);
    if(do_lock) unlock_mem(ptr, n);
-   std::free(ptr);
+   free(ptr);
    }
 
 }

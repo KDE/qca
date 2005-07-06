@@ -31,7 +31,7 @@ bool qca_have_systemstore()
 {
 	bool ok = false;
 	HCERTSTORE hSystemStore;
-	hSystemStore = CertOpenSystemStore(0, "ROOT");
+	hSystemStore = CertOpenSystemStoreA(0, "ROOT");
 	if(hSystemStore)
 		ok = true;
 	CertCloseStore(hSystemStore, 0);
@@ -42,7 +42,7 @@ CertificateCollection qca_get_systemstore(const QString &provider)
 {
 	CertificateCollection col;
 	HCERTSTORE hSystemStore;
-	hSystemStore = CertOpenSystemStore(0, "ROOT");
+	hSystemStore = CertOpenSystemStoreA(0, "ROOT");
 	if(!hSystemStore)
 		return col;
 	PCCERT_CONTEXT pc = NULL;
