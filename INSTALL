@@ -10,14 +10,5 @@ NOTE: You may also need to run '/sbin/ldconfig' or a similar tool to
       get the new library files recognized by the system.  If you are
       using Linux, just run it for good measure.
 
-You then need to install any plugins that you want. For each 
-subdirectory in the plugins/ directory, you do the same sequence
-of events:
-  ./configure
-  make
-  make install
-
-If this causes any problems, please report them to:  
-delta-affinix.com@lists.affinix.com
-
-
+Please report problems to:
+  delta-affinix.com@lists.affinix.com

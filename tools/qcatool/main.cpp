@@ -20,7 +20,8 @@
 #include <QtCore>
 #include <QtCrypto>
 
-Q_IMPORT_PLUGIN(opensslPlugin);
+//Q_IMPORT_PLUGIN(opensslPlugin);
+//Q_IMPORT_PLUGIN(gnupgPlugin);
 
 class AnimatedKeyGen : public QObject
 {
@@ -132,10 +133,11 @@ private slots:
 	void ks_needPassphrase()
 	{
 		QCA::KeyStore *ks = static_cast<QCA::KeyStore *>(sender());
-		printf("Enter passphrase for %s: ", qPrintable(ks->name()));
+		printf("Enter passphrase for %s (not hidden!) : ", qPrintable(ks->name()));
 		fflush(stdout);
 		QSecureArray result(256);
 		fgets((char *)result.data(), result.size(), stdin);
+		result.resize(qstrlen(result.data()));
 		if(result[result.size() - 1] == '\n')
 			result.resize(result.size() - 1);
 		ks->submitPassphrase(result);
@@ -617,7 +619,7 @@ static void usage()
 	printf("  --smime encrypt [cert.pem] [messagefile]\n");
 	printf("  --smime decrypt [priv.pem] [messagefile] [cert.pem] (passphrase)\n");
 	printf("\n");
-	printf("  --pgp sign [S] [messagefile]\n");
+	printf("  --pgp clearsign [S] [messagefile]\n");
 	printf("\n");
 
 	/*printf("qcatool: simple qca utility\n");
@@ -667,7 +669,7 @@ int main(int argc, char **argv)
 
 	//QCA::scanForPlugins();
 
-	if(!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
+	/*if(!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
 	{
 		printf("Error: no RSA support\n");
 		return 1;
@@ -689,7 +691,7 @@ int main(int argc, char **argv)
 	{
 		printf("Error: no cert support\n");
 		return 1;
-	}
+	}*/
 
 	QStringList args;
 	for(int n = 1; n < argc; ++n)
@@ -1780,7 +1782,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "sign")
+		if(args[1] == "clearsign")
 		{
 			if(args.count() < 4)
 			{
@@ -1820,7 +1822,7 @@ int main(int argc, char **argv)
 
 			QSecureArray result = msg.read();
 
-			printf("Result: [%s]\n", result.data());
+			printf("Result:\n%s\n", result.data());
 		}
 		else
 		{
