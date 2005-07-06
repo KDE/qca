@@ -380,8 +380,6 @@ public:
 			}
 		}
 
-		QCoreApplication::instance()->sendPostedEvents();
-
 		// at this point the worker is done.  cleanup and return
 		m.unlock();
 
@@ -420,8 +418,14 @@ protected:
 			loop = &eventLoop;
 			m.unlock();
 
-			// run the event loop.  when done, move the object back.
+			// run the event loop
 			eventLoop.exec();
+
+			// eventloop done, flush pending events
+			QCoreApplication::instance()->sendPostedEvents();
+			QCoreApplication::instance()->sendPostedEvents(0, QEvent::DeferredDelete);
+
+			// and move the object back
 			obj->moveToThread(orig_thread);
 
 			m.lock();
