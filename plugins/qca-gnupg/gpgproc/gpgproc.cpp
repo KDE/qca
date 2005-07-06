@@ -39,13 +39,15 @@ class GPGProc::Private : public QObject
 	Q_OBJECT
 public:
 	GPGProc *q;
+	QString bin;
+	QStringList args;
 	SProcess *proc;
 	QPipe pipeAux, pipeCommand, pipeStatus;
 	QByteArray statusBuf;
 	QStringList statusLines;
 	GPGProc::Error error;
 	int exitCode;
-	QTimer doneTimer;
+	QTimer startTrigger, doneTrigger;
 
 	QByteArray pre_stdin, pre_aux;
 #ifdef QPIPE_SECURE
@@ -59,10 +61,11 @@ public:
 	QByteArray leftover_stdout;
 	QByteArray leftover_stderr;
 
-	Private(GPGProc *_q) : QObject(_q), q(_q), pipeAux(this), pipeCommand(this), pipeStatus(this), doneTimer(this)
+	Private(GPGProc *_q) : QObject(_q), q(_q), pipeAux(this), pipeCommand(this), pipeStatus(this), startTrigger(this), doneTrigger(this)
 	{
 		proc = 0;
-		doneTimer.setSingleShot(true);
+		startTrigger.setSingleShot(true);
+		doneTrigger.setSingleShot(true);
 
 		connect(&pipeAux.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(aux_written(int)));
 		connect(&pipeAux.writeEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(aux_error(QPipeEnd::Error)));
@@ -70,7 +73,8 @@ public:
 		connect(&pipeCommand.writeEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(command_error(QPipeEnd::Error)));
 		connect(&pipeStatus.readEnd(), SIGNAL(readyRead()), SLOT(status_read()));
 		connect(&pipeStatus.readEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(status_error(QPipeEnd::Error)));
-		connect(&doneTimer, SIGNAL(timeout()), SLOT(doTryDone()));
+		connect(&startTrigger, SIGNAL(timeout()), SLOT(doStart()));
+		connect(&doneTrigger, SIGNAL(timeout()), SLOT(doTryDone()));
 
 		reset(ResetSessionAndData);
 	}
@@ -96,11 +100,13 @@ public:
 			proc->disconnect(this);
 			if(proc->state() != QProcess::NotRunning)
 				proc->terminate();
+			proc->setParent(0);
 			proc->deleteLater();
 			proc = 0;
 		}
 
-		doneTimer.stop();
+		startTrigger.stop();
+		doneTrigger.stop();
 
 		pre_stdin.clear();
 		pre_aux.clear();
@@ -178,6 +184,11 @@ public:
 	}
 
 public slots:
+	void doStart()
+	{
+		proc->start(bin, args);
+	}
+
 	void aux_written(int x)
 	{
 		emit q->bytesWrittenAux(x);
@@ -287,7 +298,7 @@ public slots:
 			fin_status = true;
 			if(readAndProcessStatusData())
 			{
-				doneTimer.start();
+				doneTrigger.start();
 				emit q->readyReadStatusLines();
 				return;
 			}
@@ -324,7 +335,7 @@ public slots:
 			fin_status = true;
 			if(readAndProcessStatusData())
 			{
-				doneTimer.start();
+				doneTrigger.start();
 				emit q->readyReadStatusLines();
 				return;
 			}
@@ -506,7 +517,9 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 	connect(d->proc, SIGNAL(finished(int)), d, SLOT(proc_finished(int)));
 	connect(d->proc, SIGNAL(error(QProcess::ProcessError)), d, SLOT(proc_error(QProcess::ProcessError)));
 
-	d->proc->start(bin, fullargs);
+	d->bin = bin;
+	d->args = fullargs;
+	d->startTrigger.start();
 }
 
 QByteArray GPGProc::readStdout()
