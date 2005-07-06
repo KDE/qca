@@ -331,7 +331,7 @@ SecureMessage::SecureMessage(SecureMessageSystem *system)
 {
 	d = new Private(this);
 	d->system = system;
-	d->c = static_cast<const SMSContext *>(d->system->context())->createMessage();
+	d->c = static_cast<SMSContext *>(d->system->context())->createMessage();
 	change(d->c);
 	d->init();
 }
