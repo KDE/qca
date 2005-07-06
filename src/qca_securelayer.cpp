@@ -396,7 +396,7 @@ void TLS::setConstraints(SecurityLevel s)
 			min = 129;
 			break;
 		case SL_Highest:
-			qMax(129, d->c->maxSSF());
+			min = qMax(129, d->c->maxSSF());
 			break;
 	}
 	d->con_ssfMode = true;
