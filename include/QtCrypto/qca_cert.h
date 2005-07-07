@@ -1276,7 +1276,7 @@ namespace QCA
 		/**
 		   Test if the PGP key is the secret key
 
-		   \return true if the PGG key is the secret key
+		   \return true if the PGP key is the secret key
 		*/
 		bool isSecret() const;
 
