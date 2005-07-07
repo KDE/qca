@@ -39,6 +39,8 @@
 // comment this out if you'd rather use openssl 0.9.6
 //#define OSSL_097
 
+using namespace QCA;
+
 namespace opensslQCAPlugin {
 
 //----------------------------------------------------------------------------
@@ -136,40 +138,40 @@ static QSecureArray dsasig_raw_to_der(const QSecureArray &in)
 	return result;
 }
 
-static bool is_basic_constraint(QCA::ConstraintType t)
+static bool is_basic_constraint(ConstraintType t)
 {
 	bool basic = false;
 	switch(t)
 	{
-		case QCA::DigitalSignature:
-		case QCA::NonRepudiation:
-		case QCA::KeyEncipherment:
-		case QCA::DataEncipherment:
-		case QCA::KeyAgreement:
-		case QCA::KeyCertificateSign:
-		case QCA::CRLSign:
-		case QCA::EncipherOnly:
-		case QCA::DecipherOnly:
+		case DigitalSignature:
+		case NonRepudiation:
+		case KeyEncipherment:
+		case DataEncipherment:
+		case KeyAgreement:
+		case KeyCertificateSign:
+		case CRLSign:
+		case EncipherOnly:
+		case DecipherOnly:
 			basic = true;
 			break;
 
-		case QCA::ServerAuth:
-		case QCA::ClientAuth:
-		case QCA::CodeSigning:
-		case QCA::EmailProtection:
-		case QCA::IPSecEndSystem:
-		case QCA::IPSecTunnel:
-		case QCA::IPSecUser:
-		case QCA::TimeStamping:
-		case QCA::OCSPSigning:
+		case ServerAuth:
+		case ClientAuth:
+		case CodeSigning:
+		case EmailProtection:
+		case IPSecEndSystem:
+		case IPSecTunnel:
+		case IPSecUser:
+		case TimeStamping:
+		case OCSPSigning:
 			break;
 	}
 	return basic;
 }
 
-static QCA::Constraints basic_only(const QCA::Constraints &list)
+static Constraints basic_only(const Constraints &list)
 {
-	QCA::Constraints out;
+	Constraints out;
 	for(int n = 0; n < list.count(); ++n)
 	{
 		if(is_basic_constraint(list[n]))
@@ -178,9 +180,9 @@ static QCA::Constraints basic_only(const QCA::Constraints &list)
 	return out;
 }
 
-static QCA::Constraints ext_only(const QCA::Constraints &list)
+static Constraints ext_only(const Constraints &list)
 {
-	QCA::Constraints out;
+	Constraints out;
 	for(int n = 0; n < list.count(); ++n)
 	{
 		if(!is_basic_constraint(list[n]))
@@ -190,28 +192,28 @@ static QCA::Constraints ext_only(const QCA::Constraints &list)
 }
 
 // logic from Botan
-static QCA::Constraints find_constraints(const QCA::PKeyContext &key, const QCA::Constraints &orig)
+static Constraints find_constraints(const PKeyContext &key, const Constraints &orig)
 {
-	QCA::Constraints constraints;
+	Constraints constraints;
 
-	if(key.key()->type() == QCA::PKey::RSA)
-		constraints += QCA::KeyEncipherment;
+	if(key.key()->type() == PKey::RSA)
+		constraints += KeyEncipherment;
 
-	if(key.key()->type() == QCA::PKey::DH)
-		constraints += QCA::KeyAgreement;
+	if(key.key()->type() == PKey::DH)
+		constraints += KeyAgreement;
 
-	if(key.key()->type() == QCA::PKey::RSA || key.key()->type() == QCA::PKey::DSA)
+	if(key.key()->type() == PKey::RSA || key.key()->type() == PKey::DSA)
 	{
-		constraints += QCA::DigitalSignature;
-		constraints += QCA::NonRepudiation;
+		constraints += DigitalSignature;
+		constraints += NonRepudiation;
 	}
 
-	QCA::Constraints limits = basic_only(orig);
-	QCA::Constraints the_rest = ext_only(orig);
+	Constraints limits = basic_only(orig);
+	Constraints the_rest = ext_only(orig);
 
 	if(!limits.isEmpty())
 	{
-		QCA::Constraints reduced;
+		Constraints reduced;
 		for(int n = 0; n < constraints.count(); ++n)
 		{
 			if(limits.contains(constraints[n]))
@@ -235,19 +237,19 @@ static void try_add_name_item(X509_NAME **name, int nid, const QString &val)
 	X509_NAME_add_entry_by_NID(*name, nid, MBSTRING_ASC, (unsigned char *)buf.data(), buf.size(), -1, 0);
 }
 
-static X509_NAME *new_cert_name(const QCA::CertificateInfo &info)
+static X509_NAME *new_cert_name(const CertificateInfo &info)
 {
 	X509_NAME *name = 0;
-	try_add_name_item(&name, NID_commonName, info.value(QCA::CommonName));
-	try_add_name_item(&name, NID_countryName, info.value(QCA::Country));
-	try_add_name_item(&name, NID_localityName, info.value(QCA::Locality));
-	try_add_name_item(&name, NID_stateOrProvinceName, info.value(QCA::State));
-	try_add_name_item(&name, NID_organizationName, info.value(QCA::Organization));
-	try_add_name_item(&name, NID_organizationalUnitName, info.value(QCA::OrganizationalUnit));
+	try_add_name_item(&name, NID_commonName, info.value(CommonName));
+	try_add_name_item(&name, NID_countryName, info.value(Country));
+	try_add_name_item(&name, NID_localityName, info.value(Locality));
+	try_add_name_item(&name, NID_stateOrProvinceName, info.value(State));
+	try_add_name_item(&name, NID_organizationName, info.value(Organization));
+	try_add_name_item(&name, NID_organizationalUnitName, info.value(OrganizationalUnit));
 	return name;
 }
 
-static void try_get_name_item(X509_NAME *name, int nid, QCA::CertificateInfoType t, QCA::CertificateInfo *info)
+static void try_get_name_item(X509_NAME *name, int nid, CertificateInfoType t, CertificateInfo *info)
 {
 	int loc = X509_NAME_get_index_by_NID(name, nid, -1);
 	if(loc == -1)
@@ -258,15 +260,15 @@ static void try_get_name_item(X509_NAME *name, int nid, QCA::CertificateInfoType
 	info->insert(t, QString::fromLatin1(cs));
 }
 
-static QCA::CertificateInfo get_cert_name(X509_NAME *name)
+static CertificateInfo get_cert_name(X509_NAME *name)
 {
-	QCA::CertificateInfo info;
-	try_get_name_item(name, NID_commonName, QCA::CommonName, &info);
-	try_get_name_item(name, NID_countryName, QCA::Country, &info);
-	try_get_name_item(name, NID_localityName, QCA::Locality, &info);
-	try_get_name_item(name, NID_stateOrProvinceName, QCA::State, &info);
-	try_get_name_item(name, NID_organizationName, QCA::Organization, &info);
-	try_get_name_item(name, NID_organizationalUnitName, QCA::OrganizationalUnit, &info);
+	CertificateInfo info;
+	try_get_name_item(name, NID_commonName, CommonName, &info);
+	try_get_name_item(name, NID_countryName, Country, &info);
+	try_get_name_item(name, NID_localityName, Locality, &info);
+	try_get_name_item(name, NID_stateOrProvinceName, State, &info);
+	try_get_name_item(name, NID_organizationName, Organization, &info);
+	try_get_name_item(name, NID_organizationalUnitName, OrganizationalUnit, &info);
 	return info;
 }
 
@@ -320,12 +322,12 @@ static QByteArray ipaddress_string_to_bytes(const QString &)
 	return QByteArray(4, 0);
 }
 
-static GENERAL_NAME *new_general_name(QCA::CertificateInfoType t, const QString &val)
+static GENERAL_NAME *new_general_name(CertificateInfoType t, const QString &val)
 {
 	GENERAL_NAME *name = 0;
 	switch(t)
 	{
-		case QCA::Email:
+		case Email:
 		{
 			QByteArray buf = val.toLatin1();
 
@@ -337,7 +339,7 @@ static GENERAL_NAME *new_general_name(QCA::CertificateInfoType t, const QString 
 			name->d.rfc822Name = str;
 			break;
 		}
-		case QCA::URI:
+		case URI:
 		{
 			QByteArray buf = val.toLatin1();
 
@@ -349,7 +351,7 @@ static GENERAL_NAME *new_general_name(QCA::CertificateInfoType t, const QString 
 			name->d.uniformResourceIdentifier = str;
 			break;
 		}
-		case QCA::DNS:
+		case DNS:
 		{
 			QByteArray buf = val.toLatin1();
 
@@ -361,7 +363,7 @@ static GENERAL_NAME *new_general_name(QCA::CertificateInfoType t, const QString 
 			name->d.dNSName = str;
 			break;
 		}
-		case QCA::IPAddress:
+		case IPAddress:
 		{
 			QByteArray buf = ipaddress_string_to_bytes(val);
 
@@ -373,7 +375,7 @@ static GENERAL_NAME *new_general_name(QCA::CertificateInfoType t, const QString 
 			name->d.iPAddress = str;
 			break;
 		}
-		case QCA::XMPP:
+		case XMPP:
 		{
 			QByteArray buf = val.toUtf8();
 
@@ -395,18 +397,18 @@ static GENERAL_NAME *new_general_name(QCA::CertificateInfoType t, const QString 
 		}
 
 		// the following are not alt_names
-		case QCA::CommonName:
-		case QCA::Organization:
-		case QCA::OrganizationalUnit:
-		case QCA::Locality:
-		case QCA::State:
-		case QCA::Country:
+		case CommonName:
+		case Organization:
+		case OrganizationalUnit:
+		case Locality:
+		case State:
+		case Country:
 			break;
 	}
 	return name;
 }
 
-static void try_add_general_name(GENERAL_NAMES **gn, QCA::CertificateInfoType t, const QString &val)
+static void try_add_general_name(GENERAL_NAMES **gn, CertificateInfoType t, const QString &val)
 {
 	if(val.isEmpty())
 		return;
@@ -419,14 +421,14 @@ static void try_add_general_name(GENERAL_NAMES **gn, QCA::CertificateInfoType t,
 	}
 }
 
-static X509_EXTENSION *new_cert_subject_alt_name(const QCA::CertificateInfo &info)
+static X509_EXTENSION *new_cert_subject_alt_name(const CertificateInfo &info)
 {
 	GENERAL_NAMES *gn = 0;
-	try_add_general_name(&gn, QCA::Email, info.value(QCA::Email));
-	try_add_general_name(&gn, QCA::URI, info.value(QCA::URI));
-	try_add_general_name(&gn, QCA::DNS, info.value(QCA::DNS));
-	try_add_general_name(&gn, QCA::IPAddress, info.value(QCA::IPAddress));
-	try_add_general_name(&gn, QCA::XMPP, info.value(QCA::XMPP));
+	try_add_general_name(&gn, Email, info.value(Email));
+	try_add_general_name(&gn, URI, info.value(URI));
+	try_add_general_name(&gn, DNS, info.value(DNS));
+	try_add_general_name(&gn, IPAddress, info.value(IPAddress));
+	try_add_general_name(&gn, XMPP, info.value(XMPP));
 	if(!gn)
 		return 0;
 
@@ -450,11 +452,11 @@ static GENERAL_NAME *find_general_name(GENERAL_NAMES *names, int type)
 	return gn;
 }
 
-static void try_get_general_name(GENERAL_NAMES *names, QCA::CertificateInfoType t, QCA::CertificateInfo *info)
+static void try_get_general_name(GENERAL_NAMES *names, CertificateInfoType t, CertificateInfo *info)
 {
 	switch(t)
 	{
-		case QCA::Email:
+		case Email:
 		{
 			GENERAL_NAME *gn = find_general_name(names, GEN_EMAIL);
 			if(!gn)
@@ -463,7 +465,7 @@ static void try_get_general_name(GENERAL_NAMES *names, QCA::CertificateInfoType 
 			info->insert(t, QString::fromLatin1(cs));
 			break;
 		}
-		case QCA::URI:
+		case URI:
 		{
 			GENERAL_NAME *gn = find_general_name(names, GEN_URI);
 			if(!gn)
@@ -472,7 +474,7 @@ static void try_get_general_name(GENERAL_NAMES *names, QCA::CertificateInfoType 
 			info->insert(t, QString::fromLatin1(cs));
 			break;
 		}
-		case QCA::DNS:
+		case DNS:
 		{
 			GENERAL_NAME *gn = find_general_name(names, GEN_DNS);
 			if(!gn)
@@ -481,7 +483,7 @@ static void try_get_general_name(GENERAL_NAMES *names, QCA::CertificateInfoType 
 			info->insert(t, QString::fromLatin1(cs));
 			break;
 		}
-		case QCA::IPAddress:
+		case IPAddress:
 		{
 			GENERAL_NAME *gn = find_general_name(names, GEN_IPADD);
 			if(!gn)
@@ -502,7 +504,7 @@ static void try_get_general_name(GENERAL_NAMES *names, QCA::CertificateInfoType 
 			info->insert(t, out);
 			break;
 		}
-		case QCA::XMPP:
+		case XMPP:
 		{
 			GENERAL_NAME *gn = find_general_name(names, GEN_OTHERNAME);
 			if(!gn)
@@ -528,30 +530,30 @@ static void try_get_general_name(GENERAL_NAMES *names, QCA::CertificateInfoType 
 		}
 
 		// the following are not alt_names
-		case QCA::CommonName:
-		case QCA::Organization:
-		case QCA::OrganizationalUnit:
-		case QCA::Locality:
-		case QCA::State:
-		case QCA::Country:
+		case CommonName:
+		case Organization:
+		case OrganizationalUnit:
+		case Locality:
+		case State:
+		case Country:
 			break;
 	}
 }
 
-static QCA::CertificateInfo get_cert_subject_alt_name(X509_EXTENSION *ex)
+static CertificateInfo get_cert_subject_alt_name(X509_EXTENSION *ex)
 {
-	QCA::CertificateInfo info;
+	CertificateInfo info;
 	GENERAL_NAMES *gn = (GENERAL_NAMES *)X509V3_EXT_d2i(ex);
-	try_get_general_name(gn, QCA::Email, &info);
-	try_get_general_name(gn, QCA::URI, &info);
-	try_get_general_name(gn, QCA::DNS, &info);
-	try_get_general_name(gn, QCA::IPAddress, &info);
-	try_get_general_name(gn, QCA::XMPP, &info);
+	try_get_general_name(gn, Email, &info);
+	try_get_general_name(gn, URI, &info);
+	try_get_general_name(gn, DNS, &info);
+	try_get_general_name(gn, IPAddress, &info);
+	try_get_general_name(gn, XMPP, &info);
 	GENERAL_NAMES_free(gn);
 	return info;
 }
 
-static X509_EXTENSION *new_cert_key_usage(const QCA::Constraints &constraints)
+static X509_EXTENSION *new_cert_key_usage(const Constraints &constraints)
 {
 	ASN1_BIT_STRING *keyusage = 0;
 	for(int n = 0; n < constraints.count(); ++n)
@@ -559,44 +561,44 @@ static X509_EXTENSION *new_cert_key_usage(const QCA::Constraints &constraints)
 		int bit = -1;
 		switch(constraints[n])
 		{
-			case QCA::DigitalSignature:
+			case DigitalSignature:
 				bit = Bit_DigitalSignature;
 				break;
-			case QCA::NonRepudiation:
+			case NonRepudiation:
 				bit = Bit_NonRepudiation;
 				break;
-			case QCA::KeyEncipherment:
+			case KeyEncipherment:
 				bit = Bit_KeyEncipherment;
 				break;
-			case QCA::DataEncipherment:
+			case DataEncipherment:
 				bit = Bit_DataEncipherment;
 				break;
-			case QCA::KeyAgreement:
+			case KeyAgreement:
 				bit = Bit_KeyAgreement;
 				break;
-			case QCA::KeyCertificateSign:
+			case KeyCertificateSign:
 				bit = Bit_KeyCertificateSign;
 				break;
-			case QCA::CRLSign:
+			case CRLSign:
 				bit = Bit_CRLSign;
 				break;
-			case QCA::EncipherOnly:
+			case EncipherOnly:
 				bit = Bit_EncipherOnly;
 				break;
-			case QCA::DecipherOnly:
+			case DecipherOnly:
 				bit = Bit_DecipherOnly;
 				break;
 
 			// the following are not basic key usage
-			case QCA::ServerAuth:
-			case QCA::ClientAuth:
-			case QCA::CodeSigning:
-			case QCA::EmailProtection:
-			case QCA::IPSecEndSystem:
-			case QCA::IPSecTunnel:
-			case QCA::IPSecUser:
-			case QCA::TimeStamping:
-			case QCA::OCSPSigning:
+			case ServerAuth:
+			case ClientAuth:
+			case CodeSigning:
+			case EmailProtection:
+			case IPSecEndSystem:
+			case IPSecTunnel:
+			case IPSecUser:
+			case TimeStamping:
+			case OCSPSigning:
 				break;
 		}
 		if(bit != -1)
@@ -614,33 +616,33 @@ static X509_EXTENSION *new_cert_key_usage(const QCA::Constraints &constraints)
 	return ex;
 }
 
-static QCA::Constraints get_cert_key_usage(X509_EXTENSION *ex)
+static Constraints get_cert_key_usage(X509_EXTENSION *ex)
 {
-	QCA::Constraints constraints;
+	Constraints constraints;
 	int bit_table[9] =
 	{
-		QCA::DigitalSignature,
-		QCA::NonRepudiation,
-		QCA::KeyEncipherment,
-		QCA::DataEncipherment,
-		QCA::KeyAgreement,
-		QCA::KeyCertificateSign,
-		QCA::CRLSign,
-		QCA::EncipherOnly,
-		QCA::DecipherOnly
+		DigitalSignature,
+		NonRepudiation,
+		KeyEncipherment,
+		DataEncipherment,
+		KeyAgreement,
+		KeyCertificateSign,
+		CRLSign,
+		EncipherOnly,
+		DecipherOnly
 	};
 
 	ASN1_BIT_STRING *keyusage = (ASN1_BIT_STRING *)X509V3_EXT_d2i(ex);
 	for(int n = 0; n < 9; ++n)
 	{
 		if(ASN1_BIT_STRING_get_bit(keyusage, n))
-			constraints += (QCA::ConstraintType)bit_table[n];
+			constraints += (ConstraintType)bit_table[n];
 	}
 	ASN1_BIT_STRING_free(keyusage);
 	return constraints;
 };
 
-static X509_EXTENSION *new_cert_ext_key_usage(const QCA::Constraints &constraints)
+static X509_EXTENSION *new_cert_ext_key_usage(const Constraints &constraints)
 {
 	EXTENDED_KEY_USAGE *extkeyusage = 0;
 	for(int n = 0; n < constraints.count(); ++n)
@@ -648,44 +650,44 @@ static X509_EXTENSION *new_cert_ext_key_usage(const QCA::Constraints &constraint
 		int nid = -1;
 		switch(constraints[n])
 		{
-			case QCA::ServerAuth:
+			case ServerAuth:
 				nid = NID_server_auth;
 				break;
-			case QCA::ClientAuth:
+			case ClientAuth:
 				nid = NID_client_auth;
 				break;
-			case QCA::CodeSigning:
+			case CodeSigning:
 				nid = NID_code_sign;
 				break;
-			case QCA::EmailProtection:
+			case EmailProtection:
 				nid = NID_email_protect;
 				break;
-			case QCA::IPSecEndSystem:
+			case IPSecEndSystem:
 				nid = NID_ipsecEndSystem;
 				break;
-			case QCA::IPSecTunnel:
+			case IPSecTunnel:
 				nid = NID_ipsecTunnel;
 				break;
-			case QCA::IPSecUser:
+			case IPSecUser:
 				nid = NID_ipsecUser;
 				break;
-			case QCA::TimeStamping:
+			case TimeStamping:
 				nid = NID_time_stamp;
 				break;
-			case QCA::OCSPSigning:
+			case OCSPSigning:
 				nid = NID_OCSP_sign;
 				break;
 
 			// the following are not extended key usage
-			case QCA::DigitalSignature:
-			case QCA::NonRepudiation:
-			case QCA::KeyEncipherment:
-			case QCA::DataEncipherment:
-			case QCA::KeyAgreement:
-			case QCA::KeyCertificateSign:
-			case QCA::CRLSign:
-			case QCA::EncipherOnly:
-			case QCA::DecipherOnly:
+			case DigitalSignature:
+			case NonRepudiation:
+			case KeyEncipherment:
+			case DataEncipherment:
+			case KeyAgreement:
+			case KeyCertificateSign:
+			case CRLSign:
+			case EncipherOnly:
+			case DecipherOnly:
 				break;
 		}
 		if(nid != -1)
@@ -704,9 +706,9 @@ static X509_EXTENSION *new_cert_ext_key_usage(const QCA::Constraints &constraint
 	return ex;
 }
 
-static QCA::Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
+static Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
 {
-	QCA::Constraints constraints;
+	Constraints constraints;
 
 	EXTENDED_KEY_USAGE *extkeyusage = (EXTENDED_KEY_USAGE *)X509V3_EXT_d2i(ex);
 	for(int n = 0; n < sk_ASN1_OBJECT_num(extkeyusage); ++n)
@@ -720,38 +722,38 @@ static QCA::Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
 		switch(nid)
 		{
 			case NID_server_auth:
-				t = QCA::ServerAuth;
+				t = ServerAuth;
 				break;
 			case NID_client_auth:
-				t = QCA::ClientAuth;
+				t = ClientAuth;
 				break;
 			case NID_code_sign:
-				t = QCA::CodeSigning;
+				t = CodeSigning;
 				break;
 			case NID_email_protect:
-				t = QCA::EmailProtection;
+				t = EmailProtection;
 				break;
 			case NID_ipsecEndSystem:
-				t = QCA::IPSecEndSystem;
+				t = IPSecEndSystem;
 				break;
 			case NID_ipsecTunnel:
-				t = QCA::IPSecTunnel;
+				t = IPSecTunnel;
 				break;
 			case NID_ipsecUser:
-				t = QCA::IPSecUser;
+				t = IPSecUser;
 				break;
 			case NID_time_stamp:
-				t = QCA::TimeStamping;
+				t = TimeStamping;
 				break;
 			case NID_OCSP_sign:
-				t = QCA::OCSPSigning;
+				t = OCSPSigning;
 				break;
 		};
 
 		if(t == -1)
 			continue;
 
-		constraints.append((QCA::ConstraintType)t);
+		constraints.append((ConstraintType)t);
 	}
 	sk_ASN1_OBJECT_pop_free(extkeyusage, ASN1_OBJECT_free);
 	return constraints;
@@ -812,43 +814,43 @@ static QByteArray get_cert_subject_key_id(X509_EXTENSION *ex)
 	return out;
 }*/
 
-static QCA::Validity convert_verify_error(int err)
+static Validity convert_verify_error(int err)
 {
 	// TODO: ErrorExpiredCA
-	QCA::Validity rc;
+	Validity rc;
 	switch(err)
 	{
 		case X509_V_ERR_CERT_REJECTED:
-			rc = QCA::ErrorRejected;
+			rc = ErrorRejected;
 			break;
 		case X509_V_ERR_CERT_UNTRUSTED:
-			rc = QCA::ErrorUntrusted;
+			rc = ErrorUntrusted;
 			break;
 		case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
 		case X509_V_ERR_CERT_SIGNATURE_FAILURE:
 		case X509_V_ERR_CRL_SIGNATURE_FAILURE:
 		case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
 		case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
-			rc = QCA::ErrorSignatureFailed;
+			rc = ErrorSignatureFailed;
 			break;
 		case X509_V_ERR_INVALID_CA:
 		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
 		case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
 		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
-			rc = QCA::ErrorInvalidCA;
+			rc = ErrorInvalidCA;
 			break;
 		case X509_V_ERR_INVALID_PURPOSE:  // note: not used by store verify
-			rc = QCA::ErrorInvalidPurpose;
+			rc = ErrorInvalidPurpose;
 			break;
 		case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
 		case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-			rc = QCA::ErrorSelfSigned;
+			rc = ErrorSelfSigned;
 			break;
 		case X509_V_ERR_CERT_REVOKED:
-			rc = QCA::ErrorRevoked;
+			rc = ErrorRevoked;
 			break;
 		case X509_V_ERR_PATH_LENGTH_EXCEEDED:
-			rc = QCA::ErrorPathLengthExceeded;
+			rc = ErrorPathLengthExceeded;
 			break;
 		case X509_V_ERR_CERT_NOT_YET_VALID:
 		case X509_V_ERR_CERT_HAS_EXPIRED:
@@ -858,14 +860,14 @@ static QCA::Validity convert_verify_error(int err)
 		case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
 		case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
 		case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
-			rc = QCA::ErrorExpired;
+			rc = ErrorExpired;
 			break;
 		case X509_V_ERR_APPLICATION_VERIFICATION:
 		case X509_V_ERR_OUT_OF_MEM:
 		case X509_V_ERR_UNABLE_TO_GET_CRL:
 		case X509_V_ERR_CERT_CHAIN_TOO_LONG:
 		default:
-			rc = QCA::ErrorValidityUnknown;
+			rc = ErrorValidityUnknown;
 			break;
 	}
 	return rc;
@@ -926,10 +928,10 @@ EVP_PKEY *qca_d2i_PKCS8PrivateKey(const QSecureArray &in, EVP_PKEY **x, pem_pass
 	return ret;
 }
 
-class opensslHashContext : public QCA::HashContext
+class opensslHashContext : public HashContext
 {
 public:
-    opensslHashContext(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
+    opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type) : HashContext(p, type)
     {
 	    m_algorithm = algorithm;
 	    clear();
@@ -952,7 +954,7 @@ public:
 	return a;
     }
 
-    Context *clone() const
+    Provider::Context *clone() const
     {
 	return new opensslHashContext(*this);
     }
@@ -963,21 +965,21 @@ protected:
 };	
 
 
-class opensslPbkdf1Context : public QCA::KDFContext
+class opensslPbkdf1Context : public KDFContext
 {
 public:
-    opensslPbkdf1Context(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
+    opensslPbkdf1Context(const EVP_MD *algorithm, Provider *p, const QString &type) : KDFContext(p, type)
     {
 	m_algorithm = algorithm;
 	EVP_DigestInit( &m_context, m_algorithm );
     }
 
-    Context *clone() const
+    Provider::Context *clone() const
     {
 	return new opensslPbkdf1Context( *this );
     }
     
-    QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
+    SymmetricKey makeKey(const QSecureArray &secret, const InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
 	/* from RFC2898:
@@ -988,7 +990,7 @@ public:
 	*/
 	if ( keyLength > (unsigned int)EVP_MD_size( m_algorithm ) ) {
 	    std::cout << "derived key too long" << std::endl;
-	    return QCA::SymmetricKey();
+	    return SymmetricKey();
 	}
 
 	/*
@@ -1029,21 +1031,21 @@ protected:
     EVP_MD_CTX m_context;
 };
 
-class opensslHMACContext : public QCA::MACContext
+class opensslHMACContext : public MACContext
 {
 public:
-  opensslHMACContext(const EVP_MD *algorithm, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+  opensslHMACContext(const EVP_MD *algorithm, Provider *p, const QString &type) : MACContext(p, type)
     {
 	m_algorithm = algorithm;
 	HMAC_CTX_init( &m_context );
     };
 
-    void setup(const QCA::SymmetricKey &key)
+    void setup(const SymmetricKey &key)
     {
 	HMAC_Init_ex( &m_context, key.data(), key.size(), m_algorithm, 0 );
     }
     
-    QCA::KeyLength keyLength() const
+    KeyLength keyLength() const
     {
 	return anyKeyLength();
     }
@@ -1060,7 +1062,7 @@ public:
 	HMAC_CTX_cleanup(&m_context);
     }
 
-    Context *clone() const
+    Provider::Context *clone() const
     {
 	return new opensslHMACContext(*this);
     }
@@ -1254,7 +1256,7 @@ static QByteArray dehex(const QString &hex)
 		if(hex[n] != ' ')
 			str += hex[n];
 	}
-	return QCA::hexToArray(str);
+	return hexToArray(str);
 }
 
 static QBigInteger decode(const QString &prime)
@@ -1302,11 +1304,11 @@ class DLGroupMaker : public QThread
 {
 	Q_OBJECT
 public:
-	QCA::DLGroupSet set;
+	DLGroupSet set;
 	bool ok;
 	DLParams params;
 
-	DLGroupMaker(QCA::DLGroupSet _set)
+	DLGroupMaker(DLGroupSet _set)
 	{
 		set = _set;
 	}
@@ -1318,24 +1320,24 @@ public:
 
 	virtual void run()
 	{
-		if(set == QCA::DSA_512)
+		if(set == DSA_512)
 			ok = make_dlgroup(decode_seed(JCE_512_SEED), 512, JCE_512_COUNTER, &params);
-		else if(set == QCA::DSA_768)
+		else if(set == DSA_768)
 			ok = make_dlgroup(decode_seed(JCE_768_SEED), 768, JCE_768_COUNTER, &params);
-		else if(set == QCA::DSA_1024)
+		else if(set == DSA_1024)
 			ok = make_dlgroup(decode_seed(JCE_1024_SEED), 1024, JCE_1024_COUNTER, &params);
-		else if(set == QCA::IETF_1024)
+		else if(set == IETF_1024)
 			ok = get_dlgroup(decode(IETF_1024_PRIME), 2, &params);
-		else if(set == QCA::IETF_2048)
+		else if(set == IETF_2048)
 			ok = get_dlgroup(decode(IETF_2048_PRIME), 2, &params);
-		else if(set == QCA::IETF_4096)
+		else if(set == IETF_4096)
 			ok = get_dlgroup(decode(IETF_4096_PRIME), 2, &params);
 		else
 			ok = false;
 	}
 };
 
-class MyDLGroup : public QCA::DLGroupContext
+class MyDLGroup : public DLGroupContext
 {
 	Q_OBJECT
 public:
@@ -1344,13 +1346,13 @@ public:
 	DLParams params;
 	bool empty;
 
-	MyDLGroup(QCA::Provider *p) : QCA::DLGroupContext(p)
+	MyDLGroup(Provider *p) : DLGroupContext(p)
 	{
 		gm = 0;
 		empty = true;
 	}
 
-	MyDLGroup(const MyDLGroup &from) : QCA::DLGroupContext(from.provider())
+	MyDLGroup(const MyDLGroup &from) : DLGroupContext(from.provider())
 	{
 		gm = 0;
 		empty = true;
@@ -1361,20 +1363,20 @@ public:
 		delete gm;
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new MyDLGroup(*this);
 	}
 
-	virtual QList<QCA::DLGroupSet> supportedGroupSets() const
+	virtual QList<DLGroupSet> supportedGroupSets() const
 	{
-		QList<QCA::DLGroupSet> list;
-		list += QCA::DSA_512;
-		list += QCA::DSA_768;
-		list += QCA::DSA_1024;
-		list += QCA::IETF_1024;
-		list += QCA::IETF_2048;
-		list += QCA::IETF_4096;
+		QList<DLGroupSet> list;
+		list += DSA_512;
+		list += DSA_768;
+		list += DSA_1024;
+		list += IETF_1024;
+		list += IETF_2048;
+		list += IETF_4096;
 		return list;
 	}
 
@@ -1383,7 +1385,7 @@ public:
 		return empty;
 	}
 
-	virtual void fetchGroup(QCA::DLGroupSet set, bool block)
+	virtual void fetchGroup(DLGroupSet set, bool block)
 	{
 		params = DLParams();
 		empty = true;
@@ -1467,7 +1469,7 @@ public:
 	}
 };
 
-class RSAKey : public QCA::RSAContext
+class RSAKey : public RSAContext
 {
 	Q_OBJECT
 public:
@@ -1476,13 +1478,13 @@ public:
 	bool wasBlocking;
 	bool sec;
 
-	RSAKey(QCA::Provider *p) : QCA::RSAContext(p)
+	RSAKey(Provider *p) : RSAContext(p)
 	{
 		keymaker = 0;
 		sec = false;
 	}
 
-	RSAKey(const RSAKey &from) : QCA::RSAContext(from.provider()), evp(from.evp)
+	RSAKey(const RSAKey &from) : RSAContext(from.provider()), evp(from.evp)
 	{
 		keymaker = 0;
 		sec = from.sec;
@@ -1493,7 +1495,7 @@ public:
 		delete keymaker;
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new RSAKey(*this);
 	}
@@ -1503,9 +1505,9 @@ public:
 		return (evp.pkey ? false: true);
 	}
 
-	virtual QCA::PKey::Type type() const
+	virtual PKey::Type type() const
 	{
-		return QCA::PKey::RSA;
+		return PKey::RSA;
 	}
 
 	virtual bool isPrivate() const
@@ -1548,16 +1550,16 @@ public:
 		return 8*RSA_size(evp.pkey->pkey.rsa);
 	}
 
-	virtual int maximumEncryptSize(QCA::EncryptionAlgorithm alg) const
+	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
-		if(alg == QCA::EME_PKCS1v15)
+		if(alg == EME_PKCS1v15)
 			return RSA_size(rsa) - 11 - 1;
 		else // oaep
 			return RSA_size(rsa) - 41 - 1;
 	}
 
-	virtual QSecureArray encrypt(const QSecureArray &in, QCA::EncryptionAlgorithm alg) const
+	virtual QSecureArray encrypt(const QSecureArray &in, EncryptionAlgorithm alg) const
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
 
@@ -1568,7 +1570,7 @@ public:
 		QSecureArray result(RSA_size(rsa));
 
 		int pad;
-		if(alg == QCA::EME_PKCS1v15)
+		if(alg == EME_PKCS1v15)
 			pad = RSA_PKCS1_PADDING;
 		else // oaep
 			pad = RSA_PKCS1_OAEP_PADDING;
@@ -1581,14 +1583,14 @@ public:
 		return result;
 	}
 
-	virtual bool decrypt(const QSecureArray &in, QSecureArray *out, QCA::EncryptionAlgorithm alg) const
+	virtual bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
 
 		QSecureArray result(RSA_size(rsa));
 
 		int pad;
-		if(alg == QCA::EME_PKCS1v15)
+		if(alg == EME_PKCS1v15)
 			pad = RSA_PKCS1_PADDING;
 		else // oaep
 			pad = RSA_PKCS1_OAEP_PADDING;
@@ -1602,30 +1604,30 @@ public:
 		return true;
 	}
 
-	virtual void startSign(QCA::SignatureAlgorithm alg, QCA::SignatureFormat)
+	virtual void startSign(SignatureAlgorithm alg, SignatureFormat)
 	{
 		const EVP_MD *md = 0;
-		if(alg == QCA::EMSA3_SHA1)
+		if(alg == EMSA3_SHA1)
 			md = EVP_sha1();
-		else if(alg == QCA::EMSA3_MD5)
+		else if(alg == EMSA3_MD5)
 			md = EVP_md5();
-		else if(alg == QCA::EMSA3_MD2)
+		else if(alg == EMSA3_MD2)
 			md = EVP_md2();
-		else if(alg == QCA::EMSA3_RIPEMD160)
+		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
 		evp.startSign(md);
 	}
 
-	virtual void startVerify(QCA::SignatureAlgorithm alg, QCA::SignatureFormat)
+	virtual void startVerify(SignatureAlgorithm alg, SignatureFormat)
 	{
 		const EVP_MD *md = 0;
-		if(alg == QCA::EMSA3_SHA1)
+		if(alg == EMSA3_SHA1)
 			md = EVP_sha1();
-		else if(alg == QCA::EMSA3_MD5)
+		else if(alg == EMSA3_MD5)
 			md = EVP_md5();
-		else if(alg == QCA::EMSA3_MD2)
+		else if(alg == EMSA3_MD2)
 			md = EVP_md2();
-		else if(alg == QCA::EMSA3_RIPEMD160)
+		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
 		evp.startVerify(md);
 	}
@@ -1758,10 +1760,10 @@ class DSAKeyMaker : public QThread
 {
 	Q_OBJECT
 public:
-	QCA::DLGroup domain;
+	DLGroup domain;
 	DSA *result;
 
-	DSAKeyMaker(const QCA::DLGroup &_domain) : domain(_domain), result(0)
+	DSAKeyMaker(const DLGroup &_domain) : domain(_domain), result(0)
 	{
 	}
 
@@ -1795,7 +1797,7 @@ public:
 };
 
 // note: DSA doesn't use SignatureAlgorithm, since EMSA1 is always assumed
-class DSAKey : public QCA::DSAContext
+class DSAKey : public DSAContext
 {
 	Q_OBJECT
 public:
@@ -1805,13 +1807,13 @@ public:
 	bool transformsig;
 	bool sec;
 
-	DSAKey(QCA::Provider *p) : QCA::DSAContext(p)
+	DSAKey(Provider *p) : DSAContext(p)
 	{
 		keymaker = 0;
 		sec = false;
 	}
 
-	DSAKey(const DSAKey &from) : QCA::DSAContext(from.provider()), evp(from.evp)
+	DSAKey(const DSAKey &from) : DSAContext(from.provider()), evp(from.evp)
 	{
 		keymaker = 0;
 		sec = from.sec;
@@ -1822,7 +1824,7 @@ public:
 		delete keymaker;
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new DSAKey(*this);
 	}
@@ -1832,9 +1834,9 @@ public:
 		return (evp.pkey ? false: true);
 	}
 
-	virtual QCA::PKey::Type type() const
+	virtual PKey::Type type() const
 	{
-		return QCA::PKey::DSA;
+		return PKey::DSA;
 	}
 
 	virtual bool isPrivate() const
@@ -1877,10 +1879,10 @@ public:
 		return 0; // FIXME
 	}
 
-	virtual void startSign(QCA::SignatureAlgorithm, QCA::SignatureFormat format)
+	virtual void startSign(SignatureAlgorithm, SignatureFormat format)
 	{
 		// openssl native format is DER, so transform otherwise
-		if(format != QCA::DERSequence)
+		if(format != DERSequence)
 			transformsig = true;
 		else
 			transformsig = false;
@@ -1888,10 +1890,10 @@ public:
 		evp.startSign(EVP_dss1());
 	}
 
-	virtual void startVerify(QCA::SignatureAlgorithm, QCA::SignatureFormat format)
+	virtual void startVerify(SignatureAlgorithm, SignatureFormat format)
 	{
 		// openssl native format is DER, so transform otherwise
-		if(format != QCA::DERSequence)
+		if(format != DERSequence)
 			transformsig = true;
 		else
 			transformsig = false;
@@ -1923,7 +1925,7 @@ public:
 		return evp.endVerify(in);
 	}
 
-	virtual void createPrivate(const QCA::DLGroup &domain, bool block)
+	virtual void createPrivate(const DLGroup &domain, bool block)
 	{
 		evp.reset();
 
@@ -1941,7 +1943,7 @@ public:
 		}
 	}
 
-	virtual void createPrivate(const QCA::DLGroup &domain, const QBigInteger &y, const QBigInteger &x)
+	virtual void createPrivate(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x)
 	{
 		evp.reset();
 
@@ -1963,7 +1965,7 @@ public:
 		sec = true;
 	}
 
-	virtual void createPublic(const QCA::DLGroup &domain, const QBigInteger &y)
+	virtual void createPublic(const DLGroup &domain, const QBigInteger &y)
 	{
 		evp.reset();
 
@@ -1984,9 +1986,9 @@ public:
 		sec = false;
 	}
 
-	virtual QCA::DLGroup domain() const
+	virtual DLGroup domain() const
 	{
-		return QCA::DLGroup(bn2bi(evp.pkey->pkey.dsa->p), bn2bi(evp.pkey->pkey.dsa->q), bn2bi(evp.pkey->pkey.dsa->g));
+		return DLGroup(bn2bi(evp.pkey->pkey.dsa->p), bn2bi(evp.pkey->pkey.dsa->q), bn2bi(evp.pkey->pkey.dsa->g));
 	}
 
 	virtual QBigInteger y() const
@@ -2028,10 +2030,10 @@ class DHKeyMaker : public QThread
 {
 	Q_OBJECT
 public:
-	QCA::DLGroup domain;
+	DLGroup domain;
 	DH *result;
 
-	DHKeyMaker(const QCA::DLGroup &_domain) : domain(_domain), result(0)
+	DHKeyMaker(const DLGroup &_domain) : domain(_domain), result(0)
 	{
 	}
 
@@ -2063,7 +2065,7 @@ public:
 	}
 };
 
-class DHKey : public QCA::DHContext
+class DHKey : public DHContext
 {
 	Q_OBJECT
 public:
@@ -2072,13 +2074,13 @@ public:
 	bool wasBlocking;
 	bool sec;
 
-	DHKey(QCA::Provider *p) : QCA::DHContext(p)
+	DHKey(Provider *p) : DHContext(p)
 	{
 		keymaker = 0;
 		sec = false;
 	}
 
-	DHKey(const DHKey &from) : QCA::DHContext(from.provider()), evp(from.evp)
+	DHKey(const DHKey &from) : DHContext(from.provider()), evp(from.evp)
 	{
 		keymaker = 0;
 		sec = from.sec;
@@ -2089,7 +2091,7 @@ public:
 		delete keymaker;
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new DHKey(*this);
 	}
@@ -2099,9 +2101,9 @@ public:
 		return (evp.pkey ? false: true);
 	}
 
-	virtual QCA::PKey::Type type() const
+	virtual PKey::Type type() const
 	{
-		return QCA::PKey::DH;
+		return PKey::DH;
 	}
 
 	virtual bool isPrivate() const
@@ -2137,19 +2139,19 @@ public:
 		return 0; // FIXME
 	}
 
-	virtual QCA::SymmetricKey deriveKey(const PKeyBase &theirs) const
+	virtual SymmetricKey deriveKey(const PKeyBase &theirs) const
 	{
 		DH *dh = evp.pkey->pkey.dh;
 		DH *them = static_cast<const DHKey *>(&theirs)->evp.pkey->pkey.dh;
 		QSecureArray result(DH_size(dh));
 		int ret = DH_compute_key((unsigned char *)result.data(), them->pub_key, dh);
 		if(ret <= 0)
-			return QCA::SymmetricKey();
+			return SymmetricKey();
 		result.resize(ret);
-		return QCA::SymmetricKey(result);
+		return SymmetricKey(result);
 	}
 
-	virtual void createPrivate(const QCA::DLGroup &domain, bool block)
+	virtual void createPrivate(const DLGroup &domain, bool block)
 	{
 		evp.reset();
 
@@ -2167,7 +2169,7 @@ public:
 		}
 	}
 
-	virtual void createPrivate(const QCA::DLGroup &domain, const QBigInteger &y, const QBigInteger &x)
+	virtual void createPrivate(const DLGroup &domain, const QBigInteger &y, const QBigInteger &x)
 	{
 		evp.reset();
 
@@ -2188,7 +2190,7 @@ public:
 		sec = true;
 	}
 
-	virtual void createPublic(const QCA::DLGroup &domain, const QBigInteger &y)
+	virtual void createPublic(const DLGroup &domain, const QBigInteger &y)
 	{
 		evp.reset();
 
@@ -2208,9 +2210,9 @@ public:
 		sec = false;
 	}
 
-	virtual QCA::DLGroup domain() const
+	virtual DLGroup domain() const
 	{
-		return QCA::DLGroup(bn2bi(evp.pkey->pkey.dh->p), bn2bi(evp.pkey->pkey.dh->g));
+		return DLGroup(bn2bi(evp.pkey->pkey.dh->p), bn2bi(evp.pkey->pkey.dh->g));
 	}
 
 	virtual QBigInteger y() const
@@ -2248,12 +2250,12 @@ private slots:
 //----------------------------------------------------------------------------
 // MyPKeyContext
 //----------------------------------------------------------------------------
-class MyPKeyContext : public QCA::PKeyContext
+class MyPKeyContext : public PKeyContext
 {
 public:
-	QCA::PKeyBase *k;
+	PKeyBase *k;
 
-	MyPKeyContext(QCA::Provider *p) : QCA::PKeyContext(p)
+	MyPKeyContext(Provider *p) : PKeyContext(p)
 	{
 		k = 0;
 	}
@@ -2263,54 +2265,54 @@ public:
 		delete k;
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		MyPKeyContext *c = new MyPKeyContext(*this);
-		c->k = (QCA::PKeyBase *)k->clone();
+		c->k = (PKeyBase *)k->clone();
 		return c;
 	}
 
-	virtual QList<QCA::PKey::Type> supportedTypes() const
+	virtual QList<PKey::Type> supportedTypes() const
 	{
-		QList<QCA::PKey::Type> list;
-		list += QCA::PKey::RSA;
-		list += QCA::PKey::DSA;
-		list += QCA::PKey::DH;
+		QList<PKey::Type> list;
+		list += PKey::RSA;
+		list += PKey::DSA;
+		list += PKey::DH;
 		return list;
 	}
 
-	virtual QList<QCA::PKey::Type> supportedIOTypes() const
+	virtual QList<PKey::Type> supportedIOTypes() const
 	{
-		QList<QCA::PKey::Type> list;
-		list += QCA::PKey::RSA;
-		list += QCA::PKey::DSA;
+		QList<PKey::Type> list;
+		list += PKey::RSA;
+		list += PKey::DSA;
 		return list;
 	}
 
-	virtual QList<QCA::PBEAlgorithm> supportedPBEAlgorithms() const
+	virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const
 	{
-		QList<QCA::PBEAlgorithm> list;
-		list += QCA::PBES2_DES_SHA1;
-		list += QCA::PBES2_TripleDES_SHA1;
+		QList<PBEAlgorithm> list;
+		list += PBES2_DES_SHA1;
+		list += PBES2_TripleDES_SHA1;
 		return list;
 	}
 
-	virtual QCA::PKeyBase *key()
+	virtual PKeyBase *key()
 	{
 		return k;
 	}
 
-	virtual const QCA::PKeyBase *key() const
+	virtual const PKeyBase *key() const
 	{
 		return k;
 	}
 
-	virtual void setKey(QCA::PKeyBase *key)
+	virtual void setKey(PKeyBase *key)
 	{
 		k = key;
 	}
 
-	virtual bool importKey(const QCA::PKeyBase *key)
+	virtual bool importKey(const PKeyBase *key)
 	{
 		Q_UNUSED(key);
 		return false;
@@ -2318,18 +2320,18 @@ public:
 
 	EVP_PKEY *get_pkey() const
 	{
-		QCA::PKey::Type t = k->type();
-		if(t == QCA::PKey::RSA)
+		PKey::Type t = k->type();
+		if(t == PKey::RSA)
 			return static_cast<RSAKey *>(k)->evp.pkey;
-		else if(t == QCA::PKey::DSA)
+		else if(t == PKey::DSA)
 			return static_cast<DSAKey *>(k)->evp.pkey;
 		else
 			return static_cast<DHKey *>(k)->evp.pkey;
 	}
 
-	QCA::PKeyBase *pkeyToBase(EVP_PKEY *pkey, bool sec) const
+	PKeyBase *pkeyToBase(EVP_PKEY *pkey, bool sec) const
 	{
-		QCA::PKeyBase *nk = 0;
+		PKeyBase *nk = 0;
 		if(pkey->type == EVP_PKEY_RSA)
 		{
 			RSAKey *c = new RSAKey(provider());
@@ -2395,7 +2397,7 @@ public:
 		return QString::fromLatin1(buf.toByteArray());
 	}
 
-	virtual QCA::ConvertResult publicFromDER(const QSecureArray &in)
+	virtual ConvertResult publicFromDER(const QSecureArray &in)
 	{
 		delete k;
 		k = 0;
@@ -2406,16 +2408,16 @@ public:
 		BIO_free(bi);
 
 		if(!pkey)
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 
 		k = pkeyToBase(pkey, false);
 		if(k)
-			return QCA::ConvertGood;
+			return ConvertGood;
 		else
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 	}
 
-	virtual QCA::ConvertResult publicFromPEM(const QString &s)
+	virtual ConvertResult publicFromPEM(const QString &s)
 	{
 		delete k;
 		k = 0;
@@ -2427,24 +2429,24 @@ public:
 		BIO_free(bi);
 
 		if(!pkey)
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 
 		k = pkeyToBase(pkey, false);
 		if(k)
-			return QCA::ConvertGood;
+			return ConvertGood;
 		else
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 	}
 
-	virtual QSecureArray privateToDER(const QSecureArray &passphrase, QCA::PBEAlgorithm pbe) const
+	virtual QSecureArray privateToDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const
 	{
-		//if(pbe == QCA::PBEDefault)
-		//	pbe = QCA::PBES2_TripleDES_SHA1;
+		//if(pbe == PBEDefault)
+		//	pbe = PBES2_TripleDES_SHA1;
 
 		const EVP_CIPHER *cipher = 0;
-		if(pbe == QCA::PBES2_TripleDES_SHA1)
+		if(pbe == PBES2_TripleDES_SHA1)
 			cipher = EVP_des_ede3_cbc();
-		else if(pbe == QCA::PBES2_DES_SHA1)
+		else if(pbe == PBES2_DES_SHA1)
 			cipher = EVP_des_cbc();
 
 		if(!cipher)
@@ -2465,15 +2467,15 @@ public:
 		return buf;
 	}
 
-	virtual QString privateToPEM(const QSecureArray &passphrase, QCA::PBEAlgorithm pbe) const
+	virtual QString privateToPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const
 	{
-		//if(pbe == QCA::PBEDefault)
-		//	pbe = QCA::PBES2_TripleDES_SHA1;
+		//if(pbe == PBEDefault)
+		//	pbe = PBES2_TripleDES_SHA1;
 
 		const EVP_CIPHER *cipher = 0;
-		if(pbe == QCA::PBES2_TripleDES_SHA1)
+		if(pbe == PBES2_TripleDES_SHA1)
 			cipher = EVP_des_ede3_cbc();
-		else if(pbe == QCA::PBES2_DES_SHA1)
+		else if(pbe == PBES2_DES_SHA1)
 			cipher = EVP_des_cbc();
 
 		if(!cipher)
@@ -2494,7 +2496,7 @@ public:
 		return QString::fromLatin1(buf.toByteArray());
 	}
 
-	virtual QCA::ConvertResult privateFromDER(const QSecureArray &in, const QSecureArray &passphrase)
+	virtual ConvertResult privateFromDER(const QSecureArray &in, const QSecureArray &passphrase)
 	{
 		delete k;
 		k = 0;
@@ -2506,16 +2508,16 @@ public:
 			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, &passphrase_cb, NULL);
 
 		if(!pkey)
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 
 		k = pkeyToBase(pkey, true);
 		if(k)
-			return QCA::ConvertGood;
+			return ConvertGood;
 		else
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 	}
 
-	virtual QCA::ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase)
+	virtual ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase)
 	{
 		delete k;
 		k = 0;
@@ -2531,13 +2533,13 @@ public:
 		BIO_free(bi);
 
 		if(!pkey)
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 
 		k = pkeyToBase(pkey, true);
 		if(k)
-			return QCA::ConvertGood;
+			return ConvertGood;
 		else
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 	}
 };
 
@@ -2629,7 +2631,7 @@ public:
 		return QString::fromLatin1(buf.toByteArray());
 	}
 
-	QCA::ConvertResult fromDER(const QSecureArray &in, Type t)
+	ConvertResult fromDER(const QSecureArray &in, Type t)
 	{
 		reset();
 
@@ -2646,12 +2648,12 @@ public:
 		BIO_free(bi);
 
 		if(isNull())
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 
-		return QCA::ConvertGood;
+		return ConvertGood;
 	}
 
-	QCA::ConvertResult fromPEM(const QString &s, Type t)
+	ConvertResult fromPEM(const QString &s, Type t)
 	{
 		reset();
 
@@ -2669,9 +2671,9 @@ public:
 		BIO_free(bi);
 
 		if(isNull())
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 
-		return QCA::ConvertGood;
+		return ConvertGood;
 	}
 };
 
@@ -2717,18 +2719,18 @@ auq_err:
 }
 
 // TODO: support read/write of multiple info values with the same name
-class MyCertContext : public QCA::CertContext
+class MyCertContext : public CertContext
 {
 public:
 	X509Item item;
-	QCA::CertContextProps _props;
+	CertContextProps _props;
 
-	MyCertContext(QCA::Provider *p) : QCA::CertContext(p)
+	MyCertContext(Provider *p) : CertContext(p)
 	{
 		//printf("[%p] ** created\n", this);
 	}
 
-	MyCertContext(const MyCertContext &from) : QCA::CertContext(from), item(from.item), _props(from._props)
+	MyCertContext(const MyCertContext &from) : CertContext(from), item(from.item), _props(from._props)
 	{
 		//printf("[%p] ** created as copy (from [%p])\n", this, &from);
 	}
@@ -2738,7 +2740,7 @@ public:
 		//printf("[%p] ** deleted\n", this);
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new MyCertContext(*this);
 	}
@@ -2753,20 +2755,20 @@ public:
 		return item.toPEM();
 	}
 
-	virtual QCA::ConvertResult fromDER(const QSecureArray &a)
+	virtual ConvertResult fromDER(const QSecureArray &a)
 	{
-		_props = QCA::CertContextProps();
-		QCA::ConvertResult r = item.fromDER(a, X509Item::TypeCert);
-		if(r == QCA::ConvertGood)
+		_props = CertContextProps();
+		ConvertResult r = item.fromDER(a, X509Item::TypeCert);
+		if(r == ConvertGood)
 			make_props();
 		return r;
 	}
 
-	virtual QCA::ConvertResult fromPEM(const QString &s)
+	virtual ConvertResult fromPEM(const QString &s)
 	{
-		_props = QCA::CertContextProps();
-		QCA::ConvertResult r = item.fromPEM(s, X509Item::TypeCert);
-		if(r == QCA::ConvertGood)
+		_props = CertContextProps();
+		ConvertResult r = item.fromPEM(s, X509Item::TypeCert);
+		if(r == ConvertGood)
 			make_props();
 		return r;
 	}
@@ -2778,19 +2780,19 @@ public:
 		make_props();
 	}
 
-	virtual bool createSelfSigned(const QCA::CertificateOptions &opts, const QCA::PKeyContext &priv)
+	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv)
 	{
-		_props = QCA::CertContextProps();
+		_props = CertContextProps();
 		item.reset();
 
-		QCA::CertificateInfo info = opts.info();
+		CertificateInfo info = opts.info();
 
 		// constraints - logic from Botan
-		QCA::Constraints constraints;
+		Constraints constraints;
 		if(opts.isCA())
 		{
-			constraints += QCA::KeyCertificateSign;
-			constraints += QCA::CRLSign;
+			constraints += KeyCertificateSign;
+			constraints += CRLSign;
 		}
 		else
 			constraints = find_constraints(priv, opts.constraints());
@@ -2799,9 +2801,9 @@ public:
 		X509_EXTENSION *ex;
 
 		const EVP_MD *md;
-		if(priv.type() == QCA::PKey::RSA)
+		if(priv.type() == PKey::RSA)
 			md = EVP_sha1();
-		else if(priv.type() == QCA::PKey::DSA)
+		else if(priv.type() == PKey::DSA)
 			md = EVP_dss1();
 		else
 			return false;
@@ -2884,29 +2886,29 @@ public:
 		return true;
 	}
 
-	virtual const QCA::CertContextProps *props() const
+	virtual const CertContextProps *props() const
 	{
 		//printf("[%p] grabbing props\n", this);
 		return &_props;
 	}
 
 	// does a new
-	virtual QCA::PKeyContext *subjectPublicKey() const
+	virtual PKeyContext *subjectPublicKey() const
 	{
 		MyPKeyContext *kc = new MyPKeyContext(provider());
 		EVP_PKEY *pkey = X509_get_pubkey(item.cert);
-		QCA::PKeyBase *kb = kc->pkeyToBase(pkey, false);
+		PKeyBase *kb = kc->pkeyToBase(pkey, false);
 		kc->setKey(kb);
 		return kc;
 	}
 
 	// implemented later because it depends on MyCRLContext
-	virtual QCA::Validity validate(const QList<QCA::CertContext*> &trusted, const QList<QCA::CertContext*> &untrusted, const QList<QCA::CRLContext *> &crls, QCA::UsageMode u) const;
+	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u) const;
 
 	void make_props()
 	{
 		X509 *x = item.cert;
-		QCA::CertContextProps p;
+		CertContextProps p;
 
 		p.version = X509_get_version(x);
 
@@ -2991,28 +2993,28 @@ public:
 		}*/
 
 		_props = p;
-		//printf("[%p] made props: [%s]\n", this, _props.subject[QCA::CommonName].toLatin1().data());
+		//printf("[%p] made props: [%s]\n", this, _props.subject[CommonName].toLatin1().data());
 	}
 };
 
 //----------------------------------------------------------------------------
 // MyCSRContext
 //----------------------------------------------------------------------------
-class MyCSRContext : public QCA::CSRContext
+class MyCSRContext : public CSRContext
 {
 public:
 	X509Item item;
-	QCA::CertContextProps _props;
+	CertContextProps _props;
 
-	MyCSRContext(QCA::Provider *p) : QCA::CSRContext(p)
+	MyCSRContext(Provider *p) : CSRContext(p)
 	{
 	}
 
-	MyCSRContext(const MyCSRContext &from) : QCA::CSRContext(from), item(from.item), _props(from._props)
+	MyCSRContext(const MyCSRContext &from) : CSRContext(from), item(from.item), _props(from._props)
 	{
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new MyCSRContext(*this);
 	}
@@ -3027,44 +3029,44 @@ public:
 		return item.toPEM();
 	}
 
-	virtual QCA::ConvertResult fromDER(const QSecureArray &a)
+	virtual ConvertResult fromDER(const QSecureArray &a)
 	{
-		_props = QCA::CertContextProps();
-		QCA::ConvertResult r = item.fromDER(a, X509Item::TypeReq);
-		if(r == QCA::ConvertGood)
+		_props = CertContextProps();
+		ConvertResult r = item.fromDER(a, X509Item::TypeReq);
+		if(r == ConvertGood)
 			make_props();
 		return r;
 	}
 
-	virtual QCA::ConvertResult fromPEM(const QString &s)
+	virtual ConvertResult fromPEM(const QString &s)
 	{
-		_props = QCA::CertContextProps();
-		QCA::ConvertResult r = item.fromPEM(s, X509Item::TypeReq);
-		if(r == QCA::ConvertGood)
+		_props = CertContextProps();
+		ConvertResult r = item.fromPEM(s, X509Item::TypeReq);
+		if(r == ConvertGood)
 			make_props();
 		return r;
 	}
 
-	virtual bool canUseFormat(QCA::CertificateRequestFormat f) const
+	virtual bool canUseFormat(CertificateRequestFormat f) const
 	{
-		if(f == QCA::PKCS10)
+		if(f == PKCS10)
 			return true;
 		return false;
 	}
 
-	virtual bool createRequest(const QCA::CertificateOptions &opts, const QCA::PKeyContext &priv)
+	virtual bool createRequest(const CertificateOptions &opts, const PKeyContext &priv)
 	{
-		_props = QCA::CertContextProps();
+		_props = CertContextProps();
 		item.reset();
 
-		QCA::CertificateInfo info = opts.info();
+		CertificateInfo info = opts.info();
 
 		// constraints - logic from Botan
-		QCA::Constraints constraints;
+		Constraints constraints;
 		if(opts.isCA())
 		{
-			constraints += QCA::KeyCertificateSign;
-			constraints += QCA::CRLSign;
+			constraints += KeyCertificateSign;
+			constraints += CRLSign;
 		}
 		else
 			constraints = find_constraints(priv, opts.constraints());
@@ -3073,9 +3075,9 @@ public:
 		X509_EXTENSION *ex;
 
 		const EVP_MD *md;
-		if(priv.type() == QCA::PKey::RSA)
+		if(priv.type() == PKey::RSA)
 			md = EVP_sha1();
-		else if(priv.type() == QCA::PKey::DSA)
+		else if(priv.type() == PKey::DSA)
 			md = EVP_dss1();
 		else
 			return false;
@@ -3134,16 +3136,16 @@ public:
 		return true;
 	}
 
-	virtual const QCA::CertContextProps *props() const
+	virtual const CertContextProps *props() const
 	{
 		return &_props;
 	}
 
-	virtual QCA::PKeyContext *subjectPublicKey() const // does a new
+	virtual PKeyContext *subjectPublicKey() const // does a new
 	{
 		MyPKeyContext *kc = new MyPKeyContext(provider());
 		EVP_PKEY *pkey = X509_REQ_get_pubkey(item.req);
-		QCA::PKeyBase *kb = kc->pkeyToBase(pkey, false);
+		PKeyBase *kb = kc->pkeyToBase(pkey, false);
 		kc->setKey(kb);
 		return kc;
 	}
@@ -3153,20 +3155,20 @@ public:
 		return QString();
 	}
 
-	virtual QCA::ConvertResult fromSPKAC(const QString &s)
+	virtual ConvertResult fromSPKAC(const QString &s)
 	{
 		Q_UNUSED(s);
-		return QCA::ErrorDecode;
+		return ErrorDecode;
 	}
 
 	void make_props()
 	{
 		X509_REQ *x = item.req;
-		QCA::CertContextProps p;
+		CertContextProps p;
 
 		// TODO: QString challenge;
 
-		p.format = QCA::PKCS10;
+		p.format = PKCS10;
 
 		p.subject = get_cert_name(X509_REQ_get_subject_name(x));
 
@@ -3227,20 +3229,20 @@ public:
 //----------------------------------------------------------------------------
 // MyCRLContext
 //----------------------------------------------------------------------------
-class MyCRLContext : public QCA::CRLContext
+class MyCRLContext : public CRLContext
 {
 public:
 	X509Item item;
 
-	MyCRLContext(QCA::Provider *p) : QCA::CRLContext(p)
+	MyCRLContext(Provider *p) : CRLContext(p)
 	{
 	}
 
-	MyCRLContext(const MyCRLContext &from) : QCA::CRLContext(from), item(from.item)
+	MyCRLContext(const MyCRLContext &from) : CRLContext(from), item(from.item)
 	{
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return new MyCRLContext(*this);
 	}
@@ -3255,23 +3257,23 @@ public:
 		return item.toPEM();
 	}
 
-	virtual QCA::ConvertResult fromDER(const QSecureArray &a)
+	virtual ConvertResult fromDER(const QSecureArray &a)
 	{
 		return item.fromDER(a, X509Item::TypeCRL);
 	}
 
-	virtual QCA::ConvertResult fromPEM(const QString &s)
+	virtual ConvertResult fromPEM(const QString &s)
 	{
 		return item.fromPEM(s, X509Item::TypeCRL);
 	}
 
-	virtual const QCA::CRLContextProps *props() const
+	virtual const CRLContextProps *props() const
 	{
 		return 0;
 	}
 };
 
-static bool usage_check(const MyCertContext &cc, QCA::UsageMode u)
+static bool usage_check(const MyCertContext &cc, UsageMode u)
 {
 	if (cc._props.constraints.isEmpty() ) {
 		// then any usage is OK
@@ -3280,33 +3282,33 @@ static bool usage_check(const MyCertContext &cc, QCA::UsageMode u)
 
 	switch (u)
 	{
-	case QCA::UsageAny :
+	case UsageAny :
 		return true;
 		break;
-	case QCA::UsageTLSServer :
-		return cc._props.constraints.contains(QCA::ServerAuth);
+	case UsageTLSServer :
+		return cc._props.constraints.contains(ServerAuth);
 		break;
-	case QCA::UsageTLSClient :
-		return cc._props.constraints.contains(QCA::ClientAuth);
+	case UsageTLSClient :
+		return cc._props.constraints.contains(ClientAuth);
 		break;
-	case QCA::UsageCodeSigning :
-		return cc._props.constraints.contains(QCA::CodeSigning);
+	case UsageCodeSigning :
+		return cc._props.constraints.contains(CodeSigning);
 		break;
-	case QCA::UsageEmailProtection :
-		return cc._props.constraints.contains(QCA::EmailProtection);
+	case UsageEmailProtection :
+		return cc._props.constraints.contains(EmailProtection);
 		break;
-	case QCA::UsageTimeStamping :
-		return cc._props.constraints.contains(QCA::TimeStamping);
+	case UsageTimeStamping :
+		return cc._props.constraints.contains(TimeStamping);
 		break;
-	case QCA::UsageCRLSigning :
-		return cc._props.constraints.contains(QCA::CRLSign);
+	case UsageCRLSigning :
+		return cc._props.constraints.contains(CRLSign);
 		break;
 	default:
 		return true;
 	}
 }
 
-QCA::Validity MyCertContext::validate(const QList<QCA::CertContext*> &trusted, const QList<QCA::CertContext*> &untrusted, const QList<QCA::CRLContext *> &crls, QCA::UsageMode u) const
+Validity MyCertContext::validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u) const
 {
 	STACK_OF(X509) *trusted_list = sk_X509_new_null();
 	STACK_OF(X509) *untrusted_list = sk_X509_new_null();
@@ -3371,15 +3373,15 @@ QCA::Validity MyCertContext::validate(const QList<QCA::CertContext*> &trusted, c
 		return convert_verify_error(err);
 
 	if(!usage_check(*cc, u))
-		return QCA::ErrorInvalidPurpose;
+		return ErrorInvalidPurpose;
 
-	return QCA::ValidityGood;
+	return ValidityGood;
 }
 
-class MyPIXContext : public QCA::PIXContext
+class MyPIXContext : public PIXContext
 {
 public:
-	MyPIXContext(QCA::Provider *p) : QCA::PIXContext(p)
+	MyPIXContext(Provider *p) : PIXContext(p)
 	{
 	}
 
@@ -3387,12 +3389,12 @@ public:
 	{
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return 0;
 	}
 
-	virtual QByteArray toPKCS12(const QString &name, const QList<const QCA::CertContext*> &chain, const QCA::PKeyContext &priv, const QSecureArray &passphrase) const
+	virtual QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const QSecureArray &passphrase) const
 	{
 		if(chain.count() < 1)
 			return QByteArray();
@@ -3421,13 +3423,13 @@ public:
 		return out;
 	}
 
-	virtual QCA::ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<QCA::CertContext*> *chain, QCA::PKeyContext **priv) const
+	virtual ConvertResult fromPKCS12(const QByteArray &in, const QSecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const
 	{
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
 		PKCS12 *p12 = d2i_PKCS12_bio(bi, NULL);
 		if(!p12)
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 
 		EVP_PKEY *pkey;
 		X509 *cert;
@@ -3435,7 +3437,7 @@ public:
 		if(!PKCS12_parse(p12, passphrase.data(), &pkey, &cert, &ca))
 		{
 			PKCS12_free(p12);
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 		}
 		PKCS12_free(p12);
 
@@ -3446,17 +3448,17 @@ public:
 				X509_free(cert);
 			if(ca)
 				sk_X509_pop_free(ca, X509_free);
-			return QCA::ErrorDecode;
+			return ErrorDecode;
 		}
 
 		*name = QString(); // TODO: read the name out of the file?
 
 		MyPKeyContext *pk = new MyPKeyContext(provider());
-		QCA::PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+		PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
 		pk->k = k;
 		*priv = pk;
 
-		QList<QCA::CertContext*> certs;
+		QList<CertContext*> certs;
 		if(cert)
 		{
 			MyCertContext *cc = new MyCertContext(provider());
@@ -3478,13 +3480,13 @@ public:
 		}
 
 		*chain = certs;
-		return QCA::ConvertGood;
+		return ConvertGood;
 	}
 };
 
 // TODO: test to ensure there is no cert-test lag
 static bool ssl_init = false;
-class MyTLSContext : public QCA::TLSContext
+class MyTLSContext : public TLSContext
 {
 public:
 	enum { Good, TryAgain, Bad };
@@ -3495,18 +3497,18 @@ public:
 	QByteArray sendQueue;
 	QByteArray recvQueue;
 
-	QCA::CertificateCollection trusted;
-	QCA::Certificate cert, peercert; // TODO: support cert chains
-	QCA::PrivateKey key;
+	CertificateCollection trusted;
+	Certificate cert, peercert; // TODO: support cert chains
+	PrivateKey key;
 
 	SSL *ssl;
 	SSL_METHOD *method;
 	SSL_CTX *context;
 	BIO *rbio, *wbio;
-	QCA::Validity vr;
+	Validity vr;
 	bool v_eof;
 
-	MyTLSContext(QCA::Provider *p) : QCA::TLSContext(p)
+	MyTLSContext(Provider *p) : TLSContext(p)
 	{
 		if(!ssl_init)
 		{
@@ -3525,7 +3527,7 @@ public:
 		reset();
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return 0;
 	}
@@ -3543,14 +3545,14 @@ public:
 			context = 0;
 		}
 
-		cert = QCA::Certificate();
-		key = QCA::PrivateKey();
+		cert = Certificate();
+		key = PrivateKey();
 
 		sendQueue.resize(0);
 		recvQueue.resize(0);
 		mode = Idle;
-		peercert = QCA::Certificate();
-		vr = QCA::ErrorValidityUnknown;
+		peercert = Certificate();
+		vr = ErrorValidityUnknown;
 		v_eof = false;
 	}
 
@@ -3585,7 +3587,7 @@ public:
 		Q_UNUSED(cipherSuiteList);
 	}
 
-	virtual void setup(const QCA::CertificateCollection &_trusted, const QCA::CertificateChain &_cert, const QCA::PrivateKey &_key, bool compress)
+	virtual void setup(const CertificateCollection &_trusted, const CertificateChain &_cert, const PrivateKey &_key, bool compress)
 	{
 		trusted = _trusted;
 		if(!_cert.isEmpty())
@@ -3816,15 +3818,15 @@ public:
 		return a;
 	}
 
-	virtual QCA::Validity peerCertificateValidity() const
+	virtual Validity peerCertificateValidity() const
 	{
 		return vr;
 	}
 
-	virtual QCA::CertificateChain peerCertificateChain() const
+	virtual CertificateChain peerCertificateChain() const
 	{
 		// TODO: support whole chain
-		QCA::CertificateChain chain;
+		CertificateChain chain;
 		chain.append(peercert);
 		return chain;
 	}
@@ -3838,8 +3840,8 @@ public:
 		// setup the cert store
 		{
 			X509_STORE *store = SSL_CTX_get_cert_store(context);
-			QList<QCA::Certificate> cert_list = trusted.certificates();
-			QList<QCA::CRL> crl_list = trusted.crls();
+			QList<Certificate> cert_list = trusted.certificates();
+			QList<CRL> crl_list = trusted.crls();
 			int n;
 			for(n = 0; n < cert_list.count(); ++n)
 			{
@@ -3898,7 +3900,7 @@ public:
 	void getCert()
 	{
 		// verify the certificate
-		QCA::Validity code = QCA::ErrorValidityUnknown;
+		Validity code = ErrorValidityUnknown;
 		X509 *x = SSL_get_peer_certificate(ssl);
 		if(x)
 		{
@@ -3909,13 +3911,13 @@ public:
 
 			int ret = SSL_get_verify_result(ssl);
 			if(ret == X509_V_OK)
-				code = QCA::ValidityGood;
+				code = ValidityGood;
 			else
 				code = convert_verify_error(ret);
 		}
 		else
 		{
-			peercert = QCA::Certificate();
+			peercert = Certificate();
 		}
 		vr = code;
 	}
@@ -4004,13 +4006,13 @@ public:
 	}
 };
 
-class CMSContext : public QCA::SMSContext
+class CMSContext : public SMSContext
 {
 public:
-	QCA::CertificateCollection trustedCerts;
-	QList<QCA::SecureMessageKey> privateKeys;
+	CertificateCollection trustedCerts;
+	QList<SecureMessageKey> privateKeys;
 
-	CMSContext(QCA::Provider *p) : QCA::SMSContext(p, "cms")
+	CMSContext(Provider *p) : SMSContext(p, "cms")
 	{
 	}
 
@@ -4018,22 +4020,22 @@ public:
 	{
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return 0;
 	}
 
-	virtual void setTrustedCertificates(const QCA::CertificateCollection &trusted)
+	virtual void setTrustedCertificates(const CertificateCollection &trusted)
 	{
 		trustedCerts = trusted;
 	}
 
-	virtual void setPrivateKeys(const QList<QCA::SecureMessageKey> &keys)
+	virtual void setPrivateKeys(const QList<SecureMessageKey> &keys)
 	{
 		privateKeys = keys;
 	}
 
-	virtual QCA::MessageContext *createMessage();
+	virtual MessageContext *createMessage();
 };
 
 STACK_OF(X509) *get_pk7_certs(PKCS7 *p7)
@@ -4047,27 +4049,27 @@ STACK_OF(X509) *get_pk7_certs(PKCS7 *p7)
 		return 0;
 }
 
-class MyMessageContext : public QCA::MessageContext
+class MyMessageContext : public MessageContext
 {
 	Q_OBJECT
 public:
 	CMSContext *cms;
-	QCA::SecureMessageKey signer;
-	QCA::SecureMessageKeyList to;
-	QCA::SecureMessage::SignMode signMode;
+	SecureMessageKey signer;
+	SecureMessageKeyList to;
+	SecureMessage::SignMode signMode;
 	bool bundleSigner;
 	bool smime;
-	QCA::SecureMessage::Format format;
+	SecureMessage::Format format;
 
 	Operation op;
 
 	QByteArray in, out;
 	QByteArray sig;
 
-	QCA::CertificateChain signerChain;
+	CertificateChain signerChain;
 	int ver_ret;
 
-	MyMessageContext(CMSContext *_cms, QCA::Provider *p) : QCA::MessageContext(p, "cmsmsg")
+	MyMessageContext(CMSContext *_cms, Provider *p) : MessageContext(p, "cmsmsg")
 	{
 		cms = _cms;
 
@@ -4078,7 +4080,7 @@ public:
 	{
 	}
 
-	virtual Context *clone() const
+	virtual Provider::Context *clone() const
 	{
 		return 0;
 	}
@@ -4088,21 +4090,21 @@ public:
 		return false;
 	}
 
-	virtual QCA::SecureMessage::Type type() const
+	virtual SecureMessage::Type type() const
 	{
-		return QCA::SecureMessage::CMS;
+		return SecureMessage::CMS;
 	}
 
 	virtual void reset()
 	{
 	}
 
-	virtual void setupEncrypt(const QCA::SecureMessageKeyList &keys)
+	virtual void setupEncrypt(const SecureMessageKeyList &keys)
 	{
 		to = keys;
 	}
 
-	virtual void setupSign(const QCA::SecureMessageKeyList &keys, QCA::SecureMessage::SignMode m, bool bundleSigner, bool smime)
+	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime)
 	{
 		signer = keys.first();
 		signMode = m;
@@ -4116,7 +4118,7 @@ public:
 		sig = detachedSig;
 	}
 
-	virtual void start(QCA::SecureMessage::Format f, Operation op)
+	virtual void start(SecureMessage::Format f, Operation op)
 	{
 		format = f;
 
@@ -4146,15 +4148,15 @@ public:
 		// sign
 		if(op == Sign)
 		{
-			QCA::CertificateChain chain = signer.x509CertificateChain();
-			QCA::Certificate cert = chain.primary();
-			QList<QCA::Certificate> nonroots;
+			CertificateChain chain = signer.x509CertificateChain();
+			Certificate cert = chain.primary();
+			QList<Certificate> nonroots;
 			if(chain.count() > 1)
 			{
 				for(int n = 1; n < chain.count(); ++n)
 					nonroots.append(chain[n]);
 			}
-			QCA::PrivateKey key = signer.x509PrivateKey();
+			PrivateKey key = signer.x509PrivateKey();
 
 			MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
 			MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
@@ -4215,7 +4217,7 @@ public:
 		else if(op == Encrypt)
 		{
 			// TODO: support multiple recipients
-			QCA::Certificate target = to.first().x509CertificateChain().primary();
+			Certificate target = to.first().x509CertificateChain().primary();
 
 			STACK_OF(X509) *other_certs;
 			BIO *bi;
@@ -4268,7 +4270,7 @@ public:
 				return;
 			}
 
-			QCA::CertificateChain chain;
+			CertificateChain chain;
 			//STACK_OF(X509) *xs = PKCS7_get0_signers(p7, NULL, 0);
 			STACK_OF(X509) *xs = get_pk7_certs(p7);
 			if(xs)
@@ -4279,7 +4281,7 @@ public:
 				{
 					MyCertContext *cc = new MyCertContext(provider());
 					cc->fromX509(sk_X509_value(xs, n));
-					QCA::Certificate cert;
+					Certificate cert;
 					cert.change(cc);
 					chain.append(cert);
 				}
@@ -4301,8 +4303,8 @@ public:
 				return;
 
 			X509_STORE *store = X509_STORE_new();
-			QList<QCA::Certificate> cert_list = cms->trustedCerts.certificates();
-			QList<QCA::CRL> crl_list = cms->trustedCerts.crls();
+			QList<Certificate> cert_list = cms->trustedCerts.certificates();
+			QList<CRL> crl_list = cms->trustedCerts.crls();
 			int n;
 			for(n = 0; n < cert_list.count(); ++n)
 			{
@@ -4334,9 +4336,9 @@ public:
 			bool ok = false;
 			for(int n = 0; n < cms->privateKeys.count(); ++n)
 			{
-				QCA::CertificateChain chain = cms->privateKeys[n].x509CertificateChain();
-				QCA::Certificate cert = chain.primary();
-				QCA::PrivateKey key = cms->privateKeys[n].x509PrivateKey();
+				CertificateChain chain = cms->privateKeys[n].x509CertificateChain();
+				Certificate cert = chain.primary();
+				PrivateKey key = cms->privateKeys[n].x509PrivateKey();
 
 				MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
 				MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
@@ -4393,10 +4395,10 @@ public:
 		return true;
 	}
 
-	virtual QCA::SecureMessage::Error errorCode() const
+	virtual SecureMessage::Error errorCode() const
 	{
 		// TODO
-		return QCA::SecureMessage::ErrorUnknown;
+		return SecureMessage::ErrorUnknown;
 	}
 
 	virtual QByteArray signature() const
@@ -4410,33 +4412,33 @@ public:
 		return "sha1";
 	}
 
-	virtual QCA::SecureMessageSignatureList signers() const
+	virtual SecureMessageSignatureList signers() const
 	{
-		QCA::SecureMessageKey key;
+		SecureMessageKey key;
 		if(!signerChain.isEmpty())
 			key.setX509CertificateChain(signerChain);
 
-		QCA::SecureMessageSignature s(
-			ver_ret ? QCA::SecureMessageSignature::Valid : QCA::SecureMessageSignature::InvalidSignature,
-			ver_ret ? QCA::ValidityGood : QCA::ErrorValidityUnknown,
+		SecureMessageSignature s(
+			ver_ret ? SecureMessageSignature::Valid : SecureMessageSignature::InvalidSignature,
+			ver_ret ? ValidityGood : ErrorValidityUnknown,
 			key,
 			QDateTime::currentDateTime());
 
 		// TODO
-		return QCA::SecureMessageSignatureList() << s;
+		return SecureMessageSignatureList() << s;
 	}
 };
 
-QCA::MessageContext *CMSContext::createMessage()
+MessageContext *CMSContext::createMessage()
 {
 	return new MyMessageContext(this, provider());
 }
 
 
-class opensslCipherContext : public QCA::CipherContext
+class opensslCipherContext : public CipherContext
 {
 public:
-	opensslCipherContext(const EVP_CIPHER *algorithm, const int pad, QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+	opensslCipherContext(const EVP_CIPHER *algorithm, const int pad, Provider *p, const QString &type) : CipherContext(p, type)
 	{
 		m_cryptoAlgorithm = algorithm;
 		EVP_CIPHER_CTX_init(&m_context);
@@ -4444,12 +4446,12 @@ public:
 		m_type = type;
 	}
 
-		void setup(QCA::Direction dir,
-			   const QCA::SymmetricKey &key,
-			   const QCA::InitializationVector &iv)
+		void setup(Direction dir,
+			   const SymmetricKey &key,
+			   const InitializationVector &iv)
 		{
 			m_direction = dir;
-			if (QCA::Encode == m_direction) {
+			if (Encode == m_direction) {
 				EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
 				EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
 				EVP_EncryptInit_ex(&m_context, 0, 0,
@@ -4465,7 +4467,7 @@ public:
 			EVP_CIPHER_CTX_set_padding(&m_context, m_pad);
 		}
 
-		Context *clone() const
+		Provider::Context *clone() const
 		{
 			return new opensslCipherContext( *this );
 		}
@@ -4479,7 +4481,7 @@ public:
 		{
 			out->resize(in.size()+blockSize());
 			int resultLength;
-			if (QCA::Encode == m_direction) {
+			if (Encode == m_direction) {
 				if (0 == EVP_EncryptUpdate(&m_context,
 							   (unsigned char*)out->data(),
 							   &resultLength,
@@ -4504,7 +4506,7 @@ public:
 		{
 			out->resize(blockSize());
 			int resultLength;
-			if (QCA::Encode == m_direction) {
+			if (Encode == m_direction) {
 				if (0 == EVP_EncryptFinal_ex(&m_context,
 							     (unsigned char*)out->data(),
 							     &resultLength)) {
@@ -4522,23 +4524,23 @@ public:
 		}
 
 		// Change cipher names
-		QCA::KeyLength keyLength() const
+		KeyLength keyLength() const
 		{
 			if (m_type.left(4) == "des-") {
-				return QCA::KeyLength( 8, 8, 1);
+				return KeyLength( 8, 8, 1);
 			} else if (m_type.left(6) == "aes128") {
-				return QCA::KeyLength( 16, 16, 1);
+				return KeyLength( 16, 16, 1);
 			} else if (m_type.left(6) == "aes192") {
-				return QCA::KeyLength( 24, 24, 1);
+				return KeyLength( 24, 24, 1);
 			} else if (m_type.left(6) == "aes256") {
-				return QCA::KeyLength( 32, 32, 1);
+				return KeyLength( 32, 32, 1);
 			} else if (m_type.left(8) == "blowfish") {
 				// Don't know - TODO
-				return QCA::KeyLength( 1, 32, 1);
+				return KeyLength( 1, 32, 1);
 			} else if (m_type.left(9) == "tripledes") {
-				return QCA::KeyLength( 24, 24, 1);
+				return KeyLength( 24, 24, 1);
 			} else {
-				return QCA::KeyLength( 0, 1, 1);
+				return KeyLength( 0, 1, 1);
 			}
 		}
 
@@ -4546,7 +4548,7 @@ public:
 protected:
 		EVP_CIPHER_CTX m_context;
 		const EVP_CIPHER *m_cryptoAlgorithm;
-		QCA::Direction m_direction;
+		Direction m_direction;
 		int m_pad;
 		QString m_type;
 };
@@ -4555,7 +4557,7 @@ protected:
 
 using namespace opensslQCAPlugin;
 
-class opensslProvider : public QCA::Provider
+class opensslProvider : public Provider
 {
 public:
 	void init()
@@ -4740,7 +4742,7 @@ class opensslPlugin : public QCAPlugin
 	Q_OBJECT
 public:
 	virtual int version() const { return QCA_PLUGIN_VERSION; }
-	virtual QCA::Provider *createProvider() { return new opensslProvider; }
+	virtual Provider *createProvider() { return new opensslProvider; }
 };
 
 #include "qca-openssl.moc"
