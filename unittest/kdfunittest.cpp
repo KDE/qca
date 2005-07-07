@@ -26,9 +26,9 @@
 #include <QtCrypto>
 
 struct kdfTestValues {
-    QString secret; // usually a password or passphrase
-    QString output; // the key you get back
-    QString salt;   // a salt or initialisation vector
+    char *secret; // usually a password or passphrase
+    char *output; // the key you get back
+    char *salt;   // a salt or initialisation vector
     unsigned int outputLength; // if the algo supports variable length keys, len
     unsigned int iterationCount; // number of iterations
 };

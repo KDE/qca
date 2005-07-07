@@ -47,9 +47,9 @@ void KeyLengthUnitTest::allTests()
     CHECK( keylen2.maximum(), 40 );
     CHECK( keylen2.multiple(), 1 );
 
-    QCA::KeyLength keylen3( 1, std::numeric_limits<int>::max(), 1 );
+    QCA::KeyLength keylen3( 1, INT_MAX, 1 );
     CHECK( keylen3.minimum(), 1 );
-    CHECK( keylen3.maximum(), std::numeric_limits<int>::max() );
+    CHECK( keylen3.maximum(), INT_MAX );
     CHECK( keylen3.multiple(), 1 );
 
 }

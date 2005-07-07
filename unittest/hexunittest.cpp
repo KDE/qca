@@ -35,25 +35,33 @@ HexUnitTest::HexUnitTest()
 struct hexTestStruct {
     QString raw;
     QString encoded;
-} hexTestValues[] = {
-  { "abcd", "61626364" },
-  { "ABCD", "41424344" },
-  { "", "" },
-  { "abcddef", "61626364646566" },
-  { "\0", "" },   // Empty QString.
-  { "\a", "07" }, // BEL
-  { "\b", "08" }, // BS
-  { "\t", "09" }, // HT
-  { "\n", "0a" }, // LF
-  { "\v", "0b" }, // VT
-  { "\f", "0c" }, // FF
-  { "\r", "0d" }, // CR
-  { 0, 0 }
+
+    hexTestStruct() {}
+    hexTestStruct(const QString &a, const QString &b) : raw(a), encoded(b) {}
+} *hexTestValues;
+
+static void createGlobal()
+{
+    hexTestValues = new hexTestStruct[13];
+    hexTestValues[0]  = hexTestStruct("abcd", "61626364");
+    hexTestValues[1]  = hexTestStruct("ABCD", "41424344");
+    hexTestValues[2]  = hexTestStruct("", "");
+    hexTestValues[3]  = hexTestStruct("abcddef", "61626364646566");
+    hexTestValues[4]  = hexTestStruct("\0", "");   // Empty QString.
+    hexTestValues[5]  = hexTestStruct("\a", "07"); // BEL
+    hexTestValues[6]  = hexTestStruct("\b", "08"); // BS
+    hexTestValues[7]  = hexTestStruct("\t", "09"); // HT
+    hexTestValues[8]  = hexTestStruct("\n", "0a"); // LF
+    hexTestValues[9]  = hexTestStruct("\v", "0b"); // VT
+    hexTestValues[10] = hexTestStruct("\f", "0c"); // FF
+    hexTestValues[11] = hexTestStruct("\r", "0d"); // CR
+    hexTestValues[12] = hexTestStruct(0, 0);
 };
 
 void HexUnitTest::allTests()
 {
     QCA::Initializer init;
+    createGlobal();
 
     QCA::Hex hexObject;
     QString result;

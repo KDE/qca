@@ -32,7 +32,7 @@ SymmetricKeyUnitTest::SymmetricKeyUnitTest()
 }
 
 struct weakKey {
-    QByteArray key;
+    char *key;
     bool weak;
 };
 
@@ -83,7 +83,7 @@ void SymmetricKeyUnitTest::allTests()
     CHECK( anotherKey.size(), 0 );
 
     for (int n = 0; (0 != DESTestValues[n].weak); n++) {
-      QCA::SymmetricKey key(QCA::hexToArray(DESTestValues[n].key));
+      QCA::SymmetricKey key(QCA::hexToArray(QByteArray(DESTestValues[n].key)));
       CHECK( key.isWeakDESKey(), DESTestValues[n].weak );
     }
 }

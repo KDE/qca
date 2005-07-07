@@ -33,8 +33,8 @@ HashUnitTest::HashUnitTest()
 }
 
 struct hashTestValues {
-    QByteArray inputString;
-    QString expectedHash;
+    char *inputString;
+    char *expectedHash;
 };
 
 
@@ -203,8 +203,8 @@ void HashUnitTest::allTests()
 	    SKIP("MD2 not supported" );
 	else {
 	    for (int n = 0;  (0 != md2TestValues[n].expectedHash); n++) {
-		hashResult = QCA::MD2(*it).hashToString(md2TestValues[n].inputString);
-		CHECK( hashResult, md2TestValues[n].expectedHash );
+		hashResult = QCA::MD2(*it).hashToString(QByteArray(md2TestValues[n].inputString));
+		CHECK( hashResult, QString(md2TestValues[n].expectedHash) );
 	    }
 	}
 
@@ -212,8 +212,8 @@ void HashUnitTest::allTests()
 	    SKIP("MD4 not supported");
 	else {
 	    for (int n = 0; (0 != md4TestValues[n].expectedHash); n++) {
-	    hashResult = QCA::MD4(*it).hashToString(md4TestValues[n].inputString);
-	    CHECK( hashResult, md4TestValues[n].expectedHash );
+	    hashResult = QCA::MD4(*it).hashToString(QByteArray(md4TestValues[n].inputString));
+	    CHECK( hashResult, QString(md4TestValues[n].expectedHash) );
 	    }
 	}
     
@@ -222,8 +222,8 @@ void HashUnitTest::allTests()
 	    SKIP("MD5 not supported");
 	else {
 	    for (int n = 0; (0 != md5TestValues[n].expectedHash); n++) {
-		hashResult = QCA::MD5(*it).hashToString(md5TestValues[n].inputString);
-		CHECK( hashResult, md5TestValues[n].expectedHash );
+		hashResult = QCA::MD5(*it).hashToString(QByteArray(md5TestValues[n].inputString));
+		CHECK( hashResult, QString(md5TestValues[n].expectedHash) );
 	    }
 	    
 	    QFile f1( "./data/empty" );
@@ -273,8 +273,8 @@ void HashUnitTest::allTests()
 	    SKIP("SHA0 not supported");
 	else {
 	    for (int n = 0; (0 != sha0TestValues[n].expectedHash); n++) {
-		hashResult = QCA::SHA0(*it).hashToString(sha0TestValues[n].inputString);
-		CHECK( hashResult, sha0TestValues[n].expectedHash );
+		hashResult = QCA::SHA0(*it).hashToString(QByteArray(sha0TestValues[n].inputString));
+		CHECK( hashResult, QString(sha0TestValues[n].expectedHash) );
 	    }
 	    
 	    QByteArray fillerString;
@@ -300,8 +300,8 @@ void HashUnitTest::allTests()
 	    SKIP("SHA1 not supported");
 	else {
 	    for (int n = 0; (0 != sha1TestValues[n].expectedHash); n++) {
-		hashResult = QCA::SHA1(*it).hashToString(sha1TestValues[n].inputString);
-		CHECK( hashResult, sha1TestValues[n].expectedHash );
+		hashResult = QCA::SHA1(*it).hashToString(QByteArray(sha1TestValues[n].inputString));
+		CHECK( hashResult, QString(sha1TestValues[n].expectedHash) );
 	    }
 	    
 	    QByteArray fillerString;
@@ -362,8 +362,8 @@ void HashUnitTest::allTests()
 	    SKIP("SHA224 not supported");
 	else {
 	    for (int n = 0; (0 != sha224TestValues[n].expectedHash); n++) {
-		hashResult = QCA::SHA224(*it).hashToString(sha224TestValues[n].inputString);
-		CHECK( hashResult, sha224TestValues[n].expectedHash );
+		hashResult = QCA::SHA224(*it).hashToString(QByteArray(sha224TestValues[n].inputString));
+		CHECK( hashResult, QString(sha224TestValues[n].expectedHash) );
 	    }
 	    
 	    QByteArray fillerString;
@@ -381,8 +381,8 @@ void HashUnitTest::allTests()
 	    SKIP("SHA256 not supported");
 	else {
 	    for (int n = 0; (0 != sha256TestValues[n].expectedHash); n++) {
-		hashResult = QCA::SHA256(*it).hashToString(sha256TestValues[n].inputString);
-		CHECK( hashResult, sha256TestValues[n].expectedHash );
+		hashResult = QCA::SHA256(*it).hashToString(QByteArray(sha256TestValues[n].inputString));
+		CHECK( hashResult, QString(sha256TestValues[n].expectedHash) );
 	    }
 	    
 	    QByteArray fillerString;
@@ -400,8 +400,8 @@ void HashUnitTest::allTests()
 	    SKIP("SHA384 not supported");
 	else {
 	    for (int n = 0; (0 != sha384TestValues[n].expectedHash); n++) {
-		hashResult = QCA::SHA384(*it).hashToString(sha384TestValues[n].inputString);
-		CHECK( hashResult, sha384TestValues[n].expectedHash );
+		hashResult = QCA::SHA384(*it).hashToString(QByteArray(sha384TestValues[n].inputString));
+		CHECK( hashResult, QString(sha384TestValues[n].expectedHash) );
 	    }
 	    
 	    QByteArray fillerString;
@@ -421,8 +421,8 @@ void HashUnitTest::allTests()
 	    SKIP("SHA512 not supported");
 	else {
 	    for (int n = 0; (0 != sha512TestValues[n].expectedHash); n++) {
-		hashResult = QCA::SHA512(*it).hashToString(sha512TestValues[n].inputString);
-		CHECK( hashResult, sha512TestValues[n].expectedHash );
+		hashResult = QCA::SHA512(*it).hashToString(QByteArray(sha512TestValues[n].inputString));
+		CHECK( hashResult, QString(sha512TestValues[n].expectedHash) );
 	    }
 	    
 	    QByteArray fillerString;
@@ -441,8 +441,8 @@ void HashUnitTest::allTests()
 	    SKIP("RIPEMD160 not supported");
 	else {
 	    for (int n = 0; (0 != ripemd160TestValues[n].expectedHash); n++) {
-		hashResult = QCA::RIPEMD160(*it).hashToString(ripemd160TestValues[n].inputString);
-		CHECK( hashResult, ripemd160TestValues[n].expectedHash );
+		hashResult = QCA::RIPEMD160(*it).hashToString(QByteArray(ripemd160TestValues[n].inputString));
+		CHECK( hashResult, QString(ripemd160TestValues[n].expectedHash) );
 	    }
 	    
 	    // This is the "million times 'a' test"

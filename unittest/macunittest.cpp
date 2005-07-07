@@ -65,7 +65,7 @@ void MACUnitTest::HMACMD5test( const QString &provider )
 	md5hmac2.setup ( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
-	    data3[ i ] = 0xDD;
+	    data3[ i ] = (char)0xDD;
 	md5hmac2.update( data3 );
 	CHECK( QCA::arrayToHex( md5hmac2.final() ), QString( "56be34521d144c88dbb8c733f0e8b3f6" ) );
 
@@ -73,7 +73,7 @@ void MACUnitTest::HMACMD5test( const QString &provider )
 	QCA::HMAC md5hmac4( "md5", key4, provider );
 	QSecureArray data4( 50 );
 	for (int i = 0; i < data4.size(); i++ )
-	    data4[ i ] = 0xcd;
+	    data4[ i ] = (char)0xcd;
 	md5hmac4.update( data4 );
 	CHECK( QCA::arrayToHex( md5hmac4.final() ), QString( "697eaf0aca3a3aea3a75164746ffaa79" ) );
 
@@ -87,7 +87,7 @@ void MACUnitTest::HMACMD5test( const QString &provider )
 	QCA::HMAC md5hmac6( "md5", QCA::SymmetricKey(), provider );
 	QCA::SymmetricKey key6( 80 );
 	for (int i = 0; i < key6.size(); i++)
-	    key6[ i ] = 0xaa;
+	    key6[ i ] = (char)0xaa;
 	md5hmac6.setup( key6 );
 	QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
     	md5hmac6.update( data6 );
@@ -134,7 +134,7 @@ void MACUnitTest::HMACSHA256test( const QString &provider )
 	hmac2.setup ( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
-	    data3[ i ] = 0xDD;
+	    data3[ i ] = (char)0xDD;
 	hmac2.update( data3 );
 	CHECK( QCA::arrayToHex( hmac2.final() ),
 	       QString( "773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe" ) );
@@ -143,7 +143,7 @@ void MACUnitTest::HMACSHA256test( const QString &provider )
 	QCA::HMAC hmac4( "sha256", key4, provider );
 	QSecureArray data4( 50 );
 	for (int i = 0; i < data4.size(); i++ )
-	    data4[ i ] = 0xcd;
+	    data4[ i ] = (char)0xcd;
 	hmac4.update( data4 );
 	CHECK( QCA::arrayToHex( hmac4.final() ),
 	       QString( "82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b" ) );
@@ -160,7 +160,7 @@ void MACUnitTest::HMACSHA256test( const QString &provider )
 	QCA::HMAC hmac6( "sha256", QCA::SymmetricKey(), provider );
 	QCA::SymmetricKey key6( 131 );
 	for (int i = 0; i < key6.size(); i++)
-	    key6[ i ] = 0xaa;
+	    key6[ i ] = (char)0xaa;
 	hmac6.setup( key6 );
 	QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
     	hmac6.update( data6 );
@@ -208,7 +208,7 @@ void MACUnitTest::HMACSHA224test( const QString &provider )
 	hmac2.setup ( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
-	    data3[ i ] = 0xDD;
+	    data3[ i ] = (char)0xDD;
 	hmac2.update( data3 );
 	CHECK( QCA::arrayToHex( hmac2.final() ),
 	       QString( "7fb3cb3588c6c1f6ffa9694d7d6ad2649365b0c1f65d69d1ec8333ea" ) );
@@ -217,7 +217,7 @@ void MACUnitTest::HMACSHA224test( const QString &provider )
 	QCA::HMAC hmac4( "sha224", key4, provider );
 	QSecureArray data4( 50 );
 	for (int i = 0; i < data4.size(); i++ )
-	    data4[ i ] = 0xcd;
+	    data4[ i ] = (char)0xcd;
 	hmac4.update( data4 );
 	CHECK( QCA::arrayToHex( hmac4.final() ),
 	       QString( "6c11506874013cac6a2abc1bb382627cec6a90d86efc012de7afec5a" ) );
@@ -234,7 +234,7 @@ void MACUnitTest::HMACSHA224test( const QString &provider )
 	QCA::HMAC hmac6( "sha224", QCA::SymmetricKey(), provider );
 	QCA::SymmetricKey key6( 131 );
 	for (int i = 0; i < key6.size(); i++)
-	    key6[ i ] = 0xaa;
+	    key6[ i ] = (char)0xaa;
 	hmac6.setup( key6 );
 	QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
     	hmac6.update( data6 );
@@ -282,7 +282,7 @@ void MACUnitTest::HMACSHA384test( const QString &provider )
 	hmac2.setup ( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
-	    data3[ i ] = 0xDD;
+	    data3[ i ] = (char)0xDD;
 	hmac2.update( data3 );
 	CHECK( QCA::arrayToHex( hmac2.final() ),
 	       QString( "88062608d3e6ad8a0aa2ace014c8a86f0aa635d947ac9febe83ef4e55966144b2a5ab39dc13814b94e3ab6e101a34f27" ) );
@@ -291,7 +291,7 @@ void MACUnitTest::HMACSHA384test( const QString &provider )
 	QCA::HMAC hmac4( "sha384", key4, provider );
 	QSecureArray data4( 50 );
 	for (int i = 0; i < data4.size(); i++ )
-	    data4[ i ] = 0xcd;
+	    data4[ i ] = (char)0xcd;
 	hmac4.update( data4 );
 	CHECK( QCA::arrayToHex( hmac4.final() ),
 	       QString( "3e8a69b7783c25851933ab6290af6ca77a9981480850009cc5577c6e1f573b4e6801dd23c4a7d679ccf8a386c674cffb" ) );
@@ -308,7 +308,7 @@ void MACUnitTest::HMACSHA384test( const QString &provider )
 	QCA::HMAC hmac6( "sha384", QCA::SymmetricKey(), provider );
 	QCA::SymmetricKey key6( 131 );
 	for (int i = 0; i < key6.size(); i++)
-	    key6[ i ] = 0xaa;
+	    key6[ i ] = (char)0xaa;
 	hmac6.setup( key6 );
 	QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
     	hmac6.update( data6 );
@@ -357,7 +357,7 @@ void MACUnitTest::HMACSHA512test( const QString &provider )
 	hmac2.setup ( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
-	    data3[ i ] = 0xDD;
+	    data3[ i ] = (char)0xDD;
 	hmac2.update( data3 );
 	CHECK( QCA::arrayToHex( hmac2.final() ),
 	       QString( "fa73b0089d56a284efb0f0756c890be9b1b5dbdd8ee81a3655f83e33b2279d39bf3e848279a722c806b485a47e67c807b946a337bee8942674278859e13292fb" ) );
@@ -366,7 +366,7 @@ void MACUnitTest::HMACSHA512test( const QString &provider )
 	QCA::HMAC hmac4( "sha512", key4, provider );
 	QSecureArray data4( 50 );
 	for (int i = 0; i < data4.size(); i++ )
-	    data4[ i ] = 0xcd;
+	    data4[ i ] = (char)0xcd;
 	hmac4.update( data4 );
 	CHECK( QCA::arrayToHex( hmac4.final() ),
 	       QString( "b0ba465637458c6990e5a8c5f61d4af7e576d97ff94b872de76f8050361ee3dba91ca5c11aa25eb4d679275cc5788063a5f19741120c4f2de2adebeb10a298dd" ) );
@@ -383,7 +383,7 @@ void MACUnitTest::HMACSHA512test( const QString &provider )
 	QCA::HMAC hmac6( "sha512", QCA::SymmetricKey(), provider );
 	QCA::SymmetricKey key6( 131 );
 	for (int i = 0; i < key6.size(); i++)
-	    key6[ i ] = 0xaa;
+	    key6[ i ] = (char)0xaa;
 	hmac6.setup( key6 );
 	QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
     	hmac6.update( data6 );
@@ -429,7 +429,7 @@ void MACUnitTest::HMACSHA1test( const QString &provider )
 	test3.setup( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
-	    data3[ i ] = 0xDD;
+	    data3[ i ] = (char)0xDD;
 	test3.update( data3 );
 	CHECK( QCA::arrayToHex( test3.final() ), QString( "125d7342b9ac11cd91a39af48aa17b4f63f175d3" ) );
 
@@ -438,7 +438,7 @@ void MACUnitTest::HMACSHA1test( const QString &provider )
 	test4.setup( key4 );
 	QSecureArray data4( 50 );
 	for ( int i = 0; i < data4.size(); i++ )
-	    data4[ i ] = 0xcd;
+	    data4[ i ] = (char)0xcd;
 	test4.update( data4 );
 	CHECK( QCA::arrayToHex( test4.final() ), QString( "4c9007f4026250c6bc8414f9bf50c86c2d7235da" ) );
 
@@ -452,7 +452,7 @@ void MACUnitTest::HMACSHA1test( const QString &provider )
 	QCA::HMAC test6( "sha1", QCA::SymmetricKey(), provider);
 	QCA::SymmetricKey key6( 80 );
 	for ( int i = 0; i < key6.size(); i++ )
-	    key6[i] = 0xAA;
+	    key6[i] = (char)0xAA;
 	test6.setup( key6 );
 	QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
     	test6.update( data6 );
@@ -496,7 +496,7 @@ void MACUnitTest::HMACRMD160test( const QString &provider )
 	test3.setup( key3 );
 	QSecureArray data3( 50 );
 	for ( int i = 0; i < data3.size(); i++ )
-	    data3[ i ] = 0xDD;
+	    data3[ i ] = (char)0xDD;
 	test3.update( data3 );
 	CHECK( QCA::arrayToHex( test3.final() ), QString( "b0b105360de759960ab4f35298e116e295d8e7c1" ) );
 
@@ -504,7 +504,7 @@ void MACUnitTest::HMACRMD160test( const QString &provider )
 	QCA::HMAC test4( "ripemd160", key4, provider );
 	QSecureArray data4( 50 );
 	for ( int i = 0; i < data4.size(); i++ )
-	    data4[ i ] = 0xcd;
+	    data4[ i ] = (char)0xcd;
 	test4.update( data4 );
 	CHECK( QCA::arrayToHex( test4.final() ), QString( "d5ca862f4d21d5e610e18b4cf1beb97a4365ecf4" ) );
 
@@ -518,7 +518,7 @@ void MACUnitTest::HMACRMD160test( const QString &provider )
 	QCA::HMAC test6( "ripemd160", QCA::SymmetricKey(), provider );
 	QCA::SymmetricKey key6( 80 );
 	for ( int i = 0; i < key6.size(); i++ )
-	    key6[i] = 0xAA;
+	    key6[i] = (char)0xAA;
 	test6.setup( key6 );
 	QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
     	test6.update( data6 );

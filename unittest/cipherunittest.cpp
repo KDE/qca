@@ -26,16 +26,16 @@
 #include <QtCrypto>
 
 struct cipherTestValues {
-    QString plaintext;
-    QString ciphertext;
-    QString key;
+    char *plaintext;
+    char *ciphertext;
+    char *key;
 };
 
 struct cipherIVTestValues {
-    QString plaintext;
-    QString ciphertext;
-    QString key;
-    QString iv;
+    char *plaintext;
+    char *ciphertext;
+    char *key;
+    char *iv;
 };
 
 // These are from the Botan test suite
@@ -845,9 +845,9 @@ void CipherUnitTest::aes128Tests()
 	CHECK( QCA::arrayToHex( cipherObj5.final() ), QString( "" ) );
 
 	for (int n = 0; (0 != aes128ecbTestValues[n].plaintext); n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128ecbTestValues[n].key ) );
+	    QCA::SymmetricKey key( QCA::hexToArray( QString(aes128ecbTestValues[n].key) ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key);
-	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128ecbTestValues[n].plaintext ) ) ),
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( QString(aes128ecbTestValues[n].plaintext) ) ) ),
 		   QString( aes128ecbTestValues[n].ciphertext ) );
 	    CHECK( forwardCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
@@ -855,7 +855,7 @@ void CipherUnitTest::aes128Tests()
 
 	    QCA::AES128 reverseCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Decode, key);
 
-	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128ecbTestValues[n].ciphertext ) ) ),
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( QString(aes128ecbTestValues[n].ciphertext) ) ) ),
 		   QString( aes128ecbTestValues[n].plaintext ) );
 	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
@@ -867,10 +867,10 @@ void CipherUnitTest::aes128Tests()
 	SKIP("AES128-CBC not supported!");
     else {
 	for (int n = 0; (0 != aes128cbcTestValues[n].plaintext); n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128cbcTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes128cbcTestValues[n].iv ) );
+	    QCA::SymmetricKey key( QCA::hexToArray( QString(aes128cbcTestValues[n].key) ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( QString(aes128cbcTestValues[n].iv) ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding,QCA::Encode, key, iv);
-	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128cbcTestValues[n].plaintext ) ) ),
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( QString(aes128cbcTestValues[n].plaintext) ) ) ),
 		   QString( aes128cbcTestValues[n].ciphertext ) );
 	    CHECK( forwardCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
@@ -878,7 +878,7 @@ void CipherUnitTest::aes128Tests()
 
 	    QCA::AES128 reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
 
-	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128cbcTestValues[n].ciphertext ) ) ),
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( QString(aes128cbcTestValues[n].ciphertext) ) ) ),
 		   QString( aes128cbcTestValues[n].plaintext ) );
 	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
@@ -890,10 +890,10 @@ void CipherUnitTest::aes128Tests()
 	SKIP("AES128-CFB not supported!");
     else {
 	for (int n = 0; (0 != aes128cfbTestValues[n].plaintext); n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128cfbTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes128cfbTestValues[n].iv ) );
+	    QCA::SymmetricKey key( QCA::hexToArray( QString(aes128cfbTestValues[n].key) ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( QString(aes128cfbTestValues[n].iv) ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
-	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128cfbTestValues[n].plaintext ) ) ),
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( QString(aes128cfbTestValues[n].plaintext) ) ) ),
 		   QString( aes128cfbTestValues[n].ciphertext ) );
 	    CHECK( forwardCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
@@ -901,7 +901,7 @@ void CipherUnitTest::aes128Tests()
 
 	    QCA::AES128 reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
 
-	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128cfbTestValues[n].ciphertext ) ) ),
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( QString(aes128cfbTestValues[n].ciphertext) ) ) ),
 		   QString( aes128cfbTestValues[n].plaintext ) );
 	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
@@ -913,10 +913,10 @@ void CipherUnitTest::aes128Tests()
 	SKIP("AES128-OFB not supported!");
     else {
 	for (int n = 0; (0 != aes128ofbTestValues[n].plaintext); n++) {
-	    QCA::SymmetricKey key( QCA::hexToArray( aes128ofbTestValues[n].key ) );
-	    QCA::InitializationVector iv( QCA::hexToArray( aes128ofbTestValues[n].iv ) );
+	    QCA::SymmetricKey key( QCA::hexToArray( QString(aes128ofbTestValues[n].key) ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( QString(aes128ofbTestValues[n].iv) ) );
 	    QCA::AES128 forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv);
-	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( aes128ofbTestValues[n].plaintext ) ) ),
+	    CHECK( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( QString(aes128ofbTestValues[n].plaintext) ) ) ),
 		   QString( aes128ofbTestValues[n].ciphertext ) );
 	    CHECK( forwardCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
@@ -924,7 +924,7 @@ void CipherUnitTest::aes128Tests()
 
 	    QCA::AES128 reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv);
 
-	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( aes128ofbTestValues[n].ciphertext ) ) ),
+	    CHECK( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( QString(aes128ofbTestValues[n].ciphertext) ) ) ),
 		   QString( aes128ofbTestValues[n].plaintext ) );
 	    CHECK( reverseCipher.ok(), true );
 	    CHECK( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
