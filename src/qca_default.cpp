@@ -31,7 +31,7 @@
 namespace QCA {
 
 //----------------------------------------------------------------------------
-// DefaultProvider
+// DefaultRandomContext
 //----------------------------------------------------------------------------
 class DefaultRandomContext : public RandomContext
 {
@@ -52,13 +52,13 @@ public:
 	}
 };
 
-/*
-  The following code is based on L. Peter Deutsch's implementation,
-  as provided at http://sourceforge.net/projects/libmd5-rfc/. A 
-  fair number of changes have been made to that code.
-  
-  The original code contained:
+//----------------------------------------------------------------------------
+// DefaultMD5Context
+//----------------------------------------------------------------------------
 
+/* NOTE: the following code was modified to not need BYTE_ORDER -- Justin */
+
+/*
   Copyright (C) 1999, 2000, 2002 Aladdin Enterprises.  All rights reserved.
 
   This software is provided 'as-is', without any express or implied
@@ -81,6 +81,7 @@ public:
   ghost@aladdin.com
 
  */
+/* $Id$ */
 /*
   Independent implementation of MD5 (RFC 1321).
 
@@ -110,293 +111,603 @@ public:
   1999-05-03 lpd Original version.
  */
 
-class DefaultMD5Context : public HashContext
+/*
+ * This package supports both compile-time and run-time determination of CPU
+ * byte order.  If ARCH_IS_BIG_ENDIAN is defined as 0, the code will be
+ * compiled to run only on little-endian CPUs; if ARCH_IS_BIG_ENDIAN is
+ * defined as non-zero, the code will be compiled to run only on big-endian
+ * CPUs; if ARCH_IS_BIG_ENDIAN is not defined, the code will be compiled to
+ * run on either big- or little-endian CPUs, but will run slightly less
+ * efficiently on either one than if ARCH_IS_BIG_ENDIAN is defined.
+ */
+
+typedef quint8  md5_byte_t; /* 8-bit byte */
+typedef quint32 md5_word_t; /* 32-bit word */
+
+/* Define the state of the MD5 Algorithm. */
+struct md5_state_t {
+    QSecureArray sbuf;
+    md5_word_t *count; // 2   /* message length in bits, lsw first */
+    md5_word_t *abcd;  // 4   /* digest buffer */
+    md5_byte_t *buf;   // 64  /* accumulate block */
+
+    md5_state_t()
+    {
+        sbuf.resize((6 * sizeof(md5_word_t)) + 64);
+        setup();
+    }
+
+    md5_state_t(const md5_state_t &from)
+    {
+        *this = from;
+    }
+
+    md5_state_t & operator=(const md5_state_t &from)
+    {
+        sbuf = from.sbuf;
+        setup();
+        return *this;
+    }
+
+    inline void setup()
+    {
+        char *p = sbuf.data();
+        count = (md5_word_t *)p;
+        abcd = (md5_word_t *)(p + (2 * sizeof(md5_word_t)));
+        buf = (md5_byte_t *)(p + (6 * sizeof(md5_word_t)));
+    }
+};
+
+/* Initialize the algorithm. */
+void md5_init(md5_state_t *pms);
+
+/* Append a string to the message. */
+void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes);
+
+/* Finish the message and return the digest. */
+void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
+
+#define T_MASK ((md5_word_t)~0)
+#define T1 /* 0xd76aa478 */ (T_MASK ^ 0x28955b87)
+#define T2 /* 0xe8c7b756 */ (T_MASK ^ 0x173848a9)
+#define T3    0x242070db
+#define T4 /* 0xc1bdceee */ (T_MASK ^ 0x3e423111)
+#define T5 /* 0xf57c0faf */ (T_MASK ^ 0x0a83f050)
+#define T6    0x4787c62a
+#define T7 /* 0xa8304613 */ (T_MASK ^ 0x57cfb9ec)
+#define T8 /* 0xfd469501 */ (T_MASK ^ 0x02b96afe)
+#define T9    0x698098d8
+#define T10 /* 0x8b44f7af */ (T_MASK ^ 0x74bb0850)
+#define T11 /* 0xffff5bb1 */ (T_MASK ^ 0x0000a44e)
+#define T12 /* 0x895cd7be */ (T_MASK ^ 0x76a32841)
+#define T13    0x6b901122
+#define T14 /* 0xfd987193 */ (T_MASK ^ 0x02678e6c)
+#define T15 /* 0xa679438e */ (T_MASK ^ 0x5986bc71)
+#define T16    0x49b40821
+#define T17 /* 0xf61e2562 */ (T_MASK ^ 0x09e1da9d)
+#define T18 /* 0xc040b340 */ (T_MASK ^ 0x3fbf4cbf)
+#define T19    0x265e5a51
+#define T20 /* 0xe9b6c7aa */ (T_MASK ^ 0x16493855)
+#define T21 /* 0xd62f105d */ (T_MASK ^ 0x29d0efa2)
+#define T22    0x02441453
+#define T23 /* 0xd8a1e681 */ (T_MASK ^ 0x275e197e)
+#define T24 /* 0xe7d3fbc8 */ (T_MASK ^ 0x182c0437)
+#define T25    0x21e1cde6
+#define T26 /* 0xc33707d6 */ (T_MASK ^ 0x3cc8f829)
+#define T27 /* 0xf4d50d87 */ (T_MASK ^ 0x0b2af278)
+#define T28    0x455a14ed
+#define T29 /* 0xa9e3e905 */ (T_MASK ^ 0x561c16fa)
+#define T30 /* 0xfcefa3f8 */ (T_MASK ^ 0x03105c07)
+#define T31    0x676f02d9
+#define T32 /* 0x8d2a4c8a */ (T_MASK ^ 0x72d5b375)
+#define T33 /* 0xfffa3942 */ (T_MASK ^ 0x0005c6bd)
+#define T34 /* 0x8771f681 */ (T_MASK ^ 0x788e097e)
+#define T35    0x6d9d6122
+#define T36 /* 0xfde5380c */ (T_MASK ^ 0x021ac7f3)
+#define T37 /* 0xa4beea44 */ (T_MASK ^ 0x5b4115bb)
+#define T38    0x4bdecfa9
+#define T39 /* 0xf6bb4b60 */ (T_MASK ^ 0x0944b49f)
+#define T40 /* 0xbebfbc70 */ (T_MASK ^ 0x4140438f)
+#define T41    0x289b7ec6
+#define T42 /* 0xeaa127fa */ (T_MASK ^ 0x155ed805)
+#define T43 /* 0xd4ef3085 */ (T_MASK ^ 0x2b10cf7a)
+#define T44    0x04881d05
+#define T45 /* 0xd9d4d039 */ (T_MASK ^ 0x262b2fc6)
+#define T46 /* 0xe6db99e5 */ (T_MASK ^ 0x1924661a)
+#define T47    0x1fa27cf8
+#define T48 /* 0xc4ac5665 */ (T_MASK ^ 0x3b53a99a)
+#define T49 /* 0xf4292244 */ (T_MASK ^ 0x0bd6ddbb)
+#define T50    0x432aff97
+#define T51 /* 0xab9423a7 */ (T_MASK ^ 0x546bdc58)
+#define T52 /* 0xfc93a039 */ (T_MASK ^ 0x036c5fc6)
+#define T53    0x655b59c3
+#define T54 /* 0x8f0ccc92 */ (T_MASK ^ 0x70f3336d)
+#define T55 /* 0xffeff47d */ (T_MASK ^ 0x00100b82)
+#define T56 /* 0x85845dd1 */ (T_MASK ^ 0x7a7ba22e)
+#define T57    0x6fa87e4f
+#define T58 /* 0xfe2ce6e0 */ (T_MASK ^ 0x01d3191f)
+#define T59 /* 0xa3014314 */ (T_MASK ^ 0x5cfebceb)
+#define T60    0x4e0811a1
+#define T61 /* 0xf7537e82 */ (T_MASK ^ 0x08ac817d)
+#define T62 /* 0xbd3af235 */ (T_MASK ^ 0x42c50dca)
+#define T63    0x2ad7d2bb
+#define T64 /* 0xeb86d391 */ (T_MASK ^ 0x14792c6e)
+
+
+static void
+md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 {
-public:
-        DefaultMD5Context(Provider *p) : HashContext(p, "md5")
-        {
-                clear();
-        }
+	md5_word_t
+	a = pms->abcd[0], b = pms->abcd[1],
+	c = pms->abcd[2], d = pms->abcd[3];
+	md5_word_t t;
 
-	virtual Provider::Context *clone() const
-        {
-                return new DefaultMD5Context(*this);
-        }
+	/* Define storage for little-endian or both types of CPUs. */
+	// possible FIXME: does xbuf really need to be secured?
+	QSecureArray sxbuf(16 * sizeof(md5_word_t));
+	md5_word_t *xbuf = (md5_word_t *)sxbuf.data();
+	const md5_word_t *X;
 
-        virtual void clear()
-        {
-		buf.resize(64);
-		buf.fill(0);
-		m_count = 0;
-		a = 0x67452301;
-		b = 0xefcdab89;
-		c = 0x98badcfe;
-		d = 0x10325476;
-	}
-
-        virtual void update(const QSecureArray &a)
-        {
-		const unsigned char *p = (const unsigned char*)a.data();
-		int left = a.size();
-		int offset = (m_count >> 3) & 63;
-
-		if (a.size() <= 0)
-			return;
-
-		/* Update the message length. */
-		m_count += (a.size() << 3);
-
-		/* Process an initial partial block. */
-		if (offset) {
-			int copy = (offset + a.size() > 64 ? 64 - offset : a.size());
-
-			memcpy(buf.data() + offset, p, copy);
-			if (offset + copy < 64)
-				return;
-			p += copy;
-			left -= copy;
-			md5_process(buf);
-		}
-
-		/* Process full blocks. */
-		for (; left >= 64; p += 64, left -= 64) {
-			QSecureArray thisBlock(64);
-			memcpy(thisBlock.data(), p, 64);
-			md5_process(thisBlock);
-		}
-
-		/* Process a final partial block. */
-		if (left)
-			memcpy(buf.data(), p, left);
-	}
-
-        virtual QSecureArray final()
-        {
-		QSecureArray result(16);
-		QSecureArray data(8);
-		unsigned int i;
-    
-		/* Save the length before padding. */
-		data[0] = (m_count >> 0);
-		data[1] = (m_count >> 8);
-		data[2] = (m_count >> 16);
-		data[3] = (m_count >> 24);
-		data[4] = (m_count >> 32);
-		data[5] = (m_count >> 40);
-		data[6] = (m_count >> 48);
-		data[7] = (m_count >> 56);
-		/* Pad to 56 bytes mod 64. */
-		QSecureArray padding(((55 - (m_count >> 3)) & 63) + 1);
-		if (padding.size() > 0 ) {
-			padding[0] = (char)0x80;
-			if (padding.size() > 1 ) {
-				for (i = 1; i < (unsigned int)padding.size(); ++i) {
-					padding[i] = 0x00;
-				}
-			}
-			update(padding); 
-		}
-		/* Append the length. */
-		update(data);
-
-		result[0] = (a >> 0);
-		result[1] = (a >> 8);
-		result[2] = (a >> 16);
-		result[3] = (a >> 24);
-		result[4] = (b >> 0);
-		result[5] = (b >> 8);
-		result[6] = (b >> 16);
-		result[7] = (b >> 24);
-		result[8] = (c >> 0);
-		result[9] = (c >> 8);
-		result[10] = (c >> 16);
-		result[11] = (c >> 24);
-		result[12] = (d >> 0);
-		result[13] = (d >> 8);
-		result[14] = (d >> 16);
-		result[15] = (d >> 24);
-		return result;
-        }
-
-private:
-
-        /* Define the state of the MD5 Algorithm. */
-	quint64 m_count;	        /* message length in bits */
-	quint32 a, b, c, d;		/* digest buffer */
-	QSecureArray  buf;		/* accumulate block */
-
-	quint32 rotateLeft(quint32 x, quint32 n)
 	{
-		return (((x) << (n)) | ((x) >> (32 - (n))));
-	}
-
-	quint32 F(quint32 x, quint32 y, quint32 z)
-	{
-		return (((x) & (y)) | (~(x) & (z)));
-	}
-
-	quint32 G(quint32 x, quint32 y, quint32 z)
-	{
-		return (((x) & (z)) | ((y) & ~(z)));
-	}
-
-	quint32 H(quint32 x, quint32 y, quint32 z)
-	{
-		return ((x) ^ (y) ^ (z));
-	}
-
-	quint32 I(quint32 x, quint32 y, quint32 z)
-	{
-		return ((y) ^ ((x) | ~(z)));
-	}
-
-	quint32 round1(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
-	{
-		quint32 t = a + F(b,c,d) + Xk + Ti;
-		return ( rotateLeft(t, s) + b );
-	}
-
-	quint32 round2(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
-	{
-		quint32 t = a + G(b,c,d) + Xk + Ti;
-		return ( rotateLeft(t, s) + b );
-	}
-
-	quint32 round3(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
-	{
-		quint32 t = a + H(b,c,d) + Xk + Ti;
-		return ( rotateLeft(t, s) + b );
-	}
-
-	quint32 round4(quint32 a, quint32 b, quint32 c, quint32 d, quint32 Xk, quint32 s, quint32 Ti)
-	{
-		quint32 t = a + I(b,c,d) + Xk + Ti;
-		return ( rotateLeft(t, s) + b );
-	}
-
-	void md5_process(QSecureArray data)
-	{
-		quint32 aSaved, bSaved, cSaved, dSaved;
-		aSaved = a;
-		bSaved = b;
-		cSaved = c;
-		dSaved = d;
-		
-		quint32 xbuf[16];
-		const quint32 *X;
-		
-		if (Q_BYTE_ORDER == Q_LITTLE_ENDIAN)
+		if(QSysInfo::ByteOrder == QSysInfo::BigEndian)
 		{
 			/*
-			 * On little-endian machines, we can process properly aligned
-			 * data without copying it.
-			 */
-			if (!((data.data() - (const char *)0) & 3)) {
-				/* data are properly aligned */
-				X = (const quint32 *)data.data();
-			} else {
-				/* not aligned */
-				memcpy(xbuf, data.data(), 64);
-				X = xbuf;
-			}
-		} else			/* big-endian */
-		{
-			/*
-			 * On big-endian machines, we must arrange the bytes in the
-			 * right order.
-			 */
-			const char *xp = data.data();
+			* On big-endian machines, we must arrange the bytes in the
+			* right order.
+			*/
+			const md5_byte_t *xp = data;
 			int i;
-			
-			X = xbuf;
+
+			X = xbuf;		/* (dynamic only) */
+
 			for (i = 0; i < 16; ++i, xp += 4)
 				xbuf[i] = xp[0] + (xp[1] << 8) + (xp[2] << 16) + (xp[3] << 24);
 		}
-		
-		/* Round 1. */
-		/* Do the following 16 operations. */
-		a = round1(a, b, c, d,  X[0],  7,  0xd76aa478);
-		d = round1(d, a, b, c,  X[1], 12,  0xe8c7b756);
-		c = round1(c, d, a, b,  X[2], 17,  0x242070db);
-		b = round1(b, c, d, a,  X[3], 22, 0xc1bdceee);
-		a = round1(a, b, c, d,  X[4],  7, 0xf57c0faf);
-		d = round1(d, a, b, c,  X[5], 12, 0x4787c62a);
-		c = round1(c, d, a, b,  X[6], 17, 0xa8304613);
-		b = round1(b, c, d, a,  X[7], 22, 0xfd469501);
-		a = round1(a, b, c, d,  X[8],  7, 0x698098d8);
-		d = round1(d, a, b, c,  X[9], 12, 0x8b44f7af);
-		c = round1(c, d, a, b, X[10], 17, 0xffff5bb1);
-		b = round1(b, c, d, a, X[11], 22, 0x895cd7be);
-		a = round1(a, b, c, d, X[12],  7, 0x6b901122);
-		d = round1(d, a, b, c, X[13], 12, 0xfd987193);
-		c = round1(c, d, a, b, X[14], 17, 0xa679438e);
-		b = round1(b, c, d, a, X[15], 22, 0x49b40821);
-		
-		/* Round 2. */
-		a = round2(a, b, c, d,  X[1],  5, 0xf61e2562);
-		d = round2(d, a, b, c,  X[6],  9, 0xc040b340);
-		c = round2(c, d, a, b, X[11], 14, 0x265e5a51);
-		b = round2(b, c, d, a,  X[0], 20, 0xe9b6c7aa);
-		a = round2(a, b, c, d,  X[5],  5, 0xd62f105d);
-		d = round2(d, a, b, c, X[10],  9, 0x02441453);
-		c = round2(c, d, a, b, X[15], 14, 0xd8a1e681);
-		b = round2(b, c, d, a,  X[4], 20, 0xe7d3fbc8);
-		a = round2(a, b, c, d,  X[9],  5, 0x21e1cde6);
-		d = round2(d, a, b, c, X[14],  9, 0xc33707d6);
-		c = round2(c, d, a, b,  X[3], 14, 0xf4d50d87);
-		b = round2(b, c, d, a,  X[8], 20, 0x455a14ed);
-		a = round2(a, b, c, d, X[13],  5, 0xa9e3e905);
-		d = round2(d, a, b, c,  X[2],  9, 0xfcefa3f8);
-		c = round2(c, d, a, b,  X[7], 14, 0x676f02d9);
-		b = round2(b, c, d, a, X[12], 20, 0x8d2a4c8a);
-
-		/* Round 3. */
-		a = round3(a, b, c, d,  X[5],  4, 0xfffa3942);
-		d = round3(d, a, b, c,  X[8], 11, 0x8771f681);
-		c = round3(c, d, a, b, X[11], 16, 0x6d9d6122);
-		b = round3(b, c, d, a, X[14], 23, 0xfde5380c);
-		a = round3(a, b, c, d,  X[1],  4, 0xa4beea44);
-		d = round3(d, a, b, c,  X[4], 11, 0x4bdecfa9);
-		c = round3(c, d, a, b,  X[7], 16, 0xf6bb4b60);
-		b = round3(b, c, d, a, X[10], 23, 0xbebfbc70);
-		a = round3(a, b, c, d, X[13],  4, 0x289b7ec6);
-		d = round3(d, a, b, c,  X[0], 11, 0xeaa127fa);
-		c = round3(c, d, a, b,  X[3], 16, 0xd4ef3085);
-		b = round3(b, c, d, a,  X[6], 23, 0x04881d05);
-		a = round3(a, b, c, d,  X[9],  4, 0xd9d4d039);
-		d = round3(d, a, b, c, X[12], 11, 0xe6db99e5);
-		c = round3(c, d, a, b, X[15], 16, 0x1fa27cf8);
-		b = round3(b, c, d, a,  X[2], 23, 0xc4ac5665);
-		
-		/* Round 4. */
-		a = round4(a, b, c, d,  X[0],  6, 0xf4292244);
-		d = round4(d, a, b, c,  X[7], 10, 0x432aff97);
-		c = round4(c, d, a, b, X[14], 15, 0xab9423a7);
-		b = round4(b, c, d, a,  X[5], 21, 0xfc93a039);
-		a = round4(a, b, c, d, X[12],  6, 0x655b59c3);
-		d = round4(d, a, b, c,  X[3], 10, 0x8f0ccc92);
-		c = round4(c, d, a, b, X[10], 15, 0xffeff47d);
-		b = round4(b, c, d, a,  X[1], 21, 0x85845dd1);
-		a = round4(a, b, c, d,  X[8],  6, 0x6fa87e4f);
-		d = round4(d, a, b, c, X[15], 10, 0xfe2ce6e0);
-		c = round4(c, d, a, b,  X[6], 15, 0xa3014314);
-		b = round4(b, c, d, a, X[13], 21, 0x4e0811a1);
-		a = round4(a, b, c, d,  X[4],  6, 0xf7537e82);
-		d = round4(d, a, b, c, X[11], 10, 0xbd3af235);
-		c = round4(c, d, a, b,  X[2], 15, 0x2ad7d2bb);
-		b = round4(b, c, d, a,  X[9], 21, 0xeb86d391);
-		
-		/* Then perform the following additions. (That is increment each
-		   of the four registers by the value it had before this block
-		   was started.) */
-		a += aSaved;
-		b += bSaved;
-		c += cSaved;
-		d += dSaved;
+		else			/* dynamic big-endian */
+		{
+			/*
+			* On little-endian machines, we can process properly aligned
+			* data without copying it.
+			*/
+			if (!((data - (const md5_byte_t *)0) & 3)) {
+				/* data are properly aligned */
+				X = (const md5_word_t *)data;
+			} else {
+				/* not aligned */
+				memcpy(xbuf, data, 64);
+				X = xbuf;
+			}
+		}
 	}
-	
+
+#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
+
+    /* Round 1. */
+    /* Let [abcd k s i] denote the operation
+       a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
+#define F(x, y, z) (((x) & (y)) | (~(x) & (z)))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + F(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+    /* Do the following 16 operations. */
+    SET(a, b, c, d,  0,  7,  T1);
+    SET(d, a, b, c,  1, 12,  T2);
+    SET(c, d, a, b,  2, 17,  T3);
+    SET(b, c, d, a,  3, 22,  T4);
+    SET(a, b, c, d,  4,  7,  T5);
+    SET(d, a, b, c,  5, 12,  T6);
+    SET(c, d, a, b,  6, 17,  T7);
+    SET(b, c, d, a,  7, 22,  T8);
+    SET(a, b, c, d,  8,  7,  T9);
+    SET(d, a, b, c,  9, 12, T10);
+    SET(c, d, a, b, 10, 17, T11);
+    SET(b, c, d, a, 11, 22, T12);
+    SET(a, b, c, d, 12,  7, T13);
+    SET(d, a, b, c, 13, 12, T14);
+    SET(c, d, a, b, 14, 17, T15);
+    SET(b, c, d, a, 15, 22, T16);
+#undef SET
+
+     /* Round 2. */
+     /* Let [abcd k s i] denote the operation
+          a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
+#define G(x, y, z) (((x) & (z)) | ((y) & ~(z)))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + G(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+     /* Do the following 16 operations. */
+    SET(a, b, c, d,  1,  5, T17);
+    SET(d, a, b, c,  6,  9, T18);
+    SET(c, d, a, b, 11, 14, T19);
+    SET(b, c, d, a,  0, 20, T20);
+    SET(a, b, c, d,  5,  5, T21);
+    SET(d, a, b, c, 10,  9, T22);
+    SET(c, d, a, b, 15, 14, T23);
+    SET(b, c, d, a,  4, 20, T24);
+    SET(a, b, c, d,  9,  5, T25);
+    SET(d, a, b, c, 14,  9, T26);
+    SET(c, d, a, b,  3, 14, T27);
+    SET(b, c, d, a,  8, 20, T28);
+    SET(a, b, c, d, 13,  5, T29);
+    SET(d, a, b, c,  2,  9, T30);
+    SET(c, d, a, b,  7, 14, T31);
+    SET(b, c, d, a, 12, 20, T32);
+#undef SET
+
+     /* Round 3. */
+     /* Let [abcd k s t] denote the operation
+          a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
+#define H(x, y, z) ((x) ^ (y) ^ (z))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + H(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+     /* Do the following 16 operations. */
+    SET(a, b, c, d,  5,  4, T33);
+    SET(d, a, b, c,  8, 11, T34);
+    SET(c, d, a, b, 11, 16, T35);
+    SET(b, c, d, a, 14, 23, T36);
+    SET(a, b, c, d,  1,  4, T37);
+    SET(d, a, b, c,  4, 11, T38);
+    SET(c, d, a, b,  7, 16, T39);
+    SET(b, c, d, a, 10, 23, T40);
+    SET(a, b, c, d, 13,  4, T41);
+    SET(d, a, b, c,  0, 11, T42);
+    SET(c, d, a, b,  3, 16, T43);
+    SET(b, c, d, a,  6, 23, T44);
+    SET(a, b, c, d,  9,  4, T45);
+    SET(d, a, b, c, 12, 11, T46);
+    SET(c, d, a, b, 15, 16, T47);
+    SET(b, c, d, a,  2, 23, T48);
+#undef SET
+
+     /* Round 4. */
+     /* Let [abcd k s t] denote the operation
+          a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
+#define I(x, y, z) ((y) ^ ((x) | ~(z)))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + I(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+     /* Do the following 16 operations. */
+    SET(a, b, c, d,  0,  6, T49);
+    SET(d, a, b, c,  7, 10, T50);
+    SET(c, d, a, b, 14, 15, T51);
+    SET(b, c, d, a,  5, 21, T52);
+    SET(a, b, c, d, 12,  6, T53);
+    SET(d, a, b, c,  3, 10, T54);
+    SET(c, d, a, b, 10, 15, T55);
+    SET(b, c, d, a,  1, 21, T56);
+    SET(a, b, c, d,  8,  6, T57);
+    SET(d, a, b, c, 15, 10, T58);
+    SET(c, d, a, b,  6, 15, T59);
+    SET(b, c, d, a, 13, 21, T60);
+    SET(a, b, c, d,  4,  6, T61);
+    SET(d, a, b, c, 11, 10, T62);
+    SET(c, d, a, b,  2, 15, T63);
+    SET(b, c, d, a,  9, 21, T64);
+#undef SET
+
+     /* Then perform the following additions. (That is increment each
+        of the four registers by the value it had before this block
+        was started.) */
+    pms->abcd[0] += a;
+    pms->abcd[1] += b;
+    pms->abcd[2] += c;
+    pms->abcd[3] += d;
+}
+
+void
+md5_init(md5_state_t *pms)
+{
+    pms->count[0] = pms->count[1] = 0;
+    pms->abcd[0] = 0x67452301;
+    pms->abcd[1] = /*0xefcdab89*/ T_MASK ^ 0x10325476;
+    pms->abcd[2] = /*0x98badcfe*/ T_MASK ^ 0x67452301;
+    pms->abcd[3] = 0x10325476;
+}
+
+void
+md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
+{
+    const md5_byte_t *p = data;
+    int left = nbytes;
+    int offset = (pms->count[0] >> 3) & 63;
+    md5_word_t nbits = (md5_word_t)(nbytes << 3);
+
+    if (nbytes <= 0)
+	return;
+
+    /* Update the message length. */
+    pms->count[1] += nbytes >> 29;
+    pms->count[0] += nbits;
+    if (pms->count[0] < nbits)
+	pms->count[1]++;
+
+    /* Process an initial partial block. */
+    if (offset) {
+	int copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
+
+	memcpy(pms->buf + offset, p, copy);
+	if (offset + copy < 64)
+	    return;
+	p += copy;
+	left -= copy;
+	md5_process(pms, pms->buf);
+    }
+
+    /* Process full blocks. */
+    for (; left >= 64; p += 64, left -= 64)
+	md5_process(pms, p);
+
+    /* Process a final partial block. */
+    if (left)
+	memcpy(pms->buf, p, left);
+}
+
+void
+md5_finish(md5_state_t *pms, md5_byte_t digest[16])
+{
+    static const md5_byte_t pad[64] = {
+	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+    md5_byte_t data[8];
+    int i;
+
+    /* Save the length before padding. */
+    for (i = 0; i < 8; ++i)
+	data[i] = (md5_byte_t)(pms->count[i >> 2] >> ((i & 3) << 3));
+    /* Pad to 56 bytes mod 64. */
+    md5_append(pms, pad, ((55 - (pms->count[0] >> 3)) & 63) + 1);
+    /* Append the length. */
+    md5_append(pms, data, 8);
+    for (i = 0; i < 16; ++i)
+	digest[i] = (md5_byte_t)(pms->abcd[i >> 2] >> ((i & 3) << 3));
+}
+
+class DefaultMD5Context : public HashContext
+{
+public:
+	DefaultMD5Context(Provider *p) : HashContext(p, "md5")
+	{
+		clear();
+	}
+
+	virtual Provider::Context *clone() const
+	{
+		return new DefaultMD5Context(*this);
+	}
+
+	virtual void clear()
+	{
+		md5_init(&md5);
+	}
+
+	virtual void update(const QSecureArray &in)
+	{
+		md5_append(&md5, (const md5_byte_t *)in.data(), in.size());
+	}
+
+	virtual QSecureArray final()
+	{
+		QSecureArray b(16);
+		md5_finish(&md5, (md5_byte_t *)b.data());
+		return b;
+	}
+
+	md5_state_t md5;
 };
 
+//----------------------------------------------------------------------------
+// DefaultSHA1Context
+//----------------------------------------------------------------------------
+
+// SHA1 - from a public domain implementation by Steve Reid (steve@edmweb.com)
+
+#define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
+#define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15]^block->l[(i+2)&15]^block->l[i&15],1))
+
+/* (R0+R1), R2, R3, R4 are the different operations used in SHA1 */
+#define R0(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(i)+0x5A827999+rol(v,5);w=rol(w,30);
+#define R1(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(i)+0x5A827999+rol(v,5);w=rol(w,30);
+#define R2(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0x6ED9EBA1+rol(v,5);w=rol(w,30);
+#define R3(v,w,x,y,z,i) z+=(((w|x)&y)|(w&x))+blk(i)+0x8F1BBCDC+rol(v,5);w=rol(w,30);
+#define R4(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0xCA62C1D6+rol(v,5);w=rol(w,30);
+
+struct SHA1_CONTEXT
+{
+	QSecureArray sbuf;
+	quint32 *state; // 5
+	quint32 *count; // 2
+	unsigned char *buffer; // 64
+
+	SHA1_CONTEXT()
+	{
+		sbuf.resize((7 * sizeof(quint32)) + 64);
+		setup();
+	}
+	
+	SHA1_CONTEXT(const SHA1_CONTEXT &from)
+	{
+		*this = from;
+	}
+	
+	SHA1_CONTEXT & operator=(const SHA1_CONTEXT &from)
+	{
+		sbuf = from.sbuf;
+		setup();
+		return *this;
+	}
+	
+	inline void setup()
+	{
+		char *p = sbuf.data();
+		state = (quint32 *)p;
+		count = (quint32 *)(p + (5 * sizeof(quint32)));
+		buffer = (unsigned char *)(p + (7 * sizeof(quint32)));
+	}
+};
+
+typedef union {
+	unsigned char c[64];
+	quint32 l[16];
+} CHAR64LONG16;
+
+class DefaultSHA1Context : public HashContext
+{
+public:
+	SHA1_CONTEXT _context;
+	CHAR64LONG16* block;
+
+	DefaultSHA1Context(Provider *p) : HashContext(p, "sha1")
+	{
+		clear();
+	}
+
+	virtual Provider::Context *clone() const
+	{
+		return new DefaultSHA1Context(*this);
+	}
+
+	virtual void clear()
+	{
+		sha1_init(&_context);
+	}
+
+	virtual void update(const QSecureArray &in)
+	{
+		sha1_update(&_context, (unsigned char *)in.data(), (unsigned int)in.size());
+	}
+
+	virtual QSecureArray final()
+	{
+		QSecureArray b(20);
+		sha1_final((unsigned char *)b.data(), &_context);
+		return b;
+	}
+
+	inline unsigned long blk0(quint32 i)
+	{
+		if(QSysInfo::ByteOrder == QSysInfo::BigEndian)
+			return block->l[i];
+		else
+			return (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) | (rol(block->l[i],8)&0x00FF00FF));
+	}
+
+	// Hash a single 512-bit block. This is the core of the algorithm.
+	void transform(quint32 state[5], unsigned char buffer[64])
+	{
+		quint32 a, b, c, d, e;
+
+		block = (CHAR64LONG16*)buffer;
+
+		// Copy context->state[] to working vars
+		a = state[0];
+		b = state[1];
+		c = state[2];
+		d = state[3];
+		e = state[4];
+
+		// 4 rounds of 20 operations each. Loop unrolled.
+		R0(a,b,c,d,e, 0); R0(e,a,b,c,d, 1); R0(d,e,a,b,c, 2); R0(c,d,e,a,b, 3);
+		R0(b,c,d,e,a, 4); R0(a,b,c,d,e, 5); R0(e,a,b,c,d, 6); R0(d,e,a,b,c, 7);
+		R0(c,d,e,a,b, 8); R0(b,c,d,e,a, 9); R0(a,b,c,d,e,10); R0(e,a,b,c,d,11);
+		R0(d,e,a,b,c,12); R0(c,d,e,a,b,13); R0(b,c,d,e,a,14); R0(a,b,c,d,e,15);
+		R1(e,a,b,c,d,16); R1(d,e,a,b,c,17); R1(c,d,e,a,b,18); R1(b,c,d,e,a,19);
+		R2(a,b,c,d,e,20); R2(e,a,b,c,d,21); R2(d,e,a,b,c,22); R2(c,d,e,a,b,23);
+		R2(b,c,d,e,a,24); R2(a,b,c,d,e,25); R2(e,a,b,c,d,26); R2(d,e,a,b,c,27);
+		R2(c,d,e,a,b,28); R2(b,c,d,e,a,29); R2(a,b,c,d,e,30); R2(e,a,b,c,d,31);
+		R2(d,e,a,b,c,32); R2(c,d,e,a,b,33); R2(b,c,d,e,a,34); R2(a,b,c,d,e,35);
+		R2(e,a,b,c,d,36); R2(d,e,a,b,c,37); R2(c,d,e,a,b,38); R2(b,c,d,e,a,39);
+		R3(a,b,c,d,e,40); R3(e,a,b,c,d,41); R3(d,e,a,b,c,42); R3(c,d,e,a,b,43);
+		R3(b,c,d,e,a,44); R3(a,b,c,d,e,45); R3(e,a,b,c,d,46); R3(d,e,a,b,c,47);
+		R3(c,d,e,a,b,48); R3(b,c,d,e,a,49); R3(a,b,c,d,e,50); R3(e,a,b,c,d,51);
+		R3(d,e,a,b,c,52); R3(c,d,e,a,b,53); R3(b,c,d,e,a,54); R3(a,b,c,d,e,55);
+		R3(e,a,b,c,d,56); R3(d,e,a,b,c,57); R3(c,d,e,a,b,58); R3(b,c,d,e,a,59);
+		R4(a,b,c,d,e,60); R4(e,a,b,c,d,61); R4(d,e,a,b,c,62); R4(c,d,e,a,b,63);
+		R4(b,c,d,e,a,64); R4(a,b,c,d,e,65); R4(e,a,b,c,d,66); R4(d,e,a,b,c,67);
+		R4(c,d,e,a,b,68); R4(b,c,d,e,a,69); R4(a,b,c,d,e,70); R4(e,a,b,c,d,71);
+		R4(d,e,a,b,c,72); R4(c,d,e,a,b,73); R4(b,c,d,e,a,74); R4(a,b,c,d,e,75);
+		R4(e,a,b,c,d,76); R4(d,e,a,b,c,77); R4(c,d,e,a,b,78); R4(b,c,d,e,a,79);
+
+		// Add the working vars back into context.state[]
+		state[0] += a;
+		state[1] += b;
+		state[2] += c;
+		state[3] += d;
+		state[4] += e;
+
+		// Wipe variables
+		a = b = c = d = e = 0;
+	}
+
+	// SHA1Init - Initialize new context
+	void sha1_init(SHA1_CONTEXT* context)
+	{
+		// SHA1 initialization constants
+		context->state[0] = 0x67452301;
+		context->state[1] = 0xEFCDAB89;
+		context->state[2] = 0x98BADCFE;
+		context->state[3] = 0x10325476;
+		context->state[4] = 0xC3D2E1F0;
+		context->count[0] = context->count[1] = 0;
+	}
+
+	// Run your data through this
+	void sha1_update(SHA1_CONTEXT* context, unsigned char* data, quint32 len)
+	{
+		quint32 i, j;
+
+		j = (context->count[0] >> 3) & 63;
+		if((context->count[0] += len << 3) < (len << 3))
+			context->count[1]++;
+
+		context->count[1] += (len >> 29);
+
+		if((j + len) > 63) {
+			memcpy(&context->buffer[j], data, (i = 64-j));
+			transform(context->state, context->buffer);
+			for ( ; i + 63 < len; i += 64) {
+				transform(context->state, &data[i]);
+			}
+			j = 0;
+		}
+		else i = 0;
+			memcpy(&context->buffer[j], &data[i], len - i);
+	}
+
+	// Add padding and return the message digest
+	void sha1_final(unsigned char digest[20], SHA1_CONTEXT* context)
+	{
+		quint32 i, j;
+		unsigned char finalcount[8];
+
+		for (i = 0; i < 8; i++) {
+			finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)]
+			>> ((3-(i & 3)) * 8) ) & 255);  // Endian independent
+		}
+		sha1_update(context, (unsigned char *)"\200", 1);
+		while ((context->count[0] & 504) != 448) {
+			sha1_update(context, (unsigned char *)"\0", 1);
+		}
+		sha1_update(context, finalcount, 8);  // Should cause a transform()
+		for (i = 0; i < 20; i++) {
+			digest[i] = (unsigned char) ((context->state[i>>2] >> ((3-(i & 3)) * 8) ) & 255);
+		}
+
+		// Wipe variables
+		i = j = 0;
+		memset(context->buffer, 0, 64);
+		memset(context->state, 0, 20);
+		memset(context->count, 0, 8);
+		memset(&finalcount, 0, 8);
+	}
+};
+
+//----------------------------------------------------------------------------
+// DefaultKeyStoreEntry
+//----------------------------------------------------------------------------
 class DefaultKeyStoreEntry : public KeyStoreEntryContext
 {
 public:
@@ -465,6 +776,9 @@ public:
 	}
 };
 
+//----------------------------------------------------------------------------
+// DefaultKeyStore
+//----------------------------------------------------------------------------
 class DefaultKeyStore : public KeyStoreContext
 {
 	Q_OBJECT
@@ -531,6 +845,9 @@ public:
 	}
 };
 
+//----------------------------------------------------------------------------
+// DefaultKeyStoreList
+//----------------------------------------------------------------------------
 class DefaultKeyStoreList : public KeyStoreListContext
 {
 	Q_OBJECT
@@ -566,6 +883,9 @@ public:
 	}
 };
 
+//----------------------------------------------------------------------------
+// DefaultProvider
+//----------------------------------------------------------------------------
 class DefaultProvider : public Provider
 {
 public:
@@ -589,6 +909,7 @@ public:
 		QStringList list;
 		list += "random";
 		list += "md5";
+		list += "sha1";
 		list += "keystorelist";
 		return list;
 	}
@@ -599,6 +920,8 @@ public:
 			return new DefaultRandomContext(this);
 		else if(type == "md5")
 			return new DefaultMD5Context(this);
+		else if(type == "sha1")
+			return new DefaultSHA1Context(this);
 		else if(type == "keystorelist")
 			return new DefaultKeyStoreList(this);
 		else

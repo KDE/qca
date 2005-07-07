@@ -22,9 +22,8 @@
   printf + latin1()/toLatin1() -> qPrintable() ? (in code, examples, docs, etc)
 
 * for tech preview
-  api:
-    ensure PGPKey and SASL are proper
-  default md5/sha1, resolve any endian problems
+  ensure PGPKey and SASL are proper
+  cleanup smime/pgp plugin code
 
 * finish code for APIs:
   proper parenting of all objects
@@ -43,8 +42,6 @@
   keystore: cleanup
   sasl
   securemessage
-  default provider: sha1
-  fix default md5 provider - broken on big endian.
 
 * examples
   create example for BigInteger
