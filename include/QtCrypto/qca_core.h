@@ -525,7 +525,7 @@ namespace QCA
 		/**
 		   Internal context class used for the plugin
 		*/
-		class Context
+		class QCA_EXPORT Context
 		{
 		public:
 			/**

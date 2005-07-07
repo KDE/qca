@@ -22,12 +22,8 @@
   printf + latin1()/toLatin1() -> qPrintable() ? (in code, examples, docs, etc)
 
 * for tech preview
-  plugins:
-    qca-gnupg: pgp key/sign/encrypt/verify/decrypt
   api:
     ensure PGPKey and SASL are proper
-  other:
-    fix the windows build
   default md5/sha1, resolve any endian problems
 
 * finish code for APIs:

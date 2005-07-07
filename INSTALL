@@ -1,14 +1,17 @@
 Installing QCA
 --------------
 
-Installation should be straightforward:
+For Unix/Linux/Mac:
+
   ./configure
   make
   make install
 
-NOTE: You may also need to run '/sbin/ldconfig' or a similar tool to
-      get the new library files recognized by the system.  If you are
-      using Linux, just run it for good measure.
+For Windows:
+
+  qmake qca.pro
+  nmake (or make)
+
 
 Please report problems to:
   delta-affinix.com@lists.affinix.com

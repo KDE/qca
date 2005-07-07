@@ -6,6 +6,7 @@ QCA_SRCBASE = .
 
 TEMPLATE = lib
 #CONFIG  += release
+CONFIG  += debug
 QT      -= gui
 TARGET   = qca
 DESTDIR  = $$QCA_BASE
@@ -78,14 +79,15 @@ mac: {
 	LIBS += -framework Carbon -framework Security
 }
 
-include($$QCA_BASE/conf.pri)
+unix: {
+	include($$QCA_BASE/conf.pri)
 
-# install
-target.path = $$LIBDIR
-INSTALLS += target
+	# install
+	target.path = $$LIBDIR
+	INSTALLS += target
 
-incfiles.path = $$PREFIX/include/QtCrypto
-incfiles.files = $$PUBLIC_HEADERS
-incfiles.files += $$QCA_INC/qca.h $$QCA_INC/QtCrypto
-INSTALLS += incfiles
-
+	incfiles.path = $$PREFIX/include/QtCrypto
+	incfiles.files = $$PUBLIC_HEADERS
+	incfiles.files += $$QCA_INC/qca.h $$QCA_INC/QtCrypto
+	INSTALLS += incfiles
+}
