@@ -29,28 +29,32 @@ namespace QCA {
 class ProviderItem
 {
 public:
-	Provider *p;
 	QString fname;
+	Provider *p;
 	int priority;
 
 	static ProviderItem *load(const QString &fname)
 	{
+		//printf("trying to load [%s]\n", qPrintable(fname));
 		QPluginLoader *lib = new QPluginLoader(fname);
 		QCAPlugin *plugin = qobject_cast<QCAPlugin*>(lib->instance());
 		if(!plugin || plugin->version() != QCA_PLUGIN_VERSION)
 		{
+			delete plugin;
 			delete lib;
 			return 0;
 		}
+		//printf("success\n");
 
 		Provider *p = plugin->createProvider();
 		if(!p)
 		{
+			delete plugin;
 			delete lib;
 			return 0;
 		}
 
-		ProviderItem *i = new ProviderItem(lib, p);
+		ProviderItem *i = new ProviderItem(lib, plugin, p);
 		i->fname = fname;
 		return i;
 	}
@@ -59,25 +63,32 @@ public:
 	{
 		QCAPlugin *plugin = qobject_cast<QCAPlugin*>(instance);
 		if(!plugin || plugin->version() != QCA_PLUGIN_VERSION)
+		{
+			delete plugin;
 			return 0;
+		}
 
 		Provider *p = plugin->createProvider();
 		if(!p)
+		{
+			delete plugin;
 			return 0;
+		}
 
-		ProviderItem *i = new ProviderItem(0, p);
+		ProviderItem *i = new ProviderItem(0, plugin, p);
 		return i;
 	}
 
 	static ProviderItem *fromClass(Provider *p)
 	{
-		ProviderItem *i = new ProviderItem(0, p);
+		ProviderItem *i = new ProviderItem(0, 0, p);
 		return i;
 	}
 
 	~ProviderItem()
 	{
 		delete p;
+		delete qcaPlugin;
 		delete lib;
 	}
 
@@ -91,13 +102,21 @@ public:
 
 private:
 	QPluginLoader *lib;
+	QCAPlugin *qcaPlugin;
 	bool init_done;
 
-	ProviderItem(QPluginLoader *_lib, Provider *_p)
+	ProviderItem(QPluginLoader *_lib, QCAPlugin *_qcaPlugin, Provider *_p)
 	{
 		lib = _lib;
+		qcaPlugin = _qcaPlugin;
 		p = _p;
 		init_done = false;
+
+		// disassociate from threads
+		if(qcaPlugin)
+			qcaPlugin->moveToThread(0);
+		if(lib)
+			lib->moveToThread(0);
 	}
 };
 
@@ -152,6 +171,20 @@ void ProviderManager::scan()
 			if(fi.isDir())
 				continue;
 			QString fname = fi.filePath();
+
+			// make sure we haven't loaded this file before
+			bool haveFile = false;
+			for(int n = 0; n < providerItemList.count(); ++n)
+			{
+				ProviderItem *pi = providerItemList[n];
+				if(!pi->fname.isEmpty() && pi->fname == fname)
+				{
+					haveFile = true;
+					break;
+				}
+			}
+			if(haveFile)
+				continue;
 
 			ProviderItem *i = ProviderItem::load(fname);
 			if(!i)
