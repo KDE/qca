@@ -42,21 +42,14 @@ namespace QCA
 		SL_Highest    ///< SL_High or max possible, whichever is greater
 	};
 
-	// securefilter basic rule: after calling a function that might
-	//  affect something, call others to get the results.
-	//
-	// write: call readOutgoing
-	// writeIncoming: call haveClosed/ok, read, and readOutgoing
-	// close: call haveClosed/ok and readOutgoing
-	// haveClosed: if Closed, call readUnprocessed
-	class QCA_EXPORT SecureFilter
+	// generic interface to a security layer
+	class QCA_EXPORT SecureLayer : public QObject
 	{
+		Q_OBJECT
 	public:
-		virtual ~SecureFilter();
+		SecureLayer(QObject *parent = 0);
 
 		virtual bool isClosable() const;
-		virtual bool haveClosed() const;
-		virtual bool ok() const = 0;
 		virtual int bytesAvailable() const = 0;
 		virtual int bytesOutgoingAvailable() const = 0;
 		virtual void close();
@@ -69,33 +62,12 @@ namespace QCA
 		virtual void writeIncoming(const QByteArray &a) = 0;
 		virtual QByteArray readOutgoing(int *plainBytes = 0) = 0;
 		virtual QByteArray readUnprocessed();
-	};
-
-	// securelayer - "nicer" interface, using signals.  subclass
-	//  should call layerUpdateBegin/End before and after write,
-	//  writeIncoming, or close.
-	class QCA_EXPORT SecureLayer : public QObject, public SecureFilter
-	{
-		Q_OBJECT
-	public:
-		SecureLayer(QObject *parent = 0);
-
-		void setStatefulOnly(bool b);
-
-	protected:
-		void layerUpdateBegin();
-		void layerUpdateEnd();
 
 	signals:
 		void readyRead();
 		void readyReadOutgoing();
 		void closed();
 		void error();
-
-	private:
-		bool _signals;
-		int _read, _readout;
-		bool _closed, _error;
 	};
 
 	class QCA_EXPORT TLS : public SecureLayer, public Algorithm
@@ -110,6 +82,7 @@ namespace QCA
 		};
 		enum Error
 		{
+			ErrorInit,      ///< problem starting up TLS
 			ErrorHandshake, ///< problem during the negotiation
 			ErrorCrypt      ///< problem at anytime after
 		};
@@ -137,8 +110,8 @@ namespace QCA
 		static bool canCompress(const QString &provider = QString());
 		void setCompressionEnabled(bool b);
 
-		bool startClient(const QString &host = QString());
-		bool startServer();
+		void startClient(const QString &host = QString());
+		void startServer();
 
 		bool isHandshaken() const;
 		bool isCompressed() const;
@@ -155,8 +128,6 @@ namespace QCA
 
 		// reimplemented
 		virtual bool isClosable() const;
-		virtual bool haveClosed() const;
-		virtual bool ok() const;
 		virtual int bytesAvailable() const;
 		virtual int bytesOutgoingAvailable() const;
 		virtual void close();
@@ -204,33 +175,25 @@ namespace QCA
 		*/
 		enum Error
 		{
-			ErrAuth, ///< problem during the authentication process
-			ErrCrypt ///< problem at anytime after
+			ErrorInit,      ///< problem starting up SASL
+			ErrorHandshake, ///< problem during the authentication process
+			ErrorCrypt      ///< problem at anytime after
 		};
 
 		/**
 		   Possible authentication error states
 
-These don't appear to map:
-SASL_FAIL      (-1)  generic failure
-SASL_NOMEM     (-2)  memory shortage failure
-SASL_BUFOVER   (-3)  overflowed buffer
-SASL_NOTDONE   (-6)  can't request info until later in exchange
-SASL_BADPARAM  (-7)  invalid parameter supplied
-SASL_TRYAGAIN  (-8)  transient failure (e.g., weak key)
-SASL_BADMAC    (-9)  integrity check failed
-                             -- client only codes --
-SASL_INTERACT   (2)  needs user interaction
-SASL_WRONGMECH (-11) mechanism doesn't support requested feature
-SASL_NEWSECRET (-12) new secret needed
-                              -- server only codes --
-SASL_TRANS     (-17) One time use of a plaintext password will
-                                enable requested mechanism for user
-SASL_PWLOCK    (-21) password locked
-SASL_NOCHANGE  (-22) requested change was not needed
-SASL_BADVERS   (-23) version mismatch with plug-in
-
-SASL_NOPATH    (-25) path not set
+		These don't appear to map:
+		SASL_TRYAGAIN  (-8)  transient failure (e.g., weak key)
+		SASL_BADMAC    (-9)  integrity check failed
+			-- client only codes --
+		SASL_WRONGMECH (-11) mechanism doesn't support requested feature
+		SASL_NEWSECRET (-12) new secret needed
+			-- server only codes --
+		SASL_TRANS     (-17) One time use of a plaintext password will
+			enable requested mechanism for user
+		SASL_PWLOCK    (-21) password locked
+		SASL_NOCHANGE  (-22) requested change was not needed
 		*/
 		enum AuthCondition
 		{
@@ -246,7 +209,6 @@ SASL_NOPATH    (-25) path not set
 			NoUser,       ///< User not found (server side only)
 			RemoteUnavail
 		};
-
 
 		/**
 		   Authentication requirement flag values
@@ -396,7 +358,7 @@ SASL_NOPATH    (-25) path not set
 		   \param mechlist the list of mechanisms which can be used
 		   \param ClientSendMode the mode to use on the client side
 		*/
-		bool startClient(const QString &service, const QString &host, const QStringList &mechlist, enum ClientSendMode = AllowClientSendFirst);
+		void startClient(const QString &service, const QString &host, const QStringList &mechlist, enum ClientSendMode = AllowClientSendFirst);
 
 		/**
 		   Initialise the server side of the connection
@@ -409,7 +371,7 @@ SASL_NOPATH    (-25) path not set
 		   \param mechlist the list of available mechanisms
 		   \param ServerSendMode which mode to use on the server side
 		*/
-		bool startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, enum ServerSendMode = DisableServerSendLast);
+		void startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, enum ServerSendMode = DisableServerSendLast);
 
 		/**
 		   FIXME: Justin to complete
@@ -480,12 +442,6 @@ SASL_NOPATH    (-25) path not set
 		// reimplemented
 
 		/**
-		   FIXME: Justin to complete
-		   
-		*/
-		virtual bool ok() const;
-
-		/**
 		   test how many (if any) bytes are available
 		*/
 		virtual int bytesAvailable() const;
@@ -495,10 +451,6 @@ SASL_NOPATH    (-25) path not set
 		*/
 		virtual int bytesOutgoingAvailable() const;
 
-		/**
-		   Close the current SASL connection
-		*/
-		virtual void close();
 		virtual void write(const QByteArray &a);
 		virtual QByteArray read();
 
