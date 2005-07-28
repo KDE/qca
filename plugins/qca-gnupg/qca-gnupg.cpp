@@ -171,7 +171,7 @@ class MyMessageContext;
 
 GpgOp *global_gpg;
 
-class MyKeyStore : public KeyStoreContext
+/*class MyKeyStore : public KeyStoreContext
 {
 	Q_OBJECT
 public:
@@ -278,9 +278,10 @@ public:
 	{
 		global_gpg->submitPassphrase(a.toByteArray());
 	}
-};
+};*/
 
 class MyKeyStoreList;
+class MyMessageContext;
 
 static MyKeyStoreList *keyStoreList = 0;
 
@@ -288,20 +289,21 @@ class MyKeyStoreList : public KeyStoreListContext
 {
 	Q_OBJECT
 public:
-	MyKeyStore *ks;
+	friend class MyMessageContext;
+	//MyKeyStore *ks;
 
 	MyKeyStoreList(Provider *p) : KeyStoreListContext(p)
 	{
 		keyStoreList = this;
 
-		ks = 0;
+		//ks = 0;
 
-		ks = new MyKeyStore(provider());
+		//ks = new MyKeyStore(provider());
 	}
 
 	~MyKeyStoreList()
 	{
-		delete ks;
+		//delete ks;
 
 		keyStoreList = 0;
 	}
@@ -311,12 +313,111 @@ public:
 		return 0;
 	}
 
-	virtual QList<KeyStoreContext*> keyStores() const
+	virtual void start()
 	{
-		QList<KeyStoreContext*> list;
-		if(ks)
-			list.append(ks);
+		QTimer::singleShot(0, this, SLOT(do_ready()));
+	}
+
+	virtual QList<int> keyStores() const
+	{
+		QList<int> list;
+		list += 0; // TODO
 		return list;
+	}
+
+	virtual KeyStore::Type type(int) const
+	{
+		return KeyStore::PGPKeyring;
+	}
+
+	virtual QString storeId(int) const
+	{
+		// TODO
+		return "qca-gnupg-(gpg)";
+	}
+
+	virtual QString name(int) const
+	{
+		return "GnuPG Keyring";
+	}
+
+	virtual QList<KeyStoreEntry::Type> entryTypes(int) const
+	{
+		QList<KeyStoreEntry::Type> list;
+		list += KeyStoreEntry::TypePGPSecretKey;
+		list += KeyStoreEntry::TypePGPPublicKey;
+		return list;
+	}
+
+	virtual QList<KeyStoreEntryContext*> entryList(int) const
+	{
+		QList<KeyStoreEntryContext*> out;
+
+		GpgOp::KeyList seckeys;
+		{
+			GpgOp gpg(find_bin());
+			gpg.doSecretKeys();
+			while(1)
+			{
+				GpgOp::Event e = gpg.waitForEvent(-1);
+				if(e.type == GpgOp::Event::Finished)
+					break;
+			}
+			if(!gpg.success())
+				return out;
+			seckeys = gpg.keys();
+		}
+
+		GpgOp::KeyList pubkeys;
+		{
+			GpgOp gpg(find_bin());
+			gpg.doPublicKeys();
+			while(1)
+			{
+				GpgOp::Event e = gpg.waitForEvent(-1);
+				if(e.type == GpgOp::Event::Finished)
+					break;
+			}
+			if(!gpg.success())
+				return out;
+			pubkeys = gpg.keys();
+		}
+
+		for(int n = 0; n < pubkeys.count(); ++n)
+		{
+			QString id = pubkeys[n].keyItems.first().id;
+			MyPGPKeyContext *kc = new MyPGPKeyContext(provider());
+			kc->_props.keyId = id;
+			kc->_props.userIds = QStringList() << pubkeys[n].userIds.first();
+			PGPKey pub, sec;
+			pub.change(kc);
+			for(int i = 0; i < seckeys.count(); ++i)
+			{
+				if(seckeys[i].keyItems.first().id == id)
+				{
+					MyPGPKeyContext *kc = new MyPGPKeyContext(provider());
+					kc->_props.keyId = id;
+					kc->_props.userIds = QStringList() << pubkeys[n].userIds.first();
+					sec.change(kc);
+				}
+			}
+
+			MyKeyStoreEntry *c = new MyKeyStoreEntry(pub, sec, provider());
+			out.append(c);
+		}
+
+		return out;
+	}
+
+	virtual void submitPassphrase(int, const QSecureArray &a)
+	{
+		global_gpg->submitPassphrase(a.toByteArray());
+	}
+
+private slots:
+	void do_ready()
+	{
+		emit busyEnd();
 	}
 };
 
@@ -415,7 +516,8 @@ public:
 			GpgOp::Event e = gpg.waitForEvent(-1);
 			if(e.type == GpgOp::Event::NeedPassphrase)
 			{
-				emit keyStoreList->ks->needPassphrase();
+				// TODO
+				emit keyStoreList->storeNeedPassphrase(keyStoreList, 0);
 			}
 			else if(e.type == GpgOp::Event::Finished)
 				break;
