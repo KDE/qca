@@ -1442,7 +1442,7 @@ public:
 	RSA *result;
 	int bits, exp;
 
-	RSAKeyMaker(int _bits, int _exp) : result(0), bits(_bits), exp(_exp)
+	RSAKeyMaker(int _bits, int _exp, QObject *parent = 0) : QThread(parent), result(0), bits(_bits), exp(_exp)
 	{
 	}
 
@@ -1615,6 +1615,10 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
+		else if(alg == EMSA3_Raw)
+		{
+			// TODO
+		}
 		evp.startSign(md);
 	}
 
@@ -1629,6 +1633,10 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
+		else if(alg == EMSA3_Raw)
+		{
+			// TODO
+		}
 		evp.startVerify(md);
 	}
 
@@ -1651,7 +1659,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new RSAKeyMaker(bits, exp);
+		keymaker = new RSAKeyMaker(bits, exp, this);
 		wasBlocking = block;
 		if(block)
 		{
@@ -1763,7 +1771,7 @@ public:
 	DLGroup domain;
 	DSA *result;
 
-	DSAKeyMaker(const DLGroup &_domain) : domain(_domain), result(0)
+	DSAKeyMaker(const DLGroup &_domain, QObject *parent = 0) : QThread(parent), domain(_domain), result(0)
 	{
 	}
 
@@ -1929,7 +1937,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new DSAKeyMaker(domain);
+		keymaker = new DSAKeyMaker(domain, this);
 		wasBlocking = block;
 		if(block)
 		{
@@ -2033,7 +2041,7 @@ public:
 	DLGroup domain;
 	DH *result;
 
-	DHKeyMaker(const DLGroup &_domain) : domain(_domain), result(0)
+	DHKeyMaker(const DLGroup &_domain, QObject *parent = 0) : QThread(parent), domain(_domain), result(0)
 	{
 	}
 
@@ -2155,7 +2163,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new DHKeyMaker(domain);
+		keymaker = new DHKeyMaker(domain, this);
 		wasBlocking = block;
 		if(block)
 		{
@@ -2246,6 +2254,142 @@ private slots:
 			emit finished();
 	}
 };
+
+//----------------------------------------------------------------------------
+// QCA-based RSA_METHOD
+//----------------------------------------------------------------------------
+
+// only supports EMSA3_Raw for now
+class QCA_RSA_METHOD
+{
+public:
+	RSAPrivateKey key;
+
+	QCA_RSA_METHOD(RSAPrivateKey _key, RSA *rsa)
+	{
+		key = _key;
+		RSA_set_method(rsa, rsa_method());
+		rsa->flags |= RSA_FLAG_SIGN_VER;
+		RSA_set_app_data(rsa, this);
+		rsa->n = bi2bn(_key.n());
+		rsa->e = bi2bn(_key.e());
+	}
+
+	RSA_METHOD *rsa_method()
+	{
+		static RSA_METHOD *ops = 0;
+
+		if(!ops)
+		{
+			ops = new RSA_METHOD(*RSA_get_default_method());
+			ops->rsa_priv_enc = 0;//pkcs11_rsa_encrypt;
+			ops->rsa_priv_dec = 0;//pkcs11_rsa_decrypt;
+			ops->rsa_sign = rsa_sign;
+			ops->rsa_verify = 0;//pkcs11_rsa_verify;
+			ops->finish = rsa_finish;
+		}
+		return ops;
+	}
+
+	static int rsa_sign(int type, const unsigned char *m, unsigned int m_len, unsigned char *sigret, unsigned int *siglen, const RSA *rsa)
+	{
+		QCA_RSA_METHOD *self = (QCA_RSA_METHOD *)RSA_get_app_data(rsa);
+
+		// TODO: this is disgusting
+
+		unsigned char *p, *tmps = NULL;
+		const unsigned char *s = NULL;
+		int i,j;//,ret=1;
+
+		if(type == NID_md5_sha1)
+		{
+		}
+		else
+		{
+
+		// make X509 packet
+		X509_SIG sig;
+		ASN1_TYPE parameter;
+
+		X509_ALGOR algor;
+		ASN1_OCTET_STRING digest;
+		int rsa_size = RSA_size(rsa);
+		//int rsa_size = 128;
+		//CK_ULONG sigsize = rsa_size;
+
+		sig.algor= &algor;
+		sig.algor->algorithm=OBJ_nid2obj(type);
+		if (sig.algor->algorithm == NULL)
+		{
+			//RSAerr(RSA_F_RSA_SIGN,RSA_R_UNKNOWN_ALGORITHM_TYPE);
+			return 0;
+		}
+		if (sig.algor->algorithm->length == 0)
+		{
+			//RSAerr(RSA_F_RSA_SIGN,RSA_R_THE_ASN1_OBJECT_IDENTIFIER_IS_NOT_KNOWN_FOR_THIS_MD);
+			return 0;
+		}
+		parameter.type=V_ASN1_NULL;
+		parameter.value.ptr=NULL;
+		sig.algor->parameter= &parameter;
+
+		sig.digest= &digest;
+		sig.digest->data=(unsigned char *)m; /* TMP UGLY CAST */
+		sig.digest->length=m_len;
+
+		i=i2d_X509_SIG(&sig,NULL);
+
+		j=rsa_size;
+		if (i > (j-RSA_PKCS1_PADDING_SIZE))
+		{
+			//RSAerr(RSA_F_RSA_SIGN,RSA_R_DIGEST_TOO_BIG_FOR_RSA_KEY);
+			return 0;
+		}
+
+		tmps=(unsigned char *)OPENSSL_malloc((unsigned int)j+1);
+		if (tmps == NULL)
+		{
+			//RSAerr(RSA_F_RSA_SIGN,ERR_R_MALLOC_FAILURE);
+			return 0;
+		}
+		p=tmps;
+		i2d_X509_SIG(&sig,&p);
+		s=tmps;
+		m = s;
+		m_len = i;
+		}
+
+		QSecureArray input;
+		input.resize(m_len);
+		memcpy(input.data(), m, input.size());
+		QSecureArray result = self->key.signMessage(input, EMSA3_Raw);
+
+		if(tmps)
+		{
+			OPENSSL_cleanse(tmps,(unsigned int)j+1);
+			OPENSSL_free(tmps);
+		}
+
+		memcpy(sigret, result.data(), result.size());
+		*siglen = result.size();
+
+		return 1;
+	}
+
+	static int rsa_finish(RSA *rsa)
+	{
+		QCA_RSA_METHOD *self = (QCA_RSA_METHOD *)RSA_get_app_data(rsa);
+		delete self;
+		return 1;
+	}
+};
+
+static RSA *createFromExisting(const RSAPrivateKey &key)
+{
+	RSA *r = RSA_new();
+	new QCA_RSA_METHOD(key, r); // will delete itself on RSA_free
+	return r;
+}
 
 //----------------------------------------------------------------------------
 // MyPKeyContext
@@ -3501,6 +3645,12 @@ public:
 	Certificate cert, peercert; // TODO: support cert chains
 	PrivateKey key;
 
+	bool result_success;
+	Result result_handshakeResult;
+	QByteArray result_to_net;
+	int result_encoded;
+	QByteArray result_plain;
+
 	SSL *ssl;
 	SSL_METHOD *method;
 	SSL_CTX *context;
@@ -3596,7 +3746,41 @@ public:
 		Q_UNUSED(compress); // TODO
 	}
 
-	virtual bool startClient()
+	virtual void startClient()
+	{
+		result_success = priv_startClient();
+	}
+
+	virtual void startServer()
+	{
+		result_success = priv_startServer();
+	}
+
+	virtual void handshake(const QByteArray &from_net)
+	{
+		result_handshakeResult = priv_handshake(from_net, &result_to_net);
+		doResultsReady();
+	}
+
+	virtual void shutdown(const QByteArray &from_net)
+	{
+		result_handshakeResult = priv_shutdown(from_net, &result_to_net);
+		doResultsReady();
+	}
+
+	virtual void encode(const QByteArray &from_net)
+	{
+		result_success = priv_encode(from_net, &result_to_net, &result_encoded);
+		doResultsReady();
+	}
+
+	virtual void decode(const QByteArray &from_net)
+	{
+		result_success = priv_decode(from_net, &result_plain, &result_to_net);
+		doResultsReady();
+	}
+
+	bool priv_startClient()
 	{
 		serv = false;
 		method = SSLv23_client_method();
@@ -3606,7 +3790,7 @@ public:
 		return true;
 	}
 
-	virtual bool startServer()
+	bool priv_startServer()
 	{
 		serv = true;
 		method = SSLv23_server_method();
@@ -3616,7 +3800,7 @@ public:
 		return true;
 	}
 
-	virtual Result handshake(const QByteArray &from_net, QByteArray *to_net)
+	Result priv_handshake(const QByteArray &from_net, QByteArray *to_net)
 	{
 		if(!from_net.isEmpty())
 			BIO_write(rbio, from_net.data(), from_net.size());
@@ -3674,7 +3858,7 @@ public:
 			return Continue;
 	}
 
-	virtual Result shutdown(const QByteArray &from_net, QByteArray *to_net)
+	Result priv_shutdown(const QByteArray &from_net, QByteArray *to_net)
 	{
 		if(!from_net.isEmpty())
 			BIO_write(rbio, from_net.data(), from_net.size());
@@ -3700,7 +3884,7 @@ public:
 		}
 	}
 
-	virtual bool encode(const QByteArray &plain, QByteArray *to_net, int *enc)
+	bool priv_encode(const QByteArray &plain, QByteArray *to_net, int *enc)
 	{
 		if(mode != Active)
 			return false;
@@ -3751,7 +3935,7 @@ public:
 		return true;
 	}
 
-	virtual bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net)
+	bool priv_decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net)
 	{
 		if(mode != Active)
 			return false;
@@ -3786,6 +3970,41 @@ public:
 		// could be outgoing data also
 		*to_net = readOutgoing();
 		return true;
+	}
+
+	virtual void waitForResultsReady(int msecs)
+	{
+		// TODO: for now, all operations block anyway
+		Q_UNUSED(msecs);
+	}
+
+	virtual bool success() const
+	{
+		return result_success;
+	}
+
+	virtual Result handshakeResult() const
+	{
+		return result_handshakeResult;
+	}
+
+	virtual QByteArray to_net()
+	{
+		QByteArray a = result_to_net;
+		result_to_net.clear();
+		return a;
+	}
+
+	virtual int encoded() const
+	{
+		return result_encoded;
+	}
+
+	virtual QByteArray plain()
+	{
+		QByteArray a = result_plain;
+		result_plain.clear();
+		return a;
 	}
 
 	virtual bool eof() const
@@ -3829,6 +4048,11 @@ public:
 		CertificateChain chain;
 		chain.append(peercert);
 		return chain;
+	}
+
+	void doResultsReady()
+	{
+		QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
 	}
 
 	bool init()
@@ -3878,8 +4102,29 @@ public:
 		// setup the cert to send
 		if(!cert.isNull() && !key.isNull())
 		{
-			const MyCertContext *cc = static_cast<const MyCertContext*>(cert.context());
-			const MyPKeyContext *kc = static_cast<const MyPKeyContext*>(key.context());
+			PrivateKey nkey = key;
+
+			const PKeyContext *tmp_kc = static_cast<const PKeyContext *>(nkey.context());
+
+			if(!tmp_kc->sameProvider(this))
+			{
+				printf("experimental: private key supplied by a different provider\n");
+
+				// make a pkey pointing to the existing private key
+				EVP_PKEY *pkey;
+				pkey = EVP_PKEY_new();
+				EVP_PKEY_assign_RSA(pkey, createFromExisting(nkey.toRSA()));
+
+				// make a new private key object to hold it
+				MyPKeyContext *pk = new MyPKeyContext(provider());
+				PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+				pk->k = k;
+				nkey.change(pk);
+			}
+
+			const MyCertContext *cc = static_cast<const MyCertContext *>(cert.context());
+			const MyPKeyContext *kc = static_cast<const MyPKeyContext *>(nkey.context());
+
 			if(SSL_use_certificate(ssl, cc->item.cert) != 1)
 			{
 				SSL_free(ssl);
@@ -4158,6 +4403,24 @@ public:
 			}
 			PrivateKey key = signer.x509PrivateKey();
 
+			const PKeyContext *tmp_kc = static_cast<const PKeyContext *>(key.context());
+
+			if(!tmp_kc->sameProvider(this))
+			{
+				printf("experimental: private key supplied by a different provider\n");
+
+				// make a pkey pointing to the existing private key
+				EVP_PKEY *pkey;
+				pkey = EVP_PKEY_new();
+				EVP_PKEY_assign_RSA(pkey, createFromExisting(key.toRSA()));
+
+				// make a new private key object to hold it
+				MyPKeyContext *pk = new MyPKeyContext(provider());
+				PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+				pk->k = k;
+				key.change(pk);
+			}
+
 			MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
 			MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
 
@@ -4210,7 +4473,8 @@ public:
 			}
 			else
 			{
-				printf("bad\n");
+				printf("bad here\n");
+				ERR_print_errors_fp(stdout);
 				return;
 			}
 		}
