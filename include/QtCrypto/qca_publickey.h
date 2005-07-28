@@ -42,8 +42,8 @@ namespace QCA
 	*/
 	enum EncryptionAlgorithm
 	{
-		EME_PKCS1v15,  ///< Block type 2 (PKCS1, Version 1.5)
-		EME_PKCS1_OAEP ///< Optimal asymmetric encryption padding (PKCS1, Version 2.0)
+		EME_PKCS1v15,  ///< Block type 2 (PKCS#1, Version 1.5)
+		EME_PKCS1_OAEP ///< Optimal asymmetric encryption padding (PKCS#1, Version 2.0)
 	};
 
 	/**
@@ -53,10 +53,11 @@ namespace QCA
 	{
 		SignatureUnknown, ///< Unknown signing algorithm
 		EMSA1_SHA1,  ///< SHA1, with EMSA1 (IEEE1363-2000) encoding (this is the usual DSA algorithm - FIPS186)
-		EMSA3_SHA1,  ///< SHA1, with EMSA3 (ie PKCS1 Version 1.5) encoding
-		EMSA3_MD5,   ///< MD5, with EMSA3 (ie PKCS1 Version 1.5) encoding (this is the usual RSA algorithm)
-		EMSA3_MD2,   ///< MD2, with EMSA3 (ie PKCS1 Version 1.5) encoding
-		EMSA3_RIPEMD160 ///< RIPEMD160, with EMSA3 (ie PKCS1 Version 1.5) encoding
+		EMSA3_SHA1,  ///< SHA1, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+		EMSA3_MD5,   ///< MD5, with EMSA3 (ie PKCS#1 Version 1.5) encoding (this is the usual RSA algorithm)
+		EMSA3_MD2,   ///< MD2, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+		EMSA3_RIPEMD160, ///< RIPEMD160, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+		EMSA3_Raw ///< EMSA3 without computing a message digest or a DigestInfo encoding (identical to PKCS#11's CKM_RSA_PKCS mechanism)
 	};
 
 	/**
