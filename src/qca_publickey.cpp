@@ -952,9 +952,8 @@ public:
 	PKeyContext *dest;
 	DLGroupContext *dc;
 
-	Private(KeyGenerator *_parent)
+	Private(KeyGenerator *_parent) : QObject(_parent), parent(_parent)
 	{
-		parent = _parent;
 		k = 0;
 		dest = 0;
 		dc = 0;
@@ -972,6 +971,11 @@ public slots:
 	{
 		if(!k->isNull())
 		{
+			if(!wasBlocking)
+			{
+				k->setParent(0);
+				k->moveToThread(0);
+			}
 			dest->setKey(k);
 			k = 0;
 
@@ -1045,6 +1049,8 @@ PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 
 	if(!d->blocking)
 	{
+		d->k->moveToThread(thread());
+		d->k->setParent(d);
 		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
 		static_cast<RSAContext *>(d->k)->createPrivate(bits, exp, false);
 	}
@@ -1069,6 +1075,8 @@ PrivateKey KeyGenerator::createDSA(const DLGroup &domain, const QString &provide
 
 	if(!d->blocking)
 	{
+		d->k->moveToThread(thread());
+		d->k->setParent(d);
 		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
 		static_cast<DSAContext *>(d->k)->createPrivate(domain, false);
 	}
@@ -1093,6 +1101,8 @@ PrivateKey KeyGenerator::createDH(const DLGroup &domain, const QString &provider
 
 	if(!d->blocking)
 	{
+		d->k->moveToThread(thread());
+		d->k->setParent(d);
 		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
 		static_cast<DHContext *>(d->k)->createPrivate(domain, false);
 	}
