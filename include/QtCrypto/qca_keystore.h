@@ -27,6 +27,10 @@
 
 namespace QCA
 {
+	class KeyStoreTracker;
+	class KeyStoreThread;
+	class KeyStoreManagerPrivate;
+
 	/**
 	   Single entry in a KeyStore
 
@@ -117,8 +121,19 @@ namespace QCA
 		   part of that PGP key.
 		*/
 		PGPKey pgpPublicKey() const;
+
+	private:
+		class Private;
+		Private *d;
 	};
 
+	// notes
+	//  - there can be multiple KeyStore objects referring to the same id
+	//  - when a KeyStore is constructed, it refers to a given id (deviceId)
+	//    and internal contextId.  if the context goes away, the KeyStore
+	//    becomes invalid (isValid == false), and unavailable() is emitted.
+	//    even if the device later reappears, the KeyStore remains invalid.
+	//    a new KeyStore will have to be created to use the device again.
 	/**
 	   General purpose key storage object
 
@@ -139,11 +154,22 @@ namespace QCA
 		enum Type
 		{
 			System,      ///< objects such as root certificates
-			User,        ///< objects such as  Apple Keychain, KDE Wallet
+			User,        ///< objects such as Apple Keychain, KDE Wallet
 			Application, ///< for caching accepted self-signed certificates
 			SmartCard,   ///< for smartcards
 			PGPKeyring   ///< for a PGP keyring
 		};
+
+		/**
+		   Obtain a specific KeyStore
+
+		   \param id the identification for the key store
+		*/
+		KeyStore(const QString &id, QObject *parent = 0);
+
+		~KeyStore();
+
+		bool isValid() const;
 
 		/**
 		   The keystore Type
@@ -248,10 +274,12 @@ namespace QCA
 		void needPassphrase();
 
 	private:
+		class Private;
+		Private *d;
+
+		friend class KeyStoreTracker;
 		friend class KeyStoreManager;
-		friend class KeyStoreManagerPrivate;
-		KeyStore();
-		~KeyStore();
+		void invalidate();
 	};
 
 	// use this to get access to keystores and monitor for their activity
@@ -262,31 +290,49 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-
 		/**
-		   Obtain a specific KeyStore
-
-		   \param id the identification for the key store
+		   Initializes the manager.  All applications wishing to
+		   use key stores must call this.
 		*/
-		KeyStore *keyStore(const QString &id) const;
+		void start();
 
 		/**
-		   A list of the all the key stores
+		   Indicates if the manager is busy looking for key stores
 		*/
-		QList<KeyStore*> keyStores() const;
+		bool isBusy() const;
 
 		/**
-		   The number of key stores that are currently active
+		   Blocks until the manager is done looking for key stores
+		*/
+		void waitForBusyFinished();
+
+		/**
+		   A list of all the key stores
+		*/
+		QStringList keyStores() const;
+
+		/**
+		   The number of key stores that are currently available
 		*/
 		int count() const;
 
 		/**
-		   The diagnotistic result of key store operations, such as
+		   The diagnostic result of key store operations, such as
 		   warnings and errors
 		*/
 		QString diagnosticText() const;
 
+		/**
+		   Clears the diagnostic result log
+		*/
+		void clearDiagnosticText();
+
 	signals:
+		/**
+		   emitted when the manager is done looking for key stores
+		*/
+		void busyFinished();
+
 		/**
 		   emitted when a new key store becomes available
 		*/
@@ -297,6 +343,8 @@ namespace QCA
 		KeyStoreManagerPrivate *d;
 
 		friend class Global;
+		friend class KeyStoreTracker;
+		friend class KeyStoreThread;
 		KeyStoreManager();
 		~KeyStoreManager();
 

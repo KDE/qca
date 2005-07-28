@@ -28,66 +28,25 @@ namespace QCA {
 Provider::Context *getContext(const QString &type, const QString &provider);
 
 //----------------------------------------------------------------------------
-// SecureFilter
-//----------------------------------------------------------------------------
-SecureFilter::~SecureFilter()
-{
-}
-
-bool SecureFilter::isClosable() const
-{
-	return false;
-}
-
-bool SecureFilter::haveClosed() const
-{
-	return false;
-}
-
-void SecureFilter::close()
-{
-}
-
-QByteArray SecureFilter::readUnprocessed()
-{
-	return QByteArray();
-}
-
-//----------------------------------------------------------------------------
 // SecureLayer
 //----------------------------------------------------------------------------
 SecureLayer::SecureLayer(QObject *parent)
 :QObject(parent)
 {
-	_signals = true;
 }
 
-void SecureLayer::setStatefulOnly(bool b)
+bool SecureLayer::isClosable() const
 {
-	_signals = !b;
+	return false;
 }
 
-void SecureLayer::layerUpdateBegin()
+void SecureLayer::close()
 {
-	_read = bytesAvailable();
-	_readout = bytesOutgoingAvailable();
-	_closed = haveClosed();
-	_error = !ok();
 }
 
-void SecureLayer::layerUpdateEnd()
+QByteArray SecureLayer::readUnprocessed()
 {
-	if(_signals)
-	{
-		if(bytesAvailable() > _read)
-			QTimer::singleShot(0, this, SIGNAL(readyRead()));
-		if(bytesOutgoingAvailable() > _readout)
-			QTimer::singleShot(0, this, SIGNAL(readyReadOutgoing()));
-		if(!_closed && haveClosed())
-			QTimer::singleShot(0, this, SIGNAL(closed()));
-		if(!_error && !ok())
-			QTimer::singleShot(0, this, SIGNAL(error()));
-	}
+	return QByteArray();
 }
 
 //----------------------------------------------------------------------------
@@ -100,8 +59,9 @@ enum ResetMode
 	ResetAll            = 2
 };
 
-class TLS::Private
+class TLS::Private : public QObject
 {
+	Q_OBJECT
 public:
 	TLS *q;
 	TLSContext *c;
@@ -123,20 +83,22 @@ public:
 	QByteArray in, out;
 	QByteArray to_net, from_net;
 
+	enum { OpStart, OpHandshake, OpShutdown, OpEncode, OpDecode };
+	int last_op;
+
 	bool handshaken, closing, closed, error;
 	bool tryMore;
 	int bytesEncoded;
 	Error errorCode;
 
-	Private(TLS *_q)
+	Private(TLS *_q) : QObject(_q), q(_q)
 	{
-		q = _q;
 		c = 0;
 
 		reset(ResetAll);
 	}
 
-	void reset(ResetMode mode = ResetSession)
+	void reset(ResetMode mode)
 	{
 		if(c)
 			c->reset();
@@ -184,9 +146,12 @@ public:
 
 		bool ok;
 		if(serverMode)
-			ok = c->startServer();
+			c->startServer();
 		else
-			ok = c->startClient();
+			c->startClient();
+		last_op = OpStart;
+		c->waitForResultsReady(-1);
+		ok = c->success();
 		if(!ok)
 			return false;
 
@@ -205,7 +170,11 @@ public:
 	void update()
 	{
 		bool wasHandshaken = handshaken;
-		q->layerUpdateBegin();
+		//q->layerUpdateBegin();
+		int _read = q->bytesAvailable();
+		int _readout = q->bytesOutgoingAvailable();
+		bool _closed = closed;
+		bool _error = error;
 
 		if(closing)
 			updateClosing();
@@ -213,19 +182,36 @@ public:
 			updateMain();
 
 		if(!wasHandshaken && handshaken)
-			QTimer::singleShot(0, q, SIGNAL(handshaken()));
-		q->layerUpdateEnd();
+			QMetaObject::invokeMethod(q, "handshaken", Qt::QueuedConnection);
+
+		if(q->bytesAvailable() > _read)
+		{
+			emit q->readyRead();
+			//QMetaObject::invokeMethod(q, "readyRead", Qt::QueuedConnection);
+		}
+		if(q->bytesOutgoingAvailable() > _readout)
+			QMetaObject::invokeMethod(q, "readyReadOutgoing", Qt::QueuedConnection);
+		if(!_closed && closed)
+			QMetaObject::invokeMethod(q, "closed", Qt::QueuedConnection);
+		if(!_error && error)
+			QMetaObject::invokeMethod(q, "error", Qt::QueuedConnection);
+		//q->layerUpdateEnd();
 	}
 
 	void updateClosing()
 	{
 		QByteArray a;
-		TLSContext::Result r = c->shutdown(from_net, &a);
+		TLSContext::Result r;
+		c->shutdown(from_net);
+		last_op = OpShutdown;
+		c->waitForResultsReady(-1);
+		a = c->to_net();
+		r = c->handshakeResult();
 		from_net.clear();
 
 		if(r == TLSContext::Error)
 		{
-			reset();
+			reset(ResetSession);
 			error = true;
 			errorCode = ErrorHandshake;
 			return;
@@ -236,7 +222,7 @@ public:
 		if(r == TLSContext::Success)
 		{
 			from_net = c->unprocessed();
-			reset();
+			reset(ResetSession);
 			closed = true;
 			return;
 		}
@@ -249,12 +235,17 @@ public:
 		if(!handshaken)
 		{
 			QByteArray a;
-			TLSContext::Result r = c->handshake(from_net, &a);
+			TLSContext::Result r;
+			c->handshake(from_net);
+			last_op = OpHandshake;
+			c->waitForResultsReady(-1);
+			a = c->to_net();
+			r = c->handshakeResult();
 			from_net.clear();
 
 			if(r == TLSContext::Error)
 			{
-				reset();
+				reset(ResetSession);
 				error = true;
 				errorCode = ErrorHandshake;
 				return;
@@ -287,7 +278,11 @@ public:
 				QByteArray a;
 				int enc;
 				bool more = false;
-				bool ok = c->encode(out, &a, &enc);
+				c->encode(out);
+				c->waitForResultsReady(-1);
+				bool ok = c->success();
+				a = c->to_net();
+				enc = c->encoded();
 				eof = c->eof();
 				if(ok && enc < out.size())
 					more = true;
@@ -296,7 +291,7 @@ public:
 				{
 					if(!ok)
 					{
-						reset();
+						reset(ResetSession);
 						error = true;
 						errorCode = ErrorCrypt;
 						return;
@@ -312,12 +307,16 @@ public:
 			{
 				QByteArray a;
 				QByteArray b;
-				bool ok = c->decode(from_net, &a, &b);
+				c->decode(from_net);
+				c->waitForResultsReady(-1);
+				bool ok = c->success();
+				a = c->plain();
+				b = c->to_net();
 				eof = c->eof();
 				from_net.clear();
 				if(!ok)
 				{
-					reset();
+					reset(ResetSession);
 					error = true;
 					errorCode = ErrorCrypt;
 					return;
@@ -334,6 +333,12 @@ public:
 			}
 		}
 	}
+
+private slots:
+	void tls_resultsReady()
+	{
+		//printf("results ready\n");
+	}
 };
 
 TLS::TLS(QObject *parent, const QString &provider)
@@ -341,10 +346,13 @@ TLS::TLS(QObject *parent, const QString &provider)
 {
 	d = new Private(this);
 	d->c = static_cast<TLSContext *>(context());
+	d->c->setParent(d);
+	connect(d->c, SIGNAL(resultsReady()), d, SLOT(tls_resultsReady()));
 }
 
 TLS::~TLS()
 {
+	d->c->setParent(0);
 	delete d;
 }
 
@@ -433,17 +441,33 @@ void TLS::setCompressionEnabled(bool b)
 	d->tryCompress = b;
 }
 
-bool TLS::startClient(const QString &host)
+void TLS::startClient(const QString &host)
 {
 	d->reset(ResetSessionAndData);
 	d->host = host;
-	return d->start(false);
+	//layerUpdateBegin();
+	if(!d->start(false))
+	{
+		d->reset(ResetSession);
+		d->error = true;
+		d->errorCode = ErrorInit;
+		QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection);
+	}
+	//layerUpdateEnd();
 }
 
-bool TLS::startServer()
+void TLS::startServer()
 {
 	d->reset(ResetSessionAndData);
-	return d->start(true);
+	//layerUpdateBegin();
+	if(!d->start(true))
+	{
+		d->reset(ResetSession);
+		d->error = true;
+		d->errorCode = ErrorInit;
+		QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection);
+	}
+	//layerUpdateEnd();
 }
 
 bool TLS::isHandshaken() const
@@ -513,16 +537,6 @@ CertificateChain TLS::peerCertificateChain() const
 bool TLS::isClosable() const
 {
 	return true;
-}
-
-bool TLS::haveClosed() const
-{
-	return d->closed;
-}
-
-bool TLS::ok() const
-{
-	return !d->error;
 }
 
 int TLS::bytesAvailable() const
@@ -698,7 +712,7 @@ void SASL::setRemoteAddr(const QString &addr, quint16 port)
 	d->remotePort = port;
 }
 
-bool SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode)
+void SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode)
 {
 	SASLContext::HostPort la, ra;
 	/*if(d->localPort != -1) {
@@ -715,15 +729,18 @@ bool SASL::startClient(const QString &service, const QString &host, const QStrin
 	d->setSecurityProps();
 
 	if(!d->c->clientStart(mechlist))
-		return false;
+	{
+		// TODO: ErrorInit
+		return;
+	}
 	d->first = true;
 	d->server = false;
 	d->tried = false;
 	QTimer::singleShot(0, this, SLOT(tryAgain()));
-	return true;
+	//return true;
 }
 
-bool SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, ServerSendMode)
+void SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, ServerSendMode)
 {
 	//Q_UNUSED(allowServerSendLast);
 
@@ -747,11 +764,14 @@ bool SASL::startServer(const QString &service, const QString &host, const QStrin
 		appname = "qca";
 
 	if(!d->c->serverStart(realm, mechlist, appname))
-		return false;
+	{
+		// TODO: ErrorInit
+		return;
+	}
 	d->first = true;
 	d->server = true;
 	d->tried = false;
-	return true;
+	//return true;
 }
 
 void SASL::putServerFirstStep(const QString &mech)
@@ -807,11 +827,6 @@ int SASL::ssf() const
 	return d->c->security();
 }
 
-bool SASL::ok() const
-{
-	return false;
-}
-
 int SASL::bytesAvailable() const
 {
 	return 0;
@@ -820,10 +835,6 @@ int SASL::bytesAvailable() const
 int SASL::bytesOutgoingAvailable() const
 {
 	return 0;
-}
-
-void SASL::close()
-{
 }
 
 void SASL::write(const QByteArray &a)
@@ -848,3 +859,5 @@ QByteArray SASL::readOutgoing(int *plainBytes)
 }
 
 }
+
+#include "qca_securelayer.moc"

@@ -44,7 +44,6 @@ namespace QCA
 	class Global;
 	class KeyStore;
 	class KeyStoreManager;
-	class KeyStoreManagerPrivate;
 
 	/**
 	 * Convenience representation for the plugin providers
@@ -561,7 +560,7 @@ namespace QCA
 			   \return true if the argument and this COntext
 			   have the same provider.
 			*/
-			bool sameProvider(Context *c);
+			bool sameProvider(const Context *c) const;
 
 		private:
 			Provider *_provider;

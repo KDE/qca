@@ -777,40 +777,65 @@ public:
 };
 
 //----------------------------------------------------------------------------
-// DefaultKeyStore
+// DefaultKeyStoreList
 //----------------------------------------------------------------------------
-class DefaultKeyStore : public KeyStoreContext
+class DefaultKeyStoreList : public KeyStoreListContext
 {
 	Q_OBJECT
 public:
-	DefaultKeyStore(Provider *p) : KeyStoreContext(p) {}
+	bool ready;
+
+	DefaultKeyStoreList(Provider *p) : KeyStoreListContext(p)
+	{
+		ready = false;
+	}
+
+	~DefaultKeyStoreList()
+	{
+	}
 
 	virtual Provider::Context *clone() const
 	{
 		return 0;
 	}
 
-	virtual int contextId() const
+	virtual void start()
 	{
-		return 0; // there is only 1 context, so this can be static
+		QTimer::singleShot(0, this, SLOT(do_ready()));
 	}
 
-	virtual QString deviceId() const
+	virtual QList<int> keyStores() const
 	{
-		return "qca-default-systemstore";
+		QList<int> list;
+		if(ready)
+			list += 0;
+		return list;
 	}
 
-	virtual KeyStore::Type type() const
+	virtual KeyStore::Type type(int) const
 	{
 		return KeyStore::System;
 	}
 
-	virtual QString name() const
+	virtual QString storeId(int) const
+	{
+		return "qca-default-systemstore";
+	}
+
+	virtual QString name(int) const
 	{
 		return "System Trusted Certificates";
 	}
 
-	virtual QList<KeyStoreEntryContext*> entryList() const
+	virtual QList<KeyStoreEntry::Type> entryTypes(int) const
+	{
+		QList<KeyStoreEntry::Type> list;
+		list += KeyStoreEntry::TypeCertificate;
+		list += KeyStoreEntry::TypeCRL;
+		return list;
+	}
+
+	virtual QList<KeyStoreEntryContext*> entryList(int) const
 	{
 		QList<KeyStoreEntryContext*> out;
 
@@ -836,50 +861,16 @@ public:
 		return out;
 	}
 
-	virtual QList<KeyStoreEntry::Type> entryTypes() const
+private slots:
+	void do_ready()
 	{
-		QList<KeyStoreEntry::Type> list;
-		list += KeyStoreEntry::TypeCertificate;
-		list += KeyStoreEntry::TypeCRL;
-		return list;
-	}
-};
-
-//----------------------------------------------------------------------------
-// DefaultKeyStoreList
-//----------------------------------------------------------------------------
-class DefaultKeyStoreList : public KeyStoreListContext
-{
-	Q_OBJECT
-public:
-	DefaultKeyStore *ks;
-
-	DefaultKeyStoreList(Provider *p) : KeyStoreListContext(p)
-	{
-		ks = 0;
-
 #ifndef QCA_NO_SYSTEMSTORE
 		if(qca_have_systemstore())
-			ks = new DefaultKeyStore(provider());
+		{
+			ready = true;
+		}
 #endif
-	}
-
-	~DefaultKeyStoreList()
-	{
-		delete ks;
-	}
-
-	virtual Provider::Context *clone() const
-	{
-		return 0;
-	}
-
-	virtual QList<KeyStoreContext*> keyStores() const
-	{
-		QList<KeyStoreContext*> list;
-		if(ks)
-			list.append(ks);
-		return list;
+		emit busyEnd();
 	}
 };
 
@@ -892,9 +883,9 @@ public:
 	void init()
 	{
 		QDateTime now = QDateTime::currentDateTime();
-	        while (0 == now.time().msec()) {
+		// avoid divide-by-zero
+	        while(0 == now.time().msec())
 			now = QDateTime::currentDateTime();
-		}
 		time_t t = now.toTime_t() / now.time().msec();
 		srand(t);
 	}

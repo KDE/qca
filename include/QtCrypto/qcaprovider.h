@@ -142,7 +142,7 @@ class QCA_EXPORT PKeyBase : public QObject, public Provider::Context
 {
 	Q_OBJECT
 public:
-	PKeyBase(Provider *p, const QString &type) : Provider::Context(p, type) {}
+	PKeyBase(Provider *p, const QString &type);
 	virtual bool isNull() const = 0;
 	virtual PKey::Type type() const = 0;
 	virtual bool isPrivate() const = 0;
@@ -384,8 +384,8 @@ public:
 	KeyStoreEntryContext(Provider *p) : Provider::Context(p, "keystoreentry") {}
 
 	virtual KeyStoreEntry::Type type() const = 0;
-	virtual QString name() const = 0;
 	virtual QString id() const = 0;
+	virtual QString name() const = 0;
 
 	virtual KeyBundle keyBundle() const;
 	virtual Certificate certificate() const;
@@ -394,50 +394,53 @@ public:
 	virtual PGPKey pgpPublicKey() const;
 };
 
-class QCA_EXPORT KeyStoreContext : public QObject, public Provider::Context
-{
-	Q_OBJECT
-public:
-	KeyStoreContext(Provider *p) : Provider::Context(p, "keystore") {}
-
-	virtual int contextId() const = 0; // increment for each new context made
-	virtual QString deviceId() const = 0;
-
-	virtual KeyStore::Type type() const = 0;
-	virtual QString name() const = 0;
-
-	virtual QList<KeyStoreEntryContext*> entryList() const = 0; // caller must delete
-	virtual QList<KeyStoreEntry::Type> entryTypes() const = 0;
-
-	virtual bool isReadOnly() const;
-
-	virtual bool writeEntry(const KeyBundle &kb);
-	virtual bool writeEntry(const Certificate &cert);
-	virtual bool writeEntry(const CRL &crl);
-	virtual PGPKey writeEntry(const PGPKey &key);
-	virtual bool removeEntry(const QString &id);
-
-	virtual void submitPassphrase(const QSecureArray &passphrase);
-
-signals:
-	void updated();
-	void needPassphrase();
-};
-
 class QCA_EXPORT KeyStoreListContext : public QObject, public Provider::Context
 {
 	Q_OBJECT
 public:
 	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
 
-	virtual QList<KeyStoreContext*> keyStores() const = 0;
+	virtual void start() = 0;
+
+	// returns a list of integer context ids (for keystores)
+	virtual QList<int> keyStores() const = 0;
+
+	// null/empty return values mean the context id is gone
+
+	virtual KeyStore::Type type(int id) const = 0;
+	virtual QString storeId(int id) const = 0;
+	virtual QString name(int id) const = 0;
+	virtual bool isReadOnly(int id) const;
+
+	virtual QList<KeyStoreEntry::Type> entryTypes(int id) const = 0;
+
+	// caller must delete
+	virtual QList<KeyStoreEntryContext*> entryList(int id) const = 0;
+
+	virtual bool writeEntry(int id, const KeyBundle &kb);
+	virtual bool writeEntry(int id, const Certificate &cert);
+	virtual bool writeEntry(int id, const CRL &crl);
+	virtual PGPKey writeEntry(int id, const PGPKey &key);
+	virtual bool removeEntry(int id, const QString &entryId);
+
+	virtual void submitPassphrase(int id, const QSecureArray &passphrase);
 
 signals:
+	// note: busyStart is assumed after calling start(), no need to emit
+	void busyStart();
+	void busyEnd();
+
 	void updated(KeyStoreListContext *sender);
+	void diagnosticText(KeyStoreListContext *sender, const QString &str);
+	void storeUpdated(KeyStoreListContext *sender, int contextId);
+
+	// emit this from the thread that caused it
+	void storeNeedPassphrase(KeyStoreListContext *sender, int contextId);
 };
 
-class QCA_EXPORT TLSContext : public Provider::Context
+class QCA_EXPORT TLSContext : public QObject, public Provider::Context
 {
+	Q_OBJECT
 public:
 	class SessionInfo
 	{
@@ -467,19 +470,31 @@ public:
 	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
 	virtual void setup(const CertificateCollection &trusted, const CertificateChain &cert, const PrivateKey &key, bool compress) = 0;
 
-	virtual bool startClient() = 0;
-	virtual bool startServer() = 0;
+	// operations - do only one at a time, wait for resultsReady
+	virtual void startClient() = 0;
+	virtual void startServer() = 0;
+	virtual void handshake(const QByteArray &from_net) = 0;
+	virtual void shutdown(const QByteArray &from_net) = 0;
+	virtual void encode(const QByteArray &plain) = 0;
+	virtual void decode(const QByteArray &from_net) = 0;
 
-	virtual Result handshake(const QByteArray &from_net, QByteArray *to_net) = 0;
-	virtual Result shutdown(const QByteArray &from_net, QByteArray *to_net) = 0;
-	virtual bool encode(const QByteArray &plain, QByteArray *to_net, int *encoded) = 0;
-	virtual bool decode(const QByteArray &from_net, QByteArray *plain, QByteArray *to_net) = 0;
+	virtual void waitForResultsReady(int msecs) = 0;
+
+	// results
+	virtual bool success() const = 0; // start/encode/decode
+	virtual Result handshakeResult() const = 0; // handshake/shutdown
+	virtual QByteArray to_net() = 0; // handshake/shutdown/encode/decode
+	virtual int encoded() const = 0; // encode
+	virtual QByteArray plain() = 0; // decode
+
+	virtual Validity peerCertificateValidity() const = 0;
+	virtual CertificateChain peerCertificateChain() const = 0;
 	virtual bool eof() const = 0;
 	virtual SessionInfo sessionInfo() const = 0;
 	virtual QByteArray unprocessed() = 0;
 
-	virtual Validity peerCertificateValidity() const = 0;
-	virtual CertificateChain peerCertificateChain() const = 0;
+signals:
+	void resultsReady();
 };
 
 class QCA_EXPORT SASLContext : public Provider::Context

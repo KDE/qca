@@ -121,12 +121,23 @@ class PassphrasePrompt : public QObject
 {
 	Q_OBJECT
 public:
+	QList<QCA::KeyStore*> list;
+
 	PassphrasePrompt()
 	{
 		QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
-		QList<QCA::KeyStore*> storeList = ksm->keyStores();
+		QStringList storeList = ksm->keyStores();
 		for(int n = 0; n < storeList.count(); ++n)
-			connect(storeList[n], SIGNAL(needPassphrase()), SLOT(ks_needPassphrase()));
+		{
+			QCA::KeyStore *ks = new QCA::KeyStore(storeList[n]);
+			connect(ks, SIGNAL(needPassphrase()), SLOT(ks_needPassphrase()));
+			list += ks;
+		}
+	}
+
+	~PassphrasePrompt()
+	{
+		qDeleteAll(list);
 	}
 
 private slots:
@@ -404,6 +415,10 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 	else
 		boundary = bregion;
 
+	if(boundary[0] == '\"')
+		boundary.remove(0, 1);
+	if(boundary[boundary.length() - 1] == '\"')
+		boundary.remove(boundary.length() - 1, 1);
 	//printf("boundary: [%s]\n", qPrintable(boundary));
 	QString boundary_end = QString("--") + boundary;
 	boundary = QString("--") + boundary + "\r\n";
@@ -436,13 +451,14 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 }
 
 // first = ids, second = names
-static QPair<QStringList, QStringList> getKeyStoreStrings(const QList<QCA::KeyStore*> &list)
+static QPair<QStringList, QStringList> getKeyStoreStrings(const QStringList &list)
 {
 	QPair<QStringList, QStringList> out;
 	for(int n = 0; n < list.count(); ++n)
 	{
-		out.first.append(list[n]->id());
-		out.second.append(list[n]->name());
+		QCA::KeyStore ks(list[n]);
+		out.first.append(ks.id());
+		out.second.append(ks.name());
 	}
 	return out;
 }
@@ -489,10 +505,10 @@ static int findByString(const QPair<QStringList, QStringList> &in, const QString
 	return -1;
 }
 
-static QCA::KeyStore *getKeyStore(const QString &name)
+static QString getKeyStore(const QString &name)
 {
 	QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
-	QList<QCA::KeyStore*> storeList = ksm->keyStores();
+	QStringList storeList = ksm->keyStores();
 	int n = findByString(getKeyStoreStrings(storeList), name);
 	if(n != -1)
 		return storeList[n];
@@ -520,14 +536,14 @@ static QPair<QCA::PGPKey, QCA::PGPKey> getPGPSecretKey(const QString &name)
 	QString storeName = name.mid(0, n);
 	QString objectName = name.mid(n + 1);
 
-	QCA::KeyStore *store = getKeyStore(storeName);
-	if(!store)
+	QCA::KeyStore store(getKeyStore(storeName));
+	if(!store.isValid())
 	{
 		printf("no such store\n");
 		return key;
 	}
 
-	QCA::KeyStoreEntry e = getKeyStoreEntry(store, objectName);
+	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
 	if(e.isNull())
 	{
 		printf("no such object\n");
@@ -562,14 +578,14 @@ static QCA::Certificate getCertificate(const QString &name)
 	QString storeName = name.mid(0, n);
 	QString objectName = name.mid(n + 1);
 
-	QCA::KeyStore *store = getKeyStore(storeName);
-	if(!store)
+	QCA::KeyStore store(getKeyStore(storeName));
+	if(!store.isValid())
 	{
 		printf("no such store\n");
 		return cert;
 	}
 
-	QCA::KeyStoreEntry e = getKeyStoreEntry(store, objectName);
+	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
 	if(e.isNull())
 	{
 		printf("no such object\n");
@@ -584,6 +600,47 @@ static QCA::Certificate getCertificate(const QString &name)
 
 	cert = e.certificate();
 	return cert;
+}
+
+static QCA::PrivateKey getPrivateKey(const QString &name)
+{
+	QCA::PrivateKey key;
+
+	int n = name.indexOf(':');
+	if(n == -1)
+	{
+		key = QCA::PrivateKey::fromPEMFile(name);
+		if(key.isNull())
+			printf("Error reading private key file\n");
+
+		return key;
+	}
+
+	QString storeName = name.mid(0, n);
+	QString objectName = name.mid(n + 1);
+
+	QCA::KeyStore store(getKeyStore(storeName));
+	if(!store.isValid())
+	{
+		printf("no such store\n");
+		return key;
+	}
+
+	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
+	if(e.isNull())
+	{
+		printf("no such object\n");
+		return key;
+	}
+
+	if(e.type() != QCA::KeyStoreEntry::TypeKeyBundle)
+	{
+		printf("not a keybundle\n");
+		return key;
+	}
+
+	QCA::KeyBundle kb = e.keyBundle();
+	return kb.privateKey();
 }
 
 static void usage()
@@ -614,7 +671,7 @@ static void usage()
 	printf("  --list-keystores\n");
 	printf("  --list-keystore [storeName]\n");
 	printf("\n");
-	printf("  --smime sign [priv.pem] [messagefile] [cert.pem] [nonroots.pem] (passphrase)\n");
+	printf("  --smime sign [priv.pem|X] [messagefile] [cert.pem] [nonroots.pem] (passphrase)\n");
 	printf("  --smime verify [messagefile]\n");
 	printf("  --smime encrypt [cert.pem] [messagefile]\n");
 	printf("  --smime decrypt [priv.pem] [messagefile] [cert.pem] (passphrase)\n");
@@ -664,10 +721,7 @@ static void usage()
 int main(int argc, char **argv)
 {
 	QCA::Initializer qcaInit;
-
 	QCoreApplication app(argc, argv);
-
-	//QCA::scanForPlugins();
 
 	/*if(!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
 	{
@@ -709,6 +763,11 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	// activate the KeyStoreManager and block until ready
+	QCA::keyStoreManager()->start();
+	QCA::keyStoreManager()->waitForBusyFinished();
+
+	// hook a passphrase prompt onto all the KeyStores
 	PassphrasePrompt passphrasePrompt;
 
 	bool genrsa = false;
@@ -1398,7 +1457,7 @@ int main(int argc, char **argv)
 			if(!passphrase.isEmpty())
 				key = QCA::PrivateKey(args[2], passphrase);
 			else
-				key = QCA::PrivateKey(args[2]);
+				key = getPrivateKey(args[2]);
 			if(key.isNull())
 			{
 				printf("Error reading key file\n");
@@ -1720,15 +1779,13 @@ int main(int argc, char **argv)
 	}
 	else if(args[0] == "--list-keystores")
 	{
-		QCA::scanForPlugins();
-
 		QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
-		QList<QCA::KeyStore*> storeList = ksm->keyStores();
+		QStringList storeList = ksm->keyStores();
 		for(int n = 0; n < storeList.count(); ++n)
 		{
-			QCA::KeyStore *i = storeList[n];
+			QCA::KeyStore ks(storeList[n]);
 			QString type;
-			switch(i->type())
+			switch(ks.type())
 			{
 				case QCA::KeyStore::System:      type = "Sys "; break;
 				case QCA::KeyStore::User:        type = "User"; break;
@@ -1737,7 +1794,7 @@ int main(int argc, char **argv)
 				case QCA::KeyStore::PGPKeyring:  type = "PGP "; break;
 			}
 			// TODO: id field length should be uniform based on all entries
-			printf("%s %s [%s]\n", qPrintable(type), qPrintable(i->id()), qPrintable(i->name()));
+			printf("%s %s [%s]\n", qPrintable(type), qPrintable(ks.id()), qPrintable(ks.name()));
 		}
 	}
 	else if(args[0] == "--list-keystore")
@@ -1748,16 +1805,14 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		QCA::scanForPlugins();
-
-		QCA::KeyStore *store = getKeyStore(args[1]);
-		if(!store)
+		QCA::KeyStore store(getKeyStore(args[1]));
+		if(!store.isValid())
 		{
 			printf("no such store\n");
 			return 1;
 		}
 
-		QList<QCA::KeyStoreEntry> list = store->entryList();
+		QList<QCA::KeyStoreEntry> list = store.entryList();
 		for(int n = 0; n < list.count(); ++n)
 		{
 			QCA::KeyStoreEntry i = list[n];

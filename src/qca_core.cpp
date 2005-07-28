@@ -110,6 +110,21 @@ void init(MemoryMode mode, int prealloc)
 	global = new Global;
 	global->secmem = secmem;
 	global->manager.setDefault(create_default_provider()); // manager owns it
+
+	// for maximum setuid safety, qca should be initialized before qapp:
+	//
+	//   int main(int argc, char **argv)
+	//   {
+	//       QCA::Initializer init;
+	//       QCoreApplication app(argc, argv);
+	//       return 0;
+	//   }
+	//
+	// however, the above code has the unfortunate side-effect of causing
+	// qapp to deinit before qca, which can cause problems with any
+	// plugins that have active objects (notably KeyStore).  we'll use a
+	// post routine to force qca to deinit first.
+	qAddPostRoutine(deinit);
 }
 
 void deinit()
@@ -303,10 +318,15 @@ KeyStoreManager *keyStoreManager()
 
 bool haveSystemStore()
 {
-	QList<KeyStore*> list = global->ksm->keyStores();
+	// ensure the keystores are loaded
+	global->ksm->start();
+	global->ksm->waitForBusyFinished();
+
+	QStringList list = global->ksm->keyStores();
 	for(int n = 0; n < list.count(); ++n)
 	{
-		if(list[n]->type() == KeyStore::System && list[n]->holdsTrustedCertificates())
+		KeyStore ks(list[n]);
+		if(ks.type() == KeyStore::System && ks.holdsTrustedCertificates())
 			return true;
 	}
 	return false;
@@ -314,15 +334,21 @@ bool haveSystemStore()
 
 CertificateCollection systemStore()
 {
+	// ensure the keystores are loaded
+	global->ksm->start();
+	global->ksm->waitForBusyFinished();
+
 	CertificateCollection col;
-	QList<KeyStore*> list = global->ksm->keyStores();
+	QStringList list = global->ksm->keyStores();
 	for(int n = 0; n < list.count(); ++n)
 	{
+		KeyStore ks(list[n]);
+
 		// system store
-		if(list[n]->type() == KeyStore::System && list[n]->holdsTrustedCertificates())
+		if(ks.type() == KeyStore::System && ks.holdsTrustedCertificates())
 		{
 			// extract contents
-			QList<KeyStoreEntry> entries = list[n]->entryList();
+			QList<KeyStoreEntry> entries = ks.entryList();
 			for(int i = 0; i < entries.count(); ++i)
 			{
 				if(entries[i].type() == KeyStoreEntry::TypeCertificate)
@@ -461,7 +487,7 @@ QString Provider::Context::type() const
 	return _type;
 }
 
-bool Provider::Context::sameProvider(Context *c)
+bool Provider::Context::sameProvider(const Context *c) const
 {
 	return (c->provider() == _provider);
 }
@@ -469,6 +495,12 @@ bool Provider::Context::sameProvider(Context *c)
 //----------------------------------------------------------------------------
 // PKeyBase
 //----------------------------------------------------------------------------
+PKeyBase::PKeyBase(Provider *p, const QString &type)
+:Provider::Context(p, type)
+{
+	moveToThread(0); // no thread association
+}
+
 int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const
 {
 	return 0;
@@ -540,39 +572,39 @@ PGPKey KeyStoreEntryContext::pgpPublicKey() const
 }
 
 //----------------------------------------------------------------------------
-// KeyStoreContext
+// KeyStoreListContext
 //----------------------------------------------------------------------------
-bool KeyStoreContext::isReadOnly() const
+bool KeyStoreListContext::isReadOnly(int) const
 {
 	return true;
 }
 
-bool KeyStoreContext::writeEntry(const KeyBundle &)
+bool KeyStoreListContext::writeEntry(int, const KeyBundle &)
 {
 	return false;
 }
 
-bool KeyStoreContext::writeEntry(const Certificate &)
+bool KeyStoreListContext::writeEntry(int, const Certificate &)
 {
 	return false;
 }
 
-bool KeyStoreContext::writeEntry(const CRL &)
+bool KeyStoreListContext::writeEntry(int, const CRL &)
 {
 	return false;
 }
 
-PGPKey KeyStoreContext::writeEntry(const PGPKey &)
+PGPKey KeyStoreListContext::writeEntry(int, const PGPKey &)
 {
 	return PGPKey();
 }
 
-bool KeyStoreContext::removeEntry(const QString &)
+bool KeyStoreListContext::removeEntry(int, const QString &)
 {
 	return false;
 }
 
-void KeyStoreContext::submitPassphrase(const QSecureArray &)
+void KeyStoreListContext::submitPassphrase(int, const QSecureArray &)
 {
 }
 
