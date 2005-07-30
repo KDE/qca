@@ -291,10 +291,14 @@ namespace QCA
 		Q_OBJECT
 	public:
 		/**
-		   Initializes the manager.  All applications wishing to
-		   use key stores must call this.
+		   Initialize all key store providers
 		*/
 		void start();
+
+		/**
+		   Initialize a specific key store provider
+		*/
+		void start(const QString &provider);
 
 		/**
 		   Indicates if the manager is busy looking for key stores

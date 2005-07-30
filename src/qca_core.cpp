@@ -318,8 +318,8 @@ KeyStoreManager *keyStoreManager()
 
 bool haveSystemStore()
 {
-	// ensure the keystores are loaded
-	global->ksm->start();
+	// ensure the system store is loaded
+	global->ksm->start("default");
 	global->ksm->waitForBusyFinished();
 
 	QStringList list = global->ksm->keyStores();
@@ -334,8 +334,8 @@ bool haveSystemStore()
 
 CertificateCollection systemStore()
 {
-	// ensure the keystores are loaded
-	global->ksm->start();
+	// ensure the system store is loaded
+	global->ksm->start("default");
 	global->ksm->waitForBusyFinished();
 
 	CertificateCollection col;
@@ -605,6 +605,18 @@ bool KeyStoreListContext::removeEntry(int, const QString &)
 }
 
 void KeyStoreListContext::submitPassphrase(int, const QSecureArray &)
+{
+}
+
+//----------------------------------------------------------------------------
+// TLSContext
+//----------------------------------------------------------------------------
+bool TLSContext::canUseDTLS() const
+{
+	return false;
+}
+
+void TLSContext::setMTU(int)
 {
 }
 

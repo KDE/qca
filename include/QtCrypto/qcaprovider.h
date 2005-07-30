@@ -464,37 +464,58 @@ public:
 
 	virtual QStringList supportedCipherSuites() const = 0;
 	virtual bool canCompress() const = 0;
+	virtual bool canUseDTLS() const;
 	virtual int maxSSF() const = 0;
 
 	virtual void setConstraints(int minSSF, int maxSSF) = 0;
 	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
-	virtual void setup(const CertificateCollection &trusted, const CertificateChain &cert, const PrivateKey &key, bool compress) = 0;
+	virtual void setup(const CertificateCollection &trusted, const CertificateChain &cert, const PrivateKey &key, bool server, bool compress, bool dtls) = 0;
 
-	// operations - do only one at a time, wait for resultsReady
-	virtual void startClient() = 0;
-	virtual void startServer() = 0;
-	virtual void handshake(const QByteArray &from_net) = 0;
-	virtual void shutdown(const QByteArray &from_net) = 0;
-	virtual void encode(const QByteArray &plain) = 0;
-	virtual void decode(const QByteArray &from_net) = 0;
+	virtual void shutdown() = 0; // flag for shutdown, call update next
+	virtual void setMTU(int size); // for dtls
+
+	// start() results:
+	//   result (Success or Error)
+	virtual void start() = 0;
+
+	// update() results:
+	//   during handshake:
+	//     result
+	//     to_net
+	//   during shutdown:
+	//     result
+	//     to_net
+	//   else
+	//     result (Success or Error)
+	//     to_net
+	//     encoded
+	//     to_app
+	//     eof
+	// note: for dtls, this function only operates with single
+	//       packets.  perform the operation repeatedly to send/recv
+	//       multiple packets.
+	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
 
 	virtual void waitForResultsReady(int msecs) = 0;
 
 	// results
-	virtual bool success() const = 0; // start/encode/decode
-	virtual Result handshakeResult() const = 0; // handshake/shutdown
-	virtual QByteArray to_net() = 0; // handshake/shutdown/encode/decode
-	virtual int encoded() const = 0; // encode
-	virtual QByteArray plain() = 0; // decode
+	virtual Result result() const = 0;
+	virtual QByteArray to_net() = 0;
+	virtual int encoded() const = 0;
+	virtual QByteArray to_app() = 0;
+	virtual bool eof() const = 0;
 
+	// call after successful handshake
 	virtual Validity peerCertificateValidity() const = 0;
 	virtual CertificateChain peerCertificateChain() const = 0;
-	virtual bool eof() const = 0;
 	virtual SessionInfo sessionInfo() const = 0;
+
+	// call after shutdown
 	virtual QByteArray unprocessed() = 0;
 
 signals:
 	void resultsReady();
+	void dtlsTimeout(); // call update, even with empty args
 };
 
 class QCA_EXPORT SASLContext : public Provider::Context

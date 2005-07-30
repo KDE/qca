@@ -142,16 +142,13 @@ public:
 		else
 			c->setConstraints(con_cipherSuites);
 
-		c->setup(trusted, localCert, localKey, tryCompress);
+		c->setup(trusted, localCert, localKey, serverMode, tryCompress, false);
 
 		bool ok;
-		if(serverMode)
-			c->startServer();
-		else
-			c->startClient();
+		c->start();
 		last_op = OpStart;
 		c->waitForResultsReady(-1);
-		ok = c->success();
+		ok = c->result() == TLSContext::Success;
 		if(!ok)
 			return false;
 
@@ -202,11 +199,11 @@ public:
 	{
 		QByteArray a;
 		TLSContext::Result r;
-		c->shutdown(from_net);
+		c->update(from_net, QByteArray());
 		last_op = OpShutdown;
 		c->waitForResultsReady(-1);
 		a = c->to_net();
-		r = c->handshakeResult();
+		r = c->result();
 		from_net.clear();
 
 		if(r == TLSContext::Error)
@@ -236,11 +233,11 @@ public:
 		{
 			QByteArray a;
 			TLSContext::Result r;
-			c->handshake(from_net);
+			c->update(from_net, QByteArray());
 			last_op = OpHandshake;
 			c->waitForResultsReady(-1);
 			a = c->to_net();
-			r = c->handshakeResult();
+			r = c->result();
 			from_net.clear();
 
 			if(r == TLSContext::Error)
@@ -278,9 +275,9 @@ public:
 				QByteArray a;
 				int enc;
 				bool more = false;
-				c->encode(out);
+				c->update(QByteArray(), out);
 				c->waitForResultsReady(-1);
-				bool ok = c->success();
+				bool ok = c->result() == TLSContext::Success;
 				a = c->to_net();
 				enc = c->encoded();
 				eof = c->eof();
@@ -307,10 +304,10 @@ public:
 			{
 				QByteArray a;
 				QByteArray b;
-				c->decode(from_net);
+				c->update(from_net, QByteArray());
 				c->waitForResultsReady(-1);
-				bool ok = c->success();
-				a = c->plain();
+				bool ok = c->result() == TLSContext::Success;
+				a = c->to_app();
 				b = c->to_net();
 				eof = c->eof();
 				from_net.clear();
@@ -589,6 +586,41 @@ QByteArray TLS::readUnprocessed()
 	QByteArray a = d->from_net;
 	d->from_net.clear();
 	return a;
+}
+
+bool TLS::canUseDTLS(const QString &provider)
+{
+	bool ok = false;
+	const TLSContext *c = static_cast<const TLSContext *>(getContext("tls", provider));
+	if(!c)
+		return ok;
+	ok = c->canUseDTLS();
+	delete c;
+	return ok;
+}
+
+void TLS::setDTLSEnabled(bool b)
+{
+	// TODO
+	Q_UNUSED(b);
+}
+
+int TLS::packetsAvailable() const
+{
+	// TODO
+	return 0;
+}
+
+int TLS::packetsOutgoingAvailable() const
+{
+	// TODO
+	return 0;
+}
+
+void TLS::setPacketMTU(int size) const
+{
+	// TODO
+	Q_UNUSED(size);
 }
 
 //----------------------------------------------------------------------------

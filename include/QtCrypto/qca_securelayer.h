@@ -78,7 +78,8 @@ namespace QCA
 		{
 			TLS_v1,
 			SSL_v3,
-			SSL_v2
+			SSL_v2,
+			DTLS_v1
 		};
 		enum Error
 		{
@@ -136,6 +137,13 @@ namespace QCA
 		virtual void writeIncoming(const QByteArray &a);
 		virtual QByteArray readOutgoing(int *plainBytes = 0);
 		virtual QByteArray readUnprocessed();
+
+		// for DTLS
+		static bool canUseDTLS(const QString &provider = QString());
+		void setDTLSEnabled(bool b);
+		int packetsAvailable() const;
+		int packetsOutgoingAvailable() const;
+		void setPacketMTU(int size) const;
 
 	signals:
 		void handshaken();

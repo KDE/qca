@@ -824,6 +824,12 @@ void KeyStoreManager::start()
 	scan();
 }
 
+void KeyStoreManager::start(const QString &provider)
+{
+	Q_UNUSED(provider);
+	start();
+}
+
 bool KeyStoreManager::isBusy() const
 {
 	return !(trackerInstance->hasInitialDiscovery());
