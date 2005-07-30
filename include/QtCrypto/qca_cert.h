@@ -190,7 +190,7 @@ namespace QCA
 		/**
 		   Information on the subject of the certificate
 
-		   \sa setIn
+		   \sa setInfo
 		*/
 		CertificateInfo info() const;     // request or create
 
@@ -205,10 +205,10 @@ namespace QCA
 		QStringList policies() const;     // request or create
 
 		/**
-		   test if the certificate options include the certificate being a 
-		   certificate authority
+		   test if the certificate is a CA cert
 		  
 		   \sa setAsCA
+		   \sa setAsUser
 		*/
 		bool isCA() const;                // request or create
 
@@ -267,12 +267,16 @@ namespace QCA
 		void setPolicies(const QStringList &policies);
 
 		/**
-		   set the certificate options to include the certificate being
-		   a certificate authority
+		   set the certificate to be a CA cert
 
 		   \param pathLimit the number of intermediate certificates allowable
 		*/
 		void setAsCA(int pathLimit = 8); // value from Botan
+
+		/**
+		   set the certificate to be a user cert (this is the default)
+		*/
+		void setAsUser();
 
 		/**
 		   Set the serial number property on this certificate

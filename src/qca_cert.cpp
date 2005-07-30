@@ -171,6 +171,12 @@ void CertificateOptions::setAsCA(int pathLimit)
 	d->pathLimit = pathLimit;
 }
 
+void CertificateOptions::setAsUser()
+{
+	d->isCA = false;
+	d->pathLimit = 0;
+}
+
 void CertificateOptions::setSerialNumber(const QBigInteger &i)
 {
 	d->serial = i;
