@@ -255,13 +255,15 @@ namespace QCA
 		*/
 		enum Error
 		{
-			ErrorPassphrase,     ///< passphrase was either wrong or not provided
-			ErrorFormat,         ///< input format was bad
-			ErrorSignerExpired,  ///< signing key is expired
-			ErrorSignerInvalid,  ///< signing key is invalid in some way
-			ErrorEncryptExpired, ///< encrypting key is expired
-			ErrorEncryptInvalid, ///< encrypting key is invalid in some way
-			ErrorUnknown         ///< other error
+			ErrorPassphrase,       ///< passphrase was either wrong or not provided
+			ErrorFormat,           ///< input format was bad
+			ErrorSignerExpired,    ///< signing key is expired
+			ErrorSignerInvalid,    ///< signing key is invalid in some way
+			ErrorEncryptExpired,   ///< encrypting key is expired
+			ErrorEncryptUntrusted, ///< encrypting key is untrusted
+			ErrorEncryptInvalid,   ///< encrypting key is invalid in some way
+			ErrorNeedCard,         ///< pgp card is missing
+			ErrorUnknown           ///< other error
 		};
 
 		SecureMessage(SecureMessageSystem *system);
