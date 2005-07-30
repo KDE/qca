@@ -208,10 +208,16 @@ QSecureArray::QSecureArray()
 	d = 0;
 }
 
-QSecureArray::QSecureArray(int size)
+QSecureArray::QSecureArray(int size, char ch)
 {
 	if(size > 0)
+	{
 		d = new Private(size);
+
+		// botan fills with zeros for us
+		if(ch != 0)
+			fill(ch, size);
+	}
 	else
 		d = 0;
 }
@@ -353,6 +359,11 @@ QSecureArray & QSecureArray::append(const QSecureArray &a)
 	return *this;
 }
 
+QSecureArray & QSecureArray::operator+=(const QSecureArray &a)
+{
+	return append(a);
+}
+
 void QSecureArray::fill(char fillChar, int fillToPosition)
 {
 	int len = (fillToPosition == -1) ? size() : qMin(fillToPosition, size());
@@ -383,7 +394,13 @@ bool operator!=(const QSecureArray &a, const QSecureArray &b)
 {
 	return !(a == b);
 }
-       
+
+const QSecureArray operator+(const QSecureArray &a, const QSecureArray &b)
+{
+	QSecureArray c = a;
+	return c.append(b);
+}
+
 //----------------------------------------------------------------------------
 // QBigInteger
 //----------------------------------------------------------------------------

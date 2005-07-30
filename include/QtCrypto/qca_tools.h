@@ -61,8 +61,9 @@ public:
 	 * Construct a secure byte array of the specified length
 	 *
 	 * \param size the number of bytes in the array
+	 * \param ch the value every byte should be set to
 	 */
-	QSecureArray(int size);
+	QSecureArray(int size, char ch = 0);
 
 	/**
 	 * Construct a secure byte array from a string
@@ -221,6 +222,11 @@ public:
 	 */
 	QSecureArray & append(const QSecureArray &a);
 
+	/**
+	 * Append a secure byte array to the end of this array
+	 */
+	QSecureArray & operator+=(const QSecureArray &a);
+
 protected:
 	/**
 	 * Assign the contents of a provided byte array to this
@@ -259,6 +265,13 @@ QCA_EXPORT bool operator==(const QSecureArray &a, const QSecureArray &b);
  * \relates QSecureArray
  **/
 QCA_EXPORT bool operator!=(const QSecureArray &a, const QSecureArray &b);
+
+/**
+ * Returns an array that is the result of concatenating a and b
+ *
+ * \relates QSecureArray
+ **/
+QCA_EXPORT const QSecureArray operator+(const QSecureArray &a, const QSecureArray &b);
 
 /**
    \class QBigInteger qca_tools.h QtCrypto
