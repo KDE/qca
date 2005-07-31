@@ -10,7 +10,7 @@
   document all the stuff in qca_securelayer.h
   document all the stuff in qca_securemessage.h
   think about documenting the various providers (qcaprovider.h)
-  Change Doxyfile configuration to capture whole API, and to generate Latex manual.
+  Change Doxyfile config to capture whole API, and to generate Latex manual.
 
 * Considerations
   api:
@@ -22,29 +22,6 @@
   other:
     standardize on count() vs size() when iterating?
     printf + latin1()/toLatin1() -> qPrintable() ? (in code/examples/docs/etc)
-
-* for tech preview
-  solve open issues
-  finish more API
-  finish more plugin stuff
-    clean up smime
-    add more gnupg functions
-
-* open issues
-  what about keygen & "making pkeys by params" in the context of smart cards?
-  maybe creating keys (keygen or params) should be provider-optional
-  dtls
-  SSL_get_client_CA_list
-
-* finish API
-  securearray: constructor (int size, char fill)
-  securearray: operator+, operator+= (i think bytearray has these)
-  ability to disable CA mode in cert options?
-  "untrusted" error for SecureMessage
-  needCard signal, cardOkay method for SecureMessage? (like gpgop)
-  pgpkey
-  securemessage
-  sasl
 
 * finish code for APIs:
   don't allow smart card providers to be used by default
@@ -72,8 +49,11 @@
 
 * possibilities for the future:
   Key wrapping - RFC3217 and RFC3394
-  dtls (secure UDP)
   quoted-printable TextFilter
+  keygen on smart cards
+  securemessage: cipher selection
+  tls: SSL_get_client_CA_list (does anyone use this?)
+  keystore: symmetric keys, arbitrary app data
   providers for:
     Mozilla NSS
     Windows CryptoAPI
