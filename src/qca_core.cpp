@@ -611,11 +611,6 @@ void KeyStoreListContext::submitPassphrase(int, const QSecureArray &)
 //----------------------------------------------------------------------------
 // TLSContext
 //----------------------------------------------------------------------------
-bool TLSContext::canUseDTLS() const
-{
-	return false;
-}
-
 void TLSContext::setMTU(int)
 {
 }

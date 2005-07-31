@@ -74,6 +74,11 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
+		enum Mode
+		{
+			Stream,
+			Datagram
+		};
 		enum Version
 		{
 			TLS_v1,
@@ -96,11 +101,12 @@ namespace QCA
 		};
 
 		TLS(QObject *parent = 0, const QString &provider = QString());
+		TLS(Mode mode, QObject *parent = 0, const QString &provider = QString());
 		~TLS();
 
 		void reset();
 
-		static QStringList supportedCipherSuites(const QString &provider = QString());
+		static QStringList supportedCipherSuites(Mode mode = Stream, const QString &provider = QString());
 
 		void setCertificate(const CertificateChain &cert, const PrivateKey &key);
 		void setTrustedCertificates(const CertificateCollection &trusted);
@@ -108,7 +114,7 @@ namespace QCA
 		void setConstraints(int minSSF, int maxSSF);
 		void setConstraints(const QStringList &cipherSuiteList);
 
-		static bool canCompress(const QString &provider = QString());
+		static bool canCompress(Mode mode = Stream, const QString &provider = QString());
 		void setCompressionEnabled(bool b);
 
 		void startClient(const QString &host = QString());
@@ -139,8 +145,6 @@ namespace QCA
 		virtual QByteArray readUnprocessed();
 
 		// for DTLS
-		static bool canUseDTLS(const QString &provider = QString());
-		void setDTLSEnabled(bool b);
 		int packetsAvailable() const;
 		int packetsOutgoingAvailable() const;
 		void setPacketMTU(int size) const;
@@ -190,21 +194,10 @@ namespace QCA
 
 		/**
 		   Possible authentication error states
-
-		These don't appear to map:
-		SASL_TRYAGAIN  (-8)  transient failure (e.g., weak key)
-		SASL_BADMAC    (-9)  integrity check failed
-			-- client only codes --
-		SASL_WRONGMECH (-11) mechanism doesn't support requested feature
-		SASL_NEWSECRET (-12) new secret needed
-			-- server only codes --
-		SASL_TRANS     (-17) One time use of a plaintext password will
-			enable requested mechanism for user
-		SASL_PWLOCK    (-21) password locked
-		SASL_NOCHANGE  (-22) requested change was not needed
 		*/
 		enum AuthCondition
 		{
+			AuthFail,     ///< Generic authentication failure
 			NoMech,       ///< No compatible/appropriate authentication mechanism
 			BadProto,     ///< Bad protocol or cancelled
 			BadServ,      ///< Server failed mutual authentication (client side only)
@@ -215,7 +208,7 @@ namespace QCA
 			Expired,      ///< Passphrase expired, has to be reset (server side only)
 			Disabled,     ///< Account is disabled (server side only)
 			NoUser,       ///< User not found (server side only)
-			RemoteUnavail
+			RemoteUnavail ///< Remote service needed for auth is gone (server side only)
 		};
 
 		/**
@@ -263,7 +256,7 @@ namespace QCA
 			bool user;
 
 			/**
-			   Authorisation ID is held
+			   Authorization ID is held
 			*/
 			bool authzid;
 
@@ -343,8 +336,9 @@ namespace QCA
 		void setRemoteAddr(const QString &addr, quint16 port);
 
 		/**
-		   FIXME: Justin to complete
-		   
+		   Specify the id of the externally secured connection
+
+		   \param authid the id of the connection
 		*/
 		void setExternalAuthId(const QString &authid);
 
@@ -359,7 +353,8 @@ namespace QCA
 		/**
 		   Initialise the client side of the connection
 
-		   startClient must be called on the client side of the connection
+		   startClient must be called on the client side of the connection.
+		   clientStarted will be emitted when the operation is completed.
 
 		   \param service the name of the service
 		   \param host the client side host name
@@ -372,6 +367,7 @@ namespace QCA
 		   Initialise the server side of the connection
 
 		   startServer must be called on the server side of the connection.
+		   serverStarted will be emitted when the operation is completed.
 
 		   \param service the name of the service
 		   \param host the server side host name
@@ -379,31 +375,58 @@ namespace QCA
 		   \param mechlist the list of available mechanisms
 		   \param ServerSendMode which mode to use on the server side
 		*/
-		void startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, enum ServerSendMode = DisableServerSendLast);
+		void startServer(const QString &service, const QString &host, const QString &realm, enum ServerSendMode = DisableServerSendLast);
 
 		/**
-		   FIXME: Justin to complete
-		   
-		*/
-		void putStep(const QByteArray &stepData);
+		   Process the first step in server mode (server)
 
-		/**
-		   FIXME: Justin to complete
-		   
+		   Call this with the mechanism selected by the client.  If there
+		   is initial client data, call the other version of this function
+		   instead.
 		*/
 		void putServerFirstStep(const QString &mech);
 
 		/**
-		   FIXME: Justin to complete
-		   
+		   Process the first step in server mode (server)
+
+		   Call this with the mechanism selected by the client, and initial
+		   client data.  If there is no initial client data, call the other
+		   version of this function instead.
 		*/
 		void putServerFirstStep(const QString &mech, const QByteArray &clientInit);
+
+		/**
+		   Process an authentication step
+
+		   Call this with authentication data received from the network.
+		   The only exception is the first step in server mode, in which
+		   case putServerFirstStep must be called.
+		*/
+		void putStep(const QByteArray &stepData);
+
+		/**
+		   Return the mechanism selected (client)
+		*/
+		QString mechanism() const;
+
+		/**
+		   Return the mechanism list (server)
+		*/
+		QStringList mechanismList() const;
 
 		/**
 		   Return the security strength factor of the connection
 		*/
 		int ssf() const;
+
+		/**
+		   Return the error code
+		*/
 		Error errorCode() const;
+
+		/**
+		   Return the reason for authentication failure
+		*/
 		AuthCondition authCondition() const;
 
 		// authentication
@@ -415,9 +438,9 @@ namespace QCA
 		void setUsername(const QString &user);
 
 		/**
-		   Specify the authorisation identity to use in authentication
+		   Specify the authorization identity to use in authentication
 
-		   \param auth the authorisation identity to use
+		   \param auth the authorization identity to use
 		*/
 		void setAuthzid(const QString &auth);
 
@@ -436,14 +459,12 @@ namespace QCA
 		void setRealm(const QString &realm);
 
 		/**
-		   FIXME: Justin to complete
-		   
+		   Continue negotiation after parameters have been set (client)
 		*/
 		void continueAfterParams();
 
 		/**
-		   FIXME: Justin to complete
-		   
+		   Continue negotiation after auth ids have been checked (server)
 		*/
 		void continueAfterAuthCheck();
 
@@ -466,10 +487,11 @@ namespace QCA
 		virtual QByteArray readOutgoing(int *plainBytes = 0);
 
 	signals:
-		void clientFirstStep(const QString &mech, const QByteArray *clientInit);
+		void clientStarted(bool clientInit, const QByteArray &clientInitData); // (client)
+		void serverStarted(); // (server)
 		void nextStep(const QByteArray &stepData);
-		void needParams(const Params &params);
-		void authCheck(const QString &user, const QString &authzid);
+		void needParams(const Params &params); // (client)
+		void authCheck(const QString &user, const QString &authzid); // (server)
 		void authenticated();
 
 	private:

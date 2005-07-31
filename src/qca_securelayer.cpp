@@ -347,6 +347,15 @@ TLS::TLS(QObject *parent, const QString &provider)
 	connect(d->c, SIGNAL(resultsReady()), d, SLOT(tls_resultsReady()));
 }
 
+TLS::TLS(Mode mode, QObject *parent, const QString &provider)
+:SecureLayer(parent), Algorithm(mode == Stream ? "tls" : "dtls", provider)
+{
+	d = new Private(this);
+	d->c = static_cast<TLSContext *>(context());
+	d->c->setParent(d);
+	connect(d->c, SIGNAL(resultsReady()), d, SLOT(tls_resultsReady()));
+}
+
 TLS::~TLS()
 {
 	d->c->setParent(0);
@@ -358,10 +367,10 @@ void TLS::reset()
 	d->reset(ResetAll);
 }
 
-QStringList TLS::supportedCipherSuites(const QString &provider)
+QStringList TLS::supportedCipherSuites(Mode mode, const QString &provider)
 {
 	QStringList list;
-	const TLSContext *c = static_cast<const TLSContext *>(getContext("tls", provider));
+	const TLSContext *c = static_cast<const TLSContext *>(getContext(mode == Stream ? "tls" : "dtls", provider));
 	if(!c)
 		return list;
 	list = c->supportedCipherSuites();
@@ -422,10 +431,10 @@ void TLS::setConstraints(const QStringList &cipherSuiteList)
 	d->con_cipherSuites = cipherSuiteList;
 }
 
-bool TLS::canCompress(const QString &provider)
+bool TLS::canCompress(Mode mode, const QString &provider)
 {
 	bool ok = false;
-	const TLSContext *c = static_cast<const TLSContext *>(getContext("tls", provider));
+	const TLSContext *c = static_cast<const TLSContext *>(getContext(mode == Stream ? "tls" : "dtls", provider));
 	if(!c)
 		return ok;
 	ok = c->canCompress();
@@ -588,23 +597,6 @@ QByteArray TLS::readUnprocessed()
 	return a;
 }
 
-bool TLS::canUseDTLS(const QString &provider)
-{
-	bool ok = false;
-	const TLSContext *c = static_cast<const TLSContext *>(getContext("tls", provider));
-	if(!c)
-		return ok;
-	ok = c->canUseDTLS();
-	delete c;
-	return ok;
-}
-
-void TLS::setDTLSEnabled(bool b)
-{
-	// TODO
-	Q_UNUSED(b);
-}
-
 int TLS::packetsAvailable() const
 {
 	// TODO
@@ -626,13 +618,28 @@ void TLS::setPacketMTU(int size) const
 //----------------------------------------------------------------------------
 // SASL
 //----------------------------------------------------------------------------
+
+/*
+  These don't map, but I don't think it matters much..
+    SASL_TRYAGAIN  (-8)  transient failure (e.g., weak key)
+    SASL_BADMAC    (-9)  integrity check failed
+      -- client only codes --
+    SASL_WRONGMECH (-11) mechanism doesn't support requested feature
+    SASL_NEWSECRET (-12) new secret needed
+      -- server only codes --
+    SASL_TRANS     (-17) One time use of a plaintext password will
+                         enable requested mechanism for user
+    SASL_PWLOCK    (-21) password locked
+    SASL_NOCHANGE  (-22) requested change was not needed
+*/
+
 QString *saslappname = 0;
 class SASL::Private
 {
 public:
 	void setSecurityProps()
 	{
-		c->setSecurityProps(noPlain, noActive, noDict, noAnon, reqForward, reqCreds, reqMutual, ssfmin, ssfmax, ext_authid, ext_ssf);
+		//c->setSecurityProps(noPlain, noActive, noDict, noAnon, reqForward, reqCreds, reqMutual, ssfmin, ssfmax, ext_authid, ext_ssf);
 	}
 
 	// security opts
@@ -696,7 +703,8 @@ SASL::Error SASL::errorCode() const
 
 SASL::AuthCondition SASL::authCondition() const
 {
-	return (AuthCondition)d->c->authError();
+	return AuthFail;
+	//return (AuthCondition)d->c->authError();
 }
 
 void SASL::setConstraints(AuthFlags f, SecurityLevel s)
@@ -744,7 +752,7 @@ void SASL::setRemoteAddr(const QString &addr, quint16 port)
 	d->remotePort = port;
 }
 
-void SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode)
+void SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode mode)
 {
 	SASLContext::HostPort la, ra;
 	/*if(d->localPort != -1) {
@@ -757,14 +765,19 @@ void SASL::startClient(const QString &service, const QString &host, const QStrin
 	}*/
 
 	//d->allowCSF = allowClientSendFirst;
-	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
+	//d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
 	d->setSecurityProps();
 
-	if(!d->c->clientStart(mechlist))
+	Q_UNUSED(service);
+	Q_UNUSED(host);
+	Q_UNUSED(mechlist);
+	Q_UNUSED(mode);
+
+	/*if(!d->c->clientStart(mechlist))
 	{
 		// TODO: ErrorInit
 		return;
-	}
+	}*/
 	d->first = true;
 	d->server = false;
 	d->tried = false;
@@ -772,7 +785,7 @@ void SASL::startClient(const QString &service, const QString &host, const QStrin
 	//return true;
 }
 
-void SASL::startServer(const QString &service, const QString &host, const QString &realm, QStringList *mechlist, ServerSendMode)
+void SASL::startServer(const QString &service, const QString &host, const QString &realm, ServerSendMode mode)
 {
 	//Q_UNUSED(allowServerSendLast);
 
@@ -786,8 +799,12 @@ void SASL::startServer(const QString &service, const QString &host, const QStrin
 		ra.port = d->remotePort;
 	}*/
 
-	d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
-	d->setSecurityProps();
+	//d->c->setCoreProps(service, host, d->localPort != -1 ? &la : 0, d->remotePort != -1 ? &ra : 0);
+	//d->setSecurityProps();
+	Q_UNUSED(service);
+	Q_UNUSED(host);
+	Q_UNUSED(realm);
+	Q_UNUSED(mode);
 
 	QString appname;
 	if(saslappname)
@@ -795,11 +812,11 @@ void SASL::startServer(const QString &service, const QString &host, const QStrin
 	else
 		appname = "qca";
 
-	if(!d->c->serverStart(realm, mechlist, appname))
+	/*if(!d->c->serverStart(realm, mechlist, appname))
 	{
 		// TODO: ErrorInit
 		return;
-	}
+	}*/
 	d->first = true;
 	d->server = true;
 	d->tried = false;
@@ -808,13 +825,16 @@ void SASL::startServer(const QString &service, const QString &host, const QStrin
 
 void SASL::putServerFirstStep(const QString &mech)
 {
-	/*int r =*/ d->c->serverFirstStep(mech, 0);
+	Q_UNUSED(mech);
+	/*int r =*/ //d->c->serverFirstStep(mech, 0);
 	//handleServerFirstStep(r);
 }
 
 void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
 {
-	/*int r =*/ d->c->serverFirstStep(mech, &clientInit);
+	Q_UNUSED(mech);
+	Q_UNUSED(clientInit);
+	/*int r =*/ //d->c->serverFirstStep(mech, &clientInit);
 	//handleServerFirstStep(r);
 }
 
@@ -854,9 +874,19 @@ void SASL::continueAfterAuthCheck()
 	//tryAgain();
 }
 
+QString SASL::mechanism() const
+{
+	return QString();
+}
+
+QStringList SASL::mechanismList() const
+{
+	return QStringList();
+}
+
 int SASL::ssf() const
 {
-	return d->c->security();
+	return d->c->ssf();
 }
 
 int SASL::bytesAvailable() const

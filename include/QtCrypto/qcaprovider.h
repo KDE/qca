@@ -458,13 +458,12 @@ public:
 		Continue
 	};
 
-	TLSContext(Provider *p) : Provider::Context(p, "tls") {}
+	TLSContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
 	virtual void reset() = 0;
 
 	virtual QStringList supportedCipherSuites() const = 0;
 	virtual bool canCompress() const = 0;
-	virtual bool canUseDTLS() const;
 	virtual int maxSSF() const = 0;
 
 	virtual void setConstraints(int minSSF, int maxSSF) = 0;
@@ -496,7 +495,7 @@ public:
 	//       multiple packets.
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
 
-	virtual void waitForResultsReady(int msecs) = 0;
+	virtual void waitForResultsReady(int msecs) = 0; // -1 means wait forever
 
 	// results
 	virtual Result result() const = 0;
@@ -518,20 +517,15 @@ signals:
 	void dtlsTimeout(); // call update, even with empty args
 };
 
-class QCA_EXPORT SASLContext : public Provider::Context
+class QCA_EXPORT SASLContext : public QObject, public Provider::Context
 {
+	Q_OBJECT
 public:
 	class HostPort
 	{
 	public:
 		QString addr;
 		quint16 port;
-	};
-
-	class AuthParams
-	{
-	public:
-		bool user, authzid, pass, realm;
 	};
 
 	enum Result
@@ -543,54 +537,75 @@ public:
 		Continue
 	};
 
-	enum AuthError
-	{
-		NoMech,
-		BadProto,
-		BadServ,
-		BadAuth,
-		NoAuthzid,
-		TooWeak,
-		NeedEncrypt,
-		Expired,
-		Disabled,
-		NoUser,
-		RemoteUnavail
-	};
-
 	SASLContext(Provider *p) : Provider::Context(p, "sasl") {}
 
-	// common
 	virtual void reset() = 0;
-	virtual void setCoreProps(const QString &service, const QString &host, HostPort *local, HostPort *remote) = 0;
-	virtual void setSecurityProps(bool noPlain, bool noActive, bool noDict, bool noAnon, bool reqForward, bool reqCreds, bool reqMutual, int ssfMin, int ssfMax, const QString &_ext_authid, int _ext_ssf) = 0;
-	virtual int security() const = 0;
-	virtual AuthError authError() const = 0;
 
-	// init / first step
-	virtual bool clientStart(const QStringList &mechlist) = 0;
-	virtual int clientFirstStep(bool allowClientSendFirst) = 0;
-	virtual bool serverStart(const QString &realm, QStringList *mechlist, const QString &name) = 0;
-	virtual int serverFirstStep(const QString &mech, const QByteArray *in) = 0;
+	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF) = 0;
+	virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote, const QString &ext_id, int ext_ssf) = 0;
 
-	// get / set params
-	virtual AuthParams clientParamsNeeded() const = 0;
+	// startClient() results:
+	//   result
+	//   mech
+	//   haveClientInit
+	//   stepData
+	virtual void startClient(const QStringList &mechlist, bool allowClientSendFirst) = 0;
+
+	// startServer() results:
+	//   result (Success or Error)
+	//   mechlist
+	virtual void startServer(const QString &realm, bool disableServerSendLast) = 0;
+
+	// serverFirstStep() results:
+	//   result
+	//   stepData
+	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit) = 0;
+
+	// nextStep() results:
+	//   result
+	//   stepData
+	virtual void nextStep(const QByteArray &from_net) = 0;
+
+	// tryAgain() results:
+	//   result
+	//   stepData
+	virtual void tryAgain() = 0;
+
+	// update() results:
+	//   result (Success or Error)
+	//   to_net
+	//   encoded
+	//   to_app
+	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
+
+	virtual void waitForResultsReady(int msecs) = 0; // -1 means wait forever
+
+	// results
+	virtual Result result() const = 0;
+	virtual QString mechlist() const = 0;
+	virtual QString mech() const = 0;
+	virtual bool haveClientInit() const = 0;
+	virtual QByteArray stepData() const = 0;
+	virtual QByteArray to_net() const = 0;
+	virtual int encoded() const = 0;
+	virtual QByteArray to_app() const = 0;
+
+	// call after auth success
+	virtual int ssf() const = 0;
+
+	// call after auth fail
+	virtual SASL::AuthCondition authCondition() const = 0;
+
+	// call after NeedParams
+	virtual SASL::Params clientParamsNeeded() const = 0;
 	virtual void setClientParams(const QString *user, const QString *authzid, const QSecureArray *pass, const QString *realm) = 0;
+
+	// call after AuthCheck
 	virtual QString username() const = 0;
 	virtual QString authzid() const = 0;
 
-	// continue steps
-	virtual int nextStep(const QByteArray &in) = 0;
-	virtual int tryAgain() = 0;
-
-	// results
-	virtual QString mech() const = 0;
-	virtual const QByteArray *clientInit() const = 0;
-	virtual QByteArray result() const = 0;
-
-	// security layer
-	virtual bool encode(const QByteArray &in, QByteArray *out) = 0;
-	virtual bool decode(const QByteArray &in, QByteArray *out) = 0;
+signals:
+	void resultsReady();
 };
 
 class QCA_EXPORT MessageContext : public QObject, public Provider::Context
