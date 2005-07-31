@@ -604,7 +604,11 @@ bool KeyStoreListContext::removeEntry(int, const QString &)
 	return false;
 }
 
-void KeyStoreListContext::submitPassphrase(int, const QSecureArray &)
+void KeyStoreListContext::submitPassphrase(int, int, const QSecureArray &)
+{
+}
+
+void KeyStoreListContext::rejectPassphraseRequest(int, int)
 {
 }
 

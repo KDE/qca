@@ -130,7 +130,7 @@ public:
 		for(int n = 0; n < storeList.count(); ++n)
 		{
 			QCA::KeyStore *ks = new QCA::KeyStore(storeList[n]);
-			connect(ks, SIGNAL(needPassphrase()), SLOT(ks_needPassphrase()));
+			connect(ks, SIGNAL(needPassphrase(int, const QString &)), SLOT(ks_needPassphrase(int, const QString &)));
 			list += ks;
 		}
 	}
@@ -141,17 +141,36 @@ public:
 	}
 
 private slots:
-	void ks_needPassphrase()
+	void ks_needPassphrase(int requestId, const QString &entryId)
 	{
+		Q_UNUSED(entryId);
+
 		QCA::KeyStore *ks = static_cast<QCA::KeyStore *>(sender());
-		printf("Enter passphrase for %s (not hidden!) : ", qPrintable(ks->name()));
+		QString name = ks->name();
+		/*if(!entryId.isEmpty())
+		{
+			QList<QCA::KeyStoreEntry> list = ks->entryList();
+			QCA::KeyStoreEntry entry;
+			for(int n = 0; n < list.count(); ++n)
+			{
+				QCA::KeyStoreEntry &e = list[n];
+				if(e.id() == entryId)
+				{
+					entry = e;
+					break;
+				}
+			}
+			if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
+				name = entry.pgpSecretKey().primaryUserId();
+		}*/
+		printf("Enter passphrase for %s (not hidden!) : ", qPrintable(name));
 		fflush(stdout);
 		QSecureArray result(256);
 		fgets((char *)result.data(), result.size(), stdin);
 		result.resize(qstrlen(result.data()));
 		if(result[result.size() - 1] == '\n')
 			result.resize(result.size() - 1);
-		ks->submitPassphrase(result);
+		ks->submitPassphrase(requestId, result);
 	}
 };
 

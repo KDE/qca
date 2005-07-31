@@ -269,12 +269,20 @@ bool KeyStore::removeEntry(const QString &id)
 	return false;
 }
 
-void KeyStore::submitPassphrase(const QSecureArray &passphrase)
+void KeyStore::submitPassphrase(int requestId, const QSecureArray &passphrase)
 {
 	// FIXME: QMutexLocker locker(keyStoreMutex);
 	if(d->trackerId == -1)
 		return;
-	d->ksl->submitPassphrase(d->contextId, passphrase);
+	d->ksl->submitPassphrase(d->contextId, requestId, passphrase);
+}
+
+void KeyStore::rejectPassphraseRequest(int requestId)
+{
+	// FIXME: QMutexLocker locker(keyStoreMutex);
+	if(d->trackerId == -1)
+		return;
+	d->ksl->rejectPassphraseRequest(d->contextId, requestId);
 }
 
 void KeyStore::invalidate()
@@ -423,10 +431,10 @@ public slots:
 					initialDiscoverySet += c;
 					connect(c, SIGNAL(busyEnd()), SLOT(ksl_busyEnd()));
 				}
-				connect(c, SIGNAL(updated(KeyStoreListContext *)), SLOT(ksl_updated(KeyStoreListContext *)));
-				connect(c, SIGNAL(diagnosticText(KeyStoreListContext *, const QString &)), SLOT(ksl_diagnosticText(KeyStoreListContext *, const QString &)));
-				connect(c, SIGNAL(storeUpdated(KeyStoreListContext *, int)), SLOT(ksl_storeUpdated(KeyStoreListContext *, int)));
-				connect(c, SIGNAL(storeNeedPassphrase(KeyStoreListContext *, int)), SLOT(ksl_storeNeedPassphrase(KeyStoreListContext *, int)), Qt::DirectConnection);
+				connect(c, SIGNAL(updated()), SLOT(ksl_updated()));
+				connect(c, SIGNAL(diagnosticText(const QString &)), SLOT(ksl_diagnosticText(const QString &)));
+				connect(c, SIGNAL(storeUpdated(int)), SLOT(ksl_storeUpdated(int)));
+				connect(c, SIGNAL(storeNeedPassphrase(int, int, const QString &)), SLOT(ksl_storeNeedPassphrase(int, int, const QString &)), Qt::DirectConnection);
 				c->start();
 				check(c);
 			}
@@ -470,25 +478,28 @@ private slots:
 		//	keyStoreMutex->unlock();
 	}
 
-	void ksl_updated(KeyStoreListContext *sender)
+	void ksl_updated()
 	{
 		QMutexLocker locker(keyStoreMutex);
+		KeyStoreListContext *ksl = (KeyStoreListContext *)sender();
 
-		check(sender);
+		check(ksl);
 		flush();
 	}
 
-	void ksl_diagnosticText(KeyStoreListContext *sender, const QString &str)
+	void ksl_diagnosticText(const QString &str)
 	{
-		QString name = sender->provider()->name();
+		KeyStoreListContext *ksl = (KeyStoreListContext *)sender();
+		QString name = ksl->provider()->name();
 		ksm->d->dtext += QString("%1: %2\n").arg(name).arg(str);
 	}
 
-	void ksl_storeUpdated(KeyStoreListContext *sender, int contextId)
+	void ksl_storeUpdated(int contextId)
 	{
 		QMutexLocker locker(keyStoreMutex);
+		KeyStoreListContext *ksl = (KeyStoreListContext *)sender();
 
-		Item *item = findByOwnerAndContext(sender, contextId);
+		Item *item = findByOwnerAndContext(ksl, contextId);
 		if(!item)
 			return;
 
@@ -500,8 +511,10 @@ private slots:
 		}
 	}
 
-	void ksl_storeNeedPassphrase(KeyStoreListContext *sender, int contextId)
+	void ksl_storeNeedPassphrase(int contextId, int requestId, const QString &entryId)
 	{
+		KeyStoreListContext *ksl = (KeyStoreListContext *)sender();
+
 		PublicReferences refs;
 
 		{
@@ -509,7 +522,7 @@ private slots:
 
 			//printf("ksl_storeNeedPassphrase [%p]\n", sender);
 
-			Item *item = findByOwnerAndContext(sender, contextId);
+			Item *item = findByOwnerAndContext(ksl, contextId);
 			if(!item)
 				return;
 
@@ -519,7 +532,7 @@ private slots:
 		for(int n = 0; n < refs.count(); ++n)
 		{
 			KeyStore *ks = refs[n];
-			emit ks->needPassphrase();
+			emit ks->needPassphrase(requestId, entryId); // FIXME
 		}
 	}
 

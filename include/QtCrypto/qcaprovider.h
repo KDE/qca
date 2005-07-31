@@ -423,19 +423,20 @@ public:
 	virtual PGPKey writeEntry(int id, const PGPKey &key);
 	virtual bool removeEntry(int id, const QString &entryId);
 
-	virtual void submitPassphrase(int id, const QSecureArray &passphrase);
+	virtual void submitPassphrase(int id, int requestId, const QSecureArray &passphrase);
+	virtual void rejectPassphraseRequest(int id, int requestId);
 
 signals:
 	// note: busyStart is assumed after calling start(), no need to emit
 	void busyStart();
 	void busyEnd();
 
-	void updated(KeyStoreListContext *sender);
-	void diagnosticText(KeyStoreListContext *sender, const QString &str);
-	void storeUpdated(KeyStoreListContext *sender, int contextId);
+	void updated();
+	void diagnosticText(const QString &str);
+	void storeUpdated(int id);
 
 	// emit this from the thread that caused it
-	void storeNeedPassphrase(KeyStoreListContext *sender, int contextId);
+	void storeNeedPassphrase(int id, int requestId, const QString &entryId);
 };
 
 class QCA_EXPORT TLSContext : public QObject, public Provider::Context
