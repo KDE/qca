@@ -409,7 +409,7 @@ public:
 		return out;
 	}
 
-	virtual void submitPassphrase(int, const QSecureArray &a)
+	virtual void submitPassphrase(int, int, const QSecureArray &a)
 	{
 		global_gpg->submitPassphrase(a.toByteArray());
 	}
@@ -517,7 +517,7 @@ public:
 			if(e.type == GpgOp::Event::NeedPassphrase)
 			{
 				// TODO
-				emit keyStoreList->storeNeedPassphrase(keyStoreList, 0);
+				emit keyStoreList->storeNeedPassphrase(0, 0, e.keyId);
 			}
 			else if(e.type == GpgOp::Event::Finished)
 				break;
