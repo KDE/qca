@@ -24,7 +24,7 @@ public:
 		// write qmake-feature file
 		str = QString(
 		"CONFIG *= qt\n"
-		"INCLUDEPATH = %1/include/QtCrypto\n").arg(prefix);
+		"INCLUDEPATH += %1/include/QtCrypto\n").arg(prefix);
 		str += QString(
 		"LIBS += -L%1/lib -lqca\n").arg(prefix);
 

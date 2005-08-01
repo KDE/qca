@@ -12,6 +12,7 @@ SOURCES = qca-openssl.cpp
 windows:{
 	# hardcoded openssl location
 	OPENSSL_PREFIX = /local
+	DEFINES += OSSL_097
 
 	INCLUDEPATH += $$OPENSSL_PREFIX/include
 	LIBS += -L$$OPENSSL_PREFIX/lib
