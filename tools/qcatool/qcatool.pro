@@ -4,7 +4,7 @@ CONFIG -= app_bundle
 DESTDIR = ../../bin
 
 INCLUDEPATH += ../../include/QtCrypto
-LIBS += -L../.. -lqca
+LIBS += -L../../lib -lqca
 
 SOURCES += main.cpp
 

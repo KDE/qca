@@ -6,7 +6,7 @@ TARGET = qca-unittest
 #QMAKE_CXXFLAGS_DEBUG += -fprofile-arcs -ftest-coverage
 
 INCLUDEPATH += ../include/QtCrypto
-LIBS += -L..
+LIBS += -L../lib
 LIBS += -lqca
 
 #DEFINES += QT_STATICPLUGIN

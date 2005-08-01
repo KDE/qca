@@ -3,7 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 
 INCLUDEPATH += ../../include/QtCrypto
-LIBS += -L../.. -lqca
+LIBS += -L../../lib -lqca
 
 SOURCES += main.cpp
 

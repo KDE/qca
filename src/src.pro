@@ -9,7 +9,7 @@ TEMPLATE = lib
 CONFIG  += debug
 QT      -= gui
 TARGET   = qca
-DESTDIR  = $$QCA_BASE
+DESTDIR  = $$QCA_BASE/lib
 
 MOC_DIR        = .moc
 OBJECTS_DIR    = .obj
