@@ -1,16 +1,34 @@
 QCA OpenSSL plugin
 ------------------
-Author: Brad Hards <bradh@frogmouth.net>
+Authors: Justin Karneges <justin@affinix.com>
+         Brad Hards <bradh@frogmouth.net>
 
 This plugin provides features based on OpenSSL. It implements:
 * Hashing - SHA1, SHA0, RIPEMD160, MD2, MD4, MD5
+* Block Ciphers
 * Keyed Hash Message Authentication Code (HMAC), using SHA1, MD5, RIPEMD160
+* Public keys - RSA, DSA, Diffie-Hellman
+* PKCS#12
+* SSL/TLS
+* CMS (for S/MIME)
 
 Requirements:
   OpenSSL Library (http://www.openssl.org/)
 
-Installation procedure:
+Installing
+----------
+
+For Unix/Linux/Mac:
+
   ./configure
   make
-  su -c "make install"
+  make install
+
+For Windows:
+
+  edit qca-openssl.pro
+  qmake qca-openssl.pro
+  nmake (or make)
+
+  copy [debug|release]\qca-openssl.dll qtdir\plugins\crypto
 

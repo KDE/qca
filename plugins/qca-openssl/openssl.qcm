@@ -62,7 +62,7 @@ public:
 		if(!lib.isEmpty())
 			ext += QString("-L") + lib + " -lssl -lcrypto ";
 		int ret;
-		if(!conf->doCompileAndLink(str, ext, &ret))
+		if(!conf->doCompileAndLink(str, QStringList(), ext, QString(), &ret))
 			return false;
 		if(ret == 0)
 			conf->addDefine("OSSL_097");

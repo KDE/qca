@@ -3645,8 +3645,7 @@ public:
 	Certificate cert, peercert; // TODO: support cert chains
 	PrivateKey key;
 
-	bool result_success;
-	Result result_handshakeResult;
+	Result result_result;
 	QByteArray result_to_net;
 	int result_encoded;
 	QByteArray result_plain;
@@ -3658,7 +3657,7 @@ public:
 	Validity vr;
 	bool v_eof;
 
-	MyTLSContext(Provider *p) : TLSContext(p)
+	MyTLSContext(Provider *p) : TLSContext(p, "tls")
 	{
 		if(!ssl_init)
 		{
@@ -3737,52 +3736,55 @@ public:
 		Q_UNUSED(cipherSuiteList);
 	}
 
-	virtual void setup(const CertificateCollection &_trusted, const CertificateChain &_cert, const PrivateKey &_key, bool compress)
+	virtual void setup(const CertificateCollection &_trusted, const CertificateChain &_cert, const PrivateKey &_key, bool serverMode, bool compress, bool)
 	{
 		trusted = _trusted;
 		if(!_cert.isEmpty())
 			cert = _cert.primary(); // TODO: take the whole chain
 		key = _key;
+		serv = serverMode;
 		Q_UNUSED(compress); // TODO
 	}
 
-	virtual void startClient()
+	virtual void shutdown()
 	{
-		result_success = priv_startClient();
+		mode = Closing;
 	}
 
-	virtual void startServer()
+	virtual void start()
 	{
-		result_success = priv_startServer();
+		bool ok;
+		if(serv)
+			ok = priv_startServer();
+		else
+			ok = priv_startClient();
+		result_result = ok ? Success : Error;
 	}
 
-	virtual void handshake(const QByteArray &from_net)
+	virtual void update(const QByteArray &from_net, const QByteArray &from_app)
 	{
-		result_handshakeResult = priv_handshake(from_net, &result_to_net);
-		doResultsReady();
-	}
+		if(mode == Active)
+		{
+			bool ok;
+			if(!from_app.isEmpty())
+				ok = priv_encode(from_app, &result_to_net, &result_encoded);
+			else
+				ok = priv_decode(from_net, &result_plain, &result_to_net);
+			result_result = ok ? Success : Error;
+		}
+		else if(mode == Closing)
+			result_result = priv_shutdown(from_net, &result_to_net);
+		else
+			result_result = priv_handshake(from_net, &result_to_net);
 
-	virtual void shutdown(const QByteArray &from_net)
-	{
-		result_handshakeResult = priv_shutdown(from_net, &result_to_net);
-		doResultsReady();
-	}
+		//printf("update (from_net=%d, to_net=%d, from_app=%d, to_app=%d)\n", from_net.size(), result_to_net.size(), from_app.size(), result_plain.size());
 
-	virtual void encode(const QByteArray &from_net)
-	{
-		result_success = priv_encode(from_net, &result_to_net, &result_encoded);
-		doResultsReady();
-	}
-
-	virtual void decode(const QByteArray &from_net)
-	{
-		result_success = priv_decode(from_net, &result_plain, &result_to_net);
 		doResultsReady();
 	}
 
 	bool priv_startClient()
 	{
-		serv = false;
+		//serv = false;
 		method = SSLv23_client_method();
 		if(!init())
 			return false;
@@ -3792,7 +3794,7 @@ public:
 
 	bool priv_startServer()
 	{
-		serv = true;
+		//serv = true;
 		method = SSLv23_server_method();
 		if(!init())
 			return false;
@@ -3879,7 +3881,7 @@ public:
 		}
 		else
 		{
-			mode = Closing;
+			//mode = Closing;
 			return Continue;
 		}
 	}
@@ -3946,15 +3948,19 @@ public:
 		while(!v_eof) {
 			a.resize(8192);
 			int ret = SSL_read(ssl, a.data(), a.size());
+			//printf("SSL_read = %d\n", ret);
 			if(ret > 0)
 			{
 				if(ret != (int)a.size())
 					a.resize(ret);
+				//printf("SSL_read chunk: [%s]\n", qPrintable(arrayToHex(a)));
 				recvQueue.append(a);
 			}
 			else if(ret <= 0)
 			{
+				ERR_print_errors_fp(stdout);
 				int x = SSL_get_error(ssl, ret);
+				//printf("SSL_read error = %d\n", x);
 				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
 					break;
 				else if(x == SSL_ERROR_ZERO_RETURN)
@@ -3978,14 +3984,9 @@ public:
 		Q_UNUSED(msecs);
 	}
 
-	virtual bool success() const
+	virtual Result result() const
 	{
-		return result_success;
-	}
-
-	virtual Result handshakeResult() const
-	{
-		return result_handshakeResult;
+		return result_result;
 	}
 
 	virtual QByteArray to_net()
@@ -4000,7 +4001,7 @@ public:
 		return result_encoded;
 	}
 
-	virtual QByteArray plain()
+	virtual QByteArray to_app()
 	{
 		QByteArray a = result_plain;
 		result_plain.clear();
