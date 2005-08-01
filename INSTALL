@@ -12,6 +12,9 @@ For Windows:
   qmake qca.pro
   nmake (or make)
 
+  edit crypto_win.prf
+  copy crypto_win.prf qtdir\mkspecs\features\crypto.prf
+
 
 Please report problems to:
   delta-affinix.com@lists.affinix.com

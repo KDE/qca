@@ -1,0 +1,9 @@
+CONFIG *= qt
+windows:{
+	# change this to the QCA install location
+	QCA_PREFIX = /local
+
+	INCLUDEPATH = $$QCA_PREFIX/include/QtCrypto
+	LIBS += -L$$QCA_PREFIX/lib
+	LIBS += -lqca
+}
