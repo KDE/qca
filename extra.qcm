@@ -35,7 +35,7 @@ public:
 
 		str = QString(
 		"prffiles.path = %1/mkspecs/features\n"
-		"prffiles.files = qca.prf\n"
+		"prffiles.files = crypto.prf\n"
 		"INSTALLS += prffiles\n"
 		).arg(QLibraryInfo::location(QLibraryInfo::DataPath));
 		conf->addExtra(str);
