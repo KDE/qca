@@ -1,31 +1,22 @@
-TEMPLATE = lib
-CONFIG += plugin
-QT -= gui
-
 #CONFIG += release
 CONFIG += debug
 
-QCA_INC = ../../include/QtCrypto
-QCA_LIB = ../..
+TEMPLATE = lib
+CONFIG += plugin
+QT -= gui
+CONFIG += crypto
 
-INCLUDEPATH += $$QCA_INC
-LIBS += -L$$QCA_LIB -lqca
+SOURCES = qca-pkcs11.cpp
 
-HEADERS += \
-	#cti.h
-
-SOURCES += \
-	#cti.cpp \
-	qca-pkcs11.cpp
-
-# temp hack
-DEFINES += OSSL_097
-unix:LIBS += -lssl -lcrypto
 windows:{
-	INCLUDEPATH += /local/include
-	LIBS += -L/local/lib -llibeay32 -lssleay32
+	# hardcoded openssl location
+	OPENSSL_PREFIX = /local
+	DEFINES += OSSL_097
+
+	INCLUDEPATH += $$OPENSSL_PREFIX/include
+	LIBS += -L$$OPENSSL_PREFIX/lib
+	LIBS += -llibeay32 -lssleay32
 	LIBS += -lgdi32 -lwsock32
 }
 
-#include(conf.pri)
-#include(extra.pri)
+include(conf.pri)

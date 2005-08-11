@@ -1869,7 +1869,7 @@ public:
 			return out;
 		}
 
-		emit keyStoreList->storeNeedPassphrase(keyStoreList, 0);
+		emit keyStoreList->storeNeedPassphrase(0, 0, QString());
 
 		//printf("getting object list (before login)\n");
 		if(!sess.getObjects())
