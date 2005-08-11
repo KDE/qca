@@ -1,15 +1,10 @@
-TEMPLATE = lib
-CONFIG += plugin
-QT -= gui
-
 #CONFIG += release
 CONFIG += debug
 
-QCA_INC = ../../include/QtCrypto
-QCA_LIB = ../..
-
-INCLUDEPATH += $$QCA_INC
-LIBS += -L$$QCA_LIB -lqca
+TEMPLATE = lib
+CONFIG += plugin
+QT -= gui
+CONFIG += crypto
 
 windows:LIBS += -ladvapi32
 
@@ -24,5 +19,4 @@ SOURCES += \
 	$$GPG_BASE/gpgop.cpp \
 	$$GPG_BASE/qca-gnupg.cpp
 
-#include(conf.pri)
-#include(extra.pri)
+include(conf.pri)
