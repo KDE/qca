@@ -938,6 +938,9 @@ namespace QCA
 
 		   \param domain the discrete logarithm group that this key should be generated from
 		   \param provider the name of the provider to use, if a particular provider is required
+
+		   \note Not every DLGroup makes sense for DSA. You should use one of DSA_512,
+		   DSA_768 and DSA_1024.
 		*/
 		PrivateKey createDSA(const DLGroup &domain, const QString &provider = QString());
 
@@ -950,6 +953,8 @@ namespace QCA
 
 		   \param domain the discrete logarithm group that this key should be generated from
 		   \param provider the name of the provider to use, if a particular provider is required
+		   \note For compatibility, you should use one of the IETF_ groupsets as the
+		   domain argument.
 		*/
 		PrivateKey createDH(const DLGroup &domain, const QString &provider = QString());
 
