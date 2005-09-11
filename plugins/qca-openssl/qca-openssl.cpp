@@ -1547,7 +1547,7 @@ public:
 
 	virtual int bits() const
 	{
-		return 8*RSA_size(evp.pkey->pkey.rsa);
+		return EVP_PKEY_bits(evp.pkey);
 	}
 
 	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const
@@ -1884,7 +1884,7 @@ public:
 
 	virtual int bits() const
 	{
-		return 0; // FIXME
+		return EVP_PKEY_bits(evp.pkey);
 	}
 
 	virtual void startSign(SignatureAlgorithm, SignatureFormat format)
@@ -2144,7 +2144,7 @@ public:
 
 	virtual int bits() const
 	{
-		return 0; // FIXME
+		return EVP_PKEY_bits(evp.pkey);
 	}
 
 	virtual SymmetricKey deriveKey(const PKeyBase &theirs) const
