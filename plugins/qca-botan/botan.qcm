@@ -10,56 +10,30 @@ arg: botan-config=[path],Path to the Botan configure script
 class qc_botan : public ConfObj
 {
 public:
-	qc_botan(Conf *c) : ConfObj(c) {}
-	QString name() const { return "botan"; }
-	QString shortname() const { return "botan"; }
-
-	bool exec()
+    qc_botan(Conf *c) : ConfObj(c) {}
+    QString name() const { return "botan"; }
+    QString shortname() const { return "Botan"; }
+    
+    bool exec()
 	{
-	        proc = new QProcess( 0 );
-		QString path = conf->getenv("QC_BOTAN_CONFIG");
-	        proc->addArgument( path + "botan-config" );
-        	proc->addArgument( "--libs" );
+	    QString path = conf->getenv("QC_BOTAN_CONFIG");
+	    if(path.isEmpty())
+		path = "botan-config";
 
-		if(! proc->start() )
-			// this often indicates that it wasn't found in the path.
+	    QStringList incs;
+	    QString ver, libs, other;
+	    if(!conf->findFooConfig(path, &ver, &incs, &libs, &other))
 			return false;
-
-		do {
-			usleep(100000);
-		} while (proc->isRunning());
-
-		QString libs = proc->readStdout();
-		if (!libs.isEmpty())
-			conf->addLib(libs);
-
-		proc->clearArguments();
-	        proc->addArgument( path + "botan-config" );
-        	proc->addArgument( "--cflags" );
-
-		if(! proc->start() )
-			return false;
-
-		do {
-			usleep(100000);
-		} while (proc->isRunning());
-
-		QString cflags = proc->readStdout();
-		if (!cflags.isEmpty()) {
-			QStringList cflagsList = QStringList::split(" ", cflags);
-			for ( QStringList::Iterator it = cflagsList.begin(); it != cflagsList.end(); ++it ) {
-				if ( (*it).startsWith("-I") ){
-					// we want everything except the leading "-I"
-					QString includePath = (*it).remove(0,2);
-					conf->addIncludePath(includePath);
-				} else {
-					// we want whatever is left.
-					conf->addExtra(QString("QMAKE_CFLAGS += ") + (*it) );
-				}
-			}
-		}
-		return true;
+	    
+	    for(int n = 0; n < incs.count(); ++n) {
+		conf->addIncludePath(incs[n]);
+	    }
+	    if (!libs.isEmpty()) {
+		conf->addLib(libs);
+	    }
+	    if(!other.isEmpty()) {
+		conf->addExtra(QString("QMAKE_CFLAGS += %1\n").arg(other));
+	    }
+	    return true;
 	}
-private:
-	QProcess* proc;
 };
