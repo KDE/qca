@@ -1,4 +1,5 @@
 * Additional unit tests
+* Convert unit tests to QtTestLib
 * Update to latest Botan, and remake the botantools patch as appropriate
 * create .prf for auto-discovery by qmake-based projects
 * update the README
@@ -6,7 +7,6 @@
 * API documentation
   clean up Algorithm
   clean up Filter
-  document all the stuff in qca_cert.h
   document all the stuff in qca_securelayer.h
   document all the stuff in qca_securemessage.h
   think about documenting the various providers (qcaprovider.h)
