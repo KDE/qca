@@ -1,6 +1,7 @@
 /*
 -----BEGIN QCMOD-----
 name: QCA 2.0
+arg: in-tree-build,Build with uninstalled QCA, only useful for SVN users.
 -----END QCMOD-----
 */
 
@@ -16,11 +17,21 @@ public:
 	bool exec()
 	{
 		// test for "crypto" feature and check qca version number
+		QString arg;
+		arg = conf->getenv("QC_IN_TREE_BUILD");
 
-		QString proextra =
-		"CONFIG += qt crypto\n"
-		"QT -= gui\n";
-
+		QString proextra;
+		if (!arg.isEmpty()) {
+			proextra =
+			"CONFIG += qt \n"
+			"QT -= gui\n"
+			"INCLUDEPATH += ../../../../include/QtCrypto \n"
+			"LIBS += -L../../../../lib -lqca \n";
+		} else {
+			proextra =
+			"CONFIG += qt crypto\n"
+			"QT -= gui\n";
+		}
 		QString str =
 		"#include <QtCrypto>\n"
 		"\n"
@@ -35,7 +46,10 @@ public:
 			return false;
 		if(ret != 0)
 			return false;
-
+		if (!arg.isEmpty()) {
+			conf->addIncludePath("../../include/QtCrypto");
+			conf->addLib("-L../../lib -lqca");
+		}
 		return true;
 	}
 };
