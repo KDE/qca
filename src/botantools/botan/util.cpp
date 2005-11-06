@@ -36,7 +36,6 @@ namespace QCA {
 #include <botan/exceptn.h>
 namespace QCA {
 }
-#include <cmath>
 namespace QCA {
 
 namespace Botan {
