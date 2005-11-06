@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,21 +22,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef KDFUNITTEST_H
-#define KDFUNITTEST_H
+#ifndef BIGINTUNITTEST_H
+#define BIGINTUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class KDFUnitTest : public Tester
+class BigIntUnitTest : public QObject
 {
-public:
-    KDFUnitTest();
+    Q_OBJECT
 
-public:
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
     void allTests();
 private:
-    void pbkdf1Tests();
-    void pbkdf2Tests();
+    QCA::Initializer* m_init;
 };
-
 #endif
+

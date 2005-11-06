@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Zack Rusin <zack@kde.org>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,18 +22,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "kunittest.h"
-#include <QtCore>
+#ifndef STATICUNITTEST_H
+#define STATICUNITTEST_H
+
 #include <QtCrypto>
+#include <QtTest/QtTest>
 
-int main( int argc, char** argv )
+class StaticUnitTest : public QObject
 {
-    // the Initializer object sets things up, and
-    // also does cleanup when it goes out of scope
-    QCA::Initializer init;
+    Q_OBJECT
 
-    QCoreApplication app(argc, argv);
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void hexConversions();
+    void providers();
+    void capabilities();
+    void secureMemory();
+private:
+    QCA::Initializer* m_init;
+};
+#endif
 
-    KUnitTest tests;
-    return tests.runTests();
-}

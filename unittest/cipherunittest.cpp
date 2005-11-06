@@ -1167,7 +1167,8 @@ void CipherUnitTest::tripleDESTests()
 	SKIP("Triple DES, ECB not supported!");
     else {
 	QCA::TripleDES cipherObj1( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 24 ) );
-	CHECK( cipherObj1.keyLength().minimum(), 24 );
+	// we don't check minimum, because it varies whether you are
+	// doing 2 key or 3 key triple DES.
 	CHECK( cipherObj1.keyLength().maximum(), 24 );
 	CHECK( cipherObj1.blockSize(), (unsigned)8 );
 

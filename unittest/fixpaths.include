@@ -1,0 +1,15 @@
+// This is some boilerplate to ensure that we can load 
+// plugins from (a slightly hacked) build directory
+// 
+// It is intended that this be #include'd from an init
+// routine of some kind.
+
+    QStringList libpaths = QCoreApplication::libraryPaths();
+
+    // we prepend, because we prefer the uninstalled version
+    libpaths.prepend(QString("../../plugins/qca-openssl"));
+    libpaths.prepend(QString("../../plugins/qca-botan"));
+    libpaths.prepend(QString("../../plugins/qca-gcrypt"));
+    // you can add more paths here...
+
+    QCoreApplication::setLibraryPaths(libpaths);

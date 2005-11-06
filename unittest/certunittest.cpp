@@ -133,7 +133,7 @@ void CertUnitTest::checkClientCerts(const QString &provider)
     CHECK( pubkey1.isDH(), false );
     CHECK( pubkey1.isPublic(), true );
     CHECK( pubkey1.isPrivate(), false );
-    XFAIL( pubkey1.bitSize(), 1024 );
+    CHECK( pubkey1.bitSize(), 1024 );
 
     CHECK( client1.pathLimit(), 0 );
 
@@ -226,7 +226,7 @@ void CertUnitTest::checkServerCerts(const QString &provider)
     CHECK( pubkey1.isDH(), false );
     CHECK( pubkey1.isPublic(), true );
     CHECK( pubkey1.isPrivate(), false );
-    XFAIL( pubkey1.bitSize(), 1024 );
+    CHECK( pubkey1.bitSize(), 1024 );
 
     CHECK( server1.pathLimit(), 0 );
 
@@ -263,13 +263,15 @@ void CertUnitTest::allTests()
 
     CHECK( QCA::haveSystemStore(), true );
 
-    if ( QCA::haveSystemStore() ) {
+    if ( QCA::haveSystemStore() && QCA::isSupported("cert") ) {
 	QCA::CertificateCollection collection1;
 	collection1 = QCA::systemStore();
     }
 
-    checkCAcerts(QString());
-    checkClientCerts(QString());
-    checkServerCerts(QString());
+    if ( QCA::isSupported("cert") ) {
+      checkCAcerts(QString());
+      checkClientCerts(QString());
+      checkServerCerts(QString());
+    }
 }
 

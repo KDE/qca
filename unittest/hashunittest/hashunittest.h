@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,15 +25,45 @@
 #ifndef HASHUNITTEST_H
 #define HASHUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class HashUnitTest : public Tester
+class HashUnitTest : public QObject
 {
-public:
-    HashUnitTest();
+    Q_OBJECT
 
-public:
-    void allTests();
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void md2test_data();
+    void md2test();
+    void md4test_data();
+    void md4test();
+    void md5test_data();
+    void md5test();
+    void md5filetest();
+    void sha0test_data();
+    void sha0test();
+    void sha0longtest();
+    void sha1test_data();
+    void sha1test();
+    void sha1longtest();
+    void sha224test_data();
+    void sha224test();
+    void sha224longtest();
+    void sha256test_data();
+    void sha256test();
+    void sha256longtest();
+    void sha384test_data();
+    void sha384test();
+    void sha384longtest();
+    void sha512test_data();
+    void sha512test();
+    void sha512longtest();
+    void rmd160test_data();
+    void rmd160test();
+    void rmd160longtest();
+private:
+    QCA::Initializer* m_init;
 };
-
 #endif

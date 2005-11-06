@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,103 +23,116 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "staticunittest.h"
-#include <QtCrypto>
 
-StaticUnitTest::StaticUnitTest()
-    : Tester()
+void StaticUnitTest::initTestCase()
 {
-
+    m_init = new QCA::Initializer;
+#include "../fixpaths.include"
 }
 
-void StaticUnitTest::allTests()
+void StaticUnitTest::cleanupTestCase()
 {
-    QCA::Initializer init;
+    delete m_init;
+}
 
+void StaticUnitTest::hexConversions()
+{
     QByteArray test(10, 'a');
 
-    CHECK( QCA::arrayToHex(test), QString("61616161616161616161") );
+    QCOMPARE( QCA::arrayToHex(test), QString("61616161616161616161") );
 
     test.fill('b');
     test[7] = 0x00;
 
-    CHECK( test == QCA::hexToArray(QString("62626262626262006262")), true );
+    QCOMPARE( test == QCA::hexToArray(QString("62626262626262006262")), true );
 
     QSecureArray testArray(10);
     //testArray.fill( 'a' );
     for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x61;
     }
-    CHECK( QCA::arrayToHex( testArray ), QString( "61616161616161616161" ) );
+    QCOMPARE( QCA::arrayToHex( testArray ), QString( "61616161616161616161" ) );
     //testArray.fill( 'b' );
     for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x62;
     }
     testArray[6] = 0x00;
-    CHECK( testArray == QCA::hexToArray(QString("62626262626200626262")), true );
+    QCOMPARE( testArray == QCA::hexToArray(QString("62626262626200626262")), true );
 
-    CHECK( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
+    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
 
     testArray[9] = 0x00;
-    CHECK( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
+    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
+}
 
-    // capabilities are reported as a list - that is a problem for
+
+void StaticUnitTest::capabilities()
+{
+   // capabilities are reported as a list - that is a problem for
     // doing a direct comparison, since they change
     // We try to work around that using contains()
     QStringList supportedCapabilities = QCA::supportedFeatures();
-    CHECK( supportedCapabilities.contains("random"), (QBool)true );
-    CHECK( supportedCapabilities.contains("sha1"), (QBool)true );
-    CHECK( supportedCapabilities.contains("sha0"), (QBool)true );
-    CHECK( supportedCapabilities.contains("md2"),(QBool) true );
-    CHECK( supportedCapabilities.contains("md4"), (QBool)true );
-    CHECK( supportedCapabilities.contains("md5"), (QBool)true );
-    CHECK( supportedCapabilities.contains("ripemd160"), (QBool)true );
+    QCOMPARE( supportedCapabilities.contains("random"), (QBool)true );
+    QCOMPARE( supportedCapabilities.contains("sha1"), (QBool)true );
+    QCOMPARE( supportedCapabilities.contains("sha0"), (QBool)true );
+    QCOMPARE( supportedCapabilities.contains("md2"),(QBool) true );
+    QCOMPARE( supportedCapabilities.contains("md4"), (QBool)true );
+    QCOMPARE( supportedCapabilities.contains("md5"), (QBool)true );
+    QCOMPARE( supportedCapabilities.contains("ripemd160"), (QBool)true );
 
     QStringList defaultCapabilities = QCA::defaultFeatures();
-    CHECK( defaultCapabilities.contains("random"), (QBool)true );
+    QCOMPARE( defaultCapabilities.contains("random"), (QBool)true );
 
-    CHECK( QCA::isSupported("random"), true );
-    CHECK( QCA::isSupported("sha0"), true );
-    CHECK( QCA::isSupported("sha0,sha1"), true );
-    CHECK( QCA::isSupported("md2,md4,md5"), true );
-    CHECK( QCA::isSupported("md5"), true );
-    CHECK( QCA::isSupported("ripemd160"), true );
-    CHECK( QCA::isSupported("sha256,sha384,sha512"), true );
-    CHECK( QCA::isSupported("nosuchfeature"), false );
+    QCOMPARE( QCA::isSupported("random"), true );
+    QCOMPARE( QCA::isSupported("sha0"), true );
+    QCOMPARE( QCA::isSupported("sha0,sha1"), true );
+    QCOMPARE( QCA::isSupported("md2,md4,md5"), true );
+    QCOMPARE( QCA::isSupported("md5"), true );
+    QCOMPARE( QCA::isSupported("ripemd160"), true );
+    QCOMPARE( QCA::isSupported("sha256,sha384,sha512"), true );
+    QCOMPARE( QCA::isSupported("nosuchfeature"), false );
 
     QString caps( "random,sha1,md5,ripemd160");
     QStringList capList;
     capList = caps.split( "," );
-    CHECK( QCA::isSupported(capList), true );
+    QCOMPARE( QCA::isSupported(capList), true );
     capList.append("noSuch");
-    CHECK( QCA::isSupported(capList), false );
+    QCOMPARE( QCA::isSupported(capList), false );
     capList.clear();
     capList.append("noSuch");
-    CHECK( QCA::isSupported(capList), false );
+    QCOMPARE( QCA::isSupported(capList), false );
+}
 
-
+void StaticUnitTest::secureMemory()
+{
     // this should be reliably true
-    CHECK( QCA::haveSecureMemory(), true );
+    QCOMPARE( QCA::haveSecureMemory(), true );
+}
 
+void StaticUnitTest::providers()
+{
     // providers are obviously variable, this might be a bit brittle
     QStringList providerNames;
+    QCA::scanForPlugins();
     QCA::ProviderList qcaProviders = QCA::providers();
     for (int i = 0; i < qcaProviders.size(); ++i) {
 	providerNames.append( qcaProviders[i]->name() );
     }
-    CHECK( providerNames.contains("qca-openssl"), (QBool)true );
-    CHECK( providerNames.contains("qca-gcrypt"), (QBool)true );
-    CHECK( providerNames.contains("qca-botan"), (QBool)true );
+    QCOMPARE( providerNames.contains("qca-openssl"), (QBool)true );
+    QCOMPARE( providerNames.contains("qca-gcrypt"), (QBool)true );
+    QCOMPARE( providerNames.contains("qca-botan"), (QBool)true );
 
     QCA::setProviderPriority("qca-openssl", 4);
     QCA::setProviderPriority("qca-botan", 2);
-    CHECK( QCA::providerPriority( "qca-openssl"), 4 );
-    CHECK( QCA::providerPriority( "qca-gcrypt"), 0 );
-    CHECK( QCA::providerPriority( "qca-botan"), 2 );
+    QCOMPARE( QCA::providerPriority( "qca-openssl"), 4 );
+    QCOMPARE( QCA::providerPriority( "qca-gcrypt"), 0 );
+    QCOMPARE( QCA::providerPriority( "qca-botan"), 2 );
     QCA::setProviderPriority("qca-openssl", 3);
     // reuse last
     QCA::setProviderPriority("qca-botan", -1);
-    CHECK( QCA::providerPriority( "qca-botan"), 3 );
+    QCOMPARE( QCA::providerPriority( "qca-botan"), 3 );
 
     QCA::unloadAllPlugins();
 }
 
+QTEST_MAIN(StaticUnitTest)

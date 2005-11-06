@@ -44,7 +44,7 @@ void DSAUnitTest::allTests()
 	QCA::KeyGenerator keygen;
 	CHECK( keygen.isBusy(), false );
 	CHECK( keygen.blocking(), true );
-	QCA::DLGroup group = keygen.createDLGroup(QCA::DSA_512);
+	QCA::DLGroup group = keygen.createDLGroup(QCA::DSA_1024);
 	CHECK( group.isNull(), false );
 
 	QCA::PrivateKey dsaKey = keygen.createDSA( group );
@@ -57,8 +57,9 @@ void DSAUnitTest::allTests()
 	CHECK( dsaKey.canSign(), true );
 	CHECK( dsaKey.canDecrypt(), false );
 
+	CHECK( dsaKey.bitSize(), 1024 );
 	QCA::DSAPrivateKey dsaPrivKey = dsaKey.toDSA();
-	XFAIL( dsaPrivKey.bitSize(), 512 );
+	CHECK( dsaPrivKey.bitSize(), 1024 );
 
 	QSecureArray dsaDER = dsaKey.toDER();
 	CHECK( dsaDER.isEmpty(), false );

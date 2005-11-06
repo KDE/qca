@@ -59,7 +59,7 @@ void RSAUnitTest::allTests()
 	    CHECK( rsaKey.canDecrypt(), true);
 	    
 	    QCA::RSAPrivateKey rsaPrivKey = rsaKey.toRSA();
-	    XFAIL( rsaPrivKey.bitSize(), keysize );
+	    CHECK( rsaPrivKey.bitSize(), keysize );
 	    
 	    QString rsaPEM = rsaKey.toPEM();
 	    CHECK( rsaPEM.isEmpty(), false );
