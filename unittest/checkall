@@ -1,5 +1,5 @@
 export LD_LIBRARY_PATH="../../lib:$LD_LIBRARY_PATH"
-cd bigintunittest && make check ; cd ..
-cd hashunittest && make check ; cd ..
-cd kdfunittest && make check ; cd ..
-cd staticunittest && make check ; cd .. 
+cd bigintunittest && make check && cd .. && \
+cd hashunittest && make check && cd .. && \
+cd kdfunittest && make check && cd .. && \
+cd staticunittest && make check && cd .. 
