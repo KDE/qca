@@ -3,7 +3,7 @@ TARGET = hashunittest
 DEPENDPATH += .
 INCLUDEPATH += ../../include/QtCrypto
 LIBS += -L../../lib -lqca
-CONFIG += qttest thread console
+CONFIG += qtestlib thread console
 # check target
 
 QMAKE_EXTRA_TARGETS = check
