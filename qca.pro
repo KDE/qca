@@ -15,6 +15,6 @@ unix:{
 	QMAKE_EXTRA_TARGETS += apidox
 
 	# unittest
-	check.commands += cd unittest; ./qca-unittest; cd ..
+	check.commands += cd unittest; make check; cd ..
 	QMAKE_EXTRA_TARGETS += check
 }
