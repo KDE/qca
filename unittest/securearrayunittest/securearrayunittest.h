@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,18 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef BASE64UNITTEST_H
-#define BASE64UNITTEST_H
+#ifndef SECUREARRYUNITTEST_H
+#define SECUREARRYUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class Base64UnitTest : public Tester
+class SecureArrayUnitTest : public QObject
 {
-public:
-    Base64UnitTest();
+    Q_OBJECT
 
-public:
-    void allTests();
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testAll();
+
+private:
+    QCA::Initializer* m_init;
 };
 
 #endif

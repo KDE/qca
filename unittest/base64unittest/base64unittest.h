@@ -1,7 +1,5 @@
 /**
- * qtester.h
- *
- * Copyright (C)  2004  Zack Rusin <zack@kde.org>
+ * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,50 +22,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef QTESTER_H
-#define QTESTER_H
+#ifndef BASE64UNITTEST_H
+#define BASE64UNITTEST_H
 
-#include <qobject.h>
-#include <qstringlist.h>
 
-class QVariant;
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class QTester : public QObject
+class Base64UnitTest : public QObject
 {
     Q_OBJECT
-public:
-    QTester( QObject *parent );
 
-    int testsFinished() const {
-        return m_tests;
-    }
-
-    int testsFailed() const {
-        return m_errorList.count();
-    }
-
-    int testsXFail() const {
-	return m_xfailList.count();
-    }
-
-    QStringList errorList() const {
-        return m_errorList;
-    }
-
-    QStringList xfailList() const {
-        return m_xfailList;
-    }
-
-protected:
-    void check( const char *file, int line, const char *str,
-                const QVariant &result, const QVariant &expectedResult,
-		bool expectedFailure );
-
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void test1_data();
+    void test1();
+    void test2_data();
+    void test2();
 private:
-    QStringList m_errorList;
-    QStringList m_xfailList;
-    QStringList m_xpassList;
-    int m_tests;
+    QCA::Initializer* m_init;
 };
 
 #endif

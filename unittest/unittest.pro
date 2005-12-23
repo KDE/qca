@@ -1,9 +1,13 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+	base64unittest \
 	bigintunittest \
         hashunittest \
+	hexunittest \
 	kdfunittest \
+	keygenunittest \
+	securearrayunittest \
 	staticunittest
 
 
