@@ -22,8 +22,7 @@
 
 #include <qstringlist.h>
 
-#include <botan/lookup.h>
-#include <botan/rng.h>
+#include <botan/botan.h>
 #include <botan/hmac.h>
 #include <botan/s2k.h>
 
