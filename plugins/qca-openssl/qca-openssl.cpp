@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004  Justin Karneges
- * Copyright (C) 2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,8 +36,10 @@
 #include <openssl/pkcs12.h>
 #include <openssl/ssl.h>
 
+#ifndef OSSL_097
 // comment this out if you'd rather use openssl 0.9.6
-//#define OSSL_097
+#define OSSL_097
+#endif
 
 using namespace QCA;
 
@@ -933,12 +935,18 @@ class opensslHashContext : public HashContext
 public:
     opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type) : HashContext(p, type)
     {
-	    m_algorithm = algorithm;
-	    clear();
+	m_algorithm = algorithm;
+	EVP_DigestInit( &m_context, m_algorithm );
     };
     
+    ~opensslHashContext()
+    {
+	EVP_MD_CTX_cleanup(&m_context);
+    }
+
     void clear()
     {
+	EVP_MD_CTX_cleanup(&m_context);
 	EVP_DigestInit( &m_context, m_algorithm );
     }
     
@@ -4711,111 +4719,126 @@ public:
 		m_type = type;
 	}
 
-		void setup(Direction dir,
-			   const SymmetricKey &key,
-			   const InitializationVector &iv)
-		{
-			m_direction = dir;
-			if (Encode == m_direction) {
-				EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
-				EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
-				EVP_EncryptInit_ex(&m_context, 0, 0,
-						   (const unsigned char*)(key.data()),
-						   (const unsigned char*)(iv.data()));
-			} else {
-				EVP_DecryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
-				EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
-				EVP_DecryptInit_ex(&m_context, 0, 0,
-						   (const unsigned char*)(key.data()),
-						   (const unsigned char*)(iv.data()));
-			}
-			EVP_CIPHER_CTX_set_padding(&m_context, m_pad);
+        ~opensslCipherContext()
+	{
+		EVP_CIPHER_CTX_cleanup(&m_context);
+	}
+
+	void setup(Direction dir,
+		   const SymmetricKey &key,
+		   const InitializationVector &iv)
+	{
+		m_direction = dir;
+		if ( ( m_cryptoAlgorithm == EVP_des_ede3() ) && (key.size() == 16) ) {
+			// this is really a two key version of triple DES.
+			m_cryptoAlgorithm = EVP_des_ede();
+		}
+		if (Encode == m_direction) {
+			EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
+			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
+			EVP_EncryptInit_ex(&m_context, 0, 0,
+					   (const unsigned char*)(key.data()),
+					   (const unsigned char*)(iv.data()));
+		} else {
+			EVP_DecryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
+			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
+			EVP_DecryptInit_ex(&m_context, 0, 0,
+					   (const unsigned char*)(key.data()),
+					   (const unsigned char*)(iv.data()));
 		}
 
-		Provider::Context *clone() const
-		{
-			return new opensslCipherContext( *this );
-		}
+		EVP_CIPHER_CTX_set_padding(&m_context, m_pad);
+	}
 
-		unsigned int blockSize() const
-		{
-			return EVP_CIPHER_CTX_block_size(&m_context);
-		}
+	Provider::Context *clone() const
+	{
+		return new opensslCipherContext( *this );
+	}
+	
+	unsigned int blockSize() const
+	{
+		return EVP_CIPHER_CTX_block_size(&m_context);
+	}
     
-		bool update(const QSecureArray &in, QSecureArray *out)
-		{
-			out->resize(in.size()+blockSize());
-			int resultLength;
-			if (Encode == m_direction) {
-				if (0 == EVP_EncryptUpdate(&m_context,
-							   (unsigned char*)out->data(),
-							   &resultLength,
-							   (unsigned char*)in.data(),
-							   in.size())) {
-					return false;
-				}
-			} else {
-				if (0 == EVP_DecryptUpdate(&m_context,
-							   (unsigned char*)out->data(),
-							   &resultLength,
-							   (unsigned char*)in.data(),
-							   in.size())) {
-					return false;
-				}
-			}
-			out->resize(resultLength);
+	bool update(const QSecureArray &in, QSecureArray *out)
+	{
+		// This works around a problem in OpenSSL, where it asserts if
+		// there is nothing to encrypt.
+		if ( 0 == in.size() )
 			return true;
-		}
-    
-		bool final(QSecureArray *out)
-		{
-			out->resize(blockSize());
-			int resultLength;
-			if (Encode == m_direction) {
-				if (0 == EVP_EncryptFinal_ex(&m_context,
-							     (unsigned char*)out->data(),
-							     &resultLength)) {
-					return false;
-				} 
-			} else {
-				if (0 == EVP_DecryptFinal_ex(&m_context,
-							     (unsigned char*)out->data(),
-							     &resultLength)) {
-					return false;
-				} 
-			}
-			out->resize(resultLength);
-			return true;
-		}
 
-		// Change cipher names
-		KeyLength keyLength() const
-		{
-			if (m_type.left(4) == "des-") {
-				return KeyLength( 8, 8, 1);
-			} else if (m_type.left(6) == "aes128") {
-				return KeyLength( 16, 16, 1);
-			} else if (m_type.left(6) == "aes192") {
-				return KeyLength( 24, 24, 1);
-			} else if (m_type.left(6) == "aes256") {
-				return KeyLength( 32, 32, 1);
-			} else if (m_type.left(8) == "blowfish") {
-				// Don't know - TODO
-				return KeyLength( 1, 32, 1);
-			} else if (m_type.left(9) == "tripledes") {
-				return KeyLength( 24, 24, 1);
-			} else {
-				return KeyLength( 0, 1, 1);
+		out->resize(in.size()+blockSize());
+		int resultLength;
+		if (Encode == m_direction) {
+			if (0 == EVP_EncryptUpdate(&m_context,
+						   (unsigned char*)out->data(),
+						   &resultLength,
+						   (unsigned char*)in.data(),
+						   in.size())) {
+				return false;
+			}
+		} else {
+			if (0 == EVP_DecryptUpdate(&m_context,
+						   (unsigned char*)out->data(),
+						   &resultLength,
+						   (unsigned char*)in.data(),
+						   in.size())) {
+				return false;
 			}
 		}
+		out->resize(resultLength);
+		return true;
+	}
+	
+	bool final(QSecureArray *out)
+	{
+		out->resize(blockSize());
+		int resultLength;
+		if (Encode == m_direction) {
+			if (0 == EVP_EncryptFinal_ex(&m_context,
+						     (unsigned char*)out->data(),
+						     &resultLength)) {
+				return false;
+			} 
+		} else {
+			if (0 == EVP_DecryptFinal_ex(&m_context,
+						     (unsigned char*)out->data(),
+						     &resultLength)) {
+				return false;
+			} 
+		}
+		out->resize(resultLength);
+		return true;
+	}
+	
+	// Change cipher names
+	KeyLength keyLength() const
+	{
+		if (m_type.left(4) == "des-") {
+			return KeyLength( 8, 8, 1);
+		} else if (m_type.left(6) == "aes128") {
+			return KeyLength( 16, 16, 1);
+		} else if (m_type.left(6) == "aes192") {
+			return KeyLength( 24, 24, 1);
+		} else if (m_type.left(6) == "aes256") {
+			return KeyLength( 32, 32, 1);
+		} else if (m_type.left(8) == "blowfish") {
+			// Don't know - TODO
+			return KeyLength( 1, 32, 1);
+		} else if (m_type.left(9) == "tripledes") {
+			return KeyLength( 16, 24, 1);
+		} else {
+			return KeyLength( 0, 1, 1);
+		}
+	}
 
 
 protected:
-		EVP_CIPHER_CTX m_context;
-		const EVP_CIPHER *m_cryptoAlgorithm;
-		Direction m_direction;
-		int m_pad;
-		QString m_type;
+	EVP_CIPHER_CTX m_context;
+	const EVP_CIPHER *m_cryptoAlgorithm;
+	Direction m_direction;
+	int m_pad;
+	QString m_type;
 };
 
 }
