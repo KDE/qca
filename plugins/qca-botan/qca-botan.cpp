@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004  Justin Karneges
- * Copyright (C) 2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -258,20 +258,24 @@ public:
 
     bool update(const QSecureArray &in, QSecureArray *out)
     {
-        QSecureArray result( in.size() );
+	QSecureArray result( in.size() + blockSize() );
 	m_crypter->write((Botan::byte*)in.data(), in.size());
-	m_crypter->end_msg();
-	m_crypter->read((Botan::byte*)result.data(), result.size());
+	int bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
+	result.resize(bytes_read);
         *out = result;
         return true;
     }
 
     bool final(QSecureArray *out)
     {
-	QSecureArray result;
+	QSecureArray result( 2 * blockSize() );
+	m_crypter->end_msg();
+	int bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
+	result.resize(bytes_read);
         *out = result;
         return true;
     }
+
     QCA::KeyLength keyLength() const
     {
 	return QCA::KeyLength( Botan::min_keylength_of(m_algoName),
@@ -280,6 +284,11 @@ public:
 
     }
 
+
+    ~BotanCipherContext()
+    {
+	delete m_crypter;
+    }
 
 protected:
     QCA::Direction m_dir;
@@ -298,8 +307,14 @@ class botanProvider : public QCA::Provider
 public:
     void init()
     { 
-	Botan::LibraryInitializer *init;
-	init = new Botan::LibraryInitializer;
+	m_init = new Botan::LibraryInitializer;
+    }
+
+    ~botanProvider()
+    {
+	// We should be cleaning up there, but
+	// this causes the unit tests to segfault
+	// delete m_init;
     }
 
     QString name() const
@@ -349,6 +364,7 @@ public:
 	list += "tripledes-ecb";
 	list += "blowfish-ecb";
 	list += "blowfish-cbc";
+	list += "blowfish-cbc-pkcs7";
 	list += "blowfish-cfb";
 	list += "blowfish-ofb";
 	return list;
@@ -420,6 +436,8 @@ public:
 	    return new BotanCipherContext( QString("Blowfish"), QString("ECB"), QString("NoPadding"), this, type );
 	else if ( type == "blowfish-cbc" )
 	    return new BotanCipherContext( QString("Blowfish"), QString("CBC"), QString("NoPadding"), this, type );
+	else if ( type == "blowfish-cbc-pkcs7" )
+	    return new BotanCipherContext( QString("Blowfish"), QString("CBC"), QString("PKCS7"), this, type );
 	else if ( type == "blowfish-cfb" )
 	    return new BotanCipherContext( QString("Blowfish"), QString("CFB"), QString("NoPadding"), this, type );
 	else if ( type == "blowfish-ofb" )
@@ -441,6 +459,9 @@ public:
 	else
 	    return 0;
     }
+private:
+    Botan::LibraryInitializer *m_init;
+
 };
 
 class botanPlugin : public QCAPlugin
