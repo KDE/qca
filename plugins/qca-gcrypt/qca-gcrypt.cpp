@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004  Justin Karneges
- * Copyright (C) 2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -164,7 +164,16 @@ public:
 	m_direction = dir;
 	err =  gcry_cipher_open( &context, m_cryptoAlgorithm, m_mode, 0 );
 	check_error( "gcry_cipher_open", err );
-	err = gcry_cipher_setkey( context, key.data(), key.size() );
+	if ( ( GCRY_CIPHER_3DES == m_cryptoAlgorithm ) && (key.size() == 16) ) {
+	    // this is triple DES with two keys, and gcrypt wants three
+	    QCA::SymmetricKey keyCopy(key);
+	    QSecureArray thirdKey(key);
+	    thirdKey.resize(8);
+	    keyCopy += thirdKey; 
+	    err = gcry_cipher_setkey( context, keyCopy.data(), keyCopy.size() );
+	} else {
+	    err = gcry_cipher_setkey( context, key.data(), key.size() );
+	}
 	check_error( "gcry_cipher_setkey", err );
 	err = gcry_cipher_setiv( context, iv.data(), iv.size() );
 	check_error( "gcry_cipher_setiv", err ); 
@@ -223,8 +232,10 @@ public:
 	case GCRY_CIPHER_AES128:
 	    return QCA::KeyLength( 16, 16, 1);
 	case GCRY_CIPHER_AES192:
+	    return QCA::KeyLength( 24, 24, 1);
 	case GCRY_CIPHER_3DES:
-	    	return QCA::KeyLength( 24, 24, 1);
+	    // we do two and three key versions
+	    return QCA::KeyLength( 16, 24, 8);
 	case GCRY_CIPHER_AES256:
 	    	return QCA::KeyLength( 32, 32, 1);
 	case GCRY_CIPHER_BLOWFISH:
