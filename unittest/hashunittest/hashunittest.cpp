@@ -33,6 +33,7 @@ void HashUnitTest::initTestCase()
 
 void HashUnitTest::cleanupTestCase()
 {
+    QCA::unloadAllPlugins();
     delete m_init;
 }
 
