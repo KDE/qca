@@ -443,8 +443,11 @@ public:
 	list += "hmac(sha224)";
 #endif
 	list += "hmac(sha256)";
-	list += "hmac(sha384)";
-	list += "hmac(sha512)";
+	if ( ! ( NULL == gcry_check_version("1.2.3") ) ) {
+	    // 1.2.2 and earlier have broken implementation
+	    list += "hmac(sha384)";
+	    list += "hmac(sha512)";
+	}
 	list += "hmac(ripemd160)";
 	list += "aes128-ecb";
 	list += "aes128-cfb";
