@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,24 +25,25 @@
 #ifndef MACUNITTEST_H
 #define MACUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class MACUnitTest : public Tester
+class MACUnitTest : public QObject
 {
-public:
-    MACUnitTest();
+    Q_OBJECT
 
-public:
-    void allTests();
-
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void HMACMD5();
+    void HMACSHA1();
+    void HMACSHA256();
+    void HMACSHA224();
+    void HMACSHA384();
+    void HMACSHA512();
+    void HMACRMD160();
 private:
-    void HMACMD5test( const QString &provider ); 
-    void HMACSHA1test( const QString &provider ); 
-    void HMACSHA256test( const QString &provider ); 
-    void HMACSHA224test( const QString &provider ); 
-    void HMACSHA384test( const QString &provider ); 
-    void HMACSHA512test( const QString &provider ); 
-    void HMACRMD160test( const QString &provider ); 
+    QCA::Initializer* m_init;
 };
 
 #endif

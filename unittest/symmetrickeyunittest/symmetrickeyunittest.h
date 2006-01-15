@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004, 2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,15 +25,21 @@
 #ifndef SYMMETRICKEYUNITTEST_H
 #define SYMMETRICKEYUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class SymmetricKeyUnitTest : public Tester
+class SymmetricKeyUnitTest : public QObject
 {
-public:
-    SymmetricKeyUnitTest();
-
-public:
-    void allTests();
+    Q_OBJECT
+    
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void test1();
+    void weakKey_data();
+    void weakKey();
+private:
+    QCA::Initializer* m_init;
 };
 
 #endif

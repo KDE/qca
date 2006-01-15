@@ -35,23 +35,8 @@ void CipherUnitTest::initTestCase()
 
 void CipherUnitTest::cleanupTestCase()
 {
-    QCA::unloadAllPlugins();
     delete m_init;
 }
-
-struct cipherTestValues {
-    char *plaintext;
-    char *ciphertext;
-    char *key;
-};
-
-struct cipherIVTestValues {
-    char *plaintext;
-    char *ciphertext;
-    char *key;
-    char *iv;
-};
-
 
 void CipherUnitTest::aes128_data()
 {

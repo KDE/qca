@@ -8,8 +8,10 @@ SUBDIRS += \
 	hexunittest \
 	kdfunittest \
 	keygenunittest \
+	macunittest \
 	securearrayunittest \
-	staticunittest
+	staticunittest \
+	symmetrickeyunittest
 
 
 QMAKE_EXTRA_TARGETS += check
