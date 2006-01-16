@@ -2,7 +2,9 @@
 * Convert unit tests to QtTestLib
 * Update to latest Botan, and remake the botantools patch as appropriate
 * create .prf for auto-discovery by qmake-based projects
+* ability to compile plugins in statically (check 'plugins' subdir)
 * update the README
+* special thanks to Jack Lloyd
 
 * API documentation
   clean up Algorithm
@@ -11,9 +13,14 @@
   document all the stuff in qca_securemessage.h
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
+  PKey has see-also references to uncallable functions (eg, toRSAPublicKey)
 
 * Considerations
   api:
+    make qca-gnupg's qpipe public?
+    add a None type for PKey?
+    cert extensions
+    include author/advertising info in plugin?
     make sure there aren't any cases where a Foo::supportsBar()-style function
       reports true, but then when the object is created, it doesn't actually
       support the feature (because the wrong provider was used).
@@ -22,13 +29,30 @@
     add more "getters" to the library?
     don't forget to QCA_EXPORT everything
     it's possible we use QSecureArray in some unnecessary places
+    get rid of Cert/CertReq ::signature() ?  it is quite useless, I think
   other:
     add asserts
     standardize on count() vs size() when iterating?
     printf + latin1()/toLatin1() -> qPrintable() ? (in code/examples/docs/etc)
 
 * finish code for APIs:
-  cert/key mismatch error for cms
+  plugin stuff for 4.1
+    Q_EXPORT_PLUGIN2
+    QLibrary::isLibrary()
+    interfaces?
+  better handling of static QCAPlugins:
+    we delete them, is this ok?  maybe they are supposed to be persistent.
+    if deleted, how do we get them back?
+  don't create qobjects during init (that means you, keystoremanager)
+  qcatool should have an option to list qt plugin paths and plugins found
+  remove the quality enum for randomness? (see botan)
+
+  qca-openssl: we have email altname but not email DN?
+  securemessage: algorithm selection for cms/pgp (and use SecurityLevel?)
+  tls: SSL_get_client_CA_list
+  tls: renegotiation
+  cert/key mismatch error for cms (do we want this for TLS also?)
+
   don't allow smart card providers to be used by default
   functions that don't trip a scan should do so on the first try
   proper parenting of all objects
@@ -56,10 +80,8 @@
   Key wrapping - RFC3217 and RFC3394
   quoted-printable TextFilter
   keygen on smart cards
-  securemessage: cipher selection
-  tls: SSL_get_client_CA_list (does anyone use this?)
   keystore: symmetric keys, arbitrary app data
-  direct read/write of certificate extensions? (might need ASN.1 interface)
+  cms: fine-grained control over smime attribs
   providers for:
     Mozilla NSS
     Windows CryptoAPI
