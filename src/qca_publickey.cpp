@@ -564,7 +564,7 @@ DHPrivateKey PKey::toDHPrivateKey() const
 
 bool PKey::operator==(const PKey &a) const
 {
-	if(isNull() || a.isNull())
+	if(isNull() || a.isNull() || type() != a.type())
 		return false;
 
 	if(a.isPrivate())
