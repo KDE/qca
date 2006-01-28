@@ -1,16 +1,17 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+	aes-cmac \
+	base64test \
+	certtest \
+	ciphertest \
 	hashtest \
+	hextest \
 	mactest \
 	providertest \
-	randomtest \
-	base64test \
-	hextest \
-	ciphertest \
-	certtest \
-	ssltest \
 	publickeyexample \
+	randomtest \
+	ssltest \
 	rsatest
 #	sslservtest \
 #	sasltest

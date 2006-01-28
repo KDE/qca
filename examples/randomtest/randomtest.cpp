@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2004 Brad Hards <bradh@frogmouth.net>
+ Copyright (C) 2004, 2006 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -26,16 +26,18 @@
 
 int main(int argc, char **argv)
 {
+	QCoreApplication app(argc, argv);
+
+	qDebug() << "This example generates random numbers";
+
 	// the Initializer object sets things up, and 
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
 
-	QCoreApplication app(argc, argv);
-
 	int randInt;
 	// This is the standard way to generate a random integer.
 	randInt = QCA::Random::randomInt();
-	std::cout << "A random number: " << randInt << std::endl;
+	qDebug() << "A random number: " << randInt;
 
 	// If this was going to be a really important random
 	// number, you migth want to ask for higher Quality:

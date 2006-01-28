@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2004 Brad Hards <bradh@frogmouth.net>
+ Copyright (C) 2004, 2006 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -26,11 +26,13 @@
 
 int main(int argc, char **argv)
 {
+	QCoreApplication app(argc, argv);
+
+	qDebug() << "This example shows hashed MAC";
+
 	// the Initializer object sets things up, and
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
-
-	QCoreApplication app(argc, argv);
 
 	// we use the first argument as the data to authenticate
 	// if an argument is provided. Use "hello" if no argument
@@ -51,6 +53,10 @@ int main(int argc, char **argv)
 
 		// create the key
 		QCA::SymmetricKey keyObject(key);
+		
+		// set the HMAC object to use the key
+		hmacObject.setup(key);
+		// that could also have been done in the QCA::HMAC constructor
 
 		// we split it into two parts to show incremental update
 		QSecureArray part1(arg.left(3)); // three chars - "hel"
