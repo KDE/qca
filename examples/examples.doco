@@ -59,3 +59,18 @@ can be used. Note that the argument, if you provide it, must be a
 PEM encoded file collection.
 
 */
+
+/** \example aes-cmac.cpp 
+
+This examples shows how to implement a client side "provider".
+
+There are three important parts to this
+ - the class derived from QCA::Provider (in this example called
+ "ClientSideProvider"), that generates the context class
+ - one or more context classes (in this example only one, implementing
+ AES-CMAC, called "AESCMACContext")
+ - a call to QCA::insertProvider, to add the QCA::Provider subclass
+ into QCA
+
+*/
+

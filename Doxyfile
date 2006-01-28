@@ -490,7 +490,8 @@ EXCLUDE_PATTERNS       = *.moc.* \
 # directories that contain example code fragments that are included (see 
 # the \include command).
 
-EXAMPLE_PATH           = examples/hashtest \
+EXAMPLE_PATH           = examples/aes-cmac \
+			 examples/hashtest \
                          examples/mactest \
                          examples/providertest \
                          examples/base64test \
