@@ -21,8 +21,6 @@
 
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
-// needed for printf
-#include<stdio.h>
 
 class AESCMACContext : public QCA::MACContext
 {
@@ -248,7 +246,7 @@ int main(int argc, char **argv)
 
     // We should check AES CMAC is supported before using it.
     if( !QCA::isSupported("cmac(aes)") ) {
-	printf("AES CMAC not supported!\n");
+	qDebug() << "AES CMAC not supported!";
     } else {
 	// create the required object
 	AES_CMAC cmacObject;
