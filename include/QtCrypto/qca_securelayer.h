@@ -372,7 +372,6 @@ namespace QCA
 		   \param service the name of the service
 		   \param host the server side host name
 		   \param realm the realm to use
-		   \param mechlist the list of available mechanisms
 		   \param ServerSendMode which mode to use on the server side
 		*/
 		void startServer(const QString &service, const QString &host, const QString &realm, enum ServerSendMode = DisableServerSendLast);

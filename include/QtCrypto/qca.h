@@ -1,7 +1,7 @@
 /*
  * qca.h - Qt Cryptographic Architecture
  * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,7 +36,7 @@
    \mainpage Qt Cryptographic Architecture
 
    Taking a hint from the similarly-named
-   <a href="http://java.sun.com/j2se/1.4/docs/guide/security/CryptoSpec.html">Java
+   <a href="http://java.sun.com/j2se/1.5.0/docs/guide/security/CryptoSpec.html">Java
    Cryptography Architecture</a>, %QCA aims to provide a
    straightforward and cross-platform cryptographic API, using Qt
    datatypes and conventions.  %QCA separates the API from the

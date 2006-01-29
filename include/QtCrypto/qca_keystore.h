@@ -164,25 +164,31 @@ namespace QCA
 		   Obtain a specific KeyStore
 
 		   \param id the identification for the key store
+		   \param parent the parent object for this keystore
 		*/
 		KeyStore(const QString &id, QObject *parent = 0);
 
 		~KeyStore();
 
+		/**
+		   Check if this KeyStore is valid
+
+		   \return true if the KeyStore is valid
+		*/
 		bool isValid() const;
 
 		/**
-		   The keystore Type
+		   The KeyStore Type
 		*/
 		Type type() const;
 
 		/**
-		   The name associated with the keystore
+		   The name associated with the KeyStore
 		*/
 		QString name() const;
 
 		/**
-		   The ID associated with the keystore
+		   The ID associated with the KeyStore
 		*/
 		QString id() const;
 
