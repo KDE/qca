@@ -33,7 +33,7 @@
 #include "qcaprovider.h"
 
 /**
-   \mainpage %Qt Cryptographic Architecture
+   \mainpage Qt Cryptographic Architecture
 
    Taking a hint from the similarly-named
    <a href="http://java.sun.com/j2se/1.4/docs/guide/security/CryptoSpec.html">Java
@@ -141,5 +141,181 @@
    stopped.
 
  */
+
+/** \page architecture Architecture
+
+\note You don't need to understand any of this to use %QCA. It is
+documented for those who are curious, and for anyone planning to
+extend or modify %QCA.
+
+The design of %QCA is based on the Bridge design pattern. The intent of
+the Bridge pattern is to "Decouple an abstraction from its
+implementation so that the two can vary independently." [Gamma et.al,
+pg 151].
+
+To understand how this decoupling works in the case of %QCA, is is
+easiest to look at an example - a cryptographic Hash. The API is
+pretty simple (although I've left out some parts that aren't required
+for this example):
+
+\code
+class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
+{
+public:
+    virtual void clear();
+    virtual void update(const QSecureArray &a);
+    virtual QSecureArray final();
+protected:
+    Hash(const QString &type, const QString &provider);
+}
+\endcode
+
+The implementation for the Hash class is almost as simple:
+
+\code
+Hash::Hash(const QString &type, const QString &provider)
+:Algorithm(type, provider)
+{
+}
+
+void Hash::clear()
+{
+        static_cast<HashContext *>(context())->clear();
+}
+
+void Hash::update(const QSecureArray &a)
+{
+        static_cast<HashContext *>(context())->update(a);
+}
+
+QSecureArray Hash::final()
+{
+        return static_cast<HashContext *>(context())->final();
+}
+\endcode
+
+The reason why it looks so simple is that the various methods in Hash
+just call out to equivalent routines in the context() object. The
+context comes from a call (getContext()) that is made as part of the
+Algorithm constructor. That getContext() call causes %QCA to work
+through the list of providers (generally plugins) that it knows about,
+looking for a provider that can produce the right kind of context (in
+this case, a HashContext).
+
+  The code for a HashContext doesn't need to be linked into %QCA - it can
+be varied in its implementation, including being changed at run-time. The
+application doesn't need to know how HashContext is implemented, because
+  it just has to deal with the Hash class interface. In fact, HashContext
+  may not be implemented, so the application should check (using 
+  QCA::isSupported()) before trying to use features that are implemented
+with plugins.
+
+  The code for one implementation (in this case, calling OpenSSL) is shown
+below. 
+\code
+class opensslHashContext : public HashContext
+{
+public:
+    opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type) : HashContext(p, type)
+    {
+        m_algorithm = algorithm;
+        EVP_DigestInit( &m_context, m_algorithm );
+    };
+
+    ~opensslHashContext()
+    {
+        EVP_MD_CTX_cleanup(&m_context);
+    }
+
+    void clear()
+    {
+        EVP_MD_CTX_cleanup(&m_context);
+        EVP_DigestInit( &m_context, m_algorithm );
+    }
+
+    void update(const QSecureArray &a)
+    {
+        EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
+    }
+
+    QSecureArray final()
+    {
+        QSecureArray a( EVP_MD_size( m_algorithm ) );
+        EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+        return a;
+    }
+
+    Provider::Context *clone() const
+    {
+        return new opensslHashContext(*this);
+    }
+
+protected:
+    const EVP_MD *m_algorithm;
+    EVP_MD_CTX m_context;
+};
+\endcode
+
+This approach (using an Adapter pattern) is very common in %QCA backends,
+because the plugins are often based on existing libraries.
+
+  In addition to the various Context objects, each provider also has
+  a parameterised Factory class that has a createContext() method, as
+  shown below:
+\code
+        Context *createContext(const QString &type)
+        {
+                //OpenSSL_add_all_digests();
+                if ( type == "sha1" )
+                        return new opensslHashContext( EVP_sha1(), this, type);
+                else if ( type == "sha0" )
+                        return new opensslHashContext( EVP_sha(), this, type);
+                else if ( type == "md5" )
+                        return new opensslHashContext( EVP_md5(), this, type);
+                else if ( type == "aes128-cfb" )
+                        return new opensslCipherContext( EVP_aes_128_cfb(), 0, this, type);
+                else if ( type == "aes128-cbc" )
+                        return new opensslCipherContext( EVP_aes_128_cbc(), 0, this, type);
+		else
+		        return 0;
+\endcode
+
+The resulting effect is that %QCA can ask the provider to provide an appropriate
+Context object without worrying about how it is implemented.
+
+*/
+
+/** \page providers Providers
+
+QCA works on the concept of a "provider". There is a limited
+internal provider (named "default"), but most of the work is
+done in plugin modules.
+
+The logic to selection of a provider is fairly simple. The user can 
+specify a provider name - if that name exists, and the provider supports
+the requested feature, then the named provider is used. If that
+didn't work, then the available plugins are searched (based on a
+priority order) for the requested feature. If that doesn't work,
+then the default provider is searched for the requested feature.
+
+So the only way to get the default provider is to either have no other support
+whatsoever, or to specify the default provider directly (this goes for the
+algorithm constructors as well as setGlobalRNG()).
+
+You can add your own provider in two ways - as a shared object plugin,
+and as a part of the client code.
+
+The shared object plugin needs to be able to be found using the
+built-in scan logic - this normally means you need to install it into
+the plugins/crypto subdirectory within the directory that Qt is
+installed to. This will make it available for all applications.
+
+If you have a limited application domain (such as a specialist
+algorithm, or a need to be bug-compatible), you may find it easier to
+create a client-side provider, and add it using the
+QCA::insertProvider call. There is an example of this - see
+<a href="aes-cmac_8cpp-example.html">the AES-CMAC example</a>.
+*/
+
 
 #endif
