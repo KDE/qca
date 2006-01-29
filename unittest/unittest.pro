@@ -3,6 +3,7 @@ TEMPLATE = subdirs
 SUBDIRS += \
 	base64unittest \
 	bigintunittest \
+	certunittest \
 	cipherunittest \
 	hashunittest \
 	hexunittest \
