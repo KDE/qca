@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,20 +25,22 @@
 #ifndef CERTUNITTEST_H
 #define CERTUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class CertUnitTest : public Tester
+class CertUnitTest : public QObject
 {
-public:
-    CertUnitTest();
+    Q_OBJECT
 
-public:
-    void allTests();
-
+private slots:
+    void initTestCase();
+    void checkSystemStore();  
+    void CAcertstest();
+    void checkClientCerts();
+    void checkServerCerts();
+    void cleanupTestCase();
 private:
-    void checkCAcerts(const QString &provider);
-    void checkClientCerts(const QString &provider);
-    void checkServerCerts(const QString &provider);
+    QCA::Initializer* m_init;
 };
 
 #endif
