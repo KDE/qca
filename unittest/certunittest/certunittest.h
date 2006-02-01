@@ -36,6 +36,7 @@ private slots:
     void initTestCase();
     void checkSystemStore();  
     void CAcertstest();
+    void qualitysslcatest();
     void checkClientCerts();
     void checkServerCerts();
     void cleanupTestCase();

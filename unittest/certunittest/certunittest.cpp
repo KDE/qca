@@ -81,7 +81,55 @@ void CertUnitTest::CAcertstest()
 	    QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning), (QBool)false );
 
 	    // no policies on this cert
-    QCOMPARE( ca1.policies().count(), 0 );
+	    QCOMPARE( ca1.policies().count(), 0 );
+	}
+    }
+}
+
+void CertUnitTest::qualitysslcatest()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::ConvertResult resultca1;
+	    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/QualitySSLIntermediateCA.crt", &resultca1, provider);
+	    
+	    QCOMPARE( resultca1, QCA::ConvertGood );
+	    QCOMPARE( ca1.isNull(), false );
+	    QCOMPARE( ca1.isCA(), true );
+	    QCOMPARE( ca1.isSelfSigned(), false );
+    
+	    QCOMPARE( ca1.serialNumber(), QBigInteger("33555098") );
+	    
+	    QCOMPARE( ca1.commonName(), QString("Comodo Class 3 Security Services CA") );
+	    
+	    QCOMPARE( ca1.notValidBefore().toString(), QDateTime( QDate( 2002, 8, 27 ), QTime( 19, 02, 00 ), Qt::UTC ).toString() );
+	    QCOMPARE( ca1.notValidAfter().toString(), QDateTime( QDate( 2012, 8, 27 ), QTime( 23, 59, 00 ), Qt::UTC ).toString() );
+	    
+	    QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature), (QBool)true );
+	    QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation), (QBool)true );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
+	    QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign), (QBool)true );
+	    QCOMPARE( ca1.constraints().contains(QCA::CRLSign), (QBool)true );
+	    QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::ServerAuth), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::ClientAuth), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::CodeSigning), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::EmailProtection), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecUser), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::TimeStamping), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning), (QBool)false );
 	}
     }
 }
