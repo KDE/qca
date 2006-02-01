@@ -807,14 +807,14 @@ static QByteArray get_cert_subject_key_id(X509_EXTENSION *ex)
 	return out;
 }
 
-// TODO: removed because it was crashing on the qualityssl intermediate ca cert
-/*static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
+// If you get crashes in this code, please provide a copy of the cert to bradh AT frogmouth.net
+static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
 {
 	AUTHORITY_KEYID *akid = (AUTHORITY_KEYID *)X509V3_EXT_d2i(ex);
 	QByteArray out((const char *)ASN1_STRING_data(akid->keyid), ASN1_STRING_length(akid->keyid));
 	AUTHORITY_KEYID_free(akid);
 	return out;
-}*/
+}
 
 static Validity convert_verify_error(int err)
 {
@@ -3125,7 +3125,28 @@ public:
 
 		// TODO:
 		//QSecureArray sig;
-		//SignatureAlgorithm sigalgo;
+
+		switch( OBJ_obj2nid(x->cert_info->signature->algorithm) )
+		{
+		case NID_sha1WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_SHA1;
+		    break;
+		case NID_md5WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_MD5;
+		    break;
+		case NID_md2WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_MD2;
+		    break;
+		case NID_ripemd160WithRSA:
+		    p.sigalgo = QCA::EMSA3_RIPEMD160;
+		    break;
+		case NID_dsaWithSHA1:
+		    p.sigalgo = QCA::EMSA1_SHA1;
+		    break;
+		default:
+		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->cert_info->signature->algorithm);
+		    p.sigalgo = QCA::SignatureUnknown;
+		}    
 
 		pos = X509_get_ext_by_NID(x, NID_subject_key_identifier, -1);
 		if(pos != -1)
@@ -3136,13 +3157,13 @@ public:
 		}
 
 		// TODO:
-		/*pos = X509_get_ext_by_NID(x, NID_authority_key_identifier, -1);
+		pos = X509_get_ext_by_NID(x, NID_authority_key_identifier, -1);
 		if(pos != -1)
 		{
 			X509_EXTENSION *ex = X509_get_ext(x, pos);
 			if(ex)
 				p.issuerId += get_cert_issuer_key_id(ex);
-		}*/
+		}
 
 		_props = p;
 		//printf("[%p] made props: [%s]\n", this, _props.subject[CommonName].toLatin1().data());
