@@ -807,11 +807,14 @@ static QByteArray get_cert_subject_key_id(X509_EXTENSION *ex)
 	return out;
 }
 
-// If you get crashes in this code, please provide a copy of the cert to bradh AT frogmouth.net
+// If you get any more crashes in this code, please provide a copy
+// of the cert to bradh AT frogmouth.net
 static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
 {
 	AUTHORITY_KEYID *akid = (AUTHORITY_KEYID *)X509V3_EXT_d2i(ex);
-	QByteArray out((const char *)ASN1_STRING_data(akid->keyid), ASN1_STRING_length(akid->keyid));
+	QByteArray out;
+	if (akid->keyid)
+		out = QByteArray((const char *)ASN1_STRING_data(akid->keyid), ASN1_STRING_length(akid->keyid));
 	AUTHORITY_KEYID_free(akid);
 	return out;
 }
