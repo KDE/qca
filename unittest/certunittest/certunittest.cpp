@@ -147,8 +147,7 @@ void CertUnitTest::checkClientCerts()
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("889E7EF729719D7B280F361AAE6D00D39DE1AADB").toByteArray();
 	    QCOMPARE( client1.subjectKeyId(), subjectKeyID );
-	    QEXPECT_FAIL("", "No idea yet", Continue);
-	    QCOMPARE( QCA::Hex().arrayToString(client1.issuerKeyId()), QString("BF53438278D09EC380E51B67CA0500DFB94883A5") );
+	    QCOMPARE( QCA::Hex().arrayToString(client1.issuerKeyId()), QString("bf53438278d09ec380e51b67ca0500dfb94883a5") );
 	    
 	    QCA::PublicKey pubkey1 = client1.subjectPublicKey();
 	    QCOMPARE( pubkey1.isNull(), false );
@@ -161,7 +160,6 @@ void CertUnitTest::checkClientCerts()
 	    
 	    QCOMPARE( client1.pathLimit(), 0 );
 
-	    QEXPECT_FAIL("", "No idea yet", Continue);	    
 	    QCOMPARE( client1.signatureAlgorithm(), QCA::EMSA3_MD5 );
 	    
 	    QCA::CertificateCollection trusted;
@@ -185,7 +183,6 @@ void CertUnitTest::checkClientCerts()
 	    QCOMPARE( derClient1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derClient1, &resultClient1, provider );
 	    QCOMPARE( resultClient1, QCA::ConvertGood );
-	    QEXPECT_FAIL("", "No idea yet", Continue);
 	    QCOMPARE( fromDer1 == client1, true );
 	}
     }
@@ -253,7 +250,6 @@ void CertUnitTest::checkServerCerts()
 	    
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("0234E2C906F6E0B44253BE04C0CBA7823A6DB509").toByteArray();
 	    QCOMPARE( server1.subjectKeyId(), subjectKeyID );
-	    QEXPECT_FAIL("", "No idea yet", Continue);
 	    QByteArray authorityKeyID = QCA::Hex().stringToArray("BF53438278D09EC380E51B67CA0500DFB94883A5").toByteArray();
 	    QCOMPARE( server1.issuerKeyId(), authorityKeyID );
 	    
@@ -268,7 +264,6 @@ void CertUnitTest::checkServerCerts()
 	    
 	    QCOMPARE( server1.pathLimit(), 0 );
 	    
-	    QEXPECT_FAIL("", "No idea yet", Continue);
 	    QCOMPARE( server1.signatureAlgorithm(), QCA::EMSA3_MD5 );
 	    
 	    QCA::CertificateCollection trusted;
@@ -292,7 +287,6 @@ void CertUnitTest::checkServerCerts()
 	    QCOMPARE( derServer1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derServer1, &resultServer1, provider );
 	    QCOMPARE( resultServer1, QCA::ConvertGood );
-	    QEXPECT_FAIL("", "No idea yet", Continue);
 	    QCOMPARE( fromDer1 == server1, true );
 	}
     }
