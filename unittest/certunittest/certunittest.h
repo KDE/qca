@@ -35,6 +35,7 @@ class CertUnitTest : public QObject
 private slots:
     void initTestCase();
     void checkSystemStore();  
+    void nullCert();
     void CAcertstest();
     void qualitysslcatest();
     void checkClientCerts();

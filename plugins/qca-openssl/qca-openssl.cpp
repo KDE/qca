@@ -3126,8 +3126,12 @@ public:
 				p.policies = get_cert_policies(ex);
 		}
 
-		// TODO:
-		//QSecureArray sig;
+		if (x->signature)
+		{
+			p.sig = QSecureArray(x->signature->length);
+			for (int i=0; i< x->signature->length; i++)
+				p.sig[i] = x->signature->data[i];
+		}
 
 		switch( OBJ_obj2nid(x->cert_info->signature->algorithm) )
 		{
