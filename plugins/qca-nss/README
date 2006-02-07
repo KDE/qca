@@ -1,0 +1,16 @@
+QCA Mozilla NSS plugin
+----------------------
+Author: Brad Hards <bradh@frogmouth.net>
+
+This plugin provides features based on Mozilla NSS. It implements:
+* Hashing
+
+
+Requirements:
+  Recent version of NSS.
+
+Installation procedure:
+  ./configure
+  make
+  su -c "make install"
+
