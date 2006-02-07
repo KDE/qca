@@ -63,6 +63,7 @@ void HashUnitTest::md2test()
     providersToTest.append("qca-openssl");
     // no MD2 support for libgcrypt...
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -102,6 +103,8 @@ void HashUnitTest::md4test()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    // No MD4 support for NSS?
+    // providersToTest.append("qca-nss");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -143,6 +146,7 @@ void HashUnitTest::md5test()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     providersToTest.append("default");
     
     QFETCH(QByteArray, input);
@@ -165,6 +169,7 @@ void HashUnitTest::md5filetest()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     providersToTest.append("default");
     
     foreach(QString provider, providersToTest) {
@@ -231,7 +236,7 @@ void HashUnitTest::sha0test()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    // No SHA0 for botan or gcrypt
+    // No SHA0 for botan, gcrypt or nss
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -255,7 +260,7 @@ void HashUnitTest::sha0longtest()
 
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    // No SHA0 for botan or gcrypt
+    // No SHA0 for botan, gcrypt or nss
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha0", provider))
@@ -304,6 +309,7 @@ void HashUnitTest::sha1test()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-nss");
     providersToTest.append("default");
     
     QFETCH(QByteArray, input);
@@ -325,6 +331,7 @@ void HashUnitTest::sha1longtest()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-nss");
     providersToTest.append("default");
     
     foreach(QString provider, providersToTest) {
@@ -469,6 +476,7 @@ void HashUnitTest::sha256test()
     QStringList providersToTest;
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -491,6 +499,7 @@ void HashUnitTest::sha256longtest()
     QStringList providersToTest;
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha256", provider))
@@ -542,6 +551,7 @@ void HashUnitTest::sha384test()
     QStringList providersToTest;
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -564,6 +574,7 @@ void HashUnitTest::sha384longtest()
     QStringList providersToTest;
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha384", provider))
@@ -611,6 +622,7 @@ void HashUnitTest::sha512test()
     QStringList providersToTest;
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -633,6 +645,7 @@ void HashUnitTest::sha512longtest()
     QStringList providersToTest;
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha512", provider))
@@ -705,6 +718,7 @@ void HashUnitTest::rmd160longtest()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("ripemd160", provider))
