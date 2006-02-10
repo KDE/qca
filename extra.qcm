@@ -40,6 +40,7 @@ public:
 		).arg(QLibraryInfo::location(QLibraryInfo::DataPath));
 		conf->addExtra(str);
 
+		QString qtcore = qc_getenv("QC_DEBUG") == "Y" ? QString("QtCore_debug") : QString("QtCore");
 		// write pkg-config file
 		str = QString(
 		"prefix=%1\n"
@@ -50,11 +51,11 @@ public:
 		"Name: QCA\n"
 		"Description: Qt Cryptographic Architecture library\n"
 		"Version: 2.0.0 #maybe this shouldn't be literal...\n"
-		"Requires: qt-mt\n"
+		"Requires: %2\n"
 		"Libs: -L${libdir} -lqca\n"
 		"Cflags: -I${includedir}\n"
 		"\n"
-		).arg(prefix);
+		).arg(prefix).arg(qtcore);
 
 		f.setFileName("qca.pc");
 		if(f.open(QFile::WriteOnly | QFile::Truncate))
