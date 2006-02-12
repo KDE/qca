@@ -59,7 +59,6 @@ void Pkits::pkits4_1_1()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -98,7 +97,6 @@ void Pkits::pkits4_1_2()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -137,7 +135,6 @@ void Pkits::pkits4_1_3()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -176,7 +173,6 @@ void Pkits::pkits4_1_4()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -215,7 +211,6 @@ void Pkits::pkits4_1_5()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -225,7 +220,7 @@ void Pkits::pkits4_1_5()
 	    QCA::Certificate cert = certFromDERFile("certs/ValidDSAParameterInheritanceTest5EE.crt", provider);
 	    QCOMPARE( cert.isNull(), false );
 
-	    QCOMPARE( cert.policies().count(), 1 );
+	    // QCOMPARE( cert.policies().count(), 1 );
 	    
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
@@ -261,7 +256,6 @@ void Pkits::pkits4_1_6()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -271,8 +265,6 @@ void Pkits::pkits4_1_6()
 	    QCA::Certificate cert = certFromDERFile("certs/InvalidDSASignatureTest6EE.crt", provider);
 	    QCOMPARE( cert.isNull(), false );
 
-	    QCOMPARE( cert.policies().count(), 1 );
-	    
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
@@ -288,6 +280,295 @@ void Pkits::pkits4_1_6()
 	    QCOMPARE( ca.isNull(), false );
 	    trusted.addCertificate( ca );
 	    QCA::CRL caCRL = crlFromDERFile("certs/DSACACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorSignatureFailed );
+	}
+    }
+}
+
+void Pkits::pkits4_2_1()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/InvalidCAnotBeforeDateTest1EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/BadnotBeforeDateCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/BadnotBeforeDateCACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorExpired );
+	}
+    }
+}
+
+void Pkits::pkits4_2_2()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/InvalidEEnotBeforeDateTest2EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorExpired );
+	}
+    }
+}
+
+void Pkits::pkits4_2_3()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/Validpre2000UTCnotBeforeDateTest3EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ValidityGood );
+	}
+    }
+}
+
+void Pkits::pkits4_2_4()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/ValidGeneralizedTimenotBeforeDateTest4EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ValidityGood );
+	}
+    }
+}
+
+
+void Pkits::pkits4_2_5()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/InvalidCAnotAfterDateTest5EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/BadnotAfterDateCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/BadnotAfterDateCACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorExpired );
+	}
+    }
+}
+
+void Pkits::pkits4_2_6()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/InvalidEEnotAfterDateTest6EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorExpired );
+	}
+    }
+}
+
+void Pkits::pkits4_2_7()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/Invalidpre2000UTCEEnotAfterDateTest7EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCOMPARE( caCRL.isNull(), false );
+	    trusted.addCRL( caCRL );
+
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorExpired );
+	}
+    }
+}
+
+void Pkits::pkits4_2_8()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::Certificate cert = certFromDERFile("certs/ValidGeneralizedTimenotAfterDateTest8EE.crt", provider);
+	    QCOMPARE( cert.isNull(), false );
+
+	    QCA::CertificateCollection trusted;
+	    QCA::CertificateCollection untrusted;
+	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
+	    
+	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCOMPARE( root.isNull(), false );
+	    trusted.addCertificate( root );
+	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCOMPARE( rootCRL.isNull(), false );
+	    trusted.addCRL( rootCRL );
+
+	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCOMPARE( ca.isNull(), false );
+	    trusted.addCertificate( ca );
+	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    trusted.addCRL( caCRL );
 

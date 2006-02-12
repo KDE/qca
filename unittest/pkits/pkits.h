@@ -40,6 +40,14 @@ private slots:
     void pkits4_1_4();
     void pkits4_1_5();
     void pkits4_1_6();
+    void pkits4_2_1();
+    void pkits4_2_2();
+    void pkits4_2_3();
+    void pkits4_2_4();
+    void pkits4_2_5();
+    void pkits4_2_6();
+    void pkits4_2_7();
+    void pkits4_2_8();
     void cleanupTestCase();
 private:
     QCA::Initializer* m_init;
