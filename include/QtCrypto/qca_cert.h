@@ -114,7 +114,7 @@ namespace QCA
 		ErrorSelfSigned,         ///< The certificate is self-signed, and is not found in the list of trusted certificates
 		ErrorRevoked,            ///< The certificate has been revoked
 		ErrorPathLengthExceeded, ///< The path length from the root CA to this certificate is too long
-		ErrorExpired,            ///< The certificate has expired
+		ErrorExpired,            ///< The certificate has expired, or is not yet valid (e.g. current time is earlier than notBefore time)
 		ErrorExpiredCA,          ///< The Certificate Authority has expired
 		ErrorValidityUnknown     ///< Validity is unknown
 	};
@@ -894,6 +894,17 @@ namespace QCA
 		   \return the CRL corresponding to the contents of the string
 		*/
 		static CRL fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   Import a PEM encoded %Certificate Revocation List (CRL) from a file
+
+		   \param fileName the name (and path, if required) of the file containing the certificate in PEM format
+		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return the CRL in the file
+		*/
+		static CRL fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
 	/**

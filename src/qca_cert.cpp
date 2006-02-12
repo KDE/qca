@@ -747,6 +747,17 @@ CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provide
 	return c;
 }
 
+CRL CRL::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
+{
+	QString pem;
+	if(!stringFromFile(fileName, &pem))
+	{
+		if(result)
+			*result = ErrorFile;
+		return CRL();
+	}
+	return fromPEM(pem, result, provider);
+}
 //----------------------------------------------------------------------------
 // Store
 //----------------------------------------------------------------------------
