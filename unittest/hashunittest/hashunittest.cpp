@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -147,6 +147,7 @@ void HashUnitTest::md5test()
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     providersToTest.append("default");
     
     QFETCH(QByteArray, input);
@@ -170,6 +171,7 @@ void HashUnitTest::md5filetest()
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     providersToTest.append("default");
     
     foreach(QString provider, providersToTest) {
@@ -310,6 +312,7 @@ void HashUnitTest::sha1test()
     providersToTest.append("qca-botan");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     providersToTest.append("default");
     
     QFETCH(QByteArray, input);
@@ -332,12 +335,15 @@ void HashUnitTest::sha1longtest()
     providersToTest.append("qca-botan");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     providersToTest.append("default");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha1", provider))
 	    QWARN(QString("SHA1 not supported for "+provider).toLocal8Bit());
 	else {
+	    // QTime t;
+	    // t.start();
 	    QByteArray fillerString;
 	    fillerString.fill('a', 1000);
 	    
@@ -389,6 +395,7 @@ void HashUnitTest::sha1longtest()
 	    } else {
 		QWARN( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
 	    }
+	    // qDebug() << "SHA1: " << provider << " elapsed " << t.elapsed();
 	}
     }
 }
@@ -401,17 +408,19 @@ void HashUnitTest::sha224test_data()
     // These are as specfied in FIPS 180-2, change notice 1
 
     // FIPS 180-2, Appendix B.1
-    QTest::newRow("sh224(abc)") << QByteArray("abc") << QString("23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7");
+    QTest::newRow("sha224(abc)") << QByteArray("abc") << QString("23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7");
 
     // FIPS 180-2, Appendix B.2
-    QTest::newRow("sha224(abc)") << QByteArray("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")
+    QTest::newRow("sha224(aq)") << QByteArray("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")
 			      << QString("75388b16512776cc5dba5da1fd890150b0c6455cb4f58b1952522525");
 }
 
 void HashUnitTest::sha224test()
 {
     QStringList providersToTest;
+    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-ipp");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -433,8 +442,10 @@ void HashUnitTest::sha224longtest()
     fillerString.fill('a', 1000);
     
     QStringList providersToTest;
+    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
-    
+    providersToTest.append("qca-ipp");
+
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha224", provider))
 	    QWARN(QString("SHA224 not supported for "+provider).toLocal8Bit());
@@ -474,9 +485,11 @@ void HashUnitTest::sha256test_data()
 void HashUnitTest::sha256test()
 {
     QStringList providersToTest;
+    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -500,6 +513,7 @@ void HashUnitTest::sha256longtest()
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha256", provider))
@@ -549,9 +563,11 @@ void HashUnitTest::sha384test_data()
 void HashUnitTest::sha384test()
 {
     QStringList providersToTest;
+    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -572,14 +588,18 @@ void HashUnitTest::sha384longtest()
     fillerString.fill('a', 1000);
     
     QStringList providersToTest;
+    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha384", provider))
 	    QWARN(QString("SHA384 not supported for "+provider).toLocal8Bit());
 	else {
+	    // QTime t;
+	    // t.start();
 	    QCA::SHA384 shaHash(provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
@@ -594,6 +614,7 @@ void HashUnitTest::sha384longtest()
 		shaHash.update(fillerString);
 	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
 		     QString("9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985") );
+	    // qDebug() << "SHA384: " << provider << " elapsed " << t.elapsed();
 	}
     }
 }
@@ -620,9 +641,11 @@ void HashUnitTest::sha512test_data()
 void HashUnitTest::sha512test()
 {
     QStringList providersToTest;
+    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
@@ -643,9 +666,11 @@ void HashUnitTest::sha512longtest()
     fillerString.fill('a', 1000);
     
     QStringList providersToTest;
+    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
+    providersToTest.append("qca-ipp");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("sha512", provider))
@@ -718,7 +743,6 @@ void HashUnitTest::rmd160longtest()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
     
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("ripemd160", provider))
