@@ -5,6 +5,7 @@ Authors: Justin Karneges <justin@affinix.com>
 
 This plugin provides features based on OpenSSL. It implements:
 * Hashing - SHA1, SHA0, RIPEMD160, MD2, MD4, MD5
+* Hashing - SHA224, SHA256, SHA384 and SHA512 (for openssl 0.9.8)
 * Block Ciphers
 * Keyed Hash Message Authentication Code (HMAC), using SHA1, MD5, RIPEMD160
 * Public keys - RSA, DSA, Diffie-Hellman

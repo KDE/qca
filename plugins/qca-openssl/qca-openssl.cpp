@@ -4907,6 +4907,18 @@ public:
 		list += "md2";
 		list += "md4";
 		list += "md5";
+#ifdef SHA224_DIGEST_LENGTH
+		list += "sha224";
+#endif
+#ifdef SHA256_DIGEST_LENGTH
+		list += "sha256";
+#endif
+#ifdef SHA384_DIGEST_LENGTH
+		list += "sha384";
+#endif
+#ifdef SHA512_DIGEST_LENGTH
+		list += "sha512";
+#endif
 		list += "hmac(md5)";
 		list += "hmac(sha1)";
 		list += "hmac(ripemd160)";
@@ -4967,6 +4979,22 @@ public:
 			return new opensslHashContext( EVP_md4(), this, type);
 		else if ( type == "md5" )
 			return new opensslHashContext( EVP_md5(), this, type);
+#ifdef SHA224_DIGEST_LENGTH
+		else if ( type == "sha224" )
+			return new opensslHashContext( EVP_sha224(), this, type);
+#endif
+#ifdef SHA256_DIGEST_LENGTH
+		else if ( type == "sha256" )
+			return new opensslHashContext( EVP_sha256(), this, type);
+#endif
+#ifdef SHA384_DIGEST_LENGTH
+		else if ( type == "sha384" )
+			return new opensslHashContext( EVP_sha384(), this, type);
+#endif
+#ifdef SHA512_DIGEST_LENGTH
+		else if ( type == "sha512" )
+			return new opensslHashContext( EVP_sha512(), this, type);
+#endif
 		else if ( type == "pbkdf1(sha1)" )
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
 		else if ( type == "pbkdf1(md2)" )
