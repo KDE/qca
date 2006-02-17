@@ -20,9 +20,14 @@ public:
 
 	    if (!conf->findPkgConfig(QString("mozilla-nss"),
 				     VersionAny, 0, &ver,
-				     &incs, &libs, &other))
-		return false;
-			  
+				     &incs, &libs, &other)) {
+		// try just nss - FC5 does this.
+		if (!conf->findPkgConfig(QString("nss"),
+					 VersionAny, 0, &ver,
+					 &incs, &libs, &other)) {
+		    return false;
+		}
+	    }	  
 	    for(int n = 0; n < incs.count(); ++n) {
 		conf->addIncludePath(incs[n]);
 	    }
