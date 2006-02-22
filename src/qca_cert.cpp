@@ -639,10 +639,22 @@ CRLEntry::CRLEntry()
 	_reason = Unspecified;
 }
 
+bool CRLEntry::isNull() const
+{
+	return (_time.isNull());
+}
+
 CRLEntry::CRLEntry(const Certificate &c, Reason r)
 {
 	_serial = c.serialNumber();
 	_time = QDateTime::currentDateTime();
+	_reason = r;
+}
+
+CRLEntry::CRLEntry(const QBigInteger serial, const QDateTime time, Reason r)
+{
+	_serial = serial;
+	_time = time;
 	_reason = r;
 }
 
@@ -659,6 +671,40 @@ QDateTime CRLEntry::time() const
 CRLEntry::Reason CRLEntry::reason() const
 {
 	return _reason;
+}
+
+bool CRLEntry::operator==(const CRLEntry &otherEntry) const
+{
+	if ( isNull() ) {
+		if ( otherEntry.isNull() ) {
+			return true;
+		} else {
+			return false;
+		}
+	} else if ( otherEntry.isNull() ) {
+		return false;
+	}
+
+	if ( ( _serial != otherEntry.serialNumber() ) ||
+	     ( _time != otherEntry.time() ) ||
+	     ( _reason != otherEntry.reason() ) ) {
+		return false;
+	}
+	return true;
+
+}
+
+bool CRLEntry::operator<(const CRLEntry &otherEntry) const
+{
+	if ( isNull() || otherEntry.isNull() ) {
+		return false;
+	}
+
+	if ( _serial < otherEntry.serialNumber() ) {
+		return true;
+	}
+
+	return false;
 }
 
 //----------------------------------------------------------------------------
@@ -723,6 +769,47 @@ QString CRL::toPEM() const
 	return static_cast<const CRLContext *>(context())->toPEM();
 }
 
+bool CRL::operator==(const CRL &otherCrl) const
+{
+	if ( isNull() ) {
+		if ( otherCrl.isNull() ) {
+			return true;
+		} else {
+			return false;
+		}
+	} else if ( otherCrl.isNull() ) {
+		return false;
+	}
+
+	if ( number() != otherCrl.number() )
+		return false;
+
+	if ( thisUpdate() != otherCrl.thisUpdate() )
+		return false;
+
+	if ( nextUpdate() != otherCrl.nextUpdate() )
+		return false;
+
+	if ( signature() != otherCrl.signature() )
+		return false;
+
+	if ( signatureAlgorithm() != otherCrl.signatureAlgorithm() )
+		return false;
+
+	if ( issuerKeyId() != otherCrl.issuerKeyId() )
+		return false;
+
+	if ( revoked() != otherCrl.revoked() )
+		return false;
+
+	if ( issuerKeyId() != otherCrl.issuerKeyId() )
+		return false;
+
+	return true;
+
+}
+
+
 CRL CRL::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
 	CRL c;
@@ -758,6 +845,13 @@ CRL CRL::fromPEMFile(const QString &fileName, ConvertResult *result, const QStri
 	}
 	return fromPEM(pem, result, provider);
 }
+
+bool CRL::toPEMFile(const QString &fileName) const
+{
+	return stringToFile(fileName, toPEM());
+}
+
+
 //----------------------------------------------------------------------------
 // Store
 //----------------------------------------------------------------------------
