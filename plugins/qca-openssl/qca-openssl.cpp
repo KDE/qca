@@ -3163,7 +3163,6 @@ public:
 				p.subjectId += get_cert_subject_key_id(ex);
 		}
 
-		// TODO:
 		pos = X509_get_ext_by_NID(x, NID_authority_key_identifier, -1);
 		if(pos != -1)
 		{
@@ -3413,6 +3412,7 @@ class MyCRLContext : public CRLContext
 {
 public:
 	X509Item item;
+	CRLContextProps _props;
 
 	MyCRLContext(Provider *p) : CRLContext(p)
 	{
@@ -3439,17 +3439,138 @@ public:
 
 	virtual ConvertResult fromDER(const QSecureArray &a)
 	{
-		return item.fromDER(a, X509Item::TypeCRL);
+		ConvertResult r = item.fromDER(a, X509Item::TypeCRL);
+		if(r == ConvertGood)
+			make_props();
+		return r;
 	}
 
 	virtual ConvertResult fromPEM(const QString &s)
 	{
-		return item.fromPEM(s, X509Item::TypeCRL);
+		ConvertResult r = item.fromPEM(s, X509Item::TypeCRL);
+		if(r == ConvertGood)
+			make_props();
+		return r;
 	}
 
 	virtual const CRLContextProps *props() const
 	{
-		return 0;
+		return &_props;
+	}
+
+	void make_props()
+	{
+		X509_CRL *x = item.crl;
+
+		CRLContextProps p;
+
+		p.issuer = get_cert_name(X509_CRL_get_issuer(x));
+
+		p.thisUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get_lastUpdate(x), NULL);
+		p.nextUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get_nextUpdate(x), NULL);
+
+		STACK_OF(X509_REVOKED)* revokeStack  = X509_CRL_get_REVOKED(x);
+
+		for (int i = 0; i < sk_X509_REVOKED_num(revokeStack); ++i) {
+			X509_REVOKED *rev = sk_X509_REVOKED_value(revokeStack, i);
+			QBigInteger serial = bn2bi(ASN1_INTEGER_to_BN(rev->serialNumber, NULL));
+			QDateTime time = ASN1_UTCTIME_QDateTime( rev->revocationDate, NULL);
+			QCA::CRLEntry::Reason reason = QCA::CRLEntry::Unspecified;
+			int pos = X509_REVOKED_get_ext_by_NID(rev, NID_crl_reason, -1);
+			if (pos != -1) {
+				X509_EXTENSION *ex = X509_REVOKED_get_ext(rev, pos);
+				if(ex) {
+					int *result = (int*) X509V3_EXT_d2i(ex);
+					switch (*result) {
+					case 0:
+						reason = QCA::CRLEntry::Unspecified;
+						break;
+					case 1:
+						reason = QCA::CRLEntry::KeyCompromise;
+						break;
+					case 2:
+						reason = QCA::CRLEntry::CACompromise;
+						break;
+					case 3:
+						reason = QCA::CRLEntry::AffiliationChanged;
+						break;
+					case 4:
+						reason = QCA::CRLEntry::Superseded;
+						break;
+					case 5:
+						reason = QCA::CRLEntry::CessationOfOperation;
+						break;
+					case 6:
+						reason = QCA::CRLEntry::CertificateHold;
+						break;
+					case 8:
+						reason = QCA::CRLEntry::RemoveFromCRL;
+						break;
+					case 9:
+						reason = QCA::CRLEntry::PrivilegeWithdrawn;
+						break;
+					case 10:
+						reason = QCA::CRLEntry::AACompromise;
+						break;
+					default:
+						reason = QCA::CRLEntry::Unspecified;
+						break;
+					}
+					ASN1_INTEGER_free((ASN1_INTEGER*)result);
+				}
+			}
+			CRLEntry thisEntry( serial, time, reason);
+			p.revoked.append(thisEntry);
+		}
+
+		if (x->signature)
+		{
+			p.sig = QSecureArray(x->signature->length);
+			for (int i=0; i< x->signature->length; i++)
+				p.sig[i] = x->signature->data[i];
+		}
+		switch( OBJ_obj2nid(x->sig_alg->algorithm) )
+		{
+		case NID_sha1WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_SHA1;
+		    break;
+		case NID_md5WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_MD5;
+		    break;
+		case NID_md2WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_MD2;
+		    break;
+		case NID_ripemd160WithRSA:
+		    p.sigalgo = QCA::EMSA3_RIPEMD160;
+		    break;
+		case NID_dsaWithSHA1:
+		    p.sigalgo = QCA::EMSA1_SHA1;
+		    break;
+		default:
+		    qWarning() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
+		    p.sigalgo = QCA::SignatureUnknown;
+		}    
+
+		int pos = X509_CRL_get_ext_by_NID(x, NID_authority_key_identifier, -1);
+		if(pos != -1)
+		{
+			X509_EXTENSION *ex = X509_CRL_get_ext(x, pos);
+			if(ex)
+				p.issuerId += get_cert_issuer_key_id(ex);
+		}
+
+		p.number = -1;
+		pos = X509_CRL_get_ext_by_NID(x, NID_crl_number, -1);
+		if(pos != -1)
+		{
+			X509_EXTENSION *ex = X509_CRL_get_ext(x, pos);
+			if(ex) {
+				int *result = (int*) X509V3_EXT_d2i(ex);
+				p.number = (*result);
+				ASN1_INTEGER_free((ASN1_INTEGER*)result);
+			}
+		}
+		_props = p;
 	}
 };
 
