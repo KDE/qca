@@ -42,6 +42,9 @@ namespace QCA
 
 	/**
 	   Certificate information types
+
+	   This enumeration provides the values that may appear in a
+	   CertificateInfo key field.  
 	*/
 	enum CertificateInfoType
 	{
@@ -516,11 +519,11 @@ namespace QCA
 	   B signs Certificate A, then C, B and A form a chain.
 
 	   The normal use of a CertificateChain is from a end-user Certificate (called
-	   the primary, equivalent to QList::first()) though some intermediate Certificates
+	   the primary, equivalent to QList::first()) through some intermediate Certificates
 	   to some other Certificate (QList::last()), which might
 	   be a root Certificate Authority, but does not need to be.
 
-	   You can build up the chain using normal QList operations, such as QList::append()
+	   You can build up the chain using normal QList operations, such as QList::append().
 
 	   \sa QCA::CertificateCollection for an alternative way to represent a group
 	   of Certificates that do not necessarily have a chained relationship.
@@ -755,12 +758,12 @@ namespace QCA
 			KeyCompromise,      ///< private key has been compromised
 			CACompromise,       ///< certificate authority has been compromised
 			AffiliationChanged,
-			Superceded,         ///< certificate has been superceded
+			Superseded,         ///< certificate has been superseded
 			CessationOfOperation,
-			CertificateHold,
-			RemoveFromCRL,
+			CertificateHold,    ///< certificate is on hold
+			RemoveFromCRL,      ///< certificate was previously in a CRL, but is now valid
 			PrivilegeWithdrawn,
-			AACompromise
+			AACompromise        ///< attribute authority has been compromised
 		};
 
 		/**
@@ -777,6 +780,15 @@ namespace QCA
 		CRLEntry(const Certificate &c, Reason r = Unspecified);
 
 		/**
+		   create a CRL entry
+
+		   \param serial the serial number of the Certificate being revoked
+		   \param time the time the Certificate was revoked (or will be revoked)
+		   \param r the reason that the certificate is being revoked
+		*/
+		CRLEntry(const QBigInteger serial, const QDateTime time, Reason r = Unspecified);
+
+		/**
 		   The serial number of the certificate that is the subject of this CRL entry
 		*/
 		QBigInteger serialNumber() const;
@@ -786,13 +798,33 @@ namespace QCA
 		*/
 		QDateTime time() const;
 
+
 		/**
-		   the reason that this CRL entry was created
+		   Test if this CRL entry is empty
+		*/
+		bool isNull() const;
+
+		/**
+		   The reason that this CRL entry was created
 
 		   Alternatively, you might like to think of this as the reason that the 
 		   subject certificate has been revoked
 		*/
 		Reason reason() const;
+
+		/**
+		   Test if one CRL entry is "less than" another
+		   
+		   CRL entries are compared based on their serial number
+		*/
+		bool operator<(const CRLEntry &a) const;
+
+		/**
+		   Test for equality of two CRL Entries
+		   
+		   \return true if the two certificates are the same
+		*/
+		bool operator==(const CRLEntry &a) const;
 
 	private:
 		QBigInteger _serial;
@@ -804,6 +836,19 @@ namespace QCA
 	   \class CRL qca_cert.h QtCrypto
 
 	   Certificate Revocation List
+
+	   A %CRL is a list of certificates that are special in some
+	   way. The normal reason for including a certificate on a %CRL
+	   is that the certificate should no longer be used. For
+	   example, if a key is compromised, then the associated
+	   certificate may no longer provides appropriate
+	   security. There are other reasons why a certificate may be
+	   placed on a %CRL, as shown in the CRLEntry::Reason
+	   enumeration.
+
+	   \sa CertificateCollection for a way to handle Certificates
+	   and CRLs as a single entity.
+	   \sa CRLEntry for the %CRL segment representing a single Certificate.
 	*/
 	class QCA_EXPORT CRL : public Algorithm
 	{
@@ -823,7 +868,10 @@ namespace QCA
 		CertificateInfo issuerInfo() const;
 
 		/**
-		   The CRL serial number
+		   The CRL serial number. Note that serial numbers are a
+		   CRL extension, and not all certificates have one.
+
+		   \return the CRL serial number, or -1 if there is no serial number
 		*/
 		int number() const;
 
@@ -860,21 +908,35 @@ namespace QCA
 		QByteArray issuerKeyId() const;
 
 		/**
-		   Export the Certificate Revocation List (CRL) in DER format
+		   Test for equality of two %Certificate Revocation Lists
+		   
+		   \return true if the two CRLs are the same
+		*/
+		bool operator==(const CRL &a) const;
+
+		/**
+		   Export the %Certificate Revocation List (CRL) in DER format
 
 		   \return an array containing the CRL in DER format
 		*/
 		QSecureArray toDER() const;
 
 		/**
-		   Export the Certificate Revocation List (CRL) in PEM format
+		   Export the %Certificate Revocation List (CRL) in PEM format
 
 		   \return a string containing the CRL in PEM format
 		*/
 		QString toPEM() const;
 
 		/**
-		   Import a DER encoded Certificate Revocation List (CRL)
+		   Export the %Certificate Revocation List (CRL) into PEM format in a file
+
+		   \param fileName the name of the file to use
+		*/
+		bool toPEMFile(const QString &fileName) const;
+
+		/**
+		   Import a DER encoded %Certificate Revocation List (CRL)
 
 		   \param a the array containing the CRL in DER format
 		   \param result a pointer to a ConvertResult, which if not-null will be set to the conversion status

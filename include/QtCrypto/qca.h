@@ -58,6 +58,7 @@
      - Random number generation (QCA::Random)
      - SSL/TLS (QCA::TLS)
      - X509 certificates (QCA::Certificate and QCA::CertificateCollection)
+     - X509 certificate revocation lists (QCA::CRL)
      - Simple Authentication and Security Layer (SASL) (QCA::SASL)
      - RSA (QCA::RSAPrivateKey and QCA::RSAPublicKey)
      - DSA (QCA::DSAPrivateKey and QCA::DSAPublicKey)
