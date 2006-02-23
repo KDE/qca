@@ -40,6 +40,7 @@ private slots:
     void qualitysslcatest();
     void checkClientCerts();
     void altName();
+    void extXMPP();
     void checkServerCerts();
     void crl();
     void crl2();

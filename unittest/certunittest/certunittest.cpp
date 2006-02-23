@@ -368,6 +368,48 @@ void CertUnitTest::altName()
     }
 }
 
+void CertUnitTest::extXMPP()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::ConvertResult resultClient1;
+	    QCA::Certificate client1 = QCA::Certificate::fromPEMFile( "certs/xmppcert.pem", &resultClient1, provider);
+	    QCOMPARE( resultClient1, QCA::ConvertGood );
+	    QCOMPARE( client1.isNull(), false );
+	    QCOMPARE( client1.isCA(), false );
+	    QCOMPARE( client1.isSelfSigned(), true );
+	    
+	    QCOMPARE( client1.serialNumber(), QBigInteger("9635301556349760241") );
+	    
+	    QCOMPARE( client1.commonName(), QString("demo.jabber.com") );
+
+	    QCA::CertificateInfo subject1 = client1.subjectInfo();
+	    QCOMPARE( subject1.isEmpty(), false );
+	    QVERIFY( subject1.values(QCA::Country).contains("US") );
+	    QVERIFY( subject1.values(QCA::Organization).contains("Jabber, Inc.") );
+	    QVERIFY( subject1.values(QCA::Locality).contains("Denver") );
+	    QVERIFY( subject1.values(QCA::State).contains("Colorado") );
+	    QVERIFY( subject1.values(QCA::CommonName).contains("demo.jabber.com") );
+	    QVERIFY( subject1.values(QCA::DNS).contains("demo.jabber.com") );
+	    QVERIFY( subject1.values(QCA::XMPP).contains("demo.jabber.com") );
+
+	    QCA::CertificateInfo issuer1 = client1.issuerInfo();
+	    QCOMPARE( issuer1.isEmpty(), false );
+	    QVERIFY( issuer1.values(QCA::Country).contains("US") );
+	    QVERIFY( issuer1.values(QCA::Organization).contains("Jabber, Inc.") );
+	    QVERIFY( issuer1.values(QCA::Locality).contains("Denver") );
+	    QVERIFY( issuer1.values(QCA::State).contains("Colorado") );
+	    QVERIFY( issuer1.values(QCA::CommonName).contains("demo.jabber.com") );
+	}
+    }
+}
+
 
 void CertUnitTest::checkServerCerts()
 {
