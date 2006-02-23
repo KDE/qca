@@ -391,7 +391,7 @@ void TLS::setTrustedCertificates(const CertificateCollection &trusted)
 
 void TLS::setConstraints(SecurityLevel s)
 {
-	int min;
+	int min = SL_Baseline;
 	switch(s)
 	{
 		case SL_None:
@@ -711,6 +711,8 @@ void SASL::setConstraints(AuthFlags f, SecurityLevel s)
 {
 	Q_UNUSED(f);
 	Q_UNUSED(s);
+
+	//int min = SL_None;
 
 	/*d->noPlain    = (f & SAllowPlain) ? false: true;
 	d->noAnon     = (f & SAllowAnonymous) ? false: true;

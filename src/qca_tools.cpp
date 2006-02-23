@@ -302,12 +302,16 @@ const char & QSecureArray::operator[](int index) const
 
 char & QSecureArray::at(int index)
 {
-	return (char &)(*((Botan::byte *)(*d->buf) + index));
+	Botan::byte *bp = (Botan::byte *)(*d->buf) + index;
+	char *cp = (char *)bp;
+	return *cp;
 }
 
 const char & QSecureArray::at(int index) const
 {
-	return (const char &)(*((const Botan::byte *)(*d->buf) + index));
+	const Botan::byte *bp = (const Botan::byte *)(*d->buf) + index;
+	const char *cp = (const char *)bp;
+	return *cp;
 }
 
 char *QSecureArray::data()
