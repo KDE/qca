@@ -39,7 +39,10 @@ private slots:
     void CAcertstest();
     void qualitysslcatest();
     void checkClientCerts();
+    void altName();
     void checkServerCerts();
+    void crl();
+    void crl2();
     void cleanupTestCase();
 private:
     QCA::Initializer* m_init;

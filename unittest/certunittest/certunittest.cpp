@@ -39,8 +39,7 @@ void CertUnitTest::nullCert()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
+    // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -56,8 +55,7 @@ void CertUnitTest::CAcertstest()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
+    // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -109,8 +107,7 @@ void CertUnitTest::qualitysslcatest()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
+    // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -173,8 +170,7 @@ void CertUnitTest::checkClientCerts()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
+    // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -296,13 +292,88 @@ void CertUnitTest::checkClientCerts()
     }
 }
 
+void CertUnitTest::altName()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::ConvertResult resultClient1;
+	    QCA::Certificate client1 = QCA::Certificate::fromPEMFile( "certs/altname.pem", &resultClient1, provider);
+	    QCOMPARE( resultClient1, QCA::ConvertGood );
+	    QCOMPARE( client1.isNull(), false );
+	    QCOMPARE( client1.isCA(), false );
+	    QCOMPARE( client1.isSelfSigned(), false );
+	    
+	    QCOMPARE( client1.serialNumber(), QBigInteger(1) );
+	    
+	    QCOMPARE( client1.commonName(), QString("Valid RFC822 nameConstraints EE Certificate Test21") );
+
+	    QCOMPARE( client1.constraints().contains(QCA::DigitalSignature), (QBool)true );
+	    QCOMPARE( client1.constraints().contains(QCA::NonRepudiation), (QBool)true );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
+	    QCOMPARE( client1.constraints().contains(QCA::DataEncipherment), (QBool)true );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyAgreement), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::CRLSign), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::EncipherOnly), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::DecipherOnly), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::ServerAuth), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::ClientAuth), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::CodeSigning), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::EmailProtection), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecUser), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::TimeStamping), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+
+	    QCOMPARE( client1.policies().count(), 1 );
+	    QCOMPARE( client1.policies().at(0), QString("2.16.840.1.101.3.2.1.48.1") );
+
+	    QCA::CertificateInfo subject1 = client1.subjectInfo();
+	    QCOMPARE( subject1.isEmpty(), false );
+	    QVERIFY( subject1.values(QCA::Country).contains("US") );
+	    QVERIFY( subject1.values(QCA::Organization).contains("Test Certificates") );
+	    QVERIFY( subject1.values(QCA::CommonName).contains("Valid RFC822 nameConstraints EE Certificate Test21") );
+	    QVERIFY( subject1.values(QCA::Email).contains("Test21EE@mailserver.testcertificates.gov") );
+	    
+	    QCA::CertificateInfo issuer1 = client1.issuerInfo();
+	    QCOMPARE( issuer1.isEmpty(), false );
+	    QVERIFY( issuer1.values(QCA::Country).contains("US") );
+	    QVERIFY( issuer1.values(QCA::Organization).contains("Test Certificates") );
+	    QVERIFY( issuer1.values(QCA::CommonName).contains("nameConstraints RFC822 CA1") );
+
+	    QByteArray subjectKeyID = QCA::Hex().stringToArray("b4200d42cd95ea87d463d54f0ed6d10fe5b73bfb").toByteArray();
+	    QCOMPARE( client1.subjectKeyId(), subjectKeyID );
+	    QCOMPARE( QCA::Hex().arrayToString(client1.issuerKeyId()), QString("e37f857a8ea23b9eeeb8121d7913aac4bd2e59ad") );
+	    
+	    QCA::PublicKey pubkey1 = client1.subjectPublicKey();
+	    QCOMPARE( pubkey1.isNull(), false );
+	    QCOMPARE( pubkey1.isRSA(), true );
+	    QCOMPARE( pubkey1.isDSA(), false );
+	    QCOMPARE( pubkey1.isDH(), false );
+	    QCOMPARE( pubkey1.isPublic(), true );
+	    QCOMPARE( pubkey1.isPrivate(), false );
+	    QCOMPARE( pubkey1.bitSize(), 1024 );
+	    
+	    QCOMPARE( client1.pathLimit(), 0 );
+
+	    QCOMPARE( client1.signatureAlgorithm(), QCA::EMSA3_SHA1 );
+	}
+    }
+}
+
 
 void CertUnitTest::checkServerCerts()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
+    // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -426,6 +497,163 @@ void CertUnitTest::checkSystemStore()
     if ( QCA::haveSystemStore() && QCA::isSupported("cert") ) {
 	QCA::CertificateCollection collection1;
 	collection1 = QCA::systemStore();
+    }
+}
+
+void CertUnitTest::crl()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "crl", provider ) )
+            QWARN( QString( "Certificate revocation not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::CRL emptyCRL;
+	    QVERIFY( emptyCRL.isNull() );
+
+	    QCA::ConvertResult resultCrl;
+	    QCA::CRL crl1 = QCA::CRL::fromPEMFile( "certs/Test_CRL.crl", &resultCrl, provider);
+	    QCOMPARE( resultCrl, QCA::ConvertGood );
+	    QCOMPARE( crl1.isNull(), false );
+
+	    QCA::CertificateInfo issuer = crl1.issuerInfo();
+	    QCOMPARE( issuer.isEmpty(), false );
+	    QVERIFY( issuer.values(QCA::Country).contains("de") );
+	    QVERIFY( issuer.values(QCA::Organization).contains("InsecureTestCertificate") );
+	    QVERIFY( issuer.values(QCA::CommonName).contains("For Tests Only") );
+
+	    // No keyid extension on this crl
+	    QCOMPARE( QCA::arrayToHex( crl1.issuerKeyId() ), QString("") );
+
+	    QCOMPARE( crl1.thisUpdate(), QDateTime(QDate(2001, 8, 17), QTime(11, 12, 03)) );
+	    QCOMPARE( crl1.nextUpdate(), QDateTime(QDate(2006, 8, 16), QTime(11, 12, 03)) );
+
+	    QCOMPARE( crl1.signatureAlgorithm(), QCA::EMSA3_MD5 );
+	    QSecureArray expectedSig = 
+		QCA::hexToArray("78ee531508a94fa010202f06b2efa78d46ad"
+				"7be3d8edffb83f3ae874ea2b0d33aebf0a0c"
+				"d52f6c4a482decd855f8c4a837db49e2588e"
+				"83be6e07dcce88ed1beea02bd9055a6ed4c0"
+				"3ccf6368f3d83650f5a54b1500beebe8d863"
+				"86460a3ef2773ff3883c6e22d4c53485f15b"
+				"384f51e7828d6aadf78f338a2ed6ebbb2e14"
+				"6747cb6e215a104fa5b7452944b1044144cd"
+				"f2f9590e3c07f41811b297a5865a2ca65c7a"
+				"acaa2b3cd166d7e74b6bf39f4296da9bbb6c"
+				"9a1405fef8810104307b268562d5b96e9a06"
+				"aba9f5d89285169fd77717cab248d8ec7e13"
+				"95eb5ddf5e999f5c5677dee4c5b0b4a88a13"
+				"fc7faf82bacc76adfb866a9ee338fbfb8fbb"
+				"23976635");
+	    QCOMPARE( crl1.signature(), expectedSig );
+
+	    QCOMPARE( crl1.issuerKeyId(), QByteArray("") );
+	    QCOMPARE( crl1, QCA::CRL(crl1) );
+	    QCOMPARE( crl1 == QCA::CRL(), false );
+	    QCOMPARE( crl1.number(), -1 );
+
+	    QList<QCA::CRLEntry> revokedList = crl1.revoked();
+	    QCOMPARE( revokedList.size(), 2 );
+	    qSort(revokedList);
+	    QCOMPARE( revokedList[0].serialNumber(), QBigInteger("3") );
+	    QCOMPARE( revokedList[1].serialNumber(), QBigInteger("5") );
+	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::Unspecified );
+	    QCOMPARE( revokedList[1].reason(), QCA::CRLEntry::Unspecified );
+	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 10, 39)) );
+	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 11, 59)) );
+
+	    // convert to DER
+	    QSecureArray derCRL1 = crl1.toDER();
+	    // check we got something, at least
+	    QCOMPARE( derCRL1.isEmpty(), false );
+	    // convert back from DER
+	    QCA::CRL fromDer1 = QCA::CRL::fromDER( derCRL1, &resultCrl, provider );
+	    // check the conversion at least appeared to work
+	    QCOMPARE( resultCrl, QCA::ConvertGood );
+	    // check the result is the same as what we started with
+	    QCOMPARE( fromDer1, crl1 );
+	}
+    }
+}
+
+void CertUnitTest::crl2()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "crl", provider ) )
+            QWARN( QString( "Certificate revocation not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::ConvertResult resultCrl;
+	    QCA::CRL crl1 = QCA::CRL::fromPEMFile( "certs/GoodCACRL.pem", &resultCrl, provider);
+	    QCOMPARE( resultCrl, QCA::ConvertGood );
+	    QCOMPARE( crl1.isNull(), false );
+	    QCOMPARE( crl1.provider()->name(), provider );
+
+	    QCA::CertificateInfo issuer = crl1.issuerInfo();
+	    QCOMPARE( issuer.isEmpty(), false );
+	    QVERIFY( issuer.values(QCA::Country).contains("US") );
+	    QVERIFY( issuer.values(QCA::Organization).contains("Test Certificates") );
+	    QVERIFY( issuer.values(QCA::CommonName).contains("Good CA") );
+
+	    QCOMPARE( crl1.thisUpdate(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
+	    QCOMPARE( crl1.nextUpdate(), QDateTime(QDate(2011, 4, 19), QTime(14, 57, 20)) );
+
+	    QCOMPARE( crl1.signatureAlgorithm(), QCA::EMSA3_SHA1 );
+	    QSecureArray expectedSig = 
+		QCA::hexToArray("93c2ec0b71072d9dd7a2b3f0ed084d6e0690"
+				"667206a9c23073f11872bfa7511395c4313f"
+				"1d7941ededabd096111e32474cc4f7e20865"
+				"6f7355c1590956f2607927182e9440dd7eb1"
+				"92bfb857e54cc53897752aa117a2250dec0e"
+				"b795408d2cdfb9fa10ffbe9e4af2374f25cb"
+				"1bc86defe409b903361bc1d9f94f005e8085"
+				"92cd");
+	    QCOMPARE( crl1.signature(), expectedSig );
+	    /*
+  issuerInfo() const   QCA::CRL
+	    */
+	    QCOMPARE( QCA::arrayToHex( crl1.issuerKeyId() ), QString("b72ea682cbc2c8bca87b2744d73533df9a1594c7") );
+	    QCOMPARE( crl1.number(), 1 );
+	    QCOMPARE( crl1, QCA::CRL(crl1) );
+	    QCOMPARE( crl1 == QCA::CRL(), false );
+
+	    QList<QCA::CRLEntry> revokedList = crl1.revoked();
+	    QCOMPARE( revokedList.size(), 2 );
+	    qSort(revokedList);
+	    QCOMPARE( revokedList[0].serialNumber(), QBigInteger("14") );
+	    QCOMPARE( revokedList[1].serialNumber(), QBigInteger("15") );
+	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::KeyCompromise );
+	    QCOMPARE( revokedList[1].reason(), QCA::CRLEntry::KeyCompromise );
+	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
+	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
+
+	    // convert to DER
+	    QSecureArray derCRL1 = crl1.toDER();
+	    // check we got something, at least
+	    QCOMPARE( derCRL1.isEmpty(), false );
+	    // convert back from DER
+	    QCA::CRL fromDer1 = QCA::CRL::fromDER( derCRL1, &resultCrl, provider );
+	    // check the conversion at least appeared to work
+	    QCOMPARE( resultCrl, QCA::ConvertGood );
+	    // check the result is the same as what we started with
+	    QCOMPARE( fromDer1, crl1 );
+
+	    // convert to PEM
+	    QString pemCRL1 = crl1.toPEM();
+	    // check we got something, at least
+	    QCOMPARE( pemCRL1.isEmpty(), false );
+	    // convert back from PEM
+	    QCA::CRL fromPEM1 = QCA::CRL::fromPEM( pemCRL1, &resultCrl, provider );
+	    // check the conversion at least appeared to work
+	    QCOMPARE( resultCrl, QCA::ConvertGood );
+	    // check the result is the same as what we started with
+	    QCOMPARE( fromPEM1, crl1 );
+	}
     }
 }
 
