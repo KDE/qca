@@ -26,7 +26,11 @@ public:
 		if(!path.isEmpty())
 		{
 			if(QFile::exists(path))
+			{
+				QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
+				conf->addDefine(certPathString);
 				return true;
+			}
 			return false;
 		}
 
