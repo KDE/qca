@@ -229,6 +229,7 @@ public:
     {}
 };
 
+
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
@@ -239,13 +240,13 @@ int main(int argc, char **argv)
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
 
-    if (QCA::insertProvider(new ClientSideProvider))
+    if ( QCA::insertProvider(new ClientSideProvider, 0) )
 	qDebug() << "Inserted our provider";
     else 
 	qDebug() << "our provider could not be added";
 
     // We should check AES CMAC is supported before using it.
-    if( !QCA::isSupported("cmac(aes)") ) {
+    if( ! QCA::isSupported("cmac(aes)") ) {
 	qDebug() << "AES CMAC not supported!";
     } else {
 	// create the required object
