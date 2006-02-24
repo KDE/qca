@@ -5,6 +5,9 @@
  <libdir/>
  <datadir/>
  <moddir>.</moddir>
+ <dep type='qt41'>
+  <required/>
+ </dep>
  <dep type='certstore'>
   <required/>
  </dep>
