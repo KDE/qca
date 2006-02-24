@@ -776,7 +776,7 @@ protected:
 		//connect(&app, SIGNAL(foo()), SLOT(tracker_initialDiscovery()), Qt::DirectConnection);
 		//QTimer::singleShot(3000, &app, SIGNAL(foo()));
 		//QTimer::singleShot(6000, &app, SIGNAL(foo()));
-		loop = new QEventLoop;
+		loop = new QEventLoop; // TODO: delete this at some point
 		control_wait.wakeOne();
 		control_mutex.unlock();
 		loop->exec();
@@ -832,6 +832,7 @@ void KeyStoreManager::start()
 	if(d->thread)
 		return;
 
+	moveToThread(QCoreApplication::instance()->thread());
 	d->thread = new KeyStoreThread(this);
 	d->thread->start();
 	scan();
