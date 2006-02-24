@@ -467,13 +467,13 @@ private:
 class botanPlugin : public QCAPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QCAPlugin)
 public:
-	virtual int version() const { return QCA_PLUGIN_VERSION; }
 	virtual QCA::Provider *createProvider() { return new botanProvider; }
 };
 
 #include "qca-botan.moc"
 
-Q_EXPORT_PLUGIN(botanPlugin);
+Q_EXPORT_PLUGIN2(qca-botan, botanPlugin);
 
 
