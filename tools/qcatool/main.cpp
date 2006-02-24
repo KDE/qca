@@ -531,7 +531,7 @@ static QString getKeyStore(const QString &name)
 	int n = findByString(getKeyStoreStrings(storeList), name);
 	if(n != -1)
 		return storeList[n];
-	return 0;
+	return QString();
 }
 
 static QCA::KeyStoreEntry getKeyStoreEntry(QCA::KeyStore *store, const QString &name)
@@ -668,6 +668,7 @@ static void usage()
 	printf("usage: qcatool [--command] (options)\n");
 	printf("commands:\n");
 	printf("  --help\n");
+	printf("  --plugins [-d]\n");
 	printf("\n");
 	printf("  --genrsa [bits] (passphrase)\n");
 	printf("  --gendsa [512|768|1024] (passphrase)\n");
@@ -780,6 +781,64 @@ int main(int argc, char **argv)
 	{
 		usage();
 		return 1;
+	}
+
+	if(args[0] == "--plugins")
+	{
+		printf("Qt Library Paths:\n");
+		QStringList paths = QCoreApplication::libraryPaths();
+		if(!paths.isEmpty())
+		{
+			for(int n = 0; n < paths.count(); ++n)
+			{
+				printf("  %s\n", qPrintable(paths[n]));
+			}
+		}
+		else
+			printf("  (none)\n");
+
+		QCA::scanForPlugins();
+		QCA::ProviderList list = QCA::providers();
+
+		bool debug = false;
+		for(int n = 1; n < args.count(); ++n)
+		{
+			if(args[n] == "-d")
+			{
+				debug = true;
+				break;
+			}
+		}
+		if(debug)
+		{
+			QString str = QCA::pluginDiagnosticText();
+			QCA::clearPluginDiagnosticText();
+			QStringList lines = str.split('\n', QString::SkipEmptyParts);
+			for(int n = 0; n < lines.count(); ++n)
+				printf("qca: %s\n", qPrintable(lines[n]));
+		}
+
+		printf("Available Providers:\n");
+		if(!list.isEmpty())
+		{
+			for(int n = 0; n < list.count(); ++n)
+			{
+				printf("  %s\n", qPrintable(list[n]->name()));
+			}
+		}
+		else
+			printf("  (none)\n");
+
+		QCA::unloadAllPlugins();
+		if(debug)
+		{
+			QString str = QCA::pluginDiagnosticText();
+			QCA::clearPluginDiagnosticText();
+			QStringList lines = str.split('\n', QString::SkipEmptyParts);
+			for(int n = 0; n < lines.count(); ++n)
+				printf("qca: %s\n", qPrintable(lines[n]));
+		}
+		return 0;
 	}
 
 	// activate the KeyStoreManager and block until ready
@@ -1232,7 +1291,7 @@ int main(int argc, char **argv)
 		//info[QCA::URI] = "http://psi.affinix.com/";
 		//info[QCA::DNS] = "psi.affinix.com";
 		//info[QCA::IPAddress] = "192.168.0.1";
-		//info[QCA::XMPP] = "justin@andbit.net";
+		//info.insert(QCA::XMPP, "justin@andbit.net");
 
 		opts.setInfo(info);
 		if(do_ca)

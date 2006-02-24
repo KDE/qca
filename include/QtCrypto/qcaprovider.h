@@ -38,15 +38,14 @@
 
 #include <limits>
 
-#define QCA_PLUGIN_VERSION 2
-
 class QCA_EXPORT QCAPlugin : public QObject
 {
 	Q_OBJECT
 public:
-	virtual int version() const = 0;
 	virtual QCA::Provider *createProvider() = 0;
 };
+
+Q_DECLARE_INTERFACE(QCAPlugin, "com.affinix.qca.Plugin/1.0")
 
 namespace QCA {
 

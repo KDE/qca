@@ -51,7 +51,12 @@ namespace QCA
 
 		static void mergeFeatures(QStringList *a, const QStringList &b);
 
+		QString diagnosticText() const;
+		void appendDiagnosticText(const QString &str);
+		void clearDiagnosticText();
+
 	private:
+		QString dtext;
 		QList<ProviderItem*> providerItemList;
 		ProviderList providerList;
 		Provider *def;

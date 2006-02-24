@@ -282,6 +282,18 @@ void unloadAllPlugins()
 	global->manager.unloadAll();
 }
 
+QString pluginDiagnosticText()
+{
+	QMutexLocker lock(&global->manager_mutex);
+	return global->manager.diagnosticText();
+}
+
+void clearPluginDiagnosticText()
+{
+	QMutexLocker lock(&global->manager_mutex);
+	global->manager.clearDiagnosticText();
+}
+
 void setProperty(const QString &name, const QVariant &value)
 {
 	QMutexLocker lock(&global->manager_mutex);

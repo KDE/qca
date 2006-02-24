@@ -5205,12 +5205,12 @@ public:
 class opensslPlugin : public QCAPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QCAPlugin)
 public:
-	virtual int version() const { return QCA_PLUGIN_VERSION; }
 	virtual Provider *createProvider() { return new opensslProvider; }
 };
 
 #include "qca-openssl.moc"
 
-Q_EXPORT_PLUGIN(opensslPlugin);
+Q_EXPORT_PLUGIN2(qca-openssl, opensslPlugin);
 

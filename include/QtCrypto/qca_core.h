@@ -300,6 +300,16 @@ namespace QCA
 	QCA_EXPORT void unloadAllPlugins();
 
 	/**
+	 * Retrieve plugin diagnostic text
+	 */
+	QCA_EXPORT QString pluginDiagnosticText();
+
+	/**
+	 * Clear plugin diagnostic text
+	 */
+	QCA_EXPORT void clearPluginDiagnosticText();
+
+	/**
 	 * Set a global property
 	 */
 	QCA_EXPORT void setProperty(const QString &name, const QVariant &value);
