@@ -1670,7 +1670,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new RSAKeyMaker(bits, exp, this);
+		keymaker = new RSAKeyMaker(bits, exp, !block ? this : 0);
 		wasBlocking = block;
 		if(block)
 		{
@@ -1948,7 +1948,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new DSAKeyMaker(domain, this);
+		keymaker = new DSAKeyMaker(domain, !block ? this : 0);
 		wasBlocking = block;
 		if(block)
 		{
@@ -2174,7 +2174,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new DHKeyMaker(domain, this);
+		keymaker = new DHKeyMaker(domain, !block ? this : 0);
 		wasBlocking = block;
 		if(block)
 		{
