@@ -23,6 +23,44 @@
 //Q_IMPORT_PLUGIN(opensslPlugin);
 //Q_IMPORT_PLUGIN(gnupgPlugin);
 
+static QStringList wrapstring(const QString &str, int width)
+{
+	QStringList out;
+	QString simp = str.simplified();
+	QString rest = simp;
+	while(1)
+	{
+		int lastSpace = -1;
+		int n;
+		for(n = 0; n < rest.length(); ++n)
+		{
+			if(rest[n].isSpace())
+				lastSpace = n;
+			if(n == width)
+				break;
+		}
+		if(n == rest.length())
+		{
+			out += rest;
+			break;
+		}
+
+		QString line;
+		if(lastSpace != -1)
+		{
+			line = rest.mid(0, lastSpace);
+			rest = rest.mid(lastSpace + 1);
+		}
+		else
+		{
+			line = rest.mid(0, n);
+			rest = rest.mid(n);
+		}
+		out += line;
+	}
+	return out;
+}
+
 class AnimatedKeyGen : public QObject
 {
 	Q_OBJECT
@@ -824,6 +862,13 @@ int main(int argc, char **argv)
 			for(int n = 0; n < list.count(); ++n)
 			{
 				printf("  %s\n", qPrintable(list[n]->name()));
+				QString credit = list[n]->credit();
+				if(!credit.isEmpty())
+				{
+					QStringList lines = wrapstring(credit, 74);
+					foreach(QString s, lines)
+						printf("    %s\n", qPrintable(s));
+				}
 			}
 		}
 		else

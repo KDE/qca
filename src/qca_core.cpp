@@ -479,6 +479,11 @@ void Provider::init()
 {
 }
 
+QString Provider::credit() const
+{
+	return QString();
+}
+
 Provider::Context::Context(Provider *parent, const QString &type)
 {
 	_provider = parent;

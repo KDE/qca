@@ -625,6 +625,15 @@ namespace QCA
 		virtual QStringList features() const = 0;
 
 		/**
+		 * Optional credit text for the provider.
+		 *
+		 * You might display this information in a credits or
+		 * "About" dialog.  Returns an empty string if the
+		 * provider has no credit text.
+		 */
+		virtual QString credit() const;
+
+		/**
 		 * Routine to create a plugin context
 		 *
 		 * You need to return a pointer to an algorithm

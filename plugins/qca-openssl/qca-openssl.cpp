@@ -5019,6 +5019,13 @@ public:
 		return "qca-openssl";
 	}
 
+	QString credit() const
+	{
+		return QString(
+			"This product includes cryptographic software "
+			"written by Eric Young (eay@cryptsoft.com)");
+	}
+
 	QStringList features() const
 	{
 		QStringList list;
