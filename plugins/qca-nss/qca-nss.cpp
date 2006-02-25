@@ -187,13 +187,13 @@ private:
 class nssPlugin : public QCAPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES( QCAPlugin )
 public:
-	virtual int version() const { return QCA_PLUGIN_VERSION; }
 	virtual QCA::Provider *createProvider() { return new nssProvider; }
 };
 
 #include "qca-nss.moc"
 
-Q_EXPORT_PLUGIN(nssPlugin);
+Q_EXPORT_PLUGIN2(qca-nss, nssPlugin);
 
 
