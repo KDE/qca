@@ -611,11 +611,11 @@ public:
 class gnupgPlugin : public QCAPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QCAPlugin)
 public:
-	virtual int version() const { return QCA_PLUGIN_VERSION; }
 	virtual QCA::Provider *createProvider() { return new gnupgProvider; }
 };
 
 #include "qca-gnupg.moc"
 
-Q_EXPORT_PLUGIN(gnupgPlugin);
+Q_EXPORT_PLUGIN2(qca-gnupg, gnupgPlugin);

@@ -2025,11 +2025,11 @@ public:
 class pkcs11Plugin : public QCAPlugin
 {
 	Q_OBJECT
+	Q_INTERFACES(QCAPlugin)
 public:
-	virtual int version() const { return QCA_PLUGIN_VERSION; }
 	virtual QCA::Provider *createProvider() { return new pkcs11Provider; }
 };
 
 #include "qca-pkcs11.moc"
 
-Q_EXPORT_PLUGIN(pkcs11Plugin);
+Q_EXPORT_PLUGIN2(qca-pkcs11, pkcs11Plugin);
