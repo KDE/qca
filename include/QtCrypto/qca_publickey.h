@@ -328,13 +328,12 @@ namespace QCA
 		   Interpret this key as a PublicKey
 
 		   \sa toRSAPublicKey(), toDSAPublicKey() and toDHPublicKey()
+		   for protected forms of this call.
 		*/
 		PublicKey toPublicKey() const;
 
 		/**
 		   Interpret this key as a PrivateKey
-
-		   \sa toRSAPrivateKey(), toDSAPrivateKey() and toDHPrivateKey()
 		*/
 		PrivateKey toPrivateKey() const;
 
@@ -366,7 +365,7 @@ namespace QCA
 		   key was created as a DSA key, this function cannot turn it into 
 		   an RSA key.
 
-		   \sa toPublicKey(), toDSAPublcKey() and toDHPublicKey()
+		   \sa toPublicKey() for the public version of this method
 		*/
 		RSAPublicKey toRSAPublicKey() const;
 
@@ -377,7 +376,7 @@ namespace QCA
 		   key was created as a DSA key, this function cannot turn it into 
 		   a RSA key.
 
-		   \sa toPrivateKey(), toDSAPrivateKey() and toDHPrivateKey()
+		   \sa toPrivateKey() for the public version of this method
 		*/
 		RSAPrivateKey toRSAPrivateKey() const;
 
@@ -388,7 +387,7 @@ namespace QCA
 		   key was created as an RSA key, this function cannot turn it into 
 		   a DSA key.
 
-		   \sa toPublicKey(), toRSAPublcKey() and toDHPublicKey()
+		   \sa toPublicKey() for the public version of this method
 		*/
 		DSAPublicKey toDSAPublicKey() const;
 
@@ -399,7 +398,7 @@ namespace QCA
 		   key was created as an RSA key, this function cannot turn it into 
 		   a DSA key.
 
-		   \sa toPrivateKey(), toRSAPrivateKey() and toDHPrivateKey()
+		   \sa toPrivateKey() for the public version of this method
 		*/
 		DSAPrivateKey toDSAPrivateKey() const;
 
@@ -410,7 +409,7 @@ namespace QCA
 		   key was created as a DSA key, this function cannot turn it into 
 		   a DH key.
 
-		   \sa toPublicKey(), toRSAPublcKey() and toDSAPublicKey()
+		   \sa toPublicKey() for the public version of this method
 		*/
 		DHPublicKey toDHPublicKey() const;
 
@@ -421,7 +420,7 @@ namespace QCA
 		   key was created as a DSA key, this function cannot turn it into 
 		   a DH key.
 
-		   \sa toPrivateKey(), toDSAPrivateKey() and toRSAPrivateKey()
+		   \sa toPrivateKey() for the public version of this method
 		*/
 		DHPrivateKey toDHPrivateKey() const;
 
@@ -901,7 +900,7 @@ namespace QCA
 		   \param b if true, the key generator will be set to operate in blocking mode,
 		   otherwise it will operate in non-blocking mode
 
-		   \sa blocking
+		   \sa blocking()
 		*/
 		void setBlocking(bool b);
 

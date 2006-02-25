@@ -13,7 +13,6 @@
   document all the stuff in qca_securemessage.h
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
-  PKey has see-also references to uncallable functions (eg, toRSAPublicKey)
 
 * Considerations
   api:

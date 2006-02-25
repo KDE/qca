@@ -44,7 +44,11 @@ namespace QCA
 	   Certificate information types
 
 	   This enumeration provides the values that may appear in a
-	   CertificateInfo key field.  
+	   CertificateInfo key field.  These are from RFC3280
+	   (http://www.ietf.org/rfc/rfc3280.text) except where shown.
+
+	   \sa Certificate::subjectInfo() and Certificate::issuerInfo()
+	   \sa CRL::issuerInfo()
 	*/
 	enum CertificateInfoType
 	{
@@ -55,10 +59,10 @@ namespace QCA
 		Locality,       ///< The locality (eg a shire, or part of a state) 
 		State,          ///< The state within the country
 		Country,        ///< The country
-		URI,            
-		DNS,
-		IPAddress,
-		XMPP
+		URI,            ///< Uniform Resource Identifier
+		DNS,            ///< DNS name
+		IPAddress,      ///< IP address
+		XMPP            ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt)
 	};
 
 	/**
