@@ -45,6 +45,7 @@ private slots:
     void crl();
     void crl2();
     void csr();
+    void csr2();
     void cleanupTestCase();
 private:
     QCA::Initializer* m_init;

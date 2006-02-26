@@ -750,4 +750,74 @@ void CertUnitTest::csr()
 	}
     }
 }
+
+void CertUnitTest::csr2()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "csr", provider ) )
+            QWARN( QString( "Certificate signing requests not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::ConvertResult resultCsr;
+	    QCA::CertificateRequest csr1 = QCA::CertificateRequest::fromPEMFile( "certs/newreq.pem", &resultCsr, provider);
+	    QCOMPARE( resultCsr, QCA::ConvertGood );
+	    QCOMPARE( csr1.isNull(), false );
+	    QCOMPARE( csr1.provider()->name(), provider );
+	    QCA::CertificateInfo subject = csr1.subjectInfo();
+	    QCOMPARE( subject.isEmpty(), false );
+	    QVERIFY( subject.values(QCA::Country).contains("AI") );
+	    QVERIFY( subject.values(QCA::State).contains("Hutt River Province") );
+	    QVERIFY( subject.values(QCA::Locality).contains("Lesser Internet") );
+	    QVERIFY( subject.values(QCA::Organization).contains("My Company Ltd") );
+	    QVERIFY( subject.values(QCA::OrganizationalUnit).contains("Backwater Branch Office") );
+	    QVERIFY( subject.values(QCA::CommonName).contains("FirstName Surname") );
+
+	    QCA::PublicKey pkey = csr1.subjectPublicKey();
+	    QCOMPARE( pkey.isNull(), false );
+	    QVERIFY( pkey.isRSA() );
+
+	    QCA::RSAPublicKey rsaPkey = pkey.toRSA();
+	    QCOMPARE( rsaPkey.isNull(), false );
+	    QCOMPARE( rsaPkey.e(), QBigInteger(65537) );
+	    QCOMPARE( rsaPkey.n(), QBigInteger("151872780463004414908584891835397365176526767139347372444365914360701714510188717169754430290680734981291754624394094502297070722505032645306680495915914243593438796635264236530526146243919417744996366836534380790370421346490191416041004278161146551997010463199760480957900518811859984176646089981367745961681" ) );
+
+	    QSecureArray expectedSig = 
+		QCA::hexToArray("5239cf0fcbbd1a87ad7184e235fa7e447edf"
+				"76841c081c9e2fad482b6d3bb7578e253281"
+				"67a760cc64cb2f83acd9c7665779cbea8a90"
+				"8ceb46f627fff7ad3e73e368639ba5369937"
+				"57739126b35a7173c511be5a40d6a95b6db5"
+				"11d75a78f0845d7d9672fa9cf920abe36d1f"
+				"6ca8b6f2eeb12632d4741f1b8939c24f717a"
+				"4c59");
+	    QCOMPARE( csr1.signature(), expectedSig );
+	    QCOMPARE( csr1.signatureAlgorithm(), QCA::EMSA3_MD5 );
+
+	    // convert to DER
+	    QSecureArray derCSR1 = csr1.toDER();
+	    // check we got something, at least
+	    QCOMPARE( derCSR1.isEmpty(), false );
+	    // convert back from DER
+	    QCA::CertificateRequest fromDer1 = QCA::CertificateRequest::fromDER( derCSR1, &resultCsr, provider );
+	    // check the conversion at least appeared to work
+	    QCOMPARE( resultCsr, QCA::ConvertGood );
+	    // check the result is the same as what we started with
+	    QCOMPARE( fromDer1, csr1 );
+
+	    // convert to PEM
+	    QString pemCSR1 = csr1.toPEM();
+	    // check we got something, at least
+	    QCOMPARE( pemCSR1.isEmpty(), false );
+	    // convert back from PEM
+	    QCA::CertificateRequest fromPEM1 = QCA::CertificateRequest::fromPEM( pemCSR1, &resultCsr, provider );
+	    // check the conversion at least appeared to work
+	    QCOMPARE( resultCsr, QCA::ConvertGood );
+	    // check the result is the same as what we started with
+	    QCOMPARE( fromPEM1, csr1 );
+	}
+    }
+}
 QTEST_MAIN(CertUnitTest)
