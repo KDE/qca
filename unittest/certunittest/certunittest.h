@@ -44,6 +44,7 @@ private slots:
     void checkServerCerts();
     void crl();
     void crl2();
+    void csr();
     void cleanupTestCase();
 private:
     QCA::Initializer* m_init;

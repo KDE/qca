@@ -656,9 +656,7 @@ void CertUnitTest::crl2()
 				"1bc86defe409b903361bc1d9f94f005e8085"
 				"92cd");
 	    QCOMPARE( crl1.signature(), expectedSig );
-	    /*
-  issuerInfo() const   QCA::CRL
-	    */
+
 	    QCOMPARE( QCA::arrayToHex( crl1.issuerKeyId() ), QString("b72ea682cbc2c8bca87b2744d73533df9a1594c7") );
 	    QCOMPARE( crl1.number(), 1 );
 	    QCOMPARE( crl1, QCA::CRL(crl1) );
@@ -699,4 +697,57 @@ void CertUnitTest::crl2()
     }
 }
 
+void CertUnitTest::csr()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "csr", provider ) )
+            QWARN( QString( "Certificate signing requests not supported for "+provider).toLocal8Bit() );
+        else {
+	    QCA::CertificateRequest nullCSR;
+	    QVERIFY( nullCSR.isNull() );
+	    QCA::CertificateRequest anotherNullCSR = nullCSR;
+	    QVERIFY( anotherNullCSR.isNull() );
+	    QCOMPARE( nullCSR, anotherNullCSR);
+
+	    QCA::ConvertResult resultCsr;
+	    QCA::CertificateRequest csr1 = QCA::CertificateRequest::fromPEMFile( "certs/csr1.pem", &resultCsr, provider);
+	    QCOMPARE( resultCsr, QCA::ConvertGood );
+	    QCOMPARE( csr1.isNull(), false );
+	    QCOMPARE( csr1.provider()->name(), provider );
+	    QCA::CertificateInfo subject = csr1.subjectInfo();
+	    QCOMPARE( subject.isEmpty(), false );
+	    QVERIFY( subject.values(QCA::Country).contains("AU") );
+	    QVERIFY( subject.values(QCA::State).contains("Victoria") );
+	    QVERIFY( subject.values(QCA::Locality).contains("Mitcham") );
+	    QVERIFY( subject.values(QCA::Organization).contains("GE Interlogix") );
+	    QVERIFY( subject.values(QCA::OrganizationalUnit).contains("Engineering") );
+	    QVERIFY( subject.values(QCA::CommonName).contains("coldfire") );
+
+	    QCA::PublicKey pkey = csr1.subjectPublicKey();
+	    QCOMPARE( pkey.isNull(), false );
+	    QVERIFY( pkey.isRSA() );
+
+	    QCA::RSAPublicKey rsaPkey = pkey.toRSA();
+	    QCOMPARE( rsaPkey.isNull(), false );
+	    QCOMPARE( rsaPkey.e(), QBigInteger(65537) );
+	    QCOMPARE( rsaPkey.n(), QBigInteger("104853561647822232509211983664549572246855698961210758585652966258891659217901732470712446421431206166165309547771124747713609923038218156616083520796442797276676074122658684367500665423564881889504308700315044585826841844654287577169905826705891670004942854611681809539126326134927995969418712881512819058439") );
+
+	    QSecureArray expectedSig = 
+		QCA::hexToArray("8c53f3db5efb261c8563b21d09bacec49bc6"
+				"46d34d20a73130184069103c2ba0e34a92fe"
+				"40b0fd0e911c45a40548b61d8df4318c4de8"
+				"1f300bf860b07bae6ad01c5f15ecbf821d23"
+				"7e3c45a9696efc9e83beda5a13a53ed12a62"
+				"21a6ade3a8be12016623d34523cc35951273"
+				"4f416384aa518b47d6c08b74c0fd12305ba9"
+				"e3fa");
+	    QCOMPARE( csr1.signature(), expectedSig );
+	    QCOMPARE( csr1.signatureAlgorithm(), QCA::EMSA3_MD5 );
+	}
+    }
+}
 QTEST_MAIN(CertUnitTest)
