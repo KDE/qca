@@ -575,7 +575,14 @@ bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 	if (otherCsr.isNull())
 		return false;
 
-	//TODO: this needs to check all the relevant fields.
+	if (signatureAlgorithm() != otherCsr.signatureAlgorithm())
+		return false;
+
+	if (signature() != otherCsr.signature())
+		return false;
+
+	// TODO: Anything else we should compare?
+
 	return true;
 }
 
