@@ -563,6 +563,22 @@ SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 	return static_cast<const CSRContext *>(context())->props()->sigalgo;
 }
 
+bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
+{
+	if (isNull()) {
+		if (otherCsr.isNull())
+			// they are both null
+			return true;
+		else
+			return false;
+	}
+	if (otherCsr.isNull())
+		return false;
+
+	//TODO: this needs to check all the relevant fields.
+	return true;
+}
+
 QSecureArray CertificateRequest::toDER() const
 {
 	return static_cast<const CSRContext *>(context())->toDER();

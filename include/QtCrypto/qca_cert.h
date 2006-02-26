@@ -661,6 +661,13 @@ namespace QCA
 		SignatureAlgorithm signatureAlgorithm() const;
 
 		/**
+		   Test for equality of two certificate requests
+		   
+		   \return true if the two certificate requests are the same
+		*/
+		bool operator==(const CertificateRequest &csr) const;
+
+		/**
 		   Export the Certificate Request into a DER format
 
 		   \note this only applies to PKCS#10 format certificate requests
