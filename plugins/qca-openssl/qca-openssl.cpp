@@ -3397,10 +3397,34 @@ public:
 
 		sk_X509_EXTENSION_pop_free(exts, X509_EXTENSION_free);
 
-		// TODO:
-		//QSecureArray sig;
-		//SignatureAlgorithm sigalgo;
+		if (x->signature)
+		{
+			p.sig = QSecureArray(x->signature->length);
+			for (int i=0; i< x->signature->length; i++)
+				p.sig[i] = x->signature->data[i];
+		}
 
+		switch( OBJ_obj2nid(x->sig_alg->algorithm) )
+		{
+		case NID_sha1WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_SHA1;
+		    break;
+		case NID_md5WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_MD5;
+		    break;
+		case NID_md2WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_MD2;
+		    break;
+		case NID_ripemd160WithRSA:
+		    p.sigalgo = QCA::EMSA3_RIPEMD160;
+		    break;
+		case NID_dsaWithSHA1:
+		    p.sigalgo = QCA::EMSA1_SHA1;
+		    break;
+		default:
+		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
+		    p.sigalgo = QCA::SignatureUnknown;
+		}    
 		_props = p;
 	}
 };
