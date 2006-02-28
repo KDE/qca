@@ -1,10 +1,9 @@
 * Additional unit tests
 * Convert unit tests to QtTestLib
-* Update to latest Botan, and remake the botantools patch as appropriate
-* create .prf for auto-discovery by qmake-based projects
-* ability to compile plugins in statically (check 'plugins' subdir)
 * update the README
 * special thanks to Jack Lloyd
+* mac universal binary support?
+* be sure to turn ALL .pro files (examples, everything) on release mode
 
 * API documentation
   clean up Algorithm
@@ -14,57 +13,63 @@
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
 
-* Considerations
+* beta2
   api:
-    make qca-gnupg's qpipe public?
-    add a None type for PKey?
+    should we make qca-gnupg's qpipe public?
+    should we add a None type for PKey?
+    new password handler system
+    alon: keystore: support needCard events
+    alon: passive persistence for keystoreentry and possibly other objects
     cert extensions
-    include author/advertising info in plugin?
     make sure there aren't any cases where a Foo::supportsBar()-style function
       reports true, but then when the object is created, it doesn't actually
       support the feature (because the wrong provider was used).
+    get rid of Cert/CertReq ::signature() ?  it is quite useless, I think
+    remove the quality enum for randomness? (see botan)
+    cert/key mismatch error for cms (do we want this for TLS also?)
+  code:
+    don't create qobjects during init (that means you, keystoremanager)
+    functions that don't trip a scan should do so on the first try
+    synchronizer should lazy-start the thread
+    proper parenting of all objects
+    dirwatch: thread safety
+    dirwatch: test on all platforms
+    qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
+    qca-gnupg: add enough features to make psi happy
+    sasl: get it working, lib and cyrus provider
+    if KeyStore::needPassphrase has no listener, reject the request somehow
+    race condition(?): keystore id is bad by the time a KeyStore object is
+      made. solution: if the id is invalid, queue up an unavailable() signal?
+  other:
+    Update to latest Botan, and remake the botantools patch as appropriate
+    ability to compile plugins in statically (check 'plugins' subdir)
+
+* Considerations
+  api:
     Q_DISABLE_COPY on some objects
     give all classes non-default ctors/dtors/copy/op=, and dpointers?
     add more "getters" to the library?
     don't forget to QCA_EXPORT everything
     it's possible we use QSecureArray in some unnecessary places
-    get rid of Cert/CertReq ::signature() ?  it is quite useless, I think
   other:
     add asserts
     standardize on count() vs size() when iterating?
     printf + latin1()/toLatin1() -> qPrintable() ? (in code/examples/docs/etc)
+  alon:
+    keybundle should be able to not have intermediates
+    ability to complete cert chain from a pool of nonroots
+    global provider config files
+    forkfixup
 
 * finish code for APIs:
-  plugin stuff for 4.1
-    Q_EXPORT_PLUGIN2
-    QLibrary::isLibrary()
-    interfaces?
-  better handling of static QCAPlugins:
-    we delete them, is this ok?  maybe they are supposed to be persistent.
-    if deleted, how do we get them back?
-  don't create qobjects during init (that means you, keystoremanager)
-  qcatool should have an option to list qt plugin paths and plugins found
-  remove the quality enum for randomness? (see botan)
-
-  qca-openssl: we have email altname but not email DN?
-  securemessage: algorithm selection for cms/pgp (and use SecurityLevel?)
-  tls: SSL_get_client_CA_list
-  tls: renegotiation
-  cert/key mismatch error for cms (do we want this for TLS also?)
-
-  don't allow smart card providers to be used by default
-  functions that don't trip a scan should do so on the first try
-  proper parenting of all objects
-  dirwatch: thread safety
-  dirwatch: test on all platforms
-  if KeyStore::needPassphrase has no listener, reject the request somehow
-  qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
   core: properties
   cert: rfc 2818 hostname validation
-  keystore: cleanup
   securemessage
   tls
   sasl
+  keystore: cleanup
+  don't allow smart card providers to be used by default
+  qca-openssl: we have email altname but not email DN?
 
 * examples
   create example for BigInteger
@@ -76,6 +81,9 @@
   qca-egads (or qca-egd): implement for Random support
 
 * possibilities for the future:
+  securemessage: algorithm selection for cms/pgp (and use SecurityLevel?)
+  tls: SSL_get_client_CA_list
+  tls: renegotiation
   Key wrapping - RFC3217 and RFC3394
   quoted-printable TextFilter
   keygen on smart cards
