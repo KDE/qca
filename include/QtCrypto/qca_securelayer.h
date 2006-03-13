@@ -42,7 +42,9 @@ namespace QCA
 		SL_Highest    ///< SL_High or max possible, whichever is greater
 	};
 
-	// generic interface to a security layer
+	/**
+	   Generic interface to a security layer
+	*/
 	class QCA_EXPORT SecureLayer : public QObject
 	{
 		Q_OBJECT
@@ -70,28 +72,46 @@ namespace QCA
 		void error();
 	};
 
+	/**
+	   Transport Layer Security / Secure Socket Layer 
+	*/
 	class QCA_EXPORT TLS : public SecureLayer, public Algorithm
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Operating mode
+		*/
 		enum Mode
 		{
-			Stream,
-			Datagram
+			Stream,  ///< stream mode
+			Datagram ///< datagram mode
 		};
+
+		/**
+		   Version of %TLS or SSL
+		*/
 		enum Version
 		{
-			TLS_v1,
-			SSL_v3,
-			SSL_v2,
-			DTLS_v1
+			TLS_v1, ///< Transport Layer Security, version 1
+			SSL_v3, ///< Secure Socket Layer, version 3
+			SSL_v2, ///< Secure Socket Layer, version 2
+			DTLS_v1 ///< Datagram Transport Layer Security, version 1
 		};
+
+		/**
+		   Type of error
+		*/
 		enum Error
 		{
-			ErrorInit,      ///< problem starting up TLS
+			ErrorInit,      ///< problem starting up %TLS
 			ErrorHandshake, ///< problem during the negotiation
 			ErrorCrypt      ///< problem at anytime after
 		};
+
+		/**
+		   Type of identity
+		*/
 		enum IdentityResult
 		{
 			Valid,              ///< identity is verified
@@ -114,14 +134,45 @@ namespace QCA
 		void setConstraints(int minSSF, int maxSSF);
 		void setConstraints(const QStringList &cipherSuiteList);
 
+		/**
+		   test if the link can be compressed
+
+		   \param mode the Mode to use
+		   \param provider the provider to use, if a specific provider is required
+
+		   \return true if the link can use compression
+		*/
 		static bool canCompress(Mode mode = Stream, const QString &provider = QString());
+
+		/**
+		   set the link to use compression
+
+		   \param b true if the link should use compression, or false to disable compression
+		*/
 		void setCompressionEnabled(bool b);
 
 		void startClient(const QString &host = QString());
 		void startServer();
 
+		/**
+		   test if the handshake is complete
+
+		   \return true if the handshake is complete
+
+		   \sa handshaken
+		*/
 		bool isHandshaken() const;
+
+		/**
+		   test if the link is compressed
+
+		   \return true if the link is compressed
+		*/
 		bool isCompressed() const;
+
+		/**
+		   The protocol version
+		*/
 		Version version() const;
 		QString cipherSuite() const;
 		int cipherBits() const;
@@ -150,6 +201,11 @@ namespace QCA
 		void setPacketMTU(int size) const;
 
 	signals:
+		/**
+		   Emitted when the protocol handshake is complete
+
+		   \sa isHandshaken
+		*/
 		void handshaken();
 
 	private:

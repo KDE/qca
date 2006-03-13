@@ -556,9 +556,9 @@ namespace QCA
 	/**
 	   \class CertificateRequest qca_cert.h QtCrypto
 
-	   Certificate Request
+	   %Certificate Request
 
-	   A Certificate Request is a unsigned request for a Certificate
+	   A CertificateRequest is a unsigned request for a Certificate
 	*/
 	class QCA_EXPORT CertificateRequest : public Algorithm
 	{
