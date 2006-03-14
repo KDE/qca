@@ -3888,8 +3888,26 @@ public:
 
 	virtual QStringList supportedCipherSuites() const
 	{
-		// TODO
-		return QStringList();
+		OpenSSL_add_ssl_algorithms();
+		SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
+		if (NULL == ctx) 
+			return QStringList();
+
+		SSL *ssl = SSL_new(ctx);
+		if (NULL == ssl)
+			return QStringList();
+
+		STACK_OF(SSL_CIPHER) *sk = SSL_get_ciphers(ssl);
+		QStringList cipherList;
+		for(int i = 0; i < sk_SSL_CIPHER_num(sk); ++i) {
+			SSL_CIPHER *thisCipher = sk_SSL_CIPHER_value(sk, i);
+			cipherList += SSL_CIPHER_get_name(thisCipher);
+		}
+			
+		SSL_free(ssl);
+		SSL_CTX_free(ctx);
+
+		return cipherList;
 	}
 
 	virtual bool canCompress() const
