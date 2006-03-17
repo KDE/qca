@@ -444,7 +444,7 @@ public:
 
 	virtual void reset() = 0;
 
-	virtual QStringList supportedCipherSuites() const = 0;
+	virtual QStringList supportedCipherSuites(const TLS::Version &version) const = 0;
 	virtual bool canCompress() const = 0;
 	virtual int maxSSF() const = 0;
 

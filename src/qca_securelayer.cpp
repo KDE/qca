@@ -367,13 +367,13 @@ void TLS::reset()
 	d->reset(ResetAll);
 }
 
-QStringList TLS::supportedCipherSuites(Mode mode, const QString &provider)
+QStringList TLS::supportedCipherSuites(const Version &version, const QString &provider)
 {
 	QStringList list;
-	const TLSContext *c = static_cast<const TLSContext *>(getContext(mode == Stream ? "tls" : "dtls", provider));
+	const TLSContext *c = static_cast<const TLSContext *>(getContext(version == DTLS_v1 ? "dtls" : "tls", provider));
 	if(!c)
 		return list;
-	list = c->supportedCipherSuites();
+	list = c->supportedCipherSuites(version);
 	delete c;
 	return list;
 }

@@ -126,7 +126,7 @@ namespace QCA
 
 		void reset();
 
-		static QStringList supportedCipherSuites(Mode mode = Stream, const QString &provider = QString());
+		static QStringList supportedCipherSuites(const Version &version = TLS_v1, const QString &provider = QString());
 
 		void setCertificate(const CertificateChain &cert, const PrivateKey &key);
 		void setTrustedCertificates(const CertificateCollection &trusted);
