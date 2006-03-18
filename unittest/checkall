@@ -7,6 +7,10 @@ cd cipherunittest && make check && cd .. && \
 cd hashunittest && make check && cd .. && \
 cd hexunittest && make check && cd .. && \
 cd kdfunittest && make check && cd .. && \
+cd keygenunittest && make check && cd .. && \
 cd macunittest && make check && cd .. && \
+cd pkits && make check && cd .. && \
 cd securearrayunittest && make check && cd .. && \
-cd staticunittest && make check && cd .. 
+cd staticunittest && make check && cd .. && \
+cd symmetrickeyunittest && make check && cd .. && \
+cd tls && make check && cd .. 

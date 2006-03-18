@@ -10,10 +10,11 @@ SUBDIRS += \
 	kdfunittest \
 	keygenunittest \
 	macunittest \
+	pkits \
 	securearrayunittest \
 	staticunittest \
-	symmetrickeyunittest
-
+	symmetrickeyunittest \
+	tls
 
 QMAKE_EXTRA_TARGETS += check
 check.commands = sh ./checkall
