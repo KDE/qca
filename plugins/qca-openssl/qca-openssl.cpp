@@ -4675,8 +4675,27 @@ public:
 
 	virtual SessionInfo sessionInfo() const
 	{
-		// TODO
-		return SessionInfo();
+		SessionInfo sessInfo;
+
+		sessInfo.isCompressed = (0 != ssl->session->compress_meth);
+
+		if (ssl->version == TLS1_VERSION)
+			sessInfo.version = TLS::TLS_v1;
+		else if (ssl->version == SSL3_VERSION)
+			sessInfo.version = TLS::SSL_v3;
+		else if (ssl->version == SSL2_VERSION)
+			sessInfo.version = TLS::SSL_v2;
+		else {
+			qDebug("unexpected version response");
+			sessInfo.version = TLS::TLS_v1;
+		}
+
+		sessInfo.cipherSuite = cipherIDtoString( sessInfo.version,
+							 SSL_get_current_cipher(ssl)->id);
+
+		sessInfo.cipherMaxBits = SSL_get_cipher_bits(ssl, &(sessInfo.cipherBits));
+
+		return sessInfo;
 	}
 
 	virtual QByteArray unprocessed()
