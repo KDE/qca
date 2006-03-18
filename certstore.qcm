@@ -41,6 +41,9 @@ public:
 		pathsToTry.append( QString("/usr/share/ssl/cert.pem") );
 		pathsToTry.append( QString("/usr/share/ssl/certs/ca-bundle.crt") );
 
+		// Fedora Core 5 changes to this
+		pathsToTry.append( QString("/etc/pki/tls/cert.pem") );
+
 		for(int n = 0; n < pathsToTry.count(); ++n)
 		{
         		if(QFile::exists(pathsToTry[n]))
