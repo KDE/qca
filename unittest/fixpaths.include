@@ -4,6 +4,7 @@
 // It is intended that this be #include'd from an init
 // routine of some kind.
 
+qDebug() << "";
     QStringList libpaths = QCoreApplication::libraryPaths();
 
     // we prepend, because we prefer the uninstalled version
