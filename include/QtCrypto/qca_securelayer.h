@@ -120,15 +120,60 @@ namespace QCA
 			NoCertificate       ///< identity unknown
 		};
 
+		/** 
+		    Constructor for Transport Layer Security connection
+
+		    This produces a Stream (normal %TLS) rather than Datagram (DTLS) object.
+		    If you want to do DTLS, see below.
+		    
+		    \param parent the parent object for this object
+		    \param provider the name of the provider, if a specific provider is required
+		*/
 		TLS(QObject *parent = 0, const QString &provider = QString());
+
+		/**
+		   Constructor for Transport Layer Security connection
+		   
+		   \param mode the connection Mode
+		   \param parent the parent object for this object
+		   \param provider the name of the provider, if a specific provider is required
+		*/
 		TLS(Mode mode, QObject *parent = 0, const QString &provider = QString());
+
 		~TLS();
 
 		void reset();
 
+		/**
+		   Get the list of Cipher Suites that a provider can use.
+
+		   A cipher suite is a combination of key exchange, encryption and hashing
+		   algorithms that are agreed during the initial handshake between client
+		   and server.
+
+		   \param version the protocol Version that the cipher suites are required for
+		   \param provider the provider to check, if a particular provider is required.
+
+		   \note If you don't specify a provider, one will be picked based on the
+		   provider priority system. You will not get the list of cipher suites supported
+		   by all providers unless you call this function on all providers.
+
+		   \return list of the the names of the cipher suites supported.
+		*/
 		static QStringList supportedCipherSuites(const Version &version = TLS_v1, const QString &provider = QString());
 
 		void setCertificate(const CertificateChain &cert, const PrivateKey &key);
+
+		/**
+		   Set up the set of trusted certificates that will be used to verify
+		   that the certificate provided is valid.
+
+		   Typically, this will be the collection of root certificates from the system,
+		   which you can get using QCA::systemStore(), however you may choose to pass
+		   whatever certificates match your assurance needs.
+
+		   \param trusted a bundle of trusted certificates.
+		*/
 		void setTrustedCertificates(const CertificateCollection &trusted);
 		void setConstraints(SecurityLevel s);
 		void setConstraints(int minSSF, int maxSSF);
