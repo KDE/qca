@@ -3809,6 +3809,449 @@ public:
 	}
 };
 
+//==========================================================
+static QString cipherIDtoString( const TLS::Version &version, const unsigned long &cipherID)
+{
+	if (TLS::TLS_v1 == version) {
+		switch( cipherID & 0xFFFF ) {
+		case 0x0000:
+			// RFC 2246 A.5
+			return QString("TLS_NULL_WITH_NULL_NULL");
+			break;
+		case 0x0001:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_WITH_NULL_MD5");
+			break;
+		case 0x0002:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_WITH_NULL_SHA");
+			break;
+		case 0x0003:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_EXPORT_WITH_RC4_40_MD5");
+			break;
+		case 0x0004:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_WITH_RC4_128_MD5");
+			break;
+		case 0x0005:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_WITH_RC4_128_SHA");
+			break;			
+		case 0x0006:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
+			break;
+		case 0x0007:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_WITH_IDEA_CBC_SHA");
+			break;
+		case 0x0008:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x0009:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_WITH_DES_CBC_SHA");
+			break;
+		case 0x000A:
+			// RFC 2246 A.5
+			return QString("TLS_RSA_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x000B:
+			// RFC 2246 A.5
+			return QString("TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x000C:
+			// RFC 2246 A.5
+			return QString("TLS_DH_DSS_WITH_DES_CBC_SHA");
+			break;
+		case 0x000D:
+			// RFC 2246 A.5
+			return QString("TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x000E:
+			// RFC 2246 A.5
+			return QString("TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x000F:
+			// RFC 2246 A.5
+			return QString("TLS_DH_RSA_WITH_DES_CBC_SHA");
+			break;
+		case 0x0010:
+			// RFC 2246 A.5
+			return QString("TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0011:
+			// RFC 2246 A.5
+			return QString("TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x0012:
+			// RFC 2246 A.5
+			return QString("TLS_DHE_DSS_WITH_DES_CBC_SHA");
+			break;
+		case 0x0013:
+			// RFC 2246 A.5
+			return QString("TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0014:
+			// RFC 2246 A.5
+			return QString("TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x0015:
+			// RFC 2246 A.5
+			return QString("TLS_DHE_RSA_WITH_DES_CBC_SHA");
+			break;
+		case 0x0016:
+			// RFC 2246 A.5
+			return QString("TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0017:
+			// RFC 2246 A.5
+			return QString("TLS_DH_anon_EXPORT_WITH_RC4_40_MD5");
+			break;
+		case 0x0018:
+			// RFC 2246 A.5
+			return QString("TLS_DH_anon_WITH_RC4_128_MD5");
+			break;
+		case 0x0019:
+			// RFC 2246 A.5
+			return QString("TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x001A:
+			// RFC 2246 A.5
+			return QString("TLS_DH_anon_WITH_DES_CBC_SHA");
+			break;
+		case 0x001B:
+			// RFC 2246 A.5
+			return QString("TLS_DH_anon_WITH_3DES_EDE_CBC_SHA");
+			break;
+
+		// 0x001C and 0x001D are reserved to avoid collision with SSL3 Fortezza.
+
+		// TODO: 0x001E -> 0x002B are from RFC2712.
+
+		case 0x002F:
+			// RFC 3268
+			return QString("TLS_RSA_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0030:
+			// RFC 3268
+			return QString("TLS_DH_DSS_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0031:
+			// RFC 3268
+			return QString("TLS_DH_RSA_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0032:
+			// RFC 3268
+			return QString("TLS_DHE_DSS_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0033:
+			// RFC 3268
+			return QString("TLS_DHE_RSA_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0034:
+			// RFC 3268
+			return QString("TLS_DH_anon_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0035:
+			// RFC 3268
+			return QString("TLS_RSA_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0036:
+			// RFC 3268
+			return QString("TLS_DH_DSS_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0037:
+			// RFC 3268
+			return QString("TLS_DH_RSA_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0038:
+			// RFC 3268
+			return QString("TLS_DHE_DSS_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0039:
+			// RFC 3268
+			return QString("TLS_DHE_RSA_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x003A:
+			// RFC 3268
+			return QString("TLS_DH_anon_WITH_AES_256_CBC_SHA");
+			break;
+
+			// TODO: 0x0041 -> 0x0046 are from RFC4132 (Camellia)
+
+		case 0x0060:
+			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
+			return QString("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_MD5");
+			break;
+		case 0x0061:
+			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
+			return QString("TLS_CK_RSA_EXPORT1024_WITH_RC2_CBC_56_MD5");
+			break;
+		case 0x0062:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("TLS_CK_RSA_EXPORT1024_WITH_DES_CBC_SHA");
+			break;
+		case 0x0063:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("TLS_CK_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA");
+			break;
+		case 0x0064:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_SHA");
+			break;
+		case 0x0065:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("TLS_CK_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA");
+			break;
+		case 0x0066:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("TLS_CK_DHE_DSS_WITH_RC4_128_SHA");
+			break;
+
+		// TODO: 0x0084 -> 0x0089 are from RFC4132 (Camellia)
+
+		// TODO: 0x008A -> 0x0095 are from RFC4279 (PSK)
+
+		// TODO: 0xC000 -> 0xC019 are from the ECC draft
+
+		default:
+			return QString("TLS algo to be added: %1").arg(cipherID & 0xffff, 0, 16);
+			break;
+		} 
+	} else if (TLS::SSL_v3 == version) {
+		switch( cipherID & 0xFFFF ) {
+		case 0x0000:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_NULL_WITH_NULL_NULL");
+			break;
+		case 0x0001:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_WITH_NULL_MD5");
+			break;
+		case 0x0002:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_WITH_NULL_SHA");
+			break;
+		case 0x0003:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_EXPORT_WITH_RC4_40_MD5");
+			break;
+		case 0x0004:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_WITH_RC4_128_MD5");
+			break;
+		case 0x0005:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_WITH_RC4_128_SHA");
+			break;
+		case 0x0006:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
+			break;
+		case 0x0007:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_WITH_IDEA_CBC_SHA");
+			break;
+		case 0x0008:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x0009:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_WITH_DES_CBC_SHA");
+			break;
+		case 0x000A:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_RSA_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x000B:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x000C:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_DSS_WITH_DES_CBC_SHA");
+			break;
+		case 0x000D:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x000E:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_RSA_WITH_DES_CBC_SHA");
+			break;
+		case 0x000F:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_RSA_WITH_DES_CBC_SHA");
+			break;
+		case 0x0010:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0011:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x0012:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DHE_DSS_WITH_DES_CBC_SHA");
+			break;
+		case 0x0013:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0014:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x0015:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DHE_RSA_WITH_DES_CBC_SHA");
+			break;
+		case 0x0016:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0017:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SL_DH_anon_EXPORT_WITH_RC4_40_MD5");
+			break;
+		case 0x0018:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_anon_WITH_RC4_128_MD5");
+			break;
+		case 0x0019:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA");
+			break;
+		case 0x001A:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_anon_WITH_DES_CBC_SHA");
+			break;
+		case 0x001B:
+			// From the Netscape SSL3 Draft (nov 1996)
+			return QString("SSL_DH_anon_WITH_3DES_EDE_CBC_SHA");
+			break;
+
+		// TODO: Sort out the Fortezza mess...
+
+		// These aren't in the Netscape SSL3 draft, but openssl does
+		// allow you to use them with SSL3.
+		case 0x002F:
+			return QString("SSL_RSA_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0030:
+			return QString("SSL_DH_DSS_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0031:
+			return QString("SSL_DH_RSA_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0032:
+			return QString("SSL_DHE_DSS_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0033:
+			return QString("SSL_DHE_RSA_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0034:
+			return QString("SSL_DH_anon_WITH_AES_128_CBC_SHA");
+			break;
+		case 0x0035:
+			return QString("SSL_RSA_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0036:
+			return QString("SSL_DH_DSS_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0037:
+			return QString("SSL_DH_RSA_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0038:
+			return QString("SSL_DHE_DSS_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0039:
+			return QString("SSL_DHE_RSA_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x003A:
+			return QString("SSL_DH_anon_WITH_AES_256_CBC_SHA");
+			break;
+		case 0x0060:
+			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
+			return QString("SSL_CK_RSA_EXPORT1024_WITH_RC4_56_MD5");
+			break;
+		case 0x0061:
+			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
+			return QString("SSL_CK_RSA_EXPORT1024_WITH_RC2_CBC_56_MD5");
+			break;
+		case 0x0062:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("SSL_CK_RSA_EXPORT1024_WITH_DES_CBC_SHA");
+			break;
+		case 0x0063:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("SSL_CK_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA");
+			break;
+		case 0x0064:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("SSL_CK_RSA_EXPORT1024_WITH_RC4_56_SHA");
+			break;
+		case 0x0065:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("SSL_CK_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA");
+			break;
+		case 0x0066:
+			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
+			return QString("SSL_CK_DHE_DSS_WITH_RC4_128_SHA");
+			break;
+		default:
+			return QString("SSL3 to be added: %1").arg(cipherID & 0xffff, 0, 16);
+			break;
+		}
+	} else if (TLS::SSL_v2 == version) {
+		switch( cipherID & 0xffffff) {
+		case 0x010080:
+			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
+			return QString("SSL_CK_RC4_128_WITH_MD5");
+			break;
+		case 0x020080:
+			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
+			return QString("SSL_CK_RC4_128_EXPORT40_WITH_MD5");
+			break;
+		case 0x030080:
+			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
+			return QString("SSL_CK_RC2_128_CBC_WITH_MD5");
+			break;
+		case 0x040080:
+			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
+			return QString("SSL_CK_RC2_128_CBC_EXPORT40_WITH_MD5");
+			break;
+		case 0x050080:
+			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
+			return QString("SSL_CK_RC4_128_EXPORT40_WITH_MD5");
+			break;
+		case 0x060040:
+			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
+			return QString("SSL_CK_DES_64_CBC_WITH_MD5");
+			break;
+		case 0x0700C0:
+			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
+			return QString("SSL_CK_DES_192_EDE3_CBC_WITH_MD5");
+			break;
+		case 0x080080:
+			// From the openssl source, which says "MS hack"
+			return QString("SSL_CK_RC4_64_WITH_MD5");
+			break;
+		default:
+			return QString("SSL2 to be added: %1").arg(cipherID & 0xffffff, 0, 16);
+			break;
+		}
+	}
+	else {
+		return QString("Unknown version!");
+	}
+}
+
 // TODO: test to ensure there is no cert-test lag
 static bool ssl_init = false;
 class MyTLSContext : public TLSContext
@@ -3886,22 +4329,40 @@ public:
 		v_eof = false;
 	}
 
-	virtual QStringList supportedCipherSuites() const
+	virtual QStringList supportedCipherSuites(const TLS::Version &version) const
 	{
 		OpenSSL_add_ssl_algorithms();
-		SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
+		SSL_CTX *ctx = 0;
+		switch (version) {
+		case TLS::SSL_v2:
+			ctx = SSL_CTX_new(SSLv2_client_method());
+			break;
+		case TLS::SSL_v3:
+			ctx = SSL_CTX_new(SSLv3_client_method());
+			break;
+		case TLS::TLS_v1:
+			ctx = SSL_CTX_new(TLSv1_client_method());
+			break;
+		case TLS::DTLS_v1:
+		default:
+			/* should not happen - should be in a "dtls" provider*/
+			qWarning("Unexpected enum in cipherSuites");
+			ctx = 0;
+		}
 		if (NULL == ctx) 
 			return QStringList();
 
 		SSL *ssl = SSL_new(ctx);
-		if (NULL == ssl)
+		if (NULL == ssl) {
+			SSL_CTX_free(ctx);
 			return QStringList();
+		}
 
 		STACK_OF(SSL_CIPHER) *sk = SSL_get_ciphers(ssl);
 		QStringList cipherList;
 		for(int i = 0; i < sk_SSL_CIPHER_num(sk); ++i) {
 			SSL_CIPHER *thisCipher = sk_SSL_CIPHER_value(sk, i);
-			cipherList += SSL_CIPHER_get_name(thisCipher);
+			cipherList += cipherIDtoString(version, thisCipher->id);
 		}
 			
 		SSL_free(ssl);
