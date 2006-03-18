@@ -216,12 +216,36 @@ namespace QCA
 		bool isCompressed() const;
 
 		/**
-		   The protocol version
+		   The protocol version that is in use for this connection.
 		*/
 		Version version() const;
+
+		/**
+		   The cipher suite that has been negotiated for this connection.
+
+		   The name returned here is the name used in the applicable RFC
+		   (or Internet Draft, where there is no RFC).
+		*/
 		QString cipherSuite() const;
+
+		/**
+		   The number of effective bits of security being used for this
+		   connection. 
+
+		   This can differ from the actual number of bits for certain
+		   older "export ciphers" that are deliberately crippled. If you
+		   want that information, use cipherMaxBits().
+		*/
 		int cipherBits() const;
+
+		/**
+		   The number of bits of security that the cipher could use.
+
+		   This is normally the same as cipherBits(), but can be greater
+		   for older "export ciphers".
+		*/
 		int cipherMaxBits() const;
+
 		Error errorCode() const;
 
 		IdentityResult peerIdentityResult() const;
