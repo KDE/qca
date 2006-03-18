@@ -43,6 +43,7 @@ void MACUnitTest::HMACMD5()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "hmac(md5)", provider ) )
@@ -119,6 +120,7 @@ void MACUnitTest::HMACSHA256()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "hmac(sha256)", provider ) )
@@ -281,6 +283,7 @@ void MACUnitTest::HMACSHA384()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "hmac(sha384)", provider ) )
@@ -362,6 +365,7 @@ void MACUnitTest::HMACSHA512()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "hmac(sha512)", provider ) )
@@ -443,6 +447,7 @@ void MACUnitTest::HMACSHA1()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "hmac(sha1)", provider ) )
