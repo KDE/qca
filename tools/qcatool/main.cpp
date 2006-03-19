@@ -736,6 +736,7 @@ static void usage()
 	printf("\n");
 	printf("  --pgp clearsign [S] [messagefile]\n");
 	printf("\n");
+	printf("  --list-tlsciphers\n");
 
 	/*printf("qcatool: simple qca utility\n");
 	printf("usage: qcatool (--pass, --noprompt) [command]\n");
@@ -2007,6 +2008,18 @@ int main(int argc, char **argv)
 			usage();
 			return 1;
 		}
+	}
+	else if(args[0] == "--list-tlsciphers")
+	{
+		QString cipherList;
+		cipherList = QCA::TLS::supportedCipherSuites().join("\n\t");
+		printf("TLS version 1: \n\t%s\n", qPrintable(cipherList));
+
+		cipherList = QCA::TLS::supportedCipherSuites(QCA::TLS::SSL_v3).join("\n\t");
+		printf("SSL version 3: \n\t%s\n", qPrintable(cipherList));
+
+		cipherList = QCA::TLS::supportedCipherSuites(QCA::TLS::SSL_v2).join("\n\t");
+		printf("SSL version 2: \n\t%s\n", qPrintable(cipherList));
 	}
 	else
 	{
