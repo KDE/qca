@@ -88,19 +88,16 @@ public:
 		sock = new QTcpSocket;
 		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
 		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
-		connect(sock, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(sock_error(QAbstractSocket::SocketError)));
+		connect(sock, SIGNAL(error(QAbstractSocket::SocketError)),
+			SLOT(sock_error(QAbstractSocket::SocketError)));
 
 		ssl = new QCA::TLS;
 		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
-		connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
+		connect(ssl, SIGNAL(readyReadOutgoing()),
+			SLOT(ssl_readyReadOutgoing()));
 		connect(ssl, SIGNAL(closed()), SLOT(ssl_closed()));
 		connect(ssl, SIGNAL(error()), SLOT(ssl_error()));
-
-		if(!QCA::haveSystemStore())
-			printf("Warning: no root certs\n");
-
-		rootCerts = QCA::systemStore();
 	}
 
 	~SecureTest()
@@ -134,13 +131,24 @@ signals:
 private slots:
 	void sock_connected()
 	{
+		// We just do this to help doxygen...
+		QCA::TLS *ssl = SecureTest::ssl;
+
 		printf("Connected, starting TLS handshake...\n");
-		ssl->setTrustedCertificates(rootCerts);
+
+		if(!QCA::haveSystemStore())
+			printf("Warning: no root certs\n");
+		else 
+			ssl->setTrustedCertificates(QCA::systemStore());
+
 		ssl->startClient(host);
 	}
 
 	void sock_readyRead()
 	{
+		// We just do this to help doxygen...
+		QCA::TLS *ssl = SecureTest::ssl;
+
 		ssl->writeIncoming(sock->readAll());
 	}
 
@@ -164,9 +172,15 @@ private slots:
 
 	void ssl_handshaken()
 	{
+		// We just do this to help doxygen...
+		QCA::TLS *ssl = SecureTest::ssl;
+
 		QCA::TLS::IdentityResult r = ssl->peerIdentityResult();
 
-		printf("Successful SSL handshake.\n");
+		printf("Successful SSL handshake using %s (%i of %i bits)\n",
+		       qPrintable(ssl->cipherSuite()),
+		       ssl->cipherBits(),
+		       ssl->cipherMaxBits() );
 		if(r != QCA::TLS::NoCertificate)
 		{
 			cert = ssl->peerCertificateChain().primary();
@@ -180,7 +194,8 @@ private slots:
 		else if(r == QCA::TLS::HostMismatch)
 			str += "Error: Wrong certificate";
 		else if(r == QCA::TLS::InvalidCertificate)
-			str += "Error: Invalid certificate.\n -> Reason: " + validityToString(ssl->peerCertificateValidity());
+			str += "Error: Invalid certificate.\n -> Reason: " +
+				validityToString(ssl->peerCertificateValidity());
 		else
 			str += "Error: No certificate";
 		printf("%s\n", qPrintable(str));
@@ -192,12 +207,18 @@ private slots:
 
 	void ssl_readyRead()
 	{
+		// We just do this to help doxygen...
+		QCA::TLS *ssl = SecureTest::ssl;
+
 		QByteArray a = ssl->read();
 		printf("%s", a.data());
 	}
 
 	void ssl_readyReadOutgoing()
 	{
+		// We just do this to help doxygen...
+		QCA::TLS *ssl = SecureTest::ssl;
+
 		sock->write(ssl->readOutgoing());
 	}
 
@@ -208,6 +229,9 @@ private slots:
 
 	void ssl_error()
 	{
+		// We just do this to help doxygen...
+		QCA::TLS *ssl = SecureTest::ssl;
+
 		int x = ssl->errorCode();
 		if(x == QCA::TLS::ErrorHandshake)
 		{
@@ -226,7 +250,6 @@ private:
 	QTcpSocket *sock;
 	QCA::TLS *ssl;
 	QCA::Certificate cert;
-	QCA::CertificateCollection rootCerts;
 };
 
 #include "ssltest.moc"
