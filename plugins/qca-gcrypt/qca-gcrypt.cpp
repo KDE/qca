@@ -24,8 +24,6 @@
 #include <gcrypt.h>
 #include <iostream>
 
-#define HAVE_SHA224
-
 namespace gcryptQCAPlugin {
 
 #include "pkcs5.c"
@@ -433,7 +431,7 @@ public:
 	list += "md4";
 	list += "md5";
 	list += "ripemd160";
-#ifdef HAVE_SHA224
+#ifdef GCRY_MD_SHA224
 	list += "sha224";
 #endif
 	list += "sha256";
@@ -441,7 +439,7 @@ public:
 	list += "sha512";
 	list += "hmac(md5)";
 	list += "hmac(sha1)";
-#ifdef HAVE_SHA224
+#ifdef GCRY_MD_SHA224
 	list += "hmac(sha224)";
 #endif
 	list += "hmac(sha256)";
@@ -483,7 +481,7 @@ public:
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_MD5, this, type );
 	else if ( type == "ripemd160" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_RMD160, this, type );
-#ifdef HAVE_SHA224
+#ifdef GCRY_MD_SHA224
 	else if ( type == "sha224" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA224, this, type );
 #endif
@@ -497,7 +495,7 @@ public:
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_MD5, this, type );
 	else if ( type == "hmac(sha1)" )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA1, this, type );
-#ifdef HAVE_SHA224
+#ifdef GCRY_MD_SHA224
 	else if ( type == "hmac(sha224)" )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA224, this, type );
 #endif
