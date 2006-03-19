@@ -12,7 +12,7 @@ SUBDIRS += \
 	publickeyexample \
 	randomtest \
 	ssltest \
-	rsatest
-#	sslservtest \
+	rsatest \
+	sslservtest
 #	sasltest
 

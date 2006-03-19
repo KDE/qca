@@ -52,6 +52,12 @@ The code below shows how to create an SSL client
 
 */
 
+/** \example sslservtest.cpp
+
+The code below shows how to create an SSL server
+
+*/
+
 /** \example certtest.cpp
 
 This example shows how QCA::Certificate and QCA::CertificateCollection
