@@ -1,7 +1,7 @@
 /*
  * qca_securelayer.h - Qt Cryptographic Architecture
  * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004,2005, 2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,32 +43,143 @@ namespace QCA
 	};
 
 	/**
-	   Generic interface to a security layer
+	   Abstract interface to a security layer
+
+	   SecureLayer is normally used between an application and a
+	   potentially insecure network. It provides secure
+	   communications over that network.
+
+	   The concept is that (after some initial setup), the
+	   application can write() some data to the SecureLayer
+	   implementation, and that data is encrypted (or otherwise
+	   protected, depending on the setup). The SecureLayer
+	   implementation then emits the readyReadOutgoing() signal,
+	   and the application uses readOutgoing() to retrieve the the
+	   encrypted data from the SecureLayer implementation.  The
+	   encrypted data is then sent out on the network.
+
+	   When some encrypted data comes back from the network, the
+	   application does a writeIncoming() to the SecureLayer
+	   implementation. Some time later, the SecureLayer
+	   implementation may emit readyRead() to the application,
+	   which then read()s the decrypted data from the SecureLayer
+	   implementation.
+
+	   Note that sometimes data is sent or received between the
+	   SecureLayer implementation and the network without any data
+	   being sent between the application and the SecureLayer
+	   implementation. This is a result of the initial negotiation
+	   activities (which require network traffic to agree a
+	   configuration to use) and other overheads associated with
+	   the secure link.
 	*/
 	class QCA_EXPORT SecureLayer : public QObject
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Constructor for an abstract secure communications
+		   layer
+
+		   \param parent the parent object for this object
+		*/
 		SecureLayer(QObject *parent = 0);
 
+		/**
+		   Returns true if the layer has a meaningful "close".
+		*/
 		virtual bool isClosable() const;
+
+		/**
+		   Returns the number of bytes available to be read()
+		   on the application side.
+		*/
 		virtual int bytesAvailable() const = 0;
+
+		/**
+		   Returns the number of bytes available to be
+		   readOutgoing() on the network side.
+		*/
 		virtual int bytesOutgoingAvailable() const = 0;
+
+		/**
+		   Close the link. Note that this may not be
+		   meaningful / possible for all implementations. 
+
+		   \sa isClosable() for a test that verifies if the
+		   link can be %closed.
+		*/
 		virtual void close();
 
-		// plain (application side)
+		/**
+		   This method writes unencrypted (plain) data to
+		   the SecureLayer implementation. You normally
+		   call this function on the application side.
+		*/
 		virtual void write(const QByteArray &a) = 0;
+
+		/**
+		   This method reads decrypted (plain) data from
+		   the SecureLayer implementation. You normally call
+		   this function on the application side after receiving
+		   the readyRead() signal.
+		*/
 		virtual QByteArray read() = 0;
 
-		// encoded (network side)
+		/**
+		   This method accepts encoded (typically encrypted) data
+		   for processing. You normally call this function using
+		   data read from the network socket (e.g. using 
+		   QTcpSocket::readAll()) after receiving a signal that 
+		   indicates that the socket has data to read.
+		*/
 		virtual void writeIncoming(const QByteArray &a) = 0;
+
+		/**
+		   This method provides encoded (typically encrypted)
+		   data. You normally call this function to get data
+		   to write out to the network socket (e.g. using
+		   QTcpSocket::write()) after receiving the 
+		   readyReadOutgoing() signal.
+		*/
 		virtual QByteArray readOutgoing(int *plainBytes = 0) = 0;
+
+		/**
+		   This allows you to read data without having it
+		   decrypted first. This is intended to be used for
+		   protocols that close off the connection and return
+		   to plain text transfer. You do not normally need to
+		   use this function.
+		*/
 		virtual QByteArray readUnprocessed();
 
 	signals:
+		/**
+		   This signal is emitted when SecureLayer has
+		   decrypted (application side) data ready to be
+		   read. Typically you will connect this signal to a
+		   slot that reads the data (using read()).
+		*/
 		void readyRead();
+
+		/**
+		   This signal is emitted when SecureLayer has encrypted
+		   (network side) data ready to be read. Typically you
+		   will connect this signal to a slot that reads the data
+		   (using readOutgoing()) and writes it to a network socket.
+		*/
 		void readyReadOutgoing();
+
+		/**
+		   This signal is emitted when the SecureLayer connection
+		   is %closed.
+		*/
 		void closed();
+
+		/**
+		   This signal is emitted when an error is detected. You 
+		   can determine the error type using errorCode().
+		*/
 		void error();
 	};
 
@@ -139,29 +250,54 @@ namespace QCA
 		   \param provider the name of the provider, if a specific provider is required
 		*/
 		TLS(Mode mode, QObject *parent = 0, const QString &provider = QString());
-
+		/**
+		   Destructor
+		*/
 		~TLS();
 
+		/**
+		   Reset the connection
+		*/
 		void reset();
 
 		/**
-		   Get the list of Cipher Suites that a provider can use.
+		   Get the list of cipher suites that a provider can use.
 
-		   A cipher suite is a combination of key exchange, encryption and hashing
-		   algorithms that are agreed during the initial handshake between client
-		   and server.
+		   A cipher suite is a combination of key exchange,
+		   encryption and hashing algorithms that are agreed
+		   during the initial handshake between client and
+		   server.
 
-		   \param version the protocol Version that the cipher suites are required for
-		   \param provider the provider to check, if a particular provider is required.
+		   \param version the protocol Version that the cipher
+		   suites are required for
+		   \param provider the
+		   provider to check, if a particular provider is
+		   required.
 
-		   \note If you don't specify a provider, one will be picked based on the
-		   provider priority system. You will not get the list of cipher suites supported
-		   by all providers unless you call this function on all providers.
+		   \note If you don't specify a provider, one will be
+		   picked based on the provider priority system. You
+		   will not get the list of cipher suites supported by
+		   all providers unless you call this function on all
+		   providers.
 
-		   \return list of the the names of the cipher suites supported.
+		   \return list of the the names of the cipher suites
+		   supported.
 		*/
 		static QStringList supportedCipherSuites(const Version &version = TLS_v1, const QString &provider = QString());
 
+		/**
+		   The local certificate to use. This is the
+		   certificate that will be provided to the peer. This
+		   is almost always required on the server side
+		   (because the server has to provide a certificate to
+		   the client), and may be used on the client side.
+
+		   \param cert a chain of certificates that
+		   link the host certificate to a trusted root
+		   certificate.
+		   \param key the private key for the certificate
+		   chain
+		*/
 		void setCertificate(const CertificateChain &cert, const PrivateKey &key);
 
 		/**
@@ -175,12 +311,38 @@ namespace QCA
 		   \param trusted a bundle of trusted certificates.
 		*/
 		void setTrustedCertificates(const CertificateCollection &trusted);
+
+		/**
+		   The security level required for this link
+
+		   \param s the level required for this link.
+		*/
 		void setConstraints(SecurityLevel s);
+
+		/**
+		   \overload
+
+		   \param minSSF the minimum Security Strength Factor
+		   required for this link.
+		   \param maxSSF the maximum Security Strength Factor
+		   required for this link.
+		*/
 		void setConstraints(int minSSF, int maxSSF);
+
+		/**
+		   \overload
+
+		   \param cipherSuiteList a list of the names of
+		   cipher suites that can be used for this link.
+
+		   \note the names are the same as the names in the
+		   applicable IETF RFCs (or Internet Drafts if there
+		   is no applicable RFC).
+		*/
 		void setConstraints(const QStringList &cipherSuiteList);
 
 		/**
-		   test if the link can be compressed
+		   Test if the link can use compression.
 
 		   \param mode the Mode to use
 		   \param provider the provider to use, if a specific provider is required
@@ -196,7 +358,16 @@ namespace QCA
 		*/
 		void setCompressionEnabled(bool b);
 
+		/**
+		   Start the TLS/SSL connection as a client.
+
+		   \param host the hostname that you want to connect to
+		*/
 		void startClient(const QString &host = QString());
+
+		/**
+		   Start the TLS/SSL connection as a server.
+		*/
 		void startServer();
 
 		/**
@@ -232,7 +403,8 @@ namespace QCA
 		   The number of effective bits of security being used for this
 		   connection. 
 
-		   This can differ from the actual number of bits for certain
+		   This can differ from the actual number of bits in
+		   the cipher for certain
 		   older "export ciphers" that are deliberately crippled. If you
 		   want that information, use cipherMaxBits().
 		*/
@@ -246,11 +418,52 @@ namespace QCA
 		*/
 		int cipherMaxBits() const;
 
+		/**
+		   This method returns the type of error that has
+		   occurred. You should only need to check this if the
+		   error() signal is emitted.
+		*/
 		Error errorCode() const;
 
+		/**
+		   After the SSL/TLS handshake is complete, this
+		   method allows you to determine if the other end
+		   of the connection (if the application is a client,
+		   this is the server; if the application is a server,
+		   this is the client) has a valid identity. 
+
+		   Note that the security of TLS/SSL depends on
+		   checking this. It is not enough to check that the
+		   certificate is valid - you must check that the
+		   certificate is valid for the entity that you are
+		   trying to communicate with.
+
+		   \note If this returns QCA::TLS::InvalidCertificate,
+		   you may wish to use peerCertificateValidity() to
+		   determine whether to proceed or not.
+		*/
 		IdentityResult peerIdentityResult() const;
+
+		/**
+		   After the SSL/TLS handshake is valid, this method
+		   allows you to check if the received certificate
+		   from the other end is valid. As noted in
+		   peerIdentityResult(), you also need to check that
+		   the certificate matches the entity you are trying
+		   to communicate with.
+		*/
 		Validity peerCertificateValidity() const;
+
+		/**
+		   The CertificateChain for the local host
+		   certificate.
+		*/
 		CertificateChain localCertificateChain() const;
+
+		/**
+		   The CertificateChain from the peer (other end of
+		   the connection to the trusted root certificate).
+		*/
 		CertificateChain peerCertificateChain() const;
 
 		// reimplemented
@@ -264,9 +477,29 @@ namespace QCA
 		virtual QByteArray readOutgoing(int *plainBytes = 0);
 		virtual QByteArray readUnprocessed();
 
-		// for DTLS
+		/**
+		   Determine the number of packets available to be
+		   read on the application side.
+
+		   \note this is only used with DTLS.
+		*/
 		int packetsAvailable() const;
+
+		/**
+		   Determine the number of packets available to be
+		   read on the network side.
+
+		   \note this is only used with DTLS.
+		*/
 		int packetsOutgoingAvailable() const;
+
+		/**
+		   Set the maximum packet size to use.
+
+		   \param size the number of bytes to set as the MTU.
+
+		   \note this is only used with DTSL.
+		*/
 		void setPacketMTU(int size) const;
 
 	signals:
