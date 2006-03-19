@@ -30,7 +30,21 @@
 namespace QCA
 {
 	/**
-	 * Specify the lower-bound for acceptable TLS/SASL security layers
+	   Specify the lower-bound for acceptable TLS/SASL security layers
+
+	   For TLS, the intepretation of these levels is:
+	   - Any cipher suite that provides non-authenticated communications
+	   (usually anonymous Diffie-Hellman) is SL_Integrity. 
+	   - Any cipher suite that is limited to 40 bits (export-version
+	   crippled forms of RC2, RC4 or DES) is SL_Export. Standard
+	   DES (56 bits) and some forms of RC4 (64 bits) are also SL_Export.
+	   - Any normal cipher (AES, Camellia, RC4 or similar) with 128 bits, or
+	   Elliptic Curve Ciphers with 283 bits, is SL_Baseline
+	   - AES or Camellia at least 192 bits, triple-DES and similar
+	   ciphers are SL_High.  ECC with 409 or more bits is also SL_High. 
+	   - Highest does not have an equivalent strength. It
+	   indicates that the provider should use the strongest
+	   ciphers available (but not less than SL_High). 
 	 */
 	enum SecurityLevel
 	{
