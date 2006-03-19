@@ -3928,8 +3928,62 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 			break;
 
 		// 0x001C and 0x001D are reserved to avoid collision with SSL3 Fortezza.
-
-		// TODO: 0x001E -> 0x002B are from RFC2712.
+		case 0x001E:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_DES_CBC_SHA");
+			break;
+		case 0x001F:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0020:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_RC4_128_SHA");
+			break;
+		case 0x0021:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_IDEA_CBC_SHA");
+			break;
+		case 0x0022:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_DES_CBC_MD5");
+			break;
+		case 0x0023:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_3DES_EDE_CBC_MD5");
+			break;
+		case 0x0024:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_RC4_128_MD5");
+			break;
+		case 0x0025:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_WITH_IDEA_CBC_MD5");
+			break;
+		case 0x0026:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA");
+			break;
+		case 0x0027:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_SHA");
+			break;
+		case 0x0028:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_EXPORT_WITH_RC4_40_SHA");
+			break;
+		case 0x0029:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5");
+			break;
+		case 0x002A:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_MD5");
+			break;
+		case 0x002B:
+			// RFC 2712 Section 3
+			return QString("TLS_KRB5_EXPORT_WITH_RC4_40_MD5");
+			break;
 
 		case 0x002F:
 			// RFC 3268
@@ -4140,6 +4194,48 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 
 		// These aren't in the Netscape SSL3 draft, but openssl does
 		// allow you to use them with SSL3.
+		case 0x001E:
+			return QString("SSL_KRB5_WITH_DES_CBC_SHA");
+			break;
+		case 0x001F:
+			return QString("SSL_KRB5_WITH_3DES_EDE_CBC_SHA");
+			break;
+		case 0x0020:
+			return QString("SSL_KRB5_WITH_RC4_128_SHA");
+			break;
+		case 0x0021:
+			return QString("SSL_KRB5_WITH_IDEA_CBC_SHA");
+			break;
+		case 0x0022:
+			return QString("SSL_KRB5_WITH_DES_CBC_MD5");
+			break;
+		case 0x0023:
+			return QString("SSL_KRB5_WITH_3DES_EDE_CBC_MD5");
+			break;
+		case 0x0024:
+			return QString("SSL_KRB5_WITH_RC4_128_MD5");
+			break;
+		case 0x0025:
+			return QString("SSL_KRB5_WITH_IDEA_CBC_MD5");
+			break;
+		case 0x0026:
+			return QString("SSL_KRB5_EXPORT_WITH_DES_CBC_40_SHA");
+			break;
+		case 0x0027:
+			return QString("SSL_KRB5_EXPORT_WITH_RC2_CBC_40_SHA");
+			break;
+		case 0x0028:
+			return QString("SSL_KRB5_EXPORT_WITH_RC4_40_SHA");
+			break;
+		case 0x0029:
+			return QString("SSL_KRB5_EXPORT_WITH_DES_CBC_40_MD5");
+			break;
+		case 0x002A:
+			return QString("SSL_KRB5_EXPORT_WITH_RC2_CBC_40_MD5");
+			break;
+		case 0x002B:
+			return QString("SSL_KRB5_EXPORT_WITH_RC4_40_MD5");
+			break;
 		case 0x002F:
 			return QString("SSL_RSA_WITH_AES_128_CBC_SHA");
 			break;
