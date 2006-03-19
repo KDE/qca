@@ -499,6 +499,7 @@ EXAMPLE_PATH           = examples/aes-cmac \
 			 examples/hextest \
 			 examples/certtest \
 			 examples/ssltest \
+			 examples/sslservtest \
 			 examples/rsatest
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
