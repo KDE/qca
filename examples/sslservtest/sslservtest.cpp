@@ -159,21 +159,21 @@ public:
     void start()
     {
 	if(cert.isNull()) {
-	    printf("Error loading cert!\n");
+	    qDebug() << "Error loading cert!";
 	    QTimer::singleShot(0, this, SIGNAL(quit()));
 	    return;
 	}
 	if(privkey.isNull()) {
-	    printf("Error loading private key!\n");
+	    qDebug() << "Error loading private key!";
 	    QTimer::singleShot(0, this, SIGNAL(quit()));
 	    return;
 	}
 	if(false == server->listen(QHostAddress::Any, port)) {
-	    printf("Error binding to port %d!\n", port);
+	    qDebug() << "Error binding to port " << port;
 	    QTimer::singleShot(0, this, SIGNAL(quit()));
 	    return;
 	}
-	printf("Listening on port %d ...\n", port);
+	qDebug() << "Listening on port" << port;
     }
 
 signals:
@@ -202,25 +202,25 @@ private slots:
 	    QTcpSocket* tmp = server->nextPendingConnection();
 	    tmp->close();
 	    connect(tmp, SIGNAL(disconnected()), tmp, SLOT(deleteLater()));
-	    printf("throwing away extra connection\n");
+	    qDebug() << "throwing away extra connection";
 	    return;
 	}
 	mode = Handshaking;
 	sock = server->nextPendingConnection();
 	connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
-	connect(sock, SIGNAL(connectionClosed()), SLOT(sock_connectionClosed()));
+	connect(sock, SIGNAL(disconnected()), SLOT(sock_disconnected()));
 	connect(sock, SIGNAL(error(QAbstractSocket::SocketError)),
 		SLOT(sock_error(QAbstractSocket::SocketError)));
 	connect(sock, SIGNAL(bytesWritten(qint64)), SLOT(sock_bytesWritten(qint64)));
 
-	printf("Connection received!  Starting TLS handshake...\n");
+	qDebug() << "Connection received!  Starting TLS handshake.";
 	ssl->setCertificate(cert, privkey);
 	ssl->startServer();
     }
 
-    void sock_connectionClosed()
+    void sock_disconnected()
     {
-	printf("Connection closed.\n");
+	qDebug() << "Connection closed.";
     }
 
     void sock_bytesWritten(qint64 x)
@@ -231,7 +231,7 @@ private slots:
 	    
 	    if(bytesLeft == 0) {
 		mode = Closing;
-		printf("SSL shutdown\n");
+		qDebug() << "Data transfer complete - SSL shutting down";
 		ssl->close();
 	    }
 	}
@@ -244,7 +244,7 @@ private slots:
 
     void ssl_handshaken()
     {
-	printf("Successful SSL handshake.  Waiting for newline.\n");
+	qDebug() << "Successful SSL handshake.  Waiting for newline.";
 	layer.reset();
 	bytesLeft = 0;
 	sent = false;
@@ -260,7 +260,7 @@ private slots:
 	    "<body>this is only a test</body>\n"
 	    "</html>\n";
 	
-	printf("Sending test response...\n");
+	qDebug() << "Sending test response.";
 	sent = true;
 	layer.addPlain(b.size());
 	ssl->write(b);
@@ -275,7 +275,7 @@ private slots:
     
     void ssl_closed()
     {
-	printf("Closing.\n");
+	qDebug() << "Closing socket.";
 	sock->close();
 	mode = Idle;
     }
@@ -283,11 +283,11 @@ private slots:
     void ssl_error()
     {
 	if(ssl->errorCode() == QCA::TLS::ErrorHandshake) {
-	    printf("SSL Handshake Error!  Closing.\n");
+	    qDebug() << "SSL Handshake Error!  Closing.";
 	    sock->close();
 	}
 	else {
-	    printf("SSL Error!  Closing.\n");
+	    qDebug() << "SSL Error!  Closing.";
 	    sock->close();
 	}
 	mode = Idle;
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
     int port = argc > 1 ? QString(argv[1]).toInt() : 8000;
     
     if(!QCA::isSupported("tls")) {
-	printf("TLS not supported!\n");
+	qDebug() << "TLS not supported!";
 	return 1;
     }
     
