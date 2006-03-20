@@ -54,7 +54,17 @@ The code below shows how to create an SSL client
 
 /** \example sslservtest.cpp
 
-The code below shows how to create an SSL server
+The code below shows how to create an SSL server.
+
+Note that this server returns a self-signed certificate
+for "example.com", and that the certificate is expired.
+
+The design used here only allows for one connection 
+at a time. If you want to allow for more, you should
+probably create a "TlsConnection" object that agregates
+a QCA::TLS object and a QTcpSocket (plus a little bit of
+state information) that handles a single connection. Then
+just create a TlsConnection for each server connection.
 
 */
 
@@ -70,7 +80,7 @@ PEM encoded file collection.
 
 This examples shows how to implement a client side "provider".
 
-There are three important parts to this
+There are three important parts to this:
  - the class derived from QCA::Provider (in this example called
  "ClientSideProvider"), that generates the context class
  - one or more context classes (in this example only one, implementing
