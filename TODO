@@ -74,7 +74,6 @@
 * examples
   create example for BigInteger
   fix SASL examples (client and server)
-  fix SSL example
 
 * write plugin support
   qca-botan: implement
