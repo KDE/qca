@@ -22,7 +22,6 @@
 
 #include <QtCore>
 #include <QtNetwork>
-#include<q3serversocket.h>
 #include <QtCrypto>
 
 char pemdata_cert[] =
@@ -116,7 +115,7 @@ public:
 
 	    encoded -= i.encoded;
 	    plain += i.plain;
-	    it = list.remove(it);
+	    it = list.erase(it);
 	}
 	return plain;
     }
@@ -125,28 +124,25 @@ public:
     QList<Item> list;
 };
 
-class SecureServerTest : public Q3ServerSocket
+class SecureServer : public QObject
 {
     Q_OBJECT
+
 public:
     enum { Idle, Handshaking, Active, Closing };
     
-    SecureServerTest(int _port) : Q3ServerSocket(_port), port(_port)
+    SecureServer(quint16 _port) : port(_port)
     {
-	sock = new QTcpSocket;
-	connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
-	connect(sock, SIGNAL(connectionClosed()), SLOT(sock_connectionClosed()));
-	connect(sock, SIGNAL(error(QAbstractSocket::SocketError)),
-		SLOT(sock_error(QAbstractSocket::SocketError)));
-	connect(sock, SIGNAL(bytesWritten(qint64)), SLOT(sock_bytesWritten(qint64)));
-	
+	server = new QTcpServer;
+	connect( server, SIGNAL(newConnection()), SLOT(server_handleConnection()) );
+
 	ssl = new QCA::TLS;
 	connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
 	connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 	connect(ssl, SIGNAL(readyReadOutgoing()), SLOT(ssl_readyReadOutgoing()));
 	connect(ssl, SIGNAL(closed()), SLOT(ssl_closed()));
 	connect(ssl, SIGNAL(error()), SLOT(ssl_error()));
-	
+
 	cert = QCA::Certificate::fromPEM(pemdata_cert);
 	QCA::PrivateKey key = QCA::PrivateKey::fromPEM(pemdata_privkey);
 	privkey = key.toRSA();
@@ -154,10 +150,10 @@ public:
 	mode = Idle;
     }
 
-    ~SecureServerTest()
+    ~SecureServer()
     {
 	delete ssl;
-	delete sock;
+	delete server;
     }
 
     void start()
@@ -172,28 +168,12 @@ public:
 	    QTimer::singleShot(0, this, SIGNAL(quit()));
 	    return;
 	}
-	if(!ok()) {
+	if(false == server->listen(QHostAddress::Any, port)) {
 	    printf("Error binding to port %d!\n", port);
 	    QTimer::singleShot(0, this, SIGNAL(quit()));
 	    return;
 	}
 	printf("Listening on port %d ...\n", port);
-    }
-
-    void newConnection(int s)
-    {
-	// Note: only 1 connection supported at a time in this example!
-	if(sock->isOpen()) {
-	    QTcpSocket tmp;
-	    tmp.setSocket(s);
-	    printf("throwing away extra connection\n");
-	    return;
-	}
-	mode = Handshaking;
-	sock->setSocket(s);
-	printf("Connection received!  Starting TLS handshake...\n");
-	ssl->setCertificate(cert, privkey);
-	ssl->startServer();
     }
 
 signals:
@@ -202,11 +182,40 @@ signals:
 private slots:
     void sock_readyRead()
     {
-	QByteArray buf(sock->bytesAvailable());
-	int num = sock->readBlock(buf.data(), buf.size());
-	if(num < (int)buf.size())
+	QByteArray buf(sock->bytesAvailable(), 0x00);
+
+	int num = sock->read(buf.data(), buf.size());
+
+	if ( -1 == num )
+	    qDebug() << "Error reading data from socket";
+
+	if (num < buf.size() )
 	    buf.resize(num);
+
 	ssl->writeIncoming(buf);
+    }
+
+    void server_handleConnection()
+    {
+	// Note: only 1 connection supported at a time in this example!
+	if(mode != Idle) {
+	    QTcpSocket* tmp = server->nextPendingConnection();
+	    tmp->close();
+	    connect(tmp, SIGNAL(disconnected()), tmp, SLOT(deleteLater()));
+	    printf("throwing away extra connection\n");
+	    return;
+	}
+	mode = Handshaking;
+	sock = server->nextPendingConnection();
+	connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
+	connect(sock, SIGNAL(connectionClosed()), SLOT(sock_connectionClosed()));
+	connect(sock, SIGNAL(error(QAbstractSocket::SocketError)),
+		SLOT(sock_error(QAbstractSocket::SocketError)));
+	connect(sock, SIGNAL(bytesWritten(qint64)), SLOT(sock_bytesWritten(qint64)));
+
+	printf("Connection received!  Starting TLS handshake...\n");
+	ssl->setCertificate(cert, privkey);
+	ssl->startServer();
     }
 
     void sock_connectionClosed()
@@ -259,15 +268,16 @@ private slots:
 
     void ssl_readyReadOutgoing()
     {
-	QByteArray a = ssl->readOutgoing();
-	layer.specifyEncoded(a.size(), ssl->bytesOutgoingAvailable());
-	sock->writeBlock(a.data(), a.size());
+	QByteArray outgoingData = ssl->readOutgoing();
+	layer.specifyEncoded( outgoingData.size(), ssl->bytesOutgoingAvailable());
+	sock->write( outgoingData );
     }
     
     void ssl_closed()
     {
 	printf("Closing.\n");
 	sock->close();
+	mode = Idle;
     }
     
     void ssl_error()
@@ -280,10 +290,12 @@ private slots:
 	    printf("SSL Error!  Closing.\n");
 	    sock->close();
 	}
+	mode = Idle;
     }
 
 private:
-    int port;
+    quint16 port;
+    QTcpServer *server;
     QTcpSocket *sock;
     QCA::TLS *ssl;
     QCA::Certificate cert;
@@ -309,11 +321,11 @@ int main(int argc, char **argv)
 	return 1;
     }
     
-    SecureServerTest *s = new SecureServerTest(port);
-    QObject::connect(s, SIGNAL(quit()), &app, SLOT(quit()));
-    s->start();
+    SecureServer *server = new SecureServer(port);
+    QObject::connect(server, SIGNAL(quit()), &app, SLOT(quit()));
+    server->start();
     app.exec();
-    delete s;
+    delete server;
     
     return 0;
 }
