@@ -367,6 +367,8 @@ public:
 	virtual KeyStoreEntry::Type type() const = 0;
 	virtual QString id() const = 0;
 	virtual QString name() const = 0;
+	virtual QString storeId() const = 0;
+	virtual QString storeName() const = 0;
 
 	virtual KeyBundle keyBundle() const;
 	virtual Certificate certificate() const;
@@ -381,7 +383,9 @@ class QCA_EXPORT KeyStoreListContext : public QObject, public Provider::Context
 public:
 	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
 
+	// enable/disable update events
 	virtual void start() = 0;
+	virtual void stop() = 0;
 
 	// returns a list of integer context ids (for keystores)
 	virtual QList<int> keyStores() const = 0;
@@ -395,8 +399,15 @@ public:
 
 	virtual QList<KeyStoreEntry::Type> entryTypes(int id) const = 0;
 
-	// caller must delete
+	// caller must delete any returned KeyStoreEntryContexts
+
 	virtual QList<KeyStoreEntryContext*> entryList(int id) const = 0;
+
+	// return 0 if no such entry
+	virtual KeyStoreEntryContext *entry(int id, const QString &entryId) const;
+
+	// return 0 if the provider doesn't handle this type of storeId
+	virtual KeyStoreEntryContext *entryPassive(const QString &storeId, const QString &entryId) const;
 
 	virtual bool writeEntry(int id, const KeyBundle &kb);
 	virtual bool writeEntry(int id, const Certificate &cert);

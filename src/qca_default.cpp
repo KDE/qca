@@ -712,18 +712,22 @@ class DefaultKeyStoreEntry : public KeyStoreEntryContext
 {
 public:
 	KeyStoreEntry::Type item_type;
-	QString item_id;
+	QString item_id, _storeId, _storeName;
 	Certificate _cert;
 	CRL _crl;
 
-	DefaultKeyStoreEntry(const Certificate &cert, Provider *p) : KeyStoreEntryContext(p)
+	DefaultKeyStoreEntry(const Certificate &cert, const QString &storeId, const QString &storeName, Provider *p) : KeyStoreEntryContext(p)
 	{
+		_storeId = storeId;
+		_storeName = storeName;
 		_cert = cert;
 		item_type = KeyStoreEntry::TypeCertificate;
 	}
 
-	DefaultKeyStoreEntry(const CRL &crl, Provider *p) : KeyStoreEntryContext(p)
+	DefaultKeyStoreEntry(const CRL &crl, const QString &storeId, const QString &storeName, Provider *p) : KeyStoreEntryContext(p)
 	{
+		_storeId = storeId;
+		_storeName = storeName;
 		_crl = crl;
 		item_type = KeyStoreEntry::TypeCRL;
 	}
@@ -746,6 +750,11 @@ public:
 		return item_type;
 	}
 
+	virtual QString id() const
+	{
+		return item_id;
+	}
+
 	virtual QString name() const
 	{
 		// use the common name, else orgname
@@ -760,9 +769,14 @@ public:
 			return _crl.issuerInfo().value(CommonName);
 	}
 
-	virtual QString id() const
+	virtual QString storeId() const
 	{
-		return item_id;
+		return _storeId;
+	}
+
+	virtual QString storeName() const
+	{
+		return _storeName;
 	}
 
 	virtual Certificate certificate() const
@@ -802,6 +816,11 @@ public:
 	virtual void start()
 	{
 		QTimer::singleShot(0, this, SLOT(do_ready()));
+	}
+
+	virtual void stop()
+	{
+		// no need to do anything
 	}
 
 	virtual QList<int> keyStores() const
@@ -848,13 +867,13 @@ public:
 		int n;
 		for(n = 0; n < certs.count(); ++n)
 		{
-			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(certs[n], provider());
+			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(certs[n], storeId(0), name(0), provider());
 			c->item_id = QString::number(n);
 			out.append(c);
 		}
 		for(n = 0; n < crls.count(); ++n)
 		{
-			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(crls[n], provider());
+			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(crls[n], storeId(0), name(0), provider());
 			out.append(c);
 		}
 

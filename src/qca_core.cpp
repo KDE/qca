@@ -596,6 +596,29 @@ bool KeyStoreListContext::isReadOnly(int) const
 	return true;
 }
 
+KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId) const
+{
+	KeyStoreEntryContext *out = 0;
+	QList<KeyStoreEntryContext*> list = entryList(id);
+	for(int n = 0; n < list.count(); ++n)
+	{
+		if(list[n]->id() == entryId)
+		{
+			out = list.takeAt(n);
+			break;
+		}
+	}
+	qDeleteAll(list);
+	return out;
+}
+
+KeyStoreEntryContext *KeyStoreListContext::entryPassive(const QString &storeId, const QString &entryId) const
+{
+	Q_UNUSED(storeId);
+	Q_UNUSED(entryId);
+	return 0;
+}
+
 bool KeyStoreListContext::writeEntry(int, const KeyBundle &)
 {
 	return false;
