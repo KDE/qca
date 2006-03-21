@@ -1,6 +1,7 @@
 QT -= gui
 CONFIG += console
 CONFIG -= app_bundle
+CONFIG += debug
 DESTDIR = ../../bin
 
 INCLUDEPATH += ../../include/QtCrypto
