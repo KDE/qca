@@ -56,7 +56,12 @@ public:
 		// fall back to bundled
 		if(path.isEmpty())
 		{
-			path = "$$DATADIR/qca/certs/rootcerts.pem";
+			// --prefix=$pwd ?
+			if(QFile::exists(conf->getenv("PREFIX") + "/certs/rootcerts.pem"))
+				path = "$$PREFIX/certs/rootcerts.pem";
+			else
+				path = "$$DATADIR/qca/certs/rootcerts.pem";
+
 			QString extra =
 			"sharedfiles.path = $$DATADIR/qca\n"
 			"sharedfiles.files = certs\n"
