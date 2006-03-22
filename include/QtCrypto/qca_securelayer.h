@@ -840,15 +840,7 @@ namespace QCA
 		void continueAfterAuthCheck();
 
 		// reimplemented
-
-		/**
-		   test how many (if any) bytes are available
-		*/
 		virtual int bytesAvailable() const;
-
-		/**
-		   test how many bytes (if any) are available
-		*/
 		virtual int bytesOutgoingAvailable() const;
 
 		virtual void write(const QByteArray &a);
@@ -858,11 +850,34 @@ namespace QCA
 		virtual QByteArray readOutgoing(int *plainBytes = 0);
 
 	signals:
-		void clientStarted(bool clientInit, const QByteArray &clientInitData); // (client)
-		void serverStarted(); // (server)
+		/**
+		   This signal is emitted when the client has been
+		   successfully started
+		*/
+		void clientStarted(bool clientInit, const QByteArray &clientInitData);
+
+		/**
+		   This signal is emitted after the server has been
+		   successfully started
+		*/
+		void serverStarted();
 		void nextStep(const QByteArray &stepData);
-		void needParams(const Params &params); // (client)
-		void authCheck(const QString &user, const QString &authzid); // (server)
+
+		/**
+		   This signal is emitted when the client needs
+		   additional parameters
+		*/
+		void needParams(const Params &params);
+
+		/**
+		   This signal is emitted when the server needs to
+		   perform the authentication check
+		*/
+		void authCheck(const QString &user, const QString &authzid);
+
+		/**
+		   This signal is emitted when authentication is complete.
+		*/
 		void authenticated();
 
 	private:
