@@ -47,6 +47,7 @@ PUBLIC_HEADERS += \
 	$$QCA_INC/qca_securelayer.h \
 	$$QCA_INC/qca_securemessage.h \
 	$$QCA_INC/qcaprovider.h \
+	$$QCA_INC/qpipe.h
 
 HEADERS += $$PRIVATE_HEADERS $$PUBLIC_HEADERS
 
@@ -65,7 +66,8 @@ SOURCES += \
 	$$QCA_CPP/qca_keystore.cpp \
 	$$QCA_CPP/qca_securelayer.cpp \
 	$$QCA_CPP/qca_securemessage.cpp \
-	$$QCA_CPP/qca_default.cpp
+	$$QCA_CPP/qca_default.cpp \
+	$$QCA_CPP/support/qpipe.cpp
 
 unix:!mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_flatfile.cpp

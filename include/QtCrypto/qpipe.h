@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2006  Justin Karneges <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,8 @@
 
 #include <QtCore>
 
+#define QPIPE_SECURE
+
 #ifdef QPIPE_SECURE
 # include <QtCrypto>
 #endif
@@ -36,10 +38,10 @@ typedef int Q_PIPE_ID;
 #define INVALID_Q_PIPE_ID -1
 #endif
 
-namespace gpgQCAPlugin {
+namespace QCA {
 
 // unbuffered direct pipe
-class QPipeDevice : public QObject
+class QCA_EXPORT QPipeDevice : public QObject
 {
 	Q_OBJECT
 public:
@@ -74,7 +76,7 @@ private:
 };
 
 // buffered higher-level pipe.  use this one.
-class QPipeEnd : public QObject
+class QCA_EXPORT QPipeEnd : public QObject
 {
 	Q_OBJECT
 public:
@@ -119,7 +121,7 @@ signals:
 	void readyRead();
 	void bytesWritten(int bytes);
 	void closed();
-	void error(Error e);
+	void error(QCA::QPipeEnd::Error e);
 
 private:
 	class Private;
@@ -128,7 +130,7 @@ private:
 };
 
 // creates a full pipe (two pipe ends)
-class QPipe
+class QCA_EXPORT QPipe
 {
 public:
 	QPipe(QObject *parent = 0);

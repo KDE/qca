@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2006  Justin Karneges <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,7 @@
 #define PIPEEND_READBUF     16384
 #define PIPEEND_READBUF_SEC 1024
 
-namespace gpgQCAPlugin {
+namespace QCA {
 
 #ifdef Q_OS_UNIX
 // adapted from qt
@@ -51,6 +51,7 @@ static void ignore_sigpipe()
 }
 #endif
 
+#ifdef Q_OS_UNIX
 static bool setBlocking(Q_PIPE_ID pipe, bool b)
 {
 #ifdef Q_OS_WIN
@@ -72,6 +73,7 @@ static bool setBlocking(Q_PIPE_ID pipe, bool b)
 	return true;
 #endif
 }
+#endif
 
 // returns number of bytes available
 static int pipe_read_avail(Q_PIPE_ID pipe)
@@ -288,7 +290,101 @@ private:
 		}
 		return 1;
 	}
+};
 
+//----------------------------------------------------------------------------
+// QPipeReader
+//----------------------------------------------------------------------------
+class QPipeReader : public QThread
+{
+	Q_OBJECT
+public:
+	Q_PIPE_ID pipe;
+	QMutex m;
+	QWaitCondition w;
+	bool do_quit, active;
+
+	QPipeReader(Q_PIPE_ID id, QObject *parent = 0) : QThread(parent)
+	{
+		do_quit = false;
+		active = true;
+		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, FALSE, DUPLICATE_SAME_ACCESS);
+	}
+
+	~QPipeReader()
+	{
+		if(isRunning())
+		{
+			m.lock();
+			do_quit = true;
+			w.wakeOne();
+			m.unlock();
+			if(!wait(100))
+				terminate();
+		}
+		CloseHandle(pipe);
+	}
+
+	void resume()
+	{
+		QMutexLocker locker(&m);
+		active = true;
+		w.wakeOne();
+	}
+
+protected:
+	virtual void run()
+	{
+		while(1)
+		{
+			m.lock();
+
+			while(!active && !do_quit)
+				w.wait(&m);
+
+			if(do_quit)
+			{
+				m.unlock();
+				break;
+			}
+
+			m.unlock();
+
+			while(1)
+			{
+				unsigned char c;
+				bool done;
+				int ret = pipe_read(pipe, (char *)&c, 1, &done);
+				if(done || ret != 0) // eof, error, or data?
+				{
+					int result;
+
+					if(done) // we got EOF?
+						result = -1;
+					else if(ret == -1) // we got an error?
+						result = -2;
+					else if(ret >= 1) // we got some data??  queue it
+						result = c;
+					else // no data?  not sure if this can happen
+						continue;
+
+					m.lock();
+					active = false;
+					m.unlock();
+
+					emit canRead(result);
+					break;
+				}
+			}
+		}
+	}
+
+signals:
+	// result values:
+	//  >=  0 : readAhead
+	//   = -1 : atEnd
+	//   = -2 : atError
+	void canRead(int result);
 };
 #endif
 
@@ -311,6 +407,7 @@ public:
 	int readAhead;
 	QTimer *readTimer;
 	QPipeWriter *pipeWriter;
+	QPipeReader *pipeReader;
 #endif
 #ifdef Q_OS_UNIX
 	QSocketNotifier *sn_read, *sn_write;
@@ -321,6 +418,7 @@ public:
 #ifdef Q_OS_WIN
 		readTimer = 0;
 		pipeWriter = 0;
+		pipeReader = 0;
 #endif
 #ifdef Q_OS_UNIX
 		sn_read = 0;
@@ -344,6 +442,8 @@ public:
 		readTimer = 0;
 		delete pipeWriter;
 		pipeWriter = 0;
+		delete pipeReader;
+		pipeReader = 0;
 #endif
 #ifdef Q_OS_UNIX
 		delete sn_read;
@@ -382,14 +482,25 @@ public:
 
 		if(type == QPipeDevice::Read)
 		{
-			setBlocking(pipe, false);
 #ifdef Q_OS_WIN
+			// pipe reader
+			pipeReader = new QPipeReader(pipe, this);
+			connect(pipeReader, SIGNAL(canRead(int)), this, SLOT(pr_canRead(int)));
+			pipeReader->start();
+
 			// polling timer
 			readTimer = new QTimer(this);
 			connect(readTimer, SIGNAL(timeout()), SLOT(t_timeout()));
-			readTimer->start(100);
+
+			// NOTE: now that we have pipeReader, this no longer
+			//   polls for data.  it only does delayed
+			//   singleshot notifications.
+			readTimer->setSingleShot(true);
+			//readTimer->start(100);
 #endif
 #ifdef Q_OS_UNIX
+			setBlocking(pipe, false);
+
 			// socket notifier
 			sn_read = new QSocketNotifier(pipe, QSocketNotifier::Read, this);
 			connect(sn_read, SIGNAL(activated(int)), SLOT(sn_read_activated(int)));
@@ -427,8 +538,9 @@ public slots:
 			return;
 		}
 
+		// NOTE: disabling this since we now have pipeReader
 		// is there data available for reading?  if so, signal.
-		int bytes = pipe_read_avail(pipe);
+		/*int bytes = pipe_read_avail(pipe);
 		if(bytes > 0)
 		{
 			blockReadNotify = true;
@@ -452,7 +564,7 @@ public slots:
 			blockReadNotify = true;
 			emit q->notify();
 			return;
-		}
+		}*/
 #endif
 	}
 
@@ -461,6 +573,22 @@ public slots:
 #ifdef Q_OS_WIN
 		canWrite = true;
 		emit q->notify();
+#endif
+	}
+
+	void pr_canRead(int result)
+	{
+#ifdef Q_OS_WIN
+		blockReadNotify = true;
+		if(result == -1)
+			atEnd = true;
+		else if(result == -2)
+			atError = true;
+		else
+			readAhead = result;
+		emit q->notify();
+#else
+		Q_UNUSED(result);
 #endif
 	}
 
@@ -578,6 +706,11 @@ int QPipeDevice::read(char *data, int maxsize)
 	if(maxsize < 1)
 		return -1;
 
+#ifdef Q_OS_WIN
+	// for resuming the pipeReader thread
+	bool wasBlocked = d->blockReadNotify;
+#endif
+
 	d->blockReadNotify = false;
 
 #ifdef Q_OS_WIN
@@ -607,7 +740,11 @@ int QPipeDevice::read(char *data, int maxsize)
 
 		// readAhead was enough data for the caller?
 		if(size == 0)
+		{
+			if(wasBlocked)
+				d->pipeReader->resume();
 			return offset;
+		}
 	}
 
 	// read from the pipe now
@@ -623,6 +760,10 @@ int QPipeDevice::read(char *data, int maxsize)
 				d->atEnd = true;
 			else
 				d->atError = true;
+
+			// NOTE: now that readTimer is a singleshot, we have
+			//   to start it for forceNotify to work
+			d->readTimer->start();
 		}
 		// otherwise, bail
 		else
@@ -636,6 +777,10 @@ int QPipeDevice::read(char *data, int maxsize)
 	}
 	else
 		offset += ret;
+
+	// pipe still active?  resume the pipeReader
+	if(wasBlocked && !d->atEnd && !d->atError)
+		d->pipeReader->resume();
 
 	// no data means error
 	if(offset == 0)
@@ -967,20 +1112,21 @@ public slots:
 			}
 		}
 
-		if(!sigs)
-			return;
-
 		if(ret < 1)
 		{
 			reset(ResetSession);
-			if(ret == 0)
-				emit q->error(QPipeEnd::ErrorEOF);
-			else
-				emit q->error(QPipeEnd::ErrorBroken);
+			if(sigs)
+			{
+				if(ret == 0)
+					emit q->error(QPipeEnd::ErrorEOF);
+				else
+					emit q->error(QPipeEnd::ErrorBroken);
+			}
 			return;
 		}
 
-		emit q->readyRead();
+		if(sigs)
+			emit q->readyRead();
 	}
 
 	void doWrite()
