@@ -114,6 +114,8 @@ namespace QCA
 	};
 
 	/**
+	   \class DLGroup qca_publickey.h QtCrypto
+
 	   A discrete logarithm group
 	*/
 	class QCA_EXPORT DLGroup
@@ -185,6 +187,8 @@ namespace QCA
 	};
 
 	/**
+	   \class PKey qca_publickey.h QtCrypto
+
 	   General superclass for public (PublicKey) and private (PrivateKey) keys
 	   used with asymmetric encryption techniques.
 	*/
@@ -433,6 +437,8 @@ namespace QCA
 	};
 
 	/**
+	   \class PublicKey qca_publickey.h QtCrypto
+
 	   Generic public key
 	*/
 	class QCA_EXPORT PublicKey : public PKey
@@ -674,6 +680,8 @@ namespace QCA
 	};
 
 	/**
+	   \class PrivateKey qca_publickey.h QtCrypto
+
 	   Generic private key
 	*/
 	class QCA_EXPORT PrivateKey : public PKey
@@ -868,6 +876,8 @@ namespace QCA
 	};
 
 	/**
+	   \class KeyGenerator qca_publickey.h QtCrypto
+
 	   Class for generating asymmetric key pairs
 
 	   This class is used for generating asymmetric keys (public/private key pairs)
@@ -992,6 +1002,8 @@ namespace QCA
 	};
 
 	/**
+	   \class RSAPublicKey qca_publickey.h QtCrypto
+
 	   RSA Public Key
 	*/
 	class QCA_EXPORT RSAPublicKey : public PublicKey
@@ -1035,6 +1047,8 @@ namespace QCA
 	};
 
 	/**
+	   \class RSAPrivateKey qca_publickey.h QtCrypto
+
 	   RSA Private Key
 	*/
 	class QCA_EXPORT RSAPrivateKey : public PrivateKey
@@ -1089,6 +1103,8 @@ namespace QCA
 	};
 
 	/**
+	   \class DSAPublicKey qca_publickey.h QtCrypto
+
 	   Digital Signature %Algorithm Public Key
 	*/
 	class QCA_EXPORT DSAPublicKey : public PublicKey
@@ -1127,6 +1143,8 @@ namespace QCA
 	};
 
 	/**
+	   \class DSAPrivateKey qca_publickey.h QtCrypto
+
 	   Digital Signature %Algorithm Private Key
 	*/
 	class QCA_EXPORT DSAPrivateKey : public PrivateKey
@@ -1164,6 +1182,8 @@ namespace QCA
 	};
 
 	/**
+	   \class DHPublicKey qca_publickey.h QtCrypto
+
 	   Diffie-Hellman Public Key
 	*/
 	class QCA_EXPORT DHPublicKey : public PublicKey
@@ -1202,6 +1222,8 @@ namespace QCA
 	};
 
 	/**
+	   \class DHPrivateKey qca_publickey.h QtCrypto
+
 	   Diffie-Hellman Private Key
 	*/
 	class QCA_EXPORT DHPrivateKey : public PrivateKey

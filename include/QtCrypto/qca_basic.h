@@ -1032,7 +1032,7 @@ namespace QCA
 	/**
 	 * \class BlowFish qca_basic.h QtCrypto
 	 *
-	 * Bruce Schneier's BlowFish %Cipher
+	 * Bruce Schneier's %BlowFish %Cipher
 	 *
 	 */
 	class QCA_EXPORT BlowFish : public Cipher

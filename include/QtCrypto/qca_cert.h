@@ -846,7 +846,7 @@ namespace QCA
 	/**
 	   \class CRL qca_cert.h QtCrypto
 
-	   Certificate Revocation List
+	   %Certificate Revocation List
 
 	   A %CRL is a list of certificates that are special in some
 	   way. The normal reason for including a certificate on a %CRL
@@ -1180,9 +1180,11 @@ namespace QCA
 	};
 
 	/**
+	   \class KeyBundle qca_cert.h QtCrypto
+
 	   Public/private key pair
 
-	   This holds a certificate chain and an associated private key
+	   This holds a certificate chain and an associated private key.
 	*/
 	class QCA_EXPORT KeyBundle
 	{
@@ -1298,6 +1300,8 @@ namespace QCA
 
 
 	/**
+	   \class PGPKey qca_cert.h QtCrypto
+
 	   Pretty Good Privacy key 
 
 	   This holds either a reference to an item in a real PGP keyring,

@@ -532,6 +532,10 @@ namespace QCA
 		virtual ~Provider();
 
 		/**
+		   \class Context qca_core.h QtCrypto
+
+		   \internal
+
 		   Internal context class used for the plugin
 		*/
 		class QCA_EXPORT Context
@@ -773,7 +777,10 @@ namespace QCA
 	/**
 	   \class Algorithm qca_core.h QtCrypto
 
-	   General superclass for an algorithm
+	   General superclass for an algorithm. 
+
+	   This is a fairly abstract class, mainly used for
+	   implementing the backend "provider" interface.
 	*/
 	class QCA_EXPORT Algorithm
 	{
@@ -795,7 +802,7 @@ namespace QCA
 		Algorithm & operator=(const Algorithm &from);
 
 		/**
-		   The type of algorithm
+		   The name of the algorithm type.
 		*/
 		QString type() const;
 
@@ -810,23 +817,31 @@ namespace QCA
 		// Note: The next five functions are not public!
 
 		/**
-		   (NOT PUBLIC) The context associated with this algorithm
+		   \internal
+
+		   The context associated with this algorithm
 		*/
 		Provider::Context *context();
 
 		/**
-		   (NOT PUBLIC) The context associated with this algorithm
+		   \internal
+
+		   The context associated with this algorithm
 		*/
 		const Provider::Context *context() const;
 
 		/**
-		   (NOT PUBLIC) Set the Provider for this algorithm
+		   \internal
+
+		   Set the Provider for this algorithm
 
 		   \param c the context for the Provider to use
 		*/
 		void change(Provider::Context *c);
 
 		/**
+		   \internal
+
 		   \overload
 
 		   \param type the name of the algorithm to use
@@ -835,7 +850,9 @@ namespace QCA
 		void change(const QString &type, const QString &provider);
 
 		/**
-		   (NOT PUBLIC) Take the Provider from this algorithm
+		   \internal
+
+		   Take the Provider from this algorithm
 		*/
 		Provider::Context *takeContext();
 

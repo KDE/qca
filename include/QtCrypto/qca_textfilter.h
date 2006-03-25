@@ -203,7 +203,7 @@ namespace QCA
 	/**
 	   \class Base64 qca_textfilter.h QtCrypto
 
-	   Base64 encoding / decoding
+	   %Base64 encoding / decoding
 	*/
 	class QCA_EXPORT Base64 : public TextFilter
 	{

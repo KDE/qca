@@ -34,6 +34,8 @@ namespace QCA
 	class SecureMessageSystem;
 
 	/**
+	   \class SecureMessageKey qca_securemessage.h QtCrypto
+
 	   Key for SecureMessage system
 	*/
 	class QCA_EXPORT SecureMessageKey
@@ -152,6 +154,8 @@ namespace QCA
 	typedef QList<SecureMessageKey> SecureMessageKeyList;
 
 	/**
+	   \class SecureMessageSignature qca_securemessage.h QtCrypto
+
 	   SecureMessage signature
 	*/
 	class QCA_EXPORT SecureMessageSignature

@@ -32,6 +32,8 @@ namespace QCA
 	class KeyStoreManagerPrivate;
 
 	/**
+	   \class KeyStoreEntry qca_keystore.h QtCrypto
+
 	   Single entry in a KeyStore
 
 	   This is a container for any kind of object in a KeyStore
@@ -127,14 +129,9 @@ namespace QCA
 		Private *d;
 	};
 
-	// notes
-	//  - there can be multiple KeyStore objects referring to the same id
-	//  - when a KeyStore is constructed, it refers to a given id (deviceId)
-	//    and internal contextId.  if the context goes away, the KeyStore
-	//    becomes invalid (isValid == false), and unavailable() is emitted.
-	//    even if the device later reappears, the KeyStore remains invalid.
-	//    a new KeyStore will have to be created to use the device again.
 	/**
+	   \class KeyStore qca_keystore.h QtCrypto
+
 	   General purpose key storage object
 
 	   Examples of use of this are:
@@ -143,6 +140,15 @@ namespace QCA
 	    -  apple keychain:       User Identities
 	    -  smartcard:            SmartCard Identities
 	    -  gnupg:                PGPKeyring Identities,PGPPublicKeys
+
+	    \note
+	    - there can be multiple KeyStore objects referring to the same id
+	    - when a KeyStore is constructed, it refers to a given id (deviceId)
+	    and internal contextId.  if the context goes away, the KeyStore
+	    becomes invalid (isValid() == false), and unavailable() is emitted.
+	    even if the device later reappears, the KeyStore remains invalid.
+	    a new KeyStore will have to be created to use the device again.
+
 	*/
 	class QCA_EXPORT KeyStore : public QObject, public Algorithm
 	{
@@ -301,8 +307,9 @@ namespace QCA
 		void invalidate();
 	};
 
-	// use this to get access to keystores and monitor for their activity
 	/**
+	   \class KeyStoreManager qca_keystore.h QtCrypto
+
 	   Access keystores, and monitor keystores for changes
 	*/
 	class QCA_EXPORT KeyStoreManager : public QObject

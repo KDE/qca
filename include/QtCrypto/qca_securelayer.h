@@ -57,6 +57,8 @@ namespace QCA
 	};
 
 	/**
+	   \class SecureLayer qca_securelayer.h QtCrypto
+
 	   Abstract interface to a security layer
 
 	   SecureLayer is normally used between an application and a
@@ -198,6 +200,8 @@ namespace QCA
 	};
 
 	/**
+	   \class TLS qca_securelayer.h QtCrypto
+
 	   Transport Layer Security / Secure Socket Layer 
 	*/
 	class QCA_EXPORT TLS : public SecureLayer, public Algorithm
@@ -531,6 +535,8 @@ namespace QCA
 	};
 
 	/**
+	   \class SASL qca_securelayer.h QtCrypto
+
 	   Simple Authentication and Security Layer protocol implementation
 
 	   This class implements the Simple Authenication and Security Layer protocol,
@@ -615,6 +621,8 @@ namespace QCA
 		};
 
 		/**
+		   \class Params qca_securelayer.h QtCrypto
+
 		   Parameter status for the SASL authentication
 
 		   This is used to track which parameters are currently held
