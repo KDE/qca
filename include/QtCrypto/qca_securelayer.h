@@ -861,6 +861,14 @@ namespace QCA
 		   successfully started
 		*/
 		void serverStarted();
+
+		/**
+		   This signal is emitted when there is data required
+		   to be sent over the network to complete the next
+		   step in the authentication process.
+
+		   \param stepData the data to send over the network
+		*/
 		void nextStep(const QByteArray &stepData);
 
 		/**
