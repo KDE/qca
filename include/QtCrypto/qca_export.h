@@ -21,9 +21,11 @@
 /**
    \file qca_export.h
 
-   Preprocessor magic to allow export of library symbols.
+   Preprocessor magic to allow export of library symbols. 
 
-   \note You should not use this header directly from an
+   This is strictly internal.
+
+   \note You should not include this header directly from an
    application. You should just use <tt> \#include \<QtCrypto>
    </tt> instead.
 */
@@ -33,13 +35,6 @@
 
 #include <QtGlobal>
 
-/**
-   \def QCA_EXPORT 
-
-   \internal
-
-   Makes this QCA symbol visible.
-*/
 #ifdef Q_OS_WIN32
 # ifndef QCA_STATIC
 #  ifdef QCA_MAKEDLL
@@ -51,24 +46,6 @@
 #endif
 #ifndef QCA_EXPORT
 # define QCA_EXPORT
-#endif
-
-/**
-   \def QCA_PLUGIN_EXPORT 
-
-   \internal
-
-   Makes this symbol from a plugin visible.
-*/
-#ifdef Q_OS_WIN32
-# ifdef QCA_PLUGIN_DLL
-#  define QCA_PLUGIN_EXPORT extern "C" __declspec(dllexport)
-# else
-#  define QCA_PLUGIN_EXPORT extern "C" __declspec(dllimport)
-# endif
-#endif
-#ifndef QCA_PLUGIN_EXPORT
-# define QCA_PLUGIN_EXPORT extern "C"
 #endif
 
 #endif
