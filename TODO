@@ -1,14 +1,9 @@
-* Additional unit tests
-* Convert unit tests to QtTestLib
 * update the README
 * special thanks to Jack Lloyd
 * mac universal binary support?
 * be sure to turn ALL .pro files (examples, everything) on release mode
 
 * API documentation
-  clean up Algorithm
-  clean up Filter
-  document all the stuff in qca_securelayer.h
   document all the stuff in qca_securemessage.h
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
@@ -73,7 +68,19 @@
 
 * examples
   create example for BigInteger
+  create example for OpenPGP
+  create example for CMS
   fix SASL examples (client and server)
+
+* Additional unit tests (using QTestLib):
+  - OpenPGP
+  - CMS
+  - TLS ?
+  - SASL ?
+  - QPipe
+  - FileWatch / DirWatch
+  - Complete the pkits tests
+  - Convert over the remaining non-QTestLib tests (RSA/DSA + KeyLength)
 
 * write plugin support
   qca-botan: implement
