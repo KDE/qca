@@ -547,9 +547,9 @@ namespace QCA
 		/**
 		   \class Context qca_core.h QtCrypto
 
-		   \internal
-
 		   Internal context class used for the plugin
+
+		   \internal
 		*/
 		class QCA_EXPORT Context
 		{

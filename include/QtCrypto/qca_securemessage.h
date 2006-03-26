@@ -238,21 +238,32 @@ namespace QCA
 	*/
 	typedef QList<SecureMessageSignature> SecureMessageSignatureList;
 
+	/**
+	   \class SecureMessage qca_securemessage.h QtCrypto
+
+	   Superclass for secure messages
+	*/
 	class QCA_EXPORT SecureMessage : public QObject, public Algorithm
 	{
 		Q_OBJECT
 	public:
+		/**
+		   The type of secure message
+		*/
 		enum Type
 		{
-			OpenPGP,
-			CMS
+			OpenPGP, ///< a Pretty Good Privacy message
+			CMS      ///< a Cryptographic Message Syntax message
 		};
 
+		/**
+		   The type of message signature
+		*/
 		enum SignMode
 		{
-			Message,
-			Clearsign,
-			Detached
+			Message,   
+			Clearsign,  ///< the message is clear signed
+			Detached    ///< the signature is detached
 		};
 
 		/**
@@ -280,9 +291,22 @@ namespace QCA
 			ErrorUnknown           ///< other error
 		};
 
+		/**
+		   Create a new secure message
+		   
+		   This constructor uses an existing
+		   SecureMessageSystem object (for example, an OpenPGP
+		   or CMS object) to generate a specific kind of
+		   secure message.
+
+		   \param system a pre-existing and configured SecureMessageSystem object
+		*/
 		SecureMessage(SecureMessageSystem *system);
 		~SecureMessage();
 
+		/**
+		   The Type of secure message
+		*/
 		Type type() const;
 		bool canSignMultiple() const;     // CMS feature
 		bool canClearsign() const;        // PGP feature
@@ -313,11 +337,26 @@ namespace QCA
 		Error errorCode() const;
 
 		// sign
+		/**
+		   The signature on the signed message
+		*/
 		QByteArray signature() const;
+
+		/**
+		   The name of the hash used for the signature process
+		*/
 		QString hashName() const;
 
 		// verify
-		bool wasSigned() const; // PGP: true if decrypted message was signed
+		/**
+		   Test if the message was signed.
+
+		   This is true for OpenPGP if the decrypted message
+		   was also signed.
+
+		   \return true if the message was signed.
+		*/
+		bool wasSigned() const;
 		bool verifySuccess() const;
 		SecureMessageSignature signer() const;
 		SecureMessageSignatureList signers() const;
@@ -334,6 +373,11 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   \class SecureMessageSystem qca_securemessage.h QtCrypto
+
+	   Abstract superclass for secure messaging systems
+	*/
 	class QCA_EXPORT SecureMessageSystem : public QObject, public Algorithm
 	{
 		Q_OBJECT
@@ -344,6 +388,11 @@ namespace QCA
 		SecureMessageSystem(QObject *parent, const QString &type, const QString &provider);
 	};
 
+	/**
+	   \class OpenPGP qca_securemessage.h QtCrypto
+
+	   Pretty Good Privacy messaging system
+	*/
 	class QCA_EXPORT OpenPGP : public SecureMessageSystem
 	{
 		Q_OBJECT
@@ -352,6 +401,11 @@ namespace QCA
 		~OpenPGP();
 	};
 
+	/**
+	   \class CMS qca_securemessage.h QtCrypto
+
+	   Cryptographic Message Syntax messaging system
+	*/
 	class QCA_EXPORT CMS : public SecureMessageSystem
 	{
 		Q_OBJECT

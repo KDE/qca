@@ -70,6 +70,8 @@
      - X509 certificates (QCA::Certificate and QCA::CertificateCollection)
      - X509 certificate revocation lists (QCA::CRL)
      - Simple Authentication and Security Layer (SASL) (QCA::SASL)
+     - Cryptographic Message Syntax (QCA::CMS)
+     - PGP messages (QCA::OpenPGP)
      - RSA (QCA::RSAPrivateKey and QCA::RSAPublicKey)
      - DSA (QCA::DSAPrivateKey and QCA::DSAPublicKey)
      - Diffie-Hellman (QCA::DHPrivateKey and QCA::DHPublicKey)
