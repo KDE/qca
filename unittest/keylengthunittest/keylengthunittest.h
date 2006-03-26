@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004, 2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,15 +25,19 @@
 #ifndef KEYLENGTHUNITTEST_H
 #define KEYLENGTHUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class KeyLengthUnitTest : public Tester
+class KeyLengthUnitTest : public QObject
 {
-public:
-    KeyLengthUnitTest();
+  Q_OBJECT
 
-public:
-    void allTests();
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void doTest();
+private:
+    QCA::Initializer* m_init;
 };
 
 #endif

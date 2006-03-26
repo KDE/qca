@@ -9,6 +9,7 @@ SUBDIRS += \
 	hexunittest \
 	kdfunittest \
 	keygenunittest \
+	keylengthunittest \
 	macunittest \
 	pkits \
 	securearrayunittest \

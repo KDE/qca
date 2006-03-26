@@ -8,6 +8,7 @@ cd hashunittest && make check && cd .. && \
 cd hexunittest && make check && cd .. && \
 cd kdfunittest && make check && cd .. && \
 cd keygenunittest && make check && cd .. && \
+cd keylengthunittest && make check && cd .. && \
 cd macunittest && make check && cd .. && \
 cd pkits && make check && cd .. && \
 cd securearrayunittest && make check && cd .. && \

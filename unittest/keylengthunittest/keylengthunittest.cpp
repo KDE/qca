@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004, 2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,30 +27,35 @@
 
 #include <limits>
 
-KeyLengthUnitTest::KeyLengthUnitTest()
-    : Tester()
+void KeyLengthUnitTest::initTestCase()
 {
-
+    m_init = new QCA::Initializer;
+#include "../fixpaths.include"
 }
 
-void KeyLengthUnitTest::allTests()
+void KeyLengthUnitTest::cleanupTestCase()
 {
-    QCA::Initializer init;
+    QCA::unloadAllPlugins();
+    delete m_init;
+}
 
+void KeyLengthUnitTest::doTest()
+{
     QCA::KeyLength keylen1( 0, 0, 0 );
-    CHECK( keylen1.minimum(), 0 );
-    CHECK( keylen1.maximum(), 0 );
-    CHECK( keylen1.multiple(), 0 );
+    QCOMPARE( keylen1.minimum(), 0 );
+    QCOMPARE( keylen1.maximum(), 0 );
+    QCOMPARE( keylen1.multiple(), 0 );
 
     QCA::KeyLength keylen2( 3, 40, 1 );
-    CHECK( keylen2.minimum(), 3 );
-    CHECK( keylen2.maximum(), 40 );
-    CHECK( keylen2.multiple(), 1 );
+    QCOMPARE( keylen2.minimum(), 3 );
+    QCOMPARE( keylen2.maximum(), 40 );
+    QCOMPARE( keylen2.multiple(), 1 );
 
     QCA::KeyLength keylen3( 1, INT_MAX, 1 );
-    CHECK( keylen3.minimum(), 1 );
-    CHECK( keylen3.maximum(), INT_MAX );
-    CHECK( keylen3.multiple(), 1 );
+    QCOMPARE( keylen3.minimum(), 1 );
+    QCOMPARE( keylen3.maximum(), INT_MAX );
+    QCOMPARE( keylen3.multiple(), 1 );
 
 }
 
+QTEST_MAIN(KeyLengthUnitTest)
