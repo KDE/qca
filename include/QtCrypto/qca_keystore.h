@@ -19,6 +19,16 @@
  *
  */
 
+/**
+   \file qca_keystore.h
+
+   Header file for classes that provide and manage keys
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_KEYSTORE_H
 #define QCA_KEYSTORE_H
 

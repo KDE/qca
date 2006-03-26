@@ -19,6 +19,16 @@
  *
  */
 
+/**
+   \file qca.h
+
+   Summary header file for %QCA.
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_H
 #define QCA_H
 

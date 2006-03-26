@@ -19,6 +19,16 @@
  *
  */
 
+/**
+   \file qca_textfilter.h
+
+   Header file for text encoding/decoding classes
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_TEXTFILTER_H
 #define QCA_TEXTFILTER_H
 

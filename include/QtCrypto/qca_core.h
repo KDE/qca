@@ -19,9 +19,22 @@
  *
  */
 
+/**
+   \file qca_core.h
+
+   Header file for core %QCA infrastructure
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_CORE_H
 #define QCA_CORE_H
 
+/**
+   The current version of %QCA
+*/
 #define QCA_VERSION 0x020000
 
 #include <QString>

@@ -17,6 +17,16 @@
  *
  */
 
+/**
+   \file qpipe.h
+
+   Header file for the QPipe FIFO class
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QPIPE_H
 #define QPIPE_H
 

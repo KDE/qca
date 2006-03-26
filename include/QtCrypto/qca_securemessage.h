@@ -19,6 +19,16 @@
  *
  */
 
+/**
+   \file qca_securemessage.h
+
+   Header file for secure message (PGP, CMS) classes
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_SECUREMESSAGE_H
 #define QCA_SECUREMESSAGE_H
 

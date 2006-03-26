@@ -19,6 +19,19 @@
  *
  */
 
+/**
+   \file qca_tools.h
+
+   Header file for "tool" classes used in %QCA
+
+   These classes differ from those in qca_support.h, in that they have
+   some cryptographic relationship, and require secure memory.
+
+   \Note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_TOOLS_H
 #define QCA_TOOLS_H
 
@@ -30,9 +43,32 @@ class QString;
 class QByteArray;
 class QTextStream;
 
-// Direct secure memory access.  For interfacing with C libraries if needed.
+/**
+   Allocate a block of memory from the secure memory pool.
+
+   This is intended to be used when working with C libraries.
+
+   \param bytes the number of bytes to allocate
+*/
 QCA_EXPORT void *qca_secure_alloc(int bytes);
+
+/**
+   Free (de-allocate) a block of memory that has been previously
+   allocated from the secure memory pool.
+
+   This is intended to be used when working with C libraries.
+
+   \param p pointer to the block of memory to be free'd
+*/
 QCA_EXPORT void qca_secure_free(void *p);
+
+/**
+   Resize (re-allocate) a block of memory that has been previously
+   allocated from the secure memory pool.
+
+   \param p pointer to the block of memory to be resized.
+   \param bytes the new size that is required.
+*/
 QCA_EXPORT void *qca_secure_realloc(void *p, int bytes);
 
 /**

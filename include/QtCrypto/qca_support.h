@@ -19,6 +19,19 @@
  *
  */
 
+/**
+   \file qca_support.h
+
+   Header file for "support" classes used in %QCA
+
+   The classes in this header do not have any cryptographic
+   content - they are used in %QCA, and are included for convenience. 
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_SUPPORT_H
 #define QCA_SUPPORT_H
 

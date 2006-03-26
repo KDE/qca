@@ -19,6 +19,16 @@
  *
  */
 
+/**
+   \file qca_basic.h
+
+   Header file for classes for cryptographic primitives (basic operations)
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_BASIC_H
 #define QCA_BASIC_H
 

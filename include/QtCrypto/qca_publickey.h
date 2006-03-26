@@ -19,6 +19,16 @@
  *
  */
 
+/**
+   \file qca_publickey.h
+
+   Header file for PublicKey and PrivateKey related classes
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCA_PUBLICKEY_H
 #define QCA_PUBLICKEY_H
 

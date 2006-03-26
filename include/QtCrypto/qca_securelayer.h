@@ -19,6 +19,15 @@
  *
  */
 
+/**
+   \file qca_securelayer.h
+
+   Header file for SecureLayer and its subclasses
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
 #ifndef QCA_SECURELAYER_H
 #define QCA_SECURELAYER_H
 
@@ -203,6 +212,21 @@ namespace QCA
 	   \class TLS qca_securelayer.h QtCrypto
 
 	   Transport Layer Security / Secure Socket Layer 
+
+	   Transport Layer Security (%TLS) is the current
+	   state-of-the-art in secure transport mechanisms over the
+	   internet. It can be used in a way where only one side of
+	   the link needs to authenticate to the other. This makes it
+	   very useful for servers to provide their identity to
+	   clients. Note that is is possible to use %TLS to
+	   authenticate both client and server.
+
+	   %TLS is a IETF standard (<a
+	   href="http://www.ietf.org/rfc/rfc2712.txt">RFC2712</a> for
+	   TLS version 1.0) based on earlier Netscape work on Secure
+	   Socket Layer (SSL version 2 and SSL version 3). New
+	   applications should use at least TLS 1.0, and SSL version 2
+	   should be avoided due to known security problems.
 	*/
 	class QCA_EXPORT TLS : public SecureLayer, public Algorithm
 	{
