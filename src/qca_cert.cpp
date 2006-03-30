@@ -333,6 +333,12 @@ bool Certificate::isSelfSigned() const
 	return static_cast<const CertContext *>(context())->props()->isSelfSigned;
 }
 
+bool Certificate::isIssuerOf(const Certificate &other) const
+{
+	const CertContext *cc = static_cast<const CertContext *>(other.context());
+	return static_cast<const CertContext *>(context())->isIssuerOf(cc);
+}
+
 int Certificate::pathLimit() const
 {
 	return static_cast<const CertContext *>(context())->props()->pathLimit;
@@ -360,7 +366,13 @@ QByteArray Certificate::issuerKeyId() const
 
 Validity Certificate::validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u) const
 {
-	QList<CertContext*> trusted_list;
+	QList<Certificate> issuers = trusted.certificates() + untrusted.certificates();
+	CertificateChain chain;
+	chain += *this;
+	chain = chain.complete(issuers);
+	return chain.validate(trusted, untrusted.crls(), u);
+
+	/*QList<CertContext*> trusted_list;
 	QList<CertContext*> untrusted_list;
 	QList<CRLContext*> crl_list;
 
@@ -385,7 +397,7 @@ Validity Certificate::validate(const CertificateCollection &trusted, const Certi
 		crl_list += c;
 	}
 
-	return static_cast<const CertContext *>(context())->validate(trusted_list, untrusted_list, crl_list, u);
+	return static_cast<const CertContext *>(context())->validate(trusted_list, untrusted_list, crl_list, u);*/
 }
 
 QSecureArray Certificate::toDER() const
@@ -472,6 +484,71 @@ bool Certificate::operator==(const Certificate &cert) const
 bool Certificate::operator!=(const Certificate &a) const
 {
 	return !(*this == a);
+}
+
+Validity Certificate::chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const
+{
+	QList<CertContext*> chain_list;
+	QList<CertContext*> trusted_list;
+	QList<CRLContext*> crl_list;
+
+	QList<Certificate> chain_certs = chain;
+	QList<Certificate> trusted_certs = trusted.certificates();
+	QList<CRL> crls = trusted.crls() + untrusted_crls;
+
+	for(int n = 0; n < chain_certs.count(); ++n)
+	{
+		CertContext *c = static_cast<CertContext *>(chain_certs[n].context());
+		chain_list += c;
+	}
+	for(int n = 0; n < trusted_certs.count(); ++n)
+	{
+		CertContext *c = static_cast<CertContext *>(trusted_certs[n].context());
+		trusted_list += c;
+	}
+	for(int n = 0; n < crls.count(); ++n)
+	{
+		CRLContext *c = static_cast<CRLContext *>(crls[n].context());
+		crl_list += c;
+	}
+
+	return static_cast<const CertContext *>(context())->validate_chain(chain_list, trusted_list, crl_list, u);
+}
+
+CertificateChain Certificate::chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers) const
+{
+	CertificateChain out;
+	QList<Certificate> pool = issuers + chain.mid(1);
+	out += chain.first();
+	while(!out.last().isSelfSigned())
+	{
+		// try to get next in chain
+		int at = -1;
+		for(int n = 0; n < pool.count(); ++n)
+		{
+			QString str = QString("[%1] issued by [%2] ? ").arg(out.last().commonName()).arg(pool[n].commonName());
+			if(pool[n].isIssuerOf(out.last()))
+			{
+				printf("%s  yes\n", qPrintable(str));
+				at = n;
+				break;
+			}
+			printf("%s  no\n", qPrintable(str));
+		}
+		if(at == -1)
+			break;
+
+		// take it out of the pool
+		Certificate next = pool.takeAt(at);
+
+		// make sure it isn't in the chain already (avoid loops)
+		if(out.contains(next))
+			break;
+
+		// append to the chain
+		out += next;
+	}
+	return out;
 }
 
 //----------------------------------------------------------------------------

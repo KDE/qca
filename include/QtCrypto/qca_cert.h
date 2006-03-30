@@ -39,7 +39,9 @@
 
 namespace QCA
 {
+	class CRL;
 	class CertificateCollection;
+	class CertificateChain;
 
 	/**
 	   Certificate Request Format
@@ -417,6 +419,14 @@ namespace QCA
 		bool isSelfSigned() const;
 
 		/**
+		   Test if the Certificate has signed another Certificate
+		   object and is therefore the issuer
+
+		   \return true if the certificate is the issuer
+		*/
+		bool isIssuerOf(const Certificate &other) const;
+
+		/**
 		   The upper bound of the number of links in the certificate
 		   chain, if any
 		*/
@@ -521,6 +531,11 @@ namespace QCA
 		   \return true if the two certificates are not the same
 		*/
 		bool operator!=(const Certificate &a) const;
+
+	private:
+		friend class CertificateChain;
+		Validity chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const;
+		CertificateChain chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers) const;
 	};
 	
 	/**
@@ -561,7 +576,25 @@ namespace QCA
 		   Return the primary (end-user) Certificate
 		*/
 		inline const Certificate & primary() const { return first(); }
+
+		inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u = UsageAny) const;
+
+		inline CertificateChain complete(const QList<Certificate> &issuers) const;
 	};
+
+	inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const
+	{
+		if(isEmpty())
+			return ErrorValidityUnknown;
+		return first().chain_validate(*this, trusted, untrusted_crls, u);
+	}
+
+	inline CertificateChain CertificateChain::complete(const QList<Certificate> &issuers) const
+	{
+		if(isEmpty())
+			return CertificateChain();
+		return first().chain_complete(*this, issuers);
+	}
 
 	/**
 	   \class CertificateRequest qca_cert.h QtCrypto

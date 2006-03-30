@@ -2873,6 +2873,9 @@ auq_err:
 	return qdt;
 }
 
+class MyCertContext;
+static bool sameChain(STACK_OF(X509) *ossl, const QList<const MyCertContext*> &qca);
+
 // TODO: support read/write of multiple info values with the same name
 class MyCertContext : public CertContext
 {
@@ -3057,8 +3060,52 @@ public:
 		return kc;
 	}
 
+	virtual bool isIssuerOf(const CertContext *other) const
+	{
+
+		// to check a single issuer, we make a list of 1
+		STACK_OF(X509) *untrusted_list = sk_X509_new_null();
+
+		const MyCertContext *our_cc = this;
+		X509 *x = our_cc->item.cert;
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+		sk_X509_push(untrusted_list, x);
+
+		const MyCertContext *other_cc = static_cast<const MyCertContext *>(other);
+		X509 *ox = other_cc->item.cert;
+
+		X509_STORE *store = X509_STORE_new();
+
+		X509_STORE_CTX *ctx = X509_STORE_CTX_new();
+		X509_STORE_CTX_init(ctx, store, ox, untrusted_list);
+
+		// we don't care about the verify result here
+		X509_verify_cert(ctx);
+
+		// grab the chain, which may not be fully populated
+		STACK_OF(X509) *chain = X509_STORE_CTX_get_chain(ctx);
+
+		bool ok = false;
+
+		// chain should be exactly 2 items
+		QList<const MyCertContext*> expected;
+		expected += other_cc;
+		expected += our_cc;
+		if(chain && sameChain(chain, expected))
+			ok = true;
+
+		// cleanup
+		X509_STORE_CTX_free(ctx);
+		X509_STORE_free(store);
+		sk_X509_pop_free(untrusted_list, X509_free);
+
+		return ok;
+	}
+
 	// implemented later because it depends on MyCRLContext
 	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u) const;
+
+	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext *> &crls, UsageMode u) const;
 
 	void make_props()
 	{
@@ -3175,6 +3222,22 @@ public:
 		//printf("[%p] made props: [%s]\n", this, _props.subject[CommonName].toLatin1().data());
 	}
 };
+
+bool sameChain(STACK_OF(X509) *ossl, const QList<const MyCertContext*> &qca)
+{
+	if(sk_X509_num(ossl) != qca.count())
+		return false;
+
+	for(int n = 0; n < sk_X509_num(ossl); ++n)
+	{
+		X509 *a = sk_X509_value(ossl, n);
+		X509 *b = qca[n]->item.cert;
+		if(X509_cmp(a, b) != 0)
+			return false;
+	}
+
+	return true;
+}
 
 //----------------------------------------------------------------------------
 // MyCSRContext
@@ -3633,7 +3696,7 @@ static bool usage_check(const MyCertContext &cc, UsageMode u)
 	}
 }
 
-Validity MyCertContext::validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u) const
+Validity MyCertContext::validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext*> &crls, UsageMode u) const
 {
 	STACK_OF(X509) *trusted_list = sk_X509_new_null();
 	STACK_OF(X509) *untrusted_list = sk_X509_new_null();
@@ -3684,6 +3747,92 @@ Validity MyCertContext::validate(const QList<CertContext*> &trusted, const QList
 	int err = -1;
 	if(!ret)
 		err = ctx->error;
+
+	// cleanup
+	X509_STORE_CTX_free(ctx);
+	X509_STORE_free(store);
+
+	sk_X509_pop_free(trusted_list, X509_free);
+	sk_X509_pop_free(untrusted_list, X509_free);
+	for(int n = 0; n < crl_list.count(); ++n)
+		X509_CRL_free(crl_list[n]);
+
+	if(!ret)
+		return convert_verify_error(err);
+
+	if(!usage_check(*cc, u))
+		return ErrorInvalidPurpose;
+
+	return ValidityGood;
+}
+
+Validity MyCertContext::validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, UsageMode u) const
+{
+	STACK_OF(X509) *trusted_list = sk_X509_new_null();
+	STACK_OF(X509) *untrusted_list = sk_X509_new_null();
+	QList<X509_CRL*> crl_list;
+
+	int n;
+	for(n = 0; n < trusted.count(); ++n)
+	{
+		const MyCertContext *cc = static_cast<const MyCertContext *>(trusted[n]);
+		X509 *x = cc->item.cert;
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+		sk_X509_push(trusted_list, x);
+	}
+	for(n = 1; n < chain.count(); ++n)
+	{
+		const MyCertContext *cc = static_cast<const MyCertContext *>(chain[n]);
+		X509 *x = cc->item.cert;
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+		sk_X509_push(untrusted_list, x);
+	}
+	for(n = 0; n < crls.count(); ++n)
+	{
+		const MyCRLContext *cc = static_cast<const MyCRLContext *>(crls[n]);
+		X509_CRL *x = cc->item.crl;
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+		crl_list.append(x);
+	}
+
+	const MyCertContext *cc = static_cast<const MyCertContext *>(chain[0]);
+	X509 *x = cc->item.cert;
+
+	// verification happens through a store "context"
+	X509_STORE_CTX *ctx = X509_STORE_CTX_new();
+
+	// make a store of crls
+	X509_STORE *store = X509_STORE_new();
+	for(int n = 0; n < crl_list.count(); ++n)
+		X509_STORE_add_crl(store, crl_list[n]);
+
+	// the first initialization handles untrusted certs, crls, and target cert
+	X509_STORE_CTX_init(ctx, store, x, untrusted_list);
+
+	// this initializes the trusted certs
+	X509_STORE_CTX_trusted_stack(ctx, trusted_list);
+
+	// verify!
+	int ret = X509_verify_cert(ctx);
+	int err = -1;
+	if(!ret)
+		err = ctx->error;
+
+	// grab the chain, which may not be fully populated
+	STACK_OF(X509) *xchain = X509_STORE_CTX_get_chain(ctx);
+
+	// make sure the chain is what we expect.  the reason we need to do
+	//   this is because I don't think openssl cares about the order of
+	//   input.  that is, if there's a chain A<-B<-C, and we input A as
+	//   the base cert, with B and C as the issuers, we will get a
+	//   successful validation regardless of whether the issuer list is
+	//   in the order B,C or C,B.  we don't want an input chain of A,C,B
+	//   to be considered correct, so we must account for that here.
+	QList<const MyCertContext*> expected;
+	for(int n = 0; n < chain.count(); ++n)
+		expected += static_cast<const MyCertContext *>(chain[n]);
+	if(!xchain || !sameChain(xchain, expected))
+		err = ErrorValidityUnknown;
 
 	// cleanup
 	X509_STORE_CTX_free(ctx);
