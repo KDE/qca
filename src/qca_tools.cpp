@@ -474,7 +474,6 @@ QBigInteger::QBigInteger(const QSecureArray &a)
 
 QBigInteger::QBigInteger(const QBigInteger &from)
 {
-	d = new Private;
 	*this = from;
 }
 
