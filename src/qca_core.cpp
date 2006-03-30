@@ -754,18 +754,15 @@ public:
 
 Algorithm::Algorithm()
 {
-	d = 0;
 }
 
 Algorithm::Algorithm(const QString &type, const QString &provider)
 {
-	d = 0;
 	change(type, provider);
 }
 
 Algorithm::Algorithm(const Algorithm &from)
 {
-	d = 0;
 	*this = from;
 }
 
