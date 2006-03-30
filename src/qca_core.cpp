@@ -27,6 +27,10 @@
 #include "qca_keystore.h"
 #include "qcaprovider.h"
 
+#ifdef Q_OS_UNIX
+# include <unistd.h>
+#endif
+
 namespace QCA {
 
 // from qca_tools
