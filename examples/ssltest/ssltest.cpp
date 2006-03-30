@@ -23,6 +23,23 @@
 #include <QtNetwork>
 #include <QtCrypto>
 
+char exampleCA_cert[] =
+	"-----BEGIN CERTIFICATE-----\n"
+	"MIICSzCCAbSgAwIBAgIBADANBgkqhkiG9w0BAQUFADA4MRMwEQYDVQQDEwpFeGFt\n"
+	"cGxlIENBMQswCQYDVQQGEwJVUzEUMBIGA1UEChMLRXhhbXBsZSBPcmcwHhcNMDYw\n"
+	"MzE1MDY1ODMyWhcNMDYwNDE1MDY1ODMyWjA4MRMwEQYDVQQDEwpFeGFtcGxlIENB\n"
+	"MQswCQYDVQQGEwJVUzEUMBIGA1UEChMLRXhhbXBsZSBPcmcwgZ8wDQYJKoZIhvcN\n"
+	"AQEBBQADgY0AMIGJAoGBAL6ULdOxmpeZ+G/ypV12eNO4qnHSVIPTrYPkQuweXqPy\n"
+	"atwGFheG+hLVsNIh9GGOS0tCe7a3hBBKN0BJg1ppfk2x39cDx7hefYqjBuZvp/0O\n"
+	"8Ja3qlQiJLezITZKLxMBrsibcvcuH8zpfUdys2yaN+YGeqNfjQuoNN3Byl1TwuGJ\n"
+	"AgMBAAGjZTBjMB0GA1UdDgQWBBSQKCUCLNM7uKrAt5o7qv/yQm6qEzASBgNVHRMB\n"
+	"Af8ECDAGAQEBAgEIMB4GA1UdEQQXMBWBE2V4YW1wbGVAZXhhbXBsZS5jb20wDgYD\n"
+	"VR0PAQH/BAQDAgEGMA0GCSqGSIb3DQEBBQUAA4GBAAh+SIeT1Ao5qInw8oMSoTdO\n"
+	"lQ6h67ec/Jk5KmK4OoskuimmHI0Sp0C5kOCLehXbsVWW8pXsNC2fv0d2HkdaSUcX\n"
+	"hwLzqgyZXd4mupIYlaOTZhuHDwWPCAOZS4LVsi2tndTRHKCP12441JjNKhmZRhkR\n"
+	"u5zzD60nWgM9dKTaxuZM\n"
+	"-----END CERTIFICATE-----\n";
+
 void showCertInfo(const QCA::Certificate &cert)
 {
 	printf("-- Cert --\n");
@@ -136,10 +153,16 @@ private slots:
 
 		printf("Connected, starting TLS handshake...\n");
 
+		QCA::CertificateCollection rootCerts = QCA::systemStore();
+
+		// We add this one to show how, and to make it work with
+		// the server example.
+		rootCerts.addCertificate(QCA::Certificate::fromPEM(exampleCA_cert));
+
 		if(!QCA::haveSystemStore())
 			printf("Warning: no root certs\n");
 		else 
-			ssl->setTrustedCertificates(QCA::systemStore());
+			ssl->setTrustedCertificates(rootCerts);
 
 		ssl->startClient(host);
 	}
