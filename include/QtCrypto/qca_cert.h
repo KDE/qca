@@ -577,7 +577,7 @@ namespace QCA
 		*/
 		inline const Certificate & primary() const { return first(); }
 
-		inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u = UsageAny) const;
+		inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls = QList<CRL>(), UsageMode u = UsageAny) const;
 
 		inline CertificateChain complete(const QList<Certificate> &issuers) const;
 	};
