@@ -34,12 +34,14 @@ class Pkits : public QObject
 
 private slots:
     void initTestCase();
+
     void pkits4_1_1();
     void pkits4_1_2();
     void pkits4_1_3();
     void pkits4_1_4();
     void pkits4_1_5();
     void pkits4_1_6();
+
     void pkits4_2_1();
     void pkits4_2_2();
     void pkits4_2_3();
@@ -48,6 +50,23 @@ private slots:
     void pkits4_2_6();
     void pkits4_2_7();
     void pkits4_2_8();
+
+    void pkits4_3_1();
+    void pkits4_3_2();
+    void pkits4_3_3();
+    void pkits4_3_4();
+    void pkits4_3_5();
+    void pkits4_3_6();
+    void pkits4_3_7();
+    void pkits4_3_8();
+    void pkits4_3_9();
+    void pkits4_3_10();
+    void pkits4_3_11();
+
+    void pkits4_4_1();
+    void pkits4_4_2();
+    void pkits4_4_3();
+
     void cleanupTestCase();
 private:
     QCA::Initializer* m_init;
