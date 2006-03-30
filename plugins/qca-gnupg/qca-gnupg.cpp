@@ -156,6 +156,16 @@ public:
 		return pub.keyId();
 	}
 
+	virtual QString storeId() const
+	{
+		return QString();
+	}
+
+	virtual QString storeName() const
+	{
+		return QString();
+	}
+
 	virtual PGPKey pgpSecretKey() const
 	{
 		return sec;
@@ -313,12 +323,12 @@ public:
 		return 0;
 	}
 
-	virtual void start()
+	/*virtual void start()
 	{
 		QTimer::singleShot(0, this, SLOT(do_ready()));
-	}
+	}*/
 
-	virtual QList<int> keyStores() const
+	virtual QList<int> keyStores()
 	{
 		QList<int> list;
 		list += 0; // TODO
@@ -349,7 +359,7 @@ public:
 		return list;
 	}
 
-	virtual QList<KeyStoreEntryContext*> entryList(int) const
+	virtual QList<KeyStoreEntryContext*> entryList(int)
 	{
 		QList<KeyStoreEntryContext*> out;
 
@@ -414,11 +424,11 @@ public:
 		global_gpg->submitPassphrase(a.toByteArray());
 	}
 
-private slots:
+/*private slots:
 	void do_ready()
 	{
 		emit busyEnd();
-	}
+	}*/
 };
 
 class MyOpenPGPContext : public SMSContext
@@ -447,10 +457,13 @@ public:
 	QByteArray in, out;
 	bool ok;
 
+	//PasswordAsker asker;
+
 	MyMessageContext(MyOpenPGPContext *_sms, Provider *p) : MessageContext(p, "pgpmsg")
 	{
 		sms = _sms;
 		ok = false;
+		//connect(&asker, SIGNAL(responseReady()), SLOT(asker_responseReady()));
 	}
 
 	virtual Provider::Context *clone() const
@@ -518,6 +531,9 @@ public:
 			{
 				// TODO
 				emit keyStoreList->storeNeedPassphrase(0, 0, e.keyId);
+				//asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), e.keyId, 0);
+				//asker.waitForResponse();
+				//keyStoreList->submitPassphrase(0, 0, asker.password());
 			}
 			else if(e.type == GpgOp::Event::Finished)
 				break;
@@ -563,6 +579,13 @@ public:
 	{
 		return SecureMessageSignatureList();
 	}
+
+/*private slots:
+	void asker_responseReady()
+	{
+		QSecureArray a = asker.password();
+		global_gpg->submitPassphrase(a.toByteArray());
+	}*/
 };
 
 MessageContext *MyOpenPGPContext::createMessage()

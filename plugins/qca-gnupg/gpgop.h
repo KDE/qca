@@ -22,6 +22,7 @@
 
 #include <QtCore>
 #include <QtCrypto>
+#include "qpipe.h"
 
 namespace gpgQCAPlugin {
 

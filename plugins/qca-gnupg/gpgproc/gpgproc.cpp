@@ -20,7 +20,8 @@
 #include "gpgproc.h"
 
 #include "sprocess.h"
-#include "qpipe.h"
+
+using namespace QCA;
 
 namespace gpgQCAPlugin {
 
@@ -63,16 +64,18 @@ public:
 
 	Private(GPGProc *_q) : QObject(_q), q(_q), pipeAux(this), pipeCommand(this), pipeStatus(this), startTrigger(this), doneTrigger(this)
 	{
+		qRegisterMetaType<gpgQCAPlugin::GPGProc::Error>("gpgQCAPlugin::GPGProc::Error");
+
 		proc = 0;
 		startTrigger.setSingleShot(true);
 		doneTrigger.setSingleShot(true);
 
 		connect(&pipeAux.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(aux_written(int)));
-		connect(&pipeAux.writeEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(aux_error(QPipeEnd::Error)));
+		connect(&pipeAux.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(aux_error(QCA::QPipeEnd::Error)));
 		connect(&pipeCommand.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(command_written(int)));
-		connect(&pipeCommand.writeEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(command_error(QPipeEnd::Error)));
+		connect(&pipeCommand.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(command_error(QCA::QPipeEnd::Error)));
 		connect(&pipeStatus.readEnd(), SIGNAL(readyRead()), SLOT(status_read()));
-		connect(&pipeStatus.readEnd(), SIGNAL(error(QPipeEnd::Error)), SLOT(status_error(QPipeEnd::Error)));
+		connect(&pipeStatus.readEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(status_error(QCA::QPipeEnd::Error)));
 		connect(&startTrigger, SIGNAL(timeout()), SLOT(doStart()));
 		connect(&doneTrigger, SIGNAL(timeout()), SLOT(doTryDone()));
 
@@ -194,7 +197,7 @@ public slots:
 		emit q->bytesWrittenAux(x);
 	}
 
-	void aux_error(QPipeEnd::Error)
+	void aux_error(QCA::QPipeEnd::Error)
 	{
 		emit q->debug("Aux: Pipe error");
 		reset(ResetSession);
@@ -206,7 +209,7 @@ public slots:
 		emit q->bytesWrittenCommand(x);
 	}
 
-	void command_error(QPipeEnd::Error)
+	void command_error(QCA::QPipeEnd::Error)
 	{
 		emit q->debug("Command: Pipe error");
 		reset(ResetSession);
@@ -219,7 +222,7 @@ public slots:
 			emit q->readyReadStatusLines();
 	}
 
-	void status_error(QPipeEnd::Error e)
+	void status_error(QCA::QPipeEnd::Error e)
 	{
 		if(e == QPipeEnd::ErrorEOF)
 			emit q->debug("Status: Closed (EOF)");
@@ -457,7 +460,7 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 			d->error = FailedToStart;
 
 			// emit later
-			QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection, Q_ARG(GPGProc::Error, d->error));
+			QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection, Q_ARG(gpgQCAPlugin::GPGProc::Error, d->error));
 			return;
 		}
 

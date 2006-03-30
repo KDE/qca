@@ -454,7 +454,7 @@ public:
 	{
 		dtextTimer.setSingleShot(true);
 
-		connect(&proc, SIGNAL(error(GPGProc::Error)), SLOT(proc_error(GPGProc::Error)));
+		connect(&proc, SIGNAL(error(gpgQCAPlugin::GPGProc::Error)), SLOT(proc_error(gpgQCAPlugin::GPGProc::Error)));
 		connect(&proc, SIGNAL(finished(int)), SLOT(proc_finished(int)));
 		connect(&proc, SIGNAL(readyReadStdout()), SLOT(proc_readyReadStdout()));
 		connect(&proc, SIGNAL(readyReadStderr()), SLOT(proc_readyReadStderr()));
@@ -1048,7 +1048,7 @@ private slots:
 		emit readyReadDiagnosticText();
 	}
 
-	void proc_error(GPGProc::Error e)
+	void proc_error(gpgQCAPlugin::GPGProc::Error e)
 	{
 		QString str;
 		if(e == GPGProc::FailedToStart)

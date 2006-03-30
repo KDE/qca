@@ -21,10 +21,7 @@
 #define GPGPROC_H
 
 #include <QtCore>
-
-#ifdef QPIPE_SECURE
-# include <QtCrypto>
-#endif
+#include "qpipe.h"
 
 namespace gpgQCAPlugin {
 
@@ -61,7 +58,7 @@ public:
 	void closeCommand();
 
 signals:
-	void error(Error error);
+	void error(gpgQCAPlugin::GPGProc::Error error);
 	void finished(int exitCode);
 	void readyReadStdout();
 	void readyReadStderr();
