@@ -377,6 +377,8 @@ public:
 	virtual CRL crl() const;
 	virtual PGPKey pgpSecretKey() const;
 	virtual PGPKey pgpPublicKey() const;
+
+	virtual bool ensureAccess();
 };
 
 class QCA_EXPORT KeyStoreListContext : public QObject, public Provider::Context
@@ -385,12 +387,13 @@ class QCA_EXPORT KeyStoreListContext : public QObject, public Provider::Context
 public:
 	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
 
+	virtual void start();
+
 	// enable/disable update events
-	virtual void start() = 0;
-	virtual void stop() = 0;
+	virtual void setUpdatesEnabled(bool enabled);
 
 	// returns a list of integer context ids (for keystores)
-	virtual QList<int> keyStores() const = 0;
+	virtual QList<int> keyStores() = 0;
 
 	// null/empty return values mean the context id is gone
 
@@ -403,13 +406,13 @@ public:
 
 	// caller must delete any returned KeyStoreEntryContexts
 
-	virtual QList<KeyStoreEntryContext*> entryList(int id) const = 0;
+	virtual QList<KeyStoreEntryContext*> entryList(int id) = 0;
 
 	// return 0 if no such entry
-	virtual KeyStoreEntryContext *entry(int id, const QString &entryId) const;
+	virtual KeyStoreEntryContext *entry(int id, const QString &entryId);
 
 	// return 0 if the provider doesn't handle this type of storeId
-	virtual KeyStoreEntryContext *entryPassive(const QString &storeId, const QString &entryId) const;
+	virtual KeyStoreEntryContext *entryPassive(const QString &storeId, const QString &entryId);
 
 	virtual bool writeEntry(int id, const KeyBundle &kb);
 	virtual bool writeEntry(int id, const Certificate &cert);

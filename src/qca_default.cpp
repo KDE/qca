@@ -801,7 +801,6 @@ public:
 
 	DefaultKeyStoreList(Provider *p) : KeyStoreListContext(p)
 	{
-		ready = false;
 	}
 
 	~DefaultKeyStoreList()
@@ -815,15 +814,17 @@ public:
 
 	virtual void start()
 	{
-		QTimer::singleShot(0, this, SLOT(do_ready()));
+		ready = false;
+
+#ifndef QCA_NO_SYSTEMSTORE
+		if(qca_have_systemstore())
+		{
+			ready = true;
+		}
+#endif
 	}
 
-	virtual void stop()
-	{
-		// no need to do anything
-	}
-
-	virtual QList<int> keyStores() const
+	virtual QList<int> keyStores()
 	{
 		QList<int> list;
 		if(ready)
@@ -854,7 +855,7 @@ public:
 		return list;
 	}
 
-	virtual QList<KeyStoreEntryContext*> entryList(int) const
+	virtual QList<KeyStoreEntryContext*> entryList(int)
 	{
 		QList<KeyStoreEntryContext*> out;
 
@@ -878,18 +879,6 @@ public:
 		}
 
 		return out;
-	}
-
-private slots:
-	void do_ready()
-	{
-#ifndef QCA_NO_SYSTEMSTORE
-		if(qca_have_systemstore())
-		{
-			ready = true;
-		}
-#endif
-		emit busyEnd();
 	}
 };
 

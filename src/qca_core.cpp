@@ -588,15 +588,30 @@ PGPKey KeyStoreEntryContext::pgpPublicKey() const
 	return PGPKey();
 }
 
+bool KeyStoreEntryContext::ensureAccess()
+{
+	return true;
+}
+
 //----------------------------------------------------------------------------
 // KeyStoreListContext
 //----------------------------------------------------------------------------
+void KeyStoreListContext::start()
+{
+}
+
+void KeyStoreListContext::setUpdatesEnabled(bool enabled)
+{
+	if(enabled)
+		QMetaObject::invokeMethod(this, "busyEnd", Qt::QueuedConnection);
+}
+
 bool KeyStoreListContext::isReadOnly(int) const
 {
 	return true;
 }
 
-KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId) const
+KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId)
 {
 	KeyStoreEntryContext *out = 0;
 	QList<KeyStoreEntryContext*> list = entryList(id);
@@ -612,7 +627,7 @@ KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId)
 	return out;
 }
 
-KeyStoreEntryContext *KeyStoreListContext::entryPassive(const QString &storeId, const QString &entryId) const
+KeyStoreEntryContext *KeyStoreListContext::entryPassive(const QString &storeId, const QString &entryId)
 {
 	Q_UNUSED(storeId);
 	Q_UNUSED(entryId);

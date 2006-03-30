@@ -436,6 +436,7 @@ public slots:
 				connect(c, SIGNAL(storeUpdated(int)), SLOT(ksl_storeUpdated(int)));
 				connect(c, SIGNAL(storeNeedPassphrase(int, int, const QString &)), SLOT(ksl_storeNeedPassphrase(int, int, const QString &)), Qt::DirectConnection);
 				c->start();
+				c->setUpdatesEnabled(true);
 				check(c);
 			}
 		}
