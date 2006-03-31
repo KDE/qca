@@ -141,8 +141,7 @@ public:
 	connect(ssl, SIGNAL(error()), SLOT(ssl_error()));
 
 	cert = QCA::Certificate::fromPEM(pemdata_cert);
-	QCA::PrivateKey key = QCA::PrivateKey::fromPEM(pemdata_privkey);
-	privkey = key.toRSA();
+	privkey = QCA::PrivateKey::fromPEM(pemdata_privkey);
 
 	mode = Idle;
     }
@@ -296,7 +295,7 @@ private:
     QTcpSocket *sock;
     QCA::TLS *ssl;
     QCA::Certificate cert;
-    QCA::RSAPrivateKey privkey;
+    QCA::PrivateKey privkey;
     
     bool sent;
     int mode;
