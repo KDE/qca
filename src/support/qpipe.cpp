@@ -995,10 +995,20 @@ public:
 		}
 	}
 
-	QByteArray read(QByteArray *buf)
+	QByteArray read(QByteArray *buf, int bytes)
 	{
-		QByteArray a = *buf;
-		buf->clear();
+		QByteArray a;
+		if(bytes == -1 || bytes > buf->size())
+		{
+			a = *buf;
+		}
+		else
+		{
+			a.resize(bytes);
+			memcpy(a.data(), buf->data(), a.size());
+		}
+
+		takeArray(buf, a.size());
 		setupNextRead();
 		return a;
 	}
@@ -1010,10 +1020,20 @@ public:
 	}
 
 #ifdef QPIPE_SECURE
-	QSecureArray readSecure(QSecureArray *buf)
+	QSecureArray readSecure(QSecureArray *buf, int bytes)
 	{
-		QSecureArray a = *buf;
-		buf->clear();
+		QSecureArray a;
+		if(bytes == -1 || bytes > buf->size())
+		{
+			a = *buf;
+		}
+		else
+		{
+			a.resize(bytes);
+			memcpy(a.data(), buf->data(), a.size());
+		}
+
+		takeArray(buf, a.size());
 		setupNextRead();
 		return a;
 	}
@@ -1257,9 +1277,9 @@ int QPipeEnd::bytesToWrite() const
 	return d->pendingSize();
 }
 
-QByteArray QPipeEnd::read()
+QByteArray QPipeEnd::read(int bytes)
 {
-	return d->read(&d->buf);
+	return d->read(&d->buf, bytes);
 }
 
 void QPipeEnd::write(const QByteArray &buf)
@@ -1279,9 +1299,9 @@ void QPipeEnd::write(const QByteArray &buf)
 }
 
 #ifdef QPIPE_SECURE
-QSecureArray QPipeEnd::readSecure()
+QSecureArray QPipeEnd::readSecure(int bytes)
 {
-	return d->readSecure(&d->sec_buf);
+	return d->readSecure(&d->sec_buf, bytes);
 }
 
 void QPipeEnd::writeSecure(const QSecureArray &buf)

@@ -118,12 +118,12 @@ public:
 	int bytesToWrite() const;
 
 	// normal i/o
-	QByteArray read();
+	QByteArray read(int bytes = -1);
 	void write(const QByteArray &a);
 
 #ifdef QPIPE_SECURE
 	// secure i/o
-	QSecureArray readSecure();
+	QSecureArray readSecure(int bytes = -1);
 	void writeSecure(const QSecureArray &a);
 #endif
 
