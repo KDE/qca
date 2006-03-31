@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004, 2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,15 +25,22 @@
 #ifndef RANDOMUNITTEST_H
 #define RANDOMUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class RandomUnitTest : public Tester
+class RandomUnitTest : public QObject
 {
-public:
-    RandomUnitTest();
+    Q_OBJECT
 
-public:
-    void allTests();
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testSetGlobal();
+    void testGetData();
+
+private:
+    QCA::Initializer* m_init;
+
 };
 
 #endif
