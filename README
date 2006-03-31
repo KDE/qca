@@ -45,3 +45,6 @@ When you execute that script, you should see something like the following:
 If so, you can just run (g)make to build QCA. If not, have a look at
 conf.log to see what might have gone wrong.
 
+
+You will also need to build appropriate plugins to get support for
+many of the QCA features.

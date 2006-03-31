@@ -80,7 +80,6 @@
   - QPipe
   - FileWatch / DirWatch
   - Complete the pkits tests
-  - Convert over the remaining non-QTestLib tests (RSA/DSA + KeyLength)
 
 * write plugin support
   qca-botan: implement
