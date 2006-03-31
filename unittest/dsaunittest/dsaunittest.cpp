@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2005, 2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,72 +23,72 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "dsaunittest.h"
-#include <QtCrypto>
-#include <QList>
 
-DSAUnitTest::DSAUnitTest()
-    : Tester()
+void DSAUnitTest::initTestCase()
 {
-
+    m_init = new QCA::Initializer;
+#include "../fixpaths.include"
 }
 
-void DSAUnitTest::allTests()
+void DSAUnitTest::cleanupTestCase()
 {
-    QCA::Initializer init;
+    delete m_init;
+}
 
+void DSAUnitTest::testdsa()
+{
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
-        SKIP("DSA not supported");
+        QWARN("DSA not supported");
     else {
 	QCA::KeyGenerator keygen;
-	CHECK( keygen.isBusy(), false );
-	CHECK( keygen.blocking(), true );
+	QCOMPARE( keygen.isBusy(), false );
+	QCOMPARE( keygen.blocking(), true );
 	QCA::DLGroup group = keygen.createDLGroup(QCA::DSA_1024);
-	CHECK( group.isNull(), false );
+	QCOMPARE( group.isNull(), false );
 
 	QCA::PrivateKey dsaKey = keygen.createDSA( group );
-	CHECK( dsaKey.isNull(), false );
-	CHECK( dsaKey.isRSA(), false );
-	CHECK( dsaKey.isDSA(), true );
-	CHECK( dsaKey.isDH(), false );
-	CHECK( dsaKey.isPrivate(), true );
-	CHECK( dsaKey.isPublic(), false );
-	CHECK( dsaKey.canSign(), true );
-	CHECK( dsaKey.canDecrypt(), false );
+	QCOMPARE( dsaKey.isNull(), false );
+	QCOMPARE( dsaKey.isRSA(), false );
+	QCOMPARE( dsaKey.isDSA(), true );
+	QCOMPARE( dsaKey.isDH(), false );
+	QCOMPARE( dsaKey.isPrivate(), true );
+	QCOMPARE( dsaKey.isPublic(), false );
+	QCOMPARE( dsaKey.canSign(), true );
+	QCOMPARE( dsaKey.canDecrypt(), false );
 
-	CHECK( dsaKey.bitSize(), 1024 );
+	QCOMPARE( dsaKey.bitSize(), 1024 );
 	QCA::DSAPrivateKey dsaPrivKey = dsaKey.toDSA();
-	CHECK( dsaPrivKey.bitSize(), 1024 );
+	QCOMPARE( dsaPrivKey.bitSize(), 1024 );
 
 	QSecureArray dsaDER = dsaKey.toDER();
-	CHECK( dsaDER.isEmpty(), false );
+	QCOMPARE( dsaDER.isEmpty(), false );
 
 	QString dsaPEM = dsaKey.toPEM();
-	CHECK( dsaPEM.isEmpty(), false );
+	QCOMPARE( dsaPEM.isEmpty(), false );
 
 	QCA::ConvertResult checkResult;
 	QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(dsaPEM, QSecureArray(), &checkResult);
-	CHECK( checkResult, QCA::ConvertGood );
-	CHECK( fromPEMkey.isNull(), false );
-	CHECK( fromPEMkey.isRSA(), false );
-	CHECK( fromPEMkey.isDSA(), true );
-	CHECK( fromPEMkey.isDH(), false );
-	CHECK( fromPEMkey.isPrivate(), true );
-	CHECK( fromPEMkey.isPublic(), false );
-	CHECK( dsaKey == fromPEMkey, true );
+	QCOMPARE( checkResult, QCA::ConvertGood );
+	QCOMPARE( fromPEMkey.isNull(), false );
+	QCOMPARE( fromPEMkey.isRSA(), false );
+	QCOMPARE( fromPEMkey.isDSA(), true );
+	QCOMPARE( fromPEMkey.isDH(), false );
+	QCOMPARE( fromPEMkey.isPrivate(), true );
+	QCOMPARE( fromPEMkey.isPublic(), false );
+	QVERIFY( dsaKey == fromPEMkey );
 	
 	QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(dsaDER, QSecureArray(), &checkResult);
-	CHECK( checkResult, QCA::ConvertGood );
-	CHECK( fromDERkey.isNull(), false );
-	CHECK( fromDERkey.isRSA(), false );
-	CHECK( fromDERkey.isDSA(), true );
-	CHECK( fromDERkey.isDH(), false );
-	CHECK( fromDERkey.isPrivate(), true );
-	CHECK( fromDERkey.isPublic(), false );
-#if 0
-	CHECK( dsaKey == fromDERkey, true );
-#endif
+	QCOMPARE( checkResult, QCA::ConvertGood );
+	QCOMPARE( fromDERkey.isNull(), false );
+	QCOMPARE( fromDERkey.isRSA(), false );
+	QCOMPARE( fromDERkey.isDSA(), true );
+	QCOMPARE( fromDERkey.isDH(), false );
+	QCOMPARE( fromDERkey.isPrivate(), true );
+	QCOMPARE( fromDERkey.isPublic(), false );
+	QVERIFY( dsaKey == fromDERkey );
     }
 }
 
+QTEST_MAIN(DSAUnitTest)

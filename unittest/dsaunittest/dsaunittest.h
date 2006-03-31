@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2005, 2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,15 +25,21 @@
 #ifndef DSAUNITTEST_H
 #define DSAUNITTEST_H
 
-#include "tester.h"
+#include <QtCrypto>
+#include <QtTest/QtTest>
 
-class DSAUnitTest : public Tester
+class DSAUnitTest : public QObject
 {
-public:
-    DSAUnitTest();
+    Q_OBJECT
 
-public:
-    void allTests();
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testdsa();
+
+private:
+    QCA::Initializer* m_init;
+
 };
 
 #endif
