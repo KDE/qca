@@ -630,9 +630,9 @@ int PublicKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 	return static_cast<const PKeyContext *>(context())->key()->maximumEncryptSize(alg);
 }
 
-QSecureArray PublicKey::encrypt(const QSecureArray &a, EncryptionAlgorithm alg) const
+QSecureArray PublicKey::encrypt(const QSecureArray &a, EncryptionAlgorithm alg)
 {
-	return static_cast<const PKeyContext *>(context())->key()->encrypt(a, alg);
+	return static_cast<PKeyContext *>(context())->key()->encrypt(a, alg);
 }
 
 void PublicKey::startVerify(SignatureAlgorithm alg, SignatureFormat format)
@@ -756,9 +756,9 @@ bool PrivateKey::canSign() const
 	return (isRSA() || isDSA());
 }
 
-bool PrivateKey::decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const
+bool PrivateKey::decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg)
 {
-	return static_cast<const PKeyContext *>(context())->key()->decrypt(in, out, alg);
+	return static_cast<PKeyContext *>(context())->key()->decrypt(in, out, alg);
 }
 
 void PrivateKey::startSign(SignatureAlgorithm alg, SignatureFormat format)
@@ -785,10 +785,10 @@ QSecureArray PrivateKey::signMessage(const QSecureArray &a, SignatureAlgorithm a
 	return signature();
 }
 
-SymmetricKey PrivateKey::deriveKey(const PublicKey &theirs) const
+SymmetricKey PrivateKey::deriveKey(const PublicKey &theirs)
 {
 	const PKeyContext *theirContext = static_cast<const PKeyContext *>(theirs.context());
-	return static_cast<const PKeyContext *>(context())->key()->deriveKey(*(theirContext->key()));
+	return static_cast<PKeyContext *>(context())->key()->deriveKey(*(theirContext->key()));
 }
 
 QList<PBEAlgorithm> PrivateKey::supportedPBEAlgorithms(const QString &provider)

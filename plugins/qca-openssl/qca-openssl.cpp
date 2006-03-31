@@ -1570,7 +1570,7 @@ public:
 			return RSA_size(rsa) - 41 - 1;
 	}
 
-	virtual QSecureArray encrypt(const QSecureArray &in, EncryptionAlgorithm alg) const
+	virtual QSecureArray encrypt(const QSecureArray &in, EncryptionAlgorithm alg)
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
 
@@ -1594,7 +1594,7 @@ public:
 		return result;
 	}
 
-	virtual bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const
+	virtual bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg)
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
 
@@ -2158,7 +2158,7 @@ public:
 		return EVP_PKEY_bits(evp.pkey);
 	}
 
-	virtual SymmetricKey deriveKey(const PKeyBase &theirs) const
+	virtual SymmetricKey deriveKey(const PKeyBase &theirs)
 	{
 		DH *dh = evp.pkey->pkey.dh;
 		DH *them = static_cast<const DHKey *>(&theirs)->evp.pkey->pkey.dh;

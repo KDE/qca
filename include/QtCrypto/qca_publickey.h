@@ -527,7 +527,7 @@ namespace QCA
 		   \param a the message to encrypt
 		   \param alg the algorithm to use
 		*/
-		QSecureArray encrypt(const QSecureArray &a, EncryptionAlgorithm alg) const;
+		QSecureArray encrypt(const QSecureArray &a, EncryptionAlgorithm alg);
 
 		/**
 		   Initialise the signature verification process
@@ -749,7 +749,7 @@ namespace QCA
 		   \param out the plain text data
 		   \param alg the algorithm to use
 		*/
-		bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const;
+		bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg);
 
 		/**
 		   Initialise the message signature process
@@ -787,7 +787,7 @@ namespace QCA
 
 		   \param theirs the public key to derive from
 		*/
-		SymmetricKey deriveKey(const PublicKey &theirs) const;
+		SymmetricKey deriveKey(const PublicKey &theirs);
 
 		// import / export
 		/**
