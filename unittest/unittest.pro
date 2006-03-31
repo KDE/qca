@@ -5,6 +5,8 @@ SUBDIRS += \
 	bigintunittest \
 	certunittest \
 	cipherunittest \
+	dsaunittest \
+	filewatchunittest \
 	hashunittest \
 	hexunittest \
 	kdfunittest \
@@ -12,6 +14,8 @@ SUBDIRS += \
 	keylengthunittest \
 	macunittest \
 	pkits \
+	randomunittest \
+	rsaunittest \
 	securearrayunittest \
 	staticunittest \
 	symmetrickeyunittest \

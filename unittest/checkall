@@ -4,6 +4,7 @@ cd base64unittest && make check && cd .. && \
 cd bigintunittest && make check && cd .. && \
 cd certunittest && make check && cd .. && \
 cd cipherunittest && make check && cd .. && \
+cd dsaunittest && make check && cd .. && \
 cd hashunittest && make check && cd .. && \
 cd hexunittest && make check && cd .. && \
 cd kdfunittest && make check && cd .. && \
@@ -11,6 +12,8 @@ cd keygenunittest && make check && cd .. && \
 cd keylengthunittest && make check && cd .. && \
 cd macunittest && make check && cd .. && \
 cd pkits && make check && cd .. && \
+cd randomunittest && make check && cd .. && \
+cd rsaunittest && make check && cd .. && \
 cd securearrayunittest && make check && cd .. && \
 cd staticunittest && make check && cd .. && \
 cd symmetrickeyunittest && make check && cd .. && \

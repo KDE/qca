@@ -1,5 +1,9 @@
 This directory holds simple unit tests for QCA.
 
+You can run the whole test suite by doing "make check" in this
+directory. You can also run a single set of tests by doing "make
+check" in the applicable subdirectory.
+
 Note that some of the hash tests require data files which are not
 provided with the QCA download because of their size. This is not a
 problem - the tests will simply be skipped if the files are not
@@ -9,3 +13,14 @@ tarballs as distributed into the unittest/data/ directory. These files
 should be readily available on the Internet. There is also a zero
 length file (imaginatively called "empty"), which you can create with
 something like "touch ./data/empty" at the command line.
+
+These tests are implemented using the QTestLib test framework provided
+with Qt 4.1 and later. If you are having trouble with a test, you can
+get more information by running the test applicable directly (e.g. if
+you can't make the Base64 test work, you run the ./base64unittest
+executable) with the -v1 or -v2 options. You can also specify a single
+test to be run. 
+
+Thanks to Trolltech for providing Qt and agreeing to release QTestLib,
+especially to Harald Fernengel for all the development work, a great
+tutorial at Akademy 2005 and substantial assistance with QTestLib.
