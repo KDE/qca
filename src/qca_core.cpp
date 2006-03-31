@@ -527,12 +527,12 @@ int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const
 	return 0;
 }
 
-QSecureArray PKeyBase::encrypt(const QSecureArray &, EncryptionAlgorithm) const
+QSecureArray PKeyBase::encrypt(const QSecureArray &, EncryptionAlgorithm)
 {
 	return QSecureArray();
 }
 
-bool PKeyBase::decrypt(const QSecureArray &, QSecureArray *, EncryptionAlgorithm) const
+bool PKeyBase::decrypt(const QSecureArray &, QSecureArray *, EncryptionAlgorithm)
 {
 	return false;
 }
@@ -559,7 +559,7 @@ bool PKeyBase::endVerify(const QSecureArray &)
 	return false;
 }
 
-SymmetricKey PKeyBase::deriveKey(const PKeyBase &) const
+SymmetricKey PKeyBase::deriveKey(const PKeyBase &)
 {
 	return SymmetricKey();
 }
