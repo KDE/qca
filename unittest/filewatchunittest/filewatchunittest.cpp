@@ -58,6 +58,10 @@ void FileWatchUnitTest::filewatchTest()
     tempFile.open();
     tempFile.write("foo");
     tempFile.close();
+    QTime time;
+    time.start();
+    while(time.elapsed() != 6000)
+        QCoreApplication::instance()->processEvents();
     QCOMPARE( spy.count(), 1 );
 }
 
