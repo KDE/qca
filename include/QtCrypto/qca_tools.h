@@ -37,6 +37,7 @@
 
 #include <QSharedData>
 #include <QSharedDataPointer>
+#include <QMetaType>
 #include "qca_export.h"
 
 class QString;
@@ -285,6 +286,8 @@ private:
 	QSharedDataPointer<Private> d;
 };
 
+Q_DECLARE_METATYPE(QSecureArray)
+
 /**
  * Equality operator. Returns true if the two QSecureArray
  * arguments have the same data (and the same length, of course).
@@ -500,6 +503,8 @@ private:
 	class Private;
 	QSharedDataPointer<Private> d;
 };
+
+Q_DECLARE_METATYPE(QBigInteger)
 
 /**
  * Equality operator. Returns true if the two QBigInteger values
