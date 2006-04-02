@@ -5,6 +5,7 @@ SUBDIRS += \
 	base64test \
 	certtest \
 	ciphertest \
+	cms \
 	hashtest \
 	hextest \
 	mactest \
