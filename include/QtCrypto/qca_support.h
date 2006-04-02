@@ -38,6 +38,7 @@
 #include <QString>
 #include <QObject>
 #include "qca_export.h"
+#include "qca_tools.h"
 
 namespace QCA
 {
@@ -96,6 +97,84 @@ namespace QCA
 		class Private;
 		friend class Private;
 		Private *d;
+	};
+
+	class ConsolePrivate;
+	class ConsoleReferencePrivate;
+	class ConsoleReference;
+
+	// note: only one Console object can be created at a time
+	class QCA_EXPORT Console : public QObject
+	{
+		Q_OBJECT
+	public:
+		enum ChannelMode
+		{
+			Read,        // stdin
+			ReadWrite    // stdin + stdout
+		};
+
+		enum TerminalMode
+		{
+			Default,     // use default terminal settings
+			Interactive  // char-by-char input, no echo
+		};
+
+		Console(ChannelMode cmode = Read, TerminalMode tmode = Default, QObject *parent = 0);
+		~Console();
+
+		static Console *instance();
+
+		// call shutdown() to get access to unempty buffers
+		void shutdown();
+		QByteArray bytesLeftToRead();
+		QByteArray bytesLeftToWrite();
+
+	private:
+		friend class ConsolePrivate;
+		ConsolePrivate *d;
+
+		friend class ConsoleReference;
+	};
+
+	// note: only one ConsoleReference object can be active at a time
+	class QCA_EXPORT ConsoleReference : public QObject
+	{
+		Q_OBJECT
+	public:
+		enum SecurityMode
+		{
+			SecurityDisabled,
+			SecurityEnabled
+		};
+
+		ConsoleReference(QObject *parent = 0);
+		~ConsoleReference();
+
+		void start(SecurityMode mode = SecurityDisabled);
+		void stop();
+
+		// normal i/o
+		QByteArray read(int bytes = -1);
+		void write(const QByteArray &a);
+
+		// secure i/o
+		QSecureArray readSecure(int bytes = -1);
+		void writeSecure(const QSecureArray &a);
+
+		int bytesAvailable() const;
+		int bytesToWrite() const;
+
+	signals:
+		void readyRead();
+		void bytesWritten(int);
+		void closed();
+
+	private:
+		friend class ConsoleReferencePrivate;
+		ConsoleReferencePrivate *d;
+
+		friend class Console;
 	};
 }
 

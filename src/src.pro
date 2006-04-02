@@ -67,7 +67,8 @@ SOURCES += \
 	$$QCA_CPP/qca_securelayer.cpp \
 	$$QCA_CPP/qca_securemessage.cpp \
 	$$QCA_CPP/qca_default.cpp \
-	$$QCA_CPP/support/qpipe.cpp
+	$$QCA_CPP/support/qpipe.cpp \
+	$$QCA_CPP/support/console.cpp
 
 unix:!mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_flatfile.cpp
