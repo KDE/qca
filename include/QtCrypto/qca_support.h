@@ -80,17 +80,43 @@ namespace QCA
 		Private *d;
 	};
 
+	/**
+	   Support class to monitor a file for activity
+
+	   %FileWatch monitors a specified file for any changes. When
+	   the file changes, the changed() signal is emitted.
+	*/
 	class QCA_EXPORT FileWatch : public QObject
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Standard constructor
+
+		   \param file the name of the file to watch. If not
+		   in this object, you can set it using setFileName()
+		   \param parent the parent object for this object
+		*/
 		FileWatch(const QString &file = QString(), QObject *parent = 0);
 		~FileWatch();
 
+		/**
+		   The name of the file that is being monitored
+		*/
 		QString fileName() const;
+
+		/**
+		   Change the file being monitored
+
+		   \param file the name of the file to monitor
+		*/
 		void setFileName(const QString &file);
 
 	signals:
+		/**
+		   The changed signal is emitted when the file is
+		   changed (e.g. modified, deleted)
+		*/
 		void changed();
 
 	private:

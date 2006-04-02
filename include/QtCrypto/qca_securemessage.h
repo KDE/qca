@@ -241,7 +241,7 @@ namespace QCA
 	/**
 	   \class SecureMessage qca_securemessage.h QtCrypto
 
-	   Superclass for secure messages
+	   Class representing a secure message
 	*/
 	class QCA_EXPORT SecureMessage : public QObject, public Algorithm
 	{
@@ -261,7 +261,7 @@ namespace QCA
 		*/
 		enum SignMode
 		{
-			Message,   
+			Message,    ///< the message includes the signature
 			Clearsign,  ///< the message is clear signed
 			Detached    ///< the signature is detached
 		};
@@ -308,29 +308,198 @@ namespace QCA
 		   The Type of secure message
 		*/
 		Type type() const;
-		bool canSignMultiple() const;     // CMS feature
-		bool canClearsign() const;        // PGP feature
-		bool canSignAndEncrypt() const;   // PGP feature
+
+		/**
+		   Test if the message type supports multiple
+		   (parallel) signatures.
+
+		   \return true if the secure message support multiple
+		   parallel signatures
+
+		   \note PGP cannot do this - it is primarily a CMS
+		   feature
+		*/
+		bool canSignMultiple() const;
+
+		/**
+		   True if the SecureMessageSystem can clearsign
+		   messages.
+
+		   \note CMS cannot clearsign - this is normally only
+		   available for PGP
+		*/
+		bool canClearsign() const;
+
+		/**
+		   True if the SecureMessageSystem can both sign and
+		   encrypt (in the same operation).
+
+		   \note CMS cannot do an integrated sign/encrypt -
+		   this is normally only available for PGP. You can do
+		   separate signing and encrypting operations on the
+		   same message with CMS though.
+		*/
+		bool canSignAndEncrypt() const;
 
 		void reset();
 
 		void setEnableBundleSigner(bool b);    // CMS: bundle X.509 certificate chain (default true)
 		void setEnableSMIMEAttributes(bool b); // CMS: include S/MIME attributes (default true)
+		/**
+		   Set the Format used for messages
+
+		   \param f whether to use Binary or Ascii
+		*/
 		void setFormat(Format f);              // (default Binary)
 		void setRecipient(const SecureMessageKey &key);
 		void setRecipients(const SecureMessageKeyList &keys);
 		void setSigner(const SecureMessageKey &key);
 		void setSigners(const SecureMessageKeyList &keys);
 
+		/**
+		   Start an encryption operation
+
+		   You will normally use this with some code along
+		   these lines:
+		   \code
+		   encryptingObj.startEncrypt();
+		   encryptingObj.update(message);
+		   // perhaps some more update()s
+		   encryptingObj.end();
+		   \endcode
+
+		   Each update() may (or may not) result in some
+		   encrypted data, as indicated by the readyRead()
+		   signal being emitted. Alternatively, you can wait
+		   until the whole message is available (using either
+		   waitForFinished(), or use the finished()
+		   signal. The encrypted message can then be read
+		   using the read() method.
+		*/
 		void startEncrypt();
-		void startDecrypt(); // if decrypted result is signed (PGP only), it will be verified
+
+		/**
+		   Start an decryption operation
+
+		   You will normally use this with some code along
+		   these lines:
+		   \code
+		   decryptingObj.startEncrypt();
+		   decryptingObj.update(message);
+		   // perhaps some more update()s
+		   decryptingObj.end();
+		   \endcode
+
+		   Each update() may (or may not) result in some
+		   decrypted data, as indicated by the readyRead()
+		   signal being emitted. Alternatively, you can wait
+		   until the whole message is available (using either
+		   waitForFinished(), or the finished()
+		   signal). The decrypted message can then be read
+		   using the read() method.
+
+		   \note If decrypted result is also signed (not for
+		   CMS), then the signature will be verified during
+		   this operation.
+		*/
+		void startDecrypt();
+
+		/**
+		   Start a signing operation
+
+		   You will normally use this with some code along
+		   these lines:
+		   \code
+		   signingObj.startSign(QCA::SecureMessage::Detached)
+		   signingObj.update(message);
+		   // perhaps some more update()s
+		   signingObj.end();
+		   \endcode
+
+		   You then do either waitForFinished(), or use the
+		   finished() signal, to figure out when you can get
+		   the signature. For Detached format, you get the
+		   signature out using signature(); for other formats
+		   you get the signed message out using read().
+
+		   \param m the mode that will be used to generate the
+		   signature
+		*/
 		void startSign(SignMode m = Message);
+
+		/**
+		   Start a verification operation
+
+		   \param detachedSig the detached signature to
+		   verify. Do not pass a signature for other signature
+		   types.
+		*/
 		void startVerify(const QByteArray &detachedSig = QByteArray());
+
+		/**
+		   Start a combined signing and encrypting
+		   operation. You use this in the same way as
+		   startEncrypt().
+
+		   \note This may not be possible (e.g. CMS
+		   cannot do this) - see canSignAndEncrypt() for a
+		   suitable test.
+		*/
 		void startSignAndEncrypt();
+
+		/**
+		   Process a message (or the next part of a message)
+		   in the current operation. You need to have already
+		   set up the message (startEncrypt(), startDecrypt(),
+		   startSign(), startSignAndEncrypt() and
+		   startVerify()) before calling this method.
+
+		   \param in the data to process
+		*/
 		void update(const QByteArray &in);
+
+		/**
+		   Read the available data.
+
+		   \note For detached signatures, you get the message
+		   back using this method, and get the signature back
+		   using the signature() method.
+		*/
 		QByteArray read();
+
+		/**
+		   The number of bytes available to be read.
+		*/
 		int bytesAvailable() const;
+
+		/**
+		   Complete an operation.
+
+		   You need to call this method after you have
+		   processed the message (which you pass in as the
+		   argument to update().
+
+		   \note the results of the operation are not
+		   available as soon as this method returns. You need
+		   to wait for the finished() signal, or use
+		   waitForFinished().
+		*/
 		void end();
+
+		/**
+		   Block until the operation (encryption, decryption,
+		   signing or verifying) completes.
+
+		   \param msecs the number of milliseconds to wait for
+		   the operation to complete. Pass -1 to wait
+		   indefinitely.
+
+		   \note You should not use this in GUI
+		   applications where the blocking behaviour looks
+		   like a hung application. Instead, connect the
+		   finished() signal to a slot that handles the
+		   results.
+		*/
 		bool waitForFinished(int msecs = 30000);
 
 		bool success() const;
@@ -338,7 +507,10 @@ namespace QCA
 
 		// sign
 		/**
-		   The signature on the signed message
+		   The signature for the message. This is only used
+		   for Detached signatures. For other message types,
+		   you get the message and signature together using
+		   read().
 		*/
 		QByteArray signature() const;
 
@@ -357,14 +529,47 @@ namespace QCA
 		   \return true if the message was signed.
 		*/
 		bool wasSigned() const;
+
+		/**
+		   Verify that the message signature is correct.
+
+		   \return true if the signature is valid for the
+		   message, otherwise return false
+		*/
 		bool verifySuccess() const;
+
+		/**
+		   Information on the signer for the message
+		*/
 		SecureMessageSignature signer() const;
+
+		/**
+		   Information on the signers for the message. 
+
+		   This is only meaningful if the message type supports
+		   multiple signatures (see canSignMultiple() for a
+		   suitable test).
+		*/
 		SecureMessageSignatureList signers() const;
 
 		QString diagnosticText() const;
 
 	signals:
+		/**
+		   This signal is emitted when there is some data to
+		   read. Typically you connect this signal to a slot
+		   that does a read() of the available data.
+
+		   \note This signal does not mean that the processing
+		   of a message is necessarily complete - see
+		   finished().
+		*/
 		void readyRead();
+
+		/**
+		   This signal is emitted when the message is fully
+		   processed.
+		*/ 
 		void finished();
 
 	private:
@@ -385,6 +590,19 @@ namespace QCA
 		~SecureMessageSystem();
 
 	protected:
+		/**
+		   Protected constructor for SecureMessageSystem
+		   classes. You are meant to be using a subclass (such
+		   as OpenPGP or CMS) - you only need to worry about
+		   this class if you are creating a whole new
+		   SecureMessageSystem type.
+
+		   \param parent the parent object for this object
+		   \param type the name of the Type of
+		   SecureMessageSystem to create
+		   \param provider the provider to use, if a specific
+		   provider is required.
+		*/
 		SecureMessageSystem(QObject *parent, const QString &type, const QString &provider);
 	};
 
@@ -397,6 +615,13 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Standard constructor
+
+		   \param parent the parent object for this object
+		   \param provider the provider to use, if a specific
+		   provider is required
+		*/
 		OpenPGP(QObject *parent = 0, const QString &provider = QString());
 		~OpenPGP();
 	};
@@ -405,15 +630,53 @@ namespace QCA
 	   \class CMS qca_securemessage.h QtCrypto
 
 	   Cryptographic Message Syntax messaging system
+
+	   Cryptographic Message Syntax (%CMS) "is used to digitally
+	   sign, digest, authenticate, or encrypt arbitrary message
+	   content.  The %CMS describes an encapsulation syntax for
+	   data protection.  It supports digital signatures and
+	   encryption.  The syntax allows multiple encapsulations; one
+	   encapsulation envelope can be nested inside another.
+	   Likewise, one party can digitally sign some previously
+	   encapsulated data.  It also allows arbitrary attributes,
+	   such as signing time, to be signed along with the message
+	   content, and provides for other attributes such as
+	   countersignatures to be associated with a signature." (from
+	   <a href="http://www.ietf.org/rfc/rfc3852.txt">RFC3852</a>
+	   "Cryptographic Message Syntax")
 	*/
 	class QCA_EXPORT CMS : public SecureMessageSystem
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Standard constructor
+
+		   \param parent the parent object for this object
+		   \param provider the provider to use, if a specific
+		   provider is required
+		*/
 		CMS(QObject *parent = 0, const QString &provider = QString());
 		~CMS();
 
+		/**
+		   Set the trusted certificates to use for the
+		   messages built using this CMS object.
+
+		   \param trusted the collection of trusted
+		   certificates to use
+		*/
 		void setTrustedCertificates(const CertificateCollection &trusted);
+
+		/**
+		   Set the private keys to use for the messages built
+		   using this CMS object.
+
+		   Keys are required for decrypting and signing (not
+		   for encrypting or verifying).
+
+		   \param keys the collection of keys to use
+		*/
 		void setPrivateKeys(const SecureMessageKeyList &keys);
 	};
 }
