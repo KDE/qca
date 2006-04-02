@@ -41,6 +41,7 @@
 #include "qca_securelayer.h"
 #include "qca_securemessage.h"
 #include "qcaprovider.h"
+#include "qpipe.h"
 
 /**
    \mainpage Qt Cryptographic Architecture
