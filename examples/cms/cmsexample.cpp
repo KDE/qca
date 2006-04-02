@@ -114,7 +114,6 @@ int main(int argc, char** argv)
     anotherCms.setPrivateKeys( privKeyList );
 
     QCA::SecureMessage msg2( &anotherCms );
-    msg2.setRecipient( secMsgKey2 );
 
     msg2.startDecrypt();
     msg2.update( cipherText );
@@ -154,7 +153,7 @@ int main(int argc, char** argv)
     QCA::SecureMessage signing( &anotherCms );
     signing.setSigners(privKeyList);
 
-    signing.startSign(QCA::SecureMessage::Clearsign);
+    signing.startSign(QCA::SecureMessage::Detached);
     signing.update(text);
     signing.end();
 
@@ -169,10 +168,10 @@ int main(int argc, char** argv)
     }
 
     // get the result
-    QByteArray signedMessage = signing.signature();
+    QByteArray signature = signing.signature();
 
-    qDebug() << "'" << text.data() << "', when signed and converted to base 64, is: ";
-    qDebug() << enc.arrayToString( signedMessage );
+    qDebug() << "'" << text.data() << "', signature (converted to base 64), is: ";
+    qDebug() << enc.arrayToString( signature );
     qDebug() << "Message uses" << signing.hashName() << "hashing algorithm";
     qDebug();
 
@@ -180,8 +179,10 @@ int main(int argc, char** argv)
     // Now we go back to the first CMS, and re-use that.
     QCA::SecureMessage verifying( &cms );
 
-    verifying.startVerify();
-    verifying.update(signedMessage);
+    // You have to pass the signature to startVerify(),
+    // and the message to update()
+    verifying.startVerify(signature);
+    verifying.update(text);
     verifying.end();
 
     verifying.waitForFinished(1000);
@@ -201,7 +202,7 @@ int main(int argc, char** argv)
     {
 	qDebug() << "Message verified";
     } else {
-	qDebug() << "Message failed to verify";
+	qDebug() << "Message failed to verify:" << verifying.errorCode();
     }
 
     return 0;
