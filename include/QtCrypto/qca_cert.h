@@ -433,11 +433,6 @@ namespace QCA
 		int pathLimit() const;
 
 		/**
-		   The signature on the certificate
-		*/
-		QSecureArray signature() const;
-
-		/**
 		   The signature algorithm used for the signature on this certificate
 		*/
 		SignatureAlgorithm signatureAlgorithm() const;
@@ -692,11 +687,6 @@ namespace QCA
 		   The challenge associated with this certificate request
 		*/
 		QString challenge() const;
-
-		/**
-		   The signature on this certificate request
-		*/
-		QSecureArray signature() const;
 
 		/**
 		   The algorithm used to make the signature on this certificate request

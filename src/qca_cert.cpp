@@ -344,11 +344,6 @@ int Certificate::pathLimit() const
 	return static_cast<const CertContext *>(context())->props()->pathLimit;
 }
 
-QSecureArray Certificate::signature() const
-{
-	return static_cast<const CertContext *>(context())->props()->sig;
-}
-
 SignatureAlgorithm Certificate::signatureAlgorithm() const
 {
 	return static_cast<const CertContext *>(context())->props()->sigalgo;
@@ -630,11 +625,6 @@ QString CertificateRequest::challenge() const
 	return static_cast<const CSRContext *>(context())->props()->challenge;
 }
 
-QSecureArray CertificateRequest::signature() const
-{
-	return static_cast<const CSRContext *>(context())->props()->sig;
-}
-
 SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 {
 	return static_cast<const CSRContext *>(context())->props()->sigalgo;
@@ -642,6 +632,9 @@ SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 
 bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 {
+	const CertContextProps *a = static_cast<const CSRContext *>(context())->props();
+	const CertContextProps *b = static_cast<const CSRContext *>(otherCsr.context())->props();
+
 	if (isNull()) {
 		if (otherCsr.isNull())
 			// they are both null
@@ -655,7 +648,7 @@ bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 	if (signatureAlgorithm() != otherCsr.signatureAlgorithm())
 		return false;
 
-	if (signature() != otherCsr.signature())
+	if (a->sig != b->sig)
 		return false;
 
 	// TODO: Anything else we should compare?
