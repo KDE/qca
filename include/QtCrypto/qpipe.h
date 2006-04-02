@@ -101,18 +101,19 @@ public:
 	Q_PIPE_ID id() const;
 	QString idAsString() const;
 
-#ifdef QPIPE_SECURE
-	void take(Q_PIPE_ID id, QPipeDevice::Type t, bool secure = false);
-#else
 	void take(Q_PIPE_ID id, QPipeDevice::Type t);
+#ifdef QPIPE_SECURE
+	void setSecurityEnabled(bool secure);
 #endif
 	void enable();
 	void close();
+	void release();
 #ifdef Q_OS_WIN
 	bool winDupHandle();
 #endif
 
 	void finalize(); // do an immediate read, and invalidate
+	void finalizeAndRelease(); // same as above, but don't close pipe
 
 	int bytesAvailable() const;
 	int bytesToWrite() const;
@@ -125,6 +126,12 @@ public:
 	// secure i/o
 	QSecureArray readSecure(int bytes = -1);
 	void writeSecure(const QSecureArray &a);
+#endif
+
+	QByteArray takeBytesToWrite();
+
+#ifdef QPIPE_SECURE
+	QSecureArray takeBytesToWriteSecure();
 #endif
 
 signals:

@@ -908,11 +908,11 @@ public:
 		closing = false;
 		curWrite.clear();
 #ifdef QPIPE_SECURE
+		secure = false;
 		sec_curWrite.clear();
 #endif
 
-		// always clear the write buffers, no sense in keeping them
-		if(mode >= ResetSessionAndData || type == QPipeDevice::Write)
+		if(mode >= ResetSessionAndData)
 		{
 			buf.clear();
 #ifdef QPIPE_SECURE
@@ -941,10 +941,10 @@ public:
 	{
 #ifdef QPIPE_SECURE
 		if(secure)
-			return PIPEEND_READBUF_SEC - sec_buf.size();
+			return qMax(PIPEEND_READBUF_SEC - sec_buf.size(), 0);
 		else
 #endif
-			return PIPEEND_READBUF - buf.size();
+			return qMax(PIPEEND_READBUF - buf.size(), 0);
 	}
 
 	void appendArray(QByteArray *a, const QByteArray &b)
@@ -1060,16 +1060,19 @@ public slots:
 			if(secure)
 			{
 				takeArray(&sec_buf, lastWrite);
-				sec_curWrite.clear();
 				moreData = !sec_buf.isEmpty();
 			}
 			else
 #endif
 			{
 				takeArray(&buf, lastWrite);
-				curWrite.clear();
 				moreData = !buf.isEmpty();
 			}
+
+#ifdef QPIPE_SECURE
+			sec_curWrite.clear();
+#endif
+			curWrite.clear();
 
 			int x = lastWrite;
 			lastWrite = 0;
@@ -1222,18 +1225,33 @@ QString QPipeEnd::idAsString() const
 	return QString::number(d->pipe.idAsInt());
 }
 
-#ifdef QPIPE_SECURE
-void QPipeEnd::take(Q_PIPE_ID id, QPipeDevice::Type t, bool secure)
-#else
 void QPipeEnd::take(Q_PIPE_ID id, QPipeDevice::Type t)
-#endif
 {
 	reset();
-#ifdef QPIPE_SECURE
-	d->secure = secure;
-#endif
 	d->setup(id, t);
 }
+
+#ifdef QPIPE_SECURE
+void QPipeEnd::setSecurityEnabled(bool secure)
+{
+	// no change
+	if(d->secure == secure)
+		return;
+
+	if(secure)
+	{
+		d->sec_buf = d->buf;
+		d->buf.clear();
+	}
+	else
+	{
+		d->buf = d->sec_buf.toByteArray();
+		d->sec_buf.clear();
+	}
+
+	d->secure = secure;
+}
+#endif
 
 void QPipeEnd::enable()
 {
@@ -1253,6 +1271,15 @@ void QPipeEnd::close()
 		d->closeTrigger.start(0);
 }
 
+void QPipeEnd::release()
+{
+	if(!isValid())
+		return;
+
+	d->pipe.release();
+	d->reset(ResetSession);
+}
+
 #ifdef Q_OS_WIN
 bool QPipeEnd::winDupHandle()
 {
@@ -1262,8 +1289,22 @@ bool QPipeEnd::winDupHandle()
 
 void QPipeEnd::finalize()
 {
+	if(!isValid())
+		return;
+
 	if(d->pipe.bytesAvailable())
 		d->doReadActual(false);
+	d->reset(ResetSession);
+}
+
+void QPipeEnd::finalizeAndRelease()
+{
+	if(!isValid())
+		return;
+
+	if(d->pipe.bytesAvailable())
+		d->doReadActual(false);
+	d->pipe.release();
 	d->reset(ResetSession);
 }
 
@@ -1319,6 +1360,30 @@ void QPipeEnd::writeSecure(const QSecureArray &buf)
 }
 #endif
 
+QByteArray QPipeEnd::takeBytesToWrite()
+{
+	// only call this on inactive sessions
+	if(isValid())
+		return QByteArray();
+
+	QByteArray a = d->buf;
+	d->buf.clear();
+	return a;
+}
+
+#ifdef QPIPE_SECURE
+QSecureArray QPipeEnd::takeBytesToWriteSecure()
+{
+	// only call this on inactive sessions
+	if(isValid())
+		return QSecureArray();
+
+	QSecureArray a = d->sec_buf;
+	d->sec_buf.clear();
+	return a;
+}
+#endif
+
 //----------------------------------------------------------------------------
 // QPipe
 //----------------------------------------------------------------------------
@@ -1354,25 +1419,21 @@ bool QPipe::create()
 	HANDLE r, w;
 	if(!CreatePipe(&r, &w, &secAttr, 0))
 		return false;
-#ifdef QPIPE_SECURE
-	i.take(r, QPipeDevice::Read, secure);
-	o.take(w, QPipeDevice::Write, secure);
-#else
 	i.take(r, QPipeDevice::Read);
 	o.take(w, QPipeDevice::Write);
 #endif
-#endif
+
 #ifdef Q_OS_UNIX
 	int p[2];
 	if(pipe(p) == -1)
 		return false;
-#ifdef QPIPE_SECURE
-	i.take(p[0], QPipeDevice::Read, secure);
-	o.take(p[1], QPipeDevice::Write, secure);
-#else
 	i.take(p[0], QPipeDevice::Read);
 	o.take(p[1], QPipeDevice::Write);
 #endif
+
+#ifdef QPIPE_SECURE
+	i.setSecurityEnabled(secure);
+	o.setSecurityEnabled(secure);
 #endif
 
 	return true;
