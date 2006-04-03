@@ -5816,6 +5816,18 @@ public:
 #endif
 		list += "hmac(md5)";
 		list += "hmac(sha1)";
+#ifdef SHA224_DIGEST_LENGTH
+		list += "hmac(sha224)";
+#endif
+#ifdef SHA256_DIGEST_LENGTH
+		list += "hmac(sha256)";
+#endif
+#ifdef SHA384_DIGEST_LENGTH
+		list += "hmac(sha384)";
+#endif
+#ifdef SHA512_DIGEST_LENGTH
+		list += "hmac(sha512)";
+#endif
 		list += "hmac(ripemd160)";
 		list += "pbkdf1(md2)";
 		list += "pbkdf1(sha1)";
@@ -5898,6 +5910,22 @@ public:
 			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )
 			return new opensslHMACContext( EVP_sha1(),this, type );
+#ifdef SHA224_DIGEST_LENGTH
+		else if ( type == "hmac(sha224)" )
+			return new opensslHMACContext( EVP_sha224(), this, type);
+#endif
+#ifdef SHA256_DIGEST_LENGTH
+		else if ( type == "hmac(sha256)" )
+			return new opensslHMACContext( EVP_sha256(), this, type);
+#endif
+#ifdef SHA384_DIGEST_LENGTH
+		else if ( type == "hmac(sha384)" )
+			return new opensslHMACContext( EVP_sha384(), this, type);
+#endif
+#ifdef SHA512_DIGEST_LENGTH
+		else if ( type == "hmac(sha512)" )
+			return new opensslHMACContext( EVP_sha512(), this, type);
+#endif
 		else if ( type == "hmac(ripemd160)" )
 			return new opensslHMACContext( EVP_ripemd160(), this, type );
 		else if ( type == "aes128-ecb" )
