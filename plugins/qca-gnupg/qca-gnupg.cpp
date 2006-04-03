@@ -431,6 +431,45 @@ public:
 	}*/
 };
 
+// FIXME: sloooooow
+static PGPKey publicKeyFromId(const QString &id, Provider *p)
+{
+	GpgOp::KeyList pubkeys;
+	{
+		GpgOp gpg(find_bin());
+		gpg.doPublicKeys();
+		while(1)
+		{
+			GpgOp::Event e = gpg.waitForEvent(-1);
+			if(e.type == GpgOp::Event::Finished)
+				break;
+		}
+		if(!gpg.success())
+			return PGPKey(); // FIXME
+		pubkeys = gpg.keys();
+	}
+
+	int at = -1;
+	for(int n = 0; n < pubkeys.count(); ++n)
+	{
+		if(pubkeys[n].keyItems.first().id == id)
+		{
+			at = n;
+			break;
+		}
+	}
+	if(at == -1)
+		return PGPKey(); // FIXME
+
+	MyPGPKeyContext *kc = new MyPGPKeyContext(p);
+	kc->_props.keyId = pubkeys[at].keyItems.first().id;
+	kc->_props.userIds = QStringList() << pubkeys[at].userIds.first();
+
+	PGPKey pub;
+	pub.change(kc);
+	return pub;
+}
+
 class MyOpenPGPContext : public SMSContext
 {
 public:
@@ -454,8 +493,14 @@ public:
 	MyOpenPGPContext *sms;
 
 	QString signerId;
-	QByteArray in, out;
-	bool ok;
+	QStringList recipIds;
+	Operation op;
+	SecureMessage::SignMode signMode;
+	SecureMessage::Format format;
+	QByteArray in, out, sig;
+	bool ok, wasSigned;
+	GpgOp::Error op_err;
+	SecureMessageSignature signer;
 
 	//PasswordAsker asker;
 
@@ -463,6 +508,7 @@ public:
 	{
 		sms = _sms;
 		ok = false;
+		wasSigned = false;
 		//connect(&asker, SIGNAL(responseReady()), SLOT(asker_responseReady()));
 	}
 
@@ -483,28 +529,32 @@ public:
 
 	virtual void reset()
 	{
+		ok = false;
+		wasSigned = false;
 	}
 
 	virtual void setupEncrypt(const SecureMessageKeyList &keys)
 	{
-		Q_UNUSED(keys);
+		recipIds.clear();
+		for(int n = 0; n < keys.count(); ++n)
+			recipIds += keys[n].pgpPublicKey().keyId();
 	}
 
 	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool, bool)
 	{
 		signerId = keys.first().pgpSecretKey().keyId();
-		Q_UNUSED(m);
+		signMode = m;
 	}
 
 	virtual void setupVerify(const QByteArray &detachedSig)
 	{
-		Q_UNUSED(detachedSig);
+		sig = detachedSig;
 	}
 
 	virtual void start(SecureMessage::Format f, Operation op)
 	{
-		Q_UNUSED(f);
-		Q_UNUSED(op);
+		format = f;
+		this->op = op;
 	}
 
 	virtual void update(const QByteArray &in)
@@ -514,14 +564,56 @@ public:
 
 	virtual QByteArray read()
 	{
-		return out;
+		QByteArray a = out;
+		out.clear();
+		return a;
 	}
 
 	virtual void end()
 	{
 		GpgOp gpg(find_bin());
 		global_gpg = &gpg;
-		gpg.doSignClearsign(signerId);
+
+		if(format == SecureMessage::Ascii)
+			gpg.setAsciiFormat(true);
+		else
+			gpg.setAsciiFormat(false);
+
+		if(op == Encrypt)
+		{
+			gpg.doEncrypt(recipIds);
+		}
+		else if(op == Decrypt)
+		{
+			gpg.doDecrypt();
+		}
+		else if(op == Sign)
+		{
+			if(signMode == SecureMessage::Message)
+			{
+				gpg.doSign(signerId);
+			}
+			else if(signMode == SecureMessage::Clearsign)
+			{
+				gpg.doSignClearsign(signerId);
+			}
+			else // SecureMessage::Detached
+			{
+				gpg.doSignDetached(signerId);
+			}
+		}
+		else if(op == Verify)
+		{
+			if(!sig.isEmpty())
+				gpg.doVerifyDetached(sig);
+			else
+				gpg.doVerify();
+		}
+		else if(op == SignAndEncrypt)
+		{
+			gpg.doSignAndEncrypt(signerId, recipIds);
+		}
+
 		gpg.write(in);
 		gpg.endWrite();
 		while(1)
@@ -538,8 +630,49 @@ public:
 			else if(e.type == GpgOp::Event::Finished)
 				break;
 		}
+
 		ok = gpg.success();
 		out = gpg.read();
+
+		if(ok)
+		{
+			if(gpg.wasSigned())
+			{
+				QString signerId = gpg.signerId();
+				QDateTime ts = gpg.timestamp();
+				GpgOp::VerifyResult vr = gpg.verifyResult();
+
+				SecureMessageSignature::IdentityResult ir;
+				Validity v;
+				if(vr == GpgOp::VerifyGood)
+				{
+					ir = SecureMessageSignature::Valid;
+					v = ValidityGood;
+				}
+				else if(vr == GpgOp::VerifyBad)
+				{
+					ir = SecureMessageSignature::InvalidSignature;
+					v = ValidityGood;
+				}
+				else // GpgOp::VerifyNoKey
+				{
+					ir = SecureMessageSignature::NoKey;
+					v = ErrorValidityUnknown;
+				}
+
+				SecureMessageKey key;
+				PGPKey pub = publicKeyFromId(signerId, provider());
+				if(!pub.isNull())
+				{
+					key.setPGPPublicKey(pub);
+					signer = SecureMessageSignature(ir, v, key, ts);
+					wasSigned = true;
+				}
+			}
+		}
+		else
+			op_err = gpg.errorCode();
+
 		global_gpg = 0;
 	}
 
@@ -561,12 +694,31 @@ public:
 
 	virtual SecureMessage::Error errorCode() const
 	{
-		return SecureMessage::ErrorUnknown;
+		SecureMessage::Error e = SecureMessage::ErrorUnknown;
+		if(op_err == GpgOp::ErrorProcess)
+			e = SecureMessage::ErrorUnknown;
+		else if(op_err == GpgOp::ErrorPassphrase)
+			e = SecureMessage::ErrorPassphrase;
+		else if(op_err == GpgOp::ErrorFormat)
+			e = SecureMessage::ErrorFormat;
+		else if(op_err == GpgOp::ErrorSignerExpired)
+			e = SecureMessage::ErrorSignerExpired;
+		else if(op_err == GpgOp::ErrorEncryptExpired)
+			e = SecureMessage::ErrorEncryptExpired;
+		else if(op_err == GpgOp::ErrorEncryptUntrusted)
+			e = SecureMessage::ErrorEncryptUntrusted;
+		else if(op_err == GpgOp::ErrorEncryptInvalid)
+			e = SecureMessage::ErrorEncryptInvalid;
+		else if(op_err == GpgOp::ErrorDecryptNoKey)
+			e = SecureMessage::ErrorUnknown;
+		else if(op_err == GpgOp::ErrorUnknown)
+			e = SecureMessage::ErrorUnknown;
+		return e;
 	}
 
 	virtual QByteArray signature() const
 	{
-		return QByteArray();
+		return out;
 	}
 
 	virtual QString hashName() const
@@ -577,7 +729,10 @@ public:
 
 	virtual SecureMessageSignatureList signers() const
 	{
-		return SecureMessageSignatureList();
+		SecureMessageSignatureList list;
+		if(ok && wasSigned)
+			list += signer;
+		return list;
 	}
 
 /*private slots:
