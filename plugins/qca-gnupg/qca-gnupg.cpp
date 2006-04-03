@@ -632,7 +632,13 @@ public:
 		}
 
 		ok = gpg.success();
-		out = gpg.read();
+		if(ok)
+		{
+			if(signMode == SecureMessage::Detached)
+				sig = gpg.read();
+			else
+				out = gpg.read();
+		}
 
 		if(ok)
 		{
@@ -718,7 +724,7 @@ public:
 
 	virtual QByteArray signature() const
 	{
-		return out;
+		return sig;
 	}
 
 	virtual QString hashName() const
