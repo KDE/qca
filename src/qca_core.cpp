@@ -52,6 +52,7 @@ public:
 	ProviderManager manager;
 	Random *rng;
 	KeyStoreManager *ksm;
+	QVariantMap properties;
 
 	Global()
 	{
@@ -302,16 +303,14 @@ void setProperty(const QString &name, const QVariant &value)
 {
 	QMutexLocker lock(&global->manager_mutex);
 
-	Q_UNUSED(name);
-	Q_UNUSED(value);
+	global->properties[name] = value;
 }
 
 QVariant getProperty(const QString &name)
 {
 	QMutexLocker lock(&global->manager_mutex);
 
-	Q_UNUSED(name);
-	return QVariant();
+	return global->properties.value(name);
 }
 
 Random & globalRNG()
