@@ -13,9 +13,7 @@
     new password/token event handler system
     passive keystoreentry (and related issues)
   code:
-    properties
     don't create qobjects during init (that means you, keystoremanager)
-    qca-gnupg: add enough features to make psi happy
     if KeyStore::needPassphrase has no listener, reject the request somehow
 
 * beta3
