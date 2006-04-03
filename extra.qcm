@@ -1,6 +1,9 @@
 /*
 -----BEGIN QCMOD-----
 name: extra
+section: project
+arg: enable-debug,Build everything in debug mode
+arg: disable-tests,Don't build examples and unittests
 -----END QCMOD-----
 */
 
@@ -16,10 +19,29 @@ public:
 
 	bool exec()
 	{
-		QString prefix = conf->getenv("PREFIX");
-
 		QString str;
 		QFile f;
+
+		str = QString();
+		if(conf->getenv("QC_ENABLE_DEBUG") == "Y")
+			str += "CONFIG += debug\n";
+		if(conf->getenv("QC_DISABLE_TESTS") == "Y")
+			str += "QCA_NO_TESTS = 1\n";
+		conf->addExtra(str);
+
+		// write confapp.pri
+		str = QString();
+                QString var = conf->getenv("BINDIR");
+                if(!var.isEmpty())
+                        str += QString("BINDIR = %1\n").arg(var);
+		if(conf->getenv("QC_ENABLE_DEBUG") == "Y")
+			str += "CONFIG += debug\n";
+		f.setFileName("confapp.pri");
+		if(f.open(QFile::WriteOnly | QFile::Truncate))
+			f.write(str.toLatin1());
+		f.close();
+
+		QString prefix = conf->getenv("PREFIX");
 
 		// write qmake-feature file
 		str = QString(

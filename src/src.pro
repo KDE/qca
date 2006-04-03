@@ -5,8 +5,6 @@ QCA_INCBASE = ../include
 QCA_SRCBASE = .
 
 TEMPLATE = lib
-#CONFIG  += release
-CONFIG  += debug
 QT      -= gui
 TARGET   = qca
 DESTDIR  = $$QCA_BASE/lib
@@ -82,9 +80,9 @@ mac: {
 	LIBS += -framework Carbon -framework Security
 }
 
-unix: {
-	include($$QCA_BASE/conf.pri)
+include($$QCA_BASE/conf.pri)
 
+unix: {
 	# install
 	target.path = $$LIBDIR
 	INSTALLS += target

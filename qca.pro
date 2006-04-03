@@ -4,6 +4,10 @@ SUBDIRS = src tools unittest examples
 unix:{
 	include(conf.pri)
 
+	!isEmpty(QCA_NO_TESTS) {
+		SUBDIRS -= unittest examples
+	}
+
 	# install
 	pcfiles.path = $$PREFIX/lib/pkgconfig
 	pcfiles.files = qca.pc
