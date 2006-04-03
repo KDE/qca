@@ -270,7 +270,7 @@ private slots:
 
 		QCA::KeyStore *ks = static_cast<QCA::KeyStore *>(sender());
 		QString name = ks->name();
-		/*if(!entryId.isEmpty())
+		if(!entryId.isEmpty())
 		{
 			QList<QCA::KeyStoreEntry> list = ks->entryList();
 			QCA::KeyStoreEntry entry;
@@ -285,7 +285,7 @@ private slots:
 			}
 			if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
 				name = entry.pgpSecretKey().primaryUserId();
-		}*/
+		}
 		QSecureArray result = Prompter::prompt(QString("Enter passphrase for %1").arg(name));
 		//printf("Enter passphrase for %s (not hidden!) : ", qPrintable(name));
 		//fflush(stdout);
