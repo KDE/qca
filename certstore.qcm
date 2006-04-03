@@ -1,7 +1,8 @@
 /*
 -----BEGIN QCMOD-----
 name: certstore
-arg: certstore-path=[path],Path to the SSL/X509 Certificate store
+section: project
+arg: certstore-path=[path],Path to the SSL/X509 Certificate store file
 -----END QCMOD-----
 */
 
