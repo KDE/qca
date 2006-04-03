@@ -704,6 +704,41 @@ static QPair<QCA::PGPKey, QCA::PGPKey> getPGPSecretKey(const QString &name)
 	return key;
 }
 
+static QCA::PGPKey getPGPPublicKey(const QString &name)
+{
+	QCA::PGPKey key;
+	int n = name.indexOf(':');
+	if(n == -1)
+	{
+		printf("missing colon\n");
+		return key;
+	}
+	QString storeName = name.mid(0, n);
+	QString objectName = name.mid(n + 1);
+
+	QCA::KeyStore store(getKeyStore(storeName));
+	if(!store.isValid())
+	{
+		printf("no such store\n");
+		return key;
+	}
+
+	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
+	if(e.isNull())
+	{
+		printf("no such object\n");
+		return key;
+	}
+
+	if(e.type() != QCA::KeyStoreEntry::TypePGPPublicKey && e.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
+	{
+		printf("not a PGPPublicKey\n");
+		return key;
+	}
+
+	return e.pgpPublicKey();
+}
+
 static QCA::Certificate getCertificate(const QString &name)
 {
 	QCA::Certificate cert;
@@ -821,6 +856,10 @@ static void usage()
 	printf("  --smime decrypt [priv.pem] [messagefile] [cert.pem] (passphrase)\n");
 	printf("\n");
 	printf("  --pgp clearsign [S] [messagefile]\n");
+	printf("  --pgp signdetach [S] [messagefile]\n");
+	printf("  --pgp verifydetach [messagefile] [sig]\n");
+	printf("  --pgp encrypt [P] [messagefile]\n");
+	printf("  --pgp decrypt [encryptedfile]\n");
 	printf("\n");
 	printf("  --list-tlsciphers\n");
 
@@ -2086,7 +2125,187 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			QSecureArray result = msg.read();
+			QByteArray result = msg.read();
+
+			printf("Result:\n%s\n", result.data());
+		}
+		else if(args[1] == "signdetach")
+		{
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			QPair<QCA::PGPKey, QCA::PGPKey> key = getPGPSecretKey(args[2]);
+			if(key.first.isNull())
+				return 1;
+
+			QFile infile(args[3]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QCA::SecureMessageKey skey;
+			skey.setPGPSecretKey(key.first);
+
+			QByteArray plain = infile.readAll();
+
+			QCA::OpenPGP pgp;
+			QCA::SecureMessage msg(&pgp);
+			msg.setSigner(skey);
+			msg.setFormat(QCA::SecureMessage::Ascii);
+			msg.startSign(QCA::SecureMessage::Detached);
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error signing: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QByteArray result = msg.signature();
+
+			printf("Result:\n%s\n", result.data());
+		}
+		else if(args[1] == "verifydetach")
+		{
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			QFile infile(args[2]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QFile sigfile(args[3]);
+			if(!sigfile.open(QFile::ReadOnly))
+			{
+				printf("Error opening signature file\n");
+				return 1;
+			}
+
+			QByteArray plain = infile.readAll();
+			QByteArray sig = sigfile.readAll();
+
+			QCA::OpenPGP pgp;
+			QCA::SecureMessage msg(&pgp);
+			msg.setFormat(QCA::SecureMessage::Ascii);
+			msg.startVerify(sig);
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error verifying: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QCA::SecureMessageSignature signer = msg.signer();
+			QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
+
+			QString rs;
+			if(r == QCA::SecureMessageSignature::Valid)
+				rs = "Valid";
+			else if(r == QCA::SecureMessageSignature::InvalidSignature)
+				rs = "InvalidSignature";
+			else if(r == QCA::SecureMessageSignature::InvalidKey)
+				rs = "InvalidKey";
+			else if(r == QCA::SecureMessageSignature::NoKey)
+				rs = "NoKey";
+			printf("IdentityResult: %s\n", qPrintable(rs));
+			QCA::SecureMessageKey fromkey = signer.key();
+			if(!fromkey.isNull())
+			{
+				QCA::PGPKey p = fromkey.pgpPublicKey();
+				printf("From: %s (%s)\n", qPrintable(p.primaryUserId()), qPrintable(p.keyId()));
+			}
+		}
+		else if(args[1] == "encrypt")
+		{
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::PGPKey key = getPGPPublicKey(args[2]);
+			if(key.isNull())
+				return 1;
+
+			QFile infile(args[3]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QCA::SecureMessageKey pkey;
+			pkey.setPGPPublicKey(key);
+
+			QByteArray plain = infile.readAll();
+
+			QCA::OpenPGP pgp;
+			QCA::SecureMessage msg(&pgp);
+			msg.setRecipient(pkey);
+			msg.setFormat(QCA::SecureMessage::Ascii);
+			msg.startEncrypt();
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error encrypting: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QByteArray result = msg.read();
+
+			printf("Result:\n%s\n", result.data());
+		}
+		else if(args[1] == "decrypt")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QFile infile(args[2]);
+			if(!infile.open(QFile::ReadOnly))
+			{
+				printf("Error opening message file\n");
+				return 1;
+			}
+
+			QByteArray plain = infile.readAll();
+
+			QCA::OpenPGP pgp;
+			QCA::SecureMessage msg(&pgp);
+			msg.setFormat(QCA::SecureMessage::Ascii);
+			msg.startDecrypt();
+			msg.update(plain);
+			msg.end();
+			msg.waitForFinished(-1);
+
+			if(!msg.success())
+			{
+				printf("Error decrypting: [%d]\n", msg.errorCode());
+				return 1;
+			}
+
+			QByteArray result = msg.read();
 
 			printf("Result:\n%s\n", result.data());
 		}
