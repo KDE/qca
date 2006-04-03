@@ -1,0 +1,14 @@
+*.log
+*.patch
+*.diff
+*.tmp
+*.o
+*.obj
+*.moc
+*.so
+*.rej
+*.orig
+*.dll
+configure
+conf.pri
+Makefile

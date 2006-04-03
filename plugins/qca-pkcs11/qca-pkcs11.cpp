@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2006  Alon Bar-Lev <alon.barlev@gmail.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,1350 +18,897 @@
  *
  */
 
+/*
+ * The routines in this file deal with providing private key cryptography
+ * using RSA Security Inc. PKCS #11 Cryptographic Token Interface (Cryptoki).
+ *
+ */
+
 #include <QtCore>
 #include <QtCrypto>
 
-#ifdef Q_OS_WIN
-# include "rsaref/win32.h"
-# pragma pack(push, cryptoki, 1)
-# include "rsaref/pkcs11.h"
-# pragma pack(pop, cryptoki)
-#endif
-
-#ifdef Q_OS_UNIX
-# include "rsaref/unix.h"
-# include "rsaref/pkcs11.h"
-#endif
-
-#include <openssl/rsa.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/pkcs12.h>
-#include <openssl/err.h>
+#include "pkcs11-helper.h"
 
 using namespace QCA;
 
-namespace pkcs11QCAPlugin {
-
-struct mech_name
-{
-	CK_MECHANISM_TYPE mech;
-	const char *name;
-};
-
-static struct mech_name mech_table[] =
-{
-#include "mech_names.cpp"
-};
-
-/*struct tokenflag_name
-{
-	CK_FLAGS flag;
-	const char *name;
-};
-
-static struct tokenflag_name tokenflag_table[] =
-{
-	{ CKF_RNG,                           "RNG" },
-	{ CKF_WRITE_PROTECTED,               "WRITE_PROTECTED" },
-	{ CKF_LOGIN_REQUIRED,                "LOGIN_REQUIRED" },
-	{ CKF_USER_PIN_INITIALIZED,          "USER_PIN_INITIALIZED" },
-	{ CKF_RESTORE_KEY_NOT_NEEDED,        "RESTORE_KEY_NOT_NEEDED" },
-	{ CKF_CLOCK_ON_TOKEN,                "CLOCK_ON_TOKEN" },
-	{ CKF_PROTECTED_AUTHENTICATION_PATH, "PROTECTED_AUTHENTICATION_PATH" },
-	{ CKF_DUAL_CRYPTO_OPERATIONS,        "DUAL_CRYPTO_OPERATIONS" },
-	{ CKF_TOKEN_INITIALIZED,             "TOKEN_INITIALIZED" },
-	{ CKF_SECONDARY_AUTHENTICATION,      "SECONDARY_AUTHENTICATION" },
-	{ CKF_USER_PIN_COUNT_LOW,            "USER_PIN_COUNT_LOW" },
-	{ CKF_USER_PIN_FINAL_TRY,            "USER_PIN_FINAL_TRY" },
-	{ CKF_USER_PIN_LOCKED,               "USER_PIN_LOCKED" },
-	{ CKF_USER_PIN_TO_BE_CHANGED,        "USER_PIN_TO_BE_CHANGED" },
-	{ CKF_SO_PIN_COUNT_LOW,              "SO_PIN_COUNT_LOW" },
-	{ CKF_SO_PIN_FINAL_TRY,              "SO_PIN_FINAL_TRY" },
-	{ CKF_SO_PIN_LOCKED,                 "SO_PIN_LOCKED" },
-	{ CKF_SO_PIN_TO_BE_CHANGED,          "SO_PIN_TO_BE_CHANGED" },
-	{ 0, 0 }
-};*/
-
-/*struct mechflag_name
-{
-	CK_FLAGS flag;
-	const char *name;
-};
-
-static struct mechflag_name mechflag_table[] =
-{
-	{ CKF_HW,                "HW" },
-	{ CKF_ENCRYPT,           "ENCRYPT" },
-	{ CKF_DECRYPT,           "DECRYPT" },
-	{ CKF_DIGEST,            "DIGEST" },
-	{ CKF_SIGN,              "SIGN" },
-	{ CKF_SIGN_RECOVER,      "SIGN_RECOVER" },
-	{ CKF_VERIFY,            "VERIFY" },
-	{ CKF_VERIFY_RECOVER,    "VERIFY_RECOVER" },
-	{ CKF_GENERATE,          "GENERATE" },
-	{ CKF_GENERATE_KEY_PAIR, "GENERATE_KEY_PAIR" },
-	{ CKF_WRAP,              "WRAP" },
-	{ CKF_UNWRAP,            "UNWRAP" },
-	{ CKF_DERIVE,            "DERIVE" },
-	{ 0, 0 }
-};*/
-
-static QString getString(CK_UTF8CHAR *string, size_t len)
-{
-	QByteArray cs((const char *)string, (int)len);
-	return QString::fromUtf8(cs).trimmed();
-}
-
-/*static QString hexify(const QByteArray &buf)
-{
-	QString hex;
-	for(int n = 0; n < buf.size(); ++n)
-	{
-		QString s;
-		s.sprintf("%02x", (unsigned char)buf[n]);
-		hex += s;
-	}
-	return hex;
-}*/
-
-class CTIModule
+//----------------------------------------------------------------------------
+// pkcs11Provider
+//----------------------------------------------------------------------------
+class pkcs11Provider : public QCA::Provider
 {
 private:
-	QString libname;
-	QLibrary *lib;
-
-	static CK_RV cb_createMutex(CK_VOID_PTR_PTR ppMutex)
-	{
-		*((QMutex **)ppMutex) = new QMutex;
-		return CKR_OK;
-	}
-
-	static CK_RV cb_destroyMutex(CK_VOID_PTR pMutex)
-	{
-		delete ((QMutex *)pMutex);
-		return CKR_OK;
-	}
-
-	static CK_RV cb_lockMutex(CK_VOID_PTR pMutex)
-	{
-		((QMutex *)pMutex)->lock();
-		return CKR_OK;
-	}
-
-	static CK_RV cb_unlockMutex(CK_VOID_PTR pMutex)
-	{
-		((QMutex *)pMutex)->unlock();
-		return CKR_OK;
-	}
+	bool _fLowLevelInitialized;
+	int _log_level;
+	bool _fSlotEventsActive;
+	bool _fSlotEventsLowLevelActive;
 
 public:
-	CK_FUNCTION_LIST_PTR p11;
+	pkcs11Provider ();
+	~pkcs11Provider ();
 
-	CTIModule()
-	{
-		lib = 0;
-		p11 = 0;
-	}
-
-	~CTIModule()
-	{
-		unload();
-	}
-
-	bool load(const QString &fname)
-	{
-		libname = fname;
-		lib = new QLibrary(libname);
-		if(!lib->load())
-		{
-			delete lib;
-			lib = 0;
-			return false;
-		}
-
-		CK_RV (*C_GetFunctionList)(CK_FUNCTION_LIST_PTR_PTR);
-		C_GetFunctionList = (CK_RV (*)(CK_FUNCTION_LIST_PTR_PTR))lib->resolve("C_GetFunctionList");
-		if(!C_GetFunctionList)
-		{
-			delete lib;
-			lib = 0;
-			return false;
-		}
-
-		CK_RV rv = C_GetFunctionList(&p11);
-		if(rv != CKR_OK)
-		{
-			delete lib;
-			lib = 0;
-			return false;
-		}
-
-		printf("Initializing\n");
-		CK_C_INITIALIZE_ARGS args;
-		args.CreateMutex = cb_createMutex;
-		args.DestroyMutex = cb_destroyMutex;
-		args.LockMutex = cb_lockMutex;
-		args.UnlockMutex = cb_unlockMutex;
-		args.flags = CKF_OS_LOCKING_OK;
-		args.pReserved = NULL_PTR;
-		rv = p11->C_Initialize(&args);
-		printf("Done\n");
-		if(rv != CKR_OK)
-		{
-			delete lib;
-			lib = 0;
-			return false;
-		}
-
-		return true;
-	}
-
-	void unload()
-	{
-		if(lib)
-		{
-			printf("finalizing / unloading\n");
-			p11->C_Finalize(NULL_PTR);
-			delete lib;
-			lib = 0;
-			p11 = 0;
-		}
-	}
-
-	static QString mechanismName(CK_MECHANISM_TYPE mech)
-	{
-		for(int n = 0; mech_table[n].name; ++n)
-		{
-			if(mech_table[n].mech == mech)
-				return QString::fromLatin1(mech_table[n].name);
-		}
-		return QString("Unknown-%1").arg(mech, (int)8, (int)16, QChar('0'));
-	}
-};
-
-class CTIWaitThread : public QThread
-{
-	Q_OBJECT
 public:
-	CK_FUNCTION_LIST_PTR p11;
-	QEventLoop *loop;
-	QMutex m;
-	bool cancelled;
+	virtual
+	void
+	init ();
+	
+	virtual
+	QString
+	name () const;
+	
+	virtual
+	QString
+	credit () const;
+	
+	virtual
+	QStringList
+	features () const;
+	
+	virtual
+	Context *
+	createContext (
+		const QString &type
+	);
 
-	struct SlotItem
-	{
-		CK_SLOT_ID id;
-		bool haveToken;
-	};
-	QList<SlotItem> slotList;
+	void
+	startSlotEvents ();
 
-	CTIWaitThread(const QList<SlotItem> &_slotList, QObject *parent = 0)
-	:QThread(parent), slotList(_slotList)
-	{
-		cancelled = false;
-	}
-
-	~CTIWaitThread()
-	{
-		wait();
-	}
-
-	void cancel()
-	{
-		QMutexLocker ml(&m);
-		cancelled = true;
-		if(loop)
-			QMetaObject::invokeMethod(loop, "quit", Qt::QueuedConnection);
-	}
-
-signals:
-	void slotEvent(CK_SLOT_ID id, bool haveToken);
+	void
+	stopSlotEvents ();
 
 protected:
-	virtual void run()
-	{
-		while(1)
-		{
-			CK_SLOT_ID slot;
-			CK_RV rv = p11->C_WaitForSlotEvent(0, &slot, NULL_PTR);
-			if(rv == CKR_FUNCTION_NOT_SUPPORTED)
-			{
-				// fall back on polling
-				printf("C_WaitForSlotEvent not supported, falling back to polling\n");
-				m.lock();
-				loop = new QEventLoop;
-				QTimer *t = new QTimer;
-				connect(t, SIGNAL(timeout()), SLOT(t_timeout()));
-				t->start(5000);
-				m.unlock();
-				loop->exec();
-				m.lock();
-				delete t;
-				delete loop;
-				loop = 0;
-				m.unlock();
-				break;
-			}
-			else if(rv != CKR_OK)
-			{
-				printf("C_WaitForSlotEvent returned: %08x\n", (unsigned int)rv);
-				break;
-			}
+	static
+	void
+	_logHook (
+		const void *pData,
+		const unsigned flags,
+		const char * const szFormat,
+		va_list args
+	);
+	
+	static
+	void
+	_slotEventHook (
+		const void *pData
+	);
 
-			printf("C_WaitForSlotEvent success\n");
-			CK_SLOT_INFO info;
-			rv = p11->C_GetSlotInfo(slot, &info);
-			if(rv != CKR_OK)
-				continue;
-			bool found = false;
-			for(int n = 0; n < slotList.count(); ++n)
-			{
-				if(slotList[n].id == slot)
-				{
-					found = true;
-					break;
-				}
-			}
-			if(!found)
-			{
-				printf("slot event from unknown slot?? [%lu]\n", slot);
-				continue;
-			}
-			bool haveToken = info.flags & CKF_TOKEN_PRESENT;
-			emit slotEvent(slot, haveToken);
-		}
-		printf("CTIWaitThread ending\n");
-	}
+	static
+	PKCS11H_BOOL
+	_tokenPromptHook (
+		const void *pData,
+		const pkcs11h_token_id_t token
+	);
+	
+	static
+	PKCS11H_BOOL
+	_pinPromptHook (
+		const void *pData,
+		const pkcs11h_token_id_t token,
+		char * const szPIN,
+		const size_t nMaxPIN
+	);
+	
+	void
+	logHook (
+		const unsigned flags,
+		const char * const szFormat,
+		va_list args
+	);
 
-private slots:
-	void t_timeout()
-	{
-		m.lock();
-		if(cancelled)
-		{
-			loop->quit();
-			m.unlock();
-			return;
-		}
-		m.unlock();
+	void
+	slotEventHook ();
 
-		printf("checking slot states\n");
-		for(int n = 0; n < slotList.count(); ++n)
-		{
-			SlotItem &i = slotList[n];
-			CK_SLOT_ID slot = i.id;
-			CK_SLOT_INFO info;
-			CK_RV rv = p11->C_GetSlotInfo(slot, &info);
-			if(rv != CKR_OK)
-				continue;
-			bool haveToken = info.flags & CKF_TOKEN_PRESENT;
-			if(haveToken == i.haveToken)
-				continue; // no change in state
-			i.haveToken = haveToken;
-			emit slotEvent(slot, haveToken);
-		}
-	}
+	PKCS11H_BOOL
+	cardPromptHook (
+		const pkcs11h_token_id_t token
+	);
+	
+	PKCS11H_BOOL
+	pinPromptHook (
+		const pkcs11h_token_id_t token,
+		char * const szPIN,
+		const size_t nMaxPIN
+	);
 };
 
-class CTIControl : public QObject
+namespace pkcs11QCAPlugin {
+
+class MyKeyStoreEntry;
+
+//----------------------------------------------------------------------------
+// MyKeyStoreList
+//----------------------------------------------------------------------------
+class MyKeyStoreList : public KeyStoreListContext
 {
 	Q_OBJECT
+
+private:
+	class KeyStoreItem {
+	public:
+		int id;
+		pkcs11h_token_id_t token_id;
+
+		KeyStoreItem () {
+			id = 0;
+			token_id = NULL;
+		}
+
+		~KeyStoreItem () {
+			if (token_id != NULL) {
+				pkcs11h_freeTokenId (token_id);
+			}
+		}
+	};
+	int _last_id;
+	typedef QList<KeyStoreItem *> _stores_t;
+	_stores_t _stores;
+	QHash<int, KeyStoreItem *> _storesById;
+	QHash<int, QSecureArray> _pins;
+	QMutex _mutexStores;
+	bool _initialized;
+
 public:
-	class ModuleInfo
-	{
-	public:
-		QString ckVersion;
-		QString manufacturer;
-		QString libraryDescription;
-		QString libraryVersion;
-	};
+	MyKeyStoreList (Provider *p);
 
-	class MechInfo
-	{
-	public:
-		CK_MECHANISM_TYPE type;
-		int flags;
+	~MyKeyStoreList ();
 
-		MechInfo() : flags(0) {}
-	};
+	virtual
+	Provider::Context *
+	clone () const;
 
-	class TokenInfo
-	{
-	public:
-		QString label;
-		QString manufacturer;
-		QString model;
-		QString serialNumber;
-		int flags;
-		QList<MechInfo> mechInfoList;
+public:
+	virtual
+	void
+	start ();
 
-		TokenInfo() : flags(0) {}
-	};
+	virtual
+	void
+	setUpdatesEnabled (bool enabled);
 
-	class SlotInfo
-	{
-	public:
-		CK_SLOT_ID slotId;
-		QString slotDescription;
-		QString manufacturer;
-		bool haveToken;
-		bool isRemovable;
-		bool isHardware;
-		TokenInfo tokenInfo;
-	};
+	virtual
+	KeyStoreEntryContext *
+	entry (
+		int id,
+		const QString &entryId
+	) const;
 
-	CTIModule module;
-	CK_FUNCTION_LIST_PTR p11;
-	bool have_init;
-	CTIWaitThread *waitThread;
+	virtual
+	KeyStoreEntryContext *
+	entryPassive (
+		const QString &storeId,
+		const QString &entryId
+	) const;
 
-	// "public"
-	ModuleInfo moduleInfo;
-	QList<SlotInfo> slotInfoList;
+	virtual
+	KeyStore::Type
+	type (int id) const;
 
-	CTIControl(QObject *parent = 0) : QObject(parent)
-	{
-		have_init = false;
-		waitThread = 0;
-	}
+	virtual
+	QString
+	storeId (int id) const;
 
-	~CTIControl()
-	{
-		deinit();
-	}
+	virtual
+	QString
+	name (int id) const;
 
-	bool init(const QString &fname)
-	{
-		if(!module.load(fname))
-			return false;
+	virtual
+	QList<KeyStoreEntry::Type>
+	entryTypes (int id) const;
 
-		p11 = module.p11;
+	virtual
+	QList<int>
+	keyStores ();
 
-		CK_INFO info;
-		CK_RV rv = p11->C_GetInfo(&info);
-		if(rv == CKR_OK)
-		{
-			moduleInfo.ckVersion = QString("%1.%2").arg(info.cryptokiVersion.major).arg(info.cryptokiVersion.minor);
-			moduleInfo.manufacturer = getString(info.manufacturerID, sizeof(info.manufacturerID));
-			moduleInfo.libraryDescription = getString(info.libraryDescription, sizeof(info.libraryDescription));
-			moduleInfo.libraryVersion = QString("%1.%2").arg(info.libraryVersion.major).arg(info.libraryVersion.minor);
-		}
+	virtual
+	QList<KeyStoreEntryContext*>
+	entryList (int id);
 
-		CK_ULONG num;
-		QVector<CK_SLOT_ID> slotList;
-		rv = p11->C_GetSlotList(FALSE, NULL_PTR, &num);
-		if(rv == CKR_OK)
-		{
-			slotList.resize(num);
-			p11->C_GetSlotList(FALSE, slotList.data(), &num);
-		}
+	virtual
+	void
+	submitPassphrase (
+		int id,
+		int requestId,
+		const QSecureArray &passphrase
+	);
 
-		int n;
-		for(n = 0; n < slotList.count(); ++n)
-		{
-			CK_SLOT_ID slot = slotList[n];
-			CK_SLOT_INFO info;
-			CK_RV rv = p11->C_GetSlotInfo(slot, &info);
-			if(rv != CKR_OK)
-				continue;
+	void
+	rejectPassphraseRequest (
+		int id,
+		int requestId
+	);
 
-			SlotInfo i;
-			i.slotId = slot;
-			i.slotDescription = getString(info.slotDescription, sizeof(info.slotDescription));
-			i.manufacturer = getString(info.manufacturerID, sizeof(info.manufacturerID));
-			i.haveToken = info.flags & CKF_TOKEN_PRESENT;
-			i.isRemovable = info.flags & CKF_REMOVABLE_DEVICE;
-			i.isHardware = info.flags & CKF_HW_SLOT;
-			slotInfoList += i;
-		}
+	void
+	emit_storeNeedPassphrase (
+		const pkcs11h_token_id_t token_id,
+		QSecureArray &pin
+	);
 
-		QList<CTIWaitThread::SlotItem> sl;
-		for(n = 0; n < slotInfoList.count(); ++n)
-		{
-			SlotInfo &i = slotInfoList[n];
-			CTIWaitThread::SlotItem wi;
-			wi.id = i.slotId;
-			wi.haveToken = i.haveToken;
-			sl += wi;
-			if(i.haveToken)
-				getTokenInfo(&i);
-		}
+	void
+	emit_updated ();
 
-		waitThread = new CTIWaitThread(sl, this);
-		connect(waitThread, SIGNAL(slotEvent(CK_SLOT_ID, bool)), SLOT(slotEvent(CK_SLOT_ID, bool)));
-		waitThread->p11 = module.p11;
-		waitThread->start();
-
-		have_init = true;
-		return true;
-	}
-
-	void deinit()
-	{
-		if(have_init)
-		{
-			moduleInfo = ModuleInfo();
-			slotInfoList.clear();
-			waitThread->cancel(); // needed to stop polling mode
-			module.unload(); // C_Finalize will stop wait mode
-			delete waitThread;
-			waitThread = 0;
-		}
-	}
-
-signals:
-	void slotChanged(int index);
+	void
+	emit_diagnosticText (
+		const QString &t
+	);
 
 private slots:
-	void slotEvent(CK_SLOT_ID slot, bool haveToken)
-	{
-		for(int n = 0; n < slotInfoList.count(); ++n)
-		{
-			if(slotInfoList[n].slotId == slot)
-			{
-				processSlotEvent(n, &slotInfoList[n], haveToken);
-				break;
-			}
-		}
-	}
+	void
+	doReady ();
+
+	void
+	doUpdated ();
 
 private:
-	void processSlotEvent(int index, SlotInfo *_i, bool haveToken)
-	{
-		SlotInfo &i = *_i;
+	KeyStoreItem *
+	registerTokenId (
+		const pkcs11h_token_id_t token_id
+	);
 
-		if(haveToken)
-		{
-			printf("Slot Event [%lu]: token inserted\n", i.slotId);
-			getTokenInfo(&i);
-		}
-		else
-		{
-			printf("Slot Event [%lu]: token removed\n", i.slotId);
+	void
+	clearStores ();
 
-			i.haveToken = false;
-			i.tokenInfo = TokenInfo();
-		}
+	MyKeyStoreEntry *
+	getKeyStoreEntryByCertificateId (
+		const pkcs11h_certificate_id_t certificate_id,
+		bool fPrivate,
+		const QList<Certificate> &listIssuers
+	) const;
 
-		emit slotChanged(index);
+	QString
+	MyKeyStoreList::tokenId2storeId (
+		const pkcs11h_token_id_t token_id
+	) const;
+
+	QString
+	serializeCertificateId (
+		const pkcs11h_certificate_id_t certificate_id,
+		const CertificateChain &chain,
+		const bool fPrivate
+	) const;
+
+	void
+	deserializeCertificateId (
+		const QString &from,
+		pkcs11h_certificate_id_t * const p_certificate_id,
+		bool * const fPrivate,
+		QList<Certificate> *listIssuers
+	) const;
+
+	QString
+	escapeString (
+		const QString &from
+	) const;
+		
+	QString
+	unescapeString (
+		const QString &from
+	) const;
+};
+
+static MyKeyStoreList *s_keyStoreList = NULL;
+
+//----------------------------------------------------------------------------
+// PKCS11Exception
+//----------------------------------------------------------------------------
+class PKCS11Exception {
+	
+private:
+	CK_RV rv;
+	QString msg;
+
+private:
+	PKCS11Exception () {}
+
+public:
+	PKCS11Exception (CK_RV rv, const QString &msg) {
+		this->rv = rv;
+		this->msg = msg;
 	}
 
-	void getTokenInfo(SlotInfo *_slotInfo)
-	{
-		SlotInfo &slotInfo = *_slotInfo;
+	PKCS11Exception (const PKCS11Exception &other) {
+		*this = other;
+	}
 
-		CK_SLOT_ID slot = slotInfo.slotId;
-		CK_TOKEN_INFO info;
-		printf("getting token info\n");
-		CK_RV rv = p11->C_GetTokenInfo(slot, &info);
-		if(rv != CKR_OK)
-		{
-			printf("error getting token info\n");
-			return;
-		}
+	PKCS11Exception &
+	operator = (const PKCS11Exception &other) {
+		this->rv = other.rv;
+		this->msg = other.msg;
+		return *this;
+	}
 
-		TokenInfo i;
-		i.label = getString(info.label, sizeof(info.label));
-		i.manufacturer = getString(info.manufacturerID, sizeof(info.manufacturerID));
-		i.model = getString(info.model, sizeof(info.model));
-		i.serialNumber = getString(info.serialNumber, sizeof(info.serialNumber));
-		i.flags = info.flags;
+	CK_RV
+	getRV () const {
+		return rv;
+	}
 
-		CK_ULONG num;
-		QVector<CK_MECHANISM_TYPE> mechList;
-		printf("getting token mechanism list\n");
-		rv = p11->C_GetMechanismList(slot, NULL_PTR, &num);
-		if(rv != CKR_OK)
-		{
-			printf("error getting token mechanism list\n");
-			return;
-		}
-		mechList.resize(num);
-		rv = p11->C_GetMechanismList(slot, mechList.data(), &num);
-		if(rv != CKR_OK)
-		{
-			printf("error getting token mechanism list (error 2)\n");
-			return;
-		}
-		for(int n = 0; n < mechList.count(); ++n)
-		{
-			CK_MECHANISM_TYPE type = mechList[n];
-			bool found = false;
-			for(int x = 0; x < i.mechInfoList.count(); ++x)
-			{
-				if(i.mechInfoList[x].type == type)
-				{
-					found = true;
-					break;
-				}
-			}
-			if(found) // already have it
-				continue;
-
-			CK_MECHANISM_INFO info;
-			rv = p11->C_GetMechanismInfo(slot, type, &info);
-			if(rv != CKR_OK)
-			{
-				printf("error getting mechanism list (error 3)\n");
-				return;
-			}
-			MechInfo mi;
-			mi.type = type;
-			mi.flags = info.flags;
-			i.mechInfoList += mi;
-		}
-
-		slotInfo.haveToken = true;
-		slotInfo.tokenInfo = i;
+	QString
+	getMessage () const {
+		return msg + QString (" ") + pkcs11h_getMessage (rv);
 	}
 };
 
-class CTISession
+//----------------------------------------------------------------------------
+// MyRSAKey
+//----------------------------------------------------------------------------
+class MyRSAKey : public RSAContext
 {
+	Q_OBJECT
+
 private:
-	CTIModule *mod;
-	bool have_session;
-	bool have_login;
+	bool _fPrivateKeyRole;
+	pkcs11h_certificate_id_t _pkcs11h_certificate_id;
+	pkcs11h_certificate_t _pkcs11h_certificate;
+	RSAPublicKey _pubkey;
+
+	struct sign_data_s {
+		SignatureAlgorithm alg;
+		QCA::Hash *hash;
+		QSecureArray raw;
+
+		sign_data_s() {
+			hash = NULL;
+		}
+	} sign_data;
 
 public:
-	CK_FUNCTION_LIST_PTR p11;
-	CK_SESSION_HANDLE handle;
+	MyRSAKey (
+		Provider *p,
+		pkcs11h_certificate_id_t pkcs11h_certificate_id,
+		RSAPublicKey pubkey
+	) : RSAContext (p) {
+		_fPrivateKeyRole = true;
+		_pkcs11h_certificate_id = NULL;
+		_pkcs11h_certificate = NULL;
+		
+		_pubkey = pubkey;
+		clearSign ();
 
-	class Object
-	{
-	public:
-		CK_OBJECT_HANDLE handle;
-		CK_OBJECT_CLASS type;
-		QByteArray id;
-		QString label;
-	};
-	QList<Object> objectList;
-
-	CTISession(CTIModule *_mod)
-	{
-		mod = _mod;
-		p11 = mod->p11;
-		have_session = false;
-		have_login = false;
+		setCertificateId (pkcs11h_certificate_id);
 	}
 
-	~CTISession()
-	{
-		close();
+	MyRSAKey (const MyRSAKey &from) : RSAContext (from.provider ()) {
+		_fPrivateKeyRole = from._fPrivateKeyRole;
+		_pkcs11h_certificate_id = NULL;
+		_pkcs11h_certificate = NULL;
+		_pubkey = from._pubkey;
+		sign_data.hash = NULL;
+		clearSign ();
+
+		setCertificateId (from._pkcs11h_certificate_id);
 	}
 
-	bool open(CK_SLOT_ID slot, CK_FLAGS _flags)
-	{
-		int flags = CKF_SERIAL_SESSION;
-		flags |= _flags;
-		CK_RV rv = p11->C_OpenSession(slot, flags, NULL, NULL, &handle);
-		if(rv != CKR_OK)
-			return false;
-		have_session = true;
-		return true;
+	~MyRSAKey () {
+		clearSign ();
+		freeResources ();
+
 	}
 
-	void close()
-	{
-		if(have_session)
-		{
-			printf("closing session\n");
-			p11->C_CloseSession(handle);
-			have_session = false;
+	virtual
+	Provider::Context *
+	clone () const {
+		return new MyRSAKey (*this);
+	}
+
+public:
+	virtual
+	bool
+	isNull () const {
+		return _pubkey.isNull ();
+	}
+
+	virtual
+	PKey::Type
+	type () const {
+		return _pubkey.type ();
+	}
+
+	virtual
+	bool
+	isPrivate () const {
+		return _fPrivateKeyRole;
+	}
+
+	virtual
+	bool
+	canExport () const {
+		return !_fPrivateKeyRole;
+	}
+
+	virtual
+	void
+	convertToPublic () {
+		if (_fPrivateKeyRole) {
+			if (_pkcs11h_certificate != NULL) {
+				pkcs11h_freeCertificate (_pkcs11h_certificate);
+				_pkcs11h_certificate = NULL;
+			}
+			_fPrivateKeyRole = false;
 		}
 	}
 
-	bool login(CK_USER_TYPE type, const char *pin, int pin_len)
-	{
-		CK_RV rv = p11->C_Login(handle, type, (CK_UTF8CHAR *)pin, pin_len);
-		if(rv != CKR_OK)
-			return false;
-		have_login = true;
-		return true;
+	virtual
+	int
+	bits () const {
+		return _pubkey.bitSize ();
 	}
 
-	bool loginProtected(CK_USER_TYPE type)
-	{
-		CK_RV rv = p11->C_Login(handle, type, NULL_PTR, 0);
-		if(rv != CKR_OK)
-			return false;
-		have_login = true;
-		return true;
+	virtual
+	int
+	maximumEncryptSize (
+		EncryptionAlgorithm alg
+	) const {
+		return _pubkey.maximumEncryptSize (alg);
 	}
 
-	void logout()
-	{
-		p11->C_Logout(handle);
+	virtual
+	QSecureArray
+	encrypt (
+		const QSecureArray &in,
+		EncryptionAlgorithm alg
+	) {
+		return _pubkey.encrypt (in, alg);
 	}
 
-	bool getObjects()
-	{
-		objectList.clear();
+	virtual
+	bool
+	decrypt (
+		const QSecureArray &in,
+		QSecureArray *out,
+		EncryptionAlgorithm alg
+	) {
+		try {
+			CK_MECHANISM_TYPE mech;
+			CK_RV rv;
+			size_t my_size;
 
-		CK_RV rv = p11->C_FindObjectsInit(handle, NULL_PTR, 0);
-		if(rv != CKR_OK)
-			return false;
-
-		QVector<CK_OBJECT_HANDLE> objectHandles;
-		while(1)
-		{
-			// read 128 objects at a time
-			QVector<CK_OBJECT_HANDLE> tmp(128);
-			CK_ULONG num;
-			rv = p11->C_FindObjects(handle, tmp.data(), tmp.count(), &num);
-			if(rv != CKR_OK)
-				return false;
-			bool done = ((int)num < tmp.size());
-			tmp.resize(num);
-			objectHandles += tmp;
-			if(done)
+			switch (alg) {
+				case EME_PKCS1v15:
+					mech = CKM_RSA_PKCS;
 				break;
-		}
-
-		rv = p11->C_FindObjectsFinal(handle);
-		if(rv != CKR_OK)
-			return false;
-
-		// get some basic info about each object
-		QList<Object> list;
-		for(int n = 0; n < objectHandles.count(); ++n)
-		{
-			CK_OBJECT_HANDLE obj = objectHandles[n];
-
-			CK_OBJECT_CLASS cls;
-			CK_ATTRIBUTE attr[3] =
-			{
-				{ CKA_CLASS, &cls, sizeof(CK_OBJECT_CLASS) },
-				{ CKA_ID, NULL_PTR, 0 },
-				{ CKA_LABEL, NULL_PTR, 0 }
-			};
-			CK_RV rv = p11->C_GetAttributeValue(handle, obj, attr, 3);
-			if(rv != CKR_OK)
-				return false;
-
-			// make buffers
-			QByteArray buf_id(attr[1].ulValueLen, 0);
-			QByteArray buf_label(attr[2].ulValueLen, 0);
-			attr[1].pValue = buf_id.data();
-			attr[2].pValue = buf_label.data();
-
-			// optimize by skipping over attr[0] (we have it already)
-			rv = p11->C_GetAttributeValue(handle, obj, &(attr[1]), 2);
-			if(rv != CKR_OK)
-				return false;
-
-			Object i;
-			i.handle = obj;
-			i.type = cls;
-			i.id = buf_id;
-			i.label = QString::fromUtf8(buf_label);
-			list += i;
-		}
-
-		objectList = list;
-		return true;
-	}
-
-	bool sign_RSA_EMSA3_Raw(CK_OBJECT_HANDLE key, int type, const unsigned char *in, int in_len, unsigned char *out, int *out_len)
-	{
-		// using RSA_PKCS (very "raw" algorithm)
-		// TODO: check if we have it first
-		CK_MECHANISM mechanism;
-		memset(&mechanism, 0, sizeof(mechanism));
-		mechanism.mechanism = CKM_RSA_PKCS;
-
-		CK_RV rv = p11->C_SignInit(handle, &mechanism, key);
-		if(rv != CKR_OK)
-		{
-			printf("sign fail [%08x]\n", (unsigned int)rv);
-			return false;
-		}
-
-		CK_ULONG sigsize;
-		rv = p11->C_Sign(handle, (unsigned char*)in, in_len, out, &sigsize);
-		if(rv != CKR_OK)
-		{
-			//p11->C_CloseSession(session);
-			printf("sign fail [%08x]\n", (unsigned int)rv);
-			return false;
-			//goto error;
-		}
-
-		printf("done with signing\n");
-
-		*out_len = sigsize;
-		return true;
-	}
-
-	bool getBigIntegerData(CK_OBJECT_HANDLE obj, CK_ATTRIBUTE_TYPE type, QByteArray *out)
-	{
-		CK_ATTRIBUTE attr;
-		attr.type = type;
-		attr.pValue = NULL_PTR;
-		attr.ulValueLen = 0;
-		CK_RV rv = p11->C_GetAttributeValue(handle, obj, &attr, 1);
-		if(rv != CKR_OK)
-			return false;
-
-		// make buffer
-		QByteArray buf(attr.ulValueLen, 0);
-		attr.pValue = buf.data();
-
-		rv = p11->C_GetAttributeValue(handle, obj, &attr, 1);
-		if(rv != CKR_OK)
-			return false;
-
-		*out = buf;
-		return true;
-	}
-};
-
-CTIControl *con;
-
-static QBigInteger bn2bi(BIGNUM *n)
-{
-	QSecureArray buf(BN_num_bytes(n) + 1);
-	buf[0] = 0; // positive
-	BN_bn2bin(n, (unsigned char *)buf.data() + 1);
-	return QBigInteger(buf);
-}
-
-static QSecureArray bio2buf(BIO *b)
-{
-	QSecureArray buf;
-	while(1) {
-		QSecureArray block(1024);
-		int ret = BIO_read(b, block.data(), block.size());
-		if(ret <= 0)
-			break;
-		block.resize(ret);
-		buf.append(block);
-		if(ret != 1024)
-			break;
-	}
-	BIO_free(b);
-	return buf;
-}
-
-EVP_PKEY *qca_d2i_PKCS8PrivateKey(const QSecureArray &in, EVP_PKEY **x, pem_password_cb *cb, void *u)
-{
-	PKCS8_PRIV_KEY_INFO *p8inf;
-
-	// first try unencrypted form
-	BIO *bi = BIO_new(BIO_s_mem());
-	BIO_write(bi, in.data(), in.size());
-	p8inf = d2i_PKCS8_PRIV_KEY_INFO_bio(bi, NULL);
-	BIO_free(bi);
-	if(!p8inf)
-	{
-		X509_SIG *p8;
-
-		// now try encrypted form
-		bi = BIO_new(BIO_s_mem());
-		BIO_write(bi, in.data(), in.size());
-		p8 = d2i_PKCS8_bio(bi, NULL);
-		BIO_free(bi);
-		if(!p8)
-			return NULL;
-
-		// get passphrase
-		char psbuf[PEM_BUFSIZE];
-		int klen;
-		if(cb)
-			klen = cb(psbuf, PEM_BUFSIZE, 0, u);
-		else
-			klen = PEM_def_callback(psbuf, PEM_BUFSIZE, 0, u);
-		if(klen <= 0)
-		{
-			PEMerr(PEM_F_D2I_PKCS8PRIVATEKEY_BIO, PEM_R_BAD_PASSWORD_READ);
-			X509_SIG_free(p8);
-			return NULL;
-		}
-
-		// decrypt it
-		p8inf = PKCS8_decrypt(p8, psbuf, klen);
-		X509_SIG_free(p8);
-		if(!p8inf)
-			return NULL;
-	}
-
-	EVP_PKEY *ret = EVP_PKCS82PKEY(p8inf);
-	PKCS8_PRIV_KEY_INFO_free(p8inf);
-	if(!ret)
-		return NULL;
-	if(x)
-	{
-		if(*x)
-			EVP_PKEY_free(*x);
-		*x = ret;
-	}
-	return ret;
-}
-
-static CTISession *global_session = 0;
-
-//----------------------------------------------------------------------------
-// EVPKey
-//----------------------------------------------------------------------------
-
-// note: this class squelches processing errors, since QCA doesn't care about them
-class EVPKey
-{
-public:
-	enum State { Idle, SignActive, SignError, VerifyActive, VerifyError };
-	EVP_PKEY *pkey;
-	EVP_MD_CTX mdctx;
-	State state;
-
-	EVPKey()
-	{
-		pkey = 0;
-		state = Idle;
-	}
-
-	EVPKey(const EVPKey &from)
-	{
-		pkey = from.pkey;
-		CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
-		state = Idle;
-	}
-
-	~EVPKey()
-	{
-		reset();
-	}
-
-	void reset()
-	{
-		if(pkey)
-			EVP_PKEY_free(pkey);
-		pkey = 0;
-	}
-
-	void startSign(const EVP_MD *type)
-	{
-		if(!type)
-		{
-			state = SignError;
-			return;
-		}
-
-		state = SignActive;
-		EVP_MD_CTX_init(&mdctx);
-		if(!EVP_SignInit_ex(&mdctx, type, NULL))
-			state = SignError;
-	}
-
-	void startVerify(const EVP_MD *type)
-	{
-		if(!type)
-		{
-			state = VerifyError;
-			return;
-		}
-
-		state = VerifyActive;
-		EVP_MD_CTX_init(&mdctx);
-		if(!EVP_VerifyInit_ex(&mdctx, type, NULL))
-			state = VerifyError;
-	}
-
-	void update(const QSecureArray &in)
-	{
-		if(state == SignActive)
-		{
-			if(!EVP_SignUpdate(&mdctx, in.data(), (unsigned int)in.size()))
-				state = SignError;
-		}
-		else if(state == VerifyActive)
-		{
-			if(!EVP_VerifyUpdate(&mdctx, in.data(), (unsigned int)in.size()))
-				state = VerifyError;
-		}
-	}
-
-	QSecureArray endSign()
-	{
-		if(state == SignActive)
-		{
-			QSecureArray out(EVP_PKEY_size(pkey));
-			unsigned int len = out.size();
-			if(!EVP_SignFinal(&mdctx, (unsigned char *)out.data(), &len, pkey))
-			{
-				state = SignError;
-				return QSecureArray();
+				case EME_PKCS1_OAEP:
+					mech = CKM_RSA_PKCS_OAEP;
+				break;
+				default:
+					throw PKCS11Exception (CKR_FUNCTION_NOT_SUPPORTED, "Invalid algorithm");
+				break;
 			}
-			out.resize(len);
-			state = Idle;
-			return out;
-		}
-		else
-			return QSecureArray();
-	}
 
-	bool endVerify(const QSecureArray &sig)
-	{
-		if(state == VerifyActive)
-		{
-			if(EVP_VerifyFinal(&mdctx, (unsigned char *)sig.data(), (unsigned int)sig.size(), pkey) != 1)
-			{
-				state = VerifyError;
-				return false;
+			ensureCertificate ();
+
+			if (
+				(rv = pkcs11h_certificate_decrypt (
+					_pkcs11h_certificate,
+					mech,
+					(const unsigned char * const)in.constData (),
+					in.size (),
+					NULL,
+					&my_size
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Decryption error");
 			}
-			state = Idle;
+
+			out->resize (my_size);
+
+			if (
+				(rv = pkcs11h_certificate_decrypt (
+					_pkcs11h_certificate,
+					mech,
+					(const unsigned char * const)in.constData (),
+					in.size (),
+					(unsigned char *)out->data (),
+					&my_size
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Decryption error");
+			}
+
+			rv = out->resize (my_size);
+
 			return true;
 		}
-		else
+		catch (const PKCS11Exception &e) {
+			if (s_keyStoreList != NULL) {
+				s_keyStoreList->emit_diagnosticText (
+					(QString ()).sprintf (
+						"PKCS#11: Cannot decrypt: %ld-'%s'.\n",
+						e.getRV (),
+						qPrintable (e.getMessage ())
+					)
+				);
+			}
+			
 			return false;
-	}
-};
-
-//----------------------------------------------------------------------------
-// RSAKey
-//----------------------------------------------------------------------------
-class RSAKey : public RSAContext
-{
-	Q_OBJECT
-public:
-	//EVPKey evp;
-	//RSAKeyMaker *keymaker;
-	//bool wasBlocking;
-	QSecureArray inbuf;
-	bool sec;
-	CK_OBJECT_HANDLE handle;
-
-	QBigInteger big_n, big_e;
-
-	RSAKey(Provider *p) : RSAContext(p)
-	{
-		//keymaker = 0;
-		sec = false;
-	}
-
-	RSAKey(const RSAKey &from) : RSAContext(from.provider()) //, evp(from.evp)
-	{
-		//keymaker = 0;
-
-		inbuf = from.inbuf;
-		sec = from.sec;
-		handle = from.handle;
-		big_n = from.big_n;
-		big_e = from.big_e;
-	}
-
-	~RSAKey()
-	{
-		//delete keymaker;
-	}
-
-	virtual Provider::Context *clone() const
-	{
-		return new RSAKey(*this);
-	}
-
-	virtual bool isNull() const
-	{
-		return false; //return (evp.pkey ? false: true);
-	}
-
-	virtual PKey::Type type() const
-	{
-		return PKey::RSA;
-	}
-
-	virtual bool isPrivate() const
-	{
-		return sec;
-	}
-
-	virtual bool canExport() const
-	{
-		return true;
-	}
-
-	virtual void convertToPublic()
-	{
-		/*if(!sec)
-			return;
-
-		// extract the public key into DER format
-		int len = i2d_RSAPublicKey(evp.pkey->pkey.rsa, NULL);
-		QSecureArray result(len);
-		unsigned char *p = (unsigned char *)result.data();
-		i2d_RSAPublicKey(evp.pkey->pkey.rsa, &p);
-		p = (unsigned char *)result.data();
-
-		// put the DER public key back into openssl
-		evp.reset();
-		RSA *rsa;
-#ifdef OSSL_097
-		rsa = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, result.size());
-#else
-		rsa = d2i_RSAPublicKey(NULL, (unsigned char **)&p, result.size());
-#endif
-		evp.pkey = EVP_PKEY_new();
-		EVP_PKEY_assign_RSA(evp.pkey, rsa);
-		sec = false;*/
-	}
-
-	virtual int bits() const
-	{
-		//return 8*RSA_size(evp.pkey->pkey.rsa);
-		return 0;
-	}
-
-	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const
-	{
-		/*RSA *rsa = evp.pkey->pkey.rsa;
-		if(alg == EME_PKCS1v15)
-			return RSA_size(rsa) - 11 - 1;
-		else // oaep
-			return RSA_size(rsa) - 41 - 1;*/
-		Q_UNUSED(alg);
-		return 0;
-	}
-
-	virtual QSecureArray encrypt(const QSecureArray &in, EncryptionAlgorithm alg) const
-	{
-		/*RSA *rsa = evp.pkey->pkey.rsa;
-
-		QSecureArray buf = in;
-		int max = maximumEncryptSize(alg);
-		if(buf.size() > max)
-			buf.resize(max);
-		QSecureArray result(RSA_size(rsa));
-
-		int pad;
-		if(alg == EME_PKCS1v15)
-			pad = RSA_PKCS1_PADDING;
-		else // oaep
-			pad = RSA_PKCS1_OAEP_PADDING;
-
-		int ret = RSA_public_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
-		if(ret < 0)
-			return QSecureArray();
-		result.resize(ret);
-
-		return result;*/
-		return QSecureArray();
-	}
-
-	virtual bool decrypt(const QSecureArray &in, QSecureArray *out, EncryptionAlgorithm alg) const
-	{
-		/*RSA *rsa = evp.pkey->pkey.rsa;
-
-		QSecureArray result(RSA_size(rsa));
-
-		int pad;
-		if(alg == EME_PKCS1v15)
-			pad = RSA_PKCS1_PADDING;
-		else // oaep
-			pad = RSA_PKCS1_OAEP_PADDING;
-
-		int ret = RSA_private_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
-		if(ret < 0)
-			return false;
-		result.resize(ret);
-
-		*out = result;
-		return true;*/
-		return false;
-	}
-
-	virtual void startSign(SignatureAlgorithm alg, SignatureFormat)
-	{
-		Q_UNUSED(alg);
-
-		printf("pkcs11: about to rsa sign\n");
-
-		/*const EVP_MD *md = 0;
-		if(alg == EMSA3_SHA1)
-			md = EVP_sha1();
-		else if(alg == EMSA3_MD5)
-			md = EVP_md5();
-		else if(alg == EMSA3_MD2)
-			md = EVP_md2();
-		else if(alg == EMSA3_RIPEMD160)
-			md = EVP_ripemd160();
-		else if(alg == EMSA3_Raw)
-		{
-			// TODO
 		}
-		evp.startSign(md);*/
 	}
 
-	virtual void startVerify(SignatureAlgorithm alg, SignatureFormat)
-	{
-		Q_UNUSED(alg);
+	virtual
+	void
+	startSign (
+		SignatureAlgorithm alg,
+		SignatureFormat
+	) {
+		clearSign ();
 
-		/*const EVP_MD *md = 0;
-		if(alg == EMSA3_SHA1)
-			md = EVP_sha1();
-		else if(alg == EMSA3_MD5)
-			md = EVP_md5();
-		else if(alg == EMSA3_MD2)
-			md = EVP_md2();
-		else if(alg == EMSA3_RIPEMD160)
-			md = EVP_ripemd160();
-		else if(alg == EMSA3_Raw)
-		{
-			// TODO
+		sign_data.alg = alg;
+
+		switch (sign_data.alg) {
+			case EMSA3_SHA1:
+				sign_data.hash = new QCA::SHA1 ();
+			break;
+			case EMSA3_MD5:
+				sign_data.hash = new QCA::MD5 ();
+			break;
+			case EMSA3_MD2:
+				sign_data.hash = new QCA::MD2 ();
+			break;
+			case EMSA3_Raw:
+			break;
+			case SignatureUnknown:
+			case EMSA1_SHA1:
+			case EMSA3_RIPEMD160:
+			default:
+			break;
 		}
-		evp.startVerify(md);*/
 	}
 
-	virtual void update(const QSecureArray &in)
-	{
-		//evp.update(in);
-		inbuf.append(in);
+	virtual
+	void
+	startVerify (
+		SignatureAlgorithm alg,
+		SignatureFormat sf
+	) {
+		_pubkey.startVerify (alg, sf);
 	}
 
-	virtual QSecureArray endSign()
-	{
-		//return evp.endSign();
-		const unsigned char *m = (const unsigned char *)inbuf.data();
-		unsigned int m_len = inbuf.size();
-		QSecureArray out(512);
-		int out_len = out.size();
-		bool ok = global_session->sign_RSA_EMSA3_Raw(handle, 0, m, m_len, (unsigned char *)out.data(), &out_len);
-		if(ok)
-			out.resize(out_len);
-		else
-			out.clear();
-		return out;
+	virtual
+	void
+	update (
+		const QSecureArray &in
+	) {
+		if (_fPrivateKeyRole) {
+			if (sign_data.hash != NULL) {
+				sign_data.hash->update (in);
+			}
+			else {
+				sign_data.raw.append (in);
+			}
+		}
+		else {
+			_pubkey.update (in);
+		}
 	}
 
-	virtual bool endVerify(const QSecureArray &sig)
-	{
-		//return evp.endVerify(sig);
-		Q_UNUSED(sig);
-		return false;
+	virtual
+	QSecureArray
+	endSign () {
+		QSecureArray result;
+		unsigned char *enc_alloc = NULL;
+
+		try {
+			int myrsa_size = 0;
+			
+			unsigned char *enc = NULL;
+			int enc_len = 0;
+
+			CK_RV rv;
+
+			QSecureArray final;
+
+			int type;
+
+			if (sign_data.hash != NULL) {
+				final = sign_data.hash->final ();
+			}
+			else {
+				final = sign_data.raw;
+			}
+
+			switch (sign_data.alg) {
+				case EMSA3_SHA1:
+					type = NID_sha1;
+				break;
+				case EMSA3_MD5:
+					type = NID_md5;
+				break;
+				case EMSA3_MD2:
+					type = NID_md2;
+				break;
+				case EMSA3_Raw:
+					type = NID_rsa;
+				break;
+				case SignatureUnknown:
+				case EMSA1_SHA1:
+				case EMSA3_RIPEMD160:
+				default:
+					throw PKCS11Exception (CKR_FUNCTION_NOT_SUPPORTED, "Invalid algorithm");
+				break;
+			}
+
+			ensureCertificate ();
+
+			// from some strange reason I got 2047... (for some)	<---- BUG?!?!?!
+			myrsa_size=(_pubkey.bitSize () + 7) / 8;
+
+			if (type == NID_md5_sha1 || type == NID_rsa) {
+				enc = (unsigned char *)final.data ();
+				enc_len = final.size ();
+			}
+			else {
+				X509_SIG sig;
+				ASN1_TYPE parameter;
+				X509_ALGOR algor;
+				ASN1_OCTET_STRING digest;
+
+				if ((enc = (unsigned char *)malloc (myrsa_size+1)) == NULL) {
+					throw PKCS11Exception (CKR_HOST_MEMORY, "Memory error");
+				}
+
+				enc_alloc = enc;
+				sig.algor= &algor;
+
+				if ((sig.algor->algorithm=OBJ_nid2obj (type)) == NULL) {
+					throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid algorithm");
+				}
+			
+				if (sig.algor->algorithm->length == 0) {
+					throw PKCS11Exception (CKR_KEY_SIZE_RANGE, "Key size error");
+				}
+			
+				parameter.type = V_ASN1_NULL;
+				parameter.value.ptr = NULL;
+		
+				sig.algor->parameter = &parameter;
+
+				sig.digest = &digest;
+				sig.digest->data = (unsigned char *)final.data ();
+				sig.digest->length = final.size ();
+			
+				if ((enc_len=i2d_X509_SIG (&sig, NULL)) < 0) {
+					throw PKCS11Exception (CKR_FUNCTION_FAILED, "Signature prepare failed");
+				}
+			
+				unsigned char *p = enc;
+				i2d_X509_SIG (&sig, &p);
+			}
+
+			if (enc_len > (myrsa_size-RSA_PKCS1_PADDING_SIZE)) {
+				throw PKCS11Exception (CKR_KEY_SIZE_RANGE, "Padding too small");
+			}
+
+			size_t my_size;
+			
+			if (
+				(rv = pkcs11h_certificate_signAny (
+					_pkcs11h_certificate,
+					CKM_RSA_PKCS,
+					enc,
+					enc_len,
+					NULL,
+					&my_size
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Signature failed");
+			}
+
+			result.resize (my_size);
+			
+			if (
+				(rv = pkcs11h_certificate_signAny (
+					_pkcs11h_certificate,
+					CKM_RSA_PKCS,
+					enc,
+					enc_len,
+					(unsigned char *)result.data (),
+					&my_size
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Signature failed");
+			}
+
+			result.resize (my_size);
+		}
+		catch (const PKCS11Exception &e) {
+			result.clear ();
+
+			if (s_keyStoreList != NULL) {
+				s_keyStoreList->emit_diagnosticText (
+					(QString ()).sprintf (
+						"PKCS#11: Cannot sign: %ld-'%s'.\n",
+						e.getRV (),
+						qPrintable (e.getMessage ())
+					)
+				);
+			}
+		}
+
+		if (enc_alloc != NULL) {
+			free (enc_alloc);
+		}
+	
+		clearSign ();
+
+		return result;
 	}
 
-	virtual void createPrivate(int bits, int exp, bool block)
-	{
+	virtual
+	bool
+	validSignature (
+		const QSecureArray &sig
+	) {
+		return _pubkey.validSignature (sig);
+	}
+
+	virtual
+	void
+	createPrivate (
+		int bits,
+		int exp,
+		bool block
+	) {
 		Q_UNUSED(bits);
 		Q_UNUSED(exp);
 		Q_UNUSED(block);
-
-		/*evp.reset();
-
-		keymaker = new RSAKeyMaker(bits, exp);
-		wasBlocking = block;
-		if(block)
-		{
-			keymaker->run();
-			km_finished();
-		}
-		else
-		{
-			connect(keymaker, SIGNAL(finished()), SLOT(km_finished()));
-			keymaker->start();
-		}*/
 	}
 
-	virtual void createPrivate(const QBigInteger &n, const QBigInteger &e, const QBigInteger &p, const QBigInteger &q, const QBigInteger &d)
-	{
+	virtual
+	void
+	createPrivate (
+		const QBigInteger &n,
+		const QBigInteger &e,
+		const QBigInteger &p,
+		const QBigInteger &q,
+		const QBigInteger &d
+	) {
 		Q_UNUSED(n);
 		Q_UNUSED(e);
 		Q_UNUSED(p);
 		Q_UNUSED(q);
 		Q_UNUSED(d);
-
-		/*evp.reset();
-
-		RSA *rsa = RSA_new();
-		rsa->n = bi2bn(n);
-		rsa->e = bi2bn(e);
-		rsa->p = bi2bn(p);
-		rsa->q = bi2bn(q);
-		rsa->d = bi2bn(d);
-
-		if(!rsa->n || !rsa->e || !rsa->p || !rsa->q || !rsa->d)
-		{
-			RSA_free(rsa);
-			return;
-		}
-
-		evp.pkey = EVP_PKEY_new();
-		EVP_PKEY_assign_RSA(evp.pkey, rsa);
-		sec = true;*/
 	}
 
-	virtual void createPublic(const QBigInteger &n, const QBigInteger &e)
-	{
+	virtual
+	void
+	createPublic (
+		const QBigInteger &n,
+		const QBigInteger &e
+	) {
 		Q_UNUSED(n);
 		Q_UNUSED(e);
+	}
 
-		/*evp.reset();
+	virtual
+	QBigInteger
+	n () const {
+		return _pubkey.n ();
+	}
 
-		RSA *rsa = RSA_new();
-		rsa->n = bi2bn(n);
-		rsa->e = bi2bn(e);
+	virtual
+	QBigInteger
+	e () const {
+		return _pubkey.e ();
+	}
 
-		if(!rsa->n || !rsa->e)
-		{
-			RSA_free(rsa);
-			return;
+	virtual
+	QBigInteger
+	p () const {
+		return QBigInteger();
+	}
+
+	virtual
+	QBigInteger
+	q () const {
+		return QBigInteger();
+	}
+
+	virtual
+	QBigInteger
+	d () const {
+		return QBigInteger();
+	}
+
+public:
+	PublicKey
+	getPublicKey () const {
+		return _pubkey;
+	}
+
+	bool
+	ensureTokenAccess () {
+		try {
+			CK_RV rv;
+
+			if (
+				(rv = pkcs11h_token_ensureAccess (
+					_pkcs11h_certificate_id->token_id,
+					0
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Token access");
+			}
+
+			return true;
+		}
+		catch (const PKCS11Exception &e) {
+			return false;
+		}
+	}
+
+private:
+	void
+	clearSign () {
+		sign_data.raw.clear ();
+		sign_data.alg = SignatureUnknown;
+		delete sign_data.hash;
+		sign_data.hash = NULL;
+	}
+
+	void
+	freeResources () {
+		if (_pkcs11h_certificate != NULL) {
+			pkcs11h_freeCertificate (_pkcs11h_certificate);
+			_pkcs11h_certificate = NULL;
 		}
 
-		evp.pkey = EVP_PKEY_new();
-		EVP_PKEY_assign_RSA(evp.pkey, rsa);
-		sec = false;*/
-	}
-
-	virtual QBigInteger n() const
-	{
-		return big_n;
-		//return bn2bi(evp.pkey->pkey.rsa->n);
-	}
-
-	virtual QBigInteger e() const
-	{
-		return big_e;
-		//return bn2bi(evp.pkey->pkey.rsa->e);
-	}
-
-	virtual QBigInteger p() const
-	{
-		//return bn2bi(evp.pkey->pkey.rsa->p);
-		return QBigInteger();
-	}
-
-	virtual QBigInteger q() const
-	{
-		//return bn2bi(evp.pkey->pkey.rsa->q);
-		return QBigInteger();
-	}
-
-	virtual QBigInteger d() const
-	{
-		//return bn2bi(evp.pkey->pkey.rsa->d);
-		return QBigInteger();
-	}
-
-/*private slots:
-	void km_finished()
-	{
-		RSA *rsa = keymaker->takeResult();
-		if(wasBlocking)
-			delete keymaker;
-		else
-			keymaker->deleteLater();
-		keymaker = 0;
-
-		if(rsa)
-		{
-			evp.pkey = EVP_PKEY_new();
-			EVP_PKEY_assign_RSA(evp.pkey, rsa);
-			sec = true;
+		if (_pkcs11h_certificate_id != NULL) {
+			pkcs11h_freeCertificateId (_pkcs11h_certificate_id);
+			_pkcs11h_certificate_id = NULL;
 		}
+	}
 
-		if(!wasBlocking)
-			emit finished();
-	}*/
+	void
+	setCertificateId (
+		pkcs11h_certificate_id_t pkcs11h_certificate_id
+	) {
+		CK_RV rv;
+
+		freeResources ();
+
+		if (
+			(rv = pkcs11h_duplicateCertificateId (
+				&_pkcs11h_certificate_id,
+				pkcs11h_certificate_id
+			)) != CKR_OK
+		) {
+			throw PKCS11Exception (rv, "Memory error");
+		}
+	}
+
+	void
+	ensureCertificate () {
+		CK_RV rv;
+
+		if (_pkcs11h_certificate == NULL) {
+			if (
+				(pkcs11h_certificate_create (
+					_pkcs11h_certificate_id,
+					PKCS11H_PIN_CACHE_INFINITE,
+					&_pkcs11h_certificate
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Cannot create low-level certificate");
+			}
+		}
+	}
 };
 
 //----------------------------------------------------------------------------
@@ -1368,117 +916,87 @@ public:
 //----------------------------------------------------------------------------
 class MyPKeyContext : public PKeyContext
 {
+
+private:
+	PKeyBase *_k;
+
 public:
-	PKeyBase *k;
-
-	MyPKeyContext(Provider *p) : PKeyContext(p)
-	{
-		k = 0;
+	MyPKeyContext (Provider *p) : PKeyContext (p) {
+		_k = NULL;
 	}
 
-	~MyPKeyContext()
-	{
-		delete k;
+	~MyPKeyContext () {
+		delete _k;
 	}
 
-	virtual Provider::Context *clone() const
-	{
+	virtual
+	Provider::Context *
+	clone () const {
 		MyPKeyContext *c = new MyPKeyContext(*this);
-		c->k = (PKeyBase *)k->clone();
+		c->_k = (PKeyBase *)_k->clone();
 		return c;
 	}
 
-	virtual QList<PKey::Type> supportedTypes() const
-	{
+public:
+	virtual
+	QList<PKey::Type>
+	supportedTypes () const {
 		QList<PKey::Type> list;
 		list += PKey::RSA;
-		//list += PKey::DSA;
-		//list += PKey::DH;
 		return list;
 	}
 
-	virtual QList<PKey::Type> supportedIOTypes() const
-	{
+	virtual
+	QList<PKey::Type>
+	supportedIOTypes () const {
 		QList<PKey::Type> list;
 		list += PKey::RSA;
-		//list += PKey::DSA;
 		return list;
 	}
 
-	virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const
-	{
+	virtual
+	QList<PBEAlgorithm>
+	supportedPBEAlgorithms () const {
 		QList<PBEAlgorithm> list;
-		//list += PBES2_DES_SHA1;
-		//list += PBES2_TripleDES_SHA1;
 		return list;
 	}
 
-	virtual PKeyBase *key()
-	{
-		return k;
+	virtual
+	PKeyBase *
+	key () {
+		return _k;
 	}
 
-	virtual const PKeyBase *key() const
-	{
-		return k;
+	virtual
+	const PKeyBase *
+	key () const {
+		return _k;
 	}
 
-	virtual void setKey(PKeyBase *key)
-	{
-		k = key;
+	virtual
+	void
+	setKey (PKeyBase *key) {
+		delete _k;
+		_k = key;
 	}
 
-	virtual bool importKey(const PKeyBase *key)
-	{
+	virtual
+	bool
+	importKey (
+		const PKeyBase *key
+	) {
 		Q_UNUSED(key);
 		return false;
 	}
 
-	EVP_PKEY *get_pkey() const
-	{
-		//PKey::Type t = k->type();
-		//if(t == PKey::RSA)
-			//return static_cast<RSAKey *>(k)->evp.pkey;
-		/*else if(t == PKey::DSA)
-			return static_cast<DSAKey *>(k)->evp.pkey;
-		else
-			return static_cast<DHKey *>(k)->evp.pkey;*/
-		return 0;
-	}
-
-	PKeyBase *pkeyToBase(EVP_PKEY *pkey, bool sec) const
-	{
-		PKeyBase *nk = 0;
-		if(pkey->type == EVP_PKEY_RSA)
-		{
-			RSAKey *c = new RSAKey(provider());
-			//c->evp.pkey = pkey;
-			c->sec = sec;
-			nk = c;
-		}
-		/*else if(pkey->type == EVP_PKEY_DSA)
-		{
-			DSAKey *c = new DSAKey(provider());
-			c->evp.pkey = pkey;
-			c->sec = sec;
-			nk = c;
-		}
-		else if(pkey->type == EVP_PKEY_DH)
-		{
-			DHKey *c = new DHKey(provider());
-			c->evp.pkey = pkey;
-			c->sec = sec;
-			nk = c;
-		}*/
-		else
-		{
-			EVP_PKEY_free(pkey);
-		}
-		return nk;
-	}
-
-	static int passphrase_cb(char *buf, int size, int rwflag, void *u)
-	{
+	static
+	int
+	passphrase_cb (
+		char *buf,
+		int size,
+		int rwflag,
+		void *u
+	) {
 		Q_UNUSED(buf);
 		Q_UNUSED(size);
 		Q_UNUSED(rwflag);
@@ -1486,546 +1004,1145 @@ public:
 		return 0;
 	}
 
-	virtual QSecureArray publicToDER() const
-	{
-		EVP_PKEY *pkey = get_pkey();
-
-		// OpenSSL does not have DH import/export support
-		if(pkey->type == EVP_PKEY_DH)
-			return QSecureArray();
-
-		BIO *bo = BIO_new(BIO_s_mem());
-		i2d_PUBKEY_bio(bo, pkey);
-		QSecureArray buf = bio2buf(bo);
-		return buf;
+	virtual
+	QSecureArray
+	publicToDER () const {
+		return static_cast<MyRSAKey *>(_k)->getPublicKey ().toDER ();
 	}
 
-	virtual QString publicToPEM() const
-	{
-		EVP_PKEY *pkey = get_pkey();
-
-		// OpenSSL does not have DH import/export support
-		if(pkey->type == EVP_PKEY_DH)
-			return QString();
-
-		BIO *bo = BIO_new(BIO_s_mem());
-		PEM_write_bio_PUBKEY(bo, pkey);
-		QSecureArray buf = bio2buf(bo);
-		return QString::fromLatin1(buf.toByteArray());
+	virtual
+	QString
+	publicToPEM () const {
+		return static_cast<MyRSAKey *>(_k)->getPublicKey ().toPEM ();
 	}
 
-	virtual ConvertResult publicFromDER(const QSecureArray &in)
-	{
-		delete k;
-		k = 0;
-
-		BIO *bi = BIO_new(BIO_s_mem());
-		BIO_write(bi, in.data(), in.size());
-		EVP_PKEY *pkey = d2i_PUBKEY_bio(bi, NULL);
-		BIO_free(bi);
-
-		if(!pkey)
-			return ErrorDecode;
-
-		k = pkeyToBase(pkey, false);
-		if(k)
-			return ConvertGood;
-		else
-			return ErrorDecode;
+	virtual
+	ConvertResult
+	publicFromDER (
+		const QSecureArray &in
+	) {
+		Q_UNUSED(in);
+		return ErrorDecode;
 	}
 
-	virtual ConvertResult publicFromPEM(const QString &s)
-	{
-		delete k;
-		k = 0;
-
-		QByteArray in = s.toLatin1();
-		BIO *bi = BIO_new(BIO_s_mem());
-		BIO_write(bi, in.data(), in.size());
-		EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, NULL, NULL, NULL);
-		BIO_free(bi);
-
-		if(!pkey)
-			return ErrorDecode;
-
-		k = pkeyToBase(pkey, false);
-		if(k)
-			return ConvertGood;
-		else
-			return ErrorDecode;
+	virtual
+	ConvertResult
+	publicFromPEM (
+		const QString &s
+	) {
+		Q_UNUSED(s);
+		return ErrorDecode;
 	}
 
-	virtual QSecureArray privateToDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const
-	{
-		//if(pbe == PBEDefault)
-		//	pbe = PBES2_TripleDES_SHA1;
-
-		const EVP_CIPHER *cipher = 0;
-		if(pbe == PBES2_TripleDES_SHA1)
-			cipher = EVP_des_ede3_cbc();
-		else if(pbe == PBES2_DES_SHA1)
-			cipher = EVP_des_cbc();
-
-		if(!cipher)
-			return QSecureArray();
-
-		EVP_PKEY *pkey = get_pkey();
-
-		// OpenSSL does not have DH import/export support
-		if(pkey->type == EVP_PKEY_DH)
-			return QSecureArray();
-
-		BIO *bo = BIO_new(BIO_s_mem());
-		if(!passphrase.isEmpty())
-			i2d_PKCS8PrivateKey_bio(bo, pkey, cipher, NULL, 0, NULL, (void *)passphrase.data());
-		else
-			i2d_PKCS8PrivateKey_bio(bo, pkey, NULL, NULL, 0, NULL, NULL);
-		QSecureArray buf = bio2buf(bo);
-		return buf;
+	virtual
+	QSecureArray
+	privateToDER(
+		const QSecureArray &passphrase,
+		PBEAlgorithm pbe
+	) const {
+		Q_UNUSED(passphrase);
+		Q_UNUSED(pbe);
+		return QSecureArray ();
 	}
 
-	virtual QString privateToPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const
-	{
-		//if(pbe == PBEDefault)
-		//	pbe = PBES2_TripleDES_SHA1;
-
-		const EVP_CIPHER *cipher = 0;
-		if(pbe == PBES2_TripleDES_SHA1)
-			cipher = EVP_des_ede3_cbc();
-		else if(pbe == PBES2_DES_SHA1)
-			cipher = EVP_des_cbc();
-
-		if(!cipher)
-			return QString();
-
-		EVP_PKEY *pkey = get_pkey();
-
-		// OpenSSL does not have DH import/export support
-		if(pkey->type == EVP_PKEY_DH)
-			return QString();
-
-		BIO *bo = BIO_new(BIO_s_mem());
-		if(!passphrase.isEmpty())
-			PEM_write_bio_PKCS8PrivateKey(bo, pkey, cipher, NULL, 0, NULL, (void *)passphrase.data());
-		else
-			PEM_write_bio_PKCS8PrivateKey(bo, pkey, NULL, NULL, 0, NULL, NULL);
-		QSecureArray buf = bio2buf(bo);
-		return QString::fromLatin1(buf.toByteArray());
+	virtual
+	QString
+	privateToPEM (
+		const QSecureArray &passphrase,
+		PBEAlgorithm pbe
+	) const {
+		Q_UNUSED(passphrase);
+		Q_UNUSED(pbe);
+		return QString ();
 	}
 
-	virtual ConvertResult privateFromDER(const QSecureArray &in, const QSecureArray &passphrase)
-	{
-		delete k;
-		k = 0;
-
-		EVP_PKEY *pkey;
-		if(!passphrase.isEmpty())
-			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, NULL, (void *)passphrase.data());
-		else
-			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, &passphrase_cb, NULL);
-
-		if(!pkey)
-			return ErrorDecode;
-
-		k = pkeyToBase(pkey, true);
-		if(k)
-			return ConvertGood;
-		else
-			return ErrorDecode;
+	virtual
+	ConvertResult
+	privateFromDER (
+		const QSecureArray &in,
+		const QSecureArray &passphrase
+	) {
+		Q_UNUSED(in);
+		Q_UNUSED(passphrase);
+		return ErrorDecode;
 	}
 
-	virtual ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase)
-	{
-		delete k;
-		k = 0;
-
-		QByteArray in = s.toLatin1();
-		BIO *bi = BIO_new(BIO_s_mem());
-		BIO_write(bi, in.data(), in.size());
-		EVP_PKEY *pkey;
-		if(!passphrase.isEmpty())
-			pkey = PEM_read_bio_PrivateKey(bi, NULL, NULL, (void *)passphrase.data());
-		else
-			pkey = PEM_read_bio_PrivateKey(bi, NULL, &passphrase_cb, NULL);
-		BIO_free(bi);
-
-		if(!pkey)
-			return ErrorDecode;
-
-		k = pkeyToBase(pkey, true);
-		if(k)
-			return ConvertGood;
-		else
-			return ErrorDecode;
+	virtual
+	ConvertResult
+	privateFromPEM (
+		const QString &s,
+		const QSecureArray &passphrase
+	) {
+		Q_UNUSED(s);
+		Q_UNUSED(passphrase);
+		return ErrorDecode;
 	}
 };
 
+//----------------------------------------------------------------------------
+// MyKeyStoreEntry
+//----------------------------------------------------------------------------
 class MyKeyStoreEntry : public KeyStoreEntryContext
 {
-public:
-	KeyStoreEntry::Type item_type;
+private:
+	KeyStoreEntry::Type _item_type;
 	KeyBundle _key;
 	Certificate _cert;
-	QString _name, _id;
+	QString _storeId;
+	QString _id;
+	QString _storeName;
+	QString _name;
 
-	MyKeyStoreEntry(const Certificate &cert, const QString &name, const QString &id, Provider *p) : KeyStoreEntryContext(p)
-	{
+public:
+	MyKeyStoreEntry (
+		const Certificate &cert,
+		const QString &storeId,
+		const QString &id,
+		const QString &storeName,
+		const QString &name,
+		Provider *p
+	) : KeyStoreEntryContext(p) {
+		_item_type = KeyStoreEntry::TypeCertificate;
 		_cert = cert;
-		_name = name;
+		_storeId = storeId;
 		_id = id;
-		item_type = KeyStoreEntry::TypeCertificate;
+		_storeName = storeName;
+		_name = name;
 	}
 
-	MyKeyStoreEntry(const KeyBundle &key, const QString &name, const QString &id, Provider *p) : KeyStoreEntryContext(p)
-	{
+	MyKeyStoreEntry (
+		const KeyBundle &key,
+		const QString &storeId,
+		const QString &id,
+		const QString &storeName,
+		const QString &name,
+		Provider *p
+	) : KeyStoreEntryContext(p) {
+		_item_type = KeyStoreEntry::TypeKeyBundle;
 		_key = key;
-		_name = name;
+		_storeId = storeId,
 		_id = id;
-		item_type = KeyStoreEntry::TypeKeyBundle;
+		_storeName = storeName;
+		_name = name;
 	}
 
-	MyKeyStoreEntry(const MyKeyStoreEntry &from) : KeyStoreEntryContext(from)
-	{
+	MyKeyStoreEntry (
+		const MyKeyStoreEntry &from
+	) : KeyStoreEntryContext(from) {
+		_item_type = from._item_type;
+		_key = from._key;
+		_storeId = from._storeId;
+		_id = from._id;
+		_storeName = from._storeName;
+		_name = from._name;
 	}
 
-	~MyKeyStoreEntry()
-	{
+	~MyKeyStoreEntry() {
 	}
 
-	virtual Provider::Context *clone() const
-	{
+	virtual
+	Provider::Context *
+	clone () const {
 		return new MyKeyStoreEntry(*this);
 	}
 
-	virtual KeyStoreEntry::Type type() const
-	{
-		return item_type;
+public:
+	virtual
+	KeyStoreEntry::Type
+	type () const {
+		return _item_type;
 	}
 
-	virtual QString name() const
-	{
-		// TODO
+	virtual
+	QString
+	name () const {
 		return _name;
 	}
 
-	virtual QString id() const
-	{
-		// TODO
+	virtual
+	QString
+	id () const {
 		return _id;
 	}
 
-	virtual KeyBundle keyBundle() const
-	{
+	virtual
+	KeyBundle
+	keyBundle () const {
 		return _key;
 	}
 
-	virtual Certificate certificate() const
-	{
+	virtual
+	Certificate
+	certificate () const {
 		return _cert;
 	}
-};
 
-class MyKeyStoreList;
-
-static MyKeyStoreList *keyStoreList = 0;
-
-class MyKeyStoreList : public KeyStoreListContext
-{
-	Q_OBJECT
-public:
-	QString libname;
-	QList<int> list;
-
-	MyKeyStoreList(Provider *p) : KeyStoreListContext(p)
-	{
-		keyStoreList = this;
+	virtual
+	QString
+	storeId () const {
+		return _storeId;
 	}
 
-	~MyKeyStoreList()
-	{
-		keyStoreList = 0;
+	virtual
+	QString
+	storeName () const {
+		return _storeName;
 	}
 
-	virtual Provider::Context *clone() const
-	{
-		return 0;
-	}
-
-	virtual void start()
-	{
-		libname = qgetenv("QCA_PKCS11_LIB");
-
-		if(libname.isEmpty())
-		{
-			QMetaObject::invokeMethod(this, "doReady", Qt::QueuedConnection);
-			return;
-		}
-
-		con = new CTIControl;//(this);
-		//connect(con, SIGNAL(slotChanged(int)), SLOT(slotChanged(int)));
-
-		if(!con->init(libname))
-		{
-			printf("unable to load [%s]\n", qPrintable(libname));
-			QMetaObject::invokeMethod(this, "doReady", Qt::QueuedConnection);
-			return;
-			//emit quit();
-		}
-
-		/*CTIControl::ModuleInfo moduleInfo = con->moduleInfo;
-		QList<CTIControl::SlotInfo> slotInfoList = con->slotInfoList;
-
-		printf("Cryptoki version: %s\n", qPrintable(moduleInfo.ckVersion));
-		printf("Manufacturer:     %s\n", qPrintable(moduleInfo.manufacturer));
-		printf("Library:          %s (ver %s)\n", qPrintable(moduleInfo.libraryDescription), qPrintable(moduleInfo.libraryVersion));
-
-		printf("Slots: %d\n", slotInfoList.count());
-		QList<int> tokens;
-		for(int n = 0; n < slotInfoList.count(); ++n)
-		{
-			const CTIControl::SlotInfo &slotInfo = slotInfoList[n];
-			printf("ID: %lu\n", slotInfo.slotId);
-			printf("  Description:  %s\n", qPrintable(slotInfo.slotDescription));
-			printf("  Manufacturer: %s\n", qPrintable(slotInfo.manufacturer));
-			printf("  Hardware:     %s\n", slotInfo.isHardware ? "Yes" : "No");
-			printf("  Removable:    %s\n", slotInfo.isRemovable ? "Yes" : "No");
-			printf("  Token:        %s\n", slotInfo.haveToken ? "Yes" : "No");
-			//if(slotInfo.haveToken)
-			//{
-			//	tokens += n;
-			//	const CTIControl::TokenInfo &tokenInfo = slotInfo.tokenInfo;
-			//	print_tokenInfo(tokenInfo);
-			//}
-		}*/
-
-		// TODO
-		for(int n = 0; n < con->slotInfoList.count(); ++n)
-		{
-			const CTIControl::SlotInfo &i = con->slotInfoList[n];
-			if(i.haveToken)
-			{
-				list += n;
-			}
-		}
-
-		QMetaObject::invokeMethod(this, "doReady", Qt::QueuedConnection);
-	}
-
-	virtual QList<int> keyStores() const
-	{
-		QList<int> out;
-		for(int n = 0; n < list.count(); ++n)
-			out.append(list[n]);
-		return out;
-	}
-
-	virtual KeyStore::Type type(int id) const
-	{
-		Q_UNUSED(id);
-		// TODO
-		return KeyStore::SmartCard;
-	}
-
-	virtual QString storeId(int id) const
-	{
-		Q_UNUSED(id);
-		// TODO
-		return "qca-pkcs11"; // horrible
-	}
-
-	virtual QString name(int id) const
-	{
-		// TODO
-		return con->slotInfoList[id].tokenInfo.label;
-	}
-
-	virtual QList<KeyStoreEntry::Type> entryTypes(int id) const
-	{
-		Q_UNUSED(id);
-		// TODO
-		QList<KeyStoreEntry::Type> list;
-		list += KeyStoreEntry::TypeKeyBundle;
-		list += KeyStoreEntry::TypeCertificate;
-		return list;
-	}
-
-	virtual QList<KeyStoreEntryContext*> entryList(int id) const
-	{
-		// TODO
-		Q_UNUSED(id);
-
-		QList<KeyStoreEntryContext*> out;
-
-		//printf("let's do some things with token at index %d\n", index);
-		CTIControl::SlotInfo &i = con->slotInfoList[id];
-
-		global_session = new CTISession(&con->module);
-		CTISession &sess = *global_session;
-
-		//printf("opening session\n");
-		if(!sess.open(i.slotId, CKF_RW_SESSION))
-		{
-			printf("error opening session\n");
-			return out;
-		}
-
-		emit keyStoreList->storeNeedPassphrase(0, 0, QString());
-
-		//printf("getting object list (before login)\n");
-		if(!sess.getObjects())
-		{
-			printf("error getting objects\n");
-			return out;
-		}
-
-		// try to find keybundles
-		for(int n = 0; n < sess.objectList.count(); ++n)
-		{
-			const CTISession::Object &i = sess.objectList[n];
-			if(i.type == CKO_PRIVATE_KEY)
-			{
-				const CTISession::Object *obj_key = &i;
-				QList<const CTISession::Object *> obj_certs;
-				for(int n2 = 0; n2 < sess.objectList.count(); ++n2)
-				{
-					const CTISession::Object &i2 = sess.objectList[n2];
-					if(i2.type == CKO_CERTIFICATE && i2.id == i.id)
-						obj_certs += &i2;
-				}
-
-				if(!obj_certs.isEmpty())
-				{
-					QByteArray der_buf;
-					sess.getBigIntegerData(obj_certs[0]->handle, CKA_VALUE, &der_buf);
-					Certificate cert = Certificate::fromDER(der_buf);
-					if(cert.isNull())
-						continue;
-
-					RSAKey *rsakey = new RSAKey(provider());
-					rsakey->sec = true;
-					rsakey->handle = obj_key->handle;
-
-					QByteArray buf;
-					sess.getBigIntegerData(rsakey->handle, CKA_MODULUS, &buf);
-					rsakey->big_n.fromArray(buf);
-					sess.getBigIntegerData(rsakey->handle, CKA_PUBLIC_EXPONENT, &buf);
-					rsakey->big_e.fromArray(buf);
-
-					MyPKeyContext *pkc = new MyPKeyContext(provider());
-					pkc->setKey(rsakey);
-					PrivateKey privkey;
-					privkey.change(pkc);
-					if(privkey.isNull())
-						continue;
-
-					KeyBundle key;
-					key.setCertificateChainAndKey(cert, privkey);
-
-					MyKeyStoreEntry *e = new MyKeyStoreEntry(key, obj_certs[0]->label, arrayToHex(obj_certs[0]->id), provider());
-					out += e;
-				}
-			}
-		}
-
-		/*for(int n = 0; n < sess.objectList.count(); ++n)
-		{
-			const CTISession::Object &i = sess.objectList[n];
-			QString type;
-			if(i.type == CKO_PUBLIC_KEY)
-				type = "PublicKey";
-			else if(i.type == CKO_PRIVATE_KEY)
-				type = "PrivateKey";
-			else if(i.type == CKO_CERTIFICATE)
-				type = "Certificate";
-			else
-				type = QString("Unknown-%1").arg(i.type, (int)8, (int)16, QChar('0'));
-			//printf("  %s:\n", qPrintable(type));
-			//printf("    label: %s\n", qPrintable(i.label));
-			//printf("    id:    %s\n", qPrintable(hexify(i.id)));
-
-			if(i.type != CKO_CERTIFICATE)
-				continue;
-
-			QByteArray der_buf;
-			// hack hack
-			sess.getBigIntegerData(i.handle, CKA_VALUE, &der_buf);
-
-			// FIXME: this requires cert support elsewhere
-			Certificate cert = Certificate::fromDER(der_buf);
-			if(cert.isNull())
-			{
-				printf("cert is null?\n");
-				continue;
-			}
-			MyKeyStoreEntry *e = new MyKeyStoreEntry(cert, i.label, arrayToHex(i.id), provider());
-			out += e;
-		}*/
-
-		return out;
-	}
-
-	virtual void submitPassphrase(int id, const QSecureArray &passphrase)
-	{
-		Q_UNUSED(id);
-		// TODO
-		global_session->login(CKU_USER, passphrase.data(), passphrase.size());
-	}
-
-private slots:
-	void doReady()
-	{
-		emit busyEnd();
+	virtual
+	bool
+	ensureAccess () {
+		return static_cast<MyRSAKey *>(static_cast<PKeyContext *>(_key.privateKey ().context ())->key ())->ensureTokenAccess ();
 	}
 };
+
+//----------------------------------------------------------------------------
+// MyKeyStoreList
+//----------------------------------------------------------------------------
+MyKeyStoreList::MyKeyStoreList (Provider *p) : KeyStoreListContext(p) {
+	_last_id = 0;
+	_initialized = false;
+}
+
+MyKeyStoreList::~MyKeyStoreList () {
+	s_keyStoreList = NULL;
+	clearStores ();
+}
+
+QCA::Provider::Context *
+MyKeyStoreList::clone () const {
+	return NULL;
+}
+
+void
+MyKeyStoreList::start () {
+
+	CK_RV rv = CKR_OK;
+
+	try {
+		QString strProvider = qgetenv ("QCA_PKCS11_LIB");
+
+		if (!strProvider.isEmpty()) {
+			if (
+				(rv = pkcs11h_addProvider (
+					qPrintable (strProvider),
+					qPrintable (strProvider),
+					FALSE,
+					PKCS11H_SLOTEVENT_METHOD_AUTO,
+					PKCS11H_SLOTEVENT_METHOD_AUTO,
+					0,
+					FALSE
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Adding provider " + strProvider);
+			}
+		}
+	}
+	catch (const PKCS11Exception &e) {
+		s_keyStoreList->emit_diagnosticText (
+			(QString ()).sprintf (
+				"PKCS#11: Start failed %ld-'%s'.\n",
+				e.getRV (),
+				qPrintable (e.getMessage ())
+			)
+		);
+	}
+
+	QMetaObject::invokeMethod(this, "doReady", Qt::QueuedConnection);
+}
+
+void
+MyKeyStoreList::setUpdatesEnabled (bool enabled) {
+	try {
+		pkcs11Provider *p = static_cast<pkcs11Provider *>(provider ());
+		if (enabled) {
+			p->startSlotEvents ();
+		}
+		else {
+			p->stopSlotEvents ();
+		}
+	}
+	catch (const PKCS11Exception &e) {
+		s_keyStoreList->emit_diagnosticText (
+			(QString ()).sprintf (
+				"PKCS#11: Start event failed %ld-'%s'.\n",
+				e.getRV (),
+				qPrintable (e.getMessage ())
+			)
+		);
+	}
+}
+
+KeyStoreEntryContext *
+MyKeyStoreList::entry (
+	int id,
+	const QString &entryId
+) const {
+	Q_UNUSED(id);
+	Q_UNUSED(entryId);
+	return NULL;
+}
+
+KeyStoreEntryContext *
+MyKeyStoreList::entryPassive (
+	const QString &storeId,
+	const QString &entryId
+) const {
+	Q_UNUSED(storeId);
+
+	try {
+		QList<Certificate> listIssuers;
+		pkcs11h_certificate_id_t certificate_id;
+		bool fPrivate;
+		
+		deserializeCertificateId (entryId, &certificate_id, &fPrivate, &listIssuers);
+			
+		return getKeyStoreEntryByCertificateId (certificate_id, fPrivate, listIssuers);
+	}
+	catch (const PKCS11Exception &e) {
+		s_keyStoreList->emit_diagnosticText (
+			(QString ()).sprintf (
+				"PKCS#11: Add key store entry %ld-'%s'.\n",
+				e.getRV (),
+				qPrintable (e.getMessage ())
+			)
+		);
+
+		return NULL;
+	}
+}
+
+KeyStore::Type
+MyKeyStoreList::type (int id) const {
+	Q_UNUSED(id);
+	return KeyStore::SmartCard;
+}
+
+QString
+MyKeyStoreList::storeId (int id) const {
+	QString ret;
+
+	if (_storesById.contains (id)) {
+		if (_storesById[id]->token_id != NULL) {
+			ret = tokenId2storeId (_storesById[id]->token_id);
+		}
+	}
+
+	return ret;
+}
+
+QString
+MyKeyStoreList::name (int id) const {
+	QString ret;
+
+	if (_storesById.contains (id)) {
+		if (_storesById[id]->token_id != NULL) {
+			ret = _storesById[id]->token_id->label;
+		}
+	}
+
+	return ret;
+}
+
+QList<KeyStoreEntry::Type>
+MyKeyStoreList::entryTypes (int id) const {
+	Q_UNUSED(id);
+	QList<KeyStoreEntry::Type> list;
+	list += KeyStoreEntry::TypeKeyBundle;
+	list += KeyStoreEntry::TypeCertificate;
+	return list;
+}
+
+QList<int>
+MyKeyStoreList::keyStores () {
+	pkcs11h_token_id_list_t tokens = NULL;
+	QList<int> out;
+
+	try {
+		CK_RV rv;
+
+		/*
+		 * Get available tokens
+		 */
+		if (
+			(rv = pkcs11h_enum_getTokenIds (
+				PKCS11H_ENUM_METHOD_CACHE,
+				&tokens
+			)) != CKR_OK
+		) {
+			throw PKCS11Exception (rv, "Enumerating tokens");
+		}
+
+		/*
+		 * Register all tokens, unmark
+		 * them from remove list
+		 */
+		QList<int> to_remove = _storesById.keys ();
+		for (
+			pkcs11h_token_id_list_t entry = tokens;
+			entry != NULL;
+			entry = entry->next
+		) {
+			KeyStoreItem *item = registerTokenId (entry->token_id);
+			out += item->id;
+			to_remove.removeAll (item->id);
+		}
+
+		/*
+		 * Remove all items
+		 * that were not discovered
+		 */
+		{
+			QMutexLocker l(&_mutexStores);
+
+			for (
+				QList<int>::iterator i = to_remove.begin ();
+				i != to_remove.end ();
+				i++
+			) {
+				KeyStoreItem *item = _storesById[*i];
+				_storesById.remove (item->id);
+				_stores.removeAll (item);
+				delete item;
+			}
+		}
+	}
+	catch (const PKCS11Exception &e) {
+		s_keyStoreList->emit_diagnosticText (
+			(QString ()).sprintf (
+				"PKCS#11: Cannot get key stores: %ld-'%s'.\n",
+				e.getRV (),
+				qPrintable (e.getMessage ())
+			)
+		);
+	}
+
+	if (tokens != NULL) {
+		pkcs11h_freeTokenIdList (tokens);
+	}
+
+	return out;
+}
+
+QList<KeyStoreEntryContext*>
+MyKeyStoreList::entryList (int id) {
+	pkcs11h_certificate_id_list_t certs = NULL;
+	QList<KeyStoreEntryContext*> out;
+
+	try {
+		CK_RV rv;
+
+		if (_storesById.contains (id)) {
+			KeyStoreItem *entry = _storesById[id];
+
+			if (entry->token_id != NULL) {
+				pkcs11h_certificate_id_list_t issuers = NULL;
+				pkcs11h_certificate_id_list_t current = NULL;
+				QList<Certificate> listIssuers;
+
+				if (
+					(rv = pkcs11h_enum_getTokenCertificateIds (
+						entry->token_id,
+						PKCS11H_ENUM_METHOD_CACHE,
+						&issuers,
+						&certs
+					)) != CKR_OK
+				) {
+					throw PKCS11Exception (rv, "Enumerate certificates");
+				}
+
+				for (current=issuers;current!=NULL;current=current->next) {
+					listIssuers += Certificate::fromDER (
+						QByteArray (
+							(char *)current->certificate_id->certificate_blob,
+							current->certificate_id->certificate_blob_size
+						)
+					);
+				}
+
+				for (current=issuers;current!=NULL;current=current->next) {
+					try {
+						out += getKeyStoreEntryByCertificateId (
+							current->certificate_id,
+							false,
+							listIssuers
+						);
+					}
+					catch (const PKCS11Exception &e) {
+						s_keyStoreList->emit_diagnosticText (
+							(QString ()).sprintf (
+								"PKCS#11: Add key store entry %ld-'%s'.\n",
+								e.getRV (),
+								qPrintable (e.getMessage ())
+							)
+						);
+					}
+				}
+
+				for (current=certs;current!=NULL;current=current->next) {
+					try {
+						out += getKeyStoreEntryByCertificateId (
+							current->certificate_id,
+							true,
+							listIssuers
+						);
+					}
+					catch (const PKCS11Exception &e) {
+						s_keyStoreList->emit_diagnosticText (
+							(QString ()).sprintf (
+								"PKCS#11: Add key store entry %ld-'%s'.\n",
+								e.getRV (),
+								qPrintable (e.getMessage ())
+							)
+						);
+					}
+				}
+			}
+
+		}
+	}
+	catch (const PKCS11Exception &e) {
+		s_keyStoreList->emit_diagnosticText (
+			(QString ()).sprintf (
+				"PKCS#11: Enumerating store failed %ld-'%s'.\n",
+				e.getRV (),
+				qPrintable (e.getMessage ())
+			)
+		);
+	}
+
+	if (certs != NULL) {
+		pkcs11h_freeCertificateIdList (certs);
+	}
+
+	return out;
+}
+
+void
+MyKeyStoreList::submitPassphrase (
+	int id,
+	int requestId,
+	const QSecureArray &passphrase
+) {
+	Q_UNUSED(requestId);
+
+	_pins[id] = passphrase;
+}
+
+void
+MyKeyStoreList::rejectPassphraseRequest (
+	int id,
+	int requestId
+) {
+	Q_UNUSED(requestId);
+
+	_pins[id].clear ();
+}
+
+void
+MyKeyStoreList::emit_storeNeedPassphrase (
+	const pkcs11h_token_id_t token_id,
+	QSecureArray &pin
+) {
+	KeyStoreItem *entry = NULL;
+
+	{
+		QMutexLocker l(&_mutexStores);
+
+		_stores_t::iterator i=_stores.begin ();
+
+		while (
+			i != _stores.end () &&
+			!pkcs11h_sameTokenId (
+				token_id,
+				(*i)->token_id
+			)
+		) {
+			i++;
+		}
+
+		if (i != _stores.end ()) {
+			entry = (*i);
+		}
+	}
+
+	if (entry == NULL) {
+		entry = registerTokenId (token_id);
+	}
+
+	_pins[entry->id].clear ();
+	emit s_keyStoreList->storeNeedPassphrase(entry->id, 0, QString ());
+	pin = _pins[entry->id];
+	_pins[entry->id].clear ();
+}
+
+void
+MyKeyStoreList::emit_updated () {
+	QMetaObject::invokeMethod(this, "doUpdated", Qt::QueuedConnection);
+}
+
+void
+MyKeyStoreList::emit_diagnosticText (
+	const QString &t
+) {
+	emit diagnosticText (t);
+}
+
+void
+MyKeyStoreList::doReady () {
+	emit busyEnd ();
+}
+
+void
+MyKeyStoreList::doUpdated () {
+	emit updated ();
+}
+
+MyKeyStoreList::KeyStoreItem *
+MyKeyStoreList::registerTokenId (
+	const pkcs11h_token_id_t token_id
+) {
+	QMutexLocker l(&_mutexStores);
+
+	_stores_t::iterator i=_stores.begin ();
+
+	while (
+		i != _stores.end () &&
+		!pkcs11h_sameTokenId (
+			token_id,
+			(*i)->token_id
+		)
+	) {
+		i++;
+	}
+
+	KeyStoreItem *entry = NULL;
+
+	if (i == _stores.end ()) {
+		/*
+		 * Deal with last_id overlap
+		 */
+		while (_storesById.find (++_last_id) != _storesById.end ());
+
+		entry = new KeyStoreItem;
+		entry->id = _last_id;
+		pkcs11h_duplicateTokenId (&entry->token_id, token_id);
+
+		_stores += entry;
+		_storesById.insert (entry->id, entry);
+	}
+	else {
+		entry = (*i);
+	}
+
+	return entry;
+}
+
+void
+MyKeyStoreList::clearStores () {
+	QMutexLocker l(&_mutexStores);
+
+	_storesById.clear ();
+
+	for (
+		_stores_t::iterator i=_stores.begin ();
+		i != _stores.end ();
+		i++
+	) {
+		KeyStoreItem *entry = (*i);
+		delete entry;
+	}
+
+	_stores.clear ();
+}
+
+MyKeyStoreEntry *
+MyKeyStoreList::getKeyStoreEntryByCertificateId (
+	const pkcs11h_certificate_id_t certificate_id,
+	bool fPrivate,
+	const QList<Certificate> &listIssuers
+) const {
+	MyKeyStoreEntry *entry = NULL;
+
+	if (certificate_id == 0) {
+		throw PKCS11Exception (CKR_ARGUMENTS_BAD, "Missing certificate object");
+	}
+
+	if (certificate_id->certificate_blob_size == 0) {
+		throw PKCS11Exception (CKR_ARGUMENTS_BAD, "Missing certificate");
+	}
+
+	Certificate cert = Certificate::fromDER (
+		QByteArray (
+			(char *)certificate_id->certificate_blob,
+			certificate_id->certificate_blob_size
+		)
+	);
+
+	if (cert.isNull ()) {
+		throw PKCS11Exception (CKR_ARGUMENTS_BAD, "Invalid certificate");
+	}
+
+	CertificateChain chain = CertificateChain (cert).complete (listIssuers);
+
+	QString strDescription = cert.commonName () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
+
+	QString id = serializeCertificateId (
+		certificate_id,
+		chain,
+		fPrivate
+	);
+
+	if (fPrivate) {
+		MyRSAKey *rsakey = new MyRSAKey (
+			provider(),
+			certificate_id,
+			cert.subjectPublicKey ().toRSA ()
+		);
+
+		MyPKeyContext *pkc = new MyPKeyContext (provider ());
+		pkc->setKey (rsakey);
+		PrivateKey privkey;
+		privkey.change (pkc);
+		KeyBundle key;
+		key.setCertificateChainAndKey (
+			chain,
+			privkey
+		);
+
+		entry = new MyKeyStoreEntry (
+			key,
+			tokenId2storeId (certificate_id->token_id),
+			id,
+			certificate_id->token_id->label,
+			strDescription,
+			provider ()
+		);
+	}
+	else {
+		entry = new MyKeyStoreEntry (
+			cert,
+			tokenId2storeId (certificate_id->token_id),
+			id,
+			certificate_id->token_id->label,
+			strDescription,
+			provider()
+		);
+	}
+
+	return entry;
+}
+
+QString
+MyKeyStoreList::tokenId2storeId (
+	const pkcs11h_token_id_t token_id
+) const {
+	QCA::MD2 hash1;
+	hash1.update (token_id->manufacturerID, strlen (token_id->manufacturerID));
+	hash1.update (token_id->model, strlen (token_id->model));
+	hash1.update (token_id->serialNumber, strlen (token_id->serialNumber));
+
+	return "qca-pkcs11/" + escapeString ((Base64 ()).arrayToString (hash1.final ()));
+}
+
+QString
+MyKeyStoreList::serializeCertificateId (
+	const pkcs11h_certificate_id_t certificate_id,
+	const CertificateChain &chain,
+	const bool fPrivate
+) const {
+	QString strSerialized;
+	
+	strSerialized += (QString ()).sprintf (
+		"qca-pkcs11/%s/%s/%s/%s/%s/%d",
+		qPrintable (escapeString (certificate_id->token_id->manufacturerID)),
+		qPrintable (escapeString (certificate_id->token_id->model)),
+		qPrintable (escapeString (certificate_id->token_id->serialNumber)),
+		qPrintable (escapeString (certificate_id->token_id->label)),
+		qPrintable (escapeString ((Base64 ()).arrayToString (
+			(QByteArray (
+				(const char *)certificate_id->attrCKA_ID,
+				(int)certificate_id->attrCKA_ID_size
+			)
+		)))),
+		fPrivate ? 1 : 0
+	);
+	
+	for (
+		CertificateChain::const_iterator i = chain.begin ();
+		i != chain.end ();
+		i++
+	) {
+		strSerialized += "/" + escapeString ((Base64 ()).arrayToString ((*i).toDER ()));
+	}
+
+	return strSerialized;
+}
+
+void
+MyKeyStoreList::deserializeCertificateId (
+	const QString &from,
+	pkcs11h_certificate_id_t * const p_certificate_id,
+	bool * const fPrivate,
+	QList<Certificate> *listIssuers
+) const {
+	*p_certificate_id = NULL;
+	*fPrivate = false;
+	int n = 0;
+
+	CK_RV rv;
+
+	QStringList list = from.split ("/");
+
+	if (list.size () < 8) {
+		throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+	}
+
+	if (list[n++] != "qca-pkcs11") {
+		throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+	}
+
+	pkcs11h_token_id_s token_id_s;
+	pkcs11h_certificate_id_s certificate_id_s;
+
+	memset (&token_id_s, 0, sizeof (token_id_s));
+	memset (&certificate_id_s, 0, sizeof (certificate_id_s));
+
+	certificate_id_s.token_id = &token_id_s;
+
+	strncpy (
+		token_id_s.manufacturerID,
+		qPrintable (unescapeString (list[n++])),
+		sizeof (token_id_s.manufacturerID)
+	);
+	token_id_s.manufacturerID[sizeof (token_id_s.manufacturerID)-1] = '\0';
+	strncpy (
+		token_id_s.model,
+		qPrintable (unescapeString (list[n++])),
+		sizeof (token_id_s.model)
+	);
+	token_id_s.model[sizeof (token_id_s.model)-1] = '\0';
+	strncpy (
+		token_id_s.serialNumber,
+		qPrintable (unescapeString (list[n++])),
+		sizeof (token_id_s.serialNumber)
+	);
+	token_id_s.serialNumber[sizeof (token_id_s.serialNumber)-1] = '\0';
+	strncpy (
+		token_id_s.label,
+		qPrintable (unescapeString (list[n++])),
+		sizeof (token_id_s.label)
+	);
+	token_id_s.serialNumber[sizeof (token_id_s.label)-1] = '\0';
+
+	QSecureArray arrayCKA_ID = (Base64 ()).stringToArray (unescapeString (list[n++]));
+	certificate_id_s.attrCKA_ID = (unsigned char *)arrayCKA_ID.data ();
+	certificate_id_s.attrCKA_ID_size = (size_t)arrayCKA_ID.size ();
+
+	*fPrivate = list[n++].toInt () != 0;
+
+	QSecureArray arrayCertificate = (Base64 ()).stringToArray (unescapeString (list[n++]));
+	certificate_id_s.certificate_blob = (unsigned char *)arrayCertificate.data ();
+	certificate_id_s.certificate_blob_size = (size_t)arrayCertificate.size ();
+
+	if (
+		(rv = pkcs11h_duplicateCertificateId (
+			p_certificate_id,
+			&certificate_id_s
+		)) != CKR_OK
+	) {
+		throw PKCS11Exception (rv, "Memory error");
+	}
+
+	while (n < list.size ()) {
+		*listIssuers += Certificate::fromDER (
+			(Base64 ()).stringToArray (unescapeString (list[n++]))
+		);
+	}
+}
+
+QString
+MyKeyStoreList::escapeString (
+	const QString &from
+) const {
+	QString to;
+
+	for (int i=0;i<from.size ();i++) {
+		QChar c = from[i];
+
+		if (c == '/' || c == '\\') {
+			to += (QString ()).sprintf ("\\x%02x", c.toLatin1 ());
+		}
+		else {
+			to += c;
+		}
+	}
+
+	return to;
+}
+
+QString
+MyKeyStoreList::unescapeString (
+	const QString &from
+) const {
+	QString to;
+
+	for (int i=0;i<from.size ();i++) {
+		QChar c = from[i];
+
+		if (c == '\\') {
+			to += QChar ((uchar)from.mid (i+2, 2).toInt (0, 16));
+			i+=3;
+		}
+		else {
+			to += c;
+		}
+	}
+
+	return to;
+}
 
 }
 
 using namespace pkcs11QCAPlugin;
 
-class pkcs11Provider : public QCA::Provider
-{
-public:
-	pkcs11Provider()
-	{
-		con = 0;
-	}
+//----------------------------------------------------------------------------
+// pkcs11Provider
+//----------------------------------------------------------------------------
+pkcs11Provider::pkcs11Provider () {
+	_fLowLevelInitialized = false;
+	_log_level = PKCS11H_LOG_QUITE;
+	_fSlotEventsActive = false;
+	_fSlotEventsLowLevelActive = false;
+}
 
-	~pkcs11Provider()
-	{
-		delete con;
-	}
+pkcs11Provider::~pkcs11Provider () {
+	delete s_keyStoreList;
+	s_keyStoreList = NULL;
+	pkcs11h_terminate ();
+}
 
-	virtual void init()
-	{
-	}
+void pkcs11Provider::init () {
+	try {
+		QString strLogLevel = qgetenv ("QCA_PKCS11_LOGLEVEL");
+		CK_RV rv;
 
-	virtual QString name() const
-	{
-		return "qca-pkcs11";
-	}
+		if (!strLogLevel.isEmpty ()) {
+			_log_level = strLogLevel.toInt ();
+		}
+		
+		if ((rv = pkcs11h_initialize ()) != CKR_OK) {
+			throw PKCS11Exception (rv, "Cannot initialize");
+		}
 
-	virtual QStringList features() const
-	{
-		QStringList list;
-		list += "smartcard"; // indicator, not algorithm
-		list += "pkey";
-		list += "keystorelist";
-		return list;
-	}
+		if (
+			(rv = pkcs11h_setLogHook (
+				_logHook,
+				this
+			)) != CKR_OK
+		) {
+			throw PKCS11Exception (rv, "Cannot set hook");
+		}
 
-	virtual Context *createContext(const QString &type)
-	{
-		if(type == "keystorelist")
-			return new MyKeyStoreList(this);
-		else
-			return 0;
+		pkcs11h_setLogLevel (_log_level);
+
+		if (
+			(rv = pkcs11h_setTokenPromptHook (
+				_tokenPromptHook,
+				this
+			)) != CKR_OK
+		) {
+			throw PKCS11Exception (rv, "Cannot set hook");
+		}
+		
+		if (
+			(rv = pkcs11h_setPINPromptHook (
+				_pinPromptHook,
+				this
+			)) != CKR_OK
+		) {
+			throw PKCS11Exception (rv, "Cannot set hook");
+		}
+		
+		if (rv == CKR_OK) {
+			_fLowLevelInitialized = true;
+		}
 	}
-};
+	catch (const PKCS11Exception &e) {
+/*CANNOT DO ANYTHING HERE
+		emit_diagnosticText (
+			(QString ()).sprintf (
+				"PKCS#11: Cannot initialize: %ld-'%s'.\n",
+				e.getRV (),
+				qPrintable (e.getMessage ())
+			)
+		);
+*/
+	}
+	catch (...) {
+/*CANNOT DO ANYTHING HERE
+		emit_diagnosticText ("PKCS#11: Unknown error during provider initialization.\n");
+*/
+		throw;
+	}
+}
+
+QString
+pkcs11Provider::name () const {
+	return "qca-pkcs11";
+}
+
+QString
+pkcs11Provider::credit () const {
+	return "RSA Security Inc. PKCS #11 Cryptographic Token Interface (Cryptoki).";
+}
+
+QStringList
+pkcs11Provider::features() const {
+	QStringList list;
+	list += "smartcard"; // indicator, not algorithm
+	list += "pkey";
+	list += "keystorelist";
+	return list;
+}
+
+QCA::Provider::Context
+*pkcs11Provider::createContext (const QString &type) {
+	if (_fLowLevelInitialized) {
+		if(type == "keystorelist") {
+			if (s_keyStoreList == NULL) {
+				s_keyStoreList = new MyKeyStoreList (this);
+				return s_keyStoreList;
+			}
+		}
+	}
+	return NULL;
+}
+
+void
+pkcs11Provider::startSlotEvents () {
+	CK_RV rv;
+
+	if (_fLowLevelInitialized) {
+		if (!_fSlotEventsLowLevelActive) {
+			if (
+				(rv = pkcs11h_setSlotEventHook (
+					_slotEventHook,
+					this
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Cannot start slot events");
+			}
+
+			_fSlotEventsLowLevelActive = true;
+		}
+
+		_fSlotEventsActive = true;
+	}
+}
+
+void
+pkcs11Provider::stopSlotEvents () {
+	_fSlotEventsActive = false;
+}
+
+void
+pkcs11Provider::_logHook (
+	const void *pData,
+	const unsigned flags,
+	const char * const szFormat,
+	va_list args
+) {
+	pkcs11Provider *me = (pkcs11Provider *)pData;
+	me->logHook (flags, szFormat, args);
+}
+
+void
+pkcs11Provider::_slotEventHook (
+	const void *pData
+) {
+	pkcs11Provider *me = (pkcs11Provider *)pData;
+	me->slotEventHook ();
+}
+
+PKCS11H_BOOL
+pkcs11Provider::_tokenPromptHook (
+	const void *pData,
+	const pkcs11h_token_id_t token
+) {
+	pkcs11Provider *me = (pkcs11Provider *)pData;
+	return me->cardPromptHook (token);
+}
+
+PKCS11H_BOOL
+pkcs11Provider::_pinPromptHook (
+	const void *pData,
+	const pkcs11h_token_id_t token,
+	char * const szPIN,
+	const size_t nMaxPIN
+) {
+	pkcs11Provider *me = (pkcs11Provider *)pData;
+	return me->pinPromptHook (token, szPIN, nMaxPIN);
+}
+
+void
+pkcs11Provider::logHook (
+	const unsigned flags,
+	const char * const szFormat,
+	va_list args
+) {
+	Q_UNUSED(flags);
+
+	vprintf (szFormat, args);
+	printf ("\n");
+}
+
+void
+pkcs11Provider::slotEventHook () {
+	/*
+	 * This is called from a seperate
+	 * thread.
+	 */
+	if (s_keyStoreList != NULL && _fSlotEventsActive) {
+		s_keyStoreList->emit_updated ();
+	}
+}
+
+PKCS11H_BOOL
+pkcs11Provider::cardPromptHook (
+	const pkcs11h_token_id_t token
+) {
+	printf ("PKCS#11: Token prompt '%s'\n", token->label);
+	return FALSE;
+}
+
+PKCS11H_BOOL
+pkcs11Provider::pinPromptHook (
+	const pkcs11h_token_id_t token,
+	char * const szPIN,
+	const size_t nMaxPIN
+) {
+	QSecureArray pin;
+	if (s_keyStoreList != NULL) {
+		
+		s_keyStoreList->emit_storeNeedPassphrase (token, pin);
+
+		if (!pin.isEmpty ()) {
+			if ((size_t)pin.size () < nMaxPIN-1) {
+				memmove (szPIN, pin.constData (), pin.size ());
+				szPIN[pin.size ()] = '\0';
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
 
 class pkcs11Plugin : public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QCAPlugin)
+
 public:
 	virtual QCA::Provider *createProvider() { return new pkcs11Provider; }
 };
