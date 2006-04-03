@@ -459,13 +459,24 @@ bool Certificate::matchesHostname(const QString &realHost) const
 	return false;
 }
 
-bool Certificate::operator==(const Certificate &cert) const
+bool Certificate::operator==(const Certificate &otherCert) const
 {
+	if ( isNull() ) {
+		if ( otherCert.isNull() ) {
+			return true;
+		} else {
+			return false;
+		}
+	} else if ( otherCert.isNull() ) {
+		return false;
+	}
+
 	const CertContextProps *a = static_cast<const CertContext *>(context())->props();
-	const CertContextProps *b = static_cast<const CertContext *>(cert.context())->props();
+	const CertContextProps *b = static_cast<const CertContext *>(otherCert.context())->props();
 
 	// logic from Botan
-	if(a->sig != b->sig || a->sigalgo != b->sigalgo || subjectPublicKey() != cert.subjectPublicKey())
+	if(a->sig != b->sig || a->sigalgo != b->sigalgo || 
+	   subjectPublicKey() != otherCert.subjectPublicKey())
 		return false;
 	if(a->issuer != b->issuer || a->subject != b->subject)
 		return false;
@@ -632,9 +643,6 @@ SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 
 bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 {
-	const CertContextProps *a = static_cast<const CSRContext *>(context())->props();
-	const CertContextProps *b = static_cast<const CSRContext *>(otherCsr.context())->props();
-
 	if (isNull()) {
 		if (otherCsr.isNull())
 			// they are both null
@@ -647,6 +655,9 @@ bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 
 	if (signatureAlgorithm() != otherCsr.signatureAlgorithm())
 		return false;
+
+	const CertContextProps *a = static_cast<const CSRContext *>(context())->props();
+	const CertContextProps *b = static_cast<const CSRContext *>(otherCsr.context())->props();
 
 	if (a->sig != b->sig)
 		return false;
