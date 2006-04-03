@@ -416,11 +416,14 @@ namespace QCA
 		   signingObj.end();
 		   \endcode
 
-		   You then do either waitForFinished(), or use the
-		   finished() signal, to figure out when you can get
-		   the signature. For Detached format, you get the
-		   signature out using signature(); for other formats
-		   you get the signed message out using read().
+		   For Detached signatures, you won't get any results
+		   until the whole process is done - you either
+		   waitForFinished(), or use the finished() signal, to
+		   figure out when you can get the signature (using
+		   the signature() method, not using read()). For
+		   other formats, you can use the readyRead() signal
+		   to determine when there may be part of a signed
+		   message to read().
 
 		   \param m the mode that will be used to generate the
 		   signature
@@ -461,9 +464,9 @@ namespace QCA
 		/**
 		   Read the available data.
 
-		   \note For detached signatures, you get the message
-		   back using this method, and get the signature back
-		   using the signature() method.
+		   \note For detached signatures, you don't get
+		   anything back using this method. Use signature() to
+		   get the detached signature().
 		*/
 		QByteArray read();
 
