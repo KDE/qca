@@ -522,6 +522,7 @@ public:
 		started = false;
 		mode = Console::Default;
 		thread = new ConsoleThread(this);
+		ref = 0;
 	}
 
 	~ConsolePrivate()
