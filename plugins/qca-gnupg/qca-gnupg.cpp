@@ -470,6 +470,51 @@ static PGPKey publicKeyFromId(const QString &id, Provider *p)
 	return pub;
 }
 
+static PGPKey secretKeyFromId(const QString &id, Provider *p)
+{
+	GpgOp::KeyList seckeys;
+	{
+		GpgOp gpg(find_bin());
+		gpg.doSecretKeys();
+		while(1)
+		{
+			GpgOp::Event e = gpg.waitForEvent(-1);
+			if(e.type == GpgOp::Event::Finished)
+				break;
+		}
+		if(!gpg.success())
+			return PGPKey(); // FIXME
+		seckeys = gpg.keys();
+	}
+
+	int at = -1;
+	for(int n = 0; n < seckeys.count(); ++n)
+	{
+		const GpgOp::Key &key = seckeys[n];
+		for(int k = 0; k < key.keyItems.count(); ++k)
+		{
+			const GpgOp::KeyItem &ki = key.keyItems[k];
+			if(ki.id == id)
+			{
+				at = n;
+				break;
+			}
+		}
+		if(at != -1)
+			break;
+	}
+	if(at == -1)
+		return PGPKey(); // FIXME
+
+	MyPGPKeyContext *kc = new MyPGPKeyContext(p);
+	kc->_props.keyId = seckeys[at].keyItems.first().id;
+	kc->_props.userIds = QStringList() << seckeys[at].userIds.first();
+
+	PGPKey sec;
+	sec.change(kc);
+	return sec;
+}
+
 class MyOpenPGPContext : public SMSContext
 {
 public:
@@ -622,8 +667,15 @@ public:
 			if(e.type == GpgOp::Event::NeedPassphrase)
 			{
 				// TODO
-				emit keyStoreList->storeNeedPassphrase(0, 0, e.keyId);
-				//asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), e.keyId, 0);
+
+				QString keyId;
+				PGPKey sec = secretKeyFromId(e.keyId, provider());
+				if(!sec.isNull())
+					keyId = sec.keyId();
+				else
+					keyId = e.keyId;
+				emit keyStoreList->storeNeedPassphrase(0, 0, keyId);
+				//asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), keyId, 0);
 				//asker.waitForResponse();
 				//keyStoreList->submitPassphrase(0, 0, asker.password());
 			}
