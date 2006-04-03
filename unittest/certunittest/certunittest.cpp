@@ -46,7 +46,10 @@ void CertUnitTest::nullCert()
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
         else {
 	    QCA::Certificate nullCert;
-	    QCOMPARE(nullCert.isNull(), true);
+	    QVERIFY(nullCert.isNull());
+	    QCA::Certificate anotherNullCert = nullCert;
+	    QVERIFY( anotherNullCert.isNull() );
+	    QCOMPARE( nullCert, anotherNullCert );
 	}
     }
 }
