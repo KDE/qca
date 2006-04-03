@@ -177,7 +177,7 @@ namespace QCA
 		ConsoleReference(QObject *parent = 0);
 		~ConsoleReference();
 
-		void start(SecurityMode mode = SecurityDisabled);
+		bool start(SecurityMode mode = SecurityDisabled);
 		void stop();
 
 		// normal i/o

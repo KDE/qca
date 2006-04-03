@@ -289,6 +289,11 @@ public:
 	}
 
 public slots:
+	bool isValid() const
+	{
+		return in.isValid();
+	}
+
 	void setSecurityEnabled(bool enabled)
 	{
 		in.setSecurityEnabled(enabled);
@@ -408,6 +413,11 @@ public:
 		ret = call(obj, method, args, &ok);
 		Q_ASSERT(ok);
 		return ret;
+	}
+
+	bool isValid()
+	{
+		return mycall(worker, "isValid").toBool();
 	}
 
 	void setSecurityEnabled(bool enabled)
@@ -541,6 +551,7 @@ public:
 			attr.c_lflag &= ~(ECHO);    // turn off the echo flag
 			attr.c_lflag &= ~(ICANON);  // no wait for a newline
 			attr.c_cc[VMIN] = 1;        // read at least 1 char
+			attr.c_cc[VTIME] = 0;       // set wait time to zero
 
 			// set the new attributes
 			tcsetattr(fd, TCSAFLUSH, &attr);
@@ -630,20 +641,27 @@ public:
 
 	Console *console;
 	ConsoleThread *thread;
-	QTimer readTrigger;
+	QTimer lateTrigger;
+	bool late_read, late_close;
 
-	ConsoleReferencePrivate(ConsoleReference *_q) : QObject(_q), q(_q), readTrigger(this)
+	ConsoleReferencePrivate(ConsoleReference *_q) : QObject(_q), q(_q), lateTrigger(this)
 	{
 		console = 0;
 		thread = 0;
-		connect(&readTrigger, SIGNAL(timeout()), SLOT(doReadyRead()));
-		readTrigger.setSingleShot(true);
+		connect(&lateTrigger, SIGNAL(timeout()), SLOT(doLate()));
+		lateTrigger.setSingleShot(true);
 	}
 
 private slots:
-	void doReadyRead()
+	void doLate()
 	{
-		emit q->readyRead();
+		QPointer<QObject> self = this;
+		if(late_read)
+			emit q->readyRead();
+		if(!self)
+			return;
+		if(late_close)
+			emit q->closed();
 	}
 };
 
@@ -659,10 +677,11 @@ ConsoleReference::~ConsoleReference()
 	delete d;
 }
 
-void ConsoleReference::start(SecurityMode mode)
+bool ConsoleReference::start(SecurityMode mode)
 {
-	Q_UNUSED(mode);
 	Console *c = Console::instance();
+	if(!c)
+		return false;
 
 	// one console reference at a time
 	Q_ASSERT(c->d->ref == 0);
@@ -670,6 +689,13 @@ void ConsoleReference::start(SecurityMode mode)
 	d->console = c;
 	d->thread = d->console->d->thread;
 	d->console->d->ref = this;
+
+	bool valid = d->thread->isValid();
+	int avail = d->thread->bytesAvailable();
+
+	// pipe already closed and no data?  consider this an error
+	if(!valid && avail == 0)
+		return false;
 
 	// enable security?  it will last for this active session only
 	if(mode == SecurityEnabled)
@@ -679,13 +705,24 @@ void ConsoleReference::start(SecurityMode mode)
 	connect(d->thread, SIGNAL(bytesWritten(int)), SIGNAL(bytesWritten(int)));
 	connect(d->thread, SIGNAL(closed()), SIGNAL(closed()));
 
-	if(d->thread->bytesAvailable() > 0)
-		d->readTrigger.start();
+	d->late_read = false;
+	d->late_close = false;
+
+	if(avail > 0)
+		d->late_read = true;
+
+	if(!valid)
+		d->late_close = true;
+
+	if(d->late_read || d->late_close)
+		d->lateTrigger.start();
+
+	return true;
 }
 
 void ConsoleReference::stop()
 {
-	d->readTrigger.stop();
+	d->lateTrigger.stop();
 
 	disconnect(d->thread, 0, this, 0);
 
