@@ -155,6 +155,91 @@ private slots:
 	}
 };
 
+class Prompter : public QObject
+{
+	Q_OBJECT
+public:
+	static QSecureArray prompt(const QString &promptStr)
+	{
+		printf("%s: ", qPrintable(promptStr));
+		fflush(stdout);
+		Prompter p;
+		if(!p.start())
+		{
+			printf("console input not available or closed\n");
+			return QSecureArray();
+		}
+		p.sync.waitForCondition();
+		return p.result;
+	}
+
+private:
+	QCA::Synchronizer sync;
+	QCA::ConsoleReference console;
+	QSecureArray result;
+	int at;
+
+	Prompter() : sync(this), console(this)
+	{
+		at = 0;
+		connect(&console, SIGNAL(readyRead()), SLOT(con_readyRead()));
+		connect(&console, SIGNAL(closed()), SLOT(con_closed()));
+	}
+
+	bool start()
+	{
+		return console.start(QCA::ConsoleReference::SecurityEnabled);
+	}
+
+	bool processChar(unsigned char c)
+	{
+		if(c == '\r' || c == '\n')
+		{
+			printf("\n");
+			sync.conditionMet();
+			return false;
+		}
+		else if(c == '\b' || c == 0x7f)
+		{
+			if(at > 0)
+			{
+				--at;
+				printf("\b \b");
+				fflush(stdout);
+			}
+			return true;
+		}
+		else if(c < 0x20)
+			return true;
+
+		if(at + 1 > result.size())
+			result.resize(at + 1);
+		result[at++] = c;
+
+		printf("*");
+		fflush(stdout);
+		return true;
+	}
+
+private slots:
+	void con_readyRead()
+	{
+		while(console.bytesAvailable() > 0)
+		{
+			QSecureArray buf = console.readSecure(1);
+			if(buf.isEmpty())
+				continue;
+			if(!processChar(buf[0]))
+				break;
+		}
+	}
+
+	void con_closed()
+	{
+		printf("Console closed\n");
+	}
+};
+
 class PassphrasePrompt : public QObject
 {
 	Q_OBJECT
@@ -201,13 +286,14 @@ private slots:
 			if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
 				name = entry.pgpSecretKey().primaryUserId();
 		}*/
-		printf("Enter passphrase for %s (not hidden!) : ", qPrintable(name));
-		fflush(stdout);
-		QSecureArray result(256);
-		fgets((char *)result.data(), result.size(), stdin);
-		result.resize(qstrlen(result.data()));
-		if(result[result.size() - 1] == '\n')
-			result.resize(result.size() - 1);
+		QSecureArray result = Prompter::prompt(QString("Enter passphrase for %1").arg(name));
+		//printf("Enter passphrase for %s (not hidden!) : ", qPrintable(name));
+		//fflush(stdout);
+		//QSecureArray result(256);
+		//fgets((char *)result.data(), result.size(), stdin);
+		//result.resize(qstrlen(result.data()));
+		//if(result[result.size() - 1] == '\n')
+		//	result.resize(result.size() - 1);
 		ks->submitPassphrase(requestId, result);
 	}
 };
@@ -892,6 +978,7 @@ int main(int argc, char **argv)
 	QCA::keyStoreManager()->waitForBusyFinished();
 
 	// hook a passphrase prompt onto all the KeyStores
+	QCA::Console console(QCA::Console::Read, QCA::Console::Interactive);
 	PassphrasePrompt passphrasePrompt;
 
 	bool genrsa = false;
