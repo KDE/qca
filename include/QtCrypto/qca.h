@@ -301,7 +301,7 @@ Context object without worrying about how it is implemented.
 
 /** \page providers Providers
 
-QCA works on the concept of a "provider". There is a limited
+%QCA works on the concept of a "provider". There is a limited
 internal provider (named "default"), but most of the work is
 done in plugin modules.
 
