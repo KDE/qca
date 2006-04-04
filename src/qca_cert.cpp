@@ -532,14 +532,14 @@ CertificateChain Certificate::chain_complete(const CertificateChain &chain, cons
 		int at = -1;
 		for(int n = 0; n < pool.count(); ++n)
 		{
-			QString str = QString("[%1] issued by [%2] ? ").arg(out.last().commonName()).arg(pool[n].commonName());
+			//QString str = QString("[%1] issued by [%2] ? ").arg(out.last().commonName()).arg(pool[n].commonName());
 			if(pool[n].isIssuerOf(out.last()))
 			{
-				printf("%s  yes\n", qPrintable(str));
+				//printf("%s  yes\n", qPrintable(str));
 				at = n;
 				break;
 			}
-			printf("%s  no\n", qPrintable(str));
+			//printf("%s  no\n", qPrintable(str));
 		}
 		if(at == -1)
 			break;
