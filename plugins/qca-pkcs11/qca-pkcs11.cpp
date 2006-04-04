@@ -529,7 +529,7 @@ public:
 		catch (const PKCS11Exception &e) {
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->emit_diagnosticText (
-					(QString ()).sprintf (
+					QString ().sprintf (
 						"PKCS#11: Cannot decrypt: %ld-'%s'.\n",
 						e.getRV (),
 						qPrintable (e.getMessage ())
@@ -732,7 +732,7 @@ public:
 
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->emit_diagnosticText (
-					(QString ()).sprintf (
+					QString ().sprintf (
 						"PKCS#11: Cannot sign: %ld-'%s'.\n",
 						e.getRV (),
 						qPrintable (e.getMessage ())
@@ -1240,7 +1240,7 @@ MyKeyStoreList::start () {
 	}
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
-			(QString ()).sprintf (
+			QString ().sprintf (
 				"PKCS#11: Start failed %ld-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
@@ -1264,7 +1264,7 @@ MyKeyStoreList::setUpdatesEnabled (bool enabled) {
 	}
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
-			(QString ()).sprintf (
+			QString ().sprintf (
 				"PKCS#11: Start event failed %ld-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
@@ -1301,7 +1301,7 @@ MyKeyStoreList::entryPassive (
 	}
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
-			(QString ()).sprintf (
+			QString ().sprintf (
 				"PKCS#11: Add key store entry %ld-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
@@ -1409,7 +1409,7 @@ MyKeyStoreList::keyStores () {
 	}
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
-			(QString ()).sprintf (
+			QString ().sprintf (
 				"PKCS#11: Cannot get key stores: %ld-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
@@ -1470,7 +1470,7 @@ MyKeyStoreList::entryList (int id) {
 					}
 					catch (const PKCS11Exception &e) {
 						s_keyStoreList->emit_diagnosticText (
-							(QString ()).sprintf (
+							QString ().sprintf (
 								"PKCS#11: Add key store entry %ld-'%s'.\n",
 								e.getRV (),
 								qPrintable (e.getMessage ())
@@ -1489,7 +1489,7 @@ MyKeyStoreList::entryList (int id) {
 					}
 					catch (const PKCS11Exception &e) {
 						s_keyStoreList->emit_diagnosticText (
-							(QString ()).sprintf (
+							QString ().sprintf (
 								"PKCS#11: Add key store entry %ld-'%s'.\n",
 								e.getRV (),
 								qPrintable (e.getMessage ())
@@ -1503,7 +1503,7 @@ MyKeyStoreList::entryList (int id) {
 	}
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
-			(QString ()).sprintf (
+			QString ().sprintf (
 				"PKCS#11: Enumerating store failed %ld-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
@@ -1742,7 +1742,7 @@ MyKeyStoreList::tokenId2storeId (
 	hash1.update (token_id->model, strlen (token_id->model));
 	hash1.update (token_id->serialNumber, strlen (token_id->serialNumber));
 
-	return "qca-pkcs11/" + escapeString ((Base64 ()).arrayToString (hash1.final ()));
+	return "qca-pkcs11/" + escapeString (Base64 ().arrayToString (hash1.final ()));
 }
 
 QString
@@ -1753,13 +1753,13 @@ MyKeyStoreList::serializeCertificateId (
 ) const {
 	QString strSerialized;
 	
-	strSerialized += (QString ()).sprintf (
+	strSerialized += QString ().sprintf (
 		"qca-pkcs11/%s/%s/%s/%s/%s/%d",
 		qPrintable (escapeString (certificate_id->token_id->manufacturerID)),
 		qPrintable (escapeString (certificate_id->token_id->model)),
 		qPrintable (escapeString (certificate_id->token_id->serialNumber)),
 		qPrintable (escapeString (certificate_id->token_id->label)),
-		qPrintable (escapeString ((Base64 ()).arrayToString (
+		qPrintable (escapeString (Base64 ().arrayToString (
 			(QByteArray (
 				(const char *)certificate_id->attrCKA_ID,
 				(int)certificate_id->attrCKA_ID_size
@@ -1773,7 +1773,7 @@ MyKeyStoreList::serializeCertificateId (
 		i != chain.end ();
 		i++
 	) {
-		strSerialized += "/" + escapeString ((Base64 ()).arrayToString ((*i).toDER ()));
+		strSerialized += "/" + escapeString (Base64 ().arrayToString ((*i).toDER ()));
 	}
 
 	return strSerialized;
@@ -1835,13 +1835,13 @@ MyKeyStoreList::deserializeCertificateId (
 	);
 	token_id_s.serialNumber[sizeof (token_id_s.label)-1] = '\0';
 
-	QSecureArray arrayCKA_ID = (Base64 ()).stringToArray (unescapeString (list[n++]));
+	QSecureArray arrayCKA_ID = Base64 ().stringToArray (unescapeString (list[n++]));
 	certificate_id_s.attrCKA_ID = (unsigned char *)arrayCKA_ID.data ();
 	certificate_id_s.attrCKA_ID_size = (size_t)arrayCKA_ID.size ();
 
 	*fPrivate = list[n++].toInt () != 0;
 
-	QSecureArray arrayCertificate = (Base64 ()).stringToArray (unescapeString (list[n++]));
+	QSecureArray arrayCertificate = Base64 ().stringToArray (unescapeString (list[n++]));
 	certificate_id_s.certificate_blob = (unsigned char *)arrayCertificate.data ();
 	certificate_id_s.certificate_blob_size = (size_t)arrayCertificate.size ();
 
@@ -1856,7 +1856,7 @@ MyKeyStoreList::deserializeCertificateId (
 
 	while (n < list.size ()) {
 		*listIssuers += Certificate::fromDER (
-			(Base64 ()).stringToArray (unescapeString (list[n++]))
+			Base64 ().stringToArray (unescapeString (list[n++]))
 		);
 	}
 }
@@ -1871,7 +1871,7 @@ MyKeyStoreList::escapeString (
 		QChar c = from[i];
 
 		if (c == '/' || c == '\\') {
-			to += (QString ()).sprintf ("\\x%02x", c.toLatin1 ());
+			to += QString ().sprintf ("\\x%02x", c.toLatin1 ());
 		}
 		else {
 			to += c;
@@ -1971,7 +1971,7 @@ void pkcs11Provider::init () {
 	catch (const PKCS11Exception &e) {
 /*CANNOT DO ANYTHING HERE
 		emit_diagnosticText (
-			(QString ()).sprintf (
+			QString ().sprintf (
 				"PKCS#11: Cannot initialize: %ld-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
