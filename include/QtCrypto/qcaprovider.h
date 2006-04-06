@@ -431,9 +431,6 @@ signals:
 	void updated();
 	void diagnosticText(const QString &str);
 	void storeUpdated(int id);
-
-	// emit this from the thread that caused it
-	void storeNeedPassphrase(int id, int requestId, const QString &entryId);
 };
 
 class QCA_EXPORT TLSContext : public QObject, public Provider::Context

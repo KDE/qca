@@ -269,7 +269,7 @@ bool KeyStore::removeEntry(const QString &id)
 	return false;
 }
 
-void KeyStore::submitPassphrase(int requestId, const QSecureArray &passphrase)
+/*void KeyStore::submitPassphrase(int requestId, const QSecureArray &passphrase)
 {
 	// FIXME: QMutexLocker locker(keyStoreMutex);
 	if(d->trackerId == -1)
@@ -283,7 +283,7 @@ void KeyStore::rejectPassphraseRequest(int requestId)
 	if(d->trackerId == -1)
 		return;
 	d->ksl->rejectPassphraseRequest(d->contextId, requestId);
-}
+}*/
 
 void KeyStore::invalidate()
 {
@@ -434,7 +434,7 @@ public slots:
 				connect(c, SIGNAL(updated()), SLOT(ksl_updated()));
 				connect(c, SIGNAL(diagnosticText(const QString &)), SLOT(ksl_diagnosticText(const QString &)));
 				connect(c, SIGNAL(storeUpdated(int)), SLOT(ksl_storeUpdated(int)));
-				connect(c, SIGNAL(storeNeedPassphrase(int, int, const QString &)), SLOT(ksl_storeNeedPassphrase(int, int, const QString &)), Qt::DirectConnection);
+				//connect(c, SIGNAL(storeNeedPassphrase(int, int, const QString &)), SLOT(ksl_storeNeedPassphrase(int, int, const QString &)), Qt::DirectConnection);
 				c->start();
 				c->setUpdatesEnabled(true);
 				check(c);
@@ -512,7 +512,7 @@ private slots:
 		}
 	}
 
-	void ksl_storeNeedPassphrase(int contextId, int requestId, const QString &entryId)
+	/*void ksl_storeNeedPassphrase(int contextId, int requestId, const QString &entryId)
 	{
 		KeyStoreListContext *ksl = (KeyStoreListContext *)sender();
 
@@ -535,7 +535,7 @@ private slots:
 			KeyStore *ks = refs[n];
 			emit ks->needPassphrase(requestId, entryId); // FIXME
 		}
-	}
+	}*/
 
 private:
 	Item *findByOwnerAndContext(KeyStoreListContext *owner, int contextId)

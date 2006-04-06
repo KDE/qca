@@ -272,21 +272,6 @@ namespace QCA
 		*/
 		bool removeEntry(const QString &id);
 
-		/**
-		   Provide a passphrase for the KeyStore
-
-		   \param requestId the passphrase request id
-		   \param passphrase the passphrase to use
-		*/
-		void submitPassphrase(int requestId, const QSecureArray &passphrase);
-
-		/**
-		   Reject the passphrase request from the KeyStore
-
-		   \param requestId the passphrase request id
-		*/
-		void rejectPassphraseRequest(int requestId);
-
 	signals:
 		/**
 		   Emitted when the KeyStore is changed
@@ -297,16 +282,6 @@ namespace QCA
 		   Emitted when the KeyStore becomes unavailable
 		*/
 		void unavailable();
-
-		/**
-		   Emitted when the KeyStore requires a passphrase
-
-		   entryId is empty if not applicable
-
-		   \param requestId use this id when submitting or rejecting
-		   \param entryId id of entry associated with this request
-		*/
-		void needPassphrase(int requestId, const QString &entryId);
 
 	private:
 		class Private;
