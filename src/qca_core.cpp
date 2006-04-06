@@ -966,4 +966,612 @@ InitializationVector::InitializationVector(const QByteArray &a)
 	set(QSecureArray(a));
 }
 
+//----------------------------------------------------------------------------
+// Event
+//----------------------------------------------------------------------------
+class Event::Private : public QSharedData
+{
+public:
+	Type type;
+	Source source;
+	PasswordStyle style;
+	QString ks, kse;
+	QString fname;
+	void *ptr;
+};
+
+Event::Event()
+{
 }
+
+Event::Event(const Event &from)
+:d(from.d)
+{
+}
+
+Event::~Event()
+{
+}
+
+Event & Event::operator=(const Event &from)
+{
+	d = from.d;
+	return *this;
+}
+
+bool Event::isNull() const
+{
+	return (d ? false : true);
+}
+
+Event::Type Event::type() const
+{
+	return d->type;
+}
+
+Event::Source Event::source() const
+{
+	return d->source;
+}
+
+Event::PasswordStyle Event::passwordStyle() const
+{
+	return d->style;
+}
+
+QString Event::keyStoreId() const
+{
+	return d->ks;
+}
+
+QString Event::keyStoreEntryId() const
+{
+	return d->kse;
+}
+
+QString Event::fileName() const
+{
+	return d->fname;
+}
+
+void *Event::ptr() const
+{
+	return d->ptr;
+}
+
+void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
+{
+	if(!d)
+		d = new Private;
+	d->type = Password;
+	d->source = KeyStore;
+	d->style = pstyle;
+	d->ks = keyStoreId;
+	d->kse = keyStoreEntryId;
+	d->fname = QString();
+	d->ptr = ptr;
+}
+
+void Event::setPasswordData(PasswordStyle pstyle, const QString &fileName, void *ptr)
+{
+	if(!d)
+		d = new Private;
+	d->type = Password;
+	d->source = Data;
+	d->style = pstyle;
+	d->ks = QString();
+	d->kse = QString();
+	d->fname = fileName;
+	d->ptr = ptr;
+}
+
+void Event::setToken(const QString &keyStoreEntryId, void *ptr)
+{
+	if(!d)
+		d = new Private;
+	d->type = Token;
+	d->source = KeyStore;
+	d->style = StylePassword;
+	d->ks = QString();
+	d->kse = keyStoreEntryId;
+	d->fname = QString();
+	d->ptr = ptr;
+}
+
+//----------------------------------------------------------------------------
+// EventHandler
+//----------------------------------------------------------------------------
+class AskerItem : public QObject
+{
+	Q_OBJECT
+public:
+	enum Type { Password, Token };
+
+	Type type;
+	PasswordAsker *passwordAsker;
+	TokenAsker *tokenAsker;
+
+	bool accepted;
+	QSecureArray password;
+	int id;
+	bool waiting;
+	bool done;
+	QTimer readyTrigger;
+
+	QMutex m;
+	QWaitCondition w;
+
+	QThread *emitFrom;
+	QList<EventHandler*> handlers;
+
+	AskerItem(QObject *parent = 0);
+	~AskerItem();
+
+	void ask(const Event &e);
+	void handlerGone(EventHandler *h);
+	void unreg();
+	void waitForFinished();
+	void finish();
+
+	// handler calls this
+	void accept_password(const QSecureArray &_password);
+	void accept_token();
+	void reject();
+
+private slots:
+	void ready_timeout();
+};
+
+Q_GLOBAL_STATIC(QMutex, g_event_mutex)
+
+class EventGlobal;
+static EventGlobal *g_event = 0;
+
+class EventGlobal
+{
+public:
+	QList<EventHandler*> handlers;
+	int next_id;
+
+	EventGlobal()
+	{
+		next_id = 0;
+	}
+
+	static void ensureInit()
+	{
+		if(g_event)
+			return;
+
+		g_event = new EventGlobal;
+	}
+
+	static void tryCleanup()
+	{
+		if(!g_event)
+			return;
+
+		if(g_event->handlers.isEmpty() /*&& g_event->askers.isEmpty()*/)
+		{
+			delete g_event;
+			g_event = 0;
+		}
+	}
+};
+
+class EventHandlerPrivate
+{
+public:
+	bool started;
+	QHash<int,AskerItem*> askers;
+	QMutex m;
+
+	EventHandlerPrivate()
+	{
+		started = false;
+	}
+};
+
+EventHandler::EventHandler(QObject *parent)
+:QObject(parent)
+{
+	d = new EventHandlerPrivate;
+}
+
+EventHandler::~EventHandler()
+{
+	//MX QMutexLocker locker(&d->m);
+
+	if(d->started)
+	{
+		for(int n = 0; n < d->askers.count(); ++n)
+		{
+			d->askers[n]->handlerGone(this);
+		}
+
+		/*if(d->askers.isEmpty())
+		{
+			// if this flag is set, then AskerItem::ask() will do
+			//   the global cleanup instead of us.
+
+			//g_event->deleteLaterList += this;
+		}
+		else
+		{*/
+			QMutexLocker locker(g_event_mutex());
+			g_event->handlers.removeAll(this);
+			EventGlobal::tryCleanup();
+		//}
+	}
+
+	delete d;
+}
+
+void EventHandler::start()
+{
+	QMutexLocker locker(g_event_mutex());
+	EventGlobal::ensureInit();
+	d->started = true;
+	g_event->handlers += this;
+}
+
+void EventHandler::submitPassword(int id, const QSecureArray &password)
+{
+	//MX QMutexLocker locker(&d->m);
+	AskerItem *ai = d->askers.value(id);
+	if(!ai || ai->type != AskerItem::Password)
+		return;
+
+	ai->accept_password(password);
+}
+
+void EventHandler::tokenOkay(int id)
+{
+	//MX QMutexLocker locker(&d->m);
+	AskerItem *ai = d->askers.value(id);
+	if(!ai || ai->type != AskerItem::Token)
+		return;
+
+	ai->accept_token();
+}
+
+void EventHandler::reject(int id)
+{
+	//MX QMutexLocker locker(&d->m);
+	AskerItem *ai = d->askers.value(id);
+	if(!ai)
+		return;
+
+	ai->reject();
+}
+
+//----------------------------------------------------------------------------
+// PasswordAsker
+//----------------------------------------------------------------------------
+class PasswordAskerPrivate
+{
+public:
+	AskerItem *ai;
+
+	PasswordAskerPrivate()
+	{
+		ai = 0;
+	}
+
+	~PasswordAskerPrivate()
+	{
+		delete ai;
+	}
+};
+
+PasswordAsker::PasswordAsker(QObject *parent)
+:QObject(parent)
+{
+	d = new PasswordAskerPrivate;
+}
+
+PasswordAsker::~PasswordAsker()
+{
+	delete d;
+}
+
+void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
+{
+	Event e;
+	e.setPasswordKeyStore(pstyle, keyStoreId, keyStoreEntryId, ptr);
+	delete d->ai;
+	d->ai = new AskerItem(this);
+	d->ai->type = AskerItem::Password;
+	d->ai->passwordAsker = this;
+	d->ai->ask(e);
+}
+
+void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &fileName, void *ptr)
+{
+	Event e;
+	e.setPasswordData(pstyle, fileName, ptr);
+	delete d->ai;
+	d->ai = new AskerItem(this);
+	d->ai->type = AskerItem::Password;
+	d->ai->passwordAsker = this;
+	d->ai->ask(e);
+}
+
+void PasswordAsker::cancel()
+{
+	delete d->ai;
+	d->ai = 0;
+}
+
+void PasswordAsker::waitForResponse()
+{
+	d->ai->waitForFinished();
+}
+
+bool PasswordAsker::accepted() const
+{
+	return d->ai->accepted;
+}
+
+QSecureArray PasswordAsker::password() const
+{
+	return d->ai->password;
+}
+
+//----------------------------------------------------------------------------
+// TokenAsker
+//----------------------------------------------------------------------------
+class TokenAskerPrivate
+{
+public:
+	AskerItem *ai;
+
+	TokenAskerPrivate()
+	{
+		ai = 0;
+	}
+
+	~TokenAskerPrivate()
+	{
+		delete ai;
+	}
+};
+
+TokenAsker::TokenAsker(QObject *parent)
+:QObject(parent)
+{
+	d = new TokenAskerPrivate;
+}
+
+TokenAsker::~TokenAsker()
+{
+	delete d;
+}
+
+void TokenAsker::ask(const QString &keyStoreEntryId, void *ptr)
+{
+	Event e;
+	e.setToken(keyStoreEntryId, ptr);
+	delete d->ai;
+	d->ai = new AskerItem(this);
+	d->ai->type = AskerItem::Token;
+	d->ai->tokenAsker = this;
+	d->ai->ask(e);
+}
+
+void TokenAsker::cancel()
+{
+	delete d->ai;
+	d->ai = 0;
+}
+
+void TokenAsker::waitForResponse()
+{
+	d->ai->waitForFinished();
+}
+
+bool TokenAsker::accepted() const
+{
+	return d->ai->accepted;
+}
+
+//----------------------------------------------------------------------------
+// AskerItem
+//----------------------------------------------------------------------------
+AskerItem::AskerItem(QObject *parent)
+:QObject(parent), readyTrigger(this)
+{
+	readyTrigger.setSingleShot(true);
+	connect(&readyTrigger, SIGNAL(timeout()), SLOT(ready_timeout()));
+	done = true;
+	emitFrom = 0;
+}
+
+AskerItem::~AskerItem()
+{
+	if(!done)
+		unreg();
+}
+
+void AskerItem::ask(const Event &e)
+{
+	accepted = false;
+	password = QSecureArray();
+	waiting = false;
+	done = false;
+
+	{
+		//MX QMutexLocker locker(g_event_mutex());
+
+		// no handlers?  reject the request then
+		if(!g_event || g_event->handlers.isEmpty())
+		{
+			done = true;
+			readyTrigger.start();
+			return;
+		}
+
+		id = g_event->next_id++;
+		handlers = g_event->handlers;
+
+		//g_event->askers.insert(id, this);
+	}
+
+	/*{
+		QMutexLocker locker(g_event_mutex());
+		++g_event->emitrefs;
+	}*/
+
+	{
+		//MX QMutexLocker locker(&m);
+		for(int n = 0; n < handlers.count(); ++n)
+		{
+			//MX QMutexLocker locker(&handlers[n]->d->m);
+			handlers[n]->d->askers.insert(id, this);
+		}
+
+		emitFrom = QThread::currentThread();
+
+		for(int n = 0; n < handlers.count(); ++n)
+		{
+			EventHandler *h = handlers[n];
+			if(!h)
+				continue;
+
+			emit h->eventReady(id, e);
+
+			/*{
+				QMutexLocker locker(g_event->deleteLaterMutex);
+				if(g_event->deleteLaterList.contains(h))
+				{
+					g_event->deleteLaterList.removeAll(this);
+					g_event->handlers.removeAll(this);
+					--n; // adjust iterator
+				}
+				else
+					h->d->sync_emit = false;
+			}*/
+
+			if(done)
+				break;
+		}
+
+		emitFrom = 0;
+	}
+
+	/*{
+		QMutexLocker locker(g_event_mutex());
+		--g_event->emitrefs;
+		if(g_event->emitrefs == 0)
+		{*/
+			// clean up null handlers
+			for(int n = 0; n < handlers.count(); ++n)
+			{
+				if(handlers[n] == 0)
+				{
+					handlers.removeAt(n);
+					--n; // adjust position
+				}
+			}
+		/*}
+	}*/
+
+	if(done)
+	{
+		//MX QMutexLocker locker(&m);
+		unreg();
+		readyTrigger.start();
+		return;
+	}
+}
+
+void AskerItem::handlerGone(EventHandler *h)
+{
+	if(QThread::currentThread() == emitFrom)
+	{
+		int n = handlers.indexOf(h);
+		if(n != -1)
+			handlers[n] = 0;
+	}
+	else
+	{
+		//MX QMutexLocker locker(&m);
+		handlers.removeAll(h);
+	}
+}
+
+void AskerItem::unreg()
+{
+	//if(!done)
+	//{
+		//QMutexLocker locker(&m);
+		for(int n = 0; n < handlers.count(); ++n)
+		{
+			//MX QMutexLocker locker(&handlers[n]->d->m);
+			handlers[n]->d->askers.remove(id);
+		}
+	//}
+}
+
+void AskerItem::waitForFinished()
+{
+	//MX QMutexLocker locker(&m);
+
+	if(done)
+	{
+		readyTrigger.stop();
+		return;
+	}
+
+	waiting = true;
+	w.wait(&m);
+
+	unreg();
+}
+
+void AskerItem::finish()
+{
+	done = true;
+	if(waiting)
+		w.wakeOne();
+	else
+	{
+		if(type == Password)
+			emit passwordAsker->responseReady();
+		else // Token
+			emit tokenAsker->responseReady();
+	}
+}
+
+void AskerItem::accept_password(const QSecureArray &_password)
+{
+	//MX QMutexLocker locker(&m);
+	accepted = true;
+	password = _password;
+	finish();
+}
+
+void AskerItem::accept_token()
+{
+	//MX QMutexLocker locker(&m);
+	accepted = true;
+	finish();
+}
+
+void AskerItem::reject()
+{
+	//MX QMutexLocker locker(&m);
+	finish();
+}
+
+void AskerItem::ready_timeout()
+{
+	if(type == Password)
+		emit passwordAsker->responseReady();
+	else // Token
+		emit tokenAsker->responseReady();
+}
+
+}
+
+#include "qca_core.moc"

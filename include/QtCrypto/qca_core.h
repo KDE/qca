@@ -967,6 +967,134 @@ namespace QCA
 		 */
 		InitializationVector(const QByteArray &a);
 	};
+
+	class QCA_EXPORT Event
+	{
+	public:
+		enum Type
+		{
+			Password,   ///< Asking for a password
+			Token       ///< Asking for a token
+		};
+
+		enum Source
+		{
+			KeyStore,   ///< KeyStore generated the event
+			Data        ///< File/bytearray generated the event
+		};
+
+		enum PasswordStyle
+		{
+			StylePassword,   ///< User should be prompted for a "Password"
+			StylePassphrase, ///< User should be prompted for a "Passphrase"
+			StylePIN         ///< User should be prompted for a "PIN"
+		};
+
+		Event();
+		Event(const Event &from);
+		~Event();
+		Event & operator=(const Event &from);
+
+		bool isNull() const;
+
+		Type type() const;
+
+		Source source() const;
+		PasswordStyle passwordStyle() const;
+		QString keyStoreId() const;
+		QString keyStoreEntryId() const;
+		QString fileName() const;
+		void *ptr() const;
+
+		void setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+		void setPasswordData(PasswordStyle pstyle, const QString &fileName, void *ptr);
+		void setToken(const QString &keyStoreEntryId, void *ptr);
+
+	private:
+		class Private;
+		QSharedDataPointer<Private> d;
+	};
+
+	class EventHandlerPrivate;
+	class PasswordAsker;
+	class PasswordAskerPrivate;
+	class TokenAsker;
+	class TokenAskerPrivate;
+	class AskerItem;
+
+	class QCA_EXPORT EventHandler : public QObject
+	{
+		Q_OBJECT
+	public:
+		EventHandler(QObject *parent = 0);
+		~EventHandler();
+
+		void start();
+
+		void submitPassword(int id, const QSecureArray &password);
+		void tokenOkay(int id);
+		void reject(int id);
+
+	signals:
+		void eventReady(int id, const QCA::Event &context);
+
+	private:
+		friend class EventHandlerPrivate;
+		EventHandlerPrivate *d;
+
+		friend class PasswordAsker;
+		friend class PasswordAskerPrivate;
+		friend class TokenAsker;
+		friend class AskerItem;
+	};
+
+	class QCA_EXPORT PasswordAsker : public QObject
+	{
+		Q_OBJECT
+	public:
+		PasswordAsker(QObject *parent = 0);
+		~PasswordAsker();
+
+		void ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+		void ask(Event::PasswordStyle pstyle, const QString &fileName, void *ptr);
+		void cancel();
+		void waitForResponse();
+
+		bool accepted() const;
+		QSecureArray password() const;
+
+	signals:
+		void responseReady();
+
+	private:
+		friend class PasswordAskerPrivate;
+		PasswordAskerPrivate *d;
+
+		friend class AskerItem;
+	};
+
+	class QCA_EXPORT TokenAsker : public QObject
+	{
+		Q_OBJECT
+	public:
+		TokenAsker(QObject *parent = 0);
+		~TokenAsker();
+
+		void ask(const QString &keyStoreEntryId, void *ptr);
+		void cancel();
+		void waitForResponse();
+
+		bool accepted() const;
+
+	signals:
+		void responseReady();
+
+	private:
+		friend class TokenAskerPrivate;
+		TokenAskerPrivate *d;
+
+		friend class AskerItem;
+	};
 }
 
 #endif
