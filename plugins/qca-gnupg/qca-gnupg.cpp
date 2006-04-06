@@ -547,7 +547,7 @@ public:
 	GpgOp::Error op_err;
 	SecureMessageSignature signer;
 
-	//PasswordAsker asker;
+	PasswordAsker asker;
 
 	MyMessageContext(MyOpenPGPContext *_sms, Provider *p) : MessageContext(p, "pgpmsg")
 	{
@@ -674,10 +674,10 @@ public:
 					keyId = sec.keyId();
 				else
 					keyId = e.keyId;
-				emit keyStoreList->storeNeedPassphrase(0, 0, keyId);
-				//asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), keyId, 0);
-				//asker.waitForResponse();
-				//keyStoreList->submitPassphrase(0, 0, asker.password());
+				//emit keyStoreList->storeNeedPassphrase(0, 0, keyId);
+				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), keyId, 0);
+				asker.waitForResponse();
+				keyStoreList->submitPassphrase(0, 0, asker.password());
 			}
 			else if(e.type == GpgOp::Event::Finished)
 				break;
