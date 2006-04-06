@@ -36,7 +36,7 @@ namespace QCA {
 //----------------------------------------------------------------------------
 static QByteArray getReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> argTypes)
 {
-	for(int n = obj->methodOffset(); n < obj->methodCount(); ++n)
+	for(int n = 0; n < obj->methodCount(); ++n)
 	{
 		QMetaMethod m = obj->method(n);
 		QByteArray sig = m.signature();
