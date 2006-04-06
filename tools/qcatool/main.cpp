@@ -173,15 +173,29 @@ public:
 		return p.result;
 	}
 
+	static void waitForEnter()
+	{
+		Prompter p;
+		p.enter = true;
+		if(!p.start())
+		{
+			printf("console input not available or closed\n");
+			return;
+		}
+		p.sync.waitForCondition();
+	}
+
 private:
 	QCA::Synchronizer sync;
 	QCA::ConsoleReference console;
 	QSecureArray result;
 	int at;
+	bool enter;
 
 	Prompter() : sync(this), console(this)
 	{
 		at = 0;
+		enter = false;
 		connect(&console, SIGNAL(readyRead()), SLOT(con_readyRead()));
 		connect(&console, SIGNAL(closed()), SLOT(con_closed()));
 	}
@@ -199,13 +213,18 @@ private:
 			sync.conditionMet();
 			return false;
 		}
-		else if(c == '\b' || c == 0x7f)
+
+		if(enter)
+			return true;
+
+		if(c == '\b' || c == 0x7f)
 		{
 			if(at > 0)
 			{
 				--at;
 				printf("\b \b");
 				fflush(stdout);
+				result.resize(at);
 			}
 			return true;
 		}
@@ -244,57 +263,67 @@ class PassphrasePrompt : public QObject
 {
 	Q_OBJECT
 public:
-	QList<QCA::KeyStore*> list;
+	QCA::EventHandler handler;
 
 	PassphrasePrompt()
 	{
-		QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
-		QStringList storeList = ksm->keyStores();
-		for(int n = 0; n < storeList.count(); ++n)
-		{
-			QCA::KeyStore *ks = new QCA::KeyStore(storeList[n]);
-			connect(ks, SIGNAL(needPassphrase(int, const QString &)), SLOT(ks_needPassphrase(int, const QString &)));
-			list += ks;
-		}
-	}
-
-	~PassphrasePrompt()
-	{
-		qDeleteAll(list);
+		connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)), SLOT(ph_eventReady(int, const QCA::Event &)));
+		handler.start();
 	}
 
 private slots:
-	void ks_needPassphrase(int requestId, const QString &entryId)
+	void ph_eventReady(int id, const QCA::Event &e)
 	{
-		Q_UNUSED(entryId);
-
-		QCA::KeyStore *ks = static_cast<QCA::KeyStore *>(sender());
-		QString name = ks->name();
-		if(!entryId.isEmpty())
+		if(e.type() == QCA::Event::Password)
 		{
-			QList<QCA::KeyStoreEntry> list = ks->entryList();
-			QCA::KeyStoreEntry entry;
-			for(int n = 0; n < list.count(); ++n)
+			QString type = "password";
+			if(e.passwordStyle() == QCA::Event::StylePassphrase)
+				type = "passphrase";
+			else if(e.passwordStyle() == QCA::Event::StylePIN)
+				type = "PIN";
+
+			QString str;
+			if(e.source() == QCA::Event::KeyStore)
 			{
-				QCA::KeyStoreEntry &e = list[n];
-				if(e.id() == entryId)
+				QString name = "keystore";
+				QCA::KeyStore ks(e.keyStoreId());
+				if(ks.isValid())
+					name = ks.name();
+
+				QList<QCA::KeyStoreEntry> list = ks.entryList();
+				QCA::KeyStoreEntry entry;
+				QString entryId = e.keyStoreEntryId();
+				for(int n = 0; n < list.count(); ++n)
 				{
-					entry = e;
-					break;
+					QCA::KeyStoreEntry &i = list[n];
+					if(i.id() == entryId)
+					{
+						entry = i;
+						break;
+					}
 				}
+				if(!entry.isNull())
+				{
+					if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
+						name = entry.pgpSecretKey().primaryUserId();
+				}
+
+				str = QString("Enter %1 for %2").arg(type).arg(name);
 			}
-			if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
-				name = entry.pgpSecretKey().primaryUserId();
+			else
+				str = QString("Enter %1").arg(type);
+
+			QSecureArray result = Prompter::prompt(str);
+			handler.submitPassword(id, result);
 		}
-		QSecureArray result = Prompter::prompt(QString("Enter passphrase for %1").arg(name));
-		//printf("Enter passphrase for %s (not hidden!) : ", qPrintable(name));
-		//fflush(stdout);
-		//QSecureArray result(256);
-		//fgets((char *)result.data(), result.size(), stdin);
-		//result.resize(qstrlen(result.data()));
-		//if(result[result.size() - 1] == '\n')
-		//	result.resize(result.size() - 1);
-		ks->submitPassphrase(requestId, result);
+		else if(e.type() == QCA::Event::Token)
+		{
+			//QCA::KeyStoreEntry entry(e.keyStoreEntryId());
+			//printf("Please insert token for [%s] and press Enter ...\n", qPrintable(entry.name()));
+			printf("Please insert token and press Enter ...\n");
+			Prompter::waitForEnter();
+			handler.tokenOkay(id);
+		}
 	}
 };
 
@@ -467,6 +496,21 @@ static QString validityToString(QCA::Validity v)
 			break;
 	}
 	return s;
+}
+
+static QString smErrorToString(QCA::SecureMessage::Error e)
+{
+	QMap<QCA::SecureMessage::Error,QString> map;
+	map[QCA::SecureMessage::ErrorPassphrase] = "ErrorPassphrase";
+	map[QCA::SecureMessage::ErrorFormat] = "ErrorFormat";
+	map[QCA::SecureMessage::ErrorSignerExpired] = "ErrorSignerExpired";
+	map[QCA::SecureMessage::ErrorSignerInvalid] = "ErrorSignerInvalid";
+	map[QCA::SecureMessage::ErrorEncryptExpired] = "ErrorEncryptExpired";
+	map[QCA::SecureMessage::ErrorEncryptUntrusted] = "ErrorEncryptUntrusted";
+	map[QCA::SecureMessage::ErrorEncryptInvalid] = "ErrorEncryptInvalid";
+	map[QCA::SecureMessage::ErrorNeedCard] = "ErrorNeedCard";
+	map[QCA::SecureMessage::ErrorUnknown] = "ErrorUnknown";
+	return map[e];
 }
 
 char *mime_signpart =
@@ -845,7 +889,7 @@ static void usage()
 	printf("  --showreq [certreq.pem]\n");
 	printf("  --validate [cert.pem] (nonroots.pem)\n");
 	printf("\n");
-	printf("  --extract-keybundle [cert.p12] [passphrase]\n");
+	printf("  --extract-keybundle [cert.p12] (passphrase)\n");
 	printf("\n");
 	printf("  --list-keystores\n");
 	printf("  --list-keystore [storeName]\n");
@@ -862,6 +906,7 @@ static void usage()
 	printf("  --pgp decrypt [encryptedfile]\n");
 	printf("\n");
 	printf("  --list-tlsciphers\n");
+	printf("\n");
 
 	/*printf("qcatool: simple qca utility\n");
 	printf("usage: qcatool (--pass, --noprompt) [command]\n");
@@ -1752,7 +1797,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error signing: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error signing: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -1819,7 +1865,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error encrypting: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error encrypting: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -1912,7 +1959,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error decrypting: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error decrypting: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -1973,7 +2021,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error verifying: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error verifying: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -2007,13 +2056,17 @@ int main(int argc, char **argv)
 	}
 	else if(args[0] == "--extract-keybundle")
 	{
-		if(args.count() < 3)
+		if(args.count() < 2)
 		{
 			usage();
 			return 1;
 		}
 
-		QCA::KeyBundle key = QCA::KeyBundle::fromFile(args[1], args[2].toLatin1());
+		QSecureArray passphrase;
+		if(args.count() >= 3)
+			passphrase = args[2].toLatin1();
+
+		QCA::KeyBundle key = QCA::KeyBundle::fromFile(args[1], passphrase);
 		if(key.isNull())
 		{
 			printf("Error reading key file\n");
@@ -2121,7 +2174,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error signing: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error signing: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -2164,7 +2218,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error signing: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error signing: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -2207,7 +2262,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error verifying: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error verifying: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -2266,7 +2322,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error encrypting: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error encrypting: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
@@ -2301,7 +2358,8 @@ int main(int argc, char **argv)
 
 			if(!msg.success())
 			{
-				printf("Error decrypting: [%d]\n", msg.errorCode());
+				QString errstr = smErrorToString(msg.errorCode());
+				printf("Error decrypting: [%s]\n", qPrintable(errstr));
 				return 1;
 			}
 
