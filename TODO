@@ -8,16 +8,9 @@
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
 
-* beta2
-  api:
-    new password/token event handler system
-    passive keystoreentry (and related issues)
-  code:
-    don't create qobjects during init (that means you, keystoremanager)
-    if KeyStore::needPassphrase has no listener, reject the request somehow
-
 * beta3
   api:
+    passive keystoreentry (and related issues)
     make pkeycontext conversion functions non-pure
     make sure there aren't any cases where a Foo::supportsBar()-style function
       reports true, but then when the object is created, it doesn't actually
@@ -29,6 +22,7 @@
     versionize the provider contexts
     move qcatool's prompt code into qca
   code:
+    don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try
     sasl: get it working, lib and cyrus provider
     persistent properties
