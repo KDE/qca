@@ -848,7 +848,7 @@ public:
 
 			return true;
 		}
-		catch (const PKCS11Exception &e) {
+		catch (const PKCS11Exception &) {
 			return false;
 		}
 	}
@@ -899,7 +899,7 @@ private:
 
 		if (_pkcs11h_certificate == NULL) {
 			if (
-				(pkcs11h_certificate_create (
+				(rv = pkcs11h_certificate_create (
 					_pkcs11h_certificate_id,
 					PKCS11H_PIN_CACHE_INFINITE,
 					&_pkcs11h_certificate
@@ -1968,7 +1968,7 @@ void pkcs11Provider::init () {
 			_fLowLevelInitialized = true;
 		}
 	}
-	catch (const PKCS11Exception &e) {
+	catch (const PKCS11Exception &) {
 /*CANNOT DO ANYTHING HERE
 		emit_diagnosticText (
 			QString ().sprintf (
