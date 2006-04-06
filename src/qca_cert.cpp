@@ -33,6 +33,7 @@ bool stringToFile(const QString &fileName, const QString &content);
 bool stringFromFile(const QString &fileName, QString *s);
 bool arrayToFile(const QString &fileName, const QByteArray &content);
 bool arrayFromFile(const QString &fileName, QByteArray *a);
+bool ask_passphrase(const QString &fname, void *ptr, QSecureArray *answer);
 
 //----------------------------------------------------------------------------
 // CertificateOptions
@@ -1322,8 +1323,19 @@ KeyBundle KeyBundle::fromArray(const QByteArray &a, const QSecureArray &passphra
 	KeyBundle bundle;
 	PIXContext *pix = static_cast<PIXContext *>(getContext("pix", provider));
 	ConvertResult r = pix->fromPKCS12(a, passphrase, &name, &list, &kc);
+
+	// error converting without passphrase?  maybe a passphrase is needed
+	// FIXME: we should only do this if we get ErrorPassphrase?
+	if(r != ConvertGood && passphrase.isEmpty())
+	{
+		QSecureArray pass;
+		if(ask_passphrase(QString(), 0, &pass))
+			r = pix->fromPKCS12(a, pass, &name, &list, &kc);
+	}
+
 	if(result)
 		*result = r;
+
 	if(r == ConvertGood)
 	{
 		bundle.d->name = name;

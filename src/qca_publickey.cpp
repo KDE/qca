@@ -66,6 +66,17 @@ bool arrayFromFile(const QString &fileName, QByteArray *a)
 	return true;
 }
 
+bool ask_passphrase(const QString &fname, void *ptr, QSecureArray *answer)
+{
+	PasswordAsker asker;
+	asker.ask(Event::StylePassphrase, fname, ptr);
+	asker.waitForResponse();
+	if(!asker.accepted())
+		return false;
+	*answer = asker.password();
+	return true;
+}
+
 ProviderList allProviders()
 {
 	ProviderList pl = providers();
@@ -870,7 +881,21 @@ bool PrivateKey::toPEMFile(const QString &fileName, const QSecureArray &passphra
 
 PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	return getKey<PrivateKey, Getter_PrivateKey<QSecureArray>, QSecureArray>(provider, a, passphrase, result);
+	PrivateKey out;
+	ConvertResult r;
+	out = getKey<PrivateKey, Getter_PrivateKey<QSecureArray>, QSecureArray>(provider, a, passphrase, &r);
+
+	// error converting without passphrase?  maybe a passphrase is needed
+	// FIXME: we should only do this if we get ErrorPassphrase?
+	if(r != ConvertGood && passphrase.isEmpty())
+	{
+		QSecureArray pass;
+		if(ask_passphrase(QString(), 0, &pass))
+			out = getKey<PrivateKey, Getter_PrivateKey<QSecureArray>, QSecureArray>(provider, a, pass, &r);
+	}
+	if(result)
+		*result = r;
+	return out;
 
 	/*PrivateKey k;
 
@@ -912,7 +937,21 @@ PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passph
 
 PrivateKey PrivateKey::fromPEM(const QString &s, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	return getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, s, passphrase, result);
+	PrivateKey out;
+	ConvertResult r;
+	out = getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, s, passphrase, &r);
+
+	// error converting without passphrase?  maybe a passphrase is needed
+	// FIXME: we should only do this if we get ErrorPassphrase?
+	if(r != ConvertGood && passphrase.isEmpty())
+	{
+		QSecureArray pass;
+		if(ask_passphrase(QString(), 0, &pass))
+			out = getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, s, pass, &r);
+	}
+	if(result)
+		*result = r;
+	return out;
 
 	/*PrivateKey k;
 	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
