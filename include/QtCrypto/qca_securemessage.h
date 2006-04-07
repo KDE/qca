@@ -242,6 +242,53 @@ namespace QCA
 	   \class SecureMessage qca_securemessage.h QtCrypto
 
 	   Class representing a secure message
+
+	   SecureMessage presents a unified interface for working with both
+	   OpenPGP and CMS (S/MIME) messages.  Prepare the object by calling
+	   setFormat(), setRecipient(), and setSigner() as necessary, and then
+	   begin the operation by calling an appropriate 'start' function, such
+	   as startSign().
+
+	   Here is an example of how to perform a Clearsign operation using PGP:
+
+	   \code
+// first make the SecureMessageKey
+PGPKey myPGPKey = getSecretKeyFromSomewhere();
+SecureMessageKey key;
+key.setPGPSecretKey(myPGPKey);
+
+// our data to sign
+QByteArray plain = "Hello, world";
+
+// let's do it
+OpenPGP pgp;
+SecureMessage msg(&pgp);
+msg.setSigner(key);
+msg.startSign(SecureMessage::Clearsign);
+msg.update(plain);
+msg.end();
+msg.waitForFinished(-1);
+
+if(msg.success())
+{
+	QByteArray result = msg.read();
+	// result now contains the clearsign text data
+}
+else
+{
+	// error
+	...
+}
+	   \endcode
+
+	   Performing a CMS sign operation is similar.  Simply set up the SecureMessageKey
+	   with a Certificate instead of a PGPKey, and operate on a CMS object instead of
+	   an OpenPGP object.
+
+	   \sa SecureMessageKey
+	   \sa SecureMessageSignature
+	   \sa OpenPGP
+	   \sa CMS
 	*/
 	class QCA_EXPORT SecureMessage : public QObject, public Algorithm
 	{
@@ -293,7 +340,7 @@ namespace QCA
 
 		/**
 		   Create a new secure message
-		   
+
 		   This constructor uses an existing
 		   SecureMessageSystem object (for example, an OpenPGP
 		   or CMS object) to generate a specific kind of
@@ -341,19 +388,78 @@ namespace QCA
 		*/
 		bool canSignAndEncrypt() const;
 
+		/**
+		   Reset the object state to that of original construction.
+		   Now a new operation can be performed immediately.
+		*/
 		void reset();
 
-		void setEnableBundleSigner(bool b);    // CMS: bundle X.509 certificate chain (default true)
-		void setEnableSMIMEAttributes(bool b); // CMS: include S/MIME attributes (default true)
+		/**
+		   For CMS only, this will bundle the signer certificate chain
+		   into the message.  This allows a message to be verified
+		   on its own, without the need to have obtained the signer's
+		   certificate in advance.  Email clients using S/MIME often
+		   bundle the signer, greatly simplifying key management.
+
+		   This behavior is enabled by default.
+		*/
+		void setEnableBundleSigner(bool b);
+
+		/**
+		   For CMS only, this will put extra attributes into the
+		   message related to S/MIME, such as the preferred
+		   type of algorithm to use in replies.  The attributes
+		   used are decided by the provider.
+
+		   This behavior is enabled by default.
+		*/
+		void setEnableSMIMEAttributes(bool b);
+
 		/**
 		   Set the Format used for messages
 
+		   The default is Binary.
+
 		   \param f whether to use Binary or Ascii
 		*/
-		void setFormat(Format f);              // (default Binary)
+		void setFormat(Format f);
+
+		/**
+		   Set the recipient for an encrypted message
+
+		   \sa setRecipients
+		*/
 		void setRecipient(const SecureMessageKey &key);
+
+		/**
+		   Set the list of recipients for an encrypted message.
+
+		   For a list with one item, this has the same effect as setRecipient.
+
+		   \sa setRecipient
+		*/
 		void setRecipients(const SecureMessageKeyList &keys);
+
+		/**
+		   Set the signer for a signed message.
+
+		   This is used for both creating signed messages as well as for
+		   verifying CMS messages that have no signer bundled.
+
+		   \sa setSigners
+		*/
 		void setSigner(const SecureMessageKey &key);
+
+		/**
+		   Set the list of signers for a signed message.
+
+		   This is used for both creating signed messages as well as for
+		   verifying CMS messages that have no signer bundled.
+
+		   For a list with one item, this has the same effect as setSigner.
+
+		   \sa setSigner
+		*/
 		void setSigners(const SecureMessageKeyList &keys);
 
 		/**
@@ -505,10 +611,24 @@ namespace QCA
 		*/
 		bool waitForFinished(int msecs = 30000);
 
+		/**
+		   Indicates whether or not the operation was successful
+		   or failed.  If this function returns false, then
+		   the reason for failure can be obtained with errorCode().
+
+		   \sa errorCode
+		   \sa diagnosticText
+		*/
 		bool success() const;
+
+		/**
+		   Returns the failure code.
+
+		   \sa success
+		   \sa diagnosticText
+		*/
 		Error errorCode() const;
 
-		// sign
 		/**
 		   The signature for the message. This is only used
 		   for Detached signatures. For other message types,
@@ -555,6 +675,11 @@ namespace QCA
 		*/
 		SecureMessageSignatureList signers() const;
 
+		/**
+		   Returns a log of technical information about the operation,
+		   which may be useful for presenting to the user in an
+		   advanced error dialog.
+		*/
 		QString diagnosticText() const;
 
 	signals:
@@ -585,6 +710,9 @@ namespace QCA
 	   \class SecureMessageSystem qca_securemessage.h QtCrypto
 
 	   Abstract superclass for secure messaging systems
+
+	   \sa SecureMessage
+	   \sa SecureMessageKey
 	*/
 	class QCA_EXPORT SecureMessageSystem : public QObject, public Algorithm
 	{
@@ -613,6 +741,9 @@ namespace QCA
 	   \class OpenPGP qca_securemessage.h QtCrypto
 
 	   Pretty Good Privacy messaging system
+
+	   \sa SecureMessage
+	   \sa SecureMessageKey
 	*/
 	class QCA_EXPORT OpenPGP : public SecureMessageSystem
 	{
@@ -647,6 +778,9 @@ namespace QCA
 	   countersignatures to be associated with a signature." (from
 	   <a href="http://www.ietf.org/rfc/rfc3852.txt">RFC3852</a>
 	   "Cryptographic Message Syntax")
+
+	   \sa SecureMessage
+	   \sa SecureMessageKey
 	*/
 	class QCA_EXPORT CMS : public SecureMessageSystem
 	{

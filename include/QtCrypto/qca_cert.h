@@ -572,8 +572,35 @@ namespace QCA
 		*/
 		inline const Certificate & primary() const { return first(); }
 
+		/**
+		   Check the validity of a certificate chain
+
+		   \param trusted a collection of trusted certificates
+		   \param untrusted_crls a list of additional CRLs, not necessarily trusted
+		   \param u the use required for the primary certificate
+
+		   \sa Certificate::validate()
+		*/
 		inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls = QList<CRL>(), UsageMode u = UsageAny) const;
 
+		/**
+		   Complete a certificate chain for the primary certificate, using the
+		   rest of the certificates in the chain object, as well as those in \a issuers,
+		   as possible issuers in the chain.  If there are issuers missing, then
+		   the chain might be incomplete (at the worst case, if no issuers exist
+		   for the primary certificate, then the resulting chain will
+		   consist of just the primary certificate).  To ensure a CertificateChain
+		   is fully complete, you must use validate().
+
+		   The newly constructed CertificateChain is returned.
+
+		   If the certificate chain is empty, then this will return an empty
+		   CertificateChain object.
+
+		   \param issuers a pool of issuers to draw from as necessary
+
+		   \sa validate
+		*/
 		inline CertificateChain complete(const QList<Certificate> &issuers) const;
 	};
 
