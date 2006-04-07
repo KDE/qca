@@ -162,7 +162,6 @@ private:
 	typedef QList<KeyStoreItem *> _stores_t;
 	_stores_t _stores;
 	QHash<int, KeyStoreItem *> _storesById;
-	QHash<int, QSecureArray> _pins;
 	QMutex _mutexStores;
 	bool _initialized;
 
@@ -222,22 +221,8 @@ public:
 	QList<KeyStoreEntryContext*>
 	entryList (int id);
 
-	virtual
 	void
-	submitPassphrase (
-		int id,
-		int requestId,
-		const QSecureArray &passphrase
-	);
-
-	void
-	rejectPassphraseRequest (
-		int id,
-		int requestId
-	);
-
-	void
-	emit_storeNeedPassphrase (
+	pinPrompt (
 		const pkcs11h_token_id_t token_id,
 		QSecureArray &pin
 	);
@@ -1519,28 +1504,7 @@ MyKeyStoreList::entryList (int id) {
 }
 
 void
-MyKeyStoreList::submitPassphrase (
-	int id,
-	int requestId,
-	const QSecureArray &passphrase
-) {
-	Q_UNUSED(requestId);
-
-	_pins[id] = passphrase;
-}
-
-void
-MyKeyStoreList::rejectPassphraseRequest (
-	int id,
-	int requestId
-) {
-	Q_UNUSED(requestId);
-
-	_pins[id].clear ();
-}
-
-void
-MyKeyStoreList::emit_storeNeedPassphrase (
+MyKeyStoreList::pinPrompt (
 	const pkcs11h_token_id_t token_id,
 	QSecureArray &pin
 ) {
@@ -1570,10 +1534,20 @@ MyKeyStoreList::emit_storeNeedPassphrase (
 		entry = registerTokenId (token_id);
 	}
 
-	_pins[entry->id].clear ();
-	emit s_keyStoreList->storeNeedPassphrase(entry->id, 0, QString ());
-	pin = _pins[entry->id];
-	_pins[entry->id].clear ();
+	PasswordAsker asker;
+	asker.ask (
+		Event::StylePIN,
+		tokenId2storeId (entry->token_id),
+		QString(),
+		0
+	);
+	asker.waitForResponse ();
+	if (asker.accepted ()) {
+		pin = asker.password();
+	}
+	else {
+		pin = QSecureArray();
+	}
 }
 
 void
@@ -2125,7 +2099,7 @@ pkcs11Provider::pinPromptHook (
 	QSecureArray pin;
 	if (s_keyStoreList != NULL) {
 		
-		s_keyStoreList->emit_storeNeedPassphrase (token, pin);
+		s_keyStoreList->pinPrompt (token, pin);
 
 		if (!pin.isEmpty ()) {
 			if ((size_t)pin.size () < nMaxPIN-1) {

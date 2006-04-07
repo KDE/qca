@@ -2890,7 +2890,7 @@ _pkcs11h_releaseSession (
 
 	PKCS11H_DEBUG (
 		PKCS11H_LOG_DEBUG2,
-		"PKCS#11: _pkcs11h_releaseSession session=%p",
+		"PKCS#11: _pkcs11h_releaseSession entry session=%p",
 		(void *)session
 	);
 
@@ -3384,6 +3384,13 @@ _pkcs11h_login (
 					session->fProtectedAuthenticationSupported
 				)
 			) {
+#if defined(ENABLE_PKCS11H_THREADING)
+				if (fMutexLocked) {
+					_pkcs11h_mutexRelease (&session->mutexSession);
+					fMutexLocked = FALSE;
+				}
+#endif
+
 				PKCS11H_DEBUG (
 					PKCS11H_LOG_DEBUG1,
 					"PKCS#11: Calling pin_prompt hook for '%s'",
@@ -3411,6 +3418,14 @@ _pkcs11h_login (
 					rv
 				);
 
+#if defined(ENABLE_PKCS11H_THREADING)
+				if (
+					rv == CKR_OK &&
+					(rv = _pkcs11h_mutexLock (&session->mutexSession)) == CKR_OK
+				) {
+					fMutexLocked = TRUE;
+				}
+#endif
 			}
 
 			if (session->nPINCachePeriod == PKCS11H_PIN_CACHE_INFINITE) {
