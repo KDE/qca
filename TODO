@@ -2,6 +2,7 @@
 * special thanks to Jack Lloyd
 * mac universal binary support?
 * be sure to turn ALL .pro files (examples, everything) on release mode
+* option to build qca with simultaneous debug and release, similar to qt?
 
 * API documentation
   document all the stuff in qca_securemessage.h
@@ -10,6 +11,8 @@
 
 * beta3
   api:
+    consider getting rid of all hash/cipher/etc subclasses and let the user
+      deal with just the base classes.  set type by string.
     passive keystoreentry (and related issues)
     make pkeycontext conversion functions non-pure
     make sure there aren't any cases where a Foo::supportsBar()-style function
@@ -21,6 +24,7 @@
     remove the quality enum for randomness? (see botan)
     versionize the provider contexts
     move qcatool's prompt code into qca
+    get rid of SecureMessage::signature(), return the sig in read() ?
   code:
     don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try
