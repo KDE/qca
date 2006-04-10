@@ -25,7 +25,9 @@
     versionize the provider contexts
     move qcatool's prompt code into qca
     get rid of SecureMessage::signature(), return the sig in read() ?
+    OCSP ?
   code:
+    fix asker implementation, it is a disaster
     don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try
     sasl: get it working, lib and cyrus provider
@@ -39,6 +41,7 @@
     race condition(?): keystore id is bad by the time a KeyStore object is
       made. solution: if the id is invalid, queue up an unavailable() signal?
   other:
+    ability to force internal certs
     Update to latest Botan, and remake the botantools patch as appropriate
     ability to compile plugins in statically (check 'plugins' subdir)
 
