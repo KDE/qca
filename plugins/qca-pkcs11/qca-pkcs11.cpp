@@ -259,7 +259,7 @@ private:
 	) const;
 
 	QString
-	MyKeyStoreList::tokenId2storeId (
+	tokenId2storeId (
 		const pkcs11h_token_id_t token_id
 	) const;
 
