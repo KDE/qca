@@ -26,6 +26,7 @@
     move qcatool's prompt code into qca
     get rid of SecureMessage::signature(), return the sig in read() ?
     OCSP ?
+    tls extensions: hostname and ocsp stapling
   code:
     fix asker implementation, it is a disaster
     don't create qobjects during init (that means you, keystoremanager)
