@@ -817,7 +817,9 @@ public:
 		ready = false;
 
 #ifndef QCA_NO_SYSTEMSTORE
-		if(qca_have_systemstore())
+		if(qca_have_systemstore() &&
+		   isSupported("cert") &&
+		   isSupported("crl"))
 		{
 			ready = true;
 		}
