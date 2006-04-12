@@ -82,19 +82,51 @@ void CMSut::xcrypt()
 
 	    msg.waitForFinished(-1);
 	    
-	    QByteArray result1 = msg.read();
-	    QCOMPARE( result1.isEmpty(), false );
+	    QByteArray encryptedResult1 = msg.read();
+	    QCOMPARE( encryptedResult1.isEmpty(), false );
 	    
 	    msg.reset();
+	    msg.setRecipient(secMsgKey);
 	    msg.startEncrypt();
 	    msg.update( testText );
 	    msg.end();
 
 	    msg.waitForFinished(-1);
-	    
-	    QByteArray result2 = msg.read();
+	    QVERIFY( msg.success() );
 
-	    QCOMPARE( result1, result2 );
+	    QByteArray encryptedResult2 = msg.read();
+	    QCOMPARE( encryptedResult2.isEmpty(), false );
+
+	    QCA::ConvertResult res;
+	    QSecureArray passPhrase = "start";
+	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &res );
+	    QCOMPARE( res, QCA::ConvertGood );
+	    
+	    secMsgKey.setX509PrivateKey( privKey );
+	    QCA::SecureMessageKeyList privKeyList;
+	    privKeyList += secMsgKey;
+	    QCA::CMS cms2;
+	    cms2.setPrivateKeys( privKeyList );
+
+	    QCA::SecureMessage msg2( &cms2 );
+
+	    msg2.startDecrypt();
+	    msg2.update( encryptedResult1 );
+	    msg2.end();
+	    msg2.waitForFinished(-1);
+	    QVERIFY( msg2.success() );
+	    QByteArray decryptedResult1 = msg2.read();
+	    QCOMPARE( decryptedResult1, testText );
+
+	    msg2.reset();
+	    msg2.startDecrypt();
+	    msg2.update( encryptedResult1 );
+	    msg2.end();
+	    msg2.waitForFinished(-1);
+	    QVERIFY( msg2.success() );
+	    QByteArray decryptedResult2 = msg2.read();
+
+	    QCOMPARE( decryptedResult1, decryptedResult2 );
 	}
     }
 };
