@@ -38,6 +38,8 @@ private slots:
     void cleanupTestCase();
     void xcrypt_data();
     void xcrypt();
+    void signverify_data();
+    void signverify();
 private:
     QCA::Initializer* m_init;
 
