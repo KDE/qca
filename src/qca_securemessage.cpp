@@ -284,7 +284,7 @@ public:
 
 		if(mode >= ResetAll)
 		{
-			bundleSigner = false;
+			bundleSigner = true;
 			format = SecureMessage::Binary;
 			to.clear();
 			from.clear();
