@@ -62,7 +62,7 @@ public:
 		).arg(QLibraryInfo::location(QLibraryInfo::DataPath));
 		conf->addExtra(str);
 
-		QString qtcore = qc_getenv("QC_DEBUG") == "Y" ? QString("QtCore_debug") : QString("QtCore");
+		QString qtcore = qc_getenv("QC_ENABLE_DEBUG") == "Y" ? QString("QtCore_debug") : QString("QtCore");
 		// write pkg-config file
 		str = QString(
 		"prefix=%1\n"
