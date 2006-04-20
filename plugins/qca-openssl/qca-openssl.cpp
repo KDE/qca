@@ -6007,7 +6007,7 @@ public:
 class opensslPlugin : public QCAPlugin
 {
 	Q_OBJECT
-	//Q_INTERFACES(QCAPlugin)
+	Q_INTERFACES(QCAPlugin)
 public:
 	virtual Provider *createProvider() { return new opensslProvider; }
 };
