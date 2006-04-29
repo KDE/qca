@@ -67,7 +67,7 @@ public:
     struct Item
     {
 	int plain;
-	int encoded;
+	qint64 encoded;
     };
 
     LayerTracker()
@@ -98,7 +98,7 @@ public:
 	list += i;
     }
 
-    int finished(int encoded)
+    int finished(qint64 encoded)
     {
 	int plain = 0;
 	for(QList<Item>::Iterator it = list.begin(); it != list.end();) {
@@ -222,7 +222,7 @@ private slots:
     void sock_bytesWritten(qint64 x)
     {
 	if(mode == Active && sent) {
-	    int bytes = layer.finished(x);
+	    qint64 bytes = layer.finished(x);
 	    bytesLeft -= bytes;
 	    
 	    if(bytesLeft == 0) {
@@ -299,7 +299,7 @@ private:
     
     bool sent;
     int mode;
-    int bytesLeft;
+    qint64 bytesLeft;
     LayerTracker layer;
 };
 

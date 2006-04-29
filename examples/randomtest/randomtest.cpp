@@ -49,7 +49,8 @@ int main(int argc, char **argv)
 	// use something like:
 	unsigned char randChar;
 	randChar = QCA::Random::randomChar();
-	
+	// It might not be printable, so this may not produce output
+	std::cout << "A random character: " << randChar << std::endl;
 
 	QSecureArray tenBytes(10);
 	// If you need more random values, you may want to
