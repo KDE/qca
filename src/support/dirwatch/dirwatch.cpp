@@ -30,7 +30,7 @@ static int platform_ref = 0;
 struct file_info
 {
 	QString name;
-	uint size;
+	qint64 size;
 	QDateTime lastModified;
 };
 

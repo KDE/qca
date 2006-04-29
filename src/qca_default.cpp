@@ -680,7 +680,7 @@ public:
 	// Add padding and return the message digest
 	void sha1_final(unsigned char digest[20], SHA1_CONTEXT* context)
 	{
-		quint32 i, j;
+		quint32 i;
 		unsigned char finalcount[8];
 
 		for (i = 0; i < 8; i++) {
@@ -697,7 +697,7 @@ public:
 		}
 
 		// Wipe variables
-		i = j = 0;
+		i = 0;
 		memset(context->buffer, 0, 64);
 		memset(context->state, 0, 20);
 		memset(context->count, 0, 8);
