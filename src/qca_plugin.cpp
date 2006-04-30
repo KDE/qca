@@ -279,10 +279,9 @@ void ProviderManager::scan()
 		if(!dir.exists())
 			continue;
 
-		QStringList list = dir.entryList();
-		for(QStringList::ConstIterator maybeFile = list.begin(); it != list.end(); ++it)
+		foreach(const QString maybeFile, dir.entryList())
 		{
-			QFileInfo fi(dir.filePath(*maybeFile));
+			QFileInfo fi(dir.filePath(maybeFile));
 			if(fi.isDir())
 				continue;
 			QString fname = fi.filePath();

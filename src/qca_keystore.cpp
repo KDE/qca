@@ -616,7 +616,7 @@ private:
 				delete item;
 				PublicReferences refs = refHash.value(trackerId);
 				refHash.remove(trackerId);
-				for(int refIdx = 0; n < refs.count(); ++n)
+				for(int refIdx = 0; refIdx < refs.count(); ++refIdx)
 				{
 					KeyStore *ks = refs[refIdx];
 					ks->invalidate();
