@@ -5373,8 +5373,11 @@ public:
 
 			flags = 0;
 			flags |= PKCS7_BINARY;
-			flags |= PKCS7_DETACHED; // FIXME: signmode
-			//flags |= PKCS7_NOCERTS; // FIXME: bundleSigner
+			if (SecureMessage::Detached == signMode) {
+				flags |= PKCS7_DETACHED;
+			}
+			if (false == bundleSigner)
+				flags |= PKCS7_NOCERTS;
 			p7 = PKCS7_sign(cx, kx, other_certs, bi, flags);
 
 			BIO_free(bi);
@@ -5394,7 +5397,10 @@ public:
 				// FIXME: format
 				bo = BIO_new(BIO_s_mem());
 				i2d_PKCS7_bio(bo, p7);
-				sig = bio2ba(bo);
+				if (SecureMessage::Detached == signMode)
+					sig = bio2ba(bo);
+				else 
+					out = bio2ba(bo);
 			}
 			else
 			{
@@ -5447,8 +5453,14 @@ public:
 		{
 			// TODO: support non-detached sigs
 
+			BIO *out = BIO_new(BIO_s_mem());
 			BIO *bi = BIO_new(BIO_s_mem());
-			BIO_write(bi, sig.data(), sig.size());
+			if (false == sig.isEmpty()) {
+				// We have detached signature
+				BIO_write(bi, sig.data(), sig.size());
+			} else {
+				BIO_write(bi, in.data(), in.size());
+			}
 			PKCS7 *p7 = d2i_PKCS7_bio(bi, NULL);
 			BIO_free(bi);
 
@@ -5510,10 +5522,17 @@ public:
 				X509_STORE_add_crl(store, x);
 			}
 
-			bi = BIO_new(BIO_s_mem());
-			BIO_write(bi, in.data(), in.size());
-			int ret = PKCS7_verify(p7, xs, store, bi, NULL, 0);
-			BIO_free(bi);
+			int ret;
+			if (false == sig.isEmpty()) {
+				// Detached signMode
+				bi = BIO_new(BIO_s_mem());
+				BIO_write(bi, in.data(), in.size());
+				ret = PKCS7_verify(p7, xs, store, bi, NULL, 0);
+				BIO_free(bi);
+			} else {
+				ret = PKCS7_verify(p7, xs, store, NULL, out, 0);
+				// qDebug() << "Verify: " << ret;
+			}
 			X509_STORE_free(store);
 			PKCS7_free(p7);
 
