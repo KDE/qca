@@ -40,6 +40,10 @@ private slots:
     void xcrypt();
     void signverify_data();
     void signverify();
+    void signverify_message_data();
+    void signverify_message();
+    void signverify_message_invalid_data();
+    void signverify_message_invalid();
 private:
     QCA::Initializer* m_init;
 
