@@ -403,26 +403,29 @@ static QString prompt_for(const QString &prompt)
 	return QString::fromLatin1(result).trimmed();
 }
 
-static void try_print_info(const QString &name, const QString &value)
+static void try_print_info(const QString &name, const QStringList &values)
 {
-	if(!value.isEmpty())
+	if(!values.isEmpty())
+	{
+		QString value = values.join(", ");
 		printf("   %s: %s\n", name.toLatin1().data(), value.toLatin1().data());
+	}
 }
 
 static void print_info(const QString &title, const QCA::CertificateInfo &info)
 {
 	printf("%s\n", title.toLatin1().data());
-	try_print_info("Name", info.value(QCA::CommonName));
-	try_print_info("Email", info.value(QCA::Email));
-	try_print_info("Organization", info.value(QCA::Organization));
-	try_print_info("Organizational Unit", info.value(QCA::OrganizationalUnit));
-	try_print_info("Locality", info.value(QCA::Locality));
-	try_print_info("State", info.value(QCA::State));
-	try_print_info("Country", info.value(QCA::Country));
-	try_print_info("URI", info.value(QCA::URI));
-	try_print_info("DNS", info.value(QCA::DNS));
-	try_print_info("IP Address", info.value(QCA::IPAddress));
-	try_print_info("JID", info.value(QCA::XMPP));
+	try_print_info("Name", info.values(QCA::CommonName));
+	try_print_info("Email", info.values(QCA::Email));
+	try_print_info("Organization", info.values(QCA::Organization));
+	try_print_info("Organizational Unit", info.values(QCA::OrganizationalUnit));
+	try_print_info("Locality", info.values(QCA::Locality));
+	try_print_info("State", info.values(QCA::State));
+	try_print_info("Country", info.values(QCA::Country));
+	try_print_info("URI", info.values(QCA::URI));
+	try_print_info("DNS", info.values(QCA::DNS));
+	try_print_info("IP Address", info.values(QCA::IPAddress));
+	try_print_info("JID", info.values(QCA::XMPP));
 }
 
 static QString constraint_to_string(QCA::ConstraintType t)
