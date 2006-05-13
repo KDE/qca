@@ -439,110 +439,140 @@ static X509_EXTENSION *new_cert_subject_alt_name(const CertificateInfo &info)
 	return ex;
 }
 
-static GENERAL_NAME *find_general_name(GENERAL_NAMES *names, int type)
+static GENERAL_NAME *find_next_general_name(GENERAL_NAMES *names, int type, int *pos)
 {
-	GENERAL_NAME *gn = 0;
-	for(int n = 0; n < sk_GENERAL_NAME_num(names); ++n)
-	{
-		GENERAL_NAME *i = sk_GENERAL_NAME_value(names, n);
-		if(i->type == type)
-		{
-			gn = i;
-			break;
-		}
-	}
-	return gn;
+        int temp = *pos;
+        GENERAL_NAME *gn = 0;
+        *pos = -1;
+        for(int n = temp; n < sk_GENERAL_NAME_num(names); ++n)
+        {
+                GENERAL_NAME *i = sk_GENERAL_NAME_value(names, n);
+                if(i->type == type)
+                {
+                        gn = i;
+                        *pos = n;
+                        break;
+                }
+        }
+        return gn;
 }
 
 static void try_get_general_name(GENERAL_NAMES *names, CertificateInfoType t, CertificateInfo *info)
 {
-	switch(t)
-	{
-		case Email:
-		{
-			GENERAL_NAME *gn = find_general_name(names, GEN_EMAIL);
-			if(!gn)
-				break;
-			QByteArray cs((const char *)ASN1_STRING_data(gn->d.rfc822Name), ASN1_STRING_length(gn->d.rfc822Name));
-			info->insert(t, QString::fromLatin1(cs));
-			break;
-		}
-		case URI:
-		{
-			GENERAL_NAME *gn = find_general_name(names, GEN_URI);
-			if(!gn)
-				break;
-			QByteArray cs((const char *)ASN1_STRING_data(gn->d.uniformResourceIdentifier), ASN1_STRING_length(gn->d.uniformResourceIdentifier));
-			info->insert(t, QString::fromLatin1(cs));
-			break;
-		}
-		case DNS:
-		{
-			GENERAL_NAME *gn = find_general_name(names, GEN_DNS);
-			if(!gn)
-				break;
-			QByteArray cs((const char *)ASN1_STRING_data(gn->d.dNSName), ASN1_STRING_length(gn->d.dNSName));
-			info->insert(t, QString::fromLatin1(cs));
-			break;
-		}
-		case IPAddress:
-		{
-			GENERAL_NAME *gn = find_general_name(names, GEN_IPADD);
-			if(!gn)
-				break;
+        switch(t)
+        {
+                case Email:
+                {
+                        int pos = 0;
+                        while (pos != -1)
+                        {
+                                GENERAL_NAME *gn = find_next_general_name(names, GEN_EMAIL, &pos);
+                                if (pos != -1)
+                                {
+                                        QByteArray cs((const char *)ASN1_STRING_data(gn->d.rfc822Name), ASN1_STRING_length(gn->d.rfc822Name));
+                                        info->insert(t, QString::fromLatin1(cs));
+                                        ++pos;
+                                }
+                        }
+                        break;
+                }
+                case URI:
+                {
+                        int pos = 0;
+                        while (pos != -1)
+                        {
+                                GENERAL_NAME *gn = find_next_general_name(names, GEN_URI, &pos);
+                                if (pos != -1)
+                                {
+                                        QByteArray cs((const char *)ASN1_STRING_data(gn->d.uniformResourceIdentifier), ASN1_STRING_length(gn->d.uniformResourceIdentifier));
+                                        info->insert(t, QString::fromLatin1(cs));
+                                        ++pos;
+                                }
+                        }
+                        break;
+                }
+                case DNS:
+                {
+                        int pos = 0;
+                        while (pos != -1)
+                        {
+                                GENERAL_NAME *gn = find_next_general_name(names, GEN_DNS, &pos);
+                                if (pos != -1)
+                                {
+                                        QByteArray cs((const char *)ASN1_STRING_data(gn->d.dNSName), ASN1_STRING_length(gn->d.dNSName));
+                                        info->insert(t, QString::fromLatin1(cs));
+                                        ++pos;
+                                }
+                        }
+                        break;
+                }
+                case IPAddress:
+                {
+                        int pos = 0;
+                        while (pos != -1)
+                        {
+                                GENERAL_NAME *gn = find_next_general_name(names, GEN_IPADD, &pos);
+                                if (pos != -1)
+                                {
+                                        ASN1_OCTET_STRING *str = gn->d.iPAddress;
+                                        QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
 
-			ASN1_OCTET_STRING *str = gn->d.iPAddress;
-			QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
+                                        QString out;
+                                        // IPv4 (TODO: handle IPv6)
+                                        if(buf.size() == 4)
+                                        {
+                                                out = "0.0.0.0";
+                                        }
+                                        else
+                                                break;
+                                        info->insert(t, out);
+                                        ++pos;
+                                }
+                        }
+                        break;
+                }
+                case XMPP:
+                {
+                        int pos = 0;
+                        while( pos != -1)
+                        {
+                                GENERAL_NAME *gn = find_next_general_name(names, GEN_OTHERNAME, &pos);
+                                if (pos != -1)
+                                {
+                                        OTHERNAME *other = gn->d.otherName;
+                                        if(!other)
+                                                break;
 
-			QString out;
-			// IPv4 (TODO: handle IPv6)
-			if(buf.size() == 4)
-			{
-				out = "0.0.0.0";
-			}
-			else
-				break;
+                                        ASN1_OBJECT *obj = OBJ_txt2obj("1.3.6.1.5.5.7.8.5", 1); // 1 = only accept dotted input
+                                        if(OBJ_cmp(other->type_id, obj) != 0)
+                                                break;
+                                        ASN1_OBJECT_free(obj);
 
-			info->insert(t, out);
-			break;
-		}
-		case XMPP:
-		{
-			GENERAL_NAME *gn = find_general_name(names, GEN_OTHERNAME);
-			if(!gn)
-				break;
+                                        ASN1_TYPE *at = other->value;
+                                        if(at->type != V_ASN1_UTF8STRING)
+                                                break;
 
-			OTHERNAME *other = gn->d.otherName;
-			if(!other)
-				break;
+                                        ASN1_UTF8STRING *str = at->value.utf8string;
+                                        QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
+                                        info->insert(t, QString::fromUtf8(buf));
+                                        ++pos;
+                                }
+                        }
+                        break;
+                }
 
-			ASN1_OBJECT *obj = OBJ_txt2obj("1.3.6.1.5.5.7.8.5", 1); // 1 = only accept dotted input
-			if(OBJ_cmp(other->type_id, obj) != 0)
-				break;
-			ASN1_OBJECT_free(obj);
-
-			ASN1_TYPE *at = other->value;
-			if(at->type != V_ASN1_UTF8STRING)
-				break;
-
-			ASN1_UTF8STRING *str = at->value.utf8string;
-			QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
-			info->insert(t, QString::fromUtf8(buf));
-			break;
-		}
-
-		// the following are not alt_names
-		case CommonName:
-		case Organization:
-		case OrganizationalUnit:
-		case Locality:
-		case State:
-		case Country:
-			break;
-	}
+                // the following are not alt_names
+                case CommonName:
+                case Organization:
+                case OrganizationalUnit:
+                case Locality:
+                case State:
+                case Country:
+                        break;
+        }
 }
 
-static CertificateInfo get_cert_subject_alt_name(X509_EXTENSION *ex)
+static CertificateInfo get_cert_alt_name(X509_EXTENSION *ex)
 {
 	CertificateInfo info;
 	GENERAL_NAMES *gn = (GENERAL_NAMES *)X509V3_EXT_d2i(ex);
@@ -3146,7 +3176,15 @@ public:
 		{
 			X509_EXTENSION *ex = X509_get_ext(x, pos);
 			if(ex)
-				p.subject.unite(get_cert_subject_alt_name(ex));
+				p.subject.unite(get_cert_alt_name(ex));
+		}
+
+		pos = X509_get_ext_by_NID(x, NID_issuer_alt_name, -1);
+		if(pos != -1)
+		{
+			X509_EXTENSION *ex = X509_get_ext(x, pos);
+			if(ex)
+				p.issuer.unite(get_cert_alt_name(ex));
 		}
 
 		pos = X509_get_ext_by_NID(x, NID_key_usage, -1);
@@ -3431,7 +3469,7 @@ public:
 		{
 			X509_EXTENSION *ex = X509v3_get_ext(exts, pos);
 			if(ex)
-				p.subject.unite(get_cert_subject_alt_name(ex));
+				p.subject.unite(get_cert_alt_name(ex));
 		}
 
 		pos = X509v3_get_ext_by_NID(exts, NID_key_usage, -1);
