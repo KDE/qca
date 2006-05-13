@@ -366,12 +366,27 @@ namespace QCA
 		QDateTime notValidAfter() const;
 
 		/**
-		   Properties of the subject of the certificate
+		   Properties of the subject of the certificate, as a QMultiMap
+
+		   This is the method that provides information on the
+		   subject organisation, common name, DNS name, and so
+		   on. The list of information types (i.e. the key to
+		   the multi-map) is a CertificateInfoType. The values
+		   are a list of QString.
+
+		   An example of how you can iterate over the list is:
+		   \code
+		   foreach( QString dns, info.values(QCA::DNS) ) {
+		       std::cout << "    " << qPrintable(dns) << std::endl;
+		   }
+		   \endcode
 		*/
 		CertificateInfo subjectInfo() const;
 
 		/**
 		   Properties of the issuer of the certificate
+
+		   \sa subjectInfo for how the return value works.
 		*/
 		CertificateInfo issuerInfo() const;
 
