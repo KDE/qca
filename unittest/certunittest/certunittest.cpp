@@ -265,6 +265,79 @@ void CertUnitTest::checkClientCerts()
 	}
     }
 }
+void CertUnitTest::derCAcertstest()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-gcrypt");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+            QFile f("certs/ov-root-ca-cert.crt");
+            QVERIFY(f.open(QFile::ReadOnly));
+            QByteArray der = f.readAll();
+            QCA::ConvertResult resultca1;
+            QCA::Certificate ca1 = QCA::Certificate::fromDER( QSecureArray(der),
+                                                              &resultca1,
+                                                              provider);
+
+            QCOMPARE( resultca1, QCA::ConvertGood );
+
+            QCOMPARE( ca1.pathLimit(), 0 );
+
+            QCOMPARE( ca1.isNull(), false );
+            QCOMPARE( ca1.isCA(), true );
+
+            QCOMPARE( ca1.isSelfSigned(), true );
+
+            QCOMPARE( ca1.serialNumber(), QBigInteger(0) );
+
+            QCOMPARE( ca1.commonName(), QString("For Tests Only") );
+
+            QCA::CertificateInfo si = ca1.subjectInfo();
+            QCOMPARE( si.isEmpty(), false );
+            QCOMPARE( si.value(QCA::CommonName), QString("For Tests Only") );
+            QCOMPARE( si.value(QCA::Organization), QString("InsecureTestCertificate") );
+            QCOMPARE( si.value(QCA::Country), QString("de") );
+
+
+            QCA::CertificateInfo ii = ca1.issuerInfo();
+            QCOMPARE( ii.isEmpty(), false );
+            QCOMPARE( ii.value(QCA::CommonName), QString("For Tests Only") );
+            QCOMPARE( ii.value(QCA::Organization), QString("InsecureTestCertificate") );
+            QCOMPARE( ii.value(QCA::Country), QString("de") );
+
+            QCOMPARE( ca1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
+            QCOMPARE( ca1.notValidAfter().toString(), QDateTime( QDate( 2011, 8, 15 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
+
+            QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature), (QBool)true );
+            QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation), (QBool)true );
+            QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
+            QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign), (QBool)true );
+            QCOMPARE( ca1.constraints().contains(QCA::CRLSign), (QBool)true );
+            QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::ServerAuth), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::ClientAuth), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::CodeSigning), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::EmailProtection), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
+            QCOMPARE( ca1.constraints().contains(QCA::IPSecUser), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::TimeStamping), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+
+            // no policies on this cert
+            QCOMPARE( ca1.policies().count(), 0 );
+
+            QCOMPARE( ca1.signatureAlgorithm(), QCA::EMSA3_MD5 );
+        }
+    }
+}
 
 void CertUnitTest::altName()
 {
@@ -384,6 +457,91 @@ void CertUnitTest::extXMPP()
     }
 }
 
+void CertUnitTest::altNames76()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+            QCA::ConvertResult resultClient1;
+            QCA::Certificate client1 = QCA::Certificate::fromPEMFile( "certs/76.pem", &resultClient1, provider);
+            QCOMPARE( resultClient1, QCA::ConvertGood );
+            QCOMPARE( client1.isNull(), false );
+            QCOMPARE( client1.isCA(), false );
+            QCOMPARE( client1.isSelfSigned(), false );
+
+            QCOMPARE( client1.serialNumber(), QBigInteger(118) );
+
+            QCOMPARE( client1.commonName(), QString("sip1.su.se") );
+
+            QCOMPARE( client1.constraints().contains(QCA::DigitalSignature), (QBool)true );
+            QCOMPARE( client1.constraints().contains(QCA::NonRepudiation), (QBool)true );
+            QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
+            QCOMPARE( client1.constraints().contains(QCA::DataEncipherment), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::KeyAgreement), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::CRLSign), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::EncipherOnly), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::DecipherOnly), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::ServerAuth), (QBool)true );
+            QCOMPARE( client1.constraints().contains(QCA::ClientAuth), (QBool)true );
+            QCOMPARE( client1.constraints().contains(QCA::CodeSigning), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::EmailProtection), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
+            QCOMPARE( client1.constraints().contains(QCA::IPSecUser), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::TimeStamping), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+
+            QCOMPARE( client1.policies().count(), 1 );
+
+            QCA::CertificateInfo subject1 = client1.subjectInfo();
+            QCOMPARE( subject1.isEmpty(), false );
+            QVERIFY( subject1.values(QCA::Country).contains("SE") );
+            QVERIFY( subject1.values(QCA::Organization).contains("Stockholms universitet") );
+            QVERIFY( subject1.values(QCA::CommonName).contains("sip1.su.se") );
+            QCOMPARE( subject1.values(QCA::Email).count(), 0 );
+            QCOMPARE( subject1.values(QCA::DNS).count(), 8 );
+            QVERIFY( subject1.values(QCA::DNS).contains("incomingproxy.sip.su.se") );
+            QVERIFY( subject1.values(QCA::DNS).contains("incomingproxy1.sip.su.se") );
+            QVERIFY( subject1.values(QCA::DNS).contains("outgoingproxy.sip.su.se") );
+            QVERIFY( subject1.values(QCA::DNS).contains("outgoingproxy1.sip.su.se") );
+            QVERIFY( subject1.values(QCA::DNS).contains("out.sip.su.se") );
+            QVERIFY( subject1.values(QCA::DNS).contains("appserver.sip.su.se") );
+            QVERIFY( subject1.values(QCA::DNS).contains("appserver1.sip.su.se") );
+            QVERIFY( subject1.values(QCA::DNS).contains("sip1.su.se") );
+
+            QCA::CertificateInfo issuer1 = client1.issuerInfo();
+            QCOMPARE( issuer1.isEmpty(), false );
+            QVERIFY( issuer1.values(QCA::Country).contains("SE") );
+            QVERIFY( issuer1.values(QCA::Organization).contains("Stockholms universitet") );
+            QVERIFY( issuer1.values(QCA::CommonName).contains("Stockholm University CA") );
+            QVERIFY( issuer1.values(QCA::URI).contains("http://ca.su.se") );
+            QVERIFY( issuer1.values(QCA::Email).contains("ca@su.se") );
+
+            QByteArray subjectKeyID = QCA::Hex().stringToArray("3a5c5cd1cc2c9edf73f73bd81b59b1eab83035c5").toByteArray();
+            QCOMPARE( client1.subjectKeyId(), subjectKeyID );
+            QCOMPARE( QCA::Hex().arrayToString(client1.issuerKeyId()), QString("9e2e30ba37d95144c99dbf1821f1bd7eeeb58648") );
+
+            QCA::PublicKey pubkey1 = client1.subjectPublicKey();
+            QCOMPARE( pubkey1.isNull(), false );
+            QCOMPARE( pubkey1.isRSA(), true );
+            QCOMPARE( pubkey1.isDSA(), false );
+            QCOMPARE( pubkey1.isDH(), false );
+            QCOMPARE( pubkey1.isPublic(), true );
+            QCOMPARE( pubkey1.isPrivate(), false );
+            QCOMPARE( pubkey1.bitSize(), 1024 );
+
+            QCOMPARE( client1.pathLimit(), 0 );
+
+            QCOMPARE( client1.signatureAlgorithm(), QCA::EMSA3_SHA1 );
+        }
+    }
+}
 
 void CertUnitTest::checkServerCerts()
 {

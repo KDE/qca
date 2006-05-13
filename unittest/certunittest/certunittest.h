@@ -37,11 +37,13 @@ private slots:
     void checkSystemStore();  
     void nullCert();
     void CAcertstest();
+    void derCAcertstest();
     void qualitysslcatest();
     void checkClientCerts();
     void altName();
     void extXMPP();
     void checkServerCerts();
+    void altNames76();
     void crl();
     void crl2();
     void csr();
