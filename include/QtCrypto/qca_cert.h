@@ -524,6 +524,10 @@ namespace QCA
 		/**
 		   Test if the subject of the certificate matches a specified host name
 
+		   This will return true (indicating a match), if the
+		   specified host name matches either the CommonName,
+		   or an alternative name specified in the certificate.
+
 		   \param host the name of the host to compare to
 		*/
 		bool matchesHostname(const QString &host) const;

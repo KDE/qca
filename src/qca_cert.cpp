@@ -455,7 +455,8 @@ bool Certificate::matchesHostname(const QString &realHost) const
 		peerHost.truncate(peerHost.length()-1);
 	peerHost = peerHost.toLower();
 
-	if(cnMatchesAddress(commonName(), peerHost))
+	if(cnMatchesAddress(commonName(), peerHost) ||
+	   subjectInfo().values(DNS).contains(peerHost) )
 		return true;
 	return false;
 }
