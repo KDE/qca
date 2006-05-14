@@ -269,7 +269,6 @@ void CertUnitTest::derCAcertstest()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -514,6 +513,15 @@ void CertUnitTest::altNames76()
             QVERIFY( subject1.values(QCA::DNS).contains("appserver.sip.su.se") );
             QVERIFY( subject1.values(QCA::DNS).contains("appserver1.sip.su.se") );
             QVERIFY( subject1.values(QCA::DNS).contains("sip1.su.se") );
+
+            QVERIFY( client1.matchesHostname("incomingproxy.sip.su.se") );
+            QVERIFY( client1.matchesHostname("incomingproxy1.sip.su.se") );
+            QVERIFY( client1.matchesHostname("outgoingproxy.sip.su.se") );
+            QVERIFY( client1.matchesHostname("outgoingproxy1.sip.su.se") );
+            QVERIFY( client1.matchesHostname("out.sip.su.se") );
+            QVERIFY( client1.matchesHostname("appserver.sip.su.se") );
+            QVERIFY( client1.matchesHostname("appserver1.sip.su.se") );
+            QVERIFY( client1.matchesHostname("sip1.su.se") );
 
             QCA::CertificateInfo issuer1 = client1.issuerInfo();
             QCOMPARE( issuer1.isEmpty(), false );
