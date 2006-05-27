@@ -40,10 +40,10 @@ static QByteArray getReturnType(const QMetaObject *obj, const QByteArray &method
 	{
 		QMetaMethod m = obj->method(n);
 		QByteArray sig = m.signature();
-		int n = sig.indexOf('(');
-		if(n == -1)
+		int offset = sig.indexOf('(');
+		if(offset == -1)
 			continue;
-		QByteArray name = sig.mid(0, n);
+		QByteArray name = sig.mid(0, offset);
 		if(name != method)
 			continue;
 		if(m.parameterTypes() != argTypes)
