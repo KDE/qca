@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -193,7 +193,7 @@ void CertificateOptions::setValidityPeriod(const QDateTime &start, const QDateTi
 // Certificate
 //----------------------------------------------------------------------------
 // (adapted from kdelibs) -- Justin
-static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
+static bool certnameMatchesAddress(const QString &_cn, const QString &peerHost)
 {
 	QString cn = _cn.trimmed().toLower();
 	QRegExp rx;
@@ -239,8 +239,8 @@ static bool cnMatchesAddress(const QString &_cn, const QString &peerHost)
 		// foo.example.com but not bar.foo.example.com
 		// (ie. they must have the same number of parts)
 		if(QRegExp(cn, Qt::CaseInsensitive, QRegExp::Wildcard).exactMatch(peerHost) &&
-			cn.split('.', QString::SkipEmptyParts).count() ==
-			peerHost.split('.', QString::SkipEmptyParts).count())
+		   cn.split('.', QString::SkipEmptyParts).count() ==
+		   peerHost.split('.', QString::SkipEmptyParts).count())
 			return true;
 
 		return false;
@@ -449,15 +449,25 @@ Certificate Certificate::fromPEMFile(const QString &fileName, ConvertResult *res
 
 bool Certificate::matchesHostname(const QString &realHost) const
 {
-	// TODO
 	QString peerHost = realHost.trimmed();
 	while(peerHost.endsWith("."))
 		peerHost.truncate(peerHost.length()-1);
 	peerHost = peerHost.toLower();
 
-	if(cnMatchesAddress(commonName(), peerHost) ||
-	   subjectInfo().values(DNS).contains(peerHost) )
+	if(certnameMatchesAddress(commonName(), peerHost))
 		return true;
+
+	foreach( const QString &dnsName, subjectInfo().values(DNS) ) {
+		if (certnameMatchesAddress(dnsName, peerHost))
+			return true;
+	}
+
+	foreach( const QString &ipAddy, subjectInfo().values(IPAddress) ) {
+		if (certnameMatchesAddress(ipAddy, peerHost))
+			return true;
+	}
+
+
 	return false;
 }
 
