@@ -37,6 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace QCA {
 }
 #include <cstring>
+#include <string.h>
 namespace QCA {
 
 namespace Botan {
