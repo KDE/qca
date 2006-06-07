@@ -710,7 +710,7 @@ public:
 				else if(vr == GpgOp::VerifyBad)
 				{
 					ir = SecureMessageSignature::InvalidSignature;
-					v = ValidityGood;
+					v = ErrorValidityUnknown;
 				}
 				else // GpgOp::VerifyNoKey
 				{
@@ -721,11 +721,10 @@ public:
 				SecureMessageKey key;
 				PGPKey pub = publicKeyFromId(signerId, provider());
 				if(!pub.isNull())
-				{
 					key.setPGPPublicKey(pub);
-					signer = SecureMessageSignature(ir, v, key, ts);
-					wasSigned = true;
-				}
+
+				signer = SecureMessageSignature(ir, v, key, ts);
+				wasSigned = true;
 			}
 		}
 		else
