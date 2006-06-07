@@ -28,6 +28,7 @@
     OCSP ?
     tls extensions: hostname and ocsp stapling
   code:
+    console/prompt on mac doesn't work
     fix asker implementation, it is a disaster
     don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try
@@ -46,6 +47,8 @@
     Update to latest Botan, and remake the botantools patch as appropriate
        - remove u32bit miller_rabin_test_iterations(u32bit bits, bool verify)
     ability to compile plugins in statically (check 'plugins' subdir)
+    link against our own lib (e.g. -L../../lib) before ALL other libs,
+      including Qt's libs, since some distros put qca into qt's dir.
 
 * Considerations
   api:
