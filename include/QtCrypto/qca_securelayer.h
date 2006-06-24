@@ -763,9 +763,9 @@ namespace QCA
 		   \param service the name of the service
 		   \param host the client side host name
 		   \param mechlist the list of mechanisms which can be used
-		   \param ClientSendMode the mode to use on the client side
+		   \param mode the mode to use on the client side
 		*/
-		void startClient(const QString &service, const QString &host, const QStringList &mechlist, enum ClientSendMode = AllowClientSendFirst);
+		void startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode mode = AllowClientSendFirst);
 
 		/**
 		   Initialise the server side of the connection
@@ -776,9 +776,9 @@ namespace QCA
 		   \param service the name of the service
 		   \param host the server side host name
 		   \param realm the realm to use
-		   \param ServerSendMode which mode to use on the server side
+		   \param mode which mode to use on the server side
 		*/
-		void startServer(const QString &service, const QString &host, const QString &realm, enum ServerSendMode = DisableServerSendLast);
+		void startServer(const QString &service, const QString &host, const QString &realm, ServerSendMode mode = DisableServerSendLast);
 
 		/**
 		   Process the first step in server mode (server)
