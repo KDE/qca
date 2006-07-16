@@ -5,6 +5,7 @@ SUBDIRS += \
 	bigintunittest \
 	certunittest \
 	cipherunittest \
+	clientplugin \
 	cms \
 	dsaunittest \
 	filewatchunittest \

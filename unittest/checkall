@@ -4,6 +4,7 @@ cd base64unittest && make check && cd .. && \
 cd bigintunittest && make check && cd .. && \
 cd certunittest && make check && cd .. && \
 cd cipherunittest && make check && cd .. && \
+cd clientplugin && make check && cd .. && \
 cd dsaunittest && make check && cd .. && \
 cd hashunittest && make check && cd .. && \
 cd hexunittest && make check && cd .. && \
