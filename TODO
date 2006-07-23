@@ -5,7 +5,6 @@
 * option to build qca with simultaneous debug and release, similar to qt?
 
 * API documentation
-  document all the stuff in qca_securemessage.h
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
 
