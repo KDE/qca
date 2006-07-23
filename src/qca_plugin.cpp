@@ -223,7 +223,8 @@ private:
 		init_done = false;
 
 		// disassociate from threads
-		instance->claim();
+		if(instance)
+			instance->claim();
 		logDebug(QString("ProviderItem created: [%1]").arg(p->name()));
 	}
 };
