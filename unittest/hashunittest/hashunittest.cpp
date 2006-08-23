@@ -71,7 +71,7 @@ void HashUnitTest::md2test()
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("md2", provider))
 	    QSKIP(QString("MD2 not supported for "+provider).toLocal8Bit(), SkipSingle);
-	QString hashResult = QCA::MD2(provider).hashToString(input);
+	QString hashResult = QCA::Hash("md2", provider).hashToString(input);
 	QCOMPARE( hashResult, expectedHash );
     }
 }
@@ -113,7 +113,7 @@ void HashUnitTest::md4test()
 	if(!QCA::isSupported("md4", provider))
 	    QWARN(QString("MD4 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::MD4(provider).hashToString(input);
+	  QString hashResult = QCA::Hash("md4", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -157,7 +157,7 @@ void HashUnitTest::md5test()
 	if(!QCA::isSupported("md5", provider))
 	    QWARN(QString("MD5 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::MD5(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("md5", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -180,7 +180,7 @@ void HashUnitTest::md5filetest()
 	else {
 	    QFile f1( "./data/empty" );
 	    if ( f1.open( QIODevice::ReadOnly ) ) {
-		QCA::MD5 hashObj(provider);
+		QCA::Hash hashObj("md5", provider);
 		hashObj.update( f1 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
@@ -190,7 +190,7 @@ void HashUnitTest::md5filetest()
 
 	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
-		QCA::MD5 hashObj(provider);
+		QCA::Hash hashObj("md5", provider);
 		hashObj.update( f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "7c4b3d8a360c6c3cb647160fa9adfe71" ) );
@@ -201,7 +201,7 @@ void HashUnitTest::md5filetest()
 
 	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
-		QCA::MD5 hashObj(provider);
+		QCA::Hash hashObj("md5", provider);
 		hashObj.update( f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "a74671ea68b0e3c609e8785ed8497c14" ) );
@@ -211,7 +211,7 @@ void HashUnitTest::md5filetest()
 	    
 	    QFile f4( "./data/scribus-1.2.tar.bz2" );
 	    if ( f4.open( QIODevice::ReadOnly ) ) {
-		QCA::MD5 hashObj(provider);
+		QCA::Hash hashObj("md5", provider);
 		hashObj.update( f4 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "7d2c2b228f9a6ff82c9401fd54bdbe16" ) );
@@ -247,7 +247,7 @@ void HashUnitTest::sha0test()
 	if(!QCA::isSupported("sha0", provider))
 	    QWARN(QString("SHA0 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::SHA0(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("sha0", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -268,7 +268,7 @@ void HashUnitTest::sha0longtest()
 	if(!QCA::isSupported("sha0", provider))
 	    QWARN(QString("SHA0 not supported for "+provider).toLocal8Bit());
 	else {
-	    QCA::SHA0 shaHash(provider);
+	    QCA::Hash shaHash("sha0", provider);
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
 	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
@@ -322,7 +322,7 @@ void HashUnitTest::sha1test()
 	if(!QCA::isSupported("sha1", provider))
 	    QWARN(QString("SHA1 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::SHA1(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("sha1", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -350,7 +350,7 @@ void HashUnitTest::sha1longtest()
 	    // This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
 	    // It basically reflects FIPS 180-2, Appendix A.3
 	    // Also as per AS 2805.13.3-2000 Appendix A
-	    QCA::SHA1 shaHash(provider);
+	    QCA::Hash shaHash("sha1", provider);
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
 	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
@@ -358,7 +358,7 @@ void HashUnitTest::sha1longtest()
 
 	    QFile f1( "./data/empty" );
 	    if ( f1.open( QIODevice::ReadOnly ) ) {
-		QCA::SHA1 hashObj(provider);
+		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( f1 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
@@ -368,7 +368,7 @@ void HashUnitTest::sha1longtest()
 	    
 	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
-		QCA::SHA1 hashObj(provider);
+		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "cda343591428a68e22bd2e349b890cbafb642cf7" ) );
@@ -378,7 +378,7 @@ void HashUnitTest::sha1longtest()
 
 	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
-		QCA::SHA1 hashObj(provider);
+		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "a030a9c6dcd10c5d90a86f915ad4710084cbca71" ) );
@@ -388,7 +388,7 @@ void HashUnitTest::sha1longtest()
 	    
 	    QFile f4( "./data/scribus-1.2.tar.bz2" );
 	    if ( f4.open( QIODevice::ReadOnly ) ) {
-		QCA::SHA1 hashObj(provider);
+		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( f4 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "a1fb6ed6acfd92381055b310d926d6e83e76ff1e" ) );
@@ -429,7 +429,7 @@ void HashUnitTest::sha224test()
 	if(!QCA::isSupported("sha224", provider))
 	    QWARN(QString("SHA224 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::SHA224(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("sha224", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -450,7 +450,7 @@ void HashUnitTest::sha224longtest()
 	if(!QCA::isSupported("sha224", provider))
 	    QWARN(QString("SHA224 not supported for "+provider).toLocal8Bit());
 	else {
-	    QCA::SHA224 shaHash(provider);
+	    QCA::Hash shaHash("sha224", provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
@@ -498,7 +498,7 @@ void HashUnitTest::sha256test()
 	if(!QCA::isSupported("sha256", provider))
 	    QWARN(QString("SHA256 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::SHA256(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("sha256", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -519,7 +519,7 @@ void HashUnitTest::sha256longtest()
 	if(!QCA::isSupported("sha256", provider))
 	    QWARN(QString("SHA256 not supported for "+provider).toLocal8Bit());
 	else {
-	    QCA::SHA256 shaHash(provider);
+	    QCA::Hash shaHash("sha256", provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
@@ -576,7 +576,7 @@ void HashUnitTest::sha384test()
 	if(!QCA::isSupported("sha384", provider))
 	    QWARN(QString("SHA384 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::SHA384(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("sha384", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -600,7 +600,7 @@ void HashUnitTest::sha384longtest()
 	else {
 	    // QTime t;
 	    // t.start();
-	    QCA::SHA384 shaHash(provider);
+	    QCA::Hash shaHash("sha384", provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
@@ -654,7 +654,7 @@ void HashUnitTest::sha512test()
 	if(!QCA::isSupported("sha512", provider))
 	    QWARN(QString("SHA512 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::SHA512(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("sha512", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -676,7 +676,7 @@ void HashUnitTest::sha512longtest()
 	if(!QCA::isSupported("sha512", provider))
 	    QWARN(QString("SHA512 not supported for "+provider).toLocal8Bit());
 	else {
-	    QCA::SHA512 shaHash(provider);
+	    QCA::Hash shaHash("sha512", provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
@@ -728,7 +728,7 @@ void HashUnitTest::rmd160test()
 	if(!QCA::isSupported("ripemd160", provider))
 	    QWARN(QString("RIPEMD160 not supported for "+provider).toLocal8Bit());
 	else {
-	    QString hashResult = QCA::RIPEMD160(provider).hashToString(input);
+	    QString hashResult = QCA::Hash("ripemd160", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
@@ -748,7 +748,7 @@ void HashUnitTest::rmd160longtest()
 	if(!QCA::isSupported("ripemd160", provider))
 	    QWARN(QString("RIPEMD160 not supported for "+provider).toLocal8Bit());
 	else {
-	    QCA::RIPEMD160 rmdHash(provider);
+	    QCA::Hash rmdHash("ripemd160", provider);
 
 	    // This is the "million times 'a' test"
 	    for (int i=0; i<1000; i++)

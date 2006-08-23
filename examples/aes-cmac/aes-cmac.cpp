@@ -92,7 +92,8 @@ public:
 	m_residual = QSecureArray();
 
 	// Figure 2.2, step 1.
-	QCA::AES128 aesObj(QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
+	QCA::Cipher aesObj(QString("aes128"),
+			   QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			   QCA::Encode, key);
 	QSecureArray L = aesObj.process(const_Zero);
 	
@@ -140,7 +141,8 @@ public:
 
 	    m_Y = xorArray(m_X, thisBlock);
 
-	    QCA::AES128 aesObj(QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
+	    QCA::Cipher aesObj(QString("aes128"),
+			       QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			       QCA::Encode, m_key);
 	    m_X = aesObj.process(m_Y);
 	}
@@ -167,7 +169,8 @@ public:
 	    lastBlock = xorArray(m_residual, m_k1);
 	}
 	m_Y = xorArray(m_X, lastBlock);
-	QCA::AES128 aesObj(QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
+	QCA::Cipher aesObj(QString("aes128"),
+			   QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			   QCA::Encode, m_key);
 	*out = aesObj.process(m_Y);
 
@@ -219,7 +222,7 @@ public:
 
 // AES CMAC is a Message Authentication Code based on a block cipher
 // instead of the more normal keyed hash.
-// See IETF draft-songlee-aes-cmac-03.txt
+// See RFC 4493 "The AES-CMAC Algorithm"
 class AES_CMAC: public QCA::MessageAuthenticationCode
 {
 public:
@@ -239,6 +242,12 @@ int main(int argc, char **argv)
     // the Initializer object sets things up, and
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
+
+    qDebug() << "Completed initialisation";
+
+    if( ! QCA::isSupported("aes128-ecb") ) {
+	qDebug() << "AES not supported!";
+    }
 
     if ( QCA::insertProvider(new ClientSideProvider, 0) )
 	qDebug() << "Inserted our provider";

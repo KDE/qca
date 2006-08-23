@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 		printf("SHA1 not supported!\n");
 	else {
 		// this shows the "all in one" approach
-		QString result = QCA::SHA1().hashToString(arg);
+		QString result = QCA::Hash("sha1").hashToString(arg);
 		printf("sha1(\"%s\") = [%s]\n", arg.data(), result.toAscii().data());
 	}
 
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 		QSecureArray part2(arg.toByteArray().mid(3)); // the rest - "lo"
 
 		// create the required object.
-		QCA::MD5 hashObject;
+		QCA::Hash hashObject("md5");
 		// we split it into two parts to show incremental update
 		hashObject.update(part1);
 		hashObject.update(part2);

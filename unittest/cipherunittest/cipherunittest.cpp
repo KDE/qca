@@ -118,8 +118,13 @@ void CipherUnitTest::aes128()
 	    QFETCH( QString, keyText );
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
-	    QCA::AES128 forwardCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key,
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher forwardCipher( QString( "aes128" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode, 
+				       key,
+				       QCA::InitializationVector(), 
+				       provider );
 
 	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 16 );
@@ -131,8 +136,13 @@ void CipherUnitTest::aes128()
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
 	    
-	    QCA::AES128 reverseCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Decode, key,
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher reverseCipher( QString( "aes128" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 
 	    QCOMPARE( reverseCipher.blockSize(), (unsigned)16 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 16 );
@@ -181,13 +191,25 @@ void CipherUnitTest::aes128_cbc()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES128 forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes128" ),
+				       QCA::Cipher::CBC, 
+				       QCA::Cipher::NoPadding, 
+				       QCA::Encode, 
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES128 reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes128" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -230,13 +252,25 @@ void CipherUnitTest::aes128_cfb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES128 forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes128" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES128 reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes128" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -278,13 +312,25 @@ void CipherUnitTest::aes128_ofb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES128 forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes128" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES128 reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes128" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -373,8 +419,13 @@ void CipherUnitTest::aes192()
 	    QFETCH( QString, keyText );
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
-	    QCA::AES192 forwardCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key,
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher forwardCipher( QString( "aes192" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 
 	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 24 );
@@ -386,8 +437,13 @@ void CipherUnitTest::aes192()
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
 	    
-	    QCA::AES192 reverseCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Decode, key,
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher reverseCipher( QString( "aes192" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 
 	    QCOMPARE( reverseCipher.blockSize(), (unsigned)16 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 24 );
@@ -437,13 +493,25 @@ void CipherUnitTest::aes192_cbc()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES192 forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes192" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES192 reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes192" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -485,13 +553,25 @@ void CipherUnitTest::aes192_cfb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES192 forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes192" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES192 reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes192" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -533,13 +613,25 @@ void CipherUnitTest::aes192_ofb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES192 forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes192" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES192 reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes192" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -666,9 +758,14 @@ void CipherUnitTest::aes256()
 	    QFETCH( QString, keyText );
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
-	    QCA::AES256 forwardCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key,
-					  QCA::InitializationVector(), provider );
-
+	    QCA::Cipher forwardCipher( QString( "aes256" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
+	    
 	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 32 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 32 );
@@ -679,8 +776,13 @@ void CipherUnitTest::aes256()
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
 	    
-	    QCA::AES256 reverseCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Decode, key,
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher reverseCipher( QString( "aes256" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 
 	    QCOMPARE( reverseCipher.blockSize(), (unsigned)16 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 32 );
@@ -729,13 +831,25 @@ void CipherUnitTest::aes256_cbc()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES256 forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes256" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES256 reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes256" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
@@ -778,13 +892,25 @@ void CipherUnitTest::aes256_cfb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES256 forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes256" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES256 reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes256" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 
 	    QCOMPARE( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) ), plainText  );
 	    QVERIFY( reverseCipher.ok() );
@@ -825,13 +951,25 @@ void CipherUnitTest::aes256_ofb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::AES256 forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "aes256" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::AES256 reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "aes256" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 
 	    QCOMPARE( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) ), plainText  );
 	    QVERIFY( reverseCipher.ok() );
@@ -964,9 +1102,13 @@ void CipherUnitTest::tripleDES()
         if( !QCA::isSupported( "tripledes-ecb", provider ) )
             QWARN( QString( "Triple DES, ECB not supported for "+provider).toLocal8Bit() );
         else {
-	    QCA::TripleDES cipherObj1( QCA::Cipher::ECB, QCA::Cipher::NoPadding,
-				       QCA::Encode, QCA::SymmetricKey( 24 ),
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher cipherObj1( QString( "tripledes" ),
+				    QCA::Cipher::ECB,
+				    QCA::Cipher::NoPadding,
+				    QCA::Encode,
+				    QCA::SymmetricKey( 24 ),
+				    QCA::InitializationVector(),
+				    provider );
 	    // checking minimum is a bit hairy, because it depends on whether you are
 	    // doing 2 key or 3 key triple DES.
 	    QCOMPARE( cipherObj1.keyLength().minimum(), 16 );
@@ -978,16 +1120,26 @@ void CipherUnitTest::tripleDES()
 	    QFETCH( QString, keyText );
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
-	    QCA::TripleDES forwardCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key,
-					  QCA::InitializationVector(), provider );
+	    QCA::Cipher forwardCipher( QString( "tripledes" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) ),
 		      QString( cipherText ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
 	    
-	    QCA::TripleDES reverseCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Decode, key,
-					  QCA::InitializationVector(), provider );
+	    QCA::Cipher reverseCipher( QString( "tripledes" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 	    QString update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -1233,8 +1385,13 @@ void CipherUnitTest::des()
 	    QFETCH( QString, keyText );
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
-	    QCA::DES forwardCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key,
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher forwardCipher( QString( "des" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 
 	    QCOMPARE( forwardCipher.blockSize(), (unsigned)8 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 8 );
@@ -1246,8 +1403,13 @@ void CipherUnitTest::des()
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
 	    
-	    QCA::DES reverseCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Decode, key,
-				       QCA::InitializationVector(), provider );
+	    QCA::Cipher reverseCipher( QString( "des" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 
 	    QCOMPARE( reverseCipher.blockSize(), (unsigned)8 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 8 );
@@ -1296,13 +1458,25 @@ void CipherUnitTest::des_cbc()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::DES forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "des" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::DES reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "des" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -1389,13 +1563,25 @@ void CipherUnitTest::des_cfb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::DES forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "des" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::DES reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "des" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -1446,13 +1632,25 @@ void CipherUnitTest::des_ofb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::DES forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "des" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::DES reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "des" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -1532,7 +1730,13 @@ void CipherUnitTest::des_pkcs7()
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    // just a filler
 	    QCA::InitializationVector iv;
-	    QCA::DES forwardCipher( QCA::Cipher::ECB, QCA::Cipher::PKCS7, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "des" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::PKCS7,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 8 );
@@ -1544,7 +1748,13 @@ void CipherUnitTest::des_pkcs7()
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::DES reverseCipher( QCA::Cipher::ECB, QCA::Cipher::PKCS7, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "des" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::PKCS7,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 8 );
@@ -1676,7 +1886,13 @@ void CipherUnitTest::des_cbc_pkcs7()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::DES forwardCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "des" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::PKCS7,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 8 );
@@ -1688,7 +1904,13 @@ void CipherUnitTest::des_cbc_pkcs7()
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::DES reverseCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "des" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::PKCS7,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 8 );
@@ -1707,7 +1929,11 @@ void CipherUnitTest::des_cbc_pkcs7()
     if (!QCA::isSupported("des-ecb-pkcs7") )
 	QWARN("DES, ECB mode with PKCS7 padding not supported!");
     else {
-	QCA::DES cipherObj1( QCA::Cipher::ECB, QCA::Cipher::PKCS7, QCA::Encode, QCA::SymmetricKey( 8 ) );
+	QCA::Cipher cipherObj1( QString( "des" ),
+				QCA::Cipher::ECB,
+				QCA::Cipher::PKCS7,
+				QCA::Encode,
+				QCA::SymmetricKey( 8 ) );
 	QCOMPARE( cipherObj1.keyLength().minimum(), 8 );
 	QCOMPARE( cipherObj1.keyLength().maximum(), 8 );
 	QCOMPARE( cipherObj1.blockSize(), (unsigned)8 );
@@ -1830,8 +2056,13 @@ void CipherUnitTest::blowfish()
         if( !QCA::isSupported( "blowfish-ecb", provider ) )
             QWARN( QString( "Blowfish ECB not supported for "+provider).toLocal8Bit() );
         else {
-	    QCA::BlowFish cipherObj1( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, QCA::SymmetricKey( 16 ),
-				      QCA::InitializationVector(), provider );
+	    QCA::Cipher cipherObj1( QString( "blowfish" ), 
+				    QCA::Cipher::ECB,
+				    QCA::Cipher::NoPadding, 
+				    QCA::Encode, 
+				    QCA::SymmetricKey( 16 ),
+				    QCA::InitializationVector(), provider );
+
 	    // TODO: add some test for min and max keysizes
 	    QCOMPARE( cipherObj1.blockSize(), (unsigned)8 );
 
@@ -1840,16 +2071,26 @@ void CipherUnitTest::blowfish()
 	    QFETCH( QString, keyText );
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
-	    QCA::BlowFish forwardCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Encode, key,
-					 QCA::InitializationVector(), provider );
+	    QCA::Cipher forwardCipher( QString( "blowfish" ), 
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) ),
 		      QString( cipherText ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
 		
-	    QCA::BlowFish reverseCipher( QCA::Cipher::ECB, QCA::Cipher::NoPadding, QCA::Decode, key,
-					 QCA::InitializationVector(), provider );
+	    QCA::Cipher reverseCipher( QString( "blowfish" ), 
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       QCA::InitializationVector(),
+				       provider );
 	    QString update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -1897,14 +2138,25 @@ void CipherUnitTest::blowfish_cbc()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::BlowFish forwardCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "blowfish" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::BlowFish reverseCipher( QCA::Cipher::CBC, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
-
+	    QCA::Cipher reverseCipher( QString( "blowfish" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size() ) );
@@ -1948,15 +2200,26 @@ void CipherUnitTest::blowfish_cbc_pkcs7()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::BlowFish forwardCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "blowfish" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::PKCS7,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update, cipherText.left(update.size())  );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::BlowFish reverseCipher( QCA::Cipher::CBC, QCA::Cipher::PKCS7, QCA::Decode, key, iv, provider);
-
+	    QCA::Cipher reverseCipher( QString( "blowfish" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::PKCS7,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( update, plainText.left(update.size())  );
@@ -1999,14 +2262,25 @@ void CipherUnitTest::blowfish_cfb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::BlowFish forwardCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "blowfish" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::BlowFish reverseCipher( QCA::Cipher::CFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
-
+	    QCA::Cipher reverseCipher( QString( "blowfish" ),
+				       QCA::Cipher::CFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 	    QCOMPARE( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) ), plainText  );
 	    QVERIFY( reverseCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( reverseCipher.final() ), QString( "" ) );
@@ -2047,13 +2321,25 @@ void CipherUnitTest::blowfish_ofb()
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
-	    QCA::BlowFish forwardCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Encode, key, iv, provider);
+	    QCA::Cipher forwardCipher( QString( "blowfish" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final() ), cipherText );
 	    QVERIFY( forwardCipher.ok() );
 
-	    QCA::BlowFish reverseCipher( QCA::Cipher::OFB, QCA::Cipher::NoPadding, QCA::Decode, key, iv, provider);
+	    QCA::Cipher reverseCipher( QString( "blowfish" ),
+				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
 
 	    QCOMPARE( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) ), plainText  );
 	    QVERIFY( reverseCipher.ok() );

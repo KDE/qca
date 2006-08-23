@@ -1,6 +1,6 @@
 /*
  Copyright (C) 2003 Justin Karneges
- Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
+ Copyright (C) 2005-2006 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
     
     // AES128 testing
-    if(!QCA::isSupported("des-cbc-pkcs7"))
+    if(!QCA::isSupported("aes128-cbc-pkcs7"))
 	printf("AES128-CBC not supported!\n");
     else {
 	// Create a random key - you'd probably use one from another
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	QCA::InitializationVector iv(16);
 
 	// create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
-	QCA::AES128 cipher(QCA::Cipher::CBC, 
+	QCA::Cipher cipher(QString("aes128"),QCA::Cipher::CBC, 
 			   // use Default padding, which is equivalent to PKCS7 for CBC
 			   QCA::Cipher::DefaultPadding,
 			   // this object will encrypt

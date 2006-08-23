@@ -48,15 +48,16 @@ int main(int argc, char **argv)
 		printf("HMAC(SHA1) not supported!\n");
 	} else {
 		// create the required object. This is equivalent
-		// to QCA::HMAC hmacObject("sha1").
-		QCA::HMAC hmacObject;
+		// to QCA::MessageAuthenticationCode hmacObject("hmac(sha1)").
+		QCA::MessageAuthenticationCode hmacObject;
 
 		// create the key
 		QCA::SymmetricKey keyObject(key);
 		
 		// set the HMAC object to use the key
 		hmacObject.setup(key);
-		// that could also have been done in the QCA::HMAC constructor
+		// that could also have been done in the
+		// QCA::MessageAuthenticationCode constructor
 
 		// we split it into two parts to show incremental update
 		QSecureArray part1(arg.left(3)); // three chars - "hel"

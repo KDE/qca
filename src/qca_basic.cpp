@@ -132,8 +132,11 @@ public:
 	bool ok, done;
 };
 
-Cipher::Cipher(const QString &type, Direction dir, const SymmetricKey &key, const InitializationVector &iv, const QString &provider)
-:Algorithm(type, provider)
+Cipher::Cipher( const QString &type, Mode m, Padding pad,
+	Direction dir, const SymmetricKey &key, 
+	const InitializationVector &iv,
+	const QString &provider )
+:Algorithm(withAlgorithms( type, m, pad ), provider)
 {
 	d = new Private;
 	if(!key.isEmpty())
@@ -267,8 +270,11 @@ public:
 	QSecureArray buf;
 };
 
-MessageAuthenticationCode::MessageAuthenticationCode(const QString &type, const SymmetricKey &key, const QString &provider)
-:Algorithm(type, provider)
+
+MessageAuthenticationCode::MessageAuthenticationCode(const QString &type,
+						     const SymmetricKey &key,
+						     const QString &provider)
+  :Algorithm(type, provider)
 {
 	d = new Private;
 	setup(key);
