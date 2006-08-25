@@ -538,13 +538,13 @@ public:
 
 		switch (sign_data.alg) {
 			case EMSA3_SHA1:
-				sign_data.hash = new QCA::SHA1 ();
+				sign_data.hash = new QCA::Hash ("sha1");
 			break;
 			case EMSA3_MD5:
-				sign_data.hash = new QCA::MD5 ();
+				sign_data.hash = new QCA::Hash ("md5");
 			break;
 			case EMSA3_MD2:
-				sign_data.hash = new QCA::MD2 ();
+				sign_data.hash = new QCA::Hash ("md2");
 			break;
 			case EMSA3_Raw:
 			break;
@@ -1711,7 +1711,7 @@ QString
 MyKeyStoreList::tokenId2storeId (
 	const pkcs11h_token_id_t token_id
 ) const {
-	QCA::MD2 hash1;
+	QCA::Hash hash1 ("md2");
 	hash1.update (token_id->manufacturerID, strlen (token_id->manufacturerID));
 	hash1.update (token_id->model, strlen (token_id->model));
 	hash1.update (token_id->serialNumber, strlen (token_id->serialNumber));
