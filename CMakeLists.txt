@@ -27,7 +27,7 @@ SET(qca_INCLUDEDIR "${CMAKE_SOURCE_DIR}/include" )
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" )
 SET(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib" )
 
-set(qca_PLUGINSDIR "${CMAKE_INSTALL_PREFIX}/lib/crypto/")
+set(qca_PLUGINSDIR "${CMAKE_INSTALL_PREFIX}/plugins/lib/crypto/")
 
 include(QcaMacro)
 
