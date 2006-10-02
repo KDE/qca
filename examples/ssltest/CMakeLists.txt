@@ -1,8 +1,9 @@
 set(ssltest_bin_SRCS ssltest.cpp)  
 
-QT4_GENERATE_MOC( ssltest.cpp ssltest.moc )
+
+MY_AUTOMOC( ssltest_bin_SRCS)
 
 add_executable(ssltest ${ssltest_bin_SRCS})
 
-target_link_libraries( ssltest qca ${QT_QTGUI_LIBRARY})
+target_link_libraries( ssltest qca ${QT_QTGUI_LIBRARY} ${QT_QTNETWORK_LIBRARY})
 
