@@ -1,4 +1,4 @@
-add_subdirectory(base64unittest)
+#add_subdirectory(base64unittest)
 add_subdirectory(bigintunittest)
 add_subdirectory(certunittest)
 add_subdirectory(cipherunittest)
