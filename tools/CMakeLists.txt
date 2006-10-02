@@ -1,3 +1,2 @@
-MESSAGE(STATUS "Readd qcatool")
 add_subdirectory(mozcerts)
-#add_subdirectory(qcatool)
+add_subdirectory(qcatool)
