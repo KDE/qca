@@ -1,5 +1,6 @@
 
 FIND_PACKAGE(OpenSSL)
+find_package(Sasl2)
 
 IF (OPENSSL_FOUND)
   ADD_SUBDIRECTORY(qca-openssl)
@@ -12,8 +13,13 @@ IF ( QCA_GPG_EXECUTABLE )
   MESSAGE(STATUS "GnuPG plugin enabled")
   ADD_SUBDIRECTORY(qca-gnupg)
 ENDIF ( QCA_GPG_EXECUTABLE )
+
+if(SASL2_FOUND)
+  MESSAGE(STATUS "Sasl2 plugin enabled")
+  #add_subdirectory(qca-cyrus-sasl)
+endif(SASL2_FOUND)
+
 #ADD_SUBDIRECTORY(qca-botan)
-#ADD_SUBDIRECTORY(qca-cyrus-sasl)
 #ADD_SUBDIRECTORY(qca-gcrypt)
 #ADD_SUBDIRECTORY(qca-nss)
 #ADD_SUBDIRECTORY(qca-openssl)

@@ -104,7 +104,7 @@ INSTALL(FILES "${CMAKE_BINARY_DIR}/qca.pc" DESTINATION "${CMAKE_INSTALL_PREFIX}/
 
 add_subdirectory(src)
 add_subdirectory(tools)
-
+add_subdirectory(plugins)
 if(BUILD_TESTS)
         add_subdirectory(unittest)
         add_subdirectory(examples)
