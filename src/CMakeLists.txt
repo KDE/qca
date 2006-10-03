@@ -23,30 +23,30 @@ SET( moc_SOURCES
 )
 
 IF (Q_WS_X11)
-  SET( nonmoc_SOURCES ${nonmoc_SOURCES} ${CMAKE_SOURCE_DIR}/src/qca_systemstore_flatfile.cpp )
+  SET( nonmoc_SOURCES ${nonmoc_SOURCES} qca_systemstore_flatfile.cpp )
 ENDIF(Q_WS_X11)
 
 IF (WIN32)
-  SET( moc_SOURCES ${moc_SOURCES} ${CMAKE_SOURCE_DIR}/src/qca_systemstore_win.cpp )
+  SET( moc_SOURCES ${moc_SOURCES} qca_systemstore_win.cpp )
 ENDIF(WIN32)
 
 if(APPLE)
-  set( nonmoc_SOURCES ${nonmoc_SOURCES} ${CMAKE_SOURCE_DIR}/src/qca_systemstore_mac.cpp)
+  set( nonmoc_SOURCES ${nonmoc_SOURCES} qca_systemstore_mac.cpp)
 endif(APPLE)
 
 # Support files
-#SET( qca_HEADERS ${qca_HEADERS} ${CMAKE_SOURCE_DIR}/src/support/dirwatch/dirwatch_p.h )
+#SET( qca_HEADERS ${qca_HEADERS} support/dirwatch/dirwatch_p.h )
 
 IF (WIN32)
-  SET( moc_SOURCES ${moc_SOURCES} ${CMAKE_SOURCE_DIR}/src/support/dirwatch//dirwatch_win.cpp )
+  SET( moc_SOURCES ${moc_SOURCES} support/dirwatch//dirwatch_win.cpp )
 ENDIF(WIN32)
 
 IF (UNIX)
-  SET( moc_SOURCES ${moc_SOURCES} ${CMAKE_SOURCE_DIR}/src/support/dirwatch//dirwatch_unix.cpp )
+  SET( moc_SOURCES ${moc_SOURCES} support/dirwatch//dirwatch_unix.cpp )
 ENDIF(UNIX)
 
 # Botan tools
-SET( botan_BASE ${CMAKE_SOURCE_DIR}/src/botantools/botan )
+SET( botan_BASE botantools/botan )
 
 ADD_DEFINITIONS(
 	-DBOTAN_TYPES_QT
@@ -107,10 +107,10 @@ qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_securelayer.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_securemessage.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_support.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qpipe.h")
-qt4_wrap_cpp( SOURCES "${CMAKE_SOURCE_DIR}/src/support/dirwatch/dirwatch_p.h")
+qt4_wrap_cpp( SOURCES "support/dirwatch/dirwatch_p.h")
 
 ADD_LIBRARY(qca SHARED ${SOURCES})
-INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/src/support ${CMAKE_SOURCE_DIR}/src/support/dirwatch ${botan_BASE} )
+INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} support support/dirwatch ${botan_BASE} )
 TARGET_LINK_LIBRARIES(qca ${QT_QTCORE_LIBRARY})
 
 INSTALL(TARGETS qca LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

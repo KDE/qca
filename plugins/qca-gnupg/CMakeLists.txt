@@ -5,7 +5,7 @@ SET(QCA_GNUPG_SOURCES qca-gnupg.cpp gpgop.cpp gpgproc/gpgproc.cpp gpgproc/sproce
 MY_AUTOMOC( QCA_GNUPG_SOURCES )
 
 ADD_LIBRARY(qca-gnupg SHARED ${QCA_GNUPG_SOURCES})
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugins/qca-gnupg/gpgproc)
+INCLUDE_DIRECTORIES(gpgproc)
 TARGET_LINK_LIBRARIES(qca-gnupg ${QT_QTCORE_LIBRARY} qca)
 
 #TODO perhaps search adavapi on win32
