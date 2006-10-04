@@ -4,6 +4,7 @@ find_package(Sasl2)
 
 IF (OPENSSL_FOUND)
   ADD_SUBDIRECTORY(qca-openssl)
+  ADD_SUBDIRECTORY(qca-pkcs11)
   MESSAGE(STATUS "OpenSSL plugin enabled")
 ENDIF(OPENSSL_FOUND)
 
