@@ -1,14 +1,13 @@
 PROJECT(QCA)
 
-OPTION(BUILD_TESTS "Create test" OFF)
+OPTION(BUILD_TESTS "Create test" ON)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 
 set(PKGCONFIG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
 
-#FIND_PACKAGE(Redland REQUIRED)
-#FIND_PACKAGE(Raptor REQUIRED)
-#FIND_PACKAGE(Rasqal REQUIRED)
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
+
 FIND_PACKAGE(Qt4 REQUIRED)
 
 if (APPLE)
@@ -28,10 +27,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
 SET(qca_INCLUDEDIR "${CMAKE_CURRENT_SOURCE_DIR}/include" )
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 SET(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib${LIB_SUFFIX}" )
 
-set(qca_PLUGINSDIR "${CMAKE_INSTALL_PREFIX}/plugins/lib${LIB_SUFFIX}/crypto/")
+set(qca_PLUGINSDIR "${QT_PLUGINS_DIR}/crypto/")
+MESSAGE(STATUS "Plugins will be installed to " ${qca_PLUGINSDIR})
 
 include(QcaMacro)
 
@@ -68,7 +67,7 @@ IF (qca_CERTSTORE)
   IF( QCA_USING_BUNDLED_CERTSTORE )
     MESSAGE(STATUS "Using built in certstore.")
   ELSE( QCA_USING_BUNDLED_CERTSTORE )
-    MESSAGE(STATUS "Using system in certstore.")
+    MESSAGE(STATUS "Using system certificates from " ${QC_CERTSTORE_PATH} )
   ENDIF( QCA_USING_BUNDLED_CERTSTORE )
   MESSAGE(STATUS "certstore path: " ${qca_CERTSTORE})
   ADD_DEFINITIONS( -DQCA_SYSTEMSTORE_PATH="\\\"${qca_CERTSTORE}\\\"" )

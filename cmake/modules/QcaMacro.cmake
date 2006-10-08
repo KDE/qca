@@ -20,8 +20,9 @@ MACRO (QCA_FIND_CERTSTORE)
 ENDMACRO (QCA_FIND_CERTSTORE)
 
 MACRO (USE_BUNDLED_CERTSTORE)
-  SET( qca_CERTSTORE "${CMAKE_INSTALL_PREFIX}/certs/rootcerts.pem")
+  SET( qca_CERTSTORE "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem")
   SET( QCA_USING_BUNDLED_CERTSTORE TRUE )
-  INSTALL_FILES("${CMAKE_INSTALL_PREFIX}/certs" FILES "${CMAKE_SOURCE_DIR}/certs/rootcerts.pem")
+  # note that INSTALL_FILES targets are relative to the current installation prefix...
+  INSTALL_FILES( "/certs" FILES "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem" )
 ENDMACRO (USE_BUNDLED_CERTSTORE)
 
