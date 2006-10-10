@@ -23,10 +23,9 @@ endif(SASL2_FOUND)
 #if(BOTAN_FOUND)
 #	ADD_SUBDIRECTORY(qca-botan)
 #endif(BOTAN_FOUND)	
+
 #ADD_SUBDIRECTORY(qca-gcrypt)
 #ADD_SUBDIRECTORY(qca-nss)
-#ADD_SUBDIRECTORY(qca-openssl)
-#ADD_SUBDIRECTORY(qca-pkcs11)
 #ADD_SUBDIRECTORY(qca-sasl)
 #ADD_SUBDIRECTORY(qca-tls)
 
