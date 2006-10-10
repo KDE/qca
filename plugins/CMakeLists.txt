@@ -18,6 +18,8 @@ ENDIF ( QCA_GPG_EXECUTABLE )
 
 if(SASL2_FOUND)
   MESSAGE(STATUS "Sasl2 plugin enabled")
+  MESSAGE(STATUS "Need to port qca-sasl to qt4")
+  #add_subdirectory(qca-sasl)
   #add_subdirectory(qca-cyrus-sasl)
 endif(SASL2_FOUND)
 
@@ -29,6 +31,5 @@ endif(SASL2_FOUND)
 if(NSS_FOUND)
 	ADD_SUBDIRECTORY(qca-nss)
 endif(NSS_FOUND)	
-#ADD_SUBDIRECTORY(qca-sasl)
 #ADD_SUBDIRECTORY(qca-tls)
 
