@@ -1,6 +1,7 @@
 
 FIND_PACKAGE(OpenSSL)
 find_package(Sasl2)
+find_package(Nss)
 
 IF (OPENSSL_FOUND)
   ADD_SUBDIRECTORY(qca-openssl)
@@ -25,7 +26,9 @@ endif(SASL2_FOUND)
 #endif(BOTAN_FOUND)	
 
 #ADD_SUBDIRECTORY(qca-gcrypt)
-#ADD_SUBDIRECTORY(qca-nss)
+if(NSS_FOUND)
+	ADD_SUBDIRECTORY(qca-nss)
+endif(NSS_FOUND)	
 #ADD_SUBDIRECTORY(qca-sasl)
 #ADD_SUBDIRECTORY(qca-tls)
 
