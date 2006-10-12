@@ -21,7 +21,8 @@ SUBDIRS += \
 	securearrayunittest \
 	staticunittest \
 	symmetrickeyunittest \
-	tls
+	tls \
+	velox
 
 QMAKE_EXTRA_TARGETS += check
 check.commands = sh ./checkall
