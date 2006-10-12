@@ -1,0 +1,60 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 6 (0x6)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=de, O=InsecureTestCertificate, CN=For Tests Only next generation/Email=insecure@test.insecure
+        Validity
+            Not Before: Jul  1 10:21:49 2002 GMT
+            Not After : Jun 30 10:21:49 2007 GMT
+        Subject: C=de, O=InsecureTestCertificate, CN=Insecure Server Cert/Email=insecure@test.insecure
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:bd:45:c9:dc:e9:70:4d:90:95:ff:07:09:24:8e:
+                    08:8c:d2:64:ce:16:02:00:3d:8a:15:fe:e2:9a:eb:
+                    81:3c:67:55:7e:5c:e1:75:ea:09:b4:76:84:c3:04:
+                    3e:fc:8e:49:77:ad:97:db:44:5b:3e:44:32:b3:70:
+                    c0:fe:4e:0f:82:bb:97:4b:11:34:0d:06:64:c6:8f:
+                    60:85:3c:b9:a2:7c:fa:ce:28:ab:3c:3b:2d:72:d8:
+                    e9:e4:c1:44:f3:83:00:5c:9c:51:78:6c:08:6d:a7:
+                    97:19:ce:9a:81:4b:7d:fc:13:f7:30:94:20:19:b2:
+                    60:16:77:68:a9:c4:3b:42:21
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Key Usage:
+                Digital Signature, Key Encipherment, Key Agreement
+            X509v3 Extended Key Usage:
+                TLS Web Server Authentication
+            X509v3 Subject Key Identifier:
+                F5:F1:29:8A:CD:31:98:96:2B:00:5B:78:55:F6:CC:69:55:EE:F3:18
+            X509v3 Authority Key Identifier:
+                keyid:8F:08:4F:9C:53:C1:5C:C8:E6:0C:D7:13:2E:CB:52:3C:23:96:02:14
+                DirName:/C=de/O=InsecureTestCertificate/CN=For Tests Only next generation/Email=insecure@test.insecure
+                serial:00
+
+            X509v3 Subject Alternative Name:
+                email:insecure@test.insecure
+            X509v3 Issuer Alternative Name:
+                email:insecure@test.insecure
+            Netscape Cert Type:
+                SSL Server
+            Netscape Comment:
+                This certificate was issued for testing only!
+    Signature Algorithm: md5WithRSAEncryption
+        87:48:82:2d:5d:dc:e0:0a:a1:b9:11:3a:bf:37:40:cc:c3:42:
+        b1:9a:a7:62:3d:8d:0f:7e:bc:da:a9:cc:8f:2c:4b:66:c8:42:
+        69:fc:a9:66:8b:f0:51:84:40:23:01:30:98:10:d8:76:01:b0:
+        c0:bd:ae:68:42:a7:33:c9:48:e5:30:be:4b:4e:8b:e7:f2:56:
+        3f:11:2b:2b:10:1d:1e:51:98:39:62:c0:e1:cf:dc:ef:1b:c2:
+        2c:1c:cf:94:87:d7:a0:32:c6:50:b2:f4:00:49:61:a5:80:11:
+        9e:59:99:3e:d5:59:69:83:47:05:ae:08:bb:2c:0b:53:90:53:
+        a0:86:0d:9a:6c:d4:ce:c9:d2:fd:fb:b0:a8:24:64:70:0f:9f:
+        2b:64:3b:11:40:fa:b7:30:ea:82:e1:4b:32:14:bd:d4:72:e0:
+        3f:3e:27:26:b6:d1:80:8a:ad:d4:eb:b3:cf:fc:ab:0b:b6:2d:
+        25:5b:0f:be:d5:f1:73:5a:2f:70:c3:fd:9f:3a:db:bc:ab:a7:
+        5f:3c:aa:54:b3:c8:9d:a6:12:62:dc:7b:4b:8f:62:d7:fd:f7:
+        f4:f8:3e:be:ef:26:2b:b9:4b:40:a5:36:c2:e7:0b:7e:41:ba:
+        00:88:41:de:0d:ef:fb:0c:e9:df:a0:92:b2:29:1d:ab:d3:45:
+        c8:16:37:52

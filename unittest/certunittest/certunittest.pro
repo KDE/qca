@@ -12,5 +12,4 @@ check.depends = certunittest
 check.commands = ./certunittest
 
 # Input
-HEADERS += certunittest.h
 SOURCES += certunittest.cpp
