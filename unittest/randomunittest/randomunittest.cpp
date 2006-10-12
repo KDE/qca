@@ -22,7 +22,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "randomunittest.h"
+
+#include <QtCrypto>
+#include <QtTest/QtTest>
+
+class RandomUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testSetGlobal();
+    void testGetData();
+
+private:
+    QCA::Initializer* m_init;
+
+};
 
 void RandomUnitTest::initTestCase()
 {
@@ -88,3 +105,4 @@ void RandomUnitTest::testGetData()
 
 QTEST_MAIN(RandomUnitTest)
 
+#include "randomunittest.moc"

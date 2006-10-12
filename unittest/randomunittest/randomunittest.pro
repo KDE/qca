@@ -12,5 +12,4 @@ check.depends = randomunittest
 check.commands = ./randomunittest
 
 # Input
-HEADERS += randomunittest.h
 SOURCES += randomunittest.cpp
