@@ -12,5 +12,4 @@ check.depends = pkits
 check.commands = ./pkits
 
 # Input
-HEADERS += pkits.h
 SOURCES += pkits.cpp
