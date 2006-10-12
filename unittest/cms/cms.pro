@@ -12,5 +12,4 @@ check.depends = cms
 check.commands = ./cms
 
 # Input
-HEADERS += cms.h
 SOURCES += cms.cpp

@@ -1,0 +1,11 @@
+set(cms_bin_SRCS cms.cpp)
+
+MY_AUTOMOC( cms_bin_SRCS )
+
+add_executable(cms ${cms_bin_SRCS} )
+
+target_link_libraries( cms qca ${QT_QTTEST_LIBRARY})
+
+FOREACH( testFileName RootCAcert.pem  Userkey.pem  User.pem )
+   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/${testFileName} COPYONLY)
+ENDFOREACH( testFileName )

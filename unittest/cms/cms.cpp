@@ -23,9 +23,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cms.h"
-
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class CMSut : public QObject
+{
+
+  Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void xcrypt_data();
+    void xcrypt();
+    void signverify_data();
+    void signverify();
+    void signverify_message_data();
+    void signverify_message();
+    void signverify_message_invalid_data();
+    void signverify_message_invalid();
+private:
+    QCA::Initializer* m_init;
+
+};
+
 
 void CMSut::initTestCase()
 {
@@ -72,7 +93,7 @@ void CMSut::xcrypt()
 	    QCOMPARE( msg.canClearsign(), false );
 	    QCOMPARE( msg.canSignAndEncrypt(), false );
 	    QCOMPARE( msg.type(), QCA::SecureMessage::CMS );
-	    
+
 	    msg.setRecipient(secMsgKey);
 
 	    QFETCH( QByteArray, testText );
@@ -82,10 +103,10 @@ void CMSut::xcrypt()
 	    msg.end();
 
 	    msg.waitForFinished(-1);
-	    
+
 	    QByteArray encryptedResult1 = msg.read();
 	    QCOMPARE( encryptedResult1.isEmpty(), false );
-	    
+
 	    msg.reset();
 	    msg.setRecipient(secMsgKey);
 	    msg.startEncrypt();
@@ -102,7 +123,7 @@ void CMSut::xcrypt()
 	    QSecureArray passPhrase = "start";
 	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &res );
 	    QCOMPARE( res, QCA::ConvertGood );
-	    
+
 	    secMsgKey.setX509PrivateKey( privKey );
 	    QCA::SecureMessageKeyList privKeyList;
 	    privKeyList += secMsgKey;
@@ -217,7 +238,7 @@ void CMSut::signverify()
 	    QCOMPARE( msg.canClearsign(), false );
 	    QCOMPARE( msg.canSignAndEncrypt(), false );
 	    QCOMPARE( msg.type(), QCA::SecureMessage::CMS );
-	    
+
 	    msg.startVerify( signedResult1 );
 	    msg.update( testText );
 	    msg.end();
@@ -227,7 +248,7 @@ void CMSut::signverify()
 	    QVERIFY( msg.success() );
 	    QEXPECT_FAIL( "empty", "We don't seem to be able to verify signature of a zero length message", Continue);
 	    QVERIFY( msg.verifySuccess() );
-	    
+
 	    msg.reset();
 
 	    msg.startVerify( signedResult2);
@@ -350,7 +371,7 @@ void CMSut::signverify_message()
 	    QCOMPARE( msg.canClearsign(), false );
 	    QCOMPARE( msg.canSignAndEncrypt(), false );
 	    QCOMPARE( msg.type(), QCA::SecureMessage::CMS );
-	    
+
 	    msg.startVerify( );
 	    msg.update( signedResult1 );
 	    msg.end();
@@ -359,7 +380,7 @@ void CMSut::signverify_message()
 	    QVERIFY( msg.wasSigned() );
 	    QVERIFY( msg.success() );
 	    QVERIFY( msg.verifySuccess() );
-	    
+
 	    msg.reset();
 
 	    msg.startVerify( );
@@ -476,4 +497,5 @@ void CMSut::signverify_message_invalid()
 
 QTEST_MAIN(CMSut)
 
+#include "cms.moc"
 
