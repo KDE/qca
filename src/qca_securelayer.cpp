@@ -142,7 +142,7 @@ public:
 		else
 			c->setConstraints(con_cipherSuites);
 
-		c->setup(trusted, localCert, localKey, serverMode, tryCompress, false);
+		c->setup(trusted, localCert, localKey, serverMode, host, tryCompress, false);
 
 		bool ok;
 		c->start();

@@ -404,6 +404,10 @@ namespace QCA
 		   Start the TLS/SSL connection as a client.
 
 		   \param host the hostname that you want to connect to
+
+		   \note This hostname will be used for Server Name Indication extension (see 
+		   <a href="http://www.ietf.org/rfc/rfc3546.txt">RFC 3546</a> Section 3.1)
+		   if supported by the backend provider.
 		*/
 		void startClient(const QString &host = QString());
 
