@@ -12,5 +12,4 @@ check.depends = macunittest
 check.commands = ./macunittest
 
 # Input
-HEADERS += macunittest.h
 SOURCES += macunittest.cpp

@@ -22,9 +22,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "macunittest.h"
 
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class MACUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void HMACMD5();
+    void HMACSHA1();
+    void HMACSHA256();
+    void HMACSHA224();
+    void HMACSHA384();
+    void HMACSHA512();
+    void HMACRMD160();
+private:
+    QCA::Initializer* m_init;
+};
+
 
 void MACUnitTest::initTestCase()
 {
@@ -80,7 +99,7 @@ void MACUnitTest::HMACMD5()
 		data3[ i ] = (char)0xDD;
 	    md5hmac2.update( data3 );
 	    QCOMPARE( QCA::arrayToHex( md5hmac2.final() ), QString( "56be34521d144c88dbb8c733f0e8b3f6" ) );
-	    
+
 	    QCA::SymmetricKey key4( QCA::hexToArray( "0102030405060708090a0b0c0d0e0f10111213141516171819") );
 	    QCA::MessageAuthenticationCode md5hmac4( "hmac(md5)", key4, provider );
 	    QSecureArray data4( 50 );
@@ -88,14 +107,14 @@ void MACUnitTest::HMACMD5()
 		data4[ i ] = (char)0xcd;
 	    md5hmac4.update( data4 );
 	    QCOMPARE( QCA::arrayToHex( md5hmac4.final() ), QString( "697eaf0aca3a3aea3a75164746ffaa79" ) );
-	    
+
 	    QCA::MessageAuthenticationCode md5hmac5( "hmac(md5)" );
 	    QCA::SymmetricKey key5( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	    md5hmac5.setup( key5 );
 	    QSecureArray data5( "Test With Truncation" );
 	    md5hmac5.update( data5 );
 	    QCOMPARE( QCA::arrayToHex( md5hmac5.final() ), QString( "56461ef2342edc00f9bab995690efd4c" ) );
-	    
+
 	    QCA::MessageAuthenticationCode md5hmac6( "hmac(md5)", QCA::SymmetricKey(), provider );
 	    QCA::SymmetricKey key6( 80 );
 	    for (int i = 0; i < key6.size(); i++)
@@ -104,7 +123,7 @@ void MACUnitTest::HMACMD5()
 	    QSecureArray data6( "Test Using Larger Than Block-Size Key - Hash Key First" );
 	    md5hmac6.update( data6 );
 	    QCOMPARE( QCA::arrayToHex( md5hmac6.final() ), QString( "6b1ab7fe4bd7bf8f0b62e6ce61b9d0cd" ) );
-	    
+
 	    md5hmac6.clear(); // reuse the same key
 	    QSecureArray data7( "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data" );
 	    md5hmac6.update( data7 );
@@ -534,14 +553,14 @@ void MACUnitTest::HMACRMD160()
 	    QCOMPARE( ripemd160hmacLenTest.validKeyLength( -2 ), false );
 
 	    // These tests are from RFC2286, Section 2.
-	    QCA::MessageAuthenticationCode test1( "hmac(ripemd160)", QCA::SymmetricKey(), provider ); 
+	    QCA::MessageAuthenticationCode test1( "hmac(ripemd160)", QCA::SymmetricKey(), provider );
 	    QCA::SymmetricKey key1 ( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	    test1.setup( key1 );
 	    QSecureArray data1( "Hi There" );
 	    test1.update( data1 );
 	    QCOMPARE( QCA::arrayToHex( test1.final() ), QString( "24cb4bd67d20fc1a5d2ed7732dcc39377f0a5668" ) );
 
-	    QCA::MessageAuthenticationCode test2( "hmac(ripemd160)", QCA::SymmetricKey(), provider ); 
+	    QCA::MessageAuthenticationCode test2( "hmac(ripemd160)", QCA::SymmetricKey(), provider );
 	    QCA::SymmetricKey key2( QSecureArray( "Jefe" ) );
 	    test2.setup( key2 );
 	    QSecureArray data2( "what do ya want for nothing?" );
@@ -590,6 +609,8 @@ void MACUnitTest::HMACRMD160()
 }
 
 QTEST_MAIN(MACUnitTest)
+
+#include "macunittest.moc"
 
 
 
