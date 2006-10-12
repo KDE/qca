@@ -12,5 +12,4 @@ check.depends = tlsunittest
 check.commands = ./tlsunittest
 
 # Input
-HEADERS += tlsunittest.h
 SOURCES += tlsunittest.cpp

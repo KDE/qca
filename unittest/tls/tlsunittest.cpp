@@ -22,8 +22,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "tlsunittest.h"
+
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class TLSUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testCipherList();
+private:
+    QCA::Initializer* m_init;
+};
 
 void TLSUnitTest::initTestCase()
 {
@@ -112,3 +125,5 @@ void TLSUnitTest::testCipherList()
 }
 
 QTEST_MAIN(TLSUnitTest)
+
+#include "tlsunittest.moc"
