@@ -1,0 +1,9 @@
+This test is intended to verify the subject hostname indication
+extension (see RFC3546 Section 3.1).
+
+It requires network access, and contacts a public test server
+(sni.velox.ch).
+
+Note that this test requires a suitable backend (plugin). If
+you are running this test with OpenSSL 0.9.8 or earlier, then
+you can expect it to fail.
