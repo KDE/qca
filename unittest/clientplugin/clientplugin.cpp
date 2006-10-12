@@ -22,7 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "clientplugin.h"
+
+#include <QtCrypto>
+#include <QtTest/QtTest>
+
+class ClientPlugin : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testInsertPlugin();
+
+private:
+    QCA::Initializer* m_init;
+
+};
 
 void ClientPlugin::initTestCase()
 {
@@ -70,4 +86,6 @@ void ClientPlugin::testInsertPlugin()
 }
 
 QTEST_MAIN(ClientPlugin)
+
+#include "clientplugin.moc"
 

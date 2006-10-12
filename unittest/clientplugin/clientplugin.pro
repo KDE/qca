@@ -12,5 +12,4 @@ check.depends = clientplugin
 check.commands = ./clientplugin
 
 # Input
-HEADERS += clientplugin.h
 SOURCES += clientplugin.cpp
