@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,8 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "keygenunittest.h"
+
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class KeyGenUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testRSA();
+    void testDSA();
+    void testDH();
+private:
+    QCA::Initializer* m_init;
+};
 
 void KeyGenUnitTest::initTestCase()
 {
@@ -53,13 +68,13 @@ void KeyGenUnitTest::testRSA()
     QCOMPARE( rsa1.isNull(), false );
     QCOMPARE( rsa1.e(), QBigInteger(65537) );
     QCOMPARE( rsa1.bitSize(), 1024);
-    
+
     priv1 = keygen.createRSA( 512, 17 );
     rsa1 = priv1.toRSA();
     QCOMPARE( rsa1.isNull(), false );
     QCOMPARE( rsa1.e(), QBigInteger(17) );
     QCOMPARE( rsa1.bitSize(), 512);
-    
+
     priv1 = keygen.createRSA( 512, 3 );
     rsa1 = priv1.toRSA();
     QCOMPARE( rsa1.isNull(), false );
@@ -83,13 +98,13 @@ void KeyGenUnitTest::testDSA()
     QCA::DSAPrivateKey dsa1 = priv2.toDSA();
     QCOMPARE( dsa1.isNull(), false );
     QCOMPARE( dsa1.bitSize(), 512 );
-    
+
     group = keygen.createDLGroup( QCA::DSA_768 );
     priv2 = keygen.createDSA( group );
     dsa1 = priv2.toDSA();
     QCOMPARE( dsa1.isNull(), false );
     QCOMPARE( dsa1.bitSize(), 768 );
-    
+
     group = keygen.createDLGroup( QCA::DSA_1024 );
     priv2 = keygen.createDSA( group );
     dsa1 = priv2.toDSA();
@@ -113,7 +128,7 @@ void KeyGenUnitTest::testDH()
     QCA::DHPrivateKey dh1 = priv3.toDH();
     QCOMPARE( dh1.isNull(), false );
     QCOMPARE( dh1.bitSize(), 1024 );
-    
+
     group = keygen.createDLGroup( QCA::IETF_2048 );
     priv3 = keygen.createDH( group );
     dh1 = priv3.toDH();
@@ -122,3 +137,6 @@ void KeyGenUnitTest::testDH()
 }
 
 QTEST_MAIN(KeyGenUnitTest)
+
+#include "keygenunittest.moc"
+

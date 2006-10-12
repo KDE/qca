@@ -11,5 +11,4 @@ check.depends = keygenunittest
 check.commands = ./keygenunittest
 
 # Input
-HEADERS += keygenunittest.h
 SOURCES += keygenunittest.cpp
