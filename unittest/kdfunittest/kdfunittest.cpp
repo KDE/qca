@@ -22,7 +22,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "kdfunittest.h"
+
+#include <QtCrypto>
+#include <QtTest>
+
+class KDFUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void pbkdf1md2Tests_data();
+    void pbkdf1md2Tests();
+    void pbkdf1sha1Tests_data();
+    void pbkdf1sha1Tests();
+    void pbkdf2Tests_data();
+    void pbkdf2Tests();
+    void pbkdf2extraTests();
+private:
+    QCA::Initializer* m_init;
+};
+
 
 void KDFUnitTest::initTestCase()
 {
@@ -77,7 +98,7 @@ void KDFUnitTest::pbkdf1md2Tests()
     // gcrypt doesn't do md2...
     //    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
-    
+
     QFETCH(QString, secret);
     QFETCH(QString, output);
     QFETCH(QString, salt);
@@ -146,7 +167,7 @@ void KDFUnitTest::pbkdf1sha1Tests()
     providersToTest.append("qca-openssl");
     //    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
-    
+
     QFETCH(QString, secret);
     QFETCH(QString, output);
     QFETCH(QString, salt);
@@ -240,7 +261,7 @@ void KDFUnitTest::pbkdf2Tests()
     //    providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
-    
+
     QFETCH(QString, secret);
     QFETCH(QString, output);
     QFETCH(QString, salt);
@@ -271,7 +292,7 @@ void KDFUnitTest::pbkdf2extraTests()
     // providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
-    
+
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("pbkdf2(sha1)", provider))
 	    QWARN(QString("PBKDF version 2 with SHA1 not supported for "+provider).toLocal8Bit());
@@ -296,7 +317,7 @@ void KDFUnitTest::pbkdf2extraTests()
 		QCOMPARE( QCA::arrayToHex(passwordOut),
 			  QString( "cdedb5281bb2f801565a1122b25635150ad1f7a04bb9f3a333ecc0e2e1f70837" ) );
 	    }
-	    
+
 	    // RFC3962, Appendix B
 	    {
 		QCA::InitializationVector salt(QSecureArray("ATHENA.MIT.EDUraeburn"));
@@ -308,7 +329,7 @@ void KDFUnitTest::pbkdf2extraTests()
 		QCOMPARE( QCA::arrayToHex(passwordOut),
 			  QString( "01dbee7f4a9e243e988b62c73cda935da05378b93244ec8f48a99e61ad799d86" ) );
 	    }
-	    
+
 	    // RFC3962, Appendix B
 	    {
 		QCA::InitializationVector salt(QSecureArray("ATHENA.MIT.EDUraeburn"));
@@ -321,7 +342,7 @@ void KDFUnitTest::pbkdf2extraTests()
 			  QString( "5c08eb61fdf71e4e4ec3cf6ba1f5512ba7e52ddbc5e5142f708a31e2e62b1e13" ) );
 	    }
 
-	    // RFC3211 and RFC3962, Appendix B 
+	    // RFC3211 and RFC3962, Appendix B
 	    {
 		QCA::InitializationVector salt(QCA::hexToArray("1234567878563412"));
 		QSecureArray password("password");
@@ -335,7 +356,7 @@ void KDFUnitTest::pbkdf2extraTests()
 		QCOMPARE( QCA::arrayToHex(passwordOut),
 			  QString( "d1daa78615f287e6" ) );
 	    }
-	    
+
 	    // RFC3962, Appendix B
 	    {
 		QCA::InitializationVector salt(QSecureArray("pass phrase equals block size"));
@@ -347,7 +368,7 @@ void KDFUnitTest::pbkdf2extraTests()
 		QCOMPARE( QCA::arrayToHex(passwordOut),
 			  QString( "139c30c0966bc32ba55fdbf212530ac9c5ec59f1a452f5cc9ad940fea0598ed1" ) );
 	    }
-	    
+
 	    // RFC3962, Appendix B
 	    {
 		try {
@@ -362,7 +383,7 @@ void KDFUnitTest::pbkdf2extraTests()
 		} catch(std::exception &) {
 		    if (provider == "qca-botan")
 			qDebug() << "You should use a later version of Botan";
-		    else 
+		    else
 			QFAIL("exception");
 		}
 	    }
@@ -383,3 +404,6 @@ void KDFUnitTest::pbkdf2extraTests()
 }
 
 QTEST_MAIN(KDFUnitTest)
+
+#include "kdfunittest.moc"
+

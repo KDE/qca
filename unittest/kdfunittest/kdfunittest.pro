@@ -12,5 +12,4 @@ check.depends = kdfunittest
 check.commands = ./kdfunittest
 
 # Input
-HEADERS += kdfunittest.h
 SOURCES += kdfunittest.cpp
