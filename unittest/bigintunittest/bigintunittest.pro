@@ -12,5 +12,4 @@ check.depends = bigintunittest
 check.commands = ./bigintunittest
 
 # Input
-HEADERS += bigintunittest.h
 SOURCES += bigintunittest.cpp
