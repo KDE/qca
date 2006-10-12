@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,8 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "securearrayunittest.h"
+
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class SecureArrayUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testAll();
+
+private:
+    QCA::Initializer* m_init;
+};
+
 
 void SecureArrayUnitTest::initTestCase()
 {
@@ -88,7 +103,7 @@ void SecureArrayUnitTest::testAll()
     QCOMPARE( QCA::arrayToHex ( detachArray2 ), QString( "63636363636363636363" ) );
     //implicit detach
     for (int i = 0; i < detachArray2.size(); i++) {
-	detachArray2.data()[i] = 0x67; 
+	detachArray2.data()[i] = 0x67;
     }
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     QCOMPARE( QCA::arrayToHex ( detachArray2 ), QString( "67676767676767676767" ) );
@@ -96,7 +111,7 @@ void SecureArrayUnitTest::testAll()
     QSecureArray detachArray3 = secureArray; // implicitly shared copy
     QCOMPARE( QCA::arrayToHex ( detachArray3 ), QString( "63636363636363636363" ) );
     for (int i = 0; i < detachArray3.size(); i++) {
-	detachArray3.data()[i] = 0x68; 
+	detachArray3.data()[i] = 0x68;
     }
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     QCOMPARE( QCA::arrayToHex ( detachArray3 ), QString( "68686868686868686868" ) );
@@ -128,3 +143,6 @@ void SecureArrayUnitTest::testAll()
 }
 
 QTEST_MAIN(SecureArrayUnitTest)
+
+#include "securearrayunittest.moc"
+

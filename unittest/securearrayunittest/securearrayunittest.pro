@@ -12,5 +12,4 @@ check.depends = securearrayunittest
 check.commands = ./securearrayunittest
 
 # Input
-HEADERS += securearrayunittest.h
 SOURCES += securearrayunittest.cpp
