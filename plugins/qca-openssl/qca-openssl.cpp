@@ -971,7 +971,7 @@ public:
 	m_algorithm = algorithm;
 	EVP_DigestInit( &m_context, m_algorithm );
     };
-    
+
     ~opensslHashContext()
     {
 	EVP_MD_CTX_cleanup(&m_context);
@@ -982,12 +982,12 @@ public:
 	EVP_MD_CTX_cleanup(&m_context);
 	EVP_DigestInit( &m_context, m_algorithm );
     }
-    
+
     void update(const QSecureArray &a)
     {
 	EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
     }
-    
+
     QSecureArray final()
     {
 	QSecureArray a( EVP_MD_size( m_algorithm ) );
@@ -999,11 +999,11 @@ public:
     {
 	return new opensslHashContext(*this);
     }
-    
+
 protected:
     const EVP_MD *m_algorithm;
     EVP_MD_CTX m_context;
-};	
+};
 
 
 class opensslPbkdf1Context : public KDFContext
@@ -1019,13 +1019,13 @@ public:
     {
 	return new opensslPbkdf1Context( *this );
     }
-    
+
     SymmetricKey makeKey(const QSecureArray &secret, const InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
 	/* from RFC2898:
 	   Steps:
-	   
+
 	   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
 	   "derived key too long" and stop.
 	*/
@@ -1038,7 +1038,7 @@ public:
 	   2. Apply the underlying hash function Hash for c iterations to the
 	   concatenation of the password P and the salt S, then extract
 	   the first dkLen octets to produce a derived key DK:
-	   
+
 	   T_1 = Hash (P || S) ,
 	   T_2 = Hash (T_1) ,
 	   ...
@@ -1085,7 +1085,7 @@ public:
     {
 	HMAC_Init_ex( &m_context, key.data(), key.size(), m_algorithm, 0 );
     }
-    
+
     KeyLength keyLength() const
     {
 	return anyKeyLength();
@@ -1095,7 +1095,7 @@ public:
     {
 	HMAC_Update( &m_context, (unsigned char *)a.data(), a.size() );
     }
-    
+
     void final( QSecureArray *out)
     {
 	out->resize( EVP_MD_size( m_algorithm ) );
@@ -1107,7 +1107,7 @@ public:
     {
 	return new opensslHMACContext(*this);
     }
-    
+
 protected:
     HMAC_CTX m_context;
     const EVP_MD *m_algorithm;
@@ -1254,7 +1254,7 @@ const char* IETF_2048_PRIME =
 	"E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9"
 	"DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
 	"15728E5A 8AACAA68 FFFFFFFF FFFFFFFF";
-	
+
 const char* IETF_4096_PRIME =
 	"FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
 	"29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
@@ -3017,7 +3017,7 @@ public:
 		X509_set_subject_name(x, name);
 
 		// issuer == subject
-		X509_set_issuer_name(x, name); 
+		X509_set_issuer_name(x, name);
 
 		// subject key id
 		ex = new_subject_key_id(x);
@@ -3238,7 +3238,7 @@ public:
 		default:
 		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->cert_info->signature->algorithm);
 		    p.sigalgo = QCA::SignatureUnknown;
-		}    
+		}
 
 		pos = X509_get_ext_by_NID(x, NID_subject_key_identifier, -1);
 		if(pos != -1)
@@ -3525,7 +3525,7 @@ public:
 		default:
 		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
 		    p.sigalgo = QCA::SignatureUnknown;
-		}    
+		}
 		_props = p;
 	}
 };
@@ -3674,7 +3674,7 @@ public:
 		default:
 		    qWarning() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
 		    p.sigalgo = QCA::SignatureUnknown;
-		}    
+		}
 
 		int pos = X509_CRL_get_ext_by_NID(x, NID_authority_key_identifier, -1);
 		if(pos != -1)
@@ -4024,7 +4024,7 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 		case 0x0005:
 			// RFC 2246 A.5
 			return QString("TLS_RSA_WITH_RC4_128_SHA");
-			break;			
+			break;
 		case 0x0006:
 			// RFC 2246 A.5
 			return QString("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
@@ -4261,7 +4261,7 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 		default:
 			return QString("TLS algo to be added: %1").arg(cipherID & 0xffff, 0, 16);
 			break;
-		} 
+		}
 	} else if (TLS::SSL_v3 == version) {
 		switch( cipherID & 0xFFFF ) {
 		case 0x0000:
@@ -4543,7 +4543,7 @@ public:
 	enum { Good, TryAgain, Bad };
 	enum { Idle, Connect, Accept, Handshake, Active, Closing };
 
-	bool serv;
+        bool serv; // true if we are acting as a server
 	int mode;
 	QByteArray sendQueue;
 	QByteArray recvQueue;
@@ -4551,6 +4551,7 @@ public:
 	CertificateCollection trusted;
 	Certificate cert, peercert; // TODO: support cert chains
 	PrivateKey key;
+        QString targetHostName;
 
 	Result result_result;
 	QByteArray result_to_net;
@@ -4558,7 +4559,11 @@ public:
 	QByteArray result_plain;
 
 	SSL *ssl;
-	SSL_METHOD *method;
+#if OPENSSL_VERSION_NUMBER >= 0x00909000L
+        const SSL_METHOD *method;
+#else
+    SSL_METHOD *method;
+#endif
 	SSL_CTX *context;
 	BIO *rbio, *wbio;
 	Validity vr;
@@ -4632,7 +4637,7 @@ public:
 			qWarning("Unexpected enum in cipherSuites");
 			ctx = 0;
 		}
-		if (NULL == ctx) 
+		if (NULL == ctx)
 			return QStringList();
 
 		SSL *ssl = SSL_new(ctx);
@@ -4647,7 +4652,7 @@ public:
 			SSL_CIPHER *thisCipher = sk_SSL_CIPHER_value(sk, i);
 			cipherList += cipherIDtoString(version, thisCipher->id);
 		}
-			
+
 		SSL_free(ssl);
 		SSL_CTX_free(ctx);
 
@@ -4679,13 +4684,18 @@ public:
 		Q_UNUSED(cipherSuiteList);
 	}
 
-	virtual void setup(const CertificateCollection &_trusted, const CertificateChain &_cert, const PrivateKey &_key, bool serverMode, bool compress, bool)
+	virtual void setup(const CertificateCollection &_trusted, const CertificateChain &_cert, const PrivateKey &_key, bool serverMode,
+                           const QString &hostName, bool compress, bool)
 	{
 		trusted = _trusted;
 		if(!_cert.isEmpty())
 			cert = _cert.primary(); // TODO: take the whole chain
 		key = _key;
 		serv = serverMode;
+                if ( false == serverMode ) {
+                    // client
+                    targetHostName = hostName;
+                }
 		Q_UNUSED(compress); // TODO
 	}
 
@@ -5054,6 +5064,15 @@ public:
 			return false;
 		}
 		SSL_set_ssl_method(ssl, method); // can this return error?
+
+#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+                if ( targetHostName.isEmpty() == false ) {
+                        // we have a target
+                        // this might fail, but we ignore that for now
+                        char *hostname = targetHostName.toAscii().data();
+                        SSL_set_tlsext_host_name( ssl, hostname );
+                }
+#endif
 
 		// setup the memory bio
 		rbio = BIO_new(BIO_s_mem());
@@ -5437,7 +5456,7 @@ public:
 				i2d_PKCS7_bio(bo, p7);
 				if (SecureMessage::Detached == signMode)
 					sig = bio2ba(bo);
-				else 
+				else
 					out = bio2ba(bo);
 			}
 			else
@@ -5727,12 +5746,12 @@ public:
 	{
 		return new opensslCipherContext( *this );
 	}
-	
+
 	unsigned int blockSize() const
 	{
 		return EVP_CIPHER_CTX_block_size(&m_context);
 	}
-    
+
 	bool update(const QSecureArray &in, QSecureArray *out)
 	{
 		// This works around a problem in OpenSSL, where it asserts if
@@ -5762,7 +5781,7 @@ public:
 		out->resize(resultLength);
 		return true;
 	}
-	
+
 	bool final(QSecureArray *out)
 	{
 		out->resize(blockSize());
@@ -5772,18 +5791,18 @@ public:
 						     (unsigned char*)out->data(),
 						     &resultLength)) {
 				return false;
-			} 
+			}
 		} else {
 			if (0 == EVP_DecryptFinal_ex(&m_context,
 						     (unsigned char*)out->data(),
 						     &resultLength)) {
 				return false;
-			} 
+			}
 		}
 		out->resize(resultLength);
 		return true;
 	}
-	
+
 	// Change cipher names
 	KeyLength keyLength() const
 	{
