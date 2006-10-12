@@ -584,7 +584,7 @@ namespace QCA
 
 			   \param c pointer to the Context to compare to
 
-			   \return true if the argument and this COntext
+			   \return true if the argument and this Context
 			   have the same provider.
 			*/
 			bool sameProvider(const Context *c) const;
