@@ -22,7 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "dsaunittest.h"
+
+#include <QtCrypto>
+#include <QtTest/QtTest>
+
+class DSAUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testdsa();
+
+private:
+    QCA::Initializer* m_init;
+
+};
 
 void DSAUnitTest::initTestCase()
 {
@@ -78,7 +94,7 @@ void DSAUnitTest::testdsa()
 	QCOMPARE( fromPEMkey.isPrivate(), true );
 	QCOMPARE( fromPEMkey.isPublic(), false );
 	QVERIFY( dsaKey == fromPEMkey );
-	
+
 	QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(dsaDER, QSecureArray(), &checkResult);
 	QCOMPARE( checkResult, QCA::ConvertGood );
 	QCOMPARE( fromDERkey.isNull(), false );
@@ -92,3 +108,6 @@ void DSAUnitTest::testdsa()
 }
 
 QTEST_MAIN(DSAUnitTest)
+
+#include "dsaunittest.moc"
+

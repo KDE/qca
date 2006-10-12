@@ -12,5 +12,4 @@ check.depends = dsaunittest
 check.commands = ./dsaunittest
 
 # Input
-HEADERS += dsaunittest.h
 SOURCES += dsaunittest.cpp
