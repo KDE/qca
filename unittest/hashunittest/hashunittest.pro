@@ -12,5 +12,4 @@ check.depends = hashunittest
 check.commands = ./hashunittest
 
 # Input
-HEADERS += hashunittest.h
 SOURCES += hashunittest.cpp
