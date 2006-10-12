@@ -12,5 +12,4 @@ check.depends = cipherunittest
 check.commands = ./cipherunittest
 
 # Input
-HEADERS += cipherunittest.h
 SOURCES += cipherunittest.cpp
