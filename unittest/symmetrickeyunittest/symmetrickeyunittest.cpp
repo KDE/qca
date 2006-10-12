@@ -22,8 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "symmetrickeyunittest.h"
+
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class SymmetricKeyUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void test1();
+    void weakKey_data();
+    void weakKey();
+private:
+    QCA::Initializer* m_init;
+};
 
 void SymmetricKeyUnitTest::initTestCase()
 {
@@ -74,7 +89,7 @@ void SymmetricKeyUnitTest::weakKey_data()
     QTest::addColumn<QByteArray>("keyText");
     QTest::addColumn<bool>("isWeak");
 
-    
+
     QTest::newRow("") << QByteArray("ffffffffffffffff") << true;
     QTest::newRow("") << QByteArray("0000000000000000") << true;
     QTest::newRow("") << QByteArray("d5d44ff720683d0d") << false;
@@ -97,3 +112,6 @@ void SymmetricKeyUnitTest::weakKey()
 }
 
 QTEST_MAIN(SymmetricKeyUnitTest)
+
+#include "symmetrickeyunittest.moc"
+

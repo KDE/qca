@@ -12,5 +12,4 @@ check.depends = symmetrickeyunittest
 check.commands = ./symmetrickeyunittest
 
 # Input
-HEADERS += symmetrickeyunittest.h
 SOURCES += symmetrickeyunittest.cpp
