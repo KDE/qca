@@ -12,5 +12,4 @@ check.depends = base64unittest
 check.commands = ./base64unittest
 
 # Input
-HEADERS += base64unittest.h
 SOURCES += base64unittest.cpp
