@@ -12,5 +12,4 @@ check.depends = staticunittest
 check.commands = ./staticunittest
 
 # Input
-HEADERS += staticunittest.h
 SOURCES += staticunittest.cpp

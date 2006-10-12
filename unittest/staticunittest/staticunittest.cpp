@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004-2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,7 +22,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "staticunittest.h"
+
+#include <QtCrypto>
+#include <QtTest/QtTest>
+
+class StaticUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void hexConversions();
+    void providers();
+    void capabilities();
+    void secureMemory();
+private:
+    QCA::Initializer* m_init;
+};
 
 void StaticUnitTest::initTestCase()
 {
@@ -136,3 +153,6 @@ void StaticUnitTest::providers()
 }
 
 QTEST_MAIN(StaticUnitTest)
+
+#include "staticunittest.moc"
+
