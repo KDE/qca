@@ -12,5 +12,4 @@ check.depends = keylengthunittest
 check.commands = ./keylengthunittest
 
 # Input
-HEADERS += keylengthunittest.h
 SOURCES += keylengthunittest.cpp

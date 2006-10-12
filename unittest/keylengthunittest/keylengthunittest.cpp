@@ -22,10 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "keylengthunittest.h"
+
 #include <QtCrypto>
+#include <QtTest/QtTest>
 
 #include <limits>
+
+class KeyLengthUnitTest : public QObject
+{
+  Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void doTest();
+private:
+    QCA::Initializer* m_init;
+};
 
 void KeyLengthUnitTest::initTestCase()
 {
@@ -59,3 +72,5 @@ void KeyLengthUnitTest::doTest()
 }
 
 QTEST_MAIN(KeyLengthUnitTest)
+
+#include "keylengthunittest.moc"
