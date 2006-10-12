@@ -12,5 +12,4 @@ check.depends = hexunittest
 check.commands = ./hexunittest
 
 # Input
-HEADERS += hexunittest.h
 SOURCES += hexunittest.cpp

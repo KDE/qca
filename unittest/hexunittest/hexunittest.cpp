@@ -22,8 +22,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "hexunittest.h"
+
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class HexUnitTest : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testHexString_data();
+    void testHexString();
+    void testIncrementalUpdate();
+    void testBrokenInput();
+private:
+    QCA::Initializer* m_init;
+};
 
 void HexUnitTest::initTestCase()
 {
@@ -97,3 +113,5 @@ void HexUnitTest::testBrokenInput()
 }
 
 QTEST_MAIN(HexUnitTest)
+
+#include "hexunittest.moc"
