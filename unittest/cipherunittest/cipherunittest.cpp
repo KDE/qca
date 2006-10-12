@@ -23,9 +23,74 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cipherunittest.h"
-
 #include <QtCrypto>
+#include <QtTest/QtTest>
+
+class CipherUnitTest : public QObject
+{
+
+  Q_OBJECT
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void aes128_data();
+    void aes128();
+    void aes128_cbc_data();
+    void aes128_cbc();
+    void aes128_cfb_data();
+    void aes128_cfb();
+    void aes128_ofb_data();
+    void aes128_ofb();
+
+    void aes192_data();
+    void aes192();
+    void aes192_cbc_data();
+    void aes192_cbc();
+    void aes192_cfb_data();
+    void aes192_cfb();
+    void aes192_ofb_data();
+    void aes192_ofb();
+
+    void aes256_data();
+    void aes256();
+    void aes256_cbc_data();
+    void aes256_cbc();
+    void aes256_cfb_data();
+    void aes256_cfb();
+    void aes256_ofb_data();
+    void aes256_ofb();
+
+    void tripleDES_data();
+    void tripleDES();
+
+    void des_data();
+    void des();
+    void des_pkcs7_data();
+    void des_pkcs7();
+    void des_cbc_data();
+    void des_cbc();
+    void des_cbc_pkcs7_data();
+    void des_cbc_pkcs7();
+    void des_cfb_data();
+    void des_cfb();
+    void des_ofb_data();
+    void des_ofb();
+
+    void blowfish_data();
+    void blowfish();
+    void blowfish_cbc_data();
+    void blowfish_cbc();
+    void blowfish_cbc_pkcs7_data();
+    void blowfish_cbc_pkcs7();
+    void blowfish_cfb_data();
+    void blowfish_cfb();
+    void blowfish_ofb_data();
+    void blowfish_ofb();
+private:
+    QCA::Initializer* m_init;
+
+};
 
 void CipherUnitTest::initTestCase()
 {
@@ -121,9 +186,9 @@ void CipherUnitTest::aes128()
 	    QCA::Cipher forwardCipher( QString( "aes128" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
-				       QCA::Encode, 
+				       QCA::Encode,
 				       key,
-				       QCA::InitializationVector(), 
+				       QCA::InitializationVector(),
 				       provider );
 
 	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
@@ -135,7 +200,7 @@ void CipherUnitTest::aes128()
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
-	    
+
 	    QCA::Cipher reverseCipher( QString( "aes128" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
@@ -192,9 +257,9 @@ void CipherUnitTest::aes128_cbc()
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
 	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
 	    QCA::Cipher forwardCipher( QString( "aes128" ),
-				       QCA::Cipher::CBC, 
-				       QCA::Cipher::NoPadding, 
-				       QCA::Encode, 
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
 				       key,
 				       iv,
 				       provider);
@@ -357,44 +422,44 @@ void CipherUnitTest::aes192_data()
     QTest::newRow("1") << QString("fec1c04f529bbd17d8cecfcc4718b17f")
 		       << QString("62564c738f3efe186e1a127a0c4d3c61")
 		       << QString("4a4b4c4d4f50515254555657595a5b5c5e5f606163646566");
-    QTest::newRow("2") << QString("32df99b431ed5dc5acf8caf6dc6ce475") 
+    QTest::newRow("2") << QString("32df99b431ed5dc5acf8caf6dc6ce475")
 		       << QString("07805aa043986eb23693e23bef8f3438")
 		       << QString("68696a6b6d6e6f70727374757778797a7c7d7e7f81828384");
     QTest::newRow("3") << QString("7fdc2b746f3f665296943b83710d1f82")
-		       << QString("df0b4931038bade848dee3b4b85aa44b") 
+		       << QString("df0b4931038bade848dee3b4b85aa44b")
 		       << QString("868788898b8c8d8e90919293959697989a9b9c9d9fa0a1a2");
-    QTest::newRow("4") << QString("8fba1510a3c5b87e2eaa3f7a91455ca2") 
-		       << QString("592d5fded76582e4143c65099309477c") 
+    QTest::newRow("4") << QString("8fba1510a3c5b87e2eaa3f7a91455ca2")
+		       << QString("592d5fded76582e4143c65099309477c")
 		       << QString("a4a5a6a7a9aaabacaeafb0b1b3b4b5b6b8b9babbbdbebfc0");
-    QTest::newRow("5") << QString("2c9b468b1c2eed92578d41b0716b223b") 
-		       << QString("c9b8d6545580d3dfbcdd09b954ed4e92") 
+    QTest::newRow("5") << QString("2c9b468b1c2eed92578d41b0716b223b")
+		       << QString("c9b8d6545580d3dfbcdd09b954ed4e92")
 		       << QString("c2c3c4c5c7c8c9cacccdcecfd1d2d3d4d6d7d8d9dbdcddde");
-    QTest::newRow("6") << QString("0a2bbf0efc6bc0034f8a03433fca1b1a") 
-		       << QString("5dccd5d6eb7c1b42acb008201df707a0") 
+    QTest::newRow("6") << QString("0a2bbf0efc6bc0034f8a03433fca1b1a")
+		       << QString("5dccd5d6eb7c1b42acb008201df707a0")
 		       << QString("e0e1e2e3e5e6e7e8eaebecedeff0f1f2f4f5f6f7f9fafbfc");
-    QTest::newRow("7") << QString("25260e1f31f4104d387222e70632504b") 
-		       << QString("a2a91682ffeb6ed1d34340946829e6f9") 
+    QTest::newRow("7") << QString("25260e1f31f4104d387222e70632504b")
+		       << QString("a2a91682ffeb6ed1d34340946829e6f9")
 		       << QString("fefe01010304050608090a0b0d0e0f10121314151718191a");
-    QTest::newRow("8") << QString("c527d25a49f08a5228d338642ae65137") 
-		       << QString("e45d185b797000348d9267960a68435d") 
+    QTest::newRow("8") << QString("c527d25a49f08a5228d338642ae65137")
+		       << QString("e45d185b797000348d9267960a68435d")
 		       << QString("1c1d1e1f21222324262728292b2c2d2e3031323335363738");
-    QTest::newRow("9") << QString("3b49fc081432f5890d0e3d87e884a69e") 
-		       << QString("45e060dae5901cda8089e10d4f4c246b") 
+    QTest::newRow("9") << QString("3b49fc081432f5890d0e3d87e884a69e")
+		       << QString("45e060dae5901cda8089e10d4f4c246b")
 		       << QString("3a3b3c3d3f40414244454647494a4b4c4e4f505153545556");
-    QTest::newRow("10") << QString("d173f9ed1e57597e166931df2754a083") 
-			<< QString("f6951afacc0079a369c71fdcff45df50") 
+    QTest::newRow("10") << QString("d173f9ed1e57597e166931df2754a083")
+			<< QString("f6951afacc0079a369c71fdcff45df50")
 			<< QString("58595a5b5d5e5f60626364656768696a6c6d6e6f71727374");
-    QTest::newRow("11") << QString("8c2b7cafa5afe7f13562daeae1adede0") 
-			<< QString("9e95e00f351d5b3ac3d0e22e626ddad6") 
+    QTest::newRow("11") << QString("8c2b7cafa5afe7f13562daeae1adede0")
+			<< QString("9e95e00f351d5b3ac3d0e22e626ddad6")
 			<< QString("767778797b7c7d7e80818283858687888a8b8c8d8f909192");
-    QTest::newRow("12") << QString("aaf4ec8c1a815aeb826cab741339532c") 
-			<< QString("9cb566ff26d92dad083b51fdc18c173c") 
+    QTest::newRow("12") << QString("aaf4ec8c1a815aeb826cab741339532c")
+			<< QString("9cb566ff26d92dad083b51fdc18c173c")
 			<< QString("94959697999a9b9c9e9fa0a1a3a4a5a6a8a9aaabadaeafb0");
-    QTest::newRow("13") << QString("40be8c5d9108e663f38f1a2395279ecf") 
-			<< QString("c9c82766176a9b228eb9a974a010b4fb") 
+    QTest::newRow("13") << QString("40be8c5d9108e663f38f1a2395279ecf")
+			<< QString("c9c82766176a9b228eb9a974a010b4fb")
 			<< QString("d0d1d2d3d5d6d7d8dadbdcdddfe0e1e2e4e5e6e7e9eaebec");
-    QTest::newRow("14") << QString("0c8ad9bc32d43e04716753aa4cfbe351") 
-			<< QString("d8e26aa02945881d5137f1c1e1386e88") 
+    QTest::newRow("14") << QString("0c8ad9bc32d43e04716753aa4cfbe351")
+			<< QString("d8e26aa02945881d5137f1c1e1386e88")
 			<< QString("2a2b2c2d2f30313234353637393a3b3c3e3f404143444546");
     QTest::newRow("15") << QString("1407b1d5f87d63357c8dc7ebbaebbfee")
 			<< QString("c0e024ccd68ff5ffa4d139c355a77c55")
@@ -436,7 +501,7 @@ void CipherUnitTest::aes192()
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
-	    
+
 	    QCA::Cipher reverseCipher( QString( "aes192" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
@@ -665,23 +730,23 @@ void CipherUnitTest::aes256_data()
     QTest::newRow("3") << QString("726165c1723fbcf6c026d7d00b091027")
 		       << QString("7c1700211a3991fc0ecded0ab3e576b0")
 		       << QString("30313233353637383a3b3c3d3f40414244454647494a4b4c4e4f505153545556");
-    
+
     QTest::newRow("4") << QString("d7c544de91d55cfcde1f84ca382200ce")
 		       << QString("dabcbcc855839251db51e224fbe87435")
 		       << QString("58595a5b5d5e5f60626364656768696a6c6d6e6f71727374767778797b7c7d7e");
-    
+
     QTest::newRow("5") << QString("fed3c9a161b9b5b2bd611b41dc9da357")
 		       << QString("68d56fad0406947a4dd27a7448c10f1d")
 		       << QString("80818283858687888a8b8c8d8f90919294959697999a9b9c9e9fa0a1a3a4a5a6");
-    
+
     QTest::newRow("6") << QString("4f634cdc6551043409f30b635832cf82")
 		       << QString("da9a11479844d1ffee24bbf3719a9925")
 		       << QString("a8a9aaabadaeafb0b2b3b4b5b7b8b9babcbdbebfc1c2c3c4c6c7c8c9cbcccdce");
-    
+
     QTest::newRow("7") << QString("109ce98db0dfb36734d9f3394711b4e6")
 		       << QString("5e4ba572f8d23e738da9b05ba24b8d81")
 		       << QString("d0d1d2d3d5d6d7d8dadbdcdddfe0e1e2e4e5e6e7e9eaebeceeeff0f1f3f4f5f6");
-    
+
     QTest::newRow("8") << QString("4ea6dfaba2d8a02ffdffa89835987242")
 		       << QString("a115a2065d667e3f0b883837a6e903f8")
 		       << QString("70717273757677787a7b7c7d7f80818284858687898a8b8c8e8f909193949596");
@@ -689,51 +754,51 @@ void CipherUnitTest::aes256_data()
     QTest::newRow("9") << QString("5ae094f54af58e6e3cdbf976dac6d9ef")
 		       << QString("3e9e90dc33eac2437d86ad30b137e66e")
 		       << QString("98999a9b9d9e9fa0a2a3a4a5a7a8a9aaacadaeafb1b2b3b4b6b7b8b9bbbcbdbe");
-    
+
     QTest::newRow("10") << QString("764d8e8e0f29926dbe5122e66354fdbe")
 			<< QString("01ce82d8fbcdae824cb3c48e495c3692")
 			<< QString("c0c1c2c3c5c6c7c8cacbcccdcfd0d1d2d4d5d6d7d9dadbdcdedfe0e1e3e4e5e6");
-    
+
     QTest::newRow("11") << QString("3f0418f888cdf29a982bf6b75410d6a9")
 			<< QString("0c9cff163ce936faaf083cfd3dea3117")
 			<< QString("e8e9eaebedeeeff0f2f3f4f5f7f8f9fafcfdfeff01020304060708090b0c0d0e");
-    
+
     QTest::newRow("12") << QString("e4a3e7cb12cdd56aa4a75197a9530220")
 			<< QString("5131ba9bd48f2bba85560680df504b52")
 			<< QString("10111213151617181a1b1c1d1f20212224252627292a2b2c2e2f303133343536");
-    
+
     QTest::newRow("13") << QString("211677684aac1ec1a160f44c4ebf3f26")
 			<< QString("9dc503bbf09823aec8a977a5ad26ccb2")
 			<< QString("38393a3b3d3e3f40424344454748494a4c4d4e4f51525354565758595b5c5d5e");
-    
+
     QTest::newRow("14") << QString("d21e439ff749ac8f18d6d4b105e03895")
 			<< QString("9a6db0c0862e506a9e397225884041d7")
 			<< QString("60616263656667686a6b6c6d6f70717274757677797a7b7c7e7f808183848586");
-    
+
     QTest::newRow("15") << QString("d9f6ff44646c4725bd4c0103ff5552a7")
 			<< QString("430bf9570804185e1ab6365fc6a6860c")
 			<< QString("88898a8b8d8e8f90929394959798999a9c9d9e9fa1a2a3a4a6a7a8a9abacadae");
-    
+
     QTest::newRow("16") << QString("0b1256c2a00b976250cfc5b0c37ed382")
 			<< QString("3525ebc02f4886e6a5a3762813e8ce8a")
 			<< QString("b0b1b2b3b5b6b7b8babbbcbdbfc0c1c2c4c5c6c7c9cacbcccecfd0d1d3d4d5d6");
-    
+
     QTest::newRow("17") << QString("b056447ffc6dc4523a36cc2e972a3a79")
 			<< QString("07fa265c763779cce224c7bad671027b")
 			<< QString("d8d9dadbdddedfe0e2e3e4e5e7e8e9eaecedeeeff1f2f3f4f6f7f8f9fbfcfdfe");
-    
+
     QTest::newRow("18") << QString("5e25ca78f0de55802524d38da3fe4456")
 			<< QString("e8b72b4e8be243438c9fff1f0e205872")
 			<< QString("00010203050607080a0b0c0d0f10111214151617191a1b1c1e1f202123242526");
-    
+
     QTest::newRow("19") << QString("a5bcf4728fa5eaad8567c0dc24675f83")
 			<< QString("109d4f999a0e11ace1f05e6b22cbcb50")
 			<< QString("28292a2b2d2e2f30323334353738393a3c3d3e3f41424344464748494b4c4d4e");
-    
+
     QTest::newRow("20") << QString("814e59f97ed84646b78b2ca022e9ca43")
 			<< QString("45a5e8d4c3ed58403ff08d68a0cc4029")
 			<< QString("50515253555657585a5b5c5d5f60616264656667696a6b6c6e6f707173747576");
-    
+
     QTest::newRow("21") << QString("15478beec58f4775c7a7f5d4395514d7")
 			<< QString("196865964db3d417b6bd4d586bcb7634")
 			<< QString("78797a7b7d7e7f80828384858788898a8c8d8e8f91929394969798999b9c9d9e");
@@ -765,7 +830,7 @@ void CipherUnitTest::aes256()
 				       key,
 				       QCA::InitializationVector(),
 				       provider );
-	    
+
 	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 32 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 32 );
@@ -775,7 +840,7 @@ void CipherUnitTest::aes256()
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
-	    
+
 	    QCA::Cipher reverseCipher( QString( "aes256" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
@@ -1132,7 +1197,7 @@ void CipherUnitTest::tripleDES()
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
-	    
+
 	    QCA::Cipher reverseCipher( QString( "tripledes" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
@@ -1402,7 +1467,7 @@ void CipherUnitTest::des()
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
-	    
+
 	    QCA::Cipher reverseCipher( QString( "des" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
@@ -1495,7 +1560,7 @@ void CipherUnitTest::des_cfb_data()
     QTest::addColumn<QString>("keyText");
     QTest::addColumn<QString>("ivText");
 
-    QTest::newRow("") << QString("5eef8199471c2a7ef97509623cae32c35a90245b70a21ce36e") 
+    QTest::newRow("") << QString("5eef8199471c2a7ef97509623cae32c35a90245b70a21ce36e")
 		      << QString("658b25e25df23948847afa4c9ffdd5b3ddf35d801cbe945168")
 		      << QString("add9ce7bcf48c44b") << QString("0f90e78835ba3183");
     QTest::newRow("") << QString("4e6f77206973207468652074696d6520666f7220616c6c20")
@@ -1533,7 +1598,7 @@ void CipherUnitTest::des_cfb_data()
     QTest::newRow("") << QString("d75acdd3e4040dfda924ce09e627")
 		      << QString("a878ce766412a9c387ad61642fb7")
 		      << QString("fbf9e6d9344b0f2c") << QString("6917f8fe1ac12101");
-    QTest::newRow("") << QString("38b667a6e4458c8732aae6f4d0ac36") 
+    QTest::newRow("") << QString("38b667a6e4458c8732aae6f4d0ac36")
 		      << QString("5bcfd93d6b4b45d9d0d03162fa8fb9")
 		      << QString("8616d2ea6e6106b3") << QString("cfe4dfa7044f56ab");
     QTest::newRow("") << QString("0b439a72a4430b3d15e234034ba2c066")
@@ -1688,7 +1753,7 @@ void CipherUnitTest::des_pkcs7_data()
 		      << QString("569be1f2ae91785b0634f8dd4ec1dff2") << QString("012a7de9cbfbd230");
     QTest::newRow("") << QString("e923c535186730f309cdea6dea")
 		      << QString("846d7314f76e00902054bd2b2ae1f580") << QString("3d5d56ca2e8e359c");
-    QTest::newRow("") << QString("116053a5820f9d36650eef49a05b") 
+    QTest::newRow("") << QString("116053a5820f9d36650eef49a05b")
 		      << QString("9bd56c43036485b648efe6d31e69f0c6") << QString("2ad63a5312bf4259");
     QTest::newRow("") << QString("b6dcd40077fe89138b5a2ed35e1b3d")
 		      << QString("2fbe419bada6d4bf3f6c7bb2a1aac329") << QString("7ff12d4d8a9ef138");
@@ -2056,10 +2121,10 @@ void CipherUnitTest::blowfish()
         if( !QCA::isSupported( "blowfish-ecb", provider ) )
             QWARN( QString( "Blowfish ECB not supported for "+provider).toLocal8Bit() );
         else {
-	    QCA::Cipher cipherObj1( QString( "blowfish" ), 
+	    QCA::Cipher cipherObj1( QString( "blowfish" ),
 				    QCA::Cipher::ECB,
-				    QCA::Cipher::NoPadding, 
-				    QCA::Encode, 
+				    QCA::Cipher::NoPadding,
+				    QCA::Encode,
 				    QCA::SymmetricKey( 16 ),
 				    QCA::InitializationVector(), provider );
 
@@ -2071,7 +2136,7 @@ void CipherUnitTest::blowfish()
 	    QFETCH( QString, keyText );
 
 	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
-	    QCA::Cipher forwardCipher( QString( "blowfish" ), 
+	    QCA::Cipher forwardCipher( QString( "blowfish" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
 				       QCA::Encode,
@@ -2083,8 +2148,8 @@ void CipherUnitTest::blowfish()
 	    QVERIFY( forwardCipher.ok() );
 	    QCOMPARE( QCA::arrayToHex( forwardCipher.final() ), QString( "" ) );
 	    QVERIFY( forwardCipher.ok() );
-		
-	    QCA::Cipher reverseCipher( QString( "blowfish" ), 
+
+	    QCA::Cipher reverseCipher( QString( "blowfish" ),
 				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
 				       QCA::Decode,
@@ -2353,4 +2418,5 @@ void CipherUnitTest::blowfish_ofb()
 
 QTEST_MAIN(CipherUnitTest)
 
+#include "cipherunittest.moc"
 
