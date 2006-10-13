@@ -9,8 +9,6 @@ add_subdirectory(mactest)
 add_subdirectory(providertest)
 add_subdirectory(publickeyexample)
 add_subdirectory(randomtest)
-add_subdirectory(ssltest)
 add_subdirectory(rsatest)
 add_subdirectory(ssltest)
 add_subdirectory(sslservtest)
-
