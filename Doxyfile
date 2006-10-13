@@ -491,16 +491,18 @@ EXCLUDE_PATTERNS       = *.moc.* \
 # the \include command).
 
 EXAMPLE_PATH           = examples/aes-cmac \
+                         examples/base64test \
+			 examples/certtest \
+			 examples/ciphertest \
+		         examples/cms \
 			 examples/hashtest \
+			 examples/hextest \
                          examples/mactest \
                          examples/providertest \
-                         examples/base64test \
                          examples/randomtest \
-			 examples/hextest \
-			 examples/certtest \
+			 examples/rsatest \
 			 examples/ssltest \
-			 examples/sslservtest \
-			 examples/rsatest
+			 examples/sslservtest
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -729,7 +731,7 @@ TREEVIEW_WIDTH         = 250
 # If the GENERATE_LATEX tag is set to YES (the default) Doxygen will 
 # generate Latex output.
 
-GENERATE_LATEX         = NO
+GENERATE_LATEX         = YES
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 

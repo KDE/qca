@@ -1,6 +1,54 @@
+/** \example aes-cmac.cpp 
+
+This example shows how to implement a client side "provider".
+
+There are three important parts to this:
+ - the class derived from QCA::Provider (in this example called
+ "ClientSideProvider"), that generates the context class
+ - one or more context classes (in this example only one, implementing
+ AES-CMAC, called "AESCMACContext")
+ - a call to QCA::insertProvider, to add the QCA::Provider subclass
+ into QCA
+
+*/
+
+/** \example base64test.cpp
+
+The code below shows some simple operations on a Base64 object, converting
+between QSecureArray and QString.
+
+*/
+
+/** \example certtest.cpp
+
+This example shows how QCA::Certificate and QCA::CertificateCollection
+can be used. Note that the argument, if you provide it, must be a 
+PEM encoded file collection.
+
+*/
+
+/** \example ciphertest.cpp
+
+The code below shows the normal way to use the Cipher class.
+
+*/
+
+/** \example cmsexample.cpp
+
+The code below shows the normal way to use the CMS class.
+
+*/
+
 /** \example hashtest.cpp
 
-The code below shows how to use a Hash subclass
+The code below shows how to use the Hash lass
+
+*/
+
+/** \example hextest.cpp
+
+The code below shows some simple operations on a Hex object, converting
+between QSecureArray and QString.
 
 */
 
@@ -16,21 +64,6 @@ The code below shows some simple operations on a Provider object, including
 use of iterators and some member functions.
 
 */
-
-/** \example base64test.cpp
-
-The code below shows some simple operations on a Base64 object, converting
-between QSecureArray and QString.
-
-*/
-
-/** \example hextest.cpp
-
-The code below shows some simple operations on a Hex object, converting
-between QSecureArray and QString.
-
-*/
-
 
 /** \example randomtest.cpp
 
@@ -68,25 +101,4 @@ just create a TlsConnection for each server connection.
 
 */
 
-/** \example certtest.cpp
-
-This example shows how QCA::Certificate and QCA::CertificateCollection
-can be used. Note that the argument, if you provide it, must be a 
-PEM encoded file collection.
-
-*/
-
-/** \example aes-cmac.cpp 
-
-This examples shows how to implement a client side "provider".
-
-There are three important parts to this:
- - the class derived from QCA::Provider (in this example called
- "ClientSideProvider"), that generates the context class
- - one or more context classes (in this example only one, implementing
- AES-CMAC, called "AESCMACContext")
- - a call to QCA::insertProvider, to add the QCA::Provider subclass
- into QCA
-
-*/
 
