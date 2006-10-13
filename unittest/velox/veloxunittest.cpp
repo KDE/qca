@@ -33,14 +33,16 @@ class TlsTest : public QObject
 public:
     TlsTest()
     {
-        sock = new QTcpSocket;
+        sock = new QTcpSocket( this );
         connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
         connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
 
-        ssl = new QCA::TLS;
+        ssl = new QCA::TLS( this );
         connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
         connect(ssl, SIGNAL(readyReadOutgoing()),
                 SLOT(ssl_readyReadOutgoing()));
+
+        sync = new QCA::Synchronizer( this );
     }
 
     ~TlsTest()
@@ -53,6 +55,11 @@ public:
     {
         host = _host;
         sock->connectToHost(host, port);
+    }
+
+    void waitForHandshake( int timeout = 20000 )
+    {
+        sync->waitForCondition( timeout );
     }
 
     bool isHandshaken()
@@ -84,6 +91,8 @@ private slots:
         QCA::TLS::IdentityResult r = ssl->peerIdentityResult();
 
         QCOMPARE( r,  QCA::TLS::Valid );
+
+        sync->conditionMet();
     }
 
     void ssl_readyReadOutgoing()
@@ -96,6 +105,7 @@ private:
     QTcpSocket *sock;
     QCA::TLS *ssl;
     QCA::Certificate cert;
+    QCA::Synchronizer *sync;
 };
 
 
@@ -135,7 +145,7 @@ void VeloxUnitTest::sniAlice()
     else {
         TlsTest *s = new TlsTest;
         s->start( "alice.sni.velox.ch", 443 );
-        QTest::qWait( 4000 );
+        s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
 }
@@ -147,7 +157,7 @@ void VeloxUnitTest::sniBob()
     else {
         TlsTest *s = new TlsTest;
         s->start( "bob.sni.velox.ch", 443 );
-        QTest::qWait( 4000 );
+        s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
 }
@@ -159,7 +169,7 @@ void VeloxUnitTest::sniCarol()
     else {
         TlsTest *s = new TlsTest;
         s->start( "carol.sni.velox.ch", 443 );
-        QTest::qWait( 4000 );
+        s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
 }
@@ -171,7 +181,7 @@ void VeloxUnitTest::sniDave()
     else {
         TlsTest *s = new TlsTest;
         s->start( "dave.sni.velox.ch", 443 );
-        QTest::qWait( 4000 );
+        s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
 }
@@ -183,7 +193,7 @@ void VeloxUnitTest::sniMallory()
     else {
         TlsTest *s = new TlsTest;
         s->start( "mallory.sni.velox.ch", 443 );
-        QTest::qWait( 4000 );
+        s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
 }
@@ -196,7 +206,7 @@ void VeloxUnitTest::sniIvan()
     else {
         TlsTest *s = new TlsTest;
         s->start( "ivan.sni.velox.ch", 443 );
-        QTest::qWait( 4000 );
+        s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
 }
