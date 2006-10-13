@@ -968,21 +968,33 @@ namespace QCA
 		InitializationVector(const QByteArray &a);
 	};
 
+	/**
+	   An asynchronous event
+	*/
 	class QCA_EXPORT Event
 	{
 	public:
+	        /** 
+		    type of event
+		*/
 		enum Type
 		{
 			Password,   ///< Asking for a password
 			Token       ///< Asking for a token
 		};
 
+	        /** 
+		    source of event
+		*/
 		enum Source
 		{
 			KeyStore,   ///< KeyStore generated the event
 			Data        ///< File/bytearray generated the event
 		};
 
+	        /** 
+		    password variation
+		*/
 		enum PasswordStyle
 		{
 			StylePassword,   ///< User should be prompted for a "Password"
@@ -990,24 +1002,78 @@ namespace QCA
 			StylePIN         ///< User should be prompted for a "PIN"
 		};
 
+		/**
+		   Constructor
+		*/
 		Event();
+
+		/**
+		   Copy constructor
+
+		   \param from the Event to copy from
+		*/
 		Event(const Event &from);
+
+		/**
+		   Destructor
+		*/
 		~Event();
+
+		/**
+		   Assignment operator
+
+		   \param from the Event to copy from
+		*/
 		Event & operator=(const Event &from);
 
+		/**
+		   test if this event has been setup correctly
+		*/
 		bool isNull() const;
 
+		/**
+		   the Type of this event
+		*/
 		Type type() const;
 
+		/**
+		   the Source of this event
+		*/
 		Source source() const;
+
+		/**
+		   the style of password required
+		*/
 		PasswordStyle passwordStyle() const;
+
 		QString keyStoreId() const;
 		QString keyStoreEntryId() const;
 		QString fileName() const;
+
+		/**
+		   opaque data
+		*/
 		void *ptr() const;
 
+		/**
+		   Set the values for this Event
+
+		   \param pstyle the style of password required
+		   \param keyStoreId
+		   \param keyStoreEntryId
+		   \param ptr opaque data
+		*/
 		void setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+
+		/**
+		   Set the values for this Event
+
+		   \param pstyle
+		   \param fileName
+		   \param ptr opaque data
+		*/
 		void setPasswordData(PasswordStyle pstyle, const QString &fileName, void *ptr);
+
 		void setToken(const QString &keyStoreEntryId, void *ptr);
 
 	private:
