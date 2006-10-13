@@ -41,7 +41,7 @@ The code below shows the normal way to use the CMS class.
 
 /** \example hashtest.cpp
 
-The code below shows how to use the Hash lass
+The code below shows how to use the Hash class
 
 */
 
@@ -54,7 +54,7 @@ between QSecureArray and QString.
 
 /** \example mactest.cpp
 
-The code below shows how to use a MessageAuthenticationCode subclass
+The code below shows how to usethe MessageAuthenticationCode class
 
 */
 
