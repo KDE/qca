@@ -541,6 +541,7 @@ void MACUnitTest::HMACRMD160()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "hmac(ripemd160)", provider ) )
