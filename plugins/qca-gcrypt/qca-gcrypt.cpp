@@ -443,8 +443,8 @@ public:
 	list += "hmac(sha224)";
 #endif
 	list += "hmac(sha256)";
-	if ( ! ( NULL == gcry_check_version("1.2.3") ) ) {
-	    // 1.2.2 and earlier have broken implementation
+	if ( ! ( NULL == gcry_check_version("1.3.0") ) ) {
+	    // 1.2 and earlier have broken implementation
 	    list += "hmac(sha384)";
 	    list += "hmac(sha512)";
 	}
@@ -465,6 +465,15 @@ public:
 	list += "des-ecb";
 	list += "des-cbc";
 	list += "des-cfb";
+	if ( ! ( NULL == gcry_check_version("1.3.0") ) ) {
+	    // 1.2 branch and earlier doesn't support OFB mode
+	    list += "aes128-ofb";
+	    list += "aes192-ofb";
+	    list += "aes256-ofb";
+	    list += "des-ofb";
+	    list += "tripledes-ofb";
+	    list += "blowfish-ofb";
+	}
 	list += "pbkdf1(sha1)";
 	list += "pbkdf2(sha1)";
 	return list;
@@ -511,18 +520,24 @@ public:
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes128-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "aes128-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "aes128-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "aes192-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes192-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "aes192-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "aes192-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "aes256-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "aes256-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "aes256-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "aes256-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "blowfish-ecb" )
@@ -531,14 +546,20 @@ public:
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "blowfish-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "blowfish-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "tripledes-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_ECB, false, this, type );
+	else if ( type == "tripledes-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "des-ecb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, false, this, type );
 	else if ( type == "des-cbc" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CBC, false, this, type );
 	else if ( type == "des-cfb" )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CFB, false, this, type );
+	else if ( type == "des-ofb" )
+	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_OFB, false, this, type );
 	else if ( type == "pbkdf1(sha1)" )
 	    return new gcryptQCAPlugin::pbkdf1Context( GCRY_MD_SHA1, this, type );
 	else if ( type == "pbkdf2(sha1)" )
