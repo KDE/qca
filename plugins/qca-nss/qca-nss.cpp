@@ -18,6 +18,7 @@
  */
 #include "pk11func.h"
 #include "nss.h"
+#include "hasht.h"
 
 #include <QtCrypto>
 #include <QtCore>
@@ -134,6 +135,138 @@ private:
 };	
 
 
+//-----------------------------------------------------------
+class nssHmacContext : public QCA::MACContext
+{
+public:
+    nssHmacContext( QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    {
+	NSS_NoDB_Init(".");
+
+	m_status = 0;
+
+	/* Get a slot to use for the crypto operations */
+	m_slot = PK11_GetInternalKeySlot();
+	if (!m_slot)
+	{
+	    qDebug() << "GetInternalKeySlot failed";
+	    m_status = 1;
+	    return;
+	}
+
+	if ( QString("hmac(md5)") == type ) {
+	    m_macAlgo = CKM_MD5_HMAC;
+	}
+	else if ( QString("hmac(sha1)") == type ) {
+	    m_macAlgo = CKM_SHA_1_HMAC;
+	}
+	else if ( QString("hmac(sha256)") == type ) {
+	    m_macAlgo = CKM_SHA256_HMAC;
+	}
+	else if ( QString("hmac(sha384)") == type ) {
+	    m_macAlgo = CKM_SHA384_HMAC;
+	}
+	else if ( QString("hmac(sha512)") == type ) {
+	    m_macAlgo = CKM_SHA512_HMAC;
+	}
+	else if ( QString("hmac(ripemd160)") == type ) {
+	    m_macAlgo = CKM_RIPEMD160_HMAC;
+	}
+	else {
+	    qDebug() << "Unknown provider type: " << type;
+	    return; /* this will probably cause a segfault... */
+	}
+    }
+
+    ~nssHmacContext()
+    {
+	PK11_DestroyContext(m_context, PR_TRUE);
+	if (m_slot)
+	    PK11_FreeSlot(m_slot);
+    }
+
+    Context *clone() const
+    {
+	return new nssHmacContext(*this);
+    }
+
+    void clear()
+    {
+	PK11_DestroyContext(m_context, PR_TRUE);
+
+	SECItem noParams;
+	noParams.data = 0;
+	noParams.len = 0;
+
+	m_context = PK11_CreateContextBySymKey(m_macAlgo, CKA_SIGN, m_nssKey, &noParams);
+	if (! m_context) {
+	    qDebug() << "CreateContextBySymKey failed";
+	    return;
+	}
+
+	SECStatus s = PK11_DigestBegin(m_context);
+	if (s != SECSuccess) {
+	    qDebug() << "DigestBegin failed";
+	    return;
+	}
+    }
+
+    QCA::KeyLength keyLength() const
+    {
+        return anyKeyLength();
+    }
+    
+    void setup(const QCA::SymmetricKey &key)
+    {
+        /* turn the raw key into a SECItem */
+        SECItem keyItem;
+	keyItem.data = (unsigned char*) key.data();
+	keyItem.len = key.size();
+ 
+	m_nssKey = PK11_ImportSymKey(m_slot, m_macAlgo, PK11_OriginUnwrap, CKA_SIGN, &keyItem, NULL);
+
+	SECItem noParams;
+	noParams.data = 0;
+	noParams.len = 0;
+
+	m_context = PK11_CreateContextBySymKey(m_macAlgo, CKA_SIGN, m_nssKey, &noParams);
+	if (! m_context) {
+	    qDebug() << "CreateContextBySymKey failed";
+	    return;
+	}
+
+	SECStatus s = PK11_DigestBegin(m_context);
+	if (s != SECSuccess) {
+	    qDebug() << "DigestBegin failed";
+	    return;
+	}
+    }
+
+    void update(const QSecureArray &a)
+    {
+	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
+    }
+    
+    void final( QSecureArray *out)
+    {
+	// NSS doesn't appear to be able to tell us how big the digest will
+	// be for a given algorithm until after we finalise it, so we work
+	// around the problem a bit.
+	out->resize( HASH_LENGTH_MAX ); // assume the biggest hash size we know
+	unsigned int len = 0;
+	PK11_DigestFinal(m_context, (unsigned char*)out->data(), &len, out->size());
+	out->resize(len); // and fix it up later
+    }
+    
+private:
+    PK11SlotInfo *m_slot;
+    int m_status;
+    PK11Context *m_context;
+    CK_MECHANISM_TYPE m_macAlgo;
+    PK11SymKey* m_nssKey;
+};	
+
+
 //==========================================================
 class nssProvider : public QCA::Provider
 {
@@ -154,12 +287,21 @@ public:
     QStringList features() const
     {
 	QStringList list;
+
 	list += "md2";
 	list += "md5";
 	list += "sha1";
 	list += "sha256";
 	list += "sha384";
 	list += "sha512";
+
+	list += "hmac(md5)";
+	list += "hmac(sha1)";
+	list += "hmac(sha256)";
+	list += "hmac(sha384)";
+	list += "hmac(sha512)";
+	// appears to not be implemented in NSS
+	// list += "hmac(ripemd160)";
 	return list;
     }
     
@@ -177,6 +319,19 @@ public:
 	    return new nssHashContext( this, type );
 	if ( type == "sha512" )
 	    return new nssHashContext( this, type );
+
+	if ( type == "hmac(md5)" )
+	    return new nssHmacContext( this, type );
+	if ( type == "hmac(sha1)" )
+	    return new nssHmacContext( this, type );
+	if ( type == "hmac(sha256)" )
+	    return new nssHmacContext( this, type );
+	if ( type == "hmac(sha384)" )
+	    return new nssHmacContext( this, type );
+	if ( type == "hmac(sha512)" )
+	    return new nssHmacContext( this, type );
+	if ( type == "hmac(ripemd160)" )
+	    return new nssHmacContext( this, type );
 	else
 	    return 0;
     }
