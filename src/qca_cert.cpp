@@ -1309,7 +1309,7 @@ void KeyBundle::setCertificateChainAndKey(const CertificateChain &c, const Priva
 
 QByteArray KeyBundle::toArray(const QSecureArray &passphrase, const QString &provider) const
 {
-	PIXContext *pix = static_cast<PIXContext *>(getContext("pix", provider));
+	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
 
 	QList<const CertContext*> list;
 	for(int n = 0; n < d->chain.count(); ++n)
@@ -1332,7 +1332,7 @@ KeyBundle KeyBundle::fromArray(const QByteArray &a, const QSecureArray &passphra
 	PKeyContext *kc = 0;
 
 	KeyBundle bundle;
-	PIXContext *pix = static_cast<PIXContext *>(getContext("pix", provider));
+	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
 	ConvertResult r = pix->fromPKCS12(a, passphrase, &name, &list, &kc);
 
 	// error converting without passphrase?  maybe a passphrase is needed

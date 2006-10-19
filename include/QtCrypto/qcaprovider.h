@@ -325,10 +325,10 @@ public:
 	virtual CRLContext *updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const = 0;
 };
 
-class QCA_EXPORT PIXContext : public Provider::Context
+class QCA_EXPORT PKCS12Context : public Provider::Context
 {
 public:
-	PIXContext(Provider *p) : Provider::Context(p, "pix") {}
+	PKCS12Context(Provider *p) : Provider::Context(p, "pkcs12") {}
 
 	virtual QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const QSecureArray &passphrase) const = 0;
 
