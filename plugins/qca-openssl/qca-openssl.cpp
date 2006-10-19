@@ -3890,14 +3890,14 @@ Validity MyCertContext::validate_chain(const QList<CertContext*> &chain, const Q
 	return ValidityGood;
 }
 
-class MyPIXContext : public PIXContext
+class MyPKCS12Context : public PKCS12Context
 {
 public:
-	MyPIXContext(Provider *p) : PIXContext(p)
+	MyPKCS12Context(Provider *p) : PKCS12Context(p)
 	{
 	}
 
-	~MyPIXContext()
+	~MyPKCS12Context()
 	{
 	}
 
@@ -3912,7 +3912,7 @@ public:
 			return QByteArray();
 
 		X509 *cert = static_cast<const MyCertContext *>(chain[0])->item.cert;
-		STACK_OF(X509) *ca = NULL;
+		STACK_OF(X509) *ca = sk_X509_new_null();
 		if(chain.count() > 1)
 		{
 			for(int n = 1; n < chain.count(); ++n)
@@ -3963,7 +3963,9 @@ public:
 			return ErrorDecode;
 		}
 
-		*name = QString(); // TODO: read the name out of the file?
+		int aliasLength;
+		char *aliasData = (char*)X509_alias_get0(cert, &aliasLength);
+		*name = QString::fromAscii(aliasData, aliasLength);
 
 		MyPKeyContext *pk = new MyPKeyContext(provider());
 		PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
@@ -5940,7 +5942,7 @@ public:
 		list += "cert";
 		list += "csr";
 		list += "crl";
-		list += "pix";
+		list += "pkcs12";
 		list += "tls";
 		list += "cms";
 
@@ -6070,8 +6072,8 @@ public:
 			return new MyCSRContext( this );
 		else if ( type == "crl" )
 			return new MyCRLContext( this );
-		else if ( type == "pix" )
-			return new MyPIXContext( this );
+		else if ( type == "pkcs12" )
+			return new MyPKCS12Context( this );
 		else if ( type == "tls" )
 			return new MyTLSContext( this );
 		else if ( type == "cms" )
