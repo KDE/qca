@@ -173,6 +173,7 @@ void CipherUnitTest::aes128()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes128-ecb", provider ) )
@@ -244,6 +245,7 @@ void CipherUnitTest::aes128_cbc()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes128-cbc", provider ) )
@@ -305,6 +307,7 @@ void CipherUnitTest::aes128_cfb()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes128-cfb", provider ) )
@@ -365,6 +368,7 @@ void CipherUnitTest::aes128_ofb()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes128-ofb", provider ) )
@@ -474,6 +478,7 @@ void CipherUnitTest::aes192()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes192-ecb", provider ) )
@@ -546,6 +551,7 @@ void CipherUnitTest::aes192_cbc()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes192-cbc", provider ) )
@@ -606,6 +612,7 @@ void CipherUnitTest::aes192_cfb()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes192-cfb", provider ) )
@@ -666,6 +673,7 @@ void CipherUnitTest::aes192_ofb()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes192-ofb", provider ) )
@@ -813,6 +821,7 @@ void CipherUnitTest::aes256()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes256-ecb", provider ) )
@@ -884,6 +893,7 @@ void CipherUnitTest::aes256_cbc()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes256-cbc", provider ) )
@@ -945,6 +955,7 @@ void CipherUnitTest::aes256_cfb()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes256-cfb", provider ) )
@@ -1004,6 +1015,7 @@ void CipherUnitTest::aes256_ofb()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "aes256-ofb", provider ) )
@@ -1160,8 +1172,9 @@ void CipherUnitTest::tripleDES()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
+    // providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "tripledes-ecb", provider ) )
@@ -1440,6 +1453,7 @@ void CipherUnitTest::des()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "des-ecb", provider ) )
@@ -1511,6 +1525,7 @@ void CipherUnitTest::des_cbc()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "des-cbc", provider ) )
@@ -1781,8 +1796,8 @@ void CipherUnitTest::des_pkcs7()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "des-ecb-pkcs7", provider ) )
@@ -1937,8 +1952,9 @@ void CipherUnitTest::des_cbc_pkcs7()
 {
     QStringList providersToTest;
     providersToTest.append("qca-openssl");
-    providersToTest.append("qca-gcrypt");
+    // providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "des-cbc-pkcs7", provider ) )
@@ -2116,6 +2132,7 @@ void CipherUnitTest::blowfish()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "blowfish-ecb", provider ) )
@@ -2191,6 +2208,7 @@ void CipherUnitTest::blowfish_cbc()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "blowfish-cbc", provider ) )
@@ -2253,6 +2271,7 @@ void CipherUnitTest::blowfish_cbc_pkcs7()
     providersToTest.append("qca-openssl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "blowfish-cbc-pkcs7", provider ) )
