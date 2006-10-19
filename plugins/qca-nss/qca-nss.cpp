@@ -266,6 +266,139 @@ private:
     PK11SymKey* m_nssKey;
 };	
 
+//-----------------------------------------------------------
+class nssCipherContext : public QCA::CipherContext
+{
+public:
+    nssCipherContext( QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+    {
+	NSS_NoDB_Init(".");
+
+	if ( QString("aes128-ecb") == type ) {
+	    m_cipherMechanism = CKM_AES_ECB;
+	}
+	else if ( QString("aes128-cbc") == type ) {
+	    m_cipherMechanism = CKM_AES_CBC;
+	}
+	else if ( QString("des-ecb") == type ) {
+	    m_cipherMechanism = CKM_DES_ECB;
+	}
+	else if ( QString("des-cbc") == type ) {
+	    m_cipherMechanism = CKM_DES_CBC;
+	}
+	else if ( QString("des-cbc-pkcs7") == type ) {
+	    m_cipherMechanism = CKM_DES_CBC_PAD;
+	}
+	else if ( QString("tripledes-ecb") == type ) {
+	    m_cipherMechanism = CKM_DES3_ECB;
+	}
+	else {
+	    qDebug() << "Unknown provider type: " << type;
+	    return; /* this will probably cause a segfault... */
+	}
+    }
+
+    ~nssCipherContext()
+	{
+	}
+
+    void setup( QCA::Direction dir,
+		const QCA::SymmetricKey &key,
+		const QCA::InitializationVector &iv )
+    {
+	/* Get a slot to use for the crypto operations */
+	m_slot = PK11_GetBestSlot( m_cipherMechanism, NULL );
+	if (!m_slot)
+	{
+	    qDebug() << "GetBestSlot failed";
+	    return;
+	}
+
+	/* turn the raw key into a SECItem */
+        SECItem keyItem;
+	keyItem.data = (unsigned char*) key.data();
+	keyItem.len = key.size();
+ 
+	if (QCA::Encode == dir) {
+	    m_nssKey = PK11_ImportSymKey(m_slot, m_cipherMechanism,
+					 PK11_OriginUnwrap, CKA_ENCRYPT,
+					 &keyItem, NULL);
+	} else {
+	    // decryption
+	    m_nssKey = PK11_ImportSymKey(m_slot, m_cipherMechanism,
+					 PK11_OriginUnwrap, CKA_DECRYPT,
+					 &keyItem, NULL);
+	}
+
+	SECItem ivItem;
+	ivItem.data = (unsigned char*) iv.data();
+	ivItem.len = iv.size();
+
+	m_params = PK11_ParamFromIV(m_cipherMechanism, &ivItem);
+
+	if (QCA::Encode == dir) {
+	    m_context = PK11_CreateContextBySymKey(m_cipherMechanism,
+						   CKA_ENCRYPT, m_nssKey,
+						   m_params);
+	} else {
+	    // decryption
+	    m_context = PK11_CreateContextBySymKey(m_cipherMechanism,
+						   CKA_DECRYPT, m_nssKey,
+						   m_params);
+	}
+
+	if (! m_context) {
+	    qDebug() << "CreateContextBySymKey failed";
+	    return;
+	}
+    }
+
+    QCA::Provider::Context *clone() const
+	{
+	}
+
+    unsigned int blockSize() const
+	{
+	    return PK11_GetBlockSize( m_cipherMechanism, m_params);
+	}
+
+    bool update( const QSecureArray &in, QSecureArray *out )
+	{
+	    out->resize(in.size()+blockSize());
+	    int resultLength;
+
+	    PK11_CipherOp(m_context, (unsigned char*)out->data(),
+			  &resultLength, out->size(),
+			  (unsigned char*)in.data(), in.size());
+	    out->resize(resultLength);
+
+	    return true;
+	}
+
+    bool final( QSecureArray *out )
+	{
+	    out->resize(blockSize());
+	    unsigned int resultLength;
+
+	    PK11_DigestFinal(m_context, (unsigned char*)out->data(),
+			     &resultLength, out->size());
+	    out->resize(resultLength);
+
+	    return true;
+	}
+
+    QCA::KeyLength keyLength() const
+	{
+	}
+
+private:
+    PK11SymKey* m_nssKey;
+    CK_MECHANISM_TYPE m_cipherMechanism;
+    PK11SlotInfo *m_slot;
+    PK11Context *m_context;
+    SECItem* m_params;
+};
+
 
 //==========================================================
 class nssProvider : public QCA::Provider
@@ -300,8 +433,16 @@ public:
 	list += "hmac(sha256)";
 	list += "hmac(sha384)";
 	list += "hmac(sha512)";
-	// appears to not be implemented in NSS
+	// appears to not be implemented in NSS yet
 	// list += "hmac(ripemd160)";
+
+	list += "aes128-ecb";
+	list += "aes128-cbc";
+	list += "des-ecb";
+	list += "des-cbc";
+	list += "des-cbc-pkcs7";
+	list += "tripledes-ecb";
+
 	return list;
     }
     
@@ -332,11 +473,22 @@ public:
 	    return new nssHmacContext( this, type );
 	if ( type == "hmac(ripemd160)" )
 	    return new nssHmacContext( this, type );
+
+	if ( type == "aes128-ecb" )
+	    return new nssCipherContext( this, type);
+	if ( type == "aes128-cbc" )
+	    return new nssCipherContext( this, type);
+	if ( type == "des-ecb" )
+	    return new nssCipherContext( this, type);
+	if ( type == "des-cbc" )
+	    return new nssCipherContext( this, type);
+	if ( type == "des-cbc-pkcs7" )
+	    return new nssCipherContext( this, type);
+	if ( type == "tripledes-ecb" )
+	    return new nssCipherContext( this, type);
 	else
 	    return 0;
     }
-private:
-
 };
 
 class nssPlugin : public QCAPlugin
