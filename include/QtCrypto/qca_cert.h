@@ -1261,9 +1261,19 @@ namespace QCA
 	/**
 	   \class KeyBundle qca_cert.h QtCrypto
 
-	   Public/private key pair
+	   Certificate chain and private key pair
 
-	   This holds a certificate chain and an associated private key.
+	   KeyBundle is essentially a convience class that holds a
+	   certificate chain and an associated private key. This class
+	   has a number of methods that make it particularly suitable
+	   for accessing a PKCS12 (.p12) format file, however it can
+	   be used as just a container for a Certificate, its
+	   associated PrivateKey and optionally additional
+	   X.509 Certificate that form a chain.
+	   
+	   For more information on PKCS12 "Personal Information
+	   Exchange Syntax Standard", see <a
+	   href="ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-12/pkcs-12v1.pdf">ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-12/pkcs-12v1.pdf</a>. 
 	*/
 	class QCA_EXPORT KeyBundle
 	{
@@ -1274,19 +1284,25 @@ namespace QCA
 		KeyBundle();
 
 		/**
-		   Create a KeyBundle from an encoded file
+		   Create a KeyBundle from a PKCS12 (.p12) encoded
+		   file
+
+		   This constructor requires appropriate plugin (provider)
+		   support. You must check for the "pkcs12" feature
+		   before using this constructor.
 
 		   \param fileName the name of the file to read from
 		   \param passphrase the passphrase that is applicable to the file
 
-		   \sa fromFile
+		   \sa fromFile for a more flexible version of the
+		   same capability.
 		*/
 		KeyBundle(const QString &fileName, const QSecureArray &passphrase);
 
 		/**
 		   Standard copy constructor
 
-		   \param from KeyBundle to use as source
+		   \param from the KeyBundle to use as source
 		*/
 		KeyBundle(const KeyBundle &from);
 
@@ -1295,7 +1311,7 @@ namespace QCA
 		/**
 		   Standard assignment operator
 
-		   \param from KeyBundle to use as source
+		   \param from the KeyBundle to use as source
 		*/
 		KeyBundle & operator=(const KeyBundle &from);
 
@@ -1305,17 +1321,27 @@ namespace QCA
 		bool isNull() const;
 
 		/**
-		   The name associated with this key
+		   The name associated with this key.
+
+		   This is also known as the "friendly name", and if
+		   present, is typically suitable to be displayed to
+		   the user.
+
+		   \sa setName
 		*/
 		QString name() const;
 
 		/**
 		   The public certificate part of this bundle
+
+		   \sa setCertificateChainAndKey
 		*/
 		CertificateChain certificateChain() const;
 
 		/**
 		   The private key part of this bundle
+
+		   \sa setCertificateChainAndKey
 		*/
 		PrivateKey privateKey() const;
 
@@ -1331,12 +1357,27 @@ namespace QCA
 
 		   \param c the CertificateChain containing the public part of the Bundle
 		   \param key the private key part of the Bundle
+
+		   \sa privateKey, certificateChain for getters
 		*/
 		void setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key);
 
 		// import / export
 		/**
-		   Export the key bundle to an array
+		   Export the key bundle to an array in PKCS12 format.
+
+		   This method requires appropriate plugin (provider)
+		   support - you must check for the "pkcs12" feature,
+		   as shown below.
+
+		   \code
+		   if (QCA::isSupported( "pkcs12") {
+		       // can use I/O
+		       byteArray = bundle.toArray( "pass phrase" );
+		   } else {
+		       // not possible to use I/O
+		   }
+		   \endcode
 
 		   \param passphrase the passphrase to use to protect the bundle
 		   \param provider the provider to use, if a specific provider is required
@@ -1344,7 +1385,20 @@ namespace QCA
 		QByteArray toArray(const QSecureArray &passphrase, const QString &provider = QString()) const;
 
 		/**
-		   Export the key bundle to a file
+		   Export the key bundle to a file in PKCS12 (.p12) format
+
+		   This method requires appropriate plugin (provider)
+		   support - you must check for the "pkcs12" feature,
+		   as shown below.
+
+		   \code
+		   if (QCA::isSupported( "pkcs12") {
+		       // can use I/O
+		       bool result = bundle.toFile( filename, "pass phrase" );
+		   } else {
+		       // not possible to use I/O
+		   }
+		   \endcode
 
 		   \param fileName the name of the file to save to
 		   \param passphrase the passphrase to use to protect the bundle
@@ -1353,7 +1407,20 @@ namespace QCA
 		bool toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider = QString()) const;
 
 		/**
-		   Import the key bundle from an array
+		   Import the key bundle from an array in PKCS12 format
+
+		   This method requires appropriate plugin (provider)
+		   support - you must check for the "pkcs12" feature,
+		   as shown below.
+
+		   \code
+		   if (QCA::isSupported( "pkcs12") {
+		       // can use I/O
+		       bundle = QCA::KeyBundle::fromArray( array, "pass phrase" );
+		   } else {
+		       // not possible to use I/O
+		   }
+		   \endcode
 
 		   \param a the array to import from
 		   \param passphrase the passphrase for the encoded bundle
@@ -1363,7 +1430,20 @@ namespace QCA
 		static KeyBundle fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
 
 		/**
-		   Import the key bundle from a file
+		   Import the key bundle from a file in PKCS12 (.p12) format
+
+		   This method requires appropriate plugin (provider)
+		   support - you must check for the "pkcs12" feature,
+		   as shown below.
+
+		   \code
+		   if (QCA::isSupported( "pkcs12") {
+		       // can use I/O
+		       bundle = QCA::KeyBundle::fromFile( filename, "pass phrase" );
+		   } else {
+		       // not possible to use I/O
+		   }
+		   \endcode
 
 		   \param fileName the name of the file to read from
 		   \param passphrase the passphrase for the encoded bundle
