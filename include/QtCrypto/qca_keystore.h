@@ -295,7 +295,13 @@ namespace QCA
 	/**
 	   \class KeyStoreManager qca_keystore.h QtCrypto
 
-	   Access keystores, and monitor keystores for changes
+	   Access keystores, and monitor keystores for changes.
+
+	   If you are looking to use this class, you probably want to
+	   take a reference to the global KeyStoreManager, using the
+	   QCA::keyStoreManager() function. You then need to start()
+	   the KeyStoreManager, and either wait for the busyFinished()
+	   signal, or block using waitForBusyFinished().
 	*/
 	class QCA_EXPORT KeyStoreManager : public QObject
 	{
