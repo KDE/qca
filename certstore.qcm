@@ -3,6 +3,7 @@
 name: certstore
 section: project
 arg: certstore-path=[path],Path to the SSL/X509 Certificate store file
+arg: certstore-internal,Force the use of the bundled store
 -----END QCMOD-----
 */
 
@@ -21,36 +22,39 @@ public:
 		// use built-in
 		return true;
 #else
-		QStringList pathsToTry;
-
-		path = conf->getenv("QC_CERTSTORE_PATH");
-		if(!path.isEmpty())
+		if(conf->getenv("QC_CERTSTORE_INTERNAL") != "Y")
 		{
-			if(QFile::exists(path))
+			QStringList pathsToTry;
+
+			path = conf->getenv("QC_CERTSTORE_PATH");
+			if(!path.isEmpty())
 			{
-				QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
-				conf->addDefine(certPathString);
-				return true;
+				if(QFile::exists(path))
+				{
+					QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
+					conf->addDefine(certPathString);
+					return true;
+				}
+				return false;
 			}
-			return false;
-		}
 
-		// This is from Debian
-		pathsToTry.append( QString("/etc/ssl/certs/ca-certificates.crt") );
+			// This is from Debian
+			pathsToTry.append( QString("/etc/ssl/certs/ca-certificates.crt") );
 
-		// Fedora Core 2 uses these
-		pathsToTry.append( QString("/usr/share/ssl/cert.pem") );
-		pathsToTry.append( QString("/usr/share/ssl/certs/ca-bundle.crt") );
+			// Fedora Core 2 uses these
+			pathsToTry.append( QString("/usr/share/ssl/cert.pem") );
+			pathsToTry.append( QString("/usr/share/ssl/certs/ca-bundle.crt") );
 
-		// Fedora Core 5 changes to this
-		pathsToTry.append( QString("/etc/pki/tls/cert.pem") );
+			// Fedora Core 5 changes to this
+			pathsToTry.append( QString("/etc/pki/tls/cert.pem") );
 
-		for(int n = 0; n < pathsToTry.count(); ++n)
-		{
-        		if(QFile::exists(pathsToTry[n]))
+			for(int n = 0; n < pathsToTry.count(); ++n)
 			{
-				path = pathsToTry[n];
-				break;
+        			if(QFile::exists(pathsToTry[n]))
+				{
+					path = pathsToTry[n];
+					break;
+				}
 			}
 		}
 
@@ -71,11 +75,22 @@ public:
 			bundled = true;
 		}
 
-		QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
-		conf->addDefine(certPathString);
+		conf->addExtra(makeEscapedDefine("QCA_SYSTEMSTORE_PATH", path));
 
 		return true;
 #endif
+	}
+
+	QString makeEscapedDefine(const QString &var, const QString &val)
+	{
+		QString str = QString(
+		"contains($$list($$[QT_VERSION]), 4.2.*) {\n"
+		"\tDEFINES += %1=\\\\\\\\\\\\\\"%2\\\\\\\\\\\\\\"\n"
+		"} else {\n").arg(var).arg(val);
+		str += QString(
+		"\tDEFINES += %1=\\\\\\"%2\\\\\\"\n"
+		"}\n").arg(var).arg(val);
+		return str;
 	}
 
 	QString resultString() const
