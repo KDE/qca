@@ -57,24 +57,38 @@ namespace QCA
 
 	   This enumeration provides the values that may appear in a
 	   CertificateInfo key field.  These are from RFC3280
-	   (http://www.ietf.org/rfc/rfc3280.text) except where shown.
+	   (http://www.ietf.org/rfc/rfc3280.txt) except where shown.
+	   
+	   The entries for IncorporationLocality, IncorporationState
+	   and IncorporationCountry are the same as Locality, State
+	   and Country respectively, except that the Extended
+	   Validation (EV) certificate guidelines (published by the
+	   %Certificate Authority / Browser Forum, see
+	   http://www.cabforum.org) distinguish between the place of
+	   where the company does business (which is the Locality /
+	   State / Country combination) and the jurisdiction where the
+	   company is legally incorporated (the IncorporationLocality
+	   / IncorporationState / IncorporationCountry combination).
 
 	   \sa Certificate::subjectInfo() and Certificate::issuerInfo()
 	   \sa CRL::issuerInfo()
 	*/
 	enum CertificateInfoType
 	{
-		CommonName,     ///< The common name (eg person)
-		Email,          ///< Email address
-		Organization,   ///< An organisation (eg company)
-		OrganizationalUnit,  ///< An part of an organisation (eg a division or branch)
-		Locality,       ///< The locality (eg a shire, or part of a state) 
-		State,          ///< The state within the country
-		Country,        ///< The country
-		URI,            ///< Uniform Resource Identifier
-		DNS,            ///< DNS name
-		IPAddress,      ///< IP address
-		XMPP            ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt)
+		CommonName,             ///< The common name (eg person)
+		Email,                  ///< Email address
+		Organization,           ///< An organisation (eg company)
+		OrganizationalUnit,     ///< An part of an organisation (eg a division or branch)
+		Locality,               ///< The locality (eg city, a shire, or part of a state) 
+		IncorporationLocality,  ///< The locality of incorporation (EV certificates)
+		State,                  ///< The state within the country
+		IncorporationState,     ///< The state of incorporation (EV certificates)
+		Country,                ///< The country
+		IncorporationCountry,   ///< The country of incorporation (EV certificates)
+		URI,                    ///< Uniform Resource Identifier
+		DNS,                    ///< DNS name
+		IPAddress,              ///< IP address
+		XMPP                    ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt)
 	};
 
 	/**
