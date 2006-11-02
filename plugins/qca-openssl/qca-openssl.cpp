@@ -262,13 +262,30 @@ static void try_get_name_item(X509_NAME *name, int nid, CertificateInfoType t, C
 	info->insert(t, QString::fromLatin1(cs));
 }
 
+static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, CertificateInfoType t, CertificateInfo *info)
+{
+        ASN1_OBJECT *oid = OBJ_txt2obj( oidText.toLatin1().data(), 1); // 1 = only accept dotted input
+	int loc = X509_NAME_get_index_by_OBJ(name, oid, -1);
+	if(loc == -1) {
+		return;
+	}
+	X509_NAME_ENTRY *ne = X509_NAME_get_entry(name, loc);
+	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
+	QByteArray cs((const char *)data->data, data->length);
+	info->insert(t, QString::fromLatin1(cs));
+	qDebug() << "oid: " << oidText << ",  result: " << cs;
+}
+
 static CertificateInfo get_cert_name(X509_NAME *name)
 {
 	CertificateInfo info;
 	try_get_name_item(name, NID_commonName, CommonName, &info);
 	try_get_name_item(name, NID_countryName, Country, &info);
+	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.3"), IncorporationCountry, &info);
 	try_get_name_item(name, NID_localityName, Locality, &info);
+	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.1"), IncorporationLocality, &info);
 	try_get_name_item(name, NID_stateOrProvinceName, State, &info);
+	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.2"), IncorporationState, &info);
 	try_get_name_item(name, NID_organizationName, Organization, &info);
 	try_get_name_item(name, NID_organizationalUnitName, OrganizationalUnit, &info);
 	return info;
@@ -405,6 +422,9 @@ static GENERAL_NAME *new_general_name(CertificateInfoType t, const QString &val)
 		case Locality:
 		case State:
 		case Country:
+	        case IncorporationLocality:
+	        case IncorporationState:
+	        case IncorporationCountry:
 			break;
 	}
 	return name;
@@ -566,8 +586,11 @@ static void try_get_general_name(GENERAL_NAMES *names, CertificateInfoType t, Ce
                 case Organization:
                 case OrganizationalUnit:
                 case Locality:
+	        case IncorporationLocality:
                 case State:
+	        case IncorporationState:
                 case Country:
+	        case IncorporationCountry:
                         break;
         }
 }
