@@ -34,6 +34,14 @@ static void logDebug(const QString &str)
 		g_pluginman->appendDiagnosticText(str + '\n');
 }
 
+static bool validVersion(int ver)
+{
+	// make sure the provider isn't newer than qca
+	if((ver & 0xffff00) <= (QCA_VERSION & 0xffff00))
+		return true;
+	return false;
+}
+
 class PluginInstance
 {
 private:
@@ -263,6 +271,14 @@ void ProviderManager::scan()
 				continue;
 			}
 
+			int ver = i->p->version();
+			if(!validVersion(ver))
+			{
+				logDebug(QString().sprintf("plugin version 0x%06x is in the future", ver));
+				delete i;
+				continue;
+			}
+
 			addItem(i, -1);
 		}
 		scanned_static = true;
@@ -322,6 +338,14 @@ void ProviderManager::scan()
 				continue;
 			}
 
+			int ver = i->p->version();
+			if(!validVersion(ver))
+			{
+				logDebug(QString().sprintf("plugin version 0x%06x is in the future", ver));
+				delete i;
+				continue;
+			}
+
 			addItem(i, -1);
 		}
 	}
@@ -333,6 +357,13 @@ bool ProviderManager::add(Provider *p, int priority)
 	if(haveAlready(p->name()))
 	{
 		logDebug("skipping, we already have it");
+		return false;
+	}
+
+	int ver = p->version();
+	if(!validVersion(ver))
+	{
+		logDebug(QString().sprintf("plugin version 0x%06x is in the future", ver));
 		return false;
 	}
 

@@ -46,6 +46,8 @@
 #include "qca_support.h"
 #include "qca_tools.h"
 
+QCA_EXPORT int qcaVersion();
+
 /** 
  * QCA - the Qt Cryptographic Architecture
  */
@@ -604,6 +606,19 @@ namespace QCA
 		 * routine.
 		 */
 		virtual void init();
+
+		/**
+		 * Target QCA version for the provider.
+		 *
+		 * This is used to verify compatibility between the
+		 * provider and QCA.  For a provider to be used, it
+		 * must have major and minor version numbers that are
+		 * less-than or equal to the QCA version (the patch
+		 * version number is ignored).  This means an older
+		 * provider may be used with a newer QCA, but a newer
+		 * provider cannot be used with an older QCA.
+		 */
+		virtual int version() const = 0;
 
 		/**
 		 * The name of the provider.

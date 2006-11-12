@@ -54,6 +54,11 @@ void ClientPlugin::cleanupTestCase()
 class TestClientProvider : public QCA::Provider
 {
 public:
+        int version() const
+        {
+                return QCA_VERSION;
+        }
+
         QString name() const
         {
                 return "testClientSideProvider";

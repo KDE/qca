@@ -195,6 +195,11 @@ protected:
 class ClientSideProvider : public QCA::Provider
 {
 public:
+        int version() const
+        {
+                return QCA_VERSION;
+        }
+
         QString name() const
         {
                 return "exampleClientSideProvider";

@@ -900,6 +900,11 @@ public:
 		srand(t);
 	}
 
+	int version() const
+	{
+		return QCA_VERSION;
+	}
+
 	QString name() const
 	{
 		return "default";

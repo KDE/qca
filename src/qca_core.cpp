@@ -31,6 +31,11 @@
 # include <unistd.h>
 #endif
 
+int qcaVersion()
+{
+	return QCA_VERSION;
+}
+
 namespace QCA {
 
 // from qca_tools

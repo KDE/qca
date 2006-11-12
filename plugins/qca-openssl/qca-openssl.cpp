@@ -5882,6 +5882,11 @@ public:
 		// todo: any shutdown?
 	}
 
+	int version() const
+	{
+		return QCA_VERSION;
+	}
+
 	QString name() const
 	{
 		return "qca-openssl";
