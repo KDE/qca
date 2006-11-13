@@ -493,9 +493,17 @@ QString Provider::credit() const
 }
 
 Provider::Context::Context(Provider *parent, const QString &type)
+:QObject()
 {
 	_provider = parent;
 	_type = type;
+}
+
+Provider::Context::Context(const Context &from)
+:QObject()
+{
+	_provider = from._provider;
+	_type = from._type;
 }
 
 Provider::Context::~Context()
@@ -518,12 +526,30 @@ bool Provider::Context::sameProvider(const Context *c) const
 }
 
 //----------------------------------------------------------------------------
+// BasicContext
+//----------------------------------------------------------------------------
+BasicContext::BasicContext(Provider *parent, const QString &type)
+:Context(parent, type)
+{
+	moveToThread(0); // no thread association
+}
+
+BasicContext::BasicContext(const BasicContext &from)
+:Context(from)
+{
+	moveToThread(0); // no thread association
+}
+
+BasicContext::~BasicContext()
+{
+}
+
+//----------------------------------------------------------------------------
 // PKeyBase
 //----------------------------------------------------------------------------
 PKeyBase::PKeyBase(Provider *p, const QString &type)
-:Provider::Context(p, type)
+:BasicContext(p, type)
 {
-	moveToThread(0); // no thread association
 }
 
 int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const

@@ -546,55 +546,7 @@ namespace QCA
 	public:
 		virtual ~Provider();
 
-		/**
-		   \class Context qca_core.h QtCrypto
-
-		   Internal context class used for the plugin
-
-		   \internal
-		*/
-		class QCA_EXPORT Context
-		{
-		public:
-			/**
-			   Standard constructor
-
-			   \param parent the parent provider for this 
-			   context
-			   \param type the name of the provider context type
-			*/
-			Context(Provider *parent, const QString &type);
-			virtual ~Context();
-
-			/**
-			   The Provider associated with this Context
-			*/
-			Provider *provider() const;
-
-			/**
-			   The type of context, as passed to the constructor
-			*/
-			QString type() const;
-
-			/**
-			   Create a duplicate of this Context
-			*/
-			virtual Context *clone() const = 0;
-
-			/**
-			   Test if two Contexts have the same Provider
-
-			   \param c pointer to the Context to compare to
-
-			   \return true if the argument and this Context
-			   have the same provider.
-			*/
-			bool sameProvider(const Context *c) const;
-
-		private:
-			Provider *_provider;
-			QString _type;
-		};
+		class Context;
 
 		/**
 		 * Initialisation routine.
@@ -692,6 +644,67 @@ namespace QCA
 		 * the specified Context subclasses as well.
 		 */
 		virtual Context *createContext(const QString &type) = 0;
+	};
+
+	/**
+	   \class Context qca_core.h QtCrypto
+
+	   Internal context class used for the plugin
+
+	   \internal
+	*/
+	class QCA_EXPORT Provider::Context : public QObject
+	{
+		Q_OBJECT
+	public:
+		/**
+		   Standard constructor
+
+		   \param parent the parent provider for this 
+		   context
+		   \param type the name of the provider context type
+		*/
+		Context(Provider *parent, const QString &type);
+		Context(const Context &from);
+		virtual ~Context();
+
+		/**
+		   The Provider associated with this Context
+		*/
+		Provider *provider() const;
+
+		/**
+		   The type of context, as passed to the constructor
+		*/
+		QString type() const;
+
+		/**
+		   Create a duplicate of this Context
+		*/
+		virtual Context *clone() const = 0;
+
+		/**
+		   Test if two Contexts have the same Provider
+
+		   \param c pointer to the Context to compare to
+
+		   \return true if the argument and this Context
+		   have the same provider.
+		*/
+		bool sameProvider(const Context *c) const;
+
+	private:
+		Provider *_provider;
+		QString _type;
+	};
+
+	class BasicContext : public Provider::Context
+	{
+		Q_OBJECT
+	public:
+		BasicContext(Provider *parent, const QString &type);
+		BasicContext(const BasicContext &from);
+		~BasicContext();
 	};
 
 	/**
