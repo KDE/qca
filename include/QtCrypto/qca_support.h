@@ -35,13 +35,46 @@
 #ifndef QCA_SUPPORT_H
 #define QCA_SUPPORT_H
 
+#include <QByteArray>
 #include <QString>
 #include <QObject>
+#include <QVariant>
+#include <QVariantList>
+#include <QList>
+#include <QMetaObject>
+#include <QThread>
 #include "qca_export.h"
 #include "qca_tools.h"
 
 namespace QCA
 {
+	QCA_EXPORT QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> argTypes);
+	QCA_EXPORT bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args, QVariant *ret, Qt::ConnectionType type = Qt::AutoConnection);
+
+	class QCA_EXPORT SyncThread : public QThread
+	{
+		Q_OBJECT
+	public:
+		SyncThread(QObject *parent = 0);
+		~SyncThread();
+
+		void start();
+		void stop();
+		QVariant call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(), bool *ok = 0);
+
+	protected:
+		virtual void atStart() = 0;
+		virtual void atEnd() = 0;
+
+		// reimplemented
+		virtual void run();
+
+	private:
+		class Private;
+		friend class Private;
+		Private *d;
+	};
+
 	class QCA_EXPORT Synchronizer : public QObject
 	{
 		Q_OBJECT

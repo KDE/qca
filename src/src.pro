@@ -50,7 +50,9 @@ PUBLIC_HEADERS += \
 HEADERS += $$PRIVATE_HEADERS $$PUBLIC_HEADERS
 
 # do support first
-SOURCES += $$QCA_CPP/support/synchronizer.cpp
+SOURCES += \
+	$$QCA_CPP/support/syncthread.cpp \
+	$$QCA_CPP/support/synchronizer.cpp
 include($$QCA_SRCBASE/support/dirwatch/dirwatch.pri)
 
 SOURCES += \
