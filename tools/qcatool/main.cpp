@@ -155,7 +155,7 @@ private slots:
 	}
 };
 
-class Prompter : public QObject
+/*class Prompter : public QObject
 {
 	Q_OBJECT
 public:
@@ -257,7 +257,7 @@ private slots:
 	{
 		printf("Console closed\n");
 	}
-};
+};*/
 
 class PassphrasePrompt : public QObject
 {
@@ -313,7 +313,7 @@ private slots:
 			else
 				str = QString("Enter %1").arg(type);
 
-			QSecureArray result = Prompter::prompt(str);
+			QSecureArray result = QCA::ConsolePrompt::getHidden(str);
 			handler.submitPassword(id, result);
 		}
 		else if(e.type() == QCA::Event::Token)
@@ -321,7 +321,7 @@ private slots:
 			//QCA::KeyStoreEntry entry(e.keyStoreEntryId());
 			//printf("Please insert token for [%s] and press Enter ...\n", qPrintable(entry.name()));
 			printf("Please insert token and press Enter ...\n");
-			Prompter::waitForEnter();
+			QCA::ConsolePrompt::waitForEnter();
 			handler.tokenOkay(id);
 		}
 	}

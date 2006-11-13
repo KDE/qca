@@ -570,6 +570,131 @@ int ConsoleReference::bytesToWrite() const
 	return d->thread->bytesToWrite();
 }
 
+//----------------------------------------------------------------------------
+// ConsolePrompt
+//----------------------------------------------------------------------------
+class ConsolePrompt::Private : public QObject
+{
+	Q_OBJECT
+public:
+	Synchronizer sync;
+	ConsoleReference console;
+	QSecureArray result;
+	int at;
+	bool done;
+	bool enter;
+
+	Private() : sync(this), console(this)
+	{
+		connect(&console, SIGNAL(readyRead()), SLOT(con_readyRead()));
+		connect(&console, SIGNAL(closed()), SLOT(con_closed()));
+	}
+
+	bool start(bool enterMode)
+	{
+		result.clear();
+		at = 0;
+		done = false;
+		enter = enterMode;
+		if(!console.start(QCA::ConsoleReference::SecurityEnabled))
+		{
+			printf("Console input not available or closed\n");
+			return false;
+		}
+		sync.waitForCondition();
+		return true;
+	}
+
+	bool processChar(unsigned char c)
+	{
+		if(c == '\r' || c == '\n')
+		{
+			printf("\n");
+			if(!done)
+			{
+				sync.conditionMet();
+				done = true;
+			}
+			return false;
+		}
+
+		if(enter)
+			return true;
+
+		if(c == '\b' || c == 0x7f)
+		{
+			if(at > 0)
+			{
+				--at;
+				printf("\b \b");
+				fflush(stdout);
+				result.resize(at);
+			}
+			return true;
+		}
+		else if(c < 0x20)
+			return true;
+
+		if(at + 1 > result.size())
+			result.resize(at + 1);
+		result[at++] = c;
+	
+		printf("*");
+		fflush(stdout);
+		return true;
+	}
+
+private slots:
+	void con_readyRead()
+	{
+		while(console.bytesAvailable() > 0)
+		{
+			QSecureArray buf = console.readSecure(1);
+			if(buf.isEmpty())
+				continue;
+			if(!processChar(buf[0]))
+				break;
+		}
+	}
+
+	void con_closed()
+	{
+		printf("Console closed\n");
+		if(!done)
+		{
+			sync.conditionMet();
+			done = true;
+		}
+	}
+};
+
+ConsolePrompt::ConsolePrompt(QObject *parent)
+:QObject(parent)
+{
+	d = new Private;
+}
+
+ConsolePrompt::~ConsolePrompt()
+{
+	delete d;
+}
+
+QSecureArray ConsolePrompt::getHidden(const QString &promptStr)
+{
+	printf("%s: ", qPrintable(promptStr));
+	fflush(stdout);
+	ConsolePrompt p;
+	if(!p.d->start(false))
+		return QSecureArray();
+	return p.d->result;
+}
+
+void ConsolePrompt::waitForEnter()
+{
+	ConsolePrompt p;
+	p.d->start(true);
+}
+
 }
 
 #include "console.moc"

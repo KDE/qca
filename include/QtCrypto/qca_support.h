@@ -25,7 +25,7 @@
    Header file for "support" classes used in %QCA
 
    The classes in this header do not have any cryptographic
-   content - they are used in %QCA, and are included for convenience. 
+   content - they are used in %QCA, and are included for convenience.
 
    \note You should not use this header directly from an
    application. You should just use <tt> \#include \<QtCrypto>
@@ -234,6 +234,21 @@ namespace QCA
 		ConsoleReferencePrivate *d;
 
 		friend class Console;
+	};
+
+	class ConsolePrompt : public QObject
+	{
+		Q_OBJECT
+	public:
+		static QSecureArray getHidden(const QString &promptStr);
+		static void waitForEnter();
+
+	private:
+		class Private;
+		Private *d;
+
+		ConsolePrompt(QObject *parent = 0);
+		~ConsolePrompt();
 	};
 }
 
