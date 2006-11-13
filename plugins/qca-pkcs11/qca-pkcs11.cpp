@@ -48,6 +48,10 @@ public:
 
 public:
 	virtual
+	int
+	version() const;
+
+	virtual
 	void
 	init ();
 	
@@ -1894,6 +1898,11 @@ pkcs11Provider::~pkcs11Provider () {
 	delete s_keyStoreList;
 	s_keyStoreList = NULL;
 	pkcs11h_terminate ();
+}
+
+int pkcs11Provider::version() const
+{
+	return QCA_VERSION;
 }
 
 void pkcs11Provider::init () {
