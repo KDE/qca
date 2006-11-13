@@ -911,7 +911,7 @@ namespace QCA
 		   This signal is emitted when the client needs
 		   additional parameters
 		*/
-		void needParams(const Params &params);
+		void needParams(const QCA::SASL::Params &params);
 
 		/**
 		   This signal is emitted when the server needs to

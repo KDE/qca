@@ -226,7 +226,7 @@ namespace QCA
 
 	signals:
 		void readyRead();
-		void bytesWritten(int);
+		void bytesWritten(int bytes);
 		void closed();
 
 	private:

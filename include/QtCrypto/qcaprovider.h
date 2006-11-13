@@ -472,8 +472,9 @@ public:
 
 	virtual void setConstraints(int minSSF, int maxSSF) = 0;
 	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
-	virtual void setup(const CertificateCollection &trusted, const CertificateChain &cert, const PrivateKey &key, bool server,
-			   const QString &hostName, bool compress, bool dtls) = 0;
+	virtual void setup(const CertificateCollection &trusted,
+		const CertificateChain &cert, const PrivateKey &key, bool server,
+		const QString &hostName, bool compress, bool dtls) = 0;
 
 	virtual void shutdown() = 0; // flag for shutdown, call update next
 	virtual void setMTU(int size); // for dtls
