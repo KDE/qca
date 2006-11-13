@@ -206,14 +206,14 @@ public:
 	virtual bool importKey(const PKeyBase *key) = 0;
 
 	// import / export
-	virtual QSecureArray publicToDER() const = 0;
-	virtual QString publicToPEM() const = 0;
-	virtual ConvertResult publicFromDER(const QSecureArray &a) = 0;
-	virtual ConvertResult publicFromPEM(const QString &s) = 0;
-	virtual QSecureArray privateToDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const = 0;
-	virtual QString privateToPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const = 0;
-	virtual ConvertResult privateFromDER(const QSecureArray &a, const QSecureArray &passphrase) = 0;
-	virtual ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase) = 0;
+	virtual QSecureArray publicToDER() const;
+	virtual QString publicToPEM() const;
+	virtual ConvertResult publicFromDER(const QSecureArray &a);
+	virtual ConvertResult publicFromPEM(const QString &s);
+	virtual QSecureArray privateToDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const;
+	virtual QString privateToPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const;
+	virtual ConvertResult privateFromDER(const QSecureArray &a, const QSecureArray &passphrase);
+	virtual ConvertResult privateFromPEM(const QString &s, const QSecureArray &passphrase);
 };
 
 class QCA_EXPORT CertBase : public BasicContext
@@ -591,9 +591,9 @@ public:
 	virtual QString mech() const = 0;
 	virtual bool haveClientInit() const = 0;
 	virtual QByteArray stepData() const = 0;
-	virtual QByteArray to_net() const = 0;
+	virtual QByteArray to_net() = 0;
 	virtual int encoded() const = 0;
-	virtual QByteArray to_app() const = 0;
+	virtual QByteArray to_app() = 0;
 
 	// call after auth success
 	virtual int ssf() const = 0;

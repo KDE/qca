@@ -595,6 +595,49 @@ SymmetricKey PKeyBase::deriveKey(const PKeyBase &)
 }
 
 //----------------------------------------------------------------------------
+// PKeyContext
+//----------------------------------------------------------------------------
+QSecureArray PKeyContext::publicToDER() const
+{
+	return QSecureArray();
+}
+
+QString PKeyContext::publicToPEM() const
+{
+	return QString();
+}
+
+ConvertResult PKeyContext::publicFromDER(const QSecureArray &)
+{
+	return ErrorDecode;
+}
+
+ConvertResult PKeyContext::publicFromPEM(const QString &)
+{
+	return ErrorDecode;
+}
+
+QSecureArray PKeyContext::privateToDER(const QSecureArray &, PBEAlgorithm) const
+{
+	return QSecureArray();
+}
+
+QString PKeyContext::privateToPEM(const QSecureArray &, PBEAlgorithm) const
+{
+	return QString();
+}
+
+ConvertResult PKeyContext::privateFromDER(const QSecureArray &, const QSecureArray &)
+{
+	return ErrorDecode;
+}
+
+ConvertResult PKeyContext::privateFromPEM(const QString &, const QSecureArray &)
+{
+	return ErrorDecode;
+}
+
+//----------------------------------------------------------------------------
 // KeyStoreEntryContext
 //----------------------------------------------------------------------------
 KeyBundle KeyStoreEntryContext::keyBundle() const
