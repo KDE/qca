@@ -816,6 +816,11 @@ public:
 	{
 	}
 
+	virtual int version() const
+	{
+		return QCA_VERSION;
+	}
+
 	virtual QString name() const
 	{
 		return "qca-gnupg";

@@ -20,6 +20,7 @@ SET( moc_SOURCES
 	support/console.cpp 
   support/synchronizer.cpp
   support/dirwatch/dirwatch.cpp
+  support/syncthread.cpp
 )
 
 IF (Q_WS_X11)
