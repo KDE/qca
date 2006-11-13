@@ -485,6 +485,8 @@ ConsoleReference::~ConsoleReference()
 
 bool ConsoleReference::start(SecurityMode mode)
 {
+	Q_ASSERT(!d->console);
+
 	Console *c = Console::instance();
 	if(!c)
 		return false;
@@ -501,7 +503,12 @@ bool ConsoleReference::start(SecurityMode mode)
 
 	// pipe already closed and no data?  consider this an error
 	if(!valid && avail == 0)
+	{
+		d->console->d->ref = 0;
+		d->thread = 0;
+		d->console = 0;
 		return false;
+	}
 
 	// enable security?  it will last for this active session only
 	if(mode == SecurityEnabled)
@@ -528,6 +535,9 @@ bool ConsoleReference::start(SecurityMode mode)
 
 void ConsoleReference::stop()
 {
+	if(!d->console)
+		return;
+
 	d->lateTrigger.stop();
 
 	disconnect(d->thread, 0, this, 0);
