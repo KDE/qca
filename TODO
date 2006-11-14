@@ -21,7 +21,6 @@
     why is Random returning unsigned?
     why does the MessageAuthenticationCode constructor have default args?
   code:
-    console/prompt on mac (and some linux) doesn't work
     don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try
     sasl: get it working, lib and cyrus provider
