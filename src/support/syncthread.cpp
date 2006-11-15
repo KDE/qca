@@ -171,8 +171,7 @@ QVariant SyncThread::call(QObject *obj, const QByteArray &method, const QVariant
 	bool ret;
 	ret = QMetaObject::invokeMethod(d->agent, "call_do",
 		Qt::QueuedConnection, Q_ARG(QObject*, obj),
-		Q_ARG(QByteArray, QByteArray(method)),
-		Q_ARG(QVariantList, args));
+		Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
 	Q_ASSERT(ret);
 	d->w.wait(&d->m);
 	if(ok)
