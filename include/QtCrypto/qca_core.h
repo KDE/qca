@@ -335,6 +335,23 @@ namespace QCA
 	QCA_EXPORT QVariant getProperty(const QString &name);
 
 	/**
+	 * Set provider configuration
+	 *
+	 * Allowed value types: QString, int, bool
+	 */
+	QCA_EXPORT void setProviderConfig(const QString &name, const QVariantMap &config);
+
+	/**
+	 * Retrieve provider configuration
+	 */
+	QCA_EXPORT QVariantMap getProviderConfig(const QString &name);
+
+	/**
+	 * Save provider configuration to persistent storage
+	 */
+	QCA_EXPORT void saveProviderConfig(const QString &name);
+
+	/**
 	 * Return the Random provider that is currently set to be the
 	 * global random number generator.
 	 *
@@ -644,6 +661,9 @@ namespace QCA
 		 * the specified Context subclasses as well.
 		 */
 		virtual Context *createContext(const QString &type) = 0;
+
+		virtual QVariantMap defaultConfig() const;
+		virtual void configChanged(const QVariantMap &config);
 	};
 
 	/**

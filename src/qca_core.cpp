@@ -58,6 +58,7 @@ public:
 	Random *rng;
 	KeyStoreManager *ksm;
 	QVariantMap properties;
+	QMap<QString,QVariantMap> config;
 
 	Global()
 	{
@@ -318,6 +319,50 @@ QVariant getProperty(const QString &name)
 	return global->properties.value(name);
 }
 
+void setProviderConfig(const QString &name, const QVariantMap &config)
+{
+	if(!config.contains("formtype"))
+		return;
+
+	global->config[name] = config;
+}
+
+QVariantMap getProviderConfig(const QString &name)
+{
+	QVariantMap conf;
+
+	// TODO: try loading from persistent storage
+
+	conf = global->config.value(name);
+
+	// if provider doesn't exist or doesn't have a valid config form,
+	//   use the config we loaded
+	Provider *p = findProvider(name);
+	if(!p)
+		return conf;
+	QVariantMap pconf = p->defaultConfig();
+	if(!pconf.contains("formtype"))
+		return conf;
+
+	// if the config loaded was empty, use the provider's config
+	if(conf.isEmpty())
+		return pconf;
+
+	// if the config formtype doesn't match the provider's formtype,
+	//   then use the provider's
+	if(pconf["formtype"] != conf["formtype"])
+		return pconf;
+
+	// otherwise, use the config loaded
+	return conf;
+}
+
+void saveProviderConfig(const QString &name)
+{
+	// TODO
+	Q_UNUSED(name);
+}
+
 Random & globalRNG()
 {
 	if(!global->rng)
@@ -490,6 +535,15 @@ void Provider::init()
 QString Provider::credit() const
 {
 	return QString();
+}
+
+QVariantMap Provider::defaultConfig() const
+{
+	return QVariantMap();
+}
+
+void Provider::configChanged(const QVariantMap &)
+{
 }
 
 Provider::Context::Context(Provider *parent, const QString &type)
