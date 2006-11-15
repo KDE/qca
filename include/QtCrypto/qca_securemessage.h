@@ -335,6 +335,7 @@ else
 			ErrorEncryptUntrusted, ///< encrypting key is untrusted
 			ErrorEncryptInvalid,   ///< encrypting key is invalid in some way
 			ErrorNeedCard,         ///< pgp card is missing
+			ErrorKeyMismatch,      ///< certificate and private key don't match
 			ErrorUnknown           ///< other error
 		};
 
