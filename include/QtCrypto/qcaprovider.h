@@ -234,8 +234,8 @@ class QCA_EXPORT CertContextProps
 public:
 	int version;                     // cert only
 	QDateTime start, end;            // cert only
-	CertificateInfo subject;
-	CertificateInfo issuer;          // cert only
+	CertificateInfoOrdered subject;
+	CertificateInfoOrdered issuer;   // cert only
 	Constraints constraints;
 	QStringList policies;
 	QBigInteger serial;              // cert only
@@ -252,7 +252,7 @@ public:
 class QCA_EXPORT CRLContextProps
 {
 public:
-	CertificateInfo issuer;
+	CertificateInfoOrdered issuer;
 	int number;
 	QDateTime thisUpdate, nextUpdate;
 	QList<CRLEntry> revoked;

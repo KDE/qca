@@ -3179,8 +3179,10 @@ public:
 		p.start = ASN1_UTCTIME_QDateTime(X509_get_notBefore(x), NULL);
 		p.end = ASN1_UTCTIME_QDateTime(X509_get_notAfter(x), NULL);
 
-		p.subject = get_cert_name(X509_get_subject_name(x));
-		p.issuer = get_cert_name(X509_get_issuer_name(x));
+		CertificateInfo subject, issuer;
+
+		subject = get_cert_name(X509_get_subject_name(x));
+		issuer = get_cert_name(X509_get_issuer_name(x));
 
 		p.isSelfSigned = ( X509_V_OK == X509_check_issued( x, x ) );
 
@@ -3199,7 +3201,7 @@ public:
 		{
 			X509_EXTENSION *ex = X509_get_ext(x, pos);
 			if(ex)
-				p.subject.unite(get_cert_alt_name(ex));
+				subject.unite(get_cert_alt_name(ex));
 		}
 
 		pos = X509_get_ext_by_NID(x, NID_issuer_alt_name, -1);
@@ -3207,7 +3209,7 @@ public:
 		{
 			X509_EXTENSION *ex = X509_get_ext(x, pos);
 			if(ex)
-				p.issuer.unite(get_cert_alt_name(ex));
+				issuer.unite(get_cert_alt_name(ex));
 		}
 
 		pos = X509_get_ext_by_NID(x, NID_key_usage, -1);
@@ -3278,6 +3280,13 @@ public:
 			if(ex)
 				p.issuerId += get_cert_issuer_key_id(ex);
 		}
+
+		// FIXME: super hack
+		CertificateOptions opts;
+		opts.setInfo(subject);
+		p.subject = opts.infoOrdered();
+		opts.setInfo(issuer);
+		p.issuer = opts.infoOrdered();
 
 		_props = p;
 		//printf("[%p] made props: [%s]\n", this, _props.subject[CommonName].toLatin1().data());
@@ -3473,7 +3482,9 @@ public:
 
 		p.format = PKCS10;
 
-		p.subject = get_cert_name(X509_REQ_get_subject_name(x));
+		CertificateInfo subject;
+
+		subject = get_cert_name(X509_REQ_get_subject_name(x));
 
 		STACK_OF(X509_EXTENSION) *exts = X509_REQ_get_extensions(x);
 
@@ -3492,7 +3503,7 @@ public:
 		{
 			X509_EXTENSION *ex = X509v3_get_ext(exts, pos);
 			if(ex)
-				p.subject.unite(get_cert_alt_name(ex));
+				subject.unite(get_cert_alt_name(ex));
 		}
 
 		pos = X509v3_get_ext_by_NID(exts, NID_key_usage, -1);
@@ -3549,6 +3560,12 @@ public:
 		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
 		    p.sigalgo = QCA::SignatureUnknown;
 		}
+
+		// FIXME: super hack
+		CertificateOptions opts;
+		opts.setInfo(subject);
+		p.subject = opts.infoOrdered();
+
 		_props = p;
 	}
 };
@@ -3612,7 +3629,9 @@ public:
 
 		CRLContextProps p;
 
-		p.issuer = get_cert_name(X509_CRL_get_issuer(x));
+		CertificateInfo issuer;
+
+		issuer = get_cert_name(X509_CRL_get_issuer(x));
 
 		p.thisUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get_lastUpdate(x), NULL);
 		p.nextUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get_nextUpdate(x), NULL);
@@ -3718,6 +3737,12 @@ public:
 				ASN1_INTEGER_free((ASN1_INTEGER*)result);
 			}
 		}
+
+		// FIXME: super hack
+		CertificateOptions opts;
+		opts.setInfo(issuer);
+		p.issuer = opts.infoOrdered();
+
 		_props = p;
 	}
 };

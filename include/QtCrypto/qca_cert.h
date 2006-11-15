@@ -91,6 +91,25 @@ namespace QCA
 		XMPP                    ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt)
 	};
 
+	class CertificateInfoPair
+	{
+	public:
+		CertificateInfoPair();
+		CertificateInfoPair(CertificateInfoType type, const QString &value);
+		CertificateInfoPair(const CertificateInfoPair &from);
+		~CertificateInfoPair();
+		CertificateInfoPair & operator=(const CertificateInfoPair &from);
+
+		CertificateInfoType type() const;
+		QString value() const;
+
+		bool operator==(const CertificateInfoPair &other) const;
+
+	private:
+		class Private;
+		QSharedDataPointer<Private> d;
+	};
+
 	/**
 	   Certificate constraints
 	*/
@@ -156,6 +175,8 @@ namespace QCA
 	   Certificate properties type
 	*/
 	typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
+
+	typedef QList<CertificateInfoPair> CertificateInfoOrdered;
 
 	/**
 	   %Certificate constraints type
@@ -228,6 +249,14 @@ namespace QCA
 		CertificateInfo info() const;     // request or create
 
 		/**
+		   Information on the subject of the certificate, in the
+		   exact order the items will be written
+
+		   \sa setInfoOrdered
+		*/
+		CertificateInfoOrdered infoOrdered() const;
+
+		/**
 		   list the constraints on this certificate
 		*/
 		Constraints constraints() const;  // request or create
@@ -278,12 +307,22 @@ namespace QCA
 		/**
 		   Specify information for the the subject associated with the
 		   certificate
-		   
+
 		   \param info the information for the subject
-		   
+
 		   \sa info()
 		*/
 		void setInfo(const CertificateInfo &info);
+
+		/**
+		   Specify information for the the subject associated with the
+		   certificate
+
+		   \param info the information for the subject
+
+		   \sa info()
+		*/
+		void setInfoOrdered(const CertificateInfoOrdered &info);
 
 		/**
 		   set the constraints on the certificate
@@ -363,6 +402,10 @@ namespace QCA
 		*/
 		Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
+		Certificate(const Certificate &from);
+		~Certificate();
+		Certificate & operator=(const Certificate &from);
+
 		/**
 		   Test if the certificate is empty (null)
 		   \return true if the certificate is null
@@ -397,12 +440,16 @@ namespace QCA
 		*/
 		CertificateInfo subjectInfo() const;
 
+		CertificateInfoOrdered subjectInfoOrdered() const;
+
 		/**
 		   Properties of the issuer of the certificate
 
 		   \sa subjectInfo for how the return value works.
 		*/
 		CertificateInfo issuerInfo() const;
+
+		CertificateInfoOrdered issuerInfoOrdered() const;
 
 		/**
 		   The constraints that apply to this certificate
@@ -561,6 +608,10 @@ namespace QCA
 		bool operator!=(const Certificate &a) const;
 
 	private:
+		class Private;
+		friend class Private;
+		QSharedDataPointer<Private> d;
+
 		friend class CertificateChain;
 		Validity chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const;
 		CertificateChain chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers) const;
@@ -681,6 +732,11 @@ namespace QCA
 		   \param provider the provider to use, if a specific provider is required
 		*/
 		CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
+
+		CertificateRequest(const CertificateRequest &from);
+		~CertificateRequest();
+		CertificateRequest & operator=(const CertificateRequest &from);
+
 		/**
 		   test if the certificate request is empty
 		   
@@ -709,6 +765,8 @@ namespace QCA
 		   \note this only applies to PKCS#10 format certificate requests
 		*/
 		CertificateInfo subjectInfo() const; // PKCS#10 only
+
+		CertificateInfoOrdered subjectInfoOrdered() const; // PKCS#10 only
 
 		/**
 		   The constraints that apply to this certificate request
@@ -843,6 +901,11 @@ namespace QCA
 		   \note this only applies to SPKAC format certificate requests
 		*/
 		static CertificateRequest fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+
+	private:
+		class Private;
+		friend class Private;
+		QSharedDataPointer<Private> d;
 	};
 
 	/**
@@ -958,6 +1021,9 @@ namespace QCA
 	{
 	public:
 		CRL();
+		CRL(const CRL &from);
+		~CRL();
+		CRL & operator=(const CRL &from);
 
 		/**
 		   Test if the CRL is empty
@@ -970,6 +1036,8 @@ namespace QCA
 		   Information on the issuer of the CRL
 		*/
 		CertificateInfo issuerInfo() const;
+
+		CertificateInfoOrdered issuerInfoOrdered() const;
 
 		/**
 		   The CRL serial number. Note that serial numbers are a
@@ -1071,6 +1139,11 @@ namespace QCA
 		   \return the CRL in the file
 		*/
 		static CRL fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+
+	private:
+		class Private;
+		friend class Private;
+		QSharedDataPointer<Private> d;
 	};
 
 	/**
