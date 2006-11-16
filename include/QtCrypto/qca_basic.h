@@ -641,7 +641,8 @@ namespace QCA
 
 	   MessageAuthenticationCode is a class for accessing the various 
 	   message authentication code algorithms within %QCA.
-	   HMAC using SHA1 ("hmac(sha1)")is recommended for new applications.
+	   HMAC using SHA1 ("hmac(sha1)") or HMAC using SHA256 ("hmac(sha256)") 
+	   is recommended for new applications.
 
 	   Note that if your application is potentially susceptable to "replay attacks"
 	   where the message is sent more than once, you should include a counter in
@@ -661,8 +662,8 @@ namespace QCA
 		   \param key the shared key
 		   \param provider the provider to use, if a particular provider is required
 		 */
-		MessageAuthenticationCode(const QString &type = "hmac(sha1)",
-					  const SymmetricKey &key = SymmetricKey(),
+		MessageAuthenticationCode(const QString &type,
+					  const SymmetricKey &key,
 					  const QString &provider = QString());
 
 		/**

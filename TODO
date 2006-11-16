@@ -19,7 +19,6 @@
       reports true, but then when the object is created, it doesn't actually
       support the feature (because the wrong provider was used).
     why is Random returning unsigned?
-    why does the MessageAuthenticationCode constructor have default args?
   code:
     don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try

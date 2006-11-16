@@ -7,10 +7,10 @@
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -47,13 +47,13 @@ int main(int argc, char **argv)
 	if( !QCA::isSupported("hmac(sha1)") ) {
 		printf("HMAC(SHA1) not supported!\n");
 	} else {
-		// create the required object. This is equivalent
-		// to QCA::MessageAuthenticationCode hmacObject("hmac(sha1)").
-		QCA::MessageAuthenticationCode hmacObject;
+		// create the required object using HMAC with SHA-1, and an
+		// empty key.
+		QCA::MessageAuthenticationCode hmacObject(  "hmac(sha1)", QSecureArray() );
 
 		// create the key
 		QCA::SymmetricKey keyObject(key);
-		
+
 		// set the HMAC object to use the key
 		hmacObject.setup(key);
 		// that could also have been done in the

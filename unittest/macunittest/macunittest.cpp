@@ -108,7 +108,7 @@ void MACUnitTest::HMACMD5()
 	    md5hmac4.update( data4 );
 	    QCOMPARE( QCA::arrayToHex( md5hmac4.final() ), QString( "697eaf0aca3a3aea3a75164746ffaa79" ) );
 
-	    QCA::MessageAuthenticationCode md5hmac5( "hmac(md5)" );
+	    QCA::MessageAuthenticationCode md5hmac5( "hmac(md5)", QSecureArray() );
 	    QCA::SymmetricKey key5( QCA::hexToArray( "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c" ) );
 	    md5hmac5.setup( key5 );
 	    QSecureArray data5( "Test With Truncation" );
@@ -479,7 +479,7 @@ void MACUnitTest::HMACSHA1()
 	    QCOMPARE( sha1hmacLenTest.validKeyLength( -2 ), false );
 
 	    // These tests are from RFC2202, Section 3.
-	    QCA::MessageAuthenticationCode test1; // should be default
+	    QCA::MessageAuthenticationCode test1(  "hmac(sha1)", QSecureArray() );
 	    QCA::SymmetricKey key1( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
 	    test1.setup( key1 );
 	    QSecureArray data1( "Hi There" );
