@@ -39,7 +39,7 @@ endif(APPLE)
 #SET( qca_HEADERS ${qca_HEADERS} support/dirwatch/dirwatch_p.h )
 
 IF (WIN32)
-  SET( moc_SOURCES ${moc_SOURCES} support/dirwatch//dirwatch_win.cpp )
+  SET( moc_SOURCES ${moc_SOURCES} support/dirwatch//dirwatch_win.cpp ) 
 ENDIF(WIN32)
 
 IF (UNIX)
@@ -61,6 +61,10 @@ ADD_DEFINITIONS(
   -DBOTAN_MP_WORD_BITS=32
   -DBOTAN_VECTOR_OVER_ALLOCATE=4
 )
+if(WIN32)
+   ADD_DEFINITIONS( -DQCA_MAKEDLL )
+endif(WIN32)
+
 
 SET( botan_SOURCES
 	${botan_BASE}/util.cpp
