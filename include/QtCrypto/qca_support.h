@@ -236,12 +236,12 @@ namespace QCA
 		friend class Console;
 	};
 
-	class ConsolePrompt : public QObject
+	class QCA_EXPORT ConsolePrompt : public QObject
 	{
 		Q_OBJECT
 	public:
-		static QSecureArray getHidden(const QString &promptStr);
-		static void waitForEnter();
+		QCA_EXPORT static QSecureArray getHidden(const QString &promptStr);
+		QCA_EXPORT static void waitForEnter();
 
 	private:
 		class Private;
