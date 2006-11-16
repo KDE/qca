@@ -91,18 +91,50 @@ namespace QCA
 		XMPP                    ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt)
 	};
 
+	/**
+	   One entry in a certificate information list
+	*/
 	class CertificateInfoPair
 	{
 	public:
+	        /**
+		   Standard constructor
+		*/
 		CertificateInfoPair();
+
+		/**
+		   Construct a new pair
+
+		   \param type the type of information stored in this pair
+		   \param value the value of the information to be stored
+		*/
 		CertificateInfoPair(CertificateInfoType type, const QString &value);
+
+		/**
+		   Standard copy constructor
+		*/
 		CertificateInfoPair(const CertificateInfoPair &from);
+
 		~CertificateInfoPair();
+
+		/**
+		   Standard assignment operator
+		*/
 		CertificateInfoPair & operator=(const CertificateInfoPair &from);
 
+		/**
+		   The type of information stored in the pair
+		*/
 		CertificateInfoType type() const;
+
+		/**
+		   The value of the information stored in the pair
+		*/
 		QString value() const;
 
+		/**
+		   Comparison operator
+		*/
 		bool operator==(const CertificateInfoPair &other) const;
 
 	private:
@@ -176,6 +208,9 @@ namespace QCA
 	*/
 	typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
 
+	/**
+	   Ordered certificate properties type
+	*/
 	typedef QList<CertificateInfoPair> CertificateInfoOrdered;
 
 	/**
@@ -402,8 +437,16 @@ namespace QCA
 		*/
 		Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
+		/**
+		   Standard copy constructor
+		*/
 		Certificate(const Certificate &from);
+
 		~Certificate();
+
+		/**
+		   Standard assignment operator
+		*/
 		Certificate & operator=(const Certificate &from);
 
 		/**
@@ -440,6 +483,25 @@ namespace QCA
 		*/
 		CertificateInfo subjectInfo() const;
 
+		/**
+		   Properties of the subject of the certificate, as 
+		   an ordered list (QList of CertificateInfoPair).
+
+		   This allows access to the certificate information 
+		   in the same order as they appear in a certificate.
+		   Each pair in the list has a type and a value.
+		   
+		   For example:
+		   \code
+		   CertificateInfoOrdered info = cert.subjectInfoOrdered();
+		   // info[0].type == CommonName
+		   // info[0].value == "andbit.net"
+		   \endcode
+
+		   \sa subjectInfo for an unordered version
+		   \sa issuerInfoOrdered for the ordered information on the issuer
+		   \sa CertificateInfoPair for the elements in the list
+		*/
 		CertificateInfoOrdered subjectInfoOrdered() const;
 
 		/**
@@ -449,6 +511,18 @@ namespace QCA
 		*/
 		CertificateInfo issuerInfo() const;
 
+		/**
+		   Properties of the issuer of the certificate, as 
+		   an ordered list (QList of CertificateInfoPair).
+
+		   This allows access to the certificate information 
+		   in the same order as they appear in a certificate.
+		   Each pair in the list has a type and a value.
+		   
+		   \sa issuerInfo for an unordered version
+		   \sa subjectInfoOrdered for the ordered information on the subject
+		   \sa CertificateInfoPair for the elements in the list
+		*/
 		CertificateInfoOrdered issuerInfoOrdered() const;
 
 		/**
@@ -733,8 +807,16 @@ namespace QCA
 		*/
 		CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
+		/**
+		   Standard copy constructor
+		*/
 		CertificateRequest(const CertificateRequest &from);
+
 		~CertificateRequest();
+
+		/**
+		   Standard assignment operator
+		*/
 		CertificateRequest & operator=(const CertificateRequest &from);
 
 		/**
@@ -763,9 +845,22 @@ namespace QCA
 		   Information on the subject of the certificate being requested
 
 		   \note this only applies to PKCS#10 format certificate requests
+
+		   \sa subjectInfoOrdered for a version that maintains order
+		   in the subject information.
 		*/
 		CertificateInfo subjectInfo() const; // PKCS#10 only
 
+		/**
+		   Information on the subject of the certificate being requested, as 
+		   an ordered list (QList of CertificateInfoPair).
+
+		   \note this only applies to PKCS#10 format certificate requests
+
+		   \sa subjectInfo for a version that does not maintain order, but
+		   allows access based on a multimap.
+		   \sa CertificateInfoPair for the elements in the list
+		*/
 		CertificateInfoOrdered subjectInfoOrdered() const; // PKCS#10 only
 
 		/**
@@ -1021,8 +1116,17 @@ namespace QCA
 	{
 	public:
 		CRL();
+
+		/**
+		   Standard copy constructor
+		*/
 		CRL(const CRL &from);
+
 		~CRL();
+
+		/**
+		   Standard assignment operator
+		*/
 		CRL & operator=(const CRL &from);
 
 		/**
@@ -1033,10 +1137,21 @@ namespace QCA
 		bool isNull() const;
 
 		/**
-		   Information on the issuer of the CRL
+		   Information on the issuer of the CRL as a QMultiMap.
+
+		   \sa issuerInfoOrdered for a version that maintains the order
+		   of information fields as per the underlying CRL.
 		*/
 		CertificateInfo issuerInfo() const;
 
+		/**
+		   Information on the issuer of the CRL as an ordered list
+		   (QList of CertificateInfoPair).
+
+		   \sa issuerInfo for a version that allows lookup based on
+		   a multimap.
+		   \sa CertificateInfoPair for the elements in the list
+		*/
 		CertificateInfoOrdered issuerInfoOrdered() const;
 
 		/**
