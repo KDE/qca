@@ -5,5 +5,5 @@ INCLUDEPATH += ../../include/QtCrypto
 LIBS += -L../../lib
 
 # link
-LIBS += -lqca
+LIBS += -lqca2
 
