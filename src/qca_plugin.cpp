@@ -218,6 +218,11 @@ public:
 			return;
 		init_done = true;
 		p->init();
+
+		// load configuration
+		QVariantMap conf = getProviderConfig(p->name());
+		if(!conf.isEmpty())
+			p->configChanged(conf);
 	}
 
 private:

@@ -319,21 +319,87 @@ QVariant getProperty(const QString &name)
 	return global->properties.value(name);
 }
 
-void setProviderConfig(const QString &name, const QVariantMap &config)
+static bool configIsValid(const QVariantMap &config)
 {
 	if(!config.contains("formtype"))
+		return false;
+	QMapIterator<QString,QVariant> it(config);
+	while(it.hasNext())
+	{
+		it.next();
+		const QVariant &v = it.value();
+		if(v.type() != QVariant::String && v.type() != QVariant::Int && v.type() != QVariant::Bool)
+			return false;
+	}
+	return true;
+}
+
+static QVariantMap readConfig(const QString &name)
+{
+	QSettings settings("Affinix", "QCA");
+	settings.beginGroup("ProviderConfig");
+	QStringList providerNames = settings.value("providerNames").toStringList();
+	if(!providerNames.contains(name))
+		return QVariantMap();
+
+	settings.beginGroup(name);
+	QStringList keys = settings.childKeys();
+	QVariantMap map;
+	foreach(QString key, keys)
+		map[key] = settings.value(key);
+	settings.endGroup();
+
+	if(!configIsValid(map))
+		return QVariantMap();
+	return map;
+}
+
+static bool writeConfig(const QString &name, const QVariantMap &config, bool systemWide = false)
+{
+	QSettings settings(QSettings::NativeFormat, systemWide ? QSettings::SystemScope : QSettings::UserScope, "Affinix", "QCA");
+	settings.beginGroup("ProviderConfig");
+
+	// add the entry if needed
+	QStringList providerNames = settings.value("providerNames").toStringList();
+	if(!providerNames.contains(name))
+		providerNames += name;
+	settings.setValue("providerNames", providerNames);
+
+	settings.beginGroup(name);
+	QMapIterator<QString,QVariant> it(config);
+	while(it.hasNext())
+	{
+		it.next();
+		settings.setValue(it.key(), it.value());
+	}
+	settings.endGroup();
+
+	if(settings.status() == QSettings::NoError)
+		return true;
+	return false;
+}
+
+void setProviderConfig(const QString &name, const QVariantMap &config)
+{
+	if(!configIsValid(config))
 		return;
 
 	global->config[name] = config;
+	Provider *p = findProvider(name);
+	if(p)
+		p->configChanged(config);
 }
 
 QVariantMap getProviderConfig(const QString &name)
 {
 	QVariantMap conf;
 
-	// TODO: try loading from persistent storage
+	// try loading from persistent storage
+	conf = readConfig(name);
 
-	conf = global->config.value(name);
+	// if not, load the one from memory
+	if(conf.isEmpty())
+		conf = global->config.value(name);
 
 	// if provider doesn't exist or doesn't have a valid config form,
 	//   use the config we loaded
@@ -341,7 +407,7 @@ QVariantMap getProviderConfig(const QString &name)
 	if(!p)
 		return conf;
 	QVariantMap pconf = p->defaultConfig();
-	if(!pconf.contains("formtype"))
+	if(!configIsValid(pconf))
 		return conf;
 
 	// if the config loaded was empty, use the provider's config
@@ -359,8 +425,11 @@ QVariantMap getProviderConfig(const QString &name)
 
 void saveProviderConfig(const QString &name)
 {
-	// TODO
-	Q_UNUSED(name);
+	QVariantMap conf = global->config.value(name);
+	if(conf.isEmpty())
+		return;
+
+	writeConfig(name, conf);
 }
 
 Random & globalRNG()
