@@ -1,5 +1,6 @@
 TEMPLATE = app
-CONFIG += thread console debug
+CONFIG += thread console
+#debug
 QT -= gui
 TARGET = ciphertest
 
