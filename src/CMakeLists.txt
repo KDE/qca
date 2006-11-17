@@ -122,9 +122,12 @@ if(WIN32)
 	TARGET_LINK_LIBRARIES(qca crypt32)
 endif(WIN32)	
 
+if(APPLE)
+   set(CARBON_LIBRARY_SECURITY "-framework Security")
+   TARGET_LINK_LIBRARIES(qca ${CARBON_LIBRARY} ${CARBON_LIBRARY_SECURITY})
+endif(APPLE)
+
 INSTALL(TARGETS qca DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-# FIXME mac
-#	LIBS += -framework Carbon -framework Security
 
 
 
