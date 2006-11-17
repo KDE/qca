@@ -80,6 +80,7 @@ windows: {
 mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_mac.cpp
 	LIBS += -framework Carbon -framework Security
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,"$$PREFIX/lib/"
 }
 
 include($$QCA_BASE/conf.pri)
