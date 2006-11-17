@@ -5,9 +5,13 @@ MACRO(MY_AUTOMOC _srcsList)
     GET_FILENAME_COMPONENT(_abs_FILE ${_current_FILE} ABSOLUTE)
     GET_FILENAME_COMPONENT(_basename ${_current_FILE} NAME_WE)
     SET(_moc ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc)
+    SET(extra_moc_argument)
+    if(WIN32)
+       SET(extra_moc_argument -DWIN32)
+    endif(WIN32)
     ADD_CUSTOM_COMMAND(OUTPUT ${_moc}
                        COMMAND ${QT_MOC_EXECUTABLE}
-                       ARGS ${_moc_INCS} -o ${_moc} ${_abs_FILE}
+                       ARGS ${extra_moc_argument} ${_moc_INCS} -o ${_moc} ${_abs_FILE}
                        DEPENDS ${_current_FILE}
     )
     LIST(APPEND ${_srcsList} ${_moc})
