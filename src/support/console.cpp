@@ -689,7 +689,7 @@ ConsolePrompt::~ConsolePrompt()
 	delete d;
 }
 
-QCA_EXPORT QSecureArray ConsolePrompt::getHidden(const QString &promptStr)
+QSecureArray ConsolePrompt::getHidden(const QString &promptStr)
 {
 	printf("%s: ", qPrintable(promptStr));
 	fflush(stdout);
@@ -699,7 +699,7 @@ QCA_EXPORT QSecureArray ConsolePrompt::getHidden(const QString &promptStr)
 	return p.d->result;
 }
 
-QCA_EXPORT void ConsolePrompt::waitForEnter()
+void ConsolePrompt::waitForEnter()
 {
 	ConsolePrompt p;
 	p.d->start(true);

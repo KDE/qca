@@ -240,8 +240,8 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		QCA_EXPORT static QSecureArray getHidden(const QString &promptStr);
-		QCA_EXPORT static void waitForEnter();
+		static QSecureArray getHidden(const QString &promptStr);
+		static void waitForEnter();
 
 	private:
 		class Private;
