@@ -7,10 +7,10 @@
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -79,7 +79,7 @@ public:
     {
 	// We might not have a real key, since this can get called
 	// from the constructor.
-	if (key.size() == 0) 
+	if (key.size() == 0)
 	    return;
 
 	m_key = key;
@@ -96,11 +96,11 @@ public:
 			   QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			   QCA::Encode, key);
 	QSecureArray L = aesObj.process(const_Zero);
-	
+
 	// Figure 2.2, step 2
 	if (0 == (L[0] & 0x80))
 	    m_k1 = leftShift(L);
-	else 
+	else
 	    m_k1 = xorArray(leftShift(L), const_Rb);
 
 	// Figure 2.2, step 3
@@ -189,7 +189,7 @@ protected:
     QSecureArray m_Y;
 
     // partial block that we can't do yet
-    QSecureArray m_residual; 
+    QSecureArray m_residual;
 };
 
 class ClientSideProvider : public QCA::Provider
@@ -231,9 +231,9 @@ public:
 class AES_CMAC: public QCA::MessageAuthenticationCode
 {
 public:
-    AES_CMAC(const QCA::SymmetricKey &key = QCA::SymmetricKey(), 
+    AES_CMAC(const QCA::SymmetricKey &key = QCA::SymmetricKey(),
 	     const QString &provider = QString()):
-	QCA::MessageAuthenticationCode(QCA::MessageAuthenticationCode::withAlgorithm("cmac", "aes"), key, provider)
+	QCA::MessageAuthenticationCode( "cmac(aes)", key, provider)
     {}
 };
 
@@ -241,7 +241,7 @@ public:
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
-    
+
     qDebug() << "This example shows AES CMAC";
 
     // the Initializer object sets things up, and
@@ -256,7 +256,7 @@ int main(int argc, char **argv)
 
     if ( QCA::insertProvider(new ClientSideProvider, 0) )
 	qDebug() << "Inserted our provider";
-    else 
+    else
 	qDebug() << "our provider could not be added";
 
     // We should check AES CMAC is supported before using it.
@@ -265,16 +265,16 @@ int main(int argc, char **argv)
     } else {
 	// create the required object
 	AES_CMAC cmacObject;
-	
+
 	// create the key
 	QCA::SymmetricKey key(QCA::hexToArray("2b7e151628aed2a6abf7158809cf4f3c"));
-	
-	// set the MAC to use the key 
+
+	// set the MAC to use the key
 	cmacObject.setup(key);
-	
+
 	QSecureArray message = QCA::hexToArray("6bc1bee22e409f96e93d7e117393172a"
-					       "ae2d8a571e03ac9c9eb76fac45af8e51" 
-					       "30c81c46a35ce411e5fbc1191a0a52ef" 
+					       "ae2d8a571e03ac9c9eb76fac45af8e51"
+					       "30c81c46a35ce411e5fbc1191a0a52ef"
 					       "f69f2445df4f9b17ad2b417be66c3710");
 	QSecureArray message1(message);
 	message1.resize(0);

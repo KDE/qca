@@ -737,15 +737,6 @@ namespace QCA
 		 */
 		void setup(const SymmetricKey &key);
 
-		/**
-		 * Construct the name of the algorithm
-		 *
-		 * You can use this to build a standard name string.
-		 * You probably only need this method if you are 
-		 * creating a new subclass.
-		 */
-		static QString withAlgorithm(const QString &macType, const QString &algType);
-
 	private:
 		class Private;
 		Private *d;

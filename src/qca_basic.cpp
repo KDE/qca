@@ -133,7 +133,7 @@ public:
 };
 
 Cipher::Cipher( const QString &type, Mode m, Padding pad,
-	Direction dir, const SymmetricKey &key, 
+	Direction dir, const SymmetricKey &key,
 	const InitializationVector &iv,
 	const QString &provider )
 :Algorithm(withAlgorithms( type, m, pad ), provider)
@@ -336,11 +336,6 @@ void MessageAuthenticationCode::setup(const SymmetricKey &key)
 {
 	d->key = key;
 	clear();
-}
-
-QString MessageAuthenticationCode::withAlgorithm(const QString &macType, const QString &algType)
-{
-	return (macType + '(' + algType + ')');
 }
 
 //----------------------------------------------------------------------------
