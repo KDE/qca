@@ -325,10 +325,10 @@ _pkcs11h_mutexFree (
 #if !defined(WIN32)
 static
 void
-__pkcs1h_mutexLockAll ();
+__pkcs1h_mutexLockAll (void);
 static
 void
-__pkcs1h_mutexReleaseAll ();
+__pkcs1h_mutexReleaseAll (void);
 #endif
 static
 CK_RV
@@ -505,17 +505,17 @@ _pkcs11h_hooks_default_pin_prompt (
 #if defined(ENABLE_PKCS11H_THREADING)
 static
 void
-__pkcs11h_atfork_prepare  ();
+__pkcs11h_atfork_prepare  (void);
 static
 void
-__pkcs11h_atfork_parent ();
+__pkcs11h_atfork_parent (void);
 static
 void
-__pkcs11h_atfork_child ();
+__pkcs11h_atfork_child (void);
 #endif
 static
 CK_RV
-_pkcs11h_forkFixup ();
+_pkcs11h_forkFixup (void);
 #endif
 
 #if defined(ENABLE_PKCS11H_CERTIFICATE)
@@ -687,13 +687,13 @@ _pkcs11h_slotevent_manager (
 );
 static
 CK_RV
-_pkcs11h_slotevent_init ();
+_pkcs11h_slotevent_init (void);
 static
 CK_RV
-_pkcs11h_slotevent_notify ();
+_pkcs11h_slotevent_notify (void);
 static
 CK_RV
-_pkcs11h_slotevent_terminate ();
+_pkcs11h_slotevent_terminate (void);
 
 #endif				/* ENABLE_PKCS11H_SLOTEVENT */
 
@@ -776,8 +776,8 @@ static struct {
 #endif
 #endif
 
-pkcs11h_data_t s_pkcs11h_data = NULL;
-unsigned int s_pkcs11h_loglevel = PKCS11H_LOG_INFO;
+static pkcs11h_data_t s_pkcs11h_data = NULL;
+static unsigned int s_pkcs11h_loglevel = PKCS11H_LOG_INFO;
 
 /*======================================================================*
  * PUBLIC INTERFACE
@@ -879,7 +879,7 @@ pkcs11h_getMessage (
 }
 
 CK_RV
-pkcs11h_initialize () {
+pkcs11h_initialize (void) {
 
 #if defined(ENABLE_PKCS11H_THREADING)
 	PKCS11H_BOOL fMutexLocked = FALSE;
@@ -958,7 +958,7 @@ pkcs11h_initialize () {
 }
 
 CK_RV
-pkcs11h_terminate () {
+pkcs11h_terminate (void) {
 
 	PKCS11H_DEBUG (
 		PKCS11H_LOG_DEBUG2,
@@ -1487,7 +1487,7 @@ pkcs11h_removeProvider (
 }
 
 CK_RV
-pkcs11h_forkFixup () {
+pkcs11h_forkFixup (void) {
 #if defined(WIN32)
 	return CKR_OK;
 #else
@@ -1500,7 +1500,7 @@ pkcs11h_forkFixup () {
 }
 
 CK_RV
-pkcs11h_plugAndPlay () {
+pkcs11h_plugAndPlay (void) {
 #if defined(WIN32)
 	int mypid = 0;
 #else
@@ -1910,7 +1910,7 @@ _pkcs11h_mutexFree (
  */
 static
 void
-__pkcs1h_mutexLockAll () {
+__pkcs1h_mutexLockAll (void) {
 	__pkcs11h_mutex_entry_t entry = NULL;
 	PKCS11H_BOOL fMutexLocked = FALSE;
 	PKCS11H_BOOL fAllLocked = FALSE;
@@ -1972,7 +1972,7 @@ __pkcs1h_mutexLockAll () {
 
 static
 void
-__pkcs1h_mutexReleaseAll () {
+__pkcs1h_mutexReleaseAll (void) {
 	__pkcs11h_mutex_entry_t entry = NULL;
 	PKCS11H_BOOL fMutexLocked = FALSE;
 
@@ -3608,17 +3608,17 @@ _pkcs11h_hooks_default_pin_prompt (
 
 static
 void
-__pkcs11h_atfork_prepare  () {
+__pkcs11h_atfork_prepare  (void) {
 	__pkcs1h_mutexLockAll ();
 }
 static
 void
-__pkcs11h_atfork_parent () {
+__pkcs11h_atfork_parent (void) {
 	__pkcs1h_mutexReleaseAll ();
 }
 static
 void
-__pkcs11h_atfork_child () {
+__pkcs11h_atfork_child (void) {
 	__pkcs1h_mutexReleaseAll ();
 	_pkcs11h_forkFixup ();
 }
@@ -3627,7 +3627,7 @@ __pkcs11h_atfork_child () {
 
 static
 CK_RV
-_pkcs11h_forkFixup () {
+_pkcs11h_forkFixup (void) {
 #if defined(ENABLE_PKCS11H_THREADING)
 	PKCS11H_BOOL fMutexLocked = FALSE;
 #endif
@@ -8510,7 +8510,7 @@ _pkcs11h_slotevent_manager (
 
 static
 CK_RV
-_pkcs11h_slotevent_init () {
+_pkcs11h_slotevent_init (void) {
 	CK_RV rv = CKR_OK;
 
 	PKCS11H_DEBUG (
@@ -8548,7 +8548,7 @@ _pkcs11h_slotevent_init () {
 
 static
 CK_RV
-_pkcs11h_slotevent_notify () {
+_pkcs11h_slotevent_notify (void) {
 	
 	PKCS11H_DEBUG (
 		PKCS11H_LOG_DEBUG2,
@@ -8570,7 +8570,7 @@ _pkcs11h_slotevent_notify () {
 
 static
 CK_RV
-_pkcs11h_slotevent_terminate () {
+_pkcs11h_slotevent_terminate (void) {
 	
 	PKCS11H_DEBUG (
 		PKCS11H_LOG_DEBUG2,
@@ -9888,14 +9888,14 @@ pkcs11h_standalone_dump_objects (
 		token_id = NULL;
 	}
 	
-	pkcs11h_terminate ();
+	pkcs11h_terminate (void);
 }
 
 #endif				/* ENABLE_PKCS11H_STANDALONE */
 
 #ifdef BROKEN_OPENSSL_ENGINE
-static void broken_openssl_init() __attribute__ ((constructor));
-static void  broken_openssl_init()
+static void broken_openssl_init(void) __attribute__ ((constructor));
+static void  broken_openssl_init(void)
 {
 	SSL_library_init();
 	ENGINE_load_openssl();

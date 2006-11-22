@@ -192,14 +192,14 @@ public:
 	entry (
 		int id,
 		const QString &entryId
-	) const;
+	);
 
 	virtual
 	KeyStoreEntryContext *
 	entryPassive (
 		const QString &storeId,
 		const QString &entryId
-	) const;
+	);
 
 	virtual
 	KeyStore::Type
@@ -487,7 +487,7 @@ public:
 				(rv = pkcs11h_certificate_decrypt (
 					_pkcs11h_certificate,
 					mech,
-					(const unsigned char * const)in.constData (),
+					(const unsigned char *)in.constData (),
 					in.size (),
 					NULL,
 					&my_size
@@ -502,7 +502,7 @@ public:
 				(rv = pkcs11h_certificate_decrypt (
 					_pkcs11h_certificate,
 					mech,
-					(const unsigned char * const)in.constData (),
+					(const unsigned char *)in.constData (),
 					in.size (),
 					(unsigned char *)out->data (),
 					&my_size
@@ -1266,7 +1266,7 @@ KeyStoreEntryContext *
 MyKeyStoreList::entry (
 	int id,
 	const QString &entryId
-) const {
+) {
 	Q_UNUSED(id);
 	Q_UNUSED(entryId);
 	return NULL;
@@ -1276,7 +1276,7 @@ KeyStoreEntryContext *
 MyKeyStoreList::entryPassive (
 	const QString &storeId,
 	const QString &entryId
-) const {
+) {
 	Q_UNUSED(storeId);
 
 	try {
@@ -1811,7 +1811,7 @@ MyKeyStoreList::deserializeCertificateId (
 		qPrintable (unescapeString (list[n++])),
 		sizeof (token_id_s.label)
 	);
-	token_id_s.serialNumber[sizeof (token_id_s.label)-1] = '\0';
+	token_id_s.label[sizeof (token_id_s.label)-1] = '\0';
 
 	QSecureArray arrayCKA_ID = Base64 ().stringToArray (unescapeString (list[n++]));
 	certificate_id_s.attrCKA_ID = (unsigned char *)arrayCKA_ID.data ();
@@ -2132,4 +2132,4 @@ public:
 
 #include "qca-pkcs11.moc"
 
-Q_EXPORT_PLUGIN2(qca-pkcs11, pkcs11Plugin);
+Q_EXPORT_PLUGIN2(qca-pkcs11, pkcs11Plugin)

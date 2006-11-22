@@ -217,7 +217,7 @@ pkcs11h_getMessage (
  * 	PIN cached is infinite.
  */
 CK_RV
-pkcs11h_initialize ();
+pkcs11h_initialize (void);
 
 /*
  * pkcs11h_terminate - Terminate helper interface.
@@ -226,7 +226,7 @@ pkcs11h_initialize ();
  * related resources freed.
  */
 CK_RV
-pkcs11h_terminate ();
+pkcs11h_terminate (void);
 
 /*
  * pkcs11h_setLogLevel - Set current log level of the helper.
@@ -246,7 +246,7 @@ pkcs11h_setLogLevel (
  * pkcs11h_getLogLevel - Get current log level.
  */
 unsigned
-pkcs11h_getLogLevel ();
+pkcs11h_getLogLevel (void);
 
 /*
  * pkcs11h_setLogHook - Set a log callback.
@@ -391,7 +391,7 @@ pkcs11h_removeProvider (
  * is set on configuration file, by use of pthread_atfork.
  */
 CK_RV
-pkcs11h_forkFixup ();
+pkcs11h_forkFixup (void);
 
 /*
  * pkcs11h_plugAndPlay - Handle slot rescan.
@@ -405,7 +405,7 @@ pkcs11h_forkFixup ();
  * login at the next access.
  */
 CK_RV
-pkcs11h_plugAndPlay ();
+pkcs11h_plugAndPlay (void);
 
 /*
  * pkcs11h_freeTokenId - Free token_id object.
