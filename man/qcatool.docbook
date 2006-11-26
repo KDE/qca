@@ -1,0 +1,134 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" [
+<!ENTITY % English "INCLUDE">
+<!ENTITY qcatool "<command>qcatool</command>">
+<!ENTITY Brad.Hards '<personname><firstname>Brad </firstname><surname>Hards</surname></personname>'>
+<!ENTITY Brad.Hards.mail '<email>bradh@frogmouth.net</email>'>
+
+]>
+
+<refentry id="qcatool">
+<refentryinfo>
+	<title>QCA</title>
+	<author>
+		&Brad.Hards;
+		&Brad.Hards.mail;
+	</author>
+	<date>20 November 2006</date>
+	<productname>Qt Cryptographic Architecture</productname>
+</refentryinfo>
+
+<refmeta>
+	<refentrytitle>&qcatool;</refentrytitle>
+	<manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+	<refname>&qcatool;</refname>
+	<refpurpose>A simple tool for using and testing the Qt Cryptographic Architecture (QCA).</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+&qcatool;
+<sbr>
+<arg>--help</arg>
+<sbr>
+<arg>--plugins<arg choice="opt">-d</arg></arg>
+<sbr>
+<arg>--genrsa<arg choice="req"><replaceable>bits</replaceable></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--gendsa<arg choice="req"><group><arg>512</arg><arg>768</arg><arg>1024</arg></group></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--gendh<arg choice="req"><group><arg>1024</arg><arg>2048</arg><arg>4096</arg></group></arg></arg>
+<sbr>
+<arg>--encrypt<arg choice="req"><replaceable>pub.pem</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg></arg>
+<sbr>
+<arg>--decrypt<arg choice="req"><replaceable>priv.pem</replaceable></arg><arg choice="req"><replaceable>encrytedfile</replaceable></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--sign<arg choice="req"><replaceable>priv.pem</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--verify<arg choice="req"><replaceable>pub.pem</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg><arg choice="opt"><replaceable>sigfile</replaceable></arg></arg>
+<sbr>
+<arg>--derivekey<arg choice="req"><replaceable>priv.txt</replaceable></arg><arg choice="req"><replaceable>peerpub.txt</replaceable></arg></arg>
+<sbr>
+<arg>--makeselfcert<arg choice="req"><replaceable>priv.pem</replaceable></arg><group><arg>ca</arg><arg>user</arg></group><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--makereq<arg choice="req"><replaceable>priv.pem</replaceable></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--showcert<arg choice="req"><replaceable>cert.pem</replaceable></arg></arg>
+<sbr>
+<arg>--showreq<arg choice="req"><replaceable>certreq.pem</replaceable></arg></arg>
+<sbr>
+<arg>--validate<arg choice="req"><replaceable>cert.pem</replaceable></arg><arg choice="opt"><replaceable>nonroots.pem</replaceable></arg></arg>
+<sbr>
+<arg>--extractkeybundle<arg choice="req"><replaceable>cert.p12</replaceable></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--list-keystores</arg>
+<sbr>
+<arg>--list-keystore<arg choice="req"><replaceable>storename</replaceable></arg></arg>
+<sbr>
+<arg>--smime sign<arg choice="req"><group><arg><replaceable>priv.pem</replaceable></arg><arg><replaceable>X</replaceable></arg></group></arg><arg choice="req"><replaceable>messagefile</replaceable></arg><arg choice="req"><replaceable>cert.pem</replaceable></arg><arg choice="req"><replaceable>nonroots.pem</replaceable></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--smime verify<arg choice="req"><replaceable>messagefile</replaceable></arg></arg>
+<sbr>
+<arg>--smime encrypt<arg choice="req"><replaceable>cert.pem</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg></arg>
+<sbr>
+<arg>--smime decrypt<arg choice="req"><replaceable>priv.pem</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg><arg choice="req"><replaceable>cert.pem</replaceable></arg><arg choice="opt"><replaceable>passphrase</replaceable></arg></arg>
+<sbr>
+<arg>--pgp clearsign<arg choice="req"><replaceable>secretkey</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg></arg>
+<sbr>
+<arg>--pgp signdetach<arg choice="req"><replaceable>secretkey</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg></arg>
+<sbr>
+<arg>--pgp verifydetach<arg choice="req"><replaceable>messagefile</replaceable></arg><arg choice="req"><replaceable>signature</replaceable></arg></arg>
+<sbr>
+<arg>--pgp encrypt<arg choice="req"><replaceable>publickey</replaceable></arg><arg choice="req"><replaceable>messagefile</replaceable></arg></arg>
+<sbr>
+<arg>--pgp decrypt<arg choice="req"><replaceable>encryptedfile</replaceable></arg></arg>
+<sbr>
+<arg>--list-tlsciphers</arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+
+<para>&qcatool; was originally developed as part of the test suite for the Qt Cryptographic Architecture. However  it has broader application as a user or system administrator tool.</para>
+
+<para>&qcatool; provides a range of functionality, including:
+<itemizedlist>
+<listitem><para>SMIME signing, verification, encryption and decryption.</para></listitem>
+<listitem><para>PGP signing (detached and clearsigning), verification, encryption and decryption.</para></listitem>
+<listitem><para>RSA, DSA and Diffie Hellman key generation</para></listitem>
+<listitem><para>Public key encryption, decryption, signing and verification</para></listitem>
+<listitem><para>Extraction of certificates and keys from PKCS#12 bundles</para></listitem>
+<listitem><para>Listing the availalbe keystores, and the contents of individual stores</para></listitem>
+</itemizedlist>
+</para>
+
+<note><para>&qcatool; relies on external plugins (also known as providers) for most of its functionality. If appropriate plugins are not available, then &qcatool; will not be able to implement some or all of the functionality listed above.</para></note>
+
+</refsect1>
+
+<!--
+<refsect1>
+<title>Options</title>
+
+<para>Some option description</para>
+
+</refsect1>
+
+<refsect1>
+<title>Examples</title>
+<screen>joe@hal9000:~> <command>kbookmarkmerger <filename>/usr/local/extra-bookmarks</filename></command></screen>
+<para>Merges all bookmark files stored in
+<filename>/usr/local/extra-bookmarks</filename> into joe's list of
+bookmarks.</para>
+</refsect1>
+-->
+
+<refsect1>
+<title>Author</title>
+<para>&Brad.Hards; &Brad.Hards.mail;</para>
+</refsect1>
+</refentry>
+
