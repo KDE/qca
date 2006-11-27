@@ -40,6 +40,8 @@
 
 #include "pkcs11-helper.h"
 
+#include <unistd.h> /* for usleep() */
+
 /*===========================================
  * Constants
  */
