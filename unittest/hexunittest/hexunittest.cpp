@@ -70,7 +70,7 @@ void HexUnitTest::testHexString_data()
     QTest::newRow("FF") << QString("\f") << QString("0c"); // FF
     QTest::newRow("CR") << QString("\r") << QString("0d"); // CR
     QTest::newRow("bug126735") << QString("@ABCDEFGHIJKLMNO") << QString("404142434445464748494a4b4c4d4e4f");
-};
+}
 
 void HexUnitTest::testHexString()
 {

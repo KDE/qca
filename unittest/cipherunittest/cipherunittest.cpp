@@ -163,7 +163,7 @@ void CipherUnitTest::aes128_data()
 			<< QString("8d1299236223359474011f6bf5088414")
 			<< QString("6c6d6e6f71727374767778797b7c7d7e");
 
-};
+}
 
 
 // TODO: CBC-PKCS7
@@ -237,7 +237,7 @@ void CipherUnitTest::aes128_cbc_data()
 		       << QString("7649abac8119b246cee98e9b12e9197d5086cb9b507219ee95db113a917678b273bed6b8e3c1743b7116e69e222295163ff1caa1681fac09120eca307586e1a7")
 		       << QString("2b7e151628aed2a6abf7158809cf4f3c")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes128_cbc()
 {
@@ -299,7 +299,7 @@ void CipherUnitTest::aes128_cfb_data()
 26751f67a3cbb140b1808cf187a4f4dfc04b05357c5d1c0eeac4c66f9ff7f2e6")
 		       << QString("2b7e151628aed2a6abf7158809cf4f3c")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes128_cfb()
 {
@@ -360,7 +360,7 @@ void CipherUnitTest::aes128_ofb_data()
 		       << QString("3b3fd92eb72dad20333449f8e83cfb4a7789508d16918f03f53c52dac54ed8259740051e9c5fecf64344f7a82260edcc304c6528f659c77866a510d9c1d6ae5e")
 		       << QString("2b7e151628aed2a6abf7158809cf4f3c")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes128_ofb()
 {
@@ -542,7 +542,7 @@ void CipherUnitTest::aes192_cbc_data()
 		       << QString("4f021db243bc633d7178183a9fa071e8b4d9ada9ad7dedf4e5e738763f69145a571b242012fb7ae07fa9baac3df102e008b0e27988598881d920a9e64f5615cd")
 		       << QString("8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 
 void CipherUnitTest::aes192_cbc()
@@ -604,7 +604,7 @@ void CipherUnitTest::aes192_cfb_data()
 		       << QString("cdc80d6fddf18cab34c25909c99a417467ce7f7f81173621961a2b70171d3d7a2e1e8a1dd59b88b1c8e60fed1efac4c9c05f9f9ca9834fa042ae8fba584b09ff")
 		       << QString("8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes192_cfb()
 {
@@ -665,7 +665,7 @@ void CipherUnitTest::aes192_ofb_data()
 		       << QString("cdc80d6fddf18cab34c25909c99a4174fcc28b8d4c63837c09e81700c11004018d9a9aeac0f6596f559c6d4daf59a5f26d9f200857ca6c3e9cac524bd9acc92a")
 		       << QString("8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes192_ofb()
 {
@@ -810,7 +810,7 @@ void CipherUnitTest::aes256_data()
     QTest::newRow("21") << QString("15478beec58f4775c7a7f5d4395514d7")
 			<< QString("196865964db3d417b6bd4d586bcb7634")
 			<< QString("78797a7b7d7e7f80828384858788898a8c8d8e8f91929394969798999b9c9d9e");
-};
+}
 
 
 
@@ -885,7 +885,7 @@ void CipherUnitTest::aes256_cbc_data()
 		       << QString("f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b")
 		       << QString("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes256_cbc()
 {
@@ -947,7 +947,7 @@ void CipherUnitTest::aes256_cfb_data()
 		       << QString("dc7e84bfda79164b7ecd8486985d386039ffed143b28b1c832113c6331e5407bdf10132415e54b92a13ed0a8267ae2f975a385741ab9cef82031623d55b1e471")
 		       << QString("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes256_cfb()
 {
@@ -1007,7 +1007,7 @@ void CipherUnitTest::aes256_ofb_data()
 		       << QString("dc7e84bfda79164b7ecd8486985d38604febdc6740d20b3ac88f6ad82a4fb08d71ab47a086e86eedf39d1c5bba97c4080126141d67f37be8538f5a8be740e484")
 		       << QString("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4")
 		       << QString("000102030405060708090a0b0c0d0e0f");
-};
+}
 
 void CipherUnitTest::aes256_ofb()
 {
@@ -1165,7 +1165,7 @@ void CipherUnitTest::tripleDES_data()
     QTest::newRow("33") << QString("4bd0f4854297fbde")
 			<< QString("f4ab771861457dc6")
 			<< QString("711f2cecdb92b2e201dfefa79fa7ba2f");
-};
+}
 
 // TODO: ECB-PKCS7
 void CipherUnitTest::tripleDES()
@@ -1444,7 +1444,7 @@ void CipherUnitTest::des_data()
     QTest::newRow("") << QString("0000000000000000") << QString("1aeac39a61f0a464") << QString("1002911698100101");
     QTest::newRow("") << QString("059b5e0851cf143a") << QString("86a560f10ec6d85b") << QString("0113b970fd34f2ce");
     QTest::newRow("") << QString("4e6f772069732074") << QString("3fa40e8a984d4815") << QString("0123456789abcdef");
-};
+}
 
 
 void CipherUnitTest::des()
@@ -1516,7 +1516,7 @@ void CipherUnitTest::des_cbc_data()
 		       << QString("e5c7cdde872bf27c43e934008c389c0f683788499a7c05f6")
 		       << QString("0123456789abcdef")
 		       << QString("1234567890abcdef");
-};
+}
 
 
 void CipherUnitTest::des_cbc()
@@ -1622,7 +1622,7 @@ void CipherUnitTest::des_cfb_data()
     QTest::newRow("") << QString("82e27182fc22cd8918dddbdb850034a4f2")
 		      << QString("9767881b1909db5e146caaf5fc6a118814")
 		      << QString("b9cdd5442e1c7fd7") << QString("5d1b1eceb7335274");
-};
+}
 
 
 void CipherUnitTest::des_cfb()
@@ -1691,7 +1691,7 @@ void CipherUnitTest::des_ofb_data()
     QTest::newRow("4") << QString("08a6091fa2987fdc682a8199a6d6bd1f")
 		       << QString("640b5033dcf26873fa8a34db644f2bf2")
 		       << QString("3307042dc775035e") << QString("99de32ff0351509b");
-};
+}
 
 
 void CipherUnitTest::des_ofb()
@@ -1788,7 +1788,7 @@ void CipherUnitTest::des_pkcs7_data()
 		      << QString("77dfae7f46af6db0d0e5775859943e2875854a680b54b59b")
 		      << QString("5d869f3486dfe1a1");
 
-};
+}
 
 
 // This is DES ECB, PKCS7 padding
@@ -1946,7 +1946,7 @@ void CipherUnitTest::des_cbc_pkcs7_data()
     QTest::newRow("33") << QString("8eb8faf49126ad5b8a0aa6df8b52dbe50dd5aed271641ef983bd650da69816")
 			<< QString("5b4622f1c4faa817ee3ac181b969a7afed7117e23f68bc6017519a7d1399cfe9")
 			<< QString("35501029e137d63d") << QString("c1e0e3a06b357b51");
-};
+}
 
 void CipherUnitTest::des_cbc_pkcs7()
 {
@@ -2123,7 +2123,7 @@ void CipherUnitTest::blowfish_data()
 			<< QString("f0e1d2c3b4a5968778695a4b3c2d1e0f00112233445566" );
     QTest::newRow("60") << QString("fedcba9876543210") << QString("05044b62fa52d080")
 			<< QString("f0e1d2c3b4a5968778695a4b3c2d1e0f0011223344556677" );
-};
+}
 
 
 void CipherUnitTest::blowfish()
@@ -2199,7 +2199,7 @@ void CipherUnitTest::blowfish_cbc_data()
 			   << QString("6b77b4d63006dee605b156e27403979358deb9e7154616d9749decbec05d264b")
 			   << QString("0123456789abcdeff0e1d2c3b4a59687")
 			   << QString("fedcba9876543210");
-};
+}
 
 
 void CipherUnitTest::blowfish_cbc()
@@ -2263,7 +2263,7 @@ void CipherUnitTest::blowfish_cbc_pkcs7_data()
 		       << QString("6b77b4d63006dee605b156e27403979358deb9e7154616d9749decbec05d264b")
 		       << QString("0123456789abcdeff0e1d2c3b4a59687")
 		       << QString("fedcba9876543210");
-};
+}
 
 void CipherUnitTest::blowfish_cbc_pkcs7()
 {
@@ -2326,7 +2326,7 @@ void CipherUnitTest::blowfish_cfb_data()
 		       << QString("e73214a2822139caf26ecf6d2eb9e76e3da3de04d1517200519d57a6c3")
 		       << QString("0123456789abcdeff0e1d2c3b4a59687")
 		       << QString("fedcba9876543210");
-};
+}
 
 void CipherUnitTest::blowfish_cfb()
 {
@@ -2385,7 +2385,7 @@ void CipherUnitTest::blowfish_ofb_data()
 		       << QString("e73214a2822139ca62b343cc5b65587310dd908d0c241b2263c2cf80da")
 		       << QString("0123456789abcdeff0e1d2c3b4a59687")
 		       << QString("fedcba9876543210");
-};
+}
 
 void CipherUnitTest::blowfish_ofb()
 {

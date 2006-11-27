@@ -72,7 +72,7 @@ void Base64UnitTest::test1_data()
 			 << QString("594f6a6c3637476c36736c614165782f68356179334f5278");
     QTest::newRow("3134") << QString("31346d354f33313333372c31274d754e7354307050346231333a29")
 			  << QString("4d5452744e55387a4d544d7a4e7977784a303131546e4e554d4842514e4749784d7a6f70");
-};
+}
 
 
 void Base64UnitTest::test2_data()
@@ -95,7 +95,7 @@ void Base64UnitTest::test2_data()
     QTest::newRow("QCA_2.0") << QString("QCA_2.0") << QString("UUNBXzIuMA==");
     QTest::newRow("j-0") << QString("jh/*-*/*-/4983589230")
 			 << QString("amgvKi0qLyotLzQ5ODM1ODkyMzA=");
-};
+}
 
 void Base64UnitTest::test1()
 {

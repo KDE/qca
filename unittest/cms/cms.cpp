@@ -155,7 +155,7 @@ void CMSut::xcrypt()
 	    QCOMPARE( msg2.type(), QCA::SecureMessage::CMS );
 	}
     }
-};
+}
 
 void CMSut::signverify_data()
 {
@@ -286,7 +286,7 @@ void CMSut::signverify()
 	    QCOMPARE( msg.verifySuccess(), false );
 	}
     }
-};
+}
 
 
 void CMSut::signverify_message_data()
@@ -404,7 +404,7 @@ void CMSut::signverify_message()
 	    QCOMPARE( msg.verifySuccess(), true );
 	}
     }
-};
+}
 
 void CMSut::signverify_message_invalid_data()
 {
@@ -492,7 +492,7 @@ void CMSut::signverify_message_invalid()
 	    QCOMPARE( msg.verifySuccess(), false );
 	}
     }
-};
+}
 
 
 QTEST_MAIN(CMSut)

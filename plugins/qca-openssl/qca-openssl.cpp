@@ -695,7 +695,7 @@ static Constraints get_cert_key_usage(X509_EXTENSION *ex)
 	}
 	ASN1_BIT_STRING_free(keyusage);
 	return constraints;
-};
+}
 
 static X509_EXTENSION *new_cert_ext_key_usage(const Constraints &constraints)
 {
@@ -812,7 +812,7 @@ static Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
 	}
 	sk_ASN1_OBJECT_pop_free(extkeyusage, ASN1_OBJECT_free);
 	return constraints;
-};
+}
 
 static X509_EXTENSION *new_cert_policies(const QStringList &policies)
 {
@@ -6145,5 +6145,5 @@ public:
 
 #include "qca-openssl.moc"
 
-Q_EXPORT_PLUGIN2(qca-openssl, opensslPlugin);
+Q_EXPORT_PLUGIN2(qca-openssl, opensslPlugin)
 

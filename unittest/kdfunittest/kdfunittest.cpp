@@ -159,7 +159,7 @@ void KDFUnitTest::pbkdf1sha1Tests_data()
 		       << QString("bc8bc53d4604977c3adb1d19c15e87b77a84c2f6")
 		       << static_cast<unsigned int>(14)
 		       << static_cast<unsigned int>(10000);
-};
+}
 
 void KDFUnitTest::pbkdf1sha1Tests()
 {

@@ -99,7 +99,7 @@ void SymmetricKeyUnitTest::weakKey_data()
     QTest::newRow("") << QByteArray("10071034c8980120") << false;
     QTest::newRow("") << QByteArray("1046103489988020") << false;
 
-};
+}
 
 
 void SymmetricKeyUnitTest::weakKey()
