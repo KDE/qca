@@ -6,13 +6,20 @@ set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
 
 set(PKGCONFIG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
 
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
-FIND_PACKAGE(Qt4 REQUIRED)
+find_package(Qt4 REQUIRED)
 
 if (APPLE)
    find_package(Carbon REQUIRED)
 endif (APPLE)
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+   if (CMAKE_SYSTEM_NAME MATCHES Linux)
+     set ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
+     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fno-check-new -fno-common")
+   endif (CMAKE_SYSTEM_NAME MATCHES Linux)
+endif (CMAKE_COMPILER_IS_GNUCXX)
 
 add_definitions (${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(include/QtCrypto/ ${QT_INCLUDES})
