@@ -220,9 +220,9 @@ public:
 		p->init();
 
 		// load configuration
-		QVariantMap conf = getProviderConfig(p->name());
-		if(!conf.isEmpty())
-			p->configChanged(conf);
+		//QVariantMap conf = getProviderConfig(p->name());
+		//if(!conf.isEmpty())
+		//	p->configChanged(conf);
 	}
 
 private:
