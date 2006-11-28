@@ -274,6 +274,7 @@ public:
 private slots:
 	void ph_eventReady(int id, const QCA::Event &e)
 	{
+		QCA::Console console(QCA::Console::Read, QCA::Console::Interactive);
 		if(e.type() == QCA::Event::Password)
 		{
 			QString type = "password";
@@ -1065,7 +1066,6 @@ int main(int argc, char **argv)
 	QCA::keyStoreManager()->waitForBusyFinished();
 
 	// hook a passphrase prompt onto all the KeyStores
-	QCA::Console console(QCA::Console::Read, QCA::Console::Interactive);
 	PassphrasePrompt passphrasePrompt;
 
 	bool genrsa = false;
