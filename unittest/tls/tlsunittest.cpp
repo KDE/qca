@@ -64,7 +64,6 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("TLS_DHE_RSA_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_DHE_DSS_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_AES_128_CBC_SHA") );
-	QVERIFY( cipherList.contains("TLS_RSA_WITH_IDEA_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_CK_DHE_DSS_WITH_RC4_128_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_RC4_128_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_RC4_128_MD5") );
@@ -93,7 +92,6 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("SSL_DHE_RSA_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_AES_128_CBC_SHA") );
-	QVERIFY( cipherList.contains("SSL_RSA_WITH_IDEA_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_CK_DHE_DSS_WITH_RC4_128_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_MD5") );
