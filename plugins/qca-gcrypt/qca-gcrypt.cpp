@@ -67,12 +67,12 @@ public:
     {
 	gcry_md_reset( context );
     }
-    
+
     void update(const QSecureArray &a)
     {
 	gcry_md_write( context, a.data(), a.size() );
     }
-    
+
     QSecureArray final()
     {
 	unsigned char *md;
@@ -81,12 +81,12 @@ public:
 	memcpy( a.data(), md, a.size() );
 	return a;
     }
-    
+
 protected:
     gcry_md_hd_t context;
     gcry_error_t err;
     int m_hashAlgorithm;
-};	
+};
 
 class gcryHMACContext : public QCA::MACContext
 {
@@ -169,14 +169,14 @@ public:
 	    QCA::SymmetricKey keyCopy(key);
 	    QSecureArray thirdKey(key);
 	    thirdKey.resize(8);
-	    keyCopy += thirdKey; 
+	    keyCopy += thirdKey;
 	    err = gcry_cipher_setkey( context, keyCopy.data(), keyCopy.size() );
 	} else {
 	    err = gcry_cipher_setkey( context, key.data(), key.size() );
 	}
 	check_error( "gcry_cipher_setkey", err );
 	err = gcry_cipher_setiv( context, iv.data(), iv.size() );
-	check_error( "gcry_cipher_setiv", err ); 
+	check_error( "gcry_cipher_setiv", err );
     }
 
     Context *clone() const
@@ -190,7 +190,7 @@ public:
 	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
 	return blockSize;
     }
-    
+
     bool update(const QSecureArray &in, QSecureArray *out)
     {
 	QSecureArray result( in.size() );
@@ -204,7 +204,7 @@ public:
 	*out = result;
 	return true;
     }
-    
+
     bool final(QSecureArray *out)
     {
 	QSecureArray result;
@@ -280,13 +280,13 @@ public:
     {
 	return new pbkdf1Context( *this );
     }
-    
+
     QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
 	/* from RFC2898:
 	   Steps:
-	   
+
 	   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
 	   "derived key too long" and stop.
 	*/
@@ -299,7 +299,7 @@ public:
 	   2. Apply the underlying hash function Hash for c iterations to the
 	   concatenation of the password P and the salt S, then extract
 	   the first dkLen octets to produce a derived key DK:
-	   
+
 	   T_1 = Hash (P || S) ,
 	   T_2 = Hash (T_1) ,
 	   ...
@@ -418,7 +418,12 @@ public:
 	    gcry_control (GCRYCTL_INITIALIZATION_FINISHED);
 	}
     }
-    
+
+    int version() const
+    {
+        return QCA_VERSION;
+    }
+
     QString name() const
     {
 	return "qca-gcrypt";
@@ -481,7 +486,7 @@ public:
 
     Context *createContext(const QString &type)
     {
-        // std::cout << "type: " << qPrintable(type) << std::endl; 
+        // std::cout << "type: " << qPrintable(type) << std::endl;
 	if ( type == "sha1" )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA1, this, type );
 	else if ( type == "md4" )
