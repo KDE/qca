@@ -54,16 +54,16 @@ void RandomUnitTest::cleanupTestCase()
 
 void RandomUnitTest::testSetGlobal()
 {
-    QCA::Random rng = QCA::globalRNG( );
-    QCOMPARE( rng.provider()->name(), QString( "qca-botan" ) );
-
     QCA::setGlobalRNG( "default" );
-    rng = QCA::globalRNG( );
+    QCA::Random rng = QCA::globalRNG( );
     QCOMPARE( rng.provider()->name(), QString( "default" ) );
 
-    QCA::setGlobalRNG( "qca-botan" );
-    QCA::Random rng1 = QCA::globalRNG();
-    QCOMPARE( rng1.provider()->name(), QString( "qca-botan" ) );
+    // Only check this if we have the Botan provider
+    if ( QCA::findProvider( "qca-botan" ) ) {
+        QCA::setGlobalRNG( "qca-botan" );
+        QCA::Random rng1 = QCA::globalRNG();
+        QCOMPARE( rng1.provider()->name(), QString( "qca-botan" ) );
+    }
 }
 
 void RandomUnitTest::testGetData()
