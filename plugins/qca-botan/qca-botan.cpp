@@ -36,12 +36,12 @@ public:
     botanRandomContext(QCA::Provider *p) : RandomContext(p)
     {
     }
-	
+
     Context *clone() const
     {
 	return new botanRandomContext( *this );
     }
-    
+
     QSecureArray nextBytes(int size, QCA::Random::Quality quality)
     {
 	QSecureArray buf(size);
@@ -91,22 +91,22 @@ public:
     {
 	m_hashObj->clear();
     }
-    
+
     void update(const QSecureArray &a)
     {
 	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
     }
-    
+
     QSecureArray final()
     {
 	QSecureArray a( m_hashObj->OUTPUT_LENGTH );
 	m_hashObj->final( (Botan::byte *)a.data() );
 	return a;
     }
-    
+
 private:
     Botan::HashFunction *m_hashObj;
-};	
+};
 
 
 //-----------------------------------------------------------
@@ -184,7 +184,7 @@ public:
     {
 	return new BotanPBKDFContext( *this );
     }
-    
+
     QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
@@ -219,7 +219,7 @@ public:
 	try {
 	m_dir = dir;
 	Botan::SymmetricKey keyCopy((Botan::byte*)key.data(), key.size());
-	
+
 	if (iv.size() == 0) {
 	    if (QCA::Encode == dir) {
 		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+"/"+m_algoMode+"/"+m_algoPadding,
@@ -306,7 +306,7 @@ class botanProvider : public QCA::Provider
 {
 public:
     void init()
-    { 
+    {
 	m_init = new Botan::LibraryInitializer;
     }
 
@@ -317,11 +317,16 @@ public:
 	// delete m_init;
     }
 
+    int version() const
+    {
+        return QCA_VERSION;
+    }
+
     QString name() const
     {
 	return "qca-botan";
     }
-    
+
     QStringList features() const
     {
 	QStringList list;
@@ -336,9 +341,10 @@ public:
 	list += "ripemd160";
 	list += "hmac(md5)";
 	list += "hmac(sha1)";
-	list += "hmac(sha256)";
-	list += "hmac(sha384)";
-	list += "hmac(sha512)";
+        // HMAC with SHA2 doesn't appear to work correctly in Botan.
+	// list += "hmac(sha256)";
+	// list += "hmac(sha384)";
+	// list += "hmac(sha512)";
 	list += "hmac(ripemd160)";
 	list += "pbkdf1(sha1)";
 	list += "pbkdf1(md2)";
@@ -369,7 +375,7 @@ public:
 	list += "blowfish-ofb";
 	return list;
     }
-    
+
     Context *createContext(const QString &type)
     {
 	if ( type == "random" )
