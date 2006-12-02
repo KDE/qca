@@ -112,12 +112,12 @@ public:
 	    return;
 	}
     }
-    
+
     void update(const QSecureArray &a)
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
-    
+
     QSecureArray final()
     {
 	unsigned int len = 0;
@@ -126,13 +126,13 @@ public:
 	a.resize(len);
 	return a;
     }
-    
+
 private:
     PK11SlotInfo *m_slot;
     int m_status;
     PK11Context *m_context;
     SECOidTag m_hashAlgo;
-};	
+};
 
 
 //-----------------------------------------------------------
@@ -215,14 +215,14 @@ public:
     {
         return anyKeyLength();
     }
-    
+
     void setup(const QCA::SymmetricKey &key)
     {
         /* turn the raw key into a SECItem */
         SECItem keyItem;
 	keyItem.data = (unsigned char*) key.data();
 	keyItem.len = key.size();
- 
+
 	m_nssKey = PK11_ImportSymKey(m_slot, m_macAlgo, PK11_OriginUnwrap, CKA_SIGN, &keyItem, NULL);
 
 	SECItem noParams;
@@ -246,7 +246,7 @@ public:
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
-    
+
     void final( QSecureArray *out)
     {
 	// NSS doesn't appear to be able to tell us how big the digest will
@@ -257,14 +257,14 @@ public:
 	PK11_DigestFinal(m_context, (unsigned char*)out->data(), &len, out->size());
 	out->resize(len); // and fix it up later
     }
-    
+
 private:
     PK11SlotInfo *m_slot;
     int m_status;
     PK11Context *m_context;
     CK_MECHANISM_TYPE m_macAlgo;
     PK11SymKey* m_nssKey;
-};	
+};
 
 //-----------------------------------------------------------
 class nssCipherContext : public QCA::CipherContext
@@ -318,7 +318,7 @@ public:
         SECItem keyItem;
 	keyItem.data = (unsigned char*) key.data();
 	keyItem.len = key.size();
- 
+
 	if (QCA::Encode == dir) {
 	    m_nssKey = PK11_ImportSymKey(m_slot, m_cipherMechanism,
 					 PK11_OriginUnwrap, CKA_ENCRYPT,
@@ -405,7 +405,7 @@ class nssProvider : public QCA::Provider
 {
 public:
     void init()
-    { 
+    {
     }
 
     ~nssProvider()
@@ -421,7 +421,7 @@ public:
     {
 	return "qca-nss";
     }
-    
+
     QStringList features() const
     {
 	QStringList list;
@@ -450,7 +450,7 @@ public:
 
 	return list;
     }
-    
+
     Context *createContext(const QString &type)
     {
 	if ( type == "md2" )
