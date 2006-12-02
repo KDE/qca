@@ -52,17 +52,19 @@ void KeyStore::cleanupTestCase()
 
 void KeyStore::nullKeystore()
 {
-    QCA::KeyStore nullStore( QString( "null store" ) );
-    QVERIFY( nullStore.isValid() );
+    if ( QCA::isSupported( "keystore" ) ) {
+        QCA::KeyStore nullStore( QString( "null store" ) );
+        QVERIFY( nullStore.isValid() );
 
-    QVERIFY( nullStore.entryList().isEmpty() );
+        QVERIFY( nullStore.entryList().isEmpty() );
 
-    QCOMPARE( nullStore.type(), QCA::KeyStore::User);
+        QCOMPARE( nullStore.type(), QCA::KeyStore::User);
 
-    QCOMPARE( nullStore.id(), QString( "null store" ) );
-    QCOMPARE( nullStore.holdsTrustedCertificates(), false );
-    QCOMPARE( nullStore.holdsIdentities(), false );
-    QCOMPARE( nullStore.holdsPGPPublicKeys(), false );
+        QCOMPARE( nullStore.id(), QString( "null store" ) );
+        QCOMPARE( nullStore.holdsTrustedCertificates(), false );
+        QCOMPARE( nullStore.holdsIdentities(), false );
+        QCOMPARE( nullStore.holdsPGPPublicKeys(), false );
+    }
 }
 
 QTEST_MAIN(KeyStore)
