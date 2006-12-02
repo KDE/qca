@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(qca-gnupg ${QT_QTCORE_LIBRARY} qca)
 
 #TODO perhaps search adavapi on win32
 IF (WIN32)
-  TARGET_LINK_LIBRARIES(qca-openssl advapi32)
+  TARGET_LINK_LIBRARIES(qca-gnupg advapi32)
 ENDIF (WIN32)
 
 INSTALL(TARGETS qca-gnupg LIBRARY DESTINATION ${qca_PLUGINSDIR})
