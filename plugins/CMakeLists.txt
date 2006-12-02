@@ -3,6 +3,7 @@ FIND_PACKAGE(OpenSSL)
 find_package(Sasl2)
 FIND_PACKAGE(Nss)
 FIND_PACKAGE(LibGcrypt)
+FIND_PACKAGE(Botan)
 
 IF (OPENSSL_FOUND)
   ADD_SUBDIRECTORY(qca-openssl)
@@ -24,17 +25,19 @@ if(SASL2_FOUND)
   #add_subdirectory(qca-cyrus-sasl)
 endif(SASL2_FOUND)
 
-#if(BOTAN_FOUND)
-#	ADD_SUBDIRECTORY(qca-botan)
-#endif(BOTAN_FOUND)	
+if(BOTAN_FOUND)
+  MESSAGE(STATUS "Botan plugin enabled")
+  ADD_SUBDIRECTORY(qca-botan)
+endif(BOTAN_FOUND)	
 
 if(LIBGCRYPT_FOUND)
 	MESSAGE(STATUS "libgcrypt plugin enabled")
 	ADD_SUBDIRECTORY(qca-gcrypt)
 endif(LIBGCRYPT_FOUND)
 
-#if(NSS_FOUND)
-#	ADD_SUBDIRECTORY(qca-nss)
-#endif(NSS_FOUND)	
+if(NSS_FOUND)
+	MESSAGE(STATUS "NSS plugin enabled")
+	ADD_SUBDIRECTORY(qca-nss)
+endif(NSS_FOUND)	
 
 
