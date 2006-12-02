@@ -1,3 +1,5 @@
+ENABLE_TESTING()
+
 set(pkits_bin_SRCS pkits.cpp)
 
 MY_AUTOMOC( pkits_bin_SRCS )
@@ -30,3 +32,5 @@ FOREACH( testFileName BadnotAfterDateCACert.crt RFC3280MandatoryAttributeTypesCA
 	 RevokedsubCACRL.crl ValidUTF8StringEncodedNamesTest9EE.crt RFC3280MandatoryAttributeTypesCACert.crt )
    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/certs/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/certs/${testFileName} COPYONLY)
 ENDFOREACH( testFileName )
+
+ADD_TEST(PublicKeyInfrastructure ${EXECUTABLE_OUTPUT_PATH}/pkits)
