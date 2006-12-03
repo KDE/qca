@@ -203,7 +203,7 @@ typedef struct pkcs11h_openssl_session_s *pkcs11h_openssl_session_t;
  * Parameters:
  * 	rv	- Return value.
  */
-char *
+const char *
 pkcs11h_getMessage (
 	IN const int rv
 );

@@ -785,7 +785,7 @@ static unsigned int s_pkcs11h_loglevel = PKCS11H_LOG_INFO;
  * PUBLIC INTERFACE
  *======================================================================*/
 
-char *
+const char *
 pkcs11h_getMessage (
 	IN const int rv
 ) {
