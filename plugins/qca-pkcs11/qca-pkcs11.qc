@@ -5,6 +5,9 @@
  <dep type='qca'>
   <required/>
  </dep>
+ <dep type='pkcs11_helper'>
+  <required/>
+ </dep>
  <dep type='openssl'>
   <required/>
  </dep>

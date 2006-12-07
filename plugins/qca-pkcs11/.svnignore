@@ -9,6 +9,9 @@
 *.rej
 *.orig
 *.dll
+*.cmake
+*.make
 configure
 conf.pri
 Makefile
+CMakeFiles

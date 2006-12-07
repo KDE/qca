@@ -27,7 +27,9 @@
 #include <QtCore>
 #include <QtCrypto>
 
-#include "pkcs11-helper.h"
+#include <pkcs11-helper-1.0/pkcs11h-token.h>
+#include <pkcs11-helper-1.0/pkcs11h-certificate.h>
+#include <openssl/x509.h>
 
 using namespace QCA;
 
@@ -83,7 +85,7 @@ protected:
 	static
 	void
 	_logHook (
-		const void *pData,
+		void * const global_data,
 		const unsigned flags,
 		const char * const szFormat,
 		va_list args
@@ -92,21 +94,25 @@ protected:
 	static
 	void
 	_slotEventHook (
-		const void *pData
+		void * const global_data
 	);
 
 	static
 	PKCS11H_BOOL
 	_tokenPromptHook (
-		const void *pData,
-		const pkcs11h_token_id_t token
+		void * const global_data,
+		void * const user_data,
+		const pkcs11h_token_id_t token,
+		const unsigned retry
 	);
 	
 	static
 	PKCS11H_BOOL
 	_pinPromptHook (
-		const void *pData,
+		void * const global_data,
+		void * const user_data,
 		const pkcs11h_token_id_t token,
+		const unsigned retry,
 		char * const szPIN,
 		const size_t nMaxPIN
 	);
@@ -158,7 +164,7 @@ private:
 
 		~KeyStoreItem () {
 			if (token_id != NULL) {
-				pkcs11h_freeTokenId (token_id);
+				pkcs11h_token_freeTokenId (token_id);
 			}
 		}
 	};
@@ -427,7 +433,7 @@ public:
 	convertToPublic () {
 		if (_fPrivateKeyRole) {
 			if (_pkcs11h_certificate != NULL) {
-				pkcs11h_freeCertificate (_pkcs11h_certificate);
+				pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
 				_pkcs11h_certificate = NULL;
 			}
 			_fPrivateKeyRole = false;
@@ -829,6 +835,7 @@ public:
 			if (
 				(rv = pkcs11h_token_ensureAccess (
 					_pkcs11h_certificate_id->token_id,
+					NULL,
 					0
 				)) != CKR_OK
 			) {
@@ -854,12 +861,12 @@ private:
 	void
 	freeResources () {
 		if (_pkcs11h_certificate != NULL) {
-			pkcs11h_freeCertificate (_pkcs11h_certificate);
+			pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
 			_pkcs11h_certificate = NULL;
 		}
 
 		if (_pkcs11h_certificate_id != NULL) {
-			pkcs11h_freeCertificateId (_pkcs11h_certificate_id);
+			pkcs11h_certificate_freeCertificateId (_pkcs11h_certificate_id);
 			_pkcs11h_certificate_id = NULL;
 		}
 	}
@@ -873,7 +880,7 @@ private:
 		freeResources ();
 
 		if (
-			(rv = pkcs11h_duplicateCertificateId (
+			(rv = pkcs11h_certificate_duplicateCertificateId (
 				&_pkcs11h_certificate_id,
 				pkcs11h_certificate_id
 			)) != CKR_OK
@@ -890,6 +897,8 @@ private:
 			if (
 				(rv = pkcs11h_certificate_create (
 					_pkcs11h_certificate_id,
+					NULL,
+					PKCS11H_PROMPT_MASK_ALLOW_ALL,
 					PKCS11H_PIN_CACHE_INFINITE,
 					&_pkcs11h_certificate
 				)) != CKR_OK
@@ -1354,7 +1363,7 @@ MyKeyStoreList::keyStores () {
 		 * Get available tokens
 		 */
 		if (
-			(rv = pkcs11h_enum_getTokenIds (
+			(rv = pkcs11h_token_enumTokenIds (
 				PKCS11H_ENUM_METHOD_CACHE,
 				&tokens
 			)) != CKR_OK
@@ -1407,7 +1416,7 @@ MyKeyStoreList::keyStores () {
 	}
 
 	if (tokens != NULL) {
-		pkcs11h_freeTokenIdList (tokens);
+		pkcs11h_token_freeTokenIdList (tokens);
 	}
 
 	return out;
@@ -1430,9 +1439,11 @@ MyKeyStoreList::entryList (int id) {
 				QList<Certificate> listIssuers;
 
 				if (
-					(rv = pkcs11h_enum_getTokenCertificateIds (
+					(rv = pkcs11h_certificate_enumTokenCertificateIds (
 						entry->token_id,
 						PKCS11H_ENUM_METHOD_CACHE,
+						NULL,
+						PKCS11H_PROMPT_MASK_ALLOW_ALL,
 						&issuers,
 						&certs
 					)) != CKR_OK
@@ -1501,7 +1512,7 @@ MyKeyStoreList::entryList (int id) {
 	}
 
 	if (certs != NULL) {
-		pkcs11h_freeCertificateIdList (certs);
+		pkcs11h_certificate_freeCertificateIdList (certs);
 	}
 
 	return out;
@@ -1521,7 +1532,7 @@ MyKeyStoreList::pinPrompt (
 
 		while (
 			i != _stores.end () &&
-			!pkcs11h_sameTokenId (
+			!pkcs11h_token_sameTokenId (
 				token_id,
 				(*i)->token_id
 			)
@@ -1586,7 +1597,7 @@ MyKeyStoreList::registerTokenId (
 
 	while (
 		i != _stores.end () &&
-		!pkcs11h_sameTokenId (
+		!pkcs11h_token_sameTokenId (
 			token_id,
 			(*i)->token_id
 		)
@@ -1604,7 +1615,7 @@ MyKeyStoreList::registerTokenId (
 
 		entry = new KeyStoreItem;
 		entry->id = _last_id;
-		pkcs11h_duplicateTokenId (&entry->token_id, token_id);
+		pkcs11h_token_duplicateTokenId (&entry->token_id, token_id);
 
 		_stores += entry;
 		_storesById.insert (entry->id, entry);
@@ -1824,7 +1835,7 @@ MyKeyStoreList::deserializeCertificateId (
 	certificate_id_s.certificate_blob_size = (size_t)arrayCertificate.size ();
 
 	if (
-		(rv = pkcs11h_duplicateCertificateId (
+		(rv = pkcs11h_certificate_duplicateCertificateId (
 			p_certificate_id,
 			&certificate_id_s
 		)) != CKR_OK
@@ -2031,40 +2042,50 @@ pkcs11Provider::stopSlotEvents () {
 
 void
 pkcs11Provider::_logHook (
-	const void *pData,
+	void * const global_data,
 	const unsigned flags,
 	const char * const szFormat,
 	va_list args
 ) {
-	pkcs11Provider *me = (pkcs11Provider *)pData;
+	pkcs11Provider *me = (pkcs11Provider *)global_data;
 	me->logHook (flags, szFormat, args);
 }
 
 void
 pkcs11Provider::_slotEventHook (
-	const void *pData
+	void * const global_data
 ) {
-	pkcs11Provider *me = (pkcs11Provider *)pData;
+	pkcs11Provider *me = (pkcs11Provider *)global_data;
 	me->slotEventHook ();
 }
 
 PKCS11H_BOOL
 pkcs11Provider::_tokenPromptHook (
-	const void *pData,
-	const pkcs11h_token_id_t token
+	void * const global_data,
+	void * const user_data,
+	const pkcs11h_token_id_t token,
+	const unsigned retry
 ) {
-	pkcs11Provider *me = (pkcs11Provider *)pData;
+	Q_UNUSED(user_data);
+	Q_UNUSED(retry);
+
+	pkcs11Provider *me = (pkcs11Provider *)global_data;
 	return me->cardPromptHook (token);
 }
 
 PKCS11H_BOOL
 pkcs11Provider::_pinPromptHook (
-	const void *pData,
+	void * const global_data,
+	void * const user_data,
 	const pkcs11h_token_id_t token,
+	const unsigned retry,
 	char * const szPIN,
 	const size_t nMaxPIN
 ) {
-	pkcs11Provider *me = (pkcs11Provider *)pData;
+	Q_UNUSED(user_data);
+	Q_UNUSED(retry);
+
+	pkcs11Provider *me = (pkcs11Provider *)global_data;
 	return me->pinPromptHook (token, szPIN, nMaxPIN);
 }
 

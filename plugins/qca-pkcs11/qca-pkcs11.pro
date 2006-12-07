@@ -6,7 +6,7 @@ CONFIG += plugin
 QT -= gui
 CONFIG += crypto
 
-SOURCES = qca-pkcs11.cpp pkcs11-helper.c
+SOURCES = qca-pkcs11.cpp
 
 windows:{
 	# hardcoded openssl location

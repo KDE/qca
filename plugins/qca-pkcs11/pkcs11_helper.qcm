@@ -1,0 +1,37 @@
+#include <qprocess.h>
+#include <qstringlist.h>
+/*
+-----BEGIN QCMOD-----
+name: pkcs11_helper
+-----END QCMOD-----
+*/
+
+class qc_pkcs11_helper : public ConfObj
+{
+public:
+    qc_pkcs11_helper(Conf *c) : ConfObj(c) {}
+    QString name() const { return "pkcs11-helper"; }
+    QString shortname() const { return "pkcs11-helper"; }
+    
+    bool exec()
+	{
+	    QStringList incs;
+	    QString ver, libs, other;
+
+	    if (!conf->findPkgConfig(QString("libpkcs11-helper-1"),
+				     VersionAny, 0, &ver,
+				     &incs, &libs, &other)) {
+	    	return false;
+	    }	  
+	    for(int n = 0; n < incs.count(); ++n) {
+		conf->addIncludePath(incs[n]);
+	    }
+	    if (!libs.isEmpty()) {
+		conf->addLib(libs);
+	    }
+	    if(!other.isEmpty()) {
+		conf->addExtra(QString("QMAKE_CFLAGS += %1\n").arg(other));
+	    }
+	    return true;
+	}
+};
