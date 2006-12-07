@@ -8,19 +8,13 @@
  * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
-
-/*
- * The routines in this file deal with providing private key cryptography
- * using RSA Security Inc. PKCS #11 Cryptographic Token Interface (Cryptoki).
  *
  */
 
@@ -87,7 +81,7 @@ protected:
 	_logHook (
 		void * const global_data,
 		const unsigned flags,
-		const char * const szFormat,
+		const char * const format,
 		va_list args
 	);
 	
@@ -113,14 +107,14 @@ protected:
 		void * const user_data,
 		const pkcs11h_token_id_t token,
 		const unsigned retry,
-		char * const szPIN,
-		const size_t nMaxPIN
+		char * const pin,
+		const size_t pin_max
 	);
 	
 	void
 	logHook (
 		const unsigned flags,
-		const char * const szFormat,
+		const char * const format,
 		va_list args
 	);
 
@@ -135,8 +129,8 @@ protected:
 	PKCS11H_BOOL
 	pinPromptHook (
 		const pkcs11h_token_id_t token,
-		char * const szPIN,
-		const size_t nMaxPIN
+		char * const pin,
+		const size_t pin_max
 	);
 };
 
@@ -264,7 +258,7 @@ private:
 	MyKeyStoreEntry *
 	getKeyStoreEntryByCertificateId (
 		const pkcs11h_certificate_id_t certificate_id,
-		bool fPrivate,
+		bool has_private,
 		const QList<Certificate> &listIssuers
 	) const;
 
@@ -277,14 +271,14 @@ private:
 	serializeCertificateId (
 		const pkcs11h_certificate_id_t certificate_id,
 		const CertificateChain &chain,
-		const bool fPrivate
+		const bool has_private
 	) const;
 
 	void
 	deserializeCertificateId (
 		const QString &from,
 		pkcs11h_certificate_id_t * const p_certificate_id,
-		bool * const fPrivate,
+		bool * const has_private,
 		QList<Certificate> *listIssuers
 	) const;
 
@@ -349,7 +343,7 @@ class MyRSAKey : public RSAContext
 	Q_OBJECT
 
 private:
-	bool _fPrivateKeyRole;
+	bool _has_privateKeyRole;
 	pkcs11h_certificate_id_t _pkcs11h_certificate_id;
 	pkcs11h_certificate_t _pkcs11h_certificate;
 	RSAPublicKey _pubkey;
@@ -370,7 +364,7 @@ public:
 		pkcs11h_certificate_id_t pkcs11h_certificate_id,
 		RSAPublicKey pubkey
 	) : RSAContext (p) {
-		_fPrivateKeyRole = true;
+		_has_privateKeyRole = true;
 		_pkcs11h_certificate_id = NULL;
 		_pkcs11h_certificate = NULL;
 		
@@ -381,7 +375,7 @@ public:
 	}
 
 	MyRSAKey (const MyRSAKey &from) : RSAContext (from.provider ()) {
-		_fPrivateKeyRole = from._fPrivateKeyRole;
+		_has_privateKeyRole = from._has_privateKeyRole;
 		_pkcs11h_certificate_id = NULL;
 		_pkcs11h_certificate = NULL;
 		_pubkey = from._pubkey;
@@ -419,24 +413,24 @@ public:
 	virtual
 	bool
 	isPrivate () const {
-		return _fPrivateKeyRole;
+		return _has_privateKeyRole;
 	}
 
 	virtual
 	bool
 	canExport () const {
-		return !_fPrivateKeyRole;
+		return !_has_privateKeyRole;
 	}
 
 	virtual
 	void
 	convertToPublic () {
-		if (_fPrivateKeyRole) {
+		if (_has_privateKeyRole) {
 			if (_pkcs11h_certificate != NULL) {
 				pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
 				_pkcs11h_certificate = NULL;
 			}
-			_fPrivateKeyRole = false;
+			_has_privateKeyRole = false;
 		}
 	}
 
@@ -580,7 +574,7 @@ public:
 	update (
 		const QSecureArray &in
 	) {
-		if (_fPrivateKeyRole) {
+		if (_has_privateKeyRole) {
 			if (sign_data.hash != NULL) {
 				sign_data.hash->update (in);
 			}
@@ -1195,6 +1189,186 @@ public:
 };
 
 //----------------------------------------------------------------------------
+// pkcs11QCACrypto
+//----------------------------------------------------------------------------
+class pkcs11QCACrypto {
+
+private:
+	static
+	int
+	_pkcs11h_crypto_qca_initialize (
+		void * const global_data
+	) {
+		Q_UNUSED(global_data);
+
+		return 1;
+	}
+
+	static
+	int
+	_pkcs11h_crypto_qca_uninitialize (
+		void * const global_data
+	) {
+		Q_UNUSED(global_data);
+
+		return 1;
+	}
+
+	static
+	int
+	_pkcs11h_crypto_qca_certificate_get_expiration (
+		void * const global_data,
+		const unsigned char * const blob,
+		const size_t blob_size,
+		time_t * const expiration
+	) {
+		Q_UNUSED(global_data);
+
+		Certificate cert = Certificate::fromDER (
+			QByteArray (
+				(char *)blob,
+				blob_size
+			)
+		);
+
+		*expiration = cert.notValidAfter ().toTime_t ();
+
+		return 1;
+	}
+
+	static
+	int
+	_pkcs11h_crypto_qca_certificate_get_dn (
+		void * const global_data,
+		const unsigned char * const blob,
+		const size_t blob_size,
+		char * const dn,
+		const size_t dn_max
+	) {
+		Q_UNUSED(global_data);
+
+		Certificate cert = Certificate::fromDER (
+			QByteArray (
+				(char *)blob,
+				blob_size
+			)
+		);
+		CertificateInfoOrdered dnlist = cert.subjectInfoOrdered ();
+		QString qdn;
+
+		for (
+			CertificateInfoOrdered::iterator i = dnlist.begin ();
+			i != dnlist.end ();
+			i++
+		) {
+			QString c;
+			CertificateInfoPair e = (*i);
+
+			switch (e.type ()) {
+				case CommonName:
+					c = "CN";
+				break;
+				case Email:
+					c = "E";
+				break;
+				case Organization:
+					c = "O";
+				break;
+				case OrganizationalUnit:
+					c = "OU";
+				break;
+				case Locality:
+					c = "L";
+				break;
+				case IncorporationLocality:
+					c = "EVL";
+				break;
+				case State:
+					c = "ST";
+				break;
+				case IncorporationState:
+					c = "EVST";
+				break;
+				case Country:
+					c = "C";
+				break;
+				case IncorporationCountry:
+					c = "EVC";
+				break;
+				case URI:
+					c = "URI";
+				break;
+				case DNS:
+					c = "DNS";
+				break;
+				case IPAddress:
+					c = "IP";
+				break;
+				case XMPP:
+					c = "XMPP";
+				break;
+				default:
+					c = "Unknown";
+				break;
+			}
+
+			if (!qdn.isEmpty ()) {
+				qdn += ", ";
+			}
+			qdn += c + "=" + e.value ();
+		}
+
+		if ((size_t)qdn.length () > dn_max-1) {
+			return 0;
+		}
+		else {
+			strcpy (dn, qPrintable (qdn));
+			return 1;
+		}
+	}
+
+	static
+	int
+	_pkcs11h_crypto_qca_certificate_is_issuer (
+		void * const global_data,
+		const unsigned char * const signer_blob,
+		const size_t signer_blob_size,
+		const unsigned char * const cert_blob,
+		const size_t cert_blob_size
+	) {
+		Q_UNUSED(global_data);
+
+		Certificate signer = Certificate::fromDER (
+			QByteArray (
+				(char *)signer_blob,
+				signer_blob_size
+			)
+		);
+
+		Certificate cert = Certificate::fromDER (
+			QByteArray (
+				(char *)cert_blob,
+				cert_blob_size
+			)
+		);
+
+		return signer.isIssuerOf (cert);
+	}
+
+public:
+	static pkcs11h_engine_crypto_t crypto;
+};
+
+pkcs11h_engine_crypto_t pkcs11QCACrypto::crypto = {
+	NULL,
+	_pkcs11h_crypto_qca_initialize,
+	_pkcs11h_crypto_qca_uninitialize,
+	_pkcs11h_crypto_qca_certificate_get_expiration,
+	_pkcs11h_crypto_qca_certificate_get_dn,
+	_pkcs11h_crypto_qca_certificate_is_issuer
+};
+
+//----------------------------------------------------------------------------
 // MyKeyStoreList
 //----------------------------------------------------------------------------
 MyKeyStoreList::MyKeyStoreList (Provider *p) : KeyStoreListContext(p) {
@@ -1218,13 +1392,13 @@ MyKeyStoreList::start () {
 	CK_RV rv = CKR_OK;
 
 	try {
-		QString strProvider = qgetenv ("QCA_PKCS11_LIB");
+		QString provider = qgetenv ("QCA_PKCS11_LIB");
 
-		if (!strProvider.isEmpty()) {
+		if (!provider.isEmpty()) {
 			if (
 				(rv = pkcs11h_addProvider (
-					qPrintable (strProvider),
-					qPrintable (strProvider),
+					qPrintable (provider),
+					qPrintable (provider),
 					FALSE,
 					PKCS11H_SLOTEVENT_METHOD_AUTO,
 					PKCS11H_SLOTEVENT_METHOD_AUTO,
@@ -1232,7 +1406,7 @@ MyKeyStoreList::start () {
 					FALSE
 				)) != CKR_OK
 			) {
-				throw PKCS11Exception (rv, "Adding provider " + strProvider);
+				throw PKCS11Exception (rv, "Adding provider " + provider);
 			}
 		}
 	}
@@ -1291,11 +1465,11 @@ MyKeyStoreList::entryPassive (
 	try {
 		QList<Certificate> listIssuers;
 		pkcs11h_certificate_id_t certificate_id;
-		bool fPrivate;
+		bool has_private;
 		
-		deserializeCertificateId (entryId, &certificate_id, &fPrivate, &listIssuers);
+		deserializeCertificateId (entryId, &certificate_id, &has_private, &listIssuers);
 			
-		return getKeyStoreEntryByCertificateId (certificate_id, fPrivate, listIssuers);
+		return getKeyStoreEntryByCertificateId (certificate_id, has_private, listIssuers);
 	}
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
@@ -1648,7 +1822,7 @@ MyKeyStoreList::clearStores () {
 MyKeyStoreEntry *
 MyKeyStoreList::getKeyStoreEntryByCertificateId (
 	const pkcs11h_certificate_id_t certificate_id,
-	bool fPrivate,
+	bool has_private,
 	const QList<Certificate> &listIssuers
 ) const {
 	MyKeyStoreEntry *entry = NULL;
@@ -1674,15 +1848,15 @@ MyKeyStoreList::getKeyStoreEntryByCertificateId (
 
 	CertificateChain chain = CertificateChain (cert).complete (listIssuers);
 
-	QString strDescription = cert.commonName () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
+	QString description = cert.commonName () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
 
 	QString id = serializeCertificateId (
 		certificate_id,
 		chain,
-		fPrivate
+		has_private
 	);
 
-	if (fPrivate) {
+	if (has_private) {
 		MyRSAKey *rsakey = new MyRSAKey (
 			provider(),
 			certificate_id,
@@ -1704,7 +1878,7 @@ MyKeyStoreList::getKeyStoreEntryByCertificateId (
 			tokenId2storeId (certificate_id->token_id),
 			id,
 			certificate_id->token_id->label,
-			strDescription,
+			description,
 			provider ()
 		);
 	}
@@ -1714,7 +1888,7 @@ MyKeyStoreList::getKeyStoreEntryByCertificateId (
 			tokenId2storeId (certificate_id->token_id),
 			id,
 			certificate_id->token_id->label,
-			strDescription,
+			description,
 			provider()
 		);
 	}
@@ -1726,35 +1900,70 @@ QString
 MyKeyStoreList::tokenId2storeId (
 	const pkcs11h_token_id_t token_id
 ) const {
-	QCA::Hash hash1 ("md2");
-	hash1.update (token_id->manufacturerID, strlen (token_id->manufacturerID));
-	hash1.update (token_id->model, strlen (token_id->model));
-	hash1.update (token_id->serialNumber, strlen (token_id->serialNumber));
+	QString qid = "Unknown";
+	char *id = NULL;
+	size_t len;
 
-	return "qca-pkcs11/" + escapeString (Base64 ().arrayToString (hash1.final ()));
+	if (
+		pkcs11h_token_serializeTokenId (
+			NULL,
+			&len,
+			token_id
+		) == CKR_OK &&
+		(id = (char *)malloc (len)) != NULL &&
+		pkcs11h_token_serializeTokenId (
+			id,
+			&len,
+			token_id
+		) == CKR_OK
+	) {
+		qid = id;
+	}
+
+	if (id != NULL) {
+		free (id);
+		id = NULL;
+	}
+
+	return "qca-pkcs11/" + escapeString (qid);
 }
 
 QString
 MyKeyStoreList::serializeCertificateId (
 	const pkcs11h_certificate_id_t certificate_id,
 	const CertificateChain &chain,
-	const bool fPrivate
+	const bool has_private
 ) const {
-	QString strSerialized;
+	QString serialized;
+	QString qid = "Unknown";
+	char *id = NULL;
+	size_t len;
+
+	if (
+		pkcs11h_certificate_serializeCertificateId (
+			NULL,
+			&len,
+			certificate_id
+		) == CKR_OK &&
+		(id = (char *)malloc (len)) != NULL &&
+		pkcs11h_certificate_serializeCertificateId (
+			id,
+			&len,
+			certificate_id
+		) == CKR_OK
+	) {
+		qid = id;
+	}
+
+	if (id != NULL) {
+		free (id);
+		id = NULL;
+	}
 	
-	strSerialized += QString ().sprintf (
-		"qca-pkcs11/%s/%s/%s/%s/%s/%d",
-		qPrintable (escapeString (certificate_id->token_id->manufacturerID)),
-		qPrintable (escapeString (certificate_id->token_id->model)),
-		qPrintable (escapeString (certificate_id->token_id->serialNumber)),
-		qPrintable (escapeString (certificate_id->token_id->label)),
-		qPrintable (escapeString (Base64 ().arrayToString (
-			(QByteArray (
-				(const char *)certificate_id->attrCKA_ID,
-				(int)certificate_id->attrCKA_ID_size
-			)
-		)))),
-		fPrivate ? 1 : 0
+	serialized = QString ().sprintf (
+		"qca-pkcs11/%s/%d",
+		qPrintable(escapeString (qid)),
+		has_private ? 1 : 0
 	);
 	
 	for (
@@ -1762,91 +1971,75 @@ MyKeyStoreList::serializeCertificateId (
 		i != chain.end ();
 		i++
 	) {
-		strSerialized += "/" + escapeString (Base64 ().arrayToString ((*i).toDER ()));
+		serialized += "/" + escapeString (Base64 ().arrayToString ((*i).toDER ()));
 	}
 
-	return strSerialized;
+	return serialized;
 }
 
 void
 MyKeyStoreList::deserializeCertificateId (
 	const QString &from,
 	pkcs11h_certificate_id_t * const p_certificate_id,
-	bool * const fPrivate,
+	bool * const has_private,
 	QList<Certificate> *listIssuers
 ) const {
-	*p_certificate_id = NULL;
-	*fPrivate = false;
-	int n = 0;
+	pkcs11h_certificate_id_t certificate_id = NULL;
 
-	CK_RV rv;
+	try {
+		int n = 0;
+		CK_RV rv;
 
-	QStringList list = from.split ("/");
+		*p_certificate_id = NULL;
+		*has_private = false;
 
-	if (list.size () < 8) {
-		throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+		QStringList list = from.split ("/");
+
+		if (list.size () < 3) {
+			throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+		}
+
+		if (list[n++] != "qca-pkcs11") {
+			throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+		}
+
+		if (
+			(rv = pkcs11h_certificate_deserializeCertificateId (
+				&certificate_id,
+				qPrintable (list[n++])
+			)) != CKR_OK
+		) {
+			throw PKCS11Exception (rv, "Invalid serialization");
+		}
+
+		*has_private = list[n++].toInt () != 0;
+
+		QSecureArray arrayCertificate = Base64 ().stringToArray (unescapeString (list[n++]));
+
+		if (
+			(rv = pkcs11h_certificate_setCertificateIdCertificateBlob (
+				certificate_id,
+				(unsigned char *)arrayCertificate.data (),
+				(size_t)arrayCertificate.size ()
+			)) != CKR_OK
+		) {
+			throw PKCS11Exception (rv, "Invalid serialization");
+		}
+
+		while (n < list.size ()) {
+			*listIssuers += Certificate::fromDER (
+				Base64 ().stringToArray (unescapeString (list[n++]))
+			);
+		}
+
+		*p_certificate_id = certificate_id;
+		certificate_id = NULL;
 	}
-
-	if (list[n++] != "qca-pkcs11") {
-		throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
-	}
-
-	pkcs11h_token_id_s token_id_s;
-	pkcs11h_certificate_id_s certificate_id_s;
-
-	memset (&token_id_s, 0, sizeof (token_id_s));
-	memset (&certificate_id_s, 0, sizeof (certificate_id_s));
-
-	certificate_id_s.token_id = &token_id_s;
-
-	strncpy (
-		token_id_s.manufacturerID,
-		qPrintable (unescapeString (list[n++])),
-		sizeof (token_id_s.manufacturerID)
-	);
-	token_id_s.manufacturerID[sizeof (token_id_s.manufacturerID)-1] = '\0';
-	strncpy (
-		token_id_s.model,
-		qPrintable (unescapeString (list[n++])),
-		sizeof (token_id_s.model)
-	);
-	token_id_s.model[sizeof (token_id_s.model)-1] = '\0';
-	strncpy (
-		token_id_s.serialNumber,
-		qPrintable (unescapeString (list[n++])),
-		sizeof (token_id_s.serialNumber)
-	);
-	token_id_s.serialNumber[sizeof (token_id_s.serialNumber)-1] = '\0';
-	strncpy (
-		token_id_s.label,
-		qPrintable (unescapeString (list[n++])),
-		sizeof (token_id_s.label)
-	);
-	token_id_s.label[sizeof (token_id_s.label)-1] = '\0';
-
-	QSecureArray arrayCKA_ID = Base64 ().stringToArray (unescapeString (list[n++]));
-	certificate_id_s.attrCKA_ID = (unsigned char *)arrayCKA_ID.data ();
-	certificate_id_s.attrCKA_ID_size = (size_t)arrayCKA_ID.size ();
-
-	*fPrivate = list[n++].toInt () != 0;
-
-	QSecureArray arrayCertificate = Base64 ().stringToArray (unescapeString (list[n++]));
-	certificate_id_s.certificate_blob = (unsigned char *)arrayCertificate.data ();
-	certificate_id_s.certificate_blob_size = (size_t)arrayCertificate.size ();
-
-	if (
-		(rv = pkcs11h_certificate_duplicateCertificateId (
-			p_certificate_id,
-			&certificate_id_s
-		)) != CKR_OK
-	) {
-		throw PKCS11Exception (rv, "Memory error");
-	}
-
-	while (n < list.size ()) {
-		*listIssuers += Certificate::fromDER (
-			Base64 ().stringToArray (unescapeString (list[n++]))
-		);
+	catch (...) {
+		if (certificate_id != NULL) {
+			pkcs11h_certificate_freeCertificateId (certificate_id);
+			certificate_id = NULL;
+		}
 	}
 }
 
@@ -1918,11 +2111,15 @@ int pkcs11Provider::version() const
 
 void pkcs11Provider::init () {
 	try {
-		QString strLogLevel = qgetenv ("QCA_PKCS11_LOGLEVEL");
+		QString loglevel = qgetenv ("QCA_PKCS11_LOGLEVEL");
 		CK_RV rv;
 
-		if (!strLogLevel.isEmpty ()) {
-			_log_level = strLogLevel.toInt ();
+		if (!loglevel.isEmpty ()) {
+			_log_level = loglevel.toInt ();
+		}
+
+		if ((rv = pkcs11h_engine_setCrypto (&pkcs11QCACrypto::crypto)) != CKR_OK) {
+			throw PKCS11Exception (rv, "Cannot set crypto");
 		}
 		
 		if ((rv = pkcs11h_initialize ()) != CKR_OK) {
@@ -2044,11 +2241,11 @@ void
 pkcs11Provider::_logHook (
 	void * const global_data,
 	const unsigned flags,
-	const char * const szFormat,
+	const char * const format,
 	va_list args
 ) {
 	pkcs11Provider *me = (pkcs11Provider *)global_data;
-	me->logHook (flags, szFormat, args);
+	me->logHook (flags, format, args);
 }
 
 void
@@ -2079,25 +2276,25 @@ pkcs11Provider::_pinPromptHook (
 	void * const user_data,
 	const pkcs11h_token_id_t token,
 	const unsigned retry,
-	char * const szPIN,
-	const size_t nMaxPIN
+	char * const pin,
+	const size_t pin_max
 ) {
 	Q_UNUSED(user_data);
 	Q_UNUSED(retry);
 
 	pkcs11Provider *me = (pkcs11Provider *)global_data;
-	return me->pinPromptHook (token, szPIN, nMaxPIN);
+	return me->pinPromptHook (token, pin, pin_max);
 }
 
 void
 pkcs11Provider::logHook (
 	const unsigned flags,
-	const char * const szFormat,
+	const char * const format,
 	va_list args
 ) {
 	Q_UNUSED(flags);
 
-	vprintf (szFormat, args);
+	vprintf (format, args);
 	printf ("\n");
 }
 
@@ -2123,18 +2320,18 @@ pkcs11Provider::cardPromptHook (
 PKCS11H_BOOL
 pkcs11Provider::pinPromptHook (
 	const pkcs11h_token_id_t token,
-	char * const szPIN,
-	const size_t nMaxPIN
+	char * const pin,
+	const size_t pin_max
 ) {
-	QSecureArray pin;
+	QSecureArray qpin;
 	if (s_keyStoreList != NULL) {
 		
-		s_keyStoreList->pinPrompt (token, pin);
+		s_keyStoreList->pinPrompt (token, qpin);
 
-		if (!pin.isEmpty ()) {
-			if ((size_t)pin.size () < nMaxPIN-1) {
-				memmove (szPIN, pin.constData (), pin.size ());
-				szPIN[pin.size ()] = '\0';
+		if (!qpin.isEmpty ()) {
+			if ((size_t)qpin.size () < pin_max-1) {
+				memmove (pin, qpin.constData (), qpin.size ());
+				pin[qpin.size ()] = '\0';
 				return TRUE;
 			}
 		}
