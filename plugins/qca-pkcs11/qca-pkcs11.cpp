@@ -464,6 +464,8 @@ public:
 		QSecureArray *out,
 		EncryptionAlgorithm alg
 	) {
+		bool session_locked = false;
+
 		try {
 			CK_MECHANISM_TYPE mech;
 			CK_RV rv;
@@ -484,7 +486,16 @@ public:
 			ensureCertificate ();
 
 			if (
-				(rv = pkcs11h_certificate_decrypt (
+				(rv = pkcs11h_certificate_lockSession (
+					_pkcs11h_certificate
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Cannot lock session");
+			}
+			session_locked = true;
+
+			if (
+				(rv = pkcs11h_certificate_decryptAny (
 					_pkcs11h_certificate,
 					mech,
 					(const unsigned char *)in.constData (),
@@ -499,7 +510,7 @@ public:
 			out->resize (my_size);
 
 			if (
-				(rv = pkcs11h_certificate_decrypt (
+				(rv = pkcs11h_certificate_decryptAny (
 					_pkcs11h_certificate,
 					mech,
 					(const unsigned char *)in.constData (),
@@ -513,9 +524,25 @@ public:
 
 			rv = out->resize (my_size);
 
+			if (
+				(rv = pkcs11h_certificate_releaseSession (
+					_pkcs11h_certificate
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Cannot release session");
+			}
+			session_locked = false;
+
 			return true;
 		}
 		catch (const PKCS11Exception &e) {
+			if (session_locked) {
+				pkcs11h_certificate_releaseSession (
+					_pkcs11h_certificate
+				);
+				session_locked = false;
+			}
+
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->emit_diagnosticText (
 					QString ().sprintf (
@@ -592,6 +619,7 @@ public:
 	endSign () {
 		QSecureArray result;
 		unsigned char *enc_alloc = NULL;
+		bool session_locked = false;
 
 		try {
 			int myrsa_size = 0;
@@ -687,6 +715,15 @@ public:
 			size_t my_size;
 			
 			if (
+				(rv = pkcs11h_certificate_lockSession (
+					_pkcs11h_certificate
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Cannot lock session");
+			}
+			session_locked = true;
+
+			if (
 				(rv = pkcs11h_certificate_signAny (
 					_pkcs11h_certificate,
 					CKM_RSA_PKCS,
@@ -715,9 +752,26 @@ public:
 			}
 
 			result.resize (my_size);
+
+			if (
+				(rv = pkcs11h_certificate_releaseSession (
+					_pkcs11h_certificate
+				)) != CKR_OK
+			) {
+				throw PKCS11Exception (rv, "Cannot release session");
+			}
+			session_locked = false;
+
 		}
 		catch (const PKCS11Exception &e) {
 			result.clear ();
+
+			if (session_locked) {
+				pkcs11h_certificate_releaseSession (
+					_pkcs11h_certificate
+				);
+				session_locked = false;
+			}
 
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->emit_diagnosticText (
