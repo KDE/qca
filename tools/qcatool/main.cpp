@@ -876,6 +876,7 @@ static void usage()
 	printf("commands:\n");
 	printf("  --help\n");
 	printf("  --plugins [-d]\n");
+	printf("  --config save plugin\n");
 	printf("\n");
 	printf("  --genrsa [bits] (passphrase)\n");
 	printf("  --gendsa [512|768|1024] (passphrase)\n");
@@ -1103,7 +1104,29 @@ int main(int argc, char **argv)
 		gendh = true;
 	}
 
-	if(genrsa || gendsa || gendh)
+	if (args[0] == "--config")
+	{
+		if(args.count() < 3)
+		{
+			usage();
+			return 1;
+		}
+
+		QString op = args[1];
+		QString name = args[2];
+
+		if (op == "save") {
+			QVariantMap map1 = QCA::getProviderConfig(name);
+			QCA::setProviderConfig(name, map1);
+			QCA::saveProviderConfig(name);
+			printf("Done.\n");
+		}
+		else {
+			usage();
+			return 1;
+		}
+	}
+	else if(genrsa || gendsa || gendh)
 	{
 		QCA::PrivateKey priv;
 		QString pubname, privname;
