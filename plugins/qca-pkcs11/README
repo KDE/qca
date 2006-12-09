@@ -1,0 +1,84 @@
+qca-pkcs11 -- PKCS#11 Plug-in to QCA
+
+ABOUT
+	qca-pkcs11 enables QCA smartcard integration.
+
+	qca-pkcs11 supports the following features:
+	 - Multiple providers.
+	 - Multiple tokens.
+	 - Private key signature and decryption.
+	 - Keystore objects serialization.
+	 - Keystore update notifications.
+	 - Asker integration for token and PIN.
+
+DEPENDENCIES
+	OpenSSL>=0.9.7
+		http://www.openssl.org
+
+		This product includes software developed by the OpenSSL Project
+		for use in the OpenSSL Toolkit (http://www.OpenSSL.org/)
+
+		This product includes cryptographic software written by Eric Young
+		(eay@cryptsoft.com).  This product includes software written by Tim
+		Hudson (tjh@cryptsoft.com).
+
+	pkcs11-helper>=1.02
+		http://www.opensc-projects.org
+
+CONFIGURATION
+	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
+	generate default configuration use:
+
+	$ qcatool --config save qca-pkcs11 
+
+	Attributes:
+		allow_protected_authentication (Boolean)
+			Enable/disable global protected authentication support.
+			If disabled, no protected authentication will be allowed,
+			even if provider supports this feature.
+
+		pin_cache (Integer)
+			Maximum PIN/session cache period in seconds.
+			-1 is infinite, until provider invalidates session.
+
+		log_file (String)
+			Name of log file for logging, if empty, stderr is used.
+
+		log_level (Integer)
+			Log evel of pkcs11-helper, can be from 0-5.
+
+		provider_##_enabled (Boolean)
+			Provider at this index is enabled.
+
+		provider_##_name (String)
+			Provider unique friendly name.
+
+		provider_##_library (String)
+			Provider library to load.
+
+		provider_##_allow_protected_authentication (Boolean)
+			Enable protected authentication if provider supports the feature.
+
+		provider_##_cert_private (Boolean)
+			Provider stores the certificates as private objects.
+
+		provider_##_private_mask (Integer)
+			Provider private key mask:
+			0	Determine automatically.
+			1	Use sign.
+			2	Use sign recover.
+			4	Use decrypt.
+			8	Use unwrap.
+
+		provider_##_slotevent_method (String)
+			auto	Determine automatically.
+			trigger	Use trigger.
+			poll	Use poll.
+
+		provider_##_slotevent_timeout (Integer)
+			Timeout for slotevent in poll mode.
+			Specify 0 for default.
+
+AUTHORS
+	Alon Bar-Lev <alon.barlev@gmail.com>
+

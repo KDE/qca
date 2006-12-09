@@ -33,10 +33,14 @@ using namespace QCA;
 class pkcs11Provider : public QCA::Provider
 {
 private:
+	static const int _CONFIG_MAX_PROVIDERS;
+
 	bool _fLowLevelInitialized;
 	int _log_level;
 	bool _fSlotEventsActive;
 	bool _fSlotEventsLowLevelActive;
+	QFile _log_file;
+	QStringList _providers;
 
 public:
 	pkcs11Provider ();
@@ -56,10 +60,6 @@ public:
 	name () const;
 	
 	virtual
-	QString
-	credit () const;
-	
-	virtual
 	QStringList
 	features () const;
 	
@@ -74,6 +74,14 @@ public:
 
 	void
 	stopSlotEvents ();
+
+	virtual
+	QVariantMap
+	defaultConfig () const;
+
+	virtual
+	void
+	configChanged (const QVariantMap &config);
 
 protected:
 	static
@@ -546,7 +554,7 @@ public:
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->emit_diagnosticText (
 					QString ().sprintf (
-						"PKCS#11: Cannot decrypt: %ld-'%s'.\n",
+						"PKCS#11: Cannot decrypt: %lu-'%s'.\n",
 						e.getRV (),
 						qPrintable (e.getMessage ())
 					)
@@ -776,7 +784,7 @@ public:
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->emit_diagnosticText (
 					QString ().sprintf (
-						"PKCS#11: Cannot sign: %ld-'%s'.\n",
+						"PKCS#11: Cannot sign: %lu-'%s'.\n",
 						e.getRV (),
 						qPrintable (e.getMessage ())
 					)
@@ -1442,38 +1450,6 @@ MyKeyStoreList::clone () const {
 
 void
 MyKeyStoreList::start () {
-
-	CK_RV rv = CKR_OK;
-
-	try {
-		QString provider = qgetenv ("QCA_PKCS11_LIB");
-
-		if (!provider.isEmpty()) {
-			if (
-				(rv = pkcs11h_addProvider (
-					qPrintable (provider),
-					qPrintable (provider),
-					FALSE,
-					PKCS11H_SLOTEVENT_METHOD_AUTO,
-					PKCS11H_SLOTEVENT_METHOD_AUTO,
-					0,
-					FALSE
-				)) != CKR_OK
-			) {
-				throw PKCS11Exception (rv, "Adding provider " + provider);
-			}
-		}
-	}
-	catch (const PKCS11Exception &e) {
-		s_keyStoreList->emit_diagnosticText (
-			QString ().sprintf (
-				"PKCS#11: Start failed %ld-'%s'.\n",
-				e.getRV (),
-				qPrintable (e.getMessage ())
-			)
-		);
-	}
-
 	QMetaObject::invokeMethod(this, "doReady", Qt::QueuedConnection);
 }
 
@@ -1491,7 +1467,7 @@ MyKeyStoreList::setUpdatesEnabled (bool enabled) {
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
 			QString ().sprintf (
-				"PKCS#11: Start event failed %ld-'%s'.\n",
+				"PKCS#11: Start event failed %lu-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
 			)
@@ -1528,7 +1504,7 @@ MyKeyStoreList::entryPassive (
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
 			QString ().sprintf (
-				"PKCS#11: Add key store entry %ld-'%s'.\n",
+				"PKCS#11: Add key store entry %lu-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
 			)
@@ -1636,7 +1612,7 @@ MyKeyStoreList::keyStores () {
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
 			QString ().sprintf (
-				"PKCS#11: Cannot get key stores: %ld-'%s'.\n",
+				"PKCS#11: Cannot get key stores: %lu-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
 			)
@@ -1699,7 +1675,7 @@ MyKeyStoreList::entryList (int id) {
 					catch (const PKCS11Exception &e) {
 						s_keyStoreList->emit_diagnosticText (
 							QString ().sprintf (
-								"PKCS#11: Add key store entry %ld-'%s'.\n",
+								"PKCS#11: Add key store entry %lu-'%s'.\n",
 								e.getRV (),
 								qPrintable (e.getMessage ())
 							)
@@ -1718,7 +1694,7 @@ MyKeyStoreList::entryList (int id) {
 					catch (const PKCS11Exception &e) {
 						s_keyStoreList->emit_diagnosticText (
 							QString ().sprintf (
-								"PKCS#11: Add key store entry %ld-'%s'.\n",
+								"PKCS#11: Add key store entry %lu-'%s'.\n",
 								e.getRV (),
 								qPrintable (e.getMessage ())
 							)
@@ -1732,7 +1708,7 @@ MyKeyStoreList::entryList (int id) {
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
 			QString ().sprintf (
-				"PKCS#11: Enumerating store failed %ld-'%s'.\n",
+				"PKCS#11: Enumerating store failed %lu-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
 			)
@@ -2142,6 +2118,8 @@ MyKeyStoreList::unescapeString (
 
 using namespace pkcs11QCAPlugin;
 
+const int pkcs11Provider::_CONFIG_MAX_PROVIDERS = 10;
+
 //----------------------------------------------------------------------------
 // pkcs11Provider
 //----------------------------------------------------------------------------
@@ -2165,12 +2143,7 @@ int pkcs11Provider::version() const
 
 void pkcs11Provider::init () {
 	try {
-		QString loglevel = qgetenv ("QCA_PKCS11_LOGLEVEL");
 		CK_RV rv;
-
-		if (!loglevel.isEmpty ()) {
-			_log_level = loglevel.toInt ();
-		}
 
 		if ((rv = pkcs11h_engine_setCrypto (&pkcs11QCACrypto::crypto)) != CKR_OK) {
 			throw PKCS11Exception (rv, "Cannot set crypto");
@@ -2189,7 +2162,7 @@ void pkcs11Provider::init () {
 			throw PKCS11Exception (rv, "Cannot set hook");
 		}
 
-		pkcs11h_setLogLevel (_log_level);
+		pkcs11h_setLogLevel (PKCS11H_LOG_QUITE);
 
 		if (
 			(rv = pkcs11h_setTokenPromptHook (
@@ -2208,16 +2181,16 @@ void pkcs11Provider::init () {
 		) {
 			throw PKCS11Exception (rv, "Cannot set hook");
 		}
+
+		_fLowLevelInitialized = true;
 		
-		if (rv == CKR_OK) {
-			_fLowLevelInitialized = true;
-		}
+		setProviderConfig (name (), getProviderConfig (name ()));
 	}
 	catch (const PKCS11Exception &) {
 /*CANNOT DO ANYTHING HERE
 		emit_diagnosticText (
 			QString ().sprintf (
-				"PKCS#11: Cannot initialize: %ld-'%s'.\n",
+				"PKCS#11: Cannot initialize: %lu-'%s'.\n",
 				e.getRV (),
 				qPrintable (e.getMessage ())
 			)
@@ -2228,18 +2201,12 @@ void pkcs11Provider::init () {
 /*CANNOT DO ANYTHING HERE
 		emit_diagnosticText ("PKCS#11: Unknown error during provider initialization.\n");
 */
-		throw;
 	}
 }
 
 QString
 pkcs11Provider::name () const {
 	return "qca-pkcs11";
-}
-
-QString
-pkcs11Provider::credit () const {
-	return "RSA Security Inc. PKCS #11 Cryptographic Token Interface (Cryptoki).";
 }
 
 QStringList
@@ -2289,6 +2256,132 @@ pkcs11Provider::startSlotEvents () {
 void
 pkcs11Provider::stopSlotEvents () {
 	_fSlotEventsActive = false;
+}
+
+QVariantMap
+pkcs11Provider::defaultConfig () const {
+	QVariantMap mytemplate;
+
+	mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
+	mytemplate["allow_protected_authentication"] = true;
+	mytemplate["pin_cache"] = PKCS11H_PIN_CACHE_INFINITE;
+	mytemplate["log_file"] = "";
+	mytemplate["log_level"] = PKCS11H_LOG_QUITE;
+	for (int i=0;i<_CONFIG_MAX_PROVIDERS;i++) {
+		mytemplate[QString ().sprintf ("provider_%02d_enabled", i)] = false;
+		mytemplate[QString ().sprintf ("provider_%02d_name", i)] = "";
+		mytemplate[QString ().sprintf ("provider_%02d_library", i)] = "";
+		mytemplate[QString ().sprintf ("provider_%02d_allow_protected_authentication", i)] = true;
+		mytemplate[QString ().sprintf ("provider_%02d_cert_private", i)] = false;
+		mytemplate[QString ().sprintf ("provider_%02d_private_mask", i)] = PKCS11H_PRIVATEMODE_MASK_AUTO;
+		mytemplate[QString ().sprintf ("provider_%02d_slotevent_method", i)] = "auto";
+		mytemplate[QString ().sprintf ("provider_%02d_slotevent_timeout", i)] = 0;
+	}
+
+	return mytemplate;
+}
+
+void
+pkcs11Provider::configChanged (const QVariantMap &config) {
+	CK_RV rv = CKR_OK;
+
+	if (!_fLowLevelInitialized) {
+/*CANNOT DO ANYTHING HERE
+		emit_diagnosticText ("PKCS#11: Not initialized.\n");
+*/
+		return;
+	}
+
+	unsigned log_level = config["log_level"].toInt ();
+	pkcs11h_setLogLevel (log_level);
+	if (_log_file.isOpen ()) {
+		_log_file.close ();
+	}
+	if (log_level != PKCS11H_LOG_QUITE) {
+		QString log_file = config["log_file"].toString ();
+		if (log_file.isEmpty ()) {
+			_log_file.open (stderr, QIODevice::WriteOnly);
+		}
+		else {
+			_log_file.setFileName (log_file);
+			_log_file.open (QIODevice::Append);
+		}
+		_log_file.setTextModeEnabled (true);
+	}
+	pkcs11h_setProtectedAuthentication (
+		config["allow_protected_authentication"].toBool () != false ? TRUE : FALSE
+	);
+	pkcs11h_setPINCachePeriod (config["pin_cache"].toInt ());
+
+	/*
+	 * Remove current providers
+	 */
+	for (
+		QStringList::iterator pi = _providers.begin ();
+		pi != _providers.end ();
+		pi++
+	) {
+		pkcs11h_removeProvider (qPrintable (*pi));
+	}
+	_providers.clear ();
+
+	/*
+	 * Add new providers
+	 */
+	for (int i=0;i<_CONFIG_MAX_PROVIDERS;i++) {
+		bool enabled = config[QString ().sprintf ("provider_%02d_enabled", i)].toBool ();
+		QString provider = config[QString ().sprintf ("provider_%02d_library", i)].toString ();
+		QString name = config[QString ().sprintf ("provider_%02d_name", i)].toString ();
+		QString qslotevent = config[QString ().sprintf ("provider_%02d_slotevent_method", i)].toString ();
+		unsigned slotevent = PKCS11H_SLOTEVENT_METHOD_AUTO;
+		if (qslotevent == "trigger") {
+			slotevent = PKCS11H_SLOTEVENT_METHOD_TRIGGER;
+		}
+		else if (qslotevent == "poll") {
+			slotevent = PKCS11H_SLOTEVENT_METHOD_POLL;
+		}
+
+		if (name.isEmpty ()) {
+			name = provider;
+		}
+
+		if (enabled && !provider.isEmpty()) {
+			if (
+				(rv = pkcs11h_addProvider (
+					qPrintable (name),
+					qPrintable (provider),
+					config[
+						QString ().sprintf ("provider_%02d_allow_protected_authentication", i)
+					].toBool () != false ? TRUE : FALSE,
+					(unsigned)config[
+						QString ().sprintf ("provider_%02d_private_mask", i)
+					].toInt (),
+					slotevent,
+					(unsigned)config[
+						QString ().sprintf ("provider_%02d_slotevent_timeout", i)
+					].toInt (),
+					config[
+						QString ().sprintf ("provider_%02d_cert_private", i)
+					].toBool () != false ? TRUE : FALSE
+				)) != CKR_OK
+			) {
+/*CANNOT DO ANYTHING HERE
+				emit_diagnosticText (
+					QString ().sprintf (
+						"PKCS#11: Cannot log provider '%s'-'%s' %lu-'%s'.\n",
+						qPrintable (name),
+						qPrintable (provider),
+						rv,
+						pkcs11h_getMessage (rv)
+					)
+				);
+*/
+			}
+			else {
+				_providers += provider;
+			}
+		}
+	}
 }
 
 void
@@ -2348,8 +2441,10 @@ pkcs11Provider::logHook (
 ) {
 	Q_UNUSED(flags);
 
-	vprintf (format, args);
-	printf ("\n");
+	if (_log_file.isOpen ()) {
+		_log_file.write (QString ().vsprintf (format, args).toUtf8 ());
+		_log_file.write ("\n", 1);
+	}
 }
 
 void
