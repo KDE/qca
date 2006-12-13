@@ -23,6 +23,7 @@
 #include <QtCore>
 #include <stdlib.h>
 #include "qcaprovider.h"
+#include <time.h>
 
 #ifndef QCA_NO_SYSTEMSTORE
 # include "qca_systemstore.h"
