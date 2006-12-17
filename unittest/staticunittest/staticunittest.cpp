@@ -137,6 +137,9 @@ void StaticUnitTest::providers()
     }
     QCOMPARE( providerNames.contains("qca-openssl"), (QBool)true );
     QCOMPARE( providerNames.contains("qca-gcrypt"), (QBool)true );
+    QCOMPARE( providerNames.contains("qca-nss"), (QBool)true );
+    QCOMPARE( providerNames.contains("qca-pkcs11"), (QBool)true );
+    QCOMPARE( providerNames.contains("qca-gnupg"), (QBool)true );
     QCOMPARE( providerNames.contains("qca-botan"), (QBool)true );
 
     QCA::setProviderPriority("qca-openssl", 4);
