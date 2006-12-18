@@ -652,7 +652,7 @@ namespace QCA
 		   string if the provider does not have any 
 		   special version text.
 		*/
-		virtual QString versionDescription() const;
+		//virtual QString versionDescription() const;
 
 		/**
 		 * Routine to create a plugin context
