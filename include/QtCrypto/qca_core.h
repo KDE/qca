@@ -34,6 +34,10 @@
 
 /**
    The current version of %QCA
+
+   This provides you a compile time check of the %QCA version.
+
+   \sa qcaVersion for a runtime check.
 */
 #define QCA_VERSION 0x020000
 
@@ -46,6 +50,12 @@
 #include "qca_support.h"
 #include "qca_tools.h"
 
+/**
+   The current version of %QCA.
+
+   This is equivalent to QCA_VERSION, except it provides
+   a runtime check of the version of %QCA that is being used.
+*/
 QCA_EXPORT int qcaVersion();
 
 /** 
@@ -635,6 +645,16 @@ namespace QCA
 		virtual QString credit() const;
 
 		/**
+		   Optional version description for the provider.
+
+		   You probably should only show this to the user
+		   in a debugging environment. Returns an empty
+		   string if the provider does not have any 
+		   special version text.
+		*/
+		virtual QString versionDescription() const;
+
+		/**
 		 * Routine to create a plugin context
 		 *
 		 * You need to return a pointer to an algorithm
@@ -1094,8 +1114,16 @@ namespace QCA
 		*/
 		PasswordStyle passwordStyle() const;
 
+		/**
+		   The id of the KeyStore associated with this event
+		*/
 		QString keyStoreId() const;
+
+		/**
+		   The id of the KeyStoreEntry associated with this event
+		*/
 		QString keyStoreEntryId() const;
+
 		QString fileName() const;
 
 		/**
