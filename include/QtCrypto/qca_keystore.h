@@ -223,7 +223,7 @@ namespace QCA
 		/**
 		   test if the KeyStore holds trusted certificates (and CRLs)
 		*/
-		bool holdsTrustedCertificates() const; // Certificate and CRL
+		bool holdsTrustedCertificates() const;
 
 		/**
 		   test if the KeyStore holds identities (eg KeyBundle or PGPSecretKey)
