@@ -645,16 +645,6 @@ namespace QCA
 		virtual QString credit() const;
 
 		/**
-		   Optional version description for the provider.
-
-		   You probably should only show this to the user
-		   in a debugging environment. Returns an empty
-		   string if the provider does not have any 
-		   special version text.
-		*/
-		//virtual QString versionDescription() const;
-
-		/**
 		 * Routine to create a plugin context
 		 *
 		 * You need to return a pointer to an algorithm
