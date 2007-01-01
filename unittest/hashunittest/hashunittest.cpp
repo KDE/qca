@@ -326,7 +326,7 @@ void HashUnitTest::sha0longtest()
 
 void HashUnitTest::sha1test_data()
 {
-    // These are as specfied in FIPS 180-2. Matches RFC3174
+    // These are as specified in FIPS 180-2. Matches RFC3174
     // Some additions from Australian Standard (AS) 2805.13.3-2000
     QTest::addColumn<QByteArray>("input");
     QTest::addColumn<QString>("expectedHash");
@@ -446,7 +446,7 @@ void HashUnitTest::sha224test_data()
     QTest::addColumn<QByteArray>("input");
     QTest::addColumn<QString>("expectedHash");
 
-    // These are as specfied in FIPS 180-2, change notice 1
+    // These are as specified in FIPS 180-2, change notice 1
 
     // FIPS 180-2, Appendix B.1
     QTest::newRow("sha224(abc)") << QByteArray("abc") << QString("23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7");
@@ -513,7 +513,7 @@ void HashUnitTest::sha256test_data()
     QTest::addColumn<QByteArray>("input");
     QTest::addColumn<QString>("expectedHash");
 
-    // These are as specfied in FIPS 180-2
+    // These are as specified in FIPS 180-2
 
     // FIPS 180-2, Appendix B.1
     QTest::newRow("sha256(abc)") << QByteArray("abc") << QString("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
@@ -584,7 +584,7 @@ void HashUnitTest::sha384test_data()
     QTest::addColumn<QByteArray>("input");
     QTest::addColumn<QString>("expectedHash");
 
-    // These are as specfied in FIPS 180-2, and from Aaron Gifford's SHA2 tests
+    // These are as specified in FIPS 180-2, and from Aaron Gifford's SHA2 tests
 
     // FIPS 180-2, Appendix B.1
     QTest::newRow("sha384(abc)") << QByteArray("abc")
@@ -661,7 +661,7 @@ void HashUnitTest::sha384longtest()
 }
 
 
-// These are as specfied in FIPS 180-2, and from Aaron Gifford's SHA2 tests
+// These are as specified in FIPS 180-2, and from Aaron Gifford's SHA2 tests
 void HashUnitTest::sha512test_data()
 {
     QTest::addColumn<QByteArray>("input");
