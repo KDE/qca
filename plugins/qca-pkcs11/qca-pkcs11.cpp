@@ -54,15 +54,15 @@ public:
 	virtual
 	void
 	init ();
-	
+
 	virtual
 	QString
 	name () const;
-	
+
 	virtual
 	QStringList
 	features () const;
-	
+
 	virtual
 	Context *
 	createContext (
@@ -92,7 +92,7 @@ protected:
 		const char * const format,
 		va_list args
 	);
-	
+
 	static
 	void
 	_slotEventHook (
@@ -107,7 +107,7 @@ protected:
 		const pkcs11h_token_id_t token,
 		const unsigned retry
 	);
-	
+
 	static
 	PKCS11H_BOOL
 	_pinPromptHook (
@@ -118,7 +118,7 @@ protected:
 		char * const pin,
 		const size_t pin_max
 	);
-	
+
 	void
 	logHook (
 		const unsigned flags,
@@ -133,7 +133,7 @@ protected:
 	cardPromptHook (
 		const pkcs11h_token_id_t token
 	);
-	
+
 	PKCS11H_BOOL
 	pinPromptHook (
 		const pkcs11h_token_id_t token,
@@ -294,7 +294,7 @@ private:
 	escapeString (
 		const QString &from
 	) const;
-		
+
 	QString
 	unescapeString (
 		const QString &from
@@ -307,7 +307,7 @@ static MyKeyStoreList *s_keyStoreList = NULL;
 // PKCS11Exception
 //----------------------------------------------------------------------------
 class PKCS11Exception {
-	
+
 private:
 	CK_RV rv;
 	QString msg;
@@ -375,7 +375,7 @@ public:
 		_has_privateKeyRole = true;
 		_pkcs11h_certificate_id = NULL;
 		_pkcs11h_certificate = NULL;
-		
+
 		_pubkey = pubkey;
 		clearSign ();
 
@@ -560,7 +560,7 @@ public:
 					)
 				);
 			}
-			
+
 			return false;
 		}
 	}
@@ -631,7 +631,7 @@ public:
 
 		try {
 			int myrsa_size = 0;
-			
+
 			unsigned char *enc = NULL;
 			int enc_len = 0;
 
@@ -694,24 +694,24 @@ public:
 				if ((sig.algor->algorithm=OBJ_nid2obj (type)) == NULL) {
 					throw PKCS11Exception (CKR_FUNCTION_FAILED, "Invalid algorithm");
 				}
-			
+
 				if (sig.algor->algorithm->length == 0) {
 					throw PKCS11Exception (CKR_KEY_SIZE_RANGE, "Key size error");
 				}
-			
+
 				parameter.type = V_ASN1_NULL;
 				parameter.value.ptr = NULL;
-		
+
 				sig.algor->parameter = &parameter;
 
 				sig.digest = &digest;
 				sig.digest->data = (unsigned char *)final.data ();
 				sig.digest->length = final.size ();
-			
+
 				if ((enc_len=i2d_X509_SIG (&sig, NULL)) < 0) {
 					throw PKCS11Exception (CKR_FUNCTION_FAILED, "Signature prepare failed");
 				}
-			
+
 				unsigned char *p = enc;
 				i2d_X509_SIG (&sig, &p);
 			}
@@ -721,7 +721,7 @@ public:
 			}
 
 			size_t my_size;
-			
+
 			if (
 				(rv = pkcs11h_certificate_lockSession (
 					_pkcs11h_certificate
@@ -745,7 +745,7 @@ public:
 			}
 
 			result.resize (my_size);
-			
+
 			if (
 				(rv = pkcs11h_certificate_signAny (
 					_pkcs11h_certificate,
@@ -795,7 +795,7 @@ public:
 		if (enc_alloc != NULL) {
 			free (enc_alloc);
 		}
-	
+
 		clearSign ();
 
 		return result;
@@ -1496,9 +1496,9 @@ MyKeyStoreList::entryPassive (
 		QList<Certificate> listIssuers;
 		pkcs11h_certificate_id_t certificate_id;
 		bool has_private;
-		
+
 		deserializeCertificateId (entryId, &certificate_id, &has_private, &listIssuers);
-			
+
 		return getKeyStoreEntryByCertificateId (certificate_id, has_private, listIssuers);
 	}
 	catch (const PKCS11Exception &e) {
@@ -1989,13 +1989,13 @@ MyKeyStoreList::serializeCertificateId (
 		free (id);
 		id = NULL;
 	}
-	
+
 	serialized = QString ().sprintf (
 		"qca-pkcs11/%s/%d",
 		qPrintable(escapeString (qid)),
 		has_private ? 1 : 0
 	);
-	
+
 	for (
 		CertificateChain::const_iterator i = chain.begin ();
 		i != chain.end ();
@@ -2148,7 +2148,7 @@ void pkcs11Provider::init () {
 		if ((rv = pkcs11h_engine_setCrypto (&pkcs11QCACrypto::crypto)) != CKR_OK) {
 			throw PKCS11Exception (rv, "Cannot set crypto");
 		}
-		
+
 		if ((rv = pkcs11h_initialize ()) != CKR_OK) {
 			throw PKCS11Exception (rv, "Cannot initialize");
 		}
@@ -2172,7 +2172,7 @@ void pkcs11Provider::init () {
 		) {
 			throw PKCS11Exception (rv, "Cannot set hook");
 		}
-		
+
 		if (
 			(rv = pkcs11h_setPINPromptHook (
 				_pinPromptHook,
@@ -2183,7 +2183,7 @@ void pkcs11Provider::init () {
 		}
 
 		_fLowLevelInitialized = true;
-		
+
 		setProviderConfig (name (), getProviderConfig (name ()));
 	}
 	catch (const PKCS11Exception &) {
@@ -2450,7 +2450,7 @@ pkcs11Provider::logHook (
 void
 pkcs11Provider::slotEventHook () {
 	/*
-	 * This is called from a seperate
+	 * This is called from a separate
 	 * thread.
 	 */
 	if (s_keyStoreList != NULL && _fSlotEventsActive) {
@@ -2474,7 +2474,7 @@ pkcs11Provider::pinPromptHook (
 ) {
 	QSecureArray qpin;
 	if (s_keyStoreList != NULL) {
-		
+
 		s_keyStoreList->pinPrompt (token, qpin);
 
 		if (!qpin.isEmpty ()) {
