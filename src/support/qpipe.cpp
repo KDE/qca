@@ -191,7 +191,7 @@ public:
 	{
 		do_quit = false;
 		data = 0;
-		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, FALSE, DUPLICATE_SAME_ACCESS);
+		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, false, DUPLICATE_SAME_ACCESS);
 	}
 
 	~QPipeWriter()
@@ -308,7 +308,7 @@ public:
 	{
 		do_quit = false;
 		active = true;
-		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, FALSE, DUPLICATE_SAME_ACCESS);
+		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, false, DUPLICATE_SAME_ACCESS);
 	}
 
 	~QPipeReader()
@@ -677,7 +677,7 @@ void QPipeDevice::release()
 bool QPipeDevice::winDupHandle()
 {
 	HANDLE h;
-	if(!DuplicateHandle(GetCurrentProcess(), d->pipe, GetCurrentProcess(), &h, 0, FALSE, DUPLICATE_SAME_ACCESS))
+	if(!DuplicateHandle(GetCurrentProcess(), d->pipe, GetCurrentProcess(), &h, 0, false, DUPLICATE_SAME_ACCESS))
 		return false;
 
 	Type t = d->type;
@@ -1414,7 +1414,7 @@ bool QPipe::create()
 	SECURITY_ATTRIBUTES secAttr;
 	memset(&secAttr, 0, sizeof secAttr);
 	secAttr.nLength = sizeof secAttr;
-	secAttr.bInheritHandle = TRUE;
+	secAttr.bInheritHandle = true;
 
 	HANDLE r, w;
 	if(!CreatePipe(&r, &w, &secAttr, 0))
