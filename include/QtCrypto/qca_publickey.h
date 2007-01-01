@@ -938,7 +938,7 @@ namespace QCA
 		   almost certainly want to extract the public key part out - see PKey::toPublicKey
 		   for an easy way.
 
-		   Key length is a tricky judgement - using less than 2048 is probably being
+		   Key length is a tricky judgment - using less than 2048 is probably being
 		   too liberal for long term use. Don't use less than 1024 without serious
 		   analysis.
 		   

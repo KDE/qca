@@ -647,7 +647,7 @@ namespace QCA
 	   Note that if your application is potentially susceptable to "replay attacks"
 	   where the message is sent more than once, you should include a counter in
 	   the message that is covered by the MAC, and check that the counter is always
-	   incremented every time you recieve a message and MAC.
+	   incremented every time you receive a message and MAC.
 	   
 	   For more information on HMAC, see H. Krawczyk et al. RFC2104 
 	   "HMAC: Keyed-Hashing for Message Authentication"

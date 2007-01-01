@@ -546,7 +546,7 @@ namespace QCA
 		/**
 		 * Return the number of bytes that the key must be a multiple of
 		 *
-		 * If this is one, then anything between minumum and maximum (inclusive)
+		 * If this is one, then anything between minimum and maximum (inclusive)
 		 * is acceptable.
 		 */
 		int multiple() const { return _multiple; }
