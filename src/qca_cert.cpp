@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
  */
 
@@ -677,7 +677,7 @@ bool Certificate::operator==(const Certificate &otherCert) const
 	const CertContextProps *b = static_cast<const CertContext *>(otherCert.context())->props();
 
 	// logic from Botan
-	if(a->sig != b->sig || a->sigalgo != b->sigalgo || 
+	if(a->sig != b->sig || a->sigalgo != b->sigalgo ||
 	   subjectPublicKey() != otherCert.subjectPublicKey())
 		return false;
 	if(a->issuer != b->issuer || a->subject != b->subject)
@@ -1284,7 +1284,7 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 		}
 	}
 	if(!done)
-		return QString::null;
+                return QString();
 	return pem;
 }
 
