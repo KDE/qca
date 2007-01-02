@@ -2,7 +2,7 @@ TEMPLATE = app
 CONFIG += thread console
 QT -= gui
 QT += network
-TARGET = sasltest
+TARGET = saslservtest
 
-SOURCES += sasltest.cpp
+SOURCES += saslservtest.cpp
 include(../examples.pri)
