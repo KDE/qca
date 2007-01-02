@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
  */
 
@@ -1377,7 +1377,7 @@ private:
 			if (!qdn.isEmpty ()) {
 				qdn += ", ";
 			}
-			qdn += c + "=" + e.value ();
+			qdn += c + '=' + e.value ();
 		}
 
 		if ((size_t)qdn.length () > dn_max-1) {
@@ -2001,7 +2001,7 @@ MyKeyStoreList::serializeCertificateId (
 		i != chain.end ();
 		i++
 	) {
-		serialized += "/" + escapeString (Base64 ().arrayToString ((*i).toDER ()));
+		serialized += '/' + escapeString (Base64 ().arrayToString ((*i).toDER ()));
 	}
 
 	return serialized;
@@ -2309,7 +2309,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		_log_file.setTextModeEnabled (true);
 	}
 	pkcs11h_setProtectedAuthentication (
-		config["allow_protected_authentication"].toBool () != false ? TRUE : FALSE
+		config["allow_protected_authentication"].toBool () != false ? true : false
 	);
 	pkcs11h_setPINCachePeriod (config["pin_cache"].toInt ());
 
@@ -2352,7 +2352,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					qPrintable (provider),
 					config[
 						QString ().sprintf ("provider_%02d_allow_protected_authentication", i)
-					].toBool () != false ? TRUE : FALSE,
+					].toBool () != false ? true : false,
 					(unsigned)config[
 						QString ().sprintf ("provider_%02d_private_mask", i)
 					].toInt (),
@@ -2362,7 +2362,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					].toInt (),
 					config[
 						QString ().sprintf ("provider_%02d_cert_private", i)
-					].toBool () != false ? TRUE : FALSE
+					].toBool () != false ? true : false
 				)) != CKR_OK
 			) {
 /*CANNOT DO ANYTHING HERE
@@ -2463,7 +2463,7 @@ pkcs11Provider::cardPromptHook (
 	const pkcs11h_token_id_t token
 ) {
 	printf ("PKCS#11: Token prompt '%s'\n", token->label);
-	return FALSE;
+	return false;
 }
 
 PKCS11H_BOOL
@@ -2481,11 +2481,11 @@ pkcs11Provider::pinPromptHook (
 			if ((size_t)qpin.size () < pin_max-1) {
 				memmove (pin, qpin.constData (), qpin.size ());
 				pin[qpin.size ()] = '\0';
-				return TRUE;
+				return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 class pkcs11Plugin : public QCAPlugin
