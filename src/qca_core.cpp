@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
  */
 
@@ -1132,7 +1132,7 @@ bool SymmetricKey::isWeakDESKey()
 	// clear parity bits
 	for(uint i = 0; i < 8; i++)
 		workingCopy[i] = (data()[i]) & 0xfe;
-	
+
 	for(int n = 0; n < 64; n++)
 	{
 		if(memcmp(workingCopy.data(), desWeakKeyTable[n], 8) == 0)

@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
  */
 
@@ -528,19 +528,19 @@ struct SHA1_CONTEXT
 		sbuf.resize((7 * sizeof(quint32)) + 64);
 		setup();
 	}
-	
+
 	SHA1_CONTEXT(const SHA1_CONTEXT &from)
 	{
 		*this = from;
 	}
-	
+
 	SHA1_CONTEXT & operator=(const SHA1_CONTEXT &from)
 	{
 		sbuf = from.sbuf;
 		setup();
 		return *this;
 	}
-	
+
 	inline void setup()
 	{
 		char *p = sbuf.data();
