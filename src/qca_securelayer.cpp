@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
  */
 
@@ -672,7 +672,7 @@ public:
 		int _readout = sasl->bytesOutgoingAvailable();
 
 	// 	bool force_read = false;
-	// 
+	//
 	// 	if(!handshaken)
 	// 	{
 	// 		QByteArray a;
@@ -683,7 +683,7 @@ public:
 	// 		a = c->to_net();
 	// 		r = c->result();
 	// 		from_net.clear();
-	// 
+	//
 	// 		if(r == TLSContext::Error)
 	// 		{
 	// 			reset(ResetSession);
@@ -691,9 +691,9 @@ public:
 	// 			errorCode = ErrorHandshake;
 	// 			return;
 	// 		}
-	// 
+	//
 	// 		to_net.append(a);
-	// 
+	//
 	// 		if(r == TLSContext::Success)
 	// 		{
 	// 			peerCert = c->peerCertificateChain();
@@ -708,13 +708,13 @@ public:
 	// 			force_read = true;
 	// 		}
 	// 	}
-	// 
+	//
 	// 	if(handshaken)
 	// 	{
 			bool eof        = false;
 			bool tryMore    = false;
 			bool force_read = false;
-	
+
 			if(!out.isEmpty() || tryMore)
 			{
 				tryMore = false;
@@ -745,7 +745,7 @@ public:
 					to_net.append(a);
 				}
 			}
-	
+
 			if(!from_net.isEmpty() || force_read)
 			{
 				QByteArray a;
@@ -767,7 +767,7 @@ public:
 				in.append(a);
 				to_net.append(b);
 			}
-	
+
 	// 		if(eof)
 	// 		{
 	// 			close();
@@ -775,7 +775,7 @@ public:
 	// 			return;
 	// 		}
 	// 	}
-	
+
 		if(sasl->bytesAvailable() > _read)
 		{
 			//emit sasl->readyRead();
@@ -1086,7 +1086,7 @@ void SASL::Private::tryAgain()
 				emit q->needParams(np);
 				return;
 			}
-			
+
 			d->first = false;
 			d->tried = false;
 			emit q->clientStarted(d->c->haveClientInit(), d->c->stepData());
