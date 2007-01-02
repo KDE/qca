@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
  */
 #include <QtCrypto>
@@ -72,7 +72,7 @@ private:
 class BotanHashContext : public QCA::HashContext
 {
 public:
-    BotanHashContext( QString hashName, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
+    BotanHashContext( const QString &hashName, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
     {
 	m_hashObj = Botan::get_hash(hashName.toStdString());
     }
@@ -113,7 +113,7 @@ private:
 class BotanHMACContext : public QCA::MACContext
 {
 public:
-    BotanHMACContext( QString hashName, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    BotanHMACContext( const QString &hashName, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
 	m_hashObj = new Botan::HMAC(hashName.toStdString());
 	if (0 == m_hashObj) {
@@ -170,7 +170,7 @@ protected:
 class BotanPBKDFContext: public QCA::KDFContext
 {
 public:
-    BotanPBKDFContext(QString kdfName, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
+    BotanPBKDFContext( const QString &kdfName, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {
 	m_s2k = Botan::get_s2k(kdfName.toStdString());
     }
@@ -205,7 +205,8 @@ protected:
 class BotanCipherContext : public QCA::CipherContext
 {
 public:
-    BotanCipherContext(QString algo, QString mode, QString padding, QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+    BotanCipherContext( const QString &algo, const QString &mode, const QString &padding,
+                        QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
     {
 	m_algoName = algo.toStdString();
 	m_algoMode = mode.toStdString();
@@ -222,21 +223,21 @@ public:
 
 	if (iv.size() == 0) {
 	    if (QCA::Encode == dir) {
-		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+"/"+m_algoMode+"/"+m_algoPadding,
+		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+'/'+m_algoMode+'/'+m_algoPadding,
 							      keyCopy, Botan::ENCRYPTION));
 	    }
 	    else {
-		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+"/"+m_algoMode+"/"+m_algoPadding,
+		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+'/'+m_algoMode+'/'+m_algoPadding,
 							      keyCopy, Botan::DECRYPTION));
 	    }
 	} else {
 	    Botan::InitializationVector ivCopy((Botan::byte*)iv.data(), iv.size());
 	    if (QCA::Encode == dir) {
-		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+"/"+m_algoMode+"/"+m_algoPadding,
+		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+'/'+m_algoMode+'/'+m_algoPadding,
 							      keyCopy, ivCopy, Botan::ENCRYPTION));
 	    }
 	    else {
-		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+"/"+m_algoMode+"/"+m_algoPadding,
+		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+'/'+m_algoMode+'/'+m_algoPadding,
 							      keyCopy, ivCopy, Botan::DECRYPTION));
 	    }
 	}
