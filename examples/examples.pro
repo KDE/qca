@@ -12,8 +12,10 @@ SUBDIRS += \
 	providertest \
 	publickeyexample \
 	randomtest \
-	ssltest \
 	rsatest \
+	sasltest \
+	saslservtest \
+	ssltest \
 	sslservtest
-#	sasltest
+
 
