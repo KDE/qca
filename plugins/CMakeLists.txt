@@ -24,10 +24,8 @@ IF ( QCA_GPG_EXECUTABLE )
 ENDIF ( QCA_GPG_EXECUTABLE )
 
 if(SASL2_FOUND)
-  MESSAGE(STATUS "Sasl2 plugin enabled")
-  MESSAGE(STATUS "Need to port qca-sasl to qt4")
-  #add_subdirectory(qca-sasl)
-  #add_subdirectory(qca-cyrus-sasl)
+  MESSAGE(STATUS "SASL2 plugin enabled")
+  add_subdirectory(qca-cyrus-sasl)
 endif(SASL2_FOUND)
 
 if(BOTAN_FOUND)
