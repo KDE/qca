@@ -1,12 +1,19 @@
+#CONFIG += release
+CONFIG += debug
+
 TEMPLATE = lib
-CONFIG  += qt thread debug plugin
+CONFIG += plugin
 QT -= gui
-TARGET   = qca-cyrus-sasl
+QT += network
+CONFIG += crypto
 
-DEFINES += QCA_PLUGIN
+SOURCES = qca-sasl.cpp
 
-INCLUDEPATH += ../../include/QtCrypto
-SOURCES = qca-cyrus-sasl.cpp
+windows:{
+	# hardcoded cyrus sasl location
+	DEFINES += QCA_PLUGIN_DLL
+	INCLUDEPATH += "c:\local\include"
+	LIBS += "c:\local\lib\libsasl.lib"
+}
 
-# a temporary hack until the build system works
-LIBS += -lsasl2
+include(conf.pri)
