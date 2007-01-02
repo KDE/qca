@@ -1,9 +1,0 @@
-#!/bin/sh
-
-cat >extra.pri <<EOT
-target.path=\$\$QT_PATH_PLUGINS/crypto
-INSTALLS += target
-
-INSTALL_ROOT = $PREFIX
-
-EOT
