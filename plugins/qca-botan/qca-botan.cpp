@@ -45,11 +45,16 @@ public:
     QSecureArray nextBytes(int size, QCA::Random::Quality quality)
     {
 	QSecureArray buf(size);
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,5,0)
 	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size(), lookup_quality(quality) );
+#else
+	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size() );
+#endif
 	return buf;
     }
 
 private:
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,5,0)
     Botan::RNG_Quality lookup_quality( QCA::Random::Quality quality )
     {
 	if ( QCA::Random::Nonce == quality )
@@ -65,6 +70,7 @@ private:
 	    // addition of a value to the enum
 	    return Botan::SessionKey;
     }
+#endif
 };
 
 
