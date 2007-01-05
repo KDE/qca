@@ -2309,7 +2309,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		_log_file.setTextModeEnabled (true);
 	}
 	pkcs11h_setProtectedAuthentication (
-		config["allow_protected_authentication"].toBool () != false ? true : false
+		config["allow_protected_authentication"].toBool () != false ? TRUE : FALSE
 	);
 	pkcs11h_setPINCachePeriod (config["pin_cache"].toInt ());
 
@@ -2352,7 +2352,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					qPrintable (provider),
 					config[
 						QString ().sprintf ("provider_%02d_allow_protected_authentication", i)
-					].toBool () != false ? true : false,
+					].toBool () != false ? TRUE : FALSE,
 					(unsigned)config[
 						QString ().sprintf ("provider_%02d_private_mask", i)
 					].toInt (),
@@ -2362,7 +2362,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					].toInt (),
 					config[
 						QString ().sprintf ("provider_%02d_cert_private", i)
-					].toBool () != false ? true : false
+					].toBool () != false ? TRUE : FALSE
 				)) != CKR_OK
 			) {
 /*CANNOT DO ANYTHING HERE
@@ -2463,7 +2463,7 @@ pkcs11Provider::cardPromptHook (
 	const pkcs11h_token_id_t token
 ) {
 	printf ("PKCS#11: Token prompt '%s'\n", token->label);
-	return false;
+	return FALSE;
 }
 
 PKCS11H_BOOL
@@ -2481,11 +2481,11 @@ pkcs11Provider::pinPromptHook (
 			if ((size_t)qpin.size () < pin_max-1) {
 				memmove (pin, qpin.constData (), qpin.size ());
 				pin[qpin.size ()] = '\0';
-				return true;
+				return TRUE;
 			}
 		}
 	}
-	return false;
+	return FALSE;
 }
 
 class pkcs11Plugin : public QCAPlugin
