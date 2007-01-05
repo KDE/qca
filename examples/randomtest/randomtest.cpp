@@ -7,10 +7,10 @@
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
 	qDebug() << "This example generates random numbers";
 
-	// the Initializer object sets things up, and 
+	// the Initializer object sets things up, and
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
 
@@ -38,12 +38,6 @@ int main(int argc, char **argv)
 	// This is the standard way to generate a random integer.
 	randInt = QCA::Random::randomInt();
 	qDebug() << "A random number: " << randInt;
-
-	// If this was going to be a really important random
-	// number, you migth want to ask for higher Quality:
-	randInt = QCA::Random::randomInt(QCA::Random::LongTermKey);
-	// or if this was just a junk value, you could use:
-	randInt = QCA::Random::randomInt(QCA::Random::Nonce);
 
 	// If you wanted a random character (octet), you could
 	// use something like:
@@ -56,8 +50,6 @@ int main(int argc, char **argv)
 	// If you need more random values, you may want to
 	// get an array, as shown below.
 	tenBytes = QCA::Random::randomArray(10);
-	// You can still use Quality settings, as shown below
-	tenBytes = QCA::Random::randomArray(10, QCA::Random::Nonce);
 
 	// To make this viewable, we convert to hexadecimal.
 	std::cout << "A random 10 byte array (in hex): ";
@@ -68,7 +60,7 @@ int main(int argc, char **argv)
 	// This isn't normally the easiest way, but it does work
 	QCA::Random myRandomObject;
 	randChar = myRandomObject.nextByte();
-	tenBytes = myRandomObject.nextBytes(10, QCA::Random::Nonce);
+	tenBytes = myRandomObject.nextBytes(10);
 	return 0;
 }
 

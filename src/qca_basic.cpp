@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004,2005,2007  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,32 +33,32 @@ Random::Random(const QString &provider)
 {
 }
 
-uchar Random::nextByte(Quality q)
+uchar Random::nextByte()
 {
-	return (uchar)(nextBytes(1, q)[0]);
+	return (uchar)(nextBytes(1)[0]);
 }
 
-QSecureArray Random::nextBytes(int size, Quality q)
+QSecureArray Random::nextBytes(int size)
 {
-	return static_cast<RandomContext *>(context())->nextBytes(size, q);
+	return static_cast<RandomContext *>(context())->nextBytes(size);
 }
 
-uchar Random::randomChar(Quality q)
+uchar Random::randomChar()
 {
-	return globalRNG().nextByte(q);
+	return globalRNG().nextByte();
 }
 
-uint Random::randomInt(Quality q)
+uint Random::randomInt()
 {
-	QSecureArray a = globalRNG().nextBytes(sizeof(int), q);
+	QSecureArray a = globalRNG().nextBytes(sizeof(int));
 	uint x;
 	memcpy(&x, a.data(), a.size());
 	return x;
 }
 
-QSecureArray Random::randomArray(int size, Quality q)
+QSecureArray Random::randomArray(int size)
 {
-	return globalRNG().nextBytes(size, q);
+	return globalRNG().nextBytes(size);
 }
 
 //----------------------------------------------------------------------------

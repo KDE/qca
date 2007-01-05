@@ -46,31 +46,12 @@ namespace QCA
 	   an alternative random number source, by implementing
 	   another provider.
 	 
-	   You can select the "quality" of the random numbers. For 
-	   best results, you should use Nonce or PublicValue for values
-	   that are likely to become public, and SessionKey or LongTermKey
-	   for those values that are more critical. All that said, please
-	   note that this is only a hint to the provider - it may make
-	   no difference at all.
-	 
 	   The normal use of this class is expected to be through the
 	   static members - randomChar(), randomInt() and randomArray().
 	 */
 	class QCA_EXPORT Random : public Algorithm
 	{
 	public:
-		/**
-		 * How much entropy to use for the random numbers that
-		 * are required.
-		 */
-		enum Quality
-		{
-			Nonce,      ///< Low quality, will become public
-			PublicValue,///< Will become public
-			SessionKey, ///< Intended to remain private
-			LongTermKey ///< Best available quality
-		};
-
 		/**
 		 * Standard Constructor
 		 *
@@ -84,12 +65,10 @@ namespace QCA
 		 *
 		 * This method isn't normally required - you should use
 		 * the static randomChar() method instead.
-		 * 
-		 * \param q the quality of the random byte that is required
 		 *
 		 * \sa randomChar
 		 */
-		uchar nextByte(Quality q = SessionKey);
+		uchar nextByte();
 
 		/**
 		 * Provide a specified number of random bytes
@@ -98,11 +77,10 @@ namespace QCA
 		 * the static randomArray() method instead.
 		 *
 		 * \param size the number of bytes to provide
-		 * \param q the quality of the random bytes that are required
 		 *
 		 * \sa randomArray
 		 */
-		QSecureArray nextBytes(int size, Quality q = SessionKey);
+		QSecureArray nextBytes(int size);
 
 		/**
 		 * Provide a random character (byte)
@@ -112,12 +90,10 @@ namespace QCA
 		 * \code
 		 * myRandomChar = QCA::Random::randomChar();
 		 * \endcode
-		 * 
-		 * \param q the quality of the random character that is required
 		 *
 		 * If you need a number of bytes, perhaps randomArray() may be of use
 		 */
-		static uchar randomChar(Quality q = SessionKey);
+		static uchar randomChar();
 
 		/**
 		 * Provide a random integer
@@ -125,15 +101,10 @@ namespace QCA
 		 * This is the normal way of obtaining a single random integer,
 		 * as shown below:
 		 * \code
-		 * // default quality
 		 * myRandomInt = QCA::Random::randomInt();
-		 * // cheap integer
-		 * myCheapInt = QCA::Random::randomInt( QCA::Random::Nonce );
 		 * \endcode
-		 *
-		 * \param q the quality of the random integer that is required
 		 */
-		static uint randomInt(Quality q = SessionKey);
+		static uint randomInt();
 
 		/**
 		 * Provide a specified number of random bytes
@@ -141,14 +112,11 @@ namespace QCA
 		 * \code
 		 * // build a 30 byte secure array.
 		 * QSecureArray arry = QCA::Random::randomArray(30);
-		 * // take 20 bytes, as high a quality as we can get
-		 * QSecureArray newKey = QCA::Random::randomArray(20, QCA::Random::LongTermKey);
 		 * \endcode
 		 *
 		 * \param size the number of bytes to provide
-		 * \param q the quality of the random bytes that are required
 		 */
-		static QSecureArray randomArray(int size, Quality q = SessionKey);
+		static QSecureArray randomArray(int size);
 	};
 
 	/**

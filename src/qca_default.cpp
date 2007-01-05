@@ -44,7 +44,7 @@ public:
 		return new DefaultRandomContext(provider());
 	}
 
-	virtual QSecureArray nextBytes(int size, Random::Quality)
+	virtual QSecureArray nextBytes(int size)
 	{
 		QSecureArray buf(size);
 		for(int n = 0; n < (int)buf.size(); ++n)

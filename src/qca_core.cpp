@@ -1042,7 +1042,7 @@ SymmetricKey::SymmetricKey()
 
 SymmetricKey::SymmetricKey(int size)
 {
-	set(globalRNG().nextBytes(size, Random::SessionKey));
+	set(globalRNG().nextBytes(size));
 }
 
 SymmetricKey::SymmetricKey(const QSecureArray &a)
@@ -1150,7 +1150,7 @@ InitializationVector::InitializationVector()
 
 InitializationVector::InitializationVector(int size)
 {
-	set(globalRNG().nextBytes(size, Random::Nonce));
+	set(globalRNG().nextBytes(size));
 }
 
 InitializationVector::InitializationVector(const QSecureArray &a)

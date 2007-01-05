@@ -49,7 +49,7 @@ class QCA_EXPORT RandomContext : public BasicContext
 	Q_OBJECT
 public:
 	RandomContext(Provider *p) : BasicContext(p, "random") {}
-	virtual QSecureArray nextBytes(int size, Random::Quality q) = 0;
+	virtual QSecureArray nextBytes(int size) = 0;
 };
 
 class QCA_EXPORT HashContext : public BasicContext

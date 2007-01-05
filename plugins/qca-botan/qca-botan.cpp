@@ -42,35 +42,16 @@ public:
 	return new botanRandomContext( *this );
     }
 
-    QSecureArray nextBytes(int size, QCA::Random::Quality quality)
+    QSecureArray nextBytes(int size)
     {
 	QSecureArray buf(size);
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,5,0)
-	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size(), lookup_quality(quality) );
+	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size(), Botan::SessionKey );
 #else
 	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size() );
 #endif
 	return buf;
     }
-
-private:
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,5,0)
-    Botan::RNG_Quality lookup_quality( QCA::Random::Quality quality )
-    {
-	if ( QCA::Random::Nonce == quality )
-	    return Botan::Nonce;
-	else if ( QCA::Random::PublicValue == quality )
-	    return Botan::PublicValue;
-	else if ( QCA::Random::SessionKey == quality )
-	    return Botan::SessionKey;
-	else if ( QCA::Random::LongTermKey == quality )
-	    return Botan::LongTermKey;
-	else
-	    // this can't happen, but insurance against an accidental
-	    // addition of a value to the enum
-	    return Botan::SessionKey;
-    }
-#endif
 };
 
 

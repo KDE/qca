@@ -86,19 +86,8 @@ void RandomUnitTest::testGetData()
 	QCOMPARE( QCA::Random().randomArray(3) == QCA::Random().randomArray(3), false );
 	QCOMPARE( QCA::Random::randomArray(3) == QCA::Random::randomArray(3), false );
 
-	QCOMPARE( randObject.nextByte(QCA::Random::Nonce) == randObject.nextByte(QCA::Random::SessionKey), false );
-	QCOMPARE( QCA::Random().nextByte(QCA::Random::PublicValue) == QCA::Random().nextByte(), false );
-	QCOMPARE( randObject.nextBytes(4) == randObject.nextBytes(4, QCA::Random::Nonce), false );
-	QCOMPARE( randObject.randomChar(QCA::Random::LongTermKey) == randObject.randomChar(), false );
-	QCOMPARE( QCA::Random().randomChar() == QCA::Random().randomChar(QCA::Random::PublicValue), false );
-	QCOMPARE( QCA::Random::randomChar(QCA::Random::PublicValue) == QCA::Random::randomChar(QCA::Random::Nonce), false );
-	QCOMPARE( QCA::Random().randomInt(QCA::Random::Nonce) == QCA::Random().randomInt(), false );
-	QCOMPARE( QCA::Random::randomInt(QCA::Random::Nonce) == QCA::Random::randomInt(QCA::Random::Nonce), false );
-	QCOMPARE( QCA::Random().randomArray(3, QCA::Random::Nonce) == QCA::Random().randomArray(3), false );
-	QCOMPARE( QCA::Random::randomArray(3, QCA::Random::SessionKey) == QCA::Random::randomArray(3, QCA::Random::PublicValue), false );
-
 	for (int len = 1; len <= 1024; len*=2 ) {
-	    QCOMPARE( QCA::globalRNG().nextBytes(len, QCA::Random::SessionKey).size(), len );
+	    QCOMPARE( QCA::globalRNG().nextBytes(len).size(), len );
 	}
     }
 }
