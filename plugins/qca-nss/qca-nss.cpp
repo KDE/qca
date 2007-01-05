@@ -355,6 +355,7 @@ public:
 
     QCA::Provider::Context *clone() const
 	{
+	    return new nssCipherContext(*this);
 	}
 
     unsigned int blockSize() const
