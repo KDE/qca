@@ -42,7 +42,7 @@ public:
 		Sign,              // --sign
 		SignAndEncrypt,    // --sign --encrypt
 		SignClearsign,     // --clearsign
-		SignDetached,      // --detach-sigh
+		SignDetached,      // --detach-sign
 		Verify,            // --verify
 		VerifyDetached,    // --verify
 		Import,            // --import
