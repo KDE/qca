@@ -59,6 +59,7 @@ ELSE ( WIN32 )
       "/usr/share/ssl/cert.pem"
       "/usr/share/ssl/certs/ca-bundle.crt"
       "/etc/pki/tls/cert.pem"
+      "/usr/share/curl/curl-ca-bundle.crt"
     )
     FOREACH (_current_try ${toTry})
       IF(EXISTS ${_current_try})
