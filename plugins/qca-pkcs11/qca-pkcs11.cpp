@@ -2184,7 +2184,7 @@ void pkcs11Provider::init () {
 
 		_fLowLevelInitialized = true;
 
-		setProviderConfig (name (), getProviderConfig (name ()));
+//		setProviderConfig (name (), getProviderConfig (name ()));
 	}
 	catch (const PKCS11Exception &) {
 /*CANNOT DO ANYTHING HERE
@@ -2462,7 +2462,6 @@ PKCS11H_BOOL
 pkcs11Provider::cardPromptHook (
 	const pkcs11h_token_id_t token
 ) {
-	printf ("PKCS#11: Token prompt '%s'\n", token->label);
 	return FALSE;
 }
 
