@@ -355,13 +355,13 @@ public:
 			 unsigned int keyLength, unsigned int iterationCount)
     {
 	QCA::SymmetricKey result(keyLength);
-	int retval = gcry_pbkdf2(m_algorithm, secret.data(), secret.size(),
-				     salt.data(), salt.size(),
-				     iterationCount, keyLength, result.data());
+	gcry_error_t retval = gcry_pbkdf2(m_algorithm, secret.data(), secret.size(),
+					  salt.data(), salt.size(),
+				     	  iterationCount, keyLength, result.data());
 	if (retval == GPG_ERR_NO_ERROR) {
 	    return result;
 	} else {
-	    std::cout << "got: " << retval << std::endl;
+	    // std::cout << "got: " << retval << std::endl;
 	    return QCA::SymmetricKey();
 	}
     }

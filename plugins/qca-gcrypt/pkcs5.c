@@ -45,18 +45,17 @@
  *  Output:         DK         derived key, a dkLen-octet string
  */
 
-int
+gcry_error_t
 gcry_pbkdf2 (int PRF, const char *P, size_t Plen, const char *S,
 	     size_t Slen, unsigned int c, unsigned int dkLen, char *DK)
 {
   gcry_md_hd_t prf;
-  gcry_error_t maybeError;
+  gcry_error_t rc;
   char *U;
   unsigned int u;
   unsigned int hLen;
   unsigned int l;
   unsigned int r;
-  int rc;
   unsigned char *p;
   unsigned int i;
   unsigned int k;
@@ -140,9 +139,9 @@ gcry_pbkdf2 (int PRF, const char *P, size_t Plen, const char *S,
    *  into a small set of values.
    *
    */
-  maybeError = gcry_md_open (&prf, PRF, GCRY_MD_FLAG_HMAC | GCRY_MD_FLAG_SECURE);
-  if (maybeError != GPG_ERR_NO_ERROR)
-    return (-1 *maybeError);
+  rc = gcry_md_open (&prf, PRF, GCRY_MD_FLAG_HMAC | GCRY_MD_FLAG_SECURE);
+  if (rc != GPG_ERR_NO_ERROR)
+    return rc;
 
   U = (char*)gcry_malloc(hLen);
   if (!U)
