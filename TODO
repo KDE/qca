@@ -22,7 +22,7 @@
   code:
     don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try
-    sasl: get it working, lib and cyrus provider
+    sasl: test it works correctly
     race condition(?): keystore id is bad by the time a KeyStore object is
       made. solution: if the id is invalid, queue up an unavailable() signal?
   other:
@@ -33,7 +33,9 @@
   api:
     cert extensions
     OCSP ?
-    remove the quality enum for randomness? (see botan)
+    random: either find a way to always provide good random numbers,
+            or add an indicator as to whether the numbers can be
+            trusted.
     tls extensions: hostname and ocsp stapling
   code:
     fix asker implementation, it is a disaster
