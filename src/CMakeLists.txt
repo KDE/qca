@@ -1,6 +1,7 @@
 
 # base source files
 
+
 SET( nonmoc_SOURCES
 	qca_tools.cpp
 	qca_plugin.cpp
@@ -48,6 +49,9 @@ ENDIF(UNIX)
 
 # Botan tools
 SET( botan_BASE botantools/botan )
+
+
+INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} support support/dirwatch ${botan_BASE} )
 
 ADD_DEFINITIONS(
 	-DBOTAN_TYPES_QT
@@ -115,7 +119,6 @@ qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qpipe.h")
 qt4_wrap_cpp( SOURCES "support/dirwatch/dirwatch_p.h")
 
 ADD_LIBRARY(qca SHARED ${SOURCES})
-INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} support support/dirwatch ${botan_BASE} )
 TARGET_LINK_LIBRARIES(qca ${QT_QTCORE_LIBRARY})
 
 if(WIN32)
@@ -126,6 +129,8 @@ if(APPLE)
    set(CARBON_LIBRARY_SECURITY "-framework Security")
    TARGET_LINK_LIBRARIES(qca ${CARBON_LIBRARY} ${CARBON_LIBRARY_SECURITY})
 endif(APPLE)
+
+set_target_properties(qca PROPERTIES VERSION 2.0.0 SOVERSION 2 )
 
 INSTALL(TARGETS qca DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
