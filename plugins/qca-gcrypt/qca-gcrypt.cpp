@@ -375,27 +375,27 @@ protected:
 static void * qca_func_malloc(size_t n)
 {
     return qca_secure_alloc(n);
-};
+}
 
 static void * qca_func_secure_malloc(size_t n)
 {
     return qca_secure_alloc(n);
-};
+}
 
 static void * qca_func_realloc(void *oldBlock, size_t newBlockSize)
 {
     return qca_secure_realloc(oldBlock, newBlockSize);
-};
+}
 
 static void qca_func_free(void *mem)
 {
     qca_secure_free(mem);
-};
+}
 
 int qca_func_secure_check (const void *)
 {
     return (int)QCA::haveSecureMemory();
-};
+}
 
 class gcryptProvider : public QCA::Provider
 {
@@ -584,5 +584,5 @@ class gcryptPlugin : public QCAPlugin
 
 #include "qca-gcrypt.moc"
 
-Q_EXPORT_PLUGIN2(qca-gcrypt, gcryptPlugin);
+Q_EXPORT_PLUGIN2(qca-gcrypt, gcryptPlugin)
 
