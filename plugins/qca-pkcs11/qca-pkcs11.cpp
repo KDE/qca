@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004  Justin Karneges
- * Copyright (C) 2006  Alon Bar-Lev <alon.barlev@gmail.com>
+ * Copyright (C) 2006-2007  Alon Bar-Lev <alon.barlev@gmail.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,10 +36,8 @@ private:
 	static const int _CONFIG_MAX_PROVIDERS;
 
 	bool _fLowLevelInitialized;
-	int _log_level;
 	bool _fSlotEventsActive;
 	bool _fSlotEventsLowLevelActive;
-	QFile _log_file;
 	QStringList _providers;
 
 public:
@@ -2125,7 +2123,6 @@ const int pkcs11Provider::_CONFIG_MAX_PROVIDERS = 10;
 //----------------------------------------------------------------------------
 pkcs11Provider::pkcs11Provider () {
 	_fLowLevelInitialized = false;
-	_log_level = PKCS11H_LOG_QUITE;
 	_fSlotEventsActive = false;
 	_fSlotEventsLowLevelActive = false;
 }
@@ -2292,22 +2289,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		return;
 	}
 
-	unsigned log_level = config["log_level"].toInt ();
-	pkcs11h_setLogLevel (log_level);
-	if (_log_file.isOpen ()) {
-		_log_file.close ();
-	}
-	if (log_level != PKCS11H_LOG_QUITE) {
-		QString log_file = config["log_file"].toString ();
-		if (log_file.isEmpty ()) {
-			_log_file.open (stderr, QIODevice::WriteOnly);
-		}
-		else {
-			_log_file.setFileName (log_file);
-			_log_file.open (QIODevice::Append);
-		}
-		_log_file.setTextModeEnabled (true);
-	}
+	pkcs11h_setLogLevel (config["log_level"].toInt ());
 	pkcs11h_setProtectedAuthentication (
 		config["allow_protected_authentication"].toBool () != false ? TRUE : FALSE
 	);
@@ -2439,12 +2421,28 @@ pkcs11Provider::logHook (
 	const char * const format,
 	va_list args
 ) {
-	Q_UNUSED(flags);
+	Logger::Severity severity;
 
-	if (_log_file.isOpen ()) {
-		_log_file.write (QString ().vsprintf (format, args).toUtf8 ());
-		_log_file.write ("\n", 1);
+	switch (flags) {
+		case PKCS11H_LOG_DEBUG2:
+		case PKCS11H_LOG_DEBUG1:
+			severity = Logger::Debug;
+		break;
+		case PKCS11H_LOG_INFO:
+			severity = Logger::Information;
+		break;
+		case PKCS11H_LOG_WARN:
+			severity = Logger::Warning;
+		break;
+		case PKCS11H_LOG_ERROR:
+			severity = Logger::Error;
+		break;
+		default:
+			severity = Logger::Debug;
+		break;
 	}
+
+	logger ()->logTextMessage (QString ().vsprintf (format, args), severity);
 }
 
 void
@@ -2462,6 +2460,8 @@ PKCS11H_BOOL
 pkcs11Provider::cardPromptHook (
 	const pkcs11h_token_id_t token
 ) {
+	Q_UNUSED(token);
+
 	return FALSE;
 }
 
