@@ -14,8 +14,9 @@ SUBDIRS += \
 	kdfunittest \
 	keygenunittest \
 	keylengthunittest \
+	logger \
 	macunittest \
-	pgpunittest \
+#	pgpunittest \
 	pkits \
 	randomunittest \
 	rsaunittest \
