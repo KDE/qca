@@ -19,9 +19,10 @@ SET( moc_SOURCES
 	qca_default.cpp
 	support/qpipe.cpp
 	support/console.cpp 
-  support/synchronizer.cpp
-  support/dirwatch/dirwatch.cpp
-  support/syncthread.cpp
+	support/synchronizer.cpp
+	support/dirwatch/dirwatch.cpp
+	support/syncthread.cpp
+	support/logger.cpp
 )
 
 IF (Q_WS_X11)

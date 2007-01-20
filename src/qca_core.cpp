@@ -57,6 +57,7 @@ public:
 	ProviderManager manager;
 	Random *rng;
 	KeyStoreManager *ksm;
+        Logger *logger;
 	QVariantMap properties;
 	QMap<QString,QVariantMap> config;
 
@@ -64,12 +65,14 @@ public:
 	{
 		rng = 0;
 		ksm = new KeyStoreManager;
+                logger = new Logger;
 		secmem = false;
 	}
 
 	~Global()
 	{
 		delete ksm;
+                delete logger;
 		delete rng;
 	}
 };
@@ -448,6 +451,16 @@ void setGlobalRNG(const QString &provider)
 KeyStoreManager *keyStoreManager()
 {
 	return global->ksm;
+}
+
+Logger *logger()
+{
+	return global->logger;
+}
+
+void logText( const QString &message, Logger::Severity severity )
+{
+        global->logger->logTextMessage( message, severity );
 }
 
 bool haveSystemStore()

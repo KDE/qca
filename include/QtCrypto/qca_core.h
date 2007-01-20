@@ -69,6 +69,7 @@ namespace QCA
 	class Global;
 	class KeyStore;
 	class KeyStoreManager;
+	class Logger;
 
 	/**
 	 * Convenience representation for the plugin providers
@@ -388,6 +389,24 @@ namespace QCA
 	   system storage, PGP keyrings, and smart cards.
 	*/
 	QCA_EXPORT KeyStoreManager *keyStoreManager();
+
+	/**
+	   Return a reference to the %QCA Logger, which is used for diagnostics
+	   and error recording.
+
+	   The system Logger is automatically created for you on start. 
+	*/
+	QCA_EXPORT Logger *logger();
+
+	/**
+	   Log a text message. This is just a convenience function
+	   to avoid having to call Logger::logTextMessage() on the
+	   global Logger.
+
+	   \param message the text to log
+	   \param severity the type of information to log
+	*/
+	QCA_EXPORT void logText( const QString &message, Logger::Severity severity = Logger::Information );
 
 	/**
 	   Test if QCA can access the root CA certificates

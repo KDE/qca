@@ -1,7 +1,7 @@
 /*
  * qca_support.h - Qt Cryptographic Architecture
  * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004,2005, 2007  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,6 +40,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QVariantList>
+#include <QStringList>
 #include <QList>
 #include <QMetaObject>
 #include <QThread>
@@ -250,6 +251,149 @@ namespace QCA
 		ConsolePrompt(QObject *parent = 0);
 		~ConsolePrompt();
 	};
+
+        class AbstractLogDevice;
+
+        /**
+           A simple logging system
+
+           This class provides a simple but flexible approach to logging information that
+           may be used for debugging or system operation diagnostics.
+
+           There is a single %Logger for each application that uses %QCA. You do not need
+           to create this %Logger yourself - %QCA automatically creates it on startup. You
+           can get access to the %Logger using the global QCA::logger() method.
+
+           By default the Logger just accepts all messages (binary and text). If you want to
+           get access to those messages, you need to subclass AbstractLogDevice, and register
+           your subclass (using registerLogDevice()). You can then take whatever action is
+           appropriate (e.g. show to the user using the GUI, log to a file or send to standard
+           error).
+        */
+	class QCA_EXPORT Logger : public QObject
+	{
+	    Q_OBJECT
+	public:
+            /**
+               The severity of the message
+
+               This information may be used by the log device to determine
+               what the appropriate action is.
+            */
+            enum Severity
+            {
+                Emergency = 0,   ///< Emergency: system is unusable
+                Alert = 1,       ///< Alert: action must be taken immediately
+                Critical = 2,    ///< Critical: critical conditions
+                Error = 3,       ///< Error: error conditions
+                Warning = 4,     ///< Warning: warning conditions
+                Notice = 5,      ///< Notice: normal but significant condition
+                Information = 6, ///< Informational: informational messages
+                Debug = 7        ///< Debug: debug-level messages
+            };
+
+	    /**
+		Log a message to all available log devices
+
+		\param message the text to log
+	    */
+	    void logTextMessage(const QString &message, Severity = Information);
+
+	    /**
+	       Log a binary blob to all available log devices
+
+	       \param blob the information to log
+
+	       \note how this is handled is quite logger specific. For
+	       example, it might be logged as a binary, or it might be
+	       encoded in some way
+	    */
+	    void logBinaryMessage(const QByteArray &blob, Severity = Information);
+
+	    /**
+	       Add an AbstractLogDevice subclass to the existing list of loggers
+
+	       \param logger the LogDevice to add
+	    */
+	    void registerLogDevice(AbstractLogDevice *logger);
+
+	    /**
+	       Remove an AbstractLogDevice subclass from the existing list of loggers
+
+	       \param loggerName the name of the LogDevice to remove
+
+	       \note If there are several log devices with the same name, all will be removed.
+	    */
+	    void unregisterLogDevice(const QString &loggerName);
+
+	    /**
+	       Get a list of the names of all registered log devices
+	    */
+	    QStringList currentLogDevices() const;
+
+	private:
+	    friend class Global;
+
+	    /**
+	       Create a new message logger
+	    */
+	    Logger();
+
+	    ~Logger();
+
+	    QStringList m_loggerNames;
+	    QList<AbstractLogDevice*> m_loggers;
+	};
+
+        /**
+           An abstract log device
+        */
+	class QCA_EXPORT AbstractLogDevice : public QObject
+	{
+	    Q_OBJECT
+	public:
+	    /**
+		The name of this log device
+	    */
+	    QString name() const;
+
+            /**
+               Log a message
+
+               The default implementation does nothing - you should
+               override this method in your subclass to do whatever
+               logging is required
+            */
+            virtual void logTextMessage( const QString &message, enum Logger::Severity severity );
+
+            /**
+               Log a binary blob
+
+               The default implementation does nothing - you should
+               override this method in your subclass to do whatever
+               logging is required
+            */
+            virtual void logBinaryMessage( const QByteArray &blob, Logger::Severity severity );
+
+	protected:
+	    /**
+	       Create a new message logger
+
+	       \param name the name of this log device
+	       \param parent the parent for this logger
+	    */
+	    explicit AbstractLogDevice(const QString &name, QObject *parent = 0);
+
+	    virtual ~AbstractLogDevice() = 0;
+
+	private:
+	    class Private;
+	    Private *d;
+
+            QString m_name;
+	};
+
+
 }
 
 #endif
