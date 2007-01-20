@@ -41,9 +41,6 @@ CONFIGURATION
 			Maximum PIN/session cache period in seconds.
 			-1 is infinite, until provider invalidates session.
 
-		log_file (String)
-			Name of log file for logging, if empty, stderr is used.
-
 		log_level (Integer)
 			Log evel of pkcs11-helper, can be from 0-5.
 
