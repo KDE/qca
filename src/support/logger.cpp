@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2007 Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,87 +21,88 @@
 
 namespace QCA {
 
-    AbstractLogDevice::AbstractLogDevice(const QString &name, QObject *parent) :
+AbstractLogDevice::AbstractLogDevice(const QString &name, QObject *parent) :
         QObject( parent ), m_name( name )
-    {
-    }
+{
+}
 
-    AbstractLogDevice::~AbstractLogDevice()
-    {}
+AbstractLogDevice::~AbstractLogDevice()
+{}
 
-    QString AbstractLogDevice::name() const
-    {
+QString AbstractLogDevice::name() const
+{
         return m_name;
-    }
+}
 
-    void AbstractLogDevice::logTextMessage( const QString &message, Logger::Severity severity )
-    {
+void AbstractLogDevice::logTextMessage( const QString &message, Logger::Severity severity )
+{
         Q_UNUSED( message );
         Q_UNUSED( severity );
-    }
+}
 
-    void AbstractLogDevice::logBinaryMessage( const QByteArray &blob, Logger::Severity severity )
-    {
+void AbstractLogDevice::logBinaryMessage( const QByteArray &blob, Logger::Severity severity )
+{
         Q_UNUSED( blob );
         Q_UNUSED( severity );
-    }
+}
 
-    Logger::Logger()
-    {
+Logger::Logger()
+{
         // d pointer?
-    }
+}
 
-    Logger::~Logger()
-    {
+Logger::~Logger()
+{
         // delete d;
-    }
+}
 
-    QStringList Logger::currentLogDevices() const
-    {
+QStringList Logger::currentLogDevices() const
+{
         return m_loggerNames;
-    }
+}
 
-    void Logger::registerLogDevice(AbstractLogDevice* logger)
-    {
+void Logger::registerLogDevice(AbstractLogDevice* logger)
+{
         m_loggers.append( logger );
         m_loggerNames.append( logger->name() );
-    }
+}
 
-    void Logger::unregisterLogDevice(const QString &loggerName)
-    {
+void Logger::unregisterLogDevice(const QString &loggerName)
+{
         for ( int i = 0; i < m_loggers.size(); ++i )
         {
-            if ( m_loggers[i]->name() == loggerName )
-            {
-                m_loggers.removeAt( i );
-                --i; // we backstep, to make sure we check the new entry in this position.
-            }
+                if ( m_loggers[i]->name() == loggerName )
+                {
+                        m_loggers.removeAt( i );
+                        --i; // we backstep, to make sure we check the new entry in this position.
+                }
         }
         for ( int i = 0; i < m_loggerNames.size(); ++i )
         {
-            if ( m_loggerNames[i] == loggerName )
-            {
-                m_loggerNames.removeAt( i );
-                --i; // we backstep, to make sure we check the new entry in this position.
-            }
+                if ( m_loggerNames[i] == loggerName )
+                {
+                        m_loggerNames.removeAt( i );
+                        --i; // we backstep, to make sure we check the new entry in this position.
+                }
         }
-    }
+}
 
-    void Logger::logTextMessage(const QString &message, Logger::Severity severity )
-    {
+void Logger::logTextMessage(const QString &message, Logger::Severity severity )
+{
         for ( int i = 0; i < m_loggers.size(); ++i )
         {
-            m_loggers[i]->logTextMessage( message, severity );
+                m_loggers[i]->logTextMessage( message, severity );
         }
-    }
+}
 
-    void Logger::logBinaryMessage(const QByteArray &blob, Logger::Severity severity )
-    {
+void Logger::logBinaryMessage(const QByteArray &blob, Logger::Severity severity )
+{
         for ( int i = 0; i < m_loggers.size(); ++i )
         {
-            m_loggers[i]->logBinaryMessage( blob, severity );
+                m_loggers[i]->logBinaryMessage( blob, severity );
         }
-    }
+}
+
 }
 
 
