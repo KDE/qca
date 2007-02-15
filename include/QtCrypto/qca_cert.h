@@ -94,7 +94,7 @@ namespace QCA
 	/**
 	   One entry in a certificate information list
 	*/
-	class CertificateInfoPair
+	class QCA_EXPORT CertificateInfoPair
 	{
 	public:
 	        /**

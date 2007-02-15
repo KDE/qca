@@ -28,6 +28,28 @@
 
 #include <stdlib.h>
 
+#ifdef Q_OS_WIN
+static int setenv(const char *name, const char *value, int overwrite)
+{
+    int i, iRet;
+    char * a;
+
+    if (!overwrite && getenv(name)) return 0;
+
+    i = strlen(name) + strlen(value) + 2;
+    a = (char*)malloc(i);
+    if (!a) return 1;
+
+    strcpy(a, name);
+    strcat(a, "=");
+    strcat(a, value);
+
+    iRet = putenv(a);
+    free(a);
+    return iRet;
+}
+#endif
+
 class PgpUnitTest : public QObject
 {
     Q_OBJECT
@@ -76,7 +98,9 @@ void PgpUnitTest::testKeyRing()
         QCOMPARE( pgpStore.holdsPGPPublicKeys(), true );
 
 
+#ifdef __GNUC__
 #warning using setenv is dubious in terms of portability
+#endif
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
         // We test a small keyring - I downloaded a publically available one from
         // the Amsterdam Internet Exchange.

@@ -38,9 +38,9 @@
 #ifdef Q_OS_WIN32
 # ifndef QCA_STATIC
 #  ifdef QCA_MAKEDLL
-#   define QCA_EXPORT __declspec(dllexport)
+#   define QCA_EXPORT Q_DECL_EXPORT
 #  else
-#   define QCA_EXPORT __declspec(dllimport)
+#   define QCA_EXPORT Q_DECL_IMPORT
 #  endif
 # endif
 #endif
