@@ -23,9 +23,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QtCrypto>
 #include <QtNetwork>
 #include <QtTest/QtTest>
+#include <QtCrypto>
 
 class TlsTest : public QObject
 {
