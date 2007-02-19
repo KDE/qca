@@ -155,110 +155,6 @@ private slots:
 	}
 };
 
-/*class Prompter : public QObject
-{
-	Q_OBJECT
-public:
-	static QSecureArray prompt(const QString &promptStr)
-	{
-		printf("%s: ", qPrintable(promptStr));
-		fflush(stdout);
-		Prompter p;
-		if(!p.start())
-		{
-			printf("console input not available or closed\n");
-			return QSecureArray();
-		}
-		p.sync.waitForCondition();
-		return p.result;
-	}
-
-	static void waitForEnter()
-	{
-		Prompter p;
-		p.enter = true;
-		if(!p.start())
-		{
-			printf("console input not available or closed\n");
-			return;
-		}
-		p.sync.waitForCondition();
-	}
-
-private:
-	QCA::Synchronizer sync;
-	QCA::ConsoleReference console;
-	QSecureArray result;
-	int at;
-	bool enter;
-
-	Prompter() : sync(this), console(this)
-	{
-		at = 0;
-		enter = false;
-		connect(&console, SIGNAL(readyRead()), SLOT(con_readyRead()));
-		connect(&console, SIGNAL(closed()), SLOT(con_closed()));
-	}
-
-	bool start()
-	{
-		return console.start(QCA::ConsoleReference::SecurityEnabled);
-	}
-
-	bool processChar(unsigned char c)
-	{
-		if(c == '\r' || c == '\n')
-		{
-			printf("\n");
-			sync.conditionMet();
-			return false;
-		}
-
-		if(enter)
-			return true;
-
-		if(c == '\b' || c == 0x7f)
-		{
-			if(at > 0)
-			{
-				--at;
-				printf("\b \b");
-				fflush(stdout);
-				result.resize(at);
-			}
-			return true;
-		}
-		else if(c < 0x20)
-			return true;
-
-		if(at + 1 > result.size())
-			result.resize(at + 1);
-		result[at++] = c;
-
-		printf("*");
-		fflush(stdout);
-		return true;
-	}
-
-private slots:
-	void con_readyRead()
-	{
-		while(console.bytesAvailable() > 0)
-		{
-			QSecureArray buf = console.readSecure(1);
-			if(buf.isEmpty())
-				continue;
-			if(!processChar(buf[0]))
-				break;
-		}
-	}
-
-	void con_closed()
-	{
-		printf("Console closed\n");
-	}
-};*/
-
 class PassphrasePrompt : public QObject
 {
 	Q_OBJECT
@@ -274,7 +170,6 @@ public:
 private slots:
 	void ph_eventReady(int id, const QCA::Event &e)
 	{
-		QCA::Console console(QCA::Console::Read, QCA::Console::Interactive);
 		if(e.type() == QCA::Event::Password)
 		{
 			QString type = "password";
@@ -884,8 +779,8 @@ static void usage()
 	printf("\n");
 	printf("  --encrypt [pub.pem] [messagefile]\n");
 	printf("  --decrypt [priv.pem] [encryptedfile] (passphrase)\n");
-	printf("  --sign [priv.pem] [messagefile] (passphrase)\n");
-	printf("  --verify [pub.pem] [messagefile] [sigfile]\n");
+	printf("  --sign [priv.pem] (passphrase)\n");
+	printf("  --verify [pub.pem]\n");
 	printf("  --derivekey [priv.txt] [peerpub.txt]\n");
 	printf("\n");
 	printf("  --makeselfcert [priv.pem] [ca|user] (passphrase)\n");
@@ -1342,15 +1237,15 @@ int main(int argc, char **argv)
 	}
 	else if(args[0] == "--sign")
 	{
-		if(args.count() < 3)
+		if(args.count() < 2)
 		{
 			usage();
 			return 1;
 		}
 
 		QSecureArray passphrase;
-		if(args.count() >= 4)
-			passphrase = args[3].toLatin1();
+		if(args.count() >= 3)
+			passphrase = args[2].toLatin1();
 
 		QCA::PrivateKey key;
 		if(!passphrase.isEmpty())
@@ -1359,21 +1254,13 @@ int main(int argc, char **argv)
 			key = QCA::PrivateKey(args[1]);
 		if(key.isNull())
 		{
-			printf("Error reading key file\n");
+			fprintf(stderr, "Error reading key file\n");
 			return 1;
 		}
 
 		if(!key.canSign())
 		{
-			printf("Error: this kind of key cannot create signatures\n");
-			return 1;
-		}
-
-		QFile infile(args[2]);
-		QFile outfile(infile.fileName() + ".sig");
-		if(!infile.open(QFile::ReadOnly) || !outfile.open(QFile::WriteOnly | QFile::Truncate))
-		{
-			printf("Error opening message or signature files\n");
+			fprintf(stderr, "Error: this kind of key cannot create signatures\n");
 			return 1;
 		}
 
@@ -1381,19 +1268,25 @@ int main(int argc, char **argv)
 			key.startSign(QCA::EMSA3_MD5);
 		else
 			key.startSign(QCA::EMSA1_SHA1);
-		while(!infile.atEnd())
-			key.update(infile.read(16384));
+
+		while(!feof(stdin))
+		{
+			QByteArray block(1024, 0);
+			int n = fread(block.data(), 1, 1024, stdin);
+			if(n < 0)
+				break;
+			block.resize(n);
+			key.update(block);
+		}
+
 		QSecureArray sig = key.signature();
 
 		QString str = QCA::Base64().arrayToString(sig);
-		QTextStream ts(&outfile);
-		ts << str << endl;
-
-		printf("Wrote %s\n", outfile.fileName().toLatin1().data());
+		printf("%s\n", qPrintable(str));
 	}
 	else if(args[0] == "--verify")
 	{
-		if(args.count() < 4)
+		if(args.count() < 2)
 		{
 			usage();
 			return 1;
@@ -1402,42 +1295,72 @@ int main(int argc, char **argv)
 		QCA::PublicKey key(args[1]);
 		if(key.isNull())
 		{
-			printf("Error reading key file\n");
+			fprintf(stderr, "Error reading key file\n");
 			return 1;
 		}
 
 		if(!key.canVerify())
 		{
-			printf("Error: this kind of key cannot verify signatures\n");
+			fprintf(stderr, "Error: this kind of key cannot verify signatures\n");
 			return 1;
 		}
 
-		QSecureArray sig;
+		// first line is the sig
+		bool newline = false;
+		QByteArray sigenc;
+		QByteArray rest;
+		while(!feof(stdin))
 		{
-			QFile sigfile(args[3]);
-			if(!sigfile.open(QFile::ReadOnly))
+			QByteArray block(1024, 0);
+			int n = fread(block.data(), 1, 1024, stdin);
+			if(n < 0)
+				break;
+			block.resize(n);
+
+			// look for newline
+			int at = block.indexOf('\n');
+			if(at != -1)
 			{
-				printf("Error opening signature file\n");
-				return 1;
+				QByteArray last(at, 0);
+				memcpy(last.data(), block.data(), at);
+				sigenc += last;
+
+				// store the rest
+				++at; // skip over newline
+				rest.resize(block.size() - at);
+				memcpy(rest.data(), block.data() + at, rest.size());
+				newline = true;
+				break;
 			}
-			QTextStream ts(&sigfile);
-			QString str = ts.readLine();
-			sig = QCA::Base64().stringToArray(str);
+
+			sigenc += block;
 		}
 
-		QFile infile(args[2]);
-		if(!infile.open(QFile::ReadOnly))
+		if(!newline)
 		{
-			printf("Error opening message file\n");
+			fprintf(stderr, "Error reading signature\n");
 			return 1;
 		}
+
+		QSecureArray sig = QCA::Base64().decode(sigenc);
 
 		if(key.isRSA())
 			key.startVerify(QCA::EMSA3_MD5);
 		else
 			key.startVerify(QCA::EMSA1_SHA1);
-		while(!infile.atEnd())
-			key.update(infile.read(16384));
+
+		key.update(rest);
+
+		while(!feof(stdin))
+		{
+			QByteArray block(1024, 0);
+			int n = fread(block.data(), 1, 1024, stdin);
+			if(n < 0)
+				break;
+			block.resize(n);
+			key.update(block);
+		}
+
 		if(key.validSignature(sig))
 			printf("Signature verified\n");
 		else
