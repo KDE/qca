@@ -11,23 +11,26 @@
 * beta3
   api:
     make keystoremanager work like irisnet netinterfacemanager
-    cert/key mismatch error for cms (do we want this for TLS also?)
-    get rid of SecureMessage::signature(), return the sig in read() ?
-    map doesn't maintain DN order.  use a different container
     passive keystoreentry (and related issues)
     make sure there aren't any cases where a Foo::supportsBar()-style function
       reports true, but then when the object is created, it doesn't actually
       support the feature (because the wrong provider was used).
     why is Random returning unsigned?
+    provider api note: PGP fingerpring must return all caps and no spaces
   code:
+    provider config locking issue
     don't create qobjects during init (that means you, keystoremanager)
     functions that don't trip a scan should do so on the first try
     sasl: test it works correctly
     race condition(?): keystore id is bad by the time a KeyStore object is
       made. solution: if the id is invalid, queue up an unavailable() signal?
+    functions that don't trip a scan should do so on the first try
   other:
     link against our own lib (e.g. -L../../lib) before ALL other libs,
       including Qt's libs, since some distros put qca into qt's dir.
+    when using Q_EXPORT_PLUGIN2(), pass the name using underscores instead
+      of hyphens.  e.g. qca_openssl, not qca-openssl
+    version in QSettings (maybe call the app "qca2" ?)
 
 * beta4
   api:
@@ -39,13 +42,14 @@
     tls extensions: hostname and ocsp stapling
   code:
     fix asker implementation, it is a disaster
-    persistent properties
     dirwatch: thread safety
     dirwatch: test on all platforms
     qca-openssl: ca signing
     synchronizer should lazy-start the thread
     proper parenting of all objects
     qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
+    qca-cyrussasl: make this plugin (use misha's patch to qca-sasl)
+    sasl example
   other:
     Update to latest Botan, and remake the botantools patch as appropriate
        - remove u32bit miller_rabin_test_iterations(u32bit bits, bool verify)
