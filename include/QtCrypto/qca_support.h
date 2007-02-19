@@ -163,11 +163,59 @@ namespace QCA
 	class ConsoleReferencePrivate;
 	class ConsoleReference;
 
-	// note: only one Console object can be created at a time
+	// QCA Console system
+	//
+	// QCA provides an API for asynchronous, event-based access to
+	//   the console and stdin/stdout, as these facilities are
+	//   otherwise not portable.  The primary use of this system within
+	//   QCA is for passphrase prompting in command-line applications,
+	//   using the tty console type.
+	//
+	// How it works: Create a Console object for the type of console
+	//   desired, and then use ConsoleReference to act on the console.
+	//   Only one ConsoleReference may operate on a Console at a time.
+	//
+	// A Console object overtakes either the physical console (tty
+	//   type) or stdin/stdout (stdio type).  Only one of each type
+	//   may be created at a time.
+	//
+	// Whenever code is written that needs a tty or stdio object, the
+	//   code should first call one of the static methods (ttyInstance
+	//   or stdioInstance) to see if a console object for the desired
+	//   type exists already.  If the object exists, use it.  If it does
+	//   not exist, the rule is that the relevant code should create the
+	//   object, use the object, and then destroy the object when the
+	//   operation is completed.
+	//
+	// By following the above rule, you can write code that utilizes
+	//   a console without the application having to create some master
+	//   console object for you.  Of course, if the application has
+	//   created a console then it will be used.
+	//
+	// Why make a master console object?  The primary reason is that it
+	//   is not guaranteed that all I/O will survive creation and
+	//   destruction of a console object.  If you are using the stdio
+	//   type, then you probably want a long-lived console object.  It
+	//   is possible to capture unprocessed I/O by calling
+	//   bytesLeftToRead or bytesLeftToWrite.  However, it is not
+	//   expected that general console-needing code will call these
+	//   functions when utilizing a temporary console.  Thus, an
+	//   application developer would need to create his own console
+	//   object, invoke the console-needing code, and then do his own
+	//   extraction of the unprocessed I/O if necessary.  Another reason
+	//   to extract unprocessed I/O is if you need to switch from
+	//   QCA::Console back to standard functions (e.g. fgets).
+	//
 	class QCA_EXPORT Console : public QObject
 	{
 		Q_OBJECT
 	public:
+		enum Type
+		{
+			Tty,         // physical console
+			Stdio,       // stdin/stdout
+		};
+
 		enum ChannelMode
 		{
 			Read,        // stdin
@@ -180,13 +228,17 @@ namespace QCA
 			Interactive  // char-by-char input, no echo
 		};
 
-		Console(ChannelMode cmode = Read, TerminalMode tmode = Default, QObject *parent = 0);
+		Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = 0);
 		~Console();
 
-		static Console *instance();
+		static bool isStdinRedirected();
+		static bool isStdoutRedirected();
 
-		// call shutdown() to get access to unempty buffers
-		void shutdown();
+		static Console *ttyInstance();
+		static Console *stdioInstance();
+
+		// call release() to get access to unempty buffers
+		void release();
 		QByteArray bytesLeftToRead();
 		QByteArray bytesLeftToWrite();
 
@@ -211,7 +263,7 @@ namespace QCA
 		ConsoleReference(QObject *parent = 0);
 		~ConsoleReference();
 
-		bool start(SecurityMode mode = SecurityDisabled);
+		bool start(Console *console, SecurityMode mode = SecurityDisabled);
 		void stop();
 
 		// normal i/o
@@ -222,13 +274,17 @@ namespace QCA
 		QSecureArray readSecure(int bytes = -1);
 		void writeSecure(const QSecureArray &a);
 
+		// close write channel (only if writing enabled)
+		void closeOutput();
+
 		int bytesAvailable() const;
 		int bytesToWrite() const;
 
 	signals:
 		void readyRead();
 		void bytesWritten(int bytes);
-		void closed();
+		void inputClosed();
+		void outputClosed();
 
 	private:
 		friend class ConsoleReferencePrivate;

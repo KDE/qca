@@ -71,6 +71,7 @@ public:
 		{
 			out.take(out_id, QPipeDevice::Write);
 			connect(&out, SIGNAL(bytesWritten(int)), SLOT(out_bytesWritten(int)));
+			connect(&out, SIGNAL(closed()), SLOT(out_closed()));
 			out.enable();
 		}
 
@@ -101,7 +102,10 @@ public slots:
 
 	void setSecurityEnabled(bool enabled)
 	{
-		in.setSecurityEnabled(enabled);
+		if(in.isValid())
+			in.setSecurityEnabled(enabled);
+		if(out.isValid())
+			out.setSecurityEnabled(enabled);
 	}
 
 	QByteArray read(int bytes = -1)
@@ -122,6 +126,11 @@ public slots:
 	void writeSecure(const QSecureArray &a)
 	{
 		out.writeSecure(a);
+	}
+
+	void closeOutput()
+	{
+		out.close();
 	}
 
 	int bytesAvailable() const
@@ -152,7 +161,8 @@ public:
 signals:
 	void readyRead();
 	void bytesWritten(int bytes);
-	void closed();
+	void inputClosed();
+	void outputClosed();
 
 private slots:
 	void in_readyRead()
@@ -167,12 +177,17 @@ private slots:
 
 	void in_closed()
 	{
-		emit closed();
+		emit inputClosed();
 	}
 
 	void in_error(QCA::QPipeEnd::Error)
 	{
-		emit closed();
+		emit inputClosed();
+	}
+
+	void out_closed()
+	{
+		emit outputClosed();
 	}
 };
 
@@ -250,6 +265,11 @@ public:
 		mycall(worker, "writeSecure", QVariantList() << qVariantFromValue<QSecureArray>(a));
 	}
 
+	void closeOutput()
+	{
+		mycall(worker, "closeOutput");
+	}
+
 	int bytesAvailable()
 	{
 		return mycall(worker, "bytesAvailable").toInt();
@@ -277,7 +297,8 @@ public:
 signals:
 	void readyRead();
 	void bytesWritten(int);
-	void closed();
+	void inputClosed();
+	void outputClosed();
 
 protected:
 	virtual void atStart()
@@ -289,7 +310,8 @@ protected:
 		//   signals to avoid having to make slots just to emit.
 		connect(worker, SIGNAL(readyRead()), SIGNAL(readyRead()), Qt::DirectConnection);
 		connect(worker, SIGNAL(bytesWritten(int)), SIGNAL(bytesWritten(int)), Qt::DirectConnection);
-		connect(worker, SIGNAL(closed()), SIGNAL(closed()), Qt::DirectConnection);
+		connect(worker, SIGNAL(inputClosed()), SIGNAL(inputClosed()), Qt::DirectConnection);
+		connect(worker, SIGNAL(outputClosed()), SIGNAL(outputClosed()), Qt::DirectConnection);
 
 		worker->start(_in_id, _out_id);
 	}
@@ -312,9 +334,11 @@ public:
 	Console *q;
 
 	bool started;
+	Console::Type type;
 	Console::TerminalMode mode;
 	ConsoleThread *thread;
 	ConsoleReference *ref;
+	Q_PIPE_ID in_id;
 
 #ifdef Q_OS_WIN
 	DWORD old_mode;
@@ -345,11 +369,11 @@ public:
 		if(m == Console::Interactive)
 		{
 #ifdef Q_OS_WIN
-			HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
+			HANDLE h = GetStdHandle(in_id);
 			GetConsoleMode(h, &old_mode);
 			SetConsoleMode(h, old_mode & (~ENABLE_LINE_INPUT & ~ENABLE_ECHO_INPUT));
 #else
-			int fd = 0; // stdin
+			int fd = in_id;
 			struct termios attr;
 			tcgetattr(fd, &attr);
 			old_term_attr = attr;
@@ -366,10 +390,10 @@ public:
 		else
 		{
 #ifdef Q_OS_WIN
-			HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
+			HANDLE h = GetStdHandle(in_id);
 			SetConsoleMode(h, old_mode);
 #else
-			int fd = 0; // stdin
+			int fd = in_id;
 			tcsetattr(fd, TCSANOW, &old_term_attr);
 #endif
 		}
@@ -378,50 +402,128 @@ public:
 	}
 };
 
-static Console *g_console = 0;
+static Console *g_tty_console = 0, *g_stdio_console = 0;
 
-Console::Console(ChannelMode cmode, TerminalMode tmode, QObject *parent)
+Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent)
 :QObject(parent)
 {
-	Q_ASSERT(g_console == 0);
-	g_console = this;
+	if(type == Tty)
+	{
+		Q_ASSERT(g_tty_console == 0);
+		g_tty_console = this;
+	}
+	else
+	{
+		Q_ASSERT(g_stdio_console == 0);
+		g_stdio_console = this;
+	}
 
 	d = new ConsolePrivate(this);
+	d->type = type;
 
 	Q_PIPE_ID in = INVALID_Q_PIPE_ID;
 	Q_PIPE_ID out = INVALID_Q_PIPE_ID;
 
 #ifdef Q_OS_WIN
-	in = GetStdHandle(STD_INPUT_HANDLE);
+	if(type == Tty)
+	{
+		in = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE,
+			FILE_SHARE_READ | FILE_SHARE_WRITE, false,
+			OPEN_EXISTING, 0, NULL);
+	}
+	else
+	{
+		in = GetStdHandle(STD_INPUT_HANDLE);
+	}
 #else
-	in = 0;
+	if(type == Tty)
+	{
+		in = open("/dev/tty", O_RDONLY);
+	}
+	else
+	{
+		in = 0; // stdin
+	}
 #endif
 	if(cmode == ReadWrite)
 	{
 #ifdef Q_OS_WIN
-		out = GetStdHandle(STD_OUTPUT_HANDLE);
+		if(type == Tty)
+		{
+			out = CreateFile("CONOUT$",
+				GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ | FILE_SHARE_WRITE, false,
+				OPEN_EXISTING, 0, NULL);
+		}
+		else
+		{
+			out = GetStdHandle(STD_OUTPUT_HANDLE);
+		}
 #else
-		out = 1;
+		if(type == Tty)
+		{
+			out = open("/dev/tty", O_WRONLY);
+		}
+		else
+		{
+			out = 1; // stdout
+		}
 #endif
 	}
 
+	d->in_id = in;
 	d->setInteractive(tmode);
 	d->thread->start(in, out);
 }
 
 Console::~Console()
 {
-	shutdown();
+	release();
+	Console::Type type = d->type;
 	delete d;
-	g_console = 0;
+	if(type == Tty)
+		g_tty_console = 0;
+	else
+		g_stdio_console = 0;
 }
 
-Console *Console::instance()
+bool Console::isStdinRedirected()
 {
-	return g_console;
+#ifdef Q_OS_WIN
+	Handle h = GetStdHandle(STD_INPUT_HANDLE);
+	DWORD mode;
+	if(GetConsoleMode(h, &mode))
+		return false;
+	return true;
+#else
+	return (isatty(0) ? false : true); // 0 == stdin
+#endif
 }
 
-void Console::shutdown()
+bool Console::isStdoutRedirected()
+{
+#ifdef Q_OS_WIN
+	Handle h = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD mode;
+	if(GetConsoleMode(h, &mode))
+		return false;
+	return true;
+#else
+	return (isatty(1) ? false : true); // 1 == stdout
+#endif
+}
+
+Console *Console::ttyInstance()
+{
+	return g_tty_console;
+}
+
+Console *Console::stdioInstance()
+{
+	return g_stdio_console;
+}
+
+void Console::release()
 {
 	d->thread->stop();
 }
@@ -467,7 +569,7 @@ private slots:
 		if(!self)
 			return;
 		if(late_close)
-			emit q->closed();
+			emit q->inputClosed();
 	}
 };
 
@@ -483,18 +585,16 @@ ConsoleReference::~ConsoleReference()
 	delete d;
 }
 
-bool ConsoleReference::start(SecurityMode mode)
+bool ConsoleReference::start(Console *console, SecurityMode mode)
 {
+	// make sure this reference isn't using a console already
 	Q_ASSERT(!d->console);
 
-	Console *c = Console::instance();
-	if(!c)
-		return false;
-
 	// one console reference at a time
-	Q_ASSERT(c->d->ref == 0);
+	Q_ASSERT(console->d->ref == 0);
 
-	d->console = c;
+	// let's take it
+	d->console = console;
 	d->thread = d->console->d->thread;
 	d->console->d->ref = this;
 
@@ -516,7 +616,8 @@ bool ConsoleReference::start(SecurityMode mode)
 
 	connect(d->thread, SIGNAL(readyRead()), SIGNAL(readyRead()));
 	connect(d->thread, SIGNAL(bytesWritten(int)), SIGNAL(bytesWritten(int)));
-	connect(d->thread, SIGNAL(closed()), SIGNAL(closed()));
+	connect(d->thread, SIGNAL(inputClosed()), SIGNAL(inputClosed()));
+	connect(d->thread, SIGNAL(outputClosed()), SIGNAL(outputClosed()));
 
 	d->late_read = false;
 	d->late_close = false;
@@ -570,6 +671,11 @@ void ConsoleReference::writeSecure(const QSecureArray &a)
 	d->thread->writeSecure(a);
 }
 
+void ConsoleReference::closeOutput()
+{
+	d->thread->closeOutput();
+}
+
 int ConsoleReference::bytesAvailable() const
 {
 	return d->thread->bytesAvailable();
@@ -589,37 +695,72 @@ class ConsolePrompt::Private : public QObject
 public:
 	Synchronizer sync;
 	ConsoleReference console;
+	QString promptStr;
 	QSecureArray result;
 	int at;
 	bool done;
-	bool enter;
+	bool enterMode;
 
 	Private() : sync(this), console(this)
 	{
 		connect(&console, SIGNAL(readyRead()), SLOT(con_readyRead()));
-		connect(&console, SIGNAL(closed()), SLOT(con_closed()));
+		connect(&console, SIGNAL(inputClosed()), SLOT(con_inputClosed()));
 	}
 
-	bool start(bool enterMode)
+	bool start(bool _enterMode)
 	{
+		bool tmp_console = false;
+		Console *tty = Console::ttyInstance();
+		if(!tty)
+		{
+			tty = new Console(Console::Tty, Console::ReadWrite, Console::Interactive);
+			tmp_console = true;
+		}
+
 		result.clear();
 		at = 0;
 		done = false;
-		enter = enterMode;
-		if(!console.start(QCA::ConsoleReference::SecurityEnabled))
+		enterMode = _enterMode;
+		if(!console.start(tty, ConsoleReference::SecurityEnabled))
 		{
-			printf("Console input not available or closed\n");
+			// cleanup
+			if(tmp_console)
+				delete tty;
+			fprintf(stderr, "Console input not available or closed\n");
 			return false;
 		}
+
+		if(!enterMode)
+			writeString(promptStr + ": ");
+
+		// reparent the Console under us (for Synchronizer)
+		QObject *orig_parent = tty->parent();
+		tty->setParent(this);
+
+		// block while prompting
 		sync.waitForCondition();
+
+		// restore parent
+		tty->setParent(orig_parent);
+
+		// cleanup
+		console.stop();
+		if(tmp_console)
+			delete tty;
+
 		return true;
+	}
+
+	void writeString(const QString &str)
+	{
+		console.writeSecure(str.toLocal8Bit());
 	}
 
 	bool processChar(unsigned char c)
 	{
 		if(c == '\r' || c == '\n')
 		{
-			printf("\n");
+			writeString("\n");
 			if(!done)
 			{
 				sync.conditionMet();
@@ -628,7 +769,7 @@ public:
 			return false;
 		}
 
-		if(enter)
+		if(enterMode)
 			return true;
 
 		if(c == '\b' || c == 0x7f)
@@ -636,8 +777,7 @@ public:
 			if(at > 0)
 			{
 				--at;
-				printf("\b \b");
-				fflush(stdout);
+				writeString("\b \b");
 				result.resize(at);
 			}
 			return true;
@@ -649,12 +789,15 @@ public:
 			result.resize(at + 1);
 		result[at++] = c;
 
-		printf("*");
-		fflush(stdout);
+		writeString("*");
 		return true;
 	}
 
 private slots:
+	void showPrompt()
+	{
+	}
+
 	void con_readyRead()
 	{
 		while(console.bytesAvailable() > 0)
@@ -667,9 +810,9 @@ private slots:
 		}
 	}
 
-	void con_closed()
+	void con_inputClosed()
 	{
-		printf("Console closed\n");
+		fprintf(stderr, "Console input closed\n");
 		if(!done)
 		{
 			sync.conditionMet();
@@ -691,9 +834,8 @@ ConsolePrompt::~ConsolePrompt()
 
 QSecureArray ConsolePrompt::getHidden(const QString &promptStr)
 {
-	printf("%s: ", qPrintable(promptStr));
-	fflush(stdout);
 	ConsolePrompt p;
+	p.d->promptStr = promptStr;
 	if(!p.d->start(false))
 		return QSecureArray();
 	return p.d->result;
