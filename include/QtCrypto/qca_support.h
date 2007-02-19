@@ -213,7 +213,7 @@ namespace QCA
 		enum Type
 		{
 			Tty,         // physical console
-			Stdio,       // stdin/stdout
+			Stdio        // stdin/stdout
 		};
 
 		enum ChannelMode
