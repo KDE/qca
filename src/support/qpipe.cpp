@@ -191,6 +191,7 @@ public:
 	{
 		do_quit = false;
 		data = 0;
+		connect(this, SIGNAL(canWrite_p()), SIGNAL(canWrite()));
 		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, false, DUPLICATE_SAME_ACCESS);
 	}
 
@@ -251,12 +252,13 @@ protected:
 			data = 0;
 			m.unlock();
 
-			emit canWrite();
+			emit canWrite_p();
 		}
 	}
 
 signals:
 	void canWrite();
+	void canWrite_p();
 
 private:
 	int internalWrite(const char *p, int len)
@@ -308,6 +310,7 @@ public:
 	{
 		do_quit = false;
 		active = true;
+		connect(this, SIGNAL(canRead_p(int)), SIGNAL(canRead(int)));
 		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, false, DUPLICATE_SAME_ACCESS);
 	}
 
@@ -372,7 +375,7 @@ protected:
 					active = false;
 					m.unlock();
 
-					emit canRead(result);
+					emit canRead_p(result);
 					break;
 				}
 			}
@@ -385,6 +388,7 @@ signals:
 	//   = -1 : atEnd
 	//   = -2 : atError
 	void canRead(int result);
+	void canRead_p(int result);
 };
 #endif
 
