@@ -369,9 +369,8 @@ public:
 		if(m == Console::Interactive)
 		{
 #ifdef Q_OS_WIN
-			HANDLE h = GetStdHandle(in_id);
-			GetConsoleMode(h, &old_mode);
-			SetConsoleMode(h, old_mode & (~ENABLE_LINE_INPUT & ~ENABLE_ECHO_INPUT));
+			GetConsoleMode(in_id, &old_mode);
+			SetConsoleMode(in_id, old_mode & (~ENABLE_LINE_INPUT & ~ENABLE_ECHO_INPUT));
 #else
 			int fd = in_id;
 			struct termios attr;
@@ -390,8 +389,7 @@ public:
 		else
 		{
 #ifdef Q_OS_WIN
-			HANDLE h = GetStdHandle(in_id);
-			SetConsoleMode(h, old_mode);
+			SetConsoleMode(in_id, old_mode);
 #else
 			int fd = in_id;
 			tcsetattr(fd, TCSANOW, &old_term_attr);
@@ -427,7 +425,7 @@ Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *pare
 #ifdef Q_OS_WIN
 	if(type == Tty)
 	{
-		in = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE,
+		in = CreateFileA("CONIN$", GENERIC_READ | GENERIC_WRITE,
 			FILE_SHARE_READ | FILE_SHARE_WRITE, false,
 			OPEN_EXISTING, 0, NULL);
 	}
@@ -450,7 +448,7 @@ Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *pare
 #ifdef Q_OS_WIN
 		if(type == Tty)
 		{
-			out = CreateFile("CONOUT$",
+			out = CreateFileA("CONOUT$",
 				GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ | FILE_SHARE_WRITE, false,
 				OPEN_EXISTING, 0, NULL);
@@ -490,7 +488,7 @@ Console::~Console()
 bool Console::isStdinRedirected()
 {
 #ifdef Q_OS_WIN
-	Handle h = GetStdHandle(STD_INPUT_HANDLE);
+	HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
 	DWORD mode;
 	if(GetConsoleMode(h, &mode))
 		return false;
@@ -503,7 +501,7 @@ bool Console::isStdinRedirected()
 bool Console::isStdoutRedirected()
 {
 #ifdef Q_OS_WIN
-	Handle h = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD mode;
 	if(GetConsoleMode(h, &mode))
 		return false;
