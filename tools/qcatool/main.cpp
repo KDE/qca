@@ -412,13 +412,13 @@ static QString smErrorToString(QCA::SecureMessage::Error e)
 	return map[e];
 }
 
-char *mime_signpart =
+const char *mime_signpart =
 	"Content-Type: text/plain; charset=ISO-8859-1\r\n"
 	"Content-Transfer-Encoding: 7bit\r\n"
 	"\r\n"
 	"%1";
 
-char *mime_signed =
+const char *mime_signed =
 	"Content-Type: multipart/signed;\r\n"
 	"	micalg=%1;\r\n"
 	"	boundary=QCATOOL-0001;\r\n"
@@ -438,7 +438,7 @@ char *mime_signed =
 	"\r\n"
 	"--QCATOOL-0001--\r\n";
 
-char *mime_enveloped =
+const char *mime_enveloped =
 	"Mime-Version: 1.0\r\n"
 	"Content-Transfer-Encoding: base64\r\n"
 	"Content-Type: application/pkcs7-mime;\r\n"
