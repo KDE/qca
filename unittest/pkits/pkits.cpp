@@ -55,12 +55,13 @@ private slots:
     void pkits4_3_4();
     void pkits4_3_5();
     void pkits4_3_6();
+    void pkits4_3_9();
+#ifdef ALL_PKITS_TESTS
     void pkits4_3_7();
     void pkits4_3_8();
-    void pkits4_3_9();
     void pkits4_3_10();
     void pkits4_3_11();
-
+#endif
     void pkits4_4_1();
     void pkits4_4_2();
     void pkits4_4_3();
@@ -820,7 +821,7 @@ void Pkits::pkits4_3_6()
     }
 }
 
-
+#ifdef ALL_PKITS_TESTS
 void Pkits::pkits4_3_7()
 {
     QStringList providersToTest;
@@ -855,8 +856,9 @@ void Pkits::pkits4_3_7()
 	}
     }
 }
+#endif
 
-
+#ifdef ALL_PKITS_TESTS
 void Pkits::pkits4_3_8()
 {
     QStringList providersToTest;
@@ -891,6 +893,7 @@ void Pkits::pkits4_3_8()
 	}
     }
 }
+#endif
 
 void Pkits::pkits4_3_9()
 {
@@ -927,6 +930,7 @@ void Pkits::pkits4_3_9()
     }
 }
 
+#ifdef ALL_PKITS_TESTS
 void Pkits::pkits4_3_10()
 {
     QStringList providersToTest;
@@ -961,7 +965,9 @@ void Pkits::pkits4_3_10()
 	}
     }
 }
+#endif
 
+#ifdef ALL_PKITS_TESTS
 void Pkits::pkits4_3_11()
 {
     QStringList providersToTest;
@@ -999,6 +1005,7 @@ void Pkits::pkits4_3_11()
 	}
     }
 }
+#endif
 
 void Pkits::pkits4_4_1()
 {
