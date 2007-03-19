@@ -66,6 +66,9 @@
     add asserts
     standardize on count() vs size() when iterating?
     printf + latin1()/toLatin1() -> qPrintable() ? (in code/examples/docs/etc)
+    qca-cyrus-sasl has a problem where we can create the provider, and not create
+    a saslContext, and then the destructor depends on uninitialised values (to
+    see this, valgrind staticunittest).
   alon:
     log facility, with log level and a print destination (maybe file property?)
       figure out overlap with "diagnosticText"
