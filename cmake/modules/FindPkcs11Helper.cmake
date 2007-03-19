@@ -1,9 +1,9 @@
 # - Try to find the pkcs11-helper library
 # Once done this will define
 #
-#  PKCS11H_FOUND - system has mozilla-nss lib
-#  PKCS11H_INCLUDE_DIRS - the mozilla-nss include directories
-#  PKCS11H_LIBRARIES - Link these to use mozilla-nss
+#  PKCS11H_FOUND - system has pkcs11-helper 
+#  PKCS11H_INCLUDE_DIRS - the pkcs11-helper include directories
+#  PKCS11H_LIBRARIES - Link to these to use pkcs11-helper
 #  PKCS11H_DEFINITIONS - Compiler switches required for using pkcs11-helper
 #
 # Copyright (c) 2006, Laurent Montel, <montel@kde.org>
