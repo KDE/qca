@@ -14,7 +14,7 @@ There are three important parts to this:
 
 /** \example base64test.cpp
 
-The code below shows some simple operations on a Base64 object, converting
+The code below shows some simple operations on a QCA::Base64 object, converting
 between QSecureArray and QString.
 
 */
@@ -29,45 +29,59 @@ PEM encoded file collection.
 
 /** \example ciphertest.cpp
 
-The code below shows the normal way to use the Cipher class.
+The code below shows the normal way to use the QCA::Cipher class.
 
 */
 
 /** \example cmsexample.cpp
 
-The code below shows the normal way to use the CMS class.
+The code below shows the normal way to use the QCA::CMS class.
+
+*/
+
+/** \example eventhandlerdemo.cpp
+
+The code below shows to implement a client side handler for
+password / passphrase / PIN and token requests from QCA and any
+associated providers.
 
 */
 
 /** \example hashtest.cpp
 
-The code below shows how to use the Hash class
+The code below shows how to use the QCA::Hash class
 
 */
 
 /** \example hextest.cpp
 
-The code below shows some simple operations on a Hex object, converting
+The code below shows some simple operations on a QCA::Hex object, converting
 between QSecureArray and QString.
 
 */
 
 /** \example mactest.cpp
 
-The code below shows how to usethe MessageAuthenticationCode class
+The code below shows how to use the QCA::MessageAuthenticationCode class
 
 */
 
 /** \example providertest.cpp
 
-The code below shows some simple operations on a Provider object, including
+The code below shows some simple operations on a QCA::Provider object, including
 use of iterators and some member functions.
 
 */
 
+/** \example publickeyexample.cpp
+
+The code below shows how to do public key encryption, decryption,
+signing and verification.
+*/
+
 /** \example randomtest.cpp
 
-The code below shows the normal way to use the Random class.
+The code below shows the normal way to use the QCA::Random class.
 
 */
 
@@ -76,6 +90,18 @@ The code below shows the normal way to use the Random class.
 The code below shows some of the capabilities for how to use
 RSA. This example also shows how to export and import a key
 to a file, using PEM encoding.
+
+*/
+
+/** \example saslservtest.cpp
+
+The code below shows how to create a SASL server.
+
+*/
+
+/** \example sasltest.cpp
+
+The code below shows how to create a SASL client.
 
 */
 

@@ -495,12 +495,16 @@ EXAMPLE_PATH           = examples/aes-cmac \
 			 examples/certtest \
 			 examples/ciphertest \
 		         examples/cms \
+			 examples/eventhandlerdemo \
 			 examples/hashtest \
 			 examples/hextest \
                          examples/mactest \
                          examples/providertest \
+                         examples/publickeyexample \
                          examples/randomtest \
 			 examples/rsatest \
+			 examples/saslservtest \
+			 examples/sasltest \
 			 examples/ssltest \
 			 examples/sslservtest
 

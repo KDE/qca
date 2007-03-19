@@ -1047,30 +1047,53 @@ namespace QCA
 
 	/**
 	   An asynchronous event
+
+	   Events are produced in response to the library's need for some user
+	   intervention, such as entering a pin or password, or inserting a cryptographic
+	   token.
+
+	   Event is an abstraction, so you can handle this need in a way that makes sense
+	   for your application.
 	*/
 	class QCA_EXPORT Event
 	{
 	public:
 	        /** 
-		    type of event
+		    %Type of event
+
+		    \sa type()
 		*/
 		enum Type
 		{
-			Password,   ///< Asking for a password
+			Password,   ///< Asking for a password, PIN or passphrase.
 			Token       ///< Asking for a token
 		};
 
 	        /** 
-		    source of event
+		    %Source of the event
+
+		    Events are associated with access to a KeyStore, or access to 
+		    a file (or bytearray/stream or equivalent). This tells you the
+		    type of source that caused the Event.
+
+		    \sa source()
+		    \sa fileName() for the name, if source is Event::Data
+		    \sa keyStoreId() and keyStoreEntryId for the keystore and entry, if
+		    the source is Event::KeyStore
 		*/
 		enum Source
 		{
 			KeyStore,   ///< KeyStore generated the event
-			Data        ///< File/bytearray generated the event
+			Data        ///< File or bytearray generated the event
 		};
 
 	        /** 
 		    password variation
+
+		    If the Type of Event is Password, PasswordStyle tells you whether 
+		    it is a PIN, passphrase or password.
+
+		    \sa passwordStyle()
 		*/
 		enum PasswordStyle
 		{
@@ -1119,20 +1142,34 @@ namespace QCA
 		Source source() const;
 
 		/**
-		   the style of password required
+		   the style of password required.
+
+		   This is not meaningful unless the Type is Event::Password.
+
+		   \sa PasswordStyle 
 		*/
 		PasswordStyle passwordStyle() const;
 
 		/**
 		   The id of the KeyStore associated with this event
+
+		   This is not meaningful unless the Source is KeyStore.
 		*/
 		QString keyStoreId() const;
 
 		/**
 		   The id of the KeyStoreEntry associated with this event
+
+		   This is not meaningful unless the Source is KeyStore.
 		*/
 		QString keyStoreEntryId() const;
 
+		/**
+		   Name or other identifier for the file or byte array
+		   associated with this event.
+
+		   This is not meaningful unless the Source is Data.
+		*/
 		QString fileName() const;
 
 		/**
@@ -1143,9 +1180,11 @@ namespace QCA
 		/**
 		   Set the values for this Event
 
-		   \param pstyle the style of password required
-		   \param keyStoreId
-		   \param keyStoreEntryId
+		   This creates a Password type event, for a keystore.
+
+		   \param pstyle the style of information required (e.g. PIN, password or passphrase)
+		   \param keyStoreId the keystore that the information is required for
+		   \param keyStoreEntryId the entry in the keystore that the information is required for
 		   \param ptr opaque data
 		*/
 		void setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
@@ -1153,12 +1192,22 @@ namespace QCA
 		/**
 		   Set the values for this Event
 
-		   \param pstyle
-		   \param fileName
+		   This creates a Password type event, for a file.
+
+		   \param pstyle the style of information required (e.g. PIN, password or passphrase)
+		   \param fileName the name of the file (or other identifier) that the information is required for
 		   \param ptr opaque data
 		*/
 		void setPasswordData(PasswordStyle pstyle, const QString &fileName, void *ptr);
 
+		/**
+		   Set the values for this Event
+
+		   This creates a Token type event.
+		   
+		   \param keyStoreEntryId the entry in the keystore that the token is required for
+		   \param ptr opaque data
+		*/
 		void setToken(const QString &keyStoreEntryId, void *ptr);
 
 	private:
@@ -1173,20 +1222,79 @@ namespace QCA
 	class TokenAskerPrivate;
 	class AskerItem;
 
+	/**
+	   Interface class for password / passphrase / PIN and token handlers
+
+	   This class is used on client side applications to handle
+	   the provision of passwords, passphrases and PINs by users, and
+	   to indicate that tokens have been correctly inserted.
+
+	   The concept behind this class is that the library can raise
+	   events (typically using PasswordAsker or TokenAsker), which
+	   may (or may not) be handled by the application using a
+	   handler object (that has-a EventHandler, or possibly is-a
+	   EventHandler) that is connected to the eventReady() signal.
+	*/
 	class QCA_EXPORT EventHandler : public QObject
 	{
 		Q_OBJECT
 	public:
+	        /**
+		   Constructor
+
+		   \param parent the parent object for this object
+		*/
 		EventHandler(QObject *parent = 0);
 		~EventHandler();
 
+		/**
+		   mandatory function to call after connecting the
+		   signal to a slot in your application specific password
+		   / passphrase / PIN or token handler
+		*/
 		void start();
 
+		/**
+		   function to call to return the user provided
+		   password, passphrase or PIN.
+
+		   \param id the id corresponding to the password request
+		   \param password the user-provided password, passphrase or PIN.
+
+		   \note the id parameter is the same as that provided in the
+		   eventReady() signal.
+		*/
 		void submitPassword(int id, const QSecureArray &password);
+
+		/**
+		   function to call to indicate that the token has been inserted
+		   by the user.
+
+		   \param id the id corresponding to the password request
+
+		   \note the id parameter is the same as that provided in the
+		   eventReady() signal.
+		*/
 		void tokenOkay(int id);
+
+		/**
+		   function to call to indicate that the user declined to 
+		   provide a password, passphrase, PIN or token.
+
+		   \param id the id corresponding to the password request
+
+		   \note the id parameter is the same as that provided in the
+		   eventReady() signal.
+		*/
 		void reject(int id);
 
 	signals:
+		/**
+		   signal emitted when an Event requires attention.
+
+		   You typically need to connect this signal to
+		   a compatible slot in your callback handler
+		*/
 		void eventReady(int id, const QCA::Event &context);
 
 	private:
@@ -1199,22 +1307,79 @@ namespace QCA
 		friend class AskerItem;
 	};
 
+	/** 
+	    User password / passphrase / PIN handler
+
+	    This class is used to obtain a password from a user.
+	*/
 	class QCA_EXPORT PasswordAsker : public QObject
 	{
 		Q_OBJECT
 	public:
+	       /**
+		  Construct a new asker
+
+		  \param parent the parent object for this QObject
+	       */
 		PasswordAsker(QObject *parent = 0);
 		~PasswordAsker();
 
+		/**
+		   queue a password / passphrase request associated with a key store
+		   
+		   \param pstyle the type of information required (e.g. PIN, passphrase or password)
+		   \param keyStoreId the key store that the information is required for
+		   \param keyStoreEntryId the item in the key store that the information is required for
+		   \param ptr opaque data
+		*/
 		void ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+
+		/**
+		   queue a password / passphrase request associated with a file
+		   
+		   \param pstyle the type of information required (e.g. PIN, passphrase or password)
+		   \param fileName the name of the file that the information is required for
+		   \param ptr opaque data
+		*/
 		void ask(Event::PasswordStyle pstyle, const QString &fileName, void *ptr);
+
+		/**
+		   Cancel the pending password / passphrase request
+		*/
 		void cancel();
+
+		/**
+		   Block until the password / passphrase request is
+		   completed
+
+		   You can use the responseReady signal instead of
+		   blocking, if appropriate.
+		*/
 		void waitForResponse();
 
+		/**
+		   Determine whether the password / passphrase was accepted or not
+
+		   In this context, returning true is indicative of the user clicking "Ok"
+		   or equivalent; and returning false indicates that either the user
+		   clicked "Cancel" or equivalent, or that the cancel() function was
+		   called, or that the request is still pending.
+		*/
 		bool accepted() const;
+
+		/**
+		   The password / passphrase / PIN provided by the user in response to
+		   the asker request. This may be empty.
+		*/
 		QSecureArray password() const;
 
 	signals:
+		/**
+		   Emitted when the asker process has been completed. 
+
+		   You should check whether the user accepted() the response
+		   prior to relying on the password().
+		*/
 		void responseReady();
 
 	private:
@@ -1224,20 +1389,58 @@ namespace QCA
 		friend class AskerItem;
 	};
 
+	/** 
+	    User token handler
+
+	    This class is used to request the user to insert a token.
+	*/
 	class QCA_EXPORT TokenAsker : public QObject
 	{
 		Q_OBJECT
 	public:
+	       /**
+		  Construct a new asker
+
+		  \param parent the parent object for this QObject
+	       */
 		TokenAsker(QObject *parent = 0);
 		~TokenAsker();
 
+		/**
+		   queue a token request associated with a key store
+		   
+		   \param keyStoreEntryId the item in the key store that the information is required for
+		   \param ptr opaque data
+		*/
 		void ask(const QString &keyStoreEntryId, void *ptr);
+
+		/**
+		   Cancel the pending password / passphrase request
+		*/
 		void cancel();
+
+		/**
+		   Block until the token request is completed
+
+		   You can use the responseReady signal instead of
+		   blocking, if appropriate.
+		*/
 		void waitForResponse();
 
+		/**
+		   Test if the token request was accepted or not.
+
+		   \return true if the token request was accepted
+		*/
 		bool accepted() const;
 
 	signals:
+		/**
+		   Emitted when the asker process has been completed. 
+
+		   You should check whether the user accepted() the response
+		   prior to relying on token being present.
+		*/
 		void responseReady();
 
 	private:
