@@ -242,6 +242,7 @@ static void try_add_name_item(X509_NAME **name, int nid, const QString &val)
 static X509_NAME *new_cert_name(const CertificateInfo &info)
 {
 	X509_NAME *name = 0;
+	// FIXME support multiple items of each type
 	try_add_name_item(&name, NID_commonName, info.value(CommonName));
 	try_add_name_item(&name, NID_countryName, info.value(Country));
 	try_add_name_item(&name, NID_localityName, info.value(Locality));
@@ -253,27 +254,28 @@ static X509_NAME *new_cert_name(const CertificateInfo &info)
 
 static void try_get_name_item(X509_NAME *name, int nid, CertificateInfoType t, CertificateInfo *info)
 {
-	int loc = X509_NAME_get_index_by_NID(name, nid, -1);
-	if(loc == -1)
-		return;
-	X509_NAME_ENTRY *ne = X509_NAME_get_entry(name, loc);
-	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
-	QByteArray cs((const char *)data->data, data->length);
-	info->insert(t, QString::fromLatin1(cs));
+	int loc;
+	loc = -1;
+	while ((loc = X509_NAME_get_index_by_NID(name, nid, loc)) != -1) {
+		X509_NAME_ENTRY *ne = X509_NAME_get_entry(name, loc);
+		ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
+		QByteArray cs((const char *)data->data, data->length);
+		info->insert(t, QString::fromLatin1(cs));
+	}
 }
 
 static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, CertificateInfoType t, CertificateInfo *info)
 {
         ASN1_OBJECT *oid = OBJ_txt2obj( oidText.toLatin1().data(), 1); // 1 = only accept dotted input
-	int loc = X509_NAME_get_index_by_OBJ(name, oid, -1);
-	if(loc == -1) {
-		return;
+	int loc;
+	loc = -1;
+	while ((loc = X509_NAME_get_index_by_OBJ(name, oid, loc)) != -1) {
+		X509_NAME_ENTRY *ne = X509_NAME_get_entry(name, loc);
+		ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
+		QByteArray cs((const char *)data->data, data->length);
+		info->insert(t, QString::fromLatin1(cs));
+		qDebug() << "oid: " << oidText << ",  result: " << cs;
 	}
-	X509_NAME_ENTRY *ne = X509_NAME_get_entry(name, loc);
-	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
-	QByteArray cs((const char *)data->data, data->length);
-	info->insert(t, QString::fromLatin1(cs));
-	qDebug() << "oid: " << oidText << ",  result: " << cs;
 }
 
 static CertificateInfo get_cert_name(X509_NAME *name)
@@ -446,6 +448,7 @@ static void try_add_general_name(GENERAL_NAMES **gn, CertificateInfoType t, cons
 static X509_EXTENSION *new_cert_subject_alt_name(const CertificateInfo &info)
 {
 	GENERAL_NAMES *gn = 0;
+	// FIXME support multiple items of each type
 	try_add_general_name(&gn, Email, info.value(Email));
 	try_add_general_name(&gn, URI, info.value(URI));
 	try_add_general_name(&gn, DNS, info.value(DNS));
