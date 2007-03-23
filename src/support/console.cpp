@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2006,2007  Justin Karneges <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,8 @@
 # include <unistd.h>
 # include <fcntl.h>
 #endif
+
+#define CONSOLEPROMPT_INPUT_MAX 56
 
 namespace QCA {
 
@@ -698,11 +700,27 @@ public:
 	int at;
 	bool done;
 	bool enterMode;
+	QTextCodec *codec;
+	QTextCodec::ConverterState *encstate, *decstate;
 
 	Private() : sync(this), console(this)
 	{
 		connect(&console, SIGNAL(readyRead()), SLOT(con_readyRead()));
 		connect(&console, SIGNAL(inputClosed()), SLOT(con_inputClosed()));
+
+#ifdef Q_OS_WIN
+		codec = QTextCodec::codecForMib(106); // UTF-8
+#else
+		codec = QTextCodec::codecForLocale();
+#endif
+		encstate = new QTextCodec::ConverterState(QTextCodec::IgnoreHeader);
+		decstate = new QTextCodec::ConverterState(QTextCodec::IgnoreHeader);
+	}
+
+	~Private()
+	{
+		delete encstate;
+		delete decstate;
 	}
 
 	bool start(bool _enterMode)
@@ -751,10 +769,12 @@ public:
 
 	void writeString(const QString &str)
 	{
-		console.writeSecure(str.toLocal8Bit());
+		console.writeSecure(codec->fromUnicode(str.unicode(), str.length(), encstate));
 	}
 
-	bool processChar(unsigned char c)
+	// process each char.  internally store the result as utf16, which
+	//   is easier to edit (e.g. backspace)
+	bool processChar(QChar c)
 	{
 		if(c == '\r' || c == '\n')
 		{
@@ -776,34 +796,46 @@ public:
 			{
 				--at;
 				writeString("\b \b");
-				result.resize(at);
+				result.resize(at * sizeof(ushort));
 			}
 			return true;
 		}
 		else if(c < 0x20)
 			return true;
 
-		if(at + 1 > result.size())
-			result.resize(at + 1);
-		result[at++] = c;
+		if(at >= CONSOLEPROMPT_INPUT_MAX)
+			return true;
+
+		if((at + 1) * (int)sizeof(ushort) > result.size())
+			result.resize((at + 1) * sizeof(ushort));
+		ushort *p = (ushort *)result.data();
+		p[at++] = c.unicode();
 
 		writeString("*");
 		return true;
 	}
 
 private slots:
-	void showPrompt()
-	{
-	}
-
 	void con_readyRead()
 	{
 		while(console.bytesAvailable() > 0)
 		{
 			QSecureArray buf = console.readSecure(1);
 			if(buf.isEmpty())
-				continue;
-			if(!processChar(buf[0]))
+				break;
+
+			// convert to unicode and process
+			QString str = codec->toUnicode(buf.data(), 1, decstate);
+			bool quit = false;
+			for(int n = 0; n < str.length(); ++n)
+			{
+				if(!processChar(str[n]))
+				{
+					quit = true;
+					break;
+				}
+			}
+			if(quit)
 				break;
 		}
 	}
@@ -813,8 +845,9 @@ private slots:
 		fprintf(stderr, "Console input closed\n");
 		if(!done)
 		{
-			sync.conditionMet();
 			done = true;
+			result.clear();
+			sync.conditionMet();
 		}
 	}
 };
@@ -836,7 +869,20 @@ QSecureArray ConsolePrompt::getHidden(const QString &promptStr)
 	p.d->promptStr = promptStr;
 	if(!p.d->start(false))
 		return QSecureArray();
-	return p.d->result;
+
+	// convert result from utf16 to utf8, securely
+	QTextCodec *codec = QTextCodec::codecForMib(106);
+	QTextCodec::ConverterState cstate(QTextCodec::IgnoreHeader);
+	QSecureArray out;
+	ushort *ustr = (ushort *)p.d->result.data();
+	int len = p.d->result.size() / sizeof(ushort);
+	for(int n = 0; n < len; ++n)
+	{
+		QChar c(ustr[n]);
+		out += codec->fromUnicode(&c, 1, &cstate);
+	}
+
+	return out;
 }
 
 void ConsolePrompt::waitForEnter()
