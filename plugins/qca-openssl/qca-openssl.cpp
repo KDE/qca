@@ -3015,9 +3015,9 @@ public:
 		X509_EXTENSION *ex;
 
 		const EVP_MD *md;
-		if(priv.type() == PKey::RSA)
+		if(priv.key()->type() == PKey::RSA)
 			md = EVP_sha1();
-		else if(priv.type() == PKey::DSA)
+		else if(priv.key()->type() == PKey::DSA)
 			md = EVP_dss1();
 		else
 			return false;
@@ -3390,9 +3390,9 @@ public:
 		X509_EXTENSION *ex;
 
 		const EVP_MD *md;
-		if(priv.type() == PKey::RSA)
+		if(priv.key()->type() == PKey::RSA)
 			md = EVP_sha1();
-		else if(priv.type() == PKey::DSA)
+		else if(priv.key()->type() == PKey::DSA)
 			md = EVP_dss1();
 		else
 			return false;
