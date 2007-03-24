@@ -39,6 +39,9 @@
 
 namespace QCA
 {
+	class CertContext;
+	class CSRContext;
+	class CRLContext;
 	class CRL;
 	class CertificateCollection;
 	class CertificateChain;
@@ -681,6 +684,11 @@ namespace QCA
 		*/
 		bool operator!=(const Certificate &a) const;
 
+		/**
+		   \internal
+		*/
+		void change(CertContext *c);
+
 	private:
 		class Private;
 		friend class Private;
@@ -997,6 +1005,11 @@ namespace QCA
 		*/
 		static CertificateRequest fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
 
+		/**
+		   \internal
+		*/
+		void change(CSRContext *c);
+
 	private:
 		class Private;
 		friend class Private;
@@ -1254,6 +1267,11 @@ namespace QCA
 		   \return the CRL in the file
 		*/
 		static CRL fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+
+		/**
+		   \internal
+		*/
+		void change(CRLContext *c);
 
 	private:
 		class Private;

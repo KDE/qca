@@ -383,7 +383,6 @@ QBigInteger DLGroup::g() const
 class PKey::Private
 {
 public:
-	bool sec;
 };
 
 PKey::PKey()

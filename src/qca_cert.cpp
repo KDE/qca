@@ -388,16 +388,10 @@ static bool certnameMatchesAddress(const QString &_cn, const QString &peerHost)
 class Certificate::Private : public QSharedData
 {
 public:
-	Certificate *q;
 	CertificateInfo subjectInfoMap, issuerInfoMap;
 
-	Private(Certificate *_q) : q(_q)
+	void update(CertContext *c)
 	{
-	}
-
-	void update()
-	{
-		CertContext *c = static_cast<CertContext *>(q->context());
 		if(c)
 		{
 			subjectInfoMap = orderedToMap(c->props()->subject);
@@ -412,25 +406,24 @@ public:
 };
 
 Certificate::Certificate()
-:d(new Private(this))
+:d(new Private)
 {
 }
 
 Certificate::Certificate(const QString &fileName)
-:d(new Private(this))
+:d(new Private)
 {
 	*this = fromPEMFile(fileName, 0, QString());
 }
 
 Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
-:d(new Private(this))
+:d(new Private)
 {
 	CertContext *c = static_cast<CertContext *>(getContext("cert", provider));
 	if(c->createSelfSigned(opts, *(static_cast<const PKeyContext *>(key.context()))))
 		change(c);
 	else
 		delete c;
-	d->update();
 }
 
 Certificate::Certificate(const Certificate &from)
@@ -608,7 +601,6 @@ Certificate Certificate::fromDER(const QSecureArray &a, ConvertResult *result, c
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
-	c.d->update();
 	return c;
 }
 
@@ -621,7 +613,6 @@ Certificate Certificate::fromPEM(const QString &s, ConvertResult *result, const 
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
-	c.d->update();
 	return c;
 }
 
@@ -658,7 +649,6 @@ bool Certificate::matchesHostname(const QString &realHost) const
 			return true;
 	}
 
-
 	return false;
 }
 
@@ -693,6 +683,12 @@ bool Certificate::operator==(const Certificate &otherCert) const
 bool Certificate::operator!=(const Certificate &a) const
 {
 	return !(*this == a);
+}
+
+void Certificate::change(CertContext *c)
+{
+	Algorithm::change(c);
+	d->update(static_cast<CertContext *>(context()));
 }
 
 Validity Certificate::chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const
@@ -766,16 +762,10 @@ CertificateChain Certificate::chain_complete(const CertificateChain &chain, cons
 class CertificateRequest::Private : public QSharedData
 {
 public:
-	CertificateRequest *q;
 	CertificateInfo subjectInfoMap;
 
-	Private(CertificateRequest *_q) : q(_q)
+	void update(CSRContext *c)
 	{
-	}
-
-	void update()
-	{
-		CSRContext *c = static_cast<CSRContext *>(q->context());
 		if(c)
 			subjectInfoMap = orderedToMap(c->props()->subject);
 		else
@@ -784,25 +774,24 @@ public:
 };
 
 CertificateRequest::CertificateRequest()
-:d(new Private(this))
+:d(new Private)
 {
 }
 
 CertificateRequest::CertificateRequest(const QString &fileName)
-:d(new Private(this))
+:d(new Private)
 {
 	*this = fromPEMFile(fileName, 0, QString());
 }
 
 CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
-:d(new Private(this))
+:d(new Private)
 {
 	CSRContext *c = static_cast<CSRContext *>(getContext("csr", provider));
 	if(c->createRequest(opts, *(static_cast<const PKeyContext *>(key.context()))))
 		change(c);
 	else
 		delete c;
-	d->update();
 }
 
 CertificateRequest::CertificateRequest(const CertificateRequest &from)
@@ -939,7 +928,6 @@ CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, ConvertRes
 		*result = r;
 	if(r == ConvertGood)
 		c.change(csr);
-	c.d->update();
 	return c;
 }
 
@@ -952,7 +940,6 @@ CertificateRequest CertificateRequest::fromPEM(const QString &s, ConvertResult *
 		*result = r;
 	if(r == ConvertGood)
 		c.change(csr);
-	c.d->update();
 	return c;
 }
 
@@ -982,8 +969,13 @@ CertificateRequest CertificateRequest::fromString(const QString &s, ConvertResul
 		*result = r;
 	if(r == ConvertGood)
 		c.change(csr);
-	c.d->update();
 	return c;
+}
+
+void CertificateRequest::change(CSRContext *c)
+{
+	Algorithm::change(c);
+	d->update(static_cast<CSRContext *>(context()));
 }
 
 //----------------------------------------------------------------------------
@@ -1068,16 +1060,10 @@ bool CRLEntry::operator<(const CRLEntry &otherEntry) const
 class CRL::Private : public QSharedData
 {
 public:
-	CRL *q;
 	CertificateInfo issuerInfoMap;
 
-	Private(CRL *_q) : q(_q)
+	void update(CRLContext *c)
 	{
-	}
-
-	void update()
-	{
-		CRLContext *c = static_cast<CRLContext *>(q->context());
 		if(c)
 			issuerInfoMap = orderedToMap(c->props()->issuer);
 		else
@@ -1086,7 +1072,7 @@ public:
 };
 
 CRL::CRL()
-:d(new Private(this))
+:d(new Private)
 {
 }
 
@@ -1206,7 +1192,6 @@ bool CRL::operator==(const CRL &otherCrl) const
 
 }
 
-
 CRL CRL::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
 	CRL c;
@@ -1216,7 +1201,6 @@ CRL CRL::fromDER(const QSecureArray &a, ConvertResult *result, const QString &pr
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
-	c.d->update();
 	return c;
 }
 
@@ -1229,7 +1213,6 @@ CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provide
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
-	c.d->update();
 	return c;
 }
 
@@ -1250,6 +1233,11 @@ bool CRL::toPEMFile(const QString &fileName) const
 	return stringToFile(fileName, toPEM());
 }
 
+void CRL::change(CRLContext *c)
+{
+	Algorithm::change(c);
+	d->update(static_cast<CRLContext *>(context()));
+}
 
 //----------------------------------------------------------------------------
 // Store
