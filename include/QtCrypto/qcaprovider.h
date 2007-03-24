@@ -350,7 +350,7 @@ public:
 	QStringList userIds;
 	bool isSecret;
 	QDateTime creationDate, expirationDate;
-	QString fingerprint;
+	QString fingerprint; // all lowercase, no spaces
 	bool inKeyring;
 	bool isTrusted;
 };
