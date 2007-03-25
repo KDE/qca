@@ -615,7 +615,7 @@ bool KeyStoreEntry::ensureAccess()
 		d->accessible = false;
 		return false;
 	}
-	bool ok = static_cast<const KeyStoreEntryContext *>(context())->ensureAccess();
+	bool ok = static_cast<KeyStoreEntryContext *>(context())->ensureAccess();
 	d->accessible = ok;
 	return d->accessible;
 }
