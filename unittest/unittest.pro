@@ -14,6 +14,7 @@ SUBDIRS += \
 	kdfunittest \
 	keygenunittest \
 	keylengthunittest \
+	keystore \
 	logger \
 	macunittest \
 #	pgpunittest \

@@ -52,8 +52,9 @@ void KeyStore::cleanupTestCase()
 
 void KeyStore::nullKeystore()
 {
+    QCA::KeyStoreManager manager;
     if ( QCA::isSupported( "keystore" ) ) {
-        QCA::KeyStore nullStore( QString( "null store" ) );
+        QCA::KeyStore nullStore( QString( "null store" ), &manager );
         QVERIFY( nullStore.isValid() );
 
         QVERIFY( nullStore.entryList().isEmpty() );
