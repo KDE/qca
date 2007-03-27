@@ -1050,7 +1050,11 @@ public slots:
 			pending = true;
 		}
 		if(waiting && !KeyStoreTracker::instance()->isBusy())
+		{
+			busy = false;
+			items = KeyStoreTracker::instance()->getItems();
 			w.wakeOne();
+		}
 	}
 
 	void update()
