@@ -16,6 +16,5 @@ SUBDIRS += \
 	sasltest \
 	saslservtest \
 	ssltest \
-	sslservtest
-
-
+	sslservtest \
+	tlssocket
