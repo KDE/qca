@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2005-2007  Justin Karneges <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,9 +19,6 @@
 
 #include <QtCore>
 #include <QtCrypto>
-
-//Q_IMPORT_PLUGIN(opensslPlugin);
-//Q_IMPORT_PLUGIN(gnupgPlugin);
 
 static QStringList wrapstring(const QString &str, int width)
 {
@@ -160,16 +157,57 @@ class PassphrasePrompt : public QObject
 	Q_OBJECT
 public:
 	QCA::EventHandler handler;
+	bool allowPrompt;
+	bool warned;
+	bool have_pass;
+	bool used_pass;
+	QSecureArray pass;
 
 	PassphrasePrompt()
 	{
+		allowPrompt = true;
+		warned = false;
+		have_pass = false;
+
 		connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)), SLOT(ph_eventReady(int, const QCA::Event &)));
 		handler.start();
+	}
+
+	void setExplicitPassword(const QSecureArray &_pass)
+	{
+		have_pass = true;
+		used_pass = false;
+		pass = _pass;
 	}
 
 private slots:
 	void ph_eventReady(int id, const QCA::Event &e)
 	{
+		if(have_pass)
+		{
+			// only allow using an explicit passphrase once
+			if(used_pass)
+			{
+				handler.reject(id);
+				return;
+			}
+			used_pass = true;
+			handler.submitPassword(id, pass);
+			return;
+		}
+
+		if(!allowPrompt)
+		{
+			if(!have_pass && !warned)
+			{
+				warned = true;
+				fprintf(stderr, "Error: no passphrase specified (use '--pass=' for none).\n");
+			}
+
+			handler.reject(id);
+			return;
+		}
+
 		if(e.type() == QCA::Event::Password)
 		{
 			QString type = "password";
@@ -182,29 +220,15 @@ private slots:
 			if(e.source() == QCA::Event::KeyStore)
 			{
 				QString name = "keystore";
-				QCA::KeyStoreManager ksm;
-				QCA::KeyStore ks(e.keyStoreId(), &ksm);
-				if(ks.isValid())
-					name = ks.name();
-
-				QList<QCA::KeyStoreEntry> list = ks.entryList();
-				QCA::KeyStoreEntry entry;
-				QString entryId = e.keyStoreEntryId();
-				for(int n = 0; n < list.count(); ++n)
-				{
-					QCA::KeyStoreEntry &i = list[n];
-					if(i.id() == entryId)
-					{
-						entry = i;
-						break;
-					}
-				}
+				QCA::KeyStoreEntry entry(e.keyStoreEntryId());
 				if(!entry.isNull())
 				{
-					if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
-						name = entry.pgpSecretKey().primaryUserId();
+					// TODO: enable this once we guarantee objects existing ?
+					//if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
+					//	name = entry.pgpSecretKey().primaryUserId();
+					//else
+						name = entry.name();
 				}
-
 				str = QString("Enter %1 for %2").arg(type).arg(name);
 			}
 			else
@@ -215,80 +239,302 @@ private slots:
 		}
 		else if(e.type() == QCA::Event::Token)
 		{
-			//QCA::KeyStoreEntry entry(e.keyStoreEntryId());
-			//printf("Please insert token for [%s] and press Enter ...\n", qPrintable(entry.name()));
-			printf("Please insert token and press Enter ...\n");
+			QCA::KeyStoreEntry entry(e.keyStoreEntryId());
+			printf("Please insert %s for [%s] and press Enter ...\n", qPrintable(entry.storeName()), qPrintable(entry.name()));
 			QCA::ConsolePrompt::waitForEnter();
 			handler.tokenOkay(id);
 		}
 	}
 };
 
-#include "main.moc"
-
-static bool write_dhprivatekey_file(const QCA::PrivateKey &priv, const QString &fileName)
+static bool promptForNewPassphrase(QSecureArray *result)
 {
-	QCA::DHPrivateKey key = priv.toDH();
-	QFile f(fileName);
-	if(!f.open(QFile::WriteOnly | QFile::Truncate))
+	QSecureArray out = QCA::ConsolePrompt::getHidden("Enter new passphrase");
+	if(QCA::ConsolePrompt::getHidden("Confirm new passphrase") != out)
+	{
+		fprintf(stderr, "Error: confirmation does not match original entry.\n");
 		return false;
-	QTextStream ts(&f);
-	ts << "P:" << QCA::arrayToHex(key.domain().p().toArray()).toLatin1() << endl;
-	ts << "G:" << QCA::arrayToHex(key.domain().g().toArray()).toLatin1() << endl;
-	ts << "Y:" << QCA::arrayToHex(key.y().toArray()).toLatin1() << endl;
-	ts << "X:" << QCA::arrayToHex(key.x().toArray()).toLatin1() << endl;
+	}
+	*result = out;
 	return true;
 }
 
-static bool write_dhpublickey_file(const QCA::PublicKey &pub, const QString &fileName)
+static QString line_encode(const QString &in)
 {
-	QCA::DHPublicKey key = pub.toDH();
+	QString out;
+	for(int n = 0; n < in.length(); ++n)
+	{
+		if(in[n] == '\\')
+			out += "\\\\";
+		else if(in[n] == '\n')
+			out += "\\n";
+		else
+			out += in[n];
+	}
+	return out;
+}
+
+static QString line_decode(const QString &in)
+{
+	QString out;
+	for(int n = 0; n < in.length(); ++n)
+	{
+		if(in[n] == '\\')
+		{
+			if(n + 1 < in.length())
+			{
+				if(in[n + 1] == '\\')
+					out += '\\';
+				else if(in[n + 1] == 'n')
+					out += '\n';
+				++n;
+			}
+		}
+		else
+			out += in[n];
+	}
+	return out;
+}
+
+static QString make_ksentry_string(const QString &id)
+{
+	QString out;
+	out += "QCATOOL_KEYSTOREENTRY_1\n";
+	out += line_encode(id) + '\n';
+	return out;
+}
+
+/*static bool write_ksentry_file(const QString &id, const QString &fileName)
+{
 	QFile f(fileName);
 	if(!f.open(QFile::WriteOnly | QFile::Truncate))
 		return false;
-	QTextStream ts(&f);
-	ts << "P:" << QCA::arrayToHex(key.domain().p().toArray()).toLatin1() << endl;
-	ts << "G:" << QCA::arrayToHex(key.domain().g().toArray()).toLatin1() << endl;
-	ts << "Y:" << QCA::arrayToHex(key.y().toArray()).toLatin1() << endl;
+	f.write(make_ksentry_string(id).toUtf8());
 	return true;
-}
+}*/
 
-static QMap<QString, QBigInteger> read_map_file(const QString &fileName)
+static QString read_ksentry_file(const QString &fileName)
 {
-	QMap<QString, QBigInteger> map;
+	QString out;
 
 	QFile f(fileName);
 	if(!f.open(QFile::ReadOnly))
-		return map;
+		return out;
 	QTextStream ts(&f);
+	int linenum = 0;
 	while(!ts.atEnd())
 	{
 		QString line = ts.readLine();
-		QStringList pair = line.split(':');
-		QSecureArray bin = QCA::hexToArray(pair[1]);
-		map[pair[0]] = QBigInteger(bin);
+		if(linenum == 0)
+		{
+			if(line != "QCATOOL_KEYSTOREENTRY_1")
+				return out;
+		}
+		else
+		{
+			out = line_decode(line);
+			break;
+		}
+		++linenum;
 	}
-	return map;
+	return out;
 }
 
-static QCA::PrivateKey read_dhprivatekey_file(const QString &fileName)
+static QByteArray read_der_file(const QString &fileName)
 {
-	QCA::PrivateKey key;
-	QMap<QString, QBigInteger> map;
-	map = read_map_file(fileName);
-	if(map.isEmpty())
-		return key;
-	return QCA::DHPrivateKey(QCA::DLGroup(map["P"], map["G"]), map["Y"], map["X"]);
+	QFile f(fileName);
+	if(!f.open(QFile::ReadOnly))
+		return QByteArray();
+	return f.readAll();
 }
 
-static QCA::PublicKey read_dhpublickey_file(const QString &fileName)
+class InfoType
 {
-	QCA::PublicKey key;
-	QMap<QString, QBigInteger> map;
-	map = read_map_file(fileName);
-	if(map.isEmpty())
-		return key;
-	return QCA::DHPublicKey(QCA::DLGroup(map["P"], map["G"]), map["Y"]);
+public:
+	QCA::CertificateInfoType type;
+	QString varname;
+	QString shortname;
+	QString name;
+	QString desc;
+
+	InfoType()
+	{
+	}
+
+	InfoType(QCA::CertificateInfoType _type, QString _varname, QString _shortname, QString _name, QString _desc)
+	:type(_type), varname(_varname), shortname(_shortname), name(_name), desc(_desc)
+	{
+	}
+};
+
+static QList<InfoType> makeInfoTypeList()
+{
+	QList<InfoType> out;
+	out += InfoType(QCA::CommonName,             "CommonName",             "CN",  "Common Name (CN)",          "Full name, domain, anything");
+	out += InfoType(QCA::Email,                  "Email",                  "",    "Email Address",             "");
+	out += InfoType(QCA::Organization,           "Organization",           "O",   "Organization (O)",          "Company, group, etc");
+	out += InfoType(QCA::OrganizationalUnit,     "OrganizationalUnit",     "OU",  "Organizational Unit (OU)",  "Division/branch of organization");
+	out += InfoType(QCA::Locality,               "Locality",               "",    "Locality",                  "City, shire, part of a state");
+	out += InfoType(QCA::State,                  "State",                  "",    "State",                     "State within the country");
+	out += InfoType(QCA::Country,                "Country",                "C",   "Country Code",              "2-letter code");
+	out += InfoType(QCA::IncorporationLocality,  "IncorporationLocality",  "",    "Incorporation Locality",    "For EV certificates");
+	out += InfoType(QCA::IncorporationState,     "IncorporationState",     "",    "Incorporation State",       "For EV certificates");
+	out += InfoType(QCA::IncorporationCountry,   "IncorporationCountry",   "",    "Incorporation Country",     "For EV certificates");
+	out += InfoType(QCA::URI,                    "URI",                    "",    "URI",                       "");
+	out += InfoType(QCA::DNS,                    "DNS",                    "",    "Domain Name",               "Domain (dnsName)");
+	out += InfoType(QCA::IPAddress,              "IPAddress",              "",    "IP Adddress",               "");
+	out += InfoType(QCA::XMPP,                   "XMPP",                   "",    "XMPP Address (JID)",        "From RFC 3920 (id-on-xmppAddr)");
+	return out;
+}
+
+class MyConstraintType
+{
+public:
+	QCA::ConstraintType type;
+	QString varname;
+	QString name;
+	QString desc;
+
+	MyConstraintType()
+	{
+	}
+
+	MyConstraintType(QCA::ConstraintType _type, QString _varname, QString _name, QString _desc)
+	:type(_type), varname(_varname), name(_name), desc(_desc)
+	{
+	}
+};
+
+static QList<MyConstraintType> makeConstraintTypeList()
+{
+	QList<MyConstraintType> out;
+	out += MyConstraintType(QCA::DigitalSignature,    "DigitalSignature",    "Digital Signature",      "Can be used for signing");
+	out += MyConstraintType(QCA::NonRepudiation,      "NonRepudiation",      "Non-Repudiation",        "Usage is legally binding");
+	out += MyConstraintType(QCA::KeyEncipherment,     "KeyEncipherment",     "Key Encipherment",       "Can encrypt other keys");
+	out += MyConstraintType(QCA::DataEncipherment,    "DataEncipherment",    "Data Encipherment",      "Can encrypt arbitrary data");
+	out += MyConstraintType(QCA::KeyAgreement,        "KeyAgreement",        "Key Agreement",          "Can perform key agreement (DH)");
+	out += MyConstraintType(QCA::KeyCertificateSign,  "KeyCertificateSign",  "Certificate Sign",       "Can sign other certificates");
+	out += MyConstraintType(QCA::CRLSign,             "CRLSign",             "CRL Sign",               "Can sign CRLs");
+	out += MyConstraintType(QCA::EncipherOnly,        "EncipherOnly",        "Encipher Only",          "Can be used for encrypting");
+	out += MyConstraintType(QCA::DecipherOnly,        "DecipherOnly",        "Decipher Only",          "Can be used for decrypting");
+	out += MyConstraintType(QCA::ServerAuth,          "ServerAuth",          "Server Authentication",  "TLS Server");
+	out += MyConstraintType(QCA::ClientAuth,          "ClientAuth",          "Client Authentication",  "TLS Client");
+	out += MyConstraintType(QCA::CodeSigning,         "CodeSigning",         "Code Signing",           "");
+	out += MyConstraintType(QCA::EmailProtection,     "EmailProtection",     "Email Protection",       "S/MIME");
+	out += MyConstraintType(QCA::IPSecEndSystem,      "IPSecEndSystem",      "IPSec End-System",       "");
+	out += MyConstraintType(QCA::IPSecTunnel,         "IPSecTunnel",         "IPSec Tunnel",           "");
+	out += MyConstraintType(QCA::IPSecUser,           "IPSecUser",           "IPSec User",             "");
+	out += MyConstraintType(QCA::TimeStamping,        "TimeStamping",        "Time Stamping",          "");
+	out += MyConstraintType(QCA::OCSPSigning,         "OCSPSigning",         "OCSP Signing",           "");
+	return out;
+}
+
+static bool validOid(const QString &in)
+{
+	for(int n = 0; n < in.length(); ++n)
+	{
+		if(!in[n].isDigit() && in[n] != '.')
+			return false;
+	}
+	return true;
+}
+
+class ValidityLength
+{
+public:
+	int years, months, days;
+};
+
+static int vl_getnext(const QString &in, int offset = 0)
+{
+	if(offset >= in.length())
+		return in.length();
+
+	int n = offset;
+	bool lookForNonDigit;
+
+	if(in[n].isDigit())
+		lookForNonDigit = true;
+	else
+		lookForNonDigit = false;
+
+	for(++n; n < in.length(); ++n)
+	{
+		if(in[n].isDigit() != lookForNonDigit)
+			break;
+	}
+	return n;
+}
+
+static QStringList vl_getparts(const QString &in)
+{
+	QStringList out;
+	int offset = 0;
+	while(1)
+	{
+		int n = vl_getnext(in, offset);
+		if(n == offset)
+			break;
+		out += in.mid(offset, n - offset);
+		offset = n;
+	}
+	return out;
+}
+
+static bool parseValidityLength(const QString &in, ValidityLength *vl)
+{
+	vl->years = -1;
+	vl->months = -1;
+	vl->days = -1;
+
+	QStringList parts = vl_getparts(in);
+	while(1)
+	{
+		// first part should be a number
+		if(parts.count() < 1)
+			break;
+		QString str = parts.takeFirst();
+		bool ok;
+		int x = str.toInt(&ok);
+		if(!ok)
+			return false;
+
+		// next part should be 1 letter plus any amount of space
+		if(parts.count() < 1)
+			return false;
+		str = parts.takeFirst();
+		if(!str[0].isLetter())
+			return false;
+		str = str.trimmed(); // remove space
+
+		if(str == "y")
+		{
+			if(vl->years != -1)
+				return false;
+			vl->years = x;
+		}
+		if(str == "m")
+		{
+			if(vl->months != -1)
+				return false;
+			vl->months = x;
+		}
+		if(str == "d")
+		{
+			if(vl->days != -1)
+				return false;
+			vl->days = x;
+		}
+	}
+
+	if(vl->years == -1)
+		vl->years = 0;
+	if(vl->months == -1)
+		vl->months = 0;
+	if(vl->days == -1)
+		vl->days = 0;
+
+	return true;
 }
 
 static QString prompt_for(const QString &prompt)
@@ -297,7 +543,263 @@ static QString prompt_for(const QString &prompt)
 	fflush(stdout);
 	QByteArray result(256, 0);
 	fgets((char *)result.data(), result.size(), stdin);
-	return QString::fromLatin1(result).trimmed();
+	return QString::fromLocal8Bit(result).trimmed();
+}
+
+static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
+{
+	QCA::CertificateOptions opts;
+
+	if(advanced)
+	{
+		if(!req)
+		{
+			while(1)
+			{
+				QString str = prompt_for("Create an end user ('user') certificate or a CA ('ca') certificate? [user]");
+				if(str.isEmpty())
+					str = "user";
+				if(str != "user" && str != "ca")
+				{
+					printf("'%s' is not a valid entry.\n", qPrintable(str));
+					continue;
+				}
+
+				if(str == "ca")
+					opts.setAsCA();
+				break;
+			}
+			printf("\n");
+
+			while(1)
+			{
+				QString str = prompt_for("Serial Number");
+				QBigInteger num;
+				if(str.isEmpty() || !num.fromString(str))
+				{
+					printf("'%s' is not a valid entry.\n", qPrintable(str));
+					continue;
+				}
+
+				opts.setSerialNumber(num);
+				break;
+			}
+			printf("\n");
+		}
+
+		{
+			QCA::CertificateInfoOrdered info;
+			printf("Choose the information attributes to add to the certificate.  They will be\n"
+				"added in the order they are entered.\n\n");
+			printf("Available information attributes:\n");
+			QList<InfoType> list = makeInfoTypeList();
+			for(int n = 0; n < list.count(); ++n)
+			{
+				const InfoType &i = list[n];
+				char c = 'a' + n;
+				printf("  %c) %-32s        %s\n", c, qPrintable(i.name), qPrintable(i.desc));
+			}
+			printf("\n");
+			while(1)
+			{
+				int index;
+				while(1)
+				{
+					QString str = prompt_for("Select an attribute to add, or enter to move on");
+					if(str.isEmpty())
+					{
+						index = -1;
+						break;
+					}
+					if(str.length() == 1)
+					{
+						index = str[0].toLatin1() - 'a';
+						if(index >= 0 && index < list.count())
+							break;
+					}
+					printf("'%s' is not a valid entry.\n", qPrintable(str));
+				}
+				if(index == -1)
+					break;
+
+				QString val = prompt_for(list[index].name);
+				info += QCA::CertificateInfoPair(list[index].type, val);
+				printf("Added attribute.\n\n");
+			}
+			opts.setInfoOrdered(info);
+		}
+
+		{
+			QCA::Constraints constraints;
+			printf("\n");
+			printf("Choose the constraint attributes to add to the certificate.\n\n");
+			printf("Available attributes:\n");
+			QList<MyConstraintType> list = makeConstraintTypeList();
+			for(int n = 0; n < list.count(); ++n)
+			{
+				const MyConstraintType &i = list[n];
+				char c = 'a' + n;
+				printf("  %c) %-32s        %s\n", c, qPrintable(i.name), qPrintable(i.desc));
+			}
+			printf("\n");
+			printf("If no constraints are added, then the certificate may be used for any purpose.\n\n");
+			while(1)
+			{
+				int index;
+				while(1)
+				{
+					QString str = prompt_for("Select an attribute to add, or enter to move on");
+					if(str.isEmpty())
+					{
+						index = -1;
+						break;
+					}
+					if(str.length() == 1)
+					{
+						index = str[0].toLatin1() - 'a';
+						if(index >= 0 && index < list.count())
+							break;
+					}
+					printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+				}
+				if(index == -1)
+					break;
+
+				if(constraints.contains(list[index].type))
+				{
+					printf("You have already added '%s'.\n\n", qPrintable(list[index].name));
+					continue;
+				}
+
+				constraints += list[index].type;
+				printf("Added attribute.\n\n");
+			}
+			opts.setConstraints(constraints);
+		}
+
+		{
+			QStringList policies;
+			printf("\n");
+			printf("Are there any policy OID attributes that you wish to add?  Use the dotted\n"
+				"string format.\n\n");
+			while(1)
+			{
+				QString str = prompt_for("Enter a policy OID to add, or enter to move on");
+				if(str.isEmpty())
+					break;
+				if(!validOid(str))
+				{
+					printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+					continue;
+				}
+				if(policies.contains(str))
+				{
+					printf("You have already added '%s'.\n\n", qPrintable(str));
+					continue;
+				}
+
+				policies += str;
+				printf("Added attribute.\n\n");
+			}
+			opts.setPolicies(policies);
+		}
+
+		printf("\n");
+	}
+	else
+	{
+		// self-signed alone still needs this for validation to work
+		opts.setAsCA();
+
+		QCA::CertificateInfo info;
+		info.insert(QCA::CommonName, prompt_for("Common Name"));
+		info.insert(QCA::Country, prompt_for("Country Code (2 letters)"));
+		info.insert(QCA::Organization, prompt_for("Organization"));
+		info.insert(QCA::Email, prompt_for("Email"));
+		opts.setInfo(info);
+
+		printf("\n");
+	}
+
+	if(!req)
+	{
+		while(1)
+		{
+			QString str = prompt_for("How long should the certificate be valid? (e.g. '1y2m3d')");
+			ValidityLength vl;
+			if(!parseValidityLength(str, &vl))
+			{
+				printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+				continue;
+			}
+
+			if(vl.years == 0 && vl.months == 0 && vl.days == 0)
+			{
+				printf("The certificate must be valid for at least one day.\n\n");
+				continue;
+			}
+
+			QDateTime start = QDateTime::currentDateTime().toUTC();
+			QDateTime end = start;
+			if(vl.years > 0)
+				end = end.addYears(vl.years);
+			if(vl.months > 0)
+				end = end.addMonths(vl.months);
+			if(vl.days > 0)
+				end = end.addDays(vl.days);
+			opts.setValidityPeriod(start, end);
+
+			QStringList parts;
+			if(vl.years > 0)
+				parts += QString("%1 year(s)").arg(vl.years);
+			if(vl.months > 0)
+				parts += QString("%1 month(s)").arg(vl.months);
+			if(vl.days > 0)
+				parts += QString("%1 day(s)").arg(vl.days);
+			QString out;
+			if(parts.count() == 1)
+				out = parts[0];
+			else if(parts.count() == 2)
+				out = parts[0] + " and " + parts[1];
+			else if(parts.count() == 3)
+				out = parts[0] + ", " + parts[1] + ", and " + parts[2];
+			printf("Certificate will be valid for %s.\n", qPrintable(out));
+			break;
+		}
+		printf("\n");
+	}
+
+	return opts;
+}
+
+static QString kstype_to_string(QCA::KeyStore::Type _type)
+{
+	QString type;
+	switch(_type)
+	{
+		case QCA::KeyStore::System:      type = "Sys "; break;
+		case QCA::KeyStore::User:        type = "User"; break;
+		case QCA::KeyStore::Application: type = "App "; break;
+		case QCA::KeyStore::SmartCard:   type = "Card"; break;
+		case QCA::KeyStore::PGPKeyring:  type = "PGP "; break;
+		default:                         type = "XXXX"; break;
+	}
+	return type;
+}
+
+static QString ksentrytype_to_string(QCA::KeyStoreEntry::Type _type)
+{
+	QString type;
+	switch(_type)
+	{
+		case QCA::KeyStoreEntry::TypeKeyBundle:    type = "Key "; break;
+		case QCA::KeyStoreEntry::TypeCertificate:  type = "Cert"; break;
+		case QCA::KeyStoreEntry::TypeCRL:          type = "CRL "; break;
+		case QCA::KeyStoreEntry::TypePGPSecretKey: type = "PSec"; break;
+		case QCA::KeyStoreEntry::TypePGPPublicKey: type = "PPub"; break;
+		default:                                   type = "XXXX"; break;
+	}
+	return type;
 }
 
 static void try_print_info(const QString &name, const QStringList &values)
@@ -305,51 +807,173 @@ static void try_print_info(const QString &name, const QStringList &values)
 	if(!values.isEmpty())
 	{
 		QString value = values.join(", ");
-		printf("   %s: %s\n", name.toLatin1().data(), value.toLatin1().data());
+		printf("   %s: %s\n", qPrintable(name), value.toUtf8().data());
 	}
 }
 
 static void print_info(const QString &title, const QCA::CertificateInfo &info)
 {
+	QList<InfoType> list = makeInfoTypeList();
 	printf("%s\n", title.toLatin1().data());
-	try_print_info("Name", info.values(QCA::CommonName));
-	try_print_info("Email", info.values(QCA::Email));
-	try_print_info("Organization", info.values(QCA::Organization));
-	try_print_info("Organizational Unit", info.values(QCA::OrganizationalUnit));
-	try_print_info("Locality", info.values(QCA::Locality));
-	try_print_info("State", info.values(QCA::State));
-	try_print_info("Country", info.values(QCA::Country));
-	try_print_info("URI", info.values(QCA::URI));
-	try_print_info("DNS", info.values(QCA::DNS));
-	try_print_info("IP Address", info.values(QCA::IPAddress));
-	try_print_info("JID", info.values(QCA::XMPP));
+	foreach(const InfoType &t, list)
+		try_print_info(t.name, info.values(t.type));
+}
+
+static void print_info_ordered(const QString &title, const QCA::CertificateInfoOrdered &info)
+{
+	QList<InfoType> list = makeInfoTypeList();
+	printf("%s\n", title.toLatin1().data());
+	foreach(const QCA::CertificateInfoPair &pair, info)
+	{
+		QCA::CertificateInfoType type = pair.type();
+		for(int n = 0; n < list.count(); ++n)
+		{
+			if(list[n].type == type)
+			{
+				printf("   %s: %s\n", qPrintable(list[n].name), pair.value().toUtf8().data());
+				break;
+			}
+		}
+	}
 }
 
 static QString constraint_to_string(QCA::ConstraintType t)
 {
-	QString str;
-	switch(t)
+	QList<MyConstraintType> list = makeConstraintTypeList();
+	for(int n = 0; n < list.count(); ++n)
 	{
-		case QCA::DigitalSignature:   str = "Digital Signature"; break;
-		case QCA::NonRepudiation:     str = "Non-Repudiation"; break;
-		case QCA::KeyEncipherment:    str = "Key Encipherment"; break;
-		case QCA::DataEncipherment:   str = "Data Encipherment"; break;
-		case QCA::KeyAgreement:       str = "Key Agreement"; break;
-		case QCA::KeyCertificateSign: str = "Certificate Sign"; break;
-		case QCA::CRLSign:            str = "CRL Sign"; break;
-		case QCA::EncipherOnly:       str = "Encipher Only"; break;
-		case QCA::DecipherOnly:       str = "Decipher Only"; break;
-		case QCA::ServerAuth:         str = "TLS Server Authentication"; break;
-		case QCA::ClientAuth:         str = "TLS Client Authentication"; break;
-		case QCA::CodeSigning:        str = "Code Signing"; break;
-		case QCA::EmailProtection:    str = "Email Protection"; break;
-		case QCA::IPSecEndSystem:     str = "IPSec End System"; break;
-		case QCA::IPSecTunnel:        str = "IPSec Tunnel"; break;
-		case QCA::IPSecUser:          str = "IPSec User"; break;
-		case QCA::TimeStamping:       str = "Time Stamping"; break;
-		case QCA::OCSPSigning:        str = "OCSP Signing"; break;
+		if(list[n].type == t)
+			return list[n].name;
+	}
+	return QString("Unknown Constraint");
+}
+
+static QString sigalgo_to_string(QCA::SignatureAlgorithm algo)
+{
+	QString str;
+	switch(algo)
+	{
+		case QCA::EMSA1_SHA1:       str = "EMSA1(SHA1)"; break;
+		case QCA::EMSA3_SHA1:       str = "EMSA3(SHA1)"; break;
+		case QCA::EMSA3_MD5:        str = "EMSA3(MD5)"; break;
+		case QCA::EMSA3_MD2:        str = "EMSA3(MD2)"; break;
+		case QCA::EMSA3_RIPEMD160:  str = "EMSA3(RIPEMD160)"; break;
+		case QCA::EMSA3_Raw:        str = "EMSA3(raw)"; break;
+		default:                    str = "Unknown"; break;
 	}
 	return str;
+}
+
+static void print_cert(const QCA::Certificate &cert, bool ordered = false)
+{
+	printf("Serial Number: %s\n", qPrintable(cert.serialNumber().toString()));
+
+	if(ordered)
+	{
+		print_info_ordered("Subject", cert.subjectInfoOrdered());
+		print_info_ordered("Issuer", cert.issuerInfoOrdered());
+	}
+	else
+	{
+		print_info("Subject", cert.subjectInfo());
+		print_info("Issuer", cert.issuerInfo());
+	}
+
+	printf("Validity\n");
+	printf("   Not before: %s\n", qPrintable(cert.notValidBefore().toString()));
+	printf("   Not after:  %s\n", qPrintable(cert.notValidAfter().toString()));
+
+	printf("Constraints\n");
+	QCA::Constraints constraints = cert.constraints();
+	int n;
+	if(!constraints.isEmpty())
+	{
+		for(n = 0; n < constraints.count(); ++n)
+			printf("   %s\n", qPrintable(constraint_to_string(constraints[n])));
+	}
+	else
+		printf("   No constraints\n");
+
+	printf("Policies\n");
+	QStringList policies = cert.policies();
+	if(!policies.isEmpty())
+	{
+		for(n = 0; n < policies.count(); ++n)
+			printf("   %s\n", qPrintable(policies[n]));
+	}
+	else
+		printf("   No policies\n");
+
+	QByteArray id;
+	printf("Issuer Key ID: ");
+	id = cert.issuerKeyId();
+	if(!id.isEmpty())
+		printf("%s\n", qPrintable(QCA::arrayToHex(id)));
+	else
+		printf("None\n");
+
+	printf("Subject Key ID: ");
+	id = cert.subjectKeyId();
+	if(!id.isEmpty())
+		printf("%s\n", qPrintable(QCA::arrayToHex(id)));
+	else
+		printf("None\n");
+
+	printf("CA: %s\n", cert.isCA() ? "Yes": "No");
+	printf("Signature Algorithm: %s\n", qPrintable(sigalgo_to_string(cert.signatureAlgorithm())));
+
+	QCA::PublicKey key = cert.subjectPublicKey();
+	printf("Public Key:\n%s", key.toPEM().toLatin1().data());
+}
+
+static void print_certreq(const QCA::CertificateRequest &cert, bool ordered = false)
+{
+	if(ordered)
+		print_info_ordered("Subject", cert.subjectInfoOrdered());
+	else
+		print_info("Subject", cert.subjectInfo());
+
+	printf("Constraints\n");
+	QCA::Constraints constraints = cert.constraints();
+	int n;
+	if(!constraints.isEmpty())
+	{
+		for(n = 0; n < constraints.count(); ++n)
+			printf("   %s\n", qPrintable(constraint_to_string(constraints[n])));
+	}
+	else
+		printf("   No constraints\n");
+
+	printf("Policies\n");
+	QStringList policies = cert.policies();
+	if(!policies.isEmpty())
+	{
+		for(n = 0; n < policies.count(); ++n)
+			printf("   %s\n", qPrintable(policies[n]));
+	}
+	else
+		printf("   No policies\n");
+
+	printf("CA: %s\n", cert.isCA() ? "Yes": "No");
+	printf("Signature Algorithm: %s\n", qPrintable(sigalgo_to_string(cert.signatureAlgorithm())));
+
+	QCA::PublicKey key = cert.subjectPublicKey();
+	printf("Public Key:\n%s", key.toPEM().toLatin1().data());
+}
+
+static void print_pgp(const QCA::PGPKey &key)
+{
+	printf("Key ID: %s\n", qPrintable(key.keyId()));
+	printf("User IDs:\n");
+	foreach(const QString &s, key.userIds())
+		printf("   %s\n", qPrintable(s));
+	printf("Validity\n");
+	printf("   Not before: %s\n", qPrintable(key.creationDate().toString()));
+	printf("   Not after:  %s\n", qPrintable(key.expirationDate().toString()));
+	printf("In Keyring: %s\n", key.inKeyring() ? "Yes": "No");
+	printf("Secret Key: %s\n", key.isSecret() ? "Yes": "No");
+	printf("Trusted:    %s\n", key.isTrusted() ? "Yes": "No");
+	printf("Fingerprint: %s\n", qPrintable(key.fingerprint()));
 }
 
 static QString validityToString(QCA::Validity v)
@@ -409,13 +1033,14 @@ static QString smErrorToString(QCA::SecureMessage::Error e)
 	map[QCA::SecureMessage::ErrorEncryptUntrusted] = "ErrorEncryptUntrusted";
 	map[QCA::SecureMessage::ErrorEncryptInvalid] = "ErrorEncryptInvalid";
 	map[QCA::SecureMessage::ErrorNeedCard] = "ErrorNeedCard";
+	map[QCA::SecureMessage::ErrorCertKeyMismatch] = "ErrorCertKeyMismatch";
 	map[QCA::SecureMessage::ErrorUnknown] = "ErrorUnknown";
 	return map[e];
 }
 
 const char *mime_signpart =
-	"Content-Type: text/plain; charset=ISO-8859-1\r\n"
-	"Content-Transfer-Encoding: 7bit\r\n"
+	"Content-Type: text/plain; charset=UTF-8\r\n"
+	"Content-Transfer-Encoding: 8bit\r\n"
 	"\r\n"
 	"%1";
 
@@ -476,13 +1101,58 @@ static QString rem_cr(const QString &in)
 	return out;
 }
 
+static int indexOf_newline(const QString &in, int offset = 0)
+{
+	for(int n = offset; n < in.length(); ++n)
+	{
+		if(n + 1 < in.length() && in[n] == '\r' && in[n + 1] == '\n')
+			return n;
+		if(in[n] == '\n')
+			return n;
+	}
+	return -1;
+}
+
+static int indexOf_doublenewline(const QString &in, int offset = 0)
+{
+	int at = -1;
+	while(1)
+	{
+		int n = indexOf_newline(in, offset);
+		if(n == -1)
+			return -1;
+
+		if(at != -1)
+		{
+			if(n == offset)
+				break;
+		}
+
+		at = n;
+		if(in[n] == '\n')
+			offset = n + 1;
+		else
+			offset = n + 2;
+	}
+	return at;
+}
+
+// this is so gross
+static int newline_len(const QString &in, int offset = 0)
+{
+	if(in[offset] == '\r')
+		return 2;
+	else
+		return 1;
+}
+
 // FIXME: all of this mime stuff is a total hack
 static QString open_mime_envelope(const QString &in)
 {
-	int n = in.indexOf("\r\n\r\n");
+	int n = indexOf_doublenewline(in);
 	if(n == -1)
 		return QString();
-	return in.mid(n + 4);
+	return in.mid(n + (newline_len(in, n) * 2)); // good lord
 }
 
 static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
@@ -491,8 +1161,8 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 	if(n == -1)
 		return false;
 	n += 9;
-	int i = in.indexOf("\r\n", n);
-	if(n == -1)
+	int i = indexOf_newline(in, n);
+	if(i == -1)
 		return false;
 	QString boundary;
 	QString bregion = in.mid(n, i - n);
@@ -508,33 +1178,60 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 		boundary.remove(boundary.length() - 1, 1);
 	//printf("boundary: [%s]\n", qPrintable(boundary));
 	QString boundary_end = QString("--") + boundary;
-	boundary = QString("--") + boundary + "\r\n";
+	boundary = QString("--") + boundary;
 
 	QString work = open_mime_envelope(in);
+	//printf("work: [%s]\n", qPrintable(work));
+
 	n = work.indexOf(boundary);
 	if(n == -1)
 		return false;
 	n += boundary.length();
-	i = work.indexOf(boundary, n);
-	if(n == -1)
-		return false;
-	QString tmp_data = work.mid(n, i - n);
-	n = i + boundary.length();
-	i = work.indexOf(boundary_end, n);
+	i = indexOf_newline(work, n);
 	if(i == -1)
 		return false;
-	QString tmp_sig = work.mid(n, i - n);
+	n += newline_len(work, i);
+	int data_start = n;
+
+	n = work.indexOf(boundary, data_start);
+	if(n == -1)
+		return false;
+	int data_end = n;
+
+	n = data_end + boundary.length();
+	i = indexOf_newline(work, n);
+	if(i == -1)
+		return false;
+	n += newline_len(work, i);
+	int next = n;
+
+	QString tmp_data = work.mid(data_start, data_end - data_start);
+	n = work.indexOf(boundary_end, next);
+	if(n == -1)
+		return false;
+	QString tmp_sig = work.mid(next, n - next);
 
 	// nuke some newlines
 	if(tmp_data.right(2) == "\r\n")
 		tmp_data.truncate(tmp_data.length() - 2);
+	else if(tmp_data.right(1) == "\n")
+		tmp_data.truncate(tmp_data.length() - 1);
 	if(tmp_sig.right(2) == "\r\n")
 		tmp_sig.truncate(tmp_sig.length() - 2);
+	else if(tmp_sig.right(1) == "\n")
+		tmp_sig.truncate(tmp_sig.length() - 1);
+
 	tmp_sig = open_mime_envelope(tmp_sig);
 
 	*data = tmp_data;
 	*sig = tmp_sig;
 	return true;
+}
+
+static QString idHash(const QString &id)
+{
+	// hash the id and take the rightmost 4 hex characters
+	return QCA::Hash("md5").hashToString(id.toUtf8()).right(4);
 }
 
 // first = ids, second = names
@@ -555,7 +1252,7 @@ static QPair<QStringList, QStringList> getKeyStoreEntryStrings(const QList<QCA::
 	QPair<QStringList, QStringList> out;
 	for(int n = 0; n < list.count(); ++n)
 	{
-		out.first.append(list[n].id());
+		out.first.append(idHash(list[n].id()));
 		out.second.append(list[n].name());
 	}
 	return out;
@@ -594,8 +1291,7 @@ static int findByString(const QPair<QStringList, QStringList> &in, const QString
 
 static QString getKeyStore(const QString &name)
 {
-	//QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
-	QCA::KeyStoreManager ksm;// = QCA::keyStoreManager();
+	QCA::KeyStoreManager ksm;
 	QStringList storeList = ksm.keyStores();
 	int n = findByString(getKeyStoreStrings(storeList, &ksm), name);
 	if(n != -1)
@@ -612,247 +1308,225 @@ static QCA::KeyStoreEntry getKeyStoreEntry(QCA::KeyStore *store, const QString &
 	return QCA::KeyStoreEntry();
 }
 
-static QPair<QCA::PGPKey, QCA::PGPKey> getPGPSecretKey(const QString &name)
+// here are a bunch of get_Foo functions for the various types
+
+// E - generic entry
+// K - private key
+// C - cert
+// X - keybundle
+// P - pgp public key
+// S - pgp secret key
+
+// in all cases but K, the store:obj notation can be used.  if there
+//   is no colon present, then we treat the input as a filename. we
+//   try the file as an exported passive entry id, and if the type
+//   is C or X, we'll fall back to regular files if necessary.
+
+static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false)
 {
-	QPair<QCA::PGPKey, QCA::PGPKey> key;
-	int n = name.indexOf(':');
-	if(n == -1)
-	{
-		printf("missing colon\n");
-		return key;
-	}
-	QString storeName = name.mid(0, n);
-	QString objectName = name.mid(n + 1);
-
-	QCA::KeyStoreManager ksm;
-	QCA::KeyStore store(getKeyStore(storeName), &ksm);
-	if(!store.isValid())
-	{
-		printf("no such store\n");
-		return key;
-	}
-
-	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
-	if(e.isNull())
-	{
-		printf("no such object\n");
-		return key;
-	}
-
-	if(e.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
-	{
-		printf("not a PGPSecretKey\n");
-		return key;
-	}
-
-	key.first = e.pgpSecretKey();
-	key.second = e.pgpPublicKey();
-	return key;
-}
-
-static QCA::PGPKey getPGPPublicKey(const QString &name)
-{
-	QCA::PGPKey key;
-	int n = name.indexOf(':');
-	if(n == -1)
-	{
-		printf("missing colon\n");
-		return key;
-	}
-	QString storeName = name.mid(0, n);
-	QString objectName = name.mid(n + 1);
-
-	QCA::KeyStoreManager ksm;
-	QCA::KeyStore store(getKeyStore(storeName), &ksm);
-	if(!store.isValid())
-	{
-		printf("no such store\n");
-		return key;
-	}
-
-	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
-	if(e.isNull())
-	{
-		printf("no such object\n");
-		return key;
-	}
-
-	if(e.type() != QCA::KeyStoreEntry::TypePGPPublicKey && e.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
-	{
-		printf("not a PGPPublicKey\n");
-		return key;
-	}
-
-	return e.pgpPublicKey();
-}
-
-static QCA::Certificate getCertificate(const QString &name)
-{
-	QCA::Certificate cert;
+	QCA::KeyStoreEntry entry;
 
 	int n = name.indexOf(':');
-	if(n == -1)
+	if(n != -1)
 	{
-		cert = QCA::Certificate::fromPEMFile(name);
-		if(cert.isNull())
-			printf("Error reading cert file\n");
+		// store:obj lookup
+		QString storeName = name.mid(0, n);
+		QString objectName = name.mid(n + 1);
 
-		return cert;
+		QCA::KeyStoreManager ksm;
+		QCA::KeyStore store(getKeyStore(storeName), &ksm);
+		if(!store.isValid())
+		{
+			fprintf(stderr, "Error: no such store [%s].\n", qPrintable(storeName));
+			return entry;
+		}
+
+		entry = getKeyStoreEntry(&store, objectName);
+		if(entry.isNull())
+		{
+			fprintf(stderr, "Error: no such object [%s].\n", qPrintable(objectName));
+			return entry;
+		}
+	}
+	else
+	{
+		// TODO: users of this function assume objects will also exist
+
+		// exported id
+		QString id = read_ksentry_file(name);
+		entry = QCA::KeyStoreEntry(id);
+		if(entry.isNull())
+		{
+			if(!nopassiveerror)
+				fprintf(stderr, "Error: invalid/unknown entry [%s].\n", qPrintable(name));
+			return entry;
+		}
 	}
 
-	QString storeName = name.mid(0, n);
-	QString objectName = name.mid(n + 1);
-
-	QCA::KeyStoreManager ksm;
-	QCA::KeyStore store(getKeyStore(storeName), &ksm);
-	if(!store.isValid())
-	{
-		printf("no such store\n");
-		return cert;
-	}
-
-	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
-	if(e.isNull())
-	{
-		printf("no such object\n");
-		return cert;
-	}
-
-	if(e.type() != QCA::KeyStoreEntry::TypeCertificate)
-	{
-		printf("not a certificate\n");
-		return cert;
-	}
-
-	cert = e.certificate();
-	return cert;
+	return entry;
 }
 
-static QCA::PrivateKey getPrivateKey(const QString &name)
+static QCA::PrivateKey get_K(const QString &name, const QSecureArray &pass)
 {
 	QCA::PrivateKey key;
 
 	int n = name.indexOf(':');
-	if(n == -1)
+	if(n != -1)
 	{
-		key = QCA::PrivateKey::fromPEMFile(name);
+		fprintf(stderr, "Error: cannot use store:obj notation for raw private keys.\n");
+		return key;
+	}
+
+	QCA::ConvertResult result;
+	key = QCA::PrivateKey::fromPEMFile(name, pass, &result);
+	if(result == QCA::ErrorDecode)
+	{
+		key = QCA::PrivateKey::fromDER(read_der_file(name), pass);
 		if(key.isNull())
-			printf("Error reading private key file\n");
-
-		return key;
+		{
+			printf("Error: unable to read/process private key file.\n");
+			return key;
+		}
 	}
 
-	QString storeName = name.mid(0, n);
-	QString objectName = name.mid(n + 1);
+	return key;
+}
 
-	QCA::KeyStoreManager ksm;
-	QCA::KeyStore store(getKeyStore(storeName), &ksm);
-	if(!store.isValid())
+static QCA::Certificate get_C(const QString &name)
+{
+	QCA::KeyStoreEntry entry = get_E(name, true);
+	if(!entry.isNull())
 	{
-		printf("no such store\n");
-		return key;
+		if(entry.type() != QCA::KeyStoreEntry::TypeCertificate)
+		{
+			printf("Error: entry is not a certificate.\n");
+			return QCA::Certificate();
+		}
+		return entry.certificate();
 	}
 
-	QCA::KeyStoreEntry e = getKeyStoreEntry(&store, objectName);
-	if(e.isNull())
+	// try file
+	QCA::Certificate cert = QCA::Certificate::fromPEMFile(name);
+	if(cert.isNull())
 	{
-		printf("no such object\n");
-		return key;
+		cert = QCA::Certificate::fromDER(read_der_file(name));
+		if(cert.isNull())
+		{
+			printf("Error: unable to read/process certificate file.\n");
+			return cert;
+		}
 	}
 
-	if(e.type() != QCA::KeyStoreEntry::TypeKeyBundle)
+	return cert;
+}
+
+static QCA::KeyBundle get_X(const QString &name)
+{
+	QCA::KeyStoreEntry entry = get_E(name, true);
+	if(!entry.isNull())
 	{
-		printf("not a keybundle\n");
+		if(entry.type() != QCA::KeyStoreEntry::TypeKeyBundle)
+		{
+			printf("Error: entry is not a keybundle.\n");
+			return QCA::KeyBundle();
+		}
+		return entry.keyBundle();
+	}
+
+	// try file
+	// TODO: remove passphrase arg after api update
+	QCA::KeyBundle key = QCA::KeyBundle::fromFile(name, QSecureArray());
+	if(key.isNull())
+	{
+		printf("Error: unable to read/process keybundle file.\n");
 		return key;
 	}
 
-	QCA::KeyBundle kb = e.keyBundle();
-	return kb.privateKey();
+	return key;
+}
+
+static QCA::PGPKey get_P(const QString &name)
+{
+	QCA::PGPKey key;
+	QCA::KeyStoreEntry entry = get_E(name);
+	if(!entry.isNull())
+	{
+		if(entry.type() != QCA::KeyStoreEntry::TypePGPPublicKey && entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
+		{
+			printf("Error: entry is not a pgp public key.\n");
+			return key;
+		}
+		return entry.pgpPublicKey();
+	}
+	return key;
+}
+
+static QPair<QCA::PGPKey, QCA::PGPKey> get_S(const QString &name)
+{
+	QPair<QCA::PGPKey, QCA::PGPKey> key;
+	QCA::KeyStoreEntry entry = get_E(name);
+	if(!entry.isNull())
+	{
+		if(entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
+		{
+			printf("Error: entry is not a pgp secret key.\n");
+			return key;
+		}
+
+		key.first = entry.pgpSecretKey();
+		key.second = entry.pgpPublicKey();
+		return key;
+	}
+	return key;
 }
 
 static void usage()
 {
-	printf("qcatool: simple qca testing tool\n");
-	printf("usage: qcatool [--command] (options)\n");
-	printf("commands:\n");
-	printf("  --help\n");
-	printf("  --plugins [-d]\n");
-	printf("  --config save plugin\n");
+	printf("qcatool: simple qca utility\n");
+	printf("usage: qcatool (options) [command]\n");
+	printf(" options: --pass=x, --newpass=x, --nonroots=x, --roots=x, --nosys,\n");
+	printf("          --noprompt, --ordered, --debug\n");
 	printf("\n");
-	printf("  --genrsa [bits] (passphrase)\n");
-	printf("  --gendsa [512|768|1024] (passphrase)\n");
-	printf("  --gendh [1024|2048|4096]\n");
-	printf("\n");
-	printf("  --encrypt [pub.pem] [messagefile]\n");
-	printf("  --decrypt [priv.pem] [encryptedfile] (passphrase)\n");
-	printf("  --sign [priv.pem] (passphrase)\n");
-	printf("  --verify [pub.pem]\n");
-	printf("  --derivekey [priv.txt] [peerpub.txt]\n");
-	printf("\n");
-	printf("  --makeselfcert [priv.pem] [ca|user] (passphrase)\n");
-	printf("  --makereq [priv.pem] (passphrase)\n");
-	printf("  --showcert [cert.pem]\n");
-	printf("  --showreq [certreq.pem]\n");
-	printf("  --validate [cert.pem] (nonroots.pem)\n");
-	printf("\n");
-	printf("  --extract-keybundle [cert.p12] (passphrase)\n");
-	printf("\n");
-	printf("  --list-keystores\n");
-	printf("  --list-keystore [storeName]\n");
-	printf("\n");
-	printf("  --smime sign [priv.pem|X] [messagefile] [cert.pem] [nonroots.pem] (passphrase)\n");
-	printf("  --smime verify [messagefile]\n");
-	printf("  --smime encrypt [cert.pem] [messagefile]\n");
-	printf("  --smime decrypt [priv.pem] [messagefile] [cert.pem] (passphrase)\n");
-	printf("\n");
-	printf("  --pgp clearsign [S] [messagefile]\n");
-	printf("  --pgp signdetach [S] [messagefile]\n");
-	printf("  --pgp verifydetach [messagefile] [sig]\n");
-	printf("  --pgp encrypt [P] [messagefile]\n");
-	printf("  --pgp decrypt [encryptedfile]\n");
-	printf("\n");
-	printf("  --list-tlsciphers\n");
-	printf("  --showentry [keystoreentry id]\n");
-	printf("\n");
-
-	// TODO: showentry?
-	/*printf("qcatool: simple qca utility\n");
-	printf("usage: qcatool (--pass, --noprompt) [command]\n");
-	printf("\n");
+	printf(" help|--help|-h                        This help text\n");
+	printf(" plugins                               List available plugins\n");
 	printf(" key [command]\n");
-	printf("   make rsa|dsa [bits]                Create a key pair\n");
-	printf("   changepass (--newpass) [priv.pem]  Add/change passphrase of a key\n");
-	printf("   removepass [priv.pem]              Remove passphrase of a key\n");
+	printf("   make rsa|dsa [bits]                 Create a key pair\n");
+	printf("   changepass [K]                      Add/change/remove passphrase of a key\n");
 	printf(" cert [command]\n");
-	printf("   makereq [K]                        Create certificate request (CSR)\n");
-	printf("   makeself [K] ca|user               Create self-signed certificate\n");
-	printf("   validate [C] (nonroots.pem)        Validate certificate\n");
+	printf("   makereq [K]                         Create certificate request (CSR)\n");
+	printf("   makeself [K]                        Create self-signed certificate\n");
+	printf("   makereqadv [K]                      Advanced version of 'makereq'\n");
+	printf("   makeselfadv [K]                     Advanced version of 'makeself'\n");
+	printf("   validate [C]                        Validate certificate\n");
 	printf(" keybundle [command]\n");
-	printf("   make [K] [C] (nonroots.pem)        Create a keybundle\n");
-	printf("   extract                            Extract certificate(s) and key\n");
-	printf("   changepass (--newpass)             Change passphrase of a keybundle\n");
+	printf("   make [K] [C]                        Create a keybundle\n");
+	printf("   extract [X]                         Extract certificate(s) and key\n");
+	printf("   changepass [X]                      Change passphrase of a keybundle\n");
 	printf(" keystore [command]\n");
-	printf("   list-stores                        List all available keystores\n");
-	printf("   list [storeName]                   List content of a keystore\n");
-	printf("   addcert [storeName] [cert.p12]     Add a keybundle into a keystore\n");
-	printf("   addpgp [storeName] [key.asc]       Add a PGP key into a keystore\n");
-	printf("   remove [storeName] [objectName]    Remove an object from a keystore\n");
+	printf("   list-stores                         List all available keystores\n");
+	printf("   list [storeName]                    List content of a keystore\n");
+	printf("   export [E]                          Export a keystore entry's content\n");
+	printf("   exportref [E]                       Export a keystore entry reference\n");
+	printf("   addkb [storeName] [cert.p12]        Add a keybundle into a keystore\n");
+	printf("   addpgp [storeName] [key.asc]        Add a PGP key into a keystore\n");
+	printf("   remove [E]                          Remove an object from a keystore\n");
 	printf(" show [command]\n");
-	printf("   cert [C]                           Examine a certificate\n");
-	printf("   req [req.pem]                      Examine a certificate request (CSR)\n");
-	printf("   pgp [P|S]                          Examine a PGP key\n");
+	printf("   cert [C]                            Examine a certificate\n");
+	printf("   req [req.pem]                       Examine a certificate request (CSR)\n");
+	printf("   pgp [P|S]                           Examine a PGP key\n");
 	printf(" message [command]\n");
-	printf("   sign pgp|pgpdetach|smime [X|S]     Sign a message\n");
-	printf("   encrypt pgp|smime [C|P]            Encrypt a message\n");
-	printf("   signencrypt [S] [P]                PGP sign & encrypt a message\n");
-	printf("   verify pgp|smime                   Verify a message\n");
-	printf("   decrypt pgp|smime [X|S]            Decrypt a message\n");
+	printf("   sign pgp|pgpdetach|smime [X|S]      Sign a message\n");
+	printf("   encrypt pgp|smime [C|P]             Encrypt a message\n");
+	printf("   signencrypt [S] [P]                 PGP sign & encrypt a message\n");
+	printf("   verify pgp|smime                    Verify a message\n");
+	printf("   decrypt pgp|smime (X)               Decrypt a message (S/MIME needs X)\n");
+	printf("   exportcerts                         Export certs from S/MIME message\n");
 	printf("\n");
 	printf("Object types: K = private key, C = certificate, X = key bundle,\n");
-	printf("  P = PGP public key, S = PGP secret key\n");
+	printf("  P = PGP public key, S = PGP secret key, E = generic entry\n");
 	printf("\n");
 	printf("An object must be either a filename or a keystore reference (\"store:obj\").\n");
-	printf("\n");*/
+	printf("\n");
 }
 
 int main(int argc, char **argv)
@@ -860,33 +1534,9 @@ int main(int argc, char **argv)
 	QCA::Initializer qcaInit;
 	QCoreApplication app(argc, argv);
 
-	/*if(!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
-	{
-		printf("Error: no RSA support\n");
-		return 1;
-	}
-
-	if(!QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
-	{
-		printf("Error: no DSA support\n");
-		return 1;
-	}
-
-	if(!QCA::PKey::supportedTypes().contains(QCA::PKey::DH))
-	{
-		printf("Error: no DH support\n");
-		return 1;
-	}
-
-	if(!QCA::isSupported("cert"))
-	{
-		printf("Error: no cert support\n");
-		return 1;
-	}*/
-
 	QStringList args;
 	for(int n = 1; n < argc; ++n)
-		args.append(QString(argv[n]));
+		args.append(QString::fromLocal8Bit(argv[n]));
 
 	if(args.count() < 1)
 	{
@@ -894,13 +1544,76 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if(args[0] == "--help")
+	bool have_pass = false;
+	bool have_newpass = false;
+	QSecureArray pass, newpass;
+	bool allowprompt = true;
+	bool ordered = false;
+	bool debug = false;
+	bool nosys = false;
+	QString rootsFile, nonRootsFile;
+
+	for(int n = 0; n < args.count(); ++n)
+	{
+		QString s = args[n];
+		if(!s.startsWith("--"))
+			continue;
+		QString var;
+		QString val;
+		int x = s.indexOf('=');
+		if(x != -1)
+		{
+			var = s.mid(2, x - 2);
+			val = s.mid(x + 1);
+		}
+		else
+		{
+			var = s.mid(2);
+		}
+
+		bool known = true;
+
+		if(var == "pass")
+		{
+			have_pass = true;
+			pass = val.toUtf8();
+		}
+		else if(var == "newpass")
+		{
+			have_newpass = true;
+			newpass = val.toUtf8();
+		}
+		else if(var == "noprompt")
+			allowprompt = false;
+		else if(var == "ordered")
+			ordered = true;
+		else if(var == "debug")
+			debug = true;
+		else if(var == "roots")
+			rootsFile = val;
+		else if(var == "nonroots")
+			nonRootsFile = val;
+		else if(var == "nosys")
+			nosys = true;
+		else
+			known = false;
+
+		if(known)
+		{
+			args.removeAt(n);
+			--n; // adjust position
+		}
+	}
+
+	// help
+	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
 	{
 		usage();
 		return 1;
 	}
 
-	if(args[0] == "--plugins")
+	// show plugins
+	if(args[0] == "plugins")
 	{
 		printf("Qt Library Paths:\n");
 		QStringList paths = QCoreApplication::libraryPaths();
@@ -917,15 +1630,6 @@ int main(int argc, char **argv)
 		QCA::scanForPlugins();
 		QCA::ProviderList list = QCA::providers();
 
-		bool debug = false;
-		for(int n = 1; n < args.count(); ++n)
-		{
-			if(args[n] == "-d")
-			{
-				debug = true;
-				break;
-			}
-		}
 		if(debug)
 		{
 			QString str = QCA::pluginDiagnosticText();
@@ -962,8 +1666,11 @@ int main(int argc, char **argv)
 			for(int n = 0; n < lines.count(); ++n)
 				printf("qca: %s\n", qPrintable(lines[n]));
 		}
+
 		return 0;
 	}
+
+	// for all commands besides help and plugins, we set up keystore/prompter:
 
 	// activate the KeyStoreManager and block until ready
 	QCA::KeyStoreManager::start();
@@ -971,17 +1678,18 @@ int main(int argc, char **argv)
 		QCA::KeyStoreManager ksm;
 		ksm.waitForBusyFinished();
 	}
-	//QCA::keyStoreManager()->start();
-	//QCA::keyStoreManager()->waitForBusyFinished();
 
-	// hook a passphrase prompt onto all the KeyStores
+	// enable console passphrase prompt
 	PassphrasePrompt passphrasePrompt;
+	if(!allowprompt)
+		passphrasePrompt.allowPrompt = false;
+	if(have_pass)
+		passphrasePrompt.setExplicitPassword(pass);
 
-	bool genrsa = false;
-	bool gendsa = false;
-	bool gendh = false;
-
-	if(args[0] == "--genrsa")
+	// TODO: instead of printing full usage at every wrong turn, we might
+	//       try to print something closer to the context.
+	// TODO: for each kind of operation, we need to check for support first!!
+	if(args[0] == "key")
 	{
 		if(args.count() < 2)
 		{
@@ -989,518 +1697,266 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		genrsa = true;
-	}
-	if(args[0] == "--gendsa")
-	{
-		if(args.count() < 2)
+		if(args[1] == "make")
 		{
-			usage();
-			return 1;
-		}
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
 
-		gendsa = true;
-	}
-	else if(args[0] == "--gendh")
-	{
-		if(args.count() < 2)
-		{
-			usage();
-			return 1;
-		}
+			bool genrsa;
+			int bits;
 
-		gendh = true;
-	}
-
-	if (args[0] == "--config")
-	{
-		if(args.count() < 3)
-		{
-			usage();
-			return 1;
-		}
-
-		QString op = args[1];
-		QString name = args[2];
-
-		if (op == "save") {
-			QVariantMap map1 = QCA::getProviderConfig(name);
-			QCA::setProviderConfig(name, map1);
-			QCA::saveProviderConfig(name);
-			printf("Done.\n");
-		}
-		else {
-			usage();
-			return 1;
-		}
-	}
-	else if(genrsa || gendsa || gendh)
-	{
-		QCA::PrivateKey priv;
-		QString pubname, privname;
-
-		if(genrsa)
-		{
-			int bits = args[1].toInt();
-
-			// note: last arg here is bogus
-			priv = AnimatedKeyGen::makeKey(QCA::PKey::RSA, bits, QCA::DSA_512);
-			pubname = "rsapub.pem";
-			privname = "rsapriv.pem";
-		}
-		else if(gendsa)
-		{
-			QCA::DLGroupSet set;
-			if(args[1] == "512")
-				set = QCA::DSA_512;
-			else if(args[1] == "768")
-				set = QCA::DSA_768;
-			else if(args[1] == "1024")
-				set = QCA::DSA_1024;
+			if(args[2] == "rsa")
+			{
+				genrsa = true;
+				bits = args[3].toInt();
+				if(bits < 512)
+				{
+					fprintf(stderr, "Error: RSA bits must be at least 512.\n");
+					return 1;
+				}
+			}
+			else if(args[2] == "dsa")
+			{
+				genrsa = false;
+				bits = args[3].toInt();
+				if(bits != 512 && bits != 768 && bits != 1024)
+				{
+					fprintf(stderr, "Error: DSA bits must be 512, 768, or 1024.\n");
+					return 1;
+				}
+			}
 			else
 			{
 				usage();
 				return 1;
 			}
 
-			priv = AnimatedKeyGen::makeKey(QCA::PKey::DSA, 0, set);
-			pubname = "dsapub.pem";
-			privname = "dsapriv.pem";
-		}
-		else if(gendh)
-		{
-			QCA::DLGroupSet set;
-			if(args[1] == "1024")
-				set = QCA::IETF_1024;
-			else if(args[1] == "2048")
-				set = QCA::IETF_2048;
-			else if(args[1] == "4096")
-				set = QCA::IETF_4096;
-			else
+			if(!allowprompt && !have_newpass)
 			{
-				usage();
+				fprintf(stderr, "Error: no passphrase specified (use '--newpass=' for none).\n");
 				return 1;
 			}
 
-			priv = AnimatedKeyGen::makeKey(QCA::PKey::DH, 0, set);
-			pubname = "dhpub.txt";
-			privname = "dhpriv.txt";
-		}
+			QCA::PrivateKey priv;
+			QString pubFileName, privFileName;
 
-		if(priv.isNull())
-		{
-			printf("Error: unable to generate key\n");
-			return 1;
-		}
+			if(genrsa)
+			{
+				// note: third arg is bogus, doesn't apply to RSA
+				priv = AnimatedKeyGen::makeKey(QCA::PKey::RSA, bits, QCA::DSA_512);
+				pubFileName = "rsapub.pem";
+				privFileName = "rsapriv.pem";
+			}
+			else // dsa
+			{
+				QCA::DLGroupSet set;
+				if(bits == 512)
+					set = QCA::DSA_512;
+				else if(bits == 768)
+					set = QCA::DSA_768;
+				else // 1024
+					set = QCA::DSA_1024;
 
-		QCA::PublicKey pub = priv.toPublicKey();
+				// note: second arg is bogus, doesn't apply to DSA
+				priv = AnimatedKeyGen::makeKey(QCA::PKey::DSA, 0, set);
+				pubFileName = "dsapub.pem";
+				privFileName = "dsapriv.pem";
+			}
 
-		if(genrsa || gendsa)
-		{
-			QSecureArray passphrase;
-			if(args.count() >= 3)
-			 	passphrase = args[2].toLatin1();
+			if(priv.isNull())
+			{
+				fprintf(stderr, "Error: unable to generate key.\n");
+				return 1;
+			}
 
-			if(pub.toPEMFile(pubname))
-				printf("Public key saved to %s\n", pubname.toLatin1().data());
+			QCA::PublicKey pub = priv.toPublicKey();
+
+			// prompt for new passphrase if necessary
+			if(!have_newpass)
+			{
+				while(!promptForNewPassphrase(&newpass))
+				{
+				}
+				have_newpass = true;
+			}
+
+			if(pub.toPEMFile(pubFileName))
+				printf("Public key saved to %s\n", qPrintable(pubFileName));
 			else
 			{
-				printf("Error writing %s\n", pubname.toLatin1().data());
+				fprintf(stderr, "Error: can't encode/write %s\n", qPrintable(pubFileName));
 				return 1;
 			}
 
 			bool ok;
-			if(!passphrase.isEmpty())
-				ok = priv.toPEMFile(privname, passphrase);
+			if(!newpass.isEmpty())
+				ok = priv.toPEMFile(privFileName, newpass);
 			else
-				ok = priv.toPEMFile(privname);
+				ok = priv.toPEMFile(privFileName);
 			if(ok)
-				printf("Private key saved to %s\n", privname.toLatin1().data());
+				printf("Private key saved to %s\n", qPrintable(privFileName));
 			else
 			{
-				printf("Error writing %s\n", privname.toLatin1().data());
+				fprintf(stderr, "Error: can't encode/write %s\n", qPrintable(privFileName));
 				return 1;
 			}
 		}
-		else
+		else if(args[1] == "changepass")
 		{
-			if(write_dhpublickey_file(pub, pubname))
-				printf("Public key saved to %s\n", pubname.toLatin1().data());
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			// TODO: is it weird passing 'pass' here?
+			QCA::PrivateKey priv = get_K(args[2], pass);
+			if(priv.isNull())
+				return 1;
+
+			if(!allowprompt && !have_newpass)
+			{
+				fprintf(stderr, "Error: no passphrase specified (use '--newpass=' for none).\n");
+				return 1;
+			}
+
+			// prompt for new passphrase if necessary
+			if(!have_newpass)
+			{
+				while(!promptForNewPassphrase(&newpass))
+				{
+				}
+				have_newpass = true;
+			}
+
+			QString out;
+			if(!newpass.isEmpty())
+				out = priv.toPEM(newpass);
+			else
+				out = priv.toPEM();
+			if(!out.isEmpty())
+				printf("%s", qPrintable(out));
 			else
 			{
-				printf("Error writing %s\n", pubname.toLatin1().data());
+				fprintf(stderr, "Error: can't encode key.\n");
+				return 1;
+			}
+		}
+		else
+		{
+			usage();
+			return 1;
+		}
+	}
+	else if(args[0] == "cert")
+	{
+		if(args.count() < 2)
+		{
+			usage();
+			return 1;
+		}
+
+		if(args[1] == "makereq" || args[1] == "makereqadv")
+		{
+			if(args.count() < 3)
+			{
+				usage();
 				return 1;
 			}
 
-			if(write_dhprivatekey_file(priv, privname))
-				printf("Private key saved to %s\n", privname.toLatin1().data());
+			// TODO: same as before
+			QCA::PrivateKey priv = get_K(args[2], pass);
+			if(priv.isNull())
+				return 1;
+
+			printf("\n");
+
+			bool advanced = (args[1] == "makereqadv") ? true: false;
+
+			QCA::CertificateOptions opts = promptForCertAttributes(advanced, true);
+			QCA::CertificateRequest req(opts, priv);
+
+			QString reqname = "certreq.pem";
+			if(req.toPEMFile(reqname))
+				printf("Certificate request saved to %s\n", qPrintable(reqname));
 			else
 			{
-				printf("Error writing %s\n", privname.toLatin1().data());
+				fprintf(stderr, "Error: can't encode/write %s\n", qPrintable(reqname));
 				return 1;
 			}
 		}
-	}
-	else if(args[0] == "--encrypt")
-	{
-		if(args.count() < 3)
+		else if(args[1] == "makeself" || args[1] == "makeselfadv")
 		{
-			usage();
-			return 1;
-		}
-
-		QCA::PublicKey key(args[1]);
-		if(key.isNull())
-		{
-			printf("Error reading key file\n");
-			return 1;
-		}
-
-		if(!key.canEncrypt())
-		{
-			printf("Error: this kind of key cannot encrypt\n");
-			return 1;
-		}
-
-		QCA::EncryptionAlgorithm alg = QCA::EME_PKCS1_OAEP;
-		int max = key.maximumEncryptSize(alg);
-
-		QByteArray buf;
-		{
-			QFile infile(args[2]);
-			if(!infile.open(QFile::ReadOnly))
+			if(args.count() < 3)
 			{
-				printf("Error opening message file\n");
+				usage();
 				return 1;
 			}
 
-			if(infile.size() > max)
-				fprintf(stderr, "Warning: input size is greater than key maximum, result will be truncated\n");
+			// TODO: same as before
+			QCA::PrivateKey priv = get_K(args[2], pass);
+			if(priv.isNull())
+				return 1;
 
-			buf = infile.read(max);
-		}
+			printf("\n");
 
-		QFile outfile("rsaenc.txt");
-		if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
-		{
-			printf("Error opening output file\n");
-			return 1;
-		}
+			bool advanced = (args[1] == "makeselfadv") ? true: false;
 
-		QSecureArray result = key.encrypt(buf, alg);
+			QCA::CertificateOptions opts = promptForCertAttributes(advanced, false);
+			QCA::Certificate cert(opts, priv);
 
-		QString str = QCA::Base64().arrayToString(result);
-		QTextStream ts(&outfile);
-		ts << str << endl;
-
-		printf("Wrote %s\n", outfile.fileName().toLatin1().data());
-	}
-	else if(args[0] == "--decrypt")
-	{
-		if(args.count() < 3)
-		{
-			usage();
-			return 1;
-		}
-
-		QSecureArray passphrase;
-		if(args.count() >= 4)
-			passphrase = args[3].toLatin1();
-
-		QCA::PrivateKey key;
-		if(!passphrase.isEmpty())
-			key = QCA::PrivateKey(args[1], passphrase);
-		else
-			key = QCA::PrivateKey(args[1]);
-		if(key.isNull())
-		{
-			printf("Error reading key file\n");
-			return 1;
-		}
-
-		if(!key.canDecrypt())
-		{
-			printf("Error: this kind of key cannot create decrypt\n");
-			return 1;
-		}
-
-		QCA::EncryptionAlgorithm alg = QCA::EME_PKCS1_OAEP;
-
-		QSecureArray buf;
-		{
-			QFile infile(args[2]);
-			if(!infile.open(QFile::ReadOnly))
+			QString certname = "cert.pem";
+			if(cert.toPEMFile(certname))
+				printf("Certificate saved to %s\n", qPrintable(certname));
+			else
 			{
-				printf("Error opening input file\n");
+				fprintf(stderr, "Error: can't encode/write %s\n", qPrintable(certname));
 				return 1;
 			}
-			QTextStream ts(&infile);
-			QString str = ts.readLine();
-			buf = QCA::Base64().stringToArray(str);
 		}
-
-		QSecureArray result;
-		if(!key.decrypt(buf, &result, alg))
+		else if(args[1] == "validate")
 		{
-			printf("Error decrypting\n");
-			return 1;
-		}
-
-		printf("%s\n", result.data());
-	}
-	else if(args[0] == "--sign")
-	{
-		if(args.count() < 2)
-		{
-			usage();
-			return 1;
-		}
-
-		QSecureArray passphrase;
-		if(args.count() >= 3)
-			passphrase = args[2].toLatin1();
-
-		QCA::PrivateKey key;
-		if(!passphrase.isEmpty())
-			key = QCA::PrivateKey(args[1], passphrase);
-		else
-			key = QCA::PrivateKey(args[1]);
-		if(key.isNull())
-		{
-			fprintf(stderr, "Error reading key file\n");
-			return 1;
-		}
-
-		if(!key.canSign())
-		{
-			fprintf(stderr, "Error: this kind of key cannot create signatures\n");
-			return 1;
-		}
-
-		if(key.isRSA())
-			key.startSign(QCA::EMSA3_MD5);
-		else
-			key.startSign(QCA::EMSA1_SHA1);
-
-		while(!feof(stdin))
-		{
-			QByteArray block(1024, 0);
-			int n = fread(block.data(), 1, 1024, stdin);
-			if(n < 0)
-				break;
-			block.resize(n);
-			key.update(block);
-		}
-
-		QSecureArray sig = key.signature();
-
-		QString str = QCA::Base64().arrayToString(sig);
-		printf("%s\n", qPrintable(str));
-	}
-	else if(args[0] == "--verify")
-	{
-		if(args.count() < 2)
-		{
-			usage();
-			return 1;
-		}
-
-		QCA::PublicKey key(args[1]);
-		if(key.isNull())
-		{
-			fprintf(stderr, "Error reading key file\n");
-			return 1;
-		}
-
-		if(!key.canVerify())
-		{
-			fprintf(stderr, "Error: this kind of key cannot verify signatures\n");
-			return 1;
-		}
-
-		// first line is the sig
-		bool newline = false;
-		QByteArray sigenc;
-		QByteArray rest;
-		while(!feof(stdin))
-		{
-			QByteArray block(1024, 0);
-			int n = fread(block.data(), 1, 1024, stdin);
-			if(n < 0)
-				break;
-			block.resize(n);
-
-			// look for newline
-			int at = block.indexOf('\n');
-			if(at != -1)
+			if(args.count() < 3)
 			{
-				QByteArray last(at, 0);
-				memcpy(last.data(), block.data(), at);
-				sigenc += last;
-
-				// store the rest
-				++at; // skip over newline
-				rest.resize(block.size() - at);
-				memcpy(rest.data(), block.data() + at, rest.size());
-				newline = true;
-				break;
+				usage();
+				return 1;
 			}
 
-			sigenc += block;
+			QCA::Certificate target = get_C(args[2]);
+			if(target.isNull())
+				return 1;
+
+			// get roots
+			QCA::CertificateCollection roots;
+			if(!nosys)
+				roots += QCA::systemStore();
+			if(!rootsFile.isEmpty())
+				roots += QCA::CertificateCollection::fromFlatTextFile(rootsFile);
+
+			// get nonroots
+			QCA::CertificateCollection nonroots;
+			if(!nonRootsFile.isEmpty())
+				nonroots = QCA::CertificateCollection::fromFlatTextFile(nonRootsFile);
+
+			QCA::Validity v = target.validate(roots, nonroots);
+			if(v == QCA::ValidityGood)
+				printf("Certificate is valid\n");
+			else
+			{
+				printf("Certificate is NOT valid: %s\n", qPrintable(validityToString(v)));
+				return 1;
+			}
 		}
-
-		if(!newline)
-		{
-			fprintf(stderr, "Error reading signature\n");
-			return 1;
-		}
-
-		QSecureArray sig = QCA::Base64().decode(sigenc);
-
-		if(key.isRSA())
-			key.startVerify(QCA::EMSA3_MD5);
 		else
-			key.startVerify(QCA::EMSA1_SHA1);
-
-		key.update(rest);
-
-		while(!feof(stdin))
-		{
-			QByteArray block(1024, 0);
-			int n = fread(block.data(), 1, 1024, stdin);
-			if(n < 0)
-				break;
-			block.resize(n);
-			key.update(block);
-		}
-
-		if(key.validSignature(sig))
-			printf("Signature verified\n");
-		else
-		{
-			printf("Signature did NOT verify\n");
-			return 1;
-		}
-	}
-	else if(args[0] == "--derivekey")
-	{
-		if(args.count() < 3)
 		{
 			usage();
 			return 1;
 		}
-
-		QCA::PrivateKey priv = read_dhprivatekey_file(args[1]);
-		if(priv.isNull())
-		{
-			printf("Error reading private key file\n");
-			return 1;
-		}
-
-		if(!priv.canKeyAgree())
-		{
-			printf("Error: the private key cannot be used to derive shared keys\n");
-			return 1;
-		}
-
-		QCA::PublicKey pub = read_dhpublickey_file(args[2]);
-		if(pub.isNull())
-		{
-			printf("Error reading public key file\n");
-			return 1;
-		}
-
-		if(!pub.canKeyAgree())
-		{
-			printf("Error: the public key cannot be used to derive shared keys\n");
-			return 1;
-		}
-
-		QCA::SymmetricKey key = priv.deriveKey(pub);
-		if(!key.isEmpty())
-			printf("%s\n", QCA::Base64().arrayToString(key).toLatin1().data());
-		else
-		{
-			printf("Error deriving key\n");
-			return 1;
-		}
 	}
-	else if(args[0] == "--makeselfcert")
-	{
-		if(args.count() < 3)
-		{
-			usage();
-			return 1;
-		}
-
-		QSecureArray passphrase;
-		if(args.count() >= 4)
-			passphrase = args[3].toLatin1();
-
-		QCA::PrivateKey key;
-		if(!passphrase.isEmpty())
-			key = QCA::PrivateKey(args[1], passphrase);
-		else
-			key = QCA::PrivateKey(args[1]);
-		if(key.isNull())
-		{
-			printf("Error reading key file\n");
-			return 1;
-		}
-
-		bool do_ca;
-		if(args[2] == "ca")
-			do_ca = true;
-		else if(args[2] == "user")
-			do_ca = false;
-		else
-		{
-			printf("Must specify 'ca' or 'user' as type\n");
-			return 1;
-		}
-
-		QCA::CertificateOptions opts;
-		//opts.setSerialNumber(QBigInteger("1000000000000"));
-		QCA::CertificateInfo info;
-		info.insert(QCA::CommonName, prompt_for("Common Name"));
-		info.insert(QCA::Country, prompt_for("Country Code (2 letters)"));
-		info.insert(QCA::Organization, prompt_for("Organization"));
-		info.insert(QCA::Email, prompt_for("Email"));
-
-		//info[QCA::URI] = "http://psi.affinix.com/";
-		//info[QCA::DNS] = "psi.affinix.com";
-		//info[QCA::IPAddress] = "192.168.0.1";
-		//info.insert(QCA::XMPP, "justin@andbit.net");
-
-		opts.setInfo(info);
-		if(do_ca)
-			opts.setAsCA();
-
-		//QCA::Constraints constraints;
-		//constraints += QCA::ServerAuth;
-		//constraints += QCA::CodeSigning;
-		//opts.setConstraints(constraints);
-
-		//QStringList policies;
-		//policies += "1.2.3.4";
-		//policies += "1.6.7.8";
-		//opts.setPolicies(policies);
-
-		QDateTime t = QDateTime::currentDateTime().toUTC();
-		opts.setValidityPeriod(t, t.addMonths(1));
-
-		QCA::Certificate cert(opts, key);
-
-		QString certname = "cert.pem";
-		if(cert.toPEMFile(certname))
-			printf("Certificate saved to %s\n", certname.toLatin1().data());
-		else
-		{
-			printf("Error writing %s\n", certname.toLatin1().data());
-			return 1;
-		}
-	}
-	else if(args[0] == "--makereq")
+	else if(args[0] == "keybundle")
 	{
 		if(args.count() < 2)
 		{
@@ -1508,58 +1964,187 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		QSecureArray passphrase;
-		if(args.count() >= 3)
-			passphrase = args[2].toLatin1();
-
-		QCA::PrivateKey key;
-		if(!passphrase.isEmpty())
-			key = QCA::PrivateKey(args[1], passphrase);
-		else
-			key = QCA::PrivateKey(args[1]);
-		if(key.isNull())
+		if(args[1] == "make")
 		{
-			printf("Error reading key file\n");
-			return 1;
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			// TODO: same as before
+			QCA::PrivateKey priv = get_K(args[2], pass);
+			if(priv.isNull())
+				return 1;
+
+			QCA::Certificate cert = get_C(args[3]);
+			if(cert.isNull())
+				return 1;
+
+			// get roots
+			QCA::CertificateCollection roots;
+			if(!nosys)
+				roots += QCA::systemStore();
+			if(!rootsFile.isEmpty())
+				roots += QCA::CertificateCollection::fromFlatTextFile(rootsFile);
+
+			// get nonroots
+			QCA::CertificateCollection nonroots;
+			if(!nonRootsFile.isEmpty())
+				nonroots = QCA::CertificateCollection::fromFlatTextFile(nonRootsFile);
+
+			QList<QCA::Certificate> issuer_pool = roots.certificates() + nonroots.certificates();
+
+			QCA::CertificateChain chain;
+			chain += cert;
+			chain = chain.complete(issuer_pool);
+
+			QCA::KeyBundle key;
+			key.setName(chain.primary().commonName());
+			key.setCertificateChainAndKey(chain, priv);
+
+			if(!allowprompt && !have_newpass)
+			{
+				fprintf(stderr, "Error: no passphrase specified (use '--newpass=' for none).\n");
+				return 1;
+			}
+
+			// prompt for new passphrase if necessary
+			if(!have_newpass)
+			{
+				while(!promptForNewPassphrase(&newpass))
+				{
+				}
+				have_newpass = true;
+			}
+
+			if(newpass.isEmpty())
+			{
+				fprintf(stderr, "Error: keybundles cannot have empty passphrases.\n");
+				return 1;
+			}
+
+			QString newFileName = "cert.p12";
+
+			if(key.toFile(newFileName, newpass))
+				printf("Keybundle saved to %s\n", qPrintable(newFileName));
+			else
+			{
+				fprintf(stderr, "Error: can't encode keybundle.\n");
+				return 1;
+			}
 		}
+		else if(args[1] == "extract")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
 
-		QCA::CertificateOptions opts;
-		QCA::CertificateInfo info;
-		info.insert(QCA::CommonName, prompt_for("Common Name"));
-		info.insert(QCA::Country, prompt_for("Country Code (2 letters)"));
-		info.insert(QCA::Organization, prompt_for("Organization"));
-		info.insert(QCA::Email, prompt_for("Email"));
+			QCA::KeyBundle key = get_X(args[2]);
+			if(key.isNull())
+				return 1;
 
-		opts.setInfo(info);
+			QCA::PrivateKey priv = key.privateKey();
+			bool export_priv = priv.canExport();
 
-		//if(do_ca)
-		//	opts.setAsCA();
+			if(export_priv)
+			{
+				fprintf(stderr, "You will need to create a passphrase for the extracted private key.\n");
 
-		//QCA::Constraints constraints;
-		//constraints += QCA::ServerAuth;
-		//constraints += QCA::CodeSigning;
-		//opts.setConstraints(constraints);
+				if(!allowprompt && !have_newpass)
+				{
+					fprintf(stderr, "Error: no passphrase specified (use '--newpass=' for none).\n");
+					return 1;
+				}
 
-		//QStringList policies;
-		//policies += "1.2.3.4";
-		//policies += "1.6.7.8";
-		//opts.setPolicies(policies);
+				// prompt for new passphrase if necessary
+				if(!have_newpass)
+				{
+					while(!promptForNewPassphrase(&newpass))
+					{
+					}
+					have_newpass = true;
+				}
+			}
 
-		QDateTime t = QDateTime::currentDateTime().toUTC();
-		opts.setValidityPeriod(t, t.addMonths(1));
+			printf("Certs: (first is primary)\n");
+			QCA::CertificateChain chain = key.certificateChain();
+			for(int n = 0; n < chain.count(); ++n)
+				printf("%s", qPrintable(chain[n].toPEM()));
+			printf("Private Key:\n");
+			if(export_priv)
+			{
+				QString out;
+				if(!newpass.isEmpty())
+					out = priv.toPEM(newpass);
+				else
+					out = priv.toPEM();
+				printf("%s", qPrintable(out));
+			}
+			else
+			{
+				printf("(Key is not exportable)\n");
+			}
+		}
+		else if(args[1] == "changepass")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
 
-		QCA::CertificateRequest req(opts, key);
+			QCA::KeyBundle key = get_X(args[2]);
+			if(key.isNull())
+				return 1;
 
-		QString reqname = "certreq.pem";
-		if(req.toPEMFile(reqname))
-			printf("Certificate request saved to %s\n", reqname.toLatin1().data());
+			if(!key.privateKey().canExport())
+			{
+				fprintf(stderr, "Error: private key not exportable.\n");
+				return 1;
+			}
+
+			if(!allowprompt && !have_newpass)
+			{
+				fprintf(stderr, "Error: no passphrase specified (use '--newpass=' for none).\n");
+				return 1;
+			}
+
+			// prompt for new passphrase if necessary
+			if(!have_newpass)
+			{
+				while(!promptForNewPassphrase(&newpass))
+				{
+				}
+				have_newpass = true;
+			}
+
+			if(newpass.isEmpty())
+			{
+				fprintf(stderr, "Error: keybundles cannot have empty passphrases.\n");
+				return 1;
+			}
+
+			QFileInfo fi(args[2]);
+			QString newFileName = fi.baseName() + "_new.p12";
+
+			if(key.toFile(newFileName, newpass))
+				printf("Keybundle saved to %s\n", qPrintable(newFileName));
+			else
+			{
+				fprintf(stderr, "Error: can't encode keybundle.\n");
+				return 1;
+			}
+		}
 		else
 		{
-			printf("Error writing %s\n", reqname.toLatin1().data());
+			usage();
 			return 1;
 		}
 	}
-	else if(args[0] == "--showcert")
+	else if(args[0] == "keystore")
 	{
 		if(args.count() < 2)
 		{
@@ -1567,61 +2152,184 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		QCA::Certificate cert = getCertificate(args[1]);
-		if(cert.isNull())
+		if(args[1] == "list-stores")
+		{
+			QCA::KeyStoreManager ksm;
+			QStringList storeList = ksm.keyStores();
+
+			// find longest id
+			int longest_id = -1;
+			for(int n = 0; n < storeList.count(); ++n)
+			{
+				if(longest_id == -1 || storeList[n].length() > longest_id)
+					longest_id = storeList[n].length();
+			}
+
+			for(int n = 0; n < storeList.count(); ++n)
+			{
+				QCA::KeyStore ks(storeList[n], &ksm);
+				QString type = kstype_to_string(ks.type());
+
+				// give all ids the same width
+				QString id = ks.id();
+				QString str;
+				str.fill(' ', longest_id);
+				str.replace(0, id.length(), id);
+
+				printf("%s %s [%s]\n", qPrintable(type), qPrintable(str), qPrintable(ks.name()));
+			}
+		}
+		else if(args[1] == "list")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::KeyStoreManager ksm;
+			QCA::KeyStore store(getKeyStore(args[2]), &ksm);
+			if(!store.isValid())
+			{
+				fprintf(stderr, "Error: no such store\n");
+				return 1;
+			}
+
+			QList<QCA::KeyStoreEntry> list = store.entryList();
+			for(int n = 0; n < list.count(); ++n)
+			{
+				QCA::KeyStoreEntry i = list[n];
+				QString type = ksentrytype_to_string(i.type());
+				printf("%s %s [%s]\n", qPrintable(type), qPrintable(idHash(i.id())), qPrintable(i.name()));
+			}
+		}
+		else if(args[1] == "export")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::KeyStoreEntry entry = get_E(args[2]);
+			if(entry.isNull())
+				return 1;
+
+			if(entry.type() == QCA::KeyStoreEntry::TypeCertificate)
+				printf("%s", qPrintable(entry.certificate().toPEM()));
+			else if(entry.type() == QCA::KeyStoreEntry::TypeCRL)
+				printf("%s", qPrintable(entry.crl().toPEM()));
+			else if(entry.type() == QCA::KeyStoreEntry::TypePGPPublicKey || entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
+				printf("%s", qPrintable(entry.pgpPublicKey().toString()));
+			else if(entry.type() == QCA::KeyStoreEntry::TypeKeyBundle)
+				fprintf(stderr, "Error: use 'keybundle extract' command instead.\n");
+			else
+				fprintf(stderr, "Error: cannot export type '%d'.\n", entry.type());
+		}
+		else if(args[1] == "exportref")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::KeyStoreEntry entry = get_E(args[2]);
+			if(entry.isNull())
+				return 1;
+			printf("%s", make_ksentry_string(entry.id()).toUtf8().data());
+		}
+		else if(args[1] == "addkb")
+		{
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::KeyStoreManager ksm;
+			QCA::KeyStore store(getKeyStore(args[2]), &ksm);
+			if(!store.isValid())
+			{
+				fprintf(stderr, "Error: no such store\n");
+				return 1;
+			}
+
+			QCA::Certificate cert = get_C(args[3]);
+			if(cert.isNull())
+				return 1;
+
+			if(store.writeEntry(cert))
+				printf("Entry written.\n");
+			else
+			{
+				fprintf(stderr, "Error: unable to write entry.\n");
+				return 1;
+			}
+		}
+		else if(args[1] == "addpgp")
+		{
+			if(args.count() < 4)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::KeyStoreManager ksm;
+			QCA::KeyStore store(getKeyStore(args[2]), &ksm);
+			if(!store.isValid())
+			{
+				fprintf(stderr, "Error: no such store\n");
+				return 1;
+			}
+
+			QCA::PGPKey pub = QCA::PGPKey::fromFile(args[3]);
+			if(pub.isNull())
+				return 1;
+
+			if(!store.writeEntry(pub).isNull())
+				printf("Entry written.\n");
+			else
+			{
+				fprintf(stderr, "Error: unable to write entry.\n");
+				return 1;
+			}
+		}
+		else if(args[1] == "remove")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::KeyStoreEntry entry = get_E(args[2]);
+			if(entry.isNull())
+				return 1;
+
+			QCA::KeyStoreManager ksm;
+			QCA::KeyStore store(entry.storeId(), &ksm);
+			if(!store.isValid())
+			{
+				fprintf(stderr, "Error: no such store\n");
+				return 1;
+			}
+
+			if(store.removeEntry(entry.id()))
+				printf("Entry removed.\n");
+			else
+			{
+				fprintf(stderr, "Error: unable to remove entry.\n");
+				return 1;
+			}
+		}
+		else
+		{
+			usage();
 			return 1;
-
-		printf("Serial Number: %s\n", cert.serialNumber().toString().toLatin1().data());
-
-		print_info("Subject", cert.subjectInfo());
-		print_info("Issuer", cert.issuerInfo());
-
-		printf("Validity\n");
-		printf("   Not before: %s\n", cert.notValidBefore().toString().toLatin1().data());
-		printf("   Not after: %s\n", cert.notValidAfter().toString().toLatin1().data());
-
-		printf("Constraints\n");
-		QCA::Constraints constraints = cert.constraints();
-		int n;
-		if(!constraints.isEmpty())
-		{
-			for(n = 0; n < constraints.count(); ++n)
-				printf("   %s\n", constraint_to_string(constraints[n]).toLatin1().data());
 		}
-		else
-			printf("   No constraints\n");
-
-		printf("Policies\n");
-		QStringList policies = cert.policies();
-		if(!policies.isEmpty())
-		{
-			for(n = 0; n < policies.count(); ++n)
-				printf("   %s\n", policies[n].toLatin1().data());
-		}
-		else
-			printf("   No policies\n");
-
-		// TODO: printf("Signature algorithm: %s\n");
-
-		QByteArray id;
-		printf("Issuer Key ID: ");
-		id = cert.issuerKeyId();
-		if(!id.isEmpty())
-			printf("%s\n", qPrintable(QCA::arrayToHex(id)));
-		else
-			printf("None\n");
-
-		printf("Subject Key ID: ");
-		id = cert.subjectKeyId();
-		if(!id.isEmpty())
-			printf("%s\n", qPrintable(QCA::arrayToHex(id)));
-		else
-			printf("None\n");
-
-		QCA::PublicKey key = cert.subjectPublicKey();
-		printf("Public Key:\n%s", key.toPEM().toLatin1().data());
 	}
-	else if(args[0] == "--showreq")
+	else if(args[0] == "show")
 	{
 		if(args.count() < 2)
 		{
@@ -1629,68 +2337,58 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		QCA::CertificateRequest req(args[1]);
-		if(req.isNull())
+		if(args[1] == "cert")
 		{
-			printf("Error reading cert request file\n");
-			return 1;
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::Certificate cert = get_C(args[2]);
+			if(cert.isNull())
+				return 1;
+
+			print_cert(cert, ordered);
 		}
+		else if(args[1] == "req")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
 
-		print_info("Subject", req.subjectInfo());
+			QCA::CertificateRequest req(args[2]);
+			if(req.isNull())
+			{
+				fprintf(stderr, "Error: can't read/decode certificate request file.\n");
+				return 1;
+			}
 
-		printf("Constraints\n");
-		QCA::Constraints constraints = req.constraints();
-		int n;
-		for(n = 0; n < constraints.count(); ++n)
-			printf("   %s\n", constraint_to_string(constraints[n]).toLatin1().data());
+			print_certreq(req, ordered);
+		}
+		else if(args[1] == "pgp")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
 
-		printf("Policies\n");
-		QStringList policies = req.policies();
-		for(n = 0; n < policies.count(); ++n)
-			printf("   %s\n", policies[n].toLatin1().data());
+			QCA::PGPKey pub = get_P(args[2]);
+			if(pub.isNull())
+				return 1;
 
-		QCA::PublicKey key = req.subjectPublicKey();
-		printf("Public Key:\n%s", key.toPEM().toLatin1().data());
-	}
-	else if(args[0] == "--validate")
-	{
-		if(args.count() < 2)
+			print_pgp(pub);
+		}
+		else
 		{
 			usage();
 			return 1;
 		}
-
-		QCA::Certificate target(args[1]);
-		if(target.isNull())
-		{
-			printf("Error reading cert file\n");
-			return 1;
-		}
-
-		if(!QCA::haveSystemStore())
-		{
-			printf("Error: no system store\n");
-			return 1;
-		}
-
-		// get roots
-		QCA::CertificateCollection roots = QCA::systemStore();
-
-		// get nonroots
-		QCA::CertificateCollection nonroots;
-		if(args.count() >= 3)
-			nonroots = QCA::CertificateCollection::fromFlatTextFile(args[2]);
-
-		QCA::Validity v = target.validate(roots, nonroots);
-		if(v == QCA::ValidityGood)
-			printf("Certificate is valid\n");
-		else
-		{
-			printf("Certificate is NOT valid: %s\n", validityToString(v).toLatin1().data());
-			return 1;
-		}
 	}
-	else if(args[0] == "--smime")
+	else if(args[0] == "message")
 	{
 		if(args.count() < 2)
 		{
@@ -1700,91 +2398,130 @@ int main(int argc, char **argv)
 
 		if(args[1] == "sign")
 		{
-			if(args.count() < 6)
+			if(args.count() < 4)
 			{
 				usage();
 				return 1;
 			}
 
-			QSecureArray passphrase;
-			if(args.count() >= 7)
-				passphrase = args[6].toLatin1();
-
-			QCA::PrivateKey key;
-			if(!passphrase.isEmpty())
-				key = QCA::PrivateKey(args[2], passphrase);
-			else
-				key = getPrivateKey(args[2]);
-			if(key.isNull())
-			{
-				printf("Error reading key file\n");
-				return 1;
-			}
-
-			QCA::Certificate cert(args[4]);
-			if(cert.isNull())
-			{
-				printf("Error reading cert file\n");
-				return 1;
-			}
-
-			QCA::CertificateCollection nonroots = QCA::CertificateCollection::fromFlatTextFile(args[5]);
-
-			QFile infile(args[3]);
-			if(!infile.open(QFile::ReadOnly))
-			{
-				printf("Error opening message file\n");
-				return 1;
-			}
-
+			QCA::SecureMessageSystem *sms;
 			QCA::SecureMessageKey skey;
+			QCA::SecureMessage::SignMode mode;
+			bool pgp = false;
+
+			if(args[2] == "pgp")
 			{
-				QCA::CertificateChain chain;
-				chain += cert;
-				chain += nonroots.certificates();
+				QPair<QCA::PGPKey, QCA::PGPKey> key = get_S(args[3]);
+				if(key.first.isNull())
+					return 1;
+
+				sms = new QCA::OpenPGP;
+				skey.setPGPSecretKey(key.first);
+				mode = QCA::SecureMessage::Clearsign;
+				pgp = true;
+			}
+			else if(args[2] == "pgpdetach")
+			{
+				QPair<QCA::PGPKey, QCA::PGPKey> key = get_S(args[3]);
+				if(key.first.isNull())
+					return 1;
+
+				sms = new QCA::OpenPGP;
+				skey.setPGPSecretKey(key.first);
+				mode = QCA::SecureMessage::Detached;
+				pgp = true;
+			}
+			else if(args[2] == "smime")
+			{
+				QCA::KeyBundle key = get_X(args[3]);
+				if(key.isNull())
+					return 1;
+
+				// get nonroots
+				QCA::CertificateCollection nonroots;
+				if(!nonRootsFile.isEmpty())
+					nonroots = QCA::CertificateCollection::fromFlatTextFile(nonRootsFile);
+
+				QList<QCA::Certificate> issuer_pool = nonroots.certificates();
+
+				QCA::CertificateChain chain = key.certificateChain();
+				chain = chain.complete(issuer_pool);
+
+				sms = new QCA::CMS;
 				skey.setX509CertificateChain(chain);
-				skey.setX509PrivateKey(key);
+				skey.setX509PrivateKey(key.privateKey());
+				mode = QCA::SecureMessage::Detached;
 			}
-
-			QString text = add_cr(QString::fromLatin1(infile.readAll()));
-			QByteArray plain = QString(mime_signpart).arg(text).toLatin1();
-
-			QCA::CMS cms;
-			QCA::SecureMessage msg(&cms);
-			msg.setSigner(skey);
-			msg.startSign(QCA::SecureMessage::Detached);
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
+			else
 			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error signing: [%s]\n", qPrintable(errstr));
+				usage();
 				return 1;
 			}
 
-			QFileInfo fi(infile.fileName());
+			// TODO: support streaming someday ?  we need support in
+			//   the provider as well as our smime envelope stuff
 
-			QFile outfile(fi.baseName() + "_signed.txt");
-			if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
+			// read input data from stdin all at once
+			QByteArray plain;
+			while(!feof(stdin))
 			{
-				printf("Error opening sig file\n");
+				QByteArray block(1024, 0);
+				int n = fread(block.data(), 1, 1024, stdin);
+				if(n < 0)
+					break;
+				block.resize(n);
+				plain += block;
+			}
+
+			// smime envelope
+			if(!pgp)
+			{
+				QString text = add_cr(QString::fromUtf8(plain));
+				plain = QString(mime_signpart).arg(text).toUtf8();
+			}
+
+			QCA::SecureMessage *msg = new QCA::SecureMessage(sms);
+			msg->setSigner(skey);
+			// pgp should always be ascii
+			if(pgp)
+				msg->setFormat(QCA::SecureMessage::Ascii);
+			msg->startSign(mode);
+			msg->update(plain);
+			msg->end();
+			msg->waitForFinished(-1);
+
+			if(!msg->success())
+			{
+				QString errstr = smErrorToString(msg->errorCode());
+				delete msg;
+				delete sms;
+				fprintf(stderr, "Error: unable to sign: %s\n", qPrintable(errstr));
 				return 1;
 			}
 
-			QSecureArray sig = msg.signature();
+			QString hashName = msg->hashName();
 
-			QCA::Base64 enc;
-			enc.setLineBreaksEnabled(true);
-			enc.setLineBreaksColumn(76);
-			QString sigtext = add_cr(enc.arrayToString(sig));
+			QByteArray output;
+			if(mode == QCA::SecureMessage::Detached)
+				output = msg->signature();
+			else
+				output = msg->read();
 
-			QString str = QString(mime_signed).arg(msg.hashName()).arg(QString(plain)).arg(sigtext);
-			QTextStream ts(&outfile);
-			ts << str;
+			delete msg;
+			delete sms;
 
-			printf("Wrote %s\n", qPrintable(outfile.fileName()));
+			// smime envelope
+			if(!pgp)
+			{
+				QCA::Base64 enc;
+				enc.setLineBreaksEnabled(true);
+				enc.setLineBreaksColumn(76);
+				QString sigtext = add_cr(enc.arrayToString(output));
+				QString str = QString(mime_signed).arg(hashName).arg(QString::fromUtf8(plain)).arg(sigtext);
+				output = str.toUtf8();
+			}
+
+			printf("%s", output.data());
 		}
 		else if(args[1] == "encrypt")
 		{
@@ -1794,153 +2531,152 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			QCA::Certificate cert(args[2]);
-			if(cert.isNull())
-			{
-				printf("Error reading cert file\n");
-				return 1;
-			}
-
-			QFile infile(args[3]);
-			if(!infile.open(QFile::ReadOnly))
-			{
-				printf("Error opening message file\n");
-				return 1;
-			}
-
+			QCA::SecureMessageSystem *sms;
 			QCA::SecureMessageKey skey;
+			bool pgp = false;
+
+			if(args[2] == "pgp")
 			{
-				QCA::CertificateChain chain;
-				chain += cert;
-				skey.setX509CertificateChain(chain);
+				QCA::PGPKey key = get_P(args[3]);
+				if(key.isNull())
+					return 1;
+
+				sms = new QCA::OpenPGP;
+				skey.setPGPPublicKey(key);
+				pgp = true;
 			}
-
-			QByteArray plain = infile.readAll();
-
-			QCA::CMS cms;
-			QCA::SecureMessage msg(&cms);
-			msg.setRecipient(skey);
-			msg.startEncrypt();
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
+			else if(args[2] == "smime")
 			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error encrypting: [%s]\n", qPrintable(errstr));
-				return 1;
+				QCA::Certificate cert = get_C(args[3]);
+				if(cert.isNull())
+					return 1;
+
+				sms = new QCA::CMS;
+				skey.setX509CertificateChain(cert);
 			}
-
-			QFileInfo fi(infile.fileName());
-
-			QFile outfile(fi.baseName() + "_encrypted.txt");
-			if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
-			{
-				printf("Error opening output file\n");
-				return 1;
-			}
-
-			QSecureArray result = msg.read();
-
-			QCA::Base64 enc;
-			enc.setLineBreaksEnabled(true);
-			enc.setLineBreaksColumn(76);
-			QString enctext = add_cr(enc.arrayToString(result));
-
-			QString str = QString(mime_enveloped).arg(enctext);
-			QTextStream ts(&outfile);
-			ts << str;
-
-			printf("Wrote %s\n", qPrintable(outfile.fileName()));
-		}
-		else if(args[1] == "decrypt")
-		{
-			if(args.count() < 5)
+			else
 			{
 				usage();
 				return 1;
 			}
 
-			QSecureArray passphrase;
-			if(args.count() >= 6)
-				passphrase = args[5].toLatin1();
-
-			QCA::PrivateKey key;
-			if(!passphrase.isEmpty())
-				key = QCA::PrivateKey(args[2], passphrase);
-			else
-				key = QCA::PrivateKey(args[2]);
-			if(key.isNull())
+			// read input data from stdin all at once
+			QByteArray plain;
+			while(!feof(stdin))
 			{
-				printf("Error reading key file\n");
+				QByteArray block(1024, 0);
+				int n = fread(block.data(), 1, 1024, stdin);
+				if(n < 0)
+					break;
+				block.resize(n);
+				plain += block;
+			}
+
+			QCA::SecureMessage *msg = new QCA::SecureMessage(sms);
+			msg->setRecipient(skey);
+			// pgp should always be ascii
+			if(pgp)
+				msg->setFormat(QCA::SecureMessage::Ascii);
+			msg->startEncrypt();
+			msg->update(plain);
+			msg->end();
+			msg->waitForFinished(-1);
+
+			if(!msg->success())
+			{
+				QString errstr = smErrorToString(msg->errorCode());
+				delete msg;
+				delete sms;
+				fprintf(stderr, "Error: unable to encrypt: %s\n", qPrintable(errstr));
 				return 1;
 			}
 
-			QCA::Certificate cert(args[4]);
-			if(cert.isNull())
+			QByteArray output = msg->read();
+			delete msg;
+			delete sms;
+
+			// smime envelope
+			if(!pgp)
 			{
-				printf("Error reading cert file\n");
+				QCA::Base64 enc;
+				enc.setLineBreaksEnabled(true);
+				enc.setLineBreaksColumn(76);
+				QString enctext = add_cr(enc.arrayToString(output));
+				QString str = QString(mime_enveloped).arg(enctext);
+				output = str.toUtf8();
+			}
+
+			printf("%s", output.data());
+		}
+		else if(args[1] == "signencrypt")
+		{
+			if(args.count() < 4)
+			{
+				usage();
 				return 1;
 			}
 
-			QFile infile(args[3]);
-			if(!infile.open(QFile::ReadOnly))
-			{
-				printf("Error opening message file\n");
-				return 1;
-			}
-
-			QString in = QString::fromUtf8(infile.readAll());
-			QString str = open_mime_envelope(in);
-			if(str.isEmpty())
-			{
-				printf("Error parsing message file\n");
-				return 1;
-			}
-
-			QCA::Base64 dec;
-			dec.setLineBreaksEnabled(true);
-			QByteArray crypted = dec.stringToArray(rem_cr(str)).toByteArray();
-
+			QCA::SecureMessageSystem *sms;
 			QCA::SecureMessageKey skey;
+			QCA::SecureMessageKey rkey;
+
 			{
-				QCA::CertificateChain chain;
-				chain += cert;
-				skey.setX509CertificateChain(chain);
-				skey.setX509PrivateKey(key);
+				QPair<QCA::PGPKey,QCA::PGPKey> sec = get_S(args[2]);
+				if(sec.first.isNull())
+					return 1;
+
+				QCA::PGPKey pub = get_P(args[3]);
+				if(pub.isNull())
+					return 1;
+
+				sms = new QCA::OpenPGP;
+				skey.setPGPSecretKey(sec.first);
+				rkey.setPGPPublicKey(pub);
 			}
 
-			QCA::CMS cms;
-			cms.setPrivateKeys(QCA::SecureMessageKeyList() << skey);
-			QCA::SecureMessage msg(&cms);
-			msg.startDecrypt();
-			msg.update(crypted);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
+			// read input data from stdin all at once
+			QByteArray plain;
+			while(!feof(stdin))
 			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error decrypting: [%s]\n", qPrintable(errstr));
+				QByteArray block(1024, 0);
+				int n = fread(block.data(), 1, 1024, stdin);
+				if(n < 0)
+					break;
+				block.resize(n);
+				plain += block;
+			}
+
+			QCA::SecureMessage *msg = new QCA::SecureMessage(sms);
+			if(!msg->canSignAndEncrypt())
+			{
+				delete msg;
+				delete sms;
+				fprintf(stderr, "Error: cannot perform integrated sign and encrypt.\n");
 				return 1;
 			}
 
-			QByteArray result = msg.read();
+			msg->setSigner(skey);
+			msg->setRecipient(rkey);
+			msg->setFormat(QCA::SecureMessage::Ascii);
+			msg->startSignAndEncrypt();
+			msg->update(plain);
+			msg->end();
+			msg->waitForFinished(-1);
 
-			QFileInfo fi(infile.fileName());
-
-			QFile outfile(fi.baseName() + "_decrypted.txt");
-			if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
+			if(!msg->success())
 			{
-				printf("Error opening output file\n");
+				QString errstr = smErrorToString(msg->errorCode());
+				delete msg;
+				delete sms;
+				fprintf(stderr, "Error: unable to sign and encrypt: %s\n", qPrintable(errstr));
 				return 1;
 			}
 
-			QTextStream ts(&outfile);
-			ts << QString::fromUtf8(result);
+			QByteArray output = msg->read();
+			delete msg;
+			delete sms;
 
-			printf("Wrote %s\n", qPrintable(outfile.fileName()));
+			printf("%s", output.data());
 		}
 		else if(args[1] == "verify")
 		{
@@ -1950,49 +2686,141 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			QFile infile(args[2]);
-			if(!infile.open(QFile::ReadOnly))
+			// TODO: CMS: allow verifying with --nonroots, in case the message
+			//       doesn't have the issuers in it. (also allow verifying if
+			//       if there is no cert at all (have to specify possible certs then)).
+
+			QCA::SecureMessageSystem *sms;
+			bool pgp = false;
+
+			if(args[2] == "pgp")
 			{
-				printf("Error opening message file\n");
+				sms = new QCA::OpenPGP;
+				pgp = true;
+			}
+			else if(args[2] == "smime")
+			{
+				// get roots
+				QCA::CertificateCollection roots;
+				if(!nosys)
+					roots += QCA::systemStore();
+				if(!rootsFile.isEmpty())
+					roots += QCA::CertificateCollection::fromFlatTextFile(rootsFile);
+
+				sms = new QCA::CMS;
+				((QCA::CMS *)sms)->setTrustedCertificates(roots);
+			}
+			else
+			{
+				usage();
 				return 1;
 			}
 
-			QString in = QString::fromUtf8(infile.readAll());
-			QString str, sigtext;
-			if(!open_mime_data_sig(in, &str, &sigtext))
+			QByteArray data, sig;
+			QString smime_text;
 			{
-				printf("Error parsing message file\n");
+				// read input data from stdin all at once
+				QByteArray plain;
+				while(!feof(stdin))
+				{
+					QByteArray block(1024, 0);
+					int n = fread(block.data(), 1, 1024, stdin);
+					if(n < 0)
+						break;
+					block.resize(n);
+					plain += block;
+				}
+
+				if(pgp)
+				{
+					// TODO: ensure the plugin actually outputs the signed data
+
+					// pgp can be either a detached signature followed
+					//  by data, or an integrated message.
+
+					// detached signature?
+					if(plain.startsWith("-----BEGIN PGP SIGNATURE-----"))
+					{
+						QString footer = "-----END PGP SIGNATURE-----\n";
+						int n = plain.indexOf(footer);
+						if(n == -1)
+						{
+							delete sms;
+							fprintf(stderr, "Error: pgp signature header, but no footer.\n");
+							return 1;
+						}
+
+						n += footer.length();
+						sig = plain.mid(0, n);
+						data = plain.mid(n);
+					}
+					else
+					{
+						data = plain;
+					}
+				}
+				else
+				{
+					// smime envelope
+					QString in = QString::fromUtf8(plain);
+					in = add_cr(in); // change the line endings?!
+					QString str, sigtext;
+					if(!open_mime_data_sig(in, &str, &sigtext))
+					{
+						fprintf(stderr, "Error: can't parse message file.\n");
+						return 1;
+					}
+
+					data = str.toUtf8();
+					smime_text = str;
+
+					QCA::Base64 dec;
+					dec.setLineBreaksEnabled(true);
+					sig = dec.stringToArray(rem_cr(sigtext)).toByteArray();
+				}
+			}
+
+			QCA::SecureMessage *msg = new QCA::SecureMessage(sms);
+			if(pgp)
+				msg->setFormat(QCA::SecureMessage::Ascii);
+			msg->startVerify(sig);
+			msg->update(data);
+			msg->end();
+			msg->waitForFinished(-1);
+
+			if(!msg->success())
+			{
+				QString errstr = smErrorToString(msg->errorCode());
+				delete msg;
+				delete sms;
+				fprintf(stderr, "Error: verify failed: %s\n", qPrintable(errstr));
 				return 1;
 			}
 
-			QByteArray plain = str.toLatin1();
+			QByteArray output;
+			if(pgp && sig.isEmpty())
+				output = msg->read();
 
-			//printf("parsed: data=[%s], sig=[%s]\n", qPrintable(str), qPrintable(sigtext));
+			// TODO: support multiple signers?
 
-			QCA::Base64 dec;
-			dec.setLineBreaksEnabled(true);
-			QByteArray sig = dec.stringToArray(rem_cr(sigtext)).toByteArray();
-
-			QCA::CMS cms;
-			cms.setTrustedCertificates(QCA::systemStore());
-			QCA::SecureMessage msg(&cms);
-			msg.startVerify(sig);
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
-			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error verifying: [%s]\n", qPrintable(errstr));
-				return 1;
-			}
-
-			QCA::SecureMessageSignature signer = msg.signer();
+			QCA::SecureMessageSignature signer = msg->signer();
 			QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
+			delete msg;
+			delete sms;
 
-			str = open_mime_envelope(str);
-			printf("%s", qPrintable(str));
+			// for pgp clearsign, pgp signed (non-detached), and smime,
+			//   the signed content was inside of the message.  we need
+			//   to print that content now
+			if(pgp)
+			{
+				printf("%s", output.data());
+			}
+			else
+			{
+				QString str = open_mime_envelope(smime_text);
+				printf("%s", str.toUtf8().data());
+			}
+
 			QString rs;
 			if(r == QCA::SecureMessageSignature::Valid)
 				rs = "Valid";
@@ -2002,298 +2830,26 @@ int main(int argc, char **argv)
 				rs = "InvalidKey";
 			else if(r == QCA::SecureMessageSignature::NoKey)
 				rs = "NoKey";
-			printf("IdentityResult: %s\n", qPrintable(rs));
+			fprintf(stderr, "IdentityResult: %s\n", qPrintable(rs));
+
 			QCA::SecureMessageKey key = signer.key();
 			if(!key.isNull())
 			{
-				QCA::Certificate cert = key.x509CertificateChain().primary();
-				printf("From: %s (%s)\n", qPrintable(cert.commonName()), qPrintable(cert.subjectInfo().value(QCA::Email)));
+				if(pgp)
+				{
+					QCA::PGPKey pub = key.pgpPublicKey();
+					fprintf(stderr, "From: %s (%s)\n", qPrintable(pub.primaryUserId()), qPrintable(pub.keyId()));
+				}
+				else
+				{
+					QCA::Certificate cert = key.x509CertificateChain().primary();
+					QString emailStr;
+					QCA::CertificateInfo info = cert.subjectInfo();
+					if(info.contains(QCA::Email))
+						emailStr = QString(" (%1)").arg(info.value(QCA::Email));
+					fprintf(stderr, "From: %s%s\n", qPrintable(cert.commonName()), qPrintable(emailStr));
+				}
 			}
-		}
-		else
-		{
-			usage();
-			return 1;
-		}
-	}
-	else if(args[0] == "--extract-keybundle")
-	{
-		if(args.count() < 2)
-		{
-			usage();
-			return 1;
-		}
-
-		QSecureArray passphrase;
-		if(args.count() >= 3)
-			passphrase = args[2].toLatin1();
-
-		QCA::KeyBundle key = QCA::KeyBundle::fromFile(args[1], passphrase);
-		if(key.isNull())
-		{
-			printf("Error reading key file\n");
-			return 1;
-		}
-
-		printf("Certs: (first is primary)\n");
-		QCA::CertificateChain chain = key.certificateChain();
-		for(int n = 0; n < chain.count(); ++n)
-			printf("%s", qPrintable(chain[n].toPEM()));
-		printf("Private Key:\n");
-			printf("%s", qPrintable(key.privateKey().toPEM()));
-	}
-	else if(args[0] == "--list-keystores")
-	{
-		//QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
-		QCA::KeyStoreManager ksm;
-		QStringList storeList = ksm.keyStores();
-		for(int n = 0; n < storeList.count(); ++n)
-		{
-			QCA::KeyStore ks(storeList[n], &ksm);
-			QString type;
-			switch(ks.type())
-			{
-				case QCA::KeyStore::System:      type = "Sys "; break;
-				case QCA::KeyStore::User:        type = "User"; break;
-				case QCA::KeyStore::Application: type = "App "; break;
-				case QCA::KeyStore::SmartCard:   type = "Card"; break;
-				case QCA::KeyStore::PGPKeyring:  type = "PGP "; break;
-			}
-			// TODO: id field length should be uniform based on all entries
-			printf("%s %s [%s]\n", qPrintable(type), qPrintable(ks.id()), qPrintable(ks.name()));
-		}
-	}
-	else if(args[0] == "--list-keystore")
-	{
-		if(args.count() < 2)
-		{
-			usage();
-			return 1;
-		}
-
-		QCA::KeyStoreManager ksm;
-		QCA::KeyStore store(getKeyStore(args[1]), &ksm);
-		if(!store.isValid())
-		{
-			printf("no such store\n");
-			return 1;
-		}
-
-		QList<QCA::KeyStoreEntry> list = store.entryList();
-		for(int n = 0; n < list.count(); ++n)
-		{
-			QCA::KeyStoreEntry i = list[n];
-			QString type;
-			switch(i.type())
-			{
-				case QCA::KeyStoreEntry::TypeKeyBundle:    type = "Key "; break;
-				case QCA::KeyStoreEntry::TypeCertificate:  type = "Cert"; break;
-				case QCA::KeyStoreEntry::TypeCRL:          type = "CRL "; break;
-				case QCA::KeyStoreEntry::TypePGPSecretKey: type = "PSec"; break;
-				case QCA::KeyStoreEntry::TypePGPPublicKey: type = "PPub"; break;
-			}
-			// TODO: id field length should be uniform based on all entries
-			printf("%s %-2s [%s]\n", qPrintable(type), qPrintable(i.id()), qPrintable(i.name()));
-		}
-	}
-	else if(args[0] == "--pgp")
-	{
-		if(args.count() < 2)
-		{
-			usage();
-			return 1;
-		}
-
-		if(args[1] == "clearsign")
-		{
-			if(args.count() < 4)
-			{
-				usage();
-				return 1;
-			}
-
-			QPair<QCA::PGPKey, QCA::PGPKey> key = getPGPSecretKey(args[2]);
-			if(key.first.isNull())
-				return 1;
-
-			QFile infile(args[3]);
-			if(!infile.open(QFile::ReadOnly))
-			{
-				printf("Error opening message file\n");
-				return 1;
-			}
-
-			QCA::SecureMessageKey skey;
-			skey.setPGPSecretKey(key.first);
-
-			QByteArray plain = infile.readAll();
-
-			QCA::OpenPGP pgp;
-			QCA::SecureMessage msg(&pgp);
-			msg.setSigner(skey);
-			msg.startSign(QCA::SecureMessage::Clearsign);
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
-			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error signing: [%s]\n", qPrintable(errstr));
-				return 1;
-			}
-
-			QByteArray result = msg.read();
-
-			printf("Result:\n%s\n", result.data());
-		}
-		else if(args[1] == "signdetach")
-		{
-			if(args.count() < 4)
-			{
-				usage();
-				return 1;
-			}
-
-			QPair<QCA::PGPKey, QCA::PGPKey> key = getPGPSecretKey(args[2]);
-			if(key.first.isNull())
-				return 1;
-
-			QFile infile(args[3]);
-			if(!infile.open(QFile::ReadOnly))
-			{
-				printf("Error opening message file\n");
-				return 1;
-			}
-
-			QCA::SecureMessageKey skey;
-			skey.setPGPSecretKey(key.first);
-
-			QByteArray plain = infile.readAll();
-
-			QCA::OpenPGP pgp;
-			QCA::SecureMessage msg(&pgp);
-			msg.setSigner(skey);
-			msg.setFormat(QCA::SecureMessage::Ascii);
-			msg.startSign(QCA::SecureMessage::Detached);
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
-			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error signing: [%s]\n", qPrintable(errstr));
-				return 1;
-			}
-
-			QByteArray result = msg.signature();
-
-			printf("Result:\n%s\n", result.data());
-		}
-		else if(args[1] == "verifydetach")
-		{
-			if(args.count() < 4)
-			{
-				usage();
-				return 1;
-			}
-
-			QFile infile(args[2]);
-			if(!infile.open(QFile::ReadOnly))
-			{
-				printf("Error opening message file\n");
-				return 1;
-			}
-
-			QFile sigfile(args[3]);
-			if(!sigfile.open(QFile::ReadOnly))
-			{
-				printf("Error opening signature file\n");
-				return 1;
-			}
-
-			QByteArray plain = infile.readAll();
-			QByteArray sig = sigfile.readAll();
-
-			QCA::OpenPGP pgp;
-			QCA::SecureMessage msg(&pgp);
-			msg.setFormat(QCA::SecureMessage::Ascii);
-			msg.startVerify(sig);
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
-			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error verifying: [%s]\n", qPrintable(errstr));
-				return 1;
-			}
-
-			QCA::SecureMessageSignature signer = msg.signer();
-			QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
-
-			QString rs;
-			if(r == QCA::SecureMessageSignature::Valid)
-				rs = "Valid";
-			else if(r == QCA::SecureMessageSignature::InvalidSignature)
-				rs = "InvalidSignature";
-			else if(r == QCA::SecureMessageSignature::InvalidKey)
-				rs = "InvalidKey";
-			else if(r == QCA::SecureMessageSignature::NoKey)
-				rs = "NoKey";
-			printf("IdentityResult: %s\n", qPrintable(rs));
-			QCA::SecureMessageKey fromkey = signer.key();
-			if(!fromkey.isNull())
-			{
-				QCA::PGPKey p = fromkey.pgpPublicKey();
-				printf("From: %s (%s)\n", qPrintable(p.primaryUserId()), qPrintable(p.keyId()));
-			}
-		}
-		else if(args[1] == "encrypt")
-		{
-			if(args.count() < 4)
-			{
-				usage();
-				return 1;
-			}
-
-			QCA::PGPKey key = getPGPPublicKey(args[2]);
-			if(key.isNull())
-				return 1;
-
-			QFile infile(args[3]);
-			if(!infile.open(QFile::ReadOnly))
-			{
-				printf("Error opening message file\n");
-				return 1;
-			}
-
-			QCA::SecureMessageKey pkey;
-			pkey.setPGPPublicKey(key);
-
-			QByteArray plain = infile.readAll();
-
-			QCA::OpenPGP pgp;
-			QCA::SecureMessage msg(&pgp);
-			msg.setRecipient(pkey);
-			msg.setFormat(QCA::SecureMessage::Ascii);
-			msg.startEncrypt();
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
-
-			if(!msg.success())
-			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error encrypting: [%s]\n", qPrintable(errstr));
-				return 1;
-			}
-
-			QByteArray result = msg.read();
-
-			printf("Result:\n%s\n", result.data());
 		}
 		else if(args[1] == "decrypt")
 		{
@@ -2303,79 +2859,202 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			QFile infile(args[2]);
-			if(!infile.open(QFile::ReadOnly))
+			QCA::SecureMessageSystem *sms;
+			QCA::SecureMessageKey skey;
+			bool pgp = false;
+
+			if(args[2] == "pgp")
 			{
-				printf("Error opening message file\n");
+				sms = new QCA::OpenPGP;
+				pgp = true;
+			}
+			else if(args[2] == "smime")
+			{
+				if(args.count() < 4)
+				{
+					usage();
+					return 1;
+				}
+
+				QCA::KeyBundle key = get_X(args[3]);
+				if(key.isNull())
+					return 1;
+
+				sms = new QCA::CMS;
+				skey.setX509CertificateChain(key.certificateChain());
+				skey.setX509PrivateKey(key.privateKey());
+
+				// TODO: support more than one decrypt key
+				((QCA::CMS*)sms)->setPrivateKeys(QCA::SecureMessageKeyList() << skey);
+			}
+
+			// read input data from stdin all at once
+			QByteArray plain;
+			while(!feof(stdin))
+			{
+				QByteArray block(1024, 0);
+				int n = fread(block.data(), 1, 1024, stdin);
+				if(n < 0)
+					break;
+				block.resize(n);
+				plain += block;
+			}
+
+			// smime envelope
+			if(!pgp)
+			{
+				QString in = QString::fromUtf8(plain);
+				QString str = open_mime_envelope(in);
+				if(str.isEmpty())
+				{
+					delete sms;
+					fprintf(stderr, "Error: can't parse message file.\n");
+					return 1;
+				}
+
+				QCA::Base64 dec;
+				dec.setLineBreaksEnabled(true);
+				plain = dec.stringToArray(rem_cr(str)).toByteArray();
+			}
+
+			QCA::SecureMessage *msg = new QCA::SecureMessage(sms);
+			if(pgp)
+				msg->setFormat(QCA::SecureMessage::Ascii);
+			msg->startDecrypt();
+			msg->update(plain);
+			msg->end();
+			msg->waitForFinished(-1);
+
+			if(!msg->success())
+			{
+				QString errstr = smErrorToString(msg->errorCode());
+				delete msg;
+				delete sms;
+				fprintf(stderr, "Error: decrypt failed: %s\n", qPrintable(errstr));
 				return 1;
 			}
 
-			QByteArray plain = infile.readAll();
+			QByteArray output = msg->read();
 
-			QCA::OpenPGP pgp;
-			QCA::SecureMessage msg(&pgp);
-			msg.setFormat(QCA::SecureMessage::Ascii);
-			msg.startDecrypt();
-			msg.update(plain);
-			msg.end();
-			msg.waitForFinished(-1);
+			// TODO: support multiple signers?
 
-			if(!msg.success())
+			QCA::SecureMessageSignature signer;
+			bool wasSigned = false;
+			if(msg->wasSigned())
 			{
-				QString errstr = smErrorToString(msg.errorCode());
-				printf("Error decrypting: [%s]\n", qPrintable(errstr));
+				signer = msg->signer();
+				wasSigned = true;
+			}
+			delete msg;
+			delete sms;
+
+			printf("%s", output.data());
+
+			if(wasSigned)
+			{
+				fprintf(stderr, "Message was also signed:\n");
+
+				QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
+				QString rs;
+				if(r == QCA::SecureMessageSignature::Valid)
+					rs = "Valid";
+				else if(r == QCA::SecureMessageSignature::InvalidSignature)
+					rs = "InvalidSignature";
+				else if(r == QCA::SecureMessageSignature::InvalidKey)
+					rs = "InvalidKey";
+				else if(r == QCA::SecureMessageSignature::NoKey)
+					rs = "NoKey";
+				fprintf(stderr, "IdentityResult: %s\n", qPrintable(rs));
+
+				QCA::SecureMessageKey key = signer.key();
+				if(!key.isNull())
+				{
+					QCA::PGPKey pub = key.pgpPublicKey();
+					fprintf(stderr, "From: %s (%s)\n", qPrintable(pub.primaryUserId()), qPrintable(pub.keyId()));
+				}
+			}
+		}
+		else if(args[1] == "exportcerts")
+		{
+			// TODO: can we do this with PKCS7 (certcollection) rather than smime verify?
+			QCA::SecureMessageSystem *sms;
+
+			// get roots
+			QCA::CertificateCollection roots;
+			if(!nosys)
+				roots += QCA::systemStore();
+			if(!rootsFile.isEmpty())
+				roots += QCA::CertificateCollection::fromFlatTextFile(rootsFile);
+
+			sms = new QCA::CMS;
+			((QCA::CMS *)sms)->setTrustedCertificates(roots);
+
+			QByteArray data, sig;
+			QString smime_text;
+			{
+				// read input data from stdin all at once
+				QByteArray plain;
+				while(!feof(stdin))
+				{
+					QByteArray block(1024, 0);
+					int n = fread(block.data(), 1, 1024, stdin);
+					if(n < 0)
+						break;
+					block.resize(n);
+					plain += block;
+				}
+
+				// smime envelope
+				QString in = QString::fromUtf8(plain);
+				QString str, sigtext;
+				if(!open_mime_data_sig(in, &str, &sigtext))
+				{
+					delete sms;
+					fprintf(stderr, "Error: can't parse message file.\n");
+					return 1;
+				}
+
+				data = str.toUtf8();
+				smime_text = str;
+
+				QCA::Base64 dec;
+				dec.setLineBreaksEnabled(true);
+				sig = dec.stringToArray(rem_cr(sigtext)).toByteArray();
+			}
+
+			QCA::SecureMessage *msg = new QCA::SecureMessage(sms);
+			msg->startVerify(sig);
+			msg->update(data);
+			msg->end();
+			msg->waitForFinished(-1);
+
+			if(!msg->success())
+			{
+				QString errstr = smErrorToString(msg->errorCode());
+				delete msg;
+				delete sms;
+				// TODO: wrong error message for export
+				fprintf(stderr, "Error: verify failed: %s\n", qPrintable(errstr));
 				return 1;
 			}
 
-			QByteArray result = msg.read();
+			// TODO: support multiple signers?
 
-			printf("Result:\n%s\n", result.data());
+			QCA::SecureMessageSignature signer = msg->signer();
+			delete msg;
+			delete sms;
+
+			QCA::SecureMessageKey key = signer.key();
+			if(!key.isNull())
+			{
+				foreach(const QCA::Certificate &c, key.x509CertificateChain())
+					printf("%s", qPrintable(c.toPEM()));
+			}
 		}
 		else
 		{
 			usage();
 			return 1;
-		}
-	}
-	else if(args[0] == "--list-tlsciphers")
-	{
-		QString cipherList;
-		cipherList = QCA::TLS::supportedCipherSuites().join("\n\t");
-		printf("TLS version 1: \n\t%s\n", qPrintable(cipherList));
-
-		cipherList = QCA::TLS::supportedCipherSuites(QCA::TLS::SSL_v3).join("\n\t");
-		printf("SSL version 3: \n\t%s\n", qPrintable(cipherList));
-
-		cipherList = QCA::TLS::supportedCipherSuites(QCA::TLS::SSL_v2).join("\n\t");
-		printf("SSL version 2: \n\t%s\n", qPrintable(cipherList));
-	}
-	else if(args[0] == "--showentry")
-	{
-		if(args.count() < 2)
-			usage();
-		else
-		{
-			QCA::KeyStoreEntry entry(args[1]);
-			if(entry.isNull())
-			{
-				printf("Entry id is unknown to any provider.\n");
-				return 1;
-			}
-			QString type;
-			switch(entry.type())
-			{
-				case QCA::KeyStoreEntry::TypeKeyBundle:    type = "Key "; break;
-				case QCA::KeyStoreEntry::TypeCertificate:  type = "Cert"; break;
-				case QCA::KeyStoreEntry::TypeCRL:          type = "CRL "; break;
-				case QCA::KeyStoreEntry::TypePGPSecretKey: type = "PSec"; break;
-				case QCA::KeyStoreEntry::TypePGPPublicKey: type = "PPub"; break;
-			}
-
-			printf("Entry:\n");
-			printf("  Name:       %s\n", qPrintable(entry.name()));
-			printf("  Type:       %s\n", qPrintable(type));
-			printf("  Store Name: %s\n", qPrintable(entry.storeName()));
-			printf("  Store Id:   %s\n", qPrintable(entry.storeId()));
 		}
 	}
 	else
@@ -2386,3 +3065,5 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
+#include "main.moc"
