@@ -289,6 +289,9 @@ void ProviderManager::scan()
 		scanned_static = true;
 	}
 
+	if(qgetenv("QCA_NO_PLUGINS") == "1")
+		return;
+
 	// check plugin files
 	QStringList dirs = QCoreApplication::libraryPaths();
 	if(dirs.isEmpty())
