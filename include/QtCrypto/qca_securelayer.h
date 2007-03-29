@@ -257,12 +257,12 @@ namespace QCA
 		*/
 		enum Error
 		{
-			ErrorSignerExpired, ///< local certificate is expired
-			ErrorSignerInvalid, ///< local certificate is invalid in some way
-			ErrorKeyMismatch,   ///< certificate and private key don't match
-			ErrorInit,          ///< problem starting up %TLS
-			ErrorHandshake,     ///< problem during the negotiation
-			ErrorCrypt          ///< problem at anytime after
+			ErrorSignerExpired,   ///< local certificate is expired
+			ErrorSignerInvalid,   ///< local certificate is invalid in some way
+			ErrorCertKeyMismatch, ///< certificate and private key don't match
+			ErrorInit,            ///< problem starting up %TLS
+			ErrorHandshake,       ///< problem during the negotiation
+			ErrorCrypt            ///< problem at anytime after
 		};
 
 		/**

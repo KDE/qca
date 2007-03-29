@@ -1517,7 +1517,7 @@ namespace QCA
 		   \sa fromFile for a more flexible version of the
 		   same capability.
 		*/
-		KeyBundle(const QString &fileName, const QSecureArray &passphrase);
+		KeyBundle(const QString &fileName, const QSecureArray &passphrase = QSecureArray());
 
 		/**
 		   Standard copy constructor
@@ -1647,7 +1647,7 @@ namespace QCA
 		   \param result pointer to the result of the import process
 		   \param provider the provider to use, if a specific provider is required
 		*/
-		static KeyBundle fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
+		static KeyBundle fromArray(const QByteArray &a, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
 		/**
 		   Import the key bundle from a file in PKCS12 (.p12) format
@@ -1670,7 +1670,7 @@ namespace QCA
 		   \param result pointer to the result of the import process
 		   \param provider the provider to use, if a specific provider is required
 		*/
-		static KeyBundle fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result = 0, const QString &provider = QString());
+		static KeyBundle fromFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
 	private:
 		class Private;
