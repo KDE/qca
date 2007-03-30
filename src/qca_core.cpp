@@ -95,7 +95,7 @@ public:
 	}
 };
 
-Q_GLOBAL_STATIC(QMutex, global_mutex);
+Q_GLOBAL_STATIC(QMutex, global_mutex)
 static Global *global = 0;
 
 static bool features_have(const QStringList &have, const QStringList &want)
