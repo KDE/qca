@@ -9,11 +9,9 @@ For Unix/Linux/Mac:
 
 For Windows:
 
-  qmake qca.pro
+  qmake
   nmake (or make)
-
-  edit crypto_win.prf
-  copy crypto_win.prf qtdir\mkspecs\features\crypto.prf
+  installwin
 
 
 Please report problems to:

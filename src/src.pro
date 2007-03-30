@@ -9,11 +9,7 @@ QT      -= gui
 TARGET   = qca
 DESTDIR  = $$QCA_BASE/lib
 
-MOC_DIR        = .moc
-OBJECTS_DIR    = .obj
-
-VER_MAJ = 2
-VER_MIN = 0
+VERSION = 2.0.0
 
 # make DLL
 windows: {
@@ -95,4 +91,9 @@ unix: {
 	incfiles.files = $$PUBLIC_HEADERS
 	incfiles.files += $$QCA_INC/qca.h $$QCA_INC/QtCrypto
 	INSTALLS += incfiles
+}
+
+CONFIG(debug, debug|release) {
+	unix:TARGET = $$join(TARGET,,,_debug)
+	else:TARGET = $$join(TARGET,,,d)
 }

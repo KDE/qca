@@ -2,7 +2,9 @@
 -----BEGIN QCMOD-----
 name: extra
 section: project
-arg: enable-debug,Build everything in debug mode
+arg: release,Build QCA with debugging turned off
+arg: debug,Build QCA with debugging turned on
+arg: debug-and-release,Build two versions of QCA, with and without debugging turned on (default)
 arg: disable-tests,Don't build examples and unittests
 -----END QCMOD-----
 */
@@ -32,20 +34,51 @@ public:
 		QFile f;
 
 		str = QString();
-		if(conf->getenv("QC_ENABLE_DEBUG") == "Y")
-			str += "CONFIG += debug\n";
+
+		bool release = false;
+		bool debug = false;
+		QString config_buildmode;
+
+		if(conf->getenv("QC_RELEASE") == "Y")
+		{
+			release = true;
+			config_buildmode = "CONFIG += release\n";
+		}
+		else if(conf->getenv("QC_DEBUG") == "Y")
+		{
+			debug = true;
+			config_buildmode = "CONFIG += debug\n";
+		}
+		else // if(conf->getenv("QC_DEBUG_AND_RELEASE") == "Y")
+		{
+			release = true;
+			debug = true;
+			config_buildmode = "CONFIG += debug_and_release build_all\n";
+		}
+
+		str += config_buildmode;
+
 		if(conf->getenv("QC_DISABLE_TESTS") == "Y")
 			str += "QCA_NO_TESTS = 1\n";
+
 		conf->addExtra(str);
 
-		// write confapp.pri
+		// write confapp_unix.pri
 		str = QString();
                 QString var = conf->getenv("BINDIR");
                 if(!var.isEmpty())
                         str += QString("BINDIR = %1\n").arg(var);
-		if(conf->getenv("QC_ENABLE_DEBUG") == "Y")
-			str += "CONFIG += debug\n";
-		f.setFileName("confapp.pri");
+		if(debug) // debug or debug-and-release
+		{
+			str += QString("CONFIG += debug\n");
+			str += QString("QCA_LIBNAME = qca_debug\n");
+		}
+		else // release
+		{
+			str += QString("CONFIG += release\n");
+			str += QString("QCA_LIBNAME = qca\n");
+		}
+		f.setFileName("confapp_unix.pri");
 		if(f.open(QFile::WriteOnly | QFile::Truncate))
 			f.write(str.toLatin1());
 		f.close();
@@ -53,16 +86,23 @@ public:
 		QString prefix = conf->getenv("PREFIX");
 
 		// write qmake-feature file
-		str = QString(
-		"CONFIG *= qt\n"
-		"INCLUDEPATH += %1/include/QtCrypto\n").arg(prefix);
-		str += QString(
-		"LIBS += -L%1/lib -lqca\n").arg(prefix);
+		QString crypto_in;
+		f.setFileName("crypto.prf.in");
+		if(f.open(QFile::ReadOnly))
+		{
+			crypto_in = QString::fromUtf8(f.readAll());
+			f.close();
+		}
+
+		str = QString("QCA_PREFIX = %1\n").arg(prefix);
+		str += crypto_in;
 
 		f.setFileName("crypto.prf");
 		if(f.open(QFile::WriteOnly | QFile::Truncate))
+		{
 			f.write(str.toLatin1());
-		f.close();
+			f.close();
+		}
 
 		str = QString(
 		"prffiles.path = %1/mkspecs/features\n"
@@ -72,26 +112,63 @@ public:
 		conf->addExtra(str);
 
 		QString qtcore = qc_getenv("QC_ENABLE_DEBUG") == "Y" ? QString("QtCore_debug") : QString("QtCore");
-		// write pkg-config file
-		str = QString(
+		// write pkg-config files
+
+		QString pkg_template1 = QString(
 		"prefix=%1\n"
 		"exec_prefix=${prefix}\n"
 		"libdir=${prefix}/lib\n"
 		"includedir=${prefix}/include/QtCrypto\n"
-		"\n"
-		"Name: QCA\n"
-		"Description: Qt Cryptographic Architecture library\n"
-		"Version: 2.0.0 #maybe this shouldn't be literal...\n"
-		"Requires: %2\n"
-		"Libs: -L${libdir} -lqca\n"
-		"Cflags: -I${includedir}\n"
-		"\n"
-		).arg(prefix).arg(qtcore);
+		"\n");
 
-		f.setFileName("qca.pc");
-		if(f.open(QFile::WriteOnly | QFile::Truncate))
-			f.write(str.toLatin1());
-		f.close();
+		QString pkg_template2 = QString(
+		"Name: %1\n"
+		"Description: Qt Cryptographic Architecture library\n"
+		"Version: 2.0.0\n");
+
+		QString pkg_template3 = QString(
+		"Requires: %1\n");
+
+		QString pkg_template4 = QString(
+		"Libs: -L${libdir} -l%1\n"
+		"Cflags: -I${includedir}\n"
+		"\n");
+
+		QStringList pcfiles;
+
+		QDir::current().mkdir("lib");
+		if(release)
+		{
+			str =  pkg_template1.arg(prefix);
+			str += pkg_template2.arg("QCA");
+			str += pkg_template3.arg("QtCore");
+			str += pkg_template4.arg("qca");
+			f.setFileName("lib/qca.pc");
+			if(f.open(QFile::WriteOnly | QFile::Truncate))
+				f.write(str.toLatin1());
+			f.close();
+			pcfiles += "lib/qca.pc";
+		}
+
+		if(debug)
+		{
+			str =  pkg_template1.arg(prefix);
+			str += pkg_template2.arg("QCA_debug");
+			str += pkg_template3.arg("QtCore_debug");
+			str += pkg_template4.arg("qca_debug");
+			f.setFileName("lib/qca_debug.pc");
+			if(f.open(QFile::WriteOnly | QFile::Truncate))
+				f.write(str.toLatin1());
+			f.close();
+			pcfiles += "lib/qca_debug.pc";
+		}
+
+        	str = QString(
+		"pcfiles.path = $$PREFIX/lib/pkgconfig\n"
+		"pcfiles.files = %1\n"
+		"INSTALLS += pcfiles\n"
+		).arg(pcfiles.join(" "));
+		conf->addExtra(str);
 
 		return true;
 	}

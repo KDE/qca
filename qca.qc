@@ -8,10 +8,10 @@
  <dep type='qt41'>
   <required/>
  </dep>
- <dep type='certstore'>
+ <dep type='extra'>
   <required/>
  </dep>
- <dep type='extra'>
+ <dep type='certstore'>
   <required/>
  </dep>
 </qconf>
