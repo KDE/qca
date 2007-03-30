@@ -1,8 +1,7 @@
 TEMPLATE = app
 TARGET = randomunittest
 DEPENDPATH += .
-INCLUDEPATH += ../../include/QtCrypto
-LIBS += -L../../lib -lqca
+include(../unittest.pri)
 CONFIG += qtestlib thread console
 QT -= gui
 
