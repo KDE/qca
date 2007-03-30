@@ -8,6 +8,7 @@ TEMPLATE = lib
 QT      -= gui
 TARGET   = qca
 DESTDIR  = $$QCA_BASE/lib
+windows:DLLDESTDIR = $$QCA_BASE/bin
 
 VERSION = 2.0.0
 
