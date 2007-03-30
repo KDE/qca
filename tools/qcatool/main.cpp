@@ -20,6 +20,8 @@
 #include <QtCore>
 #include <QtCrypto>
 
+#define VERSION "0.0.1"
+
 static QStringList wrapstring(const QString &str, int width)
 {
 	QStringList out;
@@ -1488,7 +1490,10 @@ static void usage()
 	printf("          --noprompt, --ordered, --debug\n");
 	printf("\n");
 	printf(" help|--help|-h                        This help text\n");
+	printf(" version|--version|-v                  Print version information\n");
 	printf(" plugins                               List available plugins\n");
+	printf(" config [command]\n");
+	printf("   save [provider]                     Save default provider config\n");
 	printf(" key [command]\n");
 	printf("   make rsa|dsa [bits]                 Create a key pair\n");
 	printf("   changepass [K]                      Add/change/remove passphrase of a key\n");
@@ -1605,11 +1610,27 @@ int main(int argc, char **argv)
 		}
 	}
 
+	// TODO: instead of printing full usage at every wrong turn, we might
+	//       try to print something closer to the context.
+	// TODO: use --debug for more stuff besides plugins
+
 	// help
 	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
 	{
 		usage();
-		return 1;
+		return 0;
+	}
+
+	// version
+	if(args[0] == "version" || args[0] == "--version" || args[0] == "-v")
+	{
+		int ver = qcaVersion();
+		int maj = (ver >> 16) & 0xff;
+		int min = (ver >> 8) & 0xff;
+		int bug = ver & 0xff;
+		printf("qcatool version %s by Justin Karneges\n", VERSION);
+		printf("Using QCA version %d.%d.%d\n", maj, min, bug);
+		return 0;
 	}
 
 	// show plugins
@@ -1669,7 +1690,51 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	// for all commands besides help and plugins, we set up keystore/prompter:
+	// config stuff
+	if(args[0] == "config")
+	{
+		if(args.count() < 2)
+		{
+			usage();
+			return 1;
+		}
+
+		if(args[1] == "save")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QString name = args[2];
+			if(!QCA::findProvider(name))
+			{
+				fprintf(stderr, "Error: no such provider '%s'.\n", qPrintable(name));
+				return 1;
+			}
+
+			QVariantMap map1 = QCA::getProviderConfig(name);
+			if(map1.isEmpty())
+			{
+				fprintf(stderr, "Error: provider does not support configuration.\n");
+				return 1;
+			}
+
+			// set and save
+			QCA::setProviderConfig(name, map1);
+			QCA::saveProviderConfig(name);
+			printf("Done.\n");
+			return 0;
+		}
+		else
+		{
+			usage();
+			return 1;
+		}
+	}
+
+	// for all other commands, we set up keystore/prompter:
 
 	// activate the KeyStoreManager and block until ready
 	QCA::KeyStoreManager::start();
@@ -1685,8 +1750,6 @@ int main(int argc, char **argv)
 	if(have_pass)
 		passphrasePrompt.setExplicitPassword(pass);
 
-	// TODO: instead of printing full usage at every wrong turn, we might
-	//       try to print something closer to the context.
 	// TODO: for each kind of operation, we need to check for support first!!
 	if(args[0] == "key")
 	{
