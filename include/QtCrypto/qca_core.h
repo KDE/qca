@@ -39,7 +39,7 @@
 
    \sa qcaVersion for a runtime check.
 */
-#define QCA_VERSION 0x020000
+#define QCA_VERSION 0x019999
 
 #include <QString>
 #include <QStringList>
