@@ -10,35 +10,19 @@
 
 * beta3
   api:
-    + make keystoremanager work like irisnet netinterfacemanager
-    + passive keystoreentry (and related issues)
     make sure there aren't any cases where a Foo::supportsBar()-style function
       reports true, but then when the object is created, it doesn't actually
       support the feature (because the wrong provider was used).
     why is Random returning unsigned?
-    + make passphrase arg to keybundle::fromFile optional
   code:
-    not picking up psa's email address?  psa_cert2.pem
-    + qca_def ids should contain the type
-    pgp passive entries
-    provider config locking issue
-    asker/event locking issues?
-    + don't create qobjects during init (that means you, keystoremanager)
-    functions that don't trip a scan should do so on the first try
-    sasl: test it works correctly
-    + race condition(?): keystore id is bad by the time a KeyStore object is
-        made. solution: if the id is invalid, queue up an unavailable() signal?
-    allow multiple init/deinit by using a reference count
     strange backtrace on mac (ask textshell)
-    + instant lockup on windows (try 'qcatool --sign' on work box)
-    constraints stuff seems messed up.  why are constraints auto-added by
-      qca-openssl?
+    qca-gnupg: pgp passive entries
+    qca-openssl: not picking up psa's email address?  psa_cert2.pem
   other:
     link against our own lib (e.g. -L../../lib) before ALL other libs,
       including Qt's libs, since some distros put qca into qt's dir.
     when using Q_EXPORT_PLUGIN2(), pass the name using underscores instead
       of hyphens.  e.g. qca_openssl, not qca-openssl
-    version in QSettings (maybe call the app "qca2" ?)
     put qca.dll into bin/ instead of lib/
     adopt 'd' naming scheme for debug? (maybe we already do this)
 
@@ -51,6 +35,7 @@
             trusted.
     tls extensions: hostname and ocsp stapling
   code:
+    tls/sasl
     fix asker implementation, it is a disaster
     dirwatch: thread safety
     dirwatch: test on all platforms
@@ -61,6 +46,8 @@
     qca-cyrussasl: make this plugin (use misha's patch to qca-sasl)
     sasl example
     qcatool TODOs
+    constraints stuff seems messed up.  why are constraints auto-added by
+      qca-openssl?
   other:
     Update to latest Botan, and remake the botantools patch as appropriate
        - remove u32bit miller_rabin_test_iterations(u32bit bits, bool verify)

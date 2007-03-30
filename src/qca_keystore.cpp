@@ -165,7 +165,6 @@ public slots:
 	void start()
 	{
 		// grab providers (and default)
-		//scanForPlugins();
 		ProviderList list = providers();
 		list.append(defaultProvider());
 
@@ -833,7 +832,6 @@ static void ensure_init()
 // static functions
 void KeyStoreManager::start()
 {
-	scanForPlugins();
 	ensure_init();
 	QMetaObject::invokeMethod(KeyStoreTracker::instance(), "start", Qt::QueuedConnection);
 }

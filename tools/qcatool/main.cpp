@@ -1627,7 +1627,6 @@ int main(int argc, char **argv)
 		else
 			printf("  (none)\n");
 
-		QCA::scanForPlugins();
 		QCA::ProviderList list = QCA::providers();
 
 		if(debug)
