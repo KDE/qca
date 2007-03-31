@@ -12,6 +12,9 @@ windows:DLLDESTDIR = $$QCA_BASE/bin
 
 VERSION = 2.0.0
 
+# default windows config for now
+windows:CONFIG += debug_and_release build_all
+
 # make DLL
 windows: {
 	CONFIG += dll

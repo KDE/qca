@@ -141,7 +141,7 @@ public:
 	}
 
 	// thread-safe
-	QList<KeyStoreTracker::Item> getItems()
+	QList<Item> getItems()
 	{
 		// TODO
 		QMutexLocker locker(&m);
