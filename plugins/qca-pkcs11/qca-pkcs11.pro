@@ -1,6 +1,3 @@
-#CONFIG += release
-CONFIG += debug
-
 TEMPLATE = lib
 CONFIG += plugin
 QT -= gui
@@ -20,3 +17,8 @@ windows:{
 }
 
 include(conf.pri)
+
+CONFIG(debug, debug|release) {
+	unix:TARGET = $$join(TARGET,,,_debug)
+	else:TARGET = $$join(TARGET,,,d)
+}
