@@ -2,6 +2,7 @@
 
 int main(int argc, char **argv)
 {
+	QCA::Initializer init;
 	QCoreApplication qapp(argc, argv);
 
 	TLSSocket socket;
