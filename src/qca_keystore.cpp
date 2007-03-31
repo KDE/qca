@@ -209,7 +209,7 @@ public slots:
 		// TODO
 		QList<KeyStoreEntry> out;
 		int contextId = -1;
-		KeyStoreListContext *c;
+		KeyStoreListContext *c = 0;
 		m.lock();
 		foreach(Item i, items)
 		{
@@ -239,7 +239,7 @@ public slots:
 		// TODO
 		QList<KeyStoreEntry::Type> out;
 		int contextId = -1;
-		KeyStoreListContext *c;
+		KeyStoreListContext *c = 0;
 		m.lock();
 		foreach(Item i, items)
 		{
@@ -260,7 +260,7 @@ public slots:
 	void *entry(const QString &storeId, const QString &entryId)
 	{
 		KeyStoreListContext *c = 0;
-		int contextId;
+		int contextId = -1;
 		m.lock();
 		foreach(Item i, items)
 		{
