@@ -6188,5 +6188,5 @@ public:
 
 #include "qca-openssl.moc"
 
-Q_EXPORT_PLUGIN2(qca-openssl, opensslPlugin)
+Q_EXPORT_PLUGIN2(qca_openssl, opensslPlugin)
 

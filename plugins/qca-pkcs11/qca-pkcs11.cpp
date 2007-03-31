@@ -2497,4 +2497,4 @@ public:
 
 #include "qca-pkcs11.moc"
 
-Q_EXPORT_PLUGIN2(qca-pkcs11, pkcs11Plugin)
+Q_EXPORT_PLUGIN2(qca_pkcs11, pkcs11Plugin)

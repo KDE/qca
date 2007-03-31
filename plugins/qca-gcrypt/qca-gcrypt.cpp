@@ -584,5 +584,5 @@ class gcryptPlugin : public QCAPlugin
 
 #include "qca-gcrypt.moc"
 
-Q_EXPORT_PLUGIN2(qca-gcrypt, gcryptPlugin)
+Q_EXPORT_PLUGIN2(qca_gcrypt, gcryptPlugin)
 

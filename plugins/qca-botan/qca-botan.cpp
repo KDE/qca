@@ -468,6 +468,5 @@ public:
 
 #include "qca-botan.moc"
 
-Q_EXPORT_PLUGIN2(qca-botan, botanPlugin);
-
+Q_EXPORT_PLUGIN2(qca_botan, botanPlugin);
 

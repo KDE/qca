@@ -857,4 +857,4 @@ public:
 
 #include "qca-gnupg.moc"
 
-Q_EXPORT_PLUGIN2(qca-gnupg, gnupgPlugin)
+Q_EXPORT_PLUGIN2(qca_gnupg, gnupgPlugin)

@@ -905,5 +905,5 @@ public:
 
 #include "qca-cyrus-sasl.moc"
 
-Q_EXPORT_PLUGIN2(qca-sasl, saslPlugin)
+Q_EXPORT_PLUGIN2(qca_cyrus_sasl, saslPlugin)
 
