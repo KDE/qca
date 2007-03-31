@@ -16,6 +16,16 @@ public:
 	QString shortname() const { return "qca"; }
 	bool exec()
 	{
+		// get the build mode
+#ifdef BUILDMODE
+		bool release = buildmode_release;
+		bool debug = buildmode_debug;
+#else
+		// else, default to just release mode
+		bool release = true;
+		bool debug = false;
+#endif
+
 		// test for "crypto" feature and check qca version number
 		QString arg;
 		arg = conf->getenv("QC_IN_TREE_BUILD");
@@ -38,14 +48,27 @@ public:
 		"int main()\n"
 		"{\n"
 		"	unsigned long x = QCA_VERSION;\n"
-		"	if(x >= 0x020000) return 0; else return 1;\n"
+		"	if(x >= 0x016363) return 0; else return 1;\n"
 		"}\n";
 
-		int ret;
-		if(!conf->doCompileAndLink(str, QStringList(), QString(), proextra, &ret))
-			return false;
-		if(ret != 0)
-			return false;
+		if(release)
+		{
+			int ret;
+			if(!conf->doCompileAndLink(str, QStringList(), QString(), proextra + "CONFIG += release\n", &ret))
+				return false;
+			if(ret != 0)
+				return false;
+		}
+
+		if(debug)
+		{
+			int ret;
+			if(!conf->doCompileAndLink(str, QStringList(), QString(), proextra + "CONFIG += debug\n", &ret))
+				return false;
+			if(ret != 0)
+				return false;
+		}
+
 		if (!arg.isEmpty()) {
 			conf->addIncludePath("../../include/QtCrypto");
 			conf->addLib("-L../../lib -lqca");

@@ -2367,7 +2367,8 @@ public:
 
 		unsigned char *p, *tmps = NULL;
 		const unsigned char *s = NULL;
-		int i,j;//,ret=1;
+		int i,j;
+		j = 0;
 
 		if(type == NID_md5_sha1)
 		{

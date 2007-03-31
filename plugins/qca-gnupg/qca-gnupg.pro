@@ -1,10 +1,9 @@
-#CONFIG += release
-CONFIG += debug
-
 TEMPLATE = lib
 CONFIG += plugin
 QT -= gui
 CONFIG += crypto
+
+VERSION = 0.0.1
 
 windows:LIBS += -ladvapi32
 
@@ -20,3 +19,8 @@ SOURCES += \
 	$$GPG_BASE/qca-gnupg.cpp
 
 include(conf.pri)
+
+CONFIG(debug, debug|release) {
+	unix:TARGET = $$join(TARGET,,,_debug)
+	else:TARGET = $$join(TARGET,,,d)
+}

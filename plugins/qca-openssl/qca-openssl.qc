@@ -2,6 +2,10 @@
  <name>qca-openssl</name>
  <profile>qca-openssl.pro</profile>
  <noprefix/>
+ <lib/>
+ <dep type='buildmode'>
+  <required/>
+ </dep>
  <dep type='qca'>
   <required/>
  </dep>
