@@ -1,0 +1,12 @@
+# prepend this file with a QCA_PREFIX definition
+
+CONFIG *= qt
+INCLUDEPATH += $$QCA_PREFIX/include/QtCrypto
+LIBS += -L$$QCA_PREFIX/lib
+
+CONFIG(debug, debug|release) {
+	unix:LIBS += -lqca_debug
+	else:LIBS += -lqcad
+} else {
+	LIBS += -lqca
+}

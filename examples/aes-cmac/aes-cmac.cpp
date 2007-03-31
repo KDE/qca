@@ -86,7 +86,7 @@ public:
 	// Generate the subkeys
 	QSecureArray const_Zero(16);
 	QSecureArray const_Rb(16);
-	const_Rb[15] = 0x87;
+	const_Rb[15] = (char)0x87;
 
 	m_X = const_Zero;
 	m_residual = QSecureArray();
@@ -110,7 +110,7 @@ public:
 	    m_k2 = xorArray(leftShift(m_k1), const_Rb);
     }
 
-    Context *clone() const
+    QCA::Provider::Context *clone() const
     {
         return new AESCMACContext(*this);
     }
@@ -162,7 +162,7 @@ public:
 	if ( numBytesLeft != 16 ) {
 	    // no full block, so we have to pad.
 	    m_residual.resize(16);
-	    m_residual[numBytesLeft] = 0x80;
+	    m_residual[numBytesLeft] = (char)0x80;
 	    lastBlock = xorArray(m_residual, m_k2);
 	} else {
 	    // this is a full block - no padding
