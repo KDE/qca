@@ -290,6 +290,7 @@ static CertificateInfo get_cert_name(X509_NAME *name)
 	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.2"), IncorporationState, &info);
 	try_get_name_item(name, NID_organizationName, Organization, &info);
 	try_get_name_item(name, NID_organizationalUnitName, OrganizationalUnit, &info);
+	try_get_name_item(name, NID_pkcs9_emailAddress, Email, &info);
 	return info;
 }
 
