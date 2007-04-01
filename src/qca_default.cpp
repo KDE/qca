@@ -967,7 +967,7 @@ public:
 	}
 
 	// TODO
-	KeyStoreEntryContext *entryPassive(const QString &_storeId, const QString &entryId)
+	virtual KeyStoreEntryContext *entryPassive(const QString &_storeId, const QString &entryId)
 	{
 		Q_UNUSED(_storeId);
 		QString storeId, storeName, eid, ename, etype, pem;
