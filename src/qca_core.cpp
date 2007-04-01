@@ -527,8 +527,10 @@ void saveProviderConfig(const QString &name)
 
 Random & globalRNG()
 {
-	QMutexLocker locker(global_mutex());
-	Q_ASSERT(global);
+	{
+		QMutexLocker locker(global_mutex());
+		Q_ASSERT(global);
+	}
 
 	if(!global->rng)
 		global->rng = new Random;
@@ -537,8 +539,10 @@ Random & globalRNG()
 
 void setGlobalRNG(const QString &provider)
 {
-	QMutexLocker locker(global_mutex());
-	Q_ASSERT(global);
+	{
+		QMutexLocker locker(global_mutex());
+		Q_ASSERT(global);
+	}
 
 	delete global->rng;
 	global->rng = new Random(provider);
