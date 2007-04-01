@@ -13,7 +13,6 @@
     make sure there aren't any cases where a Foo::supportsBar()-style function
       reports true, but then when the object is created, it doesn't actually
       support the feature (because the wrong provider was used).
-    why is Random returning unsigned?
   code:
     strange backtrace on mac (ask textshell)
   other:
@@ -30,6 +29,7 @@
     tls extensions: hostname and ocsp stapling
     QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
+    global random thread-safety?
     tls/sasl
     fix asker implementation, it is a disaster
     dirwatch: thread safety
