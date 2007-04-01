@@ -683,6 +683,7 @@ public:
 			{
 				args += "--export";
 				args += QString("0x") + input.export_key_id;
+				collectOutput = false;
 				if(input.opt_ascii)
 					readText = true;
 				break;
