@@ -111,7 +111,6 @@ public:
 		).arg(QLibraryInfo::location(QLibraryInfo::DataPath));
 		conf->addExtra(str);
 
-		QString qtcore = qc_getenv("QC_ENABLE_DEBUG") == "Y" ? QString("QtCore_debug") : QString("QtCore");
 		// write pkg-config files
 
 		QString pkg_template1 = QString(
