@@ -363,7 +363,7 @@ public:
 	{
 	}
 
-	InfoType(QCA::CertificateInfoType _type, QString _varname, QString _shortname, QString _name, QString _desc)
+	InfoType(QCA::CertificateInfoType _type, const QString &_varname, const QString &_shortname, const QString &_name, const QString &_desc)
 	:type(_type), varname(_varname), shortname(_shortname), name(_name), desc(_desc)
 	{
 	}
@@ -401,7 +401,7 @@ public:
 	{
 	}
 
-	MyConstraintType(QCA::ConstraintType _type, QString _varname, QString _name, QString _desc)
+	MyConstraintType(QCA::ConstraintType _type, const QString &_varname, const QString &_name, const QString &_desc)
 	:type(_type), varname(_varname), name(_name), desc(_desc)
 	{
 	}
