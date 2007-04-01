@@ -376,9 +376,9 @@ static QList<InfoType> makeInfoTypeList()
 	out += InfoType(QCA::Email,                  "Email",                  "",    "Email Address",             "");
 	out += InfoType(QCA::Organization,           "Organization",           "O",   "Organization (O)",          "Company, group, etc");
 	out += InfoType(QCA::OrganizationalUnit,     "OrganizationalUnit",     "OU",  "Organizational Unit (OU)",  "Division/branch of organization");
-	out += InfoType(QCA::Locality,               "Locality",               "",    "Locality",                  "City, shire, part of a state");
-	out += InfoType(QCA::State,                  "State",                  "",    "State",                     "State within the country");
-	out += InfoType(QCA::Country,                "Country",                "C",   "Country Code",              "2-letter code");
+	out += InfoType(QCA::Locality,               "Locality",               "",    "Locality (L)",              "City, shire, part of a state");
+	out += InfoType(QCA::State,                  "State",                  "",    "State (ST)",                "State within the country");
+	out += InfoType(QCA::Country,                "Country",                "C",   "Country Code (C)",          "2-letter code");
 	out += InfoType(QCA::IncorporationLocality,  "IncorporationLocality",  "",    "Incorporation Locality",    "For EV certificates");
 	out += InfoType(QCA::IncorporationState,     "IncorporationState",     "",    "Incorporation State",       "For EV certificates");
 	out += InfoType(QCA::IncorporationCountry,   "IncorporationCountry",   "",    "Incorporation Country",     "For EV certificates");
@@ -2438,6 +2438,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
+			// FIXME: isSecret will always print false here
 			QCA::PGPKey pub = get_P(args[2]);
 			if(pub.isNull())
 				return 1;
