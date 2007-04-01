@@ -16,15 +16,9 @@
     why is Random returning unsigned?
   code:
     strange backtrace on mac (ask textshell)
-    qca-gnupg: pgp passive entries
-    qca-openssl: not picking up psa's email address?  psa_cert2.pem
   other:
     link against our own lib (e.g. -L../../lib) before ALL other libs,
       including Qt's libs, since some distros put qca into qt's dir.
-    when using Q_EXPORT_PLUGIN2(), pass the name using underscores instead
-      of hyphens.  e.g. qca_openssl, not qca-openssl
-    put qca.dll into bin/ instead of lib/
-    adopt 'd' naming scheme for debug? (maybe we already do this)
 
 * beta4
   api:
@@ -34,6 +28,7 @@
             or add an indicator as to whether the numbers can be
             trusted.
     tls extensions: hostname and ocsp stapling
+    QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
     tls/sasl
     fix asker implementation, it is a disaster
