@@ -114,7 +114,16 @@ namespace QCA
 		*/
 		QString id() const;
 
+		/**
+		   The name of the KeyStore for this key object
+		*/
 		QString storeName() const;
+
+		/**
+		   The id of the KeyStore for this key object
+
+		   \sa KeyStore::id()
+		*/
 		QString storeId() const;
 
 		/**
@@ -162,7 +171,11 @@ namespace QCA
 		*/
 		bool ensureAvailable();
 
-		// like ensureAvailable, but also login to the token if needed
+		/**
+		   Like ensureAvailable, but will also ensure
+		   that the token is inserted / PIN is provided 
+		   if needed.
+		*/
 		bool ensureAccess();
 
 	private:
@@ -181,7 +194,7 @@ namespace QCA
 
 		KeyStoreEntry entry() const;
 
-	signals:
+	Q_SIGNALS:
 		void available();
 		void unavailable();
 
@@ -323,7 +336,7 @@ namespace QCA
 		*/
 		bool removeEntry(const QString &id);
 
-	signals:
+	Q_SIGNALS:
 		/**
 		   Emitted when the KeyStore is changed
 		*/
@@ -401,7 +414,7 @@ namespace QCA
 		*/
 		void sync();
 
-	signals:
+	Q_SIGNALS:
 		/**
 		   emitted when the manager has started looking for key stores
 		*/
