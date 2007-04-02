@@ -1763,6 +1763,9 @@ namespace QCA
 
 		/**
 		   The key fingerpint
+
+                   This will return the PGP fingerprint as a string. It comprises 16 hex digits,
+                   without spaces.
 		*/
 		QString fingerprint() const;
 
@@ -1786,12 +1789,23 @@ namespace QCA
 		// import / export
 
 		/**
-		   Export the key to an array
+		   Export the key to an array.
+
+                   This will export the key in a binary format (that is, not in an 
+                   "ascii armoured" form).
+
+                   \sa fromArray for a static import method.
+                   \sa toString for an "ascii armoured" export method.
 		*/
 		QSecureArray toArray() const;
 
 		/**
 		   Export the key to a string
+
+                   This will export the key in an "ascii armoured" form.
+
+                   \sa fromString for a static import method.
+                   \sa toArray for a binary format export method.
 		*/
 		QString toString() const;
 
