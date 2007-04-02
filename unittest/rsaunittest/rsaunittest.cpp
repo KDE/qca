@@ -22,7 +22,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "rsaunittest.h"
+
+#include <QtCrypto>
+#include <QtTest/QtTest>
+
+class RSAUnitTest : public QObject
+{
+    Q_OBJECT
+
+private Q_SLOTS:
+    void initTestCase();
+    void cleanupTestCase();
+    void testrsa();
+
+private:
+    QCA::Initializer* m_init;
+};
 
 void RSAUnitTest::initTestCase()
 {
@@ -41,7 +56,7 @@ void RSAUnitTest::testrsa()
     providersToTest.append("qca-openssl");
     // providersToTest.append("qca-gcrypt");
 
-    foreach(const QString provider, providersToTest) { 
+    foreach(const QString provider, providersToTest) {
 	if(!QCA::isSupported("pkey", provider) ||
 	   !QCA::PKey::supportedTypes(provider).contains(QCA::PKey::RSA) ||
 	   !QCA::PKey::supportedIOTypes(provider).contains(QCA::PKey::RSA))
@@ -63,13 +78,13 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( rsaKey.isPublic(), false );
 		QCOMPARE( rsaKey.canSign(), true);
 		QCOMPARE( rsaKey.canDecrypt(), true);
-	    
+
 		QCA::RSAPrivateKey rsaPrivKey = rsaKey.toRSA();
 		QCOMPARE( rsaPrivKey.bitSize(), keysize );
-	    
+
 		QString rsaPEM = rsaKey.toPEM();
 		QCOMPARE( rsaPEM.isEmpty(), false );
-	    
+
 		QCA::ConvertResult checkResult;
 		QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(rsaPEM, QSecureArray(), &checkResult);
 		QCOMPARE( checkResult, QCA::ConvertGood );
@@ -80,10 +95,10 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( fromPEMkey.isPrivate(), true );
 		QCOMPARE( fromPEMkey.isPublic(), false );
 		QCOMPARE( rsaKey == fromPEMkey, true );
-		
+
 		QSecureArray rsaDER = rsaKey.toDER(QSecureArray("foo"));
 		QCOMPARE( rsaDER.isEmpty(), false );
-	    
+
 		QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QSecureArray("foo"), &checkResult);
 		QCOMPARE( checkResult, QCA::ConvertGood );
 		QCOMPARE( fromDERkey.isNull(), false );
@@ -97,7 +112,7 @@ void RSAUnitTest::testrsa()
 		// same test, without passphrase
 		rsaDER = rsaKey.toDER();
 		QCOMPARE( rsaDER.isEmpty(), false );
-		
+
 		fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QSecureArray(), &checkResult);
 		QCOMPARE( checkResult, QCA::ConvertGood );
 		QCOMPARE( fromDERkey.isNull(), false );
@@ -107,7 +122,7 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( fromDERkey.isPrivate(), true );
 		QCOMPARE( fromDERkey.isPublic(), false );
 		QCOMPARE( rsaKey == fromDERkey, true );
-	    
+
 		QCA::PublicKey pubKey = rsaKey.toPublicKey();
 		QCOMPARE( pubKey.isNull(), false );
 		QCOMPARE( pubKey.isRSA(), true );
@@ -115,7 +130,7 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( pubKey.isDH(), false );
 		QCOMPARE( pubKey.isPrivate(), false );
 		QCOMPARE( pubKey.isPublic(), true );
-		
+
 		QCA::RSAPublicKey RSApubKey = pubKey.toRSA();
 		QCOMPARE( RSApubKey.e(), QBigInteger(65537) );
 		QCOMPARE( RSApubKey.isNull(), false );
@@ -131,3 +146,5 @@ void RSAUnitTest::testrsa()
 
 
 QTEST_MAIN(RSAUnitTest)
+
+#include "rsaunittest.moc"
