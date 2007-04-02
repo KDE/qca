@@ -744,6 +744,11 @@ bool KeyStore::isReadOnly() const
 	return d->item.isReadOnly;
 }
 
+void KeyStore::startAsynchronousMode()
+{
+	// TODO
+}
+
 QList<KeyStoreEntry> KeyStore::entryList() const
 {
 	if(d->trackerId == -1)

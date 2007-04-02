@@ -280,6 +280,21 @@ namespace QCA
 		bool isReadOnly() const;
 
 		/**
+		   Turns on asynchronous mode for this KeyStore instance.
+
+		   Normally, entryList() and writeEntry() are blocking
+		   calls.  However, if startAsynchronousMode() is called,
+		   then these functions will return immediately.  entryList()
+		   will return with the latest known entries, or an empty
+		   list if none are known yet (in this mode, updated() will
+		   be emitted once the initial entries are known, even if the
+		   store has not actually been altered).  writeEntry() will
+		   always return true, and the entryWritten() signal
+		   indicates the result of a write.
+		*/
+		void startAsynchronousMode();
+
+		/**
 		   A list of the KeyStoreEntry objects in this store
 		*/
 		QList<KeyStoreEntry> entryList() const;
@@ -346,6 +361,13 @@ namespace QCA
 		   Emitted when the KeyStore becomes unavailable
 		*/
 		void unavailable();
+
+		/**
+		   Emitted when an entry has been written, in asynchronous
+		   mode.  entryId is the newly written entry id on success,
+		   or an empty string if the write failed.
+		*/
+		void entryWritten(const QString &entryId);
 
 	private:
 		friend class KeyStorePrivate;
