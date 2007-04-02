@@ -51,7 +51,7 @@
          - Triple DES
          - DES
          - AES (128, 192 and 256 bit)
-     - Message Authentication Code (QCA::MAC), using
+     - Message Authentication Code (QCA::MessageAuthenticationCode), using
          - HMAC with SHA-1
          - HMAC with MD5
          - HMAC with RIPEMD160
