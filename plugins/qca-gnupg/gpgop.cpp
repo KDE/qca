@@ -181,7 +181,7 @@ public:
 						bytes += prebytes;
 						prebytes = 0;
 					}
-			
+
 					break;
 				}
 			}
@@ -283,7 +283,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 	if(it == lines.end() || (*it).at(0) != '-')
 	{
 		// first line wasn't the keyring name...
-		keyring = "";
+		keyring.clear();
 		// ...so read the first line again
 		it--;
 	}
