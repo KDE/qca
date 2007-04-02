@@ -8,10 +8,6 @@
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
 
-* beta3
-  code:
-    strange backtrace on mac ( http://flyspray.psi-im.org/task/640 )
-
 * beta4
   api:
     some functions report availability of "sub"features without having context
