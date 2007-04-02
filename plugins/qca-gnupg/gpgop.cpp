@@ -280,7 +280,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 	// if the second line isn't a divider, we are dealing
 	// with a new version of gnupg that doesn't give us
 	// the keyring file on gpg --list-keys --with-colons
-	if(it == lines.end() || (*it).at(0) != '-')
+	if(it == lines.end() || (*it).isEmpty() || (*it).at(0) != '-')
 	{
 		// first line wasn't the keyring name...
 		keyring.clear();
@@ -899,6 +899,10 @@ private:
 		else if(s == "DECRYPTION_OKAY")
 		{
 			decryptGood = true;
+
+			// message could be encrypted with several keys
+			if(curError == GpgOp::ErrorDecryptNoKey)
+				curError = GpgOp::ErrorUnknown;
 		}
 		else if(s == "SIG_CREATED")
 		{

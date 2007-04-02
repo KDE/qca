@@ -761,7 +761,6 @@ public:
 	virtual void end()
 	{
 		GpgOp gpg(find_bin());
-		global_gpg = &gpg;
 
 		if(format == SecureMessage::Ascii)
 			gpg.setAsciiFormat(true);
@@ -821,6 +820,7 @@ public:
 				//emit keyStoreList->storeNeedPassphrase(0, 0, keyId);
 				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), keyId, 0);
 				asker.waitForResponse();
+				global_gpg = &gpg;
 				keyStoreList->submitPassphrase(0, 0, asker.password());
 			}
 			else if(e.type == GpgOp::Event::Finished)
@@ -854,7 +854,7 @@ public:
 				else if(vr == GpgOp::VerifyBad)
 				{
 					ir = SecureMessageSignature::InvalidSignature;
-					v = ErrorValidityUnknown;
+					v = ValidityGood; // good key, bad sig
 				}
 				else // GpgOp::VerifyNoKey
 				{
@@ -864,8 +864,13 @@ public:
 
 				SecureMessageKey key;
 				PGPKey pub = publicKeyFromId(signerId, provider());
-				if(!pub.isNull())
-					key.setPGPPublicKey(pub);
+				if(pub.isNull())
+				{
+					MyPGPKeyContext *kc = new MyPGPKeyContext(provider());
+					kc->_props.keyId = signerId;
+					pub.change(kc);
+				}
+				key.setPGPPublicKey(pub);
 
 				signer = SecureMessageSignature(ir, v, key, ts);
 				wasSigned = true;
