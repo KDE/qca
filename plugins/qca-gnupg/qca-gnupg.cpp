@@ -34,7 +34,7 @@ static QString find_reg_gpgProgram()
 	if(RegOpenKeyExA(HKEY_CURRENT_USER, path, 0, KEY_QUERY_VALUE, &hkey) != ERROR_SUCCESS)
 	{
 		if(RegOpenKeyExA(HKEY_LOCAL_MACHINE, path, 0, KEY_QUERY_VALUE, &hkey) != ERROR_SUCCESS)
-			return QString::null;
+			return QString();
 	}
 
 	char szValue[256];
@@ -42,7 +42,7 @@ static QString find_reg_gpgProgram()
 	if(RegQueryValueExA(hkey, "gpgProgram", NULL, NULL, (LPBYTE)szValue, &dwLen) != ERROR_SUCCESS)
 	{
 		RegCloseKey(hkey);
-		return QString::null;
+		return QString();
 	}
 
 	RegCloseKey(hkey);
