@@ -683,7 +683,7 @@ else
 		*/
 		QString diagnosticText() const;
 
-	signals:
+	Q_SIGNALS:
 		/**
 		   This signal is emitted when there is some data to
 		   read. Typically you connect this signal to a slot

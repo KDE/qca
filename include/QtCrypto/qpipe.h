@@ -88,7 +88,7 @@ public:
 	int write(const char *data, int size); // return number taken, ptr must stay valid. -1 on error
 	int writeResult(int *written) const;   // 0 = success (wrote all), -1 = error (see written)
 
-signals:
+Q_SIGNALS:
 	void notify();                         // can read or can write, depending on type
 
 private:
@@ -151,7 +151,7 @@ public:
 	QSecureArray takeBytesToWriteSecure();
 #endif
 
-signals:
+Q_SIGNALS:
 	void readyRead();
 	void bytesWritten(int bytes);
 	void closed();
