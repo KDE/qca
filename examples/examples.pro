@@ -9,6 +9,7 @@ SUBDIRS += \
 	hashtest \
 	hextest \
 	mactest \
+	md5crypt \
 	providertest \
 	publickeyexample \
 	randomtest \
