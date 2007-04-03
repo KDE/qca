@@ -66,6 +66,13 @@ The code below shows how to use the QCA::MessageAuthenticationCode class
 
 */
 
+/** \example md5crypt.cpp
+
+The code below shows how to calculate an md5crypt based password. This
+code is compatible with the glibc code.
+
+*/
+
 /** \example providertest.cpp
 
 The code below shows some simple operations on a QCA::Provider object, including

@@ -500,6 +500,7 @@ EXAMPLE_PATH           = examples/aes-cmac \
 			 examples/hashtest \
 			 examples/hextest \
                          examples/mactest \
+                         examples/md5crypt \
                          examples/providertest \
                          examples/publickeyexample \
                          examples/randomtest \
