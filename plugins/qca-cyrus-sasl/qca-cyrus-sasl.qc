@@ -1,7 +1,10 @@
 <qconf>
- <name>qca-sasl</name>
- <profile>qca-sasl.pro</profile>
+ <name>qca-cyrus-sasl</name>
+ <profile>qca-cyrus-sasl.pro</profile>
  <noprefix/>
+ <dep type='buildmode'>
+  <required/>
+ </dep>
  <dep type='qca'>
   <required/>
  </dep>
