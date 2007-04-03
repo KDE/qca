@@ -2290,7 +2290,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 
 	pkcs11h_setLogLevel (config["log_level"].toInt ());
 	pkcs11h_setProtectedAuthentication (
-		config["allow_protected_authentication"].toBool () != false ? TRUE : FALSE
+		config["allow_protected_authentication"].toBool () != false ? TRUE : FALSE //krazy:exclude=captruefalse
 	);
 	pkcs11h_setPINCachePeriod (config["pin_cache"].toInt ());
 
@@ -2333,7 +2333,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					qPrintable (provider),
 					config[
 						QString ().sprintf ("provider_%02d_allow_protected_authentication", i)
-					].toBool () != false ? TRUE : FALSE,
+					].toBool () != false ? TRUE : FALSE, //krazy:exclude=captruefalse
 					(unsigned)config[
 						QString ().sprintf ("provider_%02d_private_mask", i)
 					].toInt (),
@@ -2343,7 +2343,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					].toInt (),
 					config[
 						QString ().sprintf ("provider_%02d_cert_private", i)
-					].toBool () != false ? TRUE : FALSE
+					].toBool () != false ? TRUE : FALSE //krazy:exclude=captruefalse
 				)) != CKR_OK
 			) {
 /*CANNOT DO ANYTHING HERE
@@ -2461,7 +2461,7 @@ pkcs11Provider::cardPromptHook (
 ) {
 	Q_UNUSED(token);
 
-	return FALSE;
+	return FALSE; //krazy:exclude=captruefalse
 }
 
 PKCS11H_BOOL
@@ -2479,11 +2479,11 @@ pkcs11Provider::pinPromptHook (
 			if ((size_t)qpin.size () < pin_max-1) {
 				memmove (pin, qpin.constData (), qpin.size ());
 				pin[qpin.size ()] = '\0';
-				return TRUE;
+				return TRUE; //krazy:exclude=captruefalse
 			}
 		}
 	}
-	return FALSE;
+	return FALSE; //krazy:exclude=captruefalse
 }
 
 class pkcs11Plugin : public QCAPlugin
