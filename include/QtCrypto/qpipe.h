@@ -32,7 +32,9 @@
 
 #include <QtCore>
 
-#define QPIPE_SECURE
+#ifndef QPIPE_NO_SECURE
+# define QPIPE_SECURE
+#endif
 
 #ifdef QPIPE_SECURE
 # include <QtCrypto>
