@@ -8,6 +8,7 @@ SET( nonmoc_SOURCES
 	qca_textfilter.cpp
 	qca_basic.cpp
 	qca_cert.cpp
+	support/logger.cpp
 )
 
 SET( moc_SOURCES
@@ -22,7 +23,6 @@ SET( moc_SOURCES
 	support/synchronizer.cpp
 	support/dirwatch/dirwatch.cpp
 	support/syncthread.cpp
-	support/logger.cpp
 )
 
 IF (Q_WS_X11)
