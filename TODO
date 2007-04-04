@@ -77,14 +77,11 @@
     link against our own lib (e.g. -L../../lib) before ALL other libs,
       including Qt's libs, since some distros put qca into qt's dir?
   alon:
-    log facility, with log level and a print destination (maybe file property?)
-      figure out overlap with "diagnosticText"
     convertToPublic should return a publickey rather than clone?
-    property change notifications
     keybundle should be able to not have intermediates
     ability to complete cert chain from a pool of nonroots
-    global provider config files
-    forkfixup
+    ability to create PKCS#1 without using direct low level crypto.
+    ability to throgh errors in any location in a provider.
 
 * finish code for APIs:
   core: properties
