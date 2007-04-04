@@ -31,6 +31,7 @@
       supportedCipherSuites
       canCompress
     cert extensions
+      fixup subjectInfoOrdered to handle all DN parts (oids) ?
     crl URIs
     policy info beyond OID
     OCSP ?
@@ -39,7 +40,11 @@
             trusted.
     tls extensions: hostname and ocsp stapling
     QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
+    alon: convertToPublic should return a publickey rather than clone?
+    ability to create PKCS#1 without using direct low level crypto.
   code:
+    fix the locking stuff in qca_core
+    allow logger to be used from anywhere
     global random thread-safety?
     tls/sasl
     fix asker implementation, it is a disaster
@@ -77,12 +82,6 @@
     link against our own lib (e.g. -L../../lib) before ALL other libs,
       including Qt's libs, since some distros put qca into qt's dir?
   alon:
-    convertToPublic should return a publickey rather than clone?
-    keybundle should be able to not have intermediates
-    ability to complete cert chain from a pool of nonroots
-    ability to create PKCS#1 without using direct low level crypto.
-    ability to throgh errors in any location in a provider.
-    fixup subjectInfoOrdered to handle all DN parts (oids).
     allow formating subjectInfoOrdered into string in certificate object.
 
 * finish code for APIs:
