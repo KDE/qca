@@ -128,7 +128,7 @@ protected:
 	slotEventHook ();
 
 	PKCS11H_BOOL
-	cardPromptHook (
+	tokenPromptHook (
 		const pkcs11h_token_id_t token
 	);
 
@@ -230,6 +230,11 @@ public:
 	virtual
 	QList<KeyStoreEntryContext*>
 	entryList (int id);
+
+	bool
+	tokenPrompt (
+		const pkcs11h_token_id_t token_id
+	);
 
 	void
 	pinPrompt (
@@ -1488,6 +1493,8 @@ MyKeyStoreList::entryPassive (
 	const QString &storeId,
 	const QString &entryId
 ) {
+	KeyStoreEntryContext *entry = NULL;
+
 	Q_UNUSED(storeId);
 
 	try {
@@ -1497,7 +1504,7 @@ MyKeyStoreList::entryPassive (
 
 		deserializeCertificateId (entryId, &certificate_id, &has_private, &listIssuers);
 
-		return getKeyStoreEntryByCertificateId (certificate_id, has_private, listIssuers);
+		entry = getKeyStoreEntryByCertificateId (certificate_id, has_private, listIssuers);
 	}
 	catch (const PKCS11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
@@ -1507,9 +1514,9 @@ MyKeyStoreList::entryPassive (
 				qPrintable (e.getMessage ())
 			)
 		);
-
-		return NULL;
 	}
+
+	return entry;
 }
 
 KeyStore::Type
@@ -1720,43 +1727,34 @@ MyKeyStoreList::entryList (int id) {
 	return out;
 }
 
+bool
+MyKeyStoreList::tokenPrompt (
+	const pkcs11h_token_id_t token_id
+) {
+	KeyStoreItem *entry = registerTokenId (token_id);
+
+	TokenAsker asker;
+	asker.ask (
+		tokenId2storeId (entry->token_id),
+		NULL
+	);
+	asker.waitForResponse ();
+	return asker.accepted ();
+}
+
 void
 MyKeyStoreList::pinPrompt (
 	const pkcs11h_token_id_t token_id,
 	QSecureArray &pin
 ) {
-	KeyStoreItem *entry = NULL;
-
-	{
-		QMutexLocker l(&_mutexStores);
-
-		_stores_t::iterator i=_stores.begin ();
-
-		while (
-			i != _stores.end () &&
-			!pkcs11h_token_sameTokenId (
-				token_id,
-				(*i)->token_id
-			)
-		) {
-			i++;
-		}
-
-		if (i != _stores.end ()) {
-			entry = (*i);
-		}
-	}
-
-	if (entry == NULL) {
-		entry = registerTokenId (token_id);
-	}
+	KeyStoreItem *entry = registerTokenId (token_id);
 
 	PasswordAsker asker;
 	asker.ask (
 		Event::StylePIN,
 		tokenId2storeId (entry->token_id),
 		QString(),
-		0
+		NULL
 	);
 	asker.waitForResponse ();
 	if (asker.accepted ()) {
@@ -2395,7 +2393,7 @@ pkcs11Provider::_tokenPromptHook (
 	Q_UNUSED(retry);
 
 	pkcs11Provider *me = (pkcs11Provider *)global_data;
-	return me->cardPromptHook (token);
+	return me->tokenPromptHook (token);
 }
 
 PKCS11H_BOOL
@@ -2441,7 +2439,17 @@ pkcs11Provider::logHook (
 		break;
 	}
 
-	logger ()->logTextMessage (QString ().vsprintf (format, args), severity);
+
+//@BEGIN-WORKAROUND
+// Qt vsprintf cannot can NULL for %s as vsprintf does.
+//	logger ()->logTextMessage (QString ().vsprintf (format, args), severity);
+	char buffer[1024];
+	vsnprintf (buffer, sizeof (buffer)-1, format, args);
+	buffer[sizeof (buffer)-1] = '\x0';
+// logger has problem during shutdown
+// @bhards
+//	logger ()->logTextMessage (QString ().fromUtf8 (buffer), severity);
+//@END-WORKAROUND
 }
 
 void
@@ -2456,10 +2464,12 @@ pkcs11Provider::slotEventHook () {
 }
 
 PKCS11H_BOOL
-pkcs11Provider::cardPromptHook (
+pkcs11Provider::tokenPromptHook (
 	const pkcs11h_token_id_t token
 ) {
-	Q_UNUSED(token);
+	if (s_keyStoreList != NULL) {
+		return s_keyStoreList->tokenPrompt (token) ? TRUE : FALSE; //krazy:exclude=captruefalse
+	}
 
 	return FALSE; //krazy:exclude=captruefalse
 }
