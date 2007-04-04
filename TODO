@@ -82,6 +82,8 @@
     ability to complete cert chain from a pool of nonroots
     ability to create PKCS#1 without using direct low level crypto.
     ability to throgh errors in any location in a provider.
+    fixup subjectInfoOrdered to handle all DN parts (oids).
+    allow formating subjectInfoOrdered into string in certificate object.
 
 * finish code for APIs:
   core: properties
