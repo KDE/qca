@@ -110,7 +110,7 @@ static bool features_have(const QStringList &have, const QStringList &want)
 
 void init(MemoryMode mode, int prealloc)
 {
-	QMutexLocker locker(global_mutex());
+	//QMutexLocker locker(global_mutex());
 	if(global)
 	{
 		++(global->refs);
@@ -164,7 +164,7 @@ void init()
 
 void deinit()
 {
-	QMutexLocker locker(global_mutex());
+	//QMutexLocker locker(global_mutex());
 	if(!global)
 		return;
 	--(global->refs);
