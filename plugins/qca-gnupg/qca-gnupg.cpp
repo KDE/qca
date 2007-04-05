@@ -818,7 +818,11 @@ public:
 				else
 					keyId = e.keyId;
 				//emit keyStoreList->storeNeedPassphrase(0, 0, keyId);
-				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), keyId, 0);
+				QStringList out;
+				out += escape_string("qca-gnupg-1");
+				out += escape_string(keyId);
+				QString entryId = out.join(":");
+				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), entryId, 0);
 				asker.waitForResponse();
 				global_gpg = &gpg;
 				keyStoreList->submitPassphrase(0, 0, asker.password());
