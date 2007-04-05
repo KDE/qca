@@ -550,7 +550,7 @@ void setGlobalRNG(const QString &provider)
 
 Logger *logger()
 {
-	QMutexLocker locker(global_mutex());
+	//QMutexLocker locker(global_mutex());
 	Q_ASSERT(global);
 
 	return global->logger;
@@ -558,7 +558,7 @@ Logger *logger()
 
 void logText( const QString &message, Logger::Severity severity )
 {
-	QMutexLocker locker(global_mutex());
+	//QMutexLocker locker(global_mutex());
 	Q_ASSERT(global);
 
         global->logger->logTextMessage( message, severity );
