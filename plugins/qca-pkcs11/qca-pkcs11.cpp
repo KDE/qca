@@ -129,11 +129,13 @@ protected:
 
 	PKCS11H_BOOL
 	tokenPromptHook (
+		void * const user_data,
 		const pkcs11h_token_id_t token
 	);
 
 	PKCS11H_BOOL
 	pinPromptHook (
+		void * const user_data,
 		const pkcs11h_token_id_t token,
 		char * const pin,
 		const size_t pin_max
@@ -233,11 +235,13 @@ public:
 
 	bool
 	tokenPrompt (
+		void * const user_data,
 		const pkcs11h_token_id_t token_id
 	);
 
 	void
 	pinPrompt (
+		void * const user_data,
 		const pkcs11h_token_id_t token_id,
 		QSecureArray &pin
 	);
@@ -358,6 +362,7 @@ private:
 	pkcs11h_certificate_id_t _pkcs11h_certificate_id;
 	pkcs11h_certificate_t _pkcs11h_certificate;
 	RSAPublicKey _pubkey;
+	QString _serialized_entry;
 
 	struct sign_data_s {
 		SignatureAlgorithm alg;
@@ -390,6 +395,7 @@ public:
 		_pkcs11h_certificate_id = NULL;
 		_pkcs11h_certificate = NULL;
 		_pubkey = from._pubkey;
+		_serialized_entry = from._serialized_entry;
 		sign_data.hash = NULL;
 		clearSign ();
 
@@ -406,6 +412,14 @@ public:
 	Provider::Context *
 	clone () const {
 		return new MyRSAKey (*this);
+	}
+
+public:
+	void
+	setSerializedEntry (
+		const QString &serialized_entry
+	) {
+		_serialized_entry = serialized_entry;
 	}
 
 public:
@@ -956,7 +970,7 @@ private:
 			if (
 				(rv = pkcs11h_certificate_create (
 					_pkcs11h_certificate_id,
-					NULL,
+					&_serialized_entry,
 					PKCS11H_PROMPT_MASK_ALLOW_ALL,
 					PKCS11H_PIN_CACHE_INFINITE,
 					&_pkcs11h_certificate
@@ -1729,14 +1743,18 @@ MyKeyStoreList::entryList (int id) {
 
 bool
 MyKeyStoreList::tokenPrompt (
+	void * const user_data,
 	const pkcs11h_token_id_t token_id
 ) {
-	KeyStoreItem *entry = registerTokenId (token_id);
+	Q_UNUSED(token_id);
+
+	QString *serialized = (QString *)user_data;
+	KeyStoreEntryContext *entry = entryPassive (QString (), *serialized);
 
 	TokenAsker asker;
 	asker.ask (
-		tokenId2storeId (entry->token_id),
-		NULL
+		entry->id (),
+		entry
 	);
 	asker.waitForResponse ();
 	return asker.accepted ();
@@ -1744,17 +1762,21 @@ MyKeyStoreList::tokenPrompt (
 
 void
 MyKeyStoreList::pinPrompt (
+	void * const user_data,
 	const pkcs11h_token_id_t token_id,
 	QSecureArray &pin
 ) {
-	KeyStoreItem *entry = registerTokenId (token_id);
+	Q_UNUSED(token_id);
+
+	QString *serialized = (QString *)user_data;
+	KeyStoreEntryContext *entry = entryPassive (QString (), *serialized);
 
 	PasswordAsker asker;
 	asker.ask (
 		Event::StylePIN,
-		tokenId2storeId (entry->token_id),
-		QString(),
-		NULL
+		entry->storeId (),
+		entry->id (),
+		entry
 	);
 	asker.waitForResponse ();
 	if (asker.accepted ()) {
@@ -1907,6 +1929,8 @@ MyKeyStoreList::getKeyStoreEntryByCertificateId (
 			description,
 			provider ()
 		);
+
+		rsakey->setSerializedEntry (entry->id ());
 	}
 	else {
 		entry = new MyKeyStoreEntry (
@@ -2032,7 +2056,7 @@ MyKeyStoreList::deserializeCertificateId (
 		if (
 			(rv = pkcs11h_certificate_deserializeCertificateId (
 				&certificate_id,
-				qPrintable (list[n++])
+				qPrintable (unescapeString (list[n++]))
 			)) != CKR_OK
 		) {
 			throw PKCS11Exception (rv, "Invalid serialization");
@@ -2389,11 +2413,10 @@ pkcs11Provider::_tokenPromptHook (
 	const pkcs11h_token_id_t token,
 	const unsigned retry
 ) {
-	Q_UNUSED(user_data);
 	Q_UNUSED(retry);
 
 	pkcs11Provider *me = (pkcs11Provider *)global_data;
-	return me->tokenPromptHook (token);
+	return me->tokenPromptHook (user_data, token);
 }
 
 PKCS11H_BOOL
@@ -2405,11 +2428,10 @@ pkcs11Provider::_pinPromptHook (
 	char * const pin,
 	const size_t pin_max
 ) {
-	Q_UNUSED(user_data);
 	Q_UNUSED(retry);
 
 	pkcs11Provider *me = (pkcs11Provider *)global_data;
-	return me->pinPromptHook (token, pin, pin_max);
+	return me->pinPromptHook (user_data, token, pin, pin_max);
 }
 
 void
@@ -2465,10 +2487,11 @@ pkcs11Provider::slotEventHook () {
 
 PKCS11H_BOOL
 pkcs11Provider::tokenPromptHook (
+	void * const user_data,
 	const pkcs11h_token_id_t token
 ) {
 	if (s_keyStoreList != NULL) {
-		return s_keyStoreList->tokenPrompt (token) ? TRUE : FALSE; //krazy:exclude=captruefalse
+		return s_keyStoreList->tokenPrompt (user_data, token) ? TRUE : FALSE; //krazy:exclude=captruefalse
 	}
 
 	return FALSE; //krazy:exclude=captruefalse
@@ -2476,6 +2499,7 @@ pkcs11Provider::tokenPromptHook (
 
 PKCS11H_BOOL
 pkcs11Provider::pinPromptHook (
+	void * const user_data,
 	const pkcs11h_token_id_t token,
 	char * const pin,
 	const size_t pin_max
@@ -2483,7 +2507,7 @@ pkcs11Provider::pinPromptHook (
 	QSecureArray qpin;
 	if (s_keyStoreList != NULL) {
 
-		s_keyStoreList->pinPrompt (token, qpin);
+		s_keyStoreList->pinPrompt (user_data, token, qpin);
 
 		if (!qpin.isEmpty ()) {
 			if ((size_t)qpin.size () < pin_max-1) {
