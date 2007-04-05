@@ -154,6 +154,9 @@ private slots:
 	}
 };
 
+// TODO: support auto-discovering token during token request event
+// TODO: add a special watching mode to qcatool to monitor keystore activity?
+
 class PassphrasePrompt : public QObject
 {
 	Q_OBJECT
@@ -221,7 +224,7 @@ private slots:
 			QString str;
 			if(e.source() == QCA::Event::KeyStore)
 			{
-				QString name = "keystore";
+				QString name;
 				QCA::KeyStoreEntry entry(e.keyStoreEntryId());
 				if(!entry.isNull())
 				{
@@ -231,8 +234,13 @@ private slots:
 				{
 					QCA::KeyStoreManager ksm;
 					QCA::KeyStore store(e.keyStoreId(), &ksm);
-					if(store.isValid())
-						name = store.name();
+					if(!store.isValid())
+					{
+						fprintf(stderr, "Error: received password request from unknown keystore.\n");
+						handler.reject(id);
+						return;
+					}
+					name = store.name();
 				}
 				str = QString("Enter %1 for %2").arg(type).arg(name);
 			}
@@ -254,8 +262,13 @@ private slots:
 			{
 				QCA::KeyStoreManager ksm;
 				QCA::KeyStore store(e.keyStoreId(), &ksm);
-				if(store.isValid())
-					name = store.name();
+				if(!store.isValid())
+				{
+					fprintf(stderr, "Error: received token request from unknown keystore.\n");
+					handler.reject(id);
+					return;
+				}
+				name = store.name();
 			}
 			printf("Please insert %s and press Enter ...\n", qPrintable(name));
 			QCA::ConsolePrompt::waitForEnter();
