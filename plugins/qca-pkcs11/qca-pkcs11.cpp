@@ -1949,9 +1949,10 @@ pkcs11KeyStoreList::pinPrompt (
 	const pkcs11h_token_id_t token_id,
 	QSecureArray &pin
 ) {
+	KeyStoreEntryContext *entry = NULL;
+	QString storeId;
+	QString entryId;
 	bool ret = false;
-
-	Q_UNUSED(token_id);
 
 	logger ()->logTextMessage (
 		QString ().sprintf (
@@ -1962,23 +1963,30 @@ pkcs11KeyStoreList::pinPrompt (
 		Logger::Debug
 	);
 
-	QString *serialized = (QString *)user_data;
-	KeyStoreEntryContext *entry = entryPassive (QString (), *serialized);
+	pin = QSecureArray();
+
+	if (user_data != NULL) {
+		QString *serialized = (QString *)user_data;
+		entry = entryPassive (QString (), *serialized);
+		storeId = entry->storeId (),
+		entryId = entry->id ();
+	}
+	else {
+		registerTokenId (token_id);
+		storeId = tokenId2storeId (token_id);
+	}
 
 	PasswordAsker asker;
 	asker.ask (
 		Event::StylePIN,
-		entry->storeId (),
-		entry->id (),
+		storeId,
+		entryId,
 		entry
 	);
 	asker.waitForResponse ();
 	if (asker.accepted ()) {
 		ret = true;
-		pin = asker.password();
-	}
-	else {
-		pin = QSecureArray();
+		pin = asker.password ();
 	}
 
 	logger ()->logTextMessage (
