@@ -1908,7 +1908,7 @@ pkcs11KeyStoreList::tokenPrompt (
 	void * const user_data,
 	const pkcs11h_token_id_t token_id
 ) {
-	bool ret;
+	bool ret = false;
 
 	Q_UNUSED(token_id);
 
@@ -1921,16 +1921,22 @@ pkcs11KeyStoreList::tokenPrompt (
 		Logger::Debug
 	);
 
-	QString *serialized = (QString *)user_data;
-	KeyStoreEntryContext *entry = entryPassive (QString (), *serialized);
+	/*
+	 * Justin asked to cancel if no
+	 * evailable entry.
+	 */
+	if (user_data != NULL) {
+		QString *serialized = (QString *)user_data;
+		KeyStoreEntryContext *entry = entryPassive (QString (), *serialized);
 
-	TokenAsker asker;
-	asker.ask (
-		entry->id (),
-		entry
-	);
-	asker.waitForResponse ();
-	ret = asker.accepted ();
+		TokenAsker asker;
+		asker.ask (
+			entry->id (),
+			entry
+		);
+		asker.waitForResponse ();
+		ret = asker.accepted ();
+	}
 
 	logger ()->logTextMessage (
 		QString ().sprintf (
