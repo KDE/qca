@@ -6,6 +6,7 @@ SUBDIRS += \
 	certtest \
 	ciphertest \
 	cms \
+	eventhandlerdemo \
 	hashtest \
 	hextest \
 	mactest \

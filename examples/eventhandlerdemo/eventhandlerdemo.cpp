@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 
     QCA::TokenAsker tokenAsker;
 
-    tokenAsker.ask( QString( "Entry 3" ), 0 );
+    tokenAsker.ask( QString( "Token 1" ), QString( "Entry 3" ), 0 );
 
     tokenAsker.waitForResponse();
 
