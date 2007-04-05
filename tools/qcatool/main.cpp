@@ -225,11 +225,14 @@ private slots:
 				QCA::KeyStoreEntry entry(e.keyStoreEntryId());
 				if(!entry.isNull())
 				{
-					// TODO: enable this once we guarantee objects existing ?
-					//if(entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
-					//	name = entry.pgpSecretKey().primaryUserId();
-					//else
-						name = entry.name();
+					name = entry.name();
+				}
+				else
+				{
+					QCA::KeyStoreManager ksm;
+					QCA::KeyStore store(e.keyStoreId(), &ksm);
+					if(store.isValid())
+						name = store.name();
 				}
 				str = QString("Enter %1 for %2").arg(type).arg(name);
 			}
@@ -242,7 +245,19 @@ private slots:
 		else if(e.type() == QCA::Event::Token)
 		{
 			QCA::KeyStoreEntry entry(e.keyStoreEntryId());
-			printf("Please insert %s for [%s] and press Enter ...\n", qPrintable(entry.storeName()), qPrintable(entry.name()));
+			QString name;
+			if(!entry.isNull())
+			{
+				name = entry.storeName() + " for " + entry.name();
+			}
+			else
+			{
+				QCA::KeyStoreManager ksm;
+				QCA::KeyStore store(e.keyStoreId(), &ksm);
+				if(store.isValid())
+					name = store.name();
+			}
+			printf("Please insert %s and press Enter ...\n", qPrintable(name));
 			QCA::ConsolePrompt::waitForEnter();
 			handler.tokenOkay(id);
 		}
