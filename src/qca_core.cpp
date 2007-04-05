@@ -1406,14 +1406,14 @@ void Event::setPasswordData(PasswordStyle pstyle, const QString &fileName, void 
 	d->ptr = ptr;
 }
 
-void Event::setToken(const QString &keyStoreEntryId, void *ptr)
+void Event::setToken(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
 {
 	if(!d)
 		d = new Private;
 	d->type = Token;
 	d->source = KeyStore;
 	d->style = StylePassword;
-	d->ks = QString();
+	d->ks = keyStoreId;
 	d->kse = keyStoreEntryId;
 	d->fname = QString();
 	d->ptr = ptr;
@@ -1689,10 +1689,10 @@ TokenAsker::~TokenAsker()
 	delete d;
 }
 
-void TokenAsker::ask(const QString &keyStoreEntryId, void *ptr)
+void TokenAsker::ask(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
 {
 	Event e;
-	e.setToken(keyStoreEntryId, ptr);
+	e.setToken(keyStoreId, keyStoreEntryId, ptr);
 	delete d->ai;
 	d->ai = new AskerItem(this);
 	d->ai->type = AskerItem::Token;

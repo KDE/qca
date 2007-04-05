@@ -1199,10 +1199,11 @@ namespace QCA
 
 		   This creates a Token type event.
 		   
+		   \param keyStoreId the keystore that the token is required for
 		   \param keyStoreEntryId the entry in the keystore that the token is required for
 		   \param ptr opaque data
 		*/
-		void setToken(const QString &keyStoreEntryId, void *ptr);
+		void setToken(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
 
 	private:
 		class Private;
@@ -1323,7 +1324,7 @@ namespace QCA
 		   
 		   \param pstyle the type of information required (e.g. PIN, passphrase or password)
 		   \param keyStoreId the key store that the information is required for
-		   \param keyStoreEntryId the item in the key store that the information is required for
+		   \param keyStoreEntryId the item in the key store that the information is required for (if applicable)
 		   \param ptr opaque data
 		*/
 		void ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
@@ -1403,10 +1404,11 @@ namespace QCA
 		/**
 		   queue a token request associated with a key store
 		   
-		   \param keyStoreEntryId the item in the key store that the information is required for
+		   \param keyStoreId the key store that the information is required for
+		   \param keyStoreEntryId the item in the key store that the information is required for (if applicable)
 		   \param ptr opaque data
 		*/
-		void ask(const QString &keyStoreEntryId, void *ptr);
+		void ask(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
 
 		/**
 		   Cancel the pending password / passphrase request
