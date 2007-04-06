@@ -35,9 +35,14 @@ endif (SASL2_INCLUDE_DIR AND SASL2_LIBRARIES)
 
 if (SASL2_FOUND)
    if (NOT Sasl2_FIND_QUIETLY)
-      message(STATUS "Found sasl2: ${SASL2_LIBRARIES}")
+     message(STATUS "Found Sasl2: ${SASL2_LIBRARIES}")
    endif (NOT Sasl2_FIND_QUIETLY)
+else (SASL2_FOUND)
+   if (Sasl2_FIND_REQUIRED)
+      message(FATAL_ERROR "Could not find sasl2 libraries")
+   endif (Sasl2_FIND_REQUIRED)
 endif (SASL2_FOUND)
+
 
 MARK_AS_ADVANCED(SASL2_INCLUDE_DIR SASL2_LIBRARIES)
 
