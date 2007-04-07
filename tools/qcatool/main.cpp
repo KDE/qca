@@ -277,6 +277,34 @@ private slots:
 	}
 };
 
+class PassphrasePromptThread : public QCA::SyncThread
+{
+	Q_OBJECT
+public:
+	PassphrasePrompt *pp;
+
+	PassphrasePromptThread()
+	{
+		start();
+	}
+
+	~PassphrasePromptThread()
+	{
+		stop();
+	}
+
+protected:
+	virtual void atStart()
+	{
+		pp = new PassphrasePrompt;
+	}
+
+	virtual void atEnd()
+	{
+		delete pp;
+	}
+};
+
 static bool promptForNewPassphrase(QSecureArray *result)
 {
 	QSecureArray out = QCA::ConsolePrompt::getHidden("Enter new passphrase");
@@ -1764,19 +1792,19 @@ int main(int argc, char **argv)
 
 	// for all other commands, we set up keystore/prompter:
 
+	// enable console passphrase prompt
+	PassphrasePromptThread passphrasePrompt;
+	if(!allowprompt)
+		passphrasePrompt.pp->allowPrompt = false;
+	if(have_pass)
+		passphrasePrompt.pp->setExplicitPassword(pass);
+
 	// activate the KeyStoreManager and block until ready
 	QCA::KeyStoreManager::start();
 	{
 		QCA::KeyStoreManager ksm;
 		ksm.waitForBusyFinished();
 	}
-
-	// enable console passphrase prompt
-	PassphrasePrompt passphrasePrompt;
-	if(!allowprompt)
-		passphrasePrompt.allowPrompt = false;
-	if(have_pass)
-		passphrasePrompt.setExplicitPassword(pass);
 
 	// TODO: for each kind of operation, we need to check for support first!!
 	if(args[0] == "key")
