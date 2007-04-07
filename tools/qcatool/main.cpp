@@ -240,10 +240,15 @@ private slots:
 						handler.reject(id);
 						return;
 					}
-					name = store.name();
+					if(store.type() == QCA::KeyStore::SmartCard)
+						name = QString("the '") + store.name() + "' token";
+					else
+						name = store.name();
 				}
 				str = QString("Enter %1 for %2").arg(type).arg(name);
 			}
+			else if(!e.fileName().isEmpty())
+				str = QString("Enter %1 for %2").arg(type).arg(e.fileName());
 			else
 				str = QString("Enter %1").arg(type);
 
