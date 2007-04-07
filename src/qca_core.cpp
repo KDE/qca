@@ -1533,10 +1533,23 @@ public:
 	{
 		AskerItem &i = askers[asker_at];
 
-		// is there another handler?  if so, try that one
-		if(i.handler_pos + 1 < handlers.count())
+		// look for the next usable handler
+		int pos = -1;
+		for(int n = i.handler_pos + 1; n < g_event->handlers.count(); ++n)
 		{
-			i.handler_pos++;
+			// handler and asker can't be in the same thread
+			//Q_ASSERT(g_event->handlers[n].h->thread() != i.a->thread());
+			//if(g_event->handlers[n].h->thread() != i.a->thread())
+			//{
+				pos = n;
+				break;
+			//}
+		}
+
+		// if there is one, try it
+		if(pos != -1)
+		{
+			i.handler_pos = pos;
 			ask(asker_at);
 		}
 		// if not, send official reject
@@ -1657,14 +1670,26 @@ bool asker_ask(AskerBase *a, const Event &e)
 	QMutexLocker locker(g_event_mutex());
 	if(!g_event)
 		return false;
-	if(g_event->handlers.isEmpty())
+
+	int pos = -1;
+	for(int n = 0; n < g_event->handlers.count(); ++n)
+	{
+		// handler and asker can't be in the same thread
+		//Q_ASSERT(g_event->handlers[n].h->thread() != a->thread());
+		//if(g_event->handlers[n].h->thread() != a->thread())
+		//{
+			pos = n;
+			break;
+		//}
+	}
+	if(pos == -1)
 		return false;
 
 	EventGlobal::AskerItem i;
 	i.a = a;
 	i.id = g_event->next_id++;
 	i.event = e;
-	i.handler_pos = 0;
+	i.handler_pos = pos;
 	g_event->askers += i;
 	int asker_at = g_event->askers.count() - 1;
 
