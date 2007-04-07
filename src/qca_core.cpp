@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -1420,48 +1420,38 @@ void Event::setToken(const QString &keyStoreId, const QString &keyStoreEntryId, 
 }
 
 //----------------------------------------------------------------------------
-// EventHandler
+// EventGlobal
 //----------------------------------------------------------------------------
-class AskerItem : public QObject
+class HandlerBase : public QObject
 {
 	Q_OBJECT
 public:
-	enum Type { Password, Token };
+	HandlerBase(QObject *parent = 0) : QObject(parent)
+	{
+	}
 
-	Type type;
-	PasswordAsker *passwordAsker;
-	TokenAsker *tokenAsker;
-
-	bool accepted;
-	QSecureArray password;
-	int id;
-	bool waiting;
-	bool done;
-	QTimer readyTrigger;
-
-	QMutex m;
-	QWaitCondition w;
-
-	QThread *emitFrom;
-	QList<EventHandler*> handlers;
-
-	AskerItem(QObject *parent = 0);
-	~AskerItem();
-
-	void ask(const Event &e);
-	void handlerGone(EventHandler *h);
-	void unreg();
-	void waitForFinished();
-	void finish();
-
-	// handler calls this
-	void accept_password(const QSecureArray &_password);
-	void accept_token();
-	void reject();
-
-private slots:
-	void ready_timeout();
+protected slots:
+	virtual void ask(int id, const QCA::Event &e) = 0;
 };
+
+class AskerBase : public QObject
+{
+	Q_OBJECT
+public:
+	AskerBase(QObject *parent = 0) : QObject(parent)
+	{
+	}
+
+	virtual void set_accepted(const QSecureArray &password) = 0;
+	virtual void set_rejected() = 0;
+};
+
+static void handler_add(HandlerBase *h, int pos = -1);
+static void handler_remove(HandlerBase *h);
+static void handler_accept(HandlerBase *h, int id, const QSecureArray &password);
+static void handler_reject(HandlerBase *h, int id);
+static bool asker_ask(AskerBase *a, const Event &e);
+static void asker_cancel(AskerBase *a);
 
 Q_GLOBAL_STATIC(QMutex, g_event_mutex)
 
@@ -1471,78 +1461,270 @@ static EventGlobal *g_event = 0;
 class EventGlobal
 {
 public:
-	QList<EventHandler*> handlers;
+	class HandlerItem
+	{
+	public:
+		HandlerBase *h;
+		QList<int> ids;
+	};
+
+	class AskerItem
+	{
+	public:
+		AskerBase *a;
+		int id;
+		Event event;
+		int handler_pos;
+	};
+
+	QList<HandlerItem> handlers;
+	QList<AskerItem> askers;
+
 	int next_id;
 
 	EventGlobal()
 	{
+		qRegisterMetaType<Event>("QCA::Event");
+		qRegisterMetaType<QSecureArray>("QSecureArray");
 		next_id = 0;
 	}
 
-	static void ensureInit()
+	int findHandlerItem(HandlerBase *h)
 	{
-		if(g_event)
-			return;
-
-		g_event = new EventGlobal;
+		for(int n = 0; n < handlers.count(); ++n)
+		{
+			if(handlers[n].h == h)
+				return n;
+		}
+		return -1;
 	}
 
-	static void tryCleanup()
+	int findAskerItem(AskerBase *a)
 	{
-		if(!g_event)
-			return;
-
-		if(g_event->handlers.isEmpty() /*&& g_event->askers.isEmpty()*/)
+		for(int n = 0; n < askers.count(); ++n)
 		{
-			delete g_event;
-			g_event = 0;
+			if(askers[n].a == a)
+				return n;
+		}
+		return -1;
+	}
+
+	int findAskerItemById(int id)
+	{
+		for(int n = 0; n < askers.count(); ++n)
+		{
+			if(askers[n].id == id)
+				return n;
+		}
+		return -1;
+	}
+
+	void ask(int asker_at)
+	{
+		AskerItem &i = askers[asker_at];
+
+		g_event->handlers[i.handler_pos].ids += i.id;
+		QMetaObject::invokeMethod(handlers[i.handler_pos].h, "ask",
+			Qt::QueuedConnection, Q_ARG(int, i.id),
+			Q_ARG(QCA::Event, i.event));
+	}
+
+	void reject(int asker_at)
+	{
+		AskerItem &i = askers[asker_at];
+
+		// is there another handler?  if so, try that one
+		if(i.handler_pos + 1 < handlers.count())
+		{
+			i.handler_pos++;
+			ask(asker_at);
+		}
+		// if not, send official reject
+		else
+		{
+			AskerBase *asker = i.a;
+			askers.removeAt(asker_at);
+
+			asker->set_rejected();
 		}
 	}
 };
 
-class EventHandlerPrivate
+void handler_add(HandlerBase *h, int pos)
 {
-public:
-	bool started;
-	QHash<int,AskerItem*> askers;
-	QMutex m;
+	QMutexLocker locker(g_event_mutex());
+	if(!g_event)
+		g_event = new EventGlobal;
 
-	EventHandlerPrivate()
+	EventGlobal::HandlerItem i;
+	i.h = h;
+
+	if(pos != -1)
+	{
+		g_event->handlers.insert(pos, i);
+
+		// adjust handler positions
+		for(int n = 0; n < g_event->askers.count(); ++n)
+		{
+			if(g_event->askers[n].handler_pos >= pos)
+				g_event->askers[n].handler_pos++;
+		}
+	}
+	else
+		g_event->handlers += i;
+}
+
+void handler_remove(HandlerBase *h)
+{
+	QMutexLocker locker(g_event_mutex());
+	Q_ASSERT(g_event);
+	if(!g_event)
+		return;
+	int at = g_event->findHandlerItem(h);
+	Q_ASSERT(at != -1);
+	if(at == -1)
+		return;
+
+	QList<int> ids = g_event->handlers[at].ids;
+	g_event->handlers.removeAt(at);
+
+	// adjust handler positions within askers
+	for(int n = 0; n < g_event->askers.count(); ++n)
+	{
+		if(g_event->askers[n].handler_pos >= at)
+			g_event->askers[n].handler_pos--;
+	}
+
+	// reject all askers
+	foreach(int id, ids)
+	{
+		int asker_at = g_event->findAskerItemById(id);
+		Q_ASSERT(asker_at != -1);
+
+		g_event->reject(asker_at);
+	}
+
+	if(g_event->handlers.isEmpty())
+	{
+		delete g_event;
+		g_event = 0;
+	}
+}
+
+void handler_accept(HandlerBase *h, int id, const QSecureArray &password)
+{
+	QMutexLocker locker(g_event_mutex());
+	Q_ASSERT(g_event);
+	if(!g_event)
+		return;
+	int at = g_event->findHandlerItem(h);
+	Q_ASSERT(at != -1);
+	if(at == -1)
+		return;
+	int asker_at = g_event->findAskerItemById(id);
+	Q_ASSERT(asker_at != -1);
+	if(asker_at == -1)
+		return;
+
+	g_event->handlers[at].ids.removeAll(g_event->askers[asker_at].id);
+
+	AskerBase *asker = g_event->askers[asker_at].a;
+	asker->set_accepted(password);
+}
+
+void handler_reject(HandlerBase *h, int id)
+{
+	QMutexLocker locker(g_event_mutex());
+	Q_ASSERT(g_event);
+	if(!g_event)
+		return;
+	int at = g_event->findHandlerItem(h);
+	Q_ASSERT(at != -1);
+	if(at == -1)
+		return;
+	int asker_at = g_event->findAskerItemById(id);
+	Q_ASSERT(asker_at != -1);
+	if(asker_at == -1)
+		return;
+
+	g_event->handlers[at].ids.removeAll(g_event->askers[asker_at].id);
+
+	g_event->reject(asker_at);
+}
+
+bool asker_ask(AskerBase *a, const Event &e)
+{
+	QMutexLocker locker(g_event_mutex());
+	if(!g_event)
+		return false;
+	if(g_event->handlers.isEmpty())
+		return false;
+
+	EventGlobal::AskerItem i;
+	i.a = a;
+	i.id = g_event->next_id++;
+	i.event = e;
+	i.handler_pos = 0;
+	g_event->askers += i;
+	int asker_at = g_event->askers.count() - 1;
+
+	g_event->ask(asker_at);
+	return true;
+}
+
+void asker_cancel(AskerBase *a)
+{
+	QMutexLocker locker(g_event_mutex());
+	if(!g_event)
+		return;
+	int at = g_event->findAskerItem(a);
+	if(at == -1)
+		return;
+
+	for(int n = 0; n < g_event->handlers.count(); ++n)
+		g_event->handlers[n].ids.removeAll(g_event->askers[at].id);
+
+	g_event->askers.removeAt(at);
+}
+
+//----------------------------------------------------------------------------
+// EventHandler
+//----------------------------------------------------------------------------
+class EventHandler::Private : public HandlerBase
+{
+	Q_OBJECT
+public:
+	EventHandler *q;
+	bool started;
+	QList<int> activeIds;
+
+	Private(EventHandler *_q) : HandlerBase(_q), q(_q)
 	{
 		started = false;
+	}
+
+public slots:
+	virtual void ask(int id, const QCA::Event &e)
+	{
+		activeIds += id;
+		emit q->eventReady(id, e);
 	}
 };
 
 EventHandler::EventHandler(QObject *parent)
 :QObject(parent)
 {
-	d = new EventHandlerPrivate;
+	d = new Private(this);
 }
 
 EventHandler::~EventHandler()
 {
-	//MX QMutexLocker locker(&d->m);
-
 	if(d->started)
 	{
-		for(int n = 0; n < d->askers.count(); ++n)
-		{
-			d->askers[n]->handlerGone(this);
-		}
+		foreach(int id, d->activeIds)
+			handler_reject(d, id);
 
-		/*if(d->askers.isEmpty())
-		{
-			// if this flag is set, then AskerItem::ask() will do
-			//   the global cleanup instead of us.
-
-			//g_event->deleteLaterList += this;
-		}
-		else
-		{*/
-			QMutexLocker locker(g_event_mutex());
-			g_event->handlers.removeAll(this);
-			EventGlobal::tryCleanup();
-		//}
+		handler_remove(d);
 	}
 
 	delete d;
@@ -1550,65 +1732,151 @@ EventHandler::~EventHandler()
 
 void EventHandler::start()
 {
-	QMutexLocker locker(g_event_mutex());
-	EventGlobal::ensureInit();
 	d->started = true;
-	g_event->handlers += this;
+	handler_add(d);
 }
 
 void EventHandler::submitPassword(int id, const QSecureArray &password)
 {
-	//MX QMutexLocker locker(&d->m);
-	AskerItem *ai = d->askers.value(id);
-	if(!ai || ai->type != AskerItem::Password)
+	if(!d->activeIds.contains(id))
 		return;
 
-	ai->accept_password(password);
+	d->activeIds.removeAll(id);
+	handler_accept(d, id, password);
 }
 
 void EventHandler::tokenOkay(int id)
 {
-	//MX QMutexLocker locker(&d->m);
-	AskerItem *ai = d->askers.value(id);
-	if(!ai || ai->type != AskerItem::Token)
+	if(!d->activeIds.contains(id))
 		return;
 
-	ai->accept_token();
+	d->activeIds.removeAll(id);
+	handler_accept(d, id, QSecureArray());
 }
 
 void EventHandler::reject(int id)
 {
-	//MX QMutexLocker locker(&d->m);
-	AskerItem *ai = d->askers.value(id);
-	if(!ai)
+	if(!d->activeIds.contains(id))
 		return;
 
-	ai->reject();
+	d->activeIds.removeAll(id);
+	handler_reject(d, id);
 }
 
 //----------------------------------------------------------------------------
 // PasswordAsker
 //----------------------------------------------------------------------------
-class PasswordAskerPrivate
+class AskerPrivate : public AskerBase
 {
+	Q_OBJECT
 public:
-	AskerItem *ai;
+	enum Type { Password, Token };
 
-	PasswordAskerPrivate()
+	Type type;
+	PasswordAsker *passwordAsker;
+	TokenAsker *tokenAsker;
+
+	QMutex m;
+	QWaitCondition w;
+
+	bool accepted;
+	QSecureArray password;
+	bool waiting;
+	bool done;
+
+	AskerPrivate(PasswordAsker *parent) : AskerBase(parent)
 	{
-		ai = 0;
+		passwordAsker = parent;
+		tokenAsker = 0;
+		type = Password;
+		accepted = false;
+		waiting = false;
+		done = true;
 	}
 
-	~PasswordAskerPrivate()
+	AskerPrivate(TokenAsker *parent) : AskerBase(parent)
 	{
-		delete ai;
+		passwordAsker = 0;
+		tokenAsker = parent;
+		type = Token;
+		accepted = false;
+		waiting = false;
+		done = true;
+	}
+
+	void ask(const Event &e)
+	{
+		accepted = false;
+		waiting = false;
+		done = false;
+		password.clear();
+
+		if(!asker_ask(this, e))
+		{
+			done = true;
+			QMetaObject::invokeMethod(this, "emitResponseReady", Qt::QueuedConnection);
+		}
+	}
+
+	void cancel()
+	{
+		if(!done)
+			asker_cancel(this);
+	}
+
+	virtual void set_accepted(const QSecureArray &_password)
+	{
+		QMutexLocker locker(&m);
+		accepted = true;
+		password = _password;
+		done = true;
+		if(waiting)
+			w.wakeOne();
+		else
+			QMetaObject::invokeMethod(this, "emitResponseReady", Qt::QueuedConnection);
+	}
+
+	virtual void set_rejected()
+	{
+		QMutexLocker locker(&m);
+		done = true;
+		if(waiting)
+			w.wakeOne();
+		else
+			QMetaObject::invokeMethod(this, "emitResponseReady", Qt::QueuedConnection);
+	}
+
+	void waitForResponse()
+	{
+		QMutexLocker locker(&m);
+		if(done)
+			return;
+		waiting = true;
+		w.wait(&m);
+		waiting = false;
+	}
+
+public slots:
+	virtual void emitResponseReady() = 0;
+};
+
+class PasswordAsker::Private : public AskerPrivate
+{
+public:
+	Private(PasswordAsker *_q) : AskerPrivate(_q)
+	{
+	}
+
+	virtual void emitResponseReady()
+	{
+		emit passwordAsker->responseReady();
 	}
 };
 
 PasswordAsker::PasswordAsker(QObject *parent)
 :QObject(parent)
 {
-	d = new PasswordAskerPrivate;
+	d = new Private(this);
 }
 
 PasswordAsker::~PasswordAsker()
@@ -1620,68 +1888,56 @@ void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &keyStoreId, 
 {
 	Event e;
 	e.setPasswordKeyStore(pstyle, keyStoreId, keyStoreEntryId, ptr);
-	delete d->ai;
-	d->ai = new AskerItem(this);
-	d->ai->type = AskerItem::Password;
-	d->ai->passwordAsker = this;
-	d->ai->ask(e);
+	d->ask(e);
 }
 
 void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &fileName, void *ptr)
 {
 	Event e;
 	e.setPasswordData(pstyle, fileName, ptr);
-	delete d->ai;
-	d->ai = new AskerItem(this);
-	d->ai->type = AskerItem::Password;
-	d->ai->passwordAsker = this;
-	d->ai->ask(e);
+	d->ask(e);
 }
 
 void PasswordAsker::cancel()
 {
-	delete d->ai;
-	d->ai = 0;
+	d->cancel();
 }
 
 void PasswordAsker::waitForResponse()
 {
-	d->ai->waitForFinished();
+	d->waitForResponse();
 }
 
 bool PasswordAsker::accepted() const
 {
-	return d->ai->accepted;
+	return d->accepted;
 }
 
 QSecureArray PasswordAsker::password() const
 {
-	return d->ai->password;
+	return d->password;
 }
 
 //----------------------------------------------------------------------------
 // TokenAsker
 //----------------------------------------------------------------------------
-class TokenAskerPrivate
+class TokenAsker::Private : public AskerPrivate
 {
 public:
-	AskerItem *ai;
-
-	TokenAskerPrivate()
+	Private(TokenAsker *_q) : AskerPrivate(_q)
 	{
-		ai = 0;
 	}
 
-	~TokenAskerPrivate()
+	virtual void emitResponseReady()
 	{
-		delete ai;
+		emit tokenAsker->responseReady();
 	}
 };
 
 TokenAsker::TokenAsker(QObject *parent)
 :QObject(parent)
 {
-	d = new TokenAskerPrivate;
+	d = new Private(this);
 }
 
 TokenAsker::~TokenAsker()
@@ -1693,224 +1949,22 @@ void TokenAsker::ask(const QString &keyStoreId, const QString &keyStoreEntryId, 
 {
 	Event e;
 	e.setToken(keyStoreId, keyStoreEntryId, ptr);
-	delete d->ai;
-	d->ai = new AskerItem(this);
-	d->ai->type = AskerItem::Token;
-	d->ai->tokenAsker = this;
-	d->ai->ask(e);
+	d->ask(e);
 }
 
 void TokenAsker::cancel()
 {
-	delete d->ai;
-	d->ai = 0;
+	d->cancel();
 }
 
 void TokenAsker::waitForResponse()
 {
-	d->ai->waitForFinished();
+	d->waitForResponse();
 }
 
 bool TokenAsker::accepted() const
 {
-	return d->ai->accepted;
-}
-
-//----------------------------------------------------------------------------
-// AskerItem
-//----------------------------------------------------------------------------
-AskerItem::AskerItem(QObject *parent)
-:QObject(parent), readyTrigger(this)
-{
-	readyTrigger.setSingleShot(true);
-	connect(&readyTrigger, SIGNAL(timeout()), SLOT(ready_timeout()));
-	done = true;
-	emitFrom = 0;
-}
-
-AskerItem::~AskerItem()
-{
-	if(!done)
-		unreg();
-}
-
-void AskerItem::ask(const Event &e)
-{
-	accepted = false;
-	password = QSecureArray();
-	waiting = false;
-	done = false;
-
-	{
-		//MX QMutexLocker locker(g_event_mutex());
-
-		// no handlers?  reject the request then
-		if(!g_event || g_event->handlers.isEmpty())
-		{
-			done = true;
-			readyTrigger.start();
-			return;
-		}
-
-		id = g_event->next_id++;
-		handlers = g_event->handlers;
-
-		//g_event->askers.insert(id, this);
-	}
-
-	/*{
-		QMutexLocker locker(g_event_mutex());
-		++g_event->emitrefs;
-	}*/
-
-	{
-		//MX QMutexLocker locker(&m);
-		for(int n = 0; n < handlers.count(); ++n)
-		{
-			//MX QMutexLocker locker(&handlers[n]->d->m);
-			handlers[n]->d->askers.insert(id, this);
-		}
-
-		emitFrom = QThread::currentThread();
-
-		for(int n = 0; n < handlers.count(); ++n)
-		{
-			EventHandler *h = handlers[n];
-			if(!h)
-				continue;
-
-			emit h->eventReady(id, e);
-
-			/*{
-				QMutexLocker locker(g_event->deleteLaterMutex);
-				if(g_event->deleteLaterList.contains(h))
-				{
-					g_event->deleteLaterList.removeAll(this);
-					g_event->handlers.removeAll(this);
-					--n; // adjust iterator
-				}
-				else
-					h->d->sync_emit = false;
-			}*/
-
-			if(done)
-				break;
-		}
-
-		emitFrom = 0;
-	}
-
-	/*{
-		QMutexLocker locker(g_event_mutex());
-		--g_event->emitrefs;
-		if(g_event->emitrefs == 0)
-		{*/
-			// clean up null handlers
-			for(int n = 0; n < handlers.count(); ++n)
-			{
-				if(handlers[n] == 0)
-				{
-					handlers.removeAt(n);
-					--n; // adjust position
-				}
-			}
-		/*}
-	}*/
-
-	if(done)
-	{
-		//MX QMutexLocker locker(&m);
-		unreg();
-		readyTrigger.start();
-		return;
-	}
-}
-
-void AskerItem::handlerGone(EventHandler *h)
-{
-	if(QThread::currentThread() == emitFrom)
-	{
-		int n = handlers.indexOf(h);
-		if(n != -1)
-			handlers[n] = 0;
-	}
-	else
-	{
-		//MX QMutexLocker locker(&m);
-		handlers.removeAll(h);
-	}
-}
-
-void AskerItem::unreg()
-{
-	//if(!done)
-	//{
-		//QMutexLocker locker(&m);
-		for(int n = 0; n < handlers.count(); ++n)
-		{
-			//MX QMutexLocker locker(&handlers[n]->d->m);
-			handlers[n]->d->askers.remove(id);
-		}
-	//}
-}
-
-void AskerItem::waitForFinished()
-{
-	//MX QMutexLocker locker(&m);
-
-	if(done)
-	{
-		readyTrigger.stop();
-		return;
-	}
-
-	waiting = true;
-	w.wait(&m);
-
-	unreg();
-}
-
-void AskerItem::finish()
-{
-	done = true;
-	if(waiting)
-		w.wakeOne();
-	else
-	{
-		if(type == Password)
-			emit passwordAsker->responseReady();
-		else // Token
-			emit tokenAsker->responseReady();
-	}
-}
-
-void AskerItem::accept_password(const QSecureArray &_password)
-{
-	//MX QMutexLocker locker(&m);
-	accepted = true;
-	password = _password;
-	finish();
-}
-
-void AskerItem::accept_token()
-{
-	//MX QMutexLocker locker(&m);
-	accepted = true;
-	finish();
-}
-
-void AskerItem::reject()
-{
-	//MX QMutexLocker locker(&m);
-	finish();
-}
-
-void AskerItem::ready_timeout()
-{
-	if(type == Password)
-		emit passwordAsker->responseReady();
-	else // Token
-		emit tokenAsker->responseReady();
+	return d->accepted;
 }
 
 }

@@ -1210,13 +1210,6 @@ namespace QCA
 		QSharedDataPointer<Private> d;
 	};
 
-	class EventHandlerPrivate;
-	class PasswordAsker;
-	class PasswordAskerPrivate;
-	class TokenAsker;
-	class TokenAskerPrivate;
-	class AskerItem;
-
 	/**
 	   Interface class for password / passphrase / PIN and token handlers
 
@@ -1293,13 +1286,9 @@ namespace QCA
 		void eventReady(int id, const QCA::Event &context);
 
 	private:
-		friend class EventHandlerPrivate;
-		EventHandlerPrivate *d;
-
-		friend class PasswordAsker;
-		friend class PasswordAskerPrivate;
-		friend class TokenAsker;
-		friend class AskerItem;
+		class Private;
+		friend class Private;
+		Private *d;
 	};
 
 	/** 
@@ -1378,10 +1367,9 @@ namespace QCA
 		void responseReady();
 
 	private:
-		friend class PasswordAskerPrivate;
-		PasswordAskerPrivate *d;
-
-		friend class AskerItem;
+		class Private;
+		friend class Private;
+		Private *d;
 	};
 
 	/** 
@@ -1440,10 +1428,9 @@ namespace QCA
 		void responseReady();
 
 	private:
-		friend class TokenAskerPrivate;
-		TokenAskerPrivate *d;
-
-		friend class AskerItem;
+		class Private;
+		friend class Private;
+		Private *d;
 	};
 }
 
