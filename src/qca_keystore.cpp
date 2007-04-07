@@ -505,7 +505,8 @@ KeyStoreEntry::KeyStoreEntry()
 KeyStoreEntry::KeyStoreEntry(const QString &id)
 :d(new Private)
 {
-	KeyStoreEntryContext *c = (KeyStoreEntryContext *)qVariantValue<void*>(trackercall("entryPassive", QVariantList() << id));
+	//KeyStoreEntryContext *c = (KeyStoreEntryContext *)qVariantValue<void*>(trackercall("entryPassive", QVariantList() << id));
+	KeyStoreEntryContext *c = (KeyStoreEntryContext *)KeyStoreTracker::instance()->entryPassive(id);
 	if(c)
 		change(c);
 }
