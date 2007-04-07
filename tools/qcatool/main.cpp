@@ -270,7 +270,7 @@ private slots:
 				}
 				name = store.name();
 			}
-			printf("Please insert %s and press Enter ...\n", qPrintable(name));
+			printf("Please insert the '%s' token and press Enter ...\n", qPrintable(name));
 			QCA::ConsolePrompt::waitForEnter();
 			handler.tokenOkay(id);
 		}
