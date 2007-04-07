@@ -247,9 +247,6 @@ public:
 	);
 
 	void
-	emit_updated ();
-
-	void
 	emit_diagnosticText (
 		const QString &t
 	);
@@ -2027,21 +2024,6 @@ pkcs11KeyStoreList::pinPrompt (
 }
 
 void
-pkcs11KeyStoreList::emit_updated () {
-	logger ()->logTextMessage (
-		"pkcs11KeyStoreList::emit_updated - entry",
-		Logger::Debug
-	);
-
-	QMetaObject::invokeMethod(this, "doUpdated", Qt::QueuedConnection);
-
-	logger ()->logTextMessage (
-		"pkcs11KeyStoreList::emit_updated - return",
-		Logger::Debug
-	);
-}
-
-void
 pkcs11KeyStoreList::emit_diagnosticText (
 	const QString &t
 ) {
@@ -2930,7 +2912,7 @@ pkcs11Provider::logHook (
 	char buffer[1024];
 	vsnprintf (buffer, sizeof (buffer)-1, format, args);
 	buffer[sizeof (buffer)-1] = '\x0';
-	logger ()->logTextMessage (QString ().fromUtf8 (buffer), severity);
+	logger ()->logTextMessage (buffer, severity);
 //@END-WORKAROUND
 }
 
@@ -2941,7 +2923,7 @@ pkcs11Provider::slotEventHook () {
 	 * thread.
 	 */
 	if (s_keyStoreList != NULL && _fSlotEventsActive) {
-		s_keyStoreList->emit_updated ();
+		QMetaObject::invokeMethod(s_keyStoreList, "doUpdated", Qt::QueuedConnection);
 	}
 }
 
