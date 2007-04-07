@@ -1931,7 +1931,8 @@ pkcs11KeyStoreList::tokenPrompt (
 
 		TokenAsker asker;
 		asker.ask (
-			entry->id (),
+			QString(),
+                        entry->id (),
 			entry
 		);
 		asker.waitForResponse ();
@@ -2634,7 +2635,7 @@ pkcs11Provider::features() const {
 
 QCA::Provider::Context *
 pkcs11Provider::createContext (const QString &type) {
-	
+
 	QCA::Provider::Context *context = NULL;
 
 	logger ()->logTextMessage (
