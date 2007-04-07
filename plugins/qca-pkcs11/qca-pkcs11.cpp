@@ -1272,66 +1272,15 @@ public:
 //----------------------------------------------------------------------------
 class pkcs11QCACrypto {
 
-private:
+public:
+	/*
+	 * Temp until QCA will have such
+	 */
 	static
-	int
-	_pkcs11h_crypto_qca_initialize (
-		void * const global_data
+	QString
+	getDN (
+		const Certificate &cert
 	) {
-		Q_UNUSED(global_data);
-
-		return 1;
-	}
-
-	static
-	int
-	_pkcs11h_crypto_qca_uninitialize (
-		void * const global_data
-	) {
-		Q_UNUSED(global_data);
-
-		return 1;
-	}
-
-	static
-	int
-	_pkcs11h_crypto_qca_certificate_get_expiration (
-		void * const global_data,
-		const unsigned char * const blob,
-		const size_t blob_size,
-		time_t * const expiration
-	) {
-		Q_UNUSED(global_data);
-
-		Certificate cert = Certificate::fromDER (
-			QByteArray (
-				(char *)blob,
-				blob_size
-			)
-		);
-
-		*expiration = cert.notValidAfter ().toTime_t ();
-
-		return 1;
-	}
-
-	static
-	int
-	_pkcs11h_crypto_qca_certificate_get_dn (
-		void * const global_data,
-		const unsigned char * const blob,
-		const size_t blob_size,
-		char * const dn,
-		const size_t dn_max
-	) {
-		Q_UNUSED(global_data);
-
-		Certificate cert = Certificate::fromDER (
-			QByteArray (
-				(char *)blob,
-				blob_size
-			)
-		);
 		CertificateInfoOrdered dnlist = cert.subjectInfoOrdered ();
 		QString qdn;
 
@@ -1396,6 +1345,71 @@ private:
 			}
 			qdn += c + '=' + e.value ();
 		}
+
+		return qdn;
+	}
+
+private:
+	static
+	int
+	_pkcs11h_crypto_qca_initialize (
+		void * const global_data
+	) {
+		Q_UNUSED(global_data);
+
+		return 1;
+	}
+
+	static
+	int
+	_pkcs11h_crypto_qca_uninitialize (
+		void * const global_data
+	) {
+		Q_UNUSED(global_data);
+
+		return 1;
+	}
+
+	static
+	int
+	_pkcs11h_crypto_qca_certificate_get_expiration (
+		void * const global_data,
+		const unsigned char * const blob,
+		const size_t blob_size,
+		time_t * const expiration
+	) {
+		Q_UNUSED(global_data);
+
+		Certificate cert = Certificate::fromDER (
+			QByteArray (
+				(char *)blob,
+				blob_size
+			)
+		);
+
+		*expiration = cert.notValidAfter ().toTime_t ();
+
+		return 1;
+	}
+
+	static
+	int
+	_pkcs11h_crypto_qca_certificate_get_dn (
+		void * const global_data,
+		const unsigned char * const blob,
+		const size_t blob_size,
+		char * const dn,
+		const size_t dn_max
+	) {
+		Q_UNUSED(global_data);
+
+		Certificate cert = Certificate::fromDER (
+			QByteArray (
+				(char *)blob,
+				blob_size
+			)
+		);
+		QString qdn = getDN (cert);;
 
 		if ((size_t)qdn.length () > dn_max-1) {
 			return 0;
@@ -2200,7 +2214,7 @@ pkcs11KeyStoreList::getKeyStoreEntryByCertificateId (
 
 	CertificateChain chain = CertificateChain (cert).complete (listIssuers);
 
-	QString description = cert.commonName () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
+	QString description = pkcs11QCACrypto::getDN (cert) + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
 
 	QString id = serializeCertificateId (
 		certificate_id,
