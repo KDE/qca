@@ -256,7 +256,7 @@ private slots:
 			QString name;
 			if(!entry.isNull())
 			{
-				name = entry.storeName() + " for " + entry.name();
+				name = QString("the '") + entry.storeName() + "' token for " + entry.name();
 			}
 			else
 			{
@@ -268,9 +268,9 @@ private slots:
 					handler.reject(id);
 					return;
 				}
-				name = store.name();
+				name = QString("the '") + store.name() + "' token";
 			}
-			printf("Please insert the '%s' token and press Enter ...\n", qPrintable(name));
+			printf("Please insert %s and press Enter ...\n", qPrintable(name));
 			QCA::ConsolePrompt::waitForEnter();
 			handler.tokenOkay(id);
 		}
