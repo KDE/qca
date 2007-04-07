@@ -100,6 +100,18 @@ private:
 
 };
 
+void asker_procedure();
+
+class AskerThread : public QThread
+{
+    Q_OBJECT
+protected:
+    virtual void run()
+    {
+        asker_procedure();
+    }
+};
+
 int main(int argc, char **argv)
 {
     QCoreApplication exampleApp(argc, argv);
@@ -110,6 +122,17 @@ int main(int argc, char **argv)
 
     ClientPassphraseHandler cph;
 
+    // handler and asker cannot occur in the same thread
+    AskerThread askerThread;
+    QObject::connect(&askerThread, SIGNAL(finished()), &exampleApp, SLOT(quit()));
+    askerThread.start();
+
+    exampleApp.exec();
+    return 0;
+}
+
+void asker_procedure()
+{
     QCA::PasswordAsker pwAsker;
 
     pwAsker.ask( QCA::Event::StylePassword, "foo.tmp",  0 );
@@ -131,8 +154,6 @@ int main(int argc, char **argv)
     } else {
         std::cout << "Token was not accepted" << std::endl;
     }
-
-    return 0;
 }
 
 #include "eventhandlerdemo.moc"
