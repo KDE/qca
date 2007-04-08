@@ -556,14 +556,6 @@ Logger *logger()
 	return global->logger;
 }
 
-void logText( const QString &message, Logger::Severity severity )
-{
-	//QMutexLocker locker(global_mutex());
-	Q_ASSERT(global);
-
-        global->logger->logTextMessage( message, severity );
-}
-
 bool haveSystemStore()
 {
 	// ensure the system store is loaded
