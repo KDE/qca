@@ -1844,6 +1844,33 @@ namespace QCA
 		*/
 		static PGPKey fromFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 	};
+
+	// asynchronous private key loader
+	class QCA_EXPORT KeyLoader : public QObject
+	{
+		Q_OBJECT
+	public:
+		KeyLoader(QObject *parent = 0);
+		~KeyLoader();
+
+		void loadPrivateKeyFromPEMFile(const QString &fileName);
+		void loadPrivateKeyFromPEM(const QString &s);
+		void loadPrivateKeyFromDER(const QSecureArray &a);
+		void loadKeyBundleFromFile(const QString &fileName);
+		void loadKeyBundleFromArray(const QByteArray &a);
+
+		ConvertResult convertResult() const;
+		PrivateKey privateKey() const;
+		KeyBundle keyBundle() const;
+
+	signals:
+		void finished();
+
+	private:
+		class Private;
+		friend class Private;
+		Private *d;
+	};
 }
 
 #endif

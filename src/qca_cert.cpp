@@ -1772,4 +1772,185 @@ PGPKey PGPKey::fromFile(const QString &fileName, ConvertResult *result, const QS
 	return fromString(str, result, provider);
 }
 
+//----------------------------------------------------------------------------
+// KeyLoader
+//----------------------------------------------------------------------------
+class KeyLoaderThread : public QThread
+{
+	Q_OBJECT
+public:
+	enum Type { PKPEMFile, PKPEM, PKDER, KBDERFile, KBDER };
+
+	class In
+	{
+	public:
+		Type type;
+		QString fileName, pem;
+		QSecureArray der;
+		QByteArray kbder;
+	};
+
+	class Out
+	{
+	public:
+		ConvertResult convertResult;
+		PrivateKey privateKey;
+		KeyBundle keyBundle;
+	};
+
+	In in;
+	Out out;
+
+	KeyLoaderThread(QObject *parent = 0) : QThread(parent)
+	{
+	}
+
+protected:
+	virtual void run()
+	{
+		if(in.type == PKPEMFile)
+			out.privateKey = PrivateKey::fromPEMFile(in.fileName, QSecureArray(), &out.convertResult);
+		else if(in.type == PKPEM)
+			out.privateKey = PrivateKey::fromPEM(in.pem, QSecureArray(), &out.convertResult);
+		else if(in.type == PKDER)
+			out.privateKey = PrivateKey::fromDER(in.der, QSecureArray(), &out.convertResult);
+		else if(in.type == KBDERFile)
+			out.keyBundle = KeyBundle::fromFile(in.fileName, QSecureArray(), &out.convertResult);
+		else if(in.type == KBDER)
+			out.keyBundle = KeyBundle::fromArray(in.kbder, QSecureArray(), &out.convertResult);
+	}
+};
+
+class KeyLoader::Private : public QObject
+{
+	Q_OBJECT
+public:
+	KeyLoader *q;
+
+	bool active;
+	KeyLoaderThread *thread;
+	KeyLoaderThread::In in;
+	KeyLoaderThread::Out out;
+
+	Private(KeyLoader *_q) : QObject(_q), q(_q)
+	{
+		active = false;
+	}
+
+	void reset()
+	{
+		in = KeyLoaderThread::In();
+		out = KeyLoaderThread::Out();
+	}
+
+	void start()
+	{
+		active = true;
+		thread = new KeyLoaderThread(this);
+		// used queued for signal-safety
+		connect(thread, SIGNAL(finished()), SLOT(thread_finished()), Qt::QueuedConnection);
+		thread->in = in;
+		thread->start();
+	}
+
+private slots:
+	void thread_finished()
+	{
+		out = thread->out;
+		delete thread;
+		thread = 0;
+		active = false;
+
+		emit q->finished();
+	}
+};
+
+KeyLoader::KeyLoader(QObject *parent)
+:QObject(parent)
+{
+	d = new Private(this);
 }
+
+KeyLoader::~KeyLoader()
+{
+	delete d;
+}
+
+void KeyLoader::loadPrivateKeyFromPEMFile(const QString &fileName)
+{
+	Q_ASSERT(!d->active);
+	if(d->active)
+		return;
+
+	d->reset();
+	d->in.type = KeyLoaderThread::PKPEMFile;
+	d->in.fileName = fileName;
+	d->start();
+}
+
+void KeyLoader::loadPrivateKeyFromPEM(const QString &s)
+{
+	Q_ASSERT(!d->active);
+	if(d->active)
+		return;
+
+	d->reset();
+	d->in.type = KeyLoaderThread::PKPEM;
+	d->in.pem = s;
+	d->start();
+}
+
+void KeyLoader::loadPrivateKeyFromDER(const QSecureArray &a)
+{
+	Q_ASSERT(!d->active);
+	if(d->active)
+		return;
+
+	d->reset();
+	d->in.type = KeyLoaderThread::PKDER;
+	d->in.der = a;
+	d->start();
+}
+
+void KeyLoader::loadKeyBundleFromFile(const QString &fileName)
+{
+	Q_ASSERT(!d->active);
+	if(d->active)
+		return;
+
+	d->reset();
+	d->in.type = KeyLoaderThread::KBDERFile;
+	d->in.fileName = fileName;
+	d->start();
+}
+
+void KeyLoader::loadKeyBundleFromArray(const QByteArray &a)
+{
+	Q_ASSERT(!d->active);
+	if(d->active)
+		return;
+
+	d->reset();
+	d->in.type = KeyLoaderThread::KBDERFile;
+	d->in.kbder = a;
+	d->start();
+}
+
+ConvertResult KeyLoader::convertResult() const
+{
+	return d->out.convertResult;
+}
+
+PrivateKey KeyLoader::privateKey() const
+{
+	return d->out.privateKey;
+}
+
+KeyBundle KeyLoader::keyBundle() const
+{
+	return d->out.keyBundle;
+}
+
+}
+
+#include "qca_cert.moc"
