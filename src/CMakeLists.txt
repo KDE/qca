@@ -7,7 +7,6 @@ SET( nonmoc_SOURCES
 	qca_plugin.cpp
 	qca_textfilter.cpp
 	qca_basic.cpp
-	qca_cert.cpp
 	support/logger.cpp
 )
 
@@ -18,6 +17,7 @@ SET( moc_SOURCES
 	qca_securelayer.cpp
 	qca_securemessage.cpp
 	qca_default.cpp
+	qca_cert.cpp
 	support/qpipe.cpp
 	support/console.cpp 
 	support/synchronizer.cpp
