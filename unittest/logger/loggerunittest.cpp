@@ -37,6 +37,7 @@ private slots:
     void logText1();
     void logText2();
     void logBlob();
+    void logLevel();
 private:
     QCA::Initializer* m_init;
 };
@@ -117,6 +118,9 @@ void LoggerUnitTest::basicSetup()
 
     QCOMPARE( logSystem->currentLogDevices().count(), 0 );
 
+    logSystem->setLevel (QCA::Logger::Debug);
+    QCOMPARE( logSystem->level (), QCA::Logger::Debug );
+
     NullLogger *nullLogger = new NullLogger;
 
     logSystem->registerLogDevice( nullLogger );
@@ -174,7 +178,7 @@ void LoggerUnitTest::logText1()
 // same as above, but use convenience routine.
 void LoggerUnitTest::logText2()
 {
-    QCA::logText( "Sending with no recipients" );
+    QCA_logTextMessage ( "Sending with no recipients", QCA::Logger::Notice );
 
     LastLogger *lastlogger = new LastLogger;
 
@@ -183,12 +187,12 @@ void LoggerUnitTest::logText2()
     QCOMPARE( logSystem->currentLogDevices().count(), 1 );
     QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
 
-    QCA::logText( "Sending to system, checking for log device" );
+    QCA_logTextMessage ( "Sending to system, checking for log device", QCA::Logger::Information );
     QCOMPARE( lastlogger->lastMessage(),
               QString( "Sending to system, checking for log device" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Information );
 
-    QCA::logText( "Sending at Error severity", QCA::Logger::Error );
+    QCA_logTextMessage ( "Sending at Error severity", QCA::Logger::Error );
     QCOMPARE( lastlogger->lastMessage(),
               QString( "Sending at Error severity" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Error );
@@ -198,7 +202,7 @@ void LoggerUnitTest::logText2()
     QCOMPARE( logSystem->currentLogDevices().count(), 2 );
     QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
 
-    QCA::logText( "Sending to system, checking for two log devices" );
+    QCA_logTextMessage ( "Sending to system, checking for two log devices", QCA::Logger::Information );
     QCOMPARE( lastlogger->lastMessage(),
               QString( "Sending to system, checking for two log devices" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Information );
@@ -255,6 +259,31 @@ void LoggerUnitTest::logBlob()
     delete lastlogger2;
 
 }
+
+void LoggerUnitTest::logLevel()
+{
+    QCA::Logger *logSystem = QCA::logger();
+
+    LastLogger *lastlogger = new LastLogger;
+    logSystem->registerLogDevice( lastlogger );
+
+    logSystem->setLevel (QCA::Logger::Error);
+    QCOMPARE( logSystem->level (), QCA::Logger::Error );
+
+    QCA_logTextMessage ( "Sending to system, checking that it is filtered out", QCA::Logger::Information );
+    QEXPECT_FAIL("", "Should fail", Continue);
+    QCOMPARE( lastlogger->lastMessage(),
+              QString( "Sending to system, checking that it is filtered out" ) );
+
+    QCA_logTextMessage ( "Sending to system, checking that it is not filtered out", QCA::Logger::Error );
+    QCOMPARE( lastlogger->lastMessage(),
+              QString( "Sending to system, checking that it is not filtered out" ) );
+
+    logSystem->setLevel (QCA::Logger::Debug);
+
+    delete lastlogger;
+}
+
 QTEST_MAIN(LoggerUnitTest)
 
 #include "loggerunittest.moc"

@@ -393,15 +393,42 @@ namespace QCA
 	QCA_EXPORT Logger *logger();
 
 	/**
-	   Log a text message. This is just a convenience function
-	   to avoid having to call Logger::logTextMessage() on the
-	   global Logger.
+	   Log a text message. This is an efficient function
+	   to avoid overhead of argument executions when log level
+	   blocks the message.
 
 	   \param message the text to log
 	   \param severity the type of information to log
-	*/
-	QCA_EXPORT void logText( const QString &message, Logger::Severity severity = Logger::Information );
 
+	   \note This is a macro, so arguments may or may not be evaluated.
+	*/
+#	define QCA_logTextMessage(message, severity) \
+		do { \
+			register QCA::Logger::Severity s = severity; \
+			register QCA::Logger *l = QCA::logger (); \
+			if (s <= l->level ()) { \
+				l->logTextMessage (message, s); \
+			} \
+		} while (false)
+
+	/**
+	   Log a binary message. This is an efficient function
+	   to avoid overhead of argument executions when log level
+	   blocks the message.
+
+	   \param blob the blob to log
+	   \param severity the type of information to log
+
+	   \note This is a macro, so arguments may or may not be evaluated.
+	*/
+#	define QCA_logBinaryMessage(blob, severity) \
+		do { \
+			register QCA::Logger::Severity s = severity; \
+			register QCA::Logger *l = QCA::logger (); \
+			if (s <= l->level ()) { \
+				l->logBinaryMessage (blob, s); \
+			} \
+		} while (false)
 	/**
 	   Test if QCA can access the root CA certificates
 

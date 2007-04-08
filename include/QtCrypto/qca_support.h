@@ -349,6 +349,24 @@ namespace QCA
             };
 
 	    /**
+		Get the current logging level
+
+		\return Current level
+	    */
+	    inline Logger::Severity level () const {
+	    	return m_logLevel;
+	    }
+
+	    /**
+		Set the current logging level
+
+		\param level new logging level
+
+		Only severities less or equal than the log level one will be logged
+	    */
+	    void setLevel (Logger::Severity level);
+
+	    /**
 		Log a message to all available log devices
 
 		\param message the text to log
@@ -399,6 +417,7 @@ namespace QCA
 
 	    QStringList m_loggerNames;
 	    QList<AbstractLogDevice*> m_loggers;
+	    Severity m_logLevel;
 	};
 
         /**
