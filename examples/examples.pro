@@ -9,6 +9,7 @@ SUBDIRS += \
 	eventhandlerdemo \
 	hashtest \
 	hextest \
+	keyloader \
 	mactest \
 	md5crypt \
 	providertest \
