@@ -49,11 +49,12 @@
     ability to convert infoOrdered to DN-string
     document which functions might cause a synchronous asker?
   code:
+    keystore async mode
+    keystore watcher
     fix the locking stuff in qca_core
     allow logger to be used from anywhere
     global random thread-safety?
     tls/sasl
-    fix asker implementation, it is a disaster
     dirwatch: thread safety
     dirwatch: test on all platforms
     qca-openssl: ca signing
@@ -119,7 +120,6 @@
 
 * possibilities for the future:
   internally managed intermediate object storage
-  asynchronous loading of private keys from files (don't require thread)
   securemessage: algorithm selection for cms/pgp (and use SecurityLevel?)
   tls: renegotiation
   Key wrapping - RFC3217 and RFC3394
