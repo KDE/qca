@@ -110,6 +110,7 @@ SET( SOURCES ${SOURCES} ${moc_SOURCES} ${nonmoc_SOURCES} )
 SET( SOURCES ${SOURCES} ${botan_SOURCES})
 
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_core.h")
+qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_cert.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_keystore.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qcaprovider.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_publickey.h")
