@@ -55,7 +55,7 @@ public:
 	bool secmem;
 	bool first_scan;
 	QString app_name;
-	ProviderManager manager;
+	ProviderManager *manager;
 	Random *rng;
 	Logger *logger;
 	QVariantMap properties;
@@ -68,13 +68,18 @@ public:
 		first_scan = false;
 		rng = 0;
 		logger = new Logger;
+		manager = new ProviderManager;
 	}
 
 	~Global()
 	{
 		KeyStoreManager::shutdown();
-		delete logger;
+		delete manager;
+		manager = 0;
 		delete rng;
+		rng = 0;
+		delete logger;
+		logger = 0;
 	}
 
 	void ensure_first_scan()
@@ -86,7 +91,7 @@ public:
 	void scan()
 	{
 		first_scan = true;
-		manager.scan();
+		manager->scan();
 	}
 
 	void ksm_scan()
@@ -138,7 +143,7 @@ void init(MemoryMode mode, int prealloc)
 
 	global = new Global;
 	global->secmem = secmem;
-	global->manager.setDefault(create_default_provider()); // manager owns it
+	global->manager->setDefault(create_default_provider()); // manager owns it
 	++(global->refs);
 
 	// for maximum setuid safety, qca should be initialized before qapp:
@@ -196,12 +201,12 @@ bool isSupported(const QStringList &features, const QString &provider)
 	// single
 	if(!provider.isEmpty())
 	{
-		Provider *p = global->manager.find(provider);
+		Provider *p = global->manager->find(provider);
 		if(!p)
 		{
 			// ok, try scanning for new stuff
 			global->scan();
-			p = global->manager.find(provider);
+			p = global->manager->find(provider);
 		}
 
 		if(p && features_have(p->features(), features))
@@ -210,13 +215,13 @@ bool isSupported(const QStringList &features, const QString &provider)
 	// all
 	else
 	{
-		if(features_have(global->manager.allFeatures(), features))
+		if(features_have(global->manager->allFeatures(), features))
 			return true;
 
 		// ok, try scanning for new stuff
 		global->scan();
 
-		if(features_have(global->manager.allFeatures(), features))
+		if(features_have(global->manager->allFeatures(), features))
 			return true;
 	}
 	return false;
@@ -236,7 +241,7 @@ QStringList supportedFeatures()
 
 	// query all features
 	global->scan();
-	return global->manager.allFeatures();
+	return global->manager->allFeatures();
 }
 
 QStringList defaultFeatures()
@@ -246,7 +251,7 @@ QStringList defaultFeatures()
 	if(!global)
 		return QStringList();
 
-	return global->manager.find("default")->features();
+	return global->manager->find("default")->features();
 }
 
 ProviderList providers()
@@ -258,7 +263,7 @@ ProviderList providers()
 
 	global->ensure_first_scan();
 
-	return global->manager.providers();
+	return global->manager->providers();
 }
 
 bool insertProvider(Provider *p, int priority)
@@ -270,7 +275,7 @@ bool insertProvider(Provider *p, int priority)
 
 	global->ensure_first_scan();
 
-	return global->manager.add(p, priority);
+	return global->manager->add(p, priority);
 }
 
 void setProviderPriority(const QString &name, int priority)
@@ -282,7 +287,7 @@ void setProviderPriority(const QString &name, int priority)
 
 	global->ensure_first_scan();
 
-	global->manager.changePriority(name, priority);
+	global->manager->changePriority(name, priority);
 }
 
 int providerPriority(const QString &name)
@@ -294,7 +299,7 @@ int providerPriority(const QString &name)
 
 	global->ensure_first_scan();
 
-	return global->manager.getPriority(name);
+	return global->manager->getPriority(name);
 }
 
 Provider *findProvider(const QString &name)
@@ -306,7 +311,7 @@ Provider *findProvider(const QString &name)
 
 	global->ensure_first_scan();
 
-	return global->manager.find(name);
+	return global->manager->find(name);
 }
 
 Provider *defaultProvider()
@@ -316,7 +321,7 @@ Provider *defaultProvider()
 	if(!global)
 		return 0;
 
-	return global->manager.find("default");
+	return global->manager->find("default");
 }
 
 void scanForPlugins()
@@ -340,13 +345,13 @@ void unloadAllPlugins()
 		return;
 
 	// if the global_rng was owned by a plugin, then delete it
-	if(global->rng && (global->rng->provider() != global->manager.find("default")))
+	if(global->rng && (global->rng->provider() != global->manager->find("default")))
 	{
 		delete global->rng;
 		global->rng = 0;
 	}
 
-	global->manager.unloadAll();
+	global->manager->unloadAll();
 }
 
 QString pluginDiagnosticText()
@@ -356,7 +361,7 @@ QString pluginDiagnosticText()
 	if(!global)
 		return QString();
 
-	return global->manager.diagnosticText();
+	return global->manager->diagnosticText();
 }
 
 void clearPluginDiagnosticText()
@@ -366,7 +371,7 @@ void clearPluginDiagnosticText()
 	if(!global)
 		return;
 
-	global->manager.clearDiagnosticText();
+	global->manager->clearDiagnosticText();
 }
 
 void setProperty(const QString &name, const QVariant &value)
@@ -641,26 +646,26 @@ static Provider *getProviderForType(const QString &type, const QString &provider
 	if(!provider.isEmpty())
 	{
 		// try using specific provider
-		p = global->manager.findFor(provider, type);
+		p = global->manager->findFor(provider, type);
 		if(!p)
 		{
 			// maybe this provider is new, so scan and try again
 			global->scan();
 			scanned = true;
-			p = global->manager.findFor(provider, type);
+			p = global->manager->findFor(provider, type);
 		}
 	}
 	if(!p)
 	{
 		// try using some other provider
-		p = global->manager.findFor(QString(), type);
+		p = global->manager->findFor(QString(), type);
 		if((!p || p->name() == "default") && !scanned)
 		{
 			// maybe there are new providers, so scan and try again
 			//   before giving up or using default
 			global->scan();
 			scanned = true;
-			p = global->manager.findFor(QString(), type);
+			p = global->manager->findFor(QString(), type);
 		}
 	}
 
@@ -705,7 +710,7 @@ Provider::Context *getContext(const QString &type, Provider *_p)
 		if(!global)
 			return 0;
 
-		p = global->manager.find(_p);
+		p = global->manager->find(_p);
 		if(!p)
 			return 0;
 	}
