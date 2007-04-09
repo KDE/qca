@@ -66,6 +66,13 @@ The code below shows how to use the QCA::MessageAuthenticationCode class
 
 */
 
+
+/** \example keyloader.cpp
+
+The code below shows how to use the QCA::KeyLoader class
+
+*/
+
 /** \example md5crypt.cpp
 
 The code below shows how to calculate an md5crypt based password. This

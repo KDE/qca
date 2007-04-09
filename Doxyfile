@@ -499,6 +499,7 @@ EXAMPLE_PATH           = examples/aes-cmac \
 			 examples/eventhandlerdemo \
 			 examples/hashtest \
 			 examples/hextest \
+			 examples/keyloader \
                          examples/mactest \
                          examples/md5crypt \
                          examples/providertest \
