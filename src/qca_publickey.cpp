@@ -298,6 +298,73 @@ PBEAlgorithm get_pbe_default()
 }
 
 //----------------------------------------------------------------------------
+// Global
+//----------------------------------------------------------------------------
+
+// adapted from Botan
+static const unsigned char pkcs_sha1[] =
+{
+	0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02,
+	0x1A, 0x05, 0x00, 0x04, 0x14
+};
+
+static const unsigned char pkcs_md5[] =
+{
+	0x30, 0x20, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86,
+	0xF7, 0x0D, 0x02, 0x05, 0x05, 0x00, 0x04, 0x10
+};
+
+static const unsigned char pkcs_md2[] =
+{
+	0x30, 0x20, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86,
+	0xF7, 0x0D, 0x02, 0x02, 0x05, 0x00, 0x04, 0x10
+};
+
+static const unsigned char pkcs_ripemd160[] =
+{
+	0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x24, 0x03, 0x02,
+	0x01, 0x05, 0x00, 0x04, 0x14
+};
+
+QByteArray get_hash_id(const QString &name)
+{
+	if(name == "sha1")
+		return QByteArray::fromRawData((const char *)pkcs_sha1, sizeof(pkcs_sha1));
+	else if(name == "md5")
+		return QByteArray::fromRawData((const char *)pkcs_md5, sizeof(pkcs_md5));
+	else if(name == "md2")
+		return QByteArray::fromRawData((const char *)pkcs_md2, sizeof(pkcs_md2));
+	else if(name == "ripemd160")
+		return QByteArray::fromRawData((const char *)pkcs_ripemd160, sizeof(pkcs_ripemd160));
+	else
+		return QByteArray();
+}
+
+QSecureArray emsa3Encode(const QString &hashName, const QSecureArray &digest, int size)
+{
+	QByteArray hash_id = get_hash_id(hashName);
+	if(hash_id.isEmpty())
+		return QSecureArray();
+
+	// logic adapted from Botan
+	int basesize = hash_id.size() + digest.size() + 2;
+	if(size == -1)
+		size = basesize + 1; // default to 1-byte pad
+	int padlen = size - basesize;
+	if(padlen < 1)
+		return QSecureArray();
+
+	QSecureArray out(size, 0xff); // pad with 0xff
+	out[0] = 0x01;
+	out[padlen + 1] = 0x00;
+	int at = padlen + 2;
+	memcpy(out.data() + at, hash_id.data(), hash_id.size());
+	at += hash_id.size();
+	memcpy(out.data() + at, digest.data(), digest.size());
+	return out;
+}
+
+//----------------------------------------------------------------------------
 // DLGroup
 //----------------------------------------------------------------------------
 class DLGroup::Private

@@ -124,6 +124,16 @@ namespace QCA
 	};
 
 	/**
+	   Encode a hash result in EMSA3 (PKCS#1) format
+
+	   This is a convenience function for providers that only have access
+	   to raw RSA signing (mainly smartcard providers).  This is a built-in
+	   function of QCA and does not utilize a provider.  SHA1, MD5, MD2,
+	   and RIPEMD160 are supported.
+	*/
+	QCA_EXPORT QSecureArray emsa3Encode(const QString &hashName, const QSecureArray &digest, int size = -1);
+
+	/**
 	   \class DLGroup qca_publickey.h QtCrypto
 
 	   A discrete logarithm group
