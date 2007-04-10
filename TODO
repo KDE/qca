@@ -32,7 +32,6 @@
     qca_securelayer.h
       supportedCipherSuites
       canCompress
-    ability to create PKCS#1 without using direct low level crypto.
     random: either find a way to always provide good random numbers,
       or add an indicator as to whether the numbers can be trusted.
     QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
@@ -44,22 +43,10 @@
     fix the locking stuff in qca_core
     allow logger to be used from anywhere
     global random thread-safety?
-    tls/sasl
-    dirwatch: thread safety
-    dirwatch: test on all platforms
-    qca-openssl: ca signing
-    synchronizer should lazy-start the thread
-    proper parenting of all objects
     qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
-    qca-cyrussasl: make this plugin (use misha's patch to qca-sasl)
-    sasl example
-    qcatool TODOs
-    constraints stuff seems messed up.  why are constraints auto-added by
-      qca-openssl?
-    qca-cyrus-sasl:
-      there's a problem where we can create the provider, and not create
-      a saslContext, and then the destructor depends on uninitialised values
-      (to see this, valgrind staticunittest).
+    qca-gnupg: support async
+    qca-openssl: why are some constraints auto-added?
+    qca-openssl: ca signing
   other:
     krazy warnings
     Update to latest Botan, and remake the botantools patch as appropriate
@@ -74,6 +61,16 @@
     reporting diagnostic text at the provider level?
     document which functions might cause a synchronous asker?
   code:
+    qca-cyrus-sasl:
+      there's a problem where we can create the provider, and not create
+      a saslContext, and then the destructor depends on uninitialised values
+      (to see this, valgrind staticunittest).
+    qcatool TODOs
+    qca-openssl: support async S/MIME and TLS
+    synchronizer should lazy-start the thread
+    tls/sasl
+    dirwatch: thread safety
+    dirwatch: test on all platforms
     core: properties
     cert: rfc 2818 hostname validation
     publickey/cert cleanup
@@ -82,6 +79,7 @@
     sasl
     keystore: cleanup
     don't allow smart card providers to be used by default
+    proper parenting of all objects
 
 * Considerations
   api:
