@@ -38,12 +38,28 @@ bool ask_passphrase(const QString &fname, void *ptr, QSecureArray *answer);
 static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 {
 	CertificateInfo out;
+
+	// first, do all but EmailLegacy
 	for(int n = 0; n < info.count(); ++n)
 	{
 		const CertificateInfoPair &i = info[n];
-		if(i.type() != OtherInfoType)
+		if(i.type() != OtherInfoType && i.type() != EmailLegacy)
 			out.insert(i.type(), i.value());
 	}
+
+	// lastly, apply EmailLegacy
+	for(int n = 0; n < info.count(); ++n)
+	{
+		const CertificateInfoPair &i = info[n];
+		if(i.type() == EmailLegacy)
+		{
+			// de-dup
+			QList<QString> emails = out.values(Email);
+			if(!emails.contains(i.value()))
+				out.insert(Email, i.value());
+		}
+	}
+
 	return out;
 }
 
