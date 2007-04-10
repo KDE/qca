@@ -114,6 +114,16 @@ static CertificateInfoOrdered mapToOrdered(const CertificateInfo &info)
 }
 
 //----------------------------------------------------------------------------
+// Global
+//----------------------------------------------------------------------------
+QString orderedToDNString(const CertificateInfoOrdered &in)
+{
+	// TODO
+	Q_UNUSED(in);
+	return QString();
+}
+
+//----------------------------------------------------------------------------
 // CertificateInfoPair
 //----------------------------------------------------------------------------
 class CertificateInfoPair::Private : public QSharedData

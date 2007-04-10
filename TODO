@@ -33,12 +33,12 @@
       supportedCipherSuites
       canCompress
     friendly entry name generator
-    ability to convert infoOrdered to DN-string
     ability to create PKCS#1 without using direct low level crypto.
     random: either find a way to always provide good random numbers,
       or add an indicator as to whether the numbers can be trusted.
     QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
+    cert: orderedToDNString
     keystore async mode
     keystore watcher
     fix the locking stuff in qca_core

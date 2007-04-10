@@ -244,7 +244,24 @@ namespace QCA
 	/**
 	   Ordered certificate properties type
 	*/
-	typedef QList<CertificateInfoPair> CertificateInfoOrdered;
+	class CertificateInfoOrdered : public QList<CertificateInfoPair>
+	{
+	public:
+		/**
+		   Convert to RFC 1779 string format
+		*/
+		inline QString toString() const;
+	};
+
+	/**
+	   Convert to RFC 1779 string format
+	*/
+	QString orderedToDNString(const CertificateInfoOrdered &in);
+
+	inline QString CertificateInfoOrdered::toString() const
+	{
+		return orderedToDNString(*this);
+	}
 
 	/**
 	   %Certificate constraints type
