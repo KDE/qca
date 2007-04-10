@@ -1,8 +1,6 @@
 * update the README
 * special thanks to Jack Lloyd
 * mac universal binary support?
-* be sure to turn ALL .pro files (examples, everything) on release mode
-* option to build qca with simultaneous debug and release, similar to qt?
 
 * API documentation
   think about documenting the various providers (qcaprovider.h)
@@ -10,6 +8,10 @@
 
 * beta4
   api:
+    tls features
+      calist (SSL_get_client_CA_list)
+      compression
+      hostname
     some functions report availability of "sub"features without having context
       with a specific provider (that is, the functions are not members of an
       instance owned by a provider, nor is a provider necessarily specified
@@ -19,35 +21,23 @@
       returns true, it is entirely possible that when the application creates
       a "new TLS;" instance, it won't be served by a provider that supports
       compression.  possibly offending functions:
-    qca_publickey.h:
+    qca_publickey.h
       supportedGroupSets
       supportedTypes
       supportedIOTypes
       supportedPBEAlgorithms
-    qca_cert.h:
+    qca_cert.h
       canUseFormat
       canUsePKCS7
     qca_securelayer.h
       supportedCipherSuites
       canCompress
-    cert extensions
-      fixup subjectInfoOrdered to handle all DN parts (oids) ?
-    crl URIs
-    policy info beyond OID
-    OCSP ?
-    random: either find a way to always provide good random numbers,
-            or add an indicator as to whether the numbers can be
-            trusted.
-    tls extensions: hostname and ocsp stapling
-    tls: SSL_get_client_CA_list
-    QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
-    alon: convertToPublic should return a publickey rather than clone?
-    ability to create PKCS#1 without using direct low level crypto.
-    reporting diagnostic text at the provider level?
-    EmailAlt, don't merge with Email when using CertificateInfoOrdered
-    friendly entry name generator for certs
+    friendly entry name generator
     ability to convert infoOrdered to DN-string
-    document which functions might cause a synchronous asker?
+    ability to create PKCS#1 without using direct low level crypto.
+    random: either find a way to always provide good random numbers,
+      or add an indicator as to whether the numbers can be trusted.
+    QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
     keystore async mode
     keystore watcher
@@ -77,6 +67,12 @@
     ability to compile plugins in statically (check 'plugins' subdir)
 
 * test1
+  api:
+    cert: crl URIs
+    cert: policy info beyond OID
+    alon: convertToPublic should return a publickey rather than clone?
+    reporting diagnostic text at the provider level?
+    document which functions might cause a synchronous asker?
   code:
     core: properties
     cert: rfc 2818 hostname validation
@@ -119,6 +115,8 @@
   qca-egads (or qca-egd): implement for Random support
 
 * possibilities for the future:
+  OCSP
+  tls ocsp stapling
   internally managed intermediate object storage
   securemessage: algorithm selection for cms/pgp (and use SecurityLevel?)
   tls: renegotiation
