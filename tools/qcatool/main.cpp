@@ -430,11 +430,13 @@ public:
 	}
 };
 
-static QList<InfoType> makeInfoTypeList()
+static QList<InfoType> makeInfoTypeList(bool legacyEmail = false)
 {
 	QList<InfoType> out;
 	out += InfoType(QCA::CommonName,             "CommonName",             "CN",  "Common Name (CN)",          "Full name, domain, anything");
 	out += InfoType(QCA::Email,                  "Email",                  "",    "Email Address",             "");
+	if(legacyEmail)
+		out += InfoType(QCA::EmailLegacy,            "EmailLegacy",            "",    "PKCS#9 Email Address",      "");
 	out += InfoType(QCA::Organization,           "Organization",           "O",   "Organization (O)",          "Company, group, etc");
 	out += InfoType(QCA::OrganizationalUnit,     "OrganizationalUnit",     "OU",  "Organizational Unit (OU)",  "Division/branch of organization");
 	out += InfoType(QCA::Locality,               "Locality",               "",    "Locality (L)",              "City, shire, part of a state");
@@ -884,7 +886,7 @@ static void print_info(const QString &title, const QCA::CertificateInfo &info)
 
 static void print_info_ordered(const QString &title, const QCA::CertificateInfoOrdered &info)
 {
-	QList<InfoType> list = makeInfoTypeList();
+	QList<InfoType> list = makeInfoTypeList(true);
 	printf("%s\n", title.toLatin1().data());
 	foreach(const QCA::CertificateInfoPair &pair, info)
 	{
