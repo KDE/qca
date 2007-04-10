@@ -86,7 +86,7 @@ namespace QCA
 		 * Provide a random character (byte)
 		 *
 		 * This is the normal way of obtaining a single random char
-		 * (ie. 8 bit byte), of the default quality, as shown below:
+		 * (ie. 8 bit byte), as shown below:
 		 * \code
 		 * myRandomChar = QCA::Random::randomChar();
 		 * \endcode

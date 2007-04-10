@@ -56,6 +56,7 @@ public:
 	bool first_scan;
 	QString app_name;
 	ProviderManager *manager;
+	QMutex rng_mutex;
 	Random *rng;
 	Logger *logger;
 	QVariantMap properties;
@@ -115,7 +116,7 @@ static bool features_have(const QStringList &have, const QStringList &want)
 
 void init(MemoryMode mode, int prealloc)
 {
-	//QMutexLocker locker(global_mutex());
+	// TODO: QMutexLocker locker(global_mutex());
 	if(global)
 	{
 		++(global->refs);
@@ -169,7 +170,7 @@ void init()
 
 void deinit()
 {
-	//QMutexLocker locker(global_mutex());
+	// TODO: QMutexLocker locker(global_mutex());
 	if(!global)
 		return;
 	--(global->refs);
@@ -181,14 +182,45 @@ void deinit()
 	}
 }
 
-bool haveSecureMemory()
+bool global_check()
 {
 	QMutexLocker locker(global_mutex());
 	Q_ASSERT(global);
 	if(!global)
 		return false;
+	return true;
+}
+
+QMutex *global_random_mutex()
+{
+	return &global->rng_mutex;
+}
+
+Random *global_random()
+{
+	if(!global->rng)
+		global->rng = new Random;
+	return global->rng;
+}
+
+bool haveSecureMemory()
+{
+	if(!global_check())
+		return false;
 
 	return global->secmem;
+}
+
+bool haveSecureRandom()
+{
+	if(!global_check())
+		return false;
+
+	QMutexLocker locker(global_random_mutex());
+	if(global_random()->provider()->name() != "default")
+		return true;
+
+	return false;
 }
 
 bool isSupported(const QStringList &features, const QString &provider)
@@ -530,32 +562,22 @@ void saveProviderConfig(const QString &name)
 	writeConfig(name, conf);
 }
 
-Random & globalRNG()
+QString globalRandomProvider()
 {
-	{
-		QMutexLocker locker(global_mutex());
-		Q_ASSERT(global);
-	}
-
-	if(!global->rng)
-		global->rng = new Random;
-	return *global->rng;
+	QMutexLocker locker(global_random_mutex());
+	return global_random()->provider()->name();
 }
 
-void setGlobalRNG(const QString &provider)
+void setGlobalRandomProvider(const QString &provider)
 {
-	{
-		QMutexLocker locker(global_mutex());
-		Q_ASSERT(global);
-	}
-
+	QMutexLocker locker(global_random_mutex());
 	delete global->rng;
 	global->rng = new Random(provider);
 }
 
 Logger *logger()
 {
-	//QMutexLocker locker(global_mutex());
+	// TODO: QMutexLocker locker(global_mutex());
 	Q_ASSERT(global);
 
 	return global->logger;
@@ -1183,7 +1205,7 @@ SymmetricKey::SymmetricKey()
 
 SymmetricKey::SymmetricKey(int size)
 {
-	set(globalRNG().nextBytes(size));
+	set(Random::randomArray(size));
 }
 
 SymmetricKey::SymmetricKey(const QSecureArray &a)
@@ -1291,7 +1313,7 @@ InitializationVector::InitializationVector()
 
 InitializationVector::InitializationVector(int size)
 {
-	set(globalRNG().nextBytes(size));
+	set(Random::randomArray(size));
 }
 
 InitializationVector::InitializationVector(const QSecureArray &a)

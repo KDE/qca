@@ -32,8 +32,6 @@
     qca_securelayer.h
       supportedCipherSuites
       canCompress
-    random: either find a way to always provide good random numbers,
-      or add an indicator as to whether the numbers can be trusted.
     QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
     cert: orderedToDNString
@@ -42,7 +40,6 @@
     keystore watcher
     fix the locking stuff in qca_core
     allow logger to be used from anywhere
-    global random thread-safety?
     qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
     qca-gnupg: support async
     qca-openssl: why are some constraints auto-added?

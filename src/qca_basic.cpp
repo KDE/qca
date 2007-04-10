@@ -25,6 +25,10 @@
 
 namespace QCA {
 
+// from qca_core.cpp
+QMutex *global_random_mutex();
+Random *global_random();
+
 //----------------------------------------------------------------------------
 // Random
 //----------------------------------------------------------------------------
@@ -45,12 +49,14 @@ QSecureArray Random::nextBytes(int size)
 
 uchar Random::randomChar()
 {
-	return globalRNG().nextByte();
+	QMutexLocker locker(global_random_mutex());
+	return global_random()->nextByte();
 }
 
 int Random::randomInt()
 {
-	QSecureArray a = globalRNG().nextBytes(sizeof(int));
+	QMutexLocker locker(global_random_mutex());
+	QSecureArray a = global_random()->nextBytes(sizeof(int));
 	int x;
 	memcpy(&x, a.data(), a.size());
 	return x;
@@ -58,7 +64,8 @@ int Random::randomInt()
 
 QSecureArray Random::randomArray(int size)
 {
-	return globalRNG().nextBytes(size);
+	QMutexLocker locker(global_random_mutex());
+	return global_random()->nextBytes(size);
 }
 
 //----------------------------------------------------------------------------

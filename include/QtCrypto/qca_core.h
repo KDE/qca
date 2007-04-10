@@ -148,6 +148,16 @@ namespace QCA
 	QCA_EXPORT bool haveSecureMemory();
 
 	/**
+	 * Test if secure random is available
+	 *
+	 * Secure random is considered available if the global random
+	 * provider is not the default provider.
+	 *
+	 * \return true if secure random is available
+	 */ 
+	QCA_EXPORT bool haveSecureRandom();
+
+	/**
 	 * Test if a capability (algorithm) is available.
 	 *
 	 * Since capabilities are made available at runtime, you
@@ -363,26 +373,18 @@ namespace QCA
 	QCA_EXPORT void saveProviderConfig(const QString &name);
 
 	/**
-	 * Return the Random provider that is currently set to be the
-	 * global random number generator.
-	 *
-	 * For example, to get the name of the provider that is currently
-	 * providing the Random capability, you could use:
-	 * \code
-	 * QCA::Random rng = QCA::globalRNG();
-         * std::cout << "Provider name: " << rng.provider()->name() << std::endl;
-	 * \endcode
+	 * Return the name of the global random number provider
 	 */
-	QCA_EXPORT Random & globalRNG();
+	QCA_EXPORT QString globalRandomProvider();
 
 	/**
-	 * Change the global random generation provider
+	 * Change the global random number provider
 	 *
 	 * The Random capabilities of %QCA are provided as part of the
 	 * built in capabilities, however the generator can be changed
 	 * if required.
 	 */
-	QCA_EXPORT void setGlobalRNG(const QString &provider);
+	QCA_EXPORT void setGlobalRandomProvider(const QString &provider);
 
 	/**
 	   Return a reference to the %QCA Logger, which is used for diagnostics
