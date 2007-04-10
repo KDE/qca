@@ -41,7 +41,8 @@ static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 	for(int n = 0; n < info.count(); ++n)
 	{
 		const CertificateInfoPair &i = info[n];
-		out.insert(i.type(), i.value());
+		if(i.type() != OtherInfoType)
+			out.insert(i.type(), i.value());
 	}
 	return out;
 }
@@ -77,6 +78,7 @@ static CertificateInfoOrdered mapToOrdered(const CertificateInfo &info)
 
 	// get remaining types
 	QList<CertificateInfoType> typesLeft = in.keys();
+	typesLeft.removeAll(OtherInfoType);
 
 	// dedup
 	QList<CertificateInfoType> types;
@@ -101,11 +103,14 @@ static CertificateInfoOrdered mapToOrdered(const CertificateInfo &info)
 class CertificateInfoPair::Private : public QSharedData
 {
 public:
+	bool use_altname;
 	CertificateInfoType type;
+	QString oid;
 	QString value;
 
 	Private()
 	{
+		use_altname = false;
 		type = (CertificateInfoType)-1;
 	}
 };
@@ -118,7 +123,39 @@ CertificateInfoPair::CertificateInfoPair()
 CertificateInfoPair::CertificateInfoPair(CertificateInfoType type, const QString &value)
 :d(new Private)
 {
+	switch(type)
+	{
+		case CommonName:
+		case EmailLegacy:
+		case Organization:
+		case OrganizationalUnit:
+		case Locality:
+		case IncorporationLocality:
+		case State:
+		case IncorporationState:
+		case Country:
+		case IncorporationCountry:
+			d->use_altname = false;
+			break;
+		default:
+			d->use_altname = true;
+			break;
+	}
+
 	d->type = type;
+	d->value = value;
+}
+
+CertificateInfoPair::CertificateInfoPair(const QString &oid, const QString &value, Section section)
+:d(new Private)
+{
+	if(section == AltName)
+		d->use_altname = true;
+	else
+		d->use_altname = false;
+
+	d->type = OtherInfoType;
+	d->oid = oid;
 	d->value = value;
 }
 
@@ -137,9 +174,22 @@ CertificateInfoPair & CertificateInfoPair::operator=(const CertificateInfoPair &
 	return *this;
 }
 
+CertificateInfoPair::Section CertificateInfoPair::section() const
+{
+	if(d->use_altname)
+		return AltName;
+	else
+		return DN;
+}
+
 CertificateInfoType CertificateInfoPair::type() const
 {
 	return d->type;
+}
+
+QString CertificateInfoPair::oid() const
+{
+	return d->oid;
 }
 
 QString CertificateInfoPair::value() const
@@ -149,7 +199,7 @@ QString CertificateInfoPair::value() const
 
 bool CertificateInfoPair::operator==(const CertificateInfoPair &other) const
 {
-	if(d->type == other.d->type && d->value == other.d->value)
+	if((d->type == other.d->type || (d->use_altname == other.d->use_altname && d->oid == other.d->oid)) && d->value == other.d->value)
 		return true;
 	return false;
 }

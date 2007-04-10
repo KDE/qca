@@ -889,14 +889,31 @@ static void print_info_ordered(const QString &title, const QCA::CertificateInfoO
 	foreach(const QCA::CertificateInfoPair &pair, info)
 	{
 		QCA::CertificateInfoType type = pair.type();
+		QString name;
+		int at = -1;
 		for(int n = 0; n < list.count(); ++n)
 		{
 			if(list[n].type == type)
 			{
-				printf("   %s: %s\n", qPrintable(list[n].name), pair.value().toUtf8().data());
+				at = n;
 				break;
 			}
 		}
+
+		// known type?
+		if(at != -1)
+		{
+			name = list[at].name;
+		}
+		else
+		{
+			if(pair.section() == QCA::CertificateInfoPair::DN)
+				name = QString("DN:") + pair.oid();
+			else
+				name = QString("AN:") + pair.oid();
+		}
+
+		printf("   %s: %s\n", qPrintable(name), pair.value().toUtf8().data());
 	}
 }
 

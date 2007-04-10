@@ -290,7 +290,21 @@ static CertificateInfo get_cert_name(X509_NAME *name)
 	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.2"), IncorporationState, &info);
 	try_get_name_item(name, NID_organizationName, Organization, &info);
 	try_get_name_item(name, NID_organizationalUnitName, OrganizationalUnit, &info);
-	try_get_name_item(name, NID_pkcs9_emailAddress, Email, &info);
+
+	// legacy email
+	{
+		CertificateInfo p9_info;
+		try_get_name_item(name, NID_pkcs9_emailAddress, EmailLegacy, &p9_info);
+		QList<QString> emails = info.values(Email);
+		QMapIterator<CertificateInfoType,QString> it(p9_info);
+		while(it.hasNext())
+		{
+			it.next();
+			if(!emails.contains(it.value()))
+				info.insert(Email, it.value());
+		}
+	}
+
 	return info;
 }
 
@@ -419,7 +433,9 @@ static GENERAL_NAME *new_general_name(CertificateInfoType t, const QString &val)
 		}
 
 		// the following are not alt_names
+		case OtherInfoType:
 		case CommonName:
+		case EmailLegacy:
 		case Organization:
 		case OrganizationalUnit:
 		case Locality:
@@ -586,7 +602,9 @@ static void try_get_general_name(GENERAL_NAMES *names, CertificateInfoType t, Ce
                 }
 
                 // the following are not alt_names
+		case OtherInfoType:
                 case CommonName:
+		case EmailLegacy:
                 case Organization:
                 case OrganizationalUnit:
                 case Locality:

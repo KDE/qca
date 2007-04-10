@@ -78,8 +78,10 @@ namespace QCA
 	*/
 	enum CertificateInfoType
 	{
+		OtherInfoType,          ///< Type is not listed in this enumerator (CertificateInfoPair only)
 		CommonName,             ///< The common name (eg person)
 		Email,                  ///< Email address
+		EmailLegacy,            ///< PKCS#9 Email field (CertificateInfoPair only)
 		Organization,           ///< An organisation (eg company)
 		OrganizationalUnit,     ///< An part of an organisation (eg a division or branch)
 		Locality,               ///< The locality (eg city, a shire, or part of a state) 
@@ -100,6 +102,12 @@ namespace QCA
 	class QCA_EXPORT CertificateInfoPair
 	{
 	public:
+		enum Section
+		{
+			DN,
+			AltName
+		};
+
 	        /**
 		   Standard constructor
 		*/
@@ -114,6 +122,15 @@ namespace QCA
 		CertificateInfoPair(CertificateInfoType type, const QString &value);
 
 		/**
+		   Construct a new pair
+
+		   \param oid the type of information stored in this pair as an OID
+		   \param value the value of the information to be stored
+		   \param section the section the information belongs in
+		*/
+		CertificateInfoPair(const QString &oid, const QString &value, Section section);
+
+		/**
 		   Standard copy constructor
 		*/
 		CertificateInfoPair(const CertificateInfoPair &from);
@@ -126,9 +143,22 @@ namespace QCA
 		CertificateInfoPair & operator=(const CertificateInfoPair &from);
 
 		/**
+		   The section the information is part of
+		*/
+		Section section() const;
+
+		/**
 		   The type of information stored in the pair
 		*/
 		CertificateInfoType type() const;
+
+		/**
+		   The type of information stored in the pair as an OID
+
+		   For use with types not listed in the CertificateInfoType
+		   enumerator.
+		*/
+		QString oid() const;
 
 		/**
 		   The value of the information stored in the pair
