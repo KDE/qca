@@ -42,6 +42,7 @@ namespace QCA
 	class CertContext;
 	class CSRContext;
 	class CRLContext;
+	class Certificate;
 	class CRL;
 	class CertificateCollection;
 	class CertificateChain;
@@ -256,7 +257,7 @@ namespace QCA
 	/**
 	   Convert to RFC 1779 string format
 	*/
-	QString orderedToDNString(const CertificateInfoOrdered &in);
+	QCA_EXPORT QString orderedToDNString(const CertificateInfoOrdered &in);
 
 	inline QString CertificateInfoOrdered::toString() const
 	{
@@ -267,6 +268,11 @@ namespace QCA
 	   %Certificate constraints type
 	*/
 	typedef QList<ConstraintType> Constraints;
+
+	/**
+	   Create a list of unique friendly names among a list of certificates
+	*/
+	QCA_EXPORT QStringList makeFriendlyNames(const QList<Certificate> &list);
 
 	/**
 	   \class CertificateOptions qca_cert.h QtCrypto

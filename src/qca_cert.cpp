@@ -123,6 +123,13 @@ QString orderedToDNString(const CertificateInfoOrdered &in)
 	return QString();
 }
 
+QStringList makeFriendlyNames(const QList<Certificate> &list)
+{
+	// TODO
+	Q_UNUSED(list);
+	return QStringList();
+}
+
 //----------------------------------------------------------------------------
 // CertificateInfoPair
 //----------------------------------------------------------------------------
