@@ -8,10 +8,6 @@
 
 * beta4
   api:
-    tls features
-      calist (SSL_get_client_CA_list)
-      compression
-      hostname
     some functions report availability of "sub"features without having context
       with a specific provider (that is, the functions are not members of an
       instance owned by a provider, nor is a provider necessarily specified
@@ -32,6 +28,7 @@
     qca_securelayer.h
       supportedCipherSuites
       canCompress
+      canSetHostName (tbd)
     QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
     cert: orderedToDNString

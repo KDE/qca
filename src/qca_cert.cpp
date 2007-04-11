@@ -123,6 +123,17 @@ QString orderedToDNString(const CertificateInfoOrdered &in)
 	return QString();
 }
 
+CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in)
+{
+	CertificateInfoOrdered out;
+	for(int n = 0; n < in.count(); ++n)
+	{
+		if(in[n].section() == CertificateInfoPair::DN)
+			out += in[n];
+	}
+	return out;
+}
+
 QStringList makeFriendlyNames(const QList<Certificate> &list)
 {
 	// TODO

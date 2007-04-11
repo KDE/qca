@@ -468,13 +468,16 @@ public:
 
 	virtual QStringList supportedCipherSuites(const TLS::Version &version) const = 0;
 	virtual bool canCompress() const = 0;
+	virtual bool canSetHostName() const = 0;
 	virtual int maxSSF() const = 0;
 
 	virtual void setConstraints(int minSSF, int maxSSF) = 0;
 	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
 	virtual void setup(const CertificateCollection &trusted,
-		const CertificateChain &cert, const PrivateKey &key, bool server,
-		const QString &hostName, bool compress, bool dtls) = 0;
+		bool serverMode,
+		const QList<CertificateInfoOrdered> &issuerList,
+		const QString &hostName, bool compress) = 0;
+	virtual void setCertificate(const CertificateChain &cert, const PrivateKey &key) = 0;
 
 	virtual void shutdown() = 0; // flag for shutdown, call update next
 	virtual void setMTU(int size); // for dtls
@@ -509,6 +512,10 @@ public:
 	virtual int encoded() const = 0;
 	virtual QByteArray to_app() = 0;
 	virtual bool eof() const = 0;
+
+	// call after handshake continue, but before success
+	virtual bool serverHelloReceived() const = 0;
+	virtual QList<CertificateInfoOrdered> issuerList() const = 0;
 
 	// call after successful handshake
 	virtual Validity peerCertificateValidity() const = 0;

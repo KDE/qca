@@ -387,6 +387,36 @@ namespace QCA
 		void setConstraints(const QStringList &cipherSuiteList);
 
 		/**
+		   Retrieve the list of allowed issuers by the server,
+		   if the server has provided them.  Only DN types will
+		   be present.
+
+		   \code
+		   Certificate someCert = ...
+		   PrivateKey someKey = ...
+
+		   // see if the server will take our cert
+		   CertificateInfoOrdered issuerInfo = someCert.issuerInfoOrdered().dnOnly();
+		   foreach(const CertificateInfoOrdered &info, tls->issuerList())
+		   {
+		       if(info == issuerInfo)
+		       {
+		           // server will accept someCert, let's present it
+		           tls->setCertificate(someCert, someKey);
+			   break;
+		       }
+		   }
+		   \endcode
+		*/
+		QList<CertificateInfoOrdered> issuerList() const;
+
+		/**
+		   Sets the issuer list to present to the client.  For
+		   use with servers only.  Only DN types are allowed.
+		*/
+		void setIssuerList(const QList<CertificateInfoOrdered> &issuers);
+
+		/**
 		   Test if the link can use compression.
 
 		   \param mode the Mode to use
@@ -418,6 +448,16 @@ namespace QCA
 		   Start the TLS/SSL connection as a server.
 		*/
 		void startServer();
+
+		/**
+		   Resumes TLS processing.
+
+		   Call this function after firstStepDone() or handshaken() is
+		   emitted.  By requiring this function to be called in order
+		   to proceed, applications are given a chance to perform user
+		   interaction between steps in the TLS process.
+		*/
+		void continueAfterStep();
 
 		/**
 		   test if the handshake is complete
@@ -553,8 +593,26 @@ namespace QCA
 
 	Q_SIGNALS:
 		/**
-		   Emitted when the protocol handshake is complete
+		   Emitted when the server has completed the first part
+		   of the TLS negotiation.  At this time, the client can
+		   inspect the peerCertificateChain() and issuerList().
 
+		   You must call continueAfterStep() in order for TLS
+		   processing to resume after this signal is emitted.
+
+		   \sa continueAfterStep
+		*/
+		void firstStepDone();
+
+		/**
+		   Emitted when the protocol handshake is complete.  At
+		   this time, all available information about the TLS
+		   session can be inspected.
+
+		   You must call continueAfterStep() in order for TLS
+		   processing to resume after this signal is emitted.
+
+		   \sa continueAfterStep
 		   \sa isHandshaken
 		*/
 		void handshaken();

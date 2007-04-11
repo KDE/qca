@@ -4755,6 +4755,12 @@ public:
 		return false;
 	}
 
+	virtual bool canSetHostName() const
+	{
+		// TODO
+		return false;
+	}
+
 	virtual int maxSSF() const
 	{
 		// TODO
@@ -4774,19 +4780,26 @@ public:
 		Q_UNUSED(cipherSuiteList);
 	}
 
-	virtual void setup(const CertificateCollection &_trusted, const CertificateChain &_cert, const PrivateKey &_key, bool serverMode,
-                           const QString &hostName, bool compress, bool)
+	virtual void setup(const CertificateCollection &_trusted,
+		bool serverMode,
+		const QList<CertificateInfoOrdered> &issuerList,
+		const QString &hostName, bool compress)
 	{
 		trusted = _trusted;
-		if(!_cert.isEmpty())
-			cert = _cert.primary(); // TODO: take the whole chain
-		key = _key;
 		serv = serverMode;
                 if ( false == serverMode ) {
                     // client
                     targetHostName = hostName;
                 }
 		Q_UNUSED(compress); // TODO
+		Q_UNUSED(issuerList); // TODO
+	}
+
+	virtual void setCertificate(const CertificateChain &_cert, const PrivateKey &_key)
+	{
+		if(!_cert.isEmpty())
+			cert = _cert.primary(); // TODO: take the whole chain
+		key = _key;
 	}
 
 	virtual void shutdown()
@@ -5056,6 +5069,18 @@ public:
 		return v_eof;
 	}
 
+	virtual bool serverHelloReceived() const
+	{
+		// TODO
+		return false;
+	}
+
+	virtual QList<CertificateInfoOrdered> issuerList() const
+	{
+		// TODO
+		return QList<CertificateInfoOrdered>();
+	}
+
 	virtual SessionInfo sessionInfo() const
 	{
 		SessionInfo sessInfo;
@@ -5171,6 +5196,7 @@ public:
 		// this passes control of the bios to ssl.  we don't need to free them.
 		SSL_set_bio(ssl, rbio, wbio);
 
+		// FIXME: move this to after server hello
 		// setup the cert to send
 		if(!cert.isNull() && !key.isNull())
 		{

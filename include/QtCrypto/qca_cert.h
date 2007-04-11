@@ -252,6 +252,12 @@ namespace QCA
 		   Convert to RFC 1779 string format
 		*/
 		inline QString toString() const;
+
+		/**
+		   Return a new CertificateInfoOrdered that only contains
+		   the Distinguished Name (DN) types found in this object.
+		*/
+		inline CertificateInfoOrdered dnOnly() const;
 	};
 
 	/**
@@ -259,9 +265,16 @@ namespace QCA
 	*/
 	QCA_EXPORT QString orderedToDNString(const CertificateInfoOrdered &in);
 
+	QCA_EXPORT CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in);
+
 	inline QString CertificateInfoOrdered::toString() const
 	{
 		return orderedToDNString(*this);
+	}
+
+	inline CertificateInfoOrdered CertificateInfoOrdered::dnOnly() const
+	{
+		return orderedDNOnly(*this);
 	}
 
 	/**

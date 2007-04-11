@@ -142,7 +142,8 @@ public:
 		else
 			c->setConstraints(con_cipherSuites);
 
-		c->setup(trusted, localCert, localKey, serverMode, host, tryCompress, false);
+		c->setup(trusted, serverMode, QList<CertificateInfoOrdered>(), host, tryCompress);
+		c->setCertificate(localCert, localKey);
 
 		bool ok;
 		c->start();
@@ -431,6 +432,18 @@ void TLS::setConstraints(const QStringList &cipherSuiteList)
 	d->con_cipherSuites = cipherSuiteList;
 }
 
+QList<CertificateInfoOrdered> TLS::issuerList() const
+{
+	// TODO
+	return QList<CertificateInfoOrdered>();
+}
+
+void TLS::setIssuerList(const QList<CertificateInfoOrdered> &issuers)
+{
+	// TODO
+	Q_UNUSED(issuers);
+}
+
 bool TLS::canCompress(Mode mode, const QString &provider)
 {
 	bool ok = false;
@@ -474,6 +487,11 @@ void TLS::startServer()
 		QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection);
 	}
 	//layerUpdateEnd();
+}
+
+void TLS::continueAfterStep()
+{
+	// TODO
 }
 
 bool TLS::isHandshaken() const
