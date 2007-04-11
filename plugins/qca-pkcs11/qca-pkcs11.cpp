@@ -1199,83 +1199,6 @@ public:
 //----------------------------------------------------------------------------
 class pkcs11QCACrypto {
 
-public:
-	/*
-	 * Temp until QCA will have such
-	 */
-	static
-	QString
-	getDN (
-		const Certificate &cert
-	) {
-		CertificateInfoOrdered dnlist = cert.subjectInfoOrdered ();
-		QString qdn;
-
-		for (
-			CertificateInfoOrdered::iterator i = dnlist.begin ();
-			i != dnlist.end ();
-			i++
-		) {
-			QString c;
-			CertificateInfoPair e = (*i);
-
-			switch (e.type ()) {
-				case CommonName:
-					c = "CN";
-				break;
-				case Email:
-					c = "E";
-				break;
-				case Organization:
-					c = "O";
-				break;
-				case OrganizationalUnit:
-					c = "OU";
-				break;
-				case Locality:
-					c = "L";
-				break;
-				case IncorporationLocality:
-					c = "EVL";
-				break;
-				case State:
-					c = "ST";
-				break;
-				case IncorporationState:
-					c = "EVST";
-				break;
-				case Country:
-					c = "C";
-				break;
-				case IncorporationCountry:
-					c = "EVC";
-				break;
-				case URI:
-					c = "URI";
-				break;
-				case DNS:
-					c = "DNS";
-				break;
-				case IPAddress:
-					c = "IP";
-				break;
-				case XMPP:
-					c = "XMPP";
-				break;
-				default:
-					c = "Unknown";
-				break;
-			}
-
-			if (!qdn.isEmpty ()) {
-				qdn += ", ";
-			}
-			qdn += c + '=' + e.value ();
-		}
-
-		return qdn;
-	}
-
 private:
 	static
 	int
@@ -1336,7 +1259,7 @@ private:
 				blob_size
 			)
 		);
-		QString qdn = getDN (cert);;
+		QString qdn = cert.subjectInfoOrdered ().toString ();
 
 		if ((size_t)qdn.length () > dn_max-1) {
 			return 0;
@@ -2126,7 +2049,7 @@ pkcs11KeyStoreList::getKeyStoreEntryByCertificateId (
 
 	CertificateChain chain = CertificateChain (cert).complete (listIssuers);
 
-	QString description = pkcs11QCACrypto::getDN (cert) + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
+	QString description = cert.subjectInfoOrdered ().toString () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
 
 	QString id = serializeCertificateId (
 		certificate_id,
