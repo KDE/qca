@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -116,11 +116,68 @@ static CertificateInfoOrdered mapToOrdered(const CertificateInfo &info)
 //----------------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------------
+static const char *shortNameByType(CertificateInfoType type)
+{
+	switch(type)
+	{
+		case CommonName:         return "CN";
+		case Locality:           return "L";
+		case State:              return "ST";
+		case Organization:       return "O";
+		case OrganizationalUnit: return "OU";
+		case Country:            return "C";
+		default:                 break;
+	}
+	return 0;
+}
+
+static const char *oidByDNType(CertificateInfoType type)
+{
+	switch(type)
+	{
+		case CommonName:            break;
+		case EmailLegacy:           return "1.2.840.113549.1.9.1";
+		case Organization:          break;
+		case OrganizationalUnit:    break;
+		case Locality:              break;
+		case IncorporationLocality: return "1.3.6.1.4.1.311.60.2.1.1";
+		case State:                 break;
+		case IncorporationState:    return "1.3.6.1.4.1.311.60.2.1.2";
+		case Country:               break;
+		case IncorporationCountry:  return "1.3.6.1.4.1.311.60.2.1.3";
+		default:                    break;
+	}
+	return 0;
+}
+
+static QString knownDNLabel(CertificateInfoType type)
+{
+	const char *str = shortNameByType(type);
+	if(str)
+		return str;
+
+	str = oidByDNType(type);
+	if(str)
+		return QString("OID.") + str;
+
+	return QString();
+}
+
 QString orderedToDNString(const CertificateInfoOrdered &in)
 {
-	// TODO
-	Q_UNUSED(in);
-	return QString();
+	QStringList parts;
+	foreach(const CertificateInfoPair &i, in)
+	{
+		if(i.section() != CertificateInfoPair::DN)
+			continue;
+
+		QString name = knownDNLabel(i.type());
+		if(name.isEmpty())
+			name = QString("OID.") + i.oid();
+
+		parts += name + '=' + i.value();
+	}
+	return parts.join(", ");
 }
 
 CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in)
