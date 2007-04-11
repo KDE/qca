@@ -23,7 +23,6 @@
 
 #include <pkcs11-helper-1.0/pkcs11h-token.h>
 #include <pkcs11-helper-1.0/pkcs11h-certificate.h>
-#include <openssl/x509.h>
 
 using namespace QCA;
 
@@ -33,7 +32,7 @@ using namespace QCA;
 //----------------------------------------------------------------------------
 // pkcs11Provider
 //----------------------------------------------------------------------------
-class pkcs11Provider : public QCA::Provider
+class pkcs11Provider : public Provider
 {
 private:
 	static const int _CONFIG_MAX_PROVIDERS;
@@ -366,7 +365,7 @@ private:
 
 	struct _sign_data_s {
 		SignatureAlgorithm alg;
-		QCA::Hash *hash;
+		Hash *hash;
 		QSecureArray raw;
 
 		_sign_data_s() {
@@ -594,13 +593,13 @@ public:
 
 		switch (_sign_data.alg) {
 			case EMSA3_SHA1:
-				_sign_data.hash = new QCA::Hash ("sha1");
+				_sign_data.hash = new Hash ("sha1");
 			break;
 			case EMSA3_MD5:
-				_sign_data.hash = new QCA::Hash ("md5");
+				_sign_data.hash = new Hash ("md5");
 			break;
 			case EMSA3_MD2:
-				_sign_data.hash = new QCA::Hash ("md2");
+				_sign_data.hash = new Hash ("md2");
 			break;
 			case EMSA3_Raw:
 			break;
@@ -643,99 +642,31 @@ public:
 	QSecureArray
 	endSign () {
 		QSecureArray result;
-		unsigned char *enc_alloc = NULL;
 		bool session_locked = false;
 
 		try {
-			int myrsa_size = 0;
-
-			unsigned char *enc = NULL;
-			int enc_len = 0;
-
+			QSecureArray final;
 			CK_RV rv;
 
-			QSecureArray final;
-
-			int type;
+			// from some strange reason I got 2047... (for some)	<---- BUG?!?!?!
+			int myrsa_size=(_pubkey.bitSize () + 7) / 8;
 
 			if (_sign_data.hash != NULL) {
-				final = _sign_data.hash->final ();
+				final = emsa3Encode (
+					_sign_data.hash->type (),
+					_sign_data.hash->final (),
+					myrsa_size
+				);
 			}
 			else {
 				final = _sign_data.raw;
 			}
 
-			switch (_sign_data.alg) {
-				case EMSA3_SHA1:
-					type = NID_sha1;
-				break;
-				case EMSA3_MD5:
-					type = NID_md5;
-				break;
-				case EMSA3_MD2:
-					type = NID_md2;
-				break;
-				case EMSA3_Raw:
-					type = NID_rsa;
-				break;
-				case SignatureUnknown:
-				case EMSA1_SHA1:
-				case EMSA3_RIPEMD160:
-				default:
-					throw pkcs11Exception (CKR_FUNCTION_NOT_SUPPORTED, "Invalid algorithm");
-				break;
+			if (final.size () == 0) {
+				throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot encode signature");
 			}
 
 			ensureCertificate ();
-
-			// from some strange reason I got 2047... (for some)	<---- BUG?!?!?!
-			myrsa_size=(_pubkey.bitSize () + 7) / 8;
-
-			if (type == NID_md5_sha1 || type == NID_rsa) {
-				enc = (unsigned char *)final.data ();
-				enc_len = final.size ();
-			}
-			else {
-				X509_SIG sig;
-				ASN1_TYPE parameter;
-				X509_ALGOR algor;
-				ASN1_OCTET_STRING digest;
-
-				if ((enc = (unsigned char *)malloc (myrsa_size+1)) == NULL) {
-					throw pkcs11Exception (CKR_HOST_MEMORY, "Memory error");
-				}
-
-				enc_alloc = enc;
-				sig.algor= &algor;
-
-				if ((sig.algor->algorithm=OBJ_nid2obj (type)) == NULL) {
-					throw pkcs11Exception (CKR_FUNCTION_FAILED, "Invalid algorithm");
-				}
-
-				if (sig.algor->algorithm->length == 0) {
-					throw pkcs11Exception (CKR_KEY_SIZE_RANGE, "Key size error");
-				}
-
-				parameter.type = V_ASN1_NULL;
-				parameter.value.ptr = NULL;
-
-				sig.algor->parameter = &parameter;
-
-				sig.digest = &digest;
-				sig.digest->data = (unsigned char *)final.data ();
-				sig.digest->length = final.size ();
-
-				if ((enc_len=i2d_X509_SIG (&sig, NULL)) < 0) {
-					throw pkcs11Exception (CKR_FUNCTION_FAILED, "Signature prepare failed");
-				}
-
-				unsigned char *p = enc;
-				i2d_X509_SIG (&sig, &p);
-			}
-
-			if (enc_len > (myrsa_size-RSA_PKCS1_PADDING_SIZE)) {
-				throw pkcs11Exception (CKR_KEY_SIZE_RANGE, "Padding too small");
-			}
 
 			size_t my_size;
 
@@ -752,8 +683,8 @@ public:
 				(rv = pkcs11h_certificate_signAny (
 					_pkcs11h_certificate,
 					CKM_RSA_PKCS,
-					enc,
-					enc_len,
+					(const unsigned char *)final.constData (),
+					(size_t)final.size (),
 					NULL,
 					&my_size
 				)) != CKR_OK
@@ -767,8 +698,8 @@ public:
 				(rv = pkcs11h_certificate_signAny (
 					_pkcs11h_certificate,
 					CKM_RSA_PKCS,
-					enc,
-					enc_len,
+					(const unsigned char *)final.constData (),
+					(size_t)final.size (),
 					(unsigned char *)result.data (),
 					&my_size
 				)) != CKR_OK
@@ -807,10 +738,6 @@ public:
 					)
 				);
 			}
-		}
-
-		if (enc_alloc != NULL) {
-			free (enc_alloc);
 		}
 
 		clearSign ();
@@ -1497,7 +1424,7 @@ pkcs11KeyStoreList::~pkcs11KeyStoreList () {
 	);
 }
 
-QCA::Provider::Context *
+Provider::Context *
 pkcs11KeyStoreList::clone () const {
 	QCA_logTextMessage (
 		"pkcs11KeyStoreList::clone - entry/return",
@@ -2637,10 +2564,10 @@ pkcs11Provider::features() const {
 	return list;
 }
 
-QCA::Provider::Context *
+Provider::Context *
 pkcs11Provider::createContext (const QString &type) {
 
-	QCA::Provider::Context *context = NULL;
+	Provider::Context *context = NULL;
 
 	QCA_logTextMessage (
 		QString ().sprintf (
@@ -2972,7 +2899,7 @@ class pkcs11Plugin : public QCAPlugin
 	Q_INTERFACES(QCAPlugin)
 
 public:
-	virtual QCA::Provider *createProvider() { return new pkcs11Provider; }
+	virtual Provider *createProvider() { return new pkcs11Provider; }
 };
 
 #include "qca-pkcs11.moc"

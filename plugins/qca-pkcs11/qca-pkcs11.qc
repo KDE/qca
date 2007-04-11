@@ -11,9 +11,6 @@
  <dep type='pkcs11_helper'>
   <required/>
  </dep>
- <dep type='openssl'>
-  <required/>
- </dep>
  <dep type='extra'>
   <required/>
  </dep>
