@@ -126,6 +126,7 @@ static const char *shortNameByType(CertificateInfoType type)
 		case Organization:       return "O";
 		case OrganizationalUnit: return "OU";
 		case Country:            return "C";
+		case EmailLegacy:        return "emailAddress";
 		default:                 break;
 	}
 	return 0;
