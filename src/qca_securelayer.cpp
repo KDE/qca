@@ -368,15 +368,18 @@ void TLS::reset()
 	d->reset(ResetAll);
 }
 
-QStringList TLS::supportedCipherSuites(const Version &version, const QString &provider)
+QStringList TLS::supportedCipherSuites(const Version &version) const
 {
-	QStringList list;
+	// TODO
+	Q_UNUSED(version);
+	/*QStringList list;
 	const TLSContext *c = static_cast<const TLSContext *>(getContext(version == DTLS_v1 ? "dtls" : "tls", provider));
 	if(!c)
 		return list;
 	list = c->supportedCipherSuites(version);
 	delete c;
-	return list;
+	return list;*/
+	return QStringList();
 }
 
 void TLS::setCertificate(const CertificateChain &cert, const PrivateKey &key)
@@ -444,15 +447,23 @@ void TLS::setIssuerList(const QList<CertificateInfoOrdered> &issuers)
 	Q_UNUSED(issuers);
 }
 
-bool TLS::canCompress(Mode mode, const QString &provider)
+bool TLS::canCompress() const
 {
-	bool ok = false;
+	// TODO
+	/*bool ok = false;
 	const TLSContext *c = static_cast<const TLSContext *>(getContext(mode == Stream ? "tls" : "dtls", provider));
 	if(!c)
 		return ok;
 	ok = c->canCompress();
 	delete c;
-	return ok;
+	return ok;*/
+	return false;
+}
+
+bool TLS::canSetHostName() const
+{
+	// TODO
+	return false;
 }
 
 void TLS::setCompressionEnabled(bool b)
