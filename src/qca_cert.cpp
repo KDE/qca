@@ -191,11 +191,290 @@ CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in)
 	return out;
 }
 
+static QString baseCertName(const CertificateInfo &info)
+{
+	QString str = info.value(CommonName);
+	if(str.isEmpty())
+	{
+		str = info.value(Organization);
+		if(str.isEmpty())
+			str = "Unnamed";
+	}
+	return str;
+}
+
+static QList<int> findSameName(const QString &name, const QStringList &list)
+{
+	QList<int> out;
+	for(int n = 0; n < list.count(); ++n)
+	{
+		if(list[n] == name)
+			out += n;
+	}
+	return out;
+}
+
+static QString uniqueSubjectValue(CertificateInfoType type, const QList<int> items, const QList<Certificate> &certs, int i)
+{
+	QStringList vals = certs[items[i]].subjectInfo().values(type);
+	if(!vals.isEmpty())
+	{
+		foreach(int n, items)
+		{
+			if(n == items[i])
+				continue;
+
+			QStringList other_vals = certs[n].subjectInfo().values(type);
+			for(int k = 0; k < vals.count(); ++k)
+			{
+				if(other_vals.contains(vals[k]))
+				{
+					vals.removeAt(k);
+					break;
+				}
+			}
+
+			if(vals.isEmpty())
+				break;
+		}
+
+		if(!vals.isEmpty())
+			return vals[0];
+	}
+
+	return QString();
+}
+
+static QString uniqueIssuerName(const QList<int> items, const QList<Certificate> &certs, int i)
+{
+	QString val = baseCertName(certs[items[i]].issuerInfo());
+
+	bool found = false;
+	foreach(int n, items)
+	{
+		if(n == items[i])
+			continue;
+
+		QString other_val = baseCertName(certs[n].issuerInfo());
+		if(other_val == val)
+		{
+			found = true;
+			break;
+		}
+	}
+
+	if(!found)
+		return val;
+
+	return QString();
+}
+
+static const char *constraintToString(ConstraintType type)
+{
+	switch(type)
+	{
+		case DigitalSignature:   return "DigitalSignature";
+		case NonRepudiation:     return "NonRepudiation";
+		case KeyEncipherment:    return "KeyEncipherment";
+		case DataEncipherment:   return "DataEncipherment";
+		case KeyAgreement:       return "KeyAgreement";
+		case KeyCertificateSign: return "KeyCertificateSign";
+		case CRLSign:            return "CRLSign";
+		case EncipherOnly:       return "EncipherOnly";
+		case DecipherOnly:       return "DecipherOnly";
+		case ServerAuth:         return "ServerAuth";
+		case ClientAuth:         return "ClientAuth";
+		case CodeSigning:        return "CodeSigning";
+		case EmailProtection:    return "EmailProtection";
+		case IPSecEndSystem:     return "IPSecEndSystem";
+		case IPSecTunnel:        return "IPSecTunnel";
+		case IPSecUser:          return "IPSecUser";
+		case TimeStamping:       return "TimeStamping";
+		case OCSPSigning:        return "OCSPSigning";
+	}
+	return 0;
+}
+
+static QString uniqueConstraintValue(ConstraintType type, const QList<int> items, const QList<Certificate> &certs, int i)
+{
+	ConstraintType val = type;
+	if(certs[items[i]].constraints().contains(type))
+	{
+		bool found = false;
+		foreach(int n, items)
+		{
+			if(n == items[i])
+				continue;
+
+			Constraints other_vals = certs[n].constraints();
+			if(other_vals.contains(val))
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if(!found)
+			return QString(constraintToString(val));
+	}
+
+	return QString();
+}
+
+static QString makeUniqueName(const QList<int> &items, const QStringList &list, const QList<Certificate> &certs, int i)
+{
+	QString str, name;
+
+	// different organization?
+	str = uniqueSubjectValue(Organization, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" of ") + str;
+		goto end;
+	}
+
+	// different organizational unit?
+	str = uniqueSubjectValue(OrganizationalUnit, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" of ") + str;
+		goto end;
+	}
+
+	// different email address?
+	str = uniqueSubjectValue(Email, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" <") + str + '>';
+		goto end;
+	}
+
+	// different xmpp addresses?
+	str = uniqueSubjectValue(XMPP, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" <xmpp:") + str + '>';
+		goto end;
+	}
+
+	// different issuers?
+	str = uniqueIssuerName(items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" by ") + str;
+		goto end;
+	}
+
+	// different usages?
+
+	// DigitalSignature
+	str = uniqueConstraintValue(DigitalSignature, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" for ") + str;
+		goto end;
+	}
+
+	// ClientAuth
+	str = uniqueConstraintValue(ClientAuth, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" for ") + str;
+		goto end;
+	}
+
+	// EmailProtection
+	str = uniqueConstraintValue(EmailProtection, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" for ") + str;
+		goto end;
+	}
+
+	// DataEncipherment
+	str = uniqueConstraintValue(DataEncipherment, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" for ") + str;
+		goto end;
+	}
+
+	// EncipherOnly
+	str = uniqueConstraintValue(EncipherOnly, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" for ") + str;
+		goto end;
+	}
+
+	// DecipherOnly
+	str = uniqueConstraintValue(DecipherOnly, items, certs, i);
+	if(!str.isEmpty())
+	{
+		name = list[items[i]] + QString(" for ") + str;
+		goto end;
+	}
+
+	// if there's nothing easily unique, then do a DN string
+	name = certs[items[i]].subjectInfoOrdered().toString();
+
+end:
+	return name;
+}
+
 QStringList makeFriendlyNames(const QList<Certificate> &list)
 {
-	// TODO
-	Q_UNUSED(list);
-	return QStringList();
+	QStringList names;
+
+	// give a base name to all certs first
+	foreach(const Certificate &cert, list)
+		names += baseCertName(cert.subjectInfo());
+
+	// come up with a collision list
+	QList< QList<int> > itemCollisions;
+	foreach(const QString &name, names)
+	{
+		// anyone else using this name?
+		QList<int> items = findSameName(name, names);
+		if(items.count() > 1)
+		{
+			// don't save duplicate collisions
+			bool haveAlready = false;
+			foreach(const QList<int> &other, itemCollisions)
+			{
+				foreach(int n, items)
+				{
+					if(other.contains(n))
+					{
+						haveAlready = true;
+						break;
+					}
+				}
+
+				if(haveAlready)
+					break;
+			}
+
+			if(haveAlready)
+				continue;
+
+			itemCollisions += items;
+		}
+	}
+
+	// resolve collisions by providing extra details
+	foreach(const QList<int> &items, itemCollisions)
+	{
+		//printf("%d items are using [%s]\n", items.count(), qPrintable(names[items[0]]));
+
+		for(int n = 0; n < items.count(); ++n)
+		{
+			names[items[n]] = makeUniqueName(items, names, list, n);
+			//printf("  %d: reassigning: [%s]\n", items[n], qPrintable(names[items[n]]));
+		}
+	}
+
+	return names;
 }
 
 //----------------------------------------------------------------------------
