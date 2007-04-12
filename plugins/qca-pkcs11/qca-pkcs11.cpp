@@ -829,23 +829,17 @@ public:
 
 	bool
 	ensureTokenAccess () {
-		try {
-			CK_RV rv;
-
-			if (
-				(rv = pkcs11h_token_ensureAccess (
-					_pkcs11h_certificate_id->token_id,
-					NULL,
-					0
-				)) != CKR_OK
-			) {
-				throw pkcs11Exception (rv, "Token access");
-			}
-
-			return true;
-		}
-		catch (const pkcs11Exception &) {
+		if (
+			pkcs11h_token_ensureAccess (
+				_pkcs11h_certificate_id->token_id,
+				NULL,
+				0
+			) != CKR_OK
+		) {
 			return false;
+		}
+		else {
+			return true;
 		}
 	}
 
@@ -1887,6 +1881,8 @@ pkcs11KeyStoreList::emit_diagnosticText (
 		),
 		Logger::Debug
 	);
+
+	QCA_logTextMessage (t, Logger::Warning);
 
 	emit diagnosticText (t);
 
