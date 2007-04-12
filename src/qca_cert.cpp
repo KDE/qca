@@ -27,6 +27,7 @@
 namespace QCA {
 
 Provider::Context *getContext(const QString &type, const QString &provider);
+Provider::Context *getContext(const QString &type, Provider *p);
 
 // from qca_publickey.cpp
 bool stringToFile(const QString &fileName, const QString &content);
@@ -34,6 +35,8 @@ bool stringFromFile(const QString &fileName, QString *s);
 bool arrayToFile(const QString &fileName, const QByteArray &content);
 bool arrayFromFile(const QString &fileName, QByteArray *a);
 bool ask_passphrase(const QString &fname, void *ptr, QSecureArray *answer);
+ProviderList allProviders();
+Provider *providerForName(const QString &name);
 
 static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 {
@@ -1708,6 +1711,27 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 	return pem;
 }
 
+static CertCollectionContext *get_certcollection(const QString &provider = QString())
+{
+	if(!provider.isEmpty())
+	{
+		Provider *p = providerForName(provider);
+		if(p)
+			return static_cast<CertCollectionContext *>(getContext("certcollection", p));
+	}
+	else
+	{
+		ProviderList list = allProviders();
+		foreach(Provider *p, list)
+		{
+			CertCollectionContext *c = static_cast<CertCollectionContext *>(getContext("certcollection", p));
+			if(c)
+				return c;
+		}
+	}
+	return 0;
+}
+
 class CertificateCollection::Private : public QSharedData
 {
 public:
@@ -1776,10 +1800,7 @@ CertificateCollection & CertificateCollection::operator+=(const CertificateColle
 
 bool CertificateCollection::canUsePKCS7(const QString &provider)
 {
-	CertCollectionContext *c = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
-	bool ok = c ? true : false;
-	delete c;
-	return ok;
+	return isSupported("certcollection", provider);
 }
 
 bool CertificateCollection::toFlatTextFile(const QString &fileName)
@@ -1799,7 +1820,7 @@ bool CertificateCollection::toFlatTextFile(const QString &fileName)
 
 bool CertificateCollection::toPKCS7File(const QString &fileName, const QString &provider)
 {
-	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
+	CertCollectionContext *col = get_certcollection(provider);
 
 	QList<CertContext*> cert_list;
 	QList<CRLContext*> crl_list;
@@ -1873,7 +1894,7 @@ CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileNa
 
 	QList<CertContext*> cert_list;
 	QList<CRLContext*> crl_list;
-	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
+	CertCollectionContext *col = get_certcollection(provider);
 	ConvertResult r = col->fromPKCS7(der, &cert_list, &crl_list);
 	delete col;
 
