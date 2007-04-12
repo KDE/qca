@@ -941,6 +941,7 @@ public:
 		col = qca_get_systemstore(QString());
 #endif
 		QList<Certificate> certs = col.certificates();
+		//QStringList names = makeFriendlyNames(certs);
 		QList<CRL> crls = col.crls();
 		int n;
 		for(n = 0; n < certs.count(); ++n)
@@ -948,6 +949,7 @@ public:
 			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(certs[n], storeId(0), name(0), provider());
 			//c->item_id = QString::number(n);
 			QString ename = c->makeName();
+			//QString ename = names[n];
 			QString eid = QString::number(qHash(certs[n].toDER().toByteArray()));
 			c->item_name = ename;
 			c->item_id = makeId(storeId(0), name(0), eid, ename, "cert", certs[n].toPEM());
