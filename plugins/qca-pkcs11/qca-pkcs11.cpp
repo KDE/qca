@@ -379,17 +379,27 @@ public:
 		pkcs11h_certificate_id_t pkcs11h_certificate_id,
 		RSAPublicKey pubkey
 	) : RSAContext (p) {
+		CK_RV rv;
+
 		_has_privateKeyRole = true;
 		_pkcs11h_certificate_id = NULL;
 		_pkcs11h_certificate = NULL;
-
 		_pubkey = pubkey;
 		clearSign ();
 
-		setCertificateId (pkcs11h_certificate_id);
+		if (
+			(rv = pkcs11h_certificate_duplicateCertificateId (
+				&_pkcs11h_certificate_id,
+				pkcs11h_certificate_id
+			)) != CKR_OK
+		) {
+			throw pkcs11Exception (rv, "Memory error");
+		}
 	}
 
 	pkcs11RSAKey (const pkcs11RSAKey &from) : RSAContext (from.provider ()) {
+		CK_RV rv;
+
 		_has_privateKeyRole = from._has_privateKeyRole;
 		_pkcs11h_certificate_id = NULL;
 		_pkcs11h_certificate = NULL;
@@ -398,12 +408,28 @@ public:
 		_sign_data.hash = NULL;
 		clearSign ();
 
-		setCertificateId (from._pkcs11h_certificate_id);
+		if (
+			(rv = pkcs11h_certificate_duplicateCertificateId (
+				&_pkcs11h_certificate_id,
+				from._pkcs11h_certificate_id
+			)) != CKR_OK
+		) {
+			throw pkcs11Exception (rv, "Memory error");
+		}
 	}
 
 	~pkcs11RSAKey () {
 		clearSign ();
-		freeResources ();
+
+		if (_pkcs11h_certificate != NULL) {
+			pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
+			_pkcs11h_certificate = NULL;
+		}
+
+		if (_pkcs11h_certificate_id != NULL) {
+			pkcs11h_certificate_freeCertificateId (_pkcs11h_certificate_id);
+			_pkcs11h_certificate_id = NULL;
+		}
 
 	}
 
@@ -489,6 +515,7 @@ public:
 		EncryptionAlgorithm alg
 	) {
 		bool session_locked = false;
+		bool ret = false;
 
 		try {
 			CK_MECHANISM_TYPE mech;
@@ -557,7 +584,7 @@ public:
 			}
 			session_locked = false;
 
-			return true;
+			ret = true;
 		}
 		catch (const pkcs11Exception &e) {
 			if (session_locked) {
@@ -576,9 +603,9 @@ public:
 					)
 				);
 			}
-
-			return false;
 		}
+
+		return ret;
 	}
 
 	virtual
@@ -607,6 +634,13 @@ public:
 			case EMSA1_SHA1:
 			case EMSA3_RIPEMD160:
 			default:
+				QCA_logTextMessage (
+					QString().sprintf (
+						"PKCS#11: Invalid hash algorithm %d",
+						_sign_data.alg
+					),
+					Logger::Warning
+				);
 			break;
 		}
 	}
@@ -850,37 +884,6 @@ private:
 		_sign_data.alg = SignatureUnknown;
 		delete _sign_data.hash;
 		_sign_data.hash = NULL;
-	}
-
-	void
-	freeResources () {
-		if (_pkcs11h_certificate != NULL) {
-			pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
-			_pkcs11h_certificate = NULL;
-		}
-
-		if (_pkcs11h_certificate_id != NULL) {
-			pkcs11h_certificate_freeCertificateId (_pkcs11h_certificate_id);
-			_pkcs11h_certificate_id = NULL;
-		}
-	}
-
-	void
-	setCertificateId (
-		pkcs11h_certificate_id_t pkcs11h_certificate_id
-	) {
-		CK_RV rv;
-
-		freeResources ();
-
-		if (
-			(rv = pkcs11h_certificate_duplicateCertificateId (
-				&_pkcs11h_certificate_id,
-				pkcs11h_certificate_id
-			)) != CKR_OK
-		) {
-			throw pkcs11Exception (rv, "Memory error");
-		}
 	}
 
 	void
@@ -1129,9 +1132,6 @@ public:
 		_name = from._name;
 	}
 
-	~pkcs11KeyStoreEntry() {
-	}
-
 	virtual
 	Provider::Context *
 	clone () const {
@@ -1201,7 +1201,7 @@ private:
 	) {
 		Q_UNUSED(global_data);
 
-		return 1;
+		return TRUE; //krazy:exclude=captruefalse
 	}
 
 	static
@@ -1211,7 +1211,7 @@ private:
 	) {
 		Q_UNUSED(global_data);
 
-		return 1;
+		return TRUE; //krazy:exclude=captruefalse
 	}
 
 	static
@@ -1233,7 +1233,7 @@ private:
 
 		*expiration = cert.notValidAfter ().toTime_t ();
 
-		return 1;
+		return TRUE; //krazy:exclude=captruefalse
 	}
 
 	static
@@ -1256,11 +1256,11 @@ private:
 		QString qdn = cert.subjectInfoOrdered ().toString ();
 
 		if ((size_t)qdn.length () > dn_max-1) {
-			return 0;
+			return FALSE; //krazy:exclude=captruefalse
 		}
 		else {
 			strcpy (dn, myPrintable (qdn));
-			return 1;
+			return TRUE; //krazy:exclude=captruefalse
 		}
 	}
 
@@ -1783,7 +1783,7 @@ pkcs11KeyStoreList::tokenPrompt (
 	if (user_data != NULL) {
 		QString *serialized = (QString *)user_data;
 		entry = entryPassive (QString (), *serialized);
-		storeId = entry->storeId (),
+		storeId = entry->storeId ();
 		entryId = entry->id ();
 	}
 	else {
@@ -1838,7 +1838,7 @@ pkcs11KeyStoreList::pinPrompt (
 	if (user_data != NULL) {
 		QString *serialized = (QString *)user_data;
 		entry = entryPassive (QString (), *serialized);
-		storeId = entry->storeId (),
+		storeId = entry->storeId ();
 		entryId = entry->id ();
 	}
 	else {
