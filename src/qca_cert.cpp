@@ -37,6 +37,7 @@ bool arrayFromFile(const QString &fileName, QByteArray *a);
 bool ask_passphrase(const QString &fname, void *ptr, QSecureArray *answer);
 ProviderList allProviders();
 Provider *providerForName(const QString &name);
+bool use_asker_fallback(ConvertResult r);
 
 static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 {
@@ -2038,8 +2039,7 @@ KeyBundle KeyBundle::fromArray(const QByteArray &a, const QSecureArray &passphra
 	ConvertResult r = pix->fromPKCS12(a, passphrase, &name, &list, &kc);
 
 	// error converting without passphrase?  maybe a passphrase is needed
-	// FIXME: we should only do this if we get ErrorPassphrase?
-	if(r != ConvertGood && passphrase.isEmpty())
+	if(use_asker_fallback(r) && passphrase.isEmpty())
 	{
 		QSecureArray pass;
 		if(ask_passphrase(QString(), 0, &pass))
