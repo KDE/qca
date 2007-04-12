@@ -95,6 +95,15 @@ Provider *providerForName(const QString &name)
 	return 0;
 }
 
+bool use_asker_fallback(ConvertResult r)
+{
+	// FIXME: we should only do this if we get ErrorPassphrase?
+	//if(r == ErrorPassphrase)
+	if(r != ConvertGood)
+		return true;
+	return false;
+}
+
 class Getter_GroupSet
 {
 public:
@@ -225,12 +234,34 @@ public:
 	}
 };
 
-Provider *providerForPBE(PBEAlgorithm alg)
+Provider *providerForGroupSet(DLGroupSet set)
 {
 	ProviderList pl = allProviders();
 	for(int n = 0; n < pl.count(); ++n)
 	{
-		if(Getter_PBE::getList(pl[n]).contains(alg))
+		if(Getter_GroupSet::getList(pl[n]).contains(set))
+			return pl[n];
+	}
+	return 0;
+}
+
+Provider *providerForPBE(PBEAlgorithm alg, PKey::Type ioType)
+{
+	ProviderList pl = allProviders();
+	for(int n = 0; n < pl.count(); ++n)
+	{
+		if(Getter_PBE::getList(pl[n]).contains(alg) && Getter_IOType::getList(pl[n]).contains(ioType))
+			return pl[n];
+	}
+	return 0;
+}
+
+Provider *providerForIOType(PKey::Type type)
+{
+	ProviderList pl = allProviders();
+	for(int n = 0; n < pl.count(); ++n)
+	{
+		if(Getter_IOType::getList(pl[n]).contains(type))
 			return pl[n];
 	}
 	return 0;
@@ -253,7 +284,15 @@ QList<T> getList(const QString &provider)
 	{
 		ProviderList pl = allProviders();
 		for(int n = 0; n < pl.count(); ++n)
-			list += G::getList(pl[n]);
+		{
+			QList<T> other = G::getList(pl[n]);
+			for(int k = 0; k < other.count(); ++k)
+			{
+				// only add what we don't have in the list
+				if(!list.contains(other[k]))
+					list += other[k];
+			}
+		}
 	}
 
 	return list;
@@ -418,10 +457,6 @@ DLGroup & DLGroup::operator=(const DLGroup &from)
 QList<DLGroupSet> DLGroup::supportedGroupSets(const QString &provider)
 {
 	return getList<DLGroupSet, Getter_GroupSet>(provider);
-	//DLGroupContext *c = static_cast<DLGroupContext *>(getContext("dlgroup", provider));
-	//QList<DLGroupSet> list = c->supportedGroupSets();
-	//delete c;
-	//return list;
 }
 
 bool DLGroup::isNull() const
@@ -504,19 +539,11 @@ void PKey::assignToPrivate(PKey *dest) const
 QList<PKey::Type> PKey::supportedTypes(const QString &provider)
 {
 	return getList<Type, Getter_Type>(provider);
-	//const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", provider));
-	//QList<Type> list = c->supportedTypes();
-	//delete c;
-	//return list;
 }
 
 QList<PKey::Type> PKey::supportedIOTypes(const QString &provider)
 {
 	return getList<Type, Getter_IOType>(provider);
-	//const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", provider));
-	//QList<Type> list = c->supportedIOTypes();
-	//delete c;
-	//return list;
 }
 
 bool PKey::isNull() const
@@ -738,12 +765,44 @@ bool PublicKey::verifyMessage(const QSecureArray &a, const QSecureArray &sig, Si
 
 QSecureArray PublicKey::toDER() const
 {
-	return static_cast<const PKeyContext *>(context())->publicToDER();
+	QSecureArray out;
+	Provider *p = providerForIOType(type());
+	if(!p)
+		return out;
+	const PKeyContext *cur = static_cast<const PKeyContext *>(context());
+	if(cur->provider() == p)
+	{
+		out = cur->publicToDER();
+	}
+	else
+	{
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
+		if(pk->importKey(cur->key()))
+			out = pk->publicToDER();
+		delete pk;
+	}
+	return out;
 }
 
 QString PublicKey::toPEM() const
 {
-	return static_cast<const PKeyContext *>(context())->publicToPEM();
+	QString out;
+	Provider *p = providerForIOType(type());
+	if(!p)
+		return out;
+	const PKeyContext *cur = static_cast<const PKeyContext *>(context());
+	if(cur->provider() == p)
+	{
+		out = cur->publicToPEM();
+	}
+	else
+	{
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
+		if(pk->importKey(cur->key()))
+			out = pk->publicToPEM();
+		delete pk;
+	}
+	return out;
 }
 
 bool PublicKey::toPEMFile(const QString &fileName) const
@@ -754,29 +813,11 @@ bool PublicKey::toPEMFile(const QString &fileName) const
 PublicKey PublicKey::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
 {
 	return getKey<PublicKey, Getter_PublicKey<QSecureArray>, QSecureArray>(provider, a, QSecureArray(), result);
-
-	/*PublicKey k;
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
-	ConvertResult r = c->publicFromDER(a);
-	if(result)
-		*result = r;
-	if(r == ConvertGood)
-		k.change(c);
-	return k;*/
 }
 
 PublicKey PublicKey::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
 	return getKey<PublicKey, Getter_PublicKey<QString>, QString>(provider, s, QSecureArray(), result);
-
-	/*PublicKey k;
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
-	ConvertResult r = c->publicFromPEM(s);
-	if(result)
-		*result = r;
-	if(r == ConvertGood)
-		k.change(c);
-	return k;*/
 }
 
 PublicKey PublicKey::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
@@ -871,25 +912,6 @@ SymmetricKey PrivateKey::deriveKey(const PublicKey &theirs)
 QList<PBEAlgorithm> PrivateKey::supportedPBEAlgorithms(const QString &provider)
 {
 	return getList<PBEAlgorithm, Getter_PBE>(provider);
-
-	//QList<PBEAlgorithm> list = getList<PBEAlgorithm, Getter_PBE>(provider);
-
-	// single
-	/*if(!provider.isEmpty())
-	{
-		Provider *p = providerForName(provider);
-		if(p)
-			list = getPBEList(p);
-	}
-	// all
-	else
-	{
-		ProviderList pl = allProviders();
-		for(int n = 0; n < pl.count(); ++n)
-			list += getPBEList(pl[n]);
-	}*/
-
-	//return list;
 }
 
 QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgorithm pbe) const
@@ -897,7 +919,7 @@ QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgorithm pbe)
 	QSecureArray out;
 	if(pbe == PBEDefault)
 		pbe = get_pbe_default();
-	Provider *p = providerForPBE(pbe);
+	Provider *p = providerForPBE(pbe, type());
 	if(!p)
 		return out;
 	const PKeyContext *cur = static_cast<const PKeyContext *>(context());
@@ -917,12 +939,10 @@ QSecureArray PrivateKey::toDER(const QSecureArray &passphrase, PBEAlgorithm pbe)
 
 QString PrivateKey::toPEM(const QSecureArray &passphrase, PBEAlgorithm pbe) const
 {
-	//return static_cast<const PKeyContext *>(context())->privateToPEM(passphrase, pbe);
-
 	QString out;
 	if(pbe == PBEDefault)
 		pbe = get_pbe_default();
-	Provider *p = providerForPBE(pbe);
+	Provider *p = providerForPBE(pbe, type());
 	if(!p)
 		return out;
 	const PKeyContext *cur = static_cast<const PKeyContext *>(context());
@@ -952,8 +972,7 @@ PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passph
 	out = getKey<PrivateKey, Getter_PrivateKey<QSecureArray>, QSecureArray>(provider, a, passphrase, &r);
 
 	// error converting without passphrase?  maybe a passphrase is needed
-	// FIXME: we should only do this if we get ErrorPassphrase?
-	if(r != ConvertGood && passphrase.isEmpty())
+	if(use_asker_fallback(r) && passphrase.isEmpty())
 	{
 		QSecureArray pass;
 		if(ask_passphrase(QString(), 0, &pass))
@@ -962,43 +981,6 @@ PrivateKey PrivateKey::fromDER(const QSecureArray &a, const QSecureArray &passph
 	if(result)
 		*result = r;
 	return out;
-
-	/*PrivateKey k;
-
-	// single
-	if(!provider.isEmpty())
-	{
-		Provider *p = providerForName(provider);
-		if(!p)
-			return k;
-		PKeyContext *c = static_cast<PKeyContext *>(p->createContext("pkey"));
-		if(!c)
-			return k;
-		ConvertResult r = c->privateFromDER(a, passphrase);
-		if(result)
-			*result = r;
-		if(r == ConvertGood)
-			k.change(c);
-	}
-	// all
-	else
-	{
-		ProviderList pl = allProviders();
-		for(int n = 0; n < pl.count(); ++n)
-		{
-			PKeyContext *c = static_cast<PKeyContext *>(pl[n]->createContext("pkey"));
-			if(!c)
-				continue;
-			ConvertResult r = c->privateFromDER(a, passphrase);
-			if(result)
-				*result = r;
-			if(r == ConvertGood)
-				k.change(c);
-			if(!k.isNull())
-				break;
-		}
-	}
-	return k;*/
 }
 
 PrivateKey PrivateKey::fromPEM(const QString &s, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
@@ -1008,8 +990,7 @@ PrivateKey PrivateKey::fromPEM(const QString &s, const QSecureArray &passphrase,
 	out = getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, s, passphrase, &r);
 
 	// error converting without passphrase?  maybe a passphrase is needed
-	// FIXME: we should only do this if we get ErrorPassphrase?
-	if(r != ConvertGood && passphrase.isEmpty())
+	if(use_asker_fallback(r) && passphrase.isEmpty())
 	{
 		QSecureArray pass;
 		if(ask_passphrase(QString(), 0, &pass))
@@ -1018,15 +999,6 @@ PrivateKey PrivateKey::fromPEM(const QString &s, const QSecureArray &passphrase,
 	if(result)
 		*result = r;
 	return out;
-
-	/*PrivateKey k;
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", provider));
-	ConvertResult r = c->privateFromPEM(s, passphrase);
-	if(result)
-		*result = r;
-	if(r == ConvertGood)
-		k.change(c);
-	return k;*/
 }
 
 PrivateKey PrivateKey::fromPEMFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
@@ -1230,9 +1202,15 @@ DLGroup KeyGenerator::createDLGroup(QCA::DLGroupSet set, const QString &provider
 	if(isBusy())
 		return DLGroup();
 
+	Provider *p;
+	if(!provider.isEmpty())
+		p = providerForName(provider);
+	else
+		p = providerForGroupSet(set);
+
 	d->group = DLGroup();
 	d->wasBlocking = d->blocking;
-	d->dc = static_cast<DLGroupContext *>(getContext("dlgroup", provider));
+	d->dc = static_cast<DLGroupContext *>(getContext("dlgroup", p));
 
 	if(!d->blocking)
 	{
