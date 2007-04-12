@@ -1711,27 +1711,6 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 	return pem;
 }
 
-static CertCollectionContext *get_certcollection(const QString &provider = QString())
-{
-	if(!provider.isEmpty())
-	{
-		Provider *p = providerForName(provider);
-		if(p)
-			return static_cast<CertCollectionContext *>(getContext("certcollection", p));
-	}
-	else
-	{
-		ProviderList list = allProviders();
-		foreach(Provider *p, list)
-		{
-			CertCollectionContext *c = static_cast<CertCollectionContext *>(getContext("certcollection", p));
-			if(c)
-				return c;
-		}
-	}
-	return 0;
-}
-
 class CertificateCollection::Private : public QSharedData
 {
 public:
@@ -1820,7 +1799,7 @@ bool CertificateCollection::toFlatTextFile(const QString &fileName)
 
 bool CertificateCollection::toPKCS7File(const QString &fileName, const QString &provider)
 {
-	CertCollectionContext *col = get_certcollection(provider);
+	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
 
 	QList<CertContext*> cert_list;
 	QList<CRLContext*> crl_list;
@@ -1894,7 +1873,7 @@ CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileNa
 
 	QList<CertContext*> cert_list;
 	QList<CRLContext*> crl_list;
-	CertCollectionContext *col = get_certcollection(provider);
+	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
 	ConvertResult r = col->fromPKCS7(der, &cert_list, &crl_list);
 	delete col;
 
