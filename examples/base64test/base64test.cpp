@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
 	// This does the actual conversion (encoding).
 	// You might prefer to use encoder.encode(); and have
-	// it return a QSecureArray, depending on your needs
+	// it return a QCA::SecureArray, depending on your needs
 	QString encoded = encoder.arrayToString(arg);
 
 	std::cout << arg.data() << " in base64 encoding is ";

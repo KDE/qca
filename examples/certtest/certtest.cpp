@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     QCA::Certificate cert;
     foreach (cert, certlist) {
 	std::cout << "Serial Number:";
-	// the serial number of the certificate is a QBigInteger, but we can
+	// the serial number of the certificate is a QCA::BigInteger, but we can
 	// just convert it to a string, and then output it.
 	std::cout << qPrintable(cert.serialNumber().toString()) << std::endl;
 
