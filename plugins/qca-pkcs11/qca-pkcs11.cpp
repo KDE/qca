@@ -27,7 +27,16 @@
 using namespace QCA;
 
 // qPrintable is ASCII only!!!
-#define myPrintable(s)	(s).toUtf8 ().constData ()
+#define myPrintable(s) (s).toUtf8 ().constData ()
+
+static
+inline
+QString
+certificateHash (
+	const Certificate &cert
+) {
+	return Hash ("sha1").hashToString (cert.toDER ());
+}
 
 //----------------------------------------------------------------------------
 // pkcs11Provider
@@ -272,7 +281,8 @@ private:
 	keyStoreEntryByCertificateId (
 		const pkcs11h_certificate_id_t certificate_id,
 		bool has_private,
-		const QList<Certificate> &listIssuers
+		const QList<Certificate> &listIssuers,
+		const QString &description
 	) const;
 
 	QString
@@ -1195,14 +1205,6 @@ public:
 	serialize () const {
 		return _serialized;
 	}
-
-private:
-	QString
-	certificateHash (
-		const Certificate &cert
-	) {
-		return Hash ("sha1").hashToString (cert.toDER ());
-	}
 };
 
 //----------------------------------------------------------------------------
@@ -1456,7 +1458,7 @@ pkcs11KeyStoreListContext::entryPassive (
 		bool has_private;
 		deserializeCertificateId (serialized, &certificate_id, &has_private, &listIssuers);
 
-		entry = keyStoreEntryByCertificateId (certificate_id, has_private, listIssuers);
+		entry = keyStoreEntryByCertificateId (certificate_id, has_private, listIssuers, QString ());
 	}
 	catch (const pkcs11Exception &e) {
 		s_keyStoreList->emit_diagnosticText (
@@ -1683,7 +1685,10 @@ pkcs11KeyStoreListContext::entryList (int id) {
 			if (entry->token_id != NULL) {
 				pkcs11h_certificate_id_list_t issuers = NULL;
 				pkcs11h_certificate_id_list_t current = NULL;
+				QList<Certificate> listCerts;
 				QList<Certificate> listIssuers;
+				QList<pkcs11h_certificate_id_list_t> listIds;
+				int i;
 
 				if (
 					(rv = pkcs11h_certificate_enumTokenCertificateIds (
@@ -1698,7 +1703,24 @@ pkcs11KeyStoreListContext::entryList (int id) {
 					throw pkcs11Exception (rv, "Enumerate certificates");
 				}
 
-				for (current=issuers;current!=NULL;current=current->next) {
+				for (
+					current=certs;
+					current!=NULL;
+					current=current->next
+				) {
+					listCerts += Certificate::fromDER (
+						QByteArray (
+							(char *)current->certificate_id->certificate_blob,
+							current->certificate_id->certificate_blob_size
+						)
+					);
+				}
+
+				for (
+					current=issuers;
+					current!=NULL;
+					current=current->next
+				) {
 					listIssuers += Certificate::fromDER (
 						QByteArray (
 							(char *)current->certificate_id->certificate_blob,
@@ -1707,12 +1729,24 @@ pkcs11KeyStoreListContext::entryList (int id) {
 					);
 				}
 
-				for (current=issuers;current!=NULL;current=current->next) {
+				QStringList names = makeFriendlyNames (listIssuers + listCerts);
+				QMap<QString, QString> friendlyNames;
+
+				for (i=0;i<names.size ();i++) {
+					friendlyNames.insert (certificateHash (listCerts[i]), names[i]);
+				}
+
+				for (
+					i=0, current=issuers;
+					current!=NULL;
+					i++, current=current->next
+				) {
 					try {
 						out += keyStoreEntryByCertificateId (
 							current->certificate_id,
 							false,
-							listIssuers
+							listIssuers,
+							friendlyNames[certificateHash (listIssuers[i])]
 						);
 					}
 					catch (const pkcs11Exception &e) {
@@ -1726,12 +1760,17 @@ pkcs11KeyStoreListContext::entryList (int id) {
 					}
 				}
 
-				for (current=certs;current!=NULL;current=current->next) {
+				for (
+					i=0, current=certs;
+					current!=NULL;
+					i++, current=current->next
+				) {
 					try {
 						out += keyStoreEntryByCertificateId (
 							current->certificate_id,
 							true,
-							listIssuers
+							listIssuers,
+							friendlyNames[certificateHash (listCerts[i])]
 						);
 					}
 					catch (const pkcs11Exception &e) {
@@ -1745,7 +1784,6 @@ pkcs11KeyStoreListContext::entryList (int id) {
 					}
 				}
 			}
-
 		}
 	}
 	catch (const pkcs11Exception &e) {
@@ -2022,7 +2060,8 @@ pkcs11KeyStoreEntryContext *
 pkcs11KeyStoreListContext::keyStoreEntryByCertificateId (
 	const pkcs11h_certificate_id_t certificate_id,
 	bool has_private,
-	const QList<Certificate> &listIssuers
+	const QList<Certificate> &listIssuers,
+	const QString &_description
 ) const {
 	pkcs11KeyStoreEntryContext *entry = NULL;
 
@@ -2057,13 +2096,16 @@ pkcs11KeyStoreListContext::keyStoreEntryByCertificateId (
 
 	CertificateChain chain = CertificateChain (cert).complete (listIssuers);
 
-	QString description = cert.subjectInfoOrdered ().toString () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
-
 	QString serialized = serializeCertificateId (
 		certificate_id,
 		chain,
 		has_private
 	);
+
+	QString description = _description;
+	if (description.isEmpty ()) {
+		description = cert.subjectInfoOrdered ().toString () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
+	}
 
 	if (has_private) {
 		pkcs11RSAContext *rsakey = new pkcs11RSAContext (
