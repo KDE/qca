@@ -1435,8 +1435,8 @@ static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false
 		// TODO: users of this function assume objects will also exist
 
 		// exported id
-		QString id = read_ksentry_file(name);
-		entry = QCA::KeyStoreEntry(id);
+		QString serialized = read_ksentry_file(name);
+		entry = QCA::KeyStoreEntry(serialized);
 		if(entry.isNull())
 		{
 			if(!nopassiveerror)
@@ -2379,7 +2379,7 @@ int main(int argc, char **argv)
 			QCA::KeyStoreEntry entry = get_E(args[2]);
 			if(entry.isNull())
 				return 1;
-			printf("%s", make_ksentry_string(entry.id()).toUtf8().data());
+			printf("%s", make_ksentry_string(entry.toString()).toUtf8().data());
 		}
 		else if(args[1] == "addkb")
 		{
