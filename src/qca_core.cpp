@@ -990,31 +990,30 @@ KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId)
 	return out;
 }
 
-KeyStoreEntryContext *KeyStoreListContext::entryPassive(const QString &storeId, const QString &entryId)
+KeyStoreEntryContext *KeyStoreListContext::entryPassive(const QString &serialized)
 {
-	Q_UNUSED(storeId);
-	Q_UNUSED(entryId);
+	Q_UNUSED(serialized);
 	return 0;
 }
 
-bool KeyStoreListContext::writeEntry(int, const KeyBundle &)
+QString KeyStoreListContext::writeEntry(int, const KeyBundle &)
 {
-	return false;
+	return QString();
 }
 
-bool KeyStoreListContext::writeEntry(int, const Certificate &)
+QString KeyStoreListContext::writeEntry(int, const Certificate &)
 {
-	return false;
+	return QString();
 }
 
-bool KeyStoreListContext::writeEntry(int, const CRL &)
+QString KeyStoreListContext::writeEntry(int, const CRL &)
 {
-	return false;
+	return QString();
 }
 
-PGPKey KeyStoreListContext::writeEntry(int, const PGPKey &)
+QString KeyStoreListContext::writeEntry(int, const PGPKey &)
 {
-	return PGPKey();
+	return QString();
 }
 
 bool KeyStoreListContext::removeEntry(int, const QString &)
@@ -1335,7 +1334,8 @@ public:
 	Type type;
 	Source source;
 	PasswordStyle style;
-	QString ks, kse;
+	QString ks;
+	KeyStoreEntry kse;
 	QString fname;
 	void *ptr;
 };
@@ -1384,7 +1384,7 @@ QString Event::keyStoreId() const
 	return d->ks;
 }
 
-QString Event::keyStoreEntryId() const
+KeyStoreEntry Event::keyStoreEntry() const
 {
 	return d->kse;
 }
@@ -1399,7 +1399,7 @@ void *Event::ptr() const
 	return d->ptr;
 }
 
-void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
+void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	if(!d)
 		d = new Private;
@@ -1407,7 +1407,7 @@ void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId,
 	d->source = KeyStore;
 	d->style = pstyle;
 	d->ks = keyStoreId;
-	d->kse = keyStoreEntryId;
+	d->kse = keyStoreEntry;
 	d->fname = QString();
 	d->ptr = ptr;
 }
@@ -1425,7 +1425,7 @@ void Event::setPasswordData(PasswordStyle pstyle, const QString &fileName, void 
 	d->ptr = ptr;
 }
 
-void Event::setToken(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
+void Event::setToken(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	if(!d)
 		d = new Private;
@@ -1433,7 +1433,7 @@ void Event::setToken(const QString &keyStoreId, const QString &keyStoreEntryId, 
 	d->source = KeyStore;
 	d->style = StylePassword;
 	d->ks = keyStoreId;
-	d->kse = keyStoreEntryId;
+	d->kse = keyStoreEntry;
 	d->fname = QString();
 	d->ptr = ptr;
 }
@@ -1928,10 +1928,10 @@ PasswordAsker::~PasswordAsker()
 	delete d;
 }
 
-void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
+void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	Event e;
-	e.setPasswordKeyStore(pstyle, keyStoreId, keyStoreEntryId, ptr);
+	e.setPasswordKeyStore(pstyle, keyStoreId, keyStoreEntry, ptr);
 	d->ask(e);
 }
 
@@ -1989,10 +1989,10 @@ TokenAsker::~TokenAsker()
 	delete d;
 }
 
-void TokenAsker::ask(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr)
+void TokenAsker::ask(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	Event e;
-	e.setToken(keyStoreId, keyStoreEntryId, ptr);
+	e.setToken(keyStoreId, keyStoreEntry, ptr);
 	d->ask(e);
 }
 

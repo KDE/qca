@@ -279,12 +279,12 @@ public slots:
 	}
 
 	// hack with void *
-	void *entryPassive(const QString &entryId)
+	void *entryPassive(const QString &serialized)
 	{
 		foreach(Item i, items)
 		{
 			// "is this yours?"
-			KeyStoreEntryContext *e = i.owner->entryPassive(i.storeId, entryId);
+			KeyStoreEntryContext *e = i.owner->entryPassive(serialized);
 			if(e)
 				return e;
 		}
@@ -502,13 +502,10 @@ KeyStoreEntry::KeyStoreEntry()
 {
 }
 
-KeyStoreEntry::KeyStoreEntry(const QString &id)
+KeyStoreEntry::KeyStoreEntry(const QString &serialized)
 :d(new Private)
 {
-	//KeyStoreEntryContext *c = (KeyStoreEntryContext *)qVariantValue<void*>(trackercall("entryPassive", QVariantList() << id));
-	KeyStoreEntryContext *c = (KeyStoreEntryContext *)KeyStoreTracker::instance()->entryPassive(id);
-	if(c)
-		change(c);
+	*this = fromString(serialized);
 }
 
 KeyStoreEntry::KeyStoreEntry(const KeyStoreEntry &from)
@@ -566,6 +563,21 @@ QString KeyStoreEntry::storeName() const
 QString KeyStoreEntry::storeId() const
 {
 	return static_cast<const KeyStoreEntryContext *>(context())->storeId();
+}
+
+QString KeyStoreEntry::toString() const
+{
+	return static_cast<const KeyStoreEntryContext *>(context())->serialize();
+}
+
+KeyStoreEntry KeyStoreEntry::fromString(const QString &serialized)
+{
+	KeyStoreEntry e;
+	//KeyStoreEntryContext *c = (KeyStoreEntryContext *)qVariantValue<void*>(trackercall("entryPassive", QVariantList() << id));
+	KeyStoreEntryContext *c = (KeyStoreEntryContext *)KeyStoreTracker::instance()->entryPassive(serialized);
+	if(c)
+		e.change(c);
+	return e;
 }
 
 KeyBundle KeyStoreEntry::keyBundle() const
@@ -790,32 +802,32 @@ bool KeyStore::holdsPGPPublicKeys() const
 	return false;
 }
 
-bool KeyStore::writeEntry(const KeyBundle &kb)
+QString KeyStore::writeEntry(const KeyBundle &kb)
 {
 	// TODO
 	Q_UNUSED(kb);
-	return false;
+	return QString();
 }
 
-bool KeyStore::writeEntry(const Certificate &cert)
+QString KeyStore::writeEntry(const Certificate &cert)
 {
 	// TODO
 	Q_UNUSED(cert);
-	return false;
+	return QString();
 }
 
-bool KeyStore::writeEntry(const CRL &crl)
+QString KeyStore::writeEntry(const CRL &crl)
 {
 	// TODO
 	Q_UNUSED(crl);
-	return false;
+	return QString();
 }
 
-PGPKey KeyStore::writeEntry(const PGPKey &key)
+QString KeyStore::writeEntry(const PGPKey &key)
 {
 	// TODO
 	Q_UNUSED(key);
-	return PGPKey();
+	return QString();
 }
 
 bool KeyStore::removeEntry(const QString &id)

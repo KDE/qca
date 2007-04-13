@@ -168,7 +168,6 @@ class MyKeyStoreEntry : public KeyStoreEntryContext
 public:
 	KeyStoreEntry::Type item_type;
 	PGPKey pub, sec;
-	QString _id;
 	QString _storeId, _storeName;
 
 	MyKeyStoreEntry(const PGPKey &_pub, const PGPKey &_sec, Provider *p) : KeyStoreEntryContext(p)
@@ -206,7 +205,7 @@ public:
 
 	virtual QString id() const
 	{
-		return _id;
+		return pub.keyId();
 	}
 
 	virtual QString storeId() const
@@ -229,12 +228,12 @@ public:
 		return pub;
 	}
 
-	void makeId()
+	virtual QString serialize() const
 	{
 		QStringList out;
 		out += escape_string("qca-gnupg-1");
 		out += escape_string(pub.keyId());
-		_id = out.join(":");
+		return out.join(":");
 	}
 };
 
@@ -477,18 +476,15 @@ public:
 			MyKeyStoreEntry *c = new MyKeyStoreEntry(pub, sec, provider());
 			c->_storeId = storeId(0);
 			c->_storeName = name(0);
-			c->makeId();
 			out.append(c);
 		}
 
 		return out;
 	}
 
-	virtual KeyStoreEntryContext *entryPassive(const QString &_storeId, const QString &entryId)
+	virtual KeyStoreEntryContext *entryPassive(const QString &serialized)
 	{
-		Q_UNUSED(_storeId);
-
-		QStringList parts = entryId.split(':');
+		QStringList parts = serialized.split(':');
 		if(parts.count() < 2)
 			return 0;
 		if(unescape_string(parts[0]) != "qca-gnupg-1")
@@ -559,7 +555,6 @@ public:
 		MyKeyStoreEntry *c = new MyKeyStoreEntry(pub, sec, provider());
 		c->_storeId = storeId(0);
 		c->_storeName = name(0);
-		c->_id = entryId;
 		return c;
 	}
 
@@ -821,8 +816,14 @@ public:
 				QStringList out;
 				out += escape_string("qca-gnupg-1");
 				out += escape_string(keyId);
-				QString entryId = out.join(":");
-				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), entryId, 0);
+				QString serialized = out.join(":");
+
+				KeyStoreEntry kse;
+				KeyStoreEntryContext *c = keyStoreList->entryPassive(serialized);
+				if(c)
+					kse.change(c);
+
+				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), kse, 0);
 				asker.waitForResponse();
 				global_gpg = &gpg;
 				keyStoreList->submitPassphrase(0, 0, asker.password());

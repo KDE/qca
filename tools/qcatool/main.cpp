@@ -225,7 +225,7 @@ private slots:
 			if(e.source() == QCA::Event::KeyStore)
 			{
 				QString name;
-				QCA::KeyStoreEntry entry(e.keyStoreEntryId());
+				QCA::KeyStoreEntry entry = e.keyStoreEntry();
 				if(!entry.isNull())
 				{
 					name = entry.name();
@@ -257,7 +257,7 @@ private slots:
 		}
 		else if(e.type() == QCA::Event::Token)
 		{
-			QCA::KeyStoreEntry entry(e.keyStoreEntryId());
+			QCA::KeyStoreEntry entry = e.keyStoreEntry();
 			QString name;
 			if(!entry.isNull())
 			{
@@ -2401,7 +2401,7 @@ int main(int argc, char **argv)
 			if(cert.isNull())
 				return 1;
 
-			if(store.writeEntry(cert))
+			if(!store.writeEntry(cert).isEmpty())
 				printf("Entry written.\n");
 			else
 			{
@@ -2429,7 +2429,7 @@ int main(int argc, char **argv)
 			if(pub.isNull())
 				return 1;
 
-			if(!store.writeEntry(pub).isNull())
+			if(!store.writeEntry(pub).isEmpty())
 				printf("Entry written.\n");
 			else
 			{

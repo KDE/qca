@@ -783,6 +783,7 @@ public:
 	QString item_id, _storeId, _storeName;
 	Certificate _cert;
 	CRL _crl;
+	QString item_save;
 
 	QString item_name;
 
@@ -862,6 +863,11 @@ public:
 	virtual CRL crl() const
 	{
 		return _crl;
+	}
+
+	virtual QString serialize() const
+	{
+		return item_save;
 	}
 };
 
@@ -952,7 +958,8 @@ public:
 			//QString ename = names[n];
 			QString eid = QString::number(qHash(certs[n].toDER().toByteArray()));
 			c->item_name = ename;
-			c->item_id = makeId(storeId(0), name(0), eid, ename, "cert", certs[n].toPEM());
+			c->item_id = eid;
+			c->item_save = makeId(storeId(0), name(0), eid, ename, "cert", certs[n].toPEM());
 			out.append(c);
 		}
 		for(n = 0; n < crls.count(); ++n)
@@ -961,7 +968,8 @@ public:
 			QString ename = c->makeName();
 			QString eid = QString::number(qHash(certs[n].toDER().toByteArray()));
 			c->item_name = ename;
-			c->item_id = makeId(storeId(0), name(0), eid, ename, "crl", crls[n].toPEM());
+			c->item_id = eid;
+			c->item_save = makeId(storeId(0), name(0), eid, ename, "crl", crls[n].toPEM());
 			out.append(c);
 		}
 
@@ -969,11 +977,10 @@ public:
 	}
 
 	// TODO
-	virtual KeyStoreEntryContext *entryPassive(const QString &_storeId, const QString &entryId)
+	virtual KeyStoreEntryContext *entryPassive(const QString &serialized)
 	{
-		Q_UNUSED(_storeId);
 		QString storeId, storeName, eid, ename, etype, pem;
-		if(parseId(entryId, &storeId, &storeName, &eid, &ename, &etype, &pem))
+		if(parseId(serialized, &storeId, &storeName, &eid, &ename, &etype, &pem))
 		{
 			if(etype == "cert")
 			{
@@ -983,6 +990,7 @@ public:
 				DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(cert, storeId, storeName, provider());
 				c->item_name = ename;
 				c->item_id = eid;
+				c->item_save = serialized;
 				return c;
 			}
 			else if(etype == "crl")
@@ -993,6 +1001,7 @@ public:
 				DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(crl, storeId, storeName, provider());
 				c->item_name = ename;
 				c->item_id = eid;
+				c->item_save = serialized;
 				return c;
 			}
 		}

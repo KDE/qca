@@ -68,6 +68,7 @@ namespace QCA
 	class CertificateCollection;
 	class Global;
 	class KeyStore;
+	class KeyStoreEntry;
 	class KeyStoreManager;
 	class Logger;
 
@@ -1102,7 +1103,7 @@ namespace QCA
 
 		    \sa source()
 		    \sa fileName() for the name, if source is Event::Data
-		    \sa keyStoreId() and keyStoreEntryId for the keystore and entry, if
+		    \sa keyStoreId() and keyStoreEntry() for the keystore and entry, if
 		    the source is Event::KeyStore
 		*/
 		enum Source
@@ -1182,11 +1183,11 @@ namespace QCA
 		QString keyStoreId() const;
 
 		/**
-		   The id of the KeyStoreEntry associated with this event
+		   The KeyStoreEntry associated with this event
 
 		   This is not meaningful unless the Source is KeyStore.
 		*/
-		QString keyStoreEntryId() const;
+		KeyStoreEntry keyStoreEntry() const;
 
 		/**
 		   Name or other identifier for the file or byte array
@@ -1208,10 +1209,10 @@ namespace QCA
 
 		   \param pstyle the style of information required (e.g. PIN, password or passphrase)
 		   \param keyStoreId the keystore that the information is required for
-		   \param keyStoreEntryId the entry in the keystore that the information is required for
+		   \param keyStoreEntry the entry in the keystore that the information is required for
 		   \param ptr opaque data
 		*/
-		void setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+		void setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 		/**
 		   Set the values for this Event
@@ -1230,10 +1231,10 @@ namespace QCA
 		   This creates a Token type event.
 		   
 		   \param keyStoreId the keystore that the token is required for
-		   \param keyStoreEntryId the entry in the keystore that the token is required for
+		   \param keyStoreEntry the entry in the keystore that the token is required for
 		   \param ptr opaque data
 		*/
-		void setToken(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+		void setToken(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 	private:
 		class Private;
@@ -1343,10 +1344,10 @@ namespace QCA
 		   
 		   \param pstyle the type of information required (e.g. PIN, passphrase or password)
 		   \param keyStoreId the key store that the information is required for
-		   \param keyStoreEntryId the item in the key store that the information is required for (if applicable)
+		   \param keyStoreEntry the item in the key store that the information is required for (if applicable)
 		   \param ptr opaque data
 		*/
-		void ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+		void ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 		/**
 		   queue a password / passphrase request associated with a file
@@ -1423,10 +1424,10 @@ namespace QCA
 		   queue a token request associated with a key store
 		   
 		   \param keyStoreId the key store that the information is required for
-		   \param keyStoreEntryId the item in the key store that the information is required for (if applicable)
+		   \param keyStoreEntry the item in the key store that the information is required for (if applicable)
 		   \param ptr opaque data
 		*/
-		void ask(const QString &keyStoreId, const QString &keyStoreEntryId, void *ptr);
+		void ask(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 		/**
 		   Cancel the pending password / passphrase request

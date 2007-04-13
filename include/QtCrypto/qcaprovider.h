@@ -380,6 +380,7 @@ public:
 	virtual QString name() const = 0;
 	virtual QString storeId() const = 0;
 	virtual QString storeName() const = 0;
+	virtual QString serialize() const = 0;
 
 	virtual KeyBundle keyBundle() const;
 	virtual Certificate certificate() const;
@@ -420,13 +421,13 @@ public:
 	// return 0 if no such entry
 	virtual KeyStoreEntryContext *entry(int id, const QString &entryId);
 
-	// return 0 if the provider doesn't handle this type of storeId
-	virtual KeyStoreEntryContext *entryPassive(const QString &storeId, const QString &entryId);
+	// return 0 if the provider doesn't handle or understand the string
+	virtual KeyStoreEntryContext *entryPassive(const QString &serialized);
 
-	virtual bool writeEntry(int id, const KeyBundle &kb);
-	virtual bool writeEntry(int id, const Certificate &cert);
-	virtual bool writeEntry(int id, const CRL &crl);
-	virtual PGPKey writeEntry(int id, const PGPKey &key);
+	virtual QString writeEntry(int id, const KeyBundle &kb);
+	virtual QString writeEntry(int id, const Certificate &cert);
+	virtual QString writeEntry(int id, const CRL &crl);
+	virtual QString writeEntry(int id, const PGPKey &key);
 	virtual bool removeEntry(int id, const QString &entryId);
 
 	virtual void submitPassphrase(int id, int requestId, const QSecureArray &passphrase);
