@@ -6223,7 +6223,7 @@ public:
 	}
 };
 
-class opensslPlugin : public QCAPlugin
+class opensslPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QCAPlugin)

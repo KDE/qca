@@ -458,7 +458,7 @@ private:
 
 };
 
-class botanPlugin : public QCAPlugin
+class botanPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QCAPlugin)

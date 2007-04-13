@@ -895,7 +895,7 @@ using namespace saslQCAPlugin;
 // saslPlugin
 //----------------------------------------------------------------------------
 
-class saslPlugin : public QCAPlugin
+class saslPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QCAPlugin)

@@ -1001,7 +1001,7 @@ public:
 	}
 };
 
-class gnupgPlugin : public QCAPlugin
+class gnupgPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QCAPlugin)

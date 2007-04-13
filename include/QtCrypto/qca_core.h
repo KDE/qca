@@ -431,6 +431,7 @@ namespace QCA
 				l->logBinaryMessage (blob, s); \
 			} \
 		} while (false)
+
 	/**
 	   Test if QCA can access the root CA certificates
 

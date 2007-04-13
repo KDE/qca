@@ -497,7 +497,7 @@ public:
     }
 };
 
-class nssPlugin : public QCAPlugin
+class nssPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES( QCAPlugin )

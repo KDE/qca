@@ -33,10 +33,10 @@
 
 #include <limits>
 
-class QCA_EXPORT QCAPlugin : public QObject
+class QCA_EXPORT QCAPlugin
 {
-	Q_OBJECT
 public:
+	virtual ~QCAPlugin() {}
 	virtual QCA::Provider *createProvider() = 0;
 };
 

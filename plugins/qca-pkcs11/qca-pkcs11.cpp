@@ -2812,7 +2812,7 @@ pkcs11Provider::pinPromptHook (
 	return ret; //krazy:exclude=captruefalse
 }
 
-class pkcs11Plugin : public QCAPlugin
+class pkcs11Plugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QCAPlugin)

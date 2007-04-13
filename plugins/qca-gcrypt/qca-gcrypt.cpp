@@ -574,7 +574,7 @@ public:
     }
 };
 
-class gcryptPlugin : public QCAPlugin
+class gcryptPlugin : public QObject, public QCAPlugin
 {
     Q_OBJECT
     Q_INTERFACES(QCAPlugin)
