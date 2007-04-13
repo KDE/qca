@@ -1852,6 +1852,11 @@ pkcs11KeyStoreListContext::tokenPrompt (
 		ret = true;
 	}
 
+	if (context != NULL) {
+		delete context;
+		context = NULL;
+	}
+
 	QCA_logTextMessage (
 		QString ().sprintf (
 			"pkcs11KeyStoreListContext::tokenPrompt - return ret=%d",
@@ -1907,6 +1912,11 @@ pkcs11KeyStoreListContext::pinPrompt (
 	if (asker.accepted ()) {
 		ret = true;
 		pin = asker.password ();
+	}
+
+	if (context != NULL) {
+		delete context;
+		context = NULL;
 	}
 
 	QCA_logTextMessage (
