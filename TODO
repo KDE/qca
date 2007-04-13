@@ -7,8 +7,6 @@
   Change Doxyfile config to capture whole API, and to generate Latex manual.
 
 * beta4
-  api:
-    QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
     keystore async mode
     keystore watcher
@@ -32,6 +30,7 @@
     alon: convertToPublic should return a publickey rather than clone?
     reporting diagnostic text at the provider level?
     document which functions might cause a synchronous asker?
+    async console prompter
   code:
     qca-cyrus-sasl:
       there's a problem where we can create the provider, and not create
@@ -53,6 +52,8 @@
     dirwatch: test on all platforms
     proper parenting of all objects
     qcatool TODOs
+  other:
+    update the rootcerts with mozcerts
 
 * Considerations
   api:
@@ -60,7 +61,7 @@
     give all classes non-default ctors/dtors/copy/op=, and dpointers?
     add more "getters" to the library?
     don't forget to QCA_EXPORT everything
-    it's possible we use QSecureArray in some unnecessary places
+    it's possible we use SecureArray in some unnecessary places
   other:
     add more asserts
     standardize on count() vs size() when iterating?
