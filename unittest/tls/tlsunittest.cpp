@@ -54,7 +54,8 @@ void TLSUnitTest::testCipherList()
     if(!QCA::isSupported("tls", "qca-openssl"))
 	QWARN("TLS not supported for qca-openssl");
     else {
-	QStringList cipherList = QCA::TLS::supportedCipherSuites(QCA::TLS::TLS_v1, "qca-openssl");
+	QCA::TLS *tls = new QCA::TLS(QCA::TLS::Stream, 0, "qca-openssl");
+	QStringList cipherList = tls->supportedCipherSuites(QCA::TLS::TLS_v1);
 	QVERIFY( cipherList.contains("TLS_DHE_RSA_WITH_AES_256_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_DHE_DSS_WITH_AES_256_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_AES_256_CBC_SHA") );
@@ -82,7 +83,7 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5") );
 	QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_RC4_40_MD5") );
 
-	cipherList = QCA::TLS::supportedCipherSuites(QCA::TLS::SSL_v3, "qca-openssl");
+	cipherList = tls->supportedCipherSuites(QCA::TLS::SSL_v3);
 	QVERIFY( cipherList.contains("SSL_DHE_RSA_WITH_AES_256_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_AES_256_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_AES_256_CBC_SHA") );
@@ -110,7 +111,7 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5") );
 	QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC4_40_MD5") );
 
-	cipherList = QCA::TLS::supportedCipherSuites(QCA::TLS::SSL_v2, "qca-openssl");
+	cipherList = tls->supportedCipherSuites(QCA::TLS::SSL_v2);
 	QVERIFY( cipherList.contains("SSL_CK_DES_192_EDE3_CBC_WITH_MD5") );
 	QVERIFY( cipherList.contains("SSL_CK_RC4_128_EXPORT40_WITH_MD5") );
 	QVERIFY( cipherList.contains("SSL_CK_RC2_128_CBC_WITH_MD5") );
