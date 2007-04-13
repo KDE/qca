@@ -1832,9 +1832,9 @@ pkcs11KeyStoreListContext::tokenPrompt (
 
 	if (user_data != NULL) {
 		QString *serialized = (QString *)user_data;
-		entry = KeyStoreEntry::fromString (*serialized);
 		context = entryPassive (*serialized);
 		storeId = context->storeId ();
+		entry.change (context);
 	}
 	else {
 		registerTokenId (token_id);
@@ -1887,9 +1887,9 @@ pkcs11KeyStoreListContext::pinPrompt (
 
 	if (user_data != NULL) {
 		QString *serialized = (QString *)user_data;
-		entry = KeyStoreEntry::fromString (*serialized);
 		context = entryPassive (*serialized);
 		storeId = context->storeId ();
+		entry.change (context);
 	}
 	else {
 		registerTokenId (token_id);
