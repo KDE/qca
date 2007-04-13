@@ -2264,7 +2264,7 @@ pkcs11KeyStoreListContext::serializeCertificateId (
 	buf.resize ((int)len);
 
 	serialized = QString ().sprintf (
-		"qca-pkcs11/%s/%d/",
+		"qca-pkcs11/0/%s/%d/",
 		myPrintable(escapeString (QString::fromUtf8 (buf))),
 		has_private ? 1 : 0
 	);
@@ -2326,6 +2326,10 @@ pkcs11KeyStoreListContext::deserializeCertificateId (
 
 		if (list[n++] != "qca-pkcs11") {
 			throw pkcs11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+		}
+
+		if (list[n++].toInt () != 0) {
+			throw pkcs11Exception (CKR_FUNCTION_FAILED, "Invalid serialization version");
 		}
 
 		if (
