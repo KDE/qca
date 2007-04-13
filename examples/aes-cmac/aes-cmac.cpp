@@ -36,10 +36,10 @@ public:
 
     // Helper to left shift an arbitrary length array
     // This is heavily based on the example in the I-D.
-    QSecureArray leftShift(const QSecureArray &array)
+    QCA::SecureArray leftShift(const QCA::SecureArray &array)
     {
 	// We create an output of the same size as the input
-	QSecureArray out(array.size());
+	QCA::SecureArray out(array.size());
 	// We handle one byte at a time - this is the high bit
 	// from the previous byte.
 	int overflow = 0;
@@ -59,14 +59,14 @@ public:
 
 
     // Helper to XOR two arrays - must be same length
-    QSecureArray xorArray(const QSecureArray &array1,
-			  const QSecureArray &array2)
+    QCA::SecureArray xorArray(const QCA::SecureArray &array1,
+			  const QCA::SecureArray &array2)
     {
 	if (array1.size() != array2.size())
 	    // empty array
-	    return QSecureArray();
+	    return QCA::SecureArray();
 
-	QSecureArray result(array1.size());
+	QCA::SecureArray result(array1.size());
 
 	for (int i = 0; i < array1.size(); ++i)
 	    result[i] = array1[i] ^ array2[i];
@@ -84,18 +84,18 @@ public:
 
 	m_key = key;
 	// Generate the subkeys
-	QSecureArray const_Zero(16);
-	QSecureArray const_Rb(16);
+	QCA::SecureArray const_Zero(16);
+	QCA::SecureArray const_Rb(16);
 	const_Rb[15] = (char)0x87;
 
 	m_X = const_Zero;
-	m_residual = QSecureArray();
+	m_residual = QCA::SecureArray();
 
 	// Figure 2.2, step 1.
 	QCA::Cipher aesObj(QString("aes128"),
 			   QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			   QCA::Encode, key);
-	QSecureArray L = aesObj.process(const_Zero);
+	QCA::SecureArray L = aesObj.process(const_Zero);
 
 	// Figure 2.2, step 2
 	if (0 == (L[0] & 0x80))
@@ -127,15 +127,15 @@ public:
 
     // This is a bit different to the way the I-D does it,
     // to allow for multiple update() calls.
-    void update(const QSecureArray &a)
+    void update(const QCA::SecureArray &a)
     {
-	QSecureArray bytesToProcess = m_residual + a;
+	QCA::SecureArray bytesToProcess = m_residual + a;
 	int blockNum;
 	// note that we don't want to do the last full block here, because
 	// it needs special treatment in final().
 	for (blockNum = 0; blockNum < ((bytesToProcess.size()-1)/16); ++blockNum) {
 	    // copy a block of data
-	    QSecureArray thisBlock(16);
+	    QCA::SecureArray thisBlock(16);
 	    for (int yalv = 0; yalv < 16; ++yalv)
 		thisBlock[yalv] = bytesToProcess[blockNum*16 + yalv];
 
@@ -154,9 +154,9 @@ public:
 	    m_residual[yalv] = bytesToProcess[blockNum*16 + yalv];
     }
 
-    void final( QSecureArray *out)
+    void final( QCA::SecureArray *out)
     {
-	QSecureArray lastBlock;
+	QCA::SecureArray lastBlock;
 	int numBytesLeft = m_residual.size();
 
 	if ( numBytesLeft != 16 ) {
@@ -178,18 +178,18 @@ public:
 
 protected:
     // first subkey
-    QSecureArray m_k1;
+    QCA::SecureArray m_k1;
     // second subkey
-    QSecureArray m_k2;
+    QCA::SecureArray m_k2;
     // main key
-    QSecureArray m_key;
+    QCA::SecureArray m_key;
 
     // state
-    QSecureArray m_X;
-    QSecureArray m_Y;
+    QCA::SecureArray m_X;
+    QCA::SecureArray m_Y;
 
     // partial block that we can't do yet
-    QSecureArray m_residual;
+    QCA::SecureArray m_residual;
 };
 
 class ClientSideProvider : public QCA::Provider
@@ -272,11 +272,11 @@ int main(int argc, char **argv)
 	// set the MAC to use the key
 	cmacObject.setup(key);
 
-	QSecureArray message = QCA::hexToArray("6bc1bee22e409f96e93d7e117393172a"
+	QCA::SecureArray message = QCA::hexToArray("6bc1bee22e409f96e93d7e117393172a"
 					       "ae2d8a571e03ac9c9eb76fac45af8e51"
 					       "30c81c46a35ce411e5fbc1191a0a52ef"
 					       "f69f2445df4f9b17ad2b417be66c3710");
-	QSecureArray message1(message);
+	QCA::SecureArray message1(message);
 	message1.resize(0);
 	qDebug();
 	qDebug() << "Message1: " << QCA::arrayToHex(message1);
@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message1));
 
 	cmacObject.clear();
-	QSecureArray message2(message);
+	QCA::SecureArray message2(message);
 	message2.resize(16);
 	qDebug();
 	qDebug() << "Message2: " << QCA::arrayToHex(message2);
@@ -292,7 +292,7 @@ int main(int argc, char **argv)
 	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message2));
 
 	cmacObject.clear();
-	QSecureArray message3(message);
+	QCA::SecureArray message3(message);
 	message3.resize(40);
 	qDebug();
 	qDebug() << "Message3: " << QCA::arrayToHex(message3);
@@ -300,7 +300,7 @@ int main(int argc, char **argv)
 	qDebug() << "AES-CMAC  " << QCA::arrayToHex(cmacObject.process(message3));
 
 	cmacObject.clear();
-	QSecureArray message4(message);
+	QCA::SecureArray message4(message);
 	message4.resize(64);
 	qDebug();
 	qDebug() << "Message4: " << QCA::arrayToHex(message4);

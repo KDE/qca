@@ -60,7 +60,7 @@ void SymmetricKeyUnitTest::test1()
     QCOMPARE( randomKey.size(),10 );
 
     QByteArray byteArray(10, 'c');
-    QSecureArray secureArray( byteArray );
+    QCA::SecureArray secureArray( byteArray );
     QCA::SymmetricKey keyArray = secureArray;
     QCOMPARE( secureArray.size(), 10 );
     QCOMPARE( keyArray.size(), secureArray.size() );

@@ -56,9 +56,9 @@ int byte2unsigned ( int byteValue )
 
 }
 
-QString qca_md5crypt( const QSecureArray &password, const QSecureArray &salt )
+QString qca_md5crypt( const QCA::SecureArray &password, const QCA::SecureArray &salt )
 {
-    QSecureArray finalState, magic_string = "$1$";
+    QCA::SecureArray finalState, magic_string = "$1$";
 
     // The md5crypt algorithm uses two separate hashes
     QCA::Hash hash1( "md5" );
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
 
-    QSecureArray password, salt;
+    QCA::SecureArray password, salt;
 
     QCoreApplication app ( argc, argv );
 

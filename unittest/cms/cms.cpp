@@ -120,7 +120,7 @@ void CMSut::xcrypt()
 	    QCOMPARE( encryptedResult2.isEmpty(), false );
 
 	    QCA::ConvertResult res;
-	    QSecureArray passPhrase = "start";
+	    QCA::SecureArray passPhrase = "start";
 	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &res );
 	    QCOMPARE( res, QCA::ConvertGood );
 
@@ -180,7 +180,7 @@ void CMSut::signverify()
 	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit() );
 	else {
 	    QCA::ConvertResult res;
-	    QSecureArray passPhrase = "start";
+	    QCA::SecureArray passPhrase = "start";
 	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &res, provider );
 	    QCOMPARE( res, QCA::ConvertGood );
 
@@ -312,7 +312,7 @@ void CMSut::signverify_message()
 	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit() );
 	else {
 	    QCA::ConvertResult res;
-	    QSecureArray passPhrase = "start";
+	    QCA::SecureArray passPhrase = "start";
 	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &res, provider );
 	    QCOMPARE( res, QCA::ConvertGood );
 
@@ -430,7 +430,7 @@ void CMSut::signverify_message_invalid()
 	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit() );
 	else {
 	    QCA::ConvertResult res;
-	    QSecureArray passPhrase = "start";
+	    QCA::SecureArray passPhrase = "start";
 	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &res, provider );
 	    QCOMPARE( res, QCA::ConvertGood );
 

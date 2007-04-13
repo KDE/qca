@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     // Read in a private key
     QCA::PrivateKey privKey;
     QCA::ConvertResult convRes;
-    QSecureArray passPhrase = "start";
+    QCA::SecureArray passPhrase = "start";
     privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &convRes );
     if ( convRes != QCA::ConvertGood ) {
 	qWarning() << "Sorry, could not import Private Key";
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 	return 1;
     }
 
-    QSecureArray plainTextResult = msg2.read();
+    QCA::SecureArray plainTextResult = msg2.read();
 
     qDebug() << enc.arrayToString( cipherText )
 	     << " (in base 64) decrypts to: "

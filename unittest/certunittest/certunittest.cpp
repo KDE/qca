@@ -122,7 +122,7 @@ void CertUnitTest::CAcertstest()
 	    QCOMPARE( ca1.isCA(), true );
 	    QCOMPARE( ca1.isSelfSigned(), true );
 
-	    QCOMPARE( ca1.serialNumber(), QBigInteger(0) );
+	    QCOMPARE( ca1.serialNumber(), QCA::BigInteger(0) );
 
 	    QCOMPARE( ca1.commonName(), QString("For Tests Only") );
 
@@ -174,7 +174,7 @@ void CertUnitTest::qualitysslcatest()
 
 	    QCOMPARE( ca1.signatureAlgorithm(), QCA::EMSA3_SHA1 );
 
-	    QCOMPARE( ca1.serialNumber(), QBigInteger("33555098") );
+	    QCOMPARE( ca1.serialNumber(), QCA::BigInteger("33555098") );
 
 	    QCOMPARE( ca1.commonName(), QString("Comodo Class 3 Security Services CA") );
 
@@ -223,7 +223,7 @@ void CertUnitTest::checkExpiredClientCerts()
 	    QCOMPARE( client1.isCA(), false );
 	    QCOMPARE( client1.isSelfSigned(), false );
 
-	    QCOMPARE( client1.serialNumber(), QBigInteger(2) );
+	    QCOMPARE( client1.serialNumber(), QCA::BigInteger(2) );
 
 	    QCOMPARE( client1.commonName(), QString("Insecure User Test Cert") );
 
@@ -298,7 +298,7 @@ void CertUnitTest::checkExpiredClientCerts()
 	    QCOMPARE( client1.validate( trusted, untrusted, QCA::UsageTimeStamping ), QCA::ErrorExpired );
 	    QCOMPARE( client1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ErrorExpired );
 	    QCOMPARE( client1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorExpired );
-	    QSecureArray derClient1 = client1.toDER();
+	    QCA::SecureArray derClient1 = client1.toDER();
 	    QCOMPARE( derClient1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derClient1, &resultClient1, provider );
 	    QCOMPARE( resultClient1, QCA::ConvertGood );
@@ -331,7 +331,7 @@ void CertUnitTest::checkClientCerts()
 	    QCOMPARE( client2.isCA(), false );
 	    QCOMPARE( client2.isSelfSigned(), false );
 
-	    QCOMPARE( client2.serialNumber(), QBigInteger(4) );
+	    QCOMPARE( client2.serialNumber(), QCA::BigInteger(4) );
 
 	    QCOMPARE( client2.commonName(), QString("Insecure User Test Cert") );
 
@@ -406,7 +406,7 @@ void CertUnitTest::checkClientCerts()
 	    QCOMPARE( client2.validate( trusted, untrusted, QCA::UsageTimeStamping ), QCA::ErrorInvalidPurpose );
 	    QCOMPARE( client2.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ValidityGood );
 	    QCOMPARE( client2.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorInvalidPurpose );
-	    QSecureArray derClient2 = client2.toDER();
+	    QCA::SecureArray derClient2 = client2.toDER();
 	    QCOMPARE( derClient2.isEmpty(), false );
 	    QCA::Certificate fromDer2 = QCA::Certificate::fromDER( derClient2, &resultClient2, provider );
 	    QCOMPARE( resultClient2, QCA::ConvertGood );
@@ -436,7 +436,7 @@ void CertUnitTest::derCAcertstest()
             QVERIFY(f.open(QFile::ReadOnly));
             QByteArray der = f.readAll();
             QCA::ConvertResult resultca1;
-            QCA::Certificate ca1 = QCA::Certificate::fromDER( QSecureArray(der),
+            QCA::Certificate ca1 = QCA::Certificate::fromDER( QCA::SecureArray(der),
                                                               &resultca1,
                                                               provider);
 
@@ -449,7 +449,7 @@ void CertUnitTest::derCAcertstest()
 
             QCOMPARE( ca1.isSelfSigned(), true );
 
-            QCOMPARE( ca1.serialNumber(), QBigInteger(0) );
+            QCOMPARE( ca1.serialNumber(), QCA::BigInteger(0) );
 
             QCOMPARE( ca1.commonName(), QString("For Tests Only") );
 
@@ -513,7 +513,7 @@ void CertUnitTest::altName()
 	    QCOMPARE( client1.isCA(), false );
 	    QCOMPARE( client1.isSelfSigned(), false );
 
-	    QCOMPARE( client1.serialNumber(), QBigInteger(1) );
+	    QCOMPARE( client1.serialNumber(), QCA::BigInteger(1) );
 
 	    QCOMPARE( client1.commonName(), QString("Valid RFC822 nameConstraints EE Certificate Test21") );
 
@@ -589,7 +589,7 @@ void CertUnitTest::extXMPP()
 	    QCOMPARE( client1.isCA(), false );
 	    QCOMPARE( client1.isSelfSigned(), true );
 
-	    QCOMPARE( client1.serialNumber(), QBigInteger("9635301556349760241") );
+	    QCOMPARE( client1.serialNumber(), QCA::BigInteger("9635301556349760241") );
 
 	    QCOMPARE( client1.commonName(), QString("demo.jabber.com") );
 
@@ -631,7 +631,7 @@ void CertUnitTest::altNames76()
             QCOMPARE( client1.isCA(), false );
             QCOMPARE( client1.isSelfSigned(), false );
 
-            QCOMPARE( client1.serialNumber(), QBigInteger(118) );
+            QCOMPARE( client1.serialNumber(), QCA::BigInteger(118) );
 
             QCOMPARE( client1.commonName(), QString("sip1.su.se") );
 
@@ -726,7 +726,7 @@ void CertUnitTest::checkExpiredServerCerts()
 	    QCOMPARE( server1.isCA(), false );
 	    QCOMPARE( server1.isSelfSigned(), false );
 
-	    QCOMPARE( server1.serialNumber(), QBigInteger(4) );
+	    QCOMPARE( server1.serialNumber(), QCA::BigInteger(4) );
 
 	    QCOMPARE( server1.commonName(), QString("Insecure Server Cert") );
 
@@ -802,7 +802,7 @@ void CertUnitTest::checkExpiredServerCerts()
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ErrorExpired );
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorExpired );
 
-	    QSecureArray derServer1 = server1.toDER();
+	    QCA::SecureArray derServer1 = server1.toDER();
 	    QCOMPARE( derServer1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derServer1, &resultServer1, provider );
 	    QCOMPARE( resultServer1, QCA::ConvertGood );
@@ -829,7 +829,7 @@ void CertUnitTest::checkServerCerts()
 	    QCOMPARE( server1.isCA(), false );
 	    QCOMPARE( server1.isSelfSigned(), false );
 
-	    QCOMPARE( server1.serialNumber(), QBigInteger(6) );
+	    QCOMPARE( server1.serialNumber(), QCA::BigInteger(6) );
 
 	    QCOMPARE( server1.commonName(), QString("Insecure Server Cert") );
 
@@ -905,7 +905,7 @@ void CertUnitTest::checkServerCerts()
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ErrorInvalidPurpose );
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorInvalidPurpose );
 
-	    QSecureArray derServer1 = server1.toDER();
+	    QCA::SecureArray derServer1 = server1.toDER();
 	    QCOMPARE( derServer1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derServer1, &resultServer1, provider );
 	    QCOMPARE( resultServer1, QCA::ConvertGood );
@@ -965,15 +965,15 @@ void CertUnitTest::crl()
 	    QList<QCA::CRLEntry> revokedList = crl1.revoked();
 	    QCOMPARE( revokedList.size(), 2 );
 	    qSort(revokedList);
-	    QCOMPARE( revokedList[0].serialNumber(), QBigInteger("3") );
-	    QCOMPARE( revokedList[1].serialNumber(), QBigInteger("5") );
+	    QCOMPARE( revokedList[0].serialNumber(), QCA::BigInteger("3") );
+	    QCOMPARE( revokedList[1].serialNumber(), QCA::BigInteger("5") );
 	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::Unspecified );
 	    QCOMPARE( revokedList[1].reason(), QCA::CRLEntry::Unspecified );
 	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 10, 39)) );
 	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 11, 59)) );
 
 	    // convert to DER
-	    QSecureArray derCRL1 = crl1.toDER();
+	    QCA::SecureArray derCRL1 = crl1.toDER();
 	    // check we got something, at least
 	    QCOMPARE( derCRL1.isEmpty(), false );
 	    // convert back from DER
@@ -1021,15 +1021,15 @@ void CertUnitTest::crl2()
 	    QList<QCA::CRLEntry> revokedList = crl1.revoked();
 	    QCOMPARE( revokedList.size(), 2 );
 	    qSort(revokedList);
-	    QCOMPARE( revokedList[0].serialNumber(), QBigInteger("14") );
-	    QCOMPARE( revokedList[1].serialNumber(), QBigInteger("15") );
+	    QCOMPARE( revokedList[0].serialNumber(), QCA::BigInteger("14") );
+	    QCOMPARE( revokedList[1].serialNumber(), QCA::BigInteger("15") );
 	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::KeyCompromise );
 	    QCOMPARE( revokedList[1].reason(), QCA::CRLEntry::KeyCompromise );
 	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
 	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
 
 	    // convert to DER
-	    QSecureArray derCRL1 = crl1.toDER();
+	    QCA::SecureArray derCRL1 = crl1.toDER();
 	    // check we got something, at least
 	    QCOMPARE( derCRL1.isEmpty(), false );
 	    // convert back from DER
@@ -1089,8 +1089,8 @@ void CertUnitTest::csr()
 
 	    QCA::RSAPublicKey rsaPkey = pkey.toRSA();
 	    QCOMPARE( rsaPkey.isNull(), false );
-	    QCOMPARE( rsaPkey.e(), QBigInteger(65537) );
-	    QCOMPARE( rsaPkey.n(), QBigInteger("104853561647822232509211983664549572246855698961210758585652966258891659217901732470712446421431206166165309547771124747713609923038218156616083520796442797276676074122658684367500665423564881889504308700315044585826841844654287577169905826705891670004942854611681809539126326134927995969418712881512819058439") );
+	    QCOMPARE( rsaPkey.e(), QCA::BigInteger(65537) );
+	    QCOMPARE( rsaPkey.n(), QCA::BigInteger("104853561647822232509211983664549572246855698961210758585652966258891659217901732470712446421431206166165309547771124747713609923038218156616083520796442797276676074122658684367500665423564881889504308700315044585826841844654287577169905826705891670004942854611681809539126326134927995969418712881512819058439") );
 
 	    QCOMPARE( csr1.signatureAlgorithm(), QCA::EMSA3_MD5 );
 	}
@@ -1127,13 +1127,13 @@ void CertUnitTest::csr2()
 
 	    QCA::RSAPublicKey rsaPkey = pkey.toRSA();
 	    QCOMPARE( rsaPkey.isNull(), false );
-	    QCOMPARE( rsaPkey.e(), QBigInteger(65537) );
-	    QCOMPARE( rsaPkey.n(), QBigInteger("151872780463004414908584891835397365176526767139347372444365914360701714510188717169754430290680734981291754624394094502297070722505032645306680495915914243593438796635264236530526146243919417744996366836534380790370421346490191416041004278161146551997010463199760480957900518811859984176646089981367745961681" ) );
+	    QCOMPARE( rsaPkey.e(), QCA::BigInteger(65537) );
+	    QCOMPARE( rsaPkey.n(), QCA::BigInteger("151872780463004414908584891835397365176526767139347372444365914360701714510188717169754430290680734981291754624394094502297070722505032645306680495915914243593438796635264236530526146243919417744996366836534380790370421346490191416041004278161146551997010463199760480957900518811859984176646089981367745961681" ) );
 
 	    QCOMPARE( csr1.signatureAlgorithm(), QCA::EMSA3_MD5 );
 
 	    // convert to DER
-	    QSecureArray derCSR1 = csr1.toDER();
+	    QCA::SecureArray derCSR1 = csr1.toDER();
 	    // check we got something, at least
 	    QCOMPARE( derCSR1.isEmpty(), false );
 	    // convert back from DER

@@ -40,7 +40,7 @@ private slots:
 	{
 		if(event.type() == QCA::Event::Password)
 		{
-			QSecureArray pass;
+			QCA::SecureArray pass;
 			pass = QCA::ConsolePrompt::getHidden("Passphrase");
 			handler.submitPassword(id, pass);
 		}

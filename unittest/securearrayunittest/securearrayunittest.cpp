@@ -54,15 +54,15 @@ void SecureArrayUnitTest::cleanupTestCase()
 
 void SecureArrayUnitTest::testAll()
 {
-    QSecureArray emptyArray;
+    QCA::SecureArray emptyArray;
     QCOMPARE( emptyArray.size(), 0 );
     QVERIFY( emptyArray.isEmpty() );
 
-    QSecureArray testArray(10);
+    QCA::SecureArray testArray(10);
     QCOMPARE( testArray.size(), 10 );
     QCOMPARE( testArray.isEmpty(), false );
 
-    QSecureArray testArray64(64);
+    QCA::SecureArray testArray64(64);
     QCOMPARE( testArray64.size(), 64 );
     QCOMPARE( testArray64.isEmpty(), false );
 
@@ -77,21 +77,21 @@ void SecureArrayUnitTest::testAll()
     QCOMPARE( QCA::arrayToHex( testArray ), QString( "62626262626262006262" ) );
 
     QByteArray byteArray(10, 'c');
-    QSecureArray secureArray( byteArray );
+    QCA::SecureArray secureArray( byteArray );
     QCOMPARE( secureArray.size(), 10 );
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     byteArray.fill( 'd' );
     // it should be a copy, so no effect
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
 
-    QSecureArray copyArray( secureArray );
+    QCA::SecureArray copyArray( secureArray );
     QCOMPARE( QCA::arrayToHex ( copyArray ), QString( "63636363636363636363" ) );
     copyArray.fill(0x64);
     QCOMPARE( QCA::arrayToHex ( copyArray ), QString( "64646464646464646464" ) );
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
 
     // test for detaching
-    QSecureArray detachArray1 = secureArray; // currently the same
+    QCA::SecureArray detachArray1 = secureArray; // currently the same
     QCOMPARE( QCA::arrayToHex ( detachArray1 ), QString( "63636363636363636363" ) );
     for (int i = 0; i < detachArray1.size(); i++) {
 	detachArray1[i] = 0x66; // implicit detach
@@ -99,7 +99,7 @@ void SecureArrayUnitTest::testAll()
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     QCOMPARE( QCA::arrayToHex ( detachArray1 ), QString( "66666666666666666666" ) );
 
-    QSecureArray detachArray2 = secureArray; // currently the same
+    QCA::SecureArray detachArray2 = secureArray; // currently the same
     QCOMPARE( QCA::arrayToHex ( detachArray2 ), QString( "63636363636363636363" ) );
     //implicit detach
     for (int i = 0; i < detachArray2.size(); i++) {
@@ -108,7 +108,7 @@ void SecureArrayUnitTest::testAll()
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     QCOMPARE( QCA::arrayToHex ( detachArray2 ), QString( "67676767676767676767" ) );
 
-    QSecureArray detachArray3 = secureArray; // implicitly shared copy
+    QCA::SecureArray detachArray3 = secureArray; // implicitly shared copy
     QCOMPARE( QCA::arrayToHex ( detachArray3 ), QString( "63636363636363636363" ) );
     for (int i = 0; i < detachArray3.size(); i++) {
 	detachArray3.data()[i] = 0x68;
@@ -118,7 +118,7 @@ void SecureArrayUnitTest::testAll()
 
 
     // test for resizing
-    QSecureArray resizeArray = emptyArray;
+    QCA::SecureArray resizeArray = emptyArray;
     QCOMPARE( resizeArray.size(), 0 );
     resizeArray.resize(20);
     QCOMPARE( resizeArray.size(), 20 );
@@ -129,13 +129,13 @@ void SecureArrayUnitTest::testAll()
 
 
     // test for append
-    QSecureArray appendArray = secureArray;
-    appendArray.append( QSecureArray() );
+    QCA::SecureArray appendArray = secureArray;
+    appendArray.append( QCA::SecureArray() );
     QCOMPARE( QCA::arrayToHex( secureArray), QCA::arrayToHex( appendArray ) );
     appendArray.append( secureArray );
     QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
     QCOMPARE( QCA::arrayToHex ( appendArray ), QString( "6363636363636363636363636363636363636363" ) );
-    QSecureArray appendArray2 = secureArray;
+    QCA::SecureArray appendArray2 = secureArray;
     QCOMPARE( QCA::arrayToHex ( appendArray2.append(secureArray) ), QString( "6363636363636363636363636363636363636363" ) );
 
     // test for a possible problem with operator[]

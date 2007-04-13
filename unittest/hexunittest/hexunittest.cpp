@@ -87,19 +87,19 @@ void HexUnitTest::testIncrementalUpdate()
 
     hexObject.setup(QCA::Encode);
     hexObject.clear();
-    QSecureArray result1 = hexObject.update(QSecureArray("ab"));
+    QCA::SecureArray result1 = hexObject.update(QCA::SecureArray("ab"));
     QVERIFY( hexObject.ok() );
     QCOMPARE( result1[0], '6' );
     QCOMPARE( result1[1], '1' );
     QCOMPARE( result1[2], '6' );
     QCOMPARE( result1[3], '2' );
-    QSecureArray result2 = hexObject.update(QSecureArray("cd"));
+    QCA::SecureArray result2 = hexObject.update(QCA::SecureArray("cd"));
     QCOMPARE( hexObject.ok(), true );
     QCOMPARE( result2[0], '6' );
     QCOMPARE( result2[1], '3' );
     QCOMPARE( result2[2], '6' );
     QCOMPARE( result2[3], '4' );
-    QCOMPARE( QSecureArray(), hexObject.final() );
+    QCOMPARE( QCA::SecureArray(), hexObject.final() );
     QCOMPARE( hexObject.ok(), true );
 }
 
@@ -108,7 +108,7 @@ void HexUnitTest::testBrokenInput()
     QCA::Hex hexObject;
 
     hexObject.setup(QCA::Decode);
-    hexObject.update(QSecureArray("-="));
+    hexObject.update(QCA::SecureArray("-="));
     QCOMPARE(hexObject.ok(), false);
 }
 

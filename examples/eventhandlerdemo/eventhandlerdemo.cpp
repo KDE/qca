@@ -89,7 +89,7 @@ private slots:
             }
             // You would typically request the password/PIN/passphrase.
             // again, we just fake it.
-            m_handler.submitPassword( id,  QSecureArray( "hello" ) );
+            m_handler.submitPassword( id,  QCA::SecureArray( "hello" ) );
 
         } else {
             std::cout << "Unexpected event type" << std::endl;

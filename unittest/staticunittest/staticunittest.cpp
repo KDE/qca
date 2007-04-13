@@ -63,7 +63,7 @@ void StaticUnitTest::hexConversions()
 
     QCOMPARE( test == QCA::hexToArray(QString("62626262626262006262")), true );
 
-    QSecureArray testArray(10);
+    QCA::SecureArray testArray(10);
     //testArray.fill( 'a' );
     for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x61;

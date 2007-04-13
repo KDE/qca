@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     
     // we use the first argument if provided, or
     // use "hello" if no arguments
-    QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
+    QCA::SecureArray arg = (argc >= 2) ? argv[1] : "hello";
     
     // AES128 testing
     if(!QCA::isSupported("aes128-cbc-pkcs7"))
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 	// the result of that is returned - note that if there is less than
 	// 16 bytes (1 block), then nothing will be returned - it is buffered
 	// update() can be called as many times as required.
-	QSecureArray u = cipher.update(arg);
+	QCA::SecureArray u = cipher.update(arg);
 	
 	// We need to check if that update() call worked.
 	if (!cipher.ok()) {
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 
 	// Because we are using PKCS7 padding, we need to output the final (padded) block
 	// Note that we should always call final() even with no padding, to clean up
-	QSecureArray f = cipher.final();
+	QCA::SecureArray f = cipher.final();
 
 	// Check if the final() call worked
 	if (!cipher.ok()) {
@@ -91,10 +91,10 @@ int main(int argc, char **argv)
 
 	// Build a single cipher text array. You could also call update() with
 	// each block as you receive it, if that is more useful.
-	QSecureArray cipherText = u.append(f);
+	QCA::SecureArray cipherText = u.append(f);
 
 	// take that cipher text, and decrypt it
-	QSecureArray plainText = cipher.update(cipherText);
+	QCA::SecureArray plainText = cipher.update(cipherText);
 
 	// check if the update() call worked
 	if (!cipher.ok()) {

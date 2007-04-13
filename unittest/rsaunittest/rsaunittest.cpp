@@ -86,7 +86,7 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( rsaPEM.isEmpty(), false );
 
 		QCA::ConvertResult checkResult;
-		QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(rsaPEM, QSecureArray(), &checkResult);
+		QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(rsaPEM, QCA::SecureArray(), &checkResult);
 		QCOMPARE( checkResult, QCA::ConvertGood );
 		QCOMPARE( fromPEMkey.isNull(), false );
 		QCOMPARE( fromPEMkey.isRSA(), true );
@@ -96,10 +96,10 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( fromPEMkey.isPublic(), false );
 		QCOMPARE( rsaKey == fromPEMkey, true );
 
-		QSecureArray rsaDER = rsaKey.toDER(QSecureArray("foo"));
+		QCA::SecureArray rsaDER = rsaKey.toDER(QCA::SecureArray("foo"));
 		QCOMPARE( rsaDER.isEmpty(), false );
 
-		QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QSecureArray("foo"), &checkResult);
+		QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QCA::SecureArray("foo"), &checkResult);
 		QCOMPARE( checkResult, QCA::ConvertGood );
 		QCOMPARE( fromDERkey.isNull(), false );
 		QCOMPARE( fromDERkey.isRSA(), true );
@@ -113,7 +113,7 @@ void RSAUnitTest::testrsa()
 		rsaDER = rsaKey.toDER();
 		QCOMPARE( rsaDER.isEmpty(), false );
 
-		fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QSecureArray(), &checkResult);
+		fromDERkey = QCA::PrivateKey::fromDER(rsaDER, QCA::SecureArray(), &checkResult);
 		QCOMPARE( checkResult, QCA::ConvertGood );
 		QCOMPARE( fromDERkey.isNull(), false );
 		QCOMPARE( fromDERkey.isRSA(), true );
@@ -132,7 +132,7 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( pubKey.isPublic(), true );
 
 		QCA::RSAPublicKey RSApubKey = pubKey.toRSA();
-		QCOMPARE( RSApubKey.e(), QBigInteger(65537) );
+		QCOMPARE( RSApubKey.e(), QCA::BigInteger(65537) );
 		QCOMPARE( RSApubKey.isNull(), false );
 		QCOMPARE( RSApubKey.isRSA(), true );
 		QCOMPARE( RSApubKey.isDSA(), false );

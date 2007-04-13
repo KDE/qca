@@ -66,19 +66,19 @@ void KeyGenUnitTest::testRSA()
     QCA::PrivateKey priv1 = keygen.createRSA( 1024, 65537 );
     QCA::RSAPrivateKey rsa1 = priv1.toRSA();
     QCOMPARE( rsa1.isNull(), false );
-    QCOMPARE( rsa1.e(), QBigInteger(65537) );
+    QCOMPARE( rsa1.e(), QCA::BigInteger(65537) );
     QCOMPARE( rsa1.bitSize(), 1024);
 
     priv1 = keygen.createRSA( 512, 17 );
     rsa1 = priv1.toRSA();
     QCOMPARE( rsa1.isNull(), false );
-    QCOMPARE( rsa1.e(), QBigInteger(17) );
+    QCOMPARE( rsa1.e(), QCA::BigInteger(17) );
     QCOMPARE( rsa1.bitSize(), 512);
 
     priv1 = keygen.createRSA( 512, 3 );
     rsa1 = priv1.toRSA();
     QCOMPARE( rsa1.isNull(), false );
-    QCOMPARE( rsa1.e(), QBigInteger(3) );
+    QCOMPARE( rsa1.e(), QCA::BigInteger(3) );
     QCOMPARE( rsa1.bitSize(), 512);
 }
 

@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	// we use the second argument as the key to authenticate
 	// with, if two arguments are provided. Use "secret" as
 	// the key if less than two arguments.
-	QSecureArray key((argc >= 3) ? argv[2] : "secret");
+	QCA::SecureArray key((argc >= 3) ? argv[2] : "secret");
 
 	// must always check that an algorithm is supported before using it
 	if( !QCA::isSupported("hmac(sha1)") ) {
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 	} else {
 		// create the required object using HMAC with SHA-1, and an
 		// empty key.
-		QCA::MessageAuthenticationCode hmacObject(  "hmac(sha1)", QSecureArray() );
+		QCA::MessageAuthenticationCode hmacObject(  "hmac(sha1)", QCA::SecureArray() );
 
 		// create the key
 		QCA::SymmetricKey keyObject(key);
@@ -60,13 +60,13 @@ int main(int argc, char **argv)
 		// QCA::MessageAuthenticationCode constructor
 
 		// we split it into two parts to show incremental update
-		QSecureArray part1(arg.left(3)); // three chars - "hel"
-		QSecureArray part2(arg.mid(3)); // the rest - "lo"
+		QCA::SecureArray part1(arg.left(3)); // three chars - "hel"
+		QCA::SecureArray part2(arg.mid(3)); // the rest - "lo"
 		hmacObject.update(part1);
 		hmacObject.update(part2);
 
 		// no more updates after calling final.
-		QSecureArray resultArray = hmacObject.final();
+		QCA::SecureArray resultArray = hmacObject.final();
 
 		// convert the result into printable hexadecimal.
 		QString result = QCA::arrayToHex(resultArray);

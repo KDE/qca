@@ -78,14 +78,14 @@ void DSAUnitTest::testdsa()
 	QCA::DSAPrivateKey dsaPrivKey = dsaKey.toDSA();
 	QCOMPARE( dsaPrivKey.bitSize(), 1024 );
 
-	QSecureArray dsaDER = dsaKey.toDER();
+	QCA::SecureArray dsaDER = dsaKey.toDER();
 	QCOMPARE( dsaDER.isEmpty(), false );
 
 	QString dsaPEM = dsaKey.toPEM();
 	QCOMPARE( dsaPEM.isEmpty(), false );
 
 	QCA::ConvertResult checkResult;
-	QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(dsaPEM, QSecureArray(), &checkResult);
+	QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(dsaPEM, QCA::SecureArray(), &checkResult);
 	QCOMPARE( checkResult, QCA::ConvertGood );
 	QCOMPARE( fromPEMkey.isNull(), false );
 	QCOMPARE( fromPEMkey.isRSA(), false );
@@ -95,7 +95,7 @@ void DSAUnitTest::testdsa()
 	QCOMPARE( fromPEMkey.isPublic(), false );
 	QVERIFY( dsaKey == fromPEMkey );
 
-	QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(dsaDER, QSecureArray(), &checkResult);
+	QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(dsaDER, QCA::SecureArray(), &checkResult);
 	QCOMPARE( checkResult, QCA::ConvertGood );
 	QCOMPARE( fromDERkey.isNull(), false );
 	QCOMPARE( fromDERkey.isRSA(), false );

@@ -110,7 +110,7 @@ void KDFUnitTest::pbkdf1md2Tests()
 	if(!QCA::isSupported("pbkdf1(md2)", provider))
 	    QWARN(QString("PBKDF version 1 with MD2 not supported for "+provider).toLocal8Bit());
 	else {
-	    QSecureArray password = QCA::hexToArray( secret );
+	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF1("md2", provider).makeKey( password,
 									  iv,
@@ -179,7 +179,7 @@ void KDFUnitTest::pbkdf1sha1Tests()
 	if(!QCA::isSupported("pbkdf1(sha1)", provider))
 	    QWARN(QString("PBKDF version 1 with SHA1 not supported for "+provider).toLocal8Bit());
 	else {
-	    QSecureArray password = QCA::hexToArray( secret );
+	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF1("sha1", provider).makeKey( password,
 									   iv,
@@ -273,7 +273,7 @@ void KDFUnitTest::pbkdf2Tests()
 	if(!QCA::isSupported("pbkdf2(sha1)", provider))
 	    QWARN(QString("PBKDF version 2 with SHA1 not supported for "+provider).toLocal8Bit());
 	else {
-	    QSecureArray password = QCA::hexToArray( secret );
+	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF2("sha1", provider).makeKey( password,
 								   iv,
@@ -299,8 +299,8 @@ void KDFUnitTest::pbkdf2extraTests()
 	else {
 	    // Not sure where this one came from...
 	    {
-		QCA::InitializationVector salt(QSecureArray("what do ya want for nothing?"));
-		QSecureArray password("Jefe");
+		QCA::InitializationVector salt(QCA::SecureArray("what do ya want for nothing?"));
+		QCA::SecureArray password("Jefe");
 		int iterations = 1000;
 		QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		QCOMPARE( QCA::arrayToHex(passwordOut), QString( "6349e09cb6b8c1485cfa9780ee3264df" ) );
@@ -308,8 +308,8 @@ void KDFUnitTest::pbkdf2extraTests()
 
 	    // RFC3962, Appendix B
 	    {
-		QCA::InitializationVector salt(QSecureArray("ATHENA.MIT.EDUraeburn"));
-		QSecureArray password("password");
+		QCA::InitializationVector salt(QCA::SecureArray("ATHENA.MIT.EDUraeburn"));
+		QCA::SecureArray password("password");
 		int iterations = 1;
 		QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		QCOMPARE( QCA::arrayToHex(passwordOut), QString( "cdedb5281bb2f801565a1122b2563515" ) );
@@ -320,8 +320,8 @@ void KDFUnitTest::pbkdf2extraTests()
 
 	    // RFC3962, Appendix B
 	    {
-		QCA::InitializationVector salt(QSecureArray("ATHENA.MIT.EDUraeburn"));
-		QSecureArray password("password");
+		QCA::InitializationVector salt(QCA::SecureArray("ATHENA.MIT.EDUraeburn"));
+		QCA::SecureArray password("password");
 		int iterations = 2;
 		QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		QCOMPARE( QCA::arrayToHex(passwordOut), QString( "01dbee7f4a9e243e988b62c73cda935d" ) );
@@ -332,8 +332,8 @@ void KDFUnitTest::pbkdf2extraTests()
 
 	    // RFC3962, Appendix B
 	    {
-		QCA::InitializationVector salt(QSecureArray("ATHENA.MIT.EDUraeburn"));
-		QSecureArray password("password");
+		QCA::InitializationVector salt(QCA::SecureArray("ATHENA.MIT.EDUraeburn"));
+		QCA::SecureArray password("password");
 		int iterations = 1200;
 		QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		QCOMPARE( QCA::arrayToHex(passwordOut), QString( "5c08eb61fdf71e4e4ec3cf6ba1f5512b" ) );
@@ -345,7 +345,7 @@ void KDFUnitTest::pbkdf2extraTests()
 	    // RFC3211 and RFC3962, Appendix B
 	    {
 		QCA::InitializationVector salt(QCA::hexToArray("1234567878563412"));
-		QSecureArray password("password");
+		QCA::SecureArray password("password");
 		int iterations = 5;
 		QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		QCOMPARE( QCA::arrayToHex(passwordOut), QString( "d1daa78615f287e6a1c8b120d7062a49" ) );
@@ -359,8 +359,8 @@ void KDFUnitTest::pbkdf2extraTests()
 
 	    // RFC3962, Appendix B
 	    {
-		QCA::InitializationVector salt(QSecureArray("pass phrase equals block size"));
-		QSecureArray password("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		QCA::InitializationVector salt(QCA::SecureArray("pass phrase equals block size"));
+		QCA::SecureArray password("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 		int iterations = 1200;
 		QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		QCOMPARE( QCA::arrayToHex(passwordOut), QString( "139c30c0966bc32ba55fdbf212530ac9" ) );
@@ -372,8 +372,8 @@ void KDFUnitTest::pbkdf2extraTests()
 	    // RFC3962, Appendix B
 	    {
 		try {
-		    QCA::InitializationVector salt(QSecureArray("pass phrase exceeds block size"));
-		    QSecureArray password("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		    QCA::InitializationVector salt(QCA::SecureArray("pass phrase exceeds block size"));
+		    QCA::SecureArray password("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 		    int iterations = 1200;
 		    QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		    QCOMPARE( QCA::arrayToHex(passwordOut), QString( "9ccad6d468770cd51b10e6a68721be61" ) );
@@ -390,8 +390,8 @@ void KDFUnitTest::pbkdf2extraTests()
 
 	    // RFC3962, Appendix B
 	    {
-		QCA::InitializationVector salt(QSecureArray("EXAMPLE.COMpianist"));
-		QSecureArray password(QCA::hexToArray("f09d849e"));
+		QCA::InitializationVector salt(QCA::SecureArray("EXAMPLE.COMpianist"));
+		QCA::SecureArray password(QCA::hexToArray("f09d849e"));
 		int iterations = 50;
 		QCA::SymmetricKey passwordOut = QCA::PBKDF2("sha1", provider).makeKey (password, salt, 16, iterations);
 		QCOMPARE( QCA::arrayToHex(passwordOut), QString( "6b9cf26d45455a43a5b8bb276a403b39" ) );

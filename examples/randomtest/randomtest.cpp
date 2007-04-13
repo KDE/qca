@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 	// It might not be printable, so this may not produce output
 	std::cout << "A random character: " << randChar << std::endl;
 
-	QSecureArray tenBytes(10);
+	QCA::SecureArray tenBytes(10);
 	// If you need more random values, you may want to
 	// get an array, as shown below.
 	tenBytes = QCA::Random::randomArray(10);

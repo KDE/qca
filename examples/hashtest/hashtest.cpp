@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
 	// we use the first argument if provided, or
 	// use "hello" if no arguments
-	QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
+	QCA::SecureArray arg = (argc >= 2) ? argv[1] : "hello";
 
 	// must always check that an algorithm is supported before using it
 	if( !QCA::isSupported("sha1") )
@@ -51,8 +51,8 @@ int main(int argc, char **argv)
 		// this shows the incremental approach. Naturally
 		// for this simple job, we could use the "all in one"
 		// approach - this is an example, after all :-)
-		QSecureArray part1(arg.toByteArray().left(3)); // three chars - "hel"
-		QSecureArray part2(arg.toByteArray().mid(3)); // the rest - "lo"
+		QCA::SecureArray part1(arg.toByteArray().left(3)); // three chars - "hel"
+		QCA::SecureArray part2(arg.toByteArray().mid(3)); // the rest - "lo"
 
 		// create the required object.
 		QCA::Hash hashObject("md5");
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 		hashObject.update(part1);
 		hashObject.update(part2);
 		// no more updates after calling final.
-		QSecureArray resultArray = hashObject.final();
+		QCA::SecureArray resultArray = hashObject.final();
 		// convert the result into printable hexadecimal.
 		QString result = QCA::arrayToHex(resultArray);
 		printf("md5(\"%s\") = [%s]\n", arg.data(), result.toAscii().data());

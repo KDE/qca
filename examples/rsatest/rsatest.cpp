@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
     // we use the first argument if provided, or
     // use "hello" if no arguments
-    QSecureArray arg = (argc >= 2) ? argv[1] : "hello";
+    QCA::SecureArray arg = (argc >= 2) ? argv[1] : "hello";
 
     // We demonstrate PEM usage here, so we need to test for
     // supportedIOTypes, not just supportedTypes
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 
 	// encrypt some data - note that only the public key is required
 	// you must also choose the algorithm to be used
-	QSecureArray result = pubkey.encrypt(arg, QCA::EME_PKCS1_OAEP);
+	QCA::SecureArray result = pubkey.encrypt(arg, QCA::EME_PKCS1_OAEP);
 	if(result.isEmpty()) {
 	    std::cout << "Error encrypting" << std::endl;
 	    return 1;
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	// save the private key - in a real example, make sure this goes
 	// somewhere secure and has a good pass phrase
 	// You can use the same technique with the public key too.
-	QSecureArray passPhrase = "pass phrase";
+	QCA::SecureArray passPhrase = "pass phrase";
 	seckey.toPEMFile("keyprivate.pem", passPhrase);
 
 	// Read that key back in, checking if the read succeeded
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
 	// now decrypt that encrypted data using the private key that
 	// we read in. The algorithm is the same.
-	QSecureArray decrypt;
+	QCA::SecureArray decrypt;
 	if(0 == privateKey.decrypt(result, &decrypt, QCA::EME_PKCS1_OAEP)) {
 	    printf("Error decrypting.\n");
 	    return 1;
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 	}
 	privateKey.startSign( QCA::EMSA3_MD5 );
 	privateKey.update( arg ); // just reuse the same message
-	QSecureArray argSig = privateKey.signature();
+	QCA::SecureArray argSig = privateKey.signature();
 
 	// instead of using the startSign(), update(), signature() calls,
 	// you may be better doing the whole thing in one go, using the

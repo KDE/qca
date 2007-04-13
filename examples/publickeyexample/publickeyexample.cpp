@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     // Read in a private key
     QCA::PrivateKey privKey;
     QCA::ConvertResult convRes;
-    QSecureArray passPhrase = "start";
+    QCA::SecureArray passPhrase = "start";
     privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &convRes );
     if ( convRes != QCA::ConvertGood ) {
 	std::cout << "Sorry, could not import Private Key" << std::endl;
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     }
 
     // get the result
-    QSecureArray cipherText = msg.read();
+    QCA::SecureArray cipherText = msg.read();
     QCA::Base64 enc;
     std::cout << plainText.data() << " encrypts to (in base 64): ";
     std::cout << qPrintable( enc.arrayToString( cipherText ) ) << std::endl;
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 	std::cout << "Private key cannot be used to decrypt" << std::endl;
 	return 1;
     }
-    QSecureArray plainTextResult;
+    QCA::SecureArray plainTextResult;
     if ( 0 == privKey.decrypt(cipherText, &plainTextResult, QCA::EME_PKCS1_OAEP ) ) {
 	std::cout << "Decryption process failed" << std::endl;
 	return 1;
