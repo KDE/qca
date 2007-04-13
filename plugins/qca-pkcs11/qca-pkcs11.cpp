@@ -253,7 +253,7 @@ public:
 	pinPrompt (
 		void * const user_data,
 		const pkcs11h_token_id_t token_id,
-		QSecureArray &pin
+		SecureArray &pin
 	);
 
 	void
@@ -375,7 +375,7 @@ private:
 	struct _sign_data_s {
 		SignatureAlgorithm alg;
 		Hash *hash;
-		QSecureArray raw;
+		SecureArray raw;
 
 		_sign_data_s() {
 			hash = NULL;
@@ -508,9 +508,9 @@ public:
 	}
 
 	virtual
-	QSecureArray
+	SecureArray
 	encrypt (
-		const QSecureArray &in,
+		const SecureArray &in,
 		EncryptionAlgorithm alg
 	) {
 		return _pubkey.encrypt (in, alg);
@@ -519,8 +519,8 @@ public:
 	virtual
 	bool
 	decrypt (
-		const QSecureArray &in,
-		QSecureArray *out,
+		const SecureArray &in,
+		SecureArray *out,
 		EncryptionAlgorithm alg
 	) {
 		bool session_locked = false;
@@ -666,7 +666,7 @@ public:
 	virtual
 	void
 	update (
-		const QSecureArray &in
+		const SecureArray &in
 	) {
 		if (_has_privateKeyRole) {
 			if (_sign_data.hash != NULL) {
@@ -682,13 +682,13 @@ public:
 	}
 
 	virtual
-	QSecureArray
+	SecureArray
 	endSign () {
-		QSecureArray result;
+		SecureArray result;
 		bool session_locked = false;
 
 		try {
-			QSecureArray final;
+			SecureArray final;
 			CK_RV rv;
 
 			// from some strange reason I got 2047... (for some)	<---- BUG?!?!?!
@@ -791,7 +791,7 @@ public:
 	virtual
 	bool
 	validSignature (
-		const QSecureArray &sig
+		const SecureArray &sig
 	) {
 		return _pubkey.validSignature (sig);
 	}
@@ -811,11 +811,11 @@ public:
 	virtual
 	void
 	createPrivate (
-		const QBigInteger &n,
-		const QBigInteger &e,
-		const QBigInteger &p,
-		const QBigInteger &q,
-		const QBigInteger &d
+		const BigInteger &n,
+		const BigInteger &e,
+		const BigInteger &p,
+		const BigInteger &q,
+		const BigInteger &d
 	) {
 		Q_UNUSED(n);
 		Q_UNUSED(e);
@@ -827,41 +827,41 @@ public:
 	virtual
 	void
 	createPublic (
-		const QBigInteger &n,
-		const QBigInteger &e
+		const BigInteger &n,
+		const BigInteger &e
 	) {
 		Q_UNUSED(n);
 		Q_UNUSED(e);
 	}
 
 	virtual
-	QBigInteger
+	BigInteger
 	n () const {
 		return _pubkey.n ();
 	}
 
 	virtual
-	QBigInteger
+	BigInteger
 	e () const {
 		return _pubkey.e ();
 	}
 
 	virtual
-	QBigInteger
+	BigInteger
 	p () const {
-		return QBigInteger();
+		return BigInteger();
 	}
 
 	virtual
-	QBigInteger
+	BigInteger
 	q () const {
-		return QBigInteger();
+		return BigInteger();
 	}
 
 	virtual
-	QBigInteger
+	BigInteger
 	d () const {
-		return QBigInteger();
+		return BigInteger();
 	}
 
 public:
@@ -1009,7 +1009,7 @@ public:
 	}
 
 	virtual
-	QSecureArray
+	SecureArray
 	publicToDER () const {
 		return static_cast<pkcs11RSAContext *>(_k)->publicKey ().toDER ();
 	}
@@ -1023,7 +1023,7 @@ public:
 	virtual
 	ConvertResult
 	publicFromDER (
-		const QSecureArray &in
+		const SecureArray &in
 	) {
 		Q_UNUSED(in);
 		return ErrorDecode;
@@ -1039,20 +1039,20 @@ public:
 	}
 
 	virtual
-	QSecureArray
+	SecureArray
 	privateToDER(
-		const QSecureArray &passphrase,
+		const SecureArray &passphrase,
 		PBEAlgorithm pbe
 	) const {
 		Q_UNUSED(passphrase);
 		Q_UNUSED(pbe);
-		return QSecureArray ();
+		return SecureArray ();
 	}
 
 	virtual
 	QString
 	privateToPEM (
-		const QSecureArray &passphrase,
+		const SecureArray &passphrase,
 		PBEAlgorithm pbe
 	) const {
 		Q_UNUSED(passphrase);
@@ -1063,8 +1063,8 @@ public:
 	virtual
 	ConvertResult
 	privateFromDER (
-		const QSecureArray &in,
-		const QSecureArray &passphrase
+		const SecureArray &in,
+		const SecureArray &passphrase
 	) {
 		Q_UNUSED(in);
 		Q_UNUSED(passphrase);
@@ -1075,7 +1075,7 @@ public:
 	ConvertResult
 	privateFromPEM (
 		const QString &s,
-		const QSecureArray &passphrase
+		const SecureArray &passphrase
 	) {
 		Q_UNUSED(s);
 		Q_UNUSED(passphrase);
@@ -1867,7 +1867,7 @@ bool
 pkcs11KeyStoreListContext::pinPrompt (
 	void * const user_data,
 	const pkcs11h_token_id_t token_id,
-	QSecureArray &pin
+	SecureArray &pin
 ) {
 	KeyStoreEntry entry;
 	KeyStoreEntryContext *context = NULL;
@@ -1883,7 +1883,7 @@ pkcs11KeyStoreListContext::pinPrompt (
 		Logger::Debug
 	);
 
-	pin = QSecureArray();
+	pin = SecureArray();
 
 	if (user_data != NULL) {
 		QString *serialized = (QString *)user_data;
@@ -2329,7 +2329,7 @@ pkcs11KeyStoreListContext::deserializeCertificateId (
 
 		*p_has_private = list[n++].toInt () != 0;
 
-		QSecureArray arrayCertificate = Base64 ().stringToArray (unescapeString (list[n++]));
+		SecureArray arrayCertificate = Base64 ().stringToArray (unescapeString (list[n++]));
 
 		if (
 			(rv = pkcs11h_certificate_setCertificateIdCertificateBlob (
@@ -2859,7 +2859,7 @@ pkcs11Provider::pinPromptHook (
 	PKCS11H_BOOL ret = FALSE; //krazy:exclude=captruefalse
 
 	if (s_keyStoreList != NULL) {
-		QSecureArray qpin;
+		SecureArray qpin;
 
 		if (s_keyStoreList->pinPrompt (user_data, token, qpin)) {
 			if ((size_t)qpin.size () < pin_max-1) {
