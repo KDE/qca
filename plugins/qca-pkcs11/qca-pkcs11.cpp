@@ -931,6 +931,7 @@ public:
 
 	~pkcs11PKeyContext () {
 		delete _k;
+		_k = NULL;
 	}
 
 	virtual
@@ -1632,9 +1633,12 @@ pkcs11KeyStoreListContext::keyStores () {
 				i++
 			) {
 				pkcs11KeyStoreItem *item = _storesById[*i];
+
 				_storesById.remove (item->id);
 				_stores.removeAll (item);
+
 				delete item;
+				item = NULL;
 			}
 		}
 	}
@@ -2044,8 +2048,7 @@ pkcs11KeyStoreListContext::clearStores () {
 		i != _stores.end ();
 		i++
 	) {
-		pkcs11KeyStoreItem *entry = (*i);
-		delete entry;
+		delete (*i);
 	}
 
 	_stores.clear ();
@@ -2445,6 +2448,7 @@ pkcs11Provider::~pkcs11Provider () {
 
 	delete s_keyStoreList;
 	s_keyStoreList = NULL;
+
 	pkcs11h_terminate ();
 
 	QCA_logTextMessage (
