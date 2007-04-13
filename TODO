@@ -8,37 +8,15 @@
 
 * beta4
   api:
-    some functions report availability of "sub"features without having context
-      with a specific provider (that is, the functions are not members of an
-      instance owned by a provider, nor is a provider necessarily specified
-      as an argument to the function).  in these cases, if a feature is
-      reported as being available, it is not clear how the app can actually
-      use the feature.  For example, if the static method TLS::canCompress()
-      returns true, it is entirely possible that when the application creates
-      a "new TLS;" instance, it won't be served by a provider that supports
-      compression.  possibly offending functions:
-    qca_publickey.h
-      supportedGroupSets
-      supportedTypes
-      supportedIOTypes
-      supportedPBEAlgorithms
-    qca_cert.h
-      canUseFormat
-      canUsePKCS7
-    qca_securelayer.h
-      supportedCipherSuites
-      canCompress
-      canSetHostName (tbd)
     QSecureArray/QBigInteger -> QCA::SecureArray/QCA::BigInteger ?
   code:
-    cert: orderedToDNString
-    cert: makeFriendlyNames
     keystore async mode
     keystore watcher
     fix the locking stuff in qca_core
     allow logger to be used from anywhere
     qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
     qca-gnupg: support async
+    qca-openssl: EVP_PKEY_bits() doesn't always return the full key size
     qca-openssl: why are some constraints auto-added?
     qca-openssl: ca signing
   other:
@@ -47,7 +25,7 @@
        - remove u32bit miller_rabin_test_iterations(u32bit bits, bool verify)
     ability to compile plugins in statically (check 'plugins' subdir)
 
-* test1
+* beta5
   api:
     cert: crl URIs
     cert: policy info beyond OID
@@ -59,21 +37,22 @@
       there's a problem where we can create the provider, and not create
       a saslContext, and then the destructor depends on uninitialised values
       (to see this, valgrind staticunittest).
-    qcatool TODOs
     qca-openssl: support async S/MIME and TLS
-    synchronizer should lazy-start the thread
-    tls/sasl
-    dirwatch: thread safety
-    dirwatch: test on all platforms
+    keystore: cleanup
     core: properties
     cert: rfc 2818 hostname validation
+    tls/sasl
     publickey/cert cleanup
     securemessage
-    tls
-    sasl
-    keystore: cleanup
+    synchronizer should lazy-start the thread
     don't allow smart card providers to be used by default
+
+* test1
+  code:
+    dirwatch: thread safety
+    dirwatch: test on all platforms
     proper parenting of all objects
+    qcatool TODOs
 
 * Considerations
   api:
@@ -107,6 +86,7 @@
   qca-egads (or qca-egd): implement for Random support
 
 * possibilities for the future:
+  emsa3Encode: implement in provider instead of qca?
   OCSP
   tls ocsp stapling
   internally managed intermediate object storage
