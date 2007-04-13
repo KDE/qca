@@ -386,7 +386,7 @@ namespace QCA
 		/**
 		   The serial number for the certificate
 		*/
-		QBigInteger serialNumber() const; // create
+		BigInteger serialNumber() const; // create
 
 		/**
 		   the first time the certificate will be valid
@@ -459,7 +459,7 @@ namespace QCA
 
 		   \param i the serial number to use
 		*/
-		void setSerialNumber(const QBigInteger &i);
+		void setSerialNumber(const BigInteger &i);
 
 		/**
 		   Set the validity period for the certificate
@@ -616,7 +616,7 @@ namespace QCA
 		/**
 		   The serial number of the certificate
 		*/
-		QBigInteger serialNumber() const;
+		BigInteger serialNumber() const;
 
 		/**
 		   The public key associated with the subject of the certificate
@@ -678,7 +678,7 @@ namespace QCA
 		/**
 		   Export the Certificate into a DER format
 		*/
-		QSecureArray toDER() const;
+		SecureArray toDER() const;
 
 		/**
 		   Export the Certificate into a PEM format
@@ -701,7 +701,7 @@ namespace QCA
 
 		   \return the Certificate corresponding to the certificate in the provided array
 		*/
-		static Certificate fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static Certificate fromDER(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 		/**
 		   Import the certificate from PEM format
@@ -992,7 +992,7 @@ namespace QCA
 
 		   \note this only applies to PKCS#10 format certificate requests
 		*/
-		QSecureArray toDER() const;
+		SecureArray toDER() const;
 
 		/**
 		   Export the Certificate Request into a PEM format
@@ -1021,7 +1021,7 @@ namespace QCA
 
 		   \note this only applies to PKCS#10 format certificate requests
 		*/
-		static CertificateRequest fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static CertificateRequest fromDER(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 		/**
 		   Import the certificate request from PEM format
@@ -1127,12 +1127,12 @@ namespace QCA
 		   \param time the time the Certificate was revoked (or will be revoked)
 		   \param r the reason that the certificate is being revoked
 		*/
-		CRLEntry(const QBigInteger serial, const QDateTime time, Reason r = Unspecified);
+		CRLEntry(const BigInteger serial, const QDateTime time, Reason r = Unspecified);
 
 		/**
 		   The serial number of the certificate that is the subject of this CRL entry
 		*/
-		QBigInteger serialNumber() const;
+		BigInteger serialNumber() const;
 
 		/**
 		   The time this CRL entry was created
@@ -1168,7 +1168,7 @@ namespace QCA
 		bool operator==(const CRLEntry &a) const;
 
 	private:
-		QBigInteger _serial;
+		BigInteger _serial;
 		QDateTime _time;
 		Reason _reason;
 	};
@@ -1261,7 +1261,7 @@ namespace QCA
 		/**
 		   The signature on this CRL
 		*/
-		QSecureArray signature() const;
+		SecureArray signature() const;
 
 		/**
 		   The signature algorithm used for the signature on this CRL
@@ -1285,7 +1285,7 @@ namespace QCA
 
 		   \return an array containing the CRL in DER format
 		*/
-		QSecureArray toDER() const;
+		SecureArray toDER() const;
 
 		/**
 		   Export the %Certificate Revocation List (CRL) in PEM format
@@ -1310,7 +1310,7 @@ namespace QCA
 
 		   \return the CRL corresponding to the contents of the array
 		*/
-		static CRL fromDER(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static CRL fromDER(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 		/**
 		   Import a PEM encoded %Certificate Revocation List (CRL)
@@ -1583,7 +1583,7 @@ namespace QCA
 		   \sa fromFile for a more flexible version of the
 		   same capability.
 		*/
-		KeyBundle(const QString &fileName, const QSecureArray &passphrase = QSecureArray());
+		KeyBundle(const QString &fileName, const SecureArray &passphrase = SecureArray());
 
 		/**
 		   Standard copy constructor
@@ -1668,7 +1668,7 @@ namespace QCA
 		   \param passphrase the passphrase to use to protect the bundle
 		   \param provider the provider to use, if a specific provider is required
 		*/
-		QByteArray toArray(const QSecureArray &passphrase, const QString &provider = QString()) const;
+		QByteArray toArray(const SecureArray &passphrase, const QString &provider = QString()) const;
 
 		/**
 		   Export the key bundle to a file in PKCS12 (.p12) format
@@ -1690,7 +1690,7 @@ namespace QCA
 		   \param passphrase the passphrase to use to protect the bundle
 		   \param provider the provider to use, if a specific provider is required
 		*/
-		bool toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider = QString()) const;
+		bool toFile(const QString &fileName, const SecureArray &passphrase, const QString &provider = QString()) const;
 
 		/**
 		   Import the key bundle from an array in PKCS12 format
@@ -1713,7 +1713,7 @@ namespace QCA
 		   \param result pointer to the result of the import process
 		   \param provider the provider to use, if a specific provider is required
 		*/
-		static KeyBundle fromArray(const QByteArray &a, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+		static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
 		/**
 		   Import the key bundle from a file in PKCS12 (.p12) format
@@ -1736,7 +1736,7 @@ namespace QCA
 		   \param result pointer to the result of the import process
 		   \param provider the provider to use, if a specific provider is required
 		*/
-		static KeyBundle fromFile(const QString &fileName, const QSecureArray &passphrase = QSecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+		static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
 	private:
 		class Private;
@@ -1863,7 +1863,7 @@ namespace QCA
                    \sa fromArray for a static import method.
                    \sa toString for an "ascii armoured" export method.
 		*/
-		QSecureArray toArray() const;
+		SecureArray toArray() const;
 
 		/**
 		   Export the key to a string
@@ -1890,7 +1890,7 @@ namespace QCA
 		   \param provider the provider to use, if a particular provider is required
 		*/
 		   
-		static PGPKey fromArray(const QSecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+		static PGPKey fromArray(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 		/**
 		   Import the key from a string
@@ -1921,7 +1921,7 @@ namespace QCA
 
 		void loadPrivateKeyFromPEMFile(const QString &fileName);
 		void loadPrivateKeyFromPEM(const QString &s);
-		void loadPrivateKeyFromDER(const QSecureArray &a);
+		void loadPrivateKeyFromDER(const SecureArray &a);
 		void loadKeyBundleFromFile(const QString &fileName);
 		void loadKeyBundleFromArray(const QByteArray &a);
 

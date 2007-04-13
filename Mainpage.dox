@@ -19,8 +19,8 @@
    \section features Features
 
    This library provides an easy API for the following features:
-     - Secure byte arrays (QSecureArray)
-     - Arbitrary precision integers (QBigInteger)
+     - Secure byte arrays (QCA::SecureArray)
+     - Arbitrary precision integers (QCA::BigInteger)
      - Random number generation (QCA::Random)
      - SSL/TLS (QCA::TLS)
      - X509 certificates (QCA::Certificate and QCA::CertificateCollection)

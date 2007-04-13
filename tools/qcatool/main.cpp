@@ -166,7 +166,7 @@ public:
 	bool warned;
 	bool have_pass;
 	bool used_pass;
-	QSecureArray pass;
+	QCA::SecureArray pass;
 
 	PassphrasePrompt()
 	{
@@ -178,7 +178,7 @@ public:
 		handler.start();
 	}
 
-	void setExplicitPassword(const QSecureArray &_pass)
+	void setExplicitPassword(const QCA::SecureArray &_pass)
 	{
 		have_pass = true;
 		used_pass = false;
@@ -252,7 +252,7 @@ private slots:
 			else
 				str = QString("Enter %1").arg(type);
 
-			QSecureArray result = QCA::ConsolePrompt::getHidden(str);
+			QCA::SecureArray result = QCA::ConsolePrompt::getHidden(str);
 			handler.submitPassword(id, result);
 		}
 		else if(e.type() == QCA::Event::Token)
@@ -310,9 +310,9 @@ protected:
 	}
 };
 
-static bool promptForNewPassphrase(QSecureArray *result)
+static bool promptForNewPassphrase(QCA::SecureArray *result)
 {
-	QSecureArray out = QCA::ConsolePrompt::getHidden("Enter new passphrase");
+	QCA::SecureArray out = QCA::ConsolePrompt::getHidden("Enter new passphrase");
 	if(QCA::ConsolePrompt::getHidden("Confirm new passphrase") != out)
 	{
 		fprintf(stderr, "Error: confirmation does not match original entry.\n");
@@ -639,7 +639,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 			while(1)
 			{
 				QString str = prompt_for("Serial Number");
-				QBigInteger num;
+				QCA::BigInteger num;
 				if(str.isEmpty() || !num.fromString(str))
 				{
 					printf("'%s' is not a valid entry.\n", qPrintable(str));
@@ -1448,7 +1448,7 @@ static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false
 	return entry;
 }
 
-static QCA::PrivateKey get_K(const QString &name, const QSecureArray &pass)
+static QCA::PrivateKey get_K(const QString &name, const QCA::SecureArray &pass)
 {
 	QCA::PrivateKey key;
 
@@ -1517,7 +1517,7 @@ static QCA::KeyBundle get_X(const QString &name)
 
 	// try file
 	// TODO: remove passphrase arg after api update
-	QCA::KeyBundle key = QCA::KeyBundle::fromFile(name, QSecureArray());
+	QCA::KeyBundle key = QCA::KeyBundle::fromFile(name, QCA::SecureArray());
 	if(key.isNull())
 	{
 		printf("Error: unable to read/process keybundle file.\n");
@@ -1631,7 +1631,7 @@ int main(int argc, char **argv)
 
 	bool have_pass = false;
 	bool have_newpass = false;
-	QSecureArray pass, newpass;
+	QCA::SecureArray pass, newpass;
 	bool allowprompt = true;
 	bool ordered = false;
 	bool debug = false;

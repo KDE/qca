@@ -42,7 +42,7 @@ uchar Random::nextByte()
 	return (uchar)(nextBytes(1)[0]);
 }
 
-QSecureArray Random::nextBytes(int size)
+SecureArray Random::nextBytes(int size)
 {
 	return static_cast<RandomContext *>(context())->nextBytes(size);
 }
@@ -56,13 +56,13 @@ uchar Random::randomChar()
 int Random::randomInt()
 {
 	QMutexLocker locker(global_random_mutex());
-	QSecureArray a = global_random()->nextBytes(sizeof(int));
+	SecureArray a = global_random()->nextBytes(sizeof(int));
 	int x;
 	memcpy(&x, a.data(), a.size());
 	return x;
 }
 
-QSecureArray Random::randomArray(int size)
+SecureArray Random::randomArray(int size)
 {
 	QMutexLocker locker(global_random_mutex());
 	return global_random()->nextBytes(size);
@@ -81,14 +81,14 @@ void Hash::clear()
 	static_cast<HashContext *>(context())->clear();
 }
 
-void Hash::update(const QSecureArray &a)
+void Hash::update(const SecureArray &a)
 {
 	static_cast<HashContext *>(context())->update(a);
 }
 
 void Hash::update(const QByteArray &a)
 {
-	update( QSecureArray( a ) );
+	update( SecureArray( a ) );
 }
 
 void Hash::update(const char *data, int len)
@@ -111,17 +111,17 @@ void Hash::update(QIODevice &file)
 		update(buffer, len);
 }
 
-QSecureArray Hash::final()
+SecureArray Hash::final()
 {
 	return static_cast<HashContext *>(context())->final();
 }
 
-QSecureArray Hash::hash(const QSecureArray &a)
+SecureArray Hash::hash(const SecureArray &a)
 {
 	return process(a);
 }
 
-QString Hash::hashToString(const QSecureArray &a)
+QString Hash::hashToString(const SecureArray &a)
 {
 	return arrayToHex(hash(a));
 }
@@ -190,18 +190,18 @@ void Cipher::clear()
 	static_cast<CipherContext *>(context())->setup(d->dir, d->key, d->iv);
 }
 
-QSecureArray Cipher::update(const QSecureArray &a)
+SecureArray Cipher::update(const SecureArray &a)
 {
-	QSecureArray out;
+	SecureArray out;
 	if(d->done)
 		return out;
 	d->ok = static_cast<CipherContext *>(context())->update(a, &out);
 	return out;
 }
 
-QSecureArray Cipher::final()
+SecureArray Cipher::final()
 {
-	QSecureArray out;
+	SecureArray out;
 	if(d->done)
 		return out;
 	d->done = true;
@@ -274,7 +274,7 @@ public:
 	SymmetricKey key;
 
 	bool done;
-	QSecureArray buf;
+	SecureArray buf;
 };
 
 
@@ -322,14 +322,14 @@ void MessageAuthenticationCode::clear()
 	static_cast<MACContext *>(context())->setup(d->key);
 }
 
-void MessageAuthenticationCode::update(const QSecureArray &a)
+void MessageAuthenticationCode::update(const SecureArray &a)
 {
 	if(d->done)
 		return;
 	static_cast<MACContext *>(context())->update(a);
 }
 
-QSecureArray MessageAuthenticationCode::final()
+SecureArray MessageAuthenticationCode::final()
 {
 	if(!d->done)
 	{
@@ -368,7 +368,7 @@ KeyDerivationFunction & KeyDerivationFunction::operator=(const KeyDerivationFunc
 	return *this;
 }
 
-SymmetricKey KeyDerivationFunction::makeKey(const QSecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount)
+SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount)
 {
 	return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, iterationCount);
 }

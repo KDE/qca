@@ -271,8 +271,8 @@ namespace QCA
 		void write(const QByteArray &a);
 
 		// secure i/o
-		QSecureArray readSecure(int bytes = -1);
-		void writeSecure(const QSecureArray &a);
+		SecureArray readSecure(int bytes = -1);
+		void writeSecure(const SecureArray &a);
 
 		// close write channel (only if writing enabled)
 		void closeOutput();
@@ -297,7 +297,7 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		static QSecureArray getHidden(const QString &promptStr);
+		static SecureArray getHidden(const QString &promptStr);
 		static void waitForEnter();
 
 	private:

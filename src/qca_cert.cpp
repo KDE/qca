@@ -34,7 +34,7 @@ bool stringToFile(const QString &fileName, const QString &content);
 bool stringFromFile(const QString &fileName, QString *s);
 bool arrayToFile(const QString &fileName, const QByteArray &content);
 bool arrayFromFile(const QString &fileName, QByteArray *a);
-bool ask_passphrase(const QString &fname, void *ptr, QSecureArray *answer);
+bool ask_passphrase(const QString &fname, void *ptr, SecureArray *answer);
 ProviderList allProviders();
 Provider *providerForName(const QString &name);
 bool use_asker_fallback(ConvertResult r);
@@ -604,7 +604,7 @@ public:
 	QStringList policies;
 	bool isCA;
 	int pathLimit;
-	QBigInteger serial;
+	BigInteger serial;
 	QDateTime start, end;
 
 	Private() : isCA(false), pathLimit(0)
@@ -691,7 +691,7 @@ int CertificateOptions::pathLimit() const
 	return d->pathLimit;
 }
 
-QBigInteger CertificateOptions::serialNumber() const
+BigInteger CertificateOptions::serialNumber() const
 {
 	return d->serial;
 }
@@ -745,7 +745,7 @@ void CertificateOptions::setAsUser()
 	d->pathLimit = 0;
 }
 
-void CertificateOptions::setSerialNumber(const QBigInteger &i)
+void CertificateOptions::setSerialNumber(const BigInteger &i)
 {
 	d->serial = i;
 }
@@ -927,7 +927,7 @@ QString Certificate::commonName() const
 	return d->subjectInfoMap.value(CommonName);
 }
 
-QBigInteger Certificate::serialNumber() const
+BigInteger Certificate::serialNumber() const
 {
 	return static_cast<const CertContext *>(context())->props()->serial;
 }
@@ -1012,7 +1012,7 @@ Validity Certificate::validate(const CertificateCollection &trusted, const Certi
 	return static_cast<const CertContext *>(context())->validate(trusted_list, untrusted_list, crl_list, u);*/
 }
 
-QSecureArray Certificate::toDER() const
+SecureArray Certificate::toDER() const
 {
 	return static_cast<const CertContext *>(context())->toDER();
 }
@@ -1027,7 +1027,7 @@ bool Certificate::toPEMFile(const QString &fileName) const
 	return stringToFile(fileName, toPEM());
 }
 
-Certificate Certificate::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
+Certificate Certificate::fromDER(const SecureArray &a, ConvertResult *result, const QString &provider)
 {
 	Certificate c;
 	CertContext *cc = static_cast<CertContext *>(getContext("cert", provider));
@@ -1339,7 +1339,7 @@ bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 	return true;
 }
 
-QSecureArray CertificateRequest::toDER() const
+SecureArray CertificateRequest::toDER() const
 {
 	return static_cast<const CSRContext *>(context())->toDER();
 }
@@ -1354,7 +1354,7 @@ bool CertificateRequest::toPEMFile(const QString &fileName) const
 	return stringToFile(fileName, toPEM());
 }
 
-CertificateRequest CertificateRequest::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
+CertificateRequest CertificateRequest::fromDER(const SecureArray &a, ConvertResult *result, const QString &provider)
 {
 	CertificateRequest c;
 	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
@@ -1433,14 +1433,14 @@ CRLEntry::CRLEntry(const Certificate &c, Reason r)
 	_reason = r;
 }
 
-CRLEntry::CRLEntry(const QBigInteger serial, const QDateTime time, Reason r)
+CRLEntry::CRLEntry(const BigInteger serial, const QDateTime time, Reason r)
 {
 	_serial = serial;
 	_time = time;
 	_reason = r;
 }
 
-QBigInteger CRLEntry::serialNumber() const
+BigInteger CRLEntry::serialNumber() const
 {
 	return _serial;
 }
@@ -1562,7 +1562,7 @@ QList<CRLEntry> CRL::revoked() const
 	return static_cast<const CRLContext *>(context())->props()->revoked;
 }
 
-QSecureArray CRL::signature() const
+SecureArray CRL::signature() const
 {
 	return static_cast<const CRLContext *>(context())->props()->sig;
 }
@@ -1577,7 +1577,7 @@ QByteArray CRL::issuerKeyId() const
 	return static_cast<const CRLContext *>(context())->props()->issuerId;
 }
 
-QSecureArray CRL::toDER() const
+SecureArray CRL::toDER() const
 {
 	return static_cast<const CRLContext *>(context())->toDER();
 }
@@ -1627,7 +1627,7 @@ bool CRL::operator==(const CRL &otherCrl) const
 
 }
 
-CRL CRL::fromDER(const QSecureArray &a, ConvertResult *result, const QString &provider)
+CRL CRL::fromDER(const SecureArray &a, ConvertResult *result, const QString &provider)
 {
 	CRL c;
 	CRLContext *cc = static_cast<CRLContext *>(getContext("crl", provider));
@@ -1958,7 +1958,7 @@ KeyBundle::KeyBundle()
 {
 }
 
-KeyBundle::KeyBundle(const QString &fileName, const QSecureArray &passphrase)
+KeyBundle::KeyBundle(const QString &fileName, const SecureArray &passphrase)
 :d(new Private)
 {
 	*this = fromFile(fileName, passphrase, 0, QString());
@@ -2010,7 +2010,7 @@ void KeyBundle::setCertificateChainAndKey(const CertificateChain &c, const Priva
 	d->key = key;
 }
 
-QByteArray KeyBundle::toArray(const QSecureArray &passphrase, const QString &provider) const
+QByteArray KeyBundle::toArray(const SecureArray &passphrase, const QString &provider) const
 {
 	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
 
@@ -2023,12 +2023,12 @@ QByteArray KeyBundle::toArray(const QSecureArray &passphrase, const QString &pro
 	return buf;
 }
 
-bool KeyBundle::toFile(const QString &fileName, const QSecureArray &passphrase, const QString &provider) const
+bool KeyBundle::toFile(const QString &fileName, const SecureArray &passphrase, const QString &provider) const
 {
 	return arrayToFile(fileName, toArray(passphrase, provider));
 }
 
-KeyBundle KeyBundle::fromArray(const QByteArray &a, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+KeyBundle KeyBundle::fromArray(const QByteArray &a, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
 	QString name;
 	QList<CertContext *> list;
@@ -2041,7 +2041,7 @@ KeyBundle KeyBundle::fromArray(const QByteArray &a, const QSecureArray &passphra
 	// error converting without passphrase?  maybe a passphrase is needed
 	if(use_asker_fallback(r) && passphrase.isEmpty())
 	{
-		QSecureArray pass;
+		SecureArray pass;
 		if(ask_passphrase(QString(), 0, &pass))
 			r = pix->fromPKCS12(a, pass, &name, &list, &kc);
 	}
@@ -2063,7 +2063,7 @@ KeyBundle KeyBundle::fromArray(const QByteArray &a, const QSecureArray &passphra
 	return bundle;
 }
 
-KeyBundle KeyBundle::fromFile(const QString &fileName, const QSecureArray &passphrase, ConvertResult *result, const QString &provider)
+KeyBundle KeyBundle::fromFile(const QString &fileName, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
 	QByteArray der;
 	if(!arrayFromFile(fileName, &der))
@@ -2152,7 +2152,7 @@ bool PGPKey::isTrusted() const
 	return static_cast<const PGPKeyContext *>(context())->props()->isTrusted;
 }
 
-QSecureArray PGPKey::toArray() const
+SecureArray PGPKey::toArray() const
 {
 	return static_cast<const PGPKeyContext *>(context())->toBinary();
 }
@@ -2167,7 +2167,7 @@ bool PGPKey::toFile(const QString &fileName) const
 	return stringToFile(fileName, toString());
 }
 
-PGPKey PGPKey::fromArray(const QSecureArray &a, ConvertResult *result, const QString &provider)
+PGPKey PGPKey::fromArray(const SecureArray &a, ConvertResult *result, const QString &provider)
 {
 	PGPKey k;
 	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext("pgpkey", provider));
@@ -2217,7 +2217,7 @@ public:
 	public:
 		Type type;
 		QString fileName, pem;
-		QSecureArray der;
+		SecureArray der;
 		QByteArray kbder;
 	};
 
@@ -2240,15 +2240,15 @@ protected:
 	virtual void run()
 	{
 		if(in.type == PKPEMFile)
-			out.privateKey = PrivateKey::fromPEMFile(in.fileName, QSecureArray(), &out.convertResult);
+			out.privateKey = PrivateKey::fromPEMFile(in.fileName, SecureArray(), &out.convertResult);
 		else if(in.type == PKPEM)
-			out.privateKey = PrivateKey::fromPEM(in.pem, QSecureArray(), &out.convertResult);
+			out.privateKey = PrivateKey::fromPEM(in.pem, SecureArray(), &out.convertResult);
 		else if(in.type == PKDER)
-			out.privateKey = PrivateKey::fromDER(in.der, QSecureArray(), &out.convertResult);
+			out.privateKey = PrivateKey::fromDER(in.der, SecureArray(), &out.convertResult);
 		else if(in.type == KBDERFile)
-			out.keyBundle = KeyBundle::fromFile(in.fileName, QSecureArray(), &out.convertResult);
+			out.keyBundle = KeyBundle::fromFile(in.fileName, SecureArray(), &out.convertResult);
 		else if(in.type == KBDER)
-			out.keyBundle = KeyBundle::fromArray(in.kbder, QSecureArray(), &out.convertResult);
+			out.keyBundle = KeyBundle::fromArray(in.kbder, SecureArray(), &out.convertResult);
 	}
 };
 
@@ -2331,7 +2331,7 @@ void KeyLoader::loadPrivateKeyFromPEM(const QString &s)
 	d->start();
 }
 
-void KeyLoader::loadPrivateKeyFromDER(const QSecureArray &a)
+void KeyLoader::loadPrivateKeyFromDER(const SecureArray &a)
 {
 	Q_ASSERT(!d->active);
 	if(d->active)

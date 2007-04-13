@@ -651,7 +651,7 @@ void setAppName(const QString &s)
 	global->app_name = s;
 }
 
-QString arrayToHex(const QSecureArray &a)
+QString arrayToHex(const SecureArray &a)
 {
 	return Hex().arrayToString(a);
 }
@@ -843,12 +843,12 @@ int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const
 	return 0;
 }
 
-QSecureArray PKeyBase::encrypt(const QSecureArray &, EncryptionAlgorithm)
+SecureArray PKeyBase::encrypt(const SecureArray &, EncryptionAlgorithm)
 {
-	return QSecureArray();
+	return SecureArray();
 }
 
-bool PKeyBase::decrypt(const QSecureArray &, QSecureArray *, EncryptionAlgorithm)
+bool PKeyBase::decrypt(const SecureArray &, SecureArray *, EncryptionAlgorithm)
 {
 	return false;
 }
@@ -861,16 +861,16 @@ void PKeyBase::startVerify(SignatureAlgorithm, SignatureFormat)
 {
 }
 
-void PKeyBase::update(const QSecureArray &)
+void PKeyBase::update(const SecureArray &)
 {
 }
 
-QSecureArray PKeyBase::endSign()
+SecureArray PKeyBase::endSign()
 {
-	return QSecureArray();
+	return SecureArray();
 }
 
-bool PKeyBase::endVerify(const QSecureArray &)
+bool PKeyBase::endVerify(const SecureArray &)
 {
 	return false;
 }
@@ -883,9 +883,9 @@ SymmetricKey PKeyBase::deriveKey(const PKeyBase &)
 //----------------------------------------------------------------------------
 // PKeyContext
 //----------------------------------------------------------------------------
-QSecureArray PKeyContext::publicToDER() const
+SecureArray PKeyContext::publicToDER() const
 {
-	return QSecureArray();
+	return SecureArray();
 }
 
 QString PKeyContext::publicToPEM() const
@@ -893,7 +893,7 @@ QString PKeyContext::publicToPEM() const
 	return QString();
 }
 
-ConvertResult PKeyContext::publicFromDER(const QSecureArray &)
+ConvertResult PKeyContext::publicFromDER(const SecureArray &)
 {
 	return ErrorDecode;
 }
@@ -903,22 +903,22 @@ ConvertResult PKeyContext::publicFromPEM(const QString &)
 	return ErrorDecode;
 }
 
-QSecureArray PKeyContext::privateToDER(const QSecureArray &, PBEAlgorithm) const
+SecureArray PKeyContext::privateToDER(const SecureArray &, PBEAlgorithm) const
 {
-	return QSecureArray();
+	return SecureArray();
 }
 
-QString PKeyContext::privateToPEM(const QSecureArray &, PBEAlgorithm) const
+QString PKeyContext::privateToPEM(const SecureArray &, PBEAlgorithm) const
 {
 	return QString();
 }
 
-ConvertResult PKeyContext::privateFromDER(const QSecureArray &, const QSecureArray &)
+ConvertResult PKeyContext::privateFromDER(const SecureArray &, const SecureArray &)
 {
 	return ErrorDecode;
 }
 
-ConvertResult PKeyContext::privateFromPEM(const QString &, const QSecureArray &)
+ConvertResult PKeyContext::privateFromPEM(const QString &, const SecureArray &)
 {
 	return ErrorDecode;
 }
@@ -1021,7 +1021,7 @@ bool KeyStoreListContext::removeEntry(int, const QString &)
 	return false;
 }
 
-void KeyStoreListContext::submitPassphrase(int, int, const QSecureArray &)
+void KeyStoreListContext::submitPassphrase(int, int, const SecureArray &)
 {
 }
 
@@ -1054,7 +1054,7 @@ BufferedComputation::~BufferedComputation()
 {
 }
 
-QSecureArray BufferedComputation::process(const QSecureArray &a)
+SecureArray BufferedComputation::process(const SecureArray &a)
 {
 	clear();
 	update(a);
@@ -1068,15 +1068,15 @@ Filter::~Filter()
 {
 }
 
-QSecureArray Filter::process(const QSecureArray &a)
+SecureArray Filter::process(const SecureArray &a)
 {
 	clear();
-	QSecureArray buf = update(a);
+	SecureArray buf = update(a);
 	if(!ok())
-		return QSecureArray();
-	QSecureArray fin = final();
+		return SecureArray();
+	SecureArray fin = final();
 	if(!ok())
-		return QSecureArray();
+		return SecureArray();
 	int oldsize = buf.size();
 	buf.resize(oldsize + fin.size());
 	memcpy(buf.data() + oldsize, fin.data(), fin.size());
@@ -1207,14 +1207,14 @@ SymmetricKey::SymmetricKey(int size)
 	set(Random::randomArray(size));
 }
 
-SymmetricKey::SymmetricKey(const QSecureArray &a)
+SymmetricKey::SymmetricKey(const SecureArray &a)
 {
 	set(a);
 }
 
 SymmetricKey::SymmetricKey(const QByteArray &a)
 {
-	set(QSecureArray(a));
+	set(SecureArray(a));
 }
 
 /* from libgcrypt-1.2.0 */
@@ -1290,7 +1290,7 @@ bool SymmetricKey::isWeakDESKey()
 {
 	if(size() != 8)
 		return false; // dubious
-	QSecureArray workingCopy(8);
+	SecureArray workingCopy(8);
 	// clear parity bits
 	for(uint i = 0; i < 8; i++)
 		workingCopy[i] = (data()[i]) & 0xfe;
@@ -1315,14 +1315,14 @@ InitializationVector::InitializationVector(int size)
 	set(Random::randomArray(size));
 }
 
-InitializationVector::InitializationVector(const QSecureArray &a)
+InitializationVector::InitializationVector(const SecureArray &a)
 {
 	set(a);
 }
 
 InitializationVector::InitializationVector(const QByteArray &a)
 {
-	set(QSecureArray(a));
+	set(SecureArray(a));
 }
 
 //----------------------------------------------------------------------------
@@ -1461,13 +1461,13 @@ public:
 	{
 	}
 
-	virtual void set_accepted(const QSecureArray &password) = 0;
+	virtual void set_accepted(const SecureArray &password) = 0;
 	virtual void set_rejected() = 0;
 };
 
 static void handler_add(HandlerBase *h, int pos = -1);
 static void handler_remove(HandlerBase *h);
-static void handler_accept(HandlerBase *h, int id, const QSecureArray &password);
+static void handler_accept(HandlerBase *h, int id, const SecureArray &password);
 static void handler_reject(HandlerBase *h, int id);
 static bool asker_ask(AskerBase *a, const Event &e);
 static void asker_cancel(AskerBase *a);
@@ -1504,7 +1504,7 @@ public:
 	EventGlobal()
 	{
 		qRegisterMetaType<Event>("QCA::Event");
-		qRegisterMetaType<QSecureArray>("QSecureArray");
+		qRegisterMetaType<SecureArray>("QCA::SecureArray");
 		next_id = 0;
 	}
 
@@ -1643,7 +1643,7 @@ void handler_remove(HandlerBase *h)
 	}
 }
 
-void handler_accept(HandlerBase *h, int id, const QSecureArray &password)
+void handler_accept(HandlerBase *h, int id, const SecureArray &password)
 {
 	QMutexLocker locker(g_event_mutex());
 	Q_ASSERT(g_event);
@@ -1780,7 +1780,7 @@ void EventHandler::start()
 	handler_add(d);
 }
 
-void EventHandler::submitPassword(int id, const QSecureArray &password)
+void EventHandler::submitPassword(int id, const SecureArray &password)
 {
 	if(!d->activeIds.contains(id))
 		return;
@@ -1795,7 +1795,7 @@ void EventHandler::tokenOkay(int id)
 		return;
 
 	d->activeIds.removeAll(id);
-	handler_accept(d, id, QSecureArray());
+	handler_accept(d, id, SecureArray());
 }
 
 void EventHandler::reject(int id)
@@ -1824,7 +1824,7 @@ public:
 	QWaitCondition w;
 
 	bool accepted;
-	QSecureArray password;
+	SecureArray password;
 	bool waiting;
 	bool done;
 
@@ -1868,7 +1868,7 @@ public:
 			asker_cancel(this);
 	}
 
-	virtual void set_accepted(const QSecureArray &_password)
+	virtual void set_accepted(const SecureArray &_password)
 	{
 		QMutexLocker locker(&m);
 		accepted = true;
@@ -1957,7 +1957,7 @@ bool PasswordAsker::accepted() const
 	return d->accepted;
 }
 
-QSecureArray PasswordAsker::password() const
+SecureArray PasswordAsker::password() const
 {
 	return d->password;
 }

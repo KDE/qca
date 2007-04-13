@@ -475,10 +475,10 @@ namespace QCA
 	 * representation.
 	 *
 	 * This is a convenience function to convert an arbitrary
-	 * QSecureArray to a printable representation.
+	 * SecureArray to a printable representation.
 	 *
 	 * \code
-	 * 	QSecureArray test(10);
+	 * 	SecureArray test(10);
 	 *	test.fill('a');
 	 * 	// 0x61 is 'a' in ASCII
 	 *	if (QString("61616161616161616161") == QCA::arrayToHex(test) ) {
@@ -489,7 +489,7 @@ namespace QCA
 	 * \param array the array to be converted
 	 * \return a printable representation
 	 */
-	QCA_EXPORT QString arrayToHex(const QSecureArray &array);
+	QCA_EXPORT QString arrayToHex(const SecureArray &array);
 
 	/**
 	 * Convert a QString containing a hexadecimal representation
@@ -809,12 +809,12 @@ namespace QCA
 		   \param a the byte array of data that is to 
 		   be used to update the internal state.
 		*/
-		virtual void update(const QSecureArray &a) = 0;
+		virtual void update(const SecureArray &a) = 0;
 
 		/**
 		   Complete the algorithm and return the internal state
 		*/
-		virtual QSecureArray final() = 0;
+		virtual SecureArray final() = 0;
 
 		/**
 		   Perform an "all in one" update, returning
@@ -826,7 +826,7 @@ namespace QCA
 		   \note This will invalidate any previous
 		   computation using this object.
 		*/
-		QSecureArray process(const QSecureArray &a);
+		SecureArray process(const SecureArray &a);
 	};
 
 	/**
@@ -861,13 +861,13 @@ namespace QCA
 
 		   \param a the array containing data to process
 		*/
-		virtual QSecureArray update(const QSecureArray &a) = 0;
+		virtual SecureArray update(const SecureArray &a) = 0;
 
 		/**
 		   Complete the algorithm, returning any 
 		   additional results.
 		*/
-		virtual QSecureArray final() = 0;
+		virtual SecureArray final() = 0;
 
 		/**
 		 Test if an update() or final() call succeeded.
@@ -886,7 +886,7 @@ namespace QCA
 		   \note This will invalidate any previous
 		   computation using this object.
 		*/
-		QSecureArray process(const QSecureArray &a);
+		SecureArray process(const SecureArray &a);
 	};
 
 	/**
@@ -995,7 +995,7 @@ namespace QCA
 
 	   Container for keys for symmetric encryption algorithms.
 	 */
-	class QCA_EXPORT SymmetricKey : public QSecureArray
+	class QCA_EXPORT SymmetricKey : public SecureArray
 	{
 	public:
 		/**
@@ -1018,7 +1018,7 @@ namespace QCA
 		 *
 		 * \param a the byte array to copy
 		 */
-		SymmetricKey(const QSecureArray &a);
+		SymmetricKey(const SecureArray &a);
 
 		/**
 		 * Construct a key from a provided byte array
@@ -1040,7 +1040,7 @@ namespace QCA
 
 	   Container for initialisation vectors and nonces
 	 */
-	class QCA_EXPORT InitializationVector : public QSecureArray
+	class QCA_EXPORT InitializationVector : public SecureArray
 	{
 	public:
 		/** 
@@ -1060,7 +1060,7 @@ namespace QCA
 
 		   \param a the byte array to copy
 		 */
-		InitializationVector(const QSecureArray &a);
+		InitializationVector(const SecureArray &a);
 
 		/**
 		   Construct an initialisation vector from a provided byte array
@@ -1283,7 +1283,7 @@ namespace QCA
 		   \note the id parameter is the same as that provided in the
 		   eventReady() signal.
 		*/
-		void submitPassword(int id, const QSecureArray &password);
+		void submitPassword(int id, const SecureArray &password);
 
 		/**
 		   function to call to indicate that the token has been inserted
@@ -1386,7 +1386,7 @@ namespace QCA
 		   The password / passphrase / PIN provided by the user in response to
 		   the asker request. This may be empty.
 		*/
-		QSecureArray password() const;
+		SecureArray password() const;
 
 	Q_SIGNALS:
 		/**

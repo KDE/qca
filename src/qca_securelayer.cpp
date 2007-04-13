@@ -991,7 +991,7 @@ void SASL::setAuthzid(const QString &authzid)
 	d->c->setClientParams(0, &authzid, 0, 0);
 }
 
-void SASL::setPassword(const QSecureArray &pass)
+void SASL::setPassword(const SecureArray &pass)
 {
 	d->c->setClientParams(0, 0, &pass, 0);
 }

@@ -914,7 +914,7 @@ namespace QCA
 
 		   \param pass the password to use
 		*/
-		void setPassword(const QSecureArray &pass);
+		void setPassword(const SecureArray &pass);
 
 		/**
 		   Specify the realm to use in authentication

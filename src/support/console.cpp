@@ -120,12 +120,12 @@ public slots:
 		out.write(a);
 	}
 
-	QSecureArray readSecure(int bytes = -1)
+	QCA::SecureArray readSecure(int bytes = -1)
 	{
 		return in.readSecure(bytes);
 	}
 
-	void writeSecure(const QSecureArray &a)
+	void writeSecure(const QCA::SecureArray &a)
 	{
 		out.writeSecure(a);
 	}
@@ -206,7 +206,7 @@ public:
 
 	ConsoleThread(QObject *parent = 0) : SyncThread(parent)
 	{
-		qRegisterMetaType<QSecureArray>("QSecureArray");
+		qRegisterMetaType<SecureArray>("QCA::SecureArray");
 	}
 
 	~ConsoleThread()
@@ -255,14 +255,14 @@ public:
 		mycall(worker, "write", QVariantList() << a);
 	}
 
-	QSecureArray readSecure(int bytes = -1)
+	SecureArray readSecure(int bytes = -1)
 	{
-		return qVariantValue<QSecureArray>(mycall(worker, "readSecure", QVariantList() << bytes));
+		return qVariantValue<SecureArray>(mycall(worker, "readSecure", QVariantList() << bytes));
 	}
 
-	void writeSecure(const QSecureArray &a)
+	void writeSecure(const SecureArray &a)
 	{
-		mycall(worker, "writeSecure", QVariantList() << qVariantFromValue<QSecureArray>(a));
+		mycall(worker, "writeSecure", QVariantList() << qVariantFromValue<SecureArray>(a));
 	}
 
 	void closeOutput()
@@ -659,12 +659,12 @@ void ConsoleReference::write(const QByteArray &a)
 	d->thread->write(a);
 }
 
-QSecureArray ConsoleReference::readSecure(int bytes)
+SecureArray ConsoleReference::readSecure(int bytes)
 {
 	return d->thread->readSecure(bytes);
 }
 
-void ConsoleReference::writeSecure(const QSecureArray &a)
+void ConsoleReference::writeSecure(const SecureArray &a)
 {
 	d->thread->writeSecure(a);
 }
@@ -694,7 +694,7 @@ public:
 	Synchronizer sync;
 	ConsoleReference console;
 	QString promptStr;
-	QSecureArray result;
+	SecureArray result;
 	int at;
 	bool done;
 	bool enterMode;
@@ -818,7 +818,7 @@ private slots:
 	{
 		while(console.bytesAvailable() > 0)
 		{
-			QSecureArray buf = console.readSecure(1);
+			SecureArray buf = console.readSecure(1);
 			if(buf.isEmpty())
 				break;
 
@@ -861,17 +861,17 @@ ConsolePrompt::~ConsolePrompt()
 	delete d;
 }
 
-QSecureArray ConsolePrompt::getHidden(const QString &promptStr)
+SecureArray ConsolePrompt::getHidden(const QString &promptStr)
 {
 	ConsolePrompt p;
 	p.d->promptStr = promptStr;
 	if(!p.d->start(false))
-		return QSecureArray();
+		return SecureArray();
 
 	// convert result from utf16 to utf8, securely
 	QTextCodec *codec = QTextCodec::codecForMib(106);
 	QTextCodec::ConverterState cstate(QTextCodec::IgnoreHeader);
-	QSecureArray out;
+	SecureArray out;
 	ushort *ustr = (ushort *)p.d->result.data();
 	int len = p.d->result.size() / sizeof(ushort);
 	for(int n = 0; n < len; ++n)

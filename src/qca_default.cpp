@@ -44,9 +44,9 @@ public:
 		return new DefaultRandomContext(provider());
 	}
 
-	virtual QSecureArray nextBytes(int size)
+	virtual SecureArray nextBytes(int size)
 	{
-		QSecureArray buf(size);
+		SecureArray buf(size);
 		for(int n = 0; n < (int)buf.size(); ++n)
 			buf[n] = (char)rand();
 		return buf;
@@ -127,7 +127,7 @@ typedef quint32 md5_word_t; /* 32-bit word */
 
 /* Define the state of the MD5 Algorithm. */
 struct md5_state_t {
-    QSecureArray sbuf;
+    SecureArray sbuf;
     md5_word_t *count; // 2   /* message length in bits, lsw first */
     md5_word_t *abcd;  // 4   /* digest buffer */
     md5_byte_t *buf;   // 64  /* accumulate block */
@@ -245,7 +245,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 
 	/* Define storage for little-endian or both types of CPUs. */
 	// possible FIXME: does xbuf really need to be secured?
-	QSecureArray sxbuf(16 * sizeof(md5_word_t));
+	SecureArray sxbuf(16 * sizeof(md5_word_t));
 	md5_word_t *xbuf = (md5_word_t *)sxbuf.data();
 	const md5_word_t *X;
 
@@ -485,14 +485,14 @@ public:
 		md5_init(&md5);
 	}
 
-	virtual void update(const QSecureArray &in)
+	virtual void update(const SecureArray &in)
 	{
 		md5_append(&md5, (const md5_byte_t *)in.data(), in.size());
 	}
 
-	virtual QSecureArray final()
+	virtual SecureArray final()
 	{
-		QSecureArray b(16);
+		SecureArray b(16);
 		md5_finish(&md5, (md5_byte_t *)b.data());
 		return b;
 	}
@@ -518,7 +518,7 @@ public:
 
 struct SHA1_CONTEXT
 {
-	QSecureArray sbuf;
+	SecureArray sbuf;
 	quint32 *state; // 5
 	quint32 *count; // 2
 	unsigned char *buffer; // 64
@@ -576,14 +576,14 @@ public:
 		sha1_init(&_context);
 	}
 
-	virtual void update(const QSecureArray &in)
+	virtual void update(const SecureArray &in)
 	{
 		sha1_update(&_context, (unsigned char *)in.data(), (unsigned int)in.size());
 	}
 
-	virtual QSecureArray final()
+	virtual SecureArray final()
 	{
-		QSecureArray b(20);
+		SecureArray b(20);
 		sha1_final((unsigned char *)b.data(), &_context);
 		return b;
 	}
