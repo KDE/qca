@@ -2120,8 +2120,6 @@ pkcs11KeyStoreListContext::tokenId2storeId (
 	const pkcs11h_token_id_t token_id
 ) const {
 	QString storeId;
-	QString qid = "Unknown";
-	char *id = NULL;
 	size_t len;
 
 	QCA_logTextMessage (
@@ -2137,23 +2135,27 @@ pkcs11KeyStoreListContext::tokenId2storeId (
 			NULL,
 			&len,
 			token_id
-		) == CKR_OK &&
-		(id = (char *)malloc (len)) != NULL &&
+		) != CKR_OK
+	) {
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize token id");
+	}
+
+	QByteArray buf;
+	buf.resize ((int)len);
+
+	if (
 		pkcs11h_token_serializeTokenId (
-			id,
+			buf.data (),
 			&len,
 			token_id
-		) == CKR_OK
+		) != CKR_OK
 	) {
-		qid = id;
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize token id");
 	}
 
-	if (id != NULL) {
-		free (id);
-		id = NULL;
-	}
+	buf.resize ((int)len);
 
-	storeId = "qca-pkcs11/" + escapeString (qid);
+	storeId = "qca-pkcs11/" + escapeString (QString::fromUtf8 (buf));
 
 	QCA_logTextMessage (
 		QString ().sprintf (
@@ -2173,8 +2175,6 @@ pkcs11KeyStoreListContext::serializeCertificateId (
 	const bool has_private
 ) const {
 	QString serialized;
-	QString qid = "Unknown";
-	char *id = NULL;
 	size_t len;
 
 	QCA_logTextMessage (
@@ -2191,35 +2191,42 @@ pkcs11KeyStoreListContext::serializeCertificateId (
 			NULL,
 			&len,
 			certificate_id
-		) == CKR_OK &&
-		(id = (char *)malloc (len)) != NULL &&
+		) != CKR_OK
+	) {
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize certificate id");
+	}
+
+	QByteArray buf;
+	buf.resize ((int)len);
+
+	if (
 		pkcs11h_certificate_serializeCertificateId (
-			id,
+			buf.data (),
 			&len,
 			certificate_id
-		) == CKR_OK
+		) != CKR_OK
 	) {
-		qid = id;
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize certificate id");
 	}
 
-	if (id != NULL) {
-		free (id);
-		id = NULL;
-	}
+	buf.resize ((int)len);
 
 	serialized = QString ().sprintf (
-		"qca-pkcs11/%s/%d",
-		myPrintable(escapeString (qid)),
+		"qca-pkcs11/%s/%d/",
+		myPrintable(escapeString (QString::fromUtf8 (buf))),
 		has_private ? 1 : 0
 	);
 
+	QStringList list;
 	for (
 		CertificateChain::const_iterator i = chain.begin ();
 		i != chain.end ();
 		i++
 	) {
-		serialized += '/' + escapeString (Base64 ().arrayToString ((*i).toDER ()));
+		list += escapeString (Base64 ().arrayToString ((*i).toDER ()));
 	}
+
+	serialized.append (list.join ("/"));
 
 	QCA_logTextMessage (
 		QString ().sprintf (
@@ -2327,7 +2334,7 @@ pkcs11KeyStoreListContext::escapeString (
 		QChar c = from[i];
 
 		if (c == '/' || c == '\\') {
-			to += QString ().sprintf ("\\x%02x", c.toLatin1 ());
+			to += QString ().sprintf ("\\x%04x", c.unicode ());
 		}
 		else {
 			to += c;
@@ -2347,8 +2354,8 @@ pkcs11KeyStoreListContext::unescapeString (
 		QChar c = from[i];
 
 		if (c == '\\') {
-			to += QChar ((uchar)from.mid (i+2, 2).toInt (0, 16));
-			i+=3;
+			to += QChar ((ushort)from.mid (i+2, 4).toInt (0, 16));
+			i+=5;
 		}
 		else {
 			to += c;
@@ -2770,7 +2777,7 @@ pkcs11Provider::logHook (
 //@BEGIN-WORKAROUND
 // Qt vsprintf cannot can NULL for %s as vsprintf does.
 //	QCA_logTextMessage (QString ().vsprintf (format, args), severity);
-	char buffer[1024];
+	char buffer[2048];
 	vsnprintf (buffer, sizeof (buffer)-1, format, args);
 	buffer[sizeof (buffer)-1] = '\x0';
 	QCA_logTextMessage (buffer, severity);
