@@ -115,9 +115,9 @@ public:
 	{
 		self = this;
 
-		//qRegisterMetaType<QCA::KeyStoreEntry>("QCA::KeyStoreEntry");
-		//qRegisterMetaType< QList<QCA::KeyStoreEntry> >("QList<QCA::KeyStoreEntry>");
-		//qRegisterMetaType< QList<QCA::KeyStoreEntry::Type> >("QList<QCA::KeyStoreEntry::Type>");
+		qRegisterMetaType<QCA::KeyStoreEntry>("QCA::KeyStoreEntry");
+		qRegisterMetaType< QList<QCA::KeyStoreEntry> >("QList<QCA::KeyStoreEntry>");
+		qRegisterMetaType< QList<QCA::KeyStoreEntry::Type> >("QList<QCA::KeyStoreEntry::Type>");
 
 		connect(this, SIGNAL(updated_p()), SIGNAL(updated()), Qt::QueuedConnection);
 
