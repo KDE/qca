@@ -22,6 +22,10 @@
 
 #include "qcaprovider.h"
 
+Q_DECLARE_METATYPE(QCA::KeyStoreEntry)
+Q_DECLARE_METATYPE(QList<QCA::KeyStoreEntry>)
+Q_DECLARE_METATYPE(QList<QCA::KeyStoreEntry::Type>)
+
 namespace QCA {
 
 Provider::Context *getContext(const QString &type, Provider *p);
@@ -111,9 +115,9 @@ public:
 	{
 		self = this;
 
-		qRegisterMetaType<QCA::KeyStoreEntry>("QCA::KeyStoreEntry");
-		qRegisterMetaType< QList<QCA::KeyStoreEntry> >("QList<QCA::KeyStoreEntry>");
-		qRegisterMetaType< QList<QCA::KeyStoreEntry::Type> >("QList<QCA::KeyStoreEntry::Type>");
+		//qRegisterMetaType<QCA::KeyStoreEntry>("QCA::KeyStoreEntry");
+		//qRegisterMetaType< QList<QCA::KeyStoreEntry> >("QList<QCA::KeyStoreEntry>");
+		//qRegisterMetaType< QList<QCA::KeyStoreEntry::Type> >("QList<QCA::KeyStoreEntry::Type>");
 
 		connect(this, SIGNAL(updated_p()), SIGNAL(updated()), Qt::QueuedConnection);
 

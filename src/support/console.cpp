@@ -32,6 +32,8 @@
 
 #define CONSOLEPROMPT_INPUT_MAX 56
 
+Q_DECLARE_METATYPE(QCA::SecureArray)
+
 namespace QCA {
 
 //----------------------------------------------------------------------------
