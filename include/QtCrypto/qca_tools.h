@@ -583,7 +583,4 @@ QCA_EXPORT QTextStream &operator<<(QTextStream &stream, const BigInteger &b);
 
 }
 
-Q_DECLARE_METATYPE(QCA::SecureArray)
-Q_DECLARE_METATYPE(QCA::BigInteger)
-
 #endif

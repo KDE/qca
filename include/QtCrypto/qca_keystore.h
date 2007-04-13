@@ -606,8 +606,4 @@ namespace QCA
 	};
 }
 
-Q_DECLARE_METATYPE(QCA::KeyStoreEntry)
-Q_DECLARE_METATYPE(QList<QCA::KeyStoreEntry>)
-Q_DECLARE_METATYPE(QList<QCA::KeyStoreEntry::Type>)
-
 #endif
