@@ -726,7 +726,7 @@ public:
 	}
 
 #ifdef QPIPE_SECURE
-	void submitPassphrase(const QSecureArray &a)
+	void submitPassphrase(const QCA::SecureArray &a)
 #else
 	void submitPassphrase(const QByteArray &a)
 #endif
@@ -737,7 +737,7 @@ public:
 		need_submitPassphrase = false;
 
 #ifdef QPIPE_SECURE
-		QSecureArray b = a;
+		QCA::SecureArray b = a;
 #else
 		QByteArray b = a;
 #endif
@@ -1504,7 +1504,7 @@ void GpgOp::doExport(const QString &key_id)
 }
 
 #ifdef QPIPE_SECURE
-void GpgOp::submitPassphrase(const QSecureArray &a)
+void GpgOp::submitPassphrase(const QCA::SecureArray &a)
 #else
 void GpgOp::submitPassphrase(const QByteArray &a)
 #endif

@@ -125,10 +125,10 @@ public:
 		return &_props;
 	}
 
-	virtual QSecureArray toBinary() const
+	virtual SecureArray toBinary() const
 	{
 		// TODO
-		return QSecureArray();
+		return SecureArray();
 	}
 
 	virtual QString toAscii() const
@@ -148,7 +148,7 @@ public:
 		return str;
 	}
 
-	virtual ConvertResult fromBinary(const QSecureArray &a)
+	virtual ConvertResult fromBinary(const SecureArray &a)
 	{
 		// TODO
 		Q_UNUSED(a);
@@ -344,7 +344,7 @@ public:
 		return list;
 	}
 
-	virtual void submitPassphrase(const QSecureArray &a)
+	virtual void submitPassphrase(const SecureArray &a)
 	{
 		global_gpg->submitPassphrase(a.toByteArray());
 	}
@@ -558,7 +558,7 @@ public:
 		return c;
 	}
 
-	virtual void submitPassphrase(int, int, const QSecureArray &a)
+	virtual void submitPassphrase(int, int, const SecureArray &a)
 	{
 		global_gpg->submitPassphrase(a.toByteArray());
 	}
@@ -949,7 +949,7 @@ public:
 /*private slots:
 	void asker_responseReady()
 	{
-		QSecureArray a = asker.password();
+		SecureArray a = asker.password();
 		global_gpg->submitPassphrase(a.toByteArray());
 	}*/
 };
