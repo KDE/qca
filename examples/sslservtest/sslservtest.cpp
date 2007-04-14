@@ -235,7 +235,7 @@ private slots:
 
     void sock_error(QAbstractSocket::SocketError error)
     {
-	qDebug() << "Socket error: " << error;
+	qDebug() << "Socket error: " << (unsigned) error;
     }
 
     void ssl_handshaken()
