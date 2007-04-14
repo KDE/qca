@@ -8,8 +8,6 @@
 
 * beta4
   code:
-    keystore async mode
-    keystore watcher
     fix the locking stuff in qca_core
     allow logger to be used from anywhere
     qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
@@ -18,6 +16,7 @@
     qca-openssl: why are some constraints auto-added?
     qca-openssl: ca signing
   other:
+    valgrind
     krazy warnings
     Update to latest Botan, and remake the botantools patch as appropriate
        - remove u32bit miller_rabin_test_iterations(u32bit bits, bool verify)
@@ -32,12 +31,12 @@
     document which functions might cause a synchronous asker?
     async console prompter
   code:
+    keystore: complete, async mode, clean
     qca-cyrus-sasl:
       there's a problem where we can create the provider, and not create
       a saslContext, and then the destructor depends on uninitialised values
       (to see this, valgrind staticunittest).
     qca-openssl: support async S/MIME and TLS
-    keystore: cleanup
     core: properties
     cert: rfc 2818 hostname validation
     tls/sasl
