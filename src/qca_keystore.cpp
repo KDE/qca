@@ -826,6 +826,7 @@ bool KeyStore::isReadOnly() const
 void KeyStore::startAsynchronousMode()
 {
 	// TODO
+	QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
 }
 
 QList<KeyStoreEntry> KeyStore::entryList() const
