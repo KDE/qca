@@ -338,14 +338,15 @@ namespace QCA
             */
             enum Severity
             {
-                Emergency = 0,   ///< Emergency: system is unusable
-                Alert = 1,       ///< Alert: action must be taken immediately
-                Critical = 2,    ///< Critical: critical conditions
-                Error = 3,       ///< Error: error conditions
-                Warning = 4,     ///< Warning: warning conditions
-                Notice = 5,      ///< Notice: normal but significant condition
-                Information = 6, ///< Informational: informational messages
-                Debug = 7        ///< Debug: debug-level messages
+                Quiet = 0,       ///< Quiet: turn of logging
+                Emergency = 1,   ///< Emergency: system is unusable
+                Alert = 2,       ///< Alert: action must be taken immediately
+                Critical = 3,    ///< Critical: critical conditions
+                Error = 4,       ///< Error: error conditions
+                Warning = 5,     ///< Warning: warning conditions
+                Notice = 6,      ///< Notice: normal but significant condition
+                Information = 7, ///< Informational: informational messages
+                Debug = 8        ///< Debug: debug-level messages
             };
 
 	    /**

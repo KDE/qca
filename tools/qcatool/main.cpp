@@ -106,6 +106,7 @@ private:
 };
 
 char *StreamLogger::s_severityNames[] = {
+	"Q",
 	"M",
 	"A",
 	"C",
@@ -1668,6 +1669,8 @@ static void usage()
 	printf("  P = PGP public key, S = PGP secret key, E = generic entry\n");
 	printf("\n");
 	printf("An object must be either a filename or a keystore reference (\"store:obj\").\n");
+	printf("\n");
+	printf("Log level is from 0 (quiet) to 8 (debug)\n");
 	printf("\n");
 }
 
