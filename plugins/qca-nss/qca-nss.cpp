@@ -113,15 +113,15 @@ public:
 	}
     }
 
-    void update(const QSecureArray &a)
+    void update(const QCA::SecureArray &a)
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
 
-    QSecureArray final()
+    QCA::SecureArray final()
     {
 	unsigned int len = 0;
-	QSecureArray a( 64 );
+	QCA::SecureArray a( 64 );
 	PK11_DigestFinal(m_context, (unsigned char*)a.data(), &len, a.size());
 	a.resize(len);
 	return a;
@@ -242,12 +242,12 @@ public:
 	}
     }
 
-    void update(const QSecureArray &a)
+    void update(const QCA::SecureArray &a)
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
 
-    void final( QSecureArray *out)
+    void final( QCA::SecureArray *out)
     {
 	// NSS doesn't appear to be able to tell us how big the digest will
 	// be for a given algorithm until after we finalise it, so we work
@@ -363,7 +363,7 @@ public:
 	    return PK11_GetBlockSize( m_cipherMechanism, m_params);
 	}
 
-    bool update( const QSecureArray &in, QSecureArray *out )
+    bool update( const QCA::SecureArray &in, QCA::SecureArray *out )
 	{
 	    out->resize(in.size()+blockSize());
 	    int resultLength;
@@ -376,7 +376,7 @@ public:
 	    return true;
 	}
 
-    bool final( QSecureArray *out )
+    bool final( QCA::SecureArray *out )
 	{
 	    out->resize(blockSize());
 	    unsigned int resultLength;

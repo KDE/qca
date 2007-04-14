@@ -68,15 +68,15 @@ public:
 	gcry_md_reset( context );
     }
 
-    void update(const QSecureArray &a)
+    void update(const QCA::SecureArray &a)
     {
 	gcry_md_write( context, a.data(), a.size() );
     }
 
-    QSecureArray final()
+    QCA::SecureArray final()
     {
 	unsigned char *md;
-	QSecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
+        QCA::SecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
 	md = gcry_md_read( context, m_hashAlgorithm );
 	memcpy( a.data(), md, a.size() );
 	return a;
@@ -127,12 +127,12 @@ public:
         return anyKeyLength();
     }
 
-    void update(const QSecureArray &a)
+    void update(const QCA::SecureArray &a)
     {
         gcry_md_write( context, a.data(), a.size() );
     }
 
-    void final( QSecureArray *out)
+    void final( QCA::SecureArray *out)
     {
         out->resize( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
         unsigned char *md;
@@ -167,7 +167,7 @@ public:
 	if ( ( GCRY_CIPHER_3DES == m_cryptoAlgorithm ) && (key.size() == 16) ) {
 	    // this is triple DES with two keys, and gcrypt wants three
 	    QCA::SymmetricKey keyCopy(key);
-	    QSecureArray thirdKey(key);
+            QCA::SecureArray thirdKey(key);
 	    thirdKey.resize(8);
 	    keyCopy += thirdKey;
 	    err = gcry_cipher_setkey( context, keyCopy.data(), keyCopy.size() );
@@ -191,9 +191,9 @@ public:
 	return blockSize;
     }
 
-    bool update(const QSecureArray &in, QSecureArray *out)
+    bool update(const QCA::SecureArray &in, QCA::SecureArray *out)
     {
-	QSecureArray result( in.size() );
+        QCA::SecureArray result( in.size() );
 	if (QCA::Encode == m_direction) {
 	    err = gcry_cipher_encrypt( context, (unsigned char*)result.data(), result.size(), (unsigned char*)in.data(), in.size() );
 	} else {
@@ -205,9 +205,9 @@ public:
 	return true;
     }
 
-    bool final(QSecureArray *out)
+    bool final(QCA::SecureArray *out)
     {
-	QSecureArray result;
+        QCA::SecureArray result;
 	if (m_pad) {
 	    result.resize( blockSize() );
 	    if (QCA::Encode == m_direction) {
@@ -281,7 +281,7 @@ public:
 	return new pbkdf1Context( *this );
     }
 
-    QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
 	/* from RFC2898:
@@ -311,7 +311,7 @@ public:
 	gcry_md_write( context, salt.data(), salt.size() );
 	unsigned char *md;
 	md = gcry_md_read( context, m_hashAlgorithm );
-	QSecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
+        QCA::SecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
 	memcpy( a.data(), md, a.size() );
 
 	// calculate T_2 up to T_c
@@ -351,7 +351,7 @@ public:
       return new pbkdf2Context( *this );
     }
 
-    QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
 			 unsigned int keyLength, unsigned int iterationCount)
     {
 	QCA::SymmetricKey result(keyLength);

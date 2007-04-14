@@ -103,7 +103,7 @@ public:
 		authzid = s;
 	}
 
-	void setPassword(const QSecureArray &s)
+	void setPassword(const SecureArray &s)
 	{
 		have.pass = true;
 		pass = QString::fromUtf8(s.toByteArray());
@@ -713,7 +713,7 @@ public:
 		return params.missing();
 	}
 
-	virtual void setClientParams(const QString *user, const QString *authzid, const QSecureArray *pass, const QString *realm)
+	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm)
 	{
 		if(user)
 			params.setUsername(*user);

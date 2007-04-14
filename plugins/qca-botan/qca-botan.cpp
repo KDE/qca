@@ -42,9 +42,9 @@ public:
 	return new botanRandomContext( *this );
     }
 
-    QSecureArray nextBytes(int size)
+    QCA::SecureArray nextBytes(int size)
     {
-	QSecureArray buf(size);
+        QCA::SecureArray buf(size);
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,5,0)
 	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size(), Botan::SessionKey );
 #else
@@ -79,14 +79,14 @@ public:
 	m_hashObj->clear();
     }
 
-    void update(const QSecureArray &a)
+    void update(const QCA::SecureArray &a)
     {
 	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
     }
 
-    QSecureArray final()
+    QCA::SecureArray final()
     {
-	QSecureArray a( m_hashObj->OUTPUT_LENGTH );
+        QCA::SecureArray a( m_hashObj->OUTPUT_LENGTH );
 	m_hashObj->final( (Botan::byte *)a.data() );
 	return a;
     }
@@ -137,12 +137,12 @@ public:
         return anyKeyLength();
     }
 
-    void update(const QSecureArray &a)
+    void update(const QCA::SecureArray &a)
     {
 	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
     }
 
-    void final( QSecureArray *out)
+    void final( QCA::SecureArray *out)
     {
 	out->resize( m_hashObj->OUTPUT_LENGTH );
 	m_hashObj->final( (Botan::byte *)out->data() );
@@ -172,14 +172,14 @@ public:
 	return new BotanPBKDFContext( *this );
     }
 
-    QCA::SymmetricKey makeKey(const QSecureArray &secret, const QCA::InitializationVector &salt,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
 	m_s2k->set_iterations(iterationCount);
 	m_s2k->change_salt((const Botan::byte*)salt.data(), salt.size());
 	std::string secretString(secret.data(), secret.size() );
 	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString);
-	QSecureArray retval(QByteArray((const char*)key.begin(), key.length()));
+        QCA::SecureArray retval(QByteArray((const char*)key.begin(), key.length()));
 	return QCA::SymmetricKey(retval);
     }
 
@@ -244,9 +244,9 @@ public:
 	return Botan::block_size_of(m_algoName);
     }
 
-    bool update(const QSecureArray &in, QSecureArray *out)
+    bool update(const QCA::SecureArray &in, QCA::SecureArray *out)
     {
-	QSecureArray result( in.size() + blockSize() );
+        QCA::SecureArray result( in.size() + blockSize() );
 	m_crypter->write((Botan::byte*)in.data(), in.size());
 	int bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
 	result.resize(bytes_read);
@@ -254,9 +254,9 @@ public:
         return true;
     }
 
-    bool final(QSecureArray *out)
+    bool final(QCA::SecureArray *out)
     {
-	QSecureArray result( 2 * blockSize() );
+        QCA::SecureArray result( 2 * blockSize() );
 	m_crypter->end_msg();
 	int bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
 	result.resize(bytes_read);
