@@ -645,47 +645,109 @@ void KeyStoreTracker::setEntryAvailable(KeyStoreEntry *e)
 //----------------------------------------------------------------------------
 // KeyStoreEntryWatcher
 //----------------------------------------------------------------------------
-/*class KeyStoreEntryWatcher::Private : public QObject
+class KeyStoreEntryWatcher::Private : public QObject
 {
 	Q_OBJECT
 public:
 	KeyStoreEntryWatcher *q;
 	KeyStoreManager ksm;
-	KeyStoreEntry e;
+	KeyStoreEntry entry;
+	QString storeId, entryId;
+	KeyStore *ks;
+	bool avail;
 
-	Private(KeyStoreEntryWatcher *_q) : q(_q)
+	Private(KeyStoreEntryWatcher *_q) : QObject(_q), q(_q), ksm(this)
 	{
+		ks = 0;
+		avail = false;
+		connect(&ksm, SIGNAL(keyStoreAvailable(const QString &)), SLOT(ksm_available(const QString &)));
 	}
-};*/
+
+	~Private()
+	{
+		delete ks;
+	}
+
+	void start()
+	{
+		QStringList list = ksm.keyStores();
+		foreach(const QString &storeId, list)
+			ksm_available(storeId);
+	}
+
+private slots:
+	void ksm_available(const QString &_storeId)
+	{
+		// we only care about one store
+		if(_storeId == storeId)
+		{
+			ks = new KeyStore(storeId, &ksm);
+			connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
+			ks->startAsynchronousMode();
+		}
+	}
+
+	void ks_updated()
+	{
+		bool found = false;
+		QList<KeyStoreEntry> list = ks->entryList();
+		foreach(const KeyStoreEntry &e, list)
+		{
+			if(e.id() == entryId)
+			{
+				found = true;
+				if(!avail)
+					entry = e;
+				break;
+			}
+		}
+
+		if(found && !avail)
+		{
+			avail = true;
+			emit q->available();
+		}
+		else if(!found && avail)
+		{
+			avail = false;
+			emit q->unavailable();
+		}
+	}
+
+	void ks_unavailable()
+	{
+		delete ks;
+		ks = 0;
+
+		if(avail)
+		{
+			avail = false;
+			emit q->unavailable();
+		}
+	}
+};
 
 KeyStoreEntryWatcher::KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent)
 :QObject(parent)
 {
-	// TODO
-	Q_UNUSED(e);
-	//d = new Private(this);
+	d = new Private(this);
+	if(!e.isNull())
+	{
+		d->entry = e;
+		d->storeId = e.storeId();
+		d->entryId = e.id();
+		d->start();
+	}
 }
 
 KeyStoreEntryWatcher::~KeyStoreEntryWatcher()
 {
-	//delete d;
+	delete d;
 }
-
-/*void KeyStoreEntryWatcher::start(const KeyStoreEntry &e)
-{
-	// TODO
-	Q_UNUSED(e);
-}
-
-void KeyStoreEntryWatcher::stop()
-{
-	// TODO
-}*/
 
 KeyStoreEntry KeyStoreEntryWatcher::entry() const
 {
-	// TODO
-	return KeyStoreEntry();
+	return d->entry;
 }
 
 //----------------------------------------------------------------------------
