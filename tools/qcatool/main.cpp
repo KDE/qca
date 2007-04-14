@@ -284,7 +284,6 @@ private slots:
 
 class PassphrasePromptThread : public QCA::SyncThread
 {
-	Q_OBJECT
 public:
 	PassphrasePrompt *pp;
 
