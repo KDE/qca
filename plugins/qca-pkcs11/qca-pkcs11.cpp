@@ -2688,6 +2688,16 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		}
 
 		if (enabled && !provider.isEmpty()) {
+			
+			QCA_logTextMessage (
+				QString ().sprintf (
+					"Loading PKCS#11 provider '%s' (%s)",
+					myPrintable (name),
+					myPrintable (provider)
+				),
+				Logger::Information
+			);
+
 			if (
 				(rv = pkcs11h_addProvider (
 					myPrintable (name),
