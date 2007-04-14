@@ -1627,12 +1627,8 @@ pkcs11KeyStoreListContext::keyStores () {
 		{
 			QMutexLocker l(&_mutexStores);
 
-			for (
-				QList<int>::iterator i = to_remove.begin ();
-				i != to_remove.end ();
-				i++
-			) {
-				pkcs11KeyStoreItem *item = _storesById[*i];
+			foreach (int i, to_remove) {
+				pkcs11KeyStoreItem *item = _storesById[i];
 
 				_storesById.remove (item->id);
 				_stores.removeAll (item);
@@ -2042,13 +2038,8 @@ pkcs11KeyStoreListContext::clearStores () {
 	QMutexLocker l(&_mutexStores);
 
 	_storesById.clear ();
-
-	for (
-		_stores_t::iterator i=_stores.begin ();
-		i != _stores.end ();
-		i++
-	) {
-		delete (*i);
+	foreach (pkcs11KeyStoreItem *i, _stores) {
+		delete i;
 	}
 
 	_stores.clear ();
@@ -2263,12 +2254,8 @@ pkcs11KeyStoreListContext::serializeCertificateId (
 	);
 
 	QStringList list;
-	for (
-		CertificateChain::const_iterator i = chain.begin ();
-		i != chain.end ();
-		i++
-	) {
-		list += escapeString (Base64 ().arrayToString ((*i).toDER ()));
+	foreach (Certificate i, chain) {
+		list += escapeString (Base64 ().arrayToString (i.toDER ()));
 	}
 
 	serialized.append (list.join ("/"));
@@ -2379,9 +2366,7 @@ pkcs11KeyStoreListContext::escapeString (
 ) const {
 	QString to;
 
-	for (int i=0;i<from.size ();i++) {
-		QChar c = from[i];
-
+	foreach (QChar c, from) {
 		if (c == '/' || c == '\\') {
 			to += QString ().sprintf ("\\x%04x", c.unicode ());
 		}
@@ -2677,12 +2662,8 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 	/*
 	 * Remove current providers
 	 */
-	for (
-		QStringList::iterator pi = _providers.begin ();
-		pi != _providers.end ();
-		pi++
-	) {
-		pkcs11h_removeProvider (myPrintable (*pi));
+	foreach (QString i, _providers) {
+		pkcs11h_removeProvider (myPrintable (i));
 	}
 	_providers.clear ();
 
