@@ -60,6 +60,63 @@ static QStringList wrapstring(const QString &str, int width)
 	return out;
 }
 
+class StreamLogger : public QCA::AbstractLogDevice
+{
+public:
+	StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice( "Stream logger" ), _stream(stream)
+	{
+		QCA::logger()->registerLogDevice (this);
+	}
+
+	~StreamLogger()
+	{
+		QCA::logger()->unregisterLogDevice (name ());
+	}
+
+	void logTextMessage( const QString &message, enum QCA::Logger::Severity severity )
+	{
+		_stream << now () << " " << severityName (severity) << " " << message << endl;
+	}
+
+	void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity )
+	{
+		Q_UNUSED(blob);
+		_stream << now () << " " << severityName (severity) << " " << "Binary blob not implemented yet" << endl;
+	}
+
+private:
+	inline char *severityName( enum QCA::Logger::Severity severity )
+	{
+		if (severity <= QCA::Logger::Debug) {
+			return s_severityNames[severity];
+		}
+		else {
+			return s_severityNames[QCA::Logger::Debug+1];
+		}
+	}
+
+	inline QString now() {
+		static QString format = "yyyy-MM-dd hh:mm:ss";
+		return QDateTime::currentDateTime ().toString (format);
+	}
+
+private:
+	static char *s_severityNames[];
+	QTextStream &_stream;
+};
+
+char *StreamLogger::s_severityNames[] = {
+	"M",
+	"A",
+	"C",
+	"E",
+	"W",
+	"N",
+	"I",
+	"D",
+	"U"
+};
+
 class AnimatedKeyGen : public QObject
 {
 	Q_OBJECT
@@ -1567,6 +1624,7 @@ static void usage()
 	printf("usage: qcatool (options) [command]\n");
 	printf(" options: --pass=x, --newpass=x, --nonroots=x, --roots=x, --nosys,\n");
 	printf("          --noprompt, --ordered, --debug\n");
+	printf("          --log-file=x, --log-level=n\n");
 	printf("\n");
 	printf(" help|--help|-h                        This help text\n");
 	printf(" version|--version|-v                  Print version information\n");
@@ -1617,6 +1675,9 @@ int main(int argc, char **argv)
 {
 	QCA::Initializer qcaInit;
 	QCoreApplication app(argc, argv);
+	QFile logFile;
+	QTextStream logStream (stderr);
+	StreamLogger streamLogger (logStream);
 
 	QStringList args;
 	for(int n = 1; n < argc; ++n)
@@ -1666,6 +1727,16 @@ int main(int argc, char **argv)
 		{
 			have_newpass = true;
 			newpass = val.toUtf8();
+		}
+		else if(var == "log-file")
+		{
+			logFile.setFileName (val);
+			logFile.open (QIODevice::Append | QIODevice::Text | QIODevice::Unbuffered);
+			logStream.setDevice (&logFile);
+		}
+		else if(var == "log-level")
+		{
+			QCA::logger ()->setLevel ((QCA::Logger::Severity)val.toInt ());
 		}
 		else if(var == "noprompt")
 			allowprompt = false;
