@@ -2300,7 +2300,7 @@ pkcs11KeyStoreListContext::deserializeCertificateId (
 
 		QStringList list = from.split ("/");
 
-		if (list.size () < 3) {
+		if (list.size () < 5) {
 			throw pkcs11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
 		}
 
