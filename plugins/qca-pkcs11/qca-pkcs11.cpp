@@ -2624,7 +2624,7 @@ pkcs11Provider::defaultConfig () const {
 	mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
 	mytemplate["allow_protected_authentication"] = true;
 	mytemplate["pin_cache"] = PKCS11H_PIN_CACHE_INFINITE;
-	mytemplate["log_level"] = PKCS11H_LOG_QUITE;
+	mytemplate["log_level"] = 0;
 	for (int i=0;i<_CONFIG_MAX_PROVIDERS;i++) {
 		mytemplate[QString ().sprintf ("provider_%02d_enabled", i)] = false;
 		mytemplate[QString ().sprintf ("provider_%02d_name", i)] = "";
