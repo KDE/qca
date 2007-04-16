@@ -1911,7 +1911,9 @@ namespace QCA
 		static PGPKey fromFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
 	};
 
-	// asynchronous private key loader
+	/**
+	   Asynchronous private key loader
+	*/
 	class QCA_EXPORT KeyLoader : public QObject
 	{
 		Q_OBJECT
@@ -1929,7 +1931,7 @@ namespace QCA
 		PrivateKey privateKey() const;
 		KeyBundle keyBundle() const;
 
-	signals:
+	Q_SIGNALS:
 		void finished();
 
 	private:
