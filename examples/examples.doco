@@ -15,7 +15,7 @@ There are three important parts to this:
 /** \example base64test.cpp
 
 The code below shows some simple operations on a QCA::Base64 object, converting
-between QSecureArray and QString.
+between QCA::SecureArray and QString.
 
 */
 
@@ -56,7 +56,7 @@ The code below shows how to use the QCA::Hash class
 /** \example hextest.cpp
 
 The code below shows some simple operations on a QCA::Hex object, converting
-between QSecureArray and QString.
+between QCA::SecureArray and QString.
 
 */
 
