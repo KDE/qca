@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2004  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@
  *
  */
 #include <QtCrypto>
-#include <QtCore>
+#include <QtPlugin>
 
 #include <qstringlist.h>
 

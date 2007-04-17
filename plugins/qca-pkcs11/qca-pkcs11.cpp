@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2004  Justin Karneges  <justin@affinix.com>
  * Copyright (C) 2006-2007  Alon Bar-Lev <alon.barlev@gmail.com>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,11 @@
  *
  */
 
-#include <QtCore>
 #include <QtCrypto>
+
+#include <QHash>
+#include <QMutexLocker>
+#include <QtPlugin>
 
 #include <pkcs11-helper-1.0/pkcs11h-token.h>
 #include <pkcs11-helper-1.0/pkcs11h-certificate.h>
@@ -2688,7 +2691,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		}
 
 		if (enabled && !provider.isEmpty()) {
-			
+
 			QCA_logTextMessage (
 				QString ().sprintf (
 					"Loading PKCS#11 provider '%s' (%s)",

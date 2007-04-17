@@ -18,8 +18,9 @@
  *
  */
 
-#include <QtCore>
 #include <QtCrypto>
+#include <QDebug>
+#include <QtCore/qplugin.h>
 
 extern "C"
 {

@@ -21,9 +21,10 @@
 #include "hasht.h"
 
 #include <QtCrypto>
-#include <QtCore>
 
-#include <qstringlist.h>
+#include <QDebug>
+#include <QtPlugin>
+#include <QStringList>
 
 
 //-----------------------------------------------------------

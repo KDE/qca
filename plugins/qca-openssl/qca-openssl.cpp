@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2004  Justin Karneges  <justin@affinix.com>
  * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,10 @@
  *
  */
 
-#include <QtCore>
 #include <QtCrypto>
+
+#include <QDebug>
+#include <QtCore/qplugin.h>
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
@@ -29,7 +31,6 @@
 #include <iostream>
 
 #include <openssl/rand.h>
-#include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
