@@ -21,6 +21,8 @@
 
 #include "tlssocket.h"
 
+#include <QCoreApplication>
+
 int main(int argc, char **argv)
 {
 	QCA::Initializer init;
