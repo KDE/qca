@@ -22,7 +22,6 @@
 #ifndef QCAPROVIDER_H
 #define QCAPROVIDER_H
 
-#include <QtCore>
 #include "qca_core.h"
 #include "qca_basic.h"
 #include "qca_publickey.h"

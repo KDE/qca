@@ -30,8 +30,6 @@
 #ifndef QPIPE_H
 #define QPIPE_H
 
-#include <QtCore>
-
 #ifndef QPIPE_NO_SECURE
 # define QPIPE_SECURE
 #endif
