@@ -17,8 +17,14 @@
  *
  */
 
-#include <QtCore>
 #include <QtCrypto>
+
+#include <QCoreApplication>
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QTimer>
 
 #define VERSION "0.0.1"
 

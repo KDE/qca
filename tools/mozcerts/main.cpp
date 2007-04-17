@@ -19,8 +19,11 @@
 
 /* mozilla certdata converter.  adapted from the debian ruby script */
 
-#include <QtCore>
 #include <QtCrypto>
+
+#include <QCoreApplication>
+#include <QFile>
+#include <QTextStream>
 
 QStringList splitWithQuotes(const QString &in, char c);
 
