@@ -233,7 +233,8 @@ private:
 	PluginInstance *instance;
 	bool init_done;
 
-	ProviderItem(PluginInstance *_instance, Provider *_p)
+	// TODO: someday find a way to not have this recursive mutex?
+	ProviderItem(PluginInstance *_instance, Provider *_p) : m(QMutex::Recursive)
 	{
 		instance = _instance;
 		p = _p;
@@ -648,7 +649,17 @@ void ProviderManager::addItem(ProviderItem *item, int priority)
 
 bool ProviderManager::haveAlready(const QString &name) const
 {
-	return ((def && name == def->name()) || find(name));
+	if(def && name == def->name())
+		return true;
+
+	for(int n = 0; n < providerItemList.count(); ++n)
+	{
+		ProviderItem *pi = providerItemList[n];
+		if(pi->p && pi->p->name() == name)
+			return true;
+	}
+
+	return false;
 }
 
 void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
