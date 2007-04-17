@@ -21,6 +21,8 @@
 
 #include "gpgproc.h"
 
+#include <QTimer>
+
 namespace gpgQCAPlugin {
 
 //----------------------------------------------------------------------------

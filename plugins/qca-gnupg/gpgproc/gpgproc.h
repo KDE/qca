@@ -20,7 +20,6 @@
 #ifndef GPGPROC_H
 #define GPGPROC_H
 
-#include <QtCore>
 #include "qpipe.h"
 
 namespace gpgQCAPlugin {

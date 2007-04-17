@@ -20,7 +20,6 @@
 #ifndef GPGOP_H
 #define GPGOP_H
 
-#include <QtCore>
 #include <QtCrypto>
 #include "qpipe.h"
 
