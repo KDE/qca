@@ -999,14 +999,6 @@ bool KeyStoreListContext::removeEntry(int, const QString &)
 	return false;
 }
 
-void KeyStoreListContext::submitPassphrase(int, int, const SecureArray &)
-{
-}
-
-void KeyStoreListContext::rejectPassphraseRequest(int, int)
-{
-}
-
 //----------------------------------------------------------------------------
 // TLSContext
 //----------------------------------------------------------------------------

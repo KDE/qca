@@ -429,9 +429,6 @@ public:
 	virtual QString writeEntry(int id, const PGPKey &key);
 	virtual bool removeEntry(int id, const QString &entryId);
 
-	virtual void submitPassphrase(int id, int requestId, const SecureArray &passphrase);
-	virtual void rejectPassphraseRequest(int id, int requestId);
-
 Q_SIGNALS:
 	// note: busyStart is assumed after calling start(), no need to emit
 	void busyStart();
