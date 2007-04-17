@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003 Justin Karneges
+ Copyright (C) 2003 Justin Karneges <justin@affinix.com>
  Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,6 +21,7 @@
 */
 
 #include <QtCrypto>
+#include <QCoreApplication>
 
 #include <iostream>
 

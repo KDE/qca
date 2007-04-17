@@ -19,8 +19,11 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// QtCrypto/QtCrypto has the declarations for all of QCA
+// QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
+
+#include <QCoreApplication>
+#include <QDebug>
 
 #include <iostream>
 

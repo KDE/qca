@@ -21,6 +21,10 @@
 
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
+
+#include <QCoreApplication>
+#include <QDebug>
+
 // needed for printf
 #include<stdio.h>
 

@@ -1,6 +1,6 @@
 /*
- Copyright (C) 2003 Justin Karneges
- Copyright (C) 2006 Brad Hards
+ Copyright (C) 2003 Justin Karneges <justin@affinix.com>
+ Copyright (C) 2006 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -8,10 +8,10 @@
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -20,9 +20,14 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <QtCore>
-#include <QtNetwork>
 #include <QtCrypto>
+
+#include <QCoreApplication>
+#include <QDebug>
+#include <QHostAddress>
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QTimer>
 
 char pemdata_cert[] =
 	"-----BEGIN CERTIFICATE-----\n"
@@ -103,7 +108,7 @@ public:
 	int plain = 0;
 	for(QList<Item>::Iterator it = list.begin(); it != list.end();) {
 	    Item &i = *it;
-	    
+
 	    // not enough?
 	    if(encoded < i.encoded) {
 		i.encoded -= encoded;
@@ -116,7 +121,7 @@ public:
 	}
 	return plain;
     }
-    
+
     int p;
     QList<Item> list;
 };
@@ -127,7 +132,7 @@ class SecureServer : public QObject
 
 public:
     enum { Idle, Handshaking, Active, Closing };
-    
+
     SecureServer(quint16 _port) : port(_port)
     {
 	server = new QTcpServer;
@@ -224,7 +229,7 @@ private slots:
 	if(mode == Active && sent) {
 	    qint64 bytes = layer.finished(x);
 	    bytesLeft -= bytes;
-	    
+
 	    if(bytesLeft == 0) {
 		mode = Closing;
 		qDebug() << "Data transfer complete - SSL shutting down";
@@ -250,12 +255,12 @@ private slots:
     void ssl_readyRead()
     {
 	QByteArray a = ssl->read();
-	QByteArray b = 
+	QByteArray b =
 	    "<html>\n"
 	    "<head><title>Test</title></head>\n"
 	    "<body>this is only a test</body>\n"
 	    "</html>\n";
-	
+
 	qDebug() << "Sending test response.";
 	sent = true;
 	layer.addPlain(b.size());
@@ -268,14 +273,14 @@ private slots:
 	layer.specifyEncoded( outgoingData.size(), ssl->bytesOutgoingAvailable());
 	sock->write( outgoingData );
     }
-    
+
     void ssl_closed()
     {
 	qDebug() << "Closing socket.";
 	sock->close();
 	mode = Idle;
     }
-    
+
     void ssl_error()
     {
 	if(ssl->errorCode() == QCA::TLS::ErrorHandshake) {
@@ -296,7 +301,7 @@ private:
     QCA::TLS *ssl;
     QCA::Certificate cert;
     QCA::PrivateKey privkey;
-    
+
     bool sent;
     int mode;
     qint64 bytesLeft;
@@ -311,17 +316,17 @@ int main(int argc, char **argv)
 
     QCoreApplication app(argc, argv);
     int port = argc > 1 ? QString(argv[1]).toInt() : 8000;
-    
+
     if(!QCA::isSupported("tls")) {
 	qDebug() << "TLS not supported!";
 	return 1;
     }
-    
+
     SecureServer *server = new SecureServer(port);
     QObject::connect(server, SIGNAL(quit()), &app, SLOT(quit()));
     server->start();
     app.exec();
     delete server;
-    
+
     return 0;
 }

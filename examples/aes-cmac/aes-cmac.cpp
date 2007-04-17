@@ -22,6 +22,9 @@
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
 
+#include <QCoreApplication>
+#include <QDebug>
+
 class AESCMACContext : public QCA::MACContext
 {
 public:

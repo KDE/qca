@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003 Justin Karneges
+ Copyright (C) 2003 Justin Karneges <justin@affinix.com>
  Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -8,10 +8,10 @@
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -21,9 +21,9 @@
 */
 
 
-#include <QtCore>
-
 #include <QtCrypto>
+
+#include <QCoreApplication>
 
 #include <iostream>
 
@@ -34,7 +34,7 @@ static void dumpCertificateInfo( QCA::CertificateInfo info)
 {
     std::cout << "  Organization: " << std::endl;
 
-    // Note that a single certificate can apply to more than one 
+    // Note that a single certificate can apply to more than one
     // organisation. QCA::Certificate is a multimap, so when you
     // ask for the values associated with a parameter, it returns
     // a list.
@@ -76,7 +76,7 @@ static void dumpIssuerInfo( QCA::CertificateInfo issuer)
 
 int main(int argc, char** argv)
 {
-    // the Initializer object sets things up, and 
+    // the Initializer object sets things up, and
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
 
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     	return 1;
     }
 
-    // We are going to work with a number of certificates, and a 
+    // We are going to work with a number of certificates, and a
     // QList is a great template class for that
     QList<QCA::Certificate> certlist;
 

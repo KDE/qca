@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003 Justin Karneges
+ Copyright (C) 2003 Justin Karneges <justin@affinix.com>
  Copyright (C) 2005-2006 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,9 +21,10 @@
 */
 
 
-#include <QtCore>
-
 #include <QtCrypto>
+
+#include <QCoreApplication>
+#include <QDebug>
 
 int main(int argc, char** argv)
 {

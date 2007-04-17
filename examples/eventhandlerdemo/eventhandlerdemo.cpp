@@ -22,6 +22,8 @@
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
 
+#include <QCoreApplication>
+
 #include <iostream>
 
 /**

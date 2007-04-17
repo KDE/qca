@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003 Justin Karneges
+ Copyright (C) 2003 Justin Karneges <justin@affinix.com>
  Copyright (C) 2005-2006 Brad Hards <bradh@frogmouth.net>
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -8,10 +8,10 @@
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
@@ -24,18 +24,20 @@
 #include <QtCrypto>
 #include <stdio.h>
 
+#include <QCoreApplication>
+
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
-    
-    // the Initializer object sets things up, and 
+
+    // the Initializer object sets things up, and
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
-    
+
     // we use the first argument if provided, or
     // use "hello" if no arguments
     QCA::SecureArray arg = (argc >= 2) ? argv[1] : "hello";
-    
+
     // AES128 testing
     if(!QCA::isSupported("aes128-cbc-pkcs7"))
 	printf("AES128-CBC not supported!\n");
@@ -50,7 +52,7 @@ int main(int argc, char **argv)
 	QCA::InitializationVector iv(16);
 
 	// create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
-	QCA::Cipher cipher(QString("aes128"),QCA::Cipher::CBC, 
+	QCA::Cipher cipher(QString("aes128"),QCA::Cipher::CBC,
 			   // use Default padding, which is equivalent to PKCS7 for CBC
 			   QCA::Cipher::DefaultPadding,
 			   // this object will encrypt
@@ -62,7 +64,7 @@ int main(int argc, char **argv)
 	// 16 bytes (1 block), then nothing will be returned - it is buffered
 	// update() can be called as many times as required.
 	QCA::SecureArray u = cipher.update(arg);
-	
+
 	// We need to check if that update() call worked.
 	if (!cipher.ok()) {
 	    printf("Update failed\n");
@@ -102,7 +104,7 @@ int main(int argc, char **argv)
 	}
 
 	// output results
-	printf("Decryption using AES128 of [0x%s] is %s\n", 
+	printf("Decryption using AES128 of [0x%s] is %s\n",
 	       qPrintable(QCA::arrayToHex(cipherText)), plainText.data());
 
 	// Again we need to call final(), to get the last block (with its padding removed)
@@ -116,7 +118,7 @@ int main(int argc, char **argv)
 	// output results
 	printf("Final decryption block using AES128 is %s\n", plainText.data());
 	// instead of update() and final(), you can do the whole thing
-	// in one step, using process() 
+	// in one step, using process()
 	printf("One step decryption using AES128: %s\n",
 	       (cipher.process(cipherText)).data() );
 
