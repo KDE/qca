@@ -24,7 +24,7 @@
  */
 
 #include <QtCrypto>
-#include <QtTest>
+#include <QtTest/QtTest>
 
 class KDFUnitTest : public QObject
 {
