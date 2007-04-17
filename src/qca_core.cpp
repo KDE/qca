@@ -20,12 +20,19 @@
 
 #include "qca_core.h"
 
-#include <QtCore>
 #include "qca_plugin.h"
 #include "qca_textfilter.h"
 #include "qca_cert.h"
 #include "qca_keystore.h"
 #include "qcaprovider.h"
+
+// for qAddPostRoutine
+#include <QCoreApplication>
+
+#include <QMutex>
+#include <QSettings>
+#include <QVariantMap>
+#include <QWaitCondition>
 
 #ifdef Q_OS_UNIX
 # include <unistd.h>

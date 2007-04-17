@@ -22,6 +22,12 @@
 
 #include "qcaprovider.h"
 
+#include <QCoreApplication>
+#include <QPointer>
+#include <QSet>
+#include <QMutex>
+#include <QWaitCondition>
+
 Q_DECLARE_METATYPE(QCA::KeyStoreEntry)
 Q_DECLARE_METATYPE(QList<QCA::KeyStoreEntry>)
 Q_DECLARE_METATYPE(QList<QCA::KeyStoreEntry::Type>)

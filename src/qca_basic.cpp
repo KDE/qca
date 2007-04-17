@@ -20,8 +20,9 @@
 
 #include "qca_basic.h"
 
-#include <QtCore>
 #include "qcaprovider.h"
+
+#include <QMutexLocker>
 
 namespace QCA {
 

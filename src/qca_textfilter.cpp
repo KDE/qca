@@ -20,8 +20,6 @@
 
 #include "qca_textfilter.h"
 
-#include <QtCore>
-
 namespace QCA {
 
 //----------------------------------------------------------------------------

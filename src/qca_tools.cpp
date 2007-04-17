@@ -20,8 +20,6 @@
 
 #include "qca_tools.h"
 
-#include <QtCore>
-
 #ifdef Q_OS_UNIX
 # include <stdlib.h>
 # include <sys/mman.h>

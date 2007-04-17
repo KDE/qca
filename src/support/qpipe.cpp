@@ -36,6 +36,9 @@
 # include <signal.h>
 #endif
 
+#include <QSocketNotifier>
+#include <QTimer>
+
 #define USE_POLL
 
 #define CONSOLE_CHAREXPAND  5

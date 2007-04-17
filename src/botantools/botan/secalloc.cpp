@@ -30,8 +30,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 }
-#include <algorithm>
 #include <botan/secalloc.h>
+#include <algorithm>
+
 namespace QCA {
 #ifndef BOTAN_NO_CONF_H
 }

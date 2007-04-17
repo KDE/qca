@@ -19,8 +19,11 @@
 
 #include "qca_support.h"
 
-#include <QtCore>
 #include "qpipe.h"
+
+#include <QPointer>
+#include <QTextCodec>
+#include <QTimer>
 
 #ifdef Q_OS_WIN
 # include <windows.h>

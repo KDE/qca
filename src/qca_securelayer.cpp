@@ -20,8 +20,9 @@
 
 #include "qca_securelayer.h"
 
-#include <QtCore>
 #include "qcaprovider.h"
+
+#include <QTimer>
 
 namespace QCA {
 

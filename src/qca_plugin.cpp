@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004  Justin Karneges
+ * Copyright (C) 2004  Justin Karneges  <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,13 @@
 
 #include "qca_plugin.h"
 
-#include <QtCore>
 #include "qcaprovider.h"
+
+#include <QCoreApplication>
+#include <QDir>
+#include <QFileInfo>
+#include <QLibrary>
+#include <QPluginLoader>
 
 #define PLUGIN_SUBDIR "crypto"
 

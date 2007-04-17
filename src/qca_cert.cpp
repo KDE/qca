@@ -20,9 +20,11 @@
 
 #include "qca_cert.h"
 
-#include <QtCore>
 #include "qca_publickey.h"
 #include "qcaprovider.h"
+
+#include <QTextStream>
+#include <QFile>
 
 namespace QCA {
 
