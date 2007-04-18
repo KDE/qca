@@ -23,7 +23,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <QtNetwork>
+#include <QTcpSocket>
 #include <QtTest/QtTest>
 #include <QtCrypto>
 
