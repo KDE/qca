@@ -720,7 +720,7 @@ namespace QCA
 
 		   \sa fromPEMFile for an alternative method
 		*/
-		PrivateKey(const QString &fileName, const SecureArray &passphrase = SecureArray());
+		explicit PrivateKey(const QString &fileName, const SecureArray &passphrase = SecureArray());
 
 		/**
 		   Interpret / convert the key to an RSA key

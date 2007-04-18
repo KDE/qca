@@ -175,7 +175,7 @@ namespace QCA
 		 * \param provider the name of the provider plugin
 		 * for the subclass (eg "qca-openssl")
 		 */
-		Hash(const QString &type, const QString &provider = QString());
+		explicit Hash(const QString &type, const QString &provider = QString());
 
 		/**
 		 * Reset a hash, dumping all previous parts of the
@@ -790,7 +790,7 @@ namespace QCA
 		   \param algorithm the name of the hashing algorithm to use
 		   \param provider the name of the provider to use, if available
 		*/
-		PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
+		explicit PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
 	};
 
 	/**
@@ -810,7 +810,7 @@ namespace QCA
 		   \param algorithm the name of the hashing algorithm to use
 		   \param provider the name of the provider to use, if available
 		*/
-		PBKDF2(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf2", algorithm), provider) {}
+		explicit PBKDF2(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf2", algorithm), provider) {}
 	};
 }
 

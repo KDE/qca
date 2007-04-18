@@ -95,7 +95,7 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		DirWatch(const QString &dir = QString(), QObject *parent = 0);
+		explicit DirWatch(const QString &dir = QString(), QObject *parent = 0);
 		~DirWatch();
 
 		QString dirName() const;
@@ -131,7 +131,7 @@ namespace QCA
 		   in this object, you can set it using setFileName()
 		   \param parent the parent object for this object
 		*/
-		FileWatch(const QString &file = QString(), QObject *parent = 0);
+		explicit FileWatch(const QString &file = QString(), QObject *parent = 0);
 		~FileWatch();
 
 		/**

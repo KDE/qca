@@ -319,7 +319,7 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = 0);
+		explicit KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = 0);
 		~KeyStoreEntryWatcher();
 
 		KeyStoreEntry entry() const;

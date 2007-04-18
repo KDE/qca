@@ -285,7 +285,7 @@ namespace QCA
 		    \param parent the parent object for this object
 		    \param provider the name of the provider, if a specific provider is required
 		*/
-		TLS(QObject *parent = 0, const QString &provider = QString());
+		explicit TLS(QObject *parent = 0, const QString &provider = QString());
 
 		/**
 		   Constructor for Transport Layer Security connection
@@ -294,7 +294,8 @@ namespace QCA
 		   \param parent the parent object for this object
 		   \param provider the name of the provider, if a specific provider is required
 		*/
-		TLS(Mode mode, QObject *parent = 0, const QString &provider = QString());
+		explicit TLS(Mode mode, QObject *parent = 0, const QString &provider = QString());
+
 		/**
 		   Destructor
 		*/

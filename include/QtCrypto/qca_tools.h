@@ -102,7 +102,7 @@ public:
 	 * \param size the number of bytes in the array
 	 * \param ch the value every byte should be set to
 	 */
-	SecureArray(int size, char ch = 0);
+	explicit SecureArray(int size, char ch = 0);
 
 	/**
 	 * Construct a secure byte array from a string

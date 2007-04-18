@@ -1118,7 +1118,7 @@ namespace QCA
 		   \param c the certificate to revoke
 		   \param r the reason that the certificate is being revoked
 		*/
-		CRLEntry(const Certificate &c, Reason r = Unspecified);
+		explicit CRLEntry(const Certificate &c, Reason r = Unspecified);
 
 		/**
 		   create a CRL entry

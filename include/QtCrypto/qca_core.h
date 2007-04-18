@@ -537,7 +537,7 @@ namespace QCA
 		 * \param prealloc the amount of secure memory to pre-allocate,
 		 *        in units of 1024 bytes (1K).
 		 */
-		Initializer(MemoryMode m = Practical, int prealloc = 64);
+		explicit Initializer(MemoryMode m = Practical, int prealloc = 64);
 		~Initializer();
 	};
 
