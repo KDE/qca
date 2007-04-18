@@ -554,6 +554,41 @@ void saveProviderConfig(const QString &name)
 	writeConfig(name, conf);
 }
 
+QVariantMap getProviderConfig_internal(Provider *p)
+{
+	QVariantMap conf;
+	QString name = p->name();
+
+	global->config_mutex.lock();
+
+	// try loading from persistent storage
+	conf = readConfig(name);
+
+	// if not, load the one from memory
+	if(conf.isEmpty())
+		conf = global->config.value(name);
+
+	global->config_mutex.unlock();
+
+	// if provider doesn't exist or doesn't have a valid config form,
+	//   use the config we loaded
+	QVariantMap pconf = p->defaultConfig();
+	if(!configIsValid(pconf))
+		return conf;
+
+	// if the config loaded was empty, use the provider's config
+	if(conf.isEmpty())
+		return pconf;
+
+	// if the config formtype doesn't match the provider's formtype,
+	//   then use the provider's
+	if(pconf["formtype"] != conf["formtype"])
+		return pconf;
+
+	// otherwise, use the config loaded
+	return conf;
+}
+
 QString globalRandomProvider()
 {
 	QMutexLocker locker(global_random_mutex());

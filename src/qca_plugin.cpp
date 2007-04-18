@@ -38,6 +38,9 @@
 
 namespace QCA {
 
+// from qca_core.cpp
+QVariantMap getProviderConfig_internal(Provider *p);
+
 static ProviderManager *g_pluginman = 0;
 
 static void logDebug(const QString &str)
@@ -224,7 +227,7 @@ public:
 		p->init();
 
 		// load config
-		QVariantMap conf = getProviderConfig(p->name());
+		QVariantMap conf = getProviderConfig_internal(p);
 		if(!conf.isEmpty())
 			p->configChanged(conf);
 	}
@@ -233,8 +236,7 @@ private:
 	PluginInstance *instance;
 	bool init_done;
 
-	// TODO: someday find a way to not have this recursive mutex?
-	ProviderItem(PluginInstance *_instance, Provider *_p) : m(QMutex::Recursive)
+	ProviderItem(PluginInstance *_instance, Provider *_p)
 	{
 		instance = _instance;
 		p = _p;
