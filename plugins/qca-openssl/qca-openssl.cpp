@@ -268,6 +268,9 @@ static void try_get_name_item(X509_NAME *name, int nid, CertificateInfoType t, C
 static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, CertificateInfoType t, CertificateInfo *info)
 {
         ASN1_OBJECT *oid = OBJ_txt2obj( oidText.toLatin1().data(), 1); // 1 = only accept dotted input
+	if(!oid)
+		return;
+
 	int loc;
 	loc = -1;
 	while ((loc = X509_NAME_get_index_by_OBJ(name, oid, loc)) != -1) {
@@ -277,6 +280,7 @@ static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, Ce
 		info->insert(t, QString::fromLatin1(cs));
 		qDebug() << "oid: " << oidText << ",  result: " << cs;
 	}
+	ASN1_OBJECT_free(oid);
 }
 
 static CertificateInfo get_cert_name(X509_NAME *name)
@@ -5993,7 +5997,12 @@ public:
 
 	~opensslProvider()
 	{
-		// todo: any shutdown?
+		// todo: any other shutdown?
+		EVP_cleanup();
+		//ENGINE_cleanup();
+		CRYPTO_cleanup_all_ex_data();
+		ERR_remove_state(0);
+		ERR_free_strings();
 	}
 
 	int version() const
