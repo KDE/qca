@@ -86,13 +86,13 @@ void KeyBundleTest::fromFile()
 	QCOMPARE( userBundle.name(), QString() );
 	QCOMPARE( userBundle.certificateChain().isEmpty(), false );
 	QCOMPARE( userBundle.privateKey().isNull(), false );
-	
+
 	QCA::KeyBundle userBundleCopy = userBundle;
 	QCOMPARE( userBundleCopy.isNull(), false );
 	QCOMPARE( userBundleCopy.name(), QString() );
 	QCOMPARE( userBundleCopy.certificateChain().isEmpty(), false );
 	QCOMPARE( userBundleCopy.privateKey().isNull(), false );
-	
+
 	QCA::KeyBundle userBundleAssign( userBundleCopy );
 	QCOMPARE( userBundleAssign.isNull(), false );
 	QCOMPARE( userBundleAssign.name(), QString() );
@@ -136,6 +136,9 @@ void KeyBundleTest::createBundle()
 
     QVERIFY( newBundle->isNull() );
 
+    if ( !QCA::isSupported( "certificate" ) )
+        return;
+
     QCA::Certificate ca( "RootCA2cert.pem" );
     QCOMPARE( ca.isNull(), false );
 
@@ -147,7 +150,7 @@ void KeyBundleTest::createBundle()
 
     QCA::CertificateChain chain( primary );
     chain.append( ca );
-    
+
     newBundle->setCertificateChainAndKey( chain, key );
     newBundle->setName( "My New Key Bundle" );
 
@@ -185,7 +188,7 @@ void KeyBundleTest::createBundle()
 	    QCOMPARE( bundleFromFile.privateKey(), key );
 	}
     }
-}    
+}
 
 QTEST_MAIN(KeyBundleTest)
 
