@@ -1,0 +1,37 @@
+qca-logger -- Logger Plug-in to QCA
+
+ABOUT
+	qca-logger provides simple logger writer for QCA framework.
+
+DEPENDENCIES
+	None.
+
+ENVIRONMENT
+	Configuration can be overridden by environment variables.
+
+	Variables:
+		QCALOGGER_LEVEL
+			qca-logger log level.
+
+		QCALOGGER_FILE
+			File to write to, if empty stderr will be used.
+
+CONFIGURATION
+	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
+	generate default configuration use:
+
+	$ qcatool --config save qca-logger 
+
+	Attributes:
+		enabled (Boolean)
+			Enable/disable the plugin.
+
+		file (String)
+			File to write into, if empty stderr will be used.
+
+		level (Integer)
+			Log level 0 least.
+
+AUTHORS
+	Alon Bar-Lev <alon.barlev@gmail.com>
+

@@ -6,6 +6,8 @@ FIND_PACKAGE(Pkcs11Helper)
 FIND_PACKAGE(LibGcrypt)
 FIND_PACKAGE(Botan)
 
+ADD_SUBDIRECTORY(qca-logger)
+
 IF (OPENSSL_FOUND)
   ADD_SUBDIRECTORY(qca-openssl)
   MESSAGE(STATUS "OpenSSL plugin enabled")
