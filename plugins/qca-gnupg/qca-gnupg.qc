@@ -2,6 +2,7 @@
  <name>qca-gnupg</name>
  <profile>qca-gnupg.pro</profile>
  <noprefix/>
+ <lib/>
  <dep type='buildmode'>
   <required/>
  </dep>

@@ -3,6 +3,7 @@ CONFIG += plugin
 QT -= gui
 QT += network
 CONFIG += crypto
+DESTDIR = lib
 
 VERSION = 0.0.1
 

@@ -2,6 +2,7 @@
  <name>qca-cyrus-sasl</name>
  <profile>qca-cyrus-sasl.pro</profile>
  <noprefix/>
+ <lib/>
  <dep type='buildmode'>
   <required/>
  </dep>

@@ -2,6 +2,7 @@ TEMPLATE = lib
 CONFIG += plugin
 QT -= gui
 CONFIG += crypto
+DESTDIR = lib
 
 VERSION = 0.0.1
 

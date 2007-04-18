@@ -2,6 +2,7 @@
  <name>qca-pkcs11</name>
  <profile>qca-pkcs11.pro</profile>
  <noprefix/>
+ <lib/>
  <dep type='buildmode'>
   <required/>
  </dep>
