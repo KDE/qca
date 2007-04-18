@@ -1038,6 +1038,8 @@ Certificate Certificate::fromDER(const SecureArray &a, ConvertResult *result, co
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
+	else
+		delete cc;
 	return c;
 }
 
@@ -1050,6 +1052,8 @@ Certificate Certificate::fromPEM(const QString &s, ConvertResult *result, const 
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
+	else
+		delete cc;
 	return c;
 }
 
@@ -1365,6 +1369,8 @@ CertificateRequest CertificateRequest::fromDER(const SecureArray &a, ConvertResu
 		*result = r;
 	if(r == ConvertGood)
 		c.change(csr);
+	else
+		delete csr;
 	return c;
 }
 
@@ -1377,6 +1383,8 @@ CertificateRequest CertificateRequest::fromPEM(const QString &s, ConvertResult *
 		*result = r;
 	if(r == ConvertGood)
 		c.change(csr);
+	else
+		delete csr;
 	return c;
 }
 
@@ -1406,6 +1414,8 @@ CertificateRequest CertificateRequest::fromString(const QString &s, ConvertResul
 		*result = r;
 	if(r == ConvertGood)
 		c.change(csr);
+	else
+		delete csr;
 	return c;
 }
 
@@ -1638,6 +1648,8 @@ CRL CRL::fromDER(const SecureArray &a, ConvertResult *result, const QString &pro
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
+	else
+		delete cc;
 	return c;
 }
 
@@ -1650,6 +1662,8 @@ CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provide
 		*result = r;
 	if(r == ConvertGood)
 		c.change(cc);
+	else
+		delete cc;
 	return c;
 }
 
@@ -2033,7 +2047,7 @@ bool KeyBundle::toFile(const QString &fileName, const SecureArray &passphrase, c
 KeyBundle KeyBundle::fromArray(const QByteArray &a, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
 	QString name;
-	QList<CertContext *> list;
+	QList<CertContext*> list;
 	PKeyContext *kc = 0;
 
 	KeyBundle bundle;
@@ -2047,6 +2061,7 @@ KeyBundle KeyBundle::fromArray(const QByteArray &a, const SecureArray &passphras
 		if(ask_passphrase(QString(), 0, &pass))
 			r = pix->fromPKCS12(a, pass, &name, &list, &kc);
 	}
+	delete pix;
 
 	if(result)
 		*result = r;
@@ -2178,6 +2193,8 @@ PGPKey PGPKey::fromArray(const SecureArray &a, ConvertResult *result, const QStr
 		*result = r;
 	if(r == ConvertGood)
 		k.change(kc);
+	else
+		delete kc;
 	return k;
 }
 
@@ -2190,6 +2207,8 @@ PGPKey PGPKey::fromString(const QString &s, ConvertResult *result, const QString
 		*result = r;
 	if(r == ConvertGood)
 		k.change(kc);
+	else
+		delete kc;
 	return k;
 }
 

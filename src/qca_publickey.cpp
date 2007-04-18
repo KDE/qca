@@ -197,6 +197,8 @@ public:
 			*result = r;
 		if(r == ConvertGood)
 			k.change(c);
+		else
+			delete c;
 		return k;
 	}
 };
@@ -232,6 +234,8 @@ public:
 			*result = r;
 		if(r == ConvertGood)
 			k.change(c);
+		else
+			delete c;
 		return k;
 	}
 };
