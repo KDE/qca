@@ -1,6 +1,6 @@
 /*
  * qca-sasl.cpp - SASL plugin for QCA
- * Copyright (C) 2003-2006  Justin Karneges, Michail Pishchagin
+ * Copyright (C) 2003-2006  Justin Karneges <justin@affinix.com>, Michail Pishchagin
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
