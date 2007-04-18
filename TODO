@@ -40,6 +40,7 @@
     securemessage
     synchronizer should lazy-start the thread
     don't allow smart card providers to be used by default
+    add logging to qca lib and other plugins
 
 * test1
   code:
