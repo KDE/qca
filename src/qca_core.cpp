@@ -437,7 +437,7 @@ static bool configIsValid(const QVariantMap &config)
 
 static QVariantMap readConfig(const QString &name)
 {
-	QSettings settings("Affinix", "QCA");
+	QSettings settings("Affinix", "QCA-2");
 	settings.beginGroup("ProviderConfig");
 	QStringList providerNames = settings.value("providerNames").toStringList();
 	if(!providerNames.contains(name))
@@ -457,7 +457,7 @@ static QVariantMap readConfig(const QString &name)
 
 static bool writeConfig(const QString &name, const QVariantMap &config, bool systemWide = false)
 {
-	QSettings settings(QSettings::NativeFormat, systemWide ? QSettings::SystemScope : QSettings::UserScope, "Affinix", "QCA");
+	QSettings settings(QSettings::NativeFormat, systemWide ? QSettings::SystemScope : QSettings::UserScope, "Affinix", "QCA-2");
 	settings.beginGroup("ProviderConfig");
 
 	// version
