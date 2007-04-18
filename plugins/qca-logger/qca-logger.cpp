@@ -212,4 +212,4 @@ public:
 
 #include "qca-logger.moc"
 
-Q_EXPORT_PLUGIN2(qca_Logger, LoggerPlugin)
+Q_EXPORT_PLUGIN2(qca_logger, LoggerPlugin)
