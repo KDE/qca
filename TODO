@@ -8,19 +8,15 @@
 
 * beta4
   code:
-    fix the locking stuff in qca_core
-    allow logger to be used from anywhere
     qca-gnupg: ignore newlines from passphrase, to avoid advancing command-fd
     qca-gnupg: support async
     qca-openssl: EVP_PKEY_bits() doesn't always return the full key size
     qca-openssl: why are some constraints auto-added?
     qca-openssl: ca signing
   other:
-    valgrind
     krazy warnings
     Update to latest Botan, and remake the botantools patch as appropriate
        - remove u32bit miller_rabin_test_iterations(u32bit bits, bool verify)
-    ability to compile plugins in statically (check 'plugins' subdir)
 
 * beta5
   api:
