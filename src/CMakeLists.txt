@@ -64,7 +64,8 @@ ADD_DEFINITIONS(
 
 ADD_DEFINITIONS(
   -DBOTAN_MP_WORD_BITS=32
-  -DBOTAN_VECTOR_OVER_ALLOCATE=4
+  -DBOTAN_KARAT_MUL_THRESHOLD=12
+  -DBOTAN_KARAT_SQR_THRESHOLD=12
 )
 if(WIN32)
    ADD_DEFINITIONS( -DQCA_MAKEDLL )
@@ -76,23 +77,25 @@ SET( botan_SOURCES
 	${botan_BASE}/exceptn.cpp
 	${botan_BASE}/mutex.cpp
 	${botan_BASE}/mux_qt/mux_qt.cpp
-	${botan_BASE}/secalloc.cpp
+	${botan_BASE}/charset.cpp
 	${botan_BASE}/defalloc.cpp
-	${botan_BASE}/allocate.cpp
-	${botan_BASE}/mp_core.cpp
 	${botan_BASE}/mp_comba.cpp
-	${botan_BASE}/mp_fkmul.cpp
 	${botan_BASE}/mp_mul.cpp
-	${botan_BASE}/mp_smul.cpp
 	${botan_BASE}/mp_shift.cpp
 	${botan_BASE}/mp_misc.cpp
-	${botan_BASE}/numthry.cpp
 	${botan_BASE}/divide.cpp
 	${botan_BASE}/big_base.cpp
 	${botan_BASE}/big_code.cpp
 	${botan_BASE}/big_io.cpp
 	${botan_BASE}/big_ops2.cpp
 	${botan_BASE}/big_ops3.cpp
+	${botan_BASE}/bit_ops.cpp
+	${botan_BASE}/libstate.cpp
+	${botan_BASE}/mem_pool.cpp
+	${botan_BASE}/modules.cpp
+	${botan_BASE}/mp_asm.cpp
+	${botan_BASE}/mp_mulop.cpp
+	${botan_BASE}/parsing.cpp
 )
 
 IF (UNIX)
