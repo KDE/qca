@@ -26,42 +26,84 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Memory Locking Functions Source File           *
+* Pooling Allocator Header File                  *
 * (C) 1999-2007 The Botan Project                *
 *************************************************/
 
-} // WRAPNS_LINE
-#include <botan/util.h>
-namespace QCA { // WRAPNS_LINE
-
-#ifndef _POSIX_C_SOURCE
-  #define _POSIX_C_SOURCE 199309
-#endif
+#ifndef BOTAN_POOLING_ALLOCATOR_H__
+#define BOTAN_POOLING_ALLOCATOR_H__
 
 } // WRAPNS_LINE
-#include <sys/types.h>
+#include <botan/allocate.h>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
-#include <sys/mman.h>
+#include <botan/exceptn.h>
+namespace QCA { // WRAPNS_LINE
+} // WRAPNS_LINE
+#include <botan/mutex.h>
+namespace QCA { // WRAPNS_LINE
+} // WRAPNS_LINE
+#include <utility>
+namespace QCA { // WRAPNS_LINE
+} // WRAPNS_LINE
+#include <vector>
 namespace QCA { // WRAPNS_LINE
 
 namespace Botan {
 
 /*************************************************
-* Lock an area of memory into RAM                *
+* Pooling Allocator                              *
 *************************************************/
-void lock_mem(void* ptr, u32bit bytes)
+class Pooling_Allocator : public Allocator
    {
-   mlock(ptr, bytes);
-   }
+   public:
+      void* allocate(u32bit);
+      void deallocate(void*, u32bit);
 
-/*************************************************
-* Unlock a previously locked region of memory    *
-*************************************************/
-void unlock_mem(void* ptr, u32bit bytes)
-   {
-   munlock(ptr, bytes);
-   }
+      void destroy();
+
+      Pooling_Allocator(u32bit, bool);
+      ~Pooling_Allocator();
+   private:
+      void get_more_core(u32bit);
+      byte* allocate_blocks(u32bit);
+
+      virtual void* alloc_block(u32bit) = 0;
+      virtual void dealloc_block(void*, u32bit) = 0;
+
+      class Memory_Block
+         {
+         public:
+            Memory_Block(void*);
+
+            static u32bit bitmap_size() { return BITMAP_SIZE; }
+            static u32bit block_size() { return BLOCK_SIZE; }
+
+            bool contains(void*, u32bit) const throw();
+            byte* alloc(u32bit) throw();
+            void free(void*, u32bit) throw();
+
+            bool operator<(const void*) const;
+            bool operator<(const Memory_Block& other) const
+               { return (buffer < other.buffer); }
+         private:
+            typedef u64bit bitmap_type;
+            static const u32bit BITMAP_SIZE = 8 * sizeof(bitmap_type);
+            static const u32bit BLOCK_SIZE = 64;
+
+            bitmap_type bitmap;
+            byte* buffer, *buffer_end;
+         };
+
+      const u32bit PREF_SIZE;
+
+      std::vector<Memory_Block> blocks;
+      std::vector<Memory_Block>::iterator last_used;
+      std::vector<std::pair<void*, u32bit> > allocated;
+      Mutex* mutex;
+   };
 
 }
+
+#endif
 } // WRAPNS_LINE

@@ -169,13 +169,16 @@ static const char *skip_over_curlies(const char *buf)
 
 void do_it(char *buf, char *ns)
 {
-	char str[256];
+	char str[256], str_end[256];
 	const char *p, *p2;
-	int slen;
+	int slen, slen_end;
 	int at;
 
-	sprintf(str, "namespace %s {\n", ns);
+	sprintf(str, "namespace %s { // WRAPNS_LINE\n", ns);
 	slen = strlen(str);
+
+	sprintf(str_end, "} // WRAPNS_LINE\n", ns);
+	slen_end = strlen(str_end);
 
 	at = 0;
 	while(1)
@@ -220,8 +223,8 @@ void do_it(char *buf, char *ns)
 		}
 
 		// close it
-		buf = insert_string(buf, "}\n", at);
-		at += 2;
+		buf = insert_string(buf, str_end, at);
+		at += slen_end;
 
 		if(f == 1)
 		{

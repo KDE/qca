@@ -26,105 +26,69 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Mutex Source File                              *
+* Bit/Word Operations Header File                *
 * (C) 1999-2007 The Botan Project                *
 *************************************************/
 
+#ifndef BOTAN_BIT_OPS_H__
+#define BOTAN_BIT_OPS_H__
+
 } // WRAPNS_LINE
-#include <botan/mutex.h>
+#include <botan/types.h>
 namespace QCA { // WRAPNS_LINE
-#ifndef BOTAN_NO_LIBSTATE
-} // WRAPNS_LINE
-#include <botan/libstate.h>
-namespace QCA { // WRAPNS_LINE
-#endif
 
 namespace Botan {
 
 /*************************************************
-* Mutex_Holder Constructor                       *
+* Rotation Functions                             *
 *************************************************/
-Mutex_Holder::Mutex_Holder(Mutex* m) : mux(m)
+template<typename T> inline T rotate_left(T input, u32bit rot)
+   { return (T)((input << rot) | (input >> (8*sizeof(T)-rot))); }
+
+template<typename T> inline T rotate_right(T input, u32bit rot)
+   { return (T)((input >> rot) | (input << (8*sizeof(T)-rot))); }
+
+/*************************************************
+* Byte Extraction Function                       *
+*************************************************/
+template<typename T> inline byte get_byte(u32bit byte_num, T input)
+   { return (byte)(input >> ((sizeof(T)-1-(byte_num&(sizeof(T)-1))) << 3)); }
+
+/*************************************************
+* Byte to Word Conversions                       *
+*************************************************/
+inline u16bit make_u16bit(byte input0, byte input1)
+   { return (u16bit)(((u16bit)input0 << 8) | input1); }
+
+inline u32bit make_u32bit(byte input0, byte input1, byte input2, byte input3)
+   { return (u32bit)(((u32bit)input0 << 24) | ((u32bit)input1 << 16) |
+                     ((u32bit)input2 <<  8) | input3); }
+
+inline u64bit make_u64bit(byte input0, byte input1, byte input2, byte input3,
+                          byte input4, byte input5, byte input6, byte input7)
    {
-   if(!mux)
-      throw Invalid_Argument("Mutex_Holder: Argument was NULL");
-   mux->lock();
+   return (u64bit)(((u64bit)input0 << 56) | ((u64bit)input1 << 48) |
+                   ((u64bit)input2 << 40) | ((u64bit)input3 << 32) |
+                   ((u64bit)input4 << 24) | ((u64bit)input5 << 16) |
+                   ((u64bit)input6 <<  8) | input7);
    }
 
 /*************************************************
-* Mutex_Holder Destructor                        *
+* XOR Functions                                  *
 *************************************************/
-Mutex_Holder::~Mutex_Holder()
-   {
-   mux->unlock();
-   }
-
-#ifndef BOTAN_NO_LIBSTATE
-/*************************************************
-* Named_Mutex_Holder Constructor                 *
-*************************************************/
-Named_Mutex_Holder::Named_Mutex_Holder(const std::string& name) :
-   mutex_name(name)
-   {
-   global_state().get_named_mutex(mutex_name)->lock();
-   }
+void xor_buf(byte[], const byte[], u32bit);
+void xor_buf(byte[], const byte[], const byte[], u32bit);
 
 /*************************************************
-* Named_Mutex_Holder Destructor                  *
+* Misc Utility Functions                         *
 *************************************************/
-Named_Mutex_Holder::~Named_Mutex_Holder()
-   {
-   global_state().get_named_mutex(mutex_name)->unlock();
-   }
-#endif
-
-/*************************************************
-* Default Mutex Factory                          *
-*************************************************/
-#ifdef BOTAN_FIX_GDB
-namespace {
-#else
-Mutex* Default_Mutex_Factory::make()
-   {
-#endif
-   class Default_Mutex : public Mutex
-      {
-      public:
-         class Mutex_State_Error : public Internal_Error
-            {
-            public:
-               Mutex_State_Error(const std::string& where) :
-                  Internal_Error("Default_Mutex::" + where + ": " +
-                                 "Mutex is already " + where + "ed") {}
-            };
-
-         void lock()
-            {
-            if(locked)
-               throw Mutex_State_Error("lock");
-            locked = true;
-            }
-
-         void unlock()
-            {
-            if(!locked)
-               throw Mutex_State_Error("unlock");
-            locked = false;
-            }
-
-         Default_Mutex() { locked = false; }
-      private:
-         bool locked;
-      };
-
-#ifdef BOTAN_FIX_GDB
-   } // end unnamed namespace
-Mutex* Default_Mutex_Factory::make()
-   {
-#endif
-
-   return new Default_Mutex;
-   }
+bool power_of_2(u64bit);
+u32bit high_bit(u64bit);
+u32bit low_bit(u64bit);
+u32bit significant_bytes(u64bit);
+u32bit hamming_weight(u64bit);
 
 }
+
+#endif
 } // WRAPNS_LINE

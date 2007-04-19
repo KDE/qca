@@ -26,12 +26,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Allocator Header File                          *
+* Parser Functions Header File                   *
 * (C) 1999-2007 The Botan Project                *
 *************************************************/
 
-#ifndef BOTAN_ALLOCATOR_H__
-#define BOTAN_ALLOCATOR_H__
+#ifndef BOTAN_PARSER_H__
+#define BOTAN_PARSER_H__
 
 } // WRAPNS_LINE
 #include <botan/types.h>
@@ -39,31 +39,30 @@ namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
 #include <string>
 namespace QCA { // WRAPNS_LINE
+} // WRAPNS_LINE
+#include <vector>
+namespace QCA { // WRAPNS_LINE
 
 namespace Botan {
 
 /*************************************************
-* Allocator                                      *
+* String Parsing Functions                       *
 *************************************************/
-class Allocator
-   {
-   public:
-      static Allocator* get(bool);
-
-      virtual void* allocate(u32bit) = 0;
-      virtual void deallocate(void*, u32bit) = 0;
-
-      virtual std::string type() const = 0;
-
-      virtual void init() {}
-      virtual void destroy() {}
-
-      virtual ~Allocator() {}
-   };
+#ifndef BOTAN_TOOLS_ONLY
+std::vector<std::string> parse_algorithm_name(const std::string&);
+std::vector<std::string> split_on(const std::string&, char);
+std::vector<u32bit> parse_asn1_oid(const std::string&);
+bool x500_name_cmp(const std::string&, const std::string&);
+u32bit parse_expr(const std::string&);
+#endif
 
 /*************************************************
-* Get an allocator                               *
+* String/Integer Conversions                     *
 *************************************************/
+std::string to_string(u64bit, u32bit = 0);
+#ifndef BOTAN_TOOLS_ONLY
+u32bit to_u32bit(const std::string&);
+#endif
 
 }
 

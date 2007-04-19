@@ -26,105 +26,89 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Mutex Source File                              *
+* STL Utility Functions Header File              *
 * (C) 1999-2007 The Botan Project                *
 *************************************************/
 
+#ifndef BOTAN_STL_UTIL_H__
+#define BOTAN_STL_UTIL_H__
+
 } // WRAPNS_LINE
-#include <botan/mutex.h>
+#include <map>
 namespace QCA { // WRAPNS_LINE
-#ifndef BOTAN_NO_LIBSTATE
-} // WRAPNS_LINE
-#include <botan/libstate.h>
-namespace QCA { // WRAPNS_LINE
-#endif
 
 namespace Botan {
 
 /*************************************************
-* Mutex_Holder Constructor                       *
+* Copy-on-Predicate Algorithm                    *
 *************************************************/
-Mutex_Holder::Mutex_Holder(Mutex* m) : mux(m)
+template<typename InputIterator, typename OutputIterator, typename Predicate>
+OutputIterator copy_if(InputIterator current, InputIterator end,
+                       OutputIterator dest, Predicate copy_p)
    {
-   if(!mux)
-      throw Invalid_Argument("Mutex_Holder: Argument was NULL");
-   mux->lock();
-   }
-
-/*************************************************
-* Mutex_Holder Destructor                        *
-*************************************************/
-Mutex_Holder::~Mutex_Holder()
-   {
-   mux->unlock();
-   }
-
-#ifndef BOTAN_NO_LIBSTATE
-/*************************************************
-* Named_Mutex_Holder Constructor                 *
-*************************************************/
-Named_Mutex_Holder::Named_Mutex_Holder(const std::string& name) :
-   mutex_name(name)
-   {
-   global_state().get_named_mutex(mutex_name)->lock();
-   }
-
-/*************************************************
-* Named_Mutex_Holder Destructor                  *
-*************************************************/
-Named_Mutex_Holder::~Named_Mutex_Holder()
-   {
-   global_state().get_named_mutex(mutex_name)->unlock();
-   }
-#endif
-
-/*************************************************
-* Default Mutex Factory                          *
-*************************************************/
-#ifdef BOTAN_FIX_GDB
-namespace {
-#else
-Mutex* Default_Mutex_Factory::make()
-   {
-#endif
-   class Default_Mutex : public Mutex
+   while(current != end)
       {
-      public:
-         class Mutex_State_Error : public Internal_Error
-            {
-            public:
-               Mutex_State_Error(const std::string& where) :
-                  Internal_Error("Default_Mutex::" + where + ": " +
-                                 "Mutex is already " + where + "ed") {}
-            };
+      if(copy_p(*current))
+         *dest++ = *current;
+      ++current;
+      }
+   return dest;
+   }
 
-         void lock()
-            {
-            if(locked)
-               throw Mutex_State_Error("lock");
-            locked = true;
-            }
-
-         void unlock()
-            {
-            if(!locked)
-               throw Mutex_State_Error("unlock");
-            locked = false;
-            }
-
-         Default_Mutex() { locked = false; }
-      private:
-         bool locked;
-      };
-
-#ifdef BOTAN_FIX_GDB
-   } // end unnamed namespace
-Mutex* Default_Mutex_Factory::make()
+/*************************************************
+* Searching through a std::map                   *
+*************************************************/
+template<typename K, typename V>
+inline V search_map(const std::map<K, V>& mapping,
+                    const K& key,
+                    const V& null_result = V())
    {
-#endif
+   typename std::map<K, V>::const_iterator i = mapping.find(key);
+   if(i == mapping.end())
+      return null_result;
+   return i->second;
+   }
 
-   return new Default_Mutex;
+template<typename K, typename V, typename R>
+inline R search_map(const std::map<K, V>& mapping, const K& key,
+                    const R& null_result, const R& found_result)
+   {
+   typename std::map<K, V>::const_iterator i = mapping.find(key);
+   if(i == mapping.end())
+      return null_result;
+   return found_result;
+   }
+
+/*************************************************
+* Function adaptor for delete operation          *
+*************************************************/
+template<class T>
+class del_fun : public std::unary_function<T, void>
+   {
+   public:
+      void operator()(T* ptr) { delete ptr; }
+   };
+
+/*************************************************
+* Delete the second half of a pair of objects    *
+*************************************************/
+template<typename Pair>
+void delete2nd(Pair& pair)
+   {
+   delete pair.second;
+   }
+
+/*************************************************
+* Insert a key/value pair into a multimap        *
+*************************************************/
+template<typename K, typename V>
+void multimap_insert(std::multimap<K, V>& multimap,
+                     const K& key, const V& value)
+   {
+   multimap.insert(std::make_pair(key, value));
    }
 
 }
+
+#endif
 } // WRAPNS_LINE

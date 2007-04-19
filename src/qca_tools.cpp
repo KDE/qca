@@ -47,17 +47,9 @@ static bool can_lock()
 #endif
 }
 
-static void add_mmap()
-{
-#ifdef Q_OS_UNIX
-	Botan::add_allocator_type("mmap", new Botan::MemoryMapping_Allocator);
-	Botan::set_default_allocator("mmap");
-#endif
-}
-
 // Botan shouldn't throw any exceptions in our init/deinit.
 
-static const Botan::SecureAllocator *alloc = 0;
+static Botan::Allocator *alloc = 0;
 
 bool botan_init(int prealloc, bool mmap)
 {
@@ -65,26 +57,26 @@ bool botan_init(int prealloc, bool mmap)
 	if(prealloc < 64)
 		prealloc = 64;
 
-	Botan::botan_memory_chunk = 64 * 1024;
-	Botan::botan_prealloc = prealloc / 64;
-	if(prealloc % 64 != 0)
-		++Botan::botan_prealloc;
-
-	Botan::Init::set_mutex_type(new Botan::Qt_Mutex);
-	Botan::Init::startup_memory_subsystem();
+	{
+		Botan::Builtin_Modules modules;
+		Botan::Library_State *libstate = new Botan::Library_State(modules.mutex_factory());
+		libstate->prealloc_size = prealloc * 1024;
+		Botan::set_global_state(libstate);
+		Botan::global_state().load(modules);
+	}
 
 	bool secmem = false;
 	if(can_lock())
 	{
-		Botan::set_default_allocator("locking");
+		Botan::global_state().set_default_allocator("locking");
 		secmem = true;
 	}
 	else if(mmap)
 	{
-		add_mmap();
+		Botan::global_state().set_default_allocator("mmap");
 		secmem = true;
 	}
-	alloc = Botan::get_allocator("default");
+	alloc = Botan::Allocator::get(true);
 
 	return secmem;
 }
@@ -92,8 +84,7 @@ bool botan_init(int prealloc, bool mmap)
 void botan_deinit()
 {
 	alloc = 0;
-	Botan::Init::shutdown_memory_subsystem();
-	Botan::Init::set_mutex_type(0);
+	Botan::set_global_state(0);
 }
 
 void *botan_secure_alloc(int bytes)

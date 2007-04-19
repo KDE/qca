@@ -26,44 +26,82 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Allocator Header File                          *
+* Module Factory Header File                     *
 * (C) 1999-2007 The Botan Project                *
 *************************************************/
 
-#ifndef BOTAN_ALLOCATOR_H__
-#define BOTAN_ALLOCATOR_H__
+#ifndef BOTAN_MODULE_FACTORIES_H__
+#define BOTAN_MODULE_FACTORIES_H__
 
+#ifndef BOTAN_TOOLS_ONLY
 } // WRAPNS_LINE
-#include <botan/types.h>
+#include <botan/init.h>
 namespace QCA { // WRAPNS_LINE
+#endif
 } // WRAPNS_LINE
 #include <string>
+namespace QCA { // WRAPNS_LINE
+} // WRAPNS_LINE
+#include <vector>
 namespace QCA { // WRAPNS_LINE
 
 namespace Botan {
 
 /*************************************************
-* Allocator                                      *
+* Module Builder Interface                       *
 *************************************************/
-class Allocator
+class Modules
    {
    public:
-      static Allocator* get(bool);
+      virtual class Mutex_Factory* mutex_factory() const = 0;
+#ifndef BOTAN_TOOLS_ONLY
+      virtual class Timer* timer() const = 0;
+      virtual class Charset_Transcoder* transcoder() const = 0;
+#endif
 
-      virtual void* allocate(u32bit) = 0;
-      virtual void deallocate(void*, u32bit) = 0;
+      virtual std::string default_allocator() const = 0;
 
-      virtual std::string type() const = 0;
+      virtual std::vector<class Allocator*> allocators() const = 0;
+#ifndef BOTAN_TOOLS_ONLY
+      virtual std::vector<class EntropySource*> entropy_sources() const = 0;
+      virtual std::vector<class Engine*> engines() const = 0;
+#endif
 
-      virtual void init() {}
-      virtual void destroy() {}
-
-      virtual ~Allocator() {}
+      virtual ~Modules() {}
    };
 
 /*************************************************
-* Get an allocator                               *
+* Built In Modules                               *
 *************************************************/
+class Builtin_Modules : public Modules
+   {
+   public:
+      class Mutex_Factory* mutex_factory() const;
+#ifndef BOTAN_TOOLS_ONLY
+      class Timer* timer() const;
+      class Charset_Transcoder* transcoder() const;
+#endif
+
+      std::string default_allocator() const;
+
+      std::vector<class Allocator*> allocators() const;
+#ifndef BOTAN_TOOLS_ONLY
+      std::vector<class EntropySource*> entropy_sources() const;
+      std::vector<class Engine*> engines() const;
+#endif
+
+#ifdef BOTAN_TOOLS_ONLY
+      Builtin_Modules();
+#else
+      Builtin_Modules(const InitializerOptions&);
+#endif
+   private:
+#ifdef BOTAN_TOOLS_ONLY
+      const bool should_lock;
+#else
+      const bool should_lock, use_engines;
+#endif
+   };
 
 }
 

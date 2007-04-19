@@ -26,46 +26,43 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Allocator Header File                          *
+* Multiply/Add Algorithm Source File             *
 * (C) 1999-2007 The Botan Project                *
 *************************************************/
 
-#ifndef BOTAN_ALLOCATOR_H__
-#define BOTAN_ALLOCATOR_H__
-
 } // WRAPNS_LINE
-#include <botan/types.h>
+#include <botan/mp_asm.h>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
-#include <string>
+#include <botan/mp_asmi.h>
+namespace QCA { // WRAPNS_LINE
+} // WRAPNS_LINE
+#include <botan/mp_core.h>
 namespace QCA { // WRAPNS_LINE
 
 namespace Botan {
 
+extern "C" {
+
 /*************************************************
-* Allocator                                      *
+* Multiply/Add Words                             *
 *************************************************/
-class Allocator
+word bigint_mul_add_words(word z[], const word x[], u32bit x_size, word y)
    {
-   public:
-      static Allocator* get(bool);
+   const u32bit blocks = x_size - (x_size % 8);
 
-      virtual void* allocate(u32bit) = 0;
-      virtual void deallocate(void*, u32bit) = 0;
+   word carry = 0;
 
-      virtual std::string type() const = 0;
+   for(u32bit j = 0; j != blocks; j += 8)
+      carry = word8_madd3(z + j, x + j, y, carry);
 
-      virtual void init() {}
-      virtual void destroy() {}
+   for(u32bit j = blocks; j != x_size; ++j)
+      z[j] = word_madd3(x[j], y, z[j], carry, &carry);
 
-      virtual ~Allocator() {}
-   };
-
-/*************************************************
-* Get an allocator                               *
-*************************************************/
+   return carry;
+   }
 
 }
 
-#endif
+}
 } // WRAPNS_LINE

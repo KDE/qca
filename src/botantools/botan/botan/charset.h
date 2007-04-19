@@ -1,6 +1,5 @@
-namespace QCA {
 /*
-Copyright (C) 1999-2004 The Botan Project. All rights reserved.
+Copyright (C) 1999-2007 The Botan Project. All rights reserved.
 
 Redistribution and use in source and binary forms, for any use, with or without
 modification, is permitted provided that the following conditions are met:
@@ -24,44 +23,63 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+// LICENSEHEADER_END
+namespace QCA { // WRAPNS_LINE
 /*************************************************
-* MPI Multiply-Add Core Header File              *
-* (C) 1999-2004 The Botan Project                *
+* Character Set Handling Header File             *
+* (C) 1999-2007 The Botan Project                *
 *************************************************/
 
-#ifndef BOTAN_MP_MADD_H__
-#define BOTAN_MP_MADD_H__
+#ifndef BOTAN_CHARSET_H__
+#define BOTAN_CHARSET_H__
 
-}
-#include <botan/mp_core.h>
-namespace QCA {
+} // WRAPNS_LINE
+#include <botan/types.h>
+namespace QCA { // WRAPNS_LINE
+#ifndef BOTAN_TOOLS_ONLY
+} // WRAPNS_LINE
+#include <botan/enums.h>
+namespace QCA { // WRAPNS_LINE
+#endif
+} // WRAPNS_LINE
+#include <string>
+namespace QCA { // WRAPNS_LINE
 
 namespace Botan {
 
 /*************************************************
-* Multiply-Add Operation                         *
+* Character Set Transcoder Interface             *
 *************************************************/
-inline void bigint_madd(word a, word b, word c, word d,
-                        word* out_low, word* out_high)
+#ifndef BOTAN_TOOLS_ONLY
+class Charset_Transcoder
    {
-#if (BOTAN_MP_WORD_BITS == 8)
-  typedef Botan::u16bit dword;
-#elif (BOTAN_MP_WORD_BITS == 16)
-  typedef Botan::u32bit dword;
-#elif (BOTAN_MP_WORD_BITS == 32)
-  typedef Botan::u64bit dword;
-#elif (BOTAN_MP_WORD_BITS == 64)
-  #error BOTAN_MP_WORD_BITS can only be 64 with the mp_asm64 module
-#else
-  #error BOTAN_MP_WORD_BITS must be 8, 16, 32, or 64
+   public:
+      virtual std::string transcode(const std::string&,
+                                    Character_Set, Character_Set) const = 0;
+
+      virtual ~Charset_Transcoder() {}
+   };
 #endif
 
-   dword z = (dword)a * b + c + d;
-   *out_low =  (word)((z                      ) & MP_WORD_MAX);
-   *out_high = (word)((z >> BOTAN_MP_WORD_BITS) & MP_WORD_MAX);
-   }
+namespace Charset {
+
+/*************************************************
+* Character Set Handling                         *
+*************************************************/
+#ifndef BOTAN_TOOLS_ONLY
+std::string transcode(const std::string&, Character_Set, Character_Set);
+#endif
+
+bool is_digit(char);
+bool is_space(char);
+bool caseless_cmp(char, char);
+
+byte char2digit(char);
+char digit2char(byte);
+
+}
 
 }
 
 #endif
-}
+} // WRAPNS_LINE
