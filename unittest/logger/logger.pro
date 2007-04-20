@@ -1,9 +1,6 @@
-TEMPLATE = app
-TARGET = loggerunittest
 DEPENDPATH += .
 include(../unittest.pri)
-CONFIG += qtestlib thread console
-QT -= gui
+CONFIG += qtestlib
 
 # check target
 QMAKE_EXTRA_TARGETS = check

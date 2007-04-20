@@ -1,9 +1,6 @@
-TEMPLATE = app
-TARGET = veloxunittest
 DEPENDPATH += .
 include(../unittest.pri)
-CONFIG += qtestlib thread console
-QT -= gui
+CONFIG += qtestlib
 QT += network
 
 # check target

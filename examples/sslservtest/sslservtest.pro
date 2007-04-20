@@ -1,8 +1,4 @@
-CONFIG  -= app_bundle
-CONFIG  += console
-QT      += network
+QT += network
 
 SOURCES += sslservtest.cpp
 include(../examples.pri)
-
-
