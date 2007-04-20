@@ -141,7 +141,7 @@ static SecureArray dsasig_raw_to_der(const SecureArray &in)
 	return result;
 }
 
-static bool is_basic_constraint(ConstraintType t)
+/*static bool is_basic_constraint(ConstraintType t)
 {
 	bool basic = false;
 	switch(t)
@@ -192,10 +192,10 @@ static Constraints ext_only(const Constraints &list)
 			out += list[n];
 	}
 	return out;
-}
+}*/
 
 // logic from Botan
-static Constraints find_constraints(const PKeyContext &key, const Constraints &orig)
+/*static Constraints find_constraints(const PKeyContext &key, const Constraints &orig)
 {
 	Constraints constraints;
 
@@ -228,7 +228,7 @@ static Constraints find_constraints(const PKeyContext &key, const Constraints &o
 	constraints += the_rest;
 
 	return constraints;
-}
+}*/
 
 static void try_add_name_item(X509_NAME **name, int nid, const QString &val)
 {
@@ -3026,15 +3026,17 @@ public:
 
 		CertificateInfo info = opts.info();
 
+		// Note: removing default constraints, let the app choose these if it wants
+		Constraints constraints = opts.constraints();
 		// constraints - logic from Botan
-		Constraints constraints;
+		/*Constraints constraints;
 		if(opts.isCA())
 		{
 			constraints += KeyCertificateSign;
 			constraints += CRLSign;
 		}
 		else
-			constraints = find_constraints(priv, opts.constraints());
+			constraints = find_constraints(priv, opts.constraints());*/
 
 		EVP_PKEY *pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
 		X509_EXTENSION *ex;
@@ -3401,15 +3403,17 @@ public:
 
 		CertificateInfo info = opts.info();
 
+		// Note: removing default constraints, let the app choose these if it wants
+		Constraints constraints = opts.constraints();
 		// constraints - logic from Botan
-		Constraints constraints;
+		/*Constraints constraints;
 		if(opts.isCA())
 		{
 			constraints += KeyCertificateSign;
 			constraints += CRLSign;
 		}
 		else
-			constraints = find_constraints(priv, opts.constraints());
+			constraints = find_constraints(priv, opts.constraints());*/
 
 		EVP_PKEY *pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
 		X509_EXTENSION *ex;
