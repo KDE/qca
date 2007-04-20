@@ -19,6 +19,11 @@
 
 #include "dirwatch_p.h"
 
+#include <QThread>
+#include <QTimer>
+#include <QFile>
+#include <QDir>
+
 #include <windows.h>
 
 namespace QCA {

@@ -399,7 +399,7 @@ SecureArray emsa3Encode(const QString &hashName, const SecureArray &digest, int 
 	if(padlen < 1)
 		return SecureArray();
 
-	SecureArray out(size, 0xff); // pad with 0xff
+	SecureArray out(size, (char)0xff); // pad with 0xff
 	out[0] = 0x01;
 	out[padlen + 1] = 0x00;
 	int at = padlen + 2;

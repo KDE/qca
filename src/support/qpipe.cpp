@@ -28,6 +28,19 @@
 
 #include <stdlib.h>
 
+#ifdef Q_OS_WIN
+# include <QThread>
+# include <QTimer>
+# include <QMutex>
+# include <QWaitCondition>
+# include <QTextCodec>
+# include <QTextEncoder>
+# include <QTextDecoder>
+#else
+# include <QSocketNotifier>
+# include <QTimer>
+#endif
+
 #ifdef Q_OS_UNIX
 # include <unistd.h>
 # include <fcntl.h>
@@ -35,9 +48,6 @@
 # include <sys/ioctl.h>
 # include <signal.h>
 #endif
-
-#include <QSocketNotifier>
-#include <QTimer>
 
 #define USE_POLL
 
