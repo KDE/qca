@@ -193,7 +193,7 @@ int main(int argc, char **argv)
     if ( argc < 3 )
     {
         printf ( "Usage: %s password salt (salt without $1$)\n" , argv[0] );
-        exit ( -1 );
+        return 1;
     }
 
     password.append( argv[1] );
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
         // printf( "GNU md5crypt [ %s , %s ] = '%s'\n",  password.data(), salt.data(), crypt( password.data(), ( "$1$"+salt ).data() ) );
     }
 
-    exit ( 0 );
+    return 0;
 }
 
 
