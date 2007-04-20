@@ -1693,30 +1693,39 @@ void CRL::change(CRLContext *c)
 //----------------------------------------------------------------------------
 // Store
 //----------------------------------------------------------------------------
-// TODO: support CRLs
 // CRL / X509 CRL
 // CERTIFICATE / X509 CERTIFICATE
 static QString readNextPem(QTextStream *ts, bool *isCRL)
 {
 	QString pem;
+	bool crl = false;
 	bool found = false;
 	bool done = false;
-	*isCRL = false;
 	while(!ts->atEnd())
 	{
 		QString line = ts->readLine();
 		if(!found)
 		{
-			if(line == "-----BEGIN CERTIFICATE-----")
+			if(line.startsWith("-----BEGIN "))
 			{
-				found = true;
-				pem += line + '\n';
+				if(line.contains("CERTIFICATE"))
+				{
+					found = true;
+					pem += line + '\n';
+					crl = false;
+				}
+				else if(line.contains("CRL"))
+				{
+					found = true;
+					pem += line + '\n';
+					crl = true;
+				}
 			}
 		}
 		else
 		{
 			pem += line + '\n';
-			if(line == "-----END CERTIFICATE-----")
+			if(line.startsWith("-----END "))
 			{
 				done = true;
 				break;
@@ -1725,6 +1734,8 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 	}
 	if(!done)
                 return QString();
+	if(isCRL)
+		*isCRL = crl;
 	return pem;
 }
 
@@ -1852,7 +1863,7 @@ CertificateCollection CertificateCollection::fromFlatTextFile(const QString &fil
 	QTextStream ts(&f);
 	while(1)
 	{
-		bool isCRL;
+		bool isCRL = false;
 		QString pem = readNextPem(&ts, &isCRL);
 		if(pem.isNull())
 			break;
