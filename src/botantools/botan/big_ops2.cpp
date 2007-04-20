@@ -58,7 +58,11 @@ BigInt& BigInt::operator+=(const BigInt& y)
    {
    const u32bit x_sw = sig_words(), y_sw = y.sig_words();
 
+#ifdef BOTAN_TYPES_QT
+   const u32bit reg_size = qMax(x_sw, y_sw) + 1;
+#else
    const u32bit reg_size = std::max(x_sw, y_sw) + 1;
+#endif
    grow_to(reg_size);
 
    if((sign() == y.sign()))
@@ -95,7 +99,11 @@ BigInt& BigInt::operator-=(const BigInt& y)
 
    s32bit relative_size = bigint_cmp(data(), x_sw, y.data(), y_sw);
 
+#ifdef BOTAN_TYPES_QT
+   const u32bit reg_size = qMax(x_sw, y_sw) + 1;
+#else
    const u32bit reg_size = std::max(x_sw, y_sw) + 1;
+#endif
    grow_to(reg_size);
 
    if(relative_size < 0)

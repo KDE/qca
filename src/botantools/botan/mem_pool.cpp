@@ -322,5 +322,8 @@ void Pooling_Allocator::get_more_core(u32bit in_bytes)
    last_used = std::lower_bound(blocks.begin(), blocks.end(), ptr);
    }
 
+const u32bit Pooling_Allocator::Memory_Block::BITMAP_SIZE = 8 * sizeof(Pooling_Allocator::Memory_Block::bitmap_type);
+const u32bit Pooling_Allocator::Memory_Block::BLOCK_SIZE = 64;
+
 }
 } // WRAPNS_LINE

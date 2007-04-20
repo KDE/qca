@@ -51,6 +51,9 @@ namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
 #include <cctype>
 namespace QCA { // WRAPNS_LINE
+} // WRAPNS_LINE
+#include <ctype.h>
+namespace QCA { // WRAPNS_LINE
 
 namespace Botan {
 
@@ -137,7 +140,7 @@ char digit2char(byte b)
 *************************************************/
 bool caseless_cmp(char a, char b)
    {
-   return (std::tolower((unsigned char)a) == std::tolower((unsigned char)b));
+   return (tolower((unsigned char)a) == tolower((unsigned char)b));
    }
 
 }

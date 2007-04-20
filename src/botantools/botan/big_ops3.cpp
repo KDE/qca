@@ -55,7 +55,11 @@ BigInt operator+(const BigInt& x, const BigInt& y)
    {
    const u32bit x_sw = x.sig_words(), y_sw = y.sig_words();
 
+#ifdef BOTAN_TYPES_QT
+   BigInt z(x.sign(), qMax(x_sw, y_sw) + 1);
+#else
    BigInt z(x.sign(), std::max(x_sw, y_sw) + 1);
+#endif
 
    if((x.sign() == y.sign()))
       bigint_add3(z.get_reg(), x.data(), x_sw, y.data(), y_sw);
@@ -86,7 +90,11 @@ BigInt operator-(const BigInt& x, const BigInt& y)
 
    s32bit relative_size = bigint_cmp(x.data(), x_sw, y.data(), y_sw);
 
+#ifdef BOTAN_TYPES_QT
+   BigInt z(BigInt::Positive, qMax(x_sw, y_sw) + 1);
+#else
    BigInt z(BigInt::Positive, std::max(x_sw, y_sw) + 1);
+#endif
 
    if(relative_size < 0)
       {

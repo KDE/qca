@@ -88,8 +88,8 @@ class Pooling_Allocator : public Allocator
                { return (buffer < other.buffer); }
          private:
             typedef u64bit bitmap_type;
-            static const u32bit BITMAP_SIZE = 8 * sizeof(bitmap_type);
-            static const u32bit BLOCK_SIZE = 64;
+            static const u32bit BITMAP_SIZE;
+            static const u32bit BLOCK_SIZE;
 
             bitmap_type bitmap;
             byte* buffer, *buffer_end;

@@ -450,6 +450,11 @@ Library_State::Library_State(Mutex_Factory* mutex_factory)
 /*************************************************
 * Library_State Destructor                       *
 *************************************************/
+static void delete_lock(std::pair<const std::string, Mutex*> &pair)
+   {
+   delete pair.second;
+   }
+
 Library_State::~Library_State()
    {
 #ifndef BOTAN_TOOLS_ONLY
@@ -473,8 +478,7 @@ Library_State::~Library_State()
       delete allocators[j];
       }
 
-   std::for_each(locks.begin(), locks.end(),
-                 delete2nd<std::map<std::string, Mutex*>::value_type>);
+   std::for_each(locks.begin(), locks.end(), delete_lock);
 
    delete mutex_factory;
    }
