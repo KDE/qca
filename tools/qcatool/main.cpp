@@ -225,12 +225,24 @@ class PassphrasePrompt : public QObject
 {
 	Q_OBJECT
 public:
+	class Item
+	{
+	public:
+		QString promptStr;
+		int id;
+		QCA::Event event;
+	};
+
 	QCA::EventHandler handler;
 	bool allowPrompt;
 	bool warned;
 	bool have_pass;
 	bool used_pass;
 	QCA::SecureArray pass;
+	QCA::ConsolePrompt *prompt;
+	int prompt_id;
+	QCA::Event prompt_event;
+	QList<Item> pending;
 
 	PassphrasePrompt()
 	{
@@ -238,8 +250,22 @@ public:
 		warned = false;
 		have_pass = false;
 
+		prompt = 0;
+
 		connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)), SLOT(ph_eventReady(int, const QCA::Event &)));
 		handler.start();
+	}
+
+	~PassphrasePrompt()
+	{
+		if(prompt)
+		{
+			handler.reject(prompt_id);
+			delete prompt;
+		}
+
+		while(!pending.isEmpty())
+			handler.reject(pending.takeFirst().id);
 	}
 
 	void setExplicitPassword(const QCA::SecureArray &_pass)
@@ -316,8 +342,22 @@ private slots:
 			else
 				str = QString("Enter %1").arg(type);
 
-			QCA::SecureArray result = QCA::ConsolePrompt::getHidden(str);
-			handler.submitPassword(id, result);
+			if(!prompt)
+			{
+				prompt = new QCA::ConsolePrompt(this);
+				connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
+				prompt_id = id;
+				prompt_event = e;
+				prompt->getHidden(str);
+			}
+			else
+			{
+				Item i;
+				i.promptStr = str;
+				i.id = id;
+				i.event = e;
+				pending += i;
+			}
 		}
 		else if(e.type() == QCA::Event::Token)
 		{
@@ -339,9 +379,57 @@ private slots:
 				}
 				name = QString("the '") + store.name() + "' token";
 			}
-			printf("Please insert %s and press Enter ...\n", qPrintable(name));
-			QCA::ConsolePrompt::waitForEnter();
-			handler.tokenOkay(id);
+
+			QString str = QString("Please insert %1 and press Enter ...").arg(name);
+
+			if(!prompt)
+			{
+				printf("%s\n", qPrintable(str));
+				prompt = new QCA::ConsolePrompt(this);
+				connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
+				prompt_id = id;
+				prompt_event = e;
+				prompt->getEnter();
+			}
+			else
+			{
+				Item i;
+				i.promptStr = str;
+				i.id = id;
+				i.event = e;
+				pending += i;
+			}
+		}
+		else
+			handler.reject(id);
+	}
+
+	void prompt_finished()
+	{
+		if(prompt_event.type() == QCA::Event::Password)
+			handler.submitPassword(prompt_id, prompt->result());
+		else
+			handler.tokenOkay(prompt_id);
+
+		if(!pending.isEmpty())
+		{
+			Item i = pending.takeFirst();
+			prompt_id = i.id;
+			prompt_event = i.event;
+			if(i.event.type() == QCA::Event::Password)
+			{
+				prompt->getHidden(i.promptStr);
+			}
+			else // Token
+			{
+				printf("%s\n", qPrintable(i.promptStr));
+				prompt->getEnter();
+			}
+		}
+		else
+		{
+			delete prompt;
+			prompt = 0;
 		}
 	}
 };
@@ -375,8 +463,15 @@ protected:
 
 static bool promptForNewPassphrase(QCA::SecureArray *result)
 {
-	QCA::SecureArray out = QCA::ConsolePrompt::getHidden("Enter new passphrase");
-	if(QCA::ConsolePrompt::getHidden("Confirm new passphrase") != out)
+	QCA::ConsolePrompt prompt;
+	prompt.getHidden("Enter new passphrase");
+	prompt.waitForFinished();
+	QCA::SecureArray out = prompt.result();
+
+	prompt.getHidden("Confirm new passphrase");
+	prompt.waitForFinished();
+
+	if(prompt.result() != out)
 	{
 		fprintf(stderr, "Error: confirmation does not match original entry.\n");
 		return false;

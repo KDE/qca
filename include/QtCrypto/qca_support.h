@@ -297,15 +297,21 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		static SecureArray getHidden(const QString &promptStr);
-		static void waitForEnter();
+		ConsolePrompt(QObject *parent = 0);
+		~ConsolePrompt();
+
+		void getHidden(const QString &promptStr);
+		void getEnter();
+		void waitForFinished();
+
+		SecureArray result() const;
+
+	signals:
+		void finished();
 
 	private:
 		class Private;
 		Private *d;
-
-		ConsolePrompt(QObject *parent = 0);
-		~ConsolePrompt();
 	};
 
         class AbstractLogDevice;
