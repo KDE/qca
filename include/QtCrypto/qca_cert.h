@@ -1583,7 +1583,7 @@ namespace QCA
 		   \sa fromFile for a more flexible version of the
 		   same capability.
 		*/
-		KeyBundle(const QString &fileName, const SecureArray &passphrase = SecureArray());
+		explicit KeyBundle(const QString &fileName, const SecureArray &passphrase = SecureArray());
 
 		/**
 		   Standard copy constructor
