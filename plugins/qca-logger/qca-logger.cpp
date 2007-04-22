@@ -17,8 +17,10 @@
  *
  */
 
-#include <QtCore>
 #include <QtCrypto>
+#include <QtPlugin>
+#include <QTextStream>
+#include <QFile>
 
 using namespace QCA;
 
@@ -181,8 +183,8 @@ public:
 private:
 	void
 	createLogger (
-		int level,
-		QString file
+		const int level,
+		const QString &file
 	) {
 		bool success = false;
 		if (file.isEmpty ()) {
