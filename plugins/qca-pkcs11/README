@@ -12,16 +12,6 @@ ABOUT
 	 - Asker integration for token and PIN.
 
 DEPENDENCIES
-	OpenSSL>=0.9.7
-		http://www.openssl.org
-
-		This product includes software developed by the OpenSSL Project
-		for use in the OpenSSL Toolkit (http://www.OpenSSL.org/)
-
-		This product includes cryptographic software written by Eric Young
-		(eay@cryptsoft.com).  This product includes software written by Tim
-		Hudson (tjh@cryptsoft.com).
-
 	pkcs11-helper>=1.02
 		http://www.opensc-projects.org
 
