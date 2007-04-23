@@ -38,6 +38,7 @@ private:
 	mutable QMutex m;
 	bool _use_system;
 	QString _roots_file;
+	QStringList _skip_plugins;
 
 public:
 	DefaultShared() : _use_system(true)
@@ -56,11 +57,18 @@ public:
 		return _roots_file;
 	}
 
-	void set(bool use_system, const QString &roots_file)
+	QStringList skip_plugins() const
+	{
+		QMutexLocker locker(&m);
+		return _skip_plugins;
+	}
+
+	void set(bool use_system, const QString &roots_file, const QStringList &skip_plugins)
 	{
 		QMutexLocker locker(&m);
 		_use_system = use_system;
 		_roots_file = roots_file;
+		_skip_plugins = skip_plugins;
 	}
 };
 
@@ -751,6 +759,8 @@ static QString escape_string(const QString &in)
 			out += "\\\\";
 		else if(in[n] == ':')
 			out += "\\c";
+		else if(in[n] == ',')
+			out += "\\o";
 		else
 			out += in[n];
 	}
@@ -770,6 +780,8 @@ static QString unescape_string(const QString &in)
 					out += '\\';
 				else if(in[n + 1] == 'c')
 					out += ':';
+				else if(in[n + 1] == 'o')
+					out += ',';
 				++n;
 			}
 		}
@@ -1116,6 +1128,7 @@ public:
 		config["formtype"] = "http://affinix.com/qca/forms/default#1.0";
 		config["use_system"] = true;
 		config["roots_file"] = QString();
+		config["skip_plugins"] = QString();
 		return config;
 	}
 
@@ -1123,13 +1136,26 @@ public:
 	{
 		bool use_system = config["use_system"].toBool();
 		QString roots_file = config["roots_file"].toString();
-		shared.set(use_system, roots_file);
+		QString skip_plugins_str = config["skip_plugins"].toString();
+		QStringList skip_plugins = skip_plugins_str.split(",");
+		for(int n = 0; n < skip_plugins.count(); ++n)
+		{
+			QString &s = skip_plugins[n];
+			s = unescape_string(s).trimmed();
+		}
+		shared.set(use_system, roots_file, skip_plugins);
 	}
 };
 
 Provider *create_default_provider()
 {
 	return new DefaultProvider;
+}
+
+QStringList skip_plugins(Provider *defaultProvider)
+{
+	DefaultProvider *that = (DefaultProvider *)defaultProvider;
+	return that->shared.skip_plugins();
 }
 
 #include "qca_default.moc"

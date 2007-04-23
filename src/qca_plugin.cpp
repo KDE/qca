@@ -41,6 +41,9 @@ namespace QCA {
 // from qca_core.cpp
 QVariantMap getProviderConfig_internal(Provider *p);
 
+// from qca_default.cpp
+QStringList skip_plugins(Provider *defaultProvider);
+
 static ProviderManager *g_pluginman = 0;
 
 static void logDebug(const QString &str)
@@ -359,6 +362,13 @@ void ProviderManager::scan()
 			if(!validVersion(ver))
 			{
 				logDebug(QString().sprintf("plugin version 0x%06x is in the future", ver));
+				delete i;
+				continue;
+			}
+
+			if(skip_plugins(def).contains(i->p->name()))
+			{
+				logDebug("skipping, explicitly disabled");
 				delete i;
 				continue;
 			}
