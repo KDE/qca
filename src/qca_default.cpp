@@ -20,17 +20,49 @@
 
 #include "qca_core.h"
 
-#include <stdlib.h>
+#include <QMutex>
+#include <QHash>
 #include "qcaprovider.h"
+#include <stdlib.h>
 #include <time.h>
 
 #ifndef QCA_NO_SYSTEMSTORE
 # include "qca_systemstore.h"
 #endif
 
-#include <QtCore/QHash>
-
 namespace QCA {
+
+class DefaultShared
+{
+private:
+	mutable QMutex m;
+	bool _use_system;
+	QString _roots_file;
+
+public:
+	DefaultShared() : _use_system(true)
+	{
+	}
+
+	bool use_system() const
+	{
+		QMutexLocker locker(&m);
+		return _use_system;
+	}
+
+	QString roots_file() const
+	{
+		QMutexLocker locker(&m);
+		return _roots_file;
+	}
+
+	void set(bool use_system, const QString &roots_file)
+	{
+		QMutexLocker locker(&m);
+		_use_system = use_system;
+		_roots_file = roots_file;
+	}
+};
 
 //----------------------------------------------------------------------------
 // DefaultRandomContext
@@ -880,8 +912,9 @@ class DefaultKeyStoreList : public KeyStoreListContext
 	Q_OBJECT
 public:
 	bool ready;
+	DefaultShared *shared;
 
-	DefaultKeyStoreList(Provider *p) : KeyStoreListContext(p)
+	DefaultKeyStoreList(Provider *p, DefaultShared *_shared) : KeyStoreListContext(p), shared(_shared)
 	{
 	}
 
@@ -911,7 +944,7 @@ public:
 	virtual QList<int> keyStores()
 	{
 		QList<int> list;
-		if(ready)
+		if(ready || !shared->roots_file().isEmpty())
 			list += 0;
 		return list;
 	}
@@ -943,13 +976,28 @@ public:
 	{
 		QList<KeyStoreEntryContext*> out;
 
-		CertificateCollection col;
+		QList<Certificate> certs;
+		QList<CRL> crls;
+
+		if(ready && shared->use_system())
+		{
+			CertificateCollection col;
 #ifndef QCA_NO_SYSTEMSTORE
-		col = qca_get_systemstore(QString());
+			col = qca_get_systemstore(QString());
 #endif
-		QList<Certificate> certs = col.certificates();
+			certs += col.certificates();
+			crls += col.crls();
+		}
+
+		QString roots = shared->roots_file();
+		if(!roots.isEmpty())
+		{
+			CertificateCollection col = CertificateCollection::fromFlatTextFile(roots);
+			certs += col.certificates();
+			crls += col.crls();
+		}
+
 		//QStringList names = makeFriendlyNames(certs);
-		QList<CRL> crls = col.crls();
 		int n;
 		for(n = 0; n < certs.count(); ++n)
 		{
@@ -1016,7 +1064,9 @@ public:
 class DefaultProvider : public Provider
 {
 public:
-	void init()
+	DefaultShared shared;
+
+	virtual void init()
 	{
 		QDateTime now = QDateTime::currentDateTime();
 		// avoid divide-by-zero
@@ -1026,17 +1076,17 @@ public:
 		srand(t);
 	}
 
-	int version() const
+	virtual int version() const
 	{
 		return QCA_VERSION;
 	}
 
-	QString name() const
+	virtual QString name() const
 	{
 		return "default";
 	}
 
-	QStringList features() const
+	virtual QStringList features() const
 	{
 		QStringList list;
 		list += "random";
@@ -1046,7 +1096,7 @@ public:
 		return list;
 	}
 
-	Provider::Context *createContext(const QString &type)
+	virtual Provider::Context *createContext(const QString &type)
 	{
 		if(type == "random")
 			return new DefaultRandomContext(this);
@@ -1055,9 +1105,25 @@ public:
 		else if(type == "sha1")
 			return new DefaultSHA1Context(this);
 		else if(type == "keystorelist")
-			return new DefaultKeyStoreList(this);
+			return new DefaultKeyStoreList(this, &shared);
 		else
 			return 0;
+	}
+
+	virtual QVariantMap defaultConfig() const
+	{
+		QVariantMap config;
+		config["formtype"] = "http://affinix.com/qca/forms/default#1.0";
+		config["use_system"] = true;
+		config["roots_file"] = QString();
+		return config;
+	}
+
+	virtual void configChanged(const QVariantMap &config)
+	{
+		bool use_system = config["use_system"].toBool();
+		QString roots_file = config["roots_file"].toString();
+		shared.set(use_system, roots_file);
 	}
 };
 
