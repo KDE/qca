@@ -421,7 +421,12 @@ void ProviderManager::setDefault(Provider *p)
 		delete def;
 	def = p;
 	if(def)
+	{
 		def->init();
+		QVariantMap conf = getProviderConfig_internal(def);
+		if(!conf.isEmpty())
+			def->configChanged(conf);
+	}
 }
 
 Provider *ProviderManager::find(Provider *_p) const
