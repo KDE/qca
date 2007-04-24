@@ -739,10 +739,22 @@ public:
 		need_submitPassphrase = false;
 
 #ifdef QPIPE_SECURE
-		QCA::SecureArray b = a;
+		QCA::SecureArray b;
 #else
-		QByteArray b = a;
+		QByteArray b;
 #endif
+		// filter out newlines, since that's the delimiter used
+		// to indicate a submitted passphrase
+		b.resize(a.size());
+		int at = 0;
+		for(int n = 0; n < a.size(); ++n)
+		{
+			if(a[n] != '\n')
+				b[at++] = a[n];
+		}
+		b.resize(at);
+
+		// append newline
 		b.resize(b.size() + 1);
 		b[b.size() - 1] = '\n';
 		proc.writeCommand(b);
