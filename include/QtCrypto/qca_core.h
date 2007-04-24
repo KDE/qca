@@ -772,7 +772,7 @@ namespace QCA
 		QString _type;
 	};
 
-	class BasicContext : public Provider::Context
+	class QCA_EXPORT BasicContext : public Provider::Context
 	{
 		Q_OBJECT
 	public:
