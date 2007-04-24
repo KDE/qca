@@ -12,7 +12,7 @@ windows:{
 
 	INCLUDEPATH += $$PKCS11H_PREFIX/include
 	LIBS += -L$$PKCS11H_PREFIX/lib
-	LIBS += -llibpkcs11-helper-1
+	LIBS += -lpkcs11-helper.dll
 }
 
 include(conf.pri)

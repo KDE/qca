@@ -1724,7 +1724,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 			QList<Certificate> listCerts;
 			QList<Certificate> listIssuers;
 			QList<pkcs11h_certificate_id_list_t> listIds;
-			int i;
+			int i = 0;
 
 			if (
 				(rv = pkcs11h_certificate_enumTokenCertificateIds (
