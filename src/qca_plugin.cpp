@@ -281,7 +281,7 @@ void ProviderManager::scan()
 			if(!i)
 				continue;
 
-			if(i->p && haveAlready(i->p->name()))
+			if(haveAlready(i->p->name()))
 			{
 				logDebug("skipping, we already have it");
 				delete i;
@@ -351,7 +351,7 @@ void ProviderManager::scan()
 			if(!i)
 				continue;
 
-			if(i->p && haveAlready(i->p->name()))
+			if(haveAlready(i->p->name()))
 			{
 				logDebug("skipping, we already have it");
 				delete i;
