@@ -237,6 +237,7 @@ public:
 	CertificateInfoOrdered issuer;   // cert only
 	Constraints constraints;
 	QStringList policies;
+	QStringList crlLocations;        // cert only
 	BigInteger serial;               // cert only
 	bool isCA;
 	bool isSelfSigned;               // cert only

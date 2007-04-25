@@ -604,6 +604,7 @@ public:
 	CertificateInfo infoMap;
 	Constraints constraints;
 	QStringList policies;
+	QStringList crlLocations;
 	bool isCA;
 	int pathLimit;
 	BigInteger serial;
@@ -683,6 +684,11 @@ QStringList CertificateOptions::policies() const
 	return d->policies;
 }
 
+QStringList CertificateOptions::crlLocations() const
+{
+	return d->crlLocations;
+}
+
 bool CertificateOptions::isCA() const
 {
 	return d->isCA;
@@ -733,6 +739,11 @@ void CertificateOptions::setConstraints(const Constraints &constraints)
 void CertificateOptions::setPolicies(const QStringList &policies)
 {
 	d->policies = policies;
+}
+
+void CertificateOptions::setCRLLocations(const QStringList &locations)
+{
+	d->crlLocations = locations;
 }
 
 void CertificateOptions::setAsCA(int pathLimit)
@@ -922,6 +933,11 @@ Constraints Certificate::constraints() const
 QStringList Certificate::policies() const
 {
 	return static_cast<const CertContext *>(context())->props()->policies;
+}
+
+QStringList Certificate::crlLocations() const
+{
+	return static_cast<const CertContext *>(context())->props()->crlLocations;
 }
 
 QString Certificate::commonName() const

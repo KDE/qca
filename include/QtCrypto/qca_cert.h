@@ -371,6 +371,13 @@ namespace QCA
 		QStringList policies() const;     // request or create
 
 		/**
+		   list of URI locations for CRL files
+
+		   each URI refers to the same CRL file
+		*/
+		QStringList crlLocations() const;     // create
+
+		/**
 		   test if the certificate is a CA cert
 		  
 		   \sa setAsCA
@@ -441,6 +448,15 @@ namespace QCA
 		   \param policies the policies to be used for the certificate
 		*/
 		void setPolicies(const QStringList &policies);
+
+		/**
+		   set the CRL locations of the certificate
+
+		   each location refers to the same CRL.
+
+		   \param locations a list of URIs to CRL files
+		*/
+		void setCRLLocations(const QStringList &locations);
 
 		/**
 		   set the certificate to be a CA cert
@@ -605,6 +621,13 @@ namespace QCA
 		   Policies are specified as strings containing OIDs
 		*/
 		QStringList policies() const;
+
+		/**
+		   list of URI locations for CRL files
+
+		   each URI refers to the same CRL file
+		*/
+		QStringList crlLocations() const;
 
 		/**
 		   The common name of the subject of the certificate
