@@ -1020,7 +1020,7 @@ public:
     {
 	m_algorithm = algorithm;
 	EVP_DigestInit( &m_context, m_algorithm );
-    };
+    }
 
     ~opensslHashContext()
     {
@@ -1129,7 +1129,7 @@ public:
     {
 	m_algorithm = algorithm;
 	HMAC_CTX_init( &m_context );
-    };
+    }
 
     void setup(const SymmetricKey &key)
     {
