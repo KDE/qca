@@ -4,7 +4,8 @@ QT -= gui
 CONFIG += crypto
 DESTDIR = lib
 
-VERSION = 0.0.1
+# default windows config for now
+windows:CONFIG += debug_and_release build_all
 
 SOURCES = qca-openssl.cpp
 #SOURCES += main.cpp

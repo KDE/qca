@@ -4,6 +4,9 @@ QT -= gui
 CONFIG += crypto
 DESTDIR = lib
 
+# default windows config for now
+windows:CONFIG += debug_and_release build_all
+
 SOURCES = qca-pkcs11.cpp
 
 windows:{
