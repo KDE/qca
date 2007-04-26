@@ -322,18 +322,10 @@ private slots:
 				}
 				else
 				{
-					QCA::KeyStoreManager ksm;
-					QCA::KeyStore store(e.keyStoreId(), &ksm);
-					if(!store.isValid())
-					{
-						fprintf(stderr, "Error: received password request from unknown keystore.\n");
-						handler.reject(id);
-						return;
-					}
-					if(store.type() == QCA::KeyStore::SmartCard)
-						name = QString("the '") + store.name() + "' token";
+					if(e.keyStoreInfo().type() == QCA::KeyStore::SmartCard)
+						name = QString("the '") + e.keyStoreInfo().name() + "' token";
 					else
-						name = store.name();
+						name = e.keyStoreInfo().name();
 				}
 				str = QString("Enter %1 for %2").arg(type).arg(name);
 			}
@@ -369,15 +361,7 @@ private slots:
 			}
 			else
 			{
-				QCA::KeyStoreManager ksm;
-				QCA::KeyStore store(e.keyStoreId(), &ksm);
-				if(!store.isValid())
-				{
-					fprintf(stderr, "Error: received token request from unknown keystore.\n");
-					handler.reject(id);
-					return;
-				}
-				name = QString("the '") + store.name() + "' token";
+				name = QString("the '") + e.keyStoreInfo().name() + "' token";
 			}
 
 			QString str = QString("Please insert %1 and press Enter ...").arg(name);

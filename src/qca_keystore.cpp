@@ -1224,6 +1224,63 @@ void KeyStoreManager::sync()
 	d->items = KeyStoreTracker::instance()->getItems();
 }
 
+//----------------------------------------------------------------------------
+// KeyStoreManager
+//----------------------------------------------------------------------------
+class KeyStoreInfo::Private : public QSharedData
+{
+public:
+	KeyStore::Type type;
+	QString id, name;
+};
+
+KeyStoreInfo::KeyStoreInfo()
+{
+}
+
+KeyStoreInfo::KeyStoreInfo(KeyStore::Type type, const QString &id, const QString &name)
+:d(new Private)
+{
+	d->type = type;
+	d->id = id;
+	d->name = name;
+}
+
+KeyStoreInfo::KeyStoreInfo(const KeyStoreInfo &from)
+:d(from.d)
+{
+}
+
+KeyStoreInfo::~KeyStoreInfo()
+{
+}
+
+KeyStoreInfo & KeyStoreInfo::operator=(const KeyStoreInfo &from)
+{
+	d = from.d;
+	return *this;
+}
+
+bool KeyStoreInfo::isNull() const
+{
+	return (d ? false: true);
+}
+
+KeyStore::Type KeyStoreInfo::type() const
+{
+	return d->type;
+}
+
+QString KeyStoreInfo::id() const
+{
+	return d->id;
+}
+
+QString KeyStoreInfo::name() const
+{
+	return d->name;
+}
+
 }
 
 #include "qca_keystore.moc"

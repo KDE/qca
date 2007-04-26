@@ -1890,8 +1890,7 @@ pkcs11KeyStoreListContext::tokenPrompt (
 
 	TokenAsker asker;
 	asker.ask (
-		storeId,
-		storeName,
+		KeyStoreInfo (KeyStore::SmartCard, storeId, storeName),
 		entry,
 		context
 	);
@@ -1949,8 +1948,7 @@ pkcs11KeyStoreListContext::pinPrompt (
 	PasswordAsker asker;
 	asker.ask (
 		Event::StylePIN,
-		storeId,
-		storeName,
+		KeyStoreInfo (KeyStore::SmartCard, storeId, storeName),
 		entry,
 		context
 	);

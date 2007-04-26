@@ -509,6 +509,27 @@ namespace QCA
 		friend class KeyStoreManagerPrivate;
 	};
 
+	// holds key store information outside of a keystore object
+	class QCA_EXPORT KeyStoreInfo
+	{
+	public:
+		KeyStoreInfo();
+		KeyStoreInfo(KeyStore::Type type, const QString &id, const QString &name);
+		KeyStoreInfo(const KeyStoreInfo &from);
+		~KeyStoreInfo();
+		KeyStoreInfo & operator=(const KeyStoreInfo &from);
+
+		bool isNull() const;
+
+		KeyStore::Type type() const;
+		QString id() const;
+		QString name() const;
+
+	private:
+		class Private;
+		QSharedDataPointer<Private> d;
+	};
+
 	/**
 	   \class KeyStoreManager qca_keystore.h QtCrypto
 

@@ -1339,7 +1339,7 @@ public:
 	Type type;
 	Source source;
 	PasswordStyle style;
-	QString ks, ksName;
+	KeyStoreInfo ksi;
 	KeyStoreEntry kse;
 	QString fname;
 	void *ptr;
@@ -1384,14 +1384,9 @@ Event::PasswordStyle Event::passwordStyle() const
 	return d->style;
 }
 
-QString Event::keyStoreId() const
+KeyStoreInfo Event::keyStoreInfo() const
 {
-	return d->ks;
-}
-
-QString Event::keyStoreName() const
-{
-	return d->ksName;
+	return d->ksi;
 }
 
 KeyStoreEntry Event::keyStoreEntry() const
@@ -1409,15 +1404,14 @@ void *Event::ptr() const
 	return d->ptr;
 }
 
-void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void Event::setPasswordKeyStore(PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	if(!d)
 		d = new Private;
 	d->type = Password;
 	d->source = KeyStore;
 	d->style = pstyle;
-	d->ks = keyStoreId;
-	d->ksName = keyStoreName;
+	d->ksi = keyStoreInfo;
 	d->kse = keyStoreEntry;
 	d->fname = QString();
 	d->ptr = ptr;
@@ -1430,21 +1424,20 @@ void Event::setPasswordData(PasswordStyle pstyle, const QString &fileName, void 
 	d->type = Password;
 	d->source = Data;
 	d->style = pstyle;
-	d->ks = QString();
-	d->kse = QString();
+	d->ksi = KeyStoreInfo();
+	d->kse = KeyStoreEntry();
 	d->fname = fileName;
 	d->ptr = ptr;
 }
 
-void Event::setToken(const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void Event::setToken(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	if(!d)
 		d = new Private;
 	d->type = Token;
 	d->source = KeyStore;
 	d->style = StylePassword;
-	d->ks = keyStoreId;
-	d->ksName = keyStoreName;
+	d->ksi = keyStoreInfo;
 	d->kse = keyStoreEntry;
 	d->fname = QString();
 	d->ptr = ptr;
@@ -1940,10 +1933,10 @@ PasswordAsker::~PasswordAsker()
 	delete d;
 }
 
-void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void PasswordAsker::ask(Event::PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	Event e;
-	e.setPasswordKeyStore(pstyle, keyStoreId, keyStoreName, keyStoreEntry, ptr);
+	e.setPasswordKeyStore(pstyle, keyStoreInfo, keyStoreEntry, ptr);
 	d->ask(e);
 }
 
@@ -2001,10 +1994,10 @@ TokenAsker::~TokenAsker()
 	delete d;
 }
 
-void TokenAsker::ask(const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void TokenAsker::ask(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	Event e;
-	e.setToken(keyStoreId, keyStoreName, keyStoreEntry, ptr);
+	e.setToken(keyStoreInfo, keyStoreEntry, ptr);
 	d->ask(e);
 }
 
