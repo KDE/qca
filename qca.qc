@@ -5,7 +5,7 @@
  <libdir/>
  <datadir/>
  <moddir>.</moddir>
- <dep type='qt41'>
+ <dep type='qt42'>
   <required/>
  </dep>
  <dep type='extra'>
