@@ -6,19 +6,14 @@
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
 
-* beta4
-  code:
-    crash in console prompt
-    qca-gnupg: support async
-
 * beta5
   api:
     provider init(), then start()
-    cert: crl URIs
     alon: convertToPublic should return a publickey rather than clone?
     reporting diagnostic text at the provider level?
     document which functions might cause a synchronous asker?
   code:
+    synchronizer: cleanup
     keystore: complete, async mode
     don't allow smart card providers to be used by default
     cert: rfc 2818 hostname validation
@@ -29,6 +24,7 @@
     securemessage: cleanup
     synchronizer should lazy-start the thread
     add logging to qca lib and other plugins
+    make sure we catch any throws from botan
     qca-cyrus-sasl:
       there's a problem where we can create the provider, and not create
       a saslContext, and then the destructor depends on uninitialised values
