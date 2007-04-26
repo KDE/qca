@@ -311,6 +311,7 @@ namespace QCA
 
 	private:
 		class Private;
+		friend class Private;
 		Private *d;
 	};
 
