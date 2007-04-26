@@ -147,7 +147,7 @@ void asker_procedure()
 
     QCA::TokenAsker tokenAsker;
 
-    tokenAsker.ask( KeyStoreInfo( QCA::KeyStore::SmartCard, "Token Id", "Token Name" ), QCA::KeyStoreEntry(), 0 );
+    tokenAsker.ask( QCA::KeyStoreInfo( QCA::KeyStore::SmartCard, "Token Id", "Token Name" ), QCA::KeyStoreEntry(), 0 );
 
     tokenAsker.waitForResponse();
 
