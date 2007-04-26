@@ -8,5 +8,4 @@ check.depends = rsaunittest
 check.commands = ./rsaunittest
 
 # Input
-HEADERS += rsaunittest.h
 SOURCES += rsaunittest.cpp
