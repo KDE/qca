@@ -1863,7 +1863,7 @@ pkcs11KeyStoreListContext::tokenPrompt (
 ) {
 	KeyStoreEntry entry;
 	KeyStoreEntryContext *context = NULL;
-	QString storeId;
+	QString storeId, storeName;
 	bool ret = false;
 
 	QCA_logTextMessage (
@@ -1879,16 +1879,19 @@ pkcs11KeyStoreListContext::tokenPrompt (
 		QString *serialized = (QString *)user_data;
 		context = entryPassive (*serialized);
 		storeId = context->storeId ();
+		storeName = context->storeName ();
 		entry.change (context);
 	}
 	else {
 		registerTokenId (token_id);
 		storeId = tokenId2storeId (token_id);
+		storeName = token_id->label;
 	}
 
 	TokenAsker asker;
 	asker.ask (
 		storeId,
+		storeName,
 		entry,
 		context
 	);
@@ -1916,7 +1919,7 @@ pkcs11KeyStoreListContext::pinPrompt (
 ) {
 	KeyStoreEntry entry;
 	KeyStoreEntryContext *context = NULL;
-	QString storeId;
+	QString storeId, storeName;
 	bool ret = false;
 
 	QCA_logTextMessage (
@@ -1934,17 +1937,20 @@ pkcs11KeyStoreListContext::pinPrompt (
 		QString *serialized = (QString *)user_data;
 		context = entryPassive (*serialized);
 		storeId = context->storeId ();
+		storeName = context->storeName ();
 		entry.change (context);
 	}
 	else {
 		registerTokenId (token_id);
 		storeId = tokenId2storeId (token_id);
+		storeName = token_id->label;
 	}
 
 	PasswordAsker asker;
 	asker.ask (
 		Event::StylePIN,
 		storeId,
+		storeName,
 		entry,
 		context
 	);

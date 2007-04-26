@@ -824,7 +824,7 @@ public:
 				if(c)
 					kse.change(c);
 
-				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), kse, 0);
+				asker.ask(Event::StylePassphrase, keyStoreList->storeId(0), keyStoreList->name(0), kse, 0);
 				asker.waitForResponse();
 				global_gpg = &gpg;
 				keyStoreList->submitPassphrase(0, 0, asker.password());
