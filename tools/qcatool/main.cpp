@@ -931,9 +931,6 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 	}
 	else
 	{
-		// self-signed alone still needs this for validation to work
-		opts.setAsCA();
-
 		QCA::CertificateInfo info;
 		info.insert(QCA::CommonName, prompt_for("Common Name"));
 		info.insert(QCA::Country, prompt_for("Country Code (2 letters)"));
@@ -1867,6 +1864,7 @@ int main(int argc, char **argv)
 	// TODO: instead of printing full usage at every wrong turn, we might
 	//       try to print something closer to the context.
 	// TODO: use --debug for more stuff besides plugins
+	// TODO: support for CRLs somewhere and somehow
 
 	// help
 	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
