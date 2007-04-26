@@ -1339,7 +1339,7 @@ public:
 	Type type;
 	Source source;
 	PasswordStyle style;
-	QString ks;
+	QString ks, ksName;
 	KeyStoreEntry kse;
 	QString fname;
 	void *ptr;
@@ -1389,6 +1389,11 @@ QString Event::keyStoreId() const
 	return d->ks;
 }
 
+QString Event::keyStoreName() const
+{
+	return d->ksName;
+}
+
 KeyStoreEntry Event::keyStoreEntry() const
 {
 	return d->kse;
@@ -1404,7 +1409,7 @@ void *Event::ptr() const
 	return d->ptr;
 }
 
-void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	if(!d)
 		d = new Private;
@@ -1412,6 +1417,7 @@ void Event::setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId,
 	d->source = KeyStore;
 	d->style = pstyle;
 	d->ks = keyStoreId;
+	d->ksName = keyStoreName;
 	d->kse = keyStoreEntry;
 	d->fname = QString();
 	d->ptr = ptr;
@@ -1430,7 +1436,7 @@ void Event::setPasswordData(PasswordStyle pstyle, const QString &fileName, void 
 	d->ptr = ptr;
 }
 
-void Event::setToken(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void Event::setToken(const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	if(!d)
 		d = new Private;
@@ -1438,6 +1444,7 @@ void Event::setToken(const QString &keyStoreId, const KeyStoreEntry &keyStoreEnt
 	d->source = KeyStore;
 	d->style = StylePassword;
 	d->ks = keyStoreId;
+	d->ksName = keyStoreName;
 	d->kse = keyStoreEntry;
 	d->fname = QString();
 	d->ptr = ptr;
@@ -1933,10 +1940,10 @@ PasswordAsker::~PasswordAsker()
 	delete d;
 }
 
-void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	Event e;
-	e.setPasswordKeyStore(pstyle, keyStoreId, keyStoreEntry, ptr);
+	e.setPasswordKeyStore(pstyle, keyStoreId, keyStoreName, keyStoreEntry, ptr);
 	d->ask(e);
 }
 
@@ -1994,10 +2001,10 @@ TokenAsker::~TokenAsker()
 	delete d;
 }
 
-void TokenAsker::ask(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr)
+void TokenAsker::ask(const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
 	Event e;
-	e.setToken(keyStoreId, keyStoreEntry, ptr);
+	e.setToken(keyStoreId, keyStoreName, keyStoreEntry, ptr);
 	d->ask(e);
 }
 

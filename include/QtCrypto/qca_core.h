@@ -1183,6 +1183,13 @@ namespace QCA
 		QString keyStoreId() const;
 
 		/**
+		   The name of the KeyStore associated with this event
+
+		   This is not meaningful unless the Source is KeyStore.
+		*/
+		QString keyStoreName() const;
+
+		/**
 		   The KeyStoreEntry associated with this event
 
 		   This is not meaningful unless the Source is KeyStore.
@@ -1212,7 +1219,7 @@ namespace QCA
 		   \param keyStoreEntry the entry in the keystore that the information is required for
 		   \param ptr opaque data
 		*/
-		void setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
+		void setPasswordKeyStore(PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 		/**
 		   Set the values for this Event
@@ -1234,7 +1241,7 @@ namespace QCA
 		   \param keyStoreEntry the entry in the keystore that the token is required for
 		   \param ptr opaque data
 		*/
-		void setToken(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
+		void setToken(const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 	private:
 		class Private;
@@ -1347,7 +1354,7 @@ namespace QCA
 		   \param keyStoreEntry the item in the key store that the information is required for (if applicable)
 		   \param ptr opaque data
 		*/
-		void ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
+		void ask(Event::PasswordStyle pstyle, const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 		/**
 		   queue a password / passphrase request associated with a file
@@ -1427,7 +1434,7 @@ namespace QCA
 		   \param keyStoreEntry the item in the key store that the information is required for (if applicable)
 		   \param ptr opaque data
 		*/
-		void ask(const QString &keyStoreId, const KeyStoreEntry &keyStoreEntry, void *ptr);
+		void ask(const QString &keyStoreId, const QString &keyStoreName, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 		/**
 		   Cancel the pending password / passphrase request

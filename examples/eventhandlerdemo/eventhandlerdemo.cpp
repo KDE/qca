@@ -147,7 +147,7 @@ void asker_procedure()
 
     QCA::TokenAsker tokenAsker;
 
-    tokenAsker.ask( QString( "Token 1" ), QString( "Entry 3" ), 0 );
+    tokenAsker.ask( QString( "Token 1" ), QString ( "My Token" ), QCA::KeyStoreEntry(), 0 );
 
     tokenAsker.waitForResponse();
 
