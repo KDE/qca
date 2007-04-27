@@ -19,6 +19,7 @@
  */
 
 #include <QtCrypto>
+#include <qplatformdefs.h>
 
 #include <QHash>
 #include <QMutexLocker>
@@ -2860,7 +2861,7 @@ pkcs11Provider::logHook (
 // Qt vsprintf cannot can NULL for %s as vsprintf does.
 //	QCA_logTextMessage (QString ().vsprintf (format, args), severity);
 	char buffer[2048];
-	vsnprintf (buffer, sizeof (buffer)-1, format, args);
+	QT_VSNPRINTF (buffer, sizeof (buffer)-1, format, args);
 	buffer[sizeof (buffer)-1] = '\x0';
 	QCA_logTextMessage (buffer, severity);
 //@END-WORKAROUND
