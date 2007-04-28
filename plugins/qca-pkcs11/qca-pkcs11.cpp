@@ -566,6 +566,15 @@ public:
 		bool session_locked = false;
 		bool ret = false;
 
+		QCA_logTextMessage (
+			QString ().sprintf (
+				"pkcs11RSAContext::decrypt - decrypt in.size()=%d, alg=%d",
+				in.size (),
+				(int)alg
+			),
+			Logger::Debug
+		);
+
 		try {
 			CK_MECHANISM_TYPE mech;
 			CK_RV rv;
@@ -654,6 +663,14 @@ public:
 			}
 		}
 
+		QCA_logTextMessage (
+			QString ().sprintf (
+				"pkcs11RSAContext::decrypt - decrypt out->size()=%d",
+				out->size ()
+			),
+			Logger::Debug
+		);
+
 		return ret;
 	}
 
@@ -726,6 +743,13 @@ public:
 	endSign () {
 		SecureArray result;
 		bool session_locked = false;
+
+		QCA_logTextMessage (
+			QString ().sprintf (
+				"pkcs11RSAContext::endSign - entry"
+			),
+			Logger::Debug
+		);
 
 		try {
 			SecureArray final;
@@ -824,6 +848,14 @@ public:
 		}
 
 		clearSign ();
+
+		QCA_logTextMessage (
+			QString ().sprintf (
+				"pkcs11RSAContext::endSign - return result.size ()=%d",
+				result.size ()
+			),
+			Logger::Debug
+		);
 
 		return result;
 	}
