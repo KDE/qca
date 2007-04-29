@@ -291,10 +291,10 @@ public slots:
 	// hack with void *
 	void *entryPassive(const QString &serialized)
 	{
-		foreach(Item i, items)
+		foreach(KeyStoreListContext *ksl, sources)
 		{
 			// "is this yours?"
-			KeyStoreEntryContext *e = i.owner->entryPassive(serialized);
+			KeyStoreEntryContext *e = ksl->entryPassive(serialized);
 			if(e)
 				return e;
 		}
