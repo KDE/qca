@@ -437,6 +437,11 @@ public:
 	) : RSAContext (p) {
 		CK_RV rv;
 
+		QCA_logTextMessage (
+			"pkcs11RSAContext::pkcs11RSAContext1 - entry",
+			Logger::Debug
+		);
+
 		_has_privateKeyRole = true;
 		_pkcs11h_certificate_id = NULL;
 		_pkcs11h_certificate = NULL;
@@ -452,10 +457,20 @@ public:
 		) {
 			throw pkcs11Exception (rv, "Memory error");
 		}
+
+		QCA_logTextMessage (
+			"pkcs11RSAContext::pkcs11RSAContext1 - return",
+			Logger::Debug
+		);
 	}
 
 	pkcs11RSAContext (const pkcs11RSAContext &from) : RSAContext (from.provider ()) {
 		CK_RV rv;
+
+		QCA_logTextMessage (
+			"pkcs11RSAContext::pkcs11RSAContextC - entry",
+			Logger::Debug
+		);
 
 		_has_privateKeyRole = from._has_privateKeyRole;
 		_pkcs11h_certificate_id = NULL;
@@ -473,9 +488,19 @@ public:
 		) {
 			throw pkcs11Exception (rv, "Memory error");
 		}
+
+		QCA_logTextMessage (
+			"pkcs11RSAContext::pkcs11RSAContextC - return",
+			Logger::Debug
+		);
 	}
 
 	~pkcs11RSAContext () {
+		QCA_logTextMessage (
+			"pkcs11RSAContext::~pkcs11RSAContext - entry",
+			Logger::Debug
+		);
+
 		_clearSign ();
 
 		if (_pkcs11h_certificate != NULL) {
@@ -488,6 +513,10 @@ public:
 			_pkcs11h_certificate_id = NULL;
 		}
 
+		QCA_logTextMessage (
+			"pkcs11RSAContext::~pkcs11RSAContext - return",
+			Logger::Debug
+		);
 	}
 
 	virtual
@@ -524,6 +553,11 @@ public:
 	virtual
 	void
 	convertToPublic () {
+		QCA_logTextMessage (
+			"pkcs11RSAContext::convertToPublic - entry",
+			Logger::Debug
+		);
+
 		if (_has_privateKeyRole) {
 			if (_pkcs11h_certificate != NULL) {
 				pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
@@ -531,6 +565,11 @@ public:
 			}
 			_has_privateKeyRole = false;
 		}
+
+		QCA_logTextMessage (
+			"pkcs11RSAContext::convertToPublic - return",
+			Logger::Debug
+		);
 	}
 
 	virtual
@@ -745,9 +784,7 @@ public:
 		bool session_locked = false;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
-				"pkcs11RSAContext::endSign - entry"
-			),
+			"pkcs11RSAContext::endSign - entry",
 			Logger::Debug
 		);
 
@@ -944,11 +981,21 @@ public:
 
 	bool
 	_ensureTokenAccess () {
+		QCA_logTextMessage (
+			"pkcs11RSAContext::_ensureTokenAccess - entry",
+			Logger::Debug
+		);
+
 		return pkcs11h_token_ensureAccess (
 			_pkcs11h_certificate_id->token_id,
 			NULL,
 			0
 		) == CKR_OK;
+
+		QCA_logTextMessage (
+			"pkcs11RSAContext::_ensureTokenAccess - return",
+			Logger::Debug
+		);
 	}
 
 private:
@@ -964,6 +1011,11 @@ private:
 	_ensureCertificate () {
 		CK_RV rv;
 
+		QCA_logTextMessage (
+			"pkcs11RSAContext::_ensureCertificate - entry",
+			Logger::Debug
+		);
+
 		if (_pkcs11h_certificate == NULL) {
 			if (
 				(rv = pkcs11h_certificate_create (
@@ -977,6 +1029,11 @@ private:
 				throw pkcs11Exception (rv, "Cannot create low-level certificate");
 			}
 		}
+
+		QCA_logTextMessage (
+			"pkcs11RSAContext::_ensureCertificate - return",
+			Logger::Debug
+		);
 	}
 };
 
