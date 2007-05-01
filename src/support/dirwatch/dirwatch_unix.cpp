@@ -34,6 +34,8 @@
 #endif
 
 #include <QTimer>
+#include <QSocketNotifier>
+#include <QFile>
 
 namespace QCA {
 
