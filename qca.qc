@@ -4,10 +4,11 @@
  <lib/>
  <libdir/>
  <datadir/>
- <moddir>.</moddir>
+ <moddir>qcm</moddir>
  <dep type='qt42'>
   <required/>
  </dep>
+ <dep type='dnotify'/>
  <dep type='extra'>
   <required/>
  </dep>
