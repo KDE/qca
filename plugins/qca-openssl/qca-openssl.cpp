@@ -5401,6 +5401,70 @@ STACK_OF(X509) *get_pk7_certs(PKCS7 *p7)
 		return 0;
 }
 
+class MyMessageContextThread : public QThread
+{
+	Q_OBJECT
+public:
+	SecureMessage::Format format;
+	SecureMessage::SignMode signMode;
+	Certificate cert;
+	PrivateKey key;
+	STACK_OF(X509) *other_certs;
+	BIO *bi;
+	int flags;
+	PKCS7 *p7;
+	bool ok;
+	QByteArray out, sig;
+
+	MyMessageContextThread(QObject *parent = 0) : QThread(parent), ok(false)
+	{
+	}
+
+protected:
+	virtual void run()
+	{
+		MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
+		MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
+		X509 *cx = cc->item.cert;
+		EVP_PKEY *kx = kc->get_pkey();
+
+		p7 = PKCS7_sign(cx, kx, other_certs, bi, flags);
+
+		BIO_free(bi);
+		sk_X509_pop_free(other_certs, X509_free);
+
+		if(p7)
+		{
+			//printf("good\n");
+			BIO *bo;
+
+			//BIO *bo = BIO_new(BIO_s_mem());
+			//i2d_PKCS7_bio(bo, p7);
+			//PEM_write_bio_PKCS7(bo, p7);
+			//SecureArray buf = bio2buf(bo);
+			//printf("[%s]\n", buf.data());
+
+			bo = BIO_new(BIO_s_mem());
+			if(format == SecureMessage::Binary)
+				i2d_PKCS7_bio(bo, p7);
+			else // Ascii
+				PEM_write_bio_PKCS7(bo, p7);
+
+			if (SecureMessage::Detached == signMode)
+				sig = bio2ba(bo);
+			else
+				out = bio2ba(bo);
+
+			ok = true;
+		}
+		else
+		{
+			printf("bad here\n");
+			ERR_print_errors_fp(stdout);
+		}
+	}
+};
+
 class MyMessageContext : public MessageContext
 {
 	Q_OBJECT
@@ -5421,11 +5485,15 @@ public:
 	CertificateChain signerChain;
 	int ver_ret;
 
+	MyMessageContextThread *thread;
+
 	MyMessageContext(CMSContext *_cms, Provider *p) : MessageContext(p, "cmsmsg")
 	{
 		cms = _cms;
 
 		ver_ret = 0;
+
+		thread = 0;
 	}
 
 	~MyMessageContext()
@@ -5528,16 +5596,16 @@ public:
 				key.change(pk);
 			}
 
-			MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
-			MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
+			//MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
+			//MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
 
-			X509 *cx = cc->item.cert;
-			EVP_PKEY *kx = kc->get_pkey();
+			//X509 *cx = cc->item.cert;
+			//EVP_PKEY *kx = kc->get_pkey();
 
 			STACK_OF(X509) *other_certs;
 			BIO *bi;
 			int flags;
-			PKCS7 *p7;
+			//PKCS7 *p7;
 
 			// nonroots
 			other_certs = sk_X509_new_null();
@@ -5560,36 +5628,19 @@ public:
 			}
 			if (false == bundleSigner)
 				flags |= PKCS7_NOCERTS;
-			p7 = PKCS7_sign(cx, kx, other_certs, bi, flags);
 
-			BIO_free(bi);
-			sk_X509_pop_free(other_certs, X509_free);
-
-			if(p7)
-			{
-				//printf("good\n");
-				BIO *bo;
-
-				//BIO *bo = BIO_new(BIO_s_mem());
-				//i2d_PKCS7_bio(bo, p7);
-				//PEM_write_bio_PKCS7(bo, p7);
-				//SecureArray buf = bio2buf(bo);
-				//printf("[%s]\n", buf.data());
-
-				// FIXME: format
-				bo = BIO_new(BIO_s_mem());
-				i2d_PKCS7_bio(bo, p7);
-				if (SecureMessage::Detached == signMode)
-					sig = bio2ba(bo);
-				else
-					out = bio2ba(bo);
-			}
-			else
-			{
-				printf("bad here\n");
-				ERR_print_errors_fp(stdout);
-				return;
-			}
+			if(thread)
+				delete thread;
+			thread = new MyMessageContextThread(this);
+			thread->format = format;
+			thread->signMode = signMode;
+			thread->cert = cert;
+			thread->key = key;
+			thread->other_certs = other_certs;
+			thread->bi = bi;
+			thread->flags = flags;
+			connect(thread, SIGNAL(finished()), SLOT(thread_finished()));
+			thread->start();
 		}
 		else if(op == Encrypt)
 		{
@@ -5643,13 +5694,18 @@ public:
 			} else {
 				BIO_write(bi, in.data(), in.size());
 			}
-			PKCS7 *p7 = d2i_PKCS7_bio(bi, NULL);
+			PKCS7 *p7;
+			if(format == SecureMessage::Binary)
+				p7 = d2i_PKCS7_bio(bi, NULL);
+			else // Ascii
+				p7 = PEM_read_bio_PKCS7(bi, NULL, NULL, NULL);
 			BIO_free(bi);
 
 			if(!p7)
 			{
 				// TODO
 				printf("bad1\n");
+				QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
 				return;
 			}
 
@@ -5664,6 +5720,7 @@ public:
 					cc->fromX509(sk_X509_value(xs, n));
 					Certificate cert;
 					cert.change(cc);
+					//printf("signer: [%s]\n", qPrintable(cert.commonName()));
 					signers.append(cert);
 				}
 				sk_X509_free(xs);
@@ -5687,7 +5744,10 @@ public:
 			// TODO: what happens if the signer cert isn't here?
 			// TODO: support using a signer not stored in the signature
 			if(signers.isEmpty())
+			{
+				QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
 				return;
+			}
 
 			// FIXME: handle more than one signer
 			CertificateChain chain;
@@ -5704,6 +5764,7 @@ public:
 			int n;
 			for(n = 0; n < cert_list.count(); ++n)
 			{
+				//printf("trusted: [%s]\n", qPrintable(cert_list[n].commonName()));
 				const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
 				X509 *x = cc->item.cert;
 				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
@@ -5735,6 +5796,8 @@ public:
 
 			ver_ret = ret;
 			// TODO
+
+			QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
 		}
 		else if(op == Decrypt)
 		{
@@ -5792,6 +5855,12 @@ public:
 	{
 		// TODO
 		Q_UNUSED(msecs);
+
+		if(thread)
+		{
+			thread->wait();
+			getresults();
+		}
 	}
 
 	virtual bool success() const
@@ -5838,6 +5907,19 @@ public:
 
 		// TODO
 		return SecureMessageSignatureList() << s;
+	}
+
+	void getresults()
+	{
+		sig = thread->sig;
+		out = thread->out;
+	}
+
+private slots:
+	void thread_finished()
+	{
+		getresults();
+		emit updated();
 	}
 };
 
