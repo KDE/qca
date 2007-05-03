@@ -1094,6 +1094,9 @@ public:
 				here += i.storeId;
 		}
 
+		busy = newbusy;
+		items = newitems;
+
 		// signals
 		foreach(int trackerId, gone)
 		{
@@ -1124,9 +1127,6 @@ public:
 			if(!self)
 				return;
 		}
-
-		busy = newbusy;
-		items = newitems;
 	}
 
 public slots:
