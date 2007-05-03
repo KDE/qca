@@ -3186,6 +3186,11 @@ int main(int argc, char **argv)
 				// TODO: support more than one decrypt key
 				((QCA::CMS*)sms)->setPrivateKeys(QCA::SecureMessageKeyList() << skey);
 			}
+			else
+			{
+				usage();
+				return 1;
+			}
 
 			// read input data from stdin all at once
 			QByteArray plain;
