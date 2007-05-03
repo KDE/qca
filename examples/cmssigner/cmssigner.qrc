@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/gfx" >
+        <file>key.png</file>
+    </qresource>
+</RCC>

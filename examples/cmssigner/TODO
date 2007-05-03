@@ -1,0 +1,26 @@
+icons needed:
+  app icon (may need different sizes of this?)  (a pen?)
+  keystore icon (a box?)
+  keystore entry identity icon (a card?)
+  file identity icon (a file?)  (keybundle icon?)
+  cert icon (a piece of paper?)  (cert icon?)
+
+have a graphical busy indicator for:
+  keystores are busy? (maybe a flashing thing in the status bar)
+  sign operation in progress (maybe just use an endless QProgressBar)
+
+entry icons
+  key bundle
+  cert
+  crl
+  pgp secret
+  pgp public
+
+store icons
+  system
+  user
+  application
+  smart card
+  pgp keyring
+
+unknown store/entry icon (can use the same icon for both i think)
