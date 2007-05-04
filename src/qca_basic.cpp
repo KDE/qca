@@ -23,6 +23,7 @@
 #include "qcaprovider.h"
 
 #include <QMutexLocker>
+#include <QtCore/QtGlobal>
 
 namespace QCA {
 
@@ -240,7 +241,7 @@ QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding
 		mode = "ecb";
 		break;
 	default:
-		abort();
+		Q_ASSERT(0);
 	}
 
 	// do the default

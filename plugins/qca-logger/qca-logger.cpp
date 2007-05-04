@@ -22,6 +22,8 @@
 #include <QTextStream>
 #include <QFile>
 
+#include <stdlib.h> // getenv()
+
 using namespace QCA;
 
 namespace LoggerQCAPlugin {
@@ -100,7 +102,7 @@ public:
 	LoggerProvider () {
 		_externalConfig = false;
 		_streamLogger = NULL;
-	};
+	}
 	~LoggerProvider () {
 		delete _streamLogger;
 		_streamLogger = NULL;
