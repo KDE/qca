@@ -1017,7 +1017,7 @@ private slots:
 
 	void load_file()
 	{
-		QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Identities (*.p12)"));
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Identities (*.p12 *.pfx)"));
 		if(fileName.isEmpty())
 			return;
 
