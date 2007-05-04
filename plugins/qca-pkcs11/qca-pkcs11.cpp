@@ -55,10 +55,13 @@ class pkcs11Provider : public Provider
 private:
 	static const int _CONFIG_MAX_PROVIDERS;
 
-	bool _fLowLevelInitialized;
-	bool _fSlotEventsActive;
-	bool _fSlotEventsLowLevelActive;
+	bool _lowLevelInitialized;
+	bool _slotEventsActive;
+	bool _slotEventsLowLevelActive;
 	QStringList _providers;
+
+public:
+	bool _allowLoadRootCA;
 
 public:
 	pkcs11Provider ();
@@ -1862,6 +1865,18 @@ pkcs11KeyStoreListContext::entryList (int id) {
 			entry->registerCertificates (listIssuers + listCerts);
 			QMap<QString, QString> friendlyNames = entry->friendlyNames ();
 
+			QList<Certificate> listIssuersForComplete;
+			if (dynamic_cast<pkcs11Provider *> (provider ())->_allowLoadRootCA) {
+				listIssuersForComplete = listIssuers;
+			}
+			else {
+				foreach (Certificate c, listIssuers) {
+					if (!c.isSelfSigned ()) {
+						listIssuersForComplete += c;
+					}
+				}
+			}
+
 			for (
 				i=0, current=issuers;
 				current!=NULL;
@@ -1872,13 +1887,18 @@ pkcs11KeyStoreListContext::entryList (int id) {
 						throw pkcs11Exception (CKR_ARGUMENTS_BAD, "Invalid certificate");
 					}
 
-					CertificateChain chain = CertificateChain (listIssuers[i]).complete (listIssuers);
-					out += _keyStoreEntryByCertificateId (
-						current->certificate_id,
-						false,
-						chain,
-						friendlyNames[certificateHash (chain.primary ())]
-					);
+					if (
+						listIssuers[i].isSelfSigned () &&
+						dynamic_cast<pkcs11Provider *> (provider ())->_allowLoadRootCA
+					) {
+						CertificateChain chain = CertificateChain (listIssuers[i]).complete (listIssuersForComplete);
+						out += _keyStoreEntryByCertificateId (
+							current->certificate_id,
+							false,
+							chain,
+							friendlyNames[certificateHash (chain.primary ())]
+						);
+					}
 				}
 				catch (const pkcs11Exception &e) {
 					s_keyStoreList->_emit_diagnosticText (
@@ -1901,7 +1921,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 						throw pkcs11Exception (CKR_ARGUMENTS_BAD, "Invalid certificate");
 					}
 
-					CertificateChain chain = CertificateChain (listCerts[i]).complete (listIssuers);
+					CertificateChain chain = CertificateChain (listCerts[i]).complete (listIssuersForComplete);
 					out += _keyStoreEntryByCertificateId (
 						current->certificate_id,
 						true,
@@ -2547,9 +2567,10 @@ pkcs11Provider::pkcs11Provider () {
 		Logger::Debug
 	);
 
-	_fLowLevelInitialized = false;
-	_fSlotEventsActive = false;
-	_fSlotEventsLowLevelActive = false;
+	_lowLevelInitialized = false;
+	_slotEventsActive = false;
+	_slotEventsLowLevelActive = false;
+	_allowLoadRootCA = false;
 
 	QCA_logTextMessage (
 		"pkcs11Provider::pkcs11Provider - return",
@@ -2630,7 +2651,7 @@ void pkcs11Provider::init () {
 			throw pkcs11Exception (rv, "Cannot set hook");
 		}
 
-		_fLowLevelInitialized = true;
+		_lowLevelInitialized = true;
 	}
 	catch (const pkcs11Exception &e) {
 		QCA_logTextMessage (e.message (), Logger::Error);
@@ -2682,7 +2703,7 @@ pkcs11Provider::createContext (const QString &type) {
 		Logger::Debug
 	);
 
-	if (_fLowLevelInitialized) {
+	if (_lowLevelInitialized) {
 		if (type == "keystorelist") {
 			if (s_keyStoreList == NULL) {
 				s_keyStoreList = new pkcs11KeyStoreListContext (this);
@@ -2711,8 +2732,8 @@ pkcs11Provider::startSlotEvents () {
 		Logger::Debug
 	);
 
-	if (_fLowLevelInitialized) {
-		if (!_fSlotEventsLowLevelActive) {
+	if (_lowLevelInitialized) {
+		if (!_slotEventsLowLevelActive) {
 			if (
 				(rv = pkcs11h_setSlotEventHook (
 					__slotEventHook,
@@ -2722,10 +2743,10 @@ pkcs11Provider::startSlotEvents () {
 				throw pkcs11Exception (rv, "Cannot start slot events");
 			}
 
-			_fSlotEventsLowLevelActive = true;
+			_slotEventsLowLevelActive = true;
 		}
 
-		_fSlotEventsActive = true;
+		_slotEventsActive = true;
 	}
 
 	QCA_logTextMessage (
@@ -2741,7 +2762,7 @@ pkcs11Provider::stopSlotEvents () {
 		Logger::Debug
 	);
 
-	_fSlotEventsActive = false;
+	_slotEventsActive = false;
 }
 
 QVariantMap
@@ -2754,6 +2775,7 @@ pkcs11Provider::defaultConfig () const {
 	);
 
 	mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
+	mytemplate["allow_load_rootca"] = false;
 	mytemplate["allow_protected_authentication"] = true;
 	mytemplate["pin_cache"] = PKCS11H_PIN_CACHE_INFINITE;
 	mytemplate["log_level"] = 0;
@@ -2780,10 +2802,12 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		Logger::Debug
 	);
 
-	if (!_fLowLevelInitialized) {
+	if (!_lowLevelInitialized) {
 		QCA_logTextMessage ("PKCS#11: Not initialized", Logger::Error);
 		return;
 	}
+
+	_allowLoadRootCA = config["allow_load_rootca"].toBool ();
 
 	pkcs11h_setLogLevel (config["log_level"].toInt ());
 	pkcs11h_setProtectedAuthentication (
@@ -2963,7 +2987,7 @@ pkcs11Provider::_slotEventHook () {
 	 * This is called from a separate
 	 * thread.
 	 */
-	if (s_keyStoreList != NULL && _fSlotEventsActive) {
+	if (s_keyStoreList != NULL && _slotEventsActive) {
 		QMetaObject::invokeMethod(s_keyStoreList, "doUpdated", Qt::QueuedConnection);
 	}
 }

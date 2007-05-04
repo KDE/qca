@@ -22,6 +22,12 @@ CONFIGURATION
 	$ qcatool --config save qca-pkcs11 
 
 	Attributes:
+		allow_load_rootca (Boolean)
+			Allow loading root certificate authorities' certificate
+			from token. Loading root certificates from PKCS#11 enabled
+			tokens is highly insecure, as public objects can be added
+			without user notice.
+
 		allow_protected_authentication (Boolean)
 			Enable/disable global protected authentication support.
 			If disabled, no protected authentication will be allowed,
