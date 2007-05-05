@@ -3,6 +3,9 @@ add_subdirectory(base64test)
 add_subdirectory(certtest)
 add_subdirectory(ciphertest)
 add_subdirectory(cms)
+# this is not meant to be added, because it introduces
+# a dependency on QtGui.
+# add_subdirectory(cmssigner)
 add_subdirectory(eventhandlerdemo)
 add_subdirectory(hashtest)
 add_subdirectory(hextest)
