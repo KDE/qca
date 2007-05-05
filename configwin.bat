@@ -10,50 +10,50 @@ if "%1"=="ds" goto debug_static
 goto usage
 
 :usage
-echo "usage: configwin [mode]"
-echo "modes:"
-echo "  rd          release and debug, dynamic"
-echo "  r           release, dynamic"
-echo "  d           debug, dynamic"
-echo "  rds         release and debug, static"
-echo "  rs          release static"
-echo "  ds          debug static"
+echo usage: configwin [mode]
+echo modes:
+echo   rd          release and debug, dynamic
+echo   r           release, dynamic
+echo   d           debug, dynamic
+echo   rds         release and debug, static
+echo   rs          release static
+echo   ds          debug static
 goto end
 
 :debug_and_release
-echo "Configuring for release and debug, dynamic"
-echo "CONFIG += debug_and_release build_all" > conf_win.pri
-echo "CONFIG += debug" > confapp_win.pri
+echo Configuring for release and debug, dynamic
+echo CONFIG += debug_and_release build_all > conf_win.pri
+echo CONFIG += debug > confapp_win.pri
 goto done
 
 :release
-echo "Configuring for release, dynamic"
-echo "CONFIG += release" > conf_win.pri
-echo "CONFIG += release" > confapp_win.pri
+echo Configuring for release, dynamic
+echo CONFIG += release > conf_win.pri
+echo CONFIG += release > confapp_win.pri
 goto done
 
 :debug
-echo "Configuring for debug, dynamic"
-echo "CONFIG += debug" > conf_win.pri
-echo "CONFIG += debug" > confapp_win.pri
+echo Configuring for debug, dynamic
+echo CONFIG += debug > conf_win.pri
+echo CONFIG += debug > confapp_win.pri
 goto done
 
 :debug_and_release_static
-echo "Configuring for release and debug, static"
-echo "CONFIG += debug_and_release build_all staticlib" > conf_win.pri
-echo "CONFIG += debug" > confapp_win.pri
+echo Configuring for release and debug, static
+echo CONFIG += debug_and_release build_all staticlib > conf_win.pri
+echo CONFIG += debug > confapp_win.pri
 goto done
 
 :release_static
-echo "Configuring for release, static"
-echo "CONFIG += release staticlib" > conf_win.pri
-echo "CONFIG += release" > confapp_win.pri
+echo Configuring for release, static
+echo CONFIG += release staticlib > conf_win.pri
+echo CONFIG += release > confapp_win.pri
 goto done
 
 :debug_static
-echo "Configuring for debug, static"
-echo "CONFIG += debug staticlib" > conf_win.pri
-echo "CONFIG += debug" > confapp_win.pri
+echo Configuring for debug, static
+echo CONFIG += debug staticlib > conf_win.pri
+echo CONFIG += debug > confapp_win.pri
 goto done
 
 :done
