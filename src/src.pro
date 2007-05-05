@@ -15,7 +15,7 @@ VERSION = 2.0.0
 unix:include($$QCA_BASE/conf.pri)
 windows:include($$QCA_BASE/conf_win.pri)
 
-CONFIG += create_prl link_prl
+CONFIG += create_prl
 windows:!staticlib:DEFINES += QCA_MAKEDLL
 staticlib:PRL_EXPORT_DEFINES += QCA_STATIC
 
