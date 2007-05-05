@@ -853,6 +853,8 @@ namespace QCA
 		   \param provider the provider to use, if a particular provider is required
 
 		   \sa toDER provides an inverse of fromDER, exporting the key to an array
+
+                   \sa QCA::KeyLoader for an asynchronous loader approach.
 		*/ 
 		static PrivateKey fromDER(const SecureArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
@@ -866,6 +868,8 @@ namespace QCA
 		   \param provider the provider to use, if a particular provider is required
 
 		   \sa toPEM provides an inverse of fromPEM, exporting the key to a string in PEM encoding.
+
+                   \sa QCA::KeyLoader for an asynchronous loader approach.
 		*/ 
 		static PrivateKey fromPEM(const QString &s, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
@@ -880,6 +884,8 @@ namespace QCA
 
 		   \sa toPEMFile provides an inverse of fromPEMFile
 		   \sa fromPEM which allows import from a string
+
+                   \sa QCA::KeyLoader for an asynchronous loader approach.
 
 		   \note there is also a constructor form, that allows you to create the key directly
 		*/ 

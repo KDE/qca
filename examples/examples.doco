@@ -12,12 +12,14 @@ There are three important parts to this:
 
 */
 
+
 /** \example base64test.cpp
 
 The code below shows some simple operations on a QCA::Base64 object, converting
 between QCA::SecureArray and QString.
 
 */
+
 
 /** \example certtest.cpp
 
@@ -27,17 +29,28 @@ PEM encoded file collection.
 
 */
 
+
 /** \example ciphertest.cpp
 
 The code below shows the normal way to use the QCA::Cipher class.
 
 */
 
+
 /** \example cmsexample.cpp
 
 The code below shows the normal way to use the QCA::CMS class.
 
 */
+
+
+/** \example main.cpp
+
+The code below shows how to use Cryptographic Message Syntax (CMS)
+in a GUI application.
+
+*/
+
 
 /** \example eventhandlerdemo.cpp
 
@@ -47,11 +60,13 @@ associated providers.
 
 */
 
+
 /** \example hashtest.cpp
 
 The code below shows how to use the QCA::Hash class
 
 */
+
 
 /** \example hextest.cpp
 
@@ -60,18 +75,22 @@ between QCA::SecureArray and QString.
 
 */
 
+
+/** \example keyloader.cpp
+
+The code below shows how to load a private key from a PEM format file,
+including handling any requirement for a passphrase. This is done using
+the QCA::KeyLoader class.
+
+*/
+
+
 /** \example mactest.cpp
 
 The code below shows how to use the QCA::MessageAuthenticationCode class
 
 */
 
-
-/** \example keyloader.cpp
-
-The code below shows how to use the QCA::KeyLoader class
-
-*/
 
 /** \example md5crypt.cpp
 
@@ -80,6 +99,7 @@ code is compatible with the glibc code.
 
 */
 
+
 /** \example providertest.cpp
 
 The code below shows some simple operations on a QCA::Provider object, including
@@ -87,17 +107,20 @@ use of iterators and some member functions.
 
 */
 
+
 /** \example publickeyexample.cpp
 
 The code below shows how to do public key encryption, decryption,
 signing and verification.
 */
 
+
 /** \example randomtest.cpp
 
 The code below shows the normal way to use the QCA::Random class.
 
 */
+
 
 /** \example rsatest.cpp
 
@@ -107,11 +130,13 @@ to a file, using PEM encoding.
 
 */
 
+
 /** \example saslservtest.cpp
 
 The code below shows how to create a SASL server.
 
 */
+
 
 /** \example sasltest.cpp
 
@@ -119,11 +144,6 @@ The code below shows how to create a SASL client.
 
 */
 
-/** \example ssltest.cpp
-
-The code below shows how to create an SSL client 
-
-*/
 
 /** \example sslservtest.cpp
 
@@ -140,5 +160,19 @@ state information) that handles a single connection. Then
 just create a TlsConnection for each server connection.
 
 */
+
+/** \example ssltest.cpp
+
+The code below shows how to create an SSL client 
+
+*/
+
+/** \example tlssocket.cpp
+
+The code below shows how to create a socket that can operate
+over an Transport Layer Security (TLS, also known as SSL) connection.
+
+*/
+
 
 

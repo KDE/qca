@@ -103,10 +103,13 @@ namespace QCA
 	class QCA_EXPORT CertificateInfoPair
 	{
 	public:
+	        /**
+		   Section of the certificate that the information belongs in
+		*/
 		enum Section
 		{
-			DN,
-			AltName
+			DN,     ///< Distinguished name (the primary name)
+			AltName ///< Alternate name
 		};
 
 	        /**
@@ -1735,6 +1738,8 @@ namespace QCA
 		   \param passphrase the passphrase for the encoded bundle
 		   \param result pointer to the result of the import process
 		   \param provider the provider to use, if a specific provider is required
+
+                   \sa QCA::KeyLoader for an asynchronous loader approach.
 		*/
 		static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
@@ -1758,6 +1763,8 @@ namespace QCA
 		   \param passphrase the passphrase for the encoded bundle
 		   \param result pointer to the result of the import process
 		   \param provider the provider to use, if a specific provider is required
+
+                   \sa QCA::KeyLoader for an asynchronous loader approach.
 		*/
 		static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
@@ -1936,25 +1943,121 @@ namespace QCA
 
 	/**
 	   Asynchronous private key loader
+
+           Under some circumstances, it may take an extended period to load a private key. The KeyLoader
+           class allows you to asynchronously load private keys (QCA::PrivateKey) or groups of keys
+           (QCA::KeyBundle) with a signal that advises of completion.
+
+           To use this class to load a PrivateKey, you create a KeyLoader object then use one of the
+           loadPrivateKeyFrom...() functions, depending on the format for your key. These functions return
+           immediately.  When you get the finished() signal, you can check that the loading operation
+           succeeded (using convertResult()) and then obtain the PrivateKey using the privateKey() function.
+
+           The same process applies for loading a KeyBundle, except that you use either loadKeyBundleFromFile()
+           or loadKeyBundleFromArray() instead of the loadPrivateKeyFrom...() function, and use keyBundle() instead
+           of privateKey().
+
+           The loader may need a passphrase, password or token to complete the loading of the key or key bundle.
+           You should use the QCA::EventHandler class to ensure that you deal with this correctly.
+
+           \note %QCA also provides synchronous private key loading using QCA::PrivateKey::fromPEMFile(),
+           QCA::PrivateKey::fromPEM() and QCA::PrivateKey::fromDER(). %QCA provides synchronous key bundle
+           loading using QCA::KeyBundle::fromArray() and QCA::KeyBundle::fromFile().
+           
 	*/
 	class QCA_EXPORT KeyLoader : public QObject
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Create a KeyLoader object.
+
+                   \param parent the parent object for this object
+		*/
 		KeyLoader(QObject *parent = 0);
 		~KeyLoader();
 
+		/**
+                   Initiate an asynchronous loading of a PrivateKey from a PEM format file.
+
+                   This function will return immediately.
+
+                   \param fileName the name of the file (and path, if neccessary) to load
+                   the key from
+		*/
 		void loadPrivateKeyFromPEMFile(const QString &fileName);
+
+		/**
+                   Initiate an asynchronous loading of a PrivateKey from a PEM format string.
+
+                   This function will return immediately.
+
+                   \param s the string containing the PEM formatted key
+		*/
 		void loadPrivateKeyFromPEM(const QString &s);
+
+		/**
+                   Initiate an asynchronous loading of a PrivateKey from a DER format array.
+
+                   This function will return immediately.
+
+                   \param a the array containing the DER formatted key
+		*/
 		void loadPrivateKeyFromDER(const SecureArray &a);
+
+		/**
+                   Initiate an asynchronous loading of a KeyBundle from a file
+
+                   This function will return immediately.
+
+                   \param fileName the name of the file (and path, if neccessary) to load
+                   the key bundle from
+		*/
 		void loadKeyBundleFromFile(const QString &fileName);
+
+		/**
+                   Initiate an asynchronous loading of a KeyBundle from an array
+
+                   This function will return immediately.
+
+                   \param a the array containing the key bundle
+		*/
 		void loadKeyBundleFromArray(const QByteArray &a);
 
+                /**
+                   The result of the loading process.
+
+                   This is not valid until the finished() signal has been emitted.
+                */
 		ConvertResult convertResult() const;
+
+                /**
+                   The private key that has been loaded.
+
+                   This is only valid if loadPrivateKeyFromPEMFile(), loadPrivateKeyFromPEM()
+                   or loadPrivateKeyFromDER() has been used, the load has completed (that is,
+                   finished() has been emitted), and the conversion succeeded (that is, 
+                   convertResult() returned ConvertGood).
+                */
 		PrivateKey privateKey() const;
+
+                /**
+                   The key bundle that has been loaded.
+
+                   This is only valid if loadKeyBundleFromFile() or loadKeyBundleFromArray() 
+                   has been used, the load has completed (that is, finished() has been emitted),
+                   and the conversion succeeded (that is, convertResult() returned ConvertGood).
+                */
 		KeyBundle keyBundle() const;
 
 	Q_SIGNALS:
+                /**
+                   Signal that is emitted when the load process has completed.
+
+                   \note The load process may not have completed successfully - check the 
+                   result of convertResult() to confirm this before using the privateKey() or
+                   keyBundle() results.
+                */
 		void finished();
 
 	private:
