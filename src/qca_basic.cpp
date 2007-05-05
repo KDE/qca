@@ -23,7 +23,7 @@
 #include "qcaprovider.h"
 
 #include <QMutexLocker>
-#include <QtCore/QtGlobal>
+#include <QtGlobal>
 
 namespace QCA {
 
