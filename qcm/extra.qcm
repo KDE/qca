@@ -69,15 +69,9 @@ public:
                 if(!var.isEmpty())
                         str += QString("BINDIR = %1\n").arg(var);
 		if(debug) // debug or debug-and-release
-		{
 			str += QString("CONFIG += debug\n");
-			str += QString("QCA_LIBNAME = qca_debug\n");
-		}
 		else // release
-		{
 			str += QString("CONFIG += release\n");
-			str += QString("QCA_LIBNAME = qca\n");
-		}
 		f.setFileName("confapp_unix.pri");
 		if(f.open(QFile::WriteOnly | QFile::Truncate))
 			f.write(str.toLatin1());

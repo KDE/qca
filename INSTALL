@@ -9,6 +9,7 @@ For Unix/Linux/Mac:
 
 For Windows:
 
+  configwin rd
   qmake
   nmake (or make)
   installwin

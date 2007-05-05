@@ -12,14 +12,12 @@ windows:DLLDESTDIR = $$QCA_BASE/bin
 
 VERSION = 2.0.0
 
-# default windows config for now
-windows:CONFIG += debug_and_release build_all
+unix:include($$QCA_BASE/conf.pri)
+windows:include($$QCA_BASE/conf_win.pri)
 
-# make DLL
-windows: {
-	CONFIG += dll
-	DEFINES += QCA_MAKEDLL
-}
+CONFIG += create_prl link_prl
+windows:!staticlib:DEFINES += QCA_MAKEDLL
+staticlib:PRL_EXPORT_DEFINES += QCA_STATIC
 
 QCA_INC = $$QCA_INCBASE/QtCrypto
 QCA_CPP = $$QCA_SRCBASE
@@ -83,8 +81,6 @@ mac: {
 	LIBS += -framework Carbon -framework Security
 	QMAKE_LFLAGS_SONAME = -Wl,-install_name,"$$PREFIX/lib/"
 }
-
-include($$QCA_BASE/conf.pri)
 
 unix: {
 	# install
