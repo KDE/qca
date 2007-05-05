@@ -1849,6 +1849,7 @@ int main(int argc, char **argv)
 	//       try to print something closer to the context.
 	// TODO: use --debug for more stuff besides plugins
 	// TODO: support for CRLs somewhere and somehow
+	// TODO: ability to show .p12 files without having to extract first?
 
 	// help
 	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
@@ -1978,6 +1979,9 @@ int main(int argc, char **argv)
 		passphrasePrompt.pp->allowPrompt = false;
 	if(have_pass)
 		passphrasePrompt.pp->setExplicitPassword(pass);
+
+	// TODO: don't start the keystores, or at least don't wait
+	//   for busy finished for operations that don't need it.  lagggg.
 
 	// activate the KeyStoreManager and block until ready
 	QCA::KeyStoreManager::start();
