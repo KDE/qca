@@ -1462,7 +1462,7 @@ static QPair<QStringList, QStringList> getKeyStoreStrings(const QStringList &lis
 	for(int n = 0; n < list.count(); ++n)
 	{
 		QCA::KeyStore ks(list[n], ksm);
-		out.first.append(ks.id());
+		out.first.append(idHash(ks.id()));
 		out.second.append(ks.name());
 	}
 	return out;
@@ -2473,12 +2473,12 @@ int main(int argc, char **argv)
 				QString type = kstype_to_string(ks.type());
 
 				// give all ids the same width
-				QString id = ks.id();
+				/*QString id = ks.id();
 				QString str;
 				str.fill(' ', longest_id);
-				str.replace(0, id.length(), id);
+				str.replace(0, id.length(), id);*/
 
-				printf("%s %s [%s]\n", qPrintable(type), qPrintable(str), qPrintable(ks.name()));
+				printf("%s %s [%s]\n", qPrintable(type), qPrintable(idHash(ks.id())), qPrintable(ks.name()));
 			}
 		}
 		else if(args[1] == "list")
