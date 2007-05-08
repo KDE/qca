@@ -5,18 +5,19 @@
 * API documentation
   think about documenting the various providers (qcaprovider.h)
   Change Doxyfile config to capture whole API, and to generate Latex manual.
+  document which functions might cause a synchronous asker:
+    pkey: sign/decrypt, or any non-KeyLoader privkey/keybundle loading
+    keystore: entryList (non-async), ensureAvailable, ensureAccessible
+    securemessage: waitForFinished
 
-* beta5
-  api:
-    provider init(), then start()
-    alon: convertToPublic should return a publickey rather than clone?
-    reporting diagnostic text at the provider level?
-    document which functions might cause a synchronous asker?
+* test1
   code:
-    synchronizer: cleanup
+    qca-openssl: cms sign succeeds even if we return zero in rsa_sign
     keystore: complete, async mode
-    don't allow smart card providers to be used by default
+    qcatool: pkcs11 configurator
     cert: rfc 2818 hostname validation
+    synchronizer: cleanup
+    make sure we catch any throws from botan
     publickey: cleanup
     cert: cleanup
     keystore: cleanup
@@ -24,22 +25,19 @@
     securemessage: cleanup
     synchronizer should lazy-start the thread
     add logging to qca lib and other plugins
-    make sure we catch any throws from botan
-    qca-cyrus-sasl:
-      there's a problem where we can create the provider, and not create
-      a saslContext, and then the destructor depends on uninitialised values
-      (to see this, valgrind staticunittest).
-    qca-openssl: ca signing
-    qca-openssl: support async S/MIME and TLS
-
-* test1
-  code:
+    dirwatch: consider using QFileSystemWatcher instead (or wrapping)
     dirwatch: thread safety
     dirwatch: test on all platforms
     proper parenting of all objects
     qcatool TODOs
+    finish cmssigner
+    qca-openssl: ca signing
+    qca-openssl: async tls
   other:
+    qt/x11 4.2 doesn't support debug-and-release anymore. what should we do?
+    smartcard tls example?
     update the rootcerts with mozcerts
+    regenerate botantools.diff
 
 * Considerations
   api:
@@ -86,9 +84,9 @@
   cert: any other fields we don't support but might be used out there
   cert: support for arbitrary extensions?
   cms: fine-grained control over smime attribs
+  convertToPublic should return a publickey rather than change itself
   providers for:
     Mozilla NSS
     Windows CryptoAPI
     Linux kernel crypto support, if the userspace API ever gets sorted out
     Intel Performance Primatives library
-
