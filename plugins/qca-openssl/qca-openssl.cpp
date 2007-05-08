@@ -2462,6 +2462,9 @@ public:
 			OPENSSL_free(tmps);
 		}
 
+		if(result.isEmpty())
+			return 0;
+
 		memcpy(sigret, result.data(), result.size());
 		*siglen = result.size();
 
