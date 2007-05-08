@@ -348,6 +348,13 @@ namespace QCA
 	QCA_EXPORT void clearPluginDiagnosticText();
 
 	/**
+	 * Add plugin diagnostic text
+	 *
+	 * This function should only be called by providers.
+	 */
+	QCA_EXPORT void appendPluginDiagnosticText(const QString &text);
+
+	/**
 	 * Set a global property
 	 */
 	QCA_EXPORT void setProperty(const QString &name, const QVariant &value);
