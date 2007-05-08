@@ -404,7 +404,7 @@ public:
 	virtual QString storeId(int) const
 	{
 		// TODO
-		return "qca-gnupg-(gpg)";
+		return "qca-gnupg";
 	}
 
 	virtual QString name(int) const
