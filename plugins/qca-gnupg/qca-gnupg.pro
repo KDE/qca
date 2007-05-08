@@ -4,6 +4,10 @@ QT -= gui
 CONFIG += crypto
 DESTDIR = lib
 
+VERSION = 1.0.0
+
+include(conf.pri)
+
 # default windows config for now
 windows:CONFIG += debug_and_release build_all
 
@@ -19,8 +23,6 @@ HEADERS += \
 SOURCES += \
 	$$GPG_BASE/gpgop.cpp \
 	$$GPG_BASE/qca-gnupg.cpp
-
-include(conf.pri)
 
 CONFIG(debug, debug|release) {
 	unix:TARGET = $$join(TARGET,,,_debug)

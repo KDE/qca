@@ -4,6 +4,10 @@ QT -= gui
 CONFIG += crypto
 DESTDIR = lib
 
+VERSION = 1.0.0
+
+include(conf.pri)
+
 # default windows config for now
 windows:CONFIG += debug_and_release build_all
 
@@ -17,8 +21,6 @@ windows:{
 	LIBS += -L$$PKCS11H_PREFIX/lib
 	LIBS += -lpkcs11-helper.dll
 }
-
-include(conf.pri)
 
 CONFIG(debug, debug|release) {
 	unix:TARGET = $$join(TARGET,,,_debug)

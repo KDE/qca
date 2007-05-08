@@ -4,6 +4,8 @@ QT -= gui
 CONFIG += crypto
 DESTDIR = lib
 
+VERSION = 1.0.0
+
 include(conf.pri)
 
 CONFIG += create_prl
