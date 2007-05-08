@@ -42,6 +42,7 @@ namespace saslQCAPlugin {
 class saslProvider : public Provider
 {
 public:
+	saslProvider();
 	void init();
 	~saslProvider();
         int version() const;
@@ -844,11 +845,14 @@ public:
 //----------------------------------------------------------------------------
 // saslProvider
 //----------------------------------------------------------------------------
-
-void saslProvider::init()
+saslProvider::saslProvider()
 {
 	client_init = false;
 	server_init = false;
+}
+
+void saslProvider::init()
+{
 }
 
 saslProvider::~saslProvider()
