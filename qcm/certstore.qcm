@@ -84,12 +84,8 @@ public:
 	QString makeEscapedDefine(const QString &var, const QString &val)
 	{
 		QString str = QString(
-		"contains($$list($$[QT_VERSION]), 4.2.*) {\n"
-		"\tDEFINES += %1=\\\\\\\\\\\\\\"%2\\\\\\\\\\\\\\"\n"
-		"} else {\n").arg(var).arg(val);
-		str += QString(
-		"\tDEFINES += %1=\\\\\\"%2\\\\\\"\n"
-		"}\n").arg(var).arg(val);
+		"DEFINES += %1=\\\\\\\\\\\\\\"%2\\\\\\\\\\\\\\"\n"
+		).arg(var).arg(val);
 		return str;
 	}
 
