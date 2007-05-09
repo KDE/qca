@@ -12,23 +12,19 @@
 
 * test1
   code:
-    qca-openssl: cms sign succeeds even if we return zero in rsa_sign
-    keystore: complete, async mode
     qcatool: pkcs11 configurator
     cert: rfc 2818 hostname validation
     synchronizer: cleanup
-    make sure we catch any throws from botan
     publickey: cleanup
     cert: cleanup
-    keystore: cleanup
+    keystore: complete, cleanup
     securelayer: cleanup
     securemessage: cleanup
-    synchronizer should lazy-start the thread
-    add logging to qca lib and other plugins
     dirwatch: consider using QFileSystemWatcher instead (or wrapping)
     dirwatch: thread safety
-    dirwatch: test on all platforms
-    proper parenting of all objects
+    dirwatch: proper object parenting, test on all platforms
+    make sure we catch any throws from botan
+    add logging to qca lib and other plugins
     qcatool TODOs
     finish cmssigner
     qca-openssl: ca signing
