@@ -502,6 +502,12 @@ namespace QCA
 		*/
 		void entryWritten(const QString &entryId);
 
+		/**
+		   Emitted when an entry has been removed, in asynchronous
+		   mode.  success indicates if the removal succeeded or not.
+		*/
+		void entryRemoved(bool success);
+
 	private:
 		friend class KeyStorePrivate;
 		KeyStorePrivate *d;
