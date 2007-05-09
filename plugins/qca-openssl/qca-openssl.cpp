@@ -2462,6 +2462,8 @@ public:
 			OPENSSL_free(tmps);
 		}
 
+		// TODO: even though we return error here, PKCS7_sign will
+		//   not return error.  what gives?
 		if(result.isEmpty())
 			return 0;
 
