@@ -102,7 +102,20 @@ public:
 	LoggerProvider () {
 		_externalConfig = false;
 		_streamLogger = NULL;
+
+		char *level = getenv ("QCALOGGER_LEVEL");
+		char *file = getenv ("QCALOGGER_FILE");
+
+		if (level != NULL) {
+printf ("XXXX %s %s\n", level, file);
+			_externalConfig = true;
+			createLogger (
+				atoi (level),
+				file == NULL ? QString() : QString::fromUtf8 (file)
+			);
+		}
 	}
+
 	~LoggerProvider () {
 		delete _streamLogger;
 		_streamLogger = NULL;
@@ -117,18 +130,7 @@ public:
 
 	virtual
 	void
-	init () {
-		char *level = getenv ("QCALOGGER_LEVEL");
-		char *file = getenv ("QCALOGGER_FILE");
-
-		if (level != NULL) {
-			_externalConfig = true;
-			createLogger (
-				atoi (level),
-				file == NULL ? QString() : QString::fromUtf8 (file)
-			);
-		}
-	}
+	init () {}
 
 	virtual
 	QString
