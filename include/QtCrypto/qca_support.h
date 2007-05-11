@@ -101,10 +101,6 @@ namespace QCA
 		QString dirName() const;
 		void setDirName(const QString &dir);
 
-		// DirWatch still works even if this returns false,
-		// but it will be inefficient
-		static bool platformSupported();
-
 	Q_SIGNALS:
 		void changed();
 
