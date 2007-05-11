@@ -171,7 +171,7 @@ namespace QCA
          *     printf("SHA1 not supported!\n");
 	 * else {
          *     QString result = QCA::SHA1::hashToString(myString);
-         *     printf("sha1(\"%s\") = [%s]\n", myString.data(), result.latin1());
+         *     printf("sha1(\"%s\") = [%s]\n", myString.data(), qPrintable(result));
 	 * }
 	 * \endcode
 	 * 
