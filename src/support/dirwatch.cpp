@@ -17,7 +17,7 @@
  *
  */
 
-#include "dirwatch_p.h"
+#include "qca_support.h"
 
 #include <QFileSystemWatcher>
 

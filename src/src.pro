@@ -51,8 +51,8 @@ HEADERS += $$PRIVATE_HEADERS $$PUBLIC_HEADERS
 SOURCES += \
 	$$QCA_CPP/support/syncthread.cpp \
 	$$QCA_CPP/support/logger.cpp \
-	$$QCA_CPP/support/synchronizer.cpp
-include($$QCA_SRCBASE/support/dirwatch/dirwatch.pri)
+	$$QCA_CPP/support/synchronizer.cpp \
+	$$QCA_CPP/support/dirwatch.cpp
 
 SOURCES += \
 	$$QCA_CPP/qca_tools.cpp \
