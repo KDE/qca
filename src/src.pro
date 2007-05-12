@@ -93,7 +93,9 @@ unix: {
 	INSTALLS += incfiles
 }
 
-CONFIG(debug, debug|release) {
-	unix:TARGET = $$join(TARGET,,,_debug)
-	else:TARGET = $$join(TARGET,,,d)
+!debug_and_release|build_pass {
+	CONFIG(debug, debug|release) {
+		mac:TARGET = $$member(TARGET, 0)_debug
+		windows:TARGET = $$member(TARGET, 0)d
+	}
 }

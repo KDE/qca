@@ -8,7 +8,12 @@
  <dep type='qt42'>
   <required/>
  </dep>
- <dep type='dnotify'/>
+ <dep type='buildmode'>
+  <required/>
+ </dep>
+ <dep type='universal'>
+  <required/>
+ </dep>
  <dep type='extra'>
   <required/>
  </dep>
