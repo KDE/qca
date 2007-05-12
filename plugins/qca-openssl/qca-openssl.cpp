@@ -6074,6 +6074,13 @@ using namespace opensslQCAPlugin;
 class opensslProvider : public Provider
 {
 public:
+	bool openssl_initted;
+
+	opensslProvider()
+	{
+		openssl_initted = false;
+	}
+
 	void init()
 	{
 		OpenSSL_add_all_algorithms();
@@ -6084,16 +6091,22 @@ public:
 		for(int n = 0; n < 128; ++n)
 			buf[n] = rand();
 		RAND_seed(buf, 128);
+
+		openssl_initted = true;
 	}
 
 	~opensslProvider()
 	{
+		// FIXME: ?  for now we never deinit, in case other libs/code
+		//   are using openssl
+		/*if(!openssl_initted)
+			return;
 		// todo: any other shutdown?
 		EVP_cleanup();
 		//ENGINE_cleanup();
 		CRYPTO_cleanup_all_ex_data();
 		ERR_remove_state(0);
-		ERR_free_strings();
+		ERR_free_strings();*/
 	}
 
 	int version() const
