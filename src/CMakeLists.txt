@@ -21,7 +21,7 @@ SET( moc_SOURCES
 	support/qpipe.cpp
 	support/console.cpp 
 	support/synchronizer.cpp
-	support/dirwatch/dirwatch.cpp
+	support/dirwatch.cpp
 	support/syncthread.cpp
 )
 
@@ -40,19 +40,11 @@ endif(APPLE)
 # Support files
 #SET( qca_HEADERS ${qca_HEADERS} support/dirwatch/dirwatch_p.h )
 
-IF (WIN32)
-  SET( moc_SOURCES ${moc_SOURCES} support/dirwatch//dirwatch_win.cpp ) 
-ENDIF(WIN32)
-
-IF (UNIX)
-  SET( moc_SOURCES ${moc_SOURCES} support/dirwatch//dirwatch_unix.cpp )
-ENDIF(UNIX)
-
 # Botan tools
 SET( botan_BASE botantools/botan )
 
 
-INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} support support/dirwatch ${botan_BASE} )
+INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} support ${botan_BASE} )
 
 ADD_DEFINITIONS(
 	-DBOTAN_TYPES_QT
@@ -125,7 +117,6 @@ qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_securelayer.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_securemessage.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_support.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qpipe.h")
-qt4_wrap_cpp( SOURCES "support/dirwatch/dirwatch_p.h")
 
 ADD_LIBRARY(qca SHARED ${SOURCES})
 TARGET_LINK_LIBRARIES(qca ${QT_QTCORE_LIBRARY})
