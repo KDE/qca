@@ -25,7 +25,7 @@ public:
 	bool exec()
 	{
 #ifdef Q_OS_MAC
-		if(qc_getenv("QC_MAC_UNIVERSAL") == "Y")
+		if(qc_getenv("QC_UNIVERSAL") == "Y")
 		{
 			qc_universal_enabled = true;
 
