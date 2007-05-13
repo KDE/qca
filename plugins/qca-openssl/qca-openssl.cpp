@@ -5220,7 +5220,7 @@ public:
 
 			if(!tmp_kc->sameProvider(this))
 			{
-				printf("experimental: private key supplied by a different provider\n");
+				//fprintf(stderr, "experimental: private key supplied by a different provider\n");
 
 				// make a pkey pointing to the existing private key
 				EVP_PKEY *pkey;
@@ -5587,7 +5587,7 @@ public:
 
 			if(!tmp_kc->sameProvider(this))
 			{
-				printf("experimental: private key supplied by a different provider\n");
+				//fprintf(stderr, "experimental: private key supplied by a different provider\n");
 
 				// make a pkey pointing to the existing private key
 				EVP_PKEY *pkey;
