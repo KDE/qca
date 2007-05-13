@@ -17,7 +17,7 @@ SOURCES = qca-openssl.cpp
 #SOURCES += main.cpp
 
 windows:{
-	CONFIG += winlocal
+	load(winlocal.prf)
 	OPENSSL_PREFIX = $$WINLOCAL_PREFIX
 	DEFINES += OSSL_097
 
