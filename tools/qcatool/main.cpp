@@ -218,8 +218,75 @@ private slots:
 	}
 };
 
-// TODO: support auto-discovering token during token request event
-// TODO: add a special watching mode to qcatool to monitor keystore activity?
+class KeyStoreMonitor : public QObject
+{
+	Q_OBJECT
+public:
+	static void monitor()
+	{
+		KeyStoreMonitor monitor;
+		QEventLoop eventLoop;
+		monitor.eventLoop = &eventLoop;
+		QTimer::singleShot(0, &monitor, SLOT(start()));
+		eventLoop.exec();
+	}
+
+private:
+	QEventLoop *eventLoop;
+	QCA::KeyStoreManager *ksm;
+	QList<QCA::KeyStore*> keyStores;
+	QCA::ConsolePrompt *prompt;
+
+private slots:
+	void start()
+	{
+		// user can quit the monitoring by pressing enter
+		printf("Monitoring keystores, press Enter to quit.\n");
+		prompt = new QCA::ConsolePrompt(this);
+		connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
+		prompt->getEnter();
+
+		// kick off the subsystem
+		QCA::KeyStoreManager::start();
+
+		// setup keystore manager for monitoring
+		ksm = new QCA::KeyStoreManager(this);
+		connect(ksm, SIGNAL(keyStoreAvailable(const QString &)), SLOT(ks_available(const QString &)));
+		foreach(const QString &keyStoreId, ksm->keyStores())
+			ks_available(keyStoreId);
+	}
+
+	void ks_available(const QString &keyStoreId)
+	{
+		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, ksm);
+		connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
+		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
+		keyStores += ks;
+
+		printf("  available:   %s\n", qPrintable(ks->name()));
+	}
+
+	void ks_updated()
+	{
+		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
+
+		printf("  updated:     %s\n", qPrintable(ks->name()));
+	}
+
+	void ks_unavailable()
+	{
+		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
+
+		printf("  unavailable: %s\n", qPrintable(ks->name()));
+		keyStores.removeAll(ks);
+		delete ks;
+	}
+
+	void prompt_finished()
+	{
+		eventLoop->exit();
+	}
+};
 
 class PassphrasePrompt : public QObject
 {
@@ -244,7 +311,10 @@ public:
 	QCA::Event prompt_event;
 	QList<Item> pending;
 
-	PassphrasePrompt()
+	QCA::KeyStoreManager ksm;
+	QList<QCA::KeyStore*> keyStores;
+
+	PassphrasePrompt() : handler(this), ksm(this)
 	{
 		allowPrompt = true;
 		warned = false;
@@ -254,10 +324,16 @@ public:
 
 		connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)), SLOT(ph_eventReady(int, const QCA::Event &)));
 		handler.start();
+
+		connect(&ksm, SIGNAL(keyStoreAvailable(const QString &)), SLOT(ks_available(const QString &)));
+		foreach(const QString &keyStoreId, ksm.keyStores())
+			ks_available(keyStoreId);
 	}
 
 	~PassphrasePrompt()
 	{
+		qDeleteAll(keyStores);
+
 		if(prompt)
 		{
 			handler.reject(prompt_id);
@@ -353,6 +429,25 @@ private slots:
 		}
 		else if(e.type() == QCA::Event::Token)
 		{
+			// even though we're being prompted for a missing token,
+			//   we should still check if the token is present, due to
+			//   a possible race between insert and token request.
+			bool found = false;
+			foreach(QCA::KeyStore *ks, keyStores)
+			{
+				if(ks->id() == e.keyStoreInfo().id())
+				{
+					found = true;
+					break;
+				}
+			}
+			if(found)
+			{
+				// auto-accept
+				handler.tokenOkay(id);
+				return;
+			}
+
 			QCA::KeyStoreEntry entry = e.keyStoreEntry();
 			QString name;
 			if(!entry.isNull())
@@ -368,7 +463,7 @@ private slots:
 
 			if(!prompt)
 			{
-				printf("%s\n", qPrintable(str));
+				fprintf(stderr, "%s\n", qPrintable(str));
 				prompt = new QCA::ConsolePrompt(this);
 				connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
 				prompt_id = id;
@@ -406,7 +501,7 @@ private slots:
 			}
 			else // Token
 			{
-				printf("%s\n", qPrintable(i.promptStr));
+				fprintf(stderr, "%s\n", qPrintable(i.promptStr));
 				prompt->getEnter();
 			}
 		}
@@ -415,6 +510,33 @@ private slots:
 			delete prompt;
 			prompt = 0;
 		}
+	}
+
+	void ks_available(const QString &keyStoreId)
+	{
+		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, &ksm);
+		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
+		keyStores += ks;
+
+		// are we currently in a token prompt?
+		if(prompt && prompt_event.type() == QCA::Event::Token)
+		{
+			// was the token we're looking for just inserted?
+			if(prompt_event.keyStoreInfo().id() == keyStoreId)
+			{
+				fprintf(stderr, "Token inserted!  Continuing...\n");
+
+				// auto-accept
+				prompt_finished();
+			}
+		}
+	}
+
+	void ks_unavailable()
+	{
+		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
+		keyStores.removeAll(ks);
+		delete ks;
 	}
 };
 
@@ -462,6 +584,16 @@ static bool promptForNewPassphrase(QCA::SecureArray *result)
 	}
 	*result = out;
 	return true;
+}
+
+static void ksm_start_and_wait()
+{
+	// activate the KeyStoreManager and block until ready
+	QCA::KeyStoreManager::start();
+	{
+		QCA::KeyStoreManager ksm;
+		ksm.waitForBusyFinished();
+	}
 }
 
 static QString line_encode(const QString &in)
@@ -1367,7 +1499,7 @@ static int newline_len(const QString &in, int offset = 0)
 		return 1;
 }
 
-// FIXME: all of this mime stuff is a total hack
+// all of this mime stuff is a total hack
 static QString open_mime_envelope(const QString &in)
 {
 	int n = indexOf_doublenewline(in);
@@ -1547,6 +1679,8 @@ static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false
 {
 	QCA::KeyStoreEntry entry;
 
+	ksm_start_and_wait();
+
 	int n = name.indexOf(':');
 	if(n != -1)
 	{
@@ -1571,8 +1705,6 @@ static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false
 	}
 	else
 	{
-		// TODO: users of this function assume objects will also exist
-
 		// exported id
 		QString serialized = read_ksentry_file(name);
 		entry = QCA::KeyStoreEntry(serialized);
@@ -1655,8 +1787,7 @@ static QCA::KeyBundle get_X(const QString &name)
 	}
 
 	// try file
-	// TODO: remove passphrase arg after api update
-	QCA::KeyBundle key = QCA::KeyBundle::fromFile(name, QCA::SecureArray());
+	QCA::KeyBundle key = QCA::KeyBundle::fromFile(name);
 	if(key.isNull())
 	{
 		printf("Error: unable to read/process keybundle file.\n");
@@ -1730,6 +1861,7 @@ static void usage()
 	printf(" keystore [command]\n");
 	printf("   list-stores                         List all available keystores\n");
 	printf("   list [storeName]                    List content of a keystore\n");
+	printf("   monitor                             Monitor for keystore availability\n");
 	printf("   export [E]                          Export a keystore entry's content\n");
 	printf("   exportref [E]                       Export a keystore entry reference\n");
 	printf("   addkb [storeName] [cert.p12]        Add a keybundle into a keystore\n");
@@ -1979,16 +2111,6 @@ int main(int argc, char **argv)
 		passphrasePrompt.pp->allowPrompt = false;
 	if(have_pass)
 		passphrasePrompt.pp->setExplicitPassword(pass);
-
-	// TODO: don't start the keystores, or at least don't wait
-	//   for busy finished for operations that don't need it.  lagggg.
-
-	// activate the KeyStoreManager and block until ready
-	QCA::KeyStoreManager::start();
-	{
-		QCA::KeyStoreManager ksm;
-		ksm.waitForBusyFinished();
-	}
 
 	// TODO: for each kind of operation, we need to check for support first!!
 	if(args[0] == "key")
@@ -2456,6 +2578,8 @@ int main(int argc, char **argv)
 
 		if(args[1] == "list-stores")
 		{
+			ksm_start_and_wait();
+
 			QCA::KeyStoreManager ksm;
 			QStringList storeList = ksm.keyStores();
 
@@ -2489,6 +2613,8 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
+			ksm_start_and_wait();
+
 			QCA::KeyStoreManager ksm;
 			QCA::KeyStore store(getKeyStore(args[2]), &ksm);
 			if(!store.isValid())
@@ -2504,6 +2630,10 @@ int main(int argc, char **argv)
 				QString type = ksentrytype_to_string(i.type());
 				printf("%s %s [%s]\n", qPrintable(type), qPrintable(idHash(i.id())), qPrintable(i.name()));
 			}
+		}
+		else if(args[1] == "monitor")
+		{
+			KeyStoreMonitor::monitor();
 		}
 		else if(args[1] == "export")
 		{
@@ -2549,6 +2679,8 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
+			ksm_start_and_wait();
+
 			QCA::KeyStoreManager ksm;
 			QCA::KeyStore store(getKeyStore(args[2]), &ksm);
 			if(!store.isValid())
@@ -2576,6 +2708,8 @@ int main(int argc, char **argv)
 				usage();
 				return 1;
 			}
+
+			ksm_start_and_wait();
 
 			QCA::KeyStoreManager ksm;
 			QCA::KeyStore store(getKeyStore(args[2]), &ksm);
@@ -2678,12 +2812,16 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			// FIXME: isSecret will always print false here
-			QCA::PGPKey pub = get_P(args[2]);
-			if(pub.isNull())
-				return 1;
+			// try for secret key, then try public key
+			QCA::PGPKey key = get_S(args[2]).first;
+			if(key.isNull())
+			{
+				key = get_P(args[2]);
+				if(key.isNull())
+					return 1;
+			}
 
-			print_pgp(pub);
+			print_pgp(key);
 		}
 		else
 		{
