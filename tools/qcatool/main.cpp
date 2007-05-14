@@ -1719,7 +1719,7 @@ static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false
 	return entry;
 }
 
-static QCA::PrivateKey get_K(const QString &name, const QCA::SecureArray &pass)
+static QCA::PrivateKey get_K(const QString &name)
 {
 	QCA::PrivateKey key;
 
@@ -1731,10 +1731,10 @@ static QCA::PrivateKey get_K(const QString &name, const QCA::SecureArray &pass)
 	}
 
 	QCA::ConvertResult result;
-	key = QCA::PrivateKey::fromPEMFile(name, pass, &result);
+	key = QCA::PrivateKey::fromPEMFile(name, QCA::SecureArray(), &result);
 	if(result == QCA::ErrorDecode)
 	{
-		key = QCA::PrivateKey::fromDER(read_der_file(name), pass);
+		key = QCA::PrivateKey::fromDER(read_der_file(name));
 		if(key.isNull())
 		{
 			printf("Error: unable to read/process private key file.\n");
@@ -2236,8 +2236,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			// TODO: is it weird passing 'pass' here?
-			QCA::PrivateKey priv = get_K(args[2], pass);
+			QCA::PrivateKey priv = get_K(args[2]);
 			if(priv.isNull())
 				return 1;
 
@@ -2291,8 +2290,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			// TODO: same as before
-			QCA::PrivateKey priv = get_K(args[2], pass);
+			QCA::PrivateKey priv = get_K(args[2]);
 			if(priv.isNull())
 				return 1;
 
@@ -2320,8 +2318,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			// TODO: same as before
-			QCA::PrivateKey priv = get_K(args[2], pass);
+			QCA::PrivateKey priv = get_K(args[2]);
 			if(priv.isNull())
 				return 1;
 
@@ -2396,8 +2393,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			// TODO: same as before
-			QCA::PrivateKey priv = get_K(args[2], pass);
+			QCA::PrivateKey priv = get_K(args[2]);
 			if(priv.isNull())
 				return 1;
 
