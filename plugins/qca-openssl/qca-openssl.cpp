@@ -4048,6 +4048,8 @@ public:
 			return ErrorDecode;
 		}
 
+		// TODO: require cert
+
 		int aliasLength;
 		char *aliasData = (char*)X509_alias_get0(cert, &aliasLength);
 		*name = QString::fromAscii(aliasData, aliasLength);
@@ -5367,6 +5369,7 @@ class CMSContext : public SMSContext
 {
 public:
 	CertificateCollection trustedCerts;
+	CertificateCollection untrustedCerts;
 	QList<SecureMessageKey> privateKeys;
 
 	CMSContext(Provider *p) : SMSContext(p, "cms")
@@ -5385,6 +5388,11 @@ public:
 	virtual void setTrustedCertificates(const CertificateCollection &trusted)
 	{
 		trustedCerts = trusted;
+	}
+
+	virtual void setUntrustedCertificates(const CertificateCollection &untrusted)
+	{
+		untrustedCerts = untrusted;
 	}
 
 	virtual void setPrivateKeys(const QList<SecureMessageKey> &keys)
@@ -5714,9 +5722,20 @@ public:
 				return;
 			}
 
+			// intermediates/signers that may not be in the blob
+			STACK_OF(X509) *other_certs = sk_X509_new_null();
+			QList<Certificate> untrusted_list = cms->untrustedCerts.certificates();
+			QList<CRL> untrusted_crls = cms->untrustedCerts.crls(); // we'll use the crls later
+			for(int n = 0; n < untrusted_list.count(); ++n)
+			{
+				X509 *x = static_cast<MyCertContext *>(untrusted_list[n].context())->item.cert;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+				sk_X509_push(other_certs, x);
+			}
+
 			// get the possible message signers
 			QList<Certificate> signers;
-			STACK_OF(X509) *xs = PKCS7_get0_signers(p7, NULL, 0);
+			STACK_OF(X509) *xs = PKCS7_get0_signers(p7, other_certs, 0);
 			if(xs)
 			{
 				for(int n = 0; n < sk_X509_num(xs); ++n)
@@ -5746,8 +5765,8 @@ public:
 				}
 			}
 
-			// TODO: what happens if the signer cert isn't here?
-			// TODO: support using a signer not stored in the signature
+			// signer needs to be supplied in the message itself
+			//   or via cms->untrustedCerts
 			if(signers.isEmpty())
 			{
 				QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
@@ -5782,20 +5801,30 @@ public:
 				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
 				X509_STORE_add_crl(store, x);
 			}
+			// add these crls also
+			crl_list = untrusted_crls;
+			for(n = 0; n < crl_list.count(); ++n)
+			{
+				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
+				X509_CRL *x = cc->item.crl;
+				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+				X509_STORE_add_crl(store, x);
+			}
 
 			int ret;
 			if(!sig.isEmpty()) {
 				// Detached signMode
 				bi = BIO_new(BIO_s_mem());
 				BIO_write(bi, in.data(), in.size());
-				ret = PKCS7_verify(p7, NULL, store, bi, NULL, 0);
+				ret = PKCS7_verify(p7, other_certs, store, bi, NULL, 0);
 				BIO_free(bi);
 			} else {
-				ret = PKCS7_verify(p7, NULL, store, NULL, out, 0);
+				ret = PKCS7_verify(p7, other_certs, store, NULL, out, 0);
 				// qDebug() << "Verify: " << ret;
 			}
 			//if(!ret)
 			//	ERR_print_errors_fp(stdout);
+			sk_X509_pop_free(other_certs, X509_free);
 			X509_STORE_free(store);
 			PKCS7_free(p7);
 
