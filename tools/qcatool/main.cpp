@@ -124,6 +124,32 @@ char *StreamLogger::s_severityNames[] = {
 	"U"
 };
 
+static void output_plugin_diagnostic_text()
+{
+	QString str = QCA::pluginDiagnosticText();
+	QCA::clearPluginDiagnosticText();
+	QStringList lines = str.split('\n', QString::SkipEmptyParts);
+	for(int n = 0; n < lines.count(); ++n)
+		fprintf(stderr, "plugin: %s\n", qPrintable(lines[n]));
+}
+
+static void output_keystore_diagnostic_text()
+{
+	QString str = QCA::KeyStoreManager::diagnosticText();
+	QCA::KeyStoreManager::clearDiagnosticText();
+	QStringList lines = str.split('\n', QString::SkipEmptyParts);
+	for(int n = 0; n < lines.count(); ++n)
+		fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
+}
+
+static void output_message_diagnostic_text(QCA::SecureMessage *msg)
+{
+	QString str = msg->diagnosticText();
+	QStringList lines = str.split('\n', QString::SkipEmptyParts);
+	for(int n = 0; n < lines.count(); ++n)
+		fprintf(stderr, "message: %s\n", qPrintable(lines[n]));
+}
+
 class AnimatedKeyGen : public QObject
 {
 	Q_OBJECT
@@ -2033,7 +2059,6 @@ int main(int argc, char **argv)
 
 	// TODO: instead of printing full usage at every wrong turn, we might
 	//       try to print something closer to the context.
-	// TODO: use --debug for more stuff besides plugins
 
 	// help
 	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
@@ -2072,13 +2097,7 @@ int main(int argc, char **argv)
 		QCA::ProviderList list = QCA::providers();
 
 		if(debug)
-		{
-			QString str = QCA::pluginDiagnosticText();
-			QCA::clearPluginDiagnosticText();
-			QStringList lines = str.split('\n', QString::SkipEmptyParts);
-			for(int n = 0; n < lines.count(); ++n)
-				printf("qca: %s\n", qPrintable(lines[n]));
-		}
+			output_plugin_diagnostic_text();
 
 		printf("Available Providers:\n");
 		if(!list.isEmpty())
@@ -2099,14 +2118,9 @@ int main(int argc, char **argv)
 			printf("  (none)\n");
 
 		QCA::unloadAllPlugins();
+
 		if(debug)
-		{
-			QString str = QCA::pluginDiagnosticText();
-			QCA::clearPluginDiagnosticText();
-			QStringList lines = str.split('\n', QString::SkipEmptyParts);
-			for(int n = 0; n < lines.count(); ++n)
-				printf("qca: %s\n", qPrintable(lines[n]));
-		}
+			output_plugin_diagnostic_text();
 
 		return 0;
 	}
@@ -2631,27 +2645,15 @@ int main(int argc, char **argv)
 			QCA::KeyStoreManager ksm;
 			QStringList storeList = ksm.keyStores();
 
-			// find longest id
-			int longest_id = -1;
-			for(int n = 0; n < storeList.count(); ++n)
-			{
-				if(longest_id == -1 || storeList[n].length() > longest_id)
-					longest_id = storeList[n].length();
-			}
-
 			for(int n = 0; n < storeList.count(); ++n)
 			{
 				QCA::KeyStore ks(storeList[n], &ksm);
 				QString type = kstype_to_string(ks.type());
-
-				// give all ids the same width
-				/*QString id = ks.id();
-				QString str;
-				str.fill(' ', longest_id);
-				str.replace(0, id.length(), id);*/
-
 				printf("%s %s [%s]\n", qPrintable(type), qPrintable(idHash(ks.id())), qPrintable(ks.name()));
 			}
+
+			if(debug)
+				output_keystore_diagnostic_text();
 		}
 		else if(args[1] == "list")
 		{
@@ -2667,6 +2669,9 @@ int main(int argc, char **argv)
 			QCA::KeyStore store(getKeyStore(args[2]), &ksm);
 			if(!store.isValid())
 			{
+				if(debug)
+					output_keystore_diagnostic_text();
+
 				fprintf(stderr, "Error: no such store\n");
 				return 1;
 			}
@@ -2678,10 +2683,16 @@ int main(int argc, char **argv)
 				QString type = ksentrytype_to_string(i.type());
 				printf("%s %s [%s]\n", qPrintable(type), qPrintable(idHash(i.id())), qPrintable(i.name()));
 			}
+
+			if(debug)
+				output_keystore_diagnostic_text();
 		}
 		else if(args[1] == "monitor")
 		{
 			KeyStoreMonitor::monitor();
+
+			if(debug)
+				output_keystore_diagnostic_text();
 		}
 		else if(args[1] == "export")
 		{
@@ -2702,9 +2713,15 @@ int main(int argc, char **argv)
 			else if(entry.type() == QCA::KeyStoreEntry::TypePGPPublicKey || entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
 				printf("%s", qPrintable(entry.pgpPublicKey().toString()));
 			else if(entry.type() == QCA::KeyStoreEntry::TypeKeyBundle)
+			{
 				fprintf(stderr, "Error: use 'keybundle extract' command instead.\n");
+				return 1;
+			}
 			else
+			{
 				fprintf(stderr, "Error: cannot export type '%d'.\n", entry.type());
+				return 1;
+			}
 		}
 		else if(args[1] == "exportref")
 		{
@@ -2983,9 +3000,6 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			// TODO: support streaming someday ?  we need support in
-			//   the provider as well as our smime envelope stuff
-
 			// read input data from stdin all at once
 			QByteArray plain;
 			while(!feof(stdin))
@@ -3015,11 +3029,18 @@ int main(int argc, char **argv)
 			msg->end();
 			msg->waitForFinished(-1);
 
+			if(debug)
+			{
+				output_keystore_diagnostic_text();
+				output_message_diagnostic_text(msg);
+			}
+
 			if(!msg->success())
 			{
 				QString errstr = smErrorToString(msg->errorCode());
 				delete msg;
 				delete sms;
+
 				fprintf(stderr, "Error: unable to sign: %s\n", qPrintable(errstr));
 				return 1;
 			}
@@ -3107,6 +3128,12 @@ int main(int argc, char **argv)
 			msg->end();
 			msg->waitForFinished(-1);
 
+			if(debug)
+			{
+				output_keystore_diagnostic_text();
+				output_message_diagnostic_text(msg);
+			}
+
 			if(!msg->success())
 			{
 				QString errstr = smErrorToString(msg->errorCode());
@@ -3187,6 +3214,12 @@ int main(int argc, char **argv)
 			msg->update(plain);
 			msg->end();
 			msg->waitForFinished(-1);
+
+			if(debug)
+			{
+				output_keystore_diagnostic_text();
+				output_message_diagnostic_text(msg);
+			}
 
 			if(!msg->success())
 			{
@@ -3312,6 +3345,12 @@ int main(int argc, char **argv)
 			msg->update(data);
 			msg->end();
 			msg->waitForFinished(-1);
+
+			if(debug)
+			{
+				output_keystore_diagnostic_text();
+				output_message_diagnostic_text(msg);
+			}
 
 			if(!msg->success())
 			{
@@ -3455,6 +3494,12 @@ int main(int argc, char **argv)
 			msg->end();
 			msg->waitForFinished(-1);
 
+			if(debug)
+			{
+				output_keystore_diagnostic_text();
+				output_message_diagnostic_text(msg);
+			}
+
 			if(!msg->success())
 			{
 				QString errstr = smErrorToString(msg->errorCode());
@@ -3557,6 +3602,8 @@ int main(int argc, char **argv)
 			msg->update(data);
 			msg->end();
 			msg->waitForFinished(-1);
+
+			// TODO: output diagnostic text?
 
 			if(!msg->success())
 			{
