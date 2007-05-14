@@ -668,6 +668,7 @@ public:
 	SMSContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
 	virtual void setTrustedCertificates(const CertificateCollection &trusted);
+	virtual void setUntrustedCertificates(const CertificateCollection &untrusted);
 	virtual void setPrivateKeys(const QList<SecureMessageKey> &keys);
 	virtual MessageContext *createMessage() = 0;
 };

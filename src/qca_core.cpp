@@ -1056,6 +1056,10 @@ void SMSContext::setTrustedCertificates(const CertificateCollection &)
 {
 }
 
+void SMSContext::setUntrustedCertificates(const CertificateCollection &)
+{
+}
+
 void SMSContext::setPrivateKeys(const QList<SecureMessageKey> &)
 {
 }
