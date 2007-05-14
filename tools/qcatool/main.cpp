@@ -1916,7 +1916,8 @@ static void usage()
 	printf("qcatool: simple qca utility\n");
 	printf("usage: qcatool (options) [command]\n");
 	printf(" options: --pass=x, --newpass=x, --nonroots=x, --roots=x, --nosys,\n");
-	printf("          --noprompt, --ordered, --debug, --log-file=x, --log-level=n\n");
+	printf("          --noprompt, --ordered, --debug, --log-file=x, --log-level=n,\n");
+	printf("          --nobundle\n");
 	printf("\n");
 	printf(" help|--help|-h                        This help text\n");
 	printf(" version|--version|-v                  Print version information\n");
@@ -1993,6 +1994,7 @@ int main(int argc, char **argv)
 	bool ordered = false;
 	bool debug = false;
 	bool nosys = false;
+	bool nobundle = false;
 	QString rootsFile, nonRootsFile;
 
 	for(int n = 0; n < args.count(); ++n)
@@ -2047,6 +2049,8 @@ int main(int argc, char **argv)
 			nonRootsFile = val;
 		else if(var == "nosys")
 			nosys = true;
+		else if(var == "nobundle")
+			nobundle = true;
 		else
 			known = false;
 
@@ -3024,6 +3028,7 @@ int main(int argc, char **argv)
 			// pgp should always be ascii
 			if(pgp)
 				msg->setFormat(QCA::SecureMessage::Ascii);
+			msg->setEnableBundleSigner(!nobundle);
 			msg->startSign(mode);
 			msg->update(plain);
 			msg->end();
@@ -3244,10 +3249,6 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			// TODO: CMS: allow verifying with --nonroots, in case the message
-			//       doesn't have the issuers in it. (also allow verifying if
-			//       if there is no cert at all (have to specify possible certs then)).
-
 			QCA::SecureMessageSystem *sms;
 			bool pgp = false;
 
@@ -3265,8 +3266,15 @@ int main(int argc, char **argv)
 				if(!rootsFile.isEmpty())
 					roots += QCA::CertificateCollection::fromFlatTextFile(rootsFile);
 
+				// get intermediates and possible signers, in case
+				//   the message does not have them.
+				QCA::CertificateCollection nonroots;
+				if(!nonRootsFile.isEmpty())
+					nonroots += QCA::CertificateCollection::fromFlatTextFile(nonRootsFile);
+
 				sms = new QCA::CMS;
 				((QCA::CMS *)sms)->setTrustedCertificates(roots);
+				((QCA::CMS *)sms)->setUntrustedCertificates(nonroots);
 			}
 			else
 			{
