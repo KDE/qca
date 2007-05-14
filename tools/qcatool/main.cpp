@@ -768,6 +768,24 @@ static QList<MyConstraintType> makeConstraintTypeList()
 	return out;
 }
 
+const char *crlEntryReasonToString(QCA::CRLEntry::Reason r)
+{
+	switch(r)
+	{
+		case QCA::CRLEntry::Unspecified:           return "Unspecified";
+		case QCA::CRLEntry::KeyCompromise:         return "KeyCompromise";
+		case QCA::CRLEntry::CACompromise:          return "CACompromise";
+		case QCA::CRLEntry::AffiliationChanged:    return "AffiliationChanged";
+		case QCA::CRLEntry::Superseded:            return "Superseded";
+		case QCA::CRLEntry::CessationOfOperation:  return "CessationOfOperation";
+		case QCA::CRLEntry::CertificateHold:       return "CertificateHold";
+		case QCA::CRLEntry::RemoveFromCRL:         return "RemoveFromCRL";
+		case QCA::CRLEntry::PrivilegeWithdrawn:    return "PrivilegeWithdrawn";
+		case QCA::CRLEntry::AACompromise:          return "AACompromise";
+		default:                                   return "Unknown";
+	}
+}
+
 static bool validOid(const QString &in)
 {
 	for(int n = 0; n < in.length(); ++n)
@@ -1314,6 +1332,41 @@ static void print_certreq(const QCA::CertificateRequest &cert, bool ordered = fa
 	printf("Public Key:\n%s", key.toPEM().toLatin1().data());
 }
 
+static void print_crl(const QCA::CRL &crl, bool ordered = false)
+{
+	if(ordered)
+		print_info_ordered("Issuer", crl.issuerInfoOrdered());
+	else
+		print_info("Issuer", crl.issuerInfo());
+
+	int num = crl.number();
+	if(num != -1)
+		printf("Number: %d\n", num);
+
+	printf("Validity\n");
+	printf("   This update: %s\n", qPrintable(crl.thisUpdate().toString()));
+	printf("   Next update: %s\n", qPrintable(crl.nextUpdate().toString()));
+
+	QByteArray id;
+	printf("Issuer Key ID: ");
+	id = crl.issuerKeyId();
+	if(!id.isEmpty())
+		printf("%s\n", qPrintable(QCA::arrayToHex(id)));
+	else
+		printf("None\n");
+
+	printf("Signature Algorithm: %s\n", qPrintable(sigalgo_to_string(crl.signatureAlgorithm())));
+
+	QList<QCA::CRLEntry> revokedList = crl.revoked();
+	foreach(const QCA::CRLEntry &entry, revokedList)
+	{
+		printf("   %s: %s, %s\n",
+			qPrintable(entry.serialNumber().toString()),
+			crlEntryReasonToString(entry.reason()),
+			qPrintable(entry.time().toString()));
+	}
+}
+
 static void print_pgp(const QCA::PGPKey &key)
 {
 	printf("Key ID: %s\n", qPrintable(key.keyId()));
@@ -1837,8 +1890,7 @@ static void usage()
 	printf("qcatool: simple qca utility\n");
 	printf("usage: qcatool (options) [command]\n");
 	printf(" options: --pass=x, --newpass=x, --nonroots=x, --roots=x, --nosys,\n");
-	printf("          --noprompt, --ordered, --debug\n");
-	printf("          --log-file=x, --log-level=n\n");
+	printf("          --noprompt, --ordered, --debug, --log-file=x, --log-level=n\n");
 	printf("\n");
 	printf(" help|--help|-h                        This help text\n");
 	printf(" version|--version|-v                  Print version information\n");
@@ -1870,6 +1922,8 @@ static void usage()
 	printf(" show [command]\n");
 	printf("   cert [C]                            Examine a certificate\n");
 	printf("   req [req.pem]                       Examine a certificate request (CSR)\n");
+	printf("   crl [crl.pem]                       Examine a certificate revocation list\n");
+	printf("   kb [X]                              Examine a keybundle\n");
 	printf("   pgp [P|S]                           Examine a PGP key\n");
 	printf(" message [command]\n");
 	printf("   sign pgp|pgpdetach|smime [X|S]      Sign a message\n");
@@ -1980,8 +2034,6 @@ int main(int argc, char **argv)
 	// TODO: instead of printing full usage at every wrong turn, we might
 	//       try to print something closer to the context.
 	// TODO: use --debug for more stuff besides plugins
-	// TODO: support for CRLs somewhere and somehow
-	// TODO: ability to show .p12 files without having to extract first?
 
 	// help
 	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
@@ -2794,11 +2846,47 @@ int main(int argc, char **argv)
 			QCA::CertificateRequest req(args[2]);
 			if(req.isNull())
 			{
-				fprintf(stderr, "Error: can't read/decode certificate request file.\n");
+				fprintf(stderr, "Error: can't read/process certificate request file.\n");
 				return 1;
 			}
 
 			print_certreq(req, ordered);
+		}
+		else if(args[1] == "crl")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::CRL crl = QCA::CRL::fromPEMFile(args[2]);
+			if(crl.isNull())
+			{
+				crl = QCA::CRL::fromDER(read_der_file(args[2]));
+				if(crl.isNull())
+				{
+					fprintf(stderr, "Error: unable to read/process CRL file.\n");
+					return 1;
+				}
+			}
+
+			print_crl(crl, ordered);
+		}
+		else if(args[1] == "kb")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QCA::KeyBundle key = get_X(args[2]);
+			if(key.isNull())
+				return 1;
+
+			printf("Keybundle contains %d certificates.  Displaying primary:\n", key.certificateChain().count());
+			print_cert(key.certificateChain().primary(), ordered);
 		}
 		else if(args[1] == "pgp")
 		{
