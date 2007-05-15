@@ -1454,6 +1454,20 @@ static QString validityToString(QCA::Validity v)
 	return s;
 }
 
+static QString smIdentityResultToString(QCA::SecureMessageSignature::IdentityResult r)
+{
+	QString str;
+	switch(r)
+	{
+		case QCA::SecureMessageSignature::Valid:             str = "Valid"; break;
+		case QCA::SecureMessageSignature::InvalidSignature:  str = "InvalidSignature"; break;
+		case QCA::SecureMessageSignature::InvalidKey:        str = "InvalidKey"; break;
+		case QCA::SecureMessageSignature::NoKey:             str = "NoKey"; break;
+		default:                                             str = "Unknown";
+	}
+	return str;
+}
+
 static QString smErrorToString(QCA::SecureMessage::Error e)
 {
 	QMap<QCA::SecureMessage::Error,QString> map;
@@ -1468,6 +1482,34 @@ static QString smErrorToString(QCA::SecureMessage::Error e)
 	map[QCA::SecureMessage::ErrorCertKeyMismatch] = "ErrorCertKeyMismatch";
 	map[QCA::SecureMessage::ErrorUnknown] = "ErrorUnknown";
 	return map[e];
+}
+
+static void smDisplaySignatures(const QList<QCA::SecureMessageSignature> &signers)
+{
+	foreach(const QCA::SecureMessageSignature &signer, signers)
+	{
+		QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
+		fprintf(stderr, "IdentityResult: %s\n", qPrintable(smIdentityResultToString(r)));
+
+		QCA::SecureMessageKey key = signer.key();
+		if(!key.isNull())
+		{
+			if(key.type() == QCA::SecureMessageKey::PGP)
+			{
+				QCA::PGPKey pub = key.pgpPublicKey();
+				fprintf(stderr, "From: %s (%s)\n", qPrintable(pub.primaryUserId()), qPrintable(pub.keyId()));
+			}
+			else
+			{
+				QCA::Certificate cert = key.x509CertificateChain().primary();
+				QString emailStr;
+				QCA::CertificateInfo info = cert.subjectInfo();
+				if(info.contains(QCA::Email))
+					emailStr = QString(" (%1)").arg(info.value(QCA::Email));
+				fprintf(stderr, "From: %s%s\n", qPrintable(cert.commonName()), qPrintable(emailStr));
+			}
+		}
+	}
 }
 
 const char *mime_signpart =
@@ -3299,8 +3341,6 @@ int main(int argc, char **argv)
 
 				if(pgp)
 				{
-					// TODO: ensure the plugin actually outputs the signed data
-
 					// pgp can be either a detached signature followed
 					//  by data, or an integrated message.
 
@@ -3373,10 +3413,7 @@ int main(int argc, char **argv)
 			if(pgp && sig.isEmpty())
 				output = msg->read();
 
-			// TODO: support multiple signers?
-
-			QCA::SecureMessageSignature signer = msg->signer();
-			QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
+			QList<QCA::SecureMessageSignature> signers = msg->signers();
 			delete msg;
 			delete sms;
 
@@ -3393,35 +3430,20 @@ int main(int argc, char **argv)
 				printf("%s", str.toUtf8().data());
 			}
 
-			QString rs;
-			if(r == QCA::SecureMessageSignature::Valid)
-				rs = "Valid";
-			else if(r == QCA::SecureMessageSignature::InvalidSignature)
-				rs = "InvalidSignature";
-			else if(r == QCA::SecureMessageSignature::InvalidKey)
-				rs = "InvalidKey";
-			else if(r == QCA::SecureMessageSignature::NoKey)
-				rs = "NoKey";
-			fprintf(stderr, "IdentityResult: %s\n", qPrintable(rs));
+			smDisplaySignatures(signers);
 
-			QCA::SecureMessageKey key = signer.key();
-			if(!key.isNull())
+			bool allgood = true;
+			foreach(const QCA::SecureMessageSignature &signer, signers)
 			{
-				if(pgp)
+				if(signer.identityResult() != QCA::SecureMessageSignature::Valid)
 				{
-					QCA::PGPKey pub = key.pgpPublicKey();
-					fprintf(stderr, "From: %s (%s)\n", qPrintable(pub.primaryUserId()), qPrintable(pub.keyId()));
-				}
-				else
-				{
-					QCA::Certificate cert = key.x509CertificateChain().primary();
-					QString emailStr;
-					QCA::CertificateInfo info = cert.subjectInfo();
-					if(info.contains(QCA::Email))
-						emailStr = QString(" (%1)").arg(info.value(QCA::Email));
-					fprintf(stderr, "From: %s%s\n", qPrintable(cert.commonName()), qPrintable(emailStr));
+					allgood = false;
+					break;
 				}
 			}
+
+			if(!allgood)
+				return 1;
 		}
 		else if(args[1] == "decrypt")
 		{
@@ -3519,13 +3541,11 @@ int main(int argc, char **argv)
 
 			QByteArray output = msg->read();
 
-			// TODO: support multiple signers?
-
-			QCA::SecureMessageSignature signer;
+			QList<QCA::SecureMessageSignature> signers;
 			bool wasSigned = false;
 			if(msg->wasSigned())
 			{
-				signer = msg->signer();
+				signers = msg->signers();
 				wasSigned = true;
 			}
 			delete msg;
@@ -3537,24 +3557,20 @@ int main(int argc, char **argv)
 			{
 				fprintf(stderr, "Message was also signed:\n");
 
-				QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
-				QString rs;
-				if(r == QCA::SecureMessageSignature::Valid)
-					rs = "Valid";
-				else if(r == QCA::SecureMessageSignature::InvalidSignature)
-					rs = "InvalidSignature";
-				else if(r == QCA::SecureMessageSignature::InvalidKey)
-					rs = "InvalidKey";
-				else if(r == QCA::SecureMessageSignature::NoKey)
-					rs = "NoKey";
-				fprintf(stderr, "IdentityResult: %s\n", qPrintable(rs));
+				smDisplaySignatures(signers);
 
-				QCA::SecureMessageKey key = signer.key();
-				if(!key.isNull())
+				bool allgood = true;
+				foreach(const QCA::SecureMessageSignature &signer, signers)
 				{
-					QCA::PGPKey pub = key.pgpPublicKey();
-					fprintf(stderr, "From: %s (%s)\n", qPrintable(pub.primaryUserId()), qPrintable(pub.keyId()));
+					if(signer.identityResult() != QCA::SecureMessageSignature::Valid)
+					{
+						allgood = false;
+						break;
+					}
 				}
+
+				if(!allgood)
+					return 1;
 			}
 		}
 		else if(args[1] == "exportcerts")
