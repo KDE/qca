@@ -790,7 +790,7 @@ public:
 			if(!sig.isEmpty())
 				gpg.doVerifyDetached(sig);
 			else
-				gpg.doVerify();
+				gpg.doDecrypt();
 		}
 		else if(op == SignAndEncrypt)
 		{
@@ -831,7 +831,7 @@ public:
 		ok = gpg.success();
 		if(ok)
 		{
-			if(signMode == SecureMessage::Detached)
+			if(op == Sign && signMode == SecureMessage::Detached)
 				sig = gpg.read();
 			else
 				out = gpg.read();
