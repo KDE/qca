@@ -1587,20 +1587,22 @@ pkcs11KeyStoreListContext::entryPassive (
 	);
 
 	try {
-		CertificateChain chain;
-		bool has_private;
+		if (serialized.startsWith ("qca-pkcs11/")) {
+			CertificateChain chain;
+			bool has_private;
 
-		_deserializeCertificate (serialized, &certificate_id, &has_private, chain);
-		pkcs11KeyStoreItem *sentry = _registerTokenId (certificate_id->token_id);
-		sentry->registerCertificates (chain);
-		QMap<QString, QString> friendlyNames = sentry->friendlyNames ();
+			_deserializeCertificate (serialized, &certificate_id, &has_private, chain);
+			pkcs11KeyStoreItem *sentry = _registerTokenId (certificate_id->token_id);
+			sentry->registerCertificates (chain);
+			QMap<QString, QString> friendlyNames = sentry->friendlyNames ();
 
-		entry = _keyStoreEntryByCertificateId (
-			certificate_id,
-			has_private,
-			chain,
-			friendlyNames[certificateHash (chain.primary ())]
-		);
+			entry = _keyStoreEntryByCertificateId (
+				certificate_id,
+				has_private,
+				chain,
+				friendlyNames[certificateHash (chain.primary ())]
+			);
+		}
 	}
 	catch (const pkcs11Exception &e) {
 		s_keyStoreList->_emit_diagnosticText (
