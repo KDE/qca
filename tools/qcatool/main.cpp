@@ -3586,18 +3586,7 @@ int main(int argc, char **argv)
 		}
 		else if(args[1] == "exportcerts")
 		{
-			// TODO: can we do this with PKCS7 (certcollection) rather than smime verify?
-			QCA::SecureMessageSystem *sms;
-
-			// get roots
-			QCA::CertificateCollection roots;
-			if(!nosys)
-				roots += QCA::systemStore();
-			if(!rootsFile.isEmpty())
-				roots += QCA::CertificateCollection::fromFlatTextFile(rootsFile);
-
-			sms = new QCA::CMS;
-			((QCA::CMS *)sms)->setTrustedCertificates(roots);
+			QCA::SecureMessageSystem *sms = new QCA::CMS;
 
 			QByteArray data, sig;
 			QString smime_text;
@@ -3638,29 +3627,31 @@ int main(int argc, char **argv)
 			msg->end();
 			msg->waitForFinished(-1);
 
-			// TODO: output diagnostic text?
+			if(debug)
+				output_message_diagnostic_text(msg);
 
 			if(!msg->success())
 			{
 				QString errstr = smErrorToString(msg->errorCode());
 				delete msg;
 				delete sms;
-				// TODO: wrong error message for export
-				fprintf(stderr, "Error: verify failed: %s\n", qPrintable(errstr));
+				fprintf(stderr, "Error: export failed: %s\n", qPrintable(errstr));
 				return 1;
 			}
 
-			// TODO: support multiple signers?
-
-			QCA::SecureMessageSignature signer = msg->signer();
+			QList<QCA::SecureMessageSignature> signers = msg->signers();
 			delete msg;
 			delete sms;
 
-			QCA::SecureMessageKey key = signer.key();
-			if(!key.isNull())
+			// print out all certs of all signers
+			foreach(const QCA::SecureMessageSignature &signer, signers)
 			{
-				foreach(const QCA::Certificate &c, key.x509CertificateChain())
-					printf("%s", qPrintable(c.toPEM()));
+				QCA::SecureMessageKey key = signer.key();
+				if(!key.isNull())
+				{
+					foreach(const QCA::Certificate &c, key.x509CertificateChain())
+						printf("%s", qPrintable(c.toPEM()));
+				}
 			}
 		}
 		else
