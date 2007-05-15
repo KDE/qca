@@ -5868,6 +5868,7 @@ public:
 
 				ok = true;
 				out = bio2ba(bo);
+				break;
 			}
 
 			if(!ok)
