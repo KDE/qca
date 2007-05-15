@@ -26,7 +26,7 @@
 #include <QTextStream>
 #include <QTimer>
 
-#define VERSION "0.0.1"
+#define VERSION "1.0.0"
 
 static QStringList wrapstring(const QString &str, int width)
 {
@@ -2114,9 +2114,6 @@ int main(int argc, char **argv)
 			--n; // adjust position
 		}
 	}
-
-	// TODO: instead of printing full usage at every wrong turn, we might
-	//       try to print something closer to the context.
 
 	// help
 	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
