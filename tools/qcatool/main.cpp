@@ -1858,7 +1858,7 @@ static QCA::PrivateKey get_K(const QString &name)
 		key = QCA::PrivateKey::fromDER(read_der_file(name));
 		if(key.isNull())
 		{
-			printf("Error: unable to read/process private key file.\n");
+			fprintf(stderr, "Error: unable to read/process private key file.\n");
 			return key;
 		}
 	}
@@ -1873,10 +1873,16 @@ static QCA::Certificate get_C(const QString &name)
 	{
 		if(entry.type() != QCA::KeyStoreEntry::TypeCertificate)
 		{
-			printf("Error: entry is not a certificate.\n");
+			fprintf(stderr, "Error: entry is not a certificate.\n");
 			return QCA::Certificate();
 		}
 		return entry.certificate();
+	}
+
+	if(!QCA::isSupported("cert"))
+	{
+		fprintf(stderr, "Error: need 'cert' feature.\n");
+		return QCA::Certificate();
 	}
 
 	// try file
@@ -1886,7 +1892,7 @@ static QCA::Certificate get_C(const QString &name)
 		cert = QCA::Certificate::fromDER(read_der_file(name));
 		if(cert.isNull())
 		{
-			printf("Error: unable to read/process certificate file.\n");
+			fprintf(stderr, "Error: unable to read/process certificate file.\n");
 			return cert;
 		}
 	}
@@ -1901,17 +1907,23 @@ static QCA::KeyBundle get_X(const QString &name)
 	{
 		if(entry.type() != QCA::KeyStoreEntry::TypeKeyBundle)
 		{
-			printf("Error: entry is not a keybundle.\n");
+			fprintf(stderr, "Error: entry is not a keybundle.\n");
 			return QCA::KeyBundle();
 		}
 		return entry.keyBundle();
+	}
+
+	if(!QCA::isSupported("pkcs12"))
+	{
+		fprintf(stderr, "Error: need 'pkcs12' feature.\n");
+		return QCA::KeyBundle();
 	}
 
 	// try file
 	QCA::KeyBundle key = QCA::KeyBundle::fromFile(name);
 	if(key.isNull())
 	{
-		printf("Error: unable to read/process keybundle file.\n");
+		fprintf(stderr, "Error: unable to read/process keybundle file.\n");
 		return key;
 	}
 
@@ -1926,7 +1938,7 @@ static QCA::PGPKey get_P(const QString &name)
 	{
 		if(entry.type() != QCA::KeyStoreEntry::TypePGPPublicKey && entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
 		{
-			printf("Error: entry is not a pgp public key.\n");
+			fprintf(stderr, "Error: entry is not a pgp public key.\n");
 			return key;
 		}
 		return entry.pgpPublicKey();
@@ -1942,7 +1954,7 @@ static QPair<QCA::PGPKey, QCA::PGPKey> get_S(const QString &name)
 	{
 		if(entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
 		{
-			printf("Error: entry is not a pgp secret key.\n");
+			fprintf(stderr, "Error: entry is not a pgp secret key.\n");
 			return key;
 		}
 
@@ -2224,7 +2236,6 @@ int main(int argc, char **argv)
 	if(have_pass)
 		passphrasePrompt.pp->setExplicitPassword(pass);
 
-	// TODO: for each kind of operation, we need to check for support first!!
 	if(args[0] == "key")
 	{
 		if(args.count() < 2)
@@ -2246,6 +2257,12 @@ int main(int argc, char **argv)
 
 			if(args[2] == "rsa")
 			{
+				if(!QCA::isSupported("rsa"))
+				{
+					fprintf(stderr, "Error: need 'rsa' feature.\n");
+					return 1;
+				}
+
 				genrsa = true;
 				bits = args[3].toInt();
 				if(bits < 512)
@@ -2256,6 +2273,18 @@ int main(int argc, char **argv)
 			}
 			else if(args[2] == "dsa")
 			{
+				if(!QCA::isSupported("dsa"))
+				{
+					fprintf(stderr, "Error: need 'dsa' feature.\n");
+					return 1;
+				}
+
+				if(!QCA::isSupported("dlgroup"))
+				{
+					fprintf(stderr, "Error: need 'dlgroup' feature.\n");
+					return 1;
+				}
+
 				genrsa = false;
 				bits = args[3].toInt();
 				if(bits != 512 && bits != 768 && bits != 1024)
@@ -2402,6 +2431,12 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
+			if(!QCA::isSupported("csr"))
+			{
+				fprintf(stderr, "Error: need 'csr' feature.\n");
+				return 1;
+			}
+
 			QCA::PrivateKey priv = get_K(args[2]);
 			if(priv.isNull())
 				return 1;
@@ -2427,6 +2462,12 @@ int main(int argc, char **argv)
 			if(args.count() < 3)
 			{
 				usage();
+				return 1;
+			}
+
+			if(!QCA::isSupported("cert"))
+			{
+				fprintf(stderr, "Error: need 'cert' feature.\n");
 				return 1;
 			}
 
@@ -2502,6 +2543,12 @@ int main(int argc, char **argv)
 			if(args.count() < 4)
 			{
 				usage();
+				return 1;
+			}
+
+			if(!QCA::isSupported("pkcs12"))
+			{
+				fprintf(stderr, "Error: need 'pkcs12' feature.\n");
 				return 1;
 			}
 
@@ -2800,11 +2847,11 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			QCA::Certificate cert = get_C(args[3]);
-			if(cert.isNull())
+			QCA::KeyBundle key = get_X(args[3]);
+			if(key.isNull())
 				return 1;
 
-			if(!store.writeEntry(cert).isEmpty())
+			if(!store.writeEntry(key).isEmpty())
 				printf("Entry written.\n");
 			else
 			{
@@ -2817,6 +2864,12 @@ int main(int argc, char **argv)
 			if(args.count() < 4)
 			{
 				usage();
+				return 1;
+			}
+
+			if(!QCA::isSupported("openpgp"))
+			{
+				fprintf(stderr, "Error: need 'openpgp' feature.\n");
 				return 1;
 			}
 
@@ -2906,6 +2959,12 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
+			if(!QCA::isSupported("csr"))
+			{
+				fprintf(stderr, "Error: need 'csr' feature.\n");
+				return 1;
+			}
+
 			QCA::CertificateRequest req(args[2]);
 			if(req.isNull())
 			{
@@ -2920,6 +2979,12 @@ int main(int argc, char **argv)
 			if(args.count() < 3)
 			{
 				usage();
+				return 1;
+			}
+
+			if(!QCA::isSupported("crl"))
+			{
+				fprintf(stderr, "Error: need 'crl' feature.\n");
 				return 1;
 			}
 
@@ -2999,6 +3064,12 @@ int main(int argc, char **argv)
 
 			if(args[2] == "pgp")
 			{
+				if(!QCA::isSupported("openpgp"))
+				{
+					fprintf(stderr, "Error: need 'openpgp' feature.\n");
+					return 1;
+				}
+
 				QPair<QCA::PGPKey, QCA::PGPKey> key = get_S(args[3]);
 				if(key.first.isNull())
 					return 1;
@@ -3010,6 +3081,12 @@ int main(int argc, char **argv)
 			}
 			else if(args[2] == "pgpdetach")
 			{
+				if(!QCA::isSupported("openpgp"))
+				{
+					fprintf(stderr, "Error: need 'openpgp' feature.\n");
+					return 1;
+				}
+
 				QPair<QCA::PGPKey, QCA::PGPKey> key = get_S(args[3]);
 				if(key.first.isNull())
 					return 1;
@@ -3021,6 +3098,12 @@ int main(int argc, char **argv)
 			}
 			else if(args[2] == "smime")
 			{
+				if(!QCA::isSupported("cms"))
+				{
+					fprintf(stderr, "Error: need 'cms' feature.\n");
+					return 1;
+				}
+
 				QCA::KeyBundle key = get_X(args[3]);
 				if(key.isNull())
 					return 1;
@@ -3130,6 +3213,12 @@ int main(int argc, char **argv)
 
 			if(args[2] == "pgp")
 			{
+				if(!QCA::isSupported("openpgp"))
+				{
+					fprintf(stderr, "Error: need 'openpgp' feature.\n");
+					return 1;
+				}
+
 				QCA::PGPKey key = get_P(args[3]);
 				if(key.isNull())
 					return 1;
@@ -3140,6 +3229,12 @@ int main(int argc, char **argv)
 			}
 			else if(args[2] == "smime")
 			{
+				if(!QCA::isSupported("cms"))
+				{
+					fprintf(stderr, "Error: need 'cms' feature.\n");
+					return 1;
+				}
+
 				QCA::Certificate cert = get_C(args[3]);
 				if(cert.isNull())
 					return 1;
@@ -3212,6 +3307,12 @@ int main(int argc, char **argv)
 			if(args.count() < 4)
 			{
 				usage();
+				return 1;
+			}
+
+			if(!QCA::isSupported("openpgp"))
+			{
+				fprintf(stderr, "Error: need 'openpgp' feature.\n");
 				return 1;
 			}
 
@@ -3296,11 +3397,23 @@ int main(int argc, char **argv)
 
 			if(args[2] == "pgp")
 			{
+				if(!QCA::isSupported("openpgp"))
+				{
+					fprintf(stderr, "Error: need 'openpgp' feature.\n");
+					return 1;
+				}
+
 				sms = new QCA::OpenPGP;
 				pgp = true;
 			}
 			else if(args[2] == "smime")
 			{
+				if(!QCA::isSupported("cms"))
+				{
+					fprintf(stderr, "Error: need 'cms' feature.\n");
+					return 1;
+				}
+
 				// get roots
 				QCA::CertificateCollection roots;
 				if(!nosys)
@@ -3458,6 +3571,12 @@ int main(int argc, char **argv)
 
 			if(args[2] == "pgp")
 			{
+				if(!QCA::isSupported("openpgp"))
+				{
+					fprintf(stderr, "Error: need 'openpgp' feature.\n");
+					return 1;
+				}
+
 				sms = new QCA::OpenPGP;
 				pgp = true;
 			}
@@ -3466,6 +3585,12 @@ int main(int argc, char **argv)
 				if(args.count() < 4)
 				{
 					usage();
+					return 1;
+				}
+
+				if(!QCA::isSupported("cms"))
+				{
+					fprintf(stderr, "Error: need 'cms' feature.\n");
 					return 1;
 				}
 
@@ -3586,6 +3711,12 @@ int main(int argc, char **argv)
 		}
 		else if(args[1] == "exportcerts")
 		{
+			if(!QCA::isSupported("cms"))
+			{
+				fprintf(stderr, "Error: need 'cms' feature.\n");
+				return 1;
+			}
+
 			QCA::SecureMessageSystem *sms = new QCA::CMS;
 
 			QByteArray data, sig;
