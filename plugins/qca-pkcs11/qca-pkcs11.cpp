@@ -984,21 +984,28 @@ public:
 
 	bool
 	_ensureTokenAccess () {
+		bool ret;
+
 		QCA_logTextMessage (
 			"pkcs11RSAContext::_ensureTokenAccess - entry",
 			Logger::Debug
 		);
 
-		return pkcs11h_token_ensureAccess (
+		ret = pkcs11h_token_ensureAccess (
 			_pkcs11h_certificate_id->token_id,
 			NULL,
 			0
 		) == CKR_OK;
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::_ensureTokenAccess - return",
+			QString ().sprintf (
+				"pkcs11RSAContext::_ensureTokenAccess - return ret=%d",
+				ret ? 1 : 0
+			),
 			Logger::Debug
 		);
+
+		return ret;
 	}
 
 private:
