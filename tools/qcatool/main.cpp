@@ -1999,7 +1999,7 @@ static void usage()
 	printf("   encrypt pgp|smime [C|P]             Encrypt a message\n");
 	printf("   signencrypt [S] [P]                 PGP sign & encrypt a message\n");
 	printf("   verify pgp|smime                    Verify a message\n");
-	printf("   decrypt pgp|smime (X)               Decrypt a message (S/MIME needs X)\n");
+	printf("   decrypt pgp|smime ((X) ...)         Decrypt a message (S/MIME needs X)\n");
 	printf("   exportcerts                         Export certs from S/MIME message\n");
 	printf("\n");
 	printf("Object types: K = private key, C = certificate, X = key bundle,\n");
@@ -3454,7 +3454,6 @@ int main(int argc, char **argv)
 			}
 
 			QCA::SecureMessageSystem *sms;
-			QCA::SecureMessageKey skey;
 			bool pgp = false;
 
 			if(args[2] == "pgp")
@@ -3470,16 +3469,28 @@ int main(int argc, char **argv)
 					return 1;
 				}
 
-				QCA::KeyBundle key = get_X(args[3]);
-				if(key.isNull())
-					return 1;
+				// user can provide many possible decrypt keys
+				QList<QCA::KeyBundle> keys;
+				for(int n = 3; n < args.count(); ++n)
+				{
+					QCA::KeyBundle key = get_X(args[n]);
+					if(key.isNull())
+						return 1;
+					keys += key;
+				}
 
 				sms = new QCA::CMS;
-				skey.setX509CertificateChain(key.certificateChain());
-				skey.setX509PrivateKey(key.privateKey());
 
-				// TODO: support more than one decrypt key
-				((QCA::CMS*)sms)->setPrivateKeys(QCA::SecureMessageKeyList() << skey);
+				QList<QCA::SecureMessageKey> skeys;
+				foreach(const QCA::KeyBundle &key, keys)
+				{
+					QCA::SecureMessageKey skey;
+					skey.setX509CertificateChain(key.certificateChain());
+					skey.setX509PrivateKey(key.privateKey());
+					skeys += skey;
+				}
+
+				((QCA::CMS*)sms)->setPrivateKeys(skeys);
 			}
 			else
 			{
