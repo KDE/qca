@@ -5830,7 +5830,7 @@ public:
 					cc->fromX509(sk_X509_value(xs, n));
 					Certificate cert;
 					cert.change(cc);
-					printf("signer: [%s]\n", qPrintable(cert.commonName()));
+					//printf("signer: [%s]\n", qPrintable(cert.commonName()));
 					signers.append(cert);
 				}
 				sk_X509_free(xs);
@@ -5848,7 +5848,7 @@ public:
 					Certificate cert;
 					cert.change(cc);
 					others.append(cert);
-					printf("other: [%s]\n", qPrintable(cert.commonName()));
+					//printf("other: [%s]\n", qPrintable(cert.commonName()));
 				}
 			}
 
