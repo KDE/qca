@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004  Justin Karneges  <justin@affinix.com>
+ * Copyright (C) 2004-2007  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -3655,6 +3655,13 @@ public:
 		return r;
 	}
 
+	void fromX509(X509_CRL *x)
+	{
+		CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+		item.crl = x;
+		make_props();
+	}
+
 	virtual const CRLContextProps *props() const
 	{
 		return &_props;
@@ -3781,6 +3788,85 @@ public:
 		p.issuer = opts.infoOrdered();
 
 		_props = p;
+	}
+};
+
+//----------------------------------------------------------------------------
+// MyCertCollectionContext
+//----------------------------------------------------------------------------
+class MyCertCollectionContext : public CertCollectionContext
+{
+	Q_OBJECT
+public:
+	MyCertCollectionContext(Provider *p) : CertCollectionContext(p)
+	{
+	}
+
+	virtual Provider::Context *clone() const
+	{
+		return new MyCertCollectionContext(*this);
+	}
+
+	virtual QByteArray toPKCS7(const QList<CertContext*> &certs, const QList<CRLContext*> &crls) const
+	{
+		// TODO: implement
+		Q_UNUSED(certs);
+		Q_UNUSED(crls);
+		return QByteArray();
+	}
+
+	virtual ConvertResult fromPKCS7(const QByteArray &a, QList<CertContext*> *certs, QList<CRLContext*> *crls) const
+	{
+		BIO *bi = BIO_new(BIO_s_mem());
+		BIO_write(bi, a.data(), a.size());
+		PKCS7 *p7 = d2i_PKCS7_bio(bi, NULL);
+		BIO_free(bi);
+		if(!p7)
+			return ErrorDecode;
+
+		STACK_OF(X509) *xcerts = 0;
+		STACK_OF(X509_CRL) *xcrls = 0;
+
+		int i = OBJ_obj2nid(p7->type);
+		if(i == NID_pkcs7_signed)
+		{
+			xcerts = p7->d.sign->cert;
+			xcrls = p7->d.sign->crl;
+		}
+		else if(i == NID_pkcs7_signedAndEnveloped)
+		{
+			xcerts = p7->d.signed_and_enveloped->cert;
+			xcrls = p7->d.signed_and_enveloped->crl;
+		}
+
+		QList<CertContext*> _certs;
+		QList<CRLContext*> _crls;
+
+		if(xcerts)
+		{
+			for(int n = 0; n < sk_X509_num(xcerts); ++n)
+			{
+				MyCertContext *cc = new MyCertContext(provider());
+				cc->fromX509(sk_X509_value(xcerts, n));
+				_certs += cc;
+			}
+		}
+		if(xcrls)
+		{
+			for(int n = 0; n < sk_X509_CRL_num(xcrls); ++n)
+			{
+				MyCRLContext *cc = new MyCRLContext(provider());
+				cc->fromX509(sk_X509_CRL_value(xcrls, n));
+				_crls += cc;
+			}
+		}
+
+		PKCS7_free(p7);
+
+		*certs = _certs;
+		*crls = _crls;
+
+		return ConvertGood;
 	}
 };
 
@@ -5744,7 +5830,7 @@ public:
 					cc->fromX509(sk_X509_value(xs, n));
 					Certificate cert;
 					cert.change(cc);
-					//printf("signer: [%s]\n", qPrintable(cert.commonName()));
+					printf("signer: [%s]\n", qPrintable(cert.commonName()));
 					signers.append(cert);
 				}
 				sk_X509_free(xs);
@@ -5762,6 +5848,7 @@ public:
 					Certificate cert;
 					cert.change(cc);
 					others.append(cert);
+					printf("other: [%s]\n", qPrintable(cert.commonName()));
 				}
 			}
 
@@ -6227,6 +6314,7 @@ public:
 		list += "cert";
 		list += "csr";
 		list += "crl";
+		list += "certcollection";
 		list += "pkcs12";
 		list += "tls";
 		list += "cms";
@@ -6357,6 +6445,8 @@ public:
 			return new MyCSRContext( this );
 		else if ( type == "crl" )
 			return new MyCRLContext( this );
+		else if ( type == "certcollection" )
+			return new MyCertCollectionContext( this );
 		else if ( type == "pkcs12" )
 			return new MyPKCS12Context( this );
 		else if ( type == "tls" )
