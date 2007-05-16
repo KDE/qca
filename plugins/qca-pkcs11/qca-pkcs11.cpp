@@ -2664,9 +2664,16 @@ void pkcs11Provider::init () {
 	}
 	catch (const pkcs11Exception &e) {
 		QCA_logTextMessage (e.message (), Logger::Error);
+		appendPluginDiagnosticText (
+			QString().sprintf (
+				"An error %s during initialization of qca-pkcs11 plugin\n",
+				myPrintable (e.message ())
+			)
+		);
 	}
 	catch (...) {
 		QCA_logTextMessage ("PKCS#11: Unknown error during provider initialization", Logger::Error);
+		appendPluginDiagnosticText ("Unknown error during initialization of qca-pkcs11 plugin\n");
 	}
 
 	QCA_logTextMessage (
@@ -2891,6 +2898,12 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 						pkcs11h_getMessage (rv)
 					),
 					Logger::Error
+				);
+				appendPluginDiagnosticText (
+					QString ().sprintf (
+						"Cannot load PKCS#11 provider '%s'\n",
+						myPrintable (name)
+					)
 				);
 			}
 			else {
