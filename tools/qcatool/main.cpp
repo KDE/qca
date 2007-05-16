@@ -1252,6 +1252,23 @@ static bool prompt_for_yesno(const QString &prompt, bool def = false)
 	}
 }
 
+static QString prompt_for_slotevent_method(const QString &prompt, const QString &def = QString())
+{
+	while(1)
+	{
+		QString str = prompt_for_string(prompt);
+		if(str.isEmpty())
+			return def;
+		if(partial_compare_nocase(str, "auto"))
+			return "auto";
+		else if(partial_compare_nocase(str, "trigger"))
+			return "trigger";
+		else if(partial_compare_nocase(str, "poll"))
+			return "poll";
+		printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+	}
+}
+
 static QVariantMap provider_config_edit_generic(const QVariantMap &in)
 {
 	QVariantMap config = in;
@@ -1466,6 +1483,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 			str = QString("%1 seconds").arg(config.pin_cache);
 		printf("  Maximum PIN cache time: %s\n", qPrintable(str));
 		printf("  Log level: %d\n", config.log_level);
+		printf("\n");
 		printf("PKCS#11 modules:\n");
 		if(!config.providers.isEmpty())
 		{
@@ -1516,8 +1534,162 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 			prompt = QString("Log level: [%1] ").arg(config.log_level);
 			config.log_level = prompt_for_int(prompt, config.log_level);
 		}
-		else
-			printf("selected action %d\n", index);
+		else // 1, 2, 3
+		{
+			int at = -1;
+
+			// for edit/remove, need to select provider
+			if(index == 2 || index == 3)
+			{
+				printf("\nWhich PKCS#11 module?\n");
+				for(int n = 0; n < config.providers.count(); ++n)
+				{
+					const Pkcs11ProviderConfig &provider = config.providers[n];
+					char c = 'a' + n;
+					printf("  %c) %s\n", c, qPrintable(provider.name));
+				}
+				printf("\n");
+
+				int index;
+				while(1)
+				{
+					QString str = prompt_for("Select a module, or enter to go back");
+					if(str.isEmpty())
+					{
+						index = -1;
+						break;
+					}
+					if(str.length() == 1)
+					{
+						index = str[0].toLatin1() - 'a';
+						if(index >= 0 && index < config.providers.count())
+							break;
+					}
+					printf("'%s' is not a valid entry.\n", qPrintable(str));
+				}
+
+				// exit?
+				if(index == -1)
+					continue;
+
+				at = index;
+			}
+
+			// edit the entry
+			if(index == 1 || index == 2)
+			{
+				Pkcs11ProviderConfig provider;
+				if(index == 2) // edit
+					provider = config.providers[at];
+				provider.enabled = true;
+				printf("\n");
+
+				QString prompt;
+
+				// prompt for unique name
+				while(1)
+				{
+					if(index == 1)
+						prompt = QString("Unique friendly name: ");
+					else
+						prompt = QString("Unique friendly name: [%1] ").arg(provider.name);
+					provider.name = prompt_for_string(prompt, provider.name);
+
+					if(provider.name.isEmpty())
+					{
+						printf("The friendly name cannot be blank.\n\n");
+						continue;
+					}
+
+					bool have_name_already = false;
+					for(int n = 0; n < config.providers.count(); ++n)
+					{
+						const Pkcs11ProviderConfig &i = config.providers[n];
+
+						// skip checking against the entry we are editing
+						if(at != -1 && n == at)
+							continue;
+
+						if(i.name == provider.name)
+						{
+							have_name_already = true;
+							break;
+						}
+					}
+					if(have_name_already)
+					{
+						printf("This name is already used by another module.\n\n");
+						continue;
+					}
+
+					break;
+				}
+
+				// prompt for library file
+				QString last;
+				while(1)
+				{
+					if(index == 1)
+						prompt = QString("Library filename: ");
+					else
+						prompt = QString("Library filename: [%1] ").arg(provider.library);
+					provider.library = prompt_for_string(prompt, provider.library);
+
+					if(provider.library.isEmpty())
+					{
+						printf("The library filename cannot be blank.\n\n");
+						continue;
+					}
+
+					if(last != provider.library && !QFile::exists(provider.library))
+					{
+						last = provider.library;
+						printf("'%s' does not exist.\nPress enter again if you really want this.\n\n", qPrintable(provider.library));
+						continue;
+					}
+
+					break;
+				}
+
+				prompt = QString("Allow protected authentication: [%1] ").arg(provider.allow_protected_authentication ? "Yes" : "No");
+				provider.allow_protected_authentication = prompt_for_yesno(prompt, provider.allow_protected_authentication);
+				prompt = QString("Provider stores certificates as private objects: [%1] ").arg(provider.cert_private ? "Yes" : "No");
+				provider.cert_private = prompt_for_yesno(prompt, provider.cert_private);
+				printf("\n");
+				printf("Provider private key mask:\n");
+				printf("    0        Determine automatically.\n");
+				printf("    1        Use sign.\n");
+				printf("    2        Use sign recover.\n");
+				printf("    4        Use decrypt.\n");
+				printf("    8        Use unwrap.\n");
+				prompt = QString("Mask value: [%1] ").arg(provider.private_mask);
+				provider.private_mask = prompt_for_int(prompt, provider.private_mask);
+				printf("\n");
+				printf("Slot event method:\n");
+				printf("    auto     Determine automatically.\n");
+				printf("    trigger  Use trigger.\n");
+				printf("    poll     Use poll.\n");
+				prompt = QString("Method value: [%1] ").arg(provider.slotevent_method);
+				provider.slotevent_method = prompt_for_slotevent_method(prompt, provider.slotevent_method);
+				if(provider.slotevent_method == "poll")
+				{
+					prompt = QString("Poll timeout (0 for no preference): [%1] ").arg(provider.slotevent_timeout);
+					provider.slotevent_timeout = prompt_for_int(prompt, provider.slotevent_timeout);
+				}
+				else
+					provider.slotevent_timeout = 0;
+
+				if(index == 1)
+					config.providers += provider;
+				else // 2
+					config.providers[at] = provider;
+			}
+			// remove the entry
+			else // 3
+			{
+				config.providers.removeAt(at);
+			}
+		}
 	}
 
 	return config.toVariantMap();
