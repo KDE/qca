@@ -1152,6 +1152,387 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 	return opts;
 }
 
+// qsettings seems to give us a string type for both bool and int (and
+//   possibly others, but those are the only two we care about here).
+//   in order to figure out what is actually a bool or an int, we need
+//   to examine the string.  so for the functions below, we convert
+//   the variant to a string, and then inspect it to see if it looks
+//   like a bool or an int.
+
+static bool string_is_bool(const QString &in)
+{
+	QString lc = in.toLower();
+	if(lc == "true" || lc == "false")
+		return true;
+	return false;
+}
+
+static bool string_is_int(const QString &in)
+{
+	bool ok;
+	in.toInt(&ok);
+	return ok;
+}
+
+static bool variant_is_bool(const QVariant &in)
+{
+	if(qVariantCanConvert<QString>(in) && string_is_bool(in.toString()))
+		return true;
+	return false;
+}
+
+static bool variant_is_int(const QVariant &in)
+{
+	if(qVariantCanConvert<QString>(in) && string_is_int(in.toString()))
+		return true;
+	return false;
+}
+
+static QString prompt_for_string(const QString &prompt, const QString &def = QString())
+{
+	printf("%s", prompt.toLatin1().data());
+	fflush(stdout);
+	QByteArray result(256, 0);
+	fgets((char *)result.data(), result.size(), stdin);
+	QString out = QString::fromLocal8Bit(result).trimmed();
+	if(out.isEmpty())
+		return def;
+	return out;
+}
+
+static int prompt_for_int(const QString &prompt, int def = 0)
+{
+	while(1)
+	{
+		QString str = prompt_for_string(prompt);
+		if(str.isEmpty())
+			return def;
+		bool ok;
+		int x = str.toInt(&ok);
+		if(ok)
+			return x;
+		printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+	}
+}
+
+static bool partial_compare_nocase(const QString &in, const QString &target, int min = 1)
+{
+	if(in.length() >= min && in.length() <= target.length() && target.mid(0, in.length()).toLower() == in.toLower())
+		return true;
+	return false;
+}
+
+static bool prompt_for_bool(const QString &prompt, bool def = false)
+{
+	while(1)
+	{
+		QString str = prompt_for_string(prompt);
+		if(str.isEmpty())
+			return def;
+		if(partial_compare_nocase(str, "true"))
+			return true;
+		else if(partial_compare_nocase(str, "false"))
+			return false;
+		printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+	}
+}
+
+static bool prompt_for_yesno(const QString &prompt, bool def = false)
+{
+	while(1)
+	{
+		QString str = prompt_for_string(prompt);
+		if(str.isEmpty())
+			return def;
+		if(partial_compare_nocase(str, "yes"))
+			return true;
+		else if(partial_compare_nocase(str, "no"))
+			return false;
+		printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+	}
+}
+
+static QVariantMap provider_config_edit_generic(const QVariantMap &in)
+{
+	QVariantMap config = in;
+	QMutableMapIterator<QString,QVariant> it(config);
+	while(it.hasNext())
+	{
+		it.next();
+		QString var = it.key();
+		if(var == "formtype")
+			continue;
+		QVariant val = it.value();
+
+		// fields must be bool, int, or string
+		QVariant newval;
+		QString prompt = QString("%1: [%2] ").arg(var).arg(val.toString());
+		if(variant_is_bool(val))
+			newval = prompt_for_bool(QString("bool   ") + prompt, val.toBool());
+		else if(variant_is_int(val))
+			newval = prompt_for_int(QString("int    ") + prompt, val.toInt());
+		else if(qVariantCanConvert<QString>(val))
+			newval = prompt_for_string(QString("string ") + prompt, val.toString());
+		else
+			continue; // skip bogus fields
+
+		it.setValue(newval);
+	}
+
+	return config;
+}
+
+class Pkcs11ProviderConfig
+{
+public:
+	bool allow_protected_authentication;
+	bool cert_private;
+	bool enabled;
+	QString library;
+	QString name;
+	int private_mask;
+	QString slotevent_method;
+	int slotevent_timeout;
+
+	Pkcs11ProviderConfig() :
+		allow_protected_authentication(true),
+		cert_private(false),
+		enabled(false),
+		private_mask(0),
+		slotevent_method("auto"),
+		slotevent_timeout(0)
+	{
+	}
+
+	QVariantMap toVariantMap() const
+	{
+		QVariantMap out;
+		out["allow_protected_authentication"] = allow_protected_authentication;
+		out["cert_private"] = cert_private;
+		out["enabled"] = enabled;
+		out["library"] = library;
+		out["name"] = name;
+		out["private_mask"] = private_mask;
+		out["slotevent_method"] = slotevent_method;
+		out["slotevent_timeout"] = slotevent_timeout;
+		return out;
+	}
+
+	bool fromVariantMap(const QVariantMap &in)
+	{
+		allow_protected_authentication = in["allow_protected_authentication"].toBool();
+		cert_private = in["cert_private"].toBool();
+		enabled = in["enabled"].toBool();
+		library = in["library"].toString();
+		name = in["name"].toString();
+		private_mask = in["private_mask"].toInt();
+		slotevent_method = in["slotevent_method"].toString();
+		slotevent_timeout = in["slotevent_timeout"].toInt();
+		return true;
+	}
+};
+
+class Pkcs11Config
+{
+public:
+	bool allow_load_rootca;
+	bool allow_protected_authentication;
+	int log_level;
+	int pin_cache;
+	QList<Pkcs11ProviderConfig> providers;
+
+	QVariantMap orig_config;
+
+	Pkcs11Config() :
+		allow_load_rootca(false),
+		allow_protected_authentication(true),
+		log_level(0),
+		pin_cache(-1)
+	{
+	}
+
+	QVariantMap toVariantMap() const
+	{
+		QVariantMap out = orig_config;
+
+		// form type
+		out["formtype"] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
+
+		// base settings
+		out["allow_load_rootca"] = allow_load_rootca;
+		out["allow_protected_authentication"] = allow_protected_authentication;
+		out["log_level"] = log_level;
+		out["pin_cache"] = pin_cache;
+
+		// provider settings (always write at least 10 providers)
+		for(int n = 0; n < 10 || n < providers.count(); ++n)
+		{
+			QString prefix = QString().sprintf("provider_%02d_", n);
+
+			Pkcs11ProviderConfig provider;
+			if(n < providers.count())
+				provider = providers[n];
+
+			QVariantMap subconfig = provider.toVariantMap();
+			QMapIterator<QString,QVariant> it(subconfig);
+			while(it.hasNext())
+			{
+				it.next();
+				out.insert(prefix + it.key(), it.value());
+			}
+		}
+
+		return out;
+	}
+
+	bool fromVariantMap(const QVariantMap &in)
+	{
+		if(in["formtype"] != "http://affinix.com/qca/forms/qca-pkcs11#1.0")
+			return false;
+
+		allow_load_rootca = in["allow_load_rootca"].toBool();
+		allow_protected_authentication = in["allow_protected_authentication"].toBool();
+		log_level = in["log_level"].toInt();
+		pin_cache = in["pin_cache"].toInt();
+
+		for(int n = 0;; ++n)
+		{
+			QString prefix = QString().sprintf("provider_%02d_", n);
+
+			// collect all key/values with this prefix into a
+			//   a separate container, leaving out the prefix
+			//   from the keys.
+			QVariantMap subconfig;
+			QMapIterator<QString,QVariant> it(in);
+			while(it.hasNext())
+			{
+				it.next();
+				if(it.key().startsWith(prefix))
+					subconfig.insert(it.key().mid(prefix.length()), it.value());
+			}
+
+			// if there are no config items with this prefix, we're done
+			if(subconfig.isEmpty())
+				break;
+
+			Pkcs11ProviderConfig provider;
+			if(!provider.fromVariantMap(subconfig))
+				return false;
+
+			// skip unnamed entries
+			if(provider.name.isEmpty())
+				continue;
+
+			// skip duplicate entries
+			bool have_name_already = false;
+			foreach(const Pkcs11ProviderConfig &i, providers)
+			{
+				if(i.name == provider.name)
+				{
+					have_name_already = true;
+					break;
+				}
+			}
+			if(have_name_already)
+				continue;
+
+			providers += provider;
+		}
+
+		orig_config = in;
+		return true;
+	}
+};
+
+static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
+{
+	Pkcs11Config config;
+	if(!config.fromVariantMap(in))
+	{
+		fprintf(stderr, "Error: unable to parse PKCS#11 provider configuration.\n");
+		return QVariantMap();
+	}
+
+	while(1)
+	{
+		printf("\n");
+		printf("Global settings:\n");
+		printf("  Allow loading of root CAs: %s\n", config.allow_load_rootca ? "Yes" : "No");
+		printf("  Allow protected authentication: %s\n", config.allow_protected_authentication ? "Yes" : "No");
+		QString str;
+		if(config.pin_cache == -1)
+			str = "No limit";
+		else
+			str = QString("%1 seconds").arg(config.pin_cache);
+		printf("  Maximum PIN cache time: %s\n", qPrintable(str));
+		printf("  Log level: %d\n", config.log_level);
+		printf("PKCS#11 modules:\n");
+		if(!config.providers.isEmpty())
+		{
+			foreach(const Pkcs11ProviderConfig &provider, config.providers)
+				printf("  %s\n", qPrintable(provider.name));
+		}
+		else
+			printf("  (None)\n");
+		printf("\n");
+		printf("Actions:\n");
+		printf("  a) Edit global settings\n");
+		printf("  b) Add PKCS#11 module\n");
+		printf("  c) Edit PKCS#11 module\n");
+		printf("  d) Remove PKCS#11 module\n");
+		printf("\n");
+
+		int index;
+		while(1)
+		{
+			QString str = prompt_for("Select an action, or enter to quit");
+			if(str.isEmpty())
+			{
+				index = -1;
+				break;
+			}
+			if(str.length() == 1)
+			{
+				index = str[0].toLatin1() - 'a';
+				if(index >= 0 && index < 4)
+					break;
+			}
+			printf("'%s' is not a valid entry.\n\n", qPrintable(str));
+		}
+		if(index == -1)
+			break;
+
+		if(index == 0)
+		{
+			printf("\n");
+
+			QString prompt;
+			prompt = QString("Allow loading of root CAs: [%1] ").arg(config.allow_load_rootca ? "Yes" : "No");
+			config.allow_load_rootca = prompt_for_yesno(prompt, config.allow_load_rootca);
+			prompt = QString("Allow protected authentication: [%1] ").arg(config.allow_protected_authentication ? "Yes" : "No");
+			config.allow_protected_authentication = prompt_for_yesno(prompt, config.allow_protected_authentication);
+			prompt = QString("Maximum PIN cache time in seconds (-1 for no limit): [%1] ").arg(config.pin_cache);
+			config.pin_cache = prompt_for_int(prompt, config.pin_cache);
+			prompt = QString("Log level: [%1] ").arg(config.log_level);
+			config.log_level = prompt_for_int(prompt, config.log_level);
+		}
+		else
+			printf("selected action %d\n", index);
+	}
+
+	return config.toVariantMap();
+}
+
+static QVariantMap provider_config_edit(const QVariantMap &in)
+{
+	// see if we have a configurator for a known form type
+	if(in["formtype"] == "http://affinix.com/qca/forms/qca-pkcs11#1.0")
+		return provider_config_edit_pkcs11(in);
+
+	// otherwise, use the generic configurator
+	return provider_config_edit_generic(in);
+}
+
 static QString kstype_to_string(QCA::KeyStore::Type _type)
 {
 	QString type;
@@ -1978,6 +2359,7 @@ static void usage()
 	printf(" plugins                               List available plugins\n");
 	printf(" config [command]\n");
 	printf("   save [provider]                     Save default provider config\n");
+	printf("   edit [provider]                     Edit provider config\n");
 	printf(" key [command]\n");
 	printf("   make rsa|dsa [bits]                 Create a key pair\n");
 	printf("   changepass [K]                      Add/change/remove passphrase of a key\n");
@@ -2198,6 +2580,35 @@ int main(int argc, char **argv)
 			}
 
 			QString name = args[2];
+			QCA::Provider *p = QCA::findProvider(name);
+			if(!p)
+			{
+				fprintf(stderr, "Error: no such provider '%s'.\n", qPrintable(name));
+				return 1;
+			}
+
+			QVariantMap map1 = p->defaultConfig();
+			if(map1.isEmpty())
+			{
+				fprintf(stderr, "Error: provider does not support configuration.\n");
+				return 1;
+			}
+
+			// set and save
+			QCA::setProviderConfig(name, map1);
+			QCA::saveProviderConfig(name);
+			printf("Done.\n");
+			return 0;
+		}
+		else if(args[1] == "edit")
+		{
+			if(args.count() < 3)
+			{
+				usage();
+				return 1;
+			}
+
+			QString name = args[2];
 			if(!QCA::findProvider(name))
 			{
 				fprintf(stderr, "Error: no such provider '%s'.\n", qPrintable(name));
@@ -2211,6 +2622,12 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
+			printf("Editing configuration for %s ...\n", qPrintable(name));
+
+			map1 = provider_config_edit(map1);
+			if(map1.isEmpty())
+				return 1;
+
 			// set and save
 			QCA::setProviderConfig(name, map1);
 			QCA::saveProviderConfig(name);
@@ -2223,8 +2640,6 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-
-	// for all other commands, we set up keystore/prompter:
 
 	// enable console passphrase prompt
 	PassphrasePromptThread passphrasePrompt;
