@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2007  Justin Karneges <justin@affinix.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ *
+ */
+
 #include <QtCore>
 #include <QtGui>
 #include <QtCrypto>
@@ -5,7 +24,7 @@
 #include "ui_mainwin.h"
 #include "mylistview.h"
 #include "ui_loadstore.h"
-#include "ui_modconfig.h"
+#include "pkcs11configdlg/pkcs11configdlg.h"
 
 QString escape(const QString &in)
 {
@@ -655,276 +674,6 @@ private slots:
 	}
 };
 
-// support for the 'http://affinix.com/qca/forms/qca-pkcs11#1.0' provider form
-class ModItem
-{
-public:
-	QString name; // must be unique among all modules
-	QString library; // dll
-	bool enabled;
-	bool allow_protected_auth;
-	bool cert_private;
-	int private_mask;
-	QString slotevent_method;
-	int slotevent_timeout;
-
-	ModItem() :
-		enabled(false),
-		allow_protected_auth(true),
-		cert_private(false),
-		private_mask(0),
-		slotevent_method("auto"),
-		slotevent_timeout(0)
-	{
-	}
-};
-
-class ModListModel : public QAbstractListModel
-{
-	Q_OBJECT
-//private:
-public:
-	QList<ModItem> list;
-
-public:
-	ModListModel(QObject *parent = 0) :
-		QAbstractListModel(parent)
-	{
-	}
-
-	int rowCount(const QModelIndex &parent = QModelIndex()) const
-	{
-		Q_UNUSED(parent);
-		return list.count();
-	}
-
-	QVariant data(const QModelIndex &index, int role) const
-	{
-		if(!index.isValid())
-			return QVariant();
-
-		if(index.row() >= list.count())
-			return QVariant();
-
-		if(role == Qt::DisplayRole)
-		{
-			return list[index.row()].name;
-		}
-		/*else if(role == Qt::DecorationRole)
-		{
-			return QPixmap(":/gfx/key.png");
-		}*/
-		else
-			return QVariant();
-	}
-
-	void addItem(const ModItem &i)
-	{
-		beginInsertRows(QModelIndex(), list.size(), list.size());
-		list += i;
-		endInsertRows();
-	}
-
-	void removeItem(int at)
-	{
-		beginRemoveRows(QModelIndex(), at, at);
-		list.removeAt(at);
-		endRemoveRows();
-	}
-
-	void updateItem(int at)
-	{
-		QModelIndex i = index(at);
-		emit dataChanged(i, i);
-	}
-};
-
-class ModConfig : public QDialog
-{
-	Q_OBJECT
-private:
-	Ui_ModConfig ui;
-	ModListModel *model;
-	QString providerName;
-	QVariantMap config;
-
-public:
-	ModConfig(const QString &_providerName, const QVariantMap &_config, QWidget *parent = 0) :
-		QDialog(parent),
-		providerName(_providerName),
-		config(_config)
-	{
-		ui.setupUi(this);
-
-		model = new ModListModel(this);
-		ui.lv_modules->setModel(model);
-		connect(ui.lv_modules->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), SLOT(modules_selectionChanged(const QItemSelection &, const QItemSelection &)));
-
-#if defined(Q_OS_WIN)
-		ui.lb_file->setText("Module File (.dll):");
-#elif defined(Q_OS_MAC)
-		ui.lb_file->setText("Module File (.dylib):");
-#else
-		ui.lb_file->setText("Module File (.so):");
-#endif
-
-		connect(ui.pb_add, SIGNAL(clicked()), SLOT(mod_add()));
-		connect(ui.pb_remove, SIGNAL(clicked()), SLOT(mod_remove()));
-		connect(ui.pb_browse, SIGNAL(clicked()), SLOT(mod_browse()));
-
-		connect(ui.le_name, SIGNAL(textEdited(const QString &)), SLOT(name_edited(const QString &)));
-		connect(ui.le_library, SIGNAL(textEdited(const QString &)), SLOT(library_edited(const QString &)));
-
-		ui.pb_remove->setEnabled(false);
-		ui.gb_details->setEnabled(false);
-
-		// TODO: config integrity check
-		// FIXME: this reorders the provider config. we may not want that
-		for(int n = 0; n < 10; ++n)
-		{
-			ModItem i;
-			QString prefix = QString().sprintf("provider_%02d_", n);
-			i.name = config[prefix + "name"].toString();
-			if(i.name.isEmpty())
-				continue;
-			i.library = config[prefix + "library"].toString();
-			i.enabled = config[prefix + "enabled"].toBool();
-			i.allow_protected_auth = config[prefix + "allow_protected_authentication"].toBool();
-			i.cert_private = config[prefix + "cert_private"].toBool();
-			i.private_mask = config[prefix + "private_mask"].toInt();
-			i.slotevent_method = config[prefix + "slotevent_method"].toString();
-			i.slotevent_timeout = config[prefix + "slotevent_method"].toInt();
-			model->addItem(i);
-		}
-
-		if(!model->list.isEmpty())
-			ui.lv_modules->selectionModel()->select(model->index(0), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
-	}
-
-protected slots:
-	virtual void accept()
-	{
-		for(int n = 0; n < 10 || n < model->list.count(); ++n)
-		{
-			ModItem i;
-			if(n < model->list.count())
-				i = model->list[n];
-			else
-				i = ModItem(); // default for padded items
-
-			QString prefix = QString().sprintf("provider_%02d_", n);
-			config[prefix + "name"] = i.name;
-			config[prefix + "library"] = i.library;
-			config[prefix + "enabled"] = i.enabled;
-			config[prefix + "allow_protected_authentication"] = i.allow_protected_auth;
-			config[prefix + "cert_private"] = i.cert_private;
-			config[prefix + "private_mask"] = i.private_mask;
-			config[prefix + "slotevent_method"] = i.slotevent_method;
-			config[prefix + "slotevent_method"] = i.slotevent_timeout;
-		}
-
-		QCA::setProviderConfig(providerName, config);
-		QCA::saveProviderConfig(providerName);
-
-		QDialog::accept();
-	}
-
-private slots:
-	void modules_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
-	{
-		Q_UNUSED(deselected);
-
-		if(!selected.indexes().isEmpty())
-		{
-			if(!ui.pb_remove->isEnabled())
-			{
-				ui.pb_remove->setEnabled(true);
-				ui.gb_details->setEnabled(true);
-			}
-
-			QModelIndex index = selected.indexes().first();
-
-			// TODO: ensure plaintext only
-			ui.le_name->setText(model->list[index.row()].name);
-			ui.le_library->setText(model->list[index.row()].library);
-		}
-		else if(selected.indexes().isEmpty() && ui.pb_remove->isEnabled())
-		{
-			ui.le_name->setText("");
-			ui.le_library->setText("");
-
-			ui.pb_remove->setEnabled(false);
-			ui.gb_details->setEnabled(false);
-		}
-	}
-
-	void name_edited(const QString &text)
-	{
-		QItemSelection selection = ui.lv_modules->selectionModel()->selection();
-		if(selection.indexes().isEmpty())
-			return;
-		QModelIndex index = selection.indexes().first();
-		int at = index.row();
-
-		model->list[at].name = text;
-		model->updateItem(at);
-	}
-
-	void library_edited(const QString &text)
-	{
-		QItemSelection selection = ui.lv_modules->selectionModel()->selection();
-		if(selection.indexes().isEmpty())
-			return;
-		QModelIndex index = selection.indexes().first();
-		int at = index.row();
-
-		model->list[at].library = text;
-	}
-
-	void mod_add()
-	{
-		ModItem i;
-		i.name = "New Module";
-		i.enabled = true;
-		model->addItem(i);
-
-		ui.lv_modules->selectionModel()->select(model->index(model->list.count()-1), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
-
-		ui.le_name->setFocus();
-		ui.le_name->selectAll();
-	}
-
-	void mod_remove()
-	{
-		QItemSelection selection = ui.lv_modules->selectionModel()->selection();
-		if(selection.indexes().isEmpty())
-			return;
-		QModelIndex index = selection.indexes().first();
-		model->removeItem(index.row());
-	}
-
-	void mod_browse()
-	{
-		QString spec;
-
-		// FIXME: is this too restrictive?
-#if defined(Q_OS_WIN)
-		spec = "(*.dll)";
-#elif defined(Q_OS_MAC)
-		spec = "(*.dylib)";
-#else
-		spec = "(*.so)";
-#endif
-
-		QString fileName = QFileDialog::getOpenFileName(this, tr("Select PKCS#11 Module"), QString(), tr("PKCS#11 Modules") + ' ' + spec);
-		if(fileName.isEmpty())
-			return;
-
-		ui.le_library->setText(fileName);
-		library_edited(fileName);
-	}
-};
-
 class MainWin : public QMainWindow
 {
 	Q_OBJECT
@@ -1102,27 +851,13 @@ private slots:
 
 	void mod_config()
 	{
-		QCA::ProviderList providers = QCA::providers();
-		providers += QCA::defaultProvider();
-		QCA::Provider *provider = 0;
-		QVariantMap config;
-		foreach(QCA::Provider *p, providers)
-		{
-			config = QCA::getProviderConfig(p->name());
-			if(!config.isEmpty() && config["formtype"] == "http://affinix.com/qca/forms/qca-pkcs11#1.0")
-			{
-				provider = p;
-				break;
-			}
-		}
-
-		if(!provider)
+		if(!Pkcs11ConfigDlg::isSupported())
 		{
 			QMessageBox::information(this, tr("Error"), tr("No provider available supporting standard PKCS#11 configuration."));
 			return;
 		}
 
-		ModConfig *w = new ModConfig(provider->name(), config, this);
+		Pkcs11ConfigDlg *w = new Pkcs11ConfigDlg(this);
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
 		w->setWindowModality(Qt::WindowModal);
 		w->show();
