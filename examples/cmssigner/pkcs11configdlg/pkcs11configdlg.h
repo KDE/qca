@@ -35,7 +35,7 @@ public:
 	static bool isSupported();
 
 protected slots:
-	virtual void accept();
+	virtual void done(int r);
 
 private:
 	class Private;
