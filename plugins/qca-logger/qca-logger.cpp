@@ -26,7 +26,7 @@
 
 using namespace QCA;
 
-namespace LoggerQCAPlugin {
+namespace loggerQCAPlugin {
 
 class StreamLogger : public QCA::AbstractLogDevice
 {
@@ -88,9 +88,9 @@ char *StreamLogger::s_severityNames[] = {
 
 }
 
-using namespace LoggerQCAPlugin;
+using namespace loggerQCAPlugin;
 
-class LoggerProvider : public Provider
+class loggerProvider : public Provider
 {
 private:
 	QFile _logFile;
@@ -99,7 +99,7 @@ private:
 	bool _externalConfig;
 
 public:
-	LoggerProvider () {
+	loggerProvider () {
 		_externalConfig = false;
 		_streamLogger = NULL;
 
@@ -116,7 +116,7 @@ printf ("XXXX %s %s\n", level, file);
 		}
 	}
 
-	~LoggerProvider () {
+	~loggerProvider () {
 		delete _streamLogger;
 		_streamLogger = NULL;
 	}
@@ -207,15 +207,15 @@ private:
 	}
 };
 
-class LoggerPlugin : public QObject, public QCAPlugin
+class loggerPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QCAPlugin)
 
 public:
-	virtual Provider *createProvider() { return new LoggerProvider; }
+	virtual Provider *createProvider() { return new loggerProvider; }
 };
 
 #include "qca-logger.moc"
 
-Q_EXPORT_PLUGIN2(qca_logger, LoggerPlugin)
+Q_EXPORT_PLUGIN2(qca_logger, loggerPlugin)
