@@ -1175,10 +1175,13 @@ public:
 	EVP_PKEY *pkey;
 	EVP_MD_CTX mdctx;
 	State state;
+	bool raw_type;
+	SecureArray raw;
 
 	EVPKey()
 	{
 		pkey = 0;
+		raw_type = false;
 		state = Idle;
 	}
 
@@ -1199,47 +1202,60 @@ public:
 		if(pkey)
 			EVP_PKEY_free(pkey);
 		pkey = 0;
+		raw.clear ();
+		raw_type = false;
 	}
 
 	void startSign(const EVP_MD *type)
 	{
+		state = SignActive;
 		if(!type)
 		{
-			state = SignError;
-			return;
+			raw_type = true;
+			raw.clear ();
 		}
-
-		state = SignActive;
-		EVP_MD_CTX_init(&mdctx);
-		if(!EVP_SignInit_ex(&mdctx, type, NULL))
-			state = SignError;
+		else
+		{
+			raw_type = false;
+			EVP_MD_CTX_init(&mdctx);
+			if(!EVP_SignInit_ex(&mdctx, type, NULL))
+				state = SignError;
+		}
 	}
 
 	void startVerify(const EVP_MD *type)
 	{
+		state = VerifyActive;
 		if(!type)
 		{
-			state = VerifyError;
-			return;
+			raw_type = true;
+			raw.clear ();
 		}
-
-		state = VerifyActive;
-		EVP_MD_CTX_init(&mdctx);
-		if(!EVP_VerifyInit_ex(&mdctx, type, NULL))
-			state = VerifyError;
+		else
+		{
+			EVP_MD_CTX_init(&mdctx);
+			if(!EVP_VerifyInit_ex(&mdctx, type, NULL))
+				state = VerifyError;
+		}
 	}
 
 	void update(const SecureArray &in)
 	{
 		if(state == SignActive)
 		{
-			if(!EVP_SignUpdate(&mdctx, in.data(), (unsigned int)in.size()))
-				state = SignError;
+			if (raw_type)
+				raw += in;
+			else
+				if(!EVP_SignUpdate(&mdctx, in.data(), (unsigned int)in.size()))
+					state = SignError;
 		}
 		else if(state == VerifyActive)
 		{
-			if(!EVP_VerifyUpdate(&mdctx, in.data(), (unsigned int)in.size()))
-				state = VerifyError;
+			if (raw_type)
+				raw += in;
+			else
+				if(!EVP_VerifyUpdate(&mdctx, in.data(), (unsigned int)in.size()))
+					state = VerifyError;
 		}
 	}
 
@@ -1249,10 +1265,35 @@ public:
 		{
 			SecureArray out(EVP_PKEY_size(pkey));
 			unsigned int len = out.size();
-			if(!EVP_SignFinal(&mdctx, (unsigned char *)out.data(), &len, pkey))
+			if (raw_type)
 			{
-				state = SignError;
-				return SecureArray();
+				if (pkey->type == EVP_PKEY_RSA)
+				{
+					if(RSA_private_encrypt (raw.size(), (unsigned char *)raw.data(),
+						(unsigned char *)out.data(), pkey->pkey.rsa,
+						RSA_PKCS1_PADDING) == -1) {
+
+						state = SignError;
+						return SecureArray ();
+					}
+				}
+				else if (pkey->type == EVP_PKEY_DSA)
+				{
+					state = SignError;
+					return SecureArray ();
+				}
+				else
+				{
+					state = SignError;
+					return SecureArray ();
+				}
+			}
+			else {
+				if(!EVP_SignFinal(&mdctx, (unsigned char *)out.data(), &len, pkey))
+				{
+					state = SignError;
+					return SecureArray();
+				}
 			}
 			out.resize(len);
 			state = Idle;
@@ -1266,10 +1307,45 @@ public:
 	{
 		if(state == VerifyActive)
 		{
-			if(EVP_VerifyFinal(&mdctx, (unsigned char *)sig.data(), (unsigned int)sig.size(), pkey) != 1)
+			if (raw_type)
 			{
-				state = VerifyError;
-				return false;
+				SecureArray out(EVP_PKEY_size(pkey));
+				int len = 0;
+
+				if (pkey->type == EVP_PKEY_RSA) {
+					if((len = RSA_public_decrypt (sig.size(), (unsigned char *)sig.data(),
+						(unsigned char *)out.data (), pkey->pkey.rsa,
+						RSA_PKCS1_PADDING)) == -1) {
+
+						state = VerifyError;
+						return false;
+					}
+				}
+				else if (pkey->type == EVP_PKEY_DSA)
+				{
+					state = VerifyError;
+					return false;
+				}
+				else
+				{
+					state = VerifyError;
+					return false;
+				}
+
+				out.resize (len);
+
+				if (out != raw) {
+					state = VerifyError;
+					return false;
+				}
+			}
+			else
+			{
+				if(EVP_VerifyFinal(&mdctx, (unsigned char *)sig.data(), (unsigned int)sig.size(), pkey) != 1)
+				{
+					state = VerifyError;
+					return false;
+				}
 			}
 			state = Idle;
 			return true;
@@ -1706,10 +1782,7 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
-		else if(alg == EMSA3_Raw)
-		{
-			// TODO
-		}
+		else if(alg == EMSA3_Raw); // md=0
 		evp.startSign(md);
 	}
 
@@ -1724,10 +1797,7 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
-		else if(alg == EMSA3_Raw)
-		{
-			// TODO
-		}
+		else if(alg == EMSA3_Raw); // md=0
 		evp.startVerify(md);
 	}
 
