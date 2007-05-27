@@ -7,6 +7,7 @@ FIND_PACKAGE(LibGcrypt)
 FIND_PACKAGE(Botan)
 
 ADD_SUBDIRECTORY(qca-logger)
+ADD_SUBDIRECTORY(qca-softstore)
 
 IF (OPENSSL_FOUND)
   ADD_SUBDIRECTORY(qca-openssl)
