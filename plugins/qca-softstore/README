@@ -1,0 +1,80 @@
+qca-softstore -- Software certificate store Plug-in to QCA
+
+ABOUT
+	qca-softstore provides simple persistent certificate store for QCA framework.
+	
+	The plug-in defers the private key access and passphrase prompt to the point
+	it is actually required, thus enabling the use of files stored on removable media.
+
+	The plug-in also handles the private key objects as not exportable for applications.
+
+	In order to defer the passphrase prompt, the certificate object must be extracted
+	during configuration, this also apply to PKCS#12 files, since the certificate
+	is encrypted within the format.
+
+DEPENDENCIES
+	None.
+
+CONFIGURATION
+	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
+	generate default configuration use:
+
+	$ qcatool --config save qca-softstore 
+
+	Attributes:
+		entry_##_enabled (Boolean)
+			Provider at this index is enabled.
+
+		entry_##_name (String)
+			Name of entry.
+
+		entry_##_public_type (String)
+			Type of public component:
+
+			x509chain
+				entry_##_public is X.509 certificate chain.
+				Each certificate is encoded in base64.
+				List separator is '!'.
+				First entry is end certificate.
+
+		entry_##_public (String)
+			By entry_##_public_type.
+
+		entry_##_private_type (String)
+			Type of private component:
+
+			pkcs12
+				entry_##_private is PKCS#12 format file name.
+
+			pkcs8
+				entry_##_private is base64 encoded PKCS#8 format.
+
+			rsa-file-pem
+				entry_##_private is PEM RSA key file name.
+
+			pkcs8-file
+				entry_##_private is PKCS#8 format.
+
+		entry_##_private (String)
+			By entry_##_private_type.
+
+		entry_##_no_passphrase (Boolean)
+			true if entry_##_private is not protected by passphrase.
+
+		entry_##_unlock_timeout (Integer)
+			Time in seconds to until passphrase should be prompted again.
+			Specify -1 for infinite.
+
+USEFUL COMMANDS
+	pkcs12->RSA PEM
+		openssl pkcs12 -in <pkcs12> -nocerts -out <key>
+	
+	pkcs12->Certificate PEM
+		openssl pkcs12 -in <pkcs12> -nokeys -out <key>
+
+	RSA PEM->PKCS#8
+		openssl pkcs8 -in <key> -topk8 -out <pkcs8> -outform DER
+
+AUTHORS
+	Alon Bar-Lev <alon.barlev@gmail.com>
+
