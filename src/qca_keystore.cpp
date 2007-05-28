@@ -1077,6 +1077,7 @@ void KeyStoreManager::start(const QString &provider)
 
 QString KeyStoreManager::diagnosticText()
 {
+	// TODO: spin one event cycle in the tracker to receive pending text?
 	ensure_init();
 	return KeyStoreTracker::instance()->getDText();
 }
@@ -1367,7 +1368,7 @@ void KeyStoreManager::sync()
 }
 
 //----------------------------------------------------------------------------
-// KeyStoreManager
+// KeyStoreInfo
 //----------------------------------------------------------------------------
 class KeyStoreInfo::Private : public QSharedData
 {
