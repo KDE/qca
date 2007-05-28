@@ -36,8 +36,8 @@ enum KeyType {
 	keyTypeInvalid,
 	keyTypePKCS12,
 	keyTypePKCS8Inline,
-	keyTypeRSAFilePEM,
-	keyTypePKCS8File
+	keyTypePKCS8FilePEM,
+	keyTypePKCS8FileDER
 };
 
 enum PublicType {
@@ -385,8 +385,8 @@ public:
 					case keyTypePKCS8Inline:
 					break;
 					case keyTypePKCS12:
-					case keyTypeRSAFilePEM:
-					case keyTypePKCS8File:
+					case keyTypePKCS8FilePEM:
+					case keyTypePKCS8FileDER:
 						{
 							QFile file (_entry.keyReference);
 							while (!file.open (QIODevice::ReadOnly)) {
@@ -449,7 +449,7 @@ public:
 							}
 						}
 					break;
-					case keyTypeRSAFilePEM:
+					case keyTypePKCS8FilePEM:
 						{
 							PrivateKey k = PrivateKey::fromPEMFile (
 								_entry.keyReference,
@@ -462,7 +462,7 @@ public:
 							}
 						}
 					break;
-					case keyTypePKCS8File:
+					case keyTypePKCS8FileDER:
 						{
 							QFile file (_entry.keyReference);
 							if (file.open (QIODevice::ReadOnly)) {
@@ -1097,8 +1097,8 @@ public:
 		QMap<QString, KeyType> keyTypeMap;
 		keyTypeMap["pkcs12"] = keyTypePKCS12;
 		keyTypeMap["pkcs8"] = keyTypePKCS8Inline;
-		keyTypeMap["rsa-file-pem"] = keyTypeRSAFilePEM;
-		keyTypeMap["pkcs8-file"] = keyTypePKCS8File;
+		keyTypeMap["pkcs8-file-pem"] = keyTypePKCS8FilePEM;
+		keyTypeMap["pkcs8-file-der"] = keyTypePKCS8FileDER;
 
 		QMap<QString, PublicType> publicTypeMap;
 		publicTypeMap["x509chain"] = publicTypeX509Chain;

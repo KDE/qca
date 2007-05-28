@@ -49,11 +49,11 @@ CONFIGURATION
 			pkcs8
 				entry_##_private is base64 encoded PKCS#8 format.
 
-			rsa-file-pem
-				entry_##_private is PEM RSA key file name.
+			pkcs8-file-pem
+				entry_##_private is PEM RSA key file name or PKCS#8 PEM encoded.
 
-			pkcs8-file
-				entry_##_private is PKCS#8 format.
+			pkcs8-file-der
+				entry_##_private is PKCS#8 DER format.
 
 		entry_##_private (String)
 			By entry_##_private_type.
