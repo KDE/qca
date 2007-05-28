@@ -1165,7 +1165,6 @@ namespace QCA
 		*/
 		QDateTime time() const;
 
-
 		/**
 		   Test if this CRL entry is empty
 		*/

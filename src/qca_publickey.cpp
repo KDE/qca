@@ -342,6 +342,42 @@ PBEAlgorithm get_pbe_default()
 	return PBES2_TripleDES_SHA1;
 }
 
+static PrivateKey get_privatekey_der(const SecureArray &der, const QString &fileName, void *ptr, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
+{
+	PrivateKey out;
+	ConvertResult r;
+	out = getKey<PrivateKey, Getter_PrivateKey<SecureArray>, SecureArray>(provider, der, passphrase, &r);
+
+	// error converting without passphrase?  maybe a passphrase is needed
+	if(use_asker_fallback(r) && passphrase.isEmpty())
+	{
+		SecureArray pass;
+		if(ask_passphrase(fileName, ptr, &pass))
+			out = getKey<PrivateKey, Getter_PrivateKey<SecureArray>, SecureArray>(provider, der, pass, &r);
+	}
+	if(result)
+		*result = r;
+	return out;
+}
+
+static PrivateKey get_privatekey_pem(const QString &pem, const QString &fileName, void *ptr, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
+{
+	PrivateKey out;
+	ConvertResult r;
+	out = getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, pem, passphrase, &r);
+
+	// error converting without passphrase?  maybe a passphrase is needed
+	if(use_asker_fallback(r) && passphrase.isEmpty())
+	{
+		SecureArray pass;
+		if(ask_passphrase(fileName, ptr, &pass))
+			out = getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, pem, pass, &r);
+	}
+	if(result)
+		*result = r;
+	return out;
+}
+
 //----------------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------------
@@ -973,38 +1009,12 @@ bool PrivateKey::toPEMFile(const QString &fileName, const SecureArray &passphras
 
 PrivateKey PrivateKey::fromDER(const SecureArray &a, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	PrivateKey out;
-	ConvertResult r;
-	out = getKey<PrivateKey, Getter_PrivateKey<SecureArray>, SecureArray>(provider, a, passphrase, &r);
-
-	// error converting without passphrase?  maybe a passphrase is needed
-	if(use_asker_fallback(r) && passphrase.isEmpty())
-	{
-		SecureArray pass;
-		if(ask_passphrase(QString(), 0, &pass))
-			out = getKey<PrivateKey, Getter_PrivateKey<SecureArray>, SecureArray>(provider, a, pass, &r);
-	}
-	if(result)
-		*result = r;
-	return out;
+	return get_privatekey_der(a, QString(), (void *)&a, passphrase, result, provider);
 }
 
 PrivateKey PrivateKey::fromPEM(const QString &s, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	PrivateKey out;
-	ConvertResult r;
-	out = getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, s, passphrase, &r);
-
-	// error converting without passphrase?  maybe a passphrase is needed
-	if(use_asker_fallback(r) && passphrase.isEmpty())
-	{
-		SecureArray pass;
-		if(ask_passphrase(QString(), 0, &pass))
-			out = getKey<PrivateKey, Getter_PrivateKey<QString>, QString>(provider, s, pass, &r);
-	}
-	if(result)
-		*result = r;
-	return out;
+	return get_privatekey_pem(s, QString(), (void *)&s, passphrase, result, provider);
 }
 
 PrivateKey PrivateKey::fromPEMFile(const QString &fileName, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
@@ -1016,7 +1026,7 @@ PrivateKey PrivateKey::fromPEMFile(const QString &fileName, const SecureArray &p
 			*result = ErrorFile;
 		return PrivateKey();
 	}
-	return fromPEM(pem, passphrase, result, provider);
+	return get_privatekey_pem(pem, fileName, 0, passphrase, result, provider);
 }
 
 //----------------------------------------------------------------------------

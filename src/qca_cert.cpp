@@ -41,6 +41,43 @@ ProviderList allProviders();
 Provider *providerForName(const QString &name);
 bool use_asker_fallback(ConvertResult r);
 
+// last 3 arguments must be valid, and chain must be empty
+static bool get_pkcs12_der(const QByteArray &der, const QString &fileName, void *ptr, const SecureArray &passphrase, ConvertResult *result, const QString &provider, QString *name, CertificateChain *chain, PrivateKey *key)
+{
+	QString _name;
+	QList<CertContext*> list;
+	PKeyContext *kc = 0;
+
+	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
+	ConvertResult r = pix->fromPKCS12(der, passphrase, &_name, &list, &kc);
+
+	// error converting without passphrase?  maybe a passphrase is needed
+	if(use_asker_fallback(r) && passphrase.isEmpty())
+	{
+		SecureArray pass;
+		if(ask_passphrase(fileName, ptr, &pass))
+			r = pix->fromPKCS12(der, pass, &_name, &list, &kc);
+	}
+	delete pix;
+
+	if(result)
+		*result = r;
+
+	if(r == ConvertGood)
+	{
+		*name = _name;
+		for(int n = 0; n < list.count(); ++n)
+		{
+			Certificate cert;
+			cert.change(list[n]);
+			chain->append(cert);
+		}
+		key->change(kc);
+		return true;
+	}
+	return false;
+}
+
 static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 {
 	CertificateInfo out;
@@ -2073,37 +2110,8 @@ bool KeyBundle::toFile(const QString &fileName, const SecureArray &passphrase, c
 
 KeyBundle KeyBundle::fromArray(const QByteArray &a, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
-	QString name;
-	QList<CertContext*> list;
-	PKeyContext *kc = 0;
-
 	KeyBundle bundle;
-	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
-	ConvertResult r = pix->fromPKCS12(a, passphrase, &name, &list, &kc);
-
-	// error converting without passphrase?  maybe a passphrase is needed
-	if(use_asker_fallback(r) && passphrase.isEmpty())
-	{
-		SecureArray pass;
-		if(ask_passphrase(QString(), 0, &pass))
-			r = pix->fromPKCS12(a, pass, &name, &list, &kc);
-	}
-	delete pix;
-
-	if(result)
-		*result = r;
-
-	if(r == ConvertGood)
-	{
-		bundle.d->name = name;
-		for(int n = 0; n < list.count(); ++n)
-		{
-			Certificate cert;
-			cert.change(list[n]);
-			bundle.d->chain.append(cert);
-		}
-		bundle.d->key.change(kc);
-	}
+	get_pkcs12_der(a, QString(), (void *)&a, passphrase, result, provider, &bundle.d->name, &bundle.d->chain, &bundle.d->key);
 	return bundle;
 }
 
@@ -2116,7 +2124,10 @@ KeyBundle KeyBundle::fromFile(const QString &fileName, const SecureArray &passph
 			*result = ErrorFile;
 		return KeyBundle();
 	}
-	return fromArray(der, passphrase, result, provider);
+
+	KeyBundle bundle;
+	get_pkcs12_der(der, fileName, 0, passphrase, result, provider, &bundle.d->name, &bundle.d->chain, &bundle.d->key);
+	return bundle;
 }
 
 //----------------------------------------------------------------------------
