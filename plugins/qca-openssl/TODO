@@ -7,3 +7,4 @@ implement all ietf dl groups
 
 ca signing
 async TLS
+when inserting trusted items into X509_STORE, sort by latest expiration first
