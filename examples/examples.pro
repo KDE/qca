@@ -6,7 +6,7 @@ SUBDIRS += \
 	certtest \
 	ciphertest \
 	cms \
-        #cmssigner \   # commenting out for now, requires QtGui
+	cmssigner \
 	eventhandlerdemo \
 	hashtest \
 	hextest \
