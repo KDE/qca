@@ -6,6 +6,7 @@
 * beta7
   api:
     extended key usage can have OIDs ?!
+    deinit method for providers, to occur for all before destruction?
     it's possible we use SecureArray in some unnecessary places
     Q_DISABLE_COPY on some objects
     give all classes non-default ctors/dtors/copy/op=, and dpointers?
