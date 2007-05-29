@@ -22,11 +22,43 @@
 #include <QtCrypto>
 
 #include "ui_mainwin.h"
+#include "prompter.h"
 #include "mylistview.h"
 #include "ui_loadstore.h"
 #include "pkcs11configdlg/pkcs11configdlg.h"
 
-QString escape(const QString &in)
+#define VERSION "0.0.1"
+
+class Icons
+{
+public:
+	QPixmap cert, crl, keybundle, pgppub, pgpsec;
+};
+
+Icons *g_icons = 0;
+
+//----------------------------------------------------------------------------
+// CertItem
+//----------------------------------------------------------------------------
+class CertItem
+{
+public:
+	enum StorageType { File, Entry };
+
+	QString name;
+	QCA::CertificateChain chain;
+	bool havePrivate;
+	StorageType storageType; // private storage type
+	bool usable; // storage is accessible
+	QString fileName;
+	QCA::KeyStoreEntry keyStoreEntry;
+
+	CertItem();
+	QString toString() const;
+	bool fromString(const QString &in);
+};
+
+static QString escape(const QString &in)
 {
 	QString out;
 	for(int n = 0; n < in.length(); ++n)
@@ -35,13 +67,15 @@ QString escape(const QString &in)
 			out += "\\\\";
 		else if(in[n] == ':')
 			out += "\\c";
+		else if(in[n] == '\n')
+			out += "\\n";
 		else
 			out += in[n];
 	}
 	return out;
 }
 
-QString unescape(const QString &in)
+static QString unescape(const QString &in)
 {
 	QString out;
 	for(int n = 0; n < in.length(); ++n)
@@ -55,6 +89,8 @@ QString unescape(const QString &in)
 					out += '\\';
 				else if(in[n] == 'c')
 					out += ':';
+				else if(in[n] == 'n')
+					out += '\n';
 			}
 		}
 		else
@@ -63,82 +99,100 @@ QString unescape(const QString &in)
 	return out;
 }
 
-class IdentityItem
+CertItem::CertItem() :
+	havePrivate(false),
+	storageType(File),
+	usable(false)
 {
-public:
-	enum Type { File, Entry };
+}
 
-	Type type;
-	QString name;
-	QString fileName;
-	QCA::KeyStoreEntry entry;
-	QCA::SecureArray password; // for runtime of File type only
-	bool usable;
+QString CertItem::toString() const
+{
+	QStringList parts;
 
-	QString toString() const
+	parts += name;
+	parts += QString::number(chain.count());
+	foreach(const QCA::Certificate &cert, chain)
+		parts += QCA::Base64().arrayToString(cert.toDER());
+
+	if(havePrivate)
 	{
-		QStringList parts;
-		if(type == File)
+		if(storageType == File)
 		{
-			parts += "file";
-			parts += name;
+			parts += "privateFile";
 			parts += fileName;
 		}
 		else // Entry
 		{
-			parts += "entry";
-			parts += name;
-			parts += entry.toString();
+			parts += "privateEntry";
+			parts += keyStoreEntry.toString();
 		}
-
-		for(int n = 0; n < parts.count(); ++n)
-			parts[n] = escape(parts[n]);
-		return parts.join(":");
 	}
 
-	bool fromString(const QString &in)
+	for(int n = 0; n < parts.count(); ++n)
+		parts[n] = escape(parts[n]);
+	return parts.join(":");
+}
+
+bool CertItem::fromString(const QString &in)
+{
+	QStringList parts = in.split(':');
+	for(int n = 0; n < parts.count(); ++n)
+		parts[n] = unescape(parts[n]);
+
+	if(parts.count() < 3)
+		return false;
+
+	name = parts[0];
+	int chainCount = parts[1].toInt();
+	if(chainCount < 1 || chainCount > parts.count() - 2)
+		return false;
+	chain.clear();
+	for(int n = 0; n < chainCount; ++n)
 	{
-		QStringList parts = in.split(':');
-		for(int n = 0; n < parts.count(); ++n)
-			parts[n] = unescape(parts[n]);
-
-		if(parts.count() < 3)
+		QCA::Certificate cert = QCA::Certificate::fromDER(QCA::Base64().stringToArray(parts[n + 2]));
+		if(cert.isNull())
 			return false;
+		chain += cert;
+	}
+	int at = chain.count() + 2;
 
+	if(at < parts.count())
+	{
+		havePrivate = true;
 		usable = false;
 
-		if(parts[0] == "file")
+		if(parts[at] == "privateFile")
 		{
-			type = File;
-			name = parts[1];
-			fileName = parts[2];
+			storageType = File;
+			fileName = parts[at + 1];
 			if(QFile::exists(fileName))
 				usable = true;
 		}
-		else if(parts[0] == "entry")
+		else if(parts[at] == "privateEntry")
 		{
-			type = Entry;
-			name = parts[1];
-			entry = QCA::KeyStoreEntry(parts[2]);
-			if(!entry.isNull())
+			storageType = Entry;
+			keyStoreEntry = QCA::KeyStoreEntry(parts[at + 1]);
+			if(!keyStoreEntry.isNull())
 				usable = true;
 		}
 		else
 			return false;
-
-		return true;
 	}
-};
 
-class IdentityListModel : public QAbstractListModel
+	return true;
+}
+
+//----------------------------------------------------------------------------
+// CertListModel
+//----------------------------------------------------------------------------
+class CertListModel : public QAbstractListModel
 {
 	Q_OBJECT
-//private:
 public:
-	QList<IdentityItem> list;
+	QList<CertItem> list;
 
-public:
-	IdentityListModel(QObject *parent = 0) :
+	CertListModel(QObject *parent = 0) :
 		QAbstractListModel(parent)
 	{
 	}
@@ -158,22 +212,52 @@ public:
 			return QVariant();
 
 		if(role == Qt::DisplayRole)
-		{
 			return list[index.row()].name;
-		}
-		else if(role == Qt::DecorationRole)
+		else if(role == Qt::EditRole)
+			return list[index.row()].name;
+		else if(role == Qt::DecorationRole && g_icons)
 		{
-			const IdentityItem &i = list[index.row()];
-			if(i.type == IdentityItem::File)
-				return QPixmap(":/gfx/key.png");
-			else // Entry
-				return QPixmap(":/gfx/key.png");
+			const CertItem &i = list[index.row()];
+			if(i.havePrivate)
+				return g_icons->keybundle;
+			else
+				return g_icons->cert;
 		}
 		else
 			return QVariant();
 	}
 
-	void addItem(const IdentityItem &i)
+	Qt::ItemFlags flags(const QModelIndex &index) const
+	{
+		if(!index.isValid())
+			return Qt::ItemIsEnabled;
+
+		return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+	}
+
+	bool setData(const QModelIndex &index, const QVariant &value, int role)
+	{
+		if(index.isValid() && role == Qt::EditRole)
+		{
+			QString str = value.toString();
+			list[index.row()].name = str;
+			emit dataChanged(index, index);
+			return true;
+		}
+		return false;
+	}
+
+	void addItems(const QList<CertItem> &items)
+	{
+		if(items.isEmpty())
+			return;
+
+		beginInsertRows(QModelIndex(), list.size(), list.size() + items.count() - 1);
+		list += items;
+		endInsertRows();
+	}
+
+	void addItem(const CertItem &i)
 	{
 		beginInsertRows(QModelIndex(), list.size(), list.size());
 		list += i;
@@ -199,7 +283,7 @@ public:
 				tryname = name + QString(" (%1)").arg(num);
 
 			bool found = false;
-			foreach(const IdentityItem &i, list)
+			foreach(const CertItem &i, list)
 			{
 				if(i.name == tryname)
 				{
@@ -215,94 +299,9 @@ public:
 	}
 };
 
-class KnownItem
-{
-public:
-	QString name;
-	QCA::Certificate cert;
-
-	QString toString() const
-	{
-		QStringList parts;
-		parts += name;
-		parts += QCA::Base64().arrayToString(cert.toDER());
-		for(int n = 0; n < parts.count(); ++n)
-			parts[n] = escape(parts[n]);
-		return parts.join(":");
-	}
-
-	bool fromString(const QString &in)
-	{
-		QStringList parts = in.split(':');
-		for(int n = 0; n < parts.count(); ++n)
-			parts[n] = unescape(parts[n]);
-
-		if(parts.count() < 2)
-			return false;
-
-		name = parts[0];
-		cert = QCA::Certificate::fromDER(QCA::Base64().stringToArray(parts[1]));
-		if(cert.isNull())
-			return false;
-
-		return true;
-	}
-};
-
-class KnownListModel : public QAbstractListModel
-{
-	Q_OBJECT
-//private:
-public:
-	QList<KnownItem> list;
-
-public:
-	KnownListModel(QObject *parent = 0) :
-		QAbstractListModel(parent)
-	{
-	}
-
-	int rowCount(const QModelIndex &parent = QModelIndex()) const
-	{
-		Q_UNUSED(parent);
-		return list.count();
-	}
-
-	QVariant data(const QModelIndex &index, int role) const
-	{
-		if(!index.isValid())
-			return QVariant();
-
-		if(index.row() >= list.count())
-			return QVariant();
-
-		if(role == Qt::DisplayRole)
-		{
-			return list[index.row()].name;
-		}
-		else if(role == Qt::DecorationRole)
-		{
-			return QPixmap(":/gfx/key.png");
-		}
-		else
-			return QVariant();
-	}
-
-	void addItem(const KnownItem &i)
-	{
-		beginInsertRows(QModelIndex(), list.size(), list.size());
-		list += i;
-		endInsertRows();
-	}
-
-	void removeItem(int at)
-	{
-		beginRemoveRows(QModelIndex(), at, at);
-		list.removeAt(at);
-		endRemoveRows();
-	}
-};
-
+//----------------------------------------------------------------------------
+// Operation
+//----------------------------------------------------------------------------
 class Operation : public QObject
 {
 	Q_OBJECT
@@ -316,19 +315,81 @@ signals:
 	void error(const QString &str);
 };
 
+static QString validityToString(QCA::Validity v)
+{
+	QString s;
+	switch(v)
+	{
+		case QCA::ValidityGood:
+			s = Operation::tr("Validated");
+			break;
+		case QCA::ErrorRejected:
+			s = Operation::tr("Root CA is marked to reject the specified purpose");
+			break;
+		case QCA::ErrorUntrusted:
+			s = Operation::tr("Certificate not trusted for the required purpose");
+			break;
+		case QCA::ErrorSignatureFailed:
+			s = Operation::tr("Invalid signature");
+			break;
+		case QCA::ErrorInvalidCA:
+			s = Operation::tr("Invalid CA certificate");
+			break;
+		case QCA::ErrorInvalidPurpose:
+			s = Operation::tr("Invalid certificate purpose");
+			break;
+		case QCA::ErrorSelfSigned:
+			s = Operation::tr("Certificate is self-signed");
+			break;
+		case QCA::ErrorRevoked:
+			s = Operation::tr("Certificate has been revoked");
+			break;
+		case QCA::ErrorPathLengthExceeded:
+			s = Operation::tr("Maximum certificate chain length exceeded");
+			break;
+		case QCA::ErrorExpired:
+			s = Operation::tr("Certificate has expired");
+			break;
+		case QCA::ErrorExpiredCA:
+			s = Operation::tr("CA has expired");
+			break;
+		case QCA::ErrorValidityUnknown:
+		default:
+			s = Operation::tr("General certificate validation error");
+			break;
+	}
+	return s;
+}
+
+static QString smErrorToString(QCA::SecureMessage::Error e)
+{
+	QMap<QCA::SecureMessage::Error,QString> map;
+	map[QCA::SecureMessage::ErrorPassphrase] = Operation::tr("Invalid passphrase");
+	map[QCA::SecureMessage::ErrorFormat] = Operation::tr("Bad input format");
+	map[QCA::SecureMessage::ErrorSignerExpired] = Operation::tr("Signer key is expired");
+	map[QCA::SecureMessage::ErrorSignerInvalid] = Operation::tr("Signer key is invalid");
+	map[QCA::SecureMessage::ErrorEncryptExpired] = Operation::tr("Encrypting key is expired");
+	map[QCA::SecureMessage::ErrorEncryptUntrusted] = Operation::tr("Encrypting key is untrusted");
+	map[QCA::SecureMessage::ErrorEncryptInvalid] = Operation::tr("Encrypting key is invalid");
+	map[QCA::SecureMessage::ErrorNeedCard] = Operation::tr("Card was needed but not found");
+	map[QCA::SecureMessage::ErrorCertKeyMismatch] = Operation::tr("Certificate and private key don't match");
+	map[QCA::SecureMessage::ErrorUnknown] = Operation::tr("General error");
+	return map[e];
+}
+
 class SignOperation : public Operation
 {
 	Q_OBJECT
 private:
 	QByteArray in;
-	IdentityItem *item;
+	CertItem *item;
 	QCA::CMS *cms;
 	QCA::KeyLoader *loader;
 	QCA::KeyBundle key;
 	QCA::SecureMessage *msg;
 
 public:
-	SignOperation(const QByteArray &_in, IdentityItem *_item, QCA::CMS *_cms, QObject *parent = 0) :
+	SignOperation(const QByteArray &_in, CertItem *_item, QCA::CMS *_cms, QObject *parent = 0) :
 		Operation(parent),
 		in(_in),
 		item(_item),
@@ -336,7 +397,7 @@ public:
 		loader(0),
 		msg(0)
 	{
-		if(item->type == IdentityItem::File)
+		if(item->storageType == CertItem::File)
 		{
 			loader = new QCA::KeyLoader(this);
 			connect(loader, SIGNAL(finished()), SLOT(loaded()));
@@ -344,7 +405,7 @@ public:
 		}
 		else // Entry
 		{
-			key = item->entry.keyBundle();
+			key = item->keyStoreEntry.keyBundle();
 			QMetaObject::invokeMethod(this, "do_sign", Qt::QueuedConnection);
 		}
 	}
@@ -374,7 +435,7 @@ private slots:
 
 	void do_sign()
 	{
-		printf("do_sign\n");
+		//printf("do_sign\n");
 
 		QCA::SecureMessageKey signer;
 		signer.setX509CertificateChain(key.certificateChain());
@@ -390,7 +451,7 @@ private slots:
 
 	void update()
 	{
-		printf("update\n");
+		//printf("update\n");
 
 		QByteArray buf = in.mid(0, 16384); // 16k chunks
 		in = in.mid(buf.size());
@@ -404,13 +465,14 @@ private slots:
 
 	void msg_finished()
 	{
-		printf("msg_finished\n");
+		//printf("msg_finished\n");
 
 		if(!msg->success())
 		{
+			QString str = smErrorToString(msg->errorCode());
 			delete msg;
 			msg = 0;
-			emit error(tr("Error during sign operation."));
+			emit error(tr("Error during sign operation.\nReason: %1").arg(str));
 			return;
 		}
 
@@ -438,7 +500,7 @@ public:
 		cms(_cms),
 		msg(0)
 	{
-		printf("do_verify\n");
+		//printf("do_verify\n");
 
 		msg = new QCA::SecureMessage(cms);
 		connect(msg, SIGNAL(finished()), SLOT(msg_finished()));
@@ -453,7 +515,7 @@ signals:
 private slots:
 	void update()
 	{
-		printf("update\n");
+		//printf("update\n");
 
 		QByteArray buf = in.mid(0, 16384); // 16k chunks
 		in = in.mid(buf.size());
@@ -467,13 +529,14 @@ private slots:
 
 	void msg_finished()
 	{
-		printf("msg_finished\n");
+		//printf("msg_finished\n");
 
 		if(!msg->success())
 		{
+			QString str = smErrorToString(msg->errorCode());
 			delete msg;
 			msg = 0;
-			emit error(tr("Error during verify operation."));
+			emit error(tr("Error during verify operation.\nReason: %1").arg(str));
 			return;
 		}
 
@@ -484,7 +547,17 @@ private slots:
 
 		if(r != QCA::SecureMessageSignature::Valid)
 		{
-			emit error(tr("Verification failed! [%1]").arg((int)r));
+			QString str;
+			if(r == QCA::SecureMessageSignature::InvalidSignature)
+				str = tr("Invalid signature");
+			else if(r == QCA::SecureMessageSignature::InvalidKey)
+				str = tr("Invalid key: %1").arg(validityToString(signer.keyValidity()));
+			else if(r == QCA::SecureMessageSignature::NoKey)
+				str = tr("Key not found");
+			else // unknown
+				str = tr("Unknown");
+
+			emit error(tr("Verification failed!\nReason: %1").arg(str));
 			return;
 		}
 
@@ -512,7 +585,7 @@ void MyListView::contextMenuEvent(QContextMenuEvent *event)
 	menu.exec(event->globalPos());
 }
 
-static QString entryTypeToString(QCA::KeyStoreEntry::Type type)
+/*static QString entryTypeToString(QCA::KeyStoreEntry::Type type)
 {
 	QString out;
 	switch(type)
@@ -523,6 +596,21 @@ static QString entryTypeToString(QCA::KeyStoreEntry::Type type)
 		case QCA::KeyStoreEntry::TypePGPSecretKey:  out = "S"; break;
 		case QCA::KeyStoreEntry::TypePGPPublicKey:  out = "P"; break;
 		default:                                    out = "U"; break;
+	}
+	return out;
+}*/
+
+static QPixmap entryTypeToIcon(QCA::KeyStoreEntry::Type type)
+{
+	QPixmap out;
+	switch(type)
+	{
+		case QCA::KeyStoreEntry::TypeKeyBundle:     out = g_icons->keybundle; break;
+		case QCA::KeyStoreEntry::TypeCertificate:   out = g_icons->cert; break;
+		case QCA::KeyStoreEntry::TypeCRL:           out = g_icons->crl; break;
+		case QCA::KeyStoreEntry::TypePGPSecretKey:  out = g_icons->pgpsec; break;
+		case QCA::KeyStoreEntry::TypePGPPublicKey:  out = g_icons->pgppub; break;
+		default:                                    break;
 	}
 	return out;
 }
@@ -553,6 +641,11 @@ private slots:
 	void ks_available(const QString &keyStoreId)
 	{
 		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, &ksm);
+
+		// TODO: only list non-pgp identity stores
+		//if(!ks->holdsIdentities() || ks->type() == QCA::KeyStore::PGPKeyring)
+		//	return;
+
 		connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
 		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
 		stores += ks;
@@ -571,7 +664,7 @@ private slots:
 		int at = stores.indexOf(ks);
 		QList<QCA::KeyStoreEntry> entries = ks->entryList();
 
-		// only list keybundles
+		// TODO: only list keybundles
 		/*for(int n = 0; n < entries.count(); ++n)
 		{
 			if(entries[n].type() != QCA::KeyStoreEntry::TypeKeyBundle)
@@ -583,9 +676,18 @@ private slots:
 
 		storeEntries[at] = entries;
 		storeEntryItems[at].clear();
+
+		// fake CRL, just to show off the icon
+		/*if(ks->type() == QCA::KeyStore::System)
+		{
+			QStandardItem *item = new QStandardItem(entryTypeToIcon(QCA::KeyStoreEntry::TypeCRL), "Santa's Naughty List");
+			storeEntryItems[at] += item;
+			storeItems[at]->appendRow(item);
+		}*/
+
 		foreach(const QCA::KeyStoreEntry &entry, entries)
 		{
-			QStandardItem *item = new QStandardItem(entryTypeToString(entry.type()) + " - " + entry.name());
+			QStandardItem *item = new QStandardItem(entryTypeToIcon(entry.type()), entry.name());
 			storeEntryItems[at] += item;
 			storeItems[at]->appendRow(item);
 		}
@@ -596,7 +698,7 @@ private slots:
 		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
 		Q_UNUSED(ks);
 
-		// TODO
+		// TODO: remove from internal list and display
 	}
 };
 
@@ -674,17 +776,43 @@ private slots:
 	}
 };
 
+class MyPrompter : public Prompter
+{
+	Q_OBJECT
+private:
+	QMap<QString,QCA::SecureArray> known;
+
+public:
+	MyPrompter(QObject *parent = 0) :
+		Prompter(parent)
+	{
+	}
+
+protected:
+	virtual QCA::SecureArray knownPassword(const QCA::Event &event)
+	{
+		if(event.source() == QCA::Event::Data && !event.fileName().isEmpty())
+			return known.value(event.fileName());
+		else
+			return QCA::SecureArray();
+	}
+
+	virtual void userSubmitted(const QCA::SecureArray &password, const QCA::Event &event)
+	{
+		if(event.source() == QCA::Event::Data && !event.fileName().isEmpty())
+			known[event.fileName()] = password;
+	}
+};
+
 class MainWin : public QMainWindow
 {
 	Q_OBJECT
 private:
 	Ui_MainWin ui;
-	QCA::EventHandler *eventHandler;
-	QCA::SecureArray lastPassword;
+	MyPrompter *prompter;
 	QCA::KeyLoader *keyLoader;
 	QString keyLoader_fileName;
-	IdentityListModel *model;
-	KnownListModel *known;
+	CertListModel *users, *roots;
 	QCA::CMS *cms;
 	Operation *op;
 
@@ -696,6 +824,15 @@ public:
 	{
 		ui.setupUi(this);
 
+		g_icons = new Icons;
+		g_icons->cert = QPixmap(":/gfx/icons/cert16.png");
+		g_icons->crl = QPixmap(":/gfx/icons/crl16.png");
+		g_icons->keybundle = QPixmap(":/gfx/icons/keybundle16.png");
+		g_icons->pgppub = QPixmap(":/gfx/icons/publickey16.png");
+		g_icons->pgpsec = QPixmap(":/gfx/icons/keypair16.png");
+		if(g_icons->cert.isNull() || g_icons->crl.isNull() || g_icons->keybundle.isNull() || g_icons->pgppub.isNull() || g_icons->pgpsec.isNull())
+			printf("warning: not all icons loaded\n");
+
 		actionView = new QAction(tr("&View"), this);
 		actionRename = new QAction(tr("Re&name"), this);
 		actionRemove = new QAction(tr("Rem&ove"), this);
@@ -703,67 +840,81 @@ public:
 		// TODO
 		actionView->setEnabled(false);
 
-		connect(ui.actionLoad_Identity_From_File, SIGNAL(triggered()), SLOT(load_file()));
-		connect(ui.actionLoad_Identity_From_Storage_Device, SIGNAL(triggered()), SLOT(load_device()));
-		connect(ui.actionConfigure_PKCS_11_Modules, SIGNAL(triggered()), SLOT(mod_config()));
+		connect(ui.actionLoadIdentityFile, SIGNAL(triggered()), SLOT(load_file()));
+		connect(ui.actionLoadIdentityEntry, SIGNAL(triggered()), SLOT(load_device()));
+		connect(ui.actionLoadAuthority, SIGNAL(triggered()), SLOT(load_root()));
+		connect(ui.actionConfigurePkcs11, SIGNAL(triggered()), SLOT(mod_config()));
 		connect(ui.actionQuit, SIGNAL(triggered()), SLOT(close()));
-		connect(ui.actionAbout_CMS_Signer, SIGNAL(triggered()), SLOT(about()));
+		connect(ui.actionAbout, SIGNAL(triggered()), SLOT(about()));
 		connect(ui.pb_sign, SIGNAL(clicked()), SLOT(do_sign()));
 		connect(ui.pb_verify, SIGNAL(clicked()), SLOT(do_verify()));
 
-		connect(actionView, SIGNAL(triggered()), SLOT(item_view()));
+		//connect(actionView, SIGNAL(triggered()), SLOT(item_view()));
 		connect(actionRename, SIGNAL(triggered()), SLOT(item_rename()));
 		connect(actionRemove, SIGNAL(triggered()), SLOT(item_remove()));
 
 		ui.pb_sign->setEnabled(false);
 
-		eventHandler = new QCA::EventHandler(this);
-		connect(eventHandler, SIGNAL(eventReady(int, const QCA::Event &)), SLOT(eh_eventReady(int, const QCA::Event &)));
-		eventHandler->start();
+		prompter = new MyPrompter(this);
 
-		model = new IdentityListModel(this);
-		ui.lv_identities->setModel(model);
-		connect(ui.lv_identities->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), SLOT(identities_selectionChanged(const QItemSelection &, const QItemSelection &)));
+		users = new CertListModel(this);
+		ui.lv_users->setModel(users);
+		connect(ui.lv_users->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), SLOT(users_selectionChanged(const QItemSelection &, const QItemSelection &)));
 
-		known = new KnownListModel(this);
-		ui.lv_known->setModel(known);
+		roots = new CertListModel(this);
+		ui.lv_authorities->setModel(roots);
 
-		ui.lv_identities->model = model;
-		ui.lv_known->model = known;
+		// FIXME: is this redundant?
+		ui.lv_users->model = users;
+		ui.lv_authorities->model = roots;
 
 		cms = new QCA::CMS(this);
+
+		QStringList ulist, rlist;
+		{
+			QSettings settings("Affinix", "CMS Signer");
+			ulist = settings.value("users").toStringList();
+			rlist = settings.value("roots").toStringList();
+		}
+
+		QList<CertItem> userslist;
+		foreach(const QString &s, ulist)
+		{
+			CertItem i;
+			if(i.fromString(s))
+				userslist += i;
+		}
+
+		QList<CertItem> rootslist;
+		foreach(const QString &s, rlist)
+		{
+			CertItem i;
+			if(i.fromString(s))
+				rootslist += i;
+		}
+
+		users->addItems(userslist);
+		roots->addItems(rootslist);
+	}
+
+	~MainWin()
+	{
+		QStringList ulist;
+		foreach(const CertItem &i, users->list)
+			ulist += i.toString();
+		QStringList rlist;
+		foreach(const CertItem &i, roots->list)
+			rlist += i.toString();
+
+		QSettings settings("Affinix", "CMS Signer");
+		settings.setValue("users", ulist);
+		settings.setValue("roots", rlist);
+
+		delete g_icons;
+		g_icons = 0;
 	}
 
 private slots:
-	void eh_eventReady(int id, const QCA::Event &event)
-	{
-		QString promptType;
-		if(event.passwordStyle() == QCA::Event::StylePassphrase)
-			promptType = tr("Passphrase");
-		else if(event.passwordStyle() == QCA::Event::StylePIN)
-			promptType = tr("PIN");
-		else // Password
-			promptType = tr("Password");
-
-		QString promptStr = promptType + ": ";
-
-		bool ok;
-		QString pass = QInputDialog::getText(this, tr("CMS Signer"), promptStr, QLineEdit::Password, QString(), &ok);
-		if(!ok)
-		{
-			eventHandler->reject(id);
-			return;
-		}
-
-		QCA::SecureArray password = pass.toUtf8();
-
-		// cache file passwords
-		if(event.source() == QCA::Event::Data)
-			lastPassword = password;
-
-		eventHandler->submitPassword(id, password);
-	}
-
 	void load_file()
 	{
 		QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Identities (*.p12 *.pfx)"));
@@ -786,8 +937,31 @@ private slots:
 		w->show();
 	}
 
+	void load_root()
+	{
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Certificates (*.pem *.crt)"));
+		if(fileName.isEmpty())
+			return;
+
+		QCA::Certificate cert = QCA::Certificate::fromPEMFile(fileName);
+		if(cert.isNull())
+		{
+			QMessageBox::information(this, tr("Error"), tr("Error opening certificate file."));
+			return;
+		}
+
+		QString name = roots->getUniqueName(cert.commonName());
+
+		// TODO: check for duplicate entries?
+		CertItem i;
+		i.name = name;
+		i.chain += cert;
+		roots->addItem(i);
+	}
+
 	void load_file_finished()
 	{
+		// TODO: show more descriptive reason?
 		if(keyLoader->convertResult() != QCA::ConvertGood)
 		{
 			setEnabled(true);
@@ -799,27 +973,22 @@ private slots:
 		delete keyLoader;
 		keyLoader = 0;
 
-		QCA::Certificate cert = kb.certificateChain().primary();
+		QCA::CertificateChain chain = kb.certificateChain();
+		QCA::Certificate cert = chain.primary();
 
-		QString name = model->getUniqueName(cert.commonName());
+		QString name = users->getUniqueName(cert.commonName());
 
 		// TODO: check for duplicate identities?
-		IdentityItem i;
-		i.type = IdentityItem::File;
+		CertItem i;
 		i.name = name;
+		i.chain = chain;
+		i.havePrivate = true;
+		i.storageType = CertItem::File;
 		i.fileName = keyLoader_fileName;
-		i.password = lastPassword;
 		i.usable = true;
-		lastPassword.clear();
-		model->addItem(i);
+		users->addItem(i);
 
-		ui.lv_identities->selectionModel()->select(model->index(model->list.count()-1), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
-
-		// TODO: give unique names to knowns?  check for dups also?
-		KnownItem ki;
-		ki.name = i.name;
-		ki.cert = cert;
-		known->addItem(ki);
+		ui.lv_users->selectionModel()->select(users->index(users->list.count()-1), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
 
 		setEnabled(true);
 	}
@@ -828,23 +997,22 @@ private slots:
 	{
 		QCA::KeyBundle kb = entry.keyBundle();
 
-		QCA::Certificate cert = kb.certificateChain().primary();
+		QCA::CertificateChain chain = kb.certificateChain();
+		QCA::Certificate cert = chain.primary();
 
-		QString name = model->getUniqueName(entry.name());
+		QString name = users->getUniqueName(entry.name());
 
-		IdentityItem i;
-		i.type = IdentityItem::Entry;
+		// TODO: check for duplicate identities?
+		CertItem i;
 		i.name = name;
-		i.entry = entry;
+		i.chain = chain;
+		i.havePrivate = true;
+		i.storageType = CertItem::Entry;
+		i.keyStoreEntry = entry;
 		i.usable = true;
-		model->addItem(i);
+		users->addItem(i);
 
-		ui.lv_identities->selectionModel()->select(model->index(model->list.count()-1), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
-
-		KnownItem ki;
-		ki.name = i.name;
-		ki.cert = cert;
-		known->addItem(ki);
+		ui.lv_users->selectionModel()->select(users->index(users->list.count()-1), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
 
 		setEnabled(true);
 	}
@@ -863,7 +1031,7 @@ private slots:
 		w->show();
 	}
 
-	void identities_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+	void users_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 	{
 		Q_UNUSED(deselected);
 
@@ -873,7 +1041,7 @@ private slots:
 			ui.pb_sign->setEnabled(false);
 	}
 
-	void item_view()
+	/*void item_view()
 	{
 		if(ui.lv_identities->hasFocus())
 		{
@@ -891,92 +1059,121 @@ private slots:
 			QModelIndex index = selection.indexes().first();
 			known_view(index.row());
 		}
-	}
+	}*/
 
 	void item_rename()
 	{
-		if(ui.lv_identities->hasFocus())
+		if(ui.lv_users->hasFocus())
 		{
-			QItemSelection selection = ui.lv_identities->selectionModel()->selection();
+			QItemSelection selection = ui.lv_users->selectionModel()->selection();
 			if(selection.indexes().isEmpty())
 				return;
 			QModelIndex index = selection.indexes().first();
-			identity_rename(index.row());
+			users_rename(index.row());
 		}
-		else // lv_known
+		else // lv_authorities
 		{
-			QItemSelection selection = ui.lv_known->selectionModel()->selection();
+			QItemSelection selection = ui.lv_authorities->selectionModel()->selection();
 			if(selection.indexes().isEmpty())
 				return;
 			QModelIndex index = selection.indexes().first();
-			known_rename(index.row());
+			roots_rename(index.row());
 		}
 	}
 
 	void item_remove()
 	{
-		if(ui.lv_identities->hasFocus())
+		if(ui.lv_users->hasFocus())
 		{
-			QItemSelection selection = ui.lv_identities->selectionModel()->selection();
+			QItemSelection selection = ui.lv_users->selectionModel()->selection();
 			if(selection.indexes().isEmpty())
 				return;
 			QModelIndex index = selection.indexes().first();
-			identity_remove(index.row());
+			users_remove(index.row());
 		}
-		else // lv_known
+		else // lv_authorities
 		{
-			QItemSelection selection = ui.lv_known->selectionModel()->selection();
+			QItemSelection selection = ui.lv_authorities->selectionModel()->selection();
 			if(selection.indexes().isEmpty())
 				return;
 			QModelIndex index = selection.indexes().first();
-			known_remove(index.row());
+			roots_remove(index.row());
 		}
 	}
 
-	void identity_view(int at)
+	/*void identity_view(int at)
 	{
 		printf("identity_view: %d\n", at);
-	}
+	}*/
 
-	void identity_rename(int at)
+	void users_rename(int at)
 	{
-		printf("identity_rename: %d\n", at);
+		QModelIndex index = users->index(at);
+		ui.lv_users->setFocus();
+		ui.lv_users->setCurrentIndex(index);
+		ui.lv_users->selectionModel()->select(index, QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
+		ui.lv_users->edit(index);
 	}
 
-	void identity_remove(int at)
+	void users_remove(int at)
 	{
-		model->removeItem(at);
+		users->removeItem(at);
 	}
 
-	void known_view(int at)
+	/*void known_view(int at)
 	{
 		printf("known_view: %d\n", at);
+	}*/
+
+	void roots_rename(int at)
+	{
+		QModelIndex index = roots->index(at);
+		ui.lv_authorities->setFocus();
+		ui.lv_authorities->setCurrentIndex(index);
+		ui.lv_authorities->selectionModel()->select(index, QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
+		ui.lv_authorities->edit(index);
 	}
 
-	void known_rename(int at)
+	void roots_remove(int at)
 	{
-		printf("known_rename: %d\n", at);
-	}
-
-	void known_remove(int at)
-	{
-		known->removeItem(at);
+		roots->removeItem(at);
 	}
 
 	void do_sign()
 	{
-		op = new SignOperation(ui.te_data->toPlainText().toUtf8(), &model->list[0], cms, this);
+		QItemSelection selection = ui.lv_users->selectionModel()->selection();
+		if(selection.indexes().isEmpty())
+			return;
+		QModelIndex index = selection.indexes().first();
+		int at = index.row();
+
+		op = new SignOperation(ui.te_data->toPlainText().toUtf8(), &users->list[at], cms, this);
 		connect(op, SIGNAL(finished(const QString &)), SLOT(sign_finished(const QString &)));
 		connect(op, SIGNAL(error(const QString &)), SLOT(op_error(const QString &)));
 	}
 
 	void do_verify()
 	{
-		// get known
+		// prepare root certs
 		QCA::CertificateCollection col;
-		foreach(const KnownItem &i, known->list)
-			col.addCertificate(i.cert);
+
+		// system store
 		col += QCA::systemStore();
+
+		// additional roots configured in application
+		foreach(const CertItem &i, roots->list)
+			col.addCertificate(i.chain.primary());
+
+		// consider self-signed users as roots
+		// (it is therefore not possible with this application to
+		// have people in your keyring that you don't trust)
+		foreach(const CertItem &i, users->list)
+		{
+			QCA::Certificate cert = i.chain.primary();
+			if(cert.isSelfSigned())
+				col.addCertificate(cert);
+		}
+
 		cms->setTrustedCertificates(col);
 
 		op = new VerifyOperation(ui.te_data->toPlainText().toUtf8(), ui.te_sig->toPlainText().toUtf8(), cms, this);
@@ -986,7 +1183,33 @@ private slots:
 
 	void about()
 	{
-		QMessageBox::about(this, tr("About CMS Signer"), tr("CMS Signer v0.1\nA simple tool for creating and verifying digital signatures."));
+		int ver = qcaVersion();
+		int maj = (ver >> 16) & 0xff;
+		int min = (ver >> 8) & 0xff;
+		int bug = ver & 0xff;
+		QString verstr;
+		verstr.sprintf("%d.%d.%d", maj, min, bug);
+
+		QString str;
+		str += tr("CMS Signer version %1 by Justin Karneges").arg(VERSION) + '\n';
+		str += tr("A simple tool for creating and verifying digital signatures.") + '\n';
+		str += '\n';
+		str += tr("Using QCA version %1").arg(verstr) + '\n';
+		str += '\n';
+		str += tr("Icons by Jason Kim") + '\n';
+
+		QCA::ProviderList list = QCA::providers();
+		foreach(QCA::Provider *p, list)
+		{
+			QString credit = p->credit();
+			if(!credit.isEmpty())
+			{
+				str += '\n';
+				str += credit;
+			}
+		}
+
+		QMessageBox::about(this, tr("About CMS Signer"), str);
 	}
 
 	void sign_finished(const QString &sig)
@@ -1011,9 +1234,10 @@ int main(int argc, char **argv)
 {
 	QCA::Initializer qcaInit;
 	QApplication qapp(argc, argv);
+	qapp.setApplicationName(MainWin::tr("CMS Signer"));
 	if(!QCA::isSupported("cms"))
 	{
-		QMessageBox::critical(0, MainWin::tr("CMS Signer: Error"), MainWin::tr("No support for CMS is available.  Please install an appropriate QCA plugin, such as qca-openssl."));
+		QMessageBox::critical(0, qapp.applicationName() + ": " + MainWin::tr("Error"), MainWin::tr("No support for CMS is available.  Please install an appropriate QCA plugin, such as qca-openssl."));
 		return 1;
 	}
 	MainWin mainWin;

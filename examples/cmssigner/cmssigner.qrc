@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/gfx" >
-        <file>key.png</file>
+        <file>icons/cert16.png</file>
+        <file>icons/crl16.png</file>
+        <file>icons/keybundle16.png</file>
+        <file>icons/keypair16.png</file>
+        <file>icons/publickey16.png</file>
     </qresource>
 </RCC>

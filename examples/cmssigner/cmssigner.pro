@@ -5,8 +5,8 @@ QT += gui
 
 include(pkcs11configdlg/pkcs11configdlg.pri)
 
-HEADERS += mylistview.h keystoreview.h
-SOURCES += main.cpp
+HEADERS += prompter.h mylistview.h keystoreview.h
+SOURCES += prompter.cpp main.cpp
 
 FORMS += mainwin.ui loadstore.ui
 RESOURCES += cmssigner.qrc

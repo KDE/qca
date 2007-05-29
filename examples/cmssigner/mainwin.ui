@@ -21,54 +21,43 @@
      <number>6</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" >
-      <property name="margin" >
+     <widget class="QTabWidget" name="tabWidget" >
+      <property name="currentIndex" >
        <number>0</number>
       </property>
-      <property name="spacing" >
-       <number>6</number>
-      </property>
-      <item>
+      <widget class="QWidget" name="tab" >
+       <attribute name="title" >
+        <string>Keyring</string>
+       </attribute>
        <layout class="QVBoxLayout" >
         <property name="margin" >
-         <number>0</number>
+         <number>9</number>
         </property>
         <property name="spacing" >
          <number>6</number>
         </property>
         <item>
-         <widget class="QLabel" name="label" >
-          <property name="text" >
-           <string>Identities:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="MyListView" name="lv_identities" />
+         <widget class="MyListView" name="lv_users" />
         </item>
        </layout>
-      </item>
-      <item>
+      </widget>
+      <widget class="QWidget" name="tab_2" >
+       <attribute name="title" >
+        <string>Authorities</string>
+       </attribute>
        <layout class="QVBoxLayout" >
         <property name="margin" >
-         <number>0</number>
+         <number>9</number>
         </property>
         <property name="spacing" >
          <number>6</number>
         </property>
         <item>
-         <widget class="QLabel" name="label_4" >
-          <property name="text" >
-           <string>Known Peers:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="MyListView" name="lv_known" />
+         <widget class="MyListView" name="lv_authorities" />
         </item>
        </layout>
-      </item>
-     </layout>
+      </widget>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" >
@@ -168,33 +157,34 @@
      <height>29</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile" >
-    <property name="title" >
-     <string>&amp;File</string>
-    </property>
-    <addaction name="actionLoad_Identity_From_File" />
-    <addaction name="actionLoad_Identity_From_Storage_Device" />
-    <addaction name="separator" />
-    <addaction name="actionConfigure_PKCS_11_Modules" />
-    <addaction name="separator" />
-    <addaction name="actionQuit" />
-   </widget>
    <widget class="QMenu" name="menuHelp" >
     <property name="title" >
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionAbout_CMS_Signer" />
+    <addaction name="actionAbout" />
+   </widget>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionLoadIdentityFile" />
+    <addaction name="actionLoadIdentityEntry" />
+    <addaction name="actionLoadAuthority" />
+    <addaction name="separator" />
+    <addaction name="actionConfigurePkcs11" />
+    <addaction name="separator" />
+    <addaction name="actionQuit" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuHelp" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
-  <action name="actionLoad_Identity_From_File" >
+  <action name="actionLoadIdentityFile" >
    <property name="text" >
     <string>Load Identity From &amp;File...</string>
    </property>
   </action>
-  <action name="actionLoad_Identity_From_Storage_Device" >
+  <action name="actionLoadIdentityEntry" >
    <property name="text" >
     <string>Load Identity From &amp;Storage Device...</string>
    </property>
@@ -204,14 +194,19 @@
     <string>&amp;Quit</string>
    </property>
   </action>
-  <action name="actionAbout_CMS_Signer" >
+  <action name="actionAbout" >
    <property name="text" >
     <string>About CMS Signer</string>
    </property>
   </action>
-  <action name="actionConfigure_PKCS_11_Modules" >
+  <action name="actionConfigurePkcs11" >
    <property name="text" >
     <string>Configure &amp;PKCS#11 Modules...</string>
+   </property>
+  </action>
+  <action name="actionLoadAuthority" >
+   <property name="text" >
+    <string>Load &amp;Authority...</string>
    </property>
   </action>
  </widget>
@@ -222,6 +217,15 @@
    <header>mylistview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>lv_users</tabstop>
+  <tabstop>lv_authorities</tabstop>
+  <tabstop>te_data</tabstop>
+  <tabstop>te_sig</tabstop>
+  <tabstop>pb_sign</tabstop>
+  <tabstop>pb_verify</tabstop>
+ </tabstops>
  <resources>
   <include location="cmssigner.qrc" />
  </resources>

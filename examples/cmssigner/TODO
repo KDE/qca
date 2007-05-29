@@ -24,3 +24,19 @@ store icons
   pgp keyring
 
 unknown store/entry icon (can use the same icon for both i think)
+
+when verifying a signature:
+  if the key is valid, import it and ask the user for a friendly name and
+    import into keyring
+  if the key is self-signed, ask the user to verify the fingerprint. if
+    validated, ask user for friendly name and import into keyring
+
+ability to view CertItems, showing cert values and issuer hierarchy
+report all 3 kinds of diagnostic text somewhere (plugin, keystore, secmessage)
+integrated logger window?  also allow setting the log level
+
+items in loadstore ui should not be editable
+
+don't show systemstore or pgpkeyrings
+
+respect !usable state for items
