@@ -1,22 +1,27 @@
 * beta6
+  other:
+    alon's configuration suggestions (see "QCA side by side" thread)
+    plugins need to follow the new build process
+
+* beta7
   api:
+    extended key usage can have OIDs ?!
     it's possible we use SecureArray in some unnecessary places
-    CMS::setUntrustedCertificates
     Q_DISABLE_COPY on some objects
     give all classes non-default ctors/dtors/copy/op=, and dpointers?
     add more "getters" to the library?
     don't forget to QCA_EXPORT everything
   code:
+    default: config option for setting provider priorities
     cert: rfc 2818 hostname validation
+    cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
     keystore: complete
     securelayer: complete
-    qcatool: configurator for pkcs11 and generic
-    qcatool TODOs
-    finish cmssigner
   other:
-    update README/INSTALL
-    special thanks to Jack Lloyd
-    winlocal didn't work, what now?
+    finish cmssigner, set to 1.0
+    cmssigner: i'm getting a crash sometimes during sign..  test and trace
+    update README/INSTALL, special thanks to Jack Lloyd
+    regenerate botantools.diff
 
 * test1
   doc:
@@ -26,7 +31,7 @@
       pkey: sign/decrypt, or any non-KeyLoader privkey/keybundle loading
       keystore: entryList (non-async), ensureAvailable, ensureAccessible
       securemessage: waitForFinished
-    Change Doxyfile config to capture whole API, and to generate Latex manual.
+    Change Doxyfile config to capture whole API, and to generate Latex manual
   code:
     synchronizer: cleanup
     publickey: cleanup
@@ -37,7 +42,6 @@
     add logging to qca lib and other plugins
     add more asserts?
   other:
-    regenerate botantools.diff
     update the rootcerts with mozcerts
     make sure the version is correct in all locations (README, etc)
 
@@ -62,6 +66,11 @@
   qca-egads (or qca-egd): implement for Random support
 
 * possibilities for the future:
+  qcatool: streaming securemessage operations
+  qcatool: instead of printing full usage at every wrong turn, we might try
+    to print something closer to the context
+  access to list of known cached certs, similar to how cmssigner works?
+  securemessage: ability to know which key has performed a decrypt?
   emsa3Encode: implement in provider instead of qca?
   OCSP
   tls ocsp stapling
