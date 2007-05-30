@@ -1022,6 +1022,8 @@ namespace QCA
 		void finished();
 
 	private:
+		Q_DISABLE_COPY(KeyGenerator)
+
 		class Private;
 		friend class Private;
 		Private *d;

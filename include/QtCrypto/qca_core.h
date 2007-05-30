@@ -739,15 +739,6 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
-		/**
-		   Standard constructor
-
-		   \param parent the parent provider for this 
-		   context
-		   \param type the name of the provider context type
-		*/
-		Context(Provider *parent, const QString &type);
-		Context(const Context &from);
 		virtual ~Context();
 
 		/**
@@ -775,7 +766,23 @@ namespace QCA
 		*/
 		bool sameProvider(const Context *c) const;
 
+	protected:
+		/**
+		   Standard constructor
+
+		   \param parent the parent provider for this 
+		   context
+		   \param type the name of the provider context type
+		*/
+		Context(Provider *parent, const QString &type);
+
+		// copy constructor
+		Context(const Context &from);
+
 	private:
+		// disable assignment
+		Context & operator=(const Context &from);
+
 		Provider *_provider;
 		QString _type;
 	};
@@ -784,9 +791,15 @@ namespace QCA
 	{
 		Q_OBJECT
 	public:
+		~BasicContext();
+
+	protected:
 		BasicContext(Provider *parent, const QString &type);
 		BasicContext(const BasicContext &from);
-		~BasicContext();
+
+	private:
+		// disable assignment
+		BasicContext & operator=(const BasicContext &from);
 	};
 
 	/**
@@ -1325,6 +1338,8 @@ namespace QCA
 		void eventReady(int id, const QCA::Event &context);
 
 	private:
+		Q_DISABLE_COPY(EventHandler)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -1406,6 +1421,8 @@ namespace QCA
 		void responseReady();
 
 	private:
+		Q_DISABLE_COPY(PasswordAsker)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -1467,6 +1484,8 @@ namespace QCA
 		void responseReady();
 
 	private:
+		Q_DISABLE_COPY(TokenAsker)
+
 		class Private;
 		friend class Private;
 		Private *d;

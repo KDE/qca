@@ -71,6 +71,8 @@ namespace QCA
 		virtual void run();
 
 	private:
+		Q_DISABLE_COPY(SyncThread)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -87,6 +89,8 @@ namespace QCA
 		void conditionMet();
 
 	private:
+		Q_DISABLE_COPY(Synchronizer)
+
 		class Private;
 		Private *d;
 	};
@@ -105,6 +109,8 @@ namespace QCA
 		void changed();
 
 	private:
+		Q_DISABLE_COPY(DirWatch)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -150,6 +156,8 @@ namespace QCA
 		void changed();
 
 	private:
+		Q_DISABLE_COPY(FileWatch)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -239,6 +247,8 @@ namespace QCA
 		QByteArray bytesLeftToWrite();
 
 	private:
+		Q_DISABLE_COPY(Console)
+
 		friend class ConsolePrivate;
 		ConsolePrivate *d;
 
@@ -283,6 +293,8 @@ namespace QCA
 		void outputClosed();
 
 	private:
+		Q_DISABLE_COPY(ConsoleReference)
+
 		friend class ConsoleReferencePrivate;
 		ConsoleReferencePrivate *d;
 
@@ -306,6 +318,8 @@ namespace QCA
 		void finished();
 
 	private:
+		Q_DISABLE_COPY(ConsolePrompt)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -410,6 +424,8 @@ namespace QCA
 	    QStringList currentLogDevices() const;
 
 	private:
+	    Q_DISABLE_COPY(Logger)
+
 	    friend class Global;
 
 	    /**
@@ -466,13 +482,13 @@ namespace QCA
 	    virtual ~AbstractLogDevice() = 0;
 
 	private:
+	    Q_DISABLE_COPY(AbstractLogDevice)
+
 	    class Private;
 	    Private *d;
 
             QString m_name;
 	};
-
-
 }
 
 #endif

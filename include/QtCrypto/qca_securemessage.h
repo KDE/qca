@@ -702,6 +702,8 @@ else
 		void finished();
 
 	private:
+		Q_DISABLE_COPY(SecureMessage)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -736,6 +738,9 @@ else
 		   provider is required.
 		*/
 		SecureMessageSystem(QObject *parent, const QString &type, const QString &provider);
+
+	private:
+		Q_DISABLE_COPY(SecureMessageSystem)
 	};
 
 	/**
@@ -759,6 +764,9 @@ else
 		*/
 		explicit OpenPGP(QObject *parent = 0, const QString &provider = QString());
 		~OpenPGP();
+
+	private:
+		Q_DISABLE_COPY(OpenPGP)
 	};
 
 	/**
@@ -830,6 +838,9 @@ else
 		   \param keys the collection of keys to use
 		*/
 		void setPrivateKeys(const SecureMessageKeyList &keys);
+
+	private:
+		Q_DISABLE_COPY(CMS)
 	};
 }
 

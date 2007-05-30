@@ -4,7 +4,6 @@
     problem: pgp can cause token event while pgp store is available
     deinit method for providers, to occur for all before destruction?
     it's possible we use SecureArray in some unnecessary places
-    Q_DISABLE_COPY on some objects
     give all classes non-default ctors/dtors/copy/op=, and dpointers?
     add more "getters" to the library?
     don't forget to QCA_EXPORT everything
@@ -15,6 +14,7 @@
     keystore: complete
     securelayer: complete
   other:
+    remove header file indentation
     for parallel make, have all utilities/tests depend on the library
     finish cmssigner, set to 1.0
     cmssigner: i'm getting a crash sometimes during sign..  test and trace

@@ -329,6 +329,8 @@ namespace QCA
 		void unavailable();
 
 	private:
+		Q_DISABLE_COPY(KeyStoreEntryWatcher)
+
 		class Private;
 		friend class Private;
 		Private *d;
@@ -509,6 +511,8 @@ namespace QCA
 		void entryRemoved(bool success);
 
 	private:
+		Q_DISABLE_COPY(KeyStore)
+
 		friend class KeyStorePrivate;
 		KeyStorePrivate *d;
 
@@ -622,6 +626,8 @@ namespace QCA
 		void keyStoreAvailable(const QString &id);
 
 	private:
+		Q_DISABLE_COPY(KeyStoreManager)
+
 		friend class KeyStoreManagerPrivate;
 		KeyStoreManagerPrivate *d;
 
