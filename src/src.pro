@@ -79,7 +79,7 @@ windows: {
 mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_mac.cpp
 	LIBS += -framework Carbon -framework Security
-	QMAKE_LFLAGS_SONAME = -Wl,-install_name,"$$PREFIX/lib/"
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,"$$LIBDIR/"
 }
 
 unix: {
@@ -87,7 +87,7 @@ unix: {
 	target.path = $$LIBDIR
 	INSTALLS += target
 
-	incfiles.path = $$PREFIX/include/QtCrypto
+	incfiles.path = $$INCDIR/QtCrypto
 	incfiles.files = $$PUBLIC_HEADERS
 	incfiles.files += $$QCA_INC/qca.h $$QCA_INC/QtCrypto
 	INSTALLS += incfiles
