@@ -48,6 +48,7 @@ protected:
 
 private:
 	class Private;
+	friend class Private;
 	Private *d;
 };
 
