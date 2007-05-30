@@ -1,5 +1,3 @@
-#include <qprocess.h>
-#include <qstringlist.h>
 /*
 -----BEGIN QCMOD-----
 name: pkcs11_helper

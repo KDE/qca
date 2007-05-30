@@ -6,11 +6,15 @@
  <dep type='buildmode'>
   <required/>
  </dep>
+ <dep type='universal'>
+  <required/>
+ </dep>
  <dep type='qca'>
   <required/>
  </dep>
- <dep type='extra'>
+ <dep type='qcapluginpath'>
   <required/>
  </dep>
  <moddir>.</moddir>
+ <moddir>../../qcm</moddir>
 </qconf>
