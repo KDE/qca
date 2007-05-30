@@ -1782,7 +1782,10 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
-		else if(alg == EMSA3_Raw); // md=0
+		else if(alg == EMSA3_Raw)
+		{
+			// md = 0
+		}
 		evp.startSign(md);
 	}
 
@@ -1797,7 +1800,10 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
-		else if(alg == EMSA3_Raw); // md=0
+		else if(alg == EMSA3_Raw)
+		{
+			// md = 0
+		}
 		evp.startVerify(md);
 	}
 
