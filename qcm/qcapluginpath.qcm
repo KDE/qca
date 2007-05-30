@@ -1,15 +1,15 @@
 /*
 -----BEGIN QCMOD-----
-name: extra
+name: qcapluginpath
 -----END QCMOD-----
 */
 
-class qc_extra : public ConfObj
+class qc_qcapluginpath : public ConfObj
 {
 public:
-	qc_extra(Conf *c) : ConfObj(c) {}
-	QString name() const { return "extra"; }
-	QString shortname() const { return "extra"; }
+	qc_qcapluginpath(Conf *c) : ConfObj(c) {}
+	QString name() const { return "qcapluginpath"; }
+	QString shortname() const { return "qcapluginpath"; }
 
 	// no output
 	QString checkString() const { return QString(); }

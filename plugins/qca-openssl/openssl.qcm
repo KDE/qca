@@ -54,15 +54,17 @@ public:
 			"  unsigned long x = OPENSSL_VERSION_NUMBER;\n"
 			"  if(x >= 0x00907000) return 0; else return 1;\n"
 			"}\n";
-		QString ext;
+		QStringList incs;
+		QString libs;
 		if(!inc.isEmpty())
-			ext += QString("-I") + inc + ' ';
+			incs += inc;
 		if(kb)
-			ext += QString("-I") + kbdir + ' ';
+			incs += kbdir;
 		if(!lib.isEmpty())
-			ext += QString("-L") + lib + " -lssl -lcrypto ";
+			libs += QString("-L") + lib + ' ';
+		libs += "-lssl -lcrypto";
 		int ret;
-		if(!conf->doCompileAndLink(str, QStringList(), ext, QString(), &ret))
+		if(!conf->doCompileAndLink(str, incs, libs, QString(), &ret))
 			return false;
 		if(ret == 0)
 			conf->addDefine("OSSL_097");

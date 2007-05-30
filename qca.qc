@@ -2,6 +2,7 @@
  <name>Qt Cryptographic Architecture (QCA)</name>
  <profile>qca.pro</profile>
  <lib/>
+ <incdir/>
  <libdir/>
  <datadir/>
  <moddir>qcm</moddir>

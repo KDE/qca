@@ -1,8 +1,8 @@
-# prepend this file with a QCA_PREFIX definition
+# prepend this file with QCA_INCDIR/QCA_LIBDIR definitions
 
 CONFIG *= qt
-INCLUDEPATH += $$QCA_PREFIX/include/QtCrypto
-LIBS += -L$$QCA_PREFIX/lib
+INCLUDEPATH += $$QCA_INCDIR/QtCrypto
+LIBS += -L$$QCA_LIBDIR
 
 LINKAGE = -lqca
 CONFIG(debug, debug|release) {

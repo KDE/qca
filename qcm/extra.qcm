@@ -79,6 +79,8 @@ public:
 		f.close();
 
 		QString prefix = conf->getenv("PREFIX");
+		QString incdir = conf->getenv("INCDIR");
+		QString libdir = conf->getenv("LIBDIR");
 
 		// write qmake-feature file
 		QString crypto_in;
@@ -89,7 +91,8 @@ public:
 			f.close();
 		}
 
-		str = QString("QCA_PREFIX = %1\n").arg(prefix);
+		str = QString("QCA_INCDIR = %1\n").arg(incdir);
+		str += QString("QCA_LIBDIR = %1\n").arg(libdir);
 		str += crypto_in;
 
 		f.setFileName("crypto.prf");
@@ -111,8 +114,8 @@ public:
 		QString pkg_template1 = QString(
 		"prefix=%1\n"
 		"exec_prefix=${prefix}\n"
-		"libdir=${prefix}/lib\n"
-		"includedir=${prefix}/include/QtCrypto\n"
+		"libdir=%2\n"
+		"includedir=%3/QtCrypto\n"
 		"\n");
 
 		QString pkg_template2 = QString(
@@ -133,28 +136,28 @@ public:
 		QDir::current().mkdir("lib");
 		if(release)
 		{
-			str =  pkg_template1.arg(prefix);
+			str =  pkg_template1.arg(prefix, libdir, incdir);
 			str += pkg_template2.arg("QCA");
 			str += pkg_template3.arg("QtCore");
 			str += pkg_template4.arg("qca");
-			f.setFileName("lib/qca.pc");
+			f.setFileName("lib/qca2.pc");
 			if(f.open(QFile::WriteOnly | QFile::Truncate))
 				f.write(str.toLatin1());
 			f.close();
-			pcfiles += "lib/qca.pc";
+			pcfiles += "lib/qca2.pc";
 		}
 
 		if(debug)
 		{
-			str =  pkg_template1.arg(prefix);
+			str =  pkg_template1.arg(prefix, libdir, incdir);
 			str += pkg_template2.arg("QCA_debug");
 			str += pkg_template3.arg("QtCore_debug");
 			str += pkg_template4.arg("qca_debug");
-			f.setFileName("lib/qca_debug.pc");
+			f.setFileName("lib/qca2_debug.pc");
 			if(f.open(QFile::WriteOnly | QFile::Truncate))
 				f.write(str.toLatin1());
 			f.close();
-			pcfiles += "lib/qca_debug.pc";
+			pcfiles += "lib/qca2_debug.pc";
 		}
 
         	str = QString(
