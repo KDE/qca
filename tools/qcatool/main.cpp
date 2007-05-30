@@ -26,7 +26,9 @@
 #include <QTextStream>
 #include <QTimer>
 
-#define VERSION "1.0.0"
+const char *const APPNAME = "qcatool";
+const char *const EXENAME = "qcatool2";
+const char *const VERSION = "1.0.0";
 
 static QStringList wrapstring(const QString &str, int width)
 {
@@ -2520,8 +2522,8 @@ static QPair<QCA::PGPKey, QCA::PGPKey> get_S(const QString &name)
 
 static void usage()
 {
-	printf("qcatool: simple qca utility\n");
-	printf("usage: qcatool (options) [command]\n");
+	printf("%s: simple qca utility\n", APPNAME);
+	printf("usage: %s (options) [command]\n", EXENAME);
 	printf(" options: --pass=x, --newpass=x, --nonroots=x, --roots=x, --nosys,\n");
 	printf("          --noprompt, --ordered, --debug, --log-file=x, --log-level=n,\n");
 	printf("          --nobundle\n");
@@ -2683,7 +2685,7 @@ int main(int argc, char **argv)
 		int maj = (ver >> 16) & 0xff;
 		int min = (ver >> 8) & 0xff;
 		int bug = ver & 0xff;
-		printf("qcatool version %s by Justin Karneges\n", VERSION);
+		printf("%s version %s by Justin Karneges\n", APPNAME, VERSION);
 		printf("Using QCA version %d.%d.%d\n", maj, min, bug);
 		return 0;
 	}
