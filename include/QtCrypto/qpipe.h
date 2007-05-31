@@ -79,9 +79,7 @@ public:
 	void enable();                         // enables usage (read/write) of the pipe
 	void close();                          // close the pipe
 	void release();                        // let go of the pipe but don't close
-#ifdef Q_OS_WIN
-	bool winDupHandle();                   // DuplicateHandle()
-#endif
+	bool setInheritable(bool enabled);     // note: on windows, this operation changes the id
 
 	int bytesAvailable() const;            // bytes available to read
 	int read(char *data, int maxsize);     // return number read, 0 = EOF, -1 = error
@@ -116,7 +114,7 @@ public:
 	QPipeDevice::Type type() const;
 	bool isValid() const;
 	Q_PIPE_ID id() const;
-	QString idAsString() const;
+	int idAsInt() const;
 
 	void take(Q_PIPE_ID id, QPipeDevice::Type t);
 #ifdef QPIPE_SECURE
@@ -125,9 +123,7 @@ public:
 	void enable();
 	void close();
 	void release();
-#ifdef Q_OS_WIN
-	bool winDupHandle();
-#endif
+	bool setInheritable(bool enabled);
 
 	void finalize(); // do an immediate read, and invalidate
 	void finalizeAndRelease(); // same as above, but don't close pipe
@@ -163,7 +159,7 @@ private:
 	Private *d;
 };
 
-// creates a full pipe (two pipe ends)
+// creates a full pipe (two pipe ends), non-inheritable
 class QCA_EXPORT QPipe
 {
 public:
