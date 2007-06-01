@@ -1153,7 +1153,7 @@ namespace QCA
 		   \param time the time the Certificate was revoked (or will be revoked)
 		   \param r the reason that the certificate is being revoked
 		*/
-		CRLEntry(const BigInteger serial, const QDateTime time, Reason r = Unspecified);
+		CRLEntry(const BigInteger serial, const QDateTime &time, Reason r = Unspecified);
 
 		/**
 		   The serial number of the certificate that is the subject of this CRL entry

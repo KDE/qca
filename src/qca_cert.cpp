@@ -1498,7 +1498,7 @@ CRLEntry::CRLEntry(const Certificate &c, Reason r)
 	_reason = r;
 }
 
-CRLEntry::CRLEntry(const BigInteger serial, const QDateTime time, Reason r)
+CRLEntry::CRLEntry(const BigInteger serial, const QDateTime &time, Reason r)
 {
 	_serial = serial;
 	_time = time;
