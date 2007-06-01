@@ -60,6 +60,10 @@ public:
 	*/
 	Random(const QString &provider = QString());
 
+	Random(const Random &from);
+	~Random();
+	Random & operator=(const Random &from);
+
 	/**
 	   Provide a random byte.
 
@@ -117,6 +121,10 @@ SecureArray arry = QCA::Random::randomArray(30);
 	   \param size the number of bytes to provide
 	*/
 	static SecureArray randomArray(int size);
+
+private:
+	class Private;
+	Private *d;
 };
 
 /**
@@ -180,6 +188,10 @@ public:
 	   for the subclass (eg "qca-openssl")
 	*/
 	explicit Hash(const QString &type, const QString &provider = QString());
+
+	Hash(const Hash &from);
+	~Hash();
+	Hash & operator=(const Hash &from);
 
 	/**
 	   Reset a hash, dumping all previous parts of the
@@ -305,6 +317,10 @@ SecureArray outputArray = QCA::Hash("md2")::hash(sampleArray);
 	   Hash::final(), before using the static arrayToHex() method.
 	*/
 	QString hashToString(const SecureArray &array);
+
+private:
+	class Private;
+	Private *d;
 };
 
 /**

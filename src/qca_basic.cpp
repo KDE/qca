@@ -39,6 +39,21 @@ Random::Random(const QString &provider)
 {
 }
 
+Random::Random(const Random &from)
+:Algorithm(from)
+{
+}
+
+Random::~Random()
+{
+}
+
+Random & Random::operator=(const Random &from)
+{
+	Algorithm::operator=(from);
+	return *this;
+}
+
 uchar Random::nextByte()
 {
 	return (uchar)(nextBytes(1)[0]);
@@ -76,6 +91,21 @@ SecureArray Random::randomArray(int size)
 Hash::Hash(const QString &type, const QString &provider)
 :Algorithm(type, provider)
 {
+}
+
+Hash::Hash(const Hash &from)
+:Algorithm(from), BufferedComputation(from)
+{
+}
+
+Hash::~Hash()
+{
+}
+
+Hash & Hash::operator=(const Hash &from)
+{
+	Algorithm::operator=(from);
+	return *this;
 }
 
 void Hash::clear()
