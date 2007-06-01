@@ -585,6 +585,7 @@ namespace QCA
 		KeyLength(int min, int max, int multiple)
 			: _min( min ), _max(max), _multiple( multiple )
 		{ }
+
 		/**
 		 * Obtain the minimum length for the key, in bytes
 		 */
@@ -604,7 +605,7 @@ namespace QCA
 		int multiple() const { return _multiple; }
 
 	private:
-		int const _min, _max, _multiple;
+		const int _min, _max, _multiple;
 	};
 
 	/**
