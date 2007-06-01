@@ -1174,11 +1174,6 @@ bool Certificate::operator==(const Certificate &otherCert) const
 	return true;
 }
 
-bool Certificate::operator!=(const Certificate &a) const
-{
-	return !(*this == a);
-}
-
 void Certificate::change(CertContext *c)
 {
 	Algorithm::change(c);

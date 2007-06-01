@@ -174,6 +174,14 @@ namespace QCA
 		*/
 		bool operator==(const CertificateInfoPair &other) const;
 
+		/**
+		   Inequality operator
+		*/
+		inline bool operator!=(const CertificateInfoPair &other) const
+		{
+			return !(*this == other);
+		}
+
 	private:
 		class Private;
 		QSharedDataPointer<Private> d;
@@ -768,17 +776,18 @@ namespace QCA
 
 		/**
 		   Test for equality of two certificates
-		   
+
 		   \return true if the two certificates are the same
 		*/
 		bool operator==(const Certificate &a) const;
 
 		/**
-		   Test for inequality of two certificates
-		   
-		   \return true if the two certificates are not the same
+		   Inequality operator
 		*/
-		bool operator!=(const Certificate &a) const;
+		inline bool operator!=(const Certificate &other) const
+		{
+			return !(*this == other);
+		}
 
 		/**
 		   \internal
@@ -1012,10 +1021,18 @@ namespace QCA
 
 		/**
 		   Test for equality of two certificate requests
-		   
+
 		   \return true if the two certificate requests are the same
 		*/
 		bool operator==(const CertificateRequest &csr) const;
+
+		/**
+		   Inequality operator
+		*/
+		inline bool operator!=(const CertificateRequest &other) const
+		{
+			return !(*this == other);
+		}
 
 		/**
 		   Export the Certificate Request into a DER format
@@ -1184,17 +1201,25 @@ namespace QCA
 
 		/**
 		   Test if one CRL entry is "less than" another
-		   
+
 		   CRL entries are compared based on their serial number
 		*/
 		bool operator<(const CRLEntry &a) const;
 
 		/**
 		   Test for equality of two CRL Entries
-		   
+
 		   \return true if the two certificates are the same
 		*/
 		bool operator==(const CRLEntry &a) const;
+
+		/**
+		   Inequality operator
+		*/
+		inline bool operator!=(const CRLEntry &other) const
+		{
+			return !(*this == other);
+		}
 
 	private:
 		BigInteger _serial;
@@ -1299,10 +1324,18 @@ namespace QCA
 
 		/**
 		   Test for equality of two %Certificate Revocation Lists
-		   
+
 		   \return true if the two CRLs are the same
 		*/
 		bool operator==(const CRL &a) const;
+
+		/**
+		   Inequality operator
+		*/
+		inline bool operator!=(const CRL &other) const
+		{
+			return !(*this == other);
+		}
 
 		/**
 		   Export the %Certificate Revocation List (CRL) in DER format
