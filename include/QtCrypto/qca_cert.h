@@ -1981,7 +1981,7 @@ namespace QCA
 
                    This function will return immediately.
 
-                   \param fileName the name of the file (and path, if neccessary) to load
+                   \param fileName the name of the file (and path, if necessary) to load
                    the key from
 		*/
 		void loadPrivateKeyFromPEMFile(const QString &fileName);
@@ -2009,7 +2009,7 @@ namespace QCA
 
                    This function will return immediately.
 
-                   \param fileName the name of the file (and path, if neccessary) to load
+                   \param fileName the name of the file (and path, if necessary) to load
                    the key bundle from
 		*/
 		void loadKeyBundleFromFile(const QString &fileName);
