@@ -1176,6 +1176,10 @@ namespace QCA
 		*/
 		CRLEntry(const BigInteger serial, const QDateTime &time, Reason r = Unspecified);
 
+		CRLEntry(const CRLEntry &from);
+		~CRLEntry();
+		CRLEntry & operator=(const CRLEntry &from);
+
 		/**
 		   The serial number of the certificate that is the subject of this CRL entry
 		*/
@@ -1225,6 +1229,9 @@ namespace QCA
 		BigInteger _serial;
 		QDateTime _time;
 		Reason _reason;
+
+		class Private;
+		Private *d;
 	};
 
 	/**
@@ -1557,6 +1564,10 @@ namespace QCA
 		*/
 		CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
 
+		CertificateAuthority(const CertificateAuthority &from);
+		~CertificateAuthority();
+		CertificateAuthority & operator=(const CertificateAuthority &from);
+
 		/**
 		   The Certificate belonging to the %CertificateAuthority
 
@@ -1599,6 +1610,10 @@ namespace QCA
 		   \return the update CRL
 		*/
 		CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
+
+	private:
+		class Private;
+		Private *d;
 	};
 
 	/**
@@ -1970,6 +1985,10 @@ namespace QCA
 		   \param provider the provider to use, if a particular provider is required
 		*/
 		static PGPKey fromFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+
+	private:
+		class Private;
+		Private *d;
 	};
 
 	/**

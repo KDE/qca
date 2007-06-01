@@ -1481,11 +1481,6 @@ CRLEntry::CRLEntry()
 	_reason = Unspecified;
 }
 
-bool CRLEntry::isNull() const
-{
-	return (_time.isNull());
-}
-
 CRLEntry::CRLEntry(const Certificate &c, Reason r)
 {
 	_serial = c.serialNumber();
@@ -1498,6 +1493,28 @@ CRLEntry::CRLEntry(const BigInteger serial, const QDateTime &time, Reason r)
 	_serial = serial;
 	_time = time;
 	_reason = r;
+}
+
+CRLEntry::CRLEntry(const CRLEntry &from)
+:_serial(from._serial), _time(from._time), _reason(from._reason)
+{
+}
+
+CRLEntry::~CRLEntry()
+{
+}
+
+CRLEntry & CRLEntry::operator=(const CRLEntry &from)
+{
+	_serial = from._serial;
+	_time = from._time;
+	_reason = from._reason;
+	return *this;
+}
+
+bool CRLEntry::isNull() const
+{
+	return (_time.isNull());
 }
 
 BigInteger CRLEntry::serialNumber() const
@@ -1979,6 +1996,21 @@ CertificateAuthority::CertificateAuthority(const Certificate &cert, const Privat
 :Algorithm("ca", provider)
 {
 	static_cast<CAContext *>(context())->setup(*(static_cast<const CertContext *>(cert.context())), *(static_cast<const PKeyContext *>(key.context())));
+}
+
+CertificateAuthority::CertificateAuthority(const CertificateAuthority &from)
+:Algorithm(from)
+{
+}
+
+CertificateAuthority::~CertificateAuthority()
+{
+}
+
+CertificateAuthority & CertificateAuthority::operator=(const CertificateAuthority &from)
+{
+	Algorithm::operator=(from);
+	return *this;
 }
 
 Certificate CertificateAuthority::certificate() const
