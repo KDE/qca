@@ -194,6 +194,11 @@ public:
 	Hash & operator=(const Hash &from);
 
 	/**
+	   Return the hash type
+	*/
+	QString type() const;
+
+	/**
 	   Reset a hash, dumping all previous parts of the
 	   message.
 
@@ -532,13 +537,12 @@ public:
 	   \param provider the name of the Provider to use
 
 	   \note Padding only applies to CBC and ECB modes.  CFB and OFB
-	   ciphertext is always
-	   the length of the plaintext.
+	   ciphertext is always the length of the plaintext.
 	*/
-	Cipher( const QString &type, Mode mode, Padding pad = DefaultPadding,
+	Cipher(const QString &type, Mode mode, Padding pad = DefaultPadding,
 		Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), 
 		const InitializationVector &iv = InitializationVector(),
-		const QString &provider = QString() );
+		const QString &provider = QString());
 
 	/**
 	   Standard copy constructor
@@ -552,6 +556,26 @@ public:
 	   \param from the Cipher to copy state from
 	*/
 	Cipher & operator=(const Cipher &from);
+
+	/**
+	   Return the cipher type
+	*/
+	QString type() const;
+
+	/**
+	   Return the cipher mode
+	*/
+	Mode mode() const;
+
+	/**
+	   Return the cipher padding type
+	*/
+	Padding padding() const;
+
+	/**
+	   Return the cipher direction
+	*/
+	Direction direction() const;
 
 	/**
 	   Return acceptable key lengths
@@ -673,6 +697,11 @@ public:
 	   to another
 	*/
 	MessageAuthenticationCode & operator=(const MessageAuthenticationCode &from);
+
+	/**
+	   Return the MAC type
+	*/
+	QString type() const;
 
 	/**
 	   Return acceptable key lengths

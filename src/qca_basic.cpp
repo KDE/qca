@@ -108,6 +108,12 @@ Hash & Hash::operator=(const Hash &from)
 	return *this;
 }
 
+QString Hash::type() const
+{
+	// algorithm type is the same as the hash type
+	return Algorithm::type();
+}
+
 void Hash::clear()
 {
 	static_cast<HashContext *>(context())->clear();
@@ -164,6 +170,9 @@ QString Hash::hashToString(const SecureArray &a)
 class Cipher::Private
 {
 public:
+	QString type;
+	Cipher::Mode mode;
+	Cipher::Padding pad;
 	Direction dir;
 	SymmetricKey key;
 	InitializationVector iv;
@@ -171,13 +180,16 @@ public:
 	bool ok, done;
 };
 
-Cipher::Cipher( const QString &type, Mode m, Padding pad,
+Cipher::Cipher(const QString &type, Mode mode, Padding pad,
 	Direction dir, const SymmetricKey &key,
 	const InitializationVector &iv,
-	const QString &provider )
-:Algorithm(withAlgorithms( type, m, pad ), provider)
+	const QString &provider)
+:Algorithm(withAlgorithms(type, mode, pad), provider)
 {
 	d = new Private;
+	d->type = type;
+	d->mode = mode;
+	d->pad = pad;
 	if(!key.isEmpty())
 		setup(dir, key, iv);
 }
@@ -198,6 +210,26 @@ Cipher & Cipher::operator=(const Cipher &from)
 	Algorithm::operator=(from);
 	*d = *from.d;
 	return *this;
+}
+
+QString Cipher::type() const
+{
+	return d->type;
+}
+
+Cipher::Mode Cipher::mode() const
+{
+	return d->mode;
+}
+
+Cipher::Padding Cipher::padding() const
+{
+	return d->pad;
+}
+
+Direction Cipher::direction() const
+{
+	return d->dir;
 }
 
 KeyLength Cipher::keyLength() const
@@ -311,9 +343,9 @@ public:
 
 
 MessageAuthenticationCode::MessageAuthenticationCode(const QString &type,
-						     const SymmetricKey &key,
-						     const QString &provider)
-  :Algorithm(type, provider)
+	const SymmetricKey &key,
+	const QString &provider)
+:Algorithm(type, provider)
 {
 	d = new Private;
 	setup(key);
@@ -335,6 +367,12 @@ MessageAuthenticationCode & MessageAuthenticationCode::operator=(const MessageAu
 	Algorithm::operator=(from);
 	*d = *from.d;
 	return *this;
+}
+
+QString MessageAuthenticationCode::type() const
+{
+	// algorithm type is the same as the mac type
+	return Algorithm::type();
 }
 
 KeyLength MessageAuthenticationCode::keyLength() const
