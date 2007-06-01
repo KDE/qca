@@ -172,137 +172,138 @@ class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
 {
 public:
 	/**
-	 *  Constructor
-	 *
-	 * \param type label for the type of hash to be
-	 * created (eg "sha1" or "md2")
-	 * \param provider the name of the provider plugin
-	 * for the subclass (eg "qca-openssl")
-	 */
+	   Constructor
+
+	   \param type label for the type of hash to be
+	   created (eg "sha1" or "md2")
+	   \param provider the name of the provider plugin
+	   for the subclass (eg "qca-openssl")
+	*/
 	explicit Hash(const QString &type, const QString &provider = QString());
 
 	/**
-	 * Reset a hash, dumping all previous parts of the
-	 * message.
-	 *
-	 * This method clears (or resets) the hash algorithm,
-	 * effectively undoing any previous update()
-	 * calls. You should use this call if you are re-using
-	 * a Hash sub-class object to calculate additional
-	 * hashes.
-	 */
+	   Reset a hash, dumping all previous parts of the
+	   message.
+
+	   This method clears (or resets) the hash algorithm,
+	   effectively undoing any previous update()
+	   calls. You should use this call if you are re-using
+	   a Hash sub-class object to calculate additional
+	   hashes.
+	*/
 	virtual void clear();
 
 	/**
-	 * Update a hash, adding more of the message contents
-	 * to the digest. The whole message needs to be added
-	 * using this method before you call final().
-	 *
-	 * If you find yourself only calling update() once,
-	 * you may be better off using a convenience method
-	 * such as hash() or hashToString() instead.
-	 *
-	 * \param a the byte array to add to the hash
-	 */
+	   Update a hash, adding more of the message contents
+	   to the digest. The whole message needs to be added
+	   using this method before you call final().
+
+	   If you find yourself only calling update() once,
+	   you may be better off using a convenience method
+	   such as hash() or hashToString() instead.
+
+	   \param a the byte array to add to the hash
+	*/
 	virtual void update(const SecureArray &a);
 
 	/**
-	 * \overload
-	 *
-	 * \param a the QByteArray to add to the hash
-	 */
+	   \overload
+
+	   \param a the QByteArray to add to the hash
+	*/
 	virtual void update(const QByteArray &a);
 
 	/**
-	 * \overload
-	 *
-	 * This method is provided to assist with code that
-	 * already exists, and is being ported to %QCA. You are
-	 * better off passing a SecureArray (as shown above)
-	 * if you are writing new code.
-	 *
-	 * \param data pointer to a char array
-	 * \param len the length of the array. If not specified
-	 * (or specified as a negative number), the length will be
-	 * determined with strlen(), which may not be what you want
-	 * if the array contains a null (0x00) character.
-	 */
+	   \overload
+
+	   This method is provided to assist with code that
+	   already exists, and is being ported to %QCA. You are
+	   better off passing a SecureArray (as shown above)
+	   if you are writing new code.
+
+	   \param data pointer to a char array
+	   \param len the length of the array. If not specified
+	   (or specified as a negative number), the length will be
+	   determined with strlen(), which may not be what you want
+	   if the array contains a null (0x00) character.
+	*/
 	virtual void update(const char *data, int len = -1);
 
 	/**
-	 * \overload
-	 *
-	 * This allows you to read from a file or other
-	 * I/O device. Note that the device must be already
-	 * open for reading
-	 *
-	 * \param file an I/O device
-	 *
-	 * If you are trying to calculate the hash of
-	 * a whole file (and it isn't already open), you
-	 * might want to use code like this:
-	 * \code
-	 * QFile f( "file.dat" );
-	 * if ( f1.open( IO_ReadOnly ) ) {
-	 *     QCA::Hash hashObj("sha1");
-	 *     hashObj.update( f1 );
-	 *     QString output = hashObj.final() ) ),
-	 * }
-	 * \endcode
-	 */
+	   \overload
+
+	   This allows you to read from a file or other
+	   I/O device. Note that the device must be already
+	   open for reading
+
+	   \param file an I/O device
+
+	   If you are trying to calculate the hash of
+	   a whole file (and it isn't already open), you
+	   might want to use code like this:
+	   \code
+QFile f( "file.dat" );
+if ( f1.open( IO_ReadOnly ) )
+{
+	QCA::Hash hashObj("sha1");
+	hashObj.update( f1 );
+	QString output = hashObj.final() ) ),
+}
+	   \endcode
+	*/
 	virtual void update(QIODevice &file);
 
 	/**
-	 * Finalises input and returns the hash result
-	 *
-	 * After calling update() with the required data, the
-	 * hash results are finalised and produced.
-	 *
-	 * Note that it is not possible to add further data (with
-	 * update()) after calling final(), because of the way
-	 * the hashing works - null bytes are inserted to pad
-	 * the results up to a fixed size. If you want to
-	 * reuse the Hash object, you should call clear() and
-	 * start to update() again.
-	 */
+	   Finalises input and returns the hash result
+
+	   After calling update() with the required data, the
+	   hash results are finalised and produced.
+
+	   Note that it is not possible to add further data (with
+	   update()) after calling final(), because of the way
+	   the hashing works - null bytes are inserted to pad
+	   the results up to a fixed size. If you want to
+	   reuse the Hash object, you should call clear() and
+	   start to update() again.
+	*/
 	virtual SecureArray final();
 
 	/**
-	 * %Hash a byte array, returning it as another
-	 * byte array.
-	 * 
-	 * This is a convenience method that returns the
-	 * hash of a SecureArray.
-	 * 
-	 * \code
-	 * SecureArray sampleArray(3);
-	 * sampleArray.fill('a');
-	 * SecureArray outputArray = QCA::Hash("md2")::hash(sampleArray);
-	 * \endcode
-	 * 
-	 * \param array the QByteArray to hash
-	 *
-	 * If you need more flexibility (e.g. you are constructing
-	 * a large byte array object just to pass it to hash(), then
-	 * consider creating an Hash object, and then calling
-	 * update() and final().
-	 */
+	   %Hash a byte array, returning it as another
+	   byte array
+
+	   This is a convenience method that returns the
+	   hash of a SecureArray.
+
+	   \code
+SecureArray sampleArray(3);
+sampleArray.fill('a');
+SecureArray outputArray = QCA::Hash("md2")::hash(sampleArray);
+	   \endcode
+
+	   \param array the QByteArray to hash
+
+	   If you need more flexibility (e.g. you are constructing
+	   a large byte array object just to pass it to hash(), then
+	   consider creating an Hash object, and then calling
+	   update() and final().
+	*/
 	SecureArray hash(const SecureArray &array);
 
 	/**
-	 * %Hash a byte array, returning it as a printable
-	 * string
-	 * 
-	 * This is a convenience method that returns the
-	 * hash of a QSeecureArray as a hexadecimal
-	 * representation encoded in a QString.
-	 * 
-	 * \param array the QByteArray to hash
-	 *
-	 * If you need more flexibility, you can create a Hash
-	 * object, call Hash::update() as required, then call 
-	 * Hash::final(), before using the static arrayToHex() method.
-	 */
+	   %Hash a byte array, returning it as a printable
+	   string
+
+	   This is a convenience method that returns the
+	   hash of a QSeecureArray as a hexadecimal
+	   representation encoded in a QString.
+
+	   \param array the QByteArray to hash
+
+	   If you need more flexibility, you can create a Hash
+	   object, call Hash::update() as required, then call 
+	   Hash::final(), before using the static arrayToHex() method.
+	*/
 	QString hashToString(const SecureArray &array);
 };
 
