@@ -5,6 +5,7 @@
     deinit method for providers, to occur for all before destruction?
     securemessage bytesWritten?
     Provider::version -> qcaVersion, make version() provider's own version?
+    remove CRL::signature?  (we don't have this for cert/csr)
     ensure non-default ctors/dtors/copy/op=, and dpointers as needed:
        basic,publickey,cert,keystore,securelayer,securemessage
     QCA_EXPORT check:
@@ -12,11 +13,9 @@
     de-indent / fix docs and formatting:
        basic,publickey,cert,keystore,securelayer,securemessage
     check for unnecessary SecureArray usage in the API:
-       qpipe,support,provider,core,textfilter
-       basic,publickey,cert,keystore,securelayer,securemessage
+       provider,core,textfilter,basic,publickey,cert
     check if we should add any extra "getters" to the API:
-       tools,qpipe,support,provider,core,textfilter
-       qca_basic,publickey,cert,keystore,securelayer,securemessage
+       basic,publickey,cert,keystore,securelayer,securemessage
   code:
     default: config option for setting provider priorities
     cert: rfc 2818 hostname validation
@@ -24,7 +23,6 @@
     keystore: complete
     securelayer: complete
   other:
-    remove header file indentation
     for parallel make, have all utilities/tests depend on the library
     finish cmssigner, set to 1.0
     cmssigner: i'm getting a crash sometimes during sign..  test and trace
