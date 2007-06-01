@@ -65,6 +65,11 @@ public:
 	void setup(Direction dir);
 
 	/**
+	   The direction the TextFilter is set up to use
+	*/
+	Direction direction() const;
+
+	/**
 	   Process an array in the "forward" direction,
 	   returning an array
 
@@ -227,6 +232,16 @@ public:
 	   the setup() call.
 	*/
 	Base64(Direction dir = Encode);
+
+	/**
+	   Returns true if line breaks are enabled
+	*/
+	bool lineBreaksEnabled() const;
+
+	/**
+	   Returns the line break column
+	*/
+	int lineBreaksColumn() const;
 
 	/**
 	   Sets line break mode.  If enabled, linebreaks will be
