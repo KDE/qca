@@ -679,7 +679,7 @@ QStringList features() const
 	QStringList list;
 	list += "sha1";
 	list += "sha256";
-	list += "hmac(md5)";
+	list += "hmac(sha1)";
 	return list;
 }
 	   \endcode
@@ -723,7 +723,39 @@ Context *createContext(const QString &type)
 	*/
 	virtual Context *createContext(const QString &type) = 0;
 
+	/**
+	   Method to set up the default configuration options.
+
+	   If your provider needs some configuration options,
+	   this method allows you to establish default options.
+	   The user can then change the configuration options 
+	   as required, and set them using configChanged().
+
+	   You need to return a QVariantMap that has configuration
+	   options as the keys, and the default configuration 
+	   as the values, as shown below:
+	   \code
+QVariantMap defaultConfig() const
+{
+	QVariantMap myConfig;
+	myConfig[ "firstOption" ] = QString("firstOptionValue");
+	myConfig[ "secondOption" ] = true;
+	myConfig[ "thirdOpt" ] = 1243;
+	return myConfig;
+}
+	   \endcode
+
+	   \sa configChanged for how to set the configuration;
+	*/
 	virtual QVariantMap defaultConfig() const;
+
+	/**
+	   Method to set the configuration options.
+
+	   If your provider supports configuration options, you
+	   will be advised of user changes to the configuration 
+	   when this method is called.
+	*/
 	virtual void configChanged(const QVariantMap &config);
 };
 
@@ -775,7 +807,11 @@ protected:
 	*/
 	Context(Provider *parent, const QString &type);
 
-	// copy constructor
+	/**
+	   Copy constructor
+
+	   \param from the Context to copy from
+	*/
 	Context(const Context &from);
 
 private:
