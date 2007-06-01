@@ -268,6 +268,10 @@ namespace QCA
 	*/
 	QCA_EXPORT QString orderedToDNString(const CertificateInfoOrdered &in);
 
+	/**
+	   Return a new CertificateInfoOrdered that only contains
+	   the Distinguished Name (DN) types found in the input object.
+	*/
 	QCA_EXPORT CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in);
 
 	inline QString CertificateInfoOrdered::toString() const
