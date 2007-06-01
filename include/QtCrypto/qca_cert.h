@@ -1288,11 +1288,6 @@ namespace QCA
 		QList<CRLEntry> revoked() const;
 
 		/**
-		   The signature on this CRL
-		*/
-		SecureArray signature() const;
-
-		/**
 		   The signature algorithm used for the signature on this CRL
 		*/
 		SignatureAlgorithm signatureAlgorithm() const;

@@ -5,7 +5,6 @@
     deinit method for providers, to occur for all before destruction?
     securemessage bytesWritten?
     Provider::version -> qcaVersion, make version() provider's own version?
-    remove CRL::signature?  (we don't have this for cert/csr)
     ensure non-default ctors/dtors/copy/op=, and dpointers as needed:
        basic,publickey,cert,keystore,securelayer,securemessage
     QCA_EXPORT check:

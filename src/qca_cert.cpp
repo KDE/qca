@@ -1627,11 +1627,6 @@ QList<CRLEntry> CRL::revoked() const
 	return static_cast<const CRLContext *>(context())->props()->revoked;
 }
 
-SecureArray CRL::signature() const
-{
-	return static_cast<const CRLContext *>(context())->props()->sig;
-}
-
 SignatureAlgorithm CRL::signatureAlgorithm() const
 {
 	return static_cast<const CRLContext *>(context())->props()->sigalgo;
@@ -1664,6 +1659,9 @@ bool CRL::operator==(const CRL &otherCrl) const
 		return false;
 	}
 
+	const CRLContextProps *a = static_cast<const CRLContext *>(context())->props();
+	const CRLContextProps *b = static_cast<const CRLContext *>(otherCrl.context())->props();
+
 	if ( number() != otherCrl.number() )
 		return false;
 
@@ -1673,7 +1671,7 @@ bool CRL::operator==(const CRL &otherCrl) const
 	if ( nextUpdate() != otherCrl.nextUpdate() )
 		return false;
 
-	if ( signature() != otherCrl.signature() )
+	if ( a->sig != b->sig )
 		return false;
 
 	if ( signatureAlgorithm() != otherCrl.signatureAlgorithm() )
