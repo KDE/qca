@@ -235,6 +235,10 @@ public:
 	Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = 0);
 	~Console();
 
+	Type type() const;
+	ChannelMode channelMode() const;
+	TerminalMode terminalMode() const;
+
 	static bool isStdinRedirected();
 	static bool isStdoutRedirected();
 
@@ -271,6 +275,9 @@ public:
 
 	bool start(Console *console, SecurityMode mode = SecurityDisabled);
 	void stop();
+
+	Console *console() const;
+	SecurityMode securityMode() const;
 
 	// normal i/o
 	QByteArray read(int bytes = -1);
@@ -330,18 +337,19 @@ class AbstractLogDevice;
 /**
    A simple logging system
 
-   This class provides a simple but flexible approach to logging information that
-   may be used for debugging or system operation diagnostics.
+   This class provides a simple but flexible approach to logging information
+   that may be used for debugging or system operation diagnostics.
 
-   There is a single %Logger for each application that uses %QCA. You do not need
-   to create this %Logger yourself - %QCA automatically creates it on startup. You
-   can get access to the %Logger using the global QCA::logger() method.
+   There is a single %Logger for each application that uses %QCA. You do not
+   need to create this %Logger yourself - %QCA automatically creates it on
+   startup. You can get access to the %Logger using the global QCA::logger()
+   method.
 
-   By default the Logger just accepts all messages (binary and text). If you want to
-   get access to those messages, you need to subclass AbstractLogDevice, and register
-   your subclass (using registerLogDevice()). You can then take whatever action is
-   appropriate (e.g. show to the user using the GUI, log to a file or send to standard
-   error).
+   By default the Logger just accepts all messages (binary and text). If you
+   want to get access to those messages, you need to subclass
+   AbstractLogDevice, and register your subclass (using registerLogDevice()).
+   You can then take whatever action is appropriate (e.g. show to the user
+   using the GUI, log to a file or send to standard error).
 */
 class QCA_EXPORT Logger : public QObject
 {
@@ -371,7 +379,7 @@ public:
 
 	   \return Current level
 	*/
-	inline Logger::Severity level () const { return m_logLevel; }
+	inline Logger::Severity level() const { return m_logLevel; }
 
 	/**
 	   Set the current logging level
@@ -380,7 +388,7 @@ public:
 
 	   Only severities less or equal than the log level one will be logged
 	*/
-	void setLevel (Logger::Severity level);
+	void setLevel(Logger::Severity level);
 
 	/**
 	   Log a message to all available log devices
@@ -457,7 +465,7 @@ public:
 	   override this method in your subclass to do whatever
 	   logging is required
 	*/
-	virtual void logTextMessage( const QString &message, enum Logger::Severity severity );
+	virtual void logTextMessage(const QString &message, enum Logger::Severity severity);
 
 	/**
 	   Log a binary blob
@@ -466,7 +474,7 @@ public:
 	   override this method in your subclass to do whatever
 	   logging is required
 	*/
-	virtual void logBinaryMessage( const QByteArray &blob, Logger::Severity severity );
+	virtual void logBinaryMessage(const QByteArray &blob, Logger::Severity severity);
 
 protected:
 	/**
