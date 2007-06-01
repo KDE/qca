@@ -746,6 +746,21 @@ PublicKey::PublicKey(const QString &fileName)
 	*this = fromPEMFile(fileName, 0, QString());
 }
 
+PublicKey::PublicKey(const PublicKey &from)
+:PKey(from)
+{
+}
+
+PublicKey::~PublicKey()
+{
+}
+
+PublicKey & PublicKey::operator=(const PublicKey &from)
+{
+	PKey::operator=(from);
+	return *this;
+}
+
 RSAPublicKey PublicKey::toRSA() const
 {
 	return toRSAPublicKey();
@@ -889,6 +904,21 @@ PrivateKey::PrivateKey(const QString &type, const QString &provider)
 PrivateKey::PrivateKey(const QString &fileName, const SecureArray &passphrase)
 {
 	*this = fromPEMFile(fileName, passphrase, 0, QString());
+}
+
+PrivateKey::PrivateKey(const PrivateKey &from)
+:PKey(from)
+{
+}
+
+PrivateKey::~PrivateKey()
+{
+}
+
+PrivateKey & PrivateKey::operator=(const PrivateKey &from)
+{
+	PKey::operator=(from);
+	return *this;
 }
 
 RSAPrivateKey PrivateKey::toRSA() const
