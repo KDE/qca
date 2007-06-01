@@ -786,6 +786,18 @@ private:
 	QString _type;
 };
 
+/**
+   \class BasicContext qca_core.h QtCrypto
+
+   Base class to use for primitive provider contexts
+
+   \internal
+
+   This class inherits Provider::Context and calls moveToThread(0) on
+   itself, thereby disabling the event properties of the underlying
+   QObject.  Context types that need to be a QObject should inherit from
+   Provider::Context, those that don't should inherit from BasicContext.
+*/
 class QCA_EXPORT BasicContext : public Provider::Context
 {
 	Q_OBJECT
