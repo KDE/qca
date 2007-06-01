@@ -90,6 +90,8 @@ Q_SIGNALS:
 	void notify();                         // can read or can write, depending on type
 
 private:
+	Q_DISABLE_COPY(QPipeDevice)
+
 	class Private;
 	friend class Private;
 	Private *d;
@@ -154,6 +156,8 @@ Q_SIGNALS:
 	void error(QCA::QPipeEnd::Error e);
 
 private:
+	Q_DISABLE_COPY(QPipeEnd)
+
 	class Private;
 	friend class Private;
 	Private *d;
@@ -178,6 +182,8 @@ public:
 	QPipeEnd & writeEnd() { return o; }
 
 private:
+	Q_DISABLE_COPY(QPipe)
+
 	QPipeEnd i, o;
 };
 
