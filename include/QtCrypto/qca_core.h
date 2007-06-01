@@ -1105,11 +1105,11 @@ public:
    An asynchronous event
 
    Events are produced in response to the library's need for some user
-   intervention, such as entering a pin or password, or inserting a cryptographic
-   token.
+   intervention, such as entering a pin or password, or inserting a
+   cryptographic token.
 
-   Event is an abstraction, so you can handle this need in a way that makes sense
-   for your application.
+   Event is an abstraction, so you can handle this need in a way that makes
+   sense for your application.
 */
 class QCA_EXPORT Event
 {
@@ -1134,8 +1134,8 @@ public:
 
 	   \sa source()
 	   \sa fileName() for the name, if source is Event::Data
-	   \sa keyStoreInfo() and keyStoreEntry() for the keystore and entry, if
-	   the source is Event::KeyStore
+	   \sa keyStoreInfo() and keyStoreEntry() for the keystore and entry,
+	   if the source is Event::KeyStore
 	*/
 	enum Source
 	{
@@ -1238,9 +1238,12 @@ public:
 
 	   This creates a Password type event, for a keystore.
 
-	   \param pstyle the style of information required (e.g. PIN, password or passphrase)
-	   \param keyStoreInfo info about the keystore that the information is required for
-	   \param keyStoreEntry the entry in the keystore that the information is required for
+	   \param pstyle the style of information required (e.g. PIN,
+	   password or passphrase)
+	   \param keyStoreInfo info about the keystore that the information
+	   is required for
+	   \param keyStoreEntry the entry in the keystore that the
+	   information is required for
 	   \param ptr opaque data
 	*/
 	void setPasswordKeyStore(PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
@@ -1250,8 +1253,10 @@ public:
 
 	   This creates a Password type event, for a file.
 
-	   \param pstyle the style of information required (e.g. PIN, password or passphrase)
-	   \param fileName the name of the file (or other identifier) that the information is required for
+	   \param pstyle the style of information required (e.g. PIN,
+	   password or passphrase)
+	   \param fileName the name of the file (or other identifier) that
+	   the information is required for
 	   \param ptr opaque data
 	*/
 	void setPasswordData(PasswordStyle pstyle, const QString &fileName, void *ptr);
@@ -1261,8 +1266,10 @@ public:
 
 	   This creates a Token type event.
 
-	   \param keyStoreInfo info about the keystore that the token is required for
-	   \param keyStoreEntry the entry in the keystore that the token is required for
+	   \param keyStoreInfo info about the keystore that the token is
+	   required for
+	   \param keyStoreEntry the entry in the keystore that the token is
+	   required for
 	   \param ptr opaque data
 	*/
 	void setToken(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
@@ -1375,9 +1382,12 @@ public:
 	/**
 	   queue a password / passphrase request associated with a key store
 
-	   \param pstyle the type of information required (e.g. PIN, passphrase or password)
-	   \param keyStoreInfo info of the key store that the information is required for
-	   \param keyStoreEntry the item in the key store that the information is required for (if applicable)
+	   \param pstyle the type of information required (e.g. PIN,
+	   passphrase or password)
+	   \param keyStoreInfo info of the key store that the information is
+	   required for
+	   \param keyStoreEntry the item in the key store that the
+	   information is required for (if applicable)
 	   \param ptr opaque data
 	*/
 	void ask(Event::PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
@@ -1385,8 +1395,10 @@ public:
 	/**
 	   queue a password / passphrase request associated with a file
 
-	   \param pstyle the type of information required (e.g. PIN, passphrase or password)
-	   \param fileName the name of the file that the information is required for
+	   \param pstyle the type of information required (e.g. PIN,
+	   passphrase or password)
+	   \param fileName the name of the file that the information is
+	   required for
 	   \param ptr opaque data
 	*/
 	void ask(Event::PasswordStyle pstyle, const QString &fileName, void *ptr);
@@ -1408,16 +1420,16 @@ public:
 	/**
 	   Determine whether the password / passphrase was accepted or not
 
-	   In this context, returning true is indicative of the user clicking "Ok"
-	   or equivalent; and returning false indicates that either the user
-	   clicked "Cancel" or equivalent, or that the cancel() function was
-	   called, or that the request is still pending.
+	   In this context, returning true is indicative of the user clicking
+	   "Ok" or equivalent; and returning false indicates that either the
+	   user clicked "Cancel" or equivalent, or that the cancel() function
+	   was called, or that the request is still pending.
 	*/
 	bool accepted() const;
 
 	/**
-	   The password / passphrase / PIN provided by the user in response to
-	   the asker request. This may be empty.
+	   The password / passphrase / PIN provided by the user in response
+	   to the asker request. This may be empty.
 	*/
 	SecureArray password() const;
 
@@ -1458,8 +1470,10 @@ public:
 	/**
 	   queue a token request associated with a key store
 	
-	   \param keyStoreInfo info of the key store that the information is required for
-	   \param keyStoreEntry the item in the key store that the information is required for (if applicable)
+	   \param keyStoreInfo info of the key store that the information is
+	   required for
+	   \param keyStoreEntry the item in the key store that the
+	   information is required for (if applicable)
 	   \param ptr opaque data
 	*/
 	void ask(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
