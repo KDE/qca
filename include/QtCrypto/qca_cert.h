@@ -1176,8 +1176,20 @@ namespace QCA
 		*/
 		CRLEntry(const BigInteger serial, const QDateTime &time, Reason r = Unspecified);
 
+		/**
+		   Copy constructor
+
+		   \param from the CRLEntry to copy from
+		*/
 		CRLEntry(const CRLEntry &from);
+
 		~CRLEntry();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the CRLEntry to copy from
+		*/
 		CRLEntry & operator=(const CRLEntry &from);
 
 		/**
@@ -1564,8 +1576,20 @@ namespace QCA
 		*/
 		CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
 
+		/**
+		   Copy constructor
+
+		   \param from the CertificateAuthority to copy from
+		*/
 		CertificateAuthority(const CertificateAuthority &from);
+
 		~CertificateAuthority();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the CertificateAuthority to copy from
+		*/
 		CertificateAuthority & operator=(const CertificateAuthority &from);
 
 		/**

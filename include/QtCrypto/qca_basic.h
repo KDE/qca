@@ -55,13 +55,25 @@ public:
 	/**
 	   Standard Constructor
 
-	   \param provider the provider library for the random
+	   \param provider the name of the provider library for the random
            number generation
 	*/
 	Random(const QString &provider = QString());
 
+        /**
+           Copy constructor
+
+           \param from the Random object to copy from
+        */
 	Random(const Random &from);
+
 	~Random();
+
+        /**
+           Assignment operator
+
+           \param from the Random object to copy state from
+        */
 	Random & operator=(const Random &from);
 
 	/**
@@ -188,9 +200,20 @@ public:
 	   for the subclass (eg "qca-openssl")
 	*/
 	explicit Hash(const QString &type, const QString &provider = QString());
+        /**
+           Copy constructor
 
+           \param from the Hash object to copy from
+        */
 	Hash(const Hash &from);
+
 	~Hash();
+
+        /**
+           Assignment operator
+
+           \param from the Hash object to copy state from
+        */
 	Hash & operator=(const Hash &from);
 
 	/**

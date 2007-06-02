@@ -760,7 +760,7 @@ QVariantMap defaultConfig() const
 };
 
 /**
-   \class Context qca_core.h QtCrypto
+   \class QCA::Provider::Context qca_core.h QtCrypto
 
    Internal context class used for the plugin
 
@@ -841,7 +841,20 @@ public:
 	~BasicContext();
 
 protected:
+	/**
+	   Standard constructor
+
+	   \param parent the parent provider for this 
+	   context
+	   \param type the name of the provider context type
+	*/
 	BasicContext(Provider *parent, const QString &type);
+
+	/**
+	   Copy constructor
+
+	   \param from the Context to copy from
+	*/
 	BasicContext(const BasicContext &from);
 
 private:

@@ -491,8 +491,20 @@ public:
 	*/
 	PublicKey(const QString &fileName);
 
+	/**
+	   Copy constructor
+
+	   \param from the PublicKey to copy from
+	*/
 	PublicKey(const PublicKey &from);
+
 	~PublicKey();
+
+	/**
+	   Assignment operator
+
+	   \param from the PublicKey to copy from
+	*/
 	PublicKey & operator=(const PublicKey &from);
 
 	/**
@@ -751,8 +763,20 @@ public:
 	*/
 	explicit PrivateKey(const QString &fileName, const SecureArray &passphrase = SecureArray());
 
+	/**
+	   Copy constructor
+
+	   \param from the PrivateKey to copy from
+	*/
 	PrivateKey(const PrivateKey &from);
+
 	~PrivateKey();
+
+	/**
+	   Assignment operator
+
+	   \param from the PrivateKey to copy from
+	*/
 	PrivateKey & operator=(const PrivateKey &from);
 
 	/**
