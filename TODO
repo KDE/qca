@@ -5,7 +5,6 @@
     securemessage bytesWritten?
     deinit method for providers, to occur for all before destruction?
     Provider::version -> qcaVersion, make version() provider's own version?
-    Cipher::blockSize returns a uint, which is unconventional
     Hash::update(QIODevice&) uses ref, not pointer.  is this conventional?
     KeyGenerator::blocking -> isBlocking() or maybe blockingEnabled() ?
     core: ctor/dtor/etc accessibility seems inconsistent
