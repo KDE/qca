@@ -189,30 +189,36 @@ private:
 
 /**
    Certificate constraints
+
+   X.509 certificates can be constrained in their application - that is, some
+   certificates can only be used for certain purposes. This enumeration is
+   used to identify the approved purposes for a certificate. 
+
+   \note It is common for a certificate to have more than one purpose.
 */
 enum ConstraintType
 {
 	// basic
-	DigitalSignature,
-	NonRepudiation,
-	KeyEncipherment,
-	DataEncipherment,
-	KeyAgreement,
-	KeyCertificateSign,
-	CRLSign,
-	EncipherOnly,
-	DecipherOnly,
+	DigitalSignature,    ///< Certificate can be used to create digital signatures
+	NonRepudiation,      ///< Certificate can be used for non-repudiation
+	KeyEncipherment,     ///< Certificate can be used for encrypting / decrypting keys
+	DataEncipherment,    ///< Certificate can be used for encrypting / decrypting data
+	KeyAgreement,        ///< Certificate can be used for key agreement
+	KeyCertificateSign,  ///< Certificate can be used for key certificate signing
+	CRLSign,             ///< Certificate can be used to sign Certificate Revocation Lists
+	EncipherOnly,        ///< Certificate can only be used for encryption
+	DecipherOnly,        ///< Certificate can only be used for decryption
 
 	// extended
-	ServerAuth,
-	ClientAuth,
-	CodeSigning,
-	EmailProtection,
-	IPSecEndSystem,
-	IPSecTunnel,
-	IPSecUser,
-	TimeStamping,
-	OCSPSigning
+	ServerAuth,        ///< Certificate can be used for server authentication (e.g. web server). This is an extended usage constraint.
+	ClientAuth,        ///< Certificate can be used for client authentication (e.g. web browser). This is an extended usage constraint.
+	CodeSigning,       ///< Certificate can be used to sign code. This is an extended usage constraint.
+	EmailProtection,   ///< Certificate can be used to sign / encrypt email. This is an extended usage constraint.
+	IPSecEndSystem,    ///< Certificate can be used to authenticate a endpoint in IPSEC. This is an extended usage constraint.
+	IPSecTunnel,       ///< Certificate can be used to authenticate a tunnel in IPSEC. This is an extended usage constraint.
+	IPSecUser,         ///< Certificate can be used to authenticate a user in IPSEC. This is an extended usage constraint.
+	TimeStamping,      ///< Certificate can be used to create a "time stamp" signature. This is an extended usage constraint.
+	OCSPSigning        ///< Certificate can be used to sign an Online Certificate Status Protocol (OCSP) assertion. This is an extended usage constraint.
 };
 
 /**
