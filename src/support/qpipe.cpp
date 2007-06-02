@@ -1190,9 +1190,9 @@ bool QPipeDevice::setInheritable(bool enabled)
 	d->pipe = newPipe;
 #ifdef USE_POLL
 	if(d->pipeReader)
-		d->pipeReader->pipe = d->pipe;
+		static_cast<QPipeReaderPoll*>(d->pipeReader)->pipe = d->pipe;
 	if(d->pipeWriter)
-		d->pipeWriter->pipe = d->pipe;
+		static_cast<QPipeWriterPoll*>(d->pipeWriter)->pipe = d->pipe;
 #endif
 	return true;
 #endif
