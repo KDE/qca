@@ -2,19 +2,21 @@
   api:
     extended key usage can have OIDs ?!
     problem: pgp can cause token event while pgp store is available
-    deinit method for providers, to occur for all before destruction?
     securemessage bytesWritten?
+    deinit method for providers, to occur for all before destruction?
     Provider::version -> qcaVersion, make version() provider's own version?
+    Cipher::blockSize returns a uint, which is unconventional
+    Hash::update(QIODevice&) uses ref, not pointer.  is this conventional?
+    KeyGenerator::blocking -> isBlocking() or maybe blockingEnabled() ?
+    core: ctor/dtor/etc accessibility seems inconsistent
     ensure non-default ctors/dtors/copy/op=, and dpointers as needed:
-       basic,publickey,cert,keystore,securelayer,securemessage
-    QCA_EXPORT check:
-       basic,publickey,cert,keystore,securelayer,securemessage
+       keystore,securelayer,securemessage
     de-indent / fix docs and formatting:
-       basic,publickey,cert,keystore,securelayer,securemessage
+       keystore,securelayer,securemessage
+    check if we should add any extra "getters" to the API:
+       cert,keystore,securelayer,securemessage
     check for unnecessary SecureArray usage in the API:
        provider,core,textfilter,basic,publickey,cert
-    check if we should add any extra "getters" to the API:
-       basic,publickey,cert,keystore,securelayer,securemessage
   code:
     default: config option for setting provider priorities
     cert: rfc 2818 hostname validation
