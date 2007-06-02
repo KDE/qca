@@ -109,18 +109,26 @@ enum ConvertResult
 
 /**
    Well known discrete logarithm group sets
+
+   These sets are derived from three main sources:
+   Java Cryptographic Extensions, 
+ <a href="http://www.ietf.org/rfc/rfc2412.txt">RFC2412</a> and
+ <a href="http://www.ietf.org/rfc/rfc3526.txt">RFC3526</a>.
 */
 enum DLGroupSet
 {
-	DSA_512,
-	DSA_768,
-	DSA_1024,
-	IETF_768,
-	IETF_1024,
-	IETF_1536,
-	IETF_2048,
-	IETF_3072,
-	IETF_4096
+	DSA_512,    ///< 512 bit group, for compatibility with JCE
+	DSA_768,    ///< 768 bit group, for compatibility with JCE
+	DSA_1024,   ///< 1024 bit group, for compatibility with JCE
+	IETF_768,   ///< Group 1 from RFC 2412, Section E.1
+	IETF_1024,  ///< Group 2 from RFC 2412, Section E.2
+	IETF_1536,  ///< 1536-bit MODP Group ("group 5") from RFC3526 Section 2.
+	IETF_2048,  ///< 2048-bit MODP Group ("group 14") from RFC3526 Section 3.
+	IETF_3072,  ///< 3072-bit MODP Group ("group 15") from RFC3526 Section 4.
+	IETF_4096,  ///< 4096-bit MODP Group ("group 16") from RFC3526 Section 5.
+	IETF_6144,  ///< 6144-bit MODP Group ("group 17") from RFC3526 Section 6.
+	IETF_8192,  ///< 8192-bit MODP Group ("group 18") from RFC3526 Section 7.
+
 };
 
 /**
