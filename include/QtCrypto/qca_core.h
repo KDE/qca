@@ -449,9 +449,24 @@ QCA_EXPORT Logger *logger();
 QCA_EXPORT bool haveSystemStore();
 
 /**
-   Get system-wide root CA certificates
+   Get system-wide root Certificate Authority (CA) certificates
 
-   \sa haveSystemStore
+   Many operating systems (or distributions, on Linux-type systems)
+   come with some trusted certificates. Typically, these include
+   the root certificates for major Certificate Authorities (for
+   example, Verisign, Comodo) and some additional certificates that
+   are used for system updates. They are provided in different ways
+   for different systems.
+
+   This function provides an common way to access the system 
+   certificates. There are other ways to access certificates - see
+   the various I/O methods (such as fromDER() and fromPEM()) 
+   in the Certificate and CertificateCollection classes.
+
+   \note Availability of the system certificates depends on how
+   %QCA was built. You can test whether the system certificates
+   are available using the haveSystemStore() function.
+
 */
 QCA_EXPORT CertificateCollection systemStore();
 

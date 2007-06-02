@@ -315,17 +315,55 @@ namespace QCA
 		friend class KeyStoreTracker;
 	};
 
+	/**
+	   Class to monitor the availability of a KeyStoreEntry
+
+	   Some KeyStore types have the concept of an entry that can be
+	   available only part of the time (for example, a smart card that
+	   can be removed). This class allows you to identify when a 
+	   KeyStoreEntry becomes available / unavailable.
+
+	   \note You can also monitor availability of a whole KeyStore,
+	   using KeyStoreManager::keyStoreAvailable() signal, and
+	   the KeyStore::unavailable() signal. 
+
+	   \sa KeyStore for more discussion on availability of 
+	   keys and related objects.
+	*/
 	class QCA_EXPORT KeyStoreEntryWatcher : public QObject
 	{
 		Q_OBJECT
 	public:
+		/**
+		   Standard constructor.
+
+		   This creates an object that monitors the specified KeyStore entry,
+		   emitting available() and unavailable() as the entry becomes available
+		   and unavailable respectively.
+
+		   \param e the KeyStoreEntry to monitor
+		   \param parent the parent object for this object
+		*/
 		explicit KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = 0);
+
 		~KeyStoreEntryWatcher();
 
+		/**
+		   The KeyStoreEntry that is being monitored
+		*/
 		KeyStoreEntry entry() const;
 
 	Q_SIGNALS:
+		/**
+		   This signal is emitted when the entry that is being monitored
+		   becomes available.
+		*/
 		void available();
+
+		/**
+		   This signal is emitted when the entry that is being monitored
+		   becomes unavailble.
+		*/
 		void unavailable();
 
 	private:
