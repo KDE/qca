@@ -30,6 +30,8 @@
 #ifndef QPIPE_H
 #define QPIPE_H
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 #ifndef QPIPE_NO_SECURE
 # define QPIPE_SECURE
 #endif
@@ -48,6 +50,8 @@ typedef HANDLE Q_PIPE_ID;
 #else
 typedef int Q_PIPE_ID;
 #define INVALID_Q_PIPE_ID -1
+#endif
+
 #endif
 
 // Note: for Windows console, I/O must be in UTF-8.  Reads are guaranteed to
@@ -163,22 +167,52 @@ private:
 	Private *d;
 };
 
-// creates a full pipe (two pipe ends), non-inheritable
+/**
+   A FIFO buffer (named pipe) abstraction
+
+   This class creates a full buffer, consisting of two ends (QPipeEnd).
+
+   \note This class is non-inheritable
+*/
 class QCA_EXPORT QPipe
 {
 public:
+	/**
+	   Standard constructor
+
+	   \param parent the parent object for this object
+	*/
 	QPipe(QObject *parent = 0);
+
 	~QPipe();
 
+	/**
+	   reset the pipe
+	*/
 	void reset();
 
 #ifdef QPIPE_SECURE
+	/**
+	   create the pipe
+
+	   \param secure whether to use secure memory (true) or not (false)
+	*/
 	bool create(bool secure = false);
 #else
+	/**
+	   create the pipe
+	*/
 	bool create();
 #endif
 
+	/**
+	   The read end of the pipe.
+	*/
 	QPipeEnd & readEnd() { return i; }
+
+	/**
+	   The write end of the pipe.
+	*/
 	QPipeEnd & writeEnd() { return o; }
 
 private:
