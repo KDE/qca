@@ -172,7 +172,9 @@ private:
 
    This class creates a full buffer, consisting of two ends (QPipeEnd).
 
-   \note This class is non-inheritable
+   By default, the pipe ends are not inheritable by child processes.  On
+   Windows, the pipe is created with inheritability disabled.  On Unix, the
+   FD_CLOEXEC flag is set on each end's file descriptor.
 */
 class QCA_EXPORT QPipe
 {
