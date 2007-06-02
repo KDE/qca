@@ -185,7 +185,7 @@ public:
       return new gcryCipherContext( *this );
     }
 
-    unsigned int blockSize() const
+    int blockSize() const
     {
 	unsigned int blockSize;
 	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );

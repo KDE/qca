@@ -243,7 +243,7 @@ bool Cipher::validKeyLength(int n) const
 	return ((n >= len.minimum()) && (n <= len.maximum()) && (n % len.multiple() == 0));
 }
 
-unsigned int Cipher::blockSize() const
+int Cipher::blockSize() const
 {
 	return static_cast<const CipherContext *>(context())->blockSize();
 }

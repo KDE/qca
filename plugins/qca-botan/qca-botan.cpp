@@ -239,7 +239,7 @@ public:
 	return new BotanCipherContext( *this );
     }
 
-    unsigned int blockSize() const
+    int blockSize() const
     {
 	return Botan::block_size_of(m_algoName);
     }

@@ -616,7 +616,7 @@ public:
 	/**
 	   return the block size for the cipher object
 	*/
-	uint blockSize() const;
+	int blockSize() const;
 
 	/**
 	   reset the cipher object, to allow re-use

@@ -6174,7 +6174,7 @@ public:
 		return new opensslCipherContext( *this );
 	}
 
-	unsigned int blockSize() const
+	int blockSize() const
 	{
 		return EVP_CIPHER_CTX_block_size(&m_context);
 	}

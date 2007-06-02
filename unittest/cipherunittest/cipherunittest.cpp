@@ -192,7 +192,7 @@ void CipherUnitTest::aes128()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
+	    QCOMPARE( forwardCipher.blockSize(), 16 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 16 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 16 );
 
@@ -210,7 +210,7 @@ void CipherUnitTest::aes128()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( reverseCipher.blockSize(), (unsigned)16 );
+	    QCOMPARE( reverseCipher.blockSize(), 16 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 16 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 16 );
 
@@ -497,7 +497,7 @@ void CipherUnitTest::aes192()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
+	    QCOMPARE( forwardCipher.blockSize(), 16 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 24 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 24 );
 
@@ -515,7 +515,7 @@ void CipherUnitTest::aes192()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( reverseCipher.blockSize(), (unsigned)16 );
+	    QCOMPARE( reverseCipher.blockSize(), 16 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 24 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 24 );
 
@@ -840,7 +840,7 @@ void CipherUnitTest::aes256()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( forwardCipher.blockSize(), (unsigned)16 );
+	    QCOMPARE( forwardCipher.blockSize(), 16 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 32 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 32 );
 
@@ -858,7 +858,7 @@ void CipherUnitTest::aes256()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( reverseCipher.blockSize(), (unsigned)16 );
+	    QCOMPARE( reverseCipher.blockSize(), 16 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 32 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 32 );
 
@@ -1191,7 +1191,7 @@ void CipherUnitTest::tripleDES()
 	    // doing 2 key or 3 key triple DES.
 	    QCOMPARE( cipherObj1.keyLength().minimum(), 16 );
 	    QCOMPARE( cipherObj1.keyLength().maximum(), 24 );
-	    QCOMPARE( cipherObj1.blockSize(), (unsigned)8 );
+	    QCOMPARE( cipherObj1.blockSize(), 8 );
 
 	    QFETCH( QString, plainText );
 	    QFETCH( QString, cipherText );
@@ -1472,7 +1472,7 @@ void CipherUnitTest::des()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( forwardCipher.blockSize(), (unsigned)8 );
+	    QCOMPARE( forwardCipher.blockSize(), 8 );
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 8 );
 
@@ -1490,7 +1490,7 @@ void CipherUnitTest::des()
 				       QCA::InitializationVector(),
 				       provider );
 
-	    QCOMPARE( reverseCipher.blockSize(), (unsigned)8 );
+	    QCOMPARE( reverseCipher.blockSize(), 8 );
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 8 );
 
@@ -1820,7 +1820,7 @@ void CipherUnitTest::des_pkcs7()
 
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 8 );
-	    QCOMPARE( forwardCipher.blockSize(), (unsigned)8 );
+	    QCOMPARE( forwardCipher.blockSize(), 8 );
 
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
@@ -1838,7 +1838,7 @@ void CipherUnitTest::des_pkcs7()
 
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 8 );
-	    QCOMPARE( reverseCipher.blockSize(), (unsigned)8 );
+	    QCOMPARE( reverseCipher.blockSize(), 8 );
 
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
@@ -1977,7 +1977,7 @@ void CipherUnitTest::des_cbc_pkcs7()
 
 	    QCOMPARE( forwardCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( forwardCipher.keyLength().maximum(), 8 );
-	    QCOMPARE( forwardCipher.blockSize(), (unsigned)8 );
+	    QCOMPARE( forwardCipher.blockSize(), 8 );
 
 	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ) );
 	    QVERIFY( forwardCipher.ok() );
@@ -1995,7 +1995,7 @@ void CipherUnitTest::des_cbc_pkcs7()
 
 	    QCOMPARE( reverseCipher.keyLength().minimum(), 8 );
 	    QCOMPARE( reverseCipher.keyLength().maximum(), 8 );
-	    QCOMPARE( reverseCipher.blockSize(), (unsigned)8 );
+	    QCOMPARE( reverseCipher.blockSize(), 8 );
 
 	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ) );
 	    QVERIFY( reverseCipher.ok() );
@@ -2017,7 +2017,7 @@ void CipherUnitTest::des_cbc_pkcs7()
 				QCA::SymmetricKey( 8 ) );
 	QCOMPARE( cipherObj1.keyLength().minimum(), 8 );
 	QCOMPARE( cipherObj1.keyLength().maximum(), 8 );
-	QCOMPARE( cipherObj1.blockSize(), (unsigned)8 );
+	QCOMPARE( cipherObj1.blockSize(), 8 );
 
 	for (int n = 0; (0 != desEcbPkcs7TestValues[n].plaintext); n++) {
 	    QCA::SymmetricKey key( QCA::hexToArray( desEcbPkcs7TestValues[n].key ) );
@@ -2146,7 +2146,7 @@ void CipherUnitTest::blowfish()
 				    QCA::InitializationVector(), provider );
 
 	    // TODO: add some test for min and max keysizes
-	    QCOMPARE( cipherObj1.blockSize(), (unsigned)8 );
+	    QCOMPARE( cipherObj1.blockSize(), 8 );
 
 	    QFETCH( QString, plainText );
 	    QFETCH( QString, cipherText );

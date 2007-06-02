@@ -68,7 +68,7 @@ public:
 	CipherContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv) = 0;
 	virtual KeyLength keyLength() const = 0;
-	virtual unsigned int blockSize() const = 0;
+	virtual int blockSize() const = 0;
 
 	virtual bool update(const SecureArray &in, SecureArray *out) = 0;
 	virtual bool final(SecureArray *out) = 0;

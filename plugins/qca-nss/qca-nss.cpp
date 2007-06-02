@@ -359,7 +359,7 @@ public:
 	    return new nssCipherContext(*this);
 	}
 
-    unsigned int blockSize() const
+    int blockSize() const
 	{
 	    return PK11_GetBlockSize( m_cipherMechanism, m_params);
 	}
