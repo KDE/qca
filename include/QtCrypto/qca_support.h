@@ -91,6 +91,8 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
 
    \return the name of the type that this method will return with the specified
    argument types.
+
+   \sa QMetaType for more information on the Qt meta type system.
 */
 
 QCA_EXPORT QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> argTypes);
