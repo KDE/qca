@@ -140,6 +140,46 @@ void MetaTypeUnitTest::invokeMethodTest()
     QVERIFY( ret );
     QCOMPARE( result.toBool(), true );
 
+    result = QByteArray();
+    args.clear();
+    QByteArray myArray( "array" );
+    args << myArray;
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnArg" ), args, &result );
+    QVERIFY( ret );
+    QCOMPARE( result.toByteArray(), myArray );
+
+    result = QString();
+    args.clear();
+    QString myString( "test words" );
+    args << myString;
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnArg" ), args, &result );
+    QVERIFY( ret );
+    QCOMPARE( result.toString(), myString );
+
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnRepeatArg" ), args, &result );
+    QVERIFY( ret );
+    QCOMPARE( result.toString(), myString + myString );
+
+    // 9 arguments - no matching method
+    result = QString( "unchanged" );
+    args << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0;
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "tenArgs" ), args, &result );
+    QVERIFY( ret == false );
+    QCOMPARE( result.toString(), QString( "unchanged" ) );
+
+    // 10 args
+    args << 0;
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "tenArgs" ), args, &result );
+    QVERIFY( ret );
+    QCOMPARE( result.toString(), myString );
+
+    // 11 args
+    result = QString( "unchanged" );
+    args << 0;
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "elevenArgs" ), args, &result );
+    QVERIFY( ret == false );
+    QCOMPARE( result.toString(), QString( "unchanged" ) );
+
     delete testClass1;
 }
 
