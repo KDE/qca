@@ -767,6 +767,9 @@ else
 
 	private:
 		Q_DISABLE_COPY(OpenPGP)
+
+		class Private;
+		Private *d;
 	};
 
 	/**
@@ -841,6 +844,9 @@ else
 
 	private:
 		Q_DISABLE_COPY(CMS)
+
+		class Private;
+		Private *d;
 	};
 }
 
