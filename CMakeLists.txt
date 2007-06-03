@@ -14,6 +14,8 @@ find_package(Qt4 REQUIRED)
 
 if (APPLE)
    find_package(Carbon REQUIRED)
+   set(CMAKE_INSTALL_NAME_DIR ${LIB_INSTALL_DIR})
+   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif (APPLE)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
