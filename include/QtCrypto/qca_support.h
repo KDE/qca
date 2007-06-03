@@ -61,7 +61,7 @@ class TestClass : public QObject
     // ...
 public slots:
     QString qstringMethod()  { return QString(); };
-    bool boolMethod( const QString & )  { return true; };   
+    bool boolMethod( const QString & )  { return true; };
 };
 
 QByteArray myTypeName;
@@ -69,7 +69,7 @@ QByteArray myTypeName;
 TestClass testClass;
 QList<QByteArray> argsList; // empty list, since no args
 
-myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "qStringMethod" ), argsList );
+myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "qstringMethod" ), argsList );
 // myTypeName is "QString"
 
 myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMethod" ), argsList );
@@ -80,8 +80,8 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
 // myTypeName is "bool"
    \endcode
 
-   The return type name of a method return void is "", not "void"
-       
+   The return type name of a method returning void is an empty string, not "void"
+
    \note This function is not normally required for use with
    %QCA. It is provided for use in your code, if required.
 
@@ -109,7 +109,7 @@ class TestClass : public QObject
     // ...
 public slots:
     QString qstringMethod()  { return QString( "the result" ); };
-    bool boolMethod( const QString & )  { return true; };   
+    bool boolMethod( const QString & )  { return true; };
 };
 
 TestClass *testClass = new TestClass;
