@@ -7,11 +7,10 @@
     Provider::version -> qcaVersion, make version() provider's own version?
     Hash::update(QIODevice&) uses ref, not pointer.  is this conventional?
     KeyGenerator::blocking -> isBlocking() or maybe blockingEnabled() ?
+    SASL::setLocalAddr -> setLocalAddress (and related) ?
+    SASL::continueAfterParams/continueAfterAuthCheck -> continueAfterStep ?
+    sasl: Params::authzid -> Params::authzid() ?  or perhaps OR'd enum values
     core: ctor/dtor/etc accessibility seems inconsistent
-    ensure non-default ctors/dtors/copy/op=, and dpointers as needed:
-       keystore,securelayer,securemessage
-    de-indent / fix docs and formatting:
-       keystore,securelayer,securemessage
     check if we should add any extra "getters" to the API:
        cert,keystore,securelayer,securemessage
     check for unnecessary SecureArray usage in the API:
@@ -23,6 +22,8 @@
     keystore: complete
     securelayer: complete
   other:
+    resolve the psi and cyrus-sasl incompatibility situation
+    rename qca-openssl
     for parallel make, have all utilities/tests depend on the library
     finish cmssigner, set to 1.0
     cmssigner: i'm getting a crash sometimes during sign..  test and trace
