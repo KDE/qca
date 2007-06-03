@@ -12,11 +12,13 @@ SUBDIRS += \
 	hashunittest \
 	hexunittest \
 	kdfunittest \
+	keybundle \
 	keygenunittest \
 	keylengthunittest \
 	keystore \
 	logger \
 	macunittest \
+	metatype \
 #	pgpunittest \
 	pkits \
 	randomunittest \
