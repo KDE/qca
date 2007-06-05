@@ -21,10 +21,6 @@
 
 #include "sprocess.h"
 
-#ifdef Q_OS_MAC
-#define QT_PIPE_HACK
-#endif
-
 using namespace QCA;
 
 namespace gpgQCAPlugin {
