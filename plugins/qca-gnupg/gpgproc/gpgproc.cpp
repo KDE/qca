@@ -29,7 +29,6 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
-#ifdef QT_PIPE_HACK
 class QProcessSignalRelay : public QObject
 {
 	Q_OBJECT
@@ -85,7 +84,6 @@ public slots:
 		emit error(x);
 	}
 };
-#endif
 
 //----------------------------------------------------------------------------
 // GPGProc
