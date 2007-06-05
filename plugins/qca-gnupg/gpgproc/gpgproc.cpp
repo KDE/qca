@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,10 @@
 #include "gpgproc.h"
 
 #include "sprocess.h"
+
+#ifdef Q_OS_MAC
+#define QT_PIPE_HACK
+#endif
 
 using namespace QCA;
 
