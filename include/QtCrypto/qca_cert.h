@@ -120,8 +120,8 @@ public:
 	*/
 	enum Section
 	{
-		DN,     ///< Distinguished name (the primary name)
-		AltName ///< Alternative name
+		DN,              ///< Distinguished name (the primary name)
+		AlternativeName  ///< Alternative name
 	};
 
 	/**
@@ -278,37 +278,148 @@ private:
 };
 
 /**
-   Certificate constraints
+   Known types of certificate constraints
+
+   This enumerator offers a convenient way to work with common types.
+*/
+enum ConstraintTypeKnown
+{
+	// KeyUsage
+	DigitalSignature,    ///< %Certificate can be used to create digital signatures, id = "KeyUsage.digitalSignature"
+	NonRepudiation,      ///< %Certificate can be used for non-repudiation, id = "KeyUsage.nonRepudiation"
+	KeyEncipherment,     ///< %Certificate can be used for encrypting / decrypting keys, id = "KeyUsage.keyEncipherment"
+	DataEncipherment,    ///< %Certificate can be used for encrypting / decrypting data, id = "KeyUsage.dataEncipherment"
+	KeyAgreement,        ///< %Certificate can be used for key agreement, id = "KeyUsage.keyAgreement"
+	KeyCertificateSign,  ///< %Certificate can be used for key certificate signing, id = "KeyUsage.keyCertSign"
+	CRLSign,             ///< %Certificate can be used to sign %Certificate Revocation Lists, id = "KeyUsage.crlSign"
+	EncipherOnly,        ///< %Certificate can only be used for encryption, id = "KeyUsage.encipherOnly"
+	DecipherOnly,        ///< %Certificate can only be used for decryption, id = "KeyUsage.decipherOnly"
+
+	// ExtKeyUsage
+	ServerAuth,       ///< %Certificate can be used for server authentication (e.g. web server), id = "1.3.6.1.5.5.7.3.1". This is an extended usage constraint.
+	ClientAuth,       ///< %Certificate can be used for client authentication (e.g. web browser), id = "1.3.6.1.5.5.7.3.2". This is an extended usage constraint.
+	CodeSigning,      ///< %Certificate can be used to sign code, id = "1.3.6.1.5.5.7.3.3". This is an extended usage constraint.
+	EmailProtection,  ///< %Certificate can be used to sign / encrypt email, id = "1.3.6.1.5.5.7.3.4". This is an extended usage constraint.
+	IPSecEndSystem,   ///< %Certificate can be used to authenticate a endpoint in IPSEC, id = "1.3.6.1.5.5.7.3.5". This is an extended usage constraint.
+	IPSecTunnel,      ///< %Certificate can be used to authenticate a tunnel in IPSEC, id = "1.3.6.1.5.5.7.3.6". This is an extended usage constraint.
+	IPSecUser,        ///< %Certificate can be used to authenticate a user in IPSEC, id = "1.3.6.1.5.5.7.3.7". This is an extended usage constraint.
+	TimeStamping,     ///< %Certificate can be used to create a "time stamp" signature, id = "1.3.6.1.5.5.7.3.8". This is an extended usage constraint.
+	OCSPSigning       ///< %Certificate can be used to sign an Online %Certificate Status Protocol (OCSP) assertion, id = "1.3.6.1.5.5.7.3.9". This is an extended usage constraint.
+};
+
+/**
+   Certificate constraint
 
    X.509 certificates can be constrained in their application - that is, some
-   certificates can only be used for certain purposes. This enumeration is
-   used to identify the approved purposes for a certificate.
+   certificates can only be used for certain purposes. This class is used to
+   identify an approved purpose for a certificate.
 
    \note It is common for a certificate to have more than one purpose.
 */
-enum ConstraintType
+class QCA_EXPORT ConstraintType
 {
-	// basic
-	DigitalSignature,    ///< %Certificate can be used to create digital signatures
-	NonRepudiation,      ///< %Certificate can be used for non-repudiation
-	KeyEncipherment,     ///< %Certificate can be used for encrypting / decrypting keys
-	DataEncipherment,    ///< %Certificate can be used for encrypting / decrypting data
-	KeyAgreement,        ///< %Certificate can be used for key agreement
-	KeyCertificateSign,  ///< %Certificate can be used for key certificate signing
-	CRLSign,             ///< %Certificate can be used to sign %Certificate Revocation Lists
-	EncipherOnly,        ///< %Certificate can only be used for encryption
-	DecipherOnly,        ///< %Certificate can only be used for decryption
+public:
+	/**
+	   Section of the certificate that the constraint belongs in
+	*/
+	enum Section
+	{
+		KeyUsage,          ///< Stored in the key usage section
+		ExtendedKeyUsage   ///< Stored in the extended key usage section
+	};
 
-	// extended
-	ServerAuth,       ///< %Certificate can be used for server authentication (e.g. web server). This is an extended usage constraint.
-	ClientAuth,       ///< %Certificate can be used for client authentication (e.g. web browser). This is an extended usage constraint.
-	CodeSigning,      ///< %Certificate can be used to sign code. This is an extended usage constraint.
-	EmailProtection,  ///< %Certificate can be used to sign / encrypt email. This is an extended usage constraint.
-	IPSecEndSystem,   ///< %Certificate can be used to authenticate a endpoint in IPSEC. This is an extended usage constraint.
-	IPSecTunnel,      ///< %Certificate can be used to authenticate a tunnel in IPSEC. This is an extended usage constraint.
-	IPSecUser,        ///< %Certificate can be used to authenticate a user in IPSEC. This is an extended usage constraint.
-	TimeStamping,     ///< %Certificate can be used to create a "time stamp" signature. This is an extended usage constraint.
-	OCSPSigning       ///< %Certificate can be used to sign an Online %Certificate Status Protocol (OCSP) assertion. This is an extended usage constraint.
+	/**
+	   Standard constructor
+	*/
+	ConstraintType();
+
+	/**
+	   Construct a new constraint
+
+	   The section will be derived by \a known.
+
+	   \param known the type as part of the ConstraintTypeKnown
+	   enumerator
+	*/
+	ConstraintType(ConstraintTypeKnown known);
+
+	/**
+	   Construct a new constraint
+
+	   \param id the type as an identifier string (OID or internal)
+	   \param section the section this type belongs in
+
+	   \sa id
+	*/
+	ConstraintType(const QString &id, Section section);
+
+	/**
+	   Standard copy constructor
+	*/
+	ConstraintType(const ConstraintType &from);
+
+	~ConstraintType();
+
+	/**
+	   Standard assignment operator
+	*/
+	ConstraintType & operator=(const ConstraintType &from);
+
+	/**
+	   The section the constraint is part of
+	*/
+	Section section() const;
+
+	/**
+	   The type as part of the ConstraintTypeKnown enumerator
+
+	   This function may return a value that does not exist in the
+	   enumerator.  In that case, you may use id() to determine the
+	   type.
+	*/
+	ConstraintTypeKnown known() const;
+
+	/**
+	   The type as an identifier string
+
+	   For types that have OIDs, this function returns an OID in string
+	   form.  For types that do not have OIDs, this function returns an
+	   internal identifier string whose first character is not a digit
+	   (this allows you to tell the difference between an OID and an
+	   internal identifier).
+
+	   It is hereby stated that the KeyUsage bit fields shall use the
+	   internal identifier format "KeyUsage.[rfc field name]".  For
+	   example, the keyEncipherment field would have the identifier
+	   "KeyUsage.keyEncipherment".
+
+	   Applications should not store, use, or compare against internal
+	   identifiers unless the identifiers are explicitly documented
+	   (e.g. KeyUsage).
+	*/
+	QString id() const;
+
+	/**
+	   Comparison operator
+	*/
+	bool operator<(const ConstraintType &other) const;
+
+	/**
+	   Comparison operator
+	*/
+	bool operator==(const ConstraintType &other) const;
+
+	/**
+	   Inequality operator
+	*/
+	inline bool operator!=(const ConstraintType &other) const
+	{
+		return !(*this == other);
+	}
+
+private:
+	class Private;
+	QSharedDataPointer<Private> d;
 };
 
 /**

@@ -141,10 +141,10 @@ static SecureArray dsasig_raw_to_der(const SecureArray &in)
 	return result;
 }
 
-/*static bool is_basic_constraint(ConstraintType t)
+/*static bool is_basic_constraint(const ConstraintType &t)
 {
 	bool basic = false;
-	switch(t)
+	switch(t.known())
 	{
 		case DigitalSignature:
 		case NonRepudiation:
@@ -617,7 +617,7 @@ static X509_EXTENSION *new_cert_key_usage(const Constraints &constraints)
 	for(int n = 0; n < constraints.count(); ++n)
 	{
 		int bit = -1;
-		switch(constraints[n])
+		switch(constraints[n].known())
 		{
 			case DigitalSignature:
 				bit = Bit_DigitalSignature;
@@ -646,17 +646,7 @@ static X509_EXTENSION *new_cert_key_usage(const Constraints &constraints)
 			case DecipherOnly:
 				bit = Bit_DecipherOnly;
 				break;
-
-			// the following are not basic key usage
-			case ServerAuth:
-			case ClientAuth:
-			case CodeSigning:
-			case EmailProtection:
-			case IPSecEndSystem:
-			case IPSecTunnel:
-			case IPSecUser:
-			case TimeStamping:
-			case OCSPSigning:
+			default:
 				break;
 		}
 		if(bit != -1)
@@ -694,7 +684,7 @@ static Constraints get_cert_key_usage(X509_EXTENSION *ex)
 	for(int n = 0; n < 9; ++n)
 	{
 		if(ASN1_BIT_STRING_get_bit(keyusage, n))
-			constraints += (ConstraintType)bit_table[n];
+			constraints += ConstraintType((ConstraintTypeKnown)bit_table[n]);
 	}
 	ASN1_BIT_STRING_free(keyusage);
 	return constraints;
@@ -706,7 +696,8 @@ static X509_EXTENSION *new_cert_ext_key_usage(const Constraints &constraints)
 	for(int n = 0; n < constraints.count(); ++n)
 	{
 		int nid = -1;
-		switch(constraints[n])
+		// TODO: don't use known/nid, and instead just use OIDs
+		switch(constraints[n].known())
 		{
 			case ServerAuth:
 				nid = NID_server_auth;
@@ -735,17 +726,7 @@ static X509_EXTENSION *new_cert_ext_key_usage(const Constraints &constraints)
 			case OCSPSigning:
 				nid = NID_OCSP_sign;
 				break;
-
-			// the following are not extended key usage
-			case DigitalSignature:
-			case NonRepudiation:
-			case KeyEncipherment:
-			case DataEncipherment:
-			case KeyAgreement:
-			case KeyCertificateSign:
-			case CRLSign:
-			case EncipherOnly:
-			case DecipherOnly:
+			default:
 				break;
 		}
 		if(nid != -1)
@@ -776,6 +757,7 @@ static Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
 		if(nid == NID_undef)
 			continue;
 
+		// TODO: don't use known/nid, and instead just use OIDs
 		int t = -1;
 		switch(nid)
 		{
@@ -811,7 +793,7 @@ static Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
 		if(t == -1)
 			continue;
 
-		constraints.append((ConstraintType)t);
+		constraints.append(ConstraintType((ConstraintTypeKnown)t));
 	}
 	sk_ASN1_OBJECT_pop_free(extkeyusage, ASN1_OBJECT_free);
 	return constraints;

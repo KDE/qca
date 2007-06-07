@@ -174,6 +174,25 @@ static const char DNS_id[]                    = "GeneralName.dNSName";
 static const char IPAddress_id[]              = "GeneralName.iPAddress";
 static const char XMPP_id[]                   = "1.3.6.1.5.5.7.8.5";
 
+static const char DigitalSignature_id[]    = "KeyUsage.digitalSignature";
+static const char NonRepudiation_id[]      = "KeyUsage.nonRepudiation";
+static const char KeyEncipherment_id[]     = "KeyUsage.keyEncipherment";
+static const char DataEncipherment_id[]    = "KeyUsage.dataEncipherment";
+static const char KeyAgreement_id[]        = "KeyUsage.keyAgreement";
+static const char KeyCertificateSign_id[]  = "KeyUsage.keyCertSign";
+static const char CRLSign_id[]             = "KeyUsage.crlSign";
+static const char EncipherOnly_id[]        = "KeyUsage.encipherOnly";
+static const char DecipherOnly_id[]        = "KeyUsage.decipherOnly";
+static const char ServerAuth_id[]          = "1.3.6.1.5.5.7.3.1";
+static const char ClientAuth_id[]          = "1.3.6.1.5.5.7.3.2";
+static const char CodeSigning_id[]         = "1.3.6.1.5.5.7.3.3";
+static const char EmailProtection_id[]     = "1.3.6.1.5.5.7.3.4";
+static const char IPSecEndSystem_id[]      = "1.3.6.1.5.5.7.3.5";
+static const char IPSecTunnel_id[]         = "1.3.6.1.5.5.7.3.6";
+static const char IPSecUser_id[]           = "1.3.6.1.5.5.7.3.7";
+static const char TimeStamping_id[]        = "1.3.6.1.5.5.7.3.8";
+static const char OCSPSigning_id[]         = "1.3.6.1.5.5.7.3.9";
+
 static QString knownToId(CertificateInfoTypeKnown k)
 {
 	const char *out = 0;
@@ -255,7 +274,7 @@ static CertificateInfoType::Section knownToSection(CertificateInfoTypeKnown k)
 		default:
 			break;
 	}
-	return CertificateInfoType::AltName;
+	return CertificateInfoType::AlternativeName;
 }
 
 static const char *knownToShortName(CertificateInfoTypeKnown k)
@@ -272,6 +291,98 @@ static const char *knownToShortName(CertificateInfoTypeKnown k)
 		default:                                      break;
 	}
 	return 0;
+}
+
+static QString constraintKnownToId(ConstraintTypeKnown k)
+{
+	const char *out = 0;
+	switch(k)
+	{
+		case DigitalSignature:   out = DigitalSignature_id; break;
+		case NonRepudiation:     out = NonRepudiation_id; break;
+		case KeyEncipherment:    out = KeyEncipherment_id; break;
+		case DataEncipherment:   out = DataEncipherment_id; break;
+		case KeyAgreement:       out = KeyAgreement_id; break;
+		case KeyCertificateSign: out = KeyCertificateSign_id; break;
+		case CRLSign:            out = CRLSign_id; break;
+		case EncipherOnly:       out = EncipherOnly_id; break;
+		case DecipherOnly:       out = DecipherOnly_id; break;
+		case ServerAuth:         out = ServerAuth_id; break;
+		case ClientAuth:         out = ClientAuth_id; break;
+		case CodeSigning:        out = CodeSigning_id; break;
+		case EmailProtection:    out = EmailProtection_id; break;
+		case IPSecEndSystem:     out = IPSecEndSystem_id; break;
+		case IPSecTunnel:        out = IPSecTunnel_id; break;
+		case IPSecUser:          out = IPSecUser_id; break;
+		case TimeStamping:       out = TimeStamping_id; break;
+		case OCSPSigning:        out = OCSPSigning_id; break;
+	}
+	Q_ASSERT(out);
+	if(!out)
+		abort();
+	return QString(out);
+}
+
+static int constraintIdToKnown(const QString &id)
+{
+	if(id == DigitalSignature_id)
+		return DigitalSignature;
+	else if(id == NonRepudiation_id)
+		return NonRepudiation;
+	else if(id == KeyEncipherment_id)
+		return KeyEncipherment;
+	else if(id == DataEncipherment_id)
+		return DataEncipherment;
+	else if(id == KeyAgreement_id)
+		return KeyAgreement;
+	else if(id == KeyCertificateSign_id)
+		return KeyCertificateSign;
+	else if(id == CRLSign_id)
+		return CRLSign;
+	else if(id == EncipherOnly_id)
+		return EncipherOnly;
+	else if(id == DecipherOnly_id)
+		return DecipherOnly;
+	else if(id == ServerAuth_id)
+		return ServerAuth;
+	else if(id == ClientAuth_id)
+		return ClientAuth;
+	else if(id == CodeSigning_id)
+		return CodeSigning;
+	else if(id == EmailProtection_id)
+		return EmailProtection;
+	else if(id == IPSecEndSystem_id)
+		return IPSecEndSystem;
+	else if(id == IPSecTunnel_id)
+		return IPSecTunnel;
+	else if(id == IPSecUser_id)
+		return IPSecUser;
+	else if(id == TimeStamping_id)
+		return TimeStamping;
+	else if(id == OCSPSigning_id)
+		return OCSPSigning;
+	else
+		return -1;
+}
+
+static ConstraintType::Section constraintKnownToSection(ConstraintTypeKnown k)
+{
+	switch(k)
+	{
+		case DigitalSignature:
+		case NonRepudiation:
+		case KeyEncipherment:
+		case DataEncipherment:
+		case KeyAgreement:
+		case KeyCertificateSign:
+		case CRLSign:
+		case EncipherOnly:
+		case DecipherOnly:
+			return ConstraintType::KeyUsage;
+		default:
+			break;
+	}
+	return ConstraintType::ExtendedKeyUsage;
 }
 
 static QString dnLabel(const CertificateInfoType &type)
@@ -391,9 +502,9 @@ static QString uniqueIssuerName(const QList<int> items, const QList<Certificate>
 	return QString();
 }
 
-static const char *constraintToString(ConstraintType type)
+static const char *constraintToString(const ConstraintType &type)
 {
-	switch(type)
+	switch(type.known())
 	{
 		case DigitalSignature:   return "DigitalSignature";
 		case NonRepudiation:     return "NonRepudiation";
@@ -417,7 +528,7 @@ static const char *constraintToString(ConstraintType type)
 	return 0;
 }
 
-static QString uniqueConstraintValue(ConstraintType type, const QList<int> items, const QList<Certificate> &certs, int i)
+static QString uniqueConstraintValue(const ConstraintType &type, const QList<int> items, const QList<Certificate> &certs, int i)
 {
 	ConstraintType val = type;
 	if(certs[items[i]].constraints().contains(type))
@@ -764,6 +875,119 @@ bool CertificateInfoPair::operator==(const CertificateInfoPair &other) const
 	if(d->type == other.d->type && d->value == other.d->value)
 		return true;
 	return false;
+}
+
+//----------------------------------------------------------------------------
+// ConstraintType
+//----------------------------------------------------------------------------
+class ConstraintType::Private : public QSharedData
+{
+public:
+	ConstraintType::Section section;
+	int known;
+	QString id;
+
+	Private() :
+		section(ConstraintType::KeyUsage),
+		known(-1)
+	{
+	}
+};
+
+ConstraintType::ConstraintType()
+:d(new Private)
+{
+}
+
+ConstraintType::ConstraintType(ConstraintTypeKnown known)
+:d(new Private)
+{
+	d->section = constraintKnownToSection(known);
+	d->known = known;
+	d->id = constraintKnownToId(known); // always valid
+}
+
+ConstraintType::ConstraintType(const QString &id, Section section)
+:d(new Private)
+{
+	d->section = section;
+	d->known = constraintIdToKnown(id); // can be -1 for unknown
+	d->id = id;
+}
+
+ConstraintType::ConstraintType(const ConstraintType &from)
+:d(from.d)
+{
+}
+
+ConstraintType::~ConstraintType()
+{
+}
+
+ConstraintType & ConstraintType::operator=(const ConstraintType &from)
+{
+	d = from.d;
+	return *this;
+}
+
+ConstraintType::Section ConstraintType::section() const
+{
+	return d->section;
+}
+
+ConstraintTypeKnown ConstraintType::known() const
+{
+	return (ConstraintTypeKnown)d->known;
+}
+
+QString ConstraintType::id() const
+{
+	return d->id;
+}
+
+bool ConstraintType::operator<(const ConstraintType &other) const
+{
+	// sort by knowns (in enum order), then by ids (in string order)
+	if(d->known != -1)
+	{
+		if(other.d->known == -1)
+			return true;
+		else if(d->known < other.d->known)
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		if(other.d->known != -1)
+			return false;
+		else if(d->id < other.d->id)
+			return true;
+		else
+			return false;
+	}
+}
+
+bool ConstraintType::operator==(const ConstraintType &other) const
+{
+	// are both known types?
+	if(d->known != -1 && other.d->known != -1)
+	{
+		// if so, compare the ints
+		if(d->known != other.d->known)
+			return false;
+	}
+	else
+	{
+		// otherwise, compare the string ids
+		if(d->id != other.d->id)
+			return false;
+	}
+
+	if(d->section != other.d->section)
+		return false;
+
+	return true;
 }
 
 //----------------------------------------------------------------------------
