@@ -57,10 +57,45 @@ enum CertificateRequestFormat
 };
 
 /**
-   Certificate information types
+   Known types of information stored in certificates
 
-   This enumeration provides the values that may appear in a
-   CertificateInfo key field.  These are from RFC3280
+   This enumerator offers a convenient way to work with common types.
+*/
+enum CertificateInfoTypeKnown
+{
+	CommonName,             ///< The common name (eg person), id = "2.5.4.3"
+	Email,                  ///< Email address, id = "GeneralName.rfc822Name"
+	EmailLegacy,            ///< PKCS#9 Email field, id = "1.2.840.113549.1.9.1"
+	Organization,           ///< An organisation (eg company), id = "2.5.4.10"
+	OrganizationalUnit,     ///< An part of an organisation (eg a division or branch), id = "2.5.4.11"
+	Locality,               ///< The locality (eg city, a shire, or part of a state), id = "2.5.4.7"
+	IncorporationLocality,  ///< The locality of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.1"
+	State,                  ///< The state within the country, id = "2.5.4.8"
+	IncorporationState,     ///< The state of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.2"
+	Country,                ///< The country, id = "2.5.4.6"
+	IncorporationCountry,   ///< The country of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.3"
+	URI,                    ///< Uniform Resource Identifier, id = "GeneralName.uniformResourceIdentifier"
+	DNS,                    ///< DNS name, id = "GeneralName.dNSName"
+	IPAddress,              ///< IP address, id = "GeneralName.iPAddress"
+	XMPP                    ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt), id = "1.3.6.1.5.5.7.8.5"
+};
+
+/**
+   Certificate information type
+
+   This class represents a type of information being stored in
+   a certificate.  It can be created either using a known type
+   (from the Known enumerator) or an identifier string (usually
+   an OID).  Types created either way are interchangeable.
+
+   Types also have the notion of a Section.  Some types may
+   reside in the Distinguished Name field of a certificate, and
+   some types may reside in the Subject Alternative Name field.
+   This class is capable of representing a type from either
+   section.
+
+   In the general case, applications will want to use the
+   CertificateInfoTypeKnown enumerator types.  These are from RFC3280
    (http://www.ietf.org/rfc/rfc3280.txt) except where shown.
 
    The entries for IncorporationLocality, IncorporationState
@@ -77,30 +112,7 @@ enum CertificateRequestFormat
    \sa Certificate::subjectInfo() and Certificate::issuerInfo()
    \sa CRL::issuerInfo()
 */
-enum CertificateInfoType
-{
-	OtherInfoType,          ///< Type is not listed in this enumerator (CertificateInfoPair only)
-	CommonName,             ///< The common name (eg person)
-	Email,                  ///< Email address
-	EmailLegacy,            ///< PKCS#9 Email field (CertificateInfoPair only)
-	Organization,           ///< An organisation (eg company)
-	OrganizationalUnit,     ///< An part of an organisation (eg a division or branch)
-	Locality,               ///< The locality (eg city, a shire, or part of a state) 
-	IncorporationLocality,  ///< The locality of incorporation (EV certificates)
-	State,                  ///< The state within the country
-	IncorporationState,     ///< The state of incorporation (EV certificates)
-	Country,                ///< The country
-	IncorporationCountry,   ///< The country of incorporation (EV certificates)
-	URI,                    ///< Uniform Resource Identifier
-	DNS,                    ///< DNS name
-	IPAddress,              ///< IP address
-	XMPP                    ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt)
-};
-
-/**
-   One entry in a certificate information list
-*/
-class QCA_EXPORT CertificateInfoPair
+class QCA_EXPORT CertificateInfoType
 {
 public:
 	/**
@@ -109,9 +121,109 @@ public:
 	enum Section
 	{
 		DN,     ///< Distinguished name (the primary name)
-		AltName ///< Alternate name
+		AltName ///< Alternative name
 	};
 
+	/**
+	   Standard constructor
+	*/
+	CertificateInfoType();
+
+	/**
+	   Construct a new type
+
+	   The section will be derived by \a known.
+
+	   \param known the type as part of the CertificateInfoTypeKnown
+	   enumerator
+	*/
+	CertificateInfoType(CertificateInfoTypeKnown known);
+
+	/**
+	   Construct a new type
+
+	   \param id the type as an identifier string (OID or internal)
+	   \param section the section this type belongs in
+
+	   \sa id
+	*/
+	CertificateInfoType(const QString &id, Section section);
+
+	/**
+	   Standard copy constructor
+	*/
+	CertificateInfoType(const CertificateInfoType &from);
+
+	~CertificateInfoType();
+
+	/**
+	   Standard assignment operator
+	*/
+	CertificateInfoType & operator=(const CertificateInfoType &from);
+
+	/**
+	   The section the type is part of
+	*/
+	Section section() const;
+
+	/**
+	   The type as part of the CertificateInfoTypeKnown enumerator
+
+	   This function may return a value that does not exist in the
+	   enumerator.  In that case, you may use id() to determine the
+	   type.
+	*/
+	CertificateInfoTypeKnown known() const;
+
+	/**
+	   The type as an identifier string
+
+	   For types that have OIDs, this function returns an OID in string
+	   form.  For types that do not have OIDs, this function returns an
+	   internal identifier string whose first character is not a digit
+	   (this allows you to tell the difference between an OID and an
+	   internal identifier).
+
+	   It is hereby stated that General Names (of the X.509 Subject
+	   Alternative Name) shall use the internal identifier format
+	   "GeneralName.[rfc field name]".  For example, the rfc822Name
+	   field would have the identifier "GeneralName.rfc822Name".
+
+	   Applications should not store, use, or compare against internal
+	   identifiers unless the identifiers are explicitly documented
+	   (e.g. GeneralName).
+	*/
+	QString id() const;
+
+	/**
+	   Comparison operator
+	*/
+	bool operator<(const CertificateInfoType &other) const;
+
+	/**
+	   Comparison operator
+	*/
+	bool operator==(const CertificateInfoType &other) const;
+
+	/**
+	   Inequality operator
+	*/
+	inline bool operator!=(const CertificateInfoType &other) const
+	{
+		return !(*this == other);
+	}
+
+private:
+	class Private;
+	QSharedDataPointer<Private> d;
+};
+
+/**
+   One entry in a certificate information list
+*/
+class QCA_EXPORT CertificateInfoPair
+{
+public:
 	/**
 	   Standard constructor
 	*/
@@ -123,16 +235,7 @@ public:
 	   \param type the type of information stored in this pair
 	   \param value the value of the information to be stored
 	*/
-	CertificateInfoPair(CertificateInfoType type, const QString &value);
-
-	/**
-	   Construct a new pair
-
-	   \param oid the type of information stored in this pair as an OID
-	   \param value the value of the information to be stored
-	   \param section the section the information belongs in
-	*/
-	CertificateInfoPair(const QString &oid, const QString &value, Section section);
+	CertificateInfoPair(const CertificateInfoType &type, const QString &value);
 
 	/**
 	   Standard copy constructor
@@ -147,22 +250,9 @@ public:
 	CertificateInfoPair & operator=(const CertificateInfoPair &from);
 
 	/**
-	   The section the information is part of
-	*/
-	Section section() const;
-
-	/**
 	   The type of information stored in the pair
 	*/
 	CertificateInfoType type() const;
-
-	/**
-	   The type of information stored in the pair as an OID
-
-	   For use with types not listed in the CertificateInfoType
-	   enumerator.
-	*/
-	QString oid() const;
 
 	/**
 	   The value of the information stored in the pair
@@ -192,7 +282,7 @@ private:
 
    X.509 certificates can be constrained in their application - that is, some
    certificates can only be used for certain purposes. This enumeration is
-   used to identify the approved purposes for a certificate. 
+   used to identify the approved purposes for a certificate.
 
    \note It is common for a certificate to have more than one purpose.
 */
@@ -210,15 +300,15 @@ enum ConstraintType
 	DecipherOnly,        ///< %Certificate can only be used for decryption
 
 	// extended
-	ServerAuth,        ///< %Certificate can be used for server authentication (e.g. web server). This is an extended usage constraint.
-	ClientAuth,        ///< %Certificate can be used for client authentication (e.g. web browser). This is an extended usage constraint.
-	CodeSigning,       ///< %Certificate can be used to sign code. This is an extended usage constraint.
-	EmailProtection,   ///< %Certificate can be used to sign / encrypt email. This is an extended usage constraint.
-	IPSecEndSystem,    ///< %Certificate can be used to authenticate a endpoint in IPSEC. This is an extended usage constraint.
-	IPSecTunnel,       ///< %Certificate can be used to authenticate a tunnel in IPSEC. This is an extended usage constraint.
-	IPSecUser,         ///< %Certificate can be used to authenticate a user in IPSEC. This is an extended usage constraint.
-	TimeStamping,      ///< %Certificate can be used to create a "time stamp" signature. This is an extended usage constraint.
-	OCSPSigning        ///< %Certificate can be used to sign an Online %Certificate Status Protocol (OCSP) assertion. This is an extended usage constraint.
+	ServerAuth,       ///< %Certificate can be used for server authentication (e.g. web server). This is an extended usage constraint.
+	ClientAuth,       ///< %Certificate can be used for client authentication (e.g. web browser). This is an extended usage constraint.
+	CodeSigning,      ///< %Certificate can be used to sign code. This is an extended usage constraint.
+	EmailProtection,  ///< %Certificate can be used to sign / encrypt email. This is an extended usage constraint.
+	IPSecEndSystem,   ///< %Certificate can be used to authenticate a endpoint in IPSEC. This is an extended usage constraint.
+	IPSecTunnel,      ///< %Certificate can be used to authenticate a tunnel in IPSEC. This is an extended usage constraint.
+	IPSecUser,        ///< %Certificate can be used to authenticate a user in IPSEC. This is an extended usage constraint.
+	TimeStamping,     ///< %Certificate can be used to create a "time stamp" signature. This is an extended usage constraint.
+	OCSPSigning       ///< %Certificate can be used to sign an Online %Certificate Status Protocol (OCSP) assertion. This is an extended usage constraint.
 };
 
 /**
@@ -256,11 +346,22 @@ enum Validity
 
 /**
    Certificate properties type
+
+   With this container, the information is not necessarily stored
+   in the same sequence as the certificate format itself.  Use this
+   container if the order the information is/was stored does not
+   matter for you (this is the case with most applications).
+
+   Additionally, the EmailLegacy type should not be used with this
+   container.  Use Email instead.
 */
 typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
 
 /**
    Ordered certificate properties type
+
+   This container stores the information in the same sequence as
+   the certificate format itself.
 */
 class CertificateInfoOrdered : public QList<CertificateInfoPair>
 {

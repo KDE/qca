@@ -1779,10 +1779,10 @@ static void print_info_ordered(const QString &title, const QCA::CertificateInfoO
 		}
 		else
 		{
-			if(pair.section() == QCA::CertificateInfoPair::DN)
-				name = QString("DN:") + pair.oid();
+			if(pair.type().section() == QCA::CertificateInfoType::DN)
+				name = QString("DN:") + pair.type().id();
 			else
-				name = QString("AN:") + pair.oid();
+				name = QString("AN:") + pair.type().id();
 		}
 
 		printf("   %s: %s\n", qPrintable(name), pair.value().toUtf8().data());

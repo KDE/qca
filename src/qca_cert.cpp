@@ -86,7 +86,7 @@ static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 	for(int n = 0; n < info.count(); ++n)
 	{
 		const CertificateInfoPair &i = info[n];
-		if(i.type() != OtherInfoType && i.type() != EmailLegacy)
+		if(i.type().known() != EmailLegacy)
 			out.insert(i.type(), i.value());
 	}
 
@@ -94,7 +94,7 @@ static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 	for(int n = 0; n < info.count(); ++n)
 	{
 		const CertificateInfoPair &i = info[n];
-		if(i.type() == EmailLegacy)
+		if(i.type().known() == EmailLegacy)
 		{
 			// de-dup
 			QList<QString> emails = out.values(Email);
@@ -106,7 +106,7 @@ static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 	return out;
 }
 
-static void moveMapValues(CertificateInfo *from, CertificateInfoOrdered *to, CertificateInfoType type)
+static void moveMapValues(CertificateInfo *from, CertificateInfoOrdered *to, const CertificateInfoType &type)
 {
 	QList<QString> values = from->values(type);
 	from->remove(type);
@@ -137,7 +137,6 @@ static CertificateInfoOrdered mapToOrdered(const CertificateInfo &info)
 
 	// get remaining types
 	QList<CertificateInfoType> typesLeft = in.keys();
-	typesLeft.removeAll(OtherInfoType);
 
 	// dedup
 	QList<CertificateInfoType> types;
@@ -159,9 +158,109 @@ static CertificateInfoOrdered mapToOrdered(const CertificateInfo &info)
 //----------------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------------
-static const char *shortNameByType(CertificateInfoType type)
+static const char CommonName_id[]             = "2.5.4.3";
+static const char Email_id[]                  = "GeneralName.rfc822Name";
+static const char EmailLegacy_id[]            = "1.2.840.113549.1.9.1";
+static const char Organization_id[]           = "2.5.4.10";
+static const char OrganizationalUnit_id[]     = "2.5.4.11";
+static const char Locality_id[]               = "2.5.4.7";
+static const char IncorporationLocality_id[]  = "1.3.6.1.4.1.311.60.2.1.1";
+static const char State_id[]                  = "2.5.4.8";
+static const char IncorporationState_id[]     = "1.3.6.1.4.1.311.60.2.1.2";
+static const char Country_id[]                = "2.5.4.6";
+static const char IncorporationCountry_id[]   = "1.3.6.1.4.1.311.60.2.1.3";
+static const char URI_id[]                    = "GeneralName.uniformResourceIdentifier";
+static const char DNS_id[]                    = "GeneralName.dNSName";
+static const char IPAddress_id[]              = "GeneralName.iPAddress";
+static const char XMPP_id[]                   = "1.3.6.1.5.5.7.8.5";
+
+static QString knownToId(CertificateInfoTypeKnown k)
 {
-	switch(type)
+	const char *out = 0;
+	switch(k)
+	{
+		case CommonName:            out = CommonName_id; break;
+		case Email:                 out = Email_id; break;
+		case EmailLegacy:           out = EmailLegacy_id; break;
+		case Organization:          out = Organization_id; break;
+		case OrganizationalUnit:    out = OrganizationalUnit_id; break;
+		case Locality:              out = Locality_id; break;
+		case IncorporationLocality: out = IncorporationLocality_id; break;
+		case State:                 out = State_id; break;
+		case IncorporationState:    out = IncorporationState_id; break;
+		case Country:               out = Country_id; break;
+		case IncorporationCountry:  out = IncorporationCountry_id; break;
+		case URI:                   out = URI_id; break;
+		case DNS:                   out = DNS_id; break;
+		case IPAddress:             out = IPAddress_id; break;
+		case XMPP:                  out = XMPP_id; break;
+	}
+	Q_ASSERT(out);
+	if(!out)
+		abort();
+	return QString(out);
+}
+
+static int idToKnown(const QString &id)
+{
+	if(id == CommonName_id)
+		return CommonName;
+	else if(id == Email_id)
+		return Email;
+	else if(id == EmailLegacy_id)
+		return EmailLegacy;
+	else if(id == Organization_id)
+		return Organization;
+	else if(id == OrganizationalUnit_id)
+		return OrganizationalUnit;
+	else if(id == Locality_id)
+		return Locality;
+	else if(id == IncorporationLocality_id)
+		return IncorporationLocality;
+	else if(id == State_id)
+		return State;
+	else if(id == IncorporationState_id)
+		return IncorporationState;
+	else if(id == Country_id)
+		return Country;
+	else if(id == IncorporationCountry_id)
+		return IncorporationCountry;
+	else if(id == URI_id)
+		return URI;
+	else if(id == DNS_id)
+		return DNS;
+	else if(id == IPAddress_id)
+		return IPAddress;
+	else if(id == XMPP_id)
+		return XMPP;
+	else
+		return -1;
+}
+
+static CertificateInfoType::Section knownToSection(CertificateInfoTypeKnown k)
+{
+	switch(k)
+	{
+		case CommonName:
+		case EmailLegacy:
+		case Organization:
+		case OrganizationalUnit:
+		case Locality:
+		case IncorporationLocality:
+		case State:
+		case IncorporationState:
+		case Country:
+		case IncorporationCountry:
+			return CertificateInfoType::DN;
+		default:
+			break;
+	}
+	return CertificateInfoType::AltName;
+}
+
+static const char *knownToShortName(CertificateInfoTypeKnown k)
+{
+	switch(k)
 	{
 		case CommonName:         return "CN";
 		case Locality:           return "L";
@@ -170,41 +269,23 @@ static const char *shortNameByType(CertificateInfoType type)
 		case OrganizationalUnit: return "OU";
 		case Country:            return "C";
 		case EmailLegacy:        return "emailAddress";
-		default:                 break;
+		default:                                      break;
 	}
 	return 0;
 }
 
-static const char *oidByDNType(CertificateInfoType type)
+static QString dnLabel(const CertificateInfoType &type)
 {
-	switch(type)
-	{
-		case CommonName:            break;
-		case EmailLegacy:           return "1.2.840.113549.1.9.1";
-		case Organization:          break;
-		case OrganizationalUnit:    break;
-		case Locality:              break;
-		case IncorporationLocality: return "1.3.6.1.4.1.311.60.2.1.1";
-		case State:                 break;
-		case IncorporationState:    return "1.3.6.1.4.1.311.60.2.1.2";
-		case Country:               break;
-		case IncorporationCountry:  return "1.3.6.1.4.1.311.60.2.1.3";
-		default:                    break;
-	}
-	return 0;
-}
-
-static QString knownDNLabel(CertificateInfoType type)
-{
-	const char *str = shortNameByType(type);
+	const char *str = knownToShortName(type.known());
 	if(str)
 		return str;
 
-	str = oidByDNType(type);
-	if(str)
-		return QString("OID.") + str;
+	QString id = type.id();
+	// is it an oid?
+	if(id[0].isDigit())
+		return QString("OID.") + id;
 
-	return QString();
+	return QString("qca.") + id;
 }
 
 QString orderedToDNString(const CertificateInfoOrdered &in)
@@ -212,13 +293,10 @@ QString orderedToDNString(const CertificateInfoOrdered &in)
 	QStringList parts;
 	foreach(const CertificateInfoPair &i, in)
 	{
-		if(i.section() != CertificateInfoPair::DN)
+		if(i.type().section() != CertificateInfoType::DN)
 			continue;
 
-		QString name = knownDNLabel(i.type());
-		if(name.isEmpty())
-			name = QString("OID.") + i.oid();
-
+		QString name = dnLabel(i.type());
 		parts += name + '=' + i.value();
 	}
 	return parts.join(", ");
@@ -229,7 +307,7 @@ CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in)
 	CertificateInfoOrdered out;
 	for(int n = 0; n < in.count(); ++n)
 	{
-		if(in[n].section() == CertificateInfoPair::DN)
+		if(in[n].type().section() == CertificateInfoType::DN)
 			out += in[n];
 	}
 	return out;
@@ -258,7 +336,7 @@ static QList<int> findSameName(const QString &name, const QStringList &list)
 	return out;
 }
 
-static QString uniqueSubjectValue(CertificateInfoType type, const QList<int> items, const QList<Certificate> &certs, int i)
+static QString uniqueSubjectValue(const CertificateInfoType &type, const QList<int> items, const QList<Certificate> &certs, int i)
 {
 	QStringList vals = certs[items[i]].subjectInfo().values(type);
 	if(!vals.isEmpty())
@@ -522,21 +600,126 @@ QStringList makeFriendlyNames(const QList<Certificate> &list)
 }
 
 //----------------------------------------------------------------------------
+// CertificateInfoType
+//----------------------------------------------------------------------------
+class CertificateInfoType::Private : public QSharedData
+{
+public:
+	CertificateInfoType::Section section;
+	int known;
+	QString id;
+
+	Private() :
+		section(CertificateInfoType::DN),
+		known(-1)
+	{
+	}
+};
+
+CertificateInfoType::CertificateInfoType()
+:d(new Private)
+{
+}
+
+CertificateInfoType::CertificateInfoType(CertificateInfoTypeKnown known)
+:d(new Private)
+{
+	d->section = knownToSection(known);
+	d->known = known;
+	d->id = knownToId(known); // always valid
+}
+
+CertificateInfoType::CertificateInfoType(const QString &id, Section section)
+:d(new Private)
+{
+	d->section = section;
+	d->known = idToKnown(id); // can be -1 for unknown
+	d->id = id;
+}
+
+CertificateInfoType::CertificateInfoType(const CertificateInfoType &from)
+:d(from.d)
+{
+}
+
+CertificateInfoType::~CertificateInfoType()
+{
+}
+
+CertificateInfoType & CertificateInfoType::operator=(const CertificateInfoType &from)
+{
+	d = from.d;
+	return *this;
+}
+
+CertificateInfoType::Section CertificateInfoType::section() const
+{
+	return d->section;
+}
+
+CertificateInfoTypeKnown CertificateInfoType::known() const
+{
+	return (CertificateInfoTypeKnown)d->known;
+}
+
+QString CertificateInfoType::id() const
+{
+	return d->id;
+}
+
+bool CertificateInfoType::operator<(const CertificateInfoType &other) const
+{
+	// sort by knowns (in enum order), then by ids (in string order)
+	if(d->known != -1)
+	{
+		if(other.d->known == -1)
+			return true;
+		else if(d->known < other.d->known)
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		if(other.d->known != -1)
+			return false;
+		else if(d->id < other.d->id)
+			return true;
+		else
+			return false;
+	}
+}
+
+bool CertificateInfoType::operator==(const CertificateInfoType &other) const
+{
+	// are both known types?
+	if(d->known != -1 && other.d->known != -1)
+	{
+		// if so, compare the ints
+		if(d->known != other.d->known)
+			return false;
+	}
+	else
+	{
+		// otherwise, compare the string ids
+		if(d->id != other.d->id)
+			return false;
+	}
+
+	if(d->section != other.d->section)
+		return false;
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
 // CertificateInfoPair
 //----------------------------------------------------------------------------
 class CertificateInfoPair::Private : public QSharedData
 {
 public:
-	bool use_altname;
 	CertificateInfoType type;
-	QString oid;
 	QString value;
-
-	Private()
-	{
-		use_altname = false;
-		type = (CertificateInfoType)-1;
-	}
 };
 
 CertificateInfoPair::CertificateInfoPair()
@@ -544,42 +727,10 @@ CertificateInfoPair::CertificateInfoPair()
 {
 }
 
-CertificateInfoPair::CertificateInfoPair(CertificateInfoType type, const QString &value)
+CertificateInfoPair::CertificateInfoPair(const CertificateInfoType &type, const QString &value)
 :d(new Private)
 {
-	switch(type)
-	{
-		case CommonName:
-		case EmailLegacy:
-		case Organization:
-		case OrganizationalUnit:
-		case Locality:
-		case IncorporationLocality:
-		case State:
-		case IncorporationState:
-		case Country:
-		case IncorporationCountry:
-			d->use_altname = false;
-			break;
-		default:
-			d->use_altname = true;
-			break;
-	}
-
 	d->type = type;
-	d->value = value;
-}
-
-CertificateInfoPair::CertificateInfoPair(const QString &oid, const QString &value, Section section)
-:d(new Private)
-{
-	if(section == AltName)
-		d->use_altname = true;
-	else
-		d->use_altname = false;
-
-	d->type = OtherInfoType;
-	d->oid = oid;
 	d->value = value;
 }
 
@@ -598,22 +749,9 @@ CertificateInfoPair & CertificateInfoPair::operator=(const CertificateInfoPair &
 	return *this;
 }
 
-CertificateInfoPair::Section CertificateInfoPair::section() const
-{
-	if(d->use_altname)
-		return AltName;
-	else
-		return DN;
-}
-
 CertificateInfoType CertificateInfoPair::type() const
 {
 	return d->type;
-}
-
-QString CertificateInfoPair::oid() const
-{
-	return d->oid;
 }
 
 QString CertificateInfoPair::value() const
@@ -623,7 +761,7 @@ QString CertificateInfoPair::value() const
 
 bool CertificateInfoPair::operator==(const CertificateInfoPair &other) const
 {
-	if((d->type == other.d->type || (d->use_altname == other.d->use_altname && d->oid == other.d->oid)) && d->value == other.d->value)
+	if(d->type == other.d->type && d->value == other.d->value)
 		return true;
 	return false;
 }

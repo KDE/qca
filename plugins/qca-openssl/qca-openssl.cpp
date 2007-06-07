@@ -253,7 +253,7 @@ static X509_NAME *new_cert_name(const CertificateInfo &info)
 	return name;
 }
 
-static void try_get_name_item(X509_NAME *name, int nid, CertificateInfoType t, CertificateInfo *info)
+static void try_get_name_item(X509_NAME *name, int nid, const CertificateInfoType &t, CertificateInfo *info)
 {
 	int loc;
 	loc = -1;
@@ -265,7 +265,7 @@ static void try_get_name_item(X509_NAME *name, int nid, CertificateInfoType t, C
 	}
 }
 
-static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, CertificateInfoType t, CertificateInfo *info)
+static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, const CertificateInfoType &t, CertificateInfo *info)
 {
         ASN1_OBJECT *oid = OBJ_txt2obj( oidText.toLatin1().data(), 1); // 1 = only accept dotted input
 	if(!oid)
@@ -363,10 +363,10 @@ static QByteArray ipaddress_string_to_bytes(const QString &)
 	return QByteArray(4, 0);
 }
 
-static GENERAL_NAME *new_general_name(CertificateInfoType t, const QString &val)
+static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QString &val)
 {
 	GENERAL_NAME *name = 0;
-	switch(t)
+	switch(t.known())
 	{
 		case Email:
 		{
@@ -436,25 +436,13 @@ static GENERAL_NAME *new_general_name(CertificateInfoType t, const QString &val)
 			name->d.otherName = other;
 			break;
 		}
-
-		// the following are not alt_names
-		case OtherInfoType:
-		case CommonName:
-		case EmailLegacy:
-		case Organization:
-		case OrganizationalUnit:
-		case Locality:
-		case State:
-		case Country:
-	        case IncorporationLocality:
-	        case IncorporationState:
-	        case IncorporationCountry:
+		default:
 			break;
 	}
 	return name;
 }
 
-static void try_add_general_name(GENERAL_NAMES **gn, CertificateInfoType t, const QString &val)
+static void try_add_general_name(GENERAL_NAMES **gn, const CertificateInfoType &t, const QString &val)
 {
 	if(val.isEmpty())
 		return;
@@ -502,9 +490,9 @@ static GENERAL_NAME *find_next_general_name(GENERAL_NAMES *names, int type, int 
         return gn;
 }
 
-static void try_get_general_name(GENERAL_NAMES *names, CertificateInfoType t, CertificateInfo *info)
+static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType &t, CertificateInfo *info)
 {
-        switch(t)
+        switch(t.known())
         {
                 case Email:
                 {
@@ -605,19 +593,7 @@ static void try_get_general_name(GENERAL_NAMES *names, CertificateInfoType t, Ce
                         }
                         break;
                 }
-
-                // the following are not alt_names
-		case OtherInfoType:
-                case CommonName:
-		case EmailLegacy:
-                case Organization:
-                case OrganizationalUnit:
-                case Locality:
-	        case IncorporationLocality:
-                case State:
-	        case IncorporationState:
-                case Country:
-	        case IncorporationCountry:
+		default:
                         break;
         }
 }
