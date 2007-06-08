@@ -394,6 +394,34 @@ public:
 	void reset();
 
 	/**
+	   Returns true if bundling of the signer certificate chain is
+	   enabled
+	*/
+	bool bundleSignerEnabled() const;
+
+	/**
+	   Returns true if inclusion of S/MIME attributes is enabled
+	*/
+	bool smimeAttributesEnabled() const;
+
+	/**
+	   Return the format type set for this message
+	*/
+	Format format() const;
+
+	/**
+	   Return the recipient(s) set for this message with setRecipient() or
+	   setRecipients()
+	*/
+	SecureMessageKeyList recipientKeys() const;
+
+	/**
+	   Return the signer(s) set for this message with setSigner() or
+	   setSigners()
+	*/
+	SecureMessageKeyList signerKeys() const;
+
+	/**
 	   For CMS only, this will bundle the signer certificate chain
 	   into the message.  This allows a message to be verified
 	   on its own, without the need to have obtained the signer's
@@ -402,7 +430,7 @@ public:
 
 	   This behavior is enabled by default.
 	*/
-	void setEnableBundleSigner(bool b);
+	void setBundleSignerEnabled(bool b);
 
 	/**
 	   For CMS only, this will put extra attributes into the
@@ -412,7 +440,7 @@ public:
 
 	   This behavior is enabled by default.
 	*/
-	void setEnableSMIMEAttributes(bool b);
+	void setSMIMEAttributesEnabled(bool b);
 
 	/**
 	   Set the Format used for messages
@@ -804,6 +832,21 @@ public:
 	*/
 	explicit CMS(QObject *parent = 0, const QString &provider = QString());
 	~CMS();
+
+	/**
+	   Return the trusted certificates set for this object
+	*/
+	CertificateCollection trustedCertificates() const;
+
+	/**
+	   Return the untrusted certificates set for this object
+	*/
+	CertificateCollection untrustedCertificates() const;
+
+	/**
+	   Return the private keys set for this object
+	*/
+	SecureMessageKeyList privateKeys() const;
 
 	/**
 	   Set the trusted certificates to use for the

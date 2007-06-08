@@ -3739,7 +3739,7 @@ int main(int argc, char **argv)
 			// pgp should always be ascii
 			if(pgp)
 				msg->setFormat(QCA::SecureMessage::Ascii);
-			msg->setEnableBundleSigner(!nobundle);
+			msg->setBundleSignerEnabled(!nobundle);
 			msg->startSign(mode);
 			msg->update(plain);
 			msg->end();
