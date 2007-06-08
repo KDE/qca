@@ -296,7 +296,7 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			int ver = i->p->version();
+			int ver = i->p->qcaVersion();
 			if(!validVersion(ver))
 			{
 				logDebug(QString().sprintf("plugin version 0x%06x is in the future", ver));
@@ -366,7 +366,7 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			int ver = i->p->version();
+			int ver = i->p->qcaVersion();
 			if(!validVersion(ver))
 			{
 				logDebug(QString().sprintf("plugin version 0x%06x is in the future", ver));
@@ -397,7 +397,7 @@ bool ProviderManager::add(Provider *p, int priority)
 		return false;
 	}
 
-	int ver = p->version();
+	int ver = p->qcaVersion();
 	if(!validVersion(ver))
 	{
 		logDebug(QString().sprintf("plugin version 0x%06x is in the future", ver));
@@ -704,7 +704,6 @@ void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 
 int ProviderManager::get_default_priority(const QString &name) const
 {
-	return -1;
 	QStringList list = plugin_priorities(def);
 	foreach(const QString &s, list)
 	{
