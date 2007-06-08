@@ -183,7 +183,7 @@ private:
 
 	AnimatedKeyGen()
 	{
-		gen.setBlocking(false);
+		gen.setBlockingEnabled(false);
 		connect(&gen, SIGNAL(finished()), SLOT(gen_finished()));
 		connect(&t, SIGNAL(timeout()), SLOT(t_timeout()));
 	}
