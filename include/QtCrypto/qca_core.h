@@ -642,7 +642,7 @@ public:
 	class Context;
 
 	/**
-	   Initialisation routine.
+	   Initialisation routine
 
 	   This routine will be called when your plugin
 	   is loaded, so this is a good place to do any
@@ -653,17 +653,38 @@ public:
 	virtual void init();
 
 	/**
+	   Deinitialisation routine
+
+	   This routine will be called just before provider destruction.
+	   Notably, during QCA shutdown, deinit() will be called on all
+	   providers before any of the providers are destructed.  Use this
+	   opportunity to free any resources that may be used by other
+	   providers.
+	*/
+	virtual void deinit();
+
+	/**
+	   Version number of the plugin
+
+	   The format is the same as QCA itself.  Version 1.2.3 would be
+	   represented as 0x010203.
+
+	   The default returns 0 (version 0.0.0).
+	*/
+	virtual int version() const;
+
+	/**
 	   Target QCA version for the provider.
 
 	   This is used to verify compatibility between the
 	   provider and QCA.  For a provider to be used, it
-	   must have major and minor version numbers that are
-	   less-than or equal to the QCA version (the patch
+	   must supply major and minor version numbers here that are
+	   less-than or equal to the actual QCA version (the patch
 	   version number is ignored).  This means an older
 	   provider may be used with a newer QCA, but a newer
 	   provider cannot be used with an older QCA.
 	*/
-	virtual int version() const = 0;
+	virtual int qcaVersion() const = 0;
 
 	/**
 	   The name of the provider.
@@ -706,7 +727,10 @@ QStringList features() const
 
 	   You might display this information in a credits or
 	   "About" dialog.  Returns an empty string if the
-	   provider has no credit text.
+	   provider has no credit text.  Only report credit text
+	   when absolutely required (for example, an "advertisement
+	   clause" related to licensing).  Do not use it for
+	   reporting general author information.
 	*/
 	virtual QString credit() const;
 

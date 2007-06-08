@@ -6259,7 +6259,7 @@ public:
 		ERR_free_strings();*/
 	}
 
-	int version() const
+	int qcaVersion() const
 	{
 		return QCA_VERSION;
 	}

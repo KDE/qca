@@ -861,7 +861,7 @@ saslProvider::~saslProvider()
 		sasl_done();
 }
 
-int saslProvider::version() const
+int saslProvider::qcaVersion() const
 {
         return QCA_VERSION;
 }

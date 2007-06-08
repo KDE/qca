@@ -1092,7 +1092,7 @@ public:
 	{
 	}
 
-	virtual int version() const
+	virtual int qcaVersion() const
 	{
 		return QCA_VERSION;
 	}

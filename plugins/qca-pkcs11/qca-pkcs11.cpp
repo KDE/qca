@@ -2604,10 +2604,10 @@ pkcs11Provider::~pkcs11Provider () {
 	);
 }
 
-int pkcs11Provider::version() const
+int pkcs11Provider::qcaVersion() const
 {
 	QCA_logTextMessage (
-		"pkcs11Provider::version - entry/return",
+		"pkcs11Provider::qcaVersion - entry/return",
 		Logger::Debug
 	);
 

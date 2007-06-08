@@ -785,6 +785,15 @@ void Provider::init()
 {
 }
 
+void Provider::deinit()
+{
+}
+
+int Provider::version() const
+{
+	return 0;
+}
+
 QString Provider::credit() const
 {
 	return QString();

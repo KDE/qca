@@ -1091,6 +1091,11 @@ public:
 		return QCA_VERSION;
 	}
 
+	virtual int qcaVersion() const
+	{
+		return QCA_VERSION;
+	}
+
 	virtual QString name() const
 	{
 		return "default";

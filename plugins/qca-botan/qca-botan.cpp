@@ -305,7 +305,7 @@ public:
 	// delete m_init;
     }
 
-    int version() const
+    int qcaVersion() const
     {
         return QCA_VERSION;
     }

@@ -420,7 +420,7 @@ public:
 	}
     }
 
-    int version() const
+    int qcaVersion() const
     {
         return QCA_VERSION;
     }

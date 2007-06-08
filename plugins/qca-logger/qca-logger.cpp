@@ -124,7 +124,7 @@ printf ("XXXX %s %s\n", level, file);
 public:
 	virtual
 	int
-	version() const {
+	qcaVersion() const {
 		return QCA_VERSION;
 	}
 

@@ -236,6 +236,11 @@ public:
 			p->configChanged(conf);
 	}
 
+	bool initted() const
+	{
+		return init_done;
+	}
+
 private:
 	PluginInstance *instance;
 	bool init_done;
@@ -262,6 +267,7 @@ ProviderManager::ProviderManager()
 
 ProviderManager::~ProviderManager()
 {
+	def->deinit();
 	unloadAll();
 	delete def;
 	g_pluginman = 0;
@@ -419,6 +425,12 @@ void ProviderManager::unload(const QString &name)
 
 void ProviderManager::unloadAll()
 {
+	foreach(ProviderItem *i, providerItemList)
+	{
+		if(i->initted())
+			i->p->deinit();
+	}
+
 	qDeleteAll(providerItemList);
 	providerItemList.clear();
 	providerList.clear();

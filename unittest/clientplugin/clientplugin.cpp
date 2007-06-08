@@ -54,7 +54,7 @@ void ClientPlugin::cleanupTestCase()
 class TestClientProvider : public QCA::Provider
 {
 public:
-        int version() const
+        int qcaVersion() const
         {
                 return QCA_VERSION;
         }

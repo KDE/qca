@@ -1405,7 +1405,7 @@ public:
 public:
 	virtual
 	int
-	version() const {
+	qcaVersion() const {
 		return QCA_VERSION;
 	}
 

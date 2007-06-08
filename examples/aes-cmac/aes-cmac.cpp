@@ -198,7 +198,7 @@ protected:
 class ClientSideProvider : public QCA::Provider
 {
 public:
-        int version() const
+        int qcaVersion() const
         {
                 return QCA_VERSION;
         }
