@@ -1040,7 +1040,7 @@ QString SASL::mechanism() const
 
 QStringList SASL::mechanismList() const
 {
-	return d->c->mechlist().split(" ");
+	return d->c->mechlist();
 }
 
 int SASL::ssf() const

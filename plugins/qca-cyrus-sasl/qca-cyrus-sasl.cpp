@@ -759,9 +759,9 @@ public:
 			return out_mech;
 	}
 
-	virtual QString mechlist() const
+	virtual QStringList mechlist() const
 	{
-		return result_mechlist.join(" ");
+		return result_mechlist;
 	}
 
 	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF)

@@ -596,7 +596,7 @@ public:
 
 	// results
 	virtual Result result() const = 0;
-	virtual QString mechlist() const = 0;
+	virtual QStringList mechlist() const = 0;
 	virtual QString mech() const = 0;
 	virtual bool haveClientInit() const = 0;
 	virtual QByteArray stepData() const = 0;
