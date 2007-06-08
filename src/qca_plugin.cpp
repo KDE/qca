@@ -704,8 +704,9 @@ void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 
 int ProviderManager::get_default_priority(const QString &name) const
 {
-	QStringList plugin_priorities = plugin_priorities(def);
-	foreach(const QString &s, plugin_priorities)
+	return -1;
+	QStringList list = plugin_priorities(def);
+	foreach(const QString &s, list)
 	{
 		// qca_default already sanity checks the strings
 		int n = s.indexOf(':');
