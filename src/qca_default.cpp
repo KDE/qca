@@ -37,6 +37,7 @@ private:
 	bool _use_system;
 	QString _roots_file;
 	QStringList _skip_plugins;
+	QStringList _plugin_priorities;
 
 public:
 	DefaultShared() : _use_system(true)
@@ -61,12 +62,19 @@ public:
 		return _skip_plugins;
 	}
 
-	void set(bool use_system, const QString &roots_file, const QStringList &skip_plugins)
+	QStringList plugin_priorities() const
+	{
+		QMutexLocker locker(&m);
+		return _plugin_priorities;
+	}
+
+	void set(bool use_system, const QString &roots_file, const QStringList &skip_plugins, const QStringList &plugin_priorities)
 	{
 		QMutexLocker locker(&m);
 		_use_system = use_system;
 		_roots_file = roots_file;
 		_skip_plugins = skip_plugins;
+		_plugin_priorities = plugin_priorities;
 	}
 };
 
@@ -1132,6 +1140,7 @@ public:
 		config["use_system"] = true;
 		config["roots_file"] = QString();
 		config["skip_plugins"] = QString();
+		config["plugin_priorities"] = QString();
 		return config;
 	}
 
@@ -1140,13 +1149,34 @@ public:
 		bool use_system = config["use_system"].toBool();
 		QString roots_file = config["roots_file"].toString();
 		QString skip_plugins_str = config["skip_plugins"].toString();
+		QString plugin_priorities_str = config["plugin_priorities"].toString();
+
 		QStringList skip_plugins = skip_plugins_str.split(",");
 		for(int n = 0; n < skip_plugins.count(); ++n)
 		{
 			QString &s = skip_plugins[n];
 			s = unescape_string(s).trimmed();
 		}
-		shared.set(use_system, roots_file, skip_plugins);
+
+		QStringList plugin_priorities = plugin_priorities_str.split(",");
+		for(int n = 0; n < plugin_priorities.count(); ++n)
+		{
+			QString &s = plugin_priorities[n];
+			s = unescape_string(s).trimmed();
+
+			// make sure the entry ends with ":number"
+			int x = s.indexOf(':');
+			bool ok = false;
+			if(x != -1)
+				s.mid(x + 1).toInt(&ok);
+			if(!ok)
+			{
+				plugin_priorities.removeAt(n);
+				--n;
+			}
+		}
+
+		shared.set(use_system, roots_file, skip_plugins, plugin_priorities);
 	}
 };
 
@@ -1159,6 +1189,12 @@ QStringList skip_plugins(Provider *defaultProvider)
 {
 	DefaultProvider *that = (DefaultProvider *)defaultProvider;
 	return that->shared.skip_plugins();
+}
+
+QStringList plugin_priorities(Provider *defaultProvider)
+{
+	DefaultProvider *that = (DefaultProvider *)defaultProvider;
+	return that->shared.plugin_priorities();
 }
 
 #include "qca_default.moc"

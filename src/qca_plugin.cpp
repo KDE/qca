@@ -43,6 +43,7 @@ QVariantMap getProviderConfig_internal(Provider *p);
 
 // from qca_default.cpp
 QStringList skip_plugins(Provider *defaultProvider);
+QStringList plugin_priorities(Provider *defaultProvider);
 
 static ProviderManager *g_pluginman = 0;
 
@@ -303,7 +304,7 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			addItem(i, -1);
+			addItem(i, get_default_priority(i->p->name()));
 		}
 		scanned_static = true;
 	}
@@ -380,7 +381,7 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			addItem(i, -1);
+			addItem(i, get_default_priority(i->p->name()));
 		}
 	}
 }
@@ -699,6 +700,21 @@ void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 		if(!a->contains(*it))
 			a->append(*it);
 	}
+}
+
+int ProviderManager::get_default_priority(const QString &name) const
+{
+	QStringList plugin_priorities = plugin_priorities(def);
+	foreach(const QString &s, plugin_priorities)
+	{
+		// qca_default already sanity checks the strings
+		int n = s.indexOf(':');
+		QString sname = s.mid(0, n);
+		int spriority = s.mid(n + 1).toInt();
+		if(sname == name)
+			return spriority;
+	}
+	return -1;
 }
 
 }
