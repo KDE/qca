@@ -1510,30 +1510,18 @@ bool Certificate::matchesHostname(const QString &realHost) const
 
 bool Certificate::operator==(const Certificate &otherCert) const
 {
-	if ( isNull() ) {
-		if ( otherCert.isNull() ) {
+	if(isNull())
+	{
+		if(otherCert.isNull())
 			return true;
-		} else {
+		else
 			return false;
-		}
-	} else if ( otherCert.isNull() ) {
-		return false;
 	}
+	else if(otherCert.isNull())
+		return false;
 
-	const CertContextProps *a = static_cast<const CertContext *>(context())->props();
-	const CertContextProps *b = static_cast<const CertContext *>(otherCert.context())->props();
-
-	// logic from Botan
-	if(a->sig != b->sig || a->sigalgo != b->sigalgo ||
-	   subjectPublicKey() != otherCert.subjectPublicKey())
-		return false;
-	if(a->issuer != b->issuer || a->subject != b->subject)
-		return false;
-	if(a->serial != b->serial || a->version != b->version)
-		return false;
-	if(a->start != b->start || a->end != b->end)
-		return false;
-	return true;
+	const CertContext *other = static_cast<const CertContext *>(otherCert.context());
+	return static_cast<const CertContext *>(context())->compare(other);
 }
 
 void Certificate::change(CertContext *c)
@@ -1731,28 +1719,18 @@ SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 
 bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 {
-	if (isNull()) {
-		if (otherCsr.isNull())
-			// they are both null
+	if(isNull())
+	{
+		if(otherCsr.isNull())
 			return true;
 		else
 			return false;
 	}
-	if (otherCsr.isNull())
+	else if(otherCsr.isNull())
 		return false;
 
-	if (signatureAlgorithm() != otherCsr.signatureAlgorithm())
-		return false;
-
-	const CertContextProps *a = static_cast<const CSRContext *>(context())->props();
-	const CertContextProps *b = static_cast<const CSRContext *>(otherCsr.context())->props();
-
-	if (a->sig != b->sig)
-		return false;
-
-	// TODO: Anything else we should compare?
-
-	return true;
+	const CSRContext *other = static_cast<const CSRContext *>(otherCsr.context());
+	return static_cast<const CSRContext *>(context())->compare(other);
 }
 
 SecureArray CertificateRequest::toDER() const
@@ -1896,34 +1874,32 @@ CRLEntry::Reason CRLEntry::reason() const
 
 bool CRLEntry::operator==(const CRLEntry &otherEntry) const
 {
-	if ( isNull() ) {
-		if ( otherEntry.isNull() ) {
+	if(isNull())
+	{
+		if(otherEntry.isNull())
 			return true;
-		} else {
+		else
 			return false;
-		}
-	} else if ( otherEntry.isNull() ) {
-		return false;
 	}
+	else if(otherEntry.isNull())
+		return false;
 
-	if ( ( _serial != otherEntry.serialNumber() ) ||
-	     ( _time != otherEntry.time() ) ||
-	     ( _reason != otherEntry.reason() ) ) {
+	if((_serial != otherEntry._serial) ||
+		(_time != otherEntry._time) ||
+		(_reason != otherEntry._reason))
+	{
 		return false;
 	}
 	return true;
-
 }
 
 bool CRLEntry::operator<(const CRLEntry &otherEntry) const
 {
-	if ( isNull() || otherEntry.isNull() ) {
+	if(isNull() || otherEntry.isNull())
 		return false;
-	}
 
-	if ( _serial < otherEntry.serialNumber() ) {
+	if(_serial < otherEntry._serial)
 		return true;
-	}
 
 	return false;
 }
@@ -2023,45 +1999,18 @@ QString CRL::toPEM() const
 
 bool CRL::operator==(const CRL &otherCrl) const
 {
-	if ( isNull() ) {
-		if ( otherCrl.isNull() ) {
+	if(isNull())
+	{
+		if(otherCrl.isNull())
 			return true;
-		} else {
+		else
 			return false;
-		}
-	} else if ( otherCrl.isNull() ) {
-		return false;
 	}
-
-	const CRLContextProps *a = static_cast<const CRLContext *>(context())->props();
-	const CRLContextProps *b = static_cast<const CRLContext *>(otherCrl.context())->props();
-
-	if ( number() != otherCrl.number() )
+	else if(otherCrl.isNull())
 		return false;
 
-	if ( thisUpdate() != otherCrl.thisUpdate() )
-		return false;
-
-	if ( nextUpdate() != otherCrl.nextUpdate() )
-		return false;
-
-	if ( a->sig != b->sig )
-		return false;
-
-	if ( signatureAlgorithm() != otherCrl.signatureAlgorithm() )
-		return false;
-
-	if ( issuerKeyId() != otherCrl.issuerKeyId() )
-		return false;
-
-	if ( revoked() != otherCrl.revoked() )
-		return false;
-
-	if ( issuerKeyId() != otherCrl.issuerKeyId() )
-		return false;
-
-	return true;
-
+	const CRLContext *other = static_cast<const CRLContext *>(otherCrl.context());
+	return static_cast<const CRLContext *>(context())->compare(other);
 }
 
 CRL CRL::fromDER(const SecureArray &a, ConvertResult *result, const QString &provider)

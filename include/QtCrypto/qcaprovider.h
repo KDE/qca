@@ -271,6 +271,7 @@ public:
 
 	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) = 0;
 	virtual const CertContextProps *props() const = 0;
+	virtual bool compare(const CertContext *other) const = 0;
 	virtual PKeyContext *subjectPublicKey() const = 0; // caller must delete
 	virtual bool isIssuerOf(const CertContext *other) const = 0;
 
@@ -288,6 +289,7 @@ public:
 	virtual bool canUseFormat(CertificateRequestFormat f) const = 0;
 	virtual bool createRequest(const CertificateOptions &opts, const PKeyContext &priv) = 0;
 	virtual const CertContextProps *props() const = 0;
+	virtual bool compare(const CSRContext *other) const = 0;
 	virtual PKeyContext *subjectPublicKey() const = 0; // caller must delete
 	virtual QString toSPKAC() const = 0;
 	virtual ConvertResult fromSPKAC(const QString &s) = 0;
@@ -300,6 +302,7 @@ public:
 	CRLContext(Provider *p) : CertBase(p, "crl") {}
 
 	virtual const CRLContextProps *props() const = 0;
+	virtual bool compare(const CRLContext *other) const = 0;
 };
 
 class QCA_EXPORT CertCollectionContext : public BasicContext

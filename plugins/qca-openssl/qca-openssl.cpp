@@ -3172,6 +3172,31 @@ public:
 		return &_props;
 	}
 
+	virtual bool compare(const CertContext *other) const
+	{
+		const CertContextProps *a = &_props;
+		const CertContextProps *b = other->props();
+
+		PublicKey akey, bkey;
+		PKeyContext *ac = subjectPublicKey();
+		akey.change(ac);
+		PKeyContext *bc = other->subjectPublicKey();
+		bkey.change(bc);
+
+		// logic from Botan
+		if(a->sig != b->sig || a->sigalgo != b->sigalgo || akey != bkey)
+			return false;
+
+		if(a->issuer != b->issuer || a->subject != b->subject)
+			return false;
+		if(a->serial != b->serial || a->version != b->version)
+			return false;
+		if(a->start != b->start || a->end != b->end)
+			return false;
+
+		return true;
+	}
+
 	// does a new
 	virtual PKeyContext *subjectPublicKey() const
 	{
@@ -3524,6 +3549,25 @@ public:
 		return &_props;
 	}
 
+	virtual bool compare(const CSRContext *other) const
+	{
+		const CertContextProps *a = &_props;
+		const CertContextProps *b = other->props();
+
+		PublicKey akey, bkey;
+		PKeyContext *ac = subjectPublicKey();
+		akey.change(ac);
+		PKeyContext *bc = other->subjectPublicKey();
+		bkey.change(bc);
+
+		if(a->sig != b->sig || a->sigalgo != b->sigalgo || akey != bkey)
+			return false;
+
+		// TODO: Anything else we should compare?
+
+		return true;
+	}
+
 	virtual PKeyContext *subjectPublicKey() const // does a new
 	{
 		MyPKeyContext *kc = new MyPKeyContext(provider());
@@ -3699,6 +3743,31 @@ public:
 	virtual const CRLContextProps *props() const
 	{
 		return &_props;
+	}
+
+	virtual bool compare(const CRLContext *other) const
+	{
+		const CRLContextProps *a = &_props;
+		const CRLContextProps *b = other->props();
+
+		if(a->issuer != b->issuer)
+			return false;
+		if(a->number != b->number)
+			return false;
+		if(a->thisUpdate != b->thisUpdate)
+			return false;
+		if(a->nextUpdate != b->nextUpdate)
+			return false;
+		if(a->revoked != b->revoked)
+			return false;
+		if(a->sig != b->sig)
+			return false;
+		if(a->sigalgo != b->sigalgo)
+			return false;
+		if(a->issuerId != b->issuerId)
+			return false;
+
+		return true;
 	}
 
 	void make_props()
