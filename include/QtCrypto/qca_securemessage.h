@@ -635,6 +635,9 @@ signingObj.end();
 	   like a hung application. Instead, connect the
 	   finished() signal to a slot that handles the
 	   results.
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler.
 	*/
 	bool waitForFinished(int msecs = 30000);
 

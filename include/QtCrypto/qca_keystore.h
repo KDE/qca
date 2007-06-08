@@ -130,7 +130,6 @@ if(entry.ensureAccess())
 
    In this case, any PIN prompting and private key operations
    would be caused/handled from the TLS object.
-
 */
 class QCA_EXPORT KeyStoreEntry : public Algorithm
 {
@@ -295,6 +294,8 @@ public:
 	   \sa ensureAccess
 
 	   \note This function is blocking.
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler.
 	*/
 	bool ensureAvailable();
 
@@ -305,6 +306,9 @@ public:
 
 	   \sa isAccessible
 	   \sa ensureAvailable
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler.
 	*/
 	bool ensureAccess();
 
@@ -466,6 +470,12 @@ public:
 
 	/**
 	   A list of the KeyStoreEntry objects in this store
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler
+	   (this is not a concern if asynchronous mode is enabled).
+
+	   \sa startAsynchronousMode
 	*/
 	QList<KeyStoreEntry> entryList() const;
 
@@ -491,6 +501,12 @@ public:
 	   string on failure.
 
 	   \param kb the KeyBundle to add to the KeyStore
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler
+	   (this is not a concern if asynchronous mode is enabled).
+
+	   \sa startAsynchronousMode
 	*/
 	QString writeEntry(const KeyBundle &kb);
 
@@ -521,6 +537,12 @@ public:
 	   Delete the a specified KeyStoreEntry from this KeyStore
 
 	   \param id the ID for the entry to be deleted
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler
+	   (this is not a concern if asynchronous mode is enabled).
+
+	   \sa startAsynchronousMode
 	*/
 	bool removeEntry(const QString &id);
 

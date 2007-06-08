@@ -1970,6 +1970,9 @@ public:
 
 	   \sa fromFile for a more flexible version of the
 	   same capability.
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler.
 	*/
 	explicit KeyBundle(const QString &fileName, const SecureArray &passphrase = SecureArray());
 
@@ -2114,6 +2117,9 @@ else
 	   required
 
 	   \sa QCA::KeyLoader for an asynchronous loader approach.
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler.
 	*/
 	static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
@@ -2143,6 +2149,9 @@ else
 	   required
 
 	   \sa QCA::KeyLoader for an asynchronous loader approach.
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler.
 	*/
 	static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
 
