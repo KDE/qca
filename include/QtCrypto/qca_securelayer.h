@@ -155,7 +155,7 @@ public:
 	   This method accepts encoded (typically encrypted) data
 	   for processing. You normally call this function using
 	   data read from the network socket (e.g. using 
-	   QTcpSocket::readAll()) after receiving a signal that 
+	   QTcpSocket::readAll()) after receiving a signal that
 	   indicates that the socket has data to read.
 	*/
 	virtual void writeIncoming(const QByteArray &a) = 0;
@@ -164,7 +164,7 @@ public:
 	   This method provides encoded (typically encrypted)
 	   data. You normally call this function to get data
 	   to write out to the network socket (e.g. using
-	   QTcpSocket::write()) after receiving the 
+	   QTcpSocket::write()) after receiving the
 	   readyReadOutgoing() signal.
 	*/
 	virtual QByteArray readOutgoing(int *plainBytes = 0) = 0;
@@ -202,7 +202,7 @@ Q_SIGNALS:
 	void closed();
 
 	/**
-	   This signal is emitted when an error is detected. You 
+	   This signal is emitted when an error is detected. You
 	   can determine the error type using errorCode().
 	*/
 	void error();
@@ -344,6 +344,11 @@ public:
 	void setCertificate(const CertificateChain &cert, const PrivateKey &key);
 
 	/**
+	   Return the trusted certificates set for this object
+	*/
+	CertificateCollection trustedCertificates() const;
+
+	/**
 	   Set up the set of trusted certificates that will be used to verify
 	   that the certificate provided is valid.
 
@@ -431,7 +436,16 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	bool canSetHostName() const;
 
 	/**
-	   set the link to use compression
+	   Returns true if compression is enabled
+
+	   This only indicates whether or not the object is configured to use
+	   compression, not whether or not the link is actually compressed.
+	   Use isCompressed() for that.
+	*/
+	bool compressionEnabled() const;
+
+	/**
+	   Set the link to use compression
 
 	   \param b true if the link should use compression, or false to
 	   disable compression
@@ -439,11 +453,17 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	void setCompressionEnabled(bool b);
 
 	/**
-	   Start the TLS/SSL connection as a client.
+	   Start the TLS/SSL connection as a client
+
+	   Typically, you'll want to perform RFC 2818 validation on the
+	   server's certificate, based on the hostname you're intending
+	   to connect to.  Pass a value for \a host in order to have the
+	   validation for you.  If you want to bypass this behavior and
+	   do the validation yourself, pass an empty string for \a host.
 
 	   \param host the hostname that you want to connect to
 
-	   \note This hostname will be used for Server Name Indication
+	   \note The hostname will be used for Server Name Indication
 	   extension (see
 	   <a href="http://www.ietf.org/rfc/rfc3546.txt">RFC 3546</a> Section
 	   3.1) if supported by the backend provider.
@@ -556,6 +576,12 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	CertificateChain localCertificateChain() const;
 
 	/**
+	   The PrivateKey for the local host
+	   certificate.
+	*/
+	PrivateKey localPrivateKey() const;
+
+	/**
 	   The CertificateChain from the peer (other end of
 	   the connection to the trusted root certificate).
 	*/
@@ -589,11 +615,18 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	int packetsOutgoingAvailable() const;
 
 	/**
+	   Return the currently configured maximum packet size
+
+	   \note this is only used with DTLS
+	*/
+	int packetMTU() const;
+
+	/**
 	   Set the maximum packet size to use.
 
 	   \param size the number of bytes to set as the MTU.
 
-	   \note this is only used with DTSL.
+	   \note this is only used with DTLS.
 	*/
 	void setPacketMTU(int size) const;
 

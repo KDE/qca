@@ -389,6 +389,11 @@ void TLS::setCertificate(const CertificateChain &cert, const PrivateKey &key)
 	d->localKey = key;
 }
 
+CertificateCollection TLS::trustedCertificates() const
+{
+	return d->trusted;
+}
+
 void TLS::setTrustedCertificates(const CertificateCollection &trusted)
 {
 	d->trusted = trusted;
@@ -465,6 +470,11 @@ bool TLS::canSetHostName() const
 {
 	// TODO
 	return false;
+}
+
+bool TLS::compressionEnabled() const
+{
+	return d->tryCompress;
 }
 
 void TLS::setCompressionEnabled(bool b)
@@ -565,6 +575,11 @@ CertificateChain TLS::localCertificateChain() const
 	return d->localCert;
 }
 
+PrivateKey TLS::localPrivateKey() const
+{
+	return d->localKey;
+}
+
 CertificateChain TLS::peerCertificateChain() const
 {
 	return d->peerCert;
@@ -634,6 +649,12 @@ int TLS::packetsAvailable() const
 }
 
 int TLS::packetsOutgoingAvailable() const
+{
+	// TODO
+	return 0;
+}
+
+int TLS::packetMTU() const
 {
 	// TODO
 	return 0;
