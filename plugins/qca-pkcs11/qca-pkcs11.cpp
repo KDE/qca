@@ -70,7 +70,7 @@ public:
 public:
 	virtual
 	int
-	version() const;
+	qcaVersion() const;
 
 	virtual
 	void
