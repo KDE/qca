@@ -45,7 +45,7 @@ public:
 	saslProvider();
 	void init();
 	~saslProvider();
-        int version() const;
+	int qcaVersion() const;
 	QString name() const;
 	QString credit() const;
 	QStringList features() const;
