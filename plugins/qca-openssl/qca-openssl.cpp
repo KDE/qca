@@ -5906,8 +5906,7 @@ public:
 			X509_STORE *store = X509_STORE_new();
 			QList<Certificate> cert_list = cms->trustedCerts.certificates();
 			QList<CRL> crl_list = cms->trustedCerts.crls();
-			int n;
-			for(n = 0; n < cert_list.count(); ++n)
+			for(int n = 0; n < cert_list.count(); ++n)
 			{
 				//printf("trusted: [%s]\n", qPrintable(cert_list[n].commonName()));
 				const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
@@ -5915,7 +5914,7 @@ public:
 				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
 				X509_STORE_add_cert(store, x);
 			}
-			for(n = 0; n < crl_list.count(); ++n)
+			for(int n = 0; n < crl_list.count(); ++n)
 			{
 				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
 				X509_CRL *x = cc->item.crl;
@@ -5924,7 +5923,7 @@ public:
 			}
 			// add these crls also
 			crl_list = untrusted_crls;
-			for(n = 0; n < crl_list.count(); ++n)
+			for(int n = 0; n < crl_list.count(); ++n)
 			{
 				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
 				X509_CRL *x = cc->item.crl;
