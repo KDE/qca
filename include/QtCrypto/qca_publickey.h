@@ -1013,9 +1013,9 @@ public:
 
 	   \return true if the key generator is in blocking mode
 
-	   \sa setBlocking
+	   \sa setBlockingEnabled
 	*/
-	bool blocking() const;
+	bool blockingEnabled() const;
 
 	/**
 	   Set whether the key generator is in blocking mode, nor not
@@ -1023,9 +1023,9 @@ public:
 	   \param b if true, the key generator will be set to operate in
 	   blocking mode, otherwise it will operate in non-blocking mode
 
-	   \sa blocking()
+	   \sa blockingEnabled()
 	*/
-	void setBlocking(bool b);
+	void setBlockingEnabled(bool b);
 
 	/**
 	   Test if the key generator is currently busy, or not

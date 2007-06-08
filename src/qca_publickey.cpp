@@ -1145,12 +1145,12 @@ KeyGenerator::~KeyGenerator()
 	delete d;
 }
 
-bool KeyGenerator::blocking() const
+bool KeyGenerator::blockingEnabled() const
 {
 	return d->blocking;
 }
 
-void KeyGenerator::setBlocking(bool b)
+void KeyGenerator::setBlockingEnabled(bool b)
 {
 	d->blocking = b;
 }

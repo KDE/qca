@@ -939,14 +939,14 @@ void SASL::setExternalSSF(int x)
 	d->ext_ssf = x;
 }
 
-void SASL::setLocalAddr(const QString &addr, quint16 port)
+void SASL::setLocalAddress(const QString &addr, quint16 port)
 {
 	d->localSet   = true;
 	d->local.addr = addr;
 	d->local.port = port;
 }
 
-void SASL::setRemoteAddr(const QString &addr, quint16 port)
+void SASL::setRemoteAddress(const QString &addr, quint16 port)
 {
 	d->remoteSet   = true;
 	d->remote.addr = addr;

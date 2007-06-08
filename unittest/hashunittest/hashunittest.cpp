@@ -222,7 +222,7 @@ void HashUnitTest::md5filetest()
 	    QFile f1( "./data/empty" );
 	    if ( f1.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
-		hashObj.update( f1 );
+		hashObj.update( &f1 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
 	    } else {
@@ -232,7 +232,7 @@ void HashUnitTest::md5filetest()
 	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
-		hashObj.update( f2 );
+		hashObj.update( &f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "7c4b3d8a360c6c3cb647160fa9adfe71" ) );
 	    } else {
@@ -243,7 +243,7 @@ void HashUnitTest::md5filetest()
 	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
-		hashObj.update( f3 );
+		hashObj.update( &f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "a74671ea68b0e3c609e8785ed8497c14" ) );
 	    } else {
@@ -253,7 +253,7 @@ void HashUnitTest::md5filetest()
 	    QFile f4( "./data/scribus-1.2.tar.bz2" );
 	    if ( f4.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
-		hashObj.update( f4 );
+		hashObj.update( &f4 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "7d2c2b228f9a6ff82c9401fd54bdbe16" ) );
 	    } else {
@@ -400,7 +400,7 @@ void HashUnitTest::sha1longtest()
 	    QFile f1( "./data/empty" );
 	    if ( f1.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
-		hashObj.update( f1 );
+		hashObj.update( &f1 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
 	    } else {
@@ -410,7 +410,7 @@ void HashUnitTest::sha1longtest()
 	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
-		hashObj.update( f2 );
+		hashObj.update( &f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "cda343591428a68e22bd2e349b890cbafb642cf7" ) );
 	    } else {
@@ -420,7 +420,7 @@ void HashUnitTest::sha1longtest()
 	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
-		hashObj.update( f3 );
+		hashObj.update( &f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "a030a9c6dcd10c5d90a86f915ad4710084cbca71" ) );
 	    } else {
@@ -430,7 +430,7 @@ void HashUnitTest::sha1longtest()
 	    QFile f4( "./data/scribus-1.2.tar.bz2" );
 	    if ( f4.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
-		hashObj.update( f4 );
+		hashObj.update( &f4 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
 			 QString( "a1fb6ed6acfd92381055b310d926d6e83e76ff1e" ) );
 	    } else {

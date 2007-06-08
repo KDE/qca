@@ -56,7 +56,7 @@ void KeyGenUnitTest::testRSA()
 {
     QCA::KeyGenerator keygen;
     QCOMPARE( keygen.isBusy(), false );
-    QCOMPARE( keygen.blocking(), true );
+    QCOMPARE( keygen.blockingEnabled(), true );
 
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) ||
@@ -86,7 +86,7 @@ void KeyGenUnitTest::testDSA()
 {
     QCA::KeyGenerator keygen;
     QCOMPARE( keygen.isBusy(), false );
-    QCOMPARE( keygen.blocking(), true );
+    QCOMPARE( keygen.blockingEnabled(), true );
 
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
@@ -116,7 +116,7 @@ void KeyGenUnitTest::testDH()
 {
     QCA::KeyGenerator keygen;
     QCOMPARE( keygen.isBusy(), false );
-    QCOMPARE( keygen.blocking(), true );
+    QCOMPARE( keygen.blockingEnabled(), true );
 
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::DH) ||

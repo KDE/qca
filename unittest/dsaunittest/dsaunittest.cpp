@@ -60,7 +60,7 @@ void DSAUnitTest::testdsa()
     else {
 	QCA::KeyGenerator keygen;
 	QCOMPARE( keygen.isBusy(), false );
-	QCOMPARE( keygen.blocking(), true );
+	QCOMPARE( keygen.blockingEnabled(), true );
 	QCA::DLGroup group = keygen.createDLGroup(QCA::DSA_1024);
 	QCOMPARE( group.isNull(), false );
 

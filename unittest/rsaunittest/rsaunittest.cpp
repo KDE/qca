@@ -64,7 +64,7 @@ void RSAUnitTest::testrsa()
 	else {
 	    QCA::KeyGenerator keygen;
 	    QCOMPARE( keygen.isBusy(), false );
-	    QCOMPARE( keygen.blocking(), true );
+	    QCOMPARE( keygen.blockingEnabled(), true );
 
 	    QList<int> keySizes;
 	    keySizes << 512 << 1024 << 768 << 2048;

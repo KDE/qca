@@ -838,7 +838,7 @@ public:
 	   \param addr the address of the local part of the connection
 	   \param port the port number of the local part of the connection
 	*/
-	void setLocalAddr(const QString &addr, quint16 port);
+	void setLocalAddress(const QString &addr, quint16 port);
 
 	/**
 	   Specify the peer address.
@@ -846,7 +846,7 @@ public:
 	   \param addr the address of the peer side of the connection
 	   \param port the port number of the peer side of the connection
 	*/
-	void setRemoteAddr(const QString &addr, quint16 port);
+	void setRemoteAddress(const QString &addr, quint16 port);
 
 	/**
 	   Specify the id of the externally secured connection

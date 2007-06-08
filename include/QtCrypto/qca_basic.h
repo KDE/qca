@@ -286,12 +286,12 @@ QFile f( "file.dat" );
 if ( f1.open( IO_ReadOnly ) )
 {
 	QCA::Hash hashObj("sha1");
-	hashObj.update( f1 );
+	hashObj.update( &f1 );
 	QString output = hashObj.final() ) ),
 }
 	   \endcode
 	*/
-	virtual void update(QIODevice &file);
+	virtual void update(QIODevice *file);
 
 	/**
 	   Finalises input and returns the hash result

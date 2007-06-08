@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004,2005,2007  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -140,12 +140,12 @@ void Hash::update(const char *data, int len)
 }
 
 // Reworked from KMD5, from KDE's kdelibs
-void Hash::update(QIODevice &file)
+void Hash::update(QIODevice *file)
 {
 	char buffer[1024];
 	int len;
 
-	while ((len=file.read(reinterpret_cast<char*>(buffer), sizeof(buffer))) > 0)
+	while ((len=file->read(reinterpret_cast<char*>(buffer), sizeof(buffer))) > 0)
 		update(buffer, len);
 }
 
