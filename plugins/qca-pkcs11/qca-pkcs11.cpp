@@ -77,6 +77,10 @@ public:
 	init ();
 
 	virtual
+	void
+	deinit ();
+
+	virtual
 	QString
 	name () const;
 
@@ -2589,17 +2593,7 @@ pkcs11Provider::pkcs11Provider () {
 
 pkcs11Provider::~pkcs11Provider () {
 	QCA_logTextMessage (
-		"pkcs11Provider::~pkcs11Provider - entry",
-		Logger::Debug
-	);
-
-	delete s_keyStoreList;
-	s_keyStoreList = NULL;
-
-	pkcs11h_terminate ();
-
-	QCA_logTextMessage (
-		"pkcs11Provider::~pkcs11Provider - return",
+		"pkcs11Provider::~pkcs11Provider - entry/return",
 		Logger::Debug
 	);
 }
@@ -2678,6 +2672,23 @@ void pkcs11Provider::init () {
 
 	QCA_logTextMessage (
 		"pkcs11Provider::init - return",
+		Logger::Debug
+	);
+}
+
+void pkcs11Provider::deinit () {
+	QCA_logTextMessage (
+		"pkcs11Provider::deinit - entry",
+		Logger::Debug
+	);
+
+	delete s_keyStoreList;
+	s_keyStoreList = NULL;
+
+	pkcs11h_terminate ();
+
+	QCA_logTextMessage (
+		"pkcs11Provider::deinit - return",
 		Logger::Debug
 	);
 }
