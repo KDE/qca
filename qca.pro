@@ -1,5 +1,13 @@
 TEMPLATE = subdirs
-SUBDIRS = src tools unittest examples
+SUBDIRS = sub_src sub_tools sub_unittest sub_examples
+
+sub_src.subdir = src
+sub_tools.subdir = tools
+sub_tools.depends = sub_src
+sub_unittest.subdir = unittest
+sub_unittest.depends = sub_src
+sub_examples.subdir = examples
+sub_examples.depends = sub_src
 
 unix:{
 	include(conf.pri)
