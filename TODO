@@ -1,28 +1,18 @@
 * beta7
   api:
-    problem: pgp can cause token event while pgp store is available
     securemessage bytesWritten?
-    deinit method for providers, to occur for all before destruction?
-    Provider::version -> qcaVersion, make version() provider's own version?
-    Hash::update(QIODevice&) uses ref, not pointer.  is this conventional?
-    KeyGenerator::blocking -> isBlocking() or maybe blockingEnabled() ?
-    cert: push compares into the provider
-    SASL::setLocalAddr -> setLocalAddress (and related) ?
+    problem: pgp can cause token event while pgp store is available
     SASL::continueAfterParams/continueAfterAuthCheck -> continueAfterStep ?
     sasl: Params::authzid -> Params::authzid() ?  or perhaps OR'd enum values
-    core: ctor/dtor/etc accessibility seems inconsistent
-    cert: PGPKey::canExport() ?
     check for unnecessary SecureArray usage in the API:
        provider,core,textfilter,publickey,cert
   code:
-    default: config option for setting provider priorities
     cert: rfc 2818 hostname validation
     keystore: complete
     securelayer: complete
   other:
     resolve the psi and cyrus-sasl incompatibility situation
     rename qca-openssl
-    for parallel make, have all utilities/tests depend on the library
     update README/INSTALL, special thanks to Jack Lloyd
     regenerate botantools.diff
 
@@ -30,10 +20,6 @@
   doc:
     documentation overhaul
     document provider interface
-    document which functions might cause a synchronous asker:
-      pkey: sign/decrypt, or any non-KeyLoader privkey/keybundle loading
-      keystore: entryList (non-async), ensureAvailable, ensureAccessible
-      securemessage: waitForFinished
     Change Doxyfile config to capture whole API, and to generate Latex manual
   code:
     synchronizer: cleanup
