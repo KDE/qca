@@ -154,19 +154,25 @@ private slots:
 
     void sasl_needParams(const QCA::SASL::Params &params)
     {
-        QString username;
-        if(params.user || params.authzid)
-            username = prompt("Username:");
-        if(params.user) {
-            sasl->setUsername(username);
+        if(params.needUsername())
+            sasl->setUsername(prompt("Username:"));
+        if(params.canSendAuthzid()) {
+            QString authzid = prompt("Authorize As (enter to skip):");
+            if(!authzid.isEmpty())
+                sasl->setAuthzid(authzid);
         }
-        if(params.authzid) {
-            sasl->setAuthzid(username);
+        if(params.needPassword()) {
+            QCA::ConsolePrompt prompt;
+            prompt.getHidden("* Password");
+            prompt.waitForFinished();
+            QCA::SecureArray pass = prompt.result();
+            sasl->setPassword(pass);
         }
-        if(params.pass) {
-            sasl->setPassword(prompt("Password (not hidden!):").toUtf8());
-        }
-        if(params.realm) {
+        if(params.canSendRealm()) {
+            QStringList realms = sasl->realmList();
+            printf("Available realms:\n");
+            foreach(const QString &s, realms)
+                printf("  %s\n", qPrintable(s));
             sasl->setRealm(prompt("Realm:"));
         }
         sasl->continueAfterParams();

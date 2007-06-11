@@ -344,6 +344,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	QCA::setAppName("saslservtest");
+
         ServerTest *s = new ServerTest(str, PROTO_PORT);
         QObject::connect(s, SIGNAL(quit()), &app, SLOT(quit()));
         s->start();

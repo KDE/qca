@@ -63,6 +63,12 @@ public:
 class SASLParams
 {
 public:
+	class SParams
+	{
+	public:
+		bool user, authzid, pass, realm;
+	};
+
 	SASLParams()
 	{
 		reset();
@@ -147,14 +153,14 @@ public:
 
 	bool missingAny() const
 	{
-		if((need.user && !have.user) || (need.authzid && !have.authzid) || (need.pass && !have.pass) || (need.realm && !have.realm))
+		if((need.user && !have.user) /*|| (need.authzid && !have.authzid)*/ || (need.pass && !have.pass) /*|| (need.realm && !have.realm)*/)
 			return true;
 		return false;
 	}
 
-	SASL::Params missing() const
+	SParams missing() const
 	{
-		SASL::Params np = need;
+		SParams np = need;
 		if(have.user)
 			np.user = false;
 		if(have.authzid)
@@ -183,8 +189,8 @@ public:
 	}
 
 	QList<char *> results;
-	SASL::Params need;
-	SASL::Params have;
+	SParams need;
+	SParams have;
 	QString user, authzid, pass, realm;
 };
 
@@ -320,11 +326,11 @@ private:
 		SASL::AuthCondition x;
 		switch(r) {
 			// common
-			case SASL_NOMECH:    x = SASL::NoMech; break;
-			case SASL_BADPROT:   x = SASL::BadProto; break;
+			case SASL_NOMECH:    x = SASL::NoMechanism; break;
+			case SASL_BADPROT:   x = SASL::BadProtocol; break;
 
 			// client
-			case SASL_BADSERV:   x = SASL::BadServ; break;
+			case SASL_BADSERV:   x = SASL::BadServer; break;
 
 			// server
 			case SASL_BADAUTH:   x = SASL::BadAuth; break;
@@ -334,7 +340,7 @@ private:
 			case SASL_EXPIRED:   x = SASL::Expired; break;
 			case SASL_DISABLED:  x = SASL::Disabled; break;
 			case SASL_NOUSER:    x = SASL::NoUser; break;
-			case SASL_UNAVAIL:   x = SASL::RemoteUnavail; break;
+			case SASL_UNAVAIL:   x = SASL::RemoteUnavailable; break;
 
 			default: x = SASL::AuthFail; break;
 		}
@@ -382,7 +388,7 @@ private:
 
 				params.applyInteract(need);
 				if(params.missingAny()) {
-					result_result = NeedParams;
+					result_result = Params;
 					return;
 				}
 			}
@@ -423,7 +429,7 @@ private:
 
 				params.applyInteract(need);
 				if(params.missingAny()) {
-					result_result = NeedParams;
+					result_result = Params;
 					return;
 				}
 			}
@@ -655,6 +661,7 @@ public:
 	// TODO: make use of disableServerSendLast
 	virtual void startServer(const QString &realm, bool disableServerSendLast)
 	{
+		Q_UNUSED(disableServerSendLast);
 		resetState();
 
 		g->appname = SASL_APP;
@@ -710,9 +717,10 @@ public:
 		serverTryAgain();
 	}
 
-	virtual SASL::Params clientParamsNeeded() const
+	virtual SASL::Params clientParams() const
 	{
-		return params.missing();
+		SASLParams::SParams sparams = params.missing();
+		return SASL::Params(sparams.user, sparams.authzid, sparams.pass, sparams.realm);
 	}
 
 	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm)
@@ -762,6 +770,12 @@ public:
 	virtual QStringList mechlist() const
 	{
 		return result_mechlist;
+	}
+
+	virtual QStringList realmlist() const
+	{
+		// TODO
+		return QStringList();
 	}
 
 	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF)

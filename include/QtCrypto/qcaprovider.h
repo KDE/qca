@@ -546,7 +546,7 @@ public:
 	{
 		Success,
 		Error,
-		NeedParams,
+		Params,
 		AuthCheck,
 		Continue
 	};
@@ -610,9 +610,12 @@ public:
 	// call after auth fail
 	virtual SASL::AuthCondition authCondition() const = 0;
 
-	// call after NeedParams
-	virtual SASL::Params clientParamsNeeded() const = 0;
+	// call after Params
+	virtual SASL::Params clientParams() const = 0;
 	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm) = 0;
+
+	// call after Params and SASL::Params::canSendRealm == true
+	virtual QStringList realmlist() const = 0;
 
 	// call after AuthCheck
 	virtual QString username() const = 0;

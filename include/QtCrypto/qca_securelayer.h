@@ -708,18 +708,18 @@ public:
 	*/
 	enum AuthCondition
 	{
-		AuthFail,     ///< Generic authentication failure
-		NoMech,       ///< No compatible/appropriate authentication mechanism
-		BadProto,     ///< Bad protocol or cancelled
-		BadServ,      ///< Server failed mutual authentication (client side only)
-		BadAuth,      ///< Authentication failure (server side only)
-		NoAuthzid,    ///< Authorization failure (server side only)
-		TooWeak,      ///< Mechanism too weak for this user (server side only)
-		NeedEncrypt,  ///< Encryption is needed in order to use mechanism (server side only)
-		Expired,      ///< Passphrase expired, has to be reset (server side only)
-		Disabled,     ///< Account is disabled (server side only)
-		NoUser,       ///< User not found (server side only)
-		RemoteUnavail ///< Remote service needed for auth is gone (server side only)
+		AuthFail,          ///< Generic authentication failure
+		NoMechanism,       ///< No compatible/appropriate authentication mechanism
+		BadProtocol,       ///< Bad protocol or cancelled
+		BadServer,         ///< Server failed mutual authentication (client side only)
+		BadAuth,           ///< Authentication failure (server side only)
+		NoAuthzid,         ///< Authorization failure (server side only)
+		TooWeak,           ///< Mechanism too weak for this user (server side only)
+		NeedEncrypt,       ///< Encryption is needed in order to use mechanism (server side only)
+		Expired,           ///< Passphrase expired, has to be reset (server side only)
+		Disabled,          ///< Account is disabled (server side only)
+		NoUser,            ///< User not found (server side only)
+		RemoteUnavailable  ///< Remote service needed for auth is gone (server side only)
 	};
 
 	/**
@@ -764,25 +764,35 @@ public:
 	class Params
 	{
 	public:
+		Params();
+		Params(bool user, bool authzid, bool pass, bool realm);
+		Params(const Params &from);
+		~Params();
+		Params & operator=(const Params &from);
+
 		/**
 		   User is needed
 		*/
-		bool user;
+		bool needUsername() const;
 
 		/**
-		   Authorization ID is needed
+		   An Authorization ID can be sent if desired
 		*/
-		bool authzid;
+		bool canSendAuthzid() const;
 
 		/**
 		   Password is needed
 		*/
-		bool pass;
+		bool needPassword() const;
 
 		/**
-		   Realm is needed
+		   A Realm can be sent if desired
 		*/
-		bool realm;
+		bool canSendRealm() const;
+
+	private:
+		class Private;
+		Private *d;
 	};
 
 	/**
@@ -925,6 +935,11 @@ public:
 	   Return the mechanism list (server)
 	*/
 	QStringList mechanismList() const;
+
+	/**
+	   Return the realm list, if available (client)
+	*/
+	QStringList realmList() const;
 
 	/**
 	   Return the security strength factor of the connection
