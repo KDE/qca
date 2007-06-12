@@ -428,7 +428,7 @@ private:
 	struct _sign_data_s {
 		SignatureAlgorithm alg;
 		Hash *hash;
-		SecureArray raw;
+		QByteArray raw;
 
 		_sign_data_s() {
 			hash = NULL;
@@ -776,7 +776,7 @@ public:
 				_sign_data.hash->update (in);
 			}
 			else {
-				_sign_data.raw.append (in);
+				_sign_data.raw.append (in.toByteArray ());
 			}
 		}
 		else {
@@ -785,9 +785,9 @@ public:
 	}
 
 	virtual
-	SecureArray
+	QByteArray
 	endSign () {
-		SecureArray result;
+		QByteArray result;
 		bool session_locked = false;
 
 		QCA_logTextMessage (
@@ -796,7 +796,7 @@ public:
 		);
 
 		try {
-			SecureArray final;
+			QByteArray final;
 			CK_RV rv;
 
 			// from some strange reason I got 2047... (for some)	<---- BUG?!?!?!
@@ -805,7 +805,7 @@ public:
 			if (_sign_data.hash != NULL) {
 				final = emsa3Encode (
 					_sign_data.hash->type (),
-					_sign_data.hash->final (),
+					_sign_data.hash->final ().toByteArray (),
 					myrsa_size
 				);
 			}
@@ -907,7 +907,7 @@ public:
 	virtual
 	bool
 	validSignature (
-		const SecureArray &sig
+		const QByteArray &sig
 	) {
 		return _pubkey.validSignature (sig);
 	}
@@ -1146,7 +1146,7 @@ public:
 	}
 
 	virtual
-	SecureArray
+	QByteArray
 	publicToDER () const {
 		return static_cast<pkcs11RSAContext *>(_k)->_publicKey ().toDER ();
 	}
@@ -1160,7 +1160,7 @@ public:
 	virtual
 	ConvertResult
 	publicFromDER (
-		const SecureArray &in
+		const QByteArray &in
 	) {
 		Q_UNUSED(in);
 		return ErrorDecode;

@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 	}
 	privateKey.startSign( QCA::EMSA3_MD5 );
 	privateKey.update( arg ); // just reuse the same message
-	QCA::SecureArray argSig = privateKey.signature();
+	QByteArray argSig = privateKey.signature();
 
 	// instead of using the startSign(), update(), signature() calls,
 	// you may be better doing the whole thing in one go, using the

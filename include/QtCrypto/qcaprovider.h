@@ -138,8 +138,8 @@ public:
 	virtual void startSign(SignatureAlgorithm alg, SignatureFormat format);
 	virtual void startVerify(SignatureAlgorithm alg, SignatureFormat format);
 	virtual void update(const SecureArray &in);
-	virtual SecureArray endSign();
-	virtual bool endVerify(const SecureArray &sig);
+	virtual QByteArray endSign();
+	virtual bool endVerify(const QByteArray &sig);
 
 	// key agreement
 	virtual SymmetricKey deriveKey(const PKeyBase &theirs);
@@ -205,9 +205,9 @@ public:
 	virtual bool importKey(const PKeyBase *key) = 0;
 
 	// import / export
-	virtual SecureArray publicToDER() const;
+	virtual QByteArray publicToDER() const;
 	virtual QString publicToPEM() const;
-	virtual ConvertResult publicFromDER(const SecureArray &a);
+	virtual ConvertResult publicFromDER(const QByteArray &a);
 	virtual ConvertResult publicFromPEM(const QString &s);
 	virtual SecureArray privateToDER(const SecureArray &passphrase, PBEAlgorithm pbe) const;
 	virtual QString privateToPEM(const SecureArray &passphrase, PBEAlgorithm pbe) const;

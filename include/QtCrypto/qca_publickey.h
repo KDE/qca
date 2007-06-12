@@ -139,7 +139,7 @@ enum DLGroupSet
    function of QCA and does not utilize a provider.  SHA1, MD5, MD2,
    and RIPEMD160 are supported.
 */
-QCA_EXPORT SecureArray emsa3Encode(const QString &hashName, const SecureArray &digest, int size = -1);
+QCA_EXPORT QByteArray emsa3Encode(const QString &hashName, const QByteArray &digest, int size = -1);
 
 /**
    \class DLGroup qca_publickey.h QtCrypto
@@ -609,7 +609,7 @@ if( pubkey.canVerify() )
 
 	   \return true if the signature is correct
 	*/
-	bool validSignature(const SecureArray &sig);
+	bool validSignature(const QByteArray &sig);
 
 	/**
 	   Single step message verification
@@ -624,12 +624,12 @@ if( pubkey.canVerify() )
 
 	   \return true if the signature is valid for the message
 	*/
-	bool verifyMessage(const SecureArray &a, const SecureArray &sig, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+	bool verifyMessage(const SecureArray &a, const QByteArray &sig, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 
 	/**
 	   Export the key in Distinguished Encoding Rules (DER) format
 	*/
-	SecureArray toDER() const;
+	QByteArray toDER() const;
 
 	/**
 	   Export the key in Privacy Enhanced Mail (PEM) format
@@ -676,7 +676,7 @@ if (! QCA::ConvertGood == conversionResult)
 	   conversion succeeded (ConvertGood) or not
 	   \param provider the name of the provider to use for the import.
 	*/
-	static PublicKey fromDER(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static PublicKey fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 	/**
 	   Import a key in Privacy Enhanced Mail (PEM) format
@@ -858,7 +858,7 @@ public:
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	SecureArray signature();
+	QByteArray signature();
 
 	/**
 	   One step signature process
@@ -872,7 +872,7 @@ public:
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	SecureArray signMessage(const SecureArray &a, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+	QByteArray signMessage(const SecureArray &a, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 
 	/**
 	   Derive a shared secret key from a public key

@@ -246,9 +246,9 @@ public:
 	}
 
 	virtual
-	SecureArray
+	QByteArray
 	endSign () {
-		SecureArray r = _privkeySign.signature ();
+		QByteArray r = _privkeySign.signature ();
 		_privkeySign = RSAPrivateKey ();
 		return r;
 	}
@@ -256,7 +256,7 @@ public:
 	virtual
 	bool
 	validSignature (
-		const SecureArray &sig
+		const QByteArray &sig
 	) {
 		return _pubkey.validSignature (sig);
 	}
@@ -596,7 +596,7 @@ public:
 	}
 
 	virtual
-	SecureArray
+	QByteArray
 	publicToDER () const {
 		return static_cast<softstoreRSAContext *>(_k)->_publicKey ().toDER ();
 	}
@@ -610,7 +610,7 @@ public:
 	virtual
 	ConvertResult
 	publicFromDER (
-		const SecureArray &in
+		const QByteArray &in
 	) {
 		Q_UNUSED(in);
 		return ErrorDecode;

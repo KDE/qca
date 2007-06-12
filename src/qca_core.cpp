@@ -895,12 +895,12 @@ void PKeyBase::update(const SecureArray &)
 {
 }
 
-SecureArray PKeyBase::endSign()
+QByteArray PKeyBase::endSign()
 {
-	return SecureArray();
+	return QByteArray();
 }
 
-bool PKeyBase::endVerify(const SecureArray &)
+bool PKeyBase::endVerify(const QByteArray &)
 {
 	return false;
 }
@@ -913,9 +913,9 @@ SymmetricKey PKeyBase::deriveKey(const PKeyBase &)
 //----------------------------------------------------------------------------
 // PKeyContext
 //----------------------------------------------------------------------------
-SecureArray PKeyContext::publicToDER() const
+QByteArray PKeyContext::publicToDER() const
 {
-	return SecureArray();
+	return QByteArray();
 }
 
 QString PKeyContext::publicToPEM() const
@@ -923,7 +923,7 @@ QString PKeyContext::publicToPEM() const
 	return QString();
 }
 
-ConvertResult PKeyContext::publicFromDER(const SecureArray &)
+ConvertResult PKeyContext::publicFromDER(const QByteArray &)
 {
 	return ErrorDecode;
 }

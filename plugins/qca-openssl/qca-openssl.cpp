@@ -1770,12 +1770,12 @@ public:
 		evp.update(in);
 	}
 
-	virtual SecureArray endSign()
+	virtual QByteArray endSign()
 	{
-		return evp.endSign();
+		return evp.endSign().toByteArray();
 	}
 
-	virtual bool endVerify(const SecureArray &sig)
+	virtual bool endVerify(const QByteArray &sig)
 	{
 		return evp.endVerify(sig);
 	}
@@ -2039,16 +2039,16 @@ public:
 		evp.update(in);
 	}
 
-	virtual SecureArray endSign()
+	virtual QByteArray endSign()
 	{
 		SecureArray out = evp.endSign();
 		if(transformsig)
-			return dsasig_der_to_raw(out);
+			return dsasig_der_to_raw(out).toByteArray();
 		else
-			return out;
+			return out.toByteArray();
 	}
 
-	virtual bool endVerify(const SecureArray &sig)
+	virtual bool endVerify(const QByteArray &sig)
 	{
 		SecureArray in;
 		if(transformsig)
@@ -2644,17 +2644,17 @@ public:
 		return 0;
 	}
 
-	virtual SecureArray publicToDER() const
+	virtual QByteArray publicToDER() const
 	{
 		EVP_PKEY *pkey = get_pkey();
 
 		// OpenSSL does not have DH import/export support
 		if(pkey->type == EVP_PKEY_DH)
-			return SecureArray();
+			return QByteArray();
 
 		BIO *bo = BIO_new(BIO_s_mem());
 		i2d_PUBKEY_bio(bo, pkey);
-		SecureArray buf = bio2buf(bo);
+		QByteArray buf = bio2ba(bo);
 		return buf;
 	}
 
@@ -2668,11 +2668,11 @@ public:
 
 		BIO *bo = BIO_new(BIO_s_mem());
 		PEM_write_bio_PUBKEY(bo, pkey);
-		SecureArray buf = bio2buf(bo);
-		return QString::fromLatin1(buf.toByteArray());
+		QByteArray buf = bio2ba(bo);
+		return QString::fromLatin1(buf);
 	}
 
-	virtual ConvertResult publicFromDER(const SecureArray &in)
+	virtual ConvertResult publicFromDER(const QByteArray &in)
 	{
 		delete k;
 		k = 0;
