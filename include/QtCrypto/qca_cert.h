@@ -949,7 +949,7 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	/**
 	   Export the Certificate into a DER format
 	*/
-	SecureArray toDER() const;
+	QByteArray toDER() const;
 
 	/**
 	   Export the Certificate into a PEM format
@@ -975,7 +975,7 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   \return the Certificate corresponding to the certificate in the
 	   provided array
 	*/
-	static Certificate fromDER(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static Certificate fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 	/**
 	   Import the certificate from PEM format
@@ -1292,7 +1292,7 @@ public:
 
 	   \note this only applies to PKCS#10 format certificate requests
 	*/
-	SecureArray toDER() const;
+	QByteArray toDER() const;
 
 	/**
 	   Export the Certificate Request into a PEM format
@@ -1324,7 +1324,7 @@ public:
 
 	   \note this only applies to PKCS#10 format certificate requests
 	*/
-	static CertificateRequest fromDER(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static CertificateRequest fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 	/**
 	   Import the certificate request from PEM format
@@ -1629,7 +1629,7 @@ public:
 
 	   \return an array containing the CRL in DER format
 	*/
-	SecureArray toDER() const;
+	QByteArray toDER() const;
 
 	/**
 	   Export the %Certificate Revocation List (CRL) in PEM format
@@ -1657,7 +1657,7 @@ public:
 
 	   \return the CRL corresponding to the contents of the array
 	*/
-	static CRL fromDER(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static CRL fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 	/**
 	   Import a PEM encoded %Certificate Revocation List (CRL)

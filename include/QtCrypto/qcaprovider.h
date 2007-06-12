@@ -222,9 +222,9 @@ public:
 	CertBase(Provider *p, const QString &type) : BasicContext(p, type) {}
 
 	// import / export
-	virtual SecureArray toDER() const = 0;
+	virtual QByteArray toDER() const = 0;
 	virtual QString toPEM() const = 0;
-	virtual ConvertResult fromDER(const SecureArray &a) = 0;
+	virtual ConvertResult fromDER(const QByteArray &a) = 0;
 	virtual ConvertResult fromPEM(const QString &s) = 0;
 };
 
@@ -242,7 +242,7 @@ public:
 	bool isCA;
 	bool isSelfSigned;               // cert only
 	int pathLimit;
-	SecureArray sig;
+	QByteArray sig;
 	SignatureAlgorithm sigalgo;
 	QByteArray subjectId, issuerId;  // cert only
 	QString challenge;               // csr only
@@ -256,7 +256,7 @@ public:
 	int number;
 	QDateTime thisUpdate, nextUpdate;
 	QList<CRLEntry> revoked;
-	SecureArray sig;
+	QByteArray sig;
 	SignatureAlgorithm sigalgo;
 	QByteArray issuerId;
 };

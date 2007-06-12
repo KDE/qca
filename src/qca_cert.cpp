@@ -1429,7 +1429,7 @@ Validity Certificate::validate(const CertificateCollection &trusted, const Certi
 	return static_cast<const CertContext *>(context())->validate(trusted_list, untrusted_list, crl_list, u);*/
 }
 
-SecureArray Certificate::toDER() const
+QByteArray Certificate::toDER() const
 {
 	return static_cast<const CertContext *>(context())->toDER();
 }
@@ -1444,7 +1444,7 @@ bool Certificate::toPEMFile(const QString &fileName) const
 	return stringToFile(fileName, toPEM());
 }
 
-Certificate Certificate::fromDER(const SecureArray &a, ConvertResult *result, const QString &provider)
+Certificate Certificate::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	Certificate c;
 	CertContext *cc = static_cast<CertContext *>(getContext("cert", provider));
@@ -1733,7 +1733,7 @@ bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
 	return static_cast<const CSRContext *>(context())->compare(other);
 }
 
-SecureArray CertificateRequest::toDER() const
+QByteArray CertificateRequest::toDER() const
 {
 	return static_cast<const CSRContext *>(context())->toDER();
 }
@@ -1748,7 +1748,7 @@ bool CertificateRequest::toPEMFile(const QString &fileName) const
 	return stringToFile(fileName, toPEM());
 }
 
-CertificateRequest CertificateRequest::fromDER(const SecureArray &a, ConvertResult *result, const QString &provider)
+CertificateRequest CertificateRequest::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	CertificateRequest c;
 	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
@@ -1987,7 +1987,7 @@ QByteArray CRL::issuerKeyId() const
 	return static_cast<const CRLContext *>(context())->props()->issuerId;
 }
 
-SecureArray CRL::toDER() const
+QByteArray CRL::toDER() const
 {
 	return static_cast<const CRLContext *>(context())->toDER();
 }
@@ -2013,7 +2013,7 @@ bool CRL::operator==(const CRL &otherCrl) const
 	return static_cast<const CRLContext *>(context())->compare(other);
 }
 
-CRL CRL::fromDER(const SecureArray &a, ConvertResult *result, const QString &provider)
+CRL CRL::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	CRL c;
 	CRLContext *cc = static_cast<CRLContext *>(getContext("crl", provider));

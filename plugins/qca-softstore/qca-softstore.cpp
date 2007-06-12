@@ -1155,7 +1155,7 @@ public:
 
 						foreach (QString s, base64certs) {
 							entry.chain += Certificate::fromDER (
-								Base64 ().stringToArray (s),
+								Base64 ().stringToArray (s).toByteArray (),
 								&cresult
 							);
 						}
@@ -1270,7 +1270,7 @@ private:
 
 		while (n < list.size ()) {
 			Certificate cert = Certificate::fromDER (
-				Base64 ().stringToArray (_unescapeString (list[n++]))
+				Base64 ().stringToArray (_unescapeString (list[n++])).toByteArray ()
 			);
 			if (cert.isNull ()) {
 				goto cleanup;

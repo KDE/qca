@@ -152,7 +152,7 @@ bool CertItem::fromString(const QString &in)
 	chain.clear();
 	for(int n = 0; n < chainCount; ++n)
 	{
-		QCA::Certificate cert = QCA::Certificate::fromDER(QCA::Base64().stringToArray(parts[n + 2]));
+		QCA::Certificate cert = QCA::Certificate::fromDER(QCA::Base64().stringToArray(parts[n + 2]).toByteArray());
 		if(cert.isNull())
 			return false;
 		chain += cert;

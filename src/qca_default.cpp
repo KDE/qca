@@ -1023,7 +1023,7 @@ public:
 			//c->item_id = QString::number(n);
 			QString ename = c->makeName();
 			//QString ename = names[n];
-			QString eid = QString::number(qHash(certs[n].toDER().toByteArray()));
+			QString eid = QString::number(qHash(certs[n].toDER()));
 			c->item_name = ename;
 			c->item_id = eid;
 			c->item_save = makeId(storeId(0), name(0), eid, ename, "cert", certs[n].toPEM());
@@ -1033,7 +1033,7 @@ public:
 		{
 			DefaultKeyStoreEntry *c = new DefaultKeyStoreEntry(crls[n], storeId(0), name(0), provider());
 			QString ename = c->makeName();
-			QString eid = QString::number(qHash(certs[n].toDER().toByteArray()));
+			QString eid = QString::number(qHash(certs[n].toDER()));
 			c->item_name = ename;
 			c->item_id = eid;
 			c->item_save = makeId(storeId(0), name(0), eid, ename, "crl", crls[n].toPEM());

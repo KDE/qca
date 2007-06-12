@@ -2880,7 +2880,7 @@ public:
 		return (!cert && !req && !crl);
 	}
 
-	SecureArray toDER() const
+	QByteArray toDER() const
 	{
 		BIO *bo = BIO_new(BIO_s_mem());
 		if(cert)
@@ -2889,7 +2889,7 @@ public:
 			i2d_X509_REQ_bio(bo, req);
 		else if(crl)
 			i2d_X509_CRL_bio(bo, crl);
-		SecureArray buf = bio2buf(bo);
+		QByteArray buf = bio2ba(bo);
 		return buf;
 	}
 
@@ -2902,11 +2902,11 @@ public:
 			PEM_write_bio_X509_REQ(bo, req);
 		else if(crl)
 			PEM_write_bio_X509_CRL(bo, crl);
-		SecureArray buf = bio2buf(bo);
-		return QString::fromLatin1(buf.toByteArray());
+		QByteArray buf = bio2ba(bo);
+		return QString::fromLatin1(buf);
 	}
 
-	ConvertResult fromDER(const SecureArray &in, Type t)
+	ConvertResult fromDER(const QByteArray &in, Type t)
 	{
 		reset();
 
@@ -3023,7 +3023,7 @@ public:
 		return new MyCertContext(*this);
 	}
 
-	virtual SecureArray toDER() const
+	virtual QByteArray toDER() const
 	{
 		return item.toDER();
 	}
@@ -3033,7 +3033,7 @@ public:
 		return item.toPEM();
 	}
 
-	virtual ConvertResult fromDER(const SecureArray &a)
+	virtual ConvertResult fromDER(const QByteArray &a)
 	{
 		_props = CertContextProps();
 		ConvertResult r = item.fromDER(a, X509Item::TypeCert);
@@ -3332,7 +3332,7 @@ public:
 
 		if (x->signature)
 		{
-			p.sig = SecureArray(x->signature->length);
+			p.sig = QByteArray(x->signature->length, 0);
 			for (int i=0; i< x->signature->length; i++)
 				p.sig[i] = x->signature->data[i];
 		}
@@ -3425,7 +3425,7 @@ public:
 		return new MyCSRContext(*this);
 	}
 
-	virtual SecureArray toDER() const
+	virtual QByteArray toDER() const
 	{
 		return item.toDER();
 	}
@@ -3435,7 +3435,7 @@ public:
 		return item.toPEM();
 	}
 
-	virtual ConvertResult fromDER(const SecureArray &a)
+	virtual ConvertResult fromDER(const QByteArray &a)
 	{
 		_props = CertContextProps();
 		ConvertResult r = item.fromDER(a, X509Item::TypeReq);
@@ -3649,7 +3649,7 @@ public:
 
 		if (x->signature)
 		{
-			p.sig = SecureArray(x->signature->length);
+			p.sig = QByteArray(x->signature->length, 0);
 			for (int i=0; i< x->signature->length; i++)
 				p.sig[i] = x->signature->data[i];
 		}
@@ -3707,7 +3707,7 @@ public:
 		return new MyCRLContext(*this);
 	}
 
-	virtual SecureArray toDER() const
+	virtual QByteArray toDER() const
 	{
 		return item.toDER();
 	}
@@ -3717,8 +3717,9 @@ public:
 		return item.toPEM();
 	}
 
-	virtual ConvertResult fromDER(const SecureArray &a)
+	virtual ConvertResult fromDER(const QByteArray &a)
 	{
+		_props = CRLContextProps();
 		ConvertResult r = item.fromDER(a, X509Item::TypeCRL);
 		if(r == ConvertGood)
 			make_props();
@@ -3839,7 +3840,7 @@ public:
 
 		if (x->signature)
 		{
-			p.sig = SecureArray(x->signature->length);
+			p.sig = QByteArray(x->signature->length, 0);
 			for (int i=0; i< x->signature->length; i++)
 				p.sig[i] = x->signature->data[i];
 		}

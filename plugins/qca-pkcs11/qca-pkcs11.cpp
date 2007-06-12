@@ -2476,7 +2476,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 
 		*p_has_private = list[n++].toInt () != 0;
 
-		SecureArray endCertificateBytes = Base64 ().stringToArray (_unescapeString (list[n++]));
+		QByteArray endCertificateBytes = Base64 ().stringToArray (_unescapeString (list[n++])).toByteArray ();
 		Certificate endCertificate = Certificate::fromDER (endCertificateBytes);
 
 		if (endCertificate.isNull ()) {
@@ -2496,7 +2496,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 		chain = endCertificate;
 		while (n < list.size ()) {
 			Certificate cert = Certificate::fromDER (
-				Base64 ().stringToArray (_unescapeString (list[n++]))
+				Base64 ().stringToArray (_unescapeString (list[n++])).toByteArray ()
 			);
 			if (cert.isNull ()) {
 				throw pkcs11Exception (rv, "Invalid certificate");

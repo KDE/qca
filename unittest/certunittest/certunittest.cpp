@@ -115,10 +115,9 @@ void CertUnitTest::CAcertstest()
 	    QCA::ConvertResult resultca1;
 	    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/RootCAcert.pem", &resultca1, provider);
 
-	    QCOMPARE( ca1.pathLimit(), 0 );
-
 	    QCOMPARE( resultca1, QCA::ConvertGood );
 	    QCOMPARE( ca1.isNull(), false );
+	    QCOMPARE( ca1.pathLimit(), 0 );
 	    QCOMPARE( ca1.isCA(), true );
 	    QCOMPARE( ca1.isSelfSigned(), true );
 
@@ -298,7 +297,7 @@ void CertUnitTest::checkExpiredClientCerts()
 	    QCOMPARE( client1.validate( trusted, untrusted, QCA::UsageTimeStamping ), QCA::ErrorExpired );
 	    QCOMPARE( client1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ErrorExpired );
 	    QCOMPARE( client1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorExpired );
-	    QCA::SecureArray derClient1 = client1.toDER();
+	    QByteArray derClient1 = client1.toDER();
 	    QCOMPARE( derClient1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derClient1, &resultClient1, provider );
 	    QCOMPARE( resultClient1, QCA::ConvertGood );
@@ -406,7 +405,7 @@ void CertUnitTest::checkClientCerts()
 	    QCOMPARE( client2.validate( trusted, untrusted, QCA::UsageTimeStamping ), QCA::ErrorInvalidPurpose );
 	    QCOMPARE( client2.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ValidityGood );
 	    QCOMPARE( client2.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorInvalidPurpose );
-	    QCA::SecureArray derClient2 = client2.toDER();
+	    QByteArray derClient2 = client2.toDER();
 	    QCOMPARE( derClient2.isEmpty(), false );
 	    QCA::Certificate fromDer2 = QCA::Certificate::fromDER( derClient2, &resultClient2, provider );
 	    QCOMPARE( resultClient2, QCA::ConvertGood );
@@ -436,7 +435,7 @@ void CertUnitTest::derCAcertstest()
             QVERIFY(f.open(QFile::ReadOnly));
             QByteArray der = f.readAll();
             QCA::ConvertResult resultca1;
-            QCA::Certificate ca1 = QCA::Certificate::fromDER( QCA::SecureArray(der),
+            QCA::Certificate ca1 = QCA::Certificate::fromDER(der,
                                                               &resultca1,
                                                               provider);
 
@@ -802,7 +801,7 @@ void CertUnitTest::checkExpiredServerCerts()
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ErrorExpired );
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorExpired );
 
-	    QCA::SecureArray derServer1 = server1.toDER();
+	    QByteArray derServer1 = server1.toDER();
 	    QCOMPARE( derServer1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derServer1, &resultServer1, provider );
 	    QCOMPARE( resultServer1, QCA::ConvertGood );
@@ -905,7 +904,7 @@ void CertUnitTest::checkServerCerts()
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageEmailProtection ), QCA::ErrorInvalidPurpose );
 	    QCOMPARE( server1.validate( trusted, untrusted, QCA::UsageCRLSigning ), QCA::ErrorInvalidPurpose );
 
-	    QCA::SecureArray derServer1 = server1.toDER();
+	    QByteArray derServer1 = server1.toDER();
 	    QCOMPARE( derServer1.isEmpty(), false );
 	    QCA::Certificate fromDer1 = QCA::Certificate::fromDER( derServer1, &resultServer1, provider );
 	    QCOMPARE( resultServer1, QCA::ConvertGood );
@@ -973,7 +972,7 @@ void CertUnitTest::crl()
 	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 11, 59)) );
 
 	    // convert to DER
-	    QCA::SecureArray derCRL1 = crl1.toDER();
+	    QByteArray derCRL1 = crl1.toDER();
 	    // check we got something, at least
 	    QCOMPARE( derCRL1.isEmpty(), false );
 	    // convert back from DER
@@ -1029,7 +1028,7 @@ void CertUnitTest::crl2()
 	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
 
 	    // convert to DER
-	    QCA::SecureArray derCRL1 = crl1.toDER();
+	    QByteArray derCRL1 = crl1.toDER();
 	    // check we got something, at least
 	    QCOMPARE( derCRL1.isEmpty(), false );
 	    // convert back from DER
@@ -1133,7 +1132,7 @@ void CertUnitTest::csr2()
 	    QCOMPARE( csr1.signatureAlgorithm(), QCA::EMSA3_MD5 );
 
 	    // convert to DER
-	    QCA::SecureArray derCSR1 = csr1.toDER();
+	    QByteArray derCSR1 = csr1.toDER();
 	    // check we got something, at least
 	    QCOMPARE( derCSR1.isEmpty(), false );
 	    // convert back from DER
