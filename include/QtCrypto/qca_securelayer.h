@@ -461,6 +461,9 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	   validation for you.  If you want to bypass this behavior and
 	   do the validation yourself, pass an empty string for \a host.
 
+	   If the host is an internationalized domain name, then it must be
+	   provided in unicode format, not in IDNA ACE/punycode format.
+
 	   \param host the hostname that you want to connect to
 
 	   \note The hostname will be used for Server Name Indication

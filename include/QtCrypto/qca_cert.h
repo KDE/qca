@@ -1013,6 +1013,9 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   This will return true (indicating a match), if the specified host
 	   name meets the RFC 2818 validation rules with this certificate.
 
+	   If the host is an internationalized domain name, then it must be
+	   provided in unicode format, not in IDNA ACE/punycode format.
+
 	   \param host the name of the host to compare to
 	*/
 	bool matchesHostname(const QString &host) const;
