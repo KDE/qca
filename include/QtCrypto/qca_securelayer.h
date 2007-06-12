@@ -761,7 +761,7 @@ public:
 	   This is used to indicate which parameters are needed by SASL
 	   in order to complete the authentication process.
 	*/
-	class Params
+	class QCA_EXPORT Params
 	{
 	public:
 		Params();
