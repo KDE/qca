@@ -495,10 +495,10 @@ QCA_EXPORT void setAppName(const QString &name);
    representation.
 
    This is a convenience function to convert an arbitrary
-   SecureArray to a printable representation.
+   QByteArray to a printable representation.
 
    \code
-SecureArray test(10);
+QByteArray test(10);
 test.fill('a');
 // 0x61 is 'a' in ASCII
 if (QString("61616161616161616161") == QCA::arrayToHex(test) )
@@ -510,7 +510,7 @@ if (QString("61616161616161616161") == QCA::arrayToHex(test) )
    \param array the array to be converted
    \return a printable representation
 */
-QCA_EXPORT QString arrayToHex(const SecureArray &array);
+QCA_EXPORT QString arrayToHex(const QByteArray &array);
 
 /**
    Convert a QString containing a hexadecimal representation

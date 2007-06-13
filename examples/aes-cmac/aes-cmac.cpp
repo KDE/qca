@@ -282,33 +282,33 @@ int main(int argc, char **argv)
 	QCA::SecureArray message1(message);
 	message1.resize(0);
 	qDebug();
-	qDebug() << "Message1: " << QCA::arrayToHex(message1);
+	qDebug() << "Message1: " << QCA::arrayToHex(message1.toByteArray());
 	qDebug() << "Expecting:  bb1d6929e95937287fa37d129b756746";
-	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message1));
+	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message1).toByteArray());
 
 	cmacObject.clear();
 	QCA::SecureArray message2(message);
 	message2.resize(16);
 	qDebug();
-	qDebug() << "Message2: " << QCA::arrayToHex(message2);
+	qDebug() << "Message2: " << QCA::arrayToHex(message2.toByteArray());
 	qDebug() << "Expecting:  070a16b46b4d4144f79bdd9dd04a287c";
-	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message2));
+	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message2).toByteArray());
 
 	cmacObject.clear();
 	QCA::SecureArray message3(message);
 	message3.resize(40);
 	qDebug();
-	qDebug() << "Message3: " << QCA::arrayToHex(message3);
+	qDebug() << "Message3: " << QCA::arrayToHex(message3.toByteArray());
 	qDebug() << "Expecting:  dfa66747de9ae63030ca32611497c827";
-	qDebug() << "AES-CMAC  " << QCA::arrayToHex(cmacObject.process(message3));
+	qDebug() << "AES-CMAC  " << QCA::arrayToHex(cmacObject.process(message3).toByteArray());
 
 	cmacObject.clear();
 	QCA::SecureArray message4(message);
 	message4.resize(64);
 	qDebug();
-	qDebug() << "Message4: " << QCA::arrayToHex(message4);
+	qDebug() << "Message4: " << QCA::arrayToHex(message4.toByteArray());
 	qDebug() << "Expecting:  51f0bebf7e3b9d92fc49741779363cfe";
-	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message4));
+	qDebug() << "AES-CMAC: " << QCA::arrayToHex(cmacObject.process(message4).toByteArray());
     }
 
     return 0;

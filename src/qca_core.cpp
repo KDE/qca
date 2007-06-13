@@ -683,7 +683,7 @@ void setAppName(const QString &s)
 	global->app_name = s;
 }
 
-QString arrayToHex(const SecureArray &a)
+QString arrayToHex(const QByteArray &a)
 {
 	return Hex().arrayToString(a);
 }

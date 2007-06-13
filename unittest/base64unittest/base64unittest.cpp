@@ -104,8 +104,8 @@ void Base64UnitTest::test1()
     QFETCH(QString, raw);
     QFETCH(QString, encoded);
 
-    QCOMPARE(QCA::arrayToHex(base64Object.encode(QCA::hexToArray(raw))), encoded);
-    QCOMPARE(QCA::arrayToHex(base64Object.decode(QCA::hexToArray(encoded))), raw);
+    QCOMPARE(QCA::arrayToHex(base64Object.encode(QCA::hexToArray(raw)).toByteArray()), encoded);
+    QCOMPARE(QCA::arrayToHex(base64Object.decode(QCA::hexToArray(encoded)).toByteArray()), raw);
 }
 
 void Base64UnitTest::test2()

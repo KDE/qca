@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	}
 
 	// output the encrypted data
-	QString rstr = QCA::arrayToHex(result);
+	QString rstr = QCA::arrayToHex(result.toByteArray());
 	std::cout << "\"" << arg.data() << "\" encrypted with RSA is \"";
 	std::cout << qPrintable(rstr) << "\"" << std::endl;
 

@@ -223,7 +223,7 @@ void HashUnitTest::md5filetest()
 	    if ( f1.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f1 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
 	    } else {
 		QWARN( "./data/empty could not be opened - do you need to create it?");
@@ -233,7 +233,7 @@ void HashUnitTest::md5filetest()
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f2 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "7c4b3d8a360c6c3cb647160fa9adfe71" ) );
 	    } else {
 		QWARN( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
@@ -244,7 +244,7 @@ void HashUnitTest::md5filetest()
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f3 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "a74671ea68b0e3c609e8785ed8497c14" ) );
 	    } else {
 		QWARN( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
@@ -254,7 +254,7 @@ void HashUnitTest::md5filetest()
 	    if ( f4.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f4 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "7d2c2b228f9a6ff82c9401fd54bdbe16" ) );
 	    } else {
 		QWARN( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
@@ -312,13 +312,13 @@ void HashUnitTest::sha0longtest()
 	    QCA::Hash shaHash("sha0", provider);
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("3232affa48628a26653b5aaa44541fd90d690603" ) );
 
 	    shaHash.clear();
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("3232affa48628a26653b5aaa44541fd90d690603" ) );
 	}
     }
@@ -394,14 +394,14 @@ void HashUnitTest::sha1longtest()
 	    QCA::Hash shaHash("sha1", provider);
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("34aa973cd4c4daa4f61eeb2bdbad27316534016f") );
 
 	    QFile f1( "./data/empty" );
 	    if ( f1.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f1 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
 	    } else {
 		QWARN( "./data/empty could not be opened - do you need to create it?");
@@ -411,7 +411,7 @@ void HashUnitTest::sha1longtest()
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f2 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "cda343591428a68e22bd2e349b890cbafb642cf7" ) );
 	    } else {
 		QWARN( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
@@ -421,7 +421,7 @@ void HashUnitTest::sha1longtest()
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f3 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "a030a9c6dcd10c5d90a86f915ad4710084cbca71" ) );
 	    } else {
 		QWARN( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
@@ -431,7 +431,7 @@ void HashUnitTest::sha1longtest()
 	    if ( f4.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f4 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final() ) ),
+		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
 			 QString( "a1fb6ed6acfd92381055b310d926d6e83e76ff1e" ) );
 	    } else {
 		QWARN( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
@@ -496,13 +496,13 @@ void HashUnitTest::sha224longtest()
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("20794655980c91d8bbb4c1ea97618a4bf03f42581948b2ee4ee7ad67") );
 
 	    shaHash.clear();
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("20794655980c91d8bbb4c1ea97618a4bf03f42581948b2ee4ee7ad67") );
 	}
     }
@@ -565,14 +565,14 @@ void HashUnitTest::sha256longtest()
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") );
 
 
 	    shaHash.clear();
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") );
 	}
     }
@@ -646,14 +646,14 @@ void HashUnitTest::sha384longtest()
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985") );
 
 
 	    shaHash.clear();
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985") );
 	    // qDebug() << "SHA384: " << provider << " elapsed " << t.elapsed();
 	}
@@ -722,13 +722,13 @@ void HashUnitTest::sha512longtest()
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") );
 
 	    shaHash.clear();
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") );
 	}
     }
@@ -794,13 +794,13 @@ void HashUnitTest::rmd160longtest()
 	    // This is the "million times 'a' test"
 	    for (int i=0; i<1000; i++)
 	        rmdHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(rmdHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(rmdHash.final().toByteArray())),
 		     QString("52783243c1697bdbe16d37f97f68f08325dc1528") );
 
 	    rmdHash.clear();
 	    for (int i=0; i<1000; i++)
 		rmdHash.update(fillerString);
-	    QCOMPARE( QString(QCA::arrayToHex(rmdHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(rmdHash.final().toByteArray())),
 		     QString("52783243c1697bdbe16d37f97f68f08325dc1528") );
 
 	    // This is the "8 rounds of 1234567890" test.
@@ -810,7 +810,7 @@ void HashUnitTest::rmd160longtest()
 	    rmdHash.clear();
 	    for (int i=0; i<8; i++)
 		rmdHash.update(fillerArray);
-	    QCOMPARE( QString(QCA::arrayToHex(rmdHash.final())),
+	    QCOMPARE( QString(QCA::arrayToHex(rmdHash.final().toByteArray())),
 		     QString("9b752e45573d4b39f4dbd3323cab82bf63326bfb") );
 
 	}

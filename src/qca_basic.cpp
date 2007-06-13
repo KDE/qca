@@ -161,7 +161,7 @@ SecureArray Hash::hash(const SecureArray &a)
 
 QString Hash::hashToString(const SecureArray &a)
 {
-	return arrayToHex(hash(a));
+	return arrayToHex(hash(a).toByteArray());
 }
 
 //----------------------------------------------------------------------------

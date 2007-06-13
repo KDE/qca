@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 	// output the results of that stage
 	printf("AES128 encryption of %s is [%s]\n",
 	       arg.data(),
-	       qPrintable(QCA::arrayToHex(u)) );
+	       qPrintable(QCA::arrayToHex(u.toByteArray())) );
 
 
 	// Because we are using PKCS7 padding, we need to output the final (padded) block
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 	}
 	// and output the resulting block. The ciphertext is the results of update()
 	// and the result of final()
-	printf("Final block for AES128 encryption is [0x%s]\n", qPrintable(QCA::arrayToHex(f)) );
+	printf("Final block for AES128 encryption is [0x%s]\n", qPrintable(QCA::arrayToHex(f.toByteArray())) );
 
 	// re-use the Cipher t decrypt. We need to use the same key and
 	// initialisation vector as in the encryption.
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 
 	// output results
 	printf("Decryption using AES128 of [0x%s] is %s\n",
-	       qPrintable(QCA::arrayToHex(cipherText)), plainText.data());
+	       qPrintable(QCA::arrayToHex(cipherText.toByteArray())), plainText.data());
 
 	// Again we need to call final(), to get the last block (with its padding removed)
 	plainText = cipher.final();

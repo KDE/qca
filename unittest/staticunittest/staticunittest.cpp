@@ -68,7 +68,7 @@ void StaticUnitTest::hexConversions()
     for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x61;
     }
-    QCOMPARE( QCA::arrayToHex( testArray ), QString( "61616161616161616161" ) );
+    QCOMPARE( QCA::arrayToHex( testArray.toByteArray() ), QString( "61616161616161616161" ) );
     //testArray.fill( 'b' );
     for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x62;
@@ -76,10 +76,10 @@ void StaticUnitTest::hexConversions()
     testArray[6] = 0x00;
     QCOMPARE( testArray == QCA::hexToArray(QString("62626262626200626262")), true );
 
-    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
+    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray.toByteArray() ) ), true );
 
     testArray[9] = 0x00;
-    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray ) ), true );
+    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray.toByteArray() ) ), true );
 }
 
 

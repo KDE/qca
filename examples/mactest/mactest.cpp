@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 		QCA::SecureArray resultArray = hmacObject.final();
 
 		// convert the result into printable hexadecimal.
-		QString result = QCA::arrayToHex(resultArray);
+		QString result = QCA::arrayToHex(resultArray.toByteArray());
 		printf("HMAC(SHA1) of \"%s\" with \"%s\" = [%s]\n", arg.data(), key.data(), result.toLatin1().data());
 	}
 

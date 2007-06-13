@@ -64,20 +64,20 @@ void SymmetricKeyUnitTest::test1()
     QCA::SymmetricKey keyArray = secureArray;
     QCOMPARE( secureArray.size(), 10 );
     QCOMPARE( keyArray.size(), secureArray.size() );
-    QCOMPARE( QCA::arrayToHex ( keyArray ), QString( "63636363636363636363" ) );
-    QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
+    QCOMPARE( QCA::arrayToHex ( keyArray.toByteArray() ), QString( "63636363636363636363" ) );
+    QCOMPARE( QCA::arrayToHex ( secureArray.toByteArray() ), QString( "63636363636363636363" ) );
     keyArray[3] = 0x00; // test keyArray detaches OK
-    QCOMPARE( QCA::arrayToHex ( keyArray ), QString( "63636300636363636363" ) );
-    QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
+    QCOMPARE( QCA::arrayToHex ( keyArray.toByteArray() ), QString( "63636300636363636363" ) );
+    QCOMPARE( QCA::arrayToHex ( secureArray.toByteArray() ), QString( "63636363636363636363" ) );
 
     QCA::SymmetricKey anotherKey;
     anotherKey = keyArray;
-    QCOMPARE( QCA::arrayToHex ( anotherKey ), QString( "63636300636363636363" ) );
+    QCOMPARE( QCA::arrayToHex ( anotherKey.toByteArray() ), QString( "63636300636363636363" ) );
     QCA::SymmetricKey bigKey( 100 );
     anotherKey = bigKey;
     QCOMPARE( anotherKey.size(), 100 );
     anotherKey = secureArray;
-    QCOMPARE( QCA::arrayToHex ( secureArray ), QString( "63636363636363636363" ) );
+    QCOMPARE( QCA::arrayToHex ( secureArray.toByteArray() ), QString( "63636363636363636363" ) );
     QCOMPARE( anotherKey.size(), 10 );
     anotherKey = emptyKey;
     QCOMPARE( anotherKey.size(), 0 );

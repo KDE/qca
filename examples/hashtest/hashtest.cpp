@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 		// no more updates after calling final.
 		QCA::SecureArray resultArray = hashObject.final();
 		// convert the result into printable hexadecimal.
-		QString result = QCA::arrayToHex(resultArray);
+		QString result = QCA::arrayToHex(resultArray.toByteArray());
 		printf("md5(\"%s\") = [%s]\n", arg.data(), result.toAscii().data());
 	}
 
