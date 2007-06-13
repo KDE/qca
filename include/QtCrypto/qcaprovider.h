@@ -366,9 +366,9 @@ public:
 
 	virtual const PGPKeyContextProps *props() const = 0;
 
-	virtual SecureArray toBinary() const = 0;
+	virtual QByteArray toBinary() const = 0;
 	virtual QString toAscii() const = 0;
-	virtual ConvertResult fromBinary(const SecureArray &a) = 0;
+	virtual ConvertResult fromBinary(const QByteArray &a) = 0;
 	virtual ConvertResult fromAscii(const QString &s) = 0;
 };
 

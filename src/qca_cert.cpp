@@ -2733,7 +2733,7 @@ bool PGPKey::isTrusted() const
 	return static_cast<const PGPKeyContext *>(context())->props()->isTrusted;
 }
 
-SecureArray PGPKey::toArray() const
+QByteArray PGPKey::toArray() const
 {
 	return static_cast<const PGPKeyContext *>(context())->toBinary();
 }
@@ -2748,7 +2748,7 @@ bool PGPKey::toFile(const QString &fileName) const
 	return stringToFile(fileName, toString());
 }
 
-PGPKey PGPKey::fromArray(const SecureArray &a, ConvertResult *result, const QString &provider)
+PGPKey PGPKey::fromArray(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	PGPKey k;
 	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext("pgpkey", provider));

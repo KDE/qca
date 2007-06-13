@@ -2280,7 +2280,7 @@ public:
 	   \sa fromArray for a static import method.
 	   \sa toString for an "ascii armoured" export method.
 	*/
-	SecureArray toArray() const;
+	QByteArray toArray() const;
 
 	/**
 	   Export the key to a string
@@ -2308,7 +2308,7 @@ public:
 	   \param provider the provider to use, if a particular provider is
 	   required
 	*/
-	static PGPKey fromArray(const SecureArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static PGPKey fromArray(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
 
 	/**
 	   Import the key from a string

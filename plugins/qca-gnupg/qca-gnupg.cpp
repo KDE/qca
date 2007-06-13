@@ -126,10 +126,10 @@ public:
 		return &_props;
 	}
 
-	virtual SecureArray toBinary() const
+	virtual QByteArray toBinary() const
 	{
 		// TODO
-		return SecureArray();
+		return QByteArray();
 	}
 
 	virtual QString toAscii() const
@@ -149,7 +149,7 @@ public:
 		return str;
 	}
 
-	virtual ConvertResult fromBinary(const SecureArray &a)
+	virtual ConvertResult fromBinary(const QByteArray &a)
 	{
 		// TODO
 		Q_UNUSED(a);
