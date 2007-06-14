@@ -766,7 +766,7 @@ public:
 	{
 	}
 
-	MyConstraintType(QCA::ConstraintType _type, const QString &_varname, const QString &_name, const QString &_desc)
+	MyConstraintType(const QCA::ConstraintType &_type, const QString &_varname, const QString &_name, const QString &_desc)
 	:type(_type), varname(_varname), name(_name), desc(_desc)
 	{
 	}
@@ -1789,7 +1789,7 @@ static void print_info_ordered(const QString &title, const QCA::CertificateInfoO
 	}
 }
 
-static QString constraint_to_string(QCA::ConstraintType t)
+static QString constraint_to_string(const QCA::ConstraintType &t)
 {
 	QList<MyConstraintType> list = makeConstraintTypeList();
 	for(int n = 0; n < list.count(); ++n)
@@ -1797,7 +1797,7 @@ static QString constraint_to_string(QCA::ConstraintType t)
 		if(list[n].type == t)
 			return list[n].name;
 	}
-	return QString("Unknown Constraint");
+	return t.id();
 }
 
 static QString sigalgo_to_string(QCA::SignatureAlgorithm algo)
