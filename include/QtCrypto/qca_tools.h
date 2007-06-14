@@ -75,6 +75,52 @@ QCA_EXPORT void *qca_secure_realloc(void *p, int bytes);
 namespace QCA {
 
 /**
+   \class MemoryRegion qca_tools.h QtCrypto
+
+   Array of bytes that may be optionally secured
+
+   This class is mostly unusable on its own.  Either use it as a SecureArray
+   subclass or call toByteArray() to convert to QByteArray.
+
+   Note that this class is implicitly shared (that is, copy on write).
+*/
+class QCA_EXPORT MemoryRegion
+{
+public:
+	MemoryRegion();
+	MemoryRegion(const char *str);
+	MemoryRegion(const QByteArray &from);
+	MemoryRegion(const MemoryRegion &from);
+	~MemoryRegion();
+	MemoryRegion & operator=(const MemoryRegion &from);
+	MemoryRegion & operator=(const QByteArray &from);
+
+	bool isNull() const;
+	bool isSecure() const;
+	QByteArray toByteArray() const;
+
+	bool isEmpty() const;
+	int size() const;
+
+	const char *data() const;
+	const char *constData() const;
+	const char & at(int index) const;
+
+protected:
+	MemoryRegion(int size, bool secure);
+	MemoryRegion(const QByteArray &from, bool secure);
+	char *data();
+	char & at(int index);
+	bool resize(int size, bool secure); // secure only relevant if null
+	void set(const QByteArray &from, bool secure);
+	void setSecure(bool secure);
+
+private:
+	class Private;
+	QSharedDataPointer<Private> d;
+};
+
+/**
    \class SecureArray qca_tools.h QtCrypto
 
    Secure array of bytes
@@ -88,7 +134,7 @@ namespace QCA {
 
    Note that this class is implicitly shared (that is, copy on write).
 */
-class QCA_EXPORT SecureArray
+class QCA_EXPORT SecureArray : public MemoryRegion
 {
 public:
 	/**
@@ -119,6 +165,15 @@ public:
 	   \sa operator=()
 	*/
 	SecureArray(const QByteArray &a);
+
+	/**
+	   Construct a secure byte array from a MemoryRegion
+
+	   Note that this copies, rather than references the source array
+
+	   \sa operator=()
+	*/
+	SecureArray(const MemoryRegion &a);
 
 	/**
 	   Construct a (shallow) copy of another secure byte array
@@ -241,7 +296,7 @@ public:
 	   \note The number of characters is 1 based, so if
 	   you ask for fill('x', 10), it will fill from
 	*/
-        void fill(char fillChar, int fillToPosition = -1);
+	void fill(char fillChar, int fillToPosition = -1);
 
 	/**
 	   Copy the contents of the secure array out to a 
@@ -276,10 +331,6 @@ protected:
 	   \param from the byte array to copy
 	*/
 	void set(const QByteArray &from);
-
-private:
-	class Private;
-	QSharedDataPointer<Private> d;
 };
 
 /**
