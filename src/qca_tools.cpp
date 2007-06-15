@@ -279,9 +279,12 @@ bool ai_resize(alloc_info *ai, int new_size)
 	{
 		Botan::SecureVector<Botan::byte> *new_buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)new_size + 1);
 		Botan::byte *new_p = (Botan::byte *)(*new_buf);
-		const Botan::byte *old_p = (const Botan::byte *)(*(ai->sbuf));
-		memcpy(new_p, old_p, qMin(new_size, ai->size));
-		delete ai->sbuf;
+		if(ai->size > 0)
+		{
+			const Botan::byte *old_p = (const Botan::byte *)(*(ai->sbuf));
+			memcpy(new_p, old_p, qMin(new_size, ai->size));
+			delete ai->sbuf;
+		}
 		ai->sbuf = new_buf;
 		ai->size = new_size;
 		(*(ai->sbuf))[new_size] = 0;
