@@ -647,6 +647,15 @@ SecureArray & SecureArray::append(const SecureArray &a)
 	return *this;
 }
 
+bool SecureArray::operator==(const SecureArray &other) const
+{
+	if(this == &other)
+		return true;
+	if(size() == other.size() && memcmp(data(), other.data(), size()) == 0)
+		return true;
+	return false;
+}
+
 SecureArray & SecureArray::operator+=(const SecureArray &a)
 {
 	return append(a);
@@ -667,20 +676,6 @@ void SecureArray::set(const SecureArray &from)
 void SecureArray::set(const QByteArray &from)
 {
 	*this = from;
-}
-
-bool operator==(const SecureArray &a, const SecureArray &b)
-{
-	if(&a == &b)
-		return true;
-	if(a.size() == b.size() && memcmp(a.data(), b.data(), a.size()) == 0)
-		return true;
-	return false;
-}
-
-bool operator!=(const SecureArray &a, const SecureArray &b)
-{
-	return !(a == b);
 }
 
 const SecureArray operator+(const SecureArray &a, const SecureArray &b)

@@ -313,6 +313,21 @@ public:
 	SecureArray & append(const SecureArray &a);
 
 	/**
+	   Equality operator. Returns true if both arrays have the same
+	   data (and the same length, of course).
+	*/
+	bool operator==(const SecureArray &other) const;
+	
+	/**
+	   Inequality operator. Returns true if both arrays have different
+	   length, or the same length but different data.
+	*/
+	inline bool operator!=(const SecureArray &other) const
+	{
+		return !(*this == other);
+	}
+
+	/**
 	   Append a secure byte array to the end of this array
 	*/
 	SecureArray & operator+=(const SecureArray &a);
@@ -336,26 +351,7 @@ protected:
 };
 
 /**
-   Equality operator. Returns true if the two SecureArray
-   arguments have the same data (and the same length, of course).
-
-   \relates SecureArray
-*/
-QCA_EXPORT bool operator==(const SecureArray &a, const SecureArray &b);
-
-/**
-   Inequality operator. Returns true if the two SecureArray
-   arguments have different length, or the same length but
-   different data
-
-   \relates SecureArray
-*/
-QCA_EXPORT bool operator!=(const SecureArray &a, const SecureArray &b);
-
-/**
    Returns an array that is the result of concatenating a and b
-
-   \relates SecureArray
 */
 QCA_EXPORT const SecureArray operator+(const SecureArray &a, const SecureArray &b);
 
@@ -530,8 +526,8 @@ aString = aBiggishInteger.toString(); // aString is now "5878990"
 	   \param n the BigInteger to compare with
 
 	   \return zero if the values are the same, negative if the argument
-	   is less than the value of this BigInteger, and positive if the argument
-	   value is greater than this BigInteger
+	   is less than the value of this BigInteger, and positive if the
+	   argument value is greater than this BigInteger
 
 	   \code
 BigInteger a( "400" );
@@ -545,80 +541,68 @@ result = b.compare( c );        // return negative, -400 < 200
 	*/
 	int compare(const BigInteger &n) const;
 
+	/**
+	   Equality operator. Returns true if the two BigInteger values
+	   are the same, including having the same sign.
+	*/
+	inline bool operator==(const BigInteger &other) const
+	{
+		return (compare(other) == 0);
+	}
+
+	/**
+	   Inequality operator. Returns true if the two BigInteger values
+	   are different in magnitude, sign or both.
+	*/
+	inline bool operator!=(const BigInteger &other) const
+	{
+		return !(*this == other);
+	}
+
+	/**
+	   Less than or equal operator. Returns true if the BigInteger value
+	   on the left hand side is equal to or less than the BigInteger
+	   value on the right hand side.
+	*/
+	inline bool operator<=(const BigInteger &other) const
+	{
+		return (compare(other) <= 0);
+	}
+
+	/**
+	   Greater than or equal operator. Returns true if the BigInteger
+	   value on the left hand side is equal to or greater than the
+	   BigInteger value on the right hand side.
+	*/
+	inline bool operator>=(const BigInteger &other) const
+	{
+		return (compare(other) >= 0);
+	}
+
+	/**
+	   Less than operator. Returns true if the BigInteger value
+	   on the left hand side is less than the BigInteger value
+	   on the right hand side.
+	*/
+	inline bool operator<(const BigInteger &other) const
+	{
+		return (compare(other) < 0);
+	}
+
+	/**
+	   Greater than operator. Returns true if the BigInteger value
+	   on the left hand side is greater than the BigInteger value
+	   on the right hand side.
+	*/
+	inline bool operator>(const BigInteger &other) const
+	{
+		return (compare(other) > 0);
+	}
+
 private:
 	class Private;
 	QSharedDataPointer<Private> d;
 };
-
-/**
-   Equality operator. Returns true if the two BigInteger values
-   are the same, including having the same sign
-
-   \relates BigInteger
-*/
-inline bool operator==(const BigInteger &a, const BigInteger &b)
-{
-	return (0 == a.compare( b ) );
-}
-
-/**
-   Inequality operator. Returns true if the two BigInteger values
-   are different in magnitude, sign or both
-
-   \relates BigInteger
-*/
-inline bool operator!=(const BigInteger &a, const BigInteger &b)
-{
-	return (0 != a.compare( b ) );
-}
-
-/**
-   Less than or equal operator. Returns true if the BigInteger value
-   on the left hand side is equal to or less than the BigInteger value
-   on the right hand side.
-
-   \relates BigInteger
-*/
-inline bool operator<=(const BigInteger &a, const BigInteger &b)
-{
-	return (a.compare( b ) <= 0 );
-}
-
-/**
-   Greater than or equal operator. Returns true if the BigInteger value
-   on the left hand side is equal to or greater than the BigInteger value
-   on the right hand side.
-
-   \relates BigInteger
-*/
-inline bool operator>=(const BigInteger &a, const BigInteger &b)
-{
-	return (a.compare( b ) >= 0 );
-}
-
-/**
-   Less than operator. Returns true if the BigInteger value
-   on the left hand side is less than the BigInteger value
-   on the right hand side.
-
-   \relates BigInteger
-*/
-inline bool operator<(const BigInteger &a, const BigInteger &b)
-{
-	return (a.compare( b ) < 0 );
-}
-
-/**
-   Greater than operator. Returns true if the BigInteger value
-   on the left hand side is greater than the BigInteger value
-   on the right hand side.
-
-   \relates BigInteger
-*/
-inline bool operator>(const BigInteger &a, const BigInteger &b)
-{
-	return (a.compare( b ) > 0 );
-}
 
 /**
    Stream operator
