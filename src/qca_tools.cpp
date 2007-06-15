@@ -315,6 +315,8 @@ void ai_delete(alloc_info *ai)
 //----------------------------------------------------------------------------
 // MemoryRegion
 //----------------------------------------------------------------------------
+static char blank[] = "";
+
 class MemoryRegion::Private : public QSharedData
 {
 public:
@@ -346,14 +348,14 @@ public:
 		return ai_resize(&ai, new_size);
 	}
 
-	void setSecure(bool secure)
+	void setSecure(bool sec)
 	{
 		// if same mode, do nothing
-		if(ai.sec == secure)
+		if(ai.sec == sec)
 			return;
 
 		alloc_info other;
-		ai_new(&other, ai.size, secure);
+		ai_new(&other, ai.size, sec);
 		memcpy(other.data, ai.data, ai.size);
 		ai_delete(&ai);
 		ai = other;
@@ -361,22 +363,22 @@ public:
 };
 
 MemoryRegion::MemoryRegion()
-:d(0)
+:_secure(false), d(0)
 {
 }
 
 MemoryRegion::MemoryRegion(const char *str)
-:d(new Private(QByteArray::fromRawData(str, strlen(str)), false))
+:_secure(false), d(new Private(QByteArray::fromRawData(str, strlen(str)), false))
 {
 }
 
 MemoryRegion::MemoryRegion(const QByteArray &from)
-:d(new Private(from, false))
+:_secure(false), d(new Private(from, false))
 {
 }
 
 MemoryRegion::MemoryRegion(const MemoryRegion &from)
-:d(from.d)
+:_secure(from._secure), d(from.d)
 {
 }
 
@@ -386,6 +388,7 @@ MemoryRegion::~MemoryRegion()
 
 MemoryRegion & MemoryRegion::operator=(const MemoryRegion &from)
 {
+	_secure = from._secure;
 	d = from.d;
 	return *this;
 }
@@ -403,9 +406,7 @@ bool MemoryRegion::isNull() const
 
 bool MemoryRegion::isSecure() const
 {
-	if(!d)
-		return false;
-	return d->ai.sec;
+	return _secure;
 }
 
 QByteArray MemoryRegion::toByteArray() const
@@ -428,34 +429,39 @@ QByteArray MemoryRegion::toByteArray() const
 	}
 }
 
+MemoryRegion::MemoryRegion(bool secure)
+:_secure(secure), d(0)
+{
+}
+
 MemoryRegion::MemoryRegion(int size, bool secure)
-:d(new Private(size, secure))
+:_secure(secure), d(new Private(size, secure))
 {
 }
 
 MemoryRegion::MemoryRegion(const QByteArray &from, bool secure)
-:d(new Private(from, secure))
+:_secure(secure), d(new Private(from, secure))
 {
 }
 
 char *MemoryRegion::data()
 {
 	if(!d)
-		return 0;
+		return blank;
 	return d->ai.data;
 }
 
 const char *MemoryRegion::data() const
 {
 	if(!d)
-		return 0;
+		return blank;
 	return d->ai.data;
 }
 
 const char *MemoryRegion::constData() const
 {
 	if(!d)
-		return 0;
+		return blank;
 	return d->ai.data;
 }
 
@@ -483,25 +489,24 @@ bool MemoryRegion::isEmpty() const
 	return (d->ai.size > 0 ? false : true);
 }
 
-bool MemoryRegion::resize(int size, bool secure)
+bool MemoryRegion::resize(int size)
 {
-	int cur_size = (d ? d->ai.size : 0);
-	if(cur_size == size)
+	if(!d)
+	{
+		d = new Private(size, _secure);
+		return true;
+	}
+
+	if(d->ai.size == size)
 		return true;
 
-	if(d)
-	{
-		if(!d->resize(size))
-			return false;
-	}
-	else
-		d = new Private(size, secure);
-
-	return true;
+	return d->resize(size);
 }
 
 void MemoryRegion::set(const QByteArray &from, bool secure)
 {
+	_secure = secure;
+
 	if(!from.isEmpty())
 		d = new Private(from, secure);
 	else
@@ -510,6 +515,8 @@ void MemoryRegion::set(const QByteArray &from, bool secure)
 
 void MemoryRegion::setSecure(bool secure)
 {
+	_secure = secure;
+
 	if(!d)
 	{
 		d = new Private(0, secure);
@@ -523,6 +530,7 @@ void MemoryRegion::setSecure(bool secure)
 // SecureArray
 //----------------------------------------------------------------------------
 SecureArray::SecureArray()
+:MemoryRegion(true)
 {
 }
 
@@ -573,12 +581,12 @@ SecureArray & SecureArray::operator=(const QByteArray &from)
 
 void SecureArray::clear()
 {
-	MemoryRegion::resize(0, true);
+	MemoryRegion::resize(0);
 }
 
 bool SecureArray::resize(int size)
 {
-	return MemoryRegion::resize(size, true);
+	return MemoryRegion::resize(size);
 }
 
 char & SecureArray::operator[](int index)

@@ -107,15 +107,17 @@ public:
 	const char & at(int index) const;
 
 protected:
+	MemoryRegion(bool secure);
 	MemoryRegion(int size, bool secure);
 	MemoryRegion(const QByteArray &from, bool secure);
 	char *data();
 	char & at(int index);
-	bool resize(int size, bool secure); // secure only relevant if null
+	bool resize(int size);
 	void set(const QByteArray &from, bool secure);
 	void setSecure(bool secure);
 
 private:
+	bool _secure;
 	class Private;
 	QSharedDataPointer<Private> d;
 };
