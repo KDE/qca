@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 	// instead of update() and final(), you can do the whole thing
 	// in one step, using process()
 	printf("One step decryption using AES128: %s\n",
-	       (cipher.process(cipherText)).data() );
+	       QCA::SecureArray(cipher.process(cipherText)).data() );
 
     }
 

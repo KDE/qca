@@ -130,7 +130,7 @@ public:
 
     // This is a bit different to the way the I-D does it,
     // to allow for multiple update() calls.
-    void update(const QCA::SecureArray &a)
+    void update(const QCA::MemoryRegion &a)
     {
 	QCA::SecureArray bytesToProcess = m_residual + a;
 	int blockNum;
@@ -157,7 +157,7 @@ public:
 	    m_residual[yalv] = bytesToProcess[blockNum*16 + yalv];
     }
 
-    void final( QCA::SecureArray *out)
+    void final( QCA::MemoryRegion *out)
     {
 	QCA::SecureArray lastBlock;
 	int numBytesLeft = m_residual.size();

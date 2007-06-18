@@ -316,13 +316,13 @@ public:
 	   Equality operator. Returns true if both arrays have the same
 	   data (and the same length, of course).
 	*/
-	bool operator==(const SecureArray &other) const;
+	bool operator==(const MemoryRegion &other) const;
 	
 	/**
 	   Inequality operator. Returns true if both arrays have different
 	   length, or the same length but different data.
 	*/
-	inline bool operator!=(const SecureArray &other) const
+	inline bool operator!=(const MemoryRegion &other) const
 	{
 		return !(*this == other);
 	}

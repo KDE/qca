@@ -650,7 +650,7 @@ SecureArray & SecureArray::append(const SecureArray &a)
 	return *this;
 }
 
-bool SecureArray::operator==(const SecureArray &other) const
+bool SecureArray::operator==(const MemoryRegion &other) const
 {
 	if(this == &other)
 		return true;

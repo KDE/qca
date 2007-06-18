@@ -99,7 +99,7 @@ void HexUnitTest::testIncrementalUpdate()
     QCOMPARE( result2[1], '3' );
     QCOMPARE( result2[2], '6' );
     QCOMPARE( result2[3], '4' );
-    QCOMPARE( QCA::SecureArray(), hexObject.final() );
+    QCOMPARE( QCA::SecureArray(), QCA::SecureArray(hexObject.final()) );
     QCOMPARE( hexObject.ok(), true );
 }
 

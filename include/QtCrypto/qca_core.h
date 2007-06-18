@@ -929,12 +929,12 @@ public:
 	   \param a the byte array of data that is to 
 	   be used to update the internal state.
 	*/
-	virtual void update(const SecureArray &a) = 0;
+	virtual void update(const MemoryRegion &a) = 0;
 
 	/**
 	   Complete the algorithm and return the internal state
 	*/
-	virtual SecureArray final() = 0;
+	virtual MemoryRegion final() = 0;
 
 	/**
 	   Perform an "all in one" update, returning
@@ -946,7 +946,7 @@ public:
 	   \note This will invalidate any previous
 	   computation using this object.
 	*/
-	SecureArray process(const SecureArray &a);
+	MemoryRegion process(const MemoryRegion &a);
 };
 
 /**
@@ -981,13 +981,13 @@ public:
 
 	   \param a the array containing data to process
 	*/
-	virtual SecureArray update(const SecureArray &a) = 0;
+	virtual MemoryRegion update(const MemoryRegion &a) = 0;
 
 	/**
 	   Complete the algorithm, returning any 
 	   additional results.
 	*/
-	virtual SecureArray final() = 0;
+	virtual MemoryRegion final() = 0;
 
 	/**
 	   Test if an update() or final() call succeeded.
@@ -1006,7 +1006,7 @@ public:
 	   \note This will invalidate any previous
 	   computation using this object.
 	*/
-	SecureArray process(const SecureArray &a);
+	MemoryRegion process(const MemoryRegion &a);
 };
 
 /**

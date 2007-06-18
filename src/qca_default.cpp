@@ -529,21 +529,34 @@ public:
 
 	virtual void clear()
 	{
+		secure = true;
 		md5_init(&md5);
 	}
 
-	virtual void update(const SecureArray &in)
+	virtual void update(const MemoryRegion &in)
 	{
+		if(!in.isSecure())
+			secure = false;
 		md5_append(&md5, (const md5_byte_t *)in.data(), in.size());
 	}
 
-	virtual SecureArray final()
+	virtual MemoryRegion final()
 	{
-		SecureArray b(16);
-		md5_finish(&md5, (md5_byte_t *)b.data());
-		return b;
+		if(secure)
+		{
+			SecureArray b(16, 0);
+			md5_finish(&md5, (md5_byte_t *)b.data());
+			return b;
+		}
+		else
+		{
+			QByteArray b(16, 0);
+			md5_finish(&md5, (md5_byte_t *)b.data());
+			return b;
+		}
 	}
 
+	bool secure;
 	md5_state_t md5;
 };
 
@@ -607,6 +620,7 @@ class DefaultSHA1Context : public HashContext
 public:
 	SHA1_CONTEXT _context;
 	CHAR64LONG16* block;
+	bool secure;
 
 	DefaultSHA1Context(Provider *p) : HashContext(p, "sha1")
 	{
@@ -620,19 +634,31 @@ public:
 
 	virtual void clear()
 	{
+		secure = true;
 		sha1_init(&_context);
 	}
 
-	virtual void update(const SecureArray &in)
+	virtual void update(const MemoryRegion &in)
 	{
+		if(!in.isSecure())
+			secure = false;
 		sha1_update(&_context, (unsigned char *)in.data(), (unsigned int)in.size());
 	}
 
-	virtual SecureArray final()
+	virtual MemoryRegion final()
 	{
-		SecureArray b(20);
-		sha1_final((unsigned char *)b.data(), &_context);
-		return b;
+		if(secure)
+		{
+			SecureArray b(20, 0);
+			sha1_final((unsigned char *)b.data(), &_context);
+			return b;
+		}
+		else
+		{
+			QByteArray b(20, 0);
+			sha1_final((unsigned char *)b.data(), &_context);
+			return b;
+		}
 	}
 
 	inline unsigned long blk0(quint32 i)

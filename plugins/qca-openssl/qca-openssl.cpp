@@ -991,12 +991,12 @@ public:
 	EVP_DigestInit( &m_context, m_algorithm );
     }
 
-    void update(const SecureArray &a)
+    void update(const MemoryRegion &a)
     {
 	EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
     }
 
-    SecureArray final()
+    MemoryRegion final()
     {
 	SecureArray a( EVP_MD_size( m_algorithm ) );
 	EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
@@ -1099,16 +1099,17 @@ public:
 	return anyKeyLength();
     }
 
-    void update(const SecureArray &a)
+    void update(const MemoryRegion &a)
     {
 	HMAC_Update( &m_context, (unsigned char *)a.data(), a.size() );
     }
 
-    void final( SecureArray *out)
+    void final(MemoryRegion *out)
     {
-	out->resize( EVP_MD_size( m_algorithm ) );
-	HMAC_Final(&m_context, (unsigned char *)out->data(), 0 );
+	SecureArray sa( EVP_MD_size( m_algorithm ), 0 );
+	HMAC_Final(&m_context, (unsigned char *)sa.data(), 0 );
 	HMAC_CTX_cleanup(&m_context);
+	*out = sa;
     }
 
     Provider::Context *clone() const
@@ -1197,7 +1198,7 @@ public:
 		}
 	}
 
-	void update(const SecureArray &in)
+	void update(const MemoryRegion &in)
 	{
 		if(state == SignActive)
 		{
@@ -1765,7 +1766,7 @@ public:
 		evp.startVerify(md);
 	}
 
-	virtual void update(const SecureArray &in)
+	virtual void update(const MemoryRegion &in)
 	{
 		evp.update(in);
 	}
@@ -2034,7 +2035,7 @@ public:
 		evp.startVerify(EVP_dss1());
 	}
 
-	virtual void update(const SecureArray &in)
+	virtual void update(const MemoryRegion &in)
 	{
 		evp.update(in);
 	}

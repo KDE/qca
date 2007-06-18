@@ -891,7 +891,7 @@ void PKeyBase::startVerify(SignatureAlgorithm, SignatureFormat)
 {
 }
 
-void PKeyBase::update(const SecureArray &)
+void PKeyBase::update(const MemoryRegion &)
 {
 }
 
@@ -1080,7 +1080,7 @@ BufferedComputation::~BufferedComputation()
 {
 }
 
-SecureArray BufferedComputation::process(const SecureArray &a)
+MemoryRegion BufferedComputation::process(const MemoryRegion &a)
 {
 	clear();
 	update(a);
@@ -1094,19 +1094,19 @@ Filter::~Filter()
 {
 }
 
-SecureArray Filter::process(const SecureArray &a)
+MemoryRegion Filter::process(const MemoryRegion &a)
 {
 	clear();
-	SecureArray buf = update(a);
+	MemoryRegion buf = update(a);
 	if(!ok())
-		return SecureArray();
-	SecureArray fin = final();
+		return MemoryRegion();
+	MemoryRegion fin = final();
 	if(!ok())
-		return SecureArray();
-	int oldsize = buf.size();
-	buf.resize(oldsize + fin.size());
-	memcpy(buf.data() + oldsize, fin.data(), fin.size());
-	return buf;
+		return MemoryRegion();
+	if(buf.isSecure() || fin.isSecure())
+		return (SecureArray(buf) + SecureArray(fin));
+	else
+		return (buf.toByteArray() + fin.toByteArray());
 }
 
 //----------------------------------------------------------------------------

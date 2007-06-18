@@ -803,7 +803,7 @@ void PublicKey::startVerify(SignatureAlgorithm alg, SignatureFormat format)
 	static_cast<PKeyContext *>(context())->key()->startVerify(alg, format);
 }
 
-void PublicKey::update(const SecureArray &a)
+void PublicKey::update(const MemoryRegion &a)
 {
 	static_cast<PKeyContext *>(context())->key()->update(a);
 }
@@ -813,7 +813,7 @@ bool PublicKey::validSignature(const QByteArray &sig)
 	return static_cast<PKeyContext *>(context())->key()->endVerify(sig);
 }
 
-bool PublicKey::verifyMessage(const SecureArray &a, const QByteArray &sig, SignatureAlgorithm alg, SignatureFormat format)
+bool PublicKey::verifyMessage(const MemoryRegion &a, const QByteArray &sig, SignatureAlgorithm alg, SignatureFormat format)
 {
 	startVerify(alg, format);
 	update(a);
@@ -958,7 +958,7 @@ void PrivateKey::startSign(SignatureAlgorithm alg, SignatureFormat format)
 	static_cast<PKeyContext *>(context())->key()->startSign(alg, format);
 }
 
-void PrivateKey::update(const SecureArray &a)
+void PrivateKey::update(const MemoryRegion &a)
 {
 	static_cast<PKeyContext *>(context())->key()->update(a);
 }
@@ -968,7 +968,7 @@ QByteArray PrivateKey::signature()
 	return static_cast<PKeyContext *>(context())->key()->endSign();
 }
 
-QByteArray PrivateKey::signMessage(const SecureArray &a, SignatureAlgorithm alg, SignatureFormat format)
+QByteArray PrivateKey::signMessage(const MemoryRegion &a, SignatureAlgorithm alg, SignatureFormat format)
 {
 	startSign(alg, format);
 	update(a);

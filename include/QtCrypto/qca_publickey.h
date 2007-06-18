@@ -582,7 +582,7 @@ public:
 
 	   \param a the array containing the data that should be added to the signature
 	*/
-	void update(const SecureArray &a);
+	void update(const MemoryRegion &a);
 
 	/**
 	   Check the signature is valid for the message
@@ -624,7 +624,7 @@ if( pubkey.canVerify() )
 
 	   \return true if the signature is valid for the message
 	*/
-	bool verifyMessage(const SecureArray &a, const QByteArray &sig, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+	bool verifyMessage(const MemoryRegion &a, const QByteArray &sig, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 
 	/**
 	   Export the key in Distinguished Encoding Rules (DER) format
@@ -850,7 +850,7 @@ public:
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	void update(const SecureArray &a);
+	void update(const MemoryRegion &a);
 
 	/**
 	   The resulting signature
@@ -872,7 +872,7 @@ public:
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	QByteArray signMessage(const SecureArray &a, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
+	QByteArray signMessage(const MemoryRegion &a, SignatureAlgorithm alg, SignatureFormat format = DefaultFormat);
 
 	/**
 	   Derive a shared secret key from a public key

@@ -119,7 +119,7 @@ void Hash::clear()
 	static_cast<HashContext *>(context())->clear();
 }
 
-void Hash::update(const SecureArray &a)
+void Hash::update(const MemoryRegion &a)
 {
 	static_cast<HashContext *>(context())->update(a);
 }
@@ -149,17 +149,17 @@ void Hash::update(QIODevice *file)
 		update(buffer, len);
 }
 
-SecureArray Hash::final()
+MemoryRegion Hash::final()
 {
 	return static_cast<HashContext *>(context())->final();
 }
 
-SecureArray Hash::hash(const SecureArray &a)
+MemoryRegion Hash::hash(const MemoryRegion &a)
 {
 	return process(a);
 }
 
-QString Hash::hashToString(const SecureArray &a)
+QString Hash::hashToString(const MemoryRegion &a)
 {
 	return arrayToHex(hash(a).toByteArray());
 }
@@ -254,7 +254,7 @@ void Cipher::clear()
 	static_cast<CipherContext *>(context())->setup(d->dir, d->key, d->iv);
 }
 
-SecureArray Cipher::update(const SecureArray &a)
+MemoryRegion Cipher::update(const MemoryRegion &a)
 {
 	SecureArray out;
 	if(d->done)
@@ -263,7 +263,7 @@ SecureArray Cipher::update(const SecureArray &a)
 	return out;
 }
 
-SecureArray Cipher::final()
+MemoryRegion Cipher::final()
 {
 	SecureArray out;
 	if(d->done)
@@ -338,7 +338,7 @@ public:
 	SymmetricKey key;
 
 	bool done;
-	SecureArray buf;
+	MemoryRegion buf;
 };
 
 
@@ -392,14 +392,14 @@ void MessageAuthenticationCode::clear()
 	static_cast<MACContext *>(context())->setup(d->key);
 }
 
-void MessageAuthenticationCode::update(const SecureArray &a)
+void MessageAuthenticationCode::update(const MemoryRegion &a)
 {
 	if(d->done)
 		return;
 	static_cast<MACContext *>(context())->update(a);
 }
 
-SecureArray MessageAuthenticationCode::final()
+MemoryRegion MessageAuthenticationCode::final()
 {
 	if(!d->done)
 	{

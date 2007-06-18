@@ -57,8 +57,8 @@ class QCA_EXPORT HashContext : public BasicContext
 public:
 	HashContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 	virtual void clear() = 0;
-	virtual void update(const SecureArray &a) = 0;
-	virtual SecureArray final() = 0;
+	virtual void update(const MemoryRegion &a) = 0;
+	virtual MemoryRegion final() = 0;
 };
 
 class QCA_EXPORT CipherContext : public BasicContext
@@ -82,8 +82,8 @@ public:
 	virtual void setup(const SymmetricKey &key) = 0;
 	virtual KeyLength keyLength() const = 0;
 
-	virtual void update(const SecureArray &in) = 0;
-	virtual void final(SecureArray *out) = 0;
+	virtual void update(const MemoryRegion &in) = 0;
+	virtual void final(MemoryRegion *out) = 0;
 
 protected:
 	KeyLength anyKeyLength() const
@@ -137,7 +137,7 @@ public:
 	// sign / verify
 	virtual void startSign(SignatureAlgorithm alg, SignatureFormat format);
 	virtual void startVerify(SignatureAlgorithm alg, SignatureFormat format);
-	virtual void update(const SecureArray &in);
+	virtual void update(const MemoryRegion &in);
 	virtual QByteArray endSign();
 	virtual bool endVerify(const QByteArray &sig);
 
