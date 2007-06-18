@@ -114,12 +114,12 @@ public:
 	}
     }
 
-    void update(const QCA::SecureArray &a)
+    void update(const QCA::MemoryRegion &a)
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
 
-    QCA::SecureArray final()
+    QCA::MemoryRegion final()
     {
 	unsigned int len = 0;
 	QCA::SecureArray a( 64 );
@@ -243,20 +243,21 @@ public:
 	}
     }
 
-    void update(const QCA::SecureArray &a)
+    void update(const QCA::MemoryRegion &a)
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
 
-    void final( QCA::SecureArray *out)
+    void final( QCA::MemoryRegion *out)
     {
 	// NSS doesn't appear to be able to tell us how big the digest will
 	// be for a given algorithm until after we finalise it, so we work
 	// around the problem a bit.
-	out->resize( HASH_LENGTH_MAX ); // assume the biggest hash size we know
+	QCA::SecureArray sa( HASH_LENGTH_MAX, 0 ); // assume the biggest hash size we know
 	unsigned int len = 0;
-	PK11_DigestFinal(m_context, (unsigned char*)out->data(), &len, out->size());
-	out->resize(len); // and fix it up later
+	PK11_DigestFinal(m_context, (unsigned char*)sa.data(), &len, sa.size());
+	sa.resize(len); // and fix it up later
+	*out = sa;
     }
 
 private:

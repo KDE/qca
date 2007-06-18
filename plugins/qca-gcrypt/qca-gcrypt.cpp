@@ -69,12 +69,12 @@ public:
 	gcry_md_reset( context );
     }
 
-    void update(const QCA::SecureArray &a)
+    void update(const QCA::MemoryRegion &a)
     {
 	gcry_md_write( context, a.data(), a.size() );
     }
 
-    QCA::SecureArray final()
+    QCA::MemoryRegion final()
     {
 	unsigned char *md;
         QCA::SecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
@@ -128,17 +128,18 @@ public:
         return anyKeyLength();
     }
 
-    void update(const QCA::SecureArray &a)
+    void update(const QCA::MemoryRegion &a)
     {
         gcry_md_write( context, a.data(), a.size() );
     }
 
-    void final( QCA::SecureArray *out)
+    void final( QCA::MemoryRegion *out)
     {
-        out->resize( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
+        QCA::SecureArray sa( gcry_md_get_algo_dlen( m_hashAlgorithm ), 0 );
         unsigned char *md;
         md = gcry_md_read( context, m_hashAlgorithm );
-        memcpy( out->data(), md, out->size() );
+        memcpy( sa.data(), md, sa.size() );
+        *out = sa;
     }
 
 protected:

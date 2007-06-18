@@ -79,12 +79,12 @@ public:
 	m_hashObj->clear();
     }
 
-    void update(const QCA::SecureArray &a)
+    void update(const QCA::MemoryRegion &a)
     {
 	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
     }
 
-    QCA::SecureArray final()
+    QCA::MemoryRegion final()
     {
         QCA::SecureArray a( m_hashObj->OUTPUT_LENGTH );
 	m_hashObj->final( (Botan::byte *)a.data() );
@@ -137,15 +137,16 @@ public:
         return anyKeyLength();
     }
 
-    void update(const QCA::SecureArray &a)
+    void update(const QCA::MemoryRegion &a)
     {
 	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
     }
 
-    void final( QCA::SecureArray *out)
+    void final( QCA::MemoryRegion *out)
     {
-	out->resize( m_hashObj->OUTPUT_LENGTH );
-	m_hashObj->final( (Botan::byte *)out->data() );
+	QCA::SecureArray sa( m_hashObj->OUTPUT_LENGTH, 0 );
+	m_hashObj->final( (Botan::byte *)sa.data() );
+	*out = sa;
     }
 
 protected:
