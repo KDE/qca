@@ -1233,12 +1233,14 @@ void KeyStoreManager::start()
 {
 	ensure_init();
 	QMetaObject::invokeMethod(KeyStoreTracker::instance(), "start", Qt::QueuedConnection);
+	trackercall("spinEventLoop");
 }
 
 void KeyStoreManager::start(const QString &provider)
 {
 	ensure_init();
 	QMetaObject::invokeMethod(KeyStoreTracker::instance(), "start", Qt::QueuedConnection, Q_ARG(QString, provider));
+	trackercall("spinEventLoop");
 }
 
 QString KeyStoreManager::diagnosticText()
