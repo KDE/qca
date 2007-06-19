@@ -30,18 +30,22 @@ class TestProvider : public Provider
 public:
 	TestProvider()
 	{
+		appendPluginDiagnosticText("TestProvider constructed\n");
 	}
 
 	void init()
 	{
+		appendPluginDiagnosticText("TestProvider initialized\n");
 	}
 
 	void deinit()
 	{
+		appendPluginDiagnosticText("TestProvider deinitialized\n");
 	}
 
 	~TestProvider()
 	{
+		appendPluginDiagnosticText("TestProvider destructed\n");
 	}
 
 	int version() const
@@ -480,6 +484,7 @@ public:
 
 	virtual void start()
 	{
+		emit diagnosticText("qca-test: TestKeyStoreListContext started\n");
 		t.start(2000);
 	}
 
@@ -594,6 +599,8 @@ public:
 private slots:
 	void do_step()
 	{
+		emit diagnosticText(QString("qca-test: TestKeyStoreListContext do_step %1\n").arg(step));
+
 		if(step == 0)
 		{
 			// make first store available
