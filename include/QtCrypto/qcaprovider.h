@@ -383,6 +383,7 @@ public:
 	virtual QString name() const = 0;
 	virtual QString storeId() const = 0;
 	virtual QString storeName() const = 0;
+	virtual bool isAvailable() const;
 	virtual QString serialize() const = 0;
 
 	virtual KeyBundle keyBundle() const;
@@ -424,6 +425,7 @@ public:
 	// return 0 if no such entry
 	virtual KeyStoreEntryContext *entry(int id, const QString &entryId);
 
+	// thread-safe
 	// return 0 if the provider doesn't handle or understand the string
 	virtual KeyStoreEntryContext *entryPassive(const QString &serialized);
 

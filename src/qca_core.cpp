@@ -956,6 +956,11 @@ ConvertResult PKeyContext::privateFromPEM(const QString &, const SecureArray &)
 //----------------------------------------------------------------------------
 // KeyStoreEntryContext
 //----------------------------------------------------------------------------
+bool KeyStoreEntryContext::isAvailable() const
+{
+	return true;
+}
+
 KeyBundle KeyStoreEntryContext::keyBundle() const
 {
 	return KeyBundle();

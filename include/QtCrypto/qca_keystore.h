@@ -49,39 +49,43 @@ class KeyStorePrivate;
    This is a container for any kind of object in a KeyStore
    (such as PGP keys, or X.509 certificates / private keys).
 
-   KeyStoreEntry entities are normally accessed through the KeyStore,
-   however it is possible to access KeyStoreEntry objects directly,
-   using a persistent id().
+   KeyStoreEntry objects are obtained through KeyStore or loaded from a
+   serialized string format.  The latter method requires a KeyStoreEntry
+   obtained through KeyStore to be serialized for future loading.  For
+   example:
 
    \code
-QString entry_id = someKeyStoreEntry.id();
-[ app saves entry_id to disk ]
+QString str = someKeyStoreEntry.toString();
+[ app saves str to disk ]
 [ app quits ]
 ...
 [ app launches ]
-[ app reads entry_id from disk ]
-KeyStoreEntry entry(entry_id);
+[ app reads str from disk ]
+KeyStoreEntry entry(str);
 printf("Entry name: [%s]\n", qPrintable(entry.name()));
    \endcode
 
-   Keep in mind that retrieving a passive entry's content
-   (e.g. with entry.certificate()) may return a null object.
-   To ensure the entry is available, do:
+   KeyStoreEntry objects may or may not be available.  An entry is
+   unavailable if it has a private content that is not present.  The
+   private content might exist on external hardware.  To determine if an
+   entry is available, call isAvailable().  To ensure an entry is available
+   before performing a private key operation, call ensureAvailable.  For
+   example:
 
    \code
 if(entry.ensureAvailable())
 {
-   Certificate cert = entry.certificate();
+   entry.keyBundle().privateKey().signMessage(...);
    ...
 }
    \endcode
 
    ensureAvailable() blocks and may cause hardware access, but
-   if it completes successfully then you may use the entry's
-   content.  It also means, in the case of a Smart Card token,
-   that it is probably inserted.
+   if it completes successfully then you may use the entry's private
+   content.  It also means, in the case of a Smart Card token, that
+   it is probably inserted.
 
-   To watch this id asynchronously, you would do:
+   To watch this entry asynchronously, you would do:
 
    \code
 KeyStoreEntryWatcher *watcher = new KeyStoreEntryWatcher(entry);
@@ -90,21 +94,19 @@ connect(watcher, SIGNAL(available()), SLOT(entry_available()));
 void entry_available()
 {
    // entry now available
-   Certificate cert = watcher->entry().certificate();
+   watcher->entry().keyBundle().privateKey().signMessage(...);
 }
    \endcode
 
-   Note that a provider can supply valid content objects even
-   for unavailable entries, if they have enough metadata to
-   provide that (qca-pkcs11 for example, puts the entire cert
-   in the id).
+   Unlike private content, public content is always usable even if the
+   entry is not available.  Serialized entry data contains all of the
+   metadata necessary to reconstruct the public content.
 
    Now, even though an entry may be available, it does not
    mean you have access to use it for operations.  For
-   example, a KeyBundle offered by a Smart Card that is
-   available is guaranteed to give you valid objects, however
-   as soon as you try to use the PrivateKey object for a
-   signing operation, a PIN might be asked for.  You can call
+   example, even though a KeyBundle entry offered by a Smart Card
+   may be available, as soon as you try to use the PrivateKey object
+   for a signing operation, a PIN might be asked for.  You can call
    ensureAccess() if you want to synchronously provide the PIN
    early on:
 
@@ -123,13 +125,14 @@ if(entry.ensureAccess())
    After an application is configured to use a particular key,
    it is expected that its usual running procedure will be:
 
-   - Construct KeyStoreEntry from the known id.
-   - If the content object is not available, wait for it
+   1) Construct KeyStoreEntry from the serialized data.
+   2) If the content object is not available, wait for it
    (with either ensureAvailable() or KeyStoreEntryWatcher).
-   - Pass the content object(s) to a high level operation like TLS.
+   3) Pass the content object(s) to a high level operation like TLS.
 
    In this case, any PIN prompting and private key operations
-   would be caused/handled from the TLS object.
+   would be caused/handled from the TLS object.  Omit step 2 and
+   the private key operations might cause token prompting.
 */
 class QCA_EXPORT KeyStoreEntry : public Algorithm
 {
@@ -183,8 +186,8 @@ public:
 	/**
 	   Test if the key is available for use.
 
-	   A key is considered available if the KeyStore
-	   that it is part of is present.
+	   A key is considered available if the key's private
+	   content is present.
 
 	   \sa ensureAvailable
 	   \sa isAccessible
@@ -282,13 +285,13 @@ public:
 	/**
 	   Returns true if the entry is available, otherwise false.
 
-	   Available means that the retrieval functions (like
-	   keyBundle(), certificate(), pgpPublicKey(), etc) will
-	   return non-null objects.  Entries retrieved from a
-	   KeyStore are always available, and therefore it is not
-	   necessary to call this function.  Calling this function
-	   on an already available entry may cause the entry to
-	   be refreshed.
+	   Available means that any private content for this entry is
+	   present and ready for use.  In the case of a smart card, this
+	   will ensure the card is inserted, and may invoke a token
+	   prompt.
+
+	   Calling this function on an already available entry may cause
+	   the entry to be refreshed.
 
 	   \sa isAvailable
 	   \sa ensureAccess
@@ -301,8 +304,7 @@ public:
 
 	/**
 	   Like ensureAvailable, but will also ensure
-	   that the token is inserted / PIN is provided 
-	   if needed.
+	   that the PIN is provided if needed.
 
 	   \sa isAccessible
 	   \sa ensureAvailable
@@ -549,6 +551,9 @@ public:
 Q_SIGNALS:
 	/**
 	   Emitted when the KeyStore is changed
+
+	   This occurs if entries are added, removed, or changed in this
+	   KeyStore, including changes in entry availability.
 	*/
 	void updated();
 
