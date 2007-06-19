@@ -5800,6 +5800,18 @@ public:
 				key.change(pk);
 			}
 
+			// allow different cert provider.  this is just a
+			//   quick hack, enough to please qca-test
+			if(!cert.context()->sameProvider(this))
+			{
+				//fprintf(stderr, "experimental: cert supplied by a different provider\n");
+				cert = Certificate::fromDER(cert.toDER());
+				if(cert.isNull() || !cert.context()->sameProvider(this))
+				{
+					//fprintf(stderr, "error converting cert\n");
+				}
+			}
+
 			//MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
 			//MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
 
