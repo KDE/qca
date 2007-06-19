@@ -2355,11 +2355,13 @@ static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false
 {
 	QCA::KeyStoreEntry entry;
 
-	ksm_start_and_wait();
+	QCA::KeyStoreManager::start();
 
 	int n = name.indexOf(':');
 	if(n != -1)
 	{
+		ksm_start_and_wait();
+
 		// store:obj lookup
 		QString storeName = name.mid(0, n);
 		QString objectName = name.mid(n + 1);
