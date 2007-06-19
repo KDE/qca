@@ -358,8 +358,10 @@ private:
 		// remove any contexts that are gone
 		for(int n = 0; n < items.count(); ++n)
 		{
-			if(!keyStores.contains(items[n].storeContextId))
+			if(items[n].owner == c && !keyStores.contains(items[n].storeContextId))
 			{
+				QCA_logTextMessage(QString("keystore: updateStores remove %1").arg(items[n].storeContextId), Logger::Information);
+
 				items.removeAt(n);
 				--n; // adjust position
 
@@ -374,7 +376,7 @@ private:
 			int at = -1;
 			for(int n = 0; n < items.count(); ++n)
 			{
-				if(items[n].storeContextId == id)
+				if(items[n].owner == c && items[n].storeContextId == id)
 				{
 					at = n;
 					break;
@@ -389,14 +391,18 @@ private:
 				QString name = c->name(id);
 				bool isReadOnly = c->isReadOnly(id);
 				if(i.name != name || i.isReadOnly != isReadOnly)
+				{
+					QCA_logTextMessage(QString("keystore: updateStores update %1").arg(id), Logger::Information);
+					i.name = name;
+					i.isReadOnly = isReadOnly;
 					changed = true;
-
-				i.name = name;
-				i.isReadOnly = isReadOnly;
+				}
 			}
 			// otherwise, add it
 			else
 			{
+				QCA_logTextMessage(QString("keystore: updateStores add %1").arg(id), Logger::Information);
+
 				Item i;
 				i.trackerId = tracker_id_at++;
 				i.updateCount = 0;
@@ -482,8 +488,9 @@ private slots:
 		QCA_logTextMessage(QString("keystore: ksl_storeUpdated %1 %2").arg(c->provider()->name(), QString::number(id)), Logger::Information);
 
 		QMutexLocker locker(&m);
-		foreach(Item i, items)
+		for(int n = 0; n < items.count(); ++n)
 		{
+			Item &i = items[n];
 			if(i.owner == c && i.storeContextId == id)
 			{
 				++i.updateCount;
@@ -935,6 +942,7 @@ public:
 	void invalidate()
 	{
 		trackerId = -1;
+		unreg();
 	}
 
 	bool have_entryList_op() const
@@ -1044,6 +1052,7 @@ KeyStore::KeyStore(const QString &id, KeyStoreManager *keyStoreManager)
 	{
 		d->trackerId = i->trackerId;
 		d->item = *i;
+		d->reg();
 	}
 	else
 		d->trackerId = -1;
@@ -1051,6 +1060,8 @@ KeyStore::KeyStore(const QString &id, KeyStoreManager *keyStoreManager)
 
 KeyStore::~KeyStore()
 {
+	if(d->trackerId != -1)
+		d->unreg();
 	delete d;
 }
 
@@ -1283,6 +1294,20 @@ public:
 		waiting = false;
 	}
 
+	~KeyStoreManagerPrivate()
+	{
+		// invalidate registered keystores
+		QList<KeyStore*> list;
+		QHashIterator<KeyStore*,int> it(trackerIdForKeyStore);
+		while(it.hasNext())
+		{
+			it.next();
+			list += it.key();
+		}
+		foreach(KeyStore *ks, list)
+			ks->d->invalidate();
+	}
+
 	// for keystore
 	void reg(KeyStore *ks, int trackerId)
 	{
@@ -1435,6 +1460,8 @@ public:
 public slots:
 	void tracker_updated()
 	{
+		QCA_logTextMessage(QString("keystore: tracker_updated start"), Logger::Information);
+
 		QMutexLocker locker(&m);
 		if(!pending)
 		{
@@ -1447,6 +1474,8 @@ public slots:
 			items = KeyStoreTracker::instance()->getItems();
 			w.wakeOne();
 		}
+
+		QCA_logTextMessage(QString("keystore: tracker_updated end"), Logger::Information);
 	}
 
 	void update()
