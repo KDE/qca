@@ -54,7 +54,7 @@ struct SoftStoreEntry {
 	int unlockTimeout;
 };
 
-class softstoreRSAContext : public RSAContext
+class softstorePKeyBase : public PKeyBase
 {
 	Q_OBJECT
 
@@ -62,36 +62,49 @@ private:
 	bool _has_privateKeyRole;
 	SoftStoreEntry _entry;
 	QString _serialized;
-	RSAPrivateKey _privkey;
-	RSAPrivateKey _privkeySign;
-	RSAPublicKey _pubkey;
+	PrivateKey _privkey;
+	PrivateKey _privkeySign;
+	PublicKey _pubkey;
 	QDateTime dueTime;
 
 public:
-	softstoreRSAContext (
+	static inline QString typeToString (PKey::Type t) {
+		switch (t) {
+			case PKey::RSA:
+				return "rsa";
+			case PKey::DSA:
+				return "dsa";
+			case PKey::DH:
+				return "dh";
+			default:
+				return "";
+		}
+	}
+
+	softstorePKeyBase (
 		const SoftStoreEntry &entry,
 		const QString &serialized,
 		Provider *p
-	) : RSAContext (p) {
+	) : PKeyBase (p, "rsa"/*typeToString (entry.chain.primary ().subjectPublicKey ().type ())*/) {
 		QCA_logTextMessage (
-			"softstoreRSAContext::softstoreRSAContext1 - entry",
+			"softstorePKeyBase::softstorePKeyBase1 - entry",
 			Logger::Debug
 		);
 
 		_has_privateKeyRole = true;
 		_entry = entry;
 		_serialized = serialized;
-		_pubkey = _entry.chain.primary ().subjectPublicKey ().toRSA ();
+		_pubkey = _entry.chain.primary ().subjectPublicKey ();
 
 		QCA_logTextMessage (
-			"softstoreRSAContext::softstoreRSAContext1 - return",
+			"softstorePKeyBase::softstorePKeyBase1 - return",
 			Logger::Debug
 		);
 	}
 
-	softstoreRSAContext (const softstoreRSAContext &from) : RSAContext (from.provider ()) {
+	softstorePKeyBase (const softstorePKeyBase &from) : PKeyBase (from.provider (), "rsa"/*typeToString (from._pubkey.type ())*/) {
 		QCA_logTextMessage (
-			"softstoreRSAContext::softstoreRSAContextC - entry",
+			"softstorePKeyBase::softstorePKeyBaseC - entry",
 			Logger::Debug
 		);
 
@@ -102,19 +115,19 @@ public:
 		_privkey = from._privkey;
 
 		QCA_logTextMessage (
-			"softstoreRSAContext::softstoreRSAContextC - return",
+			"softstorePKeyBase::softstorePKeyBaseC - return",
 			Logger::Debug
 		);
 	}
 
-	~softstoreRSAContext () {
+	~softstorePKeyBase () {
 		QCA_logTextMessage (
-			"softstoreRSAContext::~softstoreRSAContext - entry",
+			"softstorePKeyBase::~softstorePKeyBase - entry",
 			Logger::Debug
 		);
 
 		QCA_logTextMessage (
-			"softstoreRSAContext::~softstoreRSAContext - return",
+			"softstorePKeyBase::~softstorePKeyBase - return",
 			Logger::Debug
 		);
 	}
@@ -122,7 +135,7 @@ public:
 	virtual
 	Provider::Context *
 	clone () const {
-		return new softstoreRSAContext (*this);
+		return new softstorePKeyBase (*this);
 	}
 
 public:
@@ -154,7 +167,7 @@ public:
 	void
 	convertToPublic () {
 		QCA_logTextMessage (
-			"softstoreRSAContext::convertToPublic - entry",
+			"softstorePKeyBase::convertToPublic - entry",
 			Logger::Debug
 		);
 
@@ -163,7 +176,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			"softstoreRSAContext::convertToPublic - return",
+			"softstorePKeyBase::convertToPublic - return",
 			Logger::Debug
 		);
 	}
@@ -235,7 +248,7 @@ public:
 	virtual
 	void
 	update (
-		const SecureArray &in
+		const MemoryRegion &in
 	) {
 		if (_has_privateKeyRole) {
 			_privkeySign.update (in);
@@ -249,7 +262,7 @@ public:
 	QByteArray
 	endSign () {
 		QByteArray r = _privkeySign.signature ();
-		_privkeySign = RSAPrivateKey ();
+		_privkeySign = PrivateKey ();
 		return r;
 	}
 
@@ -299,36 +312,6 @@ public:
 		Q_UNUSED(e);
 	}
 
-	virtual
-	BigInteger
-	n () const {
-		return _pubkey.n ();
-	}
-
-	virtual
-	BigInteger
-	e () const {
-		return _pubkey.e ();
-	}
-
-	virtual
-	BigInteger
-	p () const {
-		return BigInteger();
-	}
-
-	virtual
-	BigInteger
-	q () const {
-		return BigInteger();
-	}
-
-	virtual
-	BigInteger
-	d () const {
-		return BigInteger();
-	}
-
 public:
 	PublicKey
 	_publicKey () const {
@@ -340,17 +323,17 @@ public:
 		bool ret = false;
 
 		QCA_logTextMessage (
-			"softstoreRSAContext::_ensureAccess - entry",
+			"softstorePKeyBase::_ensureAccess - entry",
 			Logger::Debug
 		);
 
 		if (_entry.unlockTimeout != -1) {
 			if (dueTime >= QDateTime::currentDateTime ()) {
 				QCA_logTextMessage (
-					"softstoreRSAContext::_ensureAccess - dueTime reached, clearing",
+					"softstorePKeyBase::_ensureAccess - dueTime reached, clearing",
 					Logger::Debug
 				);
-				_privkey = RSAPrivateKey ();
+				_privkey = PrivateKey ();
 			}
 		}
 
@@ -364,7 +347,7 @@ public:
 			ConvertResult cresult;
 
 			QCA_logTextMessage (
-				"softstoreRSAContext::_ensureAccess - no current key, creating",
+				"softstorePKeyBase::_ensureAccess - no current key, creating",
 				Logger::Debug
 			);
 
@@ -431,7 +414,7 @@ public:
 								&cresult
 							);
 							if (cresult == ConvertGood) {
-								_privkey = bundle.privateKey ().toRSA ();
+								_privkey = bundle.privateKey ();
 								ret = true;
 							}
 						}
@@ -444,7 +427,7 @@ public:
 								&cresult
 							);
 							if (cresult == ConvertGood) {
-								_privkey = k.toRSA ();
+								_privkey = k;
 								ret = true;
 							}
 						}
@@ -457,7 +440,7 @@ public:
 								&cresult
 							);
 							if (cresult == ConvertGood) {
-								_privkey = k.toRSA ();
+								_privkey = k;
 								ret = true;
 							}
 						}
@@ -474,7 +457,7 @@ public:
 									&cresult
 								);
 								if (cresult == ConvertGood) {
-									_privkey = k.toRSA ();
+									_privkey = k;
 									ret = true;
 								}
 							}
@@ -494,7 +477,7 @@ public:
 
 		QCA_logTextMessage (
 			QString ().sprintf (
-				"softstoreRSAContext::_ensureAccess - return ret=%d",
+				"softstorePKeyBase::_ensureAccess - return ret=%d",
 				ret ? 1 : 0
 			),
 			Logger::Debug
@@ -533,7 +516,7 @@ public:
 	QList<PKey::Type>
 	supportedTypes () const {
 		QList<PKey::Type> list;
-		list += PKey::RSA;
+		list += static_cast<softstorePKeyBase *>(_k)->_publicKey ().type ();
 		return list;
 	}
 
@@ -541,7 +524,7 @@ public:
 	QList<PKey::Type>
 	supportedIOTypes () const {
 		QList<PKey::Type> list;
-		list += PKey::RSA;
+		list += static_cast<softstorePKeyBase *>(_k)->_publicKey ().type ();
 		return list;
 	}
 
@@ -598,13 +581,13 @@ public:
 	virtual
 	QByteArray
 	publicToDER () const {
-		return static_cast<softstoreRSAContext *>(_k)->_publicKey ().toDER ();
+		return static_cast<softstorePKeyBase *>(_k)->_publicKey ().toDER ();
 	}
 
 	virtual
 	QString
 	publicToPEM () const {
-		return static_cast<softstoreRSAContext *>(_k)->_publicKey ().toPEM ();
+		return static_cast<softstorePKeyBase *>(_k)->_publicKey ().toPEM ();
 	}
 
 	virtual
@@ -752,7 +735,7 @@ public:
 	virtual
 	bool
 	ensureAccess () {
-		return static_cast<softstoreRSAContext *>(static_cast<PKeyContext *>(_key.privateKey ().context ())->key ())->_ensureAccess ();
+		return static_cast<softstorePKeyBase *>(static_cast<PKeyContext *>(_key.privateKey ().context ())->key ())->_ensureAccess ();
 	}
 
 	virtual
@@ -1310,14 +1293,14 @@ private:
 
 		QString serialized = _serializeSoftStoreEntry (sentry);
 		
-		softstoreRSAContext *rsakey = new softstoreRSAContext (
+		softstorePKeyBase *pkey = new softstorePKeyBase (
 			sentry,
 			serialized,
 			provider()
 		);
 
 		softstorePKeyContext *pkc = new softstorePKeyContext (provider ());
-		pkc->setKey (rsakey);
+		pkc->setKey (pkey);
 		PrivateKey privkey;
 		privkey.change (pkc);
 		KeyBundle key;
