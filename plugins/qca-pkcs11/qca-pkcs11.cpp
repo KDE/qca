@@ -769,7 +769,7 @@ public:
 	virtual
 	void
 	update (
-		const SecureArray &in
+		const MemoryRegion &in
 	) {
 		if (_has_privateKeyRole) {
 			if (_sign_data.hash != NULL) {
