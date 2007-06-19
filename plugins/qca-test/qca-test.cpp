@@ -22,6 +22,28 @@
 
 using namespace QCA;
 
+static char cert_pem[] =
+	"-----BEGIN CERTIFICATE-----\n"
+	"MIIBsTCCAVugAwIBAgIBADANBgkqhkiG9w0BAQUFADA4MRQwEgYDVQQDEwtUZXN0\n"
+	"IENlcnQgMTELMAkGA1UEBhMCVVMxEzARBgNVBAoTClRlc3QgT3JnIDEwHhcNMDcw\n"
+	"NjE5MjAzOTI4WhcNMTIwNjE5MjAzOTI4WjA4MRQwEgYDVQQDEwtUZXN0IENlcnQg\n"
+	"MTELMAkGA1UEBhMCVVMxEzARBgNVBAoTClRlc3QgT3JnIDEwXDANBgkqhkiG9w0B\n"
+	"AQEFAANLADBIAkEA3645RS/xBlWnjju6moaRYQuIDo7fwM+GxhE91HECLAg3Hnkr\n"
+	"I+qx96VXd006olOn8MrkbjSqcTJ4LcDaCGI1YwIDAQABo1AwTjAdBgNVHQ4EFgQU\n"
+	"nm5lNkkblHdoB0gLeh8mB6Ed+TMwDwYDVR0TAQH/BAUwAwIBADAcBgNVHREEFTAT\n"
+	"gRF0ZXN0MUBleGFtcGxlLmNvbTANBgkqhkiG9w0BAQUFAANBAFTtXtwfYcJZBsXJ\n"
+	"+Ckm9qbg7qR/XRERDzeR0yhHZE7F/jU5YQv7+iJL4l95iH9PkZNOk15Tu/Kzzekx\n"
+	"6CTXzKA=\n"
+	"-----END CERTIFICATE-----";
+
+static char key_n_dec[] =
+	"1171510158037441543813157379806833168225785177834459013412026750"
+	"9262193808059395366696241600386200064326196137137376912654785051"
+	"560621331316573341676090723";
+
+static char key_e_dec[] =
+	"65537";
+
 //----------------------------------------------------------------------------
 // TestProvider
 //----------------------------------------------------------------------------
@@ -74,14 +96,62 @@ public:
 };
 
 //----------------------------------------------------------------------------
+// TestData
+//----------------------------------------------------------------------------
+class TestKeyStore
+{
+public:
+	int contextId;
+	KeyStore::Type type;
+	QString storeId;
+	QString name;
+	bool readOnly;
+	bool avail; // for simplicity, all items share this global toggle
+
+	QList<KeyBundle> certs;
+
+	TestKeyStore() :
+		contextId(-1),
+		type(KeyStore::SmartCard),
+		readOnly(true),
+		avail(true)
+	{
+	}
+};
+
+class TestData
+{
+public:
+	int context_at;
+	QList<TestKeyStore> stores;
+
+	TestData() :
+		context_at(0)
+	{
+	}
+};
+
+//----------------------------------------------------------------------------
 // TestRSAContext
 //----------------------------------------------------------------------------
 class TestRSAContext : public RSAContext
 {
 	Q_OBJECT
 public:
+	bool priv;
+	TestKeyStore *store;
+
 	TestRSAContext(Provider *p) :
-		RSAContext(p)
+		RSAContext(p),
+		priv(true),
+		store(0)
+	{
+	}
+
+	TestRSAContext(const TestRSAContext &from) :
+		RSAContext(from),
+		priv(from.priv),
+		store(from.store)
 	{
 	}
 
@@ -102,7 +172,7 @@ public:
 
 	virtual bool isPrivate() const
 	{
-		return false;
+		return priv;
 	}
 
 	virtual bool canExport() const
@@ -112,11 +182,43 @@ public:
 
 	virtual void convertToPublic()
 	{
+		priv = false;
 	}
 
 	virtual int bits() const
 	{
 		return 2048;
+	}
+
+	virtual void startSign(SignatureAlgorithm alg, SignatureFormat format)
+	{
+		Q_UNUSED(alg);
+		Q_UNUSED(format);
+	}
+
+	virtual void update(const MemoryRegion &in)
+	{
+		Q_UNUSED(in);
+	}
+
+	virtual QByteArray endSign()
+	{
+		if(!store)
+			return QByteArray();
+
+		while(store->contextId == -1 || !store->avail)
+		{
+			KeyStoreInfo info(store->type, store->storeId, store->name);
+			KeyStoreEntry entry;
+
+			TokenAsker asker;
+			asker.ask(info, entry, 0);
+			asker.waitForResponse();
+			if(!asker.accepted())
+				return QByteArray();
+		}
+
+		return "foobar";
 	}
 
 	virtual void createPrivate(int bits, int exp, bool block)
@@ -143,12 +245,12 @@ public:
 
 	virtual BigInteger n() const
 	{
-		return BigInteger();
+		return BigInteger(QString(key_n_dec));
 	}
 
 	virtual BigInteger e() const
 	{
-		return BigInteger();
+		return BigInteger(QString(key_e_dec));
 	}
 
 	virtual BigInteger p() const
@@ -180,6 +282,14 @@ public:
 		PKeyContext(p),
 		_key(0)
 	{
+	}
+
+	TestPKeyContext(const TestPKeyContext &from) :
+		PKeyContext(from),
+		_key(0)
+	{
+		if(from._key)
+			_key = (TestRSAContext *)from._key->clone();
 	}
 
 	~TestPKeyContext()
@@ -253,12 +363,16 @@ public:
 
 	virtual QByteArray toDER() const
 	{
-		return QByteArray();
+		QStringList lines = toPEM().split('\n');
+		lines.removeFirst();
+		lines.removeLast();
+		QString enc = lines.join("");
+		return Base64().stringToArray(enc).toByteArray();
 	}
 
 	virtual QString toPEM() const
 	{
-		return QString();
+		return QString(cert_pem);
 	}
 
 	virtual ConvertResult fromDER(const QByteArray &a)
@@ -293,9 +407,11 @@ public:
 
 	virtual PKeyContext *subjectPublicKey() const
 	{
-		TestPKeyContext *kc = new TestPKeyContext(provider());
-		kc->setKey(new TestRSAContext(provider()));
-		return kc;
+		TestRSAContext *rsa1 = new TestRSAContext(provider());
+		rsa1->priv = false;
+		TestPKeyContext *kc1 = new TestPKeyContext(provider());
+		kc1->setKey(rsa1);
+		return kc1;
 	}
 
 	virtual bool isIssuerOf(const CertContext *other) const
@@ -332,7 +448,7 @@ class TestKeyStoreEntryContext : public KeyStoreEntryContext
 public:
 	QString _id, _name, _storeId, _storeName;
 	KeyBundle kb;
-	bool avail;
+	TestKeyStore *store;
 
 	TestKeyStoreEntryContext(Provider *p) :
 		KeyStoreEntryContext(p)
@@ -371,12 +487,12 @@ public:
 
 	virtual bool isAvailable() const
 	{
-		return avail;
+		return store->avail;
 	}
 
 	virtual QString serialize() const
 	{
-		return QString();
+		return QString("qca-test-1/fake_serialized");
 	}
 
 	virtual KeyBundle keyBundle() const
@@ -387,42 +503,6 @@ public:
 	virtual bool ensureAccess()
 	{
 		return true;
-	}
-};
-
-//----------------------------------------------------------------------------
-// TestData
-//----------------------------------------------------------------------------
-class TestKeyStore
-{
-public:
-	int contextId;
-	KeyStore::Type type;
-	QString storeId;
-	QString name;
-	bool readOnly;
-	bool avail;
-
-	QList<KeyBundle> certs;
-
-	TestKeyStore() :
-		contextId(-1),
-		type(KeyStore::SmartCard),
-		readOnly(true),
-		avail(true)
-	{
-	}
-};
-
-class TestData
-{
-public:
-	int context_at;
-	QList<TestKeyStore> stores;
-
-	TestData() :
-		context_at(0)
-	{
 	}
 };
 
@@ -449,13 +529,17 @@ public:
 		cc1->_props.subject += CertificateInfoPair(CertificateInfoType(CommonName), "Test Cert 1");
 		pub1.change(cc1);
 		PrivateKey sec1;
-		sec1.change(new TestPKeyContext(provider()));
+		TestRSAContext *rsa1 = new TestRSAContext(provider());
+		TestPKeyContext *kc1 = new TestPKeyContext(provider());
+		kc1->setKey(rsa1);
+		sec1.change(kc1);
 		cert1.setCertificateChainAndKey(pub1, sec1);
 
 		TestKeyStore ks1;
 		ks1.storeId = "store1";
 		ks1.name = "Test Store 1";
 		ks1.certs += cert1;
+		ks1.avail = false;
 		data.stores += ks1;
 
 		TestKeyStore ks2;
@@ -463,6 +547,8 @@ public:
 		ks2.name = "Test Store 2";
 		ks2.readOnly = false;
 		data.stores += ks2;
+
+		rsa1->store = &data.stores[0];
 
 		connect(&t, SIGNAL(timeout()), SLOT(do_step()));
 	}
@@ -560,15 +646,28 @@ public:
 			kse->_storeId = store.storeId;
 			kse->_storeName = store.name;
 			kse->kb = store.certs[n];
-			kse->avail = store.avail;
+			kse->store = &store;
+			out += kse;
 		}
 		return out;
 	}
 
 	virtual KeyStoreEntryContext *entryPassive(const QString &serialized)
 	{
-		Q_UNUSED(serialized);
-		return 0;
+		if(serialized == "qca-test-1/fake_serialized")
+		{
+			TestKeyStore &store = data.stores[0];
+			TestKeyStoreEntryContext *kse = new TestKeyStoreEntryContext(provider());
+			kse->_id = QString::number(0);
+			kse->_name = store.certs[0].certificateChain().primary().commonName();
+			kse->_storeId = store.storeId;
+			kse->_storeName = store.name;
+			kse->kb = store.certs[0];
+			kse->store = &store;
+			return kse;
+		}
+		else
+			return 0;
 	}
 
 	virtual QString writeEntry(int id, const KeyBundle &kb)
