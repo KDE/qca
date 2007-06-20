@@ -134,6 +134,8 @@ public:
 //----------------------------------------------------------------------------
 // TestRSAContext
 //----------------------------------------------------------------------------
+static KeyStoreEntry make_entry(Provider *p, TestKeyStore *store);
+
 class TestRSAContext : public RSAContext
 {
 	Q_OBJECT
@@ -209,7 +211,7 @@ public:
 		while(store->contextId == -1 || !store->avail)
 		{
 			KeyStoreInfo info(store->type, store->storeId, store->name);
-			KeyStoreEntry entry;
+			KeyStoreEntry entry = make_entry(provider(), store);
 
 			TokenAsker asker;
 			asker.ask(info, entry, 0);
@@ -505,6 +507,20 @@ public:
 		return true;
 	}
 };
+
+KeyStoreEntry make_entry(Provider *p, TestKeyStore *store)
+{
+	KeyStoreEntry entry;
+	TestKeyStoreEntryContext *kse = new TestKeyStoreEntryContext(p);
+	kse->_id = QString::number(0);
+	kse->_name = store->certs[0].certificateChain().primary().commonName();
+	kse->_storeId = store->storeId;
+	kse->_storeName = store->name;
+	kse->kb = store->certs[0];
+	kse->store = store;
+	entry.change(kse);
+	return entry;
+}
 
 //----------------------------------------------------------------------------
 // TestKeyStoreListContext
