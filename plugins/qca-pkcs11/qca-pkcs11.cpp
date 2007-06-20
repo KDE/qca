@@ -987,6 +987,32 @@ public:
 	}
 
 	bool
+	_isTokenAvailable() const {
+		bool ret;
+
+		QCA_logTextMessage (
+			"pkcs11RSAContext::_ensureTokenAvailable - entry",
+			Logger::Debug
+		);
+
+		ret = pkcs11h_token_ensureAccess (
+			_pkcs11h_certificate_id->token_id,
+			NULL,
+			0
+		) == CKR_OK;
+
+		QCA_logTextMessage (
+			QString ().sprintf (
+				"pkcs11RSAContext::_ensureTokenAvailable - return ret=%d",
+				ret ? 1 : 0
+			),
+			Logger::Debug
+		);
+
+		return ret;
+	}
+
+	bool
 	_ensureTokenAccess () {
 		bool ret;
 
@@ -998,7 +1024,7 @@ public:
 		ret = pkcs11h_token_ensureAccess (
 			_pkcs11h_certificate_id->token_id,
 			NULL,
-			0
+			PKCS11H_PROMPT_MASK_ALLOW_ALL
 		) == CKR_OK;
 
 		QCA_logTextMessage (
@@ -1329,6 +1355,12 @@ public:
 	QString
 	storeName () const {
 		return _storeName;
+	}
+
+	virtual
+	bool
+	isAvailable() const {
+		return static_cast<pkcs11RSAContext *>(static_cast<PKeyContext *>(_key.privateKey ().context ())->key ())->_isTokenAvailable ();
 	}
 
 	virtual
