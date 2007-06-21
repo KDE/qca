@@ -1773,7 +1773,7 @@ pkcs11KeyStoreListContext::keyStores () {
 		 */
 		if (
 			(rv = pkcs11h_token_enumTokenIds (
-				PKCS11H_ENUM_METHOD_CACHE,
+				PKCS11H_ENUM_METHOD_CACHE_EXIST,
 				&tokens
 			)) != CKR_OK
 		) {
