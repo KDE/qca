@@ -269,10 +269,10 @@ private slots:
 	void start()
 	{
 		// user can quit the monitoring by pressing enter
-		printf("Monitoring keystores, press Enter to quit.\n");
+		printf("Monitoring keystores, press 'q' to quit.\n");
 		prompt = new QCA::ConsolePrompt(this);
 		connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
-		prompt->getEnter();
+		prompt->getChar();
 
 		// kick off the subsystem
 		QCA::KeyStoreManager::start();
@@ -312,7 +312,13 @@ private slots:
 
 	void prompt_finished()
 	{
-		eventLoop->exit();
+		QChar c = prompt->resultChar();
+		if(c == 'q' || c == 'Q')
+		{
+			eventLoop->exit();
+			return;
+		}
+		prompt->getChar();
 	}
 };
 
@@ -338,6 +344,7 @@ public:
 	int prompt_id;
 	QCA::Event prompt_event;
 	QList<Item> pending;
+	bool auto_accept;
 
 	QCA::KeyStoreManager ksm;
 	QList<QCA::KeyStore*> keyStores;
@@ -347,6 +354,7 @@ public:
 		allowPrompt = true;
 		warned = false;
 		have_pass = false;
+		auto_accept = false;
 
 		prompt = 0;
 
@@ -487,7 +495,7 @@ private slots:
 				name = QString("the '") + e.keyStoreInfo().name() + "' token";
 			}
 
-			QString str = QString("Please insert %1 and press Enter ...").arg(name);
+			QString str = QString("Please insert %1 and press Enter (or 'q' to cancel) ...").arg(name);
 
 			if(!prompt)
 			{
@@ -496,7 +504,7 @@ private slots:
 				connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
 				prompt_id = id;
 				prompt_event = e;
-				prompt->getEnter();
+				prompt->getChar();
 			}
 			else
 			{
@@ -514,9 +522,31 @@ private slots:
 	void prompt_finished()
 	{
 		if(prompt_event.type() == QCA::Event::Password)
+		{
 			handler.submitPassword(prompt_id, prompt->result());
+		}
 		else
-			handler.tokenOkay(prompt_id);
+		{
+			if(auto_accept)
+			{
+				auto_accept = false;
+				handler.tokenOkay(prompt_id);
+			}
+			else
+			{
+				QChar c = prompt->resultChar();
+				if(c == '\r' || c == '\n')
+					handler.tokenOkay(prompt_id);
+				else if(c == 'q' || c == 'Q')
+					handler.reject(prompt_id);
+				else
+				{
+					// retry
+					prompt->getChar();
+					return;
+				}
+			}
+		}
 
 		if(!pending.isEmpty())
 		{
@@ -530,7 +560,7 @@ private slots:
 			else // Token
 			{
 				fprintf(stderr, "%s\n", qPrintable(i.promptStr));
-				prompt->getEnter();
+				prompt->getChar();
 			}
 		}
 		else
@@ -555,6 +585,7 @@ private slots:
 				fprintf(stderr, "Token inserted!  Continuing...\n");
 
 				// auto-accept
+				auto_accept = true;
 				prompt_finished();
 			}
 		}
