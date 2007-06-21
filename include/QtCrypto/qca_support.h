@@ -402,10 +402,11 @@ public:
 	~ConsolePrompt();
 
 	void getHidden(const QString &promptStr);
-	void getEnter();
+	void getChar();
 	void waitForFinished();
 
 	SecureArray result() const;
+	QChar resultChar() const;
 
 signals:
 	void finished();
