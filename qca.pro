@@ -13,7 +13,7 @@ unix:{
 	include(conf.pri)
 
 	!isEmpty(QCA_NO_TESTS) {
-		SUBDIRS -= unittest examples
+		SUBDIRS -= sub_unittest sub_examples
 	}
 
 	# API documentation
