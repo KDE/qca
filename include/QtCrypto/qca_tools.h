@@ -88,32 +88,161 @@ class QCA_EXPORT MemoryRegion
 {
 public:
 	MemoryRegion();
+
+	/**
+	   Constructs a new Memory Region from a null terminated 
+	   character array
+
+	   \param str pointer to the array of data to copy
+	*/
 	MemoryRegion(const char *str);
+
+	/**
+	   Constructs a new MemoryRegion from the data in a 
+	   byte array
+	*/
 	MemoryRegion(const QByteArray &from);
+
+	/**
+	   Standard copy constructor
+	*/
 	MemoryRegion(const MemoryRegion &from);
 	~MemoryRegion();
+
+	/**
+	   Standard assignment operator
+	*/
 	MemoryRegion & operator=(const MemoryRegion &from);
+
+	/**
+	   Standard assignment operator
+	*/
 	MemoryRegion & operator=(const QByteArray &from);
 
+	/**
+	   Test if the MemoryRegion is null (i.e. was created
+	   as a null array, and hasn't been resized).
+
+	   This is probably not what you are trying to do. If
+	   you are trying to determine whether there are any
+	   bytes in the array, use isEmpty() instead.
+	*/
 	bool isNull() const;
+
+	/**
+	   Test if the MemoryRegion is using secure memory, or not.
+
+	   In this context, memory is secure if it will not be paged
+	   out to disk.
+
+	   \return true if the memory region is secure
+	*/
 	bool isSecure() const;
+
+	/**
+	   Convert this memory region to a byte array.
+
+	   \note For secure data, this will make it insecure
+
+	   \sa data() and constData() for other ways to convert
+	   to an "accessible" format.
+	*/
 	QByteArray toByteArray() const;
 
+	/**
+	   Returns true if the size of the memory region is zero.
+	*/
 	bool isEmpty() const;
+
+	/**
+	   Returns the number of bytes in the memory region.
+	*/
 	int size() const;
 
+	/**
+	   Convert the contents of the memory region to 
+	   a C-compatible character array.
+
+	   \sa toByteArray for an alternative approach.
+	*/
 	const char *data() const;
 	const char *constData() const;
+
+	/**
+	   Obtain the value of the memory location at the specified
+	   position.
+	   
+	   \param index the offset into the memory region.
+
+	   \note the contents of a memory region are between
+	   0 and size()-1.
+	*/
 	const char & at(int index) const;
 
 protected:
+	/**
+	   Create a memory region, optionally using secure
+	   storage.
+
+	   \param secure if this is true, the memory region
+	   will use secure storage.
+
+	   \note This will create a memory region without
+	   any content (i.e. both isNull() and isEmpty() will
+	   return true.
+	*/
 	MemoryRegion(bool secure);
+
+	/**
+	   Create a memory region, optionally using secure
+	   storage.
+
+	   \param size the number of bytes in the memory
+	   region.
+	   \param secure if this is true, the memory region
+	   will use secure storage.
+	*/
 	MemoryRegion(int size, bool secure);
+
+	/**
+	   Create a memory region, optionally using secure
+	   storage.
+
+	   This constructor variant allows you to 
+	   initialize the memory region from an existing
+	   array.
+
+	   \param from the byte array to copy from.
+	   \param secure if this is true, the memory region
+	   will use secure storage.
+	*/
 	MemoryRegion(const QByteArray &from, bool secure);
 	char *data();
 	char & at(int index);
 	bool resize(int size);
+
+	/**
+	   Modify the memory region to match a specified
+	   byte array. This resizes the memory region
+	   as required to match the byte array size.
+
+	   \param from the byte array to copy from.
+	   \param secure if this is true, the memory region
+	   will use secure storage.
+	*/
 	void set(const QByteArray &from, bool secure);
+
+	/**
+	   Convert the memory region to use the specified
+	   memory type.
+
+	   This may involve copying data from secure to
+	   insecure storage, or from insecure to secure
+	   storage.
+
+	   \param secure if true, use secure memory; otherwise
+	   use insecure memory.
+	*/
 	void setSecure(bool secure);
 
 private:
