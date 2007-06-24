@@ -768,9 +768,33 @@ public:
 	{
 	public:
 		Params();
+
+		/**
+		   Standard constructor. 
+		   
+		   The concept behind this is that you set each of the 
+		   flags depending on which parameters are needed.
+
+		   \param user the username is required
+		   \param authzid the authorization identity is required
+		   \param pass the password is required
+		   \param realm the realm is required
+		*/
 		Params(bool user, bool authzid, bool pass, bool realm);
+
+		/**
+		   Standard copy constructor
+
+		   \param from the Params object to copy
+		*/
 		Params(const Params &from);
 		~Params();
+
+		/**
+		   Standard assignment operator
+
+		   \param from the Params object to assign from
+		*/
 		Params & operator=(const Params &from);
 
 		/**
