@@ -260,7 +260,7 @@ public:
 				if(!peerCert.isEmpty())
 				{
 					peerValidity = c->peerCertificateValidity();
-					if(peerValidity == ValidityGood && !host.isEmpty() && !peerCert.primary().matchesHostname(host))
+					if(peerValidity == ValidityGood && !host.isEmpty() && !peerCert.primary().matchesHostName(host))
 						hostMismatch = true;
 				}
 				sessionInfo = c->sessionInfo();
@@ -811,7 +811,7 @@ public:
 	// 			if(!peerCert.isEmpty())
 	// 			{
 	// 				peerValidity = c->peerCertificateValidity();
-	// 				if(peerValidity == ValidityGood && !host.isEmpty() && !peerCert.primary().matchesHostname(host))
+	// 				if(peerValidity == ValidityGood && !host.isEmpty() && !peerCert.primary().matchesHostName(host))
 	// 					hostMismatch = true;
 	// 			}
 	// 			sessionInfo = c->sessionInfo();

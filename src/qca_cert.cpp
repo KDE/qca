@@ -1666,7 +1666,7 @@ Certificate Certificate::fromPEMFile(const QString &fileName, ConvertResult *res
 
 // check for ip addresses in iPAddress, dNSName, then commonName
 // for all else, check in dNSName, then commonName
-bool Certificate::matchesHostname(const QString &host) const
+bool Certificate::matchesHostName(const QString &host) const
 {
 	QByteArray ipaddr = ipaddr_str2bin(host);
 	if(!ipaddr.isEmpty()) // ip address

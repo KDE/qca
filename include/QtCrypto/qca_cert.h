@@ -1062,7 +1062,7 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 
 	   \param host the name of the host to compare to
 	*/
-	bool matchesHostname(const QString &host) const;
+	bool matchesHostName(const QString &host) const;
 
 	/**
 	   Test for equality of two certificates
