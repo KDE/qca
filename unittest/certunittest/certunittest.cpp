@@ -671,14 +671,14 @@ void CertUnitTest::altNames76()
             QVERIFY( subject1.values(QCA::DNS).contains("appserver1.sip.su.se") );
             QVERIFY( subject1.values(QCA::DNS).contains("sip1.su.se") );
 
-            QVERIFY( client1.matchesHostname("incomingproxy.sip.su.se") );
-            QVERIFY( client1.matchesHostname("incomingproxy1.sip.su.se") );
-            QVERIFY( client1.matchesHostname("outgoingproxy.sip.su.se") );
-            QVERIFY( client1.matchesHostname("outgoingproxy1.sip.su.se") );
-            QVERIFY( client1.matchesHostname("out.sip.su.se") );
-            QVERIFY( client1.matchesHostname("appserver.sip.su.se") );
-            QVERIFY( client1.matchesHostname("appserver1.sip.su.se") );
-            QVERIFY( client1.matchesHostname("sip1.su.se") );
+            QVERIFY( client1.matchesHostName("incomingproxy.sip.su.se") );
+            QVERIFY( client1.matchesHostName("incomingproxy1.sip.su.se") );
+            QVERIFY( client1.matchesHostName("outgoingproxy.sip.su.se") );
+            QVERIFY( client1.matchesHostName("outgoingproxy1.sip.su.se") );
+            QVERIFY( client1.matchesHostName("out.sip.su.se") );
+            QVERIFY( client1.matchesHostName("appserver.sip.su.se") );
+            QVERIFY( client1.matchesHostName("appserver1.sip.su.se") );
+            QVERIFY( client1.matchesHostName("sip1.su.se") );
 
             QCA::CertificateInfo issuer1 = client1.issuerInfo();
             QCOMPARE( issuer1.isEmpty(), false );
