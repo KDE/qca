@@ -27,6 +27,8 @@
 #include <QFile>
 #include <QUrl>
 
+#include <stdlib.h>
+
 namespace QCA {
 
 Provider::Context *getContext(const QString &type, const QString &provider);
