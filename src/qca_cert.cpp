@@ -1004,7 +1004,7 @@ public:
 	CertificateInfo infoMap;
 	Constraints constraints;
 	QStringList policies;
-	QStringList crlLocations;
+	QStringList crlLocations, issuerLocations, ocspLocations;
 	bool isCA;
 	int pathLimit;
 	BigInteger serial;
@@ -1089,6 +1089,16 @@ QStringList CertificateOptions::crlLocations() const
 	return d->crlLocations;
 }
 
+QStringList CertificateOptions::issuerLocations() const
+{
+	return d->issuerLocations;
+}
+
+QStringList CertificateOptions::ocspLocations() const
+{
+	return d->ocspLocations;
+}
+
 bool CertificateOptions::isCA() const
 {
 	return d->isCA;
@@ -1144,6 +1154,16 @@ void CertificateOptions::setPolicies(const QStringList &policies)
 void CertificateOptions::setCRLLocations(const QStringList &locations)
 {
 	d->crlLocations = locations;
+}
+
+void CertificateOptions::setIssuerLocations(const QStringList &locations)
+{
+	d->issuerLocations = locations;
+}
+
+void CertificateOptions::setOCSPLocations(const QStringList &locations)
+{
+	d->ocspLocations = locations;
 }
 
 void CertificateOptions::setAsCA(int pathLimit)
@@ -1485,6 +1505,16 @@ QStringList Certificate::policies() const
 QStringList Certificate::crlLocations() const
 {
 	return static_cast<const CertContext *>(context())->props()->crlLocations;
+}
+
+QStringList Certificate::issuerLocations() const
+{
+	return static_cast<const CertContext *>(context())->props()->issuerLocations;
+}
+
+QStringList Certificate::ocspLocations() const
+{
+	return static_cast<const CertContext *>(context())->props()->ocspLocations;
 }
 
 QString Certificate::commonName() const

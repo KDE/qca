@@ -615,6 +615,22 @@ public:
 	QStringList crlLocations() const;
 
 	/**
+	   list of URI locations for issuer certificate files
+
+	   each URI refers to the same issuer file
+
+	   For Certificate creation only
+	*/
+	QStringList issuerLocations() const;
+
+	/**
+	   list of URI locations for OCSP services
+
+	   For Certificate creation only
+	*/
+	QStringList ocspLocations() const;
+
+	/**
 	   test if the certificate is a CA cert
 
 	   \sa setAsCA
@@ -700,6 +716,22 @@ public:
 	   \param locations a list of URIs to CRL files
 	*/
 	void setCRLLocations(const QStringList &locations);
+
+	/**
+	   set the issuer certificate locations of the certificate
+
+	   each location refers to the same issuer file.
+
+	   \param locations a list of URIs to issuer certificate files
+	*/
+	void setIssuerLocations(const QStringList &locations);
+
+	/**
+	   set the OCSP service locations of the certificate
+
+	   \param locations a list of URIs to OCSP services
+	*/
+	void setOCSPLocations(const QStringList &locations);
 
 	/**
 	   set the certificate to be a CA cert
@@ -874,6 +906,18 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   each URI refers to the same CRL file
 	*/
 	QStringList crlLocations() const;
+
+	/**
+	   list of URI locations for issuer certificate files
+
+	   each URI refers to the same issuer file
+	*/
+	QStringList issuerLocations() const;
+
+	/**
+	   list of URI locations for OCSP services
+	*/
+	QStringList ocspLocations() const;
 
 	/**
 	   The common name of the subject of the certificate

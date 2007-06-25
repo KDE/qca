@@ -238,6 +238,8 @@ public:
 	Constraints constraints;
 	QStringList policies;
 	QStringList crlLocations;        // cert only
+	QStringList issuerLocations;     // cert only
+	QStringList ocspLocations;       // cert only
 	BigInteger serial;               // cert only
 	bool isCA;
 	bool isSelfSigned;               // cert only
