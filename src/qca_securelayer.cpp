@@ -143,7 +143,9 @@ public:
 		else
 			c->setConstraints(con_cipherSuites);
 
-		c->setup(trusted, serverMode, QList<CertificateInfoOrdered>(), host, tryCompress);
+		c->setup(serverMode, host, tryCompress);
+		c->setTrustedCertificates(trusted);
+		//c->setIssuerList(QList<CertificateInfoOrdered>());
 		c->setCertificate(localCert, localKey);
 
 		bool ok;

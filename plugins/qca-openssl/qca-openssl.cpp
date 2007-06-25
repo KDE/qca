@@ -4987,18 +4987,23 @@ public:
 		Q_UNUSED(cipherSuiteList);
 	}
 
-	virtual void setup(const CertificateCollection &_trusted,
-		bool serverMode,
-		const QList<CertificateInfoOrdered> &issuerList,
-		const QString &hostName, bool compress)
+	virtual void setup(bool serverMode, const QString &hostName, bool compress)
 	{
-		trusted = _trusted;
 		serv = serverMode;
                 if ( false == serverMode ) {
                     // client
                     targetHostName = hostName;
                 }
 		Q_UNUSED(compress); // TODO
+	}
+
+	virtual void setTrustedCertificates(const CertificateCollection &_trusted)
+	{
+		trusted = _trusted;
+	}
+
+	virtual void setIssuerList(const QList<CertificateInfoOrdered> &issuerList)
+	{
 		Q_UNUSED(issuerList); // TODO
 	}
 
@@ -5276,10 +5281,22 @@ public:
 		return v_eof;
 	}
 
+	virtual bool clientHelloReceived() const
+	{
+		// TODO
+		return false;
+	}
+
 	virtual bool serverHelloReceived() const
 	{
 		// TODO
 		return false;
+	}
+
+	virtual QString hostName() const
+	{
+		// TODO
+		return QString();
 	}
 
 	virtual QList<CertificateInfoOrdered> issuerList() const

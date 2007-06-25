@@ -478,10 +478,9 @@ public:
 
 	virtual void setConstraints(int minSSF, int maxSSF) = 0;
 	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
-	virtual void setup(const CertificateCollection &trusted,
-		bool serverMode,
-		const QList<CertificateInfoOrdered> &issuerList,
-		const QString &hostName, bool compress) = 0;
+	virtual void setup(bool serverMode, const QString &hostName, bool compress) = 0;
+	virtual void setTrustedCertificates(const CertificateCollection &trusted) = 0;
+	virtual void setIssuerList(const QList<CertificateInfoOrdered> &issuerList) = 0;
 	virtual void setCertificate(const CertificateChain &cert, const PrivateKey &key) = 0;
 
 	virtual void shutdown() = 0; // flag for shutdown, call update next
@@ -519,7 +518,9 @@ public:
 	virtual bool eof() const = 0;
 
 	// call after handshake continue, but before success
+	virtual bool clientHelloReceived() const = 0;
 	virtual bool serverHelloReceived() const = 0;
+	virtual QString hostName() const = 0;
 	virtual QList<CertificateInfoOrdered> issuerList() const = 0;
 
 	// call after successful handshake

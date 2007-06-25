@@ -453,6 +453,12 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	void setCompressionEnabled(bool b);
 
 	/**
+	   Returns the host name specified or an empty string if no host
+	   name is specified.
+	*/
+	QString hostName() const;
+
+	/**
 	   Start the TLS/SSL connection as a client
 
 	   Typically, you'll want to perform RFC 2818 validation on the
@@ -635,10 +641,24 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 
 Q_SIGNALS:
 	/**
-	   Emitted when the server has completed the first part
-	   of the TLS negotiation.  At this time, the client can
+	   Emitted if a host name is set by the client.  At
+	   this time, the server can inspect the hostName().
+
+	   You must call continueAfterStep() in order for TLS
+	   processing to resume after this signal is emitted.
+
+	   This signal is only emitted in server mode.
+
+	   \sa continueAfterStep
+	*/
+	void hostNameReceived();
+
+	/**
+	   Emitted when the first part of the TLS negotiation
+	   has completed.  At this time, the client can
 	   inspect the version(), peerCertificateChain()
-	   and issuerList().
+	   and issuerList(), and the server can inspect the
+	   version().
 
 	   You must call continueAfterStep() in order for TLS
 	   processing to resume after this signal is emitted.
