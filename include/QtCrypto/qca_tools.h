@@ -161,11 +161,23 @@ public:
 
 	/**
 	   Convert the contents of the memory region to 
-	   a C-compatible character array.
+	   a C-compatible character array. This consists
+	   of size() bytes, followed by a null terminator.
 
 	   \sa toByteArray for an alternative approach.
+	   \sa constData, which is equivalent to this method, but avoids
+	   the possibility that the compiler picks the wrong version.
 	*/
 	const char *data() const;
+
+	/**
+	   Convert the contents of the memory region to 
+	   a C-compatible character array. This consists
+	   of size() bytes, followed by a null terminator.
+
+	   \sa toByteArray for an alternative approach.
+	   \sa data which is equivalent to this method
+	*/
 	const char *constData() const;
 
 	/**
@@ -174,8 +186,9 @@ public:
 	   
 	   \param index the offset into the memory region.
 
-	   \note the contents of a memory region are between
-	   0 and size()-1.
+	   \note The contents of a memory region are between
+	   0 and size()-1. The content at position size() is 
+	   always a null terminator.
 	*/
 	const char & at(int index) const;
 
@@ -217,8 +230,31 @@ protected:
 	   will use secure storage.
 	*/
 	MemoryRegion(const QByteArray &from, bool secure);
+
+	/**
+	   Convert the contents of the memory region to 
+	   a C-compatible character array. This consists
+	   of size() bytes, followed by a null terminator.
+	*/
 	char *data();
+
+	/**
+	   Obtain the value of the memory location at the specified
+	   position.
+	   
+	   \param index the offset into the memory region.
+
+	   \note The contents of a memory region are between
+	   0 and size()-1. The content at position size() is 
+	   always a null terminator.
+	*/
 	char & at(int index);
+
+	/**
+	   Resize the memory region to the specified size.
+
+	   \param size the new size of the region.
+	*/
 	bool resize(int size);
 
 	/**
