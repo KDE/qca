@@ -657,6 +657,7 @@ public:
 	virtual void start(SecureMessage::Format f, Operation op) = 0;
 	virtual void update(const QByteArray &in) = 0;
 	virtual QByteArray read() = 0;
+	virtual int written() = 0;
 	virtual void end() = 0;
 
 	virtual bool finished() const = 0;

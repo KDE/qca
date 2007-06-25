@@ -296,13 +296,22 @@ public slots:
 	void updated()
 	{
 		bool sig_read = false;
+		bool sig_written = false;
 		bool sig_done = false;
+		int written = 0;
 		{
 			QByteArray a = c->read();
 			if(!a.isEmpty())
 			{
 				sig_read = true;
 				in.append(a);
+			}
+
+			int x = c->written();
+			if(x > 0)
+			{
+				sig_written = true;
+				written = x;
 			}
 		}
 
@@ -323,6 +332,8 @@ public slots:
 
 		if(sig_read)
 			QTimer::singleShot(0, q, SIGNAL(readyRead()));
+		if(sig_written)
+			QMetaObject::invokeMethod(q, "bytesWritten", Qt::QueuedConnection, Q_ARG(int, written));
 		if(sig_done)
 			QTimer::singleShot(0, q, SIGNAL(finished()));
 	}

@@ -5702,6 +5702,7 @@ public:
 
 	QByteArray in, out;
 	QByteArray sig;
+	int total;
 
 	CertificateChain signerChain;
 	int ver_ret;
@@ -5711,6 +5712,8 @@ public:
 	MyMessageContext(CMSContext *_cms, Provider *p) : MessageContext(p, "cmsmsg")
 	{
 		cms = _cms;
+
+		total = 0;
 
 		ver_ret = 0;
 
@@ -5777,11 +5780,19 @@ public:
 	virtual void update(const QByteArray &in)
 	{
 		this->in.append(in);
+		total += in.size();
 	}
 
 	virtual QByteArray read()
 	{
 		return out;
+	}
+
+	virtual int written()
+	{
+		int x = total;
+		total = 0;
+		return x;
 	}
 
 	virtual void end()

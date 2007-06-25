@@ -724,6 +724,12 @@ Q_SIGNALS:
 	void readyRead();
 
 	/**
+	   This signal is emitted when data has been accepted
+	   by the message processor.
+	*/
+	void bytesWritten(int bytes);
+
+	/**
 	   This signal is emitted when the message is fully
 	   processed.
 	*/
