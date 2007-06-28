@@ -452,7 +452,18 @@ enum Validity
 	ErrorPathLengthExceeded, ///< The path length from the root CA to this certificate is too long
 	ErrorExpired,            ///< The certificate has expired, or is not yet valid (e.g. current time is earlier than notBefore time)
 	ErrorExpiredCA,          ///< The Certificate Authority has expired
-	ErrorValidityUnknown     ///< Validity is unknown
+	ErrorValidityUnknown = 64  ///< Validity is unknown
+};
+
+/**
+   The conditions to validate for a certificate
+*/
+enum ValidateFlags
+{
+	ValidateAll     = 0x00,  // Verify all conditions
+	ValidateRevoked = 0x01,  // Verify the certificate was not revoked
+	ValidateExpired = 0x02,  // Verify the certificate has not expired
+	ValidatePolicy  = 0x04   // Verify the certificate can be used for a specified purpose
 };
 
 /**
@@ -987,8 +998,11 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   \param untrusted a collection of additional certificates, not
 	   necessarily trusted
 	   \param u the use required for the certificate
+	   \param vf the conditions to validate
+
+	   \note This function may block
 	*/
-	Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u = UsageAny) const;
+	Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
 
 	/**
 	   Export the Certificate into a DER format
@@ -1090,8 +1104,8 @@ private:
 	QSharedDataPointer<Private> d;
 
 	friend class CertificateChain;
-	Validity chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const;
-	CertificateChain chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers) const;
+	Validity chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const;
+	CertificateChain chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers, Validity *result) const;
 };
 
 /**
@@ -1142,10 +1156,13 @@ public:
 	   \param untrusted_crls a list of additional CRLs, not necessarily
 	   trusted
 	   \param u the use required for the primary certificate
+	   \param vf the conditions to validate
+
+	   \note This function may block
 
 	   \sa Certificate::validate()
 	*/
-	inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls = QList<CRL>(), UsageMode u = UsageAny) const;
+	inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls = QList<CRL>(), UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
 
 	/**
 	   Complete a certificate chain for the primary certificate, using the
@@ -1153,8 +1170,10 @@ public:
 	   \a issuers, as possible issuers in the chain.  If there are issuers
 	   missing, then the chain might be incomplete (at the worst case, if
 	   no issuers exist for the primary certificate, then the resulting
-	   chain will consist of just the primary certificate).  To ensure a
-	   CertificateChain is fully complete, you must use validate().
+	   chain will consist of just the primary certificate).  Use the
+	   \a result argument to find out if there was a problem during
+	   completion.  A result of ValidityGood means the chain was completed
+	   successfully.
 
 	   The newly constructed CertificateChain is returned.
 
@@ -1162,24 +1181,27 @@ public:
 	   CertificateChain object.
 
 	   \param issuers a pool of issuers to draw from as necessary
+	   \param result the result of the completion operation
+
+	   \note This function may block
 
 	   \sa validate
 	*/
-	inline CertificateChain complete(const QList<Certificate> &issuers) const;
+	inline CertificateChain complete(const QList<Certificate> &issuers = QList<Certificate>(), Validity *result = 0) const;
 };
 
-inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const
+inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const
 {
 	if(isEmpty())
 		return ErrorValidityUnknown;
-	return first().chain_validate(*this, trusted, untrusted_crls, u);
+	return first().chain_validate(*this, trusted, untrusted_crls, u, vf);
 }
 
-inline CertificateChain CertificateChain::complete(const QList<Certificate> &issuers) const
+inline CertificateChain CertificateChain::complete(const QList<Certificate> &issuers, Validity *result) const
 {
 	if(isEmpty())
 		return CertificateChain();
-	return first().chain_complete(*this, issuers);
+	return first().chain_complete(*this, issuers, result);
 }
 
 /**

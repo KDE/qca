@@ -1573,40 +1573,16 @@ QByteArray Certificate::issuerKeyId() const
 	return static_cast<const CertContext *>(context())->props()->issuerId;
 }
 
-Validity Certificate::validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u) const
+Validity Certificate::validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u, ValidateFlags vf) const
 {
 	QList<Certificate> issuers = trusted.certificates() + untrusted.certificates();
 	CertificateChain chain;
 	chain += *this;
-	chain = chain.complete(issuers);
-	return chain.validate(trusted, untrusted.crls(), u);
-
-	/*QList<CertContext*> trusted_list;
-	QList<CertContext*> untrusted_list;
-	QList<CRLContext*> crl_list;
-
-	QList<Certificate> trusted_certs = trusted.certificates();
-	QList<Certificate> untrusted_certs = untrusted.certificates();
-	QList<CRL> crls = trusted.crls() + untrusted.crls();
-
-	int n;
-	for(n = 0; n < trusted_certs.count(); ++n)
-	{
-		CertContext *c = static_cast<CertContext *>(trusted_certs[n].context());
-		trusted_list += c;
-	}
-	for(n = 0; n < untrusted_certs.count(); ++n)
-	{
-		CertContext *c = static_cast<CertContext *>(untrusted_certs[n].context());
-		untrusted_list += c;
-	}
-	for(n = 0; n < crls.count(); ++n)
-	{
-		CRLContext *c = static_cast<CRLContext *>(crls[n].context());
-		crl_list += c;
-	}
-
-	return static_cast<const CertContext *>(context())->validate(trusted_list, untrusted_list, crl_list, u);*/
+	Validity result;
+	chain = chain.complete(issuers, &result);
+	if(result != ValidityGood)
+		return result;
+	return chain.validate(trusted, untrusted.crls(), u, vf);
 }
 
 QByteArray Certificate::toDER() const
@@ -1752,7 +1728,7 @@ void Certificate::change(CertContext *c)
 	d->update(static_cast<CertContext *>(context()));
 }
 
-Validity Certificate::chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u) const
+Validity Certificate::chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const
 {
 	QList<CertContext*> chain_list;
 	QList<CertContext*> trusted_list;
@@ -1778,14 +1754,16 @@ Validity Certificate::chain_validate(const CertificateChain &chain, const Certif
 		crl_list += c;
 	}
 
-	return static_cast<const CertContext *>(context())->validate_chain(chain_list, trusted_list, crl_list, u);
+	return static_cast<const CertContext *>(context())->validate_chain(chain_list, trusted_list, crl_list, u, vf);
 }
 
-CertificateChain Certificate::chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers) const
+CertificateChain Certificate::chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers, Validity *result) const
 {
 	CertificateChain out;
 	QList<Certificate> pool = issuers + chain.mid(1);
 	out += chain.first();
+	if(result)
+		*result = ValidityGood;
 	while(!out.last().isSelfSigned())
 	{
 		// try to get next in chain
@@ -1802,7 +1780,11 @@ CertificateChain Certificate::chain_complete(const CertificateChain &chain, cons
 			//printf("%s  no\n", qPrintable(str));
 		}
 		if(at == -1)
+		{
+			if(result)
+				*result = ErrorValidityUnknown;
 			break;
+		}
 
 		// take it out of the pool
 		Certificate next = pool.takeAt(at);

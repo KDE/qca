@@ -3251,9 +3251,9 @@ public:
 	}
 
 	// implemented later because it depends on MyCRLContext
-	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u) const;
+	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const;
 
-	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext *> &crls, UsageMode u) const;
+	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const;
 
 	void make_props()
 	{
@@ -4010,8 +4010,11 @@ static bool usage_check(const MyCertContext &cc, UsageMode u)
 	}
 }
 
-Validity MyCertContext::validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext*> &crls, UsageMode u) const
+Validity MyCertContext::validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext*> &crls, UsageMode u, ValidateFlags vf) const
 {
+	// TODO
+	Q_UNUSED(vf);
+
 	STACK_OF(X509) *trusted_list = sk_X509_new_null();
 	STACK_OF(X509) *untrusted_list = sk_X509_new_null();
 	QList<X509_CRL*> crl_list;
@@ -4080,8 +4083,11 @@ Validity MyCertContext::validate(const QList<CertContext*> &trusted, const QList
 	return ValidityGood;
 }
 
-Validity MyCertContext::validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, UsageMode u) const
+Validity MyCertContext::validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, UsageMode u, ValidateFlags vf) const
 {
+	// TODO
+	Q_UNUSED(vf);
+
 	STACK_OF(X509) *trusted_list = sk_X509_new_null();
 	STACK_OF(X509) *untrusted_list = sk_X509_new_null();
 	QList<X509_CRL*> crl_list;
