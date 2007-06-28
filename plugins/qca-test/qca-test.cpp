@@ -422,21 +422,23 @@ public:
 		return false;
 	}
 
-	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext*> &crls, UsageMode u) const
+	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext*> &crls, UsageMode u, ValidateFlags vf) const
 	{
 		Q_UNUSED(trusted);
 		Q_UNUSED(untrusted);
 		Q_UNUSED(crls);
 		Q_UNUSED(u);
+		Q_UNUSED(vf);
 		return ErrorValidityUnknown;
 	}
 
-	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, UsageMode u) const
+	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, UsageMode u, ValidateFlags vf) const
 	{
 		Q_UNUSED(chain);
 		Q_UNUSED(trusted);
 		Q_UNUSED(crls);
 		Q_UNUSED(u);
+		Q_UNUSED(vf);
 		return ErrorValidityUnknown;
 	}
 };
