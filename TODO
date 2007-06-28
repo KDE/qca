@@ -1,15 +1,11 @@
 * beta7
   api:
-    securemessage bytesWritten?
-    problem: pgp can cause token event while pgp store is available
-    textfilter: remove unnecessary SecureArray usage
+    prompting for unavailable entries
   code:
-    keystore: complete
     securelayer: complete
   other:
     rename qca-openssl
     update README/INSTALL, special thanks to Jack Lloyd
-    regenerate botantools.diff
 
 * test1
   doc:
@@ -52,7 +48,11 @@
   qca-egads (or qca-egd): implement for Random support
 
 * possibilities for the future:
-  publickey: sign/verify plaintext input uses secure memory.  overkill?
+  provider: separate public and private keys into two classes to enable
+    delegation easier.  the public part should not be implemented by most
+    providers.
+  provider: make it possible to support RSA and DSA keys without implementing
+    a separate class for each.
   cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
   qcatool: streaming securemessage operations
   qcatool: instead of printing full usage at every wrong turn, we might try
@@ -62,6 +62,7 @@
   emsa3Encode: implement in provider instead of qca?
   OCSP
   tls ocsp stapling
+  tls: pgp, psk auth ?
   internally managed intermediate object storage
   securemessage: algorithm selection for cms/pgp (and use SecurityLevel?)
   tls: renegotiation
