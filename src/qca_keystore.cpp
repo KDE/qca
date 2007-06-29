@@ -112,6 +112,8 @@ public:
 	bool startedAll;
 	bool busy;
 
+	QMutex updateMutex;
+
 	KeyStoreTracker()
 	{
 		self = this;
@@ -120,7 +122,7 @@ public:
 		qRegisterMetaType< QList<QCA::KeyStoreEntry> >("QList<QCA::KeyStoreEntry>");
 		qRegisterMetaType< QList<QCA::KeyStoreEntry::Type> >("QList<QCA::KeyStoreEntry::Type>");
 
-		connect(this, SIGNAL(updated_p()), SIGNAL(updated()), Qt::QueuedConnection);
+		connect(this, SIGNAL(updated_p()), SLOT(updated_locked()), Qt::QueuedConnection);
 
 		startedAll = false;
 		busy = true; // we start out busy
@@ -163,6 +165,20 @@ public:
 	{
 		QMutexLocker locker(&m);
 		dtext.clear();
+	}
+
+	// thread-safe
+	void addTarget(QObject *ksm)
+	{
+		QMutexLocker locker(&updateMutex);
+		ksm->connect(this, SIGNAL(updated()), SLOT(tracker_updated()), Qt::DirectConnection);
+	}
+
+	// thread-safe
+	void removeTarget(QObject *ksm)
+	{
+		QMutexLocker locker(&updateMutex);
+		disconnect(ksm);
 	}
 
 public slots:
@@ -306,6 +322,13 @@ signals:
 	// emit this when items or busy state changes
 	void updated();
 	void updated_p();
+
+private slots:
+	void updated_locked()
+	{
+		QMutexLocker locker(&updateMutex);
+		emit updated();
+	}
 
 private:
 	bool haveProviderSource(Provider *p) const
@@ -1462,7 +1485,7 @@ public:
 public slots:
 	void tracker_updated()
 	{
-		QCA_logTextMessage(QString("keystore: tracker_updated start"), Logger::Information);
+		QCA_logTextMessage(QString().sprintf("keystore: %p: tracker_updated start", q), Logger::Information);
 
 		QMutexLocker locker(&m);
 		if(!pending)
@@ -1477,7 +1500,7 @@ public slots:
 			w.wakeOne();
 		}
 
-		QCA_logTextMessage(QString("keystore: tracker_updated end"), Logger::Information);
+		QCA_logTextMessage(QString().sprintf("keystore: %p: tracker_updated end", q), Logger::Information);
 	}
 
 	void update()
@@ -1516,13 +1539,13 @@ KeyStoreManager::KeyStoreManager(QObject *parent)
 {
 	ensure_init();
 	d = new KeyStoreManagerPrivate(this);
-	d->connect(KeyStoreTracker::instance(), SIGNAL(updated()),
-		SLOT(tracker_updated()), Qt::DirectConnection);
+	KeyStoreTracker::instance()->addTarget(d);
 	sync();
 }
 
 KeyStoreManager::~KeyStoreManager()
 {
+	KeyStoreTracker::instance()->removeTarget(d);
 	delete d;
 }
 
