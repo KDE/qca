@@ -1782,7 +1782,7 @@ CertificateChain Certificate::chain_complete(const CertificateChain &chain, cons
 		if(at == -1)
 		{
 			if(result)
-				*result = ErrorValidityUnknown;
+				*result = ErrorInvalidCA;
 			break;
 		}
 
