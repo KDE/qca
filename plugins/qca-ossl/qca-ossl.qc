@@ -1,6 +1,6 @@
 <qconf>
- <name>qca-openssl</name>
- <profile>qca-openssl.pro</profile>
+ <name>qca-ossl</name>
+ <profile>qca-ossl.pro</profile>
  <noprefix/>
  <lib/>
  <dep type='buildmode'>

@@ -6383,7 +6383,7 @@ public:
 
 	QString name() const
 	{
-		return "qca-openssl";
+		return "qca-ossl";
 	}
 
 	QString credit() const
@@ -6615,7 +6615,7 @@ public:
 	virtual Provider *createProvider() { return new opensslProvider; }
 };
 
-#include "qca-openssl.moc"
+#include "qca-ossl.moc"
 
-Q_EXPORT_PLUGIN2(qca_openssl, opensslPlugin)
+Q_EXPORT_PLUGIN2(qca_ossl, opensslPlugin)
 

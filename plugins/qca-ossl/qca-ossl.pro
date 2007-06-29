@@ -13,8 +13,7 @@ CONFIG += create_prl
 # default windows config for now
 windows:CONFIG += debug_and_release build_all
 
-SOURCES = qca-openssl.cpp
-#SOURCES += main.cpp
+SOURCES = qca-ossl.cpp
 
 windows:{
 	load(winlocal.prf)
