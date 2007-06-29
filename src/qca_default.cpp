@@ -983,6 +983,7 @@ public:
 			ready = true;
 		}
 #endif
+		QMetaObject::invokeMethod(this, "busyEnd", Qt::QueuedConnection);
 	}
 
 	virtual QList<int> keyStores()
