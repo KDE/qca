@@ -996,12 +996,11 @@ bool KeyStoreEntryContext::ensureAccess()
 //----------------------------------------------------------------------------
 void KeyStoreListContext::start()
 {
+	QMetaObject::invokeMethod(this, "busyEnd", Qt::QueuedConnection);
 }
 
-void KeyStoreListContext::setUpdatesEnabled(bool enabled)
+void KeyStoreListContext::setUpdatesEnabled(bool)
 {
-	if(enabled)
-		QMetaObject::invokeMethod(this, "busyEnd", Qt::QueuedConnection);
 }
 
 bool KeyStoreListContext::isReadOnly(int) const
