@@ -1239,7 +1239,7 @@ int main(int argc, char **argv)
 	qapp.setApplicationName(MainWin::tr("CMS Signer"));
 	if(!QCA::isSupported("cms"))
 	{
-		QMessageBox::critical(0, qapp.applicationName() + ": " + MainWin::tr("Error"), MainWin::tr("No support for CMS is available.  Please install an appropriate QCA plugin, such as qca-openssl."));
+		QMessageBox::critical(0, qapp.applicationName() + ": " + MainWin::tr("Error"), MainWin::tr("No support for CMS is available.  Please install an appropriate QCA plugin, such as qca-ossl."));
 		return 1;
 	}
 	MainWin mainWin;

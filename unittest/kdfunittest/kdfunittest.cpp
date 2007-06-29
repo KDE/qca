@@ -94,7 +94,7 @@ void KDFUnitTest::pbkdf1md2Tests_data()
 void KDFUnitTest::pbkdf1md2Tests()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // gcrypt doesn't do md2...
     //    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
@@ -164,7 +164,7 @@ void KDFUnitTest::pbkdf1sha1Tests_data()
 void KDFUnitTest::pbkdf1sha1Tests()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     //    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
@@ -258,7 +258,7 @@ void KDFUnitTest::pbkdf2Tests_data()
 void KDFUnitTest::pbkdf2Tests()
 {
     QStringList providersToTest;
-    //    providersToTest.append("qca-openssl");
+    //    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
@@ -289,7 +289,7 @@ void KDFUnitTest::pbkdf2Tests()
 void KDFUnitTest::pbkdf2extraTests()
 {
     QStringList providersToTest;
-    // providersToTest.append("qca-openssl");
+    // providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 

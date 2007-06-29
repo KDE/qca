@@ -140,8 +140,8 @@ void VeloxUnitTest::cleanupTestCase()
 
 void VeloxUnitTest::sniAlice()
 {
-    if(!QCA::isSupported("tls", "qca-openssl"))
-	QWARN("TLS not supported for qca-openssl");
+    if(!QCA::isSupported("tls", "qca-ossl"))
+	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
         s->start( "alice.sni.velox.ch", 443 );
@@ -152,8 +152,8 @@ void VeloxUnitTest::sniAlice()
 
 void VeloxUnitTest::sniBob()
 {
-    if(!QCA::isSupported("tls", "qca-openssl"))
-	QWARN("TLS not supported for qca-openssl");
+    if(!QCA::isSupported("tls", "qca-ossl"))
+	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
         s->start( "bob.sni.velox.ch", 443 );
@@ -164,8 +164,8 @@ void VeloxUnitTest::sniBob()
 
 void VeloxUnitTest::sniCarol()
 {
-    if(!QCA::isSupported("tls", "qca-openssl"))
-	QWARN("TLS not supported for qca-openssl");
+    if(!QCA::isSupported("tls", "qca-ossl"))
+	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
         s->start( "carol.sni.velox.ch", 443 );
@@ -176,8 +176,8 @@ void VeloxUnitTest::sniCarol()
 
 void VeloxUnitTest::sniDave()
 {
-    if(!QCA::isSupported("tls", "qca-openssl"))
-	QWARN("TLS not supported for qca-openssl");
+    if(!QCA::isSupported("tls", "qca-ossl"))
+	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
         s->start( "dave.sni.velox.ch", 443 );
@@ -188,8 +188,8 @@ void VeloxUnitTest::sniDave()
 
 void VeloxUnitTest::sniMallory()
 {
-    if(!QCA::isSupported("tls", "qca-openssl"))
-	QWARN("TLS not supported for qca-openssl");
+    if(!QCA::isSupported("tls", "qca-ossl"))
+	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
         s->start( "mallory.sni.velox.ch", 443 );
@@ -201,8 +201,8 @@ void VeloxUnitTest::sniMallory()
 
 void VeloxUnitTest::sniIvan()
 {
-    if(!QCA::isSupported("tls", "qca-openssl"))
-	QWARN("TLS not supported for qca-openssl");
+    if(!QCA::isSupported("tls", "qca-ossl"))
+	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
         s->start( "ivan.sni.velox.ch", 443 );

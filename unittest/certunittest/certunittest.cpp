@@ -68,7 +68,7 @@ void CertUnitTest::cleanupTestCase()
 void CertUnitTest::nullCert()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -87,7 +87,7 @@ void CertUnitTest::nullCert()
 void CertUnitTest::noSuchFile()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -105,7 +105,7 @@ void CertUnitTest::noSuchFile()
 void CertUnitTest::CAcertstest()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -156,7 +156,7 @@ void CertUnitTest::CAcertstest()
 void CertUnitTest::qualitysslcatest()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -208,7 +208,7 @@ void CertUnitTest::qualitysslcatest()
 void CertUnitTest::checkExpiredClientCerts()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -316,7 +316,7 @@ void CertUnitTest::checkExpiredClientCerts()
 void CertUnitTest::checkClientCerts()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -425,7 +425,7 @@ void CertUnitTest::checkClientCerts()
 void CertUnitTest::derCAcertstest()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -498,7 +498,7 @@ void CertUnitTest::derCAcertstest()
 void CertUnitTest::altName()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -574,7 +574,7 @@ void CertUnitTest::altName()
 void CertUnitTest::extXMPP()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -616,7 +616,7 @@ void CertUnitTest::extXMPP()
 void CertUnitTest::altNames76()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -711,7 +711,7 @@ void CertUnitTest::altNames76()
 void CertUnitTest::checkExpiredServerCerts()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -814,7 +814,7 @@ void CertUnitTest::checkExpiredServerCerts()
 void CertUnitTest::checkServerCerts()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -927,7 +927,7 @@ void CertUnitTest::checkSystemStore()
 void CertUnitTest::crl()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -988,7 +988,7 @@ void CertUnitTest::crl()
 void CertUnitTest::crl2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -1055,7 +1055,7 @@ void CertUnitTest::crl2()
 void CertUnitTest::csr()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {
@@ -1099,7 +1099,7 @@ void CertUnitTest::csr()
 void CertUnitTest::csr2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-botan");
 
     foreach(const QString provider, providersToTest) {

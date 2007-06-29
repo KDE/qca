@@ -135,19 +135,19 @@ void StaticUnitTest::providers()
     for (int i = 0; i < qcaProviders.size(); ++i) {
 	providerNames.append( qcaProviders[i]->name() );
     }
-    QCOMPARE( providerNames.contains("qca-openssl"), (QBool)true );
+    QCOMPARE( providerNames.contains("qca-ossl"), (QBool)true );
     QCOMPARE( providerNames.contains("qca-gcrypt"), (QBool)true );
     QCOMPARE( providerNames.contains("qca-nss"), (QBool)true );
     QCOMPARE( providerNames.contains("qca-pkcs11"), (QBool)true );
     QCOMPARE( providerNames.contains("qca-gnupg"), (QBool)true );
     QCOMPARE( providerNames.contains("qca-botan"), (QBool)true );
 
-    QCA::setProviderPriority("qca-openssl", 4);
+    QCA::setProviderPriority("qca-ossl", 4);
     QCA::setProviderPriority("qca-botan", 2);
-    QCOMPARE( QCA::providerPriority( "qca-openssl"), 4 );
+    QCOMPARE( QCA::providerPriority( "qca-ossl"), 4 );
     QCOMPARE( QCA::providerPriority( "qca-gcrypt"), 0 );
     QCOMPARE( QCA::providerPriority( "qca-botan"), 2 );
-    QCA::setProviderPriority("qca-openssl", 3);
+    QCA::setProviderPriority("qca-ossl", 3);
     // reuse last
     QCA::setProviderPriority("qca-botan", -1);
     QCOMPARE( QCA::providerPriority( "qca-botan"), 3 );

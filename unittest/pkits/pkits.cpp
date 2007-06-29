@@ -105,7 +105,7 @@ static QCA::CRL crlFromDERFile(const QString &fileName, const QString &provider)
 void Pkits::pkits4_1_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -142,7 +142,7 @@ void Pkits::pkits4_1_1()
 void Pkits::pkits4_1_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -179,7 +179,7 @@ void Pkits::pkits4_1_2()
 void Pkits::pkits4_1_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -216,7 +216,7 @@ void Pkits::pkits4_1_3()
 void Pkits::pkits4_1_4()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -253,7 +253,7 @@ void Pkits::pkits4_1_4()
 void Pkits::pkits4_1_5()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -297,7 +297,7 @@ void Pkits::pkits4_1_5()
 void Pkits::pkits4_1_6()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -332,7 +332,7 @@ void Pkits::pkits4_1_6()
 void Pkits::pkits4_2_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -367,7 +367,7 @@ void Pkits::pkits4_2_1()
 void Pkits::pkits4_2_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -402,7 +402,7 @@ void Pkits::pkits4_2_2()
 void Pkits::pkits4_2_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -437,7 +437,7 @@ void Pkits::pkits4_2_3()
 void Pkits::pkits4_2_4()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -473,7 +473,7 @@ void Pkits::pkits4_2_4()
 void Pkits::pkits4_2_5()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -508,7 +508,7 @@ void Pkits::pkits4_2_5()
 void Pkits::pkits4_2_6()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -543,7 +543,7 @@ void Pkits::pkits4_2_6()
 void Pkits::pkits4_2_7()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -578,7 +578,7 @@ void Pkits::pkits4_2_7()
 void Pkits::pkits4_2_8()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -613,7 +613,7 @@ void Pkits::pkits4_2_8()
 void Pkits::pkits4_3_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -648,7 +648,7 @@ void Pkits::pkits4_3_1()
 void Pkits::pkits4_3_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -683,7 +683,7 @@ void Pkits::pkits4_3_2()
 void Pkits::pkits4_3_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -719,7 +719,7 @@ void Pkits::pkits4_3_3()
 void Pkits::pkits4_3_4()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -754,7 +754,7 @@ void Pkits::pkits4_3_4()
 void Pkits::pkits4_3_5()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -789,7 +789,7 @@ void Pkits::pkits4_3_5()
 void Pkits::pkits4_3_6()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -825,7 +825,7 @@ void Pkits::pkits4_3_6()
 void Pkits::pkits4_3_7()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -862,7 +862,7 @@ void Pkits::pkits4_3_7()
 void Pkits::pkits4_3_8()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -898,7 +898,7 @@ void Pkits::pkits4_3_8()
 void Pkits::pkits4_3_9()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -934,7 +934,7 @@ void Pkits::pkits4_3_9()
 void Pkits::pkits4_3_10()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -971,7 +971,7 @@ void Pkits::pkits4_3_10()
 void Pkits::pkits4_3_11()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -1010,7 +1010,7 @@ void Pkits::pkits4_3_11()
 void Pkits::pkits4_4_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -1045,7 +1045,7 @@ void Pkits::pkits4_4_1()
 void Pkits::pkits4_4_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -1090,7 +1090,7 @@ void Pkits::pkits4_4_2()
 void Pkits::pkits4_4_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )

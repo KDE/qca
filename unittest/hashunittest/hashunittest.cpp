@@ -101,7 +101,7 @@ void HashUnitTest::md2test_data()
 void HashUnitTest::md2test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // no MD2 support for libgcrypt...
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -141,7 +141,7 @@ void HashUnitTest::md4test_data()
 void HashUnitTest::md4test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     // No MD4 support for NSS?
@@ -184,7 +184,7 @@ void HashUnitTest::md5test_data()
 void HashUnitTest::md5test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -208,7 +208,7 @@ void HashUnitTest::md5test()
 void HashUnitTest::md5filetest()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -278,7 +278,7 @@ void HashUnitTest::sha0test_data()
 void HashUnitTest::sha0test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // No SHA0 for botan, gcrypt or nss
 
     QFETCH(QByteArray, input);
@@ -302,7 +302,7 @@ void HashUnitTest::sha0longtest()
     // This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
 
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // No SHA0 for botan, gcrypt or nss
 
     foreach(QString provider, providersToTest) {
@@ -349,7 +349,7 @@ void HashUnitTest::sha1test_data()
 void HashUnitTest::sha1test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-nss");
@@ -372,7 +372,7 @@ void HashUnitTest::sha1test()
 void HashUnitTest::sha1longtest()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-nss");
@@ -459,7 +459,7 @@ void HashUnitTest::sha224test_data()
 void HashUnitTest::sha224test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-ipp");
 
@@ -483,7 +483,7 @@ void HashUnitTest::sha224longtest()
     fillerString.fill('a', 1000);
 
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-ipp");
 
@@ -526,7 +526,7 @@ void HashUnitTest::sha256test_data()
 void HashUnitTest::sha256test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -604,7 +604,7 @@ void HashUnitTest::sha384test_data()
 void HashUnitTest::sha384test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -629,7 +629,7 @@ void HashUnitTest::sha384longtest()
     fillerString.fill('a', 1000);
 
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -682,7 +682,7 @@ void HashUnitTest::sha512test_data()
 void HashUnitTest::sha512test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -707,7 +707,7 @@ void HashUnitTest::sha512longtest()
     fillerString.fill('a', 1000);
 
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -758,7 +758,7 @@ void HashUnitTest::rmd160test_data()
 void HashUnitTest::rmd160test()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
@@ -781,7 +781,7 @@ void HashUnitTest::rmd160longtest()
     fillerString.fill('a', 1000);
 
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 

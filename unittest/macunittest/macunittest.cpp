@@ -59,7 +59,7 @@ void MACUnitTest::cleanupTestCase()
 void MACUnitTest::HMACMD5()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -136,7 +136,7 @@ void MACUnitTest::HMACMD5()
 void MACUnitTest::HMACSHA256()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -218,7 +218,7 @@ void MACUnitTest::HMACSHA256()
 void MACUnitTest::HMACSHA224()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 
@@ -299,7 +299,7 @@ void MACUnitTest::HMACSHA224()
 void MACUnitTest::HMACSHA384()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -381,7 +381,7 @@ void MACUnitTest::HMACSHA384()
 void MACUnitTest::HMACSHA512()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -463,7 +463,7 @@ void MACUnitTest::HMACSHA512()
 void MACUnitTest::HMACSHA1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
@@ -538,7 +538,7 @@ void MACUnitTest::HMACSHA1()
 void MACUnitTest::HMACRMD160()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");

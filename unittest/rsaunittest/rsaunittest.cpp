@@ -53,7 +53,7 @@ void RSAUnitTest::cleanupTestCase()
 void RSAUnitTest::testrsa()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
     // providersToTest.append("qca-gcrypt");
 
     foreach(const QString provider, providersToTest) {

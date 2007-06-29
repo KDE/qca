@@ -72,7 +72,7 @@ void CMSut::xcrypt_data()
 void CMSut::xcrypt()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -171,7 +171,7 @@ void CMSut::signverify_data()
 void CMSut::signverify()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -303,7 +303,7 @@ void CMSut::signverify_message_data()
 void CMSut::signverify_message()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
@@ -421,7 +421,7 @@ void CMSut::signverify_message_invalid_data()
 void CMSut::signverify_message_invalid()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-openssl");
+    providersToTest.append("qca-ossl");
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
