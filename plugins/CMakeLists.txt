@@ -10,7 +10,7 @@ ADD_SUBDIRECTORY(qca-logger)
 ADD_SUBDIRECTORY(qca-softstore)
 
 IF (OPENSSL_FOUND)
-  ADD_SUBDIRECTORY(qca-openssl)
+  ADD_SUBDIRECTORY(qca-ossl)
   MESSAGE(STATUS "OpenSSL plugin enabled")
 ENDIF(OPENSSL_FOUND)
 
