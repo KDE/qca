@@ -269,8 +269,9 @@ private slots:
 
     void ssl_readyReadOutgoing()
     {
-	QByteArray outgoingData = ssl->readOutgoing();
-	layer.specifyEncoded( outgoingData.size(), ssl->bytesOutgoingAvailable());
+	int plainBytes;
+	QByteArray outgoingData = ssl->readOutgoing(&plainBytes);
+	layer.specifyEncoded( outgoingData.size(), plainBytes );
 	sock->write( outgoingData );
     }
 
