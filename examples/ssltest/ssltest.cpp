@@ -111,6 +111,7 @@ public:
 
 		ssl = new QCA::TLS;
 		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
+		connect(ssl, SIGNAL(firstStepDone()), SLOT(ssl_firstStepDone()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 		connect(ssl, SIGNAL(readyReadOutgoing()),
 			SLOT(ssl_readyReadOutgoing()));
@@ -224,9 +225,25 @@ private slots:
 			str += "Error: No certificate";
 		printf("%s\n", qPrintable(str));
 
+		ssl->continueAfterStep();
+
 		printf("Let's try a GET request now.\n");
 		QString req = "GET / HTTP/1.0\nHost: " + host + "\n\n";
 		ssl->write(req.toLatin1());
+	}
+
+	void ssl_firstStepDone()
+	{
+		// We just do this to help doxygen...
+		QCA::TLS *ssl = SecureTest::ssl;
+
+		QList<QCA::CertificateInfoOrdered> issuerList = ssl->issuerList();
+		if(!issuerList.isEmpty())
+			printf("Server requests %d issuers.\n", issuerList.count());
+		else
+			printf("Server requests no specific issuers.\n");
+
+		ssl->continueAfterStep();
 	}
 
 	void ssl_readyRead()
