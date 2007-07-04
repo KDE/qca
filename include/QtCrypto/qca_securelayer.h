@@ -680,6 +680,10 @@ Q_SIGNALS:
 	*/
 	void handshaken();
 
+protected:
+	void connectNotify(const char *signal);
+	void disconnectNotify(const char *signal);
+
 private:
 	Q_DISABLE_COPY(TLS)
 
