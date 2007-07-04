@@ -915,21 +915,21 @@ void TLS::setPacketMTU(int size) const
 
 void TLS::connectNotify(const char *signal)
 {
-	if(QLatin1String(signal) == QMetaObject::normalizedSignature(SIGNAL(firstStepDone())))
+	if(signal == QMetaObject::normalizedSignature(SIGNAL(firstStepDone())))
 		d->connect_firstStepDone = true;
-	else if(QLatin1String(signal) == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
 		d->connect_hostNameReceived = true;
-	else if(QLatin1String(signal) == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
 		d->connect_handshaken = true;
 }
 
 void TLS::disconnectNotify(const char *signal)
 {
-	if(QLatin1String(signal) == QMetaObject::normalizedSignature(SIGNAL(firstStepDone())))
+	if(signal == QMetaObject::normalizedSignature(SIGNAL(firstStepDone())))
 		d->connect_firstStepDone = false;
-	else if(QLatin1String(signal) == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
 		d->connect_hostNameReceived = false;
-	else if(QLatin1String(signal) == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
 		d->connect_handshaken = false;
 }
 
