@@ -1,6 +1,7 @@
 /*
  * qca-sasl.cpp - SASL plugin for QCA
- * Copyright (C) 2003-2006  Justin Karneges <justin@affinix.com>, Michail Pishchagin
+ * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2006  Michail Pishchagin <mblsha@gmail.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -645,16 +646,21 @@ public:
 		int r = sasl_client_new(service.toLatin1().data(), host.toLatin1().data(), localAddr.isEmpty() ? 0 : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? 0 : remoteAddr.toLatin1().data(), callbacks, 0, &con);
 		if(r != SASL_OK) {
 			setAuthCondition(r);
+			doResultsReady();
 			return;
 		}
 
 		if(!setsecprops())
+		{
+			doResultsReady();
 			return;
+		}
 
 		result_mechlist = mechlist;
 		servermode = false;
 		step = 0;
 		result_result = Success;
+		doResultsReady();
 		return;
 	}
 
@@ -685,11 +691,15 @@ public:
 		int r = sasl_server_new(service.toLatin1().data(), host.toLatin1().data(), !realm.isEmpty() ? realm.toLatin1().data() : 0, localAddr.isEmpty() ? 0 : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? 0 : remoteAddr.toLatin1().data(), callbacks, 0, &con);
 		if(r != SASL_OK) {
 			setAuthCondition(r);
+			doResultsReady();
 			return;
 		}
 
 		if(!setsecprops())
+		{
+			doResultsReady();
 			return;
+		}
 
 		const char *ml;
 		r = sasl_listmech(con, 0, 0, " ", 0, &ml, 0, 0);
@@ -702,6 +712,7 @@ public:
 		ca_done = false;
 		ca_skip = false;
 		result_result = Success;
+		doResultsReady();
 		return;
 	}
 
@@ -715,6 +726,7 @@ public:
 		else
 			in_useClientInit = false;
 		serverTryAgain();
+		doResultsReady();
 	}
 
 	virtual SASL::Params clientParams() const
@@ -757,6 +769,7 @@ public:
 			serverTryAgain();
 		else
 			clientTryAgain();
+		doResultsReady();
 	}
 
 	virtual QString mech() const
