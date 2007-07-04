@@ -5033,6 +5033,8 @@ public:
 		else
 			ok = priv_startClient();
 		result_result = ok ? Success : Error;
+
+		doResultsReady();
 	}
 
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app)
