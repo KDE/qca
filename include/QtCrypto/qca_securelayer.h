@@ -1080,12 +1080,17 @@ Q_SIGNALS:
 	/**
 	   This signal is emitted when the client needs
 	   additional parameters
+
+	   Set parameter values as necessary and then call
+	   continueAfterParams().
 	*/
 	void needParams(const QCA::SASL::Params &params);
 
 	/**
 	   This signal is emitted when the server needs to
 	   perform the authentication check
+
+	   If the user and authzid are valid, call continueAfterAuthCheck().
 	*/
 	void authCheck(const QString &user, const QString &authzid);
 

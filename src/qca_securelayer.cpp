@@ -1043,121 +1043,10 @@ public:
 
 	void update()
 	{
-		int _read    = sasl->bytesAvailable();
-		int _readout = sasl->bytesOutgoingAvailable();
-
-	// 	bool force_read = false;
-	//
-	// 	if(!handshaken)
-	// 	{
-	// 		QByteArray a;
-	// 		TLSContext::Result r;
-	// 		c->update(from_net, QByteArray());
-	// 		last_op = OpHandshake;
-	// 		c->waitForResultsReady(-1);
-	// 		a = c->to_net();
-	// 		r = c->result();
-	// 		from_net.clear();
-	//
-	// 		if(r == TLSContext::Error)
-	// 		{
-	// 			reset(ResetSession);
-	// 			error = true;
-	// 			errorCode = ErrorHandshake;
-	// 			return;
-	// 		}
-	//
-	// 		to_net.append(a);
-	//
-	// 		if(r == TLSContext::Success)
-	// 		{
-	// 			peerCert = c->peerCertificateChain();
-	// 			if(!peerCert.isEmpty())
-	// 			{
-	// 				peerValidity = c->peerCertificateValidity();
-	// 				if(peerValidity == ValidityGood && !host.isEmpty() && !peerCert.primary().matchesHostName(host))
-	// 					hostMismatch = true;
-	// 			}
-	// 			sessionInfo = c->sessionInfo();
-	// 			handshaken = true;
-	// 			force_read = true;
-	// 		}
-	// 	}
-	//
-	// 	if(handshaken)
-	// 	{
-			bool eof        = false;
-			bool tryMore    = false;
-			bool force_read = false;
-
-			if(!out.isEmpty() || tryMore)
-			{
-				tryMore = false;
-				QByteArray a;
-				int enc;
-				bool more = false;
-				c->update(QByteArray(), out);
-				c->waitForResultsReady(-1);
-				bool ok = c->result() == SASLContext::Success;
-				a = c->to_net();
-				enc = c->encoded();
-				// eof = c->eof();
-				if(ok && enc < out.size())
-					more = true;
-				out.clear();
-				if(!eof)
-				{
-					if(!ok)
-					{
-						sasl->reset();
-						// error = true;
-						// errorCode = ErrorCrypt;
-						return;
-					}
-					bytesEncoded += enc;
-					if(more)
-						tryMore = true;
-					to_net.append(a);
-				}
-			}
-
-			if(!from_net.isEmpty() || force_read)
-			{
-				QByteArray a;
-				QByteArray b;
-				c->update(from_net, QByteArray());
-				c->waitForResultsReady(-1);
-				bool ok = c->result() == SASLContext::Success;
-				a = c->to_app();
-				b = c->to_net();
-				// eof = c->eof();
-				from_net.clear();
-				if(!ok)
-				{
-					sasl->reset();
-					// error = true;
-					// errorCode = ErrorCrypt;
-					return;
-				}
-				in.append(a);
-				to_net.append(b);
-			}
-
-	// 		if(eof)
-	// 		{
-	// 			close();
-	// 			updateClosing();
-	// 			return;
-	// 		}
-	// 	}
-
-		if(sasl->bytesAvailable() > _read)
-		{
-			//emit sasl->readyRead();
-			QMetaObject::invokeMethod(sasl, "readyRead", Qt::QueuedConnection);
-		}
-		if(sasl->bytesOutgoingAvailable() > _readout)
-			QMetaObject::invokeMethod(sasl, "readyReadOutgoing", Qt::QueuedConnection);
+		pending_write += out.size();
+		c->update(from_net, out);
+		from_net.clear();
+		out.clear();
 	}
 
 	QByteArray out;
@@ -1172,17 +1061,148 @@ public:
 	QString ext_authid;
 	int ext_ssf;
 
+	bool authed;
 	bool tried;
 	SASLContext *c;
 	SASLContext::HostPort local, remote;
 	bool localSet, remoteSet;
-	QByteArray stepData; // mblsha: wtf is this for?
+	QByteArray stepData;
 	bool allowClientSendFirst;
 	bool disableServerSendLast;
 	bool first, server;
 	Error errorCode;
+	int pending_write;
 
 public slots:
+	void sasl_resultsReady()
+	{
+		Private *d = this;
+		SASL *q = sasl;
+
+		if(!authed)
+		{
+			if(server)
+			{
+				if(d->c->result() == SASLContext::Error) {
+					d->errorCode = ErrorHandshake;
+					emit q->error();
+					return;
+				}
+				else if(d->c->result() == SASLContext::Continue) {
+					d->tried = false;
+					emit q->nextStep(d->c->stepData());
+					return;
+				}
+				else if(d->c->result() == SASLContext::AuthCheck) {
+					emit q->authCheck(d->c->username(), d->c->authzid());
+					return;
+				}
+			}
+			else // client
+			{
+				if(first)
+				{
+					if(d->c->result() == SASLContext::Error) {
+						d->errorCode = ErrorHandshake;
+						emit q->error();
+						return;
+					}
+					else if(d->c->result() == SASLContext::Params) {
+						//d->tried = false;
+						Params np = d->c->clientParams();
+						emit q->needParams(np);
+						return;
+					}
+
+					d->first = false;
+					d->tried = false;
+					emit q->clientStarted(d->c->haveClientInit(), d->c->stepData());
+				}
+				else
+				{
+					if(d->c->result() == SASLContext::Error) {
+						d->errorCode = ErrorHandshake;
+						emit q->error();
+						return;
+					}
+					else if(d->c->result() == SASLContext::Params) {
+						//d->tried = false;
+						Params np = d->c->clientParams();
+						emit q->needParams(np);
+						return;
+					}
+					// else if(d->c->result() == SASLContext::Continue) {
+						d->tried = false;
+						emit q->nextStep(d->c->stepData());
+					// 	return;
+					// }
+				}
+			}
+
+			if(d->c->result() == SASLContext::Success)
+			{
+				d->authed = true;
+				emit q->authenticated();
+			}
+			else if(d->c->result() == SASLContext::Error) {
+				d->errorCode = ErrorHandshake;
+				emit q->error();
+			}
+
+			return;
+		}
+
+		int _read    = sasl->bytesAvailable();
+		int _readout = sasl->bytesOutgoingAvailable();
+
+		bool eof        = false;
+
+		QByteArray a;
+		int enc;
+		bool more = false;
+		bool ok = c->result() == SASLContext::Success;
+		a = c->to_net();
+		enc = c->encoded();
+		if(ok)
+		{
+			if(enc < pending_write)
+			{
+				pending_write -= enc;
+				more = true;
+			}
+		}
+
+		if(!eof)
+		{
+			if(!ok)
+			{
+				sasl->reset();
+				return;
+			}
+			bytesEncoded += enc;
+			to_net.append(a);
+		}
+
+		QByteArray b;
+		b = c->to_app();
+
+		if(!ok)
+		{
+			sasl->reset();
+			return;
+		}
+
+		in.append(b);
+
+		if(sasl->bytesAvailable() > _read)
+		{
+			//emit sasl->readyRead();
+			QMetaObject::invokeMethod(sasl, "readyRead", Qt::QueuedConnection);
+		}
+		if(sasl->bytesOutgoingAvailable() > _readout)
+			QMetaObject::invokeMethod(sasl, "readyReadOutgoing", Qt::QueuedConnection);
+	}
+
 	void tryAgain();
 };
 
@@ -1191,6 +1211,7 @@ SASL::SASL(QObject *parent, const QString &provider)
 {
 	d = new Private(this);
 	d->c = (SASLContext *)context();
+	d->connect(d->c, SIGNAL(resultsReady()), SLOT(sasl_resultsReady()));
 	reset();
 }
 
@@ -1209,11 +1230,13 @@ void SASL::reset()
 	d->ext_authid = QString();
 	d->ext_ssf    = 0;
 
+	d->authed = false;
 	d->out.clear();
 	d->in.clear();
 	d->to_net.clear();
 	d->from_net.clear();
 	d->bytesEncoded = 0;
+	d->pending_write = 0;
 
 	d->c->reset();
 }
@@ -1421,21 +1444,6 @@ void SASL::Private::tryAgain()
 		else {
 			d->c->tryAgain();
 		}
-
-		if(d->c->result() == SASLContext::Error) {
-			d->errorCode = ErrorHandshake;
-			emit q->error();
-			return;
-		}
-		else if(d->c->result() == SASLContext::Continue) {
-			d->tried = false;
-			emit q->nextStep(d->c->stepData());
-			return;
-		}
-		else if(d->c->result() == SASLContext::AuthCheck) {
-			emit q->authCheck(d->c->username(), d->c->authzid());
-			return;
-		}
 	}
 	else {
 		if(d->first) {
@@ -1446,22 +1454,6 @@ void SASL::Private::tryAgain()
 			}
 
 			d->c->tryAgain();
-
-			if(d->c->result() == SASLContext::Error) {
-				d->errorCode = ErrorHandshake;
-				emit q->error();
-				return;
-			}
-			else if(d->c->result() == SASLContext::Params) {
-				//d->tried = false;
-				Params np = d->c->clientParams();
-				emit q->needParams(np);
-				return;
-			}
-
-			d->first = false;
-			d->tried = false;
-			emit q->clientStarted(d->c->haveClientInit(), d->c->stepData());
 		}
 		else {
 			if(!d->tried) {
@@ -1470,31 +1462,7 @@ void SASL::Private::tryAgain()
 			}
 			else
 				d->c->tryAgain();
-
-			if(d->c->result() == SASLContext::Error) {
-				d->errorCode = ErrorHandshake;
-				emit q->error();
-				return;
-			}
-			else if(d->c->result() == SASLContext::Params) {
-				//d->tried = false;
-				Params np = d->c->clientParams();
-				emit q->needParams(np);
-				return;
-			}
-			// else if(d->c->result() == SASLContext::Continue) {
-				d->tried = false;
-				emit q->nextStep(d->c->stepData());
-			// 	return;
-			// }
 		}
-	}
-
-	if(d->c->result() == SASLContext::Success)
-		emit q->authenticated();
-	else if(d->c->result() == SASLContext::Error) {
-		d->errorCode = ErrorHandshake;
-		emit q->error();
 	}
 }
 
