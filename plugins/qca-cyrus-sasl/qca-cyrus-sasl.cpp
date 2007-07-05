@@ -323,7 +323,7 @@ private:
 
 	void setAuthCondition(int r)
 	{
-            qDebug() << "authcondition: " << r;
+            //qDebug() << "authcondition: " << r;
 		SASL::AuthCondition x;
 		switch(r) {
 			// common
@@ -660,6 +660,7 @@ public:
 		servermode = false;
 		step = 0;
 		result_result = Success;
+		clientTryAgain();
 		doResultsReady();
 		return;
 	}
