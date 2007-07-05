@@ -754,6 +754,7 @@ public:
 	*/
 	enum AuthFlags
 	{
+		AuthFlagsNone          = 0x00,
 		AllowPlain             = 0x01,
 		AllowAnonymous         = 0x02,
 		RequireForwardSecrecy  = 0x04,
