@@ -332,13 +332,32 @@ public:
 		{
 			if(mode == TLS::Stream)
 			{
+				// FIXME: we should be able to send both at once,
+				//   but if we do this then qca-ossl gives us
+				//   broken security layer.  probably a bug in
+				//   qca-ossl?
+
 				// otherwise, send both from_net and out
-				if(!from_net.isEmpty() || !out.isEmpty())
+				/*if(!from_net.isEmpty() || !out.isEmpty())
 				{
 					op = OpUpdate;
 					pending_write += out.size();
 					c->update(from_net, out);
 					from_net.clear();
+					out.clear();
+				}*/
+
+				if(!from_net.isEmpty())
+				{
+					op = OpUpdate;
+					c->update(from_net, QByteArray());
+					from_net.clear();
+				}
+				else if(!out.isEmpty())
+				{
+					op = OpUpdate;
+					pending_write += out.size();
+					c->update(QByteArray(), out);
 					out.clear();
 				}
 			}
@@ -398,7 +417,8 @@ private slots:
 
 				if(!a.isEmpty())
 				{
-					emit q->readyReadOutgoing();
+					QMetaObject::invokeMethod(q, "readyReadOutgoing", Qt::QueuedConnection);
+					//emit q->readyReadOutgoing();
 					if(!self)
 						return;
 				}
@@ -431,7 +451,8 @@ private slots:
 
 				if(!a.isEmpty())
 				{
-					emit q->readyReadOutgoing();
+					QMetaObject::invokeMethod(q, "readyReadOutgoing", Qt::QueuedConnection);
+					//emit q->readyReadOutgoing();
 					if(!self)
 						return;
 				}
@@ -453,6 +474,7 @@ private slots:
 						blocked = true;
 						emit q->handshaken();
 					}
+					// FIXME: else?
 					return;
 				}
 				else // Continue
@@ -513,6 +535,7 @@ private slots:
 			{
 				reset(ResetSession);
 				errorCode = ErrorCrypt;
+				emit q->error();
 				return;
 			}
 
@@ -523,11 +546,9 @@ private slots:
 			bool more = false;
 			if(mode == TLS::Stream)
 			{
-				if(enc < pending_write)
-				{
-					pending_write -= enc;
+				pending_write -= enc;
+				if(pending_write > 0)
 					more = true;
-				}
 			}
 			else
 			{
@@ -547,6 +568,7 @@ private slots:
 			{
 				to_net.append(a);
 				in.append(b);
+				bytesEncoded += enc;
 			}
 			else
 			{
@@ -556,21 +578,21 @@ private slots:
 
 			if(!a.isEmpty())
 			{
-				emit q->readyReadOutgoing();
+				QMetaObject::invokeMethod(q, "readyReadOutgoing", Qt::QueuedConnection);
+				//emit q->readyReadOutgoing();
 				if(!self)
 					return;
 			}
 
 			if(!b.isEmpty())
 			{
-				emit q->readyRead();
+				QMetaObject::invokeMethod(q, "readyRead", Qt::QueuedConnection);
+				//emit q->readyRead();
 				if(!self)
 					return;
 			}
 
-			if(!eof)
-				bytesEncoded += enc;
-			else
+			if(eof)
 				close();
 
 			if(eof || more)
@@ -1012,12 +1034,131 @@ bool SASL::Params::canSendRealm() const
 class SASL::Private : public QObject
 {
 	Q_OBJECT
-private:
-	SASL *sasl;
 public:
-	Private(SASL *parent)
+	SASL *q;
+	SASLContext *c;
+
+	enum
 	{
-		sasl = parent;
+		OpStart,
+		OpServerFirstStep,
+		OpNextStep,
+		OpTryAgain,
+		OpUpdate
+	};
+
+	AuthFlags auth_flags;
+	int ssfmin, ssfmax;
+	QString ext_authid;
+	int ext_ssf;
+	bool localSet, remoteSet;
+	SASLContext::HostPort local, remote;
+
+	bool set_username, set_authzid, set_password, set_realm;
+	QString username, authzid, realm;
+	SecureArray password;
+
+	bool server;
+	QStringList mechlist;
+	QString server_realm;
+	bool allowClientSendFirst;
+	bool disableServerSendLast;
+
+	int op;
+	bool first;
+	bool authed;
+	Error errorCode;
+	QByteArray out;
+	QByteArray in;
+	QByteArray to_net;
+	QByteArray from_net;
+	int bytesEncoded;
+	int pending_write;
+
+	Private(SASL *_q) : QObject(_q), q(_q)
+	{
+		c = 0;
+		set_username = false;
+		set_authzid = false;
+		set_password = false;
+		set_realm = false;
+
+		reset(ResetAll);
+
+		c = static_cast<SASLContext *>(q->context());
+
+		// parent the context to us, so that moveToThread works
+		c->setParent(this);
+
+		connect(c, SIGNAL(resultsReady()), SLOT(sasl_resultsReady()));
+	}
+
+	~Private()
+	{
+		// context is owned by Algorithm, unparent so we don't double-delete
+		c->setParent(0);
+	}
+
+	void reset(ResetMode mode)
+	{
+		if(c)
+		{
+			c->reset();
+
+			if(mode < ResetAll)
+			{
+				QString *p_username = 0;
+				QString *p_authzid = 0;
+				SecureArray *p_password = 0;
+				QString *p_realm = 0;
+
+				if(set_username)
+					p_username = &username;
+				if(set_authzid)
+					p_authzid = &authzid;
+				if(set_password)
+					p_password = &password;
+				if(set_realm)
+					p_realm = &realm;
+
+				c->setClientParams(p_username, p_authzid, p_password, p_realm);
+			}
+		}
+
+		op = -1;
+		authed = false;
+		out.clear();
+		from_net.clear();
+		bytesEncoded = 0;
+		pending_write = 0;
+
+		if(mode >= ResetSessionAndData)
+		{
+			in.clear();
+			to_net.clear();
+		}
+
+		if(mode >= ResetAll)
+		{
+			auth_flags = SASL::AuthFlagsNone;
+			ssfmin = 0;
+			ssfmax = 0;
+			ext_authid = QString();
+			ext_ssf = 0;
+			localSet = false;
+			remoteSet = false;
+			local = SASLContext::HostPort();
+			remote = SASLContext::HostPort();
+
+			set_username = false;
+			username = QString();
+			set_authzid = false;
+			authzid = QString();
+			set_password = false;
+			password = SecureArray();
+			set_realm = false;
+			realm = QString();
+		}
 	}
 
 	void setup(const QString &service, const QString &host)
@@ -1026,75 +1167,128 @@ public:
 		c->setConstraints(auth_flags, ssfmin, ssfmax);
 	}
 
-	void handleServerFirstStep()
+	void start()
 	{
-		errorCode = ErrorHandshake;
+		op = OpStart;
+		first = true;
 
-		if(c->result() == SASLContext::Success)
-			QMetaObject::invokeMethod(sasl, "authenticated", Qt::QueuedConnection);
-		else if(c->result() == SASLContext::Continue)
-			QMetaObject::invokeMethod(sasl, "nextStep", Qt::QueuedConnection, Q_ARG(QByteArray, c->stepData())); // TODO: double-check this!
-		else if(c->result() == SASLContext::AuthCheck ||
-		        c->result() == SASLContext::Params)
-			QMetaObject::invokeMethod(this, "tryAgain", Qt::QueuedConnection);
+		if(server)
+			c->startServer(server_realm, disableServerSendLast);
 		else
-			QMetaObject::invokeMethod(sasl, "error", Qt::QueuedConnection);
+			c->startClient(mechlist, allowClientSendFirst);
+	}
+
+	void putServerFirstStep(const QString &mech, const QByteArray *clientInit)
+	{
+		if(op != -1)
+			return;
+
+		op = OpServerFirstStep;
+
+		c->serverFirstStep(mech, clientInit);
+	}
+
+	void putStep(const QByteArray &stepData)
+	{
+		if(op != -1)
+			return;
+
+		op = OpNextStep;
+
+		c->nextStep(stepData);
+	}
+
+	void tryAgain()
+	{
+		if(op != -1)
+			return;
+
+		op = OpTryAgain;
+
+		c->tryAgain();
 	}
 
 	void update()
 	{
+		if(op != -1)
+			return;
+
+		op = OpUpdate;
+
 		pending_write += out.size();
 		c->update(from_net, out);
 		from_net.clear();
 		out.clear();
 	}
 
-	QByteArray out;
-	QByteArray in;
-	QByteArray to_net;
-	QByteArray from_net;
-	int bytesEncoded;
-
-	// security opts
-	AuthFlags auth_flags;
-	int ssfmin, ssfmax;
-	QString ext_authid;
-	int ext_ssf;
-
-	bool authed;
-	bool tried;
-	SASLContext *c;
-	SASLContext::HostPort local, remote;
-	bool localSet, remoteSet;
-	QByteArray stepData;
-	bool allowClientSendFirst;
-	bool disableServerSendLast;
-	bool first, server;
-	Error errorCode;
-	int pending_write;
-
-public slots:
+private slots:
 	void sasl_resultsReady()
 	{
-		Private *d = this;
-		SASL *q = sasl;
+		QPointer<QObject> self = this;
 
-		if(!authed)
+		int last_op = op;
+		op = -1;
+
+		SASLContext::Result r = c->result();
+
+		if(last_op == OpStart)
 		{
 			if(server)
 			{
-				if(d->c->result() == SASLContext::Error) {
-					d->errorCode = ErrorHandshake;
+				if(r != SASLContext::Success)
+				{
+					errorCode = SASL::ErrorInit;
 					emit q->error();
 					return;
 				}
-				else if(d->c->result() == SASLContext::Continue) {
-					d->tried = false;
-					emit q->nextStep(d->c->stepData());
+
+				emit q->serverStarted();
+				return;
+			}
+			else // client
+			{
+				// fall into this logic
+				last_op = OpTryAgain;
+			}
+		}
+		else if(last_op == OpServerFirstStep)
+		{
+			// fall into this logic
+			last_op = OpTryAgain;
+		}
+		else if(last_op == OpNextStep)
+		{
+			// fall into this logic
+			last_op = OpTryAgain;
+		}
+
+		if(last_op == OpTryAgain)
+		{
+			if(server)
+			{
+				if(r == SASLContext::Continue)
+				{
+					emit q->nextStep(c->stepData());
 					return;
 				}
-				else if(d->c->result() == SASLContext::AuthCheck) {
-					emit q->authCheck(d->c->username(), d->c->authzid());
+				else if(r == SASLContext::AuthCheck)
+				{
+					emit q->authCheck(c->username(), c->authzid());
+					return;
+				}
+				else if(r == SASLContext::Success)
+				{
+					// FIXME: not signal safe
+					emit q->nextStep(c->stepData());
+
+					authed = true;
+					emit q->authenticated();
+					return;
+				}
+				else // error
+				{
+					errorCode = SASL::ErrorHandshake;
+					emit q->error();
 					return;
 				}
 			}
@@ -1102,117 +1296,103 @@ public slots:
 			{
 				if(first)
 				{
-					if(d->c->result() == SASLContext::Error) {
-						d->errorCode = ErrorHandshake;
+					if(r == SASLContext::Error)
+					{
+						if(first)
+							errorCode = SASL::ErrorInit;
+						else
+							errorCode = SASL::ErrorHandshake;
 						emit q->error();
 						return;
 					}
-					else if(d->c->result() == SASLContext::Params) {
-						//d->tried = false;
-						Params np = d->c->clientParams();
+					else if(r == SASLContext::Params)
+					{
+						Params np = c->clientParams();
 						emit q->needParams(np);
 						return;
 					}
 
-					d->first = false;
-					d->tried = false;
-					emit q->clientStarted(d->c->haveClientInit(), d->c->stepData());
+					first = false;
+					emit q->clientStarted(c->haveClientInit(), c->stepData());
+					return;
 				}
 				else
 				{
-					if(d->c->result() == SASLContext::Error) {
-						d->errorCode = ErrorHandshake;
+					if(r == SASLContext::Error)
+					{
+						errorCode = ErrorHandshake;
 						emit q->error();
 						return;
 					}
-					else if(d->c->result() == SASLContext::Params) {
-						//d->tried = false;
-						Params np = d->c->clientParams();
+					else if(r == SASLContext::Params)
+					{
+						Params np = c->clientParams();
 						emit q->needParams(np);
 						return;
 					}
-					// else if(d->c->result() == SASLContext::Continue) {
-						d->tried = false;
-						emit q->nextStep(d->c->stepData());
-					// 	return;
-					// }
+					else if(r == SASLContext::Continue)
+					{
+						emit q->nextStep(c->stepData());
+						return;
+					}
+					else if(r == SASLContext::Success)
+					{
+						// FIXME: not signal safe
+						emit q->nextStep(c->stepData());
+
+						authed = true;
+						emit q->authenticated();
+						return;
+					}
 				}
 			}
-
-			if(d->c->result() == SASLContext::Success)
+		}
+		else if(last_op == OpUpdate)
+		{
+			if(r != SASLContext::Success)
 			{
-				d->authed = true;
-				emit q->authenticated();
-			}
-			else if(d->c->result() == SASLContext::Error) {
-				d->errorCode = ErrorHandshake;
+				errorCode = ErrorCrypt;
 				emit q->error();
-			}
-
-			return;
-		}
-
-		int _read    = sasl->bytesAvailable();
-		int _readout = sasl->bytesOutgoingAvailable();
-
-		bool eof        = false;
-
-		QByteArray a;
-		int enc;
-		bool more = false;
-		bool ok = c->result() == SASLContext::Success;
-		a = c->to_net();
-		enc = c->encoded();
-		if(ok)
-		{
-			if(enc < pending_write)
-			{
-				pending_write -= enc;
-				more = true;
-			}
-		}
-
-		if(!eof)
-		{
-			if(!ok)
-			{
-				sasl->reset();
 				return;
 			}
+
+			QByteArray a = c->to_net();
+			QByteArray b = c->to_app();
+			int enc = c->encoded();
+
+			to_net += a;
+			in += b;
+
+			bool more = false;
+			pending_write -= enc;
+			if(pending_write > 0)
+				more = true;
 			bytesEncoded += enc;
-			to_net.append(a);
+
+			if(!a.isEmpty())
+			{
+				emit q->readyReadOutgoing();
+				if(!self)
+					return;
+			}
+
+			if(!b.isEmpty())
+			{
+				emit q->readyRead();
+				if(!self)
+					return;
+			}
+
+			if(more)
+				update();
 		}
-
-		QByteArray b;
-		b = c->to_app();
-
-		if(!ok)
-		{
-			sasl->reset();
-			return;
-		}
-
-		in.append(b);
-
-		if(sasl->bytesAvailable() > _read)
-		{
-			//emit sasl->readyRead();
-			QMetaObject::invokeMethod(sasl, "readyRead", Qt::QueuedConnection);
-		}
-		if(sasl->bytesOutgoingAvailable() > _readout)
-			QMetaObject::invokeMethod(sasl, "readyReadOutgoing", Qt::QueuedConnection);
 	}
-
-	void tryAgain();
 };
 
 SASL::SASL(QObject *parent, const QString &provider)
 :SecureLayer(parent), Algorithm("sasl", provider)
 {
 	d = new Private(this);
-	d->c = (SASLContext *)context();
-	d->connect(d->c, SIGNAL(resultsReady()), SLOT(sasl_resultsReady()));
-	reset();
 }
 
 SASL::~SASL()
@@ -1222,23 +1402,7 @@ SASL::~SASL()
 
 void SASL::reset()
 {
-	d->localSet  = false;
-	d->remoteSet = false;
-
-	d->ssfmin     = 0;
-	d->ssfmax     = 0;
-	d->ext_authid = QString();
-	d->ext_ssf    = 0;
-
-	d->authed = false;
-	d->out.clear();
-	d->in.clear();
-	d->to_net.clear();
-	d->from_net.clear();
-	d->bytesEncoded = 0;
-	d->pending_write = 0;
-
-	d->c->reset();
+	d->reset(ResetAll);
 }
 
 SASL::Error SASL::errorCode() const
@@ -1281,84 +1445,85 @@ void SASL::setExternalAuthId(const QString &authid)
 	d->ext_authid = authid;
 }
 
-void SASL::setExternalSSF(int x)
+void SASL::setExternalSSF(int strength)
 {
-	d->ext_ssf = x;
+	d->ext_ssf = strength;
 }
 
 void SASL::setLocalAddress(const QString &addr, quint16 port)
 {
-	d->localSet   = true;
+	d->localSet = true;
 	d->local.addr = addr;
 	d->local.port = port;
 }
 
 void SASL::setRemoteAddress(const QString &addr, quint16 port)
 {
-	d->remoteSet   = true;
+	d->remoteSet = true;
 	d->remote.addr = addr;
 	d->remote.port = port;
 }
 
 void SASL::startClient(const QString &service, const QString &host, const QStringList &mechlist, ClientSendMode mode)
 {
+	d->reset(ResetSessionAndData);
 	d->setup(service, host);
-	d->allowClientSendFirst = (mode == AllowClientSendFirst);
-	d->c->startClient(mechlist, d->allowClientSendFirst);
-	d->first  = true;
 	d->server = false;
-	d->tried  = false;
-	QTimer::singleShot(0, d, SLOT(tryAgain()));
+	d->mechlist = mechlist;
+	d->allowClientSendFirst = (mode == AllowClientSendFirst);
+	d->start();
 }
 
 void SASL::startServer(const QString &service, const QString &host, const QString &realm, ServerSendMode mode)
 {
+	d->reset(ResetSessionAndData);
 	d->setup(service, host);
-
-	d->disableServerSendLast = (mode == DisableServerSendLast);
-	d->c->startServer(realm, d->disableServerSendLast);
-	d->first  = true;
 	d->server = true;
-	d->tried  = false;
-	if(d->c->result() == SASLContext::Success)
-		QMetaObject::invokeMethod(this, "serverStarted", Qt::QueuedConnection);
+	d->server_realm = realm;
+	d->disableServerSendLast = (mode == DisableServerSendLast);
+	d->start();
 }
 
 void SASL::putServerFirstStep(const QString &mech)
 {
-	d->c->serverFirstStep(mech, 0);
-	d->handleServerFirstStep();
+	d->putServerFirstStep(mech, 0);
 }
 
 void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
 {
-	d->c->serverFirstStep(mech, &clientInit);
-	d->handleServerFirstStep();
+	d->putServerFirstStep(mech, &clientInit);
 }
 
 void SASL::putStep(const QByteArray &stepData)
 {
-	d->stepData = stepData;
-	d->tryAgain();
+	d->putStep(stepData);
 }
 
 void SASL::setUsername(const QString &user)
 {
+	d->set_username = true;
+	d->username = user;
 	d->c->setClientParams(&user, 0, 0, 0);
 }
 
 void SASL::setAuthzid(const QString &authzid)
 {
+	d->set_authzid = true;
+	d->authzid = authzid;
 	d->c->setClientParams(0, &authzid, 0, 0);
 }
 
 void SASL::setPassword(const SecureArray &pass)
 {
+	d->set_password = true;
+	d->password = pass;
 	d->c->setClientParams(0, 0, &pass, 0);
 }
 
 void SASL::setRealm(const QString &realm)
 {
+	d->set_realm = true;
+	d->realm = realm;
 	d->c->setClientParams(0, 0, 0, &realm);
 }
 
@@ -1429,41 +1594,6 @@ QByteArray SASL::readOutgoing(int *plainBytes)
 		*plainBytes = d->bytesEncoded;
 	d->bytesEncoded = 0;
 	return a;
-}
-
-void SASL::Private::tryAgain()
-{
-	Private *d = this;
-	SASL *q = sasl;
-
-	if(d->server) {
-		if(!d->tried) {
-			d->c->nextStep(d->stepData);
-			d->tried = true;
-		}
-		else {
-			d->c->tryAgain();
-		}
-	}
-	else {
-		if(d->first) {
-			if(d->c->result() == SASLContext::Error) {
-				d->errorCode = ErrorInit;
-				emit q->error();
-				return;
-			}
-
-			d->c->tryAgain();
-		}
-		else {
-			if(!d->tried) {
-				d->c->nextStep(d->stepData);
-				d->tried = true;
-			}
-			else
-				d->c->tryAgain();
-		}
-	}
 }
 
 }
