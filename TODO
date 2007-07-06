@@ -1,10 +1,7 @@
 * beta7
   api:
     prompting for unavailable entries
-  code:
-    securelayer: complete
   other:
-    rename qca-openssl
     update README/INSTALL, special thanks to Jack Lloyd
 
 * test1
