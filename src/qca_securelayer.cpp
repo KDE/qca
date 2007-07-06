@@ -185,12 +185,13 @@ public:
 	QByteArray to_net, from_net;
 	int pending_write;
 	LayerTracker layer;
+	bool need_finish_handshake;
 
 	QList<QByteArray> packet_in, packet_out;
 	QList<QByteArray> packet_to_net, packet_from_net;
 	QList<int> packet_to_net_encoded;
 
-	bool connect_hostNameReceived, connect_certificateRequested, connect_handshaken;
+	bool connect_hostNameReceived, connect_certificateRequested, connect_peerCertificateAvailable, connect_handshaken;
 
 	enum { OpStart, OpUpdate };
 
@@ -207,6 +208,7 @@ public:
 		c = 0;
 		connect_hostNameReceived = false;
 		connect_certificateRequested = false;
+		connect_peerCertificateAvailable = false;
 		connect_handshaken = false;
 		server = false;
 
@@ -246,6 +248,7 @@ public:
 		pending_write = 0;
 		blocked = false;
 		layer.reset();
+		need_finish_handshake = false;
 
 		if(mode >= ResetSessionAndData)
 		{
@@ -332,6 +335,18 @@ public:
 			return;
 
 		//printf("update\n");
+		if(need_finish_handshake)
+		{
+			need_finish_handshake = false;
+
+			handshaken = true;
+			if(connect_handshaken)
+			{
+				blocked = true;
+				QMetaObject::invokeMethod(q, "handshaken", Qt::QueuedConnection);
+				return;
+			}
+		}
 
 		if(!handshaken)
 		{
@@ -508,13 +523,15 @@ private slots:
 						session.change(sc);
 					}
 
-					handshaken = true;
-					if(connect_handshaken)
+					need_finish_handshake = true;
+					if(connect_peerCertificateAvailable)
 					{
 						blocked = true;
-						emit q->handshaken();
+						QMetaObject::invokeMethod(q, "peerCertificateAvailable", Qt::QueuedConnection);
+						return;
 					}
-					// FIXME: else?
+
+					update();
 					return;
 				}
 				else // Continue
@@ -540,6 +557,8 @@ private slots:
 					}
 					else
 					{
+						// TODO: check for server certificate here also, and emit peerCertificateAvailable
+
 						bool serverHello = c->serverHelloReceived();
 						if(serverHello)
 						{
@@ -1003,6 +1022,8 @@ void TLS::connectNotify(const char *signal)
 		d->connect_hostNameReceived = true;
 	else if(signal == QMetaObject::normalizedSignature(SIGNAL(certificateRequested())))
 		d->connect_certificateRequested = true;
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(peerCertificateAvailable())))
+		d->connect_peerCertificateAvailable = true;
 	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
 		d->connect_handshaken = true;
 }
@@ -1013,6 +1034,8 @@ void TLS::disconnectNotify(const char *signal)
 		d->connect_hostNameReceived = false;
 	else if(signal == QMetaObject::normalizedSignature(SIGNAL(certificateRequested())))
 		d->connect_certificateRequested = false;
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(peerCertificateAvailable())))
+		d->connect_peerCertificateAvailable = false;
 	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
 		d->connect_handshaken = false;
 }

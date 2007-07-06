@@ -518,11 +518,11 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	/**
 	   Resumes TLS processing.
 
-	   Call this function after hostNameReceived(),
-	   certificateRequested() or handshaken() is emitted.  By requiring
-	   this function to be called in order to proceed, applications are
-	   given a chance to perform user interaction between steps in the
-	   TLS process.
+	   Call this function after hostNameReceived(), certificateRequested()
+	   peerCertificateAvailable() or handshaken() is emitted.  By
+	   requiring this function to be called in order to proceed,
+	   applications are given a chance to perform user interaction between
+	   steps in the TLS process.
 	*/
 	void continueAfterStep();
 
@@ -704,6 +704,18 @@ Q_SIGNALS:
 	   \sa continueAfterStep
 	*/
 	void certificateRequested();
+
+	/**
+	   Emitted when a certificate is received from the peer.
+	   At this time, you may inspect peerIdentityResult(),
+	   peerCertificateValidity(), and peerCertificateChain().
+
+	   You must call continueAfterStep() in order for TLS
+	   processing to resume after this signal is emitted.
+
+	   \sa continueAfterStep
+	*/
+	void peerCertificateAvailable();
 
 	/**
 	   Emitted when the protocol handshake is complete.  At
