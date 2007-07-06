@@ -103,6 +103,9 @@ class SecureTest : public QObject
 public:
 	SecureTest()
 	{
+		sock_done = false;
+		ssl_done = false;
+
 		sock = new QTcpSocket;
 		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
 		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
@@ -180,7 +183,10 @@ private slots:
 	void sock_connectionClosed()
 	{
 		printf("\nConnection closed.\n");
-		quit();
+		sock_done = true;
+
+		if(ssl_done && sock_done)
+			emit quit();
 	}
 
 	void sock_error(QAbstractSocket::SocketError x)
@@ -192,7 +198,7 @@ private slots:
 		}
 
 		printf("\nSocket error.\n");
-		quit();
+		emit quit();
 	}
 
 	void ssl_handshaken()
@@ -266,6 +272,10 @@ private slots:
 	void ssl_closed()
 	{
 		printf("SSL session closed.\n");
+		ssl_done = true;
+
+		if(ssl_done && sock_done)
+			emit quit();
 	}
 
 	void ssl_error()
@@ -277,12 +287,12 @@ private slots:
 		if(x == QCA::TLS::ErrorHandshake)
 		{
 			printf("SSL Handshake Error!\n");
-			quit();
+			emit quit();
 		}
 		else
 		{
 			printf("SSL Error!\n");
-			quit();
+			emit quit();
 		}
 	}
 
@@ -291,6 +301,7 @@ private:
 	QTcpSocket *sock;
 	QCA::TLS *ssl;
 	QCA::Certificate cert;
+	bool sock_done, ssl_done;
 };
 
 #include "ssltest.moc"
