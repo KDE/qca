@@ -113,8 +113,8 @@ public:
 			SLOT(sock_error(QAbstractSocket::SocketError)));
 
 		ssl = new QCA::TLS;
+		connect(ssl, SIGNAL(certificateRequested()), SLOT(ssl_certificateRequested()));
 		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
-		connect(ssl, SIGNAL(firstStepDone()), SLOT(ssl_firstStepDone()));
 		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
 		connect(ssl, SIGNAL(readyReadOutgoing()),
 			SLOT(ssl_readyReadOutgoing()));
@@ -238,16 +238,19 @@ private slots:
 		ssl->write(req.toLatin1());
 	}
 
-	void ssl_firstStepDone()
+	void ssl_certificateRequested()
 	{
 		// We just do this to help doxygen...
 		QCA::TLS *ssl = SecureTest::ssl;
 
+		printf("Server requested client certificate.\n");
 		QList<QCA::CertificateInfoOrdered> issuerList = ssl->issuerList();
 		if(!issuerList.isEmpty())
-			printf("Server requests %d issuers.\n", issuerList.count());
-		else
-			printf("Server requests no specific issuers.\n");
+		{
+			printf("Allowed issuers:\n");
+			foreach(QCA::CertificateInfoOrdered i, issuerList)
+				printf("  %s\n", qPrintable(i.toString()));
+		}
 
 		ssl->continueAfterStep();
 	}

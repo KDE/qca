@@ -5020,6 +5020,12 @@ public:
 		key = _key;
 	}
 
+	virtual void setSessionId(const TLSSessionContext &id)
+	{
+		// TODO
+		Q_UNUSED(id);
+	}
+
 	virtual void shutdown()
 	{
 		mode = Closing;
@@ -5340,6 +5346,8 @@ public:
 							 SSL_get_current_cipher(ssl)->id);
 
 		sessInfo.cipherMaxBits = SSL_get_cipher_bits(ssl, &(sessInfo.cipherBits));
+
+		sessInfo.id = 0; // TODO: session resuming
 
 		return sessInfo;
 	}

@@ -118,6 +118,33 @@ QByteArray SecureLayer::readUnprocessed()
 }
 
 //----------------------------------------------------------------------------
+// TLSSession
+//----------------------------------------------------------------------------
+TLSSession::TLSSession()
+{
+}
+
+TLSSession::TLSSession(const TLSSession &from)
+:Algorithm(from)
+{
+}
+
+TLSSession::~TLSSession()
+{
+}
+
+TLSSession & TLSSession::operator=(const TLSSession &from)
+{
+	Algorithm::operator=(from);
+	return *this;
+}
+
+bool TLSSession::isNull() const
+{
+	return (!context() ? true : false);
+}
+
+//----------------------------------------------------------------------------
 // TLS
 //----------------------------------------------------------------------------
 enum ResetMode
@@ -143,16 +170,16 @@ public:
 	int con_minSSF, con_maxSSF;
 	QStringList con_cipherSuites;
 	QList<CertificateInfoOrdered> issuerList;
+	TLSSession session;
 	bool tryCompress;
 	int packet_mtu;
 
 	QString host;
 	CertificateChain peerCert;
 	Validity peerValidity;
-	bool blocked, need_emit_firststep;
+	bool blocked;
 	bool hostMismatch;
 	TLSContext::SessionInfo sessionInfo;
-	bool certificateRequested;
 
 	QByteArray in, out;
 	QByteArray to_net, from_net;
@@ -163,7 +190,7 @@ public:
 	QList<QByteArray> packet_to_net, packet_from_net;
 	QList<int> packet_to_net_encoded;
 
-	bool connect_firstStepDone, connect_hostNameReceived, connect_handshaken;
+	bool connect_hostNameReceived, connect_certificateRequested, connect_handshaken;
 
 	enum { OpStart, OpUpdate };
 
@@ -178,8 +205,8 @@ public:
 	{
 		// c is 0 during initial reset, so we don't redundantly reset it
 		c = 0;
-		connect_firstStepDone = false;
 		connect_hostNameReceived = false;
+		connect_certificateRequested = false;
 		connect_handshaken = false;
 		server = false;
 
@@ -218,9 +245,7 @@ public:
 		op = -1;
 		pending_write = 0;
 		blocked = false;
-		need_emit_firststep = false;
 		layer.reset();
-		certificateRequested = false;
 
 		if(mode >= ResetSessionAndData)
 		{
@@ -248,6 +273,7 @@ public:
 			tryCompress = false;
 			packet_mtu = -1;
 			issuerList.clear();
+			session = TLSSession();
 		}
 	}
 
@@ -267,6 +293,11 @@ public:
 		c->setTrustedCertificates(trusted);
 		if(serverMode)
 			c->setIssuerList(issuerList);
+		if(!session.isNull())
+		{
+			TLSSessionContext *sc = static_cast<TLSSessionContext*>(session.context());
+			c->setSessionId(*sc);
+		}
 		c->setMTU(packet_mtu);
 
 		op = OpStart;
@@ -301,17 +332,6 @@ public:
 			return;
 
 		//printf("update\n");
-		if(need_emit_firststep)
-		{
-			need_emit_firststep = false;
-
-			if(connect_firstStepDone)
-			{
-				blocked = true;
-				emit q->firstStepDone();
-				return;
-			}
-		}
 
 		if(!handshaken)
 		{
@@ -482,6 +502,12 @@ private slots:
 					}
 
 					sessionInfo = c->sessionInfo();
+					if(sessionInfo.id)
+					{
+						TLSSessionContext *sc = static_cast<TLSSessionContext*>(sessionInfo.id->clone());
+						session.change(sc);
+					}
+
 					handshaken = true;
 					if(connect_handshaken)
 					{
@@ -504,18 +530,7 @@ private slots:
 								if(connect_hostNameReceived)
 								{
 									blocked = true;
-									need_emit_firststep = true;
 									emit q->hostNameReceived();
-									if(!self)
-										return;
-								}
-							}
-							else
-							{
-								if(connect_firstStepDone)
-								{
-									blocked = true;
-									emit q->firstStepDone();
 									if(!self)
 										return;
 								}
@@ -528,14 +543,16 @@ private slots:
 						bool serverHello = c->serverHelloReceived();
 						if(serverHello)
 						{
-							certificateRequested = c->certificateRequested();
-							issuerList = c->issuerList();
-							if(connect_firstStepDone)
+							if(c->certificateRequested())
 							{
-								blocked = true;
-								emit q->firstStepDone();
-								if(!self)
-									return;
+								issuerList = c->issuerList();
+								if(connect_certificateRequested)
+								{
+									blocked = true;
+									emit q->certificateRequested();
+									if(!self)
+										return;
+								}
 							}
 						}
 						return;
@@ -725,11 +742,6 @@ void TLS::setConstraints(const QStringList &cipherSuiteList)
 		d->c->setConstraints(d->con_cipherSuites);
 }
 
-bool TLS::certificateRequested() const
-{
-	return d->certificateRequested;
-}
-
 QList<CertificateInfoOrdered> TLS::issuerList() const
 {
 	return d->issuerList;
@@ -740,6 +752,11 @@ void TLS::setIssuerList(const QList<CertificateInfoOrdered> &issuers)
 	d->issuerList = issuers;
 	if(d->active)
 		d->c->setIssuerList(issuers);
+}
+
+void TLS::setSession(const TLSSession &session)
+{
+	d->session = session;
 }
 
 bool TLS::canCompress() const
@@ -813,6 +830,11 @@ int TLS::cipherBits() const
 int TLS::cipherMaxBits() const
 {
 	return d->sessionInfo.cipherMaxBits;
+}
+
+TLSSession TLS::session() const
+{
+	return d->session;
 }
 
 TLS::Error TLS::errorCode() const
@@ -977,20 +999,20 @@ void TLS::setPacketMTU(int size) const
 
 void TLS::connectNotify(const char *signal)
 {
-	if(signal == QMetaObject::normalizedSignature(SIGNAL(firstStepDone())))
-		d->connect_firstStepDone = true;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
+	if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
 		d->connect_hostNameReceived = true;
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(certificateRequested())))
+		d->connect_certificateRequested = true;
 	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
 		d->connect_handshaken = true;
 }
 
 void TLS::disconnectNotify(const char *signal)
 {
-	if(signal == QMetaObject::normalizedSignature(SIGNAL(firstStepDone())))
-		d->connect_firstStepDone = false;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
+	if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
 		d->connect_hostNameReceived = false;
+	else if(signal == QMetaObject::normalizedSignature(SIGNAL(certificateRequested())))
+		d->connect_certificateRequested = false;
 	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
 		d->connect_handshaken = false;
 }

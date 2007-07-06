@@ -447,6 +447,13 @@ Q_SIGNALS:
 	void storeUpdated(int id);
 };
 
+class QCA_EXPORT TLSSessionContext : public BasicContext
+{
+	Q_OBJECT
+public:
+	TLSSessionContext(Provider *p) : BasicContext(p, "tlssession") {}
+};
+
 class QCA_EXPORT TLSContext : public Provider::Context
 {
 	Q_OBJECT
@@ -458,6 +465,7 @@ public:
 		TLS::Version version;
 		QString cipherSuite;
 		int cipherBits, cipherMaxBits;
+		TLSSessionContext *id;
 	};
 
 	enum Result
@@ -482,6 +490,7 @@ public:
 	virtual void setTrustedCertificates(const CertificateCollection &trusted) = 0;
 	virtual void setIssuerList(const QList<CertificateInfoOrdered> &issuerList) = 0;
 	virtual void setCertificate(const CertificateChain &cert, const PrivateKey &key) = 0;
+	virtual void setSessionId(const TLSSessionContext &id) = 0;
 
 	virtual void shutdown() = 0; // flag for shutdown, call update next
 	virtual void setMTU(int size); // for dtls

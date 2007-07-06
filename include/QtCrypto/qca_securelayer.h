@@ -217,6 +217,20 @@ private:
 };
 
 /**
+   Session token, used for TLS resuming
+*/
+class QCA_EXPORT TLSSession : public Algorithm
+{
+public:
+	TLSSession();
+	TLSSession(const TLSSession &from);
+	~TLSSession();
+	TLSSession & operator=(const TLSSession &from);
+
+	bool isNull() const;
+};
+
+/**
    \class TLS qca_securelayer.h QtCrypto
 
    Transport Layer Security / Secure Socket Layer 
@@ -403,11 +417,6 @@ public:
 	void setConstraints(const QStringList &cipherSuiteList);
 
 	/**
-	   Returns true if a certificate was requested by the server
-	*/
-	bool certificateRequested() const;
-
-	/**
 	   Retrieve the list of allowed issuers by the server,
 	   if the server has provided them.  Only DN types will
 	   be present.
@@ -436,6 +445,11 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	   use with servers only.  Only DN types are allowed.
 	*/
 	void setIssuerList(const QList<CertificateInfoOrdered> &issuers);
+
+	/**
+	   Resume a TLS session using the given session object
+	*/
+	void setSession(const TLSSession &session);
 
 	/**
 	   Test if the link can use compression
@@ -504,10 +518,11 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	/**
 	   Resumes TLS processing.
 
-	   Call this function after firstStepDone() or handshaken() is
-	   emitted.  By requiring this function to be called in order
-	   to proceed, applications are given a chance to perform user
-	   interaction between steps in the TLS process.
+	   Call this function after hostNameReceived(),
+	   certificateRequested() or handshaken() is emitted.  By requiring
+	   this function to be called in order to proceed, applications are
+	   given a chance to perform user interaction between steps in the
+	   TLS process.
 	*/
 	void continueAfterStep();
 
@@ -558,6 +573,12 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	   for older "export ciphers".
 	*/
 	int cipherMaxBits() const;
+
+	/**
+	   The session object of the TLS connection, which can be used
+	   for resuming.
+	*/
+	TLSSession session() const;
 
 	/**
 	   This method returns the type of error that has
@@ -672,18 +693,17 @@ Q_SIGNALS:
 	void hostNameReceived();
 
 	/**
-	   Emitted when the first part of the TLS negotiation
-	   has completed.  At this time, the client can
-	   inspect version(), peerCertificateChain(),
-	   certificateRequested() and issuerList(), and the
-	   server can inspect version().
+	   Emitted when the server requests a certificate.  At
+	   this time, the client can inspect the issuerList().
 
 	   You must call continueAfterStep() in order for TLS
 	   processing to resume after this signal is emitted.
 
+	   This signal is only emitted in client mode.
+
 	   \sa continueAfterStep
 	*/
-	void firstStepDone();
+	void certificateRequested();
 
 	/**
 	   Emitted when the protocol handshake is complete.  At
