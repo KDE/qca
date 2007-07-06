@@ -1,9 +1,3 @@
-* beta7
-  api:
-    prompting for unavailable entries
-  other:
-    update README/INSTALL, special thanks to Jack Lloyd
-
 * test1
   doc:
     documentation overhaul
