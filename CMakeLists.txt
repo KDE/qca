@@ -114,6 +114,8 @@ INCLUDE_DIRECTORIES(${QT_QTCORE_INCLUDE_DIR} "${qca_INCLUDEDIR}/QtCrypto")
 CONFIGURE_FILE("qca.pc.cmake" "${CMAKE_BINARY_DIR}/qca.pc" @ONLY)
 INSTALL(FILES "${CMAKE_BINARY_DIR}/qca.pc" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
 
+CONFIGURE_FILE("crypto.prf.cmake" "${CMAKE_BINARY_DIR}/crypto.prf" @ONLY)
+INSTALL(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION ${CMAKE_INSTALL_PREFIX}/mkspecs/features)
 
 add_subdirectory(src)
 add_subdirectory(tools)
