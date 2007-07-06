@@ -42,6 +42,7 @@ public:
 	QList<Item> pending;
 	bool prompting;
 	QMessageBox *token_prompt;
+	bool auto_accept;
 
 	QCA::KeyStoreManager ksm;
 	QList<QCA::KeyStore*> keyStores;
@@ -149,12 +150,44 @@ private slots:
 			//   we should still check if the token is present, due to
 			//   a possible race between insert and token request.
 			bool found = false;
-			foreach(QCA::KeyStore *ks, keyStores)
+
+			// token-only
+			if(event.keyStoreEntry().isNull())
 			{
-				if(ks->id() == event.keyStoreInfo().id())
+				foreach(QCA::KeyStore *ks, keyStores)
 				{
-					found = true;
-					break;
+					if(ks->id() == event.keyStoreInfo().id())
+					{
+						found = true;
+						break;
+					}
+				}
+			}
+			// token-entry
+			else
+			{
+				QCA::KeyStoreEntry kse = event.keyStoreEntry();
+
+				QCA::KeyStore *ks = 0;
+				foreach(QCA::KeyStore *i, keyStores)
+				{
+					if(i->id() == event.keyStoreInfo().id())
+					{
+						ks = i;
+						break;
+					}
+				}
+				if(ks)
+				{
+					QList<QCA::KeyStoreEntry> list = ks->entryList();
+					foreach(const QCA::KeyStoreEntry &e, list)
+					{
+						if(e.id() == kse.id() && kse.isAvailable())
+						{
+							found = true;
+							break;
+						}
+					}
 				}
 			}
 			if(found)
@@ -168,18 +201,19 @@ private slots:
 			QString name;
 			if(!entry.isNull())
 			{
-				name = Prompter::tr("the '%1' token for %2").arg(entry.storeName(), entry.name());
+				name = Prompter::tr("Please make %1 (of %2) available").arg(entry.name(), entry.storeName());
 			}
 			else
 			{
-				name = Prompter::tr("the '%1' token").arg(event.keyStoreInfo().name());
+				name = Prompter::tr("Please insert the '%1' token").arg(event.keyStoreInfo().name());
 			}
 
-			QString str = Prompter::tr("Please insert %1 and click OK.").arg(name);
+			QString str = Prompter::tr("%1 and click OK.").arg(name);
 
 			QMessageBox msgBox(QMessageBox::Information, QApplication::instance()->applicationName() + ": " + tr("Prompt"), str, QMessageBox::Ok | QMessageBox::Cancel, 0);
 			token_prompt = &msgBox;
-			if(msgBox.exec() == QDialog::Accepted)
+			auto_accept = false;
+			if(msgBox.exec() == QMessageBox::Ok || auto_accept)
 				handler.tokenOkay(id);
 			else
 				handler.reject(id);
@@ -199,16 +233,19 @@ private slots:
 	void ks_available(const QString &keyStoreId)
 	{
 		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, &ksm);
+		connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
 		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
 		keyStores += ks;
+		ks->startAsynchronousMode();
 
-		// are we currently in a token prompt?
-		if(token_prompt && pending.first().event.type() == QCA::Event::Token)
+		// are we currently in a token-only prompt?
+		if(token_prompt && pending.first().event.type() == QCA::Event::Token && pending.first().event.keyStoreEntry().isNull())
 		{
 			// was the token we're looking for just inserted?
 			if(pending.first().event.keyStoreInfo().id() == keyStoreId)
 			{
 				// auto-accept
+				auto_accept = true;
 				token_prompt->accept();
 			}
 		}
@@ -219,6 +256,39 @@ private slots:
 		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
 		keyStores.removeAll(ks);
 		delete ks;
+	}
+
+	void ks_updated()
+	{
+		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
+
+		// are we currently in a token-entry prompt?
+		if(token_prompt && pending.first().event.type() == QCA::Event::Token && !pending.first().event.keyStoreEntry().isNull())
+		{
+			QCA::KeyStoreEntry kse = pending.first().event.keyStoreEntry();
+
+			// was the token of the entry we're looking for updated?
+			if(pending.first().event.keyStoreInfo().id() == ks->id())
+			{
+				// is the entry available?
+				bool avail = false;
+				QList<QCA::KeyStoreEntry> list = ks->entryList();
+				foreach(const QCA::KeyStoreEntry &e, list)
+				{
+					if(e.id() == kse.id())
+					{
+						avail = kse.isAvailable();
+						break;
+					}
+				}
+				if(avail)
+				{
+					// auto-accept
+					auto_accept = true;
+					token_prompt->accept();
+				}
+			}
+		}
 	}
 };
 

@@ -469,12 +469,44 @@ private slots:
 			//   we should still check if the token is present, due to
 			//   a possible race between insert and token request.
 			bool found = false;
-			foreach(QCA::KeyStore *ks, keyStores)
+
+			// token-only
+			if(e.keyStoreEntry().isNull())
 			{
-				if(ks->id() == e.keyStoreInfo().id())
+				foreach(QCA::KeyStore *ks, keyStores)
 				{
-					found = true;
-					break;
+					if(ks->id() == e.keyStoreInfo().id())
+					{
+						found = true;
+						break;
+					}
+				}
+			}
+			// token-entry
+			else
+			{
+				QCA::KeyStoreEntry kse = e.keyStoreEntry();
+
+				QCA::KeyStore *ks = 0;
+				foreach(QCA::KeyStore *i, keyStores)
+				{
+					if(i->id() == e.keyStoreInfo().id())
+					{
+						ks = i;
+						break;
+					}
+				}
+				if(ks)
+				{
+					QList<QCA::KeyStoreEntry> list = ks->entryList();
+					foreach(const QCA::KeyStoreEntry &e, list)
+					{
+						if(e.id() == kse.id() && kse.isAvailable())
+						{
+							found = true;
+							break;
+						}
+					}
 				}
 			}
 			if(found)
@@ -488,14 +520,14 @@ private slots:
 			QString name;
 			if(!entry.isNull())
 			{
-				name = QString("the '") + entry.storeName() + "' token for " + entry.name();
+				name = QString("Please make ") + entry.name() + " (of " + entry.storeName() + ") available";
 			}
 			else
 			{
-				name = QString("the '") + e.keyStoreInfo().name() + "' token";
+				name = QString("Please insert the '") + e.keyStoreInfo().name() + "' token";
 			}
 
-			QString str = QString("Please insert %1 and press Enter (or 'q' to cancel) ...").arg(name);
+			QString str = QString("%1 and press Enter (or 'q' to cancel) ...").arg(name);
 
 			if(!prompt)
 			{
@@ -573,11 +605,13 @@ private slots:
 	void ks_available(const QString &keyStoreId)
 	{
 		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, &ksm);
+		connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
 		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
 		keyStores += ks;
+		ks->startAsynchronousMode();
 
-		// are we currently in a token prompt?
-		if(prompt && prompt_event.type() == QCA::Event::Token)
+		// are we currently in a token-only prompt?
+		if(prompt && prompt_event.type() == QCA::Event::Token && prompt_event.keyStoreEntry().isNull())
 		{
 			// was the token we're looking for just inserted?
 			if(prompt_event.keyStoreInfo().id() == keyStoreId)
@@ -596,6 +630,41 @@ private slots:
 		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
 		keyStores.removeAll(ks);
 		delete ks;
+	}
+
+	void ks_updated()
+	{
+		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
+
+		// are we currently in a token-entry prompt?
+		if(prompt && prompt_event.type() == QCA::Event::Token && !prompt_event.keyStoreEntry().isNull())
+		{
+			QCA::KeyStoreEntry kse = prompt_event.keyStoreEntry();
+
+			// was the token of the entry we're looking for updated?
+			if(prompt_event.keyStoreInfo().id() == ks->id())
+			{
+				// is the entry available?
+				bool avail = false;
+				QList<QCA::KeyStoreEntry> list = ks->entryList();
+				foreach(const QCA::KeyStoreEntry &e, list)
+				{
+					if(e.id() == kse.id())
+					{
+						avail = kse.isAvailable();
+						break;
+					}
+				}
+				if(avail)
+				{
+					fprintf(stderr, "Entry available!  Continuing...\n");
+
+					// auto-accept
+					auto_accept = true;
+					prompt_finished();
+				}
+			}
+		}
 	}
 };
 
