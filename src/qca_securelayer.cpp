@@ -32,7 +32,7 @@ Provider::Context *getContext(const QString &type, const QString &provider);
 //----------------------------------------------------------------------------
 // LayerTracker
 //----------------------------------------------------------------------------
-/*class LayerTracker
+class LayerTracker
 {
 private:
 	struct Item
@@ -93,7 +93,7 @@ public:
 		}
 		return plain;
 	}
-};*/
+};
 
 //----------------------------------------------------------------------------
 // SecureLayer
@@ -156,6 +156,7 @@ public:
 	QByteArray in, out;
 	QByteArray to_net, from_net;
 	int pending_write;
+	LayerTracker layer;
 
 	QList<QByteArray> packet_in, packet_out;
 	QList<QByteArray> packet_to_net, packet_from_net;
@@ -214,6 +215,7 @@ public:
 		pending_write = 0;
 		blocked = false;
 		need_emit_firststep = false;
+		layer.reset();
 
 		if(mode >= ResetSessionAndData)
 		{
@@ -284,6 +286,7 @@ public:
 
 	void update()
 	{
+		//printf("update attempt\n");
 		if(blocked)
 			return;
 
@@ -291,6 +294,7 @@ public:
 		if(op != -1)
 			return;
 
+		//printf("update\n");
 		if(need_emit_firststep)
 		{
 			need_emit_firststep = false;
@@ -353,7 +357,7 @@ public:
 					c->update(from_net, QByteArray());
 					from_net.clear();
 				}
-				else if(!out.isEmpty())
+				else //if(!out.isEmpty())
 				{
 					op = OpUpdate;
 					pending_write += out.size();
@@ -389,7 +393,8 @@ private slots:
 			{
 				reset(ResetSession);
 				errorCode = TLS::ErrorInit;
-				emit q->error();
+				QMetaObject::invokeMethod(q, "error", Qt::QueuedConnection);
+				//emit q->error();
 				return;
 			}
 
@@ -406,7 +411,8 @@ private slots:
 				{
 					reset(ResetSession);
 					errorCode = ErrorHandshake;
-					emit q->error();
+					QMetaObject::invokeMethod(q, "error", Qt::QueuedConnection);
+					//emit q->error();
 					return;
 				}
 
@@ -427,7 +433,8 @@ private slots:
 				{
 					from_net = c->unprocessed();
 					reset(ResetSession);
-					emit q->closed();
+					QMetaObject::invokeMethod(q, "closed", Qt::QueuedConnection);
+					//emit q->closed();
 					return;
 				}
 
@@ -440,7 +447,8 @@ private slots:
 				{
 					reset(ResetSession);
 					errorCode = TLS::ErrorHandshake;
-					emit q->error();
+					QMetaObject::invokeMethod(q, "error", Qt::QueuedConnection);
+					//emit q->error();
 					return;
 				}
 
@@ -535,11 +543,13 @@ private slots:
 			{
 				reset(ResetSession);
 				errorCode = ErrorCrypt;
-				emit q->error();
+				QMetaObject::invokeMethod(q, "error", Qt::QueuedConnection);
+				//emit q->error();
 				return;
 			}
 
 			QByteArray b = c->to_app();
+			//printf("to_app: %d (%s)\n", b.size(), b.data());
 			bool eof = c->eof();
 			int enc = c->encoded();
 
@@ -563,6 +573,9 @@ private slots:
 				if(!packet_out.isEmpty())
 					more = true;
 			}
+
+			if(!out.isEmpty())
+				more = true;
 
 			if(mode == TLS::Stream)
 			{
@@ -853,7 +866,10 @@ void TLS::close()
 void TLS::write(const QByteArray &a)
 {
 	if(d->mode == Stream)
+	{
 		d->out.append(a);
+		d->layer.addPlain(a.size());
+	}
 	else
 		d->packet_out.append(a);
 	d->update();
@@ -888,6 +904,7 @@ QByteArray TLS::readOutgoing(int *plainBytes)
 		d->to_net.clear();
 		if(plainBytes)
 			*plainBytes = d->bytesEncoded;
+		d->layer.specifyEncoded(a.size(), d->bytesEncoded);
 		d->bytesEncoded = 0;
 		return a;
 	}
@@ -911,6 +928,11 @@ QByteArray TLS::readUnprocessed()
 	}
 	else
 		return QByteArray();
+}
+
+int TLS::convertBytesWritten(qint64 bytes)
+{
+	return d->layer.finished(bytes);
 }
 
 int TLS::packetsAvailable() const
@@ -1074,6 +1096,7 @@ public:
 	QByteArray from_net;
 	int bytesEncoded;
 	int pending_write;
+	LayerTracker layer;
 
 	Private(SASL *_q) : QObject(_q), q(_q)
 	{
@@ -1131,6 +1154,7 @@ public:
 		from_net.clear();
 		bytesEncoded = 0;
 		pending_write = 0;
+		layer.reset();
 
 		if(mode >= ResetSessionAndData)
 		{
@@ -1570,6 +1594,7 @@ int SASL::bytesOutgoingAvailable() const
 void SASL::write(const QByteArray &a)
 {
 	d->out.append(a);
+	d->layer.addPlain(a.size());
 	d->update();
 }
 
@@ -1592,8 +1617,14 @@ QByteArray SASL::readOutgoing(int *plainBytes)
 	d->to_net.clear();
 	if(plainBytes)
 		*plainBytes = d->bytesEncoded;
+	d->layer.specifyEncoded(a.size(), d->bytesEncoded);
 	d->bytesEncoded = 0;
 	return a;
+}
+
+int SASL::convertBytesWritten(qint64 bytes)
+{
+	return d->layer.finished(bytes);
 }
 
 }

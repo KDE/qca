@@ -178,6 +178,11 @@ public:
 	*/
 	virtual QByteArray readUnprocessed();
 
+	/**
+	   Convert encrypted bytes written to plain text bytes written
+	*/
+	virtual int convertBytesWritten(qint64 encryptedBytes) = 0;
+
 Q_SIGNALS:
 	/**
 	   This signal is emitted when SecureLayer has
@@ -606,6 +611,7 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	virtual void writeIncoming(const QByteArray &a);
 	virtual QByteArray readOutgoing(int *plainBytes = 0);
 	virtual QByteArray readUnprocessed();
+	virtual int convertBytesWritten(qint64 encryptedBytes);
 
 	/**
 	   Determine the number of packets available to be
@@ -1049,12 +1055,11 @@ public:
 	// reimplemented
 	virtual int bytesAvailable() const;
 	virtual int bytesOutgoingAvailable() const;
-
 	virtual void write(const QByteArray &a);
 	virtual QByteArray read();
-
 	virtual void writeIncoming(const QByteArray &a);
 	virtual QByteArray readOutgoing(int *plainBytes = 0);
+	virtual int convertBytesWritten(qint64 encryptedBytes);
 
 Q_SIGNALS:
 	/**
