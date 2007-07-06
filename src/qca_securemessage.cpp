@@ -139,6 +139,12 @@ void SecureMessageKey::setX509PrivateKey(const PrivateKey &k)
 	d->cert_sec = k;
 }
 
+void SecureMessageKey::setX509KeyBundle(const KeyBundle &kb)
+{
+	setX509CertificateChain(kb.certificateChain());
+	setX509PrivateKey(kb.privateKey());
+}
+
 bool SecureMessageKey::havePrivate() const
 {
 	if(d->type == SecureMessageKey::PGP && !d->pgp_sec.isNull())

@@ -649,6 +649,11 @@ void TLS::setCertificate(const CertificateChain &cert, const PrivateKey &key)
 		d->c->setCertificate(cert, key);
 }
 
+void TLS::setCertificate(const KeyBundle &kb)
+{
+	setCertificate(kb.certificateChain(), kb.privateKey());
+}
+
 CertificateCollection TLS::trustedCertificates() const
 {
 	return d->trusted;

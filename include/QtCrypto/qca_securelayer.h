@@ -349,6 +349,13 @@ public:
 	void setCertificate(const CertificateChain &cert, const PrivateKey &key);
 
 	/**
+	   \overload
+
+	   Allows setting a certificate from a KeyBundle.
+	*/
+	void setCertificate(const KeyBundle &kb);
+
+	/**
 	   Return the trusted certificates set for this object
 	*/
 	CertificateCollection trustedCertificates() const;

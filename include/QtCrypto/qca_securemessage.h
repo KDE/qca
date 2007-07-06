@@ -137,6 +137,11 @@ public:
 	void setX509PrivateKey(const PrivateKey &k);
 
 	/**
+	   Set the public and private part of this X.509 key with KeyBundle.
+	*/
+	void setX509KeyBundle(const KeyBundle &kb);
+
+	/**
 	   Test if this key contains a private key part
 	*/
 	bool havePrivate() const;
