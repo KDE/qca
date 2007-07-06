@@ -152,6 +152,7 @@ public:
 	bool blocked, need_emit_firststep;
 	bool hostMismatch;
 	TLSContext::SessionInfo sessionInfo;
+	bool certificateRequested;
 
 	QByteArray in, out;
 	QByteArray to_net, from_net;
@@ -180,6 +181,7 @@ public:
 		connect_firstStepDone = false;
 		connect_hostNameReceived = false;
 		connect_handshaken = false;
+		server = false;
 
 		reset(ResetAll);
 
@@ -202,6 +204,8 @@ public:
 		if(c)
 			c->reset();
 
+		if(!server)
+			issuerList.clear();
 		active = false;
 		server = false;
 		host = QString();
@@ -216,6 +220,7 @@ public:
 		blocked = false;
 		need_emit_firststep = false;
 		layer.reset();
+		certificateRequested = false;
 
 		if(mode >= ResetSessionAndData)
 		{
@@ -242,6 +247,7 @@ public:
 			con_cipherSuites = QStringList();
 			tryCompress = false;
 			packet_mtu = -1;
+			issuerList.clear();
 		}
 	}
 
@@ -522,6 +528,7 @@ private slots:
 						bool serverHello = c->serverHelloReceived();
 						if(serverHello)
 						{
+							certificateRequested = c->certificateRequested();
 							issuerList = c->issuerList();
 							if(connect_firstStepDone)
 							{
@@ -718,6 +725,11 @@ void TLS::setConstraints(const QStringList &cipherSuiteList)
 		d->c->setConstraints(d->con_cipherSuites);
 }
 
+bool TLS::certificateRequested() const
+{
+	return d->certificateRequested;
+}
+
 QList<CertificateInfoOrdered> TLS::issuerList() const
 {
 	return d->issuerList;
@@ -754,6 +766,7 @@ void TLS::startClient(const QString &host)
 {
 	d->reset(ResetSessionAndData);
 	d->host = host;
+	d->issuerList.clear();
 
 	// client mode
 	d->start(false);

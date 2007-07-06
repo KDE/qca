@@ -521,6 +521,7 @@ public:
 	virtual bool clientHelloReceived() const = 0;
 	virtual bool serverHelloReceived() const = 0;
 	virtual QString hostName() const = 0;
+	virtual bool certificateRequested() const = 0;
 	virtual QList<CertificateInfoOrdered> issuerList() const = 0;
 
 	// call after successful handshake

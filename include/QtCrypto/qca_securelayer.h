@@ -403,6 +403,11 @@ public:
 	void setConstraints(const QStringList &cipherSuiteList);
 
 	/**
+	   Returns true if a certificate was requested by the server
+	*/
+	bool certificateRequested() const;
+
+	/**
 	   Retrieve the list of allowed issuers by the server,
 	   if the server has provided them.  Only DN types will
 	   be present.
@@ -669,9 +674,9 @@ Q_SIGNALS:
 	/**
 	   Emitted when the first part of the TLS negotiation
 	   has completed.  At this time, the client can
-	   inspect the version(), peerCertificateChain()
-	   and issuerList(), and the server can inspect the
-	   version().
+	   inspect version(), peerCertificateChain(),
+	   certificateRequested() and issuerList(), and the
+	   server can inspect version().
 
 	   You must call continueAfterStep() in order for TLS
 	   processing to resume after this signal is emitted.

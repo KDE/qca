@@ -5307,6 +5307,12 @@ public:
 		return QString();
 	}
 
+	virtual bool certificateRequested() const
+	{
+		// TODO
+		return false;
+	}
+
 	virtual QList<CertificateInfoOrdered> issuerList() const
 	{
 		// TODO
