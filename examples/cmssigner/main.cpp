@@ -1242,6 +1242,7 @@ int main(int argc, char **argv)
 		QMessageBox::critical(0, qapp.applicationName() + ": " + MainWin::tr("Error"), MainWin::tr("No support for CMS is available.  Please install an appropriate QCA plugin, such as qca-ossl."));
 		return 1;
 	}
+	QCA::KeyStoreManager::start();
 	MainWin mainWin;
 	mainWin.show();
 	return qapp.exec();
