@@ -65,67 +65,6 @@ char pemdata_privkey[] =
 	"07y2gaVbYxtis0s=\n"
 	"-----END PRIVATE KEY-----\n";
 
-
-class LayerTracker
-{
-public:
-    struct Item
-    {
-	int plain;
-	qint64 encoded;
-    };
-
-    LayerTracker()
-    {
-	p = 0;
-    }
-
-    void reset()
-    {
-	p = 0;
-	list.clear();
-    }
-
-    void addPlain(int plain)
-    {
-	p += plain;
-    }
-
-    void specifyEncoded(int encoded, int plain)
-    {
-	// can't specify more bytes than we have
-	if(plain > p)
-	    plain = p;
-	p -= plain;
-	Item i;
-	i.plain = plain;
-	i.encoded = encoded;
-	list += i;
-    }
-
-    int finished(qint64 encoded)
-    {
-	int plain = 0;
-	for(QList<Item>::Iterator it = list.begin(); it != list.end();) {
-	    Item &i = *it;
-
-	    // not enough?
-	    if(encoded < i.encoded) {
-		i.encoded -= encoded;
-		break;
-	    }
-
-	    encoded -= i.encoded;
-	    plain += i.plain;
-	    it = list.erase(it);
-	}
-	return plain;
-    }
-
-    int p;
-    QList<Item> list;
-};
-
 class SecureServer : public QObject
 {
     Q_OBJECT
@@ -227,7 +166,7 @@ private slots:
     void sock_bytesWritten(qint64 x)
     {
 	if(mode == Active && sent) {
-	    qint64 bytes = layer.finished(x);
+	    qint64 bytes = ssl->convertBytesWritten(x);
 	    bytesLeft -= bytes;
 
 	    if(bytesLeft == 0) {
@@ -246,10 +185,10 @@ private slots:
     void ssl_handshaken()
     {
 	qDebug() << "Successful SSL handshake.  Waiting for newline.";
-	layer.reset();
 	bytesLeft = 0;
 	sent = false;
 	mode = Active;
+	ssl->continueAfterStep();
     }
 
     void ssl_readyRead()
@@ -263,7 +202,6 @@ private slots:
 
 	qDebug() << "Sending test response.";
 	sent = true;
-	layer.addPlain(b.size());
 	ssl->write(b);
     }
 
@@ -271,7 +209,6 @@ private slots:
     {
 	int plainBytes;
 	QByteArray outgoingData = ssl->readOutgoing(&plainBytes);
-	layer.specifyEncoded( outgoingData.size(), plainBytes );
 	sock->write( outgoingData );
     }
 
@@ -306,7 +243,6 @@ private:
     bool sent;
     int mode;
     qint64 bytesLeft;
-    LayerTracker layer;
 };
 
 #include "sslservtest.moc"
