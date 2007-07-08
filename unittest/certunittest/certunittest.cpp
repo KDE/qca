@@ -916,11 +916,15 @@ void CertUnitTest::checkServerCerts()
 
 void CertUnitTest::checkSystemStore()
 {
-    QCOMPARE( QCA::haveSystemStore(), true );
+    if ( QCA::isSupported("cert") && QCA::isSupported("crl") ) {
+        QCOMPARE( QCA::haveSystemStore(), true );
 
-    if ( QCA::haveSystemStore() && QCA::isSupported("cert") ) {
 	QCA::CertificateCollection collection1;
 	collection1 = QCA::systemStore();
+	// Do we have any certs?
+	QVERIFY( collection1.certificates().count() > 0);
+    } else {
+      QCOMPARE( QCA::haveSystemStore(), false );
     }
 }
 
