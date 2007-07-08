@@ -34,7 +34,6 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void hexConversions();
-    void providers();
     void capabilities();
     void secureMemory();
 private:
@@ -85,33 +84,16 @@ void StaticUnitTest::hexConversions()
 
 void StaticUnitTest::capabilities()
 {
-   // capabilities are reported as a list - that is a problem for
+    // capabilities are reported as a list - that is a problem for
     // doing a direct comparison, since they change
     // We try to work around that using contains()
-    QStringList supportedCapabilities = QCA::supportedFeatures();
-    QCOMPARE( supportedCapabilities.contains("random"), (QBool)true );
-    QCOMPARE( supportedCapabilities.contains("sha1"), (QBool)true );
-    QCOMPARE( supportedCapabilities.contains("sha0"), (QBool)true );
-    QCOMPARE( supportedCapabilities.contains("md2"),(QBool) true );
-    QCOMPARE( supportedCapabilities.contains("md4"), (QBool)true );
-    QCOMPARE( supportedCapabilities.contains("md5"), (QBool)true );
-    QCOMPARE( supportedCapabilities.contains("ripemd160"), (QBool)true );
-
     QStringList defaultCapabilities = QCA::defaultFeatures();
-    QCOMPARE( defaultCapabilities.contains("random"), (QBool)true );
+    QVERIFY( defaultCapabilities.contains("random") );
+    QVERIFY( defaultCapabilities.contains("sha1") );
+    QVERIFY( defaultCapabilities.contains("md5") );
 
-    QCOMPARE( QCA::isSupported("random"), true );
-    QCOMPARE( QCA::isSupported("sha0"), true );
-    QCOMPARE( QCA::isSupported("sha0,sha1"), true );
-    QCOMPARE( QCA::isSupported("md2,md4,md5"), true );
-    QCOMPARE( QCA::isSupported("md5"), true );
-    QCOMPARE( QCA::isSupported("ripemd160"), true );
-    QCOMPARE( QCA::isSupported("sha256,sha384,sha512"), true );
-    QCOMPARE( QCA::isSupported("nosuchfeature"), false );
-
-    QString caps( "random,sha1,md5,ripemd160");
     QStringList capList;
-    capList = caps.split( "," );
+    capList << "random" << "sha1";
     QCOMPARE( QCA::isSupported(capList), true );
     capList.append("noSuch");
     QCOMPARE( QCA::isSupported(capList), false );
@@ -124,35 +106,6 @@ void StaticUnitTest::secureMemory()
 {
     // this should be reliably true
     QCOMPARE( QCA::haveSecureMemory(), true );
-}
-
-void StaticUnitTest::providers()
-{
-    // providers are obviously variable, this might be a bit brittle
-    QStringList providerNames;
-    QCA::scanForPlugins();
-    QCA::ProviderList qcaProviders = QCA::providers();
-    for (int i = 0; i < qcaProviders.size(); ++i) {
-	providerNames.append( qcaProviders[i]->name() );
-    }
-    QCOMPARE( providerNames.contains("qca-ossl"), (QBool)true );
-    QCOMPARE( providerNames.contains("qca-gcrypt"), (QBool)true );
-    QCOMPARE( providerNames.contains("qca-nss"), (QBool)true );
-    QCOMPARE( providerNames.contains("qca-pkcs11"), (QBool)true );
-    QCOMPARE( providerNames.contains("qca-gnupg"), (QBool)true );
-    QCOMPARE( providerNames.contains("qca-botan"), (QBool)true );
-
-    QCA::setProviderPriority("qca-ossl", 4);
-    QCA::setProviderPriority("qca-botan", 2);
-    QCOMPARE( QCA::providerPriority( "qca-ossl"), 4 );
-    QCOMPARE( QCA::providerPriority( "qca-gcrypt"), 0 );
-    QCOMPARE( QCA::providerPriority( "qca-botan"), 2 );
-    QCA::setProviderPriority("qca-ossl", 3);
-    // reuse last
-    QCA::setProviderPriority("qca-botan", -1);
-    QCOMPARE( QCA::providerPriority( "qca-botan"), 3 );
-
-    QCA::unloadAllPlugins();
 }
 
 QTEST_MAIN(StaticUnitTest)
