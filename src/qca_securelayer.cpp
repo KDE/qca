@@ -1365,8 +1365,11 @@ private slots:
 				}
 				else if(r == SASLContext::Success)
 				{
-					// FIXME: not signal safe
-					emit q->nextStep(c->stepData());
+					if(!disableServerSendLast)
+					{
+						// FIXME: not signal safe
+						emit q->nextStep(c->stepData());
+					}
 
 					authed = true;
 					emit q->authenticated();
