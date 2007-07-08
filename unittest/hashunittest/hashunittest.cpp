@@ -229,36 +229,27 @@ void HashUnitTest::md5filetest()
 		QWARN( "./data/empty could not be opened - do you need to create it?");
 	    }
 
-	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
+	    QFile f2( "./data/twobytes" );
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "7c4b3d8a360c6c3cb647160fa9adfe71" ) );
+			 QString( "5fc9808ed18e442ab4164c59f151e757" ) );
 	    } else {
-		QWARN( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
+		QWARN( "./data/twobytes could not be opened - do you need to download it?");
 	    }
 
 
-	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
+	    QFile f3( "./data/twohundredbytes" );
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "a74671ea68b0e3c609e8785ed8497c14" ) );
+			 QString( "b91c1f114d942520ecdf7e84e580cda3" ) );
 	    } else {
-		QWARN( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
+		QWARN( "./data/twohundredbytes could not be opened - do you need to download it?");
 	    }
 
-	    QFile f4( "./data/scribus-1.2.tar.bz2" );
-	    if ( f4.open( QIODevice::ReadOnly ) ) {
-		QCA::Hash hashObj("md5", provider);
-		hashObj.update( &f4 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "7d2c2b228f9a6ff82c9401fd54bdbe16" ) );
-	    } else {
-		QWARN( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
-	    }
 	}
     }
 }
@@ -407,36 +398,26 @@ void HashUnitTest::sha1longtest()
 		QWARN( "./data/empty could not be opened - do you need to create it?");
 	    }
 
-	    QFile f2( "./data/Botan-1.4.1.tar.bz2" );
+	    QFile f2( "./data/twobytes" );
 	    if ( f2.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "cda343591428a68e22bd2e349b890cbafb642cf7" ) );
+			 QString( "efbd6de3c51ca16094391e837bf52f7452593e5c" ) );
 	    } else {
-		QWARN( "./data/Botan-1.4.1.tar.bz2 could not be opened - do you need to download it?");
+		QWARN( "./data/twobytes could not be opened - do you need to download it?");
 	    }
 
-	    QFile f3( "./data/linux-2.6.7.tar.bz2" );
+	    QFile f3( "./data/twohundredbytes" );
 	    if ( f3.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "a030a9c6dcd10c5d90a86f915ad4710084cbca71" ) );
+			 QString( "d636519dfb18d913acbe69fc3ee5a4c7ac870297" ) );
 	    } else {
-		QWARN( "./data/linux-2.6.7.tar.bz2 could not be opened - do you need to download it?");
+		QWARN( "./data/twohundredbytes could not be opened - do you need to download it?");
 	    }
 
-	    QFile f4( "./data/scribus-1.2.tar.bz2" );
-	    if ( f4.open( QIODevice::ReadOnly ) ) {
-		QCA::Hash hashObj("sha1", provider);
-		hashObj.update( &f4 );
-		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "a1fb6ed6acfd92381055b310d926d6e83e76ff1e" ) );
-	    } else {
-		QWARN( "./data/scribus-1.2.tar.bz2 could not be opened - do you need to download it?");
-	    }
-	    // qDebug() << "SHA1: " << provider << " elapsed " << t.elapsed();
 	}
     }
 }
