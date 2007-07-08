@@ -1,0 +1,87 @@
+QCA Test Plan
+
+There are two types of tests that you should consider running on your
+QCA build - manual functionality tests, and automated "self checking"
+tests.
+
+You should start with a couple of quick manual tests, then do the
+automated tests, and then conduct more sophisticated manual tests.
+
+
+
+Initial Manual Testing
+
+The fist step is to use the "qcatool" command line tool to verify
+basic operation.
+
+
+Test 1 - Verify startup
+
+Execute the "qcatool" application with no arguments
+
+Expected result: Information on usage of the application is
+displayed.
+
+
+
+Test 2 - Verify application version
+
+Execute the "qcatool" application with the "--version" option
+
+Expected result: Information on the version of QCA and the version of
+qcatool is displayed.
+
+
+
+Test 3 - Verify plugin can be loaded
+
+Execute the "qcatool" application with the "plugins" option
+
+Expected result: The plugin paths are displayed (which correspond with
+the appropriate plugin directory for Qt, and the current
+directory). 
+
+The list of providers is displayed, or "(none)" is displayed if no
+providers are installed. Note: "(none)" should not be displayed if any
+providers are installed.
+
+
+
+Test 4 - Run "self checking" tests
+
+Note: this test does not exercise any providers unless the providers
+are installed.
+
+Note: automated unit testing with qmake is experimental.
+
+If using cmake, run "make test" in the build directory. If using
+qmake/qconf, run "make check".
+
+Expected result: All (23) tests pass.
+
+
+
+Additional "self checking" tests
+
+Depending on test requirements, consider running additional unit tests
+that are not in the "make test" / "make check" set. For example, to
+run the unit tests for TLS Server Name Indication, run the "veloxunittest"
+test application from the "unittest/velox" directory.
+
+Note that tests outside the "make test" / "make check" set are
+potentially fragile, and should not be expected to pass in all
+circumstances. Nor should the tests be expected to fail if there is a
+problem. You should ensure that you understand what the test is
+supposed to be checking before running the test and attempting to
+interpret the results.
+
+
+
+Additional manual tests
+
+Depending on test requirements, consider using "qcatool" to check for
+additional functionality.
+
+Depending on test requirements, consider using code in the "examples"
+directory to verify functionality.
+

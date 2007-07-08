@@ -1,19 +1,9 @@
 This directory holds simple unit tests for QCA.
 
-You can run the whole test suite by doing "make check" in this
-directory. You can also run a single set of tests by doing "make
-check" in the applicable subdirectory.
-
-Note that some of the hash tests require data files which are not
-provided with the QCA download because of their size. This is not a
-problem - the tests will simply be skipped if the files are not
-present. If you want to exercise these tests, you need to copy (or
-link) Botan-1.4.1.tar.bz2, linux-2.6.7.tar.bz2 and scribus-1.2.tar.bz2
-tarballs as distributed into the unittest/hashunittest/data/
-directory.  These files should be readily available on the
-Internet. There is also a zero length file (imaginatively called
-"empty"), which you can create with something like "touch
-./data/empty" at the command line.
+You can run the whole test suite by doing "make test" (or "make check"
+for qconf/qmake, experimental only) in this directory. You can also
+run a single set of tests by doing "make test" in the applicable
+subdirectory. See "TestPlan" for more detail. 
 
 These tests are implemented using the QTestLib test framework provided
 with Qt 4.1 and later. If you are having trouble with a test, you can
