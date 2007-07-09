@@ -20,6 +20,7 @@ SUBDIRS += \
 	macunittest \
 	metatype \
 #	pgpunittest \
+#	pipeunittest \
 	pkits \
 	randomunittest \
 	rsaunittest \
@@ -29,6 +30,6 @@ SUBDIRS += \
 	tls \
 	velox
 
-QMAKE_EXTRA_TARGETS += check
-check.commands = sh ./checkall
+QMAKE_EXTRA_TARGETS += test
+test.commands = sh ./checkall
 

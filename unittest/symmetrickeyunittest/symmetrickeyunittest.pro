@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = symmetrickeyunittest
-check.commands = ./symmetrickeyunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = symmetrickeyunittest
+test.commands = ./symmetrickeyunittest
 
 # Input
 SOURCES += symmetrickeyunittest.cpp

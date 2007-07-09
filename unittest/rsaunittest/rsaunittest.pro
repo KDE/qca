@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = rsaunittest
-check.commands = ./rsaunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = rsaunittest
+test.commands = ./rsaunittest
 
 # Input
 SOURCES += rsaunittest.cpp

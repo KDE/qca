@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = tlsunittest
-check.commands = ./tlsunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = tlsunittest
+test.commands = ./tlsunittest
 
 # Input
 SOURCES += tlsunittest.cpp

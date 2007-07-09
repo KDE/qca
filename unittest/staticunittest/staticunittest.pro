@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = staticunittest
-check.commands = ./staticunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = staticunittest
+test.commands = ./staticunittest
 
 # Input
 SOURCES += staticunittest.cpp

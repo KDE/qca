@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = cipherunittest
-check.commands = ./cipherunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = cipherunittest
+test.commands = ./cipherunittest
 
 # Input
 SOURCES += cipherunittest.cpp

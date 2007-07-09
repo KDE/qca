@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = filewatchunittest
-check.commands = ./filewatchunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = filewatchunittest
+test.commands = ./filewatchunittest
 
 # Input
 HEADERS += filewatchunittest.h

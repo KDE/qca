@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = keybundle
-check.commands = ./keybundle
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = keybundle
+test.commands = ./keybundle
 
 # Input
 SOURCES += keybundle.cpp

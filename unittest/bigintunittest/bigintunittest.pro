@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = bigintunittest
-check.commands = ./bigintunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = bigintunittest
+test.commands = ./bigintunittest
 
 # Input
 SOURCES += bigintunittest.cpp

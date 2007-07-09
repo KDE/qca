@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = macunittest
-check.commands = ./macunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = macunittest
+test.commands = ./macunittest
 
 # Input
 SOURCES += macunittest.cpp

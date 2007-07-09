@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = randomunittest
-check.commands = ./randomunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = randomunittest
+test.commands = ./randomunittest
 
 # Input
 SOURCES += randomunittest.cpp

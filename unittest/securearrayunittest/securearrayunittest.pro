@@ -2,10 +2,10 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 
-# check target
-QMAKE_EXTRA_TARGETS = check
-check.depends = securearrayunittest
-check.commands = ./securearrayunittest
+# test target
+QMAKE_EXTRA_TARGETS = test
+test.depends = securearrayunittest
+test.commands = ./securearrayunittest
 
 # Input
 SOURCES += securearrayunittest.cpp
