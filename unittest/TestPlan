@@ -54,8 +54,7 @@ are installed.
 
 Note: automated unit testing with qmake is experimental.
 
-If using cmake, run "make test" in the build directory. If using
-qmake/qconf, run "make check".
+Run "make test" in the build directory.
 
 Expected result: All (23) tests pass.
 
@@ -64,16 +63,15 @@ Expected result: All (23) tests pass.
 Additional "self checking" tests
 
 Depending on test requirements, consider running additional unit tests
-that are not in the "make test" / "make check" set. For example, to
-run the unit tests for TLS Server Name Indication, run the "veloxunittest"
-test application from the "unittest/velox" directory.
+that are not in the "make test" set. For example, to run the unit
+tests for TLS Server Name Indication, run the "veloxunittest" test
+application from the "unittest/velox" directory.
 
-Note that tests outside the "make test" / "make check" set are
-potentially fragile, and should not be expected to pass in all
-circumstances. Nor should the tests be expected to fail if there is a
-problem. You should ensure that you understand what the test is
-supposed to be checking before running the test and attempting to
-interpret the results.
+Note that tests outside the "make test" set are potentially fragile,
+and should not be expected to pass in all circumstances. Nor should
+the tests be expected to fail if there is a problem. You should ensure
+that you understand what the test is supposed to be checking before
+running the test and attempting to interpret the results.
 
 
 
