@@ -98,15 +98,24 @@ void PipeUnitTest::readWrite()
     QVERIFY( pipe1.writeEnd().isValid() );
     QVERIFY( pipe1.readEnd().isValid() );
 
+    // enable the pipe ends for read/write
+    pipe1.writeEnd().enable();
+    pipe1.readEnd().enable();
+
     pipe1.writeEnd().write( testData1 );
     // QTest::qWait(1);
+    QCoreApplication::processEvents();
     QCoreApplication::processEvents();
     QByteArray out1 = pipe1.readEnd().read(); // read all...
     QCOMPARE( testData1, out1 );
 
     pipe1.writeEnd().write( testData1 ); // put it back in
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
     QCOMPARE( pipe1.readEnd().bytesAvailable(), testData1.size() );
     pipe1.writeEnd().write( testData2 );
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
     QCOMPARE( pipe1.readEnd().bytesAvailable(), testData1.size() + testData2.size() );
     
 
