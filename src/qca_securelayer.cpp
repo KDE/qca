@@ -599,9 +599,12 @@ private slots:
 			bool more = false;
 			if(mode == TLS::Stream)
 			{
-				pending_write -= enc;
-				if(pending_write > 0)
-					more = true;
+				if(!a.isEmpty())
+				{
+					pending_write -= enc;
+					if(pending_write > 0)
+						more = true;
+				}
 			}
 			else
 			{
