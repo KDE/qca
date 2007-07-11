@@ -36,6 +36,7 @@ private slots:
     void createPipeWithInsecureMemory();
     void createPipeWithSecureMemory();
     void readWrite();
+    void signalTests();
 private:
     QCA::Initializer* m_init;
 };
@@ -103,23 +104,71 @@ void PipeUnitTest::readWrite()
     pipe1.readEnd().enable();
 
     pipe1.writeEnd().write( testData1 );
-    // QTest::qWait(1);
-    QCoreApplication::processEvents();
-    QCoreApplication::processEvents();
+    QTest::qWait(1); // process events
     QByteArray out1 = pipe1.readEnd().read(); // read all...
     QCOMPARE( testData1, out1 );
 
     pipe1.writeEnd().write( testData1 ); // put it back in
-    QCoreApplication::processEvents();
-    QCoreApplication::processEvents();
+    QTest::qWait(1); // process events
     QCOMPARE( pipe1.readEnd().bytesAvailable(), testData1.size() );
-    pipe1.writeEnd().write( testData2 );
-    QCoreApplication::processEvents();
-    QCoreApplication::processEvents();
-    QCOMPARE( pipe1.readEnd().bytesAvailable(), testData1.size() + testData2.size() );
-    
 
+    pipe1.writeEnd().write( testData2 ); // add some more data
+    QTest::qWait(1); // process events
+    QCOMPARE( pipe1.readEnd().bytesAvailable(), testData1.size() + testData2.size() );
+    QByteArray thisRead = pipe1.readEnd().read(1);
+    QCOMPARE( thisRead, QByteArray("D") );
+    thisRead = pipe1.readEnd().read(3);
+    QCOMPARE( thisRead, QByteArray("own") );
+    thisRead = pipe1.readEnd().read();
+    QCOMPARE( thisRead, QByteArray(" thepipe!") );
 }
+
+void PipeUnitTest::signalTests()
+{
+    QCA::QPipe* pipe = new QCA::QPipe;
+    pipe->create();
+    
+    QVERIFY( pipe->writeEnd().isValid() );
+    pipe->writeEnd().enable();
+    QVERIFY( pipe->readEnd().isValid() );
+    pipe->readEnd().enable();
+
+    QSignalSpy readyReadSpy( &(pipe->readEnd()), SIGNAL( readyRead() ) );
+    QVERIFY( readyReadSpy.isValid() );
+    QSignalSpy bytesWrittenSpy( &(pipe->writeEnd()), SIGNAL( bytesWritten(int) ) );
+    QVERIFY( bytesWrittenSpy.isValid() );
+    QSignalSpy closedWriteSpy( &(pipe->writeEnd()), SIGNAL( closed() ) );
+    QVERIFY( closedWriteSpy.isValid() );
+    QSignalSpy closedReadSpy( &(pipe->readEnd()), SIGNAL( closed() ) );
+    QVERIFY( closedReadSpy.isValid() );
+
+    QCOMPARE( readyReadSpy.count(), 0 );
+    QCOMPARE( bytesWrittenSpy.count(), 0 );
+    QCOMPARE( closedWriteSpy.count(), 0 );
+    QCOMPARE( closedReadSpy.count(), 0 );
+
+    QByteArray data("Far better, it is, to dare mighty things");
+    pipe->writeEnd().write( data );
+    QTest::qWait(1);
+    QCOMPARE( readyReadSpy.count(), 1 );
+    QCOMPARE( bytesWrittenSpy.count(), 1 );    
+    // this pulls out the first argument to the first signal as an integer
+    QCOMPARE( bytesWrittenSpy.takeFirst().at(0).toInt(), data.size() );
+    QCOMPARE( pipe->readEnd().bytesAvailable(), data.size() );
+
+    QCOMPARE( closedWriteSpy.count(), 0 );
+    QCOMPARE( closedReadSpy.count(), 0 );
+ 
+    pipe->readEnd().close();
+    QTest::qWait(1);
+    QCOMPARE( closedWriteSpy.count(), 0 );
+    QCOMPARE( closedReadSpy.count(), 1 );
+    pipe->writeEnd().close();
+    QTest::qWait(1);
+    QCOMPARE( closedWriteSpy.count(), 1 );
+    QCOMPARE( closedReadSpy.count(), 1 );
+}
+
 QTEST_MAIN(PipeUnitTest)
 
 #include "pipeunittest.moc"
