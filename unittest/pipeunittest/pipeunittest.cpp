@@ -36,7 +36,9 @@ private slots:
     void createPipeWithInsecureMemory();
     void createPipeWithSecureMemory();
     void readWrite();
+    void readWriteSecure();
     void signalTests();
+    void signalTestsSecure();
 private:
     QCA::Initializer* m_init;
 };
@@ -105,6 +107,7 @@ void PipeUnitTest::readWrite()
 
     pipe1.writeEnd().write( testData1 );
     QTest::qWait(1); // process events
+    QTest::qWait(1); // process events
     QByteArray out1 = pipe1.readEnd().read(); // read all...
     QCOMPARE( testData1, out1 );
 
@@ -121,6 +124,41 @@ void PipeUnitTest::readWrite()
     QCOMPARE( thisRead, QByteArray("own") );
     thisRead = pipe1.readEnd().read();
     QCOMPARE( thisRead, QByteArray(" thepipe!") );
+}
+
+void PipeUnitTest::readWriteSecure()
+{
+    QCA::QPipe pipe1;
+    QCA::SecureArray testData1( "Down the" );
+    QCA::SecureArray testData2( " secure pipe!" );
+
+    pipe1.create(true);
+    QVERIFY( pipe1.writeEnd().isValid() );
+    QVERIFY( pipe1.readEnd().isValid() );
+
+    // enable the pipe ends for read/write
+    pipe1.writeEnd().enable();
+    pipe1.readEnd().enable();
+
+    pipe1.writeEnd().writeSecure( testData1 );
+    QTest::qWait(1); // process events
+    QTest::qWait(1); // process events
+    QCA::SecureArray out1 = pipe1.readEnd().readSecure(); // read all...
+    QCOMPARE( testData1, out1 );
+
+    pipe1.writeEnd().writeSecure( testData1 ); // put it back in
+    QTest::qWait(1); // process events
+    QCOMPARE( pipe1.readEnd().bytesAvailable(), testData1.size() );
+
+    pipe1.writeEnd().writeSecure( testData2 ); // add some more data
+    QTest::qWait(1); // process events
+    QCOMPARE( pipe1.readEnd().bytesAvailable(), testData1.size() + testData2.size() );
+    QCA::SecureArray thisRead = pipe1.readEnd().readSecure(1);
+    QCOMPARE( thisRead, QCA::SecureArray("D") );
+    thisRead = pipe1.readEnd().readSecure(3);
+    QCOMPARE( thisRead, QCA::SecureArray("own") );
+    thisRead = pipe1.readEnd().readSecure();
+    QCOMPARE( thisRead, QCA::SecureArray(" the secure pipe!") );
 }
 
 void PipeUnitTest::signalTests()
@@ -149,6 +187,54 @@ void PipeUnitTest::signalTests()
 
     QByteArray data("Far better, it is, to dare mighty things");
     pipe->writeEnd().write( data );
+    QTest::qWait(1);
+    QTest::qWait(1);
+    QCOMPARE( readyReadSpy.count(), 1 );
+    QCOMPARE( bytesWrittenSpy.count(), 1 );    
+    // this pulls out the first argument to the first signal as an integer
+    QCOMPARE( bytesWrittenSpy.takeFirst().at(0).toInt(), data.size() );
+    QCOMPARE( pipe->readEnd().bytesAvailable(), data.size() );
+
+    QCOMPARE( closedWriteSpy.count(), 0 );
+    QCOMPARE( closedReadSpy.count(), 0 );
+ 
+    pipe->readEnd().close();
+    QTest::qWait(1);
+    QCOMPARE( closedWriteSpy.count(), 0 );
+    QCOMPARE( closedReadSpy.count(), 1 );
+    pipe->writeEnd().close();
+    QTest::qWait(1);
+    QCOMPARE( closedWriteSpy.count(), 1 );
+    QCOMPARE( closedReadSpy.count(), 1 );
+}
+
+void PipeUnitTest::signalTestsSecure()
+{
+    QCA::QPipe* pipe = new QCA::QPipe;
+    pipe->create(true);
+    
+    QVERIFY( pipe->writeEnd().isValid() );
+    pipe->writeEnd().enable();
+    QVERIFY( pipe->readEnd().isValid() );
+    pipe->readEnd().enable();
+
+    QSignalSpy readyReadSpy( &(pipe->readEnd()), SIGNAL( readyRead() ) );
+    QVERIFY( readyReadSpy.isValid() );
+    QSignalSpy bytesWrittenSpy( &(pipe->writeEnd()), SIGNAL( bytesWritten(int) ) );
+    QVERIFY( bytesWrittenSpy.isValid() );
+    QSignalSpy closedWriteSpy( &(pipe->writeEnd()), SIGNAL( closed() ) );
+    QVERIFY( closedWriteSpy.isValid() );
+    QSignalSpy closedReadSpy( &(pipe->readEnd()), SIGNAL( closed() ) );
+    QVERIFY( closedReadSpy.isValid() );
+
+    QCOMPARE( readyReadSpy.count(), 0 );
+    QCOMPARE( bytesWrittenSpy.count(), 0 );
+    QCOMPARE( closedWriteSpy.count(), 0 );
+    QCOMPARE( closedReadSpy.count(), 0 );
+
+    QCA::SecureArray data("Far better, it is, to dare mighty things");
+    pipe->writeEnd().writeSecure( data );
+    QTest::qWait(1);
     QTest::qWait(1);
     QCOMPARE( readyReadSpy.count(), 1 );
     QCOMPARE( bytesWrittenSpy.count(), 1 );    
