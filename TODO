@@ -30,7 +30,6 @@
   - CMS
   - TLS ?
   - SASL ?
-  - QPipe
   - FileWatch / DirWatch
   - Complete the pkits tests
 
