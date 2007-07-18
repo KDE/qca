@@ -113,15 +113,22 @@ class QCA_EXPORT QPipeEnd : public QObject
 {
 	Q_OBJECT
 public:
+
+	/**
+	   The type of error
+	*/ 
 	enum Error
 	{
-		ErrorEOF,
-		ErrorBroken
+		ErrorEOF,    ///< End of file error
+		ErrorBroken  ///< Broken pipe error
 	};
 
 	QPipeEnd(QObject *parent = 0);
 	~QPipeEnd();
 
+	/**
+	   Reset the pipe end to an inactive state
+	*/
 	void reset();
 
 	/**
@@ -136,10 +143,19 @@ public:
 	   may need to call enable() first
 	*/
 	bool isValid() const;
+
+	/**
+	   Pipe identification
+	*/
 	Q_PIPE_ID id() const;
+
+	/**
+	   Pipe identification
+	*/
 	int idAsInt() const;
 
 	void take(Q_PIPE_ID id, QPipeDevice::Type t);
+
 #ifdef QPIPE_SECURE
 	void setSecurityEnabled(bool secure);
 #endif
@@ -153,15 +169,24 @@ public:
 
 	/**
 	   Close the end of the pipe
-	   
+
 	   \sa closed()
 	*/
 	void close();
+
 	void release();
+
 	bool setInheritable(bool enabled);
 
-	void finalize(); // do an immediate read, and invalidate
-	void finalizeAndRelease(); // same as above, but don't close pipe
+	/**
+	   Clear the contents of the pipe, and invalidate the pipe
+	*/
+	void finalize();
+
+	/**
+	   Clear the contents of the pipe, and release the pipe
+	*/
+	void finalizeAndRelease();
 
 	/**
 	   Determine how many bytes are available to be read.
@@ -172,6 +197,7 @@ public:
 	   when there are bytes available to read.
 	*/
 	int bytesAvailable() const;
+
 	int bytesToWrite() const;
 
 	// normal i/o
@@ -180,15 +206,47 @@ public:
 
 	   You can only call this on the read end of the pipe
 
+	   If the pipe is using secure memory, you should use readSecure()
+
 	   \param bytes the number of bytes to read (-1 for all 
 	   content).
 	*/
 	QByteArray read(int bytes = -1);
+
+	/**
+	   Write bytes to the pipe.
+
+	   You can only call this on the write end of the pipe.
+
+	   If the pipe is using secure memory, you should use writeSecure().
+
+	   \param a the array to write to the pipe
+	*/
 	void write(const QByteArray &a);
 
 #ifdef QPIPE_SECURE
 	// secure i/o
+	/**
+	   Read bytes from the pipe. 
+
+	   You can only call this on the read end of the pipe
+
+	   If the pipe is using insecure memory, you should use read()
+
+	   \param bytes the number of bytes to read (-1 for all 
+	   content).
+	*/
 	SecureArray readSecure(int bytes = -1);
+
+	/**
+	   Write bytes to the pipe.
+
+	   You can only call this on the write end of the pipe.
+
+	   If the pipe is using insecure memory, you should use write().
+
+	   \param a the array to write to the pipe
+	*/
 	void writeSecure(const SecureArray &a);
 #endif
 
