@@ -51,11 +51,19 @@ static bool can_lock()
 
 static Botan::Allocator *alloc = 0;
 
+void botan_throw_abort()
+{
+	fprintf(stderr, "QCA: Exception from internal Botan\n");
+	abort();
+}
+
 bool botan_init(int prealloc, bool mmap)
 {
 	// 64k minimum
 	if(prealloc < 64)
 		prealloc = 64;
+
+	bool secmem = false;
 
 	try
 	{
@@ -64,6 +72,18 @@ bool botan_init(int prealloc, bool mmap)
 		libstate->prealloc_size = prealloc * 1024;
 		Botan::set_global_state(libstate);
 		Botan::global_state().load(modules);
+
+		if(can_lock())
+		{
+			Botan::global_state().set_default_allocator("locking");
+			secmem = true;
+		}
+		else if(mmap)
+		{
+			Botan::global_state().set_default_allocator("mmap");
+			secmem = true;
+		}
+		alloc = Botan::Allocator::get(true);
 	}
 	catch(std::exception &)
 	{
@@ -71,36 +91,45 @@ bool botan_init(int prealloc, bool mmap)
 		abort();
 	}
 
-	bool secmem = false;
-	if(can_lock())
-	{
-		Botan::global_state().set_default_allocator("locking");
-		secmem = true;
-	}
-	else if(mmap)
-	{
-		Botan::global_state().set_default_allocator("mmap");
-		secmem = true;
-	}
-	alloc = Botan::Allocator::get(true);
-
 	return secmem;
 }
 
 void botan_deinit()
 {
-	alloc = 0;
-	Botan::set_global_state(0);
+	try
+	{
+		alloc = 0;
+		Botan::set_global_state(0);
+	}
+	catch(std::exception &)
+	{
+		botan_throw_abort();
+	}
 }
 
 void *botan_secure_alloc(int bytes)
 {
-	return alloc->allocate((Botan::u32bit)bytes);
+	try
+	{
+		return alloc->allocate((Botan::u32bit)bytes);
+	}
+	catch(std::exception &)
+	{
+		botan_throw_abort();
+	}
+	return 0; // never get here
 }
 
 void botan_secure_free(void *p, int bytes)
 {
-	alloc->deallocate(p, (Botan::u32bit)bytes);
+	try
+	{
+		alloc->deallocate(p, (Botan::u32bit)bytes);
+	}
+	catch(std::exception &)
+	{
+		botan_throw_abort();
+	}
 }
 
 } // end namespace QCA
@@ -200,7 +229,16 @@ bool ai_new(alloc_info *ai, int size, bool sec)
 
 	if(sec)
 	{
-		ai->sbuf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size + 1);
+		try
+		{
+			ai->sbuf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size + 1);
+		}
+		catch(std::exception &)
+		{
+			botan_throw_abort();
+			return false; // never get here
+		}
+
 		(*(ai->sbuf))[size] = 0;
 		ai->qbuf = 0;
 		Botan::byte *bp = (Botan::byte *)(*(ai->sbuf));
@@ -231,7 +269,16 @@ bool ai_copy(alloc_info *ai, const alloc_info *from)
 
 	if(ai->sec)
 	{
-		ai->sbuf = new Botan::SecureVector<Botan::byte>(*(from->sbuf));
+		try
+		{
+			ai->sbuf = new Botan::SecureVector<Botan::byte>(*(from->sbuf));
+		}
+		catch(std::exception &)
+		{
+			botan_throw_abort();
+			return false; // never get here
+		}
+
 		ai->qbuf = 0;
 		Botan::byte *bp = (Botan::byte *)(*(ai->sbuf));
 		ai->data = (char *)bp;
@@ -277,7 +324,17 @@ bool ai_resize(alloc_info *ai, int new_size)
 
 	if(ai->sec)
 	{
-		Botan::SecureVector<Botan::byte> *new_buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)new_size + 1);
+		Botan::SecureVector<Botan::byte> *new_buf;
+		try
+		{
+			new_buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)new_size + 1);
+		}
+		catch(std::exception &)
+		{
+			botan_throw_abort();
+			return false; // never get here
+		}
+
 		Botan::byte *new_p = (Botan::byte *)(*new_buf);
 		if(ai->size > 0)
 		{
