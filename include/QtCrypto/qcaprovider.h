@@ -1,6 +1,6 @@
 /*
  * qcaprovider.h - QCA Plugin API
- * Copyright (C) 2003-2005  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -19,6 +19,16 @@
  *
  */
 
+/**
+   \file qcaprovider.h
+
+   Header file for provider implementation classes (e.g. plugins)
+
+   \note You should not use this header directly from an
+   application. You should just use <tt> \#include \<QtCrypto>
+   </tt> instead.
+*/
+
 #ifndef QCAPROVIDER_H
 #define QCAPROVIDER_H
 
@@ -32,10 +42,36 @@
 
 #include <limits>
 
+/**
+   Provider plugin base class
+
+   QCA loads cryptographic provider plugins with QPluginLoader.  The QObject
+   obtained when loading the plugin must implement the QCAPlugin interface.
+   This is done by inheriting QCAPlugin, and including
+   Q_INTERFACES(QCAPlugin) in your class declaration.
+
+   For example:
+\code
+class MyPlugin : public QObject, public QCAPlugin
+{
+	Q_OBJECT
+	Q_INTERFACES(QCAPlugin)
+public:
+	virtual Provider *createProvider() { ... }
+};
+\endcode
+
+   There is only one function to reimplement, called createProvider().  This
+   function should return a newly allocated Provider instance.
+*/
 class QCA_EXPORT QCAPlugin
 {
 public:
 	virtual ~QCAPlugin() {}
+
+	/**
+	   Returns a newly allocated Provider instance.
+	*/
 	virtual QCA::Provider *createProvider() = 0;
 };
 
@@ -43,29 +79,68 @@ Q_DECLARE_INTERFACE(QCAPlugin, "com.affinix.qca.Plugin/1.0")
 
 namespace QCA {
 
+/**
+   Random provider
+*/
 class QCA_EXPORT RandomContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	RandomContext(Provider *p) : BasicContext(p, "random") {}
+
+	/**
+	   Return an array of random bytes
+
+	   \param size the number of random bytes to return
+	*/
 	virtual SecureArray nextBytes(int size) = 0;
 };
 
+/**
+   Hash provider
+*/
 class QCA_EXPORT HashContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	HashContext(Provider *p, const QString &type) : BasicContext(p, type) {}
+
+	/**
+	   Reset the object to its initial state
+	*/
 	virtual void clear() = 0;
+
+	/**
+	   Process a chunk of data
+
+	   \param a the input data to process
+	*/
 	virtual void update(const MemoryRegion &a) = 0;
+
+	/**
+	   Return the computed hash
+	*/
 	virtual MemoryRegion final() = 0;
 };
 
+/**
+   Cipher provider
+*/
 class QCA_EXPORT CipherContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	CipherContext(Provider *p, const QString &type) : BasicContext(p, type) {}
+
 	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv) = 0;
 	virtual KeyLength keyLength() const = 0;
 	virtual int blockSize() const = 0;
@@ -74,11 +149,18 @@ public:
 	virtual bool final(SecureArray *out) = 0;
 };
 
+/**
+   Message authentication code provider
+*/
 class QCA_EXPORT MACContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	MACContext(Provider *p, const QString &type) : BasicContext(p, type) {}
+
 	virtual void setup(const SymmetricKey &key) = 0;
 	virtual KeyLength keyLength() const = 0;
 
@@ -95,19 +177,33 @@ protected:
 	}
 };
 
+/**
+   Key derivation function provider
+*/
 class QCA_EXPORT KDFContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	KDFContext(Provider *p, const QString &type) : BasicContext(p, type) {}
+
 	virtual SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount) = 0;
 };
 
+/**
+   Discrete logarithm provider
+*/
 class QCA_EXPORT DLGroupContext : public Provider::Context
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	DLGroupContext(Provider *p) : Provider::Context(p, "dlgroup") {}
+
 	virtual QList<DLGroupSet> supportedGroupSets() const = 0;
 	virtual bool isNull() const = 0;
 	virtual void fetchGroup(DLGroupSet set, bool block) = 0;
@@ -117,11 +213,18 @@ Q_SIGNALS:
 	void finished();
 };
 
+/**
+   Public key implementation provider base
+*/
 class QCA_EXPORT PKeyBase : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	PKeyBase(Provider *p, const QString &type);
+
 	virtual bool isNull() const = 0;
 	virtual PKey::Type type() const = 0;
 	virtual bool isPrivate() const = 0;
@@ -148,11 +251,18 @@ Q_SIGNALS:
 	void finished();
 };
 
+/**
+   RSA provider
+*/
 class QCA_EXPORT RSAContext : public PKeyBase
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	RSAContext(Provider *p) : PKeyBase(p, "rsa") {}
+
 	virtual void createPrivate(int bits, int exp, bool block) = 0;
 	virtual void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q, const BigInteger &d) = 0;
 	virtual void createPublic(const BigInteger &n, const BigInteger &e) = 0;
@@ -163,11 +273,18 @@ public:
 	virtual BigInteger d() const = 0;
 };
 
+/**
+   DSA provider
+*/
 class QCA_EXPORT DSAContext : public PKeyBase
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	DSAContext(Provider *p) : PKeyBase(p, "dsa") {}
+
 	virtual void createPrivate(const DLGroup &domain, bool block) = 0;
 	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) = 0;
 	virtual void createPublic(const DLGroup &domain, const BigInteger &y) = 0;
@@ -176,11 +293,18 @@ public:
 	virtual BigInteger x() const = 0;
 };
 
+/**
+   Diffie-Hellman provider
+*/
 class QCA_EXPORT DHContext : public PKeyBase
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	DHContext(Provider *p) : PKeyBase(p, "dh") {}
+
 	virtual void createPrivate(const DLGroup &domain, bool block) = 0;
 	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) = 0;
 	virtual void createPublic(const DLGroup &domain, const BigInteger &y) = 0;
@@ -189,10 +313,16 @@ public:
 	virtual BigInteger x() const = 0;
 };
 
+/**
+   Public key container provider
+*/
 class QCA_EXPORT PKeyContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	PKeyContext(Provider *p) : BasicContext(p, "pkey") {}
 
 	virtual QList<PKey::Type> supportedTypes() const = 0;
@@ -215,10 +345,16 @@ public:
 	virtual ConvertResult privateFromPEM(const QString &s, const SecureArray &passphrase);
 };
 
+/**
+   X.509 certificate and certificate request provider base
+*/
 class QCA_EXPORT CertBase : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	CertBase(Provider *p, const QString &type) : BasicContext(p, type) {}
 
 	// import / export
@@ -265,10 +401,16 @@ public:
 
 class CRLContext;
 
+/**
+   X.509 certificate provider
+*/
 class QCA_EXPORT CertContext : public CertBase
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	CertContext(Provider *p) : CertBase(p, "cert") {}
 
 	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) = 0;
@@ -282,10 +424,16 @@ public:
 	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, UsageMode u, ValidateFlags vf) const = 0;
 };
 
+/**
+   X.509 certificate request provider
+*/
 class QCA_EXPORT CSRContext : public CertBase
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	CSRContext(Provider *p) : CertBase(p, "csr") {}
 
 	virtual bool canUseFormat(CertificateRequestFormat f) const = 0;
@@ -297,20 +445,32 @@ public:
 	virtual ConvertResult fromSPKAC(const QString &s) = 0;
 };
 
+/**
+   X.509 certificate revocation list provider
+*/
 class QCA_EXPORT CRLContext : public CertBase
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	CRLContext(Provider *p) : CertBase(p, "crl") {}
 
 	virtual const CRLContextProps *props() const = 0;
 	virtual bool compare(const CRLContext *other) const = 0;
 };
 
+/**
+   X.509 certificate collection provider
+*/
 class QCA_EXPORT CertCollectionContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	CertCollectionContext(Provider *p) : BasicContext(p, "certcollection") {}
 
 	// ownership of items IS NOT passed
@@ -320,10 +480,16 @@ public:
 	virtual ConvertResult fromPKCS7(const QByteArray &a, QList<CertContext*> *certs, QList<CRLContext*> *crls) const = 0;
 };
 
+/**
+   X.509 certificate authority provider
+*/
 class QCA_EXPORT CAContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	CAContext(Provider *p) : BasicContext(p, "ca") {}
 
 	virtual void setup(const CertContext &cert, const PKeyContext &priv) = 0;
@@ -336,10 +502,16 @@ public:
 	virtual CRLContext *updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const = 0;
 };
 
+/**
+   PKCS#12 provider
+*/
 class QCA_EXPORT PKCS12Context : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	PKCS12Context(Provider *p) : BasicContext(p, "pkcs12") {}
 
 	virtual QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const SecureArray &passphrase) const = 0;
@@ -360,10 +532,16 @@ public:
 	bool isTrusted;
 };
 
+/**
+   OpenPGP key provider
+*/
 class QCA_EXPORT PGPKeyContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	PGPKeyContext(Provider *p) : BasicContext(p, "pgpkey") {}
 
 	virtual const PGPKeyContextProps *props() const = 0;
@@ -374,10 +552,16 @@ public:
 	virtual ConvertResult fromAscii(const QString &s) = 0;
 };
 
+/**
+   KeyStoreEntry provider
+*/
 class QCA_EXPORT KeyStoreEntryContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	KeyStoreEntryContext(Provider *p) : BasicContext(p, "keystoreentry") {}
 
 	virtual KeyStoreEntry::Type type() const = 0;
@@ -397,10 +581,16 @@ public:
 	virtual bool ensureAccess();
 };
 
+/**
+   KeyStore provider
+*/
 class QCA_EXPORT KeyStoreListContext : public Provider::Context
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
 
 	virtual void start();
@@ -447,13 +637,22 @@ Q_SIGNALS:
 	void storeUpdated(int id);
 };
 
+/**
+   TLS "session" provider
+*/
 class QCA_EXPORT TLSSessionContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	TLSSessionContext(Provider *p) : BasicContext(p, "tlssession") {}
 };
 
+/**
+   TLS provider
+*/
 class QCA_EXPORT TLSContext : public Provider::Context
 {
 	Q_OBJECT
@@ -475,6 +674,9 @@ public:
 		Continue
 	};
 
+	/**
+	   Standard constructor
+	*/
 	TLSContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
 	virtual void reset() = 0;
@@ -546,6 +748,9 @@ Q_SIGNALS:
 	void dtlsTimeout(); // call update, even with empty args
 };
 
+/**
+   SASL provider
+*/
 class QCA_EXPORT SASLContext : public Provider::Context
 {
 	Q_OBJECT
@@ -566,6 +771,9 @@ public:
 		Continue
 	};
 
+	/**
+	   Standard constructor
+	*/
 	SASLContext(Provider *p) : Provider::Context(p, "sasl") {}
 
 	virtual void reset() = 0;
@@ -640,6 +848,9 @@ Q_SIGNALS:
 	void resultsReady();
 };
 
+/**
+   SecureMessage provider
+*/
 class QCA_EXPORT MessageContext : public Provider::Context
 {
 	Q_OBJECT
@@ -653,6 +864,9 @@ public:
 		SignAndEncrypt
 	};
 
+	/**
+	   Standard constructor
+	*/
 	MessageContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
 	virtual bool canSignMultiple() const = 0;
@@ -684,10 +898,16 @@ Q_SIGNALS:
 	void updated();
 };
 
+/**
+   SecureMessageSystem provider
+*/
 class QCA_EXPORT SMSContext : public BasicContext
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	SMSContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
 	virtual void setTrustedCertificates(const CertificateCollection &trusted);
