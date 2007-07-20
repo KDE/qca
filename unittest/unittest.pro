@@ -20,7 +20,7 @@ SUBDIRS += \
 	macunittest \
 	metatype \
 #	pgpunittest \
-#	pipeunittest \
+	pipeunittest \
 	pkits \
 	randomunittest \
 	rsaunittest \
