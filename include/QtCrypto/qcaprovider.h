@@ -678,6 +678,7 @@ public:
 	virtual QByteArray signature() const = 0;
 	virtual QString hashName() const = 0;
 	virtual SecureMessageSignatureList signers() const = 0;
+	virtual QString diagnosticText() const = 0;
 
 Q_SIGNALS:
 	void updated();

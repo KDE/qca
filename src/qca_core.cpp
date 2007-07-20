@@ -1063,6 +1063,14 @@ void TLSContext::setMTU(int)
 }
 
 //----------------------------------------------------------------------------
+// MessageContext
+//----------------------------------------------------------------------------
+QString MessageContext::diagnosticText() const
+{
+	return QString();
+}
+
+//----------------------------------------------------------------------------
 // SMSContext
 //----------------------------------------------------------------------------
 void SMSContext::setTrustedCertificates(const CertificateCollection &)

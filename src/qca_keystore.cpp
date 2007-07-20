@@ -1376,7 +1376,9 @@ public:
 
 	void do_update()
 	{
-		QPointer<QObject> self(this); // for signal-safety
+		// ksm doesn't have reset or state changes so we can
+		//   use QPointer here for full SS.
+		QPointer<QObject> self(this);
 
 		bool newbusy = KeyStoreTracker::instance()->isBusy();
 		QList<KeyStoreTracker::Item> newitems = KeyStoreTracker::instance()->getItems();
