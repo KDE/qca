@@ -352,6 +352,7 @@ public:
 	bool ignore_dataChanged;
 
 	Private(Pkcs11ConfigDlg *_q, const QString &_providerName, const QVariantMap &configmap) :
+		QObject(_q),
 		q(_q),
 		providerName(_providerName),
 		dirty(false),

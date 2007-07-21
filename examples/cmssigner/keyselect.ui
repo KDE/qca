@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>LoadStore</class>
- <widget class="QDialog" name="LoadStore" >
+ <class>KeySelect</class>
+ <widget class="QDialog" name="KeySelect" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -57,7 +57,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>LoadStore</receiver>
+   <receiver>KeySelect</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
@@ -73,7 +73,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>LoadStore</receiver>
+   <receiver>KeySelect</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >

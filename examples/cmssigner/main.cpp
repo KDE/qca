@@ -25,8 +25,8 @@
 
 #include "ui_mainwin.h"
 #include "prompter.h"
+#include "keyselectdlg.h"
 #include "mylistview.h"
-#include "ui_loadstore.h"
 #include "pkcs11configdlg/pkcs11configdlg.h"
 
 #define VERSION "0.0.1"
@@ -54,6 +54,7 @@ public:
 	bool usable; // storage is accessible
 	QString fileName;
 	QCA::KeyStoreEntry keyStoreEntry;
+	QString keyStoreEntryString;
 
 	CertItem();
 	QString toString() const;
@@ -127,7 +128,10 @@ QString CertItem::toString() const
 		else // Entry
 		{
 			parts += "privateEntry";
-			parts += keyStoreEntry.toString();
+			if(!keyStoreEntry.isNull())
+				parts += keyStoreEntry.toString();
+			else
+				parts += keyStoreEntryString;
 		}
 	}
 
@@ -174,7 +178,8 @@ bool CertItem::fromString(const QString &in)
 		else if(parts[at] == "privateEntry")
 		{
 			storageType = Entry;
-			keyStoreEntry = QCA::KeyStoreEntry(parts[at + 1]);
+			keyStoreEntryString = parts[at + 1];
+			keyStoreEntry = QCA::KeyStoreEntry(keyStoreEntryString);
 			if(!keyStoreEntry.isNull())
 				usable = true;
 		}
@@ -587,197 +592,6 @@ void MyListView::contextMenuEvent(QContextMenuEvent *event)
 	menu.exec(event->globalPos());
 }
 
-/*static QString entryTypeToString(QCA::KeyStoreEntry::Type type)
-{
-	QString out;
-	switch(type)
-	{
-		case QCA::KeyStoreEntry::TypeKeyBundle:     out = "X"; break;
-		case QCA::KeyStoreEntry::TypeCertificate:   out = "C"; break;
-		case QCA::KeyStoreEntry::TypeCRL:           out = "R"; break;
-		case QCA::KeyStoreEntry::TypePGPSecretKey:  out = "S"; break;
-		case QCA::KeyStoreEntry::TypePGPPublicKey:  out = "P"; break;
-		default:                                    out = "U"; break;
-	}
-	return out;
-}*/
-
-static QPixmap entryTypeToIcon(QCA::KeyStoreEntry::Type type)
-{
-	QPixmap out;
-	switch(type)
-	{
-		case QCA::KeyStoreEntry::TypeKeyBundle:     out = g_icons->keybundle; break;
-		case QCA::KeyStoreEntry::TypeCertificate:   out = g_icons->cert; break;
-		case QCA::KeyStoreEntry::TypeCRL:           out = g_icons->crl; break;
-		case QCA::KeyStoreEntry::TypePGPSecretKey:  out = g_icons->pgpsec; break;
-		case QCA::KeyStoreEntry::TypePGPPublicKey:  out = g_icons->pgppub; break;
-		default:                                    break;
-	}
-	return out;
-}
-
-class KeyStoreModel : public QStandardItemModel
-{
-	Q_OBJECT
-public:
-	QCA::KeyStoreManager ksm;
-	QList<QCA::KeyStore*> stores;
-	QList<QStandardItem*> storeItems;
-	QList< QList<QCA::KeyStoreEntry> > storeEntries;
-	QList< QList<QStandardItem*> > storeEntryItems;
-
-	KeyStoreModel(QObject *parent = 0) :
-		QStandardItemModel(parent), ksm(this)
-	{
-		// make sure keystores are started
-		QCA::KeyStoreManager::start();
-
-		connect(&ksm, SIGNAL(keyStoreAvailable(const QString &)), SLOT(ks_available(const QString &)));
-		QStringList list = ksm.keyStores();
-		foreach(const QString &s, list)
-			ks_available(s);
-	}
-
-private slots:
-	void ks_available(const QString &keyStoreId)
-	{
-		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, &ksm);
-
-		// TODO: only list non-pgp identity stores
-		//if(!ks->holdsIdentities() || ks->type() == QCA::KeyStore::PGPKeyring)
-		//	return;
-
-		connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
-		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
-		stores += ks;
-		ks->startAsynchronousMode();
-
-		QStandardItem *item = new QStandardItem(ks->name());
-		storeItems += item;
-		storeEntries += QList<QCA::KeyStoreEntry>();
-		storeEntryItems += QList<QStandardItem*>();
-		appendRow(item);
-	}
-
-	void ks_updated()
-	{
-		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
-		int at = stores.indexOf(ks);
-		QList<QCA::KeyStoreEntry> entries = ks->entryList();
-
-		// TODO: only list keybundles
-		/*for(int n = 0; n < entries.count(); ++n)
-		{
-			if(entries[n].type() != QCA::KeyStoreEntry::TypeKeyBundle)
-			{
-				entries.removeAt(n);
-				--n; // adjust position
-			}
-		}*/
-
-		storeEntries[at] = entries;
-		storeEntryItems[at].clear();
-
-		// fake CRL, just to show off the icon
-		/*if(ks->type() == QCA::KeyStore::System)
-		{
-			QStandardItem *item = new QStandardItem(entryTypeToIcon(QCA::KeyStoreEntry::TypeCRL), "Santa's Naughty List");
-			storeEntryItems[at] += item;
-			storeItems[at]->appendRow(item);
-		}*/
-
-		foreach(const QCA::KeyStoreEntry &entry, entries)
-		{
-			QStandardItem *item = new QStandardItem(entryTypeToIcon(entry.type()), entry.name());
-			storeEntryItems[at] += item;
-			storeItems[at]->appendRow(item);
-		}
-	}
-
-	void ks_unavailable()
-	{
-		QCA::KeyStore *ks = (QCA::KeyStore *)sender();
-		Q_UNUSED(ks);
-
-		// TODO: remove from internal list and display
-	}
-};
-
-class LoadStore : public QDialog
-{
-	Q_OBJECT
-private:
-	Ui_LoadStore ui;
-	KeyStoreModel *model;
-	QCA::KeyStoreEntry cur_entry;
-
-public:
-	LoadStore(QWidget *parent = 0) :
-		QDialog(parent)
-	{
-		ui.setupUi(this);
-
-		ui.lv_stores->header()->hide();
-
-		ui.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-
-		model = new KeyStoreModel(this);
-		ui.lv_stores->setModel(model);
-		connect(ui.lv_stores->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), SLOT(stores_selectionChanged(const QItemSelection &, const QItemSelection &)));
-	}
-
-signals:
-	void entrySelected(const QCA::KeyStoreEntry &entry);
-
-protected slots:
-	virtual void accept()
-	{
-		QCA::KeyStoreEntry entry = cur_entry;
-		QDialog::accept();
-		emit entrySelected(entry);
-	}
-
-private slots:
-	void stores_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
-	{
-		Q_UNUSED(deselected);
-
-		bool valid = false;
-		QCA::KeyStoreEntry entry;
-		{
-			QModelIndex index;
-			if(!selected.indexes().isEmpty())
-				index = selected.indexes().first();
-			if(index.isValid())
-			{
-				QModelIndex pindex = index.parent();
-				// are we clicking on an entry?
-				if(pindex.isValid())
-				{
-					int store_at = pindex.row();
-					int entry_at = index.row();
-
-					entry = model->storeEntries[store_at][entry_at];
-					if(entry.type() == QCA::KeyStoreEntry::TypeKeyBundle)
-						valid = true;
-				}
-			}
-		}
-
-		if(valid)
-			cur_entry = entry;
-		else
-			cur_entry = QCA::KeyStoreEntry();
-
-		QPushButton *ok = ui.buttonBox->button(QDialogButtonBox::Ok);
-		if(valid && !ok->isEnabled())
-			ok->setEnabled(true);
-		else if(!valid && ok->isEnabled())
-			ok->setEnabled(false);
-	}
-};
-
 class MyPrompter : public Prompter
 {
 	Q_OBJECT
@@ -932,10 +746,15 @@ private slots:
 
 	void load_device()
 	{
-		LoadStore *w = new LoadStore(this);
+		KeySelectDlg *w = new KeySelectDlg(this);
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
 		w->setWindowModality(Qt::WindowModal);
-		connect(w, SIGNAL(entrySelected(const QCA::KeyStoreEntry &)), SLOT(load_device_finished(const QCA::KeyStoreEntry &)));
+		connect(w, SIGNAL(selected(const QCA::KeyStoreEntry &)), SLOT(load_device_finished(const QCA::KeyStoreEntry &)));
+		w->setIcon(KeySelectDlg::IconCert, g_icons->cert);
+		w->setIcon(KeySelectDlg::IconCrl, g_icons->crl);
+		w->setIcon(KeySelectDlg::IconKeyBundle, g_icons->keybundle);
+		w->setIcon(KeySelectDlg::IconPgpPub, g_icons->pgppub);
+		w->setIcon(KeySelectDlg::IconPgpSec, g_icons->pgpsec);
 		w->show();
 	}
 
