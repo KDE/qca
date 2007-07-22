@@ -5,6 +5,10 @@ for qconf/qmake, experimental only) in this directory. You can also
 run a single set of tests by doing "make test" in the applicable
 subdirectory. See "TestPlan" for more detail. 
 
+The "testcerts" directory is not a unit test. It is the tools used
+to generate certificates used in unit tests, and is a copy of the 
+CA.pl script and associated configuration file provided with openssl. 
+
 These tests are implemented using the QTestLib test framework provided
 with Qt 4.1 and later. If you are having trouble with a test, you can
 get more information by running the test applicable directly (e.g. if

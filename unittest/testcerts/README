@@ -1,0 +1,11 @@
+These are the tools used to generate test certificates
+for unit testing in QCA.
+
+You need to have openssl installed.
+
+Do not try to generate certificates blindly. You always need
+to read and understand the openssl.cnf options to make any
+kind of sensible certificate.
+
+The PEM passphrase is always "start".
+
