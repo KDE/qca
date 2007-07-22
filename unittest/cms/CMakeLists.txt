@@ -8,7 +8,7 @@ add_executable(cms ${cms_bin_SRCS} )
 
 target_link_libraries( cms qca ${QT_QTTEST_LIBRARY})
 
-FOREACH( testFileName RootCAcert.pem  Userkey.pem  User.pem )
+FOREACH( testFileName QcaTestRootCert.pem QcaTestClientCert.pem  QcaTestClientKey.pem )
    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/${testFileName} COPYONLY)
 ENDFOREACH( testFileName )
 
