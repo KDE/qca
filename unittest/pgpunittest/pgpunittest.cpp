@@ -75,32 +75,28 @@ void PgpUnitTest::cleanupTestCase()
 
 void PgpUnitTest::testKeyRing()
 {
-    // activate the KeyStoreManager and block until ready
-    QCA::keyStoreManager()->start();
-    QCA::keyStoreManager()->waitForBusyFinished();
+    // activate the KeyStoreManager
+    QCA::KeyStoreManager::start();
 
     if ( QCA::isSupported( QStringList( QString( "keystorelist" ) ),
                             QString( "qca-gnupg" ) ) )
     {
-        QCA::KeyStoreManager *ksm = QCA::keyStoreManager();
-        QStringList stores = ksm->keyStores();
-        QVERIFY( stores.contains( "qca-gnupg-(gpg)" ) );
+	QCA::KeyStoreManager *keyManager = new QCA::KeyStoreManager(this);
+	keyManager->waitForBusyFinished();
+	QStringList storeIds = keyManager->keyStores();
+	QVERIFY( storeIds.contains( "qca-gnupg" ) );
 
-        QCA::KeyStore pgpStore( "qca-gnupg-(gpg)" );
+        QCA::KeyStore pgpStore( QString("qca-gnupg"), keyManager );
         QVERIFY( pgpStore.isValid() );
         QCOMPARE( pgpStore.name(), QString( "GnuPG Keyring" ) );
         QCOMPARE( pgpStore.type(), QCA::KeyStore::PGPKeyring );
-        QCOMPARE( pgpStore.id(), QString( "qca-gnupg-(gpg)" ) );
-        QEXPECT_FAIL( "", "writing entries isn't yet supported (TODO)", Continue );
+        QCOMPARE( pgpStore.id(), QString( "qca-gnupg" ) );
+	QEXPECT_FAIL( "", "Write support not yet implemented", Continue );
         QCOMPARE( pgpStore.isReadOnly(), false );
         QCOMPARE( pgpStore.holdsTrustedCertificates(), false );
         QCOMPARE( pgpStore.holdsIdentities(), true );
         QCOMPARE( pgpStore.holdsPGPPublicKeys(), true );
 
-
-#ifdef __GNUC__
-#warning using setenv is dubious in terms of portability
-#endif
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
         // We test a small keyring - I downloaded a publically available one from
         // the Amsterdam Internet Exchange.
@@ -151,6 +147,7 @@ void PgpUnitTest::testKeyRing()
     }
 
 }
+
 QTEST_MAIN(PgpUnitTest)
 
 #include "pgpunittest.moc"
