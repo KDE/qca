@@ -324,18 +324,18 @@ void CertUnitTest::checkClientCerts()
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
         else {
 	    QCA::ConvertResult resultClient2;
-	    QCA::Certificate client2 = QCA::Certificate::fromPEMFile( "certs/user2goodcert.pem", &resultClient2, provider);
+	    QCA::Certificate client2 = QCA::Certificate::fromPEMFile( "certs/QcaTestClientCert.pem", &resultClient2, provider);
 	    QCOMPARE( resultClient2, QCA::ConvertGood );
 	    QCOMPARE( client2.isNull(), false );
 	    QCOMPARE( client2.isCA(), false );
 	    QCOMPARE( client2.isSelfSigned(), false );
 
-	    QCOMPARE( client2.serialNumber(), QCA::BigInteger(4) );
+	    QCOMPARE( client2.serialNumber(), QCA::BigInteger("13149359243510447488") );
 
-	    QCOMPARE( client2.commonName(), QString("Insecure User Test Cert") );
+	    QCOMPARE( client2.commonName(), QString("Qca Test Client Certificate") );
 
-	    QCOMPARE( client2.notValidBefore().toString(), QDateTime( QDate( 2002, 7, 1 ), QTime( 9, 58, 50 ), Qt::UTC ).toString() );
-	    QCOMPARE( client2.notValidAfter().toString(), QDateTime( QDate( 2007, 6, 30 ), QTime( 9, 58, 50 ), Qt::UTC ).toString() );
+	    QCOMPARE( client2.notValidBefore().toString(), QDateTime( QDate( 2007, 7, 22 ), QTime( 3, 30, 29 ), Qt::UTC ).toString() );
+	    QCOMPARE( client2.notValidAfter().toString(), QDateTime( QDate( 2012, 7, 20 ), QTime( 3, 30, 29 ), Qt::UTC ).toString() );
 
 	    QCOMPARE( client2.constraints().contains(QCA::DigitalSignature), (QBool)true );
 	    QCOMPARE( client2.constraints().contains(QCA::NonRepudiation), (QBool)true );
@@ -361,19 +361,20 @@ void CertUnitTest::checkClientCerts()
 
 	    QCA::CertificateInfo subject2 = client2.subjectInfo();
 	    QCOMPARE( subject2.isEmpty(), false );
-	    QCOMPARE( subject2.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( subject2.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( subject2.values(QCA::CommonName).contains("Insecure User Test Cert"), (QBool)true );
+	    QVERIFY( subject2.values(QCA::Country).contains("US") );
+	    QVERIFY( subject2.values(QCA::Organization).contains("Qca Development and Test") );
+	    QVERIFY( subject2.values(QCA::OrganizationalUnit).contains("Certificate Generation Section") );
+	    QVERIFY( subject2.values(QCA::CommonName).contains("Qca Test Client Certificate") );
 
 	    QCA::CertificateInfo issuer2 = client2.issuerInfo();
 	    QCOMPARE( issuer2.isEmpty(), false );
-	    QCOMPARE( issuer2.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( issuer2.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( issuer2.values(QCA::CommonName).contains("For Tests Only next generation"), (QBool)true );
+	    QVERIFY( issuer2.values(QCA::Country).contains("AU") );
+	    QVERIFY( issuer2.values(QCA::Organization).contains("Qca Development and Test") );
+	    QVERIFY( issuer2.values(QCA::CommonName).contains("Qca Test Root Certificate") );
 
-	    QByteArray subjectKeyID = QCA::Hex().stringToArray("7b5c26f014e47d3c5c9d5cb486a5e76cbe8e77fb").toByteArray();
+	    QByteArray subjectKeyID = QCA::Hex().stringToArray("B27FD3113923BE1DC46F53CE81AFF1D48001F6F6").toByteArray();
 	    QCOMPARE( client2.subjectKeyId(), subjectKeyID );
-	    QCOMPARE( QCA::Hex().arrayToString(client2.issuerKeyId()), QString("8f084f9c53c15cc8e60cd7132ecb523c23960214") );
+	    QCOMPARE( QCA::Hex().arrayToString(client2.issuerKeyId()), QString("513ff2146e496adc41b815b5a086f42ee4f545f8") );
 
 	    QCA::PublicKey pubkey2 = client2.subjectPublicKey();
 	    QCOMPARE( pubkey2.isNull(), false );
@@ -386,14 +387,14 @@ void CertUnitTest::checkClientCerts()
 
 	    QCOMPARE( client2.pathLimit(), 0 );
 
-	    QCOMPARE( client2.signatureAlgorithm(), QCA::EMSA3_MD5 );
+	    QCOMPARE( client2.signatureAlgorithm(), QCA::EMSA3_SHA1 );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( client2.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
 	    QCA::ConvertResult resultca2;
-	    QCA::Certificate ca2 = QCA::Certificate::fromPEMFile( "certs/RootCA2cert.pem", &resultca2, provider);
+	    QCA::Certificate ca2 = QCA::Certificate::fromPEMFile( "certs/QcaTestRootCert.pem", &resultca2, provider);
 	    QCOMPARE( resultca2, QCA::ConvertGood );
 	    trusted.addCertificate( ca2 );
 
@@ -822,24 +823,24 @@ void CertUnitTest::checkServerCerts()
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
         else {
 	    QCA::ConvertResult resultServer1;
-	    QCA::Certificate server1 = QCA::Certificate::fromPEMFile( "certs/servergood2cert.pem", &resultServer1, provider);
+	    QCA::Certificate server1 = QCA::Certificate::fromPEMFile( "certs/QcaTestServerCert.pem", &resultServer1, provider);
 	    QCOMPARE( resultServer1, QCA::ConvertGood );
 	    QCOMPARE( server1.isNull(), false );
 	    QCOMPARE( server1.isCA(), false );
 	    QCOMPARE( server1.isSelfSigned(), false );
 
-	    QCOMPARE( server1.serialNumber(), QCA::BigInteger(6) );
+	    QCOMPARE( server1.serialNumber(), QCA::BigInteger("13149359243510447489") );
 
-	    QCOMPARE( server1.commonName(), QString("Insecure Server Cert") );
+	    QCOMPARE( server1.commonName(), QString("Qca Server Test certificate") );
 
-	    QCOMPARE( server1.notValidBefore().toString(), QDateTime( QDate( 2002, 7, 1 ), QTime( 10, 21, 49 ), Qt::UTC ).toString() );
-	    QCOMPARE( server1.notValidAfter().toString(), QDateTime( QDate( 2007, 6, 30 ), QTime( 10, 21, 49 ), Qt::UTC ).toString() );
+	    QCOMPARE( server1.notValidBefore().toString(), QDateTime( QDate( 2007, 7, 22 ), QTime( 6, 5, 39 ), Qt::UTC ).toString() );
+	    QCOMPARE( server1.notValidAfter().toString(), QDateTime( QDate( 2012, 7, 20 ), QTime( 6, 5, 39 ), Qt::UTC ).toString() );
 
 	    QCOMPARE( server1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::NonRepudiation), (QBool)false );
+	    QCOMPARE( server1.constraints().contains(QCA::NonRepudiation), (QBool)true );
 	    QCOMPARE( server1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
 	    QCOMPARE( server1.constraints().contains(QCA::DataEncipherment), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::KeyAgreement), (QBool)true );
+	    QCOMPARE( server1.constraints().contains(QCA::KeyAgreement), (QBool)false );
 	    QCOMPARE( server1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
 	    QCOMPARE( server1.constraints().contains(QCA::CRLSign), (QBool)false );
 	    QCOMPARE( server1.constraints().contains(QCA::EncipherOnly), (QBool)false );
@@ -859,19 +860,21 @@ void CertUnitTest::checkServerCerts()
 
 	    QCA::CertificateInfo subject1 = server1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QCOMPARE( subject1.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure Server Cert"), (QBool)true );
+	    QVERIFY( subject1.values(QCA::Country).contains("IL") );
+	    QVERIFY( subject1.values(QCA::Organization).contains("Qca Development and Test") );
+	    QVERIFY( subject1.values(QCA::OrganizationalUnit).contains("Server Management Section") );
+	    QVERIFY( subject1.values(QCA::CommonName).contains("Qca Server Test certificate") );
 
 	    QCA::CertificateInfo issuer1 = server1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QCOMPARE( issuer1.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only next generation"), (QBool)true );
+	    QVERIFY( issuer1.values(QCA::Country).contains("AU") );
+	    QVERIFY( issuer1.values(QCA::Organization).contains("Qca Development and Test") );
+	    QVERIFY( issuer1.values(QCA::OrganizationalUnit).contains("Certificate Generation Section") );
+	    QVERIFY( issuer1.values(QCA::CommonName).contains("Qca Test Root Certificate") );
 
-	    QByteArray subjectKeyID = QCA::Hex().stringToArray("f5f1298acd3198962b005b7855f6cc6955eef318").toByteArray();
+	    QByteArray subjectKeyID = QCA::Hex().stringToArray("3CAAB3B75975DB2C95AFB481FA5640D8986B27CB").toByteArray();
 	    QCOMPARE( server1.subjectKeyId(), subjectKeyID );
-	    QByteArray authorityKeyID = QCA::Hex().stringToArray("8f084f9c53c15cc8e60cd7132ecb523c23960214").toByteArray();
+	    QByteArray authorityKeyID = QCA::Hex().stringToArray("513ff2146e496adc41b815b5a086f42ee4f545f8").toByteArray();
 	    QCOMPARE( server1.issuerKeyId(), authorityKeyID );
 
 	    QCA::PublicKey pubkey1 = server1.subjectPublicKey();
@@ -885,14 +888,14 @@ void CertUnitTest::checkServerCerts()
 
 	    QCOMPARE( server1.pathLimit(), 0 );
 
-	    QCOMPARE( server1.signatureAlgorithm(), QCA::EMSA3_MD5 );
+	    QCOMPARE( server1.signatureAlgorithm(), QCA::EMSA3_SHA1 );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( server1.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
 	    QCA::ConvertResult resultca1;
-	    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/RootCA2cert.pem", &resultca1, provider);
+	    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( "certs/QcaTestRootCert.pem", &resultca1, provider);
 	    QCOMPARE( resultca1, QCA::ConvertGood );
 	    trusted.addCertificate( ca1 );
 	    QCOMPARE( server1.validate( trusted, untrusted ), QCA::ValidityGood );
