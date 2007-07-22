@@ -20,14 +20,14 @@
 
 #include "qca_keystore.h"
 
-#include "qcaprovider.h"
-
 #include <QCoreApplication>
 #include <QAbstractEventDispatcher>
 #include <QPointer>
 #include <QSet>
 #include <QMutex>
 #include <QWaitCondition>
+
+#include "qcaprovider.h"
 
 Q_DECLARE_METATYPE(QCA::KeyStoreEntry)
 Q_DECLARE_METATYPE(QList<QCA::KeyStoreEntry>)
@@ -1547,6 +1547,7 @@ KeyStoreManager::KeyStoreManager(QObject *parent)
 
 KeyStoreManager::~KeyStoreManager()
 {
+	Q_ASSERT(KeyStoreTracker::instance());
 	KeyStoreTracker::instance()->removeTarget(d);
 	delete d;
 }
