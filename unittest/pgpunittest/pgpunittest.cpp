@@ -81,12 +81,12 @@ void PgpUnitTest::testKeyRing()
     if ( QCA::isSupported( QStringList( QString( "keystorelist" ) ),
                             QString( "qca-gnupg" ) ) )
     {
-	QCA::KeyStoreManager *keyManager = new QCA::KeyStoreManager(this);
-	keyManager->waitForBusyFinished();
-	QStringList storeIds = keyManager->keyStores();
+      QCA::KeyStoreManager keyManager(this);
+	keyManager.waitForBusyFinished();
+	QStringList storeIds = keyManager.keyStores();
 	QVERIFY( storeIds.contains( "qca-gnupg" ) );
 
-        QCA::KeyStore pgpStore( QString("qca-gnupg"), keyManager );
+        QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
         QVERIFY( pgpStore.isValid() );
         QCOMPARE( pgpStore.name(), QString( "GnuPG Keyring" ) );
         QCOMPARE( pgpStore.type(), QCA::KeyStore::PGPKeyring );
