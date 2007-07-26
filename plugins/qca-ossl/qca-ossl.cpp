@@ -6466,6 +6466,7 @@ public:
 		list += "blowfish-cfb";
 		list += "blowfish-ofb";
 		list += "tripledes-ecb";
+		list += "tripledes-cbc";
 		list += "des-ecb";
 		list += "des-ecb-pkcs7";
 		list += "des-cbc";
@@ -6583,6 +6584,8 @@ public:
 			return new opensslCipherContext( EVP_bf_cbc(), 1, this, type);
 		else if ( type == "tripledes-ecb" )
 			return new opensslCipherContext( EVP_des_ede3(), 0, this, type);
+		else if ( type == "tripledes-cbc" )
+			return new opensslCipherContext( EVP_des_ede3_cbc(), 0, this, type);
 		else if ( type == "des-ecb" )
 			return new opensslCipherContext( EVP_des_ecb(), 0, this, type);
 		else if ( type == "des-ecb-pkcs7" )
