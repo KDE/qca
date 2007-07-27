@@ -67,6 +67,9 @@ public:
 class QCA_EXPORT QCAPlugin
 {
 public:
+	/**
+	   Destructs the object
+	*/
 	virtual ~QCAPlugin() {}
 
 	/**
@@ -141,11 +144,34 @@ public:
 	*/
 	CipherContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
+	/**
+	   Set up the object for encrypt/decrypt
+	*/
 	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv) = 0;
+
+	/**
+	   Returns the KeyLength for this cipher
+	*/
 	virtual KeyLength keyLength() const = 0;
+
+	/**
+	   Returns the block size for this cipher
+	*/
 	virtual int blockSize() const = 0;
 
+	/**
+	   Process a chunk of data.  Returns true if successful.
+
+	   \param in the input data to process
+	   \param out pointer to an array that should store the result
+	*/
 	virtual bool update(const SecureArray &in, SecureArray *out) = 0;
+
+	/**
+	   Finish the cipher processing.  Returns true if successful.
+
+	   \param out pointer to an array that should store the result
+	*/
 	virtual bool final(SecureArray *out) = 0;
 };
 
@@ -161,13 +187,34 @@ public:
 	*/
 	MACContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
+	/**
+	   Set up the object for hashing
+	*/
 	virtual void setup(const SymmetricKey &key) = 0;
+
+	/**
+	   Returns the KeyLength for this MAC algorithm
+	*/
 	virtual KeyLength keyLength() const = 0;
 
+	/**
+	   Process a chunk of data
+
+	   \param in the input data to process
+	*/
 	virtual void update(const MemoryRegion &in) = 0;
+
+	/**
+	   Compute the result after processing all data
+
+	   \param out pointer to an array that should store the result
+	*/
 	virtual void final(MemoryRegion *out) = 0;
 
 protected:
+	/**
+	   Returns a KeyLength that supports any length
+	*/
 	KeyLength anyKeyLength() const
 	{
 		// this is used instead of a default implementation to make sure that
@@ -189,6 +236,9 @@ public:
 	*/
 	KDFContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
+	/**
+	   Create a key and return it
+	*/
 	virtual SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount) = 0;
 };
 
@@ -204,12 +254,39 @@ public:
 	*/
 	DLGroupContext(Provider *p) : Provider::Context(p, "dlgroup") {}
 
+	/**
+	   The DLGroupSets supported by this object
+	*/
 	virtual QList<DLGroupSet> supportedGroupSets() const = 0;
+
+	/**
+	   Returns true if there is a result to obtain
+	*/
 	virtual bool isNull() const = 0;
+
+	/**
+	   Attempt to create P, Q, and G values from the specified group set
+
+	   If \a block is true, then this function blocks until completion.
+	   Otherwise, this function returns immediately and finished() is
+	   emitted when the operation completes.
+
+	   If an error occurs during generation, then the operation will
+	   complete and isNull() will return true.
+	*/
 	virtual void fetchGroup(DLGroupSet set, bool block) = 0;
+
+	/**
+	   Obtain the result of the operation.  Ensure isNull() returns false
+	   before calling this function.
+	*/
 	virtual void getResult(BigInteger *p, BigInteger *q, BigInteger *g) const = 0;
 
 Q_SIGNALS:
+	/**
+	   Emitted when the fetchGroup() operation completes in non-blocking
+	   mode.
+	*/
 	void finished();
 };
 
@@ -225,29 +302,120 @@ public:
 	*/
 	PKeyBase(Provider *p, const QString &type);
 
+	/**
+	   Returns true if this object is not valid.  This is the default
+	   state, and the object may also become this state if a conversion
+	   or generation function fails.
+	*/
 	virtual bool isNull() const = 0;
+
+	/**
+	   Returns the type of public key
+	*/
 	virtual PKey::Type type() const = 0;
+
+	/**
+	   Returns true if this is a private key, otherwise false
+	*/
 	virtual bool isPrivate() const = 0;
+
+	/**
+	   Returns true if the components of this key are accessible and
+	   whether it can be serialized into an output format.  Private keys
+	   from a smart card device will often not be exportable.
+	*/
 	virtual bool canExport() const = 0;
+
+	/**
+	   If the key is a private key, this function will convert it into a
+	   public key (all private key data includes the public data as well,
+	   which is why this is possible).  If the key is already a public
+	   key, then this function has no effect.
+	*/
 	virtual void convertToPublic() = 0;
+
+	/**
+	   Returns the number of bits in the key
+	*/
 	virtual int bits() const = 0;
 
-	// encrypt/decrypt
+	/**
+	   Returns the maximum number of bytes that can be encrypted by this
+	   key
+	*/
 	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const;
+
+	/**
+	   Encrypt data
+
+	   \param in the input data to encrypt
+	   \param alg the encryption algorithm to use
+	*/
 	virtual SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg);
+
+	/**
+	   Decrypt data
+
+	   \param in the input data to decrypt
+	   \param out pointer to an array to store the plaintext result
+	   \param alg the encryption algorithm used to generate the input
+	   data
+	*/
 	virtual bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg);
 
-	// sign / verify
+	/**
+	   Begin a signing operation
+
+	   \param alg the signature algorithm to use
+	   \param format the signature format to use
+	*/
 	virtual void startSign(SignatureAlgorithm alg, SignatureFormat format);
+
+	/**
+	   Begin a verify operation
+
+	   \param alg the signature algorithm used by the input signature
+	   \param format the signature format used by the input signature
+	*/
 	virtual void startVerify(SignatureAlgorithm alg, SignatureFormat format);
+
+	/**
+	   Process the plaintext input data for either signing or verifying,
+	   whichever operation is active.
+
+	   \param in the input data to process
+	*/
 	virtual void update(const MemoryRegion &in);
+
+	/**
+	   Complete a signing operation, and return the signature value
+
+	   If there is an error signing, an empty array is returned.
+	*/
 	virtual QByteArray endSign();
+
+	/**
+	   Complete a verify operation, and return true if successful
+
+	   If there is an error verifying, this function returns false.
+
+	   \param sig the signature to verify with the input data
+	*/
 	virtual bool endVerify(const QByteArray &sig);
 
-	// key agreement
+	/**
+	   Compute a symmetric key based on this private key and some other
+	   public key
+
+	   Essentially for Diffie-Hellman only.
+	*/
 	virtual SymmetricKey deriveKey(const PKeyBase &theirs);
 
 Q_SIGNALS:
+	/**
+	   Emitted when an asynchronous operation completes on this key.
+	   Such operations will be documented that they emit this signal.
+	*/
 	void finished();
 };
 
@@ -263,13 +431,55 @@ public:
 	*/
 	RSAContext(Provider *p) : PKeyBase(p, "rsa") {}
 
+	/**
+	   Generate an RSA private key
+
+	   If \a block is true, then this function blocks until completion.
+	   Otherwise, this function returns immediately and finished() is
+	   emitted when the operation completes.
+
+	   If an error occurs during generation, then the operation will
+	   complete and isNull() will return true.
+
+	   \param bits the length of the key to generate, in bits
+	   \param exp the exponent to use for generation
+	   \param block whether to use blocking mode
+	*/
 	virtual void createPrivate(int bits, int exp, bool block) = 0;
+
+	/**
+	   Create an RSA private key based on the five components
+	*/
 	virtual void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q, const BigInteger &d) = 0;
+
+	/**
+	   Create an RSA public key based on the two public components
+	*/
 	virtual void createPublic(const BigInteger &n, const BigInteger &e) = 0;
+
+	/**
+	   Returns the public N component of this RSA key
+	*/
 	virtual BigInteger n() const = 0;
+
+	/**
+	   Returns the public E component of this RSA key
+	*/
 	virtual BigInteger e() const = 0;
+
+	/**
+	   Returns the private P component of this RSA key
+	*/
 	virtual BigInteger p() const = 0;
+
+	/**
+	   Returns the private Q component of this RSA key
+	*/
 	virtual BigInteger q() const = 0;
+
+	/**
+	   Returns the private D component of this RSA key
+	*/
 	virtual BigInteger d() const = 0;
 };
 
@@ -285,11 +495,44 @@ public:
 	*/
 	DSAContext(Provider *p) : PKeyBase(p, "dsa") {}
 
+	/**
+	   Generate a DSA private key
+
+	   If \a block is true, then this function blocks until completion.
+	   Otherwise, this function returns immediately and finished() is
+	   emitted when the operation completes.
+
+	   If an error occurs during generation, then the operation will
+	   complete and isNull() will return true.
+
+	   \param domain the domain values to use for generation
+	   \param block whether to use blocking mode
+	*/
 	virtual void createPrivate(const DLGroup &domain, bool block) = 0;
+
+	/**
+	   Create a DSA private key based on its numeric components
+	*/
 	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) = 0;
+
+	/**
+	   Create a DSA public key based on its numeric components
+	*/
 	virtual void createPublic(const DLGroup &domain, const BigInteger &y) = 0;
+
+	/**
+	   Returns the public domain component of this DSA key
+	*/
 	virtual DLGroup domain() const = 0;
+
+	/**
+	   Returns the public Y component of this DSA key
+	*/
 	virtual BigInteger y() const = 0;
+
+	/**
+	   Returns the private X component of this DSA key
+	*/
 	virtual BigInteger x() const = 0;
 };
 
@@ -305,16 +548,55 @@ public:
 	*/
 	DHContext(Provider *p) : PKeyBase(p, "dh") {}
 
+	/**
+	   Generate a Diffie-Hellman private key
+
+	   If \a block is true, then this function blocks until completion.
+	   Otherwise, this function returns immediately and finished() is
+	   emitted when the operation completes.
+
+	   If an error occurs during generation, then the operation will
+	   complete and isNull() will return true.
+
+	   \param domain the domain values to use for generation
+	   \param block whether to use blocking mode
+	*/
 	virtual void createPrivate(const DLGroup &domain, bool block) = 0;
+
+	/**
+	   Create a Diffie-Hellman private key based on its numeric
+	   components
+	*/
 	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) = 0;
+
+	/**
+	   Create a Diffie-Hellman public key based on its numeric
+	   components
+	*/
 	virtual void createPublic(const DLGroup &domain, const BigInteger &y) = 0;
+
+	/**
+	   Returns the public domain component of this Diffie-Hellman key
+	*/
 	virtual DLGroup domain() const = 0;
+
+	/**
+	   Returns the public Y component of this Diffie-Hellman key
+	*/
 	virtual BigInteger y() const = 0;
+
+	/**
+	   Returns the private X component of this Diffie-Hellman key
+	*/
 	virtual BigInteger x() const = 0;
 };
 
 /**
    Public key container provider
+
+   This object "holds" a public key object.  By default it contains no key
+   (key() returns 0), but you can put a key into it with setKey(), or you
+   can call an import function such as publicFromDER().
 */
 class QCA_EXPORT PKeyContext : public BasicContext
 {
@@ -325,23 +607,119 @@ public:
 	*/
 	PKeyContext(Provider *p) : BasicContext(p, "pkey") {}
 
+	/**
+	   Returns a list of supported public key types
+	*/
 	virtual QList<PKey::Type> supportedTypes() const = 0;
+
+	/**
+	   Returns a list of public key types that can be serialized and
+	   deserialized into DER and PEM format
+	*/
 	virtual QList<PKey::Type> supportedIOTypes() const = 0;
+
+	/**
+	   Returns a list of password-based encryption algorithms that are
+	   supported for private key serialization and deserialization
+	*/
 	virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const = 0;
 
+	/**
+	   Returns the key held by this object, or 0 if there is no key
+	*/
 	virtual PKeyBase *key() = 0;
+
+	/**
+	   Returns the key held by this object, or 0 if there is no key
+	*/
 	virtual const PKeyBase *key() const = 0;
+
+	/**
+	   Sets the key for this object.  If this object already had a key,
+	   then the old one is destructed.  This object takes ownership of
+	   the key.
+	*/
 	virtual void setKey(PKeyBase *key) = 0;
+
+	/**
+	   Attempt to import a key from another provider.  Returns true if
+	   successful, otherwise false.
+
+	   Generally this function is used if the specified key's provider
+	   does not support serialization, but your provider does.  The call
+	   to this function would then be followed by an export function,
+	   such as publicToDER().
+	*/
 	virtual bool importKey(const PKeyBase *key) = 0;
 
-	// import / export
+	/**
+	   Convert a public key to DER format, and return the value
+	*/
 	virtual QByteArray publicToDER() const;
+
+	/**
+	   Convert a public key to PEM format, and return the value
+	*/
 	virtual QString publicToPEM() const;
+
+	/**
+	   Read DER-formatted input and convert it into a public key
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param a the input data
+	*/
 	virtual ConvertResult publicFromDER(const QByteArray &a);
+
+	/**
+	   Read PEM-formatted input and convert it into a public key
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param s the input data
+	*/
 	virtual ConvertResult publicFromPEM(const QString &s);
+
+	/**
+	   Convert a private key to DER format, and return the value
+
+	   \param passphrase the passphrase to encode the result with, or an
+	   empty array if no encryption is desired
+	   \param pbe the encryption algorithm to use, if applicable
+	*/
 	virtual SecureArray privateToDER(const SecureArray &passphrase, PBEAlgorithm pbe) const;
+
+	/**
+	   Convert a private key to PEM format, and return the value
+
+	   \param passphrase the passphrase to encode the result with, or an
+	   empty array if no encryption is desired
+	   \param pbe the encryption algorithm to use, if applicable
+	*/
 	virtual QString privateToPEM(const SecureArray &passphrase, PBEAlgorithm pbe) const;
+
+	/**
+	   Read DER-formatted input and convert it into a private key
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param a the input data
+	   \param passphrase the passphrase needed to decrypt, if applicable
+	*/
 	virtual ConvertResult privateFromDER(const SecureArray &a, const SecureArray &passphrase);
+
+	/**
+	   Read PEM-formatted input and convert it into a private key
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param s the input data
+	   \param passphrase the passphrase needed to decrypt, if applicable
+	*/
 	virtual ConvertResult privateFromPEM(const QString &s, const SecureArray &passphrase);
 };
 
