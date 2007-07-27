@@ -654,11 +654,15 @@ public:
 
 	/**
 	   Convert a public key to DER format, and return the value
+
+	   Returns an empty array on error.
 	*/
 	virtual QByteArray publicToDER() const;
 
 	/**
 	   Convert a public key to PEM format, and return the value
+
+	   Returns an empty string on error.
 	*/
 	virtual QString publicToPEM() const;
 
@@ -685,6 +689,8 @@ public:
 	/**
 	   Convert a private key to DER format, and return the value
 
+	   Returns an empty array on error.
+
 	   \param passphrase the passphrase to encode the result with, or an
 	   empty array if no encryption is desired
 	   \param pbe the encryption algorithm to use, if applicable
@@ -693,6 +699,8 @@ public:
 
 	/**
 	   Convert a private key to PEM format, and return the value
+
+	   Returns an empty string on error.
 
 	   \param passphrase the passphrase to encode the result with, or an
 	   empty array if no encryption is desired
@@ -735,45 +743,224 @@ public:
 	*/
 	CertBase(Provider *p, const QString &type) : BasicContext(p, type) {}
 
-	// import / export
+	/**
+	   Convert this object to DER format, and return the value
+
+	   Returns an empty array on error.
+	*/
 	virtual QByteArray toDER() const = 0;
+
+	/**
+	   Convert this object to PEM format, and return the value
+
+	   Returns an empty string on error.
+	*/
 	virtual QString toPEM() const = 0;
+
+	/**
+	   Read DER-formatted input and convert it into this object
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param a the input data
+	*/
 	virtual ConvertResult fromDER(const QByteArray &a) = 0;
+
+	/**
+	   Read PEM-formatted input and convert it into this object
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param s the input data
+	*/
 	virtual ConvertResult fromPEM(const QString &s) = 0;
 };
 
+/**
+   X.509 certificate or certificate request properties
+
+   Some fields are only for certificates or only for certificate requests,
+   and these fields are noted.
+*/
 class QCA_EXPORT CertContextProps
 {
 public:
-	int version;                     // cert only
-	QDateTime start, end;            // cert only
+	/**
+	   The X.509 certificate version, usually 3
+
+	   This field is for certificates only.
+	*/
+	int version;
+
+	/**
+	   The time the certificate becomes valid (often the time of create)
+
+	   This field is for certificates only.
+	*/
+	QDateTime start;
+
+	/**
+	   The time the certificate expires
+
+	   This field is for certificates only.
+	*/
+	QDateTime end;
+
+	/**
+	   The subject information
+	*/
 	CertificateInfoOrdered subject;
-	CertificateInfoOrdered issuer;   // cert only
+
+	/**
+	   The issuer information
+
+	   This field is for certificates only.
+	*/
+	CertificateInfoOrdered issuer;
+
+	/**
+	   The constraints
+	*/
 	Constraints constraints;
+
+	/**
+	   The policies
+	*/
 	QStringList policies;
-	QStringList crlLocations;        // cert only
-	QStringList issuerLocations;     // cert only
-	QStringList ocspLocations;       // cert only
-	BigInteger serial;               // cert only
+
+	/**
+	   A list of URIs for CRLs
+
+	   This field is for certificates only.
+	*/
+	QStringList crlLocations;
+
+	/**
+	   A list of URIs for issuer certificates
+
+	   This field is for certificates only.
+	*/
+	QStringList issuerLocations;
+
+	/**
+	   A list of URIs for OCSP services
+
+	   This field is for certificates only.
+	*/
+	QStringList ocspLocations;
+
+	/**
+	   The certificate serial number
+
+	   This field is for certificates only.
+	*/
+	BigInteger serial;
+
+	/**
+	   True if the certificate is a CA or the certificate request is
+	   requesting to be a CA, otherwise false
+	*/
 	bool isCA;
-	bool isSelfSigned;               // cert only
+
+	/**
+	   True if the certificate is self-signed
+
+	   This field is for certificates only.
+	*/
+	bool isSelfSigned;
+
+	/**
+	   The path limit
+	*/
 	int pathLimit;
+
+	/**
+	   The signature data
+	*/
 	QByteArray sig;
+
+	/**
+	   The signature algorithm used to create the signature
+	*/
 	SignatureAlgorithm sigalgo;
-	QByteArray subjectId, issuerId;  // cert only
-	QString challenge;               // csr only
-	CertificateRequestFormat format; // csr only
+
+	/**
+	   The subject id
+
+	   This field is for certificates only.
+	*/
+	QByteArray subjectId;
+
+	/**
+	   The issuer id
+
+	   This field is for certificates only.
+	*/
+	QByteArray issuerId;
+
+	/**
+	   The SPKAC challenge value
+
+	   This field is for certificate requests only.
+	*/
+	QString challenge;
+
+	/**
+	   The format used for the certificate request
+
+	   This field is for certificate requests only.
+	*/
+	CertificateRequestFormat format;
 };
 
+/**
+   X.509 certificate revocation list properties
+
+   For efficiency and simplicity, the members are directly accessed.
+*/
 class QCA_EXPORT CRLContextProps
 {
 public:
+	/**
+	   The issuer information of the CRL
+	*/
 	CertificateInfoOrdered issuer;
+
+	/**
+	   The CRL number, which increases at each update
+	*/
 	int number;
-	QDateTime thisUpdate, nextUpdate;
+
+	/**
+	   The time this CRL was created
+	*/
+	QDateTime thisUpdate;
+
+	/**
+	   The time this CRL expires, and the next CRL should be fetched
+	*/
+	QDateTime nextUpdate;
+
+	/**
+	   The revoked entries
+	*/
 	QList<CRLEntry> revoked;
+
+	/**
+	   The signature data of the CRL
+	*/
 	QByteArray sig;
+
+	/**
+	   The signature algorithm used by the issuer to sign the CRL
+	*/
 	SignatureAlgorithm sigalgo;
+
+	/**
+	   The issuer id
+	*/
 	QByteArray issuerId;
 };
 
@@ -791,14 +978,71 @@ public:
 	*/
 	CertContext(Provider *p) : CertBase(p, "cert") {}
 
+	/**
+	   Create a self-signed certificate based on the given options and
+	   private key.  Returns true if successful, otherwise false.
+
+	   If successful, this object becomes the self-signed certificate.
+	   If unsuccessful, this object is considered to be in an
+	   uninitialized state.
+	*/
 	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) = 0;
+
+	/**
+	   Returns a pointer to the properties of this certificate
+	*/
 	virtual const CertContextProps *props() const = 0;
+
+	/**
+	   Returns true if this certificate is equal to another certificate,
+	   otherwise false
+
+	   \param other the certificate to compare with
+	*/
 	virtual bool compare(const CertContext *other) const = 0;
-	virtual PKeyContext *subjectPublicKey() const = 0; // caller must delete
+
+	/**
+	   Returns a copy of this certificate's public key.  The caller is
+	   responsible for deleting it.
+	*/
+	virtual PKeyContext *subjectPublicKey() const = 0;
+
+	/**
+	   Returns true if this certificate is an issuer of another
+	   certificate, otherwise false
+
+	   \param other the issued certificate to check
+	*/
 	virtual bool isIssuerOf(const CertContext *other) const = 0;
 
-	// ownership of items IS NOT passed
+	/**
+	   Validate this certificate
+
+	   This function is blocking.
+
+	   \param trusted list of trusted certificates
+	   \param untrusted list of untrusted certificates (can be empty)
+	   \param crls list of CRLs (can be empty)
+	   \param u the desired usage for this certificate
+	   \param vf validation options
+	*/
 	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext*> &crls, UsageMode u, ValidateFlags vf) const = 0;
+
+	/**
+	   Validate a certificate chain.  This function makes no use of the
+	   certificate represented by this object, and it can be used even
+	   if this object is in an uninitialized state.
+
+	   This function is blocking.
+
+	   \param chain list of certificates in the chain, starting with the
+	   user certificate.  It is not necessary for the chain to contain
+	   the final root certificate.
+	   \param trusted list of trusted certificates
+	   \param crls list of CRLs (can be empty)
+	   \param u the desired usage for the user certificate in the chain
+	   \param vf validation options
+	*/
 	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext*> &crls, UsageMode u, ValidateFlags vf) const = 0;
 };
 
@@ -814,12 +1058,58 @@ public:
 	*/
 	CSRContext(Provider *p) : CertBase(p, "csr") {}
 
+	/**
+	   Returns true if the provider of this object supports the specified
+	   format, otherwise false
+	*/
 	virtual bool canUseFormat(CertificateRequestFormat f) const = 0;
+
+	/**
+	   Create a certificate request based on the given options and
+	   private key.  Returns true if successful, otherwise false.
+
+	   If successful, this object becomes the certificate request.
+	   If unsuccessful, this object is considered to be in an
+	   uninitialized state.
+	*/
 	virtual bool createRequest(const CertificateOptions &opts, const PKeyContext &priv) = 0;
+
+	/**
+	   Returns a pointer to the properties of this certificate request
+	*/
 	virtual const CertContextProps *props() const = 0;
+
+	/**
+	   Returns true if this certificate request is equal to another
+	   certificate request, otherwise false
+
+	   \param other the certificate request to compare with
+	*/
 	virtual bool compare(const CSRContext *other) const = 0;
-	virtual PKeyContext *subjectPublicKey() const = 0; // caller must delete
+
+	/**
+	   Returns a copy of this certificate request's public key.  The
+	   caller is responsible for deleting it.
+	*/
+	virtual PKeyContext *subjectPublicKey() const = 0;
+
+	/**
+	   Convert this certificate request to Netscape SPKAC format, and
+	   return the value
+
+	   Returns an empty string on error.
+	*/
 	virtual QString toSPKAC() const = 0;
+
+	/**
+	   Read Netscape SPKAC input and convert it into a certificate
+	   request
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param s the input data
+	*/
 	virtual ConvertResult fromSPKAC(const QString &s) = 0;
 };
 
@@ -835,7 +1125,16 @@ public:
 	*/
 	CRLContext(Provider *p) : CertBase(p, "crl") {}
 
+	/**
+	   Returns a pointer to the properties of this CRL
+	*/
 	virtual const CRLContextProps *props() const = 0;
+
+	/**
+	   Returns true if this CRL is equal to another CRL, otherwise false
+
+	   \param other the CRL to compare with
+	*/
 	virtual bool compare(const CRLContext *other) const = 0;
 };
 
@@ -851,10 +1150,26 @@ public:
 	*/
 	CertCollectionContext(Provider *p) : BasicContext(p, "certcollection") {}
 
-	// ownership of items IS NOT passed
+	/**
+	   Create PKCS#7 DER output based on the input certificates and CRLs
+
+	   Returns an empty array on error.
+	*/
 	virtual QByteArray toPKCS7(const QList<CertContext*> &certs, const QList<CRLContext*> &crls) const = 0;
 
-	// ownership of items IS passed
+	/**
+	   Read PKCS#7 DER input and convert it into a list of certificates
+	   and CRLs
+
+	   The caller is responsible for deleting the returned items.
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param a the input data
+	   \param certs the destination list for the certificates
+	   \param crls the destination list for the CRLs
+	*/
 	virtual ConvertResult fromPKCS7(const QByteArray &a, QList<CertContext*> *certs, QList<CRLContext*> *crls) const = 0;
 };
 
@@ -870,13 +1185,59 @@ public:
 	*/
 	CAContext(Provider *p) : BasicContext(p, "ca") {}
 
+	/**
+	   Prepare the object for usage
+
+	   This must be called before any CA operations are performed.
+
+	   \param cert the certificate of the CA
+	   \param priv the private key of the CA
+	*/
 	virtual void setup(const CertContext &cert, const PKeyContext &priv) = 0;
 
-	// caller must delete all return values here
+	/**
+	   Returns a copy of the CA's certificate.  The caller is responsible
+	   for deleting it.
+	*/
 	virtual CertContext *certificate() const = 0;
+
+	/**
+	   Issue a certificate based on a certificate request, and return
+	   the certificate.  The caller is responsible for deleting it.
+
+	   \param req the certificate request
+	   \param notValidAfter the expiration date
+	*/
 	virtual CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const = 0;
+
+	/**
+	   Issue a certificate based on a public key and options, and return
+	   the certificate.  The caller is responsible for deleting it.
+
+	   \param pub the public key of the certificate
+	   \param opts the options to use for generation
+	*/
 	virtual CertContext *createCertificate(const PKeyContext &pub, const CertificateOptions &opts) const = 0;
+
+	/**
+	   Create a new CRL and return it.  The caller is responsible for
+	   deleting it.
+
+	   The CRL has no entries in it.
+
+	   \param nextUpdate the expiration date of the CRL
+	*/
 	virtual CRLContext *createCRL(const QDateTime &nextUpdate) const = 0;
+
+	/**
+	   Update an existing CRL, by examining an old one and creating a new
+	   one based on it.  The new CRL is returned, and the caller is
+	   responsible for deleting it.
+
+	   \param crl an existing CRL issued by this CA
+	   \param entries the list of revoked entries
+	   \param nextUpdate the expiration date of the new CRL
+	*/
 	virtual CRLContext *updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const = 0;
 };
 
@@ -892,21 +1253,86 @@ public:
 	*/
 	PKCS12Context(Provider *p) : BasicContext(p, "pkcs12") {}
 
+	/**
+	   Create PKCS#12 DER output based on a set of input items
+
+	   Returns an empty array on error.
+
+	   \param name the friendly name of the data
+	   \param chain the certificate chain to store
+	   \param priv the private key to store
+	   \param passphrase the passphrase to encrypt the PKCS#12 data with
+	*/
 	virtual QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const SecureArray &passphrase) const = 0;
 
-	// caller must delete
+	/**
+	   Read PKCS#12 DER input and convert it into a set of output items
+
+	   The caller is responsible for deleting the returned items.
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param in the input data
+	   \param passphrase the passphrase needed to decrypt the input data
+	   \param name the destination string for the friendly name
+	   \param chain the destination list for the certificate chain
+	   \param priv address of a pointer to accept the private key
+	*/
 	virtual ConvertResult fromPKCS12(const QByteArray &in, const SecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const = 0;
 };
 
+/**
+   OpenPGP key properties
+
+   For efficiency and simplicity, the members are directly accessed.
+*/
 class QCA_EXPORT PGPKeyContextProps
 {
 public:
+	/**
+	   The key id
+	*/
 	QString keyId;
+
+	/**
+	   List of user id strings for the key, the first one being the
+	   primary user id
+	*/
 	QStringList userIds;
+
+	/**
+	   True if this key is a secret key, otherwise false
+	*/
 	bool isSecret;
-	QDateTime creationDate, expirationDate;
-	QString fingerprint; // all lowercase, no spaces
+
+	/**
+	   The time the key was created
+	*/
+	QDateTime creationDate;
+
+	/**
+	   The time the key expires
+	*/
+	QDateTime expirationDate;
+
+	/**
+	   The hex fingerprint of the key
+
+	   The format is all lowercase with no spaces.
+	*/
+	QString fingerprint;
+
+	/**
+	   True if this key is in a keyring (and thus usable), otherwise
+	   false
+	*/
 	bool inKeyring;
+
+	/**
+	   True if this key is trusted (e.g. signed by the keyring owner or
+	   via some web-of-trust), otherwise false
+	*/
 	bool isTrusted;
 };
 
@@ -922,11 +1348,39 @@ public:
 	*/
 	PGPKeyContext(Provider *p) : BasicContext(p, "pgpkey") {}
 
+	/**
+	   Returns a pointer to the properties of this key
+	*/
 	virtual const PGPKeyContextProps *props() const = 0;
 
+	/**
+	   Convert the key to binary format, and return the value
+	*/
 	virtual QByteArray toBinary() const = 0;
+
+	/**
+	   Convert the key to ascii-armored format, and return the value
+	*/
 	virtual QString toAscii() const = 0;
+
+	/**
+	   Read binary input and convert it into a key
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param a the input data
+	*/
 	virtual ConvertResult fromBinary(const QByteArray &a) = 0;
+
+	/**
+	   Read ascii-armored input and convert it into a key
+
+	   Returns QCA::ConvertGood if successful, otherwise some error
+	   value.
+
+	   \param s the input data
+	*/
 	virtual ConvertResult fromAscii(const QString &s) = 0;
 };
 
@@ -942,20 +1396,87 @@ public:
 	*/
 	KeyStoreEntryContext(Provider *p) : BasicContext(p, "keystoreentry") {}
 
+	/**
+	   Returns the entry type
+	*/
 	virtual KeyStoreEntry::Type type() const = 0;
+
+	/**
+	   Returns the entry id
+
+	   This id must be unique among all other entries in the same store.
+	*/
 	virtual QString id() const = 0;
+
+	/**
+	   Returns the name of this entry
+	*/
 	virtual QString name() const = 0;
+
+	/**
+	   Returns the id of the store that contains this entry
+	*/
 	virtual QString storeId() const = 0;
+
+	/**
+	   Returns the name of the store that contains this entry
+	*/
 	virtual QString storeName() const = 0;
+
+	/**
+	   Returns true if the private key of this entry is present for use
+	*/
 	virtual bool isAvailable() const;
+
+	/**
+	   Serialize the information about this entry
+
+	   This allows the entry object to be restored later, even if the
+	   store that contains it is not present.
+
+	   \sa KeyStoreListContext::entryPassive()
+	*/
 	virtual QString serialize() const = 0;
 
+	/**
+	   If this entry is of type KeyStoreEntry::TypeKeyBundle, this
+	   function returns the KeyBundle of the entry
+	*/
 	virtual KeyBundle keyBundle() const;
+
+	/**
+	   If this entry is of type KeyStoreEntry::TypeCertificate, this
+	   function returns the Certificate of the entry
+	*/
 	virtual Certificate certificate() const;
+
+	/**
+	   If this entry is of type KeyStoreEntry::TypeCRL, this function
+	   returns the CRL of the entry
+	*/
 	virtual CRL crl() const;
+
+	/**
+	   If this entry is of type KeyStoreEntry::TypePGPSecretKey, this
+	   function returns the secret PGPKey of the entry
+	*/
 	virtual PGPKey pgpSecretKey() const;
+
+	/**
+	   If this entry is of type KeyStoreEntry::TypePGPPublicKey or
+	   KeyStoreEntry::TypePGPSecretKey, this function returns the public
+	   PGPKey of the entry
+	*/
 	virtual PGPKey pgpPublicKey() const;
 
+	/**
+	   Attempt to ensure the private key of this entry is usable and
+	   accessible, potentially prompting the user and/or performing a
+	   login to a token device.  Returns true if the entry is now
+	   accessible, or false if the entry cannot be made accessible.
+
+	   This function is blocking.
+	*/
 	virtual bool ensureAccess();
 };
 
@@ -1041,7 +1562,8 @@ public:
 		bool isCompressed;
 		TLS::Version version;
 		QString cipherSuite;
-		int cipherBits, cipherMaxBits;
+		int cipherBits;
+		int cipherMaxBits;
 		TLSSessionContext *id;
 	};
 
@@ -1288,9 +1810,36 @@ public:
 	*/
 	SMSContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
+	/**
+	   Set the trusted certificates and for this secure message system,
+	   to be used for validation
+
+	   The collection may also contain CRLs.
+
+	   This function is only valid for CMS.
+	*/
 	virtual void setTrustedCertificates(const CertificateCollection &trusted);
+
+	/**
+	   Set the untrusted certificates and CRLs for this secure message
+	   system, to be used for validation
+
+	   This function is only valid for CMS.
+	*/
 	virtual void setUntrustedCertificates(const CertificateCollection &untrusted);
+
+	/**
+	   Set the private keys for this secure message system, to be used
+	   for decryption
+
+	   This function is only valid for CMS.
+	*/
 	virtual void setPrivateKeys(const QList<SecureMessageKey> &keys);
+
+	/**
+	   Create a new message object for this system.  The caller is
+	   responsible for deleting it.
+	*/
 	virtual MessageContext *createMessage() = 0;
 };
 
