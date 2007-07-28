@@ -84,6 +84,9 @@ namespace QCA {
 
 /**
    Random provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want Random instead.
 */
 class QCA_EXPORT RandomContext : public BasicContext
 {
@@ -104,6 +107,9 @@ public:
 
 /**
    Hash provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want Hash instead.
 */
 class QCA_EXPORT HashContext : public BasicContext
 {
@@ -134,6 +140,9 @@ public:
 
 /**
    Cipher provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want Cipher instead.
 */
 class QCA_EXPORT CipherContext : public BasicContext
 {
@@ -177,6 +186,10 @@ public:
 
 /**
    Message authentication code provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want
+   MessageAuthenticationCode instead.
 */
 class QCA_EXPORT MACContext : public BasicContext
 {
@@ -226,6 +239,10 @@ protected:
 
 /**
    Key derivation function provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want KeyDerivationFunction
+   instead.
 */
 class QCA_EXPORT KDFContext : public BasicContext
 {
@@ -244,6 +261,9 @@ public:
 
 /**
    Discrete logarithm provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want DLGroup instead.
 */
 class QCA_EXPORT DLGroupContext : public Provider::Context
 {
@@ -292,6 +312,10 @@ Q_SIGNALS:
 
 /**
    Public key implementation provider base
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want PKey, PublicKey, or
+   PrivateKey instead.
 */
 class QCA_EXPORT PKeyBase : public BasicContext
 {
@@ -421,6 +445,10 @@ Q_SIGNALS:
 
 /**
    RSA provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want RSAPublicKey or
+   RSAPrivateKey instead.
 */
 class QCA_EXPORT RSAContext : public PKeyBase
 {
@@ -485,6 +513,10 @@ public:
 
 /**
    DSA provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want DSAPublicKey or
+   DSAPrivateKey instead.
 */
 class QCA_EXPORT DSAContext : public PKeyBase
 {
@@ -538,6 +570,10 @@ public:
 
 /**
    Diffie-Hellman provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want DHPublicKey or
+   DHPrivateKey instead.
 */
 class QCA_EXPORT DHContext : public PKeyBase
 {
@@ -593,6 +629,10 @@ public:
 
 /**
    Public key container provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want PKey, PublicKey, or
+   PrivateKey instead.
 
    This object "holds" a public key object.  By default it contains no key
    (key() returns 0), but you can put a key into it with setKey(), or you
@@ -733,6 +773,10 @@ public:
 
 /**
    X.509 certificate and certificate request provider base
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want Certificate,
+   CertificateRequest, or CRL instead.
 */
 class QCA_EXPORT CertBase : public BasicContext
 {
@@ -780,6 +824,10 @@ public:
 
 /**
    X.509 certificate or certificate request properties
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want Certificate or
+   CertificateRequest instead.
 
    Some fields are only for certificates or only for certificate requests,
    and these fields are noted.
@@ -918,6 +966,9 @@ public:
 /**
    X.509 certificate revocation list properties
 
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want CRL instead.
+
    For efficiency and simplicity, the members are directly accessed.
 */
 class QCA_EXPORT CRLContextProps
@@ -968,6 +1019,9 @@ class CRLContext;
 
 /**
    X.509 certificate provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want Certificate instead.
 */
 class QCA_EXPORT CertContext : public CertBase
 {
@@ -1048,6 +1102,10 @@ public:
 
 /**
    X.509 certificate request provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want CertificateRequest
+   instead.
 */
 class QCA_EXPORT CSRContext : public CertBase
 {
@@ -1115,6 +1173,9 @@ public:
 
 /**
    X.509 certificate revocation list provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want CRL instead.
 */
 class QCA_EXPORT CRLContext : public CertBase
 {
@@ -1140,6 +1201,10 @@ public:
 
 /**
    X.509 certificate collection provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want CertificateCollection
+   instead.
 */
 class QCA_EXPORT CertCollectionContext : public BasicContext
 {
@@ -1175,6 +1240,10 @@ public:
 
 /**
    X.509 certificate authority provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want CertificateAuthority
+   instead.
 */
 class QCA_EXPORT CAContext : public BasicContext
 {
@@ -1243,6 +1312,9 @@ public:
 
 /**
    PKCS#12 provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want KeyBundle instead.
 */
 class QCA_EXPORT PKCS12Context : public BasicContext
 {
@@ -1284,6 +1356,9 @@ public:
 
 /**
    OpenPGP key properties
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want PGPKey instead.
 
    For efficiency and simplicity, the members are directly accessed.
 */
@@ -1338,6 +1413,9 @@ public:
 
 /**
    OpenPGP key provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want PGPKey instead.
 */
 class QCA_EXPORT PGPKeyContext : public BasicContext
 {
@@ -1386,6 +1464,10 @@ public:
 
 /**
    KeyStoreEntry provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want KeyStoreEntry
+   instead.
 */
 class QCA_EXPORT KeyStoreEntryContext : public BasicContext
 {
@@ -1482,6 +1564,9 @@ public:
 
 /**
    KeyStore provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want KeyStore instead.
 */
 class QCA_EXPORT KeyStoreListContext : public Provider::Context
 {
@@ -1538,6 +1623,9 @@ Q_SIGNALS:
 
 /**
    TLS "session" provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want TLSSession instead.
 */
 class QCA_EXPORT TLSSessionContext : public BasicContext
 {
@@ -1551,6 +1639,9 @@ public:
 
 /**
    TLS provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want TLS instead.
 */
 class QCA_EXPORT TLSContext : public Provider::Context
 {
@@ -1650,6 +1741,9 @@ Q_SIGNALS:
 
 /**
    SASL provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want SASL instead.
 */
 class QCA_EXPORT SASLContext : public Provider::Context
 {
@@ -1750,6 +1844,10 @@ Q_SIGNALS:
 
 /**
    SecureMessage provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want SecureMessage
+   instead.
 */
 class QCA_EXPORT MessageContext : public Provider::Context
 {
@@ -1800,6 +1898,10 @@ Q_SIGNALS:
 
 /**
    SecureMessageSystem provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want SecureMessageSystem
+   instead.
 */
 class QCA_EXPORT SMSContext : public BasicContext
 {
