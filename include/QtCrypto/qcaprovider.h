@@ -1647,14 +1647,46 @@ class QCA_EXPORT TLSContext : public Provider::Context
 {
 	Q_OBJECT
 public:
+	/**
+	   Information about an active TLS connection
+
+	   For efficiency and simplicity, the members are directly accessed.
+	*/
 	class SessionInfo
 	{
 	public:
+		/**
+		   True if the TLS connection is compressed, otherwise false
+		*/
 		bool isCompressed;
+
+		/**
+		   The TLS protocol version being used for this connection
+		*/
 		TLS::Version version;
+
+		/**
+		   The cipher suite being used for this connection
+
+		   \sa TLSContext::supportedCipherSuites()
+		*/
 		QString cipherSuite;
+
+		/**
+		   The bit size of the cipher used for this connection
+		*/
 		int cipherBits;
+
+		/**
+		   The maximum bit size possible of the cipher used for this
+		   connection
+		*/
 		int cipherMaxBits;
+
+		/**
+		   Pointer to the id of this TLS session, for use with
+		   resuming
+		*/
 		TLSSessionContext *id;
 	};
 
@@ -1670,9 +1702,18 @@ public:
 	*/
 	TLSContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
+	/**
+	   Reset the object to its initial state
+	*/
 	virtual void reset() = 0;
 
+	/**
+	   Returns a list of supported cipher suites for the specified
+	   SSL/TLS version.  The cipher suites are specified as strings, for
+	   example: "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA" (without quotes).
+	*/
 	virtual QStringList supportedCipherSuites(const TLS::Version &version) const = 0;
+
 	virtual bool canCompress() const = 0;
 	virtual bool canSetHostName() const = 0;
 	virtual int maxSSF() const = 0;
@@ -1749,10 +1790,22 @@ class QCA_EXPORT SASLContext : public Provider::Context
 {
 	Q_OBJECT
 public:
+	/**
+	   Convenience class to hold an IP address and an associated port
+
+	   For efficiency and simplicity, the members are directly accessed.
+	*/
 	class HostPort
 	{
 	public:
+		/**
+		   The IP address
+		*/
 		QString addr;
+
+		/**
+		   The port
+		*/
 		quint16 port;
 	};
 
