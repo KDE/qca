@@ -17,15 +17,16 @@ if (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
   SET(NSS_FOUND TRUE)
 
 else (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
+  if(NOT WIN32)
+    INCLUDE(UsePkgConfig)
 
-  INCLUDE(UsePkgConfig)
+    PKGCONFIG(nss _NSSIncDir _NSSLinkDir _NSSLinkFlags _NSSCflags)
 
-  PKGCONFIG(nss _NSSIncDir _NSSLinkDir _NSSLinkFlags _NSSCflags)
+    set(NSS_DEFINITIONS ${_NSSCflags})
+    set(NSS_INCLUDE_DIRS ${_NSSIncDir})
+    set(NSS_LIBRARIES ${_NSSLinkFlags})
+  endif(NOT WIN32)
 
-  set(NSS_DEFINITIONS ${_NSSCflags})
-  set(NSS_INCLUDE_DIRS ${_NSSIncDir})
-  set(NSS_LIBRARIES ${_NSSLinkFlags})
-  
   if (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
      set(NSS_FOUND TRUE)
   endif (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
