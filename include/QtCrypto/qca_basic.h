@@ -37,6 +37,13 @@
 namespace QCA {
 
 /**
+   \defgroup UserAPI QCA user API
+
+   This is the main set of QCA classes, intended for use
+   in standard applications.
+*/
+/*@{*/
+/**
    \class Random qca_basic.h QtCrypto
 
    Source of random numbers
@@ -888,7 +895,7 @@ public:
 	*/
 	explicit PBKDF2(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf2", algorithm), provider) {}
 };
-
+/*@}*/
 }
 
 #endif

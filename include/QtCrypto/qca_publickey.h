@@ -48,6 +48,10 @@ class DHPublicKey;
 class DHPrivateKey;
 
 /**
+   \addtogroup UserAPI
+*/
+/*@{*/
+/**
    Encryption algorithms
 */
 enum EncryptionAlgorithm
@@ -1420,7 +1424,7 @@ public:
 	*/
 	BigInteger x() const;
 };
-
+/*@}*/
 }
 
 #endif

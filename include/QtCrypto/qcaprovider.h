@@ -43,6 +43,14 @@
 #include <limits>
 
 /**
+   \defgroup ProviderAPI QCA provider API
+
+   This group of classes and functions is not normally needed 
+   by application writers, but can be used to extend QCA if
+   required
+*/
+/*@{*/
+/**
    Provider plugin base class
 
    QCA loads cryptographic provider plugins with QPluginLoader.  The QObject
@@ -77,10 +85,16 @@ public:
 	*/
 	virtual QCA::Provider *createProvider() = 0;
 };
+/*@}*/
 
 Q_DECLARE_INTERFACE(QCAPlugin, "com.affinix.qca.Plugin/1.0")
 
 namespace QCA {
+
+/**
+   \addtogroup ProviderAPI
+*/
+/*@{*/
 
 /**
    Random provider
@@ -1998,6 +2012,9 @@ public:
 	virtual MessageContext *createMessage() = 0;
 };
 
+/*@}*/
+
 }
+
 
 #endif

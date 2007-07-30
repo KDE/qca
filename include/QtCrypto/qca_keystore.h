@@ -42,6 +42,10 @@ class KeyStoreManagerPrivate;
 class KeyStorePrivate;
 
 /**
+   \addtogroup UserAPI
+*/
+/*@{*/
+/**
    \class KeyStoreEntry qca_keystore.h QtCrypto
 
    Single entry in a KeyStore
@@ -765,7 +769,7 @@ private:
 	static void scan();
 	static void shutdown();
 };
-
+/*@}*/
 }
 
 #endif

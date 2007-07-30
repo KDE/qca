@@ -41,6 +41,10 @@ class QDateTime;
 
 namespace QCA {
 
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 class SecureMessageSystem;
 
 /**
@@ -902,6 +906,7 @@ private:
 	class Private;
 	Private *d;
 };
+/*@}*/
 
 }
 

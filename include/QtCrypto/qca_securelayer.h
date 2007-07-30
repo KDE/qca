@@ -39,6 +39,10 @@
 namespace QCA {
 
 /**
+   \addtogroup UserAPI
+*/
+/*@{*/
+/**
    Specify the lower-bound for acceptable TLS/SASL security layers
 
    For TLS, the intepretation of these levels is:
@@ -1172,7 +1176,7 @@ private:
 	friend class Private;
 	Private *d;
 };
-
+/*@}*/
 }
 
 #endif

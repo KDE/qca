@@ -74,6 +74,10 @@ class KeyStoreManager;
 class Logger;
 
 /**
+   \addtogroup UserAPI
+*/
+/*@{*/
+/**
    Convenience representation for the plugin providers
 
    You can get a list of providers using the providers()
@@ -1602,6 +1606,7 @@ private:
 	friend class Private;
 	Private *d;
 };
+/*@}*/
 
 }
 

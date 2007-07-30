@@ -48,6 +48,10 @@ class CertificateCollection;
 class CertificateChain;
 
 /**
+   \addtogroup UserAPI
+*/
+/*@{*/
+/**
    Certificate Request Format
 */
 enum CertificateRequestFormat
@@ -2546,7 +2550,7 @@ private:
 	friend class Private;
 	Private *d;
 };
-
+/*@}*/
 }
 
 #endif

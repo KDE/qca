@@ -35,7 +35,10 @@
 #include "qca_core.h"
 
 namespace QCA {
-
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 /**
    \class TextFilter qca_textfilter.h QtCrypto
 
@@ -310,7 +313,7 @@ private:
 	class Private;
 	Private *d;
 };
-
+/*@}*/
 }
 
 #endif

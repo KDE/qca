@@ -45,6 +45,10 @@ class QByteArray;
 class QTextStream;
 
 /**
+   \addtogroup UserAPI
+*/
+/*@{*/
+/**
    Allocate a block of memory from the secure memory pool.
 
    This is intended to be used when working with C libraries.
@@ -71,9 +75,13 @@ QCA_EXPORT void qca_secure_free(void *p);
    \param bytes the new size that is required.
 */
 QCA_EXPORT void *qca_secure_realloc(void *p, int bytes);
-
+/*@}*/
 namespace QCA {
 
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 /**
    \class MemoryRegion qca_tools.h QtCrypto
 
@@ -776,6 +784,7 @@ private:
 */
 QCA_EXPORT QTextStream &operator<<(QTextStream &stream, const BigInteger &b);
 
+/*@}*/
 }
 
 #endif
