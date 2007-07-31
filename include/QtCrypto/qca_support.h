@@ -50,10 +50,6 @@
 namespace QCA {
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-/**
    Convenience method to determine the return type of a method
 
    This function identifies the return type of a specified
@@ -145,6 +141,11 @@ ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "boolMethod" ), arg
    \relates SyncThread
 */
 QCA_EXPORT bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args, QVariant *ret, Qt::ConnectionType type = Qt::AutoConnection);
+
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 
 /**
    Convenience class to synchronize a thread

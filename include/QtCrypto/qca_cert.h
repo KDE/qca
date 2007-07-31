@@ -47,10 +47,7 @@ class CRL;
 class CertificateCollection;
 class CertificateChain;
 
-/**
-   \addtogroup UserAPI
-*/
-/*@{*/
+
 /**
    Certificate Request Format
 */
@@ -84,6 +81,10 @@ enum CertificateInfoTypeKnown
 	XMPP                    ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt), id = "1.3.6.1.5.5.7.8.5"
 };
 
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 /**
    Certificate information type
 
@@ -280,6 +281,7 @@ private:
 	class Private;
 	QSharedDataPointer<Private> d;
 };
+/*@}*/
 
 /**
    Known types of certificate constraints
@@ -319,6 +321,8 @@ enum ConstraintTypeKnown
    identify an approved purpose for a certificate.
 
    \note It is common for a certificate to have more than one purpose.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT ConstraintType
 {
@@ -488,6 +492,8 @@ typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
 
    This container stores the information in the same sequence as
    the certificate format itself.
+
+   \ingroup UserAPI
 */
 class CertificateInfoOrdered : public QList<CertificateInfoPair>
 {
@@ -535,6 +541,10 @@ typedef QList<ConstraintType> Constraints;
 */
 QCA_EXPORT QStringList makeFriendlyNames(const QList<Certificate> &list);
 
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 /**
    \class CertificateOptions qca_cert.h QtCrypto
 
@@ -1193,7 +1203,7 @@ public:
 	*/
 	inline CertificateChain complete(const QList<Certificate> &issuers = QList<Certificate>(), Validity *result = 0) const;
 };
-
+/*@}*/
 inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const
 {
 	if(isEmpty())
@@ -1207,6 +1217,11 @@ inline CertificateChain CertificateChain::complete(const QList<Certificate> &iss
 		return CertificateChain();
 	return first().chain_complete(*this, issuers, result);
 }
+
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 
 /**
    \class CertificateRequest qca_cert.h QtCrypto

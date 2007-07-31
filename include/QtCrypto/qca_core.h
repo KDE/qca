@@ -74,10 +74,6 @@ class KeyStoreManager;
 class Logger;
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-/**
    Convenience representation for the plugin providers
 
    You can get a list of providers using the providers()
@@ -551,6 +547,8 @@ QCA_EXPORT QByteArray hexToArray(const QString &hexString);
    To ensure that QCA is properly initialised and cleaned up,
    it is convenient to create an Initializer object, and let it
    go out of scope at the end of %QCA usage.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Initializer
 {
@@ -587,6 +585,8 @@ KeyLength keyLen( 4, 12, 4 );
 #include<limits>
 KeyLength( 0, std::numeric_limits<int>::max(), 1 );
    \endcode
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT KeyLength
 {
@@ -637,6 +637,8 @@ private:
    QCA capabilities and plugins, however there is nothing stopping
    you from using it to obtain information about specific plugins,
    as shown in the example below.
+
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT Provider
 {
@@ -808,6 +810,8 @@ QVariantMap defaultConfig() const
    Internal context class used for the plugin
 
    \internal
+
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT Provider::Context : public QObject
 {
@@ -876,6 +880,8 @@ private:
    itself, thereby disabling the event properties of the underlying
    QObject.  Context types that need to be a QObject should inherit from
    Provider::Context, those that don't should inherit from BasicContext.
+
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT BasicContext : public Provider::Context
 {
@@ -916,6 +922,8 @@ private:
    algorithm has some internal state that is modified
    when you call update() and returned when you call
    final().
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT BufferedComputation
 {
@@ -968,6 +976,8 @@ public:
    your class from a subclass with stronger semantics, or if your
    update() function is always returning null results, and
    everything comes out at final(), try BufferedComputation.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Filter
 {
@@ -1020,6 +1030,8 @@ public:
 
    This is a fairly abstract class, mainly used for
    implementing the backend "provider" interface.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Algorithm
 {
@@ -1118,6 +1130,8 @@ private:
    \class SymmetricKey qca_core.h QtCrypto
 
    Container for keys for symmetric encryption algorithms.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SymmetricKey : public SecureArray
 {
@@ -1162,6 +1176,8 @@ public:
    \class InitializationVector qca_core.h QtCrypto
 
    Container for initialisation vectors and nonces
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT InitializationVector : public SecureArray
 {
@@ -1202,6 +1218,8 @@ public:
 
    Event is an abstraction, so you can handle this need in a way that makes
    sense for your application.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Event
 {
@@ -1383,6 +1401,8 @@ private:
    may (or may not) be handled by the application using a
    handler object (that has-a EventHandler, or possibly is-a
    EventHandler) that is connected to the eventReady() signal.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT EventHandler : public QObject
 {
@@ -1458,6 +1478,8 @@ private:
    User password / passphrase / PIN handler
 
    This class is used to obtain a password from a user.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT PasswordAsker : public QObject
 {
@@ -1546,6 +1568,8 @@ private:
    User token handler
 
    This class is used to request the user to insert a token.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT TokenAsker : public QObject
 {
@@ -1606,7 +1630,6 @@ private:
 	friend class Private;
 	Private *d;
 };
-/*@}*/
 
 }
 

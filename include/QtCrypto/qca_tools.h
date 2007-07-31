@@ -45,10 +45,6 @@ class QByteArray;
 class QTextStream;
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-/**
    Allocate a block of memory from the secure memory pool.
 
    This is intended to be used when working with C libraries.
@@ -75,13 +71,9 @@ QCA_EXPORT void qca_secure_free(void *p);
    \param bytes the new size that is required.
 */
 QCA_EXPORT void *qca_secure_realloc(void *p, int bytes);
-/*@}*/
+
 namespace QCA {
 
-/**
-   \addtogroup UserAPI
-*/
-/*@{*/
 /**
    \class MemoryRegion qca_tools.h QtCrypto
 
@@ -91,6 +83,8 @@ namespace QCA {
    subclass or call toByteArray() to convert to QByteArray.
 
    Note that this class is implicitly shared (that is, copy on write).
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT MemoryRegion
 {
@@ -308,6 +302,8 @@ private:
    cleared first.
 
    Note that this class is implicitly shared (that is, copy on write).
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SecureArray : public MemoryRegion
 {
@@ -541,6 +537,8 @@ if ( BigInteger("3499543804349") ==
 	// do something
 }
    \endcode
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT BigInteger
 {
@@ -777,6 +775,8 @@ private:
 	QSharedDataPointer<Private> d;
 };
 
+
+
 /**
    Stream operator
 
@@ -784,7 +784,7 @@ private:
 */
 QCA_EXPORT QTextStream &operator<<(QTextStream &stream, const BigInteger &b);
 
-/*@}*/
+
 }
 
 #endif

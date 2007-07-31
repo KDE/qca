@@ -357,6 +357,7 @@ private:
 	class Private;
 	Private *d;
 };
+/*@}*/
 
 /**
    \page hashing Hashing Algorithms
@@ -511,6 +512,10 @@ private:
    stripped of ciphertext.
 */
 
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 /**
    \class Cipher qca_basic.h QtCrypto
 

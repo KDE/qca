@@ -39,10 +39,6 @@
 namespace QCA {
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-/**
    Specify the lower-bound for acceptable TLS/SASL security layers
 
    For TLS, the intepretation of these levels is:
@@ -68,6 +64,11 @@ enum SecurityLevel
 	SL_High,      ///< must be more than 128 bit
 	SL_Highest    ///< SL_High or max possible, whichever is greater
 };
+
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 
 /**
    \class SecureLayer qca_securelayer.h QtCrypto

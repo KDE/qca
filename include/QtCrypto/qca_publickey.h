@@ -48,10 +48,6 @@ class DHPublicKey;
 class DHPrivateKey;
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-/**
    Encryption algorithms
 */
 enum EncryptionAlgorithm
@@ -145,6 +141,10 @@ enum DLGroupSet
 */
 QCA_EXPORT QByteArray emsa3Encode(const QString &hashName, const QByteArray &digest, int size = -1);
 
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 /**
    \class DLGroup qca_publickey.h QtCrypto
 

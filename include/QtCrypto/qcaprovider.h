@@ -22,7 +22,7 @@
 /**
    \file qcaprovider.h
 
-   Header file for provider implementation classes (e.g. plugins)
+   Header file for provider implementation classes (plugins)
 
    \note You should not use this header directly from an
    application. You should just use <tt> \#include \<QtCrypto>
@@ -45,7 +45,7 @@
 /**
    \defgroup ProviderAPI QCA provider API
 
-   This group of classes and functions is not normally needed 
+   This group of classes is not normally needed 
    by application writers, but can be used to extend QCA if
    required
 */

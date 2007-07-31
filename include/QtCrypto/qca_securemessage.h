@@ -41,16 +41,14 @@ class QDateTime;
 
 namespace QCA {
 
-/**
-   \addtogroup UserAPI
-*/
-/*@{*/
 class SecureMessageSystem;
 
 /**
    \class SecureMessageKey qca_securemessage.h QtCrypto
 
    Key for SecureMessage system
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SecureMessageKey
 {
@@ -173,6 +171,8 @@ typedef QList<SecureMessageKey> SecureMessageKeyList;
    \class SecureMessageSignature qca_securemessage.h QtCrypto
 
    SecureMessage signature
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SecureMessageSignature
 {
@@ -243,6 +243,12 @@ private:
    A list of signatures
 */
 typedef QList<SecureMessageSignature> SecureMessageSignatureList;
+
+
+/**
+   \addtogroup UserAPI
+*/
+/*@{*/
 
 /**
    \class SecureMessage qca_securemessage.h QtCrypto
