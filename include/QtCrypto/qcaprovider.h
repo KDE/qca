@@ -1591,47 +1591,182 @@ public:
 	*/
 	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
 
+	/**
+	   Starts the keystore provider
+	*/
 	virtual void start();
 
-	// enable/disable update events
+	/**
+	   Enables or disables update events
+
+	   The updated() and storeUpdated() signals might not be emitted if
+	   updates are not enabled.
+	*/
 	virtual void setUpdatesEnabled(bool enabled);
 
-	// returns a list of integer context ids (for keystores)
+	/**
+	   Returns a list of integer context ids, each representing a
+	   keystore instance
+
+	   If a keystore becomes unavailable and then later becomes
+	   available again (for example, if a smart card is removed and
+	   then the same one is inserted again), the integer context id
+	   must be different than last time.
+	*/
 	virtual QList<int> keyStores() = 0;
 
-	// null/empty return values mean the context id is gone
-
+	/**
+	   Returns the type of the specified store, or -1 if the integer
+	   context id is invalid
+	*/
 	virtual KeyStore::Type type(int id) const = 0;
+
+	/**
+	   Returns the string id of the store, or an empty string if the
+	   integer context id is invalid
+
+	   The string id of the store should be unique to a single store, and
+	   it should persist between availability/unavailability.  For
+	   example, a smart card that is removed and inserted again should
+	   have the same string id (despite having a new integer context id).
+	*/
 	virtual QString storeId(int id) const = 0;
+
+	/**
+	   Returns the friendly name of the store, or an empty string if the
+	   integer context id is invalid
+	*/
 	virtual QString name(int id) const = 0;
+
+	/**
+	   Returns true if the store is read-only
+
+	   If the integer context id is invalid, this function should return
+	   true.
+	*/
 	virtual bool isReadOnly(int id) const;
 
+	/**
+	   Returns the types supported by the store, or an empty list if the
+	   integer context id is invalid
+
+	   This function should return all supported types, even if the store
+	   doesn't actually contain entries for all of the types.
+	*/
 	virtual QList<KeyStoreEntry::Type> entryTypes(int id) const = 0;
 
-	// caller must delete any returned KeyStoreEntryContexts
+	/**
+	   Returns the entries of the store, or an empty list if the integer
+	   context id is invalid
 
+	   The caller is responsible for deleting the returned entry objects.
+	*/
 	virtual QList<KeyStoreEntryContext*> entryList(int id) = 0;
 
-	// return 0 if no such entry
+	/**
+	   Returns a single entry in the store, if the entry id is already
+	   known.  If the entry does not exist, the function returns 0.
+
+	   The caller is responsible for deleting the returned entry object.
+	*/
 	virtual KeyStoreEntryContext *entry(int id, const QString &entryId);
 
-	// thread-safe
-	// return 0 if the provider doesn't handle or understand the string
+	/**
+	   Returns a single entry, created from the serialization string of
+	   a previous entry (using KeyStoreEntryContext::serialize()).  If
+	   the serialization string cannot be parsed by this provider, or the
+	   entry cannot otherwise be created, the function returns 0.
+
+	   The caller is responsible for deleting the returned entry object.
+
+	   This function must be thread-safe.
+	*/
 	virtual KeyStoreEntryContext *entryPassive(const QString &serialized);
 
+	/**
+	   Write a KeyBundle to the store
+
+	   Returns the entry id of the new item, or an empty string if there
+	   was an error writing the item.
+	*/
 	virtual QString writeEntry(int id, const KeyBundle &kb);
+
+	/**
+	   Write a Certificate to the store
+
+	   Returns the entry id of the new item, or an empty string if there
+	   was an error writing the item.
+	*/
 	virtual QString writeEntry(int id, const Certificate &cert);
+
+	/**
+	   Write a CRL to the store
+
+	   Returns the entry id of the new item, or an empty string if there
+	   was an error writing the item.
+	*/
 	virtual QString writeEntry(int id, const CRL &crl);
+
+	/**
+	   Write a PGPKey to the store
+
+	   Returns the entry id of the new item, or an empty string if there
+	   was an error writing the item.
+	*/
 	virtual QString writeEntry(int id, const PGPKey &key);
+
+	/**
+	   Remove an entry from the store
+
+	   Returns true if the entry is successfully removed, otherwise
+	   false.
+	*/
 	virtual bool removeEntry(int id, const QString &entryId);
 
 Q_SIGNALS:
-	// note: busyStart is assumed after calling start(), no need to emit
+	/**
+	   Emit this when the provider is busy looking for keystores.  The
+	   provider goes into a busy state when it has reason to believe
+	   there are keystores present, but it still needs to check or query
+	   some devices to see for sure.
+
+	   For example, if a smart card is inserted, then the provider may
+	   immediately go into a busy state upon detecting the insert.
+	   However, it may take some seconds before the smart card
+	   information can be queried and reported by the provider.  Once
+	   the card is queried successfully, the provider would leave the
+	   busy state and report the new keystore.
+
+	   When this object is first started with start(), it is assumed to
+	   be in the busy state, so there is no need to emit this signal at
+	   the beginning.
+	*/
 	void busyStart();
+
+	/**
+	   Emit this to leave the busy state
+
+	   When this object is first started with start(), it is assumed to
+	   be in the busy state.  You must emit busyEnd() at some point, or
+	   QCA will never ask you about keystores.
+	*/
 	void busyEnd();
 
+	/**
+	   Indicates the list of keystores has changed, and that QCA should
+	   call keyStores() to obtain the latest list
+	*/
 	void updated();
+
+	/**
+	   Emitted when there is diagnostic text to report
+	*/
 	void diagnosticText(const QString &str);
+
+	/**
+	   Indicates that the entry list of a keystore has changed (entries
+	   added, removed, or modified)
+	*/
 	void storeUpdated(int id);
 };
 
@@ -1868,26 +2003,96 @@ public:
 	*/
 	virtual bool waitForResultsReady(int msecs) = 0;
 
-	// results
+	/**
+	   Returns the result code of an operation
+	*/
 	virtual Result result() const = 0;
+
+	/**
+	   Returns data that should be sent across the network
+	*/
 	virtual QByteArray to_net() = 0;
+
+	/**
+	   Returns the number of bytes of plaintext data that is encoded
+	   inside of to_net()
+	*/
 	virtual int encoded() const = 0;
+
+	/**
+	   Returns data that is decoded from the network and should be
+	   processed by the application
+	*/
 	virtual QByteArray to_app() = 0;
+
+	/**
+	   Returns true if the peer has closed the stream
+	*/
 	virtual bool eof() const = 0;
 
-	// call after handshake continue, but before success
+	/**
+	   Returns true if the TLS client hello has been received
+
+	   This is only valid if a handshake is in progress or
+	   completed.
+	*/
 	virtual bool clientHelloReceived() const = 0;
+
+	/**
+	   Returns true if the TLS server hello has been received
+
+	   This is only valid if a handshake is in progress or completed.
+	*/
 	virtual bool serverHelloReceived() const = 0;
+
+	/**
+	   Returns the host name sent by the client using server name
+	   indication (server mode only)
+
+	   This is only valid if a handshake is in progress or completed.
+	*/
 	virtual QString hostName() const = 0;
+
+	/**
+	   Returns true if the peer is requesting a certificate
+
+	   This is only valid if a handshake is in progress or completed.
+	*/
 	virtual bool certificateRequested() const = 0;
+
+	/**
+	   Returns the issuer list sent by the server (client mode only)
+
+	   This is only valid if a handshake is in progress or completed.
+	*/
 	virtual QList<CertificateInfoOrdered> issuerList() const = 0;
 
-	// call after successful handshake
+	/**
+	   Returns the QCA::Validity of the peer certificate
+
+	   This is only valid if a handshake is completed.
+	*/
 	virtual Validity peerCertificateValidity() const = 0;
+
+	/**
+	   Returns the peer certificate chain
+
+	   This is only valid if a handshake is completed.
+	*/
 	virtual CertificateChain peerCertificateChain() const = 0;
+
+	/**
+	   Returns information about the active TLS session
+
+	   This is only valid if a handshake is completed.
+	*/
 	virtual SessionInfo sessionInfo() const = 0;
 
-	// call after shutdown
+	/**
+	   Returns any unprocessed network input data
+
+	   This is only valid after a successful shutdown.
+	*/
 	virtual QByteArray unprocessed() = 0;
 
 Q_SIGNALS:
@@ -1970,38 +2175,73 @@ public:
 	*/
 	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF) = 0;
 
-	// startClient() results:
-	//   result
-	//   mech
-	//   haveClientInit
-	//   stepData
+	/**
+	   Begins the session in client mode, starting with the
+	   authentication
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   On completion, result(), mech(), haveClientInit(), and stepData()
+	   will be valid.  If result() is Success, then the session is now in
+	   the connected state.
+	*/
 	virtual void startClient(const QStringList &mechlist, bool allowClientSendFirst) = 0;
 
-	// startServer() results:
-	//   result (Success or Error)
-	//   mechlist
+	/**
+	   Begins the session in server mode, starting with the
+	   authentication
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   On completion, result() and mechlist() will be valid.  The
+	   result() function will return Success or Error.  If the result is
+	   Success, then serverFirstStep() will be called next.
+	*/
 	virtual void startServer(const QString &realm, bool disableServerSendLast) = 0;
 
-	// serverFirstStep() results:
-	//   result
-	//   stepData
+	/**
+	   Finishes server startup
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   On completion, result() and stepData() will be valid.  If result()
+	   is Success, then the session is now in the connected state.
+	*/
 	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit) = 0;
 
-	// nextStep() results:
-	//   result
-	//   stepData
+	/**
+	   Perform another step of the SASL authentication
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   On completion, result() and stepData() will be valid.
+	*/
 	virtual void nextStep(const QByteArray &from_net) = 0;
 
-	// tryAgain() results:
-	//   result
-	//   stepData
+	/**
+	   Attempt the most recent operation again.  This is used if the
+	   result() of an operation is Params or AuthCheck.
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   On completion, result() and stepData() will be valid.
+	*/
 	virtual void tryAgain() = 0;
 
-	// update() results:
-	//   result (Success or Error)
-	//   to_net
-	//   encoded
-	//   to_app
+	/**
+	   Performs one iteration of the SASL security layer processing
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   On completion, result(), to_net(), encoded(), and to_app() will be
+	   valid.  The result() function will return Success or Error.
+	*/
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
 
 	/**
@@ -2016,31 +2256,97 @@ public:
 	*/
 	virtual bool waitForResultsReady(int msecs) = 0;
 
-	// results
+	/**
+	   Returns the result code of an operation
+	*/
 	virtual Result result() const = 0;
+
+	/**
+	   Returns the mechanism list (server mode only)
+	*/
 	virtual QStringList mechlist() const = 0;
+
+	/**
+	   Returns the mechanism selected
+	*/
 	virtual QString mech() const = 0;
+
+	/**
+	   Returns true if the client has initialization data
+	*/
 	virtual bool haveClientInit() const = 0;
+
+	/**
+	   Returns an authentication payload for to be transmitted over the
+	   network
+	*/
 	virtual QByteArray stepData() const = 0;
+
+	/**
+	   Returns data that should be sent across the network (for the
+	   security layer)
+	*/
 	virtual QByteArray to_net() = 0;
+
+	/**
+	   Returns the number of bytes of plaintext data that is encoded
+	   inside of to_net()
+	*/
 	virtual int encoded() const = 0;
+
+	/**
+	   Returns data that is decoded from the network and should be
+	   processed by the application
+	*/
 	virtual QByteArray to_app() = 0;
 
-	// call after auth success
+	/**
+	   Returns the SSF of the active SASL session
+
+	   This is only valid after authentication success.
+	*/
 	virtual int ssf() const = 0;
 
-	// call after auth fail
+	/**
+	   Returns the reason for failure, if the authentication was not
+	   successful.
+
+	   This is only valid after authentication failure.
+	*/
 	virtual SASL::AuthCondition authCondition() const = 0;
 
-	// call after Params
+	/**
+	   Returns the needed/optional client parameters
+
+	   This is only valid after receiving the Params result code.
+	*/
 	virtual SASL::Params clientParams() const = 0;
+
+	/**
+	   Set some of the client parameters (pass 0 to not set a field)
+	*/
 	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm) = 0;
 
-	// call after Params and SASL::Params::canSendRealm == true
+	/**
+	   Returns the realm list (client mode only)
+
+	   This is only valid after receiving the Params result code and
+	   SASL::Params::canSendRealm is set to true.
+	*/
 	virtual QStringList realmlist() const = 0;
 
-	// call after AuthCheck
+	/**
+	   Returns the username attempting to authenticate (server mode only)
+
+	   This is only valid after receiving the AuthCheck result code.
+	*/
 	virtual QString username() const = 0;
+
+	/**
+	   Returns the authzid attempting to authorize (server mode only)
+
+	   This is only valid after receiving the AuthCheck result code.
+	*/
 	virtual QString authzid() const = 0;
 
 Q_SIGNALS:
@@ -2062,13 +2368,16 @@ class QCA_EXPORT MessageContext : public Provider::Context
 {
 	Q_OBJECT
 public:
+	/**
+	   The type of operation being performed
+	*/
 	enum Operation
 	{
-		Encrypt,
-		Decrypt,
-		Sign,
-		Verify,
-		SignAndEncrypt
+		Encrypt,       ///< Encrypt operation
+		Decrypt,       ///< Decrypt (or Decrypt and Verify) operation
+		Sign,          ///< Sign operation
+		Verify,        ///< Verify operation
+		SignAndEncrypt ///< Sign and Encrypt operation
 	};
 
 	/**
@@ -2076,32 +2385,139 @@ public:
 	*/
 	MessageContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
+	/**
+	   Returns true if the provider supports multiple signers for
+	   signature creation or signature verification
+	*/
 	virtual bool canSignMultiple() const = 0;
 
+	/**
+	   The type of secure message (e.g. PGP or CMS)
+	*/
 	virtual SecureMessage::Type type() const = 0;
 
+	/**
+	   Reset the object to its initial state
+	*/
 	virtual void reset() = 0;
+
+	/**
+	   Configure a new encrypting operation
+	*/
 	virtual void setupEncrypt(const SecureMessageKeyList &keys) = 0;
+
+	/**
+	   Configure a new signing operation
+	*/
 	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime) = 0;
+
+	/**
+	   Configure a new verify operation
+	*/
 	virtual void setupVerify(const QByteArray &detachedSig) = 0;
 
+	/**
+	   Begins the secure message operation
+
+	   This function returns immediately.
+
+	   If there is input data, update() will be called (potentially
+	   repeatedly) afterwards.  Emit updated() if there is data to
+	   read, if input data has been accepted, or if the operation has
+	   finished.
+	*/
 	virtual void start(SecureMessage::Format f, Operation op) = 0;
+
+	/**
+	   Provide input to the message operation
+	*/
 	virtual void update(const QByteArray &in) = 0;
+
+	/**
+	   Extract output from the message operation
+	*/
 	virtual QByteArray read() = 0;
+
+	/**
+	   Returns the number of input bytes accepted since the last call to
+	   update()
+	*/
 	virtual int written() = 0;
+
+	/**
+	   Indicates the end of input
+	*/
 	virtual void end() = 0;
 
+	/**
+	   Returns true if the operation has finished, otherwise false
+	*/
 	virtual bool finished() const = 0;
-	virtual bool waitForFinished(int msecs) = 0; // -1 means wait forever
 
+	/**
+	   Waits for the secure message operation to complete.  In this case,
+	   the updated() signal is not emitted.  Returns true if the
+	   operation completed or false if this function times out.
+
+	   This function is blocking.
+
+	   \param msecs number of milliseconds to wait (-1 to wait forever)
+	*/
+	virtual bool waitForFinished(int msecs) = 0;
+
+	/**
+	   Returns true if the operation was successful
+
+	   This is only valid if the operation has finished.
+	*/
 	virtual bool success() const = 0;
+
+	/**
+	   Returns the reason for failure, if the operation was not
+	   successful
+
+	   This is only valid if the operation has finished.
+	*/
 	virtual SecureMessage::Error errorCode() const = 0;
+
+	/**
+	   Returns the signature, in the case of a detached signature
+	   operation
+
+	   This is only valid if the operation has finished.
+	*/
 	virtual QByteArray signature() const = 0;
+
+	/**
+	   Returns the name of the hash used to generate the signature, in
+	   the case of a signature operation
+
+	   This is only valid if the operation has finished.
+	*/
 	virtual QString hashName() const = 0;
+
+	/**
+	   Returns a list of signatures, in the case of a verify or decrypt
+	   and verify operation
+
+	   This is only valid if the operation has finished.
+	*/
 	virtual SecureMessageSignatureList signers() const = 0;
+
+	/**
+	   Returns any diagnostic text for the operation, potentially useful
+	   to show the user in the event the operation is unsuccessful.  For
+	   example, this could be the stderr output of gpg.
+
+	   This is only valid if the operation has finished.
+	*/
 	virtual QString diagnosticText() const;
 
 Q_SIGNALS:
+	/**
+	   Emitted when there is data to read, if input data has been
+	   accepted, or if the operation has finished
+	*/
 	void updated();
 };
 
