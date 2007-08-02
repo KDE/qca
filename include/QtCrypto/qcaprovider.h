@@ -1704,11 +1704,14 @@ public:
 		TLSSessionContext *id;
 	};
 
+	/**
+	   Result of a TLS operation
+	*/
 	enum Result
 	{
-		Success,
-		Error,
-		Continue
+		Success, ///< Operation completed
+		Error,   ///< Operation failed
+		Continue ///< More data needed to complete operation
 	};
 
 	/**
@@ -1728,44 +1731,142 @@ public:
 	*/
 	virtual QStringList supportedCipherSuites(const TLS::Version &version) const = 0;
 
+	/**
+	   Returns true if the provider supports compression
+	*/
 	virtual bool canCompress() const = 0;
+
+	/**
+	   Returns true if the provider supports server name indication
+	*/
 	virtual bool canSetHostName() const = 0;
+
+	/**
+	   Returns the maximum SSF supported by this provider
+	*/
 	virtual int maxSSF() const = 0;
 
-	virtual void setConstraints(int minSSF, int maxSSF) = 0;
-	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
+	/**
+	   Configure a new session
+
+	   This function will be called before any other configuration
+	   functions.
+	*/
 	virtual void setup(bool serverMode, const QString &hostName, bool compress) = 0;
+
+	/**
+	   Set the constraints of the session using SSF values
+
+	   This function will be called before start().
+	*/
+	virtual void setConstraints(int minSSF, int maxSSF) = 0;
+
+	/**
+	   \overload
+
+	   Set the constraints of the session using a cipher suite list
+
+	   This function will be called before start().
+
+	   \sa supportedCipherSuites
+	*/
+	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
+
+	/**
+	   Set the list of trusted certificates
+
+	   This function may be called at any time.
+	*/
 	virtual void setTrustedCertificates(const CertificateCollection &trusted) = 0;
+
+	/**
+	   Set the list of acceptable issuers
+
+	   This function may be called at any time.
+
+	   This function is for server mode only.
+	*/
 	virtual void setIssuerList(const QList<CertificateInfoOrdered> &issuerList) = 0;
+
+	/**
+	   Set the local certificate
+
+	   This function may be called at any time.
+	*/
 	virtual void setCertificate(const CertificateChain &cert, const PrivateKey &key) = 0;
+
+	/**
+	   Set the TLS session id, for session resuming
+
+	   This function will be called before start().
+	*/
 	virtual void setSessionId(const TLSSessionContext &id) = 0;
 
-	virtual void shutdown() = 0; // flag for shutdown, call update next
-	virtual void setMTU(int size); // for dtls
+	/**
+	   Sets the session to the shutdown state.
 
-	// start() results:
-	//   result (Success or Error)
+	   The actual shutdown operation will happen at a future call to
+	   update().
+
+	   This function is for normal TLS only (not DTLS).
+	*/
+	virtual void shutdown() = 0;
+
+	/**
+	   Set the maximum transmission unit size
+
+	   This function is for DTLS only.
+	*/
+	virtual void setMTU(int size);
+
+	/**
+	   Begins the session, starting with the handshake
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   On completion, the result() function will return Success if the
+	   TLS session is able to begin, or Error if there is a failure to
+	   initialize the TLS subsystem.  If successful, the session is now
+	   in the handshake state, and update() will be called repeatedly
+	   until the session ends.
+	*/
 	virtual void start() = 0;
 
-	// update() results:
-	//   during handshake:
-	//     result
-	//     to_net
-	//   during shutdown:
-	//     result
-	//     to_net
-	//   else
-	//     result (Success or Error)
-	//     to_net
-	//     encoded
-	//     to_app
-	//     eof
-	// note: for dtls, this function only operates with single
-	//       packets.  perform the operation repeatedly to send/recv
-	//       multiple packets.
+	/**
+	   Performs one iteration of the TLS session processing
+
+	   This function returns immediately, and completion is signaled with
+	   the resultsReady() signal.
+
+	   If the session is in a handshake state, result() and to_net() will
+	   be valid.  If result() is Success, then the session is now in the
+	   connected state.
+
+	   If the session is in a shutdown state, result() and to_net() will
+	   be valid.  If result() is Success, then the session has ended.
+
+	   If the session is in a connected state, result(), to_net(),
+	   encoded(), to_app(), and eof() are valid.  The result() function
+	   will return Success or Error.  Note that eof() does not apply
+	   to DTLS.
+
+	   For DTLS, this function operates with single packets.  Many
+	   update() operations must be performed repeatedly to exchange
+	   multiple packets.
+	*/
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
 
-	virtual void waitForResultsReady(int msecs) = 0; // -1 means wait forever
+	/**
+	   Waits for a start() or update() operation to complete.  In this
+	   case, the resultsReady() signal is not emitted.  Returns true if
+	   the operation completed or false if this function times out.
+
+	   This function is blocking.
+
+	   \param msecs number of milliseconds to wait (-1 to wait forever)
+	*/
+	virtual bool waitForResultsReady(int msecs) = 0;
 
 	// results
 	virtual Result result() const = 0;
@@ -1790,8 +1891,16 @@ public:
 	virtual QByteArray unprocessed() = 0;
 
 Q_SIGNALS:
+	/**
+	   Emit this when a start() or update() operation has completed.
+	*/
 	void resultsReady();
-	void dtlsTimeout(); // call update, even with empty args
+
+	/**
+	   Emit this to force the application to call update(), even with
+	   empty arguments.
+	*/
+	void dtlsTimeout();
 };
 
 /**
@@ -1823,13 +1932,16 @@ public:
 		quint16 port;
 	};
 
+	/**
+	   Result of a SASL operation
+	*/
 	enum Result
 	{
-		Success,
-		Error,
-		Params,
-		AuthCheck,
-		Continue
+		Success,   ///< Operation completed
+		Error,     ///< Operation failed
+		Params,    ///< Parameters are needed to complete authentication
+		AuthCheck, ///< Client login can be inspected (server only)
+		Continue   ///< More steps needed to complete authentication
 	};
 
 	/**
@@ -1837,10 +1949,26 @@ public:
 	*/
 	SASLContext(Provider *p) : Provider::Context(p, "sasl") {}
 
+	/**
+	   Reset the object to its initial state
+	*/
 	virtual void reset() = 0;
 
-	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF) = 0;
+	/**
+	   Configure a new session
+
+	   This function will be called before any other configuration
+	   functions.
+	*/
 	virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote, const QString &ext_id, int ext_ssf) = 0;
+
+	/**
+	   Set the constraints of the session using SSF values
+
+	   This function will be called before startClient() or
+	   startServer().
+	*/
+	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF) = 0;
 
 	// startClient() results:
 	//   result
@@ -1876,7 +2004,17 @@ public:
 	//   to_app
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
 
-	virtual void waitForResultsReady(int msecs) = 0; // -1 means wait forever
+	/**
+	   Waits for a startClient(), startServer(), serverFirstStep(),
+	   nextStep(), tryAgain(), or update() operation to complete.  In
+	   this case, the resultsReady() signal is not emitted.  Returns true
+	   if the operation completed or false if this function times out.
+
+	   This function is blocking.
+
+	   \param msecs number of milliseconds to wait (-1 to wait forever)
+	*/
+	virtual bool waitForResultsReady(int msecs) = 0;
 
 	// results
 	virtual Result result() const = 0;
@@ -1906,6 +2044,10 @@ public:
 	virtual QString authzid() const = 0;
 
 Q_SIGNALS:
+	/**
+	   Emit this when a startClient(), startServer(), serverFirstStep(),
+	   nextStep(), tryAgain(), or update() operation has completed.
+	*/
 	void resultsReady();
 };
 
@@ -1950,7 +2092,7 @@ public:
 	virtual void end() = 0;
 
 	virtual bool finished() const = 0;
-	virtual void waitForFinished(int msecs) = 0; // -1 means wait forever
+	virtual bool waitForFinished(int msecs) = 0; // -1 means wait forever
 
 	virtual bool success() const = 0;
 	virtual SecureMessage::Error errorCode() const = 0;
