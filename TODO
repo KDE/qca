@@ -1,18 +1,12 @@
 * test1
   doc:
-    documentation overhaul
-    document provider interface
     Change Doxyfile config to capture whole API, and to generate Latex manual
   code:
-    synchronizer: cleanup
-    publickey: cleanup
-    cert: cleanup
-    keystore: cleanup
+    default provider: cleanup
     securelayer: cleanup
-    securemessage: cleanup
-    add logging to qca lib and other plugins
-    add more asserts?
+    add more asserts/logging to qca lib
   other:
+    qca-gnupg: improve gpg detection on mac (check psi 0.10 code)
     finish cmssigner, set to 1.0
     cmssigner: i'm getting a crash sometimes during sign..  test and trace
     update the rootcerts with mozcerts
@@ -38,6 +32,7 @@
   qca-egads (or qca-egd): implement for Random support
 
 * possibilities for the future:
+  publickey: use_asker_fallback should use ErrorPassphrase
   provider: separate public and private keys into two classes to enable
     delegation easier.  the public part should not be implemented by most
     providers.

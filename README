@@ -1,24 +1,32 @@
 Qt Cryptographic Architecture (QCA) version 2.0.0
 -------------------------------------------------
-Date: July 5th, 2007
+Date: August 7th, 2007
 Website: http://delta.affinix.com/qca/
 Mailing List: Delta Project <delta@lists.affinix.com>
 
 Project Lead/Maintainer (2003-current):
   Justin Karneges <justin@affinix.com>
+  (March 2007 - July 2007 under Barracuda Networks employment)
 
 Development, Documentation, Unittests (2004-current):
   Brad Hards <bradh@frogmouth.net>
 
 Special Thanks:
+  Portugal Telecom (SAPO division), for sponsorship
   Alon Bar-Lev, for smart card and design assistance
   Jack Lloyd, for Botan and X.509 mentoring
   L. Peter Deutsch, for the public domain MD5 implementation
   Steve Reid, for the public domain SHA1 implementation
+  Jason Kim, for the CMS Signer graphics
 
 
+Install
+-------
   For installation or compiling instructions, see the INSTALL file.
 
+
+License
+-------
   This library is licensed under the Lesser GNU General Public License.  See
   the COPYING file for more information.
 
@@ -55,6 +63,8 @@ Description
 
   QCA was originally created to support the security needs of the
   Psi XMPP/Jabber client project ( http://psi-im.org/ ).
+
+  API Documentation is located in the 'apidocs' subdirectory.
 
 
 Have fun,
