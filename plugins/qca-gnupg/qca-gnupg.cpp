@@ -898,7 +898,7 @@ public:
 		return _finished;
 	}
 
-	virtual void waitForFinished(int msecs)
+	virtual bool waitForFinished(int msecs)
 	{
 		// FIXME
 		Q_UNUSED(msecs);
@@ -935,7 +935,7 @@ public:
 				if(!asker.accepted())
 				{
 					seterror();
-					return;
+					return true;
 				}
 
 				gpg.submitPassphrase(asker.password());
@@ -947,7 +947,7 @@ public:
 				if(!tokenAsker.accepted())
 				{
 					seterror();
-					return;
+					return true;
 				}
 
 				gpg.cardOkay();
@@ -957,6 +957,7 @@ public:
 		}
 
 		complete();
+		return true;
 	}
 
 	virtual bool success() const

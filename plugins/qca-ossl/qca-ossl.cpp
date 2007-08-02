@@ -5260,10 +5260,11 @@ public:
 		return true;
 	}
 
-	virtual void waitForResultsReady(int msecs)
+	virtual bool waitForResultsReady(int msecs)
 	{
 		// TODO: for now, all operations block anyway
 		Q_UNUSED(msecs);
+		return true;
 	}
 
 	virtual Result result() const
@@ -6139,7 +6140,7 @@ public:
 		return true;
 	}
 
-	virtual void waitForFinished(int msecs)
+	virtual bool waitForFinished(int msecs)
 	{
 		// TODO
 		Q_UNUSED(msecs);
@@ -6149,6 +6150,7 @@ public:
 			thread->wait();
 			getresults();
 		}
+		return true;
 	}
 
 	virtual bool success() const
