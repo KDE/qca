@@ -148,24 +148,188 @@ QCA_EXPORT bool invokeMethodWithVariants(QObject *obj, const QByteArray &method,
 /*@{*/
 
 /**
-   Convenience class to synchronize a thread
+   Convenience class to run a thread and interact with it synchronously
+
+   SyncThread makes it easy to perform the common practice of starting a
+   thread, running some objects in that thread, and then interacting with
+   those objects safely.  Often, there is no need to directly use threading
+   primitives (e.g. QMutex), resulting in very clean multi-threaded code.
+
+   \note The following is an excerpt from
+   http://delta.affinix.com/2006/11/13/synchronized-threads-part-3/
+
+   ---<br>
+   With SyncThread, you can start, stop, and call a method in another thread
+   while the main thread sleeps. The only requirement is that the methods be
+   declared as slots.
+
+   Below is a contrived example, where we have an object in another thread
+   that increments a counter over a some interval, using the Qt event loop,
+   and provides a method to inspect the value.
+
+   First, the Counter object:
+
+\code
+class Counter : public QObject
+{
+	Q_OBJECT
+private:
+	int x;
+	QTimer timer;
+
+public:
+	Counter() : timer(this)
+	{
+		x = 0;
+		connect(&timer, SIGNAL(timeout()), SLOT(t_timeout()));
+	}
+
+public slots:
+	void start(int seconds)
+	{
+		timer.setInterval(seconds * 1000);
+		timer.start();
+	}
+
+	int value() const
+	{
+		return x;
+	}
+
+private slots:
+	void t_timeout()
+	{
+		++x;
+	}
+};
+\endcode
+
+   Looks like a typical object, no surprises.
+
+   Now to wrap Counter with SyncThread. We went over how to do this in the
+   first article, and it is very straightforward:
+
+\code
+class CounterThread : public SyncThread
+{
+	Q_OBJECT
+public:
+	Counter *counter;
+
+	CounterThread(QObject *parent) : SyncThread(parent)
+	{
+		counter = 0;
+	}
+
+	~CounterThread()
+	{
+		// SyncThread will stop the thread on destruct, but since our
+		//   atStop() function makes references to CounterThread's
+		//   members, we need to shutdown here, before CounterThread
+		//   destructs.
+		stop();
+	}
+
+protected:
+	virtual void atStart()
+	{
+		counter = new Counter;
+	}
+
+	virtual void atStop()
+	{
+		delete counter;
+	}
+};
+\endcode
+
+   We can then use it like this:
+
+\code
+CounterThread *thread = new CounterThread;
+
+// after this call, the thread is started and the Counter is ready
+thread->start();
+
+// let's start the counter with a 1 second interval
+thread->call(thread->counter, "start", QVariantList() << 1);
+...
+
+// after some time passes, let's check on the value
+int x = thread->call(thread->counter, "value").toInt();
+
+// we're done with this thing
+delete thread;
+\endcode
+
+   Do you see a mutex anywhere?  I didn't think so.<br>
+   ---
+
+   Even without the call() function, SyncThread is still very useful
+   for preparing objects in another thread, which you can then
+   QObject::connect() to and use signals and slots like normal.
 */
 class QCA_EXPORT SyncThread : public QThread
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+	*/
 	SyncThread(QObject *parent = 0);
+
+	/**
+	   Calls stop() and then destructs
+
+	   \note Subclasses should call stop() in their own destructor
+	*/
 	~SyncThread();
 
+	/**
+	   Starts the thread, begins the event loop the thread, and then
+	   calls atStart() in the thread.  This function will block until
+	   atStart() has returned.
+	*/
 	void start();
+
+	/**
+	   Stops the event loop of the thread, calls atStop() in the thread,
+	   and instructs the thread to finish.  This function will block
+	   until the thread has finished.
+	*/
 	void stop();
+
+	/**
+	   Calls a slot of an object in the thread.  This function will block
+	   until the slot has returned.
+
+	   It is possible for the call to fail, for example if the method
+	   does not exist.
+
+	   The arguments and return value of the call use QVariant.  If the
+	   method has no return value (returns void), then the returned
+	   QVariant will be null.
+
+	   \param obj the object to call the method on
+	   \param method the name of the method (without the arguments or
+	   brackets)
+	   \param args the list of arguments to use in the method call
+	   \param ok if not 0, true is stored here if the call succeeds,
+	   otherwise false is stored here.
+	*/
 	QVariant call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(), bool *ok = 0);
 
 protected:
+	/**
+	   Reimplement this to perform your initialization
+	*/
 	virtual void atStart() = 0;
+
+	/**
+	   Reimplement this to perform your deinitialization
+	*/
 	virtual void atEnd() = 0;
 
-	// reimplemented
 	virtual void run();
 
 private:
