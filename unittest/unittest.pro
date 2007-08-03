@@ -19,7 +19,7 @@ SUBDIRS += \
 	logger \
 	macunittest \
 	metatype \
-#	pgpunittest \
+	pgpunittest \
 	pipeunittest \
 	pkits \
 	randomunittest \
