@@ -49,8 +49,10 @@
    by application writers, but can be used to extend QCA if
    required
 */
-/*@{*/
+
 /**
+   \class QCAPlugin qcaprovider.h QtCrypto
+
    Provider plugin base class
 
    QCA loads cryptographic provider plugins with QPluginLoader.  The QObject
@@ -71,6 +73,8 @@ public:
 
    There is only one function to reimplement, called createProvider().  This
    function should return a newly allocated Provider instance.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT QCAPlugin
 {
@@ -85,22 +89,20 @@ public:
 	*/
 	virtual QCA::Provider *createProvider() = 0;
 };
-/*@}*/
 
 Q_DECLARE_INTERFACE(QCAPlugin, "com.affinix.qca.Plugin/1.0")
 
 namespace QCA {
 
 /**
-   \addtogroup ProviderAPI
-*/
-/*@{*/
+   \class RandomContext qcaprovider.h QtCrypto
 
-/**
    Random provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Random instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT RandomContext : public BasicContext
 {
@@ -120,10 +122,14 @@ public:
 };
 
 /**
+   \class HashContext qcaprovider.h QtCrypto
+
    Hash provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Hash instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT HashContext : public BasicContext
 {
@@ -153,10 +159,14 @@ public:
 };
 
 /**
+   \class CipherContext qcaprovider.h QtCrypto
+
    Cipher provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Cipher instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CipherContext : public BasicContext
 {
@@ -199,11 +209,15 @@ public:
 };
 
 /**
+   \class MACContext qcaprovider.h QtCrypto
+
    Message authentication code provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want
    MessageAuthenticationCode instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT MACContext : public BasicContext
 {
@@ -252,11 +266,15 @@ protected:
 };
 
 /**
+   \class KDFContext qcaprovider.h QtCrypto
+
    Key derivation function provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want KeyDerivationFunction
    instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT KDFContext : public BasicContext
 {
@@ -274,10 +292,14 @@ public:
 };
 
 /**
+   \class DLGroupContext qcaprovider.h QtCrypto
+
    Discrete logarithm provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want DLGroup instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT DLGroupContext : public Provider::Context
 {
@@ -325,11 +347,15 @@ Q_SIGNALS:
 };
 
 /**
+   \class PKeyBase qcaprovider.h QtCrypto
+
    Public key implementation provider base
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want PKey, PublicKey, or
    PrivateKey instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT PKeyBase : public BasicContext
 {
@@ -458,11 +484,15 @@ Q_SIGNALS:
 };
 
 /**
+   \class RSAContext qcaprovider.h QtCrypto
+
    RSA provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want RSAPublicKey or
    RSAPrivateKey instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT RSAContext : public PKeyBase
 {
@@ -526,11 +556,15 @@ public:
 };
 
 /**
+   \class DSAContext qcaprovider.h QtCrypto
+
    DSA provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want DSAPublicKey or
    DSAPrivateKey instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT DSAContext : public PKeyBase
 {
@@ -583,11 +617,15 @@ public:
 };
 
 /**
+   \class DHContext qcaprovider.h QtCrypto
+
    Diffie-Hellman provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want DHPublicKey or
    DHPrivateKey instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT DHContext : public PKeyBase
 {
@@ -642,6 +680,8 @@ public:
 };
 
 /**
+   \class PKeyContext qcaprovider.h QtCrypto
+
    Public key container provider
 
    \note This class is part of the provider plugin interface and should not
@@ -651,6 +691,8 @@ public:
    This object "holds" a public key object.  By default it contains no key
    (key() returns 0), but you can put a key into it with setKey(), or you
    can call an import function such as publicFromDER().
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT PKeyContext : public BasicContext
 {
@@ -786,11 +828,15 @@ public:
 };
 
 /**
+   \class CertBase qcaprovider.h QtCrypto
+
    X.509 certificate and certificate request provider base
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Certificate,
    CertificateRequest, or CRL instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CertBase : public BasicContext
 {
@@ -837,6 +883,8 @@ public:
 };
 
 /**
+   \class CertContextProps qcaprovider.h QtCrypto
+
    X.509 certificate or certificate request properties
 
    \note This class is part of the provider plugin interface and should not
@@ -845,6 +893,8 @@ public:
 
    Some fields are only for certificates or only for certificate requests,
    and these fields are noted.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CertContextProps
 {
@@ -978,12 +1028,16 @@ public:
 };
 
 /**
+   \class CRLContextProps qcaprovider.h QtCrypto
+
    X.509 certificate revocation list properties
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want CRL instead.
 
    For efficiency and simplicity, the members are directly accessed.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CRLContextProps
 {
@@ -1032,10 +1086,14 @@ public:
 class CRLContext;
 
 /**
+   \class CertContext qcaprovider.h QtCrypto
+
    X.509 certificate provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Certificate instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CertContext : public CertBase
 {
@@ -1115,11 +1173,15 @@ public:
 };
 
 /**
+   \class CSRContext qcaprovider.h QtCrypto
+
    X.509 certificate request provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want CertificateRequest
    instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CSRContext : public CertBase
 {
@@ -1186,10 +1248,14 @@ public:
 };
 
 /**
+   \class CRLContext qcaprovider.h QtCrypto
+
    X.509 certificate revocation list provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want CRL instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CRLContext : public CertBase
 {
@@ -1214,11 +1280,15 @@ public:
 };
 
 /**
+   \class CertCollectionContext qcaprovider.h QtCrypto
+
    X.509 certificate collection provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want CertificateCollection
    instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CertCollectionContext : public BasicContext
 {
@@ -1253,11 +1323,15 @@ public:
 };
 
 /**
+   \class CAContext qcaprovider.h QtCrypto
+
    X.509 certificate authority provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want CertificateAuthority
    instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT CAContext : public BasicContext
 {
@@ -1325,10 +1399,14 @@ public:
 };
 
 /**
+   \class PKCS12Context qcaprovider.h QtCrypto
+
    PKCS#12 provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want KeyBundle instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT PKCS12Context : public BasicContext
 {
@@ -1369,12 +1447,16 @@ public:
 };
 
 /**
+   \class PGPKeyContextProps qcaprovider.h QtCrypto
+
    OpenPGP key properties
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want PGPKey instead.
 
    For efficiency and simplicity, the members are directly accessed.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT PGPKeyContextProps
 {
@@ -1426,10 +1508,14 @@ public:
 };
 
 /**
+   \class PGPKeyContext qcaprovider.h QtCrypto
+
    OpenPGP key provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want PGPKey instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT PGPKeyContext : public BasicContext
 {
@@ -1477,11 +1563,15 @@ public:
 };
 
 /**
+   \class KeyStoreEntryContext qcaprovider.h QtCrypto
+
    KeyStoreEntry provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want KeyStoreEntry
    instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT KeyStoreEntryContext : public BasicContext
 {
@@ -1577,10 +1667,14 @@ public:
 };
 
 /**
+   \class KeyStoreListContext qcaprovider.h QtCrypto
+
    KeyStore provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want KeyStore instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT KeyStoreListContext : public Provider::Context
 {
@@ -1771,10 +1865,14 @@ Q_SIGNALS:
 };
 
 /**
+   \class TLSSessionContext qcaprovider.h QtCrypto
+
    TLS "session" provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want TLSSession instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT TLSSessionContext : public BasicContext
 {
@@ -1787,16 +1885,22 @@ public:
 };
 
 /**
+   \class TLSContext qcaprovider.h QtCrypto
+
    TLS provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want TLS instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT TLSContext : public Provider::Context
 {
 	Q_OBJECT
 public:
 	/**
+	   \class QCA::TLSContext::SessionInfo qcaprovider.h QtCrypto
+
 	   Information about an active TLS connection
 
 	   For efficiency and simplicity, the members are directly accessed.
@@ -2111,16 +2215,22 @@ Q_SIGNALS:
 };
 
 /**
+   \class SASLContext qcaprovider.h QtCrypto
+
    SASL provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want SASL instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT SASLContext : public Provider::Context
 {
 	Q_OBJECT
 public:
 	/**
+	   \class QCA::SASLContext::HostPort qcaprovider.h QtCrypto
+
 	   Convenience class to hold an IP address and an associated port
 
 	   For efficiency and simplicity, the members are directly accessed.
@@ -2362,11 +2472,15 @@ Q_SIGNALS:
 };
 
 /**
+   \class MessageContext qcaprovider.h QtCrypto
+
    SecureMessage provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want SecureMessage
    instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT MessageContext : public Provider::Context
 {
@@ -2526,11 +2640,15 @@ Q_SIGNALS:
 };
 
 /**
+   \class SMSContext qcaprovider.h QtCrypto
+
    SecureMessageSystem provider
 
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want SecureMessageSystem
    instead.
+
+  \ingroup ProviderAPI
 */
 class QCA_EXPORT SMSContext : public BasicContext
 {
@@ -2573,8 +2691,6 @@ public:
 	*/
 	virtual MessageContext *createMessage() = 0;
 };
-
-/*@}*/
 
 }
 
