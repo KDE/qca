@@ -42,6 +42,8 @@
 
 #include <limits>
 
+#ifndef DOXYGEN_NO_PROVIDER_API
+
 /**
    \defgroup ProviderAPI QCA provider API
 
@@ -2693,6 +2695,6 @@ public:
 };
 
 }
-
+#endif
 
 #endif
