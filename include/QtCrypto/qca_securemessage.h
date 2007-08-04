@@ -246,11 +246,6 @@ typedef QList<SecureMessageSignature> SecureMessageSignatureList;
 
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-
-/**
    \class SecureMessage qca_securemessage.h QtCrypto
 
    Class representing a secure message
@@ -301,6 +296,8 @@ else
    \sa SecureMessageSignature
    \sa OpenPGP
    \sa CMS
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SecureMessage : public QObject, public Algorithm
 {
@@ -765,6 +762,8 @@ private:
 
    \sa SecureMessage
    \sa SecureMessageKey
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SecureMessageSystem : public QObject, public Algorithm
 {
@@ -799,6 +798,9 @@ private:
 
    \sa SecureMessage
    \sa SecureMessageKey
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT OpenPGP : public SecureMessageSystem
 {
@@ -842,6 +844,9 @@ private:
 
    \sa SecureMessage
    \sa SecureMessageKey
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT CMS : public SecureMessageSystem
 {
@@ -912,7 +917,6 @@ private:
 	class Private;
 	Private *d;
 };
-/*@}*/
 
 }
 

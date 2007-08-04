@@ -143,11 +143,8 @@ ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "boolMethod" ), arg
 QCA_EXPORT bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args, QVariant *ret, Qt::ConnectionType type = Qt::AutoConnection);
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
+   \class SyncThread qca_support.h QtCrypto
 
-/**
    Convenience class to run a thread and interact with it synchronously
 
    SyncThread makes it easy to perform the common practice of starting a
@@ -268,6 +265,8 @@ delete thread;
    Even without the call() function, SyncThread is still very useful
    for preparing objects in another thread, which you can then
    QObject::connect() to and use signals and slots like normal.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SyncThread : public QThread
 {
@@ -379,10 +378,14 @@ private:
 };
 
 /**
+   \class FileWatch qca_support.h QtCrypto
+
    Support class to monitor a file for activity
 
    %FileWatch monitors a specified file for any changes. When
    the file changes, the changed() signal is emitted.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT FileWatch : public QObject
 {
@@ -598,6 +601,8 @@ private:
 class AbstractLogDevice;
 
 /**
+   \class Logger qca_support.h QtCrypto
+
    A simple logging system
 
    This class provides a simple but flexible approach to logging information
@@ -613,6 +618,8 @@ class AbstractLogDevice;
    AbstractLogDevice, and register your subclass (using registerLogDevice()).
    You can then take whatever action is appropriate (e.g. show to the user
    using the GUI, log to a file or send to standard error).
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Logger : public QObject
 {
@@ -710,7 +717,11 @@ private:
 };
 
 /**
+   \class AbstractLogDevice qca_support.h QtCrypto
+
    An abstract log device
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT AbstractLogDevice : public QObject
 {
@@ -758,7 +769,7 @@ private:
 
 	QString m_name;
 };
-/*@}*/
+
 }
 
 #endif

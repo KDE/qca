@@ -42,7 +42,8 @@ namespace QCA {
    This is the main set of QCA classes, intended for use
    in standard applications.
 */
-/*@{*/
+
+
 /**
    \class Random qca_basic.h QtCrypto
 
@@ -55,6 +56,8 @@ namespace QCA {
 
    The normal use of this class is expected to be through the
    static members - randomChar(), randomInt() and randomArray().
+
+   \ingroup UserAPI
  */
 class QCA_EXPORT Random : public Algorithm
 {
@@ -194,6 +197,9 @@ else
    you could simply call QCA::Hash("algoName").hash() with the
    data that you would otherwise have provided to the update()
    call.
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
 {
@@ -357,7 +363,7 @@ private:
 	class Private;
 	Private *d;
 };
-/*@}*/
+
 
 /**
    \page hashing Hashing Algorithms
@@ -513,10 +519,6 @@ private:
 */
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-/**
    \class Cipher qca_basic.h QtCrypto
 
    General class for cipher (encryption / decryption) algorithms.
@@ -533,6 +535,8 @@ private:
    - AES128 - "aes128"
    - AES192 - "aes192"
    - AES256 - "aes256"
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Cipher : public Algorithm, public Filter
 {
@@ -703,6 +707,9 @@ private:
 
    For more information on HMAC, see H. Krawczyk et al. RFC2104 
    "HMAC: Keyed-Hashing for Message Authentication"
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
 {
@@ -809,6 +816,9 @@ private:
    not need to use it directly unless you are
    adding another key derivation capability to %QCA - you should be
    using a sub-class. PBKDF2 using SHA1 is recommended for new applications.
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT KeyDerivationFunction : public Algorithm
 {
@@ -868,6 +878,8 @@ private:
 
    This class implements Password Based Key Derivation Function version 1,
    as specified in RFC2898, and also in PKCS#5.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT PBKDF1 : public KeyDerivationFunction
 {
@@ -888,6 +900,9 @@ public:
 
    This class implements Password Based Key Derivation Function version 2,
    as specified in RFC2898, and also in PKCS#5.
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT PBKDF2 : public KeyDerivationFunction
 {
@@ -900,7 +915,7 @@ public:
 	*/
 	explicit PBKDF2(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf2", algorithm), provider) {}
 };
-/*@}*/
+
 }
 
 #endif

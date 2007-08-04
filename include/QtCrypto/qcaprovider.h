@@ -1800,6 +1800,8 @@ public:
 	   Information about an active TLS connection
 
 	   For efficiency and simplicity, the members are directly accessed.
+
+	   \ingroup UserAPI
 	*/
 	class SessionInfo
 	{
@@ -2122,6 +2124,8 @@ public:
 	   Convenience class to hold an IP address and an associated port
 
 	   For efficiency and simplicity, the members are directly accessed.
+
+	   \ingroup UserAPI
 	*/
 	class HostPort
 	{

@@ -1210,6 +1210,8 @@ public:
 };
 
 /**
+   \class Event qca_core.h QtCrypto
+
    An asynchronous event
 
    Events are produced in response to the library's need for some user
@@ -1390,6 +1392,8 @@ private:
 };
 
 /**
+   \class EventHandler qca_core.h QtCrypto
+
    Interface class for password / passphrase / PIN and token handlers
 
    This class is used on client side applications to handle
@@ -1475,6 +1479,8 @@ private:
 };
 
 /**
+   \class PasswordAsker qca_core.h QtCrypto
+
    User password / passphrase / PIN handler
 
    This class is used to obtain a password from a user.
@@ -1565,6 +1571,8 @@ private:
 };
 
 /**
+   \class TokenAsker qca_core.h QtCrypto
+
    User token handler
 
    This class is used to request the user to insert a token.

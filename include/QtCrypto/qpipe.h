@@ -105,9 +105,13 @@ private:
 };
 
 /**
+   \class QPipeEnd qpipe.h QtCrypto
+
    A buffered higher-level pipe end
 
    This is either the read end or write end of a QPipe.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT QPipeEnd : public QObject
 {
@@ -291,6 +295,8 @@ private:
 };
 
 /**
+   \class QPipe qpipe.h QtCrypto
+
    A FIFO buffer (named pipe) abstraction
 
    This class creates a full buffer, consisting of two ends
@@ -301,6 +307,8 @@ private:
    By default, the pipe ends are not inheritable by child processes.  On
    Windows, the pipe is created with inheritability disabled.  On Unix, the
    FD_CLOEXEC flag is set on each end's file descriptor.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT QPipe
 {

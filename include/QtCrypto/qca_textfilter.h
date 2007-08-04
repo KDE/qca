@@ -35,10 +35,7 @@
 #include "qca_core.h"
 
 namespace QCA {
-/**
-   \addtogroup UserAPI
-*/
-/*@{*/
+
 /**
    \class TextFilter qca_textfilter.h QtCrypto
 
@@ -47,6 +44,8 @@ namespace QCA {
    This differs from Filter in that it has the concept
    of an algorithm that works in two directions, and 
    supports operations on QString arguments.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT TextFilter : public Filter
 {
@@ -158,6 +157,8 @@ protected:
    \class Hex qca_textfilter.h QtCrypto
 
    Hexadecimal encoding / decoding
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Hex : public TextFilter
 {
@@ -224,6 +225,8 @@ private:
    \class Base64 qca_textfilter.h QtCrypto
 
    %Base64 encoding / decoding
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT Base64 : public TextFilter
 {
@@ -313,7 +316,7 @@ private:
 	class Private;
 	Private *d;
 };
-/*@}*/
+
 }
 
 #endif

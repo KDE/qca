@@ -42,10 +42,6 @@ class KeyStoreManagerPrivate;
 class KeyStorePrivate;
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-/**
    \class KeyStoreEntry qca_keystore.h QtCrypto
 
    Single entry in a KeyStore
@@ -137,6 +133,8 @@ if(entry.ensureAccess())
    In this case, any PIN prompting and private key operations
    would be caused/handled from the TLS object.  Omit step 2 and
    the private key operations might cause token prompting.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT KeyStoreEntry : public Algorithm
 {
@@ -326,6 +324,8 @@ private:
 };
 
 /**
+   \class KeyStoreEntryWatcher qca_keystore.h QtCrypto
+
    Class to monitor the availability of a KeyStoreEntry
 
    Some KeyStore types have the concept of an entry that can be
@@ -339,6 +339,8 @@ private:
 
    \sa KeyStore for more discussion on availability of 
    keys and related objects.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT KeyStoreEntryWatcher : public QObject
 {
@@ -403,6 +405,8 @@ private:
     becomes invalid (isValid() == false), and unavailable() is emitted.
     even if the device later reappears, the KeyStore remains invalid.
     a new KeyStore will have to be created to use the device again.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT KeyStore : public QObject, public Algorithm
 {
@@ -589,6 +593,8 @@ private:
 };
 
 /**
+   \class KeyStoreInfo qca_keystore.h QtCrypto
+
    Key store information, outside of a KeyStore object
 
    This class is used in conjunction with the Event class,
@@ -602,6 +608,8 @@ private:
    "qca-mystorename". The name() of a KeyStore is used to describe
    it (i.e. this is the "pretty" name to show the user), and is
    typically of the form "My Store Name".
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT KeyStoreInfo
 {
@@ -686,6 +694,8 @@ private:
    If you know the KeyStoreEntry that you need, you can
    use KeyStore passively, as described in the KeyStoreEntry
    documentation.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT KeyStoreManager : public QObject
 {
@@ -769,7 +779,7 @@ private:
 	static void scan();
 	static void shutdown();
 };
-/*@}*/
+
 }
 
 #endif

@@ -66,11 +66,6 @@ enum SecurityLevel
 };
 
 /**
-   \addtogroup UserAPI
-*/
-/*@{*/
-
-/**
    \class SecureLayer qca_securelayer.h QtCrypto
 
    Abstract interface to a security layer
@@ -102,6 +97,8 @@ enum SecurityLevel
    activities (which require network traffic to agree a
    configuration to use) and other overheads associated with
    the secure link.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT SecureLayer : public QObject
 {
@@ -222,7 +219,12 @@ private:
 };
 
 /**
+   \class TLSSession qca_securelayer.h QtCrypto
+
    Session token, used for TLS resuming
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT TLSSession : public Algorithm
 {
@@ -270,6 +272,8 @@ public:
    Socket Layer (SSL version 2 and SSL version 3). New
    applications should use at least TLS 1.0, and SSL version 2
    should be avoided due to known security problems.
+
+   \ingroup UserAPI
 */
 class QCA_EXPORT TLS : public SecureLayer, public Algorithm
 {
@@ -786,6 +790,9 @@ private:
    "protocol aware".  That means that %SASL does not understand how the client
    connects to the server, and %SASL does not understand the actual
    application protocol.
+
+   \ingroup UserAPI
+
 */
 class QCA_EXPORT SASL : public SecureLayer, public Algorithm
 {
@@ -859,6 +866,8 @@ public:
 
 	   This is used to indicate which parameters are needed by SASL
 	   in order to complete the authentication process.
+
+	   \ingroup UserAPI
 	*/
 	class QCA_EXPORT Params
 	{
@@ -1177,7 +1186,7 @@ private:
 	friend class Private;
 	Private *d;
 };
-/*@}*/
+
 }
 
 #endif
