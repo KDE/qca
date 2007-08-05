@@ -337,7 +337,10 @@ public:
 	explicit TLS(QObject *parent = 0, const QString &provider = QString());
 
 	/**
-	   Constructor for Transport Layer Security connection
+	   Constructor for Transport Layer Security connection.
+
+	   This constructor can be used for both normal TLS (set mode to TLS::Stream)
+	   or DTLS (set mode to TLS::Datagram).
 
 	   \param mode the connection Mode
 	   \param parent the parent object for this object
@@ -756,7 +759,19 @@ Q_SIGNALS:
 	void handshaken();
 
 protected:
+	/**
+	   Called when a connection is made to a particular signal
+
+	   \param signal the name of the signal that has been
+	   connected to.
+	*/
 	void connectNotify(const char *signal);
+	/**
+	   Called when a connection is removed from a particular signal
+
+	   \param signal the name of the signal that has been
+	   disconnected from.
+	*/
 	void disconnectNotify(const char *signal);
 
 private:
