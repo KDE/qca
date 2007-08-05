@@ -1,4 +1,3 @@
-
 /*
  * qca_securelayer.h - Qt Cryptographic Architecture
  * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
