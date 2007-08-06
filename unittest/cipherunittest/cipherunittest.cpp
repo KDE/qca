@@ -172,7 +172,6 @@ void CipherUnitTest::aes128_data()
 }
 
 
-// TODO: CBC-PKCS7
 void CipherUnitTest::aes128()
 {
     QStringList providersToTest;
