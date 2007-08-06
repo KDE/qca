@@ -14,10 +14,7 @@
 # libgcrypt is moving to pkg-config, but earlier version don't have it
 
 #search in typical paths for libgcrypt-config
-FIND_PROGRAM(BOTANCONFIG_EXECUTABLE NAMES botan-config PATHS
-   /usr/bin
-   /usr/local/bin
-)
+FIND_PROGRAM(BOTANCONFIG_EXECUTABLE NAMES botan-config)
 
 #reset variables
 set(BOTAN_LIBRARIES)

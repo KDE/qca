@@ -14,10 +14,7 @@
 # libgcrypt is moving to pkg-config, but earlier version don't have it
 
 #search in typical paths for libgcrypt-config
-FIND_PROGRAM(LIBGCRYPTCONFIG_EXECUTABLE NAMES libgcrypt-config PATHS
-   /usr/bin
-   /usr/local/bin
-)
+FIND_PROGRAM(LIBGCRYPTCONFIG_EXECUTABLE NAMES libgcrypt-config)
 
 #reset variables
 set(LIBGCRYPT_LIBRARIES)

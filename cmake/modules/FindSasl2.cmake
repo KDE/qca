@@ -16,16 +16,9 @@ if (SASL2_INCLUDE_DIR)
   set(SASL2_FIND_QUIETLY TRUE)
 endif (SASL2_INCLUDE_DIR)
 
-FIND_PATH(SASL2_INCLUDE_DIR sasl/sasl.h
-   /usr/include
-   /usr/local/include
-)
+FIND_PATH(SASL2_INCLUDE_DIR sasl/sasl.h)
 
-FIND_LIBRARY(SASL2_LIBRARIES NAMES sasl2
-   PATHS
-   /usr/lib
-   /usr/local/lib
-)
+FIND_LIBRARY(SASL2_LIBRARIES NAMES sasl2)
 
 
 if (SASL2_INCLUDE_DIR AND SASL2_LIBRARIES)
