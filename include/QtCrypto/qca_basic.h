@@ -505,16 +505,17 @@ private:
    then the padding is 0x03 0x03 0x03 ).
 
    On encryption, for algorithm / mode combinations that require
-   padding, you will get a block of ciphertext when the input plain text
-   block is complete. When you call final(), you will get out the ciphertext
-   that corresponds to the last bit of plain text, plus any padding. If you
-   had provided plaintext that matched up with a block size, then the cipher
-   text block is generated from pure padding - you always get at least some
-   padding, to ensure that the padding can be safely removed on decryption.
+   padding, you will get a block of ciphertext when the input plain
+   text block is complete. When you call final(), you will get out the
+   ciphertext that corresponds to the last part of the plain text,
+   plus any padding. If you had provided plaintext that matched up
+   with a block size, then the cipher text block is generated from
+   pure padding - you always get at least some padding, to ensure that
+   the padding can be safely removed on decryption.
 
    On decryption, for algorithm / mode combinations that use padding,
    you will get back a block of plaintext when the input ciphertext block
-   is complete. When you call final(), you will a block that has been
+   is complete. When you call final(), you will get a block that has been
    stripped of ciphertext.
 */
 
@@ -535,6 +536,17 @@ private:
    - AES128 - "aes128"
    - AES192 - "aes192"
    - AES256 - "aes256"
+
+   When checking for the availability of a particular kind
+   of cipher operation (e.g. AES128 in CBC mode with PKCS7
+   padding), you append the mode and padding type (in that
+   example "aes128-cbc-pkcs7"). CFB and OFB modes don't use
+   padding, so they are always just the cipher name followed
+   by the mode (e.g. "blowfish-cfb" or "aes192-ofb"). If
+   you are not using padding with CBC mode (i.e. you are
+   ensuring block size operations yourself), just use 
+   the cipher name followed by "-cbc" (e.g. "blowfish-cbc"
+   or "aes256-cbc"). 
 
    \ingroup UserAPI
 */
