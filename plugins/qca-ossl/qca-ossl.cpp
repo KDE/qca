@@ -6457,9 +6457,11 @@ public:
 		list += "aes192-ecb";
 		list += "aes192-cfb";
 		list += "aes192-cbc";
+		list += "aes192-cbc-pkcs7";
 		list += "aes192-ofb";
 		list += "aes256-ecb";
 		list += "aes256-cbc";
+		list += "aes256-cbc-pkcs7";
 		list += "aes256-cfb";
 		list += "aes256-ofb";
 		list += "blowfish-ecb";
@@ -6564,6 +6566,8 @@ public:
 			return new opensslCipherContext( EVP_aes_192_cfb(), 0, this, type);
 		else if ( type == "aes192-cbc" )
 			return new opensslCipherContext( EVP_aes_192_cbc(), 0, this, type);
+		else if ( type == "aes192-cbc-pkcs7" )
+			return new opensslCipherContext( EVP_aes_192_cbc(), 1, this, type);
 		else if ( type == "aes192-ofb" )
 			return new opensslCipherContext( EVP_aes_192_ofb(), 0, this, type);
 		else if ( type == "aes256-ecb" )
@@ -6572,6 +6576,8 @@ public:
 			return new opensslCipherContext( EVP_aes_256_cfb(), 0, this, type);
 		else if ( type == "aes256-cbc" )
 			return new opensslCipherContext( EVP_aes_256_cbc(), 0, this, type);
+		else if ( type == "aes256-cbc-pkcs7" )
+			return new opensslCipherContext( EVP_aes_256_cbc(), 1, this, type);
 		else if ( type == "aes256-ofb" )
 			return new opensslCipherContext( EVP_aes_256_ofb(), 0, this, type);
 		else if ( type == "blowfish-ecb" )
