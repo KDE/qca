@@ -38,6 +38,8 @@ private slots:
     void aes128();
     void aes128_cbc_data();
     void aes128_cbc();
+    void aes128_cbc_pkcs7_data();
+    void aes128_cbc_pkcs7();
     void aes128_cfb_data();
     void aes128_cfb();
     void aes128_ofb_data();
@@ -47,6 +49,8 @@ private slots:
     void aes192();
     void aes192_cbc_data();
     void aes192_cbc();
+    void aes192_cbc_pkcs7_data();
+    void aes192_cbc_pkcs7();
     void aes192_cfb_data();
     void aes192_cfb();
     void aes192_ofb_data();
@@ -56,6 +60,8 @@ private slots:
     void aes256();
     void aes256_cbc_data();
     void aes256_cbc();
+    void aes256_cbc_pkcs7_data();
+    void aes256_cbc_pkcs7();
     void aes256_cfb_data();
     void aes256_cfb();
     void aes256_ofb_data();
@@ -286,6 +292,93 @@ void CipherUnitTest::aes128_cbc()
     }
 }
 
+// These were generated using OpenSSL's enc command
+void CipherUnitTest::aes128_cbc_pkcs7_data()
+{
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("cipherText");
+    QTest::addColumn<QString>("keyText");
+    QTest::addColumn<QString>("ivText");
+
+    QTest::newRow("1") << QString("")
+		       << QString("18fe62efa4dc4b21a4127b225855b475")
+		       << QString("0123456789ABCDEF0123456789ABCDEF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("2") << QString("610a")
+		       << QString("92823eab12924cd168f54d3f4baa9a4d")
+		       << QString("0123456789ABCDEF0123456789ABCDEF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("3") << QString("6162636465666768696a0a")
+		       << QString("9d41b355abd61e3dfa482f3c1aeaae49")
+		       << QString("0123456789ABCDEF0123456789ABCDEF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size - 1") << QString("6162636465666768696a6b6c6d6e0a")
+		       << QString("c86b53850815cae7ae4a6e7529a87587")
+		       << QString("0123456789ABCDEF0123456789ABCDEF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size") << QString("6162636465666768696a6b6c6d6e310a")
+		       << QString("26fb0474b70d118f2b1d5b74e58c97bf3bb81bece1250509c5c68771ae23ceac")
+		       << QString("0123456789ABCDEF0123456789ABCDEF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size+1") << QString("6162636465666768696a6b6c6d6e6f310a")
+		       << QString("656f5c5693741967e059149e9239452fa286ac7c86ef653182d226d543d53013")
+		       << QString("0123456789ABCDEF0123456789ABCDEF")
+		       << QString("00001111222233334444555566667777");
+
+}
+
+void CipherUnitTest::aes128_cbc_pkcs7()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "aes128-cbc-pkcs7", provider ) )
+            QWARN( QString( "AES128 CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
+        else {
+	    QFETCH( QString, plainText );
+	    QFETCH( QString, cipherText );
+	    QFETCH( QString, keyText );
+	    QFETCH( QString, ivText );
+
+	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
+	    QCA::Cipher forwardCipher( QString( "aes128" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::DefaultPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
+	    QVERIFY( forwardCipher.ok() );
+	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+	    QVERIFY( forwardCipher.ok() );
+
+	    QCA::Cipher reverseCipher( QString( "aes128" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::DefaultPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
+	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
+	    QVERIFY( reverseCipher.ok() );
+	    QCOMPARE( update, plainText.left(update.size() ) );
+	    QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+	    QVERIFY( reverseCipher.ok() );
+	}
+    }
+}
+
 // This is from the Botan test suite
 void CipherUnitTest::aes128_cfb_data()
 {
@@ -471,7 +564,6 @@ void CipherUnitTest::aes192_data()
 }
 
 
-// TODO: CBC-PKCS7
 void CipherUnitTest::aes192()
 {
     QStringList providersToTest;
@@ -591,6 +683,94 @@ void CipherUnitTest::aes192_cbc()
 	}
     }
 }
+
+// These were generated using OpenSSL's enc command
+void CipherUnitTest::aes192_cbc_pkcs7_data()
+{
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("cipherText");
+    QTest::addColumn<QString>("keyText");
+    QTest::addColumn<QString>("ivText");
+
+    QTest::newRow("1") << QString("")
+		       << QString("49c1da70f461d1bb5147ded60f0f01ef")
+		       << QString("0123456789ABCDEF0123456789ABCDEF0011223344556677")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("2") << QString("610a")
+		       << QString("42e5a030df8b6bf896899853744e480c")
+		       << QString("0123456789ABCDEF0123456789ABCDEF0011223344556677")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("3") << QString("6162636465666768696a0a")
+		       << QString("160a3b6ff48d6850906ffa6b8291f511")
+		       << QString("0123456789ABCDEF0123456789ABCDEF0011223344556677")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size - 1") << QString("6162636465666768696a6b6c6d6e0a")
+				    << QString("b113c5aec849e49dc8487f66ce29bab0")
+		       << QString("0123456789ABCDEF0123456789ABCDEF0011223344556677")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size") << QString("6162636465666768696a6b6c6d6e310a")
+		       << QString("80c4a001f93c468b7dd3525cc46020b470e3ac39a13be57ab18c7903d121a266")
+		       << QString("0123456789ABCDEF0123456789ABCDEF0011223344556677")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size+1") << QString("6162636465666768696a6b6c6d6e6f310a")
+				  << QString("f0f9982e4118287cda37062f5acfd7b2f27741ddac7bd3882c7b4e4872b81047")
+				  << QString("0123456789ABCDEF0123456789ABCDEF0011223344556677")
+				  << QString("00001111222233334444555566667777");
+
+}
+
+void CipherUnitTest::aes192_cbc_pkcs7()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "aes192-cbc-pkcs7", provider ) )
+            QWARN( QString( "AES192 CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
+        else {
+	    QFETCH( QString, plainText );
+	    QFETCH( QString, cipherText );
+	    QFETCH( QString, keyText );
+	    QFETCH( QString, ivText );
+
+	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
+	    QCA::Cipher forwardCipher( QString( "aes192" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::DefaultPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
+	    QVERIFY( forwardCipher.ok() );
+	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+	    QVERIFY( forwardCipher.ok() );
+
+	    QCA::Cipher reverseCipher( QString( "aes192" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::DefaultPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
+	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
+	    QVERIFY( reverseCipher.ok() );
+	    QCOMPARE( update, plainText.left(update.size() ) );
+	    QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+	    QVERIFY( reverseCipher.ok() );
+	}
+    }
+}
+
 
 // This is from the Botan test suite
 void CipherUnitTest::aes192_cfb_data()
@@ -814,7 +994,6 @@ void CipherUnitTest::aes256_data()
 
 
 
-// TODO: CBC-PKCS7
 void CipherUnitTest::aes256()
 {
     QStringList providersToTest;
@@ -934,6 +1113,94 @@ void CipherUnitTest::aes256_cbc()
 	}
     }
 }
+
+// These were generated using OpenSSL's enc command
+void CipherUnitTest::aes256_cbc_pkcs7_data()
+{
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("cipherText");
+    QTest::addColumn<QString>("keyText");
+    QTest::addColumn<QString>("ivText");
+
+    QTest::newRow("1") << QString("")
+		       << QString("99fac653629ddb546d65ac699d7323ba")
+		       << QString("0123456789ABCDEF0123456789ABCDEF00112233445566778899AABBCCDDEEFF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("2") << QString("610a")
+		       << QString("1dd0366efe719f6bf0e2c30e8cc168fd")
+		       << QString("0123456789ABCDEF0123456789ABCDEF00112233445566778899AABBCCDDEEFF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("3") << QString("6162636465666768696a0a")
+		       << QString("a433fb0dc673093f726d748c8f76cf0d")
+		       << QString("0123456789ABCDEF0123456789ABCDEF00112233445566778899AABBCCDDEEFF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size - 1") << QString("6162636465666768696a6b6c6d6e0a")
+				    << QString("b5cfa68d21ad91649eafc35dee06f007")
+		       << QString("0123456789ABCDEF0123456789ABCDEF00112233445566778899AABBCCDDEEFF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size") << QString("6162636465666768696a6b6c6d6e310a")
+		       << QString("45c4b50e4d4433b011187983da5034fe14cf12c04cfc3bceb57a88c455491f46")
+		       << QString("0123456789ABCDEF0123456789ABCDEF00112233445566778899AABBCCDDEEFF")
+		       << QString("00001111222233334444555566667777");
+
+    QTest::newRow("block size+1") << QString("6162636465666768696a6b6c6d6e6f310a")
+				  << QString("4ef5702f0c16bbfda9b57e6e98186763325c81c99b6cdd8e4bc34dcaa82d00e9")
+				  << QString("0123456789ABCDEF0123456789ABCDEF00112233445566778899AABBCCDDEEFF")
+				  << QString("00001111222233334444555566667777");
+
+}
+
+void CipherUnitTest::aes256_cbc_pkcs7()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "aes256-cbc-pkcs7", provider ) )
+            QWARN( QString( "AES256 CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
+        else {
+	    QFETCH( QString, plainText );
+	    QFETCH( QString, cipherText );
+	    QFETCH( QString, keyText );
+	    QFETCH( QString, ivText );
+
+	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
+	    QCA::Cipher forwardCipher( QString( "aes256" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::DefaultPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
+	    QVERIFY( forwardCipher.ok() );
+	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+	    QVERIFY( forwardCipher.ok() );
+
+	    QCA::Cipher reverseCipher( QString( "aes256" ),
+				       QCA::Cipher::CBC,
+				       QCA::Cipher::DefaultPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
+	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
+	    QVERIFY( reverseCipher.ok() );
+	    QCOMPARE( update, plainText.left(update.size() ) );
+	    QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+	    QVERIFY( reverseCipher.ok() );
+	}
+    }
+}
+
 
 // These are from the Botan test suite
 void CipherUnitTest::aes256_cfb_data()
