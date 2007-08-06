@@ -766,6 +766,7 @@ protected:
 	   connected to.
 	*/
 	void connectNotify(const char *signal);
+
 	/**
 	   Called when a connection is removed from a particular signal
 

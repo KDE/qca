@@ -127,7 +127,11 @@ public:
 		ErrorBroken  ///< Broken pipe error
 	};
 
+	/**
+	   Standard constructor
+	*/
 	QPipeEnd(QObject *parent = 0);
+
 	~QPipeEnd();
 
 	/**
@@ -158,15 +162,28 @@ public:
 	*/
 	int idAsInt() const;
 
+	/**
+	   Take over an existing pipe handle
+
+	   \param id the pipe handle
+	   \param t the type of the pipe (read or write)
+	*/
 	void take(Q_PIPE_ID id, QPipeDevice::Type t);
 
 #ifdef QPIPE_SECURE
+	/**
+	   Sets whether the pipe uses secure memory for read/write
+
+	   Enabling this may reduce performance, and it should only be used if
+	   sensitive data is being transmitted (such as a passphrase).
+	*/
 	void setSecurityEnabled(bool secure);
 #endif
+
 	/**
 	   Enable the endpoint for the pipe
 
-	   When endpoint is created, it is not
+	   When an endpoint is created, it is not
 	   able to be used until it is enabled.
 	*/
 	void enable();
@@ -178,8 +195,20 @@ public:
 	*/
 	void close();
 
+	/**
+	   Let go of the active pipe handle, but don't close it
+
+	   Use this before destructing QPipeEnd, if you don't want the pipe
+	   to automatically close.
+	*/
 	void release();
 
+	/**
+	   Sets whether the pipe should be inheritable to child processes
+
+	   Returns true if inheritability was successfully changed, otherwise
+	   false.
+	*/
 	bool setInheritable(bool enabled);
 
 	/**
@@ -202,9 +231,16 @@ public:
 	*/
 	int bytesAvailable() const;
 
+	/**
+	   Returns the number of bytes pending to write
+
+	   This only makes sense at the write end of the pipe
+
+	   \sa bytesWritten() for a signal that can be used to determine
+	   when bytes have been written
+	*/
 	int bytesToWrite() const;
 
-	// normal i/o
 	/**
 	   Read bytes from the pipe. 
 
@@ -229,7 +265,6 @@ public:
 	void write(const QByteArray &a);
 
 #ifdef QPIPE_SECURE
-	// secure i/o
 	/**
 	   Read bytes from the pipe. 
 
@@ -254,9 +289,21 @@ public:
 	void writeSecure(const SecureArray &a);
 #endif
 
+	/**
+	   Returns any unsent bytes queued for writing
+
+	   If the pipe is using secure memory, you should use
+	   takeBytesToWriteSecure().
+	*/
 	QByteArray takeBytesToWrite();
 
 #ifdef QPIPE_SECURE
+	/**
+	   Returns any unsent bytes queued for writing
+
+	   If the pipe is using insecure memory, you should use
+	   takeBytesToWrite().
+	*/
 	SecureArray takeBytesToWriteSecure();
 #endif
 
@@ -278,12 +325,24 @@ Q_SIGNALS:
 	void bytesWritten(int bytes);
 
 	/**
-	   Emitted when the pipe is closed.
+	   Emitted when this end of the pipe is closed as a result of calling
+	   close()
 
-	   This is applicable to both the read end and write end of
-	   the pipe. 
+	   If this is the write end of the pipe and there is data still
+	   pending to write, this signal will be emitted once all of the data
+	   has been written.
+
+	   To be notified if the other end of the pipe has been closed, see
+	   error().
 	*/
 	void closed();
+
+	/**
+	   Emitted when the pipe encounters an error trying to read or write,
+	   or if the other end of the pipe has been closed
+
+	   \param e the reason for error
+	*/
 	void error(QCA::QPipeEnd::Error e);
 
 private:

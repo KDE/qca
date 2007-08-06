@@ -329,6 +329,9 @@ protected:
 	*/
 	virtual void atEnd() = 0;
 
+	/**
+	   Starts the event loop and calls atStart and atStop as necessary
+	*/
 	virtual void run();
 
 private:
