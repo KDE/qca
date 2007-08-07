@@ -19,6 +19,10 @@
 #include <QtCrypto>
 #include <QtPlugin>
 
+#ifdef Q_OS_MAC
+#include <QFileInfo>
+#endif
+
 #ifdef Q_OS_WIN
 # include<windows.h>
 #endif
