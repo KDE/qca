@@ -59,6 +59,12 @@ static QString find_bin()
 	if(!s.isNull())
 		bin = s;
 #endif
+#ifdef Q_OS_MAC
+	// mac-gpg
+	QFileInfo fi("/usr/local/bin/gpg");
+	if(fi.exists())
+		bin = fi.filePath();
+#endif
 	return bin;
 }
 
