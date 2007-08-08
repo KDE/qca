@@ -538,6 +538,7 @@ class KeyStoreThread : public SyncThread
 	Q_OBJECT
 public:
 	KeyStoreTracker *tracker;
+	QMutex call_mutex;
 
 	KeyStoreThread(QObject *parent = 0) : SyncThread(parent)
 	{
@@ -585,12 +586,23 @@ public:
 	}
 };
 
+// this function is thread-safe
 static QVariant trackercall(const char *method, const QVariantList &args = QVariantList())
 {
 	QVariant ret;
 	bool ok;
+
+	g_ksm->thread->call_mutex.lock();
 	ret = g_ksm->thread->call(KeyStoreTracker::instance(), method, args, &ok);
+	g_ksm->thread->call_mutex.unlock();
+
 	Q_ASSERT(ok);
+	if(!ok)
+	{
+		fprintf(stderr, "QCA: KeyStoreTracker call [%s] failed.\n", method);
+		abort();
+		return QVariant();
+	}
 	return ret;
 }
 
