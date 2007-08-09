@@ -534,12 +534,15 @@ public:
 	TestData data;
 	int step;
 	QTimer t;
+	bool first;
+	int next_id;
 
 	TestKeyStoreListContext(Provider *p) :
 		KeyStoreListContext(p),
 		t(this)
 	{
 		step = 0;
+		next_id = 1;
 
 		KeyBundle cert1;
 		Certificate pub1;
@@ -588,6 +591,7 @@ public:
 
 	virtual void start()
 	{
+		first = true;
 		emit diagnosticText("qca-test: TestKeyStoreListContext started\n");
 		t.start(2000);
 	}
@@ -721,13 +725,19 @@ private slots:
 		if(step == 0)
 		{
 			// make first store available
-			data.stores[0].contextId = 1;
-			emit busyEnd();
+			data.stores[0].contextId = next_id++;
+			if(first)
+			{
+				first = false;
+				emit busyEnd();
+			}
+			else
+				emit updated();
 		}
 		else if(step == 1)
 		{
 			// make second store available
-			data.stores[1].contextId = 2;
+			data.stores[1].contextId = next_id++;
 			emit updated();
 		}
 		else if(step == 2)
@@ -745,7 +755,7 @@ private slots:
 		else if(step == 4)
 		{
 			// make the first store available
-			data.stores[0].contextId = 3;
+			data.stores[0].contextId = next_id++;
 			emit updated();
 		}
 		else if(step == 5)
@@ -760,10 +770,20 @@ private slots:
 			data.stores[0].contextId = -1;
 			emit updated();
 		}
+		else if(step == 7)
+		{
+			// do it all over again in 10 seconds
+			// (2 seconds before, 6 seconds here, 2 seconds after)
+			t.start(6000);
+		}
 		else
 		{
-			// stop, we're done
-			t.stop();
+			step = 0;
+			data.stores[0].avail = false;
+
+			// set interval to 2 seconds
+			t.start(2000);
+			return;
 		}
 
 		++step;
