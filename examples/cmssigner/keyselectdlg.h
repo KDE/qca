@@ -28,6 +28,7 @@ class QPixmap;
 
 namespace QCA
 {
+	class CertificateChain;
 	class KeyStoreEntry;
 }
 
@@ -51,12 +52,14 @@ public:
 
 signals:
 	void selected(const QCA::KeyStoreEntry &entry);
+	void viewCertificate(const QCA::CertificateChain &chain);
 
 protected slots:
 	virtual void accept();
 
 private:
 	class Private;
+	friend class Private;
 	Private *d;
 };
 

@@ -27,27 +27,33 @@
     </widget>
    </item>
    <item>
-    <widget class="KeyStoreView" name="lv_stores" />
+    <widget class="QTreeView" name="lv_stores" />
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox" >
-     <property name="orientation" >
-      <enum>Qt::Horizontal</enum>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
      </property>
-     <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+     <property name="spacing" >
+      <number>6</number>
      </property>
-    </widget>
+     <item>
+      <widget class="QLabel" name="lb_busy" />
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons" >
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KeyStoreView</class>
-   <extends>QTreeView</extends>
-   <header>keystoreview.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>lv_stores</tabstop>
   <tabstop>buttonBox</tabstop>

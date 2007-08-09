@@ -1,30 +1,26 @@
-have a graphical busy indicator for:
-  keystores are busy? (maybe a flashing thing in the status bar)
-  sign operation in progress (maybe just use an endless QProgressBar)
-
 app icon (may need different sizes of this?)  (a pen?)
-
 store icons
   system
   user
   application
   smart card
   pgp keyring
-
 unknown store/entry icon (can use the same icon for both i think)
+animation rather than text for keystore busy?
+animation for signing in progress (maybe just use an endless QProgressBar?)
+integrated logger window?  also allow setting the log level
+prompter should not call entrylist unless necessary.  right now it starts
+  async mode on all stores, even if there is no prompting or anything going
+  on.  qcatool has this problem also
+report all 3 kinds of diagnostic text somewhere
+  plugin: plugin dialog invoked from file menu ?  also show provider versions
+  keystore: invoked from keyselectdlg ?
+  secmessage: "details" button on error dialog?
 
+further cleanup
+don't remember pkcs12 password if it was wrong
 when verifying a signature:
   if the key is valid, import it and ask the user for a friendly name and
     import into keyring
   if the key is self-signed, ask the user to verify the fingerprint. if
     validated, ask user for friendly name and import into keyring
-
-ability to view CertItems, showing cert values and issuer hierarchy
-report all 3 kinds of diagnostic text somewhere (plugin, keystore, secmessage)
-integrated logger window?  also allow setting the log level
-
-items in loadstore ui should not be editable
-
-don't show systemstore or pgpkeyrings
-
-respect !usable state for items

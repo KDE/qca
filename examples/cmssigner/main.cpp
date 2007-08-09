@@ -25,8 +25,8 @@
 
 #include "ui_mainwin.h"
 #include "prompter.h"
+#include "certviewdlg.h"
 #include "keyselectdlg.h"
-#include "mylistview.h"
 #include "pkcs11configdlg/pkcs11configdlg.h"
 
 #define VERSION "0.0.1"
@@ -219,7 +219,12 @@ public:
 			return QVariant();
 
 		if(role == Qt::DisplayRole)
-			return list[index.row()].name;
+		{
+			QString str = list[index.row()].name;
+			if(!list[index.row()].usable)
+				str += QString(" ") + tr("(not usable)");
+			return str;
+		}
 		else if(role == Qt::EditRole)
 			return list[index.row()].name;
 		else if(role == Qt::DecorationRole && g_icons)
@@ -574,7 +579,7 @@ private slots:
 
 QAction *actionView, *actionRename, *actionRemove;
 
-MyListView::MyListView(QWidget *parent) :
+/*MyListView::MyListView(QWidget *parent) :
 	QListView(parent)
 {
 }
@@ -590,7 +595,7 @@ void MyListView::contextMenuEvent(QContextMenuEvent *event)
 	menu.addAction(actionRename);
 	menu.addAction(actionRemove);
 	menu.exec(event->globalPos());
-}
+}*/
 
 class MyPrompter : public Prompter
 {
@@ -654,7 +659,7 @@ public:
 		actionRemove = new QAction(tr("Rem&ove"), this);
 
 		// TODO
-		actionView->setEnabled(false);
+		//actionView->setEnabled(false);
 
 		connect(ui.actionLoadIdentityFile, SIGNAL(triggered()), SLOT(load_file()));
 		connect(ui.actionLoadIdentityEntry, SIGNAL(triggered()), SLOT(load_device()));
@@ -665,7 +670,7 @@ public:
 		connect(ui.pb_sign, SIGNAL(clicked()), SLOT(do_sign()));
 		connect(ui.pb_verify, SIGNAL(clicked()), SLOT(do_verify()));
 
-		//connect(actionView, SIGNAL(triggered()), SLOT(item_view()));
+		connect(actionView, SIGNAL(triggered()), SLOT(item_view()));
 		connect(actionRename, SIGNAL(triggered()), SLOT(item_rename()));
 		connect(actionRemove, SIGNAL(triggered()), SLOT(item_remove()));
 
@@ -677,12 +682,15 @@ public:
 		ui.lv_users->setModel(users);
 		connect(ui.lv_users->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), SLOT(users_selectionChanged(const QItemSelection &, const QItemSelection &)));
 
+		ui.lv_users->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(ui.lv_users, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(users_customContextMenuRequested(const QPoint &)));
+
 		roots = new CertListModel(this);
 		ui.lv_authorities->setModel(roots);
 
 		// FIXME: is this redundant?
-		ui.lv_users->model = users;
-		ui.lv_authorities->model = roots;
+		//ui.lv_users->model = users;
+		//ui.lv_authorities->model = roots;
 
 		cms = new QCA::CMS(this);
 
@@ -750,6 +758,7 @@ private slots:
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
 		w->setWindowModality(Qt::WindowModal);
 		connect(w, SIGNAL(selected(const QCA::KeyStoreEntry &)), SLOT(load_device_finished(const QCA::KeyStoreEntry &)));
+		connect(w, SIGNAL(viewCertificate(const QCA::CertificateChain &)), SLOT(keyselect_viewCertificate(const QCA::CertificateChain &)));
 		w->setIcon(KeySelectDlg::IconCert, g_icons->cert);
 		w->setIcon(KeySelectDlg::IconCrl, g_icons->crl);
 		w->setIcon(KeySelectDlg::IconKeyBundle, g_icons->keybundle);
@@ -856,31 +865,38 @@ private slots:
 	{
 		Q_UNUSED(deselected);
 
-		if(!selected.indexes().isEmpty() && !ui.pb_sign->isEnabled())
+		int at = -1;
+		if(!selected.indexes().isEmpty())
+		{
+			QModelIndex index = selected.indexes().first();
+			at = index.row();
+		}
+
+		if(at != -1 && users->list[at].usable && !ui.pb_sign->isEnabled())
 			ui.pb_sign->setEnabled(true);
-		else if(selected.indexes().isEmpty() && ui.pb_sign->isEnabled())
+		else if(ui.pb_sign->isEnabled())
 			ui.pb_sign->setEnabled(false);
 	}
 
-	/*void item_view()
+	void item_view()
 	{
-		if(ui.lv_identities->hasFocus())
+		if(ui.lv_users->hasFocus())
 		{
-			QItemSelection selection = ui.lv_identities->selectionModel()->selection();
+			QItemSelection selection = ui.lv_users->selectionModel()->selection();
 			if(selection.indexes().isEmpty())
 				return;
 			QModelIndex index = selection.indexes().first();
-			identity_view(index.row());
+			users_view(index.row());
 		}
-		else // lv_known
+		/*else // lv_authorities
 		{
 			QItemSelection selection = ui.lv_known->selectionModel()->selection();
 			if(selection.indexes().isEmpty())
 				return;
 			QModelIndex index = selection.indexes().first();
 			known_view(index.row());
-		}
-	}*/
+		}*/
+	}
 
 	void item_rename()
 	{
@@ -927,6 +943,14 @@ private slots:
 		printf("identity_view: %d\n", at);
 	}*/
 
+	void users_view(int at)
+	{
+		CertItem &i = users->list[at];
+		CertViewDlg *w = new CertViewDlg(i.chain, this);
+		w->setAttribute(Qt::WA_DeleteOnClose, true);
+		w->show();
+	}
+
 	void users_rename(int at)
 	{
 		QModelIndex index = users->index(at);
@@ -958,6 +982,27 @@ private slots:
 	void roots_remove(int at)
 	{
 		roots->removeItem(at);
+	}
+
+	void keyselect_viewCertificate(const QCA::CertificateChain &chain)
+	{
+		// TODO: completion?
+		CertViewDlg *w = new CertViewDlg(chain, (QWidget *)sender());
+		w->setAttribute(Qt::WA_DeleteOnClose, true);
+		w->show();
+	}
+
+	void users_customContextMenuRequested(const QPoint &pos)
+	{
+		QItemSelection selection = ui.lv_users->selectionModel()->selection();
+		if(selection.indexes().isEmpty())
+			return;
+
+		QMenu menu(this);
+		menu.addAction(actionView);
+		menu.addAction(actionRename);
+		menu.addAction(actionRemove);
+		menu.exec(ui.lv_users->viewport()->mapToGlobal(pos));
 	}
 
 	void do_sign()

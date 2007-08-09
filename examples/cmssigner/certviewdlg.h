@@ -19,23 +19,26 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef KEYSTOREVIEW_H
-#define KEYSTOREVIEW_H
+#ifndef CERTVIEWDLG_H
+#define CERTVIEWDLG_H
 
-#include <QTreeView>
+#include <QDialog>
 
-//class QAbstractListModel;
+namespace QCA
+{
+	class CertificateChain;
+}
 
-class KeyStoreView : public QTreeView
+class CertViewDlg : public QDialog
 {
 	Q_OBJECT
 public:
-	KeyStoreView(QWidget *parent = 0) : QTreeView(parent) {}
+	CertViewDlg(const QCA::CertificateChain &chain, QWidget *parent = 0);
+	~CertViewDlg();
 
-	//QAbstractListModel *model;
-
-/*protected:
-	virtual void contextMenuEvent(QContextMenuEvent *event);*/
+private:
+	class Private;
+	Private *d;
 };
 
 #endif

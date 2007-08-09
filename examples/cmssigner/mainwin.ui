@@ -37,7 +37,7 @@
          <number>6</number>
         </property>
         <item>
-         <widget class="MyListView" name="lv_users" />
+         <widget class="QListView" name="lv_users" />
         </item>
        </layout>
       </widget>
@@ -53,7 +53,7 @@
          <number>6</number>
         </property>
         <item>
-         <widget class="MyListView" name="lv_authorities" />
+         <widget class="QListView" name="lv_authorities" />
         </item>
        </layout>
       </widget>
@@ -210,13 +210,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MyListView</class>
-   <extends>QListView</extends>
-   <header>mylistview.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>lv_users</tabstop>
