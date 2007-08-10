@@ -1,6 +1,8 @@
 /*
 -----BEGIN QCMOD-----
 name: pkcs11_helper
+arg: with-pkcs11-helper-inc=[path],Path to pkcs11-helper include files
+arg: with-pkcs11-helper-lib=[path],Path to pkcs11-helper library files
 -----END QCMOD-----
 */
 
@@ -16,11 +18,18 @@ public:
 	    QStringList incs;
 	    QString ver, libs, other;
 
-	    if (!conf->findPkgConfig(QString("libpkcs11-helper-1"),
-				     VersionAny, 0, &ver,
-				     &incs, &libs, &other)) {
-	    	return false;
-	    }	  
+	    QString s = conf->getenv("QC_WITH_PKCS11_HELPER_LIB");
+	    if(!s.isEmpty()) {
+	        incs += conf->getenv("QC_WITH_PKCS11_HELPER_INC");
+	    	libs += s;
+	    }
+	    else {
+		    if (!conf->findPkgConfig(QString("libpkcs11-helper-1"),
+					     VersionAny, 0, &ver,
+					     &incs, &libs, &other)) {
+			return false;
+		    }	  
+	    }
 	    for(int n = 0; n < incs.count(); ++n) {
 		conf->addIncludePath(incs[n]);
 	    }
