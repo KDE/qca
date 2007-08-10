@@ -60,7 +60,7 @@
 	 - HMAC with SHA-384
 	 - HMAC with SHA-512
      - Encoding and decoding of hexadecimal (QCA::Hex) and 
-     Base64 (QCA::Base64)
+     Base64 (QCA::Base64) strings.
   
    Functionality is supplied via plugins.  This is useful for avoiding
    dependence on a particular crypto library and makes upgrading easier,
@@ -82,6 +82,52 @@
    functionality is determined during runtime, and plugins are loaded
    from the 'crypto' subfolder of the %Qt library paths. There are <a
    href="examples.html">additional examples available</a>.
+
+   \subsection tute1 Introduction
+
+   Using %QCA is much like using Qt, and if you are familiar with
+   Qt, then it should feel "natural". There are a few things you
+   do need to know though, to build reliable applications:
+   - %QCA needs to be initialized before you use any class that
+     requires plugin support, or uses secure memory. That is most
+     of %QCA, so you should assume that you need to perform 
+     initialization. The easiest way to do this is to instantiate
+     a QCA::Initializer object and ensure it is not deleted (or
+     allowed to go out of scope) until you have finished using 
+     %QCA.
+   - Most features/algorithms are provided by plugins/\ref providers.
+     You should check that the required feature is actually 
+     available (using QCA::isSupported()) before trying to create
+     it. If you try to create a class and suitable provider support
+     is not available, you will get back a null object, and when
+     you try to use one of the methods, your application will
+     segfault. Also, for features that take algorithm names (e.g.
+     QCA::Hash, which takes the name of the hashing algorithm such
+     as "md5" or "sha256"), the name is looked up at run-time, so
+     if you make a typographical error (e.g. "md56") it will compile
+     correctly, but segfault at run-time.
+
+   \subsection tute2 Thoughts on security
+
+   %QCA tries to be flexible in what it supports. That does not mean that
+   every possible combination of features makes sense though. 
+
+   We strongly recommend against coming up with your own design made up
+   of low-level cryptographic primitives (e.g. QCA::Hash, QCA::Cipher and
+   similar features) and trying to use higher level capabilities. In particular,
+   we recommend looking at QCA::TLS, QCA::SASL, QCA::CMS and QCA::OpenPGP
+   as starting points. 
+
+   When selecting a particular cryptographic feature, you should make sure
+   that you understand what sort of threats your application is likely
+   to be exposed to, and how that threat can be effectively countered. In 
+   addition, you should consider whether you can avoid adding cryptographic
+   features directly to your application (e.g. for secure transport, you
+   may be able to tunnel your application over SSH).
+
+   Also, you may need to look beyond %QCA for some security needs (e.g.
+   for authentication, your situation may be more suited to using 
+   Kerberos than SASL or TLS).
 
    \section availability Availability
 
