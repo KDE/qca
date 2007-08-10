@@ -297,9 +297,8 @@ private:
    The %SecureArray provides an array of memory from a pool that is,
    at least partly, secure. In this sense, secure means that the contents
    of the memory should not be made available to other applications. By
-   comparison, a QMemArray (or subclass such as QCString or QByteArray) may
-   be held in pages that might be swapped to disk or free'd without being
-   cleared first.
+   comparison, a QByteArray or QString may be held in pages that might be
+   swapped to disk or free'd without being cleared first.
 
    Note that this class is implicitly shared (that is, copy on write).
 
