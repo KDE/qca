@@ -198,6 +198,8 @@ else
    data that you would otherwise have provided to the update()
    call.
 
+   For more information on hashing algorithms, see \ref hashing.
+
    \ingroup UserAPI
 
 */
@@ -483,7 +485,7 @@ private:
 */
 
 /**
-   \Page padding Padding
+   \page paddingDescription Padding
 
    For those Cipher sub-classes that are block based, there are modes
    that require a full block on encryption and decryption - %Cipher Block
@@ -554,7 +556,11 @@ class QCA_EXPORT Cipher : public Algorithm, public Filter
 {
 public:
 	/**
-	   Mode settings for cipher algorithms
+	   Mode settings for cipher algorithms.
+
+	   \note ECB is almost never what you want, unless you
+	   are trying to implement a %Cipher variation that is not
+	   supported by %QCA.
 	*/
 	enum Mode
 	{
@@ -565,7 +571,10 @@ public:
 	};
 
 	/**
-	   Padding variations for cipher algorithms
+	   Padding variations for cipher algorithms.
+
+	   See the \ref paddingDescription description for more details on
+	   padding schemes.
 	*/
 	enum Padding
 	{
@@ -682,7 +691,9 @@ public:
 	   \param dir the Direction that this Cipher should use (Encode for
 	   encryption, Decode for decryption)
 	   \param key the SymmetricKey array that is the key
-	   \param iv the InitializationVector to use
+	   \param iv the InitializationVector to use (not used for ECB Mode)
+
+	   \note You should not leave iv empty for any Mode except ECB.
 	*/
 	void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector());
 
