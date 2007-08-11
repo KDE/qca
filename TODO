@@ -2,13 +2,10 @@
   doc:
     Change Doxyfile config to capture whole API, and to generate Latex manual
   code:
-    default provider: cleanup
     securelayer: cleanup
     add more asserts/logging to qca lib
   other:
-    qca-gnupg: improve gpg detection on mac (check psi 0.10 code)
     finish cmssigner, set to 1.0
-    cmssigner: i'm getting a crash sometimes during sign..  test and trace
     update the rootcerts with mozcerts
     make sure the version is correct in all locations (README, etc)
 
