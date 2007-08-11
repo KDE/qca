@@ -18,7 +18,6 @@ report all 3 kinds of diagnostic text somewhere
   secmessage: "details" button on error dialog?
 
 further cleanup
-don't remember pkcs12 password if it was wrong
 when verifying a signature:
   if the key is valid, import it and ask the user for a friendly name and
     import into keyring
