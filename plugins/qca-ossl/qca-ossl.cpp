@@ -141,6 +141,15 @@ static SecureArray dsasig_raw_to_der(const SecureArray &in)
 	return result;
 }
 
+static int passphrase_cb(char *buf, int size, int rwflag, void *u)
+{
+	Q_UNUSED(buf);
+	Q_UNUSED(size);
+	Q_UNUSED(rwflag);
+	Q_UNUSED(u);
+	return 0;
+}
+
 /*static bool is_basic_constraint(const ConstraintType &t)
 {
 	bool basic = false;
@@ -2636,15 +2645,6 @@ public:
 		return nk;
 	}
 
-	static int passphrase_cb(char *buf, int size, int rwflag, void *u)
-	{
-		Q_UNUSED(buf);
-		Q_UNUSED(size);
-		Q_UNUSED(rwflag);
-		Q_UNUSED(u);
-		return 0;
-	}
-
 	virtual QByteArray publicToDER() const
 	{
 		EVP_PKEY *pkey = get_pkey();
@@ -2701,7 +2701,7 @@ public:
 		QByteArray in = s.toLatin1();
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
-		EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, NULL, NULL, NULL);
+		EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, NULL, passphrase_cb, NULL);
 		BIO_free(bi);
 
 		if(!pkey)
@@ -2781,7 +2781,7 @@ public:
 		if(!passphrase.isEmpty())
 			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, NULL, (void *)passphrase.data());
 		else
-			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, &passphrase_cb, NULL);
+			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, passphrase_cb, NULL);
 
 		if(!pkey)
 			return ErrorDecode;
@@ -2805,7 +2805,7 @@ public:
 		if(!passphrase.isEmpty())
 			pkey = PEM_read_bio_PrivateKey(bi, NULL, NULL, (void *)passphrase.data());
 		else
-			pkey = PEM_read_bio_PrivateKey(bi, NULL, &passphrase_cb, NULL);
+			pkey = PEM_read_bio_PrivateKey(bi, NULL, passphrase_cb, NULL);
 		BIO_free(bi);
 
 		if(!pkey)
@@ -2938,11 +2938,11 @@ public:
 		BIO_write(bi, in.data(), in.size());
 
 		if(t == TypeCert)
-			cert = PEM_read_bio_X509(bi, NULL, NULL, NULL);
+			cert = PEM_read_bio_X509(bi, NULL, passphrase_cb, NULL);
 		else if(t == TypeReq)
-			req = PEM_read_bio_X509_REQ(bi, NULL, NULL, NULL);
+			req = PEM_read_bio_X509_REQ(bi, NULL, passphrase_cb, NULL);
 		else if(t == TypeCRL)
-			crl = PEM_read_bio_X509_CRL(bi, NULL, NULL, NULL);
+			crl = PEM_read_bio_X509_CRL(bi, NULL, passphrase_cb, NULL);
 
 		BIO_free(bi);
 
@@ -5965,7 +5965,7 @@ public:
 			if(format == SecureMessage::Binary)
 				p7 = d2i_PKCS7_bio(bi, NULL);
 			else // Ascii
-				p7 = PEM_read_bio_PKCS7(bi, NULL, NULL, NULL);
+				p7 = PEM_read_bio_PKCS7(bi, NULL, passphrase_cb, NULL);
 			BIO_free(bi);
 
 			if(!p7)
