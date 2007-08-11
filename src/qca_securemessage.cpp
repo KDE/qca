@@ -114,6 +114,7 @@ void SecureMessageKey::setPGPPublicKey(const PGPKey &pub)
 void SecureMessageKey::setPGPSecretKey(const PGPKey &sec)
 {
 	d->ensureType(SecureMessageKey::PGP);
+	Q_ASSERT(sec.isSecret());
 	d->pgp_sec = sec;
 }
 
