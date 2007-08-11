@@ -5406,14 +5406,14 @@ public:
 			{
 				const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
 				X509 *x = cc->item.cert;
-				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+				//CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
 				X509_STORE_add_cert(store, x);
 			}
 			for(n = 0; n < crl_list.count(); ++n)
 			{
 				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
 				X509_CRL *x = cc->item.crl;
-				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+				//CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
 				X509_STORE_add_crl(store, x);
 			}
 		}
@@ -6045,14 +6045,14 @@ public:
 				//printf("trusted: [%s]\n", qPrintable(cert_list[n].commonName()));
 				const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
 				X509 *x = cc->item.cert;
-				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
+				//CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
 				X509_STORE_add_cert(store, x);
 			}
 			for(int n = 0; n < crl_list.count(); ++n)
 			{
 				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
 				X509_CRL *x = cc->item.crl;
-				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+				//CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
 				X509_STORE_add_crl(store, x);
 			}
 			// add these crls also
@@ -6061,7 +6061,7 @@ public:
 			{
 				const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
 				X509_CRL *x = cc->item.crl;
-				CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
+				//CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
 				X509_STORE_add_crl(store, x);
 			}
 
