@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2006  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2006-2007 Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -50,6 +50,40 @@ static int setenv(const char *name, const char *value, int overwrite)
 }
 #endif
 
+// Note; in a real application you get this from a user, but this
+// is a useful trick for a unit test.
+// See the qcatool application or keyloader and eventhandler examples
+// for how to do this properly.
+class PGPPassphraseProvider: public QObject
+{
+    Q_OBJECT
+public:
+    PGPPassphraseProvider(QObject *parent = 0) : QObject(parent)
+    {
+        connect(&m_handler, SIGNAL(eventReady(int, const QCA::Event &)),
+		SLOT(eh_eventReady(int, const QCA::Event &)));
+	m_handler.start();
+    }
+
+private slots:
+    void eh_eventReady(int id, const QCA::Event &event)
+    {
+        qDebug() << "got event: " << id;
+        if(event.type() == QCA::Event::Password)
+	{
+	    QCA::SecureArray pass("start");
+	    m_handler.submitPassword(id, pass);
+	}
+	else
+	{
+	    m_handler.reject(id);
+        }
+    }
+
+private:
+    QCA::EventHandler m_handler;
+};
+
 class PgpUnitTest : public QObject
 {
     Q_OBJECT
@@ -58,6 +92,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void testKeyRing();
+    void testClearsign();
 private:
     QCA::Initializer* m_init;
 };
@@ -81,7 +116,7 @@ void PgpUnitTest::testKeyRing()
     if ( QCA::isSupported( QStringList( QString( "keystorelist" ) ),
                             QString( "qca-gnupg" ) ) )
     {
-      QCA::KeyStoreManager keyManager(this);
+        QCA::KeyStoreManager keyManager(this);
 	keyManager.waitForBusyFinished();
 	QStringList storeIds = keyManager.keyStores();
 	QVERIFY( storeIds.contains( "qca-gnupg" ) );
@@ -147,6 +182,110 @@ void PgpUnitTest::testKeyRing()
     }
 
 }
+
+class TesterThread : public QThread
+{
+    Q_OBJECT
+protected:
+    virtual void run()
+    {
+        testClearSign();
+    }
+private:
+  void testClearSign();
+};
+
+
+void PgpUnitTest::testClearsign()
+{
+    // handler and asker cannot occur in the same thread
+    TesterThread testerThread;
+    testerThread.start();  
+}
+
+void TesterThread::testClearSign()
+{
+    PGPPassphraseProvider handler;
+
+    // activate the KeyStoreManager
+    QCA::KeyStoreManager::start();
+
+    QCA::KeyStoreManager keyManager(this);
+    keyManager.waitForBusyFinished();
+    QStringList storeIds = keyManager.keyStores();
+    QVERIFY( storeIds.contains( "qca-gnupg" ) );
+    
+    QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+    QVERIFY( pgpStore.isValid() );
+
+    if ( QCA::isSupported( QStringList( QString( "openpgp" ) ), QString( "qca-gnupg" ) ) ||
+	 QCA::isSupported( QStringList( QString( "keystorelist" ) ), QString( "qca-gnupg" ) ) ) {
+
+        QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
+
+	// This keyring has a private / public key pair
+	if ( 0 != setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+	}
+	
+	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
+	QCOMPARE( keylist.count(), 1 );
+
+	QCA::KeyStoreEntry myPGPKey = keylist.at(0);	
+	QCOMPARE( myPGPKey.isNull(), false );
+	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
+	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );
+	QCOMPARE( myPGPKey.id(), QString("9E946237DAFCCFF4") );
+	QVERIFY( myPGPKey.keyBundle().isNull() );
+	QVERIFY( myPGPKey.certificate().isNull() );
+	QVERIFY( myPGPKey.crl().isNull() );
+	QCOMPARE( myPGPKey.pgpSecretKey().isNull(), false );
+	QCOMPARE( myPGPKey.pgpPublicKey().isNull(), false );
+	  
+	// first make the SecureMessageKey
+	QCA::SecureMessageKey key;
+	key.setPGPSecretKey( myPGPKey.pgpSecretKey() );
+	QVERIFY( key.havePrivate() );
+
+	// our data to sign
+	QByteArray plain = "Hello, world";
+
+	// let's do it
+	QCA::OpenPGP pgp;
+	QCA::SecureMessage msg(&pgp);
+	msg.setSigner(key);
+	msg.setFormat(QCA::SecureMessage::Ascii);
+	msg.startSign(QCA::SecureMessage::Clearsign);
+	msg.update(plain);
+	msg.end();
+	msg.waitForFinished(2000);
+
+        QString str = QCA::KeyStoreManager::diagnosticText();
+        QCA::KeyStoreManager::clearDiagnosticText();
+        QStringList lines = str.split('\n', QString::SkipEmptyParts);
+        for(int n = 0; n < lines.count(); ++n)
+                fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
+
+        QString out = msg.diagnosticText();
+        QStringList msglines = out.split('\n', QString::SkipEmptyParts);
+        for(int n = 0; n < msglines.count(); ++n)
+                fprintf(stderr, "message: %s\n", qPrintable(msglines[n]));
+
+	if(msg.success()) {
+	    QByteArray result = msg.read();
+	    // result now contains the clearsign text data
+	} else {
+	    qDebug() << "Failure:" <<  msg.errorCode();
+	    QFAIL("Failed to clearsign");
+	}
+
+
+	if ( false == oldGNUPGHOME.isNull() ) {
+	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+	}
+    }
+}
+
 
 QTEST_MAIN(PgpUnitTest)
 

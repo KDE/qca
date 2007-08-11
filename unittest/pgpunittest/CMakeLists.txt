@@ -16,4 +16,8 @@ FOREACH( testFileName pubring.gpg trustdb.gpg )
    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/keys2/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/keys2/${testFileName} COPYONLY)
 ENDFOREACH( testFileName )
 
+FOREACH( testFileName pubring.gpg secring.gpg trustdb.gpg )
+   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/keys3/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/keys3/${testFileName} COPYONLY)
+ENDFOREACH( testFileName )
+
 ADD_TEST(PGP ${EXECUTABLE_OUTPUT_PATH}/pgpunittest)
