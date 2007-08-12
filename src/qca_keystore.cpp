@@ -27,6 +27,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#include <stdlib.h> // abort
+
 #include "qcaprovider.h"
 
 Q_DECLARE_METATYPE(QCA::KeyStoreEntry)
