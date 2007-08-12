@@ -1,0 +1,169 @@
+.TH QCA "1" "August 2007" "qcatool 2.0.0" "User Commands"
+
+.SH NAME
+qcatool \- command line tool for the Qt Cryptographic Architecture
+
+.SH DESCRIPTION
+qcatool is a command line tool for performing various cryptographic
+operations with the Qt Cryptographic Architecture (QCA). qcatool can
+also be used for testing and debugging QCA.
+
+.SH USAGE
+qcatool has a range of options and commands. You only ever get to 
+use one command, but you may use several, one or no options.
+
+.SH OPTIONS
+As noted above, these are all optional, and may be combined.
+.PP
+.TP
+\fB\-\-pass\fR=PASSWORD
+Specify the password to use.
+.TP
+\fB\-\-newpass\fR=PASSWORD
+Specify the new password to use for password change 
+with the \fBkey changepass\fR and \fBkeybundle changepass\fR commands.
+.TP
+\fB\-\-nonroots\fR=CERTIFICATES
+Specify additional certificates, not trusted, but which may be used
+in the trust path if appropriate trust can be established.
+.TP
+\fB\-\-roots\fR=CERTIFICATES
+Specify additional certificates which can be used as trusted (root)
+certificates.
+.TP
+\fB\-\-nosys\fR
+Disable use of the standard root certificates that are provided by
+the operating system.
+.TP
+\fB\-\-noprompt\fR
+.TP
+\fB\-\-ordered\fR
+.TP
+\fB\-\-debug\fR
+Enable additional output to aid debugging.
+.TP
+\fB\-\-log-file=FILENAME\fR
+Log to the specified file.
+.TP
+\fB\-\-log-level=LEVEL\fR
+Log at the specified level. The log level can be between 0 (none)
+and 8 (most).
+.TP
+\fB\-\-nobundle\fR
+
+.SH COMMANDS
+.TP
+\fBhelp\fR, \fB\-\-help\fR, \fB\-h\fR
+Output usage (help) information.
+.TP
+\fBversion\fR, \fB\-\-version\fR, \fB\-v\fR
+Output version information.
+.TP
+\fBplugins\fR
+List available plugins. Use the \fB\-\-debug\fR option to get
+more information on plugins which are found and which ones actually
+loaded.
+.TP
+\fBconfig save \fI[provider]\fR
+Save provider configuration. If \fIprovider\fR is not specified, the
+default provider is saved.
+.TP
+\fBconfig edit \fI[provider]\fR
+Edit provider configuration. If \fIprovider\fR is not specified, the
+default provider is edited.
+.TP
+\fBkey make rsa|dsa [bits]\fR
+Create a key pair
+.TP
+\fBkey changepass [K]
+Add/change/remove passphrase of a key
+.TP
+\fBcert makereq [K]\fR
+Create certificate request (CSR)
+.TP
+\fBcert makeself [K]\fR
+Create self-signed certificate
+.TP
+\fBcert makereqadv [K]\fR
+Advanced version of 'makereq'
+.TP
+\fBcert makeselfadv [K]\fR
+Advanced version of 'makeself'
+.TP
+\fBcert validate [C]\fR
+Validate certificate
+.TP
+\fBkeybundle make [K] [C]\fR
+Create a keybundle
+.TP
+\fBkeybundle extract [X]\fR
+Extract certificate(s) and key
+.TP
+\fBkeybundle changepass [X]\fR
+Change passphrase of a keybundle
+.TP
+\fBkeystore list-stores\fR
+List all available keystores
+.TP
+\fBkeystore list [storeName]\fR
+List content of a keystore
+.TP
+\fBkeystore monitor\fR
+Monitor for keystore availability
+.TP
+\fBkeystore export [E]\fR
+Export a keystore entry's content
+.TP
+\fBkeystore exportref [E]\fR
+Export a keystore entry reference
+.TP
+\fBkeystore addkb [storeName] [cert.p12]\fR
+Add a keybundle into a keystore
+.TP
+\fBkeystore addpgp [storeName] [key.asc]\fR
+Add a PGP key into a keystore
+.TP
+\fBkeystore remove [E]\fR
+Remove an object from a keystore
+.TP
+\fBshow cert [C]\fR
+Examine a certificate
+.TP
+\fBshow req [req.pem]\fR
+Examine a certificate request (CSR)
+.TP
+\fBshow crl [crl.pem]\fR
+Examine a certificate revocation list
+.TP
+\fBshow kb [X]\fR
+Examine a keybundle
+.TP
+\fBshow pgp [P|S]\fR
+Examine a PGP key
+.TP
+\fBmessage sign pgp|pgpdetach|smime [X|S]\fR
+Sign a message
+.TP
+\fBmessage encrypt pgp|smime [C|P]\fR
+Encrypt a message
+.TP
+\fBmessage signencrypt [S] [P]\fR
+PGP sign & encrypt a message
+.TP
+\fBmessage verify pgp|smime\fR
+Verify a message
+.TP
+\fBmessage decrypt pgp|smime ((X) ...)\fR
+Decrypt a message (S/MIME needs X)
+.TP
+\fBmessage exportcerts\fR
+Export certs from S/MIME message
+
+Object types: K = private key, C = certificate, X = key bundle, P = PGP public key, S = PGP secret key, E = generic entry
+
+An object must be either a filename or a keystore reference ("store:obj").
+
+.SH AUTHOR
+qcatool was written by Justin Karneges as part of QCA. This manual page
+was written by Brad Hards.
+
