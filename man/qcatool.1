@@ -17,11 +17,16 @@ As noted above, these are all optional, and may be combined.
 .PP
 .TP
 \fB\-\-pass\fR=PASSWORD
-Specify the password to use.
+Specify the password to use. This is probably a bad idea except for 
+testing, because anyone can read the arguments to a command line
+application.
 .TP
 \fB\-\-newpass\fR=PASSWORD
 Specify the new password to use for password change 
 with the \fBkey changepass\fR and \fBkeybundle changepass\fR commands.
+This is probably a bad idea except for 
+testing, because anyone can read the arguments to a command line
+application.
 .TP
 \fB\-\-nonroots\fR=CERTIFICATES
 Specify additional certificates, not trusted, but which may be used
@@ -36,6 +41,10 @@ Disable use of the standard root certificates that are provided by
 the operating system.
 .TP
 \fB\-\-noprompt\fR
+Disable prompting for passwords/passphrases. If you do not provide
+the passphrase on the command line (with \fB\-\-pass\fR or \fB\-\-newpass\fR)
+this will cause qcatool to abort the command if a password/passphrase is
+required.
 .TP
 \fB\-\-ordered\fR
 .TP
@@ -50,6 +59,7 @@ Log at the specified level. The log level can be between 0 (none)
 and 8 (most).
 .TP
 \fB\-\-nobundle\fR
+Disable signing using a PKCS12 key bundle.
 
 .SH COMMANDS
 .TP
@@ -159,9 +169,22 @@ Decrypt a message (S/MIME needs X)
 \fBmessage exportcerts\fR
 Export certs from S/MIME message
 
-Object types: K = private key, C = certificate, X = key bundle, P = PGP public key, S = PGP secret key, E = generic entry
+.SH ARGUMENTS
+The arguments to the commands are as follows.
 
-An object must be either a filename or a keystore reference ("store:obj").
+K = private key.
+
+C = certificate.
+
+X = key bundle.
+
+P = PGP public key.
+
+S = PGP secret key.
+
+E = generic entry.
+
+These must be identified by either a filename or a keystore reference ("store:obj").
 
 .SH AUTHOR
 qcatool was written by Justin Karneges as part of QCA. This manual page
