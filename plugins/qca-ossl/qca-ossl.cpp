@@ -5722,6 +5722,7 @@ public:
 	SecureMessage::Format format;
 
 	Operation op;
+	bool _finished;
 
 	QByteArray in, out;
 	QByteArray sig;
@@ -5788,6 +5789,7 @@ public:
 	virtual void start(SecureMessage::Format f, Operation op)
 	{
 		format = f;
+		_finished = false;
 
 		// TODO: other operations
 		//if(op == Sign)
@@ -5804,6 +5806,7 @@ public:
 	{
 		this->in.append(in);
 		total += in.size();
+		QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
 	}
 
 	virtual QByteArray read()
@@ -5820,6 +5823,8 @@ public:
 
 	virtual void end()
 	{
+		_finished = true;
+
 		// sign
 		if(op == Sign)
 		{
@@ -6136,8 +6141,7 @@ public:
 
 	virtual bool finished() const
 	{
-		// TODO
-		return true;
+		return _finished;
 	}
 
 	virtual bool waitForFinished(int msecs)
