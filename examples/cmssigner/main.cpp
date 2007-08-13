@@ -104,18 +104,65 @@ static QString validityToString(QCA::Validity v)
 
 static QString smErrorToString(QCA::SecureMessage::Error e)
 {
-	QMap<QCA::SecureMessage::Error,QString> map;
-	map[QCA::SecureMessage::ErrorPassphrase] = Operation::tr("Invalid passphrase");
-	map[QCA::SecureMessage::ErrorFormat] = Operation::tr("Bad input format");
-	map[QCA::SecureMessage::ErrorSignerExpired] = Operation::tr("Signer key is expired");
-	map[QCA::SecureMessage::ErrorSignerInvalid] = Operation::tr("Signer key is invalid");
-	map[QCA::SecureMessage::ErrorEncryptExpired] = Operation::tr("Encrypting key is expired");
-	map[QCA::SecureMessage::ErrorEncryptUntrusted] = Operation::tr("Encrypting key is untrusted");
-	map[QCA::SecureMessage::ErrorEncryptInvalid] = Operation::tr("Encrypting key is invalid");
-	map[QCA::SecureMessage::ErrorNeedCard] = Operation::tr("Card was needed but not found");
-	map[QCA::SecureMessage::ErrorCertKeyMismatch] = Operation::tr("Certificate and private key don't match");
-	map[QCA::SecureMessage::ErrorUnknown] = Operation::tr("General error");
-	return map[e];
+	QString s;
+	switch(e)
+	{
+		case QCA::SecureMessage::ErrorPassphrase:
+			s = Operation::tr("Invalid passphrase.");
+			break;
+		case QCA::SecureMessage::ErrorFormat:
+			s = Operation::tr("Bad input format.");
+			break;
+		case QCA::SecureMessage::ErrorSignerExpired:
+			s = Operation::tr("Signer key is expired.");
+			break;
+		case QCA::SecureMessage::ErrorSignerInvalid:
+			s = Operation::tr("Signer key is invalid.");
+			break;
+		case QCA::SecureMessage::ErrorEncryptExpired:
+			s = Operation::tr("Encrypting key is expired.");
+			break;
+		case QCA::SecureMessage::ErrorEncryptUntrusted:
+			s = Operation::tr("Encrypting key is untrusted.");
+			break;
+		case QCA::SecureMessage::ErrorEncryptInvalid:
+			s = Operation::tr("Encrypting key is invalid.");
+			break;
+		case QCA::SecureMessage::ErrorNeedCard:
+			s = Operation::tr("Card was needed but not found.");
+			break;
+		case QCA::SecureMessage::ErrorCertKeyMismatch:
+			s = Operation::tr("Certificate and private key don't match.");
+			break;
+		case QCA::SecureMessage::ErrorUnknown:
+		default:
+			s = Operation::tr("General error.");
+			break;
+	}
+	return s;
+}
+
+static QString smsIdentityToString(const QCA::SecureMessageSignature &sig)
+{
+	QString s;
+	switch(sig.identityResult())
+	{
+		case QCA::SecureMessageSignature::Valid:
+			break;
+		case QCA::SecureMessageSignature::InvalidSignature:
+			s = Operation::tr("Invalid signature");
+			break;
+		case QCA::SecureMessageSignature::InvalidKey:
+			s = Operation::tr("Invalid key: %1").arg(validityToString(sig.keyValidity()));
+			break;
+		case QCA::SecureMessageSignature::NoKey:
+			s = Operation::tr("Key not found");
+			break;
+		default: // this should not really be possible
+			s = Operation::tr("Unknown");
+			break;
+	}
+	return s;
 }
 
 class SignOperation : public Operation
@@ -123,17 +170,19 @@ class SignOperation : public Operation
 	Q_OBJECT
 private:
 	QByteArray in;
-	CertItem item;
+	CertItemStore *store;
+	int id;
 	QCA::CMS *cms;
 	CertItemPrivateLoader *loader;
-	QCA::KeyBundle key;
 	QCA::SecureMessage *msg;
+	int pending;
 
 public:
-	SignOperation(const QByteArray &_in, const CertItem &_item, CertItemStore *store, int id, QCA::CMS *_cms, QObject *parent = 0) :
+	SignOperation(const QByteArray &_in, CertItemStore *_store, int _id, QCA::CMS *_cms, QObject *parent = 0) :
 		Operation(parent),
 		in(_in),
-		item(_item),
+		store(_store),
+		id(_id),
 		cms(_cms),
 		msg(0)
 	{
@@ -142,67 +191,60 @@ public:
 		loader->start(id);
 	}
 
-	~SignOperation()
-	{
-		delete loader;
-	}
-
 signals:
+	void loadError();
 	void finished(const QString &sig);
 
 private slots:
 	void loader_finished()
 	{
 		QCA::PrivateKey privateKey = loader->privateKey();
-		if(privateKey.isNull())
-		{
-			emit error(tr("Error loading key for use."));
-			return;
-		}
-
 		delete loader;
 		loader = 0;
 
-		key = QCA::KeyBundle();
-		key.setCertificateChainAndKey(item.certificateChain(), privateKey);
+		if(privateKey.isNull())
+		{
+			emit loadError();
+			return;
+		}
 
-		do_sign();
-	}
-
-	void do_sign()
-	{
-		//printf("do_sign\n");
+		CertItem item = store->itemFromId(id);
 
 		QCA::SecureMessageKey signer;
-		signer.setX509CertificateChain(key.certificateChain());
-		signer.setX509PrivateKey(key.privateKey());
+		signer.setX509CertificateChain(item.certificateChain());
+		signer.setX509PrivateKey(privateKey);
 
 		msg = new QCA::SecureMessage(cms);
+		connect(msg, SIGNAL(bytesWritten(int)), SLOT(msg_bytesWritten(int)));
 		connect(msg, SIGNAL(finished()), SLOT(msg_finished()));
 		msg->setFormat(QCA::SecureMessage::Ascii);
 		msg->setSigner(signer);
 		msg->startSign(QCA::SecureMessage::Detached);
+
+		pending = 0;
 		update();
 	}
 
 	void update()
 	{
-		//printf("update\n");
-
-		QByteArray buf = in.mid(0, 16384); // 16k chunks
+		QByteArray buf = in.mid(0, 16384 - pending); // 16k chunks
 		in = in.mid(buf.size());
+		pending += buf.size();
 		msg->update(buf);
+	}
 
-		if(in.isEmpty())
+	void msg_bytesWritten(int x)
+	{
+		pending -= x;
+
+		if(in.isEmpty() && pending == 0)
 			msg->end();
 		else
-			QMetaObject::invokeMethod(this, "update", Qt::QueuedConnection);
+			update();
 	}
 
 	void msg_finished()
 	{
-		//printf("msg_finished\n");
-
 		if(!msg->success())
 		{
 			QString str = smErrorToString(msg->errorCode());
@@ -215,7 +257,6 @@ private slots:
 		QByteArray result = msg->signature();
 		delete msg;
 		msg = 0;
-
 		emit finished(QString::fromLatin1(result));
 	}
 };
@@ -227,6 +268,7 @@ private:
 	QByteArray in, sig;
 	QCA::CMS *cms;
 	QCA::SecureMessage *msg;
+	int pending;
 
 public:
 	VerifyOperation(const QByteArray &_in, const QByteArray &_sig, QCA::CMS *_cms, QObject *parent = 0) :
@@ -236,13 +278,14 @@ public:
 		cms(_cms),
 		msg(0)
 	{
-		//printf("do_verify\n");
-
 		msg = new QCA::SecureMessage(cms);
+		connect(msg, SIGNAL(bytesWritten(int)), SLOT(msg_bytesWritten(int)));
 		connect(msg, SIGNAL(finished()), SLOT(msg_finished()));
 		msg->setFormat(QCA::SecureMessage::Ascii);
 		msg->startVerify(sig);
-		QMetaObject::invokeMethod(this, "update", Qt::QueuedConnection);
+
+		pending = 0;
+		update();
 	}
 
 signals:
@@ -251,22 +294,24 @@ signals:
 private slots:
 	void update()
 	{
-		//printf("update\n");
-
-		QByteArray buf = in.mid(0, 16384); // 16k chunks
+		QByteArray buf = in.mid(0, 16384 - pending); // 16k chunks
 		in = in.mid(buf.size());
+		pending += buf.size();
 		msg->update(buf);
+	}
 
-		if(in.isEmpty())
+	void msg_bytesWritten(int x)
+	{
+		pending -= x;
+
+		if(in.isEmpty() && pending == 0)
 			msg->end();
 		else
-			QMetaObject::invokeMethod(this, "update", Qt::QueuedConnection);
+			update();
 	}
 
 	void msg_finished()
 	{
-		//printf("msg_finished\n");
-
 		if(!msg->success())
 		{
 			QString str = smErrorToString(msg->errorCode());
@@ -277,22 +322,12 @@ private slots:
 		}
 
 		QCA::SecureMessageSignature signer = msg->signer();
-		QCA::SecureMessageSignature::IdentityResult r = signer.identityResult();
 		delete msg;
 		msg = 0;
 
-		if(r != QCA::SecureMessageSignature::Valid)
+		if(signer.identityResult() != QCA::SecureMessageSignature::Valid)
 		{
-			QString str;
-			if(r == QCA::SecureMessageSignature::InvalidSignature)
-				str = tr("Invalid signature");
-			else if(r == QCA::SecureMessageSignature::InvalidKey)
-				str = tr("Invalid key: %1").arg(validityToString(signer.keyValidity()));
-			else if(r == QCA::SecureMessageSignature::NoKey)
-				str = tr("Key not found");
-			else // unknown
-				str = tr("Unknown");
-
+			QString str = smsIdentityToString(signer);
 			emit error(tr("Verification failed!\nReason: %1").arg(str));
 			return;
 		}
@@ -301,6 +336,9 @@ private slots:
 	}
 };
 
+//----------------------------------------------------------------------------
+// MainWin
+//----------------------------------------------------------------------------
 class MainWin : public QMainWindow
 {
 	Q_OBJECT
@@ -340,9 +378,6 @@ public:
 		actionRename = new QAction(tr("Re&name"), this);
 		actionRemove = new QAction(tr("Rem&ove"), this);
 
-		// TODO
-		//actionView->setEnabled(false);
-
 		connect(ui.actionLoadIdentityFile, SIGNAL(triggered()), SLOT(load_file()));
 		connect(ui.actionLoadIdentityEntry, SIGNAL(triggered()), SLOT(load_device()));
 		connect(ui.actionLoadAuthority, SIGNAL(triggered()), SLOT(load_root()));
@@ -365,6 +400,9 @@ public:
 		connect(ui.lv_users, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(users_customContextMenuRequested(const QPoint &)));
 
 		ui.lv_authorities->setModel(roots);
+
+		ui.lv_authorities->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(ui.lv_authorities, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(roots_customContextMenuRequested(const QPoint &)));
 
 		cms = new QCA::CMS(this);
 
@@ -409,7 +447,6 @@ private slots:
 			return;
 
 		setEnabled(false);
-
 		users->addFromFile(fileName);
 	}
 
@@ -427,6 +464,11 @@ private slots:
 		w->setIcon(KeySelectDlg::IconPgpSec, g_icons->pgpsec);
 		w->show();
 	}
+
+	void load_device_finished(const QCA::KeyStoreEntry &entry)
+	{
+		users->addFromKeyStore(entry);
+        }
 
 	void load_root()
 	{
@@ -486,9 +528,13 @@ private slots:
 			at = index.row();
 		}
 
-		if(at != -1 && users->itemFromRow(at).isUsable() && !ui.pb_sign->isEnabled())
+		bool usable = false;
+		if(at != -1 && users->itemFromRow(at).isUsable())
+			usable = true;
+
+		if(usable && !ui.pb_sign->isEnabled())
 			ui.pb_sign->setEnabled(true);
-		else if(ui.pb_sign->isEnabled())
+		else if(!usable && ui.pb_sign->isEnabled())
 			ui.pb_sign->setEnabled(false);
 	}
 
@@ -502,14 +548,14 @@ private slots:
 			QModelIndex index = selection.indexes().first();
 			users_view(index.row());
 		}
-		/*else // lv_authorities
+		else // lv_authorities
 		{
-			QItemSelection selection = ui.lv_known->selectionModel()->selection();
+			QItemSelection selection = ui.lv_authorities->selectionModel()->selection();
 			if(selection.indexes().isEmpty())
 				return;
 			QModelIndex index = selection.indexes().first();
-			known_view(index.row());
-		}*/
+			roots_view(index.row());
+		}
 	}
 
 	void item_rename()
@@ -552,13 +598,9 @@ private slots:
 		}
 	}
 
-	/*void identity_view(int at)
-	{
-		printf("identity_view: %d\n", at);
-	}*/
-
 	void users_view(int at)
 	{
+		// TODO: completion
 		CertItem i = users->itemFromRow(at);
 		CertViewDlg *w = new CertViewDlg(i.certificateChain(), this);
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -579,10 +621,14 @@ private slots:
 		users->removeItem(users->idFromRow(at));
 	}
 
-	/*void known_view(int at)
+	void roots_view(int at)
 	{
-		printf("known_view: %d\n", at);
-	}*/
+		// TODO: completion
+		CertItem i = roots->itemFromRow(at);
+		CertViewDlg *w = new CertViewDlg(i.certificateChain(), this);
+		w->setAttribute(Qt::WA_DeleteOnClose, true);
+		w->show();
+	}
 
 	void roots_rename(int at)
 	{
@@ -600,7 +646,7 @@ private slots:
 
 	void keyselect_viewCertificate(const QCA::CertificateChain &chain)
 	{
-		// TODO: completion?
+		// TODO: completion
 		CertViewDlg *w = new CertViewDlg(chain, (QWidget *)sender());
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
 		w->show();
@@ -619,6 +665,19 @@ private slots:
 		menu.exec(ui.lv_users->viewport()->mapToGlobal(pos));
 	}
 
+	void roots_customContextMenuRequested(const QPoint &pos)
+	{
+		QItemSelection selection = ui.lv_authorities->selectionModel()->selection();
+		if(selection.indexes().isEmpty())
+			return;
+
+		QMenu menu(this);
+		menu.addAction(actionView);
+		menu.addAction(actionRename);
+		menu.addAction(actionRemove);
+		menu.exec(ui.lv_authorities->viewport()->mapToGlobal(pos));
+	}
+
 	void do_sign()
 	{
 		QItemSelection selection = ui.lv_users->selectionModel()->selection();
@@ -627,7 +686,8 @@ private slots:
 		QModelIndex index = selection.indexes().first();
 		int at = index.row();
 
-		op = new SignOperation(ui.te_data->toPlainText().toUtf8(), users->itemFromRow(at), users, users->idFromRow(at), cms, this);
+		op = new SignOperation(ui.te_data->toPlainText().toUtf8(), users, users->idFromRow(at), cms, this);
+		connect(op, SIGNAL(loadError()), SLOT(sign_loadError()));
 		connect(op, SIGNAL(finished(const QString &)), SLOT(sign_finished(const QString &)));
 		connect(op, SIGNAL(error(const QString &)), SLOT(op_error(const QString &)));
 	}
@@ -640,7 +700,6 @@ private slots:
 		// system store
 		col += QCA::systemStore();
 
-		// TODO
 		// additional roots configured in application
 		foreach(const CertItem &i, roots->items())
 			col.addCertificate(i.certificateChain().primary());
@@ -693,6 +752,11 @@ private slots:
 		QMessageBox::about(this, tr("About CMS Signer"), str);
 	}
 
+	void sign_loadError()
+	{
+		// do nothing, the loader already shows an error dialog on its own
+	}
+
 	void sign_finished(const QString &sig)
 	{
 		ui.te_sig->setPlainText(sig);
@@ -715,14 +779,18 @@ int main(int argc, char **argv)
 {
 	QCA::Initializer qcaInit;
 	QApplication qapp(argc, argv);
+
 	qapp.setApplicationName(MainWin::tr("CMS Signer"));
-	if(!QCA::isSupported("cms"))
+
+	if(!QCA::isSupported("cert,crl,cms"))
 	{
 		QMessageBox::critical(0, qapp.applicationName() + ": " + MainWin::tr("Error"),
 			MainWin::tr("No support for CMS is available.  Please install an appropriate QCA plugin, such as qca-ossl."));
 		return 1;
 	}
+
 	QCA::KeyStoreManager::start();
+
 	MainWin mainWin;
 	mainWin.show();
 	return qapp.exec();
