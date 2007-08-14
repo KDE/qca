@@ -1,4 +1,4 @@
-.TH QCA "1" "August 2007" "qcatool 2.0.0" "User Commands"
+.TH QCATOOL "1" "August 2007" "qcatool 1.0.0" "Qt Cryptographic Architecture (QCA)"
 
 .SH NAME
 qcatool \- command line tool for the Qt Cryptographic Architecture
@@ -47,6 +47,7 @@ this will cause qcatool to abort the command if a password/passphrase is
 required.
 .TP
 \fB\-\-ordered\fR
+If outputting certificate information fields (Distinguished Name and Subject Alternative Name), show them in same the order that they are present in the certificate rather than in a friendly sorted order.
 .TP
 \fB\-\-debug\fR
 Enable additional output to aid debugging.
@@ -59,7 +60,7 @@ Log at the specified level. The log level can be between 0 (none)
 and 8 (most).
 .TP
 \fB\-\-nobundle\fR
-Disable signing using a PKCS12 key bundle.
+When S/MIME signing, do not bundle the signer's certificate chain inside the signature.  This results in a smaller signature output, but requires the recipient to have all of the necessary certificates in order to verify it.
 
 .SH COMMANDS
 .TP
@@ -75,12 +76,10 @@ more information on plugins which are found and which ones actually
 loaded.
 .TP
 \fBconfig save \fI[provider]\fR
-Save provider configuration. If \fIprovider\fR is not specified, the
-default provider is saved.
+Save provider configuration. Use this to have the provider's default configuration written to persistent storage, which you can then edit by hand.
 .TP
 \fBconfig edit \fI[provider]\fR
-Edit provider configuration. If \fIprovider\fR is not specified, the
-default provider is edited.
+Edit provider configuration. The changes are written to persistent storage.
 .TP
 \fBkey make rsa|dsa [bits]\fR
 Create a key pair
