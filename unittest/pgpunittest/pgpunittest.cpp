@@ -84,6 +84,30 @@ private:
     QCA::EventHandler m_handler;
 };
 
+class PGPPassphraseProviderThread : public QCA::SyncThread
+{
+    Q_OBJECT
+public:
+    ~PGPPassphraseProviderThread()
+    {
+	stop();
+    }
+
+protected:
+    void atStart()
+    {
+	prov = new PGPPassphraseProvider;
+    }
+
+    void atEnd()
+    {
+	delete prov;
+    }
+
+private:
+    PGPPassphraseProvider *prov;
+};
+
 class PgpUnitTest : public QObject
 {
     Q_OBJECT
@@ -180,32 +204,15 @@ void PgpUnitTest::testKeyRing()
             setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
         }
     }
-
 }
-
-class TesterThread : public QThread
-{
-    Q_OBJECT
-protected:
-    virtual void run()
-    {
-        testClearSign();
-    }
-private:
-  void testClearSign();
-};
-
 
 void PgpUnitTest::testClearsign()
 {
-    // handler and asker cannot occur in the same thread
-    TesterThread testerThread;
-    testerThread.start();  
-}
-
-void TesterThread::testClearSign()
-{
-    PGPPassphraseProvider handler;
+    // event handling cannot be used in the same thread as synchronous calls
+    // which might require event handling.  let's put our event handler in
+    // a side thread so that we can write the unit test synchronously.
+    PGPPassphraseProviderThread thread;
+    thread.start();
 
     // activate the KeyStoreManager
     QCA::KeyStoreManager::start();
@@ -241,7 +248,7 @@ void TesterThread::testClearSign()
 	QVERIFY( myPGPKey.crl().isNull() );
 	QCOMPARE( myPGPKey.pgpSecretKey().isNull(), false );
 	QCOMPARE( myPGPKey.pgpPublicKey().isNull(), false );
-	  
+  
 	// first make the SecureMessageKey
 	QCA::SecureMessageKey key;
 	key.setPGPSecretKey( myPGPKey.pgpSecretKey() );
@@ -278,7 +285,6 @@ void TesterThread::testClearSign()
 	    qDebug() << "Failure:" <<  msg.errorCode();
 	    QFAIL("Failed to clearsign");
 	}
-
 
 	if ( false == oldGNUPGHOME.isNull() ) {
 	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
