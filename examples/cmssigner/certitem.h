@@ -100,6 +100,8 @@ public:
 	int addFromKeyStore(const QCA::KeyStoreEntry &entry);
 	int addUser(const QCA::CertificateChain &chain);
 
+	void updateChain(int id, const QCA::CertificateChain &chain);
+
 	void removeItem(int id);
 
 	void setIcon(IconType type, const QPixmap &icon);

@@ -30,7 +30,7 @@
 #include "pkcs11configdlg/pkcs11configdlg.h"
 #include "certitem.h"
 
-#define VERSION "0.0.1"
+#define VERSION "1.0.0"
 
 class Icons
 {
@@ -271,6 +271,8 @@ private:
 	int pending;
 
 public:
+	QCA::SecureMessageSignature signer;
+
 	VerifyOperation(const QByteArray &_in, const QByteArray &_sig, QCA::CMS *_cms, QObject *parent = 0) :
 		Operation(parent),
 		in(_in),
@@ -321,7 +323,7 @@ private slots:
 			return;
 		}
 
-		QCA::SecureMessageSignature signer = msg->signer();
+		signer = msg->signer();
 		delete msg;
 		msg = 0;
 
@@ -339,6 +341,19 @@ private slots:
 //----------------------------------------------------------------------------
 // MainWin
 //----------------------------------------------------------------------------
+static QString get_fingerprint(const QCA::Certificate &cert)
+{
+	QString hex = QCA::Hash("sha1").hashToString(cert.toDER());
+	QString out;
+	for(int n = 0; n < hex.count(); ++n)
+	{
+		if(n != 0 && n % 2 == 0)
+			out += ':';
+		out += hex[n];
+	}
+	return out;
+}
+
 class MainWin : public QMainWindow
 {
 	Q_OBJECT
@@ -348,11 +363,14 @@ private:
 	QCA::CMS *cms;
 	Operation *op;
 	QAction *actionView, *actionRename, *actionRemove;
+	QCA::Certificate self_signed_verify_cert;
+	int auto_import_req_id;
 
 public:
 	MainWin(QWidget *parent = 0) :
 		QMainWindow(parent),
-		op(0)
+		op(0),
+		auto_import_req_id(-1)
 	{
 		ui.setupUi(this);
 
@@ -439,6 +457,32 @@ public:
 		store->setIcon(CertItemStore::IconPgpSec, g_icons->pgpsec);
 	}
 
+	QCA::CertificateCollection allCerts()
+	{
+		QCA::CertificateCollection col;
+
+		// system store
+		col += QCA::systemStore();
+
+		// additional roots configured in application
+		foreach(const CertItem &i, roots->items())
+			col.addCertificate(i.certificateChain().primary());
+
+		// user chains
+		foreach(const CertItem &i, users->items())
+		{
+			foreach(const QCA::Certificate &cert, i.certificateChain())
+				col.addCertificate(cert);
+		}
+
+		return col;
+	}
+
+	QCA::CertificateChain complete(const QCA::CertificateChain &chain)
+	{
+		return chain.complete(allCerts().certificates());
+	}
+
 private slots:
 	void load_file()
 	{
@@ -488,10 +532,22 @@ private slots:
 
 	void users_addSuccess(int req_id, int id)
 	{
-		Q_UNUSED(req_id);
-		Q_UNUSED(id);
+		if(req_id == auto_import_req_id)
+		{
+			auto_import_req_id = -1;
 
-		ui.lv_users->selectionModel()->select(users->index(users->rowCount()-1), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
+			CertItem i = users->itemFromId(id);
+
+			QMessageBox::information(this, tr("User added"), tr(
+				"This signature was made by a previously unknown user, and so the "
+				"user has now been added to the keyring as \"%1\"."
+				).arg(i.name()));
+
+			verify_next();
+			return;
+		}
+
+		ui.lv_users->selectionModel()->select(users->index(users->rowFromId(id)), QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current);
 
 		setEnabled(true);
 	}
@@ -600,9 +656,8 @@ private slots:
 
 	void users_view(int at)
 	{
-		// TODO: completion
 		CertItem i = users->itemFromRow(at);
-		CertViewDlg *w = new CertViewDlg(i.certificateChain(), this);
+		CertViewDlg *w = new CertViewDlg(complete(i.certificateChain()), this);
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
 		w->show();
 	}
@@ -623,9 +678,8 @@ private slots:
 
 	void roots_view(int at)
 	{
-		// TODO: completion
 		CertItem i = roots->itemFromRow(at);
-		CertViewDlg *w = new CertViewDlg(i.certificateChain(), this);
+		CertViewDlg *w = new CertViewDlg(complete(i.certificateChain()), this);
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
 		w->show();
 	}
@@ -646,8 +700,7 @@ private slots:
 
 	void keyselect_viewCertificate(const QCA::CertificateChain &chain)
 	{
-		// TODO: completion
-		CertViewDlg *w = new CertViewDlg(chain, (QWidget *)sender());
+		CertViewDlg *w = new CertViewDlg(complete(chain), (QWidget *)sender());
 		w->setAttribute(Qt::WA_DeleteOnClose, true);
 		w->show();
 	}
@@ -686,10 +739,12 @@ private slots:
 		QModelIndex index = selection.indexes().first();
 		int at = index.row();
 
+		setEnabled(false);
+
 		op = new SignOperation(ui.te_data->toPlainText().toUtf8(), users, users->idFromRow(at), cms, this);
 		connect(op, SIGNAL(loadError()), SLOT(sign_loadError()));
 		connect(op, SIGNAL(finished(const QString &)), SLOT(sign_finished(const QString &)));
-		connect(op, SIGNAL(error(const QString &)), SLOT(op_error(const QString &)));
+		connect(op, SIGNAL(error(const QString &)), SLOT(sign_error(const QString &)));
 	}
 
 	void do_verify()
@@ -714,11 +769,20 @@ private slots:
 				col.addCertificate(cert);
 		}
 
+		// the self signed verify cert, if applicable
+		if(!self_signed_verify_cert.isNull())
+		{
+			col.addCertificate(self_signed_verify_cert);
+			self_signed_verify_cert = QCA::Certificate();
+		}
+
 		cms->setTrustedCertificates(col);
+
+		setEnabled(false);
 
 		op = new VerifyOperation(ui.te_data->toPlainText().toUtf8(), ui.te_sig->toPlainText().toUtf8(), cms, this);
 		connect(op, SIGNAL(finished()), SLOT(verify_finished()));
-		connect(op, SIGNAL(error(const QString &)), SLOT(op_error(const QString &)));
+		connect(op, SIGNAL(error(const QString &)), SLOT(verify_error(const QString &)));
 	}
 
 	void about()
@@ -754,24 +818,116 @@ private slots:
 
 	void sign_loadError()
 	{
-		// do nothing, the loader already shows an error dialog on its own
+		delete op;
+		op = 0;
+
+		setEnabled(true);
 	}
 
 	void sign_finished(const QString &sig)
 	{
+		delete op;
+		op = 0;
+
 		ui.te_sig->setPlainText(sig);
+
+		setEnabled(true);
+	}
+
+	void sign_error(const QString &msg)
+	{
+		delete op;
+		op = 0;
+
+		setEnabled(true);
+
+		QMessageBox::information(this, tr("Error"), msg);
 	}
 
 	void verify_finished()
 	{
+		QCA::SecureMessageSignature signer = ((VerifyOperation *)op)->signer;
+		delete op;
+		op = 0;
+
+		// import the cert?
+		QCA::SecureMessageKey skey = signer.key();
+		if(!skey.isNull())
+		{
+			QCA::CertificateChain chain = skey.x509CertificateChain();
+
+			int at = -1;
+			QList<CertItem> items = users->items();
+			for(int n = 0; n < items.count(); ++n)
+			{
+				const CertItem &i = items[n];
+				if(i.certificateChain().primary() == chain.primary())
+				{
+					at = n;
+					break;
+				}
+			}
+
+			// add
+			if(at == -1)
+			{
+				auto_import_req_id = users->addUser(chain);
+				return;
+			}
+			// update
+			else
+			{
+				users->updateChain(users->idFromRow(at), chain);
+			}
+		}
+
+		verify_next();
+	}
+
+	void verify_next()
+	{
+		setEnabled(true);
+
 		QMessageBox::information(this, tr("Verify"), tr("Signature verified successfully."));
 	}
 
-	void op_error(const QString &msg)
+	void verify_error(const QString &msg)
 	{
-		QMessageBox::information(this, tr("Error"), msg);
+		QCA::SecureMessageSignature signer = ((VerifyOperation *)op)->signer;
 		delete op;
 		op = 0;
+
+		QCA::SecureMessageKey skey = signer.key();
+		if(signer.keyValidity() == QCA::ErrorSelfSigned && !skey.isNull())
+		{
+			QCA::CertificateChain chain = skey.x509CertificateChain();
+			if(chain.count() == 1 && chain.primary().isSelfSigned())
+			{
+				QCA::Certificate cert = chain.primary();
+
+				int ret = QMessageBox::warning(this, tr("Self-signed certificate"), tr(
+					"<qt>The signature is made by an unknown user, and the certificate is self-signed.<br>\n"
+					"<br>\n"
+					"<nobr>Common Name: %1</nobr><br>\n"
+					"<nobr>SHA1 Fingerprint: %2</nobr><br>\n"
+					"<br>\n"
+					"Trust the certificate?</qt>"
+					).arg(cert.commonName(), get_fingerprint(cert)),
+					QMessageBox::Yes | QMessageBox::No,
+					QMessageBox::No);
+
+				if(ret == QMessageBox::Yes)
+				{
+					self_signed_verify_cert = cert;
+					do_verify();
+					return;
+				}
+			}
+		}
+
+		setEnabled(true);
+
+		QMessageBox::information(this, tr("Error"), msg);
 	}
 };
 

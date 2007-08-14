@@ -16,10 +16,3 @@ report all 3 kinds of diagnostic text somewhere
   plugin: plugin dialog invoked from file menu ?  also show provider versions
   keystore: invoked from keyselectdlg ?
   secmessage: "details" button on error dialog?
-
-further cleanup
-when verifying a signature:
-  if the key is valid, import it and ask the user for a friendly name and
-    import into keyring
-  if the key is self-signed, ask the user to verify the fingerprint. if
-    validated, ask user for friendly name and import into keyring

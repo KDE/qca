@@ -546,6 +546,10 @@ int CertItemStore::addUser(const QCA::CertificateChain &chain)
 	return req_id;
 }
 
+void CertItemStore::updateChain(int id, const QCA::CertificateChain &chain)
+{
+}
+
 void CertItemStore::removeItem(int id)
 {
 	int at = rowFromId(id);
@@ -581,7 +585,7 @@ QVariant CertItemStore::data(const QModelIndex &index, int role) const
 	if(role == Qt::DisplayRole)
 	{
 		QString str = list[at].name();
-		if(!list[at].isUsable())
+		if(list[at].havePrivate() && !list[at].isUsable())
 			str += QString(" ") + tr("(not usable)");
 		return str;
 	}
