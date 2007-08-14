@@ -91,6 +91,10 @@ unix: {
 	incfiles.files = $$PUBLIC_HEADERS
 	incfiles.files += $$QCA_INC/qca.h $$QCA_INC/QtCrypto
 	INSTALLS += incfiles
+
+	manfiles.path = $$DATADIR/man/man1
+	manfiles.files = $$QCA_BASE/man/qcatool2.1
+	INSTALLS += manfiles
 }
 
 !debug_and_release|build_pass {
