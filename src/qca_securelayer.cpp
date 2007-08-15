@@ -594,7 +594,9 @@ private slots:
 			QByteArray b = c->to_app();
 			//printf("to_app: %d (%s)\n", b.size(), b.data());
 			bool eof = c->eof();
-			int enc = c->encoded();
+			int enc = 0;
+			if(!a.isEmpty())
+				enc = c->encoded();
 
 			bool more = false;
 			if(mode == TLS::Stream)
@@ -1451,7 +1453,9 @@ private slots:
 
 			QByteArray a = c->to_net();
 			QByteArray b = c->to_app();
-			int enc = c->encoded();
+			int enc = 0;
+			if(!a.isEmpty())
+				enc = c->encoded();
 
 			to_net += a;
 			in += b;
