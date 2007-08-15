@@ -47,6 +47,9 @@
 # include <errno.h>
 # include <sys/ioctl.h>
 # include <signal.h>
+# ifdef HAVE_SYS_FILIO_H
+#  include <sys/filio.h>
+# endif
 #endif
 
 #define USE_POLL
