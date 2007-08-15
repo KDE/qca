@@ -374,6 +374,9 @@ protected:
 
 }
 
+extern "C"
+{
+
 static void * qca_func_malloc(size_t n)
 {
     return qca_secure_alloc(n);
@@ -398,6 +401,7 @@ int qca_func_secure_check (const void *)
 {
     return (int)QCA::haveSecureMemory();
 }
+} // extern "C"
 
 class gcryptProvider : public QCA::Provider
 {
