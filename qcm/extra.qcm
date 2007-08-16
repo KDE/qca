@@ -30,6 +30,27 @@ public:
 		QString str;
 		QFile f;
 
+		// HAVE_SYS_FILIO_H
+		if(conf->findHeader("sys/filio.h", QStringList(), &str))
+		{
+			if(!str.isEmpty())
+				conf->addIncludePath(str);
+			conf->addDefine("HAVE_SYS_FILIO_H");
+		}
+
+		// MLOCK_NOT_VOID_PTR
+		str =
+		"# include <stdlib.h>\n"
+		"# include <sys/mman.h>\n"
+		"int main() { void *f = 0; return mlock(f,8); }\n";
+		if(!conf->doCompileAndLink(str, QStringList(), QString(), QString()))
+		{
+			conf->debug("mlock(2) does not take a void *");
+			conf->addDefine("MLOCK_NOT_VOID_PTR");
+		}
+
+		str = QString();
+
 		if(conf->getenv("QC_DISABLE_TESTS") == "Y")
 			str += "QCA_NO_TESTS = 1\n";
 
