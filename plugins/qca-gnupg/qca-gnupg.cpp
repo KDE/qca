@@ -699,6 +699,7 @@ public:
 	SecureMessageSignature signer;
 	GpgOp gpg;
 	bool _finished;
+	QString dtext;
 
 	PasswordAsker asker;
 	TokenAsker tokenAsker;
@@ -847,6 +848,8 @@ public:
 	void complete()
 	{
 		_finished = true;
+
+		dtext = gpg.readDiagnosticText();
 
 		ok = gpg.success();
 		if(ok)
@@ -1016,6 +1019,11 @@ public:
 		if(ok && wasSigned)
 			list += signer;
 		return list;
+	}
+
+	virtual QString diagnosticText() const
+	{
+		return dtext;
 	}
 
 private slots:
