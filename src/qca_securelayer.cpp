@@ -513,24 +513,21 @@ public:
 			else
 			{
 				// note: there may not be a packet
-				arg_from_net = packet_from_net.takeFirst();
+				if(!packet_from_net.isEmpty())
+					arg_from_net = packet_from_net.takeFirst();
 			}
 		}
 		else
 		{
 			if(mode == TLS::Stream)
 			{
-				// FIXME: qca-ossl can't handle an update
-				//   containing both from_net and from_app
-				//   simultaneously.  As a work around, we'll
-				//   do them separately.
-
 				if(!from_net.isEmpty())
 				{
 					arg_from_net = from_net;
 					from_net.clear();
 				}
-				else
+
+				if(!out.isEmpty())
 				{
 					out_pending += out.size();
 					arg_from_app = out;
@@ -539,7 +536,9 @@ public:
 			}
 			else
 			{
-				arg_from_net = packet_from_net.takeFirst();
+				if(!packet_from_net.isEmpty())
+					arg_from_net = packet_from_net.takeFirst();
+
 				if(!packet_out.isEmpty())
 				{
 					arg_from_app = packet_out.takeFirst();
@@ -1055,7 +1054,12 @@ QByteArray TLS::read()
 		return a;
 	}
 	else
-		return d->packet_in.takeFirst();
+	{
+		if(!d->packet_in.isEmpty())
+			return d->packet_in.takeFirst();
+		else
+			return QByteArray();
+	}
 }
 
 void TLS::writeIncoming(const QByteArray &a)
@@ -1081,11 +1085,20 @@ QByteArray TLS::readOutgoing(int *plainBytes)
 	}
 	else
 	{
-		QByteArray a = d->packet_to_net.takeFirst();
-		int x = d->packet_to_net_encoded.takeFirst();
-		if(plainBytes)
-			*plainBytes = x;
-		return a;
+		if(!d->packet_to_net.isEmpty())
+		{
+			QByteArray a = d->packet_to_net.takeFirst();
+			int x = d->packet_to_net_encoded.takeFirst();
+			if(plainBytes)
+				*plainBytes = x;
+			return a;
+		}
+		else
+		{
+			if(plainBytes)
+				*plainBytes = 0;
+			return QByteArray();
+		}
 	}
 }
 
