@@ -1822,6 +1822,19 @@ static QVariantMap provider_config_edit(const QVariantMap &in)
 	return provider_config_edit_generic(in);
 }
 
+static QString get_fingerprint(const QCA::Certificate &cert, const QString &hashType)
+{
+	QString hex = QCA::Hash(hashType).hashToString(cert.toDER());
+	QString out;
+	for(int n = 0; n < hex.count(); ++n)
+	{
+		if(n != 0 && n % 2 == 0)
+			out += ':';
+		out += hex[n];
+	}
+	return out;
+}
+
 static QString kstype_to_string(QCA::KeyStore::Type _type)
 {
 	QString type;
@@ -1991,6 +2004,9 @@ static void print_cert(const QCA::Certificate &cert, bool ordered = false)
 
 	QCA::PublicKey key = cert.subjectPublicKey();
 	printf("Public Key:\n%s", key.toPEM().toLatin1().data());
+
+	printf("SHA1 Fingerprint: %s\n", qPrintable(get_fingerprint(cert, "sha1")));
+	printf("MD5 Fingerprint: %s\n", qPrintable(get_fingerprint(cert, "md5")));
 }
 
 static void print_certreq(const QCA::CertificateRequest &cert, bool ordered = false)
