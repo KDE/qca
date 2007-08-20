@@ -425,6 +425,15 @@ public:
 		else if(a.type == Action::Handshaken)
 		{
 			state = Connected;
+
+			// write any app data waiting during handshake
+			if(!out.isEmpty())
+			{
+				need_update = true;
+				if(!actionTrigger.isActive())
+					actionTrigger.start();
+			}
+
 			if(connect_handshaken)
 			{
 				blocked = true;
@@ -1245,9 +1254,6 @@ class SASL::Private : public QObject
 {
 	Q_OBJECT
 public:
-	SASL *q;
-	SASLContext *c;
-
 	enum
 	{
 		OpStart,
@@ -1257,42 +1263,77 @@ public:
 		OpUpdate
 	};
 
+	class Action
+	{
+	public:
+		enum Type
+		{
+			NextStep,
+			Authenticated,
+			ReadyRead,
+			ReadyReadOutgoing
+		};
+
+		int type;
+		QByteArray stepData;
+
+		Action(int _type) : type(_type)
+		{
+		}
+
+		Action(int _type, const QByteArray &_stepData) : type(_type), stepData(_stepData)
+		{
+		}
+	};
+
+	SASL *q;
+	SASLContext *c;
+
+	// persistent settings (survives ResetSessionAndData)
 	AuthFlags auth_flags;
 	int ssfmin, ssfmax;
 	QString ext_authid;
 	int ext_ssf;
 	bool localSet, remoteSet;
 	SASLContext::HostPort local, remote;
-
 	bool set_username, set_authzid, set_password, set_realm;
 	QString username, authzid, realm;
 	SecureArray password;
 
+	// session
 	bool server;
 	QStringList mechlist;
 	QString server_realm;
 	bool allowClientSendFirst;
 	bool disableServerSendLast;
-
+	QTimer actionTrigger;
 	int op;
+	QList<Action> actionQueue;
+	bool need_update;
 	bool first;
 	bool authed;
+
+	// data (survives ResetSession)
+	QString mech; // selected mech
 	Error errorCode;
-	QByteArray out;
-	QByteArray in;
-	QByteArray to_net;
-	QByteArray from_net;
-	int bytesEncoded;
-	int pending_write;
+
+	// stream i/o
+	QByteArray in, out;
+	QByteArray to_net, from_net;
+	int out_pending;
+	int to_net_encoded;
 	LayerTracker layer;
 
-	Private(SASL *_q) : QObject(_q), q(_q)
+	Private(SASL *_q) : QObject(_q), q(_q), actionTrigger(this)
 	{
 		c = 0;
 		set_username = false;
 		set_authzid = false;
 		set_password = false;
 		set_realm = false;
+
+		connect(&actionTrigger, SIGNAL(timeout()), SLOT(doNextAction()));
+		actionTrigger.setSingleShot(true);
 
 		reset(ResetAll);
 
@@ -1313,41 +1354,33 @@ public:
 	void reset(ResetMode mode)
 	{
 		if(c)
-		{
 			c->reset();
 
-			if(mode < ResetAll)
-			{
-				QString *p_username = 0;
-				QString *p_authzid = 0;
-				SecureArray *p_password = 0;
-				QString *p_realm = 0;
-
-				if(set_username)
-					p_username = &username;
-				if(set_authzid)
-					p_authzid = &authzid;
-				if(set_password)
-					p_password = &password;
-				if(set_realm)
-					p_realm = &realm;
-
-				c->setClientParams(p_username, p_authzid, p_password, p_realm);
-			}
-		}
-
+		server = false;
+		mechlist.clear();
+		server_realm = QString();
+		allowClientSendFirst = false;
+		disableServerSendLast = true;
+		actionTrigger.stop();
 		op = -1;
+		actionQueue.clear();
+		need_update = false;
+		first = false;
 		authed = false;
+
 		out.clear();
-		from_net.clear();
-		bytesEncoded = 0;
-		pending_write = 0;
-		layer.reset();
+		out_pending = 0;
 
 		if(mode >= ResetSessionAndData)
 		{
+			mech = QString();
+			errorCode = (SASL::Error)-1;
+
 			in.clear();
 			to_net.clear();
+			from_net.clear();
+			to_net_encoded = 0;
+			layer.reset();
 		}
 
 		if(mode >= ResetAll)
@@ -1377,6 +1410,22 @@ public:
 	{
 		c->setup(service, host, localSet ? &local : 0, remoteSet ? &remote : 0, ext_authid, ext_ssf);
 		c->setConstraints(auth_flags, ssfmin, ssfmax);
+
+		QString *p_username = 0;
+		QString *p_authzid = 0;
+		SecureArray *p_password = 0;
+		QString *p_realm = 0;
+
+		if(set_username)
+			p_username = &username;
+		if(set_authzid)
+			p_authzid = &authzid;
+		if(set_password)
+			p_password = &password;
+		if(set_realm)
+			p_realm = &realm;
+
+		c->setClientParams(p_username, p_authzid, p_password, p_realm);
 	}
 
 	void start()
@@ -1385,9 +1434,15 @@ public:
 		first = true;
 
 		if(server)
+		{
+			QCA_logTextMessage(QString("sasl[%1]: c->startServer()").arg(q->objectName()), Logger::Information);
 			c->startServer(server_realm, disableServerSendLast);
+		}
 		else
+		{
+			QCA_logTextMessage(QString("sasl[%1]: c->startClient()").arg(q->objectName()), Logger::Information);
 			c->startClient(mechlist, allowClientSendFirst);
+		}
 	}
 
 	void putServerFirstStep(const QString &mech, const QByteArray *clientInit)
@@ -1395,8 +1450,8 @@ public:
 		if(op != -1)
 			return;
 
+		QCA_logTextMessage(QString("sasl[%1]: c->serverFirstStep()").arg(q->objectName()), Logger::Information);
 		op = OpServerFirstStep;
-
 		c->serverFirstStep(mech, clientInit);
 	}
 
@@ -1405,8 +1460,8 @@ public:
 		if(op != -1)
 			return;
 
+		QCA_logTextMessage(QString("sasl[%1]: c->nextStep()").arg(q->objectName()), Logger::Information);
 		op = OpNextStep;
-
 		c->nextStep(stepData);
 	}
 
@@ -1415,19 +1470,77 @@ public:
 		if(op != -1)
 			return;
 
+		QCA_logTextMessage(QString("sasl[%1]: c->tryAgain()").arg(q->objectName()), Logger::Information);
 		op = OpTryAgain;
-
 		c->tryAgain();
+	}
+
+	void processNextAction()
+	{
+		if(actionQueue.isEmpty())
+		{
+			if(need_update)
+				update();
+			return;
+		}
+
+		Action a = actionQueue.takeFirst();
+
+		// set up for the next one, if necessary
+		if(!actionQueue.isEmpty() || need_update)
+		{
+			if(!actionTrigger.isActive())
+				actionTrigger.start();
+		}
+
+		if(a.type == Action::NextStep)
+		{
+			emit q->nextStep(a.stepData);
+		}
+		else if(a.type == Action::Authenticated)
+		{
+			authed = true;
+			if(!out.isEmpty())
+			{
+				need_update = true;
+				if(!actionTrigger.isActive())
+					actionTrigger.start();
+			}
+			emit q->authenticated();
+		}
+		else if(a.type == Action::ReadyRead)
+		{
+			emit q->readyRead();
+		}
+		else if(a.type == Action::ReadyReadOutgoing)
+		{
+			emit q->readyReadOutgoing();
+		}
 	}
 
 	void update()
 	{
-		if(op != -1)
+		// defer writes while authenticating
+		if(!authed)
 			return;
 
-		op = OpUpdate;
+		if(!actionQueue.isEmpty())
+		{
+			QCA_logTextMessage(QString("sasl[%1]: ignoring update while processing actions").arg(q->objectName()), Logger::Information);
+			need_update = true;
+			return;
+		}
 
-		pending_write += out.size();
+		// only allow one operation at a time
+		if(op != -1)
+		{
+			QCA_logTextMessage(QString("sasl[%1]: ignoring update while operation active").arg(q->objectName()), Logger::Information);
+			return;
+		}
+
+		QCA_logTextMessage(QString("sasl[%1]: c->update()").arg(q->objectName()), Logger::Information);
+		op = OpUpdate;
+		out_pending += out.size();
 		c->update(from_net, out);
 		from_net.clear();
 		out.clear();
@@ -1436,8 +1549,6 @@ public:
 private slots:
 	void sasl_resultsReady()
 	{
-		QPointer<QObject> self = this;
-
 		int last_op = op;
 		op = -1;
 
@@ -1445,6 +1556,8 @@ private slots:
 
 		if(last_op == OpStart)
 		{
+			mech = c->mech();
+
 			if(server)
 			{
 				if(r != SASLContext::Success)
@@ -1491,13 +1604,11 @@ private slots:
 				else if(r == SASLContext::Success)
 				{
 					if(!disableServerSendLast)
-					{
-						// FIXME: not signal safe
-						emit q->nextStep(c->stepData());
-					}
+						actionQueue += Action(Action::NextStep, c->stepData());
 
-					authed = true;
-					emit q->authenticated();
+					actionQueue += Action(Action::Authenticated);
+
+					processNextAction();
 					return;
 				}
 				else // error
@@ -1552,11 +1663,10 @@ private slots:
 					}
 					else if(r == SASLContext::Success)
 					{
-						// FIXME: not signal safe
-						emit q->nextStep(c->stepData());
+						actionQueue += Action(Action::NextStep, c->stepData());
+						actionQueue += Action(Action::Authenticated);
 
-						authed = true;
-						emit q->authenticated();
+						processNextAction();
 						return;
 					}
 				}
@@ -1571,38 +1681,43 @@ private slots:
 				return;
 			}
 
-			QByteArray a = c->to_net();
-			QByteArray b = c->to_app();
-			int enc = 0;
-			if(!a.isEmpty())
+			QByteArray c_to_net = c->to_net();
+			QByteArray c_to_app = c->to_app();
+			int enc = -1;
+			if(!c_to_net.isEmpty())
 				enc = c->encoded();
 
-			to_net += a;
-			in += b;
+			bool io_pending = false;
+			if(!c_to_net.isEmpty())
+				out_pending -= enc;
 
-			bool more = false;
-			pending_write -= enc;
-			if(pending_write > 0)
-				more = true;
-			bytesEncoded += enc;
+			if(out_pending > 0)
+				io_pending = true;
 
-			if(!a.isEmpty())
-			{
-				emit q->readyReadOutgoing();
-				if(!self)
-					return;
-			}
+			if(!out.isEmpty())
+				io_pending = true;
 
-			if(!b.isEmpty())
-			{
-				emit q->readyRead();
-				if(!self)
-					return;
-			}
+			to_net += c_to_net;
+			in += c_to_app;
+			to_net_encoded += enc;
 
-			if(more)
+			if(!c_to_net.isEmpty())
+				actionQueue += Action(Action::ReadyReadOutgoing);
+
+			if(!c_to_app.isEmpty())
+				actionQueue += Action(Action::ReadyRead);
+
+			if(io_pending)
 				update();
+
+			processNextAction();
+			return;
 		}
+	}
+
+	void doNextAction()
+	{
+		processNextAction();
 	}
 };
 
@@ -1635,15 +1750,15 @@ SASL::AuthCondition SASL::authCondition() const
 void SASL::setConstraints(AuthFlags f, SecurityLevel s)
 {
 	int min = 0;
-	if (s == SL_Integrity)
+	if(s == SL_Integrity)
 		min = 1;
-	else if (s == SL_Export)
+	else if(s == SL_Export)
 		min = 56;
-	else if (s == SL_Baseline)
+	else if(s == SL_Baseline)
 		min = 128;
-	else if (s == SL_High)
+	else if(s == SL_High)
 		min = 192;
-	else if (s == SL_Highest)
+	else if(s == SL_Highest)
 		min = 256;
 
 	setConstraints(f, min, 256);
@@ -1756,7 +1871,7 @@ void SASL::continueAfterAuthCheck()
 
 QString SASL::mechanism() const
 {
-	return d->c->mech();
+	return d->mech;
 }
 
 QStringList SASL::mechanismList() const
@@ -1809,9 +1924,9 @@ QByteArray SASL::readOutgoing(int *plainBytes)
 	QByteArray a = d->to_net;
 	d->to_net.clear();
 	if(plainBytes)
-		*plainBytes = d->bytesEncoded;
-	d->layer.specifyEncoded(a.size(), d->bytesEncoded);
-	d->bytesEncoded = 0;
+		*plainBytes = d->to_net_encoded;
+	d->layer.specifyEncoded(a.size(), d->to_net_encoded);
+	d->to_net_encoded = 0;
 	return a;
 }
 
