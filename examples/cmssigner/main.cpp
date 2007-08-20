@@ -24,7 +24,6 @@
 #include <QtCrypto>
 
 #include "ui_mainwin.h"
-#include "prompter.h"
 #include "certviewdlg.h"
 #include "keyselectdlg.h"
 #include "pkcs11configdlg/pkcs11configdlg.h"

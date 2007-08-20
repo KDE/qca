@@ -268,6 +268,9 @@ bool CertItem::isUsable() const
 //----------------------------------------------------------------------------
 // CertItemStore
 //----------------------------------------------------------------------------
+static MyPrompter *g_prompter = 0;
+static int g_prompter_refs = 0;
+
 class CertItemStorePrivate : public QObject
 {
 	Q_OBJECT
@@ -296,13 +299,28 @@ public:
 		next_id(0),
 		next_req_id(0)
 	{
-		prompter = new MyPrompter(this);
+		if(!g_prompter)
+		{
+			g_prompter = new MyPrompter;
+			g_prompter_refs = 1;
+		}
+		else
+			++g_prompter_refs;
+
+		prompter = g_prompter;
 	}
 
 	~CertItemStorePrivate()
 	{
 		foreach(const LoaderItem &i, loaders)
 			delete i.keyLoader;
+
+		--g_prompter_refs;
+		if(g_prompter_refs == 0)
+		{
+			delete g_prompter;
+			g_prompter = 0;
+		}
 	}
 
 	QString getUniqueName(const QString &name)
@@ -548,6 +566,8 @@ int CertItemStore::addUser(const QCA::CertificateChain &chain)
 
 void CertItemStore::updateChain(int id, const QCA::CertificateChain &chain)
 {
+	int at = rowFromId(id);
+	d->list[at].d->chain = chain;
 }
 
 void CertItemStore::removeItem(int id)
