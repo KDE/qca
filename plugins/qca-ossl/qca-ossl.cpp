@@ -5050,7 +5050,7 @@ public:
 			bool ok;
 			if(!from_app.isEmpty())
 				ok = priv_encode(from_app, &result_to_net, &result_encoded);
-			else
+			if(ok)
 				ok = priv_decode(from_net, &result_plain, &result_to_net);
 			result_result = ok ? Success : Error;
 		}
