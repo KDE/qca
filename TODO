@@ -3,9 +3,7 @@
     Change Doxyfile config to capture whole API, and to generate Latex manual
   code:
     securelayer: cleanup
-    add more asserts/logging to qca lib
   other:
-    finish cmssigner, set to 1.0
     update the rootcerts with mozcerts
     make sure the version is correct in all locations (README, etc)
 
