@@ -6193,14 +6193,21 @@ public:
 		// TODO/FIXME !!! InvalidSignature might be used here even
 		//   if the signature is just fine, and the key is invalid
 		//   (we need to use InvalidKey instead).
-		QCA::Validity verror = ErrorValidityUnknown;
-		if(signerChain.count() == 1 && signerChain.primary().isSelfSigned())
-			verror = ErrorSelfSigned;
-		SecureMessageSignature s(
-			ver_ret ? SecureMessageSignature::Valid : SecureMessageSignature::InvalidSignature,
-			ver_ret ? ValidityGood : verror,
-			key,
-			QDateTime::currentDateTime());
+
+		Validity vr = ErrorValidityUnknown;
+		if(!signerChain.isEmpty())
+			vr = signerChain.validate(cms->trustedCerts, cms->untrustedCerts.crls());
+
+		SecureMessageSignature::IdentityResult ir;
+		if(vr == ValidityGood)
+			ir = SecureMessageSignature::Valid;
+		else
+			ir = SecureMessageSignature::InvalidKey;
+
+		if(!ver_ret)
+			ir = SecureMessageSignature::InvalidSignature;
+
+		SecureMessageSignature s(ir, vr, key, QDateTime::currentDateTime());
 
 		// TODO
 		return SecureMessageSignatureList() << s;
