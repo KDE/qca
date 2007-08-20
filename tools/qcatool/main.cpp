@@ -805,6 +805,21 @@ static QString read_ksentry_file(const QString &fileName)
 	return out;
 }
 
+static bool is_pem_file(const QString &fileName)
+{
+	QFile f(fileName);
+	if(!f.open(QFile::ReadOnly))
+		return false;
+	QTextStream ts(&f);
+	if(!ts.atEnd())
+	{
+		QString line = ts.readLine();
+		if(line.startsWith("-----BEGIN"))
+			return true;
+	}
+	return false;
+}
+
 static QByteArray read_der_file(const QString &fileName)
 {
 	QFile f(fileName);
@@ -2508,16 +2523,14 @@ static QCA::PrivateKey get_K(const QString &name)
 		return key;
 	}
 
-	QCA::ConvertResult result;
-	key = QCA::PrivateKey::fromPEMFile(name, QCA::SecureArray(), &result);
-	if(result == QCA::ErrorDecode)
-	{
+	if(is_pem_file(name))
+		key = QCA::PrivateKey::fromPEMFile(name);
+	else
 		key = QCA::PrivateKey::fromDER(read_der_file(name));
-		if(key.isNull())
-		{
-			fprintf(stderr, "Error: unable to read/process private key file.\n");
-			return key;
-		}
+	if(key.isNull())
+	{
+		fprintf(stderr, "Error: unable to read/process private key file.\n");
+		return key;
 	}
 
 	return key;
@@ -2543,15 +2556,15 @@ static QCA::Certificate get_C(const QString &name)
 	}
 
 	// try file
-	QCA::Certificate cert = QCA::Certificate::fromPEMFile(name);
+	QCA::Certificate cert;
+	if(is_pem_file(name))
+		cert = QCA::Certificate::fromPEMFile(name);
+	else
+		cert = QCA::Certificate::fromDER(read_der_file(name));
 	if(cert.isNull())
 	{
-		cert = QCA::Certificate::fromDER(read_der_file(name));
-		if(cert.isNull())
-		{
-			fprintf(stderr, "Error: unable to read/process certificate file.\n");
-			return cert;
-		}
+		fprintf(stderr, "Error: unable to read/process certificate file.\n");
+		return cert;
 	}
 
 	return cert;
@@ -3676,15 +3689,15 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			QCA::CRL crl = QCA::CRL::fromPEMFile(args[2]);
+			QCA::CRL crl;
+			if(is_pem_file(args[2]))
+				crl = QCA::CRL::fromPEMFile(args[2]);
+			else
+				crl = QCA::CRL::fromDER(read_der_file(args[2]));
 			if(crl.isNull())
 			{
-				crl = QCA::CRL::fromDER(read_der_file(args[2]));
-				if(crl.isNull())
-				{
-					fprintf(stderr, "Error: unable to read/process CRL file.\n");
-					return 1;
-				}
+				fprintf(stderr, "Error: unable to read/process CRL file.\n");
+				return 1;
 			}
 
 			print_crl(crl, ordered);
