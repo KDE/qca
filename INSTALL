@@ -8,6 +8,7 @@ For Unix/Linux/Mac:
   ./configure
   make
   make install
+  /sbin/ldconfig, if necessary
 
 For Windows:
 
