@@ -1,12 +1,12 @@
 Qt Cryptographic Architecture (QCA) version 2.0.0
 -------------------------------------------------
-Date: August 7th, 2007
+Date: August 19th, 2007
 Website: http://delta.affinix.com/qca/
 Mailing List: Delta Project <delta@lists.affinix.com>
 
 Project Lead/Maintainer (2003-current):
   Justin Karneges <justin@affinix.com>
-  (March 2007 - July 2007 under Barracuda Networks employment)
+  (March 2007 - August 2007 under Barracuda Networks employment)
 
 Development, Documentation, Unittests (2004-current):
   Brad Hards <bradh@frogmouth.net>
