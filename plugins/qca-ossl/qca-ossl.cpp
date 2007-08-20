@@ -5047,7 +5047,7 @@ public:
 	{
 		if(mode == Active)
 		{
-			bool ok;
+			bool ok = true;
 			if(!from_app.isEmpty())
 				ok = priv_encode(from_app, &result_to_net, &result_encoded);
 			if(ok)
@@ -5214,7 +5214,7 @@ public:
 			}
 		}
 
-		*to_net = readOutgoing();
+		*to_net += readOutgoing();
 		*enc = encoded;
 		return true;
 	}
@@ -5256,7 +5256,7 @@ public:
 		recvQueue.resize(0);
 
 		// could be outgoing data also
-		*to_net = readOutgoing();
+		*to_net += readOutgoing();
 		return true;
 	}
 
