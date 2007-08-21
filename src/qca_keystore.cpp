@@ -28,6 +28,7 @@
 #include <QWaitCondition>
 
 #include <stdlib.h> // abort
+#include <stdio.h>  // fprintf
 
 #include "qcaprovider.h"
 

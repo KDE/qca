@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     // supportedIOTypes, not just supportedTypes
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
-	printf("RSA not supported!\n");
+	std::cout << "RSA not supported!\n";
     else {
 	// When creating a public / private key pair, you make the
 	// private key, and then extract the public key component from it
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 	// we read in. The algorithm is the same.
 	QCA::SecureArray decrypt;
 	if(0 == privateKey.decrypt(result, &decrypt, QCA::EME_PKCS1_OAEP)) {
-	    printf("Error decrypting.\n");
+	    std::cout << "Error decrypting.\n";
 	    return 1;
 	}
 

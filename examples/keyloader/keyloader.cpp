@@ -25,6 +25,8 @@
 #include <QCoreApplication>
 #include <QTimer>
 
+#include <stdio.h>
+
 class PassphraseHandler: public QObject
 {
 	Q_OBJECT
