@@ -1,13 +1,13 @@
-project(qcatool)
+project(qcatool2)
 
-set(qcatool_moc_SRCS main.cpp)
+set(qcatool2_moc_SRCS main.cpp)
 
-MY_AUTOMOC( qcatool_moc_SRCS )
+MY_AUTOMOC( qcatool2_moc_SRCS )
 
-set(qcatool_bin_SRCS ${qcatool_moc_SRCS})  
+set(qcatool2_bin_SRCS ${qcatool2_moc_SRCS})  
 
-add_executable(qcatool ${qcatool_bin_SRCS})
+add_executable(qcatool2 ${qcatool2_bin_SRCS})
 
-target_link_libraries( qcatool qca ${QT_QTGUI_LIBRARY})
+target_link_libraries( qcatool2 qca ${QT_QTGUI_LIBRARY})
 
-install(TARGETS qcatool DESTINATION bin)
+install(TARGETS qcatool2 DESTINATION bin)
