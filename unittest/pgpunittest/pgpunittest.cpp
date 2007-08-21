@@ -68,7 +68,6 @@ public:
 private slots:
     void eh_eventReady(int id, const QCA::Event &event)
     {
-        qDebug() << "got event: " << id;
         if(event.type() == QCA::Event::Password)
 	{
 	    QCA::SecureArray pass("start");
@@ -117,6 +116,7 @@ private slots:
     void cleanupTestCase();
     void testKeyRing();
     void testClearsign();
+    void testDetachedSign();
 private:
     QCA::Initializer* m_init;
 };
@@ -278,14 +278,152 @@ void PgpUnitTest::testClearsign()
         for(int n = 0; n < msglines.count(); ++n)
                 fprintf(stderr, "message: %s\n", qPrintable(msglines[n]));
 
+	QByteArray clearsignedData;
 	if(msg.success()) {
-	    QByteArray result = msg.read();
-	    // result now contains the clearsign text data
+	    clearsignedData = msg.read();
 	} else {
 	    qDebug() << "Failure:" <<  msg.errorCode();
 	    QFAIL("Failed to clearsign");
 	}
 
+	qDebug() << "result:" << clearsignedData;
+
+
+	// OK, now lets verify that the result will verify.
+	// let's do it
+	QCA::OpenPGP pgp2;
+	QCA::SecureMessage msg2(&pgp2);
+	msg2.setFormat(QCA::SecureMessage::Ascii);
+	msg2.startVerify();
+	msg2.update(clearsignedData);
+	msg2.end();
+	msg2.waitForFinished(2000);	
+
+	QVERIFY(msg2.verifySuccess());
+
+	if(msg2.success()) {
+	    QCOMPARE( msg2.read(), plain );
+	} else {
+	    qDebug() << "Failure:" <<  msg2.errorCode();
+	    QFAIL("Failed to verify clearsigned message");
+	}
+
+	if ( false == oldGNUPGHOME.isNull() ) {
+	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+	}
+    }
+}
+
+
+void PgpUnitTest::testDetachedSign()
+{
+    // event handling cannot be used in the same thread as synchronous calls
+    // which might require event handling.  let's put our event handler in
+    // a side thread so that we can write the unit test synchronously.
+    PGPPassphraseProviderThread thread;
+    thread.start();
+
+    // activate the KeyStoreManager
+    QCA::KeyStoreManager::start();
+
+    QCA::KeyStoreManager keyManager(this);
+    keyManager.waitForBusyFinished();
+    QStringList storeIds = keyManager.keyStores();
+    QVERIFY( storeIds.contains( "qca-gnupg" ) );
+    
+    QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+    QVERIFY( pgpStore.isValid() );
+
+    if ( QCA::isSupported( QStringList( QString( "openpgp" ) ), QString( "qca-gnupg" ) ) ||
+	 QCA::isSupported( QStringList( QString( "keystorelist" ) ), QString( "qca-gnupg" ) ) ) {
+
+        QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
+
+	// This keyring has a private / public key pair
+	if ( 0 != setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+	}
+	
+	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
+	QCOMPARE( keylist.count(), 1 );
+
+	QCA::KeyStoreEntry myPGPKey = keylist.at(0);	
+	QCOMPARE( myPGPKey.isNull(), false );
+	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
+	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );
+	QCOMPARE( myPGPKey.id(), QString("9E946237DAFCCFF4") );
+	QVERIFY( myPGPKey.keyBundle().isNull() );
+	QVERIFY( myPGPKey.certificate().isNull() );
+	QVERIFY( myPGPKey.crl().isNull() );
+	QCOMPARE( myPGPKey.pgpSecretKey().isNull(), false );
+	QCOMPARE( myPGPKey.pgpPublicKey().isNull(), false );
+  
+	// first make the SecureMessageKey
+	QCA::SecureMessageKey key;
+	key.setPGPSecretKey( myPGPKey.pgpSecretKey() );
+	QVERIFY( key.havePrivate() );
+
+	// our data to sign
+	QByteArray plain = "Hello, world";
+
+	// let's do it
+	QCA::OpenPGP pgp;
+	QCA::SecureMessage msg(&pgp);
+	msg.setSigner(key);
+	msg.setFormat(QCA::SecureMessage::Ascii);
+	msg.startSign(QCA::SecureMessage::Detached);
+	msg.update(plain);
+	msg.end();
+	msg.waitForFinished(2000);
+
+        QString str = QCA::KeyStoreManager::diagnosticText();
+        QCA::KeyStoreManager::clearDiagnosticText();
+        QStringList lines = str.split('\n', QString::SkipEmptyParts);
+        for(int n = 0; n < lines.count(); ++n)
+                fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
+
+        QString out = msg.diagnosticText();
+        QStringList msglines = out.split('\n', QString::SkipEmptyParts);
+        for(int n = 0; n < msglines.count(); ++n)
+                fprintf(stderr, "message: %s\n", qPrintable(msglines[n]));
+
+	QByteArray detachedSignature;
+	if(msg.success()) {
+	    detachedSignature = msg.signature();
+	} else {
+	    qDebug() << "Failure:" <<  msg.errorCode();
+	    QFAIL("Failed to create detached signature");
+	}
+
+	// qDebug() << "result:" << detachedSignature;
+
+
+	// OK, now lets verify that the resulting signature will verify.
+	// let's do it
+	QCA::OpenPGP pgp2;
+	QCA::SecureMessage msg2( &pgp2 );
+	msg2.setFormat( QCA::SecureMessage::Ascii );
+	msg2.startVerify( detachedSignature );
+	msg2.update( plain );
+	msg2.end();
+	msg2.waitForFinished( 2000 );	
+
+	QVERIFY(msg2.verifySuccess());
+
+
+	// If the message is different, it shouldn't verify any more
+	QCA::SecureMessage msg3( &pgp2 );
+	msg3.setFormat( QCA::SecureMessage::Ascii );
+	msg3.startVerify( detachedSignature );
+	msg3.update( plain+"1" );
+	msg3.end();
+	msg3.waitForFinished( 2000 );	
+
+	QCOMPARE( msg3.verifySuccess(), false );
+
+	QCOMPARE( msg3.errorCode(), QCA::SecureMessage::ErrorUnknown );
+
+	// Restore things to the way they were....
 	if ( false == oldGNUPGHOME.isNull() ) {
 	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
 	}
