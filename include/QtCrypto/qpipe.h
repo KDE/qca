@@ -60,7 +60,17 @@ typedef int Q_PIPE_ID;
 
 namespace QCA {
 
-// unbuffered direct pipe
+
+/**
+   \class QPipeDevice qpipe.h QtCrypto
+
+   Unbuffered direct pipe.
+
+   This class is not usually required except for very low level operations.
+   You should use QPipe and QPipeEnd for most applications.
+
+   \ingroup UserAPI
+*/
 class QCA_EXPORT QPipeDevice : public QObject
 {
 	Q_OBJECT
@@ -74,27 +84,116 @@ public:
 		Write ///< The pipe end can be written to
 	};
 
+	/**
+	   Standard constructor
+
+	   \param parent the parent object to this object
+	*/
 	QPipeDevice(QObject *parent = 0);
 	~QPipeDevice();
 
-	Type type() const;                     // Read or Write
-	bool isValid() const;                  // indicates if a pipe is held
-	Q_PIPE_ID id() const;                  // pipe id (Win=HANDLE, Unix=int)
-	int idAsInt() const;                   // pipe id turned into an integer
+	/**
+	   The Type of the pipe device (that is, read or write)
+	*/
+	Type type() const;
 
-	void take(Q_PIPE_ID id, Type t);       // take over the pipe id, close the old
-	void enable();                         // enables usage (read/write) of the pipe
-	void close();                          // close the pipe
-	void release();                        // let go of the pipe but don't close
-	bool setInheritable(bool enabled);     // note: on windows, this operation changes the id
+	/**
+	   Test whether this object corresponds to a valid pipe
+	*/
+	bool isValid() const;
 
-	int bytesAvailable() const;            // bytes available to read
-	int read(char *data, int maxsize);     // return number read, 0 = EOF, -1 = error
-	int write(const char *data, int size); // return number taken, ptr must stay valid. -1 on error
-	int writeResult(int *written) const;   // 0 = success (wrote all), -1 = error (see written)
+	/**
+	   The low level identification for this pipe.
+
+	   On Windows, this is a HANDLE. On Unix, this is a file descriptor (i.e. integer).
+
+	   Code using this method should be carefully tested for portability.
+
+	   \sa idAsInt
+	*/
+	Q_PIPE_ID id() const;
+
+	/**
+	   The low level identification for this pipe, returned as an integer.
+
+	   Code using this method should be carefully tested for portability.
+
+	   \sa id().
+	*/
+	int idAsInt() const;
+
+	/**
+	   Take over an existing pipe id, closing the old pipe if any.
+
+	   \param id the identification of the pipe end to take over.
+	   \param t the type of pipe end (read or write).
+	*/
+	void take(Q_PIPE_ID id, Type t);
+
+	/**
+	   Enable the pipe for reading or writing (depending on Type)
+	*/
+	void enable();
+
+	/**
+	   Close the pipe end.
+	*/
+	void close();
+
+	/**
+	   Release the pipe end, but do not close it.
+	*/
+	void release();
+
+	/**
+	   Set the pupe end to be inheritable
+
+	   \note On Windows, this operation changes the pipe end id value.
+	*/
+	bool setInheritable(bool enabled);
+
+	/**
+	   Obtain the number of bytes available to be read.
+	*/
+	int bytesAvailable() const;
+
+	/**
+	   Read from the pipe end
+
+	   \param data where to put the data that has been read
+	   \param maxsize the maximum number of bytes to be read.
+
+	   \return the actual number of bytes read, 0 on end-of-file, or -1 on error.
+	*/
+	int read(char *data, int maxsize);
+
+	/**
+	   Write to the pipe end.
+
+	   \param data the source of the data to be written
+	   \param size the number of bytes in the data to be written
+
+	   \note the data source must remain valid
+
+	   \return the number of bytes written, or -1 on error.
+	*/
+	int write(const char *data, int size);
+
+	/**
+	   The result of a write operation
+
+	   \param written if not null, this will be set to the number of 
+	   bytes written in the last operation.
+
+	   \return 0 on success (all data written), or -1 on error
+	*/
+	int writeResult(int *written) const;
 
 Q_SIGNALS:
-	void notify();                         // can read or can write, depending on type
+	/**
+	   Emitted when the pipe end can be read from or written to (depending on its Type).
+	*/
+	void notify();
 
 private:
 	Q_DISABLE_COPY(QPipeDevice)

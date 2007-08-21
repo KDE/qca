@@ -342,14 +342,35 @@ private:
 	Private *d;
 };
 
+/**
+  \class Synchronizer qca_support.h QtCrypto
+
+  Enable synchronization between two threads.
+*/
 class QCA_EXPORT Synchronizer : public QObject
 {
 	Q_OBJECT
 public:
+	/**
+	  Standard constructor
+
+	  \param parent the parent object to this object
+	*/
 	Synchronizer(QObject *parent);
 	~Synchronizer();
 
+	/**
+	   Call to pause execution in this thread. This function
+	   will block until conditionMet() is called.
+
+	   \param msecs the time to wait before proceeding. The default
+	   timeout value (-1) indicates to wait indefinitely.
+	*/
 	bool waitForCondition(int msecs = -1);
+
+	/**
+	   Call to continue execution in the paused thread.
+	*/
 	void conditionMet();
 
 private:
@@ -359,17 +380,54 @@ private:
 	Private *d;
 };
 
+/**
+   \class DirWatch qca_support.h QtCrypto
+
+   Support class to monitor a directory for activity.
+
+   %DirWatch monitors a specified file for any changes. When
+   the directory changes, the changed() signal is emitted.
+
+   \note QFileSystemWatcher has very similar functionality
+   to this class. You should evaluate this class and 
+   QFileSystemWatcher to determine which better suits your
+   application needs.
+
+   \ingroup UserAPI
+*/
 class QCA_EXPORT DirWatch : public QObject
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+
+	   \param dir the name of the directory to watch. If not
+	   set in the constructor, you can set it using setDirName()
+	   \param parent the parent object for this object
+	*/
 	explicit DirWatch(const QString &dir = QString(), QObject *parent = 0);
 	~DirWatch();
 
+	/**
+	   The name of the directory that is being monitored
+	*/
 	QString dirName() const;
+
+	/**
+	   Change the directory being monitored
+
+	   \param dir the name of the directory to monitor
+	*/
 	void setDirName(const QString &dir);
 
 Q_SIGNALS:
+	/**
+	   The changed signal is emitted when the directory is
+	   changed (e.g. modified by addition or deletion of a
+	   file within the directory, or the deletion of the
+	   directory)
+	*/
 	void changed();
 
 private:
@@ -387,6 +445,11 @@ private:
 
    %FileWatch monitors a specified file for any changes. When
    the file changes, the changed() signal is emitted.
+
+   \note QFileSystemWatcher has very similar functionality
+   to this class. You should evaluate this class and 
+   QFileSystemWatcher to determine which better suits your
+   application needs.
 
    \ingroup UserAPI
 */
@@ -435,87 +498,166 @@ class ConsolePrivate;
 class ConsoleReferencePrivate;
 class ConsoleReference;
 
-// QCA Console system
-//
-// QCA provides an API for asynchronous, event-based access to
-//   the console and stdin/stdout, as these facilities are
-//   otherwise not portable.  The primary use of this system within
-//   QCA is for passphrase prompting in command-line applications,
-//   using the tty console type.
-//
-// How it works: Create a Console object for the type of console
-//   desired, and then use ConsoleReference to act on the console.
-//   Only one ConsoleReference may operate on a Console at a time.
-//
-// A Console object overtakes either the physical console (tty
-//   type) or stdin/stdout (stdio type).  Only one of each type
-//   may be created at a time.
-//
-// Whenever code is written that needs a tty or stdio object, the
-//   code should first call one of the static methods (ttyInstance
-//   or stdioInstance) to see if a console object for the desired
-//   type exists already.  If the object exists, use it.  If it does
-//   not exist, the rule is that the relevant code should create the
-//   object, use the object, and then destroy the object when the
-//   operation is completed.
-//
-// By following the above rule, you can write code that utilizes
-//   a console without the application having to create some master
-//   console object for you.  Of course, if the application has
-//   created a console then it will be used.
-//
-// Why make a master console object?  The primary reason is that it
-//   is not guaranteed that all I/O will survive creation and
-//   destruction of a console object.  If you are using the stdio
-//   type, then you probably want a long-lived console object.  It
-//   is possible to capture unprocessed I/O by calling
-//   bytesLeftToRead or bytesLeftToWrite.  However, it is not
-//   expected that general console-needing code will call these
-//   functions when utilizing a temporary console.  Thus, an
-//   application developer would need to create his own console
-//   object, invoke the console-needing code, and then do his own
-//   extraction of the unprocessed I/O if necessary.  Another reason
-//   to extract unprocessed I/O is if you need to switch from
-//   QCA::Console back to standard functions (e.g. fgets).
-//
+/**
+   \class Console qca_support.h QtCrypto
+
+   %QCA %Console system
+
+   %QCA provides an API for asynchronous, event-based access to
+   the console and stdin/stdout, as these facilities are
+   otherwise not portable.  The primary use of this system within
+   %QCA is for passphrase prompting in command-line applications,
+   using the tty console type.
+
+   How it works: Create a %Console object for the type of console
+   desired, and then use ConsoleReference to act on the console.
+   Only one ConsoleReference may operate on a %Console at a time.
+
+   A %Console object takes over either the physical console (Console::Tty
+   type) or stdin/stdout (Console::Stdio type).  Only one of each type
+   may be created at a time.
+
+   Whenever code is written that needs a tty or stdio object, the
+   code should first call one of the static methods (ttyInstance()
+   or stdioInstance()) to see if a console object for the desired
+   type exists already.  If the object exists, use it.  If it does
+   not exist, the rule is that the relevant code should create the
+   object, use the object, and then destroy the object when the
+   operation is completed.
+
+   By following the above rule, you can write code that utilizes
+   a console without the application having to create some master
+   console object for you.  Of course, if the application has
+   created a console then it will be used.
+
+   The reason why there is a master console object is that it
+   is not guaranteed that all I/O will survive creation and
+   destruction of a console object.  If you are using the Stdio
+   Type, then you probably want a long-lived console object.  It
+   is possible to capture unprocessed I/O by calling
+   bytesLeftToRead or bytesLeftToWrite.  However, it is not
+   expected that general console-needing code will call these
+   functions when utilizing a temporary console.  Thus, an
+   application developer would need to create his own console
+   object, invoke the console-needing code, and then do his own
+   extraction of the unprocessed I/O if necessary.  Another reason
+   to extract unprocessed I/O is if you need to switch from
+   %Console back to standard functions (e.g. fgets() ).
+
+   \ingroup UserAPI
+*/
 class QCA_EXPORT Console : public QObject
 {
 	Q_OBJECT
 public:
+	/**
+	   The type of console object
+	*/
 	enum Type
 	{
-		Tty,         // physical console
-		Stdio        // stdin/stdout
+		Tty,         ///< physical console
+		Stdio        ///< stdin/stdout
 	};
-
+	/**
+	   The type of I/O to use with the console object.
+	*/
 	enum ChannelMode
 	{
-		Read,        // stdin
-		ReadWrite    // stdin + stdout
+		Read,        ///< Read only (equivalent to stdin)
+		ReadWrite    ///< Read/write (equivalent to stdin and stdout)
 	};
 
+	/**
+	   The nature of the console operation
+	*/
 	enum TerminalMode
 	{
-		Default,     // use default terminal settings
-		Interactive  // char-by-char input, no echo
+		Default,     ///< use default terminal settings
+		Interactive  ///< char-by-char input, no echo
 	};
 
+	/**
+	   Standard constructor
+
+	   Note that library code should not create a new Console object
+	   without checking whether there is already a Console object of
+	   the required Type. See the main documentation for Console for the 
+	   rationale for this.
+
+	   \param type the Type of Console object to create
+	   \param cmode the ChannelMode (I/O type) to use
+	   \param tmode the TerminalMode to use
+	   \param parent the parent object for this object
+
+	   \sa ttyInstance() and stdioInstance for static methods that allow
+	   you to test whether there is already a Console object of the 
+	   required Type, and if there is, obtain a reference to that object.
+	*/
 	Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = 0);
 	~Console();
 
+	/**
+	   The Type of this Console object
+	*/
 	Type type() const;
+
+	/**
+	   The ChannelMode of this Console object
+	*/
 	ChannelMode channelMode() const;
+
+	/**
+	   The TerminalMode of this Console object
+	*/
 	TerminalMode terminalMode() const;
 
+	/**
+	   Test whether standard input is redirected.
+
+	   \sa type() and channelMode()
+	*/
 	static bool isStdinRedirected();
+
+	/**
+	   Test whether standard output is redirected.
+
+	   \sa type() and channelMode()
+	*/
 	static bool isStdoutRedirected();
 
+	/**
+	   The current terminal-type console object
+
+	   \return null if there is no current Console
+	   of this type, otherwise the Console to use
+	*/
 	static Console *ttyInstance();
+
+	/**
+	   The current stdio-type console object
+
+	   \return null if there is no current Console
+	   of this type, otherwise the Console to use
+	*/
 	static Console *stdioInstance();
 
-	// call release() to get access to unempty buffers
+	/**
+	  Release the Console
+
+	  This allows access to buffers containing any remaining data
+	*/
 	void release();
+
+	/**
+	   Obtain remaining data from the Console, awaiting
+	   a read operation
+	*/
 	QByteArray bytesLeftToRead();
+
+	/**
+	   Obtain remaining data from the Console, awaiting
+	   a write operation
+	*/
 	QByteArray bytesLeftToWrite();
 
 private:
@@ -527,44 +669,155 @@ private:
 	friend class ConsoleReference;
 };
 
-// note: only one ConsoleReference object can be active at a time
+/**
+   \class ConsoleReference qca_support.h QtCrypto
+
+   Manager for a Console
+
+   \note Only one %ConsoleReference object can be active at a time
+
+   \ingroup UserAPI
+*/
 class QCA_EXPORT ConsoleReference : public QObject
 {
 	Q_OBJECT
 public:
+	/**
+	   The security setting to use for the Console being managed.
+	*/
 	enum SecurityMode
 	{
 		SecurityDisabled,
 		SecurityEnabled
 	};
 
+	/**
+	   Standard constructor
+
+	   \param parent the parent object for this object
+	*/
 	ConsoleReference(QObject *parent = 0);
 	~ConsoleReference();
 
+	/**
+	   Set the Console object to be managed, and start processing.
+
+	   You typically want to use Console::ttyInstance() or
+	   Console::stdioInstance() to obtain the required Console
+	   reference.
+
+	   \param console reference to the Console to be managed
+	   \param mode the SecurityMode to use for this Console.
+
+	   \sa QCA::Console for more information on how to handle the
+	   console aspects of your application or library code.
+	*/
 	bool start(Console *console, SecurityMode mode = SecurityDisabled);
+
+	/**
+	   Stop processing, and release the Console
+	*/
 	void stop();
 
+	/**
+	   The Console object managed by this object
+
+	   \sa start() to set the Console to be managed
+	*/
 	Console *console() const;
+
+	/**
+	   The security mode setting for the Console object
+	   managed by this object.
+
+	   \sa start() to set the SecurityMode
+	*/
 	SecurityMode securityMode() const;
 
-	// normal i/o
+	/**
+	   Read data from the Console.
+
+	   \param bytes the number of bytes to read. The default 
+	   is to read all available bytes
+
+	   \sa readSecure() for a method suitable for reading 
+	   sensitive data.
+	*/
 	QByteArray read(int bytes = -1);
+
+	/**
+	   Write data to the Console.
+
+	   \param a the array of data to write to the Console
+
+	   \sa writeSecure() for a method suitable for writing
+	   sensitive data.
+	*/
 	void write(const QByteArray &a);
 
-	// secure i/o
+	/**
+	   Read secure data from the Console
+
+	   \param bytes the number of bytes to read. The default 
+	   is to read all available bytes
+
+	   \sa read() which is suitable for non-sensitive data
+	*/
 	SecureArray readSecure(int bytes = -1);
+
+	/**
+	   Write secure data to the Console
+
+	   \param a the array of data to write to the Console
+
+	   \sa write() wich is suitable for non-sensitive data
+	*/
 	void writeSecure(const SecureArray &a);
 
-	// close write channel (only if writing enabled)
+	/**
+	   Close the write channel
+
+	   You only need to call this if writing is enabled
+	   on the Console being managed.
+	*/
 	void closeOutput();
 
+	/**
+	   The number of bytes available to read from the 
+	   Console being managed.
+	*/
 	int bytesAvailable() const;
+
+	/**
+	   The number of bytes remaining to be written
+	   to the Console being managed
+	*/
 	int bytesToWrite() const;
 
 Q_SIGNALS:
+	/**
+	   Emitted when there are bytes available to read from
+	   the Console being managed
+	*/
 	void readyRead();
+
+	/**
+	   Emitted when bytes are written to the Console
+
+	   \param bytes the number of bytes that were written
+
+	   \sa bytesAvailable()
+	*/
 	void bytesWritten(int bytes);
+
+	/**
+	   Emitted when the console input is closed
+	*/
 	void inputClosed();
+
+	/**
+	   Emitted when the console output is closed
+	*/
 	void outputClosed();
 
 private:
@@ -576,21 +829,92 @@ private:
 	friend class Console;
 };
 
+/**
+   \class ConsolePrompt qca_support.h QtCrypto
+
+   Console prompt handler.
+
+   This class provides a convenient way to get user input in a secure way,
+as shown below:
+\code
+QCA::ConsolePrompt prompt;
+prompt.getHidden("Passphrase");
+prompt.waitForFinished();
+QCA:SecureArray pass = prompt.result();
+\endcode
+
+   \note It is not necessary to use waitForFinished(), because you can
+   just connect the finished() signal to a suitable method, however
+   command line (console) applications often require waitForFinished().
+
+   \ingroup UserAPI
+*/
 class QCA_EXPORT ConsolePrompt : public QObject
 {
 	Q_OBJECT
 public:
+	/**
+	   Standard constructor
+
+	   \param parent the parent object for this object
+	*/
 	ConsolePrompt(QObject *parent = 0);
 	~ConsolePrompt();
 
+	/**
+	   Allow the user to enter data without it being echo'd to 
+	   the terminal. This is particularly useful for entry
+	   of passwords, passphrases and PINs.
+
+	   \param promptStr the prompt to display to the user
+
+	   \sa result() for how to get the input back.
+	*/
 	void getHidden(const QString &promptStr);
+
+	/**
+	   Obtain one character from the user
+
+	   \sa resultChar() for how to get the input back.
+	*/
 	void getChar();
+
+	/**
+	   Block waiting for user input.
+
+	   You may wish to use the finished() signal to
+	   avoid blocking.
+	*/
 	void waitForFinished();
 
+	/**
+	   Obtain the result of the user input.
+
+	   This method is usually called to obtain data
+	   from the user that was requested by the getHidden()
+	   call.
+	*/
 	SecureArray result() const;
+
+	/**
+	   Obtain the result of the user input.
+
+	   This method is usually called to obtain data
+	   from the user that was requested by the getChar()
+	   call.
+	*/
 	QChar resultChar() const;
 
 signals:
+	/**
+	   Emitted when the user input activity has been
+	   completed.
+
+	   This corresponds to the provision of a string
+	   for getHidden() or a single character for getChar().
+
+	   \sa waitForFinished
+	*/
 	void finished();
 
 private:
