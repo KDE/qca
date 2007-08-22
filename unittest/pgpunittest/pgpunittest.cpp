@@ -219,14 +219,15 @@ void PgpUnitTest::testClearsign()
 
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
-    QStringList storeIds = keyManager.keyStores();
-    QVERIFY( storeIds.contains( "qca-gnupg" ) );
-    
-    QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
-    QVERIFY( pgpStore.isValid() );
 
     if ( QCA::isSupported( QStringList( QString( "openpgp" ) ), QString( "qca-gnupg" ) ) ||
 	 QCA::isSupported( QStringList( QString( "keystorelist" ) ), QString( "qca-gnupg" ) ) ) {
+
+        QStringList storeIds = keyManager.keyStores();
+	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+    
+	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+	QVERIFY( pgpStore.isValid() );
 
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
 
@@ -327,14 +328,15 @@ void PgpUnitTest::testDetachedSign()
 
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
-    QStringList storeIds = keyManager.keyStores();
-    QVERIFY( storeIds.contains( "qca-gnupg" ) );
-    
-    QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
-    QVERIFY( pgpStore.isValid() );
 
     if ( QCA::isSupported( QStringList( QString( "openpgp" ) ), QString( "qca-gnupg" ) ) ||
 	 QCA::isSupported( QStringList( QString( "keystorelist" ) ), QString( "qca-gnupg" ) ) ) {
+
+        QStringList storeIds = keyManager.keyStores();
+	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+    
+	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+	QVERIFY( pgpStore.isValid() );
 
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
 
