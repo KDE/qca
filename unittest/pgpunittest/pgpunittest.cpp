@@ -286,9 +286,6 @@ void PgpUnitTest::testClearsign()
 	    QFAIL("Failed to clearsign");
 	}
 
-	qDebug() << "result:" << clearsignedData;
-
-
 	// OK, now lets verify that the result will verify.
 	// let's do it
 	QCA::OpenPGP pgp2;
@@ -302,7 +299,9 @@ void PgpUnitTest::testClearsign()
 	QVERIFY(msg2.verifySuccess());
 
 	if(msg2.success()) {
-	    QCOMPARE( msg2.read(), plain );
+	    // The trimmed() call is needed because clearsigning
+	    // trashes whitespace
+	    QCOMPARE( QString(msg2.read()).trimmed(), QString(plain).trimmed() );
 	} else {
 	    qDebug() << "Failure:" <<  msg2.errorCode();
 	    QFAIL("Failed to verify clearsigned message");
