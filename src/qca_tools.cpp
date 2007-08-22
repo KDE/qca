@@ -846,6 +846,40 @@ BigInteger & BigInteger::operator-=(const BigInteger &i)
 	return *this;
 }
 
+BigInteger & BigInteger::operator*=(const BigInteger &i)
+{
+	d->n *= i.d->n;
+	return *this;
+}
+
+BigInteger & BigInteger::operator/=(const BigInteger &i)
+{
+	try
+	{
+		d->n /= i.d->n;
+	}
+	catch(std::exception &)
+	{
+		fprintf(stderr, "QCA: Botan integer division error\n");
+		abort();
+	}
+	return *this;
+}
+
+BigInteger & BigInteger::operator%=(const BigInteger &i)
+{
+	try
+	{
+		d->n %= i.d->n;
+	}
+	catch(std::exception &)
+	{
+		fprintf(stderr, "QCA: Botan integer division error\n");
+		abort();
+	}
+	return *this;
+}
+
 BigInteger & BigInteger::operator=(const QString &s)
 {
 	fromString(s);

@@ -643,6 +643,27 @@ a -= b; // a is now -1000
 	BigInteger & operator-=(const BigInteger &b);
 
 	/**
+	   Multiply in place operator
+
+	   \param b the amount to multiply by
+	*/
+	BigInteger & operator*=(const BigInteger &b);
+
+	/**
+	   Divide in place operator
+
+	   \param b the amount to divide by
+	*/
+	BigInteger & operator/=(const BigInteger &b);
+
+	/**
+	   Modulo in place operator
+
+	   \param b the amount to divide by
+	*/
+	BigInteger & operator%=(const BigInteger &b);
+
+	/**
 	   Output %BigInteger as a byte array, useful for storage or
 	   transmission.  The format is a binary integer in sign-extended
 	   network-byte-order.
