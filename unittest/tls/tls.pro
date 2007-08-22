@@ -1,6 +1,7 @@
 DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
+TARGET = tlsunittest
 
 # test target
 QMAKE_EXTRA_TARGETS = test
