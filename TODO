@@ -19,6 +19,7 @@
 
 * possibilities for the future:
   publickey: use_asker_fallback should use ErrorPassphrase
+  publickey: ability to compare keys without IO support
   provider: separate public and private keys into two classes to enable
     delegation easier.  the public part should not be implemented by most
     providers.
