@@ -5,17 +5,25 @@ cd bigintunittest && make test && cd .. && \
 cd certunittest && make test && cd .. && \
 cd cipherunittest && make test && cd .. && \
 cd clientplugin && make test && cd .. && \
+cd cms && make test && cd .. && \
 cd dsaunittest && make test && cd .. && \
+#cd filewatchunittest && make test && cd .. && \
 cd hashunittest && make test && cd .. && \
 cd hexunittest && make test && cd .. && \
 cd kdfunittest && make test && cd .. && \
+cd keybundle && make test && cd .. && \
 cd keygenunittest && make test && cd .. && \
 cd keylengthunittest && make test && cd .. && \
+cd keystore && make test && cd .. && \
 cd macunittest && make test && cd .. && \
+cd metatype && make test && cd .. && \
+cd pgpunittest && make test && cd .. && \
+cd pipeunittest && make test && cd .. && \
 cd pkits && make test && cd .. && \
 cd randomunittest && make test && cd .. && \
 cd rsaunittest && make test && cd .. && \
 cd securearrayunittest && make test && cd .. && \
 cd staticunittest && make test && cd .. && \
 cd symmetrickeyunittest && make test && cd .. && \
-cd tls && make test && cd .. 
+cd tls && make test && cd .. && \
+cd velox && make test && cd .. 
