@@ -508,6 +508,8 @@ public:
 			return;
 		}
 
+		need_update = false;
+
 		QByteArray arg_from_net, arg_from_app;
 
 		if(state == Handshaking)
