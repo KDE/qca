@@ -5,7 +5,7 @@ includedir=@CMAKE_INSTALL_PREFIX@/include/QtCrypto
 
 Name: QCA
 Description: Qt Cryptographic Architecture library\n
-Version: 2.0.0 #maybe this shouldn't be literal...
+Version: @QCA_LIB_VERSION_STRING@
 Requires: QtCore
 Libs: -L${libdir} -lqca
 Cflags: -I${includedir}
