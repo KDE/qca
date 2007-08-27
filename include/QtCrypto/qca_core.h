@@ -291,7 +291,7 @@ QCA_EXPORT void setProviderPriority(const QString &name, int priority);
 /**
    Return the priority of a specified provider
 
-   The name of the provider (eg "qca-openssl") is used to look up the 
+   The name of the provider (eg "qca-ossl") is used to look up the 
    current priority associated with that provider. If the provider
    is not found (or something else went wrong), -1 is returned.
 

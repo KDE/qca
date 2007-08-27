@@ -1,7 +1,7 @@
 /*
  * qca_basic.h - Qt Cryptographic Architecture
  * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2004-2007  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 /**
    \file qca_basic.h
 
-   Header file for classes for cryptographic primitives (basic operations)
+   Header file for classes for cryptographic primitives (basic operations).
 
    \note You should not use this header directly from an
    application. You should just use <tt> \#include \<QtCrypto>
@@ -47,7 +47,7 @@ namespace QCA {
 /**
    \class Random qca_basic.h QtCrypto
 
-   Source of random numbers
+   Source of random numbers.
 
    QCA provides a built in source of random numbers, which
    can be accessed through this class. You can also use
@@ -73,7 +73,7 @@ public:
         /**
            Copy constructor
 
-           \param from the Random object to copy from
+           \param from the %Random object to copy from
         */
 	Random(const Random &from);
 
@@ -82,7 +82,7 @@ public:
         /**
            Assignment operator
 
-           \param from the Random object to copy state from
+           \param from the %Random object to copy state from
         */
 	Random & operator=(const Random &from);
 
@@ -97,7 +97,7 @@ public:
 	uchar nextByte();
 
 	/**
-	   Provide a specified number of random bytes
+	   Provide a specified number of random bytes.
 
 	   This method isn't normally required - you should use
 	   the static randomArray() method instead.
@@ -117,12 +117,12 @@ public:
 myRandomChar = QCA::Random::randomChar();
 	   \endcode
 
-	   If you need a number of bytes, perhaps randomArray() may be of use
+	   If you need a number of bytes, perhaps randomArray() may be of use.
 	*/
 	static uchar randomChar();
 
 	/**
-	   Provide a random integer
+	   Provide a random integer.
 
 	   This is the normal way of obtaining a single random integer,
 	   as shown below:
@@ -133,7 +133,7 @@ myRandomInt = QCA::Random::randomInt();
 	static int randomInt();
 
 	/**
-	   Provide a specified number of random bytes
+	   Provide a specified number of random bytes.
 
 	   \code
 // build a 30 byte secure array.
@@ -210,9 +210,9 @@ public:
 	   Constructor
 
 	   \param type label for the type of hash to be
-	   created (eg "sha1" or "md2")
+	   created (for example, "sha1" or "md2")
 	   \param provider the name of the provider plugin
-	   for the subclass (eg "qca-openssl")
+	   for the subclass (eg "qca-ossl")
 	*/
 	explicit Hash(const QString &type, const QString &provider = QString());
         /**
