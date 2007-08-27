@@ -37,17 +37,19 @@ The code below shows the normal way to use the QCA::Cipher class.
 */
 
 
-/** \example cmsexample.cpp
-
-The code below shows the normal way to use the QCA::CMS class.
-
-*/
-
-
-/** \example main.cpp
+/** \example cmssigner/main.cpp
 
 The code below shows how to use Cryptographic Message Syntax (CMS)
 in a GUI application.
+
+\include certitem.h
+\include certitem.cpp
+\include certviewdlg.h
+\include certviewdlg.cpp
+\include keyselectdlg.h
+\include keyselectdlg.cpp
+\include prompter.h
+\include prompter.cpp
 
 */
 
@@ -172,6 +174,8 @@ The code below shows how to create an SSL client
 The code below shows how to create a socket that can operate
 over an Transport Layer Security (TLS, also known as SSL) connection.
 
+\include tlssocket/tlssocket.h
+\include tlssocket/main.cpp
 */
 
 
