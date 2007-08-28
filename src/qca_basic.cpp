@@ -30,6 +30,19 @@ namespace QCA {
 // from qca_core.cpp
 QMutex *global_random_mutex();
 Random *global_random();
+Provider::Context *getContext(const QString &type, Provider *p);
+
+// from qca_publickey.cpp
+ProviderList allProviders();
+
+static void mergeList(QStringList *a, const QStringList &b)
+{
+	foreach(const QString &s, b)
+	{
+		if(!a->contains(s))
+			a->append(s);
+	}
+}
 
 //----------------------------------------------------------------------------
 // Random
@@ -106,6 +119,22 @@ Hash & Hash::operator=(const Hash &from)
 {
 	Algorithm::operator=(from);
 	return *this;
+}
+
+QStringList Hash::supportedTypes()
+{
+	QStringList out;
+	ProviderList pl = allProviders();
+	foreach(Provider *p, pl)
+	{
+		InfoContext *c = static_cast<InfoContext *>(getContext("info", p));
+		if(!c)
+			continue;
+
+		mergeList(&out, c->supportedHashTypes());
+		delete c;
+	}
+	return out;
 }
 
 QString Hash::type() const

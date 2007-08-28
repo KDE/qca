@@ -231,6 +231,11 @@ public:
 	Hash & operator=(const Hash &from);
 
 	/**
+	   Returns a list of all of the hash types available
+	*/
+	static QStringList supportedTypes();
+
+	/**
 	   Return the hash type
 	*/
 	QString type() const;

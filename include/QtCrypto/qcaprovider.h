@@ -97,6 +97,31 @@ Q_DECLARE_INTERFACE(QCAPlugin, "com.affinix.qca.Plugin/1.0")
 namespace QCA {
 
 /**
+   \class InfoContext qcaprovider.h QtCrypto
+
+   Extended provider information
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.
+
+   \ingroup ProviderAPI
+*/
+class QCA_EXPORT InfoContext : public BasicContext
+{
+	Q_OBJECT
+public:
+	/**
+	   Standard constructor
+	*/
+	InfoContext(Provider *p) : BasicContext(p, "info") {}
+
+	/**
+	   The hash algorithms supported by the provider
+	*/
+	virtual QStringList supportedHashTypes() const;
+};
+
+/**
    \class RandomContext qcaprovider.h QtCrypto
 
    Random provider

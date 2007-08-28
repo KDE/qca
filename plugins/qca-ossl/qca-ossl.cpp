@@ -6366,6 +6366,49 @@ protected:
 	QString m_type;
 };
 
+static QStringList all_hash_types()
+{
+	QStringList list;
+	list += "sha1";
+	list += "sha0";
+	list += "ripemd160";
+	list += "md2";
+	list += "md4";
+	list += "md5";
+#ifdef SHA224_DIGEST_LENGTH
+	list += "sha224";
+#endif
+#ifdef SHA256_DIGEST_LENGTH
+	list += "sha256";
+#endif
+#ifdef SHA384_DIGEST_LENGTH
+	list += "sha384";
+#endif
+#ifdef SHA512_DIGEST_LENGTH
+	list += "sha512";
+#endif
+	return list;
+}
+
+class opensslInfoContext : public InfoContext
+{
+	Q_OBJECT
+public:
+	opensslInfoContext(Provider *p) : InfoContext(p)
+	{
+	}
+
+	Context *clone() const
+	{
+		return new opensslInfoContext(*this);
+	}
+
+	QStringList supportedHashTypes() const
+	{
+		return all_hash_types();
+	}
+};
+
 }
 
 using namespace opensslQCAPlugin;
@@ -6428,24 +6471,7 @@ public:
 	QStringList features() const
 	{
 		QStringList list;
-		list += "sha1";
-		list += "sha0";
-		list += "ripemd160";
-		list += "md2";
-		list += "md4";
-		list += "md5";
-#ifdef SHA224_DIGEST_LENGTH
-		list += "sha224";
-#endif
-#ifdef SHA256_DIGEST_LENGTH
-		list += "sha256";
-#endif
-#ifdef SHA384_DIGEST_LENGTH
-		list += "sha384";
-#endif
-#ifdef SHA512_DIGEST_LENGTH
-		list += "sha512";
-#endif
+		list += all_hash_types();
 		list += "hmac(md5)";
 		list += "hmac(sha1)";
 #ifdef SHA224_DIGEST_LENGTH
@@ -6510,7 +6536,9 @@ public:
 	Context *createContext(const QString &type)
 	{
 		//OpenSSL_add_all_digests();
-		if ( type == "sha1" )
+		if ( type == "info" )
+			return new opensslInfoContext(this);
+		else if ( type == "sha1" )
 			return new opensslHashContext( EVP_sha1(), this, type);
 		else if ( type == "sha0" )
 			return new opensslHashContext( EVP_sha(), this, type);
