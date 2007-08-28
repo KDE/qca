@@ -33,7 +33,7 @@ class CertViewDlg : public QDialog
 {
 	Q_OBJECT
 public:
-	CertViewDlg(const QCA::CertificateChain &chain, QWidget *parent = 0);
+	explicit CertViewDlg(const QCA::CertificateChain &chain, QWidget *parent = 0);
 	~CertViewDlg();
 
 private:

@@ -951,7 +951,8 @@ public:
 	   specified, or specified as empty, then any provider is 
 	   acceptable.
 	*/
-	SASL(QObject *parent = 0, const QString &provider = QString());
+	explicit SASL(QObject *parent = 0, const QString &provider = QString());
+
 	~SASL();
 
 	/**

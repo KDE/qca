@@ -128,7 +128,7 @@ class CertItemPrivateLoader : public QObject
 {
 	Q_OBJECT
 public:
-	CertItemPrivateLoader(CertItemStore *store, QObject *parent = 0);
+	explicit CertItemPrivateLoader(CertItemStore *store, QObject *parent = 0);
 	~CertItemPrivateLoader();
 
 	void start(int id);
