@@ -770,7 +770,7 @@ public:
 
 	   \param a the array of data to write to the Console
 
-	   \sa write() wich is suitable for non-sensitive data
+	   \sa write() which is suitable for non-sensitive data
 	*/
 	void writeSecure(const SecureArray &a);
 
@@ -992,7 +992,7 @@ public:
 
 	   \param message the text to log
 	*/
-	void logTextMessage(const QString &message, Severity = Information);
+	void logTextMessage(const QString &message, Logger::Severity = Information);
 
 	/**
 	   Log a binary blob to all available log devices
@@ -1003,7 +1003,7 @@ public:
 	   example, it might be logged as a binary, or it might be
 	   encoded in some way
 	*/
-	void logBinaryMessage(const QByteArray &blob, Severity = Information);
+	void logBinaryMessage(const QByteArray &blob, Logger::Severity = Information);
 
 	/**
 	   Add an AbstractLogDevice subclass to the existing list of loggers
