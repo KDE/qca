@@ -6390,6 +6390,61 @@ static QStringList all_hash_types()
 	return list;
 }
 
+static QStringList all_cipher_types()
+{
+	QStringList list;
+	list += "aes128-ecb";
+	list += "aes128-cfb";
+	list += "aes128-cbc";
+	list += "aes128-cbc-pkcs7";
+	list += "aes128-ofb";
+	list += "aes192-ecb";
+	list += "aes192-cfb";
+	list += "aes192-cbc";
+	list += "aes192-cbc-pkcs7";
+	list += "aes192-ofb";
+	list += "aes256-ecb";
+	list += "aes256-cbc";
+	list += "aes256-cbc-pkcs7";
+	list += "aes256-cfb";
+	list += "aes256-ofb";
+	list += "blowfish-ecb";
+	list += "blowfish-cbc-pkcs7";
+	list += "blowfish-cbc";
+	list += "blowfish-cfb";
+	list += "blowfish-ofb";
+	list += "tripledes-ecb";
+	list += "tripledes-cbc";
+	list += "des-ecb";
+	list += "des-ecb-pkcs7";
+	list += "des-cbc";
+	list += "des-cbc-pkcs7";
+	list += "des-cfb";
+	list += "des-ofb";
+	return list;
+}
+
+static QStringList all_mac_types()
+{
+	QStringList list;
+	list += "hmac(md5)";
+	list += "hmac(sha1)";
+#ifdef SHA224_DIGEST_LENGTH
+	list += "hmac(sha224)";
+#endif
+#ifdef SHA256_DIGEST_LENGTH
+	list += "hmac(sha256)";
+#endif
+#ifdef SHA384_DIGEST_LENGTH
+	list += "hmac(sha384)";
+#endif
+#ifdef SHA512_DIGEST_LENGTH
+	list += "hmac(sha512)";
+#endif
+	list += "hmac(ripemd160)";
+	return list;
+}
+
 class opensslInfoContext : public InfoContext
 {
 	Q_OBJECT
@@ -6406,6 +6461,16 @@ public:
 	QStringList supportedHashTypes() const
 	{
 		return all_hash_types();
+	}
+
+	QStringList supportedCipherTypes() const
+	{
+		return all_cipher_types();
+	}
+
+	QStringList supportedMACTypes() const
+	{
+		return all_mac_types();
 	}
 };
 
@@ -6472,51 +6537,10 @@ public:
 	{
 		QStringList list;
 		list += all_hash_types();
-		list += "hmac(md5)";
-		list += "hmac(sha1)";
-#ifdef SHA224_DIGEST_LENGTH
-		list += "hmac(sha224)";
-#endif
-#ifdef SHA256_DIGEST_LENGTH
-		list += "hmac(sha256)";
-#endif
-#ifdef SHA384_DIGEST_LENGTH
-		list += "hmac(sha384)";
-#endif
-#ifdef SHA512_DIGEST_LENGTH
-		list += "hmac(sha512)";
-#endif
-		list += "hmac(ripemd160)";
+		list += all_mac_types();
+		list += all_cipher_types();
 		list += "pbkdf1(md2)";
 		list += "pbkdf1(sha1)";
-		list += "aes128-ecb";
-		list += "aes128-cfb";
-		list += "aes128-cbc";
-		list += "aes128-cbc-pkcs7";
-		list += "aes128-ofb";
-		list += "aes192-ecb";
-		list += "aes192-cfb";
-		list += "aes192-cbc";
-		list += "aes192-cbc-pkcs7";
-		list += "aes192-ofb";
-		list += "aes256-ecb";
-		list += "aes256-cbc";
-		list += "aes256-cbc-pkcs7";
-		list += "aes256-cfb";
-		list += "aes256-ofb";
-		list += "blowfish-ecb";
-		list += "blowfish-cbc-pkcs7";
-		list += "blowfish-cbc";
-		list += "blowfish-cfb";
-		list += "blowfish-ofb";
-		list += "tripledes-ecb";
-		list += "tripledes-cbc";
-		list += "des-ecb";
-		list += "des-ecb-pkcs7";
-		list += "des-cbc";
-		list += "des-cbc-pkcs7";
-		list += "des-cfb";
-		list += "des-ofb";
 		list += "pkey";
 		list += "dlgroup";
 		list += "rsa";
