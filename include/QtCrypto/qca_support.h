@@ -976,7 +976,7 @@ public:
 
 	   \return Current level
 	*/
-	inline Logger::Severity level() const { return m_logLevel; }
+	inline Severity level() const { return m_logLevel; }
 
 	/**
 	   Set the current logging level
@@ -985,14 +985,14 @@ public:
 
 	   Only severities less or equal than the log level one will be logged
 	*/
-	void setLevel(Logger::Severity level);
+	void setLevel(Severity level);
 
 	/**
 	   Log a message to all available log devices
 
 	   \param message the text to log
 	*/
-	void logTextMessage(const QString &message, Logger::Severity = Information);
+	void logTextMessage(const QString &message, Severity = Information);
 
 	/**
 	   Log a binary blob to all available log devices
@@ -1003,7 +1003,7 @@ public:
 	   example, it might be logged as a binary, or it might be
 	   encoded in some way
 	*/
-	void logBinaryMessage(const QByteArray &blob, Logger::Severity = Information);
+	void logBinaryMessage(const QByteArray &blob, Severity = Information);
 
 	/**
 	   Add an AbstractLogDevice subclass to the existing list of loggers
@@ -1066,7 +1066,7 @@ public:
 	   override this method in your subclass to do whatever
 	   logging is required
 	*/
-	virtual void logTextMessage(const QString &message, enum Logger::Severity severity);
+	virtual void logTextMessage(const QString &message, Logger::Severity severity);
 
 	/**
 	   Log a binary blob
