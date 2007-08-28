@@ -416,7 +416,7 @@ void PgpUnitTest::testDetachedSign()
 	QCA::SecureMessage msg3( &pgp2 );
 	msg3.setFormat( QCA::SecureMessage::Ascii );
 	msg3.startVerify( detachedSignature );
-	msg3.update( plain+"1" );
+	msg3.update( plain+'1' );
 	msg3.end();
 	msg3.waitForFinished( 2000 );	
 
