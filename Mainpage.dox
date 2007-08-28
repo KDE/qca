@@ -163,7 +163,7 @@
 
 /** \page architecture Architecture
 
-\note You don't need to understand any of this to use %QCA. It is
+\note You don't need to understand any of this to use %QCA - it is
 documented for those who are curious, and for anyone planning to
 extend or modify %QCA.
 
@@ -296,10 +296,61 @@ because the plugins are often based on existing libraries.
                         return new opensslCipherContext( EVP_aes_128_cbc(), 0, this, type);
 		else
 		        return 0;
+	}
 \endcode
 
 The resulting effect is that %QCA can ask the provider to provide an appropriate
 Context object without worrying about how it is implemented.
+
+For features that are implemented with variable algorithms (for example, HashContext can
+support a wide range of algorithms - MD5, SHA0, and SHA1 in the example above; and
+CipherContext and MACContext can also do this), we need to be able to let applications
+determine which algorithms are supported. This is handled through the InfoContext class.
+A typical example is shown below:
+\code
+	class opensslInfoContext : public InfoContext
+	{
+        	Q_OBJECT
+	public:
+        	opensslInfoContext(Provider *p) : InfoContext(p)
+	        {
+	        }
+
+	        Context *clone() const
+        	{
+                	return new opensslInfoContext(*this);
+	        }
+
+        	QStringList supportedHashTypes() const
+	        {
+			QStringList list;
+			list += "sha1";
+			list += "sha0";
+			list += "md5";
+        	        return list;
+        	}
+
+		// MAC and Cipher types can go in here
+	};
+\endcode
+
+Note that InfoContext is itself a feature, so you have to add it to the createContext()
+method for the provider, as shown below:
+\code
+        Context *createContext(const QString &type)
+        {
+                if ( type == "sha1" )
+                        return new opensslHashContext( EVP_sha1(), this, type);
+                else if ( type == "sha0" )
+                        return new opensslHashContext( EVP_sha(), this, type);
+                else if ( type == "md5" )
+                        return new opensslHashContext( EVP_md5(), this, type);
+                else if ( type == "info" )
+                        return new opensslInfoContext( this );
+		else
+		        return 0;
+	}
+\endcode
 
 */
 
