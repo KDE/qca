@@ -7,7 +7,7 @@
     QStringList libpaths = QCoreApplication::libraryPaths();
 
     // we prepend, because we prefer the uninstalled version
-    libpaths.prepend(QString("../../plugins/qca-openssl"));
+    libpaths.prepend(QString("../../plugins/qca-ossl"));
     libpaths.prepend(QString("../../plugins/qca-botan"));
     libpaths.prepend(QString("../../plugins/qca-gcrypt"));
     // you can add more paths here...
