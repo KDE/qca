@@ -233,7 +233,7 @@ public:
 	/**
 	   Returns a list of all of the hash types available
 	*/
-	static QStringList supportedTypes();
+	static QStringList supportedTypes(const QString &provider = QString());
 
 	/**
 	   Return the hash type
@@ -622,6 +622,11 @@ public:
 	Cipher & operator=(const Cipher &from);
 
 	/**
+	   Returns a list of all of the cipher types available
+	*/
+	static QStringList supportedTypes(const QString &provider = QString());
+
+	/**
 	   Return the cipher type
 	*/
 	QString type() const;
@@ -765,6 +770,12 @@ public:
 	   to another
 	*/
 	MessageAuthenticationCode & operator=(const MessageAuthenticationCode &from);
+
+	/**
+	   Returns a list of all of the message authentication code types
+	   available
+	*/
+	static QStringList supportedTypes(const QString &provider = QString());
 
 	/**
 	   Return the MAC type

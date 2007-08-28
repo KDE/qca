@@ -868,6 +868,16 @@ QStringList InfoContext::supportedHashTypes() const
 	return QStringList();
 }
 
+QStringList InfoContext::supportedCipherTypes() const
+{
+	return QStringList();
+}
+
+QStringList InfoContext::supportedMACTypes() const
+{
+	return QStringList();
+}
+
 //----------------------------------------------------------------------------
 // PKeyBase
 //----------------------------------------------------------------------------

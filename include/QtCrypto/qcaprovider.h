@@ -119,6 +119,16 @@ public:
 	   The hash algorithms supported by the provider
 	*/
 	virtual QStringList supportedHashTypes() const;
+
+	/**
+	   The cipher algorithms supported by the provider
+	*/
+	virtual QStringList supportedCipherTypes() const;
+
+	/**
+	   The mac algorithms supported by the provider
+	*/
+	virtual QStringList supportedMACTypes() const;
 };
 
 /**
