@@ -18,12 +18,12 @@ cd keystore && make test && cd .. && \
 cd macunittest && make test && cd .. && \
 cd metatype && make test && cd .. && \
 cd pgpunittest && make test && cd .. && \
-cd pipeunittest && make test && cd .. && \
+#cd pipeunittest && make test && cd .. && \
 cd pkits && make test && cd .. && \
 cd randomunittest && make test && cd .. && \
 cd rsaunittest && make test && cd .. && \
 cd securearrayunittest && make test && cd .. && \
 cd staticunittest && make test && cd .. && \
 cd symmetrickeyunittest && make test && cd .. && \
-cd tls && make test && cd .. && \
-cd velox && make test && cd .. 
+cd tls && make test && cd .. #&& \
+#cd velox && make test && cd ..
