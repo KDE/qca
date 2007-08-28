@@ -27,9 +27,9 @@ For Unix/Linux/Mac:
 
 For Windows:
 
-  edit qca-openssl.pro
-  qmake qca-openssl.pro
+  edit qca-ossl.pro
+  qmake qca-ossl.pro
   nmake (or make)
 
-  copy [debug|release]\qca-openssl.dll qtdir\plugins\crypto
+  copy [debug|release]\qca-ossl.dll qtdir\plugins\crypto
 
