@@ -401,7 +401,10 @@ public:
 		if(actionQueue.isEmpty())
 		{
 			if(need_update)
+			{
+				QCA_logTextMessage(QString("tls[%1]: need_update").arg(q->objectName()), Logger::Information);
 				update();
+			}
 			return;
 		}
 
@@ -611,6 +614,10 @@ public:
 		}
 
 		QByteArray c_to_net = c->to_net();
+		if(!c_to_net.isEmpty())
+		{
+			QCA_logTextMessage(QString("tls[%1]: to_net %2").arg(q->objectName(), QString::number(c_to_net.size())), Logger::Information);
+		}
 
 		if(state == Closing)
 		{
@@ -679,6 +686,11 @@ public:
 		else // Connected
 		{
 			QByteArray c_to_app = c->to_app();
+			if(!c_to_app.isEmpty())
+			{
+				QCA_logTextMessage(QString("tls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())), Logger::Information);
+			}
+
 			bool eof = c->eof();
 			int enc = -1;
 			if(!c_to_net.isEmpty())
@@ -739,7 +751,10 @@ public:
 			}
 
 			if(eof || io_pending)
+			{
+				QCA_logTextMessage(QString("tls[%1]: eof || io_pending").arg(q->objectName()), Logger::Information);
 				update();
+			}
 
 			processNextAction();
 			return;
@@ -1053,6 +1068,7 @@ void TLS::write(const QByteArray &a)
 	}
 	else
 		d->packet_out.append(a);
+	QCA_logTextMessage(QString("tls[%1]: write").arg(objectName()), Logger::Information);
 	d->update();
 }
 
@@ -1079,6 +1095,7 @@ void TLS::writeIncoming(const QByteArray &a)
 		d->from_net.append(a);
 	else
 		d->packet_from_net.append(a);
+	QCA_logTextMessage(QString("tls[%1]: writeIncoming %2").arg(objectName(), QString::number(a.size())), Logger::Information);
 	d->update();
 }
 
