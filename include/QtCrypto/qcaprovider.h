@@ -76,7 +76,7 @@ public:
    There is only one function to reimplement, called createProvider().  This
    function should return a newly allocated Provider instance.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT QCAPlugin
 {
@@ -104,7 +104,7 @@ namespace QCA {
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Random instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT RandomContext : public BasicContext
 {
@@ -131,7 +131,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Hash instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT HashContext : public BasicContext
 {
@@ -168,7 +168,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Cipher instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CipherContext : public BasicContext
 {
@@ -219,7 +219,7 @@ public:
    be used directly by applications.  You probably want
    MessageAuthenticationCode instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT MACContext : public BasicContext
 {
@@ -276,7 +276,7 @@ protected:
    be used directly by applications.  You probably want KeyDerivationFunction
    instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT KDFContext : public BasicContext
 {
@@ -301,7 +301,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want DLGroup instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT DLGroupContext : public Provider::Context
 {
@@ -357,7 +357,7 @@ Q_SIGNALS:
    be used directly by applications.  You probably want PKey, PublicKey, or
    PrivateKey instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT PKeyBase : public BasicContext
 {
@@ -494,7 +494,7 @@ Q_SIGNALS:
    be used directly by applications.  You probably want RSAPublicKey or
    RSAPrivateKey instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT RSAContext : public PKeyBase
 {
@@ -566,7 +566,7 @@ public:
    be used directly by applications.  You probably want DSAPublicKey or
    DSAPrivateKey instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT DSAContext : public PKeyBase
 {
@@ -627,7 +627,7 @@ public:
    be used directly by applications.  You probably want DHPublicKey or
    DHPrivateKey instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT DHContext : public PKeyBase
 {
@@ -694,7 +694,7 @@ public:
    (key() returns 0), but you can put a key into it with setKey(), or you
    can call an import function such as publicFromDER().
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT PKeyContext : public BasicContext
 {
@@ -838,7 +838,7 @@ public:
    be used directly by applications.  You probably want Certificate,
    CertificateRequest, or CRL instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CertBase : public BasicContext
 {
@@ -896,7 +896,7 @@ public:
    Some fields are only for certificates or only for certificate requests,
    and these fields are noted.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CertContextProps
 {
@@ -1039,7 +1039,7 @@ public:
 
    For efficiency and simplicity, the members are directly accessed.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CRLContextProps
 {
@@ -1095,7 +1095,7 @@ class CRLContext;
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want Certificate instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CertContext : public CertBase
 {
@@ -1183,7 +1183,7 @@ public:
    be used directly by applications.  You probably want CertificateRequest
    instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CSRContext : public CertBase
 {
@@ -1257,7 +1257,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want CRL instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CRLContext : public CertBase
 {
@@ -1290,7 +1290,7 @@ public:
    be used directly by applications.  You probably want CertificateCollection
    instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CertCollectionContext : public BasicContext
 {
@@ -1333,7 +1333,7 @@ public:
    be used directly by applications.  You probably want CertificateAuthority
    instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT CAContext : public BasicContext
 {
@@ -1408,7 +1408,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want KeyBundle instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT PKCS12Context : public BasicContext
 {
@@ -1458,7 +1458,7 @@ public:
 
    For efficiency and simplicity, the members are directly accessed.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT PGPKeyContextProps
 {
@@ -1517,7 +1517,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want PGPKey instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT PGPKeyContext : public BasicContext
 {
@@ -1573,7 +1573,7 @@ public:
    be used directly by applications.  You probably want KeyStoreEntry
    instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT KeyStoreEntryContext : public BasicContext
 {
@@ -1676,7 +1676,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want KeyStore instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT KeyStoreListContext : public Provider::Context
 {
@@ -1874,7 +1874,7 @@ Q_SIGNALS:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want TLSSession instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT TLSSessionContext : public BasicContext
 {
@@ -1894,7 +1894,7 @@ public:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want TLS instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT TLSContext : public Provider::Context
 {
@@ -1907,7 +1907,7 @@ public:
 
 	   For efficiency and simplicity, the members are directly accessed.
 
-	   \ingroup UserAPI
+	   \ingroup ProviderAPI
 	*/
 	class SessionInfo
 	{
@@ -2224,7 +2224,7 @@ Q_SIGNALS:
    \note This class is part of the provider plugin interface and should not
    be used directly by applications.  You probably want SASL instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT SASLContext : public Provider::Context
 {
@@ -2237,7 +2237,7 @@ public:
 
 	   For efficiency and simplicity, the members are directly accessed.
 
-	   \ingroup UserAPI
+	   \ingroup ProviderAPI
 	*/
 	class HostPort
 	{
@@ -2482,7 +2482,7 @@ Q_SIGNALS:
    be used directly by applications.  You probably want SecureMessage
    instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT MessageContext : public Provider::Context
 {
@@ -2650,7 +2650,7 @@ Q_SIGNALS:
    be used directly by applications.  You probably want SecureMessageSystem
    instead.
 
-  \ingroup ProviderAPI
+   \ingroup ProviderAPI
 */
 class QCA_EXPORT SMSContext : public BasicContext
 {

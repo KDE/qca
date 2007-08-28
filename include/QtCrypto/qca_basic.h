@@ -43,7 +43,6 @@ namespace QCA {
    in standard applications.
 */
 
-
 /**
    \class Random qca_basic.h QtCrypto
 
@@ -70,19 +69,19 @@ public:
 	*/
 	Random(const QString &provider = QString());
 
-        /**
-           Copy constructor
+	/**
+	   Copy constructor
 
-           \param from the %Random object to copy from
+	   \param from the %Random object to copy from
         */
 	Random(const Random &from);
 
 	~Random();
 
         /**
-           Assignment operator
+	   Assignment operator
 
-           \param from the %Random object to copy state from
+	   \param from the %Random object to copy state from
         */
 	Random & operator=(const Random &from);
 
@@ -201,7 +200,6 @@ else
    For more information on hashing algorithms, see \ref hashing.
 
    \ingroup UserAPI
-
 */
 class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
 {
@@ -215,19 +213,20 @@ public:
 	   for the subclass (eg "qca-ossl")
 	*/
 	explicit Hash(const QString &type, const QString &provider = QString());
-        /**
-           Copy constructor
 
-           \param from the Hash object to copy from
+	/**
+	   Copy constructor
+
+	   \param from the Hash object to copy from
         */
 	Hash(const Hash &from);
 
 	~Hash();
 
-        /**
-           Assignment operator
+	/**
+	   Assignment operator
 
-           \param from the Hash object to copy state from
+	   \param from the Hash object to copy state from
         */
 	Hash & operator=(const Hash &from);
 
@@ -365,7 +364,6 @@ private:
 	class Private;
 	Private *d;
 };
-
 
 /**
    \page hashing Hashing Algorithms
@@ -608,6 +606,7 @@ public:
 	   Standard copy constructor
 	*/
 	Cipher(const Cipher &from);
+
 	~Cipher();
 
 	/**
@@ -732,7 +731,6 @@ private:
    "HMAC: Keyed-Hashing for Message Authentication"
 
    \ingroup UserAPI
-
 */
 class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
 {
@@ -850,6 +848,7 @@ public:
 	   Standard copy constructor
 	*/
 	KeyDerivationFunction(const KeyDerivationFunction &from);
+
 	~KeyDerivationFunction();
 
 	/**
@@ -925,7 +924,6 @@ public:
    as specified in RFC2898, and also in PKCS#5.
 
    \ingroup UserAPI
-
 */
 class QCA_EXPORT PBKDF2 : public KeyDerivationFunction
 {
