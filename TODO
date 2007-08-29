@@ -6,16 +6,14 @@
   fix SASL examples (client and server)
 
 * additional unit tests (using QTestLib):
-  - OpenPGP
+  - OpenPGP - encryption/decryption and Message format signing/verification
   - CMS
   - TLS ?
   - SASL ?
   - FileWatch / DirWatch
   - Complete the pkits tests
 
-* write plugin support
-  qca-botan: implement
-  qca-egads (or qca-egd): implement for Random support
+* write plugin support - most plugins need at least some work
 
 * possibilities for the future:
   publickey: use_asker_fallback should use ErrorPassphrase
@@ -51,3 +49,5 @@
     Windows CryptoAPI
     Linux kernel crypto support, if the userspace API ever gets sorted out
     Intel Performance Primatives library
+    Botan: partly implemented
+    EGD / EGADS: implement for Random support
