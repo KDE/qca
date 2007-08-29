@@ -3,10 +3,9 @@
   create example for OpenPGP
   create example for CMS
   create example for using TLS with smart cards (maybe reuse ssltest?)
-  fix SASL examples (client and server)
 
 * additional unit tests (using QTestLib):
-  - OpenPGP - encryption/decryption and Message format signing/verification
+  - OpenPGP - encryption/decryption
   - CMS
   - TLS ?
   - SASL ?
