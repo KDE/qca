@@ -129,6 +129,20 @@
    for authentication, your situation may be more suited to using 
    Kerberos than SASL or TLS).
 
+   \subsection intro-design Design
+
+   The architecture of %QCA is shown below:
+
+   \image html qca-arch.png "QCA Architecture"
+   \image latex qca-arch.eps "QCA Architecture"
+
+   Application authors normally only need to use the User API. The
+   provider API is available for plugin authors, but can also
+   be used by application authors to provide very specific capabilities.
+
+   For more information on the design of %QCA, you might like to review
+   the \ref architecture description.
+ 
    \section availability Availability
 
    \subsection qca2code Current development
