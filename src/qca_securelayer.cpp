@@ -437,6 +437,8 @@ public:
 					actionTrigger.start();
 			}
 
+			QCA_logTextMessage(QString("tls[%1]: handshaken").arg(q->objectName()), Logger::Information);
+
 			if(connect_handshaken)
 			{
 				blocked = true;
@@ -1519,12 +1521,16 @@ public:
 		else if(a.type == Action::Authenticated)
 		{
 			authed = true;
+
+			// write any app data waiting during authentication
 			if(!out.isEmpty())
 			{
 				need_update = true;
 				if(!actionTrigger.isActive())
 					actionTrigger.start();
 			}
+
+			QCA_logTextMessage(QString("sasl[%1]: authenticated").arg(q->objectName()), Logger::Information);
 			emit q->authenticated();
 		}
 		else if(a.type == Action::ReadyRead)
@@ -1541,7 +1547,10 @@ public:
 	{
 		// defer writes while authenticating
 		if(!authed)
+		{
+			QCA_logTextMessage(QString("sasl[%1]: ignoring update while not yet authenticated").arg(q->objectName()), Logger::Information);
 			return;
+		}
 
 		if(!actionQueue.isEmpty())
 		{
@@ -1557,6 +1566,8 @@ public:
 			return;
 		}
 
+		need_update = false;
+
 		QCA_logTextMessage(QString("sasl[%1]: c->update()").arg(q->objectName()), Logger::Information);
 		op = OpUpdate;
 		out_pending += out.size();
@@ -1568,6 +1579,8 @@ public:
 private slots:
 	void sasl_resultsReady()
 	{
+		QCA_logTextMessage(QString("sasl[%1]: c->resultsReady()").arg(q->objectName()), Logger::Information);
+
 		int last_op = op;
 		op = -1;
 
