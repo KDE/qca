@@ -69,8 +69,13 @@ namespace QCA {
 static void ignore_sigpipe()
 {
 	// Set to ignore SIGPIPE once only.
+#if QT_VERSION < 0x040400
 	static QBasicAtomic atom = Q_ATOMIC_INIT(0);
 	if(atom.testAndSet(0, 1))
+#else
+	static QBasicAtomicInt atom = Q_BASIC_ATOMIC_INITIALIZER(0);
+	if(atom.testAndSetRelaxed(0, 1))
+#endif
 	{
 		struct sigaction noaction;
 		memset(&noaction, 0, sizeof(noaction));
