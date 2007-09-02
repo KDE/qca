@@ -46,11 +46,13 @@
          - SHA-256
          - SHA-384
          - SHA-512
+         - Whirlpool
      - Ciphers (QCA::Cipher) using
          - BlowFish
          - Triple DES
          - DES
          - AES (128, 192 and 256 bit)
+         - CAST5 (also known as CAST-128)
      - Message Authentication Code (QCA::MessageAuthenticationCode), using
          - HMAC with SHA-1
          - HMAC with MD5
@@ -134,7 +136,7 @@
    The architecture of %QCA is shown below:
 
    \image html qca-arch.png "QCA Architecture"
-   \image latex qca-arch.eps "QCA Architecture"
+   \image latex qca-arch.eps "QCA Architecture" width=\textwidth
 
    Application authors normally only need to use the User API. The
    provider API is available for plugin authors, but can also

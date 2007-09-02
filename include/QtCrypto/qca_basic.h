@@ -485,6 +485,17 @@ private:
    "Specifications for the Secure %Hash Standard", available from
    http://csrc.nist.gov/publications/. The label for SHA-512 is
    "sha512".
+
+   The Whirlpool algorithm takes an arbitrary data stream, known as
+   the message (up to \f$2^{256}\f$ bits in length) and outputs a
+   condensed 512 bit (64 byte) representation of that data
+   stream, known as the message digest. The Whirlpool algorithm is
+   considered secure in that it is considered computationally
+   infeasible to find the message that produced the message
+   digest. For more information on Whirlpool, see 
+   http://paginas.terra.com.br/informatica/paulobarreto/WhirlpoolPage.html
+   or ISO/IEC 10118-3:2004. The label for Whirlpool is
+   "whirlpool".
 */
 
 /**
@@ -541,6 +552,7 @@ private:
    - AES128 - "aes128"
    - AES192 - "aes192"
    - AES256 - "aes256"
+   - CAST5 (CAST-128) - "cast5"
 
    When checking for the availability of a particular kind
    of cipher operation (e.g. AES128 in CBC mode with PKCS7

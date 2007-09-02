@@ -6347,6 +6347,8 @@ public:
 			return KeyLength( 24, 24, 1);
 		} else if (m_type.left(6) == "aes256") {
 			return KeyLength( 32, 32, 1);
+		} else if (m_type.left(5) == "cast5") {
+			return KeyLength( 5, 16, 1);
 		} else if (m_type.left(8) == "blowfish") {
 			// Don't know - TODO
 			return KeyLength( 1, 32, 1);
@@ -6387,6 +6389,9 @@ static QStringList all_hash_types()
 #ifdef SHA512_DIGEST_LENGTH
 	list += "sha512";
 #endif
+#ifdef OBJ_whirlpool
+	list += "whirlpool";
+#endif
 	return list;
 }
 
@@ -6421,6 +6426,11 @@ static QStringList all_cipher_types()
 	list += "des-cbc-pkcs7";
 	list += "des-cfb";
 	list += "des-ofb";
+	list += "cast5-ecb";
+	list += "cast5-cbc";
+	list += "cast5-cbc-pkcs7";
+	list += "cast5-cfb";
+	list += "cast5-ofb";
 	return list;
 }
 
@@ -6590,6 +6600,10 @@ public:
 		else if ( type == "sha512" )
 			return new opensslHashContext( EVP_sha512(), this, type);
 #endif
+#ifdef OBJ_whirlpool
+		else if ( type == "whirlpool" )
+			return new opensslHashContext( EVP_whirlpool(), this, type);
+#endif
 		else if ( type == "pbkdf1(sha1)" )
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
 		else if ( type == "pbkdf1(md2)" )
@@ -6672,6 +6686,16 @@ public:
 			return new opensslCipherContext( EVP_des_cfb(), 0, this, type);
 		else if ( type == "des-ofb" )
 			return new opensslCipherContext( EVP_des_ofb(), 0, this, type);
+		else if ( type == "cast5-ecb" )
+			return new opensslCipherContext( EVP_cast5_ecb(), 0, this, type);
+		else if ( type == "cast5-cbc" )
+			return new opensslCipherContext( EVP_cast5_cbc(), 0, this, type);
+		else if ( type == "cast5-cbc-pkcs7" )
+			return new opensslCipherContext( EVP_cast5_cbc(), 1, this, type);
+		else if ( type == "cast5-cfb" )
+			return new opensslCipherContext( EVP_cast5_cfb(), 0, this, type);
+		else if ( type == "cast5-ofb" )
+			return new opensslCipherContext( EVP_cast5_ofb(), 0, this, type);
 		else if ( type == "pkey" )
 			return new MyPKeyContext( this );
 		else if ( type == "dlgroup" )
