@@ -1,5 +1,5 @@
 /**
- * Copyright (C)  2004-2006  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2004-2007  Brad Hards <bradh@frogmouth.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -93,6 +93,10 @@ private slots:
     void blowfish_cfb();
     void blowfish_ofb_data();
     void blowfish_ofb();
+
+  
+    void cast5_data();
+    void cast5();
 private:
     QCA::Initializer* m_init;
 
@@ -2685,6 +2689,70 @@ void CipherUnitTest::blowfish_ofb()
 
 	    QCA::Cipher reverseCipher( QString( "blowfish" ),
 				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
+
+	    QCOMPARE( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() ), plainText  );
+	    QVERIFY( reverseCipher.ok() );
+	    QCOMPARE( QCA::arrayToHex( reverseCipher.final().toByteArray() ), QString( "" ) );
+	    QVERIFY( reverseCipher.ok() );
+	}
+    }
+}
+
+
+// From RFC2144 Appendix B
+void CipherUnitTest::cast5_data()
+{
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("cipherText");
+    QTest::addColumn<QString>("keyText");
+
+    QTest::newRow("128-bit") << QString("0123456789abcdef")
+			     << QString("238b4fe5847e44b2")
+			     << QString("0123456712345678234567893456789A");
+
+    QTest::newRow("80-bit") << QString("0123456789abcdef")
+			     << QString("eb6a711a2c02271b")
+			     << QString("01234567123456782345");
+
+    QTest::newRow("40-bit") << QString("0123456789abcdef")
+			     << QString("7ac816d16e9b302e")
+			     << QString("0123456712");
+}
+
+void CipherUnitTest::cast5()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cast5-ecb", provider ) )
+            QWARN( QString( "CAST5 not supported for "+provider).toLocal8Bit() );
+        else {
+	    QFETCH( QString, plainText );
+	    QFETCH( QString, cipherText );
+	    QFETCH( QString, keyText );
+
+	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
+	    QCA::InitializationVector iv;
+	    QCA::Cipher forwardCipher( QString( "cast5" ),
+				       QCA::Cipher::ECB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
+	    QVERIFY( forwardCipher.ok() );
+	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+	    QVERIFY( forwardCipher.ok() );
+
+	    QCA::Cipher reverseCipher( QString( "cast5" ),
+				       QCA::Cipher::ECB,
 				       QCA::Cipher::NoPadding,
 				       QCA::Decode,
 				       key,
