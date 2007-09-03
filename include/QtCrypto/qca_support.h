@@ -274,6 +274,8 @@ class QCA_EXPORT SyncThread : public QThread
 public:
 	/**
 	   Standard constructor
+
+	   \param parent the parent object for this parent.
 	*/
 	SyncThread(QObject *parent = 0);
 
@@ -1065,6 +1067,9 @@ public:
 	   The default implementation does nothing - you should
 	   override this method in your subclass to do whatever
 	   logging is required
+
+	   \param message the message to log
+	   \param severity the severity level of the message
 	*/
 	virtual void logTextMessage(const QString &message, Logger::Severity severity);
 
@@ -1074,6 +1079,9 @@ public:
 	   The default implementation does nothing - you should
 	   override this method in your subclass to do whatever
 	   logging is required
+
+	   \param blob the message (as a byte array) to log
+	   \param severity the severity level of the message
 	*/
 	virtual void logBinaryMessage(const QByteArray &blob, Logger::Severity severity);
 

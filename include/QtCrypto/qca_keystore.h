@@ -160,6 +160,8 @@ public:
 	   Create a passive KeyStoreEntry based on a serialized
 	   string
 
+	   \param serialized the string containing the keystore entry information
+
 	   \sa fromString
 	*/
 	KeyStoreEntry(const QString &serialized);
@@ -248,6 +250,8 @@ public:
 	/**
 	   Load a passive entry by using a serialized string
 	   as input
+
+	   \param serialized the string containing the keystore entry information
 
 	   \return the newly created KeyStoreEntry
 	*/
@@ -572,14 +576,18 @@ Q_SIGNALS:
 
 	/**
 	   Emitted when an entry has been written, in asynchronous
-	   mode.  entryId is the newly written entry id on success,
+	   mode.  
+
+	   \param entryId is the newly written entry id on success,
 	   or an empty string if the write failed.
 	*/
 	void entryWritten(const QString &entryId);
 
 	/**
 	   Emitted when an entry has been removed, in asynchronous
-	   mode.  success indicates if the removal succeeded or not.
+	   mode.  
+
+	   \param success indicates if the removal succeeded (true) or not (false).
 	*/
 	void entryRemoved(bool success);
 
@@ -716,6 +724,8 @@ public:
 
 	/**
 	   Initialize a specific key store provider
+
+	   \param provider the name of the provider to start
 	*/
 	static void start(const QString &provider);
 
@@ -764,6 +774,8 @@ Q_SIGNALS:
 
 	/**
 	   emitted when a new key store becomes available
+
+	   \param id the name of the key store that has become available
 	*/
 	void keyStoreAvailable(const QString &id);
 

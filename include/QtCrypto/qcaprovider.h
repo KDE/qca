@@ -400,6 +400,8 @@ class QCA_EXPORT PKeyBase : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	PKeyBase(Provider *p, const QString &type);
 
@@ -1376,6 +1378,8 @@ class QCA_EXPORT CAContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	CAContext(Provider *p) : BasicContext(p, "ca") {}
 
@@ -1451,6 +1455,8 @@ class QCA_EXPORT PKCS12Context : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	PKCS12Context(Provider *p) : BasicContext(p, "pkcs12") {}
 
@@ -1560,6 +1566,8 @@ class QCA_EXPORT PGPKeyContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	PGPKeyContext(Provider *p) : BasicContext(p, "pgpkey") {}
 
@@ -1616,6 +1624,8 @@ class QCA_EXPORT KeyStoreEntryContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	KeyStoreEntryContext(Provider *p) : BasicContext(p, "keystoreentry") {}
 
@@ -1719,6 +1729,8 @@ class QCA_EXPORT KeyStoreListContext : public Provider::Context
 public:
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
 
@@ -1917,6 +1929,8 @@ class QCA_EXPORT TLSSessionContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	TLSSessionContext(Provider *p) : BasicContext(p, "tlssession") {}
 };
@@ -1994,6 +2008,8 @@ public:
 
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	TLSContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
@@ -2006,6 +2022,8 @@ public:
 	   Returns a list of supported cipher suites for the specified
 	   SSL/TLS version.  The cipher suites are specified as strings, for
 	   example: "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA" (without quotes).
+
+	   \param version the version of TLS to search for
 	*/
 	virtual QStringList supportedCipherSuites(const TLS::Version &version) const = 0;
 
@@ -2302,6 +2320,8 @@ public:
 
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
 	*/
 	SASLContext(Provider *p) : Provider::Context(p, "sasl") {}
 
@@ -2537,6 +2557,9 @@ public:
 
 	/**
 	   Standard constructor
+
+	   \param p the Provider associated with this context
+	   \param type the name of the type of secure message to be created
 	*/
 	MessageContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
@@ -2558,6 +2581,8 @@ public:
 
 	/**
 	   Configure a new encrypting operation
+
+	   \param keys the keys to be used for encryption.
 	*/
 	virtual void setupEncrypt(const SecureMessageKeyList &keys) = 0;
 
@@ -2568,6 +2593,8 @@ public:
 
 	/**
 	   Configure a new verify operation
+
+	   \param detachedSig the detached signature to use (if applicable) for verification
 	*/
 	virtual void setupVerify(const QByteArray &detachedSig) = 0;
 

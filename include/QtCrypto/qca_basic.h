@@ -232,6 +232,10 @@ public:
 
 	/**
 	   Returns a list of all of the hash types available
+
+	   \param provider the name of the provider to get a list from, if one
+	   provider is required. If not specified, available hash types from all
+	   providers will be returned.
 	*/
 	static QStringList supportedTypes(const QString &provider = QString());
 
@@ -621,6 +625,8 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   \param from the Cipher to copy state from
 	*/
 	Cipher(const Cipher &from);
 
@@ -635,6 +641,10 @@ public:
 
 	/**
 	   Returns a list of all of the cipher types available
+
+	   \param provider the name of the provider to get a list from, if one
+	   provider is required. If not specified, available cipher types from all
+	   providers will be returned.
 	*/
 	static QStringList supportedTypes(const QString &provider = QString());
 
@@ -770,6 +780,11 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   Copies the state (including key) from one MessageAuthenticationCode
+	   to another
+
+	   \param from the MessageAuthenticationCode to copy state from
 	*/
 	MessageAuthenticationCode(const MessageAuthenticationCode &from);
 
@@ -780,12 +795,18 @@ public:
 
 	   Copies the state (including key) from one MessageAuthenticationCode
 	   to another
+
+	   \param from the MessageAuthenticationCode to assign from.
 	*/
 	MessageAuthenticationCode & operator=(const MessageAuthenticationCode &from);
 
 	/**
 	   Returns a list of all of the message authentication code types
 	   available
+
+	   \param provider the name of the provider to get a list from, if one
+	   provider is required. If not specified, available message authentication
+	   codes types from all providers will be returned.
 	*/
 	static QStringList supportedTypes(const QString &provider = QString());
 
@@ -874,6 +895,8 @@ class QCA_EXPORT KeyDerivationFunction : public Algorithm
 public:
 	/**
 	   Standard copy constructor
+
+	   \param from the KeyDerivationFunction to copy from
 	*/
 	KeyDerivationFunction(const KeyDerivationFunction &from);
 
@@ -884,6 +907,8 @@ public:
 
 	   Copies the state (including key) from one KeyDerivationFunction
 	   to another
+
+	   \param from the KeyDerivationFunction to assign from
 	*/
 	KeyDerivationFunction & operator=(const KeyDerivationFunction &from);
 
@@ -907,12 +932,20 @@ public:
 	   You can use this to build a standard name string.
 	   You probably only need this method if you are 
 	   creating a new subclass.
+
+	   \param kdfType the type of key derivation function
+	   \param algType the name of the algorithm to use with the key derivation function
+
+	   \return the name of the KDF/algorithm pair
 	*/
 	static QString withAlgorithm(const QString &kdfType, const QString &algType);
 
 protected:
 	/**
 	   Special constructor for subclass initialisation
+
+	   \param type the algorithm to create
+	   \param provider the name of the provider to create the key derivation function in.
 	*/
 	KeyDerivationFunction(const QString &type, const QString &provider);
 

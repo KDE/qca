@@ -316,6 +316,8 @@ QCA_EXPORT ProviderList providers();
 
 /**
    Return the named provider, or 0 if not found
+
+   \param name the name of the provider to search for.
 */
 QCA_EXPORT Provider *findProvider(const QString &name);
 
@@ -348,16 +350,27 @@ QCA_EXPORT void clearPluginDiagnosticText();
    Add plugin diagnostic text
 
    This function should only be called by providers.
+
+   \param text the diagnostic message to append
 */
 QCA_EXPORT void appendPluginDiagnosticText(const QString &text);
 
 /**
    Set a global property
+
+   \param name the name of the property
+   \param value the value to set the property to
+
+   \sa getProperty
 */
 QCA_EXPORT void setProperty(const QString &name, const QVariant &value);
 
 /**
    Retrieve a global property
+
+   \param name the name of the property to look up
+
+   \sa setProperty
 */
 QCA_EXPORT QVariant getProperty(const QString &name);
 
@@ -389,6 +402,9 @@ QCA_EXPORT QString globalRandomProvider();
    The Random capabilities of %QCA are provided as part of the
    built in capabilities, however the generator can be changed
    if required.
+
+   \param provider the name of the provider to use as the global random
+   provider.
 */
 QCA_EXPORT void setGlobalRandomProvider(const QString &provider);
 
@@ -957,6 +973,8 @@ public:
 
 	   \note This will invalidate any previous
 	   computation using this object.
+
+	   \param a the data to process.
 	*/
 	MemoryRegion process(const MemoryRegion &a);
 };
@@ -1019,6 +1037,8 @@ public:
 
 	   \note This will invalidate any previous
 	   computation using this object.
+
+	   \param a the data to process in this step
 	*/
 	MemoryRegion process(const MemoryRegion &a);
 };
@@ -1467,6 +1487,9 @@ Q_SIGNALS:
 
 	   You typically need to connect this signal to
 	   a compatible slot in your callback handler
+
+	   \param id the identification number for the event 
+	   \param context information about the type of response required
 	*/
 	void eventReady(int id, const QCA::Event &context);
 

@@ -156,6 +156,8 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   \param from the certificate information to copy from
 	*/
 	CertificateInfoType(const CertificateInfoType &from);
 
@@ -163,6 +165,8 @@ public:
 
 	/**
 	   Standard assignment operator
+
+	   \param from the certificate information to assign from
 	*/
 	CertificateInfoType & operator=(const CertificateInfoType &from);
 
@@ -202,16 +206,25 @@ public:
 
 	/**
 	   Comparison operator
+
+	   \param other the certificate information to compare with this
+	   certificate information.
 	*/
 	bool operator<(const CertificateInfoType &other) const;
 
 	/**
 	   Comparison operator
+
+	   \param other the certificate information to compare with this
+	   certificate information.
 	*/
 	bool operator==(const CertificateInfoType &other) const;
 
 	/**
 	   Inequality operator
+
+	   \param other the certificate information to compare with this
+	   certificate information.
 	*/
 	inline bool operator!=(const CertificateInfoType &other) const
 	{
@@ -248,6 +261,8 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   \param from the information pair to copy from
 	*/
 	CertificateInfoPair(const CertificateInfoPair &from);
 
@@ -255,6 +270,8 @@ public:
 
 	/**
 	   Standard assignment operator
+
+	   \param from the information pair to assign from
 	*/
 	CertificateInfoPair & operator=(const CertificateInfoPair &from);
 
@@ -270,11 +287,17 @@ public:
 
 	/**
 	   Comparison operator
+
+	   \param other the certificate information pair to compare with this
+	   certificate information pair.
 	*/
 	bool operator==(const CertificateInfoPair &other) const;
 
 	/**
 	   Inequality operator
+
+	   \param other the certificate information pair to compare with this
+	   certificate information pair.
 	*/
 	inline bool operator!=(const CertificateInfoPair &other) const
 	{
@@ -369,6 +392,8 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   \param from the constraint type to copy from
 	*/
 	ConstraintType(const ConstraintType &from);
 
@@ -376,6 +401,8 @@ public:
 
 	/**
 	   Standard assignment operator
+
+	   \param from the constraint type to assign from
 	*/
 	ConstraintType & operator=(const ConstraintType &from);
 
@@ -415,16 +442,22 @@ public:
 
 	/**
 	   Comparison operator
+
+	   \param other the constraint type to compare with this constraint
 	*/
 	bool operator<(const ConstraintType &other) const;
 
 	/**
 	   Comparison operator
+
+	   \param other the constraint type to compare with this constraint
 	*/
 	bool operator==(const ConstraintType &other) const;
 
 	/**
 	   Inequality operator
+
+	   \param other the constraint type to compare with this constraint
 	*/
 	inline bool operator!=(const ConstraintType &other) const
 	{
@@ -520,12 +553,16 @@ public:
 
 /**
    Convert to RFC 1779 string format
+
+   \param in the certificate info to convert
 */
 QCA_EXPORT QString orderedToDNString(const CertificateInfoOrdered &in);
 
 /**
    Return a new CertificateInfoOrdered that only contains
    the Distinguished Name (DN) types found in the input object.
+
+   \param in the certificate info to extract from
 */
 QCA_EXPORT CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in);
 
@@ -546,6 +583,9 @@ typedef QList<ConstraintType> Constraints;
 
 /**
    Create a list of unique friendly names among a list of certificates
+
+   \param list the list of certificates for which a friendly name is required.
+
 */
 QCA_EXPORT QStringList makeFriendlyNames(const QList<Certificate> &list);
 
@@ -834,6 +874,8 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   \param from the certificate to copy from
 	*/
 	Certificate(const Certificate &from);
 
@@ -841,6 +883,8 @@ public:
 
 	/**
 	   Standard assignment operator
+
+	   \param from the Certificate to assign from
 	*/
 	Certificate & operator=(const Certificate &from);
 
@@ -934,21 +978,21 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	QStringList policies() const;
 
 	/**
-	   list of URI locations for CRL files
+	   List of URI locations for CRL files
 
-	   each URI refers to the same CRL file
+	   Each URI refers to the same CRL file
 	*/
 	QStringList crlLocations() const;
 
 	/**
-	   list of URI locations for issuer certificate files
+	   List of URI locations for issuer certificate files
 
-	   each URI refers to the same issuer file
+	   Each URI refers to the same issuer file
 	*/
 	QStringList issuerLocations() const;
 
 	/**
-	   list of URI locations for OCSP services
+	   List of URI locations for OCSP services
 	*/
 	QStringList ocspLocations() const;
 
@@ -988,7 +1032,9 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   Test if the Certificate has signed another Certificate
 	   object and is therefore the issuer
 
-	   \return true if the certificate is the issuer
+	   \param other the certificate to test
+
+	   \return true if this certificate is the issuer of the argument
 	*/
 	bool isIssuerOf(const Certificate &other) const;
 
@@ -1103,12 +1149,16 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	/**
 	   Test for equality of two certificates
 
+	   \param a the certificate to compare this certificate with
+
 	   \return true if the two certificates are the same
 	*/
 	bool operator==(const Certificate &a) const;
 
 	/**
 	   Inequality operator
+
+	   \param other the certificate to compare this certificate with
 	*/
 	inline bool operator!=(const Certificate &other) const
 	{
@@ -1117,6 +1167,8 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 
 	/**
 	   \internal
+
+	   \param c context (internal)
 	*/
 	void change(CertContext *c);
 
@@ -1266,6 +1318,8 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   \param from the request to copy from
 	*/
 	CertificateRequest(const CertificateRequest &from);
 
@@ -1273,6 +1327,8 @@ public:
 
 	/**
 	   Standard assignment operator
+
+	   \param from the request to assign from
 	*/
 	CertificateRequest & operator=(const CertificateRequest &from);
 
@@ -1370,12 +1426,16 @@ public:
 	/**
 	   Test for equality of two certificate requests
 
+	   \param csr the certificate request to be compared to this certificate request
+
 	   \return true if the two certificate requests are the same
 	*/
 	bool operator==(const CertificateRequest &csr) const;
 
 	/**
 	   Inequality operator
+
+	   \param other the certificate request to be compared to this certificate request
 	*/
 	inline bool operator!=(const CertificateRequest &other) const
 	{
@@ -1482,6 +1542,8 @@ public:
 
 	/**
 	   \internal
+
+	   \param c context (internal)
 	*/
 	void change(CSRContext *c);
 
@@ -1584,11 +1646,15 @@ public:
 	   Test if one CRL entry is "less than" another
 
 	   CRL entries are compared based on their serial number
+
+	   \param a the CRL entry to be compared to this CRL entry.
 	*/
 	bool operator<(const CRLEntry &a) const;
 
 	/**
 	   Test for equality of two CRL Entries
+
+	   \param a the CRL entry to be compared to this CRL entry.
 
 	   \return true if the two certificates are the same
 	*/
@@ -1596,6 +1662,8 @@ public:
 
 	/**
 	   Inequality operator
+
+	   \param other the CRL entry to be compared to this CRL entry.
 	*/
 	inline bool operator!=(const CRLEntry &other) const
 	{
@@ -1638,6 +1706,8 @@ public:
 
 	/**
 	   Standard copy constructor
+
+	   \param from the revocation list to copy from
 	*/
 	CRL(const CRL &from);
 
@@ -1645,6 +1715,8 @@ public:
 
 	/**
 	   Standard assignment operator
+
+	   \param from the revocation list to assign from
 	*/
 	CRL & operator=(const CRL &from);
 
@@ -1711,12 +1783,16 @@ public:
 	/**
 	   Test for equality of two %Certificate Revocation Lists
 
+	   \param a the CRL to be compared to this CRL 
+
 	   \return true if the two CRLs are the same
 	*/
 	bool operator==(const CRL &a) const;
 
 	/**
 	   Inequality operator
+
+	   \param other the CRL to be compared to this CRL 
 	*/
 	inline bool operator!=(const CRL &other) const
 	{
@@ -1787,6 +1863,8 @@ public:
 
 	/**
 	   \internal
+
+	   \param c context (internal)
 	*/
 	void change(CRLContext *c);
 
@@ -2290,8 +2368,11 @@ public:
 	/**
 	   Create a PGP key from an encoded file
 
-	   \sa fromFile
-	   \sa toFile
+	   \param fileName the name (and path, if required) of the file
+	   that the PGP key is to be loaded from.
+
+	   \sa fromFile for a version that allows better error checking / validation 
+	   \sa toFile for a method to write out the key.
 	*/
 	PGPKey(const QString &fileName);
 

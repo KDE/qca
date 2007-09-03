@@ -280,6 +280,9 @@ else
 	   that uses them, including the constructor form that takes a
 	   fileName), then you need to check for supportedIOTypes() instead.
 
+	   \param provider the name of the provider to use, if a particular 
+	   provider is required.
+
 	   \sa supportedIOTypes()
 	*/
 	static QList<Type> supportedTypes(const QString &provider = QString());
@@ -307,6 +310,9 @@ else
 	   (ie not PEM or DER import/export), then you can use
 	   supportedTypes().  There is no need to use both - if the key type
 	   is supported for IO, then is also supported for basic operations.
+
+	   \param provider the name of the provider to use, if a particular 
+	   provider is required.
 
 	   \sa supportedTypes()
 	*/
@@ -382,11 +388,15 @@ else
 
 	/**
 	   test if two keys are equal
+
+	   \param a the key to compare with this key
 	*/
 	bool operator==(const PKey &a) const;
 
 	/**
 	   test if two keys are not equal
+
+	   \param a the key to compare with this key
 	*/
 	bool operator!=(const PKey &a) const;
 
@@ -398,6 +408,8 @@ protected:
 
 	/**
 	   Set the key
+
+	   \param k the key to assign from
 	*/
 	void set(const PKey &k);
 

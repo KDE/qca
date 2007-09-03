@@ -130,16 +130,22 @@ public:
 
 	/**
 	   Set the public key part of this X.509 key.
+
+	   \param c the Certificate chain containing the public keys
 	*/
 	void setX509CertificateChain(const CertificateChain &c);
 
 	/**
 	   Set the private key part of this X.509 key.
+
+	   \param k the private key
 	*/
 	void setX509PrivateKey(const PrivateKey &k);
 
 	/**
 	   Set the public and private part of this X.509 key with KeyBundle.
+
+	   \param kb the public and private key bundle
 	*/
 	void setX509KeyBundle(const KeyBundle &kb);
 
@@ -189,12 +195,23 @@ public:
 	};
 
 	/**
-	   Create an empty signature check object
+	   Create an empty signature check object.
+
+	   User applications don't normally need to create signature checks. You normally
+	   get the object back as a result of a SecureMessage operation.
 	*/
 	SecureMessageSignature();
 
 	/**
 	   Create a signature check object
+
+	   User applications don't normally need to create signature checks. You normally
+	   get the object back as a result of a SecureMessage operation.
+
+	   \param r the result of the check
+	   \param v the Validity of the key validation check
+	   \param key the key associated with the signature
+	   \param ts the timestamp associated with the signature
 	*/
 	SecureMessageSignature(IdentityResult r, Validity v, const SecureMessageKey &key, const QDateTime &ts);
 
@@ -441,6 +458,8 @@ public:
 	   bundle the signer, greatly simplifying key management.
 
 	   This behavior is enabled by default.
+
+	   \param b whether to bundle (if true) or not (false)
 	*/
 	void setBundleSignerEnabled(bool b);
 
@@ -451,6 +470,8 @@ public:
 	   used are decided by the provider.
 
 	   This behavior is enabled by default.
+
+	   \param b whether to embed extra attribues (if true) or not (false)
 	*/
 	void setSMIMEAttributesEnabled(bool b);
 
@@ -466,6 +487,8 @@ public:
 	/**
 	   Set the recipient for an encrypted message
 
+	   \param key the recipient's key
+
 	   \sa setRecipients
 	*/
 	void setRecipient(const SecureMessageKey &key);
@@ -474,6 +497,8 @@ public:
 	   Set the list of recipients for an encrypted message.
 
 	   For a list with one item, this has the same effect as setRecipient.
+
+	   \param keys the recipients' key
 
 	   \sa setRecipient
 	*/
@@ -484,6 +509,8 @@ public:
 
 	   This is used for both creating signed messages as well as for
 	   verifying CMS messages that have no signer bundled.
+
+	   \param key the key associated with the signer
 
 	   \sa setSigners
 	*/
@@ -496,6 +523,8 @@ public:
 	   verifying CMS messages that have no signer bundled.
 
 	   For a list with one item, this has the same effect as setSigner.
+
+	   \param keys the key associated with the signer
 
 	   \sa setSigner
 	*/
@@ -738,6 +767,8 @@ Q_SIGNALS:
 	/**
 	   This signal is emitted when data has been accepted
 	   by the message processor.
+
+	   \param bytes the number of bytes written
 	*/
 	void bytesWritten(int bytes);
 

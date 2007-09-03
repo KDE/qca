@@ -142,6 +142,8 @@ public:
 	   This method writes unencrypted (plain) data to
 	   the SecureLayer implementation. You normally
 	   call this function on the application side.
+
+	   \param a the source of the application-side data
 	*/
 	virtual void write(const QByteArray &a) = 0;
 
@@ -159,6 +161,8 @@ public:
 	   data read from the network socket (e.g. using 
 	   QTcpSocket::readAll()) after receiving a signal that
 	   indicates that the socket has data to read.
+
+	   \param a the ByteArray to take network-side data from
 	*/
 	virtual void writeIncoming(const QByteArray &a) = 0;
 
@@ -168,6 +172,8 @@ public:
 	   to write out to the network socket (e.g. using
 	   QTcpSocket::write()) after receiving the
 	   readyReadOutgoing() signal.
+
+	   \param plainBytes the number of bytes that were read.
 	*/
 	virtual QByteArray readOutgoing(int *plainBytes = 0) = 0;
 
@@ -182,6 +188,8 @@ public:
 
 	/**
 	   Convert encrypted bytes written to plain text bytes written
+
+	   \param encryptedBytes the number of bytes to convert
 	*/
 	virtual int convertBytesWritten(qint64 encryptedBytes) = 0;
 
@@ -394,6 +402,9 @@ public:
 	   \overload
 
 	   Allows setting a certificate from a KeyBundle.
+
+	   \param kb key bundle containing the local certificate
+	   and associated private key.
 	*/
 	void setCertificate(const KeyBundle &kb);
 
@@ -471,11 +482,15 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	/**
 	   Sets the issuer list to present to the client.  For
 	   use with servers only.  Only DN types are allowed.
+
+	   \param issuers the list of valid issuers to be used.
 	*/
 	void setIssuerList(const QList<CertificateInfoOrdered> &issuers);
 
 	/**
 	   Resume a %TLS session using the given session object
+
+	   \param session the session state to use for resumption.
 	*/
 	void setSession(const TLSSession &session);
 
@@ -1054,6 +1069,8 @@ public:
 	   Call this with the mechanism selected by the client.  If there
 	   is initial client data, call the other version of this function
 	   instead.
+
+	   \param mech the mechanism to be used.
 	*/
 	void putServerFirstStep(const QString &mech);
 
@@ -1063,6 +1080,9 @@ public:
 	   Call this with the mechanism selected by the client, and initial
 	   client data.  If there is no initial client data, call the other
 	   version of this function instead.
+
+	   \param mech the mechanism to be used
+	   \param clientInit the initial data provided by the client side
 	*/
 	void putServerFirstStep(const QString &mech, const QByteArray &clientInit);
 
@@ -1072,6 +1092,8 @@ public:
 	   Call this with authentication data received from the network.
 	   The only exception is the first step in server mode, in which
 	   case putServerFirstStep must be called.
+
+	   \param stepData the authentication data from the network
 	*/
 	void putStep(const QByteArray &stepData);
 
@@ -1178,8 +1200,11 @@ Q_SIGNALS:
 	   This signal is emitted when the client needs
 	   additional parameters
 
-	   Set parameter values as necessary and then call
+	   After receiving this signal, the application should set 
+	   the required parameter values appropriately and then call
 	   continueAfterParams().
+
+	   \param params the parameters that are required by the client
 	*/
 	void needParams(const QCA::SASL::Params &params);
 
@@ -1188,6 +1213,9 @@ Q_SIGNALS:
 	   perform the authentication check
 
 	   If the user and authzid are valid, call continueAfterAuthCheck().
+
+	   \param user the user identification name
+	   \param authzid the user authorization name
 	*/
 	void authCheck(const QString &user, const QString &authzid);
 

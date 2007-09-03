@@ -146,9 +146,11 @@ public:
 	void release();
 
 	/**
-	   Set the pupe end to be inheritable
+	   Set the pipe end to be inheritable
 
 	   \note On Windows, this operation changes the pipe end id value.
+
+	   \param enabled whether the pipe is inheritable (true) or not (false)
 	*/
 	bool setInheritable(bool enabled);
 
@@ -275,6 +277,8 @@ public:
 
 	   Enabling this may reduce performance, and it should only be used if
 	   sensitive data is being transmitted (such as a passphrase).
+
+	   \param secure whether the pipe uses secure memory (true) or not (false).
 	*/
 	void setSecurityEnabled(bool secure);
 #endif
@@ -307,6 +311,8 @@ public:
 
 	   Returns true if inheritability was successfully changed, otherwise
 	   false.
+
+	   \param enabled whether the pipe is inheritable (true) or not (false).
 	*/
 	bool setInheritable(bool enabled);
 

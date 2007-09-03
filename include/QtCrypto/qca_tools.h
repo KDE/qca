@@ -102,22 +102,30 @@ public:
 	/**
 	   Constructs a new MemoryRegion from the data in a 
 	   byte array
+
+	   \param from the QByteArray to copy from
 	*/
 	MemoryRegion(const QByteArray &from);
 
 	/**
 	   Standard copy constructor
+
+	   \param from the MemoryRegion to copy from
 	*/
 	MemoryRegion(const MemoryRegion &from);
 	~MemoryRegion();
 
 	/**
 	   Standard assignment operator
+
+	   \param from the MemoryRegion to copy from
 	*/
 	MemoryRegion & operator=(const MemoryRegion &from);
 
 	/**
 	   Standard assignment operator
+
+	   \param from the QByteArray to copy from
 	*/
 	MemoryRegion & operator=(const QByteArray &from);
 
@@ -323,14 +331,18 @@ public:
 	/**
 	   Construct a secure byte array from a string
 
-	   Note that this copies, rather than references the source array
+	   Note that this copies, rather than references the source array.
+
+	   \param str the source of the data (as a null terminated string).
 	*/
 	SecureArray(const char *str);
 
 	/**
 	   Construct a secure byte array from a QByteArray
 
-	   Note that this copies, rather than references the source array
+	   Note that this copies, rather than references the source array.
+
+	   \param a the source of the data.
 
 	   \sa operator=()
 	*/
@@ -340,6 +352,8 @@ public:
 	   Construct a secure byte array from a MemoryRegion
 
 	   Note that this copies, rather than references the source array
+
+	   \param a the source of the data.
 
 	   \sa operator=()
 	*/
@@ -356,6 +370,8 @@ public:
 
 	/**
 	   Creates a reference, rather than a deep copy.
+
+	   \param from the array to reference
 	*/
 	SecureArray & operator=(const SecureArray &from);
 
@@ -477,18 +493,24 @@ public:
 
 	/**
 	   Append a secure byte array to the end of this array
+
+	   \param a the array to append to this array
 	*/
 	SecureArray & append(const SecureArray &a);
 
 	/**
 	   Equality operator. Returns true if both arrays have the same
 	   data (and the same length, of course).
+
+	   \param other the MemoryRegion to compare to
 	*/
 	bool operator==(const MemoryRegion &other) const;
 	
 	/**
 	   Inequality operator. Returns true if both arrays have different
 	   length, or the same length but different data.
+
+	   \param other the MemoryRegion to compare to
 	*/
 	inline bool operator!=(const MemoryRegion &other) const
 	{
@@ -497,6 +519,8 @@ public:
 
 	/**
 	   Append a secure byte array to the end of this array
+
+	   \param a the array to append to this array
 	*/
 	SecureArray & operator+=(const SecureArray &a);
 
@@ -735,6 +759,8 @@ result = b.compare( c );        // return negative, -400 < 200
 	/**
 	   Equality operator. Returns true if the two BigInteger values
 	   are the same, including having the same sign.
+
+	   \param other the BigInteger to compare to
 	*/
 	inline bool operator==(const BigInteger &other) const
 	{
@@ -744,6 +770,8 @@ result = b.compare( c );        // return negative, -400 < 200
 	/**
 	   Inequality operator. Returns true if the two BigInteger values
 	   are different in magnitude, sign or both.
+
+	   \param other the BigInteger to compare to
 	*/
 	inline bool operator!=(const BigInteger &other) const
 	{
@@ -754,6 +782,8 @@ result = b.compare( c );        // return negative, -400 < 200
 	   Less than or equal operator. Returns true if the BigInteger value
 	   on the left hand side is equal to or less than the BigInteger
 	   value on the right hand side.
+
+	   \param other the BigInteger to compare to
 	*/
 	inline bool operator<=(const BigInteger &other) const
 	{
@@ -764,6 +794,8 @@ result = b.compare( c );        // return negative, -400 < 200
 	   Greater than or equal operator. Returns true if the BigInteger
 	   value on the left hand side is equal to or greater than the
 	   BigInteger value on the right hand side.
+
+	   \param other the BigInteger to compare to
 	*/
 	inline bool operator>=(const BigInteger &other) const
 	{
@@ -774,6 +806,8 @@ result = b.compare( c );        // return negative, -400 < 200
 	   Less than operator. Returns true if the BigInteger value
 	   on the left hand side is less than the BigInteger value
 	   on the right hand side.
+
+	   \param other the BigInteger to compare to
 	*/
 	inline bool operator<(const BigInteger &other) const
 	{
@@ -784,6 +818,8 @@ result = b.compare( c );        // return negative, -400 < 200
 	   Greater than operator. Returns true if the BigInteger value
 	   on the left hand side is greater than the BigInteger value
 	   on the right hand side.
+
+	   \param other the BigInteger to compare to
 	*/
 	inline bool operator>(const BigInteger &other) const
 	{
@@ -799,6 +835,9 @@ private:
 
 /**
    Stream operator
+
+   \param stream the stream to write to
+   \param b the integer to write to the stream
 
    \relates BigInteger
 */
