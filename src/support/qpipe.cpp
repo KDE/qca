@@ -73,16 +73,16 @@ static bool ign_sigpipe = false;
 static void ignore_sigpipe()
 {
 	// Set to ignore SIGPIPE once only.
-#if QT_VERSION < 0x040400
+//#if QT_VERSION < 0x040400
 	QMutexLocker locker(ign_mutex());
 	if(!ign_sigpipe)
 	{
 		ign_sigpipe = true;
-#else
-	static QBasicAtomicInt atom = Q_BASIC_ATOMIC_INITIALIZER(0);
-	if(atom.testAndSetRelaxed(0, 1))
-	{
-#endif
+//#else
+//	static QBasicAtomicInt atom = Q_BASIC_ATOMIC_INITIALIZER(0);
+//	if(atom.testAndSetRelaxed(0, 1))
+//	{
+//#endif
 		struct sigaction noaction;
 		memset(&noaction, 0, sizeof(noaction));
 		noaction.sa_handler = SIG_IGN;
