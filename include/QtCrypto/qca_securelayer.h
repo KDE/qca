@@ -1176,8 +1176,16 @@ public:
 
 Q_SIGNALS:
 	/**
-	   This signal is emitted when the client has been
-	   successfully started
+	   This signal is emitted when the client has been successfully
+	   started
+
+	   \param clientInit true if the client should send an initial
+	   response to the server
+	   \param clientInitData the initial response to send to the server.
+	   Do note that there is a difference in SASL between an empty initial
+	   response and no initial response, and so even if clientInitData is
+	   an empty array, you still need to send an initial response if
+	   clientInit is true.
 	*/
 	void clientStarted(bool clientInit, const QByteArray &clientInitData);
 
