@@ -413,6 +413,9 @@ else
 protected:
 	/**
 	   Create a key of the specified type
+
+	   \param type the name of the type of key to create
+	   \param provider the name of the provider to create the key in
 	*/
 	PKey(const QString &type, const QString &provider);
 
