@@ -112,6 +112,8 @@ class QCA_EXPORT InfoContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	InfoContext(Provider *p) : BasicContext(p, "info") {}
 
@@ -147,6 +149,8 @@ class QCA_EXPORT RandomContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	RandomContext(Provider *p) : BasicContext(p, "random") {}
 
@@ -174,6 +178,9 @@ class QCA_EXPORT HashContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
+	   \param type the name of the type of hash provided by this context
 	*/
 	HashContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
@@ -211,11 +218,21 @@ class QCA_EXPORT CipherContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
+	   \param type the name of the type of cipher provided by this context
+
+	   \note type includes the name of the cipher (e.g. "aes256"), the operating
+	   mode (e.g. "cbc" or "ofb") and the padding type (e.g. "pkcs7") if any.
 	*/
 	CipherContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
 	/**
 	   Set up the object for encrypt/decrypt
+
+	   \param dir the direction for the cipher (encryption/decryption)
+	   \param key the symmetric key to use for the cipher
+	   \param iv the initialization vector to use for the cipher (not used in ECB mode)
 	*/
 	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv) = 0;
 
@@ -262,11 +279,15 @@ class QCA_EXPORT MACContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+	   \param p the provider associated with this context
+	   \param type the name of the type of MAC algorithm provided by this context
 	*/
 	MACContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
 	/**
 	   Set up the object for hashing
+
+	   \param key the key to use with the MAC.
 	*/
 	virtual void setup(const SymmetricKey &key) = 0;
 
@@ -319,6 +340,9 @@ class QCA_EXPORT KDFContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
+	   \param type the name of the KDF provided by this context
 	*/
 	KDFContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
@@ -344,6 +368,8 @@ class QCA_EXPORT DLGroupContext : public Provider::Context
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	DLGroupContext(Provider *p) : Provider::Context(p, "dlgroup") {}
 
@@ -539,6 +565,8 @@ class QCA_EXPORT RSAContext : public PKeyBase
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	RSAContext(Provider *p) : PKeyBase(p, "rsa") {}
 
@@ -611,6 +639,8 @@ class QCA_EXPORT DSAContext : public PKeyBase
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	DSAContext(Provider *p) : PKeyBase(p, "dsa") {}
 
@@ -672,6 +702,8 @@ class QCA_EXPORT DHContext : public PKeyBase
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	DHContext(Provider *p) : PKeyBase(p, "dh") {}
 
@@ -739,6 +771,8 @@ class QCA_EXPORT PKeyContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	PKeyContext(Provider *p) : BasicContext(p, "pkey") {}
 
@@ -883,6 +917,9 @@ class QCA_EXPORT CertBase : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
+	   \param type the type of certificate-like object provided by this context
 	*/
 	CertBase(Provider *p, const QString &type) : BasicContext(p, type) {}
 
@@ -1140,6 +1177,8 @@ class QCA_EXPORT CertContext : public CertBase
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	CertContext(Provider *p) : CertBase(p, "cert") {}
 
@@ -1150,6 +1189,9 @@ public:
 	   If successful, this object becomes the self-signed certificate.
 	   If unsuccessful, this object is considered to be in an
 	   uninitialized state.
+
+	   \param opts the options to set on the certificate
+	   \param priv the key to be used to sign the certificate 
 	*/
 	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) = 0;
 
@@ -1228,12 +1270,16 @@ class QCA_EXPORT CSRContext : public CertBase
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	CSRContext(Provider *p) : CertBase(p, "csr") {}
 
 	/**
 	   Returns true if the provider of this object supports the specified
 	   format, otherwise false
+
+	   \param f the format to test for support for.
 	*/
 	virtual bool canUseFormat(CertificateRequestFormat f) const = 0;
 
@@ -1244,6 +1290,9 @@ public:
 	   If successful, this object becomes the certificate request.
 	   If unsuccessful, this object is considered to be in an
 	   uninitialized state.
+
+	   \param opts the options to set on the certificate
+	   \param priv the key to be used to sign the certificate 
 	*/
 	virtual bool createRequest(const CertificateOptions &opts, const PKeyContext &priv) = 0;
 
@@ -1302,6 +1351,8 @@ class QCA_EXPORT CRLContext : public CertBase
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	CRLContext(Provider *p) : CertBase(p, "crl") {}
 
@@ -1335,6 +1386,8 @@ class QCA_EXPORT CertCollectionContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
 	*/
 	CertCollectionContext(Provider *p) : BasicContext(p, "certcollection") {}
 
@@ -2720,6 +2773,9 @@ class QCA_EXPORT SMSContext : public BasicContext
 public:
 	/**
 	   Standard constructor
+
+	   \param p the provider associated with this context
+	   \param type the name of the type of secure message system
 	*/
 	SMSContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
@@ -2730,6 +2786,8 @@ public:
 	   The collection may also contain CRLs.
 
 	   This function is only valid for CMS.
+
+	   \param trusted a set of trusted certificates and CRLs.
 	*/
 	virtual void setTrustedCertificates(const CertificateCollection &trusted);
 
@@ -2738,6 +2796,8 @@ public:
 	   system, to be used for validation
 
 	   This function is only valid for CMS.
+
+	   \param untrusted a set of untrusted certificates and CRLs.
 	*/
 	virtual void setUntrustedCertificates(const CertificateCollection &untrusted);
 
@@ -2746,6 +2806,8 @@ public:
 	   for decryption
 
 	   This function is only valid for CMS.
+
+	   \param keys the keys to be used for decryption
 	*/
 	virtual void setPrivateKeys(const QList<SecureMessageKey> &keys);
 
