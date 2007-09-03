@@ -342,12 +342,17 @@ public:
 	   Standard constructor
 
 	   \param p the provider associated with this context
-	   \param type the name of the KDF provided by this context
+	   \param type the name of the KDF provided by this context (including algorithm)
 	*/
 	KDFContext(Provider *p, const QString &type) : BasicContext(p, type) {}
 
 	/**
 	   Create a key and return it
+
+	   \param secret the secret part (typically password)
+	   \param salt the salt / initialization vector
+	   \param keyLength the length of the key to be produced
+	   \param iterationCount the number of iterations of the derivation algorith,
 	*/
 	virtual SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount) = 0;
 };
@@ -392,12 +397,19 @@ public:
 
 	   If an error occurs during generation, then the operation will
 	   complete and isNull() will return true.
+
+	   \param set the group set to generate the key from
+	   \param block whether to block (true) or not (false)
 	*/
 	virtual void fetchGroup(DLGroupSet set, bool block) = 0;
 
 	/**
 	   Obtain the result of the operation.  Ensure isNull() returns false
 	   before calling this function.
+
+	   \param p the P value
+	   \param q the Q value
+	   \param g the G value
 	*/
 	virtual void getResult(BigInteger *p, BigInteger *q, BigInteger *g) const = 0;
 
@@ -428,6 +440,7 @@ public:
 	   Standard constructor
 
 	   \param p the Provider associated with this context
+	   \param type type of key provided by this context
 	*/
 	PKeyBase(Provider *p, const QString &type);
 
@@ -471,6 +484,8 @@ public:
 	/**
 	   Returns the maximum number of bytes that can be encrypted by this
 	   key
+
+	   \param alg the algorithm to be used for encryption
 	*/
 	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const;
 
@@ -537,6 +552,8 @@ public:
 	   public key
 
 	   Essentially for Diffie-Hellman only.
+
+	   \param theirs the other side (public key) to be used for key generation.
 	*/
 	virtual SymmetricKey deriveKey(const PKeyBase &theirs);
 
@@ -588,11 +605,20 @@ public:
 
 	/**
 	   Create an RSA private key based on the five components
+
+	   \param n the N parameter
+	   \param e the public exponent
+	   \param p the P parameter
+	   \param q the Q parameter
+	   \param d the D parameter
 	*/
 	virtual void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q, const BigInteger &d) = 0;
 
 	/**
 	   Create an RSA public key based on the two public components
+
+	   \param n the N parameter
+	   \param e the public exponent
 	*/
 	virtual void createPublic(const BigInteger &n, const BigInteger &e) = 0;
 
@@ -661,11 +687,18 @@ public:
 
 	/**
 	   Create a DSA private key based on its numeric components
+
+	   \param domain the domain values to use for generation
+	   \param y the public Y component
+	   \param x the private X component
 	*/
 	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) = 0;
 
 	/**
 	   Create a DSA public key based on its numeric components
+
+	   \param domain the domain values to use for generation
+	   \param y the public Y component
 	*/
 	virtual void createPublic(const DLGroup &domain, const BigInteger &y) = 0;
 
@@ -725,12 +758,19 @@ public:
 	/**
 	   Create a Diffie-Hellman private key based on its numeric
 	   components
+
+	   \param domain the domain values to use for generation
+	   \param y the public Y component
+	   \param x the private X component
 	*/
 	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) = 0;
 
 	/**
 	   Create a Diffie-Hellman public key based on its numeric
 	   components
+
+	   \param domain the domain values to use for generation
+	   \param y the public Y component
 	*/
 	virtual void createPublic(const DLGroup &domain, const BigInteger &y) = 0;
 
@@ -807,6 +847,8 @@ public:
 	   Sets the key for this object.  If this object already had a key,
 	   then the old one is destructed.  This object takes ownership of
 	   the key.
+
+	   \param key the key to be set for this object
 	*/
 	virtual void setKey(PKeyBase *key) = 0;
 
@@ -818,6 +860,8 @@ public:
 	   does not support serialization, but your provider does.  The call
 	   to this function would then be followed by an export function,
 	   such as publicToDER().
+
+	   \param key the key to be imported
 	*/
 	virtual bool importKey(const PKeyBase *key) = 0;
 
@@ -1797,6 +1841,8 @@ public:
 
 	   The updated() and storeUpdated() signals might not be emitted if
 	   updates are not enabled.
+
+	   \param enabled whether update notifications are enabled (true) or disabled (false)
 	*/
 	virtual void setUpdatesEnabled(bool enabled);
 
@@ -1814,6 +1860,8 @@ public:
 	/**
 	   Returns the type of the specified store, or -1 if the integer
 	   context id is invalid
+
+	   \param id the id for the store context
 	*/
 	virtual KeyStore::Type type(int id) const = 0;
 
@@ -1825,12 +1873,16 @@ public:
 	   it should persist between availability/unavailability.  For
 	   example, a smart card that is removed and inserted again should
 	   have the same string id (despite having a new integer context id).
+
+	   \param id the id for the store context
 	*/
 	virtual QString storeId(int id) const = 0;
 
 	/**
 	   Returns the friendly name of the store, or an empty string if the
 	   integer context id is invalid
+
+	   \param id the id for the store context
 	*/
 	virtual QString name(int id) const = 0;
 
@@ -1839,6 +1891,8 @@ public:
 
 	   If the integer context id is invalid, this function should return
 	   true.
+
+	   \param id the id for the store context
 	*/
 	virtual bool isReadOnly(int id) const;
 
@@ -1848,6 +1902,8 @@ public:
 
 	   This function should return all supported types, even if the store
 	   doesn't actually contain entries for all of the types.
+
+	   \param id the id for the store context
 	*/
 	virtual QList<KeyStoreEntry::Type> entryTypes(int id) const = 0;
 
@@ -1856,6 +1912,8 @@ public:
 	   context id is invalid
 
 	   The caller is responsible for deleting the returned entry objects.
+
+	   \param id the id for the store context
 	*/
 	virtual QList<KeyStoreEntryContext*> entryList(int id) = 0;
 
@@ -1864,6 +1922,9 @@ public:
 	   known.  If the entry does not exist, the function returns 0.
 
 	   The caller is responsible for deleting the returned entry object.
+
+	   \param id the id for the store context
+	   \param entryId the entry to retrieve
 	*/
 	virtual KeyStoreEntryContext *entry(int id, const QString &entryId);
 
@@ -1876,6 +1937,8 @@ public:
 	   The caller is responsible for deleting the returned entry object.
 
 	   This function must be thread-safe.
+
+	   \param serialized the serialized data to create the entry from
 	*/
 	virtual KeyStoreEntryContext *entryPassive(const QString &serialized);
 
@@ -1884,6 +1947,9 @@ public:
 
 	   Returns the entry id of the new item, or an empty string if there
 	   was an error writing the item.
+
+	   \param id the id for the store context
+	   \param kb the key bundle to add to the store
 	*/
 	virtual QString writeEntry(int id, const KeyBundle &kb);
 
@@ -1892,6 +1958,9 @@ public:
 
 	   Returns the entry id of the new item, or an empty string if there
 	   was an error writing the item.
+
+	   \param id the id for the store context
+	   \param cert the certificate to add to the store
 	*/
 	virtual QString writeEntry(int id, const Certificate &cert);
 
@@ -1900,6 +1969,9 @@ public:
 
 	   Returns the entry id of the new item, or an empty string if there
 	   was an error writing the item.
+
+	   \param id the id for the store context
+	   \param crl the revocation list to add to the store
 	*/
 	virtual QString writeEntry(int id, const CRL &crl);
 
@@ -1908,6 +1980,9 @@ public:
 
 	   Returns the entry id of the new item, or an empty string if there
 	   was an error writing the item.
+
+	   \param id the id for the store context
+	   \param key the PGP key to add to the store
 	*/
 	virtual QString writeEntry(int id, const PGPKey &key);
 
@@ -1916,6 +1991,9 @@ public:
 
 	   Returns true if the entry is successfully removed, otherwise
 	   false.
+
+	   \param id the id for the store context
+	   \param entryId the entry to remove from the store
 	*/
 	virtual bool removeEntry(int id, const QString &entryId);
 
@@ -1956,12 +2034,16 @@ Q_SIGNALS:
 
 	/**
 	   Emitted when there is diagnostic text to report
+
+	   \param str the diagnostic text
 	*/
 	void diagnosticText(const QString &str);
 
 	/**
 	   Indicates that the entry list of a keystore has changed (entries
 	   added, removed, or modified)
+
+	   \param id the id of the key store that has changed
 	*/
 	void storeUpdated(int id);
 };
@@ -2063,6 +2145,7 @@ public:
 	   Standard constructor
 
 	   \param p the Provider associated with this context
+	   \param type the name of the type of feature that supported by this context
 	*/
 	TLSContext(Provider *p, const QString &type) : Provider::Context(p, type) {}
 
@@ -2100,6 +2183,10 @@ public:
 
 	   This function will be called before any other configuration
 	   functions.
+
+	   \param serverMode whether to operate as a server (true) or client (false)
+	   \param hostName the hostname to use
+	   \param compress whether to compress (true) or not (false)
 	*/
 	virtual void setup(bool serverMode, const QString &hostName, bool compress) = 0;
 
@@ -2107,6 +2194,9 @@ public:
 	   Set the constraints of the session using SSF values
 
 	   This function will be called before start().
+
+	   \param minSSF the minimum strength factor that is acceptable 
+	   \param maxSSF the maximum strength factor that is acceptable
 	*/
 	virtual void setConstraints(int minSSF, int maxSSF) = 0;
 
@@ -2117,6 +2207,9 @@ public:
 
 	   This function will be called before start().
 
+	   \param cipherSuiteList the list of cipher suites that may be used for
+	   this session.
+
 	   \sa supportedCipherSuites
 	*/
 	virtual void setConstraints(const QStringList &cipherSuiteList) = 0;
@@ -2125,6 +2218,8 @@ public:
 	   Set the list of trusted certificates
 
 	   This function may be called at any time.
+
+	   \param trusted the trusted certificates and CRLs to be used.
 	*/
 	virtual void setTrustedCertificates(const CertificateCollection &trusted) = 0;
 
@@ -2134,6 +2229,8 @@ public:
 	   This function may be called at any time.
 
 	   This function is for server mode only.
+
+	   \param issuerList the list of issuers that may be used
 	*/
 	virtual void setIssuerList(const QList<CertificateInfoOrdered> &issuerList) = 0;
 
@@ -2141,6 +2238,9 @@ public:
 	   Set the local certificate
 
 	   This function may be called at any time.
+
+	   \param cert the certificate and associated trust chain
+	   \param key the private key for the local certificate
 	*/
 	virtual void setCertificate(const CertificateChain &cert, const PrivateKey &key) = 0;
 
@@ -2148,6 +2248,8 @@ public:
 	   Set the TLS session id, for session resuming
 
 	   This function will be called before start().
+
+	   \param id the session identification
 	*/
 	virtual void setSessionId(const TLSSessionContext &id) = 0;
 
@@ -2165,6 +2267,8 @@ public:
 	   Set the maximum transmission unit size
 
 	   This function is for DTLS only.
+
+	   \param size the maximum number of bytes in a datagram
 	*/
 	virtual void setMTU(int size);
 
@@ -2203,6 +2307,9 @@ public:
 	   For DTLS, this function operates with single packets.  Many
 	   update() operations must be performed repeatedly to exchange
 	   multiple packets.
+
+	   \param from_net the data from the "other side" of the connection
+	   \param from_app the data from the application of the protocol
 	*/
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
 
@@ -2396,6 +2503,10 @@ public:
 
 	   This function will be called before startClient() or
 	   startServer().
+
+	   \param f the flags to use
+	   \param minSSF the minimum strength factor that is acceptable 
+	   \param maxSSF the maximum strength factor that is acceptable
 	*/
 	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF) = 0;
 
@@ -2409,6 +2520,10 @@ public:
 	   On completion, result(), mech(), haveClientInit(), and stepData()
 	   will be valid.  If result() is Success, then the session is now in
 	   the connected state.
+
+	   \param mechlist the list of mechanisms
+	   \param allowClientSendFirst whether the client sends first (true) or the server
+	   sends first (false)
 	*/
 	virtual void startClient(const QStringList &mechlist, bool allowClientSendFirst) = 0;
 
@@ -2422,6 +2537,10 @@ public:
 	   On completion, result() and mechlist() will be valid.  The
 	   result() function will return Success or Error.  If the result is
 	   Success, then serverFirstStep() will be called next.
+
+	   \param realm the realm to authenticate in
+	   \param disableServerSendLast whether the client sends first (true) or the server
+	   sends first (false)
 	*/
 	virtual void startServer(const QString &realm, bool disableServerSendLast) = 0;
 
@@ -2433,6 +2552,8 @@ public:
 
 	   On completion, result() and stepData() will be valid.  If result()
 	   is Success, then the session is now in the connected state.
+
+	   \param mech the mechanism to use
 	*/
 	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit) = 0;
 
@@ -2443,6 +2564,9 @@ public:
 	   the resultsReady() signal.
 
 	   On completion, result() and stepData() will be valid.
+
+	   \param from_net the data from the "other side" of the protocol
+	   to be used for the next step.
 	*/
 	virtual void nextStep(const QByteArray &from_net) = 0;
 
@@ -2465,6 +2589,9 @@ public:
 
 	   On completion, result(), to_net(), encoded(), and to_app() will be
 	   valid.  The result() function will return Success or Error.
+
+	   \param from_net the data from the "other side" of the protocol
+	   \param from_app the data from the application of the protocol
 	*/
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app) = 0;
 
@@ -2548,6 +2675,11 @@ public:
 
 	/**
 	   Set some of the client parameters (pass 0 to not set a field)
+
+	   \param user the user name
+	   \param authzid the authorization name / role
+	   \param pass the password
+	   \param realm the realm to authenticate in
 	*/
 	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm) = 0;
 
@@ -2641,6 +2773,11 @@ public:
 
 	/**
 	   Configure a new signing operation
+
+	   \param keys the keys to use for signing
+	   \param m the mode to sign in
+	   \param bundleSigner whether to bundle the signing keys (true) or not (false)
+	   \param smime whether to use smime format (true) or not (false)
 	*/
 	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime) = 0;
 
@@ -2660,11 +2797,16 @@ public:
 	   repeatedly) afterwards.  Emit updated() if there is data to
 	   read, if input data has been accepted, or if the operation has
 	   finished.
+
+	   \param f the format of the message to be produced
+	   \param op the operation to be performed
 	*/
 	virtual void start(SecureMessage::Format f, Operation op) = 0;
 
 	/**
 	   Provide input to the message operation
+
+	   \param in the data to use for the message operation
 	*/
 	virtual void update(const QByteArray &in) = 0;
 

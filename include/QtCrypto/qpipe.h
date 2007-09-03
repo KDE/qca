@@ -230,6 +230,8 @@ public:
 
 	/**
 	   Standard constructor
+
+	   \param parent the parent object for this object
 	*/
 	QPipeEnd(QObject *parent = 0);
 

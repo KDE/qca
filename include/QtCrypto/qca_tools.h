@@ -544,6 +544,9 @@ protected:
 
 /**
    Returns an array that is the result of concatenating a and b
+
+   \param a the string to put at the start of the result
+   \param b the string to put at the end of the result
 */
 QCA_EXPORT const SecureArray operator+(const SecureArray &a, const SecureArray &b);
 

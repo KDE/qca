@@ -156,22 +156,24 @@ public:
 	/**
 	   Construct a discrete logarithm group from raw parameters
 
-	   \param p
-	   \param q
-	   \param g
+	   \param p the P parameter
+	   \param q the Q parameter
+	   \param g the G parameter
 	*/
 	DLGroup(const BigInteger &p, const BigInteger &q, const BigInteger &g);
 
 	/**
 	   Construct a discrete logarithm group from raw parameters
 
-	   \param p
-	   \param g
+	   \param p the P parameter
+	   \param g the G parameter
 	*/
 	DLGroup(const BigInteger &p, const BigInteger &g);
 
 	/**
 	   Standard copy constructor
+
+	   \param from the group to copy from
 	*/
 	DLGroup(const DLGroup &from);
 	~DLGroup();
@@ -237,6 +239,9 @@ public:
 		DH   ///< Diffie Hellman key
 	};
 
+	/**
+	   Standard constructor
+	*/
 	PKey();
 
 	/**
@@ -245,6 +250,7 @@ public:
 	   \param from the key to copy from
 	*/
 	PKey(const PKey &from);
+
 	~PKey();
 
 	/**
