@@ -378,16 +378,23 @@ QCA_EXPORT QVariant getProperty(const QString &name);
    Set provider configuration
 
    Allowed value types: QString, int, bool
+
+   \param name the name of the provider to set the configuration to
+   \param config the configuration
 */
 QCA_EXPORT void setProviderConfig(const QString &name, const QVariantMap &config);
 
 /**
    Retrieve provider configuration
+
+   \param name the name of the provider to retrieve the configuration of
 */
 QCA_EXPORT QVariantMap getProviderConfig(const QString &name);
 
 /**
    Save provider configuration to persistent storage
+
+   \param name the name of the provider to have its configuration saved
 */
 QCA_EXPORT void saveProviderConfig(const QString &name);
 
@@ -816,6 +823,8 @@ QVariantMap defaultConfig() const
 	   If your provider supports configuration options, you
 	   will be advised of user changes to the configuration 
 	   when this method is called.
+
+	   \param config the new configuration to be used by the provider
 	*/
 	virtual void configChanged(const QVariantMap &config);
 };

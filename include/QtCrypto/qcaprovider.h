@@ -1439,6 +1439,9 @@ public:
 	   Create PKCS#7 DER output based on the input certificates and CRLs
 
 	   Returns an empty array on error.
+
+	   \param certs list of certificates to store in the output
+	   \param crls list of CRLs to store in the output
 	*/
 	virtual QByteArray toPKCS7(const QList<CertContext*> &certs, const QList<CRLContext*> &crls) const = 0;
 
@@ -2495,6 +2498,21 @@ public:
 
 	   This function will be called before any other configuration
 	   functions.
+
+	   \param service the name of the network service being provided by
+	   this application, which can be used by the SASL system for policy
+	   control.  Examples: "imap", "xmpp"
+	   \param host the hostname that the application is interacting with
+	   or as
+	   \param local pointer to a HostPort representing the local end of a
+	   network socket, or 0 if this information is unknown or not
+	   available
+	   \param remote pointer to a HostPort representing the peer end of a
+	   network socket, or 0 if this information is unknown or not
+	   available
+	   \param ext_id the id to be used for SASL EXTERNAL (client only)
+	   \param ext_ssf the SSF of the external authentication channel
+	   (client only)
 	*/
 	virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote, const QString &ext_id, int ext_ssf) = 0;
 
@@ -2539,8 +2557,8 @@ public:
 	   Success, then serverFirstStep() will be called next.
 
 	   \param realm the realm to authenticate in
-	   \param disableServerSendLast whether the client sends first (true) or the server
-	   sends first (false)
+	   \param disableServerSendLast whether the client sends first (true)
+	   or the server sends first (false)
 	*/
 	virtual void startServer(const QString &realm, bool disableServerSendLast) = 0;
 
@@ -2554,6 +2572,8 @@ public:
 	   is Success, then the session is now in the connected state.
 
 	   \param mech the mechanism to use
+	   \param clientInit initial data from the client, or 0 if there is
+	   no such data
 	*/
 	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit) = 0;
 

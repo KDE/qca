@@ -138,6 +138,10 @@ enum DLGroupSet
    to raw RSA signing (mainly smartcard providers).  This is a built-in
    function of QCA and does not utilize a provider.  SHA1, MD5, MD2,
    and RIPEMD160 are supported.
+
+   \param hashName the hash type used to create the digest
+   \param digest the digest to encode in EMSA3 format
+   \param size the desired size of the encoding output (-1 for automatic size)
 */
 QCA_EXPORT QByteArray emsa3Encode(const QString &hashName, const QByteArray &digest, int size = -1);
 
