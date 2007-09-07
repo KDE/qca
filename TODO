@@ -1,7 +1,6 @@
 * examples
   create example for BigInteger
   create example for OpenPGP
-  create example for CMS
   create example for using TLS with smart cards (maybe reuse ssltest?)
 
 * additional unit tests (using QTestLib):
