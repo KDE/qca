@@ -2,7 +2,7 @@
 -----BEGIN QCMOD-----
 name: extra
 section: project
-arg: disable-tests,Don't build examples and unittests
+arg: disable-tests,Don't build examples and unittests.
 -----END QCMOD-----
 */
 

@@ -2,8 +2,8 @@
 -----BEGIN QCMOD-----
 name: certstore
 section: project
-arg: certstore-path=[path],Path to the SSL/X509 Certificate store file
-arg: certstore-internal,Force the use of the bundled store
+arg: certstore-path=[path],Path to the SSL/X509 Certificate store file.
+arg: certstore-internal,Force the use of the bundled store.
 -----END QCMOD-----
 */
 
