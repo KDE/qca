@@ -1,8 +1,8 @@
 /*
 -----BEGIN QCMOD-----
-name: QCA 2.0
-arg: in-tree-build,Build with uninstalled QCA, only useful for SVN users.
+name: QCA >= 2.0
 -----END QCMOD-----
+arg: in-tree-build,Build with uninstalled QCA, only useful for SVN users.
 */
 
 //----------------------------------------------------------------------------
@@ -12,7 +12,7 @@ class qc_qca : public ConfObj
 {
 public:
 	qc_qca(Conf *c) : ConfObj(c) {}
-	QString name() const { return "QCA 2.0"; }
+	QString name() const { return "QCA >= 2.0"; }
 	QString shortname() const { return "qca"; }
 	bool exec()
 	{
@@ -27,28 +27,28 @@ public:
 #endif
 
 		// test for "crypto" feature and check qca version number
-		QString arg;
-		arg = conf->getenv("QC_IN_TREE_BUILD");
+		//QString arg;
+		//arg = conf->getenv("QC_IN_TREE_BUILD");
 
 		QString proextra;
-		if (!arg.isEmpty()) {
+		/*if (!arg.isEmpty()) {
 			proextra =
 			"CONFIG += qt \n"
 			"QT -= gui\n"
 			"INCLUDEPATH += ../../../../include/QtCrypto \n"
 			"LIBS += -L../../../../lib -lqca \n";
-		} else {
+		} else {*/
 			proextra =
 			"CONFIG += qt crypto\n"
 			"QT -= gui\n";
-		}
+		//}
 		QString str =
 		"#include <QtCrypto>\n"
 		"\n"
 		"int main()\n"
 		"{\n"
 		"	unsigned long x = QCA_VERSION;\n"
-		"	if(x >= 0x016363) return 0; else return 1;\n"
+		"	if(x >= 0x020000 && x < 0x030000) return 0; else return 1;\n"
 		"}\n";
 
 		if(release)
@@ -69,10 +69,10 @@ public:
 				return false;
 		}
 
-		if (!arg.isEmpty()) {
+		/*if (!arg.isEmpty()) {
 			conf->addIncludePath("../../include/QtCrypto");
 			conf->addLib("-L../../lib -lqca");
-		}
+		}*/
 		return true;
 	}
 };
