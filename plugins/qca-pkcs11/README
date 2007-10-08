@@ -38,7 +38,7 @@ CONFIGURATION
 			-1 is infinite, until provider invalidates session.
 
 		log_level (Integer)
-			Log evel of pkcs11-helper, can be from 0-5.
+			Log level of pkcs11-helper, can be from 0-5.
 
 		provider_##_enabled (Boolean)
 			Provider at this index is enabled.
