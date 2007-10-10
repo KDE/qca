@@ -13,7 +13,7 @@ ABOUT
 
 DEPENDENCIES
 	pkcs11-helper>=1.02
-		http://www.opensc-projects.org
+		http://www.opensc-project.org/
 
 CONFIGURATION
 	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
