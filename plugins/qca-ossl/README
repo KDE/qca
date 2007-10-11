@@ -1,7 +1,12 @@
-QCA OSSL plugin
-------------------
-Authors: Justin Karneges <justin@affinix.com>
-         Brad Hards <bradh@frogmouth.net>
+QCA OSSL plugin version 2.0.0
+-----------------------------
+Date: October 11th, 2007
+Website: http://delta.affinix.com/qca/
+Mailing List: Delta Project <delta@lists.affinix.com>
+
+Authors:
+  Justin Karneges <justin@affinix.com>
+  Brad Hards <bradh@frogmouth.net>
 
 This plugin provides features based on OpenSSL. It implements:
 * Hashing - SHA1, SHA0, RIPEMD160, MD2, MD4, MD5
@@ -27,9 +32,8 @@ For Unix/Linux/Mac:
 
 For Windows:
 
-  edit qca-ossl.pro
-  qmake qca-ossl.pro
+  configwin rd
+  qmake
   nmake (or make)
-
-  copy [debug|release]\qca-ossl.dll qtdir\plugins\crypto
+  copy lib\qca-ossl2.dll qtdir\plugins\crypto
 

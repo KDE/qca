@@ -4,19 +4,21 @@ QT -= gui
 CONFIG += crypto
 DESTDIR = lib
 
-VERSION = 1.0.0
+VERSION = 2.0.0
 
-include(conf.pri)
+unix:include(conf.pri)
+windows:include(conf_win.pri)
 
 CONFIG += create_prl
-
-# default windows config for now
-windows:CONFIG += debug_and_release build_all
 
 SOURCES = qca-ossl.cpp
 
 windows:{
 	load(winlocal.prf)
+	isEmpty(WINLOCAL_PREFIX) {
+		error("WINLOCAL_PREFIX not found.  See http://delta.affinix.com/platform/#winlocal")
+	}
+
 	OPENSSL_PREFIX = $$WINLOCAL_PREFIX
 	DEFINES += OSSL_097
 
@@ -26,7 +28,9 @@ windows:{
 	LIBS += -lgdi32 -lwsock32
 }
 
-CONFIG(debug, debug|release) {
-	unix:TARGET = $$join(TARGET,,,_debug)
-	else:TARGET = $$join(TARGET,,,d)
+!debug_and_release|build_pass {
+        CONFIG(debug, debug|release) {
+                mac:TARGET = $$member(TARGET, 0)_debug
+                windows:TARGET = $$member(TARGET, 0)d
+        }
 }
