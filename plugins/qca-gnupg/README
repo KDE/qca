@@ -1,0 +1,29 @@
+QCA GnuPG plugin version 2.0.0
+------------------------------
+Date: October 11th, 2007
+Website: http://delta.affinix.com/qca/
+Mailing List: Delta Project <delta@lists.affinix.com>
+
+Author: Justin Karneges <justin@affinix.com>
+
+This plugin provides features based on GnuPG.
+
+Requirements:
+  GnuPG 1.x or 2.x (runtime dependency only)
+
+Installing
+----------
+
+For Unix/Linux/Mac:
+
+  ./configure
+  make
+  make install
+
+For Windows:
+
+  configwin rd
+  qmake
+  nmake (or make)
+  copy lib\*.dll qtdir\plugins\crypto
+

@@ -35,5 +35,5 @@ For Windows:
   configwin rd
   qmake
   nmake (or make)
-  copy lib\qca-ossl2.dll qtdir\plugins\crypto
+  copy lib\*.dll qtdir\plugins\crypto
 

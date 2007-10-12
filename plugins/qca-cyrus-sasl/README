@@ -1,0 +1,29 @@
+QCA Cyrus SASL plugin version 2.0.0
+-----------------------------------
+Date: October 11th, 2007
+Website: http://delta.affinix.com/qca/
+Mailing List: Delta Project <delta@lists.affinix.com>
+
+Author: Justin Karneges <justin@affinix.com>
+
+This plugin provides features based on Cyrus SASL version 2.
+
+Requirements:
+  Cyrus SASL 2.x (libsasl2)
+
+Installing
+----------
+
+For Unix/Linux/Mac:
+
+  ./configure
+  make
+  make install
+
+For Windows:
+
+  configwin rd
+  qmake
+  nmake (or make)
+  copy lib\*.dll qtdir\plugins\crypto
+

@@ -1,10 +1,22 @@
-qca-logger -- Logger Plug-in to QCA
+qca-logger 2.0.0 -- Logger Plug-in to QCA
 
 ABOUT
 	qca-logger provides simple logger writer for QCA framework.
 
 DEPENDENCIES
 	None.
+
+INSTALL
+	For Unix/Linux/Mac:
+		./configure
+		make
+		make install
+
+	For Windows:
+		configwin rd
+		qmake
+		nmake (or make)
+		copy lib\*.dll qtdir\plugins\crypto
 
 ENVIRONMENT
 	Configuration can be overridden by environment variables.

@@ -1,4 +1,4 @@
-qca-pkcs11 -- PKCS#11 Plug-in to QCA
+qca-pkcs11 2.0.0 -- PKCS#11 Plug-in to QCA
 
 ABOUT
 	qca-pkcs11 enables QCA smartcard integration.
@@ -14,6 +14,18 @@ ABOUT
 DEPENDENCIES
 	pkcs11-helper>=1.02
 		http://www.opensc-project.org/
+
+INSTALL
+	For Unix/Linux/Mac:
+		./configure
+		make
+		make install
+
+	For Windows:
+		configwin rd
+		qmake
+		nmake (or make)
+		copy lib\*.dll qtdir\plugins\crypto
 
 CONFIGURATION
 	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to

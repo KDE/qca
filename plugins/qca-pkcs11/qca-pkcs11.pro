@@ -4,25 +4,31 @@ QT -= gui
 CONFIG += crypto
 DESTDIR = lib
 
-VERSION = 1.0.0
+VERSION = 2.0.0
 
-include(conf.pri)
+unix:include(conf.pri)
+windows:include(conf_win.pri)
 
-# default windows config for now
-windows:CONFIG += debug_and_release build_all
+CONFIG += create_prl
 
 SOURCES = qca-pkcs11.cpp
 
 windows:{
-	# hardcoded location
-	PKCS11H_PREFIX = /local
+	load(winlocal.prf)
+	isEmpty(WINLOCAL_PREFIX) {
+		error("WINLOCAL_PREFIX not found.  See http://delta.affinix.com/platform/#winlocal")
+	}
+
+	PKCS11H_PREFIX = $$WINLOCAL_PREFIX
 
 	INCLUDEPATH += $$PKCS11H_PREFIX/include
 	LIBS += -L$$PKCS11H_PREFIX/lib
 	LIBS += -lpkcs11-helper.dll
 }
 
-CONFIG(debug, debug|release) {
-	unix:TARGET = $$join(TARGET,,,_debug)
-	else:TARGET = $$join(TARGET,,,d)
+!debug_and_release|build_pass {
+	CONFIG(debug, debug|release) {
+		mac:TARGET = $$member(TARGET, 0)_debug
+		windows:TARGET = $$member(TARGET, 0)d
+	}
 }
