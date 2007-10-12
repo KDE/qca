@@ -1,6 +1,8 @@
 /*
 -----BEGIN QCMOD-----
 name: qcapluginpath
+section: project
+arg: plugins-path=[path],Path to install to.  Default: qtdir/plugins
 -----END QCMOD-----
 */
 
@@ -16,12 +18,18 @@ public:
 
 	bool exec()
 	{
+		QString plugins_path = conf->getenv("QC_PLUGINS_PATH");
+
+		// default to qtdir
+		if(plugins_path.isEmpty())
+			plugins_path = QLibraryInfo::location(QLibraryInfo::PluginsPath);
+
 		// install into plugins path
 		QString str;
 		str += QString(
 		"target.path=%1/crypto\n"
 		"INSTALLS += target\n"
-		).arg(QLibraryInfo::location(QLibraryInfo::PluginsPath));
+		).arg(plugins_path);
 		conf->addExtra(str);
 		return true;
 	}
