@@ -828,7 +828,7 @@ public:
 
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app)
 	{
-		bool ok;
+		bool ok = false;
 		if(!from_app.isEmpty())
 			ok = sasl_endecode(from_app, &result_to_net, true);
 		if(ok && !from_net.isEmpty())
