@@ -93,7 +93,7 @@ public:
 	}
 
 private:
-	inline char *severityName( enum QCA::Logger::Severity severity )
+	inline const char *severityName( enum QCA::Logger::Severity severity )
 	{
 		if (severity <= QCA::Logger::Debug) {
 			return s_severityNames[severity];
@@ -109,11 +109,11 @@ private:
 	}
 
 private:
-	static char *s_severityNames[];
+	static const char *s_severityNames[];
 	QTextStream &_stream;
 };
 
-char *StreamLogger::s_severityNames[] = {
+const char *StreamLogger::s_severityNames[] = {
 	"Q",
 	"M",
 	"A",
