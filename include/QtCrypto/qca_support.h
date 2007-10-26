@@ -907,7 +907,7 @@ public:
 	*/
 	QChar resultChar() const;
 
-signals:
+Q_SIGNALS:
 	/**
 	   Emitted when the user input activity has been
 	   completed.
