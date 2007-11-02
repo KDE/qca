@@ -1,13 +1,12 @@
 TEMPLATE = lib
 CONFIG += plugin
 QT -= gui
-QT += network
-CONFIG += crypto
 DESTDIR = lib
 
 VERSION = 2.0.0
 
 unix:include(conf.pri)
+windows:CONFIG += crypto
 windows:include(conf_win.pri)
 
 CONFIG += create_prl

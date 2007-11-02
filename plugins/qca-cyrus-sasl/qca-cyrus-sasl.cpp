@@ -28,7 +28,6 @@ extern "C"
 #include <sasl/sasl.h>
 }
 
-#include <QHostAddress>
 #include <QStringList>
 #include <QList>
 #include <QFile>
