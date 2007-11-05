@@ -20,8 +20,9 @@
  */
 
 #include <QtCrypto>
+#include <qcaprovider.h>
 #include <QDebug>
-#include <QtCore/qplugin.h>
+#include <QtPlugin>
 
 extern "C"
 {

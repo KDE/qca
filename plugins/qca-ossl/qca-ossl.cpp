@@ -19,9 +19,9 @@
  */
 
 #include <QtCrypto>
-
+#include <qcaprovider.h>
 #include <QDebug>
-#include <QtCore/qplugin.h>
+#include <QtPlugin>
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>

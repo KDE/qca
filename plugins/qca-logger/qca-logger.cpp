@@ -18,6 +18,7 @@
  */
 
 #include <QtCrypto>
+#include <qcaprovider.h>
 #include <QtPlugin>
 #include <QTextStream>
 #include <QFile>

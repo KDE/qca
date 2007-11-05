@@ -19,6 +19,7 @@
  */
 
 #include <QtCrypto>
+#include <qcaprovider.h>
 #include <qplatformdefs.h>
 
 #include <QHash>
