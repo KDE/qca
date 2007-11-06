@@ -29,6 +29,7 @@
   securemessage: ability to know which key has performed a decrypt?
   emsa3Encode: implement in provider instead of qca?
   OCSP
+  securelayer: ability to specify how much to read, rather than just read all
   tls ocsp stapling
   tls: pgp, psk auth ?
   internally managed intermediate object storage
