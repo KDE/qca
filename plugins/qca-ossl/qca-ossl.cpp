@@ -3413,8 +3413,6 @@ class MyCAContext : public CAContext
 public:
 	X509Item caCert;
 	MyPKeyContext *privateKey;
-	QDateTime minDateTime;
-	QDateTime maxDateTime;
 
 	MyCAContext(Provider *p) : CAContext(p)
 	{
@@ -3457,10 +3455,6 @@ public:
 	virtual void setup(const CertContext &cert, const PKeyContext &priv)
 	{
 		caCert = static_cast<const MyCertContext&>(cert).item;
-		minDateTime = cert.props() -> start;
-		minDateTime.setTimeSpec(Qt::UTC);
-		maxDateTime = cert.props() -> end;
-		maxDateTime.setTimeSpec(Qt::UTC);
 		delete privateKey;
 		privateKey = 0;
 		privateKey = static_cast<MyPKeyContext*>(priv.clone());
@@ -3472,7 +3466,6 @@ public:
 		const EVP_MD *md = 0;
 		X509 *x = 0;
 		const CertContextProps &props = *req.props();
-		QDateTime end = qMin(maxDateTime, notValidAfter);
 		CertificateOptions subjectOpts;
 		X509_NAME *subjectName = 0;
 		X509_EXTENSION *ex = 0;
@@ -3499,8 +3492,8 @@ public:
 		BN_free(bn);
 
 		// validity period
-		ASN1_TIME_set(X509_get_notBefore(x), minDateTime.toTime_t());
-		ASN1_TIME_set(X509_get_notAfter(x), end.toTime_t());
+		ASN1_TIME_set(X509_get_notBefore(x), QDateTime::currentDateTime().toUTC().toTime_t());
+		ASN1_TIME_set(X509_get_notAfter(x), notValidAfter.toTime_t());
 
 		X509_set_pubkey(x, static_cast<const MyPKeyContext*>(req.subjectPublicKey()) -> get_pkey());
 		X509_set_subject_name(x, subjectName);
