@@ -32,7 +32,7 @@
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
 
-#define PROTO_NAME "foo"
+#define PROTO_NAME "qcatest"
 #define PROTO_PORT 8001
 
 static QString prompt(const QString &s)

@@ -32,14 +32,14 @@
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
 
-#define PROTO_NAME "foo"
+#define PROTO_NAME "qcatest"
 #define PROTO_PORT 8001
 
 class ServerTest : public QTcpServer
 {
 	Q_OBJECT
 public:
-	ServerTest(const QString &_str, int _port) : port(_port)
+	ServerTest(const QString &_str, const QString &_host, int _port) : port(_port)
 	{
 		sock = 0;
 		sasl = 0;
@@ -47,6 +47,7 @@ public:
                 connect(this, SIGNAL(newConnection()), SLOT(serv_newConnection()));
 		realm.clear();
 		str = _str;
+		host = _host;
 	}
 
     	~ServerTest()
@@ -62,14 +63,16 @@ public:
 			QTimer::singleShot(0, this, SIGNAL(quit()));
 			return;
 		}
-		char myhostname[256];
+
+		/*char myhostname[256];
 		int r = gethostname(myhostname, sizeof(myhostname)-1);
 		if(r == -1) {
 			printf("Error getting hostname!\n");
 			QTimer::singleShot(0, this, SIGNAL(quit()));
 			return;
 		}
-		host = myhostname;
+		host = myhostname;*/
+
 		printf("Listening on %s:%d ...\n", host.toLatin1().data(), port);
 	}
 
@@ -154,7 +157,7 @@ private slots:
 		QString line = "C";
 		if(!stepData.isEmpty()) {
 			line += ',';
-			line += arrayToString(stepData.data());
+			line += arrayToString(stepData);
 		}
 		sendLine(line);
 	}
@@ -271,6 +274,7 @@ private:
 		sock = 0;
 		sasl = 0;
 	}
+
 	QString arrayToString(const QByteArray &ba)
 	{
 		QCA::Base64 encoder;
@@ -328,16 +332,26 @@ private:
 
 #include "saslservtest.moc"
 
+void usage()
+{
+	printf("usage: saslservtest domain [message]\n");
+}
+
 int main(int argc, char **argv)
 {
 	QCA::Initializer init;
 	QCoreApplication app(argc, argv);
 
-	QString host, user, pass;
-	QString str = "Hello, World";
+	if(argc < 2)
+	{
+		usage();
+		return 0;
+	}
 
-        if(argc >= 2)
-            str = argv[2];
+	QString host = argv[1];
+	QString str = "Hello, World";
+	if(argc >= 3)
+		str = argv[2];
 
 	if(!QCA::isSupported("sasl")) {
 		printf("SASL not supported!\n");
@@ -346,7 +360,7 @@ int main(int argc, char **argv)
 
 	QCA::setAppName("saslservtest");
 
-        ServerTest *s = new ServerTest(str, PROTO_PORT);
+        ServerTest *s = new ServerTest(str, host, PROTO_PORT);
         QObject::connect(s, SIGNAL(quit()), &app, SLOT(quit()));
         s->start();
         app.exec();
