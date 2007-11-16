@@ -2840,21 +2840,35 @@ public:
 
 	X509Item(const X509Item &from)
 	{
-		cert = from.cert;
-		req = from.req;
-		crl = from.crl;
-
-		if(cert)
-			CRYPTO_add(&cert->references, 1, CRYPTO_LOCK_X509);
-		if(req)
-			CRYPTO_add(&req->references, 1, CRYPTO_LOCK_X509_REQ);
-		if(crl)
-			CRYPTO_add(&crl->references, 1, CRYPTO_LOCK_X509_CRL);
+		cert = 0;
+		req = 0;
+		crl = 0;
+		*this = from;
 	}
 
 	~X509Item()
 	{
 		reset();
+	}
+
+	X509Item & operator=(const X509Item &from)
+	{
+		if(this != &from)
+		{
+			reset();
+			cert = from.cert;
+			req = from.req;
+			crl = from.crl;
+
+			if(cert)
+				CRYPTO_add(&cert->references, 1, CRYPTO_LOCK_X509);
+			if(req)
+				CRYPTO_add(&req->references, 1, CRYPTO_LOCK_X509_REQ);
+			if(crl)
+				CRYPTO_add(&crl->references, 1, CRYPTO_LOCK_X509_CRL);
+		}
+
+		return *this;
 	}
 
 	void reset()
