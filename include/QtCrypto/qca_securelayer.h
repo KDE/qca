@@ -276,7 +276,9 @@ public:
 
    %TLS is a IETF standard (<a
    href="http://www.ietf.org/rfc/rfc2712.txt">RFC2712</a> for
-   TLS version 1.0) based on earlier Netscape work on Secure
+   TLS version 1.0, and <a
+   href="http://www.ietf.org/rfc/rfc4346.txt">RFC4346</a> for
+   TLS version 1.1) based on earlier Netscape work on Secure
    Socket Layer (SSL version 2 and SSL version 3). New
    applications should use at least TLS 1.0, and SSL version 2
    should be avoided due to known security problems.
