@@ -258,7 +258,7 @@ void KDFUnitTest::pbkdf2Tests_data()
 void KDFUnitTest::pbkdf2Tests()
 {
     QStringList providersToTest;
-    //    providersToTest.append("qca-ossl");
+    providersToTest.append("qca-ossl");
     providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
 

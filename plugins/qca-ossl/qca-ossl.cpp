@@ -1089,6 +1089,31 @@ protected:
     EVP_MD_CTX m_context;
 };
 
+class opensslPbkdf2Context : public KDFContext
+{
+public:
+    opensslPbkdf2Context(Provider *p, const QString &type) : KDFContext(p, type)
+    {
+    }
+
+    Provider::Context *clone() const
+    {
+	return new opensslPbkdf2Context( *this );
+    }
+
+    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
+			      unsigned int keyLength, unsigned int iterationCount)
+    {
+      SecureArray out(keyLength);
+      PKCS5_PBKDF2_HMAC_SHA1( (char*)secret.data(), secret.size(),
+			      (unsigned char*)salt.data(), salt.size(),
+			      iterationCount, keyLength, (unsigned char*)out.data() );
+      return out;
+    }
+
+protected:
+};
+
 class opensslHMACContext : public MACContext
 {
 public:
@@ -6734,6 +6759,7 @@ public:
 		list += all_cipher_types();
 		list += "pbkdf1(md2)";
 		list += "pbkdf1(sha1)";
+		list += "pbkdf2(sha1)";
 		list += "pkey";
 		list += "dlgroup";
 		list += "rsa";
@@ -6792,6 +6818,8 @@ public:
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
 		else if ( type == "pbkdf1(md2)" )
 			return new opensslPbkdf1Context( EVP_md2(), this, type );
+		else if ( type == "pbkdf2(sha1)" )
+			return new opensslPbkdf2Context( this, type );
 		else if ( type == "hmac(md5)" )
 			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )
