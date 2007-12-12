@@ -182,7 +182,7 @@ public:
 		}
 
         	str = QString(
-		"pcfiles.path = $$PREFIX/lib/pkgconfig\n"
+		"pcfiles.path = $$LIBDIR/pkgconfig\n"
 		"pcfiles.files = %1\n"
 		"INSTALLS += pcfiles\n"
 		).arg(pcfiles.join(" "));
