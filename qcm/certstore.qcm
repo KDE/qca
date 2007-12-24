@@ -29,13 +29,9 @@ public:
 			path = conf->getenv("QC_CERTSTORE_PATH");
 			if(!path.isEmpty())
 			{
-				if(QFile::exists(path))
-				{
-					QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
-					conf->addDefine(certPathString);
-					return true;
-				}
-				return false;
+				QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
+				conf->addDefine(certPathString);
+				return true;
 			}
 
 			// This is from Debian
