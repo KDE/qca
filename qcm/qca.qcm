@@ -35,9 +35,9 @@ public:
 	bool exec()
 	{
 		// get the build mode
-#ifdef BUILDMODE
-		bool release = buildmode_release;
-		bool debug = buildmode_debug;
+#ifdef QC_BUILDMODE
+		bool release = qc_buildmode_release;
+		bool debug = qc_buildmode_debug;
 #else
 		// else, default to just release mode
 		bool release = true;
