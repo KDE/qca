@@ -28,9 +28,9 @@
 
 #include <stdlib.h>
 
-#ifdef Q_OS_WIN
-static int setenv(const char *name, const char *value, int overwrite)
+static int qca_setenv(const char *name, const char *value, int overwrite)
 {
+#ifdef Q_OS_WIN
     int i, iRet;
     char * a;
 
@@ -47,8 +47,10 @@ static int setenv(const char *name, const char *value, int overwrite)
     iRet = putenv(a);
     free(a);
     return iRet;
-}
+#else
+    return setenv(name, value, overwrite);
 #endif
+}
 
 // Note; in a real application you get this from a user, but this
 // is a useful trick for a unit test.
@@ -161,7 +163,7 @@ void PgpUnitTest::testKeyRing()
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
         // We test a small keyring - I downloaded a publically available one from
         // the Amsterdam Internet Exchange.
-        if ( 0 == setenv( "GNUPGHOME",  "./keys1", 1 ) )
+        if ( 0 == qca_setenv( "GNUPGHOME",  "./keys1", 1 ) )
         {
             QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
             QCOMPARE( keylist.count(), 6 );
@@ -192,7 +194,7 @@ void PgpUnitTest::testKeyRing()
         }
 
         // We now test an empty keyring
-        if ( 0 == setenv( "GNUPGHOME",  "./keys2", 1 ) )
+        if ( 0 == qca_setenv( "GNUPGHOME",  "./keys2", 1 ) )
         {
             QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
             QCOMPARE( keylist.count(), 0 );
@@ -203,7 +205,7 @@ void PgpUnitTest::testKeyRing()
 
         if ( false == oldGNUPGHOME.isNull() )
         {
-            setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+            qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
         }
     }
 }
@@ -234,7 +236,7 @@ void PgpUnitTest::testMessageSign()
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
 
 	// This keyring has a private / public key pair
-	if ( 0 != setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
 	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
 	}
 	
@@ -311,7 +313,7 @@ void PgpUnitTest::testMessageSign()
 	}
 
 	if ( false == oldGNUPGHOME.isNull() ) {
-	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
 	}
 
 	// now test that if we corrupt the message, it no longer
@@ -329,7 +331,7 @@ void PgpUnitTest::testMessageSign()
 	QCOMPARE(msg3.errorCode(), QCA::SecureMessage::ErrorUnknown);
 
 	if ( false == oldGNUPGHOME.isNull() ) {
-	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
 	}
     }
 }
@@ -361,7 +363,7 @@ void PgpUnitTest::testClearsign()
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
 
 	// This keyring has a private / public key pair
-	if ( 0 != setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
 	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
 	}
 	
@@ -440,7 +442,7 @@ void PgpUnitTest::testClearsign()
 	}
 
 	if ( false == oldGNUPGHOME.isNull() ) {
-	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
 	}
     }
 }
@@ -472,7 +474,7 @@ void PgpUnitTest::testDetachedSign()
         QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
 
 	// This keyring has a private / public key pair
-	if ( 0 != setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
 	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
 	}
 	
@@ -559,7 +561,7 @@ void PgpUnitTest::testDetachedSign()
 
 	// Restore things to the way they were....
 	if ( false == oldGNUPGHOME.isNull() ) {
-	    setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
 	}
     }
 }
