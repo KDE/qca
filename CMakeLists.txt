@@ -51,7 +51,7 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 SET(qca_INCLUDEDIR "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 SET(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib${LIB_SUFFIX}" )
 
-set(qca_PLUGINSDIR "${CMAKE_INSTALL_PREFIX}/lib/qca/crypto/")
+set(qca_PLUGINSDIR "${QT_PLUGINS_DIR}/crypto/")
 MESSAGE(STATUS "Plugins will be installed to " ${qca_PLUGINSDIR})
 
 include(QcaMacro)
