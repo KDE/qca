@@ -5128,6 +5128,16 @@ public:
 		v_eof = false;
 	}
 
+	// dummy verification function for SSL_set_verify()
+	static int ssl_verify_callback(int preverify_ok, X509_STORE_CTX *x509_ctx)
+	{
+		Q_UNUSED(preverify_ok);
+		Q_UNUSED(x509_ctx);
+
+		// don't terminate handshake in case of verification failure
+		return 1;
+	}
+
 	virtual QStringList supportedCipherSuites(const TLS::Version &version) const
 	{
 		OpenSSL_add_ssl_algorithms();
@@ -5690,6 +5700,14 @@ public:
 				SSL_CTX_free(context);
 				return false;
 			}
+		}
+
+		// request a certificate from the client, if in server mode
+		if(serv)
+		{
+			SSL_set_verify(ssl,
+				SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+				ssl_verify_callback);
 		}
 
 		return true;
