@@ -24,7 +24,11 @@ windows:{
 
 	INCLUDEPATH += $$OPENSSL_PREFIX/include
 	LIBS += -L$$OPENSSL_PREFIX/lib
-	LIBS += -llibeay32 -lssleay32
+	LINKAGE = -llibeay32 -lssleay32
+	CONFIG(debug, debug|release) {
+		windows:LINKAGE = -llibeay32d -lssleay32d
+	}
+	LIBS += $$LINKAGE
 	LIBS += -lgdi32 -lwsock32
 }
 
