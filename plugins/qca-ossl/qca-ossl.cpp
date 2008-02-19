@@ -6671,7 +6671,7 @@ public:
 	{
 	}
 
-	Context *clone() const
+	Provider::Context *clone() const
 	{
 		return new opensslInfoContext(*this);
 	}
