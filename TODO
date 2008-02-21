@@ -13,18 +13,44 @@
 
 * write plugin support - most plugins need at least some work
 
-* possibilities for the future:
+* 2.0.1
+  qpipe.cpp: lines 771, 856.  warning: int result might be unused.
+  on linux, the pkgconfig files for release/debug should be the same.
+    on mac, they should differ.  right?  (double check what qt/mac does)
+  put QPluginLoader.errorString() into plugin dtext
+  installwin.bat should ensure %QTDIR% is set
+  cmssigner: convert path separators in field when loading a pkcs11 module
+  qcatool2 should be version 2.0.x, just like plugins are
   publickey: use_asker_fallback should use ErrorPassphrase
+  cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
+  qcatool: instead of printing full usage at every wrong turn, we might try
+    to print something closer to the context
+  sasl examples should allow setting protocol name
+  tls/sasl: fix update bug (reported feb 20th)
+
+* possibilities for the future:
+  gss/kerberos interface?
+  spnego?
+  make sure it is possible to add new public key types (e.g. ECC).  right now
+    it looks like qca_publickey is hard-coded sometimes (such as canVerify()
+    returning true only for RSA and DSA public keys, no way to override this
+    in a plugin...)
+  if you store a typical self-signed cert into the system store as a way to
+    trust it, does that make you vulnerable to the cert signing other certs?
+  make distinction between invalid ca and ca not found
+  make distinction between depth 0 self-signed and self-signed in chain
+  use Q_PROPERTY on some things (e.g. TLS::compressionEnabled) ?
+  signRequest should allow specifying the serial number
+  qca-ossl: give credit to tim and "openssl" itself, not just eric?
+  tls: should there be an explicit property for requesting a certificate in
+    server mode?  right now qca-ossl simply always asks for a cert
   publickey: ability to compare keys without IO support
   provider: separate public and private keys into two classes to enable
     delegation easier.  the public part should not be implemented by most
     providers.
   provider: make it possible to support RSA and DSA keys without implementing
     a separate class for each.
-  cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
   qcatool: streaming securemessage operations
-  qcatool: instead of printing full usage at every wrong turn, we might try
-    to print something closer to the context
   access to list of known cached certs, similar to how cmssigner works?
   securemessage: ability to know which key has performed a decrypt?
   emsa3Encode: implement in provider instead of qca?
