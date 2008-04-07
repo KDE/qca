@@ -331,12 +331,15 @@ public:
 		gpg.doImport(a);
 		gpg_waitForFinished(&gpg);
 		gpg_keyStoreLog(gpg.readDiagnosticText());
-		if(!gpg.success())
+		// comment this out.  apparently gpg will report failure for
+		//   an import if there are trust issues, even though the
+		//   key actually did get imported
+		/*if(!gpg.success())
 		{
 			cleanup_temp_keyring(pubname);
 			cleanup_temp_keyring(secname);
 			return ErrorDecode;
-		}
+		}*/
 
 		// now extract the key from gpg like normal
 
@@ -374,6 +377,13 @@ public:
 			{
 				key = seckeys.first();
 				sec = true;
+			}
+			else
+			{
+				// no keys found
+				cleanup_temp_keyring(pubname);
+				cleanup_temp_keyring(secname);
+				return ErrorDecode;
 			}
 		}
 
