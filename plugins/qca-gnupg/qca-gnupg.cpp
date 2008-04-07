@@ -838,6 +838,7 @@ private slots:
 				secwatch = 0;
 				releaseAndDeleteLater(this, pubwatch);
 				pubwatch = 0;
+				emit busyEnd();
 				return;
 			}
 
@@ -903,6 +904,9 @@ private slots:
 		}
 		else
 		{
+			if(!gpg.success())
+				return;
+
 			GpgOp::Type op = gpg.op();
 			if(op == GpgOp::SecretKeys)
 			{
@@ -923,7 +927,7 @@ private slots:
 
 			if(!secdirty && !pubdirty)
 			{
-				emit updated();
+				emit storeUpdated(0);
 				return;
 			}
 
