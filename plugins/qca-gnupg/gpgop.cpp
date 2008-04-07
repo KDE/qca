@@ -446,7 +446,7 @@ public:
 	bool badPassphrase;
 	bool need_submitPassphrase, need_cardOkay;
 	QString diagnosticText;
-	QTimer dtextTimer;
+	SafeTimer dtextTimer;
 
 #ifdef GPG_PROFILE
 	QTime timer;
@@ -1196,7 +1196,7 @@ public:
 	{
 		if(act)
 		{
-			delete act;
+			releaseAndDeleteLater(this, act);
 			act = 0;
 		}
 
