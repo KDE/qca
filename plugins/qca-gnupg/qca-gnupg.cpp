@@ -23,6 +23,7 @@
 #include <QDir>
 #include <QLatin1String>
 #include <QMutex>
+#include <stdio.h>
 
 #ifdef Q_OS_MAC
 #include <QFileInfo>
@@ -33,12 +34,49 @@
 #endif
 #include "gpgop.h"
 
-// for release function
+// for SafeTimer and release function
 #include "gpgproc.h"
 
 using namespace QCA;
 
 namespace gpgQCAPlugin {
+
+static int qVersionInt()
+{
+	static int out = -1;
+
+	if(out == -1) {
+		QString str = QString::fromLatin1(qVersion());
+		QStringList parts = str.split('.', QString::KeepEmptyParts);
+		Q_ASSERT(parts.count() == 3);
+		out = 0;
+		for(int n = 0; n < 3; ++n) {
+			bool ok;
+			int x = parts[n].toInt(&ok);
+			Q_ASSERT(ok);
+			Q_ASSERT(x > 0 && x <= 0xff);
+			out <<= x;
+		}
+	}
+
+	return out;
+}
+
+#ifdef Q_OS_LINUX
+static bool qt_buggy_fsw()
+{
+	// FIXME: just a guess that this is fixed in 4.3.5 and 4.4.0
+	if(qVersionInt() < 0x040305)
+		return true;
+	else
+		return false;
+}
+#else
+static bool qt_buggy_fsw()
+{
+	return false;
+}
+#endif
 
 // begin ugly hack for qca 2.0.0 with broken dirwatch support
 
@@ -54,7 +92,42 @@ namespace gpgQCAPlugin {
 
 // some structures below to give accessible interface to qca 2.0.0 internals
 
-class FileWatch2 : public QObject
+class DirWatch2 : public QObject
+{
+        Q_OBJECT
+public:
+        explicit DirWatch2(const QString &dir = QString(), QObject *parent = 0)
+	{
+		Q_UNUSED(dir);
+		Q_UNUSED(parent);
+	}
+
+	~DirWatch2()
+	{
+	}
+
+	QString dirName() const
+	{
+		return QString();
+	}
+
+	void setDirName(const QString &dir)
+	{
+		Q_UNUSED(dir);
+	}
+
+Q_SIGNALS:
+	void changed();
+
+public:
+	Q_DISABLE_COPY(DirWatch2)
+
+	class Private;
+	friend class Private;
+	Private *d;
+};
+
+/*class FileWatch2 : public QObject
 {
 	Q_OBJECT
 public:
@@ -87,7 +160,7 @@ public:
 	class Private;
 	friend class Private;
 	Private *d;
-};
+};*/
 
 class QFileSystemWatcherRelay2 : public QObject
 {
@@ -95,7 +168,23 @@ class QFileSystemWatcherRelay2 : public QObject
 public:
 };
 
-class FileWatch2::Private : public QObject
+class DirWatch2::Private : public QObject
+{
+        Q_OBJECT
+public:
+        DirWatch2 *q;
+        QFileSystemWatcher *watcher;
+        QFileSystemWatcherRelay2 *watcher_relay;
+        QString dirName;
+
+private slots:
+	void watcher_changed(const QString &path)
+	{
+		Q_UNUSED(path);
+	}
+};
+
+/*class FileWatch2::Private : public QObject
 {
 	Q_OBJECT
 public:
@@ -109,12 +198,13 @@ private slots:
 	{
 		Q_UNUSED(path);
 	}
-};
+};*/
 
-static void hack_fix(FileWatch *fw)
+static void hack_fix(DirWatch *dw)
 {
-	FileWatch2 *fw2 = reinterpret_cast<FileWatch2*>(fw);
-	QObject::connect(fw2->d->watcher_relay, SIGNAL(fileChanged(const QString &)), fw2->d, SLOT(watcher_changed(const QString &)));
+	DirWatch2 *dw2 = reinterpret_cast<DirWatch2*>(dw);
+	QObject::connect(dw2->d->watcher_relay, SIGNAL(directoryChanged(const QString &)), dw2->d, SLOT(watcher_changed(const QString &)));
+	fprintf(stderr, "qca-gnupg: patching DirWatch to fix failed connect\n");
 }
 
 // end ugly hack
@@ -507,6 +597,189 @@ public:
 	}
 };
 
+// since keyring files are often modified by creating a new copy and
+//   overwriting the original file, this messes up Qt's file watching
+//   capability since the original file goes away.  to work around this
+//   problem, we'll watch the directories containing the keyring files
+//   instead of watching the actual files themselves.
+//
+// FIXME: consider moving this logic into FileWatch
+class RingWatch : public QObject
+{
+	Q_OBJECT
+public:
+	class DirItem
+	{
+	public:
+		DirWatch *dirWatch;
+		SafeTimer *changeTimer;
+	};
+
+	class FileItem
+	{
+	public:
+		DirWatch *dirWatch;
+		QString fileName;
+		bool exists;
+		qint64 size;
+		QDateTime lastModified;
+	};
+
+	QList<DirItem> dirs;
+	QList<FileItem> files;
+
+	RingWatch(QObject *parent = 0) :
+		QObject(parent)
+	{
+	}
+
+	~RingWatch()
+	{
+		clear();
+	}
+
+	void add(const QString &filePath)
+	{
+		QFileInfo fi(filePath);
+		QString path = fi.absolutePath();
+
+		// watching this path already?
+		DirWatch *dirWatch = 0;
+		foreach(const DirItem &di, dirs)
+		{
+			if(di.dirWatch->dirName() == path)
+			{
+				dirWatch = di.dirWatch;
+				break;
+			}
+		}
+
+		// if not, make a watcher
+		if(!dirWatch)
+		{
+			//printf("creating dirwatch for [%s]\n", qPrintable(path));
+
+			DirItem di;
+			di.dirWatch = new DirWatch(path, this);
+			connect(di.dirWatch, SIGNAL(changed()), SLOT(dirChanged()));
+
+			if(qcaVersion() == 0x020000)
+				hack_fix(di.dirWatch);
+
+			di.changeTimer = new SafeTimer(this);
+			di.changeTimer->setSingleShot(true);
+			connect(di.changeTimer, SIGNAL(timeout()), SLOT(handleChanged()));
+
+			dirWatch = di.dirWatch;
+			dirs += di;
+		}
+
+		FileItem i;
+		i.dirWatch = dirWatch;
+		i.fileName = fi.fileName();
+		i.exists = fi.exists();
+		if(i.exists)
+		{
+			i.size = fi.size();
+			i.lastModified = fi.lastModified();
+		}
+		files += i;
+
+		//printf("watching [%s] in [%s]\n", qPrintable(fi.fileName()), qPrintable(i.dirWatch->dirName()));
+	}
+
+	void clear()
+	{
+		files.clear();
+
+		foreach(const DirItem &di, dirs)
+		{
+			delete di.changeTimer;
+			delete di.dirWatch;
+		}
+
+		dirs.clear();
+	}
+
+signals:
+	void changed(const QString &filePath);
+
+private slots:
+	void dirChanged()
+	{
+		DirWatch *dirWatch = (DirWatch *)sender();
+
+		int at = -1;
+		for(int n = 0; n < dirs.count(); ++n)
+		{
+			if(dirs[n].dirWatch == dirWatch)
+			{
+				at = n;
+				break;
+			}
+		}
+		if(at == -1)
+			return;
+
+		// we get a ton of change notifications for the dir when
+		//   something happens..   let's collect them and only
+		//   report after 100ms
+
+		if(!dirs[at].changeTimer->isActive())
+			dirs[at].changeTimer->start(100);
+	}
+
+	void handleChanged()
+	{
+		SafeTimer *t = (SafeTimer *)sender();
+
+		int at = -1;
+		for(int n = 0; n < dirs.count(); ++n)
+		{
+			if(dirs[n].changeTimer == t)
+			{
+				at = n;
+				break;
+			}
+		}
+		if(at == -1)
+			return;
+
+		DirWatch *dirWatch = dirs[at].dirWatch;
+		QString dir = dirWatch->dirName();
+
+		// see which files changed
+		QStringList changeList;
+		for(int n = 0; n < files.count(); ++n)
+		{
+			FileItem &i = files[n];
+			QString filePath = dir + '/' + i.fileName;
+			QFileInfo fi(filePath);
+
+			// if the file didn't exist, and still doesn't, skip
+			if(!i.exists && !fi.exists())
+				continue;
+
+			// size/lastModified should only get checked here if
+			//   the file existed and still exists
+			if(fi.exists() != i.exists || fi.size() != i.size || fi.lastModified() != i.lastModified)
+			{
+				changeList += filePath;
+
+				i.exists = fi.exists();
+				if(i.exists)
+				{
+					i.size = fi.size();
+					i.lastModified = fi.lastModified();
+				}
+			}
+		}
+
+		foreach(const QString &s, changeList)
+			emit changed(s);
+	}
+};
+
 class MyKeyStoreList : public KeyStoreListContext
 {
 	Q_OBJECT
@@ -517,7 +790,7 @@ public:
 	GpgOp::KeyList pubkeys, seckeys;
 	QString pubring, secring;
 	bool pubdirty, secdirty;
-	FileWatch *pubwatch, *secwatch;
+	RingWatch ringWatch;
 	QMutex ringMutex;
 
 	MyKeyStoreList(Provider *p) :
@@ -526,13 +799,13 @@ public:
 		gpg(find_bin(), this),
 		pubdirty(false),
 		secdirty(false),
-		pubwatch(0),
-		secwatch(0)
+		ringWatch(this)
 	{
 		QMutexLocker locker(ksl_mutex());
 		keyStoreList = this;
 
 		connect(&gpg, SIGNAL(finished()), SLOT(gpg_finished()));
+		connect(&ringWatch, SIGNAL(changed(const QString &)), SLOT(ring_changed(const QString &)));
 	}
 
 	~MyKeyStoreList()
@@ -560,7 +833,6 @@ public:
 		// FIXME: collect and emit in one pass
 		QMetaObject::invokeMethod(this, "diagnosticText", Qt::QueuedConnection, Q_ARG(QString, str));
 	}
-
 
 	virtual void start()
 	{
@@ -678,6 +950,7 @@ public:
 		return c;
 	}
 
+	// TODO: cache should reflect this change immediately
 	virtual QString writeEntry(int, const PGPKey &key)
 	{
 		const MyPGPKeyContext *kc = static_cast<const MyPGPKeyContext *>(key.context());
@@ -693,12 +966,21 @@ public:
 		return kc->_props.keyId;
 	}
 
-	virtual bool removeEntry(int id, const QString &entryId)
+	// TODO: cache should reflect this change immediately
+	virtual bool removeEntry(int, const QString &entryId)
 	{
-		// TODO
-		Q_UNUSED(id);
-		Q_UNUSED(entryId);
-		return false;
+		ringMutex.lock();
+		PGPKey pub = getPubKey(entryId);
+		ringMutex.unlock();
+
+		const MyPGPKeyContext *kc = static_cast<const MyPGPKeyContext *>(pub.context());
+		QString fingerprint = kc->_props.fingerprint;
+
+		GpgOp gpg(find_bin());
+		gpg.doDeleteKey(fingerprint);
+		gpg_waitForFinished(&gpg);
+		gpg_keyStoreLog(gpg.readDiagnosticText());
+		return gpg.success();
 	}
 
 	// internal
@@ -834,10 +1116,7 @@ private slots:
 			// any steps that fail during init, just give up completely
 			if(!gpg.success())
 			{
-				releaseAndDeleteLater(this, secwatch);
-				secwatch = 0;
-				releaseAndDeleteLater(this, pubwatch);
-				pubwatch = 0;
+				ringWatch.clear();
 				emit busyEnd();
 				return;
 			}
@@ -853,12 +1132,14 @@ private slots:
 			else if(init_step == 1)
 			{
 				secring = gpg.keyringFile();
+
+				if(qt_buggy_fsw())
+					fprintf(stderr, "qca-gnupg: disabling keyring monitoring due to buggy Qt version\n");
+
 				if(!secring.isEmpty())
 				{
-					secwatch = new FileWatch(secring, this);
-					if(qcaVersion() == 0x200000)
-						hack_fix(secwatch);
-					connect(secwatch, SIGNAL(changed()), SLOT(sec_changed()));
+					if(!qt_buggy_fsw())
+						ringWatch.add(secring);
 				}
 
 				// obtain keyring file names for monitoring
@@ -871,10 +1152,8 @@ private slots:
 				pubring = gpg.keyringFile();
 				if(!pubring.isEmpty())
 				{
-					pubwatch = new FileWatch(pubring, this);
-					if(qcaVersion() == 0x200000)
-						hack_fix(pubwatch);
-					connect(pubwatch, SIGNAL(changed()), SLOT(sec_changed()));
+					if(!qt_buggy_fsw())
+						ringWatch.add(pubring);
 				}
 
 				// cache initial keyrings
@@ -935,6 +1214,17 @@ private slots:
 		}
 	}
 
+	void ring_changed(const QString &filePath)
+	{
+		ext_keyStoreLog(QString("ring_changed: [%1]\n").arg(filePath));
+
+		if(filePath == secring)
+			sec_changed();
+		else if(filePath == pubring)
+			pub_changed();
+	}
+
+private:
 	void pub_changed()
 	{
 		pubdirty = true;
@@ -947,7 +1237,6 @@ private slots:
 		handleDirtyRings();
 	}
 
-private:
 	void handleDirtyRings()
 	{
 		if(!initialized || gpg.isActive())
