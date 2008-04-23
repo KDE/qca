@@ -2045,7 +2045,7 @@ public:
 	   \param provider the provider to use, if a specific provider is
 	   required
 	*/
-	CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider = QString());
+	CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
 
 	/**
 	   Copy constructor
