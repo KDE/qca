@@ -2434,7 +2434,7 @@ public:
 	/**
 	   The key fingerpint
 
-	   This will return the PGP fingerprint as a string. It comprises 16
+	   This will return the PGP fingerprint as a string. It comprises 40
 	   hex digits, without spaces.
 	*/
 	QString fingerprint() const;
