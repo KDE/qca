@@ -1134,7 +1134,7 @@ private slots:
 				secring = gpg.keyringFile();
 
 				if(qt_buggy_fsw())
-					fprintf(stderr, "qca-gnupg: disabling keyring monitoring due to buggy Qt version\n");
+					fprintf(stderr, "qca-gnupg: disabling keyring monitoring in Qt version < 4.3.5\n");
 
 				if(!secring.isEmpty())
 				{
