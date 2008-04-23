@@ -186,9 +186,9 @@ int main(int argc, char **argv)
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
 
-    QCA::SecureArray password, salt;
-
     QCoreApplication app ( argc, argv );
+
+    QCA::SecureArray password, salt;
 
     if ( argc < 3 )
     {
