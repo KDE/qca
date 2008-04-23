@@ -2079,6 +2079,21 @@ static void print_crl(const QCA::CRL &crl, bool ordered = false)
 	}
 }
 
+static QString format_pgp_fingerprint(const QString &in)
+{
+	QString out;
+	bool first = true;
+	for(int n = 0; n + 3 < in.length(); n += 4)
+	{
+		if(!first)
+			out += ' ';
+		else
+			first = false;
+		out += in.mid(n, 4).toUpper();
+	}
+	return out;
+}
+
 static void print_pgp(const QCA::PGPKey &key)
 {
 	printf("Key ID: %s\n", qPrintable(key.keyId()));
@@ -2087,11 +2102,14 @@ static void print_pgp(const QCA::PGPKey &key)
 		printf("   %s\n", qPrintable(s));
 	printf("Validity\n");
 	printf("   Not before: %s\n", qPrintable(key.creationDate().toString()));
-	printf("   Not after:  %s\n", qPrintable(key.expirationDate().toString()));
+	if(!key.expirationDate().isNull())
+		printf("   Not after:  %s\n", qPrintable(key.expirationDate().toString()));
+	else
+		printf("   Not after:  (no expiration)\n");
 	printf("In Keyring: %s\n", key.inKeyring() ? "Yes": "No");
 	printf("Secret Key: %s\n", key.isSecret() ? "Yes": "No");
 	printf("Trusted:    %s\n", key.isTrusted() ? "Yes": "No");
-	printf("Fingerprint: %s\n", qPrintable(key.fingerprint()));
+	printf("Fingerprint: %s\n", qPrintable(format_pgp_fingerprint(key.fingerprint())));
 }
 
 static QString validityToString(QCA::Validity v)
@@ -2618,29 +2636,38 @@ static QCA::KeyBundle get_X(const QString &name)
 
 static QCA::PGPKey get_P(const QString &name)
 {
-	QCA::PGPKey key;
-	QCA::KeyStoreEntry entry = get_E(name);
+	QCA::KeyStoreEntry entry = get_E(name, true);
 	if(!entry.isNull())
 	{
 		if(entry.type() != QCA::KeyStoreEntry::TypePGPPublicKey && entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
 		{
 			fprintf(stderr, "Error: entry is not a pgp public key.\n");
-			return key;
+			return QCA::PGPKey();
 		}
 		return entry.pgpPublicKey();
 	}
+
+	// try file
+	QCA::PGPKey key = QCA::PGPKey::fromFile(name);
+	if(key.isNull())
+	{
+		fprintf(stderr, "Error: unable to read/process pgp key file.\n");
+		return key;
+	}
+
 	return key;
 }
 
-static QPair<QCA::PGPKey, QCA::PGPKey> get_S(const QString &name)
+static QPair<QCA::PGPKey, QCA::PGPKey> get_S(const QString &name, bool noerror = false)
 {
 	QPair<QCA::PGPKey, QCA::PGPKey> key;
-	QCA::KeyStoreEntry entry = get_E(name);
+	QCA::KeyStoreEntry entry = get_E(name, true);
 	if(!entry.isNull())
 	{
 		if(entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey)
 		{
-			fprintf(stderr, "Error: entry is not a pgp secret key.\n");
+			if(!noerror)
+				fprintf(stderr, "Error: entry is not a pgp secret key.\n");
 			return key;
 		}
 
@@ -3742,7 +3769,7 @@ int main(int argc, char **argv)
 			}
 
 			// try for secret key, then try public key
-			QCA::PGPKey key = get_S(args[2]).first;
+			QCA::PGPKey key = get_S(args[2], true).first;
 			if(key.isNull())
 			{
 				key = get_P(args[2]);
