@@ -127,17 +127,31 @@ private:
 
 void PgpUnitTest::initTestCase()
 {
-    m_init = new QCA::Initializer;
+    // instead of initializing qca once, we will initialize it for every
+    //   test case.  this is the only way to get the keystore subsystem
+    //   to reload, which we need to do if we want qca-gnupg to respect
+    //   changes to $GNUPGHOME.
+    //m_init = new QCA::Initializer;
 #include "../fixpaths.include"
 }
 
 void PgpUnitTest::cleanupTestCase()
 {
-    delete m_init;
+    //delete m_init;
 }
 
 void PgpUnitTest::testKeyRing()
 {
+    QCA::Initializer *qcaInit = new QCA::Initializer;
+
+    // We test a small keyring - I downloaded a publically available one from
+    QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
+    // the Amsterdam Internet Exchange.
+    if ( qca_setenv( "GNUPGHOME",  "./keys1", 1 ) != 0 )
+    {
+        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+    }
+
     // activate the KeyStoreManager
     QCA::KeyStoreManager::start();
 
@@ -160,64 +174,82 @@ void PgpUnitTest::testKeyRing()
         QCOMPARE( pgpStore.holdsIdentities(), true );
         QCOMPARE( pgpStore.holdsPGPPublicKeys(), true );
 
-        QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
-        // We test a small keyring - I downloaded a publically available one from
-        // the Amsterdam Internet Exchange.
-        if ( 0 == qca_setenv( "GNUPGHOME",  "./keys1", 1 ) )
-        {
-            QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
-            QCOMPARE( keylist.count(), 6 );
-            QStringList nameList;
-            foreach( const QCA::KeyStoreEntry key,  keylist ) {
-                QCOMPARE( key.isNull(), false );
-                QCOMPARE( key.type(),  QCA::KeyStoreEntry::TypePGPPublicKey );
-                QCOMPARE( key.id().length(),  16 ); // 16 hex digits
-                QVERIFY( key.keyBundle().isNull() );
-                QVERIFY( key.certificate().isNull() );
-                QVERIFY( key.crl().isNull() );
-                QVERIFY( key.pgpSecretKey().isNull() );
-                QCOMPARE( key.pgpPublicKey().isNull(), false );
+        QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
+        QCOMPARE( keylist.count(), 6 );
+        QStringList nameList;
+        foreach( const QCA::KeyStoreEntry key,  keylist ) {
+            QCOMPARE( key.isNull(), false );
+            QCOMPARE( key.type(),  QCA::KeyStoreEntry::TypePGPPublicKey );
+            QCOMPARE( key.id().length(),  16 ); // 16 hex digits
+            QVERIFY( key.keyBundle().isNull() );
+            QVERIFY( key.certificate().isNull() );
+            QVERIFY( key.crl().isNull() );
+            QVERIFY( key.pgpSecretKey().isNull() );
+            QCOMPARE( key.pgpPublicKey().isNull(), false );
 
-                // We accumulate the names, and check them next
-                nameList << key.name();
-            }
-            QVERIFY( nameList.contains( "Steven Bakker <steven.bakker@ams-ix.net>" ) );
-            QVERIFY( nameList.contains( "Romeo Zwart <rz@ams-ix.net>" ) );
-            QVERIFY( nameList.contains( "Arien Vijn <arien.vijn@ams-ix.net>" ) );
-            QVERIFY( nameList.contains( "Niels Bakker <niels.bakker@ams-ix.net>" ) );
-            QVERIFY( nameList.contains( "Henk Steenman <Henk.Steenman@ams-ix.net>" ) );
-            QVERIFY( nameList.contains( "Geert Nijpels <geert.nijpels@ams-ix.net>" ) );
-
-            // TODO: We should test removeEntry() and writeEntry() here.
-        } else {
-            QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+            // We accumulate the names, and check them next
+            nameList << key.name();
         }
+        QVERIFY( nameList.contains( "Steven Bakker <steven.bakker@ams-ix.net>" ) );
+        QVERIFY( nameList.contains( "Romeo Zwart <rz@ams-ix.net>" ) );
+        QVERIFY( nameList.contains( "Arien Vijn <arien.vijn@ams-ix.net>" ) );
+        QVERIFY( nameList.contains( "Niels Bakker <niels.bakker@ams-ix.net>" ) );
+        QVERIFY( nameList.contains( "Henk Steenman <Henk.Steenman@ams-ix.net>" ) );
+        QVERIFY( nameList.contains( "Geert Nijpels <geert.nijpels@ams-ix.net>" ) );
 
-        // We now test an empty keyring
-        if ( 0 == qca_setenv( "GNUPGHOME",  "./keys2", 1 ) )
-        {
-            QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
-            QCOMPARE( keylist.count(), 0 );
-            // TODO: We should test removeEntry() and writeEntry() here.
-        } else {
-            QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
-        }
-
-        if ( false == oldGNUPGHOME.isNull() )
-        {
-            qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
-        }
+        // TODO: We should test removeEntry() and writeEntry() here.
     }
+
+    delete qcaInit;
+    qcaInit = new QCA::Initializer;
+
+    // We now test an empty keyring
+    if ( qca_setenv( "GNUPGHOME",  "./keys2", 1 ) != 0 )
+    {
+        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+    }
+
+    QCA::KeyStoreManager::start();
+
+    if ( QCA::isSupported( QStringList( QString( "keystorelist" ) ),
+                            QString( "qca-gnupg" ) ) )
+    {
+        QCA::KeyStoreManager keyManager(this);
+	keyManager.waitForBusyFinished();
+	QStringList storeIds = keyManager.keyStores();
+	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+
+        QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+
+        QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
+        QCOMPARE( keylist.count(), 0 );
+        // TODO: We should test removeEntry() and writeEntry() here.
+    }
+
+    if ( false == oldGNUPGHOME.isNull() )
+    {
+        qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
+    }
+
+    delete qcaInit;
 }
 
 void PgpUnitTest::testMessageSign()
 {
+    QCA::Initializer qcaInit;
+
     // event handling cannot be used in the same thread as synchronous calls
     // which might require event handling.  let's put our event handler in
     // a side thread so that we can write the unit test synchronously.
     PGPPassphraseProviderThread thread;
     thread.start();
 
+    // This keyring has a private / public key pair
+    QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
+    if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+    }
+	
     // activate the KeyStoreManager
     QCA::KeyStoreManager::start();
 
@@ -233,13 +265,6 @@ void PgpUnitTest::testMessageSign()
 	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
 	QVERIFY( pgpStore.isValid() );
 
-        QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
-
-	// This keyring has a private / public key pair
-	if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
-	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
-	}
-	
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
 	QCOMPARE( keylist.count(), 1 );
 
@@ -312,6 +337,7 @@ void PgpUnitTest::testMessageSign()
 	    QFAIL("Failed to verify message");
 	}
 
+	// why is this here?
 	if ( false == oldGNUPGHOME.isNull() ) {
 	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
 	}
@@ -330,21 +356,30 @@ void PgpUnitTest::testMessageSign()
 	QCOMPARE(msg3.verifySuccess(), false);
 	QCOMPARE(msg3.errorCode(), QCA::SecureMessage::ErrorUnknown);
 
-	if ( false == oldGNUPGHOME.isNull() ) {
-	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
-	}
+    }
+
+    if ( false == oldGNUPGHOME.isNull() ) {
+        qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
     }
 }
 
 
 void PgpUnitTest::testClearsign()
 {
+    QCA::Initializer qcaInit;
+
     // event handling cannot be used in the same thread as synchronous calls
     // which might require event handling.  let's put our event handler in
     // a side thread so that we can write the unit test synchronously.
     PGPPassphraseProviderThread thread;
     thread.start();
 
+    // This keyring has a private / public key pair
+    QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
+    if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+    }
+	
     // activate the KeyStoreManager
     QCA::KeyStoreManager::start();
 
@@ -360,13 +395,6 @@ void PgpUnitTest::testClearsign()
 	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
 	QVERIFY( pgpStore.isValid() );
 
-        QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
-
-	// This keyring has a private / public key pair
-	if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
-	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
-	}
-	
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
 	QCOMPARE( keylist.count(), 1 );
 
@@ -440,22 +468,30 @@ void PgpUnitTest::testClearsign()
 	    qDebug() << "Failure:" <<  msg2.errorCode();
 	    QFAIL("Failed to verify clearsigned message");
 	}
+    }
 
-	if ( false == oldGNUPGHOME.isNull() ) {
-	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
-	}
+    if ( false == oldGNUPGHOME.isNull() ) {
+        qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
     }
 }
 
 
 void PgpUnitTest::testDetachedSign()
 {
+    QCA::Initializer qcaInit;
+
     // event handling cannot be used in the same thread as synchronous calls
     // which might require event handling.  let's put our event handler in
     // a side thread so that we can write the unit test synchronously.
     PGPPassphraseProviderThread thread;
     thread.start();
 
+    // This keyring has a private / public key pair
+    QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
+    if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
+    }
+	
     // activate the KeyStoreManager
     QCA::KeyStoreManager::start();
 
@@ -471,13 +507,6 @@ void PgpUnitTest::testDetachedSign()
 	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
 	QVERIFY( pgpStore.isValid() );
 
-        QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
-
-	// This keyring has a private / public key pair
-	if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
-	        QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
-	}
-	
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
 	QCOMPARE( keylist.count(), 1 );
 
@@ -558,11 +587,11 @@ void PgpUnitTest::testDetachedSign()
 	QCOMPARE( msg3.verifySuccess(), false );
 
 	QCOMPARE( msg3.errorCode(), QCA::SecureMessage::ErrorUnknown );
+    }
 
-	// Restore things to the way they were....
-	if ( false == oldGNUPGHOME.isNull() ) {
-	    qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
-	}
+    // Restore things to the way they were....
+    if ( false == oldGNUPGHOME.isNull() ) {
+        qca_setenv( "GNUPGHOME",  oldGNUPGHOME.data(), 1 );
     }
 }
 
