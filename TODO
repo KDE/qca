@@ -14,11 +14,30 @@
 * write plugin support - most plugins need at least some work
 
 * 2.0.1
+  keystore write support is broken, due to metatype stuff.  make sure all
+    write types are correct, and that removal also works.
+  unloadAllPlugins should also shutdown keystores beforehand
+  use deleteLater QTimer, QSocketNotifier, and anything that might come from
+    a metacall.  consider a way to de-metacall-ify internally so qca users
+    aren't required to deleteLater on public api objects
+  dirwatch/filewatch: empty string means no monitoring. don't attempt to watch
+    a blank filename
+  dirwatch/filewatch: connect() statement wrong
+  cms example: User.pem expired.  probably other certs need regen also?
+  fix publickeyexample.  it encrypts with cms, decrypts with raw rsa??
+  fix wildcard matching
+  cert unit tests need to test wildcards!!
+  make sure all examples start with initializer then qapp
   qpipe.cpp: lines 771, 856.  warning: int result might be unused.
   on linux, the pkgconfig files for release/debug should be the same.
     on mac, they should differ.  right?  (double check what qt/mac does)
-  put QPluginLoader.errorString() into plugin dtext
+  plugin dtext improvements
+    clean up text, it's a bit too verbose (mentioning same files over and over)
+    use QPluginLoader.errorString()
+    don't rescan just because we're using a default provider
+    log feature names being checked for
   installwin.bat should ensure %QTDIR% is set
+  installwin.bat should put quotes around qca paths to support paths with space
   cmssigner: convert path separators in field when loading a pkcs11 module
   qcatool2 should be version 2.0.x, just like plugins are
   publickey: use_asker_fallback should use ErrorPassphrase
@@ -27,8 +46,17 @@
     to print something closer to the context
   sasl examples should allow setting protocol name
   tls/sasl: fix update bug (reported feb 20th)
+  lazy-create the global logger, else we end up with QObject created before
+    qapp in the standard case
+
+* 2.1.0
+  CertificateAuthority constructor provider argument should have default value
 
 * possibilities for the future:
+  make it possible to change GNUPGHOME and have qca-gnupg respect the change?
+    see pgpunittest.
+  why is Logger a QObject?
+  operator==,!= for PGPKey?
   gss/kerberos interface?
   spnego?
   make sure it is possible to add new public key types (e.g. ECC).  right now
