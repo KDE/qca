@@ -152,7 +152,7 @@ static int pipe_read_avail(Q_PIPE_ID pipe)
 #ifdef Q_OS_UNIX
 	size_t nbytes = 0;
 	if(ioctl(pipe, FIONREAD, (char *)&nbytes) >= 0)
-		bytesAvail = *((int *)&nbytes);
+		bytesAvail = (int)nbytes;
 #endif
 	return bytesAvail;
 }
