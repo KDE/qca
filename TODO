@@ -23,11 +23,7 @@
   dirwatch/filewatch: empty string means no monitoring. don't attempt to watch
     a blank filename
   dirwatch/filewatch: connect() statement wrong
-  cms example: User.pem expired.  probably other certs need regen also?
-  fix publickeyexample.  it encrypts with cms, decrypts with raw rsa??
   fix wildcard matching
-  cert unit tests need to test wildcards!!
-  make sure all examples start with initializer then qapp
   qpipe.cpp: lines 771, 856.  warning: int result might be unused.
   on linux, the pkgconfig files for release/debug should be the same.
     on mac, they should differ.  right?  (double check what qt/mac does)
@@ -38,16 +34,23 @@
     log feature names being checked for
   installwin.bat should ensure %QTDIR% is set
   installwin.bat should put quotes around qca paths to support paths with space
-  cmssigner: convert path separators in field when loading a pkcs11 module
   qcatool2 should be version 2.0.x, just like plugins are
-  publickey: use_asker_fallback should use ErrorPassphrase
-  cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
-  qcatool: instead of printing full usage at every wrong turn, we might try
-    to print something closer to the context
   sasl examples should allow setting protocol name
   tls/sasl: fix update bug (reported feb 20th)
   lazy-create the global logger, else we end up with QObject created before
     qapp in the standard case
+  qpipe.cpp: make sure the "(int)" casts handle overflow
+
+* 2.0.2
+  cms example: User.pem expired.  probably other certs need regen also?
+  fix publickeyexample.  it encrypts with cms, decrypts with raw rsa??
+  qcatool: instead of printing full usage at every wrong turn, we might try
+    to print something closer to the context
+  publickey: use_asker_fallback should use ErrorPassphrase
+  cmssigner: convert path separators in field when loading a pkcs11 module
+  cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
+  cert unit tests need to test wildcards!!
+  make sure all examples start with initializer then qapp
 
 * 2.1.0
   CertificateAuthority constructor provider argument should have default value
