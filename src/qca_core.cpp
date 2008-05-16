@@ -135,6 +135,22 @@ public:
 		}
 		return logger;
 	}
+
+	void unloadAllPlugins()
+	{
+		KeyStoreManager::shutdown();
+
+		// if the global_rng was owned by a plugin, then delete it
+		rng_mutex.lock();
+		if(rng && (rng->provider() != manager->find("default")))
+		{
+			delete rng;
+			rng = 0;
+		}
+		rng_mutex.unlock();
+
+		manager->unloadAll();
+	}
 };
 
 Q_GLOBAL_STATIC(QMutex, global_mutex)
@@ -388,16 +404,7 @@ void unloadAllPlugins()
 	if(!global_check())
 		return;
 
-	// if the global_rng was owned by a plugin, then delete it
-	global->rng_mutex.lock();
-	if(global->rng && (global->rng->provider() != global->manager->find("default")))
-	{
-		delete global->rng;
-		global->rng = 0;
-	}
-	global->rng_mutex.unlock();
-
-	global->manager->unloadAll();
+	global->unloadAllPlugins();
 }
 
 QString pluginDiagnosticText()
