@@ -778,6 +778,8 @@ protected:
 						result = -2;
 					else if(ret >= 1) // we got some data??  queue it
 						result = c;
+					else // will never happen
+						result = -2;
 
 					m.lock();
 					active = false;
@@ -863,6 +865,8 @@ private:
 				result = -2;
 			else if(ret >= 1) // we got some data??  queue it
 				result = c;
+			else // will never happen
+				result = -2;
 
 			timer.stop();
 			emit canRead(result);
