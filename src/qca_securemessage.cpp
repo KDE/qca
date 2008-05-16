@@ -22,8 +22,7 @@
 #include "qca_securemessage.h"
 
 #include "qcaprovider.h"
-
-#include <QTimer>
+#include "qca_safeobj.h"
 
 namespace QCA {
 
@@ -265,7 +264,7 @@ public:
 	QString dtext;
 
 	QList<int> bytesWrittenArgs;
-	QTimer readyReadTrigger, bytesWrittenTrigger, finishedTrigger;
+	SafeTimer readyReadTrigger, bytesWrittenTrigger, finishedTrigger;
 
 	Private(SecureMessage *_q) : readyReadTrigger(this), bytesWrittenTrigger(this), finishedTrigger(this)
 	{

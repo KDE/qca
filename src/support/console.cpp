@@ -21,10 +21,10 @@
 #include "qca_support.h"
 
 #include "qpipe.h"
+#include "qca_safeobj.h"
 
 #include <QPointer>
 #include <QTextCodec>
-#include <QTimer>
 #include <QMutex>
 
 #ifdef Q_OS_WIN
@@ -586,7 +586,7 @@ public:
 	Console *console;
 	ConsoleThread *thread;
 	ConsoleReference::SecurityMode smode;
-	QTimer lateTrigger;
+	SafeTimer lateTrigger;
 	bool late_read, late_close;
 
 	ConsoleReferencePrivate(ConsoleReference *_q) : QObject(_q), q(_q), lateTrigger(this)

@@ -22,8 +22,8 @@
 #include "qca_securelayer.h"
 
 #include "qcaprovider.h"
+#include "qca_safeobj.h"
 
-#include <QTimer>
 #include <QPointer>
 
 namespace QCA {
@@ -223,7 +223,7 @@ public:
 	bool server;
 	QString host;
 	TLSContext::SessionInfo sessionInfo;
-	QTimer actionTrigger;
+	SafeTimer actionTrigger;
 	int op;
 	QList<Action> actionQueue;
 	bool need_update;
@@ -1334,7 +1334,7 @@ public:
 	QString server_realm;
 	bool allowClientSendFirst;
 	bool disableServerSendLast;
-	QTimer actionTrigger;
+	SafeTimer actionTrigger;
 	int op;
 	QList<Action> actionQueue;
 	bool need_update;

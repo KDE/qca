@@ -29,17 +29,18 @@
 
 #include <stdlib.h>
 
+// sorry, i've added this dependency for now, but it's easy enough to take
+//   with you if you want qpipe independent of qca
+#include "qca_safeobj.h"
+
 #ifdef Q_OS_WIN
 # include <QThread>
-# include <QTimer>
 # include <QMutex>
 # include <QWaitCondition>
 # include <QTextCodec>
 # include <QTextEncoder>
 # include <QTextDecoder>
 #else
-# include <QSocketNotifier>
-# include <QTimer>
 # include <QMutex>
 #endif
 
@@ -631,7 +632,7 @@ public:
 	Q_PIPE_ID pipe;
 	const char *data;
 	int size;
-	QTimer timer;
+	SafeTimer timer;
 	int total;
 
 	QPipeWriterPoll(Q_PIPE_ID id, QObject *parent = 0) : QPipeWriter(parent), timer(this)
@@ -802,7 +803,7 @@ class QPipeReaderPoll : public QPipeReader
 	Q_OBJECT
 public:
 	Q_PIPE_ID pipe;
-	QTimer timer;
+	SafeTimer timer;
 	bool consoleMode;
 
 	QPipeReaderPoll(Q_PIPE_ID id, QObject *parent = 0) : QPipeReader(parent), timer(this)
@@ -909,14 +910,14 @@ public:
 #ifdef Q_OS_WIN
 	bool atEnd, atError, forceNotify;
 	int readAhead;
-	QTimer *readTimer;
+	SafeTimer *readTimer;
 	QTextDecoder *dec;
 	bool consoleMode;
 	QPipeWriter *pipeWriter;
 	QPipeReader *pipeReader;
 #endif
 #ifdef Q_OS_UNIX
-	QSocketNotifier *sn_read, *sn_write;
+	SafeSocketNotifier *sn_read, *sn_write;
 #endif
 
 	Private(QPipeDevice *_q) : QObject(_q), q(_q), pipe(INVALID_Q_PIPE_ID)
@@ -1020,7 +1021,7 @@ public:
 			pipeReader->start();
 
 			// polling timer
-			readTimer = new QTimer(this);
+			readTimer = new SafeTimer(this);
 			connect(readTimer, SIGNAL(timeout()), SLOT(t_timeout()));
 
 			// updated: now that we have pipeReader, this no longer
@@ -1032,7 +1033,7 @@ public:
 			pipe_set_blocking(pipe, false);
 
 			// socket notifier
-			sn_read = new QSocketNotifier(pipe, QSocketNotifier::Read, this);
+			sn_read = new SafeSocketNotifier(pipe, QSocketNotifier::Read, this);
 			connect(sn_read, SIGNAL(activated(int)), SLOT(sn_read_activated(int)));
 #endif
 		}
@@ -1043,7 +1044,7 @@ public:
 			pipe_set_blocking(pipe, false);
 
 			// socket notifier
-			sn_write = new QSocketNotifier(pipe, QSocketNotifier::Write, this);
+			sn_write = new SafeSocketNotifier(pipe, QSocketNotifier::Write, this);
 			connect(sn_write, SIGNAL(activated(int)), SLOT(sn_write_activated(int)));
 			sn_write->setEnabled(false);
 #endif
@@ -1500,7 +1501,7 @@ public:
 	SecureArray sec_buf;
 	SecureArray sec_curWrite;
 #endif
-	QTimer readTrigger, writeTrigger, closeTrigger, writeErrorTrigger;
+	SafeTimer readTrigger, writeTrigger, closeTrigger, writeErrorTrigger;
 	bool canRead, activeWrite;
 	int lastWrite;
 	bool closeLater;

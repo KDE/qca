@@ -27,6 +27,7 @@ INCLUDEPATH += $$QCA_INC $$QCA_CPP
 include($$QCA_SRCBASE/botantools/botantools.pri)
 
 PRIVATE_HEADERS += \
+	$$QCA_CPP/qca_safeobj.h \
 	$$QCA_CPP/qca_plugin.h \
 	$$QCA_CPP/qca_systemstore.h
 
@@ -55,6 +56,7 @@ SOURCES += \
 	$$QCA_CPP/support/dirwatch.cpp
 
 SOURCES += \
+	$$QCA_CPP/qca_safeobj.cpp \
 	$$QCA_CPP/qca_tools.cpp \
 	$$QCA_CPP/qca_core.cpp \
 	$$QCA_CPP/qca_textfilter.cpp \
