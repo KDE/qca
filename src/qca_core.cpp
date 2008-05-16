@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2008  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -72,6 +72,7 @@ public:
 	QMutex prop_mutex;
 	QMap<QString,QVariantMap> config;
 	QMutex config_mutex;
+	QMutex logger_mutex;
 
 	Global()
 	{
@@ -79,7 +80,7 @@ public:
 		secmem = false;
 		first_scan = false;
 		rng = 0;
-		logger = new Logger;
+		logger = 0;
 		manager = new ProviderManager;
 	}
 
@@ -118,6 +119,20 @@ public:
 	void ksm_scan()
 	{
 		KeyStoreManager::scan();
+	}
+
+	Logger *get_logger()
+	{
+		QMutexLocker locker(&logger_mutex);
+		if(!logger)
+		{
+			logger = new Logger;
+
+			// needed so deinit may delete the logger regardless
+			//   of what thread the logger was created from
+			logger->moveToThread(0);
+		}
+		return logger;
 	}
 };
 
@@ -612,7 +627,7 @@ void setGlobalRandomProvider(const QString &provider)
 
 Logger *logger()
 {
-	return global->logger;
+	return global->get_logger();
 }
 
 bool haveSystemStore()
