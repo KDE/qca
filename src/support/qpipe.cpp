@@ -28,6 +28,7 @@
 #include "qpipe.h"
 
 #include <stdlib.h>
+#include <limits.h>
 
 // sorry, i've added this dependency for now, but it's easy enough to take
 //   with you if you want qpipe independent of qca
@@ -93,6 +94,34 @@ static void ignore_sigpipe()
 }
 #endif
 
+#ifdef Q_OS_WIN
+static int pipe_dword_cap_to_int(DWORD dw)
+{
+	if(sizeof(int) <= sizeof(DWORD))
+		return (int)((dw > INT_MAX) ? INT_MAX : dw);
+	else
+		return (int)dw;
+}
+
+static bool pipe_dword_overflows_int(DWORD dw)
+{
+	if(sizeof(int) <= sizeof(DWORD))
+		return (dw > INT_MAX) ? true : false;
+	else
+		return false;
+}
+#endif
+
+#ifdef Q_OS_UNIX
+static int pipe_size_t_cap_to_int(size_t size)
+{
+	if(sizeof(int) <= sizeof(size_t))
+		return (int)((size > INT_MAX) ? INT_MAX : size);
+	else // maybe silly..  can int ever be larger than size_t?
+		return (int)size;
+}
+#endif
+
 static bool pipe_set_blocking(Q_PIPE_ID pipe, bool b)
 {
 #ifdef Q_OS_WIN
@@ -149,12 +178,12 @@ static int pipe_read_avail(Q_PIPE_ID pipe)
 #ifdef Q_OS_WIN
 	DWORD i = 0;
 	if(PeekNamedPipe(pipe, 0, 0, 0, &i, 0))
-		bytesAvail = (int)i;
+		bytesAvail = pipe_dword_cap_to_int(i);
 #endif
 #ifdef Q_OS_UNIX
 	size_t nbytes = 0;
 	if(ioctl(pipe, FIONREAD, (char *)&nbytes) >= 0)
-		bytesAvail = (int)nbytes;
+		bytesAvail = pipe_size_t_cap_to_int(nbytes);
 #endif
 	return bytesAvail;
 }
@@ -188,7 +217,7 @@ static int pipe_read(Q_PIPE_ID pipe, char *data, int max, bool *eof)
 		else
 			return -1;
 	}
-	bytesRead = (int)r;
+	bytesRead = (int)r; // safe to cast, since 'max' is signed
 #endif
 #ifdef Q_OS_UNIX
 	int r = 0;
@@ -220,7 +249,7 @@ static int pipe_write(Q_PIPE_ID pipe, const char *data, int size)
 	DWORD written;
 	if(!WriteFile(pipe, data, size, &written, 0))
 		return -1;
-	return (int)written;
+	return (int)written; // safe to cast, since 'size' is signed
 #endif
 #ifdef Q_OS_UNIX
 	ignore_sigpipe();
@@ -255,7 +284,7 @@ static int pipe_read_avail_console(Q_PIPE_ID pipe)
 {
 	DWORD count, i;
 	INPUT_RECORD *rec;
-	int n, total;
+	int n, icount, total;
 
 	// how many events are there?
 	if(!GetNumberOfConsoleInputEvents(pipe, &count))
@@ -274,11 +303,12 @@ static int pipe_read_avail_console(Q_PIPE_ID pipe)
 		free(rec);
 		return -1;
 	}
-	count = i; // use only the amount returned
+
+	icount = pipe_dword_cap_to_int(i); // process only the amount returned
 
 	// see which ones are normal keypress events
 	total = 0;
-	for(n = 0; n < (int)count; ++n)
+	for(n = 0; n < icount; ++n)
 	{
 		if(rec[n].EventType == KEY_EVENT)
 		{
@@ -391,11 +421,13 @@ static int pipe_write_console(Q_PIPE_ID pipe, const ushort *data, int size)
 		{
 			// convert number of bytes to number of unicode chars
 			i = (DWORD)QString::fromLocal8Bit(out.mid(0, i)).length();
+			if(pipe_dword_overflows_int(i))
+				return -1;
 		}
 	)
 	if(!ret)
 		return -1;
-	return (int)i;
+	return (int)i; // safe to cast since 'size' is signed
 }
 #endif
 
@@ -1169,7 +1201,7 @@ int QPipeDevice::idAsInt() const
 #ifdef Q_OS_WIN
 	DWORD dw;
 	memcpy(&dw, &d->pipe, sizeof(DWORD));
-	return (int)dw;
+	return (int)dw; // FIXME? assumes handle value fits in signed int
 #endif
 #ifdef Q_OS_UNIX
 	return d->pipe;
