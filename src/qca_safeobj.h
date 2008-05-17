@@ -84,6 +84,7 @@ public:
 
 	~SafeSocketNotifier()
 	{
+		sn->setEnabled(false);
 		releaseAndDeleteLater(this, sn);
 	}
 
