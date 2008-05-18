@@ -1,5 +1,7 @@
 PROJECT(QCA)
 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
+
 OPTION(BUILD_TESTS "Create test" ON)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )

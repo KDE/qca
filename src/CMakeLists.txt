@@ -27,13 +27,14 @@ SET( nonmoc_SOURCES
 )
 
 SET( moc_SOURCES
+	qca_cert.cpp
 	qca_core.cpp
-	qca_publickey.cpp
+	qca_default.cpp
 	qca_keystore.cpp
+	qca_publickey.cpp
+	qca_safeobj.cpp
 	qca_securelayer.cpp
 	qca_securemessage.cpp
-	qca_default.cpp
-	qca_cert.cpp
 	support/qpipe.cpp
 	support/console.cpp 
 	support/synchronizer.cpp
@@ -130,6 +131,7 @@ qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_securelayer.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_securemessage.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_support.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qpipe.h")
+qt4_wrap_cpp( SOURCES "qca_safeobj.h")
 
 ADD_LIBRARY(qca SHARED ${SOURCES})
 TARGET_LINK_LIBRARIES(qca ${QT_QTCORE_LIBRARY})
