@@ -22,6 +22,8 @@
   +use deleteLater on QTimer and QSocketNotifier, to avoid qt 4.4 warning
   +qpipe.cpp: lines 771, 856.  warning: int result might be uninitialized.
   +qpipe.cpp: make sure the "(int)" casts handle overflow
+  +installwin.bat should ensure %QTDIR% is set
+  +installwin.bat should put quotes around paths to support spaces
   dirwatch/filewatch: empty string means no monitoring. don't attempt to watch
     a blank filename
   dirwatch/filewatch: connect() statement wrong
@@ -38,8 +40,6 @@
     use QPluginLoader.errorString()
     don't rescan just because we're using a default provider
     log feature names being checked for
-  installwin.bat should ensure %QTDIR% is set
-  installwin.bat should put quotes around qca paths to support paths with space
   sasl examples should allow setting protocol name
   qcatool2 should be version 2.0.x, just like plugins are
 
