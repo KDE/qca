@@ -155,7 +155,20 @@ public:
 		QStringList pcfiles;
 
 		QDir::current().mkdir("lib");
+
+		bool do_pc_normal = false;
+		bool do_pc_debug = false;
+
+#ifdef Q_OS_MAC
 		if(release)
+			do_pc_normal = true;
+		if(debug)
+			do_pc_debug = true;
+#else
+		do_pc_normal = true;
+#endif
+
+		if(do_pc_normal)
 		{
 			str =  pkg_template1.arg(prefix, libdir, incdir);
 			str += pkg_template2.arg("QCA");
@@ -168,7 +181,7 @@ public:
 			pcfiles += "lib/qca2.pc";
 		}
 
-		if(debug)
+		if(do_pc_debug)
 		{
 			str =  pkg_template1.arg(prefix, libdir, incdir);
 			str += pkg_template2.arg("QCA_debug");
@@ -181,12 +194,15 @@ public:
 			pcfiles += "lib/qca2_debug.pc";
 		}
 
-        	str = QString(
-		"pcfiles.path = $$LIBDIR/pkgconfig\n"
-		"pcfiles.files = %1\n"
-		"INSTALLS += pcfiles\n"
-		).arg(pcfiles.join(" "));
-		conf->addExtra(str);
+		if(!pcfiles.isEmpty())
+		{
+        		str = QString(
+			"pcfiles.path = $$LIBDIR/pkgconfig\n"
+			"pcfiles.files = %1\n"
+			"INSTALLS += pcfiles\n"
+			).arg(pcfiles.join(" "));
+			conf->addExtra(str);
+		}
 
 		return true;
 	}
