@@ -301,6 +301,8 @@ bool isSupported(const QStringList &features, const QString &provider)
 		if(features_have(global->manager->allFeatures(), features))
 			return true;
 
+		global->manager->appendDiagnosticText(QString("Scanning to find features: %1\n").arg(features.join(" ")));
+
 		// ok, try scanning for new stuff
 		global->scan();
 
