@@ -24,9 +24,10 @@
   +qpipe.cpp: make sure the "(int)" casts handle overflow
   +installwin.bat should ensure %QTDIR% is set
   +installwin.bat should put quotes around paths to support spaces
-  dirwatch/filewatch: empty string means no monitoring. don't attempt to watch
-    a blank filename
-  dirwatch/filewatch: connect() statement wrong
+  +dirwatch/filewatch: empty string means no monitoring. don't attempt to watch
+     a blank filename
+  +dirwatch/filewatch: connect() statement wrong
+  +filewatch: track across create/delete
   use deleteLater on any object that might emit from a metacall.  consider a
     way to de-metacall-ify internally so qca users aren't required to
     deleteLater on public api objects.  this is to work around a bug fixed
