@@ -96,7 +96,7 @@ public:
 		logger = 0;
 	}
 
-	void ensure_first_scan()
+	bool ensure_first_scan()
 	{
 		scan_mutex.lock();
 		if(!first_scan)
@@ -104,9 +104,10 @@ public:
 			first_scan = true;
 			manager->scan();
 			scan_mutex.unlock();
-			return;
+			return true;
 		}
 		scan_mutex.unlock();
+		return false;
 	}
 
 	void scan()
@@ -719,12 +720,12 @@ QByteArray hexToArray(const QString &str)
 static Provider *getProviderForType(const QString &type, const QString &provider)
 {
 	Provider *p = 0;
-	bool scanned = false;
+	bool scanned = global->ensure_first_scan();
 	if(!provider.isEmpty())
 	{
 		// try using specific provider
 		p = global->manager->findFor(provider, type);
-		if(!p)
+		if(!p && !scanned)
 		{
 			// maybe this provider is new, so scan and try again
 			global->scan();
@@ -736,7 +737,17 @@ static Provider *getProviderForType(const QString &type, const QString &provider
 	{
 		// try using some other provider
 		p = global->manager->findFor(QString(), type);
-		if((!p || p->name() == "default") && !scanned)
+
+		// note: we used to rescan if no provider was found or if
+		//   the only found provider was 'default'.  now we only
+		//   rescan if no provider was found.  this optimizes lookups
+		//   for features that are in the default provider (such as
+		//   'sha1') when no other plugin is available.  the drawback
+		//   is that if a plugin is installed later during runtime,
+		//   then it won't be picked up without restarting the
+		//   application or manually calling QCA::scanForPlugins.
+		//if((!p || p->name() == "default") && !scanned)
+		if(!p && !scanned)
 		{
 			// maybe there are new providers, so scan and try again
 			//   before giving up or using default
