@@ -58,6 +58,7 @@ void FileWatchUnitTest::filewatchTest()
 
     tempFile->open();
     tempFile->write("foo");
+    tempFile->flush();
     QTest::qWait(7000);
     QCOMPARE( spy.count(), 1 );
 
@@ -68,10 +69,12 @@ void FileWatchUnitTest::filewatchTest()
 
     tempFile->open();
     tempFile->write("foo");
+    tempFile->flush();
     QTest::qWait(7000);
     QCOMPARE( spy.count(), 2 );
 
     tempFile->write("bar");
+    tempFile->flush();
     QTest::qWait(7000);
     QCOMPARE( spy.count(), 3 );
 
