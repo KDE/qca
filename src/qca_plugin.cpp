@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007  Justin Karneges  <justin@affinix.com>
+ * Copyright (C) 2004-2008  Justin Karneges  <justin@affinix.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,6 +45,35 @@ QVariantMap getProviderConfig_internal(Provider *p);
 // from qca_default.cpp
 QStringList skip_plugins(Provider *defaultProvider);
 QStringList plugin_priorities(Provider *defaultProvider);
+
+// stupidly simple log truncation function.  if the log exceeds size chars,
+//   then throw out the top half, to nearest line.
+QString truncate_log(const QString &in, int size)
+{
+	if(size < 2 || in.length() < size)
+		return in;
+
+	// start by pointing at the last chars
+	int at = in.length() - (size / 2);
+
+	// if the previous char is a newline, then this is a perfect cut.
+	//   otherwise, we need to skip to after the next newline.
+	if(in[at - 1] != '\n')
+	{
+		while(at < in.length() && in[at] != '\n')
+		{
+			++at;
+		}
+
+		// at this point we either reached a newline, or end of
+		//   the entire buffer
+
+		if(in[at] == '\n')
+			++at;
+	}
+
+	return in.mid(at);
+}
 
 static ProviderManager *g_pluginman = 0;
 
@@ -693,6 +722,7 @@ void ProviderManager::appendDiagnosticText(const QString &str)
 	QMutexLocker locker(&logMutex);
 
 	dtext += str;
+	dtext = truncate_log(dtext, 20000);
 }
 
 void ProviderManager::clearDiagnosticText()

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
+ * Copyright (C) 2003-2008  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004,2005  Brad Hards <bradh@frogmouth.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -44,6 +44,9 @@ Q_DECLARE_METATYPE(QCA::PGPKey)
 namespace QCA {
 
 Provider::Context *getContext(const QString &type, Provider *p);
+
+// from qca_plugin.cpp
+QString truncate_log(const QString &in, int size);
 
 /*
   How this stuff works:
@@ -550,6 +553,7 @@ private slots:
 	{
 		QMutexLocker locker(&m);
 		dtext += str;
+		dtext = truncate_log(dtext, 100000);
 	}
 
 	void ksl_storeUpdated(int id)
