@@ -130,7 +130,9 @@ static void output_plugin_diagnostic_text()
 {
 	QString str = QCA::pluginDiagnosticText();
 	QCA::clearPluginDiagnosticText();
-	QStringList lines = str.split('\n', QString::SkipEmptyParts);
+	if(str[str.length()-1] == '\n')
+		str.truncate(str.length()-1);
+	QStringList lines = str.split('\n', QString::KeepEmptyParts);
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "plugin: %s\n", qPrintable(lines[n]));
 }
@@ -139,7 +141,9 @@ static void output_keystore_diagnostic_text()
 {
 	QString str = QCA::KeyStoreManager::diagnosticText();
 	QCA::KeyStoreManager::clearDiagnosticText();
-	QStringList lines = str.split('\n', QString::SkipEmptyParts);
+	if(str[str.length()-1] == '\n')
+		str.truncate(str.length()-1);
+	QStringList lines = str.split('\n', QString::KeepEmptyParts);
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
 }
@@ -147,7 +151,9 @@ static void output_keystore_diagnostic_text()
 static void output_message_diagnostic_text(QCA::SecureMessage *msg)
 {
 	QString str = msg->diagnosticText();
-	QStringList lines = str.split('\n', QString::SkipEmptyParts);
+	if(str[str.length()-1] == '\n')
+		str.truncate(str.length()-1);
+	QStringList lines = str.split('\n', QString::KeepEmptyParts);
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "message: %s\n", qPrintable(lines[n]));
 }
