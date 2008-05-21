@@ -18,7 +18,7 @@ SUBDIRS += \
 	randomtest \
 	rsatest \
 	saslclient \
-	saslservtest \
+	saslserver \
 	ssltest \
 	sslservtest \
 	tlssocket
