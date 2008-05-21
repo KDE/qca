@@ -28,7 +28,7 @@
 
 const char *const APPNAME = "qcatool";
 const char *const EXENAME = "qcatool2";
-const char *const VERSION = "1.0.0";
+const char *const VERSION = "2.0.1";
 
 static QStringList wrapstring(const QString &str, int width)
 {
