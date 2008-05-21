@@ -28,21 +28,20 @@
      a blank filename
   +dirwatch/filewatch: connect() statement wrong
   +filewatch: track across create/delete
+  +fix wildcard matching
+  +on linux, the pkgconfig files for release/debug should be the same.  on
+     mac, they should differ.
+  +clean up plugin dtext, it's too verbose (mentioning same files over and
+     over).  also, use QPluginLoader.errorString()
+  +don't rescan just because we're using a default provider
+  +plugin dtext: log feature names being checked for
+  +tls/sasl: fix update bug (reported feb 20th)
+  +qcatool2 should be version 2.0.x, just like plugins are
   use deleteLater on any object that might emit from a metacall.  consider a
     way to de-metacall-ify internally so qca users aren't required to
     deleteLater on public api objects.  this is to work around a bug fixed
     in qt 4.3.5 and 4.4.0, so maybe we just wait for 4.3.5...
-  tls/sasl: fix update bug (reported feb 20th)
-  fix wildcard matching
-  on linux, the pkgconfig files for release/debug should be the same.
-    on mac, they should differ.  right?  (double check what qt/mac does)
-  plugin dtext improvements
-    clean up text, it's a bit too verbose (mentioning same files over and over)
-    use QPluginLoader.errorString()
-    don't rescan just because we're using a default provider
-    log feature names being checked for
   sasl examples should allow setting protocol name
-  qcatool2 should be version 2.0.x, just like plugins are
 
 * 2.0.2
   cms example: User.pem expired.  probably other certs need regen also?
