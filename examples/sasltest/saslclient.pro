@@ -1,4 +1,4 @@
 QT += network
 
-SOURCES += sasltest.cpp
+SOURCES += saslclient.cpp
 include(../examples.pri)
