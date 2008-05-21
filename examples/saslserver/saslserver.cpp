@@ -331,11 +331,11 @@ private:
 	}
 };
 
-#include "saslservtest.moc"
+#include "saslserver.moc"
 
 void usage()
 {
-	printf("usage: saslservtest domain [message]\n");
+	printf("usage: saslserver domain [message]\n");
 }
 
 int main(int argc, char **argv)
@@ -359,7 +359,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	QCA::setAppName("saslservtest");
+	QCA::setAppName("saslserver");
 
         ServerTest *s = new ServerTest(str, host, PROTO_PORT);
         QObject::connect(s, SIGNAL(quit()), &app, SLOT(quit()));

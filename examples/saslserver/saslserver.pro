@@ -1,6 +1,6 @@
 QT += network
 
-SOURCES += saslservtest.cpp
+SOURCES += saslserver.cpp
 include(../examples.pri)
 
 windows:LIBS += -lws2_32
