@@ -511,6 +511,7 @@ public:
 		if(op != -1)
 		{
 			QCA_logTextMessage(QString("tls[%1]: ignoring update while operation active").arg(q->objectName()), Logger::Information);
+			need_update = true;
 			return;
 		}
 
@@ -1574,6 +1575,7 @@ public:
 		if(op != -1)
 		{
 			QCA_logTextMessage(QString("sasl[%1]: ignoring update while operation active").arg(q->objectName()), Logger::Information);
+			need_update = true;
 			return;
 		}
 
