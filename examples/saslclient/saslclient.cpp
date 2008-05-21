@@ -99,20 +99,23 @@ class ClientTest : public QObject
 private:
 	QString host, proto, authzid, realm, user, pass;
 	int port;
+	bool no_authzid, no_realm;
 	int mode; // 0 = receive mechanism list, 1 = sasl negotiation, 2 = app
 	QTcpSocket *sock;
 	QCA::SASL *sasl;
 	QByteArray inbuf;
 
 public:
-	ClientTest(const QString &_host, int _port, const QString &_proto, const QString &_authzid, const QString &_realm, const QString &_user, const QString &_pass) :
+	ClientTest(const QString &_host, int _port, const QString &_proto, const QString &_authzid, const QString &_realm, const QString &_user, const QString &_pass, bool _no_authzid, bool _no_realm) :
 		host(_host),
 		proto(_proto),
 		authzid(_authzid),
 		realm(_realm),
 		user(_user),
 		pass(_pass),
-		port(_port)
+		port(_port),
+		no_authzid(_no_authzid),
+		no_realm(_no_realm)
 	{
 		sock = new QTcpSocket(this);
 		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
@@ -233,7 +236,7 @@ private slots:
 			sasl->setUsername(user);
 		}
 
-		if(params.canSendAuthzid())
+		if(params.canSendAuthzid() && !no_authzid)
 		{
 			authzid = prompt("Authorize As (enter to skip):");
 			if(!authzid.isEmpty())
@@ -249,7 +252,7 @@ private slots:
 			sasl->setPassword(pass);
 		}
 
-		if(params.canSendRealm())
+		if(params.canSendRealm() && !no_realm)
 		{
 			QStringList realms = sasl->realmList();
 			printf("Available realms:\n");
@@ -407,6 +410,8 @@ int main(int argc, char **argv)
 	// options
 	QString proto = "qcatest"; // default protocol
 	QString authzid, realm;
+	bool no_authzid = false;
+	bool no_realm = false;
 	for(int n = 0; n < args.count(); ++n)
 	{
 		if(!args[n].startsWith("--"))
@@ -424,11 +429,25 @@ int main(int argc, char **argv)
 			var = opt;
 
 		if(var == "proto")
+		{
 			proto = val;
+		}
 		else if(var == "authzid")
-			authzid = val;
+		{
+			// specifying empty authzid means force unspecified
+			if(val.isEmpty())
+				no_authzid = true;
+			else
+				authzid = val;
+		}
 		else if(var == "realm")
-			realm = val;
+		{
+			// specifying empty realm means force unspecified
+			if(val.isEmpty())
+				no_realm = true;
+			else
+				realm = val;
+		}
 
 		args.removeAt(n);
 		--n; // adjust position
@@ -464,7 +483,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	ClientTest client(host, port, proto, authzid, realm, user, pass);
+	ClientTest client(host, port, proto, authzid, realm, user, pass, no_authzid, no_realm);
 	QObject::connect(&client, SIGNAL(quit()), &qapp, SLOT(quit()));
 	QTimer::singleShot(0, &client, SLOT(start()));
 	qapp.exec();
