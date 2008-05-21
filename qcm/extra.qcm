@@ -154,7 +154,10 @@ public:
 
 		QStringList pcfiles;
 
-		QDir::current().mkdir("lib");
+		QDir dir = QDir::current();
+		dir.mkdir("lib");
+		dir.cd("lib");
+		dir.mkdir("pkgconfig");
 
 		bool do_pc_normal = false;
 		bool do_pc_debug = false;
@@ -174,11 +177,11 @@ public:
 			str += pkg_template2.arg("QCA");
 			str += pkg_template3.arg("QtCore");
 			str += pkg_template4.arg("qca");
-			f.setFileName("lib/qca2.pc");
+			f.setFileName("lib/pkgconfig/qca2.pc");
 			if(f.open(QFile::WriteOnly | QFile::Truncate))
 				f.write(str.toLatin1());
 			f.close();
-			pcfiles += "lib/qca2.pc";
+			pcfiles += "lib/pkgconfig/qca2.pc";
 		}
 
 		if(do_pc_debug)
@@ -187,11 +190,11 @@ public:
 			str += pkg_template2.arg("QCA_debug");
 			str += pkg_template3.arg("QtCore_debug");
 			str += pkg_template4.arg("qca_debug");
-			f.setFileName("lib/qca2_debug.pc");
+			f.setFileName("lib/pkgconfig/qca2_debug.pc");
 			if(f.open(QFile::WriteOnly | QFile::Truncate))
 				f.write(str.toLatin1());
 			f.close();
-			pcfiles += "lib/qca2_debug.pc";
+			pcfiles += "lib/pkgconfig/qca2_debug.pc";
 		}
 
 		if(!pcfiles.isEmpty())
