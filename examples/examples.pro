@@ -17,7 +17,7 @@ SUBDIRS += \
 	publickeyexample \
 	randomtest \
 	rsatest \
-	sasltest \
+	saslclient \
 	saslservtest \
 	ssltest \
 	sslservtest \

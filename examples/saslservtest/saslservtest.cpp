@@ -270,7 +270,8 @@ private:
 	void close()
 	{
 		delete sasl;
-		sock->deleteLater();
+		QTimer::singleShot(1000, sock, SLOT(deleteLater()));
+		//sock->deleteLater();
 		sock = 0;
 		sasl = 0;
 	}
