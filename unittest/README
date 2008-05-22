@@ -1,9 +1,12 @@
 This directory holds simple unit tests for QCA.
 
-You can run the whole test suite by doing "make test" (or "make check"
-for qconf/qmake, experimental only) in this directory. You can also
-run a single set of tests by doing "make test" in the applicable
-subdirectory. See "TestPlan" for more detail. 
+You can run the whole test suite by doing "make test" in this
+directory. You can also run a single set of tests by doing "make test"
+in the applicable subdirectory. See "TestPlan" for more detail. 
+
+The unittests were originally designed to be run through cmake,
+however they should work just fine without it. Please report any
+problems.
 
 The "testcerts" directory is not a unit test. It is the tools used
 to generate certificates used in unit tests, and is a copy of the 
