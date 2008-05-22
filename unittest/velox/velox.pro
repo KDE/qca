@@ -2,6 +2,7 @@ DEPENDPATH += .
 include(../unittest.pri)
 CONFIG += qtestlib
 QT += network
+TARGET = veloxunittest
 
 # test target
 QMAKE_EXTRA_TARGETS = test
