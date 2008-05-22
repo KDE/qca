@@ -368,7 +368,10 @@ private:
 			}
 			else if(type == "E")
 			{
-				printf("Error: Authentication failed.\n");
+				if(!rest.isEmpty())
+					printf("Error: server says: %s.\n", qPrintable(rest));
+				else
+					printf("Error: server error, unspecified.\n");
 				emit quit();
 				return;
 			}
