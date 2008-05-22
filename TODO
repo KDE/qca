@@ -37,11 +37,12 @@
   +plugin dtext: log feature names being checked for
   +tls/sasl: fix update bug (reported feb 20th)
   +qcatool2 should be version 2.0.x, just like plugins are
+  +sasl examples should allow setting protocol name
+  +completely clean sasl examples
   use deleteLater on any object that might emit from a metacall.  consider a
     way to de-metacall-ify internally so qca users aren't required to
     deleteLater on public api objects.  this is to work around a bug fixed
     in qt 4.3.5 and 4.4.0, so maybe we just wait for 4.3.5...
-  sasl examples should allow setting protocol name
 
 * 2.0.2
   cms example: User.pem expired.  probably other certs need regen also?
@@ -53,11 +54,14 @@
   cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
   cert unit tests need to test wildcards!!
   make sure all examples start with initializer then qapp
+  consider a more readable implementation of qca_securelayer logic using the
+    object-sessions concept (write the blog first :))
 
 * 2.1.0
   CertificateAuthority constructor provider argument should have default value
 
 * possibilities for the future:
+  can we ever get SASL::NoAuthzid?
   make it possible to change GNUPGHOME and have qca-gnupg respect the change?
     see pgpunittest.
   why is Logger a QObject?
