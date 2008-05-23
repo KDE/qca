@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! -x qca.pro ] || [ -x .svn ]; then
+if [ ! -e qca.pro ] || [ -e .svn ]; then
 	echo This script should only be run within an exported qca tree.
 	exit 1
 fi
