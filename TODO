@@ -61,6 +61,8 @@
   CertificateAuthority constructor provider argument should have default value
 
 * possibilities for the future:
+  find a better way for a provider to automatically promote itself?  (see
+    qca-wingss)
   can we ever get SASL::NoAuthzid?
   make it possible to change GNUPGHOME and have qca-gnupg respect the change?
     see pgpunittest.
