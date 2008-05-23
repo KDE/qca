@@ -1601,8 +1601,6 @@ private slots:
 
 		if(last_op == OpStart)
 		{
-			mech = c->mech();
-
 			if(server)
 			{
 				if(r != SASLContext::Success)
@@ -1617,6 +1615,8 @@ private slots:
 			}
 			else // client
 			{
+				mech = c->mech();
+
 				// fall into this logic
 				last_op = OpTryAgain;
 			}
