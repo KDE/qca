@@ -10,7 +10,7 @@ TARGET   = qca
 DESTDIR  = $$QCA_BASE/lib
 windows:DLLDESTDIR = $$QCA_BASE/bin
 
-VERSION = 2.0.0
+VERSION = 2.0.1
 
 unix:include($$QCA_BASE/conf.pri)
 windows:include($$QCA_BASE/conf_win.pri)
