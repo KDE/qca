@@ -22,6 +22,7 @@
 #include <qcaprovider.h>
 #include <QtPlugin>
 #include <QMutex>
+#include <QLibrary>
 
 #ifndef FORWARD_ONLY
 #include <windows.h>
@@ -760,6 +761,224 @@ public:
 	}
 };
 
+//----------------------------------------------------------------------------
+// SaslWinGss
+//----------------------------------------------------------------------------
+static bool wingss_available()
+{
+	return true;
+}
+
+class SaslWinGss : public SASLContext
+{
+	Q_OBJECT
+
+public:
+	SaslGssapiSession sess;
+	bool authed;
+	QByteArray _to_net, _to_app;
+	int enc;
+
+	SaslWinGss(Provider *p) :
+		SASLContext(p)
+	{
+	}
+
+	Provider::Context *clone() const
+	{
+		return 0;
+	}
+
+	virtual void reset()
+	{
+		// TODO
+	}
+
+	virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote, const QString &ext_id, int ext_ssf)
+	{
+		// TODO
+		Q_UNUSED(local);
+		Q_UNUSED(remote);
+		Q_UNUSED(ext_id);
+		Q_UNUSED(ext_ssf);
+
+		sess.init(service, host);
+	}
+
+	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF)
+	{
+		// TODO
+		Q_UNUSED(f);
+		Q_UNUSED(minSSF);
+		Q_UNUSED(maxSSF);
+	}
+
+	virtual void startClient(const QStringList &mechlist, bool allowClientSendFirst)
+	{
+		// TODO
+		Q_UNUSED(allowClientSendFirst);
+
+		if(!mechlist.contains("GSSAPI"))
+		{
+			// TODO: report error
+			return;
+		}
+
+		authed = false;
+		sess.step(QByteArray(), &_to_net, &authed); // TODO: handle error
+
+		QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+	}
+
+	virtual void startServer(const QString &realm, bool disableServerSendLast)
+	{
+		// TODO
+		Q_UNUSED(realm);
+		Q_UNUSED(disableServerSendLast);
+	}
+
+	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit)
+	{
+		// TODO
+		Q_UNUSED(mech);
+		Q_UNUSED(clientInit);
+	}
+
+	virtual void nextStep(const QByteArray &from_net)
+	{
+		// TODO
+		sess.step(from_net, &_to_net, &authed); // TODO: handle error
+
+		QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+	}
+
+	virtual void tryAgain()
+	{
+		// TODO
+	}
+
+	virtual void update(const QByteArray &from_net, const QByteArray &from_app)
+	{
+		// TODO
+		QByteArray a;
+
+		sess.decode(from_net, &a); // TODO: handle error
+		_to_app += a;
+
+		sess.encode(from_app, &a); // TODO: handle error
+		_to_net += a;
+		enc += from_app.size();
+
+		QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+	}
+
+	virtual bool waitForResultsReady(int msecs)
+	{
+		// TODO
+		Q_UNUSED(msecs);
+		return true;
+	}
+
+	virtual Result result() const
+	{
+		// TODO
+		if(authed)
+			return Success;
+		else
+			return Continue;
+	}
+
+	virtual QStringList mechlist() const
+	{
+		// TODO
+		return QStringList();
+	}
+
+	virtual QString mech() const
+	{
+		// TODO
+		return "GSSAPI";
+	}
+
+	virtual bool haveClientInit() const
+	{
+		// TODO
+		return true;
+	}
+
+	virtual QByteArray stepData() const
+	{
+		// TODO
+		return _to_net;
+	}
+
+	virtual QByteArray to_net()
+	{
+		// TODO
+		QByteArray a = _to_net;
+		_to_net.clear();
+		enc = 0;
+		return a;
+	}
+
+	virtual int encoded() const
+	{
+		// TODO
+		return enc;
+	}
+
+	virtual QByteArray to_app()
+	{
+		// TODO
+		return _to_app;
+	}
+
+	virtual int ssf() const
+	{
+		// TODO
+		return 56;
+	}
+
+	virtual SASL::AuthCondition authCondition() const
+	{
+		// TODO
+		return SASL::AuthFail;
+	}
+
+	virtual SASL::Params clientParams() const
+	{
+		// TODO
+		return SASL::Params();
+	}
+
+	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm)
+	{
+		// TODO
+		Q_UNUSED(user);
+		Q_UNUSED(authzid);
+		Q_UNUSED(pass);
+		Q_UNUSED(realm);
+	}
+
+	virtual QStringList realmlist() const
+	{
+		// TODO
+		return QStringList();
+	}
+
+	virtual QString username() const
+	{
+		// TODO
+		return QString();
+	}
+
+	virtual QString authzid() const
+	{
+		// TODO
+		return QString();
+	}
+};
+
 #endif // !defined(FORWARD_ONLY)
 
 class MetaSasl : public SASLContext
@@ -819,7 +1038,7 @@ public:
 
 	virtual Provider::Context *clone() const
 	{
-		return s->clone();
+		return 0;
 	}
 
 	virtual void reset()
@@ -860,7 +1079,7 @@ public:
 #ifndef FORWARD_ONLY
 		if(mechlist.contains("GSSAPI") && wingss_available())
 		{
-			s = new SaslWinGss(this);
+			s = new SaslWinGss(provider());
 		}
 		else
 		{
@@ -926,7 +1145,7 @@ public:
 		s->startClient(mechlist, allowClientSendFirst);
 	}
 
-	virtual void startServer(const QString &realm, bool disableServerSendLast) 
+	virtual void startServer(const QString &realm, bool disableServerSendLast)
 	{
 		// collect mechs of all providers, by starting all of them
 		serverInit_active = true;
@@ -1187,6 +1406,14 @@ public:
 
 	virtual void init()
 	{
+#ifndef FORWARD_ONLY
+		sspi_load(); // TODO: handle error
+#endif
+	}
+
+	~wingssProvider()
+	{
+		sspi_unload();
 	}
 
 	virtual int qcaVersion() const
