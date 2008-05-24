@@ -1413,7 +1413,9 @@ public:
 
 	~wingssProvider()
 	{
+#ifndef FORWARD_ONLY
 		sspi_unload();
+#endif
 	}
 
 	virtual int qcaVersion() const
