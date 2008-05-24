@@ -104,6 +104,8 @@ private:
 	QTcpSocket *sock;
 	QCA::SASL *sasl;
 	QByteArray inbuf;
+	bool sock_done;
+	int waitCycles;
 
 public:
 	ClientTest(const QString &_host, int _port, const QString &_proto, const QString &_authzid, const QString &_realm, const QString &_user, const QString &_pass, bool _no_authzid, bool _no_realm) :
@@ -115,7 +117,9 @@ public:
 		pass(_pass),
 		port(_port),
 		no_authzid(_no_authzid),
-		no_realm(_no_realm)
+		no_realm(_no_realm),
+		sock_done(false),
+		waitCycles(0)
 	{
 		sock = new QTcpSocket(this);
 		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
@@ -170,8 +174,8 @@ private slots:
 		{
 			if(mode == 2) // app mode, where disconnect means completion
 			{
-				printf("Finished, server closed connection.\n");
-				emit quit();
+				sock_done = true;
+				tryFinished();
 				return;
 			}
 			else // any other mode, where disconnect is an error
@@ -192,6 +196,36 @@ private slots:
 		{
 			QByteArray a = sock->readAll();
 			printf("Read %d bytes\n", a.size());
+
+			// there is a possible flaw in the qca 2.0 api, in
+			//   that if sasl data is received from the peer
+			//   followed by a disconnect from the peer, there is
+			//   no clear approach to salvaging the bytes.  tls is
+			//   not affected because tls has the concept of
+			//   closing a session.  with sasl, there is no
+			//   closing, and since the qca api is asynchronous,
+			//   we could potentially wait forever for decoded
+			//   data, if the last write was a partial packet.
+			//
+			// for now, we can perform a simple workaround of
+			//   waiting at least two event loop cycles for
+			//   decoded data before giving up and assuming the
+			//   last write was partial.  the fact is, all current
+			//   qca sasl providers respond within this time
+			//   frame, so this fix should work fine for now.  in
+			//   qca 2.1, we should revise the api to handle this
+			//   situation better.
+			//
+			// further note: i guess this only affects application
+			//   protocols that have no close message of their
+			//   own, and rely on the tcp-level close.  examples
+			//   are http, and of course this qcatest protocol.
+			if(waitCycles == 0)
+			{
+				waitCycles = 2;
+				QMetaObject::invokeMethod(this, "waitWriteIncoming", Qt::QueuedConnection);
+			}
+
 			sasl->writeIncoming(a);
 		}
 		else // mech list or sasl negotiation mode
@@ -302,7 +336,28 @@ private slots:
 		emit quit();
 	}
 
+	void waitWriteIncoming()
+	{
+		--waitCycles;
+		if(waitCycles > 0)
+		{
+			QMetaObject::invokeMethod(this, "waitWriteIncoming", Qt::QueuedConnection);
+			return;
+		}
+
+		tryFinished();
+	}
+
 private:
+	void tryFinished()
+	{
+		if(sock_done && waitCycles == 0)
+		{
+			printf("Finished, server closed connection.\n");
+			emit quit();
+		}
+	}
+
 	QString arrayToString(const QByteArray &ba)
 	{
 		return QCA::Base64().arrayToString(ba);
