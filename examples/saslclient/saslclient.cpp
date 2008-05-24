@@ -208,7 +208,7 @@ private slots:
 			//   data, if the last write was a partial packet.
 			//
 			// for now, we can perform a simple workaround of
-			//   waiting at least two event loop cycles for
+			//   waiting at least three event loop cycles for
 			//   decoded data before giving up and assuming the
 			//   last write was partial.  the fact is, all current
 			//   qca sasl providers respond within this time
@@ -222,7 +222,7 @@ private slots:
 			//   are http, and of course this qcatest protocol.
 			if(waitCycles == 0)
 			{
-				waitCycles = 2;
+				waitCycles = 3;
 				QMetaObject::invokeMethod(this, "waitWriteIncoming", Qt::QueuedConnection);
 			}
 
@@ -354,6 +354,19 @@ private:
 		if(sock_done && waitCycles == 0)
 		{
 			printf("Finished, server closed connection.\n");
+
+			// if we give up on waiting for a response to
+			//   writeIncoming, then it might come late.  in
+			//   theory this shouldn't happen if we wait enough
+			//   cycles, but if one were to arrive then it could
+			//   occur between the request to quit the app and
+			//   the actual quit of the app.  to assist with
+			//   debugging, then, we'll explicitly stop listening
+			//   for signals here.  otherwise the response may
+			//   still be received and displayed, giving a false
+			//   sense of correctness.
+			sasl->disconnect(this);
+
 			emit quit();
 		}
 	}
