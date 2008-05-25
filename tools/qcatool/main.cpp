@@ -1317,10 +1317,14 @@ static QString prompt_for_string(const QString &prompt, const QString &def = QSt
 	fflush(stdout);
 	QByteArray result(256, 0);
 	fgets((char *)result.data(), result.size(), stdin);
-	QString out = QString::fromLocal8Bit(result).trimmed();
-	if(out.isEmpty())
+	if(result[result.length()-1] == '\n')
+		result.truncate(result.length()-1);
+	// empty input -> use default
+	if(result.isEmpty())
 		return def;
-	return out;
+	// trimmed input could result in an empty value, but in that case
+	//   it is treated as if the user wishes to submit an empty value.
+	return QString::fromLocal8Bit(result).trimmed();
 }
 
 static int prompt_for_int(const QString &prompt, int def = 0)
@@ -2961,6 +2965,7 @@ int main(int argc, char **argv)
 			}
 
 			printf("Editing configuration for %s ...\n", qPrintable(name));
+			printf("Note: to clear a string entry, type whitespace and press enter.\n");
 
 			map1 = provider_config_edit(map1);
 			if(map1.isEmpty())
