@@ -34,6 +34,97 @@ using namespace QCA;
 
 #define PROVIDER_NAME "qca-wingss"
 
+#if !defined(FORWARD_ONLY)
+
+// some defs possibly missing from MinGW
+
+#ifndef SEC_E_MESSAGE_ALTERED
+#define SEC_E_MESSAGE_ALTERED ((SECURITY_STATUS)0x130F)
+#endif
+
+#ifndef SECURITY_ENTRYPOINTW
+#define SECURITY_ENTRYPOINTW TEXT("InitSecurityInterfaceW")
+#endif
+
+#ifndef SECPKG_FLAG_GSS_COMPATIBLE
+#define SECPKG_FLAG_GSS_COMPATIBLE 0x0001000
+#endif
+
+#ifndef SECQOP_WRAP_NO_ENCRYPT
+#define SECQOP_WRAP_NO_ENCRYPT 0x80000001
+#endif
+
+#ifndef ISC_RET_MUTUAL_AUTH
+#define ISC RET_MUTUAL_AUTH     0x00000002
+#endif
+
+#ifndef ISC_RET_SEQUENCE_DETECT
+#define ISC_RET_SEQUENCE_DETECT 0x00000008
+#endif
+
+#ifndef ISC_RET_CONFIDENTIALITY
+#define ISC_RET_CONFIDENTIALITY 0x00000010
+#endif
+
+#ifndef ISC_RET_INTEGRITY
+#define ISC_RET_INTEGRITY       0x00010000
+#endif
+
+#ifdef Q_CC_MINGW
+
+// for some reason, the MinGW definition of the W table has A functions in
+//   it, so we define a fixed version to use instead...
+
+typedef struct _FIXED_SECURITY_FUNCTION_TABLEW {
+	unsigned long dwVersion;
+	ENUMERATE_SECURITY_PACKAGES_FN_W EnumerateSecurityPackagesW;
+	QUERY_CREDENTIALS_ATTRIBUTES_FN_W QueryCredentialsAttributesW;
+	ACQUIRE_CREDENTIALS_HANDLE_FN_W AcquireCredentialsHandleW;
+	FREE_CREDENTIALS_HANDLE_FN FreeCredentialsHandle;
+	void SEC_FAR* Reserved2;
+	INITIALIZE_SECURITY_CONTEXT_FN_W InitializeSecurityContextW;
+	ACCEPT_SECURITY_CONTEXT_FN AcceptSecurityContext;
+	COMPLETE_AUTH_TOKEN_FN CompleteAuthToken;
+	DELETE_SECURITY_CONTEXT_FN DeleteSecurityContext;
+	APPLY_CONTROL_TOKEN_FN_W ApplyControlTokenW;
+	QUERY_CONTEXT_ATTRIBUTES_FN_W QueryContextAttributesW;
+	IMPERSONATE_SECURITY_CONTEXT_FN ImpersonateSecurityContext;
+	REVERT_SECURITY_CONTEXT_FN RevertSecurityContext;
+	MAKE_SIGNATURE_FN MakeSignature;
+	VERIFY_SIGNATURE_FN VerifySignature;
+	FREE_CONTEXT_BUFFER_FN FreeContextBuffer;
+	QUERY_SECURITY_PACKAGE_INFO_FN_W QuerySecurityPackageInfoW;
+	void SEC_FAR* Reserved3;
+	void SEC_FAR* Reserved4;
+	void SEC_FAR* Unknown1;
+	void SEC_FAR* Unknown2;
+	void SEC_FAR* Unknown3;
+	void SEC_FAR* Unknown4;
+	void SEC_FAR* Unknown5;
+	ENCRYPT_MESSAGE_FN EncryptMessage;
+	DECRYPT_MESSAGE_FN DecryptMessage;
+} FixedSecurityFunctionTableW, *PFixedSecurityFunctionTableW;
+
+typedef FixedSecurityFunctionTableW MySecurityFunctionTableW;
+typedef PFixedSecurityFunctionTableW PMySecurityFunctionTableW;
+
+#else
+
+typedef SecurityFunctionTableW MySecurityFunctionTableW;
+typedef PSecurityFunctionTableW PMySecurityFunctionTableW;
+
+#endif
+
+#ifdef UNICODE
+# define MySecurityFunctionTable MySecurityFunctionTableW
+# define PMySecurityFunctionTable PMySecurityFunctionTableW
+#else
+# define MySecurityFunctionTable MySecurityFunctionTableA
+# define PMySecurityFunctionTable PMySecurityFunctionTableA
+#endif
+
+#endif // !defined(FORWARD_ONLY)
+
 namespace wingssQCAPlugin {
 
 #if !defined(FORWARD_ONLY)
@@ -77,8 +168,15 @@ QString ptr_toString(const void *p);
 Q_GLOBAL_STATIC(QMutex, sspi_mutex)
 Q_GLOBAL_STATIC(QMutex, sspi_logger_mutex)
 
+union SecurityFunctionTableUnion
+{
+	PMySecurityFunctionTableW W;
+	PSecurityFunctionTableA A;
+	void *ptr;
+};
+
 static QLibrary *sspi_lib = 0;
-static PSecurityFunctionTable sspi = 0;
+static SecurityFunctionTableUnion sspi;
 static sspi_logger_func sspi_logger;
 static QList<SspiPackage> *sspi_packagelist = 0;
 
@@ -147,6 +245,8 @@ QString ptr_toString(const void *p)
 bool sspi_load()
 {
 	QMutexLocker locker(sspi_mutex());
+	if(sspi_lib)
+		return true;
 
 	sspi_lib = new QLibrary("secur32");
 	if(!sspi_lib->load())
@@ -156,9 +256,23 @@ bool sspi_load()
 		return false;
 	}
 
-	QString securityEntrypoint = QString::fromUtf16(SECURITY_ENTRYPOINTW);
-	INIT_SECURITY_INTERFACE_W pInitSecurityInterface = (INIT_SECURITY_INTERFACE_W)(sspi_lib->resolve(securityEntrypoint.toLatin1().data()));
-	if(!pInitSecurityInterface)
+	union
+	{
+		INIT_SECURITY_INTERFACE_W W;
+		INIT_SECURITY_INTERFACE_A A;
+		void *ptr;
+	} pInitSecurityInterface;
+	pInitSecurityInterface.ptr = 0;
+
+	QString securityEntrypoint;
+	QT_WA(
+		securityEntrypoint = QString::fromUtf16(SECURITY_ENTRYPOINTW);
+		pInitSecurityInterface.W = (INIT_SECURITY_INTERFACE_W)(sspi_lib->resolve(securityEntrypoint.toLatin1().data()));
+	,
+		securityEntrypoint = QString::fromLatin1(SECURITY_ENTRYPOINT_ANSIA);
+		pInitSecurityInterface.A = (INIT_SECURITY_INTERFACE_A)(sspi_lib->resolve(securityEntrypoint.toLatin1().data()));
+	)
+	if(!pInitSecurityInterface.ptr)
 	{
 		sspi_lib->unload();
 		delete sspi_lib;
@@ -166,9 +280,22 @@ bool sspi_load()
 		return false;
 	}
 
-	PSecurityFunctionTable funcs = pInitSecurityInterface();
-	sspi_log(QString("%1() = %2\n").arg(securityEntrypoint, ptr_toString(funcs)));
-	if(!funcs)
+	union
+	{
+		PMySecurityFunctionTableW W;
+		PSecurityFunctionTableA A;
+		void *ptr;
+	} funcs;
+	funcs.ptr = 0;
+
+	QT_WA(
+		funcs.W = (PMySecurityFunctionTableW)pInitSecurityInterface.W();
+	,
+		funcs.A = pInitSecurityInterface.A();
+	)
+
+	sspi_log(QString("%1() = %2\n").arg(securityEntrypoint, ptr_toString(funcs.ptr)));
+	if(!funcs.ptr)
 	{
 		sspi_lib->unload();
 		delete sspi_lib;
@@ -176,7 +303,12 @@ bool sspi_load()
 		return false;
 	}
 
-	sspi = funcs;
+	QT_WA(
+		sspi.W = funcs.W;
+	,
+		sspi.A = funcs.A;
+	)
+
 	return true;
 }
 
@@ -187,14 +319,14 @@ void sspi_unload()
 	sspi_lib->unload();
 	delete sspi_lib;
 	sspi_lib = 0;
-	sspi = 0;
+	sspi.ptr = 0;
 }
 
 static QList<SspiPackage> sspi_get_packagelist_direct()
 {
 	ULONG cPackages;
 	SecPkgInfo *pPackageInfo;
-	SECURITY_STATUS ret = sspi->EnumerateSecurityPackages(&cPackages, &pPackageInfo);
+	SECURITY_STATUS ret = sspi.W->EnumerateSecurityPackages(&cPackages, &pPackageInfo);
 	sspi_log(QString("EnumerateSecurityPackages() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 	if(ret != SEC_E_OK)
 		return QList<SspiPackage>();
@@ -213,7 +345,7 @@ static QList<SspiPackage> sspi_get_packagelist_direct()
 		out += i;
 	}
 
-	ret = sspi->FreeContextBuffer(&pPackageInfo);
+	ret = sspi.W->FreeContextBuffer(&pPackageInfo);
 	sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 
 	return out;
@@ -274,10 +406,10 @@ public:
 	{
 		if(initialized)
 		{
-			SECURITY_STATUS ret = sspi->DeleteSecurityContext(&ctx);
+			SECURITY_STATUS ret = sspi.W->DeleteSecurityContext(&ctx);
 			sspi_log(QString("DeleteSecurityContext() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 
-			ret = sspi->FreeCredentialsHandle(&user_cred);
+			ret = sspi.W->FreeCredentialsHandle(&user_cred);
 			sspi_log(QString("FreeCredentialsHandle() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 		}
 	}
@@ -308,7 +440,7 @@ public:
 		if(!found)
 			return false;
 
-		SECURITY_STATUS ret = sspi->AcquireCredentialsHandle(
+		SECURITY_STATUS ret = sspi.W->AcquireCredentialsHandle(
 			(SEC_WCHAR *)0, // we want creds of logged-in user
 			(SEC_WCHAR *)QString("Kerberos").utf16(),
 			SECPKG_CRED_OUTBOUND,
@@ -357,7 +489,7 @@ public:
 		// ISC_REQ_DELEGATE
 		// ISC_REQ_REPLAY_DETECT
 
-		ret = sspi->InitializeSecurityContext(
+		ret = sspi.W->InitializeSecurityContext(
 			&user_cred,
 			0, // NULL for the first call
 			(SEC_WCHAR *)spn.utf16(),
@@ -378,7 +510,7 @@ public:
 				first_out_token.resize(outbuf.cbBuffer);
 				memcpy(first_out_token.data(), outbuf.pvBuffer, outbuf.cbBuffer);
 
-				SECURITY_STATUS fret = sspi->FreeContextBuffer(outbuf.pvBuffer);
+				SECURITY_STATUS fret = sspi.W->FreeContextBuffer(outbuf.pvBuffer);
 				sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(fret)));
 			}
 
@@ -392,7 +524,7 @@ public:
 			//   SEC_I_COMPLETE_AND_CONTINUE, which i believe are
 			//   not used for kerberos
 
-			ret = sspi->FreeCredentialsHandle(&user_cred);
+			ret = sspi.W->FreeCredentialsHandle(&user_cred);
 			sspi_log(QString("FreeCredentialsHandle() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 			return false;
 		}
@@ -436,7 +568,7 @@ public:
 			inbufdesc.cBuffers = 1;
 			inbufdesc.pBuffers = &inbuf;
 
-			SECURITY_STATUS ret = sspi->InitializeSecurityContext(
+			SECURITY_STATUS ret = sspi.W->InitializeSecurityContext(
 				&user_cred,
 				&ctx,
 				(SEC_WCHAR *)spn.utf16(),
@@ -457,7 +589,7 @@ public:
 					out->resize(outbuf.cbBuffer);
 					memcpy(out->data(), outbuf.pvBuffer, outbuf.cbBuffer);
 
-					SECURITY_STATUS fret = sspi->FreeContextBuffer(outbuf.pvBuffer);
+					SECURITY_STATUS fret = sspi.W->FreeContextBuffer(outbuf.pvBuffer);
 					sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(fret)));
 				}
 				else
@@ -473,10 +605,10 @@ public:
 				//   SEC_I_COMPLETE_AND_CONTINUE, which i believe are
 				//   not used for kerberos
 
-				ret = sspi->DeleteSecurityContext(&ctx);
+				ret = sspi.W->DeleteSecurityContext(&ctx);
 				sspi_log(QString("DeleteSecurityContext() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 
-				ret = sspi->FreeCredentialsHandle(&user_cred);
+				ret = sspi.W->FreeCredentialsHandle(&user_cred);
 				sspi_log(QString("FreeCredentialsHandle() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 
 				initialized = false;
@@ -492,7 +624,7 @@ public:
 	{
 		if(!have_sizes)
 		{
-			SECURITY_STATUS ret = sspi->QueryContextAttributes(&ctx, SECPKG_ATTR_SIZES, &ctx_sizes);
+			SECURITY_STATUS ret = sspi.W->QueryContextAttributes(&ctx, SECPKG_ATTR_SIZES, &ctx_sizes);
 			sspi_log(QString("QueryContextAttributes(ctx, SECPKG_ATTR_SIZES, ...) = %1\n").arg(SECURITY_STATUS_toString(ret)));
 			if(ret != SEC_E_OK)
 				return false;
@@ -529,7 +661,7 @@ public:
 		bufdesc.cBuffers = 3;
 		bufdesc.pBuffers = buf;
 
-		SECURITY_STATUS ret = sspi->EncryptMessage(&ctx, encrypt ? 0 : SECQOP_WRAP_NO_ENCRYPT, &bufdesc, 0);
+		SECURITY_STATUS ret = sspi.W->EncryptMessage(&ctx, encrypt ? 0 : SECQOP_WRAP_NO_ENCRYPT, &bufdesc, 0);
 		sspi_log(QString("EncryptMessage() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 		if(ret != SEC_E_OK)
 			return false;
@@ -559,7 +691,7 @@ public:
 		bufdesc.pBuffers = buf;
 
 		ULONG fQOP;
-		SECURITY_STATUS ret = sspi->DecryptMessage(&ctx, &bufdesc, 0, &fQOP);
+		SECURITY_STATUS ret = sspi.W->DecryptMessage(&ctx, &bufdesc, 0, &fQOP);
 		sspi_log(QString("DecryptMessage() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 		if(ret == SEC_E_INCOMPLETE_MESSAGE)
 		{
@@ -575,7 +707,7 @@ public:
 			out->resize(buf[0].cbBuffer);
 			memcpy(out->data(), buf[0].pvBuffer, buf[0].cbBuffer);
 
-			SECURITY_STATUS ret = sspi->FreeContextBuffer(buf[0].pvBuffer);
+			SECURITY_STATUS ret = sspi.W->FreeContextBuffer(buf[0].pvBuffer);
 			sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 		}
 		else
