@@ -39,35 +39,51 @@ using namespace QCA;
 // some defs possibly missing from MinGW
 
 #ifndef SEC_E_MESSAGE_ALTERED
-#define SEC_E_MESSAGE_ALTERED ((SECURITY_STATUS)0x130F)
+#define SEC_E_MESSAGE_ALTERED       0x8009030F
+#endif
+
+#ifndef SEC_E_CONTEXT_EXPIRED
+#define SEC_E_CONTEXT_EXPIRED       0x80090317
+#endif
+
+#ifndef SEC_E_CRYPTO_SYSTEM_INVALID
+#define SEC_E_CRYPTO_SYSTEM_INVALID 0x80090337
+#endif
+
+#ifndef SEC_E_OUT_OF_SEQUENCE
+#define SEC_E_OUT_OF_SEQUENCE       0x80090310
 #endif
 
 #ifndef SECURITY_ENTRYPOINTW
-#define SECURITY_ENTRYPOINTW TEXT("InitSecurityInterfaceW")
+#define SECURITY_ENTRYPOINTW        TEXT("InitSecurityInterfaceW")
+#endif
+
+#ifndef SECURITY_ENTRYPOINT_ANSIA
+#define SECURITY_ENTRYPOINT_ANSIA   "InitSecurityInterfaceA"
 #endif
 
 #ifndef SECPKG_FLAG_GSS_COMPATIBLE
-#define SECPKG_FLAG_GSS_COMPATIBLE 0x0001000
+#define SECPKG_FLAG_GSS_COMPATIBLE  0x00001000
 #endif
 
 #ifndef SECQOP_WRAP_NO_ENCRYPT
-#define SECQOP_WRAP_NO_ENCRYPT 0x80000001
+#define SECQOP_WRAP_NO_ENCRYPT      0x80000001
 #endif
 
 #ifndef ISC_RET_MUTUAL_AUTH
-#define ISC RET_MUTUAL_AUTH     0x00000002
+#define ISC_RET_MUTUAL_AUTH         0x00000002
 #endif
 
 #ifndef ISC_RET_SEQUENCE_DETECT
-#define ISC_RET_SEQUENCE_DETECT 0x00000008
+#define ISC_RET_SEQUENCE_DETECT     0x00000008
 #endif
 
 #ifndef ISC_RET_CONFIDENTIALITY
-#define ISC_RET_CONFIDENTIALITY 0x00000010
+#define ISC_RET_CONFIDENTIALITY     0x00000010
 #endif
 
 #ifndef ISC_RET_INTEGRITY
-#define ISC_RET_INTEGRITY       0x00010000
+#define ISC_RET_INTEGRITY           0x00010000
 #endif
 
 #ifdef Q_CC_MINGW
@@ -266,7 +282,7 @@ bool sspi_load()
 
 	QString securityEntrypoint;
 	QT_WA(
-		securityEntrypoint = QString::fromUtf16(SECURITY_ENTRYPOINTW);
+		securityEntrypoint = QString::fromUtf16((const ushort *)SECURITY_ENTRYPOINTW);
 		pInitSecurityInterface.W = (INIT_SECURITY_INTERFACE_W)(sspi_lib->resolve(securityEntrypoint.toLatin1().data()));
 	,
 		securityEntrypoint = QString::fromLatin1(SECURITY_ENTRYPOINT_ANSIA);
@@ -324,29 +340,55 @@ void sspi_unload()
 
 static QList<SspiPackage> sspi_get_packagelist_direct()
 {
-	ULONG cPackages;
-	SecPkgInfo *pPackageInfo;
-	SECURITY_STATUS ret = sspi.W->EnumerateSecurityPackages(&cPackages, &pPackageInfo);
-	sspi_log(QString("EnumerateSecurityPackages() = %1\n").arg(SECURITY_STATUS_toString(ret)));
-	if(ret != SEC_E_OK)
-		return QList<SspiPackage>();
-
 	QList<SspiPackage> out;
-	for(int n = 0; n < (int)cPackages; ++n)
-	{
-		SecPkgInfo *p = &pPackageInfo[n];
-		SspiPackage i;
-		i.name = QString::fromUtf16(p->Name);
-		i.caps = p->fCapabilities;
-		i.version = p->wVersion;
-		i.rpcid = p->wRPCID;
-		i.maxtok = p->cbMaxToken;
-		i.comment = QString::fromUtf16(p->Comment);
-		out += i;
-	}
 
-	ret = sspi.W->FreeContextBuffer(&pPackageInfo);
-	sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(ret)));
+	QT_WA(
+		ULONG cPackages;
+		SecPkgInfoW *pPackageInfo;
+		SECURITY_STATUS ret = sspi.W->EnumerateSecurityPackagesW(&cPackages, &pPackageInfo);
+		sspi_log(QString("EnumerateSecurityPackages() = %1\n").arg(SECURITY_STATUS_toString(ret)));
+		if(ret != SEC_E_OK)
+			return out;
+
+		for(int n = 0; n < (int)cPackages; ++n)
+		{
+			SecPkgInfoW *p = &pPackageInfo[n];
+			SspiPackage i;
+			i.name = QString::fromUtf16((const ushort *)p->Name);
+			i.caps = p->fCapabilities;
+			i.version = p->wVersion;
+			i.rpcid = p->wRPCID;
+			i.maxtok = p->cbMaxToken;
+			i.comment = QString::fromUtf16((const ushort *)p->Comment);
+			out += i;
+		}
+
+		ret = sspi.W->FreeContextBuffer(&pPackageInfo);
+		sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(ret)));
+	,
+		ULONG cPackages;
+		SecPkgInfoA *pPackageInfo;
+		SECURITY_STATUS ret = sspi.A->EnumerateSecurityPackagesA(&cPackages, &pPackageInfo);
+		sspi_log(QString("EnumerateSecurityPackages() = %1\n").arg(SECURITY_STATUS_toString(ret)));
+		if(ret != SEC_E_OK)
+			return out;
+
+		for(int n = 0; n < (int)cPackages; ++n)
+		{
+			SecPkgInfoA *p = &pPackageInfo[n];
+			SspiPackage i;
+			i.name = QString::fromLocal8Bit(p->Name);
+			i.caps = p->fCapabilities;
+			i.version = p->wVersion;
+			i.rpcid = p->wRPCID;
+			i.maxtok = p->cbMaxToken;
+			i.comment = QString::fromLocal8Bit(p->Comment);
+			out += i;
+		}
+
+		ret = sspi.A->FreeContextBuffer(&pPackageInfo);
+		sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(ret)));
+	)
 
 	return out;
 }
