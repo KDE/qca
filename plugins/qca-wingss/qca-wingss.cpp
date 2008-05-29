@@ -145,6 +145,10 @@ namespace wingssQCAPlugin {
 
 #if !defined(FORWARD_ONLY)
 
+//----------------------------------------------------------------------------
+// SSPI helper API
+//----------------------------------------------------------------------------
+
 typedef void (*sspi_logger_func)(const QString &str);
 
 class SspiPackage
@@ -179,7 +183,9 @@ void sspi_refresh_packagelist();
 QString SECURITY_STATUS_toString(SECURITY_STATUS i);
 QString ptr_toString(const void *p);
 
-// -----
+//----------------------------------------------------------------------------
+// SSPI helper implementation
+//----------------------------------------------------------------------------
 
 Q_GLOBAL_STATIC(QMutex, sspi_mutex)
 Q_GLOBAL_STATIC(QMutex, sspi_logger_mutex)
@@ -417,11 +423,30 @@ void sspi_refresh_packagelist()
 	sspi_refresh_packagelist_internal();
 }
 
-// -----
-
+//----------------------------------------------------------------------------
+// KerberosSession
+//----------------------------------------------------------------------------
+// this class thinly wraps SSPI to perform kerberos.
 class KerberosSession
 {
 public:
+	enum ReturnCode
+	{
+		Success,
+		NeedMoreData, // for decrypt
+		ErrorInvalidSystem,
+		ErrorKerberosNotFound,
+		ErrorAcquireCredentials,
+		ErrorInitialize,
+		ErrorQueryContext,
+		ErrorEncrypt,
+		ErrorDecrypt
+	};
+
+	SECURITY_STATUS lastErrorCode;
+
+	quint32 maxtok;
+
 	bool initialized;
 	bool first_step;
 	QByteArray first_out_token;
@@ -456,11 +481,22 @@ public:
 		}
 	}
 
-	bool init(const QString &_spn)
+	ReturnCode init(const QString &_spn)
 	{
+		// kerberos only works on unicode-based systems.  we do this
+		//   check so we can lazily use the W api from here on out.
+		bool validSystem;
+		QT_WA(
+			validSystem = true;
+		,
+			validSystem = false;
+		)
+		if(!validSystem)
+			return ErrorInvalidSystem;
+
 		// ensure kerberos is available
 		bool found = false;
-		quint32 maxtok;
+		quint32 _maxtok;
 		QList<SspiPackage> packages = sspi_get_packagelist();
 		sspi_log("SSPI packages:\n");
 		foreach(const SspiPackage &p, packages)
@@ -472,7 +508,7 @@ public:
 			if(p.name == "Kerberos" && gss)
 			{
 				found = true;
-				maxtok = p.maxtok;
+				_maxtok = p.maxtok;
 			}
 
 			QString gssstr = gss ? "yes" : "no";
@@ -480,9 +516,10 @@ public:
 		}
 
 		if(!found)
-			return false;
+			return ErrorKerberosNotFound;
 
-		SECURITY_STATUS ret = sspi.W->AcquireCredentialsHandle(
+		// get the logged-in user's credentials
+		SECURITY_STATUS ret = sspi.W->AcquireCredentialsHandleW(
 			(SEC_WCHAR *)0, // we want creds of logged-in user
 			(SEC_WCHAR *)QString("Kerberos").utf16(),
 			SECPKG_CRED_OUTBOUND,
@@ -494,8 +531,12 @@ public:
 			&user_cred_expiry);
 		sspi_log(QString("AcquireCredentialsHandle() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 		if(ret != SEC_E_OK)
-			return false;
+		{
+			lastErrorCode = ret;
+			return ErrorAcquireCredentials;
+		}
 
+		maxtok = _maxtok;
 		authed = false;
 		spn = _spn;
 
@@ -531,7 +572,7 @@ public:
 		// ISC_REQ_DELEGATE
 		// ISC_REQ_REPLAY_DETECT
 
-		ret = sspi.W->InitializeSecurityContext(
+		ret = sspi.W->InitializeSecurityContextW(
 			&user_cred,
 			0, // NULL for the first call
 			(SEC_WCHAR *)spn.utf16(),
@@ -566,19 +607,29 @@ public:
 			//   SEC_I_COMPLETE_AND_CONTINUE, which i believe are
 			//   not used for kerberos
 
+			lastErrorCode = ret;
+
 			ret = sspi.W->FreeCredentialsHandle(&user_cred);
 			sspi_log(QString("FreeCredentialsHandle() = %1\n").arg(SECURITY_STATUS_toString(ret)));
-			return false;
+
+			return ErrorInitialize;
 		}
 
 		initialized = true;
 		first_step = true;
 
-		return true;
+		return Success;
 	}
 
-	bool step(const QByteArray &in, QByteArray *out, bool *authenticated)
+	ReturnCode step(const QByteArray &in, QByteArray *out, bool *authenticated)
 	{
+		if(authed)
+		{
+			out->clear();
+			*authenticated = true;
+			return Success;
+		}
+
 		if(first_step)
 		{
 			// ignore 'in'
@@ -610,7 +661,7 @@ public:
 			inbufdesc.cBuffers = 1;
 			inbufdesc.pBuffers = &inbuf;
 
-			SECURITY_STATUS ret = sspi.W->InitializeSecurityContext(
+			SECURITY_STATUS ret = sspi.W->InitializeSecurityContextW(
 				&user_cred,
 				&ctx,
 				(SEC_WCHAR *)spn.utf16(),
@@ -647,6 +698,8 @@ public:
 				//   SEC_I_COMPLETE_AND_CONTINUE, which i believe are
 				//   not used for kerberos
 
+				lastErrorCode = ret;
+
 				ret = sspi.W->DeleteSecurityContext(&ctx);
 				sspi_log(QString("DeleteSecurityContext() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 
@@ -654,37 +707,36 @@ public:
 				sspi_log(QString("FreeCredentialsHandle() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 
 				initialized = false;
-				return false;
+				return ErrorInitialize;
 			}
 		}
 
 		*authenticated = authed;
-		return true;
+		return Success;
 	}
 
-	bool encode(const QByteArray &in, QByteArray *out, bool encrypt)
+	ReturnCode encode(const QByteArray &in, QByteArray *out, bool encrypt)
 	{
 		if(!have_sizes)
 		{
-			SECURITY_STATUS ret = sspi.W->QueryContextAttributes(&ctx, SECPKG_ATTR_SIZES, &ctx_sizes);
+			SECURITY_STATUS ret = sspi.W->QueryContextAttributesW(&ctx, SECPKG_ATTR_SIZES, &ctx_sizes);
 			sspi_log(QString("QueryContextAttributes(ctx, SECPKG_ATTR_SIZES, ...) = %1\n").arg(SECURITY_STATUS_toString(ret)));
 			if(ret != SEC_E_OK)
-				return false;
+			{
+				lastErrorCode = ret;
+				return ErrorQueryContext;
+			}
 
 			have_sizes = true;
 		}
 
-		// TODO: 'in' must not be larger than cbMaximumMessage of SECPKG_ATTR_STREAM_SIZES
-
 		QByteArray tokenbuf(ctx_sizes.cbSecurityTrailer, 0);
 		QByteArray padbuf(ctx_sizes.cbBlockSize, 0);
 
-		// NOTE: we used to allocate a buffer of 1024 just in case the output
-		//  data is larger than the input.  however, putty wingss doesn't
-		//  seem to worry about this.  maybe output is always equal to or
-		//  smaller than the input.
-		//QByteArray databuf(1024, 0);
-		//memcpy(databuf.data(), in.data(), in.size());
+		// we assume here, like putty wingss, that the output size is
+		//   less than or equal to the input size.  honestly I don't
+		//   see how this is clear from the SSPI documentation, but
+		//   the code seems to work so we'll go with it...
 		QByteArray databuf = in;
 
 		SecBuffer buf[3];
@@ -706,18 +758,20 @@ public:
 		SECURITY_STATUS ret = sspi.W->EncryptMessage(&ctx, encrypt ? 0 : SECQOP_WRAP_NO_ENCRYPT, &bufdesc, 0);
 		sspi_log(QString("EncryptMessage() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 		if(ret != SEC_E_OK)
-			return false;
+		{
+			lastErrorCode = ret;
+			return ErrorEncrypt;
+		}
 
 		QByteArray fullbuf;
 		for(int i = 0; i < (int)bufdesc.cBuffers; ++i)
 			fullbuf += QByteArray((const char *)bufdesc.pBuffers[i].pvBuffer, bufdesc.pBuffers[i].cbBuffer);
 
 		*out = fullbuf;
-		return true;
+		return Success;
 	}
 
-	// -1 = error, 0 = need more data, 1 = success
-	int decode(const QByteArray &in, QByteArray *out, bool *encrypted)
+	ReturnCode decode(const QByteArray &in, QByteArray *out, bool *encrypted)
 	{
 		SecBuffer buf[2];
 		buf[0].BufferType = SECBUFFER_DATA;
@@ -737,11 +791,12 @@ public:
 		sspi_log(QString("DecryptMessage() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 		if(ret == SEC_E_INCOMPLETE_MESSAGE)
 		{
-			return 0;
+			return NeedMoreData;
 		}
 		else if(ret != SEC_E_OK)
 		{
-			return -1;
+			lastErrorCode = ret;
+			return ErrorDecrypt;
 		}
 
 		if(buf[0].pvBuffer)
@@ -760,11 +815,16 @@ public:
 		else
 			*encrypted = true;
 
-		return 1;
+		return Success;
 	}
 };
 
-// TODO: use debug
+//----------------------------------------------------------------------------
+// SaslGssapiSession
+//----------------------------------------------------------------------------
+// this class wraps KerberosSession to perform SASL GSSAPI.  it hides away
+//   any SSPI details, and is thus very simple to use.
+// TODO: use debug, interpret errors
 class SaslGssapiSession
 {
 private:
@@ -786,7 +846,7 @@ public:
 	{
 		mode = 0;
 		authed = false;
-		return sess.init(proto + '/' + fqdn);
+		return (sess.init(proto + '/' + fqdn) == KerberosSession::Success);
 	}
 
 	bool step(const QByteArray &in, QByteArray *out, bool *authenticated)
@@ -794,7 +854,7 @@ public:
 		if(mode == 0)
 		{
 			bool kerb_authed;
-			if(!sess.step(in, out, &kerb_authed))
+			if(sess.step(in, out, &kerb_authed) != KerberosSession::Success)
 				return false;
 
 			if(kerb_authed)
@@ -828,7 +888,7 @@ public:
 
 			QByteArray decbuf;
 			bool encrypted;
-			if(!sess.decode(in, &decbuf, &encrypted))
+			if(sess.decode(in, &decbuf, &encrypted) != KerberosSession::Success)
 				return false;
 
 			// this packet is supposed to be not encrypted
@@ -857,8 +917,11 @@ public:
 			obuf[2] = 16;
 			printf("[%02x%02x%02x%02x]\n", (unsigned int)obuf[0], (unsigned int)obuf[1], (unsigned int)obuf[2], (unsigned int)obuf[3]);
 
-			if(!sess.encode(obuf, out, false))
+			if(sess.encode(obuf, out, false) != KerberosSession::Success)
+			{
+				printf("sess.encode failed\n");
 				return false;
+			}
 
 			*authenticated = true;
 		}
@@ -869,7 +932,7 @@ public:
 	bool encode(const QByteArray &in, QByteArray *out)
 	{
 		QByteArray kerb_out;
-		if(sess.encode(in, &kerb_out, true))
+		if(sess.encode(in, &kerb_out, true) == KerberosSession::Success)
 		{
 			QByteArray sasl_out(kerb_out.size() + 4, 0);
 
@@ -928,7 +991,7 @@ public:
 
 		// count incomplete packets as errors, since they are sasl framed
 		bool encrypted;
-		if(sess.decode(kerb_in, out, &encrypted) == 1)
+		if(sess.decode(kerb_in, out, &encrypted) == KerberosSession::Success)
 			return true;
 		else
 			return false;
@@ -1155,6 +1218,9 @@ public:
 
 #endif // !defined(FORWARD_ONLY)
 
+//----------------------------------------------------------------------------
+// MetaSasl
+//----------------------------------------------------------------------------
 class MetaSasl : public SASLContext
 {
 	Q_OBJECT
