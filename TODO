@@ -39,10 +39,7 @@
   +qcatool2 should be version 2.0.x, just like plugins are
   +sasl examples should allow setting protocol name
   +completely clean sasl examples
-  use deleteLater on any object that might emit from a metacall.  consider a
-    way to de-metacall-ify internally so qca users aren't required to
-    deleteLater on public api objects.  this is to work around a bug fixed
-    in qt 4.3.5 and 4.4.0, so maybe we just wait for 4.3.5...
+  +ensure mozilla certs are up to date
 
 * 2.0.2
   cms example: User.pem expired.  probably other certs need regen also?
@@ -61,6 +58,14 @@
   CertificateAuthority constructor provider argument should have default value
 
 * possibilities for the future:
+  the securelayer system doesn't respond to the app if processed data yields
+    no events (an example of this would be a partially-received encrypted
+    payload).  since securelayer is async, an app could end up waiting for
+    a response that is never going to come.  the current workaround is to wait
+    some event cycles and then give up (see the saslclient example).  the fix
+    is probably to make the securelayer system always respond to the app once
+    data has been processed, whether or not the processing yields anything
+    interesting yet.
   find a better way for a provider to automatically promote itself?  (see
     qca-wingss)
   can we ever get SASL::NoAuthzid?
