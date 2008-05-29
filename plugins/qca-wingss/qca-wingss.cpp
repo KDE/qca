@@ -423,6 +423,15 @@ void sspi_refresh_packagelist()
 	sspi_refresh_packagelist_internal();
 }
 
+template <typename T>
+inline T cap_to_int(const T &t)
+{
+	if(sizeof(int) <= sizeof(T))
+		return (int)((t > INT_MAX) ? INT_MAX : t);
+	else
+		return (int)t;
+}
+
 //----------------------------------------------------------------------------
 // KerberosSession
 //----------------------------------------------------------------------------
@@ -462,6 +471,7 @@ public:
 	ULONG ctx_attr;
 	bool have_sizes;
 	SecPkgContext_Sizes ctx_sizes;
+	SecPkgContext_StreamSizes ctx_streamSizes;
 
 	KerberosSession() :
 		initialized(false),
@@ -715,7 +725,8 @@ public:
 		return Success;
 	}
 
-	ReturnCode encode(const QByteArray &in, QByteArray *out, bool encrypt)
+	// private
+	bool ensure_sizes_cached()
 	{
 		if(!have_sizes)
 		{
@@ -724,11 +735,49 @@ public:
 			if(ret != SEC_E_OK)
 			{
 				lastErrorCode = ret;
-				return ErrorQueryContext;
+				return false;
 			}
+
+			// for some reason, querying the stream sizes returns
+			//   SEC_E_UNSUPPORTED_FUNCTION on my system, even
+			//   though the docs say it should work and putty
+			//   wingss also calls it.
+
+			// all we really need is cbMaximumMessage, and since
+			//   we can't query for it, we'll hard code some
+			//   value.  according to putty wingss, the max size
+			//   is essentially unbounded anyway, so this should
+			//   be safe to do.
+			ctx_streamSizes.cbMaximumMessage = 8192;
+
+			//ret = sspi.W->QueryContextAttributesW(&ctx, SECPKG_ATTR_STREAM_SIZES, &ctx_streamSizes);
+			//sspi_log(QString("QueryContextAttributes(ctx, SECPKG_ATTR_STREAM_SIZES, ...) = %1\n").arg(SECURITY_STATUS_toString(ret)));
+			//if(ret != SEC_E_OK)
+			//{
+			//	lastErrorCode = ret;
+			//	return ErrorQueryContext;
+			//}
 
 			have_sizes = true;
 		}
+
+		return true;
+	}
+
+	ReturnCode get_max_encrypt_size(int *max)
+	{
+		if(!ensure_sizes_cached())
+			return ErrorQueryContext;
+
+		*max = cap_to_int<unsigned long>(ctx_streamSizes.cbMaximumMessage);
+
+		return Success;
+	}
+
+	ReturnCode encode(const QByteArray &in, QByteArray *out, bool encrypt)
+	{
+		if(!ensure_sizes_cached())
+			return ErrorQueryContext;
 
 		QByteArray tokenbuf(ctx_sizes.cbSecurityTrailer, 0);
 		QByteArray padbuf(ctx_sizes.cbBlockSize, 0);
@@ -824,41 +873,81 @@ public:
 //----------------------------------------------------------------------------
 // this class wraps KerberosSession to perform SASL GSSAPI.  it hides away
 //   any SSPI details, and is thus very simple to use.
-// TODO: use debug, interpret errors
 class SaslGssapiSession
 {
 private:
+	int secflags;
 	KerberosSession sess;
 	int mode; // 0 = kerberos tokens, 1 = app packets
 	bool authed;
 	QByteArray inbuf;
 
+	int max_enc_size; // most we can encrypt to them
+	int max_dec_size; // most we are expected to decrypt from them
+
 public:
+	enum SecurityFlags
+	{
+		// only one of these should be set
+		RequireAtLeastInt  = 0x0001,
+		RequireConf        = 0x0002
+	};
+
+	enum ReturnCode
+	{
+		Success,
+		ErrorInit,
+		ErrorKerberosStep,
+		ErrorAppTokenDecode,
+		ErrorAppTokenIsEncrypted,
+		ErrorAppTokenWrongSize,
+		ErrorAppTokenInvalid,
+		ErrorAppTokenEncode,
+		ErrorLayerTooWeak,
+		ErrorEncode,
+		ErrorDecode,
+		ErrorDecodeTooLarge,
+		ErrorDecodeNotEncrypted
+	};
+
+	bool do_layer, do_conf;
+
 	SaslGssapiSession()
 	{
 	}
 
-	~SaslGssapiSession()
+	ReturnCode init(const QString &proto, const QString &fqdn, int _secflags)
 	{
-	}
-
-	bool init(const QString &proto, const QString &fqdn)
-	{
-		mode = 0;
+		secflags = _secflags;
+		mode = 0; // kerberos tokens
 		authed = false;
-		return (sess.init(proto + '/' + fqdn) == KerberosSession::Success);
+
+		do_layer = false;
+		do_conf = false;
+
+		if(sess.init(proto + '/' + fqdn) != KerberosSession::Success)
+			return ErrorInit;
+
+		return Success;
 	}
 
-	bool step(const QByteArray &in, QByteArray *out, bool *authenticated)
+	ReturnCode step(const QByteArray &in, QByteArray *out, bool *authenticated)
 	{
-		if(mode == 0)
+		if(authed)
+		{
+			out->clear();
+			*authenticated = true;
+			return Success;
+		}
+
+		if(mode == 0) // kerberos tokens
 		{
 			bool kerb_authed;
 			if(sess.step(in, out, &kerb_authed) != KerberosSession::Success)
-				return false;
+				return ErrorKerberosStep;
 
 			if(kerb_authed)
-				mode = 1;
+				mode = 1; // switch to app packets
 
 			*authenticated = false;
 		}
@@ -889,17 +978,33 @@ public:
 			QByteArray decbuf;
 			bool encrypted;
 			if(sess.decode(in, &decbuf, &encrypted) != KerberosSession::Success)
-				return false;
+			{
+				sspi_log("Error decoding application token\n");
+				return ErrorAppTokenDecode;
+			}
 
 			// this packet is supposed to be not encrypted
 			if(encrypted)
-				return false;
+			{
+				sspi_log("Error, application token is encrypted\n");
+				return ErrorAppTokenIsEncrypted;
+			}
 
 			// packet must be exactly 4 bytes
 			if(decbuf.size() != 4)
-				return false;
+			{
+				sspi_log("Error, application token is the wrong size\n");
+				return ErrorAppTokenWrongSize;
+			}
 
-			printf("[%02x%02x%02x%02x]\n", (unsigned int)decbuf[0], (unsigned int)decbuf[1], (unsigned int)decbuf[2], (unsigned int)decbuf[3]);
+			QString str;
+			str.sprintf("%02x%02x%02x%02x",
+				(unsigned int)decbuf[0],
+				(unsigned int)decbuf[1],
+				(unsigned int)decbuf[2],
+				(unsigned int)decbuf[3]);
+			sspi_log(QString("Received application token: [%1]\n").arg(str));
+
 			unsigned char layermask = decbuf[0];
 			quint32 maxsize = 0;
 			maxsize += (unsigned char)decbuf[1];
@@ -908,93 +1013,250 @@ public:
 			maxsize <<= 8;
 			maxsize += (unsigned char)decbuf[3];
 
-			printf("layermask: %02x\n", (int)layermask);
-			printf("maxsize:   %d\n", maxsize);
+			// if 'None' is all that is supported, then maxsize
+			//   must be zero
+			if(layermask == 1 && maxsize > 0)
+			{
+				sspi_log("Error, supports no security layer but the max buffer size is not zero\n");
+				return ErrorAppTokenInvalid;
+			}
 
-			// no layer, zero maxsize
+			// convert maxsize to a signed int, by capping it
+			int _max_enc_size = cap_to_int<quint32>(maxsize);
+
+			// parse out layermask
+			bool saslLayerNone = false;
+			bool saslLayerInt = false;
+			bool saslLayerConf = false;
+			QStringList saslLayerModes;
+			if(layermask & 1)
+			{
+				saslLayerNone = true;
+				saslLayerModes += "None";
+			}
+			if(layermask & 2)
+			{
+				saslLayerInt = true;
+				saslLayerModes += "Int";
+			}
+			if(layermask & 4)
+			{
+				saslLayerConf = true;
+				saslLayerModes += "Conf";
+			}
+
+			sspi_log(QString("Security layer modes supported: %1\n").arg(saslLayerModes.join(", ")));
+			sspi_log(QString("Security layer max packet size: %1\n").arg(maxsize));
+
+			// create outbound 4-byte application token
 			QByteArray obuf(4, 0);
-			obuf[0] = 4;
-			obuf[2] = 16;
-			printf("[%02x%02x%02x%02x]\n", (unsigned int)obuf[0], (unsigned int)obuf[1], (unsigned int)obuf[2], (unsigned int)obuf[3]);
+
+			// set one of use_conf or use_int, but not both
+			bool use_conf = false;
+			bool use_int = false;
+			if(encryptionPossible && saslLayerConf)
+				use_conf = true;
+			else if(layerPossible && saslLayerInt)
+				use_int = true;
+			else if(!saslLayerNone)
+			{
+				sspi_log("Error, no compatible layer mode supported, not even 'None'\n");
+				return ErrorLayerTooWeak;
+			}
+
+			if((secflags & RequireConf) && !use_conf)
+			{
+				sspi_log("Error, 'Conf' required but not supported\n");
+				return ErrorLayerTooWeak;
+			}
+
+			if((secflags & RequireAtLeastInt) && !use_conf && !use_int)
+			{
+				sspi_log("Error, 'Conf' or 'Int' required but not supported\n");
+				return ErrorLayerTooWeak;
+			}
+
+			if(use_conf)
+			{
+				sspi_log("Using 'Conf' layer\n");
+				obuf[0] = 4;
+			}
+			else if(use_int)
+			{
+				sspi_log("Using 'Int' layer\n");
+				obuf[0] = 2;
+			}
+			else
+			{
+				sspi_log("Using 'None' layer\n");
+				obuf[0] = 1;
+			}
+
+			// as far as i can tell, there is no max decrypt size
+			//   with sspi.  so we'll just pick some number.
+			//   a small one is good, to prevent excessive input
+			//   buffering.
+			// in other parts of the code, it is assumed this
+			//   value is less than INT_MAX
+			int _max_dec_size = 8192; // same as cyrus
+
+			obuf[1] = (unsigned char)((_max_dec_size >> 16) & 0xff);
+			obuf[2] = (unsigned char)((_max_dec_size >> 8)  & 0xff);
+			obuf[3] = (unsigned char)((_max_dec_size)       & 0xff);
+
+			str.sprintf("%02x%02x%02x%02x",
+				(unsigned int)obuf[0],
+				(unsigned int)obuf[1],
+				(unsigned int)obuf[2],
+				(unsigned int)obuf[3]);
+			sspi_log(QString("Sending application token: [%1]\n").arg(str));
 
 			if(sess.encode(obuf, out, false) != KerberosSession::Success)
 			{
-				printf("sess.encode failed\n");
-				return false;
+				sspi_log("Error encoding application token\n");
+				return ErrorAppTokenEncode;
 			}
+
+			if(use_conf || use_int)
+				do_layer = true;
+			if(use_conf)
+				do_conf = true;
+
+			max_enc_size = _max_enc_size;
+			max_dec_size = _max_dec_size;
 
 			*authenticated = true;
 		}
 
-		return true;
+		return Success;
 	}
 
-	bool encode(const QByteArray &in, QByteArray *out)
+	ReturnCode encode(const QByteArray &in, QByteArray *out)
 	{
-		QByteArray kerb_out;
-		if(sess.encode(in, &kerb_out, true) == KerberosSession::Success)
+		if(!do_layer)
 		{
+			*out = in;
+			return Success;
+		}
+
+		int local_encrypt_max;
+		if(sess.get_max_encrypt_size(&local_encrypt_max) != KerberosSession::Success)
+			return ErrorEncode;
+
+		// send no more per-packet than what our local system will
+		//   encrypt AND no more than what the peer will accept.
+		int chunk_max = qMin(local_encrypt_max, max_enc_size);
+		if(chunk_max < 8)
+		{
+			sspi_log("Error, chunk_max is ridiculously small\n");
+			return ErrorEncode;
+		}
+
+		QByteArray total_out;
+
+		// break up into packets, if input exceeds max size
+		int encoded = 0;
+		while(encoded < in.size())
+		{
+			int left = in.size() - encoded;
+			int chunk_size = qMin(left, chunk_max);
+			QByteArray kerb_in = QByteArray::fromRawData(in.data() + encoded, chunk_size);
+			QByteArray kerb_out;
+			if(sess.encode(kerb_in, &kerb_out, do_conf) != KerberosSession::Success)
+				return ErrorEncode;
+
 			QByteArray sasl_out(kerb_out.size() + 4, 0);
 
 			// SASL (not GSS!) uses a 4 byte length prefix
 			quint32 len = kerb_out.size();
-			sasl_out[3] = (unsigned char)(len & 0xff);
-			len >>= 8;
-			sasl_out[2] = (unsigned char)(len & 0xff);
-			len >>= 8;
-			sasl_out[1] = (unsigned char)(len & 0xff);
-			len >>= 8;
-			sasl_out[0] = (unsigned char)(len & 0xff);
+			sasl_out[0] = (unsigned char)((len >> 24) & 0xff);
+			sasl_out[1] = (unsigned char)((len >> 16) & 0xff);
+			sasl_out[2] = (unsigned char)((len >> 8)  & 0xff);
+			sasl_out[3] = (unsigned char)((len)       & 0xff);
 
 			memcpy(sasl_out.data() + 4, kerb_out.data(), kerb_out.size());
-			*out = sasl_out;
-			return true;
+
+			encoded += kerb_in.size();
+			total_out += sasl_out;
 		}
-		else
-			return false;
+
+		*out = total_out;
+		return Success;
 	}
 
-	bool decode(const QByteArray &in, QByteArray *out)
+	ReturnCode decode(const QByteArray &in, QByteArray *out)
 	{
+		if(!do_layer)
+		{
+			*out = in;
+			return Success;
+		}
+
+		// buffer the input
 		inbuf += in;
 
-		if(inbuf.size() < 4)
+		QByteArray total_out;
+
+		// the buffer might contain many packets.  decode as many
+		//   as possible
+		while(1)
 		{
-			// need more data
-			out->clear();
-			return true;
+			if(inbuf.size() < 4)
+			{
+				// need more data
+				break;
+			}
+
+			// SASL (not GSS!) uses a 4 byte length prefix
+			quint32 ulen = 0;
+			ulen += (unsigned char)inbuf[0];
+			ulen <<= 8;
+			ulen += (unsigned char)inbuf[1];
+			ulen <<= 8;
+			ulen += (unsigned char)inbuf[2];
+			ulen <<= 8;
+			ulen += (unsigned char)inbuf[3];
+
+			// this capping is safe, because we throw error if the value
+			//   is too large, and an acceptable value will always be
+			//   lower than the maximum integer size.
+			int len = cap_to_int<quint32>(ulen);
+			if(len > max_dec_size)
+			{
+				// this means the peer ignored our max buffer size.
+				//   very evil, or we're under attack.
+				sspi_log("Error, decode size too large\n");
+				return ErrorDecodeTooLarge;
+			}
+
+			if(inbuf.size() - 4 < len)
+			{
+				// need more data
+				break;
+			}
+
+			// take the packet from the inbuf
+			QByteArray kerb_in = inbuf.mid(4, len);
+			memmove(inbuf.data(), inbuf.data() + len + 4, inbuf.size() - len - 4);
+			inbuf.resize(inbuf.size() - len - 4);
+
+			// count incomplete packets as errors, since they are sasl framed
+			QByteArray kerb_out;
+			bool encrypted;
+			if(sess.decode(kerb_in, &kerb_out, &encrypted) != KerberosSession::Success)
+				return ErrorDecode;
+
+			if(do_conf && !encrypted)
+			{
+				sspi_log("Error, received unencrypted packet in 'Conf' mode\n");
+				return ErrorDecodeNotEncrypted;
+			}
+
+			total_out += kerb_out;
 		}
 
-		// SASL (not GSS!) uses a 4 byte length prefix
-		quint32 ulen = 0;
-		ulen += (unsigned char)inbuf[0];
-		ulen <<= 8;
-		ulen += (unsigned char)inbuf[1];
-		ulen <<= 8;
-		ulen += (unsigned char)inbuf[2];
-		ulen <<= 8;
-		ulen += (unsigned char)inbuf[3];
-
-		// FIXME: this only works for 31-bit
-		int len = (int)ulen;
-
-		if(inbuf.size() - 4 < len)
-		{
-			// need more data
-			out->clear();
-			return true;
-		}
-
-		QByteArray kerb_in = inbuf.mid(4, len);
-		memmove(inbuf.data(), inbuf.data() + len + 4, inbuf.size() - len - 4);
-		inbuf.resize(inbuf.size() - len - 4);
-
-		// count incomplete packets as errors, since they are sasl framed
-		bool encrypted;
-		if(sess.decode(kerb_in, out, &encrypted) == KerberosSession::Success)
-			return true;
-		else
-			return false;
+		*out = total_out;
+		return Success;
 	}
 };
 
@@ -1039,7 +1301,7 @@ public:
 		Q_UNUSED(ext_id);
 		Q_UNUSED(ext_ssf);
 
-		sess.init(service, host);
+		sess.init(service, host, 0);
 	}
 
 	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF)
@@ -1647,6 +1909,7 @@ public:
 	virtual void init()
 	{
 #ifndef FORWARD_ONLY
+		sspi_set_logger(do_log);
 		sspi_load(); // TODO: handle error
 #endif
 	}
@@ -1705,6 +1968,13 @@ public:
 		else
 			return 0;
 	}
+
+#ifndef FORWARD_ONLY
+	static void do_log(const QString &str)
+	{
+		QCA_logTextMessage(str, Logger::Debug);
+	}
+#endif
 };
 
 }
