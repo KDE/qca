@@ -1,0 +1,27 @@
+QCA Windows GSS plugin version 2.0.0
+------------------------------------
+Date: May 29th, 2008
+Website: http://delta.affinix.com/qca/
+Mailing List: Delta Project <delta@lists.affinix.com>
+
+Author: Justin Karneges <justin@affinix.com>
+
+This plugin provides SASL (GSSAPI mechanism only) using the native Windows
+Security Support Provider Interface (SSPI) for Kerberos.  Basically what this
+means is that if your Windows computer authenticates against a domain, then
+you can access capable SASL servers on that domain without a password.
+
+This plugin will safely load on any version of Windows, but it will only
+perform its function if the Kerberos SSPI feature is present (available in
+Windows 2000 or later).
+
+Installing
+----------
+
+For Windows:
+
+  configwin rd
+  qmake
+  nmake (or make)
+  copy lib\*.dll qtdir\plugins\crypto
+
