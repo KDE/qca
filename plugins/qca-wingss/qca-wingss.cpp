@@ -23,6 +23,7 @@
 #include <QtPlugin>
 #include <QMutex>
 #include <QLibrary>
+#include <QTimer>
 
 #ifndef FORWARD_ONLY
 #include <windows.h>
@@ -910,6 +911,10 @@ public:
 		ErrorDecodeNotEncrypted
 	};
 
+	// set this before auth, if you want
+	QString authzid;
+
+	// read-only
 	bool do_layer, do_conf;
 
 	SaslGssapiSession()
@@ -1048,8 +1053,8 @@ public:
 			sspi_log(QString("Security layer modes supported: %1\n").arg(saslLayerModes.join(", ")));
 			sspi_log(QString("Security layer max packet size: %1\n").arg(maxsize));
 
-			// create outbound 4-byte application token
-			QByteArray obuf(4, 0);
+			// create outbound application token
+			QByteArray obuf(4, 0); // initially 4 bytes
 
 			// set one of use_conf or use_int, but not both
 			bool use_conf = false;
@@ -1100,15 +1105,20 @@ public:
 			//   value is less than INT_MAX
 			int _max_dec_size = 8192; // same as cyrus
 
+			// max size must be zero if no security layer is used
+			if(!use_conf && !use_int)
+				_max_dec_size = 0;
+
 			obuf[1] = (unsigned char)((_max_dec_size >> 16) & 0xff);
 			obuf[2] = (unsigned char)((_max_dec_size >> 8)  & 0xff);
 			obuf[3] = (unsigned char)((_max_dec_size)       & 0xff);
 
-			str.sprintf("%02x%02x%02x%02x",
-				(unsigned int)obuf[0],
-				(unsigned int)obuf[1],
-				(unsigned int)obuf[2],
-				(unsigned int)obuf[3]);
+			if(!authzid.isEmpty())
+				obuf += authzid.toUtf8();
+
+			str.clear();
+			for(int n = 0; n < obuf.size(); ++n)
+				str += QString().sprintf("%02x", (unsigned int)obuf[n]);
 			sspi_log(QString("Sending application token: [%1]\n").arg(str));
 
 			if(sess.encode(obuf, out, false) != KerberosSession::Success)
@@ -1261,6 +1271,51 @@ public:
 };
 
 //----------------------------------------------------------------------------
+// SafeTimer (copied from qca_safeobj)
+//----------------------------------------------------------------------------
+static void releaseAndDeleteLater(QObject *owner, QObject *obj)
+{
+	obj->disconnect(owner);
+	obj->setParent(0);
+	obj->deleteLater();
+}
+
+class SafeTimer : public QObject
+{
+	Q_OBJECT
+public:
+	SafeTimer(QObject *parent = 0) :
+		QObject(parent)
+	{
+		t = new QTimer(this);
+		connect(t, SIGNAL(timeout()), SIGNAL(timeout()));
+	}
+
+	~SafeTimer()
+	{
+		releaseAndDeleteLater(this, t);
+	}
+
+	int interval() const                { return t->interval(); }
+	bool isActive() const               { return t->isActive(); }
+	bool isSingleShot() const           { return t->isSingleShot(); }
+	void setInterval(int msec)          { t->setInterval(msec); }
+	void setSingleShot(bool singleShot) { t->setSingleShot(singleShot); }
+	int timerId() const                 { return t->timerId(); }
+
+public slots:
+	void start(int msec)                { t->start(msec); }
+	void start()                        { t->start(); }
+	void stop()                         { t->stop(); }
+
+signals:
+	void timeout();
+
+private:
+	QTimer *t;
+};
+
+//----------------------------------------------------------------------------
 // SaslWinGss
 //----------------------------------------------------------------------------
 static bool wingss_available()
@@ -1273,14 +1328,29 @@ class SaslWinGss : public SASLContext
 	Q_OBJECT
 
 public:
-	SaslGssapiSession sess;
+	SaslGssapiSession *sess;
 	bool authed;
+	Result _result;
+	SASL::AuthCondition _authCondition;
+	QByteArray _step_to_net;
 	QByteArray _to_net, _to_app;
 	int enc;
+	SafeTimer resultsReadyTrigger;
+
+	QString opt_service, opt_host, opt_ext_id;
+	int opt_ext_ssf;
+	int opt_flags;
+	int opt_minssf, opt_maxssf;
+
+	QString opt_authzid;
 
 	SaslWinGss(Provider *p) :
-		SASLContext(p)
+		SASLContext(p),
+		sess(0),
+		resultsReadyTrigger(this)
 	{
+		connect(&resultsReadyTrigger, SIGNAL(timeout()), SIGNAL(resultsReady()));
+		resultsReadyTrigger.setSingleShot(true);
 	}
 
 	Provider::Context *clone() const
@@ -1290,130 +1360,212 @@ public:
 
 	virtual void reset()
 	{
-		// TODO
+		delete sess;
+		sess = 0;
+		authed = false;
+		_step_to_net.clear();
+		_to_net.clear();
+		_to_app.clear();
+		resultsReadyTrigger.stop();
+
+		opt_service.clear();
+		opt_host.clear();
+		opt_ext_id.clear();
 	}
 
 	virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote, const QString &ext_id, int ext_ssf)
 	{
-		// TODO
+		// unused by this provider
 		Q_UNUSED(local);
 		Q_UNUSED(remote);
-		Q_UNUSED(ext_id);
-		Q_UNUSED(ext_ssf);
 
-		sess.init(service, host, 0);
+		opt_service = service;
+		opt_host = host;
+		opt_ext_id = ext_id;
+		opt_ext_ssf = ext_ssf;
 	}
 
 	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF)
 	{
-		// TODO
-		Q_UNUSED(f);
-		Q_UNUSED(minSSF);
-		Q_UNUSED(maxSSF);
+		opt_flags = (int)f;
+		opt_minssf = minSSF;
+		opt_maxssf = maxSSF;
 	}
 
 	virtual void startClient(const QStringList &mechlist, bool allowClientSendFirst)
 	{
-		// TODO
-		Q_UNUSED(allowClientSendFirst);
-
+		// we only support GSSAPI
 		if(!mechlist.contains("GSSAPI"))
 		{
-			// TODO: report error
+			_result = Error;
+			_authCondition = SASL::NoMechanism;
+			resultsReadyTrigger.start();
 			return;
 		}
 
-		authed = false;
-		sess.step(QByteArray(), &_to_net, &authed); // TODO: handle error
+		// GSSAPI (or this provider) doesn't meet these requirements
+		if(opt_flags & SASL::RequireForwardSecrecy
+			|| opt_flags & SASL::RequirePassCredentials
+			|| !allowClientSendFirst)
+		{
+			_result = Error;
+			_authCondition = SASL::NoMechanism;
+			resultsReadyTrigger.start();
+			return;
+		}
 
-		QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+		sess = new SaslGssapiSession;
+		sess->authzid = opt_authzid;
+
+		int secflags = 0;
+		if(opt_minssf > 1)
+			secflags |= SaslGssapiSession::RequireConf;
+		else if(opt_minssf == 1)
+			secflags |= SaslGssapiSession::RequireAtLeastInt;
+
+		SaslGssapiSession::ReturnCode ret = sess->init(opt_service, opt_host, secflags);
+		if(ret != SaslGssapiSession::Success)
+		{
+			_result = Error;
+			_authCondition = SASL::AuthFail;
+			resultsReadyTrigger.start();
+			return;
+		}
+
+		ret = sess->step(QByteArray(), &_step_to_net, &authed);
+		if(ret != SaslGssapiSession::Success)
+		{
+			_result = Error;
+			_authCondition = SASL::AuthFail;
+			resultsReadyTrigger.start();
+			return;
+		}
+
+		if(authed)
+			_result = Success;
+		else
+			_result = Continue;
+
+		resultsReadyTrigger.start();
 	}
 
 	virtual void startServer(const QString &realm, bool disableServerSendLast)
 	{
-		// TODO
+		// server mode unsupported at this time
 		Q_UNUSED(realm);
 		Q_UNUSED(disableServerSendLast);
+
+		_result = Error;
+		_authCondition = SASL::AuthFail;
+		resultsReadyTrigger.start();
 	}
 
 	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit)
 	{
-		// TODO
+		// server mode unsupported at this time
 		Q_UNUSED(mech);
 		Q_UNUSED(clientInit);
 	}
 
 	virtual void nextStep(const QByteArray &from_net)
 	{
-		// TODO
-		sess.step(from_net, &_to_net, &authed); // TODO: handle error
+		SaslGssapiSession::ReturnCode ret = sess->step(from_net, &_step_to_net, &authed);
+		if(ret != SaslGssapiSession::Success)
+		{
+			_result = Error;
+			_authCondition = SASL::AuthFail;
+			resultsReadyTrigger.start();
+			return;
+		}
 
-		QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+		if(authed)
+			_result = Success;
+		else
+			_result = Continue;
+
+		resultsReadyTrigger.start();
 	}
 
 	virtual void tryAgain()
 	{
-		// TODO
+		// we never ask for params, so this function should never be
+		//   called
 	}
 
 	virtual void update(const QByteArray &from_net, const QByteArray &from_app)
 	{
-		// TODO
+		SaslGssapiSession::ReturnCode ret;
 		QByteArray a;
 
-		sess.decode(from_net, &a); // TODO: handle error
-		_to_app += a;
+		if(!from_net.isEmpty())
+		{
+			ret = sess->decode(from_net, &a);
+			if(ret != SaslGssapiSession::Success)
+			{
+				_result = Error;
+				resultsReadyTrigger.start();
+				return;
+			}
 
-		sess.encode(from_app, &a); // TODO: handle error
-		_to_net += a;
-		enc += from_app.size();
+			_to_app += a;
+		}
 
-		QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+		if(!from_app.isEmpty())
+		{
+			ret = sess->encode(from_app, &a);
+			if(ret != SaslGssapiSession::Success)
+			{
+				_result = Error;
+				resultsReadyTrigger.start();
+				return;
+			}
+
+			_to_net += a;
+			enc += from_app.size();
+		}
+
+		_result = Success;
+		resultsReadyTrigger.start();
 	}
 
 	virtual bool waitForResultsReady(int msecs)
 	{
-		// TODO
+		// all results are ready instantly
 		Q_UNUSED(msecs);
+		resultsReadyTrigger.stop();
 		return true;
 	}
 
 	virtual Result result() const
 	{
-		// TODO
-		if(authed)
-			return Success;
-		else
-			return Continue;
+		return _result;
 	}
 
 	virtual QStringList mechlist() const
 	{
-		// TODO
+		// server mode unsupported at this time
 		return QStringList();
 	}
 
 	virtual QString mech() const
 	{
-		// TODO
+		// only mech we support :)
 		return "GSSAPI";
 	}
 
 	virtual bool haveClientInit() const
 	{
-		// TODO
+		// GSSAPI always has a client init response
 		return true;
 	}
 
 	virtual QByteArray stepData() const
 	{
-		// TODO
-		return _to_net;
+		return _step_to_net;
 	}
 
 	virtual QByteArray to_net()
 	{
-		// TODO
 		QByteArray a = _to_net;
 		_to_net.clear();
 		enc = 0;
@@ -1422,58 +1574,79 @@ public:
 
 	virtual int encoded() const
 	{
-		// TODO
 		return enc;
 	}
 
 	virtual QByteArray to_app()
 	{
-		// TODO
-		return _to_app;
+		QByteArray a = _to_app;
+		_to_app.clear();
+		return a;
 	}
 
 	virtual int ssf() const
 	{
-		// TODO
-		return 56;
+		if(!sess->do_layer)
+			return 0;
+
+		if(sess->do_conf)
+		{
+			// TODO: calculate this value somehow?  for now we'll
+			//   just hard code it to 56, which is basically what
+			//   cyrus does.
+			return 56;
+		}
+		else
+			return 1;
 	}
 
 	virtual SASL::AuthCondition authCondition() const
 	{
-		// TODO
-		return SASL::AuthFail;
+		return _authCondition;
 	}
 
 	virtual SASL::Params clientParams() const
 	{
-		// TODO
+		// we never ask for params
 		return SASL::Params();
 	}
 
 	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm)
 	{
-		// TODO
+		// unused by this provider
 		Q_UNUSED(user);
-		Q_UNUSED(authzid);
 		Q_UNUSED(pass);
 		Q_UNUSED(realm);
+
+		if(authzid)
+		{
+			opt_authzid = *authzid;
+			if(sess)
+				sess->authzid = opt_authzid;
+		}
+		else
+		{
+			opt_authzid.clear();
+			if(sess)
+				sess->authzid.clear();
+		}
 	}
 
 	virtual QStringList realmlist() const
 	{
-		// TODO
+		// unused by this provider
 		return QStringList();
 	}
 
 	virtual QString username() const
 	{
-		// TODO
+		// server mode unsupported at this time
 		return QString();
 	}
 
 	virtual QString authzid() const
 	{
-		// TODO
+		// server mode unsupported at this time
 		return QString();
 	}
 };
