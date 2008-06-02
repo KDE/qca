@@ -84,6 +84,11 @@ mac: {
 	QMAKE_LFLAGS_SONAME = -Wl,-install_name,"$$LIBDIR/"
 }
 
+FRAMEWORK_HEADERS.version = Versions
+FRAMEWORK_HEADERS.files = $$PUBLIC_HEADERS $$QCA_INC/qca.h $$QCA_INC/QtCrypto
+FRAMEWORK_HEADERS.path = Headers
+QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+
 unix: {
 	# install
 	target.path = $$LIBDIR
@@ -92,7 +97,7 @@ unix: {
 	incfiles.path = $$INCDIR/QtCrypto
 	incfiles.files = $$PUBLIC_HEADERS
 	incfiles.files += $$QCA_INC/qca.h $$QCA_INC/QtCrypto
-	INSTALLS += incfiles
+	!lib_bundle:INSTALLS += incfiles
 
 	manfiles.path = $$DATADIR/man/man1
 	manfiles.files = $$QCA_BASE/man/qcatool2.1

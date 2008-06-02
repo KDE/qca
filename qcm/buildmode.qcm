@@ -7,9 +7,9 @@ arg: debug,Build with debugging turned on.
 arg: debug-and-release,Build two versions, with and without debugging turned on (mac only).
 arg: no-separate-debug-info,Do not store debug information in a separate file (default for mac).
 arg: separate-debug-info,Strip debug information into a separate .debug file (default for non-mac).
+arg: no-framework,Do not build as a Mac framework.
+arg: framework,Build as a Mac framework (default).
 -----END QCMOD-----
-arg: no-framework,Do not build as a Mac framework (default).
-arg: framework,Build as a Mac framework.
 */
 
 #define QC_BUILDMODE
@@ -34,8 +34,8 @@ public:
 		bool opt_release = false;
 		bool opt_debug = false;
 		bool opt_debug_and_release = false;
-		//bool opt_no_framework = false;
-		//bool opt_framework = false;
+		bool opt_no_framework = false;
+		bool opt_framework = false;
 		bool opt_no_separate_debug_info = false;
 		bool opt_separate_debug_info = false;
 
@@ -45,19 +45,29 @@ public:
 			opt_debug = true;
 		if(conf->getenv("QC_DEBUG_AND_RELEASE") == "Y")
 			opt_debug_and_release = true;
-		//if(conf->getenv("QC_NO_FRAMEWORK") == "Y")
-		//	opt_no_framework = true;
-		//if(conf->getenv("QC_FRAMEWORK") == "Y")
-		//	opt_framework = true;
+		if(conf->getenv("QC_NO_FRAMEWORK") == "Y")
+			opt_no_framework = true;
+		if(conf->getenv("QC_FRAMEWORK") == "Y")
+			opt_framework = true;
 		if(conf->getenv("QC_NO_SEPARATE_DEBUG_INFO") == "Y")
 			opt_no_separate_debug_info = true;
 		if(conf->getenv("QC_SEPARATE_DEBUG_INFO") == "Y")
 			opt_separate_debug_info = true;
 
+		bool staticmode = false;
+		if(conf->getenv("QC_STATIC") == "Y")
+			staticmode = true;
+
 #ifndef Q_OS_MAC
 		if(opt_debug_and_release)
 		{
 			printf("\nError: The --debug-and-release option is for mac only.\n");
+			exit(1);
+		}
+
+		if(opt_framework)
+		{
+			printf("\nError: The --framework option is for mac only.\n");
 			exit(1);
 		}
 #endif
@@ -80,7 +90,13 @@ public:
 		}
 
 		// framework
-		/*x = 0;
+		if(opt_framework && staticmode)
+		{
+			printf("\nError: Cannot use both --framework and --static.\n");
+			exit(1);
+		}
+
+		x = 0;
 		if(opt_no_framework)
 			++x;
 		if(opt_framework)
@@ -89,7 +105,7 @@ public:
 		{
 			printf("\nError: Use only one of --framework or --no-framework.\n");
 			exit(1);
-		}*/
+		}
 
 		// debug info
 		x = 0;
@@ -117,7 +133,7 @@ public:
 		else // default
 			qc_buildmode_release = true;
 
-		/*if(opt_framework)
+		if(opt_framework)
 			qc_buildmode_framework = true;
 		else if(opt_no_framework)
 		{
@@ -125,8 +141,9 @@ public:
 		}
 		else // default
 		{
-			// nothing to do
-		}*/
+			if(!staticmode)
+				qc_buildmode_framework = true;
+		}
 
 		if(opt_separate_debug_info)
 			qc_buildmode_separate_debug_info = true;
@@ -154,8 +171,10 @@ public:
 		else // qc_buildmode_debug
 			opts += "debug";
 
-		//if(qc_buildmode_framework)
-		//	opts += "lib_bundle";
+#ifdef Q_OS_MAC
+		if(qc_buildmode_framework)
+			opts += "lib_bundle";
+#endif
 
 		if(qc_buildmode_separate_debug_info)
 			opts += "separate_debug_info";
