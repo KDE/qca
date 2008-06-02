@@ -480,7 +480,7 @@ static QVariantMap readConfig(const QString &name)
 	settings.beginGroup(name);
 	QStringList keys = settings.childKeys();
 	QVariantMap map;
-	foreach(QString key, keys)
+	foreach(const QString &key, keys)
 		map[key] = settings.value(key);
 	settings.endGroup();
 

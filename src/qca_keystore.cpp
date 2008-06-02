@@ -273,7 +273,7 @@ public slots:
 		KeyStoreListContext *c = 0;
 		int contextId = -1;
 		m.lock();
-		foreach(Item i, items)
+		foreach(const Item &i, items)
 		{
 			if(i.storeId == storeId)
 			{
@@ -1549,7 +1549,7 @@ public:
 			}
 		}
 
-		foreach(QString storeId, here)
+		foreach(const QString &storeId, here)
 		{
 			emit q->keyStoreAvailable(storeId);
 			if(!self)

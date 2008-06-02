@@ -2888,7 +2888,7 @@ int main(int argc, char **argv)
 				if(!credit.isEmpty())
 				{
 					QStringList lines = wrapstring(credit, 74);
-					foreach(QString s, lines)
+					foreach(const QString &s, lines)
 						printf("    %s\n", qPrintable(s));
 				}
 			}

@@ -390,7 +390,7 @@ void ProviderManager::scan()
 			continue;
 		}
 
-		foreach(const QString maybeFile, entryList)
+		foreach(const QString &maybeFile, entryList)
 		{
 			QFileInfo fi(dir.filePath(maybeFile));
 

@@ -1001,7 +1001,7 @@ public:
 			Logger::Debug
 		);
 
-		foreach (SoftStoreEntry e, _entries) {
+		foreach (const SoftStoreEntry &e, _entries) {
 			list += _keyStoreEntryBySoftStoreEntry (e);
 		}
 
@@ -1136,7 +1136,7 @@ public:
 					case publicTypeX509Chain:
 						QStringList base64certs = config[QString ().sprintf ("entry_%02d_public", i)].toString ().split ("!");
 
-						foreach (QString s, base64certs) {
+						foreach (const QString &s, base64certs) {
 							entry.chain += Certificate::fromDER (
 								Base64 ().stringToArray (s).toByteArray (),
 								&cresult
@@ -1195,7 +1195,7 @@ private:
 		);
 
 		QStringList list;
-		foreach (Certificate i, entry.chain) {
+		foreach (const Certificate &i, entry.chain) {
 			list += _escapeString (Base64 ().arrayToString (i.toDER ()));
 		}
 
@@ -1333,7 +1333,7 @@ private:
 	) const {
 		QString to;
 
-		foreach (QChar c, from) {
+		foreach (const QChar &c, from) {
 			if (c == '/' || c == '\\') {
 				to += QString ().sprintf ("\\x%04x", c.unicode ());
 			}
