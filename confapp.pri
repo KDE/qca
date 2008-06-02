@@ -1,8 +1,10 @@
 unix:include(confapp_unix.pri)
 windows:include(confapp_win.pri)
 
-QCA_LIBNAME = qca
-CONFIG(debug, debug|release) {
-	windows:QCA_LIBNAME = qcad
-	mac:QCA_LIBNAME = qca_debug
+exists(crypto.prf) {
+	# our apps should build against the qca in this tree
+	include(crypto.prf)
+} else {
+	# attempt to use system-wide qca
+	CONFIG *= crypto
 }
