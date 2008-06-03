@@ -147,7 +147,7 @@ public:
 		}
 		else // default
 		{
-			if(!staticmode && !qc_buildmode_debug)
+			if(!staticmode && !opt_debug)
 				qc_buildmode_framework = true;
 		}
 
