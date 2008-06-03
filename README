@@ -1,6 +1,6 @@
 Qt Cryptographic Architecture (QCA) version 2.0.1
 -------------------------------------------------
-Date: May 29th, 2008
+Date: June 2nd, 2008
 Website: http://delta.affinix.com/qca/
 Mailing List: Delta Project <delta@lists.affinix.com>
 
@@ -35,6 +35,7 @@ Changes
 -------
   New in 2.0.1
   - Bugfix release, forward and backward compatible with 2.0.0
+  - Ability to build as a Mac framework (and build this way by default)
   - On non-Mac Unix, the pkgconfig file is always qca2.pc, even in debug mode
   - Certificates containing wildcards are now matched properly
   - DirWatch/FileWatch now work
