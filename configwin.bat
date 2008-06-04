@@ -57,6 +57,10 @@ echo CONFIG += debug > confapp_win.pri
 goto done
 
 :done
+echo QCA_INCDIR = "%CD%\include" > crypto.prf
+echo QCA_LIBDIR = "%CD%\lib" >> crypto.prf
+type crypto.prf.in >> crypto.prf
+
 echo Wrote conf_win.pri and confapp_win.pri
 
 :end
