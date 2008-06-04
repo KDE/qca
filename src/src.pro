@@ -82,12 +82,23 @@ mac: {
 	SOURCES += $$QCA_CPP/qca_systemstore_mac.cpp
 	LIBS += -framework Carbon -framework Security
 	QMAKE_LFLAGS_SONAME = -Wl,-install_name,"$$LIBDIR/"
+
+	QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.3
 }
 
-FRAMEWORK_HEADERS.version = Versions
-FRAMEWORK_HEADERS.files = $$PUBLIC_HEADERS $$QCA_INC/qca.h $$QCA_INC/QtCrypto
-FRAMEWORK_HEADERS.path = Headers
-QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+mac:lib_bundle: {
+	QMAKE_FRAMEWORK_BUNDLE_NAME = $$TARGET
+	CONFIG(debug, debug|release) {
+		!build_pass:CONFIG += build_all
+	} else { #release
+		!debug_and_release|build_pass {
+			FRAMEWORK_HEADERS.version = Versions
+			FRAMEWORK_HEADERS.files = $$PUBLIC_HEADERS $$QCA_INC/qca.h $$QCA_INC/QtCrypto
+			FRAMEWORK_HEADERS.path = Headers
+			QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+		}
+	}
+}
 
 unix: {
 	# install
