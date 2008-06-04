@@ -22,7 +22,7 @@ bool qc_buildmode_separate_debug_info = false;
 class qc_buildmodeplugin : public ConfObj
 {
 public:
-	qc_buildmode(Conf *c) : ConfObj(c) {}
+	qc_buildmodeplugin(Conf *c) : ConfObj(c) {}
 	QString name() const { return "buildmodeplugin"; }
 	QString shortname() const { return "buildmodeplugin"; }
 
