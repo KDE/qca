@@ -37,7 +37,7 @@ The code below shows the normal way to use the QCA::Cipher class.
 */
 
 
-/** \example cmssigner/main.cpp
+/* \example cmssigner/main.cpp
 
 The code below shows how to use Cryptographic Message Syntax (CMS)
 in a GUI application.
@@ -133,14 +133,14 @@ to a file, using PEM encoding.
 */
 
 
-/** \example saslservtest.cpp
+/** \example saslserver.cpp
 
 The code below shows how to create a SASL server.
 
 */
 
 
-/** \example sasltest.cpp
+/** \example saslclient.cpp
 
 The code below shows how to create a SASL client.
 
@@ -169,7 +169,7 @@ The code below shows how to create an SSL client
 
 */
 
-/** \example tlssocket.cpp
+/* \example tlssocket.cpp
 
 The code below shows how to create a socket that can operate
 over an Transport Layer Security (TLS, also known as SSL) connection.

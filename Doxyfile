@@ -542,8 +542,8 @@ EXAMPLE_PATH           = examples/aes-cmac \
                          examples/publickeyexample \
                          examples/randomtest \
                          examples/rsatest \
-                         examples/saslservtest \
-                         examples/sasltest \
+                         examples/saslclient \
+                         examples/saslserver \
                          examples/ssltest \
                          examples/sslservtest \
                          examples/tlssocket
