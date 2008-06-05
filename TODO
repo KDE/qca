@@ -40,6 +40,7 @@
   +sasl examples should allow setting protocol name
   +completely clean sasl examples
   +ensure mozilla certs are up to date
+  +allow building as a framework
 
 * 2.0.2
   cms example: User.pem expired.  probably other certs need regen also?
