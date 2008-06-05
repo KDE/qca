@@ -28,7 +28,7 @@
    These classes differ from those in qca_support.h, in that they have
    some cryptographic relationship, and require secure memory.
 
-   \Note You should not use this header directly from an
+   \note You should not use this header directly from an
    application. You should just use <tt> \#include \<QtCrypto>
    </tt> instead.
 */
