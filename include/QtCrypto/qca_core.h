@@ -275,7 +275,8 @@ QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
    if that provider supports the algorithm.
    - if the provider with the lowest priority number doesn't support 
    the required algorithm, the provider with the next lowest priority number
-   will be tried,and so on through to the provider with the largest priority number
+   will be tried, and so on through to the provider with the largest priority
+   number
    - if none of the plugin providers support the required algorithm, then
    the default (built-in) provider will be tried.
 
