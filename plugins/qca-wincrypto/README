@@ -1,0 +1,25 @@
+QCA Windows Cryptography plugin
+-------------------------------
+Date: June 11th, 2008
+Website: http://delta.affinix.com/qca/
+Mailing List: Delta Project <delta@lists.affinix.com>
+
+Author: Michael Leupold <lemma@confuego.org>
+
+This plugin might at some point provide the means to support the
+Windows Cryptographic API. Currently it only supports generating
+random numbers using the CryptGenRandom call.
+
+This plugin should load on any version of Windows, but it will
+only generate random numbers on Windows 2000 or later.
+
+Installing
+----------
+
+For Windows:
+
+  configwin rd
+  qmake
+  nmake (or make)
+  copy lib\*.dll qtdir\plugins\crypto
+

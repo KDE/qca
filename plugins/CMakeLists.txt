@@ -58,4 +58,11 @@ IF(NSS_FOUND)
 	ADD_SUBDIRECTORY(qca-nss)
 ENDIF(NSS_FOUND)	
 
+# 
+# Currently disabled
+#
+# IF (WIN32)
+#         MESSAGE(STATUS "WinCrypto plugin enabled")
+#         ADD_SUBDIRECTORY(qca-wincrypto)
+# ENDIF (WIN32)
 

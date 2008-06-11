@@ -1,0 +1,19 @@
+# QCA WinCrypto
+
+IF (WIN32)
+   SET (QCA_WINCRYPTO_SOURCES qca-wincrypto.cpp)
+
+   MY_AUTOMOC (QCA_WINCRYPTO_SOURCES)
+
+   ADD_LIBRARY (qca-wincrypto SHARED ${QCA_WINCRYPTO_SOURCES})
+   # use win32 includes
+   TARGET_LINK_LIBRARIES (qca-wincrypto ${QT_QTCORE_LIBRARY})
+   TARGET_LINK_LIBRARIES (qca-wincrypto qca)
+   TARGET_LINK_LIBRARIES (qca-wincrypto advapi32)
+
+   INSTALL (TARGETS qca-wincrypto
+	    LIBRARY DESTINATION ${qca_PLUGINSDIR}
+	    ARCHIVE DESTINATION ${qca_PLUGINSDIR}
+	    RUNTIME DESTINATION ${qca_PLUGINSDIR}
+   )
+ENDIF (WIN32)
