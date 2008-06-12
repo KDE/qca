@@ -6710,6 +6710,34 @@ public:
 	}
 };
 
+class opensslRandomContext : public RandomContext
+{
+public:
+	opensslRandomContext(QCA::Provider *p) : RandomContext(p)
+	{
+	}
+
+	Context *clone() const
+	{
+		return new opensslRandomContext(*this);
+	}
+
+	QCA::SecureArray nextBytes(int size)
+	{
+		QCA::SecureArray buf(size);
+		int r;
+		// FIXME: loop while we don't have enough random bytes.
+		while (true) {
+			r = RAND_bytes((unsigned char*)(buf.data()), size);
+			if (r == 1) break; // success
+			r = RAND_pseudo_bytes((unsigned char*)(buf.data()),
+						size);
+			if (r >= 0) break; // accept insecure random numbers
+		}
+		return buf;
+	}
+};
+
 }
 
 using namespace opensslQCAPlugin;
@@ -6729,11 +6757,14 @@ public:
 		OpenSSL_add_all_algorithms();
 		ERR_load_crypto_strings();
 
-		srand(time(NULL));
-		char buf[128];
-		for(int n = 0; n < 128; ++n)
-			buf[n] = rand();
-		RAND_seed(buf, 128);
+		// seed the RNG if it's not seeded yet
+		if (RAND_status() == 0) {
+			qsrand(time(NULL));
+			char buf[128];
+			for(int n = 0; n < 128; ++n)
+				buf[n] = qrand();
+			RAND_seed(buf, 128);
+		}
 
 		openssl_initted = true;
 	}
@@ -6772,6 +6803,7 @@ public:
 	QStringList features() const
 	{
 		QStringList list;
+		list += "random";
 		list += all_hash_types();
 		list += all_mac_types();
 		list += all_cipher_types();
@@ -6798,7 +6830,9 @@ public:
 	Context *createContext(const QString &type)
 	{
 		//OpenSSL_add_all_digests();
-		if ( type == "info" )
+		if ( type == "random" )
+			return new opensslRandomContext(this);
+		else if ( type == "info" )
 			return new opensslInfoContext(this);
 		else if ( type == "sha1" )
 			return new opensslHashContext( EVP_sha1(), this, type);
