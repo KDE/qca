@@ -29,8 +29,7 @@ public:
 			path = conf->getenv("QC_CERTSTORE_PATH");
 			if(!path.isEmpty())
 			{
-				QString certPathString = "QCA_SYSTEMSTORE_PATH='\"" + path + "\"'";
-				conf->addDefine(certPathString);
+				conf->addExtra(makeEscapedDefine("QCA_SYSTEMSTORE_PATH", path));
 				return true;
 			}
 
