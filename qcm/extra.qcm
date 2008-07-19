@@ -83,7 +83,11 @@ public:
 		else // release
 			str += QString("CONFIG += release\n");
 		if(debug_info)
+		{
 			str += QString("CONFIG += separate_debug_info\n");
+			str += "QMAKE_CFLAGS += -g\n";
+			str += "QMAKE_CXXFLAGS += -g\n";
+		}
 		if(universal)
 		{
 			str +=

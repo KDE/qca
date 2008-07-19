@@ -167,6 +167,7 @@ public:
 
 		// make the string
 		QStringList opts;
+		QString other;
 
 		if(qc_buildmode_release && qc_buildmode_debug)
 		{
@@ -184,10 +185,18 @@ public:
 #endif
 
 		if(qc_buildmode_separate_debug_info)
+		{
 			opts += "separate_debug_info";
+			other += "QMAKE_CFLAGS += -g\n";
+			other += "QMAKE_CXXFLAGS += -g\n";
+		}
 
 		QString str = QString("CONFIG += ") + opts.join(" ") + '\n';
 		conf->addExtra(str);
+
+		if(!other.isEmpty())
+			conf->addExtra(other);
+
 		return true;
 	}
 };
