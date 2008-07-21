@@ -30,26 +30,12 @@
 
 static int qca_setenv(const char *name, const char *value, int overwrite)
 {
-#ifdef Q_OS_WIN
-    int i, iRet;
-    char * a;
+    if (!overwrite && !qgetenv(name).isNull()) return 0;
 
-    if (!overwrite && getenv(name)) return 0;
-
-    i = strlen(name) + strlen(value) + 2;
-    a = (char*)malloc(i);
-    if (!a) return 1;
-
-    strcpy(a, name);
-    strcat(a, "=");
-    strcat(a, value);
-
-    iRet = putenv(a);
-    free(a);
-    return iRet;
-#else
-    return setenv(name, value, overwrite);
-#endif
+    if(qputenv(name, QByteArray(value)))
+        return 0; // success
+    else
+        return 1; // error
 }
 
 // Note; in a real application you get this from a user, but this
