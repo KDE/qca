@@ -39,10 +39,11 @@
   +qcatool2 should be version 2.0.x, just like plugins are
   +sasl examples should allow setting protocol name
   +completely clean sasl examples
-  +ensure mozilla certs are up to date
   +allow building as a framework
+  +ensure mozilla certs are up to date (use firefox 3)
 
 * 2.0.2
+  use rpath?
   cms example: User.pem expired.  probably other certs need regen also?
   fix publickeyexample.  it encrypts with cms, decrypts with raw rsa??
   qcatool: instead of printing full usage at every wrong turn, we might try
