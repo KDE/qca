@@ -6,6 +6,8 @@ DESTDIR = lib
 VERSION = 2.0.0
 
 unix:include(conf.pri)
+unix:CONFIG += crypto # shortcut since there's no configure
+unix:DEFINES += FORWARD_ONLY
 windows:CONFIG += crypto
 windows:include(conf_win.pri)
 
