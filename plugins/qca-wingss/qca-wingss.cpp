@@ -2147,15 +2147,42 @@ private slots:
 private:
 	QStringList combine_mechlists()
 	{
-		// TODO
-		return saslProviders[0].mechlist;
+		QStringList out;
+
+		// FIXME: consider prioritizing certain mechs?
+		foreach(const SaslProvider &sp, saslProviders)
+		{
+			foreach(const QString &mech, sp.mechlist)
+			{
+				if(!out.contains(mech))
+					out += mech;
+			}
+		}
+
+		return out;
 	}
 
 	int choose_provider(const QString &mech)
 	{
-		// TODO
-		Q_UNUSED(mech);
-		return 0;
+		int at = -1;
+
+		// find a provider for this mech
+		for(int n = 0; n < saslProviders.count(); ++n)
+		{
+			const SaslProvider &sp = saslProviders[n];
+			if(sp.mechlist.contains(mech))
+			{
+				at = n;
+				break;
+			}
+		}
+
+		// no provider offered this mech?  then just go with the
+		//   first provider
+		if(at == -1)
+			at = 0;
+
+		return at;
 	}
 };
 
