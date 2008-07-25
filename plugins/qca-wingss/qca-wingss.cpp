@@ -144,6 +144,51 @@ typedef PSecurityFunctionTableW PMySecurityFunctionTableW;
 
 namespace wingssQCAPlugin {
 
+//----------------------------------------------------------------------------
+// SafeTimer (copied from qca_safeobj)
+//----------------------------------------------------------------------------
+static void releaseAndDeleteLater(QObject *owner, QObject *obj)
+{
+	obj->disconnect(owner);
+	obj->setParent(0);
+	obj->deleteLater();
+}
+
+class SafeTimer : public QObject
+{
+	Q_OBJECT
+public:
+	SafeTimer(QObject *parent = 0) :
+		QObject(parent)
+	{
+		t = new QTimer(this);
+		connect(t, SIGNAL(timeout()), SIGNAL(timeout()));
+	}
+
+	~SafeTimer()
+	{
+		releaseAndDeleteLater(this, t);
+	}
+
+	int interval() const                { return t->interval(); }
+	bool isActive() const               { return t->isActive(); }
+	bool isSingleShot() const           { return t->isSingleShot(); }
+	void setInterval(int msec)          { t->setInterval(msec); }
+	void setSingleShot(bool singleShot) { t->setSingleShot(singleShot); }
+	int timerId() const                 { return t->timerId(); }
+
+public slots:
+	void start(int msec)                { t->start(msec); }
+	void start()                        { t->start(); }
+	void stop()                         { t->stop(); }
+
+signals:
+	void timeout();
+
+private:
+	QTimer *t;
+};
+
 #if !defined(FORWARD_ONLY)
 
 //----------------------------------------------------------------------------
@@ -1271,58 +1316,8 @@ public:
 };
 
 //----------------------------------------------------------------------------
-// SafeTimer (copied from qca_safeobj)
-//----------------------------------------------------------------------------
-static void releaseAndDeleteLater(QObject *owner, QObject *obj)
-{
-	obj->disconnect(owner);
-	obj->setParent(0);
-	obj->deleteLater();
-}
-
-class SafeTimer : public QObject
-{
-	Q_OBJECT
-public:
-	SafeTimer(QObject *parent = 0) :
-		QObject(parent)
-	{
-		t = new QTimer(this);
-		connect(t, SIGNAL(timeout()), SIGNAL(timeout()));
-	}
-
-	~SafeTimer()
-	{
-		releaseAndDeleteLater(this, t);
-	}
-
-	int interval() const                { return t->interval(); }
-	bool isActive() const               { return t->isActive(); }
-	bool isSingleShot() const           { return t->isSingleShot(); }
-	void setInterval(int msec)          { t->setInterval(msec); }
-	void setSingleShot(bool singleShot) { t->setSingleShot(singleShot); }
-	int timerId() const                 { return t->timerId(); }
-
-public slots:
-	void start(int msec)                { t->start(msec); }
-	void start()                        { t->start(); }
-	void stop()                         { t->stop(); }
-
-signals:
-	void timeout();
-
-private:
-	QTimer *t;
-};
-
-//----------------------------------------------------------------------------
 // SaslWinGss
 //----------------------------------------------------------------------------
-static bool wingss_available()
-{
-	return true;
-}
-
 class SaslWinGss : public SASLContext
 {
 	Q_OBJECT
@@ -1371,6 +1366,7 @@ public:
 		opt_service.clear();
 		opt_host.clear();
 		opt_ext_id.clear();
+		opt_authzid.clear();
 	}
 
 	virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote, const QString &ext_id, int ext_ssf)
@@ -1656,12 +1652,23 @@ public:
 //----------------------------------------------------------------------------
 // MetaSasl
 //----------------------------------------------------------------------------
+#ifndef FORWARD_ONLY
+class wingssProvider;
+static bool wingssProvider_have_sspi(wingssProvider *provider);
+#endif
+
 class MetaSasl : public SASLContext
 {
 	Q_OBJECT
 
 public:
 	SASLContext *s;
+
+	Result _result;
+	SASL::AuthCondition _authCondition;
+	SafeTimer resultsReadyTrigger;
+	Synchronizer sync;
+	bool waiting;
 
 	QString opt_service, opt_host;
 	bool have_opt_local, have_opt_remote;
@@ -1696,6 +1703,9 @@ public:
 
 	MetaSasl(Provider *p) :
 		SASLContext(p),
+		resultsReadyTrigger(this),
+		sync(this),
+		waiting(false),
 		serverInit_active(false)
 	{
 		s = 0;
@@ -1704,6 +1714,9 @@ public:
 		have_opt_authzid = false;
 		have_opt_pass = false;
 		have_opt_realm = false;
+
+		connect(&resultsReadyTrigger, SIGNAL(timeout()), SIGNAL(resultsReady()));
+		resultsReadyTrigger.setSingleShot(true);
 	}
 
 	~MetaSasl()
@@ -1716,10 +1729,37 @@ public:
 		return 0;
 	}
 
+	void clearSaslProviders()
+	{
+		foreach(const SaslProvider &sp, saslProviders)
+			delete sp.sasl;
+
+		saslProviders.clear();
+	}
+
 	virtual void reset()
 	{
 		delete s;
 		s = 0;
+
+		resultsReadyTrigger.stop();
+
+		opt_service.clear();
+		opt_host.clear();
+		opt_ext_id.clear();
+		opt_user.clear();
+		opt_authzid.clear();
+		opt_realm.clear();
+		opt_pass.clear();
+
+		have_opt_user = false;
+		have_opt_authzid = false;
+		have_opt_pass = false;
+		have_opt_realm = false;
+
+		clearSaslProviders();
+		serverInit_active = false;
+		serverInit_mechlist.clear();
 	}
 
 	virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote, const QString &ext_id, int ext_ssf)
@@ -1752,7 +1792,7 @@ public:
 	virtual void startClient(const QStringList &mechlist, bool allowClientSendFirst)
 	{
 #ifndef FORWARD_ONLY
-		if(mechlist.contains("GSSAPI") && wingss_available())
+		if(mechlist.contains("GSSAPI") && wingssProvider_have_sspi((wingssProvider *)provider()))
 		{
 			s = new SaslWinGss(provider());
 		}
@@ -1788,9 +1828,15 @@ public:
 
 		if(!s)
 		{
-			// TODO: report error
+			// no usable provider?  throw error
+			_result = Error;
+			_authCondition = SASL::NoMechanism;
+			resultsReadyTrigger.start();
 			return;
 		}
+
+		// proper parenting
+		s->setParent(this);
 
 		const HostPort *pLocal = 0;
 		const HostPort *pRemote = 0;
@@ -1816,7 +1862,8 @@ public:
 		s->setClientParams(pUser, pAuthzid, pPass, pRealm);
 		connect(s, SIGNAL(resultsReady()), SLOT(s_resultsReady()));
 
-		printf("client using [%s] with %d mechs\n", qPrintable(s->provider()->name()), mechlist.count());
+		QString str = QString("MetaSasl: client using %1 with %2 mechs").arg(s->provider()->name(), QString::number(mechlist.count()));
+		QCA_logTextMessage(str, Logger::Debug);
 		s->startClient(mechlist, allowClientSendFirst);
 	}
 
@@ -1850,6 +1897,9 @@ public:
 
 			sp.sasl = static_cast<SASLContext *>(p->createContext("sasl"));
 
+			// proper parenting
+			sp.sasl->setParent(this);
+
 			const HostPort *pLocal = 0;
 			const HostPort *pRemote = 0;
 			if(have_opt_local)
@@ -1868,13 +1918,18 @@ public:
 
 	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit)
 	{
-		// TODO: set 's' based on chosen mech
-		SASLContext *sasl = saslProviders[0].sasl;
-		saslProviders.clear();
-		serverInit_active = false;
-		sasl->disconnect(this);
-		s = sasl;
+		// choose a provider based on the mech
+		int at = choose_provider(mech);
 
+		// extract it and clean up the rest
+		SASLContext *sasl = saslProviders[at].sasl;
+		sasl->disconnect(this);
+		saslProviders.removeAt(at);
+		clearSaslProviders();
+		serverInit_active = false;
+
+		// use the chosen provider
+		s = sasl;
 		connect(s, SIGNAL(resultsReady()), SLOT(s_resultsReady()));
 		s->serverFirstStep(mech, clientInit);
 	}
@@ -1896,15 +1951,27 @@ public:
 
 	virtual bool waitForResultsReady(int msecs)
 	{
-		return s->waitForResultsReady(msecs);
+		if(serverInit_active)
+		{
+			waiting = true;
+			bool ret = sync.waitForCondition(msecs);
+			waiting = false;
+			return ret;
+		}
+		else if(s)
+			return s->waitForResultsReady(msecs);
+		else
+			return true;
 	}
 
 	virtual Result result() const
 	{
 		if(serverInit_active)
 			return serverInit_result;
-		else
+		else if(s)
 			return s->result();
+		else
+			return _result;
 	}
 
 	virtual QStringList mechlist() const
@@ -1952,7 +2019,10 @@ public:
 
 	virtual SASL::AuthCondition authCondition() const
 	{
-		return s->authCondition();
+		if(s)
+			return s->authCondition();
+		else
+			return _authCondition;
 	}
 
 	virtual SASL::Params clientParams() const
@@ -2049,14 +2119,28 @@ private slots:
 				serverInit_result = Success;
 				serverInit_mechlist = combine_mechlists();
 
-				emit resultsReady();
+				if(waiting)
+					sync.conditionMet();
+				else
+					emit resultsReady();
 			}
 		}
 		else
 		{
-			// TODO: ?
 			delete sasl;
 			saslProviders.removeAt(at);
+
+			if(saslProviders.isEmpty())
+			{
+				// indicate error
+				serverInit_result = Error;
+				_authCondition = SASL::NoMechanism;
+
+				if(waiting)
+					sync.conditionMet();
+				else
+					emit resultsReady();
+			}
 		}
 	}
 
@@ -2066,6 +2150,13 @@ private:
 		// TODO
 		return saslProviders[0].mechlist;
 	}
+
+	int choose_provider(const QString &mech)
+	{
+		// TODO
+		Q_UNUSED(mech);
+		return 0;
+	}
 };
 
 class wingssProvider : public Provider
@@ -2073,9 +2164,11 @@ class wingssProvider : public Provider
 public:
 	mutable QMutex m;
 	mutable bool forced_priority;
+	bool have_sspi;
 
 	wingssProvider() :
-		forced_priority(false)
+		forced_priority(false),
+		have_sspi(false)
 	{
 	}
 
@@ -2083,14 +2176,15 @@ public:
 	{
 #ifndef FORWARD_ONLY
 		sspi_set_logger(do_log);
-		sspi_load(); // TODO: handle error
+		have_sspi = sspi_load();
 #endif
 	}
 
 	~wingssProvider()
 	{
 #ifndef FORWARD_ONLY
-		sspi_unload();
+		if(have_sspi)
+			sspi_unload();
 #endif
 	}
 
@@ -2149,6 +2243,13 @@ public:
 	}
 #endif
 };
+
+#ifndef FORWARD_ONLY
+bool wingssProvider_have_sspi(wingssProvider *provider)
+{
+	return provider->have_sspi;
+}
+#endif
 
 }
 
