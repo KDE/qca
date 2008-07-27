@@ -55,6 +55,10 @@ using namespace QCA;
 #define SEC_E_OUT_OF_SEQUENCE       0x80090310
 #endif
 
+#ifndef SEC_E_BUFFER_TOO_SMALL
+#define SEC_E_BUFFER_TOO_SMALL      0x80090321
+#endif
+
 #ifndef SECURITY_ENTRYPOINTW
 #define SECURITY_ENTRYPOINTW        TEXT("InitSecurityInterfaceW")
 #endif
@@ -552,7 +556,7 @@ public:
 
 		// ensure kerberos is available
 		bool found = false;
-		quint32 _maxtok;
+		quint32 _maxtok = 0;
 		QList<SspiPackage> packages = sspi_get_packagelist();
 		sspi_log("SSPI packages:\n");
 		foreach(const SspiPackage &p, packages)
