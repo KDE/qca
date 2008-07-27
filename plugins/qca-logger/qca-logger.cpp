@@ -23,6 +23,8 @@
 #include <QTextStream>
 #include <QFile>
 
+#include <stdlib.h>
+
 using namespace QCA;
 
 namespace loggerQCAPlugin {
