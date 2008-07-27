@@ -23,8 +23,6 @@
 #include <QTextStream>
 #include <QFile>
 
-#include <stdlib.h> // getenv()
-
 using namespace QCA;
 
 namespace loggerQCAPlugin {
@@ -104,15 +102,15 @@ public:
 		_externalConfig = false;
 		_streamLogger = NULL;
 
-		char *level = getenv ("QCALOGGER_LEVEL");
-		char *file = getenv ("QCALOGGER_FILE");
+		QByteArray level = qgetenv ("QCALOGGER_LEVEL");
+		QByteArray file = qgetenv ("QCALOGGER_FILE");
 
-		if (level != NULL) {
-printf ("XXXX %s %s\n", level, file);
+		if (!level.isEmpty ()) {
+			printf ("XXXX %s %s\n", level.data (), file.data ());
 			_externalConfig = true;
 			createLogger (
 				atoi (level),
-				file == NULL ? QString() : QString::fromUtf8 (file)
+				file.isEmpty () ? QString() : QString::fromUtf8 (file)
 			);
 		}
 	}
