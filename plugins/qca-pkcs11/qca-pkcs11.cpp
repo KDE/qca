@@ -1448,7 +1448,7 @@ private:
 			return FALSE; //krazy:exclude=captruefalse
 		}
 		else {
-			strcpy (dn, myPrintable (qdn));
+			qstrcpy (dn, myPrintable (qdn));
 			return TRUE; //krazy:exclude=captruefalse
 		}
 	}
