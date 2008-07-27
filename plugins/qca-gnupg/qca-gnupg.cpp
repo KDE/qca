@@ -41,6 +41,7 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
+#ifdef Q_OS_LINUX
 static int qVersionInt()
 {
 	static int out = -1;
@@ -76,7 +77,6 @@ static int qVersionInt()
 	return out;
 }
 
-#ifdef Q_OS_LINUX
 static bool qt_buggy_fsw()
 {
 	// fixed in 4.3.5 and 4.4.1
