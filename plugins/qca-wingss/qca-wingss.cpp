@@ -1824,8 +1824,11 @@ public:
 				}
 			}
 
-			// use the first
-			s = static_cast<SASLContext *>(list.first()->createContext("sasl"));
+			if(!list.isEmpty())
+			{
+				// use the first
+				s = static_cast<SASLContext *>(list.first()->createContext("sasl"));
+			}
 #ifndef FORWARD_ONLY
 		}
 #endif
