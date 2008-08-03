@@ -60,6 +60,7 @@
   CertificateAuthority constructor provider argument should have default value
 
 * possibilities for the future:
+  don't expose windows.h in qpipe.h, find another way to get HANDLE
   cert: ability to get a list of all validation errors, rather than just one
   the securelayer system doesn't respond to the app if processed data yields
     no events (an example of this would be a partially-received encrypted
