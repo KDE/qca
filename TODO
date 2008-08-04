@@ -1,47 +1,3 @@
-* examples
-  create example for BigInteger
-  create example for OpenPGP
-  create example for using TLS with smart cards (maybe reuse ssltest?)
-
-* additional unit tests (using QTestLib):
-  - OpenPGP - encryption/decryption
-  - CMS
-  - TLS ?
-  - SASL ?
-  - FileWatch / DirWatch
-  - Complete the pkits tests
-
-* write plugin support - most plugins need at least some work
-
-* 2.0.1
-  +keystore write support is broken, due to metatype stuff.  make sure all
-     write types are correct, and that removal also works.
-  +lazy-create the global logger, else we end up with QObject created before
-     qapp in the standard case
-  +unloadAllPlugins should also shutdown keystores beforehand
-  +use deleteLater on QTimer and QSocketNotifier, to avoid qt 4.4 warning
-  +qpipe.cpp: lines 771, 856.  warning: int result might be uninitialized.
-  +qpipe.cpp: make sure the "(int)" casts handle overflow
-  +installwin.bat should ensure %QTDIR% is set
-  +installwin.bat should put quotes around paths to support spaces
-  +dirwatch/filewatch: empty string means no monitoring. don't attempt to watch
-     a blank filename
-  +dirwatch/filewatch: connect() statement wrong
-  +filewatch: track across create/delete
-  +fix wildcard matching
-  +on linux, the pkgconfig files for release/debug should be the same.  on
-     mac, they should differ.
-  +clean up plugin dtext, it's too verbose (mentioning same files over and
-     over).  also, use QPluginLoader.errorString()
-  +don't rescan just because we're using a default provider
-  +plugin dtext: log feature names being checked for
-  +tls/sasl: fix update bug (reported feb 20th)
-  +qcatool2 should be version 2.0.x, just like plugins are
-  +sasl examples should allow setting protocol name
-  +completely clean sasl examples
-  +allow building as a framework
-  +ensure mozilla certs are up to date (use firefox 3)
-
 * 2.0.2
   use rpath?
   cms example: User.pem expired.  probably other certs need regen also?
@@ -60,6 +16,9 @@
   CertificateAuthority constructor provider argument should have default value
 
 * possibilities for the future:
+  examples: bigint, pgp, tls with smartcards (reuse ssltest?), more?
+  unittests: pgp enc/dec, cms, sasl, tls, filewatch/dirwatch
+  complete pkits unittests
   don't expose windows.h in qpipe.h, find another way to get HANDLE
   cert: ability to get a list of all validation errors, rather than just one
   the securelayer system doesn't respond to the app if processed data yields
