@@ -6173,6 +6173,7 @@ public:
 				i2d_PKCS7_bio(bo, p7);
 				//PEM_write_bio_PKCS7(bo, p7);
 				out = bio2ba(bo);
+				PKCS7_free(p7);
 			}
 			else
 			{
