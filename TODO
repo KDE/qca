@@ -1,4 +1,5 @@
 * 2.0.2
+  mac deployment target is 10.3, but it should probably be 10.4 for universal?
   use rpath?
   cms example: User.pem expired.  probably other certs need regen also?
   fix publickeyexample.  it encrypts with cms, decrypts with raw rsa??
