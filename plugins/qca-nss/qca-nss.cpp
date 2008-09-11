@@ -509,5 +509,5 @@ public:
 
 #include "qca-nss.moc"
 
-Q_EXPORT_PLUGIN2(qca_nss, nssPlugin);
+Q_EXPORT_PLUGIN2(qca_nss, nssPlugin)
 
