@@ -622,7 +622,8 @@ public:
 //   problem, we'll watch the directories containing the keyring files
 //   instead of watching the actual files themselves.
 //
-// FIXME: consider moving this logic into FileWatch
+// FIXME: qca 2.0.1 FileWatch has this logic already, so we can probably
+//   simplify this class.
 class RingWatch : public QObject
 {
 	Q_OBJECT
@@ -1150,7 +1151,7 @@ private slots:
 			// secret keyring filename
 			else if(init_step == 1)
 			{
-				secring = gpg.keyringFile();
+				secring = QFileInfo(gpg.keyringFile()).canonicalFilePath();
 
 				if(qt_buggy_fsw())
 					fprintf(stderr, "qca-gnupg: disabling keyring monitoring in Qt version < 4.3.5 or 4.4.1\n");
@@ -1168,7 +1169,7 @@ private slots:
 			// public keyring filename
 			else if(init_step == 2)
 			{
-				pubring = gpg.keyringFile();
+				pubring = QFileInfo(gpg.keyringFile()).canonicalFilePath();
 				if(!pubring.isEmpty())
 				{
 					if(!qt_buggy_fsw())
