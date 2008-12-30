@@ -13,6 +13,8 @@ set(PKGCONFIG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
 find_package(Qt4 REQUIRED)
+# properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
+include(${QT_USE_FILE})
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "0")
