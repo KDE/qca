@@ -3041,7 +3041,7 @@ pkcs11Provider::_logHook (
 // Qt vsprintf cannot can NULL for %s as vsprintf does.
 //	QCA_logTextMessage (QString ().vsprintf (format, args), severity);
 	char buffer[2048];
-	QT_VSNPRINTF (buffer, sizeof (buffer)-1, format, args);
+	qvsnprintf (buffer, sizeof (buffer)-1, format, args);
 	buffer[sizeof (buffer)-1] = '\x0';
 	QCA_logTextMessage (buffer, severity);
 //@END-WORKAROUND
