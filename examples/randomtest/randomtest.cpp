@@ -29,13 +29,13 @@
 
 int main(int argc, char **argv)
 {
-	QCoreApplication app(argc, argv);
-
-	qDebug() << "This example generates random numbers";
-
 	// the Initializer object sets things up, and
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
+
+	QCoreApplication app(argc, argv);
+
+	qDebug() << "This example generates random numbers";
 
 	int randInt;
 	// This is the standard way to generate a random integer.

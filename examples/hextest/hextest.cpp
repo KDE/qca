@@ -28,11 +28,11 @@
 
 int main(int argc, char **argv)
 {
-	QCoreApplication app(argc, argv);
-
 	// the Initializer object sets things up, and
 	// also does cleanup when it goes out of scope
 	QCA::Initializer init;
+
+	QCoreApplication app(argc, argv);
 
 	// we use the first argument as the data to encode / decode
 	// if an argument is provided. Use "hello" if no argument

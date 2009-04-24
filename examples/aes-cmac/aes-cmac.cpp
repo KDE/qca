@@ -243,15 +243,13 @@ public:
 
 int main(int argc, char **argv)
 {
-    QCoreApplication app(argc, argv);
-
-    qDebug() << "This example shows AES CMAC";
-
     // the Initializer object sets things up, and
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
 
-    qDebug() << "Completed initialisation";
+    qDebug() << "This example shows AES CMAC";
+
+    QCoreApplication app(argc, argv);
 
     if( ! QCA::isSupported("aes128-ecb") ) {
 	qDebug() << "AES not supported!";

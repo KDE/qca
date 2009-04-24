@@ -116,11 +116,11 @@ protected:
 
 int main(int argc, char **argv)
 {
-    QCoreApplication exampleApp(argc, argv);
-
     // the Initializer object sets things up, and
     // also does cleanup when it goes out of scope
     QCA::Initializer init;
+
+    QCoreApplication exampleApp(argc, argv);
 
     ClientPassphraseHandler cph;
 
