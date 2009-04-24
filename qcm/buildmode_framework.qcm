@@ -8,7 +8,7 @@ arg: framework,Build as a Mac framework (default).
 */
 
 #define QC_BUILDMODE_FRAMEWORK
-bool qc_buildmode_framework = false;
+bool qc_buildmode_framework_enabled = false;
 
 class qc_buildmode_framework : public ConfObj
 {
@@ -74,7 +74,7 @@ public:
 		// now process the options
 
 		if(opt_framework)
-			qc_buildmode_framework = true;
+			qc_buildmode_framework_enabled = true;
 		else if(opt_no_framework)
 		{
 			// nothing to do
@@ -82,10 +82,10 @@ public:
 		else // default
 		{
 			if(!staticmode && !qc_buildmode_debug)
-				qc_buildmode_framework = true;
+				qc_buildmode_framework_enabled = true;
 		}
 
-		if(qc_buildmode_framework)
+		if(qc_buildmode_framework_enabled)
 			conf->addExtra("CONFIG += lib_bundle");
 #endif
 
