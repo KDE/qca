@@ -2,7 +2,7 @@
 -----BEGIN QCMOD-----
 name: qcapluginpath
 section: project
-arg: plugins-path=[path],Path to install to.  Default: qtdir/plugins
+arg: plugins-path=[path],Path to install to (unix only).  Default: qtdir/plugins
 -----END QCMOD-----
 */
 
@@ -18,6 +18,7 @@ public:
 
 	bool exec()
 	{
+#ifndef Q_OS_WIN
 		QString plugins_path = conf->getenv("QC_PLUGINS_PATH");
 
 		// default to qtdir
@@ -31,6 +32,8 @@ public:
 		"INSTALLS += target\n"
 		).arg(plugins_path);
 		conf->addExtra(str);
+#endif
+
 		return true;
 	}
 };

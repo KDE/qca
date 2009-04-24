@@ -18,6 +18,7 @@ public:
 
 	bool exec()
 	{
+#ifndef Q_OS_WIN
 		// --prefix=$pwd ?
 		QString datadir;
 		if(QFile::exists(conf->getenv("PREFIX") + "/qca.pro"))
@@ -26,10 +27,12 @@ public:
 			datadir = "$$DATADIR/qca";
 
 		conf->addExtra(makeEscapedDefine("DATADIR", datadir));
+#endif
 
 		QString str;
 		QFile f;
 
+#ifndef Q_OS_WIN
 		// HAVE_SYS_FILIO_H
 		if(conf->findHeader("sys/filio.h", QStringList(), &str))
 		{
@@ -50,6 +53,7 @@ public:
 		}
 
 		str = QString();
+#endif
 
 		if(conf->getenv("QC_DISABLE_TESTS") == "Y")
 			str += "QCA_NO_TESTS = 1\n";
@@ -73,11 +77,13 @@ public:
 		sdk = qc_universal_sdk;
 #endif
 
-		// write confapp_unix.pri
+		// write confapp.pri
 		str = QString();
+#ifndef Q_OS_WIN
                 QString var = conf->getenv("BINDIR");
                 if(!var.isEmpty())
 			str += QString("BINDIR = %1\n").arg(var);
+#endif
 		if(debug) // debug or debug-and-release
 			str += QString("CONFIG += debug\n");
 		else // release
@@ -98,12 +104,14 @@ public:
 			if(!sdk.isEmpty())
 				str += QString("QMAKE_MAC_SDK = %1\n").arg(sdk);
 		}
-		f.setFileName("confapp_unix.pri");
+		f.setFileName("confapp.pri");
 		if(f.open(QFile::WriteOnly | QFile::Truncate))
 			f.write(str.toLatin1());
 		f.close();
 
+#ifndef Q_OS_WIN
 		QString prefix = conf->getenv("PREFIX");
+#endif
 		QString incdir = conf->getenv("INCDIR");
 		QString libdir = conf->getenv("LIBDIR");
 
@@ -134,6 +142,7 @@ public:
 		).arg(QLibraryInfo::location(QLibraryInfo::DataPath));
 		conf->addExtra(str);
 
+#ifndef Q_OS_WIN
 		// write pkg-config files
 
 		QString pkg_template1 = QString(
@@ -210,6 +219,7 @@ public:
 			).arg(pcfiles.join(" "));
 			conf->addExtra(str);
 		}
+#endif
 
 		return true;
 	}

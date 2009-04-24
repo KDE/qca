@@ -5,8 +5,8 @@ section: project
 arg: release,Build with debugging turned off (default).
 arg: debug,Build with debugging turned on.
 arg: debug-and-release,Build two versions, with and without debugging turned on (mac only).
-arg: no-separate-debug-info,Do not store debug information in a separate file (default for mac).
-arg: separate-debug-info,Strip debug information into a separate .debug file (default for non-mac).
+arg: no-separate-debug-info,Do not store debug information in a separate file (unix only, default for mac).
+arg: separate-debug-info,Strip debug information into a separate .debug file (unix only, default for non-mac).
 arg: no-framework,Do not build as a Mac framework.
 arg: framework,Build as a Mac framework (default).
 -----END QCMOD-----
@@ -68,6 +68,20 @@ public:
 		if(opt_framework)
 		{
 			printf("\nError: The --framework option is for mac only.\n");
+			exit(1);
+		}
+#endif
+
+#ifdef Q_OS_WIN
+		if(opt_no_separate_debug_info)
+		{
+			printf("\nError: The --no-separate-debug-info option is for unix only.\n");
+			exit(1);
+		}
+
+		if(opt_separate_debug_info)
+		{
+			printf("\nError: The --separate-debug-info option is for unix only.\n");
 			exit(1);
 		}
 #endif
@@ -159,7 +173,7 @@ public:
 		}
 		else // default
 		{
-#ifndef Q_OS_MAC
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 			qc_buildmode_separate_debug_info = true;
 #endif
 		}
