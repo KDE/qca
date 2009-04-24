@@ -12,6 +12,9 @@
  <dep type='buildmode'>
   <required/>
  </dep>
+ <dep type='buildmode_framework'>
+  <required/>
+ </dep>
  <dep type='universal'>
   <required/>
  </dep>

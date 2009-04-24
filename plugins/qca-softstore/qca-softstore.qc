@@ -3,7 +3,7 @@
  <profile>qca-softstore.pro</profile>
  <noprefix/>
  <lib/>
- <dep type='buildmodeplugin'>
+ <dep type='buildmode'>
   <required/>
  </dep>
  <dep type='universal'>
