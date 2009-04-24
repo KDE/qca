@@ -12,8 +12,7 @@ windows:DLLDESTDIR = $$QCA_BASE/bin
 
 VERSION = 2.0.1
 
-unix:include($$QCA_BASE/conf.pri)
-windows:include($$QCA_BASE/conf_win.pri)
+include($$QCA_BASE/conf.pri)
 
 CONFIG += create_prl
 windows:!staticlib:DEFINES += QCA_MAKEDLL

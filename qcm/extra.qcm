@@ -109,11 +109,15 @@ public:
 			f.write(str.toLatin1());
 		f.close();
 
-#ifndef Q_OS_WIN
+#ifdef Q_OS_WIN
+		QString prefix = QDir::currentPath();
+		QString incdir = prefix + "/include";
+		QString libdir = prefix + "/lib";
+#else
 		QString prefix = conf->getenv("PREFIX");
-#endif
 		QString incdir = conf->getenv("INCDIR");
 		QString libdir = conf->getenv("LIBDIR");
+#endif
 
 		// write qmake-feature file
 		QString crypto_in;
