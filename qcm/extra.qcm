@@ -135,6 +135,7 @@ public:
 			f.close();
 		}
 
+#ifndef Q_OS_WIN
 		str = QString(
 		"prffiles.path = %1/mkspecs/features\n"
 		"prffiles.files = crypto.prf\n"
@@ -142,7 +143,6 @@ public:
 		).arg(QLibraryInfo::location(QLibraryInfo::DataPath));
 		conf->addExtra(str);
 
-#ifndef Q_OS_WIN
 		// write pkg-config files
 
 		QString pkg_template1 = QString(

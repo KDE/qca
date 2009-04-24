@@ -1,7 +1,7 @@
 QT -= gui
 CONFIG += console
 CONFIG -= app_bundle
-include(../../confapp.pri)
+include(../../app.pri)
 TARGET = qcatool2
 DESTDIR = ../../bin
 

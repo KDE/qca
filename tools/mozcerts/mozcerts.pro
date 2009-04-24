@@ -1,6 +1,6 @@
 QT -= gui
 CONFIG += console
 CONFIG -= app_bundle
-include(../../confapp.pri)
+include(../../app.pri)
 
 SOURCES += main.cpp

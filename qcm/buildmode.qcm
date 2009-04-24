@@ -4,7 +4,7 @@ name: buildmode
 section: project
 arg: release,Build with debugging turned off (default).
 arg: debug,Build with debugging turned on.
-arg: debug-and-release,Build two versions, with and without debugging turned on (mac only).
+arg: debug-and-release,Build two versions, with and without debugging turned on (windows/mac only).
 arg: no-separate-debug-info,Do not store debug information in a separate file (unix only, default for mac).
 arg: separate-debug-info,Strip debug information into a separate .debug file (unix only, default for non-mac).
 arg: no-framework,Do not build as a Mac framework.
@@ -58,13 +58,15 @@ public:
 		if(conf->getenv("QC_STATIC") == "Y")
 			staticmode = true;
 
-#ifndef Q_OS_MAC
+#if !defined(Q_OS_WIN) && !defined(Q_OS_MAC)
 		if(opt_debug_and_release)
 		{
-			printf("\nError: The --debug-and-release option is for mac only.\n");
+			printf("\nError: The --debug-and-release option is for windows/mac only.\n");
 			exit(1);
 		}
+#endif
 
+#ifndef Q_OS_MAC
 		if(opt_framework)
 		{
 			printf("\nError: The --framework option is for mac only.\n");
