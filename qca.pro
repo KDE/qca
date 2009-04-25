@@ -9,13 +9,13 @@ sub_unittest.depends = sub_src
 sub_examples.subdir = examples
 sub_examples.depends = sub_src
 
-unix:{
-	include(conf.pri)
+include(conf.pri)
 
-	!isEmpty(QCA_NO_TESTS) {
-		SUBDIRS -= sub_unittest sub_examples
-	}
+!isEmpty(QCA_NO_TESTS) {
+	SUBDIRS -= sub_unittest sub_examples
+}
 
+unix: {
 	# API documentation
 	#apidox.commands += doxygen && cd apidocs/html && ./installdox -lqt.tag@/home/bradh/build/qt-x11-opensource-4.0.0-rc1-snapshot/doc/html/ && cd ../..
 	apidox.commands += doxygen && cd apidocs/html && ./installdox -lqt.tag@http://doc.trolltech.com/4.1 && cd ../..
