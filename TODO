@@ -1,6 +1,4 @@
-* 2.0.2
-  abort if feature requested but not found
-  mac deployment target is 10.3, but it should probably be 10.4 for universal?
+* 2.0.3
   use rpath?
   cms example: User.pem expired.  probably other certs need regen also?
   fix publickeyexample.  it encrypts with cms, decrypts with raw rsa??
@@ -10,15 +8,17 @@
   cmssigner: convert path separators in field when loading a pkcs11 module
   cert: better makeFriendlyName diffing for key usage (consider OIDs) ?
   cert unit tests need to test wildcards!!
-  make sure all examples start with initializer then qapp
   consider a more readable implementation of qca_securelayer logic using the
     object-sessions concept (write the blog first :))
+  vs2005: big_io.obj : warning LNK4221: no public symbols found; archive
+    member will be inaccessible 
 
 * 2.1.0
   CertificateAuthority constructor provider argument should have default value
   CertificateAuthority::createCertificate declared but not implemented!
 
 * possibilities for the future:
+  abort if feature requested but not found, rather than crashing
   examples: bigint, pgp, tls with smartcards (reuse ssltest?), more?
   unittests: pgp enc/dec, cms, sasl, tls, filewatch/dirwatch
   complete pkits unittests
