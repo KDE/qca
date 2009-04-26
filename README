@@ -1,6 +1,6 @@
-Qt Cryptographic Architecture (QCA) version 2.0.1
+Qt Cryptographic Architecture (QCA) version 2.0.2
 -------------------------------------------------
-Date: June 2nd, 2008
+Date: April 24th, 2009
 Website: http://delta.affinix.com/qca/
 Mailing List: Delta Project <delta@lists.affinix.com>
 
@@ -33,8 +33,14 @@ License
 
 Changes
 -------
+  New in 2.0.2
+  - Bugfix release, forward and backward compatible with 2.0.x
+  - Fix compatibility with Qt 4.5 when QCA::Initializer appears before QApp
+  - Don't convert to secure memory when Hash::update(QByteArray) is used
+  - Use configure.exe instead of configwin.bat
+
   New in 2.0.1
-  - Bugfix release, forward and backward compatible with 2.0.0
+  - Bugfix release, forward and backward compatible with 2.0.x
   - Ability to build as a Mac framework (and build this way by default)
   - On non-Mac Unix, the pkgconfig file is always qca2.pc, even in debug mode
   - Certificates containing wildcards are now matched properly
@@ -43,19 +49,6 @@ Changes
   - Don't delete objects in their event handler (prevents Qt 4.4 warnings)
   - Fix potential hang with TLS in server mode
   - Windows version can be configured/installed using paths with spaces
-
-  New in 2.0.0
-  - Rewritten for Qt 4
-  - MAC algorithms
-  - DSA
-  - Diffie-Hellman
-  - Secure random
-  - Secure memory
-  - Extensive X.509 API, supporting chains, crls, and validation
-  - Smart cards and other key storage
-  - OpenPGP
-  - Cryptographic Message Syntax (for S/MIME)
-  - probably more
 
 
 Description
