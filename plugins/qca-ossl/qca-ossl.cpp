@@ -42,6 +42,15 @@
 #define OSSL_097
 #endif
 
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10000000L
+// OpenSSL 1.0.0 makes a few changes that aren't very C++ friendly...
+// Among other things, CHECKED_PTR_OF returns a void*, but is used in
+// contexts requiring STACK pointers.
+#undef CHECKED_PTR_OF
+#define CHECKED_PTR_OF(type, p) \
+	            ((_STACK*) (1 ? p : (type*)0))
+#endif
+
 using namespace QCA;
 
 namespace opensslQCAPlugin {
