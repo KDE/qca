@@ -1784,6 +1784,14 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
+		else if(alg == EMSA3_SHA224)
+			md = EVP_sha224();
+		else if(alg == EMSA3_SHA256)
+			md = EVP_sha256();
+		else if(alg == EMSA3_SHA384)
+			md = EVP_sha384();
+		else if(alg == EMSA3_SHA512)
+			md = EVP_sha512();
 		else if(alg == EMSA3_Raw)
 		{
 			// md = 0
@@ -1802,6 +1810,14 @@ public:
 			md = EVP_md2();
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
+		else if(alg == EMSA3_SHA224)
+			md = EVP_sha224();
+		else if(alg == EMSA3_SHA256)
+			md = EVP_sha256();
+		else if(alg == EMSA3_SHA384)
+			md = EVP_sha384();
+		else if(alg == EMSA3_SHA512)
+			md = EVP_sha512();
 		else if(alg == EMSA3_Raw)
 		{
 			// md = 0
@@ -3402,6 +3418,18 @@ public:
 		    break;
 		case NID_dsaWithSHA1:
 		    p.sigalgo = QCA::EMSA1_SHA1;
+		    break;
+		case NID_sha224WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_SHA224;
+		    break;
+		case NID_sha256WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_SHA256;
+		    break;
+		case NID_sha384WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_SHA384;
+		    break;
+		case NID_sha512WithRSAEncryption:
+		    p.sigalgo = QCA::EMSA3_SHA512;
 		    break;
 		default:
 		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->cert_info->signature->algorithm);

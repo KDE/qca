@@ -68,7 +68,11 @@ enum SignatureAlgorithm
 	EMSA3_MD5,        ///< MD5, with EMSA3 (ie PKCS#1 Version 1.5) encoding (this is the usual RSA algorithm)
 	EMSA3_MD2,        ///< MD2, with EMSA3 (ie PKCS#1 Version 1.5) encoding
 	EMSA3_RIPEMD160,  ///< RIPEMD160, with EMSA3 (ie PKCS#1 Version 1.5) encoding
-	EMSA3_Raw         ///< EMSA3 without computing a message digest or a DigestInfo encoding (identical to PKCS#11's CKM_RSA_PKCS mechanism)
+	EMSA3_Raw,        ///< EMSA3 without computing a message digest or a DigestInfo encoding (identical to PKCS#11's CKM_RSA_PKCS mechanism)
+	EMSA3_SHA224,     ///< SHA224, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+	EMSA3_SHA256,     ///< SHA256, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+	EMSA3_SHA384,     ///< SHA384, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+	EMSA3_SHA512      ///< SHA512, with EMSA3 (ie PKCS#1 Version 1.5) encoding
 };
 
 /**

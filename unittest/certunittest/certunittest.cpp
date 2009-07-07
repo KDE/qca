@@ -45,6 +45,7 @@ private slots:
     void checkExpiredServerCerts();
     void checkServerCerts();
     void altNames76();
+    void sha256cert();
     void crl();
     void crl2();
     void csr();
@@ -705,6 +706,45 @@ void CertUnitTest::altNames76()
             QCOMPARE( client1.pathLimit(), 0 );
 
             QCOMPARE( client1.signatureAlgorithm(), QCA::EMSA3_SHA1 );
+        }
+    }
+}
+
+void CertUnitTest::sha256cert()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+    // providersToTest.append("qca-botan");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "cert", provider ) )
+            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit() );
+        else {
+            QFile f("certs/RAIZ2007_CERTIFICATE_AND_CRL_SIGNING_SHA256.crt");
+            QVERIFY(f.open(QFile::ReadOnly));
+            QByteArray der = f.readAll();
+            QCA::ConvertResult resultcert;
+            QCA::Certificate cert = QCA::Certificate::fromDER(der,
+                                                              &resultcert,
+                                                              provider);
+
+            QCOMPARE( resultcert, QCA::ConvertGood );
+            QCOMPARE( cert.isNull(), false );
+            QCOMPARE( cert.isCA(), true );
+            QCOMPARE( cert.isSelfSigned(), true );
+
+            QCA::PublicKey pubkey = cert.subjectPublicKey();
+            QCOMPARE( pubkey.isNull(), false );
+            QCOMPARE( pubkey.isRSA(), true );
+            QCOMPARE( pubkey.isDSA(), false );
+            QCOMPARE( pubkey.isDH(), false );
+            QCOMPARE( pubkey.isPublic(), true );
+            QCOMPARE( pubkey.isPrivate(), false );
+            QCOMPARE( pubkey.bitSize(), 4096 );
+
+            QCOMPARE( cert.pathLimit(), 0 );
+
+            QCOMPARE( cert.signatureAlgorithm(), QCA::EMSA3_SHA256 );
         }
     }
 }
