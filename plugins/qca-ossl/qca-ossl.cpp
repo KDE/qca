@@ -1191,6 +1191,7 @@ public:
 	{
 		pkey = from.pkey;
 		CRYPTO_add(&pkey->references, 1, CRYPTO_LOCK_EVP_PKEY);
+		raw_type = false;
 		state = Idle;
 	}
 
@@ -1235,6 +1236,7 @@ public:
 		}
 		else
 		{
+			raw_type = false;
 			EVP_MD_CTX_init(&mdctx);
 			if(!EVP_VerifyInit_ex(&mdctx, type, NULL))
 				state = VerifyError;
