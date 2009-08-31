@@ -274,7 +274,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 	if(lines.count() < 1)
 		return false;
 
-	QStringList::ConstIterator it = lines.begin();
+	QStringList::ConstIterator it = lines.constBegin();
 
 	// first line is keyring file
 	QString keyring = *(it++);
@@ -282,7 +282,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 	// if the second line isn't a divider, we are dealing
 	// with a new version of gnupg that doesn't give us
 	// the keyring file on gpg --list-keys --with-colons
-	if(it == lines.end() || (*it).isEmpty() || (*it).at(0) != '-')
+	if(it == lines.constEnd() || (*it).isEmpty() || (*it).at(0) != '-')
 	{
 		// first line wasn't the keyring name...
 		keyring.clear();
@@ -295,7 +295,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 		it++;
 	}
 
-	for(; it != lines.end(); ++it)
+	for(; it != lines.constEnd(); ++it)
 	{
 		QStringList f = (*it).split(':');
 		if(f.count() < 1)
@@ -572,7 +572,7 @@ public:
 				args += "--encrypt";
 
 				// recipients
-				for(QStringList::ConstIterator it = input.recip_ids.begin(); it != input.recip_ids.end(); ++it)
+				for(QStringList::ConstIterator it = input.recip_ids.constBegin(); it != input.recip_ids.constEnd(); ++it)
 				{
 					args += "--recipient";
 					args += QString("0x") + *it;
@@ -615,7 +615,7 @@ public:
 				args += "--encrypt";
 
 				// recipients
-				for(QStringList::ConstIterator it = input.recip_ids.begin(); it != input.recip_ids.end(); ++it)
+				for(QStringList::ConstIterator it = input.recip_ids.constBegin(); it != input.recip_ids.constEnd(); ++it)
 				{
 					args += "--recipient";
 					args += QString("0x") + *it;
