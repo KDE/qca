@@ -2891,6 +2891,19 @@ int main(int argc, char **argv)
 					foreach(const QString &s, lines)
 						printf("    %s\n", qPrintable(s));
 				}
+				if (debug)
+				{
+					QStringList capabilities = list[n]->features();
+					foreach(const QString &capability, capabilities)
+					{
+						printf("    *%s", qPrintable(capability));
+						if(!QCA::isSupported(qPrintable(capability), list[n]->name()))
+						{
+							printf("(NOT supported) - bug");
+						}
+						printf("\n");
+					}
+				}
 			}
 		}
 		else
