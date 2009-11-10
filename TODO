@@ -1,4 +1,5 @@
 * 2.0.3
+  handle mac universal builds for arches besides x86 and ppc (e.g. x86_64)
   use rpath?
   cms example: User.pem expired.  probably other certs need regen also?
   fix publickeyexample.  it encrypts with cms, decrypts with raw rsa??
@@ -16,6 +17,7 @@
 * 2.1.0
   CertificateAuthority constructor provider argument should have default value
   CertificateAuthority::createCertificate declared but not implemented!
+  CertificateCollection: ability to remove certs/crls?
 
 * possibilities for the future:
   abort if feature requested but not found, rather than crashing
