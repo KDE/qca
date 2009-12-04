@@ -25,6 +25,9 @@
 #include <botan/botan.h>
 #include <botan/hmac.h>
 #include <botan/s2k.h>
+#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(1,8,0)
+#include <botan/algo_factory.h>
+#endif
 
 #include <stdlib.h>
 #include <iostream>
@@ -47,8 +50,11 @@ public:
         QCA::SecureArray buf(size);
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,5,0)
 	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size(), Botan::SessionKey );
-#else
+#elif BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,7,6)
 	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size() );
+#else
+	Botan::AutoSeeded_RNG rng;
+	rng.randomize(reinterpret_cast<Botan::byte*>(buf.data()), buf.size());
 #endif
 	return buf;
     }
@@ -102,7 +108,11 @@ class BotanHMACContext : public QCA::MACContext
 public:
     BotanHMACContext( const QString &hashName, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,8,0)
 	m_hashObj = new Botan::HMAC(hashName.toStdString());
+#else
+	m_hashObj = new Botan::HMAC(Botan::global_state().algorithm_factory().make_hash_function(hashName.toStdString()));
+#endif
 	if (0 == m_hashObj) {
 	    std::cout << "null context object" << std::endl;
 	}
