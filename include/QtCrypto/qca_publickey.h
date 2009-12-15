@@ -59,6 +59,14 @@ enum EncryptionAlgorithm
 
 /**
    Signature algorithm variants
+
+   Note that most signature algorithms follow a process of first hashing the
+   plaintext data to be signed, creating a payload format that wraps the hash
+   value (among other things), and then signing the payload with the private
+   key.  So, for example, an EMSA3(SHA1) signature outputted by QCA cannot be
+   verified by merely performing RSA and SHA1 operations (e.g.
+   "openssl rsautl -verify" and comparing with sha1sum), because that would not
+   take the EMSA3 payload format into consideration.
 */
 enum SignatureAlgorithm
 {
