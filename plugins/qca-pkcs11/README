@@ -31,7 +31,7 @@ CONFIGURATION
 	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
 	generate default configuration use:
 
-	$ qcatool --config save qca-pkcs11 
+	$ qcatool2 config save qca-pkcs11 
 
 	Attributes:
 		allow_load_rootca (Boolean)
