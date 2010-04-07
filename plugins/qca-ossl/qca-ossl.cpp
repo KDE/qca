@@ -1782,8 +1782,10 @@ public:
 			md = EVP_sha1();
 		else if(alg == EMSA3_MD5)
 			md = EVP_md5();
+#ifdef HAVE_OPENSSL_MD2_H
 		else if(alg == EMSA3_MD2)
 			md = EVP_md2();
+#endif
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
 		else if(alg == EMSA3_SHA224)
@@ -1808,8 +1810,10 @@ public:
 			md = EVP_sha1();
 		else if(alg == EMSA3_MD5)
 			md = EVP_md5();
+#ifdef HAVE_OPENSSL_MD2_H
 		else if(alg == EMSA3_MD2)
 			md = EVP_md2();
+#endif
 		else if(alg == EMSA3_RIPEMD160)
 			md = EVP_ripemd160();
 		else if(alg == EMSA3_SHA224)
@@ -3412,9 +3416,11 @@ public:
 		case NID_md5WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD5;
 		    break;
+#ifdef HAVE_OPENSSL_MD2_H
 		case NID_md2WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD2;
 		    break;
+#endif
 		case NID_ripemd160WithRSA:
 		    p.sigalgo = QCA::EMSA3_RIPEMD160;
 		    break;
@@ -3910,9 +3916,11 @@ public:
 		case NID_md5WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD5;
 		    break;
+#ifdef HAVE_OPENSSL_MD2_H
 		case NID_md2WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD2;
 		    break;
+#endif
 		case NID_ripemd160WithRSA:
 		    p.sigalgo = QCA::EMSA3_RIPEMD160;
 		    break;
@@ -4100,9 +4108,11 @@ public:
 		case NID_md5WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD5;
 		    break;
+#ifdef HAVE_OPENSSL_MD2_H
 		case NID_md2WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD2;
 		    break;
+#endif
 		case NID_ripemd160WithRSA:
 		    p.sigalgo = QCA::EMSA3_RIPEMD160;
 		    break;
@@ -6640,7 +6650,9 @@ static QStringList all_hash_types()
 	list += "sha1";
 	list += "sha0";
 	list += "ripemd160";
+#ifdef HAVE_OPENSSL_MD2_H
 	list += "md2";
+#endif
 	list += "md4";
 	list += "md5";
 #ifdef SHA224_DIGEST_LENGTH
@@ -6849,7 +6861,9 @@ public:
 		list += all_hash_types();
 		list += all_mac_types();
 		list += all_cipher_types();
+#ifdef HAVE_OPENSSL_MD2_H
 		list += "pbkdf1(md2)";
+#endif
 		list += "pbkdf1(sha1)";
 		list += "pbkdf2(sha1)";
 		list += "pkey";
@@ -6882,8 +6896,10 @@ public:
 			return new opensslHashContext( EVP_sha(), this, type);
 		else if ( type == "ripemd160" )
 			return new opensslHashContext( EVP_ripemd160(), this, type);
+#ifdef HAVE_OPENSSL_MD2_H
 		else if ( type == "md2" )
 			return new opensslHashContext( EVP_md2(), this, type);
+#endif
 		else if ( type == "md4" )
 			return new opensslHashContext( EVP_md4(), this, type);
 		else if ( type == "md5" )
@@ -6912,8 +6928,10 @@ public:
 */
 		else if ( type == "pbkdf1(sha1)" )
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
+#ifdef HAVE_OPENSSL_MD2_H
 		else if ( type == "pbkdf1(md2)" )
 			return new opensslPbkdf1Context( EVP_md2(), this, type );
+#endif
 		else if ( type == "pbkdf2(sha1)" )
 			return new opensslPbkdf2Context( this, type );
 		else if ( type == "hmac(md5)" )
