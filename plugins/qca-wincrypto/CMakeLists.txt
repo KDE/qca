@@ -5,7 +5,7 @@ IF (WIN32)
 
    MY_AUTOMOC (QCA_WINCRYPTO_SOURCES)
 
-   ADD_LIBRARY (qca-wincrypto SHARED ${QCA_WINCRYPTO_SOURCES})
+   ADD_LIBRARY (qca-wincrypto MODULE ${QCA_WINCRYPTO_SOURCES})
    # use win32 includes
    TARGET_LINK_LIBRARIES (qca-wincrypto ${QT_QTCORE_LIBRARY})
    TARGET_LINK_LIBRARIES (qca-wincrypto qca)
