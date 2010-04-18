@@ -1782,7 +1782,7 @@ public:
 			md = EVP_sha1();
 		else if(alg == EMSA3_MD5)
 			md = EVP_md5();
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		else if(alg == EMSA3_MD2)
 			md = EVP_md2();
 #endif
@@ -1810,7 +1810,7 @@ public:
 			md = EVP_sha1();
 		else if(alg == EMSA3_MD5)
 			md = EVP_md5();
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		else if(alg == EMSA3_MD2)
 			md = EVP_md2();
 #endif
@@ -3416,7 +3416,7 @@ public:
 		case NID_md5WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD5;
 		    break;
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		case NID_md2WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD2;
 		    break;
@@ -3916,7 +3916,7 @@ public:
 		case NID_md5WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD5;
 		    break;
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		case NID_md2WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD2;
 		    break;
@@ -4108,7 +4108,7 @@ public:
 		case NID_md5WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD5;
 		    break;
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		case NID_md2WithRSAEncryption:
 		    p.sigalgo = QCA::EMSA3_MD2;
 		    break;
@@ -6650,7 +6650,7 @@ static QStringList all_hash_types()
 	list += "sha1";
 	list += "sha0";
 	list += "ripemd160";
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 	list += "md2";
 #endif
 	list += "md4";
@@ -6861,7 +6861,7 @@ public:
 		list += all_hash_types();
 		list += all_mac_types();
 		list += all_cipher_types();
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		list += "pbkdf1(md2)";
 #endif
 		list += "pbkdf1(sha1)";
@@ -6896,7 +6896,7 @@ public:
 			return new opensslHashContext( EVP_sha(), this, type);
 		else if ( type == "ripemd160" )
 			return new opensslHashContext( EVP_ripemd160(), this, type);
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		else if ( type == "md2" )
 			return new opensslHashContext( EVP_md2(), this, type);
 #endif
@@ -6928,7 +6928,7 @@ public:
 */
 		else if ( type == "pbkdf1(sha1)" )
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
-#ifdef HAVE_OPENSSL_MD2_H
+#ifdef HAVE_OPENSSL_MD2
 		else if ( type == "pbkdf1(md2)" )
 			return new opensslPbkdf1Context( EVP_md2(), this, type );
 #endif
