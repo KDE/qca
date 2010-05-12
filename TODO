@@ -18,6 +18,7 @@
   CertificateAuthority constructor provider argument should have default value
   CertificateAuthority::createCertificate declared but not implemented!
   CertificateCollection: ability to remove certs/crls?
+  pull kwallet's SecureBuffer?
 
 * possibilities for the future:
   abort if feature requested but not found, rather than crashing
