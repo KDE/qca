@@ -38,6 +38,7 @@ endif (UNIX  AND NOT  APPLE)
 
 if (WIN32)
  set(CMAKE_DEBUG_POSTFIX "d")
+ add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif (WIN32)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
