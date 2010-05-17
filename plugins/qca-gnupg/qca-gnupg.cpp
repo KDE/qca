@@ -926,6 +926,11 @@ public:
 		return out;
 	}
 
+	virtual bool isReadOnly(int) const
+	{
+		return false;
+	}
+
 	virtual KeyStoreEntryContext *entry(int, const QString &entryId)
 	{
 		QMutexLocker locker(&ringMutex);
