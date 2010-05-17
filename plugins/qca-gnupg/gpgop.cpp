@@ -1588,7 +1588,10 @@ GpgOp::Event GpgOp::waitForEvent(int msecs)
 	d->waiting = true;
 	d->sync.waitForCondition(msecs);
 	d->waiting = false;
-	return d->eventList.takeFirst();
+	if(!d->eventList.isEmpty())
+		return d->eventList.takeFirst();
+	else
+		return GpgOp::Event();
 }
 
 bool GpgOp::success() const
