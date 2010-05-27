@@ -33,10 +33,10 @@
 # include <sys/termios.h>
 # include <unistd.h>
 # include <fcntl.h>
-# include <stdlib.h>
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define CONSOLEPROMPT_INPUT_MAX 56
 
