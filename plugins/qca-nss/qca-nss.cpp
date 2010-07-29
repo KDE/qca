@@ -392,6 +392,7 @@ public:
 
     QCA::KeyLength keyLength() const
 	{
+		return QCA::KeyLength(0, 0, 0);
 	}
 
 private:
