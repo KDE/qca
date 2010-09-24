@@ -2474,12 +2474,47 @@ public:
 		{
 			ops = new RSA_METHOD(*RSA_get_default_method());
 			ops->rsa_priv_enc = 0;//pkcs11_rsa_encrypt;
-			ops->rsa_priv_dec = 0;//pkcs11_rsa_decrypt;
+			ops->rsa_priv_dec = rsa_priv_dec;
 			ops->rsa_sign = rsa_sign;
 			ops->rsa_verify = 0;//pkcs11_rsa_verify;
 			ops->finish = rsa_finish;
 		}
 		return ops;
+	}
+
+	static int rsa_priv_dec(int flen, const unsigned char *from, unsigned char *to, RSA *rsa, int padding)
+	{
+		QCA::EncryptionAlgorithm algo;
+
+		if (padding == RSA_PKCS1_PADDING)
+		{
+			algo = QCA::EME_PKCS1v15;
+		}
+		else if (padding == RSA_PKCS1_OAEP_PADDING)
+		{
+			algo = QCA::EME_PKCS1_OAEP;
+		}
+		else
+		{
+			RSAerr(RSA_F_RSA_EAY_PRIVATE_DECRYPT, RSA_R_UNKNOWN_PADDING_TYPE);
+			return -1;
+		}
+
+		QCA_RSA_METHOD *self = (QCA_RSA_METHOD *)RSA_get_app_data(rsa);
+
+		QCA::SecureArray input;
+		input.resize(flen);
+		memcpy(input.data(), from, input.size());
+
+		QCA::SecureArray output;
+
+		if (self->key.decrypt(input, &output, algo)) {
+			memcpy(to, output.data(), output.size());
+			return output.size();
+		}
+
+		// XXX: An error should be set in this case too.
+		return -1;
 	}
 
 	static int rsa_sign(int type, const unsigned char *m, unsigned int m_len, unsigned char *sigret, unsigned int *siglen, const RSA *rsa)
