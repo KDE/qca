@@ -106,20 +106,28 @@ static BIGNUM *bi2bn(const BigInteger &n)
 	return BN_bin2bn((const unsigned char *)buf.data(), buf.size(), NULL);
 }
 
+// take lowest bytes of BIGNUM to fit
+// pad with high byte zeroes to fit
+static SecureArray bn2fixedbuf(BIGNUM *n, int size)
+{
+	SecureArray buf(BN_num_bytes(n));
+	BN_bn2bin(n, (unsigned char *)buf.data());
+
+	SecureArray out(size);
+	memset(out.data(), 0, size);
+	int len = qMin(size, buf.size());
+	memcpy(out.data() + (size - len), buf.data(), len);
+	return out;
+}
+
 static SecureArray dsasig_der_to_raw(const SecureArray &in)
 {
 	DSA_SIG *sig = DSA_SIG_new();
 	const unsigned char *inp = (const unsigned char *)in.data();
 	d2i_DSA_SIG(&sig, &inp, in.size());
 
-	SecureArray part_r(20);
-	SecureArray part_s(20);
-	memset(part_r.data(), 0, 20);
-	memset(part_s.data(), 0, 20);
-	unsigned char *p = (unsigned char *)part_r.data();
-	BN_bn2bin(sig->r, p);
-	p = (unsigned char *)part_s.data();
-	BN_bn2bin(sig->s, p);
+	SecureArray part_r = bn2fixedbuf(sig->r, 20);
+	SecureArray part_s = bn2fixedbuf(sig->s, 20);
 	SecureArray result;
 	result.append(part_r);
 	result.append(part_s);
