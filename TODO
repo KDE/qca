@@ -1,4 +1,4 @@
-* 2.0.3
+* 2.0.4
   handle mac universal builds for arches besides x86 and ppc (e.g. x86_64)
   use rpath?
   cms example: User.pem expired.  probably other certs need regen also?

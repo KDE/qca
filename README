@@ -1,6 +1,6 @@
-Qt Cryptographic Architecture (QCA) version 2.0.2
+Qt Cryptographic Architecture (QCA) version 2.0.3
 -------------------------------------------------
-Date: April 24th, 2009
+Date: November 27th, 2010
 Website: http://delta.affinix.com/qca/
 Mailing List: Delta Project <delta@lists.affinix.com>
 
@@ -33,6 +33,10 @@ License
 
 Changes
 -------
+  New in 2.0.3
+  - Bugfix release, forward and backward compatible with 2.0.x
+  - Fix compilation when using Qt/Windows SDK
+
   New in 2.0.2
   - Bugfix release, forward and backward compatible with 2.0.x
   - Fix compatibility with Qt 4.5 when QCA::Initializer appears before QApp
