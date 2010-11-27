@@ -1048,8 +1048,10 @@ static QString prompt_for(const QString &prompt)
 	printf("%s: ", prompt.toLatin1().data());
 	fflush(stdout);
 	QByteArray result(256, 0);
-	fgets((char *)result.data(), result.size(), stdin);
-	return QString::fromLocal8Bit(result).trimmed();
+	if(fgets((char *)result.data(), result.size(), stdin))
+		return QString::fromLocal8Bit(result).trimmed();
+	else
+		return QString();
 }
 
 static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
@@ -1316,7 +1318,8 @@ static QString prompt_for_string(const QString &prompt, const QString &def = QSt
 	printf("%s", prompt.toLatin1().data());
 	fflush(stdout);
 	QByteArray result(256, 0);
-	fgets((char *)result.data(), result.size(), stdin);
+	if(!fgets((char *)result.data(), result.size(), stdin))
+		return QString();
 	if(result[result.length()-1] == '\n')
 		result.truncate(result.length()-1);
 	// empty input -> use default
