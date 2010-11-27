@@ -367,7 +367,7 @@ void ProviderManager::scan()
 		return;
 
 	// check plugin files
-	QStringList dirs = QCoreApplication::libraryPaths();
+	const QStringList dirs = QCoreApplication::libraryPaths();
 	if(dirs.isEmpty())
 		logDebug("No Qt Library Paths");
 	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)

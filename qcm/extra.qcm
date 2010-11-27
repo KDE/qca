@@ -159,7 +159,7 @@ public:
 		QString pkg_template2 = QString(
 		"Name: %1\n"
 		"Description: Qt Cryptographic Architecture library\n"
-		"Version: 2.0.2\n");
+		"Version: 2.0.3\n");
 
 		QString pkg_template3 = QString(
 		"Requires: %1\n");

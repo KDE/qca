@@ -28,7 +28,7 @@
 
 const char *const APPNAME = "qcatool";
 const char *const EXENAME = "qcatool2";
-const char *const VERSION = "2.0.2";
+const char *const VERSION = "2.0.3";
 
 static QStringList wrapstring(const QString &str, int width)
 {
@@ -1048,8 +1048,10 @@ static QString prompt_for(const QString &prompt)
 	printf("%s: ", prompt.toLatin1().data());
 	fflush(stdout);
 	QByteArray result(256, 0);
-	fgets((char *)result.data(), result.size(), stdin);
-	return QString::fromLocal8Bit(result).trimmed();
+	if(fgets((char *)result.data(), result.size(), stdin))
+		return QString::fromLocal8Bit(result).trimmed();
+	else
+		return QString();
 }
 
 static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
@@ -1316,7 +1318,8 @@ static QString prompt_for_string(const QString &prompt, const QString &def = QSt
 	printf("%s", prompt.toLatin1().data());
 	fflush(stdout);
 	QByteArray result(256, 0);
-	fgets((char *)result.data(), result.size(), stdin);
+	if(!fgets((char *)result.data(), result.size(), stdin))
+		return QString();
 	if(result[result.length()-1] == '\n')
 		result.truncate(result.length()-1);
 	// empty input -> use default
@@ -2890,6 +2893,19 @@ int main(int argc, char **argv)
 					QStringList lines = wrapstring(credit, 74);
 					foreach(const QString &s, lines)
 						printf("    %s\n", qPrintable(s));
+				}
+				if (debug)
+				{
+					QStringList capabilities = list[n]->features();
+					foreach(const QString &capability, capabilities)
+					{
+						printf("    *%s", qPrintable(capability));
+						if(!QCA::isSupported(qPrintable(capability), list[n]->name()))
+						{
+							printf("(NOT supported) - bug");
+						}
+						printf("\n");
+					}
 				}
 			}
 		}
