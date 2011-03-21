@@ -24,7 +24,9 @@
 
 #include <botan/botan.h>
 #include <botan/hmac.h>
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
 #include <botan/s2k.h>
+#endif
 #if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(1,8,0)
 #include <botan/algo_factory.h>
 #endif
@@ -92,7 +94,11 @@ public:
 
     QCA::MemoryRegion final()
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
         QCA::SecureArray a( m_hashObj->OUTPUT_LENGTH );
+#else
+	QCA::SecureArray a( m_hashObj->output_length() );
+#endif
 	m_hashObj->final( (Botan::byte *)a.data() );
 	return a;
     }
@@ -154,7 +160,11 @@ public:
 
     void final( QCA::MemoryRegion *out)
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
 	QCA::SecureArray sa( m_hashObj->OUTPUT_LENGTH, 0 );
+#else
+	QCA::SecureArray sa( m_hashObj->output_length(), 0 );
+#endif
 	m_hashObj->final( (Botan::byte *)sa.data() );
 	*out = sa;
     }
@@ -186,10 +196,15 @@ public:
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
 	m_s2k->set_iterations(iterationCount);
 	m_s2k->change_salt((const Botan::byte*)salt.data(), salt.size());
 	std::string secretString(secret.data(), secret.size() );
 	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString);
+#else
+	std::string secretString(secret.data(), secret.size() );
+	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString, (const Botan::byte*)salt.data(), salt.size(), iterationCount);
+#endif
         QCA::SecureArray retval(QByteArray((const char*)key.begin(), key.length()));
 	return QCA::SymmetricKey(retval);
     }
@@ -277,10 +292,23 @@ public:
 
     QCA::KeyLength keyLength() const
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
 	return QCA::KeyLength( Botan::min_keylength_of(m_algoName),
 			       Botan::max_keylength_of(m_algoName),
 			       Botan::keylength_multiple_of(m_algoName) );
-
+#else
+        Botan::Algorithm_Factory &af = Botan::global_state().algorithm_factory();
+        Botan::Key_Length_Specification kls(0);
+        if(const Botan::BlockCipher *bc = af.prototype_block_cipher(m_algoName))
+            kls = bc->key_spec();
+        else if(const Botan::StreamCipher *sc = af.prototype_stream_cipher(m_algoName))
+            kls = sc->key_spec();
+        else if(const Botan::MessageAuthenticationCode *mac = af.prototype_mac(m_algoName))
+            kls = mac->key_spec();
+        return QCA::KeyLength( kls.minimum_keylength(),
+                               kls.maximum_keylength(),
+                               kls.keylength_multiple() );
+#endif
     }
 
 
