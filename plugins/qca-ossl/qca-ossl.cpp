@@ -5811,19 +5811,43 @@ public:
 	{
 		// verify the certificate
 		Validity code = ErrorValidityUnknown;
-		X509 *x = SSL_get_peer_certificate(ssl);
-		if(x)
+		STACK_OF(X509) *x_chain = SSL_get_peer_cert_chain(ssl);
+		//X509 *x = SSL_get_peer_certificate(ssl);
+		if(x_chain)
 		{
-			MyCertContext *cc = new MyCertContext(provider());
-			cc->fromX509(x);
-			X509_free(x);
-			peercert.change(cc);
+			CertificateChain chain;
 
+			if(serv)
+			{
+				X509 *x = SSL_get_peer_certificate(ssl);
+				MyCertContext *cc = new MyCertContext(provider());
+				cc->fromX509(x);
+				Certificate cert;
+				cert.change(cc);
+				chain += cert;
+			}
+
+			for(int n = 0; n < sk_X509_num(x_chain); ++n)
+			{
+				X509 *x = sk_X509_value(x_chain, n);
+				MyCertContext *cc = new MyCertContext(provider());
+				cc->fromX509(x);
+				Certificate cert;
+				cert.change(cc);
+				chain += cert;
+			}
+
+			peercert = chain.primary();
+
+#ifdef Q_OS_MAC
+			code = chain.validate(trusted);
+#else
 			int ret = SSL_get_verify_result(ssl);
 			if(ret == X509_V_OK)
 				code = ValidityGood;
 			else
 				code = convert_verify_error(ret);
+#endif
 		}
 		else
 		{
