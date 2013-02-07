@@ -1,4 +1,16 @@
 
+IF (Qt5Core_FOUND)
+  # FindQt4.cmake wasn't used, so define it here
+  MACRO (QT4_GET_MOC_INC_DIRS _moc_INC_DIRS)
+     SET(${_moc_INC_DIRS})
+     GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
+
+     FOREACH(_current ${_inc_DIRS})
+        SET(${_moc_INC_DIRS} ${${_moc_INC_DIRS}} "-I" ${_current})
+     ENDFOREACH(_current ${_inc_DIRS})
+  ENDMACRO(QT4_GET_MOC_INC_DIRS)
+ENDIF()
+
 MACRO(MY_AUTOMOC _srcsList)
   QT4_GET_MOC_INC_DIRS(_moc_INCS)
   FOREACH (_current_FILE ${${_srcsList}})

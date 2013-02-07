@@ -4,17 +4,26 @@ cmake_minimum_required(VERSION 2.4.5)
 
 option(BUILD_TESTS "Create test" ON)
 
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
-
-set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Directory where lib will install")
-
-set(PKGCONFIG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
-
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
-find_package(Qt4 REQUIRED)
-# properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
-include(${QT_USE_FILE})
+find_package(Qt5Core QUIET)
+if (Qt5Core_FOUND)
+  message(STATUS "Building with Qt5 support")
+  find_package(ECM 0.0.6 REQUIRED NO_MODULE)
+  set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_MODULE_PATH})
+  find_package(Qt5Transitional REQUIRED Core Network)
+  include(GNUInstallDirs)
+  set(LIB_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+else()
+  set(QT_MIN_VERSION "4.7.0")
+  find_package(Qt4 REQUIRED)
+  # properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
+  include(${QT_USE_FILE})
+  set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
+  set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Directory where lib will install")
+endif()
+
+set(PKGCONFIG_INSTALL_PREFIX "${LIB_INSTALL_DIR}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "0")
@@ -148,7 +157,7 @@ add_subdirectory(src)
 add_subdirectory(tools)
 add_subdirectory(plugins)
 
-if(BUILD_TESTS)
+if(BUILD_TESTS AND NOT Qt5Core_FOUND)
   enable_testing()
   add_subdirectory(unittest)
   add_subdirectory(examples)

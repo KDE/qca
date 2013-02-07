@@ -258,7 +258,11 @@ private:
 			int id = timers[n].id;
 			for(int i = 0; i < edtimers.count(); ++i)
 			{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+				if(edtimers[i].timerId == id)
+#else
 				if(edtimers[i].first == id)
+#endif
 				{
 					found = true;
 					break;
@@ -278,7 +282,11 @@ private:
 		// added?
 		for(int n = 0; n < edtimers.count(); ++n)
 		{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+			int id = edtimers[n].timerId;
+#else
 			int id = edtimers[n].first;
+#endif
 			bool found = false;
 			for(int i = 0; i < timers.count(); ++i)
 			{
@@ -293,7 +301,11 @@ private:
 			{
 				TimerInfo info;
 				info.id = id;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+				info.interval = edtimers[n].interval;
+#else
 				info.interval = edtimers[n].second;
+#endif
 				info.time.start();
 				timers += info;
 #ifdef TIMERFIXER_DEBUG
