@@ -22,6 +22,8 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtCrypto>
+#include <QMessageBox>
+#include <QFileDialog>
 
 #include "ui_mainwin.h"
 #include "certviewdlg.h"

@@ -87,8 +87,11 @@ void MetaTypeUnitTest::returnTypeTest()
     QList<QByteArray> args;
 
     // returns a null type name because that is what void does...
+#if QT_VERSION >= 0x050000
+    QCOMPARE( QByteArray( "void" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "voidMethod" ), args ) );
+#else
     QCOMPARE( QByteArray(), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "voidMethod" ), args ) );
-
+#endif
     QCOMPARE( QByteArray( "QString" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "qstringMethod" ), args ) );
 
     // returns a null type, because args don't match

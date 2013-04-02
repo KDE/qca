@@ -24,6 +24,9 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtCrypto>
+#include <QPushButton>
+#include <QMenu>
+#include <QMessageBox>
 #include "ui_keyselect.h"
 
 #define ONLY_SHOW_KEYBUNDLE

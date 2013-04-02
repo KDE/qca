@@ -2,6 +2,9 @@ include(../examples.pri)
 CONFIG -= console
 CONFIG += app_bundle
 QT += gui
+contains(QT_VERSION, ^5\\..*) {
+  QT += widgets
+}
 
 include(pkcs11configdlg/pkcs11configdlg.pri)
 

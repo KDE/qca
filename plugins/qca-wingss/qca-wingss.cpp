@@ -337,6 +337,10 @@ bool sspi_load()
 	pInitSecurityInterface.ptr = 0;
 
 	QString securityEntrypoint;
+#if QT_VERSION >= 0x050000
+	securityEntrypoint = QString::fromUtf16((const ushort *)SECURITY_ENTRYPOINTW);
+	pInitSecurityInterface.W = (INIT_SECURITY_INTERFACE_W)(sspi_lib->resolve(securityEntrypoint.toLatin1().data()));
+#else
 	QT_WA(
 		securityEntrypoint = QString::fromUtf16((const ushort *)SECURITY_ENTRYPOINTW);
 		pInitSecurityInterface.W = (INIT_SECURITY_INTERFACE_W)(sspi_lib->resolve(securityEntrypoint.toLatin1().data()));
@@ -344,6 +348,7 @@ bool sspi_load()
 		securityEntrypoint = QString::fromLatin1(SECURITY_ENTRYPOINT_ANSIA);
 		pInitSecurityInterface.A = (INIT_SECURITY_INTERFACE_A)(sspi_lib->resolve(securityEntrypoint.toLatin1().data()));
 	)
+#endif
 	if(!pInitSecurityInterface.ptr)
 	{
 		sspi_lib->unload();
@@ -360,11 +365,15 @@ bool sspi_load()
 	} funcs;
 	funcs.ptr = 0;
 
+#if QT_VERSION >= 0x050000
+	funcs.W = (PMySecurityFunctionTableW)pInitSecurityInterface.W();
+#else
 	QT_WA(
 		funcs.W = (PMySecurityFunctionTableW)pInitSecurityInterface.W();
 	,
 		funcs.A = pInitSecurityInterface.A();
 	)
+#endif
 
 	sspi_log(QString("%1() = %2\n").arg(securityEntrypoint, ptr_toString(funcs.ptr)));
 	if(!funcs.ptr)
@@ -375,11 +384,15 @@ bool sspi_load()
 		return false;
 	}
 
+#if QT_VERSION >= 0x050000
+	sspi.W = funcs.W;
+#else
 	QT_WA(
 		sspi.W = funcs.W;
 	,
 		sspi.A = funcs.A;
 	)
+#endif
 
 	return true;
 }
@@ -398,6 +411,30 @@ static QList<SspiPackage> sspi_get_packagelist_direct()
 {
 	QList<SspiPackage> out;
 
+#if QT_VERSION >= 0x050000
+	ULONG cPackages;
+	SecPkgInfoW *pPackageInfo;
+	SECURITY_STATUS ret = sspi.W->EnumerateSecurityPackagesW(&cPackages, &pPackageInfo);
+	sspi_log(QString("EnumerateSecurityPackages() = %1\n").arg(SECURITY_STATUS_toString(ret)));
+	if(ret != SEC_E_OK)
+		return out;
+
+	for(int n = 0; n < (int)cPackages; ++n)
+	{
+		SecPkgInfoW *p = &pPackageInfo[n];
+		SspiPackage i;
+		i.name = QString::fromUtf16((const ushort *)p->Name);
+		i.caps = p->fCapabilities;
+		i.version = p->wVersion;
+		i.rpcid = p->wRPCID;
+		i.maxtok = p->cbMaxToken;
+		i.comment = QString::fromUtf16((const ushort *)p->Comment);
+		out += i;
+	}
+
+	ret = sspi.W->FreeContextBuffer(&pPackageInfo);
+	sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(ret)));
+#else
 	QT_WA(
 		ULONG cPackages;
 		SecPkgInfoW *pPackageInfo;
@@ -445,6 +482,7 @@ static QList<SspiPackage> sspi_get_packagelist_direct()
 		ret = sspi.A->FreeContextBuffer(&pPackageInfo);
 		sspi_log(QString("FreeContextBuffer() = %1\n").arg(SECURITY_STATUS_toString(ret)));
 	)
+#endif
 
 	return out;
 }
@@ -545,6 +583,7 @@ public:
 	{
 		// kerberos only works on unicode-based systems.  we do this
 		//   check so we can lazily use the W api from here on out.
+#if QT_VERSION < 0x050000
 		bool validSystem;
 		QT_WA(
 			validSystem = true;
@@ -553,6 +592,7 @@ public:
 		)
 		if(!validSystem)
 			return ErrorInvalidSystem;
+#endif
 
 		// ensure kerberos is available
 		bool found = false;

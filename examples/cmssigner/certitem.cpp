@@ -24,6 +24,7 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtCrypto>
+#include <QMessageBox>
 #include "prompter.h"
 
 typedef QMap<CertItemStore::IconType,QPixmap> CertItemIconset;

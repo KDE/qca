@@ -24,6 +24,9 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtCrypto>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QApplication>
 
 class Prompter::Private : public QObject
 {

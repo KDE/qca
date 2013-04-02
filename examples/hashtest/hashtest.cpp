@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	else {
 		// this shows the "all in one" approach
 		QString result = QCA::Hash("sha1").hashToString(arg);
-		printf("sha1(\"%s\") = [%s]\n", arg.data(), result.toAscii().data());
+		printf("sha1(\"%s\") = [%s]\n", arg.data(), qPrintable(result));
 	}
 
 	// must always check that an algorithm is supported before using it
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 		QCA::SecureArray resultArray = hashObject.final();
 		// convert the result into printable hexadecimal.
 		QString result = QCA::arrayToHex(resultArray.toByteArray());
-		printf("md5(\"%s\") = [%s]\n", arg.data(), result.toAscii().data());
+		printf("md5(\"%s\") = [%s]\n", arg.data(), qPrintable(result));
 	}
 
 	return 0;

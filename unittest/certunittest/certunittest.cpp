@@ -129,24 +129,24 @@ void CertUnitTest::CAcertstest()
 	    QCOMPARE( ca1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
 	    QCOMPARE( ca1.notValidAfter().toString(), QDateTime( QDate( 2011, 8, 15 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
 
-	    QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::CRLSign), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::ServerAuth), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::ClientAuth), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::CodeSigning), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::EmailProtection), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-	    QCOMPARE( ca1.constraints().contains(QCA::IPSecUser), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::TimeStamping), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::CRLSign) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::ServerAuth) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::ClientAuth) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::CodeSigning) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::EmailProtection) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel) == true, false);
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecUser) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::TimeStamping) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning) == true, false );
 
 	    // no policies on this cert
 	    QCOMPARE( ca1.policies().count(), 0 );
@@ -184,24 +184,24 @@ void CertUnitTest::qualitysslcatest()
 
 	    QCOMPARE( ca1.pathLimit(), 0 );
 
-	    QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::CRLSign), (QBool)true );
-	    QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::ServerAuth), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::ClientAuth), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::CodeSigning), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::EmailProtection), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-	    QCOMPARE( ca1.constraints().contains(QCA::IPSecUser), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::TimeStamping), (QBool)false );
-	    QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+	    QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::CRLSign) == true, true );
+	    QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::ServerAuth) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::ClientAuth) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::CodeSigning) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::EmailProtection) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel) == true, false);
+	    QCOMPARE( ca1.constraints().contains(QCA::IPSecUser) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::TimeStamping) == true, false );
+	    QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning) == true, false );
 	}
     }
 }
@@ -230,39 +230,39 @@ void CertUnitTest::checkExpiredClientCerts()
 	    QCOMPARE( client1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 32, 38 ), Qt::UTC ).toString() );
 	    QCOMPARE( client1.notValidAfter().toString(), QDateTime( QDate( 2006, 8, 16 ), QTime( 8, 32, 38 ), Qt::UTC ).toString() );
 
-	    QCOMPARE( client1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::NonRepudiation), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::DataEncipherment), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::KeyAgreement), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::CRLSign), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::ServerAuth), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::ClientAuth), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::CodeSigning), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::EmailProtection), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-	    QCOMPARE( client1.constraints().contains(QCA::IPSecUser), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::TimeStamping), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::DigitalSignature) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::NonRepudiation) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::DataEncipherment) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyAgreement) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::CRLSign) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::EncipherOnly) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::DecipherOnly) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::ServerAuth) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::ClientAuth) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::CodeSigning) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::EmailProtection) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel) == true, false);
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecUser) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::TimeStamping) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::OCSPSigning) == true, false );
 
 	    // no policies on this cert
 	    QCOMPARE( client1.policies().count(), 0 );
 
 	    QCA::CertificateInfo subject1 = client1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QCOMPARE( subject1.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure User Test Cert"), (QBool)true );
+	    QCOMPARE( subject1.values(QCA::Country).contains("de") == true, true );
+	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
+	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure User Test Cert") == true, true );
 
 	    QCA::CertificateInfo issuer1 = client1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QCOMPARE( issuer1.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only"), (QBool)true );
+	    QCOMPARE( issuer1.values(QCA::Country).contains("de") == true, true );
+	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
+	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only") == true, true );
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("889E7EF729719D7B280F361AAE6D00D39DE1AADB").toByteArray();
 	    QCOMPARE( client1.subjectKeyId(), subjectKeyID );
@@ -338,24 +338,24 @@ void CertUnitTest::checkClientCerts()
 	    QCOMPARE( client2.notValidBefore().toString(), QDateTime( QDate( 2007, 7, 22 ), QTime( 3, 30, 29 ), Qt::UTC ).toString() );
 	    QCOMPARE( client2.notValidAfter().toString(), QDateTime( QDate( 2012, 7, 20 ), QTime( 3, 30, 29 ), Qt::UTC ).toString() );
 
-	    QCOMPARE( client2.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( client2.constraints().contains(QCA::NonRepudiation), (QBool)true );
-	    QCOMPARE( client2.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-	    QCOMPARE( client2.constraints().contains(QCA::DataEncipherment), (QBool)true );
-	    QCOMPARE( client2.constraints().contains(QCA::KeyAgreement), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::CRLSign), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::EncipherOnly), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::DecipherOnly), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::ServerAuth), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::ClientAuth), (QBool)true );
-	    QCOMPARE( client2.constraints().contains(QCA::CodeSigning), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::EmailProtection), (QBool)true );
-	    QCOMPARE( client2.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-	    QCOMPARE( client2.constraints().contains(QCA::IPSecUser), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::TimeStamping), (QBool)false );
-	    QCOMPARE( client2.constraints().contains(QCA::OCSPSigning), (QBool)false );
+	    QCOMPARE( client2.constraints().contains(QCA::DigitalSignature) == true, true );
+	    QCOMPARE( client2.constraints().contains(QCA::NonRepudiation) == true, true );
+	    QCOMPARE( client2.constraints().contains(QCA::KeyEncipherment) == true, true );
+	    QCOMPARE( client2.constraints().contains(QCA::DataEncipherment) == true, true );
+	    QCOMPARE( client2.constraints().contains(QCA::KeyAgreement) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::KeyCertificateSign) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::CRLSign) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::EncipherOnly) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::DecipherOnly) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::ServerAuth) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::ClientAuth) == true, true );
+	    QCOMPARE( client2.constraints().contains(QCA::CodeSigning) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::EmailProtection) == true, true );
+	    QCOMPARE( client2.constraints().contains(QCA::IPSecEndSystem) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::IPSecTunnel) == true, false);
+	    QCOMPARE( client2.constraints().contains(QCA::IPSecUser) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::TimeStamping) == true, false );
+	    QCOMPARE( client2.constraints().contains(QCA::OCSPSigning) == true, false );
 
 	    // no policies on this cert
 	    QCOMPARE( client2.policies().count(), 0 );
@@ -470,24 +470,24 @@ void CertUnitTest::derCAcertstest()
             QCOMPARE( ca1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
             QCOMPARE( ca1.notValidAfter().toString(), QDateTime( QDate( 2011, 8, 15 ), QTime( 8, 30, 39 ), Qt::UTC ).toString() );
 
-            QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-            QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation), (QBool)true );
-            QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-            QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign), (QBool)true );
-            QCOMPARE( ca1.constraints().contains(QCA::CRLSign), (QBool)true );
-            QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::ServerAuth), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::ClientAuth), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::CodeSigning), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::EmailProtection), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-            QCOMPARE( ca1.constraints().contains(QCA::IPSecUser), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::TimeStamping), (QBool)false );
-            QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+            QCOMPARE( ca1.constraints().contains(QCA::DigitalSignature) == true, true );
+            QCOMPARE( ca1.constraints().contains(QCA::NonRepudiation) == true, true );
+            QCOMPARE( ca1.constraints().contains(QCA::KeyEncipherment) == true, true );
+            QCOMPARE( ca1.constraints().contains(QCA::DataEncipherment) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::KeyAgreement) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::KeyCertificateSign) == true, true );
+            QCOMPARE( ca1.constraints().contains(QCA::CRLSign) == true, true );
+            QCOMPARE( ca1.constraints().contains(QCA::EncipherOnly) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::DecipherOnly) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::ServerAuth) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::ClientAuth) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::CodeSigning) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::EmailProtection) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::IPSecTunnel) == true, false);
+            QCOMPARE( ca1.constraints().contains(QCA::IPSecUser) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::TimeStamping) == true, false );
+            QCOMPARE( ca1.constraints().contains(QCA::OCSPSigning) == true, false );
 
             // no policies on this cert
             QCOMPARE( ca1.policies().count(), 0 );
@@ -518,24 +518,24 @@ void CertUnitTest::altName()
 
 	    QCOMPARE( client1.commonName(), QString("Valid RFC822 nameConstraints EE Certificate Test21") );
 
-	    QCOMPARE( client1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::NonRepudiation), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::DataEncipherment), (QBool)true );
-	    QCOMPARE( client1.constraints().contains(QCA::KeyAgreement), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::CRLSign), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::ServerAuth), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::ClientAuth), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::CodeSigning), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::EmailProtection), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-	    QCOMPARE( client1.constraints().contains(QCA::IPSecUser), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::TimeStamping), (QBool)false );
-	    QCOMPARE( client1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+	    QCOMPARE( client1.constraints().contains(QCA::DigitalSignature) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::NonRepudiation) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::DataEncipherment) == true, true );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyAgreement) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::CRLSign) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::EncipherOnly) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::DecipherOnly) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::ServerAuth) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::ClientAuth) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::CodeSigning) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::EmailProtection) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel) == true, false);
+	    QCOMPARE( client1.constraints().contains(QCA::IPSecUser) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::TimeStamping) == true, false );
+	    QCOMPARE( client1.constraints().contains(QCA::OCSPSigning) == true, false );
 
 	    QCOMPARE( client1.policies().count(), 1 );
 	    QCOMPARE( client1.policies().at(0), QString("2.16.840.1.101.3.2.1.48.1") );
@@ -636,24 +636,24 @@ void CertUnitTest::altNames76()
 
             QCOMPARE( client1.commonName(), QString("sip1.su.se") );
 
-            QCOMPARE( client1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-            QCOMPARE( client1.constraints().contains(QCA::NonRepudiation), (QBool)true );
-            QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-            QCOMPARE( client1.constraints().contains(QCA::DataEncipherment), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::KeyAgreement), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::CRLSign), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::ServerAuth), (QBool)true );
-            QCOMPARE( client1.constraints().contains(QCA::ClientAuth), (QBool)true );
-            QCOMPARE( client1.constraints().contains(QCA::CodeSigning), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::EmailProtection), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-            QCOMPARE( client1.constraints().contains(QCA::IPSecUser), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::TimeStamping), (QBool)false );
-            QCOMPARE( client1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+            QCOMPARE( client1.constraints().contains(QCA::DigitalSignature) == true, true );
+            QCOMPARE( client1.constraints().contains(QCA::NonRepudiation) == true, true );
+            QCOMPARE( client1.constraints().contains(QCA::KeyEncipherment) == true, true );
+            QCOMPARE( client1.constraints().contains(QCA::DataEncipherment) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::KeyAgreement) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::KeyCertificateSign) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::CRLSign) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::EncipherOnly) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::DecipherOnly) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::ServerAuth) == true, true );
+            QCOMPARE( client1.constraints().contains(QCA::ClientAuth) == true, true );
+            QCOMPARE( client1.constraints().contains(QCA::CodeSigning) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::EmailProtection) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::IPSecTunnel) == true, false);
+            QCOMPARE( client1.constraints().contains(QCA::IPSecUser) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::TimeStamping) == true, false );
+            QCOMPARE( client1.constraints().contains(QCA::OCSPSigning) == true, false );
 
             QCOMPARE( client1.policies().count(), 1 );
 
@@ -773,39 +773,39 @@ void CertUnitTest::checkExpiredServerCerts()
 	    QCOMPARE( server1.notValidBefore().toString(), QDateTime( QDate( 2001, 8, 17 ), QTime( 8, 46, 24 ), Qt::UTC ).toString() );
 	    QCOMPARE( server1.notValidAfter().toString(), QDateTime( QDate( 2006, 8, 16 ), QTime( 8, 46, 24 ), Qt::UTC ).toString() );
 
-	    QCOMPARE( server1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::NonRepudiation), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::DataEncipherment), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::KeyAgreement), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::CRLSign), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::ServerAuth), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::ClientAuth), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::CodeSigning), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::EmailProtection), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-	    QCOMPARE( server1.constraints().contains(QCA::IPSecUser), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::TimeStamping), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+	    QCOMPARE( server1.constraints().contains(QCA::DigitalSignature) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::NonRepudiation) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::KeyEncipherment) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::DataEncipherment) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::KeyAgreement) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::KeyCertificateSign) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::CRLSign) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::EncipherOnly) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::DecipherOnly) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::ServerAuth) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::ClientAuth) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::CodeSigning) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::EmailProtection) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::IPSecTunnel) == true, false);
+	    QCOMPARE( server1.constraints().contains(QCA::IPSecUser) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::TimeStamping) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::OCSPSigning) == true, false );
 
 	    // no policies on this cert
 	    QCOMPARE( server1.policies().count(), 0 );
 
 	    QCA::CertificateInfo subject1 = server1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QCOMPARE( subject1.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure Server Cert"), (QBool)true );
+	    QCOMPARE( subject1.values(QCA::Country).contains("de") == true, true );
+	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
+	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure Server Cert") == true, true );
 
 	    QCA::CertificateInfo issuer1 = server1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QCOMPARE( issuer1.values(QCA::Country).contains("de"), (QBool)true );
-	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate"), (QBool)true );
-	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only"), (QBool)true );
+	    QCOMPARE( issuer1.values(QCA::Country).contains("de") == true, true );
+	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
+	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only") == true, true );
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("0234E2C906F6E0B44253BE04C0CBA7823A6DB509").toByteArray();
 	    QCOMPARE( server1.subjectKeyId(), subjectKeyID );
@@ -876,24 +876,24 @@ void CertUnitTest::checkServerCerts()
 	    QCOMPARE( server1.notValidBefore().toString(), QDateTime( QDate( 2007, 7, 22 ), QTime( 6, 5, 39 ), Qt::UTC ).toString() );
 	    QCOMPARE( server1.notValidAfter().toString(), QDateTime( QDate( 2012, 7, 20 ), QTime( 6, 5, 39 ), Qt::UTC ).toString() );
 
-	    QCOMPARE( server1.constraints().contains(QCA::DigitalSignature), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::NonRepudiation), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::KeyEncipherment), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::DataEncipherment), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::KeyAgreement), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::KeyCertificateSign), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::CRLSign), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::EncipherOnly), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::DecipherOnly), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::ServerAuth), (QBool)true );
-	    QCOMPARE( server1.constraints().contains(QCA::ClientAuth), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::CodeSigning), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::EmailProtection), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::IPSecEndSystem), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::IPSecTunnel), (QBool)false);
-	    QCOMPARE( server1.constraints().contains(QCA::IPSecUser), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::TimeStamping), (QBool)false );
-	    QCOMPARE( server1.constraints().contains(QCA::OCSPSigning), (QBool)false );
+	    QCOMPARE( server1.constraints().contains(QCA::DigitalSignature) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::NonRepudiation) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::KeyEncipherment) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::DataEncipherment) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::KeyAgreement) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::KeyCertificateSign) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::CRLSign) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::EncipherOnly) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::DecipherOnly) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::ServerAuth) == true, true );
+	    QCOMPARE( server1.constraints().contains(QCA::ClientAuth) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::CodeSigning) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::EmailProtection) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::IPSecEndSystem) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::IPSecTunnel) == true, false);
+	    QCOMPARE( server1.constraints().contains(QCA::IPSecUser) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::TimeStamping) == true, false );
+	    QCOMPARE( server1.constraints().contains(QCA::OCSPSigning) == true, false );
 
 	    // no policies on this cert
 	    QCOMPARE( server1.policies().count(), 0 );

@@ -293,11 +293,15 @@ static int pipe_read_avail_console(Q_PIPE_ID pipe)
 	// peek them all
 	rec = (INPUT_RECORD *)malloc(count * sizeof(INPUT_RECORD));
 	BOOL ret;
+#if QT_VERSION >= 0x050000
+	ret = PeekConsoleInputW(pipe, rec, count, &i);
+#else
 	QT_WA(
 		ret = PeekConsoleInputW(pipe, rec, count, &i);
 	,
 		ret = PeekConsoleInputA(pipe, rec, count, &i);
 	)
+#endif
 	if(!ret)
 	{
 		free(rec);
@@ -345,11 +349,15 @@ static int pipe_read_console(Q_PIPE_ID pipe, ushort *data, int max, bool *eof, Q
 	}
 	else
 	{
+#if QT_VERSION >= 0x050000
+		dec = 0;
+#else
 		QT_WA(
 			dec = 0;
 		,
 			dec = QTextCodec::codecForLocale()->makeDecoder();
 		)
+#endif
 		own_decoder = true;
 	}
 
@@ -362,12 +370,16 @@ static int pipe_read_console(Q_PIPE_ID pipe, ushort *data, int max, bool *eof, Q
 
 		BOOL ret;
 		DWORD i;
+#if QT_VERSION >= 0x050000
+		ret = ReadConsoleW(pipe, &uni, 1, &i, NULL);
+#else
 		QT_WA(
 			ret = ReadConsoleW(pipe, &uni, 1, &i, NULL);
 		,
 			ret = ReadConsoleA(pipe, &ansi, 1, &i, NULL);
 			use_uni = false;
 		)
+#endif
 		if(!ret)
 		{
 			// if the first read is an error, then report error
@@ -410,6 +422,9 @@ static int pipe_write_console(Q_PIPE_ID pipe, const ushort *data, int size)
 {
 	DWORD i;
 	BOOL ret;
+#if QT_VERSION >= 0x050000
+	ret = WriteConsoleW(pipe, data, size, &i, NULL);
+#else
 	QT_WA(
 		ret = WriteConsoleW(pipe, data, size, &i, NULL);
 	,
@@ -425,6 +440,7 @@ static int pipe_write_console(Q_PIPE_ID pipe, const ushort *data, int size)
 				return -1;
 		}
 	)
+#endif
 	if(!ret)
 		return -1;
 	return (int)i; // safe to cast since 'size' is signed
@@ -1036,11 +1052,15 @@ public:
 			// console might need a decoder
 			if(consoleMode)
 			{
+#if QT_VERSION >= 0x050000
+				dec = 0;
+#else
 				QT_WA(
 					dec = 0;
 				,
 					dec = QTextCodec::codecForLocale()->makeDecoder();
 				)
+#endif
 			}
 
 			// pipe reader

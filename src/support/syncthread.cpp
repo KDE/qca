@@ -62,12 +62,20 @@ bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVar
 		argTypes += args[n].typeName();
 
 	// get return type
-	int metatype = 0;
+	int metatype = QMetaType::Void;
 	QByteArray retTypeName = methodReturnType(obj->metaObject(), method, argTypes);
+#if QT_VERSION >= 0x050000
+	if(!retTypeName.isEmpty() && retTypeName != "void")
+#else
 	if(!retTypeName.isEmpty())
+#endif
 	{
 		metatype = QMetaType::type(retTypeName.data());
-		if(metatype == 0) // lookup failed
+#if QT_VERSION >= 0x050000
+		if(metatype == QMetaType::UnknownType) // lookup failed
+#else
+		if(metatype == QMetaType::Void) // lookup failed
+#endif
 			return false;
 	}
 
@@ -77,7 +85,8 @@ bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVar
 
 	QGenericReturnArgument retarg;
 	QVariant retval;
-	if(metatype != 0)
+
+	if(metatype != QMetaType::Void)
 	{
 		retval = QVariant(metatype, (const void *)0);
 		retarg = QGenericReturnArgument(retval.typeName(), retval.data());

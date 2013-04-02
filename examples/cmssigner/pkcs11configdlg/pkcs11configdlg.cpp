@@ -24,6 +24,8 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtCrypto>
+#include <QMessageBox>
+#include <QFileDialog>
 #include "ui_pkcs11config.h"
 
 //----------------------------------------------------------------------------

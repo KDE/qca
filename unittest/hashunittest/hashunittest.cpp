@@ -114,7 +114,11 @@ void HashUnitTest::md2test()
 
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("md2", provider))
+#if QT_VERSION >= 0x050000
+	    QSKIP(QString("MD2 not supported for "+provider).toLocal8Bit());
+#else
 	    QSKIP(QString("MD2 not supported for "+provider).toLocal8Bit(), SkipSingle);
+#endif
 	QString hashResult = QCA::Hash("md2", provider).hashToString(input);
 	QCOMPARE( hashResult, expectedHash );
     }

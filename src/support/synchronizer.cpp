@@ -58,7 +58,7 @@ public:
 
 	static bool haveFixer(QObject *obj)
 	{
-		return (qFindChild<TimerFixer *>(obj) ? true: false);
+		return obj->findChild<TimerFixer *>() ? true : false;
 	}
 
 	TimerFixer(QObject *_target, TimerFixer *_fp = 0) : QObject(_target)
@@ -180,7 +180,11 @@ private slots:
 			int timeLeft = qMax(info.interval - info.time.elapsed(), 0);
 			info.fixInterval = true;
 			ed->unregisterTimer(info.id);
+#if QT_VERSION >= 0x050000
+			ed->registerTimer(info.id, timeLeft, Qt::CoarseTimer, target);
+#else
 			ed->registerTimer(info.id, timeLeft, target);
+#endif
 
 #ifdef TIMERFIXER_DEBUG
 			printf("TimerFixer[%p] adjusting [%d] to %d\n", this, info.id, timeLeft);
@@ -239,7 +243,11 @@ private:
 #endif
 			info.fixInterval = false;
 			ed->unregisterTimer(info.id);
+#if QT_VERSION >= 0x050000
+			ed->registerTimer(info.id, info.interval, Qt::CoarseTimer, target);
+#else
 			ed->registerTimer(info.id, info.interval, target);
+#endif
 		}
 
 		info.time.start();
