@@ -42,17 +42,13 @@ SET( moc_SOURCES
 	support/syncthread.cpp
 )
 
-IF (Q_WS_X11)
-  SET( nonmoc_SOURCES ${nonmoc_SOURCES} qca_systemstore_flatfile.cpp )
-ENDIF(Q_WS_X11)
-
 IF (WIN32)
   SET( moc_SOURCES ${moc_SOURCES} qca_systemstore_win.cpp )
-ENDIF(WIN32)
-
-if(APPLE)
+elseif(APPLE)
   set( nonmoc_SOURCES ${nonmoc_SOURCES} qca_systemstore_mac.cpp)
-endif(APPLE)
+else()
+  SET( nonmoc_SOURCES ${nonmoc_SOURCES} qca_systemstore_flatfile.cpp )
+endif()
 
 # Support files
 #SET( qca_HEADERS ${qca_HEADERS} support/dirwatch/dirwatch_p.h )
