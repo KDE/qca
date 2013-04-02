@@ -807,6 +807,9 @@ Provider::Context *TestProvider::createContext(const QString &type)
 class TestPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
+#if QT_VERSION >= 0x050000
+	Q_PLUGIN_METADATA(IID "org.psi-im.qca-test")
+#endif
 	Q_INTERFACES(QCAPlugin)
 public:
 	virtual Provider *createProvider() { return new TestProvider; }
@@ -814,4 +817,6 @@ public:
 
 #include "qca-test.moc"
 
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(qca_test, TestPlugin);
+#endif

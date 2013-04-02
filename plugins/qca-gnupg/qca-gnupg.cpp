@@ -1785,11 +1785,15 @@ public:
 class gnupgPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
+#if QT_VERSION >= 0x050000
+	Q_PLUGIN_METADATA(IID "org.psi-im.qca-gnupg")
+#endif
 	Q_INTERFACES(QCAPlugin)
 public:
 	virtual QCA::Provider *createProvider() { return new gnupgProvider; }
 };
 
 #include "qca-gnupg.moc"
-
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(qca_gnupg, gnupgPlugin)
+#endif

@@ -3099,7 +3099,7 @@ QDateTime ASN1_UTCTIME_QDateTime(ASN1_UTCTIME *tm, int *isGmt)
 		s = (v[10]-'0')*10+(v[11]-'0');
 
 	// localize the date and display it.
-	qdate.setYMD(y+1900, M, d);
+	qdate.setDate(y+1900, M, d);
 	qtime.setHMS(h,m,s);
 	qdt.setDate(qdate); qdt.setTime(qtime);
 auq_err:
@@ -4549,7 +4549,7 @@ public:
 
 		int aliasLength;
 		char *aliasData = (char*)X509_alias_get0(cert, &aliasLength);
-		*name = QString::fromAscii(aliasData, aliasLength);
+		*name = QString::fromLatin1(aliasData, aliasLength);
 
 		MyPKeyContext *pk = new MyPKeyContext(provider());
 		PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
@@ -5743,7 +5743,7 @@ public:
                 if ( targetHostName.isEmpty() == false ) {
                         // we have a target
                         // this might fail, but we ignore that for now
-                        char *hostname = targetHostName.toAscii().data();
+                        char *hostname = targetHostName.toLatin1().data();
                         SSL_set_tlsext_host_name( ssl, hostname );
                 }
 #endif
@@ -7124,6 +7124,9 @@ public:
 class opensslPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
+#if QT_VERSION >= 0x050000
+	Q_PLUGIN_METADATA(IID "org.psi-im.qca-ossl")
+#endif
 	Q_INTERFACES(QCAPlugin)
 public:
 	virtual Provider *createProvider() { return new opensslProvider; }
@@ -7131,5 +7134,6 @@ public:
 
 #include "qca-ossl.moc"
 
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(qca_ossl, opensslPlugin)
-
+#endif

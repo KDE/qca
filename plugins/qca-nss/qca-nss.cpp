@@ -503,6 +503,9 @@ public:
 class nssPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
+#if QT_VERSION >= 0x050000
+	Q_PLUGIN_METADATA(IID "org.psi-im.qca-nss")
+#endif
 	Q_INTERFACES( QCAPlugin )
 public:
 	virtual QCA::Provider *createProvider() { return new nssProvider; }
@@ -510,5 +513,6 @@ public:
 
 #include "qca-nss.moc"
 
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(qca_nss, nssPlugin)
-
+#endif

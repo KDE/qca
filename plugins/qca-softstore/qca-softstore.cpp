@@ -1503,7 +1503,9 @@ const int softstoreProvider::_CONFIG_MAX_ENTRIES = 50;
 class softstorePlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
+#if QT_VERSION >= 0x050000
 	Q_INTERFACES(QCAPlugin)
+#endif
 
 public:
 	virtual Provider *createProvider() { return new softstoreProvider; }
@@ -1511,4 +1513,6 @@ public:
 
 #include "qca-softstore.moc"
 
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(qca_softstore, softstorePlugin)
+#endif
