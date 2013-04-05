@@ -1,6 +1,9 @@
 ENABLE_TESTING()
 # QTEST_MAIN is using QApplication when QT_GUI_LIB is defined
 remove_definitions(-DQT_GUI_LIB)
+if(Qt5Core_FOUND)
+  find_package(Qt5Transitional REQUIRED Test)
+endif(Qt5Core_FOUND)
 add_subdirectory(base64unittest)
 add_subdirectory(bigintunittest)
 add_subdirectory(certunittest)

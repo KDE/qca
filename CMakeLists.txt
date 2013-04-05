@@ -157,7 +157,7 @@ add_subdirectory(src)
 add_subdirectory(tools)
 add_subdirectory(plugins)
 
-if(BUILD_TESTS AND NOT Qt5Core_FOUND)
+if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(unittest)
   add_subdirectory(examples)
