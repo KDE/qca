@@ -28,7 +28,11 @@ endif()
 
 set(PKGCONFIG_INSTALL_PREFIX "${LIB_INSTALL_DIR}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
 
-set(QCA_LIB_MAJOR_VERSION "2")
+if (Qt5Core_FOUND)
+  set(QCA_LIB_MAJOR_VERSION "3")
+else()
+  set(QCA_LIB_MAJOR_VERSION "2")
+endif()
 set(QCA_LIB_MINOR_VERSION "0")
 set(QCA_LIB_PATCH_VERSION "3")
 
