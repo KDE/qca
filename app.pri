@@ -1,6 +1,11 @@
 include(confapp.pri)
 
-mac:QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.3
+mac: {
+	QMAKE_MACOSX_DEPLOYMENT_TARGET=$$(QMAKE_MACOSX_DEPLOYMENT_TARGET)
+	isEmpty(QMAKE_MACOSX_DEPLOYMENT_TARGET) {
+		QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.3
+	}
+}
 
 exists(crypto.prf) {
 	# our apps should build against the qca in this tree
