@@ -307,11 +307,11 @@ public:
 	   might want to use code like this:
 	   \code
 QFile f( "file.dat" );
-if ( f1.open( IO_ReadOnly ) )
+if ( f.open( QIODevice::ReadOnly ) )
 {
 	QCA::Hash hashObj("sha1");
-	hashObj.update( &f1 );
-	QString output = hashObj.final() ) ),
+	hashObj.update( &f );
+	QByteArray output = hashObj.final().toByteArray();
 }
 	   \endcode
 	*/
@@ -359,7 +359,7 @@ SecureArray outputArray = QCA::Hash("md2")::hash(sampleArray);
 	   string
 
 	   This is a convenience method that returns the
-	   hash of a QSeecureArray as a hexadecimal
+	   hash of a SecureArray as a hexadecimal
 	   representation encoded in a QString.
 
 	   \param array the QByteArray to hash
