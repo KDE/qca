@@ -24,6 +24,7 @@
 #include <QLatin1String>
 #include <QMutex>
 #include <stdio.h>
+#include <QCoreApplication>
 
 #ifdef Q_OS_MAC
 #include <QFileInfo>
@@ -228,48 +229,125 @@ static void hack_fix(DirWatch *dw)
 
 // end ugly hack
 
-#ifdef Q_OS_WIN
-static QString find_reg_gpgProgram()
+static bool check_bin(const QString &bin)
 {
-	HKEY root;
-	root = HKEY_CURRENT_USER;
+	QFileInfo fi(bin);
+	return fi.exists();
+}
 
-	HKEY hkey;
-	const char *path = "Software\\GNU\\GnuPG";
-	if(RegOpenKeyExA(HKEY_CURRENT_USER, path, 0, KEY_QUERY_VALUE, &hkey) != ERROR_SUCCESS)
-	{
-		if(RegOpenKeyExA(HKEY_LOCAL_MACHINE, path, 0, KEY_QUERY_VALUE, &hkey) != ERROR_SUCCESS)
-			return QString();
-	}
+#ifdef Q_OS_WIN
+static bool get_reg_key(HKEY root, const char *path, QString &value)
+{
+	HKEY hkey = 0;
 
 	char szValue[256];
 	DWORD dwLen = 256;
-	if(RegQueryValueExA(hkey, "gpgProgram", NULL, NULL, (LPBYTE)szValue, &dwLen) != ERROR_SUCCESS)
-	{
-		RegCloseKey(hkey);
-		return QString();
-	}
 
-	RegCloseKey(hkey);
-	return QString::fromLatin1(szValue);
+	bool res = false;
+
+	if(RegOpenKeyExA(root, path, 0, KEY_QUERY_VALUE, &hkey) == ERROR_SUCCESS)
+	{
+		if (RegQueryValueExA(hkey, "Install Directory", NULL, NULL, (LPBYTE)szValue, &dwLen) == ERROR_SUCCESS)
+		{
+			value = QString::fromLocal8Bit(szValue);
+			res = true;
+		}
+		RegCloseKey(hkey);
+	}
+	return res;
+}
+
+
+static QString find_reg_gpgProgram()
+{
+	QStringList bins;
+	bins << "gpg.exe" << "gpg2.exe";
+
+	HKEY root;
+	root = HKEY_CURRENT_USER;
+
+	const char *path = "Software\\GNU\\GnuPG";
+	const char *path2 = "Software\\Wow6432Node\\GNU\\GnuPG";
+
+	QString dir;
+	if (get_reg_key(HKEY_CURRENT_USER, path, dir)) {}
+	else if (get_reg_key(HKEY_CURRENT_USER, path2, dir)) {}
+	else if (get_reg_key(HKEY_LOCAL_MACHINE, path, dir)) {}
+	else if (get_reg_key(HKEY_LOCAL_MACHINE, path2, dir)) {}
+
+	if (!dir.isEmpty())
+	{
+		foreach (QString bin, bins)
+		{
+			if (check_bin(dir + "\\" + bin))
+			{
+				return dir + "\\" + bin;
+			}
+		}
+	}
+	return QString();
 }
 #endif
 
 static QString find_bin()
 {
-	QString bin = "gpg";
+	// gpg and gpg2 has identical semantics
+	// so any from them can be used
+	QStringList bins;
 #ifdef Q_OS_WIN
-	QString s = find_reg_gpgProgram();
-	if(!s.isNull())
-		bin = s;
+	bins << "gpg.exe" << "gpg2.exe";
+#else
+	bins << "gpg" << "gpg2";
 #endif
+
+	// Prefer bundled gpg
+	foreach (QString bin, bins)
+	{
+		if (check_bin(QCoreApplication::applicationDirPath() + "/" + bin))
+		{
+			return QCoreApplication::applicationDirPath() + "/" + bin;
+		}
+	}
+
+#ifdef Q_OS_WIN
+	// On Windows look up at registry
+	QString bin = find_reg_gpgProgram();
+	if (!bin.isEmpty())
+		return bin;
+#endif
+
+	// Look up at PATH environment
+#ifdef Q_OS_WIN
+	QString pathSep = ";";
+#else
+	QString pathSep = ":";
+#endif
+
+	QStringList paths = QString::fromUtf8(qgetenv("PATH")).split(pathSep, QString::SkipEmptyParts);
+
 #ifdef Q_OS_MAC
-	// mac-gpg
-	QFileInfo fi("/usr/local/bin/gpg");
-	if(fi.exists())
-		bin = fi.filePath();
+	// On Mac OS bundled always uses system default PATH
+	// so it need explicity add extra paths which can
+	// contain gpg
+	// Mac GPG and brew use /usr/local/bin
+	// MacPorts uses /opt/local/bin
+	paths << "/usr/local/bin" << "/opt/local/bin";
 #endif
-	return bin;
+	paths.removeDuplicates();
+
+	foreach (QString path, paths)
+	{
+		foreach (QString bin, bins)
+		{
+			if (check_bin(path + "/" + bin))
+			{
+				return path + "/" + bin;
+			}
+		}
+	}
+
+	// Return nothing if gpg not found
+	return QString();
 }
 
 static QString escape_string(const QString &in)
