@@ -229,7 +229,7 @@ static void hack_fix(DirWatch *dw)
 
 // end ugly hack
 
-static bool check_bin(const QString &bin)
+inline bool check_bin(const QString &bin)
 {
 	QFileInfo fi(bin);
 	return fi.exists();
@@ -270,14 +270,15 @@ static QString find_reg_gpgProgram()
 	const char *path2 = "Software\\Wow6432Node\\GNU\\GnuPG";
 
 	QString dir;
-	if (get_reg_key(HKEY_CURRENT_USER, path, dir)) {}
-	else if (get_reg_key(HKEY_CURRENT_USER, path2, dir)) {}
-	else if (get_reg_key(HKEY_LOCAL_MACHINE, path, dir)) {}
-	else if (get_reg_key(HKEY_LOCAL_MACHINE, path2, dir)) {}
+	// check list of possible places in registry
+	get_reg_key(HKEY_CURRENT_USER, path, dir)  ||
+	get_reg_key(HKEY_CURRENT_USER, path2, dir) ||
+	get_reg_key(HKEY_LOCAL_MACHINE, path, dir) ||
+	get_reg_key(HKEY_LOCAL_MACHINE, path2, dir);
 
 	if (!dir.isEmpty())
 	{
-		foreach (QString bin, bins)
+		foreach (const QString &bin, bins)
 		{
 			if (check_bin(dir + "\\" + bin))
 			{
@@ -301,7 +302,7 @@ static QString find_bin()
 #endif
 
 	// Prefer bundled gpg
-	foreach (QString bin, bins)
+	foreach (const QString &bin, bins)
 	{
 		if (check_bin(QCoreApplication::applicationDirPath() + "/" + bin))
 		{
@@ -335,9 +336,9 @@ static QString find_bin()
 #endif
 	paths.removeDuplicates();
 
-	foreach (QString path, paths)
+	foreach (const QString &path, paths)
 	{
-		foreach (QString bin, bins)
+		foreach (const QString &bin, bins)
 		{
 			if (check_bin(path + "/" + bin))
 			{
