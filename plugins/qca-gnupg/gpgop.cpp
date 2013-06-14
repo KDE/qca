@@ -1006,8 +1006,15 @@ private:
 #endif
 
 		// put stdout and stderr into QStrings
-		QString outstr = QString::fromLatin1(buf_stdout);
-		QString errstr = QString::fromLatin1(buf_stderr);
+
+		// FIXME: on Windows gpg returns --with-colons in
+		// utf-8 charset but for -k or -K it uses
+		// console output charset (which may will be differs
+		// then system charse). Will be wait a resolving of
+		// QTBUG-13303 https://bugreports.qt-project.org/browse/QTBUG-13303
+		// After it need to make some changes.
+		QString outstr = QString::fromUtf8(buf_stdout);
+		QString errstr = QString::fromUtf8(buf_stderr);
 
 		if(collectOutput)
 			diagnosticText += QString("stdout: [%1]\n").arg(outstr);
