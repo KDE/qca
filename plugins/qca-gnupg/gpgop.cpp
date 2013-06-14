@@ -367,7 +367,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 		}
 		else if(type == "uid")
 		{
-			QByteArray uid = getCString(f[9].toLatin1());
+			QByteArray uid = getCString(f[9].toUtf8());
 			keyList.last().userIds.append(QString::fromUtf8(uid));
 		}
 		else if(type == "fpr")

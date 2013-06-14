@@ -25,10 +25,7 @@
 #include <QMutex>
 #include <stdio.h>
 #include <QCoreApplication>
-
-#ifdef Q_OS_MAC
 #include <QFileInfo>
-#endif
 
 #ifdef Q_OS_WIN
 # include<windows.h>
