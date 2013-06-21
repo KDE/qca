@@ -48,7 +48,7 @@
 // contexts requiring STACK pointers.
 #undef CHECKED_PTR_OF
 #define CHECKED_PTR_OF(type, p) \
-	            ((_STACK*) (1 ? p : (type*)0))
+	((_STACK*) (1 ? p : (type*)0))
 #endif
 
 using namespace QCA;
@@ -293,7 +293,7 @@ static void try_get_name_item(X509_NAME *name, int nid, const CertificateInfoTyp
 
 static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, const CertificateInfoType &t, CertificateInfo *info)
 {
-        ASN1_OBJECT *oid = OBJ_txt2obj( oidText.toLatin1().data(), 1); // 1 = only accept dotted input
+	ASN1_OBJECT *oid = OBJ_txt2obj( oidText.toLatin1().data(), 1); // 1 = only accept dotted input
 	if(!oid)
 		return;
 
@@ -394,76 +394,76 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	GENERAL_NAME *name = 0;
 	switch(t.known())
 	{
-		case Email:
-		{
-			QByteArray buf = val.toLatin1();
+	case Email:
+	{
+		QByteArray buf = val.toLatin1();
 
-			ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
-			ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
+		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
-			name = GENERAL_NAME_new();
-			name->type = GEN_EMAIL;
-			name->d.rfc822Name = str;
-			break;
-		}
-		case URI:
-		{
-			QByteArray buf = val.toLatin1();
+		name = GENERAL_NAME_new();
+		name->type = GEN_EMAIL;
+		name->d.rfc822Name = str;
+		break;
+	}
+	case URI:
+	{
+		QByteArray buf = val.toLatin1();
 
-			ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
-			ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
+		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
-			name = GENERAL_NAME_new();
-			name->type = GEN_URI;
-			name->d.uniformResourceIdentifier = str;
-			break;
-		}
-		case DNS:
-		{
-			QByteArray buf = val.toLatin1();
+		name = GENERAL_NAME_new();
+		name->type = GEN_URI;
+		name->d.uniformResourceIdentifier = str;
+		break;
+	}
+	case DNS:
+	{
+		QByteArray buf = val.toLatin1();
 
-			ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
-			ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
+		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
-			name = GENERAL_NAME_new();
-			name->type = GEN_DNS;
-			name->d.dNSName = str;
-			break;
-		}
-		case IPAddress:
-		{
-			QByteArray buf = ipaddress_string_to_bytes(val);
+		name = GENERAL_NAME_new();
+		name->type = GEN_DNS;
+		name->d.dNSName = str;
+		break;
+	}
+	case IPAddress:
+	{
+		QByteArray buf = ipaddress_string_to_bytes(val);
 
-			ASN1_OCTET_STRING *str = ASN1_OCTET_STRING_new();
-			ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_OCTET_STRING *str = ASN1_OCTET_STRING_new();
+		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
-			name = GENERAL_NAME_new();
-			name->type = GEN_IPADD;
-			name->d.iPAddress = str;
-			break;
-		}
-		case XMPP:
-		{
-			QByteArray buf = val.toUtf8();
+		name = GENERAL_NAME_new();
+		name->type = GEN_IPADD;
+		name->d.iPAddress = str;
+		break;
+	}
+	case XMPP:
+	{
+		QByteArray buf = val.toUtf8();
 
-			ASN1_UTF8STRING *str = ASN1_UTF8STRING_new();
-			ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_UTF8STRING *str = ASN1_UTF8STRING_new();
+		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
-			ASN1_TYPE *at = ASN1_TYPE_new();
-			at->type = V_ASN1_UTF8STRING;
-			at->value.utf8string = str;
+		ASN1_TYPE *at = ASN1_TYPE_new();
+		at->type = V_ASN1_UTF8STRING;
+		at->value.utf8string = str;
 
-			OTHERNAME *other = OTHERNAME_new();
-			other->type_id = OBJ_txt2obj("1.3.6.1.5.5.7.8.5", 1); // 1 = only accept dotted input
-			other->value = at;
+		OTHERNAME *other = OTHERNAME_new();
+		other->type_id = OBJ_txt2obj("1.3.6.1.5.5.7.8.5", 1); // 1 = only accept dotted input
+		other->value = at;
 
-			name = GENERAL_NAME_new();
-			name->type = GEN_OTHERNAME;
-			name->d.otherName = other;
-			break;
-		}
-		default:
-			break;
+		name = GENERAL_NAME_new();
+		name->type = GEN_OTHERNAME;
+		name->d.otherName = other;
+		break;
+	}
+	default:
+		break;
 	}
 	return name;
 }
@@ -500,128 +500,128 @@ static X509_EXTENSION *new_cert_subject_alt_name(const CertificateInfo &info)
 
 static GENERAL_NAME *find_next_general_name(GENERAL_NAMES *names, int type, int *pos)
 {
-        int temp = *pos;
-        GENERAL_NAME *gn = 0;
-        *pos = -1;
-        for(int n = temp; n < sk_GENERAL_NAME_num(names); ++n)
-        {
-                GENERAL_NAME *i = sk_GENERAL_NAME_value(names, n);
-                if(i->type == type)
-                {
-                        gn = i;
-                        *pos = n;
-                        break;
-                }
-        }
-        return gn;
+	int temp = *pos;
+	GENERAL_NAME *gn = 0;
+	*pos = -1;
+	for(int n = temp; n < sk_GENERAL_NAME_num(names); ++n)
+	{
+		GENERAL_NAME *i = sk_GENERAL_NAME_value(names, n);
+		if(i->type == type)
+		{
+			gn = i;
+			*pos = n;
+			break;
+		}
+	}
+	return gn;
 }
 
 static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType &t, CertificateInfo *info)
 {
-        switch(t.known())
-        {
-                case Email:
-                {
-                        int pos = 0;
-                        while (pos != -1)
-                        {
-                                GENERAL_NAME *gn = find_next_general_name(names, GEN_EMAIL, &pos);
-                                if (pos != -1)
-                                {
-                                        QByteArray cs((const char *)ASN1_STRING_data(gn->d.rfc822Name), ASN1_STRING_length(gn->d.rfc822Name));
-                                        info->insert(t, QString::fromLatin1(cs));
-                                        ++pos;
-                                }
-                        }
-                        break;
-                }
-                case URI:
-                {
-                        int pos = 0;
-                        while (pos != -1)
-                        {
-                                GENERAL_NAME *gn = find_next_general_name(names, GEN_URI, &pos);
-                                if (pos != -1)
-                                {
-                                        QByteArray cs((const char *)ASN1_STRING_data(gn->d.uniformResourceIdentifier), ASN1_STRING_length(gn->d.uniformResourceIdentifier));
-                                        info->insert(t, QString::fromLatin1(cs));
-                                        ++pos;
-                                }
-                        }
-                        break;
-                }
-                case DNS:
-                {
-                        int pos = 0;
-                        while (pos != -1)
-                        {
-                                GENERAL_NAME *gn = find_next_general_name(names, GEN_DNS, &pos);
-                                if (pos != -1)
-                                {
-                                        QByteArray cs((const char *)ASN1_STRING_data(gn->d.dNSName), ASN1_STRING_length(gn->d.dNSName));
-                                        info->insert(t, QString::fromLatin1(cs));
-                                        ++pos;
-                                }
-                        }
-                        break;
-                }
-                case IPAddress:
-                {
-                        int pos = 0;
-                        while (pos != -1)
-                        {
-                                GENERAL_NAME *gn = find_next_general_name(names, GEN_IPADD, &pos);
-                                if (pos != -1)
-                                {
-                                        ASN1_OCTET_STRING *str = gn->d.iPAddress;
-                                        QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
+	switch(t.known())
+	{
+	case Email:
+	{
+		int pos = 0;
+		while (pos != -1)
+		{
+			GENERAL_NAME *gn = find_next_general_name(names, GEN_EMAIL, &pos);
+			if (pos != -1)
+			{
+				QByteArray cs((const char *)ASN1_STRING_data(gn->d.rfc822Name), ASN1_STRING_length(gn->d.rfc822Name));
+				info->insert(t, QString::fromLatin1(cs));
+				++pos;
+			}
+		}
+		break;
+	}
+	case URI:
+	{
+		int pos = 0;
+		while (pos != -1)
+		{
+			GENERAL_NAME *gn = find_next_general_name(names, GEN_URI, &pos);
+			if (pos != -1)
+			{
+				QByteArray cs((const char *)ASN1_STRING_data(gn->d.uniformResourceIdentifier), ASN1_STRING_length(gn->d.uniformResourceIdentifier));
+				info->insert(t, QString::fromLatin1(cs));
+				++pos;
+			}
+		}
+		break;
+	}
+	case DNS:
+	{
+		int pos = 0;
+		while (pos != -1)
+		{
+			GENERAL_NAME *gn = find_next_general_name(names, GEN_DNS, &pos);
+			if (pos != -1)
+			{
+				QByteArray cs((const char *)ASN1_STRING_data(gn->d.dNSName), ASN1_STRING_length(gn->d.dNSName));
+				info->insert(t, QString::fromLatin1(cs));
+				++pos;
+			}
+		}
+		break;
+	}
+	case IPAddress:
+	{
+		int pos = 0;
+		while (pos != -1)
+		{
+			GENERAL_NAME *gn = find_next_general_name(names, GEN_IPADD, &pos);
+			if (pos != -1)
+			{
+				ASN1_OCTET_STRING *str = gn->d.iPAddress;
+				QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
 
-                                        QString out;
-                                        // IPv4 (TODO: handle IPv6)
-                                        if(buf.size() == 4)
-                                        {
-                                                out = "0.0.0.0";
-                                        }
-                                        else
-                                                break;
-                                        info->insert(t, out);
-                                        ++pos;
-                                }
-                        }
-                        break;
-                }
-                case XMPP:
-                {
-                        int pos = 0;
-                        while( pos != -1)
-                        {
-                                GENERAL_NAME *gn = find_next_general_name(names, GEN_OTHERNAME, &pos);
-                                if (pos != -1)
-                                {
-                                        OTHERNAME *other = gn->d.otherName;
-                                        if(!other)
-                                                break;
+				QString out;
+				// IPv4 (TODO: handle IPv6)
+				if(buf.size() == 4)
+				{
+					out = "0.0.0.0";
+				}
+				else
+					break;
+				info->insert(t, out);
+				++pos;
+			}
+		}
+		break;
+	}
+	case XMPP:
+	{
+		int pos = 0;
+		while( pos != -1)
+		{
+			GENERAL_NAME *gn = find_next_general_name(names, GEN_OTHERNAME, &pos);
+			if (pos != -1)
+			{
+				OTHERNAME *other = gn->d.otherName;
+				if(!other)
+					break;
 
-                                        ASN1_OBJECT *obj = OBJ_txt2obj("1.3.6.1.5.5.7.8.5", 1); // 1 = only accept dotted input
-                                        if(OBJ_cmp(other->type_id, obj) != 0)
-                                                break;
-                                        ASN1_OBJECT_free(obj);
+				ASN1_OBJECT *obj = OBJ_txt2obj("1.3.6.1.5.5.7.8.5", 1); // 1 = only accept dotted input
+				if(OBJ_cmp(other->type_id, obj) != 0)
+					break;
+				ASN1_OBJECT_free(obj);
 
-                                        ASN1_TYPE *at = other->value;
-                                        if(at->type != V_ASN1_UTF8STRING)
-                                                break;
+				ASN1_TYPE *at = other->value;
+				if(at->type != V_ASN1_UTF8STRING)
+					break;
 
-                                        ASN1_UTF8STRING *str = at->value.utf8string;
-                                        QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
-                                        info->insert(t, QString::fromUtf8(buf));
-                                        ++pos;
-                                }
-                        }
-                        break;
-                }
-		default:
-                        break;
-        }
+				ASN1_UTF8STRING *str = at->value.utf8string;
+				QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
+				info->insert(t, QString::fromUtf8(buf));
+				++pos;
+			}
+		}
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 static CertificateInfo get_cert_alt_name(X509_EXTENSION *ex)
@@ -645,35 +645,35 @@ static X509_EXTENSION *new_cert_key_usage(const Constraints &constraints)
 		int bit = -1;
 		switch(constraints[n].known())
 		{
-			case DigitalSignature:
-				bit = Bit_DigitalSignature;
-				break;
-			case NonRepudiation:
-				bit = Bit_NonRepudiation;
-				break;
-			case KeyEncipherment:
-				bit = Bit_KeyEncipherment;
-				break;
-			case DataEncipherment:
-				bit = Bit_DataEncipherment;
-				break;
-			case KeyAgreement:
-				bit = Bit_KeyAgreement;
-				break;
-			case KeyCertificateSign:
-				bit = Bit_KeyCertificateSign;
-				break;
-			case CRLSign:
-				bit = Bit_CRLSign;
-				break;
-			case EncipherOnly:
-				bit = Bit_EncipherOnly;
-				break;
-			case DecipherOnly:
-				bit = Bit_DecipherOnly;
-				break;
-			default:
-				break;
+		case DigitalSignature:
+			bit = Bit_DigitalSignature;
+			break;
+		case NonRepudiation:
+			bit = Bit_NonRepudiation;
+			break;
+		case KeyEncipherment:
+			bit = Bit_KeyEncipherment;
+			break;
+		case DataEncipherment:
+			bit = Bit_DataEncipherment;
+			break;
+		case KeyAgreement:
+			bit = Bit_KeyAgreement;
+			break;
+		case KeyCertificateSign:
+			bit = Bit_KeyCertificateSign;
+			break;
+		case CRLSign:
+			bit = Bit_CRLSign;
+			break;
+		case EncipherOnly:
+			bit = Bit_EncipherOnly;
+			break;
+		case DecipherOnly:
+			bit = Bit_DecipherOnly;
+			break;
+		default:
+			break;
 		}
 		if(bit != -1)
 		{
@@ -725,35 +725,35 @@ static X509_EXTENSION *new_cert_ext_key_usage(const Constraints &constraints)
 		// TODO: don't use known/nid, and instead just use OIDs
 		switch(constraints[n].known())
 		{
-			case ServerAuth:
-				nid = NID_server_auth;
-				break;
-			case ClientAuth:
-				nid = NID_client_auth;
-				break;
-			case CodeSigning:
-				nid = NID_code_sign;
-				break;
-			case EmailProtection:
-				nid = NID_email_protect;
-				break;
-			case IPSecEndSystem:
-				nid = NID_ipsecEndSystem;
-				break;
-			case IPSecTunnel:
-				nid = NID_ipsecTunnel;
-				break;
-			case IPSecUser:
-				nid = NID_ipsecUser;
-				break;
-			case TimeStamping:
-				nid = NID_time_stamp;
-				break;
-			case OCSPSigning:
-				nid = NID_OCSP_sign;
-				break;
-			default:
-				break;
+		case ServerAuth:
+			nid = NID_server_auth;
+			break;
+		case ClientAuth:
+			nid = NID_client_auth;
+			break;
+		case CodeSigning:
+			nid = NID_code_sign;
+			break;
+		case EmailProtection:
+			nid = NID_email_protect;
+			break;
+		case IPSecEndSystem:
+			nid = NID_ipsecEndSystem;
+			break;
+		case IPSecTunnel:
+			nid = NID_ipsecTunnel;
+			break;
+		case IPSecUser:
+			nid = NID_ipsecUser;
+			break;
+		case TimeStamping:
+			nid = NID_time_stamp;
+			break;
+		case OCSPSigning:
+			nid = NID_OCSP_sign;
+			break;
+		default:
+			break;
 		}
 		if(nid != -1)
 		{
@@ -787,33 +787,33 @@ static Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
 		int t = -1;
 		switch(nid)
 		{
-			case NID_server_auth:
-				t = ServerAuth;
-				break;
-			case NID_client_auth:
-				t = ClientAuth;
-				break;
-			case NID_code_sign:
-				t = CodeSigning;
-				break;
-			case NID_email_protect:
-				t = EmailProtection;
-				break;
-			case NID_ipsecEndSystem:
-				t = IPSecEndSystem;
-				break;
-			case NID_ipsecTunnel:
-				t = IPSecTunnel;
-				break;
-			case NID_ipsecUser:
-				t = IPSecUser;
-				break;
-			case NID_time_stamp:
-				t = TimeStamping;
-				break;
-			case NID_OCSP_sign:
-				t = OCSPSigning;
-				break;
+		case NID_server_auth:
+			t = ServerAuth;
+			break;
+		case NID_client_auth:
+			t = ClientAuth;
+			break;
+		case NID_code_sign:
+			t = CodeSigning;
+			break;
+		case NID_email_protect:
+			t = EmailProtection;
+			break;
+		case NID_ipsecEndSystem:
+			t = IPSecEndSystem;
+			break;
+		case NID_ipsecTunnel:
+			t = IPSecTunnel;
+			break;
+		case NID_ipsecUser:
+			t = IPSecUser;
+			break;
+		case NID_time_stamp:
+			t = TimeStamping;
+			break;
+		case NID_OCSP_sign:
+			t = OCSPSigning;
+			break;
 		};
 
 		if(t == -1)
@@ -889,55 +889,55 @@ static Validity convert_verify_error(int err)
 	Validity rc;
 	switch(err)
 	{
-		case X509_V_ERR_CERT_REJECTED:
-			rc = ErrorRejected;
-			break;
-		case X509_V_ERR_CERT_UNTRUSTED:
-			rc = ErrorUntrusted;
-			break;
-		case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
-		case X509_V_ERR_CERT_SIGNATURE_FAILURE:
-		case X509_V_ERR_CRL_SIGNATURE_FAILURE:
-		case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
-		case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
-			rc = ErrorSignatureFailed;
-			break;
-		case X509_V_ERR_INVALID_CA:
-		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
-		case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
-		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
-			rc = ErrorInvalidCA;
-			break;
-		case X509_V_ERR_INVALID_PURPOSE:  // note: not used by store verify
-			rc = ErrorInvalidPurpose;
-			break;
-		case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-		case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-			rc = ErrorSelfSigned;
-			break;
-		case X509_V_ERR_CERT_REVOKED:
-			rc = ErrorRevoked;
-			break;
-		case X509_V_ERR_PATH_LENGTH_EXCEEDED:
-			rc = ErrorPathLengthExceeded;
-			break;
-		case X509_V_ERR_CERT_NOT_YET_VALID:
-		case X509_V_ERR_CERT_HAS_EXPIRED:
-		case X509_V_ERR_CRL_NOT_YET_VALID:
-		case X509_V_ERR_CRL_HAS_EXPIRED:
-		case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
-		case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
-		case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
-		case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
-			rc = ErrorExpired;
-			break;
-		case X509_V_ERR_APPLICATION_VERIFICATION:
-		case X509_V_ERR_OUT_OF_MEM:
-		case X509_V_ERR_UNABLE_TO_GET_CRL:
-		case X509_V_ERR_CERT_CHAIN_TOO_LONG:
-		default:
-			rc = ErrorValidityUnknown;
-			break;
+	case X509_V_ERR_CERT_REJECTED:
+		rc = ErrorRejected;
+		break;
+	case X509_V_ERR_CERT_UNTRUSTED:
+		rc = ErrorUntrusted;
+		break;
+	case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
+	case X509_V_ERR_CERT_SIGNATURE_FAILURE:
+	case X509_V_ERR_CRL_SIGNATURE_FAILURE:
+	case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
+	case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
+		rc = ErrorSignatureFailed;
+		break;
+	case X509_V_ERR_INVALID_CA:
+	case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+	case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
+	case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
+		rc = ErrorInvalidCA;
+		break;
+	case X509_V_ERR_INVALID_PURPOSE:  // note: not used by store verify
+		rc = ErrorInvalidPurpose;
+		break;
+	case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+	case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
+		rc = ErrorSelfSigned;
+		break;
+	case X509_V_ERR_CERT_REVOKED:
+		rc = ErrorRevoked;
+		break;
+	case X509_V_ERR_PATH_LENGTH_EXCEEDED:
+		rc = ErrorPathLengthExceeded;
+		break;
+	case X509_V_ERR_CERT_NOT_YET_VALID:
+	case X509_V_ERR_CERT_HAS_EXPIRED:
+	case X509_V_ERR_CRL_NOT_YET_VALID:
+	case X509_V_ERR_CRL_HAS_EXPIRED:
+	case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
+	case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
+	case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
+	case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
+		rc = ErrorExpired;
+		break;
+	case X509_V_ERR_APPLICATION_VERIFICATION:
+	case X509_V_ERR_OUT_OF_MEM:
+	case X509_V_ERR_UNABLE_TO_GET_CRL:
+	case X509_V_ERR_CERT_CHAIN_TOO_LONG:
+	default:
+		rc = ErrorValidityUnknown;
+		break;
 	}
 	return rc;
 }
@@ -1000,133 +1000,133 @@ EVP_PKEY *qca_d2i_PKCS8PrivateKey(const SecureArray &in, EVP_PKEY **x, pem_passw
 class opensslHashContext : public HashContext
 {
 public:
-    opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type) : HashContext(p, type)
-    {
-	m_algorithm = algorithm;
-	EVP_DigestInit( &m_context, m_algorithm );
-    }
+	opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type) : HashContext(p, type)
+	{
+		m_algorithm = algorithm;
+		EVP_DigestInit( &m_context, m_algorithm );
+	}
 
-    ~opensslHashContext()
-    {
-	EVP_MD_CTX_cleanup(&m_context);
-    }
+	~opensslHashContext()
+	{
+		EVP_MD_CTX_cleanup(&m_context);
+	}
 
-    void clear()
-    {
-	EVP_MD_CTX_cleanup(&m_context);
-	EVP_DigestInit( &m_context, m_algorithm );
-    }
+	void clear()
+	{
+		EVP_MD_CTX_cleanup(&m_context);
+		EVP_DigestInit( &m_context, m_algorithm );
+	}
 
-    void update(const MemoryRegion &a)
-    {
-	EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
-    }
+	void update(const MemoryRegion &a)
+	{
+		EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
+	}
 
-    MemoryRegion final()
-    {
-	SecureArray a( EVP_MD_size( m_algorithm ) );
-	EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
-	return a;
-    }
+	MemoryRegion final()
+	{
+		SecureArray a( EVP_MD_size( m_algorithm ) );
+		EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+		return a;
+	}
 
-    Provider::Context *clone() const
-    {
-	return new opensslHashContext(*this);
-    }
+	Provider::Context *clone() const
+	{
+		return new opensslHashContext(*this);
+	}
 
 protected:
-    const EVP_MD *m_algorithm;
-    EVP_MD_CTX m_context;
+	const EVP_MD *m_algorithm;
+	EVP_MD_CTX m_context;
 };
 
 
 class opensslPbkdf1Context : public KDFContext
 {
 public:
-    opensslPbkdf1Context(const EVP_MD *algorithm, Provider *p, const QString &type) : KDFContext(p, type)
-    {
-	m_algorithm = algorithm;
-	EVP_DigestInit( &m_context, m_algorithm );
-    }
-
-    Provider::Context *clone() const
-    {
-	return new opensslPbkdf1Context( *this );
-    }
-
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
-			      unsigned int keyLength, unsigned int iterationCount)
-    {
-	/* from RFC2898:
-	   Steps:
-
-	   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
-	   "derived key too long" and stop.
-	*/
-	if ( keyLength > (unsigned int)EVP_MD_size( m_algorithm ) ) {
-	    std::cout << "derived key too long" << std::endl;
-	    return SymmetricKey();
+	opensslPbkdf1Context(const EVP_MD *algorithm, Provider *p, const QString &type) : KDFContext(p, type)
+	{
+		m_algorithm = algorithm;
+		EVP_DigestInit( &m_context, m_algorithm );
 	}
 
-	/*
-	   2. Apply the underlying hash function Hash for c iterations to the
-	   concatenation of the password P and the salt S, then extract
-	   the first dkLen octets to produce a derived key DK:
-
-	   T_1 = Hash (P || S) ,
-	   T_2 = Hash (T_1) ,
-	   ...
-	   T_c = Hash (T_{c-1}) ,
-	   DK = Tc<0..dkLen-1>
-	*/
-	// calculate T_1
-	EVP_DigestUpdate( &m_context, (unsigned char*)secret.data(), secret.size() );
-	EVP_DigestUpdate( &m_context, (unsigned char*)salt.data(), salt.size() );
-	SecureArray a( EVP_MD_size( m_algorithm ) );
-	EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
-
-	// calculate T_2 up to T_c
-	for ( unsigned int i = 2; i <= iterationCount; ++i ) {
-	    EVP_DigestInit( &m_context, m_algorithm );
-	    EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
-	    EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+	Provider::Context *clone() const
+	{
+		return new opensslPbkdf1Context( *this );
 	}
 
-	// shrink a to become DK, of the required length
-	a.resize(keyLength);
+	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
+						 unsigned int keyLength, unsigned int iterationCount)
+	{
+		/* from RFC2898:
+		   Steps:
 
-	/*
-	   3. Output the derived key DK.
-	*/
-	return a;
-    }
+		   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
+		   "derived key too long" and stop.
+		*/
+		if ( keyLength > (unsigned int)EVP_MD_size( m_algorithm ) ) {
+			std::cout << "derived key too long" << std::endl;
+			return SymmetricKey();
+		}
+
+		/*
+		  2. Apply the underlying hash function Hash for c iterations to the
+		  concatenation of the password P and the salt S, then extract
+		  the first dkLen octets to produce a derived key DK:
+
+		  T_1 = Hash (P || S) ,
+		  T_2 = Hash (T_1) ,
+		  ...
+		  T_c = Hash (T_{c-1}) ,
+		  DK = Tc<0..dkLen-1>
+		*/
+		// calculate T_1
+		EVP_DigestUpdate( &m_context, (unsigned char*)secret.data(), secret.size() );
+		EVP_DigestUpdate( &m_context, (unsigned char*)salt.data(), salt.size() );
+		SecureArray a( EVP_MD_size( m_algorithm ) );
+		EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+
+		// calculate T_2 up to T_c
+		for ( unsigned int i = 2; i <= iterationCount; ++i ) {
+			EVP_DigestInit( &m_context, m_algorithm );
+			EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
+			EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+		}
+
+		// shrink a to become DK, of the required length
+		a.resize(keyLength);
+
+		/*
+		  3. Output the derived key DK.
+		*/
+		return a;
+	}
 
 protected:
-    const EVP_MD *m_algorithm;
-    EVP_MD_CTX m_context;
+	const EVP_MD *m_algorithm;
+	EVP_MD_CTX m_context;
 };
 
 class opensslPbkdf2Context : public KDFContext
 {
 public:
-    opensslPbkdf2Context(Provider *p, const QString &type) : KDFContext(p, type)
-    {
-    }
+	opensslPbkdf2Context(Provider *p, const QString &type) : KDFContext(p, type)
+	{
+	}
 
-    Provider::Context *clone() const
-    {
-	return new opensslPbkdf2Context( *this );
-    }
+	Provider::Context *clone() const
+	{
+		return new opensslPbkdf2Context( *this );
+	}
 
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
-			      unsigned int keyLength, unsigned int iterationCount)
-    {
-      SecureArray out(keyLength);
-      PKCS5_PBKDF2_HMAC_SHA1( (char*)secret.data(), secret.size(),
-			      (unsigned char*)salt.data(), salt.size(),
-			      iterationCount, keyLength, (unsigned char*)out.data() );
-      return out;
-    }
+	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
+						 unsigned int keyLength, unsigned int iterationCount)
+	{
+		SecureArray out(keyLength);
+		PKCS5_PBKDF2_HMAC_SHA1( (char*)secret.data(), secret.size(),
+								(unsigned char*)salt.data(), salt.size(),
+								iterationCount, keyLength, (unsigned char*)out.data() );
+		return out;
+	}
 
 protected:
 };
@@ -1134,43 +1134,43 @@ protected:
 class opensslHMACContext : public MACContext
 {
 public:
-  opensslHMACContext(const EVP_MD *algorithm, Provider *p, const QString &type) : MACContext(p, type)
-    {
-	m_algorithm = algorithm;
-	HMAC_CTX_init( &m_context );
-    }
+	opensslHMACContext(const EVP_MD *algorithm, Provider *p, const QString &type) : MACContext(p, type)
+	{
+		m_algorithm = algorithm;
+		HMAC_CTX_init( &m_context );
+	}
 
-    void setup(const SymmetricKey &key)
-    {
-	HMAC_Init_ex( &m_context, key.data(), key.size(), m_algorithm, 0 );
-    }
+	void setup(const SymmetricKey &key)
+	{
+		HMAC_Init_ex( &m_context, key.data(), key.size(), m_algorithm, 0 );
+	}
 
-    KeyLength keyLength() const
-    {
-	return anyKeyLength();
-    }
+	KeyLength keyLength() const
+	{
+		return anyKeyLength();
+	}
 
-    void update(const MemoryRegion &a)
-    {
-	HMAC_Update( &m_context, (unsigned char *)a.data(), a.size() );
-    }
+	void update(const MemoryRegion &a)
+	{
+		HMAC_Update( &m_context, (unsigned char *)a.data(), a.size() );
+	}
 
-    void final(MemoryRegion *out)
-    {
-	SecureArray sa( EVP_MD_size( m_algorithm ), 0 );
-	HMAC_Final(&m_context, (unsigned char *)sa.data(), 0 );
-	HMAC_CTX_cleanup(&m_context);
-	*out = sa;
-    }
+	void final(MemoryRegion *out)
+	{
+		SecureArray sa( EVP_MD_size( m_algorithm ), 0 );
+		HMAC_Final(&m_context, (unsigned char *)sa.data(), 0 );
+		HMAC_CTX_cleanup(&m_context);
+		*out = sa;
+	}
 
-    Provider::Context *clone() const
-    {
-	return new opensslHMACContext(*this);
-    }
+	Provider::Context *clone() const
+	{
+		return new opensslHMACContext(*this);
+	}
 
 protected:
-    HMAC_CTX m_context;
-    const EVP_MD *m_algorithm;
+	HMAC_CTX m_context;
+	const EVP_MD *m_algorithm;
 };
 
 //----------------------------------------------------------------------------
@@ -1282,8 +1282,8 @@ public:
 				if (pkey->type == EVP_PKEY_RSA)
 				{
 					if(RSA_private_encrypt (raw.size(), (unsigned char *)raw.data(),
-						(unsigned char *)out.data(), pkey->pkey.rsa,
-						RSA_PKCS1_PADDING) == -1) {
+											(unsigned char *)out.data(), pkey->pkey.rsa,
+											RSA_PKCS1_PADDING) == -1) {
 
 						state = SignError;
 						return SecureArray ();
@@ -1326,8 +1326,8 @@ public:
 
 				if (pkey->type == EVP_PKEY_RSA) {
 					if((len = RSA_public_decrypt (sig.size(), (unsigned char *)sig.data(),
-						(unsigned char *)out.data (), pkey->pkey.rsa,
-						RSA_PKCS1_PADDING)) == -1) {
+												  (unsigned char *)out.data (), pkey->pkey.rsa,
+												  RSA_PKCS1_PADDING)) == -1) {
 
 						state = VerifyError;
 						return false;
@@ -2542,56 +2542,56 @@ public:
 		else
 		{
 
-		// make X509 packet
-		X509_SIG sig;
-		ASN1_TYPE parameter;
+			// make X509 packet
+			X509_SIG sig;
+			ASN1_TYPE parameter;
 
-		X509_ALGOR algor;
-		ASN1_OCTET_STRING digest;
-		int rsa_size = RSA_size(rsa);
-		//int rsa_size = 128;
-		//CK_ULONG sigsize = rsa_size;
+			X509_ALGOR algor;
+			ASN1_OCTET_STRING digest;
+			int rsa_size = RSA_size(rsa);
+			//int rsa_size = 128;
+			//CK_ULONG sigsize = rsa_size;
 
-		sig.algor= &algor;
-		sig.algor->algorithm=OBJ_nid2obj(type);
-		if (sig.algor->algorithm == NULL)
-		{
-			//RSAerr(RSA_F_RSA_SIGN,RSA_R_UNKNOWN_ALGORITHM_TYPE);
-			return 0;
-		}
-		if (sig.algor->algorithm->length == 0)
-		{
-			//RSAerr(RSA_F_RSA_SIGN,RSA_R_THE_ASN1_OBJECT_IDENTIFIER_IS_NOT_KNOWN_FOR_THIS_MD);
-			return 0;
-		}
-		parameter.type=V_ASN1_NULL;
-		parameter.value.ptr=NULL;
-		sig.algor->parameter= &parameter;
+			sig.algor= &algor;
+			sig.algor->algorithm=OBJ_nid2obj(type);
+			if (sig.algor->algorithm == NULL)
+			{
+				//RSAerr(RSA_F_RSA_SIGN,RSA_R_UNKNOWN_ALGORITHM_TYPE);
+				return 0;
+			}
+			if (sig.algor->algorithm->length == 0)
+			{
+				//RSAerr(RSA_F_RSA_SIGN,RSA_R_THE_ASN1_OBJECT_IDENTIFIER_IS_NOT_KNOWN_FOR_THIS_MD);
+				return 0;
+			}
+			parameter.type=V_ASN1_NULL;
+			parameter.value.ptr=NULL;
+			sig.algor->parameter= &parameter;
 
-		sig.digest= &digest;
-		sig.digest->data=(unsigned char *)m; /* TMP UGLY CAST */
-		sig.digest->length=m_len;
+			sig.digest= &digest;
+			sig.digest->data=(unsigned char *)m; /* TMP UGLY CAST */
+			sig.digest->length=m_len;
 
-		i=i2d_X509_SIG(&sig,NULL);
+			i=i2d_X509_SIG(&sig,NULL);
 
-		j=rsa_size;
-		if (i > (j-RSA_PKCS1_PADDING_SIZE))
-		{
-			//RSAerr(RSA_F_RSA_SIGN,RSA_R_DIGEST_TOO_BIG_FOR_RSA_KEY);
-			return 0;
-		}
+			j=rsa_size;
+			if (i > (j-RSA_PKCS1_PADDING_SIZE))
+			{
+				//RSAerr(RSA_F_RSA_SIGN,RSA_R_DIGEST_TOO_BIG_FOR_RSA_KEY);
+				return 0;
+			}
 
-		tmps=(unsigned char *)OPENSSL_malloc((unsigned int)j+1);
-		if (tmps == NULL)
-		{
-			//RSAerr(RSA_F_RSA_SIGN,ERR_R_MALLOC_FAILURE);
-			return 0;
-		}
-		p=tmps;
-		i2d_X509_SIG(&sig,&p);
-		s=tmps;
-		m = s;
-		m_len = i;
+			tmps=(unsigned char *)OPENSSL_malloc((unsigned int)j+1);
+			if (tmps == NULL)
+			{
+				//RSAerr(RSA_F_RSA_SIGN,ERR_R_MALLOC_FAILURE);
+				return 0;
+			}
+			p=tmps;
+			i2d_X509_SIG(&sig,&p);
+			s=tmps;
+			m = s;
+			m_len = i;
 		}
 
 		SecureArray input;
@@ -3095,14 +3095,14 @@ QDateTime ASN1_UTCTIME_QDateTime(ASN1_UTCTIME *tm, int *isGmt)
 	h = (v[6]-'0')*10+(v[7]-'0');
 	m =  (v[8]-'0')*10+(v[9]-'0');
 	if (    (v[10] >= '0') && (v[10] <= '9') &&
-		(v[11] >= '0') && (v[11] <= '9'))
+			(v[11] >= '0') && (v[11] <= '9'))
 		s = (v[10]-'0')*10+(v[11]-'0');
 
 	// localize the date and display it.
 	qdate.setDate(y+1900, M, d);
 	qtime.setHMS(h,m,s);
 	qdt.setDate(qdate); qdt.setTime(qtime);
-auq_err:
+ auq_err:
 	if (isGmt) *isGmt = gmt;
 	return qdt;
 }
@@ -3454,37 +3454,37 @@ public:
 		switch( OBJ_obj2nid(x->cert_info->signature->algorithm) )
 		{
 		case NID_sha1WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_SHA1;
-		    break;
+			p.sigalgo = QCA::EMSA3_SHA1;
+			break;
 		case NID_md5WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_MD5;
-		    break;
+			p.sigalgo = QCA::EMSA3_MD5;
+			break;
 #ifdef HAVE_OPENSSL_MD2
 		case NID_md2WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_MD2;
-		    break;
+			p.sigalgo = QCA::EMSA3_MD2;
+			break;
 #endif
 		case NID_ripemd160WithRSA:
-		    p.sigalgo = QCA::EMSA3_RIPEMD160;
-		    break;
+			p.sigalgo = QCA::EMSA3_RIPEMD160;
+			break;
 		case NID_dsaWithSHA1:
-		    p.sigalgo = QCA::EMSA1_SHA1;
-		    break;
+			p.sigalgo = QCA::EMSA1_SHA1;
+			break;
 		case NID_sha224WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_SHA224;
-		    break;
+			p.sigalgo = QCA::EMSA3_SHA224;
+			break;
 		case NID_sha256WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_SHA256;
-		    break;
+			p.sigalgo = QCA::EMSA3_SHA256;
+			break;
 		case NID_sha384WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_SHA384;
-		    break;
+			p.sigalgo = QCA::EMSA3_SHA384;
+			break;
 		case NID_sha512WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_SHA512;
-		    break;
+			p.sigalgo = QCA::EMSA3_SHA512;
+			break;
 		default:
-		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->cert_info->signature->algorithm);
-		    p.sigalgo = QCA::SignatureUnknown;
+			qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->cert_info->signature->algorithm);
+			p.sigalgo = QCA::SignatureUnknown;
 		}
 
 		pos = X509_get_ext_by_NID(x, NID_subject_key_identifier, -1);
@@ -3954,25 +3954,25 @@ public:
 		switch( OBJ_obj2nid(x->sig_alg->algorithm) )
 		{
 		case NID_sha1WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_SHA1;
-		    break;
+			p.sigalgo = QCA::EMSA3_SHA1;
+			break;
 		case NID_md5WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_MD5;
-		    break;
+			p.sigalgo = QCA::EMSA3_MD5;
+			break;
 #ifdef HAVE_OPENSSL_MD2
 		case NID_md2WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_MD2;
-		    break;
+			p.sigalgo = QCA::EMSA3_MD2;
+			break;
 #endif
 		case NID_ripemd160WithRSA:
-		    p.sigalgo = QCA::EMSA3_RIPEMD160;
-		    break;
+			p.sigalgo = QCA::EMSA3_RIPEMD160;
+			break;
 		case NID_dsaWithSHA1:
-		    p.sigalgo = QCA::EMSA1_SHA1;
-		    break;
+			p.sigalgo = QCA::EMSA1_SHA1;
+			break;
 		default:
-		    qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
-		    p.sigalgo = QCA::SignatureUnknown;
+			qDebug() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
+			p.sigalgo = QCA::SignatureUnknown;
 		}
 
 		// FIXME: super hack
@@ -4146,25 +4146,25 @@ public:
 		switch( OBJ_obj2nid(x->sig_alg->algorithm) )
 		{
 		case NID_sha1WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_SHA1;
-		    break;
+			p.sigalgo = QCA::EMSA3_SHA1;
+			break;
 		case NID_md5WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_MD5;
-		    break;
+			p.sigalgo = QCA::EMSA3_MD5;
+			break;
 #ifdef HAVE_OPENSSL_MD2
 		case NID_md2WithRSAEncryption:
-		    p.sigalgo = QCA::EMSA3_MD2;
-		    break;
+			p.sigalgo = QCA::EMSA3_MD2;
+			break;
 #endif
 		case NID_ripemd160WithRSA:
-		    p.sigalgo = QCA::EMSA3_RIPEMD160;
-		    break;
+			p.sigalgo = QCA::EMSA3_RIPEMD160;
+			break;
 		case NID_dsaWithSHA1:
-		    p.sigalgo = QCA::EMSA1_SHA1;
-		    break;
+			p.sigalgo = QCA::EMSA1_SHA1;
+			break;
 		default:
-		    qWarning() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
-		    p.sigalgo = QCA::SignatureUnknown;
+			qWarning() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
+			p.sigalgo = QCA::SignatureUnknown;
 		}
 
 		int pos = X509_CRL_get_ext_by_NID(x, NID_authority_key_identifier, -1);
@@ -4717,7 +4717,7 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 			return QString("TLS_DH_anon_WITH_3DES_EDE_CBC_SHA");
 			break;
 
-		// 0x001C and 0x001D are reserved to avoid collision with SSL3 Fortezza.
+			// 0x001C and 0x001D are reserved to avoid collision with SSL3 Fortezza.
 		case 0x001E:
 			// RFC 2712 Section 3
 			return QString("TLS_KRB5_WITH_DES_CBC_SHA");
@@ -4855,11 +4855,11 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 			return QString("TLS_CK_DHE_DSS_WITH_RC4_128_SHA");
 			break;
 
-		// TODO: 0x0084 -> 0x0089 are from RFC4132 (Camellia)
+			// TODO: 0x0084 -> 0x0089 are from RFC4132 (Camellia)
 
-		// TODO: 0x008A -> 0x0095 are from RFC4279 (PSK)
+			// TODO: 0x008A -> 0x0095 are from RFC4279 (PSK)
 
-		// TODO: 0xC000 -> 0xC019 are from the ECC draft
+			// TODO: 0xC000 -> 0xC019 are from the ECC draft
 
 		default:
 			return QString("TLS algo to be added: %1").arg(cipherID & 0xffff, 0, 16);
@@ -4980,10 +4980,10 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 			return QString("SSL_DH_anon_WITH_3DES_EDE_CBC_SHA");
 			break;
 
-		// TODO: Sort out the Fortezza mess...
+			// TODO: Sort out the Fortezza mess...
 
-		// These aren't in the Netscape SSL3 draft, but openssl does
-		// allow you to use them with SSL3.
+			// These aren't in the Netscape SSL3 draft, but openssl does
+			// allow you to use them with SSL3.
 		case 0x001E:
 			return QString("SSL_KRB5_WITH_DES_CBC_SHA");
 			break;
@@ -5146,7 +5146,7 @@ public:
 	enum { Good, TryAgain, Bad };
 	enum { Idle, Connect, Accept, Handshake, Active, Closing };
 
-        bool serv; // true if we are acting as a server
+	bool serv; // true if we are acting as a server
 	int mode;
 	QByteArray sendQueue;
 	QByteArray recvQueue;
@@ -5154,7 +5154,7 @@ public:
 	CertificateCollection trusted;
 	Certificate cert, peercert; // TODO: support cert chains
 	PrivateKey key;
-        QString targetHostName;
+	QString targetHostName;
 
 	Result result_result;
 	QByteArray result_to_net;
@@ -5163,9 +5163,9 @@ public:
 
 	SSL *ssl;
 #if OPENSSL_VERSION_NUMBER >= 0x00909000L
-        const SSL_METHOD *method;
+	const SSL_METHOD *method;
 #else
-    SSL_METHOD *method;
+	SSL_METHOD *method;
 #endif
 	SSL_CTX *context;
 	BIO *rbio, *wbio;
@@ -5308,10 +5308,10 @@ public:
 	virtual void setup(bool serverMode, const QString &hostName, bool compress)
 	{
 		serv = serverMode;
-                if ( false == serverMode ) {
-                    // client
-                    targetHostName = hostName;
-                }
+		if ( false == serverMode ) {
+			// client
+			targetHostName = hostName;
+		}
 		Q_UNUSED(compress); // TODO
 	}
 
@@ -5656,7 +5656,7 @@ public:
 		}
 
 		sessInfo.cipherSuite = cipherIDtoString( sessInfo.version,
-							 SSL_get_current_cipher(ssl)->id);
+												 SSL_get_current_cipher(ssl)->id);
 
 		sessInfo.cipherMaxBits = SSL_get_cipher_bits(ssl, &(sessInfo.cipherBits));
 
@@ -5740,12 +5740,12 @@ public:
 		SSL_set_ssl_method(ssl, method); // can this return error?
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-                if ( targetHostName.isEmpty() == false ) {
-                        // we have a target
-                        // this might fail, but we ignore that for now
-                        char *hostname = targetHostName.toLatin1().data();
-                        SSL_set_tlsext_host_name( ssl, hostname );
-                }
+		if ( targetHostName.isEmpty() == false ) {
+			// we have a target
+			// this might fail, but we ignore that for now
+			char *hostname = targetHostName.toLatin1().data();
+			SSL_set_tlsext_host_name( ssl, hostname );
+		}
 #endif
 
 		// setup the memory bio
@@ -5800,8 +5800,8 @@ public:
 		if(serv)
 		{
 			SSL_set_verify(ssl,
-				SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
-				ssl_verify_callback);
+						   SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+						   ssl_verify_callback);
 		}
 
 		return true;
@@ -6138,7 +6138,7 @@ public:
 		// TODO: other operations
 		//if(op == Sign)
 		//{
-			this->op = op;
+		this->op = op;
 		//}
 		//else if(op == Encrypt)
 		//{
@@ -6589,14 +6589,14 @@ public:
 		m_type = type;
 	}
 
-        ~opensslCipherContext()
+	~opensslCipherContext()
 	{
 		EVP_CIPHER_CTX_cleanup(&m_context);
 	}
 
 	void setup(Direction dir,
-		   const SymmetricKey &key,
-		   const InitializationVector &iv)
+			   const SymmetricKey &key,
+			   const InitializationVector &iv)
 	{
 		m_direction = dir;
 		if ( ( m_cryptoAlgorithm == EVP_des_ede3() ) && (key.size() == 16) ) {
@@ -6607,14 +6607,14 @@ public:
 			EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
 			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
 			EVP_EncryptInit_ex(&m_context, 0, 0,
-					   (const unsigned char*)(key.data()),
-					   (const unsigned char*)(iv.data()));
+							   (const unsigned char*)(key.data()),
+							   (const unsigned char*)(iv.data()));
 		} else {
 			EVP_DecryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
 			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
 			EVP_DecryptInit_ex(&m_context, 0, 0,
-					   (const unsigned char*)(key.data()),
-					   (const unsigned char*)(iv.data()));
+							   (const unsigned char*)(key.data()),
+							   (const unsigned char*)(iv.data()));
 		}
 
 		EVP_CIPHER_CTX_set_padding(&m_context, m_pad);
@@ -6641,18 +6641,18 @@ public:
 		int resultLength;
 		if (Encode == m_direction) {
 			if (0 == EVP_EncryptUpdate(&m_context,
-						   (unsigned char*)out->data(),
-						   &resultLength,
-						   (unsigned char*)in.data(),
-						   in.size())) {
+									   (unsigned char*)out->data(),
+									   &resultLength,
+									   (unsigned char*)in.data(),
+									   in.size())) {
 				return false;
 			}
 		} else {
 			if (0 == EVP_DecryptUpdate(&m_context,
-						   (unsigned char*)out->data(),
-						   &resultLength,
-						   (unsigned char*)in.data(),
-						   in.size())) {
+									   (unsigned char*)out->data(),
+									   &resultLength,
+									   (unsigned char*)in.data(),
+									   in.size())) {
 				return false;
 			}
 		}
@@ -6666,14 +6666,14 @@ public:
 		int resultLength;
 		if (Encode == m_direction) {
 			if (0 == EVP_EncryptFinal_ex(&m_context,
-						     (unsigned char*)out->data(),
-						     &resultLength)) {
+										 (unsigned char*)out->data(),
+										 &resultLength)) {
 				return false;
 			}
 		} else {
 			if (0 == EVP_DecryptFinal_ex(&m_context,
-						     (unsigned char*)out->data(),
-						     &resultLength)) {
+										 (unsigned char*)out->data(),
+										 &resultLength)) {
 				return false;
 			}
 		}
@@ -6854,7 +6854,7 @@ public:
 			r = RAND_bytes((unsigned char*)(buf.data()), size);
 			if (r == 1) break; // success
 			r = RAND_pseudo_bytes((unsigned char*)(buf.data()),
-						size);
+								  size);
 			if (r >= 0) break; // accept insecure random numbers
 		}
 		return buf;
@@ -6919,8 +6919,8 @@ public:
 	QString credit() const
 	{
 		return QString(
-			"This product includes cryptographic software "
-			"written by Eric Young (eay@cryptsoft.com)");
+					   "This product includes cryptographic software "
+					   "written by Eric Young (eay@cryptsoft.com)");
 	}
 
 	QStringList features() const
