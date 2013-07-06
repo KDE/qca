@@ -3,6 +3,7 @@ project(QCA)
 cmake_minimum_required(VERSION 2.4.5)
 
 option(BUILD_TESTS "Create test" ON)
+option(QCA_INSTALL_PLUGINS_IN_QT_PREFIX "Install plugins in the Qt prefix instead of the Install prefix" OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
@@ -80,7 +81,11 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 set(qca_INCLUDEDIR "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib${LIB_SUFFIX}" )
 
-set(qca_PLUGINSDIR "${QT_PLUGINS_DIR}/crypto/")
+if( QCA_INSTALL_PLUGINS_IN_QT_PREFIX )
+    set(qca_PLUGINSDIR "${QT_PLUGINS_DIR}/crypto/")
+else()
+    set(qca_PLUGINSDIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/qt4/plugins/crypto/" )
+endif()
 message(STATUS "Plugins will be installed to " ${qca_PLUGINSDIR})
 
 include(QcaMacro)
