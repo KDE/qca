@@ -304,7 +304,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 
 		bool key = false; // key or not
 		bool primary = false; // primary key or sub key
-		bool sec = false; // private key or not
+		// bool sec = false; // private key or not
 
 		if(type == "pub")
 		{
@@ -315,7 +315,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 		{
 			key = true;
 			primary = true;
-			sec = true;
+			// sec = true;
 		}
 		else if(type == "sub")
 		{
@@ -324,7 +324,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 		else if(type == "ssb")
 		{
 			key = true;
-			sec = true;
+			// sec = true;
 		}
 
 		if(key)

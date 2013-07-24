@@ -23,6 +23,7 @@ SET( nonmoc_SOURCES
 	qca_plugin.cpp
 	qca_textfilter.cpp
 	qca_basic.cpp
+	qca_safeobj.cpp
 	support/logger.cpp
 )
 
@@ -32,7 +33,6 @@ SET( moc_SOURCES
 	qca_default.cpp
 	qca_keystore.cpp
 	qca_publickey.cpp
-	qca_safeobj.cpp
 	qca_securelayer.cpp
 	qca_securemessage.cpp
 	support/qpipe.cpp

@@ -1504,8 +1504,9 @@ class softstorePlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 #if QT_VERSION >= 0x050000
-	Q_INTERFACES(QCAPlugin)
+	Q_PLUGIN_METADATA(IID "org.psi-im.qca-softstore")
 #endif
+	Q_INTERFACES(QCAPlugin)
 
 public:
 	virtual Provider *createProvider() { return new softstoreProvider; }
