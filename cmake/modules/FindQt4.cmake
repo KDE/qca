@@ -267,6 +267,22 @@ IF (QT4_QMAKE_FOUND)
     MARK_AS_ADVANCED(QT_USE_FRAMEWORKS)
   ENDIF (APPLE)
   
+  # ask qmake for prefix
+  IF (NOT QT_PREFIX_DIR)
+     EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
+        ARGS "-query QT_INSTALL_PREFIX"
+        OUTPUT_VARIABLE qt_prefix )
+     SET(QT_PREFIX_DIR ${qt_prefix} CACHE INTERNAL "")
+  ENDIF (NOT QT_PREFIX_DIR)
+
+  # ask qmake for the data dir
+  IF (NOT QT_DATA_DIR)
+     EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
+        ARGS "-query QT_INSTALL_DATA"
+        OUTPUT_VARIABLE qt_data )
+     SET(QT_DATA_DIR ${qt_data} CACHE INTERNAL "")
+  ENDIF (NOT QT_DATA_DIR)
+
   # ask qmake for the binary dir
   IF (NOT QT_BINARY_DIR)
      EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
