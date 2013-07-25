@@ -3,7 +3,7 @@ project(QCA)
 cmake_minimum_required(VERSION 2.4.5)
 
 option(BUILD_TESTS "Create test" ON)
-option(QCA_INSTALL_IN_QT_PREFIX "Install QCA in the Qt prefix instead of the Install prefix" ON)
+option(QCA_INSTALL_PLUGINS_IN_QT_PREFIX "Install plugins in the Qt prefix instead of the Install prefix" OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
@@ -27,6 +27,8 @@ else()
   set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Directory where lib will install")
 endif()
 
+set(PKGCONFIG_INSTALL_PREFIX "${LIB_INSTALL_DIR}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
+
 if (Qt5Core_FOUND)
   set(QCA_LIB_MAJOR_VERSION "3")
 else()
@@ -40,14 +42,14 @@ set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${
 
 if (APPLE)
    find_package(Carbon REQUIRED)
-   set(CMAKE_INSTALL_NAME_DIR ${QCA_LIBRARY_INSTALL_DIR})
+   set(CMAKE_INSTALL_NAME_DIR ${LIB_INSTALL_DIR})
    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif (APPLE)
 
 # set up RPATH handling, so the libs are found if they are installed to a non-standard location, Alex
 if (UNIX  AND NOT  APPLE)
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE)
-  set(CMAKE_INSTALL_RPATH   "${QCA_LIBRARY_INSTALL_DIR}" )
+  set(CMAKE_INSTALL_RPATH   "${LIB_INSTALL_DIR}" )
 endif (UNIX  AND NOT  APPLE)
 
 
@@ -79,39 +81,12 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 set(qca_INCLUDEDIR "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib${LIB_SUFFIX}" )
 
-if( QCA_INSTALL_IN_QT_PREFIX )
-  set(QCA_PREFIX_INSTALL_DIR "${QT_PREFIX_DIR}" CACHE PATH "Directory where qca will install")
-  set(QCA_PLUGINS_INSTALL_DIR "${QT_PLUGINS_DIR}/crypto" CACHE PATH "Directory where qca plugins will install")
-  set(QCA_BINARY_INSTALL_DIR "${QT_BINARY_DIR}" CACHE PATH "Directory where qca plugins will install")
-  set(QCA_LIBRARY_INSTALL_DIR "${QT_LIBRARY_DIR}" CACHE PATH "Directory where qca library will install")
-  set(QCA_FEATURE_INSTALL_DIR "${QT_MKSPECS_DIR}/features" CACHE PATH "Directory where qca feature file will install")
-  set(QCA_INCLUDE_INSTALL_DIR "${QT_INCLUDE_DIR}" CACHE PATH "Directory where qca public headers will install")
-  set(QCA_PRIVATE_INCLUDE_INSTALL_DIR "${QT_INCLUDE_DIR}" CACHE PATH "Directory where qca headers will install")
-  set(QCA_DOC_INSTALL_DIR "${QT_DOC_DIR}/html/qca/" CACHE PATH "Directory where qca documentation will install")
-  set(QCA_MAN_INSTALL_DIR "${QT_DATA_DIR}/man" CACHE PATH "Directory where qca man pages will install")
-else( QCA_INSTALL_IN_QT_PREFIX )
-  set(QCA_PREFIX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Directory where qca will install")
-  set(QCA_PLUGINS_INSTALL_DIR "${LIB_INSTALL_DIR}/qt4/plugins/crypto" CACHE PATH "Directory where qca plugins will install")
-  set(QCA_BINARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Directory where qca plugins will install")
-  set(QCA_LIBRARY_INSTALL_DIR "${LIB_INSTALL_DIR}" CACHE PATH "Directory where qca library will install")
-  set(QCA_FEATURE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/mkspecs/features" CACHE PATH "Directory where qca feature file will install")
-  set(QCA_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Directory where qca public headers will install")
-  set(QCA_PRIVATE_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Directory where qca headers will install")
-  set(QCA_DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/qca/html" CACHE PATH "Directory where qca documentation will install")
-  set(QCA_MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where qca man pages will install")
-endif( QCA_INSTALL_IN_QT_PREFIX )
-
-set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
-
-message(STATUS "QCA prefix is " ${QCA_PREFIX_INSTALL_DIR})
-message(STATUS "Plugins will be installed to " ${QCA_PLUGINS_INSTALL_DIR})
-message(STATUS "Binary will be installed to " ${QCA_BINARY_INSTALL_DIR})
-message(STATUS "Library will be installed to " ${QCA_LIBRARY_INSTALL_DIR})
-message(STATUS "Feature file will be installed to " ${QCA_FEATURE_INSTALL_DIR})
-message(STATUS "Public headers will be installed to " ${QCA_INCLUDE_INSTALL_DIR})
-message(STATUS "Private headers will be installed to " ${QCA_PRIVATE_INCLUDE_INSTALL_DIR})
-message(STATUS "Documentation will be installed to " ${QCA_DOC_INSTALL_DIR})
-message(STATUS "Man page will be installed to " ${QCA_MAN_INSTALL_DIR})
+if( QCA_INSTALL_PLUGINS_IN_QT_PREFIX )
+    set(qca_PLUGINSDIR "${QT_PLUGINS_DIR}/crypto/")
+else()
+    set(qca_PLUGINSDIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/qt4/plugins/crypto/" )
+endif()
+message(STATUS "Plugins will be installed to " ${qca_PLUGINSDIR})
 
 include(QcaMacro)
 
@@ -176,7 +151,7 @@ set( public_HEADERS
 set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
 
 #install public headers only
-install(FILES ${public_HEADERS} DESTINATION "${QCA_INCLUDE_INSTALL_DIR}/QtCrypto")
+install(FILES ${public_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/QtCrypto")
 
 include_directories(${QT_QTCORE_INCLUDE_DIR} "${qca_INCLUDEDIR}/QtCrypto")
 
@@ -186,9 +161,9 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 configure_file("crypto.prf.cmake" "${CMAKE_BINARY_DIR}/crypto.prf" @ONLY)
-install(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION "${QCA_FEATURE_INSTALL_DIR}")
+install(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION ${CMAKE_INSTALL_PREFIX}/mkspecs/features)
 
-install(FILES man/qcatool2.1 DESTINATION "${QCA_MAN_INSTALL_DIR}/man1")
+install(FILES man/qcatool2.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
 
 add_subdirectory(src)
 add_subdirectory(tools)

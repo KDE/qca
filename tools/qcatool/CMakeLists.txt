@@ -10,4 +10,4 @@ add_executable(qcatool2 ${qcatool2_bin_SRCS})
 
 target_link_libraries( qcatool2 qca ${QT_QTCORE_LIBRARY})
 
-install(TARGETS qcatool2 DESTINATION "${QCA_BINARY_INSTALL_DIR}")
+install(TARGETS qcatool2 DESTINATION bin)

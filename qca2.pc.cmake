@@ -1,7 +1,7 @@
-prefix=@QCA_PREFIX_INSTALL_DIR@
-exec_prefix=@QCA_PREFIX_INSTALL_DIR@
-libdir=@QCA_LIBRARY_INSTALL_DIR@
-includedir=@QCA_INCLUDE_INSTALL_DIR@/QtCrypto
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@LIB_INSTALL_DIR@
+includedir=@CMAKE_INSTALL_PREFIX@/include/QtCrypto
 
 Name: QCA
 Description: Qt Cryptographic Architecture library
