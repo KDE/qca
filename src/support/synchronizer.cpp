@@ -167,8 +167,8 @@ private slots:
 
 	void fixTimers()
 	{
-		edlink();
 		updateTimerList();
+		edlink();
 
 		for(int n = 0; n < timers.count(); ++n)
 		{
