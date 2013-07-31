@@ -335,8 +335,8 @@ void CertUnitTest::checkClientCerts()
 
 	    QCOMPARE( client2.commonName(), QString("Qca Test Client Certificate") );
 
-	    QCOMPARE( client2.notValidBefore().toString(), QDateTime( QDate( 2007, 7, 22 ), QTime( 3, 30, 29 ), Qt::UTC ).toString() );
-	    QCOMPARE( client2.notValidAfter().toString(), QDateTime( QDate( 2012, 7, 20 ), QTime( 3, 30, 29 ), Qt::UTC ).toString() );
+	    QCOMPARE( client2.notValidBefore().toString(), QDateTime( QDate( 2013, 7, 31 ), QTime( 15, 14, 28 ), Qt::UTC ).toString() );
+	    QCOMPARE( client2.notValidAfter().toString(), QDateTime( QDate( 2033, 7, 26 ), QTime( 15, 14, 28 ), Qt::UTC ).toString() );
 
 	    QCOMPARE( client2.constraints().contains(QCA::DigitalSignature) == true, true );
 	    QCOMPARE( client2.constraints().contains(QCA::NonRepudiation) == true, true );
@@ -373,9 +373,9 @@ void CertUnitTest::checkClientCerts()
 	    QVERIFY( issuer2.values(QCA::Organization).contains("Qca Development and Test") );
 	    QVERIFY( issuer2.values(QCA::CommonName).contains("Qca Test Root Certificate") );
 
-	    QByteArray subjectKeyID = QCA::Hex().stringToArray("B27FD3113923BE1DC46F53CE81AFF1D48001F6F6").toByteArray();
+	    QByteArray subjectKeyID = QCA::Hex().stringToArray("1e604e03127d287ba40427a961b428a2d09b50d1").toByteArray();
 	    QCOMPARE( client2.subjectKeyId(), subjectKeyID );
-	    QCOMPARE( QCA::Hex().arrayToString(client2.issuerKeyId()), QString("513ff2146e496adc41b815b5a086f42ee4f545f8") );
+	    QCOMPARE( QCA::Hex().arrayToString(client2.issuerKeyId()), QString("f61c451de1b0458138c60568c1a7cb0f7ade0363") );
 
 	    QCA::PublicKey pubkey2 = client2.subjectPublicKey();
 	    QCOMPARE( pubkey2.isNull(), false );
@@ -873,8 +873,8 @@ void CertUnitTest::checkServerCerts()
 
 	    QCOMPARE( server1.commonName(), QString("Qca Server Test certificate") );
 
-	    QCOMPARE( server1.notValidBefore().toString(), QDateTime( QDate( 2007, 7, 22 ), QTime( 6, 5, 39 ), Qt::UTC ).toString() );
-	    QCOMPARE( server1.notValidAfter().toString(), QDateTime( QDate( 2012, 7, 20 ), QTime( 6, 5, 39 ), Qt::UTC ).toString() );
+	    QCOMPARE( server1.notValidBefore().toString(), QDateTime( QDate( 2013, 7, 31 ), QTime( 15, 23, 25 ), Qt::UTC ).toString() );
+	    QCOMPARE( server1.notValidAfter().toString(), QDateTime( QDate( 2033, 7, 26 ), QTime( 15, 23, 25 ), Qt::UTC ).toString() );
 
 	    QCOMPARE( server1.constraints().contains(QCA::DigitalSignature) == true, true );
 	    QCOMPARE( server1.constraints().contains(QCA::NonRepudiation) == true, true );
@@ -912,9 +912,9 @@ void CertUnitTest::checkServerCerts()
 	    QVERIFY( issuer1.values(QCA::OrganizationalUnit).contains("Certificate Generation Section") );
 	    QVERIFY( issuer1.values(QCA::CommonName).contains("Qca Test Root Certificate") );
 
-	    QByteArray subjectKeyID = QCA::Hex().stringToArray("3CAAB3B75975DB2C95AFB481FA5640D8986B27CB").toByteArray();
+	    QByteArray subjectKeyID = QCA::Hex().stringToArray("819870c8b81eab53e72d0446b65790aa0d3eab1a").toByteArray();
 	    QCOMPARE( server1.subjectKeyId(), subjectKeyID );
-	    QByteArray authorityKeyID = QCA::Hex().stringToArray("513ff2146e496adc41b815b5a086f42ee4f545f8").toByteArray();
+	    QByteArray authorityKeyID = QCA::Hex().stringToArray("f61c451de1b0458138c60568c1a7cb0f7ade0363").toByteArray();
 	    QCOMPARE( server1.issuerKeyId(), authorityKeyID );
 
 	    QCA::PublicKey pubkey1 = server1.subjectPublicKey();
