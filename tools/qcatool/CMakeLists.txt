@@ -6,8 +6,14 @@ MY_AUTOMOC( qcatool2_moc_SRCS )
 
 set(qcatool2_bin_SRCS ${qcatool2_moc_SRCS})  
 
-add_executable(qcatool2 ${qcatool2_bin_SRCS})
+if(QCA_LIB_SUFFIX)
+  set(QCATOOL_NAME qcatool2-${QCA_LIB_SUFFIX})
+else(QCA_LIB_SUFFIX)
+  set(QCATOOL_NAME qcatool2)
+endif(QCA_LIB_SUFFIX)
 
-target_link_libraries( qcatool2 qca ${QT_QTCORE_LIBRARY})
+add_executable(${QCATOOL_NAME} ${qcatool2_bin_SRCS})
 
-install(TARGETS qcatool2 DESTINATION "${QCA_BINARY_INSTALL_DIR}")
+target_link_libraries( ${QCATOOL_NAME} ${QCA_LIB_NAME} ${QT_QTCORE_LIBRARY})
+
+install(TARGETS ${QCATOOL_NAME} DESTINATION "${QCA_BINARY_INSTALL_DIR}")

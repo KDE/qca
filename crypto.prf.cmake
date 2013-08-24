@@ -5,9 +5,9 @@ CONFIG *= qt
 INCLUDEPATH += $$QCA_INCDIR/QtCrypto
 LIBS += -L$$QCA_LIBDIR
 
-LINKAGE = -lqca
+LINKAGE = -l@QCA_LIB_NAME@
 CONFIG(debug, debug|release) {
-	windows:LINKAGE = -lqcad
-	mac:LINKAGE = -lqca_debug
+	windows:LINKAGE = -l@QCA_LIB_NAME@d
+	mac:LINKAGE = -l@QCA_LIB_NAME@_debug
 }
 LIBS += $$LINKAGE

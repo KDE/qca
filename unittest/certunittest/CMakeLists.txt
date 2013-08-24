@@ -6,7 +6,7 @@ MY_AUTOMOC( certunittest_bin_SRCS )
 
 add_executable(certunittest ${certunittest_bin_SRCS} )
 
-target_link_libraries( certunittest qca ${QT_QTTEST_LIBRARY})
+target_link_libraries( certunittest ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
 
 FOREACH( testFileName RootCAcert.pem 76.pem altname.pem csr1.pem 
 	 GoodCACRL.pem ov-root-ca-cert.crt User.pem QcaTestClientCert.pem xmppcert.pem 

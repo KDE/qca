@@ -7,5 +7,5 @@ Name: QCA
 Description: Qt Cryptographic Architecture library
 Version: @QCA_LIB_VERSION_STRING@
 Requires: QtCore
-Libs: -L${libdir} -lqca
+Libs: -L${libdir} -l@QCA_LIB_NAME@
 Cflags: -I${includedir}
