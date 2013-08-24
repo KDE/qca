@@ -587,7 +587,8 @@ public:
 		CBC, ///< operate in %Cipher Block Chaining mode
 		CFB, ///< operate in %Cipher FeedBack mode
 		ECB, ///< operate in Electronic Code Book mode
-		OFB  ///< operate in Output FeedBack Mode
+		OFB, ///< operate in Output FeedBack Mode
+		CTR, ///< operate in CounTer Mode
 	};
 
 	/**

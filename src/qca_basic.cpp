@@ -393,6 +393,9 @@ QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding
 	case ECB:
 		mode = "ecb";
 		break;
+	case CTR:
+		mode = "ctr";
+		break;
 	default:
 		Q_ASSERT(0);
 	}
