@@ -6752,16 +6752,19 @@ static QStringList all_cipher_types()
 	list += "aes128-cbc";
 	list += "aes128-cbc-pkcs7";
 	list += "aes128-ofb";
+	list += "aes128-ctr";
 	list += "aes192-ecb";
 	list += "aes192-cfb";
 	list += "aes192-cbc";
 	list += "aes192-cbc-pkcs7";
 	list += "aes192-ofb";
+	list += "aes192-ctr";
 	list += "aes256-ecb";
 	list += "aes256-cbc";
 	list += "aes256-cbc-pkcs7";
 	list += "aes256-cfb";
 	list += "aes256-ofb";
+	list += "aes256-ctr";
 	list += "blowfish-ecb";
 	list += "blowfish-cbc-pkcs7";
 	list += "blowfish-cbc";
@@ -7035,6 +7038,8 @@ public:
 			return new opensslCipherContext( EVP_aes_128_cbc(), 1, this, type);
 		else if ( type == "aes128-ofb" )
 			return new opensslCipherContext( EVP_aes_128_ofb(), 0, this, type);
+		else if ( type == "aes128-ctr" )
+			return new opensslCipherContext( EVP_aes_128_ctr(), 0, this, type);
 		else if ( type == "aes192-ecb" )
 			return new opensslCipherContext( EVP_aes_192_ecb(), 0, this, type);
 		else if ( type == "aes192-cfb" )
@@ -7045,6 +7050,8 @@ public:
 			return new opensslCipherContext( EVP_aes_192_cbc(), 1, this, type);
 		else if ( type == "aes192-ofb" )
 			return new opensslCipherContext( EVP_aes_192_ofb(), 0, this, type);
+		else if ( type == "aes192-ctr" )
+			return new opensslCipherContext( EVP_aes_192_ctr(), 0, this, type);
 		else if ( type == "aes256-ecb" )
 			return new opensslCipherContext( EVP_aes_256_ecb(), 0, this, type);
 		else if ( type == "aes256-cfb" )
@@ -7055,6 +7062,8 @@ public:
 			return new opensslCipherContext( EVP_aes_256_cbc(), 1, this, type);
 		else if ( type == "aes256-ofb" )
 			return new opensslCipherContext( EVP_aes_256_ofb(), 0, this, type);
+		else if ( type == "aes256-ctr" )
+			return new opensslCipherContext( EVP_aes_256_ctr(), 0, this, type);
 		else if ( type == "blowfish-ecb" )
 			return new opensslCipherContext( EVP_bf_ecb(), 0, this, type);
 		else if ( type == "blowfish-cfb" )

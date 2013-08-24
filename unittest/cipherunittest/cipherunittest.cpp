@@ -44,6 +44,8 @@ private slots:
     void aes128_cfb();
     void aes128_ofb_data();
     void aes128_ofb();
+    void aes128_ctr_data();
+    void aes128_ctr();
 
     void aes192_data();
     void aes192();
@@ -55,6 +57,8 @@ private slots:
     void aes192_cfb();
     void aes192_ofb_data();
     void aes192_ofb();
+    void aes192_ctr_data();
+    void aes192_ctr();
 
     void aes256_data();
     void aes256();
@@ -66,6 +70,8 @@ private slots:
     void aes256_cfb();
     void aes256_ofb_data();
     void aes256_ofb();
+    void aes256_ctr_data();
+    void aes256_ctr();
 
     void tripleDES_data();
     void tripleDES();
@@ -180,7 +186,7 @@ void CipherUnitTest::aes128()
 {
     QStringList providersToTest;
     providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
+    // providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
 
@@ -491,6 +497,66 @@ void CipherUnitTest::aes128_ofb()
 
 	    QCA::Cipher reverseCipher( QString( "aes128" ),
 				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
+	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
+	    QVERIFY( reverseCipher.ok() );
+	    QCOMPARE( update, plainText.left(update.size() ) );
+	    QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+	    QVERIFY( reverseCipher.ok() );
+	}
+    }
+}
+
+void CipherUnitTest::aes128_ctr_data()
+{
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("cipherText");
+    QTest::addColumn<QString>("keyText");
+    QTest::addColumn<QString>("ivText");
+
+    QTest::newRow("1") << QString("6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710")
+		       << QString("3b3fd92eb72dad20333449f8e83cfb4a010c041999e03f36448624483e582d0ea62293cfa6df74535c354181168774df2d55a54706273c50d7b4f8a8cddc6ed7")
+		       << QString("2b7e151628aed2a6abf7158809cf4f3c")
+		       << QString("000102030405060708090a0b0c0d0e0f");
+}
+
+void CipherUnitTest::aes128_ctr()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "aes128-ctr", provider ) )
+            QWARN( QString( "AES128 CTR not supported for "+provider).toLocal8Bit() );
+        else {
+	    QFETCH( QString, plainText );
+	    QFETCH( QString, cipherText );
+	    QFETCH( QString, keyText );
+	    QFETCH( QString, ivText );
+
+	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
+	    QCA::Cipher forwardCipher( QString( "aes128" ),
+				       QCA::Cipher::CTR,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
+	    QVERIFY( forwardCipher.ok() );
+	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+	    QVERIFY( forwardCipher.ok() );
+
+	    QCA::Cipher reverseCipher( QString( "aes128" ),
+				       QCA::Cipher::CTR,
 				       QCA::Cipher::NoPadding,
 				       QCA::Decode,
 				       key,
@@ -883,6 +949,66 @@ void CipherUnitTest::aes192_ofb()
 
 	    QCA::Cipher reverseCipher( QString( "aes192" ),
 				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
+	    update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
+	    QVERIFY( reverseCipher.ok() );
+	    QCOMPARE( update, plainText.left(update.size() ) );
+	    QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+	    QVERIFY( reverseCipher.ok() );
+	}
+    }
+}
+
+void CipherUnitTest::aes192_ctr_data()
+{
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("cipherText");
+    QTest::addColumn<QString>("keyText");
+    QTest::addColumn<QString>("ivText");
+
+    QTest::newRow("1") << QString("6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710")
+		       << QString("cdc80d6fddf18cab34c25909c99a417437d8a639171fdcca63ebd17ce2d7321a79a0c96b53c7eeecd9ed7157c444fc7a845c37b2f511697b0e89d5ed60c4d49e")
+		       << QString("8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b")
+		       << QString("000102030405060708090a0b0c0d0e0f");
+}
+
+void CipherUnitTest::aes192_ctr()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "aes192-ctr", provider ) )
+            QWARN( QString( "AES192 CTR not supported for "+provider).toLocal8Bit() );
+        else {
+	    QFETCH( QString, plainText );
+	    QFETCH( QString, cipherText );
+	    QFETCH( QString, keyText );
+	    QFETCH( QString, ivText );
+
+	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
+	    QCA::Cipher forwardCipher( QString( "aes192" ),
+				       QCA::Cipher::CTR,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
+	    QVERIFY( forwardCipher.ok() );
+	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+	    QVERIFY( forwardCipher.ok() );
+
+	    QCA::Cipher reverseCipher( QString( "aes192" ),
+				       QCA::Cipher::CTR,
 				       QCA::Cipher::NoPadding,
 				       QCA::Decode,
 				       key,
@@ -1312,6 +1438,66 @@ void CipherUnitTest::aes256_ofb()
 
 	    QCA::Cipher reverseCipher( QString( "aes256" ),
 				       QCA::Cipher::OFB,
+				       QCA::Cipher::NoPadding,
+				       QCA::Decode,
+				       key,
+				       iv,
+				       provider);
+
+	    QCOMPARE( QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() ), plainText  );
+	    QVERIFY( reverseCipher.ok() );
+	    QCOMPARE( QCA::arrayToHex( reverseCipher.final().toByteArray() ), QString( "" ) );
+	    QVERIFY( reverseCipher.ok() );
+	}
+    }
+}
+
+void CipherUnitTest::aes256_ctr_data()
+{
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("cipherText");
+    QTest::addColumn<QString>("keyText");
+    QTest::addColumn<QString>("ivText");
+
+    QTest::newRow("1") << QString("6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710")
+		       << QString("dc7e84bfda79164b7ecd8486985d3860d577788b8d8a85745513a5d50f821f30ffe96d5cf54b238dcc8d6783a87f3beae9af546344cb9ca4d1e553ffc06bc73e")
+		       << QString("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4")
+		       << QString("000102030405060708090a0b0c0d0e0f");
+}
+
+void CipherUnitTest::aes256_ctr()
+{
+    QStringList providersToTest;
+    providersToTest.append("qca-ossl");
+    providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-botan");
+    providersToTest.append("qca-nss");
+
+    foreach(const QString provider, providersToTest) {
+        if( !QCA::isSupported( "aes256-ctr", provider ) )
+            QWARN( QString( "AES256 CTR not supported for "+provider).toLocal8Bit() );
+        else {
+	    QFETCH( QString, plainText );
+	    QFETCH( QString, cipherText );
+	    QFETCH( QString, keyText );
+	    QFETCH( QString, ivText );
+
+	    QCA::SymmetricKey key( QCA::hexToArray( keyText ) );
+	    QCA::InitializationVector iv( QCA::hexToArray( ivText ) );
+	    QCA::Cipher forwardCipher( QString( "aes256" ),
+				       QCA::Cipher::CTR,
+				       QCA::Cipher::NoPadding,
+				       QCA::Encode,
+				       key,
+				       iv,
+				       provider);
+	    QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
+	    QVERIFY( forwardCipher.ok() );
+	    QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+	    QVERIFY( forwardCipher.ok() );
+
+	    QCA::Cipher reverseCipher( QString( "aes256" ),
+				       QCA::Cipher::CTR,
 				       QCA::Cipher::NoPadding,
 				       QCA::Decode,
 				       key,
