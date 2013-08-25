@@ -1628,7 +1628,7 @@ void CipherUnitTest::tripleDES()
 {
     QStringList providersToTest;
     providersToTest.append("qca-ossl");
-    // providersToTest.append("qca-gcrypt");
+    providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
 
