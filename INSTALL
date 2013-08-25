@@ -1,36 +1,39 @@
 Installing QCA
 --------------
 
-QCA requires Qt 4.2 or greater.
+QCA requires Qt 4.7 or greater.
 
-For Unix/Linux/Mac:
+For Unix/Linux/Mac/Windows:
 
-  ./configure
+  cmake .
   make
   make install
   /sbin/ldconfig, if necessary
 
-For Windows:
-
-  configure
-  nmake (or make)
-  installwin
-
-
 Notes
 -----
-  - On unix, use --prefix=$PWD to build in-place
 
+  Use cmake cache entries
 
-Building from SVN
-------------------
-First, install the 'qconf' program, at least version 1.5.  You can download
-the source here:
-  http://delta.affinix.com/qconf/
+  QT4_BUILD - forced Qt4 building (by default: OFF)
+  BUILD_TESTS - build unittests (by default: ON)
+  QCA_INSTALL_IN_QT_PREFIX - install in Qt prefix instead of
+                             CMAKE_INSTALL_PREFIX (by default: ON)
+  QCA_LIB_SUFFIX - suffix will be used for library, qcatool binary,
+                   qcatool manpage and qca pkg-config file (by default: "")
+  LIB_SUFFIX - library directory suffix (by default: "")
+  LIB_INSTALL_DIR - path to library directory
+                    (by default: ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 
-Then, go into the QCA source tree and type 'qconf'.  You should now have a
-configure program to execute, just like from a normal source package.
+  Finally install paths can be override with:
 
+  QCA_PREFIX_INSTALL_DIR - qca prefix, just a origin to make other paths
+  QCA_PLUGINS_INSTALL_DIR - qt plugins path
+  QCA_BINARY_INSTALL_DIR - qcatool will be installed to
+  QCA_LIBRARY_INSTALL_DIR - qca library will be installed to
+  QCA_FEATURE_INSTALL_DIR - path to qt mkspecs dir
+  QCA_INCLUDE_INSTALL_DIR - path for QtCrypto dir with includes
+  QCA_PRIVATE_INCLUDE_INSTALL_DIR - for future implementation
+  QCA_DOC_INSTALL_DIR - for html documentation
+  QCA_MAN_INSTALL_DIR - for qcatool manpage
 
-Please report problems to:
-  delta@lists.affinix.com
