@@ -16,9 +16,11 @@ include(QcaMacro)
 
 if (Qt5Core_FOUND)
   message(STATUS "Building with Qt5 support")
-  find_package(ECM 0.0.6 REQUIRED NO_MODULE)
-  set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_MODULE_PATH})
+  # Got from ECM
+  # Distros have no ECM. So I just copied required cmake modules.
   find_package(Qt5Transitional REQUIRED Core Network)
+  include(ECMQt4To5Porting)
+
   include(GNUInstallDirs)
   setup_qt5_dirs()
 else()
