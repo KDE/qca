@@ -39,6 +39,7 @@ Notes
   QCA_PRIVATE_INCLUDE_INSTALL_DIR - for future implementation
   QCA_DOC_INSTALL_DIR - for html documentation
   QCA_MAN_INSTALL_DIR - for qcatool manpage
+  PKGCONFIG_INSTALL_PREFIX - path to install pkg config file
 
 Please report problems to:
   http://bugs.kde.org
