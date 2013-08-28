@@ -28,7 +28,7 @@ else()
   include(${QT_USE_FILE})
 endif()
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
-set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Directory where lib will install")
+set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "Directory where lib will install")
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "0")
@@ -113,7 +113,7 @@ else( QCA_INSTALL_IN_QT_PREFIX )
   set(QCA_MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where qca man pages will install")
 endif( QCA_INSTALL_IN_QT_PREFIX )
 
-set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
+set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "Base directory for pkgconfig files")
 
 message(STATUS "QCA prefix is " ${QCA_PREFIX_INSTALL_DIR})
 message(STATUS "Plugins will be installed to " ${QCA_PLUGINS_INSTALL_DIR})
@@ -124,6 +124,7 @@ message(STATUS "Public headers will be installed to " ${QCA_INCLUDE_INSTALL_DIR}
 message(STATUS "Private headers will be installed to " ${QCA_PRIVATE_INCLUDE_INSTALL_DIR})
 message(STATUS "Documentation will be installed to " ${QCA_DOC_INSTALL_DIR})
 message(STATUS "Man page will be installed to " ${QCA_MAN_INSTALL_DIR})
+message(STATUS "Pkg-config file will be installed to " ${PKGCONFIG_INSTALL_PREFIX})
 
 message(STATUS "Checking for certstore..")
 # fixme add OR mac
