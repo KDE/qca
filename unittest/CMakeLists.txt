@@ -2,6 +2,7 @@ ENABLE_TESTING()
 # QTEST_MAIN is using QApplication when QT_GUI_LIB is defined
 remove_definitions(-DQT_GUI_LIB)
 if(Qt5Core_FOUND)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
   find_package(Qt5Transitional REQUIRED Test)
 endif(Qt5Core_FOUND)
 add_subdirectory(base64unittest)

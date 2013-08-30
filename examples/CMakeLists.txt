@@ -1,3 +1,6 @@
+if(Qt5Core_FOUND)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
+endif()
 add_subdirectory(aes-cmac)
 add_subdirectory(base64test)
 add_subdirectory(certtest)
