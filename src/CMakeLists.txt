@@ -15,6 +15,8 @@ if(NOT MLOCK_TAKES_VOID)
   ADD_DEFINITIONS(-DMLOCK_NOT_VOID_PTR)
 endif(NOT MLOCK_TAKES_VOID)
 
+configure_file(config-qca.h.cmake "${CMAKE_CURRENT_BINARY_DIR}/config-qca.h" @ONLY)
+
 # base source files
 
 
