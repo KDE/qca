@@ -145,6 +145,7 @@ else ( WIN32 )
       "/usr/share/ssl/cert.pem"
       "/usr/share/ssl/certs/ca-bundle.crt"
       "/etc/pki/tls/cert.pem"
+      "/etc/ssl/ca-bundle.pem"
       "/usr/share/curl/curl-ca-bundle.crt"
     )
     foreach (_current_try ${toTry})
