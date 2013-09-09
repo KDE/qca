@@ -3,9 +3,6 @@ Installing QCA
 
 QCA requires Qt 4.7 or greater.
 
-Also for Qt5 it is need to have ECM (extra cmake moduler)
-http://quickgit.kde.org/?p=extra-cmake-modules.git
-
 For Unix/Linux/Mac/Windows:
 
   cmake .
