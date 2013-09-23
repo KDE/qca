@@ -1,1 +1,0 @@
-#cmakedefine QCA_PLUGIN_SUBDIR "@QCA_PLUGIN_SUBDIR@"

@@ -26,7 +26,7 @@
 //   the provider.
 
 #include "qca_plugin.h"
-#include "config-qca.h"
+
 #include "qcaprovider.h"
 
 #include <QCoreApplication>
@@ -35,6 +35,7 @@
 #include <QLibrary>
 #include <QPluginLoader>
 
+#define PLUGIN_SUBDIR "crypto"
 
 namespace QCA {
 
@@ -373,7 +374,7 @@ void ProviderManager::scan()
 	{
 		logDebug(QString("Checking Qt Library Path: %1").arg(*it));
 		QDir libpath(*it);
-		QDir dir(libpath.filePath(QCA_PLUGIN_SUBDIR));
+		QDir dir(libpath.filePath(PLUGIN_SUBDIR));
 		if(!dir.exists())
 		{
 			logDebug("  (No 'crypto' subdirectory)");
