@@ -6,7 +6,7 @@ endif(NOT CMAKE_INSTALL_PREFIX)
 
 project(QCA)
 
-cmake_minimum_required(VERSION 2.4.5)
+cmake_minimum_required(VERSION 2.6.0)
 
 option(BUILD_TESTS "Create test" ON)
 
@@ -159,7 +159,7 @@ else (qca_CERTSTORE)
   install_files( "/certs" FILES "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem" )
 endif (qca_CERTSTORE)
 message(STATUS "certstore path: " ${qca_CERTSTORE})
-add_definitions( -DQCA_SYSTEMSTORE_PATH="\\\"${qca_CERTSTORE}\\\"" )
+add_definitions( -DQCA_SYSTEMSTORE_PATH="${qca_CERTSTORE}" )
 
 
 set( private_HEADERS ${qca_INCLUDEDIR}/QtCrypto/qca_plugin.h ${qca_INCLUDEDIR}/QtCrypto/qca_systemstore.h )
