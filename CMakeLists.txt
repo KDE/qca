@@ -1,9 +1,14 @@
+# Checking for user explicity defined CMAKE_INSTALL_PREFIX
+# It must be done before project(...)
+if(NOT CMAKE_INSTALL_PREFIX)
+  set(QCA_INSTALL_IN_QT_PREFIX ON)
+endif(NOT CMAKE_INSTALL_PREFIX)
+
 project(QCA)
 
 cmake_minimum_required(VERSION 2.4.5)
 
 option(BUILD_TESTS "Create test" ON)
-option(QCA_INSTALL_IN_QT_PREFIX "Install QCA in the Qt prefix instead of the Install prefix" ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
@@ -117,17 +122,6 @@ endif( QCA_INSTALL_IN_QT_PREFIX )
 
 set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "Base directory for pkgconfig files")
 
-message(STATUS "QCA prefix is " ${QCA_PREFIX_INSTALL_DIR})
-message(STATUS "Plugins will be installed to " ${QCA_PLUGINS_INSTALL_DIR})
-message(STATUS "Binary will be installed to " ${QCA_BINARY_INSTALL_DIR})
-message(STATUS "Library will be installed to " ${QCA_LIBRARY_INSTALL_DIR})
-message(STATUS "Feature file will be installed to " ${QCA_FEATURE_INSTALL_DIR})
-message(STATUS "Public headers will be installed to " ${QCA_INCLUDE_INSTALL_DIR})
-message(STATUS "Private headers will be installed to " ${QCA_PRIVATE_INCLUDE_INSTALL_DIR})
-message(STATUS "Documentation will be installed to " ${QCA_DOC_INSTALL_DIR})
-message(STATUS "Man page will be installed to " ${QCA_MAN_INSTALL_DIR})
-message(STATUS "Pkg-config file will be installed to " ${PKGCONFIG_INSTALL_PREFIX})
-
 message(STATUS "Checking for certstore..")
 # fixme add OR mac
 if( WIN32 )
@@ -221,3 +215,34 @@ if(BUILD_TESTS)
   add_subdirectory(examples)
 endif(BUILD_TESTS)
 
+# /usr/local is traditional path for installing apps on POSIX-systems.
+# I consciously break this. Qt by default looks plugins and features only in
+# own directory. So by default install libs in Qt prefix it is a best choice.
+# This can be unwanted behaviour for users who don't read INSTALL file or/and
+# not read cmake reports. I just try to warn their.
+
+# In really anybody who do cmake . && make && sudo make install do it for own risk.
+
+if(QCA_INSTALL_IN_QT_PREFIX)
+  message("")
+  message("")
+  message("!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!!")
+  message("!! QCA will be installed in Qt prefix             !!")
+  message("!! If you want to install in /usr/local           !!")
+  message("!! you MUST explicity define CMAKE_INSTALL_PREFIX !!")
+  message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  message("")
+endif(QCA_INSTALL_IN_QT_PREFIX)
+
+message("")
+message("QCA prefix is " ${QCA_PREFIX_INSTALL_DIR})
+message("Plugins will be installed to " ${QCA_PLUGINS_INSTALL_DIR})
+message("Binary will be installed to " ${QCA_BINARY_INSTALL_DIR})
+message("Library will be installed to " ${QCA_LIBRARY_INSTALL_DIR})
+message("Feature file will be installed to " ${QCA_FEATURE_INSTALL_DIR})
+message("Public headers will be installed to " ${QCA_INCLUDE_INSTALL_DIR})
+message("Private headers will be installed to " ${QCA_PRIVATE_INCLUDE_INSTALL_DIR})
+message("Documentation will be installed to " ${QCA_DOC_INSTALL_DIR})
+message("Man page will be installed to " ${QCA_MAN_INSTALL_DIR})
+message("Pkg-config file will be installed to " ${PKGCONFIG_INSTALL_PREFIX})
+message("")

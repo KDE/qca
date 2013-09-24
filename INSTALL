@@ -15,10 +15,10 @@ Notes
 
   Use cmake cache entries
 
+  CMAKE_INSTALL_PREFIX - must be defined otherwise QCA will be installed
+                         in Qt prefix (by default: "")
   QT4_BUILD - forced Qt4 building (by default: OFF)
   BUILD_TESTS - build unittests (by default: ON)
-  QCA_INSTALL_IN_QT_PREFIX - install in Qt prefix instead of
-                             CMAKE_INSTALL_PREFIX (by default: ON)
   QCA_LIB_SUFFIX - suffix will be used for library, qcatool binary,
                    qcatool manpage and qca pkg-config file (by default: "")
   LIB_SUFFIX - library directory suffix (by default: "")
