@@ -4,9 +4,11 @@ if(NOT CMAKE_INSTALL_PREFIX)
   set(QCA_INSTALL_IN_QT_PREFIX ON)
 endif(NOT CMAKE_INSTALL_PREFIX)
 
-project(QCA)
+project(qca)
 
 cmake_minimum_required(VERSION 2.6.0)
+
+include(GNUInstallDirs)
 
 option(BUILD_TESTS "Create test" ON)
 
@@ -82,6 +84,7 @@ set(qca_INCLUDEDIR "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" )
 
 if( QCA_INSTALL_IN_QT_PREFIX )
+  # QCA install dirs the same as Qt dirs
   set(QCA_PREFIX_INSTALL_DIR "${QT_PREFIX_DIR}" CACHE PATH "Directory where qca will install")
   set(QCA_PLUGINS_INSTALL_DIR "${QT_PLUGINS_DIR}/crypto" CACHE PATH "Directory where qca plugins will install")
   set(QCA_BINARY_INSTALL_DIR "${QT_BINARY_DIR}" CACHE PATH "Directory where qca plugins will install")
@@ -92,15 +95,16 @@ if( QCA_INSTALL_IN_QT_PREFIX )
   set(QCA_DOC_INSTALL_DIR "${QT_DOC_DIR}/html/qca/" CACHE PATH "Directory where qca documentation will install")
   set(QCA_MAN_INSTALL_DIR "${QT_DATA_DIR}/man" CACHE PATH "Directory where qca man pages will install")
 else( QCA_INSTALL_IN_QT_PREFIX )
+  # QCA install dirs based on GNU standard
   set(QCA_PREFIX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Directory where qca will install")
-  set(QCA_PLUGINS_INSTALL_DIR "${LIB_INSTALL_DIR}/plugins/crypto" CACHE PATH "Directory where qca plugins will install")
-  set(QCA_BINARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Directory where qca plugins will install")
-  set(QCA_LIBRARY_INSTALL_DIR "${LIB_INSTALL_DIR}" CACHE PATH "Directory where qca library will install")
+  set(QCA_PLUGINS_INSTALL_DIR "${CMAKE_INSTALL_FULL_LIBDIR}/plugins/crypto" CACHE PATH "Directory where qca plugins will install")
+  set(QCA_BINARY_INSTALL_DIR "${CMAKE_INSTALL_FULL_BINDIR}" CACHE PATH "Directory where qca plugins will install")
+  set(QCA_LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_FULL_LIBDIR}" CACHE PATH "Directory where qca library will install")
   set(QCA_FEATURE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/mkspecs/features" CACHE PATH "Directory where qca feature file will install")
-  set(QCA_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Directory where qca public headers will install")
-  set(QCA_PRIVATE_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Directory where qca headers will install")
-  set(QCA_DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/qca/html" CACHE PATH "Directory where qca documentation will install")
-  set(QCA_MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where qca man pages will install")
+  set(QCA_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}" CACHE PATH "Directory where qca public headers will install")
+  set(QCA_PRIVATE_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}" CACHE PATH "Directory where qca headers will install")
+  set(QCA_DOC_INSTALL_DIR "${CMAKE_INSTALL_FULL_DOCDIR}/html" CACHE PATH "Directory where qca documentation will install")
+  set(QCA_MAN_INSTALL_DIR "${CMAKE_INSTALL_FULL_MANDIR}" CACHE PATH "Directory where qca man pages will install")
 endif( QCA_INSTALL_IN_QT_PREFIX )
 
 set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "Base directory for pkgconfig files")
