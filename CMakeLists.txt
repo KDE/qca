@@ -4,7 +4,7 @@ if(NOT CMAKE_INSTALL_PREFIX)
   set(QCA_INSTALL_IN_QT_PREFIX ON)
 endif(NOT CMAKE_INSTALL_PREFIX)
 
-project(QCA)
+project(qca)
 
 cmake_minimum_required(VERSION 2.6.0)
 
@@ -99,7 +99,7 @@ else( QCA_INSTALL_IN_QT_PREFIX )
   set(QCA_FEATURE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/mkspecs/features" CACHE PATH "Directory where qca feature file will install")
   set(QCA_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Directory where qca public headers will install")
   set(QCA_PRIVATE_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Directory where qca headers will install")
-  set(QCA_DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/qca/html" CACHE PATH "Directory where qca documentation will install")
+  set(QCA_DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}/html" CACHE PATH "Directory where qca documentation will install")
   set(QCA_MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where qca man pages will install")
 endif( QCA_INSTALL_IN_QT_PREFIX )
 
