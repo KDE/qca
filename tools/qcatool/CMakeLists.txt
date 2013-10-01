@@ -1,6 +1,7 @@
 project(qcatool2)
 
 set(qcatool2_moc_SRCS main.cpp)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 MY_AUTOMOC( qcatool2_moc_SRCS )
 
