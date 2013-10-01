@@ -53,19 +53,6 @@ endif(QCA_LIB_SUFFIX)
 set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}")
 
 
-if (APPLE)
-   find_package(Carbon REQUIRED)
-   set(CMAKE_INSTALL_NAME_DIR ${QCA_LIBRARY_INSTALL_DIR})
-   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-endif (APPLE)
-
-# set up RPATH handling, so the libs are found if they are installed to a non-standard location, Alex
-if (UNIX  AND NOT  APPLE)
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE)
-  set(CMAKE_INSTALL_RPATH   "${QCA_LIBRARY_INSTALL_DIR}" )
-endif (UNIX  AND NOT  APPLE)
-
-
 if (WIN32)
  set(CMAKE_DEBUG_POSTFIX "d")
  add_definitions(-DWIN32_LEAN_AND_MEAN)
@@ -117,6 +104,18 @@ else( QCA_INSTALL_IN_QT_PREFIX )
 endif( QCA_INSTALL_IN_QT_PREFIX )
 
 set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "Base directory for pkgconfig files")
+
+if (APPLE)
+   find_package(Carbon REQUIRED)
+   set(CMAKE_INSTALL_NAME_DIR ${QCA_LIBRARY_INSTALL_DIR})
+   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif (APPLE)
+
+# set up RPATH handling, so the libs are found if they are installed to a non-standard location, Alex
+if (UNIX  AND NOT  APPLE)
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE)
+  set(CMAKE_INSTALL_RPATH   "${QCA_LIBRARY_INSTALL_DIR}" )
+endif (UNIX  AND NOT  APPLE)
 
 message(STATUS "Checking for certstore..")
 # fixme add OR mac
