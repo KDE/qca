@@ -34,8 +34,6 @@ else()
   # properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
   include(${QT_USE_FILE})
 endif()
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
-set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "Directory where lib will install")
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "0")
@@ -92,6 +90,11 @@ if( QCA_INSTALL_IN_QT_PREFIX )
   set(QCA_DOC_INSTALL_DIR "${QT_DOC_DIR}/html/qca/" CACHE PATH "Directory where qca documentation will install")
   set(QCA_MAN_INSTALL_DIR "${QT_DATA_DIR}/man" CACHE PATH "Directory where qca man pages will install")
 else( QCA_INSTALL_IN_QT_PREFIX )
+  # Cmake says nothing about LIB_SUFFIX
+  # de facto it is a standard way to specify lib suffix on many distros
+  set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
+  set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "Directory where lib will install")
+
   set(QCA_PREFIX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Directory where qca will install")
   set(QCA_PLUGINS_INSTALL_DIR "${LIB_INSTALL_DIR}/plugins/crypto" CACHE PATH "Directory where qca plugins will install")
   set(QCA_BINARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Directory where qca plugins will install")
