@@ -19,8 +19,8 @@ Notes
                          in Qt prefix (by default: "")
   QT4_BUILD - forced Qt4 building (by default: OFF)
   BUILD_TESTS - build unittests (by default: ON)
-  QCA_LIB_SUFFIX - suffix will be used for library, qcatool binary,
-                   qcatool manpage and qca pkg-config file (by default: "")
+  QCA_SUFFIX - suffix will be used for library, qcatool binary,
+               qcatool manpage and qca pkg-config file (by default: "")
   LIB_SUFFIX - library directory suffix (by default: "")
   LIB_INSTALL_DIR - path to library directory
                     (by default: ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
