@@ -218,14 +218,15 @@ endif(BUILD_TESTS)
 # In really anybody who do cmake . && make && sudo make install do it for own risk.
 
 if(QCA_INSTALL_IN_QT_PREFIX)
+  string(ASCII 27 ESCAPE)
   message("")
-  message("")
+  message("${ESCAPE}[31m")
   message("!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!!")
   message("!! QCA will be installed in Qt prefix             !!")
   message("!! If you want to install in /usr/local           !!")
   message("!! you MUST explicity define CMAKE_INSTALL_PREFIX !!")
   message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-  message("")
+  message("${ESCAPE}[0m")
 endif(QCA_INSTALL_IN_QT_PREFIX)
 
 message("")
