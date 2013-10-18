@@ -156,15 +156,20 @@ public:
 
 		watcher->addPath(dir.path());
 
-		// similarly, we don't check for existence of the file.  if
-		//   the add works, then it works.  however, unlike the dir,
-		//   if the file add fails then the overall monitoring could
-		//   still potentially work...
-
-		watcher->addPath(filePath);
+		// can't watch for non-existent directory
+		if(!watcher->directories().contains(dir.path()))
+		{
+			stop();
+			return;
+		}
 
 		// save whether or not the file exists
 		fileExisted = fi.exists();
+
+		// add only if file existent
+		// if no it will be added on directoryChanged signal
+		if(fileExisted)
+			watcher->addPath(filePath);
 
 		// TODO: address race conditions and think about error
 		//   reporting instead of silently failing.  probably this
