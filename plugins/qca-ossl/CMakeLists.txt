@@ -1,44 +1,55 @@
 # QCA OSSL
 
-INCLUDE(CheckFunctionExists)
-SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
-CHECK_FUNCTION_EXISTS(EVP_md2 HAVE_OPENSSL_MD2)
-IF (HAVE_OPENSSL_MD2)
-  ADD_DEFINITIONS(-DHAVE_OPENSSL_MD2)
-ELSE (HAVE_OPENSSL_MD2)
-  MESSAGE(WARNING "qca-ossl will be compiled without MD2 digest algorithm support")
-ENDIF (HAVE_OPENSSL_MD2)
+if(WITH_ossl_PLUGIN STREQUAL "yes")
+  find_package(OpenSSL REQUIRED)
+else(WITH_ossl_PLUGIN STREQUAL "yes")
+  find_package(OpenSSL)
+endif(WITH_ossl_PLUGIN STREQUAL "yes")
 
-CHECK_FUNCTION_EXISTS(EVP_aes_128_ctr HAVE_OPENSSL_AES_CTR)
-IF (HAVE_OPENSSL_AES_CTR)
-  ADD_DEFINITIONS(-DHAVE_OPENSSL_AES_CTR)
-ELSE (HAVE_OPENSSL_AES_CTR)
-  MESSAGE(WARNING "qca-ossl will be compiled without AES CTR mode encryption support")
-ENDIF (HAVE_OPENSSL_AES_CTR)
+if(OPENSSL_FOUND)
+  set(WITH_ossl_PLUGIN "yes" PARENT_SCOPE)
 
-SET(QCA_OSSL_SOURCES qca-ossl.cpp)
+  include(CheckFunctionExists)
+  set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
+  check_function_exists(EVP_md2 HAVE_OPENSSL_MD2)
+  if(HAVE_OPENSSL_MD2)
+    add_definitions(-DHAVE_OPENSSL_MD2)
+  else(HAVE_OPENSSL_MD2)
+    message(WARNING "qca-ossl will be compiled without MD2 digest algorithm support")
+  endif(HAVE_OPENSSL_MD2)
 
-MY_AUTOMOC( QCA_OSSL_SOURCES )
+  check_function_exists(EVP_aes_128_ctr HAVE_OPENSSL_AES_CTR)
+  if(HAVE_OPENSSL_AES_CTR)
+    add_definitions(-DHAVE_OPENSSL_AES_CTR)
+  else(HAVE_OPENSSL_AES_CTR)
+    message(WARNING "qca-ossl will be compiled without AES CTR mode encryption support")
+  endif(HAVE_OPENSSL_AES_CTR)
 
-ADD_LIBRARY(qca-ossl MODULE ${QCA_OSSL_SOURCES})
-INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(qca-ossl ${QT_QTCORE_LIBRARY})
-TARGET_LINK_LIBRARIES(qca-ossl ${QCA_LIB_NAME})
-TARGET_LINK_LIBRARIES(qca-ossl ${OPENSSL_LIBRARIES})
+  set(QCA_OSSL_SOURCES qca-ossl.cpp)
 
-IF (APPLE)
-  TARGET_LINK_LIBRARIES(qca-ossl crypto)
-ENDIF (APPLE)
+  my_automoc( QCA_OSSL_SOURCES )
 
-IF (WIN32)
-  ADD_DEFINITIONS(-DOSSL_097)
-  TARGET_LINK_LIBRARIES(qca-ossl gdi32)
-  TARGET_LINK_LIBRARIES(qca-ossl wsock32)
-  TARGET_LINK_LIBRARIES(qca-ossl ${OPENSSL_EAY_LIBRARIES})
-ENDIF (WIN32)
+  add_library(qca-ossl MODULE ${QCA_OSSL_SOURCES})
+  include_directories(${OPENSSL_INCLUDE_DIR})
+  target_link_libraries(qca-ossl ${QT_QTCORE_LIBRARY})
+  target_link_libraries(qca-ossl ${QCA_LIB_NAME})
+  target_link_libraries(qca-ossl ${OPENSSL_LIBRARIES})
 
-INSTALL(TARGETS qca-ossl
-        LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-)
+  if(APPLE)
+    target_link_libraries(qca-ossl crypto)
+  endif(APPLE)
+
+  if(WIN32)
+    add_definitions(-DOSSL_097)
+    target_link_libraries(qca-ossl gdi32)
+    target_link_libraries(qca-ossl wsock32)
+    target_link_libraries(qca-ossl ${OPENSSL_EAY_LIBRARIES})
+  endif(WIN32)
+
+  install(TARGETS qca-ossl
+          LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
+          ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
+          RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+else(OPENSSL_FOUND)
+  set(WITH_ossl_PLUGIN "no" PARENT_SCOPE)
+endif(OPENSSL_FOUND)

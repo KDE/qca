@@ -1,24 +1,32 @@
 # QCA GnuPG
 
-# we don't moc gpgporc/sprocess.cpp
-SET(QCA_GNUPG_MOC_SOURCES qca-gnupg.cpp gpgop.cpp gpgproc/gpgproc.cpp)
+find_program(QCA_GPG_EXECUTABLE NAMES gpg2 gpg)
+if(QCA_GPG_EXECUTABLE)
+  set(WITH_gnupg_PLUGIN "yes" PARENT_SCOPE)
 
-MY_AUTOMOC( QCA_GNUPG_MOC_SOURCES )
+  # we don't moc gpgporc/sprocess.cpp
+  set(QCA_GNUPG_MOC_SOURCES qca-gnupg.cpp gpgop.cpp gpgproc/gpgproc.cpp)
 
-QT4_WRAP_CPP( EXTRA_GNUPG_SOURCES gpgop.h )
-QT4_WRAP_CPP( EXTRA_GNUPG_SOURCES gpgproc/gpgproc.h )
-QT4_WRAP_CPP( EXTRA_GNUPG_SOURCES gpgproc/sprocess.h )
+  my_automoc(QCA_GNUPG_MOC_SOURCES)
 
-ADD_LIBRARY(qca-gnupg MODULE ${QCA_GNUPG_MOC_SOURCES} gpgproc/sprocess.cpp ${EXTRA_GNUPG_SOURCES} )
-INCLUDE_DIRECTORIES(gpgproc)
-TARGET_LINK_LIBRARIES(qca-gnupg ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME})
+  qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgop.h)
+  qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/gpgproc.h)
+  qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/sprocess.h)
 
-IF (WIN32)
-  TARGET_LINK_LIBRARIES(qca-gnupg advapi32)
-ENDIF (WIN32)
+  add_library(qca-gnupg MODULE ${QCA_GNUPG_MOC_SOURCES} gpgproc/sprocess.cpp ${EXTRA_GNUPG_SOURCES})
+  include_directories(gpgproc)
+  target_link_libraries(qca-gnupg ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME})
 
-INSTALL(TARGETS qca-gnupg DESTINATION
-        LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-)
+  if (WIN32)
+    target_link_libraries(qca-gnupg advapi32)
+  endif (WIN32)
+
+  install(TARGETS qca-gnupg DESTINATION
+          LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
+          ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
+          RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+elseif(WITH_gnupg_PLUGIN STREQUAL "yes")
+  message(FATAL_ERROR "Could not find GnuPG binary")
+else(QCA_GPG_EXECUTABLE)
+  set(WITH_gnupg_PLUGIN "no" PARENT_SCOPE)
+endif(QCA_GPG_EXECUTABLE)

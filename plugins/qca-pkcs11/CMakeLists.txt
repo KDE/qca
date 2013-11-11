@@ -1,21 +1,34 @@
 # qca-pkcs11
 
-SET(QCA_PKCS11_SOURCES qca-pkcs11.cpp)
-MY_AUTOMOC( QCA_PKCS11_SOURCES )
+if(WITH_pkcs11_PLUGIN STREQUAL "yes")
+  find_package(OpenSSL REQUIRED)
+  find_package(Pkcs11Helper REQUIRED)
+else(WITH_pkcs11_PLUGIN STREQUAL "yes")
+  find_package(OpenSSL)
+  find_package(Pkcs11Helper)
+endif(WITH_pkcs11_PLUGIN STREQUAL "yes")
 
-ADD_LIBRARY(qca-pkcs11 MODULE ${QCA_PKCS11_SOURCES})
+if(OPENSSL_FOUND AND PKCS11H_FOUND)
+  set(WITH_pkcs11_PLUGIN "yes" PARENT_SCOPE)
+  set(QCA_PKCS11_SOURCES qca-pkcs11.cpp)
+  my_automoc( QCA_PKCS11_SOURCES )
 
-ADD_DEFINITIONS(${PKCS11H_DEFINITIONS})
-INCLUDE_DIRECTORIES(${PKCS11H_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(qca-pkcs11 ${QT_QTCORE_LIBRARY})
-TARGET_LINK_LIBRARIES(qca-pkcs11 ${QCA_LIB_NAME})
-TARGET_LINK_LIBRARIES(qca-pkcs11 ${PKCS11H_LIBRARIES})
-IF (WIN32)
-  TARGET_LINK_LIBRARIES(qca-pkcs11 pkcs11-helper.dll)
-ENDIF (WIN32)
+  add_library(qca-pkcs11 MODULE ${QCA_PKCS11_SOURCES})
 
-INSTALL(TARGETS qca-pkcs11
-        LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-)
+  add_definitions(${PKCS11H_DEFINITIONS})
+  include_directories(${PKCS11H_INCLUDE_DIR})
+  target_link_libraries(qca-pkcs11 ${QT_QTCORE_LIBRARY})
+  target_link_libraries(qca-pkcs11 ${QCA_LIB_NAME})
+  target_link_libraries(qca-pkcs11 ${PKCS11H_LIBRARIES})
+  if (WIN32)
+    target_link_libraries(qca-pkcs11 pkcs11-helper.dll)
+  endif(WIN32)
+
+  install(TARGETS qca-pkcs11
+          LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
+          ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
+          RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+
+else(OPENSSL_FOUND AND PKCS11H_FOUND)
+  set(WITH_pkcs11_PLUGIN "no" PARENT_SCOPE)
+endif(OPENSSL_FOUND AND PKCS11H_FOUND)
