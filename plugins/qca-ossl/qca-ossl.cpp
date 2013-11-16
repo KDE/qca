@@ -1734,8 +1734,12 @@ public:
 		RSA *rsa = evp.pkey->pkey.rsa;
 		if(alg == EME_PKCS1v15)
 			return RSA_size(rsa) - 11 - 1;
-		else // oaep
+		else if(alg == EME_PKCS1_OAEP)
 			return RSA_size(rsa) - 41 - 1;
+		else if(alg == EME_PKCS1v15_SSL)
+			return RSA_size(rsa) - 11 - 1;
+		else if(alg == EME_NO_PADDING)
+			return RSA_size(rsa) - 1;
 	}
 
 	virtual SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg)
@@ -1749,10 +1753,13 @@ public:
 		SecureArray result(RSA_size(rsa));
 
 		int pad;
-		if(alg == EME_PKCS1v15)
-			pad = RSA_PKCS1_PADDING;
-		else // oaep
-			pad = RSA_PKCS1_OAEP_PADDING;
+		switch(alg)
+		{
+		case EME_PKCS1v15:      pad = RSA_PKCS1_PADDING;       break;
+		case EME_PKCS1_OAEP:    pad = RSA_PKCS1_OAEP_PADDING;  break;
+		case EME_PKCS1v15_SSL:  pad = RSA_SSLV23_PADDING;      break;
+		case EME_NO_PADDING:    pad = RSA_NO_PADDING;          break;
+		}
 
 		int ret = RSA_public_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
 		if(ret < 0)
@@ -1769,10 +1776,13 @@ public:
 		SecureArray result(RSA_size(rsa));
 
 		int pad;
-		if(alg == EME_PKCS1v15)
-			pad = RSA_PKCS1_PADDING;
-		else // oaep
-			pad = RSA_PKCS1_OAEP_PADDING;
+		switch(alg)
+		{
+		case EME_PKCS1v15:      pad = RSA_PKCS1_PADDING;       break;
+		case EME_PKCS1_OAEP:    pad = RSA_PKCS1_OAEP_PADDING;  break;
+		case EME_PKCS1v15_SSL:  pad = RSA_SSLV23_PADDING;      break;
+		case EME_NO_PADDING:    pad = RSA_NO_PADDING;          break;
+		}
 
 		int ret = RSA_private_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
 		if(ret < 0)
