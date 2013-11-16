@@ -53,9 +53,10 @@ class DHPrivateKey;
 */
 enum EncryptionAlgorithm
 {
-	EME_PKCS1v15,   ///< Block type 2 (PKCS#1, Version 1.5)
-	EME_PKCS1_OAEP, ///< Optimal asymmetric encryption padding (PKCS#1, Version 2.0)
-	EME_NO_PADDING  ///< No padding
+	EME_PKCS1v15,     ///< Block type 2 (PKCS#1, Version 1.5)
+	EME_PKCS1_OAEP,   ///< Optimal asymmetric encryption padding (PKCS#1, Version 2.0)
+	EME_PKCS1v15_SSL, ///< PKCS#1, Version 1.5 with an SSL-specific modification
+	EME_NO_PADDING    ///< Raw RSA encryption
 };
 
 /**
