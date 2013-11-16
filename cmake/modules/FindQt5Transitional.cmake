@@ -45,10 +45,15 @@ if (Qt5Core_FOUND)
                                  ${Qt5PrintSupport_LIBRARIES}
                                  ${Qt5Svg_LIBRARIES} )
       endif()
-      if ("${_component}" STREQUAL "Core")
-        find_package(Qt5Concurrent REQUIRED)
-        list(APPEND QT_LIBRARIES ${Qt5Concurrent_LIBRARIES} )
-      endif()
+#      Core module was separated to Core and Concurrent in Qt5.
+#      But QCA doesn't use any classes from QtConcurrent.
+#      So QtConcurrent mustn't be used in QCA.
+#      Uncomment this if Concurrent support will be added.
+
+#      if ("${_component}" STREQUAL "Core")
+#        find_package(Qt5Concurrent REQUIRED)
+#        list(APPEND QT_LIBRARIES ${Qt5Concurrent_LIBRARIES} )
+#      endif()
     endforeach()
   endif()
 
