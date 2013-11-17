@@ -1899,6 +1899,12 @@ public:
 			return;
 		}
 
+		// When private key has no Public Exponent (e) or Private Exponent (d)
+		// need to disable blinding. Otherwise decryption will be broken.
+		// http://www.mail-archive.com/openssl-users@openssl.org/msg63530.html
+		if(BN_is_zero(rsa->e) || BN_is_zero(rsa->d))
+			RSA_blinding_off(rsa);
+
 		evp.pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_RSA(evp.pkey, rsa);
 		sec = true;
