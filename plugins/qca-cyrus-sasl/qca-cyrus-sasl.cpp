@@ -938,7 +938,7 @@ class saslPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 #if QT_VERSION >= 0x050000
-	Q_PLUGIN_METADATA(IID "org.psi-im.qca-cyrus-sasl")
+	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
 #endif
 	Q_INTERFACES(QCAPlugin)
 public:
