@@ -24,9 +24,9 @@ Notes
   LIB_SUFFIX - library directory suffix (by default: "")
   LIB_INSTALL_DIR - path to library directory
                     (by default: ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
-  ENABLE_PLUGINS - list plugins to build (botan;ossl;gnupg for example).
-                   Also possible values is none, auto or all
-                   (by default: "auto")
+  BUILD_PLUGINS - list plugins to build (botan;ossl;gnupg for example).
+                  Also possible values is none, auto or all
+                  (by default: "auto")
   WITH_${PLUGIN}_PLUGIN - to build particular plugin. Can be no, yes or
                           auto (WITH_ossl_PLUGIN=auto for example)
 
