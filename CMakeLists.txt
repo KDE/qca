@@ -64,6 +64,10 @@ if (WIN32)
  add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif (WIN32)
 
+if (APPLE)
+ set(CMAKE_DEBUG_POSTFIX "_debug")
+endif (APPLE)
+
 if (CMAKE_COMPILER_IS_GNUCXX)
    if (CMAKE_SYSTEM_NAME MATCHES Linux)
      add_definitions (-D_BSD_SOURCE)
