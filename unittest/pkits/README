@@ -1,0 +1,8 @@
+This directory holds PKITS (PKI Test Suite).
+
+The certificates and CRLs used for the tests are made by the 
+NIST (http://csrc.nist.gov/groups/ST/crypto_apps_infra/pki/pkitesting.html), 
+if the certificates are expired (for i.e.: This lib is still used after 10 
+years again), you can download the certificates on the NIST's website.
+
+- PKITS v1.0.1, posted on 2011.
