@@ -3122,6 +3122,7 @@ QDateTime ASN1_UTCTIME_QDateTime(ASN1_UTCTIME *tm, int *isGmt)
 	qdate.setDate(y+1900, M, d);
 	qtime.setHMS(h,m,s);
 	qdt.setDate(qdate); qdt.setTime(qtime);
+	if (gmt) qdt.setTimeSpec(Qt::UTC);
  auq_err:
 	if (isGmt) *isGmt = gmt;
 	return qdt;
