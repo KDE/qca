@@ -998,8 +998,8 @@ void CertUnitTest::crl()
 	    // No keyid extension on this crl
 	    QCOMPARE( QCA::arrayToHex( crl1.issuerKeyId() ), QString("") );
 
-	    QCOMPARE( crl1.thisUpdate(), QDateTime(QDate(2001, 8, 17), QTime(11, 12, 03)) );
-	    QCOMPARE( crl1.nextUpdate(), QDateTime(QDate(2006, 8, 16), QTime(11, 12, 03)) );
+	    QCOMPARE( crl1.thisUpdate(), QDateTime(QDate(2001, 8, 17), QTime(11, 12, 03), Qt::UTC) );
+	    QCOMPARE( crl1.nextUpdate(), QDateTime(QDate(2006, 8, 16), QTime(11, 12, 03), Qt::UTC) );
 
 	    QCOMPARE( crl1.signatureAlgorithm(), QCA::EMSA3_MD5 );
 
@@ -1015,8 +1015,8 @@ void CertUnitTest::crl()
 	    QCOMPARE( revokedList[1].serialNumber(), QCA::BigInteger("5") );
 	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::Unspecified );
 	    QCOMPARE( revokedList[1].reason(), QCA::CRLEntry::Unspecified );
-	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 10, 39)) );
-	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 11, 59)) );
+	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 10, 39), Qt::UTC) );
+	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 8, 17), QTime(11, 11, 59), Qt::UTC) );
 
 	    // convert to DER
 	    QByteArray derCRL1 = crl1.toDER();
@@ -1054,8 +1054,8 @@ void CertUnitTest::crl2()
 	    QVERIFY( issuer.values(QCA::Organization).contains("Test Certificates") );
 	    QVERIFY( issuer.values(QCA::CommonName).contains("Good CA") );
 
-	    QCOMPARE( crl1.thisUpdate(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
-	    QCOMPARE( crl1.nextUpdate(), QDateTime(QDate(2011, 4, 19), QTime(14, 57, 20)) );
+	    QCOMPARE( crl1.thisUpdate(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20), Qt::UTC) );
+	    QCOMPARE( crl1.nextUpdate(), QDateTime(QDate(2011, 4, 19), QTime(14, 57, 20), Qt::UTC) );
 
 	    QCOMPARE( crl1.signatureAlgorithm(), QCA::EMSA3_SHA1 );
 
@@ -1071,8 +1071,8 @@ void CertUnitTest::crl2()
 	    QCOMPARE( revokedList[1].serialNumber(), QCA::BigInteger("15") );
 	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::KeyCompromise );
 	    QCOMPARE( revokedList[1].reason(), QCA::CRLEntry::KeyCompromise );
-	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
-	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20)) );
+	    QCOMPARE( revokedList[0].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20), Qt::UTC) );
+	    QCOMPARE( revokedList[1].time(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20), Qt::UTC) );
 
 	    // convert to DER
 	    QByteArray derCRL1 = crl1.toDER();
