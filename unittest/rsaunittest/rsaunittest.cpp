@@ -34,6 +34,7 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void testrsa();
+    void testAsymmetricEncryption();
 
 private:
     QCA::Initializer* m_init;
@@ -78,6 +79,7 @@ void RSAUnitTest::testrsa()
 		QCOMPARE( rsaKey.isPublic(), false );
 		QCOMPARE( rsaKey.canSign(), true);
 		QCOMPARE( rsaKey.canDecrypt(), true);
+		QCOMPARE( rsaKey.canEncrypt(), true);
 
 		QCA::RSAPrivateKey rsaPrivKey = rsaKey.toRSA();
 		QCOMPARE( rsaPrivKey.bitSize(), keysize );
@@ -144,6 +146,40 @@ void RSAUnitTest::testrsa()
     }
 }
 
+void RSAUnitTest::testAsymmetricEncryption()
+{
+	QCA::RSAPrivateKey rsaPrivKey1 = QCA::KeyGenerator().createRSA(512, 65537, "qca-ossl").toRSA();
+	QCA::RSAPublicKey rsaPubKey1 = rsaPrivKey1.toPublicKey().toRSA();
+
+	QCA::RSAPrivateKey rsaPrivKey2 = QCA::KeyGenerator().createRSA(512, 65537, "qca-ossl").toRSA();
+	// QCA::RSAPublicKey rsaPubKey2 = rsaPrivKey2.toPublicKey().toRSA();
+
+	const QCA::SecureArray clearText = "Hello World !";
+	QCA::SecureArray testText;
+	QCA::SecureArray cipherText;
+
+	// Test keys #1: Enc with public, dec with private
+	QVERIFY( rsaPubKey1.maximumEncryptSize(QCA::EME_PKCS1v15) >=  clearText.size() );
+	cipherText = rsaPubKey1.encrypt(clearText, QCA::EME_PKCS1v15);
+	QVERIFY( rsaPrivKey1.decrypt(cipherText, &testText, QCA::EME_PKCS1v15) );
+	QCOMPARE( clearText, testText );
+	testText.clear();
+	// ---
+
+	// Test keys #2 to decipher key #1
+	QVERIFY( !rsaPrivKey2.decrypt(cipherText, &testText, QCA::EME_PKCS1v15) );
+	QVERIFY( testText.isEmpty() );
+	// ---
+
+	// Test keys #2: Enc with private, dec with public
+	cipherText.clear();
+	QVERIFY( rsaPrivKey1.maximumEncryptSize(QCA::EME_PKCS1v15) >=  clearText.size() );
+	cipherText = rsaPrivKey1.encrypt(clearText, QCA::EME_PKCS1v15);
+	QVERIFY( rsaPubKey1.decrypt(cipherText, &testText, QCA::EME_PKCS1v15) );
+	QCOMPARE( clearText, testText );
+	testText.clear();
+	// ---
+}
 
 QTEST_MAIN(RSAUnitTest)
 

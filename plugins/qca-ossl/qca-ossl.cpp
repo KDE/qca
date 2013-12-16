@@ -1747,9 +1747,9 @@ public:
 	virtual SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg)
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
-
 		SecureArray buf = in;
 		int max = maximumEncryptSize(alg);
+
 		if(buf.size() > max)
 			buf.resize(max);
 		SecureArray result(RSA_size(rsa));
@@ -1764,7 +1764,12 @@ public:
 		default: return SecureArray(); break;
 		}
 
-		int ret = RSA_public_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
+		int ret;
+		if (isPrivate())
+			ret = RSA_private_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
+		else
+			ret = RSA_public_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
+
 		if(ret < 0)
 			return SecureArray();
 		result.resize(ret);
@@ -1775,10 +1780,9 @@ public:
 	virtual bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg)
 	{
 		RSA *rsa = evp.pkey->pkey.rsa;
-
 		SecureArray result(RSA_size(rsa));
-
 		int pad;
+
 		switch(alg)
 		{
 		case EME_PKCS1v15:      pad = RSA_PKCS1_PADDING;       break;
@@ -1788,7 +1792,12 @@ public:
 		default: return false; break;
 		}
 
-		int ret = RSA_private_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
+		int ret;
+		if (isPrivate())
+			ret = RSA_private_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
+		else
+			ret = RSA_public_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
+
 		if(ret < 0)
 			return false;
 		result.resize(ret);

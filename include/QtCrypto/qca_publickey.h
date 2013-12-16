@@ -595,6 +595,13 @@ public:
 	bool canEncrypt() const;
 
 	/**
+	   Test if this key can be used for decryption
+
+	   \return true if the key can be used for decryption
+	*/
+	bool canDecrypt() const;
+
+	/**
 	   Test if the key can be used for verifying signatures
 
 	   \return true of the key can be used for verification
@@ -616,6 +623,18 @@ public:
 	   \param alg the algorithm to use
 	*/
 	SecureArray encrypt(const SecureArray &a, EncryptionAlgorithm alg);
+
+	/**
+	   Decrypt the message
+
+	   \param in the cipher (encrypted) data
+	   \param out the plain text data
+	   \param alg the algorithm to use
+
+	   \note This synchronous operation may require event handling, and so
+	   it must not be called from the same thread as an EventHandler.
+	*/
+	bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg);
 
 	/**
 	   Initialise the signature verification process
@@ -864,11 +883,26 @@ public:
 	bool canDecrypt() const;
 
 	/**
+	   Test if this key can be used for encryption
+
+	   \return true if the key can be used for encryption
+	*/
+	bool canEncrypt() const;
+
+	/**
 	   Test if this key can be used for signing
 
 	   \return true if the key can be used to make a signature
 	*/
 	bool canSign() const;
+
+	/**
+	   The maximum message size that can be encrypted with a specified
+	   algorithm
+
+	   \param alg the algorithm to check
+	*/
+	int maximumEncryptSize(EncryptionAlgorithm alg) const;
 
 	/**
 	   Decrypt the message
@@ -881,6 +915,14 @@ public:
 	   it must not be called from the same thread as an EventHandler.
 	*/
 	bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg);
+
+	/**
+	   Encrypt a message using a specified algorithm
+
+	   \param a the message to encrypt
+	   \param alg the algorithm to use
+	*/
+	SecureArray encrypt(const SecureArray &a, EncryptionAlgorithm alg);
 
 	/**
 	   Initialise the message signature process

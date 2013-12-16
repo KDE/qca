@@ -804,6 +804,11 @@ bool PublicKey::canEncrypt() const
 	return isRSA();
 }
 
+bool PublicKey::canDecrypt() const
+{
+	return isRSA();
+}
+
 bool PublicKey::canVerify() const
 {
 	return (isRSA() || isDSA());
@@ -817,6 +822,11 @@ int PublicKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 SecureArray PublicKey::encrypt(const SecureArray &a, EncryptionAlgorithm alg)
 {
 	return static_cast<PKeyContext *>(context())->key()->encrypt(a, alg);
+}
+
+bool PublicKey::decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg)
+{
+	return static_cast<PKeyContext *>(context())->key()->decrypt(in, out, alg);
 }
 
 void PublicKey::startVerify(SignatureAlgorithm alg, SignatureFormat format)
@@ -964,14 +974,29 @@ bool PrivateKey::canDecrypt() const
 	return isRSA();
 }
 
+bool PrivateKey::canEncrypt() const
+{
+	return isRSA();
+}
+
 bool PrivateKey::canSign() const
 {
 	return (isRSA() || isDSA());
 }
 
+int PrivateKey::maximumEncryptSize(EncryptionAlgorithm alg) const
+{
+    return static_cast<const PKeyContext *>(context())->key()->maximumEncryptSize(alg);
+}
+
 bool PrivateKey::decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg)
 {
 	return static_cast<PKeyContext *>(context())->key()->decrypt(in, out, alg);
+}
+
+SecureArray PrivateKey::encrypt(const SecureArray &a, EncryptionAlgorithm alg)
+{
+	return static_cast<PKeyContext *>(context())->key()->encrypt(a, alg);
 }
 
 void PrivateKey::startSign(SignatureAlgorithm alg, SignatureFormat format)
