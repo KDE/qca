@@ -42,3 +42,21 @@ MACRO(MY_AUTOMOC _srcsList)
     LIST(APPEND ${_srcsList} ${_moc})
   ENDFOREACH (_current_FILE)
 ENDMACRO(MY_AUTOMOC)
+
+macro(set_enabled_plugin PLUGIN ENABLED)
+  # To nice looks
+  if(ENABLED)
+    set(ENABLED "on")
+  else(ENABLED)
+    set(ENABLED "off")
+  endif(ENABLED)
+  set(WITH_${PLUGIN}_PLUGIN_INTERNAL ${ENABLED} CACHE INTERNAL "")
+endmacro(set_enabled_plugin)
+
+macro(enable_plugin PLUGIN)
+  set_enabled_plugin(${PLUGIN} "on")
+endmacro(enable_plugin)
+
+macro(disable_plugin PLUGIN)
+  set_enabled_plugin(${PLUGIN} "off")
+endmacro(disable_plugin)

@@ -2,7 +2,7 @@
 
 find_program(QCA_GPG_EXECUTABLE NAMES gpg2 gpg)
 if(QCA_GPG_EXECUTABLE)
-  set(WITH_gnupg_PLUGIN "yes" PARENT_SCOPE)
+  enable_plugin("gnupg")
 
   # we don't moc gpgporc/sprocess.cpp
   set(QCA_GNUPG_MOC_SOURCES qca-gnupg.cpp gpgop.cpp gpgproc/gpgproc.cpp)
@@ -28,5 +28,5 @@ if(QCA_GPG_EXECUTABLE)
 elseif(WITH_gnupg_PLUGIN STREQUAL "yes")
   message(FATAL_ERROR "Could not find GnuPG binary")
 else(QCA_GPG_EXECUTABLE)
-  set(WITH_gnupg_PLUGIN "no" PARENT_SCOPE)
+  disable_plugin("gnupg")
 endif(QCA_GPG_EXECUTABLE)

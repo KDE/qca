@@ -1,6 +1,6 @@
 # qca-softstore
 
-set(WITH_softstore_PLUGIN "yes" PARENT_SCOPE)
+enable_plugin("softstore")
 set(QCA_SOFTSTORE_SOURCES qca-softstore.cpp)
 my_automoc( QCA_SOFTSTORE_SOURCES )
 

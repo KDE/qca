@@ -1,6 +1,6 @@
 # qca-logger
 
-set(WITH_logger_PLUGIN "yes" PARENT_SCOPE)
+enable_plugin("logger")
 set(QCA_LOGGER_SOURCES qca-logger.cpp)
 my_automoc( QCA_LOGGER_SOURCES )
 

@@ -5,7 +5,7 @@ else(WITH_nss_PLUGIN STREQUAL "yes")
 endif(WITH_nss_PLUGIN STREQUAL "yes")
 
 if(NSS_FOUND)
-  set(WITH_nss_PLUGIN "yes" PARENT_SCOPE)
+  enable_plugin("nss")
 
   set(QCA_NSS_SOURCES qca-nss.cpp)
   add_definitions(${NSS_DEFINITIONS})
@@ -19,5 +19,6 @@ if(NSS_FOUND)
           ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
           RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
 else(NSS_FOUND)
+  disable_plugin("nss")
   set(WITH_nss_PLUGIN "no" PARENT_SCOPE)
 endif(NSS_FOUND)

@@ -5,7 +5,7 @@ else(WITH_botan_PLUGIN STREQUAL "yes")
 endif(WITH_botan_PLUGIN STREQUAL "yes")
 
 if(BOTAN_FOUND)
-  set(WITH_botan_PLUGIN "yes" PARENT_SCOPE)
+  enable_plugin("botan")
 
   set(QCA_BOTAN_SOURCES qca-botan.cpp)
   add_definitions(${BOTAN_CFLAGS})
@@ -18,5 +18,5 @@ if(BOTAN_FOUND)
           ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
           RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
 else(BOTAN_FOUND)
-  set(WITH_botan_PLUGIN "no" PARENT_SCOPE)
+  disable_plugin("botan")
 endif(BOTAN_FOUND)

@@ -7,7 +7,7 @@ else(WITH_ossl_PLUGIN STREQUAL "yes")
 endif(WITH_ossl_PLUGIN STREQUAL "yes")
 
 if(OPENSSL_FOUND)
-  set(WITH_ossl_PLUGIN "yes" PARENT_SCOPE)
+  enable_plugin("ossl")
 
   include(CheckFunctionExists)
   set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
@@ -51,5 +51,5 @@ if(OPENSSL_FOUND)
           ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
           RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
 else(OPENSSL_FOUND)
-  set(WITH_ossl_PLUGIN "no" PARENT_SCOPE)
+  disable_plugin("ossl")
 endif(OPENSSL_FOUND)
