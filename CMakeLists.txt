@@ -9,6 +9,7 @@ project(qca)
 cmake_minimum_required(VERSION 2.6.0)
 
 option(BUILD_TESTS "Create test" ON)
+option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
 
 string(TOLOWER "${BUILD_PLUGINS}" BUILD_PLUGINS)
@@ -218,13 +219,15 @@ configure_file(man/qcatool.1 "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" COPYONLY)
 install(FILES "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" DESTINATION "${QCA_MAN_INSTALL_DIR}/man1")
 
 add_subdirectory(src)
-add_subdirectory(tools)
 add_subdirectory(plugins)
 if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(unittest)
   add_subdirectory(examples)
 endif(BUILD_TESTS)
+if(BUILD_TOOLS)
+  add_subdirectory(tools)
+endif(BUILD_TOOLS)
 
 # /usr/local is traditional path for installing apps on POSIX-systems.
 # I consciously break this. Qt by default looks plugins and features only in
