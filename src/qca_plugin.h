@@ -40,7 +40,7 @@ public:
 
 	void scan();
 	bool add(Provider *p, int priority);
-	void unload(const QString &name);
+	bool unload(const QString &name);
 	void unloadAll();
 	void setDefault(Provider *p);
 	Provider *find(Provider *p) const;

@@ -247,15 +247,32 @@ QCA_EXPORT QStringList defaultFeatures();
    current plugin providers at a specified priority. If
    a provider with the name already exists, this call fails.
 
+   QCA takes ownership of the provider.
+
    \param p a pointer to a Provider object, which must be
    set up.
    \param priority the priority level to set the provider to
    \return true if the provider is added, and false if the
    provider is not added (failure)
 
+   \sa unloadProvider for unloading specified providers
    \sa setProviderPriority for a description of the provider priority system
 */
 QCA_EXPORT bool insertProvider(Provider *p, int priority = 0);
+
+/**
+   Unload specified provider
+
+   The specified provider is removed from the list of providers
+   and deleted. If no provider with the name is found, this call fails.
+
+   \param name the name of the provider
+   \return true if the provider is unloaded, and false if the provider
+   cannot be found
+
+   \sa insertProvider for adding providers
+*/
+QCA_EXPORT bool unloadProvider(const QString &name);
 
 /**
    Change the priority of a specified provider

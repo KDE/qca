@@ -375,6 +375,16 @@ bool insertProvider(Provider *p, int priority)
 	return global->manager->add(p, priority);
 }
 
+bool unloadProvider(const QString &name)
+{
+	if(!global_check_load())
+		return false;
+
+	global->ensure_first_scan();
+
+	return global->manager->unload(name);
+}
+
 void setProviderPriority(const QString &name, int priority)
 {
 	if(!global_check_load())

@@ -24,6 +24,7 @@
  */
 
 #include <QtCrypto>
+#include <QtCore/QPointer>
 #include <QtTest/QtTest>
 
 #ifdef QT_STATICPLUGIN
@@ -37,7 +38,7 @@ class ClientPlugin : public QObject
 private slots:
     void initTestCase();
     void cleanupTestCase();
-    void testInsertPlugin();
+    void testInsertRemovePlugin();
 
 private:
     QCA::Initializer* m_init;
@@ -55,8 +56,12 @@ void ClientPlugin::cleanupTestCase()
     delete m_init;
 }
 
-class TestClientProvider : public QCA::Provider
+const QString providerName = "testClientSideProvider";
+
+class TestClientProvider : public QObject, public QCA::Provider
 {
+        Q_OBJECT
+
 public:
         int qcaVersion() const
         {
@@ -65,7 +70,7 @@ public:
 
         QString name() const
         {
-                return "testClientSideProvider";
+                return providerName;
         }
 
         QStringList features() const
@@ -89,9 +94,17 @@ public:
         }
 };
 
-void ClientPlugin::testInsertPlugin()
+void ClientPlugin::testInsertRemovePlugin()
 {
-    QCA::insertProvider(new TestClientProvider, 0);
+    QPointer<TestClientProvider> provider = new TestClientProvider;
+
+    QVERIFY(QCA::insertProvider(provider, 10));
+    QCOMPARE(QCA::findProvider(providerName), provider.data());
+    QCOMPARE(QCA::providerPriority(providerName), 10);
+
+    QVERIFY(QCA::unloadProvider(providerName));
+    QCOMPARE(QCA::findProvider(providerName), static_cast<QCA::Provider *>(0));
+    QVERIFY(provider.isNull());
 }
 
 QTEST_MAIN(ClientPlugin)

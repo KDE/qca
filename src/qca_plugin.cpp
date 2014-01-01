@@ -489,21 +489,26 @@ bool ProviderManager::add(Provider *p, int priority)
 	return true;
 }
 
-void ProviderManager::unload(const QString &name)
+bool ProviderManager::unload(const QString &name)
 {
 	for(int n = 0; n < providerItemList.count(); ++n)
 	{
 		ProviderItem *i = providerItemList[n];
 		if(i->p && i->p->name() == name)
 		{
+			if(i->initted())
+				i->p->deinit();
+
 			delete i;
 			providerItemList.removeAt(n);
 			providerList.removeAt(n);
 
 			logDebug(QString("Unloaded: %1").arg(name));
-			return;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void ProviderManager::unloadAll()
