@@ -28,6 +28,10 @@
 
 #include <stdlib.h>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 // qt did not introduce qputenv until 4.4, so we'll keep a copy here for 4.2
 //   compat
 bool my_qputenv(const char *varName, const QByteArray& value)

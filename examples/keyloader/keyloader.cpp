@@ -27,6 +27,10 @@
 
 #include <stdio.h>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 class PassphraseHandler: public QObject
 {
 	Q_OBJECT

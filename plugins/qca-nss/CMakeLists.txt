@@ -11,7 +11,7 @@ if(NSS_FOUND)
   add_definitions(${NSS_DEFINITIONS})
   include_directories(${NSS_INCLUDE_DIR})
   my_automoc( QCA_NSS_SOURCES )
-  add_library(qca-nss MODULE ${QCA_NSS_SOURCES})
+  add_library(qca-nss ${PLUGIN_TYPE} ${QCA_NSS_SOURCES})
   target_link_libraries(qca-nss ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${NSS_LIBRARIES})
 
   install(TARGETS qca-nss

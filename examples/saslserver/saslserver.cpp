@@ -29,6 +29,10 @@
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 static QString socketErrorToString(QAbstractSocket::SocketError x)
 {
 	QString s;

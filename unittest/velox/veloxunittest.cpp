@@ -27,6 +27,10 @@
 #include <QtTest/QtTest>
 #include <QtCrypto>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 class TlsTest : public QObject
 {
     Q_OBJECT

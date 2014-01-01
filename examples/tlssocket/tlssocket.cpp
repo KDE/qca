@@ -21,6 +21,10 @@
 
 #include "tlssocket.h"
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 class TLSSocket::Private : public QObject
 {
 	Q_OBJECT

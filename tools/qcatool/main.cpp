@@ -26,6 +26,11 @@
 #include <QTextStream>
 #include <QTimer>
 
+
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 const char *const APPNAME = "qcatool";
 const char *const EXENAME = "qcatool";
 const char *const VERSION = "2.0.3";

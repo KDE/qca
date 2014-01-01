@@ -6,6 +6,6 @@ MY_AUTOMOC( metatype_bin_SRCS )
 
 add_executable( metatypeunittest ${metatype_bin_SRCS} )
 
-target_link_libraries( metatypeunittest ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
+target_link_qca_test_libraries(metatypeunittest)
 
 ADD_TEST(MetaTypeUnittest ${EXECUTABLE_OUTPUT_PATH}/metatypeunittest)

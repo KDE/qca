@@ -26,6 +26,10 @@
 
 #include <iostream>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 int main(int argc, char **argv)
 {
 	QCoreApplication(argc, argv);

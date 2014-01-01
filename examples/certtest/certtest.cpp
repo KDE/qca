@@ -27,6 +27,10 @@
 
 #include <iostream>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 // dump out information about some part of the certificate
 // we use this same approach for information about the subject
 // of the certificate, and also about the issuer of the certificate

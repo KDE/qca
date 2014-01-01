@@ -10,7 +10,7 @@ if(BOTAN_FOUND)
   set(QCA_BOTAN_SOURCES qca-botan.cpp)
   add_definitions(${BOTAN_CFLAGS})
   my_automoc(QCA_BOTAN_SOURCES)
-  add_library(qca-botan MODULE ${QCA_BOTAN_SOURCES})
+  add_library(qca-botan ${PLUGIN_TYPE} ${QCA_BOTAN_SOURCES})
   target_link_libraries(qca-botan ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${BOTAN_LIBRARIES})
 
   install(TARGETS qca-botan

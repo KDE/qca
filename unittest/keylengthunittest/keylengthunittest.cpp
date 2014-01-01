@@ -28,6 +28,10 @@
 
 #include <limits>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 class KeyLengthUnitTest : public QObject
 {
   Q_OBJECT

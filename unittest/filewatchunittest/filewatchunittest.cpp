@@ -24,6 +24,10 @@
  */
 #include "filewatchunittest.h"
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 void FileWatchUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;

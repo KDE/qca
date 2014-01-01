@@ -6,7 +6,8 @@ MY_AUTOMOC( pkits_bin_SRCS )
 
 add_executable(pkits ${pkits_bin_SRCS} )
 
-target_link_libraries( pkits ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
+target_link_qca_test_libraries(pkits)
+
 
 FOREACH( testFileName BadnotAfterDateCACert.crt RFC3280MandatoryAttributeTypesCACRL.crl BadnotAfterDateCACRL.crl
 	 RFC3280OptionalAttributeTypesCACert.crt BadnotBeforeDateCACert.crt RFC3280OptionalAttributeTypesCACRL.crl

@@ -29,6 +29,10 @@
 #include <QTcpSocket>
 #include <QTimer>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 char pemdata_cert[] =
 	"-----BEGIN CERTIFICATE-----\n"
 	"MIICeTCCAeKgAwIBAgIRAKKKnOj6Aarmwf0phApitVAwDQYJKoZIhvcNAQEFBQAw\n"

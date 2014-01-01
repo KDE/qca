@@ -4,7 +4,7 @@ enable_plugin("softstore")
 set(QCA_SOFTSTORE_SOURCES qca-softstore.cpp)
 my_automoc( QCA_SOFTSTORE_SOURCES )
 
-add_library(qca-softstore MODULE ${QCA_SOFTSTORE_SOURCES})
+add_library(qca-softstore ${PLUGIN_TYPE} ${QCA_SOFTSTORE_SOURCES})
 
 add_definitions(${SOFTSTOREH_DEFINITIONS})
 include_directories(${SOFTSTOREH_INCLUDE_DIR})

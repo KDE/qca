@@ -6,6 +6,6 @@ MY_AUTOMOC( securearrayunittest_bin_SRCS )
 
 add_executable( securearrayunittest ${securearrayunittest_bin_SRCS} )
 
-target_link_libraries( securearrayunittest ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
+target_link_qca_test_libraries(securearrayunittest)
 
 ADD_TEST(SecureArray ${EXECUTABLE_OUTPUT_PATH}/securearrayunittest)

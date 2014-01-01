@@ -6,6 +6,6 @@ MY_AUTOMOC( keystoreunittest_bin_SRCS )
 
 add_executable( keystore ${keystoreunittest_bin_SRCS} )
 
-target_link_libraries( keystore ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
+target_link_qca_test_libraries(keystore)
 
 ADD_TEST(KeyStore ${EXECUTABLE_OUTPUT_PATH}/keystore)

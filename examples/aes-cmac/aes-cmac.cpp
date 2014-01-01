@@ -25,6 +25,10 @@
 #include <QCoreApplication>
 #include <QDebug>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 class AESCMACContext : public QCA::MACContext
 {
 public:

@@ -26,6 +26,10 @@
 
 #include <iostream>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 /**
    We need a class on the client side to handle password requests.
 */

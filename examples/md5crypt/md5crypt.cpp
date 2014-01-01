@@ -30,6 +30,10 @@
 #include <QtDebug>
 #include <stdio.h>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 QString to64 ( long v , int size )
 {
 

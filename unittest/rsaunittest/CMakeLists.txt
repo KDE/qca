@@ -6,6 +6,6 @@ MY_AUTOMOC( rsaunittest_bin_SRCS )
 
 add_executable(rsaunittest ${rsaunittest_bin_SRCS} )
 
-target_link_libraries( rsaunittest ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
+target_link_qca_test_libraries(rsaunittest)
 
 ADD_TEST(RSA ${EXECUTABLE_OUTPUT_PATH}/rsaunittest)

@@ -13,7 +13,7 @@ if(OPENSSL_FOUND AND PKCS11H_FOUND)
   set(QCA_PKCS11_SOURCES qca-pkcs11.cpp)
   my_automoc( QCA_PKCS11_SOURCES )
 
-  add_library(qca-pkcs11 MODULE ${QCA_PKCS11_SOURCES})
+  add_library(qca-pkcs11 ${PLUGIN_TYPE} ${QCA_PKCS11_SOURCES})
 
   add_definitions(${PKCS11H_DEFINITIONS})
   include_directories(${PKCS11H_INCLUDE_DIR})

@@ -6,8 +6,7 @@ MY_AUTOMOC( keybundleunittest_bin_SRCS )
 
 add_executable( keybundle ${keybundleunittest_bin_SRCS} )
 
-target_link_libraries( keybundle ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
-
+target_link_qca_test_libraries(keybundle)
 
 FOREACH( testFileName RootCA2cert.pem  servergood2.p12  
 	 user2goodcert.pem  user2goodkey.pem  user2good.p12 )

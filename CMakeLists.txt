@@ -11,6 +11,7 @@ cmake_minimum_required(VERSION 2.6.0)
 option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
+option(SHARED_LIBRARY "Build shared library" ON)
 
 string(TOLOWER "${BUILD_PLUGINS}" BUILD_PLUGINS)
 if(NOT BUILD_PLUGINS)
@@ -38,11 +39,32 @@ if (Qt5Core_FOUND)
 else()
   set(QT_MIN_VERSION "4.7.0")
   set(QT_USE_IMPORTED_TARGETS ON)
-  find_package(Qt4 REQUIRED QtCore)
+  if(BUILD_TESTS)
+    find_package(Qt4 REQUIRED QtCore QtNetwork QtTest)
+  else(BUILD_TESTS)
+    find_package(Qt4 REQUIRED QtCore)
+  endif(BUILD_TESTS)
+
   # properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
   include(${QT_USE_FILE})
   setup_qt4_dirs()
 endif()
+
+if(SHARED_LIBRARY)
+  set(LIBRARY_TYPE "SHARED")
+else(SHARED_LIBRARY)
+  set(LIBRARY_TYPE "STATIC")
+endif(SHARED_LIBRARY)
+
+# QCA can be shared but plugins will be static
+# if Qt is static.
+if(NOT SHARED_LIBRARY OR QT_IS_STATIC)
+  set(STATIC_PLUGINS ON)
+  add_definitions(-DQT_STATICPLUGIN)
+  set(PLUGIN_TYPE "STATIC")
+else(NOT SHARED_LIBRARY OR QT_IS_STATIC)
+  set(PLUGIN_TYPE "MODULE")
+endif(NOT SHARED_LIBRARY OR QT_IS_STATIC)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "0")
@@ -81,6 +103,8 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 
 add_definitions (${QT_DEFINITIONS})
 include_directories("include/QtCrypto/")
+# for generated files
+include_directories(${CMAKE_BINARY_DIR})
 
 # uninstall target
 configure_file(
@@ -224,6 +248,18 @@ install(FILES "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" DESTINATION "${QCA_MAN_IN
 
 add_subdirectory(src)
 add_subdirectory(plugins)
+
+if(STATIC_PLUGINS)
+  # Generate header with static plugins list
+  file(WRITE "${CMAKE_BINARY_DIR}/import_plugins.h" "#include <QtPlugin>\n")
+  foreach(PLUGIN IN LISTS PLUGINS)
+    if(WITH_${PLUGIN}_PLUGIN_INTERNAL)
+      string(REPLACE "-" "_" IMPORT_NAME "qca-${PLUGIN}")
+      file(APPEND "${CMAKE_BINARY_DIR}/import_plugins.h" "Q_IMPORT_PLUGIN(${IMPORT_NAME})\n")
+    endif(WITH_${PLUGIN}_PLUGIN_INTERNAL)
+  endforeach(PLUGIN IN LISTS PLUGINS)
+endif(STATIC_PLUGINS)
+
 if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(unittest)

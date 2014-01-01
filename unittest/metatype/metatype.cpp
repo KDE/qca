@@ -28,6 +28,10 @@
 
 #include <limits>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 class TestClass1 : public QObject
 {
     Q_OBJECT

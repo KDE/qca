@@ -20,7 +20,7 @@ if(LIBGCRYPT_FOUND)
     set(QCA_GCRYPT_SOURCES qca-gcrypt.cpp)
     add_definitions(${LIBGCRYPT_CFLAGS})
     my_automoc(QCA_GCRYPT_SOURCES)
-    add_library(qca-gcrypt MODULE ${QCA_GCRYPT_SOURCES})
+    add_library(qca-gcrypt ${PLUGIN_TYPE} ${QCA_GCRYPT_SOURCES})
     target_link_libraries(qca-gcrypt ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${LIBGCRYPT_LIBRARIES})
 
     install(TARGETS qca-gcrypt

@@ -68,3 +68,27 @@ endmacro(enable_plugin)
 macro(disable_plugin PLUGIN)
   set_enabled_plugin(${PLUGIN} "off")
 endmacro(disable_plugin)
+
+# it used to build examples and tools
+macro(target_link_qca_libraries TARGET)
+  # Link with QCA library
+  target_link_libraries(${TARGET} ${QT_QTCORE_LIBRARY})
+  target_link_libraries(${TARGET} ${QCA_LIB_NAME})
+
+  # Statically link with all enabled QCA plugins
+  if(STATIC_PLUGINS)
+    target_link_libraries(${TARGET} ${QT_QTCORE_LIB_DEPENDENCIES})
+    foreach(PLUGIN IN LISTS PLUGINS)
+      # Check plugin for enabled
+      if(WITH_${PLUGIN}_PLUGIN_INTERNAL)
+        target_link_libraries(${TARGET} qca-${PLUGIN})
+      endif(WITH_${PLUGIN}_PLUGIN_INTERNAL)
+    endforeach(PLUGIN)
+  endif(STATIC_PLUGINS)
+endmacro(target_link_qca_libraries)
+
+# it used to build unittests
+macro(target_link_qca_test_libraries TARGET)
+  target_link_qca_libraries(${TARGET})
+  target_link_libraries(${TARGET} ${QT_QTTEST_LIBRARY})
+endmacro(target_link_qca_test_libraries)

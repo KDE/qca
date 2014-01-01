@@ -26,6 +26,10 @@
 
 #include <QCoreApplication>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 int main(int argc, char **argv)
 {
     // the Initializer object sets things up, and

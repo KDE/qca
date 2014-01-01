@@ -6,7 +6,6 @@ MY_AUTOMOC( filewatchunittest_bin_SRCS )
 
 add_executable( filewatchunittest ${filewatchunittest_bin_SRCS} )
 
-target_link_libraries( filewatchunittest ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
+target_link_qca_test_libraries(filewatchunittest)
 
 ADD_TEST(FileWatch ${EXECUTABLE_OUTPUT_PATH}/filewatchunittest)
-

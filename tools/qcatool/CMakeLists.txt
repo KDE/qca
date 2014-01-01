@@ -9,6 +9,6 @@ set(qcatool_bin_SRCS ${qcatool_moc_SRCS})
 
 add_executable(${QCA_TOOL_NAME} ${qcatool_bin_SRCS})
 
-target_link_libraries( ${QCA_TOOL_NAME} ${QCA_LIB_NAME} ${QT_QTCORE_LIBRARY})
+target_link_qca_libraries(${QCA_TOOL_NAME})
 
 install(TARGETS ${QCA_TOOL_NAME} DESTINATION "${QCA_BINARY_INSTALL_DIR}")

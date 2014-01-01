@@ -29,7 +29,7 @@ if(OPENSSL_FOUND)
 
   my_automoc( QCA_OSSL_SOURCES )
 
-  add_library(qca-ossl MODULE ${QCA_OSSL_SOURCES})
+  add_library(qca-ossl ${PLUGIN_TYPE} ${QCA_OSSL_SOURCES})
   include_directories(${OPENSSL_INCLUDE_DIR})
   target_link_libraries(qca-ossl ${QT_QTCORE_LIBRARY})
   target_link_libraries(qca-ossl ${QCA_LIB_NAME})

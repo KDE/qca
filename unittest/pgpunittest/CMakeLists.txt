@@ -6,7 +6,8 @@ MY_AUTOMOC( pgpunittest_bin_SRCS )
 
 add_executable(pgpunittest ${pgpunittest_bin_SRCS} )
 
-target_link_libraries( pgpunittest ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY} )
+target_link_qca_test_libraries(pgpunittest)
+
 
 FOREACH( testFileName pubring.gpg secring.gpg trustdb.gpg )
    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/keys1/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/keys1/${testFileName} COPYONLY)

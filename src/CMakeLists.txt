@@ -129,7 +129,7 @@ qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_support.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qpipe.h")
 qt4_wrap_cpp( SOURCES "qca_safeobj.h")
 
-ADD_LIBRARY(${QCA_LIB_NAME} SHARED ${SOURCES})
+ADD_LIBRARY(${QCA_LIB_NAME} ${LIBRARY_TYPE} ${SOURCES})
 TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} ${QT_QTCORE_LIBRARY})
 
 if(WIN32)

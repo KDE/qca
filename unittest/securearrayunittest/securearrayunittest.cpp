@@ -26,6 +26,10 @@
 #include <QtCrypto>
 #include <QtTest/QtTest>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 class SecureArrayUnitTest : public QObject
 {
     Q_OBJECT

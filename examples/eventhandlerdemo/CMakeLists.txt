@@ -4,5 +4,4 @@ MY_AUTOMOC( eventhandlerdemo_bin_SRCS)
 
 add_executable(eventhandlerdemo ${eventhandlerdemo_bin_SRCS})
 
-target_link_libraries( eventhandlerdemo ${QCA_LIB_NAME} ${QT_QTCORE_LIBRARY})
-
+target_link_qca_libraries(eventhandlerdemo)

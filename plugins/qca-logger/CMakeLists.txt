@@ -4,7 +4,7 @@ enable_plugin("logger")
 set(QCA_LOGGER_SOURCES qca-logger.cpp)
 my_automoc( QCA_LOGGER_SOURCES )
 
-add_library(qca-logger MODULE ${QCA_LOGGER_SOURCES})
+add_library(qca-logger ${PLUGIN_TYPE} ${QCA_LOGGER_SOURCES})
 
 add_definitions(${LOGGERH_DEFINITIONS})
 include_directories(${LOGGERH_INCLUDE_DIR})

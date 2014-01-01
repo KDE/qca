@@ -10,7 +10,7 @@ if(SASL2_FOUND)
   set(QCA_SASL_SOURCES qca-cyrus-sasl.cpp)
   include_directories( ${SASL2_INCLUDE_DIR} )
   my_automoc( QCA_SASL_SOURCES )
-  add_library(qca-cyrus-sasl MODULE ${QCA_SASL_SOURCES})
+  add_library(qca-cyrus-sasl ${PLUGIN_TYPE} ${QCA_SASL_SOURCES})
   target_link_libraries(qca-cyrus-sasl ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${SASL2_LIBRARIES})
 
   install(TARGETS qca-cyrus-sasl

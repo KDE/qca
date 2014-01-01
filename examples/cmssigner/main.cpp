@@ -31,6 +31,10 @@
 #include "pkcs11configdlg/pkcs11configdlg.h"
 #include "certitem.h"
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 #define VERSION "1.0.0"
 
 class Icons

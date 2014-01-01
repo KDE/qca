@@ -24,6 +24,10 @@
 #include <QCoreApplication>
 #include <QTcpSocket>
 
+#ifdef QT_STATICPLUGIN
+#include "import_plugins.h"
+#endif
+
 char exampleCA_cert[] =
 	"-----BEGIN CERTIFICATE-----\n"
 	"MIICSzCCAbSgAwIBAgIBADANBgkqhkiG9w0BAQUFADA4MRMwEQYDVQQDEwpFeGFt\n"

@@ -13,7 +13,7 @@ if(QCA_GPG_EXECUTABLE)
   qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/gpgproc.h)
   qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/sprocess.h)
 
-  add_library(qca-gnupg MODULE ${QCA_GNUPG_MOC_SOURCES} gpgproc/sprocess.cpp ${EXTRA_GNUPG_SOURCES})
+  add_library(qca-gnupg ${PLUGIN_TYPE} ${QCA_GNUPG_MOC_SOURCES} gpgproc/sprocess.cpp ${EXTRA_GNUPG_SOURCES})
   include_directories(gpgproc)
   target_link_libraries(qca-gnupg ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME})
 

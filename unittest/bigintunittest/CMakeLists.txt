@@ -6,6 +6,6 @@ MY_AUTOMOC( bigintunittest_bin_SRCS )
 
 add_executable(bigintunittest ${bigintunittest_bin_SRCS} )
 
-target_link_libraries( bigintunittest ${QCA_LIB_NAME} ${QT_QTTEST_LIBRARY})
+target_link_qca_test_libraries(bigintunittest)
 
 ADD_TEST("BigInteger" ${EXECUTABLE_OUTPUT_PATH}/bigintunittest)
