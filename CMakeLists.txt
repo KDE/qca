@@ -37,9 +37,11 @@ if (Qt5Core_FOUND)
   setup_qt5_dirs()
 else()
   set(QT_MIN_VERSION "4.7.0")
-  find_package(Qt4 REQUIRED)
+  set(QT_USE_IMPORTED_TARGETS ON)
+  find_package(Qt4 REQUIRED QtCore)
   # properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
   include(${QT_USE_FILE})
+  setup_qt4_dirs()
 endif()
 
 set(QCA_LIB_MAJOR_VERSION "2")
@@ -78,7 +80,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 add_definitions (${QT_DEFINITIONS})
-include_directories(include/QtCrypto/ ${QT_INCLUDES})
+include_directories("include/QtCrypto/")
 
 # uninstall target
 configure_file(
