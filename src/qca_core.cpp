@@ -44,6 +44,26 @@ int qcaVersion()
 	return QCA_VERSION;
 }
 
+const char *qcaVersionStr()
+{
+	return QCA_VERSION_STR;
+}
+
+int qcaMajorVersion()
+{
+	return QCA_MAJOR_VERSION;
+}
+
+int qcaMinorVersion()
+{
+	return QCA_MINOR_VERSION;
+}
+
+int qcaPatchVersion()
+{
+	return QCA_PATCH_VERSION;
+}
+
 namespace QCA {
 
 // from qca_tools

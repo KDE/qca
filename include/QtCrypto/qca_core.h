@@ -33,15 +33,6 @@
 #ifndef QCA_CORE_H
 #define QCA_CORE_H
 
-/**
-   The current version of %QCA
-
-   This provides you a compile time check of the %QCA version.
-
-   \sa qcaVersion for a runtime check.
-*/
-#define QCA_VERSION 0x020003
-
 #include <QString>
 #include <QStringList>
 #include <QList>
@@ -50,14 +41,47 @@
 #include "qca_export.h"
 #include "qca_support.h"
 #include "qca_tools.h"
+#include "qca_version.h"
 
 /**
    The current version of %QCA.
 
-   This is equivalent to QCA_VERSION, except it provides
+   This is equivalent to ::QCA_VERSION, except it provides
    a runtime check of the version of %QCA that is being used.
 */
 QCA_EXPORT int qcaVersion();
+
+/**
+   The current version of %QCA.
+
+   This is equivalent to ::QCA_VERSION_STR, except it provides
+   a runtime check of the version of %QCA that is being used.
+*/
+QCA_EXPORT const char *qcaVersionStr();
+
+/**
+   The current version of %QCA.
+
+   This is equivalent to ::QCA_MAJOR_VERSION, except it provides
+   a runtime check of the version of %QCA that is being used.
+*/
+QCA_EXPORT int qcaMajorVersion();
+
+/**
+   The current version of %QCA.
+
+   This is equivalent to ::QCA_MINOR_VERSION, except it provides
+   a runtime check of the version of %QCA that is being used.
+*/
+QCA_EXPORT int qcaMinorVersion();
+
+/**
+   The current version of %QCA.
+
+   This is equivalent to ::QCA_PATCH_VERSION, except it provides
+   a runtime check of the version of %QCA that is being used.
+*/
+QCA_EXPORT int qcaPatchVersion();
 
 /**
    QCA - the Qt Cryptographic Architecture

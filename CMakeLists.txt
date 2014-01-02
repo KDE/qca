@@ -85,6 +85,7 @@ endif(QCA_SUFFIX)
 
 set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}")
 
+configure_file("include/QtCrypto/qca_version.h.in" "${CMAKE_BINARY_DIR}/qca_version.h")
 
 if (WIN32)
  set(CMAKE_DEBUG_POSTFIX "d")
@@ -226,6 +227,7 @@ set( public_HEADERS
   ${qca_INCLUDEDIR}/QtCrypto/qca_keystore.h
   ${qca_INCLUDEDIR}/QtCrypto/qca_securelayer.h
   ${qca_INCLUDEDIR}/QtCrypto/qca_securemessage.h
+  ${CMAKE_BINARY_DIR}/qca_version.h
   ${qca_INCLUDEDIR}/QtCrypto/qpipe.h )
 
 set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
