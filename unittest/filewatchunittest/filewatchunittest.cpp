@@ -41,6 +41,8 @@ void FileWatchUnitTest::cleanupTestCase()
 
 void FileWatchUnitTest::filewatchTest()
 {
+    QWARN("Unittest will take about 1 minute. Please wait.");
+
     QCA::FileWatch watcher;
     QCOMPARE( watcher.fileName(), QString() );
 
