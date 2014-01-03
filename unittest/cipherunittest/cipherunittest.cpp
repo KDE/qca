@@ -641,7 +641,7 @@ void CipherUnitTest::aes192()
 {
     QStringList providersToTest;
     providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
+	// providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
 
@@ -1131,7 +1131,7 @@ void CipherUnitTest::aes256()
 {
     QStringList providersToTest;
     providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
+	// providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
 
@@ -1632,7 +1632,7 @@ void CipherUnitTest::tripleDES()
 {
     QStringList providersToTest;
     providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
+	// providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
 
@@ -1911,7 +1911,7 @@ void CipherUnitTest::des()
 {
     QStringList providersToTest;
     providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
+	// providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
 
@@ -2590,7 +2590,7 @@ void CipherUnitTest::blowfish()
 {
     QStringList providersToTest;
     providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
+	// providersToTest.append("qca-gcrypt");
     providersToTest.append("qca-botan");
     providersToTest.append("qca-nss");
 
