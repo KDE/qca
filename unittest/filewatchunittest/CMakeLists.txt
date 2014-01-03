@@ -1,10 +1,9 @@
 ENABLE_TESTING()
 
-set( filewatchunittest_bin_SRCS filewatchunittest.cpp)  
+set(SOURCES "filewatchunittest.cpp")
+qt4_wrap_cpp(SOURCES "filewatchunittest.h")
 
-MY_AUTOMOC( filewatchunittest_bin_SRCS )
-
-add_executable( filewatchunittest ${filewatchunittest_bin_SRCS} )
+add_executable( filewatchunittest ${SOURCES})
 
 target_link_qca_test_libraries(filewatchunittest)
 
