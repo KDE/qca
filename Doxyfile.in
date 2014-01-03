@@ -462,9 +462,10 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = examples \
-                         . \
-                         include/QtCrypto
+INPUT                  = @CMAKE_SOURCE_DIR@/examples \
+                         @CMAKE_SOURCE_DIR@ \
+                         @CMAKE_SOURCE_DIR@/include/QtCrypto \
+                         @CMAKE_BINARY_DIR@/qca_version.h
 
 # This tag can be used to specify the character encoding of the source files that 
 # doxygen parses. Internally doxygen uses the UTF-8 encoding, which is also the default 
@@ -494,7 +495,7 @@ RECURSIVE              = NO
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = 
+EXCLUDE                = @CMAKE_BINARY_DIR@/import_plugins.h
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -526,27 +527,27 @@ EXCLUDE_SYMBOLS        =
 # directories that contain example code fragments that are included (see 
 # the \include command).
 
-EXAMPLE_PATH           = examples/aes-cmac \
-                         examples/base64test \
-                         examples/certtest \
-                         examples/ciphertest \
-                         examples/cms \
-                         examples/cmssigner \
-                         examples/eventhandlerdemo \
-                         examples/hashtest \
-                         examples/hextest \
-                         examples/keyloader \
-                         examples/mactest \
-                         examples/md5crypt \
-                         examples/providertest \
-                         examples/publickeyexample \
-                         examples/randomtest \
-                         examples/rsatest \
-                         examples/saslclient \
-                         examples/saslserver \
-                         examples/ssltest \
-                         examples/sslservtest \
-                         examples/tlssocket
+EXAMPLE_PATH           = @CMAKE_SOURCE_DIR@/examples/aes-cmac \
+                         @CMAKE_SOURCE_DIR@/examples/base64test \
+                         @CMAKE_SOURCE_DIR@/examples/certtest \
+                         @CMAKE_SOURCE_DIR@/examples/ciphertest \
+                         @CMAKE_SOURCE_DIR@/examples/cms \
+                         @CMAKE_SOURCE_DIR@/examples/cmssigner \
+                         @CMAKE_SOURCE_DIR@/examples/eventhandlerdemo \
+                         @CMAKE_SOURCE_DIR@/examples/hashtest \
+                         @CMAKE_SOURCE_DIR@/examples/hextest \
+                         @CMAKE_SOURCE_DIR@/examples/keyloader \
+                         @CMAKE_SOURCE_DIR@/examples/mactest \
+                         @CMAKE_SOURCE_DIR@/examples/md5crypt \
+                         @CMAKE_SOURCE_DIR@/examples/providertest \
+                         @CMAKE_SOURCE_DIR@/examples/publickeyexample \
+                         @CMAKE_SOURCE_DIR@/examples/randomtest \
+                         @CMAKE_SOURCE_DIR@/examples/rsatest \
+                         @CMAKE_SOURCE_DIR@/examples/saslclient \
+                         @CMAKE_SOURCE_DIR@/examples/saslserver \
+                         @CMAKE_SOURCE_DIR@/examples/ssltest \
+                         @CMAKE_SOURCE_DIR@/examples/sslservtest \
+                         @CMAKE_SOURCE_DIR@/examples/tlssocket
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -1098,7 +1099,7 @@ SKIP_FUNCTION_MACROS   = YES
 # If a tag file is not located in the directory in which doxygen 
 # is run, you must also specify the path to the tagfile here.
 
-TAGFILES               = src/qt.tag
+TAGFILES               = @CMAKE_SOURCE_DIR@/src/qt.tag
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create 
 # a tag file that is based on the input files it reads.

@@ -57,7 +57,7 @@
 #define QCA_VERSION_STR "@QCA_LIB_VERSION_STRING@"
 
 /**
-   Can be used like #if (QCA_VERSION >= QCA_VERSION_CHECK(2, 0, 3))
+   Can be used like #if (QCA_VERSION >= %QCA_VERSION_CHECK(2, 0, 3))
 
    \param major part of the version
    \param minor part of the version

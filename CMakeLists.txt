@@ -17,6 +17,8 @@ option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
 option(SHARED_LIBRARY "Build shared library" ON)
 
+find_package(Doxygen)
+
 string(TOLOWER "${BUILD_PLUGINS}" BUILD_PLUGINS)
 if(NOT BUILD_PLUGINS)
   set(BUILD_PLUGINS "none")
@@ -270,6 +272,14 @@ endif(BUILD_TESTS)
 if(BUILD_TOOLS)
   add_subdirectory(tools)
 endif(BUILD_TOOLS)
+
+if(DOXYGEN_FOUND)
+  configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
+  add_custom_target(doc
+    ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Generating API documentation with Doxygen" VERBATIM)
+endif(DOXYGEN_FOUND)
 
 # /usr/local is traditional path for installing apps on POSIX-systems.
 # I consciously break this. Qt by default looks plugins and features only in
