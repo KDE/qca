@@ -392,7 +392,32 @@ public:
 
     QCA::KeyLength keyLength() const
 	{
-		return QCA::KeyLength(0, 0, 0);
+		int min = 0;
+		int max = 0;
+		int multiple = 0;
+
+		switch (m_cipherMechanism) {
+		case CKM_AES_ECB:
+		case CKM_AES_CBC:
+			min = max = 16;
+			multiple = 1;
+			break;
+
+		case CKM_DES_ECB:
+		case CKM_DES_CBC:
+		case CKM_DES_CBC_PAD:
+			min = max = 8;
+			multiple = 1;
+			break;
+
+		case CKM_DES3_ECB:
+			min = 16;
+			max = 24;
+			multiple = 1;
+			break;
+		}
+
+		return QCA::KeyLength(min, max, multiple);
 	}
 
 private:
