@@ -8,6 +8,10 @@ project(qca)
 
 cmake_minimum_required(VERSION 2.6.0)
 
+set(QCA_LIB_MAJOR_VERSION "2")
+set(QCA_LIB_MINOR_VERSION "1")
+set(QCA_LIB_PATCH_VERSION "0")
+
 option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
@@ -65,10 +69,6 @@ if(NOT SHARED_LIBRARY OR QT_IS_STATIC)
 else(NOT SHARED_LIBRARY OR QT_IS_STATIC)
   set(PLUGIN_TYPE "MODULE")
 endif(NOT SHARED_LIBRARY OR QT_IS_STATIC)
-
-set(QCA_LIB_MAJOR_VERSION "2")
-set(QCA_LIB_MINOR_VERSION "0")
-set(QCA_LIB_PATCH_VERSION "3")
 
 set(QCA_SUFFIX "" CACHE STRING "QCA common suffix")
 if(QCA_SUFFIX)
