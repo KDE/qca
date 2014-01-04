@@ -71,14 +71,20 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_RC4_128_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_RC4_128_MD5") );
-	QVERIFY( cipherList.contains("TLS_DHE_RSA_WITH_DES_CBC_SHA") );
-	QVERIFY( cipherList.contains("TLS_DHE_DSS_WITH_DES_CBC_SHA") );
-	QVERIFY( cipherList.contains("TLS_RSA_WITH_DES_CBC_SHA") );
-	QVERIFY( cipherList.contains("TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA") );
-	QVERIFY( cipherList.contains("TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA") );
-	QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_DES40_CBC_SHA") );
-	QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5") );
-	QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_RC4_40_MD5") );
+
+	// Fedora 20 openssl has no this cipher suites.
+	// I just believe that F20 has the most strict patent rules
+	// and Fedora list is the minimal default list.
+	// It should fit for every openssl distribuition.
+
+	// QVERIFY( cipherList.contains("TLS_DHE_RSA_WITH_DES_CBC_SHA") );
+	// QVERIFY( cipherList.contains("TLS_DHE_DSS_WITH_DES_CBC_SHA") );
+	// QVERIFY( cipherList.contains("TLS_RSA_WITH_DES_CBC_SHA") );
+	// QVERIFY( cipherList.contains("TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA") );
+	// QVERIFY( cipherList.contains("TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA") );
+	// QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_DES40_CBC_SHA") );
+	// QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5") );
+	// QVERIFY( cipherList.contains("TLS_RSA_EXPORT_WITH_RC4_40_MD5") );
 
 	cipherList = tls->supportedCipherSuites(QCA::TLS::SSL_v3);
 	QVERIFY( cipherList.contains("SSL_DHE_RSA_WITH_AES_256_CBC_SHA") );
@@ -92,14 +98,15 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_MD5") );
-	QVERIFY( cipherList.contains("SSL_DHE_RSA_WITH_DES_CBC_SHA") );
-	QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_DES_CBC_SHA") );
-	QVERIFY( cipherList.contains("SSL_RSA_WITH_DES_CBC_SHA") );
-	QVERIFY( cipherList.contains("SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA") );
-	QVERIFY( cipherList.contains("SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA") );
-	QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_DES40_CBC_SHA") );
-	QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5") );
-	QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC4_40_MD5") );
+
+	// QVERIFY( cipherList.contains("SSL_DHE_RSA_WITH_DES_CBC_SHA") );
+	// QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_DES_CBC_SHA") );
+	// QVERIFY( cipherList.contains("SSL_RSA_WITH_DES_CBC_SHA") );
+	// QVERIFY( cipherList.contains("SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA") );
+	// QVERIFY( cipherList.contains("SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA") );
+	// QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_DES40_CBC_SHA") );
+	// QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5") );
+	// QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC4_40_MD5") );
 
 	cipherList = tls->supportedCipherSuites(QCA::TLS::SSL_v2);
 	QVERIFY( cipherList.contains("SSL_CK_DES_192_EDE3_CBC_WITH_MD5") );
