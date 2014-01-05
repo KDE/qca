@@ -151,7 +151,7 @@ void PgpUnitTest::testKeyRing()
     // We test a small keyring - I downloaded a publically available one from
     QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
     // the Amsterdam Internet Exchange.
-    if ( qca_setenv( "GNUPGHOME",  "./keys1", 1 ) != 0 )
+	if ( qca_setenv( "GNUPGHOME",  "./keys1_work", 1 ) != 0 )
     {
         QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
     }
@@ -208,7 +208,7 @@ void PgpUnitTest::testKeyRing()
     qcaInit = new QCA::Initializer;
 
     // We now test an empty keyring
-    if ( qca_setenv( "GNUPGHOME",  "./keys2", 1 ) != 0 )
+	if ( qca_setenv( "GNUPGHOME",  "./keys2_work", 1 ) != 0 )
     {
         QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
     }
@@ -250,7 +250,7 @@ void PgpUnitTest::testMessageSign()
 
     // This keyring has a private / public key pair
     QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
-    if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	if ( 0 != qca_setenv( "GNUPGHOME",	"./keys3_work", 1 ) ) {
         QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
     }
 	
@@ -380,7 +380,7 @@ void PgpUnitTest::testClearsign()
 
     // This keyring has a private / public key pair
     QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
-    if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	if ( 0 != qca_setenv( "GNUPGHOME",	"./keys3_work", 1 ) ) {
         QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
     }
 	
@@ -492,7 +492,7 @@ void PgpUnitTest::testDetachedSign()
 
     // This keyring has a private / public key pair
     QByteArray oldGNUPGHOME = qgetenv( "GNUPGHOME" );
-    if ( 0 != qca_setenv( "GNUPGHOME",  "./keys3", 1 ) ) {
+	if ( 0 != qca_setenv( "GNUPGHOME",	"./keys3_work", 1 ) ) {
         QFAIL( "Expected to be able to set the GNUPGHOME environment variable, but couldn't" );
     }
 	
