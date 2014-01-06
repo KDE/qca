@@ -41,8 +41,10 @@ private slots:
     void pbkdf1md2Tests();
     void pbkdf1sha1Tests_data();
     void pbkdf1sha1Tests();
+	void pbkdf1sha1TimeTest();
     void pbkdf2Tests_data();
     void pbkdf2Tests();
+	void pbkdf2TimeTest();
     void pbkdf2extraTests();
 private:
     QCA::Initializer* m_init;
@@ -194,6 +196,40 @@ void KDFUnitTest::pbkdf1sha1Tests()
     }
 }
 
+void KDFUnitTest::pbkdf1sha1TimeTest()
+{
+	QStringList providersToTest;
+	providersToTest.append("qca-ossl");
+	providersToTest.append("qca-botan");
+	providersToTest.append("qca-gcrypt");
+
+	QCA::SecureArray password("secret");
+	QCA::InitializationVector iv(QByteArray("salt"));
+	unsigned int outputLength = 20;
+	int timeInterval = 200;
+	unsigned int iterationCount;
+
+	foreach(QString provider, providersToTest) {
+		if(!QCA::isSupported("pbkdf1(sha1)", provider)) {
+			QString warning("PBKDF version 1 with SHA1 not supported for %1");
+			QWARN(warning.arg(provider).toStdString().c_str());
+		} else {
+			QCA::SymmetricKey key1(QCA::PBKDF1("sha1", provider).makeKey(password,
+																		 iv,
+																		 outputLength,
+																		 timeInterval,
+																		 &iterationCount));
+
+			QCA::SymmetricKey key2(QCA::PBKDF1("sha1", provider).makeKey(password,
+																		 iv,
+																		 outputLength,
+																		 iterationCount));
+
+			QCOMPARE( key1, key2 );
+		}
+	}
+}
+
 void KDFUnitTest::pbkdf2Tests_data()
 {
     QTest::addColumn<QString>("secret");  // usually a password or passphrase
@@ -289,6 +325,39 @@ void KDFUnitTest::pbkdf2Tests()
     }
 }
 
+void KDFUnitTest::pbkdf2TimeTest()
+{
+	QStringList providersToTest;
+	providersToTest.append("qca-ossl");
+	providersToTest.append("qca-botan");
+	providersToTest.append("qca-gcrypt");
+
+	QCA::SecureArray password("secret");
+	QCA::InitializationVector iv(QByteArray("salt"));
+	unsigned int outputLength = 20;
+	int timeInterval = 200;
+	unsigned int iterationCount;
+
+	foreach(QString provider, providersToTest) {
+		if(!QCA::isSupported("pbkdf2(sha1)", provider)) {
+			QString warning("PBKDF version 2 with SHA1 not supported for %1");
+			QWARN(warning.arg(provider).toStdString().c_str());
+		} else {
+			QCA::SymmetricKey key1(QCA::PBKDF2("sha1", provider).makeKey(password,
+																		 iv,
+																		 outputLength,
+																		 timeInterval,
+																		 &iterationCount));
+
+			QCA::SymmetricKey key2(QCA::PBKDF2("sha1", provider).makeKey(password,
+																		 iv,
+																		 outputLength,
+																		 iterationCount));
+
+			QCOMPARE( key1, key2 );
+		}
+	}
+}
 
 void KDFUnitTest::pbkdf2extraTests()
 {

@@ -21,6 +21,8 @@
 
 #include <QtCore/qplugin.h>
 
+#include <QTime>
+
 #include <qstringlist.h>
 #include <gcrypt.h>
 #include <iostream>
@@ -333,6 +335,69 @@ public:
 	return a;
     }
 
+	QCA::SymmetricKey makeKey(const QCA::SecureArray &secret,
+							  const QCA::InitializationVector &salt,
+							  unsigned int keyLength,
+							  int msecInterval,
+							  unsigned int *iterationCount)
+	{
+		Q_ASSERT(iterationCount != NULL);
+		QTime timer;
+
+		/*
+		   from RFC2898:
+		   Steps:
+
+		   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
+		   "derived key too long" and stop.
+		*/
+		if ( keyLength > gcry_md_get_algo_dlen(m_hashAlgorithm) ) {
+			std::cout << "derived key too long" << std::endl;
+			return QCA::SymmetricKey();
+		}
+
+		/*
+		   2. Apply the underlying hash function Hash for M milliseconds
+		   to the concatenation of the password P and the salt S, incrementing c,
+		   then extract the first dkLen octets to produce a derived key DK:
+
+		   time from 0 to M
+		   T_1 = Hash (P || S) ,
+		   T_2 = Hash (T_1) ,
+		   ...
+		   T_c = Hash (T_{c-1}) ,
+		   when time = 0: stop,
+		   DK = Tc<0..dkLen-1>
+		*/
+		// calculate T_1
+		gcry_md_write( context, secret.data(), secret.size() );
+		gcry_md_write( context, salt.data(), salt.size() );
+		unsigned char *md;
+		md = gcry_md_read( context, m_hashAlgorithm );
+		QCA::SecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
+		memcpy( a.data(), md, a.size() );
+
+		// calculate T_2 up to T_c
+		*iterationCount = 2 - 1;	// <- Have to remove 1, unless it computes one
+		timer.start();				// ^  time more than the base function
+									// ^  with the same iterationCount
+		while (timer.elapsed() < msecInterval) {
+			gcry_md_reset( context );
+			gcry_md_write( context, a.data(), a.size() );
+			md = gcry_md_read( context, m_hashAlgorithm );
+			memcpy( a.data(), md, a.size() );
+			++(*iterationCount);
+		}
+
+		// shrink a to become DK, of the required length
+		a.resize(keyLength);
+
+		/*
+		   3. Output the derived key DK.
+		*/
+		return a;
+	}
+
 protected:
     gcry_md_hd_t context;
     gcry_error_t err;
@@ -367,6 +432,34 @@ public:
 	    return QCA::SymmetricKey();
 	}
     }
+
+	QCA::SymmetricKey makeKey(const QCA::SecureArray &secret,
+							  const QCA::InitializationVector &salt,
+							  unsigned int keyLength,
+							  int msecInterval,
+							  unsigned int *iterationCount)
+	{
+		Q_ASSERT(iterationCount != NULL);
+		QCA::SymmetricKey result(keyLength);
+		QTime timer;
+
+		*iterationCount = 0;
+		timer.start();
+
+		while (timer.elapsed() < msecInterval) {
+			gcry_error_t retval = gcry_pbkdf2(m_algorithm,
+											  secret.data(),
+											  secret.size(),
+											  salt.data(),
+											  salt.size(),
+											  1,
+											  keyLength,
+											  result.data());
+			++(*iterationCount);
+		}
+
+		return makeKey(secret, salt, keyLength, *iterationCount);
+	}
 
 protected:
     int m_algorithm;

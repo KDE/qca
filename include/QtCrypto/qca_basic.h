@@ -929,6 +929,25 @@ public:
 	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount);
 
 	/**
+	   Generate the key from a specified secret and salt value
+
+	   \note key length is ignored for some functions
+
+	   \param secret the secret (password or passphrase)
+	   \param salt the salt to use
+	   \param keyLength the length of key to return
+	   \param msecInterval the maximum time to compute the key, in milliseconds
+	   \param iterationCount a pointer to store the number of iteration done for the specified time
+
+	   \return the derived key
+	*/
+	SymmetricKey makeKey(const SecureArray &secret,
+						 const InitializationVector &salt,
+						 unsigned int keyLength,
+						 int msecInterval,
+						 unsigned int *iterationCount);
+
+	/**
 	   Construct the name of the algorithm
 
 	   You can use this to build a standard name string.

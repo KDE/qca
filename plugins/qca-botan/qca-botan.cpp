@@ -18,6 +18,7 @@
  *
  */
 #include <QtCrypto>
+#include <QTime>
 #include <QtPlugin>
 
 #include <qstringlist.h>
@@ -208,6 +209,40 @@ public:
         QCA::SecureArray retval(QByteArray((const char*)key.begin(), key.length()));
 	return QCA::SymmetricKey(retval);
     }
+
+	QCA::SymmetricKey makeKey(const QCA::SecureArray &secret,
+							  const QCA::InitializationVector &salt,
+							  unsigned int keyLength,
+							  int msecInterval,
+							  unsigned int *iterationCount)
+	{
+		Q_ASSERT(iterationCount != NULL);
+		Botan::OctetString key;
+		QTime timer;
+		std::string secretString(secret.data(), secret.size() );
+
+		*iterationCount = 0;
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
+		m_s2k->set_iterations(1);
+		m_s2k->change_salt((const Botan::byte*)salt.data(), salt.size());
+		timer.start();
+		while (timer.elapsed() < msecInterval) {
+			key = m_s2k->derive_key(keyLength, secretString);
+			++(*iterationCount);
+		}
+#else
+		timer.start();
+		while (timer.elapsed() < msecInterval) {
+			key = m_s2k->derive_key(keyLength,
+									secretString,
+									(const Botan::byte*)salt.data(),
+									salt.size(),
+									1);
+			++(*iterationCount);
+		}
+#endif
+		return makeKey(secret, salt, keyLength, *iterationCount);
+	}
 
 protected:
     Botan::S2K* m_s2k;

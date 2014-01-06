@@ -21,6 +21,7 @@
 #include <QtCrypto>
 #include <qcaprovider.h>
 #include <QDebug>
+#include <QTime>
 #include <QtPlugin>
 
 #include <openssl/evp.h>
@@ -1101,6 +1102,65 @@ public:
 		return a;
 	}
 
+	SymmetricKey makeKey(const SecureArray &secret,
+						 const InitializationVector &salt,
+						 unsigned int keyLength,
+						 int msecInterval,
+						 unsigned int *iterationCount)
+	{
+		Q_ASSERT(iterationCount != NULL);
+		QTime timer;
+
+		/* from RFC2898:
+		   Steps:
+
+		   1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
+		   "derived key too long" and stop.
+		*/
+		if ( keyLength > (unsigned int)EVP_MD_size( m_algorithm ) ) {
+			std::cout << "derived key too long" << std::endl;
+			return SymmetricKey();
+		}
+
+		/*
+		  2. Apply the underlying hash function Hash for M milliseconds
+		  to the concatenation of the password P and the salt S, incrementing c,
+		  then extract the first dkLen octets to produce a derived key DK:
+
+		  time from M to 0
+		  T_1 = Hash (P || S) ,
+		  T_2 = Hash (T_1) ,
+		  ...
+		  T_c = Hash (T_{c-1}) ,
+		  when time = 0: stop,
+		  DK = Tc<0..dkLen-1>
+		*/
+		// calculate T_1
+		EVP_DigestUpdate( &m_context, (unsigned char*)secret.data(), secret.size() );
+		EVP_DigestUpdate( &m_context, (unsigned char*)salt.data(), salt.size() );
+		SecureArray a( EVP_MD_size( m_algorithm ) );
+		EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+
+		// calculate T_2 up to T_c
+		*iterationCount = 2 - 1;	// <- Have to remove 1, unless it computes one
+		timer.start();				// ^  time more than the base function
+									// ^  with the same iterationCount
+		while (timer.elapsed() < msecInterval) {
+			EVP_DigestInit( &m_context, m_algorithm );
+			EVP_DigestUpdate( &m_context, (unsigned char*)a.data(), a.size() );
+			EVP_DigestFinal( &m_context, (unsigned char*)a.data(), 0 );
+			++(*iterationCount);
+		}
+
+		// shrink a to become DK, of the required length
+		a.resize(keyLength);
+
+		/*
+		  3. Output the derived key DK.
+		*/
+		return a;
+	}
+
 protected:
 	const EVP_MD *m_algorithm;
 	EVP_MD_CTX m_context;
@@ -1125,6 +1185,40 @@ public:
 		PKCS5_PBKDF2_HMAC_SHA1( (char*)secret.data(), secret.size(),
 								(unsigned char*)salt.data(), salt.size(),
 								iterationCount, keyLength, (unsigned char*)out.data() );
+		return out;
+	}
+
+	SymmetricKey makeKey(const SecureArray &secret,
+						 const InitializationVector &salt,
+						 unsigned int keyLength,
+						 int msecInterval,
+						 unsigned int *iterationCount)
+	{
+		Q_ASSERT(iterationCount != NULL);
+		QTime timer;
+		SecureArray out(keyLength);
+
+		*iterationCount = 0;
+		timer.start();
+
+		// PBKDF2 needs an iterationCount itself, unless PBKDF1.
+		// So we need to calculate first the number of iterations for
+		// That time interval, then feed the iterationCounts to PBKDF2
+		while (timer.elapsed() < msecInterval) {
+			PKCS5_PBKDF2_HMAC_SHA1((char*)secret.data(),
+								   secret.size(),
+								   (unsigned char*)salt.data(),
+								   salt.size(),
+								   1,
+								   keyLength,
+								   (unsigned char*)out.data());
+			++(*iterationCount);
+		}
+
+		// Now we can directely call makeKey base function,
+		// as we now have the iterationCount
+		out = makeKey(secret, salt, keyLength, *iterationCount);
+
 		return out;
 	}
 

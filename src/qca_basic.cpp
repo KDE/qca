@@ -542,6 +542,19 @@ SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &secret, const Ini
 	return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, iterationCount);
 }
 
+SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &secret,
+											const InitializationVector &salt,
+											unsigned int keyLength,
+											int msecInterval,
+											unsigned int *iterationCount)
+{
+	return static_cast<KDFContext *>(context())->makeKey(secret,
+														 salt,
+														 keyLength,
+														 msecInterval,
+														 iterationCount);
+}
+
 QString KeyDerivationFunction::withAlgorithm(const QString &kdfType, const QString &algType)
 {
 	return (kdfType + '(' + algType + ')');
