@@ -16,6 +16,7 @@ option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
 option(SHARED_LIBRARY "Build shared library" ON)
+option(DEVELOPER_MODE "Special developer mode" OFF)
 
 find_package(Doxygen)
 
@@ -84,6 +85,10 @@ else(QCA_SUFFIX)
   set(MOZCERTS_NAME mozcerts)
   set(QCA_PC_NAME qca2.pc)
 endif(QCA_SUFFIX)
+
+if(DEVELOPER_MODE)
+  add_definitions(-DDEVELOPER_MODE -DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
+endif(DEVELOPER_MODE)
 
 set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}")
 

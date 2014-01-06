@@ -30,6 +30,9 @@ Notes
                   (by default: "auto")
   WITH_${PLUGIN}_PLUGIN - to build particular plugin. Can be no, yes or
                           auto (WITH_ossl_PLUGIN=auto for example)
+  DEVELOPER_MODE - mode to enable features for developers. If ON
+                   will be used hardcoded path to 'crypto'
+                   (by default: OFF)
 
   Finally install paths can be override with:
 

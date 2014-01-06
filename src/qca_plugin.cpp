@@ -367,12 +367,22 @@ void ProviderManager::scan()
 		return;
 
 	// check plugin files
+#ifdef DEVELOPER_MODE
+	// Load plugins only from buildtree
+	QStringList dirs;
+	dirs << QCA_PLUGIN_PATH;
+#else
 	const QStringList dirs = QCoreApplication::libraryPaths();
+#endif
 	if(dirs.isEmpty())
 		logDebug("No Qt Library Paths");
 	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
+#ifdef DEVELOPER_MODE
+		logDebug(QString("Checking QCA build tree Path: %1").arg(*it));
+#else
 		logDebug(QString("Checking Qt Library Path: %1").arg(*it));
+#endif
 		QDir libpath(*it);
 		QDir dir(libpath.filePath(PLUGIN_SUBDIR));
 		if(!dir.exists())

@@ -5,7 +5,12 @@ if(Qt5Core_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
   find_package(Qt5Transitional REQUIRED Test)
 endif(Qt5Core_FOUND)
-add_definitions(-DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
+
+# avoid redefinition
+if(NOT DEVELOPER_MODE)
+  add_definitions(-DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
+endif(NOT DEVELOPER_MODE)
+
 add_subdirectory(base64unittest)
 add_subdirectory(bigintunittest)
 add_subdirectory(certunittest)
