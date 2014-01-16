@@ -6,6 +6,6 @@ includedir=@QCA_INCLUDE_INSTALL_DIR@/QtCrypto
 Name: QCA
 Description: Qt Cryptographic Architecture library
 Version: @QCA_LIB_VERSION_STRING@
-Requires: QtCore
+Requires: @QCA_QT_PC_VERSION@
 Libs: -L${libdir} -l@QCA_LIB_NAME@
 Cflags: -I${includedir}
