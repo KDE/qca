@@ -261,6 +261,15 @@ void deinit()
 	--(global->refs);
 	if(global->refs == 0)
 	{
+		// In order to maintain symmetry with the init() function, remove the
+		// post routine from QCoreApplication. This is needed in case when the
+		// QCA library is unloaded before QCoreApplication instance completes:
+		// QCoreApplication d-tor would try to execute the deinit() function,
+		// which would no longer be there.
+		// Note that this function is documented only in Qt 5.3 and later, but
+		// it has been present since ancient times with the same semantics.
+		qRemovePostRoutine(deinit);
+
 		delete global;
 		global = 0;
 		botan_deinit();
