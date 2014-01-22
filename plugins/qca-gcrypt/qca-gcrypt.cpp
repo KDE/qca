@@ -447,14 +447,14 @@ public:
 		timer.start();
 
 		while (timer.elapsed() < msecInterval) {
-			gcry_error_t retval = gcry_pbkdf2(m_algorithm,
-											  secret.data(),
-											  secret.size(),
-											  salt.data(),
-											  salt.size(),
-											  1,
-											  keyLength,
-											  result.data());
+			gcry_pbkdf2(m_algorithm,
+						secret.data(),
+						secret.size(),
+						salt.data(),
+						salt.size(),
+						1,
+						keyLength,
+						result.data());
 			++(*iterationCount);
 		}
 
