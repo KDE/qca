@@ -213,7 +213,7 @@ else (qca_CERTSTORE)
   message(STATUS "Using built in certstore.")
   set( qca_CERTSTORE "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem")
   # note that INSTALL_FILES targets are relative to the current installation prefix...
-  install_files( "/certs" FILES "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem" )
+  install(FILES "${qca_CERTSTORE}" DESTINATION "${QCA_PREFIX_INSTALL_DIR}/certs")
 endif (qca_CERTSTORE)
 message(STATUS "certstore path: " ${qca_CERTSTORE})
 add_definitions( -DQCA_SYSTEMSTORE_PATH="${qca_CERTSTORE}" )
