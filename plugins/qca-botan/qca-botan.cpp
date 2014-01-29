@@ -307,9 +307,10 @@ public:
 
     bool update(const QCA::SecureArray &in, QCA::SecureArray *out)
     {
-        QCA::SecureArray result( in.size() + blockSize() );
 	m_crypter->write((Botan::byte*)in.data(), in.size());
-	int bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
+	QCA::SecureArray result( m_crypter->remaining() );
+	// Perhaps bytes_read is redundant and can be dropped
+	size_t bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
 	result.resize(bytes_read);
         *out = result;
         return true;
@@ -317,9 +318,10 @@ public:
 
     bool final(QCA::SecureArray *out)
     {
-        QCA::SecureArray result( 2 * blockSize() );
 	m_crypter->end_msg();
-	int bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
+	QCA::SecureArray result( m_crypter->remaining() );
+	// Perhaps bytes_read is redundant and can be dropped
+	size_t bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
 	result.resize(bytes_read);
         *out = result;
         return true;
