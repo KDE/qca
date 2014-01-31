@@ -20,7 +20,7 @@ cmake_policy(SET CMP0020 OLD)
 option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
-option(SHARED_LIBRARY "Build shared library" ON)
+option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(DEVELOPER_MODE "Special developer mode" OFF)
 
 find_package(Doxygen)
@@ -64,21 +64,15 @@ else()
   set(QCA_QT_PC_VERSION "QtCore")
 endif()
 
-if(SHARED_LIBRARY)
-  set(LIBRARY_TYPE "SHARED")
-else(SHARED_LIBRARY)
-  set(LIBRARY_TYPE "STATIC")
-endif(SHARED_LIBRARY)
-
 # QCA can be shared but plugins will be static
 # if Qt is static.
-if(NOT SHARED_LIBRARY OR QT_IS_STATIC)
+if(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
   set(STATIC_PLUGINS ON)
   add_definitions(-DQT_STATICPLUGIN)
   set(PLUGIN_TYPE "STATIC")
-else(NOT SHARED_LIBRARY OR QT_IS_STATIC)
+else(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
   set(PLUGIN_TYPE "MODULE")
-endif(NOT SHARED_LIBRARY OR QT_IS_STATIC)
+endif(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
 
 set(QCA_SUFFIX "" CACHE STRING "QCA common suffix")
 if(QCA_SUFFIX)
