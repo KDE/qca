@@ -43,7 +43,7 @@ SET( moc_SOURCES
 )
 
 IF (WIN32)
-  SET( moc_SOURCES ${moc_SOURCES} qca_systemstore_win.cpp )
+  SET( nonmoc_SOURCES ${nonmoc_SOURCES} qca_systemstore_win.cpp )
 elseif(APPLE)
   set( nonmoc_SOURCES ${nonmoc_SOURCES} qca_systemstore_mac.cpp)
 else()
