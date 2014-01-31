@@ -12,6 +12,11 @@ set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "1")
 set(QCA_LIB_PATCH_VERSION "0")
 
+# Do not automatically link Qt executables to qtmain target on Windows.
+# QCA exucatables use console mode only. Not need to link against
+# qtmain.lib.
+cmake_policy(SET CMP0020 OLD)
+
 option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
