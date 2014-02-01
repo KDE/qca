@@ -8,4 +8,4 @@ add_executable( hexunittest ${hexunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(hexunittest)
 
-ADD_TEST(HexadecimalConversion ${EXECUTABLE_OUTPUT_PATH}/hexunittest)
+add_qca_test(hexunittest "HexadecimalConversion")

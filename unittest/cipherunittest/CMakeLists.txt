@@ -8,4 +8,4 @@ add_executable(cipherunittest ${cipherunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(cipherunittest)
 
-ADD_TEST( SymmetricCipher ${EXECUTABLE_OUTPUT_PATH}/cipherunittest)
+add_qca_test(cipherunittest "SymmetricCipher")

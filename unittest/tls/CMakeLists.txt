@@ -8,4 +8,4 @@ add_executable(tlsunittest ${tlsunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(tlsunittest)
 
-ADD_TEST(TransportLayerSecurity ${EXECUTABLE_OUTPUT_PATH}/tlsunittest)
+add_qca_test(tlsunittest "TransportLayerSecurity")

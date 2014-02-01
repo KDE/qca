@@ -8,4 +8,4 @@ add_executable( macunittest ${macunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(macunittest)
 
-ADD_TEST(MessageAuthenticationCode ${EXECUTABLE_OUTPUT_PATH}/macunittest)
+add_qca_test(macunittest "MessageAuthenticationCode")

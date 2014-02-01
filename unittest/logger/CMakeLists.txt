@@ -8,4 +8,4 @@ add_executable(loggerunittest ${loggerunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(loggerunittest)
 
-ADD_TEST(Logger ${EXECUTABLE_OUTPUT_PATH}/loggerunittest)
+add_qca_test(loggerunittest "Logger")

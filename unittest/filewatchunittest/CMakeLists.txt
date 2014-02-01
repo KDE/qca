@@ -7,4 +7,4 @@ add_executable( filewatchunittest ${SOURCES})
 
 target_link_qca_test_libraries(filewatchunittest)
 
-ADD_TEST(FileWatch ${EXECUTABLE_OUTPUT_PATH}/filewatchunittest)
+add_qca_test(filewatchunittest "FileWatch")

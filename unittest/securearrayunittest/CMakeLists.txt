@@ -8,4 +8,4 @@ add_executable( securearrayunittest ${securearrayunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(securearrayunittest)
 
-ADD_TEST(SecureArray ${EXECUTABLE_OUTPUT_PATH}/securearrayunittest)
+add_qca_test(securearrayunittest "SecureArray")

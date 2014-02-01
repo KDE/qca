@@ -1,7 +1,6 @@
 project(mozcerts)
 
 set(mozcerts_bin_SRCS main.cpp)  
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 add_executable(${MOZCERTS_NAME} ${mozcerts_bin_SRCS})
 

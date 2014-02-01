@@ -8,4 +8,4 @@ add_executable( metatypeunittest ${metatype_bin_SRCS} )
 
 target_link_qca_test_libraries(metatypeunittest)
 
-ADD_TEST(MetaTypeUnittest ${EXECUTABLE_OUTPUT_PATH}/metatypeunittest)
+add_qca_test(metatypeunittest "MetaTypeUnittest")

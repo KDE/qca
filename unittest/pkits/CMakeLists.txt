@@ -31,7 +31,7 @@ FOREACH( testFileName BadnotAfterDateCACert.crt RFC3280MandatoryAttributeTypesCA
 	 NoCRLCACert.crt ValidRolloverfromPrintableStringtoUTF8StringTest10EE.crt
 	 RevokedsubCACert.crt ValidUTF8StringCaseInsensitiveMatchTest11EE.crt
 	 RevokedsubCACRL.crl ValidUTF8StringEncodedNamesTest9EE.crt RFC3280MandatoryAttributeTypesCACert.crt )
-   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/certs/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/certs/${testFileName} COPYONLY)
+   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/certs/${testFileName} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/certs/${testFileName} COPYONLY)
 ENDFOREACH( testFileName )
 
-ADD_TEST(PublicKeyInfrastructure ${EXECUTABLE_OUTPUT_PATH}/pkits)
+add_qca_test(pkits "PublicKeyInfrastructure")

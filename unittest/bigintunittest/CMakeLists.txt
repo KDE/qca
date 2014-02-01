@@ -8,4 +8,4 @@ add_executable(bigintunittest ${bigintunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(bigintunittest)
 
-ADD_TEST("BigInteger" ${EXECUTABLE_OUTPUT_PATH}/bigintunittest)
+add_qca_test(bigintunittest "BigInteger")

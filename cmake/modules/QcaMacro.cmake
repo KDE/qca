@@ -92,3 +92,11 @@ macro(target_link_qca_test_libraries TARGET)
   target_link_qca_libraries(${TARGET})
   target_link_libraries(${TARGET} ${QT_QTTEST_LIBRARY})
 endmacro(target_link_qca_test_libraries)
+
+# it used to build unittests
+macro(add_qca_test TARGET DESCRIPTION)
+  message("${TARGET} : ${DESCRIPTION} : ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET}")
+  add_test(NAME "${DESCRIPTION}"
+           WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+           COMMAND "${TARGET}")
+endmacro(add_qca_test)

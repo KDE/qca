@@ -14,7 +14,7 @@ FOREACH( testFileName RootCAcert.pem 76.pem altname.pem csr1.pem
 	 Server.pem QcaTestServerCert.pem xmppcert.pem newreq.pem
 	 QualitySSLIntermediateCA.crt QcaTestRootCert.pem Test_CRL.crl
 	 RAIZ2007_CERTIFICATE_AND_CRL_SIGNING_SHA256.crt )
-   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/certs/${testFileName} ${CMAKE_CURRENT_BINARY_DIR}/certs/${testFileName} COPYONLY)
+   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/certs/${testFileName} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/certs/${testFileName} COPYONLY)
 ENDFOREACH( testFileName )
 
-ADD_TEST(Certificate ${EXECUTABLE_OUTPUT_PATH}/certunittest)
+add_qca_test(certunittest "Certificate")

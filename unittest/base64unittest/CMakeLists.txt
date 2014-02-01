@@ -8,4 +8,4 @@ add_executable(base64unittest ${base64unittest_bin_SRCS} )
 
 target_link_qca_test_libraries(base64unittest)
 
-ADD_TEST(Base64 ${EXECUTABLE_OUTPUT_PATH}/base64unittest)
+add_qca_test(base64unittest "Base64")

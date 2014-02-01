@@ -8,4 +8,4 @@ add_executable( keygenunittest ${keygenunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(keygenunittest)
 
-ADD_TEST(KeyGeneration ${EXECUTABLE_OUTPUT_PATH}/keygenunittest)
+add_qca_test(keygenunittest "KeyGeneration")

@@ -8,4 +8,4 @@ add_executable(rsaunittest ${rsaunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(rsaunittest)
 
-ADD_TEST(RSA ${EXECUTABLE_OUTPUT_PATH}/rsaunittest)
+add_qca_test(rsaunittest "RSA")

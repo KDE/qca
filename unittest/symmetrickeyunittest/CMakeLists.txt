@@ -8,4 +8,4 @@ add_executable( symmetrickeyunittest ${symmetrickeyunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(symmetrickeyunittest)
 
-ADD_TEST(SymmetricKey ${EXECUTABLE_OUTPUT_PATH}/symmetrickeyunittest)
+add_qca_test(symmetrickeyunittest "SymmetricKey")
