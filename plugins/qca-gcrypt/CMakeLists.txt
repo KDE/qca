@@ -27,6 +27,8 @@ if(LIBGCRYPT_FOUND)
             LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
             ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
             RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+
+    install_pdb(qca-gcrypt ${QCA_PLUGINS_INSTALL_DIR})
   else(HAVE_GCRY_ERROR_T)
     message(STATUS "libgcrypt seems to be too old")
     disable_plugin("gcrypt")

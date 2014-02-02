@@ -17,6 +17,8 @@ if(SASL2_FOUND)
           LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
           ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
           RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+
+  install_pdb(qca-cyrus-sasl ${QCA_PLUGINS_INSTALL_DIR})
 else(SASL2_FOUND)
   disable_plugin("cyrus-sasl")
 endif(SASL2_FOUND)
