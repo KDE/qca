@@ -116,7 +116,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	InfoContext(Provider *p) : BasicContext(p, "info") {}
+	InfoContext(Provider *p) : BasicContext(p, QStringLiteral("info") ) {}
 
 	/**
 	   The hash algorithms supported by the provider
@@ -153,7 +153,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	RandomContext(Provider *p) : BasicContext(p, "random") {}
+	RandomContext(Provider *p) : BasicContext(p, QStringLiteral("random")) {}
 
 	/**
 	   Return an array of random bytes
@@ -392,7 +392,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	DLGroupContext(Provider *p) : Provider::Context(p, "dlgroup") {}
+	DLGroupContext(Provider *p) : Provider::Context(p, QStringLiteral("dlgroup")) {}
 
 	/**
 	   The DLGroupSets supported by this object
@@ -601,7 +601,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	RSAContext(Provider *p) : PKeyBase(p, "rsa") {}
+	RSAContext(Provider *p) : PKeyBase(p, QStringLiteral("rsa")) {}
 
 	/**
 	   Generate an RSA private key
@@ -684,7 +684,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	DSAContext(Provider *p) : PKeyBase(p, "dsa") {}
+	DSAContext(Provider *p) : PKeyBase(p, QStringLiteral("dsa")) {}
 
 	/**
 	   Generate a DSA private key
@@ -754,7 +754,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	DHContext(Provider *p) : PKeyBase(p, "dh") {}
+	DHContext(Provider *p) : PKeyBase(p, QStringLiteral("dh")) {}
 
 	/**
 	   Generate a Diffie-Hellman private key
@@ -830,7 +830,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	PKeyContext(Provider *p) : BasicContext(p, "pkey") {}
+	PKeyContext(Provider *p) : BasicContext(p, QStringLiteral("pkey")) {}
 
 	/**
 	   Returns a list of supported public key types
@@ -1240,7 +1240,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	CertContext(Provider *p) : CertBase(p, "cert") {}
+	CertContext(Provider *p) : CertBase(p, QStringLiteral("cert")) {}
 
 	/**
 	   Create a self-signed certificate based on the given options and
@@ -1333,7 +1333,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	CSRContext(Provider *p) : CertBase(p, "csr") {}
+	CSRContext(Provider *p) : CertBase(p, QStringLiteral("csr")) {}
 
 	/**
 	   Returns true if the provider of this object supports the specified
@@ -1414,7 +1414,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	CRLContext(Provider *p) : CertBase(p, "crl") {}
+	CRLContext(Provider *p) : CertBase(p, QStringLiteral("crl")) {}
 
 	/**
 	   Returns a pointer to the properties of this CRL
@@ -1449,7 +1449,7 @@ public:
 
 	   \param p the provider associated with this context
 	*/
-	CertCollectionContext(Provider *p) : BasicContext(p, "certcollection") {}
+	CertCollectionContext(Provider *p) : BasicContext(p, QStringLiteral("certcollection")) {}
 
 	/**
 	   Create PKCS#7 DER output based on the input certificates and CRLs
@@ -1497,7 +1497,7 @@ public:
 
 	   \param p the Provider associated with this context
 	*/
-	CAContext(Provider *p) : BasicContext(p, "ca") {}
+	CAContext(Provider *p) : BasicContext(p, QStringLiteral("ca")) {}
 
 	/**
 	   Prepare the object for usage
@@ -1574,7 +1574,7 @@ public:
 
 	   \param p the Provider associated with this context
 	*/
-	PKCS12Context(Provider *p) : BasicContext(p, "pkcs12") {}
+	PKCS12Context(Provider *p) : BasicContext(p, QStringLiteral("pkcs12")) {}
 
 	/**
 	   Create PKCS#12 DER output based on a set of input items
@@ -1685,7 +1685,7 @@ public:
 
 	   \param p the Provider associated with this context
 	*/
-	PGPKeyContext(Provider *p) : BasicContext(p, "pgpkey") {}
+	PGPKeyContext(Provider *p) : BasicContext(p, QStringLiteral("pgpkey")) {}
 
 	/**
 	   Returns a pointer to the properties of this key
@@ -1743,7 +1743,7 @@ public:
 
 	   \param p the Provider associated with this context
 	*/
-	KeyStoreEntryContext(Provider *p) : BasicContext(p, "keystoreentry") {}
+	KeyStoreEntryContext(Provider *p) : BasicContext(p, QStringLiteral("keystoreentry")) {}
 
 	/**
 	   Returns the entry type
@@ -1848,7 +1848,7 @@ public:
 
 	   \param p the Provider associated with this context
 	*/
-	KeyStoreListContext(Provider *p) : Provider::Context(p, "keystorelist") {}
+	KeyStoreListContext(Provider *p) : Provider::Context(p, QStringLiteral("keystorelist")) {}
 
 	/**
 	   Starts the keystore provider
@@ -2086,7 +2086,7 @@ public:
 
 	   \param p the Provider associated with this context
 	*/
-	TLSSessionContext(Provider *p) : BasicContext(p, "tlssession") {}
+	TLSSessionContext(Provider *p) : BasicContext(p, QStringLiteral("tlssession")) {}
 };
 
 /**
@@ -2502,7 +2502,7 @@ public:
 
 	   \param p the Provider associated with this context
 	*/
-	SASLContext(Provider *p) : Provider::Context(p, "sasl") {}
+	SASLContext(Provider *p) : Provider::Context(p, QStringLiteral("sasl")) {}
 
 	/**
 	   Reset the object to its initial state

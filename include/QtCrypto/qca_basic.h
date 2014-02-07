@@ -35,6 +35,13 @@
 
 #include "qca_core.h"
 
+// Qt5 comes with QStringLiteral for wrapping string literals, which Qt4 does
+// not have. It is needed if the headers are built with QT_NO_CAST_FROM_ASCII.
+// Defining it here as QString::fromUtf8 for convenience.
+#ifndef QStringLiteral
+#define QStringLiteral(str) QString::fromUtf8(str)
+#endif
+
 namespace QCA {
 
 /**
@@ -994,7 +1001,8 @@ public:
 	   \param algorithm the name of the hashing algorithm to use
 	   \param provider the name of the provider to use, if available
 	*/
-	explicit PBKDF1(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf1", algorithm), provider) {}
+	explicit PBKDF1(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
+		: KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf1"), algorithm), provider) {}
 };
 
 /**
@@ -1016,7 +1024,8 @@ public:
 	   \param algorithm the name of the hashing algorithm to use
 	   \param provider the name of the provider to use, if available
 	*/
-	explicit PBKDF2(const QString &algorithm = "sha1", const QString &provider = QString()) : KeyDerivationFunction(withAlgorithm("pbkdf2", algorithm), provider) {}
+	explicit PBKDF2(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
+		: KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf2"), algorithm), provider) {}
 };
 
 }
