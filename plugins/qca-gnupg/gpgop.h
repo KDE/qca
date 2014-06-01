@@ -66,7 +66,10 @@ public:
 		ErrorEncryptUntrusted, // encrypting key is untrusted
 		ErrorEncryptInvalid,   // encrypting key is invalid in some way
 		ErrorDecryptNoKey,     // missing decrypt key
-		ErrorUnknown           // other error
+		ErrorUnknown,          // other error
+		ErrorSignerRevoked,    // signing key is revoked
+		ErrorSignatureExpired, // signature is expired
+		ErrorEncryptRevoked    // encrypting key is revoked
 	};
 
 	class Event

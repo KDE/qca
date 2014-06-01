@@ -1696,8 +1696,14 @@ public:
 			e = SecureMessage::ErrorFormat;
 		else if(op_err == GpgOp::ErrorSignerExpired)
 			e = SecureMessage::ErrorSignerExpired;
+		else if(op_err == GpgOp::ErrorSignerRevoked)
+			e = SecureMessage::ErrorSignerRevoked;
+		else if(op_err == GpgOp::ErrorSignatureExpired)
+			e = SecureMessage::ErrorSignatureExpired;
 		else if(op_err == GpgOp::ErrorEncryptExpired)
 			e = SecureMessage::ErrorEncryptExpired;
+		else if(op_err == GpgOp::ErrorEncryptRevoked)
+			e = SecureMessage::ErrorEncryptRevoked;
 		else if(op_err == GpgOp::ErrorEncryptUntrusted)
 			e = SecureMessage::ErrorEncryptUntrusted;
 		else if(op_err == GpgOp::ErrorEncryptInvalid)

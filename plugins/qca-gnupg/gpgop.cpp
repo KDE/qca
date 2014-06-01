@@ -442,7 +442,7 @@ public:
 	QByteArray buf_stdout, buf_stderr;
 	bool useAux;
 	QString passphraseKeyId;
-	bool signing, signPartDone, decryptGood, signGood;
+	bool signing, decryptGood, signGood;
 	GpgOp::Error curError;
 	bool badPassphrase;
 	bool need_submitPassphrase, need_cardOkay;
@@ -487,7 +487,6 @@ public:
 		useAux = false;
 		passphraseKeyId = QString();
 		signing = false;
-		signPartDone = false;
 		decryptGood = false;
 		signGood = false;
 		curError = GpgOp::ErrorUnknown;
@@ -879,25 +878,17 @@ private:
 			if(curError == GpgOp::ErrorUnknown)
 				curError = GpgOp::ErrorFormat;
 		}
-		else if(s == "KEYEXPIRED")
+		else if(s == "EXPKEYSIG")
 		{
-			if(curError == GpgOp::ErrorUnknown)
-			{
-				if(input.op == GpgOp::SignAndEncrypt)
-				{
-					if(!signPartDone)
-						curError = GpgOp::ErrorSignerExpired;
-					else
-						curError = GpgOp::ErrorEncryptExpired;
-				}
-				else
-				{
-					if(signing)
-						curError = GpgOp::ErrorSignerExpired;
-					else
-						curError = GpgOp::ErrorEncryptExpired;
-				}
-			}
+			curError = GpgOp::ErrorSignerExpired;
+		}
+		else if(s == "REVKEYSIG")
+		{
+			curError = GpgOp::ErrorSignerRevoked;
+		}
+		else if(s == "EXPSIG")
+		{
+			curError = GpgOp::ErrorSignatureExpired;
 		}
 		else if(s == "INV_RECP")
 		{
@@ -907,7 +898,16 @@ private:
 			{
 				if(r == 10)
 					curError = GpgOp::ErrorEncryptUntrusted;
+				else if(r == 4)
+					curError = GpgOp::ErrorEncryptRevoked;
+				else if(r == 5)
+					curError = GpgOp::ErrorEncryptExpired;
 				else
+					// due to GnuPG bug #1650
+					// <https://bugs.g10code.com/gnupg/issue1650>
+					// encrypting to expired and revoked keys will
+					// not specify any reason for failing,
+					// defaulting to this
 					curError = GpgOp::ErrorEncryptInvalid;
 			}
 		}
@@ -964,9 +964,6 @@ private:
 		else if(s == "GOOD_PASSPHRASE")
 		{
 			badPassphrase = false;
-
-			// a trick to determine what KEYEXPIRED should apply to
-			signPartDone = true;
 		}
 		else if(s == "BAD_PASSPHRASE")
 		{

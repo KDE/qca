@@ -363,7 +363,10 @@ public:
 		ErrorEncryptInvalid,   ///< encrypting key is invalid in some way
 		ErrorNeedCard,         ///< pgp card is missing
 		ErrorCertKeyMismatch,  ///< certificate and private key don't match
-		ErrorUnknown           ///< other error
+		ErrorUnknown,          ///< other error
+		ErrorSignerRevoked,    ///< signing key is revoked
+		ErrorSignatureExpired, ///< signature is expired
+		ErrorEncryptRevoked    ///< encrypting key is revoked
 	};
 
 	/**
