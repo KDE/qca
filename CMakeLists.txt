@@ -323,3 +323,19 @@ message("Documentation will be installed to " ${QCA_DOC_INSTALL_DIR})
 message("Man page will be installed to " ${QCA_MAN_INSTALL_DIR})
 message("Pkg-config file will be installed to " ${PKGCONFIG_INSTALL_PREFIX})
 message("")
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/QCA2Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/QCA2Config.cmake"
+  INSTALL_DESTINATION "share/cmake/QCA2"
+)
+write_basic_config_version_file(QCA2ConfigVersion.cmake VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
+
+install(EXPORT QCATargets DESTINATION "share/cmake/QCA2" FILE QCA2Targets.cmake NAMESPACE QCA:: )
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/QCA2Config.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/QCA2ConfigVersion.cmake"
+  DESTINATION "share/cmake/QCA2"
+  COMPONENT Devel
+)
