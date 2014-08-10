@@ -328,14 +328,14 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/QCA2Config.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/QCA2Config.cmake"
-  INSTALL_DESTINATION "share/cmake/QCA2"
+  INSTALL_DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_LIB_NAME}
 )
 write_basic_config_version_file(QCA2ConfigVersion.cmake VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
 
-install(EXPORT QCATargets DESTINATION "share/cmake/QCA2" FILE QCA2Targets.cmake NAMESPACE QCA:: )
+install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_LIB_NAME} FILE QCA2Targets.cmake NAMESPACE QCA:: )
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/QCA2Config.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/QCA2ConfigVersion.cmake"
-  DESTINATION "share/cmake/QCA2"
+  DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_LIB_NAME}
   COMPONENT Devel
 )
