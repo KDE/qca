@@ -14,7 +14,7 @@
    application!
 
    %QCA should work everywhere %Qt does, including Windows/Unix/MacOSX. This
-   version of %QCA is for Qt4, and requires no Qt3 compatibility code.
+   version of %QCA is for Qt4 or Qt5, and requires no Qt3 compatibility code.
 
    \section features Features
 
@@ -157,19 +157,20 @@
 
    \subsection qca2dev Current development
 
-   The latest version of the code is available from the KDE Subversion
-   server (there is no formal release of the current version at this time). See
-   <a href="http://developer.kde.org/source/anonsvn.html">
-   http://developer.kde.org/source/anonsvn.html
-   </a> for general instructions. You do <i>not</i> need kdelibs or
-   arts modules for %QCA - just pull down kdesupport/qca. The plugins
-   are in the same tree. Naturally you will need %Qt properly set up
-   and configured in order to build and use %QCA.
+   The latest version of the code is available from the KDE Git server
+   (there is no formal release of the current version at this time).
+   Naturally you will need %Qt properly set up and configured in order
+   to build and use %QCA.
 
-   The Subversion code can also be browsed
-   <a href="http://websvn.kde.org/trunk/kdesupport/qca/">
+   The Git code can be browsed
+   <a href="http://quickgit.kde.org/?p=qca.git">
    via the web</a>
 
+   Use
+   \verbatim
+   git clone git://anongit.kde.org/qca.git
+   \endverbatim
+   to get the latest sources.
  */
 
 /** \page architecture Architecture
