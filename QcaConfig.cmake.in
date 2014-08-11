@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+if(NOT TARGET qca)
+  include("${CMAKE_CURRENT_LIST_DIR}/QcaTargets.cmake")
+endif()
+
+set(Qca_LIBRARY qca)

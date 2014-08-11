@@ -170,6 +170,50 @@ endif( QCA_INSTALL_IN_QT_PREFIX )
 
 set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "Base directory for pkgconfig files")
 
+normalize_path(QCA_PREFIX_INSTALL_DIR)
+
+# check for oportunity to use relative paths
+set(USE_RELATIVE_PATHS ON)
+foreach(PATH QCA_PLUGINS_INSTALL_DIR
+             QCA_BINARY_INSTALL_DIR
+             QCA_LIBRARY_INSTALL_DIR
+             QCA_FEATURE_INSTALL_DIR
+             QCA_INCLUDE_INSTALL_DIR
+             QCA_PRIVATE_INCLUDE_INSTALL_DIR
+             QCA_DOC_INSTALL_DIR
+             QCA_MAN_INSTALL_DIR
+             PKGCONFIG_INSTALL_PREFIX)
+
+  # Normalize path before comparsion
+  normalize_path(${PATH})
+
+  # if all paths are subdirs of CMAKE_INSTALL_PREFIX it is possible to use relative paths
+  string(FIND "${${PATH}}" "${QCA_PREFIX_INSTALL_DIR}" POS)
+  if(NOT "${POS}" STREQUAL "0")
+    set(USE_RELATIVE_PATHS OFF)
+  endif()
+endforeach()
+
+# strip CMAKE_INSTALL_PREFIX in all paths
+if(USE_RELATIVE_PATHS)
+  message(STATUS "Installed package is relocatable")
+  foreach(PATH QCA_PLUGINS_INSTALL_DIR
+               QCA_BINARY_INSTALL_DIR
+               QCA_LIBRARY_INSTALL_DIR
+               QCA_FEATURE_INSTALL_DIR
+               QCA_INCLUDE_INSTALL_DIR
+               QCA_PRIVATE_INCLUDE_INSTALL_DIR
+               QCA_DOC_INSTALL_DIR
+               QCA_MAN_INSTALL_DIR
+               PKGCONFIG_INSTALL_PREFIX)
+
+     file(RELATIVE_PATH ${PATH} ${CMAKE_INSTALL_PREFIX} "${${PATH}}")
+  endforeach()
+else()
+  message(STATUS "Installed package is NOT relocatable")
+  set(QCA_PREFIX_INSTALL_DIR "")
+endif()
+
 if (APPLE)
    find_package(Carbon REQUIRED)
    set(CMAKE_INSTALL_NAME_DIR ${QCA_LIBRARY_INSTALL_DIR})
@@ -216,7 +260,8 @@ else (qca_CERTSTORE)
   message(STATUS "Using built in certstore.")
   set( qca_CERTSTORE "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem")
   # note that INSTALL_FILES targets are relative to the current installation prefix...
-  install(FILES "${qca_CERTSTORE}" DESTINATION "${QCA_PREFIX_INSTALL_DIR}/certs")
+  # QCA_PREFIX_INSTALL_DIR is normalized and ends with / not need to use slash in DESTINATION
+  install(FILES "${qca_CERTSTORE}" DESTINATION "${QCA_PREFIX_INSTALL_DIR}certs")
 endif (qca_CERTSTORE)
 message(STATUS "certstore path: " ${qca_CERTSTORE})
 add_definitions( -DQCA_SYSTEMSTORE_PATH="${qca_CERTSTORE}" )
@@ -243,9 +288,6 @@ set( public_HEADERS
   ${qca_INCLUDEDIR}/QtCrypto/qpipe.h )
 
 set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
-
-#install public headers only
-install(FILES ${public_HEADERS} DESTINATION "${QCA_INCLUDE_INSTALL_DIR}/QtCrypto")
 
 include_directories(${QT_QTCORE_INCLUDE_DIR} "${qca_INCLUDEDIR}/QtCrypto")
 
@@ -312,30 +354,29 @@ if(QCA_INSTALL_IN_QT_PREFIX)
 endif(QCA_INSTALL_IN_QT_PREFIX)
 
 message("")
-message("QCA prefix is " ${QCA_PREFIX_INSTALL_DIR})
-message("Plugins will be installed to " ${QCA_PLUGINS_INSTALL_DIR})
-message("Binary will be installed to " ${QCA_BINARY_INSTALL_DIR})
-message("Library will be installed to " ${QCA_LIBRARY_INSTALL_DIR})
-message("Feature file will be installed to " ${QCA_FEATURE_INSTALL_DIR})
-message("Public headers will be installed to " ${QCA_INCLUDE_INSTALL_DIR})
-message("Private headers will be installed to " ${QCA_PRIVATE_INCLUDE_INSTALL_DIR})
-message("Documentation will be installed to " ${QCA_DOC_INSTALL_DIR})
-message("Man page will be installed to " ${QCA_MAN_INSTALL_DIR})
-message("Pkg-config file will be installed to " ${PKGCONFIG_INSTALL_PREFIX})
+message("QCA prefix is " "${QCA_PREFIX_INSTALL_DIR}")
+message("Plugins will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_PLUGINS_INSTALL_DIR}")
+message("Binary will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_BINARY_INSTALL_DIR}")
+message("Library will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_LIBRARY_INSTALL_DIR}")
+message("Feature file will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_FEATURE_INSTALL_DIR}")
+message("Public headers will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_INCLUDE_INSTALL_DIR}")
+message("Private headers will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_PRIVATE_INCLUDE_INSTALL_DIR}")
+message("Documentation will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_DOC_INSTALL_DIR}")
+message("Man page will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_MAN_INSTALL_DIR}")
+message("Pkg-config file will be installed to " "${QCA_PREFIX_INSTALL_DIR}${PKGCONFIG_INSTALL_PREFIX}")
 message("")
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/QCA2Config.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/QCA2Config.cmake"
-  INSTALL_DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_LIB_NAME}
+  "${CMAKE_CURRENT_SOURCE_DIR}/QcaConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/QcaConfig.cmake"
+  INSTALL_DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
 )
-write_basic_config_version_file(QCA2ConfigVersion.cmake VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
+write_basic_config_version_file(QcaConfigVersion.cmake VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
 
-install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_LIB_NAME} FILE QCA2Targets.cmake NAMESPACE QCA:: )
+install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE QcaTargets.cmake)
 install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/QCA2Config.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/QCA2ConfigVersion.cmake"
-  DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_LIB_NAME}
-  COMPONENT Devel
+  "${CMAKE_CURRENT_BINARY_DIR}/QcaConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/QcaConfigVersion.cmake"
+  DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
 )
