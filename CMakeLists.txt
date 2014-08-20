@@ -194,6 +194,12 @@ foreach(PATH QCA_PLUGINS_INSTALL_DIR
   endif()
 endforeach()
 
+if(NOT WIN32)
+  # qca2.pc uses absolute paths. So it must be there. Don't rellocate this.
+  configure_file("qca2.pc.cmake" "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" @ONLY)
+  install(FILES "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
+endif(NOT WIN32)
+
 # strip CMAKE_INSTALL_PREFIX in all paths
 if(USE_RELATIVE_PATHS)
   message(STATUS "Installed package is relocatable")
@@ -290,11 +296,6 @@ set( public_HEADERS
 set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
 
 include_directories(${QT_QTCORE_INCLUDE_DIR} "${qca_INCLUDEDIR}/QtCrypto")
-
-if(NOT WIN32)
-  configure_file("qca2.pc.cmake" "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
-endif(NOT WIN32)
 
 configure_file("crypto.prf.cmake" "${CMAKE_BINARY_DIR}/crypto.prf" @ONLY)
 install(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION "${QCA_FEATURE_INSTALL_DIR}")
