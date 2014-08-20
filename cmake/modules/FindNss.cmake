@@ -3,37 +3,28 @@
 #
 #  NSS_FOUND - system has mozilla-nss lib
 #  NSS_INCLUDE_DIRS - the mozilla-nss include directories
-#  NSS_LIBRARIES - Link these to use mozilla-nss
-#  NSS_DEFINITIONS - Compiler switches required for using NSS
+#  NSS_LDFLAGS - Link these to use mozilla-nss
+#  NSS_CFLAGS_OTHER - Compiler switches required for using NSS
 #
 # Copyright (c) 2006, Laurent Montel, <montel@kde.org>
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-if (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
+if(NSS_INCLUDE_DIRS AND NSS_LDFLAGS)
 
   # in cache already
   SET(NSS_FOUND TRUE)
 
-else (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
+else()
   if(NOT WIN32)
-    INCLUDE(UsePkgConfig)
-
-    PKGCONFIG(nss _NSSIncDir _NSSLinkDir _NSSLinkFlags _NSSCflags)
-
-    set(NSS_DEFINITIONS ${_NSSCflags})
-    set(NSS_INCLUDE_DIRS ${_NSSIncDir})
-    set(NSS_LIBRARIES ${_NSSLinkFlags})
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(NSS nss)
   endif(NOT WIN32)
 
-  if (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
-     set(NSS_FOUND TRUE)
-  endif (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
-  
   if (NSS_FOUND)
     if (NOT Nss_FIND_QUIETLY)
-      message(STATUS "Found NSS: ${NSS_LIBRARIES}")
+      message(STATUS "Found NSS: ${NSS_LDFLAGS}")
     endif (NOT Nss_FIND_QUIETLY)
   else (NSS_FOUND)
     if (Nss_FIND_REQUIRED)
@@ -41,6 +32,6 @@ else (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
     endif (Nss_FIND_REQUIRED)
   endif (NSS_FOUND)
   
-  MARK_AS_ADVANCED(NSS_INCLUDE_DIRS NSS_LIBRARIES)
+  mark_as_advanced(NSS_INCLUDE_DIRS NSS_LDFLAGS NSS_CFLAGS_OTHER)
   
-endif (NSS_INCLUDE_DIRS AND NSS_LIBRARIES)
+endif()

@@ -3,8 +3,8 @@
 #
 #  PKCS11H_FOUND - system has pkcs11-helper 
 #  PKCS11H_INCLUDE_DIRS - the pkcs11-helper include directories
-#  PKCS11H_LIBRARIES - Link to these to use pkcs11-helper
-#  PKCS11H_DEFINITIONS - Compiler switches required for using pkcs11-helper
+#  PKCS11H_LDFLAGS - Link to these to use pkcs11-helper
+#  PKCS11H_CFLAGS_OTHER - Compiler switches required for using pkcs11-helper
 #
 # Copyright (c) 2006, Laurent Montel, <montel@kde.org>
 #
@@ -14,29 +14,20 @@
 # pkcs11-helper can be found at http://www.opensc-project.org/pkcs11-helper
 #
 
-if (PKCS11H_INCLUDE_DIRS AND PKCS11H_LIBRARIES)
+if(PKCS11H_INCLUDE_DIRS AND PKCS11H_LDFLAGS)
 
   # in cache already
   SET(PKCS11H_FOUND TRUE)
 
-else (PKCS11H_INCLUDE_DIRS AND PKCS11H_LIBRARIES)
+else()
   if(NOT WIN32)
-    INCLUDE(UsePkgConfig)
-
-    PKGCONFIG(libpkcs11-helper-1 _PKCS11HIncDir _PKCS11HLinkDir _PKCS11HLinkFlags _PKCS11HCflags)
-
-    set(PKCS11H_DEFINITIONS ${_PKCS11HCflags})
-    set(PKCS11H_INCLUDE_DIRS ${_PKCS11HIncDir})
-    set(PKCS11H_LIBRARIES ${_PKCS11HLinkFlags})
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(PKCS11H libpkcs11-helper-1)
   endif(NOT WIN32)
 
-  if (PKCS11H_INCLUDE_DIRS AND PKCS11H_LIBRARIES)
-     set(PKCS11H_FOUND TRUE)
-  endif (PKCS11H_INCLUDE_DIRS AND PKCS11H_LIBRARIES)
-  
   if (PKCS11H_FOUND)
     if (NOT Pkcs11Helper_FIND_QUIETLY)
-      message(STATUS "Found pkcs11-helper: ${PKCS11H_LIBRARIES}")
+      message(STATUS "Found pkcs11-helper: ${PKCS11H_LDFLAGS}")
     endif (NOT Pkcs11Helper_FIND_QUIETLY)
   else (PKCS11H_FOUND)
     if (Pkcs11Helper_FIND_REQUIRED)
@@ -44,6 +35,6 @@ else (PKCS11H_INCLUDE_DIRS AND PKCS11H_LIBRARIES)
     endif (Pkcs11Helper_FIND_REQUIRED)
   endif (PKCS11H_FOUND)
   
-  MARK_AS_ADVANCED(PKCS11H_INCLUDE_DIRS PKCS11H_LIBRARIES)
+  mark_as_advanced(PKCS11H_INCLUDE_DIRS PKCS11H_LDFLAGS PKCS11H_CFLAGS_OTHER)
   
-endif (PKCS11H_INCLUDE_DIRS AND PKCS11H_LIBRARIES)
+endif()

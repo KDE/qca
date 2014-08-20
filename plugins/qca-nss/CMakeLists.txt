@@ -8,11 +8,11 @@ if(NSS_FOUND)
   enable_plugin("nss")
 
   set(QCA_NSS_SOURCES qca-nss.cpp)
-  add_definitions(${NSS_DEFINITIONS})
-  include_directories(${NSS_INCLUDE_DIR})
+  add_definitions(${NSS_CFLAGS_OTHER})
+  include_directories(${NSS_INCLUDE_DIRS})
   my_automoc( QCA_NSS_SOURCES )
   add_library(qca-nss ${PLUGIN_TYPE} ${QCA_NSS_SOURCES})
-  target_link_libraries(qca-nss ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${NSS_LIBRARIES})
+  target_link_libraries(qca-nss ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${NSS_LDFALGS})
 
   install(TARGETS qca-nss
           LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
