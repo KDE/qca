@@ -2,6 +2,8 @@
 # It must be done before project(...)
 if(NOT CMAKE_INSTALL_PREFIX)
   set(QCA_INSTALL_IN_QT_PREFIX ON)
+  # If CMAKE_INSTALL_PREFIX is set in cmake arguments
+  unset(CMAKE_INSTALL_PREFIX CACHE)
 endif(NOT CMAKE_INSTALL_PREFIX)
 
 project(qca)
