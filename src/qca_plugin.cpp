@@ -391,10 +391,7 @@ void ProviderManager::scan()
 			continue;
 		}
 
-		QStringList entryList = dir.entryList();
-		// filter out "." and ".." to keep debug output cleaner
-		entryList.removeAll(".");
-		entryList.removeAll("..");
+		QStringList entryList = dir.entryList(QDir::Files);
 		if(entryList.isEmpty())
 		{
 			logDebug("  (No files in 'crypto' subdirectory)");
