@@ -816,7 +816,11 @@ bool PublicKey::canVerify() const
 
 int PublicKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 {
-	return static_cast<const PKeyContext *>(context())->key()->maximumEncryptSize(alg);
+	const PKeyContext* ctx = qobject_cast<const PKeyContext *>(context());
+	if (ctx)
+		return ctx->key()->maximumEncryptSize(alg);
+	else
+		return -1;
 }
 
 SecureArray PublicKey::encrypt(const SecureArray &a, EncryptionAlgorithm alg)
@@ -1216,6 +1220,8 @@ PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
 	d->k = static_cast<RSAContext *>(getContext("rsa", provider));
+	if (!d->k)
+		return PrivateKey();
 	d->dest = static_cast<PKeyContext *>(getContext("pkey", d->k->provider()));
 
 	if(!d->blocking)
