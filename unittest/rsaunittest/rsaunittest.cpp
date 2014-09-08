@@ -156,7 +156,11 @@ void RSAUnitTest::testAsymmetricEncryption()
 	   !QCA::PKey::supportedTypes("qca-ossl").contains(QCA::PKey::RSA) ||
 	   !QCA::PKey::supportedIOTypes("qca-ossl").contains(QCA::PKey::RSA)) {
 	    QWARN(QString("RSA not supported").toLocal8Bit());
+#if QT_VERSION >= 0x050000
 	    QSKIP("RSA not supported. skipping");
+#else
+	    QSKIP("RSA not supported. skipping",SkipAll);
+#endif
 	}
 	QCA::RSAPrivateKey rsaPrivKey1 = QCA::KeyGenerator().createRSA(512, 65537, "qca-ossl").toRSA();
 	QCA::RSAPublicKey rsaPubKey1 = rsaPrivKey1.toPublicKey().toRSA();
