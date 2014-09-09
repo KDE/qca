@@ -825,29 +825,46 @@ int PublicKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 
 SecureArray PublicKey::encrypt(const SecureArray &a, EncryptionAlgorithm alg)
 {
-	return static_cast<PKeyContext *>(context())->key()->encrypt(a, alg);
+	PKeyContext* ctx = qobject_cast<PKeyContext *>(context());
+	if (ctx)
+		return ctx->key()->encrypt(a, alg);
+	else
+		return SecureArray();
 }
 
 bool PublicKey::decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg)
 {
-	return static_cast<PKeyContext *>(context())->key()->decrypt(in, out, alg);
+        PKeyContext* ctx = qobject_cast<PKeyContext *>(context());
+	if (ctx)
+		return ctx->key()->decrypt(in, out, alg);
+	else
+		return false;
 }
 
 void PublicKey::startVerify(SignatureAlgorithm alg, SignatureFormat format)
 {
 	if(isDSA() && format == DefaultFormat)
 		format = IEEE_1363;
-	static_cast<PKeyContext *>(context())->key()->startVerify(alg, format);
+	PKeyContext* ctx = qobject_cast<PKeyContext *>(context());
+	if(ctx)
+		ctx->key()->startVerify(alg, format);
+
 }
 
 void PublicKey::update(const MemoryRegion &a)
 {
-	static_cast<PKeyContext *>(context())->key()->update(a);
+	PKeyContext* ctx = qobject_cast<PKeyContext *>(context());
+	if(ctx) {
+		ctx->key()->update(a);
+	}
 }
 
 bool PublicKey::validSignature(const QByteArray &sig)
 {
-	return static_cast<PKeyContext *>(context())->key()->endVerify(sig);
+	PKeyContext* ctx = qobject_cast<PKeyContext *>(context());
+	if(ctx)
+		return ctx->key()->endVerify(sig);
+	return false;
 }
 
 bool PublicKey::verifyMessage(const MemoryRegion &a, const QByteArray &sig, SignatureAlgorithm alg, SignatureFormat format)
@@ -871,7 +888,7 @@ QByteArray PublicKey::toDER() const
 	else
 	{
 		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
-		if(pk->importKey(cur->key()))
+		if(pk && pk->importKey(cur->key()))
 			out = pk->publicToDER();
 		delete pk;
 	}
@@ -882,6 +899,8 @@ QString PublicKey::toPEM() const
 {
 	QString out;
 	const PKeyContext *cur = static_cast<const PKeyContext *>(context());
+	if(!cur)
+		return out;
 	Provider *p = providerForIOType(type(), cur);
 	if(!p)
 		return out;
@@ -892,7 +911,7 @@ QString PublicKey::toPEM() const
 	else
 	{
 		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
-		if(pk->importKey(cur->key()))
+		if(pk && pk->importKey(cur->key()))
 			out = pk->publicToPEM();
 		delete pk;
 	}
