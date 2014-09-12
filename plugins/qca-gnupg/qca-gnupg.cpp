@@ -1414,13 +1414,10 @@ public:
 	PasswordAsker asker;
 	TokenAsker tokenAsker;
 
-	MyMessageContext(MyOpenPGPContext *_sms, Provider *p) : MessageContext(p, "pgpmsg"), gpg(find_bin())
+	MyMessageContext(MyOpenPGPContext *_sms, Provider *p) : MessageContext(p, "pgpmsg"), sms(_sms), op(Sign),
+	    signMode(SecureMessage::Detached), format(SecureMessage::Ascii), wrote(0), ok(false), wasSigned(false),
+	    op_err(GpgOp::ErrorUnknown), gpg(find_bin()) ,_finished(false)
 	{
-		sms = _sms;
-		wrote = 0;
-		ok = false;
-		wasSigned = false;
-
 		connect(&gpg, SIGNAL(readyRead()), SLOT(gpg_readyRead()));
 		connect(&gpg, SIGNAL(bytesWritten(int)), SLOT(gpg_bytesWritten(int)));
 		connect(&gpg, SIGNAL(finished()), SLOT(gpg_finished()));
