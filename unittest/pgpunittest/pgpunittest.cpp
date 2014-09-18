@@ -139,6 +139,11 @@ void PgpUnitTest::initTestCase()
     //   changes to $GNUPGHOME.
     //m_init = new QCA::Initializer;
 #include "../fixpaths.include"
+
+    // Change current directory to executable directory
+    // it is need to find keys*_work directories
+    if (!QCoreApplication::applicationDirPath().isEmpty())
+        QDir::setCurrent(QCoreApplication::applicationDirPath());
 }
 
 void PgpUnitTest::cleanupTestCase()
