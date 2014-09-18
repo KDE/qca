@@ -185,9 +185,9 @@ private slots:
 			info.fixInterval = true;
 			ed->unregisterTimer(info.id);
 #if QT_VERSION >= 0x050000
-			ed->registerTimer(info.id, timeLeft, Qt::CoarseTimer, target);
+			info.id = ed->registerTimer(timeLeft, Qt::CoarseTimer, target);
 #else
-			ed->registerTimer(info.id, timeLeft, target);
+			info.id = ed->registerTimer(timeLeft, target);
 #endif
 
 #ifdef TIMERFIXER_DEBUG
@@ -248,9 +248,9 @@ private:
 			info.fixInterval = false;
 			ed->unregisterTimer(info.id);
 #if QT_VERSION >= 0x050000
-			ed->registerTimer(info.id, info.interval, Qt::CoarseTimer, target);
+			info.id = ed->registerTimer(info.interval, Qt::CoarseTimer, target);
 #else
-			ed->registerTimer(info.id, info.interval, target);
+			info.id = ed->registerTimer(info.interval, target);
 #endif
 		}
 
