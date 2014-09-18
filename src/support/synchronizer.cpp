@@ -30,6 +30,10 @@
 
 //#define TIMERFIXER_DEBUG
 
+#ifdef TIMERFIXER_DEBUG
+#include <stdio.h>
+#endif
+
 namespace QCA {
 
 //----------------------------------------------------------------------------
