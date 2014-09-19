@@ -179,7 +179,6 @@ void PgpUnitTest::testKeyRing()
         QCOMPARE( pgpStore.name(), QString( "GnuPG Keyring" ) );
         QCOMPARE( pgpStore.type(), QCA::KeyStore::PGPKeyring );
         QCOMPARE( pgpStore.id(), QString( "qca-gnupg" ) );
-	QEXPECT_FAIL( "", "Write support not yet implemented", Continue );
         QCOMPARE( pgpStore.isReadOnly(), false );
         QCOMPARE( pgpStore.holdsTrustedCertificates(), false );
         QCOMPARE( pgpStore.holdsIdentities(), true );
