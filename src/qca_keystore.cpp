@@ -106,7 +106,15 @@ public:
 		KeyStore::Type type;
 		bool isReadOnly;
 
-		Item() : trackerId(-1), updateCount(0), owner(0), storeContextId(-1)
+		Item()
+			: trackerId(-1)
+			, updateCount(0)
+			, owner(0)
+			, storeContextId(-1)
+			, storeId("")
+			, name("")
+			, type(KeyStore::System)
+			, isReadOnly(false)
 		{
 		}
 	};
