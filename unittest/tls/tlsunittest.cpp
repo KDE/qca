@@ -108,14 +108,16 @@ void TLSUnitTest::testCipherList()
 	// QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5") );
 	// QVERIFY( cipherList.contains("SSL_RSA_EXPORT_WITH_RC4_40_MD5") );
 
-	cipherList = tls->supportedCipherSuites(QCA::TLS::SSL_v2);
-	QVERIFY( cipherList.contains("SSL_CK_DES_192_EDE3_CBC_WITH_MD5") );
-	QVERIFY( cipherList.contains("SSL_CK_RC4_128_EXPORT40_WITH_MD5") );
-	QVERIFY( cipherList.contains("SSL_CK_RC2_128_CBC_WITH_MD5") );
-	QVERIFY( cipherList.contains("SSL_CK_RC4_128_WITH_MD5") );
-	QVERIFY( cipherList.contains("SSL_CK_DES_64_CBC_WITH_MD5") );
-	QVERIFY( cipherList.contains("SSL_CK_RC2_128_CBC_EXPORT40_WITH_MD5") );
-	QVERIFY( cipherList.contains("SSL_CK_RC4_128_EXPORT40_WITH_MD5") );
+	// Debian testing (jessie) has no these ciphers. So disable them.
+
+	// cipherList = tls->supportedCipherSuites(QCA::TLS::SSL_v2);
+	// QVERIFY( cipherList.contains("SSL_CK_DES_192_EDE3_CBC_WITH_MD5") );
+	// QVERIFY( cipherList.contains("SSL_CK_RC4_128_EXPORT40_WITH_MD5") );
+	// QVERIFY( cipherList.contains("SSL_CK_RC2_128_CBC_WITH_MD5") );
+	// QVERIFY( cipherList.contains("SSL_CK_RC4_128_WITH_MD5") );
+	// QVERIFY( cipherList.contains("SSL_CK_DES_64_CBC_WITH_MD5") );
+	// QVERIFY( cipherList.contains("SSL_CK_RC2_128_CBC_EXPORT40_WITH_MD5") );
+	// QVERIFY( cipherList.contains("SSL_CK_RC4_128_EXPORT40_WITH_MD5") );
     }
 }
 
