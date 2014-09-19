@@ -26,6 +26,8 @@
 
 #include <QTimer>
 #include <QSocketNotifier>
+#include <QEvent>
+#include <stdio.h>
 
 namespace QCA {
 
@@ -39,35 +41,35 @@ class SafeTimer : public QObject
 {
 	Q_OBJECT
 public:
-	SafeTimer(QObject *parent = 0) :
-		QObject(parent)
-	{
-		t = new QTimer(this);
-		connect(t, SIGNAL(timeout()), SIGNAL(timeout()));
-	}
+	SafeTimer(QObject *parent = 0);
+	~SafeTimer();
 
-	~SafeTimer()
-	{
-		releaseAndDeleteLater(this, t);
-	}
-
-	int interval() const                { return t->interval(); }
-	bool isActive() const               { return t->isActive(); }
-	bool isSingleShot() const           { return t->isSingleShot(); }
-	void setInterval(int msec)          { t->setInterval(msec); }
-	void setSingleShot(bool singleShot) { t->setSingleShot(singleShot); }
-	int timerId() const                 { return t->timerId(); }
+	int interval() const;
+	bool isActive() const;
+	bool isSingleShot() const;
+	void setInterval(int msec);
+	void setSingleShot(bool singleShot);
+	int timerId() const;
 
 public slots:
-	void start(int msec)                { t->start(msec); }
-	void start()                        { t->start(); }
-	void stop()                         { t->stop(); }
+	void start(int msec);
+	void start();
+	void stop();
 
 signals:
 	void timeout();
 
+protected:
+	bool event(QEvent *event);
+	void timerEvent(QTimerEvent *event);
+
 private:
-	QTimer *t;
+	// Functions is used internally. Outer world mustn't have access them.
+	void startTimer() {}
+	void killTimer(int) {}
+
+	class Private;
+	Private *d;
 };
 
 class SafeSocketNotifier : public QObject
