@@ -305,7 +305,7 @@ void PgpUnitTest::testMessageSign()
 	msg.startSign(QCA::SecureMessage::Message);
 	msg.update(plain);
 	msg.end();
-	msg.waitForFinished(2000);
+	msg.waitForFinished(5000);
 
 #if 0
         QString str = QCA::KeyStoreManager::diagnosticText();
@@ -336,7 +336,7 @@ void PgpUnitTest::testMessageSign()
 	msg2.startVerify();
 	msg2.update(messageData);
 	msg2.end();
-	msg2.waitForFinished(2000);	
+	msg2.waitForFinished(5000);
 
 	QVERIFY(msg2.verifySuccess());
 
@@ -361,7 +361,7 @@ void PgpUnitTest::testMessageSign()
 	msg3.startVerify();
 	msg3.update(messageData);
 	msg3.end();
-	msg3.waitForFinished(2000);	
+	msg3.waitForFinished(5000);
 
 	QCOMPARE(msg3.verifySuccess(), false);
 	QCOMPARE(msg3.errorCode(), QCA::SecureMessage::ErrorUnknown);
@@ -435,7 +435,7 @@ void PgpUnitTest::testClearsign()
 	msg.startSign(QCA::SecureMessage::Clearsign);
 	msg.update(plain);
 	msg.end();
-	msg.waitForFinished(2000);
+	msg.waitForFinished(5000);
 
 #if 0
         QString str = QCA::KeyStoreManager::diagnosticText();
@@ -466,7 +466,7 @@ void PgpUnitTest::testClearsign()
 	msg2.startVerify();
 	msg2.update(clearsignedData);
 	msg2.end();
-	msg2.waitForFinished(2000);	
+	msg2.waitForFinished(5000);
 
 	QVERIFY(msg2.verifySuccess());
 
@@ -547,7 +547,7 @@ void PgpUnitTest::testDetachedSign()
 	msg.startSign(QCA::SecureMessage::Detached);
 	msg.update(plain);
 	msg.end();
-	msg.waitForFinished(2000);
+	msg.waitForFinished(5000);
 
 #if 0
         QString str = QCA::KeyStoreManager::diagnosticText();
@@ -666,7 +666,7 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
 		msg.startSign(QCA::SecureMessage::Clearsign);
 		msg.update(validMessage);
 		msg.end();
-		msg.waitForFinished(2000);
+		msg.waitForFinished(5000);
 
 		QVERIFY(msg.success());
 
@@ -679,7 +679,7 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
 		msg1.startVerify();
 		msg1.update(nonExpiredKeySignature);
 		msg1.end();
-		msg1.waitForFinished(2000);
+		msg1.waitForFinished(5000);
 
 		QByteArray signedResult = msg1.read();
 
@@ -709,7 +709,7 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
 		msg2.startVerify();
 		msg2.update(expiredKeySignature);
 		msg2.end();
-		msg2.waitForFinished(2000);
+		msg2.waitForFinished(5000);
 
 		QCOMPARE(msg2.verifySuccess(), false);
 		QCOMPARE(msg2.errorCode(), QCA::SecureMessage::ErrorSignerExpired);
@@ -737,7 +737,7 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
 		msg3.startVerify();
 		msg3.update(revokedKeySignature);
 		msg3.end();
-		msg3.waitForFinished(2000);
+		msg3.waitForFinished(5000);
 
 		QCOMPARE(msg3.verifySuccess(), false);
 		QCOMPARE(msg3.errorCode(), QCA::SecureMessage::ErrorSignerRevoked);
@@ -766,7 +766,7 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
 		msg4.startVerify();
 		msg4.update(expiredSignature);
 		msg4.end();
-		msg4.waitForFinished(2000);
+		msg4.waitForFinished(5000);
 
 		QCOMPARE(msg4.verifySuccess(), false);
 		QCOMPARE(msg4.errorCode(), QCA::SecureMessage::ErrorSignatureExpired);
@@ -856,7 +856,7 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
 		msg.startEncrypt();
 		msg.update(nonExpiredMessage);
 		msg.end();
-		msg.waitForFinished(2000);
+		msg.waitForFinished(5000);
 
 		QVERIFY(msg.success());
 		QByteArray encResult = msg.read();
@@ -867,7 +867,7 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
 		msg1.startDecrypt();
 		msg1.update(encResult);
 		msg1.end();
-		msg1.waitForFinished(2000);
+		msg1.waitForFinished(5000);
 
 		QVERIFY(msg1.success());
 		QByteArray decResult = msg1.read();
@@ -886,7 +886,7 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
 		msg2.startEncrypt();
 		msg2.update(expiredMessage);
 		msg2.end();
-		msg2.waitForFinished(2000);
+		msg2.waitForFinished(5000);
 
 		QCOMPARE(msg2.success(), false);
 		// Note: If gpg worked as expected, msg.errorCode() should
@@ -908,7 +908,7 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
 		msg3.startEncrypt();
 		msg3.update(revokedMessage);
 		msg3.end();
-		msg3.waitForFinished(2000);
+		msg3.waitForFinished(5000);
 
 		QCOMPARE(msg3.success(), false);
 		// Note: If gpg worked as expected, msg.errorCode() should
