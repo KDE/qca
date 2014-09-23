@@ -2860,7 +2860,7 @@ int main(int argc, char **argv)
 	}
 
 	// help
-	if(args[0] == "help" || args[0] == "--help" || args[0] == "-h")
+	if(args.isEmpty() || args[0] == "help" || args[0] == "--help" || args[0] == "-h")
 	{
 		usage();
 		return 0;
