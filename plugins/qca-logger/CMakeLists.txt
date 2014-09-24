@@ -12,8 +12,8 @@ target_link_libraries(qca-logger ${QT_QTCORE_LIBRARY})
 target_link_libraries(qca-logger ${QCA_LIB_NAME})
 
 install(TARGETS qca-logger
-        LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+        LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+        ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+        RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
 
-install_pdb(qca-logger ${QCA_PLUGINS_INSTALL_DIR})
+install_pdb(qca-logger ${QCA_CRYPTO_INSTALL_DIR})

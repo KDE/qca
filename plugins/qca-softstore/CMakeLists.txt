@@ -12,8 +12,8 @@ target_link_libraries(qca-softstore ${QT_QTCORE_LIBRARY})
 target_link_libraries(qca-softstore ${QCA_LIB_NAME})
 
 install(TARGETS qca-softstore
-        LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-        RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+        LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+        ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+        RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
 
-install_pdb(qca-softstore ${QCA_PLUGINS_INSTALL_DIR})
+install_pdb(qca-softstore ${QCA_CRYPTO_INSTALL_DIR})

@@ -24,11 +24,11 @@ if(LIBGCRYPT_FOUND)
     target_link_libraries(qca-gcrypt ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${LIBGCRYPT_LIBRARIES})
 
     install(TARGETS qca-gcrypt
-            LIBRARY DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-            ARCHIVE DESTINATION "${QCA_PLUGINS_INSTALL_DIR}"
-            RUNTIME DESTINATION "${QCA_PLUGINS_INSTALL_DIR}")
+            LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
 
-    install_pdb(qca-gcrypt ${QCA_PLUGINS_INSTALL_DIR})
+    install_pdb(qca-gcrypt ${QCA_CRYPTO_INSTALL_DIR})
   else(HAVE_GCRY_ERROR_T)
     message(STATUS "libgcrypt seems to be too old")
     disable_plugin("gcrypt")

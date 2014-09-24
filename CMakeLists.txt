@@ -145,7 +145,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" )
 
 if( QCA_INSTALL_IN_QT_PREFIX )
   set(QCA_PREFIX_INSTALL_DIR "${QT_PREFIX_DIR}" CACHE PATH "Directory where qca will install")
-  set(QCA_PLUGINS_INSTALL_DIR "${QT_PLUGINS_DIR}/crypto" CACHE PATH "Directory where qca plugins will install")
+  set(QCA_PLUGINS_INSTALL_DIR "${QT_PLUGINS_DIR}" CACHE PATH "Directory where qca plugins will install")
   set(QCA_BINARY_INSTALL_DIR "${QT_BINARY_DIR}" CACHE PATH "Directory where qca plugins will install")
   set(QCA_LIBRARY_INSTALL_DIR "${QT_LIBRARY_DIR}" CACHE PATH "Directory where qca library will install")
   set(QCA_FEATURE_INSTALL_DIR "${QT_MKSPECS_DIR}/features" CACHE PATH "Directory where qca feature file will install")
@@ -160,7 +160,7 @@ else( QCA_INSTALL_IN_QT_PREFIX )
   set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "Directory where lib will install")
 
   set(QCA_PREFIX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Directory where qca will install")
-  set(QCA_PLUGINS_INSTALL_DIR "${LIB_INSTALL_DIR}/${QCA_LIB_NAME}/crypto" CACHE PATH "Directory where qca plugins will install")
+  set(QCA_PLUGINS_INSTALL_DIR "${LIB_INSTALL_DIR}/${QCA_LIB_NAME}" CACHE PATH "Directory where qca plugins will install")
   set(QCA_BINARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Directory where qca plugins will install")
   set(QCA_LIBRARY_INSTALL_DIR "${LIB_INSTALL_DIR}" CACHE PATH "Directory where qca library will install")
   set(QCA_FEATURE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/mkspecs/features" CACHE PATH "Directory where qca feature file will install")
@@ -304,6 +304,8 @@ install(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION "${QCA_FEATURE_INSTAL
 
 configure_file(man/qcatool.1 "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" COPYONLY)
 install(FILES "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" DESTINATION "${QCA_MAN_INSTALL_DIR}/man1")
+
+set(QCA_CRYPTO_INSTALL_DIR "${QCA_PLUGINS_INSTALL_DIR}/crypto")
 
 add_subdirectory(src)
 add_subdirectory(plugins)
