@@ -89,10 +89,6 @@ else(QCA_SUFFIX)
   set(QCA_PC_NAME qca2.pc)
 endif(QCA_SUFFIX)
 
-if(DEVELOPER_MODE)
-  add_definitions(-DDEVELOPER_MODE -DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
-endif(DEVELOPER_MODE)
-
 set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}")
 
 configure_file("include/QtCrypto/qca_version.h.in" "${CMAKE_BINARY_DIR}/qca_version.h")
@@ -221,6 +217,12 @@ else()
   message(STATUS "Installed package is NOT relocatable")
   set(QCA_PREFIX_INSTALL_DIR "")
 endif()
+
+if(DEVELOPER_MODE)
+  add_definitions(-DDEVELOPER_MODE -DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
+else()
+  add_definitions(-DQCA_PLUGIN_PATH="${QCA_PREFIX_INSTALL_DIR}${QCA_PLUGINS_INSTALL_DIR}")
+endif(DEVELOPER_MODE)
 
 if (APPLE)
    find_package(Carbon REQUIRED)

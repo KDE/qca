@@ -2881,14 +2881,7 @@ int main(int argc, char **argv)
 	// show plugins
 	if(args[0] == "plugins")
 	{
-#ifdef DEVELOPER_MODE
-		printf("QCA build tree path:\n");
-		QStringList paths;
-		paths << QCA_PLUGIN_PATH;
-#else
-		printf("Qt Library Paths:\n");
-		QStringList paths = QCoreApplication::libraryPaths();
-#endif
+		QStringList paths = QCA::pluginPaths();
 		if(!paths.isEmpty())
 		{
 			for(int n = 0; n < paths.count(); ++n)

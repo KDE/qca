@@ -34,6 +34,7 @@
 #include <QSettings>
 #include <QVariantMap>
 #include <QWaitCondition>
+#include <QDir>
 
 #ifdef Q_OS_UNIX
 # include <unistd.h>
@@ -450,6 +451,37 @@ Provider *defaultProvider()
 		return 0;
 
 	return global->manager->find("default");
+}
+
+QStringList pluginPaths()
+{
+	QStringList paths;
+#ifndef DEVELOPER_MODE
+	const QString qcaPluginPath = qgetenv("QCA_PLUGIN_PATH");
+	if (!qcaPluginPath.isEmpty())
+	{
+#ifdef Q_OS_WIN
+		QLatin1Char pathSep(';');
+#else
+		QLatin1Char pathSep(':');
+#endif
+		foreach (const QString &path, qcaPluginPath.split(pathSep))
+		{
+			QString canonicalPath = QDir(path).canonicalPath();
+			if (!canonicalPath.isEmpty())
+				paths << canonicalPath;
+		}
+
+	}
+	paths += QCoreApplication::libraryPaths();
+#endif
+	// In developer mode load plugins only from buildtree.
+	// In regular mode QCA_PLUGIN_PATH is path where plugins was installed
+	paths << QDir(QCA_PLUGIN_PATH).canonicalPath();
+#ifndef DEVELOPER_MODE
+	paths.removeDuplicates();
+#endif
+	return paths;
 }
 
 void scanForPlugins()

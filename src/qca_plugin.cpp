@@ -366,14 +366,7 @@ void ProviderManager::scan()
 	if(qgetenv("QCA_NO_PLUGINS") == "1")
 		return;
 
-	// check plugin files
-#ifdef DEVELOPER_MODE
-	// Load plugins only from buildtree
-	QStringList dirs;
-	dirs << QCA_PLUGIN_PATH;
-#else
-	const QStringList dirs = QCoreApplication::libraryPaths();
-#endif
+	const QStringList dirs = pluginPaths();
 	if(dirs.isEmpty())
 		logDebug("No Qt Library Paths");
 	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)

@@ -370,6 +370,19 @@ QCA_EXPORT Provider *findProvider(const QString &name);
 QCA_EXPORT Provider *defaultProvider();
 
 /**
+   Retrieve plugin paths. It consists of:
+   1. QCA_PLUGIN_PATH environment if set.
+   2. \c %QCoreApplication::libraryPaths() .
+   3. Directory where plugins were installed.
+
+   QCA_PLUGIN_PATH is paths list like PATH or QT_PLUGIN_PATH.
+   It uses system path separator. \";\" on Windows and \":\" on Unix.
+
+   This function was introduced in %QCA 2.1.
+*/
+QCA_EXPORT QStringList pluginPaths();
+
+/**
    Scan for new plugins
 */
 QCA_EXPORT void scanForPlugins();
