@@ -25,7 +25,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QTimer>
-
+#include <QDir>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"
@@ -2886,7 +2886,7 @@ int main(int argc, char **argv)
 		{
 			for(int n = 0; n < paths.count(); ++n)
 			{
-				printf("  %s\n", qPrintable(paths[n]));
+				printf("  %s\n", qPrintable(QDir::toNativeSeparators(paths[n])));
 			}
 		}
 		else
