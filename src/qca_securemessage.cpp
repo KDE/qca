@@ -23,6 +23,7 @@
 
 #include "qcaprovider.h"
 #include "qca_safeobj.h"
+#include "qca_safetimer.h"
 
 namespace QCA {
 

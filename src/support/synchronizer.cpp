@@ -19,6 +19,7 @@
  */
 
 #include "qca_support.h"
+#include "qca_safetimer.h"
 
 #include <QAbstractEventDispatcher>
 #include <QCoreApplication>
@@ -200,7 +201,8 @@ private:
 	void hook(QObject *obj)
 	{
 		// don't watch a fixer or any object that already has one
-		if(obj == this || qobject_cast<TimerFixer *>(obj) || haveFixer(obj))
+		// SafeTimer has own method to fix timers, skip it too
+		if(obj == this || qobject_cast<TimerFixer *>(obj) || haveFixer(obj) || qobject_cast<SafeTimer*>(obj))
 			return;
 
 		new TimerFixer(obj, this);
@@ -362,12 +364,23 @@ public:
 	QWaitCondition w;
 	QThread *orig_thread;
 
-	Private(QObject *_obj, Synchronizer *_q) : QThread(_q), q(_q)
+	Private(QObject *_obj, Synchronizer *_q)
+		: QThread(_q)
+		, q(_q)
+		, active(false)
+		, do_quit(false)
+		, cond_met(false)
+		, obj(_obj)
+		, loop(0)
+		, agent(0)
+		, fixer(0)
+		, m(QMutex::NonRecursive)
+		, w()
+		, orig_thread(0)
 	{
-		active = false;
-		obj = _obj;
-		loop = 0;
-		fixer = new TimerFixer(obj);
+		// SafeTimer has own method to fix timers, skip it too
+		if (!qobject_cast<SafeTimer*>(obj))
+			fixer = new TimerFixer(obj);
 	}
 
 	~Private()

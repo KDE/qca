@@ -295,7 +295,8 @@ set( public_HEADERS
   ${qca_INCLUDEDIR}/QtCrypto/qca_securelayer.h
   ${qca_INCLUDEDIR}/QtCrypto/qca_securemessage.h
   ${CMAKE_BINARY_DIR}/qca_version.h
-  ${qca_INCLUDEDIR}/QtCrypto/qpipe.h )
+  ${qca_INCLUDEDIR}/QtCrypto/qpipe.h
+  ${qca_INCLUDEDIR}/QtCrypto/qca_safetimer.h)
 
 set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
 

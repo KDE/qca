@@ -24,9 +24,7 @@
 
 // NOTE: this API is private to QCA
 
-#include <QTimer>
 #include <QSocketNotifier>
-#include <QEvent>
 #include <stdio.h>
 
 namespace QCA {
@@ -35,42 +33,14 @@ namespace QCA {
 //   obj->disconnect(owner); // to prevent future signals to owner
 //   obj->setParent(0);      // to prevent delete if parent is deleted
 //   obj->deleteLater();     // now we can forget about the object
-void releaseAndDeleteLater(QObject *owner, QObject *obj);
-
-class SafeTimer : public QObject
+inline void releaseAndDeleteLater(QObject *owner, QObject *obj)
 {
-	Q_OBJECT
-public:
-	SafeTimer(QObject *parent = 0);
-	~SafeTimer();
+	obj->disconnect(owner);
+	obj->setParent(0);
+	obj->deleteLater();
+}
 
-	int interval() const;
-	bool isActive() const;
-	bool isSingleShot() const;
-	void setInterval(int msec);
-	void setSingleShot(bool singleShot);
-	int timerId() const;
 
-public slots:
-	void start(int msec);
-	void start();
-	void stop();
-
-signals:
-	void timeout();
-
-protected:
-	bool event(QEvent *event);
-	void timerEvent(QTimerEvent *event);
-
-private:
-	// Functions is used internally. Outer world mustn't have access them.
-	void startTimer() {}
-	void killTimer(int) {}
-
-	class Private;
-	Private *d;
-};
 
 class SafeSocketNotifier : public QObject
 {

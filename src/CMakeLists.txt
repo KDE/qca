@@ -32,7 +32,7 @@ SET( moc_SOURCES
 	qca_default.cpp
 	qca_keystore.cpp
 	qca_publickey.cpp
-	qca_safeobj.cpp
+	qca_safetimer.cpp
 	qca_securelayer.cpp
 	qca_securemessage.cpp
 	support/qpipe.cpp
@@ -128,6 +128,7 @@ qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_securemessage.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_support.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qpipe.h")
 qt4_wrap_cpp( SOURCES "qca_safeobj.h")
+qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_safetimer.h")
 
 ADD_LIBRARY(${QCA_LIB_NAME} ${LIBRARY_TYPE} ${SOURCES})
 TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} ${QT_QTCORE_LIBRARY})

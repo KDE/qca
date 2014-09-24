@@ -149,53 +149,6 @@ typedef PSecurityFunctionTableW PMySecurityFunctionTableW;
 namespace wingssQCAPlugin {
 
 //----------------------------------------------------------------------------
-// SafeTimer (copied from qca_safeobj)
-//----------------------------------------------------------------------------
-static void releaseAndDeleteLater(QObject *owner, QObject *obj)
-{
-	obj->disconnect(owner);
-	obj->setParent(0);
-	obj->deleteLater();
-}
-
-class SafeTimer : public QObject
-{
-	Q_OBJECT
-public:
-	SafeTimer(QObject *parent = 0) :
-		QObject(parent)
-	{
-		t = new QTimer(this);
-		connect(t, SIGNAL(timeout()), SIGNAL(timeout()));
-	}
-
-	~SafeTimer()
-	{
-		releaseAndDeleteLater(this, t);
-	}
-
-	int interval() const                { return t->interval(); }
-	bool isActive() const               { return t->isActive(); }
-	bool isSingleShot() const           { return t->isSingleShot(); }
-	void setInterval(int msec)          { t->setInterval(msec); }
-	void setSingleShot(bool singleShot) { t->setSingleShot(singleShot); }
-	int timerId() const                 { return t->timerId(); }
-
-public slots:
-	void start(int msec)                { t->start(msec); }
-	void start()                        { t->start(); }
-	void stop()                         { t->stop(); }
-
-signals:
-	void timeout();
-
-private:
-	QTimer *t;
-};
-
-#if !defined(FORWARD_ONLY)
-
-//----------------------------------------------------------------------------
 // SSPI helper API
 //----------------------------------------------------------------------------
 

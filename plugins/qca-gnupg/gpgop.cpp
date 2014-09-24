@@ -20,6 +20,7 @@
 #include "gpgop.h"
 
 #include "gpgproc.h"
+#include "qca_safetimer.h"
 
 #include <QTimer>
 
@@ -447,7 +448,7 @@ public:
 	bool badPassphrase;
 	bool need_submitPassphrase, need_cardOkay;
 	QString diagnosticText;
-	SafeTimer dtextTimer;
+	QCA::SafeTimer dtextTimer;
 
 #ifdef GPG_PROFILE
 	QTime timer;
@@ -1208,7 +1209,10 @@ public:
 	{
 		if(act)
 		{
-			releaseAndDeleteLater(this, act);
+			act->disconnect(this);
+			act->setParent(0);
+			act->deleteLater();
+
 			act = 0;
 		}
 

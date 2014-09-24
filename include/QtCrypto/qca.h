@@ -43,5 +43,6 @@
 #include "qca_securemessage.h"
 #include "qcaprovider.h"
 #include "qpipe.h"
+#include "qca_safetimer.h"
 
 #endif

@@ -39,66 +39,6 @@ void releaseAndDeleteLater(QObject *owner, QObject *obj)
 }
 
 //----------------------------------------------------------------------------
-// SafeTimer
-//----------------------------------------------------------------------------
-SafeTimer::SafeTimer(QObject *parent) :
-	QObject(parent)
-{
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), SIGNAL(timeout()));
-}
-
-SafeTimer::~SafeTimer()
-{
-	releaseAndDeleteLater(this, timer);
-}
-
-int SafeTimer::interval() const
-{
-	return timer->interval();
-}
-
-bool SafeTimer::isActive() const
-{
-	return timer->isActive();
-}
-
-bool SafeTimer::isSingleShot() const
-{
-	return timer->isSingleShot();
-}
-
-void SafeTimer::setInterval(int msec)
-{
-	timer->setInterval(msec);
-}
-
-void SafeTimer::setSingleShot(bool singleShot)
-{
-	timer->setSingleShot(singleShot);
-}
-
-int SafeTimer::timerId() const
-{
-	return timer->timerId();
-}
-
-void SafeTimer::start(int msec)
-{
-	timer->start(msec);
-}
-
-void SafeTimer::start()
-{
-	timer->start();
-}
-
-void SafeTimer::stop()
-{
-	timer->stop();
-}
-
-//----------------------------------------------------------------------------
 // QProcessSignalRelay
 //----------------------------------------------------------------------------
 class QProcessSignalRelay : public QObject

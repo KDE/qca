@@ -23,6 +23,7 @@
 
 #include "qcaprovider.h"
 #include "qca_safeobj.h"
+#include "qca_safetimer.h"
 
 #include <QPointer>
 #if QT_VERSION >= 0x050000
