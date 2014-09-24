@@ -372,9 +372,9 @@ void ProviderManager::scan()
 	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)
 	{
 #ifdef DEVELOPER_MODE
-		logDebug(QString("Checking QCA build tree Path: %1").arg(*it));
+		logDebug(QString("Checking QCA build tree Path: %1").arg(QDir::toNativeSeparators(*it)));
 #else
-		logDebug(QString("Checking Qt Library Path: %1").arg(*it));
+		logDebug(QString("Checking Qt Library Path: %1").arg(QDir::toNativeSeparators(*it)));
 #endif
 		QDir libpath(*it);
 		QDir dir(libpath.filePath(PLUGIN_SUBDIR));
