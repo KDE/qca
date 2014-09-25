@@ -1,5 +1,6 @@
 
 find_package(Qt5Core QUIET)
+mark_as_advanced(Qt5Core_DIR)
 
 if (Qt5Core_FOUND)
   if (NOT Qt5Transitional_FIND_COMPONENTS)
@@ -26,21 +27,24 @@ if (Qt5Core_FOUND)
       )
     foreach(_component ${_components})
       find_package(Qt5${_component})
-
+      mark_as_advanced(Qt5${_component}_DIR)
       list(APPEND QT_LIBRARIES ${Qt5${_component}_LIBRARIES})
     endforeach()
   else()
     set(_components ${Qt5Transitional_FIND_COMPONENTS})
     foreach(_component ${Qt5Transitional_FIND_COMPONENTS})
       find_package(Qt5${_component} REQUIRED)
+      mark_as_advanced(Qt5${_component}_DIR)
       if ("${_component}" STREQUAL "WebKit")
         find_package(Qt5WebKitWidgets REQUIRED)
+        mark_as_advanced(Qt5WebKitWidgets_DIR)
         list(APPEND QT_LIBRARIES ${Qt5WebKitWidgets_LIBRARIES} )
       endif()
       if ("${_component}" STREQUAL "Gui")
         find_package(Qt5Widgets REQUIRED)
         find_package(Qt5PrintSupport REQUIRED)
         find_package(Qt5Svg REQUIRED)
+        mark_as_advanced(Qt5Widgets_DIR Qt5PrintSupport_DIR Qt5Svg_DIR)
         list(APPEND QT_LIBRARIES ${Qt5Widgets_LIBRARIES}
                                  ${Qt5PrintSupport_LIBRARIES}
                                  ${Qt5Svg_LIBRARIES} )

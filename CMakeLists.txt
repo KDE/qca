@@ -37,6 +37,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 option(QT4_BUILD "Force building with Qt4 even if Qt5 is found")
 if (NOT QT4_BUILD)
   find_package(Qt5Core QUIET)
+  mark_as_advanced(Qt5Core_DIR)
 endif()
 
 include(QcaMacro)
@@ -59,6 +60,8 @@ else()
   else(BUILD_TESTS)
     find_package(Qt4 REQUIRED QtCore)
   endif(BUILD_TESTS)
+  # WORKAROUND: Seems it must be done in Qt4 find module but didn't
+  mark_as_advanced(QT_QMAKE_EXECUTABLE)
 
   # properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
   include(${QT_USE_FILE})

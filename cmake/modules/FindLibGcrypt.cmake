@@ -15,6 +15,7 @@
 
 #search in typical paths for libgcrypt-config
 FIND_PROGRAM(LIBGCRYPTCONFIG_EXECUTABLE NAMES libgcrypt-config)
+mark_as_advanced(LIBGCRYPTCONFIG_EXECUTABLE)
 
 #reset variables
 set(LIBGCRYPT_LIBRARIES)

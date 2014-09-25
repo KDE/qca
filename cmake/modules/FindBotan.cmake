@@ -15,6 +15,7 @@
 
 #search in typical paths for libgcrypt-config
 FIND_PROGRAM(BOTANCONFIG_EXECUTABLE NAMES botan-config botan-config-1.10)
+mark_as_advanced(BOTANCONFIG_EXECUTABLE)
 
 #reset variables
 set(BOTAN_LIBRARIES)
