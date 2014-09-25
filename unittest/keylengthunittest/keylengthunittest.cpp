@@ -47,7 +47,6 @@ private:
 void KeyLengthUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void KeyLengthUnitTest::cleanupTestCase()

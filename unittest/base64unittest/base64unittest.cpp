@@ -50,7 +50,6 @@ private:
 void Base64UnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void Base64UnitTest::cleanupTestCase()

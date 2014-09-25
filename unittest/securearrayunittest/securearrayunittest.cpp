@@ -47,7 +47,6 @@ private:
 void SecureArrayUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void SecureArrayUnitTest::cleanupTestCase()

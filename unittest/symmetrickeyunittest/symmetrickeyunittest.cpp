@@ -47,7 +47,6 @@ private:
 void SymmetricKeyUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void SymmetricKeyUnitTest::cleanupTestCase()

@@ -48,7 +48,6 @@ private:
 void HexUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void HexUnitTest::cleanupTestCase()

@@ -62,7 +62,6 @@ private:
 void CertUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void CertUnitTest::cleanupTestCase()

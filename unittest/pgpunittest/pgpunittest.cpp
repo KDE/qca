@@ -138,7 +138,6 @@ void PgpUnitTest::initTestCase()
     //   to reload, which we need to do if we want qca-gnupg to respect
     //   changes to $GNUPGHOME.
     //m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 
     // Change current directory to executable directory
     // it is need to find keys*_work directories

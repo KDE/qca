@@ -45,7 +45,6 @@ private:
 void TLSUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void TLSUnitTest::cleanupTestCase()

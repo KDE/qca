@@ -50,7 +50,6 @@ private:
 void PipeUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void PipeUnitTest::cleanupTestCase()

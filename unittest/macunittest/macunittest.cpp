@@ -52,7 +52,6 @@ private:
 void MACUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void MACUnitTest::cleanupTestCase()

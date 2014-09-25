@@ -219,10 +219,14 @@ else()
 endif()
 
 if(DEVELOPER_MODE)
-  add_definitions(-DDEVELOPER_MODE -DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
-else()
-  add_definitions(-DQCA_PLUGIN_PATH="${QCA_PREFIX_INSTALL_DIR}${QCA_PLUGINS_INSTALL_DIR}")
-endif(DEVELOPER_MODE)
+  add_definitions(-DDEVELOPER_MODE)
+
+# To prefer plugins from build tree when run qca from build tree
+  file(WRITE ${CMAKE_BINARY_DIR}/bin/qt.conf
+"[Paths]
+Plugins=${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}
+")
+endif()
 
 if (APPLE)
    find_package(Carbon REQUIRED)

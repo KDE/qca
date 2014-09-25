@@ -47,7 +47,6 @@ private:
 void KeyGenUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void KeyGenUnitTest::cleanupTestCase()

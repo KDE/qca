@@ -47,7 +47,6 @@ private:
 void StaticUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-#include "../fixpaths.include"
 }
 
 void StaticUnitTest::cleanupTestCase()
