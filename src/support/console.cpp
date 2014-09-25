@@ -453,7 +453,7 @@ Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *pare
 	if(type == Tty)
 	{
 		in = CreateFileA("CONIN$", GENERIC_READ | GENERIC_WRITE,
-			FILE_SHARE_READ | FILE_SHARE_WRITE, false,
+			FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 			OPEN_EXISTING, 0, NULL);
 	}
 	else
@@ -477,7 +477,7 @@ Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *pare
 		{
 			out = CreateFileA("CONOUT$",
 				GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ | FILE_SHARE_WRITE, false,
+				FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 				OPEN_EXISTING, 0, NULL);
 		}
 		else
