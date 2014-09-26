@@ -22,6 +22,7 @@
 #ifndef QCA_SAFETIMER_H
 #define QCA_SAFETIMER_H
 
+#include "qca_export.h"
 #include <QObject>
 
 class QEvent;
@@ -29,7 +30,7 @@ class QTimerEvent;
 
 namespace QCA {
 
-class SafeTimer : public QObject
+class QCA_EXPORT SafeTimer : public QObject
 {
 	Q_OBJECT
 public:
