@@ -21,7 +21,6 @@
 
 #include "gpgproc.h"
 #include "qca_safetimer.h"
-#include <QTimer>
 
 // #define GPGOP_DEBUG
 
