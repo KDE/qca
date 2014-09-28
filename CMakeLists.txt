@@ -198,9 +198,9 @@ endforeach()
 
 if(NOT WIN32)
   # qca2.pc uses absolute paths. So it must be there. Don't rellocate this.
-  configure_file("qca2.pc.cmake" "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" @ONLY)
+  configure_file("qca2.pc.cmake" "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pkgconfig/${QCA_PC_NAME}" @ONLY)
   if(NOT DEVELOPER_MODE)
-    install(FILES "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
+    install(FILES "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pkgconfig/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
   endif()
 endif(NOT WIN32)
 
@@ -314,14 +314,14 @@ set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
 
 include_directories(${QT_QTCORE_INCLUDE_DIR} "${qca_INCLUDEDIR}/QtCrypto")
 
-configure_file("crypto.prf.cmake" "${CMAKE_BINARY_DIR}/crypto.prf" @ONLY)
+configure_file("crypto.prf.cmake" "${CMAKE_BINARY_DIR}/mkspecs/features/crypto.prf" @ONLY)
 if(NOT DEVELOPER_MODE)
-  install(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION "${QCA_FEATURE_INSTALL_DIR}")
+  install(FILES "${CMAKE_BINARY_DIR}/mkspecs/features/crypto.prf" DESTINATION "${QCA_FEATURE_INSTALL_DIR}")
 endif()
 
-configure_file(man/qcatool.1 "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" COPYONLY)
+configure_file(man/qcatool.1 "${CMAKE_BINARY_DIR}/share/man/man1/${QCA_TOOL_NAME}.1" COPYONLY)
 if(NOT DEVELOPER_MODE)
-  install(FILES "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" DESTINATION "${QCA_MAN_INSTALL_DIR}/man1")
+  install(FILES "${CMAKE_BINARY_DIR}/share/man/man1/${QCA_TOOL_NAME}.1" DESTINATION "${QCA_MAN_INSTALL_DIR}/man1")
 endif()
 
 set(QCA_CRYPTO_INSTALL_DIR "${QCA_PLUGINS_INSTALL_DIR}/crypto")
@@ -363,10 +363,10 @@ endif(DOXYGEN_FOUND)
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/QcaConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/QcaConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfig.cmake"
   INSTALL_DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
 )
-write_basic_config_version_file(QcaConfigVersion.cmake VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
+write_basic_config_version_file("${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfigVersion.cmake" VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
 
 if(NOT DEVELOPER_MODE)
 
@@ -405,8 +405,8 @@ if(NOT DEVELOPER_MODE)
 
   install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE QcaTargets.cmake)
   install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/QcaConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/QcaConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfigVersion.cmake"
     DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
     )
 endif()
