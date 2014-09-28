@@ -13,12 +13,15 @@ if(BOTAN_FOUND)
   add_library(qca-botan ${PLUGIN_TYPE} ${QCA_BOTAN_SOURCES})
   target_link_libraries(qca-botan ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${BOTAN_LIBRARIES})
 
-  install(TARGETS qca-botan
-          LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
-          ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
-          RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
+  if(NOT DEVELOPER_MODE)
+    install(TARGETS qca-botan
+            LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
 
-  install_pdb(qca-botan ${QCA_CRYPTO_INSTALL_DIR})
+    install_pdb(qca-botan ${QCA_CRYPTO_INSTALL_DIR})
+  endif()
+
 else(BOTAN_FOUND)
   disable_plugin("botan")
 endif(BOTAN_FOUND)

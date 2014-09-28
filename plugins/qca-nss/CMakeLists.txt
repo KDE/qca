@@ -14,12 +14,14 @@ if(NSS_FOUND)
   add_library(qca-nss ${PLUGIN_TYPE} ${QCA_NSS_SOURCES})
   target_link_libraries(qca-nss ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${NSS_LDFLAGS})
 
-  install(TARGETS qca-nss
-          LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
-          ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
-          RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
+  if(NOT DEVELOPER_MODE)
+    install(TARGETS qca-nss
+            LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
 
-  install_pdb(qca-nss ${QCA_CRYPTO_INSTALL_DIR})
+    install_pdb(qca-nss ${QCA_CRYPTO_INSTALL_DIR})
+  endif()
 else(NSS_FOUND)
   disable_plugin("nss")
   set(WITH_nss_PLUGIN "no" PARENT_SCOPE)

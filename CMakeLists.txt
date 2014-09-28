@@ -116,15 +116,16 @@ include_directories("include/QtCrypto/")
 # for generated files
 include_directories(${CMAKE_BINARY_DIR})
 
-# uninstall target
-configure_file(
+if(NOT DEVELOPER_MODE)
+  # uninstall target
+  configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
+  add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-# /uninstall target
+endif()
 
 # Always include srcdir and builddir in include path
 # This saves typing ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY} in about every subdir
@@ -198,7 +199,9 @@ endforeach()
 if(NOT WIN32)
   # qca2.pc uses absolute paths. So it must be there. Don't rellocate this.
   configure_file("qca2.pc.cmake" "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
+  if(NOT DEVELOPER_MODE)
+    install(FILES "${CMAKE_BINARY_DIR}/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
+  endif()
 endif(NOT WIN32)
 
 # strip CMAKE_INSTALL_PREFIX in all paths
@@ -278,7 +281,9 @@ else (qca_CERTSTORE)
   set( qca_CERTSTORE "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem")
   # note that INSTALL_FILES targets are relative to the current installation prefix...
   # QCA_PREFIX_INSTALL_DIR is normalized and ends with / not need to use slash in DESTINATION
-  install(FILES "${qca_CERTSTORE}" DESTINATION "${QCA_PREFIX_INSTALL_DIR}certs")
+  if(NOT DEVELOPER_MODE)
+    install(FILES "${qca_CERTSTORE}" DESTINATION "${QCA_PREFIX_INSTALL_DIR}certs")
+  endif()
 endif (qca_CERTSTORE)
 message(STATUS "certstore path: " ${qca_CERTSTORE})
 add_definitions( -DQCA_SYSTEMSTORE_PATH="${qca_CERTSTORE}" )
@@ -310,10 +315,14 @@ set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
 include_directories(${QT_QTCORE_INCLUDE_DIR} "${qca_INCLUDEDIR}/QtCrypto")
 
 configure_file("crypto.prf.cmake" "${CMAKE_BINARY_DIR}/crypto.prf" @ONLY)
-install(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION "${QCA_FEATURE_INSTALL_DIR}")
+if(NOT DEVELOPER_MODE)
+  install(FILES "${CMAKE_BINARY_DIR}/crypto.prf" DESTINATION "${QCA_FEATURE_INSTALL_DIR}")
+endif()
 
 configure_file(man/qcatool.1 "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" COPYONLY)
-install(FILES "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" DESTINATION "${QCA_MAN_INSTALL_DIR}/man1")
+if(NOT DEVELOPER_MODE)
+  install(FILES "${CMAKE_BINARY_DIR}/${QCA_TOOL_NAME}.1" DESTINATION "${QCA_MAN_INSTALL_DIR}/man1")
+endif()
 
 set(QCA_CRYPTO_INSTALL_DIR "${QCA_PLUGINS_INSTALL_DIR}/crypto")
 
@@ -351,39 +360,6 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif(DOXYGEN_FOUND)
 
-# /usr/local is traditional path for installing apps on POSIX-systems.
-# I consciously break this. Qt by default looks plugins and features only in
-# own directory. So by default install libs in Qt prefix it is a best choice.
-# This can be unwanted behaviour for users who don't read INSTALL file or/and
-# not read cmake reports. I just try to warn their.
-
-# In really anybody who do cmake . && make && sudo make install do it for own risk.
-
-if(QCA_INSTALL_IN_QT_PREFIX)
-  string(ASCII 27 ESCAPE)
-  message("")
-  message("${ESCAPE}[31m")
-  message("!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!!")
-  message("!! QCA will be installed in Qt prefix             !!")
-  message("!! If you want to install in /usr/local           !!")
-  message("!! you MUST explicity define CMAKE_INSTALL_PREFIX !!")
-  message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-  message("${ESCAPE}[0m")
-endif(QCA_INSTALL_IN_QT_PREFIX)
-
-message("")
-message("QCA prefix is " "${QCA_PREFIX_INSTALL_DIR}")
-message("Plugins will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_PLUGINS_INSTALL_DIR}")
-message("Binary will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_BINARY_INSTALL_DIR}")
-message("Library will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_LIBRARY_INSTALL_DIR}")
-message("Feature file will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_FEATURE_INSTALL_DIR}")
-message("Public headers will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_INCLUDE_INSTALL_DIR}")
-message("Private headers will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_PRIVATE_INCLUDE_INSTALL_DIR}")
-message("Documentation will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_DOC_INSTALL_DIR}")
-message("Man page will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_MAN_INSTALL_DIR}")
-message("Pkg-config file will be installed to " "${QCA_PREFIX_INSTALL_DIR}${PKGCONFIG_INSTALL_PREFIX}")
-message("")
-
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/QcaConfig.cmake.in"
@@ -392,9 +368,45 @@ configure_package_config_file(
 )
 write_basic_config_version_file(QcaConfigVersion.cmake VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
 
-install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE QcaTargets.cmake)
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/QcaConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/QcaConfigVersion.cmake"
-  DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
-)
+if(NOT DEVELOPER_MODE)
+
+  # /usr/local is traditional path for installing apps on POSIX-systems.
+  # I consciously break this. Qt by default looks plugins and features only in
+  # own directory. So by default install libs in Qt prefix it is a best choice.
+  # This can be unwanted behaviour for users who don't read INSTALL file or/and
+  # not read cmake reports. I just try to warn their.
+
+  # In really anybody who do cmake . && make && sudo make install do it for own risk.
+
+  if(QCA_INSTALL_IN_QT_PREFIX)
+    string(ASCII 27 ESCAPE)
+    message("")
+    message("${ESCAPE}[31m")
+    message("!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!!")
+    message("!! QCA will be installed in Qt prefix             !!")
+    message("!! If you want to install in /usr/local           !!")
+    message("!! you MUST explicity define CMAKE_INSTALL_PREFIX !!")
+    message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    message("${ESCAPE}[0m")
+  endif(QCA_INSTALL_IN_QT_PREFIX)
+
+  message("")
+  message("QCA prefix is " "${QCA_PREFIX_INSTALL_DIR}")
+  message("Plugins will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_PLUGINS_INSTALL_DIR}")
+  message("Binary will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_BINARY_INSTALL_DIR}")
+  message("Library will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_LIBRARY_INSTALL_DIR}")
+  message("Feature file will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_FEATURE_INSTALL_DIR}")
+  message("Public headers will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_INCLUDE_INSTALL_DIR}")
+  message("Private headers will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_PRIVATE_INCLUDE_INSTALL_DIR}")
+  message("Documentation will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_DOC_INSTALL_DIR}")
+  message("Man page will be installed to " "${QCA_PREFIX_INSTALL_DIR}${QCA_MAN_INSTALL_DIR}")
+  message("Pkg-config file will be installed to " "${QCA_PREFIX_INSTALL_DIR}${PKGCONFIG_INSTALL_PREFIX}")
+  message("")
+
+  install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE QcaTargets.cmake)
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/QcaConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/QcaConfigVersion.cmake"
+    DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
+    )
+endif()

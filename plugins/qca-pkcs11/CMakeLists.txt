@@ -24,12 +24,14 @@ if(OPENSSL_FOUND AND PKCS11H_FOUND)
     target_link_libraries(qca-pkcs11 pkcs11-helper.dll)
   endif(WIN32)
 
-  install(TARGETS qca-pkcs11
-          LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
-          ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
-          RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
+  if(NOT DEVELOPER_MODE)
+    install(TARGETS qca-pkcs11
+            LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
+            RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
 
-  install_pdb(qca-pkcs11 ${QCA_CRYPTO_INSTALL_DIR})
+    install_pdb(qca-pkcs11 ${QCA_CRYPTO_INSTALL_DIR})
+  endif()
 else(OPENSSL_FOUND AND PKCS11H_FOUND)
   disable_plugin("pkcs11")
 endif(OPENSSL_FOUND AND PKCS11H_FOUND)
