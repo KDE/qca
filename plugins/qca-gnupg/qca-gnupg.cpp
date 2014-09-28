@@ -39,62 +39,6 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
-#ifdef Q_OS_LINUX
-static int qVersionInt()
-{
-	static int out = -1;
-
-	if(out == -1)
-	{
-		QString str = QString::fromLatin1(qVersion());
-		QStringList parts = str.split('.', QString::KeepEmptyParts);
-		if(parts.count() != 3)
-		{
-			out = 0;
-			return out;
-		}
-
-		out = 0;
-		for(int n = 0; n < 3; ++n)
-		{
-			bool ok;
-			int x = parts[n].toInt(&ok);
-			if(ok && x >= 0 && x <= 0xff)
-			{
-				out <<= 8;
-				out += x;
-			}
-			else
-			{
-				out = 0;
-				return out;
-			}
-		}
-	}
-
-	return out;
-}
-
-static bool qt_buggy_fsw()
-{
-	// fixed in 4.3.5 and 4.4.1
-	int ver = qVersionInt();
-	int majmin = ver >> 8;
-	if(majmin < 0x0403)
-		return true;
-	else if(majmin == 0x0403 && ver < 0x040305)
-		return true;
-	else if(majmin == 0x0404 && ver < 0x040401)
-		return true;
-	return false;
-}
-#else
-static bool qt_buggy_fsw()
-{
-	return false;
-}
-#endif
-
 // begin ugly hack for qca 2.0.0 with broken dirwatch support
 
 // hacks:
@@ -1234,13 +1178,9 @@ private slots:
 			{
 				secring = QFileInfo(gpg.keyringFile()).canonicalFilePath();
 
-				if(qt_buggy_fsw())
-					fprintf(stderr, "qca-gnupg: disabling keyring monitoring in Qt version < 4.3.5 or 4.4.1\n");
-
 				if(!secring.isEmpty())
 				{
-					if(!qt_buggy_fsw())
-						ringWatch.add(secring);
+					ringWatch.add(secring);
 				}
 
 				// obtain keyring file names for monitoring
@@ -1253,8 +1193,7 @@ private slots:
 				pubring = QFileInfo(gpg.keyringFile()).canonicalFilePath();
 				if(!pubring.isEmpty())
 				{
-					if(!qt_buggy_fsw())
-						ringWatch.add(pubring);
+					ringWatch.add(pubring);
 				}
 
 				// cache initial keyrings
