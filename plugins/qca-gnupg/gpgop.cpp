@@ -21,8 +21,14 @@
 
 #include "gpgproc.h"
 #include "qca_safetimer.h"
-
 #include <QTimer>
+
+// #define GPGOP_DEBUG
+
+#ifdef GPGOP_DEBUG
+#include "stdio.h"
+#endif
+
 
 namespace gpgQCAPlugin {
 
@@ -859,7 +865,7 @@ private:
 
 	void processStatusLine(const QString &line)
 	{
-		diagnosticText += QString("{") + line + "}\n";
+		appendDiagnosticText("{" + line + "}");
 		ensureDTextEmit();
 
 		if(!proc.isActive())
@@ -1015,8 +1021,8 @@ private:
 		QString errstr = QString::fromUtf8(buf_stderr);
 
 		if(collectOutput)
-			diagnosticText += QString("stdout: [%1]\n").arg(outstr);
-		diagnosticText += QString("stderr: [%1]\n").arg(errstr);
+			appendDiagnosticText(QString("stdout: [%1]").arg(outstr));
+		appendDiagnosticText(QString("stderr: [%1]").arg(errstr));
 		ensureDTextEmit();
 
 		if(badPassphrase)
@@ -1090,7 +1096,7 @@ private slots:
 		else if(e == GPGProc::ErrorWrite)
 			str = "ErrorWrite";
 
-		diagnosticText += QString("GPG Process Error: %1\n").arg(str);
+		appendDiagnosticText(QString("GPG Process Error: %1").arg(str));
 		ensureDTextEmit();
 
 		output.errorCode = GpgOp::ErrorProcess;
@@ -1099,7 +1105,7 @@ private slots:
 
 	void proc_finished(int exitCode)
 	{
-		diagnosticText += QString("GPG Process Finished: exitStatus=%1\n").arg(exitCode);
+		appendDiagnosticText(QString("GPG Process Finished: exitStatus=%1").arg(exitCode));
 		ensureDTextEmit();
 
 		processResult(exitCode);
@@ -1155,8 +1161,16 @@ private slots:
 
 	void proc_debug(const QString &str)
 	{
-		diagnosticText += "GPGProc: " + str + '\n';
+		appendDiagnosticText("GPGProc: " + str);
 		ensureDTextEmit();
+	}
+
+	void appendDiagnosticText(const QString &line)
+	{
+#ifdef GPGOP_DEBUG
+		printf("%s\n", qPrintable(line));
+#endif
+		diagnosticText += line;
 	}
 };
 
