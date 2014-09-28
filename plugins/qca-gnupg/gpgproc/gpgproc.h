@@ -22,8 +22,6 @@
 
 #include "qpipe.h"
 
-class QTimer;
-
 namespace gpgQCAPlugin {
 
 // GPGProc - executes gpg and provides access to all 6 channels.  NormalMode

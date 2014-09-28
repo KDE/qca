@@ -21,7 +21,6 @@
 #define SPROCESS_H
 
 #include <QProcess>
-#include <QTimer>
 
 namespace gpgQCAPlugin {
 
