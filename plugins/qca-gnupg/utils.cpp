@@ -18,6 +18,7 @@
  */
 
 #include "utils.h"
+#include "mykeystorelist.h"
 #include <QFileInfo>
 #include <QStringList>
 #include <QCoreApplication>
@@ -25,8 +26,27 @@
 #include <windows.h>
 #endif
 
+using namespace QCA;
+
 namespace gpgQCAPlugin
 {
+
+void gpg_waitForFinished(GpgOp *gpg)
+{
+	while(1)
+	{
+		GpgOp::Event e = gpg->waitForEvent(-1);
+		if(e.type == GpgOp::Event::Finished)
+			break;
+	}
+}
+
+void gpg_keyStoreLog(const QString &str)
+{
+	MyKeyStoreList *ksl = MyKeyStoreList::instance();
+	if(ksl)
+		ksl->ext_keyStoreLog(str);
+}
 
 inline bool check_bin(const QString &bin)
 {
@@ -185,6 +205,24 @@ QString unescape_string(const QString &in)
 			out += in[n];
 	}
 	return out;
+}
+
+PGPKey publicKeyFromId(const QString &id)
+{
+	MyKeyStoreList *ksl = MyKeyStoreList::instance();
+	if(!ksl)
+		return PGPKey();
+
+	return ksl->publicKeyFromId(id);
+}
+
+PGPKey secretKeyFromId(const QString &id)
+{
+	MyKeyStoreList *ksl = MyKeyStoreList::instance();
+	if(!ksl)
+		return PGPKey();
+
+	return ksl->secretKeyFromId(id);
 }
 
 } // end namespace gpgQCAPlugin

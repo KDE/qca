@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2003-2008  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2014  Ivan Romanov <drizt@land.ru>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,19 +18,39 @@
 
 #pragma once
 
-#include "qca_cert.h"
-#include <QString>
+#include "qcaprovider.h"
+#include "ringwatch.h"
+#include "gpgop.h"
 
 namespace gpgQCAPlugin
 {
 
-class GpgOp;
-void gpg_waitForFinished(GpgOp *gpg);
-void gpg_keyStoreLog(const QString &str);
-QString find_bin();
-QString escape_string(const QString &in);
-QString unescape_string(const QString &in);
-QCA::PGPKey publicKeyFromId(const QString &id);
-QCA::PGPKey secretKeyFromId(const QString &id);
+class MyPGPKeyContext : public QCA::PGPKeyContext
+{
+public:
+	QCA::PGPKeyContextProps _props;
+
+	// keys loaded externally (not from the keyring) need to have these
+	//   values cached, since we can't extract them later
+	QByteArray cacheExportBinary;
+	QString cacheExportAscii;
+
+	MyPGPKeyContext(QCA::Provider *p);
+
+	// reimplemented Provider::Context
+	QCA::Provider::Context *clone() const;
+
+	// reimplemented PGPKeyContext
+	const QCA::PGPKeyContextProps *props() const;
+
+	QByteArray toBinary() const;
+	QCA::ConvertResult fromBinary(const QByteArray &a);
+
+	QString toAscii() const;
+	QCA::ConvertResult fromAscii(const QString &s);
+
+	void set(const GpgOp::Key &i, bool isSecret, bool inKeyring, bool isTrusted);
+	static void cleanup_temp_keyring(const QString &name);
+};
 
 } // end namespace gpgQCAPlugin

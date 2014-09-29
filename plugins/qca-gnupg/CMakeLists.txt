@@ -11,6 +11,12 @@ set(QCA_GNUPG_MOC_SOURCES
 set(QCA_GNUPG_NONMOC_SOURCES
   utils.cpp
   gpgproc/sprocess.cpp
+  mypgpkeycontext.cpp
+  mykeystoreentry.cpp
+  myopenpgpcontext.cpp
+  mykeystorelist.cpp
+  mymessagecontext.cpp
+  ringwatch.cpp
 )
 
 my_automoc(QCA_GNUPG_MOC_SOURCES)
@@ -18,6 +24,9 @@ my_automoc(QCA_GNUPG_MOC_SOURCES)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgop.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/gpgproc.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/sprocess.h)
+qt4_wrap_cpp(EXTRA_GNUPG_SOURCES ringwatch.h)
+qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mykeystorelist.h)
+qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mymessagecontext.h)
 
 add_library(qca-gnupg ${PLUGIN_TYPE} ${QCA_GNUPG_MOC_SOURCES} ${QCA_GNUPG_NONMOC_SOURCES} ${EXTRA_GNUPG_SOURCES})
 include_directories(gpgproc)

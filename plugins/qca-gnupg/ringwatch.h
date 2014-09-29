@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2003-2008  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2014  Ivan Romanov <drizt@land.ru>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,19 +18,57 @@
 
 #pragma once
 
-#include "qca_cert.h"
-#include <QString>
+#include <QObject>
+#include <QDateTime>
+#include <QList>
+
+namespace QCA
+{
+
+class SafeTimer;
+class DirWatch;
+
+}
 
 namespace gpgQCAPlugin
 {
 
-class GpgOp;
-void gpg_waitForFinished(GpgOp *gpg);
-void gpg_keyStoreLog(const QString &str);
-QString find_bin();
-QString escape_string(const QString &in);
-QString unescape_string(const QString &in);
-QCA::PGPKey publicKeyFromId(const QString &id);
-QCA::PGPKey secretKeyFromId(const QString &id);
+class RingWatch : public QObject
+{
+	Q_OBJECT
+public:
+	class DirItem
+	{
+	public:
+		QCA::DirWatch *dirWatch;
+		QCA::SafeTimer *changeTimer;
+	};
+
+	class FileItem
+	{
+	public:
+		QCA::DirWatch *dirWatch;
+		QString fileName;
+		bool exists;
+		qint64 size;
+		QDateTime lastModified;
+	};
+
+	QList<DirItem> dirs;
+	QList<FileItem> files;
+
+	RingWatch(QObject *parent = 0);
+	~RingWatch();
+
+	void add(const QString &filePath);
+	void clear();
+
+signals:
+	void changed(const QString &filePath);
+
+private slots:
+	void dirChanged();
+	void handleChanged();
+};
 
 } // end namespace gpgQCAPlugin

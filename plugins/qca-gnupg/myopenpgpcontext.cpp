@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2003-2008  Justin Karneges <justin@affinix.com>
- * Copyright (C) 2014  Ivan Romanov <drizt@land.ru>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,21 +16,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
-#pragma once
+#include "myopenpgpcontext.h"
+#include "mymessagecontext.h"
 
-#include "qca_cert.h"
-#include <QString>
+using namespace QCA;
 
 namespace gpgQCAPlugin
 {
 
-class GpgOp;
-void gpg_waitForFinished(GpgOp *gpg);
-void gpg_keyStoreLog(const QString &str);
-QString find_bin();
-QString escape_string(const QString &in);
-QString unescape_string(const QString &in);
-QCA::PGPKey publicKeyFromId(const QString &id);
-QCA::PGPKey secretKeyFromId(const QString &id);
+MyOpenPGPContext::MyOpenPGPContext(QCA::Provider *p)
+	: SMSContext(p, "openpgp")
+{
+	// TODO
+}
+
+Provider::Context *MyOpenPGPContext::clone() const
+{
+	return 0;
+}
+
+MessageContext *MyOpenPGPContext::createMessage()
+{
+	return new MyMessageContext(this, provider());
+}
 
 } // end namespace gpgQCAPlugin
