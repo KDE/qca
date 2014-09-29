@@ -394,7 +394,11 @@ public slots:
 		}
 
 		if(pre_stdin_close)
+		{
+			proc->waitForBytesWritten();
 			proc->closeWriteChannel();
+		}
+
 		if(pre_aux_close)
 			pipeAux.writeEnd().close();
 		if(pre_command_close)
@@ -738,9 +742,14 @@ void GPGProc::closeStdin()
 		return;
 
 	if(d->proc->state() == QProcess::Running)
+	{
+		d->proc->waitForBytesWritten();
 		d->proc->closeWriteChannel();
+	}
 	else
+	{
 		d->pre_stdin_close = true;
+	}
 }
 
 void GPGProc::closeAux()
