@@ -307,14 +307,8 @@ public slots:
 		setupArguments();
 
 		proc->start(bin, args);
+		proc->waitForStarted();
 
-		// FIXME: From reading the source to Qt on both windows
-		//   and unix platforms, we know that fork/CreateProcess
-		//   are called in start.  However this is not guaranteed
-		//   from an API perspective.  We should probably call
-		//   QProcess::waitForStarted() to synchronously ensure
-		//   fork/CreateProcess are called before closing these
-		//   pipes.
 		pipeAux.readEnd().close();
 		pipeCommand.readEnd().close();
 		pipeStatus.writeEnd().close();
