@@ -188,8 +188,17 @@ public:
 		if(proc)
 		{
 			proc->disconnect(this);
+
 			if(proc->state() != QProcess::NotRunning)
-				proc->terminate();
+			{
+				// Before try to correct end proccess
+				// Terminate if failed
+				proc->close();
+				bool finished = proc->waitForFinished(5000);
+				if (!finished)
+					proc->terminate();
+			}
+
 			proc->setParent(0);
 #ifdef QPROC_SIGNAL_RELAY
 			releaseAndDeleteLater(this, proc_relay);
