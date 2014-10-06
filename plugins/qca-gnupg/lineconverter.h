@@ -39,7 +39,6 @@ private:
 	enum State { Normal, Partial };
 	Mode mode;
 	State state;
-	bool write_conv;
 	int prebytes;
 	QList<int> list;
 };

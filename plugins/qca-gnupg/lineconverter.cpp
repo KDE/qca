@@ -25,11 +25,6 @@ void LineConverter::setup(LineConverter::Mode m)
 {
 	state = Normal;
 	mode = m;
-#ifdef Q_OS_WIN
-	write_conv = true;
-#else
-	write_conv = false;
-#endif
 	prebytes = 0;
 	list.clear();
 }
@@ -38,6 +33,9 @@ QByteArray LineConverter::update(const QByteArray &buf)
 {
 	if(mode == Read)
 	{
+		// Convert buf to UNIX line ending style
+		// If buf ends with '\r' set state to Partival
+
 		QByteArray out;
 
 		if(state == Normal)
@@ -63,6 +61,7 @@ QByteArray LineConverter::update(const QByteArray &buf)
 			// found, not last character
 			if(n < (buf.size() - 1))
 			{
+				// found windows line ending "\r\n"
 				if(out[n + 1] == '\n')
 				{
 					// clip out the '\r'
@@ -83,45 +82,44 @@ QByteArray LineConverter::update(const QByteArray &buf)
 	}
 	else
 	{
-		if(write_conv)
+		// On Windows use DOS line ending style.
+		// On UNIX don't do any convertation. Return buf as is.
+#ifdef Q_OS_WIN
+		QByteArray out;
+		int prev = 0;
+		int at = 0;
+
+		while(1)
 		{
-			QByteArray out;
-			int prev = 0;
-			int at = 0;
+			int n = buf.indexOf('\n', at);
+			if(n == -1)
+				break;
 
-			while(1)
-			{
-				int n = buf.indexOf('\n', at);
-				if(n == -1)
-					break;
+			int chunksize = n - at;
+			int oldsize = out.size();
+			out.resize(oldsize + chunksize + 2);
+			memcpy(out.data() + oldsize, buf.data() + at, chunksize);
+			memcpy(out.data() + oldsize + chunksize, "\r\n", 2);
 
-				int chunksize = n - at;
-				int oldsize = out.size();
-				out.resize(oldsize + chunksize + 2);
-				memcpy(out.data() + oldsize, buf.data() + at, chunksize);
-				memcpy(out.data() + oldsize + chunksize, "\r\n", 2);
+			list.append(prebytes + n + 1 - prev);
+			prebytes = 0;
+			prev = n;
 
-				list.append(prebytes + n + 1 - prev);
-				prebytes = 0;
-				prev = n;
-
-				at = n + 1;
-			}
-			if(at < buf.size())
-			{
-				int chunksize = buf.size() - at;
-				int oldsize = out.size();
-				out.resize(oldsize + chunksize);
-				memcpy(out.data() + oldsize, buf.data() + at, chunksize);
-			}
-
-			prebytes += buf.size() - prev;
-			return out;
+			at = n + 1;
 		}
-		else
+		if(at < buf.size())
 		{
-			return buf;
+			int chunksize = buf.size() - at;
+			int oldsize = out.size();
+			out.resize(oldsize + chunksize);
+			memcpy(out.data() + oldsize, buf.data() + at, chunksize);
 		}
+
+		prebytes += buf.size() - prev;
+		return out;
+#else
+		return buf;
+#endif
 	}
 }
 
@@ -133,7 +131,7 @@ QByteArray LineConverter::final()
 		if(state == Partial)
 		{
 			out.resize(1);
-			out[0] = '\r';
+			out[0] = '\n';
 		}
 		return out;
 	}
@@ -150,39 +148,36 @@ QByteArray LineConverter::process(const QByteArray &buf)
 
 int LineConverter::writtenToActual(int bytes)
 {
-	if(write_conv)
+#ifdef Q_OS_WIN
+	int n = 0;
+	int counter = bytes;
+	while(counter > 0)
 	{
-		int n = 0;
-		int counter = bytes;
-		while(counter > 0)
+		if(!list.isEmpty() && bytes >= list.first())
 		{
-			if(!list.isEmpty() && bytes >= list.first())
-			{
-				++n;
-				counter -= list.takeFirst();
-			}
-			else
-			{
-				if(list.isEmpty())
-					prebytes -= counter;
-				else
-					list.first() -= counter;
-
-				if(prebytes < 0)
-				{
-					bytes += prebytes;
-					prebytes = 0;
-				}
-
-				break;
-			}
+			++n;
+			counter -= list.takeFirst();
 		}
-		return bytes - n;
+		else
+		{
+			if(list.isEmpty())
+				prebytes -= counter;
+			else
+				list.first() -= counter;
+
+			if(prebytes < 0)
+			{
+				bytes += prebytes;
+				prebytes = 0;
+			}
+
+			break;
+		}
 	}
-	else
-	{
-		return bytes;
-	}
+	return bytes - n;
+#else
+	return bytes;
+#endif
 }
 
 } // end namespace gpgQCAPlugin
