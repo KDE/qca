@@ -17,6 +17,7 @@ set(QCA_GNUPG_NONMOC_SOURCES
   mykeystorelist.cpp
   mymessagecontext.cpp
   ringwatch.cpp
+  lineconverter.cpp
 )
 
 my_automoc(QCA_GNUPG_MOC_SOURCES)
