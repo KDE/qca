@@ -17,15 +17,12 @@
  *
  */
 
-#include "gpgproc.h"
-
-#include "sprocess.h"
+#include "gpgproc_p.h"
 
 #ifdef Q_OS_MAC
 #define QT_PIPE_HACK
 #endif
 
-#define QPROC_SIGNAL_RELAY
 
 using namespace QCA;
 
@@ -38,218 +35,126 @@ void releaseAndDeleteLater(QObject *owner, QObject *obj)
 	obj->deleteLater();
 }
 
-//----------------------------------------------------------------------------
-// QProcessSignalRelay
-//----------------------------------------------------------------------------
-class QProcessSignalRelay : public QObject
+
+GPGProc::Private::Private(GPGProc *_q)
+	: QObject(_q)
+	, q(_q)
+	, pipeAux(this)
+	, pipeCommand(this)
+	, pipeStatus(this)
+	, startTrigger(this)
+	, doneTrigger(this)
 {
-	Q_OBJECT
-public:
-	QProcessSignalRelay(QProcess *proc, QObject *parent = 0)
-	:QObject(parent)
-	{
-		qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
-		connect(proc, SIGNAL(started()), SLOT(proc_started()), Qt::QueuedConnection);
-		connect(proc, SIGNAL(readyReadStandardOutput()), SLOT(proc_readyReadStandardOutput()), Qt::QueuedConnection);
-		connect(proc, SIGNAL(readyReadStandardError()), SLOT(proc_readyReadStandardError()), Qt::QueuedConnection);
-		connect(proc, SIGNAL(bytesWritten(qint64)), SLOT(proc_bytesWritten(qint64)), Qt::QueuedConnection);
-		connect(proc, SIGNAL(finished(int)), SLOT(proc_finished(int)), Qt::QueuedConnection);
-		connect(proc, SIGNAL(error(QProcess::ProcessError)), SLOT(proc_error(QProcess::ProcessError)), Qt::QueuedConnection);
-	}
+	qRegisterMetaType<gpgQCAPlugin::GPGProc::Error>("gpgQCAPlugin::GPGProc::Error");
 
-signals:
-	void started();
-	void readyReadStandardOutput();
-	void readyReadStandardError();
-	void bytesWritten(qint64);
-	void finished(int);
-	void error(QProcess::ProcessError);
-
-public slots:
-	void proc_started()
-	{
-		emit started();
-	}
-
-	void proc_readyReadStandardOutput()
-	{
-		emit readyReadStandardOutput();
-	}
-
-	void proc_readyReadStandardError()
-	{
-		emit readyReadStandardError();
-	}
-
-	void proc_bytesWritten(qint64 x)
-	{
-		emit bytesWritten(x);
-	}
-
-	void proc_finished(int x)
-	{
-		emit finished(x);
-	}
-
-	void proc_error(QProcess::ProcessError x)
-	{
-		emit error(x);
-	}
-};
-
-//----------------------------------------------------------------------------
-// GPGProc
-//----------------------------------------------------------------------------
-enum ResetMode
-{
-	ResetSession        = 0,
-	ResetSessionAndData = 1,
-	ResetAll            = 2
-};
-
-class GPGProc::Private : public QObject
-{
-	Q_OBJECT
-public:
-	GPGProc *q;
-	QString bin;
-	QStringList args;
-	GPGProc::Mode mode;
-	SProcess *proc;
+	proc = 0;
 #ifdef QPROC_SIGNAL_RELAY
-	QProcessSignalRelay *proc_relay;
+	proc_relay = 0;
 #endif
-	QPipe pipeAux, pipeCommand, pipeStatus;
-	QByteArray statusBuf;
-	QStringList statusLines;
-	GPGProc::Error error;
-	int exitCode;
-	SafeTimer startTrigger, doneTrigger;
+	startTrigger.setSingleShot(true);
+	doneTrigger.setSingleShot(true);
 
-	QByteArray pre_stdin, pre_aux;
-#ifdef QPIPE_SECURE
-	SecureArray pre_command;
-#else
-	QByteArray pre_command;
-#endif
-	bool pre_stdin_close, pre_aux_close, pre_command_close;
+	connect(&pipeAux.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(aux_written(int)));
+	connect(&pipeAux.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(aux_error(QCA::QPipeEnd::Error)));
+	connect(&pipeCommand.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(command_written(int)));
+	connect(&pipeCommand.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(command_error(QCA::QPipeEnd::Error)));
+	connect(&pipeStatus.readEnd(), SIGNAL(readyRead()), SLOT(status_read()));
+	connect(&pipeStatus.readEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(status_error(QCA::QPipeEnd::Error)));
+	connect(&startTrigger, SIGNAL(timeout()), SLOT(doStart()));
+	connect(&doneTrigger, SIGNAL(timeout()), SLOT(doTryDone()));
 
-	bool need_status, fin_process, fin_process_success, fin_status;
-	QByteArray leftover_stdout;
-	QByteArray leftover_stderr;
+	reset(ResetSessionAndData);
+}
 
-	Private(GPGProc *_q) : QObject(_q), q(_q), pipeAux(this), pipeCommand(this), pipeStatus(this), startTrigger(this), doneTrigger(this)
-	{
-		qRegisterMetaType<gpgQCAPlugin::GPGProc::Error>("gpgQCAPlugin::GPGProc::Error");
+GPGProc::Private::~Private()
+{
+	reset(ResetSession);
+}
 
-		proc = 0;
-#ifdef QPROC_SIGNAL_RELAY
-		proc_relay = 0;
-#endif
-		startTrigger.setSingleShot(true);
-		doneTrigger.setSingleShot(true);
-
-		connect(&pipeAux.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(aux_written(int)));
-		connect(&pipeAux.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(aux_error(QCA::QPipeEnd::Error)));
-		connect(&pipeCommand.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(command_written(int)));
-		connect(&pipeCommand.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(command_error(QCA::QPipeEnd::Error)));
-		connect(&pipeStatus.readEnd(), SIGNAL(readyRead()), SLOT(status_read()));
-		connect(&pipeStatus.readEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(status_error(QCA::QPipeEnd::Error)));
-		connect(&startTrigger, SIGNAL(timeout()), SLOT(doStart()));
-		connect(&doneTrigger, SIGNAL(timeout()), SLOT(doTryDone()));
-
-		reset(ResetSessionAndData);
-	}
-
-	~Private()
-	{
-		reset(ResetSession);
-	}
-
-	void closePipes()
-	{
+void GPGProc::Private::closePipes()
+{
 #ifdef QT_PIPE_HACK
-		pipeAux.readEnd().reset();
-		pipeCommand.readEnd().reset();
-		pipeStatus.writeEnd().reset();
+	pipeAux.readEnd().reset();
+	pipeCommand.readEnd().reset();
+	pipeStatus.writeEnd().reset();
 #endif
 
-		pipeAux.reset();
-		pipeCommand.reset();
-		pipeStatus.reset();
-	}
+	pipeAux.reset();
+	pipeCommand.reset();
+	pipeStatus.reset();
+}
 
-	void reset(ResetMode mode)
-	{
+void GPGProc::Private::reset(ResetMode mode)
+{
 #ifndef QT_PIPE_HACK
-		closePipes();
+	closePipes();
 #endif
 
-		if(proc)
+	if(proc)
+	{
+		proc->disconnect(this);
+
+		if(proc->state() != QProcess::NotRunning)
 		{
-			proc->disconnect(this);
+			// Before try to correct end proccess
+			// Terminate if failed
+			proc->close();
+			bool finished = proc->waitForFinished(5000);
+			if (!finished)
+				proc->terminate();
+		}
 
-			if(proc->state() != QProcess::NotRunning)
-			{
-				// Before try to correct end proccess
-				// Terminate if failed
-				proc->close();
-				bool finished = proc->waitForFinished(5000);
-				if (!finished)
-					proc->terminate();
-			}
-
-			proc->setParent(0);
+		proc->setParent(0);
 #ifdef QPROC_SIGNAL_RELAY
-			releaseAndDeleteLater(this, proc_relay);
-			proc_relay = 0;
-			delete proc; // should be safe to do thanks to relay
+		releaseAndDeleteLater(this, proc_relay);
+		proc_relay = 0;
+		delete proc; // should be safe to do thanks to relay
 #else
-			proc->deleteLater();
+		proc->deleteLater();
 #endif
-			proc = 0;
-		}
-
-#ifdef QT_PIPE_HACK
-		closePipes();
-#endif
-
-		startTrigger.stop();
-		doneTrigger.stop();
-
-		pre_stdin.clear();
-		pre_aux.clear();
-		pre_command.clear();
-		pre_stdin_close = false;
-		pre_aux_close = false;
-		pre_command_close = false;
-
-		need_status = false;
-		fin_process = false;
-		fin_status = false;
-
-		if(mode >= ResetSessionAndData)
-		{
-			statusBuf.clear();
-			statusLines.clear();
-			leftover_stdout.clear();
-			leftover_stderr.clear();
-			error = GPGProc::FailedToStart;
-			exitCode = -1;
-		}
+		proc = 0;
 	}
 
-	bool setupPipes(bool makeAux)
+#ifdef QT_PIPE_HACK
+	closePipes();
+#endif
+
+	startTrigger.stop();
+	doneTrigger.stop();
+
+	pre_stdin.clear();
+	pre_aux.clear();
+	pre_command.clear();
+	pre_stdin_close = false;
+	pre_aux_close = false;
+	pre_command_close = false;
+
+	need_status = false;
+	fin_process = false;
+	fin_status = false;
+
+	if(mode >= ResetSessionAndData)
 	{
-		if(makeAux && !pipeAux.create())
-		{
-			closePipes();
-			emit q->debug("Error creating pipeAux");
-			return false;
-		}
+		statusBuf.clear();
+		statusLines.clear();
+		leftover_stdout.clear();
+		leftover_stderr.clear();
+		error = GPGProc::FailedToStart;
+		exitCode = -1;
+	}
+}
+
+bool GPGProc::Private::setupPipes(bool makeAux)
+{
+	if(makeAux && !pipeAux.create())
+	{
+		closePipes();
+		emit q->debug("Error creating pipeAux");
+		return false;
+	}
 
 #ifdef QPIPE_SECURE
-		if(!pipeCommand.create(true)) // secure
+	if(!pipeCommand.create(true)) // secure
 #else
 		if(!pipeCommand.create())
 #endif
@@ -259,321 +164,318 @@ public:
 			return false;
 		}
 
-		if(!pipeStatus.create())
-		{
-			closePipes();
-			emit q->debug("Error creating pipeStatus");
-			return false;
-		}
-
-		return true;
+	if(!pipeStatus.create())
+	{
+		closePipes();
+		emit q->debug("Error creating pipeStatus");
+		return false;
 	}
 
-	void setupArguments()
+	return true;
+}
+
+void GPGProc::Private::setupArguments()
+{
+	QStringList fullargs;
+	fullargs += "--no-tty";
+
+	if(mode == ExtendedMode)
 	{
-		QStringList fullargs;
-		fullargs += "--no-tty";
+		fullargs += "--enable-special-filenames";
 
-		if(mode == ExtendedMode)
-		{
-			fullargs += "--enable-special-filenames";
+		fullargs += "--status-fd";
+		fullargs += QString::number(pipeStatus.writeEnd().idAsInt());
 
-			fullargs += "--status-fd";
-			fullargs += QString::number(pipeStatus.writeEnd().idAsInt());
-
-			fullargs += "--command-fd";
-			fullargs += QString::number(pipeCommand.readEnd().idAsInt());
-		}
-
-		for(int n = 0; n < args.count(); ++n)
-		{
-			QString a = args[n];
-			if(mode == ExtendedMode && a == "-&?")
-				fullargs += QString("-&") + QString::number(pipeAux.readEnd().idAsInt());
-			else
-				fullargs += a;
-		}
-
-		QString fullcmd = fullargs.join(" ");
-		emit q->debug(QString("Running: [") + bin + ' ' + fullcmd + ']');
-
-		args = fullargs;
+		fullargs += "--command-fd";
+		fullargs += QString::number(pipeCommand.readEnd().idAsInt());
 	}
 
-public slots:
-	void doStart()
+	for(int n = 0; n < args.count(); ++n)
 	{
+		QString a = args[n];
+		if(mode == ExtendedMode && a == "-&?")
+			fullargs += QString("-&") + QString::number(pipeAux.readEnd().idAsInt());
+		else
+			fullargs += a;
+	}
+
+	QString fullcmd = fullargs.join(" ");
+	emit q->debug(QString("Running: [") + bin + ' ' + fullcmd + ']');
+
+	args = fullargs;
+}
+
+void GPGProc::Private::doStart()
+{
 #ifdef Q_OS_WIN
-		// Note: for unix, inheritability is set in SProcess
-		if(pipeAux.readEnd().isValid())
-			pipeAux.readEnd().setInheritable(true);
-		if(pipeCommand.readEnd().isValid())
-			pipeCommand.readEnd().setInheritable(true);
-		if(pipeStatus.writeEnd().isValid())
-			pipeStatus.writeEnd().setInheritable(true);
+	// Note: for unix, inheritability is set in SProcess
+	if(pipeAux.readEnd().isValid())
+		pipeAux.readEnd().setInheritable(true);
+	if(pipeCommand.readEnd().isValid())
+		pipeCommand.readEnd().setInheritable(true);
+	if(pipeStatus.writeEnd().isValid())
+		pipeStatus.writeEnd().setInheritable(true);
 #endif
 
-		setupArguments();
+	setupArguments();
 
-		proc->start(bin, args);
-		proc->waitForStarted();
+	proc->start(bin, args);
+	proc->waitForStarted();
 
-		pipeAux.readEnd().close();
-		pipeCommand.readEnd().close();
-		pipeStatus.writeEnd().close();
-	}
+	pipeAux.readEnd().close();
+	pipeCommand.readEnd().close();
+	pipeStatus.writeEnd().close();
+}
 
-	void aux_written(int x)
+void GPGProc::Private::aux_written(int x)
+{
+	emit q->bytesWrittenAux(x);
+}
+
+void GPGProc::Private::aux_error(QCA::QPipeEnd::Error)
+{
+	emit q->debug("Aux: Pipe error");
+	reset(ResetSession);
+	emit q->error(GPGProc::ErrorWrite);
+}
+
+void GPGProc::Private::command_written(int x)
+{
+	emit q->bytesWrittenCommand(x);
+}
+
+void GPGProc::Private::command_error(QCA::QPipeEnd::Error)
+{
+	emit q->debug("Command: Pipe error");
+	reset(ResetSession);
+	emit q->error(GPGProc::ErrorWrite);
+}
+
+void GPGProc::Private::status_read()
+{
+	if(readAndProcessStatusData())
+		emit q->readyReadStatusLines();
+}
+
+void GPGProc::Private::status_error(QCA::QPipeEnd::Error e)
+{
+	if(e == QPipeEnd::ErrorEOF)
+		emit q->debug("Status: Closed (EOF)");
+	else
+		emit q->debug("Status: Closed (gone)");
+
+	fin_status = true;
+	doTryDone();
+}
+
+void GPGProc::Private::proc_started()
+{
+	emit q->debug("Process started");
+
+	// Note: we don't close these here anymore.  instead we
+	//   do it just after calling proc->start().
+	// close these, we don't need them
+	/*pipeAux.readEnd().close();
+	  pipeCommand.readEnd().close();
+	  pipeStatus.writeEnd().close();*/
+
+	// do the pre* stuff
+	if(!pre_stdin.isEmpty())
 	{
-		emit q->bytesWrittenAux(x);
+		proc->write(pre_stdin);
+		pre_stdin.clear();
 	}
-
-	void aux_error(QCA::QPipeEnd::Error)
+	if(!pre_aux.isEmpty())
 	{
-		emit q->debug("Aux: Pipe error");
-		reset(ResetSession);
-		emit q->error(GPGProc::ErrorWrite);
+		pipeAux.writeEnd().write(pre_aux);
+		pre_aux.clear();
 	}
-
-	void command_written(int x)
+	if(!pre_command.isEmpty())
 	{
-		emit q->bytesWrittenCommand(x);
-	}
-
-	void command_error(QCA::QPipeEnd::Error)
-	{
-		emit q->debug("Command: Pipe error");
-		reset(ResetSession);
-		emit q->error(GPGProc::ErrorWrite);
-	}
-
-	void status_read()
-	{
-		if(readAndProcessStatusData())
-			emit q->readyReadStatusLines();
-	}
-
-	void status_error(QCA::QPipeEnd::Error e)
-	{
-		if(e == QPipeEnd::ErrorEOF)
-			emit q->debug("Status: Closed (EOF)");
-		else
-			emit q->debug("Status: Closed (gone)");
-
-		fin_status = true;
-		doTryDone();
-	}
-
-	void proc_started()
-	{
-		emit q->debug("Process started");
-
-		// Note: we don't close these here anymore.  instead we
-		//   do it just after calling proc->start().
-		// close these, we don't need them
-		/*pipeAux.readEnd().close();
-		pipeCommand.readEnd().close();
-		pipeStatus.writeEnd().close();*/
-
-		// do the pre* stuff
-		if(!pre_stdin.isEmpty())
-		{
-			proc->write(pre_stdin);
-			pre_stdin.clear();
-		}
-		if(!pre_aux.isEmpty())
-		{
-			pipeAux.writeEnd().write(pre_aux);
-			pre_aux.clear();
-		}
-		if(!pre_command.isEmpty())
-		{
 #ifdef QPIPE_SECURE
-			pipeCommand.writeEnd().writeSecure(pre_command);
+		pipeCommand.writeEnd().writeSecure(pre_command);
 #else
-			pipeCommand.writeEnd().write(pre_command);
+		pipeCommand.writeEnd().write(pre_command);
 #endif
-			pre_command.clear();
-		}
+		pre_command.clear();
+	}
 
-		if(pre_stdin_close)
+	if(pre_stdin_close)
+	{
+		proc->waitForBytesWritten();
+		proc->closeWriteChannel();
+	}
+
+	if(pre_aux_close)
+		pipeAux.writeEnd().close();
+	if(pre_command_close)
+		pipeCommand.writeEnd().close();
+}
+
+void GPGProc::Private::proc_readyReadStandardOutput()
+{
+	emit q->readyReadStdout();
+}
+
+void GPGProc::Private::proc_readyReadStandardError()
+{
+	emit q->readyReadStderr();
+}
+
+void GPGProc::Private::proc_bytesWritten(qint64 lx)
+{
+	int x = (int)lx;
+	emit q->bytesWrittenStdin(x);
+}
+
+void GPGProc::Private::proc_finished(int x)
+{
+	emit q->debug(QString("Process finished: %1").arg(x));
+	exitCode = x;
+
+	fin_process = true;
+	fin_process_success = true;
+
+	if(need_status && !fin_status)
+	{
+		pipeStatus.readEnd().finalize();
+		fin_status = true;
+		if(readAndProcessStatusData())
 		{
-			proc->waitForBytesWritten();
-			proc->closeWriteChannel();
+			doneTrigger.start();
+			emit q->readyReadStatusLines();
+			return;
 		}
-
-		if(pre_aux_close)
-			pipeAux.writeEnd().close();
-		if(pre_command_close)
-			pipeCommand.writeEnd().close();
 	}
 
-	void proc_readyReadStandardOutput()
-	{
-		emit q->readyReadStdout();
-	}
+	doTryDone();
+}
 
-	void proc_readyReadStandardError()
-	{
-		emit q->readyReadStderr();
-	}
+void GPGProc::Private::proc_error(QProcess::ProcessError x)
+{
+	QMap<int, QString> errmap;
+	errmap[QProcess::FailedToStart] = "FailedToStart";
+	errmap[QProcess::Crashed]       = "Crashed";
+	errmap[QProcess::Timedout]      = "Timedout";
+	errmap[QProcess::WriteError]    = "WriteError";
+	errmap[QProcess::ReadError]     = "ReadError";
+	errmap[QProcess::UnknownError]  = "UnknownError";
 
-	void proc_bytesWritten(qint64 lx)
-	{
-		int x = (int)lx;
-		emit q->bytesWrittenStdin(x);
-	}
+	emit q->debug(QString("Process error: %1").arg(errmap[x]));
 
-	void proc_finished(int x)
-	{
-		emit q->debug(QString("Process finished: %1").arg(x));
-		exitCode = x;
+	if(x == QProcess::FailedToStart)
+		error = GPGProc::FailedToStart;
+	else if(x == QProcess::WriteError)
+		error = GPGProc::ErrorWrite;
+	else
+		error = GPGProc::UnexpectedExit;
 
-		fin_process = true;
-		fin_process_success = true;
-
-		if(need_status && !fin_status)
-		{
-			pipeStatus.readEnd().finalize();
-			fin_status = true;
-			if(readAndProcessStatusData())
-			{
-				doneTrigger.start();
-				emit q->readyReadStatusLines();
-				return;
-			}
-		}
-
-		doTryDone();
-	}
-
-	void proc_error(QProcess::ProcessError x)
-	{
-		QMap<int, QString> errmap;
-		errmap[QProcess::FailedToStart] = "FailedToStart";
-		errmap[QProcess::Crashed]       = "Crashed";
-		errmap[QProcess::Timedout]      = "Timedout";
-		errmap[QProcess::WriteError]    = "WriteError";
-		errmap[QProcess::ReadError]     = "ReadError";
-		errmap[QProcess::UnknownError]  = "UnknownError";
-
-		emit q->debug(QString("Process error: %1").arg(errmap[x]));
-
-		if(x == QProcess::FailedToStart)
-			error = GPGProc::FailedToStart;
-		else if(x == QProcess::WriteError)
-			error = GPGProc::ErrorWrite;
-		else
-			error = GPGProc::UnexpectedExit;
-
-		fin_process = true;
-		fin_process_success = false;
+	fin_process = true;
+	fin_process_success = false;
 
 #ifdef QT_PIPE_HACK
-		// If the process fails to start, then the ends of the pipes
-		// intended for the child process are still open.  Some Mac
-		// users experience a lockup if we close our ends of the pipes
-		// when the child's ends are still open.  If we ensure the
-		// child's ends are closed, we prevent this lockup.  I have no
-		// idea why the problem even happens or why this fix should
-		// work.
-		pipeAux.readEnd().reset();
-		pipeCommand.readEnd().reset();
-		pipeStatus.writeEnd().reset();
+	// If the process fails to start, then the ends of the pipes
+	// intended for the child process are still open.  Some Mac
+	// users experience a lockup if we close our ends of the pipes
+	// when the child's ends are still open.  If we ensure the
+	// child's ends are closed, we prevent this lockup.  I have no
+	// idea why the problem even happens or why this fix should
+	// work.
+	pipeAux.readEnd().reset();
+	pipeCommand.readEnd().reset();
+	pipeStatus.writeEnd().reset();
 #endif
 
-		if(need_status && !fin_status)
+	if(need_status && !fin_status)
+	{
+		pipeStatus.readEnd().finalize();
+		fin_status = true;
+		if(readAndProcessStatusData())
 		{
-			pipeStatus.readEnd().finalize();
-			fin_status = true;
-			if(readAndProcessStatusData())
-			{
-				doneTrigger.start();
-				emit q->readyReadStatusLines();
-				return;
-			}
-		}
-
-		doTryDone();
-	}
-
-	void doTryDone()
-	{
-		if(!fin_process)
+			doneTrigger.start();
+			emit q->readyReadStatusLines();
 			return;
-
-		if(need_status && !fin_status)
-			return;
-
-		emit q->debug("Done");
-
-		// get leftover data
-		proc->setReadChannel(QProcess::StandardOutput);
-		leftover_stdout = proc->readAll();
-
-		proc->setReadChannel(QProcess::StandardError);
-		leftover_stderr = proc->readAll();
-
-		reset(ResetSession);
-		if(fin_process_success)
-			emit q->finished(exitCode);
-		else
-			emit q->error(error);
-	}
-
-private:
-	bool readAndProcessStatusData()
-	{
-		QByteArray buf = pipeStatus.readEnd().read();
-		if(buf.isEmpty())
-			return false;
-
-		return processStatusData(buf);
-	}
-
-	// return true if there are newly parsed lines available
-	bool processStatusData(const QByteArray &buf)
-	{
-		statusBuf.append(buf);
-
-		// extract all lines
-		QStringList list;
-		while(1)
-		{
-			int n = statusBuf.indexOf('\n');
-			if(n == -1)
-				break;
-
-			// extract the string from statusbuf
-			++n;
-			char *p = (char *)statusBuf.data();
-			QByteArray cs(p, n);
-			int newsize = statusBuf.size() - n;
-			memmove(p, p + n, newsize);
-			statusBuf.resize(newsize);
-
-			// convert to string without newline
-			QString str = QString::fromUtf8(cs);
-			str.truncate(str.length() - 1);
-
-			// ensure it has a proper header
-			if(str.left(9) != "[GNUPG:] ")
-				continue;
-
-			// take it off
-			str = str.mid(9);
-
-			// add to the list
-			list += str;
 		}
-
-		if(list.isEmpty())
-			return false;
-
-		statusLines += list;
-		return true;
 	}
-};
+
+	doTryDone();
+}
+
+void GPGProc::Private::doTryDone()
+{
+	if(!fin_process)
+		return;
+
+	if(need_status && !fin_status)
+		return;
+
+	emit q->debug("Done");
+
+	// get leftover data
+	proc->setReadChannel(QProcess::StandardOutput);
+	leftover_stdout = proc->readAll();
+
+	proc->setReadChannel(QProcess::StandardError);
+	leftover_stderr = proc->readAll();
+
+	reset(ResetSession);
+	if(fin_process_success)
+		emit q->finished(exitCode);
+	else
+		emit q->error(error);
+}
+
+bool GPGProc::Private::readAndProcessStatusData()
+{
+	QByteArray buf = pipeStatus.readEnd().read();
+	if(buf.isEmpty())
+		return false;
+
+	return processStatusData(buf);
+}
+
+// return true if there are newly parsed lines available
+bool GPGProc::Private::processStatusData(const QByteArray &buf)
+{
+	statusBuf.append(buf);
+
+	// extract all lines
+	QStringList list;
+	while(1)
+	{
+		int n = statusBuf.indexOf('\n');
+		if(n == -1)
+			break;
+
+		// extract the string from statusbuf
+		++n;
+		char *p = (char *)statusBuf.data();
+		QByteArray cs(p, n);
+		int newsize = statusBuf.size() - n;
+		memmove(p, p + n, newsize);
+		statusBuf.resize(newsize);
+
+		// convert to string without newline
+		QString str = QString::fromUtf8(cs);
+		str.truncate(str.length() - 1);
+
+		// ensure it has a proper header
+		if(str.left(9) != "[GNUPG:] ")
+			continue;
+
+		// take it off
+		str = str.mid(9);
+
+		// add to the list
+		list += str;
+	}
+
+	if(list.isEmpty())
+		return false;
+
+	statusLines += list;
+	return true;
+}
 
 GPGProc::GPGProc(QObject *parent)
 :QObject(parent)
@@ -778,5 +680,3 @@ void GPGProc::closeCommand()
 }
 
 }
-
-#include "gpgproc.moc"

@@ -17,6 +17,7 @@
  *
  */
 
+#include "gpgop_p.h"
 #include "gpgop.h"
 #include "gpgaction.h"
 
@@ -25,226 +26,197 @@ namespace gpgQCAPlugin {
 //----------------------------------------------------------------------------
 // GpgOp
 //----------------------------------------------------------------------------
-enum ResetMode
+GpgOp::Private::Private(GpgOp *_q)
+	: QObject(_q)
+	, sync(_q)
+	, q(_q)
+	, act(0)
+	, waiting(false)
 {
-	ResetSession        = 0,
-	ResetSessionAndData = 1,
-	ResetAll            = 2
-};
+	reset(ResetAll);
+}
 
-class GpgOp::Private : public QObject
+GpgOp::Private::~Private()
 {
-	Q_OBJECT
-public:
-	QCA::Synchronizer sync;
-	GpgOp *q;
-	GpgAction *act;
-	QString bin;
-	GpgOp::Type op;
-	GpgAction::Output output;
-	QByteArray result;
-	QString diagnosticText;
-	QList<GpgOp::Event> eventList;
-	bool waiting;
+	reset(ResetAll);
+}
 
-	bool opt_ascii, opt_noagent, opt_alwaystrust;
-	QString opt_pubfile, opt_secfile;
-
-#ifdef GPG_PROFILE
-	QTime timer;
-#endif
-
-	Private(GpgOp *_q) : QObject(_q), sync(_q), q(_q)
+void GpgOp::Private::reset(ResetMode mode)
+{
+	if(act)
 	{
+		act->disconnect(this);
+		act->setParent(0);
+		act->deleteLater();
+
 		act = 0;
-		waiting = false;
-
-		reset(ResetAll);
 	}
 
-	~Private()
+	if(mode >= ResetSessionAndData)
 	{
-		reset(ResetAll);
+		output = GpgAction::Output();
+		result.clear();
+		diagnosticText = QString();
+		eventList.clear();
 	}
 
-	void reset(ResetMode mode)
+	if(mode >= ResetAll)
 	{
-		if(act)
-		{
-			act->disconnect(this);
-			act->setParent(0);
-			act->deleteLater();
-
-			act = 0;
-		}
-
-		if(mode >= ResetSessionAndData)
-		{
-			output = GpgAction::Output();
-			result.clear();
-			diagnosticText = QString();
-			eventList.clear();
-		}
-
-		if(mode >= ResetAll)
-		{
-			opt_ascii = false;
-			opt_noagent = false;
-			opt_alwaystrust = false;
-			opt_pubfile = QString();
-			opt_secfile = QString();
-		}
+		opt_ascii = false;
+		opt_noagent = false;
+		opt_alwaystrust = false;
+		opt_pubfile = QString();
+		opt_secfile = QString();
 	}
+}
 
-	void make_act(GpgOp::Type _op)
-	{
-		reset(ResetSessionAndData);
+void GpgOp::Private::make_act(GpgOp::Type _op)
+{
+	reset(ResetSessionAndData);
 
-		op = _op;
+	op = _op;
 
-		act = new GpgAction(this);
+	act = new GpgAction(this);
 
-		connect(act, SIGNAL(readyRead()), SLOT(act_readyRead()));
-		connect(act, SIGNAL(bytesWritten(int)), SLOT(act_bytesWritten(int)));
-		connect(act, SIGNAL(needPassphrase(const QString &)), SLOT(act_needPassphrase(const QString &)));
-		connect(act, SIGNAL(needCard()), SLOT(act_needCard()));
-		connect(act, SIGNAL(finished()), SLOT(act_finished()));
-		connect(act, SIGNAL(readyReadDiagnosticText()), SLOT(act_readyReadDiagnosticText()));
+	connect(act, SIGNAL(readyRead()), SLOT(act_readyRead()));
+	connect(act, SIGNAL(bytesWritten(int)), SLOT(act_bytesWritten(int)));
+	connect(act, SIGNAL(needPassphrase(const QString &)), SLOT(act_needPassphrase(const QString &)));
+	connect(act, SIGNAL(needCard()), SLOT(act_needCard()));
+	connect(act, SIGNAL(finished()), SLOT(act_finished()));
+	connect(act, SIGNAL(readyReadDiagnosticText()), SLOT(act_readyReadDiagnosticText()));
 
-		act->input.bin = bin;
-		act->input.op = op;
-		act->input.opt_ascii = opt_ascii;
-		act->input.opt_noagent = opt_noagent;
-		act->input.opt_alwaystrust = opt_alwaystrust;
-		act->input.opt_pubfile = opt_pubfile;
-		act->input.opt_secfile = opt_secfile;
-	}
+	act->input.bin = bin;
+	act->input.op = op;
+	act->input.opt_ascii = opt_ascii;
+	act->input.opt_noagent = opt_noagent;
+	act->input.opt_alwaystrust = opt_alwaystrust;
+	act->input.opt_pubfile = opt_pubfile;
+	act->input.opt_secfile = opt_secfile;
+}
 
-	void eventReady(const GpgOp::Event &e)
-	{
-		eventList += e;
-		sync.conditionMet();
-	}
+void GpgOp::Private::eventReady(const GpgOp::Event &e)
+{
+	eventList += e;
+	sync.conditionMet();
+}
 
-	void eventReady(GpgOp::Event::Type type)
-	{
-		GpgOp::Event e;
-		e.type = type;
-		eventReady(e);
-	}
+void GpgOp::Private::eventReady(GpgOp::Event::Type type)
+{
+	GpgOp::Event e;
+	e.type = type;
+	eventReady(e);
+}
 
-	void eventReady(GpgOp::Event::Type type, int written)
-	{
-		GpgOp::Event e;
-		e.type = type;
-		e.written = written;
-		eventReady(e);
-	}
+void GpgOp::Private::eventReady(GpgOp::Event::Type type, int written)
+{
+	GpgOp::Event e;
+	e.type = type;
+	e.written = written;
+	eventReady(e);
+}
 
-	void eventReady(GpgOp::Event::Type type, const QString &keyId)
-	{
-		GpgOp::Event e;
-		e.type = type;
-		e.keyId = keyId;
-		eventReady(e);
-	}
+void GpgOp::Private::eventReady(GpgOp::Event::Type type, const QString &keyId)
+{
+	GpgOp::Event e;
+	e.type = type;
+	e.keyId = keyId;
+	eventReady(e);
+}
 
-public slots:
-	void act_readyRead()
-	{
-		if(waiting)
-			eventReady(GpgOp::Event::ReadyRead);
-		else
-			emit q->readyRead();
-	}
+void GpgOp::Private::act_readyRead()
+{
+	if(waiting)
+		eventReady(GpgOp::Event::ReadyRead);
+	else
+		emit q->readyRead();
+}
 
-	void act_bytesWritten(int bytes)
-	{
-		if(waiting)
-			eventReady(GpgOp::Event::BytesWritten, bytes);
-		else
-			emit q->bytesWritten(bytes);
-	}
+void GpgOp::Private::act_bytesWritten(int bytes)
+{
+	if(waiting)
+		eventReady(GpgOp::Event::BytesWritten, bytes);
+	else
+		emit q->bytesWritten(bytes);
+}
 
-	void act_needPassphrase(const QString &keyId)
-	{
-		if(waiting)
-			eventReady(GpgOp::Event::NeedPassphrase, keyId);
-		else
-			emit q->needPassphrase(keyId);
-	}
+void GpgOp::Private::act_needPassphrase(const QString &keyId)
+{
+	if(waiting)
+		eventReady(GpgOp::Event::NeedPassphrase, keyId);
+	else
+		emit q->needPassphrase(keyId);
+}
 
-	void act_needCard()
-	{
-		if(waiting)
-			eventReady(GpgOp::Event::NeedCard);
-		else
-			emit q->needCard();
-	}
+void GpgOp::Private::act_needCard()
+{
+	if(waiting)
+		eventReady(GpgOp::Event::NeedCard);
+	else
+		emit q->needCard();
+}
 
-	void act_readyReadDiagnosticText()
-	{
-		QString s = act->readDiagnosticText();
-		//printf("dtext ready: [%s]\n", qPrintable(s));
-		diagnosticText += s;
+void GpgOp::Private::act_readyReadDiagnosticText()
+{
+	QString s = act->readDiagnosticText();
+	//printf("dtext ready: [%s]\n", qPrintable(s));
+	diagnosticText += s;
 
-		if(waiting)
-			eventReady(GpgOp::Event::ReadyReadDiagnosticText);
-		else
-			emit q->readyReadDiagnosticText();
-	}
+	if(waiting)
+		eventReady(GpgOp::Event::ReadyReadDiagnosticText);
+	else
+		emit q->readyReadDiagnosticText();
+}
 
-	void act_finished()
-	{
+void GpgOp::Private::act_finished()
+{
 #ifdef GPG_PROFILE
-		if(op == GpgOp::Encrypt)
-			printf("<< doEncrypt: %d >>\n", timer.elapsed());
+	if(op == GpgOp::Encrypt)
+		printf("<< doEncrypt: %d >>\n", timer.elapsed());
 #endif
 
-		result = act->read();
-		diagnosticText += act->readDiagnosticText();
-		output = act->output;
+	result = act->read();
+	diagnosticText += act->readDiagnosticText();
+	output = act->output;
 
-		QMap<int, QString> errmap;
-		errmap[GpgOp::ErrorProcess] = "ErrorProcess";
-		errmap[GpgOp::ErrorPassphrase] = "ErrorPassphrase";
-		errmap[GpgOp::ErrorFormat] = "ErrorFormat";
-		errmap[GpgOp::ErrorSignerExpired] = "ErrorSignerExpired";
-		errmap[GpgOp::ErrorEncryptExpired] = "ErrorEncryptExpired";
-		errmap[GpgOp::ErrorEncryptUntrusted] = "ErrorEncryptUntrusted";
-		errmap[GpgOp::ErrorEncryptInvalid] = "ErrorEncryptInvalid";
-		errmap[GpgOp::ErrorDecryptNoKey] = "ErrorDecryptNoKey";
-		errmap[GpgOp::ErrorUnknown] = "ErrorUnknown";
-		if(output.success)
-			diagnosticText += "GpgAction success\n";
+	QMap<int, QString> errmap;
+	errmap[GpgOp::ErrorProcess] = "ErrorProcess";
+	errmap[GpgOp::ErrorPassphrase] = "ErrorPassphrase";
+	errmap[GpgOp::ErrorFormat] = "ErrorFormat";
+	errmap[GpgOp::ErrorSignerExpired] = "ErrorSignerExpired";
+	errmap[GpgOp::ErrorEncryptExpired] = "ErrorEncryptExpired";
+	errmap[GpgOp::ErrorEncryptUntrusted] = "ErrorEncryptUntrusted";
+	errmap[GpgOp::ErrorEncryptInvalid] = "ErrorEncryptInvalid";
+	errmap[GpgOp::ErrorDecryptNoKey] = "ErrorDecryptNoKey";
+	errmap[GpgOp::ErrorUnknown] = "ErrorUnknown";
+	if(output.success)
+		diagnosticText += "GpgAction success\n";
+	else
+		diagnosticText += QString("GpgAction error: %1\n").arg(errmap[output.errorCode]);
+
+	if(output.wasSigned)
+	{
+		QString s;
+		if(output.verifyResult == GpgOp::VerifyGood)
+			s = "VerifyGood";
+		else if(output.verifyResult == GpgOp::VerifyBad)
+			s = "VerifyBad";
 		else
-			diagnosticText += QString("GpgAction error: %1\n").arg(errmap[output.errorCode]);
-
-		if(output.wasSigned)
-		{
-			QString s;
-			if(output.verifyResult == GpgOp::VerifyGood)
-				s = "VerifyGood";
-			else if(output.verifyResult == GpgOp::VerifyBad)
-				s = "VerifyBad";
-			else
-				s = "VerifyNoKey";
-			diagnosticText += QString("wasSigned: verifyResult: %1\n").arg(s);
-		}
-
-		//printf("diagnosticText:\n%s", qPrintable(diagnosticText));
-
-		reset(ResetSession);
-
-		if(waiting)
-			eventReady(GpgOp::Event::Finished);
-		else
-			emit q->finished();
+			s = "VerifyNoKey";
+		diagnosticText += QString("wasSigned: verifyResult: %1\n").arg(s);
 	}
-};
+
+	//printf("diagnosticText:\n%s", qPrintable(diagnosticText));
+
+	reset(ResetSession);
+
+	if(waiting)
+		eventReady(GpgOp::Event::Finished);
+	else
+		emit q->finished();
+}
 
 GpgOp::GpgOp(const QString &bin, QObject *parent)
-:QObject(parent)
+	:QObject(parent)
 {
 	d = new Private(this);
 	d->bin = bin;
@@ -510,5 +482,3 @@ GpgOp::VerifyResult GpgOp::verifyResult() const
 }
 
 }
-
-#include "gpgop.moc"

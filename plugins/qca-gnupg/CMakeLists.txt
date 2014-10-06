@@ -4,11 +4,10 @@ enable_plugin("gnupg")
 
 set(QCA_GNUPG_MOC_SOURCES
   qca-gnupg.cpp
-  gpgop.cpp
-  gpgproc/gpgproc.cpp
 )
 
 set(QCA_GNUPG_NONMOC_SOURCES
+  gpgop.cpp
   utils.cpp
   gpgproc/sprocess.cpp
   mypgpkeycontext.cpp
@@ -19,12 +18,15 @@ set(QCA_GNUPG_NONMOC_SOURCES
   ringwatch.cpp
   lineconverter.cpp
   gpgaction.cpp
+  gpgproc/gpgproc.cpp
 )
 
 my_automoc(QCA_GNUPG_MOC_SOURCES)
 
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgop.h)
+qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgop_p.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/gpgproc.h)
+qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/gpgproc_p.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/sprocess.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES ringwatch.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mykeystorelist.h)
