@@ -18,6 +18,7 @@ set(QCA_GNUPG_NONMOC_SOURCES
   mymessagecontext.cpp
   ringwatch.cpp
   lineconverter.cpp
+  gpgaction.cpp
 )
 
 my_automoc(QCA_GNUPG_MOC_SOURCES)
@@ -28,6 +29,7 @@ qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgproc/sprocess.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES ringwatch.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mykeystorelist.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mymessagecontext.h)
+qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgaction.h)
 
 add_library(qca-gnupg ${PLUGIN_TYPE} ${QCA_GNUPG_MOC_SOURCES} ${QCA_GNUPG_NONMOC_SOURCES} ${EXTRA_GNUPG_SOURCES})
 include_directories(gpgproc)
