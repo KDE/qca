@@ -33,6 +33,7 @@ Notes
   DEVELOPER_MODE - mode to enable features for developers. If ON
                    will be used hardcoded path to 'crypto'
                    (by default: OFF)
+  OSX_FRAMEWORK - build an OS X framework (by default: ON)
 
   Finally install paths can be override with:
 

@@ -136,7 +136,7 @@ qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qpipe.h")
 qt4_wrap_cpp( SOURCES "qca_safeobj.h")
 qt4_wrap_cpp( SOURCES "${qca_INCLUDEDIR}/QtCrypto/qca_safetimer.h")
 
-ADD_LIBRARY(${QCA_LIB_NAME} ${LIBRARY_TYPE} ${SOURCES})
+ADD_LIBRARY(${QCA_LIB_NAME} ${LIBRARY_TYPE} ${SOURCES}  ${public_HEADERS})
 TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} ${QT_QTCORE_LIBRARY})
 
 if(WIN32)
@@ -153,6 +153,7 @@ set_target_properties(${QCA_LIB_NAME} PROPERTIES
                       SOVERSION ${QCA_LIB_MAJOR_VERSION}
                       DEFINE_SYMBOL QCA_MAKEDLL
                       PUBLIC_HEADER "${public_HEADERS}"
+                      FRAMEWORK ${OSX_FRAMEWORK}
                       EXPORT_NAME qca
                       )
 
@@ -162,6 +163,7 @@ if(NOT DEVELOPER_MODE)
           LIBRARY DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
           RUNTIME DESTINATION "${QCA_BINARY_INSTALL_DIR}"
           ARCHIVE DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
+          FRAMEWORK DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
           PUBLIC_HEADER DESTINATION "${QCA_INCLUDE_INSTALL_DIR}/QtCrypto" INCLUDES DESTINATION "${QCA_INCLUDE_INSTALL_DIR}/QtCrypto"
           )
 
