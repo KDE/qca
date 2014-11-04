@@ -207,6 +207,8 @@ endif(NOT WIN32)
 # strip CMAKE_INSTALL_PREFIX in all paths
 if(USE_RELATIVE_PATHS)
   message(STATUS "Installed package is relocatable")
+  file(RELATIVE_PATH CRYPTO_PRF_RELATIVE_PATH "${QCA_FEATURE_INSTALL_DIR}/features" ${CMAKE_INSTALL_PREFIX})
+  set(CRYPTO_PRF_RELATIVE_PATH "$$PWD/${CRYPTO_PRF_RELATIVE_PATH}")
   foreach(PATH QCA_PLUGINS_INSTALL_DIR
                QCA_BINARY_INSTALL_DIR
                QCA_LIBRARY_INSTALL_DIR
@@ -222,6 +224,7 @@ if(USE_RELATIVE_PATHS)
 else()
   message(STATUS "Installed package is NOT relocatable")
   set(QCA_PREFIX_INSTALL_DIR "")
+  set(CRYPTO_PRF_RELATIVE_PATH "")
 endif()
 
 if(DEVELOPER_MODE)
