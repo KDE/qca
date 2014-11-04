@@ -243,12 +243,6 @@ if (APPLE)
    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif (APPLE)
 
-# set up RPATH handling, so the libs are found if they are installed to a non-standard location, Alex
-if (UNIX  AND NOT  APPLE)
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE)
-  set(CMAKE_INSTALL_RPATH   "${QCA_LIBRARY_INSTALL_DIR}" )
-endif (UNIX  AND NOT  APPLE)
-
 message(STATUS "Checking for certstore..")
 # fixme add OR mac
 if( WIN32 )
