@@ -11,6 +11,11 @@ if(BOTAN_FOUND)
   add_definitions(${BOTAN_CFLAGS})
   my_automoc(QCA_BOTAN_SOURCES)
   add_library(qca-botan ${PLUGIN_TYPE} ${QCA_BOTAN_SOURCES})
+
+  if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
+    set_property(TARGET qca-botan  PROPERTY SUFFIX ".dylib")
+  endif()
+
   target_link_libraries(qca-botan ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${BOTAN_LIBRARIES})
 
   if(NOT DEVELOPER_MODE)

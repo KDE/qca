@@ -14,6 +14,10 @@ if(NSS_FOUND)
   add_library(qca-nss ${PLUGIN_TYPE} ${QCA_NSS_SOURCES})
   target_link_libraries(qca-nss ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${NSS_LDFLAGS})
 
+  if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
+    set_property(TARGET qca-nss PROPERTY SUFFIX ".dylib")
+  endif()
+
   if(NOT DEVELOPER_MODE)
     install(TARGETS qca-nss
             LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"

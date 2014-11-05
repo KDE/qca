@@ -34,6 +34,11 @@ qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mymessagecontext.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgaction.h)
 
 add_library(qca-gnupg ${PLUGIN_TYPE} ${QCA_GNUPG_MOC_SOURCES} ${QCA_GNUPG_NONMOC_SOURCES} ${EXTRA_GNUPG_SOURCES})
+
+if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
+  set_property(TARGET qca-gnupg PROPERTY SUFFIX ".dylib")
+endif()
+
 include_directories(gpgproc)
 target_link_libraries(qca-gnupg ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME})
 

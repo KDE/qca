@@ -21,6 +21,11 @@ if(LIBGCRYPT_FOUND)
     add_definitions(${LIBGCRYPT_CFLAGS})
     my_automoc(QCA_GCRYPT_SOURCES)
     add_library(qca-gcrypt ${PLUGIN_TYPE} ${QCA_GCRYPT_SOURCES})
+
+    if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
+      set_property(TARGET qca-gcrypt PROPERTY SUFFIX ".dylib")
+    endif()
+
     target_link_libraries(qca-gcrypt ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${LIBGCRYPT_LIBRARIES})
 
     if(NOT DEVELOPER_MODE)

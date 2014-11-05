@@ -15,6 +15,10 @@ if(OPENSSL_FOUND AND PKCS11H_FOUND)
 
   add_library(qca-pkcs11 ${PLUGIN_TYPE} ${QCA_PKCS11_SOURCES})
 
+  if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
+    set_property(TARGET qca-pkcs11 PROPERTY SUFFIX ".dylib")
+  endif()
+
   add_definitions(${PKCS11H_CFLAGS_OTHER})
   include_directories(${PKCS11H_INCLUDE_DIRS})
   target_link_libraries(qca-pkcs11 ${QT_QTCORE_LIBRARY})

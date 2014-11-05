@@ -6,6 +6,10 @@ my_automoc( QCA_SOFTSTORE_SOURCES )
 
 add_library(qca-softstore ${PLUGIN_TYPE} ${QCA_SOFTSTORE_SOURCES})
 
+if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
+  set_property(TARGET qca-softstore PROPERTY SUFFIX ".dylib")
+endif()
+
 add_definitions(${SOFTSTOREH_DEFINITIONS})
 include_directories(${SOFTSTOREH_INCLUDE_DIR})
 target_link_libraries(qca-softstore ${QT_QTCORE_LIBRARY})
