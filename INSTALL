@@ -34,6 +34,7 @@ Notes
                    will be used hardcoded path to 'crypto'
                    (by default: OFF)
   OSX_FRAMEWORK - build an OS X framework (by default: ON)
+  USE_RELATIVE_PATHS - make relocatable package if possible (by default: OFF)
 
   Finally install paths can be override with:
 

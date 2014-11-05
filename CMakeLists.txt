@@ -181,7 +181,8 @@ set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "
 normalize_path(QCA_PREFIX_INSTALL_DIR)
 
 # check for oportunity to use relative paths
-set(USE_RELATIVE_PATHS ON)
+option(USE_RELATIVE_PATHS "Try to make relocatable package")
+
 foreach(PATH QCA_PLUGINS_INSTALL_DIR
              QCA_BINARY_INSTALL_DIR
              QCA_LIBRARY_INSTALL_DIR
