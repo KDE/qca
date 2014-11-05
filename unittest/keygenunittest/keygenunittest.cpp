@@ -104,23 +104,36 @@ void KeyGenUnitTest::testDSA()
 	QSKIP("DSA not supported!", SkipAll);
 #endif
 
-    QCA::DLGroup group = keygen.createDLGroup( QCA::DSA_512 );
-    QCA::PrivateKey priv2 = keygen.createDSA( group );
-    QCA::DSAPrivateKey dsa1 = priv2.toDSA();
-    QCOMPARE( dsa1.isNull(), false );
-    QCOMPARE( dsa1.bitSize(), 512 );
+	QCA::DLGroup group;
+	QCA::PrivateKey priv2;
+	QCA::DSAPrivateKey dsa1;
 
-    group = keygen.createDLGroup( QCA::DSA_768 );
-    priv2 = keygen.createDSA( group );
-    dsa1 = priv2.toDSA();
-    QCOMPARE( dsa1.isNull(), false );
-    QCOMPARE( dsa1.bitSize(), 768 );
+	if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_512))
+	{
+		group = keygen.createDLGroup( QCA::DSA_512 );
+		priv2 = keygen.createDSA( group );
+		dsa1 = priv2.toDSA();
+		QCOMPARE( dsa1.isNull(), false );
+		QCOMPARE( dsa1.bitSize(), 512 );
+	}
 
-    group = keygen.createDLGroup( QCA::DSA_1024 );
-    priv2 = keygen.createDSA( group );
-    dsa1 = priv2.toDSA();
-    QCOMPARE( dsa1.isNull(), false );
-    QCOMPARE( dsa1.bitSize(), 1024 );
+	if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_768))
+	{
+		group = keygen.createDLGroup( QCA::DSA_768 );
+		priv2 = keygen.createDSA( group );
+		dsa1 = priv2.toDSA();
+		QCOMPARE( dsa1.isNull(), false );
+		QCOMPARE( dsa1.bitSize(), 768 );
+	}
+
+	if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_1024))
+	{
+		group = keygen.createDLGroup( QCA::DSA_1024 );
+		priv2 = keygen.createDSA( group );
+		dsa1 = priv2.toDSA();
+		QCOMPARE( dsa1.isNull(), false );
+		QCOMPARE( dsa1.bitSize(), 1024 );
+	}
 }
 
 void KeyGenUnitTest::testDH()
