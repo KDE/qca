@@ -1,3 +1,13 @@
+* 2.2.0
+- New plugin qca-gpgme to replace current qca-gnupg. qca-gnupg requires
+  to have gpg binary which can be any 1.4.x or 2.x. Them behaviour is
+  different. gpg2 requires gpg-agent to ask user for passphrase. No
+  correct way to check that key requires passphrase.
+
+- Add an interface for gnupg to handle keys (create and remove, maybe
+  something else).
+
+-- Obsoletes
 * 2.0.4
   handle mac universal builds for arches besides x86 and ppc (e.g. x86_64)
   use rpath?
