@@ -56,11 +56,26 @@ void DSAUnitTest::cleanupTestCase()
 
 void DSAUnitTest::testdsa()
 {
-    if(!QCA::isSupported("pkey") ||
-       !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
-       !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
-        QWARN("DSA not supported");
-    else {
+	if(!QCA::isSupported("pkey") ||
+	   !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
+	   !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
+	{
+#if QT_VERSION >= 0x050000
+		QSKIP("DSA not supported!");
+#else
+		QSKIP("DSA not supported!", SkipAll);
+#endif
+	}
+
+	if (!QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_1024))
+	{
+#if QT_VERSION >= 0x050000
+		QSKIP("DSA_1024 discrete logarithm group sets not supported!");
+#else
+		QSKIP("DSA_1024 discrete logarithm group sets not supported!", SkipAll);
+#endif
+	}
+
 	QCA::KeyGenerator keygen;
 	QCOMPARE( keygen.isBusy(), false );
 	QCOMPARE( keygen.blockingEnabled(), true );
@@ -107,7 +122,6 @@ void DSAUnitTest::testdsa()
 	QCOMPARE( fromDERkey.isPrivate(), true );
 	QCOMPARE( fromDERkey.isPublic(), false );
 	QVERIFY( dsaKey == fromDERkey );
-    }
 }
 
 QTEST_MAIN(DSAUnitTest)
