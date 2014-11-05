@@ -1593,20 +1593,38 @@ public:
 
 	virtual void run()
 	{
-		if(set == DSA_512)
+		switch (set)
+		{
+#ifndef OPENSSL_FIPS
+		case DSA_512:
 			ok = make_dlgroup(decode_seed(JCE_512_SEED), 512, JCE_512_COUNTER, &params);
-		else if(set == DSA_768)
+			break;
+
+		case DSA_768:
 			ok = make_dlgroup(decode_seed(JCE_768_SEED), 768, JCE_768_COUNTER, &params);
-		else if(set == DSA_1024)
+			break;
+
+		case DSA_1024:
 			ok = make_dlgroup(decode_seed(JCE_1024_SEED), 1024, JCE_1024_COUNTER, &params);
-		else if(set == IETF_1024)
+			break;
+#endif
+
+		case IETF_1024:
 			ok = get_dlgroup(decode(IETF_1024_PRIME), 2, &params);
-		else if(set == IETF_2048)
+			break;
+
+		case IETF_2048:
 			ok = get_dlgroup(decode(IETF_2048_PRIME), 2, &params);
-		else if(set == IETF_4096)
+			break;
+
+		case IETF_4096:
 			ok = get_dlgroup(decode(IETF_4096_PRIME), 2, &params);
-		else
+			break;
+
+		default:
 			ok = false;
+			break;
+		}
 	}
 };
 
@@ -1644,9 +1662,14 @@ public:
 	virtual QList<DLGroupSet> supportedGroupSets() const
 	{
 		QList<DLGroupSet> list;
+
+		// DSA_* was removed in FIPS specification
+		// https://bugzilla.redhat.com/show_bug.cgi?id=1144655
+#ifndef OPENSSL_FIPS
 		list += DSA_512;
 		list += DSA_768;
 		list += DSA_1024;
+#endif
 		list += IETF_1024;
 		list += IETF_2048;
 		list += IETF_4096;
