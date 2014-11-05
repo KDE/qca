@@ -18,7 +18,11 @@ endif(NOT MLOCK_TAKES_VOID)
 if(DEVELOPER_MODE)
   add_definitions(-DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
 else()
-  add_definitions(-DQCA_PLUGIN_PATH="${QCA_PREFIX_INSTALL_DIR}${QCA_PLUGINS_INSTALL_DIR}")
+  if(USE_RELATIVE_PATHS)
+    add_definitions(-DQCA_PLUGIN_PATH="${QCA_PREFIX_INSTALL_DIR}/${QCA_PLUGINS_INSTALL_DIR}")
+  else()
+    add_definitions(-DQCA_PLUGIN_PATH="${QCA_PLUGINS_INSTALL_DIR}")
+  endif()
 endif()
 
 # base source files

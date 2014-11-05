@@ -114,7 +114,6 @@ endmacro(install_pdb)
 
 macro(normalize_path PATH)
   get_filename_component(${PATH} "${${PATH}}" ABSOLUTE)
-  if(NOT "${${PATH}}" MATCHES "/$")
-    set(${PATH} "${${PATH}}/")
-  endif()
+  # Strip trailing slashes
+  string(REGEX REPLACE "/+$" "" PATH ${PATH})
 endmacro()
