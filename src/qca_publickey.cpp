@@ -531,16 +531,19 @@ bool DLGroup::isNull() const
 
 BigInteger DLGroup::p() const
 {
+	Q_ASSERT(d);
 	return d->p;
 }
 
 BigInteger DLGroup::q() const
 {
+	Q_ASSERT(d);
 	return d->q;
 }
 
 BigInteger DLGroup::g() const
 {
+	Q_ASSERT(d);
 	return d->g;
 }
 
@@ -1327,19 +1330,22 @@ DLGroup KeyGenerator::createDLGroup(QCA::DLGroupSet set, const QString &provider
 	else
 		p = providerForGroupSet(set);
 
-	d->group = DLGroup();
-	d->wasBlocking = d->blocking;
 	d->dc = static_cast<DLGroupContext *>(getContext("dlgroup", p));
+	d->group = DLGroup();
 
-	if(!d->blocking)
+	if (d->dc)
 	{
-		connect(d->dc, SIGNAL(finished()), d, SLOT(done_group()));
-		d->dc->fetchGroup(set, false);
-	}
-	else
-	{
-		d->dc->fetchGroup(set, true);
-		d->done_group();
+		d->wasBlocking = d->blocking;
+		if(!d->blocking)
+		{
+			connect(d->dc, SIGNAL(finished()), d, SLOT(done_group()));
+			d->dc->fetchGroup(set, false);
+		}
+		else
+		{
+			d->dc->fetchGroup(set, true);
+			d->done_group();
+		}
 	}
 
 	return d->group;
