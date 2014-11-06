@@ -4309,6 +4309,18 @@ public:
 		case NID_dsaWithSHA1:
 			p.sigalgo = QCA::EMSA1_SHA1;
 			break;
+		case NID_sha224WithRSAEncryption:
+			p.sigalgo = QCA::EMSA3_SHA224;
+			break;
+		case NID_sha256WithRSAEncryption:
+			p.sigalgo = QCA::EMSA3_SHA256;
+			break;
+		case NID_sha384WithRSAEncryption:
+			p.sigalgo = QCA::EMSA3_SHA384;
+			break;
+		case NID_sha512WithRSAEncryption:
+			p.sigalgo = QCA::EMSA3_SHA512;
+			break;
 		default:
 			qWarning() << "Unknown signature value: " << OBJ_obj2nid(x->sig_alg->algorithm);
 			p.sigalgo = QCA::SignatureUnknown;
