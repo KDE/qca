@@ -152,9 +152,14 @@ if(APPLE)
    TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} ${CARBON_LIBRARY} ${CARBON_LIBRARY_SECURITY})
 endif(APPLE)
 
+if(NOT ANDROID)
+  set_target_properties(${QCA_LIB_NAME} PROPERTIES
+                        VERSION ${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}
+                        SOVERSION ${QCA_LIB_MAJOR_VERSION}
+                        )
+endif()
+
 set_target_properties(${QCA_LIB_NAME} PROPERTIES
-                      VERSION ${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}
-                      SOVERSION ${QCA_LIB_MAJOR_VERSION}
                       DEFINE_SYMBOL QCA_MAKEDLL
                       PUBLIC_HEADER "${public_HEADERS}"
                       FRAMEWORK ${OSX_FRAMEWORK}
