@@ -7,6 +7,8 @@
 - Add an interface for gnupg to handle keys (create and remove, maybe
   something else).
 
+- Add ECDSA support to qca-ossl plugin
+
 -- Obsoletes
 * 2.0.4
   handle mac universal builds for arches besides x86 and ppc (e.g. x86_64)
