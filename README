@@ -33,6 +33,38 @@ License
 
 Changes
 -------
+  New in 2.1.0
+  - Ported to Qt5 (Qt4 alsa supported)
+  - New building system. CMake instead of qmake
+  - Added CTR symetric cipher support to qca core
+  - Added no padding encryption algorithm to qca core
+  - qcatool2 renamed to qcatool
+  - fixed crash in qcatool when only options provided on command line without any commands
+  - Use plugins installation path as hard-coded runtime plugins search path
+  - Added new functiion pluginPaths
+  - Added functions to get runtime QCA version
+  - Fixed 'no watch file' warnings in FileWatch
+  - Added EME_PKCS1v15_SSL Encryption Algorithm
+  - New implementation of SafeTimer to prevent crashes
+  - Updated certificates for unittests
+  - RSA Keys are permutable, can encrypt with private and decrypt with public
+  - Add unloadProvider() function for symmetry with insertProvider()
+  - Overloaded "makeKey" to derive a password depending on a time factor
+  - Remove pointer to deinit() routine from QCoreApplication at deinitialization
+  - Fix a couple of crashes where all plugins might not be available
+  - Fix operating on keys with unrelated expired subkeys
+  - Fixed timers in Synchronizer class
+  - Dropped randomunittest
+  - Fixed many unittests
+  - qca-gnupg: internal refactoring
+  - qca-gnupg: try both gpg and gpg2 to find gnupg executable
+  - qca-gnupg: fixed some encodings problem
+  - qca-ossl: no DSA_* dl groups in FIPS specification
+  - qca-ossl: added missed signatures to CRLContext
+  - qca-ossl: fixed certs time zone
+  - qca-nss: fixed KeyLenght for Cipher
+  - qca-botan: fixed getting result size for ciphers
+
   New in 2.0.3
   - Bugfix release, forward and backward compatible with 2.0.x
   - Fix compilation when using Qt/Windows SDK
