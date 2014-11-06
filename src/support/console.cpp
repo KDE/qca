@@ -30,7 +30,11 @@
 #ifdef Q_OS_WIN
 # include <windows.h>
 #else
-# include <sys/termios.h>
+# ifdef Q_OS_ANDROID
+#  include <termios.h>
+# else
+#  include <sys/termios.h>
+# endif
 # include <unistd.h>
 # include <fcntl.h>
 #endif
