@@ -178,15 +178,15 @@ typedef quint32 md5_word_t; /* 32-bit word */
 
 /* Define the state of the MD5 Algorithm. */
 struct md5_state_t {
-    SecureArray sbuf;
-    md5_word_t *count; // 2   /* message length in bits, lsw first */
-    md5_word_t *abcd;  // 4   /* digest buffer */
-    md5_byte_t *buf;   // 64  /* accumulate block */
+    md5_word_t count[2]; // 2   /* message length in bits, lsw first */
+    md5_word_t abcd[4];  // 4   /* digest buffer */
+    md5_byte_t buf[64];  // 64  /* accumulate block */
 
     md5_state_t()
     {
-        sbuf.resize((6 * sizeof(md5_word_t)) + 64);
-        setup();
+        memset(count, 0, 2 * sizeof(md5_word_t));
+        memset(abcd, 0, 4 * sizeof(md5_word_t));
+        memset(buf, 0, 64 * sizeof(md5_byte_t));
     }
 
     md5_state_t(const md5_state_t &from)
@@ -196,17 +196,8 @@ struct md5_state_t {
 
     md5_state_t & operator=(const md5_state_t &from)
     {
-        sbuf = from.sbuf;
-        setup();
+        *this = from;
         return *this;
-    }
-
-    inline void setup()
-    {
-        char *p = sbuf.data();
-        count = (md5_word_t *)p;
-        abcd = (md5_word_t *)(p + (2 * sizeof(md5_word_t)));
-        buf = (md5_byte_t *)(p + (6 * sizeof(md5_word_t)));
     }
 };
 
@@ -295,9 +286,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	md5_word_t t;
 
 	/* Define storage for little-endian or both types of CPUs. */
-	// possible FIXME: does xbuf really need to be secured?
-	SecureArray sxbuf(16 * sizeof(md5_word_t));
-	md5_word_t *xbuf = (md5_word_t *)sxbuf.data();
+	md5_word_t xbuf[16];
 	const md5_word_t *X;
 
 	{
@@ -319,12 +308,15 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 		{
 			/*
 			* On little-endian machines, we can process properly aligned
-			* data without copying it.
+			* data without copying it. On arm do copying always
 			*/
-			if (!((data - (const md5_byte_t *)0) & 3)) {
+#ifndef Q_PROCESSOR_ARM
+			if (!((data - static_cast<const md5_byte_t*>(0)) & 3)) {
 				/* data are properly aligned */
-				X = (const md5_word_t *)data;
-			} else {
+				X = reinterpret_cast<const md5_word_t*>(data);
+			} else
+#endif
+			{
 				/* not aligned */
 				memcpy(xbuf, data, 64);
 				X = xbuf;
@@ -571,7 +563,12 @@ public:
 // SHA1 - from a public domain implementation by Steve Reid (steve@edmweb.com)
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
+
+#ifdef Q_PROCESSOR_ARM
+#define blk(i) (block.l[i&15] = rol(block.l[(i+13)&15]^block.l[(i+8)&15]^block.l[(i+2)&15]^block.l[i&15],1))
+#else
 #define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15]^block->l[(i+2)&15]^block->l[i&15],1))
+#endif
 
 /* (R0+R1), R2, R3, R4 are the different operations used in SHA1 */
 #define R0(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(i)+0x5A827999+rol(v,5);w=rol(w,30);
@@ -582,15 +579,15 @@ public:
 
 struct SHA1_CONTEXT
 {
-	SecureArray sbuf;
-	quint32 *state; // 5
-	quint32 *count; // 2
-	unsigned char *buffer; // 64
+	quint32 state[5]; // 5
+	quint32 count[2]; // 2
+	unsigned char buffer[64]; // 64
 
 	SHA1_CONTEXT()
 	{
-		sbuf.resize((7 * sizeof(quint32)) + 64);
-		setup();
+		memset(state, 0, 5 * sizeof(quint32));
+		memset(count, 0, 2 * sizeof(quint32));
+		memset(buffer, 0, 64 * sizeof(unsigned char));
 	}
 
 	SHA1_CONTEXT(const SHA1_CONTEXT &from)
@@ -600,17 +597,8 @@ struct SHA1_CONTEXT
 
 	SHA1_CONTEXT & operator=(const SHA1_CONTEXT &from)
 	{
-		sbuf = from.sbuf;
-		setup();
+		*this = from;
 		return *this;
-	}
-
-	inline void setup()
-	{
-		char *p = sbuf.data();
-		state = (quint32 *)p;
-		count = (quint32 *)(p + (5 * sizeof(quint32)));
-		buffer = (unsigned char *)(p + (7 * sizeof(quint32)));
 	}
 };
 
@@ -623,7 +611,11 @@ class DefaultSHA1Context : public HashContext
 {
 public:
 	SHA1_CONTEXT _context;
-	CHAR64LONG16* block;
+#ifdef Q_PROCESSOR_ARM
+	CHAR64LONG16 block;
+#else
+	CHAR64LONG16 *block;
+#endif
 	bool secure;
 
 	DefaultSHA1Context(Provider *p) : HashContext(p, "sha1")
@@ -668,9 +660,17 @@ public:
 	inline unsigned long blk0(quint32 i)
 	{
 		if(QSysInfo::ByteOrder == QSysInfo::BigEndian)
+#ifdef Q_PROCESSOR_ARM
+			return block.l[i];
+#else
 			return block->l[i];
+#endif
 		else
+#ifdef Q_PROCESSOR_ARM
+			return (block.l[i] = (rol(block.l[i],24)&0xFF00FF00) | (rol(block.l[i],8)&0x00FF00FF));
+#else
 			return (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) | (rol(block->l[i],8)&0x00FF00FF));
+#endif
 	}
 
 	// Hash a single 512-bit block. This is the core of the algorithm.
@@ -678,8 +678,11 @@ public:
 	{
 		quint32 a, b, c, d, e;
 
-		block = (CHAR64LONG16*)buffer;
-
+#ifdef Q_PROCESSOR_ARM
+		memcpy(&block, buffer, sizeof(block));
+#else
+		block = reinterpret_cast<CHAR64LONG16*>(buffer);
+#endif
 		// Copy context->state[] to working vars
 		a = state[0];
 		b = state[1];
