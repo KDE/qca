@@ -33,7 +33,6 @@
 #ifndef QCA_CERT_H
 #define QCA_CERT_H
 
-#include <QMap>
 #include <QDateTime>
 #include "qca_core.h"
 #include "qca_publickey.h"

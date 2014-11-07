@@ -22,7 +22,6 @@
 #include "qca_core.h"
 
 #include <QMutex>
-#include <QHash>
 #include "qca_textfilter.h"
 #include "qca_cert.h"
 #include "qcaprovider.h"
