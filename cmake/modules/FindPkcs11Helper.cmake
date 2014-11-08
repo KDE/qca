@@ -21,7 +21,7 @@ if(PKCS11H_INCLUDE_DIRS AND PKCS11H_LDFLAGS)
 
 else()
   if(NOT WIN32)
-    find_package(PkgConfig REQUIRED)
+    find_package(PkgConfig)
     pkg_search_module(PKCS11H libpkcs11-helper-1)
   endif(NOT WIN32)
 

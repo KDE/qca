@@ -18,7 +18,7 @@ if(NSS_INCLUDE_DIRS AND NSS_LDFLAGS)
 
 else()
   if(NOT WIN32)
-    find_package(PkgConfig REQUIRED)
+    find_package(PkgConfig)
     pkg_search_module(NSS nss)
   endif(NOT WIN32)
 
