@@ -1539,10 +1539,12 @@ static BigInteger decode(const QString &prime)
 	return BigInteger(SecureArray(a));
 }
 
+#ifndef OPENSSL_FIPS
 static QByteArray decode_seed(const QString &hex_seed)
 {
 	return dehex(hex_seed);
 }
+#endif
 
 class DLParams
 {
@@ -1550,6 +1552,7 @@ public:
 	BigInteger p, q, g;
 };
 
+#ifndef OPENSSL_FIPS
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
 	int ret_counter;
@@ -1564,6 +1567,7 @@ static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams
 	DSA_free(dsa);
 	return true;
 }
+#endif
 
 static bool get_dlgroup(const BigInteger &p, const BigInteger &g, DLParams *params)
 {
