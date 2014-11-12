@@ -22,6 +22,7 @@ cmake_policy(SET CMP0020 OLD)
 option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
+# BUILD_SHARED_LIBS is cmake variable. Need to change default value.
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(DEVELOPER_MODE "Special developer mode" OFF)
 
