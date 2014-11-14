@@ -8,7 +8,7 @@ endif(NOT CMAKE_INSTALL_PREFIX)
 
 project(qca)
 
-cmake_minimum_required(VERSION 2.6.0)
+cmake_minimum_required(VERSION 2.8.12)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "1")
