@@ -371,13 +371,19 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif(DOXYGEN_FOUND)
 
+if(NOT QCA_SUFFIX)
+  set(QCA_CONFIG_NAME_BASE "Qca")
+else()
+  set(QCA_CONFIG_NAME_BASE "Qca-${QCA_SUFFIX}")
+endif()
+
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/QcaConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}Config.cmake"
   INSTALL_DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
 )
-write_basic_config_version_file("${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfigVersion.cmake" VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
+write_basic_config_version_file("${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}ConfigVersion.cmake" VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
 
 if(NOT DEVELOPER_MODE)
 
@@ -445,10 +451,10 @@ if(NOT DEVELOPER_MODE)
     endif()
   endif()
 
-  install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE QcaTargets.cmake)
+  install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE ${QCA_CONFIG_NAME_BASE}Targets.cmake)
   install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}ConfigVersion.cmake"
     DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
     )
 endif()
