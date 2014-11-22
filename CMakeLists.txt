@@ -435,6 +435,16 @@ if(NOT DEVELOPER_MODE)
   endif()
   message("")
 
+  if(UNIX AND NOT APPLE)
+    if(NOT QCA_SUFFIX AND NOT QT4_BUILD)
+
+      message("${ESCAPE}[31mYou don't have QCA_SUFFIX set. Please note that the recommended way of")
+      message("building Qt5 version of qca for Linux distributions is to set")
+      message("QCA_SUFFIX to qt5 (-DQCA_SUFFIX=qt5).")
+      message("${ESCAPE}[0m")
+    endif()
+  endif()
+
   install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE QcaTargets.cmake)
   install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/QcaConfig.cmake"
