@@ -92,11 +92,13 @@ if(QCA_SUFFIX)
   set(QCA_TOOL_NAME qcatool-${QCA_SUFFIX})
   set(MOZCERTS_NAME mozcerts-${QCA_SUFFIX})
   set(QCA_PC_NAME qca2-${QCA_SUFFIX}.pc)
+  set(QCA_CONFIG_NAME_BASE "Qca-${QCA_SUFFIX}")
 else(QCA_SUFFIX)
   set(QCA_LIB_NAME qca)
   set(QCA_TOOL_NAME qcatool)
   set(MOZCERTS_NAME mozcerts)
   set(QCA_PC_NAME qca2.pc)
+  set(QCA_CONFIG_NAME_BASE "Qca")
 endif(QCA_SUFFIX)
 
 set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}")
@@ -376,12 +378,6 @@ if(DOXYGEN_FOUND)
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif(DOXYGEN_FOUND)
-
-if(NOT QCA_SUFFIX)
-  set(QCA_CONFIG_NAME_BASE "Qca")
-else()
-  set(QCA_CONFIG_NAME_BASE "Qca-${QCA_SUFFIX}")
-endif()
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
