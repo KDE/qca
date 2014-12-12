@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream& stream, const BigInt& n)
          stream.write("-", 1);
       SecureVector<byte> buffer = BigInt::encode(n, base);
       u32bit skip = 0;
-      while(buffer[skip] == '0' && skip < buffer.size())
+      while(skip < buffer.size() && buffer[skip] == '0')
          ++skip;
       stream.write((const char*)buffer.begin() + skip, buffer.size() - skip);
       }
