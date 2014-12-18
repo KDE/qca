@@ -1,0 +1,4 @@
+REPOSITORY = "git://anongit.kde.org/qca"
+REVIEWBOARD_URL = "https://git.reviewboard.kde.org"
+TARGET_PEOPLE = "iromanov"
+BRANCH = "master"
