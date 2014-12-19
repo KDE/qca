@@ -210,8 +210,19 @@ private slots:
 	{
 		Q_UNUSED(path);
 		QFileInfo fi(filePath);
-		if(!fi.exists())
+		if (!fi.exists() && !fileExisted) {
+			// Got a file changed signal on a file that does not exist
+			// and is not actively watched. This happens when we
+			// previously watched a file but it was deleted and after
+			// the original deletion changed-signal we get another one
+			// (for example because of bad signal timing). In this scenario
+			// we must ignore the change as the change, whatever it may
+			// have been, is of no interest to us because we don't watch
+			// the file and furthermore the file does not even exist.
+			return;
+		} else if (!fi.exists()) {
 			fileExisted = false;
+		};
 		emit q->changed();
 	}
 };
