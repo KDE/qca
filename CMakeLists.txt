@@ -59,6 +59,7 @@ if (Qt5Core_FOUND)
   include(GNUInstallDirs)
   setup_qt5_dirs()
   set(QCA_QT_PC_VERSION "Qt5Core")
+  set(QCA_SUFFIX "qt5")
 else()
   set(QT_MIN_VERSION "4.7.0")
   set(QT_USE_IMPORTED_TARGETS ON)
@@ -392,10 +393,10 @@ endif(DOXYGEN_FOUND)
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/QcaConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}Config.cmake"
-  INSTALL_DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
+  "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/${QCA_CONFIG_NAME_BASE}/${QCA_CONFIG_NAME_BASE}Config.cmake"
+  INSTALL_DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_CONFIG_NAME_BASE}
 )
-write_basic_config_version_file("${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}ConfigVersion.cmake" VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
+write_basic_config_version_file("${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/${QCA_CONFIG_NAME_BASE}/${QCA_CONFIG_NAME_BASE}ConfigVersion.cmake" VERSION ${QCA_LIB_VERSION_STRING} COMPATIBILITY AnyNewerVersion)
 
 if(NOT DEVELOPER_MODE)
 
@@ -463,10 +464,10 @@ if(NOT DEVELOPER_MODE)
     endif()
   endif()
 
-  install(EXPORT QCATargets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca FILE ${QCA_CONFIG_NAME_BASE}Targets.cmake)
+  install(EXPORT ${QCA_CONFIG_NAME_BASE}Targets DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_CONFIG_NAME_BASE} FILE ${QCA_CONFIG_NAME_BASE}Targets.cmake)
   install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}Config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/Qca/${QCA_CONFIG_NAME_BASE}ConfigVersion.cmake"
-    DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/Qca
+    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/${QCA_CONFIG_NAME_BASE}/${QCA_CONFIG_NAME_BASE}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/${QCA_CONFIG_NAME_BASE}/${QCA_CONFIG_NAME_BASE}ConfigVersion.cmake"
+    DESTINATION ${QCA_LIBRARY_INSTALL_DIR}/cmake/${QCA_CONFIG_NAME_BASE}
     )
 endif()
