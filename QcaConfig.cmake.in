@@ -1,7 +1,7 @@
 @PACKAGE_INIT@
 
-if(NOT TARGET qca)
+if(NOT TARGET @QCA_CONFIG_NAME_BASE@)
   include("${CMAKE_CURRENT_LIST_DIR}/@QCA_CONFIG_NAME_BASE@Targets.cmake")
 endif()
 
-set(Qca_LIBRARY qca)
+set(Qca_LIBRARY @QCA_CONFIG_NAME_BASE@)
