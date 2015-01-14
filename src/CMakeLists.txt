@@ -163,12 +163,12 @@ set_target_properties(${QCA_LIB_NAME} PROPERTIES
                       DEFINE_SYMBOL QCA_MAKEDLL
                       PUBLIC_HEADER "${public_HEADERS}"
                       FRAMEWORK ${OSX_FRAMEWORK}
-                      EXPORT_NAME ${QCA_LIB_NAME}
+                      EXPORT_NAME qca
                       )
 
 if(NOT DEVELOPER_MODE)
   install(TARGETS ${QCA_LIB_NAME}
-          EXPORT ${QCA_CONFIG_NAME_BASE}Targets
+          EXPORT QCATargets
           LIBRARY DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
           RUNTIME DESTINATION "${QCA_BINARY_INSTALL_DIR}"
           ARCHIVE DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
