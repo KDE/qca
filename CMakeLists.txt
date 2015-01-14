@@ -281,13 +281,13 @@ message(STATUS "Checking for certstore..")
 if( WIN32 )
 # USE BUILTIN
 else ( WIN32 )
-  if ( ENV{QC_CERTSTORE_PATH} )
-    if(EXISTS ENV{QC_CERTSTORE_PATH})
+  if ( DEFINED ENV{QC_CERTSTORE_PATH} )
+    if(EXISTS $ENV{QC_CERTSTORE_PATH})
       set( qca_CERTSTORE $ENV{QC_CERTSTORE_PATH})
-    else(EXISTS ENV{QC_CERTSTORE_PATH})
+    else(EXISTS $ENV{QC_CERTSTORE_PATH})
       # path to try
-    endif(EXISTS ENV{QC_CERTSTORE_PATH})
-  else( ENV{QC_CERTSTORE_PATH} )
+    endif(EXISTS $ENV{QC_CERTSTORE_PATH})
+  else( DEFINED ENV{QC_CERTSTORE_PATH} )
     set( toTry
       "/etc/ssl/certs/ca-certificates.crt"
       "/usr/share/ssl/cert.pem"
@@ -301,7 +301,7 @@ else ( WIN32 )
         set( qca_CERTSTORE ${_current_try})
       endif(EXISTS ${_current_try})
     endforeach (_current_try)
-  endif( ENV{QC_CERTSTORE_PATH} )
+  endif( DEFINED ENV{QC_CERTSTORE_PATH} )
 endif(WIN32)
 
 if (qca_CERTSTORE)
