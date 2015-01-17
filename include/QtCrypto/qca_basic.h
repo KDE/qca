@@ -35,6 +35,8 @@
 
 #include "qca_core.h"
 
+#include <QIODevice>
+
 // Qt5 comes with QStringLiteral for wrapping string literals, which Qt4 does
 // not have. It is needed if the headers are built with QT_NO_CAST_FROM_ASCII.
 // Defining it here as QString::fromUtf8 for convenience.
@@ -595,7 +597,7 @@ public:
 		CFB, ///< operate in %Cipher FeedBack mode
 		ECB, ///< operate in Electronic Code Book mode
 		OFB, ///< operate in Output FeedBack Mode
-		CTR, ///< operate in CounTer Mode
+		CTR  ///< operate in CounTer Mode
 	};
 
 	/**
