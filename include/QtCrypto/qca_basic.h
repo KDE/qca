@@ -595,7 +595,7 @@ public:
 		CFB, ///< operate in %Cipher FeedBack mode
 		ECB, ///< operate in Electronic Code Book mode
 		OFB, ///< operate in Output FeedBack Mode
-		CTR, ///< operate in CounTer Mode
+		CTR  ///< operate in CounTer Mode
 	};
 
 	/**
