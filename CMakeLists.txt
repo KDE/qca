@@ -271,7 +271,7 @@ Plugins=${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}
 endif()
 
 if (APPLE)
-   find_package(Carbon REQUIRED)
+   find_package(CoreFoundation REQUIRED)
    set(CMAKE_INSTALL_NAME_DIR ${QCA_LIBRARY_INSTALL_DIR})
    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif (APPLE)
