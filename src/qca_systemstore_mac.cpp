@@ -20,7 +20,6 @@
 
 #include "qca_systemstore.h"
 
-#include <Carbon/Carbon.h>
 #include <Security/SecTrust.h>
 #include <Security/SecCertificate.h>
 
