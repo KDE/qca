@@ -44,12 +44,12 @@ public:
 	void setSingleShot(bool singleShot);
 	int timerId() const;
 
-public slots:
+public Q_SLOTS:
 	void start(int msec);
 	void start();
 	void stop();
 
-signals:
+Q_SIGNALS:
 	void timeout();
 
 protected:
