@@ -25,6 +25,13 @@ if(OPENSSL_FOUND)
     message(WARNING "qca-ossl will be compiled without AES CTR mode encryption support")
   endif(HAVE_OPENSSL_AES_CTR)
 
+  check_function_exists(EVP_sha HAVE_OPENSSL_SHA0)
+  if(HAVE_OPENSSL_SHA0)
+    add_definitions(-DHAVE_OPENSSL_SHA0)
+  else(HAVE_OPENSSL_SHA0)
+    message(WARNING "qca-ossl will be compiled without SHA-0 digest algorithm support")
+  endif(HAVE_OPENSSL_SHA0)
+
   set(QCA_OSSL_SOURCES qca-ossl.cpp)
 
   my_automoc( QCA_OSSL_SOURCES )
