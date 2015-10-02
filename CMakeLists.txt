@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "1")
-set(QCA_LIB_PATCH_VERSION "0")
+set(QCA_LIB_PATCH_VERSION "1")
 
 # Do not automatically link Qt executables to qtmain target on Windows.
 # QCA exucatables use console mode only. Not need to link against
