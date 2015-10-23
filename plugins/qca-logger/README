@@ -32,7 +32,7 @@ CONFIGURATION
 	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
 	generate default configuration use:
 
-	$ qcatool --config save qca-logger 
+	$ qcatool config save qca-logger
 
 	Attributes:
 		enabled (Boolean)
