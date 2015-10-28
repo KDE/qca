@@ -119,6 +119,7 @@ private:
 	bool need_submitPassphrase, need_cardOkay;
 	QString diagnosticText;
 	QCA::SafeTimer dtextTimer;
+	bool utf8Output;
 
 #ifdef GPG_PROFILE
 	QTime timer;
