@@ -35,7 +35,7 @@ public:
 	bool initialized;
 	GpgOp gpg;
 	GpgOp::KeyList pubkeys, seckeys;
-	QString pubring, secring;
+	QString pubring, secring, homeDir;
 	bool pubdirty, secdirty;
 	RingWatch ringWatch;
 	QMutex ringMutex;

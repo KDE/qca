@@ -456,6 +456,11 @@ QString GpgOp::keyringFile() const
 	return d->output.keyringFile;
 }
 
+QString GpgOp::homeDir() const
+{
+	return d->output.homeDir;
+}
+
 QString GpgOp::encryptedToId() const
 {
 	return d->output.encryptedToId;

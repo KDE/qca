@@ -186,6 +186,7 @@ public:
 	Error errorCode() const;
 	KeyList keys() const;              // Keys
 	QString keyringFile() const;       // KeyringFile
+	QString homeDir() const;		   // GnuPG home directory
 	QString encryptedToId() const;     // Decrypt (for ErrorDecryptNoKey)
 	bool wasSigned() const;            // Decrypt
 	QString signerId() const;          // Verify

@@ -365,6 +365,7 @@ void MyKeyStoreList::gpg_finished()
 		{
 			// obtain keyring file names for monitoring
 			init_step = 1;
+			homeDir = gpg.homeDir();
 			gpg.doSecretKeyringFile();
 		}
 		// secret keyring filename
@@ -372,10 +373,11 @@ void MyKeyStoreList::gpg_finished()
 		{
 			secring = QFileInfo(gpg.keyringFile()).canonicalFilePath();
 
-			if(!secring.isEmpty())
+			if(secring.isEmpty())
 			{
-				ringWatch.add(secring);
+				secring = homeDir + "/secring.gpg";
 			}
+			ringWatch.add(secring);
 
 			// obtain keyring file names for monitoring
 			init_step = 2;
@@ -385,10 +387,11 @@ void MyKeyStoreList::gpg_finished()
 		else if(init_step == 2)
 		{
 			pubring = QFileInfo(gpg.keyringFile()).canonicalFilePath();
-			if(!pubring.isEmpty())
+			if(pubring.isEmpty())
 			{
-				ringWatch.add(pubring);
+				pubring = homeDir + "/pubring.gpg";
 			}
+			ringWatch.add(pubring);
 
 			// cache initial keyrings
 			init_step = 3;

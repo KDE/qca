@@ -64,6 +64,7 @@ public:
 		QString signerId;
 		QDateTime timestamp;
 		GpgOp::VerifyResult verifyResult;
+		QString homeDir;
 
 		Output() : success(false), errorCode(GpgOp::ErrorUnknown), wasSigned(false) {}
 	};

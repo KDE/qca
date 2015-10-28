@@ -784,7 +784,20 @@ void GpgAction::processResult(int code)
 	}
 	else if(code == 0)
 	{
-		if(input.op == GpgOp::SecretKeyringFile || input.op == GpgOp::PublicKeyringFile)
+		if(input.op == GpgOp::Check)
+		{
+			QStringList strList = outstr.split("\n");
+			foreach (const QString &str, strList)
+			{
+				if (!str.startsWith("Home: "))
+					continue;
+
+				output.homeDir = str.section(' ', 1);
+				break;
+			}
+			output.success = true;
+		}
+		else if(input.op == GpgOp::SecretKeyringFile || input.op == GpgOp::PublicKeyringFile)
 		{
 			if(findKeyringFilename(outstr, &output.keyringFile))
 				output.success = true;
