@@ -303,12 +303,18 @@ void GpgAction::start()
 	}
 	case GpgOp::SecretKeyringFile:
 	{
+#ifndef Q_OS_WIN
+		args += "--display-charset=utf-8";
+#endif
 		args += "--list-secret-keys";
 		readText = true;
 		break;
 	}
 	case GpgOp::PublicKeyringFile:
 	{
+#ifndef Q_OS_WIN
+		args += "--display-charset=utf-8";
+#endif
 		args += "--list-public-keys";
 		readText = true;
 		break;
