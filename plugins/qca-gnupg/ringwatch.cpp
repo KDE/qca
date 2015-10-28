@@ -48,7 +48,10 @@ RingWatch::~RingWatch()
 void RingWatch::add(const QString &filePath)
 {
 	QFileInfo fi(filePath);
-	QString path = fi.absolutePath();
+	// Try to avoid symbolic links
+	QString path = fi.canonicalPath();
+	if (path.isEmpty())
+		path = fi.absolutePath();
 
 	// watching this path already?
 	DirWatch *dirWatch = 0;
