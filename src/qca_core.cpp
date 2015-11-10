@@ -481,6 +481,8 @@ QStringList pluginPaths()
 #ifndef DEVELOPER_MODE
 	paths.removeDuplicates();
 #endif
+	// No empty strings
+	paths.removeAll(QString());
 	return paths;
 }
 
