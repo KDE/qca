@@ -150,8 +150,6 @@ public:
 
 	~PluginInstance()
 	{
-		QString className = QString::fromLatin1(_instance->metaObject()->className());
-
 		if(_ownInstance)
 			delete _instance;
 
