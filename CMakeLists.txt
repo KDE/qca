@@ -115,7 +115,7 @@ endif (WIN32)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
    if (CMAKE_SYSTEM_NAME MATCHES Linux)
-     add_definitions (-D_BSD_SOURCE)
+     add_definitions (-D_DEFAULT_SOURCE)
      # on arm -Wcast-align throws many internal qt warning
      if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcast-align")
