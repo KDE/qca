@@ -272,7 +272,6 @@ Plugins=${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}
 endif()
 
 if (APPLE)
-   find_package(CoreFoundation REQUIRED)
    set(CMAKE_INSTALL_NAME_DIR ${QCA_LIBRARY_INSTALL_DIR})
    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif (APPLE)
@@ -321,7 +320,7 @@ add_definitions( -DQCA_SYSTEMSTORE_PATH="${qca_CERTSTORE}" )
 
 set( private_HEADERS ${qca_INCLUDEDIR}/QtCrypto/qca_plugin.h ${qca_INCLUDEDIR}/QtCrypto/qca_systemstore.h )
 
-set( public_HEADERS 
+set( public_HEADERS
   ${qca_INCLUDEDIR}/QtCrypto/qca.h
   ${qca_INCLUDEDIR}/QtCrypto/qcaprovider.h
   ${qca_INCLUDEDIR}/QtCrypto/QtCrypto

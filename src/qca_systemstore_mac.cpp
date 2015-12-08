@@ -39,10 +39,9 @@ CertificateCollection qca_get_systemstore(const QString &provider)
 	for(int n = 0; n < CFArrayGetCount(anchors); ++n)
 	{
 		SecCertificateRef cr = (SecCertificateRef)CFArrayGetValueAtIndex(anchors, n);
-		CSSM_DATA cssm;
-		SecCertificateGetData(cr, &cssm);
-		QByteArray der(cssm.Length, 0);
-		memcpy(der.data(), cssm.Data, cssm.Length);
+		CFDataRef derRef = SecCertificateCopyData(cr);
+		QByteArray der((const char *)CFDataGetBytePtr(derRef), CFDataGetLength(derRef));
+		CFRelease(derRef);
 
 		Certificate cert = Certificate::fromDER(der, 0, provider);
 		if(!cert.isNull())

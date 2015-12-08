@@ -46,7 +46,7 @@ SET( moc_SOURCES
 	qca_securelayer.cpp
 	qca_securemessage.cpp
 	support/qpipe.cpp
-	support/console.cpp 
+	support/console.cpp
 	support/synchronizer.cpp
 	support/dirwatch.cpp
 	support/syncthread.cpp
@@ -145,9 +145,10 @@ TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} ${QT_QTCORE_LIBRARY})
 
 if(WIN32)
 	TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} crypt32 ws2_32)
-endif(WIN32)	
+endif(WIN32)
 
 if(APPLE)
+   set(COREFOUNDATION_LIBRARY "-framework CoreFoundation")
    set(COREFOUNDATION_LIBRARY_SECURITY "-framework Security")
    TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} ${COREFOUNDATION_LIBRARY} ${COREFOUNDATION_LIBRARY_SECURITY})
 endif(APPLE)
