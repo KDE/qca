@@ -37,7 +37,7 @@ License
 Changes
 -------
   New in 2.1.0
-  - Ported to Qt5 (Qt4 alsa supported)
+  - Ported to Qt5 (Qt4 also supported)
   - New building system. CMake instead of qmake
   - Added CTR symetric cipher support to qca core
   - Added no padding encryption algorithm to qca core
