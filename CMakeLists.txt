@@ -200,6 +200,12 @@ set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "
 
 normalize_path(QCA_PREFIX_INSTALL_DIR)
 
+if(OSX_FRAMEWORK)
+  set(QCA_FULL_INCLUDE_INSTALL_DIR "${QCA_LIBRARY_INSTALL_DIR}/${QCA_LIB_NAME}.framework/Headers")
+else()
+  set(QCA_FULL_INCLUDE_INSTALL_DIR "${QCA_INCLUDE_INSTALL_DIR}/QtCrypto")
+endif()
+
 # check for oportunity to use relative paths
 option(USE_RELATIVE_PATHS "Try to make relocatable package")
 
@@ -225,7 +231,7 @@ endforeach()
 
 if(NOT WIN32)
   if(OSX_FRAMEWORK)
-    set(PKGCONFIG_CFLAGS "-F\${libdir} -I\${libdir}/${QCA_LIB_NAME}.framework/Headers")
+    set(PKGCONFIG_CFLAGS "-F\${libdir} -I\${includedir}")
     set(PKGCONFIG_LIBS "-F\${libdir} -framework ${QCA_LIB_NAME}")
   else()
     set(PKGCONFIG_CFLAGS "-I\${includedir}")

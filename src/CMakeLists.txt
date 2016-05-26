@@ -168,16 +168,16 @@ set_target_properties(${QCA_LIB_NAME} PROPERTIES
                       )
 
 if(NOT DEVELOPER_MODE)
-  install(TARGETS ${QCA_LIB_NAME}
-          EXPORT ${QCA_CONFIG_NAME_BASE}Targets
+  # Do not split 'PUBLIC_HEADER ...' line. It means install headers to folder
+  # and set this folder as -I flag for imported target.
+  # Also EXPORT doesn't actually install any files. It only created a new target.
+  install(TARGETS ${QCA_LIB_NAME} EXPORT ${QCA_CONFIG_NAME_BASE}Targets
           LIBRARY DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
           RUNTIME DESTINATION "${QCA_BINARY_INSTALL_DIR}"
           ARCHIVE DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
           FRAMEWORK DESTINATION "${QCA_LIBRARY_INSTALL_DIR}"
-          PUBLIC_HEADER DESTINATION "${QCA_INCLUDE_INSTALL_DIR}/QtCrypto"
-          INCLUDES DESTINATION "${QCA_INCLUDE_INSTALL_DIR}/QtCrypto"
-          )
-
+          PUBLIC_HEADER DESTINATION "${QCA_FULL_INCLUDE_INSTALL_DIR}" INCLUDES DESTINATION "${QCA_FULL_INCLUDE_INSTALL_DIR}"
+  )
   install_pdb(${QCA_LIB_NAME} ${QCA_BINARY_INSTALL_DIR})
 endif()
 
