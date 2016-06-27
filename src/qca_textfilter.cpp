@@ -293,7 +293,7 @@ static QByteArray b64decode(const QByteArray &s, bool *ok)
 	// 64 specifies eof
 	// everything else specifies data
 
-	static char tbl[] =
+	static signed char tbl[] =
 	{
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
