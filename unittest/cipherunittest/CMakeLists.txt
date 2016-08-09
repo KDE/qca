@@ -1,10 +1,11 @@
-ENABLE_TESTING()
+enable_testing()
 
-set( cipherunittest_bin_SRCS cipherunittest.cpp )
+set(cipherunittest_bin_HDRS cipherunittest.h)
+set(cipherunittest_bin_SRCS cipherunittest.cpp)
 
-MY_AUTOMOC( cipherunittest_bin_SRCS )
+qt4_wrap_cpp(EXTRA_SRCS cipherunittest.h)
 
-add_executable(cipherunittest ${cipherunittest_bin_SRCS} )
+add_executable(cipherunittest ${cipherunittest_bin_SRCS} ${EXTRA_SRCS})
 
 target_link_qca_test_libraries(cipherunittest)
 
