@@ -234,8 +234,9 @@ public:
 	   \param dir the direction for the cipher (encryption/decryption)
 	   \param key the symmetric key to use for the cipher
 	   \param iv the initialization vector to use for the cipher (not used in ECB mode)
+	   \param tag the AuthTag to use (only for GCM and CCM modes)
 	*/
-	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv) = 0;
+	virtual void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv, const AuthTag &tag) = 0;
 
 	/**
 	   Returns the KeyLength for this cipher
@@ -246,6 +247,11 @@ public:
 	   Returns the block size for this cipher
 	*/
 	virtual int blockSize() const = 0;
+
+	/**
+	   Returns the authentication tag for this cipher
+	*/
+	virtual AuthTag tag() const = 0;
 
 	/**
 	   Process a chunk of data.  Returns true if successful.
