@@ -163,8 +163,10 @@ public:
 
     void setup(QCA::Direction dir,
 	       const QCA::SymmetricKey &key,
-	       const QCA::InitializationVector &iv)
+	       const QCA::InitializationVector &iv,
+	       const QCA::AuthTag &tag)
     {
+	Q_UNUSED(tag);
 	m_direction = dir;
 	err =  gcry_cipher_open( &context, m_cryptoAlgorithm, m_mode, 0 );
 	check_error( "gcry_cipher_open", err );
@@ -193,6 +195,12 @@ public:
 	unsigned int blockSize;
 	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
 	return blockSize;
+    }
+
+    QCA::AuthTag tag() const
+    {
+    // For future implementation
+	return QCA::AuthTag();
     }
 
     bool update(const QCA::SecureArray &in, QCA::SecureArray *out)

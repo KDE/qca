@@ -262,6 +262,7 @@ public:
 	Direction dir;
 	SymmetricKey key;
 	InitializationVector iv;
+	AuthTag tag;
 
 	bool ok, done;
 };
@@ -279,6 +280,19 @@ Cipher::Cipher(const QString &type, Mode mode, Padding pad,
 	if(!key.isEmpty())
 		setup(dir, key, iv);
 }
+
+Cipher::Cipher(const QString &type, Cipher::Mode mode, Cipher::Padding pad, Direction dir, const SymmetricKey &key, const InitializationVector &iv, const AuthTag &tag, const QString &provider)
+	: Algorithm(withAlgorithms(type, mode, pad), provider)
+{
+	d = new Private;
+	d->type = type;
+	d->mode = mode;
+	d->pad = pad;
+	d->tag = tag;
+	if(!key.isEmpty())
+		setup(dir, key, iv, tag);
+}
+
 
 Cipher::Cipher(const Cipher &from)
 :Algorithm(from), Filter(from)
@@ -339,10 +353,15 @@ int Cipher::blockSize() const
 	return static_cast<const CipherContext *>(context())->blockSize();
 }
 
+AuthTag Cipher::tag() const
+{
+	return static_cast<const CipherContext *>(context())->tag();
+}
+
 void Cipher::clear()
 {
 	d->done = false;
-	static_cast<CipherContext *>(context())->setup(d->dir, d->key, d->iv);
+	static_cast<CipherContext *>(context())->setup(d->dir, d->key, d->iv, d->tag);
 }
 
 MemoryRegion Cipher::update(const MemoryRegion &a)
@@ -371,9 +390,15 @@ bool Cipher::ok() const
 
 void Cipher::setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv)
 {
+	setup(dir, key, iv, AuthTag());
+}
+
+void Cipher::setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv, const AuthTag &tag)
+{
 	d->dir = dir;
 	d->key = key;
 	d->iv = iv;
+	d->tag = tag;
 	clear();
 }
 
@@ -395,6 +420,12 @@ QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding
 		break;
 	case CTR:
 		mode = "ctr";
+		break;
+	case GCM:
+		mode = "gcm";
+		break;
+	case CCM:
+		mode = "ccm";
 		break;
 	default:
 		Q_ASSERT(0);

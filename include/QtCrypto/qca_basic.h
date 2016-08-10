@@ -2,6 +2,7 @@
  * qca_basic.h - Qt Cryptographic Architecture
  * Copyright (C) 2003-2007  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004-2007  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2013-2016  Ivan Romanov <drizt@land.ru>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -581,6 +582,7 @@ private:
 
    \ingroup UserAPI
 */
+
 class QCA_EXPORT Cipher : public Algorithm, public Filter
 {
 public:
@@ -597,7 +599,9 @@ public:
 		CFB, ///< operate in %Cipher FeedBack mode
 		ECB, ///< operate in Electronic Code Book mode
 		OFB, ///< operate in Output FeedBack Mode
-		CTR  ///< operate in CounTer Mode
+		CTR, ///< operate in CounTer Mode
+		GCM, ///< operate in Galois Counter Mode
+		CCM  ///< operate in Counter with CBC-MAC
 	};
 
 	/**
@@ -632,6 +636,28 @@ public:
 	Cipher(const QString &type, Mode mode, Padding pad = DefaultPadding,
 		Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), 
 		const InitializationVector &iv = InitializationVector(),
+		const QString &provider = QString());
+
+	/**
+	   Standard constructor
+
+	   \param type the name of the cipher specialisation to use (e.g.
+	   "aes128")
+	   \param mode the operating Mode to use (e.g. QCA::Cipher::CBC)
+	   \param pad the type of Padding to use
+	   \param dir the Direction that this Cipher should use (Encode for
+	   encryption, Decode for decryption)
+	   \param key the SymmetricKey array that is the key
+	   \param iv the InitializationVector to use (not used for ECB mode)
+	   \param tag the AuthTag to use (only for GCM and CCM modes)
+	   \param provider the name of the Provider to use
+
+	   \note Padding only applies to CBC and ECB modes.  CFB and OFB
+	   ciphertext is always the length of the plaintext.
+	*/
+	Cipher(const QString &type, Mode mode, Padding pad,
+		Direction dir, const SymmetricKey &key,
+		const InitializationVector &iv, const AuthTag &tag,
 		const QString &provider = QString());
 
 	/**
@@ -698,6 +724,11 @@ public:
 	int blockSize() const;
 
 	/**
+	   return the authentication tag for the cipher object
+	*/
+	AuthTag tag() const;
+
+	/**
 	   reset the cipher object, to allow re-use
 	*/
 	virtual void clear();
@@ -740,6 +771,22 @@ public:
 	void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector());
 
 	/**
+	   Reset / reconfigure the Cipher
+
+	   You can use this to re-use an existing Cipher, rather than creating
+	   a new object with a slightly different configuration.
+
+	   \param dir the Direction that this Cipher should use (Encode for
+	   encryption, Decode for decryption)
+	   \param key the SymmetricKey array that is the key
+	   \param iv the InitializationVector to use (not used for ECB Mode)
+	   \param tag the AuthTag to use (only for GCM and CCM modes)
+
+	   \note You should not leave iv empty for any Mode except ECB.
+	*/
+	void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv, const AuthTag &tag);
+
+	/**
 	   Construct a Cipher type string
 
 	   \param cipherType the name of the algorithm (eg AES128, DES)
@@ -749,7 +796,6 @@ public:
 	   QCA::PCKS7)
 	*/
 	static QString withAlgorithms(const QString &cipherType, Mode modeType, Padding paddingType);
-
 private:
 	class Private;
 	Private *d;

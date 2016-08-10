@@ -1,5 +1,6 @@
 /**
  * Copyright (C)  2004-2007  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C)  2013-2016  Ivan Romanov <drizt@land.ru>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -496,6 +497,103 @@ void CipherUnitTest::aes128_ctr()
 	}
 }
 
+void CipherUnitTest::aes128_gcm_data()
+{
+	QTest::addColumn<QString>("plainText");
+	QTest::addColumn<QString>("payload");
+	QTest::addColumn<QString>("tag");
+	QTest::addColumn<QString>("keyText");
+	QTest::addColumn<QString>("ivText");
+
+	QTest::newRow("short") << QString("6f6820526f6d656d6f21")
+						   << QString("a9f2558b9a74e6fc551f")
+						   << QString("f8ebf75f108c6f74e6fe49035d268d43")
+						   << QString("1f491f8ddf4856ae4bff9039d418175a")
+						   << QString("f85f8aad39164daf64a12ad9b3fc8a3a");
+
+	QTest::newRow("long") << QString("54484520515549434b2042524f574e20464f58204a554d504544204f56455220544845204c415a5920444f472753204241434b2031323334353637383930")
+						  << QString("04e321a8870b6b9cd6846239c27a63fb41d0a7b8994f1514c066f0427fa9ed6707ea6e3b4f161fdff0eb5fc087ed3827b569cd72456c697b5a3a62c9e767")
+						  << QString("b0ad4aa545ea25fc3117cbed955ff155")
+						  << QString("56341f2b431d3b0dbad787db003f2215")
+						  << QString("bfcd3a7252f7f199bf788df8cf61032a");
+
+
+	QTest::newRow("wrongtag") << QString("6f6820526f6d656d6f21")
+							  << QString("a9f2558b9a74e6fc551f")
+							  << QString("f8ebf75f108c6f74e6fe49035d268d44")
+							  << QString("1f491f8ddf4856ae4bff9039d418175a")
+							  << QString("f85f8aad39164daf64a12ad9b3fc8a3a");
+}
+
+void CipherUnitTest::aes128_gcm()
+{
+	QStringList providersToTest;
+	providersToTest.append("qca-ossl");
+	providersToTest.append("qca-gcrypt");
+	providersToTest.append("qca-botan");
+	providersToTest.append("qca-nss");
+
+	foreach (const QString &provider, providersToTest) {
+		if (!QCA::isSupported( "aes128-gcm", provider))
+			QWARN(QString("AES128 GCM not supported for " + provider).toLocal8Bit());
+		else {
+			QFETCH(QString, plainText);
+			QFETCH(QString, payload);
+			QFETCH(QString, tag);
+			QFETCH(QString, keyText);
+			QFETCH(QString, ivText);
+
+			QCA::SymmetricKey key(QCA::hexToArray(keyText));
+			QCA::InitializationVector iv(QCA::hexToArray(ivText));
+			QCA::AuthTag authTag(16);
+			QCA::Cipher forwardCipher(QString("aes128"),
+									  QCA::Cipher::GCM,
+									  QCA::Cipher::NoPadding,
+									  QCA::Encode,
+									  key,
+									  iv,
+									  authTag,
+									  provider);
+			QString update = QCA::arrayToHex(forwardCipher.update(QCA::hexToArray(plainText)).toByteArray());
+			QVERIFY(forwardCipher.ok());
+			update += QCA::arrayToHex(forwardCipher.final().toByteArray());
+			authTag = forwardCipher.tag();
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QCOMPARE(QCA::arrayToHex(authTag.toByteArray()), tag);
+			QCOMPARE(update, payload);
+			QVERIFY(forwardCipher.ok());
+
+			QCA::Cipher reverseCipher(QString( "aes128"),
+									  QCA::Cipher::GCM,
+									  QCA::Cipher::NoPadding,
+									  QCA::Decode,
+									  key,
+									  iv,
+									  QCA::AuthTag(QCA::hexToArray(tag)),
+									  provider);
+
+			update = QCA::arrayToHex(reverseCipher.update(QCA::hexToArray(payload)).toByteArray());
+			QVERIFY(reverseCipher.ok());
+			QCOMPARE(update, plainText.left(update.size()));
+			update += QCA::arrayToHex(reverseCipher.final().toByteArray());
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QCOMPARE(update, plainText);
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QVERIFY(reverseCipher.ok());
+		}
+	}
+}
+
+void CipherUnitTest::aes128_ccm_data()
+{
+
+}
+
+void CipherUnitTest::aes128_ccm()
+{
+	// For future implementation
+}
+
 void CipherUnitTest::aes192_data()
 {
 	QTest::addColumn<QString>("plainText");
@@ -948,6 +1046,104 @@ void CipherUnitTest::aes192_ctr()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+}
+
+void CipherUnitTest::aes192_gcm_data()
+{
+	QTest::addColumn<QString>("plainText");
+	QTest::addColumn<QString>("payload");
+	QTest::addColumn<QString>("tag");
+	QTest::addColumn<QString>("keyText");
+	QTest::addColumn<QString>("ivText");
+
+	QTest::newRow("short") << QString("6f6820526f6d656d6f21")
+						   << QString("01ca25ff74121917f397")
+						   << QString("b90e97706d8eacbabc0be5e0a671b4e4")
+						   << QString("7ecb21a647fae54a0996ad281ab0c1a00cb905d9e2eb3b82")
+						   << QString("f85f8aad39164daf64a12ad9b3fc8a3a");
+
+	QTest::newRow("long") << QString("54484520515549434b2042524f574e20464f58204a554d504544204f56455220544845204c415a5920444f472753204241434b2031323334353637383930")
+						  << QString("4c1c5874877f0bee6efd450ec341b1c591e1e100da40bd4744e1035ed0ed0fb458f8efdb7c4b0b2101e29c950c56dc2489c2febec2d7062da28b9a033173")
+						  << QString("af3ea1b7f275ea1e4d4e1fdce63f83fe")
+						  << QString("7ecb21a647fae54a0996ad281ab0c1a00cb905d9e2eb3b82")
+						  << QString("bfcd3a7252f7f199bf788df8cf61032a");
+
+
+	QTest::newRow("wrongtag") << QString("6f6820526f6d656d6f21")
+							  << QString("773c3d06b94727c04afc")
+							  << QString("c558aca7f19050db49d94d99119277af")
+							  << QString("7ecb21a647fae54a0996ad281ab0c1a00cb905d9e2eb3b82")
+							  << QString("bfcd3a7252f7f199bf788df8cf61032a");
+}
+
+void CipherUnitTest::aes192_gcm()
+{
+	QStringList providersToTest;
+	providersToTest.append("qca-ossl");
+	providersToTest.append("qca-gcrypt");
+	providersToTest.append("qca-botan");
+	providersToTest.append("qca-nss");
+
+	foreach (const QString &provider, providersToTest) {
+		if (!QCA::isSupported( "aes192-gcm", provider))
+			QWARN(QString("AES128 GCM not supported for " + provider).toLocal8Bit());
+		else {
+			QFETCH(QString, plainText);
+			QFETCH(QString, payload);
+			QFETCH(QString, tag);
+			QFETCH(QString, keyText);
+			QFETCH(QString, ivText);
+
+			QCA::SymmetricKey key(QCA::hexToArray(keyText));
+			QCA::InitializationVector iv(QCA::hexToArray(ivText));
+			QCA::AuthTag authTag(16);
+			QCA::Cipher forwardCipher(QString("aes192"),
+									  QCA::Cipher::GCM,
+									  QCA::Cipher::NoPadding,
+									  QCA::Encode,
+									  key,
+									  iv,
+									  authTag,
+									  provider);
+			QString update = QCA::arrayToHex(forwardCipher.update(QCA::hexToArray(plainText)).toByteArray());
+			QVERIFY(forwardCipher.ok());
+			update += QCA::arrayToHex(forwardCipher.final().toByteArray());
+			authTag = forwardCipher.tag();
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QCOMPARE(QCA::arrayToHex(authTag.toByteArray()), tag);
+			QCOMPARE(update, payload);
+			QVERIFY(forwardCipher.ok());
+
+			QCA::Cipher reverseCipher(QString( "aes192"),
+									  QCA::Cipher::GCM,
+									  QCA::Cipher::NoPadding,
+									  QCA::Decode,
+									  key,
+									  iv,
+									  QCA::AuthTag(QCA::hexToArray(tag)),
+									  provider);
+
+			update = QCA::arrayToHex(reverseCipher.update(QCA::hexToArray(payload)).toByteArray());
+			QVERIFY(reverseCipher.ok());
+			QCOMPARE(update, plainText.left(update.size()));
+			update += QCA::arrayToHex(reverseCipher.final().toByteArray());
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QCOMPARE(update, plainText);
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QVERIFY(reverseCipher.ok());
+		}
+	}
+}
+
+
+void CipherUnitTest::aes192_ccm_data()
+{
+
+}
+
+void CipherUnitTest::aes192_ccm()
+{
+	// For future implementation
 }
 
 void CipherUnitTest::aes256_data()
@@ -1440,6 +1636,103 @@ void CipherUnitTest::aes256_ctr()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+}
+
+void CipherUnitTest::aes256_gcm_data()
+{
+	QTest::addColumn<QString>("plainText");
+	QTest::addColumn<QString>("payload");
+	QTest::addColumn<QString>("tag");
+	QTest::addColumn<QString>("keyText");
+	QTest::addColumn<QString>("ivText");
+
+	QTest::newRow("short") << QString("6f6820526f6d656d6f21")
+						   << QString("4ce2f4df041252820847")
+						   << QString("1c570805832dfe7babc1b386c26bcd04")
+						   << QString("3fa609690bf07a81a75839b0a4c0add774f54eb804d4f02df488691910298b04")
+						   << QString("f85f8aad39164daf64a12ad9b3fc8a3a");
+
+	QTest::newRow("long") << QString("54484520515549434b2042524f574e20464f58204a554d504544204f56455220544845204c415a5920444f472753204241434b2031323334353637383930")
+						  << QString("e516c267146d6cfd3af3300e24aba7ac23ab3c5cb4765937a6c0156e454cae357e14f4c0dfb0def9624f4f70de90ad2bc9cd555171c4551c26b6346922ed")
+						  << QString("f59aac31ab9dace3fcc693e114dd6610")
+						  << QString("3fa609690bf07a81a75839b0a4c0add774f54eb804d4f02df488691910298b04")
+						  << QString("bfcd3a7252f7f199bf788df8cf61032a");
+
+
+	QTest::newRow("wrongtag") << QString("6f6820526f6d656d6f21")
+							  << QString("4ce2f4df041252820847")
+							  << QString("1c570805833dfe7babc1b386c26bcd04")
+							  << QString("3fa609690bf07a81a75839b0a4c0add774f54eb804d4f02df488691910298b04")
+							  << QString("f85f8aad39164daf64a12ad9b3fc8a3a");
+}
+
+void CipherUnitTest::aes256_gcm()
+{
+	QStringList providersToTest;
+	providersToTest.append("qca-ossl");
+	providersToTest.append("qca-gcrypt");
+	providersToTest.append("qca-botan");
+	providersToTest.append("qca-nss");
+
+	foreach (const QString &provider, providersToTest) {
+		if (!QCA::isSupported( "aes256-gcm", provider))
+			QWARN(QString("AES256 GCM not supported for " + provider).toLocal8Bit());
+		else {
+			QFETCH(QString, plainText);
+			QFETCH(QString, payload);
+			QFETCH(QString, tag);
+			QFETCH(QString, keyText);
+			QFETCH(QString, ivText);
+
+			QCA::SymmetricKey key(QCA::hexToArray(keyText));
+			QCA::InitializationVector iv(QCA::hexToArray(ivText));
+			QCA::AuthTag authTag(16);
+			QCA::Cipher forwardCipher(QString("aes256"),
+									  QCA::Cipher::GCM,
+									  QCA::Cipher::NoPadding,
+									  QCA::Encode,
+									  key,
+									  iv,
+									  authTag,
+									  provider);
+			QString update = QCA::arrayToHex(forwardCipher.update(QCA::hexToArray(plainText)).toByteArray());
+			QVERIFY(forwardCipher.ok());
+			update += QCA::arrayToHex(forwardCipher.final().toByteArray());
+			authTag = forwardCipher.tag();
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QCOMPARE(QCA::arrayToHex(authTag.toByteArray()), tag);
+			QCOMPARE(update, payload);
+			QVERIFY(forwardCipher.ok());
+
+			QCA::Cipher reverseCipher(QString( "aes256"),
+									  QCA::Cipher::GCM,
+									  QCA::Cipher::NoPadding,
+									  QCA::Decode,
+									  key,
+									  iv,
+									  QCA::AuthTag(QCA::hexToArray(tag)),
+									  provider);
+
+			update = QCA::arrayToHex(reverseCipher.update(QCA::hexToArray(payload)).toByteArray());
+			QVERIFY(reverseCipher.ok());
+			QCOMPARE(update, plainText.left(update.size()));
+			update += QCA::arrayToHex(reverseCipher.final().toByteArray());
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QCOMPARE(update, plainText);
+			QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+			QVERIFY(reverseCipher.ok());
+		}
+	}
+}
+
+void CipherUnitTest::aes256_ccm_data()
+{
+
+}
+
+void CipherUnitTest::aes256_ccm()
+{
+	// For future implementation
 }
 
 void CipherUnitTest::tripleDES_data()

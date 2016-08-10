@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2004-2007  Justin Karneges <justin@affinix.com>
  * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
+ * Copyright (C) 2013-2016  Ivan Romanov <drizt@land.ru>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -6761,8 +6762,10 @@ public:
 
 	void setup(Direction dir,
 			   const SymmetricKey &key,
-			   const InitializationVector &iv)
+			   const InitializationVector &iv,
+			   const AuthTag &tag)
 	{
+		m_tag = tag;
 		m_direction = dir;
 		if ( ( m_cryptoAlgorithm == EVP_des_ede3() ) && (key.size() == 16) ) {
 			// this is really a two key version of triple DES.
@@ -6771,12 +6774,20 @@ public:
 		if (Encode == m_direction) {
 			EVP_EncryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
 			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
+			if (m_type.endsWith("gcm") || m_type.endsWith("ccm")) {
+				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
+				EVP_CIPHER_CTX_ctrl(&m_context, parameter, iv.size(), NULL);
+			}
 			EVP_EncryptInit_ex(&m_context, 0, 0,
 							   (const unsigned char*)(key.data()),
 							   (const unsigned char*)(iv.data()));
 		} else {
 			EVP_DecryptInit_ex(&m_context, m_cryptoAlgorithm, 0, 0, 0);
 			EVP_CIPHER_CTX_set_key_length(&m_context, key.size());
+			if (m_type.endsWith("gcm") || m_type.endsWith("ccm")) {
+				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
+				EVP_CIPHER_CTX_ctrl(&m_context, parameter, iv.size(), NULL);
+			}
 			EVP_DecryptInit_ex(&m_context, 0, 0,
 							   (const unsigned char*)(key.data()),
 							   (const unsigned char*)(iv.data()));
@@ -6794,6 +6805,11 @@ public:
 	{
 		return EVP_CIPHER_CTX_block_size(&m_context);
 	}
+
+    AuthTag tag() const
+    {
+		return m_tag;
+    }
 
 	bool update(const SecureArray &in, SecureArray *out)
 	{
@@ -6835,7 +6851,19 @@ public:
 										 &resultLength)) {
 				return false;
 			}
+			if (m_tag.size() && (m_type.endsWith("gcm") || m_type.endsWith("ccm"))) {
+				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_GET_TAG : EVP_CTRL_CCM_GET_TAG;
+				if (0 == EVP_CIPHER_CTX_ctrl(&m_context, parameter, m_tag.size(), (unsigned char*)m_tag.data())) {
+					return false;
+				}
+			}
 		} else {
+			if (m_tag.size() && (m_type.endsWith("gcm") || m_type.endsWith("ccm"))) {
+				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_TAG : EVP_CTRL_CCM_SET_TAG;
+				if (0 == EVP_CIPHER_CTX_ctrl(&m_context, parameter, m_tag.size(), m_tag.data())) {
+					return false;
+				}
+			}
 			if (0 == EVP_DecryptFinal_ex(&m_context,
 										 (unsigned char*)out->data(),
 										 &resultLength)) {
@@ -6876,6 +6904,7 @@ protected:
 	Direction m_direction;
 	int m_pad;
 	QString m_type;
+	AuthTag m_tag;
 };
 
 static QStringList all_hash_types()
@@ -6922,6 +6951,12 @@ static QStringList all_cipher_types()
 #ifdef HAVE_OPENSSL_AES_CTR
 	list += "aes128-ctr";
 #endif
+#ifdef HAVE_OPENSSL_AES_GCM
+	list += "aes128-gcm";
+#endif
+#ifdef HAVE_OPENSSL_AES_CCM
+	list += "aes128-ccm";
+#endif
 	list += "aes192-ecb";
 	list += "aes192-cfb";
 	list += "aes192-cbc";
@@ -6930,6 +6965,12 @@ static QStringList all_cipher_types()
 #ifdef HAVE_OPENSSL_AES_CTR
 	list += "aes192-ctr";
 #endif
+#ifdef HAVE_OPENSSL_AES_GCM
+	list += "aes192-gcm";
+#endif
+#ifdef HAVE_OPENSSL_AES_CCM
+	list += "aes192-ccm";
+#endif
 	list += "aes256-ecb";
 	list += "aes256-cbc";
 	list += "aes256-cbc-pkcs7";
@@ -6937,6 +6978,12 @@ static QStringList all_cipher_types()
 	list += "aes256-ofb";
 #ifdef HAVE_OPENSSL_AES_CTR
 	list += "aes256-ctr";
+#endif
+#ifdef HAVE_OPENSSL_AES_GCM
+	list += "aes256-gcm";
+#endif
+#ifdef HAVE_OPENSSL_AES_CCM
+	list += "aes256-ccm";
 #endif
 	list += "blowfish-ecb";
 	list += "blowfish-cbc-pkcs7";
@@ -7217,6 +7264,14 @@ public:
 		else if ( type == "aes128-ctr" )
 			return new opensslCipherContext( EVP_aes_128_ctr(), 0, this, type);
 #endif
+#ifdef HAVE_OPENSSL_AES_GCM
+		else if ( type == "aes128-gcm" )
+			return new opensslCipherContext( EVP_aes_128_gcm(), 0, this, type);
+#endif
+#ifdef HAVE_OPENSSL_AES_CCM
+		else if ( type == "aes128-ccm" )
+			return new opensslCipherContext( EVP_aes_128_ccm(), 0, this, type);
+#endif
 		else if ( type == "aes192-ecb" )
 			return new opensslCipherContext( EVP_aes_192_ecb(), 0, this, type);
 		else if ( type == "aes192-cfb" )
@@ -7231,6 +7286,14 @@ public:
 		else if ( type == "aes192-ctr" )
 			return new opensslCipherContext( EVP_aes_192_ctr(), 0, this, type);
 #endif
+#ifdef HAVE_OPENSSL_AES_GCM
+		else if ( type == "aes192-gcm" )
+			return new opensslCipherContext( EVP_aes_192_gcm(), 0, this, type);
+#endif
+#ifdef HAVE_OPENSSL_AES_CCM
+		else if ( type == "aes192-ccm" )
+			return new opensslCipherContext( EVP_aes_192_ccm(), 0, this, type);
+#endif
 		else if ( type == "aes256-ecb" )
 			return new opensslCipherContext( EVP_aes_256_ecb(), 0, this, type);
 		else if ( type == "aes256-cfb" )
@@ -7244,6 +7307,14 @@ public:
 #ifdef HAVE_OPENSSL_AES_CTR
 		else if ( type == "aes256-ctr" )
 			return new opensslCipherContext( EVP_aes_256_ctr(), 0, this, type);
+#endif
+#ifdef HAVE_OPENSSL_AES_GCM
+		else if ( type == "aes256-gcm" )
+			return new opensslCipherContext( EVP_aes_256_gcm(), 0, this, type);
+#endif
+#ifdef HAVE_OPENSSL_AES_CCM
+		else if ( type == "aes256-ccm" )
+			return new opensslCipherContext( EVP_aes_256_ccm(), 0, this, type);
 #endif
 		else if ( type == "blowfish-ecb" )
 			return new opensslCipherContext( EVP_bf_ecb(), 0, this, type);
