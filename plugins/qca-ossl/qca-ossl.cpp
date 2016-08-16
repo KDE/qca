@@ -6882,7 +6882,9 @@ static QStringList all_hash_types()
 {
 	QStringList list;
 	list += "sha1";
+#ifdef HAVE_OPENSSL_SHA0
 	list += "sha0";
+#endif
 	list += "ripemd160";
 #ifdef HAVE_OPENSSL_MD2
 	list += "md2";
