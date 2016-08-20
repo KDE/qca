@@ -620,6 +620,32 @@ if (QCA::hexToArray(QString("62626262626262006262") ) == test )
 QCA_EXPORT QByteArray hexToArray(const QString &hexString);
 
 /**
+   Convert a byte array to printable base64
+   representation.
+
+   This is a convenience function to convert an arbitrary
+   QByteArray to a printable representation.
+
+   \param array the array to be converted
+   \return a printable representation
+*/
+QCA_EXPORT QString arrayToBase64(const QByteArray &array);
+
+/**
+   Convert a QString containing a base64 representation
+   of a byte array into a QByteArray
+
+   This is a convenience function to convert a printable
+   representation into a QByteArray - effectively the inverse
+   of QCA::arrayToBase64.
+
+   \param base64String the string containing a printable
+   representation to be converted
+   \return the equivalent QByteArray
+*/
+QCA_EXPORT QByteArray base64ToArray(const QString &base64String);
+
+/**
    \class Initializer qca_core.h QtCrypto
 
    Convenience method for initialising and cleaning up %QCA
