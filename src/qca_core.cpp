@@ -813,6 +813,16 @@ QByteArray hexToArray(const QString &str)
 	return Hex().stringToArray(str).toByteArray();
 }
 
+QString arrayToBase64(const QByteArray &a)
+{
+	return Base64().arrayToString(a);
+}
+
+QByteArray base64ToArray(const QString &base64String)
+{
+	return Base64().stringToArray(base64String).toByteArray();
+}
+
 static Provider *getProviderForType(const QString &type, const QString &provider)
 {
 	Provider *p = 0;
