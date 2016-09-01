@@ -8,7 +8,11 @@ endif(NOT CMAKE_INSTALL_PREFIX)
 
 project(qca)
 
-cmake_minimum_required(VERSION 2.8.12)
+if(NOT APPLE)
+  cmake_minimum_required(VERSION 2.8.12)
+else()
+  cmake_minimum_required(VERSION 3.0)
+endif()
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "1")
@@ -278,7 +282,6 @@ Plugins=${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}
 endif()
 
 if (APPLE)
-   set(CMAKE_INSTALL_NAME_DIR ${QCA_LIBRARY_INSTALL_DIR})
    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif (APPLE)
 
