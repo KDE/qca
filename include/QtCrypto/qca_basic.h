@@ -532,7 +532,9 @@ private:
    The most common padding scheme is known as PKCS#7 (also PKCS#1), and
    it specifies that the pad bytes are all equal to the length of the 
    padding ( for example, if you need three pad bytes to complete the block,
-   then the padding is 0x03 0x03 0x03 ).
+   then the padding is 0x03 0x03 0x03 ). PKCS#5 padding is a subset of
+   PKCS#7 padding for 8 byte block sizes. For explanation, see
+   http://crypto.stackexchange.com/questions/9043/what-is-the-difference-between-pkcs5-padding-and-pkcs7-padding/9044#9044.
 
    On encryption, for algorithm / mode combinations that require
    padding, you will get a block of ciphertext when the input plain
