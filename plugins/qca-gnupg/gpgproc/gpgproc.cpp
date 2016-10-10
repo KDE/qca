@@ -220,7 +220,9 @@ void GPGProc::Private::doStart()
 	setupArguments();
 
 	proc->start(bin, args);
-	proc->waitForStarted();
+	if (!proc->waitForStarted()) {
+		qWarning("Can't start gpg: %s", qPrintable(proc->errorString()));
+	}
 
 	pipeAux.readEnd().close();
 	pipeCommand.readEnd().close();
