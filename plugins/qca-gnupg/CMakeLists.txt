@@ -21,6 +21,23 @@ set(QCA_GNUPG_NONMOC_SOURCES
   gpgproc/gpgproc.cpp
 )
 
+set(QCA_GNUPG_HEADERS
+  gpgaction.h
+  ringwatch.h
+  gpgop.h
+  gpgop_p.h
+  lineconverter.h
+  mypgpkeycontext.h
+  mykeystoreentry.h
+  mykeystorelist.h
+  gpgproc/gpgproc_p.h
+  gpgproc/sprocess.h
+  gpgproc/gpgproc.h
+  utils.h
+  mymessagecontext.h
+  myopenpgpcontext.h
+)
+
 my_automoc(QCA_GNUPG_MOC_SOURCES)
 
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgop.h)
@@ -33,7 +50,7 @@ qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mykeystorelist.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES mymessagecontext.h)
 qt4_wrap_cpp(EXTRA_GNUPG_SOURCES gpgaction.h)
 
-add_library(qca-gnupg ${PLUGIN_TYPE} ${QCA_GNUPG_MOC_SOURCES} ${QCA_GNUPG_NONMOC_SOURCES} ${EXTRA_GNUPG_SOURCES})
+add_library(qca-gnupg ${PLUGIN_TYPE} ${QCA_GNUPG_MOC_SOURCES} ${QCA_GNUPG_NONMOC_SOURCES} ${EXTRA_GNUPG_SOURCES} ${QCA_GNUPG_HEADERS})
 
 if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
   set_property(TARGET qca-gnupg PROPERTY SUFFIX ".dylib")
