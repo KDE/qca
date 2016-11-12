@@ -304,10 +304,12 @@ public:
 	{
 	}
 
-    void setup( QCA::Direction dir,
-		const QCA::SymmetricKey &key,
-		const QCA::InitializationVector &iv )
+    void setup(QCA::Direction dir,
+               const QCA::SymmetricKey &key,
+               const QCA::InitializationVector &iv,
+               const QCA::AuthTag &tag)
     {
+	Q_UNUSED(tag);
 	/* Get a slot to use for the crypto operations */
 	m_slot = PK11_GetBestSlot( m_cipherMechanism, NULL );
 	if (!m_slot)
@@ -364,6 +366,12 @@ public:
 	{
 	    return PK11_GetBlockSize( m_cipherMechanism, m_params);
 	}
+
+    QCA::AuthTag tag() const
+    {
+    // For future implementation
+	return QCA::AuthTag();
+    }
 
     bool update( const QCA::SecureArray &in, QCA::SecureArray *out )
 	{

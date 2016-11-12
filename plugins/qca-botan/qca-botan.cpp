@@ -263,8 +263,10 @@ public:
 
     void setup(QCA::Direction dir,
                const QCA::SymmetricKey &key,
-               const QCA::InitializationVector &iv)
+               const QCA::InitializationVector &iv,
+               const QCA::AuthTag &tag)
     {
+	Q_UNUSED(tag);
 	try {
 	m_dir = dir;
 	Botan::SymmetricKey keyCopy((Botan::byte*)key.data(), key.size());
@@ -303,6 +305,12 @@ public:
     int blockSize() const
     {
 	return Botan::block_size_of(m_algoName);
+    }
+
+    QCA::AuthTag tag() const
+    {
+    // For future implementation
+	return QCA::AuthTag();
     }
 
     bool update(const QCA::SecureArray &in, QCA::SecureArray *out)

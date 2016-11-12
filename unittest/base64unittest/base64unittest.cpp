@@ -120,6 +120,9 @@ void Base64UnitTest::test2()
 
     QCOMPARE( base64Object.encodeString(raw), encoded );
     QCOMPARE( base64Object.decodeString(encoded), raw );
+
+    QCOMPARE( QCA::arrayToBase64(raw.toUtf8()), encoded );
+    QCOMPARE( QLatin1String(QCA::base64ToArray(encoded)), raw );
 }
 
 QTEST_MAIN(Base64UnitTest)
