@@ -23,6 +23,10 @@ set(QCA_LIB_PATCH_VERSION "0")
 # qtmain.lib.
 cmake_policy(SET CMP0020 OLD)
 
+if(POLICY CMP0042)
+  cmake_policy(SET CMP0042 OLD)
+endif()
+
 option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
 set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible values: none, all and auto)")
