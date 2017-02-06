@@ -69,7 +69,9 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("TLS_DHE_DSS_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_RC4_128_SHA") );
-	QVERIFY( cipherList.contains("TLS_RSA_WITH_RC4_128_MD5") );
+
+	// Fedora 22 has no TLS_RSA_WITH_RC4_128_MD5
+	// QVERIFY( cipherList.contains("TLS_RSA_WITH_RC4_128_MD5") );
 
 	// Fedora 20 openssl has no this cipher suites.
 	// I just believe that F20 has the most strict patent rules
@@ -96,7 +98,9 @@ void TLSUnitTest::testCipherList()
 	QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_AES_128_CBC_SHA") );
 	QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_SHA") );
-	QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_MD5") );
+
+	// Fedora 22 has no SSL_RSA_WITH_RC4_128_MD5
+	// QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_MD5") );
 
 	// QVERIFY( cipherList.contains("SSL_DHE_RSA_WITH_DES_CBC_SHA") );
 	// QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_DES_CBC_SHA") );
