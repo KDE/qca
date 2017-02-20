@@ -153,6 +153,7 @@ set_target_properties(${QCA_LIB_NAME} PROPERTIES
                       DEFINE_SYMBOL QCA_MAKEDLL
                       PUBLIC_HEADER "${public_HEADERS}"
                       FRAMEWORK ${OSX_FRAMEWORK}
+                      FRAMEWORK_VERSION ${QCA_LIB_MAJOR_VERSION}
                       EXPORT_NAME ${QCA_LIB_NAME}
                       )
 
