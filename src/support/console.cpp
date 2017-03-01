@@ -857,7 +857,7 @@ public:
 			return false;
 		}
 
-		if(c == '\b' || c == 0x7f)
+		if(c == '\b' || c.unicode() == 0x7f)
 		{
 			if(at > 0)
 			{
