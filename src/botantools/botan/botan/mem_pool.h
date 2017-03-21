@@ -63,7 +63,7 @@ class Pooling_Allocator : public Allocator
       void destroy();
 
       Pooling_Allocator(u32bit, bool);
-      ~Pooling_Allocator();
+      ~Pooling_Allocator() QCA_NOEXCEPT(false);
    private:
       void get_more_core(u32bit);
       byte* allocate_blocks(u32bit);
