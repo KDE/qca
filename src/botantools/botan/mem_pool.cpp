@@ -171,7 +171,7 @@ Pooling_Allocator::Pooling_Allocator(u32bit p_size, bool) :
 /*************************************************
 * Pooling_Allocator Destructor                   *
 *************************************************/
-Pooling_Allocator::~Pooling_Allocator()
+Pooling_Allocator::~Pooling_Allocator() NOEXCEPT
    {
    delete mutex;
    if(blocks.size())

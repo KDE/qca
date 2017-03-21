@@ -107,7 +107,7 @@ void* MemoryMapping_Allocator::alloc_block(u32bit n)
             umask(old_umask);
             }
 
-         ~TemporaryFile()
+         ~TemporaryFile() NOEXCEPT
             {
             delete[] filepath;
             if(fd != -1 && close(fd) == -1)
