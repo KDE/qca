@@ -492,8 +492,8 @@ QCA_EXPORT Logger *logger();
 */
 #define QCA_logTextMessage(message, severity) \
 	do { \
-		register QCA::Logger::Severity s = severity; \
-		register QCA::Logger *l = QCA::logger (); \
+		QCA::Logger::Severity s = severity; \
+		QCA::Logger *l = QCA::logger (); \
 		if (s <= l->level ()) { \
 			l->logTextMessage (message, s); \
 		} \
@@ -511,8 +511,8 @@ QCA_EXPORT Logger *logger();
 */
 #define QCA_logBinaryMessage(blob, severity) \
 	do { \
-		register QCA::Logger::Severity s = severity; \
-		register QCA::Logger *l = QCA::logger (); \
+		QCA::Logger::Severity s = severity; \
+		QCA::Logger *l = QCA::logger (); \
 		if (s <= l->level ()) { \
 			l->logBinaryMessage (blob, s); \
 		} \
