@@ -18,11 +18,6 @@ set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "2")
 set(QCA_LIB_PATCH_VERSION "0")
 
-# Do not automatically link Qt executables to qtmain target on Windows.
-# QCA exucatables use console mode only. Not need to link against
-# qtmain.lib.
-cmake_policy(SET CMP0020 OLD)
-
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
 endif()
@@ -51,6 +46,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
 option(QT4_BUILD "Force building with Qt4 even if Qt5 is found")
 if (NOT QT4_BUILD)
+  # Do not automatically link Qt executables to qtmain target on Windows.
+  # QCA exucatables use console mode only. Not need to link against qtmain.lib.
+  set(Qt5_NO_LINK_QTMAIN ON)
   find_package(Qt5Core QUIET)
   mark_as_advanced(Qt5Core_DIR)
 endif()
@@ -71,6 +69,9 @@ if (Qt5Core_FOUND)
 else()
   set(QT_MIN_VERSION "4.7.0")
   set(QT_USE_IMPORTED_TARGETS ON)
+  # Do not automatically link Qt executables to qtmain target on Windows.
+  # QCA exucatables use console mode only. Not need to link against qtmain.lib.
+  set(QT4_NO_LINK_QTMAIN ON)
   if(BUILD_TESTS)
     find_package(Qt4 REQUIRED QtCore QtNetwork QtTest)
   else(BUILD_TESTS)
