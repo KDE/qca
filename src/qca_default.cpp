@@ -184,9 +184,9 @@ struct md5_state_t {
 
     md5_state_t()
     {
-        memset(count, 0, 2 * sizeof(md5_word_t));
-        memset(abcd, 0, 4 * sizeof(md5_word_t));
-        memset(buf, 0, 64 * sizeof(md5_byte_t));
+        memset(count, 0, sizeof(count));
+        memset(abcd, 0, sizeof(abcd));
+        memset(buf, 0, sizeof(buf));
     }
 
     md5_state_t(const md5_state_t &from)
@@ -196,7 +196,9 @@ struct md5_state_t {
 
     md5_state_t & operator=(const md5_state_t &from)
     {
-        *this = from;
+        memcpy(count, from.count, sizeof(count));
+        memcpy(abcd, from.abcd, sizeof(abcd));
+        memcpy(buf, from.buf, sizeof(buf));
         return *this;
     }
 };
@@ -579,27 +581,29 @@ public:
 
 struct SHA1_CONTEXT
 {
-	quint32 state[5]; // 5
-	quint32 count[2]; // 2
-	unsigned char buffer[64]; // 64
+    quint32 state[5]; // 5
+    quint32 count[2]; // 2
+    unsigned char buffer[64]; // 64
 
-	SHA1_CONTEXT()
-	{
-		memset(state, 0, 5 * sizeof(quint32));
-		memset(count, 0, 2 * sizeof(quint32));
-		memset(buffer, 0, 64 * sizeof(unsigned char));
-	}
+    SHA1_CONTEXT()
+    {
+        memset(state, 0, sizeof(state));
+        memset(count, 0, sizeof(count));
+        memset(buffer, 0, sizeof(buffer));
+    }
 
-	SHA1_CONTEXT(const SHA1_CONTEXT &from)
-	{
-		*this = from;
-	}
+    SHA1_CONTEXT(const SHA1_CONTEXT &from)
+    {
+        *this = from;
+    }
 
-	SHA1_CONTEXT & operator=(const SHA1_CONTEXT &from)
-	{
-		*this = from;
-		return *this;
-	}
+    SHA1_CONTEXT & operator=(const SHA1_CONTEXT &from)
+    {
+        memcpy(state, from.state, sizeof(state));
+        memcpy(count, from.count, sizeof(count));
+        memcpy(buffer, from.buffer, sizeof(buffer));
+        return *this;
+    }
 };
 
 typedef union {
