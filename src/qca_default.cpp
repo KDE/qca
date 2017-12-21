@@ -185,9 +185,9 @@ struct md5_state_t {
 
     md5_state_t()
     {
-        memset(count, 0, 2 * sizeof(md5_word_t));
-        memset(abcd, 0, 4 * sizeof(md5_word_t));
-        memset(buf, 0, 64 * sizeof(md5_byte_t));
+        memset(count, 0, sizeof(count));
+        memset(abcd, 0, sizeof(abcd));
+        memset(buf, 0, sizeof(buf));
     }
 };
 
@@ -576,9 +576,9 @@ struct SHA1_CONTEXT
 
 	SHA1_CONTEXT()
 	{
-		memset(state, 0, 5 * sizeof(quint32));
-		memset(count, 0, 2 * sizeof(quint32));
-		memset(buffer, 0, 64 * sizeof(unsigned char));
+		memset(state, 0, sizeof(state));
+		memset(count, 0, sizeof(count));
+		memset(buffer, 0, sizeof(buffer));
 	}
 };
 

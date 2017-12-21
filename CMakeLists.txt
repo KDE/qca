@@ -83,10 +83,20 @@ set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${
 configure_file("include/QtCrypto/qca_version.h.in" "${CMAKE_BINARY_DIR}/qca_version.h")
 
 if (WIN32)
- set(CMAKE_DEBUG_POSTFIX "d")
- add_definitions(-DWIN32_LEAN_AND_MEAN)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  add_definitions(-DWIN32_LEAN_AND_MEAN)
+
+  include(CheckCXXSourceCompiles)
+  CHECK_CXX_SOURCE_COMPILES("
+  #include <windows.h>
+  int main() { return std::min(1, 2); }
+  " MINMAX_ARE_FUNCTIONS)
+  if(NOT MINMAX_ARE_FUNCTIONS)
+    message(STATUS "min, max macro defined by windows.h")
+    add_definitions(-DNOMINMAX)
+  endif()
 elseif (APPLE)
- set(CMAKE_DEBUG_POSTFIX "_debug")
+  set(CMAKE_DEBUG_POSTFIX "_debug")
 endif (WIN32)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
