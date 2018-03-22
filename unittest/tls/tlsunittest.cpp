@@ -103,6 +103,9 @@ void TLSUnitTest::testCipherList()
 	// QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_AES_128_CBC_SHA") );
 	// QVERIFY( cipherList.contains("SSL_RSA_WITH_AES_128_CBC_SHA") );
 
+	// Fedora 22 has no SSL_RSA_WITH_RC4_128_MD5
+	// QVERIFY( cipherList.contains("SSL_RSA_WITH_RC4_128_MD5") );
+
 	// QVERIFY( cipherList.contains("SSL_DHE_RSA_WITH_DES_CBC_SHA") );
 	// QVERIFY( cipherList.contains("SSL_DHE_DSS_WITH_DES_CBC_SHA") );
 	// QVERIFY( cipherList.contains("SSL_RSA_WITH_DES_CBC_SHA") );
