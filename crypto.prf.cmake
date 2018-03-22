@@ -5,11 +5,11 @@ CONFIG *= qt
 
 LINKAGE =
 
-exists($$QCA_LIBDIR/qca.framework) {
+exists($$QCA_LIBDIR/@QCA_LIB_NAME@.framework) {
 	QMAKE_CXXFLAGS += -F$$QCA_LIBDIR
 	LIBS *= -F$$QCA_LIBDIR
-	INCLUDEPATH += $$QCA_LIBDIR/qca.framework/Headers
-	LINKAGE = -framework qca
+	INCLUDEPATH += $$QCA_LIBDIR/@QCA_LIB_NAME@.framework/Headers
+	LINKAGE = -framework @QCA_LIB_NAME@
 }
 
 # else, link normally
