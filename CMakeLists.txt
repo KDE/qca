@@ -59,7 +59,11 @@ if (Qt5Core_FOUND)
   message(STATUS "Building with Qt5 support")
   # Got from ECM
   # Distros have no ECM. So I just copied required cmake modules.
-  find_package(Qt5Transitional REQUIRED Core Network)
+  if(BUILD_TESTS)
+    find_package(Qt5Transitional REQUIRED Core Network)
+  else()
+    find_package(Qt5Transitional REQUIRED Core)
+  endif()
   include(ECMQt4To5Porting)
 
   include(GNUInstallDirs)
