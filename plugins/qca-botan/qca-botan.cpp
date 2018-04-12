@@ -23,18 +23,13 @@
 
 #include <qstringlist.h>
 
-#include <botan/hmac.h>
-#include <botan/version.h>
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
 #include <botan/botan.h>
+#include <botan/hmac.h>
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
+#include <botan/s2k.h>
+#endif
+#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(1,8,0)
 #include <botan/algo_factory.h>
-#else
-#include <botan/auto_rng.h>
-#include <botan/block_cipher.h>
-#include <botan/filters.h>
-#include <botan/hash.h>
-#include <botan/pbkdf.h>
-#include <botan/stream_cipher.h>
 #endif
 
 #include <stdlib.h>
@@ -56,8 +51,14 @@ public:
     QCA::SecureArray nextBytes(int size)
     {
         QCA::SecureArray buf(size);
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,5,0)
+	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size(), Botan::SessionKey );
+#elif BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,7,6)
+	Botan::Global_RNG::randomize( (Botan::byte*)buf.data(), buf.size() );
+#else
 	Botan::AutoSeeded_RNG rng;
 	rng.randomize(reinterpret_cast<Botan::byte*>(buf.data()), buf.size());
+#endif
 	return buf;
     }
 };
@@ -69,11 +70,7 @@ class BotanHashContext : public QCA::HashContext
 public:
     BotanHashContext( const QString &hashName, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
 	m_hashObj = Botan::get_hash(hashName.toStdString());
-#else
-	m_hashObj = Botan::HashFunction::create(hashName.toStdString()).release();
-#endif
     }
 
     ~BotanHashContext()
@@ -98,7 +95,11 @@ public:
 
     QCA::MemoryRegion final()
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
+        QCA::SecureArray a( m_hashObj->OUTPUT_LENGTH );
+#else
 	QCA::SecureArray a( m_hashObj->output_length() );
+#endif
 	m_hashObj->final( (Botan::byte *)a.data() );
 	return a;
     }
@@ -114,10 +115,10 @@ class BotanHMACContext : public QCA::MACContext
 public:
     BotanHMACContext( const QString &hashName, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-	m_hashObj = new Botan::HMAC(Botan::global_state().algorithm_factory().make_hash_function(hashName.toStdString()));
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,8,0)
+	m_hashObj = new Botan::HMAC(hashName.toStdString());
 #else
-	m_hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
+	m_hashObj = new Botan::HMAC(Botan::global_state().algorithm_factory().make_hash_function(hashName.toStdString()));
 #endif
 	if (0 == m_hashObj) {
 	    std::cout << "null context object" << std::endl;
@@ -160,7 +161,11 @@ public:
 
     void final( QCA::MemoryRegion *out)
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
+	QCA::SecureArray sa( m_hashObj->OUTPUT_LENGTH, 0 );
+#else
 	QCA::SecureArray sa( m_hashObj->output_length(), 0 );
+#endif
 	m_hashObj->final( (Botan::byte *)sa.data() );
 	*out = sa;
     }
@@ -192,8 +197,15 @@ public:
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount)
     {
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
+	m_s2k->set_iterations(iterationCount);
+	m_s2k->change_salt((const Botan::byte*)salt.data(), salt.size());
+	std::string secretString(secret.data(), secret.size() );
+	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString);
+#else
 	std::string secretString(secret.data(), secret.size() );
 	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString, (const Botan::byte*)salt.data(), salt.size(), iterationCount);
+#endif
         QCA::SecureArray retval(QByteArray((const char*)key.begin(), key.length()));
 	return QCA::SymmetricKey(retval);
     }
@@ -210,6 +222,15 @@ public:
 		std::string secretString(secret.data(), secret.size() );
 
 		*iterationCount = 0;
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
+		m_s2k->set_iterations(1);
+		m_s2k->change_salt((const Botan::byte*)salt.data(), salt.size());
+		timer.start();
+		while (timer.elapsed() < msecInterval) {
+			key = m_s2k->derive_key(keyLength, secretString);
+			++(*iterationCount);
+		}
+#else
 		timer.start();
 		while (timer.elapsed() < msecInterval) {
 			key = m_s2k->derive_key(keyLength,
@@ -219,6 +240,7 @@ public:
 									1);
 			++(*iterationCount);
 		}
+#endif
 		return makeKey(secret, salt, keyLength, *iterationCount);
 	}
 
@@ -282,14 +304,7 @@ public:
 
     int blockSize() const
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
 	return Botan::block_size_of(m_algoName);
-#else
-	if(const std::unique_ptr<Botan::BlockCipher> bc = Botan::BlockCipher::create(m_algoName))
-	    return bc->block_size();
-        
-	throw Botan::Algorithm_Not_Found(m_algoName);
-#endif
     }
 
     QCA::AuthTag tag() const
@@ -322,31 +337,23 @@ public:
 
     QCA::KeyLength keyLength() const
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
+#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(1,9,0)
+	return QCA::KeyLength( Botan::min_keylength_of(m_algoName),
+			       Botan::max_keylength_of(m_algoName),
+			       Botan::keylength_multiple_of(m_algoName) );
+#else
         Botan::Algorithm_Factory &af = Botan::global_state().algorithm_factory();
-#endif
         Botan::Key_Length_Specification kls(0);
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
         if(const Botan::BlockCipher *bc = af.prototype_block_cipher(m_algoName))
-#else
-        if(const std::unique_ptr<Botan::BlockCipher> bc = Botan::BlockCipher::create(m_algoName))
-#endif
             kls = bc->key_spec();
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
         else if(const Botan::StreamCipher *sc = af.prototype_stream_cipher(m_algoName))
-#else
-        else if(const std::unique_ptr<Botan::StreamCipher> sc = Botan::StreamCipher::create(m_algoName))
-#endif
             kls = sc->key_spec();
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
         else if(const Botan::MessageAuthenticationCode *mac = af.prototype_mac(m_algoName))
-#else
-        else if(const std::unique_ptr<Botan::MessageAuthenticationCode> mac = Botan::MessageAuthenticationCode::create(m_algoName))
-#endif
             kls = mac->key_spec();
         return QCA::KeyLength( kls.minimum_keylength(),
                                kls.maximum_keylength(),
                                kls.keylength_multiple() );
+#endif
     }
 
 
@@ -372,9 +379,7 @@ class botanProvider : public QCA::Provider
 public:
     void init()
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
 	m_init = new Botan::LibraryInitializer;
-#endif
     }
 
     ~botanProvider()
@@ -533,9 +538,7 @@ public:
 	    return 0;
     }
 private:
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
     Botan::LibraryInitializer *m_init;
-#endif
 
 };
 
