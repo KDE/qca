@@ -11,30 +11,12 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-# libgcrypt is moving to pkg-config, but earlier version don't have it
-
-#search in typical paths for libgcrypt-config
-FIND_PROGRAM(BOTANCONFIG_EXECUTABLE NAMES botan-config botan-config-1.10)
-mark_as_advanced(BOTANCONFIG_EXECUTABLE)
-
 #reset variables
 set(BOTAN_LIBRARIES)
 set(BOTAN_CFLAGS)
 
-# if botan-config has been found
-IF(BOTANCONFIG_EXECUTABLE)
-
-  EXEC_PROGRAM(${BOTANCONFIG_EXECUTABLE} ARGS --libs RETURN_VALUE _return_VALUE OUTPUT_VARIABLE BOTAN_LIBRARIES)
-
-  EXEC_PROGRAM(${BOTANCONFIG_EXECUTABLE} ARGS --cflags RETURN_VALUE _return_VALUE OUTPUT_VARIABLE BOTAN_CFLAGS)
-
-  IF(BOTAN_LIBRARIES)
-    SET(BOTAN_FOUND TRUE)
-  ENDIF(BOTAN_LIBRARIES)
-
-  MARK_AS_ADVANCED(BOTAN_CFLAGS BOTAN_LIBRARIES)
-
-ENDIF(BOTANCONFIG_EXECUTABLE)
+find_package(PkgConfig)
+pkg_search_module(BOTAN botan>=1.10 botan-1.10 botan-2)
 
 if (BOTAN_FOUND)
    if (NOT Botan_FIND_QUIETLY)
