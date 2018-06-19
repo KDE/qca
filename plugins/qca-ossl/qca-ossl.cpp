@@ -23,6 +23,7 @@
 #include <QtCrypto>
 #include <qcaprovider.h>
 #include <QDebug>
+#include <QScopedPointer>
 #include <QTime>
 #include <QtPlugin>
 
@@ -538,6 +539,11 @@ static GENERAL_NAME *find_next_general_name(GENERAL_NAMES *names, int type, int 
 	return gn;
 }
 
+static QByteArray qca_ASN1_STRING_toByteArray(ASN1_STRING *x)
+{
+	return QByteArray(reinterpret_cast<const char *>(ASN1_STRING_get0_data(x)), ASN1_STRING_length(x));
+}
+
 static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType &t, CertificateInfo *info)
 {
 	switch(t.known())
@@ -550,7 +556,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			GENERAL_NAME *gn = find_next_general_name(names, GEN_EMAIL, &pos);
 			if (pos != -1)
 			{
-				QByteArray cs((const char *)ASN1_STRING_data(gn->d.rfc822Name), ASN1_STRING_length(gn->d.rfc822Name));
+				QByteArray cs = qca_ASN1_STRING_toByteArray(gn->d.rfc822Name);
 				info->insert(t, QString::fromLatin1(cs));
 				++pos;
 			}
@@ -565,7 +571,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			GENERAL_NAME *gn = find_next_general_name(names, GEN_URI, &pos);
 			if (pos != -1)
 			{
-				QByteArray cs((const char *)ASN1_STRING_data(gn->d.uniformResourceIdentifier), ASN1_STRING_length(gn->d.uniformResourceIdentifier));
+				QByteArray cs= qca_ASN1_STRING_toByteArray(gn->d.uniformResourceIdentifier);
 				info->insert(t, QString::fromLatin1(cs));
 				++pos;
 			}
@@ -580,7 +586,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			GENERAL_NAME *gn = find_next_general_name(names, GEN_DNS, &pos);
 			if (pos != -1)
 			{
-				QByteArray cs((const char *)ASN1_STRING_data(gn->d.dNSName), ASN1_STRING_length(gn->d.dNSName));
+				QByteArray cs = qca_ASN1_STRING_toByteArray(gn->d.dNSName);
 				info->insert(t, QString::fromLatin1(cs));
 				++pos;
 			}
@@ -596,7 +602,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			if (pos != -1)
 			{
 				ASN1_OCTET_STRING *str = gn->d.iPAddress;
-				QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
+				QByteArray buf = qca_ASN1_STRING_toByteArray(str);
 
 				QString out;
 				// IPv4 (TODO: handle IPv6)
@@ -634,7 +640,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 					break;
 
 				ASN1_UTF8STRING *str = at->value.utf8string;
-				QByteArray buf((const char *)ASN1_STRING_data(str), ASN1_STRING_length(str));
+				QByteArray buf = qca_ASN1_STRING_toByteArray(str);
 				info->insert(t, QString::fromUtf8(buf));
 				++pos;
 			}
@@ -888,7 +894,7 @@ static QStringList get_cert_policies(X509_EXTENSION *ex)
 static QByteArray get_cert_subject_key_id(X509_EXTENSION *ex)
 {
 	ASN1_OCTET_STRING *skid = (ASN1_OCTET_STRING *)X509V3_EXT_d2i(ex);
-	QByteArray out((const char *)ASN1_STRING_data(skid), ASN1_STRING_length(skid));
+	QByteArray out = qca_ASN1_STRING_toByteArray(skid);
 	ASN1_OCTET_STRING_free(skid);
 	return out;
 }
@@ -900,7 +906,7 @@ static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
 	AUTHORITY_KEYID *akid = (AUTHORITY_KEYID *)X509V3_EXT_d2i(ex);
 	QByteArray out;
 	if (akid->keyid)
-		out = QByteArray((const char *)ASN1_STRING_data(akid->keyid), ASN1_STRING_length(akid->keyid));
+		out = qca_ASN1_STRING_toByteArray(akid->keyid);
 	AUTHORITY_KEYID_free(akid);
 	return out;
 }
@@ -1628,20 +1634,37 @@ public:
 };
 
 #ifndef OPENSSL_FIPS
+namespace  {
+struct DsaDeleter
+{
+	static inline void cleanup(void *pointer)
+	{
+		if (pointer)
+			DSA_free((DSA *)pointer);
+	}
+};
+} // end of anonymous namespace
+
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
 	int ret_counter;
-	DSA *dsa = DSA_generate_parameters(bits, (unsigned char *)seed.data(), seed.size(), &ret_counter, NULL, NULL, NULL);
+	QScopedPointer<DSA, DsaDeleter> dsa(DSA_new());
 	if(!dsa)
 		return false;
+
+	if (DSA_generate_parameters_ex(dsa.data(), bits, (const unsigned char *)seed.data(), seed.size(),
+			&ret_counter, NULL, NULL) != 1)
+		return false;
+
 	if(ret_counter != counter)
 		return false;
+
 	const BIGNUM *bnp, *bnq, *bng;
-	DSA_get0_pqg(dsa, &bnp, &bnq, &bng);
+	DSA_get0_pqg(dsa.data(), &bnp, &bnq, &bng);
 	params->p = bn2bi(bnp);
 	params->q = bn2bi(bnq);
 	params->g = bn2bi(bng);
-	DSA_free(dsa);
+
 	return true;
 }
 #endif
@@ -1812,6 +1835,26 @@ private slots:
 //----------------------------------------------------------------------------
 // RSAKey
 //----------------------------------------------------------------------------
+namespace {
+struct RsaDeleter
+{
+	static inline void cleanup(void *pointer)
+	{
+		if (pointer)
+			RSA_free((RSA *)pointer);
+	}
+};
+
+struct BnDeleter
+{
+	static inline void cleanup(void *pointer)
+	{
+		if (pointer)
+			BN_free((BIGNUM *)pointer);
+	}
+};
+} // end of anonymous namespace
+
 class RSAKeyMaker : public QThread
 {
 	Q_OBJECT
@@ -1832,10 +1875,22 @@ public:
 
 	virtual void run()
 	{
-		RSA *rsa = RSA_generate_key(bits, exp, NULL, NULL);
+		QScopedPointer<RSA, RsaDeleter> rsa(RSA_new());
 		if(!rsa)
 			return;
-		result = rsa;
+
+		QScopedPointer<BIGNUM, BnDeleter> e(BN_new());
+		if(!e)
+			return;
+
+		BN_clear(e.data());
+		if (BN_set_word(e.data(), exp) != 1)
+			return;
+
+		if (RSA_generate_key_ex(rsa.data(), bits, e.data(), NULL) == 0)
+			return;
+
+		result = rsa.take();
 	}
 
 	RSA *takeResult()
@@ -7247,9 +7302,6 @@ public:
 		while (true) {
 			r = RAND_bytes((unsigned char*)(buf.data()), size);
 			if (r == 1) break; // success
-			r = RAND_pseudo_bytes((unsigned char*)(buf.data()),
-								  size);
-			if (r >= 0) break; // accept insecure random numbers
 		}
 		return buf;
 	}

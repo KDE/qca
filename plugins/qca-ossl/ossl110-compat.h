@@ -149,14 +149,6 @@ static int DSA_set0_key(DSA *dsa, BIGNUM *pub_key, BIGNUM *priv_key)
     return 1;
 }
 
-static void X509_SIG_getm(const X509_SIG *sig, X509_ALGOR **palg, ASN1_OCTET_STRING **pdigest)
-{
-    if (palg)
-        *palg = sig->algor;
-    if (pdigest)
-        *pdigest = sig->digest;
-}
-
 static void X509_REQ_get0_signature(const X509_REQ *req, const ASN1_BIT_STRING **psig, const X509_ALGOR **palg)
 {
     if (psig)
