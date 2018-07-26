@@ -4247,7 +4247,7 @@ int main(int argc, char **argv)
 					// detached signature?
 					if(plain.startsWith("-----BEGIN PGP SIGNATURE-----"))
 					{
-						QString footer = "-----END PGP SIGNATURE-----\n";
+						QByteArray footer = "-----END PGP SIGNATURE-----\n";
 						int n = plain.indexOf(footer);
 						if(n == -1)
 						{
