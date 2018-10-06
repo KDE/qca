@@ -224,7 +224,7 @@ void init(MemoryMode mode, int prealloc)
 
 	if(drop_root)
 	{
-#ifdef Q_OS_UNIX
+#if defined(Q_OS_UNIX) && !defined(Q_OS_ANDROID)
 		setuid(getuid());
 #endif
 	}
