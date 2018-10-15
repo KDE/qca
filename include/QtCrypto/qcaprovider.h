@@ -380,6 +380,40 @@ public:
 };
 
 /**
+   \class HKDFContext qcaprovider.h QtCrypto
+
+   HKDF provider
+
+   \note This class is part of the provider plugin interface and should not
+   be used directly by applications.  You probably want HKDF instead.
+
+   \ingroup ProviderAPI
+*/
+class QCA_EXPORT HKDFContext : public BasicContext
+{
+	Q_OBJECT
+public:
+	/**
+	   Standard constructor
+
+	   \param p the provider associated with this context
+	   \param type the name of the HKDF provided by this context (including algorithm)
+	*/
+	HKDFContext(Provider *p, const QString &type) : BasicContext(p, type) {}
+
+	/**
+	   Create a key and return it
+
+	   \param secret the secret part (typically password)
+	   \param salt the salt / initialization vector
+	   \param info the info / initialization vector
+	   \param keyLength the length of the key to be produced
+	*/
+	virtual SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
+								 const InitializationVector &info, unsigned int keyLength) = 0;
+};
+
+/**
    \class DLGroupContext qcaprovider.h QtCrypto
 
    Discrete logarithm provider

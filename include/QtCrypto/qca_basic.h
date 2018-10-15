@@ -1078,6 +1078,63 @@ public:
 		: KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf2"), algorithm), provider) {}
 };
 
+/**
+   \class HKDF qca_basic.h QtCrypto
+   \since 2.3
+
+   HMAC-based extract-and-expand key derivation function
+
+   This class implements HMAC-based Extract-and-Expand Key Derivation Function,
+   as specified in RFC5869.
+
+   \ingroup UserAPI
+*/
+class QCA_EXPORT HKDF : public Algorithm
+{
+public:
+	/**
+	   Standard constructor
+
+	   \param algorithm the name of the hashing algorithm to use
+	   \param provider the name of the provider to use, if available
+	*/
+	explicit HKDF(const QString &algorithm = QStringLiteral("sha256"), const QString &provider = QString());
+
+	/**
+	   Standard copy constructor
+
+	   \param from the KeyDerivationFunction to copy from
+	*/
+	HKDF(const HKDF &from);
+
+	~HKDF();
+
+	/**
+	   Assignment operator
+
+	   Copies the state (including key) from one HKDF
+	   to another
+
+	   \param from the HKDF to assign from
+	*/
+	HKDF & operator=(const HKDF &from);
+
+	/**
+	   Generate the key from a specified secret, salt value, and an additional info
+
+	   \note key length is ignored for some functions
+
+	   \param secret the secret (password or passphrase)
+	   \param salt the salt to use
+	   \param info the info to use
+	   \param keyLength the length of key to return
+
+	   \return the derived key
+	*/
+	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
+						 const InitializationVector &info, unsigned int keyLength);
+};
+
 }
 
 #endif

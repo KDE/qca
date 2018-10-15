@@ -29,6 +29,7 @@
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include <openssl/kdf.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1274,6 +1275,35 @@ public:
 	}
 
 protected:
+};
+
+class opensslHkdfContext : public HKDFContext
+{
+public:
+	opensslHkdfContext(Provider *p, const QString &type) : HKDFContext(p, type)
+	{
+	}
+
+	Provider::Context *clone() const
+	{
+		return new opensslHkdfContext( *this );
+	}
+
+	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
+						 const InitializationVector &info, unsigned int keyLength)
+	{
+		SecureArray out(keyLength);
+		EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
+		EVP_PKEY_derive_init(pctx);
+		EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_sha256());
+		EVP_PKEY_CTX_set1_hkdf_salt(pctx, salt.data(), int(salt.size()));
+		EVP_PKEY_CTX_set1_hkdf_key(pctx, secret.data(), int(secret.size()));
+		EVP_PKEY_CTX_add1_hkdf_info(pctx, info.data(), int(info.size()));
+		size_t outlen = out.size();
+		EVP_PKEY_derive(pctx, reinterpret_cast<unsigned char*>(out.data()), &outlen);
+		EVP_PKEY_CTX_free(pctx);
+		return out;
+	}
 };
 
 class opensslHMACContext : public MACContext
@@ -7381,6 +7411,7 @@ public:
 #endif
 		list += "pbkdf1(sha1)";
 		list += "pbkdf2(sha1)";
+		list += "hkdf(sha256)";
 		list += "pkey";
 		list += "dlgroup";
 		list += "rsa";
@@ -7451,6 +7482,8 @@ public:
 #endif
 		else if ( type == "pbkdf2(sha1)" )
 			return new opensslPbkdf2Context( this, type );
+		else if ( type == "hkdf(sha256)" )
+			return new opensslHkdfContext( this, type );
 		else if ( type == "hmac(md5)" )
 			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )

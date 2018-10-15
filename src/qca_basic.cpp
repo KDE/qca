@@ -591,4 +591,35 @@ QString KeyDerivationFunction::withAlgorithm(const QString &kdfType, const QStri
 	return (kdfType + '(' + algType + ')');
 }
 
+//----------------------------------------------------------------------------
+// HKDF
+//----------------------------------------------------------------------------
+HKDF::HKDF(const QString &algorithm, const QString &provider)
+: Algorithm(QStringLiteral("hkdf(") + algorithm + ')', provider)
+{
+}
+
+HKDF::HKDF(const HKDF &from)
+: Algorithm(from)
+{
+}
+
+HKDF::~HKDF()
+{
+}
+
+HKDF & HKDF::operator=(const HKDF &from)
+{
+	Algorithm::operator=(from);
+	return *this;
+}
+
+SymmetricKey HKDF::makeKey(const SecureArray &secret, const InitializationVector &salt, const InitializationVector &info, unsigned int keyLength)
+{
+	return static_cast<HKDFContext *>(context())->makeKey(secret,
+														  salt,
+														  info,
+														  keyLength);
+}
+
 }
