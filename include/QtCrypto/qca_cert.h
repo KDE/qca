@@ -746,7 +746,7 @@ public:
 	void setChallenge(const QString &s);
 
 	/**
-	   Specify information for the the subject associated with the
+	   Specify information for the subject associated with the
 	   certificate
 
 	   \param info the information for the subject
@@ -756,7 +756,7 @@ public:
 	void setInfo(const CertificateInfo &info);
 
 	/**
-	   Specify information for the the subject associated with the
+	   Specify information for the subject associated with the
 	   certificate
 
 	   \param info the information for the subject

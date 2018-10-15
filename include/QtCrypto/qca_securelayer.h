@@ -80,7 +80,7 @@ enum SecurityLevel
    implementation, and that data is encrypted (or otherwise
    protected, depending on the setup). The SecureLayer
    implementation then emits the readyReadOutgoing() signal,
-   and the application uses readOutgoing() to retrieve the the
+   and the application uses readOutgoing() to retrieve the
    encrypted data from the SecureLayer implementation.  The
    encrypted data is then sent out on the network.
 
@@ -381,7 +381,7 @@ public:
 	   \param version the protocol Version that the cipher
 	   suites are required for
 
-	   \return list of the the names of the cipher suites
+	   \return list of the names of the cipher suites
 	   supported.
 	*/
 	QStringList supportedCipherSuites(const Version &version = TLS_v1) const;
