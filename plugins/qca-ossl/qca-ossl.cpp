@@ -29,7 +29,6 @@
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
-#include <openssl/kdf.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,6 +65,10 @@
 #ifdef OSSL_110
 #define M_ASN1_IA5STRING_new() ASN1_IA5STRING_new()
 #define RSA_F_RSA_EAY_PRIVATE_DECRYPT RSA_F_RSA_OSSL_PRIVATE_DECRYPT
+#endif
+
+#ifdef OSSL_110
+#include <openssl/kdf.h>
 #endif
 
 using namespace QCA;
@@ -1277,6 +1280,7 @@ public:
 protected:
 };
 
+#ifdef OSSL_110
 class opensslHkdfContext : public HKDFContext
 {
 public:
@@ -1305,6 +1309,7 @@ public:
 		return out;
 	}
 };
+#endif
 
 class opensslHMACContext : public MACContext
 {
@@ -7411,7 +7416,9 @@ public:
 #endif
 		list += "pbkdf1(sha1)";
 		list += "pbkdf2(sha1)";
+#ifdef OSSL_110
 		list += "hkdf(sha256)";
+#endif
 		list += "pkey";
 		list += "dlgroup";
 		list += "rsa";
@@ -7482,8 +7489,10 @@ public:
 #endif
 		else if ( type == "pbkdf2(sha1)" )
 			return new opensslPbkdf2Context( this, type );
+#ifdef OSSL_110
 		else if ( type == "hkdf(sha256)" )
 			return new opensslHkdfContext( this, type );
+#endif
 		else if ( type == "hmac(md5)" )
 			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )

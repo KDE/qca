@@ -34,7 +34,9 @@
 #include <botan/filters.h>
 #include <botan/hash.h>
 #include <botan/pbkdf.h>
+#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 #include <botan/hkdf.h>
+#endif
 #include <botan/stream_cipher.h>
 #endif
 
@@ -228,17 +230,14 @@ protected:
 };
 
 //-----------------------------------------------------------
+#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 class BotanHKDFContext: public QCA::HKDFContext
 {
 public:
     BotanHKDFContext(const QString &hashName, QCA::Provider *p, const QString &type) : QCA::HKDFContext(p, type)
     {
 	Botan::HMAC *hashObj;
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-	hashObj = new Botan::HMAC(Botan::global_state().algorithm_factory().make_hash_function(hashName.toStdString()));
-#else
 	hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
-#endif
 	m_hkdf = new Botan::HKDF(hashObj);
     }
 
@@ -268,6 +267,7 @@ public:
 protected:
     Botan::HKDF* m_hkdf;
 };
+#endif
 
 
 //-----------------------------------------------------------
@@ -459,7 +459,9 @@ public:
 	list += "pbkdf1(sha1)";
 	list += "pbkdf1(md2)";
 	list += "pbkdf2(sha1)";
+#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 	list += "hkdf(sha256)";
+#endif
 	list += "aes128-ecb";
 	list += "aes128-cbc";
 	list += "aes128-cfb";
@@ -525,8 +527,10 @@ public:
 	    return new BotanPBKDFContext( QString("PBKDF1(MD2)"), this, type );
 	else if ( type == "pbkdf2(sha1)" )
 	    return new BotanPBKDFContext( QString("PBKDF2(SHA-1)"), this, type );
+#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 	else if ( type == "hkdf(sha256)" )
 	    return new BotanHKDFContext( QString("SHA-256"), this, type );
+#endif
 	else if ( type == "aes128-ecb" )
 	    return new BotanCipherContext( QString("AES-128"), QString("ECB"), QString("NoPadding"), this, type );
 	else if ( type == "aes128-cbc" )
