@@ -1682,16 +1682,12 @@ struct DsaDeleter
 
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
-	int ret_counter;
 	QScopedPointer<DSA, DsaDeleter> dsa(DSA_new());
 	if(!dsa)
 		return false;
 
 	if (DSA_generate_parameters_ex(dsa.data(), bits, (const unsigned char *)seed.data(), seed.size(),
-			&ret_counter, NULL, NULL) != 1)
-		return false;
-
-	if(ret_counter != counter)
+			NULL, NULL, NULL) != 1)
 		return false;
 
 	const BIGNUM *bnp, *bnq, *bng;
