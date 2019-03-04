@@ -56,28 +56,16 @@ if(OPENSSL_FOUND)
     set_property(TARGET qca-ossl PROPERTY SUFFIX ".dylib")
   endif()
 
-  include_directories(${OPENSSL_INCLUDE_DIR})
   target_link_libraries(qca-ossl ${QT_QTCORE_LIBRARY})
   target_link_libraries(qca-ossl ${QCA_LIB_NAME})
-  target_link_libraries(qca-ossl ${OPENSSL_LIBRARIES})
-
-  if(APPLE)
-    target_link_libraries(qca-ossl crypto)
-  endif(APPLE)
-
-  if(WIN32)
-    add_definitions(-DOSSL_097)
-    target_link_libraries(qca-ossl gdi32)
-    target_link_libraries(qca-ossl wsock32)
-    target_link_libraries(qca-ossl ${OPENSSL_EAY_LIBRARIES})
-  endif(WIN32)
+  target_link_libraries(qca-ossl OpenSSL::SSL OpenSSL::Crypto)
 
   if(NOT DEVELOPER_MODE)
     install(TARGETS qca-ossl
             LIBRARY DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
             ARCHIVE DESTINATION "${QCA_CRYPTO_INSTALL_DIR}"
             RUNTIME DESTINATION "${QCA_CRYPTO_INSTALL_DIR}")
-  
+
     install_pdb(qca-ossl ${QCA_CRYPTO_INSTALL_DIR})
   endif()
 

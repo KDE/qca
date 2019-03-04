@@ -8,11 +8,7 @@ endif(NOT CMAKE_INSTALL_PREFIX)
 
 project(qca)
 
-if(NOT APPLE)
-  cmake_minimum_required(VERSION 2.8.12)
-else()
-  cmake_minimum_required(VERSION 3.0)
-endif()
+cmake_minimum_required(VERSION 3.4)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "2")
