@@ -431,7 +431,6 @@ if(NOT DEVELOPER_MODE)
     message("!! you MUST explicity define CMAKE_INSTALL_PREFIX !!")
     message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     message("${ESCAPE}[0m")
-    message(FATAL_ERROR "Aborting")
   endif(QCA_INSTALL_IN_QT_PREFIX)
 
   message("")
