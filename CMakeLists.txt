@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.4)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "2")
-set(QCA_LIB_PATCH_VERSION "0")
+set(QCA_LIB_PATCH_VERSION "1")
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
