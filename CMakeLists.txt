@@ -1,4 +1,4 @@
-# Checking for user explicity defined CMAKE_INSTALL_PREFIX
+# Checking for user explicitly defined CMAKE_INSTALL_PREFIX
 # It must be done before project(...)
 if(NOT CMAKE_INSTALL_PREFIX)
   set(QCA_INSTALL_IN_QT_PREFIX ON)
@@ -6,9 +6,10 @@ if(NOT CMAKE_INSTALL_PREFIX)
   unset(CMAKE_INSTALL_PREFIX CACHE)
 endif(NOT CMAKE_INSTALL_PREFIX)
 
-project(qca)
-
+# The cmake min. version should be set before calling project(...) too
 cmake_minimum_required(VERSION 3.4)
+
+project(qca)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "2")
