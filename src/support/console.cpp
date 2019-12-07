@@ -291,7 +291,7 @@ public:
 
 	void writeSecure(const SecureArray &a)
 	{
-		mycall(worker, "writeSecure", QVariantList() << qVariantFromValue<SecureArray>(a));
+		mycall(worker, "writeSecure", QVariantList() << QVariant::fromValue<SecureArray>(a));
 	}
 
 	void closeOutput()
