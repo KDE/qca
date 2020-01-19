@@ -179,7 +179,12 @@ class BotanPBKDFContext: public QCA::KDFContext
 public:
     BotanPBKDFContext( const QString &kdfName, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {
-	m_s2k = Botan::get_s2k(kdfName.toStdString());
+	try {
+	    m_s2k = Botan::get_s2k(kdfName.toStdString());
+	} catch (Botan::Exception& e) {
+	    m_s2k = nullptr;
+	    std::cout << "caught: " << e.what() << std::endl;
+	}
     }
 
     ~BotanPBKDFContext() 
@@ -195,6 +200,9 @@ public:
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
 			      unsigned int keyLength, unsigned int iterationCount) override
     {
+	if (!m_s2k)
+	    return {};
+
 	std::string secretString(secret.data(), secret.size() );
 	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString, (const Botan::byte*)salt.data(), salt.size(), iterationCount);
         QCA::SecureArray retval(QByteArray((const char*)key.begin(), key.length()));
