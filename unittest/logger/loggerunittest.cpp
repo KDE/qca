@@ -65,7 +65,7 @@ public:
     ~LastLogger()
     {}
 
-    void logTextMessage( const QString &message, enum QCA::Logger::Severity severity )
+    void logTextMessage( const QString &message, enum QCA::Logger::Severity severity ) override
     {
         m_lastMessage = message;
         m_messageSeverity = severity;
@@ -76,7 +76,7 @@ public:
         return m_lastMessage;
     }
 
-    void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity )
+    void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity ) override
     {
         m_lastBlob = blob;
         m_blobSeverity = severity;

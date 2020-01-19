@@ -2,7 +2,6 @@
 
 enable_plugin("softstore")
 set(QCA_SOFTSTORE_SOURCES qca-softstore.cpp)
-my_automoc( QCA_SOFTSTORE_SOURCES )
 
 add_library(qca-softstore ${PLUGIN_TYPE} ${QCA_SOFTSTORE_SOURCES})
 
@@ -12,7 +11,7 @@ endif()
 
 add_definitions(${SOFTSTOREH_DEFINITIONS})
 include_directories(${SOFTSTOREH_INCLUDE_DIR})
-target_link_libraries(qca-softstore ${QT_QTCORE_LIBRARY})
+target_link_libraries(qca-softstore Qt5::Core)
 target_link_libraries(qca-softstore ${QCA_LIB_NAME})
 
 if(NOT DEVELOPER_MODE)

@@ -2,8 +2,6 @@ ENABLE_TESTING()
 
 set(keybundleunittest_bin_SRCS keybundle.cpp)  
 
-MY_AUTOMOC( keybundleunittest_bin_SRCS )
-
 add_executable( keybundle ${keybundleunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(keybundle)

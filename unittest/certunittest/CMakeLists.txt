@@ -2,8 +2,6 @@ ENABLE_TESTING()
 
 set(certunittest_bin_SRCS certunittest.cpp)
 
-MY_AUTOMOC( certunittest_bin_SRCS )
-
 add_executable(certunittest ${certunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(certunittest)

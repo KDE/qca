@@ -23,6 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "clientplugin.h"
+
 #include <QtCrypto>
 #include <QtCore/QPointer>
 #include <QtTest/QtTest>
@@ -30,20 +32,6 @@
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"
 #endif
-
-class ClientPlugin : public QObject
-{
-    Q_OBJECT
-
-private slots:
-    void initTestCase();
-    void cleanupTestCase();
-    void testInsertRemovePlugin();
-
-private:
-    QCA::Initializer* m_init;
-
-};
 
 void ClientPlugin::initTestCase()
 {
@@ -59,8 +47,7 @@ const QString providerName = "testClientSideProvider";
 
 class TestClientProvider : public QObject, public QCA::Provider
 {
-        Q_OBJECT
-
+    Q_OBJECT
 public:
         int qcaVersion() const override
         {
@@ -109,4 +96,3 @@ void ClientPlugin::testInsertRemovePlugin()
 QTEST_MAIN(ClientPlugin)
 
 #include "clientplugin.moc"
-

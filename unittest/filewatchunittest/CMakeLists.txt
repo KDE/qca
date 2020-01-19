@@ -1,7 +1,6 @@
 ENABLE_TESTING()
 
 set(SOURCES "filewatchunittest.cpp")
-qt4_wrap_cpp(SOURCES "filewatchunittest.h")
 
 add_executable( filewatchunittest ${SOURCES})
 

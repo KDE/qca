@@ -2,8 +2,6 @@ ENABLE_TESTING()
 
 set(pkits_bin_SRCS pkits.cpp)
 
-MY_AUTOMOC( pkits_bin_SRCS )
-
 add_executable(pkits ${pkits_bin_SRCS} )
 
 target_link_qca_test_libraries(pkits)

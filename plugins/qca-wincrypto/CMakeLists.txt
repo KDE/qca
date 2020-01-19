@@ -3,11 +3,9 @@
 IF (WIN32)
    SET (QCA_WINCRYPTO_SOURCES qca-wincrypto.cpp)
 
-   MY_AUTOMOC (QCA_WINCRYPTO_SOURCES)
-
    ADD_LIBRARY (qca-wincrypto MODULE ${QCA_WINCRYPTO_SOURCES})
    # use win32 includes
-   TARGET_LINK_LIBRARIES (qca-wincrypto ${QT_QTCORE_LIBRARY})
+   TARGET_LINK_LIBRARIES (qca-wincrypto Qt5::core)
    TARGET_LINK_LIBRARIES (qca-wincrypto ${QCA_LIB_NAME})
    TARGET_LINK_LIBRARIES (qca-wincrypto advapi32)
 

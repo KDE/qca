@@ -29,36 +29,14 @@
 
 namespace QCA {
 
-// This function performs the following steps:
-//   obj->disconnect(owner); // to prevent future signals to owner
-//   obj->setParent(0);      // to prevent delete if parent is deleted
-//   obj->deleteLater();     // now we can forget about the object
-inline void releaseAndDeleteLater(QObject *owner, QObject *obj)
-{
-	obj->disconnect(owner);
-	obj->setParent(0);
-	obj->deleteLater();
-}
-
-
-
 class SafeSocketNotifier : public QObject
 {
 	Q_OBJECT
 public:
 	SafeSocketNotifier(int socket, QSocketNotifier::Type type,
-		QObject *parent = 0) :
-		QObject(parent)
-	{
-		sn = new QSocketNotifier(socket, type, this);
-		connect(sn, SIGNAL(activated(int)), SIGNAL(activated(int)));
-	}
+		QObject *parent = 0);
 
-	~SafeSocketNotifier()
-	{
-		sn->setEnabled(false);
-		releaseAndDeleteLater(this, sn);
-	}
+	~SafeSocketNotifier();
 
 	bool isEnabled() const             { return sn->isEnabled(); }
 	int socket() const                 { return sn->socket(); }

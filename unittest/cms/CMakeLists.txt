@@ -2,8 +2,6 @@ ENABLE_TESTING()
 
 set(cms_bin_SRCS cms.cpp)
 
-MY_AUTOMOC( cms_bin_SRCS )
-
 add_executable(cms ${cms_bin_SRCS} )
 
 target_link_qca_test_libraries(cms)

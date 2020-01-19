@@ -31,10 +31,10 @@
 class ClientPlugin : public QObject
 {
     Q_OBJECT
-
-private Q_SLOTS:
+private slots:
     void initTestCase();
     void cleanupTestCase();
+    void testInsertRemovePlugin();
 
 private:
     QCA::Initializer* m_init;

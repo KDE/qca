@@ -41,51 +41,17 @@ endif(NOT BUILD_PLUGINS)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
-option(QT4_BUILD "Force building with Qt4 even if Qt5 is found")
-if (NOT QT4_BUILD)
-  # Do not automatically link Qt executables to qtmain target on Windows.
-  # QCA exucatables use console mode only. Not need to link against qtmain.lib.
-  set(Qt5_NO_LINK_QTMAIN ON)
-  find_package(Qt5Core QUIET)
-  mark_as_advanced(Qt5Core_DIR)
-endif()
+# Do not automatically link Qt executables to qtmain target on Windows.
+# QCA exucatables use console mode only. Not need to link against qtmain.lib.
+set(Qt5_NO_LINK_QTMAIN ON)
+find_package(Qt5 REQUIRED Core)
+set(CMAKE_AUTOMOC ON)
 
 include(QcaMacro)
-
-if (Qt5Core_FOUND)
-  message(STATUS "Building with Qt5 support")
-  # Got from ECM
-  # Distros have no ECM. So I just copied required cmake modules.
-  if(BUILD_TESTS)
-    find_package(Qt5Transitional REQUIRED Core Network)
-  else()
-    find_package(Qt5Transitional REQUIRED Core)
-  endif()
-  include(ECMQt4To5Porting)
-
-  include(GNUInstallDirs)
-  setup_qt5_dirs()
-  set(QCA_QT_PC_VERSION "Qt5Core")
-  set(QCA_SUFFIX "qt5")
-else()
-  set(QT_MIN_VERSION "4.7.0")
-  set(QT_USE_IMPORTED_TARGETS ON)
-  # Do not automatically link Qt executables to qtmain target on Windows.
-  # QCA exucatables use console mode only. Not need to link against qtmain.lib.
-  set(QT4_NO_LINK_QTMAIN ON)
-  if(BUILD_TESTS)
-    find_package(Qt4 REQUIRED QtCore QtNetwork QtTest)
-  else(BUILD_TESTS)
-    find_package(Qt4 REQUIRED QtCore)
-  endif(BUILD_TESTS)
-  # WORKAROUND: Seems it must be done in Qt4 find module but didn't
-  mark_as_advanced(QT_QMAKE_EXECUTABLE)
-
-  # properly set up compile flags (QT_DEBUG/QT_NO_DEBUG, ...)
-  include(${QT_USE_FILE})
-  setup_qt4_dirs()
-  set(QCA_QT_PC_VERSION "QtCore")
-endif()
+include(GNUInstallDirs)
+setup_qt5_dirs()
+set(QCA_QT_PC_VERSION "Qt5Core")
+set(QCA_SUFFIX "qt5")
 
 # QCA can be shared but plugins will be static
 # if Qt is static.
@@ -356,7 +322,7 @@ set( public_HEADERS
 
 set( qca_HEADERS ${private_HEADERS} ${public_HEADERS} )
 
-include_directories(${QT_QTCORE_INCLUDE_DIR} "${qca_INCLUDEDIR}/QtCrypto")
+include_directories("${qca_INCLUDEDIR}/QtCrypto")
 
 configure_file("crypto.prf.cmake" "${CMAKE_BINARY_DIR}/mkspecs/features/crypto.prf" @ONLY)
 if(NOT DEVELOPER_MODE)
@@ -469,7 +435,7 @@ if(NOT DEVELOPER_MODE)
   message("")
 
   if(UNIX AND NOT APPLE)
-    if(NOT QCA_SUFFIX AND NOT QT4_BUILD)
+    if(NOT QCA_SUFFIX)
 
       message("${ESCAPE}[31mYou don't have QCA_SUFFIX set. Please note that the recommended way of")
       message("building Qt5 version of qca for Linux distributions is to set")

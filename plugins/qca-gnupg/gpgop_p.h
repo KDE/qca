@@ -21,16 +21,10 @@
 
 #include "gpgop.h"
 #include "gpgaction.h"
+#include "gpgproc_p.h"
 #include <QObject>
 
 namespace gpgQCAPlugin {
-
-enum ResetMode
-{
-	ResetSession        = 0,
-	ResetSessionAndData = 1,
-	ResetAll            = 2
-};
 
 class GpgOp::Private : public QObject
 {

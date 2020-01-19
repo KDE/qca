@@ -2,8 +2,6 @@ ENABLE_TESTING()
 
 set(pgpunittest_bin_SRCS pgpunittest.cpp)  
 
-MY_AUTOMOC( pgpunittest_bin_SRCS )
-
 add_executable(pgpunittest ${pgpunittest_bin_SRCS} )
 
 target_link_qca_test_libraries(pgpunittest)

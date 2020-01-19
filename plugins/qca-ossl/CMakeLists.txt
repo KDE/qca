@@ -48,15 +48,13 @@ if(OPENSSL_FOUND)
 
   set(QCA_OSSL_SOURCES qca-ossl.cpp)
 
-  my_automoc( QCA_OSSL_SOURCES )
-
   add_library(qca-ossl ${PLUGIN_TYPE} ${QCA_OSSL_SOURCES})
 
   if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
     set_property(TARGET qca-ossl PROPERTY SUFFIX ".dylib")
   endif()
 
-  target_link_libraries(qca-ossl ${QT_QTCORE_LIBRARY})
+  target_link_libraries(qca-ossl Qt5::Core)
   target_link_libraries(qca-ossl ${QCA_LIB_NAME})
   target_link_libraries(qca-ossl OpenSSL::SSL OpenSSL::Crypto)
 

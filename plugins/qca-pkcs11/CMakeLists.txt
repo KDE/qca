@@ -11,7 +11,6 @@ endif(WITH_pkcs11_PLUGIN STREQUAL "yes")
 if(OPENSSL_FOUND AND PKCS11H_FOUND)
   enable_plugin("pkcs11")
   set(QCA_PKCS11_SOURCES qca-pkcs11.cpp)
-  my_automoc( QCA_PKCS11_SOURCES )
 
   add_library(qca-pkcs11 ${PLUGIN_TYPE} ${QCA_PKCS11_SOURCES})
 
@@ -21,7 +20,7 @@ if(OPENSSL_FOUND AND PKCS11H_FOUND)
 
   add_definitions(${PKCS11H_CFLAGS_OTHER})
   include_directories(${PKCS11H_INCLUDE_DIRS})
-  target_link_libraries(qca-pkcs11 ${QT_QTCORE_LIBRARY})
+  target_link_libraries(qca-pkcs11 Qt5::Core)
   target_link_libraries(qca-pkcs11 ${QCA_LIB_NAME})
   target_link_libraries(qca-pkcs11 ${PKCS11H_LDFLAGS})
   if (WIN32)

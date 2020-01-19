@@ -9,14 +9,13 @@ if(SASL2_FOUND)
 
   set(QCA_SASL_SOURCES qca-cyrus-sasl.cpp)
   include_directories( ${SASL2_INCLUDE_DIR} )
-  my_automoc( QCA_SASL_SOURCES )
   add_library(qca-cyrus-sasl ${PLUGIN_TYPE} ${QCA_SASL_SOURCES})
 
   if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
     set_property(TARGET qca-cyrus-sasl PROPERTY SUFFIX ".dylib")
   endif()
 
-  target_link_libraries(qca-cyrus-sasl ${QT_QTCORE_LIBRARY} ${QCA_LIB_NAME} ${SASL2_LIBRARIES})
+  target_link_libraries(qca-cyrus-sasl Qt5::Core ${QCA_LIB_NAME} ${SASL2_LIBRARIES})
 
   if(NOT DEVELOPER_MODE)
     install(TARGETS qca-cyrus-sasl
