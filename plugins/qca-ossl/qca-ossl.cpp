@@ -23,8 +23,8 @@
 #include <QtCrypto>
 #include <qcaprovider.h>
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QScopedPointer>
-#include <QTime>
 #include <QtPlugin>
 
 #include <openssl/evp.h>
@@ -1164,7 +1164,7 @@ public:
 						 unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
-		QTime timer;
+		QElapsedTimer timer;
 
 		/* from RFC2898:
 		   Steps:
@@ -1250,7 +1250,7 @@ public:
 						 unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
-		QTime timer;
+		QElapsedTimer timer;
 		SecureArray out(keyLength);
 
 		*iterationCount = 0;

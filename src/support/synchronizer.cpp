@@ -23,10 +23,10 @@
 
 #include <QAbstractEventDispatcher>
 #include <QCoreApplication>
+#include <QElapsedTimer>
 #include <QEvent>
 #include <QMutex>
 #include <QPair>
-#include <QTime>
 #include <QWaitCondition>
 
 //#define TIMERFIXER_DEBUG
@@ -48,7 +48,7 @@ public:
 	{
 		int id;
 		int interval;
-		QTime time;
+		QElapsedTimer time;
 		bool fixInterval;
 
 		TimerInfo() : fixInterval(false) {}
@@ -182,7 +182,7 @@ private slots:
 			QThread *objectThread = target->thread();
 			QAbstractEventDispatcher *ed = QAbstractEventDispatcher::instance(objectThread);
 
-			int timeLeft = qMax(info.interval - info.time.elapsed(), 0);
+			int timeLeft = qMax(info.interval - static_cast<int>(info.time.elapsed()), 0);
 			info.fixInterval = true;
 			ed->unregisterTimer(info.id);
 #if QT_VERSION >= 0x050000

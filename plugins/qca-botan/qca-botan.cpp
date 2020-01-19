@@ -18,7 +18,7 @@
  *
  */
 #include <QtCrypto>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QtPlugin>
 
 #include <qstringlist.h>
@@ -209,7 +209,7 @@ public:
 	{
 		Q_ASSERT(iterationCount != NULL);
 		Botan::OctetString key;
-		QTime timer;
+		QElapsedTimer timer;
 		std::string secretString(secret.data(), secret.size() );
 
 		*iterationCount = 0;

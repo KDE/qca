@@ -21,7 +21,7 @@
 
 #include <QtCore/qplugin.h>
 
-#include <QTime>
+#include <QElapsedTimer>
 
 #include <qstringlist.h>
 #include <gcrypt.h>
@@ -350,7 +350,7 @@ public:
 							  unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
-		QTime timer;
+		QElapsedTimer timer;
 
 		/*
 		   from RFC2898:
@@ -449,7 +449,7 @@ public:
 	{
 		Q_ASSERT(iterationCount != NULL);
 		QCA::SymmetricKey result(keyLength);
-		QTime timer;
+		QElapsedTimer timer;
 
 		*iterationCount = 0;
 		timer.start();
