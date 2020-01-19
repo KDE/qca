@@ -314,6 +314,7 @@ public:
 	}
 	m_crypter->start_msg();
 	} catch (Botan::Exception& e) {
+	    m_crypter = nullptr;
 	    std::cout << "caught: " << e.what() << std::endl;
 	}
     }
@@ -343,6 +344,8 @@ public:
 
     bool update(const QCA::SecureArray &in, QCA::SecureArray *out)
     {
+	if (!m_crypter)
+	    return false;
 	m_crypter->write((Botan::byte*)in.data(), in.size());
 	QCA::SecureArray result( m_crypter->remaining() );
 	// Perhaps bytes_read is redundant and can be dropped
