@@ -192,6 +192,11 @@ public:
 	delete m_s2k;
     }
 
+    bool isOk() const
+    {
+	return m_s2k;
+    }
+
     Context *clone() const override
     {
 	return new BotanPBKDFContext( *this );
@@ -418,7 +423,17 @@ protected:
     Botan::Pipe *m_crypter;
 };
 
+static QString qcaPbkdfToBotanPbkdf(const QString &pbkdf)
+{
+    if (pbkdf == QLatin1String("pbkdf1(sha1)"))
+	return QStringLiteral("PBKDF1(SHA-1)");
+    else if (pbkdf == QLatin1String("pbkdf1(md2)"))
+	return QStringLiteral("PBKDF1(MD2)");
+    else if (pbkdf == QLatin1String("pbkdf2(sha1)"))
+	return QStringLiteral("PBKDF2(SHA-1)");
 
+    return {};
+}
 
 //==========================================================
 class botanProvider : public QCA::Provider
@@ -450,53 +465,57 @@ public:
 
     QStringList features() const override
     {
-	QStringList list;
-	list += "random";
-	list += "md2";
-	list += "md4";
-	list += "md5";
-	list += "sha1";
-	list += "sha256";
-	list += "sha384";
-	list += "sha512";
-	list += "ripemd160";
-	list += "hmac(md5)";
-	list += "hmac(sha1)";
-        // HMAC with SHA2 doesn't appear to work correctly in Botan.
-	// list += "hmac(sha256)";
-	// list += "hmac(sha384)";
-	// list += "hmac(sha512)";
-	list += "hmac(ripemd160)";
-	list += "pbkdf1(sha1)";
-	list += "pbkdf1(md2)";
-	list += "pbkdf2(sha1)";
+	static QStringList list;
+	if (list.isEmpty()) {
+	    list += "random";
+	    list += "md2";
+	    list += "md4";
+	    list += "md5";
+	    list += "sha1";
+	    list += "sha256";
+	    list += "sha384";
+	    list += "sha512";
+	    list += "ripemd160";
+	    list += "hmac(md5)";
+	    list += "hmac(sha1)";
+	    // HMAC with SHA2 doesn't appear to work correctly in Botan.
+	    // list += "hmac(sha256)";
+	    // list += "hmac(sha384)";
+	    // list += "hmac(sha512)";
+	    list += "hmac(ripemd160)";
+	    list += "pbkdf1(sha1)";
+	    std::unique_ptr<BotanPBKDFContext> pbkdf1md2(new BotanPBKDFContext( qcaPbkdfToBotanPbkdf("pbkdf1(md2)"), nullptr, "pbkdf1(md2)"));
+	    if (pbkdf1md2->isOk())
+		list += "pbkdf1(md2)";
+	    list += "pbkdf2(sha1)";
 #if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
-	list += "hkdf(sha256)";
+	    list += "hkdf(sha256)";
 #endif
-	list += "aes128-ecb";
-	list += "aes128-cbc";
-	list += "aes128-cfb";
-	list += "aes128-ofb";
-	list += "aes192-ecb";
-	list += "aes192-cbc";
-	list += "aes192-cfb";
-	list += "aes192-ofb";
-	list += "aes256-ecb";
-	list += "aes256-cbc";
-	list += "aes256-cfb";
-	list += "aes256-ofb";
-	list += "des-ecb";
-	list += "des-ecb-pkcs7";
-	list += "des-cbc";
-	list += "des-cbc-pkcs7";
-	list += "des-cfb";
-	list += "des-ofb";
-	list += "tripledes-ecb";
-	list += "blowfish-ecb";
-	list += "blowfish-cbc";
-	list += "blowfish-cbc-pkcs7";
-	list += "blowfish-cfb";
-	list += "blowfish-ofb";
+	    list += "aes128-ecb";
+	    list += "aes128-cbc";
+	    list += "aes128-cfb";
+	    list += "aes128-ofb";
+	    list += "aes192-ecb";
+	    list += "aes192-cbc";
+	    list += "aes192-cfb";
+	    list += "aes192-ofb";
+	    list += "aes256-ecb";
+	    list += "aes256-cbc";
+	    list += "aes256-cfb";
+	    list += "aes256-ofb";
+	    list += "des-ecb";
+	    list += "des-ecb-pkcs7";
+	    list += "des-cbc";
+	    list += "des-cbc-pkcs7";
+	    list += "des-cfb";
+	    list += "des-ofb";
+	    list += "tripledes-ecb";
+	    list += "blowfish-ecb";
+	    list += "blowfish-cbc";
+	    list += "blowfish-cbc-pkcs7";
+	    list += "blowfish-cfb";
+	    list += "blowfish-ofb";
+	}
 	return list;
     }
 
@@ -532,12 +551,8 @@ public:
 	    return new BotanHMACContext( QString("SHA-512"), this, type );
 	else if ( type == "hmac(ripemd160)" )
 	    return new BotanHMACContext( QString("RIPEMD-160"), this, type );
-	else if ( type == "pbkdf1(sha1)" )
-	    return new BotanPBKDFContext( QString("PBKDF1(SHA-1)"), this, type );
-	else if ( type == "pbkdf1(md2)" )
-	    return new BotanPBKDFContext( QString("PBKDF1(MD2)"), this, type );
-	else if ( type == "pbkdf2(sha1)" )
-	    return new BotanPBKDFContext( QString("PBKDF2(SHA-1)"), this, type );
+	else if ( type.startsWith(QLatin1String("pbkdf")) )
+	    return new BotanPBKDFContext( qcaPbkdfToBotanPbkdf(type), this, type );
 #if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 	else if ( type == "hkdf(sha256)" )
 	    return new BotanHKDFContext( QString("SHA-256"), this, type );
