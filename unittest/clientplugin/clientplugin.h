@@ -35,7 +35,6 @@ class ClientPlugin : public QObject
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
-    void testInsertPlugin();
 
 private:
     QCA::Initializer* m_init;
