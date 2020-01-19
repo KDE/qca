@@ -178,6 +178,8 @@ void GPGProc::Private::setupArguments()
 {
 	QStringList fullargs;
 	fullargs += "--no-tty";
+	fullargs += "--pinentry-mode";
+	fullargs += "loopback";
 
 	if(mode == ExtendedMode)
 	{
