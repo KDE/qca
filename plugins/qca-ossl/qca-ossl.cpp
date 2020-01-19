@@ -1052,26 +1052,26 @@ public:
 		EVP_MD_CTX_free(m_context);
 	}
 
-	void clear()
+	void clear() override
 	{
 		EVP_MD_CTX_free(m_context);
 		m_context = EVP_MD_CTX_new();
 		EVP_DigestInit( m_context, m_algorithm );
 	}
 
-	void update(const MemoryRegion &a)
+	void update(const MemoryRegion &a) override
 	{
 		EVP_DigestUpdate( m_context, (unsigned char*)a.data(), a.size() );
 	}
 
-	MemoryRegion final()
+	MemoryRegion final() override
 	{
 		SecureArray a( EVP_MD_size( m_algorithm ) );
 		EVP_DigestFinal( m_context, (unsigned char*)a.data(), 0 );
 		return a;
 	}
 
-	Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new opensslHashContext(*this);
 	}
@@ -1105,13 +1105,13 @@ public:
 		EVP_MD_CTX_free(m_context);
 	}
 
-	Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new opensslPbkdf1Context( *this );
 	}
 
 	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
-						 unsigned int keyLength, unsigned int iterationCount)
+						 unsigned int keyLength, unsigned int iterationCount) override
 	{
 		/* from RFC2898:
 		   Steps:
@@ -1161,7 +1161,7 @@ public:
 						 const InitializationVector &salt,
 						 unsigned int keyLength,
 						 int msecInterval,
-						 unsigned int *iterationCount)
+						 unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
 		QTime timer;
@@ -1228,13 +1228,13 @@ public:
 	{
 	}
 
-	Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new opensslPbkdf2Context( *this );
 	}
 
 	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
-						 unsigned int keyLength, unsigned int iterationCount)
+						 unsigned int keyLength, unsigned int iterationCount) override
 	{
 		SecureArray out(keyLength);
 		PKCS5_PBKDF2_HMAC_SHA1( (char*)secret.data(), secret.size(),
@@ -1247,7 +1247,7 @@ public:
 						 const InitializationVector &salt,
 						 unsigned int keyLength,
 						 int msecInterval,
-						 unsigned int *iterationCount)
+						 unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
 		QTime timer;
@@ -1288,13 +1288,13 @@ public:
 	{
 	}
 
-	Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new opensslHkdfContext( *this );
 	}
 
 	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
-						 const InitializationVector &info, unsigned int keyLength)
+						 const InitializationVector &info, unsigned int keyLength) override
 	{
 		SecureArray out(keyLength);
 		EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
@@ -1336,22 +1336,22 @@ public:
 		HMAC_CTX_free(m_context);
 	}
 
-	void setup(const SymmetricKey &key)
+	void setup(const SymmetricKey &key) override
 	{
 		HMAC_Init_ex( m_context, key.data(), key.size(), m_algorithm, 0 );
 	}
 
-	KeyLength keyLength() const
+	KeyLength keyLength() const override
 	{
 		return anyKeyLength();
 	}
 
-	void update(const MemoryRegion &a)
+	void update(const MemoryRegion &a) override
 	{
 		HMAC_Update( m_context, (unsigned char *)a.data(), a.size() );
 	}
 
-	void final(MemoryRegion *out)
+	void final(MemoryRegion *out) override
 	{
 		SecureArray sa( EVP_MD_size( m_algorithm ), 0 );
 		HMAC_Final(m_context, (unsigned char *)sa.data(), 0 );
@@ -1363,7 +1363,7 @@ public:
 		*out = sa;
 	}
 
-	Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new opensslHMACContext(*this);
 	}
@@ -1730,7 +1730,7 @@ public:
 		wait();
 	}
 
-	virtual void run()
+	void run() override
 	{
 		switch (set)
 		{
@@ -1793,12 +1793,12 @@ public:
 		delete gm;
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new MyDLGroup(*this);
 	}
 
-	virtual QList<DLGroupSet> supportedGroupSets() const
+	QList<DLGroupSet> supportedGroupSets() const override
 	{
 		QList<DLGroupSet> list;
 
@@ -1815,12 +1815,12 @@ public:
 		return list;
 	}
 
-	virtual bool isNull() const
+	bool isNull() const override
 	{
 		return empty;
 	}
 
-	virtual void fetchGroup(DLGroupSet set, bool block)
+	void fetchGroup(DLGroupSet set, bool block) override
 	{
 		params = DLParams();
 		empty = true;
@@ -1839,7 +1839,7 @@ public:
 		}
 	}
 
-	virtual void getResult(BigInteger *p, BigInteger *q, BigInteger *g) const
+	void getResult(BigInteger *p, BigInteger *q, BigInteger *g) const override
 	{
 		*p = params.p;
 		*q = params.q;
@@ -1908,7 +1908,7 @@ public:
 			RSA_free(result);
 	}
 
-	virtual void run()
+	void run() override
 	{
 		QScopedPointer<RSA, RsaDeleter> rsa(RSA_new());
 		if(!rsa)
@@ -1962,32 +1962,32 @@ public:
 		delete keymaker;
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new RSAKey(*this);
 	}
 
-	virtual bool isNull() const
+	bool isNull() const override
 	{
 		return (evp.pkey ? false: true);
 	}
 
-	virtual PKey::Type type() const
+	PKey::Type type() const override
 	{
 		return PKey::RSA;
 	}
 
-	virtual bool isPrivate() const
+	bool isPrivate() const override
 	{
 		return sec;
 	}
 
-	virtual bool canExport() const
+	bool canExport() const override
 	{
 		return true;
 	}
 
-	virtual void convertToPublic()
+	void convertToPublic() override
 	{
 		if(!sec)
 			return;
@@ -2013,12 +2013,12 @@ public:
 		sec = false;
 	}
 
-	virtual int bits() const
+	int bits() const override
 	{
 		return EVP_PKEY_bits(evp.pkey);
 	}
 
-	virtual int maximumEncryptSize(EncryptionAlgorithm alg) const
+	int maximumEncryptSize(EncryptionAlgorithm alg) const override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		int size = 0;
@@ -2033,7 +2033,7 @@ public:
 		return size;
 	}
 
-	virtual SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg)
+	SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg) override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		SecureArray buf = in;
@@ -2066,7 +2066,7 @@ public:
 		return result;
 	}
 
-	virtual bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg)
+	bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg) override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		SecureArray result(RSA_size(rsa));
@@ -2095,7 +2095,7 @@ public:
 		return true;
 	}
 
-	virtual void startSign(SignatureAlgorithm alg, SignatureFormat)
+	void startSign(SignatureAlgorithm alg, SignatureFormat) override
 	{
 		const EVP_MD *md = 0;
 		if(alg == EMSA3_SHA1)
@@ -2123,7 +2123,7 @@ public:
 		evp.startSign(md);
 	}
 
-	virtual void startVerify(SignatureAlgorithm alg, SignatureFormat)
+	void startVerify(SignatureAlgorithm alg, SignatureFormat) override
 	{
 		const EVP_MD *md = 0;
 		if(alg == EMSA3_SHA1)
@@ -2151,22 +2151,22 @@ public:
 		evp.startVerify(md);
 	}
 
-	virtual void update(const MemoryRegion &in)
+	void update(const MemoryRegion &in) override
 	{
 		evp.update(in);
 	}
 
-	virtual QByteArray endSign()
+	QByteArray endSign() override
 	{
 		return evp.endSign().toByteArray();
 	}
 
-	virtual bool endVerify(const QByteArray &sig)
+	bool endVerify(const QByteArray &sig) override
 	{
 		return evp.endVerify(sig);
 	}
 
-	virtual void createPrivate(int bits, int exp, bool block)
+	void createPrivate(int bits, int exp, bool block) override
 	{
 		evp.reset();
 
@@ -2184,7 +2184,7 @@ public:
 		}
 	}
 
-	virtual void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q, const BigInteger &d)
+	void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q, const BigInteger &d) override
 	{
 		evp.reset();
 
@@ -2208,7 +2208,7 @@ public:
 		sec = true;
 	}
 
-	virtual void createPublic(const BigInteger &n, const BigInteger &e)
+	void createPublic(const BigInteger &n, const BigInteger &e) override
 	{
 		evp.reset();
 
@@ -2224,7 +2224,7 @@ public:
 		sec = false;
 	}
 
-	virtual BigInteger n() const
+	BigInteger n() const override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnn;
@@ -2232,7 +2232,7 @@ public:
 		return bn2bi(bnn);
 	}
 
-	virtual BigInteger e() const
+	BigInteger e() const override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bne;
@@ -2240,7 +2240,7 @@ public:
 		return bn2bi(bne);
 	}
 
-	virtual BigInteger p() const
+	BigInteger p() const override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnp;
@@ -2248,7 +2248,7 @@ public:
 		return bn2bi(bnp);
 	}
 
-	virtual BigInteger q() const
+	BigInteger q() const override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnq;
@@ -2256,7 +2256,7 @@ public:
 		return bn2bi(bnq);
 	}
 
-	virtual BigInteger d() const
+	BigInteger d() const override
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnd;
@@ -2307,7 +2307,7 @@ public:
 			DSA_free(result);
 	}
 
-	virtual void run()
+	void run() override
 	{
 		DSA *dsa = DSA_new();
 		BIGNUM *pne = bi2bn(domain.p()),
@@ -2359,32 +2359,32 @@ public:
 		delete keymaker;
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new DSAKey(*this);
 	}
 
-	virtual bool isNull() const
+	bool isNull() const override
 	{
 		return (evp.pkey ? false: true);
 	}
 
-	virtual PKey::Type type() const
+	PKey::Type type() const override
 	{
 		return PKey::DSA;
 	}
 
-	virtual bool isPrivate() const
+	bool isPrivate() const override
 	{
 		return sec;
 	}
 
-	virtual bool canExport() const
+	bool canExport() const override
 	{
 		return true;
 	}
 
-	virtual void convertToPublic()
+	void convertToPublic() override
 	{
 		if(!sec)
 			return;
@@ -2410,12 +2410,12 @@ public:
 		sec = false;
 	}
 
-	virtual int bits() const
+	int bits() const override
 	{
 		return EVP_PKEY_bits(evp.pkey);
 	}
 
-	virtual void startSign(SignatureAlgorithm, SignatureFormat format)
+	void startSign(SignatureAlgorithm, SignatureFormat format) override
 	{
 		// openssl native format is DER, so transform otherwise
 		if(format != DERSequence)
@@ -2426,7 +2426,7 @@ public:
 		evp.startSign(EVP_sha1());
 	}
 
-	virtual void startVerify(SignatureAlgorithm, SignatureFormat format)
+	void startVerify(SignatureAlgorithm, SignatureFormat format) override
 	{
 		// openssl native format is DER, so transform otherwise
 		if(format != DERSequence)
@@ -2437,12 +2437,12 @@ public:
 		evp.startVerify(EVP_sha1());
 	}
 
-	virtual void update(const MemoryRegion &in)
+	void update(const MemoryRegion &in) override
 	{
 		evp.update(in);
 	}
 
-	virtual QByteArray endSign()
+	QByteArray endSign() override
 	{
 		SecureArray out = evp.endSign();
 		if(transformsig)
@@ -2451,7 +2451,7 @@ public:
 			return out.toByteArray();
 	}
 
-	virtual bool endVerify(const QByteArray &sig)
+	bool endVerify(const QByteArray &sig) override
 	{
 		SecureArray in;
 		if(transformsig)
@@ -2461,7 +2461,7 @@ public:
 		return evp.endVerify(in);
 	}
 
-	virtual void createPrivate(const DLGroup &domain, bool block)
+	void createPrivate(const DLGroup &domain, bool block) override
 	{
 		evp.reset();
 
@@ -2479,7 +2479,7 @@ public:
 		}
 	}
 
-	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x)
+	void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) override
 	{
 		evp.reset();
 
@@ -2502,7 +2502,7 @@ public:
 		sec = true;
 	}
 
-	virtual void createPublic(const DLGroup &domain, const BigInteger &y)
+	void createPublic(const DLGroup &domain, const BigInteger &y) override
 	{
 		evp.reset();
 
@@ -2524,7 +2524,7 @@ public:
 		sec = false;
 	}
 
-	virtual DLGroup domain() const
+	DLGroup domain() const override
 	{
 		DSA *dsa = EVP_PKEY_get0_DSA(evp.pkey);
 		const BIGNUM *bnp, *bnq, *bng;
@@ -2532,7 +2532,7 @@ public:
 		return DLGroup(bn2bi(bnp), bn2bi(bnq), bn2bi(bng));
 	}
 
-	virtual BigInteger y() const
+	BigInteger y() const override
 	{
 		DSA *dsa = EVP_PKEY_get0_DSA(evp.pkey);
 		const BIGNUM *bnpub_key;
@@ -2540,7 +2540,7 @@ public:
 		return bn2bi(bnpub_key);
 	}
 
-	virtual BigInteger x() const
+	BigInteger x() const override
 	{
 		DSA *dsa = EVP_PKEY_get0_DSA(evp.pkey);
 		const BIGNUM *bnpriv_key;
@@ -2591,7 +2591,7 @@ public:
 			DH_free(result);
 	}
 
-	virtual void run()
+	void run() override
 	{
 		DH *dh = DH_new();
 		BIGNUM *bnp = bi2bn(domain.p());
@@ -2639,32 +2639,32 @@ public:
 		delete keymaker;
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new DHKey(*this);
 	}
 
-	virtual bool isNull() const
+	bool isNull() const override
 	{
 		return (evp.pkey ? false: true);
 	}
 
-	virtual PKey::Type type() const
+	PKey::Type type() const override
 	{
 		return PKey::DH;
 	}
 
-	virtual bool isPrivate() const
+	bool isPrivate() const override
 	{
 		return sec;
 	}
 
-	virtual bool canExport() const
+	bool canExport() const override
 	{
 		return true;
 	}
 
-	virtual void convertToPublic()
+	 void convertToPublic() override
 	{
 		if(!sec)
 			return;
@@ -2685,12 +2685,12 @@ public:
 		sec = false;
 	}
 
-	virtual int bits() const
+	int bits() const override
 	{
 		return EVP_PKEY_bits(evp.pkey);
 	}
 
-	virtual SymmetricKey deriveKey(const PKeyBase &theirs)
+	SymmetricKey deriveKey(const PKeyBase &theirs) override
 	{
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		DH *them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
@@ -2705,7 +2705,7 @@ public:
 		return SymmetricKey(result);
 	}
 
-	virtual void createPrivate(const DLGroup &domain, bool block)
+	void createPrivate(const DLGroup &domain, bool block) override
 	{
 		evp.reset();
 
@@ -2723,7 +2723,7 @@ public:
 		}
 	}
 
-	virtual void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x)
+	void createPrivate(const DLGroup &domain, const BigInteger &y, const BigInteger &x) override
 	{
 		evp.reset();
 
@@ -2745,7 +2745,7 @@ public:
 		sec = true;
 	}
 
-	virtual void createPublic(const DLGroup &domain, const BigInteger &y)
+	void createPublic(const DLGroup &domain, const BigInteger &y) override
 	{
 		evp.reset();
 
@@ -2766,7 +2766,7 @@ public:
 		sec = false;
 	}
 
-	virtual DLGroup domain() const
+	DLGroup domain() const override
 	{
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		const BIGNUM *bnp, *bng;
@@ -2774,7 +2774,7 @@ public:
 		return DLGroup(bn2bi(bnp), bn2bi(bng));
 	}
 
-	virtual BigInteger y() const
+	BigInteger y() const override
 	{
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		const BIGNUM *bnpub_key;
@@ -2782,7 +2782,7 @@ public:
 		return bn2bi(bnpub_key);
 	}
 
-	virtual BigInteger x() const
+	BigInteger x() const override
 	{
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		const BIGNUM *bnpriv_key;
@@ -3016,14 +3016,14 @@ public:
 		delete k;
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		MyPKeyContext *c = new MyPKeyContext(*this);
 		c->k = (PKeyBase *)k->clone();
 		return c;
 	}
 
-	virtual QList<PKey::Type> supportedTypes() const
+	QList<PKey::Type> supportedTypes() const override
 	{
 		QList<PKey::Type> list;
 		list += PKey::RSA;
@@ -3032,7 +3032,7 @@ public:
 		return list;
 	}
 
-	virtual QList<PKey::Type> supportedIOTypes() const
+	QList<PKey::Type> supportedIOTypes() const override
 	{
 		QList<PKey::Type> list;
 		list += PKey::RSA;
@@ -3040,7 +3040,7 @@ public:
 		return list;
 	}
 
-	virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const
+	QList<PBEAlgorithm> supportedPBEAlgorithms() const override
 	{
 		QList<PBEAlgorithm> list;
 		list += PBES2_DES_SHA1;
@@ -3048,22 +3048,22 @@ public:
 		return list;
 	}
 
-	virtual PKeyBase *key()
+	PKeyBase *key() override
 	{
 		return k;
 	}
 
-	virtual const PKeyBase *key() const
+	const PKeyBase *key() const override
 	{
 		return k;
 	}
 
-	virtual void setKey(PKeyBase *key)
+	void setKey(PKeyBase *key) override
 	{
 		k = key;
 	}
 
-	virtual bool importKey(const PKeyBase *key)
+	bool importKey(const PKeyBase *key) override
 	{
 		Q_UNUSED(key);
 		return false;
@@ -3112,7 +3112,7 @@ public:
 		return nk;
 	}
 
-	virtual QByteArray publicToDER() const
+	QByteArray publicToDER() const override
 	{
 		EVP_PKEY *pkey = get_pkey();
 
@@ -3128,7 +3128,7 @@ public:
 		return buf;
 	}
 
-	virtual QString publicToPEM() const
+	QString publicToPEM() const override
 	{
 		EVP_PKEY *pkey = get_pkey();
 
@@ -3144,7 +3144,7 @@ public:
 		return QString::fromLatin1(buf);
 	}
 
-	virtual ConvertResult publicFromDER(const QByteArray &in)
+	ConvertResult publicFromDER(const QByteArray &in) override
 	{
 		delete k;
 		k = 0;
@@ -3164,7 +3164,7 @@ public:
 			return ErrorDecode;
 	}
 
-	virtual ConvertResult publicFromPEM(const QString &s)
+	ConvertResult publicFromPEM(const QString &s) override
 	{
 		delete k;
 		k = 0;
@@ -3185,7 +3185,7 @@ public:
 			return ErrorDecode;
 	}
 
-	virtual SecureArray privateToDER(const SecureArray &passphrase, PBEAlgorithm pbe) const
+	SecureArray privateToDER(const SecureArray &passphrase, PBEAlgorithm pbe) const override
 	{
 		//if(pbe == PBEDefault)
 		//	pbe = PBES2_TripleDES_SHA1;
@@ -3215,7 +3215,7 @@ public:
 		return buf;
 	}
 
-	virtual QString privateToPEM(const SecureArray &passphrase, PBEAlgorithm pbe) const
+	QString privateToPEM(const SecureArray &passphrase, PBEAlgorithm pbe) const override
 	{
 		//if(pbe == PBEDefault)
 		//	pbe = PBES2_TripleDES_SHA1;
@@ -3245,7 +3245,7 @@ public:
 		return QString::fromLatin1(buf.toByteArray());
 	}
 
-	virtual ConvertResult privateFromDER(const SecureArray &in, const SecureArray &passphrase)
+	ConvertResult privateFromDER(const SecureArray &in, const SecureArray &passphrase) override
 	{
 		delete k;
 		k = 0;
@@ -3266,7 +3266,7 @@ public:
 			return ErrorDecode;
 	}
 
-	virtual ConvertResult privateFromPEM(const QString &s, const SecureArray &passphrase)
+	ConvertResult privateFromPEM(const QString &s, const SecureArray &passphrase) override
 	{
 		delete k;
 		k = 0;
@@ -3514,22 +3514,22 @@ public:
 		//printf("[%p] ** deleted\n", this);
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new MyCertContext(*this);
 	}
 
-	virtual QByteArray toDER() const
+	QByteArray toDER() const override
 	{
 		return item.toDER();
 	}
 
-	virtual QString toPEM() const
+	QString toPEM() const override
 	{
 		return item.toPEM();
 	}
 
-	virtual ConvertResult fromDER(const QByteArray &a)
+	ConvertResult fromDER(const QByteArray &a) override
 	{
 		_props = CertContextProps();
 		ConvertResult r = item.fromDER(a, X509Item::TypeCert);
@@ -3538,7 +3538,7 @@ public:
 		return r;
 	}
 
-	virtual ConvertResult fromPEM(const QString &s)
+	ConvertResult fromPEM(const QString &s) override
 	{
 		_props = CertContextProps();
 		ConvertResult r = item.fromPEM(s, X509Item::TypeCert);
@@ -3554,7 +3554,7 @@ public:
 		make_props();
 	}
 
-	virtual bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv)
+	bool createSelfSigned(const CertificateOptions &opts, const PKeyContext &priv) override
 	{
 		_props = CertContextProps();
 		item.reset();
@@ -3662,13 +3662,13 @@ public:
 		return true;
 	}
 
-	virtual const CertContextProps *props() const
+	const CertContextProps *props() const override
 	{
 		//printf("[%p] grabbing props\n", this);
 		return &_props;
 	}
 
-	virtual bool compare(const CertContext *other) const
+	bool compare(const CertContext *other) const override
 	{
 		const CertContextProps *a = &_props;
 		const CertContextProps *b = other->props();
@@ -3694,7 +3694,7 @@ public:
 	}
 
 	// does a new
-	virtual PKeyContext *subjectPublicKey() const
+	PKeyContext *subjectPublicKey() const override
 	{
 		MyPKeyContext *kc = new MyPKeyContext(provider());
 		EVP_PKEY *pkey = X509_get_pubkey(item.cert);
@@ -3703,7 +3703,7 @@ public:
 		return kc;
 	}
 
-	virtual bool isIssuerOf(const CertContext *other) const
+	bool isIssuerOf(const CertContext *other) const override
 	{
 
 		// to check a single issuer, we make a list of 1
@@ -3746,9 +3746,9 @@ public:
 	}
 
 	// implemented later because it depends on MyCRLContext
-	virtual Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const;
+	Validity validate(const QList<CertContext*> &trusted, const QList<CertContext*> &untrusted, const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const override;
 
-	virtual Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const;
+	Validity validate_chain(const QList<CertContext*> &chain, const QList<CertContext*> &trusted, const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const override;
 
 	void make_props()
 	{
@@ -3945,7 +3945,7 @@ public:
 		delete privateKey;
 	}
 
-	virtual CertContext *certificate() const
+	CertContext *certificate() const override
 	{
 		MyCertContext *cert = new MyCertContext(provider());
 
@@ -3953,7 +3953,7 @@ public:
 		return cert;
 	}
 
-	virtual CertContext *createCertificate(const PKeyContext &pub, const CertificateOptions &opts) const
+	CertContext *createCertificate(const PKeyContext &pub, const CertificateOptions &opts) const override
 	{
 		// TODO: implement
 		Q_UNUSED(pub)
@@ -3961,14 +3961,14 @@ public:
 		return 0;
 	}
 
-	virtual CRLContext *createCRL(const QDateTime &nextUpdate) const
+	CRLContext *createCRL(const QDateTime &nextUpdate) const override
 	{
 		// TODO: implement
 		Q_UNUSED(nextUpdate)
 		return 0;
 	}
 
-	virtual void setup(const CertContext &cert, const PKeyContext &priv)
+	void setup(const CertContext &cert, const PKeyContext &priv) override
 	{
 		caCert = static_cast<const MyCertContext&>(cert).item;
 		delete privateKey;
@@ -3976,7 +3976,7 @@ public:
 		privateKey = static_cast<MyPKeyContext*>(priv.clone());
 	}
 
-	virtual CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const
+	CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const override
 	{
 		MyCertContext *cert = 0;
 		const EVP_MD *md = 0;
@@ -4074,7 +4074,7 @@ public:
 		return cert;
 	}
 
-	virtual CRLContext *updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const
+	CRLContext *updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const override
 	{
 		// TODO: implement
 		Q_UNUSED(crl)
@@ -4083,7 +4083,7 @@ public:
 		return 0;
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new MyCAContext(*this);
 	}
@@ -4106,22 +4106,22 @@ public:
 	{
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new MyCSRContext(*this);
 	}
 
-	virtual QByteArray toDER() const
+	QByteArray toDER() const override
 	{
 		return item.toDER();
 	}
 
-	virtual QString toPEM() const
+	QString toPEM() const override
 	{
 		return item.toPEM();
 	}
 
-	virtual ConvertResult fromDER(const QByteArray &a)
+	ConvertResult fromDER(const QByteArray &a) override
 	{
 		_props = CertContextProps();
 		ConvertResult r = item.fromDER(a, X509Item::TypeReq);
@@ -4130,7 +4130,7 @@ public:
 		return r;
 	}
 
-	virtual ConvertResult fromPEM(const QString &s)
+	ConvertResult fromPEM(const QString &s) override
 	{
 		_props = CertContextProps();
 		ConvertResult r = item.fromPEM(s, X509Item::TypeReq);
@@ -4139,14 +4139,14 @@ public:
 		return r;
 	}
 
-	virtual bool canUseFormat(CertificateRequestFormat f) const
+	bool canUseFormat(CertificateRequestFormat f) const override
 	{
 		if(f == PKCS10)
 			return true;
 		return false;
 	}
 
-	virtual bool createRequest(const CertificateOptions &opts, const PKeyContext &priv)
+	bool createRequest(const CertificateOptions &opts, const PKeyContext &priv) override
 	{
 		_props = CertContextProps();
 		item.reset();
@@ -4230,12 +4230,12 @@ public:
 		return true;
 	}
 
-	virtual const CertContextProps *props() const
+	const CertContextProps *props() const override
 	{
 		return &_props;
 	}
 
-	virtual bool compare(const CSRContext *other) const
+	bool compare(const CSRContext *other) const override
 	{
 		const CertContextProps *a = &_props;
 		const CertContextProps *b = other->props();
@@ -4254,7 +4254,7 @@ public:
 		return true;
 	}
 
-	virtual PKeyContext *subjectPublicKey() const // does a new
+	PKeyContext *subjectPublicKey() const override // does a new
 	{
 		MyPKeyContext *kc = new MyPKeyContext(provider());
 		EVP_PKEY *pkey = X509_REQ_get_pubkey(item.req);
@@ -4263,12 +4263,12 @@ public:
 		return kc;
 	}
 
-	virtual QString toSPKAC() const
+	QString toSPKAC() const override
 	{
 		return QString();
 	}
 
-	virtual ConvertResult fromSPKAC(const QString &s)
+	ConvertResult fromSPKAC(const QString &s) override
 	{
 		Q_UNUSED(s);
 		return ErrorDecode;
@@ -4393,22 +4393,22 @@ public:
 	{
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new MyCRLContext(*this);
 	}
 
-	virtual QByteArray toDER() const
+	QByteArray toDER() const override
 	{
 		return item.toDER();
 	}
 
-	virtual QString toPEM() const
+	QString toPEM() const override
 	{
 		return item.toPEM();
 	}
 
-	virtual ConvertResult fromDER(const QByteArray &a)
+	ConvertResult fromDER(const QByteArray &a) override
 	{
 		_props = CRLContextProps();
 		ConvertResult r = item.fromDER(a, X509Item::TypeCRL);
@@ -4417,7 +4417,7 @@ public:
 		return r;
 	}
 
-	virtual ConvertResult fromPEM(const QString &s)
+	ConvertResult fromPEM(const QString &s) override
 	{
 		ConvertResult r = item.fromPEM(s, X509Item::TypeCRL);
 		if(r == ConvertGood)
@@ -4432,12 +4432,12 @@ public:
 		make_props();
 	}
 
-	virtual const CRLContextProps *props() const
+	const CRLContextProps *props() const override
 	{
 		return &_props;
 	}
 
-	virtual bool compare(const CRLContext *other) const
+	bool compare(const CRLContext *other) const override
 	{
 		const CRLContextProps *a = &_props;
 		const CRLContextProps *b = other->props();
@@ -4616,12 +4616,12 @@ public:
 	{
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new MyCertCollectionContext(*this);
 	}
 
-	virtual QByteArray toPKCS7(const QList<CertContext*> &certs, const QList<CRLContext*> &crls) const
+	QByteArray toPKCS7(const QList<CertContext*> &certs, const QList<CRLContext*> &crls) const override
 	{
 		// TODO: implement
 		Q_UNUSED(certs);
@@ -4629,7 +4629,7 @@ public:
 		return QByteArray();
 	}
 
-	virtual ConvertResult fromPKCS7(const QByteArray &a, QList<CertContext*> *certs, QList<CRLContext*> *crls) const
+	ConvertResult fromPKCS7(const QByteArray &a, QList<CertContext*> *certs, QList<CRLContext*> *crls) const override
 	{
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, a.data(), a.size());
@@ -4892,12 +4892,12 @@ public:
 	{
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return 0;
 	}
 
-	virtual QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const SecureArray &passphrase) const
+	QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const SecureArray &passphrase) const override
 	{
 		if(chain.count() < 1)
 			return QByteArray();
@@ -4926,7 +4926,7 @@ public:
 		return out;
 	}
 
-	virtual ConvertResult fromPKCS12(const QByteArray &in, const SecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const
+	ConvertResult fromPKCS12(const QByteArray &in, const SecureArray &passphrase, QString *name, QList<CertContext*> *chain, PKeyContext **priv) const override
 	{
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
@@ -5600,12 +5600,12 @@ public:
 		reset();
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return 0;
 	}
 
-	virtual void reset()
+	void reset() override
 	{
 		if(ssl)
 		{
@@ -5639,7 +5639,7 @@ public:
 		return 1;
 	}
 
-	virtual QStringList supportedCipherSuites(const TLS::Version &version) const
+	QStringList supportedCipherSuites(const TLS::Version &version) const override
 	{
 		OpenSSL_add_ssl_algorithms();
 		SSL_CTX *ctx = 0;
@@ -5685,38 +5685,38 @@ public:
 		return cipherList;
 	}
 
-	virtual bool canCompress() const
+	bool canCompress() const override
 	{
 		// TODO
 		return false;
 	}
 
-	virtual bool canSetHostName() const
+	bool canSetHostName() const override
 	{
 		// TODO
 		return false;
 	}
 
-	virtual int maxSSF() const
+	int maxSSF() const override
 	{
 		// TODO
 		return 256;
 	}
 
-	virtual void setConstraints(int minSSF, int maxSSF)
+	void setConstraints(int minSSF, int maxSSF) override
 	{
 		// TODO
 		Q_UNUSED(minSSF);
 		Q_UNUSED(maxSSF);
 	}
 
-	virtual void setConstraints(const QStringList &cipherSuiteList)
+	void setConstraints(const QStringList &cipherSuiteList) override
 	{
 		// TODO
 		Q_UNUSED(cipherSuiteList);
 	}
 
-	virtual void setup(bool serverMode, const QString &hostName, bool compress)
+	void setup(bool serverMode, const QString &hostName, bool compress) override
 	{
 		serv = serverMode;
 		if ( false == serverMode ) {
@@ -5726,35 +5726,35 @@ public:
 		Q_UNUSED(compress); // TODO
 	}
 
-	virtual void setTrustedCertificates(const CertificateCollection &_trusted)
+	void setTrustedCertificates(const CertificateCollection &_trusted) override
 	{
 		trusted = _trusted;
 	}
 
-	virtual void setIssuerList(const QList<CertificateInfoOrdered> &issuerList)
+	void setIssuerList(const QList<CertificateInfoOrdered> &issuerList) override
 	{
 		Q_UNUSED(issuerList); // TODO
 	}
 
-	virtual void setCertificate(const CertificateChain &_cert, const PrivateKey &_key)
+	void setCertificate(const CertificateChain &_cert, const PrivateKey &_key) override
 	{
 		if(!_cert.isEmpty())
 			cert = _cert.primary(); // TODO: take the whole chain
 		key = _key;
 	}
 
-	virtual void setSessionId(const TLSSessionContext &id)
+	void setSessionId(const TLSSessionContext &id) override
 	{
 		// TODO
 		Q_UNUSED(id);
 	}
 
-	virtual void shutdown()
+	void shutdown() override
 	{
 		mode = Closing;
 	}
 
-	virtual void start()
+	void start() override
 	{
 		bool ok;
 		if(serv)
@@ -5766,7 +5766,7 @@ public:
 		doResultsReady();
 	}
 
-	virtual void update(const QByteArray &from_net, const QByteArray &from_app)
+	void update(const QByteArray &from_net, const QByteArray &from_app) override
 	{
 		if(mode == Active)
 		{
@@ -5983,73 +5983,73 @@ public:
 		return true;
 	}
 
-	virtual bool waitForResultsReady(int msecs)
+	bool waitForResultsReady(int msecs) override
 	{
 		// TODO: for now, all operations block anyway
 		Q_UNUSED(msecs);
 		return true;
 	}
 
-	virtual Result result() const
+	Result result() const override
 	{
 		return result_result;
 	}
 
-	virtual QByteArray to_net()
+	QByteArray to_net() override
 	{
 		QByteArray a = result_to_net;
 		result_to_net.clear();
 		return a;
 	}
 
-	virtual int encoded() const
+	int encoded() const override
 	{
 		return result_encoded;
 	}
 
-	virtual QByteArray to_app()
+	QByteArray to_app() override
 	{
 		QByteArray a = result_plain;
 		result_plain.clear();
 		return a;
 	}
 
-	virtual bool eof() const
+	bool eof() const override
 	{
 		return v_eof;
 	}
 
-	virtual bool clientHelloReceived() const
+	bool clientHelloReceived() const override
 	{
 		// TODO
 		return false;
 	}
 
-	virtual bool serverHelloReceived() const
+	bool serverHelloReceived() const override
 	{
 		// TODO
 		return false;
 	}
 
-	virtual QString hostName() const
+	QString hostName() const override
 	{
 		// TODO
 		return QString();
 	}
 
-	virtual bool certificateRequested() const
+	bool certificateRequested() const override
 	{
 		// TODO
 		return false;
 	}
 
-	virtual QList<CertificateInfoOrdered> issuerList() const
+	QList<CertificateInfoOrdered> issuerList() const override
 	{
 		// TODO
 		return QList<CertificateInfoOrdered>();
 	}
 
-	virtual SessionInfo sessionInfo() const
+	SessionInfo sessionInfo() const override
 	{
 		SessionInfo sessInfo;
 
@@ -6078,7 +6078,7 @@ public:
 		return sessInfo;
 	}
 
-	virtual QByteArray unprocessed()
+	QByteArray unprocessed() override
 	{
 		QByteArray a;
 		int size = BIO_pending(rbio);
@@ -6097,12 +6097,12 @@ public:
 		return a;
 	}
 
-	virtual Validity peerCertificateValidity() const
+	Validity peerCertificateValidity() const override
 	{
 		return vr;
 	}
 
-	virtual CertificateChain peerCertificateChain() const
+	CertificateChain peerCertificateChain() const override
 	{
 		// TODO: support whole chain
 		CertificateChain chain;
@@ -6368,27 +6368,27 @@ public:
 	{
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return 0;
 	}
 
-	virtual void setTrustedCertificates(const CertificateCollection &trusted)
+	void setTrustedCertificates(const CertificateCollection &trusted) override
 	{
 		trustedCerts = trusted;
 	}
 
-	virtual void setUntrustedCertificates(const CertificateCollection &untrusted)
+	void setUntrustedCertificates(const CertificateCollection &untrusted) override
 	{
 		untrustedCerts = untrusted;
 	}
 
-	virtual void setPrivateKeys(const QList<SecureMessageKey> &keys)
+	void setPrivateKeys(const QList<SecureMessageKey> &keys) override
 	{
 		privateKeys = keys;
 	}
 
-	virtual MessageContext *createMessage();
+	MessageContext *createMessage() override;
 };
 
 STACK_OF(X509) *get_pk7_certs(PKCS7 *p7)
@@ -6422,7 +6422,7 @@ public:
 	}
 
 protected:
-	virtual void run()
+	void run() override
 	{
 		MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
 		MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
@@ -6505,31 +6505,31 @@ public:
 	{
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return 0;
 	}
 
-	virtual bool canSignMultiple() const
+	bool canSignMultiple() const override
 	{
 		return false;
 	}
 
-	virtual SecureMessage::Type type() const
+	SecureMessage::Type type() const override
 	{
 		return SecureMessage::CMS;
 	}
 
-	virtual void reset()
+	void reset() override
 	{
 	}
 
-	virtual void setupEncrypt(const SecureMessageKeyList &keys)
+	void setupEncrypt(const SecureMessageKeyList &keys) override
 	{
 		to = keys;
 	}
 
-	virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime)
+	void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime) override
 	{
 		signer = keys.first();
 		signMode = m;
@@ -6537,13 +6537,13 @@ public:
 		this->smime = smime;
 	}
 
-	virtual void setupVerify(const QByteArray &detachedSig)
+	void setupVerify(const QByteArray &detachedSig) override
 	{
 		// TODO
 		sig = detachedSig;
 	}
 
-	virtual void start(SecureMessage::Format f, Operation op)
+	void start(SecureMessage::Format f, Operation op) override
 	{
 		format = f;
 		_finished = false;
@@ -6559,26 +6559,26 @@ public:
 		//}
 	}
 
-	virtual void update(const QByteArray &in)
+	void update(const QByteArray &in) override
 	{
 		this->in.append(in);
 		total += in.size();
 		QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
 	}
 
-	virtual QByteArray read()
+	QByteArray read() override
 	{
 		return out;
 	}
 
-	virtual int written()
+	int written() override
 	{
 		int x = total;
 		total = 0;
 		return x;
 	}
 
-	virtual void end()
+	void end() override
 	{
 		_finished = true;
 
@@ -6897,12 +6897,12 @@ public:
 		}
 	}
 
-	virtual bool finished() const
+	bool finished() const override
 	{
 		return _finished;
 	}
 
-	virtual bool waitForFinished(int msecs)
+	bool waitForFinished(int msecs) override
 	{
 		// TODO
 		Q_UNUSED(msecs);
@@ -6915,30 +6915,30 @@ public:
 		return true;
 	}
 
-	virtual bool success() const
+	bool success() const override
 	{
 		// TODO
 		return true;
 	}
 
-	virtual SecureMessage::Error errorCode() const
+	SecureMessage::Error errorCode() const override
 	{
 		// TODO
 		return SecureMessage::ErrorUnknown;
 	}
 
-	virtual QByteArray signature() const
+	QByteArray signature() const override
 	{
 		return sig;
 	}
 
-	virtual QString hashName() const
+	QString hashName() const override
 	{
 		// TODO
 		return "sha1";
 	}
 
-	virtual SecureMessageSignatureList signers() const
+	SecureMessageSignatureList signers() const override
 	{
 		// only report signers for verify
 		if(op != Verify)
@@ -7024,7 +7024,7 @@ public:
 	void setup(Direction dir,
 			   const SymmetricKey &key,
 			   const InitializationVector &iv,
-			   const AuthTag &tag)
+			   const AuthTag &tag) override
 	{
 		m_tag = tag;
 		m_direction = dir;
@@ -7057,22 +7057,22 @@ public:
 		EVP_CIPHER_CTX_set_padding(m_context, m_pad);
 	}
 
-	Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new opensslCipherContext( *this );
 	}
 
-	int blockSize() const
+	int blockSize() const override
 	{
 		return EVP_CIPHER_CTX_block_size(m_context);
 	}
 
-    AuthTag tag() const
+    AuthTag tag() const override
     {
 		return m_tag;
     }
 
-	bool update(const SecureArray &in, SecureArray *out)
+	bool update(const SecureArray &in, SecureArray *out) override
 	{
 		// This works around a problem in OpenSSL, where it asserts if
 		// there is nothing to encrypt.
@@ -7102,7 +7102,7 @@ public:
 		return true;
 	}
 
-	bool final(SecureArray *out)
+	bool final(SecureArray *out) override
 	{
 		out->resize(blockSize());
 		int resultLength;
@@ -7136,7 +7136,7 @@ public:
 	}
 
 	// Change cipher names
-	KeyLength keyLength() const
+	KeyLength keyLength() const override
 	{
 		if (m_type.left(4) == "des-") {
 			return KeyLength( 8, 8, 1);
@@ -7296,22 +7296,22 @@ public:
 	{
 	}
 
-	Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new opensslInfoContext(*this);
 	}
 
-	QStringList supportedHashTypes() const
+	QStringList supportedHashTypes() const override
 	{
 		return all_hash_types();
 	}
 
-	QStringList supportedCipherTypes() const
+	QStringList supportedCipherTypes() const override
 	{
 		return all_cipher_types();
 	}
 
-	QStringList supportedMACTypes() const
+	QStringList supportedMACTypes() const override
 	{
 		return all_mac_types();
 	}
@@ -7324,12 +7324,12 @@ public:
 	{
 	}
 
-	Context *clone() const
+	Context *clone() const override
 	{
 		return new opensslRandomContext(*this);
 	}
 
-	QCA::SecureArray nextBytes(int size)
+	QCA::SecureArray nextBytes(int size) override
 	{
 		QCA::SecureArray buf(size);
 		int r;
@@ -7356,7 +7356,7 @@ public:
 		openssl_initted = false;
 	}
 
-	void init()
+	void init() override
 	{
 		OpenSSL_add_all_algorithms();
 		ERR_load_crypto_strings();
@@ -7387,24 +7387,24 @@ public:
 		ERR_free_strings();*/
 	}
 
-	int qcaVersion() const
+	int qcaVersion() const override
 	{
 		return QCA_VERSION;
 	}
 
-	QString name() const
+	QString name() const override
 	{
 		return "qca-ossl";
 	}
 
-	QString credit() const
+	QString credit() const override
 	{
 		return QString(
 					   "This product includes cryptographic software "
 					   "written by Eric Young (eay@cryptsoft.com)");
 	}
 
-	QStringList features() const
+	QStringList features() const override
 	{
 		QStringList list;
 		list += "random";
@@ -7436,7 +7436,7 @@ public:
 		return list;
 	}
 
-	Context *createContext(const QString &type)
+	Context *createContext(const QString &type) override
 	{
 		//OpenSSL_add_all_digests();
 		if ( type == "random" )
@@ -7655,7 +7655,7 @@ class opensslPlugin : public QObject, public QCAPlugin
 #endif
 	Q_INTERFACES(QCAPlugin)
 public:
-	virtual Provider *createProvider() { return new opensslProvider; }
+	Provider *createProvider() override { return new opensslProvider; }
 };
 
 #include "qca-ossl.moc"

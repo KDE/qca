@@ -86,12 +86,12 @@ public:
 		QCA::logger()->unregisterLogDevice (name ());
 	}
 
-	void logTextMessage( const QString &message, enum QCA::Logger::Severity severity )
+	void logTextMessage( const QString &message, enum QCA::Logger::Severity severity ) override
 	{
 		_stream << now () << " " << severityName (severity) << " " << message << endl;
 	}
 
-	void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity )
+	void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity ) override
 	{
 		Q_UNUSED(blob);
 		_stream << now () << " " << severityName (severity) << " " << "Binary blob not implemented yet" << endl;
@@ -695,12 +695,12 @@ public:
 	}
 
 protected:
-	virtual void atStart()
+	void atStart() override
 	{
 		pp = new PassphrasePrompt;
 	}
 
-	virtual void atEnd()
+	void atEnd() override
 	{
 		delete pp;
 	}

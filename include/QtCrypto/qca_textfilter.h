@@ -179,7 +179,7 @@ public:
 
 	   This is useful to reuse an existing Hex object
 	*/
-	virtual void clear();
+	void clear() override;
 
 	/**
 	   Process more data, returning the corresponding
@@ -195,7 +195,7 @@ public:
 
 	   \param a the array containing data to process
 	*/
-	virtual MemoryRegion update(const MemoryRegion &a);
+	MemoryRegion update(const MemoryRegion &a) override;
 
 	/**
 	   Complete the algorithm
@@ -205,14 +205,14 @@ public:
 	   zero length array - any output will have been returned
 	   from the update() call.
 	*/
-	virtual MemoryRegion final();
+	MemoryRegion final() override;
 
 	/**
 	   Test if an update() or final() call succeeded.
 	 
 	   \return true if the previous call succeeded
 	*/
-	virtual bool ok() const;
+	bool ok() const override;
 
 private:
 	Q_DISABLE_COPY(Hex)
@@ -274,7 +274,7 @@ public:
 	   Reset the internal state. This is useful to 
 	   reuse an existing Base64 object
 	*/
-	virtual void clear();
+	void clear() override;
 
 	/**
 	   Process more data, returning the corresponding
@@ -290,7 +290,7 @@ public:
 
 	   \param a the array containing data to process
 	*/
-	virtual MemoryRegion update(const MemoryRegion &a);
+	MemoryRegion update(const MemoryRegion &a) override;
 
 	/**
 	   Complete the algorithm
@@ -300,14 +300,14 @@ public:
 	   empty array, or an array containing one or two
 	   "=" (equals, 0x3D) characters.
 	*/
-	virtual MemoryRegion final();
+	MemoryRegion final() override;
 
 	/**
 	   Test if an update() or final() call succeeded.
 	 
 	   \return true if the previous call succeeded
 	*/
-	virtual bool ok() const;
+	bool ok() const override;
 
 private:
 	Q_DISABLE_COPY(Base64)

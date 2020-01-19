@@ -53,8 +53,8 @@ Q_SIGNALS:
 	void timeout();
 
 protected:
-	bool event(QEvent *event);
-	void timerEvent(QTimerEvent *event);
+	bool event(QEvent *event) override;
+	void timerEvent(QTimerEvent *event) override;
 
 private:
 	// Functions is used internally. Outer world mustn't have access them.

@@ -69,31 +69,25 @@ public:
 	~pkcs11Provider ();
 
 public:
-	virtual
 	int
-	qcaVersion() const;
+	qcaVersion() const override;
 
-	virtual
 	void
-	init ();
+	init () override;
 
-	virtual
 	void
-	deinit ();
+	deinit () override;
 
-	virtual
 	QString
-	name () const;
+	name () const override;
 
-	virtual
 	QStringList
-	features () const;
+	features () const override;
 
-	virtual
 	Context *
 	createContext (
 		const QString &type
-	);
+	) override;
 
 	void
 	startSlotEvents ();
@@ -101,13 +95,11 @@ public:
 	void
 	stopSlotEvents ();
 
-	virtual
 	QVariantMap
-	defaultConfig () const;
+	defaultConfig () const override;
 
-	virtual
 	void
-	configChanged (const QVariantMap &config);
+	configChanged (const QVariantMap &config) override;
 
 protected:
 	static
@@ -247,55 +239,44 @@ public:
 
 	~pkcs11KeyStoreListContext ();
 
-	virtual
 	Provider::Context *
-	clone () const;
+	clone () const override;
 
 public:
-	virtual
 	void
-	start ();
+	start () override;
 
-	virtual
 	void
-	setUpdatesEnabled (bool enabled);
+	setUpdatesEnabled (bool enabled) override;
 
-	virtual
 	KeyStoreEntryContext *
 	entry (
 		int id,
 		const QString &entryId
-	);
+	) override;
 
-	virtual
 	KeyStoreEntryContext *
 	entryPassive (
 		const QString &serialized
-	);
+	) override;
 
-	virtual
 	KeyStore::Type
-	type (int id) const;
+	type (int id) const override;
 
-	virtual
 	QString
-	storeId (int id) const;
+	storeId (int id) const override;
 
-	virtual
 	QString
-	name (int id) const;
+	name (int id) const override;
 
-	virtual
 	QList<KeyStoreEntry::Type>
-	entryTypes (int id) const;
+	entryTypes (int id) const override;
 
-	virtual
 	QList<int>
-	keyStores ();
+	keyStores () override;
 
-	virtual
 	QList<KeyStoreEntryContext *>
-	entryList (int id);
+	entryList (int id) override;
 
 	bool
 	_tokenPrompt (
@@ -527,40 +508,34 @@ public:
 		);
 	}
 
-	virtual
 	Provider::Context *
-	clone () const {
+	clone () const override {
 		return new pkcs11RSAContext (*this);
 	}
 
 public:
-	virtual
 	bool
-	isNull () const {
+	isNull () const override {
 		return _pubkey.isNull ();
 	}
 
-	virtual
 	PKey::Type
-	type () const {
+	type () const override {
 		return _pubkey.type ();
 	}
 
-	virtual
 	bool
-	isPrivate () const {
+	isPrivate () const override {
 		return _has_privateKeyRole;
 	}
 
-	virtual
 	bool
-	canExport () const {
+	canExport () const override {
 		return !_has_privateKeyRole;
 	}
 
-	virtual
 	void
-	convertToPublic () {
+	convertToPublic () override {
 		QCA_logTextMessage (
 			"pkcs11RSAContext::convertToPublic - entry",
 			Logger::Debug
@@ -580,36 +555,32 @@ public:
 		);
 	}
 
-	virtual
 	int
-	bits () const {
+	bits () const override {
 		return _pubkey.bitSize ();
 	}
 
-	virtual
 	int
 	maximumEncryptSize (
 		EncryptionAlgorithm alg
-	) const {
+	) const override {
 		return _pubkey.maximumEncryptSize (alg);
 	}
 
-	virtual
 	SecureArray
 	encrypt (
 		const SecureArray &in,
 		EncryptionAlgorithm alg
-	) {
+	) override {
 		return _pubkey.encrypt (in, alg);
 	}
 
-	virtual
 	bool
 	decrypt (
 		const SecureArray &in,
 		SecureArray *out,
 		EncryptionAlgorithm alg
-	) {
+	) override {
 		bool session_locked = false;
 		bool ret = false;
 
@@ -721,12 +692,11 @@ public:
 		return ret;
 	}
 
-	virtual
 	void
 	startSign (
 		SignatureAlgorithm alg,
 		SignatureFormat
-	) {
+	) override {
 		_clearSign ();
 
 		_sign_data.alg = alg;
@@ -758,20 +728,18 @@ public:
 		}
 	}
 
-	virtual
 	void
 	startVerify (
 		SignatureAlgorithm alg,
 		SignatureFormat sf
-	) {
+	) override {
 		_pubkey.startVerify (alg, sf);
 	}
 
-	virtual
 	void
 	update (
 		const MemoryRegion &in
-	) {
+	) override {
 		if (_has_privateKeyRole) {
 			if (_sign_data.hash != NULL) {
 				_sign_data.hash->update (in);
@@ -785,9 +753,8 @@ public:
 		}
 	}
 
-	virtual
 	QByteArray
-	endSign () {
+	endSign () override {
 		QByteArray result;
 		bool session_locked = false;
 
@@ -913,19 +880,17 @@ public:
 		return _pubkey.validSignature (sig);
 	}
 
-	virtual
 	void
 	createPrivate (
 		int bits,
 		int exp,
 		bool block
-	) {
+	) override {
 		Q_UNUSED(bits);
 		Q_UNUSED(exp);
 		Q_UNUSED(block);
 	}
 
-	virtual
 	void
 	createPrivate (
 		const BigInteger &n,
@@ -933,7 +898,7 @@ public:
 		const BigInteger &p,
 		const BigInteger &q,
 		const BigInteger &d
-	) {
+	) override {
 		Q_UNUSED(n);
 		Q_UNUSED(e);
 		Q_UNUSED(p);
@@ -941,43 +906,37 @@ public:
 		Q_UNUSED(d);
 	}
 
-	virtual
 	void
 	createPublic (
 		const BigInteger &n,
 		const BigInteger &e
-	) {
+	) override {
 		Q_UNUSED(n);
 		Q_UNUSED(e);
 	}
 
-	virtual
 	BigInteger
-	n () const {
+	n () const override {
 		return _pubkey.n ();
 	}
 
-	virtual
 	BigInteger
-	e () const {
+	e () const override {
 		return _pubkey.e ();
 	}
 
-	virtual
 	BigInteger
-	p () const {
+	p () const override {
 		return BigInteger();
 	}
 
-	virtual
 	BigInteger
-	q () const {
+	q () const override {
 		return BigInteger();
 	}
 
-	virtual
 	BigInteger
-	d () const {
+	d () const override {
 		return BigInteger();
 	}
 
@@ -1097,62 +1056,54 @@ public:
 		_k = NULL;
 	}
 
-	virtual
 	Provider::Context *
-	clone () const {
+	clone () const override {
 		pkcs11PKeyContext *c = new pkcs11PKeyContext (*this);
 		c->_k = (PKeyBase *)_k->clone();
 		return c;
 	}
 
 public:
-	virtual
 	QList<PKey::Type>
-	supportedTypes () const {
+	supportedTypes () const override {
 		QList<PKey::Type> list;
 		list += PKey::RSA;
 		return list;
 	}
 
-	virtual
 	QList<PKey::Type>
-	supportedIOTypes () const {
+	supportedIOTypes () const override {
 		QList<PKey::Type> list;
 		list += PKey::RSA;
 		return list;
 	}
 
-	virtual
 	QList<PBEAlgorithm>
-	supportedPBEAlgorithms () const {
+	supportedPBEAlgorithms () const override {
 		QList<PBEAlgorithm> list;
 		return list;
 	}
 
-	virtual
 	PKeyBase *
-	key () {
+	key () override {
 		return _k;
 	}
 
-	virtual
 	const PKeyBase *
-	key () const {
+	key () const override {
 		return _k;
 	}
 
-	virtual
 	void
-	setKey (PKeyBase *key) {
+	setKey (PKeyBase *key) override {
 		delete _k;
 		_k = key;
 	}
 
-	virtual
 	bool
 	importKey (
 		const PKeyBase *key
-	) {
+	) override {
 		Q_UNUSED(key);
 		return false;
 	}
@@ -1172,75 +1123,67 @@ public:
 		return 0;
 	}
 
-	virtual
 	QByteArray
-	publicToDER () const {
+	publicToDER () const override {
 		return static_cast<pkcs11RSAContext *>(_k)->_publicKey ().toDER ();
 	}
 
-	virtual
 	QString
-	publicToPEM () const {
+	publicToPEM () const override {
 		return static_cast<pkcs11RSAContext *>(_k)->_publicKey ().toPEM ();
 	}
 
-	virtual
 	ConvertResult
 	publicFromDER (
 		const QByteArray &in
-	) {
+	) override {
 		Q_UNUSED(in);
 		return ErrorDecode;
 	}
 
-	virtual
 	ConvertResult
 	publicFromPEM (
 		const QString &s
-	) {
+	) override {
 		Q_UNUSED(s);
 		return ErrorDecode;
 	}
 
-	virtual
 	SecureArray
 	privateToDER(
 		const SecureArray &passphrase,
 		PBEAlgorithm pbe
-	) const {
+	) const override {
 		Q_UNUSED(passphrase);
 		Q_UNUSED(pbe);
 		return SecureArray ();
 	}
 
-	virtual
 	QString
 	privateToPEM (
 		const SecureArray &passphrase,
 		PBEAlgorithm pbe
-	) const {
+	) const override {
 		Q_UNUSED(passphrase);
 		Q_UNUSED(pbe);
 		return QString ();
 	}
 
-	virtual
 	ConvertResult
 	privateFromDER (
 		const SecureArray &in,
 		const SecureArray &passphrase
-	) {
+	) override {
 		Q_UNUSED(in);
 		Q_UNUSED(passphrase);
 		return ErrorDecode;
 	}
 
-	virtual
 	ConvertResult
 	privateFromPEM (
 		const QString &s,
 		const SecureArray &passphrase
-	) {
+	) override {
 		Q_UNUSED(s);
 		Q_UNUSED(passphrase);
 		return ErrorDecode;
@@ -1309,70 +1252,59 @@ public:
 		_name = from._name;
 	}
 
-	virtual
 	Provider::Context *
-	clone () const {
+	clone () const override {
 		return new pkcs11KeyStoreEntryContext (*this);
 	}
 
 public:
-	virtual
 	KeyStoreEntry::Type
-	type () const {
+	type () const override {
 		return _item_type;
 	}
 
-	virtual
 	QString
-	name () const {
+	name () const override {
 		return _name;
 	}
 
-	virtual
 	QString
-	id () const {
+	id () const override {
 		return _id;
 	}
 
-	virtual
 	KeyBundle
-	keyBundle () const {
+	keyBundle () const override {
 		return _key;
 	}
 
-	virtual
 	Certificate
-	certificate () const {
+	certificate () const override {
 		return _cert;
 	}
 
-	virtual
 	QString
-	storeId () const {
+	storeId () const override {
 		return _storeId;
 	}
 
-	virtual
 	QString
-	storeName () const {
+	storeName () const override {
 		return _storeName;
 	}
 
-	virtual
 	bool
-	isAvailable() const {
+	isAvailable() const override {
 		return static_cast<pkcs11RSAContext *>(static_cast<PKeyContext *>(_key.privateKey ().context ())->key ())->_isTokenAvailable ();
 	}
 
-	virtual
 	bool
-	ensureAccess () {
+	ensureAccess () override {
 		return static_cast<pkcs11RSAContext *>(static_cast<PKeyContext *>(_key.privateKey ().context ())->key ())->_ensureTokenAccess ();
 	}
 
-	virtual
 	QString
-	serialize () const {
+	serialize () const override {
 		return _serialized;
 	}
 };
@@ -3103,7 +3035,7 @@ class pkcs11Plugin : public QObject, public QCAPlugin
 	Q_INTERFACES(QCAPlugin)
 
 public:
-	virtual Provider *createProvider() { return new pkcs11Provider; }
+	Provider *createProvider() override { return new pkcs11Provider; }
 };
 
 #include "qca-pkcs11.moc"

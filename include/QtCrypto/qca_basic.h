@@ -265,7 +265,7 @@ public:
 	   a Hash sub-class object to calculate additional
 	   hashes.
 	*/
-	virtual void clear();
+	void clear() override;
 
 	/**
 	   Update a hash, adding more of the message contents
@@ -278,7 +278,7 @@ public:
 
 	   \param a the byte array to add to the hash
 	*/
-	virtual void update(const MemoryRegion &a);
+	void update(const MemoryRegion &a) override;
 
 	/**
 	   \overload
@@ -340,7 +340,7 @@ if ( f.open( QIODevice::ReadOnly ) )
 	   reuse the Hash object, you should call clear() and
 	   start to update() again.
 	*/
-	virtual MemoryRegion final();
+	MemoryRegion final() override;
 
 	/**
 	   %Hash a byte array, returning it as another
@@ -733,7 +733,7 @@ public:
 	/**
 	   reset the cipher object, to allow re-use
 	*/
-	virtual void clear();
+	void clear() override;
 
 	/**
 	   pass in a byte array of data, which will be encrypted or decrypted
@@ -742,20 +742,20 @@ public:
 
 	   \param a the array of data to encrypt / decrypt
 	*/
-	virtual MemoryRegion update(const MemoryRegion &a);
+	MemoryRegion update(const MemoryRegion &a) override;
 
 	/**
 	   complete the block of data, padding as required, and returning
 	   the completed block
 	*/
-	virtual MemoryRegion final();
+	MemoryRegion final() override;
 
 	/**
 	   Test if an update() or final() call succeeded.
 
 	   \return true if the previous call succeeded
 	*/
-	virtual bool ok() const;
+	bool ok() const override;
 
 	/**
 	   Reset / reconfigure the Cipher
@@ -899,7 +899,7 @@ public:
 	   doesn't need to be changed, you don't need to call
 	   setup() again, since the key can just be reused.
 	*/
-	virtual void clear();
+	void clear() override;
 
 	/**
 	   Update the MAC, adding more of the message contents
@@ -908,7 +908,7 @@ public:
 
 	   \param array the message contents
 	*/
-	virtual void update(const MemoryRegion &array);
+	void update(const MemoryRegion &array) override;
 
 	/**
 	   Finalises input and returns the MAC result
@@ -921,7 +921,7 @@ public:
 	   reuse the %MessageAuthenticationCode object, you
 	   should call clear() and start to update() again.
 	*/
-	virtual MemoryRegion final();
+	MemoryRegion final() override;
 
 	/**
 	   Initialise the MAC algorithm

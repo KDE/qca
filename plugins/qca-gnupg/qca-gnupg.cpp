@@ -27,21 +27,21 @@ using namespace gpgQCAPlugin;
 class gnupgProvider : public QCA::Provider
 {
 public:
-	virtual void init()
+	void init() override
 	{
 	}
 
-	virtual int qcaVersion() const
+	int qcaVersion() const override
 	{
 		return QCA_VERSION;
 	}
 
-	virtual QString name() const
+	QString name() const override
 	{
 		return "qca-gnupg";
 	}
 
-	virtual QStringList features() const
+	QStringList features() const override
 	{
 		QStringList list;
 		list += "pgpkey";
@@ -50,7 +50,7 @@ public:
 		return list;
 	}
 
-	virtual Context *createContext(const QString &type)
+	Context *createContext(const QString &type) override
 	{
 		if(type == "pgpkey")
 			return new MyPGPKeyContext(this);
@@ -71,7 +71,7 @@ class gnupgPlugin : public QObject, public QCAPlugin
 #endif
 	Q_INTERFACES(QCAPlugin)
 public:
-	virtual QCA::Provider *createProvider() { return new gnupgProvider; }
+	QCA::Provider *createProvider() override { return new gnupgProvider; }
 };
 
 #include "qca-gnupg.moc"

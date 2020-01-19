@@ -44,13 +44,13 @@ class saslProvider : public Provider
 {
 public:
 	saslProvider();
-	void init();
+	void init() override;
 	~saslProvider();
-	int qcaVersion() const;
-	QString name() const;
-	QString credit() const;
-	QStringList features() const;
-	Context *createContext(const QString &type);
+	int qcaVersion() const override;
+	QString name() const override;
+	QString credit() const override;
+	QStringList features() const override;
+	Context *createContext(const QString &type) override;
 
 	bool client_init;
 	bool server_init;
@@ -581,23 +581,23 @@ public:
 		reset();
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return 0;
 	}
 
-	virtual Result result() const
+	Result result() const override
 	{
 		return result_result;
 	}
 
-	virtual void reset()
+	void reset() override
 	{
 		resetState();
 		resetParams();
 	}
 
-	virtual void setup(const QString &_service, const QString &_host, const HostPort *local, const HostPort *remote, const QString &ext_id, int _ext_ssf)
+	void setup(const QString &_service, const QString &_host, const HostPort *local, const HostPort *remote, const QString &ext_id, int _ext_ssf) override
 	{
 		service = _service;
 		host = _host;
@@ -607,12 +607,12 @@ public:
 		ext_ssf = _ext_ssf;
 	}
 
-	virtual int ssf() const
+	int ssf() const override
 	{
 		return result_ssf;
 	}
 
-	virtual void startClient(const QStringList &mechlist, bool allowClientSendFirst)
+	void startClient(const QStringList &mechlist, bool allowClientSendFirst) override
 	{
 		resetState();
 
@@ -670,7 +670,7 @@ public:
 	}
 
 	// TODO: make use of disableServerSendLast
-	virtual void startServer(const QString &realm, bool disableServerSendLast)
+	void startServer(const QString &realm, bool disableServerSendLast) override
 	{
 		Q_UNUSED(disableServerSendLast);
 		resetState();
@@ -721,7 +721,7 @@ public:
 		return;
 	}
 
-	virtual void serverFirstStep(const QString &mech, const QByteArray *clientInit)
+	void serverFirstStep(const QString &mech, const QByteArray *clientInit) override
 	{
 		in_mech = mech;
 		if(clientInit) {
@@ -734,13 +734,13 @@ public:
 		doResultsReady();
 	}
 
-	virtual SASL::Params clientParams() const
+	SASL::Params clientParams() const override
 	{
 		SASLParams::SParams sparams = params.missing();
 		return SASL::Params(sparams.user, sparams.authzid, sparams.pass, sparams.realm);
 	}
 
-	virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm)
+	void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm) override
 	{
 		if(user)
 			params.setUsername(*user);
@@ -752,23 +752,23 @@ public:
 			params.setRealm(*realm);
 	}
 
-	virtual QString username() const
+	QString username() const override
 	{
 		return sc_username;
 	}
 
-	virtual QString authzid() const
+	QString authzid() const override
 	{
 		return sc_authzid;
 	}
 
-	virtual void nextStep(const QByteArray &from_net)
+	void nextStep(const QByteArray &from_net) override
 	{
 		in_buf = from_net;
 		tryAgain();
 	}
 
-	virtual void tryAgain()
+	void tryAgain() override
 	{
 		if(servermode)
 			serverTryAgain();
@@ -777,7 +777,7 @@ public:
 		doResultsReady();
 	}
 
-	virtual QString mech() const
+	QString mech() const override
 	{
 		if (servermode)
 			return in_mech;
@@ -785,18 +785,18 @@ public:
 			return out_mech;
 	}
 
-	virtual QStringList mechlist() const
+	QStringList mechlist() const override
 	{
 		return result_mechlist;
 	}
 
-	virtual QStringList realmlist() const
+	QStringList realmlist() const override
 	{
 		// TODO
 		return QStringList();
 	}
 
-	virtual void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF)
+	void setConstraints(SASL::AuthFlags f, int minSSF, int maxSSF) override
 	{
 		int sf = 0;
 		if( !(f & SASL::AllowPlain) )
@@ -819,14 +819,14 @@ public:
 		ssf_max = maxSSF;
 	}
 
-	virtual bool waitForResultsReady(int msecs)
+	bool waitForResultsReady(int msecs) override
 	{
 		// TODO: for now, all operations block anyway
 		Q_UNUSED(msecs);
 		return true;
 	}
 
-	virtual void update(const QByteArray &from_net, const QByteArray &from_app)
+	void update(const QByteArray &from_net, const QByteArray &from_app) override
 	{
 		bool ok = true;
 		if(!from_app.isEmpty())
@@ -841,36 +841,36 @@ public:
 		doResultsReady();
 	}
 
-	virtual bool haveClientInit() const
+	bool haveClientInit() const override
 	{
 		return result_haveClientInit;
 	}
 
-	virtual QByteArray stepData() const
+	QByteArray stepData() const override
 	{
 		return out_buf;
 	}
 
-	virtual QByteArray to_net()
+	QByteArray to_net() override
 	{
 		QByteArray a = result_to_net;
 		result_to_net.clear();
 		return a;
 	}
 
-	virtual int encoded() const
+	int encoded() const override
 	{
 		return result_encoded;
 	}
 
-	virtual QByteArray to_app()
+	QByteArray to_app() override
 	{
 		QByteArray a = result_plain;
 		result_plain.clear();
 		return a;
 	}
 
-	virtual SASL::AuthCondition authCondition() const
+	SASL::AuthCondition authCondition() const override
 	{
 		return result_authCondition;
 	}
@@ -942,7 +942,7 @@ class saslPlugin : public QObject, public QCAPlugin
 #endif
 	Q_INTERFACES(QCAPlugin)
 public:
-	virtual Provider *createProvider() { return new saslProvider; }
+	Provider *createProvider() override { return new saslProvider; }
 };
 
 #include "qca-cyrus-sasl.moc"

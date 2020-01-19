@@ -2837,7 +2837,7 @@ public:
 	}
 
 protected:
-	virtual void run()
+	void run() override
 	{
 		if(in.type == PKPEMFile)
 			out.privateKey = PrivateKey::fromPEMFile(in.fileName, SecureArray(), &out.convertResult);

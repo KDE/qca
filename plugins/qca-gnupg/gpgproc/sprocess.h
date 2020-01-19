@@ -35,7 +35,7 @@ public:
 	void setInheritPipeList(const QList<int> &);
 
 protected:
-	virtual void setupChildProcess();
+	void setupChildProcess() override;
 
 private:
 	QList<int> pipeList;

@@ -29,10 +29,10 @@ public:
 	MyOpenPGPContext(QCA::Provider *p);
 
 	// reimplemented Provider::Context
-	QCA::Provider::Context *clone() const;
+	QCA::Provider::Context *clone() const override;
 
 	// reimplemented SMSContext
-	QCA::MessageContext *createMessage();
+	QCA::MessageContext *createMessage() override;
 };
 
 

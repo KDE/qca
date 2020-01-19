@@ -1966,7 +1966,7 @@ public:
 	}
 
 public slots:
-	virtual void ask(int id, const QCA::Event &e)
+	void ask(int id, const QCA::Event &e) override
 	{
 		activeIds += id;
 		emit q->eventReady(id, e);
@@ -2086,7 +2086,7 @@ public:
 			asker_cancel(this);
 	}
 
-	virtual void set_accepted(const SecureArray &_password)
+	void set_accepted(const SecureArray &_password) override
 	{
 		QMutexLocker locker(&m);
 		accepted = true;
@@ -2098,7 +2098,7 @@ public:
 			QMetaObject::invokeMethod(this, "emitResponseReady", Qt::QueuedConnection);
 	}
 
-	virtual void set_rejected()
+	void set_rejected() override
 	{
 		QMutexLocker locker(&m);
 		done = true;
@@ -2129,7 +2129,7 @@ public:
 	{
 	}
 
-	virtual void emitResponseReady()
+	void emitResponseReady() override
 	{
 		emit passwordAsker->responseReady();
 	}
@@ -2190,7 +2190,7 @@ public:
 	{
 	}
 
-	virtual void emitResponseReady()
+	void emitResponseReady() override
 	{
 		emit tokenAsker->responseReady();
 	}

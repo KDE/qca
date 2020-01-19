@@ -62,17 +62,17 @@ class TestClientProvider : public QObject, public QCA::Provider
         Q_OBJECT
 
 public:
-        int qcaVersion() const
+        int qcaVersion() const override
         {
                 return QCA_VERSION;
         }
 
-        QString name() const
+        QString name() const override
         {
                 return providerName;
         }
 
-        QStringList features() const
+        QStringList features() const override
         {
                 QStringList list;
                 list += "testClientSideProviderFeature1";
@@ -80,7 +80,7 @@ public:
                 return list;
         }
 
-        Provider::Context *createContext(const QString &type)
+        Provider::Context *createContext(const QString &type) override
         {
             if(type == "testClientSideProviderFeature1")
                 // return new Feature1Context(this);

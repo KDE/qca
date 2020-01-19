@@ -82,7 +82,7 @@ public:
     }
 
 
-    void setup(const QCA::SymmetricKey &key)
+    void setup(const QCA::SymmetricKey &key) override
     {
 	// We might not have a real key, since this can get called
 	// from the constructor.
@@ -117,24 +117,24 @@ public:
 	    m_k2 = xorArray(leftShift(m_k1), const_Rb);
     }
 
-    QCA::Provider::Context *clone() const
+    QCA::Provider::Context *clone() const override
     {
         return new AESCMACContext(*this);
     }
 
-    void clear()
+    void clear() 
     {
 	setup(m_key);
     }
 
-    QCA::KeyLength keyLength() const
+    QCA::KeyLength keyLength() const override
     {
         return QCA::KeyLength(16, 16, 1);
     }
 
     // This is a bit different to the way the I-D does it,
     // to allow for multiple update() calls.
-    void update(const QCA::MemoryRegion &a)
+    void update(const QCA::MemoryRegion &a) override
     {
 	QCA::SecureArray bytesToProcess = m_residual + a;
 	int blockNum;
@@ -161,7 +161,7 @@ public:
 	    m_residual[yalv] = bytesToProcess[blockNum*16 + yalv];
     }
 
-    void final( QCA::MemoryRegion *out)
+    void final( QCA::MemoryRegion *out) override
     {
 	QCA::SecureArray lastBlock;
 	int numBytesLeft = m_residual.size();
@@ -202,17 +202,17 @@ protected:
 class ClientSideProvider : public QCA::Provider
 {
 public:
-        int qcaVersion() const
+        int qcaVersion() const override
         {
                 return QCA_VERSION;
         }
 
-        QString name() const
+        QString name() const override
         {
                 return "exampleClientSideProvider";
         }
 
-        QStringList features() const
+        QStringList features() const override
         {
                 QStringList list;
                 list += "cmac(aes)";
@@ -220,7 +220,7 @@ public:
                 return list;
         }
 
-        Provider::Context *createContext(const QString &type)
+        Provider::Context *createContext(const QString &type) override
         {
 	    if(type == "cmac(aes)")
 		return new AESCMACContext(this);

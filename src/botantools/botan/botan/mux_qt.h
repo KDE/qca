@@ -45,7 +45,7 @@ namespace Botan {
 class Qt_Mutex_Factory : public Mutex_Factory
    {
    public:
-      Mutex* make();
+      Mutex* make() override;
    };
 
 }

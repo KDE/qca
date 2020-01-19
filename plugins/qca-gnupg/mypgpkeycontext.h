@@ -38,16 +38,16 @@ public:
 	MyPGPKeyContext(QCA::Provider *p);
 
 	// reimplemented Provider::Context
-	QCA::Provider::Context *clone() const;
+	QCA::Provider::Context *clone() const override;
 
 	// reimplemented PGPKeyContext
-	const QCA::PGPKeyContextProps *props() const;
+	const QCA::PGPKeyContextProps *props() const override;
 
-	QByteArray toBinary() const;
-	QCA::ConvertResult fromBinary(const QByteArray &a);
+	QByteArray toBinary() const override;
+	QCA::ConvertResult fromBinary(const QByteArray &a) override;
 
-	QString toAscii() const;
-	QCA::ConvertResult fromAscii(const QString &s);
+	QString toAscii() const override;
+	QCA::ConvertResult fromAscii(const QString &s) override;
 
 	void set(const GpgOp::Key &i, bool isSecret, bool inKeyring, bool isTrusted);
 	static void cleanup_temp_keyring(const QString &name);

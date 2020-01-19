@@ -52,28 +52,28 @@ public:
 	MyMessageContext(MyOpenPGPContext *_sms, QCA::Provider *p);
 
 	// reimplemented Provider::Context
-	QCA::Provider::Context *clone() const;
+	QCA::Provider::Context *clone() const override;
 
 	// reimplemented MessageContext
-	bool canSignMultiple() const;
-	QCA::SecureMessage::Type type() const;
-	void reset();
-	void setupEncrypt(const QCA::SecureMessageKeyList &keys);
-	void setupSign(const QCA::SecureMessageKeyList &keys, QCA::SecureMessage::SignMode m, bool, bool);
-	void setupVerify(const QByteArray &detachedSig);
-	void start(QCA::SecureMessage::Format f, QCA::MessageContext::Operation op);
-	void update(const QByteArray &in);
-	QByteArray read();
-	int written();
-	void end();
-	bool finished() const;
-	bool waitForFinished(int msecs);
-	bool success() const;
-	QCA::SecureMessage::Error errorCode() const;
-	QByteArray signature() const;
-	QString hashName() const;
-	QCA::SecureMessageSignatureList signers() const;
-	QString diagnosticText() const;
+	bool canSignMultiple() const override;
+	QCA::SecureMessage::Type type() const override;
+	void reset() override;
+	void setupEncrypt(const QCA::SecureMessageKeyList &keys) override;
+	void setupSign(const QCA::SecureMessageKeyList &keys, QCA::SecureMessage::SignMode m, bool, bool) override;
+	void setupVerify(const QByteArray &detachedSig) override;
+	void start(QCA::SecureMessage::Format f, QCA::MessageContext::Operation op) override;
+	void update(const QByteArray &in) override;
+	QByteArray read() override;
+	int written() override;
+	void end() override;
+	bool finished() const override;
+	bool waitForFinished(int msecs) override;
+	bool success() const override;
+	QCA::SecureMessage::Error errorCode() const override;
+	QByteArray signature() const override;
+	QString hashName() const override;
+	QCA::SecureMessageSignatureList signers() const override;
+	QString diagnosticText() const override;
 
 	void seterror();
 	void complete();

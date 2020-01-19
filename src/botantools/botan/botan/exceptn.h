@@ -51,7 +51,7 @@ namespace Botan {
 class Exception : public std::exception
    {
    public:
-      const char* what() const throw() { return msg.c_str(); }
+      const char* what() const throw() override { return msg.c_str(); }
       Exception(const std::string& m = "Unknown error") { set_msg(m); }
       virtual ~Exception() throw() {}
    protected:

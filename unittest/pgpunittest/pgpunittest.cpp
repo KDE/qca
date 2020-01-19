@@ -99,12 +99,12 @@ public:
     }
 
 protected:
-    void atStart()
+    void atStart() override
     {
 	prov = new PGPPassphraseProvider;
     }
 
-    void atEnd()
+    void atEnd() override
     {
 	delete prov;
     }

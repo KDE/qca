@@ -330,7 +330,7 @@ signals:
 	void outputClosed();
 
 protected:
-	virtual void atStart()
+	void atStart() override
 	{
 		worker = new ConsoleWorker;
 
@@ -345,7 +345,7 @@ protected:
 		worker->start(_in_id, _out_id);
 	}
 
-	virtual void atEnd()
+	void atEnd() override
 	{
 		in_left = worker->takeBytesToRead();
 		out_left = worker->takeBytesToWrite();

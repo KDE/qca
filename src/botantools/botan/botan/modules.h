@@ -76,15 +76,15 @@ class Modules
 class Builtin_Modules : public Modules
    {
    public:
-      class Mutex_Factory* mutex_factory() const;
+      class Mutex_Factory* mutex_factory() const override;
 #ifndef BOTAN_TOOLS_ONLY
       class Timer* timer() const;
       class Charset_Transcoder* transcoder() const;
 #endif
 
-      std::string default_allocator() const;
+      std::string default_allocator() const override;
 
-      std::vector<class Allocator*> allocators() const;
+      std::vector<class Allocator*> allocators() const override;
 #ifndef BOTAN_TOOLS_ONLY
       std::vector<class EntropySource*> entropy_sources() const;
       std::vector<class Engine*> engines() const;

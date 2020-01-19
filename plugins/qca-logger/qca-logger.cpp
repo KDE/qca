@@ -42,12 +42,12 @@ public:
 		QCA::logger()->unregisterLogDevice (name ());
 	}
 
-	void logTextMessage( const QString &message, enum QCA::Logger::Severity severity )
+	void logTextMessage( const QString &message, enum QCA::Logger::Severity severity ) override
 	{
 		_stream << now () << " " << severityName (severity) << " " << message << endl;
 	}
 
-	void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity )
+	void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity ) override
 	{
 		Q_UNUSED(blob);
 		_stream << now () << " " << severityName (severity) << " " << "Binary blob not implemented yet" << endl;
@@ -123,42 +123,36 @@ public:
 	}
 
 public:
-	virtual
 	int
-	qcaVersion() const {
+	qcaVersion() const override {
 		return QCA_VERSION;
 	}
 
-	virtual
 	void
-	init () {}
+	init () override {}
 
-	virtual
 	QString
-	name () const {
+	name () const override {
 		return "qca-logger";
 	}
 
-	virtual
 	QStringList
-	features () const {
+	features () const override {
 		QStringList list;
 		list += "log";
 		return list;
 	}
 
-	virtual
 	Context *
 	createContext (
 		const QString &type
-	) {
+	) override {
 		Q_UNUSED(type);
 		return NULL;
 	}
 
-	virtual
 	QVariantMap
-	defaultConfig () const {
+	defaultConfig () const override {
 		QVariantMap mytemplate;
 
 		mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-logger#1.0";
@@ -169,9 +163,8 @@ public:
 		return mytemplate;
 	}
 
-	virtual
 	void
-	configChanged (const QVariantMap &config) {
+	configChanged (const QVariantMap &config) override {
 		if (!_externalConfig) {
 			delete _streamLogger;
 			_streamLogger = NULL;
@@ -217,7 +210,7 @@ class loggerPlugin : public QObject, public QCAPlugin
 	Q_INTERFACES(QCAPlugin)
 
 public:
-	virtual Provider *createProvider() { return new loggerProvider; }
+	Provider *createProvider() override { return new loggerProvider; }
 };
 
 #include "qca-logger.moc"

@@ -112,7 +112,7 @@ class AskerThread : public QThread
 {
     Q_OBJECT
 protected:
-    virtual void run()
+    void run() override
     {
         asker_procedure();
     }

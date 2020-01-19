@@ -105,7 +105,7 @@ public:
 #endif
 	}
 
-	virtual bool event(QEvent *e)
+	bool event(QEvent *e) override
 	{
 		switch(e->type())
 		{
@@ -121,7 +121,7 @@ public:
 		return QObject::event(e);
 	}
 
-	virtual bool eventFilter(QObject *, QEvent *e)
+	bool eventFilter(QObject *, QEvent *e) override
 	{
 		switch(e->type())
 		{
@@ -461,7 +461,7 @@ public:
 	}
 
 protected:
-	virtual void run()
+	void run() override
 	{
 		m.lock();
 		QEventLoop eventLoop;

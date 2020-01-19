@@ -57,10 +57,10 @@ namespace Botan {
 class Pooling_Allocator : public Allocator
    {
    public:
-      void* allocate(u32bit);
-      void deallocate(void*, u32bit);
+      void* allocate(u32bit) override;
+      void deallocate(void*, u32bit) override;
 
-      void destroy();
+      void destroy() override;
 
       Pooling_Allocator(u32bit, bool);
       ~Pooling_Allocator() QCA_NOEXCEPT(false);

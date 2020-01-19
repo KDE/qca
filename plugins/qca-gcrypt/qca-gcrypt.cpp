@@ -61,22 +61,22 @@ public:
 	gcry_md_close( context );
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new gcryHashContext(*this);
     }
 
-    void clear()
+    void clear() override
     {
 	gcry_md_reset( context );
     }
 
-    void update(const QCA::MemoryRegion &a)
+    void update(const QCA::MemoryRegion &a) override
     {
 	gcry_md_write( context, a.data(), a.size() );
     }
 
-    QCA::MemoryRegion final()
+    QCA::MemoryRegion final() override
     {
 	unsigned char *md;
         QCA::SecureArray a( gcry_md_get_algo_dlen( m_hashAlgorithm ) );
@@ -110,12 +110,12 @@ public:
         gcry_md_close( context );
     }
 
-    void setup(const QCA::SymmetricKey &key)
+    void setup(const QCA::SymmetricKey &key) override
     {
         gcry_md_setkey( context, key.data(), key.size() );
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
         return new gcryHMACContext(*this);
     }
@@ -125,17 +125,17 @@ public:
         gcry_md_reset( context );
     }
 
-    QCA::KeyLength keyLength() const
+    QCA::KeyLength keyLength() const override
     {
         return anyKeyLength();
     }
 
-    void update(const QCA::MemoryRegion &a)
+    void update(const QCA::MemoryRegion &a) override
     {
         gcry_md_write( context, a.data(), a.size() );
     }
 
-    void final( QCA::MemoryRegion *out)
+    void final( QCA::MemoryRegion *out) override
     {
         QCA::SecureArray sa( gcry_md_get_algo_dlen( m_hashAlgorithm ), 0 );
         unsigned char *md;
@@ -164,7 +164,7 @@ public:
     void setup(QCA::Direction dir,
 	       const QCA::SymmetricKey &key,
 	       const QCA::InitializationVector &iv,
-	       const QCA::AuthTag &tag)
+	       const QCA::AuthTag &tag) override
     {
 	Q_UNUSED(tag);
 	m_direction = dir;
@@ -185,25 +185,25 @@ public:
 	check_error( "gcry_cipher_setiv", err );
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
       return new gcryCipherContext( *this );
     }
 
-    int blockSize() const
+    int blockSize() const override
     {
 	unsigned int blockSize;
 	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
 	return blockSize;
     }
 
-    QCA::AuthTag tag() const
+    QCA::AuthTag tag() const override
     {
     // For future implementation
 	return QCA::AuthTag();
     }
 
-    bool update(const QCA::SecureArray &in, QCA::SecureArray *out)
+    bool update(const QCA::SecureArray &in, QCA::SecureArray *out) override
     {
         QCA::SecureArray result( in.size() );
 	if (QCA::Encode == m_direction) {
@@ -217,7 +217,7 @@ public:
 	return true;
     }
 
-    bool final(QCA::SecureArray *out)
+    bool final(QCA::SecureArray *out) override
     {
         QCA::SecureArray result;
 	if (m_pad) {
@@ -235,7 +235,7 @@ public:
 	return true;
     }
 
-    QCA::KeyLength keyLength() const
+    QCA::KeyLength keyLength() const override
     {
     switch (m_cryptoAlgorithm)
 	{
@@ -288,13 +288,13 @@ public:
 	gcry_md_close( context );
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new pbkdf1Context( *this );
     }
 
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
-			      unsigned int keyLength, unsigned int iterationCount)
+			      unsigned int keyLength, unsigned int iterationCount) override
     {
 	/* from RFC2898:
 	   Steps:
@@ -347,7 +347,7 @@ public:
 							  const QCA::InitializationVector &salt,
 							  unsigned int keyLength,
 							  int msecInterval,
-							  unsigned int *iterationCount)
+							  unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
 		QTime timer;
@@ -421,13 +421,13 @@ public:
 	m_algorithm = algorithm;
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
       return new pbkdf2Context( *this );
     }
 
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
-			 unsigned int keyLength, unsigned int iterationCount)
+			 unsigned int keyLength, unsigned int iterationCount) override
     {
 	QCA::SymmetricKey result(keyLength);
 	gcry_error_t retval = gcry_pbkdf2(m_algorithm, secret.data(), secret.size(),
@@ -445,7 +445,7 @@ public:
 							  const QCA::InitializationVector &salt,
 							  unsigned int keyLength,
 							  int msecInterval,
-							  unsigned int *iterationCount)
+							  unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
 		QCA::SymmetricKey result(keyLength);
@@ -507,7 +507,7 @@ int qca_func_secure_check (const void *)
 class gcryptProvider : public QCA::Provider
 {
 public:
-    void init()
+    void init() override
     {
 	if (!gcry_control (GCRYCTL_ANY_INITIALIZATION_P))
 	{ /* No other library has already initialized libgcrypt. */
@@ -526,17 +526,17 @@ public:
 	}
     }
 
-    int qcaVersion() const
+    int qcaVersion() const override
     {
         return QCA_VERSION;
     }
 
-    QString name() const
+    QString name() const override
     {
 	return "qca-gcrypt";
     }
 
-    QStringList features() const
+    QStringList features() const override
     {
 	QStringList list;
 	list += "sha1";
@@ -591,7 +591,7 @@ public:
 	return list;
     }
 
-    Context *createContext(const QString &type)
+    Context *createContext(const QString &type) override
     {
         // std::cout << "type: " << qPrintable(type) << std::endl;
 	if ( type == "sha1" )
@@ -689,7 +689,7 @@ class gcryptPlugin : public QObject, public QCAPlugin
 #endif
     Q_INTERFACES(QCAPlugin)
 	public:
-    virtual QCA::Provider *createProvider() { return new gcryptProvider; }
+    QCA::Provider *createProvider() override { return new gcryptProvider; }
 };
 
 #include "qca-gcrypt.moc"

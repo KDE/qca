@@ -66,7 +66,7 @@ class Mutex_Factory
 class Default_Mutex_Factory : public Mutex_Factory
    {
    public:
-      Mutex* make();
+      Mutex* make() override;
    };
 
 /*************************************************

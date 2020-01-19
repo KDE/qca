@@ -51,8 +51,8 @@ Mutex* Qt_Mutex_Factory::make()
    class Qt_Mutex : public Mutex
       {
       public:
-         void lock() { mutex.lock(); }
-         void unlock() { mutex.unlock(); }
+         void lock() override { mutex.lock(); }
+         void unlock() override { mutex.unlock(); }
       private:
          QMutex mutex;
       };

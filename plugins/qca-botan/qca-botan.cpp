@@ -51,12 +51,12 @@ public:
     {
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new botanRandomContext( *this );
     }
 
-    QCA::SecureArray nextBytes(int size)
+    QCA::SecureArray nextBytes(int size) override
     {
         QCA::SecureArray buf(size);
 	Botan::AutoSeeded_RNG rng;
@@ -84,22 +84,22 @@ public:
 	delete m_hashObj;
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new BotanHashContext(*this);
     }
 
-    void clear()
+    void clear() override
     {
 	m_hashObj->clear();
     }
 
-    void update(const QCA::MemoryRegion &a)
+    void update(const QCA::MemoryRegion &a) override
     {
 	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
     }
 
-    QCA::MemoryRegion final()
+    QCA::MemoryRegion final() override
     {
 	QCA::SecureArray a( m_hashObj->output_length() );
 	m_hashObj->final( (Botan::byte *)a.data() );
@@ -131,7 +131,7 @@ public:
     {
     }
 
-    void setup(const QCA::SymmetricKey &key)
+    void setup(const QCA::SymmetricKey &key) override
     {
 	// this often gets called with an empty key, because that is the default
 	// in the QCA MessageAuthenticationCode constructor. Botan doesn't like
@@ -141,27 +141,27 @@ public:
 	}
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new BotanHMACContext(*this);
     }
 
-    void clear()
+    void clear() 
     {
 	m_hashObj->clear();
     }
 
-    QCA::KeyLength keyLength() const
+    QCA::KeyLength keyLength() const override
     {
         return anyKeyLength();
     }
 
-    void update(const QCA::MemoryRegion &a)
+    void update(const QCA::MemoryRegion &a) override
     {
 	m_hashObj->update( (const Botan::byte*)a.data(), a.size() );
     }
 
-    void final( QCA::MemoryRegion *out)
+    void final( QCA::MemoryRegion *out) override
     {
 	QCA::SecureArray sa( m_hashObj->output_length(), 0 );
 	m_hashObj->final( (Botan::byte *)sa.data() );
@@ -182,18 +182,18 @@ public:
 	m_s2k = Botan::get_s2k(kdfName.toStdString());
     }
 
-    ~BotanPBKDFContext()
+    ~BotanPBKDFContext() 
     {
 	delete m_s2k;
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new BotanPBKDFContext( *this );
     }
 
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
-			      unsigned int keyLength, unsigned int iterationCount)
+			      unsigned int keyLength, unsigned int iterationCount) override
     {
 	std::string secretString(secret.data(), secret.size() );
 	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString, (const Botan::byte*)salt.data(), salt.size(), iterationCount);
@@ -205,7 +205,7 @@ public:
 							  const QCA::InitializationVector &salt,
 							  unsigned int keyLength,
 							  int msecInterval,
-							  unsigned int *iterationCount)
+							  unsigned int *iterationCount) override
 	{
 		Q_ASSERT(iterationCount != NULL);
 		Botan::OctetString key;
@@ -246,13 +246,13 @@ public:
 	delete m_hkdf;
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new BotanHKDFContext( *this );
     }
 
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
-			      const QCA::InitializationVector &info, unsigned int keyLength)
+			      const QCA::InitializationVector &info, unsigned int keyLength) override
     {
 	std::string secretString(secret.data(), secret.size());
 	Botan::secure_vector<uint8_t> key(keyLength);
@@ -285,7 +285,7 @@ public:
     void setup(QCA::Direction dir,
                const QCA::SymmetricKey &key,
                const QCA::InitializationVector &iv,
-               const QCA::AuthTag &tag)
+               const QCA::AuthTag &tag) override
     {
 	Q_UNUSED(tag);
 	try {
@@ -319,12 +319,12 @@ public:
 	}
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new BotanCipherContext( *this );
     }
 
-    int blockSize() const
+    int blockSize() const override
     {
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
 	return Botan::block_size_of(m_algoName);
@@ -336,13 +336,13 @@ public:
 #endif
     }
 
-    QCA::AuthTag tag() const
+    QCA::AuthTag tag() const override
     {
     // For future implementation
 	return QCA::AuthTag();
     }
 
-    bool update(const QCA::SecureArray &in, QCA::SecureArray *out)
+    bool update(const QCA::SecureArray &in, QCA::SecureArray *out) override
     {
 	if (!m_crypter)
 	    return false;
@@ -355,7 +355,7 @@ public:
         return true;
     }
 
-    bool final(QCA::SecureArray *out)
+    bool final(QCA::SecureArray *out) override
     {
 	m_crypter->end_msg();
 	QCA::SecureArray result( m_crypter->remaining() );
@@ -366,7 +366,7 @@ public:
         return true;
     }
 
-    QCA::KeyLength keyLength() const
+    QCA::KeyLength keyLength() const override
     {
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
         Botan::Algorithm_Factory &af = Botan::global_state().algorithm_factory();
@@ -416,7 +416,7 @@ protected:
 class botanProvider : public QCA::Provider
 {
 public:
-    void init()
+    void init() override
     {
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
 	m_init = new Botan::LibraryInitializer;
@@ -430,17 +430,17 @@ public:
 	// delete m_init;
     }
 
-    int qcaVersion() const
+    int qcaVersion() const override
     {
         return QCA_VERSION;
     }
 
-    QString name() const
+    QString name() const override
     {
 	return "qca-botan";
     }
 
-    QStringList features() const
+    QStringList features() const override
     {
 	QStringList list;
 	list += "random";
@@ -492,7 +492,7 @@ public:
 	return list;
     }
 
-    Context *createContext(const QString &type)
+    Context *createContext(const QString &type) override
     {
 	if ( type == "random" )
 	    return new botanRandomContext( this );
@@ -600,7 +600,7 @@ class botanPlugin : public QObject, public QCAPlugin
 #endif
 	Q_INTERFACES(QCAPlugin)
 public:
-	virtual QCA::Provider *createProvider() { return new botanProvider; }
+	QCA::Provider *createProvider() override { return new botanProvider; }
 };
 
 #include "qca-botan.moc"

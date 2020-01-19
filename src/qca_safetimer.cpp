@@ -55,8 +55,8 @@ signals:
 	void needFix();
 
 protected:
-	bool event(QEvent *event);
-	void timerEvent(QTimerEvent *event);
+	bool event(QEvent *event) override;
+	void timerEvent(QTimerEvent *event) override;
 };
 
 SafeTimer::Private::Private(QObject *parent)

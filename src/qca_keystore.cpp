@@ -620,12 +620,12 @@ public:
 		stop();
 	}
 
-	void atStart()
+	void atStart() override
 	{
 		tracker = new KeyStoreTracker;
 	}
 
-	void atEnd()
+	void atEnd() override
 	{
 		delete tracker;
 	}
@@ -997,7 +997,7 @@ public:
 	}
 
 protected:
-	virtual void run()
+	void run() override
 	{
 		if(type == EntryList)
 #if QT_VERSION >= 0x050000

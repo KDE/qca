@@ -335,7 +335,7 @@ protected:
 	/**
 	   Starts the event loop and calls atStart and atStop as necessary
 	*/
-	virtual void run();
+	void run() override;
 
 private:
 	Q_DISABLE_COPY(SyncThread)

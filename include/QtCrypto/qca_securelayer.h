@@ -681,16 +681,16 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	CertificateChain peerCertificateChain() const;
 
 	// reimplemented
-	virtual bool isClosable() const;
-	virtual int bytesAvailable() const;
-	virtual int bytesOutgoingAvailable() const;
-	virtual void close();
-	virtual void write(const QByteArray &a);
-	virtual QByteArray read();
-	virtual void writeIncoming(const QByteArray &a);
-	virtual QByteArray readOutgoing(int *plainBytes = 0);
-	virtual QByteArray readUnprocessed();
-	virtual int convertBytesWritten(qint64 encryptedBytes);
+	bool isClosable() const override;
+	int bytesAvailable() const override;
+	int bytesOutgoingAvailable() const override;
+	void close() override;
+	void write(const QByteArray &a) override;
+	QByteArray read() override;
+	void writeIncoming(const QByteArray &a) override;
+	QByteArray readOutgoing(int *plainBytes = 0) override;
+	QByteArray readUnprocessed() override;
+	int convertBytesWritten(qint64 encryptedBytes) override;
 
 	/**
 	   Determine the number of packets available to be
@@ -784,7 +784,7 @@ protected:
 	   connected to.
 	*/
 #if QT_VERSION >= 0x050000
-	void connectNotify(const QMetaMethod &signal);
+	void connectNotify(const QMetaMethod &signal) override;
 #else
 	void connectNotify(const char *signal);
 #endif
@@ -796,7 +796,7 @@ protected:
 	   disconnected from.
 	*/
 #if QT_VERSION >= 0x050000
-	void disconnectNotify(const QMetaMethod &signal);
+	void disconnectNotify(const QMetaMethod &signal) override;
 #else
 	void disconnectNotify(const char *signal);
 #endif
@@ -1177,13 +1177,13 @@ public:
 	void continueAfterAuthCheck();
 
 	// reimplemented
-	virtual int bytesAvailable() const;
-	virtual int bytesOutgoingAvailable() const;
-	virtual void write(const QByteArray &a);
-	virtual QByteArray read();
-	virtual void writeIncoming(const QByteArray &a);
-	virtual QByteArray readOutgoing(int *plainBytes = 0);
-	virtual int convertBytesWritten(qint64 encryptedBytes);
+	int bytesAvailable() const override;
+	int bytesOutgoingAvailable() const override;
+	void write(const QByteArray &a) override;
+	QByteArray read() override;
+	void writeIncoming(const QByteArray &a) override;
+	QByteArray readOutgoing(int *plainBytes = 0) override;
+	int convertBytesWritten(qint64 encryptedBytes) override;
 
 Q_SIGNALS:
 	/**

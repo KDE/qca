@@ -90,12 +90,12 @@ public:
 	    PK11_FreeSlot(m_slot);
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new nssHashContext(*this);
     }
 
-    void clear()
+    void clear() override
     {
 	SECStatus s;
 
@@ -114,12 +114,12 @@ public:
 	}
     }
 
-    void update(const QCA::MemoryRegion &a)
+    void update(const QCA::MemoryRegion &a) override
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
 
-    QCA::MemoryRegion final()
+    QCA::MemoryRegion final() override
     {
 	unsigned int len = 0;
 	QCA::SecureArray a( 64 );
@@ -186,7 +186,7 @@ public:
 	    PK11_FreeSlot(m_slot);
     }
 
-    Context *clone() const
+    Context *clone() const override
     {
 	return new nssHmacContext(*this);
     }
@@ -212,12 +212,12 @@ public:
 	}
     }
 
-    QCA::KeyLength keyLength() const
+    QCA::KeyLength keyLength() const override
     {
         return anyKeyLength();
     }
 
-    void setup(const QCA::SymmetricKey &key)
+    void setup(const QCA::SymmetricKey &key) override
     {
         /* turn the raw key into a SECItem */
         SECItem keyItem;
@@ -243,12 +243,12 @@ public:
 	}
     }
 
-    void update(const QCA::MemoryRegion &a)
+    void update(const QCA::MemoryRegion &a) override
     {
 	PK11_DigestOp(m_context, (const unsigned char*)a.data(), a.size());
     }
 
-    void final( QCA::MemoryRegion *out)
+    void final( QCA::MemoryRegion *out) override
     {
 	// NSS doesn't appear to be able to tell us how big the digest will
 	// be for a given algorithm until after we finalise it, so we work
@@ -307,7 +307,7 @@ public:
     void setup(QCA::Direction dir,
                const QCA::SymmetricKey &key,
                const QCA::InitializationVector &iv,
-               const QCA::AuthTag &tag)
+               const QCA::AuthTag &tag) override
     {
 	Q_UNUSED(tag);
 	/* Get a slot to use for the crypto operations */
@@ -357,23 +357,23 @@ public:
 	}
     }
 
-    QCA::Provider::Context *clone() const
+    QCA::Provider::Context *clone() const override
 	{
 	    return new nssCipherContext(*this);
 	}
 
-    int blockSize() const
+    int blockSize() const override
 	{
 	    return PK11_GetBlockSize( m_cipherMechanism, m_params);
 	}
 
-    QCA::AuthTag tag() const
+    QCA::AuthTag tag() const override
     {
     // For future implementation
 	return QCA::AuthTag();
     }
 
-    bool update( const QCA::SecureArray &in, QCA::SecureArray *out )
+    bool update( const QCA::SecureArray &in, QCA::SecureArray *out ) override
 	{
 	    out->resize(in.size()+blockSize());
 	    int resultLength;
@@ -386,7 +386,7 @@ public:
 	    return true;
 	}
 
-    bool final( QCA::SecureArray *out )
+    bool final( QCA::SecureArray *out ) override
 	{
 	    out->resize(blockSize());
 	    unsigned int resultLength;
@@ -398,7 +398,7 @@ public:
 	    return true;
 	}
 
-    QCA::KeyLength keyLength() const
+    QCA::KeyLength keyLength() const override
 	{
 		int min = 0;
 		int max = 0;
@@ -441,7 +441,7 @@ private:
 class nssProvider : public QCA::Provider
 {
 public:
-    void init()
+    void init() override
     {
     }
 
@@ -449,17 +449,17 @@ public:
     {
     }
 
-    int qcaVersion() const
+    int qcaVersion() const override
     {
 	return QCA_VERSION;
     }
 
-    QString name() const
+    QString name() const override
     {
 	return "qca-nss";
     }
 
-    QStringList features() const
+    QStringList features() const override
     {
 	QStringList list;
 
@@ -488,7 +488,7 @@ public:
 	return list;
     }
 
-    Context *createContext(const QString &type)
+    Context *createContext(const QString &type) override
     {
 	if ( type == "md2" )
 	    return new nssHashContext( this, type );
@@ -541,7 +541,7 @@ class nssPlugin : public QObject, public QCAPlugin
 #endif
 	Q_INTERFACES( QCAPlugin )
 public:
-	virtual QCA::Provider *createProvider() { return new nssProvider; }
+	QCA::Provider *createProvider() override { return new nssProvider; }
 };
 
 #include "qca-nss.moc"

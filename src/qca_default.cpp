@@ -90,12 +90,12 @@ class DefaultRandomContext : public RandomContext
 public:
 	DefaultRandomContext(Provider *p) : RandomContext(p) {}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new DefaultRandomContext(provider());
 	}
 
-	virtual SecureArray nextBytes(int size)
+	SecureArray nextBytes(int size) override
 	{
 		SecureArray buf(size);
 		for(int n = 0; n < (int)buf.size(); ++n)
@@ -518,25 +518,25 @@ public:
 		clear();
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new DefaultMD5Context(*this);
 	}
 
-	virtual void clear()
+	void clear() override
 	{
 		secure = true;
 		md5_init(&md5);
 	}
 
-	virtual void update(const MemoryRegion &in)
+	void update(const MemoryRegion &in) override
 	{
 		if(!in.isSecure())
 			secure = false;
 		md5_append(&md5, (const md5_byte_t *)in.data(), in.size());
 	}
 
-	virtual MemoryRegion final()
+	MemoryRegion final() override
 	{
 		if(secure)
 		{
@@ -623,25 +623,25 @@ public:
 		clear();
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new DefaultSHA1Context(*this);
 	}
 
-	virtual void clear()
+	void clear() override
 	{
 		secure = true;
 		sha1_init(&_context);
 	}
 
-	virtual void update(const MemoryRegion &in)
+	void update(const MemoryRegion &in) override
 	{
 		if(!in.isSecure())
 			secure = false;
 		sha1_update(&_context, (unsigned char *)in.data(), (unsigned int)in.size());
 	}
 
-	virtual MemoryRegion final()
+	MemoryRegion final() override
 	{
 		if(secure)
 		{
@@ -928,47 +928,47 @@ public:
 		_crl = crl;
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return new DefaultKeyStoreEntry(*this);
 	}
 
-	virtual KeyStoreEntry::Type type() const
+	KeyStoreEntry::Type type() const override
 	{
 		return _type;
 	}
 
-	virtual QString id() const
+	QString id() const override
 	{
 		return _id;
 	}
 
-	virtual QString name() const
+	QString name() const override
 	{
 		return _name;
 	}
 
-	virtual QString storeId() const
+	QString storeId() const override
 	{
 		return _storeId;
 	}
 
-	virtual QString storeName() const
+	QString storeName() const override
 	{
 		return _storeName;
 	}
 
-	virtual Certificate certificate() const
+	Certificate certificate() const override
 	{
 		return _cert;
 	}
 
-	virtual CRL crl() const
+	CRL crl() const override
 	{
 		return _crl;
 	}
 
-	virtual QString serialize() const
+	QString serialize() const override
 	{
 		if(_serialized.isEmpty())
 		{
@@ -1067,19 +1067,19 @@ public:
 	{
 	}
 
-	virtual Provider::Context *clone() const
+	Provider::Context *clone() const override
 	{
 		return 0;
 	}
 
-	virtual void start()
+	void start() override
 	{
 		x509_supported = false;
 
 		QMetaObject::invokeMethod(this, "busyEnd", Qt::QueuedConnection);
 	}
 
-	virtual QList<int> keyStores()
+	QList<int> keyStores() override
 	{
 		if(!x509_supported)
 		{
@@ -1103,22 +1103,22 @@ public:
 		return list;
 	}
 
-	virtual KeyStore::Type type(int) const
+	KeyStore::Type type(int) const override
 	{
 		return KeyStore::System;
 	}
 
-	virtual QString storeId(int) const
+	QString storeId(int) const override
 	{
 		return "qca-default-systemstore";
 	}
 
-	virtual QString name(int) const
+	QString name(int) const override
 	{
 		return "System Trusted Certificates";
 	}
 
-	virtual QList<KeyStoreEntry::Type> entryTypes(int) const
+	QList<KeyStoreEntry::Type> entryTypes(int) const override
 	{
 		QList<KeyStoreEntry::Type> list;
 		list += KeyStoreEntry::TypeCertificate;
@@ -1126,7 +1126,7 @@ public:
 		return list;
 	}
 
-	virtual QList<KeyStoreEntryContext*> entryList(int)
+	QList<KeyStoreEntryContext*> entryList(int) override
 	{
 		QList<KeyStoreEntryContext*> out;
 
@@ -1177,7 +1177,7 @@ public:
 		return out;
 	}
 
-	virtual KeyStoreEntryContext *entryPassive(const QString &serialized)
+	KeyStoreEntryContext *entryPassive(const QString &serialized) override
 	{
 		return DefaultKeyStoreEntry::deserialize(serialized, provider());
 	}
@@ -1206,7 +1206,7 @@ class DefaultProvider : public Provider
 public:
 	DefaultShared shared;
 
-	virtual void init()
+	void init() override
 	{
 		QDateTime now = QDateTime::currentDateTime();
 
@@ -1216,22 +1216,22 @@ public:
 		qsrand(t);
 	}
 
-	virtual int version() const
+	int version() const override
 	{
 		return QCA_VERSION;
 	}
 
-	virtual int qcaVersion() const
+	int qcaVersion() const override
 	{
 		return QCA_VERSION;
 	}
 
-	virtual QString name() const
+	QString name() const override
 	{
 		return "default";
 	}
 
-	virtual QStringList features() const
+	QStringList features() const override
 	{
 		QStringList list;
 		list += "random";
@@ -1241,7 +1241,7 @@ public:
 		return list;
 	}
 
-	virtual Provider::Context *createContext(const QString &type)
+	Provider::Context *createContext(const QString &type) override
 	{
 		if(type == "random")
 			return new DefaultRandomContext(this);
@@ -1255,7 +1255,7 @@ public:
 			return 0;
 	}
 
-	virtual QVariantMap defaultConfig() const
+	QVariantMap defaultConfig() const override
 	{
 		QVariantMap config;
 		config["formtype"] = "http://affinix.com/qca/forms/default#1.0";
@@ -1266,7 +1266,7 @@ public:
 		return config;
 	}
 
-	virtual void configChanged(const QVariantMap &config)
+	void configChanged(const QVariantMap &config) override
 	{
 		bool use_system = config["use_system"].toBool();
 		QString roots_file = config["roots_file"].toString();
