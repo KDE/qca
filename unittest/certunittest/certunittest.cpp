@@ -1013,7 +1013,7 @@ void CertUnitTest::crl()
 
 	    QList<QCA::CRLEntry> revokedList = crl1.revoked();
 	    QCOMPARE( revokedList.size(), 2 );
-	    qSort(revokedList);
+	    std::sort(revokedList.begin(), revokedList.end());
 	    QCOMPARE( revokedList[0].serialNumber(), QCA::BigInteger("3") );
 	    QCOMPARE( revokedList[1].serialNumber(), QCA::BigInteger("5") );
 	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::Unspecified );
@@ -1069,7 +1069,7 @@ void CertUnitTest::crl2()
 
 	    QList<QCA::CRLEntry> revokedList = crl1.revoked();
 	    QCOMPARE( revokedList.size(), 2 );
-	    qSort(revokedList);
+	    std::sort(revokedList.begin(), revokedList.end());
 	    QCOMPARE( revokedList[0].serialNumber(), QCA::BigInteger("14") );
 	    QCOMPARE( revokedList[1].serialNumber(), QCA::BigInteger("15") );
 	    QCOMPARE( revokedList[0].reason(), QCA::CRLEntry::KeyCompromise );
