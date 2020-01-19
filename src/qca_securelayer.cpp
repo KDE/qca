@@ -26,9 +26,7 @@
 #include "qca_safetimer.h"
 
 #include <QPointer>
-#if QT_VERSION >= 0x050000
 #include <QMetaMethod>
-#endif
 
 namespace QCA {
 
@@ -1177,7 +1175,6 @@ void TLS::setPacketMTU(int size) const
 		d->c->setMTU(size);
 }
 
-#if QT_VERSION >= 0x050000
 void TLS::connectNotify(const QMetaMethod &signal)
 {
 	if(signal == QMetaMethod::fromSignal(&TLS::hostNameReceived))
@@ -1201,31 +1198,6 @@ void TLS::disconnectNotify(const QMetaMethod &signal)
 	else if(signal == QMetaMethod::fromSignal(&TLS::handshaken))
 		d->connect_handshaken = false;
 }
-#else
-void TLS::connectNotify(const char *signal)
-{
-	if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
-		d->connect_hostNameReceived = true;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(certificateRequested())))
-		d->connect_certificateRequested = true;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(peerCertificateAvailable())))
-		d->connect_peerCertificateAvailable = true;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
-		d->connect_handshaken = true;
-}
-
-void TLS::disconnectNotify(const char *signal)
-{
-	if(signal == QMetaObject::normalizedSignature(SIGNAL(hostNameReceived())))
-		d->connect_hostNameReceived = false;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(certificateRequested())))
-		d->connect_certificateRequested = false;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(peerCertificateAvailable())))
-		d->connect_peerCertificateAvailable = false;
-	else if(signal == QMetaObject::normalizedSignature(SIGNAL(handshaken())))
-		d->connect_handshaken = false;
-}
-#endif
 
 //----------------------------------------------------------------------------
 // SASL::Params

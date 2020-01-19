@@ -64,11 +64,7 @@ void KeyGenUnitTest::testRSA()
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
-#if QT_VERSION >= 0x050000
         QSKIP("RSA not supported!");
-#else
-        QSKIP("RSA not supported!", SkipAll);
-#endif
 
     QCA::PrivateKey priv1 = keygen.createRSA( 1024, 65537 );
     QCA::RSAPrivateKey rsa1 = priv1.toRSA();
@@ -98,11 +94,7 @@ void KeyGenUnitTest::testDSA()
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
-#if QT_VERSION >= 0x050000
 	QSKIP("DSA not supported!");
-#else
-	QSKIP("DSA not supported!", SkipAll);
-#endif
 
 	QCA::DLGroup group;
 	QCA::PrivateKey priv2;
@@ -145,11 +137,7 @@ void KeyGenUnitTest::testDH()
     if(!QCA::isSupported("pkey") ||
        !QCA::PKey::supportedTypes().contains(QCA::PKey::DH) ||
        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DH))
-#if QT_VERSION >= 0x050000
 	QSKIP("DH not supported!");
-#else
-	QSKIP("DH not supported!", SkipAll);
-#endif
 
     QCA::DLGroup group = keygen.createDLGroup( QCA::IETF_1024 );
     QCA::PrivateKey priv3 = keygen.createDH( group );

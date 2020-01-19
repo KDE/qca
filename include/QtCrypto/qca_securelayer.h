@@ -783,11 +783,7 @@ protected:
 	   \param signal the name of the signal that has been
 	   connected to.
 	*/
-#if QT_VERSION >= 0x050000
 	void connectNotify(const QMetaMethod &signal) override;
-#else
-	void connectNotify(const char *signal);
-#endif
 
 	/**
 	   Called when a connection is removed from a particular signal
@@ -795,11 +791,7 @@ protected:
 	   \param signal the name of the signal that has been
 	   disconnected from.
 	*/
-#if QT_VERSION >= 0x050000
 	void disconnectNotify(const QMetaMethod &signal) override;
-#else
-	void disconnectNotify(const char *signal);
-#endif
 
 private:
 	Q_DISABLE_COPY(TLS)

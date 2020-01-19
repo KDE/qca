@@ -185,11 +185,7 @@ private slots:
 			int timeLeft = qMax(info.interval - static_cast<int>(info.time.elapsed()), 0);
 			info.fixInterval = true;
 			ed->unregisterTimer(info.id);
-#if QT_VERSION >= 0x050000
 			info.id = ed->registerTimer(timeLeft, Qt::CoarseTimer, target);
-#else
-			info.id = ed->registerTimer(timeLeft, target);
-#endif
 
 #ifdef TIMERFIXER_DEBUG
 			printf("TimerFixer[%p] adjusting [%d] to %d\n", this, info.id, timeLeft);
@@ -249,11 +245,7 @@ private:
 #endif
 			info.fixInterval = false;
 			ed->unregisterTimer(info.id);
-#if QT_VERSION >= 0x050000
 			info.id = ed->registerTimer(info.interval, Qt::CoarseTimer, target);
-#else
-			info.id = ed->registerTimer(info.interval, target);
-#endif
 		}
 
 		info.time.start();
@@ -272,11 +264,7 @@ private:
 			int id = timers[n].id;
 			for(int i = 0; i < edtimers.count(); ++i)
 			{
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 				if(edtimers[i].timerId == id)
-#else
-				if(edtimers[i].first == id)
-#endif
 				{
 					found = true;
 					break;
@@ -296,11 +284,7 @@ private:
 		// added?
 		for(int n = 0; n < edtimers.count(); ++n)
 		{
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 			int id = edtimers[n].timerId;
-#else
-			int id = edtimers[n].first;
-#endif
 			bool found = false;
 			for(int i = 0; i < timers.count(); ++i)
 			{
@@ -315,11 +299,7 @@ private:
 			{
 				TimerInfo info;
 				info.id = id;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 				info.interval = edtimers[n].interval;
-#else
-				info.interval = edtimers[n].second;
-#endif
 				info.time.start();
 				timers += info;
 #ifdef TIMERFIXER_DEBUG

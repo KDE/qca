@@ -102,18 +102,12 @@ public:
 class WinCryptoPlugin : public QObject, public QCAPlugin
 {
    Q_OBJECT
-#if QT_VERSION >= 0x050000
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
-#endif
    Q_INTERFACES(QCAPlugin)
 
 public:
    virtual QCA::Provider *createProvider() { return new WinCryptoProvider; }
 };
-
-#if QT_VERSION < 0x050000
-#include "qca-wincrypto.moc"
-#endif
 
 Q_EXPORT_PLUGIN2(qca_wincrypto, WinCryptoPlugin);
 

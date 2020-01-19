@@ -60,20 +60,12 @@ void DSAUnitTest::testdsa()
 	   !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
 	   !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
 	{
-#if QT_VERSION >= 0x050000
 		QSKIP("DSA not supported!");
-#else
-		QSKIP("DSA not supported!", SkipAll);
-#endif
 	}
 
 	if (!QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_1024))
 	{
-#if QT_VERSION >= 0x050000
 		QSKIP("DSA_1024 discrete logarithm group sets not supported!");
-#else
-		QSKIP("DSA_1024 discrete logarithm group sets not supported!", SkipAll);
-#endif
 	}
 
 	QCA::KeyGenerator keygen;

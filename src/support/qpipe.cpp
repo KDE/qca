@@ -76,16 +76,10 @@ static bool ign_sigpipe = false;
 static void ignore_sigpipe()
 {
 	// Set to ignore SIGPIPE once only.
-//#if QT_VERSION < 0x040400
 	QMutexLocker locker(ign_mutex());
 	if(!ign_sigpipe)
 	{
 		ign_sigpipe = true;
-//#else
-//	static QBasicAtomicInt atom = Q_BASIC_ATOMIC_INITIALIZER(0);
-//	if(atom.testAndSetRelaxed(0, 1))
-//	{
-//#endif
 		struct sigaction noaction;
 		memset(&noaction, 0, sizeof(noaction));
 		noaction.sa_handler = SIG_IGN;
@@ -293,15 +287,7 @@ static int pipe_read_avail_console(Q_PIPE_ID pipe)
 	// peek them all
 	rec = (INPUT_RECORD *)malloc(count * sizeof(INPUT_RECORD));
 	BOOL ret;
-#if QT_VERSION >= 0x050000
 	ret = PeekConsoleInputW(pipe, rec, count, &i);
-#else
-	QT_WA(
-		ret = PeekConsoleInputW(pipe, rec, count, &i);
-	,
-		ret = PeekConsoleInputA(pipe, rec, count, &i);
-	)
-#endif
 	if(!ret)
 	{
 		free(rec);
@@ -349,15 +335,7 @@ static int pipe_read_console(Q_PIPE_ID pipe, ushort *data, int max, bool *eof, Q
 	}
 	else
 	{
-#if QT_VERSION >= 0x050000
 		dec = 0;
-#else
-		QT_WA(
-			dec = 0;
-		,
-			dec = QTextCodec::codecForLocale()->makeDecoder();
-		)
-#endif
 		own_decoder = true;
 	}
 
@@ -370,16 +348,7 @@ static int pipe_read_console(Q_PIPE_ID pipe, ushort *data, int max, bool *eof, Q
 
 		BOOL ret;
 		DWORD i;
-#if QT_VERSION >= 0x050000
 		ret = ReadConsoleW(pipe, &uni, 1, &i, NULL);
-#else
-		QT_WA(
-			ret = ReadConsoleW(pipe, &uni, 1, &i, NULL);
-		,
-			ret = ReadConsoleA(pipe, &ansi, 1, &i, NULL);
-			use_uni = false;
-		)
-#endif
 		if(!ret)
 		{
 			// if the first read is an error, then report error
@@ -422,25 +391,7 @@ static int pipe_write_console(Q_PIPE_ID pipe, const ushort *data, int size)
 {
 	DWORD i;
 	BOOL ret;
-#if QT_VERSION >= 0x050000
 	ret = WriteConsoleW(pipe, data, size, &i, NULL);
-#else
-	QT_WA(
-		ret = WriteConsoleW(pipe, data, size, &i, NULL);
-	,
-		// Note: we lose security by converting to QString here, but
-		//   who really cares if we're writing to a *display* ? :)
-		QByteArray out = QString::fromUtf16(data, size).toLocal8Bit();
-		ret = WriteConsoleA(pipe, out.data(), out.size(), &i, NULL);
-		if(ret)
-		{
-			// convert number of bytes to number of unicode chars
-			i = (DWORD)QString::fromLocal8Bit(out.mid(0, i)).length();
-			if(pipe_dword_overflows_int(i))
-				return -1;
-		}
-	)
-#endif
 	if(!ret)
 		return -1;
 	return (int)i; // safe to cast since 'size' is signed
@@ -1052,15 +1003,7 @@ public:
 			// console might need a decoder
 			if(consoleMode)
 			{
-#if QT_VERSION >= 0x050000
 				dec = 0;
-#else
-				QT_WA(
-					dec = 0;
-				,
-					dec = QTextCodec::codecForLocale()->makeDecoder();
-				)
-#endif
 			}
 
 			// pipe reader

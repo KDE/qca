@@ -937,9 +937,7 @@ using namespace saslQCAPlugin;
 class saslPlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
-#if QT_VERSION >= 0x050000
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
-#endif
 	Q_INTERFACES(QCAPlugin)
 public:
 	Provider *createProvider() override { return new saslProvider; }
@@ -947,6 +945,3 @@ public:
 
 #include "qca-cyrus-sasl.moc"
 
-#if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(qca_cyrus_sasl, saslPlugin)
-#endif

@@ -37,10 +37,6 @@ namespace QCA { // WRAPNS_LINE
 #include <qmutex.h>
 namespace QCA { // WRAPNS_LINE
 
-#if QT_VERSION <= 0x040000 && !defined(QT_THREAD_SUPPORT)
-   #error Your version of Qt does not support threads or mutexes
-#endif
-
 namespace Botan {
 
 /*************************************************

@@ -3029,9 +3029,7 @@ pkcs11Provider::_pinPromptHook (
 class pkcs11Plugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
-#if QT_VERSION >= 0x050000
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
-#endif
 	Q_INTERFACES(QCAPlugin)
 
 public:
@@ -3039,7 +3037,3 @@ public:
 };
 
 #include "qca-pkcs11.moc"
-
-#if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(qca_pkcs11, pkcs11Plugin)
-#endif

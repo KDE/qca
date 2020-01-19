@@ -1445,9 +1445,7 @@ const int softstoreProvider::_CONFIG_MAX_ENTRIES = 50;
 class softstorePlugin : public QObject, public QCAPlugin
 {
 	Q_OBJECT
-#if QT_VERSION >= 0x050000
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
-#endif
 	Q_INTERFACES(QCAPlugin)
 
 public:
@@ -1455,7 +1453,3 @@ public:
 };
 
 #include "qca-softstore.moc"
-
-#if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(qca_softstore, softstorePlugin)
-#endif
