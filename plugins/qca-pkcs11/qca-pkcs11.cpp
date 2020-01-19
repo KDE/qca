@@ -209,7 +209,7 @@ private:
 			const QList<Certificate> &certs
 		) {
 			foreach (Certificate i, certs) {
-				if (qFind (_certs.begin (), _certs.end (), i) == _certs.end ()) {
+				if (std::find (_certs.begin (), _certs.end (), i) == _certs.end ()) {
 					_certs += i;
 				}
 			}
