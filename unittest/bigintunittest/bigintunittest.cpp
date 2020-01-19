@@ -61,6 +61,8 @@ void BigIntUnitTest::allTests()
     QCOMPARE( QCA::BigInteger("-255").toString(), QCA::BigInteger(-255).toString() );
     QCOMPARE( QCA::BigInteger("255").toString(), QString("255") );
     QCOMPARE( QCA::BigInteger("-255").toString(), QString("-255") );
+    QCOMPARE( QCA::BigInteger("255"), QCA::BigInteger(QCA::BigInteger(255).toArray()) );
+    QCOMPARE( QCA::BigInteger("-255"), QCA::BigInteger(QCA::BigInteger(-255).toArray()) );
 
     // Some operator tests
     QCOMPARE( QCA::BigInteger("255") == QCA::BigInteger(255), true );
