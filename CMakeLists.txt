@@ -44,7 +44,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 # Do not automatically link Qt executables to qtmain target on Windows.
 # QCA exucatables use console mode only. Not need to link against qtmain.lib.
 set(Qt5_NO_LINK_QTMAIN ON)
-find_package(Qt5 REQUIRED Core)
+find_package(Qt5 5.5 REQUIRED Core)
 set(CMAKE_AUTOMOC ON)
 
 include(QcaMacro)

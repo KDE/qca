@@ -1531,7 +1531,7 @@ public:
 		// provider settings (always write at least 10 providers)
 		for(int n = 0; n < 10 || n < providers.count(); ++n)
 		{
-			QString prefix = QString().sprintf("provider_%02d_", n);
+			QString prefix = QString::asprintf("provider_%02d_", n);
 
 			Pkcs11ProviderConfig provider;
 			if(n < providers.count())
@@ -1561,7 +1561,7 @@ public:
 
 		for(int n = 0;; ++n)
 		{
-			QString prefix = QString().sprintf("provider_%02d_", n);
+			QString prefix = QString::asprintf("provider_%02d_", n);
 
 			// collect all key/values with this prefix into a
 			//   a separate container, leaving out the prefix

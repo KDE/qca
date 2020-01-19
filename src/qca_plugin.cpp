@@ -348,7 +348,7 @@ void ProviderManager::scan()
 			int ver = i->p->qcaVersion();
 			if(!validVersion(ver))
 			{
-				errstr.sprintf("plugin version 0x%06x is in the future", ver);
+				errstr = QString::asprintf("plugin version 0x%06x is in the future", ver);
 				logDebug(QString("  %1: (as %2) %3").arg(className, providerName, errstr));
 				delete i;
 				continue;
@@ -440,7 +440,7 @@ void ProviderManager::scan()
 			int ver = i->p->qcaVersion();
 			if(!validVersion(ver))
 			{
-				errstr.sprintf("plugin version 0x%06x is in the future", ver);
+				errstr = QString::asprintf("plugin version 0x%06x is in the future", ver);
 				logDebug(QString("  %1: (class: %2, as %3) %4").arg(fileName, className, providerName, errstr));
 				delete i;
 				continue;
@@ -475,8 +475,7 @@ bool ProviderManager::add(Provider *p, int priority)
 	int ver = p->qcaVersion();
 	if(!validVersion(ver))
 	{
-		QString errstr;
-		errstr.sprintf("plugin version 0x%06x is in the future", ver);
+		QString errstr = QString::asprintf("plugin version 0x%06x is in the future", ver);
 		logDebug(QString("Directly adding: %1: %2").arg(providerName, errstr));
 		return false;
 	}

@@ -1614,7 +1614,7 @@ public:
 public slots:
 	void tracker_updated()
 	{
-		QCA_logTextMessage(QString().sprintf("keystore: %p: tracker_updated start", q), Logger::Information);
+		QCA_logTextMessage(QString::asprintf("keystore: %p: tracker_updated start", q), Logger::Information);
 
 		QMutexLocker locker(&m);
 		if(!pending)
@@ -1629,7 +1629,7 @@ public slots:
 			w.wakeOne();
 		}
 
-		QCA_logTextMessage(QString().sprintf("keystore: %p: tracker_updated end", q), Logger::Information);
+		QCA_logTextMessage(QString::asprintf("keystore: %p: tracker_updated end", q), Logger::Information);
 	}
 
 	void update()

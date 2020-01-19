@@ -462,7 +462,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstorePKeyBase::_ensureAccess - return ret=%d",
 				ret ? 1 : 0
 			),
@@ -686,7 +686,7 @@ public:
 
 	QString
 	storeId () const override {
-		return QString ().sprintf ("%s/%s", "qca-softstore", myPrintable (_entry.name));
+		return QString::asprintf ("%s/%s", "qca-softstore", myPrintable (_entry.name));
 	}
 
 	QString
@@ -716,7 +716,7 @@ private:
 public:
 	softstoreKeyStoreListContext (Provider *p) : KeyStoreListContext (p) {
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::softstoreKeyStoreListContext - entry Provider=%p",
 				(void *)p
 			),
@@ -773,7 +773,7 @@ public:
 	void
 	setUpdatesEnabled (bool enabled) override {
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::setUpdatesEnabled - entry/return enabled=%d",
 				enabled ? 1 : 0
 			),
@@ -787,7 +787,7 @@ public:
 		const QString &entryId
 	) override {
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::entry - entry/return id=%d entryId='%s'",
 				id,
 				myPrintable (entryId)
@@ -807,7 +807,7 @@ public:
 		KeyStoreEntryContext *entry = NULL;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::entryPassive - entry serialized='%s'",
 				myPrintable (serialized)
 			),
@@ -823,7 +823,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::entryPassive - return entry=%p",
 				(void *)entry
 			),
@@ -838,7 +838,7 @@ public:
 		Q_UNUSED(id);
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::type - entry/return id=%d",
 				id
 			),
@@ -853,7 +853,7 @@ public:
 		QString ret;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::storeId - entry id=%d",
 				id
 			),
@@ -863,7 +863,7 @@ public:
 		ret = "qca-softstore";
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::storeId - return ret=%s",
 				myPrintable (ret)
 			),
@@ -878,7 +878,7 @@ public:
 		QString ret;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::name - entry id=%d",
 				id
 			),
@@ -888,7 +888,7 @@ public:
 		ret = "User Software Store";
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::name - return ret=%s",
 				myPrintable (ret)
 			),
@@ -903,7 +903,7 @@ public:
 		Q_UNUSED(id);
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::entryTypes - entry/return id=%d",
 				id
 			),
@@ -928,7 +928,7 @@ public:
 		list += _last_id;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::keyStores - return out.size()=%d",
 				list.size ()
 			),
@@ -943,7 +943,7 @@ public:
 		QList<KeyStoreEntryContext*> list;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::entryList - entry id=%d",
 				id
 			),
@@ -955,7 +955,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::entryList - return out.size()=%d",
 				list.size ()
 			),
@@ -970,7 +970,7 @@ public:
 		const QString &t
 	) {
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::_emit_diagnosticText - entry t='%s'",
 				myPrintable (t)
 			),
@@ -1039,23 +1039,23 @@ public:
 		_entries.clear ();
 
 		for (int i=0;i<maxEntries;i++) {
-			if (config[QString ().sprintf ("entry_%02d_enabled", i)].toBool ()) {
+			if (config[QString::asprintf ("entry_%02d_enabled", i)].toBool ()) {
 				ConvertResult cresult;
 				SoftStoreEntry entry;
 				PublicType publicType = publicTypeInvalid;
 
-				entry.name = config[QString ().sprintf ("entry_%02d_name", i)].toString ();
-				QString stringReferenceType  = config[QString ().sprintf ("entry_%02d_private_type", i)].toString ();
-				QString stringPublicType  = config[QString ().sprintf ("entry_%02d_public_type", i)].toString ();
-				entry.noPassphrase = config[QString ().sprintf ("entry_%02d_no_passphrase", i)].toBool ();
-				entry.unlockTimeout = config[QString ().sprintf ("entry_%02d_unlock_timeout", i)].toInt ();
+				entry.name = config[QString::asprintf ("entry_%02d_name", i)].toString ();
+				QString stringReferenceType  = config[QString::asprintf ("entry_%02d_private_type", i)].toString ();
+				QString stringPublicType  = config[QString::asprintf ("entry_%02d_public_type", i)].toString ();
+				entry.noPassphrase = config[QString::asprintf ("entry_%02d_no_passphrase", i)].toBool ();
+				entry.unlockTimeout = config[QString::asprintf ("entry_%02d_unlock_timeout", i)].toInt ();
 
 				if (publicTypeMap.contains (stringPublicType)) {
 					publicType = publicTypeMap[stringPublicType];
 				}
 				else {
 					_emit_diagnosticText (
-						QString ().sprintf (
+						QString::asprintf (
 							"Software Store: Bad public key type of '%s' entry.\n",
 							myPrintable (entry.name)
 						)
@@ -1068,7 +1068,7 @@ public:
 				}
 				else {
 					_emit_diagnosticText (
-						QString ().sprintf (
+						QString::asprintf (
 							"Software Store: Bad private key type of '%s' entry.\n",
 							myPrintable (entry.name)
 						)
@@ -1076,14 +1076,14 @@ public:
 					goto cleanup1;
 				}
 
-				entry.keyReference = config[QString ().sprintf ("entry_%02d_private", i)].toString ();
+				entry.keyReference = config[QString::asprintf ("entry_%02d_private", i)].toString ();
 
 				switch (publicType) {
 					case publicTypeInvalid:
 						goto cleanup1;
 					break;
 					case publicTypeX509Chain:
-						QStringList base64certs = config[QString ().sprintf ("entry_%02d_public", i)].toString ().split ("!");
+						QStringList base64certs = config[QString::asprintf ("entry_%02d_public", i)].toString ().split ("!");
 
 						foreach (const QString &s, base64certs) {
 							entry.chain += Certificate::fromDER (
@@ -1094,7 +1094,7 @@ public:
 
 						if (cresult != ConvertGood) {
 							_emit_diagnosticText (
-								QString ().sprintf (
+								QString::asprintf (
 									"Software Store: Cannot load certificate of '%s' entry.\n",
 									myPrintable (entry.name)
 								)
@@ -1127,14 +1127,14 @@ private:
 		QString serialized;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::_serializeSoftStoreEntry - entry name=%s",
 				myPrintable (entry.name)
 			),
 			Logger::Debug
 		);
 
-		serialized = QString ().sprintf (
+		serialized = QString::asprintf (
 			"qca-softstore/0/%s/%d/%s/%d/%d/x509chain/",
 			myPrintable (_escapeString (entry.name)),
 			entry.keyReferenceType,
@@ -1151,7 +1151,7 @@ private:
 		serialized.append (list.join ("/"));
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::_serializeSoftStoreEntry - return serialized='%s'",
 				myPrintable (serialized)
 			),
@@ -1169,7 +1169,7 @@ private:
 		bool ret = false;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::_deserializeSoftStoreEntry - entry from='%s'",
 				myPrintable (serialized)
 			),
@@ -1215,7 +1215,7 @@ private:
 	cleanup:
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::_deserializeSoftStoreEntry - return ret=%d chain.size()=%d",
 				ret ? 1 : 0,
 				entry.chain.size ()
@@ -1233,7 +1233,7 @@ private:
 		softstoreKeyStoreEntryContext *entry = NULL;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::_keyStoreEntryBySoftStoreEntry - entry name=%s",
 				myPrintable (sentry.name)
 			),
@@ -1266,7 +1266,7 @@ private:
 		);
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreKeyStoreListContext::_keyStoreEntryBySoftStoreEntry - return entry=%p",
 				(void *)entry
 			),
@@ -1284,7 +1284,7 @@ private:
 
 		foreach (const QChar &c, from) {
 			if (c == '/' || c == '\\') {
-				to += QString ().sprintf ("\\x%04x", c.unicode ());
+				to += QString::asprintf ("\\x%04x", c.unicode ());
 			}
 			else {
 				to += c;
@@ -1369,7 +1369,7 @@ public:
 		Provider::Context *context = NULL;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreProvider::createContext - entry type='%s'",
 				myPrintable (type)
 			),
@@ -1385,7 +1385,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"softstoreProvider::createContext - return context=%p",
 				(void *)context
 			),
@@ -1406,14 +1406,14 @@ public:
 
 		mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-softstore#1.0";
 		for (int i=0;i<_CONFIG_MAX_ENTRIES;i++) {
-			mytemplate[QString ().sprintf ("entry_%02d_enabled", i)] = false;
-			mytemplate[QString ().sprintf ("entry_%02d_name", i)] = "";
-			mytemplate[QString ().sprintf ("entry_%02d_public_type", i)] = "";
-			mytemplate[QString ().sprintf ("entry_%02d_private_type", i)] = "";
-			mytemplate[QString ().sprintf ("entry_%02d_public", i)] = "";
-			mytemplate[QString ().sprintf ("entry_%02d_private", i)] = "";
-			mytemplate[QString ().sprintf ("entry_%02d_unlock_timeout", i)] = -1;
-			mytemplate[QString ().sprintf ("entry_%02d_no_passphrase", i)] = false;
+			mytemplate[QString::asprintf ("entry_%02d_enabled", i)] = false;
+			mytemplate[QString::asprintf ("entry_%02d_name", i)] = "";
+			mytemplate[QString::asprintf ("entry_%02d_public_type", i)] = "";
+			mytemplate[QString::asprintf ("entry_%02d_private_type", i)] = "";
+			mytemplate[QString::asprintf ("entry_%02d_public", i)] = "";
+			mytemplate[QString::asprintf ("entry_%02d_private", i)] = "";
+			mytemplate[QString::asprintf ("entry_%02d_unlock_timeout", i)] = -1;
+			mytemplate[QString::asprintf ("entry_%02d_no_passphrase", i)] = false;
 		}
 
 		return mytemplate;

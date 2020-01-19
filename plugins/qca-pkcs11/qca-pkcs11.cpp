@@ -585,7 +585,7 @@ public:
 		bool ret = false;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"pkcs11RSAContext::decrypt - decrypt in.size()=%d, alg=%d",
 				in.size (),
 				(int)alg
@@ -672,7 +672,7 @@ public:
 
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->_emit_diagnosticText (
-					QString ().sprintf (
+					QString::asprintf (
 						"PKCS#11: Cannot decrypt: %lu-'%s'.\n",
 						e.rv (),
 						myPrintable (e.message ())
@@ -682,7 +682,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"pkcs11RSAContext::decrypt - decrypt out->size()=%d",
 				out->size ()
 			),
@@ -718,7 +718,7 @@ public:
 			case EMSA3_RIPEMD160:
 			default:
 				QCA_logTextMessage (
-					QString().sprintf (
+					QString::asprintf (
 						"PKCS#11: Invalid hash algorithm %d",
 						_sign_data.alg
 					),
@@ -850,7 +850,7 @@ public:
 
 			if (s_keyStoreList != NULL) {
 				s_keyStoreList->_emit_diagnosticText (
-					QString ().sprintf (
+					QString::asprintf (
 						"PKCS#11: Cannot sign: %lu-'%s'.\n",
 						e.rv (),
 						myPrintable (e.message ())
@@ -862,7 +862,7 @@ public:
 		_clearSign ();
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"pkcs11RSAContext::endSign - return result.size ()=%d",
 				result.size ()
 			),
@@ -962,7 +962,7 @@ public:
 		) == CKR_OK;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"pkcs11RSAContext::_ensureTokenAvailable - return ret=%d",
 				ret ? 1 : 0
 			),
@@ -988,7 +988,7 @@ public:
 		) == CKR_OK;
 
 		QCA_logTextMessage (
-			QString ().sprintf (
+			QString::asprintf (
 				"pkcs11RSAContext::_ensureTokenAccess - return ret=%d",
 				ret ? 1 : 0
 			),
@@ -1431,7 +1431,7 @@ pkcs11h_engine_crypto_t pkcs11QCACrypto::crypto = {
 //----------------------------------------------------------------------------
 pkcs11KeyStoreListContext::pkcs11KeyStoreListContext (Provider *p) : KeyStoreListContext(p) {
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::pkcs11KeyStoreListContext - entry Provider=%p",
 			(void *)p
 		),
@@ -1489,7 +1489,7 @@ pkcs11KeyStoreListContext::start () {
 void
 pkcs11KeyStoreListContext::setUpdatesEnabled (bool enabled) {
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::setUpdatesEnabled - entry enabled=%d",
 			enabled ? 1 : 0
 		),
@@ -1507,7 +1507,7 @@ pkcs11KeyStoreListContext::setUpdatesEnabled (bool enabled) {
 	}
 	catch (const pkcs11Exception &e) {
 		s_keyStoreList->_emit_diagnosticText (
-			QString ().sprintf (
+			QString::asprintf (
 				"PKCS#11: Start event failed %lu-'%s'.\n",
 				e.rv (),
 				myPrintable (e.message ())
@@ -1527,7 +1527,7 @@ pkcs11KeyStoreListContext::entry (
 	const QString &entryId
 ) {
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::entry - entry/return id=%d entryId='%s'",
 			id,
 			myPrintable (entryId)
@@ -1548,7 +1548,7 @@ pkcs11KeyStoreListContext::entryPassive (
 	pkcs11h_certificate_id_t certificate_id = NULL;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::entryPassive - entry serialized='%s'",
 			myPrintable (serialized)
 		),
@@ -1575,7 +1575,7 @@ pkcs11KeyStoreListContext::entryPassive (
 	}
 	catch (const pkcs11Exception &e) {
 		s_keyStoreList->_emit_diagnosticText (
-			QString ().sprintf (
+			QString::asprintf (
 				"PKCS#11: Add key store entry %lu-'%s'.\n",
 				e.rv (),
 				myPrintable (e.message ())
@@ -1589,7 +1589,7 @@ pkcs11KeyStoreListContext::entryPassive (
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::entryPassive - return entry=%p",
 			(void *)entry
 		),
@@ -1605,7 +1605,7 @@ pkcs11KeyStoreListContext::type (int id) const {
 	Q_UNUSED(id);
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::type - entry/return id=%d",
 			id
 		),
@@ -1620,7 +1620,7 @@ pkcs11KeyStoreListContext::storeId (int id) const {
 	QString ret;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::storeId - entry id=%d",
 			id
 		),
@@ -1632,7 +1632,7 @@ pkcs11KeyStoreListContext::storeId (int id) const {
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::storeId - return ret=%s",
 			myPrintable (ret)
 		),
@@ -1647,7 +1647,7 @@ pkcs11KeyStoreListContext::name (int id) const {
 	QString ret;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::name - entry id=%d",
 			id
 		),
@@ -1659,7 +1659,7 @@ pkcs11KeyStoreListContext::name (int id) const {
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::name - return ret=%s",
 			myPrintable (ret)
 		),
@@ -1675,7 +1675,7 @@ pkcs11KeyStoreListContext::entryTypes (int id) const {
 	Q_UNUSED(id);
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::entryTypes - entry/return id=%d",
 			id
 		),
@@ -1748,7 +1748,7 @@ pkcs11KeyStoreListContext::keyStores () {
 	}
 	catch (const pkcs11Exception &e) {
 		s_keyStoreList->_emit_diagnosticText (
-			QString ().sprintf (
+			QString::asprintf (
 				"PKCS#11: Cannot get key stores: %lu-'%s'.\n",
 				e.rv (),
 				myPrintable (e.message ())
@@ -1761,7 +1761,7 @@ pkcs11KeyStoreListContext::keyStores () {
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::keyStores - return out.size()=%d",
 			out.size ()
 		),
@@ -1777,7 +1777,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 	QList<KeyStoreEntryContext*> out;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::entryList - entry id=%d",
 			id
 		),
@@ -1880,7 +1880,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 				}
 				catch (const pkcs11Exception &e) {
 					s_keyStoreList->_emit_diagnosticText (
-						QString ().sprintf (
+						QString::asprintf (
 							"PKCS#11: Add key store entry %lu-'%s'.\n",
 							e.rv (),
 							myPrintable (e.message ())
@@ -1909,7 +1909,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 				}
 				catch (const pkcs11Exception &e) {
 					s_keyStoreList->_emit_diagnosticText (
-						QString ().sprintf (
+						QString::asprintf (
 							"PKCS#11: Add key store entry %lu-'%s'.\n",
 							e.rv (),
 							myPrintable (e.message ())
@@ -1921,7 +1921,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 	}
 	catch (const pkcs11Exception &e) {
 		s_keyStoreList->_emit_diagnosticText (
-			QString ().sprintf (
+			QString::asprintf (
 				"PKCS#11: Enumerating store failed %lu-'%s'.\n",
 				e.rv (),
 				myPrintable (e.message ())
@@ -1934,7 +1934,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::entryList - return out.size()=%d",
 			out.size ()
 		),
@@ -1955,7 +1955,7 @@ pkcs11KeyStoreListContext::_tokenPrompt (
 	bool ret = false;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_tokenPrompt - entry user_data=%p, token_id=%p",
 			user_data,
 			(void *)token_id
@@ -1988,7 +1988,7 @@ pkcs11KeyStoreListContext::_tokenPrompt (
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_tokenPrompt - return ret=%d",
 			ret ? 1 : 0
 		),
@@ -2010,7 +2010,7 @@ pkcs11KeyStoreListContext::_pinPrompt (
 	bool ret = false;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_pinPrompt - entry user_data=%p, token_id=%p",
 			user_data,
 			(void *)token_id
@@ -2047,7 +2047,7 @@ pkcs11KeyStoreListContext::_pinPrompt (
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_pinPrompt - return ret=%d",
 			ret ? 1 : 0
 		),
@@ -2062,7 +2062,7 @@ pkcs11KeyStoreListContext::_emit_diagnosticText (
 	const QString &t
 ) {
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_emit_diagnosticText - entry t='%s'",
 			myPrintable (t)
 		),
@@ -2114,7 +2114,7 @@ pkcs11KeyStoreListContext::_registerTokenId (
 	const pkcs11h_token_id_t token_id
 ) {
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_registerTokenId - entry token_id=%p",
 			(void *)token_id
 		),
@@ -2153,7 +2153,7 @@ pkcs11KeyStoreListContext::_registerTokenId (
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_registerTokenId - return entry=%p",
 			(void *)token_id
 		),
@@ -2195,7 +2195,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 	pkcs11KeyStoreEntryContext *entry = NULL;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId - entry certificate_id=%p, has_private=%d, chain.size()=%d",
 			(void *)certificate_id,
 			has_private ? 1 : 0,
@@ -2259,7 +2259,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId - return entry=%p",
 			(void *)entry
 		),
@@ -2277,7 +2277,7 @@ pkcs11KeyStoreListContext::_tokenId2storeId (
 	size_t len;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_tokenId2storeId - entry token_id=%p",
 			(void *)token_id
 		),
@@ -2312,7 +2312,7 @@ pkcs11KeyStoreListContext::_tokenId2storeId (
 	storeId = "qca-pkcs11/" + _escapeString (QString::fromUtf8 (buf));
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_tokenId2storeId - return storeId='%s'",
 			myPrintable (storeId)
 		),
@@ -2332,7 +2332,7 @@ pkcs11KeyStoreListContext::_serializeCertificate (
 	size_t len;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_serializeCertificate - entry certificate_id=%p, xx, has_private=%d",
 			(void *)certificate_id,
 			has_private ? 1 : 0
@@ -2365,7 +2365,7 @@ pkcs11KeyStoreListContext::_serializeCertificate (
 
 	buf.resize ((int)len);
 
-	serialized = QString ().sprintf (
+	serialized = QString::asprintf (
 		"qca-pkcs11/0/%s/%d/",
 		myPrintable(_escapeString (QString::fromUtf8 (buf))),
 		has_private ? 1 : 0
@@ -2379,7 +2379,7 @@ pkcs11KeyStoreListContext::_serializeCertificate (
 	serialized.append (list.join ("/"));
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_serializeCertificate - return serialized='%s'",
 			myPrintable (serialized)
 		),
@@ -2400,7 +2400,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 	chain.clear ();
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_deserializeCertificate - entry from='%s', p_certificate_id=%p, p_has_private=%p",
 			myPrintable (from),
 			(void *)p_certificate_id,
@@ -2481,7 +2481,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11KeyStoreListContext::_deserializeCertificate - return *p_certificate_id=%p, chain.size()=%d",
 			(void *)*p_certificate_id,
 			chain.size ()
@@ -2498,7 +2498,7 @@ pkcs11KeyStoreListContext::_escapeString (
 
 	foreach (QChar c, from) {
 		if (c == '/' || c == '\\') {
-			to += QString ().sprintf ("\\x%04x", c.unicode ());
+			to += QString::asprintf ("\\x%04x", c.unicode ());
 		}
 		else {
 			to += c;
@@ -2624,7 +2624,7 @@ void pkcs11Provider::init () {
 	catch (const pkcs11Exception &e) {
 		QCA_logTextMessage (e.message (), Logger::Error);
 		appendPluginDiagnosticText (
-			QString().sprintf (
+			QString::asprintf (
 				"An error %s during initialization of qca-pkcs11 plugin\n",
 				myPrintable (e.message ())
 			)
@@ -2688,7 +2688,7 @@ pkcs11Provider::createContext (const QString &type) {
 	Provider::Context *context = NULL;
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11Provider::createContext - entry type='%s'",
 			myPrintable (type)
 		),
@@ -2705,7 +2705,7 @@ pkcs11Provider::createContext (const QString &type) {
 	}
 
 	QCA_logTextMessage (
-		QString ().sprintf (
+		QString::asprintf (
 			"pkcs11Provider::createContext - return context=%p",
 			(void *)context
 		),
@@ -2772,14 +2772,14 @@ pkcs11Provider::defaultConfig () const {
 	mytemplate["pin_cache"] = PKCS11H_PIN_CACHE_INFINITE;
 	mytemplate["log_level"] = 0;
 	for (int i=0;i<_CONFIG_MAX_PROVIDERS;i++) {
-		mytemplate[QString ().sprintf ("provider_%02d_enabled", i)] = false;
-		mytemplate[QString ().sprintf ("provider_%02d_name", i)] = "";
-		mytemplate[QString ().sprintf ("provider_%02d_library", i)] = "";
-		mytemplate[QString ().sprintf ("provider_%02d_allow_protected_authentication", i)] = true;
-		mytemplate[QString ().sprintf ("provider_%02d_cert_private", i)] = false;
-		mytemplate[QString ().sprintf ("provider_%02d_private_mask", i)] = PKCS11H_PRIVATEMODE_MASK_AUTO;
-		mytemplate[QString ().sprintf ("provider_%02d_slotevent_method", i)] = "auto";
-		mytemplate[QString ().sprintf ("provider_%02d_slotevent_timeout", i)] = 0;
+		mytemplate[QString::asprintf ("provider_%02d_enabled", i)] = false;
+		mytemplate[QString::asprintf ("provider_%02d_name", i)] = "";
+		mytemplate[QString::asprintf ("provider_%02d_library", i)] = "";
+		mytemplate[QString::asprintf ("provider_%02d_allow_protected_authentication", i)] = true;
+		mytemplate[QString::asprintf ("provider_%02d_cert_private", i)] = false;
+		mytemplate[QString::asprintf ("provider_%02d_private_mask", i)] = PKCS11H_PRIVATEMODE_MASK_AUTO;
+		mytemplate[QString::asprintf ("provider_%02d_slotevent_method", i)] = "auto";
+		mytemplate[QString::asprintf ("provider_%02d_slotevent_timeout", i)] = 0;
 	}
 
 	return mytemplate;
@@ -2819,10 +2819,10 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 	 * Add new providers
 	 */
 	for (int i=0;i<_CONFIG_MAX_PROVIDERS;i++) {
-		bool enabled = config[QString ().sprintf ("provider_%02d_enabled", i)].toBool ();
-		QString provider = config[QString ().sprintf ("provider_%02d_library", i)].toString ();
-		QString name = config[QString ().sprintf ("provider_%02d_name", i)].toString ();
-		QString qslotevent = config[QString ().sprintf ("provider_%02d_slotevent_method", i)].toString ();
+		bool enabled = config[QString::asprintf ("provider_%02d_enabled", i)].toBool ();
+		QString provider = config[QString::asprintf ("provider_%02d_library", i)].toString ();
+		QString name = config[QString::asprintf ("provider_%02d_name", i)].toString ();
+		QString qslotevent = config[QString::asprintf ("provider_%02d_slotevent_method", i)].toString ();
 		unsigned slotevent = PKCS11H_SLOTEVENT_METHOD_AUTO;
 		if (qslotevent == "trigger") {
 			slotevent = PKCS11H_SLOTEVENT_METHOD_TRIGGER;
@@ -2838,7 +2838,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		if (enabled && !provider.isEmpty()) {
 
 			QCA_logTextMessage (
-				QString ().sprintf (
+				QString::asprintf (
 					"Loading PKCS#11 provider '%s' (%s)",
 					myPrintable (name),
 					myPrintable (provider)
@@ -2851,22 +2851,22 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					myPrintable (name),
 					myPrintable (provider),
 					config[
-						QString ().sprintf ("provider_%02d_allow_protected_authentication", i)
+						QString::asprintf ("provider_%02d_allow_protected_authentication", i)
 					].toBool () != false ? TRUE : FALSE, //krazy:exclude=captruefalse
 					(unsigned)config[
-						QString ().sprintf ("provider_%02d_private_mask", i)
+						QString::asprintf ("provider_%02d_private_mask", i)
 					].toInt (),
 					slotevent,
 					(unsigned)config[
-						QString ().sprintf ("provider_%02d_slotevent_timeout", i)
+						QString::asprintf ("provider_%02d_slotevent_timeout", i)
 					].toInt (),
 					config[
-						QString ().sprintf ("provider_%02d_cert_private", i)
+						QString::asprintf ("provider_%02d_cert_private", i)
 					].toBool () != false ? TRUE : FALSE //krazy:exclude=captruefalse
 				)) != CKR_OK
 			) {
 				QCA_logTextMessage (
-					QString ().sprintf (
+					QString::asprintf (
 						"PKCS#11: Cannot log provider '%s'-'%s' %lu-'%s'.\n",
 						myPrintable (name),
 						myPrintable (provider),
@@ -2876,7 +2876,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 					Logger::Error
 				);
 				appendPluginDiagnosticText (
-					QString ().sprintf (
+					QString::asprintf (
 						"Cannot load PKCS#11 provider '%s'\n",
 						myPrintable (name)
 					)
