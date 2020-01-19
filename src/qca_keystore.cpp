@@ -1259,7 +1259,7 @@ QString KeyStore::writeEntry(const KeyBundle &kb)
 	else
 	{
 		QVariant arg;
-		qVariantSetValue<KeyBundle>(arg, kb);
+		arg.setValue<KeyBundle>(kb);
 		return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
 	}
 }
@@ -1274,7 +1274,7 @@ QString KeyStore::writeEntry(const Certificate &cert)
 	else
 	{
 		QVariant arg;
-		qVariantSetValue<Certificate>(arg, cert);
+		arg.setValue<Certificate>(cert);
 		return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
 	}
 }
@@ -1289,7 +1289,7 @@ QString KeyStore::writeEntry(const CRL &crl)
 	else
 	{
 		QVariant arg;
-		qVariantSetValue<CRL>(arg, crl);
+		arg.setValue<CRL>(crl);
 		return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
 	}
 }
@@ -1304,7 +1304,7 @@ QString KeyStore::writeEntry(const PGPKey &key)
 	else
 	{
 		QVariant arg;
-		qVariantSetValue<PGPKey>(arg, key);
+		arg.setValue<PGPKey>(key);
 		return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
 	}
 }
