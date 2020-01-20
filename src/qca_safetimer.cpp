@@ -39,7 +39,7 @@ class SafeTimer::Private : public QObject
 	friend class SafeTimer;
 
 public:
-	Private(QObject *parent = 0);
+	Private(QObject *parent = nullptr);
 
 	int timerId;
 	int fixerTimerId;

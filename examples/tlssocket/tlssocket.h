@@ -27,7 +27,7 @@
 class TLSSocket : public QTcpSocket
 {
 public:
-	TLSSocket(QObject *parent = 0);
+	TLSSocket(QObject *parent = nullptr);
 	~TLSSocket();
 
 	void connectToHostEncrypted(const QString &host, quint16 port);

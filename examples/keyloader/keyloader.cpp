@@ -37,7 +37,7 @@ class PassphraseHandler: public QObject
 public:
 	QCA::EventHandler handler;
 
-	PassphraseHandler(QObject *parent = 0) : QObject(parent)
+	PassphraseHandler(QObject *parent = nullptr) : QObject(parent)
 	{
 		connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)),
 			SLOT(eh_eventReady(int, const QCA::Event &)));

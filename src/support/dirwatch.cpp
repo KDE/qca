@@ -37,7 +37,7 @@ class QFileSystemWatcherRelay : public QObject
 public:
 	QFileSystemWatcher *watcher;
 
-	QFileSystemWatcherRelay(QFileSystemWatcher *_watcher, QObject *parent = 0)
+	QFileSystemWatcherRelay(QFileSystemWatcher *_watcher, QObject *parent = nullptr)
 	:QObject(parent), watcher(_watcher)
 	{
 		connect(watcher, SIGNAL(directoryChanged(const QString &)), SIGNAL(directoryChanged(const QString &)), Qt::QueuedConnection);

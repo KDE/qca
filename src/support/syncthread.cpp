@@ -120,7 +120,7 @@ class SyncThreadAgent : public QObject
 {
 	Q_OBJECT
 public:
-	SyncThreadAgent(QObject *parent = 0) : QObject(parent)
+	SyncThreadAgent(QObject *parent = nullptr) : QObject(parent)
 	{
 		QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
 	}

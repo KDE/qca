@@ -32,7 +32,7 @@ class QProcessSignalRelay : public QObject
 {
 	Q_OBJECT
 public:
-	QProcessSignalRelay(QProcess *proc, QObject *parent = 0)
+	QProcessSignalRelay(QProcess *proc, QObject *parent = nullptr)
 	:QObject(parent)
 	{
 		qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");

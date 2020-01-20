@@ -34,7 +34,7 @@ class SafeSocketNotifier : public QObject
 	Q_OBJECT
 public:
 	SafeSocketNotifier(int socket, QSocketNotifier::Type type,
-		QObject *parent = 0);
+		QObject *parent = nullptr);
 
 	~SafeSocketNotifier();
 

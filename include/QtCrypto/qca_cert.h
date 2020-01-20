@@ -1101,7 +1101,7 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   \return the Certificate corresponding to the certificate in the
 	   provided array
 	*/
-	static Certificate fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static Certificate fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the certificate from PEM format
@@ -1115,7 +1115,7 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   \return the Certificate corresponding to the certificate in the
 	   provided string
 	*/
-	static Certificate fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+	static Certificate fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the certificate from a file
@@ -1130,7 +1130,7 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 	   \return the Certificate corresponding to the certificate in the
 	   provided string
 	*/
-	static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+	static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Test if the subject of the certificate matches a specified host
@@ -1479,7 +1479,7 @@ public:
 
 	   \note this only applies to PKCS#10 format certificate requests
 	*/
-	static CertificateRequest fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static CertificateRequest fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the certificate request from PEM format
@@ -1496,7 +1496,7 @@ public:
 
 	   \note this only applies to PKCS#10 format certificate requests
 	*/
-	static CertificateRequest fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+	static CertificateRequest fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the certificate request from a file
@@ -1513,7 +1513,7 @@ public:
 
 	   \note this only applies to PKCS#10 format certificate requests
 	*/
-	static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+	static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Export the CertificateRequest to a string
@@ -1538,7 +1538,7 @@ public:
 
 	   \note this only applies to SPKAC format certificate requests
 	*/
-	static CertificateRequest fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+	static CertificateRequest fromString(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   \internal
@@ -1832,7 +1832,7 @@ public:
 
 	   \return the CRL corresponding to the contents of the array
 	*/
-	static CRL fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static CRL fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import a PEM encoded %Certificate Revocation List (CRL)
@@ -1845,7 +1845,7 @@ public:
 
 	   \return the CRL corresponding to the contents of the string
 	*/
-	static CRL fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+	static CRL fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import a PEM encoded %Certificate Revocation List (CRL) from a file
@@ -1859,7 +1859,7 @@ public:
 
 	   \return the CRL in the file
 	*/
-	static CRL fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+	static CRL fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   \internal
@@ -2004,7 +2004,7 @@ public:
 	   \return the CertificateCollection corresponding to the contents of
 	   the file specified in fileName
 	*/
-	static CertificateCollection fromFlatTextFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+	static CertificateCollection fromFlatTextFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   import a CertificateCollection from a PKCS#7 file
@@ -2019,7 +2019,7 @@ public:
 	   \return the CertificateCollection corresponding to the contents of
 	   the file specified in fileName
 	*/
-	static CertificateCollection fromPKCS7File(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+	static CertificateCollection fromPKCS7File(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 private:
 	class Private;
@@ -2304,7 +2304,7 @@ else
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+	static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the key bundle from a file in PKCS12 (.p12) format
@@ -2336,7 +2336,7 @@ else
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+	static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = nullptr, const QString &provider = QString());
 
 private:
 	class Private;
@@ -2493,7 +2493,7 @@ public:
 	   \param provider the provider to use, if a particular provider is
 	   required
 	*/
-	static PGPKey fromArray(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static PGPKey fromArray(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the key from a string
@@ -2504,7 +2504,7 @@ public:
 	   \param provider the provider to use, if a particular provider is
 	   required
 	*/
-	static PGPKey fromString(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+	static PGPKey fromString(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the key from a file
@@ -2516,7 +2516,7 @@ public:
 	   \param provider the provider to use, if a particular provider is
 	   required
 	*/
-	static PGPKey fromFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+	static PGPKey fromFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 private:
 	class Private;
@@ -2571,7 +2571,7 @@ public:
 
 	   \param parent the parent object for this object
 	*/
-	KeyLoader(QObject *parent = 0);
+	KeyLoader(QObject *parent = nullptr);
 	~KeyLoader();
 
 	/**

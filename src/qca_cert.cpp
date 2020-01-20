@@ -2832,7 +2832,7 @@ public:
 	In in;
 	Out out;
 
-	KeyLoaderThread(QObject *parent = 0) : QThread(parent)
+	KeyLoaderThread(QObject *parent = nullptr) : QThread(parent)
 	{
 	}
 

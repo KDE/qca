@@ -37,7 +37,7 @@ class ClientPassphraseHandler: public QObject
 {
     Q_OBJECT
 public:
-    ClientPassphraseHandler(QObject *parent = 0) : QObject( parent )
+    ClientPassphraseHandler(QObject *parent = nullptr) : QObject( parent )
     {
         // When the PasswordAsker or TokenAsker needs to interact
         // with the user, it raises a signal. We connect that to a

@@ -1566,7 +1566,7 @@ public:
 
 	   \param parent the parent object for this object
 	*/
-	EventHandler(QObject *parent = 0);
+	EventHandler(QObject *parent = nullptr);
 	~EventHandler();
 
 	/**
@@ -1648,7 +1648,7 @@ public:
 
 	   \param parent the parent object for this QObject
 	*/
-	PasswordAsker(QObject *parent = 0);
+	PasswordAsker(QObject *parent = nullptr);
 	~PasswordAsker();
 
 	/**
@@ -1740,7 +1740,7 @@ public:
 
 	   \param parent the parent object for this QObject
 	*/
-	TokenAsker(QObject *parent = 0);
+	TokenAsker(QObject *parent = nullptr);
 	~TokenAsker();
 
 	/**

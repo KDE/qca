@@ -743,7 +743,7 @@ if (! QCA::ConvertGood == conversionResult)
 	   conversion succeeded (ConvertGood) or not
 	   \param provider the name of the provider to use for the import.
 	*/
-	static PublicKey fromDER(const QByteArray &a, ConvertResult *result = 0, const QString &provider = QString());
+	static PublicKey fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import a key in Privacy Enhanced Mail (PEM) format
@@ -770,7 +770,7 @@ if (! QCA::ConvertGood == conversionResult)
 	   \sa toPEM, which provides an inverse of fromPEM()
 	   \sa fromPEMFile, which provides an import direct from a file.
 	*/
-	static PublicKey fromPEM(const QString &s, ConvertResult *result = 0, const QString &provider = QString());
+	static PublicKey fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import a key in Privacy Enhanced Mail (PEM) format from a file
@@ -799,7 +799,7 @@ if (! QCA::ConvertGood == conversionResult)
 
 	   \note there is also a constructor form that can import from a file
 	*/
-	static PublicKey fromPEMFile(const QString &fileName, ConvertResult *result = 0, const QString &provider = QString());
+	static PublicKey fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 protected:
 	/**
@@ -1045,7 +1045,7 @@ public:
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	static PrivateKey fromDER(const SecureArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+	static PrivateKey fromDER(const SecureArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the key from Privacy Enhanced Mail (PEM) format
@@ -1065,7 +1065,7 @@ public:
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	static PrivateKey fromPEM(const QString &s, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+	static PrivateKey fromPEM(const QString &s, const SecureArray &passphrase = SecureArray(), ConvertResult *result = nullptr, const QString &provider = QString());
 
 	/**
 	   Import the key in Privacy Enhanced Mail (PEM) format from a file
@@ -1089,7 +1089,7 @@ public:
 	   \note This synchronous operation may require event handling, and so
 	   it must not be called from the same thread as an EventHandler.
 	*/
-	static PrivateKey fromPEMFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = 0, const QString &provider = QString());
+	static PrivateKey fromPEMFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = nullptr, const QString &provider = QString());
 
 protected:
 	/**
@@ -1126,7 +1126,7 @@ public:
 
 	   \param parent the parent object, if applicable
 	*/
-	KeyGenerator(QObject *parent = 0);
+	KeyGenerator(QObject *parent = nullptr);
 
 	~KeyGenerator();
 

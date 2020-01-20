@@ -90,7 +90,7 @@ public:
 
 	   \param parent the parent object to this object
 	*/
-	QPipeDevice(QObject *parent = 0);
+	QPipeDevice(QObject *parent = nullptr);
 	~QPipeDevice();
 
 	/**
@@ -234,7 +234,7 @@ public:
 
 	   \param parent the parent object for this object
 	*/
-	QPipeEnd(QObject *parent = 0);
+	QPipeEnd(QObject *parent = nullptr);
 
 	~QPipeEnd();
 
@@ -487,7 +487,7 @@ public:
 
 	   \param parent the parent object for this object
 	*/
-	QPipe(QObject *parent = 0);
+	QPipe(QObject *parent = nullptr);
 
 	~QPipe();
 

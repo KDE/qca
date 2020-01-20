@@ -848,7 +848,7 @@ public:
 	   \param provider the provider to use, if a specific
 	   provider is required
 	*/
-	explicit OpenPGP(QObject *parent = 0, const QString &provider = QString());
+	explicit OpenPGP(QObject *parent = nullptr, const QString &provider = QString());
 	~OpenPGP();
 
 private:
@@ -894,7 +894,7 @@ public:
 	   \param provider the provider to use, if a specific
 	   provider is required
 	*/
-	explicit CMS(QObject *parent = 0, const QString &provider = QString());
+	explicit CMS(QObject *parent = nullptr, const QString &provider = QString());
 	~CMS();
 
 	/**

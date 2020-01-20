@@ -1663,7 +1663,7 @@ class HandlerBase : public QObject
 {
 	Q_OBJECT
 public:
-	HandlerBase(QObject *parent = 0) : QObject(parent)
+	HandlerBase(QObject *parent = nullptr) : QObject(parent)
 	{
 	}
 
@@ -1675,7 +1675,7 @@ class AskerBase : public QObject
 {
 	Q_OBJECT
 public:
-	AskerBase(QObject *parent = 0) : QObject(parent)
+	AskerBase(QObject *parent = nullptr) : QObject(parent)
 	{
 	}
 

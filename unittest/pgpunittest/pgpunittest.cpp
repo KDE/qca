@@ -64,7 +64,7 @@ class PGPPassphraseProvider: public QObject
 {
     Q_OBJECT
 public:
-    PGPPassphraseProvider(QObject *parent = 0) : QObject(parent)
+    PGPPassphraseProvider(QObject *parent = nullptr) : QObject(parent)
     {
         connect(&m_handler, SIGNAL(eventReady(int, const QCA::Event &)),
 		SLOT(eh_eventReady(int, const QCA::Event &)));

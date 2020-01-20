@@ -72,7 +72,7 @@ public:
 	Input input;
 	Output output;
 
-	GpgAction(QObject *parent = 0);
+	GpgAction(QObject *parent = nullptr);
 	~GpgAction();
 	void reset();
 	void start();

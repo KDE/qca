@@ -361,7 +361,7 @@ public:
 	   \param e the KeyStoreEntry to monitor
 	   \param parent the parent object for this object
 	*/
-	explicit KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = 0);
+	explicit KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = nullptr);
 
 	~KeyStoreEntryWatcher();
 
@@ -715,7 +715,7 @@ public:
 
 	   \param parent the parent for this object
 	*/
-	KeyStoreManager(QObject *parent = 0);
+	KeyStoreManager(QObject *parent = nullptr);
 	~KeyStoreManager();
 
 	/**

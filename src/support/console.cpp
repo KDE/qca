@@ -60,7 +60,7 @@ private:
 	QByteArray in_left, out_left;
 
 public:
-	ConsoleWorker(QObject *parent = 0) : QObject(parent), in(this), out(this)
+	ConsoleWorker(QObject *parent = nullptr) : QObject(parent), in(this), out(this)
 	{
 		started = false;
 	}
@@ -219,7 +219,7 @@ public:
 	QByteArray in_left, out_left;
 	QMutex call_mutex;
 
-	ConsoleThread(QObject *parent = 0) : SyncThread(parent)
+	ConsoleThread(QObject *parent = nullptr) : SyncThread(parent)
 	{
 		qRegisterMetaType<SecureArray>("QCA::SecureArray");
 	}

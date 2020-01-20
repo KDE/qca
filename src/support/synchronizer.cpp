@@ -317,7 +317,7 @@ class SynchronizerAgent : public QObject
 {
 	Q_OBJECT
 public:
-	SynchronizerAgent(QObject *parent = 0) : QObject(parent)
+	SynchronizerAgent(QObject *parent = nullptr) : QObject(parent)
 	{
 		QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
 	}

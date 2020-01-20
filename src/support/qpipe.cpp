@@ -419,7 +419,7 @@ class QPipeWriter : public QThread
 {
 	Q_OBJECT
 public:
-	QPipeWriter(QObject *parent = 0) : QThread(parent)
+	QPipeWriter(QObject *parent = nullptr) : QThread(parent)
 	{
 	}
 
@@ -456,7 +456,7 @@ class QPipeReader : public QThread
 {
 	Q_OBJECT
 public:
-	QPipeReader(QObject *parent = 0) : QThread(parent)
+	QPipeReader(QObject *parent = nullptr) : QThread(parent)
 	{
 	}
 
@@ -499,7 +499,7 @@ public:
 	const char *data;
 	int size;
 
-	QPipeWriterThread(Q_PIPE_ID id, QObject *parent = 0) : QPipeWriter(parent)
+	QPipeWriterThread(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeWriter(parent)
 	{
 		do_quit = false;
 		data = 0;
@@ -634,7 +634,7 @@ public:
 	SafeTimer timer;
 	int total;
 
-	QPipeWriterPoll(Q_PIPE_ID id, QObject *parent = 0) : QPipeWriter(parent), timer(this)
+	QPipeWriterPoll(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeWriter(parent), timer(this)
 	{
 		pipe = id;
 		data = 0;
@@ -708,7 +708,7 @@ public:
 	QWaitCondition w;
 	bool do_quit, active;
 
-	QPipeReaderThread(Q_PIPE_ID id, QObject *parent = 0) : QPipeReader(parent)
+	QPipeReaderThread(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeReader(parent)
 	{
 		do_quit = false;
 		active = true;
@@ -807,7 +807,7 @@ public:
 	SafeTimer timer;
 	bool consoleMode;
 
-	QPipeReaderPoll(Q_PIPE_ID id, QObject *parent = 0) : QPipeReader(parent), timer(this)
+	QPipeReaderPoll(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeReader(parent), timer(this)
 	{
 		pipe = id;
 		connect(&timer, SIGNAL(timeout()), SLOT(tryRead()));

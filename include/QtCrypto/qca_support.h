@@ -278,7 +278,7 @@ public:
 
 	   \param parent the parent object for this parent.
 	*/
-	SyncThread(QObject *parent = 0);
+	SyncThread(QObject *parent = nullptr);
 
 	/**
 	   Calls stop() and then destructs
@@ -409,7 +409,7 @@ public:
 	   set in the constructor, you can set it using setDirName()
 	   \param parent the parent object for this object
 	*/
-	explicit DirWatch(const QString &dir = QString(), QObject *parent = 0);
+	explicit DirWatch(const QString &dir = QString(), QObject *parent = nullptr);
 	~DirWatch();
 
 	/**
@@ -467,7 +467,7 @@ public:
 	   in this object, you can set it using setFileName()
 	   \param parent the parent object for this object
 	*/
-	explicit FileWatch(const QString &file = QString(), QObject *parent = 0);
+	explicit FileWatch(const QString &file = QString(), QObject *parent = nullptr);
 	~FileWatch();
 
 	/**
@@ -596,7 +596,7 @@ public:
 	   you to test whether there is already a Console object of the 
 	   required Type, and if there is, obtain a reference to that object.
 	*/
-	Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = 0);
+	Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = nullptr);
 	~Console();
 
 	/**
@@ -699,7 +699,7 @@ public:
 
 	   \param parent the parent object for this object
 	*/
-	ConsoleReference(QObject *parent = 0);
+	ConsoleReference(QObject *parent = nullptr);
 	~ConsoleReference();
 
 	/**
@@ -861,7 +861,7 @@ public:
 
 	   \param parent the parent object for this object
 	*/
-	ConsolePrompt(QObject *parent = 0);
+	ConsolePrompt(QObject *parent = nullptr);
 	~ConsolePrompt();
 
 	/**
@@ -1093,7 +1093,7 @@ protected:
 	   \param name the name of this log device
 	   \param parent the parent for this logger
 	*/
-	explicit AbstractLogDevice(const QString &name, QObject *parent = 0);
+	explicit AbstractLogDevice(const QString &name, QObject *parent = nullptr);
 
 	virtual ~AbstractLogDevice() = 0;
 

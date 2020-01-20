@@ -1897,7 +1897,7 @@ public:
 	RSA *result;
 	int bits, exp;
 
-	RSAKeyMaker(int _bits, int _exp, QObject *parent = 0) : QThread(parent), result(0), bits(_bits), exp(_exp)
+	RSAKeyMaker(int _bits, int _exp, QObject *parent = nullptr) : QThread(parent), result(0), bits(_bits), exp(_exp)
 	{
 	}
 
@@ -2296,7 +2296,7 @@ public:
 	DLGroup domain;
 	DSA *result;
 
-	DSAKeyMaker(const DLGroup &_domain, QObject *parent = 0) : QThread(parent), domain(_domain), result(0)
+	DSAKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) : QThread(parent), domain(_domain), result(0)
 	{
 	}
 
@@ -2580,7 +2580,7 @@ public:
 	DLGroup domain;
 	DH *result;
 
-	DHKeyMaker(const DLGroup &_domain, QObject *parent = 0) : QThread(parent), domain(_domain), result(0)
+	DHKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) : QThread(parent), domain(_domain), result(0)
 	{
 	}
 
@@ -6417,7 +6417,7 @@ public:
 	bool ok;
 	QByteArray out, sig;
 
-	MyMessageContextThread(QObject *parent = 0) : QThread(parent), ok(false)
+	MyMessageContextThread(QObject *parent = nullptr) : QThread(parent), ok(false)
 	{
 	}
 

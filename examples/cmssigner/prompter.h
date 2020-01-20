@@ -34,7 +34,7 @@ class Prompter : public QObject
 {
 	Q_OBJECT
 public:
-	Prompter(QObject *parent = 0);
+	Prompter(QObject *parent = nullptr);
 	~Prompter();
 
 protected:

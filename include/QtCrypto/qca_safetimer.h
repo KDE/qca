@@ -34,7 +34,7 @@ class QCA_EXPORT SafeTimer : public QObject
 {
 	Q_OBJECT
 public:
-	SafeTimer(QObject *parent = 0);
+	SafeTimer(QObject *parent = nullptr);
 	~SafeTimer();
 
 	int interval() const;

@@ -600,7 +600,7 @@ public:
 	KeyStoreTracker *tracker;
 	QMutex call_mutex;
 
-	KeyStoreThread(QObject *parent = 0) : SyncThread(parent)
+	KeyStoreThread(QObject *parent = nullptr) : SyncThread(parent)
 	{
 	}
 
@@ -971,7 +971,7 @@ public:
 	QString entryId; // in: RemoveEntry, out: WriteEntry
 	bool success; // out: RemoveEntry
 
-	KeyStoreOperation(QObject *parent = 0)
+	KeyStoreOperation(QObject *parent = nullptr)
 	:QThread(parent)
 	{
 	}

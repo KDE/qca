@@ -82,7 +82,7 @@ public:
 		IconPgpSec
 	};
 
-	CertItemStore(QObject *parent = 0);
+	CertItemStore(QObject *parent = nullptr);
 	~CertItemStore();
 
 	int idFromRow(int row) const;
@@ -128,7 +128,7 @@ class CertItemPrivateLoader : public QObject
 {
 	Q_OBJECT
 public:
-	explicit CertItemPrivateLoader(CertItemStore *store, QObject *parent = 0);
+	explicit CertItemPrivateLoader(CertItemStore *store, QObject *parent = nullptr);
 	~CertItemPrivateLoader();
 
 	void start(int id);

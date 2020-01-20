@@ -111,7 +111,7 @@ public:
 
 	   \param parent the parent object for this object
 	*/
-	SecureLayer(QObject *parent = 0);
+	SecureLayer(QObject *parent = nullptr);
 
 	/**
 	   Returns true if the layer has a meaningful "close".
@@ -345,7 +345,7 @@ public:
 	    \param provider the name of the provider, if a specific provider
 	    is required
 	*/
-	explicit TLS(QObject *parent = 0, const QString &provider = QString());
+	explicit TLS(QObject *parent = nullptr, const QString &provider = QString());
 
 	/**
 	   Constructor for Transport Layer Security connection.
@@ -358,7 +358,7 @@ public:
 	   \param provider the name of the provider, if a specific provider is
 	   required
 	*/
-	explicit TLS(Mode mode, QObject *parent = 0, const QString &provider = QString());
+	explicit TLS(Mode mode, QObject *parent = nullptr, const QString &provider = QString());
 
 	/**
 	   Destructor
@@ -969,7 +969,7 @@ public:
 	   specified, or specified as empty, then any provider is 
 	   acceptable.
 	*/
-	explicit SASL(QObject *parent = 0, const QString &provider = QString());
+	explicit SASL(QObject *parent = nullptr, const QString &provider = QString());
 
 	~SASL();
 
