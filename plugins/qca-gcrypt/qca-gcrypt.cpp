@@ -574,7 +574,7 @@ public:
 	list += "blowfish-cbc";
 	list += "blowfish-cfb";
 	list += "tripledes-ecb";
-	list += "des-ecb";
+// 	list += "des-ecb";
 	list += "des-cbc";
 	list += "des-cfb";
 	if ( ! ( NULL == gcry_check_version("1.3.0") ) ) {
