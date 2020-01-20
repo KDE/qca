@@ -203,7 +203,7 @@ void HashUnitTest::md5filetest()
 {
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("md5", provider)) {
-	    QFile f1( "./data/empty" );
+	    QFile f1( TEST_DATA_DIR "/data/empty" );
 	    QVERIFY( f1.open( QIODevice::ReadOnly ) );
 	    {
 		QCA::Hash hashObj("md5", provider);
@@ -212,7 +212,7 @@ void HashUnitTest::md5filetest()
 			    QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
 	    }
 
-	    QFile f2( "./data/twobytes" );
+	    QFile f2( TEST_DATA_DIR "/data/twobytes" );
 	    QVERIFY( f2.open( QIODevice::ReadOnly ) );
 	    {
 		QCA::Hash hashObj("md5", provider);
@@ -222,7 +222,7 @@ void HashUnitTest::md5filetest()
 	    }
 
 
-	    QFile f3( "./data/twohundredbytes" );
+	    QFile f3( TEST_DATA_DIR "/data/twohundredbytes" );
 	    QVERIFY( f3.open( QIODevice::ReadOnly ) );
 	    {
 		QCA::Hash hashObj("md5", provider);
@@ -342,7 +342,7 @@ void HashUnitTest::sha1longtest()
 	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QString("34aa973cd4c4daa4f61eeb2bdbad27316534016f") );
 
-	    QFile f1( "./data/empty" );
+	    QFile f1( TEST_DATA_DIR "/data/empty" );
 	    QVERIFY( f1.open( QIODevice::ReadOnly ) );
 	    {
 		QCA::Hash hashObj("sha1", provider);
@@ -351,7 +351,7 @@ void HashUnitTest::sha1longtest()
 			    QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
 	    }
 
-	    QFile f2( "./data/twobytes" );
+	    QFile f2( TEST_DATA_DIR "/data/twobytes" );
 	    QVERIFY( f2.open( QIODevice::ReadOnly ) );
 	    {
 		QCA::Hash hashObj("sha1", provider);
@@ -360,7 +360,7 @@ void HashUnitTest::sha1longtest()
 			    QString( "efbd6de3c51ca16094391e837bf52f7452593e5c" ) );
 	    }
 
-	    QFile f3( "./data/twohundredbytes" );
+	    QFile f3( TEST_DATA_DIR "/data/twohundredbytes" );
 	    QVERIFY( f3.open( QIODevice::ReadOnly ) );
 	    {
 		QCA::Hash hashObj("sha1", provider);
