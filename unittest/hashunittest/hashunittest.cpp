@@ -116,8 +116,13 @@ void HashUnitTest::md2test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("md2", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("md2", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("md2", provider);
+	    QCA::Hash copy = hash;
+	    copy.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports MD2:" << providersToTest;
@@ -154,8 +159,13 @@ void HashUnitTest::md4test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("md4", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("md4", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("md4", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports MD4:" << providersToTest;
@@ -191,8 +201,13 @@ void HashUnitTest::md5test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("md5", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("md5", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("md5", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports MD2:" << providersToTest;
@@ -255,8 +270,13 @@ void HashUnitTest::sha0test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("sha0", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("sha0", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("sha0", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA0:" << providersToTest;
@@ -317,8 +337,13 @@ void HashUnitTest::sha1test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("sha1", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("sha1", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("sha1", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA1:" << providersToTest;
@@ -396,8 +421,13 @@ void HashUnitTest::sha224test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("sha224", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("sha224", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("sha224", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA224:" << providersToTest;
@@ -452,8 +482,13 @@ void HashUnitTest::sha256test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("sha256", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("sha256", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("sha256", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA256:" << providersToTest;
@@ -516,8 +551,14 @@ void HashUnitTest::sha384test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("sha384", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("sha384", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("sha384", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
+
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA384:" << providersToTest;
@@ -579,8 +620,13 @@ void HashUnitTest::sha512test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("sha512", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("sha512", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("sha512", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA512:" << providersToTest;
@@ -640,8 +686,13 @@ void HashUnitTest::rmd160test()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("ripemd160", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("ripemd160", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("ripemd160", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports RIPEMD160:" << providersToTest;
@@ -713,8 +764,13 @@ void HashUnitTest::whirlpooltest()
     foreach(QString provider, providersToTest) {
 	if(QCA::isSupported("whirlpool", provider)) {
 	    anyProviderTested = true;
-	    QString hashResult = QCA::Hash("whirlpool", provider).hashToString(input);
-	    QCOMPARE( hashResult, expectedHash );
+
+	    QCA::Hash hash = QCA::Hash("whirlpool", provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
 	}
     }
     if (!anyProviderTested) qWarning() << "NONE of the providers supports Whirlpool:" << providersToTest;

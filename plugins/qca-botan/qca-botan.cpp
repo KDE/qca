@@ -102,7 +102,7 @@ public:
 
     Context *clone() const override
     {
-	return new BotanHashContext(*this);
+	return new BotanHashContext(provider(), type());
     }
 
     void clear() override

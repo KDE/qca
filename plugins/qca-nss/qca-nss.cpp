@@ -92,7 +92,7 @@ public:
 
     Context *clone() const override
     {
-	return new nssHashContext(*this);
+	return new nssHashContext(provider(), type());
     }
 
     void clear() override

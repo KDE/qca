@@ -63,7 +63,7 @@ public:
 
     Context *clone() const override
     {
-	return new gcryHashContext(*this);
+	return new gcryHashContext(m_hashAlgorithm, provider(), type());
     }
 
     void clear() override
