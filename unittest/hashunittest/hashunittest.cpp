@@ -204,36 +204,32 @@ void HashUnitTest::md5filetest()
     foreach(QString provider, providersToTest) {
 	if(!QCA::isSupported("md5", provider)) {
 	    QFile f1( "./data/empty" );
-	    if ( f1.open( QIODevice::ReadOnly ) ) {
+	    QVERIFY( f1.open( QIODevice::ReadOnly ) );
+	    {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f1 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
-	    } else {
-		QWARN( "./data/empty could not be opened - do you need to create it?");
+			    QString( "d41d8cd98f00b204e9800998ecf8427e" ) );
 	    }
 
 	    QFile f2( "./data/twobytes" );
-	    if ( f2.open( QIODevice::ReadOnly ) ) {
+	    QVERIFY( f2.open( QIODevice::ReadOnly ) );
+	    {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "5fc9808ed18e442ab4164c59f151e757" ) );
-	    } else {
-		QWARN( "./data/twobytes could not be opened - do you need to download it?");
+			    QString( "5fc9808ed18e442ab4164c59f151e757" ) );
 	    }
 
 
 	    QFile f3( "./data/twohundredbytes" );
-	    if ( f3.open( QIODevice::ReadOnly ) ) {
+	    QVERIFY( f3.open( QIODevice::ReadOnly ) );
+	    {
 		QCA::Hash hashObj("md5", provider);
 		hashObj.update( &f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "b91c1f114d942520ecdf7e84e580cda3" ) );
-	    } else {
-		QWARN( "./data/twohundredbytes could not be opened - do you need to download it?");
+			    QString( "b91c1f114d942520ecdf7e84e580cda3" ) );
 	    }
-
 	}
     }
 }
@@ -347,35 +343,31 @@ void HashUnitTest::sha1longtest()
 		     QString("34aa973cd4c4daa4f61eeb2bdbad27316534016f") );
 
 	    QFile f1( "./data/empty" );
-	    if ( f1.open( QIODevice::ReadOnly ) ) {
+	    QVERIFY( f1.open( QIODevice::ReadOnly ) );
+	    {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f1 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
-	    } else {
-		QWARN( "./data/empty could not be opened - do you need to create it?");
+			    QString( "da39a3ee5e6b4b0d3255bfef95601890afd80709" ) );
 	    }
 
 	    QFile f2( "./data/twobytes" );
-	    if ( f2.open( QIODevice::ReadOnly ) ) {
+	    QVERIFY( f2.open( QIODevice::ReadOnly ) );
+	    {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f2 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "efbd6de3c51ca16094391e837bf52f7452593e5c" ) );
-	    } else {
-		QWARN( "./data/twobytes could not be opened - do you need to download it?");
+			    QString( "efbd6de3c51ca16094391e837bf52f7452593e5c" ) );
 	    }
 
 	    QFile f3( "./data/twohundredbytes" );
-	    if ( f3.open( QIODevice::ReadOnly ) ) {
+	    QVERIFY( f3.open( QIODevice::ReadOnly ) );
+	    {
 		QCA::Hash hashObj("sha1", provider);
 		hashObj.update( &f3 );
 		QCOMPARE( QString( QCA::arrayToHex( hashObj.final().toByteArray() ) ),
-			 QString( "d636519dfb18d913acbe69fc3ee5a4c7ac870297" ) );
-	    } else {
-		QWARN( "./data/twohundredbytes could not be opened - do you need to download it?");
+			    QString( "d636519dfb18d913acbe69fc3ee5a4c7ac870297" ) );
 	    }
-
 	}
     }
 }
