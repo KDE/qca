@@ -210,7 +210,6 @@ public:
 	    m_s2k = Botan::get_s2k(kdfName.toStdString());
 	} catch (Botan::Exception& e) {
 	    m_s2k = nullptr;
-	    std::cout << "caught: " << e.what() << std::endl;
 	}
     }
 
