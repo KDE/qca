@@ -282,17 +282,114 @@ protected:
 };
 #endif
 
+static void qcaCipherToBotanCipher(const QString &type, std::string *algoName, std::string *algoMode, std::string *algoPadding)
+{
+    if (type == "aes128-ecb" ) {
+	*algoName = "AES-128";
+	*algoMode = "ECB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes128-cbc" ) {
+	*algoName = "AES-128";
+	*algoMode = "CBC";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes128-cfb" ) {
+	*algoName = "AES-128";
+	*algoMode = "CFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes128-ofb" ) {
+	*algoName = "AES-128";
+	*algoMode = "OFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes192-ecb" ) {
+	*algoName = "AES-192";
+	*algoMode = "ECB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes192-cbc" ) {
+	*algoName = "AES-192";
+	*algoMode = "CBC";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes192-cfb" ) {
+	*algoName = "AES-192";
+	*algoMode = "CFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes192-ofb" ) {
+	*algoName = "AES-192";
+	*algoMode = "OFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes256-ecb" ) {
+	*algoName = "AES-256";
+	*algoMode = "ECB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes256-cbc" ) {
+	*algoName = "AES-256";
+	*algoMode = "CBC";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes256-cfb" ) {
+	*algoName = "AES-256";
+	*algoMode = "CFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "aes256-ofb" ) {
+	*algoName = "AES-256";
+	*algoMode = "OFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "blowfish-ecb" ) {
+	*algoName = "Blowfish";
+	*algoMode = "ECB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "blowfish-cbc" ) {
+	*algoName = "Blowfish";
+	*algoMode = "CBC";
+	*algoPadding = "NoPadding";
+    } else if ( type == "blowfish-cbc-pkcs7" ) {
+	*algoName = "Blowfish";
+	*algoMode = "CBC";
+	*algoPadding = "PKCS7";
+    } else if ( type == "blowfish-cfb" ) {
+	*algoName = "Blowfish";
+	*algoMode = "CFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "blowfish-ofb" ) {
+	*algoName = "Blowfish";
+	*algoMode = "OFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "des-ecb" ) {
+	*algoName = "DES";
+	*algoMode = "ECB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "des-ecb-pkcs7" ) {
+	*algoName = "DES";
+	*algoMode = "ECB";
+	*algoPadding = "PKCS7";
+    } else if ( type == "des-cbc" ) {
+	*algoName = "DES";
+	*algoMode = "CBC";
+	*algoPadding = "NoPadding";
+    } else if ( type == "des-cbc-pkcs7" ) {
+	*algoName = "DES";
+	*algoMode = "CBC";
+	*algoPadding = "PKCS7";
+    } else if ( type == "des-cfb" ) {
+	*algoName = "DES";
+	*algoMode = "CFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "des-ofb" ) {
+	*algoName = "DES";
+	*algoMode = "OFB";
+	*algoPadding = "NoPadding";
+    } else if ( type == "tripledes-ecb" ) {
+	*algoName = "TripleDES";
+	*algoMode = "ECB";
+	*algoPadding = "NoPadding";
+    }
+}
 
 //-----------------------------------------------------------
 class BotanCipherContext : public QCA::CipherContext
 {
 public:
-    BotanCipherContext( const QString &algo, const QString &mode, const QString &padding,
-                        QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+    BotanCipherContext( QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
     {
-	m_algoName = algo.toStdString();
-	m_algoMode = mode.toStdString();
-	m_algoPadding = padding.toStdString();
+	qcaCipherToBotanCipher( type, &m_algoName, &m_algoMode, &m_algoPadding );
     }
 
     void setup(QCA::Direction dir,
@@ -463,34 +560,24 @@ public:
 	return "qca-botan";
     }
 
-    QStringList features() const override
+    const QStringList &pbkdfTypes() const
     {
 	static QStringList list;
 	if (list.isEmpty()) {
-	    list += "random";
-	    list += "md2";
-	    list += "md4";
-	    list += "md5";
-	    list += "sha1";
-	    list += "sha256";
-	    list += "sha384";
-	    list += "sha512";
-	    list += "ripemd160";
-	    list += "hmac(md5)";
-	    list += "hmac(sha1)";
-	    // HMAC with SHA2 doesn't appear to work correctly in Botan.
-	    // list += "hmac(sha256)";
-	    // list += "hmac(sha384)";
-	    // list += "hmac(sha512)";
-	    list += "hmac(ripemd160)";
 	    list += "pbkdf1(sha1)";
 	    std::unique_ptr<BotanPBKDFContext> pbkdf1md2(new BotanPBKDFContext( qcaPbkdfToBotanPbkdf("pbkdf1(md2)"), nullptr, "pbkdf1(md2)"));
 	    if (pbkdf1md2->isOk())
 		list += "pbkdf1(md2)";
 	    list += "pbkdf2(sha1)";
-#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
-	    list += "hkdf(sha256)";
-#endif
+	}
+	return list;
+    }
+
+    const QStringList &cipherTypes() const
+    {
+	static QStringList supported;
+	if (supported.isEmpty()) {
+	    QStringList list;
 	    list += "aes128-ecb";
 	    list += "aes128-cbc";
 	    list += "aes128-cfb";
@@ -515,6 +602,46 @@ public:
 	    list += "blowfish-cbc-pkcs7";
 	    list += "blowfish-cfb";
 	    list += "blowfish-ofb";
+
+	    for (const QString &cipher : qAsConst(list)) {
+		std::string algoName, algoMode, algoPadding;
+		qcaCipherToBotanCipher(cipher, &algoName, &algoMode, &algoPadding);
+		try {
+		    std::unique_ptr<Botan::Keyed_Filter> enc(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::ENCRYPTION));
+		    std::unique_ptr<Botan::Keyed_Filter> dec(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::DECRYPTION));
+		    supported += cipher;
+		} catch (Botan::Exception& e) {
+		}
+	    }
+	}
+	return supported;
+    }
+
+    QStringList features() const override
+    {
+	static QStringList list;
+	if (list.isEmpty()) {
+	    list += "random";
+	    list += "md2";
+	    list += "md4";
+	    list += "md5";
+	    list += "sha1";
+	    list += "sha256";
+	    list += "sha384";
+	    list += "sha512";
+	    list += "ripemd160";
+	    list += "hmac(md5)";
+	    list += "hmac(sha1)";
+	    // HMAC with SHA2 doesn't appear to work correctly in Botan.
+	    // list += "hmac(sha256)";
+	    // list += "hmac(sha384)";
+	    // list += "hmac(sha512)";
+	    list += "hmac(ripemd160)";
+	    list += pbkdfTypes();
+#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
+	    list += "hkdf(sha256)";
+#endif
+	    list += cipherTypes();
 	}
 	return list;
     }
@@ -551,62 +678,16 @@ public:
 	    return new BotanHMACContext( QString("SHA-512"), this, type );
 	else if ( type == "hmac(ripemd160)" )
 	    return new BotanHMACContext( QString("RIPEMD-160"), this, type );
-	else if ( type.startsWith(QLatin1String("pbkdf")) )
+	else if ( pbkdfTypes().contains(type) )
 	    return new BotanPBKDFContext( qcaPbkdfToBotanPbkdf(type), this, type );
 #if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 	else if ( type == "hkdf(sha256)" )
 	    return new BotanHKDFContext( QString("SHA-256"), this, type );
 #endif
-	else if ( type == "aes128-ecb" )
-	    return new BotanCipherContext( QString("AES-128"), QString("ECB"), QString("NoPadding"), this, type );
-	else if ( type == "aes128-cbc" )
-	    return new BotanCipherContext( QString("AES-128"), QString("CBC"), QString("NoPadding"), this, type );
-	else if ( type == "aes128-cfb" )
-	    return new BotanCipherContext( QString("AES-128"), QString("CFB"), QString("NoPadding"), this, type );
-	else if ( type == "aes128-ofb" )
-	    return new BotanCipherContext( QString("AES-128"), QString("OFB"), QString("NoPadding"), this, type );
-	else if ( type == "aes192-ecb" )
-	    return new BotanCipherContext( QString("AES-192"), QString("ECB"), QString("NoPadding"), this, type );
-	else if ( type == "aes192-cbc" )
-	    return new BotanCipherContext( QString("AES-192"), QString("CBC"), QString("NoPadding"), this, type );
-	else if ( type == "aes192-cfb" )
-	    return new BotanCipherContext( QString("AES-192"), QString("CFB"), QString("NoPadding"), this, type );
-	else if ( type == "aes192-ofb" )
-	    return new BotanCipherContext( QString("AES-192"), QString("OFB"), QString("NoPadding"), this, type );
-	else if ( type == "aes256-ecb" )
-	    return new BotanCipherContext( QString("AES-256"), QString("ECB"), QString("NoPadding"), this, type );
-	else if ( type == "aes256-cbc" )
-	    return new BotanCipherContext( QString("AES-256"), QString("CBC"), QString("NoPadding"), this, type );
-	else if ( type == "aes256-cfb" )
-	    return new BotanCipherContext( QString("AES-256"), QString("CFB"), QString("NoPadding"), this, type );
-	else if ( type == "aes256-ofb" )
-	    return new BotanCipherContext( QString("AES-256"), QString("OFB"), QString("NoPadding"), this, type );
-	else if ( type == "blowfish-ecb" )
-	    return new BotanCipherContext( QString("Blowfish"), QString("ECB"), QString("NoPadding"), this, type );
-	else if ( type == "blowfish-cbc" )
-	    return new BotanCipherContext( QString("Blowfish"), QString("CBC"), QString("NoPadding"), this, type );
-	else if ( type == "blowfish-cbc-pkcs7" )
-	    return new BotanCipherContext( QString("Blowfish"), QString("CBC"), QString("PKCS7"), this, type );
-	else if ( type == "blowfish-cfb" )
-	    return new BotanCipherContext( QString("Blowfish"), QString("CFB"), QString("NoPadding"), this, type );
-	else if ( type == "blowfish-ofb" )
-	    return new BotanCipherContext( QString("Blowfish"), QString("OFB"), QString("NoPadding"), this, type );
-	else if ( type == "des-ecb" )
-	    return new BotanCipherContext( QString("DES"), QString("ECB"), QString("NoPadding"), this, type );
-	else if ( type == "des-ecb-pkcs7" )
-	    return new BotanCipherContext( QString("DES"), QString("ECB"), QString("PKCS7"), this, type );
-	else if ( type == "des-cbc" )
-	    return new BotanCipherContext( QString("DES"), QString("CBC"), QString("NoPadding"), this, type );
-	else if ( type == "des-cbc-pkcs7" )
-	    return new BotanCipherContext( QString("DES"), QString("CBC"), QString("PKCS7"), this, type );
-	else if ( type == "des-cfb" )
-	    return new BotanCipherContext( QString("DES"), QString("CFB"), QString("NoPadding"), this, type );
-	else if ( type == "des-ofb" )
-	    return new BotanCipherContext( QString("DES"), QString("OFB"), QString("NoPadding"), this, type );
-	else if ( type == "tripledes-ecb" )
-	    return new BotanCipherContext( QString("TripleDES"), QString("ECB"), QString("NoPadding"), this, type );
+	else if ( cipherTypes().contains( type ) )
+	    return new BotanCipherContext( this, type );
 	else
-	    return 0;
+	    return nullptr;
     }
 private:
 #if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
