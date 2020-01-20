@@ -192,8 +192,8 @@ public:
 
     int blockSize() const override
     {
-	unsigned int blockSize;
-	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, (size_t*)&blockSize );
+	size_t blockSize;
+	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, &blockSize );
 	return blockSize;
     }
 
