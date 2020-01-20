@@ -50,12 +50,16 @@ private slots:
     void hkdfTests();
 private:
     QCA::Initializer* m_init;
+    QStringList providersToTest;
 };
 
 
 void KDFUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
+
+    for(QCA::Provider *provider : QCA::providers())
+        providersToTest << provider->name();
 }
 
 void KDFUnitTest::cleanupTestCase()
@@ -100,23 +104,16 @@ void KDFUnitTest::pbkdf1md2Tests_data()
 
 void KDFUnitTest::pbkdf1md2Tests()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    // gcrypt doesn't do md2...
-    //    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-
     QFETCH(QString, secret);
     QFETCH(QString, output);
     QFETCH(QString, salt);
     QFETCH(unsigned int, outputLength);
     QFETCH(unsigned int, iterationCount);
 
-
+    bool anyProviderTested = false;
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("pbkdf1(md2)", provider))
-	    QWARN(QString("PBKDF version 1 with MD2 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("pbkdf1(md2)", provider)) {
+	    anyProviderTested = true;
 	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF1("md2", provider).makeKey( password,
@@ -126,6 +123,7 @@ void KDFUnitTest::pbkdf1md2Tests()
 	    QCOMPARE( QCA::arrayToHex( key.toByteArray() ), output );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports PBKDF version 1 with MD2:" << providersToTest;
 }
 
 void KDFUnitTest::pbkdf1sha1Tests_data()
@@ -170,22 +168,16 @@ void KDFUnitTest::pbkdf1sha1Tests_data()
 
 void KDFUnitTest::pbkdf1sha1Tests()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    //    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-
     QFETCH(QString, secret);
     QFETCH(QString, output);
     QFETCH(QString, salt);
     QFETCH(unsigned int, outputLength);
     QFETCH(unsigned int, iterationCount);
 
-
+    bool anyProviderTested = false;
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("pbkdf1(sha1)", provider))
-	    QWARN(QString("PBKDF version 1 with SHA1 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("pbkdf1(sha1)", provider)) {
+	    anyProviderTested = true;
 	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF1("sha1", provider).makeKey( password,
@@ -195,15 +187,11 @@ void KDFUnitTest::pbkdf1sha1Tests()
 	    QCOMPARE( QCA::arrayToHex( key.toByteArray() ), output );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports PBKDF version 1 with SHA1:" << providersToTest;
 }
 
 void KDFUnitTest::pbkdf1sha1TimeTest()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-gcrypt");
-
 	QCA::SecureArray password("secret");
 	QCA::InitializationVector iv(QByteArray("salt"));
 	unsigned int outputLength = 20;
@@ -211,10 +199,7 @@ void KDFUnitTest::pbkdf1sha1TimeTest()
 	unsigned int iterationCount;
 
 	foreach(QString provider, providersToTest) {
-		if(!QCA::isSupported("pbkdf1(sha1)", provider)) {
-			QString warning("PBKDF version 1 with SHA1 not supported for %1");
-			QWARN(warning.arg(provider).toStdString().c_str());
-		} else {
+		if(QCA::isSupported("pbkdf1(sha1)", provider)) {
 			QCA::SymmetricKey key1(QCA::PBKDF1("sha1", provider).makeKey(password,
 																		 iv,
 																		 outputLength,
@@ -298,11 +283,6 @@ void KDFUnitTest::pbkdf2Tests_data()
 
 void KDFUnitTest::pbkdf2Tests()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-
     QFETCH(QString, secret);
     QFETCH(QString, output);
     QFETCH(QString, salt);
@@ -310,10 +290,10 @@ void KDFUnitTest::pbkdf2Tests()
     QFETCH(unsigned int, iterationCount);
 
 
+    bool anyProviderTested = false;
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("pbkdf2(sha1)", provider))
-	    QWARN(QString("PBKDF version 2 with SHA1 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("pbkdf2(sha1)", provider)) {
+	    anyProviderTested = true;
 	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
 	    QCA::SymmetricKey key = QCA::PBKDF2("sha1", provider).makeKey( password,
@@ -324,15 +304,12 @@ void KDFUnitTest::pbkdf2Tests()
 
 	}
     }
+
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports PBKDF version 2 with SHA1:" << providersToTest;
 }
 
 void KDFUnitTest::pbkdf2TimeTest()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-gcrypt");
-
 	QCA::SecureArray password("secret");
 	QCA::InitializationVector iv(QByteArray("salt"));
 	unsigned int outputLength = 20;
@@ -340,10 +317,7 @@ void KDFUnitTest::pbkdf2TimeTest()
 	unsigned int iterationCount;
 
 	foreach(QString provider, providersToTest) {
-		if(!QCA::isSupported("pbkdf2(sha1)", provider)) {
-			QString warning("PBKDF version 2 with SHA1 not supported for %1");
-			QWARN(warning.arg(provider).toStdString().c_str());
-		} else {
+		if(QCA::isSupported("pbkdf2(sha1)", provider)) {
 			QCA::SymmetricKey key1(QCA::PBKDF2("sha1", provider).makeKey(password,
 																		 iv,
 																		 outputLength,
@@ -362,15 +336,8 @@ void KDFUnitTest::pbkdf2TimeTest()
 
 void KDFUnitTest::pbkdf2extraTests()
 {
-    QStringList providersToTest;
-    // providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("pbkdf2(sha1)", provider))
-	    QWARN(QString("PBKDF version 2 with SHA1 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("pbkdf2(sha1)", provider)) {
 	    // Not sure where this one came from...
 	    {
 		QCA::InitializationVector salt(QCA::SecureArray("what do ya want for nothing?"));
@@ -503,20 +470,15 @@ void KDFUnitTest::hkdfTests_data()
 
 void KDFUnitTest::hkdfTests()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    //providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-
     QFETCH(QString, secret);
     QFETCH(QString, salt);
     QFETCH(QString, info);
     QFETCH(QString, output);
 
+    bool anyProviderTested = false;
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("hkdf(sha256)", provider))
-	    QWARN(QString("HKDF with SHA256 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("hkdf(sha256)", provider)) {
+	    anyProviderTested = true;
 	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector saltv( QCA::hexToArray( salt ) );
 	    QCA::InitializationVector infov( QCA::hexToArray( info ) );
@@ -528,6 +490,7 @@ void KDFUnitTest::hkdfTests()
 
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports HKDF version 1 with SHA256:" << providersToTest;
 }
 
 QTEST_MAIN(KDFUnitTest)
