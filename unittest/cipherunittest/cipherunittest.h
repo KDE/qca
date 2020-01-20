@@ -120,7 +120,7 @@ private slots:
 	void cast5();
 private:
 	QCA::Initializer* m_init;
-
+	QStringList providersToTest;
 };
 
 #endif // CIPHERUNITTEST_H

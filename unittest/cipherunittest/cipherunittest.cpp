@@ -36,6 +36,8 @@
 void CipherUnitTest::initTestCase()
 {
 	m_init = new QCA::Initializer;
+	for(QCA::Provider *provider : QCA::providers())
+		providersToTest << provider->name();
 }
 
 void CipherUnitTest::cleanupTestCase()
@@ -108,16 +110,10 @@ void CipherUnitTest::aes128_data()
 
 void CipherUnitTest::aes128()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	// providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes128-ecb", provider ) )
-			QWARN( QString( "AES128 ECB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes128-ecb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -164,6 +160,7 @@ void CipherUnitTest::aes128()
 			QCOMPARE( afterDecodeText, plainText );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES128 ECB:" << providersToTest;
 }
 
 
@@ -183,16 +180,10 @@ void CipherUnitTest::aes128_cbc_data()
 
 void CipherUnitTest::aes128_cbc()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes128-cbc", provider ) )
-			QWARN( QString( "AES128 CBC not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes128-cbc", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -226,6 +217,7 @@ void CipherUnitTest::aes128_cbc()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES128 CBC:" << providersToTest;
 }
 
 // These were generated using OpenSSL's enc command
@@ -270,16 +262,10 @@ void CipherUnitTest::aes128_cbc_pkcs7_data()
 
 void CipherUnitTest::aes128_cbc_pkcs7()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes128-cbc-pkcs7", provider ) )
-			QWARN( QString( "AES128 CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes128-cbc-pkcs7", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -313,6 +299,7 @@ void CipherUnitTest::aes128_cbc_pkcs7()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES128 CBC with PKCS7 padding:" << providersToTest;
 }
 
 // This is from the Botan test suite
@@ -331,16 +318,10 @@ void CipherUnitTest::aes128_cfb_data()
 
 void CipherUnitTest::aes128_cfb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes128-cfb", provider ) )
-			QWARN( QString( "AES128 CFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes128-cfb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -374,6 +355,7 @@ void CipherUnitTest::aes128_cfb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES128 CFB:" << providersToTest;
 }
 
 // This is from the Botan test suite
@@ -392,16 +374,10 @@ void CipherUnitTest::aes128_ofb_data()
 
 void CipherUnitTest::aes128_ofb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes128-ofb", provider ) )
-			QWARN( QString( "AES128 OFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes128-ofb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -435,6 +411,7 @@ void CipherUnitTest::aes128_ofb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES128 OFB:" << providersToTest;
 }
 
 void CipherUnitTest::aes128_ctr_data()
@@ -452,16 +429,10 @@ void CipherUnitTest::aes128_ctr_data()
 
 void CipherUnitTest::aes128_ctr()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes128-ctr", provider ) )
-			QWARN( QString( "AES128 CTR not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes128-ctr", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -495,6 +466,7 @@ void CipherUnitTest::aes128_ctr()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES128 CTR:" << providersToTest;
 }
 
 void CipherUnitTest::aes128_gcm_data()
@@ -527,16 +499,10 @@ void CipherUnitTest::aes128_gcm_data()
 
 void CipherUnitTest::aes128_gcm()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
-	foreach (const QString &provider, providersToTest) {
-		if (!QCA::isSupported( "aes128-gcm", provider))
-			QWARN(QString("AES128 GCM not supported for " + provider).toLocal8Bit());
-		else {
+	bool anyProviderTested = false;
+	foreach(const QString &provider, providersToTest) {
+		if (QCA::isSupported( "aes128-gcm", provider)) {
+			anyProviderTested = true;
 			QFETCH(QString, plainText);
 			QFETCH(QString, payload);
 			QFETCH(QString, tag);
@@ -582,6 +548,7 @@ void CipherUnitTest::aes128_gcm()
 			QVERIFY(reverseCipher.ok());
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES128 GCM:" << providersToTest;
 }
 
 void CipherUnitTest::aes128_ccm_data()
@@ -657,16 +624,10 @@ void CipherUnitTest::aes192_data()
 
 void CipherUnitTest::aes192()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	// providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes192-ecb", provider ) )
-			QWARN( QString( "AES192 ECB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes192-ecb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -713,6 +674,7 @@ void CipherUnitTest::aes192()
 			QCOMPARE( afterDecodeText, plainText );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES192 ECB:" << providersToTest;
 }
 
 
@@ -733,16 +695,10 @@ void CipherUnitTest::aes192_cbc_data()
 
 void CipherUnitTest::aes192_cbc()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes192-cbc", provider ) )
-			QWARN( QString( "AES192 CBC not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes192-cbc", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -776,6 +732,7 @@ void CipherUnitTest::aes192_cbc()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES192 CBC:" << providersToTest;
 }
 
 // These were generated using OpenSSL's enc command
@@ -820,16 +777,10 @@ void CipherUnitTest::aes192_cbc_pkcs7_data()
 
 void CipherUnitTest::aes192_cbc_pkcs7()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes192-cbc-pkcs7", provider ) )
-			QWARN( QString( "AES192 CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes192-cbc-pkcs7", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -863,6 +814,7 @@ void CipherUnitTest::aes192_cbc_pkcs7()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES192 CBC with PKCS7 padding:" << providersToTest;
 }
 
 
@@ -882,16 +834,10 @@ void CipherUnitTest::aes192_cfb_data()
 
 void CipherUnitTest::aes192_cfb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes192-cfb", provider ) )
-			QWARN( QString( "AES192 CFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes192-cfb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -925,6 +871,7 @@ void CipherUnitTest::aes192_cfb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES192 CFB:" << providersToTest;
 }
 
 // This is from the Botan test suite
@@ -943,16 +890,10 @@ void CipherUnitTest::aes192_ofb_data()
 
 void CipherUnitTest::aes192_ofb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes192-ofb", provider ) )
-			QWARN( QString( "AES192 OFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes192-ofb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -986,6 +927,7 @@ void CipherUnitTest::aes192_ofb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES192 OFB:" << providersToTest;
 }
 
 void CipherUnitTest::aes192_ctr_data()
@@ -1003,16 +945,10 @@ void CipherUnitTest::aes192_ctr_data()
 
 void CipherUnitTest::aes192_ctr()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes192-ctr", provider ) )
-			QWARN( QString( "AES192 CTR not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes192-ctr", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -1046,6 +982,7 @@ void CipherUnitTest::aes192_ctr()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES192 CTR:" << providersToTest;
 }
 
 void CipherUnitTest::aes192_gcm_data()
@@ -1078,16 +1015,10 @@ void CipherUnitTest::aes192_gcm_data()
 
 void CipherUnitTest::aes192_gcm()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
-	foreach (const QString &provider, providersToTest) {
-		if (!QCA::isSupported( "aes192-gcm", provider))
-			QWARN(QString("AES128 GCM not supported for " + provider).toLocal8Bit());
-		else {
+	bool anyProviderTested = false;
+	foreach(const QString &provider, providersToTest) {
+		if (QCA::isSupported( "aes192-gcm", provider)) {
+			anyProviderTested = true;
 			QFETCH(QString, plainText);
 			QFETCH(QString, payload);
 			QFETCH(QString, tag);
@@ -1133,6 +1064,7 @@ void CipherUnitTest::aes192_gcm()
 			QVERIFY(reverseCipher.ok());
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES192 GCM:" << providersToTest;
 }
 
 
@@ -1248,16 +1180,10 @@ void CipherUnitTest::aes256_data()
 
 void CipherUnitTest::aes256()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	// providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes256-ecb", provider ) )
-			QWARN( QString( "AES256 ECB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes256-ecb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -1304,6 +1230,7 @@ void CipherUnitTest::aes256()
 			QCOMPARE( afterDecodeText, plainText );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES256 ECB:" << providersToTest;
 }
 
 
@@ -1323,16 +1250,10 @@ void CipherUnitTest::aes256_cbc_data()
 
 void CipherUnitTest::aes256_cbc()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes256-cbc", provider ) )
-			QWARN( QString( "AES256 CBC not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes256-cbc", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -1367,6 +1288,7 @@ void CipherUnitTest::aes256_cbc()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES256 CBC:" << providersToTest;
 }
 
 // These were generated using OpenSSL's enc command
@@ -1411,16 +1333,10 @@ void CipherUnitTest::aes256_cbc_pkcs7_data()
 
 void CipherUnitTest::aes256_cbc_pkcs7()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes256-cbc-pkcs7", provider ) )
-			QWARN( QString( "AES256 CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes256-cbc-pkcs7", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -1454,6 +1370,7 @@ void CipherUnitTest::aes256_cbc_pkcs7()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES256 CBC with PKCS7 padding:" << providersToTest;
 }
 
 
@@ -1473,16 +1390,10 @@ void CipherUnitTest::aes256_cfb_data()
 
 void CipherUnitTest::aes256_cfb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes256-cfb", provider ) )
-			QWARN( QString( "AES256 CFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes256-cfb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -1516,6 +1427,7 @@ void CipherUnitTest::aes256_cfb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES256 CFB:" << providersToTest;
 }
 
 void CipherUnitTest::aes256_ofb_data()
@@ -1533,16 +1445,10 @@ void CipherUnitTest::aes256_ofb_data()
 
 void CipherUnitTest::aes256_ofb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes256-ofb", provider ) )
-			QWARN( QString( "AES256 OFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes256-ofb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -1576,6 +1482,7 @@ void CipherUnitTest::aes256_ofb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES256 OFB:" << providersToTest;
 }
 
 void CipherUnitTest::aes256_ctr_data()
@@ -1593,16 +1500,10 @@ void CipherUnitTest::aes256_ctr_data()
 
 void CipherUnitTest::aes256_ctr()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "aes256-ctr", provider ) )
-			QWARN( QString( "AES256 CTR not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "aes256-ctr", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -1636,6 +1537,7 @@ void CipherUnitTest::aes256_ctr()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES256 CTR:" << providersToTest;
 }
 
 void CipherUnitTest::aes256_gcm_data()
@@ -1668,16 +1570,10 @@ void CipherUnitTest::aes256_gcm_data()
 
 void CipherUnitTest::aes256_gcm()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
-	foreach (const QString &provider, providersToTest) {
-		if (!QCA::isSupported( "aes256-gcm", provider))
-			QWARN(QString("AES256 GCM not supported for " + provider).toLocal8Bit());
-		else {
+	bool anyProviderTested = false;
+	foreach(const QString &provider, providersToTest) {
+		if (QCA::isSupported( "aes256-gcm", provider)) {
+			anyProviderTested = true;
 			QFETCH(QString, plainText);
 			QFETCH(QString, payload);
 			QFETCH(QString, tag);
@@ -1723,6 +1619,7 @@ void CipherUnitTest::aes256_gcm()
 			QVERIFY(reverseCipher.ok());
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports AES256 GCM:" << providersToTest;
 }
 
 void CipherUnitTest::aes256_ccm_data()
@@ -1849,16 +1746,10 @@ void CipherUnitTest::tripleDES_data()
 // TODO: ECB-PKCS7
 void CipherUnitTest::tripleDES()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	// providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "tripledes-ecb", provider ) )
-			QWARN( QString( "Triple DES, ECB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "tripledes-ecb", provider ) ) {
+			anyProviderTested = true;
 			QCA::Cipher cipherObj1( QString( "tripledes" ),
 									QCA::Cipher::ECB,
 									QCA::Cipher::NoPadding,
@@ -1910,6 +1801,7 @@ void CipherUnitTest::tripleDES()
 			QCOMPARE( afterDecodeText, plainText );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports Triple DES, ECB:" << providersToTest;
 }
 
 // These are from the Botan test suite - its ECB mode, no padding
@@ -2134,16 +2026,10 @@ void CipherUnitTest::des_data()
 
 void CipherUnitTest::des()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	// providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "des-ecb", provider ) )
-			QWARN( QString( "DES ECB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "des-ecb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -2190,6 +2076,7 @@ void CipherUnitTest::des()
 			QCOMPARE( afterDecodeText, plainText );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports DES ECB:" << providersToTest;
 }
 
 // This is from the Botan test suite
@@ -2209,16 +2096,10 @@ void CipherUnitTest::des_cbc_data()
 
 void CipherUnitTest::des_cbc()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "des-cbc", provider ) )
-			QWARN( QString( "DES CBC not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "des-cbc", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -2252,6 +2133,7 @@ void CipherUnitTest::des_cbc()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports DES CBC:" << providersToTest;
 }
 
 
@@ -2315,15 +2197,10 @@ void CipherUnitTest::des_cfb_data()
 
 void CipherUnitTest::des_cfb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "des-cfb", provider ) )
-			QWARN( QString( "DES CFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "des-cfb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -2357,6 +2234,7 @@ void CipherUnitTest::des_cfb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports DES CFB:" << providersToTest;
 }
 
 // This is from the Botan test suite
@@ -2384,15 +2262,10 @@ void CipherUnitTest::des_ofb_data()
 
 void CipherUnitTest::des_ofb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "des-ofb", provider ) )
-			QWARN( QString( "DES OFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "des-ofb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -2426,6 +2299,7 @@ void CipherUnitTest::des_ofb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports DES OFB:" << providersToTest;
 }
 
 // These are from the Botan test suite
@@ -2482,15 +2356,10 @@ void CipherUnitTest::des_pkcs7_data()
 // This is DES ECB, PKCS7 padding
 void CipherUnitTest::des_pkcs7()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "des-ecb-pkcs7", provider ) )
-			QWARN( QString( "DES ECB with PKCS7 padding not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "des-ecb-pkcs7", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -2535,6 +2404,7 @@ void CipherUnitTest::des_pkcs7()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports DES OFB with PKCS7 padding:" << providersToTest;
 }
 
 // These are from the Botan test suite
@@ -2638,16 +2508,10 @@ void CipherUnitTest::des_cbc_pkcs7_data()
 
 void CipherUnitTest::des_cbc_pkcs7()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	// providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "des-cbc-pkcs7", provider ) )
-			QWARN( QString( "DES CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
-		else {
+		if( !QCA::isSupported( "des-cbc-pkcs7", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -2692,6 +2556,7 @@ void CipherUnitTest::des_cbc_pkcs7()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports DES CBC with PKCS7 padding:" << providersToTest;
 }
 
 #if 0
@@ -2816,16 +2681,10 @@ void CipherUnitTest::blowfish_data()
 
 void CipherUnitTest::blowfish()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	// providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "blowfish-ecb", provider ) )
-			QWARN( QString( "Blowfish ECB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "blowfish-ecb", provider ) ) {
+			anyProviderTested = true;
 			QCA::Cipher cipherObj1( QString( "blowfish" ),
 									QCA::Cipher::ECB,
 									QCA::Cipher::NoPadding,
@@ -2873,6 +2732,7 @@ void CipherUnitTest::blowfish()
 			QCOMPARE( afterDecodeText, plainText );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports Blowfish ECB:" << providersToTest;
 }
 
 // From the Eric Young test vectors on Bruce's site. I modified
@@ -2897,16 +2757,10 @@ void CipherUnitTest::blowfish_cbc_data()
 
 void CipherUnitTest::blowfish_cbc()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "blowfish-cbc", provider ) )
-			QWARN( QString( "Blowfish CBC not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "blowfish-cbc", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -2940,6 +2794,7 @@ void CipherUnitTest::blowfish_cbc()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports Blowfish CBC:" << providersToTest;
 }
 
 // I can't find any independent test vectors. I used the no padding case, with hand padding added,
@@ -2960,16 +2815,10 @@ void CipherUnitTest::blowfish_cbc_pkcs7_data()
 
 void CipherUnitTest::blowfish_cbc_pkcs7()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-	providersToTest.append("qca-nss");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "blowfish-cbc-pkcs7", provider ) )
-			QWARN( QString( "Blowfish CBC with PKCS7 padding not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "blowfish-cbc-pkcs7", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -3004,6 +2853,7 @@ void CipherUnitTest::blowfish_cbc_pkcs7()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports Blowfish CBC with PKCS7 padding:" << providersToTest;
 }
 
 
@@ -3023,15 +2873,10 @@ void CipherUnitTest::blowfish_cfb_data()
 
 void CipherUnitTest::blowfish_cfb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "blowfish-cfb", provider ) )
-			QWARN( QString( "Blowfish CFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "blowfish-cfb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -3064,6 +2909,7 @@ void CipherUnitTest::blowfish_cfb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports Blowfish CFB:" << providersToTest;
 }
 
 // From the Eric Young test vectors on Bruce's site:
@@ -3082,15 +2928,10 @@ void CipherUnitTest::blowfish_ofb_data()
 
 void CipherUnitTest::blowfish_ofb()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-	providersToTest.append("qca-gcrypt");
-	providersToTest.append("qca-botan");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "blowfish-ofb", provider ) )
-			QWARN( QString( "Blowfish OFB not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "blowfish-ofb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -3124,6 +2965,7 @@ void CipherUnitTest::blowfish_ofb()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports Blowfish OFB:" << providersToTest;
 }
 
 
@@ -3149,13 +2991,10 @@ void CipherUnitTest::cast5_data()
 
 void CipherUnitTest::cast5()
 {
-	QStringList providersToTest;
-	providersToTest.append("qca-ossl");
-
+	bool anyProviderTested = false;
 	foreach(const QString provider, providersToTest) {
-		if( !QCA::isSupported( "cast5-ecb", provider ) )
-			QWARN( QString( "CAST5 not supported for "+provider).toLocal8Bit() );
-		else {
+		if( QCA::isSupported( "cast5-ecb", provider ) ) {
+			anyProviderTested = true;
 			QFETCH( QString, plainText );
 			QFETCH( QString, cipherText );
 			QFETCH( QString, keyText );
@@ -3188,6 +3027,7 @@ void CipherUnitTest::cast5()
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
+	if (!anyProviderTested) qWarning() << "NONE of the providers supports CAST5:" << providersToTest;
 }
 
 
