@@ -25,20 +25,13 @@
 
 #include <botan/hmac.h>
 #include <botan/version.h>
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-#include <botan/botan.h>
-#include <botan/algo_factory.h>
-#else
 #include <botan/auto_rng.h>
 #include <botan/block_cipher.h>
 #include <botan/filters.h>
 #include <botan/hash.h>
 #include <botan/pbkdf.h>
-#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 #include <botan/hkdf.h>
-#endif
 #include <botan/stream_cipher.h>
-#endif
 
 #include <stdlib.h>
 #include <iostream>
@@ -94,11 +87,7 @@ public:
     BotanHashContext( QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
     {
 	const QString hashName = qcaHashToBotanHash(type);
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-	m_hashObj = Botan::get_hash(hashName.toStdString());
-#else
 	m_hashObj = Botan::HashFunction::create(hashName.toStdString()).release();
-#endif
     }
 
     ~BotanHashContext()
@@ -144,11 +133,7 @@ class BotanHMACContext : public QCA::MACContext
 public:
     BotanHMACContext( const QString &hashName, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-	m_hashObj = new Botan::HMAC(Botan::global_state().algorithm_factory().make_hash_function(hashName.toStdString()));
-#else
 	m_hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
-#endif
 	if (0 == m_hashObj) {
 	    std::cout << "null context object" << std::endl;
 	}
@@ -269,7 +254,6 @@ protected:
 };
 
 //-----------------------------------------------------------
-#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 class BotanHKDFContext: public QCA::HKDFContext
 {
 public:
@@ -306,7 +290,6 @@ public:
 protected:
     Botan::HKDF* m_hkdf;
 };
-#endif
 
 static void qcaCipherToBotanCipher(const QString &type, std::string *algoName, std::string *algoMode, std::string *algoPadding)
 {
@@ -462,14 +445,10 @@ public:
 
     int blockSize() const override
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-	return Botan::block_size_of(m_algoName);
-#else
 	if(const std::unique_ptr<Botan::BlockCipher> bc = Botan::BlockCipher::create(m_algoName))
 	    return bc->block_size();
         
 	throw Botan::Algorithm_Not_Found(m_algoName);
-#endif
     }
 
     QCA::AuthTag tag() const override
@@ -504,27 +483,12 @@ public:
 
     QCA::KeyLength keyLength() const override
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-        Botan::Algorithm_Factory &af = Botan::global_state().algorithm_factory();
-#endif
         Botan::Key_Length_Specification kls(0);
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-        if(const Botan::BlockCipher *bc = af.prototype_block_cipher(m_algoName))
-#else
         if(const std::unique_ptr<Botan::BlockCipher> bc = Botan::BlockCipher::create(m_algoName))
-#endif
             kls = bc->key_spec();
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-        else if(const Botan::StreamCipher *sc = af.prototype_stream_cipher(m_algoName))
-#else
         else if(const std::unique_ptr<Botan::StreamCipher> sc = Botan::StreamCipher::create(m_algoName))
-#endif
             kls = sc->key_spec();
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-        else if(const Botan::MessageAuthenticationCode *mac = af.prototype_mac(m_algoName))
-#else
         else if(const std::unique_ptr<Botan::MessageAuthenticationCode> mac = Botan::MessageAuthenticationCode::create(m_algoName))
-#endif
             kls = mac->key_spec();
         return QCA::KeyLength( kls.minimum_keylength(),
                                kls.maximum_keylength(),
@@ -564,9 +528,6 @@ class botanProvider : public QCA::Provider
 public:
     void init() override
     {
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-	m_init = new Botan::LibraryInitializer;
-#endif
     }
 
     ~botanProvider()
@@ -680,9 +641,7 @@ public:
 	    // list += "hmac(sha512)";
 	    list += "hmac(ripemd160)";
 	    list += pbkdfTypes();
-#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 	    list += "hkdf(sha256)";
-#endif
 	    list += cipherTypes();
 	    list += hashTypes();
 	}
@@ -709,20 +668,14 @@ public:
 	    return new BotanHMACContext( QString("RIPEMD-160"), this, type );
 	else if ( pbkdfTypes().contains(type) )
 	    return new BotanPBKDFContext( qcaPbkdfToBotanPbkdf(type), this, type );
-#if BOTAN_VERSION_CODE >= BOTAN_VERSION_CODE_FOR(2,0,0)
 	else if ( type == "hkdf(sha256)" )
 	    return new BotanHKDFContext( QString("SHA-256"), this, type );
-#endif
 	else if ( cipherTypes().contains( type ) )
 	    return new BotanCipherContext( this, type );
 	else
 	    return nullptr;
     }
 private:
-#if BOTAN_VERSION_CODE < BOTAN_VERSION_CODE_FOR(2,0,0)
-    Botan::LibraryInitializer *m_init;
-#endif
-
 };
 
 class botanPlugin : public QObject, public QCAPlugin
