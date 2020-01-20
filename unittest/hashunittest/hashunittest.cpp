@@ -71,11 +71,14 @@ private slots:
     void whirlpoollongtest();
 private:
     QCA::Initializer* m_init;
+    QStringList providersToTest;
 };
 
 void HashUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
+    for(QCA::Provider *provider : QCA::providers())
+        providersToTest << provider->name();
 }
 
 void HashUnitTest::cleanupTestCase()
@@ -106,21 +109,19 @@ void HashUnitTest::md2test_data()
 
 void HashUnitTest::md2test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    // no MD2 support for libgcrypt...
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
+    bool anyProviderTested = false;
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("md2", provider))
-	    QSKIP(QString("MD2 not supported for "+provider).toLocal8Bit());
-	QString hashResult = QCA::Hash("md2", provider).hashToString(input);
-	QCOMPARE( hashResult, expectedHash );
+	if(QCA::isSupported("md2", provider)) {
+	    anyProviderTested = true;
+	    QString hashResult = QCA::Hash("md2", provider).hashToString(input);
+	    QCOMPARE( hashResult, expectedHash );
+	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports MD2:" << providersToTest;
+
 }
 
 void HashUnitTest::md4test_data()
@@ -146,24 +147,18 @@ void HashUnitTest::md4test_data()
 
 void HashUnitTest::md4test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    // No MD4 support for NSS?
-    // providersToTest.append("qca-nss");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("md4", provider))
-	    QWARN(QString("MD4 not supported for "+provider).toLocal8Bit());
-	else {
-	  QString hashResult = QCA::Hash("md4", provider).hashToString(input);
+	if(QCA::isSupported("md4", provider)) {
+	    anyProviderTested = true;
+	    QString hashResult = QCA::Hash("md4", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports MD4:" << providersToTest;
 }
 
 void HashUnitTest::md5test_data()
@@ -189,42 +184,25 @@ void HashUnitTest::md5test_data()
 
 void HashUnitTest::md5test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-    providersToTest.append("default");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("md5", provider))
-	    QWARN(QString("MD5 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("md5", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("md5", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports MD2:" << providersToTest;
 }
 
 
 void HashUnitTest::md5filetest()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-    providersToTest.append("default");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("md5", provider))
-	    QWARN(QString("MD5 not supported for "+provider).toLocal8Bit());
-	else {
+	if(!QCA::isSupported("md5", provider)) {
 	    QFile f1( "./data/empty" );
 	    if ( f1.open( QIODevice::ReadOnly ) ) {
 		QCA::Hash hashObj("md5", provider);
@@ -274,21 +252,18 @@ void HashUnitTest::sha0test_data()
 
 void HashUnitTest::sha0test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    // No SHA0 for botan, gcrypt or nss
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha0", provider))
-	    QWARN(QString("SHA0 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha0", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("sha0", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA0:" << providersToTest;
 }
 
 void HashUnitTest::sha0longtest()
@@ -298,14 +273,8 @@ void HashUnitTest::sha0longtest()
 
     // This test extracted from OpenOffice.org 1.1.2, in sal/workben/t_digest.c
 
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    // No SHA0 for botan, gcrypt or nss
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha0", provider))
-	    QWARN(QString("SHA0 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha0", provider)) {
 	    QCA::Hash shaHash("sha0", provider);
 	    for (int i=0; i<1000; i++)
 		shaHash.update(fillerString);
@@ -345,41 +314,24 @@ void HashUnitTest::sha1test_data()
 
 void HashUnitTest::sha1test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-    providersToTest.append("default");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha1", provider))
-	    QWARN(QString("SHA1 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha1", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("sha1", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA1:" << providersToTest;
 }
 
 void HashUnitTest::sha1longtest()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-    providersToTest.append("default");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha1", provider))
-	    QWARN(QString("SHA1 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha1", provider)) {
 	    // QTime t;
 	    // t.start();
 	    QByteArray fillerString;
@@ -445,22 +397,18 @@ void HashUnitTest::sha224test_data()
 
 void HashUnitTest::sha224test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-ipp");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha224", provider))
-	    QWARN(QString("SHA224 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha224", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("sha224", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA224:" << providersToTest;
 }
 
 
@@ -469,15 +417,8 @@ void HashUnitTest::sha224longtest()
     QByteArray fillerString;
     fillerString.fill('a', 1000);
 
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-ipp");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha224", provider))
-	    QWARN(QString("SHA224 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha224", provider)) {
 	    QCA::Hash shaHash("sha224", provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
@@ -512,24 +453,18 @@ void HashUnitTest::sha256test_data()
 
 void HashUnitTest::sha256test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha256", provider))
-	    QWARN(QString("SHA256 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha256", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("sha256", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA256:" << providersToTest;
 }
 
 void HashUnitTest::sha256longtest()
@@ -537,16 +472,8 @@ void HashUnitTest::sha256longtest()
     QByteArray fillerString;
     fillerString.fill('a', 1000);
 
-    QStringList providersToTest;
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha256", provider))
-	    QWARN(QString("SHA256 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha256", provider)) {
 	    QCA::Hash shaHash("sha256", provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
@@ -590,24 +517,18 @@ void HashUnitTest::sha384test_data()
 
 void HashUnitTest::sha384test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha384", provider))
-	    QWARN(QString("SHA384 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha384", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("sha384", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA384:" << providersToTest;
 }
 
 void HashUnitTest::sha384longtest()
@@ -615,17 +536,8 @@ void HashUnitTest::sha384longtest()
     QByteArray fillerString;
     fillerString.fill('a', 1000);
 
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha384", provider))
-	    QWARN(QString("SHA384 not supported for "+provider).toLocal8Bit());
-	else {
+	if(!QCA::isSupported("sha384", provider)) {
 	    // QTime t;
 	    // t.start();
 	    QCA::Hash shaHash("sha384", provider);
@@ -668,24 +580,18 @@ void HashUnitTest::sha512test_data()
 
 void HashUnitTest::sha512test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha512", provider))
-	    QWARN(QString("SHA512 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha512", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("sha512", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA512:" << providersToTest;
 }
 
 void HashUnitTest::sha512longtest()
@@ -693,17 +599,8 @@ void HashUnitTest::sha512longtest()
     QByteArray fillerString;
     fillerString.fill('a', 1000);
 
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-    providersToTest.append("qca-nss");
-    providersToTest.append("qca-ipp");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("sha512", provider))
-	    QWARN(QString("SHA512 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("sha512", provider)) {
 	    QCA::Hash shaHash("sha512", provider);
 
 	    // This basically reflects FIPS 180-2, change notice 1, section 3
@@ -744,22 +641,18 @@ void HashUnitTest::rmd160test_data()
 
 void HashUnitTest::rmd160test()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("ripemd160", provider))
-	    QWARN(QString("RIPEMD160 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("ripemd160", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("ripemd160", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports RIPEMD160:" << providersToTest;
 }
 
 void HashUnitTest::rmd160longtest()
@@ -767,15 +660,8 @@ void HashUnitTest::rmd160longtest()
     QByteArray fillerString;
     fillerString.fill('a', 1000);
 
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-    providersToTest.append("qca-gcrypt");
-    providersToTest.append("qca-botan");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("ripemd160", provider))
-	    QWARN(QString("RIPEMD160 not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("ripemd160", provider)) {
 	    QCA::Hash rmdHash("ripemd160", provider);
 
 	    // This is the "million times 'a' test"
@@ -828,20 +714,18 @@ void HashUnitTest::whirlpooltest_data()
 
 void HashUnitTest::whirlpooltest()
 {
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-
+    bool anyProviderTested = false;
     QFETCH(QByteArray, input);
     QFETCH(QString, expectedHash);
 
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("whirlpool", provider))
-	    QWARN(QString("Whirlpool not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("whirlpool", provider)) {
+	    anyProviderTested = true;
 	    QString hashResult = QCA::Hash("whirlpool", provider).hashToString(input);
 	    QCOMPARE( hashResult, expectedHash );
 	}
     }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports Whirlpool:" << providersToTest;
 }
 
 void HashUnitTest::whirlpoollongtest()
@@ -849,13 +733,8 @@ void HashUnitTest::whirlpoollongtest()
     QByteArray fillerString;
     fillerString.fill('a', 1000);
 
-    QStringList providersToTest;
-    providersToTest.append("qca-ossl");
-
     foreach(QString provider, providersToTest) {
-	if(!QCA::isSupported("whirlpool", provider))
-	    QWARN(QString("Whirlpool not supported for "+provider).toLocal8Bit());
-	else {
+	if(QCA::isSupported("whirlpool", provider)) {
 	    QCA::Hash rmdHash("whirlpool", provider);
 
 	    // This is the "million times 'a' test"
