@@ -284,12 +284,21 @@ protected:
     Botan::S2K* m_s2k;
 };
 
+static QString qcaHkdfToBotanHkdf(const QString &type)
+{
+    if ( type == "hkdf(sha256)" )
+	return QString("SHA-256");
+
+    return {};
+}
+
 //-----------------------------------------------------------
 class BotanHKDFContext: public QCA::HKDFContext
 {
 public:
-    BotanHKDFContext(const QString &hashName, QCA::Provider *p, const QString &type) : QCA::HKDFContext(p, type)
+    BotanHKDFContext(QCA::Provider *p, const QString &type) : QCA::HKDFContext(p, type)
     {
+	const QString hashName = qcaHkdfToBotanHkdf(type);
 	Botan::HMAC *hashObj;
 	hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
 	m_hkdf = new Botan::HKDF(hashObj);
@@ -302,7 +311,7 @@ public:
 
     Context *clone() const override
     {
-	return new BotanHKDFContext( *this );
+	return new BotanHKDFContext( provider(), type() );
     }
 
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
@@ -662,6 +671,15 @@ public:
 	return list;
     }
 
+    QStringList hkdfTypes() const
+    {
+	static QStringList list;
+	if (list.isEmpty()) {
+	    list += "hkdf(sha256)";
+	}
+	return list;
+    }
+
     QStringList features() const override
     {
 	static QStringList list;
@@ -669,7 +687,7 @@ public:
 	    list += "random";
 	    list += hmacTypes();
 	    list += pbkdfTypes();
-	    list += "hkdf(sha256)";
+	    list += hkdfTypes();
 	    list += cipherTypes();
 	    list += hashTypes();
 	}
@@ -686,8 +704,8 @@ public:
 	    return new BotanHMACContext( this, type );
 	else if ( pbkdfTypes().contains(type) )
 	    return new BotanPBKDFContext( this, type );
-	else if ( type == "hkdf(sha256)" )
-	    return new BotanHKDFContext( QString("SHA-256"), this, type );
+	else if ( hkdfTypes().contains(type) )
+	    return new BotanHKDFContext( this, type );
 	else if ( cipherTypes().contains( type ) )
 	    return new BotanCipherContext( this, type );
 	else

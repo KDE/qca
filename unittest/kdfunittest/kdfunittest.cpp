@@ -482,7 +482,11 @@ void KDFUnitTest::hkdfTests()
 	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector saltv( QCA::hexToArray( salt ) );
 	    QCA::InitializationVector infov( QCA::hexToArray( info ) );
-	    QCA::SymmetricKey key = QCA::HKDF("sha256", provider).makeKey( password,
+	    QCA::HKDF hkdf = QCA::HKDF("sha256", provider);
+	    QCA::HKDF copy = hkdf;
+	    copy.context(); // detach
+
+	    QCA::SymmetricKey key = hkdf.makeKey( password,
 								   saltv,
 								   infov,
 								   output.size() / 2 );
