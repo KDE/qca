@@ -180,10 +180,10 @@ void KDFUnitTest::pbkdf1sha1Tests()
 	    anyProviderTested = true;
 	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
-	    QCA::SymmetricKey key = QCA::PBKDF1("sha1", provider).makeKey( password,
-									   iv,
-									   outputLength,
-									   iterationCount);
+	    QCA::PBKDF1 pbkdf = QCA::PBKDF1("sha1", provider);
+	    QCA::PBKDF1 copy = pbkdf;
+	    copy.context(); // detach
+	    QCA::SymmetricKey key = pbkdf.makeKey( password, iv, outputLength, iterationCount);
 	    QCOMPARE( QCA::arrayToHex( key.toByteArray() ), output );
 	}
     }
@@ -296,10 +296,10 @@ void KDFUnitTest::pbkdf2Tests()
 	    anyProviderTested = true;
 	    QCA::SecureArray password = QCA::hexToArray( secret );
 	    QCA::InitializationVector iv( QCA::hexToArray( salt) );
-	    QCA::SymmetricKey key = QCA::PBKDF2("sha1", provider).makeKey( password,
-								   iv,
-								   outputLength,
-								   iterationCount);
+	    QCA::PBKDF2 pbkdf = QCA::PBKDF2("sha1", provider);
+	    QCA::PBKDF2 copy = pbkdf;
+	    copy.context(); // detach
+	    QCA::SymmetricKey key = pbkdf.makeKey( password, iv, outputLength, iterationCount);
 	    QCOMPARE( QCA::arrayToHex( key.toByteArray() ), output );
 
 	}

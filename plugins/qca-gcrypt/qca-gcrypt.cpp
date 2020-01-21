@@ -290,7 +290,7 @@ public:
 
     Context *clone() const override
     {
-	return new pbkdf1Context( *this );
+	return new pbkdf1Context( m_hashAlgorithm, provider(), type() );
     }
 
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,

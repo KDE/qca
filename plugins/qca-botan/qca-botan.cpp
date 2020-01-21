@@ -203,14 +203,26 @@ protected:
     Botan::HMAC *m_hashObj;
 };
 
+static QString qcaPbkdfToBotanPbkdf(const QString &pbkdf)
+{
+    if (pbkdf == QLatin1String("pbkdf1(sha1)"))
+	return QStringLiteral("PBKDF1(SHA-1)");
+    else if (pbkdf == QLatin1String("pbkdf1(md2)"))
+	return QStringLiteral("PBKDF1(MD2)");
+    else if (pbkdf == QLatin1String("pbkdf2(sha1)"))
+	return QStringLiteral("PBKDF2(SHA-1)");
+
+    return {};
+}
 
 //-----------------------------------------------------------
 class BotanPBKDFContext: public QCA::KDFContext
 {
 public:
-    BotanPBKDFContext( const QString &kdfName, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
+    BotanPBKDFContext( QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {
 	try {
+	    const QString kdfName = qcaPbkdfToBotanPbkdf(type);
 	    m_s2k = Botan::get_s2k(kdfName.toStdString());
 	} catch (Botan::Exception& e) {
 	    m_s2k = nullptr;
@@ -229,7 +241,7 @@ public:
 
     Context *clone() const override
     {
-	return new BotanPBKDFContext( *this );
+	return new BotanPBKDFContext( provider(), type() );
     }
 
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
@@ -529,18 +541,6 @@ protected:
     Botan::Pipe *m_crypter;
 };
 
-static QString qcaPbkdfToBotanPbkdf(const QString &pbkdf)
-{
-    if (pbkdf == QLatin1String("pbkdf1(sha1)"))
-	return QStringLiteral("PBKDF1(SHA-1)");
-    else if (pbkdf == QLatin1String("pbkdf1(md2)"))
-	return QStringLiteral("PBKDF1(MD2)");
-    else if (pbkdf == QLatin1String("pbkdf2(sha1)"))
-	return QStringLiteral("PBKDF2(SHA-1)");
-
-    return {};
-}
-
 //==========================================================
 class botanProvider : public QCA::Provider
 {
@@ -571,7 +571,7 @@ public:
 	static QStringList list;
 	if (list.isEmpty()) {
 	    list += "pbkdf1(sha1)";
-	    std::unique_ptr<BotanPBKDFContext> pbkdf1md2(new BotanPBKDFContext( qcaPbkdfToBotanPbkdf("pbkdf1(md2)"), nullptr, "pbkdf1(md2)"));
+	    std::unique_ptr<BotanPBKDFContext> pbkdf1md2(new BotanPBKDFContext( nullptr, "pbkdf1(md2)"));
 	    if (pbkdf1md2->isOk())
 		list += "pbkdf1(md2)";
 	    list += "pbkdf2(sha1)";
@@ -685,7 +685,7 @@ public:
 	else if ( hmacTypes().contains(type) )
 	    return new BotanHMACContext( this, type );
 	else if ( pbkdfTypes().contains(type) )
-	    return new BotanPBKDFContext( qcaPbkdfToBotanPbkdf(type), this, type );
+	    return new BotanPBKDFContext( this, type );
 	else if ( type == "hkdf(sha256)" )
 	    return new BotanHKDFContext( QString("SHA-256"), this, type );
 	else if ( cipherTypes().contains( type ) )
