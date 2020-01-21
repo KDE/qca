@@ -117,7 +117,7 @@ public:
 
     Context *clone() const override
     {
-        return new gcryHMACContext(*this);
+        return new gcryHMACContext(m_hashAlgorithm, provider(), type());
     }
 
     void clear()

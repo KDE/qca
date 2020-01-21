@@ -126,13 +126,31 @@ private:
     Botan::HashFunction *m_hashObj;
 };
 
+static QString qcaHmacToBotanHmac(const QString &type)
+{
+    if ( type == "hmac(md5)" )
+	return QString("MD5");
+    else if ( type == "hmac(sha1)" )
+	return QString("SHA-1");
+    else if ( type == "hmac(sha256)" )
+	return QString("SHA-256");
+    else if ( type == "hmac(sha384)" )
+	return QString("SHA-384");
+    else if ( type == "hmac(sha512)" )
+	return QString("SHA-512");
+    else if ( type == "hmac(ripemd160)" )
+	return QString("RIPEMD-160");
+
+    return {};
+}
 
 //-----------------------------------------------------------
 class BotanHMACContext : public QCA::MACContext
 {
 public:
-    BotanHMACContext( const QString &hashName, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    BotanHMACContext(QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
+	const QString hashName = qcaHmacToBotanHmac(type);
 	m_hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
 	if (0 == m_hashObj) {
 	    std::cout << "null context object" << std::endl;
@@ -141,6 +159,7 @@ public:
 
     ~BotanHMACContext()
     {
+	delete m_hashObj;
     }
 
     void setup(const QCA::SymmetricKey &key) override
@@ -155,7 +174,7 @@ public:
 
     Context *clone() const override
     {
-	return new BotanHMACContext(*this);
+	return new BotanHMACContext(provider(), type());
     }
 
     void clear() 
@@ -628,11 +647,10 @@ public:
 	return supported;
     }
 
-    QStringList features() const override
+    const QStringList &hmacTypes() const
     {
 	static QStringList list;
 	if (list.isEmpty()) {
-	    list += "random";
 	    list += "hmac(md5)";
 	    list += "hmac(sha1)";
 	    // HMAC with SHA2 doesn't appear to work correctly in Botan.
@@ -640,6 +658,16 @@ public:
 	    // list += "hmac(sha384)";
 	    // list += "hmac(sha512)";
 	    list += "hmac(ripemd160)";
+	}
+	return list;
+    }
+
+    QStringList features() const override
+    {
+	static QStringList list;
+	if (list.isEmpty()) {
+	    list += "random";
+	    list += hmacTypes();
 	    list += pbkdfTypes();
 	    list += "hkdf(sha256)";
 	    list += cipherTypes();
@@ -654,18 +682,8 @@ public:
 	    return new botanRandomContext( this );
 	else if ( hashTypes().contains(type) )
 	    return new BotanHashContext( this, type );
-	else if ( type == "hmac(md5)" )
-	    return new BotanHMACContext( QString("MD5"), this, type );
-	else if ( type == "hmac(sha1)" )
-	    return new BotanHMACContext( QString("SHA-1"), this, type );
-	else if ( type == "hmac(sha256)" )
-	    return new BotanHMACContext( QString("SHA-256"), this, type );
-	else if ( type == "hmac(sha384)" )
-	    return new BotanHMACContext( QString("SHA-384"), this, type );
-	else if ( type == "hmac(sha512)" )
-	    return new BotanHMACContext( QString("SHA-512"), this, type );
-	else if ( type == "hmac(ripemd160)" )
-	    return new BotanHMACContext( QString("RIPEMD-160"), this, type );
+	else if ( hmacTypes().contains(type) )
+	    return new BotanHMACContext( this, type );
 	else if ( pbkdfTypes().contains(type) )
 	    return new BotanPBKDFContext( qcaPbkdfToBotanPbkdf(type), this, type );
 	else if ( type == "hkdf(sha256)" )

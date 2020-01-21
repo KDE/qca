@@ -77,6 +77,9 @@ void MACUnitTest::HMACMD5()
 	    QCOMPARE( md5hmacLenTest.validKeyLength( 848888 ), true );
 	    QCOMPARE( md5hmacLenTest.validKeyLength( -2 ), false );
 
+	    QCA::MessageAuthenticationCode copy = md5hmacLenTest;
+	    copy.context(); // detach
+
 	    // These tests are from RFC2202, Section 2.
 	    // The first three are also in the Appendix to RFC2104
 	    QCA::MessageAuthenticationCode md5hmac1( "hmac(md5)", QCA::SymmetricKey(), provider );
@@ -153,6 +156,9 @@ void MACUnitTest::HMACSHA256()
 	    QCOMPARE( hmacLenTest.validKeyLength( 1 ), true );
 	    QCOMPARE( hmacLenTest.validKeyLength( 848888 ), true );
 	    QCOMPARE( hmacLenTest.validKeyLength( -2 ), false );
+
+	    QCA::MessageAuthenticationCode copy = hmacLenTest;
+	    copy.context(); // detach
 
 	    QCA::MessageAuthenticationCode hmac1( "hmac(sha256)", QCA::SymmetricKey(), provider );
 	    QCA::SymmetricKey key1( QCA::SecureArray( "Jefe" ) );
@@ -234,6 +240,9 @@ void MACUnitTest::HMACSHA224()
 	    QCOMPARE( hmacLenTest.validKeyLength( 1 ), true );
 	    QCOMPARE( hmacLenTest.validKeyLength( 848888 ), true );
 	    QCOMPARE( hmacLenTest.validKeyLength( -2 ), false );
+
+	    QCA::MessageAuthenticationCode copy = hmacLenTest;
+	    copy.context(); // detach
 
 	    QCA::MessageAuthenticationCode hmac1( "hmac(sha224)", QCA::SymmetricKey(), provider );
 	    QCA::SymmetricKey key1( QCA::SecureArray( "Jefe" ) );
@@ -317,6 +326,9 @@ void MACUnitTest::HMACSHA384()
 	    QCOMPARE( hmacLenTest.validKeyLength( 848888 ), true );
 	    QCOMPARE( hmacLenTest.validKeyLength( -2 ), false );
 
+	    QCA::MessageAuthenticationCode copy = hmacLenTest;
+	    copy.context(); // detach
+
 	    QCA::MessageAuthenticationCode hmac1( "hmac(sha384)", QCA::SymmetricKey(), provider );
 	    QCA::SymmetricKey key1( QCA::SecureArray( "Jefe" ) );
 	    hmac1.setup( key1 );
@@ -398,6 +410,9 @@ void MACUnitTest::HMACSHA512()
 	    QCOMPARE( hmacLenTest.validKeyLength( 1 ), true );
 	    QCOMPARE( hmacLenTest.validKeyLength( 848888 ), true );
 	    QCOMPARE( hmacLenTest.validKeyLength( -2 ), false );
+
+	    QCA::MessageAuthenticationCode copy = hmacLenTest;
+	    copy.context(); // detach
 
 	    QCA::MessageAuthenticationCode hmac1( "hmac(sha512)", QCA::SymmetricKey(), provider );
 	    QCA::SymmetricKey key1( QCA::SecureArray( "Jefe" ) );
@@ -481,6 +496,9 @@ void MACUnitTest::HMACSHA1()
 	    QCOMPARE( sha1hmacLenTest.validKeyLength( 848888 ), true );
 	    QCOMPARE( sha1hmacLenTest.validKeyLength( -2 ), false );
 
+	    QCA::MessageAuthenticationCode copy = sha1hmacLenTest;
+	    copy.context(); // detach
+
 	    // These tests are from RFC2202, Section 3.
 	    QCA::MessageAuthenticationCode test1(  "hmac(sha1)", QCA::SecureArray() );
 	    QCA::SymmetricKey key1( QCA::hexToArray( "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b" ) );
@@ -555,6 +573,9 @@ void MACUnitTest::HMACRMD160()
 	    QCOMPARE( ripemd160hmacLenTest.validKeyLength( 1 ), true );
 	    QCOMPARE( ripemd160hmacLenTest.validKeyLength( 848888 ), true );
 	    QCOMPARE( ripemd160hmacLenTest.validKeyLength( -2 ), false );
+
+	    QCA::MessageAuthenticationCode copy = ripemd160hmacLenTest;
+	    copy.context(); // detach
 
 	    // These tests are from RFC2286, Section 2.
 	    QCA::MessageAuthenticationCode test1( "hmac(ripemd160)", QCA::SymmetricKey(), provider );

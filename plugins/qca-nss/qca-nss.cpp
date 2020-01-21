@@ -144,6 +144,7 @@ public:
     {
 	NSS_NoDB_Init(".");
 
+	m_context = 0;
 	m_status = 0;
 
 	/* Get a slot to use for the crypto operations */
@@ -181,14 +182,15 @@ public:
 
     ~nssHmacContext()
     {
-	PK11_DestroyContext(m_context, PR_TRUE);
+	if (m_context)
+	    PK11_DestroyContext(m_context, PR_TRUE);
 	if (m_slot)
 	    PK11_FreeSlot(m_slot);
     }
 
     Context *clone() const override
     {
-	return new nssHmacContext(*this);
+	return new nssHmacContext(provider(), type());
     }
 
     void clear()
