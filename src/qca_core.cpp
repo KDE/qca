@@ -1276,7 +1276,7 @@ MemoryRegion Filter::process(const MemoryRegion &a)
 	if(buf.isSecure() || fin.isSecure())
 		return (SecureArray(buf) + SecureArray(fin));
 	else
-		return (buf.toByteArray() + fin.toByteArray());
+		return QByteArray(buf.toByteArray() + fin.toByteArray());
 }
 
 //----------------------------------------------------------------------------
