@@ -110,7 +110,7 @@ public:
 		started = false;
 	}
 
-public slots:
+public Q_SLOTS:
 	bool isValid() const
 	{
 		return in.isValid();
@@ -174,13 +174,13 @@ public:
 		return a;
 	}
 
-signals:
+Q_SIGNALS:
 	void readyRead();
 	void bytesWritten(int bytes);
 	void inputClosed();
 	void outputClosed();
 
-private slots:
+private Q_SLOTS:
 	void in_readyRead()
 	{
 		emit readyRead();
@@ -319,7 +319,7 @@ public:
 		return a;
 	}
 
-signals:
+Q_SIGNALS:
 	void readyRead();
 	void bytesWritten(int);
 	void inputClosed();
@@ -601,7 +601,7 @@ public:
 		lateTrigger.setSingleShot(true);
 	}
 
-private slots:
+private Q_SLOTS:
 	void doLate()
 	{
 		QPointer<QObject> self = this;
@@ -899,7 +899,7 @@ public:
 		result = out;
 	}
 
-private slots:
+private Q_SLOTS:
 	void con_readyRead()
 	{
 		while(console.bytesAvailable() > 0)

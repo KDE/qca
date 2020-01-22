@@ -48,10 +48,10 @@ public:
 	bool isActive;
 	QElapsedTimer elapsedTimer;
 
-public slots:
+public Q_SLOTS:
 	void fixTimer();
 
-signals:
+Q_SIGNALS:
 	void needFix();
 
 protected:

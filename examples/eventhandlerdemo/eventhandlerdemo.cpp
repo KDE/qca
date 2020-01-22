@@ -50,7 +50,7 @@ public:
         m_handler.start();
     }
 
-private slots:
+private Q_SLOTS:
     // This slot gets called when the provider needs a token inserted,
     // or to get a passphrase / password / PIN.
     void my_eventReady(int id, const QCA::Event &event)

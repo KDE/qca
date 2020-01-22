@@ -199,7 +199,7 @@ private:
 		connect(&t, SIGNAL(timeout()), SLOT(t_timeout()));
 	}
 
-private slots:
+private Q_SLOTS:
 	void start()
 	{
 		printf("Generating Key ...  ");
@@ -276,7 +276,7 @@ private:
 	QList<QCA::KeyStore*> keyStores;
 	QCA::ConsolePrompt *prompt;
 
-private slots:
+private Q_SLOTS:
 	void start()
 	{
 		// user can quit the monitoring by pressing enter
@@ -398,7 +398,7 @@ public:
 		pass = _pass;
 	}
 
-private slots:
+private Q_SLOTS:
 	void ph_eventReady(int id, const QCA::Event &e)
 	{
 		if(have_pass)

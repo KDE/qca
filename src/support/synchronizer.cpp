@@ -146,7 +146,7 @@ public:
 		return false;
 	}
 
-private slots:
+private Q_SLOTS:
 	void edlink()
 	{
 		ed = QAbstractEventDispatcher::instance();
@@ -322,7 +322,7 @@ public:
 		QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
 	}
 
-signals:
+Q_SIGNALS:
 	void started();
 };
 
@@ -480,7 +480,7 @@ protected:
 		}
 	}
 
-private slots:
+private Q_SLOTS:
 	void agent_started()
 	{
 		m.unlock();

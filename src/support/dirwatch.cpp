@@ -44,7 +44,7 @@ public:
 		connect(watcher, SIGNAL(fileChanged(const QString &)), SIGNAL(fileChanged(const QString &)), Qt::QueuedConnection);
 	}
 
-signals:
+Q_SIGNALS:
 	void directoryChanged(const QString &path);
 	void fileChanged(const QString &path);
 };
@@ -65,7 +65,7 @@ public:
 	{
 	}
 
-private slots:
+private Q_SLOTS:
 	void watcher_changed(const QString &path)
 	{
 		Q_UNUSED(path);
@@ -190,7 +190,7 @@ public:
 		filePath.clear();
 	}
 
-private slots:
+private Q_SLOTS:
 	void dir_changed(const QString &path)
 	{
 		Q_UNUSED(path);

@@ -305,7 +305,7 @@ public:
 		endRemoveRows();
 	}
 
-signals:
+Q_SIGNALS:
 	void editFailed(const QModelIndex &index, const QString &reasonString);
 };
 
@@ -537,7 +537,7 @@ public:
 		QCA::saveProviderConfig(providerName);
 	}
 
-private slots:
+private Q_SLOTS:
 	void model_editFailed(const QModelIndex &index, const QString &reasonString)
 	{
 		// if the dialog has already been dismissed, then don't

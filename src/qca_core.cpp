@@ -1667,7 +1667,7 @@ public:
 	{
 	}
 
-protected slots:
+protected Q_SLOTS:
 	virtual void ask(int id, const QCA::Event &e) = 0;
 };
 
@@ -1965,7 +1965,7 @@ public:
 		started = false;
 	}
 
-public slots:
+public Q_SLOTS:
 	void ask(int id, const QCA::Event &e) override
 	{
 		activeIds += id;
@@ -2118,7 +2118,7 @@ public:
 		waiting = false;
 	}
 
-public slots:
+public Q_SLOTS:
 	virtual void emitResponseReady() = 0;
 };
 

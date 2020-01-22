@@ -987,7 +987,7 @@ public:
 		);
 	}
 
-private slots:
+private Q_SLOTS:
 	void
 	doReady () {
 		QCA_logTextMessage (

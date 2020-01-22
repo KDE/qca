@@ -57,7 +57,7 @@ public:
 	void eventReady(GpgOp::Event::Type type, int written);
 	void eventReady(GpgOp::Event::Type type, const QString &keyId);
 
-public slots:
+public Q_SLOTS:
 	void act_readyRead();
 	void act_bytesWritten(int bytes);
 	void act_needPassphrase(const QString &keyId);

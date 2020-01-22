@@ -365,7 +365,7 @@ public:
 		return str;
 	}
 
-public slots:
+public Q_SLOTS:
 	void loader_finished()
 	{
 		QCA::KeyLoader *keyLoader = (QCA::KeyLoader *)sender();
@@ -662,7 +662,7 @@ public:
 	{
 	}
 
-public slots:
+public Q_SLOTS:
 	void loader_finished()
 	{
 		QCA::ConvertResult r = loader->convertResult();

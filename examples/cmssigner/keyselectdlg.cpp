@@ -180,7 +180,7 @@ public:
 		return 0;
 	}
 
-private slots:
+private Q_SLOTS:
 	void ks_available(const QString &keyStoreId)
 	{
 		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, &ksm);
@@ -330,7 +330,7 @@ public:
 		actionView->setEnabled(false);
 	}
 
-private slots:
+private Q_SLOTS:
 	void ksm_busyStarted()
 	{
 		ui.lb_busy->setText(tr("Looking for devices..."));

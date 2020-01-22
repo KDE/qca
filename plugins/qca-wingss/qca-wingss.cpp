@@ -1987,7 +1987,7 @@ public:
 		return s->authzid();
 	}
 
-private slots:
+private Q_SLOTS:
 	void s_resultsReady()
 	{
 		emit resultsReady();

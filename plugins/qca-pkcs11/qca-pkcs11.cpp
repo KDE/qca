@@ -296,7 +296,7 @@ public:
 		const QString &t
 	);
 
-private slots:
+private Q_SLOTS:
 	void
 	doReady ();
 

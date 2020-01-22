@@ -200,7 +200,7 @@ public:
 		disconnect(ksm);
 	}
 
-public slots:
+public Q_SLOTS:
 	void spinEventLoop()
 	{
 		QAbstractEventDispatcher::instance()->processEvents(QEventLoop::AllEvents);
@@ -377,12 +377,12 @@ public slots:
 		return i.owner->removeEntry(i.storeContextId, entryId);
 	}
 
-signals:
+Q_SIGNALS:
 	// emit this when items or busy state changes
 	void updated();
 	void updated_p();
 
-private slots:
+private Q_SLOTS:
 	void updated_locked()
 	{
 		QMutexLocker locker(&updateMutex);
@@ -503,7 +503,7 @@ private:
 		return changed;
 	}
 
-private slots:
+private Q_SLOTS:
 	void ksl_busyStart()
 	{
 		KeyStoreListContext *c = (KeyStoreListContext *)sender();
@@ -842,7 +842,7 @@ public:
 			ksm_available(storeId);
 	}
 
-private slots:
+private Q_SLOTS:
 	void ksm_available(const QString &_storeId)
 	{
 		// we only care about one store
@@ -1107,7 +1107,7 @@ public:
 		op->start();
 	}
 
-private slots:
+private Q_SLOTS:
 	void op_finished()
 	{
 		KeyStoreOperation *op = (KeyStoreOperation *)sender();
@@ -1565,7 +1565,7 @@ public:
 		}
 	}
 
-public slots:
+public Q_SLOTS:
 	void tracker_updated()
 	{
 		QCA_logTextMessage(QString::asprintf("keystore: %p: tracker_updated start", q), Logger::Information);

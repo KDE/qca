@@ -317,7 +317,7 @@ public:
 		}
 	}
 
-public slots:
+public Q_SLOTS:
 	void updated()
 	{
 		bool sig_read = false;

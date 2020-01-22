@@ -1846,7 +1846,7 @@ public:
 		*g = params.g;
 	}
 
-private slots:
+private Q_SLOTS:
 	void gm_finished()
 	{
 		bool ok = gm->ok;
@@ -2264,7 +2264,7 @@ public:
 		return bn2bi(bnd);
 	}
 
-private slots:
+private Q_SLOTS:
 	void km_finished()
 	{
 		RSA *rsa = keymaker->takeResult();
@@ -2548,7 +2548,7 @@ public:
 		return bn2bi(bnpriv_key);
 	}
 
-private slots:
+private Q_SLOTS:
 	void km_finished()
 	{
 		DSA *dsa = keymaker->takeResult();
@@ -2790,7 +2790,7 @@ public:
 		return bn2bi(bnpriv_key);
 	}
 
-private slots:
+private Q_SLOTS:
 	void km_finished()
 	{
 		DH *dh = keymaker->takeResult();
@@ -6977,7 +6977,7 @@ public:
 		out = thread->out;
 	}
 
-private slots:
+private Q_SLOTS:
 	void thread_finished()
 	{
 		getresults();

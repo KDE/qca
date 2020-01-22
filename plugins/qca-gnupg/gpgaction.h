@@ -82,14 +82,14 @@ public:
 	void submitPassphrase(const QByteArray &a);
 #endif
 
-public slots:
+public Q_SLOTS:
 	QByteArray read();
 	void write(const QByteArray &in);
 	void endWrite();
 	void cardOkay();
 	QString readDiagnosticText();
 
-signals:
+Q_SIGNALS:
 	void readyRead();
 	void bytesWritten(int bytes);
 	void finished();
@@ -125,7 +125,7 @@ private:
 	QTime timer;
 #endif
 
-private slots:
+private Q_SLOTS:
 	void t_dtext();
 	void proc_error(gpgQCAPlugin::GPGProc::Error e);
 	void proc_finished(int exitCode);

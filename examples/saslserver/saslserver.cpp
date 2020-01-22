@@ -116,13 +116,13 @@ public:
 	int reserveId();
 	void releaseId(int id);
 
-public slots:
+public Q_SLOTS:
 	void start();
 
-signals:
+Q_SIGNALS:
 	void quit();
 
-private slots:
+private Q_SLOTS:
 	void server_newConnection();
 };
 
@@ -184,7 +184,7 @@ public:
 		serverTest->releaseId(id);
 	}
 
-private slots:
+private Q_SLOTS:
 	void sasl_serverStarted()
 	{
 		sendLine(sasl->mechanismList().join(" "));

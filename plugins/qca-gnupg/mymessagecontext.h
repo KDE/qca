@@ -78,7 +78,7 @@ public:
 	void seterror();
 	void complete();
 
-private slots:
+private Q_SLOTS:
 	void gpg_readyRead();
 	void gpg_bytesWritten(int bytes);
 	void gpg_finished();

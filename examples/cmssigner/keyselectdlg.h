@@ -50,7 +50,7 @@ public:
 
 	void setIcon(IconType type, const QPixmap &icon);
 
-signals:
+Q_SIGNALS:
 	void selected(const QCA::KeyStoreEntry &entry);
 	void viewCertificate(const QCA::CertificateChain &chain);
 

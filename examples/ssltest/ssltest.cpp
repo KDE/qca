@@ -151,10 +151,10 @@ public:
 		sock->connectToHost(host, port);
 	}
 
-signals:
+Q_SIGNALS:
 	void quit();
 
-private slots:
+private Q_SLOTS:
 	void sock_connected()
 	{
 		// We just do this to help doxygen...

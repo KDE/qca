@@ -2884,7 +2884,7 @@ public:
 		thread->start();
 	}
 
-private slots:
+private Q_SLOTS:
 	void thread_finished()
 	{
 		out = thread->out;

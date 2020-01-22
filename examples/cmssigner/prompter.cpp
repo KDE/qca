@@ -74,7 +74,7 @@ public:
 			handler.reject(pending.takeFirst().id);
 	}
 
-private slots:
+private Q_SLOTS:
 	void ph_eventReady(int id, const QCA::Event &event)
 	{
 		Item i;

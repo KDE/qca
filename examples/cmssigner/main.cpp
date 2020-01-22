@@ -57,7 +57,7 @@ public:
 	{
 	}
 
-signals:
+Q_SIGNALS:
 	void error(const QString &str);
 };
 
@@ -196,11 +196,11 @@ public:
 		loader->start(id);
 	}
 
-signals:
+Q_SIGNALS:
 	void loadError();
 	void finished(const QString &sig);
 
-private slots:
+private Q_SLOTS:
 	void loader_finished()
 	{
 		QCA::PrivateKey privateKey = loader->privateKey();
@@ -295,10 +295,10 @@ public:
 		update();
 	}
 
-signals:
+Q_SIGNALS:
 	void finished();
 
-private slots:
+private Q_SLOTS:
 	void update()
 	{
 		QByteArray buf = in.mid(0, 16384 - pending); // 16k chunks
@@ -488,7 +488,7 @@ public:
 		return chain.complete(allCerts().certificates());
 	}
 
-private slots:
+private Q_SLOTS:
 	void load_file()
 	{
 		QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Identities (*.p12 *.pfx)"));

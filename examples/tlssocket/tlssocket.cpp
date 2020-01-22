@@ -72,7 +72,7 @@ public:
 		return ok;
 	}
 
-private slots:
+private Q_SLOTS:
 	void sock_connected()
 	{
 		//printf("sock connected\n");

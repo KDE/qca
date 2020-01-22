@@ -111,7 +111,7 @@ public:
 		agent = 0;
 	}
 
-private slots:
+private Q_SLOTS:
 	void agent_started();
 	void agent_call_ret(bool success, const QVariant &ret);
 };
@@ -125,11 +125,11 @@ public:
 		QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
 	}
 
-signals:
+Q_SIGNALS:
 	void started();
 	void call_ret(bool success, const QVariant &ret);
 
-public slots:
+public Q_SLOTS:
 	void call_do(QObject *obj, const QByteArray &method, const QVariantList &args)
 	{
 		QVariant ret;

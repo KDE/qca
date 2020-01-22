@@ -436,7 +436,7 @@ public:
 	// data pointer needs to remain until canWrite is emitted
 	virtual int write(const char *data, int size) = 0;
 
-signals:
+Q_SIGNALS:
 	// result values:
 	//   =   0 : success
 	//   =  -1 : error
@@ -470,7 +470,7 @@ public:
 	// to be called after every read
 	virtual void resume() = 0;
 
-signals:
+Q_SIGNALS:
 	// result values:
 	//  >=  0 : readAhead
 	//   = -1 : atEnd
@@ -617,7 +617,7 @@ private:
 		return total;
 	}
 
-signals:
+Q_SIGNALS:
 	void canWrite_p(int result, int bytesWritten);
 };
 
@@ -668,7 +668,7 @@ public:
 		return _size;
 	}
 
-private slots:
+private Q_SLOTS:
 	void tryNextWrite()
 	{
 		int written = pipe_write(pipe, data + total, size - total);
@@ -792,7 +792,7 @@ protected:
 		}
 	}
 
-signals:
+Q_SIGNALS:
 	void canRead_p(int result);
 };
 
@@ -829,7 +829,7 @@ public:
 		timer.start(0);
 	}
 
-private slots:
+private Q_SLOTS:
 	void tryRead()
 	{
 		if(consoleMode)
@@ -1050,7 +1050,7 @@ public:
 		}
 	}
 
-public slots:
+public Q_SLOTS:
 	void t_timeout()
 	{
 #ifdef Q_OS_WIN
@@ -1674,7 +1674,7 @@ public:
 	}
 #endif
 
-public slots:
+public Q_SLOTS:
 	void pipe_notify()
 	{
 		if(pipe.type() == QPipeDevice::Read)

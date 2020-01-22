@@ -1163,7 +1163,7 @@ public:
 		delete dc;
 	}
 
-public slots:
+public Q_SLOTS:
 	void done()
 	{
 		if(!k->isNull())

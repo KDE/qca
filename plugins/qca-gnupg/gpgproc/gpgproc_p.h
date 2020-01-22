@@ -44,7 +44,7 @@ public:
 		connect(proc, SIGNAL(error(QProcess::ProcessError)), SLOT(proc_error(QProcess::ProcessError)), Qt::QueuedConnection);
 	}
 
-signals:
+Q_SIGNALS:
 	void started();
 	void readyReadStandardOutput();
 	void readyReadStandardError();
@@ -52,7 +52,7 @@ signals:
 	void finished(int);
 	void error(QProcess::ProcessError);
 
-public slots:
+public Q_SLOTS:
 	void proc_started()
 	{
 		emit started();
@@ -129,7 +129,7 @@ public:
 	bool setupPipes(bool makeAux);
 	void setupArguments();
 
-public slots:
+public Q_SLOTS:
 	void doStart();
 	void aux_written(int x);
 	void aux_error(QCA::QPipeEnd::Error);

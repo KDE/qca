@@ -717,7 +717,7 @@ public:
 		return true;
 	}
 
-private slots:
+private Q_SLOTS:
 	void do_step()
 	{
 		emit diagnosticText(QString("qca-test: TestKeyStoreListContext do_step %1\n").arg(step));

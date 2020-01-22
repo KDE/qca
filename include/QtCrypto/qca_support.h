@@ -194,7 +194,7 @@ public slots:
 		return x;
 	}
 
-private slots:
+private Q_SLOTS:
 	void t_timeout()
 	{
 		++x;

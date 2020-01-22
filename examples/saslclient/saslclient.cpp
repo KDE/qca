@@ -140,7 +140,7 @@ public:
 		connect(sasl, SIGNAL(error()), SLOT(sasl_error()));
 	}
 
-public slots:
+public Q_SLOTS:
 	void start()
 	{
 		mode = 0; // mech list mode
@@ -163,10 +163,10 @@ public slots:
 		sock->connectToHost(host, port);
 	}
 
-signals:
+Q_SIGNALS:
 	void quit();
 
-private slots:
+private Q_SLOTS:
 	void sock_connected()
 	{
 		printf("Connected to server.  Awaiting mechanism list...\n");

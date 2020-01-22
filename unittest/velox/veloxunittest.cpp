@@ -71,7 +71,7 @@ public:
         return ssl->isHandshaken();
     }
 
-private slots:
+private Q_SLOTS:
     void sock_connected()
     {
         QCA::CertificateCollection rootCerts;
@@ -117,7 +117,7 @@ class VeloxUnitTest : public QObject
 {
     Q_OBJECT
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void sniAlice();

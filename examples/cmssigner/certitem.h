@@ -112,7 +112,7 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 	bool setData(const QModelIndex &index, const QVariant &value, int role);
 
-signals:
+Q_SIGNALS:
 	void addSuccess(int reqId, int id);
 	void addFailed(int reqId);
 
@@ -135,7 +135,7 @@ public:
 
 	QCA::PrivateKey privateKey() const;
 
-signals:
+Q_SIGNALS:
 	void finished();
 
 private:

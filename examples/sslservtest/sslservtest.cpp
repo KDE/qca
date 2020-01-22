@@ -120,10 +120,10 @@ public:
 	qDebug() << "Listening on port" << port;
     }
 
-signals:
+Q_SIGNALS:
     void quit();
 
-private slots:
+private Q_SLOTS:
     void sock_readyRead()
     {
 	QByteArray buf(sock->bytesAvailable(), 0x00);

@@ -71,7 +71,7 @@ public:
 	m_handler.start();
     }
 
-private slots:
+private Q_SLOTS:
     void eh_eventReady(int id, const QCA::Event &event)
     {
         if(event.type() == QCA::Event::Password)
@@ -118,7 +118,7 @@ class PgpUnitTest : public QObject
 {
     Q_OBJECT
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void testKeyRing();

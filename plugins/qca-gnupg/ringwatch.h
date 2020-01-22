@@ -63,10 +63,10 @@ public:
 	void add(const QString &filePath);
 	void clear();
 
-signals:
+Q_SIGNALS:
 	void changed(const QString &filePath);
 
-private slots:
+private Q_SLOTS:
 	void dirChanged();
 	void handleChanged();
 };

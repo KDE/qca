@@ -71,7 +71,7 @@ public:
 	QCA::PGPKey publicKeyFromId(const QString &keyId);
 	QCA::PGPKey secretKeyFromId(const QString &keyId);
 
-private slots:
+private Q_SLOTS:
 	void gpg_finished();
 	void ring_changed(const QString &filePath);
 

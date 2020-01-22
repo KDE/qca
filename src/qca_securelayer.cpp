@@ -767,7 +767,7 @@ public:
 		}
 	}
 
-private slots:
+private Q_SLOTS:
 	void tls_resultsReady()
 	{
 		QCA_logTextMessage(QString("tls[%1]: c->resultsReady()").arg(q->objectName()), Logger::Information);
@@ -1591,7 +1591,7 @@ public:
 		out.clear();
 	}
 
-private slots:
+private Q_SLOTS:
 	void sasl_resultsReady()
 	{
 		QCA_logTextMessage(QString("sasl[%1]: c->resultsReady()").arg(q->objectName()), Logger::Information);

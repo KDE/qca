@@ -44,7 +44,7 @@ public:
 		handler.start();
 	}
 
-private slots:
+private Q_SLOTS:
 	void eh_eventReady(int id, const QCA::Event &event)
 	{
 		if(event.type() == QCA::Event::Password)
@@ -73,16 +73,16 @@ public:
 		connect(&keyLoader, SIGNAL(finished()), SLOT(kl_finished()));
 	}
 
-public slots:
+public Q_SLOTS:
 	void start()
 	{
 		keyLoader.loadPrivateKeyFromPEMFile(str);
 	}
 
-signals:
+Q_SIGNALS:
 	void quit();
 
-private slots:
+private Q_SLOTS:
 	void kl_finished()
 	{
 		if(keyLoader.convertResult() == QCA::ConvertGood)

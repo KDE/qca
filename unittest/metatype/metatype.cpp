@@ -41,7 +41,7 @@ public:
     ~TestClass1() { };
     TestClass1(const TestClass1 & ):QObject( 0 ) { };
 
-public slots:
+public Q_SLOTS:
     void voidMethod() { };
     QString qstringMethod()  { return QString(); };
     bool boolMethod( const QString & )  { return true; };
@@ -64,7 +64,7 @@ class MetaTypeUnitTest : public QObject
 {
   Q_OBJECT
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void returnTypeTest();

@@ -103,7 +103,8 @@ if (CMAKE_COMPILER_IS_GNUCXX)
    endif (CMAKE_SYSTEM_NAME MATCHES Linux)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
-add_definitions (${QT_DEFINITIONS})
+add_definitions(-DQT_NO_SIGNALS_SLOTS_KEYWORDS)
+
 include_directories("include/QtCrypto/")
 # for generated files
 include_directories(${CMAKE_BINARY_DIR})

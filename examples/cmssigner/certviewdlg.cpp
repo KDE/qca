@@ -143,7 +143,7 @@ public:
 		ui.lb_info->setText(cert_info_string(chain[x]));
 	}
 
-private slots:
+private Q_SLOTS:
 	void cb_activated(int)
 	{
 		updateInfo();
