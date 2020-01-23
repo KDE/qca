@@ -315,7 +315,7 @@ private:
 			r = sasl_setprop(con, SASL_SSF_EXTERNAL, &ssf);
 			if(r != SASL_OK)
 				return false;
-			r = sasl_setprop(con, SASL_AUTH_EXTERNAL, &authid);
+			r = sasl_setprop(con, SASL_AUTH_EXTERNAL, authid);
 			if(r != SASL_OK)
 				return false;
 		}
