@@ -79,9 +79,9 @@ void CMSut::xcrypt()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit() );
+            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit().constData() );
         else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit() );
+	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit().constData() );
 	else {
 	    QCA::Certificate pubCert = QCA::Certificate::fromPEMFile( "QcaTestClientCert.pem",0, provider );
 	    QCOMPARE( pubCert.isNull(), false );
@@ -178,9 +178,9 @@ void CMSut::signverify()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit() );
+            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit().constData() );
         else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit() );
+	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit().constData() );
 	else {
 	    QCA::ConvertResult res;
 	    QCA::SecureArray passPhrase = "start";
@@ -310,9 +310,9 @@ void CMSut::signverify_message()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit() );
+            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit().constData() );
         else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit() );
+	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit().constData() );
 	else {
 	    QCA::ConvertResult res;
 	    QCA::SecureArray passPhrase = "start";
@@ -428,9 +428,9 @@ void CMSut::signverify_message_invalid()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit() );
+            QWARN( QString( "Certificate not supported for "+provider).toLocal8Bit().constData() );
         else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit() );
+	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit().constData() );
 	else {
 	    QCA::ConvertResult res;
 	    QCA::SecureArray passPhrase = "start";

@@ -677,7 +677,7 @@ public:
 
 		g->appname = SASL_APP;
 		if(!g->server_init) {
-			sasl_server_init(NULL, QFile::encodeName(g->appname));
+			sasl_server_init(NULL, QFile::encodeName(g->appname).constData());
 			g->server_init = true;
 		}
 

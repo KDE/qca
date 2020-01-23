@@ -64,7 +64,7 @@ void RSAUnitTest::testrsa()
 	if(!QCA::isSupported("pkey", provider) ||
 	   !QCA::PKey::supportedTypes(provider).contains(QCA::PKey::RSA) ||
 	   !QCA::PKey::supportedIOTypes(provider).contains(QCA::PKey::RSA))
-	    QWARN(QString("RSA not supported for "+provider).toLocal8Bit());
+	    QWARN(QString("RSA not supported for "+provider).toLocal8Bit().constData());
 	else {
 	    QCA::KeyGenerator keygen;
 	    QCOMPARE( keygen.isBusy(), false );
@@ -154,7 +154,7 @@ void RSAUnitTest::testAsymmetricEncryption()
 	if(!QCA::isSupported("pkey", "qca-ossl") ||
 	   !QCA::PKey::supportedTypes("qca-ossl").contains(QCA::PKey::RSA) ||
 	   !QCA::PKey::supportedIOTypes("qca-ossl").contains(QCA::PKey::RSA)) {
-	    QWARN(QString("RSA not supported").toLocal8Bit());
+	    QWARN("RSA not supported");
 	    QSKIP("RSA not supported. skipping");
 	}
 	QCA::RSAPrivateKey rsaPrivKey1 = QCA::KeyGenerator().createRSA(512, 65537, "qca-ossl").toRSA();

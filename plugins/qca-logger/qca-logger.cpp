@@ -111,7 +111,7 @@ public:
 			printf ("XXXX %s %s\n", level.data (), file.data ());
 			_externalConfig = true;
 			createLogger (
-				atoi (level),
+				atoi (level.constData()),
 				file.isEmpty () ? QString() : QString::fromUtf8 (file)
 			);
 		}
