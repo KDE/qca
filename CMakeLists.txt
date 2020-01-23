@@ -107,6 +107,14 @@ add_definitions(-DQT_NO_SIGNALS_SLOTS_KEYWORDS
                 -DQT_USE_QSTRINGBUILDER
                 -DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 
+if (NOT WIN32)
+    # Strict iterators can't be used on Windows, they lead to a link error
+    # when application code iterates over a QVector<QPoint> for instance, unless
+    # Qt itself was also built with strict iterators.
+    # See example at https://bugreports.qt.io/browse/AUTOSUITE-946
+    add_definitions(-DQT_STRICT_ITERATORS)
+endif()
+
 include_directories("include/QtCrypto/")
 # for generated files
 include_directories(${CMAKE_BINARY_DIR})
