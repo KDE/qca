@@ -139,7 +139,7 @@ public:
 		if(n != -1)
 		{
 			host = _host.mid(0, n);
-			port = _host.mid(n+1).toInt();
+			port = _host.midRef(n+1).toInt();
 		}
 		else
 		{

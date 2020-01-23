@@ -800,7 +800,7 @@ int ProviderManager::get_default_priority(const QString &name) const
 		// qca_default already sanity checks the strings
 		int n = s.indexOf(':');
 		QString sname = s.mid(0, n);
-		int spriority = s.mid(n + 1).toInt();
+		int spriority = s.midRef(n + 1).toInt();
 		if(sname == name)
 			return spriority;
 	}

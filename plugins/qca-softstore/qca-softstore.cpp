@@ -1304,7 +1304,7 @@ private:
 			QChar c = from[i];
 
 			if (c == '\\') {
-				to += QChar ((ushort)from.mid (i+2, 4).toInt (0, 16));
+				to += QChar ((ushort)from.midRef (i+2, 4).toInt (0, 16));
 				i+=5;
 			}
 			else {

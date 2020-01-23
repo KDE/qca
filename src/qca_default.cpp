@@ -1291,7 +1291,7 @@ public:
 			int x = s.indexOf(':');
 			bool ok = false;
 			if(x != -1)
-				s.mid(x + 1).toInt(&ok);
+				s.midRef(x + 1).toInt(&ok);
 			if(!ok)
 			{
 				plugin_priorities.removeAt(n);

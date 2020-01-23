@@ -492,7 +492,7 @@ int main(int argc, char **argv)
 	if(at != -1)
 	{
 		host = hostinput.mid(0, at);
-		port = hostinput.mid(at + 1).toInt();
+		port = hostinput.midRef(at + 1).toInt();
 	}
 	else
 		host = hostinput;
