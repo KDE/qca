@@ -309,7 +309,8 @@ private:
 			return false;
 
 		if(!ext_authid.isEmpty()) {
-			const char *authid = ext_authid.toLatin1().data();
+			const QByteArray ext_authidBA = ext_authid.toLatin1();
+			const char *authid = ext_authidBA.data();
 			sasl_ssf_t ssf = ext_ssf;
 			r = sasl_setprop(con, SASL_SSF_EXTERNAL, &ssf);
 			if(r != SASL_OK)
