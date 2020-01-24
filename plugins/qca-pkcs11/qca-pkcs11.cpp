@@ -1794,7 +1794,6 @@ pkcs11KeyStoreListContext::entryList (int id) {
 			pkcs11h_certificate_id_list_t current = NULL;
 			QList<Certificate> listCerts;
 			QList<Certificate> listIssuers;
-			QList<pkcs11h_certificate_id_list_t> listIds;
 			int i = 0;
 
 			if (

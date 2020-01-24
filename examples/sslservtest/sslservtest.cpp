@@ -197,7 +197,7 @@ private Q_SLOTS:
 
     void ssl_readyRead()
     {
-	QByteArray a = ssl->read();
+	ssl->read();
 	QByteArray b =
 	    "<html>\n"
 	    "<head><title>Test</title></head>\n"

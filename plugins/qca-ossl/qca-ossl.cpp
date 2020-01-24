@@ -6696,7 +6696,6 @@ public:
 			BIO_free(bi);
 			sk_X509_pop_free(other_certs, X509_free);
 
-			QString env;
 			if(p7)
 			{
 				// FIXME: format

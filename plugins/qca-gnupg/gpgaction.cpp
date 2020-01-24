@@ -605,7 +605,6 @@ void GpgAction::submitCommand(const QByteArray &a)
 // since str is taken as a value, it is ok to use the same variable for 'rest'
 QString GpgAction::nextArg(QString str, QString *rest)
 {
-	QString out;
 	int n = str.indexOf(' ');
 	if(n == -1)
 	{
