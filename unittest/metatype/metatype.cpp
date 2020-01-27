@@ -160,7 +160,7 @@ void MetaTypeUnitTest::invokeMethodTest()
 
     ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnRepeatArg" ), args, &result );
     QVERIFY( ret );
-    QCOMPARE( result.toString(), myString + myString );
+    QCOMPARE( result.toString(), QString( myString + myString ) );
 
     // 9 arguments - no matching method
     result = QString( "unchanged" );

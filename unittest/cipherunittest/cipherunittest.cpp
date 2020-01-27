@@ -200,7 +200,7 @@ void CipherUnitTest::aes128_cbc()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes128" ),
@@ -213,7 +213,7 @@ void CipherUnitTest::aes128_cbc()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -282,7 +282,7 @@ void CipherUnitTest::aes128_cbc_pkcs7()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes128" ),
@@ -295,7 +295,7 @@ void CipherUnitTest::aes128_cbc_pkcs7()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -338,7 +338,7 @@ void CipherUnitTest::aes128_cfb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes128" ),
@@ -351,7 +351,7 @@ void CipherUnitTest::aes128_cfb()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -394,7 +394,7 @@ void CipherUnitTest::aes128_ofb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes128" ),
@@ -407,7 +407,7 @@ void CipherUnitTest::aes128_ofb()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -449,7 +449,7 @@ void CipherUnitTest::aes128_ctr()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes128" ),
@@ -462,7 +462,7 @@ void CipherUnitTest::aes128_ctr()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -715,7 +715,7 @@ void CipherUnitTest::aes192_cbc()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes192" ),
@@ -728,7 +728,7 @@ void CipherUnitTest::aes192_cbc()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -797,7 +797,7 @@ void CipherUnitTest::aes192_cbc_pkcs7()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes192" ),
@@ -810,7 +810,7 @@ void CipherUnitTest::aes192_cbc_pkcs7()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -854,7 +854,7 @@ void CipherUnitTest::aes192_cfb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes192" ),
@@ -867,7 +867,7 @@ void CipherUnitTest::aes192_cfb()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -910,7 +910,7 @@ void CipherUnitTest::aes192_ofb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes192" ),
@@ -923,7 +923,7 @@ void CipherUnitTest::aes192_ofb()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -965,7 +965,7 @@ void CipherUnitTest::aes192_ctr()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes192" ),
@@ -978,7 +978,7 @@ void CipherUnitTest::aes192_ctr()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -1270,7 +1270,7 @@ void CipherUnitTest::aes256_cbc()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes256" ),
@@ -1284,7 +1284,7 @@ void CipherUnitTest::aes256_cbc()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -1353,7 +1353,7 @@ void CipherUnitTest::aes256_cbc_pkcs7()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes256" ),
@@ -1366,7 +1366,7 @@ void CipherUnitTest::aes256_cbc_pkcs7()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -1410,7 +1410,7 @@ void CipherUnitTest::aes256_cfb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes256" ),
@@ -1465,7 +1465,7 @@ void CipherUnitTest::aes256_ofb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes256" ),
@@ -1520,7 +1520,7 @@ void CipherUnitTest::aes256_ctr()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "aes256" ),
@@ -2116,7 +2116,7 @@ void CipherUnitTest::des_cbc()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "des" ),
@@ -2129,7 +2129,7 @@ void CipherUnitTest::des_cbc()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -2217,7 +2217,7 @@ void CipherUnitTest::des_cfb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "des" ),
@@ -2230,7 +2230,7 @@ void CipherUnitTest::des_cfb()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -2282,7 +2282,7 @@ void CipherUnitTest::des_ofb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "des" ),
@@ -2295,7 +2295,7 @@ void CipherUnitTest::des_ofb()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -2382,7 +2382,7 @@ void CipherUnitTest::des_pkcs7()
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
 			QCOMPARE( update, cipherText.left(update.size())  );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "des" ),
@@ -2400,7 +2400,7 @@ void CipherUnitTest::des_pkcs7()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size())  );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -2534,7 +2534,7 @@ void CipherUnitTest::des_cbc_pkcs7()
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
 			QCOMPARE( update, cipherText.left(update.size())  );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "des" ),
@@ -2552,7 +2552,7 @@ void CipherUnitTest::des_cbc_pkcs7()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size())  );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -2777,7 +2777,7 @@ void CipherUnitTest::blowfish_cbc()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "blowfish" ),
@@ -2790,7 +2790,7 @@ void CipherUnitTest::blowfish_cbc()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size() ) );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -2836,7 +2836,7 @@ void CipherUnitTest::blowfish_cbc_pkcs7()
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
 			QCOMPARE( update, cipherText.left(update.size())  );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "blowfish" ),
@@ -2849,7 +2849,7 @@ void CipherUnitTest::blowfish_cbc_pkcs7()
 			update = QCA::arrayToHex( reverseCipher.update( QCA::hexToArray( cipherText ) ).toByteArray() );
 			QVERIFY( reverseCipher.ok() );
 			QCOMPARE( update, plainText.left(update.size())  );
-			QCOMPARE( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ), plainText );
+			QCOMPARE( QString( update + QCA::arrayToHex( reverseCipher.final().toByteArray() ) ), plainText );
 			QVERIFY( reverseCipher.ok() );
 		}
 	}
@@ -2893,7 +2893,7 @@ void CipherUnitTest::blowfish_cfb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "blowfish" ),
@@ -2948,7 +2948,7 @@ void CipherUnitTest::blowfish_ofb()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "blowfish" ),
@@ -3010,7 +3010,7 @@ void CipherUnitTest::cast5()
 									   provider);
 			QString update = QCA::arrayToHex( forwardCipher.update( QCA::hexToArray( plainText ) ).toByteArray() );
 			QVERIFY( forwardCipher.ok() );
-			QCOMPARE( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ), cipherText );
+			QCOMPARE( QString( update + QCA::arrayToHex( forwardCipher.final().toByteArray() ) ), cipherText );
 			QVERIFY( forwardCipher.ok() );
 
 			QCA::Cipher reverseCipher( QString( "cast5" ),
