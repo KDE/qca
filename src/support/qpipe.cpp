@@ -503,7 +503,7 @@ public:
 	{
 		do_quit = false;
 		data = 0;
-		connect(this, SIGNAL(canWrite_p(int, int)), SIGNAL(canWrite(int, int)));
+		connect(this, &QPipeWriterThread::canWrite_p, this, &QPipeWriterThread::canWrite);
 		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, false, DUPLICATE_SAME_ACCESS);
 	}
 
@@ -638,7 +638,7 @@ public:
 	{
 		pipe = id;
 		data = 0;
-		connect(&timer, SIGNAL(timeout()), SLOT(tryNextWrite()));
+		connect(&timer, &SafeTimer::timeout, this, &QPipeWriterPoll::tryNextWrite);
 	}
 
 	virtual ~QPipeWriterPoll()
@@ -712,7 +712,7 @@ public:
 	{
 		do_quit = false;
 		active = true;
-		connect(this, SIGNAL(canRead_p(int)), SIGNAL(canRead(int)));
+		connect(this, &QPipeReaderThread::canRead_p, this, &QPipeReaderThread::canRead);
 		DuplicateHandle(GetCurrentProcess(), id, GetCurrentProcess(), &pipe, 0, false, DUPLICATE_SAME_ACCESS);
 	}
 
@@ -810,7 +810,7 @@ public:
 	QPipeReaderPoll(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeReader(parent), timer(this)
 	{
 		pipe = id;
-		connect(&timer, SIGNAL(timeout()), SLOT(tryRead()));
+		connect(&timer, &SafeTimer::timeout, this, &QPipeReaderPoll::tryRead);
 	}
 
 	virtual ~QPipeReaderPoll()
@@ -1016,12 +1016,12 @@ public:
 			else
 				pipeReader = new QPipeReaderThread(pipe, this);
 #endif
-			connect(pipeReader, SIGNAL(canRead(int)), this, SLOT(pr_canRead(int)));
+			connect(pipeReader, &QPipeReader::canRead, this, &Private::pr_canRead);
 			pipeReader->start();
 
 			// polling timer
 			readTimer = new SafeTimer(this);
-			connect(readTimer, SIGNAL(timeout()), SLOT(t_timeout()));
+			connect(readTimer, &SafeTimer::timeout, this, &Private::t_timeout);
 
 			// updated: now that we have pipeReader, this no longer
 			//   polls for data.  it only does delayed singleshot
@@ -1033,7 +1033,7 @@ public:
 
 			// socket notifier
 			sn_read = new SafeSocketNotifier(pipe, QSocketNotifier::Read, this);
-			connect(sn_read, SIGNAL(activated(int)), SLOT(sn_read_activated(int)));
+			connect(sn_read, &SafeSocketNotifier::activated, this, &Private::sn_read_activated);
 #endif
 		}
 		else
@@ -1044,7 +1044,7 @@ public:
 
 			// socket notifier
 			sn_write = new SafeSocketNotifier(pipe, QSocketNotifier::Write, this);
-			connect(sn_write, SIGNAL(activated(int)), SLOT(sn_write_activated(int)));
+			connect(sn_write, &SafeSocketNotifier::activated, this, &Private::sn_write_activated);
 			sn_write->setEnabled(false);
 #endif
 		}
@@ -1413,7 +1413,7 @@ int QPipeDevice::write(const char *data, int size)
 		else
 			d->pipeWriter = new QPipeWriterThread(d->pipe, d);
 #endif
-		connect(d->pipeWriter, SIGNAL(canWrite(int, int)), d, SLOT(pw_canWrite(int, int)));
+		connect(d->pipeWriter, &QPipeWriter::canWrite, d, &Private::pw_canWrite);
 		d->pipeWriter->start();
 	}
 
@@ -1512,11 +1512,11 @@ public:
 		writeTrigger.setSingleShot(true);
 		closeTrigger.setSingleShot(true);
 		writeErrorTrigger.setSingleShot(true);
-		connect(&pipe, SIGNAL(notify()), SLOT(pipe_notify()));
-		connect(&readTrigger, SIGNAL(timeout()), SLOT(doRead()));
-		connect(&writeTrigger, SIGNAL(timeout()), SLOT(doWrite()));
-		connect(&closeTrigger, SIGNAL(timeout()), SLOT(doClose()));
-		connect(&writeErrorTrigger, SIGNAL(timeout()), SLOT(doWriteError()));
+		connect(&pipe, &QPipeDevice::notify, this, &Private::pipe_notify);
+		connect(&readTrigger, &SafeTimer::timeout, this, &Private::doRead);
+		connect(&writeTrigger, &SafeTimer::timeout, this, &Private::doWrite);
+		connect(&closeTrigger, &SafeTimer::timeout, this, &Private::doClose);
+		connect(&writeErrorTrigger, &SafeTimer::timeout, this, &Private::doWriteError);
 		reset(ResetSessionAndData);
 	}
 

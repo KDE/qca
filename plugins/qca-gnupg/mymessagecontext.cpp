@@ -37,15 +37,15 @@ MyMessageContext::MyMessageContext(MyOpenPGPContext *_sms, Provider *p)
 	, wasSigned(false)
 	, op_err(GpgOp::ErrorUnknown), gpg(find_bin()) ,_finished(false)
 {
-	connect(&gpg, SIGNAL(readyRead()), SLOT(gpg_readyRead()));
-	connect(&gpg, SIGNAL(bytesWritten(int)), SLOT(gpg_bytesWritten(int)));
-	connect(&gpg, SIGNAL(finished()), SLOT(gpg_finished()));
-	connect(&gpg, SIGNAL(needPassphrase(const QString &)), SLOT(gpg_needPassphrase(const QString &)));
-	connect(&gpg, SIGNAL(needCard()), SLOT(gpg_needCard()));
-	connect(&gpg, SIGNAL(readyReadDiagnosticText()), SLOT(gpg_readyReadDiagnosticText()));
+	connect(&gpg, &GpgOp::readyRead, this, &MyMessageContext::gpg_readyRead);
+	connect(&gpg, &GpgOp::bytesWritten, this, &MyMessageContext::gpg_bytesWritten);
+	connect(&gpg, &GpgOp::finished, this, &MyMessageContext::gpg_finished);
+	connect(&gpg, &GpgOp::needPassphrase, this, &MyMessageContext::gpg_needPassphrase);
+	connect(&gpg, &GpgOp::needCard, this, &MyMessageContext::gpg_needCard);
+	connect(&gpg, &GpgOp::readyReadDiagnosticText, this, &MyMessageContext::gpg_readyReadDiagnosticText);
 
-	connect(&asker, SIGNAL(responseReady()), SLOT(asker_responseReady()));
-	connect(&tokenAsker, SIGNAL(responseReady()), SLOT(tokenAsker_responseReady()));
+	connect(&asker, &QCA::PasswordAsker::responseReady, this, &MyMessageContext::asker_responseReady);
+	connect(&tokenAsker, &QCA::TokenAsker::responseReady, this, &MyMessageContext::tokenAsker_responseReady);
 }
 
 Provider::Context *MyMessageContext::clone() const

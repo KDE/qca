@@ -141,7 +141,7 @@ public:
 		qRegisterMetaType<CRL>();
 		qRegisterMetaType<PGPKey>();
 
-		connect(this, SIGNAL(updated_p()), SLOT(updated_locked()), Qt::QueuedConnection);
+		connect(this, &KeyStoreTracker::updated_p, this, &KeyStoreTracker::updated_locked, Qt::QueuedConnection);
 
 		startedAll = false;
 		busy = true; // we start out busy
@@ -187,11 +187,7 @@ public:
 	}
 
 	// thread-safe
-	void addTarget(QObject *ksm)
-	{
-		QMutexLocker locker(&updateMutex);
-		ksm->connect(this, SIGNAL(updated()), SLOT(tracker_updated()), Qt::DirectConnection);
-	}
+	void addTarget(KeyStoreManagerPrivate *ksm);
 
 	// thread-safe
 	void removeTarget(QObject *ksm)
@@ -418,11 +414,11 @@ private:
 
 		sources += c;
 		busySources += c;
-		connect(c, SIGNAL(busyStart()), SLOT(ksl_busyStart()));
-		connect(c, SIGNAL(busyEnd()), SLOT(ksl_busyEnd()));
-		connect(c, SIGNAL(updated()), SLOT(ksl_updated()));
-		connect(c, SIGNAL(diagnosticText(const QString &)), SLOT(ksl_diagnosticText(const QString &)));
-		connect(c, SIGNAL(storeUpdated(int)), SLOT(ksl_storeUpdated(int)));
+		connect(c, &KeyStoreListContext::busyStart, this, &KeyStoreTracker::ksl_busyStart);
+		connect(c, &KeyStoreListContext::busyEnd, this, &KeyStoreTracker::ksl_busyEnd);
+		connect(c, &KeyStoreListContext::updated, this, &KeyStoreTracker::ksl_updated);
+		connect(c, &KeyStoreListContext::diagnosticText, this, &KeyStoreTracker::ksl_diagnosticText);
+		connect(c, &KeyStoreListContext::storeUpdated, this, &KeyStoreTracker::ksl_storeUpdated);
 		c->start();
 		c->setUpdatesEnabled(true);
 
@@ -827,7 +823,7 @@ public:
 	{
 		ks = 0;
 		avail = false;
-		connect(&ksm, SIGNAL(keyStoreAvailable(const QString &)), SLOT(ksm_available(const QString &)));
+		connect(&ksm, &KeyStoreManager::keyStoreAvailable, this, &KeyStoreEntryWatcher::Private::ksm_available);
 	}
 
 	~Private()
@@ -849,7 +845,7 @@ private Q_SLOTS:
 		if(_storeId == storeId)
 		{
 			ks = new KeyStore(storeId, &ksm);
-			connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
+			connect(ks, &KeyStore::updated, this, &Private::ks_updated);
 			ks->startAsynchronousMode();
 		}
 	}
@@ -1076,7 +1072,7 @@ public:
 	{
 		KeyStoreOperation *op = new KeyStoreOperation(this);
 		// use queued for signal-safety
-		connect(op, SIGNAL(finished()), SLOT(op_finished()), Qt::QueuedConnection);
+		connect(op, &KeyStoreOperation::finished, this, &KeyStorePrivate::op_finished, Qt::QueuedConnection);
 		op->type = KeyStoreOperation::EntryList;
 		op->trackerId = trackerId;
 		ops += op;
@@ -1087,7 +1083,7 @@ public:
 	{
 		KeyStoreOperation *op = new KeyStoreOperation(this);
 		// use queued for signal-safety
-		connect(op, SIGNAL(finished()), SLOT(op_finished()), Qt::QueuedConnection);
+		connect(op, &KeyStoreOperation::finished, this, &KeyStorePrivate::op_finished, Qt::QueuedConnection);
 		op->type = KeyStoreOperation::WriteEntry;
 		op->trackerId = trackerId;
 		op->wentry = wentry;
@@ -1099,7 +1095,7 @@ public:
 	{
 		KeyStoreOperation *op = new KeyStoreOperation(this);
 		// use queued for signal-safety
-		connect(op, SIGNAL(finished()), SLOT(op_finished()), Qt::QueuedConnection);
+		connect(op, &KeyStoreOperation::finished, this, &KeyStorePrivate::op_finished, Qt::QueuedConnection);
 		op->type = KeyStoreOperation::RemoveEntry;
 		op->trackerId = trackerId;
 		op->entryId = entryId;
@@ -1595,6 +1591,13 @@ public Q_SLOTS:
 		do_update();
 	}
 };
+
+// from KeyStoreTracker
+void KeyStoreTracker::addTarget(KeyStoreManagerPrivate *ksm)
+{
+	QMutexLocker locker(&updateMutex);
+	connect(this, &KeyStoreTracker::updated, ksm, &KeyStoreManagerPrivate::tracker_updated, Qt::DirectConnection);
+}
 
 // from KeyStorePrivate
 void KeyStorePrivate::reg()

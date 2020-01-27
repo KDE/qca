@@ -276,16 +276,16 @@ public:
 		readyReadTrigger.setSingleShot(true);
 		bytesWrittenTrigger.setSingleShot(true);
 		finishedTrigger.setSingleShot(true);
-		connect(&readyReadTrigger, SIGNAL(timeout()), SLOT(t_readyRead()));
-		connect(&bytesWrittenTrigger, SIGNAL(timeout()), SLOT(t_bytesWritten()));
-		connect(&finishedTrigger, SIGNAL(timeout()), SLOT(t_finished()));
+		connect(&readyReadTrigger, &SafeTimer::timeout, this, &Private::t_readyRead);
+		connect(&bytesWrittenTrigger, &SafeTimer::timeout, this, &Private::t_bytesWritten);
+		connect(&finishedTrigger, &SafeTimer::timeout, this, &Private::t_finished);
 
 		reset(ResetAll);
 	}
 
 	void init()
 	{
-		connect(c, SIGNAL(updated()), SLOT(updated()));
+		connect(c, &MessageContext::updated, this, &Private::updated);
 	}
 
 	void reset(ResetMode mode)

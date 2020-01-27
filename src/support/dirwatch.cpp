@@ -40,8 +40,8 @@ public:
 	QFileSystemWatcherRelay(QFileSystemWatcher *_watcher, QObject *parent = nullptr)
 	:QObject(parent), watcher(_watcher)
 	{
-		connect(watcher, SIGNAL(directoryChanged(const QString &)), SIGNAL(directoryChanged(const QString &)), Qt::QueuedConnection);
-		connect(watcher, SIGNAL(fileChanged(const QString &)), SIGNAL(fileChanged(const QString &)), Qt::QueuedConnection);
+		connect(watcher, &QFileSystemWatcher::directoryChanged, this, &QFileSystemWatcherRelay::directoryChanged, Qt::QueuedConnection);
+		connect(watcher, &QFileSystemWatcher::fileChanged, this, &QFileSystemWatcherRelay::fileChanged, Qt::QueuedConnection);
 	}
 
 Q_SIGNALS:
@@ -65,7 +65,7 @@ public:
 	{
 	}
 
-private Q_SLOTS:
+public Q_SLOTS:
 	void watcher_changed(const QString &path)
 	{
 		Q_UNUSED(path);
@@ -106,7 +106,7 @@ void DirWatch::setDirName(const QString &dir)
 	{
 		d->watcher = new QFileSystemWatcher(this);
 		d->watcher_relay = new QFileSystemWatcherRelay(d->watcher, this);
-		connect(d->watcher_relay, SIGNAL(directoryChanged(const QString &)), d, SLOT(watcher_changed(const QString &)));
+		connect(d->watcher_relay, &QFileSystemWatcherRelay::directoryChanged, d, &Private::watcher_changed);
 
 		d->watcher->addPath(d->dirName);
 	}
@@ -137,8 +137,8 @@ public:
 
 		watcher = new QFileSystemWatcher(this);
 		watcher_relay = new QFileSystemWatcherRelay(watcher, this);
-		connect(watcher_relay, SIGNAL(directoryChanged(const QString &)), SLOT(dir_changed(const QString &)));
-		connect(watcher_relay, SIGNAL(fileChanged(const QString &)), SLOT(file_changed(const QString &)));
+		connect(watcher_relay, &QFileSystemWatcherRelay::directoryChanged, this, &Private::dir_changed);
+		connect(watcher_relay, &QFileSystemWatcherRelay::fileChanged, this, &Private::file_changed);
 
 		QFileInfo fi(fileName);
 		fi.makeAbsolute();

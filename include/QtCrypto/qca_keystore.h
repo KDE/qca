@@ -90,7 +90,7 @@ if(entry.ensureAvailable())
 
    \code
 KeyStoreEntryWatcher *watcher = new KeyStoreEntryWatcher(entry);
-connect(watcher, SIGNAL(available()), SLOT(entry_available()));
+connect(watcher, &KeyStoreEntryWatcher::available, this, &YourClass::entry_available);
 ...
 void entry_available()
 {

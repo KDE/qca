@@ -36,12 +36,12 @@ public:
 	:QObject(parent)
 	{
 		qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
-		connect(proc, SIGNAL(started()), SLOT(proc_started()), Qt::QueuedConnection);
-		connect(proc, SIGNAL(readyReadStandardOutput()), SLOT(proc_readyReadStandardOutput()), Qt::QueuedConnection);
-		connect(proc, SIGNAL(readyReadStandardError()), SLOT(proc_readyReadStandardError()), Qt::QueuedConnection);
-		connect(proc, SIGNAL(bytesWritten(qint64)), SLOT(proc_bytesWritten(qint64)), Qt::QueuedConnection);
-		connect(proc, SIGNAL(finished(int)), SLOT(proc_finished(int)), Qt::QueuedConnection);
-		connect(proc, SIGNAL(error(QProcess::ProcessError)), SLOT(proc_error(QProcess::ProcessError)), Qt::QueuedConnection);
+		connect(proc, &QProcess::started, this, &QProcessSignalRelay::proc_started, Qt::QueuedConnection);
+		connect(proc, &QProcess::readyReadStandardOutput, this, &QProcessSignalRelay::proc_readyReadStandardOutput, Qt::QueuedConnection);
+		connect(proc, &QProcess::readyReadStandardError, this, &QProcessSignalRelay::proc_readyReadStandardError, Qt::QueuedConnection);
+		connect(proc, &QProcess::bytesWritten, this, &QProcessSignalRelay::proc_bytesWritten, Qt::QueuedConnection);
+		connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &QProcessSignalRelay::proc_finished, Qt::QueuedConnection);
+		connect(proc, &QProcess::errorOccurred, this, &QProcessSignalRelay::proc_error, Qt::QueuedConnection);
 	}
 
 Q_SIGNALS:

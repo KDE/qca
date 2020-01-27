@@ -264,7 +264,7 @@ public:
 		connect_handshaken = false;
 		server = false;
 
-		connect(&actionTrigger, SIGNAL(timeout()), SLOT(doNextAction()));
+		connect(&actionTrigger, &SafeTimer::timeout, this, &Private::doNextAction);
 		actionTrigger.setSingleShot(true);
 
 		reset(ResetAll);
@@ -274,8 +274,8 @@ public:
 		// parent the context to us, so that moveToThread works
 		c->setParent(this);
 
-		connect(c, SIGNAL(resultsReady()), SLOT(tls_resultsReady()));
-		connect(c, SIGNAL(dtlsTimeout()), SLOT(tls_dtlsTimeout()));
+		connect(c, &TLSContext::resultsReady, this, &Private::tls_resultsReady);
+		connect(c, &TLSContext::dtlsTimeout, this, &Private::tls_dtlsTimeout);
 	}
 
 	~Private()
@@ -1363,7 +1363,7 @@ public:
 		set_password = false;
 		set_realm = false;
 
-		connect(&actionTrigger, SIGNAL(timeout()), SLOT(doNextAction()));
+        connect(&actionTrigger, &SafeTimer::timeout, this, &Private::doNextAction);
 		actionTrigger.setSingleShot(true);
 
 		reset(ResetAll);
@@ -1373,7 +1373,7 @@ public:
 		// parent the context to us, so that moveToThread works
 		c->setParent(this);
 
-		connect(c, SIGNAL(resultsReady()), SLOT(sasl_resultsReady()));
+		connect(c, &SASLContext::resultsReady, this, &Private::sasl_resultsReady);
 	}
 
 	~Private()

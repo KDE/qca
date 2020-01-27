@@ -179,7 +179,7 @@ public:
 	Counter() : timer(this)
 	{
 		x = 0;
-		connect(&timer, SIGNAL(timeout()), SLOT(t_timeout()));
+		connect(&timer, &QTimer::timeout, this, &Counter::t_timeout);
 	}
 
 public slots:

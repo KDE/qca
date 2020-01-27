@@ -42,8 +42,7 @@ public:
         // When the PasswordAsker or TokenAsker needs to interact
         // with the user, it raises a signal. We connect that to a
         // local slot to get the required information.
-        connect( &m_handler, SIGNAL( eventReady(int, const QCA::Event &) ),
-                 SLOT( my_eventReady(int, const QCA::Event &) ) );
+        connect( &m_handler, &QCA::EventHandler::eventReady, this, &ClientPassphraseHandler::my_eventReady );
 
         // Now that we are set up, we can start the EventHandler. Nothing
         // will happen if you don't call this method.
@@ -130,7 +129,7 @@ int main(int argc, char **argv)
 
     // handler and asker cannot occur in the same thread
     AskerThread askerThread;
-    QObject::connect(&askerThread, SIGNAL(finished()), &exampleApp, SLOT(quit()));
+    QObject::connect(&askerThread, &AskerThread::finished, &exampleApp, &QCoreApplication::quit);
     askerThread.start();
 
     exampleApp.exec();

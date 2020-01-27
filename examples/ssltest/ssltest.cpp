@@ -111,19 +111,17 @@ public:
 		ssl_done = false;
 
 		sock = new QTcpSocket;
-		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
-		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
-		connect(sock, SIGNAL(error(QAbstractSocket::SocketError)),
-			SLOT(sock_error(QAbstractSocket::SocketError)));
+		connect(sock, &QTcpSocket::connected, this, &SecureTest::sock_connected);
+		connect(sock, &QTcpSocket::readyRead, this, &SecureTest::sock_readyRead);
+		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureTest::sock_error);
 
 		ssl = new QCA::TLS;
-		connect(ssl, SIGNAL(certificateRequested()), SLOT(ssl_certificateRequested()));
-		connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
-		connect(ssl, SIGNAL(readyRead()), SLOT(ssl_readyRead()));
-		connect(ssl, SIGNAL(readyReadOutgoing()),
-			SLOT(ssl_readyReadOutgoing()));
-		connect(ssl, SIGNAL(closed()), SLOT(ssl_closed()));
-		connect(ssl, SIGNAL(error()), SLOT(ssl_error()));
+		connect(ssl, &QCA::TLS::certificateRequested, this, &SecureTest::ssl_certificateRequested);
+		connect(ssl, &QCA::TLS::handshaken, this, &SecureTest::ssl_handshaken);
+		connect(ssl, &QCA::TLS::readyRead, this, &SecureTest::ssl_readyRead);
+		connect(ssl, &QCA::TLS::readyReadOutgoing, this, &SecureTest::ssl_readyReadOutgoing);
+		connect(ssl, &QCA::TLS::closed, this, &SecureTest::ssl_closed);
+		connect(ssl, &QCA::TLS::error, this, &SecureTest::ssl_error);
 	}
 
 	~SecureTest()
@@ -327,7 +325,7 @@ int main(int argc, char **argv)
 	}
 
 	SecureTest *s = new SecureTest;
-	QObject::connect(s, SIGNAL(quit()), &app, SLOT(quit()));
+	QObject::connect(s, &SecureTest::quit, &app, &QCoreApplication::quit);
 	s->start(host);
 	app.exec();
 	delete s;

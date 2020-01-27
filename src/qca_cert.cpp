@@ -2879,7 +2879,7 @@ public:
 		active = true;
 		thread = new KeyLoaderThread(this);
 		// used queued for signal-safety
-		connect(thread, SIGNAL(finished()), SLOT(thread_finished()), Qt::QueuedConnection);
+		connect(thread, &KeyLoaderThread::finished, this, &KeyLoader::Private::thread_finished, Qt::QueuedConnection);
 		thread->in = in;
 		thread->start();
 	}

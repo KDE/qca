@@ -224,16 +224,16 @@ GpgAction::GpgAction(QObject *parent)
 {
 	dtextTimer.setSingleShot(true);
 
-	connect(&proc, SIGNAL(error(gpgQCAPlugin::GPGProc::Error)), SLOT(proc_error(gpgQCAPlugin::GPGProc::Error)));
-	connect(&proc, SIGNAL(finished(int)), SLOT(proc_finished(int)));
-	connect(&proc, SIGNAL(readyReadStdout()), SLOT(proc_readyReadStdout()));
-	connect(&proc, SIGNAL(readyReadStderr()), SLOT(proc_readyReadStderr()));
-	connect(&proc, SIGNAL(readyReadStatusLines()), SLOT(proc_readyReadStatusLines()));
-	connect(&proc, SIGNAL(bytesWrittenStdin(int)), SLOT(proc_bytesWrittenStdin(int)));
-	connect(&proc, SIGNAL(bytesWrittenAux(int)), SLOT(proc_bytesWrittenAux(int)));
-	connect(&proc, SIGNAL(bytesWrittenCommand(int)), SLOT(proc_bytesWrittenCommand(int)));
-	connect(&proc, SIGNAL(debug(const QString &)), SLOT(proc_debug(const QString &)));
-	connect(&dtextTimer, SIGNAL(timeout()), SLOT(t_dtext()));
+	connect(&proc, &GPGProc::error, this, &GpgAction::proc_error);
+	connect(&proc, &GPGProc::finished, this, &GpgAction::proc_finished);
+	connect(&proc, &GPGProc::readyReadStdout, this, &GpgAction::proc_readyReadStdout);
+	connect(&proc, &GPGProc::readyReadStderr, this, &GpgAction::proc_readyReadStderr);
+	connect(&proc, &GPGProc::readyReadStatusLines, this, &GpgAction::proc_readyReadStatusLines);
+	connect(&proc, &GPGProc::bytesWrittenStdin, this, &GpgAction::proc_bytesWrittenStdin);
+	connect(&proc, &GPGProc::bytesWrittenAux, this, &GpgAction::proc_bytesWrittenAux);
+	connect(&proc, &GPGProc::bytesWrittenCommand, this, &GpgAction::proc_bytesWrittenCommand);
+	connect(&proc, &GPGProc::debug, this, &GpgAction::proc_debug);
+	connect(&dtextTimer, &QCA::SafeTimer::timeout, this, &GpgAction::t_dtext);
 
 	reset();
 }

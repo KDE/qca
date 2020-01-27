@@ -45,7 +45,7 @@ void FileWatchUnitTest::filewatchTest()
     QCA::FileWatch watcher;
     QCOMPARE( watcher.fileName(), QString() );
 
-    QSignalSpy spy( &watcher, SIGNAL(changed()) );
+    QSignalSpy spy( &watcher, &QCA::FileWatch::changed );
     QVERIFY( spy.isValid() );
     QCOMPARE( spy.count(), 0 );
 

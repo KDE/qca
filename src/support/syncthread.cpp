@@ -111,7 +111,7 @@ public:
 		agent = 0;
 	}
 
-private Q_SLOTS:
+public Q_SLOTS:
 	void agent_started();
 	void agent_call_ret(bool success, const QVariant &ret);
 };
@@ -192,8 +192,8 @@ void SyncThread::run()
 	d->m.lock();
 	d->loop = new QEventLoop;
 	d->agent = new SyncThreadAgent;
-	connect(d->agent, SIGNAL(started()), d, SLOT(agent_started()), Qt::DirectConnection);
-	connect(d->agent, SIGNAL(call_ret(bool, const QVariant &)), d, SLOT(agent_call_ret(bool, const QVariant &)), Qt::DirectConnection);
+	connect(d->agent, &SyncThreadAgent::started, d, &Private::agent_started, Qt::DirectConnection);
+	connect(d->agent, &SyncThreadAgent::call_ret, d, &Private::agent_call_ret, Qt::DirectConnection);
 	d->loop->exec();
 	d->m.lock();
 	atEnd();

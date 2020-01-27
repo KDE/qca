@@ -42,17 +42,17 @@ public:
 	Private(TLSSocket *_q) : QObject(_q), q(_q), sync(_q)
 	{
 		sock = new QTcpSocket(this);
-		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
-		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
-		connect(sock, SIGNAL(bytesWritten(qint64)), SLOT(sock_bytesWritten(qint64)));
-		connect(sock, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(sock_error(QAbstractSocket::SocketError)));
+		connect(sock, &QTcpSocket::connected, this, &TLSSocket::Private::sock_connected);
+		connect(sock, &QTcpSocket::readyRead, this, &TLSSocket::Private::sock_readyRead);
+		connect(sock, &QTcpSocket::bytesWritten, this, &TLSSocket::Private::sock_bytesWritten);
+		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &TLSSocket::Private::sock_error);
 
 		tls = new QCA::TLS(this);
-		connect(tls, SIGNAL(handshaken()), SLOT(tls_handshaken()));
-		connect(tls, SIGNAL(readyRead()), SLOT(tls_readyRead()));
-		connect(tls, SIGNAL(readyReadOutgoing()), SLOT(tls_readyReadOutgoing()));
-		connect(tls, SIGNAL(closed()), SLOT(tls_closed()));
-		connect(tls, SIGNAL(error()), SLOT(tls_error()));
+		connect(tls, &QCA::TLS::handshaken, this, &TLSSocket::Private::tls_handshaken);
+		connect(tls, &QCA::TLS::readyRead, this, &TLSSocket::Private::tls_readyRead);
+		connect(tls, &QCA::TLS::readyReadOutgoing, this, &TLSSocket::Private::tls_readyReadOutgoing);
+		connect(tls, &QCA::TLS::closed, this, &TLSSocket::Private::tls_closed);
+		connect(tls, &QCA::TLS::error, this, &TLSSocket::Private::tls_error);
 		tls->setTrustedCertificates(QCA::systemStore());
 		encrypted = false;
 		error = false;

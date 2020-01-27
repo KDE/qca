@@ -71,11 +71,11 @@ void RingWatch::add(const QString &filePath)
 
 		DirItem di;
 		di.dirWatch = new DirWatch(path, this);
-		connect(di.dirWatch, SIGNAL(changed()), SLOT(dirChanged()));
+		connect(di.dirWatch, &DirWatch::changed, this, &RingWatch::dirChanged);
 
 		di.changeTimer = new SafeTimer(this);
 		di.changeTimer->setSingleShot(true);
-		connect(di.changeTimer, SIGNAL(timeout()), SLOT(handleChanged()));
+		connect(di.changeTimer, &SafeTimer::timeout, this, &RingWatch::handleChanged);
 
 		dirWatch = di.dirWatch;
 		dirs += di;

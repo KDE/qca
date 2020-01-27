@@ -151,7 +151,7 @@ private Q_SLOTS:
 	{
 		ed = QAbstractEventDispatcher::instance();
 		//printf("TimerFixer[%p] linking to dispatcher %p\n", this, ed);
-		connect(ed, SIGNAL(aboutToBlock()), SLOT(ed_aboutToBlock()));
+		connect(ed, &QAbstractEventDispatcher::aboutToBlock, this, &TimerFixer::ed_aboutToBlock);
 	}
 
 	void edunlink()
@@ -159,7 +159,7 @@ private Q_SLOTS:
 		//printf("TimerFixer[%p] unlinking from dispatcher %p\n", this, ed);
 		if(ed)
 		{
-			disconnect(ed, SIGNAL(aboutToBlock()), this, SLOT(ed_aboutToBlock()));
+			disconnect(ed, &QAbstractEventDispatcher::aboutToBlock, this, &TimerFixer::ed_aboutToBlock);
 			ed = 0;
 		}
 	}
@@ -459,7 +459,7 @@ protected:
 
 			loop = &eventLoop;
 			agent = new SynchronizerAgent;
-			connect(agent, SIGNAL(started()), SLOT(agent_started()), Qt::DirectConnection);
+			connect(agent, &SynchronizerAgent::started, this, &Private::agent_started, Qt::DirectConnection);
 
 			// run the event loop
 			eventLoop.exec();

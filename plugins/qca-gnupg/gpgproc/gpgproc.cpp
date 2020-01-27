@@ -54,14 +54,14 @@ GPGProc::Private::Private(GPGProc *_q)
 	startTrigger.setSingleShot(true);
 	doneTrigger.setSingleShot(true);
 
-	connect(&pipeAux.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(aux_written(int)));
-	connect(&pipeAux.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(aux_error(QCA::QPipeEnd::Error)));
-	connect(&pipeCommand.writeEnd(), SIGNAL(bytesWritten(int)), SLOT(command_written(int)));
-	connect(&pipeCommand.writeEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(command_error(QCA::QPipeEnd::Error)));
-	connect(&pipeStatus.readEnd(), SIGNAL(readyRead()), SLOT(status_read()));
-	connect(&pipeStatus.readEnd(), SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(status_error(QCA::QPipeEnd::Error)));
-	connect(&startTrigger, SIGNAL(timeout()), SLOT(doStart()));
-	connect(&doneTrigger, SIGNAL(timeout()), SLOT(doTryDone()));
+	connect(&pipeAux.writeEnd(), &QCA::QPipeEnd::bytesWritten, this, &GPGProc::Private::aux_written);
+	connect(&pipeAux.writeEnd(), &QCA::QPipeEnd::error, this, &GPGProc::Private::aux_error);
+	connect(&pipeCommand.writeEnd(), &QCA::QPipeEnd::bytesWritten, this, &GPGProc::Private::command_written);
+	connect(&pipeCommand.writeEnd(), &QCA::QPipeEnd::error, this, &GPGProc::Private::command_error);
+	connect(&pipeStatus.readEnd(), &QCA::QPipeEnd::readyRead, this, &GPGProc::Private::status_read);
+	connect(&pipeStatus.readEnd(), &QCA::QPipeEnd::error, this, &GPGProc::Private::status_error);
+	connect(&startTrigger, &QCA::SafeTimer::timeout, this, &GPGProc::Private::doStart);
+	connect(&doneTrigger, &QCA::SafeTimer::timeout, this, &GPGProc::Private::doTryDone);
 
 	reset(ResetSessionAndData);
 }
@@ -544,19 +544,19 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 
 #ifdef QPROC_SIGNAL_RELAY
 	d->proc_relay = new QProcessSignalRelay(d->proc, d);
-	connect(d->proc_relay, SIGNAL(started()), d, SLOT(proc_started()));
-	connect(d->proc_relay, SIGNAL(readyReadStandardOutput()), d, SLOT(proc_readyReadStandardOutput()));
-	connect(d->proc_relay, SIGNAL(readyReadStandardError()), d, SLOT(proc_readyReadStandardError()));
-	connect(d->proc_relay, SIGNAL(bytesWritten(qint64)), d, SLOT(proc_bytesWritten(qint64)));
-	connect(d->proc_relay, SIGNAL(finished(int)), d, SLOT(proc_finished(int)));
-	connect(d->proc_relay, SIGNAL(error(QProcess::ProcessError)), d, SLOT(proc_error(QProcess::ProcessError)));
+	connect(d->proc_relay, &QProcessSignalRelay::started, d, &GPGProc::Private::proc_started);
+	connect(d->proc_relay, &QProcessSignalRelay::readyReadStandardOutput, d, &GPGProc::Private::proc_readyReadStandardOutput);
+	connect(d->proc_relay, &QProcessSignalRelay::readyReadStandardError, d, &GPGProc::Private::proc_readyReadStandardError);
+	connect(d->proc_relay, &QProcessSignalRelay::bytesWritten, d, &GPGProc::Private::proc_bytesWritten);
+	connect(d->proc_relay, &QProcessSignalRelay::finished, d, &GPGProc::Private::proc_finished);
+	connect(d->proc_relay, &QProcessSignalRelay::error, d, &GPGProc::Private::proc_error);
 #else
-	connect(d->proc, SIGNAL(started()), d, SLOT(proc_started()));
-	connect(d->proc, SIGNAL(readyReadStandardOutput()), d, SLOT(proc_readyReadStandardOutput()));
-	connect(d->proc, SIGNAL(readyReadStandardError()), d, SLOT(proc_readyReadStandardError()));
-	connect(d->proc, SIGNAL(bytesWritten(qint64)), d, SLOT(proc_bytesWritten(qint64)));
-	connect(d->proc, SIGNAL(finished(int)), d, SLOT(proc_finished(int)));
-	connect(d->proc, SIGNAL(error(QProcess::ProcessError)), d, SLOT(proc_error(QProcess::ProcessError)));
+	connect(d->proc, &SProcess::started, d, &GPGProc::Private::proc_started);
+	connect(d->proc, &SProcess::readyReadStandardOutput, d, &GPGProc::Private::proc_readyReadStandardOutput);
+	connect(d->proc, &SProcess::readyReadStandardError, d, &GPGProc::Private::proc_readyReadStandardError);
+	connect(d->proc, &SProcess::bytesWritten, d, &GPGProc::Private::proc_bytesWritten);
+	connect(d->proc, QOverload<int,QProcess::ExitStatus>::of(&SProcess::finished), d, &GPGProc::Private::proc_finished);
+	connect(d->proc, &SProcess::errorOccurred, d, &GPGProc::Private::proc_error);
 #endif
 
 	d->bin = bin;

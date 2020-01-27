@@ -77,17 +77,17 @@ public:
 		if(in_id != INVALID_Q_PIPE_ID)
 		{
 			in.take(in_id, QPipeDevice::Read);
-			connect(&in, SIGNAL(readyRead()), SLOT(in_readyRead()));
-			connect(&in, SIGNAL(closed()), SLOT(in_closed()));
-			connect(&in, SIGNAL(error(QCA::QPipeEnd::Error)), SLOT(in_error(QCA::QPipeEnd::Error)));
+			connect(&in, &QPipeEnd::readyRead, this, &ConsoleWorker::in_readyRead);
+			connect(&in, &QPipeEnd::closed, this, &ConsoleWorker::in_closed);
+			connect(&in, &QPipeEnd::error, this, &ConsoleWorker::in_error);
 			in.enable();
 		}
 
 		if(out_id != INVALID_Q_PIPE_ID)
 		{
 			out.take(out_id, QPipeDevice::Write);
-			connect(&out, SIGNAL(bytesWritten(int)), SLOT(out_bytesWritten(int)));
-			connect(&out, SIGNAL(closed()), SLOT(out_closed()));
+			connect(&out, &QPipeEnd::bytesWritten, this, &ConsoleWorker::out_bytesWritten);
+			connect(&out, &QPipeEnd::closed, this, &ConsoleWorker::out_closed);
 			out.enable();
 		}
 
@@ -333,10 +333,10 @@ protected:
 		// use direct connections here, so that the emits come from
 		//   the other thread.  we can also connect to our own
 		//   signals to avoid having to make slots just to emit.
-		connect(worker, SIGNAL(readyRead()), SIGNAL(readyRead()), Qt::DirectConnection);
-		connect(worker, SIGNAL(bytesWritten(int)), SIGNAL(bytesWritten(int)), Qt::DirectConnection);
-		connect(worker, SIGNAL(inputClosed()), SIGNAL(inputClosed()), Qt::DirectConnection);
-		connect(worker, SIGNAL(outputClosed()), SIGNAL(outputClosed()), Qt::DirectConnection);
+		connect(worker, &ConsoleWorker::readyRead, this, &ConsoleThread::readyRead, Qt::DirectConnection);
+		connect(worker, &ConsoleWorker::bytesWritten, this, &ConsoleThread::bytesWritten, Qt::DirectConnection);
+		connect(worker, &ConsoleWorker::inputClosed, this, &ConsoleThread::inputClosed, Qt::DirectConnection);
+		connect(worker, &ConsoleWorker::outputClosed, this, &ConsoleThread::outputClosed, Qt::DirectConnection);
 
 		worker->start(_in_id, _out_id);
 	}
@@ -597,7 +597,7 @@ public:
 	{
 		console = 0;
 		thread = 0;
-		connect(&lateTrigger, SIGNAL(timeout()), SLOT(doLate()));
+		connect(&lateTrigger, &SafeTimer::timeout, this, &ConsoleReferencePrivate::doLate);
 		lateTrigger.setSingleShot(true);
 	}
 
@@ -656,10 +656,10 @@ bool ConsoleReference::start(Console *console, SecurityMode mode)
 	if(mode == SecurityEnabled)
 		d->thread->setSecurityEnabled(true);
 
-	connect(d->thread, SIGNAL(readyRead()), SIGNAL(readyRead()));
-	connect(d->thread, SIGNAL(bytesWritten(int)), SIGNAL(bytesWritten(int)));
-	connect(d->thread, SIGNAL(inputClosed()), SIGNAL(inputClosed()));
-	connect(d->thread, SIGNAL(outputClosed()), SIGNAL(outputClosed()));
+	connect(d->thread, &ConsoleThread::readyRead, this, &ConsoleReference::readyRead);
+	connect(d->thread, &ConsoleThread::bytesWritten, this, &ConsoleReference::bytesWritten);
+	connect(d->thread, &ConsoleThread::inputClosed, this, &ConsoleReference::inputClosed);
+	connect(d->thread, &ConsoleThread::outputClosed, this, &ConsoleReference::outputClosed);
 
 	d->late_read = false;
 	d->late_close = false;
@@ -762,8 +762,8 @@ public:
 
 	Private(ConsolePrompt *_q) : QObject(_q), q(_q), sync(_q), console(this)
 	{
-		connect(&console, SIGNAL(readyRead()), SLOT(con_readyRead()));
-		connect(&console, SIGNAL(inputClosed()), SLOT(con_inputClosed()));
+		connect(&console, &ConsoleReference::readyRead, this, &Private::con_readyRead);
+		connect(&console, &ConsoleReference::inputClosed, this, &Private::con_inputClosed);
 
 		con = 0;
 		own_con = false;

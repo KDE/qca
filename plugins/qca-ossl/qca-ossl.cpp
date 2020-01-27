@@ -1834,7 +1834,7 @@ public:
 		}
 		else
 		{
-			connect(gm, SIGNAL(finished()), SLOT(gm_finished()));
+			connect(gm, &DLGroupMaker::finished, this, &MyDLGroup::gm_finished);
 			gm->start();
 		}
 	}
@@ -2179,7 +2179,7 @@ public:
 		}
 		else
 		{
-			connect(keymaker, SIGNAL(finished()), SLOT(km_finished()));
+			connect(keymaker, &RSAKeyMaker::finished, this, &RSAKey::km_finished);
 			keymaker->start();
 		}
 	}
@@ -2474,7 +2474,7 @@ public:
 		}
 		else
 		{
-			connect(keymaker, SIGNAL(finished()), SLOT(km_finished()));
+			connect(keymaker, &DSAKeyMaker::finished, this, &DSAKey::km_finished);
 			keymaker->start();
 		}
 	}
@@ -2718,7 +2718,7 @@ public:
 		}
 		else
 		{
-			connect(keymaker, SIGNAL(finished()), SLOT(km_finished()));
+			connect(keymaker, &DHKeyMaker::finished, this, &DHKey::km_finished);
 			keymaker->start();
 		}
 	}
@@ -6668,7 +6668,7 @@ public:
 			thread->other_certs = other_certs;
 			thread->bi = bi;
 			thread->flags = flags;
-			connect(thread, SIGNAL(finished()), SLOT(thread_finished()));
+			connect(thread, &MyMessageContextThread::finished, this, &MyMessageContext::thread_finished);
 			thread->start();
 		}
 		else if(op == Encrypt)

@@ -195,8 +195,8 @@ private:
 	AnimatedKeyGen()
 	{
 		gen.setBlockingEnabled(false);
-		connect(&gen, SIGNAL(finished()), SLOT(gen_finished()));
-		connect(&t, SIGNAL(timeout()), SLOT(t_timeout()));
+		connect(&gen, &QCA::KeyGenerator::finished, this, &AnimatedKeyGen::gen_finished);
+		connect(&t, &QTimer::timeout, this, &AnimatedKeyGen::t_timeout);
 	}
 
 private Q_SLOTS:
@@ -282,7 +282,7 @@ private Q_SLOTS:
 		// user can quit the monitoring by pressing enter
 		printf("Monitoring keystores, press 'q' to quit.\n");
 		prompt = new QCA::ConsolePrompt(this);
-		connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
+		connect(prompt, &QCA::ConsolePrompt::finished, this, &KeyStoreMonitor::prompt_finished);
 		prompt->getChar();
 
 		// kick off the subsystem
@@ -290,7 +290,7 @@ private Q_SLOTS:
 
 		// setup keystore manager for monitoring
 		ksm = new QCA::KeyStoreManager(this);
-		connect(ksm, SIGNAL(keyStoreAvailable(const QString &)), SLOT(ks_available(const QString &)));
+		connect(ksm, &QCA::KeyStoreManager::keyStoreAvailable, this, &KeyStoreMonitor::ks_available);
 		foreach(const QString &keyStoreId, ksm->keyStores())
 			ks_available(keyStoreId);
 	}
@@ -298,8 +298,8 @@ private Q_SLOTS:
 	void ks_available(const QString &keyStoreId)
 	{
 		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, ksm);
-		connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
-		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
+		connect(ks, &QCA::KeyStore::updated, this, &KeyStoreMonitor::ks_updated);
+		connect(ks, &QCA::KeyStore::unavailable, this, &KeyStoreMonitor::ks_unavailable);
 		keyStores += ks;
 
 		printf("  available:   %s\n", qPrintable(ks->name()));
@@ -369,10 +369,10 @@ public:
 
 		prompt = 0;
 
-		connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)), SLOT(ph_eventReady(int, const QCA::Event &)));
+		connect(&handler, &QCA::EventHandler::eventReady, this, &PassphrasePrompt::ph_eventReady);
 		handler.start();
 
-		connect(&ksm, SIGNAL(keyStoreAvailable(const QString &)), SLOT(ks_available(const QString &)));
+		connect(&ksm, &QCA::KeyStoreManager::keyStoreAvailable, this, &PassphrasePrompt::ks_available);
 		foreach(const QString &keyStoreId, ksm.keyStores())
 			ks_available(keyStoreId);
 	}
@@ -460,7 +460,7 @@ private Q_SLOTS:
 			if(!prompt)
 			{
 				prompt = new QCA::ConsolePrompt(this);
-				connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
+				connect(prompt, &QCA::ConsolePrompt::finished, this, &PassphrasePrompt::prompt_finished);
 				prompt_id = id;
 				prompt_event = e;
 				prompt->getHidden(str);
@@ -544,7 +544,7 @@ private Q_SLOTS:
 			{
 				fprintf(stderr, "%s\n", qPrintable(str));
 				prompt = new QCA::ConsolePrompt(this);
-				connect(prompt, SIGNAL(finished()), SLOT(prompt_finished()));
+                connect(prompt, &QCA::ConsolePrompt::finished, this, &PassphrasePrompt::prompt_finished);
 				prompt_id = id;
 				prompt_event = e;
 				prompt->getChar();
@@ -616,8 +616,8 @@ private Q_SLOTS:
 	void ks_available(const QString &keyStoreId)
 	{
 		QCA::KeyStore *ks = new QCA::KeyStore(keyStoreId, &ksm);
-		connect(ks, SIGNAL(updated()), SLOT(ks_updated()));
-		connect(ks, SIGNAL(unavailable()), SLOT(ks_unavailable()));
+		connect(ks, &QCA::KeyStore::updated, this, &PassphrasePrompt::ks_updated);
+		connect(ks, &QCA::KeyStore::unavailable, this, &PassphrasePrompt::ks_unavailable);
 		keyStores += ks;
 		ks->startAsynchronousMode();
 

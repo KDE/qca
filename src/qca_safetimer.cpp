@@ -68,7 +68,7 @@ SafeTimer::Private::Private(QObject *parent)
 	, isActive(false)
 	, elapsedTimer(QElapsedTimer())
 {
-	connect(this, SIGNAL(needFix()), SLOT(fixTimer()), Qt::QueuedConnection);
+	connect(this, &Private::needFix, this, &Private::fixTimer, Qt::QueuedConnection);
 }
 
 void SafeTimer::Private::fixTimer()

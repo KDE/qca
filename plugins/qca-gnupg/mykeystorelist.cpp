@@ -41,8 +41,8 @@ MyKeyStoreList::MyKeyStoreList(Provider *p)
 	QMutexLocker locker(ksl_mutex());
 	keyStoreList = this;
 
-	connect(&gpg, SIGNAL(finished()), SLOT(gpg_finished()));
-	connect(&ringWatch, SIGNAL(changed(const QString &)), SLOT(ring_changed(const QString &)));
+	connect(&gpg, &GpgOp::finished, this, &MyKeyStoreList::gpg_finished);
+	connect(&ringWatch, &RingWatch::changed, this, &MyKeyStoreList::ring_changed);
 }
 
 MyKeyStoreList::~MyKeyStoreList()

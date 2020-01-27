@@ -126,18 +126,18 @@ public:
 		waitCycles(0)
 	{
 		sock = new QTcpSocket(this);
-		connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
-		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
-		connect(sock, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(sock_error(QAbstractSocket::SocketError)));
+		connect(sock, &QTcpSocket::connected, this, &ClientTest::sock_connected);
+		connect(sock, &QTcpSocket::readyRead, this, &ClientTest::sock_readyRead);
+		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &ClientTest::sock_error);
 
 		sasl = new QCA::SASL(this);
-		connect(sasl, SIGNAL(clientStarted(bool, const QByteArray &)), SLOT(sasl_clientFirstStep(bool, const QByteArray &)));
-		connect(sasl, SIGNAL(nextStep(const QByteArray &)), SLOT(sasl_nextStep(const QByteArray &)));
-		connect(sasl, SIGNAL(needParams(const QCA::SASL::Params &)), SLOT(sasl_needParams(const QCA::SASL::Params &)));
-		connect(sasl, SIGNAL(authenticated()), SLOT(sasl_authenticated()));
-		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
-		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
-		connect(sasl, SIGNAL(error()), SLOT(sasl_error()));
+		connect(sasl, &QCA::SASL::clientStarted, this, &ClientTest::sasl_clientFirstStep);
+		connect(sasl, &QCA::SASL::nextStep, this, &ClientTest::sasl_nextStep);
+		connect(sasl, &QCA::SASL::needParams, this, &ClientTest::sasl_needParams);
+		connect(sasl, &QCA::SASL::authenticated, this, &ClientTest::sasl_authenticated);
+		connect(sasl, &QCA::SASL::readyRead, this, &ClientTest::sasl_readyRead);
+		connect(sasl, &QCA::SASL::readyReadOutgoing, this, &ClientTest::sasl_readyReadOutgoing);
+		connect(sasl, &QCA::SASL::error, this, &ClientTest::sasl_error);
 	}
 
 public Q_SLOTS:
@@ -559,7 +559,7 @@ int main(int argc, char **argv)
 	}
 
 	ClientTest client(host, port, proto, authzid, realm, user, pass, no_authzid, no_realm);
-	QObject::connect(&client, SIGNAL(quit()), &qapp, SLOT(quit()));
+	QObject::connect(&client, &ClientTest::quit, &qapp, &QCoreApplication::quit);
 	QTimer::singleShot(0, &client, SLOT(start()));
 	qapp.exec();
 

@@ -38,13 +38,12 @@ public:
     TlsTest()
     {
         sock = new QTcpSocket( this );
-        connect(sock, SIGNAL(connected()), SLOT(sock_connected()));
-        connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
+        connect(sock, &QTcpSocket::connected, this, &TlsTest::sock_connected);
+        connect(sock, &QTcpSocket::readyRead, this, &TlsTest::sock_readyRead);
 
         ssl = new QCA::TLS( this );
-        connect(ssl, SIGNAL(handshaken()), SLOT(ssl_handshaken()));
-        connect(ssl, SIGNAL(readyReadOutgoing()),
-                SLOT(ssl_readyReadOutgoing()));
+        connect(ssl, &QCA::TLS::handshaken, this, &TlsTest::ssl_handshaken);
+        connect(ssl, &QCA::TLS::readyReadOutgoing, this, &TlsTest::ssl_readyReadOutgoing);
 
         sync = new QCA::Synchronizer( this );
     }

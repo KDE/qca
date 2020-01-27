@@ -39,8 +39,7 @@ public:
 
 	PassphraseHandler(QObject *parent = nullptr) : QObject(parent)
 	{
-		connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)),
-			SLOT(eh_eventReady(int, const QCA::Event &)));
+		connect(&handler, &QCA::EventHandler::eventReady, this, &PassphraseHandler::eh_eventReady);
 		handler.start();
 	}
 
@@ -70,7 +69,7 @@ public:
 
 	App()
 	{
-		connect(&keyLoader, SIGNAL(finished()), SLOT(kl_finished()));
+		connect(&keyLoader, &QCA::KeyLoader::finished, this, &App::kl_finished);
 	}
 
 public Q_SLOTS:
@@ -111,7 +110,7 @@ int main(int argc, char **argv)
 	PassphraseHandler passphraseHandler;
 	App app;
 	app.str = argv[1];
-	QObject::connect(&app, SIGNAL(quit()), &qapp, SLOT(quit()));
+	QObject::connect(&app, &App::quit, &qapp, QCoreApplication::quit);
 	QTimer::singleShot(0, &app, SLOT(start()));
 	qapp.exec();
 	return 0;

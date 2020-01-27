@@ -153,19 +153,19 @@ public:
 		id = serverTest->reserveId();
 
 		sock->setParent(this);
-		connect(sock, SIGNAL(disconnected()), SLOT(sock_disconnected()));
-		connect(sock, SIGNAL(readyRead()), SLOT(sock_readyRead()));
-		connect(sock, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(sock_error(QAbstractSocket::SocketError)));
-		connect(sock, SIGNAL(bytesWritten(qint64)), SLOT(sock_bytesWritten(qint64)));
+		connect(sock, &QTcpSocket::disconnected, this, &ServerTestHandler::sock_disconnected);
+		connect(sock, &QTcpSocket::readyRead, this, &ServerTestHandler::sock_readyRead);
+		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &ServerTestHandler::sock_error);
+		connect(sock, &QTcpSocket::bytesWritten, this, &ServerTestHandler::sock_bytesWritten);
 
 		sasl = new QCA::SASL(this);
-		connect(sasl, SIGNAL(authCheck(const QString &, const QString &)), SLOT(sasl_authCheck(const QString &, const QString &)));
-		connect(sasl, SIGNAL(nextStep(const QByteArray &)), SLOT(sasl_nextStep(const QByteArray &)));
-		connect(sasl, SIGNAL(authenticated()), SLOT(sasl_authenticated()));
-		connect(sasl, SIGNAL(readyRead()), SLOT(sasl_readyRead()));
-		connect(sasl, SIGNAL(readyReadOutgoing()), SLOT(sasl_readyReadOutgoing()));
-		connect(sasl, SIGNAL(error()), SLOT(sasl_error()));
-		connect(sasl, SIGNAL(serverStarted()), SLOT(sasl_serverStarted()));
+		connect(sasl, &QCA::SASL::authCheck, this, &ServerTestHandler::sasl_authCheck);
+		connect(sasl, &QCA::SASL::nextStep, this, &ServerTestHandler::sasl_nextStep);
+		connect(sasl, &QCA::SASL::authenticated, this, &ServerTestHandler::sasl_authenticated);
+		connect(sasl, &QCA::SASL::readyRead, this, &ServerTestHandler::sasl_readyRead);
+		connect(sasl, &QCA::SASL::readyReadOutgoing, this, &ServerTestHandler::sasl_readyReadOutgoing);
+		connect(sasl, &QCA::SASL::error, this, &ServerTestHandler::sasl_error);
+		connect(sasl, &QCA::SASL::serverStarted, this, &ServerTestHandler::sasl_serverStarted);
 
 		mode = 0; // mech list mode
 		toWrite = 0;
@@ -393,7 +393,7 @@ ServerTest::ServerTest(const QString &_host, int _port, const QString &_proto, c
 	port(_port)
 {
 	tcpServer = new QTcpServer(this);
-	connect(tcpServer, SIGNAL(newConnection()), SLOT(server_newConnection()));
+	connect(tcpServer, &QTcpServer::newConnection, this, &ServerTest::server_newConnection);
 }
 
 int ServerTest::reserveId()
@@ -504,7 +504,7 @@ int main(int argc, char **argv)
 	}
 
 	ServerTest server(host, port, proto, realm, str);
-	QObject::connect(&server, SIGNAL(quit()), &qapp, SLOT(quit()));
+	QObject::connect(&server, &ServerTest::quit, &qapp, &QCoreApplication::quit);
 	QTimer::singleShot(0, &server, SLOT(start()));
 	qapp.exec();
 

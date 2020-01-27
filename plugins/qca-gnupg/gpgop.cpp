@@ -78,12 +78,12 @@ void GpgOp::Private::make_act(GpgOp::Type _op)
 
 	act = new GpgAction(this);
 
-	connect(act, SIGNAL(readyRead()), SLOT(act_readyRead()));
-	connect(act, SIGNAL(bytesWritten(int)), SLOT(act_bytesWritten(int)));
-	connect(act, SIGNAL(needPassphrase(const QString &)), SLOT(act_needPassphrase(const QString &)));
-	connect(act, SIGNAL(needCard()), SLOT(act_needCard()));
-	connect(act, SIGNAL(finished()), SLOT(act_finished()));
-	connect(act, SIGNAL(readyReadDiagnosticText()), SLOT(act_readyReadDiagnosticText()));
+	connect(act, &GpgAction::readyRead, this, &GpgOp::Private::act_readyRead);
+	connect(act, &GpgAction::bytesWritten, this, &GpgOp::Private::act_bytesWritten);
+	connect(act, &GpgAction::needPassphrase, this, &GpgOp::Private::act_needPassphrase);
+	connect(act, &GpgAction::needCard, this, &GpgOp::Private::act_needCard);
+	connect(act, &GpgAction::finished, this, &GpgOp::Private::act_finished);
+	connect(act, &GpgAction::readyReadDiagnosticText, this, &GpgOp::Private::act_readyReadDiagnosticText);
 
 	act->input.bin = bin;
 	act->input.op = op;

@@ -1250,7 +1250,7 @@ PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 	{
 		d->k->moveToThread(thread());
 		d->k->setParent(d);
-		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
+		connect(d->k, &RSAContext::finished, d, &Private::done);
 		static_cast<RSAContext *>(d->k)->createPrivate(bits, exp, false);
 	}
 	else
@@ -1276,7 +1276,7 @@ PrivateKey KeyGenerator::createDSA(const DLGroup &domain, const QString &provide
 	{
 		d->k->moveToThread(thread());
 		d->k->setParent(d);
-		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
+		connect(d->k, &DSAContext::finished, d, &Private::done);
 		static_cast<DSAContext *>(d->k)->createPrivate(domain, false);
 	}
 	else
@@ -1302,7 +1302,7 @@ PrivateKey KeyGenerator::createDH(const DLGroup &domain, const QString &provider
 	{
 		d->k->moveToThread(thread());
 		d->k->setParent(d);
-		connect(d->k, SIGNAL(finished()), d, SLOT(done()));
+		connect(d->k, &DHContext::finished, d, &Private::done);
 		static_cast<DHContext *>(d->k)->createPrivate(domain, false);
 	}
 	else
@@ -1338,7 +1338,7 @@ DLGroup KeyGenerator::createDLGroup(QCA::DLGroupSet set, const QString &provider
 		d->wasBlocking = d->blocking;
 		if(!d->blocking)
 		{
-			connect(d->dc, SIGNAL(finished()), d, SLOT(done_group()));
+			connect(d->dc, &DLGroupContext ::finished, d, &Private::done_group);
 			d->dc->fetchGroup(set, false);
 		}
 		else
