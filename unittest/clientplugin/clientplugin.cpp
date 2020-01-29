@@ -43,7 +43,7 @@ void ClientPlugin::cleanupTestCase()
     delete m_init;
 }
 
-const QString providerName = "testClientSideProvider";
+static const QLatin1String providerName("testClientSideProvider");
 
 class TestClientProvider : public QObject, public QCA::Provider
 {

@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 	socket.connectToHostEncrypted("www.paypal.com", 443);
 	socket.write("GET / HTTP/1.0\r\n\r\n");
 	while(socket.waitForReadyRead())
-		printf("%s", socket.readAll().data());
+		printf("%s", socket.readAll().constData());
 
 	return 0;
 }

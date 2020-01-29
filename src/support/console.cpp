@@ -110,11 +110,22 @@ public:
 		started = false;
 	}
 
-public Q_SLOTS:
-	bool isValid() const
+	Q_INVOKABLE bool isValid() const
 	{
 		return in.isValid();
 	}
+
+	Q_INVOKABLE int bytesAvailable() const
+	{
+		return in.bytesAvailable();
+	}
+
+	Q_INVOKABLE int bytesToWrite() const
+	{
+		return in.bytesToWrite();
+	}
+
+public Q_SLOTS:
 
 	void setSecurityEnabled(bool enabled)
 	{
@@ -147,16 +158,6 @@ public Q_SLOTS:
 	void closeOutput()
 	{
 		out.close();
-	}
-
-	int bytesAvailable() const
-	{
-		return in.bytesAvailable();
-	}
-
-	int bytesToWrite() const
-	{
-		return in.bytesToWrite();
 	}
 
 public:

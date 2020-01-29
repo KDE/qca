@@ -77,7 +77,8 @@ private:
 void HashUnitTest::initTestCase()
 {
     m_init = new QCA::Initializer;
-    for(QCA::Provider *provider : QCA::providers())
+    const auto providers = QCA::providers();
+    for(QCA::Provider *provider : providers)
         providersToTest << provider->name();
 }
 
