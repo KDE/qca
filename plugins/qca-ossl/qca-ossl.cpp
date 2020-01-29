@@ -4016,7 +4016,7 @@ public:
 		BN_free(bn);
 
 		// validity period
-		ASN1_TIME_set(X509_get_notBefore(x), QDateTime::currentDateTime().toUTC().toTime_t());
+		ASN1_TIME_set(X509_get_notBefore(x), QDateTime::currentDateTimeUtc().toTime_t());
 		ASN1_TIME_set(X509_get_notAfter(x), notValidAfter.toTime_t());
 
 		X509_set_pubkey(x, static_cast<const MyPKeyContext*>(req.subjectPublicKey()) -> get_pkey());

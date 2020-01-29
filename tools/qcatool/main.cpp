@@ -451,10 +451,10 @@ private Q_SLOTS:
 					else
 						name = e.keyStoreInfo().name();
 				}
-				str = QString("Enter %1 for %2").arg(type).arg(name);
+				str = QString("Enter %1 for %2").arg(type, name);
 			}
 			else if(!e.fileName().isEmpty())
-				str = QString("Enter %1 for %2").arg(type).arg(e.fileName());
+				str = QString("Enter %1 for %2").arg(type, e.fileName());
 			else
 				str = QString("Enter %1").arg(type);
 
@@ -1251,7 +1251,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 				continue;
 			}
 
-			QDateTime start = QDateTime::currentDateTime().toUTC();
+			QDateTime start = QDateTime::currentDateTimeUtc();
 			QDateTime end = start;
 			if(vl.years > 0)
 				end = end.addYears(vl.years);
@@ -1420,7 +1420,7 @@ static QVariantMap provider_config_edit_generic(const QVariantMap &in)
 
 		// fields must be bool, int, or string
 		QVariant newval;
-		QString prompt = QString("%1: [%2] ").arg(var).arg(val.toString());
+		QString prompt = QString("%1: [%2] ").arg(var, val.toString());
 		if(variant_is_bool(val))
 			newval = prompt_for_bool(QString("bool   ") + prompt, val.toBool());
 		else if(variant_is_int(val))
@@ -3970,7 +3970,7 @@ int main(int argc, char **argv)
 				enc.setLineBreaksEnabled(true);
 				enc.setLineBreaksColumn(76);
 				QString sigtext = add_cr(enc.arrayToString(output));
-				QString str = QString(mime_signed).arg(hashName).arg(QString::fromUtf8(plain)).arg(sigtext);
+				QString str = QString(mime_signed).arg(hashName, QString::fromUtf8(plain), sigtext);
 				output = str.toUtf8();
 			}
 

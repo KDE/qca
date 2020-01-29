@@ -48,7 +48,7 @@ bool my_qputenv(const char *varName, const QByteArray& value)
 
 static int qca_setenv(const char *name, const char *value, int overwrite)
 {
-    if (!overwrite && !qgetenv(name).isNull()) return 0;
+    if (!overwrite && qEnvironmentVariableIsSet(name)) return 0;
 
     if(my_qputenv(name, QByteArray(value)))
         return 0; // success
