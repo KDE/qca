@@ -1042,6 +1042,7 @@ private:
 //----------------------------------------------------------------------------
 class pkcs11PKeyContext : public PKeyContext
 {
+    Q_OBJECT
 
 private:
 	PKeyBase *_k;
@@ -1195,6 +1196,7 @@ public:
 //----------------------------------------------------------------------------
 class pkcs11KeyStoreEntryContext : public KeyStoreEntryContext
 {
+    Q_OBJECT
 private:
 	KeyStoreEntry::Type _item_type;
 	KeyBundle _key;

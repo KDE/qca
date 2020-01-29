@@ -213,6 +213,7 @@ static QString addrString(const SASLContext::HostPort &hp)
 
 class saslContext : public SASLContext
 {
+    Q_OBJECT
 	saslProvider *g;
 
 	// core props

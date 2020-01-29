@@ -48,6 +48,7 @@ private:
 
 class NullLogger : public QCA::AbstractLogDevice
 {
+  Q_OBJECT
 public:
     NullLogger() : QCA::AbstractLogDevice( "null logger" )
     {}
@@ -58,6 +59,7 @@ public:
 
 class LastLogger : public QCA::AbstractLogDevice
 {
+  Q_OBJECT
 public:
     LastLogger() : QCA::AbstractLogDevice( "last logger" )
     {}

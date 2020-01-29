@@ -27,6 +27,7 @@ namespace gpgQCAPlugin
 
 class MyPGPKeyContext : public QCA::PGPKeyContext
 {
+    Q_OBJECT
 public:
 	QCA::PGPKeyContextProps _props;
 

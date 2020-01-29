@@ -87,6 +87,7 @@ public:
 //----------------------------------------------------------------------------
 class DefaultRandomContext : public RandomContext
 {
+    Q_OBJECT
 public:
 	DefaultRandomContext(Provider *p) : RandomContext(p) {}
 
@@ -512,6 +513,7 @@ md5_finish(md5_state_t *pms, md5_byte_t digest[16])
 
 class DefaultMD5Context : public HashContext
 {
+    Q_OBJECT
 public:
 	DefaultMD5Context(Provider *p) : HashContext(p, "md5")
 	{
@@ -609,6 +611,7 @@ typedef union {
 
 class DefaultSHA1Context : public HashContext
 {
+    Q_OBJECT
 public:
 	SHA1_CONTEXT _context;
 #ifdef Q_PROCESSOR_ARM
@@ -905,6 +908,7 @@ static bool entry_deserialize(const QString &in, QString *storeId, QString *stor
 
 class DefaultKeyStoreEntry : public KeyStoreEntryContext
 {
+    Q_OBJECT
 public:
 	KeyStoreEntry::Type _type;
 	QString _id, _name, _storeId, _storeName;

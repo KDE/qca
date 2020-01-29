@@ -44,6 +44,7 @@ void check_error( const QString &label, gcry_error_t err )
 
 class gcryHashContext : public QCA::HashContext
 {
+    Q_OBJECT
 public:
     gcryHashContext(int hashAlgorithm, QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
     {
@@ -93,6 +94,7 @@ protected:
 
 class gcryHMACContext : public QCA::MACContext
 {
+    Q_OBJECT
 public:
     gcryHMACContext(int hashAlgorithm, QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
@@ -153,6 +155,7 @@ protected:
 
 class gcryCipherContext : public QCA::CipherContext
 {
+    Q_OBJECT
 public:
     gcryCipherContext(int algorithm, int mode, bool pad, QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
     {
@@ -271,6 +274,7 @@ protected:
 
 class pbkdf1Context : public QCA::KDFContext
 {
+    Q_OBJECT
 public:
     pbkdf1Context(int algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {
@@ -415,6 +419,7 @@ protected:
 
 class pbkdf2Context : public QCA::KDFContext
 {
+    Q_OBJECT
 public:
     pbkdf2Context(int algorithm, QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {

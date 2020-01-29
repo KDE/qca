@@ -30,6 +30,7 @@
 //-----------------------------------------------------------
 class nssHashContext : public QCA::HashContext
 {
+    Q_OBJECT
 public:
     nssHashContext( QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
     {
@@ -139,6 +140,7 @@ private:
 //-----------------------------------------------------------
 class nssHmacContext : public QCA::MACContext
 {
+    Q_OBJECT
 public:
     nssHmacContext( QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
@@ -273,6 +275,7 @@ private:
 //-----------------------------------------------------------
 class nssCipherContext : public QCA::CipherContext
 {
+    Q_OBJECT
 public:
     nssCipherContext( QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
     {

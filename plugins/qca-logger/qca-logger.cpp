@@ -31,6 +31,7 @@ namespace loggerQCAPlugin {
 
 class StreamLogger : public QCA::AbstractLogDevice
 {
+    Q_OBJECT
 public:
 	StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice( "Stream logger" ), _stream(stream)
 	{

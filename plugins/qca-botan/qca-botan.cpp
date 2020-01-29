@@ -39,6 +39,7 @@
 //-----------------------------------------------------------
 class botanRandomContext : public QCA::RandomContext
 {
+Q_OBJECT
 public:
     botanRandomContext(QCA::Provider *p) : RandomContext(p)
     {
@@ -83,6 +84,7 @@ static QString qcaHashToBotanHash(const QString &type)
 //-----------------------------------------------------------
 class BotanHashContext : public QCA::HashContext
 {
+Q_OBJECT
 public:
     BotanHashContext( QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
     {
@@ -147,6 +149,7 @@ static QString qcaHmacToBotanHmac(const QString &type)
 //-----------------------------------------------------------
 class BotanHMACContext : public QCA::MACContext
 {
+Q_OBJECT
 public:
     BotanHMACContext(QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
     {
@@ -218,6 +221,7 @@ static QString qcaPbkdfToBotanPbkdf(const QString &pbkdf)
 //-----------------------------------------------------------
 class BotanPBKDFContext: public QCA::KDFContext
 {
+Q_OBJECT
 public:
     BotanPBKDFContext( QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
     {
@@ -295,6 +299,7 @@ static QString qcaHkdfToBotanHkdf(const QString &type)
 //-----------------------------------------------------------
 class BotanHKDFContext: public QCA::HKDFContext
 {
+    Q_OBJECT
 public:
     BotanHKDFContext(QCA::Provider *p, const QString &type) : QCA::HKDFContext(p, type)
     {
@@ -435,6 +440,7 @@ static void qcaCipherToBotanCipher(const QString &type, std::string *algoName, s
 //-----------------------------------------------------------
 class BotanCipherContext : public QCA::CipherContext
 {
+    Q_OBJECT
 public:
     BotanCipherContext( QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
     {

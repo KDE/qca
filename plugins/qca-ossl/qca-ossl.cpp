@@ -1031,6 +1031,7 @@ EVP_PKEY *qca_d2i_PKCS8PrivateKey(const SecureArray &in, EVP_PKEY **x, pem_passw
 
 class opensslHashContext : public HashContext
 {
+    Q_OBJECT
 public:
 	opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type) : HashContext(p, type)
 	{
@@ -1084,6 +1085,7 @@ protected:
 
 class opensslPbkdf1Context : public KDFContext
 {
+    Q_OBJECT
 public:
 	opensslPbkdf1Context(const EVP_MD *algorithm, Provider *p, const QString &type) : KDFContext(p, type)
 	{
@@ -1223,6 +1225,7 @@ protected:
 
 class opensslPbkdf2Context : public KDFContext
 {
+    Q_OBJECT
 public:
 	opensslPbkdf2Context(Provider *p, const QString &type) : KDFContext(p, type)
 	{
@@ -1283,6 +1286,7 @@ protected:
 #ifdef OSSL_110
 class opensslHkdfContext : public HKDFContext
 {
+    Q_OBJECT
 public:
 	opensslHkdfContext(Provider *p, const QString &type) : HKDFContext(p, type)
 	{
@@ -1313,6 +1317,7 @@ public:
 
 class opensslHMACContext : public MACContext
 {
+    Q_OBJECT
 public:
 	opensslHMACContext(const EVP_MD *algorithm, Provider *p, const QString &type) : MACContext(p, type)
 	{
@@ -3003,6 +3008,7 @@ static RSA *createFromExisting(const RSAPrivateKey &key)
 //----------------------------------------------------------------------------
 class MyPKeyContext : public PKeyContext
 {
+    Q_OBJECT
 public:
 	PKeyBase *k;
 
@@ -3495,6 +3501,7 @@ static bool sameChain(STACK_OF(X509) *ossl, const QList<const MyCertContext*> &q
 // TODO: support read/write of multiple info values with the same name
 class MyCertContext : public CertContext
 {
+    Q_OBJECT
 public:
 	X509Item item;
 	CertContextProps _props;
@@ -3926,6 +3933,7 @@ bool sameChain(STACK_OF(X509) *ossl, const QList<const MyCertContext*> &qca)
 // Thanks to Pascal Patry
 class MyCAContext : public CAContext
 {
+    Q_OBJECT
 public:
 	X509Item caCert;
 	MyPKeyContext *privateKey;
@@ -4094,6 +4102,7 @@ public:
 //----------------------------------------------------------------------------
 class MyCSRContext : public CSRContext
 {
+    Q_OBJECT
 public:
 	X509Item item;
 	CertContextProps _props;
@@ -4381,6 +4390,7 @@ public:
 //----------------------------------------------------------------------------
 class MyCRLContext : public CRLContext
 {
+    Q_OBJECT
 public:
 	X509Item item;
 	CRLContextProps _props;
@@ -4883,6 +4893,7 @@ Validity MyCertContext::validate_chain(const QList<CertContext*> &chain, const Q
 
 class MyPKCS12Context : public PKCS12Context
 {
+    Q_OBJECT
 public:
 	MyPKCS12Context(Provider *p) : PKCS12Context(p)
 	{
@@ -5551,6 +5562,7 @@ static QString cipherIDtoString( const TLS::Version &version, const unsigned lon
 static bool ssl_init = false;
 class MyTLSContext : public TLSContext
 {
+    Q_OBJECT
 public:
 	enum { Good, TryAgain, Bad };
 	enum { Idle, Connect, Accept, Handshake, Active, Closing };
@@ -6355,6 +6367,7 @@ public:
 
 class CMSContext : public SMSContext
 {
+    Q_OBJECT
 public:
 	CertificateCollection trustedCerts;
 	CertificateCollection untrustedCerts;
@@ -6992,6 +7005,7 @@ MessageContext *CMSContext::createMessage()
 
 class opensslCipherContext : public CipherContext
 {
+    Q_OBJECT
 public:
 	opensslCipherContext(const EVP_CIPHER *algorithm, const int pad, Provider *p, const QString &type) : CipherContext(p, type)
 	{
@@ -7316,6 +7330,7 @@ public:
 
 class opensslRandomContext : public RandomContext
 {
+    Q_OBJECT
 public:
 	opensslRandomContext(QCA::Provider *p) : RandomContext(p)
 	{

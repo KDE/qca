@@ -2124,6 +2124,7 @@ public Q_SLOTS:
 
 class PasswordAsker::Private : public AskerPrivate
 {
+    Q_OBJECT
 public:
 	Private(PasswordAsker *_q) : AskerPrivate(_q)
 	{
@@ -2185,6 +2186,7 @@ SecureArray PasswordAsker::password() const
 //----------------------------------------------------------------------------
 class TokenAsker::Private : public AskerPrivate
 {
+    Q_OBJECT
 public:
 	Private(TokenAsker *_q) : AskerPrivate(_q)
 	{

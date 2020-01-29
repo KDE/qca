@@ -11,3 +11,16 @@ build_ubuntu_18_04:
     - cmake -G Ninja ..
     - ninja
     - ctest
+
+build_clazy:
+  stage: build
+  image: debian:unstable
+  before_script:
+    - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+    - apt-get update
+    - apt-get build-dep --yes --no-install-recommends qca2
+    - apt-get install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev clazy clang
+  script:
+    - mkdir -p build && cd build
+    - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
+    - CLAZY_CHECKS="missing-qobject-macro" ninja

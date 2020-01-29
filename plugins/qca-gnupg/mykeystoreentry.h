@@ -27,6 +27,7 @@ class MyKeyStoreList;
 
 class MyKeyStoreEntry : public QCA::KeyStoreEntryContext
 {
+    Q_OBJECT
 public:
 	QCA::KeyStoreEntry::Type item_type;
 	QCA::PGPKey pub, sec;

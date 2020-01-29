@@ -475,6 +475,7 @@ public:
 
 class softstorePKeyContext : public PKeyContext
 {
+    Q_OBJECT
 
 private:
 	PKeyBase *_k;
@@ -625,6 +626,7 @@ public:
 
 class softstoreKeyStoreEntryContext : public KeyStoreEntryContext
 {
+    Q_OBJECT
 private:
 	KeyStoreEntry::Type _item_type;
 	KeyBundle _key;

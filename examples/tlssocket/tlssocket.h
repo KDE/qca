@@ -26,6 +26,7 @@
 
 class TLSSocket : public QTcpSocket
 {
+    Q_OBJECT
 public:
 	TLSSocket(QObject *parent = nullptr);
 	~TLSSocket();

@@ -75,6 +75,7 @@ static QStringList wrapstring(const QString &str, int width)
 
 class StreamLogger : public QCA::AbstractLogDevice
 {
+    Q_OBJECT
 public:
 	StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice( "Stream logger" ), _stream(stream)
 	{
@@ -681,6 +682,7 @@ private Q_SLOTS:
 
 class PassphrasePromptThread : public QCA::SyncThread
 {
+    Q_OBJECT
 public:
 	PassphrasePrompt *pp;
 

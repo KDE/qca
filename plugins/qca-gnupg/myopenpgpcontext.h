@@ -25,6 +25,7 @@ namespace gpgQCAPlugin
 
 class MyOpenPGPContext : public QCA::SMSContext
 {
+    Q_OBJECT
 public:
 	MyOpenPGPContext(QCA::Provider *p);
 

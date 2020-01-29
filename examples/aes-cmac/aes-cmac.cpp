@@ -31,6 +31,7 @@
 
 class AESCMACContext : public QCA::MACContext
 {
+    Q_OBJECT
 public:
     AESCMACContext(QCA::Provider *p) : QCA::MACContext(p, "cmac(aes)")
     {
@@ -316,3 +317,4 @@ int main(int argc, char **argv)
     return 0;
 }
 
+#include "aes-cmac.moc"
