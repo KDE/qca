@@ -819,7 +819,7 @@ void TLS::reset()
 	d->reset(ResetAll);
 }
 
-QStringList TLS::supportedCipherSuites(const Version &version) const
+QStringList TLS::supportedCipherSuites(const Version &version) const // clazy:exclude=function-args-by-value TODO make it remove the & when we break ABI
 {
 	return d->c->supportedCipherSuites(version);
 }

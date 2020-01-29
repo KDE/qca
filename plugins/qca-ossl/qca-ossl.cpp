@@ -1411,6 +1411,8 @@ public:
 		EVP_MD_CTX_copy(mdctx, from.mdctx);
 	}
 
+	EVPKey &operator=(const EVPKey &from) = delete;
+
 	~EVPKey()
 	{
 		reset();
@@ -1587,7 +1589,7 @@ public:
 //----------------------------------------------------------------------------
 
 // IETF primes from Botan
-const char* IETF_1024_PRIME =
+static const char* IETF_1024_PRIME =
 	"FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
 	"29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
 	"EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
@@ -1595,7 +1597,7 @@ const char* IETF_1024_PRIME =
 	"EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381"
 	"FFFFFFFF FFFFFFFF";
 
-const char* IETF_2048_PRIME =
+static const char* IETF_2048_PRIME =
 	"FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
 	"29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
 	"EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
@@ -1608,7 +1610,7 @@ const char* IETF_2048_PRIME =
 	"DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
 	"15728E5A 8AACAA68 FFFFFFFF FFFFFFFF";
 
-const char* IETF_4096_PRIME =
+static const char* IETF_4096_PRIME =
 	"FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
 	"29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
 	"EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
@@ -1633,14 +1635,14 @@ const char* IETF_4096_PRIME =
 	"FFFFFFFF FFFFFFFF";
 
 // JCE seeds from Botan
-const char* JCE_512_SEED = "B869C82B 35D70E1B 1FF91B28 E37A62EC DC34409B";
-const int JCE_512_COUNTER = 123;
+static const char* JCE_512_SEED = "B869C82B 35D70E1B 1FF91B28 E37A62EC DC34409B";
+static const int JCE_512_COUNTER = 123;
 
-const char* JCE_768_SEED = "77D0F8C4 DAD15EB8 C4F2F8D6 726CEFD9 6D5BB399";
-const int JCE_768_COUNTER = 263;
+static const char* JCE_768_SEED = "77D0F8C4 DAD15EB8 C4F2F8D6 726CEFD9 6D5BB399";
+static const int JCE_768_COUNTER = 263;
 
-const char* JCE_1024_SEED = "8D515589 4229D5E6 89EE01E6 018A237E 2CAE64CD";
-const int JCE_1024_COUNTER = 92;
+static const char* JCE_1024_SEED = "8D515589 4229D5E6 89EE01E6 018A237E 2CAE64CD";
+static const int JCE_1024_COUNTER = 92;
 
 static QByteArray dehex(const QString &hex)
 {
@@ -2827,7 +2829,7 @@ class QCA_RSA_METHOD
 public:
 	RSAPrivateKey key;
 
-	QCA_RSA_METHOD(RSAPrivateKey _key, RSA *rsa)
+	QCA_RSA_METHOD(const RSAPrivateKey &_key, RSA *rsa)
 	{
 		key = _key;
 		RSA_set_method(rsa, rsa_method());
@@ -5020,7 +5022,7 @@ public:
 };
 
 //==========================================================
-static QString cipherIDtoString( const TLS::Version &version, const unsigned long &cipherID)
+static QString cipherIDtoString( const TLS::Version version, const unsigned long cipherID)
 {
 	if (TLS::TLS_v1 == version) {
 		switch( cipherID & 0xFFFF ) {

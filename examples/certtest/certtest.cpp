@@ -34,7 +34,7 @@
 // dump out information about some part of the certificate
 // we use this same approach for information about the subject
 // of the certificate, and also about the issuer of the certificate
-static void dumpCertificateInfo( QCA::CertificateInfo info)
+static void dumpCertificateInfo( const QCA::CertificateInfo &info)
 {
     std::cout << "  Organization: " << std::endl;
 
@@ -61,7 +61,7 @@ static void dumpCertificateInfo( QCA::CertificateInfo info)
 }
 
 // This is just a convenience routine
-static void dumpSubjectInfo( QCA::CertificateInfo subject)
+static void dumpSubjectInfo( const QCA::CertificateInfo &subject)
 {
     std::cout << "Subject: " << std::endl;
 
@@ -70,7 +70,7 @@ static void dumpSubjectInfo( QCA::CertificateInfo subject)
 
 
 // This is just a convenience routine
-static void dumpIssuerInfo( QCA::CertificateInfo issuer)
+static void dumpIssuerInfo( const QCA::CertificateInfo &issuer)
 {
     std::cout << "Issuer: " << std::endl;
 

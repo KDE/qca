@@ -176,7 +176,7 @@ public:
 		kg.set = set;
 		QEventLoop eventLoop;
 		kg.eventLoop = &eventLoop;
-		QTimer::singleShot(0, &kg, SLOT(start()));
+		QTimer::singleShot(0, &kg, &AnimatedKeyGen::start);
 		eventLoop.exec();
 		QCA::PrivateKey key = kg.key;
 		return key;
@@ -267,7 +267,7 @@ public:
 		KeyStoreMonitor monitor;
 		QEventLoop eventLoop;
 		monitor.eventLoop = &eventLoop;
-		QTimer::singleShot(0, &monitor, SLOT(start()));
+		QTimer::singleShot(0, &monitor, &KeyStoreMonitor::start);
 		eventLoop.exec();
 	}
 
@@ -854,7 +854,7 @@ public:
 	{
 	}
 
-	InfoType(QCA::CertificateInfoType _type, const QString &_varname, const QString &_shortname, const QString &_name, const QString &_desc)
+	InfoType(const QCA::CertificateInfoType &_type, const QString &_varname, const QString &_shortname, const QString &_name, const QString &_desc)
 	:type(_type), varname(_varname), shortname(_shortname), name(_name), desc(_desc)
 	{
 	}
@@ -2236,13 +2236,13 @@ static void smDisplaySignatures(const QList<QCA::SecureMessageSignature> &signer
 	}
 }
 
-const char *mime_signpart =
+static const char *mime_signpart =
 	"Content-Type: text/plain; charset=UTF-8\r\n"
 	"Content-Transfer-Encoding: 8bit\r\n"
 	"\r\n"
 	"%1";
 
-const char *mime_signed =
+static const char *mime_signed =
 	"Content-Type: multipart/signed;\r\n"
 	"	micalg=%1;\r\n"
 	"	boundary=QCATOOL-0001;\r\n"
@@ -2262,7 +2262,7 @@ const char *mime_signed =
 	"\r\n"
 	"--QCATOOL-0001--\r\n";
 
-const char *mime_enveloped =
+static const char *mime_enveloped =
 	"Mime-Version: 1.0\r\n"
 	"Content-Transfer-Encoding: base64\r\n"
 	"Content-Type: application/pkcs7-mime;\r\n"

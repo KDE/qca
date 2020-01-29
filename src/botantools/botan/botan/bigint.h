@@ -58,7 +58,7 @@ namespace Botan {
 /*************************************************
 * BigInt                                         *
 *************************************************/
-class BigInt
+class BigInt // clazy:exclude=rule-of-three TODO Needs checking if a real bug or not
    {
    public:
       enum Base { Octal = 8, Decimal = 10, Hexadecimal = 16, Binary = 256 };

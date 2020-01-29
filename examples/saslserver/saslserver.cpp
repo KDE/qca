@@ -505,7 +505,7 @@ int main(int argc, char **argv)
 
 	ServerTest server(host, port, proto, realm, str);
 	QObject::connect(&server, &ServerTest::quit, &qapp, &QCoreApplication::quit);
-	QTimer::singleShot(0, &server, SLOT(start()));
+	QTimer::singleShot(0, &server, &ServerTest::start);
 	qapp.exec();
 
 	return 0;

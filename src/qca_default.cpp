@@ -189,17 +189,6 @@ struct md5_state_t {
         memset(abcd, 0, 4 * sizeof(md5_word_t));
         memset(buf, 0, 64 * sizeof(md5_byte_t));
     }
-
-    md5_state_t(const md5_state_t &from)
-    {
-        *this = from;
-    }
-
-    md5_state_t & operator=(const md5_state_t &from)
-    {
-        *this = from;
-        return *this;
-    }
 };
 
 /* Initialize the algorithm. */
@@ -590,17 +579,6 @@ struct SHA1_CONTEXT
 		memset(state, 0, 5 * sizeof(quint32));
 		memset(count, 0, 2 * sizeof(quint32));
 		memset(buffer, 0, 64 * sizeof(unsigned char));
-	}
-
-	SHA1_CONTEXT(const SHA1_CONTEXT &from)
-	{
-		*this = from;
-	}
-
-	SHA1_CONTEXT & operator=(const SHA1_CONTEXT &from)
-	{
-		*this = from;
-		return *this;
 	}
 };
 

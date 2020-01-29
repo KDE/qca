@@ -451,7 +451,7 @@ static QList<int> findSameName(const QString &name, const QStringList &list)
 	return out;
 }
 
-static QString uniqueSubjectValue(const CertificateInfoType &type, const QList<int> items, const QList<Certificate> &certs, int i)
+static QString uniqueSubjectValue(const CertificateInfoType &type, const QList<int> &items, const QList<Certificate> &certs, int i)
 {
 	QStringList vals = certs[items[i]].subjectInfo().values(type);
 	if(!vals.isEmpty())
@@ -482,7 +482,7 @@ static QString uniqueSubjectValue(const CertificateInfoType &type, const QList<i
 	return QString();
 }
 
-static QString uniqueIssuerName(const QList<int> items, const QList<Certificate> &certs, int i)
+static QString uniqueIssuerName(const QList<int> &items, const QList<Certificate> &certs, int i)
 {
 	QString val = baseCertName(certs[items[i]].issuerInfo());
 
@@ -532,7 +532,7 @@ static const char *constraintToString(const ConstraintType &type)
 	return 0;
 }
 
-static QString uniqueConstraintValue(const ConstraintType &type, const QList<int> items, const QList<Certificate> &certs, int i)
+static QString uniqueConstraintValue(const ConstraintType &type, const QList<int> &items, const QList<Certificate> &certs, int i)
 {
 	ConstraintType val = type;
 	if(certs[items[i]].constraints().contains(type))
@@ -2033,7 +2033,7 @@ CRLEntry::CRLEntry(const Certificate &c, Reason r)
 	_reason = r;
 }
 
-CRLEntry::CRLEntry(const BigInteger serial, const QDateTime &time, Reason r)
+CRLEntry::CRLEntry(const BigInteger serial, const QDateTime &time, Reason r) // clazy:exclude=function-args-by-ref TODO make serial const & when we break ABI
 {
 	_serial = serial;
 	_time = time;

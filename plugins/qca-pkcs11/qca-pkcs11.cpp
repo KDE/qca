@@ -196,6 +196,9 @@ private:
 			}
 		}
 
+		pkcs11KeyStoreItem(const pkcs11KeyStoreItem &) = delete;
+		pkcs11KeyStoreItem &operator=(const pkcs11KeyStoreItem &) = delete;
+
 		inline int id () const {
 			return _id;
 		}
@@ -369,17 +372,6 @@ public:
 	pkcs11Exception (const CK_RV rv, const QString &msg) {
 		_rv = rv;
 		_msg = msg;
-	}
-
-	pkcs11Exception (const pkcs11Exception &other) {
-		*this = other;
-	}
-
-	pkcs11Exception &
-	operator = (const pkcs11Exception &other) {
-		_rv = other._rv;
-		_msg = other._msg;
-		return *this;
 	}
 
 	CK_RV

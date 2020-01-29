@@ -113,6 +113,9 @@ void* MemoryMapping_Allocator::alloc_block(u32bit n)
             if(fd != -1 && close(fd) == -1)
                throw MemoryMapping_Failed("Could not close file");
             }
+
+         TemporaryFile(const TemporaryFile &) = delete;
+         TemporaryFile &operator=(const TemporaryFile &) = delete;
       private:
          int fd;
          char* filepath;

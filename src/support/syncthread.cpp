@@ -27,7 +27,7 @@
 
 namespace QCA {
 
-QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> argTypes)
+QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> argTypes) // clazy:exclude=function-args-by-ref TODO make argTypes const & when we break ABI
 {
 	for(int n = 0; n < obj->methodCount(); ++n)
 	{

@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 	App app;
 	app.str = argv[1];
 	QObject::connect(&app, &App::quit, &qapp, QCoreApplication::quit);
-	QTimer::singleShot(0, &app, SLOT(start()));
+	QTimer::singleShot(0, &app, &App::start);
 	qapp.exec();
 	return 0;
 }

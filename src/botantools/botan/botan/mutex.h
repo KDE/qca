@@ -77,6 +77,9 @@ class Mutex_Holder
    public:
       Mutex_Holder(Mutex*);
       ~Mutex_Holder();
+
+      Mutex_Holder(const Mutex_Holder &) = delete;
+      Mutex_Holder &operator=(const Mutex_Holder &) = delete;
    private:
       Mutex* mux;
    };

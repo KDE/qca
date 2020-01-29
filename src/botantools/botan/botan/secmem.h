@@ -225,7 +225,7 @@ class SecureVector : public MemoryRegion<T>
 * Locked Fixed Length Buffer                     *
 *************************************************/
 template<typename T, u32bit L>
-class SecureBuffer : public MemoryRegion<T>
+class SecureBuffer : public MemoryRegion<T> // clazy:exclude=rule-of-three TODO Needs checking if a real bug or not
    {
    public:
       SecureBuffer<T,L>& operator=(const SecureBuffer<T,L>& in)

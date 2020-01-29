@@ -160,6 +160,9 @@ public:
 		}
 	}
 
+	PluginInstance(const PluginInstance &) = delete;
+	PluginInstance &operator=(const PluginInstance &) = delete;
+
 	void claim()
 	{
 		if(_loader)

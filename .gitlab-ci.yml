@@ -23,4 +23,4 @@ build_clazy:
   script:
     - mkdir -p build && cd build
     - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
-    - CLAZY_CHECKS="level0,level1,missing-qobject-macro,no-container-anti-pattern" ninja
+    - CLAZY_CHECKS="level0,level1,level2,no-container-anti-pattern,no-copyable-polymorphic,no-ctor-missing-parent-argument,no-qstring-allocations,isempty-vs-count,qhash-with-char-pointer-key,qproperty-type-mismatch,qrequiredresult-candidates,signal-with-return-value,thread-with-slots,tr-non-literal,unneeded-cast" ninja

@@ -560,7 +560,7 @@ int main(int argc, char **argv)
 
 	ClientTest client(host, port, proto, authzid, realm, user, pass, no_authzid, no_realm);
 	QObject::connect(&client, &ClientTest::quit, &qapp, &QCoreApplication::quit);
-	QTimer::singleShot(0, &client, SLOT(start()));
+	QTimer::singleShot(0, &client, &ClientTest::start);
 	qapp.exec();
 
 	return 0;

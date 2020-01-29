@@ -640,6 +640,9 @@ public:
 	{
 		delete thread;
 	}
+
+	KeyStoreManagerGlobal(const KeyStoreManagerGlobal &) = delete;
+	KeyStoreManagerGlobal &operator=(const KeyStoreManagerGlobal &) = delete;
 };
 
 // this function is thread-safe
