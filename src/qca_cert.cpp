@@ -2439,7 +2439,7 @@ CertificateCollection CertificateCollection::fromFlatTextFile(const QString &fil
 
 	CertificateCollection certs;
 	QTextStream ts(&f);
-	while(1)
+	while(true)
 	{
 		bool isCRL = false;
 		QString pem = readNextPem(&ts, &isCRL);

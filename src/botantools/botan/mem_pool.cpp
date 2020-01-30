@@ -300,12 +300,12 @@ void Pooling_Allocator::get_more_core(u32bit in_bytes)
    if(ptr == 0)
       throw Memory_Exhaustion();
 
-   allocated.push_back(std::make_pair(ptr, to_allocate));
+   allocated.emplace_back(ptr, to_allocate);
 
    for(u32bit j = 0; j != in_blocks; ++j)
       {
       byte* byte_ptr = static_cast<byte*>(ptr);
-      blocks.push_back(Memory_Block(byte_ptr + j * TOTAL_BLOCK_SIZE));
+      blocks.emplace_back(byte_ptr + j * TOTAL_BLOCK_SIZE);
       }
 
    std::sort(blocks.begin(), blocks.end());

@@ -241,7 +241,7 @@ bool MyMessageContext::waitForFinished(int msecs)
 	Q_UNUSED(msecs);
 	MyKeyStoreList *keyStoreList = MyKeyStoreList::instance();
 
-	while(1)
+	while(true)
 	{
 		// TODO: handle token prompt events
 

@@ -40,7 +40,7 @@ static QStringList wrapstring(const QString &str, int width)
 	QStringList out;
 	QString simp = str.simplified();
 	QString rest = simp;
-	while(1)
+	while(true)
 	{
 		int lastSpace = -1;
 		int n;
@@ -740,14 +740,14 @@ static void ksm_start_and_wait()
 static QString line_encode(const QString &in)
 {
 	QString out;
-	for(int n = 0; n < in.length(); ++n)
+	for(const QChar &c : in)
 	{
-		if(in[n] == '\\')
+		if(c == '\\')
 			out += "\\\\";
-		else if(in[n] == '\n')
+		else if(c == '\n')
 			out += "\\n";
 		else
-			out += in[n];
+			out += c;
 	}
 	return out;
 }
@@ -944,9 +944,9 @@ const char *crlEntryReasonToString(QCA::CRLEntry::Reason r)
 
 static bool validOid(const QString &in)
 {
-	for(int n = 0; n < in.length(); ++n)
+	for(const QChar &c : in)
 	{
-		if(!in[n].isDigit() && in[n] != '.')
+		if(!c.isDigit() && c != '.')
 			return false;
 	}
 	return true;
@@ -983,7 +983,7 @@ static QStringList vl_getparts(const QString &in)
 {
 	QStringList out;
 	int offset = 0;
-	while(1)
+	while(true)
 	{
 		int n = vl_getnext(in, offset);
 		if(n == offset)
@@ -1001,7 +1001,7 @@ static bool parseValidityLength(const QString &in, ValidityLength *vl)
 	vl->days = -1;
 
 	QStringList parts = vl_getparts(in);
-	while(1)
+	while(true)
 	{
 		// first part should be a number
 		if(parts.count() < 1)
@@ -1069,7 +1069,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 	{
 		if(!req)
 		{
-			while(1)
+			while(true)
 			{
 				QString str = prompt_for("Create an end user ('user') certificate or a CA ('ca') certificate? [user]");
 				if(str.isEmpty())
@@ -1086,7 +1086,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 			}
 			printf("\n");
 
-			while(1)
+			while(true)
 			{
 				QString str = prompt_for("Serial Number");
 				QCA::BigInteger num;
@@ -1115,10 +1115,10 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 				printf("  %c) %-32s        %s\n", c, qPrintable(i.name), qPrintable(i.desc));
 			}
 			printf("\n");
-			while(1)
+			while(true)
 			{
 				int index;
-				while(1)
+				while(true)
 				{
 					QString str = prompt_for("Select an attribute to add, or enter to move on");
 					if(str.isEmpty())
@@ -1158,10 +1158,10 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 			}
 			printf("\n");
 			printf("If no constraints are added, then the certificate may be used for any purpose.\n\n");
-			while(1)
+			while(true)
 			{
 				int index;
-				while(1)
+				while(true)
 				{
 					QString str = prompt_for("Select an attribute to add, or enter to move on");
 					if(str.isEmpty())
@@ -1197,7 +1197,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 			printf("\n");
 			printf("Are there any policy OID attributes that you wish to add?  Use the dotted\n"
 				"string format.\n\n");
-			while(1)
+			while(true)
 			{
 				QString str = prompt_for("Enter a policy OID to add, or enter to move on");
 				if(str.isEmpty())
@@ -1235,7 +1235,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 
 	if(!req)
 	{
-		while(1)
+		while(true)
 		{
 			QString str = prompt_for("How long should the certificate be valid? (e.g. '1y2m3d')");
 			ValidityLength vl;
@@ -1339,7 +1339,7 @@ static QString prompt_for_string(const QString &prompt, const QString &def = QSt
 
 static int prompt_for_int(const QString &prompt, int def = 0)
 {
-	while(1)
+	while(true)
 	{
 		QString str = prompt_for_string(prompt);
 		if(str.isEmpty())
@@ -1361,7 +1361,7 @@ static bool partial_compare_nocase(const QString &in, const QString &target, int
 
 static bool prompt_for_bool(const QString &prompt, bool def = false)
 {
-	while(1)
+	while(true)
 	{
 		QString str = prompt_for_string(prompt);
 		if(str.isEmpty())
@@ -1376,7 +1376,7 @@ static bool prompt_for_bool(const QString &prompt, bool def = false)
 
 static bool prompt_for_yesno(const QString &prompt, bool def = false)
 {
-	while(1)
+	while(true)
 	{
 		QString str = prompt_for_string(prompt);
 		if(str.isEmpty())
@@ -1391,7 +1391,7 @@ static bool prompt_for_yesno(const QString &prompt, bool def = false)
 
 static QString prompt_for_slotevent_method(const QString &prompt, const QString &def = QString())
 {
-	while(1)
+	while(true)
 	{
 		QString str = prompt_for_string(prompt);
 		if(str.isEmpty())
@@ -1607,7 +1607,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 		return QVariantMap();
 	}
 
-	while(1)
+	while(true)
 	{
 		printf("\n");
 		printf("Global settings:\n");
@@ -1638,7 +1638,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 		printf("\n");
 
 		int index;
-		while(1)
+		while(true)
 		{
 			QString str = prompt_for("Select an action, or enter to quit");
 			if(str.isEmpty())
@@ -1688,7 +1688,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 				printf("\n");
 
 				int index;
-				while(1)
+				while(true)
 				{
 					QString str = prompt_for("Select a module, or enter to go back");
 					if(str.isEmpty())
@@ -1724,7 +1724,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 				QString prompt;
 
 				// prompt for unique name
-				while(1)
+				while(true)
 				{
 					if(index == 1)
 						prompt = QString("Unique friendly name: ");
@@ -1764,7 +1764,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 
 				// prompt for library file
 				QString last;
-				while(1)
+				while(true)
 				{
 					if(index == 1)
 						prompt = QString("Library filename: ");
@@ -2277,7 +2277,7 @@ static QString add_cr(const QString &in)
 {
 	QString out = in;
 	int at = 0;
-	while(1)
+	while(true)
 	{
 		at = out.indexOf('\n', at);
 		if(at == -1)
@@ -2314,7 +2314,7 @@ static int indexOf_newline(const QString &in, int offset = 0)
 static int indexOf_doublenewline(const QString &in, int offset = 0)
 {
 	int at = -1;
-	while(1)
+	while(true)
 	{
 		int n = indexOf_newline(in, offset);
 		if(n == -1)

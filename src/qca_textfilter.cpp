@@ -114,16 +114,16 @@ void Hex::clear()
 
 MemoryRegion Hex::update(const MemoryRegion &m)
 {
-	QByteArray a = m.toByteArray();
+	const QByteArray a = m.toByteArray();
 	if(_dir == Encode)
 	{
 		QByteArray out(a.size() * 2, 0);
 		int at = 0;
 		int c;
-		for(int n = 0; n < (int)a.size(); ++n)
+		for(const char ac : a)
 		{
-			uchar lo = (uchar)a[n] & 0x0f;
-			uchar hi = (uchar)a[n] >> 4;
+			uchar lo = (uchar)ac & 0x0f;
+			uchar hi = (uchar)ac >> 4;
 			c = enhex(hi);
 			if(c == -1)
 			{
@@ -158,9 +158,9 @@ MemoryRegion Hex::update(const MemoryRegion &m)
 		QByteArray out(a.size() / 2, 0);
 		int at = 0;
 		int c;
-		for(int n = 0; n < (int)a.size(); ++n)
+		for(const char ac : a)
 		{
-			c = dehex((char)a[n]);
+			c = dehex(ac);
 			if(c == -1)
 			{
 				_ok = false;

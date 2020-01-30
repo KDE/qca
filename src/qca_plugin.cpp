@@ -370,14 +370,14 @@ void ProviderManager::scan()
 	const QStringList dirs = pluginPaths();
 	if(dirs.isEmpty())
 		logDebug("No Qt Library Paths");
-	for(QStringList::ConstIterator it = dirs.begin(); it != dirs.end(); ++it)
+	for(const QString &dirIt : dirs)
 	{
 #ifdef DEVELOPER_MODE
-		logDebug(QString("Checking QCA build tree Path: %1").arg(QDir::toNativeSeparators(*it)));
+		logDebug(QString("Checking QCA build tree Path: %1").arg(QDir::toNativeSeparators(dirIt)));
 #else
-		logDebug(QString("Checking Qt Library Path: %1").arg(QDir::toNativeSeparators(*it)));
+		logDebug(QString("Checking Qt Library Path: %1").arg(QDir::toNativeSeparators(dirIt)));
 #endif
-		QDir libpath(*it);
+		QDir libpath(dirIt);
 		QDir dir(libpath.filePath(PLUGIN_SUBDIR));
 		if(!dir.exists())
 		{
@@ -788,10 +788,10 @@ bool ProviderManager::haveAlready(const QString &name) const
 
 void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 {
-	for(QStringList::ConstIterator it = b.begin(); it != b.end(); ++it)
+	for(const QString &s : b)
 	{
-		if(!a->contains(*it))
-			a->append(*it);
+		if(!a->contains(s))
+			a->append(s);
 	}
 }
 

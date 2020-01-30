@@ -44,12 +44,12 @@ int main(int argc, char **argv)
     QCA::scanForPlugins();
 
     // this gives us all the plugin providers as a list
-    QCA::ProviderList qcaProviders = QCA::providers();
-    for (int i = 0; i < qcaProviders.size(); ++i) {
+    const QCA::ProviderList qcaProviders = QCA::providers();
+    for (const QCA::Provider *provider : qcaProviders) {
 	// each provider has a name, which we can display
-        std::cout << qcaProviders[i]->name().toLatin1().data() << ": ";
+	std::cout << provider->name().toLatin1().data() << ": ";
 	// ... and also a list of features
-	QStringList capabilities = qcaProviders[i]->features();
+	QStringList capabilities = provider->features();
 	// we turn the string list back into a single string,
 	// and display it as well
 	std::cout << capabilities.join(", ").toLatin1().data() << std::endl;

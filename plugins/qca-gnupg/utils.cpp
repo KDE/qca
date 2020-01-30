@@ -33,7 +33,7 @@ namespace gpgQCAPlugin
 
 void gpg_waitForFinished(GpgOp *gpg)
 {
-	while(1)
+	while(true)
 	{
 		GpgOp::Event e = gpg->waitForEvent(-1);
 		if(e.type == GpgOp::Event::Finished)
@@ -173,14 +173,14 @@ QString find_bin()
 QString escape_string(const QString &in)
 {
 	QString out;
-	for(int n = 0; n < in.length(); ++n)
+	for(const QChar &c : in)
 	{
-		if(in[n] == '\\')
+		if(c == '\\')
 			out += "\\\\";
-		else if(in[n] == ':')
+		else if(c == ':')
 			out += "\\c";
 		else
-			out += in[n];
+			out += c;
 	}
 	return out;
 }

@@ -81,7 +81,7 @@ namespace opensslQCAPlugin {
 static SecureArray bio2buf(BIO *b)
 {
 	SecureArray buf;
-	while(1) {
+	while(true) {
 		SecureArray block(1024);
 		int ret = BIO_read(b, block.data(), block.size());
 		if(ret <= 0)
@@ -98,7 +98,7 @@ static SecureArray bio2buf(BIO *b)
 static QByteArray bio2ba(BIO *b)
 {
 	QByteArray buf;
-	while(1) {
+	while(true) {
 		QByteArray block(1024, 0);
 		int ret = BIO_read(b, block.data(), block.size());
 		if(ret <= 0)
@@ -1647,10 +1647,10 @@ static const int JCE_1024_COUNTER = 92;
 static QByteArray dehex(const QString &hex)
 {
 	QString str;
-	for(int n = 0; n < hex.length(); ++n)
+	for(const QChar &c : hex)
 	{
-		if(hex[n] != ' ')
-			str += hex[n];
+		if(c != ' ')
+			str += c;
 	}
 	return hexToArray(str);
 }
@@ -7379,8 +7379,8 @@ public:
 		if (RAND_status() == 0) {
 			qsrand(time(NULL));
 			char buf[128];
-			for(int n = 0; n < 128; ++n)
-				buf[n] = qrand();
+			for(char &n : buf)
+				n = qrand();
 			RAND_seed(buf, 128);
 		}
 

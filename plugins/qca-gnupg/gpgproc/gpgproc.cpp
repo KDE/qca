@@ -437,7 +437,7 @@ bool GPGProc::Private::processStatusData(const QByteArray &buf)
 
 	// extract all lines
 	QStringList list;
-	while(1)
+	while(true)
 	{
 		int n = statusBuf.indexOf('\n');
 		if(n == -1)

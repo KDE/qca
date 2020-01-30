@@ -446,7 +446,7 @@ protected:
 		m.lock();
 		QEventLoop eventLoop;
 
-		while(1)
+		while(true)
 		{
 			// thread now sleeps, waiting for work
 			w.wakeOne();

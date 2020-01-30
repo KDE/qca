@@ -777,18 +777,18 @@ public:
 static QString escape_string(const QString &in)
 {
 	QString out;
-	for(int n = 0; n < in.length(); ++n)
+	for(const QChar &c : in)
 	{
-		if(in[n] == '\\')
+		if(c == '\\')
 			out += "\\\\";
-		else if(in[n] == ':')
+		else if(c == ':')
 			out += "\\c";
-		else if(in[n] == ',')
+		else if(c == ',')
 			out += "\\o";
-		else if(in[n] == '\n')
+		else if(c == '\n')
 			out += "\\n";
 		else
-			out += in[n];
+			out += c;
 	}
 	return out;
 }

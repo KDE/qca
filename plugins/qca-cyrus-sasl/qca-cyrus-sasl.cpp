@@ -382,7 +382,7 @@ private:
 			need = 0;
 			QString list = result_mechlist.join(" ");
 			int r;
-			while(1) {
+			while(true) {
 				if(need)
 					params.extractHave(need);
 				if(in_sendFirst)
@@ -425,7 +425,7 @@ private:
 			const char *clientout;
 			unsigned int clientoutlen;
 			int r;
-			while(1) {
+			while(true) {
 				if(need)
 					params.extractHave(need);
 				//printf("sasl_client_step(con, {%s}, %d, &need, &clientout, &clientoutlen);\n", in_buf.data(), in_buf.size());
@@ -538,7 +538,7 @@ private:
 
 		int at = 0;
 		out->resize(0);
-		while(1) {
+		while(true) {
 			int size = in.size() - at;
 			if(size == 0)
 				break;

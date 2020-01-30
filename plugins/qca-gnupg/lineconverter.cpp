@@ -50,7 +50,7 @@ QByteArray LineConverter::update(const QByteArray &buf)
 		}
 
 		int n = 0;
-		while(1)
+		while(true)
 		{
 			n = out.indexOf('\r', n);
 			// not found

@@ -1491,9 +1491,9 @@ bool SymmetricKey::isWeakDESKey()
 	for(uint i = 0; i < 8; i++)
 		workingCopy[i] = (data()[i]) & 0xfe;
 
-	for(int n = 0; n < 64; n++)
+	for(auto n : desWeakKeyTable)
 	{
-		if(memcmp(workingCopy.data(), desWeakKeyTable[n], 8) == 0)
+		if(memcmp(workingCopy.data(), n, 8) == 0)
 			return true;
 	}
 	return false;

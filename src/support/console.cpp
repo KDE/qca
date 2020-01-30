@@ -910,11 +910,11 @@ private Q_SLOTS:
 				break;
 
 			// convert to unicode and process
-			QString str = codec->toUnicode(buf.data(), 1, decstate);
+			const QString str = codec->toUnicode(buf.data(), 1, decstate);
 			bool quit = false;
-			for(int n = 0; n < str.length(); ++n)
+			for(const QChar &c : str)
 			{
-				if(!processChar(str[n]))
+				if(!processChar(c))
 				{
 					quit = true;
 					break;
