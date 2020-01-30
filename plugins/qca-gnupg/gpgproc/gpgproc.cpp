@@ -48,9 +48,7 @@ GPGProc::Private::Private(GPGProc *_q)
 	qRegisterMetaType<gpgQCAPlugin::GPGProc::Error>("gpgQCAPlugin::GPGProc::Error");
 
 	proc = 0;
-#ifdef QPROC_SIGNAL_RELAY
 	proc_relay = 0;
-#endif
 	startTrigger.setSingleShot(true);
 	doneTrigger.setSingleShot(true);
 
@@ -105,13 +103,9 @@ void GPGProc::Private::reset(ResetMode mode)
 		}
 
 		proc->setParent(0);
-#ifdef QPROC_SIGNAL_RELAY
 		releaseAndDeleteLater(this, proc_relay);
 		proc_relay = 0;
 		delete proc; // should be safe to do thanks to relay
-#else
-		proc->deleteLater();
-#endif
 		proc = 0;
 	}
 
@@ -542,7 +536,6 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 	if(d->pipeStatus.readEnd().isValid())
 		d->pipeStatus.readEnd().enable();
 
-#ifdef QPROC_SIGNAL_RELAY
 	d->proc_relay = new QProcessSignalRelay(d->proc, d);
 	connect(d->proc_relay, &QProcessSignalRelay::started, d, &GPGProc::Private::proc_started);
 	connect(d->proc_relay, &QProcessSignalRelay::readyReadStandardOutput, d, &GPGProc::Private::proc_readyReadStandardOutput);
@@ -550,14 +543,6 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 	connect(d->proc_relay, &QProcessSignalRelay::bytesWritten, d, &GPGProc::Private::proc_bytesWritten);
 	connect(d->proc_relay, &QProcessSignalRelay::finished, d, &GPGProc::Private::proc_finished);
 	connect(d->proc_relay, &QProcessSignalRelay::error, d, &GPGProc::Private::proc_error);
-#else
-	connect(d->proc, &SProcess::started, d, &GPGProc::Private::proc_started);
-	connect(d->proc, &SProcess::readyReadStandardOutput, d, &GPGProc::Private::proc_readyReadStandardOutput);
-	connect(d->proc, &SProcess::readyReadStandardError, d, &GPGProc::Private::proc_readyReadStandardError);
-	connect(d->proc, &SProcess::bytesWritten, d, &GPGProc::Private::proc_bytesWritten);
-	connect(d->proc, QOverload<int,QProcess::ExitStatus>::of(&SProcess::finished), d, &GPGProc::Private::proc_finished);
-	connect(d->proc, &SProcess::errorOccurred, d, &GPGProc::Private::proc_error);
-#endif
 
 	d->bin = bin;
 	d->args = args;

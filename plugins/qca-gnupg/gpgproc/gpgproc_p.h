@@ -19,8 +19,6 @@
 
 #pragma once
 
-#define QPROC_SIGNAL_RELAY
-
 #include "qpipe.h"
 #include "sprocess.h"
 #include "gpgproc.h"
@@ -100,9 +98,7 @@ public:
 	QStringList args;
 	GPGProc::Mode mode;
 	SProcess *proc;
-#ifdef QPROC_SIGNAL_RELAY
 	QProcessSignalRelay *proc_relay;
-#endif
 	QCA::QPipe pipeAux, pipeCommand, pipeStatus;
 	QByteArray statusBuf;
 	QStringList statusLines;
