@@ -38,7 +38,6 @@ class TestClass1 : public QObject
 
 public:
     TestClass1() { };
-    ~TestClass1() { };
     TestClass1(const TestClass1 & ):QObject( 0 ) { };
 
 public Q_SLOTS:

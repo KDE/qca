@@ -937,7 +937,7 @@ public:
 #endif
 	}
 
-	~Private()
+	~Private() override
 	{
 		reset();
 	}

@@ -48,7 +48,7 @@ public:
         sync = new QCA::Synchronizer( this );
     }
 
-    ~TlsTest()
+    ~TlsTest() override
     {
         delete ssl;
         delete sock;

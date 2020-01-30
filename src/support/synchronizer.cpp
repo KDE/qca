@@ -86,7 +86,7 @@ public:
 			hook(list[n]);
 	}
 
-	~TimerFixer()
+	~TimerFixer() override
 	{
 		if(fixerParent)
 			fixerParent->fixerChildren.removeAll(this);
@@ -363,7 +363,7 @@ public:
 			fixer = new TimerFixer(obj);
 	}
 
-	~Private()
+	~Private() override
 	{
 		stop();
 		delete fixer;

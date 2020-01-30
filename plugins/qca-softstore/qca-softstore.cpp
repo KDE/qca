@@ -120,7 +120,7 @@ public:
 		);
 	}
 
-	~softstorePKeyBase () {
+	~softstorePKeyBase () override {
 		QCA_logTextMessage (
 			"softstorePKeyBase::~softstorePKeyBase - entry",
 			Logger::Debug
@@ -485,7 +485,7 @@ public:
 		_k = NULL;
 	}
 
-	~softstorePKeyContext () {
+	~softstorePKeyContext () override {
 		delete _k;
 		_k = NULL;
 	}
@@ -733,7 +733,7 @@ public:
 		);
 	}
 
-	~softstoreKeyStoreListContext () {
+	~softstoreKeyStoreListContext () override {
 		QCA_logTextMessage (
 			"softstoreKeyStoreListContext::~softstoreKeyStoreListContext - entry",
 			Logger::Debug
@@ -1333,7 +1333,7 @@ public:
 	softstoreProvider () {
 	}
 
-	~softstoreProvider () {
+	~softstoreProvider () override {
 	}
 
 public:

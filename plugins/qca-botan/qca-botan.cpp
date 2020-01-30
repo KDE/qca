@@ -92,7 +92,7 @@ public:
 	m_hashObj = Botan::HashFunction::create(hashName.toStdString()).release();
     }
 
-    ~BotanHashContext()
+    ~BotanHashContext() override
     {
 	delete m_hashObj;
     }
@@ -160,7 +160,7 @@ public:
 	}
     }
 
-    ~BotanHMACContext()
+    ~BotanHMACContext() override
     {
 	delete m_hashObj;
     }
@@ -233,7 +233,7 @@ public:
 	}
     }
 
-    ~BotanPBKDFContext() 
+    ~BotanPBKDFContext() override
     {
 	delete m_s2k;
     }
@@ -309,7 +309,7 @@ public:
 	m_hkdf = new Botan::HKDF(hashObj);
     }
 
-    ~BotanHKDFContext()
+    ~BotanHKDFContext() override
     {
 	delete m_hkdf;
     }
@@ -542,7 +542,7 @@ public:
     }
 
 
-    ~BotanCipherContext()
+    ~BotanCipherContext() override
     {
 	delete m_crypter;
     }
@@ -564,7 +564,7 @@ public:
     {
     }
 
-    ~botanProvider()
+    ~botanProvider() override
     {
 	// We should be cleaning up there, but
 	// this causes the unit tests to segfault

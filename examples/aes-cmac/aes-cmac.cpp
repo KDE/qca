@@ -37,11 +37,6 @@ public:
     {
     }
 
-    ~AESCMACContext()
-    {
-    }
-
-
     // Helper to left shift an arbitrary length array
     // This is heavily based on the example in the I-D.
     QCA::SecureArray leftShift(const QCA::SecureArray &array)

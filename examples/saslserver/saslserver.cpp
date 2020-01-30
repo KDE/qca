@@ -179,7 +179,7 @@ public:
 		sasl->startServer(proto, host, realm);
 	}
 
-	~ServerTestHandler()
+	~ServerTestHandler() override
 	{
 		serverTest->releaseId(id);
 	}

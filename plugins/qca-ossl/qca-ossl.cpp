@@ -1048,7 +1048,7 @@ public:
 		EVP_MD_CTX_copy_ex(m_context, other.m_context);
 	}
 
-	~opensslHashContext()
+	~opensslHashContext() override
 	{
 		EVP_MD_CTX_free(m_context);
 	}
@@ -1102,7 +1102,7 @@ public:
 		EVP_MD_CTX_copy(m_context, other.m_context);
 	}
 
-	~opensslPbkdf1Context()
+	~opensslPbkdf1Context() override
 	{
 		EVP_MD_CTX_free(m_context);
 	}
@@ -1336,7 +1336,7 @@ public:
 		HMAC_CTX_copy(m_context, other.m_context);
 	}
 
-	~opensslHMACContext()
+	~opensslHMACContext() override
 	{
 		HMAC_CTX_free(m_context);
 	}
@@ -1732,7 +1732,7 @@ public:
 		set = _set;
 	}
 
-	~DLGroupMaker()
+	~DLGroupMaker() override
 	{
 		wait();
 	}
@@ -1795,7 +1795,7 @@ public:
 		empty = true;
 	}
 
-	~MyDLGroup()
+	~MyDLGroup() override
 	{
 		delete gm;
 	}
@@ -1908,7 +1908,7 @@ public:
 	{
 	}
 
-	~RSAKeyMaker()
+	~RSAKeyMaker() override
 	{
 		wait();
 		if(result)
@@ -1964,7 +1964,7 @@ public:
 		sec = from.sec;
 	}
 
-	~RSAKey()
+	~RSAKey() override
 	{
 		delete keymaker;
 	}
@@ -2307,7 +2307,7 @@ public:
 	{
 	}
 
-	~DSAKeyMaker()
+	~DSAKeyMaker() override
 	{
 		wait();
 		if(result)
@@ -2361,7 +2361,7 @@ public:
 		sec = from.sec;
 	}
 
-	~DSAKey()
+	~DSAKey() override
 	{
 		delete keymaker;
 	}
@@ -2591,7 +2591,7 @@ public:
 	{
 	}
 
-	~DHKeyMaker()
+	~DHKeyMaker() override
 	{
 		wait();
 		if(result)
@@ -2641,7 +2641,7 @@ public:
 		sec = from.sec;
 	}
 
-	~DHKey()
+	~DHKey() override
 	{
 		delete keymaker;
 	}
@@ -3019,7 +3019,7 @@ public:
 		k = 0;
 	}
 
-	~MyPKeyContext()
+	~MyPKeyContext() override
 	{
 		delete k;
 	}
@@ -3518,7 +3518,7 @@ public:
 		//printf("[%p] ** created as copy (from [%p])\n", this, &from);
 	}
 
-	~MyCertContext()
+	~MyCertContext() override
 	{
 		//printf("[%p] ** deleted\n", this);
 	}
@@ -3950,7 +3950,7 @@ public:
 		privateKey = static_cast<MyPKeyContext*>(from.privateKey -> clone());
 	}
 
-	~MyCAContext()
+	~MyCAContext() override
 	{
 		delete privateKey;
 	}
@@ -4901,7 +4901,7 @@ public:
 	{
 	}
 
-	~MyPKCS12Context()
+	~MyPKCS12Context() override
 	{
 	}
 
@@ -5609,7 +5609,7 @@ public:
 		reset();
 	}
 
-	~MyTLSContext()
+	~MyTLSContext() override
 	{
 		reset();
 	}
@@ -6379,7 +6379,7 @@ public:
 	{
 	}
 
-	~CMSContext()
+	~CMSContext() override
 	{
 	}
 
@@ -6516,7 +6516,7 @@ public:
 		thread = 0;
 	}
 
-	~MyMessageContext()
+	~MyMessageContext() override
 	{
 	}
 
@@ -7030,7 +7030,7 @@ public:
 		m_tag = other.m_tag;
 	}
 
-	~opensslCipherContext()
+	~opensslCipherContext() override
 	{
 		EVP_CIPHER_CTX_cleanup(m_context);
 		EVP_CIPHER_CTX_free(m_context);
@@ -7387,7 +7387,7 @@ public:
 		openssl_initted = true;
 	}
 
-	~opensslProvider()
+	~opensslProvider() override
 	{
 		// FIXME: ?  for now we never deinit, in case other libs/code
 		//   are using openssl

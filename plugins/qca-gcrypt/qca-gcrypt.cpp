@@ -57,7 +57,7 @@ public:
 	}
     }
 
-    ~gcryHashContext()
+    ~gcryHashContext() override
     {
 	gcry_md_close( context );
     }
@@ -107,7 +107,7 @@ public:
         }
     }
 
-    ~gcryHMACContext()
+    ~gcryHMACContext() override
     {
         gcry_md_close( context );
     }
@@ -287,7 +287,7 @@ public:
 	}
     }
 
-    ~pbkdf1Context()
+    ~pbkdf1Context() override
     {
 	gcry_md_close( context );
     }

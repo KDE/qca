@@ -66,7 +66,7 @@ public:
 
 public:
 	pkcs11Provider ();
-	~pkcs11Provider ();
+	~pkcs11Provider () override;
 
 public:
 	int
@@ -240,7 +240,7 @@ private:
 public:
 	pkcs11KeyStoreListContext (Provider *p);
 
-	~pkcs11KeyStoreListContext ();
+	~pkcs11KeyStoreListContext () override;
 
 	Provider::Context *
 	clone () const override;
@@ -476,7 +476,7 @@ public:
 		);
 	}
 
-	~pkcs11RSAContext () {
+	~pkcs11RSAContext () override {
 		QCA_logTextMessage (
 			"pkcs11RSAContext::~pkcs11RSAContext - entry",
 			Logger::Debug
@@ -1044,7 +1044,7 @@ public:
 		_k = NULL;
 	}
 
-	~pkcs11PKeyContext () {
+	~pkcs11PKeyContext () override {
 		delete _k;
 		_k = NULL;
 	}

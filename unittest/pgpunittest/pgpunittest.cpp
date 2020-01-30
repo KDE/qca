@@ -92,7 +92,7 @@ class PGPPassphraseProviderThread : public QCA::SyncThread
 {
     Q_OBJECT
 public:
-    ~PGPPassphraseProviderThread()
+    ~PGPPassphraseProviderThread() override
     {
 	stop();
     }

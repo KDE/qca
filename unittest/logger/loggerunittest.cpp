@@ -52,9 +52,6 @@ class NullLogger : public QCA::AbstractLogDevice
 public:
     NullLogger() : QCA::AbstractLogDevice( "null logger" )
     {}
-
-    ~NullLogger()
-    {}
 };
 
 class LastLogger : public QCA::AbstractLogDevice
@@ -62,9 +59,6 @@ class LastLogger : public QCA::AbstractLogDevice
   Q_OBJECT
 public:
     LastLogger() : QCA::AbstractLogDevice( "last logger" )
-    {}
-
-    ~LastLogger()
     {}
 
     void logTextMessage( const QString &message, enum QCA::Logger::Severity severity ) override

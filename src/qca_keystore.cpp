@@ -147,7 +147,7 @@ public:
 		busy = true; // we start out busy
 	}
 
-	~KeyStoreTracker()
+	~KeyStoreTracker() override
 	{
 		qDeleteAll(sources);
 		self = 0;
@@ -600,7 +600,7 @@ public:
 	{
 	}
 
-	~KeyStoreThread()
+	~KeyStoreThread() override
 	{
 		stop();
 	}
@@ -829,7 +829,7 @@ public:
 		connect(&ksm, &KeyStoreManager::keyStoreAvailable, this, &KeyStoreEntryWatcher::Private::ksm_available);
 	}
 
-	~Private()
+	~Private() override
 	{
 		delete ks;
 	}
@@ -975,7 +975,7 @@ public:
 	{
 	}
 
-	~KeyStoreOperation()
+	~KeyStoreOperation() override
 	{
 		wait();
 	}
@@ -1031,7 +1031,7 @@ public:
 	{
 	}
 
-	~KeyStorePrivate()
+	~KeyStorePrivate() override
 	{
 		qDeleteAll(ops);
 	}
@@ -1399,7 +1399,7 @@ public:
 		waiting = false;
 	}
 
-	~KeyStoreManagerPrivate()
+	~KeyStoreManagerPrivate() override
 	{
 		// invalidate registered keystores
 		QList<KeyStore*> list;

@@ -45,7 +45,7 @@ class saslProvider : public Provider
 public:
 	saslProvider();
 	void init() override;
-	~saslProvider();
+	~saslProvider() override;
 	int qcaVersion() const override;
 	QString name() const override;
 	QString credit() const override;
@@ -578,7 +578,7 @@ public:
 		reset();
 	}
 
-	~saslContext()
+	~saslContext() override
 	{
 		reset();
 	}

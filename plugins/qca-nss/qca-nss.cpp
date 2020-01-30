@@ -84,7 +84,7 @@ public:
 	}
     }
 
-    ~nssHashContext()
+    ~nssHashContext() override
     {
 	PK11_DestroyContext(m_context, PR_TRUE);
 	if (m_slot)
@@ -182,7 +182,7 @@ public:
 	}
     }
 
-    ~nssHmacContext()
+    ~nssHmacContext() override
     {
 	if (m_context)
 	    PK11_DestroyContext(m_context, PR_TRUE);
@@ -305,7 +305,7 @@ public:
 	}
     }
 
-    ~nssCipherContext()
+    ~nssCipherContext() override
 	{
 	}
 
@@ -450,7 +450,7 @@ public:
     {
     }
 
-    ~nssProvider()
+    ~nssProvider() override
     {
     }
 

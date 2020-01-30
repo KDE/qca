@@ -65,7 +65,7 @@ public:
 		started = false;
 	}
 
-	~ConsoleWorker()
+	~ConsoleWorker() override
 	{
 		stop();
 	}
@@ -225,7 +225,7 @@ public:
 		qRegisterMetaType<SecureArray>("QCA::SecureArray");
 	}
 
-	~ConsoleThread()
+	~ConsoleThread() override
 	{
 		stop();
 	}
@@ -381,7 +381,7 @@ public:
 		ref = 0;
 	}
 
-	~ConsolePrivate()
+	~ConsolePrivate() override
 	{
 		delete thread;
 		setInteractive(Console::Default);
@@ -779,7 +779,7 @@ public:
 		decstate = 0;
 	}
 
-	~Private()
+	~Private() override
 	{
 		reset();
 	}

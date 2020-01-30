@@ -94,7 +94,7 @@ public:
 	mode = Idle;
     }
 
-    ~SecureServer()
+    ~SecureServer() override
     {
 	delete ssl;
 	delete server;

@@ -124,7 +124,7 @@ public:
 		connect(ssl, &QCA::TLS::error, this, &SecureTest::ssl_error);
 	}
 
-	~SecureTest()
+	~SecureTest() override
 	{
 		delete ssl;
 		delete sock;

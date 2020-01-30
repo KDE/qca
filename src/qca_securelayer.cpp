@@ -278,7 +278,7 @@ public:
 		connect(c, &TLSContext::dtlsTimeout, this, &Private::tls_dtlsTimeout);
 	}
 
-	~Private()
+	~Private() override
 	{
 		// context is owned by Algorithm, unparent so we don't double-delete
 		c->setParent(0);
@@ -1376,7 +1376,7 @@ public:
 		connect(c, &SASLContext::resultsReady, this, &Private::sasl_resultsReady);
 	}
 
-	~Private()
+	~Private() override
 	{
 		// context is owned by Algorithm, unparent so we don't double-delete
 		c->setParent(0);

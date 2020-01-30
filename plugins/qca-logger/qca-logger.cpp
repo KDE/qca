@@ -38,7 +38,7 @@ public:
 		QCA::logger()->registerLogDevice (this);
 	}
 
-	~StreamLogger()
+	~StreamLogger() override
 	{
 		QCA::logger()->unregisterLogDevice (name ());
 	}
@@ -118,7 +118,7 @@ public:
 		}
 	}
 
-	~loggerProvider () {
+	~loggerProvider () override {
 		delete _streamLogger;
 		_streamLogger = NULL;
 	}

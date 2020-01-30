@@ -82,7 +82,7 @@ public:
 		QCA::logger()->registerLogDevice (this);
 	}
 
-	~StreamLogger()
+	~StreamLogger() override
 	{
 		QCA::logger()->unregisterLogDevice (name ());
 	}
@@ -378,7 +378,7 @@ public:
 			ks_available(keyStoreId);
 	}
 
-	~PassphrasePrompt()
+	~PassphrasePrompt() override
 	{
 		qDeleteAll(keyStores);
 
@@ -691,7 +691,7 @@ public:
 		start();
 	}
 
-	~PassphrasePromptThread()
+	~PassphrasePromptThread() override
 	{
 		stop();
 	}
