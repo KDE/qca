@@ -66,13 +66,13 @@ void KeyBundleTest::nullBundle()
     QVERIFY( nullBundle.certificateChain().isEmpty() );
     QVERIFY( nullBundle.privateKey().isNull() );
 
-    QCA::KeyBundle nullCopy = nullBundle;
+    QCA::KeyBundle nullCopy = nullBundle; // NOLINT(performance-unnecessary-copy-initialization) This is copied on purpose to check the assignment operator
     QVERIFY( nullCopy.isNull() );
     QCOMPARE( nullCopy.name(), QString() );
     QVERIFY( nullCopy.certificateChain().isEmpty() );
     QVERIFY( nullCopy.privateKey().isNull() );
 
-    QCA::KeyBundle nullAssigned( nullCopy );
+    QCA::KeyBundle nullAssigned( nullCopy ); // NOLINT(performance-unnecessary-copy-initialization) This is copied on purpose to check the copy constructor
     QVERIFY( nullAssigned.isNull() );
     QCOMPARE( nullAssigned.name(), QString() );
     QVERIFY( nullAssigned.certificateChain().isEmpty() );
@@ -90,13 +90,13 @@ void KeyBundleTest::fromFile()
 	QCOMPARE( userBundle.certificateChain().isEmpty(), false );
 	QCOMPARE( userBundle.privateKey().isNull(), false );
 
-	QCA::KeyBundle userBundleCopy = userBundle;
+	QCA::KeyBundle userBundleCopy = userBundle; // NOLINT(performance-unnecessary-copy-initialization) This is copied on purpose to check the assignment operator
 	QCOMPARE( userBundleCopy.isNull(), false );
 	QCOMPARE( userBundleCopy.name(), QString() );
 	QCOMPARE( userBundleCopy.certificateChain().isEmpty(), false );
 	QCOMPARE( userBundleCopy.privateKey().isNull(), false );
 
-	QCA::KeyBundle userBundleAssign( userBundleCopy );
+	QCA::KeyBundle userBundleAssign( userBundleCopy ); // NOLINT(performance-unnecessary-copy-initialization) This is copied on purpose to check the copy constructor
 	QCOMPARE( userBundleAssign.isNull(), false );
 	QCOMPARE( userBundleAssign.name(), QString() );
 	QCOMPARE( userBundleAssign.certificateChain().isEmpty(), false );

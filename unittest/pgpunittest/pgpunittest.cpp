@@ -276,7 +276,7 @@ void PgpUnitTest::testMessageSign()
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
 	QCOMPARE( keylist.count(), 1 );
 
-	QCA::KeyStoreEntry myPGPKey = keylist.at(0);	
+	const QCA::KeyStoreEntry &myPGPKey = keylist.at(0);
 	QCOMPARE( myPGPKey.isNull(), false );
 	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
 	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );
@@ -406,7 +406,7 @@ void PgpUnitTest::testClearsign()
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
 	QCOMPARE( keylist.count(), 1 );
 
-	QCA::KeyStoreEntry myPGPKey = keylist.at(0);	
+	const QCA::KeyStoreEntry &myPGPKey = keylist.at(0);
 	QCOMPARE( myPGPKey.isNull(), false );
 	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
 	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );
@@ -518,7 +518,7 @@ void PgpUnitTest::testDetachedSign()
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
 	QCOMPARE( keylist.count(), 1 );
 
-	QCA::KeyStoreEntry myPGPKey = keylist.at(0);	
+	const QCA::KeyStoreEntry &myPGPKey = keylist.at(0);
 	QCOMPARE( myPGPKey.isNull(), false );
 	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
 	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );

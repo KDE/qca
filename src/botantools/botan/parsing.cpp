@@ -75,7 +75,7 @@ std::string to_string(u64bit n, u32bit min_len)
       {
       while(n > 0)
          {
-         lenstr = Charset::digit2char(n % 10) + lenstr;
+         lenstr = Charset::digit2char(n % 10) + lenstr; // NOLINT(performance-inefficient-string-concatenation)
          n /= 10;
          }
       }
@@ -83,7 +83,7 @@ std::string to_string(u64bit n, u32bit min_len)
       lenstr = "0";
 
    while(lenstr.size() < min_len)
-      lenstr = "0" + lenstr;
+      lenstr = "0" + lenstr; // NOLINT(performance-inefficient-string-concatenation)
 
    return lenstr;
    }

@@ -652,8 +652,8 @@ public:
 		std::string algoName, algoMode, algoPadding;
 		qcaCipherToBotanCipher(cipher, &algoName, &algoMode, &algoPadding);
 		try {
-		    std::unique_ptr<Botan::Keyed_Filter> enc(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::ENCRYPTION));
-		    std::unique_ptr<Botan::Keyed_Filter> dec(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::DECRYPTION));
+		    std::unique_ptr<Botan::Keyed_Filter> enc(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::ENCRYPTION)); // NOLINT(performance-inefficient-string-concatenation)
+		    std::unique_ptr<Botan::Keyed_Filter> dec(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::DECRYPTION)); // NOLINT(performance-inefficient-string-concatenation)
 		    supported += cipher;
 		} catch (Botan::Exception& e) {
 		}

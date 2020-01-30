@@ -2208,7 +2208,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 	);
 
 	QString description = _description;
-	Certificate cert = chain.primary ();
+	const Certificate &cert = chain.primary ();
 	if (description.isEmpty ()) {
 		description = cert.subjectInfoOrdered ().toString () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
 	}

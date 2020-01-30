@@ -534,7 +534,6 @@ static const char *constraintToString(const ConstraintType &type)
 
 static QString uniqueConstraintValue(const ConstraintType &type, const QList<int> &items, const QList<Certificate> &certs, int i)
 {
-	ConstraintType val = type;
 	if(certs[items[i]].constraints().contains(type))
 	{
 		bool found = false;
@@ -544,7 +543,7 @@ static QString uniqueConstraintValue(const ConstraintType &type, const QList<int
 				continue;
 
 			Constraints other_vals = certs[n].constraints();
-			if(other_vals.contains(val))
+			if(other_vals.contains(type))
 			{
 				found = true;
 				break;
@@ -552,7 +551,7 @@ static QString uniqueConstraintValue(const ConstraintType &type, const QList<int
 		}
 
 		if(!found)
-			return QString(constraintToString(val));
+			return QString(constraintToString(type));
 	}
 
 	return QString();
@@ -2033,7 +2032,7 @@ CRLEntry::CRLEntry(const Certificate &c, Reason r)
 	_reason = r;
 }
 
-CRLEntry::CRLEntry(const BigInteger serial, const QDateTime &time, Reason r) // clazy:exclude=function-args-by-ref TODO make serial const & when we break ABI
+CRLEntry::CRLEntry(const BigInteger serial, const QDateTime &time, Reason r) // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param) TODO make serial const & when we break ABI
 {
 	_serial = serial;
 	_time = time;
