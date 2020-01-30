@@ -66,7 +66,7 @@ private:
 	}
 
 	inline QString now() {
-		static QString format = "yyyy-MM-dd hh:mm:ss";
+		static const QString format = "yyyy-MM-dd hh:mm:ss";
 		return QDateTime::currentDateTime ().toString (format);
 	}
 

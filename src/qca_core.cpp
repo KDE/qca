@@ -1414,7 +1414,7 @@ SymmetricKey::SymmetricKey(const QByteArray &a)
 }
 
 /* from libgcrypt-1.2.0 */
-static unsigned char desWeakKeyTable[64][8] =
+static const unsigned char desWeakKeyTable[64][8] =
 {
 	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, /*w*/
 	{ 0x00, 0x00, 0x1e, 0x1e, 0x00, 0x00, 0x0e, 0x0e },

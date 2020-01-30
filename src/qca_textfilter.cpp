@@ -247,7 +247,7 @@ static QByteArray b64encode(const QByteArray &s)
 {
 	int i;
 	int len = s.size();
-	static char tbl[] =
+	static const char tbl[] =
 		"ABCDEFGH"
 		"IJKLMNOP"
 		"QRSTUVWX"
@@ -293,7 +293,7 @@ static QByteArray b64decode(const QByteArray &s, bool *ok)
 	// 64 specifies eof
 	// everything else specifies data
 
-	static signed char tbl[] =
+	static const signed char tbl[] =
 	{
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
