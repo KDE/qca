@@ -29,7 +29,7 @@ class SProcess : public QProcess
 	Q_OBJECT
 public:
 	SProcess(QObject *parent = nullptr);
-	~SProcess();
+	~SProcess() override;
 
 #ifdef Q_OS_UNIX
 	void setInheritPipeList(const QList<int> &);

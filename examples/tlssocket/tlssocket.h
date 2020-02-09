@@ -29,7 +29,7 @@ class TLSSocket : public QTcpSocket
     Q_OBJECT
 public:
 	TLSSocket(QObject *parent = nullptr);
-	~TLSSocket();
+	~TLSSocket() override;
 
 	void connectToHostEncrypted(const QString &host, quint16 port);
 	QCA::TLS *tls();

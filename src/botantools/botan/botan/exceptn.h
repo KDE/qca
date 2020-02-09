@@ -53,7 +53,7 @@ class Exception : public std::exception
    public:
       const char* what() const throw() override { return msg.c_str(); }
       Exception(const std::string& m = "Unknown error") { set_msg(m); }
-      virtual ~Exception() throw() {}
+      ~Exception() throw() override {}
    protected:
       void set_msg(const std::string& m) { msg = "Botan: " + m; }
    private:

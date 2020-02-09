@@ -285,7 +285,7 @@ public:
 
 	   \note Subclasses should call stop() in their own destructor
 	*/
-	~SyncThread();
+	~SyncThread() override;
 
 	/**
 	   Starts the thread, begins the event loop the thread, and then
@@ -360,7 +360,7 @@ public:
 	  \param parent the parent object to this object
 	*/
 	Synchronizer(QObject *parent);
-	~Synchronizer();
+	~Synchronizer() override;
 
 	/**
 	   Call to pause execution in this thread. This function
@@ -410,7 +410,7 @@ public:
 	   \param parent the parent object for this object
 	*/
 	explicit DirWatch(const QString &dir = QString(), QObject *parent = nullptr);
-	~DirWatch();
+	~DirWatch() override;
 
 	/**
 	   The name of the directory that is being monitored
@@ -468,7 +468,7 @@ public:
 	   \param parent the parent object for this object
 	*/
 	explicit FileWatch(const QString &file = QString(), QObject *parent = nullptr);
-	~FileWatch();
+	~FileWatch() override;
 
 	/**
 	   The name of the file that is being monitored
@@ -597,7 +597,7 @@ public:
 	   required Type, and if there is, obtain a reference to that object.
 	*/
 	Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = nullptr);
-	~Console();
+	~Console() override;
 
 	/**
 	   The Type of this Console object
@@ -700,7 +700,7 @@ public:
 	   \param parent the parent object for this object
 	*/
 	ConsoleReference(QObject *parent = nullptr);
-	~ConsoleReference();
+	~ConsoleReference() override;
 
 	/**
 	   Set the Console object to be managed, and start processing.
@@ -862,7 +862,7 @@ public:
 	   \param parent the parent object for this object
 	*/
 	ConsolePrompt(QObject *parent = nullptr);
-	~ConsolePrompt();
+	~ConsolePrompt() override;
 
 	/**
 	   Allow the user to enter data without it being echo'd to 
@@ -1039,7 +1039,7 @@ private:
 	*/
 	Logger();
 
-	~Logger();
+	~Logger() override;
 
 	QStringList m_loggerNames;
 	QList<AbstractLogDevice*> m_loggers;
@@ -1095,7 +1095,7 @@ protected:
 	*/
 	explicit AbstractLogDevice(const QString &name, QObject *parent = nullptr);
 
-	virtual ~AbstractLogDevice() = 0;
+	~AbstractLogDevice() override = 0;
 
 private:
 	Q_DISABLE_COPY(AbstractLogDevice)

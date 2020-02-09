@@ -49,7 +49,7 @@ public:
 #endif
 
 	Private(GpgOp *_q);
-	~Private();
+	~Private() override;
 	void reset(ResetMode mode);
 	void make_act(GpgOp::Type _op);
 	void eventReady(const GpgOp::Event &e);

@@ -270,7 +270,7 @@ public:
 	*/
 	PKey(const PKey &from);
 
-	~PKey();
+	~PKey() override;
 
 	/**
 	   Standard assignment operator
@@ -554,7 +554,7 @@ public:
 	*/
 	PublicKey(const PublicKey &from);
 
-	~PublicKey();
+	~PublicKey() override;
 
 	/**
 	   Assignment operator
@@ -851,7 +851,7 @@ public:
 	*/
 	PrivateKey(const PrivateKey &from);
 
-	~PrivateKey();
+	~PrivateKey() override;
 
 	/**
 	   Assignment operator
@@ -1128,7 +1128,7 @@ public:
 	*/
 	KeyGenerator(QObject *parent = nullptr);
 
-	~KeyGenerator();
+	~KeyGenerator() override;
 
 	/**
 	   Test whether the key generator is set to operate in blocking mode,

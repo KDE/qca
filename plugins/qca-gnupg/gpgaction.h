@@ -73,7 +73,7 @@ public:
 	Output output;
 
 	GpgAction(QObject *parent = nullptr);
-	~GpgAction();
+	~GpgAction() override;
 	void reset();
 	void start();
 #ifdef QPIPE_SECURE

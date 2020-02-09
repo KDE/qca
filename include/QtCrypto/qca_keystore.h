@@ -174,7 +174,7 @@ public:
 	*/
 	KeyStoreEntry(const KeyStoreEntry &from);
 
-	~KeyStoreEntry();
+	~KeyStoreEntry() override;
 
 	/**
 	   Standard assignment operator
@@ -363,7 +363,7 @@ public:
 	*/
 	explicit KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = nullptr);
 
-	~KeyStoreEntryWatcher();
+	~KeyStoreEntryWatcher() override;
 
 	/**
 	   The KeyStoreEntry that is being monitored
@@ -437,7 +437,7 @@ public:
 	*/
 	KeyStore(const QString &id, KeyStoreManager *keyStoreManager);
 
-	~KeyStore();
+	~KeyStore() override;
 
 	/**
 	   Check if this KeyStore is valid
@@ -716,7 +716,7 @@ public:
 	   \param parent the parent for this object
 	*/
 	KeyStoreManager(QObject *parent = nullptr);
-	~KeyStoreManager();
+	~KeyStoreManager() override;
 
 	/**
 	   Initialize all key store providers

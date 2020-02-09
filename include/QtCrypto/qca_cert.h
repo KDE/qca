@@ -879,7 +879,7 @@ public:
 	*/
 	Certificate(const Certificate &from);
 
-	~Certificate();
+	~Certificate() override;
 
 	/**
 	   Standard assignment operator
@@ -1323,7 +1323,7 @@ public:
 	*/
 	CertificateRequest(const CertificateRequest &from);
 
-	~CertificateRequest();
+	~CertificateRequest() override;
 
 	/**
 	   Standard assignment operator
@@ -1711,7 +1711,7 @@ public:
 	*/
 	CRL(const CRL &from);
 
-	~CRL();
+	~CRL() override;
 
 	/**
 	   Standard assignment operator
@@ -2054,7 +2054,7 @@ public:
 	*/
 	CertificateAuthority(const CertificateAuthority &from);
 
-	~CertificateAuthority();
+	~CertificateAuthority() override;
 
 	/**
 	   Standard assignment operator
@@ -2383,7 +2383,7 @@ public:
 	*/
 	PGPKey(const PGPKey &from);
 
-	~PGPKey();
+	~PGPKey() override;
 
 	/**
 	   Standard assignment operator
@@ -2572,7 +2572,7 @@ public:
 	   \param parent the parent object for this object
 	*/
 	KeyLoader(QObject *parent = nullptr);
-	~KeyLoader();
+	~KeyLoader() override;
 
 	/**
 	   Initiate an asynchronous loading of a PrivateKey from a PEM format

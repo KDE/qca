@@ -247,7 +247,7 @@ public:
 	*/
 	TLSSession(const TLSSession &from);
 
-	~TLSSession();
+	~TLSSession() override;
 
 	/**
 	   Assignment operator
@@ -363,7 +363,7 @@ public:
 	/**
 	   Destructor
 	*/
-	~TLS();
+	~TLS() override;
 
 	/**
 	   Reset the connection
@@ -971,7 +971,7 @@ public:
 	*/
 	explicit SASL(QObject *parent = nullptr, const QString &provider = QString());
 
-	~SASL();
+	~SASL() override;
 
 	/**
 	   Reset the %SASL mechanism

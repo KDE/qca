@@ -80,7 +80,7 @@ public:
         */
 	Random(const Random &from);
 
-	~Random();
+	~Random() override;
 
         /**
 	   Assignment operator
@@ -225,7 +225,7 @@ public:
         */
 	Hash(const Hash &from);
 
-	~Hash();
+	~Hash() override;
 
 	/**
 	   Assignment operator
@@ -662,7 +662,7 @@ public:
 	*/
 	Cipher(const Cipher &from);
 
-	~Cipher();
+	~Cipher() override;
 
 	/**
 	   Assignment operator
@@ -840,7 +840,7 @@ public:
 	*/
 	MessageAuthenticationCode(const MessageAuthenticationCode &from);
 
-	~MessageAuthenticationCode();
+	~MessageAuthenticationCode() override;
 
 	/**
 	   Assignment operator.
@@ -952,7 +952,7 @@ public:
 	*/
 	KeyDerivationFunction(const KeyDerivationFunction &from);
 
-	~KeyDerivationFunction();
+	~KeyDerivationFunction() override;
 
 	/**
 	   Assignment operator
@@ -1100,7 +1100,7 @@ public:
 	*/
 	HKDF(const HKDF &from);
 
-	~HKDF();
+	~HKDF() override;
 
 	/**
 	   Assignment operator

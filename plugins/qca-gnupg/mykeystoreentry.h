@@ -35,7 +35,7 @@ public:
 
 	MyKeyStoreEntry(const QCA::PGPKey &_pub, const QCA::PGPKey &_sec, QCA::Provider *p);
 	MyKeyStoreEntry(const MyKeyStoreEntry &from);
-	~MyKeyStoreEntry();
+	~MyKeyStoreEntry() override;
 
 	// reimplemented Provider::Context
 	QCA::Provider::Context *clone() const override;

@@ -36,7 +36,7 @@ public:
 	SafeSocketNotifier(int socket, QSocketNotifier::Type type,
 		QObject *parent = nullptr);
 
-	~SafeSocketNotifier();
+	~SafeSocketNotifier() override;
 
 	bool isEnabled() const             { return sn->isEnabled(); }
 	int socket() const                 { return sn->socket(); }

@@ -91,7 +91,7 @@ public:
 	   \param parent the parent object to this object
 	*/
 	QPipeDevice(QObject *parent = nullptr);
-	~QPipeDevice();
+	~QPipeDevice() override;
 
 	/**
 	   The Type of the pipe device (that is, read or write)
@@ -236,7 +236,7 @@ public:
 	*/
 	QPipeEnd(QObject *parent = nullptr);
 
-	~QPipeEnd();
+	~QPipeEnd() override;
 
 	/**
 	   Reset the pipe end to an inactive state

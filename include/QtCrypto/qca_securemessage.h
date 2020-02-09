@@ -381,7 +381,7 @@ public:
 	   object
 	*/
 	SecureMessage(SecureMessageSystem *system);
-	~SecureMessage();
+	~SecureMessage() override;
 
 	/**
 	   The Type of secure message
@@ -804,7 +804,7 @@ class QCA_EXPORT SecureMessageSystem : public QObject, public Algorithm
 {
 	Q_OBJECT
 public:
-	~SecureMessageSystem();
+	~SecureMessageSystem() override;
 
 protected:
 	/**
@@ -849,7 +849,7 @@ public:
 	   provider is required
 	*/
 	explicit OpenPGP(QObject *parent = nullptr, const QString &provider = QString());
-	~OpenPGP();
+	~OpenPGP() override;
 
 private:
 	Q_DISABLE_COPY(OpenPGP)
@@ -895,7 +895,7 @@ public:
 	   provider is required
 	*/
 	explicit CMS(QObject *parent = nullptr, const QString &provider = QString());
-	~CMS();
+	~CMS() override;
 
 	/**
 	   Return the trusted certificates set for this object

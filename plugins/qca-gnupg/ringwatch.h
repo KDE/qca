@@ -58,7 +58,7 @@ public:
 	QList<FileItem> files;
 
 	RingWatch(QObject *parent = nullptr);
-	~RingWatch();
+	~RingWatch() override;
 
 	void add(const QString &filePath);
 	void clear();

@@ -41,7 +41,7 @@ public:
 	QMutex ringMutex;
 
 	MyKeyStoreList(QCA::Provider *p);
-	~MyKeyStoreList();
+	~MyKeyStoreList() override;
 
 	// reimplemented Provider::Context
 	QCA::Provider::Context *clone() const override;

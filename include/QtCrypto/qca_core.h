@@ -928,7 +928,7 @@ class QCA_EXPORT Provider::Context : public QObject
 {
 	Q_OBJECT
 public:
-	virtual ~Context();
+	~Context() override;
 
 	/**
 	   The Provider associated with this Context
@@ -998,7 +998,7 @@ class QCA_EXPORT BasicContext : public Provider::Context
 {
 	Q_OBJECT
 public:
-	~BasicContext();
+	~BasicContext() override;
 
 protected:
 	/**
@@ -1570,7 +1570,7 @@ public:
 	   \param parent the parent object for this object
 	*/
 	EventHandler(QObject *parent = nullptr);
-	~EventHandler();
+	~EventHandler() override;
 
 	/**
 	   mandatory function to call after connecting the
@@ -1652,7 +1652,7 @@ public:
 	   \param parent the parent object for this QObject
 	*/
 	PasswordAsker(QObject *parent = nullptr);
-	~PasswordAsker();
+	~PasswordAsker() override;
 
 	/**
 	   queue a password / passphrase request associated with a key store
@@ -1744,7 +1744,7 @@ public:
 	   \param parent the parent object for this QObject
 	*/
 	TokenAsker(QObject *parent = nullptr);
-	~TokenAsker();
+	~TokenAsker() override;
 
 	/**
 	   queue a token request associated with a key store

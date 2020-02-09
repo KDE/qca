@@ -119,7 +119,7 @@ public:
 	QByteArray leftover_stderr;
 
 	Private(GPGProc *_q);
-	~Private();
+	~Private() override;
 	void closePipes();
 	void reset(ResetMode mode);
 	bool setupPipes(bool makeAux);
