@@ -52,7 +52,7 @@ static bool get_pkcs12_der(const QByteArray &der, const QString &fileName, void 
 	QList<CertContext*> list;
 	PKeyContext *kc = nullptr;
 
-	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
+	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext(QStringLiteral("pkcs12"), provider));
 	ConvertResult r = pix->fromPKCS12(der, passphrase, &_name, &list, &kc);
 
 	// error converting without passphrase?  maybe a passphrase is needed
@@ -398,9 +398,9 @@ static QString dnLabel(const CertificateInfoType &type)
 	QString id = type.id();
 	// is it an oid?
 	if(id[0].isDigit())
-		return QString("OID.") + id;
+		return QStringLiteral("OID.") + id;
 
-	return QString("qca.") + id;
+	return QStringLiteral("qca.") + id;
 }
 
 QString orderedToDNString(const CertificateInfoOrdered &in)
@@ -414,7 +414,7 @@ QString orderedToDNString(const CertificateInfoOrdered &in)
 		QString name = dnLabel(i.type());
 		parts += name + '=' + i.value();
 	}
-	return parts.join(", ");
+	return parts.join(QStringLiteral(", "));
 }
 
 CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in)
@@ -435,7 +435,7 @@ static QString baseCertName(const CertificateInfo &info)
 	{
 		str = info.value(Organization);
 		if(str.isEmpty())
-			str = "Unnamed";
+			str = QStringLiteral("Unnamed");
 	}
 	return str;
 }
@@ -565,7 +565,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueSubjectValue(Organization, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" of ") + str;
+		name = list[items[i]] + QStringLiteral(" of ") + str;
 		goto end;
 	}
 
@@ -573,7 +573,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueSubjectValue(OrganizationalUnit, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" of ") + str;
+		name = list[items[i]] + QStringLiteral(" of ") + str;
 		goto end;
 	}
 
@@ -581,7 +581,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueSubjectValue(Email, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" <") + str + '>';
+		name = list[items[i]] + QStringLiteral(" <") + str + '>';
 		goto end;
 	}
 
@@ -589,7 +589,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueSubjectValue(XMPP, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" <xmpp:") + str + '>';
+		name = list[items[i]] + QStringLiteral(" <xmpp:") + str + '>';
 		goto end;
 	}
 
@@ -597,7 +597,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueIssuerName(items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" by ") + str;
+		name = list[items[i]] + QStringLiteral(" by ") + str;
 		goto end;
 	}
 
@@ -607,7 +607,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueConstraintValue(DigitalSignature, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" for ") + str;
+		name = list[items[i]] + QStringLiteral(" for ") + str;
 		goto end;
 	}
 
@@ -615,7 +615,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueConstraintValue(ClientAuth, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" for ") + str;
+		name = list[items[i]] + QStringLiteral(" for ") + str;
 		goto end;
 	}
 
@@ -623,7 +623,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueConstraintValue(EmailProtection, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" for ") + str;
+		name = list[items[i]] + QStringLiteral(" for ") + str;
 		goto end;
 	}
 
@@ -631,7 +631,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueConstraintValue(DataEncipherment, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" for ") + str;
+		name = list[items[i]] + QStringLiteral(" for ") + str;
 		goto end;
 	}
 
@@ -639,7 +639,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueConstraintValue(EncipherOnly, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" for ") + str;
+		name = list[items[i]] + QStringLiteral(" for ") + str;
 		goto end;
 	}
 
@@ -647,7 +647,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueConstraintValue(DecipherOnly, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QString(" for ") + str;
+		name = list[items[i]] + QStringLiteral(" for ") + str;
 		goto end;
 	}
 
@@ -1436,7 +1436,7 @@ Certificate::Certificate(const QString &fileName)
 Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
 :d(new Private)
 {
-	CertContext *c = static_cast<CertContext *>(getContext("cert", provider));
+	CertContext *c = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
 	if(c->createSelfSigned(opts, *(static_cast<const PKeyContext *>(key.context()))))
 		change(c);
 	else
@@ -1603,7 +1603,7 @@ bool Certificate::toPEMFile(const QString &fileName) const
 Certificate Certificate::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	Certificate c;
-	CertContext *cc = static_cast<CertContext *>(getContext("cert", provider));
+	CertContext *cc = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
 	ConvertResult r = cc->fromDER(a);
 	if(result)
 		*result = r;
@@ -1617,7 +1617,7 @@ Certificate Certificate::fromDER(const QByteArray &a, ConvertResult *result, con
 Certificate Certificate::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
 	Certificate c;
-	CertContext *cc = static_cast<CertContext *>(getContext("cert", provider));
+	CertContext *cc = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
 	ConvertResult r = cc->fromPEM(s);
 	if(result)
 		*result = r;
@@ -1819,7 +1819,7 @@ CertificateRequest::CertificateRequest(const QString &fileName)
 CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
 :d(new Private)
 {
-	CSRContext *c = static_cast<CSRContext *>(getContext("csr", provider));
+	CSRContext *c = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
 	if(c->createRequest(opts, *(static_cast<const PKeyContext *>(key.context()))))
 		change(c);
 	else
@@ -1849,7 +1849,7 @@ bool CertificateRequest::isNull() const
 
 bool CertificateRequest::canUseFormat(CertificateRequestFormat f, const QString &provider)
 {
-	CSRContext *c = static_cast<CSRContext *>(getContext("csr", provider));
+	CSRContext *c = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
 	bool ok = c->canUseFormat(f);
 	delete c;
 	return ok;
@@ -1944,7 +1944,7 @@ bool CertificateRequest::toPEMFile(const QString &fileName) const
 CertificateRequest CertificateRequest::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	CertificateRequest c;
-	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
+	CSRContext *csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
 	ConvertResult r = csr->fromDER(a);
 	if(result)
 		*result = r;
@@ -1958,7 +1958,7 @@ CertificateRequest CertificateRequest::fromDER(const QByteArray &a, ConvertResul
 CertificateRequest CertificateRequest::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
 	CertificateRequest c;
-	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
+	CSRContext *csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
 	ConvertResult r = csr->fromPEM(s);
 	if(result)
 		*result = r;
@@ -1989,7 +1989,7 @@ QString CertificateRequest::toString() const
 CertificateRequest CertificateRequest::fromString(const QString &s, ConvertResult *result, const QString &provider)
 {
 	CertificateRequest c;
-	CSRContext *csr = static_cast<CSRContext *>(getContext("csr", provider));
+	CSRContext *csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
 	ConvertResult r = csr->fromSPKAC(s);
 	if(result)
 		*result = r;
@@ -2209,7 +2209,7 @@ bool CRL::operator==(const CRL &otherCrl) const
 CRL CRL::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	CRL c;
-	CRLContext *cc = static_cast<CRLContext *>(getContext("crl", provider));
+	CRLContext *cc = static_cast<CRLContext *>(getContext(QStringLiteral("crl"), provider));
 	ConvertResult r = cc->fromDER(a);
 	if(result)
 		*result = r;
@@ -2223,7 +2223,7 @@ CRL CRL::fromDER(const QByteArray &a, ConvertResult *result, const QString &prov
 CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
 	CRL c;
-	CRLContext *cc = static_cast<CRLContext *>(getContext("crl", provider));
+	CRLContext *cc = static_cast<CRLContext *>(getContext(QStringLiteral("crl"), provider));
 	ConvertResult r = cc->fromPEM(s);
 	if(result)
 		*result = r;
@@ -2273,15 +2273,15 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 		QString line = ts->readLine();
 		if(!found)
 		{
-			if(line.startsWith("-----BEGIN "))
+			if(line.startsWith(QLatin1String("-----BEGIN ")))
 			{
-				if(line.contains("CERTIFICATE"))
+				if(line.contains(QLatin1String("CERTIFICATE")))
 				{
 					found = true;
 					pem += line + '\n';
 					crl = false;
 				}
-				else if(line.contains("CRL"))
+				else if(line.contains(QLatin1String("CRL")))
 				{
 					found = true;
 					pem += line + '\n';
@@ -2292,7 +2292,7 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 		else
 		{
 			pem += line + '\n';
-			if(line.startsWith("-----END "))
+			if(line.startsWith(QLatin1String("-----END ")))
 			{
 				done = true;
 				break;
@@ -2394,7 +2394,7 @@ bool CertificateCollection::toFlatTextFile(const QString &fileName)
 
 bool CertificateCollection::toPKCS7File(const QString &fileName, const QString &provider)
 {
-	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
+	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext(QStringLiteral("certcollection"), provider));
 
 	QList<CertContext*> cert_list;
 	QList<CRLContext*> crl_list;
@@ -2468,7 +2468,7 @@ CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileNa
 
 	QList<CertContext*> cert_list;
 	QList<CRLContext*> crl_list;
-	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext("certcollection", provider));
+	CertCollectionContext *col = static_cast<CertCollectionContext *>(getContext(QStringLiteral("certcollection"), provider));
 	ConvertResult r = col->fromPKCS7(der, &cert_list, &crl_list);
 	delete col;
 
@@ -2497,7 +2497,7 @@ CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileNa
 // CertificateAuthority
 //----------------------------------------------------------------------------
 CertificateAuthority::CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider)
-:Algorithm("ca", provider)
+:Algorithm(QStringLiteral("ca"), provider)
 {
 	static_cast<CAContext *>(context())->setup(*(static_cast<const CertContext *>(cert.context())), *(static_cast<const PKeyContext *>(key.context())));
 }
@@ -2621,7 +2621,7 @@ void KeyBundle::setCertificateChainAndKey(const CertificateChain &c, const Priva
 
 QByteArray KeyBundle::toArray(const SecureArray &passphrase, const QString &provider) const
 {
-	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
+	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext(QStringLiteral("pkcs12"), provider));
 
 	QList<const CertContext*> list;
 	for(int n = 0; n < d->chain.count(); ++n)
@@ -2754,7 +2754,7 @@ bool PGPKey::toFile(const QString &fileName) const
 PGPKey PGPKey::fromArray(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
 	PGPKey k;
-	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext("pgpkey", provider));
+	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext(QStringLiteral("pgpkey"), provider));
 	ConvertResult r = kc->fromBinary(a);
 	if(result)
 		*result = r;
@@ -2768,7 +2768,7 @@ PGPKey PGPKey::fromArray(const QByteArray &a, ConvertResult *result, const QStri
 PGPKey PGPKey::fromString(const QString &s, ConvertResult *result, const QString &provider)
 {
 	PGPKey k;
-	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext("pgpkey", provider));
+	PGPKeyContext *kc = static_cast<PGPKeyContext *>(getContext(QStringLiteral("pgpkey"), provider));
 	ConvertResult r = kc->fromAscii(s);
 	if(result)
 		*result = r;

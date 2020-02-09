@@ -113,7 +113,7 @@ public:
 	static QList<DLGroupSet> getList(Provider *p)
 	{
 		QList<DLGroupSet> list;
-		const DLGroupContext *c = static_cast<const DLGroupContext *>(getContext("dlgroup", p));
+		const DLGroupContext *c = static_cast<const DLGroupContext *>(getContext(QStringLiteral("dlgroup"), p));
 		if(!c)
 			return list;
 		list = c->supportedGroupSets();
@@ -128,7 +128,7 @@ public:
 	static QList<PBEAlgorithm> getList(Provider *p)
 	{
 		QList<PBEAlgorithm> list;
-		const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", p));
+		const PKeyContext *c = static_cast<const PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(!c)
 			return list;
 		list = c->supportedPBEAlgorithms();
@@ -143,7 +143,7 @@ public:
 	static QList<PKey::Type> getList(Provider *p)
 	{
 		QList<PKey::Type> list;
-		const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", p));
+		const PKeyContext *c = static_cast<const PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(!c)
 			return list;
 		list = c->supportedTypes();
@@ -158,7 +158,7 @@ public:
 	static QList<PKey::Type> getList(Provider *p)
 	{
 		QList<PKey::Type> list;
-		const PKeyContext *c = static_cast<const PKeyContext *>(getContext("pkey", p));
+		const PKeyContext *c = static_cast<const PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(!c)
 			return list;
 		list = c->supportedIOTypes();
@@ -186,7 +186,7 @@ public:
 	static PublicKey getKey(Provider *p, const I &in, const SecureArray &, ConvertResult *result)
 	{
 		PublicKey k;
-		PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", p));
+		PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(!c)
 		{
 			if(result)
@@ -223,7 +223,7 @@ public:
 	static PrivateKey getKey(Provider *p, const I &in, const SecureArray &passphrase, ConvertResult *result)
 	{
 		PrivateKey k;
-		PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", p));
+		PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(!c)
 		{
 			if(result)
@@ -432,13 +432,13 @@ static const unsigned char pkcs_ripemd160[] =
 
 QByteArray get_hash_id(const QString &name)
 {
-	if(name == "sha1")
+	if(name == QLatin1String("sha1"))
 		return QByteArray::fromRawData((const char *)pkcs_sha1, sizeof(pkcs_sha1));
-	else if(name == "md5")
+	else if(name == QLatin1String("md5"))
 		return QByteArray::fromRawData((const char *)pkcs_md5, sizeof(pkcs_md5));
-	else if(name == "md2")
+	else if(name == QLatin1String("md2"))
 		return QByteArray::fromRawData((const char *)pkcs_md2, sizeof(pkcs_md2));
-	else if(name == "ripemd160")
+	else if(name == QLatin1String("ripemd160"))
 		return QByteArray::fromRawData((const char *)pkcs_ripemd160, sizeof(pkcs_ripemd160));
 	else
 		return QByteArray();
@@ -890,7 +890,7 @@ QByteArray PublicKey::toDER() const
 	}
 	else
 	{
-		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(pk && pk->importKey(cur->key()))
 			out = pk->publicToDER();
 		delete pk;
@@ -913,7 +913,7 @@ QString PublicKey::toPEM() const
 	}
 	else
 	{
-		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(pk && pk->importKey(cur->key()))
 			out = pk->publicToPEM();
 		delete pk;
@@ -1075,7 +1075,7 @@ SecureArray PrivateKey::toDER(const SecureArray &passphrase, PBEAlgorithm pbe) c
 	}
 	else
 	{
-		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(pk->importKey(cur->key()))
 			out = pk->privateToDER(passphrase, pbe);
 		delete pk;
@@ -1098,7 +1098,7 @@ QString PrivateKey::toPEM(const SecureArray &passphrase, PBEAlgorithm pbe) const
 	}
 	else
 	{
-		PKeyContext *pk = static_cast<PKeyContext *>(getContext("pkey", p));
+		PKeyContext *pk = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), p));
 		if(pk->importKey(cur->key()))
 			out = pk->privateToPEM(passphrase, pbe);
 		delete pk;
@@ -1241,10 +1241,10 @@ PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 
 	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
-	d->k = static_cast<RSAContext *>(getContext("rsa", provider));
+	d->k = static_cast<RSAContext *>(getContext(QStringLiteral("rsa"), provider));
 	if (!d->k)
 		return PrivateKey();
-	d->dest = static_cast<PKeyContext *>(getContext("pkey", d->k->provider()));
+	d->dest = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), d->k->provider()));
 
 	if(!d->blocking)
 	{
@@ -1269,8 +1269,8 @@ PrivateKey KeyGenerator::createDSA(const DLGroup &domain, const QString &provide
 
 	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
-	d->k = static_cast<DSAContext *>(getContext("dsa", provider));
-	d->dest = static_cast<PKeyContext *>(getContext("pkey", d->k->provider()));
+	d->k = static_cast<DSAContext *>(getContext(QStringLiteral("dsa"), provider));
+	d->dest = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), d->k->provider()));
 
 	if(!d->blocking)
 	{
@@ -1295,8 +1295,8 @@ PrivateKey KeyGenerator::createDH(const DLGroup &domain, const QString &provider
 
 	d->key = PrivateKey();
 	d->wasBlocking = d->blocking;
-	d->k = static_cast<DHContext *>(getContext("dh", provider));
-	d->dest = static_cast<PKeyContext *>(getContext("pkey", d->k->provider()));
+	d->k = static_cast<DHContext *>(getContext(QStringLiteral("dh"), provider));
+	d->dest = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), d->k->provider()));
 
 	if(!d->blocking)
 	{
@@ -1330,7 +1330,7 @@ DLGroup KeyGenerator::createDLGroup(QCA::DLGroupSet set, const QString &provider
 	else
 		p = providerForGroupSet(set);
 
-	d->dc = static_cast<DLGroupContext *>(getContext("dlgroup", p));
+	d->dc = static_cast<DLGroupContext *>(getContext(QStringLiteral("dlgroup"), p));
 	d->group = DLGroup();
 
 	if (d->dc)
@@ -1365,9 +1365,9 @@ RSAPublicKey::RSAPublicKey()
 
 RSAPublicKey::RSAPublicKey(const BigInteger &n, const BigInteger &e, const QString &provider)
 {
-	RSAContext *k = static_cast<RSAContext *>(getContext("rsa", provider));
+	RSAContext *k = static_cast<RSAContext *>(getContext(QStringLiteral("rsa"), provider));
 	k->createPublic(n, e);
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()));
+	PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), k->provider()));
 	c->setKey(k);
 	change(c);
 }
@@ -1396,9 +1396,9 @@ RSAPrivateKey::RSAPrivateKey()
 
 RSAPrivateKey::RSAPrivateKey(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q, const BigInteger &d, const QString &provider)
 {
-	RSAContext *k = static_cast<RSAContext *>(getContext("rsa", provider));
+	RSAContext *k = static_cast<RSAContext *>(getContext(QStringLiteral("rsa"), provider));
 	k->createPrivate(n, e, p, q, d);
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()));
+	PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), k->provider()));
 	c->setKey(k);
 	change(c);
 }
@@ -1437,9 +1437,9 @@ DSAPublicKey::DSAPublicKey()
 
 DSAPublicKey::DSAPublicKey(const DLGroup &domain, const BigInteger &y, const QString &provider)
 {
-	DSAContext *k = static_cast<DSAContext *>(getContext("dsa", provider));
+	DSAContext *k = static_cast<DSAContext *>(getContext(QStringLiteral("dsa"), provider));
 	k->createPublic(domain, y);
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()));
+	PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), k->provider()));
 	c->setKey(k);
 	change(c);
 }
@@ -1468,9 +1468,9 @@ DSAPrivateKey::DSAPrivateKey()
 
 DSAPrivateKey::DSAPrivateKey(const DLGroup &domain, const BigInteger &y, const BigInteger &x, const QString &provider)
 {
-	DSAContext *k = static_cast<DSAContext *>(getContext("dsa", provider));
+	DSAContext *k = static_cast<DSAContext *>(getContext(QStringLiteral("dsa"), provider));
 	k->createPrivate(domain, y, x);
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()));
+	PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), k->provider()));
 	c->setKey(k);
 	change(c);
 }
@@ -1499,9 +1499,9 @@ DHPublicKey::DHPublicKey()
 
 DHPublicKey::DHPublicKey(const DLGroup &domain, const BigInteger &y, const QString &provider)
 {
-	DHContext *k = static_cast<DHContext *>(getContext("dh", provider));
+	DHContext *k = static_cast<DHContext *>(getContext(QStringLiteral("dh"), provider));
 	k->createPublic(domain, y);
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()));
+	PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), k->provider()));
 	c->setKey(k);
 	change(c);
 }
@@ -1530,9 +1530,9 @@ DHPrivateKey::DHPrivateKey()
 
 DHPrivateKey::DHPrivateKey(const DLGroup &domain, const BigInteger &y, const BigInteger &x, const QString &provider)
 {
-	DHContext *k = static_cast<DHContext *>(getContext("dh", provider));
+	DHContext *k = static_cast<DHContext *>(getContext(QStringLiteral("dh"), provider));
 	k->createPrivate(domain, y, x);
-	PKeyContext *c = static_cast<PKeyContext *>(getContext("pkey", k->provider()));
+	PKeyContext *c = static_cast<PKeyContext *>(getContext(QStringLiteral("pkey"), k->provider()));
 	c->setKey(k);
 	change(c);
 }

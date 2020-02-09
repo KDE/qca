@@ -71,13 +71,13 @@ public:
 	static inline QString typeToString (PKey::Type t) {
 		switch (t) {
 			case PKey::RSA:
-				return "rsa";
+				return QStringLiteral("rsa");
 			case PKey::DSA:
-				return "dsa";
+				return QStringLiteral("dsa");
 			case PKey::DH:
-				return "dh";
+				return QStringLiteral("dh");
 			default:
-				return "";
+				return QLatin1String("");
 		}
 	}
 
@@ -85,9 +85,9 @@ public:
 		const SoftStoreEntry &entry,
 		const QString &serialized,
 		Provider *p
-	) : PKeyBase (p, "rsa"/*typeToString (entry.chain.primary ().subjectPublicKey ().type ())*/) {
+	) : PKeyBase (p, QStringLiteral("rsa")/*typeToString (entry.chain.primary ().subjectPublicKey ().type ())*/) {
 		QCA_logTextMessage (
-			"softstorePKeyBase::softstorePKeyBase1 - entry",
+			QStringLiteral("softstorePKeyBase::softstorePKeyBase1 - entry"),
 			Logger::Debug
 		);
 
@@ -97,14 +97,14 @@ public:
 		_pubkey = _entry.chain.primary ().subjectPublicKey ();
 
 		QCA_logTextMessage (
-			"softstorePKeyBase::softstorePKeyBase1 - return",
+			QStringLiteral("softstorePKeyBase::softstorePKeyBase1 - return"),
 			Logger::Debug
 		);
 	}
 
-	softstorePKeyBase (const softstorePKeyBase &from) : PKeyBase (from.provider (), "rsa"/*typeToString (from._pubkey.type ())*/) {
+	softstorePKeyBase (const softstorePKeyBase &from) : PKeyBase (from.provider (), QStringLiteral("rsa")/*typeToString (from._pubkey.type ())*/) {
 		QCA_logTextMessage (
-			"softstorePKeyBase::softstorePKeyBaseC - entry",
+			QStringLiteral("softstorePKeyBase::softstorePKeyBaseC - entry"),
 			Logger::Debug
 		);
 
@@ -115,19 +115,19 @@ public:
 		_privkey = from._privkey;
 
 		QCA_logTextMessage (
-			"softstorePKeyBase::softstorePKeyBaseC - return",
+			QStringLiteral("softstorePKeyBase::softstorePKeyBaseC - return"),
 			Logger::Debug
 		);
 	}
 
 	~softstorePKeyBase () override {
 		QCA_logTextMessage (
-			"softstorePKeyBase::~softstorePKeyBase - entry",
+			QStringLiteral("softstorePKeyBase::~softstorePKeyBase - entry"),
 			Logger::Debug
 		);
 
 		QCA_logTextMessage (
-			"softstorePKeyBase::~softstorePKeyBase - return",
+			QStringLiteral("softstorePKeyBase::~softstorePKeyBase - return"),
 			Logger::Debug
 		);
 	}
@@ -161,7 +161,7 @@ public:
 	void
 	convertToPublic () override {
 		QCA_logTextMessage (
-			"softstorePKeyBase::convertToPublic - entry",
+			QStringLiteral("softstorePKeyBase::convertToPublic - entry"),
 			Logger::Debug
 		);
 
@@ -170,7 +170,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			"softstorePKeyBase::convertToPublic - return",
+			QStringLiteral("softstorePKeyBase::convertToPublic - return"),
 			Logger::Debug
 		);
 	}
@@ -309,14 +309,14 @@ public:
 		bool ret = false;
 
 		QCA_logTextMessage (
-			"softstorePKeyBase::_ensureAccess - entry",
+			QStringLiteral("softstorePKeyBase::_ensureAccess - entry"),
 			Logger::Debug
 		);
 
 		if (_entry.unlockTimeout != -1) {
 			if (dueTime >= QDateTime::currentDateTime ()) {
 				QCA_logTextMessage (
-					"softstorePKeyBase::_ensureAccess - dueTime reached, clearing",
+					QStringLiteral("softstorePKeyBase::_ensureAccess - dueTime reached, clearing"),
 					Logger::Debug
 				);
 				_privkey = PrivateKey ();
@@ -333,7 +333,7 @@ public:
 			ConvertResult cresult;
 
 			QCA_logTextMessage (
-				"softstorePKeyBase::_ensureAccess - no current key, creating",
+				QStringLiteral("softstorePKeyBase::_ensureAccess - no current key, creating"),
 				Logger::Debug
 			);
 
@@ -728,21 +728,21 @@ public:
 		_last_id = 0;
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::softstoreKeyStoreListContext - return",
+			QStringLiteral("softstoreKeyStoreListContext::softstoreKeyStoreListContext - return"),
 			Logger::Debug
 		);
 	}
 
 	~softstoreKeyStoreListContext () override {
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::~softstoreKeyStoreListContext - entry",
+			QStringLiteral("softstoreKeyStoreListContext::~softstoreKeyStoreListContext - entry"),
 			Logger::Debug
 		);
 
 		s_keyStoreList = nullptr;
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::~softstoreKeyStoreListContext - return",
+			QStringLiteral("softstoreKeyStoreListContext::~softstoreKeyStoreListContext - return"),
 			Logger::Debug
 		);
 	}
@@ -750,7 +750,7 @@ public:
 	Provider::Context *
 	clone () const override {
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::clone - entry/return",
+			QStringLiteral("softstoreKeyStoreListContext::clone - entry/return"),
 			Logger::Debug
 		);
 		return nullptr;
@@ -760,14 +760,14 @@ public:
 	void
 	start () override {
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::start - entry",
+			QStringLiteral("softstoreKeyStoreListContext::start - entry"),
 			Logger::Debug
 		);
 
 		QMetaObject::invokeMethod(this, "doReady", Qt::QueuedConnection);
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::start - return",
+			QStringLiteral("softstoreKeyStoreListContext::start - return"),
 			Logger::Debug
 		);
 	}
@@ -816,7 +816,7 @@ public:
 			Logger::Debug
 		);
 
-		if (serialized.startsWith ("qca-softstore/")) {
+		if (serialized.startsWith (QLatin1String("qca-softstore/"))) {
 			SoftStoreEntry sentry;
 
 			if (_deserializeSoftStoreEntry (serialized, sentry)) {
@@ -862,7 +862,7 @@ public:
 			Logger::Debug
 		);
 
-		ret = "qca-softstore";
+		ret = QStringLiteral("qca-softstore");
 
 		QCA_logTextMessage (
 			QString::asprintf (
@@ -887,7 +887,7 @@ public:
 			Logger::Debug
 		);
 
-		ret = "User Software Store";
+		ret = QStringLiteral("User Software Store");
 
 		QCA_logTextMessage (
 			QString::asprintf (
@@ -923,7 +923,7 @@ public:
 		QList<int> list;
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::keyStores - entry",
+			QStringLiteral("softstoreKeyStoreListContext::keyStores - entry"),
 			Logger::Debug
 		);
 
@@ -984,7 +984,7 @@ public:
 		emit diagnosticText (t);
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::_emit_diagnosticText - return",
+			QStringLiteral("softstoreKeyStoreListContext::_emit_diagnosticText - return"),
 			Logger::Debug
 		);
 	}
@@ -993,14 +993,14 @@ private Q_SLOTS:
 	void
 	doReady () {
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::doReady - entry",
+			QStringLiteral("softstoreKeyStoreListContext::doReady - entry"),
 			Logger::Debug
 		);
 
 		emit busyEnd ();
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::doReady - return",
+			QStringLiteral("softstoreKeyStoreListContext::doReady - return"),
 			Logger::Debug
 		);
 	}
@@ -1008,14 +1008,14 @@ private Q_SLOTS:
 	void
 	doUpdated () {
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::doUpdated - entry",
+			QStringLiteral("softstoreKeyStoreListContext::doUpdated - entry"),
 			Logger::Debug
 		);
 
 		emit updated ();
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::doUpdated - return",
+			QStringLiteral("softstoreKeyStoreListContext::doUpdated - return"),
 			Logger::Debug
 		);
 	}
@@ -1024,18 +1024,18 @@ public:
 	void
 	_updateConfig (const QVariantMap &config, const int maxEntries) {
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::_updateConfig - entry",
+			QStringLiteral("softstoreKeyStoreListContext::_updateConfig - entry"),
 			Logger::Debug
 		);
 
 		QMap<QString, KeyType> keyTypeMap;
-		keyTypeMap["pkcs12"] = keyTypePKCS12;
-		keyTypeMap["pkcs8"] = keyTypePKCS8Inline;
-		keyTypeMap["pkcs8-file-pem"] = keyTypePKCS8FilePEM;
-		keyTypeMap["pkcs8-file-der"] = keyTypePKCS8FileDER;
+		keyTypeMap[QStringLiteral("pkcs12")] = keyTypePKCS12;
+		keyTypeMap[QStringLiteral("pkcs8")] = keyTypePKCS8Inline;
+		keyTypeMap[QStringLiteral("pkcs8-file-pem")] = keyTypePKCS8FilePEM;
+		keyTypeMap[QStringLiteral("pkcs8-file-der")] = keyTypePKCS8FileDER;
 
 		QMap<QString, PublicType> publicTypeMap;
-		publicTypeMap["x509chain"] = publicTypeX509Chain;
+		publicTypeMap[QStringLiteral("x509chain")] = publicTypeX509Chain;
 
 		_last_id++;
 		_entries.clear ();
@@ -1085,7 +1085,7 @@ public:
 						goto cleanup1;
 					break;
 					case publicTypeX509Chain:
-						QStringList base64certs = config[QString::asprintf ("entry_%02d_public", i)].toString ().split ("!");
+						QStringList base64certs = config[QString::asprintf ("entry_%02d_public", i)].toString ().split (QStringLiteral("!"));
 
 						foreach (const QString &s, base64certs) {
 							entry.chain += Certificate::fromDER (
@@ -1116,7 +1116,7 @@ public:
 		QMetaObject::invokeMethod(s_keyStoreList, "doUpdated", Qt::QueuedConnection);
 
 		QCA_logTextMessage (
-			"softstoreKeyStoreListContext::_updateConfig - return",
+			QStringLiteral("softstoreKeyStoreListContext::_updateConfig - return"),
 			Logger::Debug
 		);
 	}
@@ -1150,7 +1150,7 @@ private:
 			list += _escapeString (Base64 ().arrayToString (i.toDER ()));
 		}
 
-		serialized.append (list.join ("/"));
+		serialized.append (list.join (QStringLiteral("/")));
 
 		QCA_logTextMessage (
 			QString::asprintf (
@@ -1180,14 +1180,14 @@ private:
 
 		entry = SoftStoreEntry ();
 
-		QStringList list = serialized.split ("/");
+		QStringList list = serialized.split (QStringLiteral("/"));
 		int n=0;
 
 		if (list.size () < 8) {
 			goto cleanup;
 		}
 
-		if (list[n++] != "qca-softstore") {
+		if (list[n++] != QLatin1String("qca-softstore")) {
 			goto cleanup;
 		}
 
@@ -1348,19 +1348,19 @@ public:
 
 	QString
 	name () const override {
-		return "qca-softstore";
+		return QStringLiteral("qca-softstore");
 	}
 
 	QStringList
 	features () const override {
 		QCA_logTextMessage (
-			"softstoreProvider::features - entry/return",
+			QStringLiteral("softstoreProvider::features - entry/return"),
 			Logger::Debug
 		);
 
 		QStringList list;
-		list += "pkey";
-		list += "keystorelist";
+		list += QStringLiteral("pkey");
+		list += QStringLiteral("keystorelist");
 		return list;
 	}
 
@@ -1378,7 +1378,7 @@ public:
 			Logger::Debug
 		);
 
-		if (type == "keystorelist") {
+		if (type == QLatin1String("keystorelist")) {
 			if (s_keyStoreList == nullptr) {
 				s_keyStoreList = new softstoreKeyStoreListContext (this);
 				s_keyStoreList->_updateConfig (_config, _CONFIG_MAX_ENTRIES);
@@ -1402,11 +1402,11 @@ public:
 		QVariantMap mytemplate;
 
 		QCA_logTextMessage (
-			"softstoreProvider::defaultConfig - entry/return",
+			QStringLiteral("softstoreProvider::defaultConfig - entry/return"),
 			Logger::Debug
 		);
 
-		mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-softstore#1.0";
+		mytemplate[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-softstore#1.0";
 		for (int i=0;i<_CONFIG_MAX_ENTRIES;i++) {
 			mytemplate[QString::asprintf ("entry_%02d_enabled", i)] = false;
 			mytemplate[QString::asprintf ("entry_%02d_name", i)] = "";
@@ -1425,7 +1425,7 @@ public:
 	configChanged (const QVariantMap &config) override {
 
 		QCA_logTextMessage (
-			"softstoreProvider::configChanged - entry",
+			QStringLiteral("softstoreProvider::configChanged - entry"),
 			Logger::Debug
 		);
 
@@ -1436,7 +1436,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			"softstoreProvider::configChanged - return",
+			QStringLiteral("softstoreProvider::configChanged - return"),
 			Logger::Debug
 		);
 	}

@@ -313,11 +313,11 @@ static CertificateInfo get_cert_name(X509_NAME *name)
 	CertificateInfo info;
 	try_get_name_item(name, NID_commonName, CommonName, &info);
 	try_get_name_item(name, NID_countryName, Country, &info);
-	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.3"), IncorporationCountry, &info);
+	try_get_name_item_by_oid(name, QStringLiteral("1.3.6.1.4.1.311.60.2.1.3"), IncorporationCountry, &info);
 	try_get_name_item(name, NID_localityName, Locality, &info);
-	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.1"), IncorporationLocality, &info);
+	try_get_name_item_by_oid(name, QStringLiteral("1.3.6.1.4.1.311.60.2.1.1"), IncorporationLocality, &info);
 	try_get_name_item(name, NID_stateOrProvinceName, State, &info);
-	try_get_name_item_by_oid(name, QString("1.3.6.1.4.1.311.60.2.1.2"), IncorporationState, &info);
+	try_get_name_item_by_oid(name, QStringLiteral("1.3.6.1.4.1.311.60.2.1.2"), IncorporationState, &info);
 	try_get_name_item(name, NID_organizationName, Organization, &info);
 	try_get_name_item(name, NID_organizationalUnitName, OrganizationalUnit, &info);
 
@@ -584,7 +584,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 				// IPv4 (TODO: handle IPv6)
 				if(buf.size() == 4)
 				{
-					out = "0.0.0.0";
+					out = QStringLiteral("0.0.0.0");
 				}
 				else
 					break;
@@ -4875,253 +4875,253 @@ static QString cipherIDtoString( const TLS::Version version, const unsigned long
 		switch( cipherID & 0xFFFF ) {
 		case 0x0000:
 			// RFC 2246 A.5
-			return QString("TLS_NULL_WITH_NULL_NULL");
+			return QStringLiteral("TLS_NULL_WITH_NULL_NULL");
 			break;
 		case 0x0001:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_WITH_NULL_MD5");
+			return QStringLiteral("TLS_RSA_WITH_NULL_MD5");
 			break;
 		case 0x0002:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_WITH_NULL_SHA");
+			return QStringLiteral("TLS_RSA_WITH_NULL_SHA");
 			break;
 		case 0x0003:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_EXPORT_WITH_RC4_40_MD5");
+			return QStringLiteral("TLS_RSA_EXPORT_WITH_RC4_40_MD5");
 			break;
 		case 0x0004:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_WITH_RC4_128_MD5");
+			return QStringLiteral("TLS_RSA_WITH_RC4_128_MD5");
 			break;
 		case 0x0005:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_WITH_RC4_128_SHA");
+			return QStringLiteral("TLS_RSA_WITH_RC4_128_SHA");
 			break;
 		case 0x0006:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
+			return QStringLiteral("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
 			break;
 		case 0x0007:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_WITH_IDEA_CBC_SHA");
+			return QStringLiteral("TLS_RSA_WITH_IDEA_CBC_SHA");
 			break;
 		case 0x0008:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("TLS_RSA_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x0009:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_RSA_WITH_DES_CBC_SHA");
 			break;
 		case 0x000A:
 			// RFC 2246 A.5
-			return QString("TLS_RSA_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("TLS_RSA_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x000B:
 			// RFC 2246 A.5
-			return QString("TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x000C:
 			// RFC 2246 A.5
-			return QString("TLS_DH_DSS_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_DH_DSS_WITH_DES_CBC_SHA");
 			break;
 		case 0x000D:
 			// RFC 2246 A.5
-			return QString("TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x000E:
 			// RFC 2246 A.5
-			return QString("TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x000F:
 			// RFC 2246 A.5
-			return QString("TLS_DH_RSA_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_DH_RSA_WITH_DES_CBC_SHA");
 			break;
 		case 0x0010:
 			// RFC 2246 A.5
-			return QString("TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0011:
 			// RFC 2246 A.5
-			return QString("TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x0012:
 			// RFC 2246 A.5
-			return QString("TLS_DHE_DSS_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_DHE_DSS_WITH_DES_CBC_SHA");
 			break;
 		case 0x0013:
 			// RFC 2246 A.5
-			return QString("TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0014:
 			// RFC 2246 A.5
-			return QString("TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x0015:
 			// RFC 2246 A.5
-			return QString("TLS_DHE_RSA_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_DHE_RSA_WITH_DES_CBC_SHA");
 			break;
 		case 0x0016:
 			// RFC 2246 A.5
-			return QString("TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0017:
 			// RFC 2246 A.5
-			return QString("TLS_DH_anon_EXPORT_WITH_RC4_40_MD5");
+			return QStringLiteral("TLS_DH_anon_EXPORT_WITH_RC4_40_MD5");
 			break;
 		case 0x0018:
 			// RFC 2246 A.5
-			return QString("TLS_DH_anon_WITH_RC4_128_MD5");
+			return QStringLiteral("TLS_DH_anon_WITH_RC4_128_MD5");
 			break;
 		case 0x0019:
 			// RFC 2246 A.5
-			return QString("TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x001A:
 			// RFC 2246 A.5
-			return QString("TLS_DH_anon_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_DH_anon_WITH_DES_CBC_SHA");
 			break;
 		case 0x001B:
 			// RFC 2246 A.5
-			return QString("TLS_DH_anon_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("TLS_DH_anon_WITH_3DES_EDE_CBC_SHA");
 			break;
 
 			// 0x001C and 0x001D are reserved to avoid collision with SSL3 Fortezza.
 		case 0x001E:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_KRB5_WITH_DES_CBC_SHA");
 			break;
 		case 0x001F:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("TLS_KRB5_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0020:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_RC4_128_SHA");
+			return QStringLiteral("TLS_KRB5_WITH_RC4_128_SHA");
 			break;
 		case 0x0021:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_IDEA_CBC_SHA");
+			return QStringLiteral("TLS_KRB5_WITH_IDEA_CBC_SHA");
 			break;
 		case 0x0022:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_DES_CBC_MD5");
+			return QStringLiteral("TLS_KRB5_WITH_DES_CBC_MD5");
 			break;
 		case 0x0023:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_3DES_EDE_CBC_MD5");
+			return QStringLiteral("TLS_KRB5_WITH_3DES_EDE_CBC_MD5");
 			break;
 		case 0x0024:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_RC4_128_MD5");
+			return QStringLiteral("TLS_KRB5_WITH_RC4_128_MD5");
 			break;
 		case 0x0025:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_WITH_IDEA_CBC_MD5");
+			return QStringLiteral("TLS_KRB5_WITH_IDEA_CBC_MD5");
 			break;
 		case 0x0026:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA");
+			return QStringLiteral("TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA");
 			break;
 		case 0x0027:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_SHA");
+			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_SHA");
 			break;
 		case 0x0028:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_EXPORT_WITH_RC4_40_SHA");
+			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC4_40_SHA");
 			break;
 		case 0x0029:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5");
+			return QStringLiteral("TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5");
 			break;
 		case 0x002A:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_MD5");
+			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_MD5");
 			break;
 		case 0x002B:
 			// RFC 2712 Section 3
-			return QString("TLS_KRB5_EXPORT_WITH_RC4_40_MD5");
+			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC4_40_MD5");
 			break;
 
 		case 0x002F:
 			// RFC 3268
-			return QString("TLS_RSA_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("TLS_RSA_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0030:
 			// RFC 3268
-			return QString("TLS_DH_DSS_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("TLS_DH_DSS_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0031:
 			// RFC 3268
-			return QString("TLS_DH_RSA_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("TLS_DH_RSA_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0032:
 			// RFC 3268
-			return QString("TLS_DHE_DSS_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("TLS_DHE_DSS_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0033:
 			// RFC 3268
-			return QString("TLS_DHE_RSA_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("TLS_DHE_RSA_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0034:
 			// RFC 3268
-			return QString("TLS_DH_anon_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("TLS_DH_anon_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0035:
 			// RFC 3268
-			return QString("TLS_RSA_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("TLS_RSA_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0036:
 			// RFC 3268
-			return QString("TLS_DH_DSS_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("TLS_DH_DSS_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0037:
 			// RFC 3268
-			return QString("TLS_DH_RSA_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("TLS_DH_RSA_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0038:
 			// RFC 3268
-			return QString("TLS_DHE_DSS_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("TLS_DHE_DSS_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0039:
 			// RFC 3268
-			return QString("TLS_DHE_RSA_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("TLS_DHE_RSA_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x003A:
 			// RFC 3268
-			return QString("TLS_DH_anon_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("TLS_DH_anon_WITH_AES_256_CBC_SHA");
 			break;
 
 			// TODO: 0x0041 -> 0x0046 are from RFC4132 (Camellia)
 
 		case 0x0060:
 			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
-			return QString("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_MD5");
+			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_MD5");
 			break;
 		case 0x0061:
 			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
-			return QString("TLS_CK_RSA_EXPORT1024_WITH_RC2_CBC_56_MD5");
+			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_RC2_CBC_56_MD5");
 			break;
 		case 0x0062:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("TLS_CK_RSA_EXPORT1024_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_DES_CBC_SHA");
 			break;
 		case 0x0063:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("TLS_CK_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA");
+			return QStringLiteral("TLS_CK_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA");
 			break;
 		case 0x0064:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_SHA");
+			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_SHA");
 			break;
 		case 0x0065:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("TLS_CK_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA");
+			return QStringLiteral("TLS_CK_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA");
 			break;
 		case 0x0066:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("TLS_CK_DHE_DSS_WITH_RC4_128_SHA");
+			return QStringLiteral("TLS_CK_DHE_DSS_WITH_RC4_128_SHA");
 			break;
 
 			// TODO: 0x0084 -> 0x0089 are from RFC4132 (Camellia)
@@ -5131,122 +5131,122 @@ static QString cipherIDtoString( const TLS::Version version, const unsigned long
 			// TODO: 0xC000 -> 0xC019 are from the ECC draft
 
 		default:
-			return QString("TLS algo to be added: %1").arg(cipherID & 0xffff, 0, 16);
+			return QStringLiteral("TLS algo to be added: %1").arg(cipherID & 0xffff, 0, 16);
 			break;
 		}
 	} else if (TLS::SSL_v3 == version) {
 		switch( cipherID & 0xFFFF ) {
 		case 0x0000:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_NULL_WITH_NULL_NULL");
+			return QStringLiteral("SSL_NULL_WITH_NULL_NULL");
 			break;
 		case 0x0001:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_WITH_NULL_MD5");
+			return QStringLiteral("SSL_RSA_WITH_NULL_MD5");
 			break;
 		case 0x0002:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_WITH_NULL_SHA");
+			return QStringLiteral("SSL_RSA_WITH_NULL_SHA");
 			break;
 		case 0x0003:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_EXPORT_WITH_RC4_40_MD5");
+			return QStringLiteral("SSL_RSA_EXPORT_WITH_RC4_40_MD5");
 			break;
 		case 0x0004:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_WITH_RC4_128_MD5");
+			return QStringLiteral("SSL_RSA_WITH_RC4_128_MD5");
 			break;
 		case 0x0005:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_WITH_RC4_128_SHA");
+			return QStringLiteral("SSL_RSA_WITH_RC4_128_SHA");
 			break;
 		case 0x0006:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
+			return QStringLiteral("SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
 			break;
 		case 0x0007:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_WITH_IDEA_CBC_SHA");
+			return QStringLiteral("SSL_RSA_WITH_IDEA_CBC_SHA");
 			break;
 		case 0x0008:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("SSL_RSA_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x0009:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_RSA_WITH_DES_CBC_SHA");
 			break;
 		case 0x000A:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_RSA_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("SSL_RSA_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x000B:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x000C:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_DSS_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_DH_DSS_WITH_DES_CBC_SHA");
 			break;
 		case 0x000D:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x000E:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_RSA_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_DH_RSA_WITH_DES_CBC_SHA");
 			break;
 		case 0x000F:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_RSA_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_DH_RSA_WITH_DES_CBC_SHA");
 			break;
 		case 0x0010:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0011:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x0012:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DHE_DSS_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_DHE_DSS_WITH_DES_CBC_SHA");
 			break;
 		case 0x0013:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0014:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x0015:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DHE_RSA_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_DHE_RSA_WITH_DES_CBC_SHA");
 			break;
 		case 0x0016:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0017:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SL_DH_anon_EXPORT_WITH_RC4_40_MD5");
+			return QStringLiteral("SL_DH_anon_EXPORT_WITH_RC4_40_MD5");
 			break;
 		case 0x0018:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_anon_WITH_RC4_128_MD5");
+			return QStringLiteral("SSL_DH_anon_WITH_RC4_128_MD5");
 			break;
 		case 0x0019:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA");
+			return QStringLiteral("SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA");
 			break;
 		case 0x001A:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_anon_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_DH_anon_WITH_DES_CBC_SHA");
 			break;
 		case 0x001B:
 			// From the Netscape SSL3 Draft (nov 1996)
-			return QString("SSL_DH_anon_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("SSL_DH_anon_WITH_3DES_EDE_CBC_SHA");
 			break;
 
 			// TODO: Sort out the Fortezza mess...
@@ -5254,156 +5254,156 @@ static QString cipherIDtoString( const TLS::Version version, const unsigned long
 			// These aren't in the Netscape SSL3 draft, but openssl does
 			// allow you to use them with SSL3.
 		case 0x001E:
-			return QString("SSL_KRB5_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_KRB5_WITH_DES_CBC_SHA");
 			break;
 		case 0x001F:
-			return QString("SSL_KRB5_WITH_3DES_EDE_CBC_SHA");
+			return QStringLiteral("SSL_KRB5_WITH_3DES_EDE_CBC_SHA");
 			break;
 		case 0x0020:
-			return QString("SSL_KRB5_WITH_RC4_128_SHA");
+			return QStringLiteral("SSL_KRB5_WITH_RC4_128_SHA");
 			break;
 		case 0x0021:
-			return QString("SSL_KRB5_WITH_IDEA_CBC_SHA");
+			return QStringLiteral("SSL_KRB5_WITH_IDEA_CBC_SHA");
 			break;
 		case 0x0022:
-			return QString("SSL_KRB5_WITH_DES_CBC_MD5");
+			return QStringLiteral("SSL_KRB5_WITH_DES_CBC_MD5");
 			break;
 		case 0x0023:
-			return QString("SSL_KRB5_WITH_3DES_EDE_CBC_MD5");
+			return QStringLiteral("SSL_KRB5_WITH_3DES_EDE_CBC_MD5");
 			break;
 		case 0x0024:
-			return QString("SSL_KRB5_WITH_RC4_128_MD5");
+			return QStringLiteral("SSL_KRB5_WITH_RC4_128_MD5");
 			break;
 		case 0x0025:
-			return QString("SSL_KRB5_WITH_IDEA_CBC_MD5");
+			return QStringLiteral("SSL_KRB5_WITH_IDEA_CBC_MD5");
 			break;
 		case 0x0026:
-			return QString("SSL_KRB5_EXPORT_WITH_DES_CBC_40_SHA");
+			return QStringLiteral("SSL_KRB5_EXPORT_WITH_DES_CBC_40_SHA");
 			break;
 		case 0x0027:
-			return QString("SSL_KRB5_EXPORT_WITH_RC2_CBC_40_SHA");
+			return QStringLiteral("SSL_KRB5_EXPORT_WITH_RC2_CBC_40_SHA");
 			break;
 		case 0x0028:
-			return QString("SSL_KRB5_EXPORT_WITH_RC4_40_SHA");
+			return QStringLiteral("SSL_KRB5_EXPORT_WITH_RC4_40_SHA");
 			break;
 		case 0x0029:
-			return QString("SSL_KRB5_EXPORT_WITH_DES_CBC_40_MD5");
+			return QStringLiteral("SSL_KRB5_EXPORT_WITH_DES_CBC_40_MD5");
 			break;
 		case 0x002A:
-			return QString("SSL_KRB5_EXPORT_WITH_RC2_CBC_40_MD5");
+			return QStringLiteral("SSL_KRB5_EXPORT_WITH_RC2_CBC_40_MD5");
 			break;
 		case 0x002B:
-			return QString("SSL_KRB5_EXPORT_WITH_RC4_40_MD5");
+			return QStringLiteral("SSL_KRB5_EXPORT_WITH_RC4_40_MD5");
 			break;
 		case 0x002F:
-			return QString("SSL_RSA_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("SSL_RSA_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0030:
-			return QString("SSL_DH_DSS_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("SSL_DH_DSS_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0031:
-			return QString("SSL_DH_RSA_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("SSL_DH_RSA_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0032:
-			return QString("SSL_DHE_DSS_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("SSL_DHE_DSS_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0033:
-			return QString("SSL_DHE_RSA_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("SSL_DHE_RSA_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0034:
-			return QString("SSL_DH_anon_WITH_AES_128_CBC_SHA");
+			return QStringLiteral("SSL_DH_anon_WITH_AES_128_CBC_SHA");
 			break;
 		case 0x0035:
-			return QString("SSL_RSA_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("SSL_RSA_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0036:
-			return QString("SSL_DH_DSS_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("SSL_DH_DSS_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0037:
-			return QString("SSL_DH_RSA_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("SSL_DH_RSA_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0038:
-			return QString("SSL_DHE_DSS_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("SSL_DHE_DSS_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0039:
-			return QString("SSL_DHE_RSA_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("SSL_DHE_RSA_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x003A:
-			return QString("SSL_DH_anon_WITH_AES_256_CBC_SHA");
+			return QStringLiteral("SSL_DH_anon_WITH_AES_256_CBC_SHA");
 			break;
 		case 0x0060:
 			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
-			return QString("SSL_CK_RSA_EXPORT1024_WITH_RC4_56_MD5");
+			return QStringLiteral("SSL_CK_RSA_EXPORT1024_WITH_RC4_56_MD5");
 			break;
 		case 0x0061:
 			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
-			return QString("SSL_CK_RSA_EXPORT1024_WITH_RC2_CBC_56_MD5");
+			return QStringLiteral("SSL_CK_RSA_EXPORT1024_WITH_RC2_CBC_56_MD5");
 			break;
 		case 0x0062:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("SSL_CK_RSA_EXPORT1024_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_CK_RSA_EXPORT1024_WITH_DES_CBC_SHA");
 			break;
 		case 0x0063:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("SSL_CK_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA");
+			return QStringLiteral("SSL_CK_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA");
 			break;
 		case 0x0064:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("SSL_CK_RSA_EXPORT1024_WITH_RC4_56_SHA");
+			return QStringLiteral("SSL_CK_RSA_EXPORT1024_WITH_RC4_56_SHA");
 			break;
 		case 0x0065:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("SSL_CK_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA");
+			return QStringLiteral("SSL_CK_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA");
 			break;
 		case 0x0066:
 			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QString("SSL_CK_DHE_DSS_WITH_RC4_128_SHA");
+			return QStringLiteral("SSL_CK_DHE_DSS_WITH_RC4_128_SHA");
 			break;
 		default:
-			return QString("SSL3 to be added: %1").arg(cipherID & 0xffff, 0, 16);
+			return QStringLiteral("SSL3 to be added: %1").arg(cipherID & 0xffff, 0, 16);
 			break;
 		}
 	} else if (TLS::SSL_v2 == version) {
 		switch( cipherID & 0xffffff) {
 		case 0x010080:
 			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
-			return QString("SSL_CK_RC4_128_WITH_MD5");
+			return QStringLiteral("SSL_CK_RC4_128_WITH_MD5");
 			break;
 		case 0x020080:
 			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
-			return QString("SSL_CK_RC4_128_EXPORT40_WITH_MD5");
+			return QStringLiteral("SSL_CK_RC4_128_EXPORT40_WITH_MD5");
 			break;
 		case 0x030080:
 			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
-			return QString("SSL_CK_RC2_128_CBC_WITH_MD5");
+			return QStringLiteral("SSL_CK_RC2_128_CBC_WITH_MD5");
 			break;
 		case 0x040080:
 			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
-			return QString("SSL_CK_RC2_128_CBC_EXPORT40_WITH_MD5");
+			return QStringLiteral("SSL_CK_RC2_128_CBC_EXPORT40_WITH_MD5");
 			break;
 		case 0x050080:
 			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
-			return QString("SSL_CK_RC4_128_EXPORT40_WITH_MD5");
+			return QStringLiteral("SSL_CK_RC4_128_EXPORT40_WITH_MD5");
 			break;
 		case 0x060040:
 			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
-			return QString("SSL_CK_DES_64_CBC_WITH_MD5");
+			return QStringLiteral("SSL_CK_DES_64_CBC_WITH_MD5");
 			break;
 		case 0x0700C0:
 			// From the Netscape SSL2 Draft Section C.4 (nov 1994)
-			return QString("SSL_CK_DES_192_EDE3_CBC_WITH_MD5");
+			return QStringLiteral("SSL_CK_DES_192_EDE3_CBC_WITH_MD5");
 			break;
 		case 0x080080:
 			// From the openssl source, which says "MS hack"
-			return QString("SSL_CK_RC4_64_WITH_MD5");
+			return QStringLiteral("SSL_CK_RC4_64_WITH_MD5");
 			break;
 		default:
-			return QString("SSL2 to be added: %1").arg(cipherID & 0xffffff, 0, 16);
+			return QStringLiteral("SSL2 to be added: %1").arg(cipherID & 0xffffff, 0, 16);
 			break;
 		}
 	}
 	else {
-		return QString("Unknown version!");
+		return QStringLiteral("Unknown version!");
 	}
 }
 
@@ -5438,7 +5438,7 @@ public:
 	Validity vr;
 	bool v_eof;
 
-	MyTLSContext(Provider *p) : TLSContext(p, "tls")
+	MyTLSContext(Provider *p) : TLSContext(p, QStringLiteral("tls"))
 	{
 		if(!ssl_init)
 		{
@@ -6213,7 +6213,7 @@ public:
 	CertificateCollection untrustedCerts;
 	QList<SecureMessageKey> privateKeys;
 
-	CMSContext(Provider *p) : SMSContext(p, "cms")
+	CMSContext(Provider *p) : SMSContext(p, QStringLiteral("cms"))
 	{
 	}
 
@@ -6343,7 +6343,7 @@ public:
 
 	MyMessageContextThread *thread;
 
-	MyMessageContext(CMSContext *_cms, Provider *p) : MessageContext(p, "cmsmsg")
+	MyMessageContext(CMSContext *_cms, Provider *p) : MessageContext(p, QStringLiteral("cmsmsg"))
 	{
 		cms = _cms;
 
@@ -6787,7 +6787,7 @@ public:
 	QString hashName() const override
 	{
 		// TODO
-		return "sha1";
+		return QStringLiteral("sha1");
 	}
 
 	SecureMessageSignatureList signers() const override
@@ -6888,8 +6888,8 @@ public:
 		if (Encode == m_direction) {
 			EVP_EncryptInit_ex(m_context, m_cryptoAlgorithm, nullptr, nullptr, nullptr);
 			EVP_CIPHER_CTX_set_key_length(m_context, key.size());
-			if (m_type.endsWith("gcm") || m_type.endsWith("ccm")) {
-				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
+			if (m_type.endsWith(QLatin1String("gcm")) || m_type.endsWith(QLatin1String("ccm"))) {
+				int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
 				EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
 			}
 			EVP_EncryptInit_ex(m_context, nullptr, nullptr,
@@ -6898,8 +6898,8 @@ public:
 		} else {
 			EVP_DecryptInit_ex(m_context, m_cryptoAlgorithm, nullptr, nullptr, nullptr);
 			EVP_CIPHER_CTX_set_key_length(m_context, key.size());
-			if (m_type.endsWith("gcm") || m_type.endsWith("ccm")) {
-				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
+			if (m_type.endsWith(QLatin1String("gcm")) || m_type.endsWith(QLatin1String("ccm"))) {
+				int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
 				EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
 			}
 			EVP_DecryptInit_ex(m_context, nullptr, nullptr,
@@ -6965,15 +6965,15 @@ public:
 										 &resultLength)) {
 				return false;
 			}
-			if (m_tag.size() && (m_type.endsWith("gcm") || m_type.endsWith("ccm"))) {
-				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_GET_TAG : EVP_CTRL_CCM_GET_TAG;
+			if (m_tag.size() && (m_type.endsWith(QLatin1String("gcm")) || m_type.endsWith(QLatin1String("ccm")))) {
+				int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_GET_TAG : EVP_CTRL_CCM_GET_TAG;
 				if (0 == EVP_CIPHER_CTX_ctrl(m_context, parameter, m_tag.size(), (unsigned char*)m_tag.data())) {
 					return false;
 				}
 			}
 		} else {
-			if (m_tag.size() && (m_type.endsWith("gcm") || m_type.endsWith("ccm"))) {
-				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_TAG : EVP_CTRL_CCM_SET_TAG;
+			if (m_tag.size() && (m_type.endsWith(QLatin1String("gcm")) || m_type.endsWith(QLatin1String("ccm")))) {
+				int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_SET_TAG : EVP_CTRL_CCM_SET_TAG;
 				if (0 == EVP_CIPHER_CTX_ctrl(m_context, parameter, m_tag.size(), m_tag.data())) {
 					return false;
 				}
@@ -6991,20 +6991,20 @@ public:
 	// Change cipher names
 	KeyLength keyLength() const override
 	{
-		if (m_type.left(4) == "des-") {
+		if (m_type.left(4) == QLatin1String("des-")) {
 			return KeyLength( 8, 8, 1);
-		} else if (m_type.left(6) == "aes128") {
+		} else if (m_type.left(6) == QLatin1String("aes128")) {
 			return KeyLength( 16, 16, 1);
-		} else if (m_type.left(6) == "aes192") {
+		} else if (m_type.left(6) == QLatin1String("aes192")) {
 			return KeyLength( 24, 24, 1);
-		} else if (m_type.left(6) == "aes256") {
+		} else if (m_type.left(6) == QLatin1String("aes256")) {
 			return KeyLength( 32, 32, 1);
-		} else if (m_type.left(5) == "cast5") {
+		} else if (m_type.left(5) == QLatin1String("cast5")) {
 			return KeyLength( 5, 16, 1);
-		} else if (m_type.left(8) == "blowfish") {
+		} else if (m_type.left(8) == QLatin1String("blowfish")) {
 			// Don't know - TODO
 			return KeyLength( 1, 32, 1);
-		} else if (m_type.left(9) == "tripledes") {
+		} else if (m_type.left(9) == QLatin1String("tripledes")) {
 			return KeyLength( 16, 24, 1);
 		} else {
 			return KeyLength( 0, 1, 1);
@@ -7024,30 +7024,30 @@ protected:
 static QStringList all_hash_types()
 {
 	QStringList list;
-	list += "sha1";
+	list += QStringLiteral("sha1");
 #ifdef HAVE_OPENSSL_SHA0
-	list += "sha0";
+	list += QStringLiteral("sha0");
 #endif
-	list += "ripemd160";
+	list += QStringLiteral("ripemd160");
 #ifdef HAVE_OPENSSL_MD2
-	list += "md2";
+	list += QStringLiteral("md2");
 #endif
-	list += "md4";
-	list += "md5";
+	list += QStringLiteral("md4");
+	list += QStringLiteral("md5");
 #ifdef SHA224_DIGEST_LENGTH
-	list += "sha224";
+	list += QStringLiteral("sha224");
 #endif
 #ifdef SHA256_DIGEST_LENGTH
-	list += "sha256";
+	list += QStringLiteral("sha256");
 #endif
 #ifdef SHA384_DIGEST_LENGTH
-	list += "sha384";
+	list += QStringLiteral("sha384");
 #endif
 #ifdef SHA512_DIGEST_LENGTH
-	list += "sha512";
+	list += QStringLiteral("sha512");
 #endif
 #ifdef OBJ_whirlpool
-	list += "whirlpool";
+	list += QStringLiteral("whirlpool");
 #endif
 	return list;
 }
@@ -7055,87 +7055,87 @@ static QStringList all_hash_types()
 static QStringList all_cipher_types()
 {
 	QStringList list;
-	list += "aes128-ecb";
-	list += "aes128-cfb";
-	list += "aes128-cbc";
-	list += "aes128-cbc-pkcs7";
-	list += "aes128-ofb";
+	list += QStringLiteral("aes128-ecb");
+	list += QStringLiteral("aes128-cfb");
+	list += QStringLiteral("aes128-cbc");
+	list += QStringLiteral("aes128-cbc-pkcs7");
+	list += QStringLiteral("aes128-ofb");
 #ifdef HAVE_OPENSSL_AES_CTR
-	list += "aes128-ctr";
+	list += QStringLiteral("aes128-ctr");
 #endif
 #ifdef HAVE_OPENSSL_AES_GCM
-	list += "aes128-gcm";
+	list += QStringLiteral("aes128-gcm");
 #endif
 #ifdef HAVE_OPENSSL_AES_CCM
-	list += "aes128-ccm";
+	list += QStringLiteral("aes128-ccm");
 #endif
-	list += "aes192-ecb";
-	list += "aes192-cfb";
-	list += "aes192-cbc";
-	list += "aes192-cbc-pkcs7";
-	list += "aes192-ofb";
+	list += QStringLiteral("aes192-ecb");
+	list += QStringLiteral("aes192-cfb");
+	list += QStringLiteral("aes192-cbc");
+	list += QStringLiteral("aes192-cbc-pkcs7");
+	list += QStringLiteral("aes192-ofb");
 #ifdef HAVE_OPENSSL_AES_CTR
-	list += "aes192-ctr";
+	list += QStringLiteral("aes192-ctr");
 #endif
 #ifdef HAVE_OPENSSL_AES_GCM
-	list += "aes192-gcm";
+	list += QStringLiteral("aes192-gcm");
 #endif
 #ifdef HAVE_OPENSSL_AES_CCM
-	list += "aes192-ccm";
+	list += QStringLiteral("aes192-ccm");
 #endif
-	list += "aes256-ecb";
-	list += "aes256-cbc";
-	list += "aes256-cbc-pkcs7";
-	list += "aes256-cfb";
-	list += "aes256-ofb";
+	list += QStringLiteral("aes256-ecb");
+	list += QStringLiteral("aes256-cbc");
+	list += QStringLiteral("aes256-cbc-pkcs7");
+	list += QStringLiteral("aes256-cfb");
+	list += QStringLiteral("aes256-ofb");
 #ifdef HAVE_OPENSSL_AES_CTR
-	list += "aes256-ctr";
+	list += QStringLiteral("aes256-ctr");
 #endif
 #ifdef HAVE_OPENSSL_AES_GCM
-	list += "aes256-gcm";
+	list += QStringLiteral("aes256-gcm");
 #endif
 #ifdef HAVE_OPENSSL_AES_CCM
-	list += "aes256-ccm";
+	list += QStringLiteral("aes256-ccm");
 #endif
-	list += "blowfish-ecb";
-	list += "blowfish-cbc-pkcs7";
-	list += "blowfish-cbc";
-	list += "blowfish-cfb";
-	list += "blowfish-ofb";
-	list += "tripledes-ecb";
-	list += "tripledes-cbc";
-	list += "des-ecb";
-	list += "des-ecb-pkcs7";
-	list += "des-cbc";
-	list += "des-cbc-pkcs7";
-	list += "des-cfb";
-	list += "des-ofb";
-	list += "cast5-ecb";
-	list += "cast5-cbc";
-	list += "cast5-cbc-pkcs7";
-	list += "cast5-cfb";
-	list += "cast5-ofb";
+	list += QStringLiteral("blowfish-ecb");
+	list += QStringLiteral("blowfish-cbc-pkcs7");
+	list += QStringLiteral("blowfish-cbc");
+	list += QStringLiteral("blowfish-cfb");
+	list += QStringLiteral("blowfish-ofb");
+	list += QStringLiteral("tripledes-ecb");
+	list += QStringLiteral("tripledes-cbc");
+	list += QStringLiteral("des-ecb");
+	list += QStringLiteral("des-ecb-pkcs7");
+	list += QStringLiteral("des-cbc");
+	list += QStringLiteral("des-cbc-pkcs7");
+	list += QStringLiteral("des-cfb");
+	list += QStringLiteral("des-ofb");
+	list += QStringLiteral("cast5-ecb");
+	list += QStringLiteral("cast5-cbc");
+	list += QStringLiteral("cast5-cbc-pkcs7");
+	list += QStringLiteral("cast5-cfb");
+	list += QStringLiteral("cast5-ofb");
 	return list;
 }
 
 static QStringList all_mac_types()
 {
 	QStringList list;
-	list += "hmac(md5)";
-	list += "hmac(sha1)";
+	list += QStringLiteral("hmac(md5)");
+	list += QStringLiteral("hmac(sha1)");
 #ifdef SHA224_DIGEST_LENGTH
-	list += "hmac(sha224)";
+	list += QStringLiteral("hmac(sha224)");
 #endif
 #ifdef SHA256_DIGEST_LENGTH
-	list += "hmac(sha256)";
+	list += QStringLiteral("hmac(sha256)");
 #endif
 #ifdef SHA384_DIGEST_LENGTH
-	list += "hmac(sha384)";
+	list += QStringLiteral("hmac(sha384)");
 #endif
 #ifdef SHA512_DIGEST_LENGTH
-	list += "hmac(sha512)";
+	list += QStringLiteral("hmac(sha512)");
 #endif
-	list += "hmac(ripemd160)";
+	list += QStringLiteral("hmac(ripemd160)");
 	return list;
 }
 
@@ -7246,7 +7246,7 @@ public:
 
 	QString name() const override
 	{
-		return "qca-ossl";
+		return QStringLiteral("qca-ossl");
 	}
 
 	QString credit() const override
@@ -7259,29 +7259,29 @@ public:
 	QStringList features() const override
 	{
 		QStringList list;
-		list += "random";
+		list += QStringLiteral("random");
 		list += all_hash_types();
 		list += all_mac_types();
 		list += all_cipher_types();
 #ifdef HAVE_OPENSSL_MD2
-		list += "pbkdf1(md2)";
+		list += QStringLiteral("pbkdf1(md2)");
 #endif
-		list += "pbkdf1(sha1)";
-		list += "pbkdf2(sha1)";
-		list += "hkdf(sha256)";
-		list += "pkey";
-		list += "dlgroup";
-		list += "rsa";
-		list += "dsa";
-		list += "dh";
-		list += "cert";
-		list += "csr";
-		list += "crl";
-		list += "certcollection";
-		list += "pkcs12";
-		list += "tls";
-		list += "cms";
-		list += "ca";
+		list += QStringLiteral("pbkdf1(sha1)");
+		list += QStringLiteral("pbkdf2(sha1)");
+		list += QStringLiteral("hkdf(sha256)");
+		list += QStringLiteral("pkey");
+		list += QStringLiteral("dlgroup");
+		list += QStringLiteral("rsa");
+		list += QStringLiteral("dsa");
+		list += QStringLiteral("dh");
+		list += QStringLiteral("cert");
+		list += QStringLiteral("csr");
+		list += QStringLiteral("crl");
+		list += QStringLiteral("certcollection");
+		list += QStringLiteral("pkcs12");
+		list += QStringLiteral("tls");
+		list += QStringLiteral("cms");
+		list += QStringLiteral("ca");
 
 		return list;
 	}
@@ -7289,205 +7289,205 @@ public:
 	Context *createContext(const QString &type) override
 	{
 		//OpenSSL_add_all_digests();
-		if ( type == "random" )
+		if ( type == QLatin1String("random") )
 			return new opensslRandomContext(this);
-		else if ( type == "info" )
+		else if ( type == QLatin1String("info") )
 			return new opensslInfoContext(this);
-		else if ( type == "sha1" )
+		else if ( type == QLatin1String("sha1") )
 			return new opensslHashContext( EVP_sha1(), this, type);
 #ifdef HAVE_OPENSSL_SHA0
-		else if ( type == "sha0" )
+		else if ( type == QLatin1String("sha0") )
 			return new opensslHashContext( EVP_sha(), this, type);
 #endif
-		else if ( type == "ripemd160" )
+		else if ( type == QLatin1String("ripemd160") )
 			return new opensslHashContext( EVP_ripemd160(), this, type);
 #ifdef HAVE_OPENSSL_MD2
-		else if ( type == "md2" )
+		else if ( type == QLatin1String("md2") )
 			return new opensslHashContext( EVP_md2(), this, type);
 #endif
-		else if ( type == "md4" )
+		else if ( type == QLatin1String("md4") )
 			return new opensslHashContext( EVP_md4(), this, type);
-		else if ( type == "md5" )
+		else if ( type == QLatin1String("md5") )
 			return new opensslHashContext( EVP_md5(), this, type);
 #ifdef SHA224_DIGEST_LENGTH
-		else if ( type == "sha224" )
+		else if ( type == QLatin1String("sha224") )
 			return new opensslHashContext( EVP_sha224(), this, type);
 #endif
 #ifdef SHA256_DIGEST_LENGTH
-		else if ( type == "sha256" )
+		else if ( type == QLatin1String("sha256") )
 			return new opensslHashContext( EVP_sha256(), this, type);
 #endif
 #ifdef SHA384_DIGEST_LENGTH
-		else if ( type == "sha384" )
+		else if ( type == QLatin1String("sha384") )
 			return new opensslHashContext( EVP_sha384(), this, type);
 #endif
 #ifdef SHA512_DIGEST_LENGTH
-		else if ( type == "sha512" )
+		else if ( type == QLatin1String("sha512") )
 			return new opensslHashContext( EVP_sha512(), this, type);
 #endif
 #ifdef OBJ_whirlpool
-		else if ( type == "whirlpool" )
+		else if ( type == QLatin1String("whirlpool") )
 			return new opensslHashContext( EVP_whirlpool(), this, type);
 #endif
-		else if ( type == "pbkdf1(sha1)" )
+		else if ( type == QLatin1String("pbkdf1(sha1)") )
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
 #ifdef HAVE_OPENSSL_MD2
-		else if ( type == "pbkdf1(md2)" )
+		else if ( type == QLatin1String("pbkdf1(md2)") )
 			return new opensslPbkdf1Context( EVP_md2(), this, type );
 #endif
-		else if ( type == "pbkdf2(sha1)" )
+		else if ( type == QLatin1String("pbkdf2(sha1)") )
 			return new opensslPbkdf2Context( this, type );
-		else if ( type == "hkdf(sha256)" )
+		else if ( type == QLatin1String("hkdf(sha256)") )
 			return new opensslHkdfContext( this, type );
-		else if ( type == "hmac(md5)" )
+		else if ( type == QLatin1String("hmac(md5)") )
 			return new opensslHMACContext( EVP_md5(), this, type );
-		else if ( type == "hmac(sha1)" )
+		else if ( type == QLatin1String("hmac(sha1)") )
 			return new opensslHMACContext( EVP_sha1(),this, type );
 #ifdef SHA224_DIGEST_LENGTH
-		else if ( type == "hmac(sha224)" )
+		else if ( type == QLatin1String("hmac(sha224)") )
 			return new opensslHMACContext( EVP_sha224(), this, type);
 #endif
 #ifdef SHA256_DIGEST_LENGTH
-		else if ( type == "hmac(sha256)" )
+		else if ( type == QLatin1String("hmac(sha256)") )
 			return new opensslHMACContext( EVP_sha256(), this, type);
 #endif
 #ifdef SHA384_DIGEST_LENGTH
-		else if ( type == "hmac(sha384)" )
+		else if ( type == QLatin1String("hmac(sha384)") )
 			return new opensslHMACContext( EVP_sha384(), this, type);
 #endif
 #ifdef SHA512_DIGEST_LENGTH
-		else if ( type == "hmac(sha512)" )
+		else if ( type == QLatin1String("hmac(sha512)") )
 			return new opensslHMACContext( EVP_sha512(), this, type);
 #endif
-		else if ( type == "hmac(ripemd160)" )
+		else if ( type == QLatin1String("hmac(ripemd160)") )
 			return new opensslHMACContext( EVP_ripemd160(), this, type );
-		else if ( type == "aes128-ecb" )
+		else if ( type == QLatin1String("aes128-ecb") )
 			return new opensslCipherContext( EVP_aes_128_ecb(), 0, this, type);
-		else if ( type == "aes128-cfb" )
+		else if ( type == QLatin1String("aes128-cfb") )
 			return new opensslCipherContext( EVP_aes_128_cfb(), 0, this, type);
-		else if ( type == "aes128-cbc" )
+		else if ( type == QLatin1String("aes128-cbc") )
 			return new opensslCipherContext( EVP_aes_128_cbc(), 0, this, type);
-		else if ( type == "aes128-cbc-pkcs7" )
+		else if ( type == QLatin1String("aes128-cbc-pkcs7") )
 			return new opensslCipherContext( EVP_aes_128_cbc(), 1, this, type);
-		else if ( type == "aes128-ofb" )
+		else if ( type == QLatin1String("aes128-ofb") )
 			return new opensslCipherContext( EVP_aes_128_ofb(), 0, this, type);
 #ifdef HAVE_OPENSSL_AES_CTR
-		else if ( type == "aes128-ctr" )
+		else if ( type == QLatin1String("aes128-ctr") )
 			return new opensslCipherContext( EVP_aes_128_ctr(), 0, this, type);
 #endif
 #ifdef HAVE_OPENSSL_AES_GCM
-		else if ( type == "aes128-gcm" )
+		else if ( type == QLatin1String("aes128-gcm") )
 			return new opensslCipherContext( EVP_aes_128_gcm(), 0, this, type);
 #endif
 #ifdef HAVE_OPENSSL_AES_CCM
-		else if ( type == "aes128-ccm" )
+		else if ( type == QLatin1String("aes128-ccm") )
 			return new opensslCipherContext( EVP_aes_128_ccm(), 0, this, type);
 #endif
-		else if ( type == "aes192-ecb" )
+		else if ( type == QLatin1String("aes192-ecb") )
 			return new opensslCipherContext( EVP_aes_192_ecb(), 0, this, type);
-		else if ( type == "aes192-cfb" )
+		else if ( type == QLatin1String("aes192-cfb") )
 			return new opensslCipherContext( EVP_aes_192_cfb(), 0, this, type);
-		else if ( type == "aes192-cbc" )
+		else if ( type == QLatin1String("aes192-cbc") )
 			return new opensslCipherContext( EVP_aes_192_cbc(), 0, this, type);
-		else if ( type == "aes192-cbc-pkcs7" )
+		else if ( type == QLatin1String("aes192-cbc-pkcs7") )
 			return new opensslCipherContext( EVP_aes_192_cbc(), 1, this, type);
-		else if ( type == "aes192-ofb" )
+		else if ( type == QLatin1String("aes192-ofb") )
 			return new opensslCipherContext( EVP_aes_192_ofb(), 0, this, type);
 #ifdef HAVE_OPENSSL_AES_CTR
-		else if ( type == "aes192-ctr" )
+		else if ( type == QLatin1String("aes192-ctr") )
 			return new opensslCipherContext( EVP_aes_192_ctr(), 0, this, type);
 #endif
 #ifdef HAVE_OPENSSL_AES_GCM
-		else if ( type == "aes192-gcm" )
+		else if ( type == QLatin1String("aes192-gcm") )
 			return new opensslCipherContext( EVP_aes_192_gcm(), 0, this, type);
 #endif
 #ifdef HAVE_OPENSSL_AES_CCM
-		else if ( type == "aes192-ccm" )
+		else if ( type == QLatin1String("aes192-ccm") )
 			return new opensslCipherContext( EVP_aes_192_ccm(), 0, this, type);
 #endif
-		else if ( type == "aes256-ecb" )
+		else if ( type == QLatin1String("aes256-ecb") )
 			return new opensslCipherContext( EVP_aes_256_ecb(), 0, this, type);
-		else if ( type == "aes256-cfb" )
+		else if ( type == QLatin1String("aes256-cfb") )
 			return new opensslCipherContext( EVP_aes_256_cfb(), 0, this, type);
-		else if ( type == "aes256-cbc" )
+		else if ( type == QLatin1String("aes256-cbc") )
 			return new opensslCipherContext( EVP_aes_256_cbc(), 0, this, type);
-		else if ( type == "aes256-cbc-pkcs7" )
+		else if ( type == QLatin1String("aes256-cbc-pkcs7") )
 			return new opensslCipherContext( EVP_aes_256_cbc(), 1, this, type);
-		else if ( type == "aes256-ofb" )
+		else if ( type == QLatin1String("aes256-ofb") )
 			return new opensslCipherContext( EVP_aes_256_ofb(), 0, this, type);
 #ifdef HAVE_OPENSSL_AES_CTR
-		else if ( type == "aes256-ctr" )
+		else if ( type == QLatin1String("aes256-ctr") )
 			return new opensslCipherContext( EVP_aes_256_ctr(), 0, this, type);
 #endif
 #ifdef HAVE_OPENSSL_AES_GCM
-		else if ( type == "aes256-gcm" )
+		else if ( type == QLatin1String("aes256-gcm") )
 			return new opensslCipherContext( EVP_aes_256_gcm(), 0, this, type);
 #endif
 #ifdef HAVE_OPENSSL_AES_CCM
-		else if ( type == "aes256-ccm" )
+		else if ( type == QLatin1String("aes256-ccm") )
 			return new opensslCipherContext( EVP_aes_256_ccm(), 0, this, type);
 #endif
-		else if ( type == "blowfish-ecb" )
+		else if ( type == QLatin1String("blowfish-ecb") )
 			return new opensslCipherContext( EVP_bf_ecb(), 0, this, type);
-		else if ( type == "blowfish-cfb" )
+		else if ( type == QLatin1String("blowfish-cfb") )
 			return new opensslCipherContext( EVP_bf_cfb(), 0, this, type);
-		else if ( type == "blowfish-ofb" )
+		else if ( type == QLatin1String("blowfish-ofb") )
 			return new opensslCipherContext( EVP_bf_ofb(), 0, this, type);
-		else if ( type == "blowfish-cbc" )
+		else if ( type == QLatin1String("blowfish-cbc") )
 			return new opensslCipherContext( EVP_bf_cbc(), 0, this, type);
-		else if ( type == "blowfish-cbc-pkcs7" )
+		else if ( type == QLatin1String("blowfish-cbc-pkcs7") )
 			return new opensslCipherContext( EVP_bf_cbc(), 1, this, type);
-		else if ( type == "tripledes-ecb" )
+		else if ( type == QLatin1String("tripledes-ecb") )
 			return new opensslCipherContext( EVP_des_ede3(), 0, this, type);
-		else if ( type == "tripledes-cbc" )
+		else if ( type == QLatin1String("tripledes-cbc") )
 			return new opensslCipherContext( EVP_des_ede3_cbc(), 0, this, type);
-		else if ( type == "des-ecb" )
+		else if ( type == QLatin1String("des-ecb") )
 			return new opensslCipherContext( EVP_des_ecb(), 0, this, type);
-		else if ( type == "des-ecb-pkcs7" )
+		else if ( type == QLatin1String("des-ecb-pkcs7") )
 			return new opensslCipherContext( EVP_des_ecb(), 1, this, type);
-		else if ( type == "des-cbc" )
+		else if ( type == QLatin1String("des-cbc") )
 			return new opensslCipherContext( EVP_des_cbc(), 0, this, type);
-		else if ( type == "des-cbc-pkcs7" )
+		else if ( type == QLatin1String("des-cbc-pkcs7") )
 			return new opensslCipherContext( EVP_des_cbc(), 1, this, type);
-		else if ( type == "des-cfb" )
+		else if ( type == QLatin1String("des-cfb") )
 			return new opensslCipherContext( EVP_des_cfb(), 0, this, type);
-		else if ( type == "des-ofb" )
+		else if ( type == QLatin1String("des-ofb") )
 			return new opensslCipherContext( EVP_des_ofb(), 0, this, type);
-		else if ( type == "cast5-ecb" )
+		else if ( type == QLatin1String("cast5-ecb") )
 			return new opensslCipherContext( EVP_cast5_ecb(), 0, this, type);
-		else if ( type == "cast5-cbc" )
+		else if ( type == QLatin1String("cast5-cbc") )
 			return new opensslCipherContext( EVP_cast5_cbc(), 0, this, type);
-		else if ( type == "cast5-cbc-pkcs7" )
+		else if ( type == QLatin1String("cast5-cbc-pkcs7") )
 			return new opensslCipherContext( EVP_cast5_cbc(), 1, this, type);
-		else if ( type == "cast5-cfb" )
+		else if ( type == QLatin1String("cast5-cfb") )
 			return new opensslCipherContext( EVP_cast5_cfb(), 0, this, type);
-		else if ( type == "cast5-ofb" )
+		else if ( type == QLatin1String("cast5-ofb") )
 			return new opensslCipherContext( EVP_cast5_ofb(), 0, this, type);
-		else if ( type == "pkey" )
+		else if ( type == QLatin1String("pkey") )
 			return new MyPKeyContext( this );
-		else if ( type == "dlgroup" )
+		else if ( type == QLatin1String("dlgroup") )
 			return new MyDLGroup( this );
-		else if ( type == "rsa" )
+		else if ( type == QLatin1String("rsa") )
 			return new RSAKey( this );
-		else if ( type == "dsa" )
+		else if ( type == QLatin1String("dsa") )
 			return new DSAKey( this );
-		else if ( type == "dh" )
+		else if ( type == QLatin1String("dh") )
 			return new DHKey( this );
-		else if ( type == "cert" )
+		else if ( type == QLatin1String("cert") )
 			return new MyCertContext( this );
-		else if ( type == "csr" )
+		else if ( type == QLatin1String("csr") )
 			return new MyCSRContext( this );
-		else if ( type == "crl" )
+		else if ( type == QLatin1String("crl") )
 			return new MyCRLContext( this );
-		else if ( type == "certcollection" )
+		else if ( type == QLatin1String("certcollection") )
 			return new MyCertCollectionContext( this );
-		else if ( type == "pkcs12" )
+		else if ( type == QLatin1String("pkcs12") )
 			return new MyPKCS12Context( this );
-		else if ( type == "tls" )
+		else if ( type == QLatin1String("tls") )
 			return new MyTLSContext( this );
-		else if ( type == "cms" )
+		else if ( type == QLatin1String("cms") )
 			return new CMSContext( this );
-		else if ( type == "ca" )
+		else if ( type == QLatin1String("ca") )
 			return new MyCAContext( this );
 		return nullptr;
 	}

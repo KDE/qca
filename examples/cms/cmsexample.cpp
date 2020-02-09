@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
     // Read in a public key cert
     // you could also build this using the fromPEMFile() method
-    QCA::Certificate pubCert( "User.pem" );
+    QCA::Certificate pubCert( QStringLiteral("User.pem") );
     if ( pubCert.isNull() ) {
 	qWarning() << "Sorry, could not import public key certificate";
 	return 1;
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     QCA::PrivateKey privKey;
     QCA::ConvertResult convRes;
     QCA::SecureArray passPhrase = "start";
-    privKey = QCA::PrivateKey::fromPEMFile( "Userkey.pem", passPhrase, &convRes );
+    privKey = QCA::PrivateKey::fromPEMFile( QStringLiteral("Userkey.pem"), passPhrase, &convRes );
     if ( convRes != QCA::ConvertGood ) {
 	qWarning() << "Sorry, could not import Private Key";
 	return 1;

@@ -57,7 +57,7 @@ void RSAUnitTest::cleanupTestCase()
 void RSAUnitTest::testrsa()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
     // providersToTest.append("qca-gcrypt");
 
     foreach(const QString provider, providersToTest) {
@@ -151,16 +151,16 @@ void RSAUnitTest::testrsa()
 
 void RSAUnitTest::testAsymmetricEncryption()
 {
-	if(!QCA::isSupported("pkey", "qca-ossl") ||
-	   !QCA::PKey::supportedTypes("qca-ossl").contains(QCA::PKey::RSA) ||
-	   !QCA::PKey::supportedIOTypes("qca-ossl").contains(QCA::PKey::RSA)) {
+	if(!QCA::isSupported("pkey", QStringLiteral("qca-ossl")) ||
+	   !QCA::PKey::supportedTypes(QStringLiteral("qca-ossl")).contains(QCA::PKey::RSA) ||
+	   !QCA::PKey::supportedIOTypes(QStringLiteral("qca-ossl")).contains(QCA::PKey::RSA)) {
 	    QWARN("RSA not supported");
 	    QSKIP("RSA not supported. skipping");
 	}
-	QCA::RSAPrivateKey rsaPrivKey1 = QCA::KeyGenerator().createRSA(512, 65537, "qca-ossl").toRSA();
+	QCA::RSAPrivateKey rsaPrivKey1 = QCA::KeyGenerator().createRSA(512, 65537, QStringLiteral("qca-ossl")).toRSA();
 	QCA::RSAPublicKey rsaPubKey1 = rsaPrivKey1.toPublicKey().toRSA();
 
-	QCA::RSAPrivateKey rsaPrivKey2 = QCA::KeyGenerator().createRSA(512, 65537, "qca-ossl").toRSA();
+	QCA::RSAPrivateKey rsaPrivKey2 = QCA::KeyGenerator().createRSA(512, 65537, QStringLiteral("qca-ossl")).toRSA();
 	// QCA::RSAPublicKey rsaPubKey2 = rsaPrivKey2.toPublicKey().toRSA();
 
 	const QCA::SecureArray clearText = "Hello World !";

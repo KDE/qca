@@ -58,25 +58,25 @@ void StaticUnitTest::hexConversions()
 {
     QByteArray test(10, 'a');
 
-    QCOMPARE( QCA::arrayToHex(test), QString("61616161616161616161") );
+    QCOMPARE( QCA::arrayToHex(test), QStringLiteral("61616161616161616161") );
 
     test.fill('b');
     test[7] = 0x00;
 
-    QCOMPARE( test == QCA::hexToArray(QString("62626262626262006262")), true );
+    QCOMPARE( test == QCA::hexToArray(QStringLiteral("62626262626262006262")), true );
 
     QCA::SecureArray testArray(10);
     //testArray.fill( 'a' );
     for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x61;
     }
-    QCOMPARE( QCA::arrayToHex( testArray.toByteArray() ), QString( "61616161616161616161" ) );
+    QCOMPARE( QCA::arrayToHex( testArray.toByteArray() ), QStringLiteral( "61616161616161616161" ) );
     //testArray.fill( 'b' );
     for (int i = 0; i < testArray.size(); i++) {
 	testArray[ i ] = 0x62;
     }
     testArray[6] = 0x00;
-    QCOMPARE( testArray == QCA::hexToArray(QString("62626262626200626262")), true );
+    QCOMPARE( testArray == QCA::hexToArray(QStringLiteral("62626262626200626262")), true );
 
     QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray.toByteArray() ) ), true );
 
@@ -91,17 +91,17 @@ void StaticUnitTest::capabilities()
     // doing a direct comparison, since they change
     // We try to work around that using contains()
     QStringList defaultCapabilities = QCA::defaultFeatures();
-    QVERIFY( defaultCapabilities.contains("random") );
-    QVERIFY( defaultCapabilities.contains("sha1") );
-    QVERIFY( defaultCapabilities.contains("md5") );
+    QVERIFY( defaultCapabilities.contains(QStringLiteral("random")) );
+    QVERIFY( defaultCapabilities.contains(QStringLiteral("sha1")) );
+    QVERIFY( defaultCapabilities.contains(QStringLiteral("md5")) );
 
     QStringList capList;
-    capList << "random" << "sha1";
+    capList << QStringLiteral("random") << QStringLiteral("sha1");
     QCOMPARE( QCA::isSupported(capList), true );
-    capList.append("noSuch");
+    capList.append(QStringLiteral("noSuch"));
     QCOMPARE( QCA::isSupported(capList), false );
     capList.clear();
-    capList.append("noSuch");
+    capList.append(QStringLiteral("noSuch"));
     QCOMPARE( QCA::isSupported(capList), false );
 }
 

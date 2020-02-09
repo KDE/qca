@@ -51,29 +51,29 @@ static QString socketErrorToString(QAbstractSocket::SocketError x)
 	switch(x)
 	{
 		case QAbstractSocket::ConnectionRefusedError:
-			s = "connection refused or timed out"; break;
+			s = QStringLiteral("connection refused or timed out"); break;
 		case QAbstractSocket::RemoteHostClosedError:
-			s = "remote host closed the connection"; break;
+			s = QStringLiteral("remote host closed the connection"); break;
 		case QAbstractSocket::HostNotFoundError:
-			s = "host not found"; break;
+			s = QStringLiteral("host not found"); break;
 		case QAbstractSocket::SocketAccessError:
-			s = "access error"; break;
+			s = QStringLiteral("access error"); break;
 		case QAbstractSocket::SocketResourceError:
-			s = "too many sockets"; break;
+			s = QStringLiteral("too many sockets"); break;
 		case QAbstractSocket::SocketTimeoutError:
-			s = "operation timed out"; break;
+			s = QStringLiteral("operation timed out"); break;
 		case QAbstractSocket::DatagramTooLargeError:
-			s = "datagram was larger than system limit"; break;
+			s = QStringLiteral("datagram was larger than system limit"); break;
 		case QAbstractSocket::NetworkError:
-			s = "network error"; break;
+			s = QStringLiteral("network error"); break;
 		case QAbstractSocket::AddressInUseError:
-			s = "address is already in use"; break;
+			s = QStringLiteral("address is already in use"); break;
 		case QAbstractSocket::SocketAddressNotAvailableError:
-			s = "address does not belong to the host"; break;
+			s = QStringLiteral("address does not belong to the host"); break;
 		case QAbstractSocket::UnsupportedSocketOperationError:
-			s = "operation is not supported by the local operating system"; break;
+			s = QStringLiteral("operation is not supported by the local operating system"); break;
 		default:
-			s = "unknown socket error"; break;
+			s = QStringLiteral("unknown socket error"); break;
 	}
 	return s;
 }
@@ -84,14 +84,14 @@ static QString saslAuthConditionToString(QCA::SASL::AuthCondition x)
 	switch(x)
 	{
 		case QCA::SASL::NoMechanism:
-			s = "no appropriate mechanism could be negotiated"; break;
+			s = QStringLiteral("no appropriate mechanism could be negotiated"); break;
 		case QCA::SASL::BadProtocol:
-			s = "bad SASL protocol"; break;
+			s = QStringLiteral("bad SASL protocol"); break;
 		case QCA::SASL::BadServer:
-			s = "server failed mutual authentication"; break;
+			s = QStringLiteral("server failed mutual authentication"); break;
 		// AuthFail or unknown (including those defined for server only)
 		default:
-			s = "generic authentication failure"; break;
+			s = QStringLiteral("generic authentication failure"); break;
 	};
 	return s;
 }
@@ -257,7 +257,7 @@ private Q_SLOTS:
 
 	void sasl_nextStep(const QByteArray &stepData)
 	{
-		QString line = "C";
+		QString line = QStringLiteral("C");
 		if(!stepData.isEmpty())
 		{
 			line += ',';
@@ -270,13 +270,13 @@ private Q_SLOTS:
 	{
 		if(params.needUsername())
 		{
-			user = prompt("Username:");
+			user = prompt(QStringLiteral("Username:"));
 			sasl->setUsername(user);
 		}
 
 		if(params.canSendAuthzid() && !no_authzid)
 		{
-			authzid = prompt("Authorize As (enter to skip):");
+			authzid = prompt(QStringLiteral("Authorize As (enter to skip):"));
 			if(!authzid.isEmpty())
 				sasl->setAuthzid(authzid);
 		}
@@ -284,7 +284,7 @@ private Q_SLOTS:
 		if(params.needPassword())
 		{
 			QCA::ConsolePrompt prompt;
-			prompt.getHidden("* Password");
+			prompt.getHidden(QStringLiteral("* Password"));
 			prompt.waitForFinished();
 			QCA::SecureArray pass = prompt.result();
 			sasl->setPassword(pass);
@@ -298,7 +298,7 @@ private Q_SLOTS:
 				printf("  (none specified)\n");
 			foreach(const QString &s, realms)
 				printf("  %s\n", qPrintable(s));
-			realm = prompt("Realm (enter to skip):");
+			realm = prompt(QStringLiteral("Realm (enter to skip):"));
 			if(!realm.isEmpty())
 				sasl->setRealm(realm);
 		}
@@ -434,11 +434,11 @@ private:
 			else
 				type = line;
 	
-			if(type == "C")
+			if(type == QLatin1String("C"))
 			{
 				sasl->putStep(stringToArray(rest));
 			}
-			else if(type == "E")
+			else if(type == QLatin1String("E"))
 			{
 				if(!rest.isEmpty())
 					printf("Error: server says: %s.\n", qPrintable(rest));
@@ -447,7 +447,7 @@ private:
 				emit quit();
 				return;
 			}
-			else if(type == "A")
+			else if(type == QLatin1String("A"))
 			{
 				printf("Authentication success.\n");
 				mode = 2; // switch to app mode
@@ -483,13 +483,13 @@ int main(int argc, char **argv)
 	args.removeFirst();
 
 	// options
-	QString proto = "qcatest"; // default protocol
+	QString proto = QStringLiteral("qcatest"); // default protocol
 	QString authzid, realm;
 	bool no_authzid = false;
 	bool no_realm = false;
 	for(int n = 0; n < args.count(); ++n)
 	{
-		if(!args[n].startsWith("--"))
+		if(!args[n].startsWith(QLatin1String("--")))
 			continue;
 
 		QString opt = args[n].mid(2);
@@ -503,11 +503,11 @@ int main(int argc, char **argv)
 		else
 			var = opt;
 
-		if(var == "proto")
+		if(var == QLatin1String("proto"))
 		{
 			proto = val;
 		}
-		else if(var == "authzid")
+		else if(var == QLatin1String("authzid"))
 		{
 			// specifying empty authzid means force unspecified
 			if(val.isEmpty())
@@ -515,7 +515,7 @@ int main(int argc, char **argv)
 			else
 				authzid = val;
 		}
-		else if(var == "realm")
+		else if(var == QLatin1String("realm"))
 		{
 			// specifying empty realm means force unspecified
 			if(val.isEmpty())

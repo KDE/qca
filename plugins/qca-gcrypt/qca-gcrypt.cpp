@@ -31,12 +31,12 @@ namespace gcryptQCAPlugin {
 
 #include "pkcs5.c"
 
-void check_error( const QString &label, gcry_error_t err )
+void check_error( const char *label, gcry_error_t err )
 {
     // we ignore the case where it is not an error, and
     // we also don't flag weak keys.
     if ( ( GPG_ERR_NO_ERROR != err ) && ( GPG_ERR_WEAK_KEY  != gpg_err_code(err) ) ) {
-	std::cout << "Failure (" << qPrintable(label) << "): ";
+	std::cout << "Failure (" << label << "): ";
 		std::cout << gcry_strsource(err) << "/";
 		std::cout << gcry_strerror(err) << std::endl;
     }
@@ -538,148 +538,148 @@ public:
 
     QString name() const override
     {
-	return "qca-gcrypt";
+	return QStringLiteral("qca-gcrypt");
     }
 
     QStringList features() const override
     {
 	QStringList list;
-	list += "sha1";
-	list += "md4";
-	list += "md5";
-	list += "ripemd160";
+	list += QStringLiteral("sha1");
+	list += QStringLiteral("md4");
+	list += QStringLiteral("md5");
+	list += QStringLiteral("ripemd160");
 #ifdef GCRY_MD_SHA224
-	list += "sha224";
+	list += QStringLiteral("sha224");
 #endif
-	list += "sha256";
-	list += "sha384";
-	list += "sha512";
-	list += "hmac(md5)";
-	list += "hmac(sha1)";
+	list += QStringLiteral("sha256");
+	list += QStringLiteral("sha384");
+	list += QStringLiteral("sha512");
+	list += QStringLiteral("hmac(md5)");
+	list += QStringLiteral("hmac(sha1)");
 #ifdef GCRY_MD_SHA224
-	list += "hmac(sha224)";
+	list += QStringLiteral("hmac(sha224)");
 #endif
-	list += "hmac(sha256)";
+	list += QStringLiteral("hmac(sha256)");
 	if ( ! ( nullptr == gcry_check_version("1.3.0") ) ) {
 	    // 1.2 and earlier have broken implementation
-	    list += "hmac(sha384)";
-	    list += "hmac(sha512)";
+	    list += QStringLiteral("hmac(sha384)");
+	    list += QStringLiteral("hmac(sha512)");
 	}
-	list += "hmac(ripemd160)";
-	list += "aes128-ecb";
-	list += "aes128-cfb";
-	list += "aes128-cbc";
-	list += "aes192-ecb";
-	list += "aes192-cfb";
-	list += "aes192-cbc";
-	list += "aes256-ecb";
-	list += "aes256-cfb";
-	list += "aes256-cbc";
-	list += "blowfish-ecb";
-	list += "blowfish-cbc";
-	list += "blowfish-cfb";
-	list += "tripledes-ecb";
-// 	list += "des-ecb";
-	list += "des-cbc";
-	list += "des-cfb";
+	list += QStringLiteral("hmac(ripemd160)");
+	list += QStringLiteral("aes128-ecb");
+	list += QStringLiteral("aes128-cfb");
+	list += QStringLiteral("aes128-cbc");
+	list += QStringLiteral("aes192-ecb");
+	list += QStringLiteral("aes192-cfb");
+	list += QStringLiteral("aes192-cbc");
+	list += QStringLiteral("aes256-ecb");
+	list += QStringLiteral("aes256-cfb");
+	list += QStringLiteral("aes256-cbc");
+	list += QStringLiteral("blowfish-ecb");
+	list += QStringLiteral("blowfish-cbc");
+	list += QStringLiteral("blowfish-cfb");
+	list += QStringLiteral("tripledes-ecb");
+// 	list += QStringLiteral("des-ecb");
+	list += QStringLiteral("des-cbc");
+	list += QStringLiteral("des-cfb");
 	if ( ! ( nullptr == gcry_check_version("1.3.0") ) ) {
 	    // 1.2 branch and earlier doesn't support OFB mode
-	    list += "aes128-ofb";
-	    list += "aes192-ofb";
-	    list += "aes256-ofb";
-	    list += "des-ofb";
-	    list += "tripledes-ofb";
-	    list += "blowfish-ofb";
+	    list += QStringLiteral("aes128-ofb");
+	    list += QStringLiteral("aes192-ofb");
+	    list += QStringLiteral("aes256-ofb");
+	    list += QStringLiteral("des-ofb");
+	    list += QStringLiteral("tripledes-ofb");
+	    list += QStringLiteral("blowfish-ofb");
 	}
-	list += "pbkdf1(sha1)";
-	list += "pbkdf2(sha1)";
+	list += QStringLiteral("pbkdf1(sha1)");
+	list += QStringLiteral("pbkdf2(sha1)");
 	return list;
     }
 
     Context *createContext(const QString &type) override
     {
         // std::cout << "type: " << qPrintable(type) << std::endl;
-	if ( type == "sha1" )
+	if ( type == QLatin1String("sha1") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA1, this, type );
-	else if ( type == "md4" )
+	else if ( type == QLatin1String("md4") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_MD4, this, type );
-	else if ( type == "md5" )
+	else if ( type == QLatin1String("md5") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_MD5, this, type );
-	else if ( type == "ripemd160" )
+	else if ( type == QLatin1String("ripemd160") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_RMD160, this, type );
 #ifdef GCRY_MD_SHA224
-	else if ( type == "sha224" )
+	else if ( type == QLatin1String("sha224") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA224, this, type );
 #endif
-	else if ( type == "sha256" )
+	else if ( type == QLatin1String("sha256") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA256, this, type );
-	else if ( type == "sha384" )
+	else if ( type == QLatin1String("sha384") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA384, this, type );
-	else if ( type == "sha512" )
+	else if ( type == QLatin1String("sha512") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA512, this, type );
-	else if ( type == "hmac(md5)" )
+	else if ( type == QLatin1String("hmac(md5)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_MD5, this, type );
-	else if ( type == "hmac(sha1)" )
+	else if ( type == QLatin1String("hmac(sha1)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA1, this, type );
 #ifdef GCRY_MD_SHA224
-	else if ( type == "hmac(sha224)" )
+	else if ( type == QLatin1String("hmac(sha224)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA224, this, type );
 #endif
-	else if ( type == "hmac(sha256)" )
+	else if ( type == QLatin1String("hmac(sha256)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA256, this, type );
-	else if ( type == "hmac(sha384)" )
+	else if ( type == QLatin1String("hmac(sha384)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA384, this, type );
-	else if ( type == "hmac(sha512)" )
+	else if ( type == QLatin1String("hmac(sha512)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_SHA512, this, type );
-	else if ( type == "hmac(ripemd160)" )
+	else if ( type == QLatin1String("hmac(ripemd160)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_RMD160, this, type );
-	else if ( type == "aes128-ecb" )
+	else if ( type == QLatin1String("aes128-ecb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, false, this, type );
-	else if ( type == "aes128-cfb" )
+	else if ( type == QLatin1String("aes128-cfb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CFB, false, this, type );
-	else if ( type == "aes128-ofb" )
+	else if ( type == QLatin1String("aes128-ofb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_OFB, false, this, type );
-	else if ( type == "aes128-cbc" )
+	else if ( type == QLatin1String("aes128-cbc") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, false, this, type );
-	else if ( type == "aes192-ecb" )
+	else if ( type == QLatin1String("aes192-ecb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_ECB, false, this, type );
-	else if ( type == "aes192-cfb" )
+	else if ( type == QLatin1String("aes192-cfb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CFB, false, this, type );
-	else if ( type == "aes192-ofb" )
+	else if ( type == QLatin1String("aes192-ofb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_OFB, false, this, type );
-	else if ( type == "aes192-cbc" )
+	else if ( type == QLatin1String("aes192-cbc") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES192, GCRY_CIPHER_MODE_CBC, false, this, type );
-	else if ( type == "aes256-ecb" )
+	else if ( type == QLatin1String("aes256-ecb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_ECB, false, this, type );
-	else if ( type == "aes256-cfb" )
+	else if ( type == QLatin1String("aes256-cfb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CFB, false, this, type );
-	else if ( type == "aes256-ofb" )
+	else if ( type == QLatin1String("aes256-ofb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_OFB, false, this, type );
-	else if ( type == "aes256-cbc" )
+	else if ( type == QLatin1String("aes256-cbc") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, false, this, type );
-	else if ( type == "blowfish-ecb" )
+	else if ( type == QLatin1String("blowfish-ecb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_ECB, false, this, type );
-	else if ( type == "blowfish-cbc" )
+	else if ( type == QLatin1String("blowfish-cbc") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CBC, false, this, type );
-	else if ( type == "blowfish-cfb" )
+	else if ( type == QLatin1String("blowfish-cfb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_CFB, false, this, type );
-	else if ( type == "blowfish-ofb" )
+	else if ( type == QLatin1String("blowfish-ofb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_BLOWFISH, GCRY_CIPHER_MODE_OFB, false, this, type );
-	else if ( type == "tripledes-ecb" )
+	else if ( type == QLatin1String("tripledes-ecb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_ECB, false, this, type );
-	else if ( type == "tripledes-ofb" )
+	else if ( type == QLatin1String("tripledes-ofb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_3DES, GCRY_CIPHER_MODE_OFB, false, this, type );
-	else if ( type == "des-ecb" )
+	else if ( type == QLatin1String("des-ecb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, false, this, type );
-	else if ( type == "des-cbc" )
+	else if ( type == QLatin1String("des-cbc") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CBC, false, this, type );
-	else if ( type == "des-cfb" )
+	else if ( type == QLatin1String("des-cfb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_CFB, false, this, type );
-	else if ( type == "des-ofb" )
+	else if ( type == QLatin1String("des-ofb") )
 	    return new gcryptQCAPlugin::gcryCipherContext( GCRY_CIPHER_DES, GCRY_CIPHER_MODE_OFB, false, this, type );
-	else if ( type == "pbkdf1(sha1)" )
+	else if ( type == QLatin1String("pbkdf1(sha1)") )
 	    return new gcryptQCAPlugin::pbkdf1Context( GCRY_MD_SHA1, this, type );
-	else if ( type == "pbkdf2(sha1)" )
+	else if ( type == QLatin1String("pbkdf2(sha1)") )
 	    return new gcryptQCAPlugin::pbkdf2Context( GCRY_MD_SHA1, this, type );
 	else
 	    return nullptr;

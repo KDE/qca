@@ -50,7 +50,7 @@ class NullLogger : public QCA::AbstractLogDevice
 {
   Q_OBJECT
 public:
-    NullLogger() : QCA::AbstractLogDevice( "null logger" )
+    NullLogger() : QCA::AbstractLogDevice( QStringLiteral( "null logger" ) )
     {}
 };
 
@@ -58,7 +58,7 @@ class LastLogger : public QCA::AbstractLogDevice
 {
   Q_OBJECT
 public:
-    LastLogger() : QCA::AbstractLogDevice( "last logger" )
+    LastLogger() : QCA::AbstractLogDevice( QStringLiteral( "last logger" ) )
     {}
 
     void logTextMessage( const QString &message, enum QCA::Logger::Severity severity ) override
@@ -124,8 +124,8 @@ void LoggerUnitTest::basicSetup()
 
     logSystem->registerLogDevice( nullLogger );
     QCOMPARE( logSystem->currentLogDevices().count(), 1 );
-    QVERIFY( logSystem->currentLogDevices().contains( "null logger" ) );
-    logSystem->unregisterLogDevice( "null logger" );
+    QVERIFY( logSystem->currentLogDevices().contains( QStringLiteral("null logger") ) );
+    logSystem->unregisterLogDevice( QStringLiteral("null logger") );
     QCOMPARE( logSystem->currentLogDevices().count(), 0 );
 
     delete nullLogger;
@@ -135,37 +135,37 @@ void LoggerUnitTest::logText1()
 {
     QCA::Logger *logSystem = QCA::logger();
 
-    logSystem->logTextMessage( "Sending with no recipients" );
+    logSystem->logTextMessage( QStringLiteral("Sending with no recipients") );
 
     LastLogger *lastlogger = new LastLogger;
     logSystem->registerLogDevice( lastlogger );
     QCOMPARE( logSystem->currentLogDevices().count(), 1 );
-    QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
+    QVERIFY( logSystem->currentLogDevices().contains( QStringLiteral("last logger" ) ) );
 
-    logSystem->logTextMessage( "Sending to system, checking for log device" );
+    logSystem->logTextMessage( QStringLiteral("Sending to system, checking for log device") );
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending to system, checking for log device" ) );
+              QStringLiteral( "Sending to system, checking for log device" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Information );
 
-    logSystem->logTextMessage( "Sending at Error severity", QCA::Logger::Error );
+    logSystem->logTextMessage( QStringLiteral("Sending at Error severity"), QCA::Logger::Error );
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending at Error severity" ) );
+              QStringLiteral( "Sending at Error severity" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Error );
 
     LastLogger *lastlogger2 = new LastLogger;
     logSystem->registerLogDevice( lastlogger2 );
     QCOMPARE( logSystem->currentLogDevices().count(), 2 );
-    QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
+    QVERIFY( logSystem->currentLogDevices().contains( QStringLiteral("last logger" ) ) );
 
-    logSystem->logTextMessage( "Sending to system, checking for two log devices" );
+    logSystem->logTextMessage( QStringLiteral("Sending to system, checking for two log devices") );
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending to system, checking for two log devices" ) );
+              QStringLiteral( "Sending to system, checking for two log devices" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Information );
     QCOMPARE( lastlogger2->lastMessage(),
-              QString( "Sending to system, checking for two log devices" ) );
+              QStringLiteral( "Sending to system, checking for two log devices" ) );
     QCOMPARE( lastlogger2->lastMessageSeverity(),  QCA::Logger::Information );
 
-    logSystem->unregisterLogDevice( "last logger" ); // this will remove them both
+    logSystem->unregisterLogDevice( QStringLiteral("last logger") ); // this will remove them both
 
     QCOMPARE( logSystem->currentLogDevices().count(), 0 );
 
@@ -177,39 +177,39 @@ void LoggerUnitTest::logText1()
 // same as above, but use convenience routine.
 void LoggerUnitTest::logText2()
 {
-    QCA_logTextMessage ( "Sending with no recipients", QCA::Logger::Notice );
+    QCA_logTextMessage ( QStringLiteral("Sending with no recipients"), QCA::Logger::Notice );
 
     LastLogger *lastlogger = new LastLogger;
 
     QCA::Logger *logSystem = QCA::logger();
     logSystem->registerLogDevice( lastlogger );
     QCOMPARE( logSystem->currentLogDevices().count(), 1 );
-    QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
+    QVERIFY( logSystem->currentLogDevices().contains( QStringLiteral("last logger" ) ) );
 
-    QCA_logTextMessage ( "Sending to system, checking for log device", QCA::Logger::Information );
+    QCA_logTextMessage ( QStringLiteral("Sending to system, checking for log device"), QCA::Logger::Information );
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending to system, checking for log device" ) );
+              QStringLiteral( "Sending to system, checking for log device" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Information );
 
-    QCA_logTextMessage ( "Sending at Error severity", QCA::Logger::Error );
+    QCA_logTextMessage ( QStringLiteral("Sending at Error severity"), QCA::Logger::Error );
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending at Error severity" ) );
+              QStringLiteral( "Sending at Error severity" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Error );
 
     LastLogger *lastlogger2 = new LastLogger;
     logSystem->registerLogDevice( lastlogger2 );
     QCOMPARE( logSystem->currentLogDevices().count(), 2 );
-    QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
+    QVERIFY( logSystem->currentLogDevices().contains( QStringLiteral("last logger" ) ) );
 
-    QCA_logTextMessage ( "Sending to system, checking for two log devices", QCA::Logger::Information );
+    QCA_logTextMessage ( QStringLiteral("Sending to system, checking for two log devices"), QCA::Logger::Information );
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending to system, checking for two log devices" ) );
+              QStringLiteral( "Sending to system, checking for two log devices" ) );
     QCOMPARE( lastlogger->lastMessageSeverity(),  QCA::Logger::Information );
     QCOMPARE( lastlogger2->lastMessage(),
-              QString( "Sending to system, checking for two log devices" ) );
+              QStringLiteral( "Sending to system, checking for two log devices" ) );
     QCOMPARE( lastlogger2->lastMessageSeverity(),  QCA::Logger::Information );
 
-    logSystem->unregisterLogDevice( "last logger" ); // this will remove them both
+    logSystem->unregisterLogDevice( QStringLiteral("last logger") ); // this will remove them both
 
     QCOMPARE( logSystem->currentLogDevices().count(), 0 );
 
@@ -229,7 +229,7 @@ void LoggerUnitTest::logBlob()
     LastLogger *lastlogger = new LastLogger;
     logSystem->registerLogDevice( lastlogger );
     QCOMPARE( logSystem->currentLogDevices().count(), 1 );
-    QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
+    QVERIFY( logSystem->currentLogDevices().contains( QStringLiteral("last logger" ) ) );
 
     logSystem->logBinaryMessage( test );
     QCOMPARE( lastlogger->lastBlob(), test );
@@ -242,7 +242,7 @@ void LoggerUnitTest::logBlob()
     LastLogger *lastlogger2 = new LastLogger;
     logSystem->registerLogDevice( lastlogger2 );
     QCOMPARE( logSystem->currentLogDevices().count(), 2 );
-    QVERIFY( logSystem->currentLogDevices().contains( "last logger" ) );
+    QVERIFY( logSystem->currentLogDevices().contains( QStringLiteral("last logger" ) ) );
 
     test += test;
     logSystem->logBinaryMessage(  test );
@@ -251,7 +251,7 @@ void LoggerUnitTest::logBlob()
     QCOMPARE( lastlogger2->lastBlob(), test );
     QCOMPARE( lastlogger2->lastBlobSeverity(),  QCA::Logger::Information );
 
-    logSystem->unregisterLogDevice( "last logger" ); // this will remove them both
+    logSystem->unregisterLogDevice( QStringLiteral("last logger") ); // this will remove them both
 
     QCOMPARE( logSystem->currentLogDevices().count(), 0 );
     delete lastlogger;
@@ -269,14 +269,14 @@ void LoggerUnitTest::logLevel()
     logSystem->setLevel (QCA::Logger::Error);
     QCOMPARE( logSystem->level (), QCA::Logger::Error );
 
-    QCA_logTextMessage ( "Sending to system, checking that it is filtered out", QCA::Logger::Information );
+    QCA_logTextMessage ( QStringLiteral("Sending to system, checking that it is filtered out"), QCA::Logger::Information );
     QEXPECT_FAIL("", "Should fail", Continue);
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending to system, checking that it is filtered out" ) );
+              QStringLiteral( "Sending to system, checking that it is filtered out" ) );
 
-    QCA_logTextMessage ( "Sending to system, checking that it is not filtered out", QCA::Logger::Error );
+    QCA_logTextMessage ( QStringLiteral("Sending to system, checking that it is not filtered out"), QCA::Logger::Error );
     QCOMPARE( lastlogger->lastMessage(),
-              QString( "Sending to system, checking that it is not filtered out" ) );
+              QStringLiteral( "Sending to system, checking that it is not filtered out" ) );
 
     logSystem->setLevel (QCA::Logger::Debug);
 

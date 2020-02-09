@@ -87,9 +87,9 @@ QString MyKeyStoreEntry::serialize() const
 	// we only serialize the key id.  this means the keyring
 	//   must be available to restore the data
 	QStringList out;
-	out += escape_string("qca-gnupg-1");
+	out += escape_string(QStringLiteral("qca-gnupg-1"));
 	out += escape_string(pub.keyId());
-	return out.join(":");
+	return out.join(QStringLiteral(":"));
 }
 
 } // end namespace gpgQCAPlugin

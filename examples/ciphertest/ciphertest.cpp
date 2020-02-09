@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	QCA::InitializationVector iv(16);
 
 	// create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
-	QCA::Cipher cipher(QString("aes128"),QCA::Cipher::CBC,
+	QCA::Cipher cipher(QStringLiteral("aes128"),QCA::Cipher::CBC,
 			   // use Default padding, which is equivalent to PKCS7 for CBC
 			   QCA::Cipher::DefaultPadding,
 			   // this object will encrypt

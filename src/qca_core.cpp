@@ -178,7 +178,7 @@ public:
 
 		// if the global_rng was owned by a plugin, then delete it
 		rng_mutex.lock();
-		if(rng && (rng->provider() != manager->find("default")))
+		if(rng && (rng->provider() != manager->find(QStringLiteral("default"))))
 		{
 			delete rng;
 			rng = nullptr;
@@ -321,7 +321,7 @@ bool haveSecureRandom()
 		return false;
 
 	QMutexLocker locker(global_random_mutex());
-	if(global_random()->provider()->name() != "default")
+	if(global_random()->provider()->name() != QLatin1String("default"))
 		return true;
 
 	return false;
@@ -352,7 +352,7 @@ bool isSupported(const QStringList &features, const QString &provider)
 		if(features_have(global->manager->allFeatures(), features))
 			return true;
 
-		global->manager->appendDiagnosticText(QString("Scanning to find features: %1\n").arg(features.join(" ")));
+		global->manager->appendDiagnosticText(QStringLiteral("Scanning to find features: %1\n").arg(features.join(QStringLiteral(" "))));
 
 		// ok, try scanning for new stuff
 		global->scan();
@@ -383,7 +383,7 @@ QStringList defaultFeatures()
 	if(!global_check_load())
 		return QStringList();
 
-	return global->manager->find("default")->features();
+	return global->manager->find(QStringLiteral("default"))->features();
 }
 
 ProviderList providers()
@@ -451,7 +451,7 @@ Provider *defaultProvider()
 	if(!global_check_load())
 		return nullptr;
 
-	return global->manager->find("default");
+	return global->manager->find(QStringLiteral("default"));
 }
 
 QStringList pluginPaths()
@@ -478,7 +478,7 @@ QStringList pluginPaths()
 #endif
 	// In developer mode load plugins only from buildtree.
 	// In regular mode QCA_PLUGIN_PATH is path where plugins was installed
-	paths << QDir(QCA_PLUGIN_PATH).canonicalPath();
+	paths << QDir(QStringLiteral(QCA_PLUGIN_PATH)).canonicalPath();
 #ifndef DEVELOPER_MODE
 	paths.removeDuplicates();
 #endif
@@ -550,7 +550,7 @@ QVariant getProperty(const QString &name)
 
 static bool configIsValid(const QVariantMap &config)
 {
-	if(!config.contains("formtype"))
+	if(!config.contains(QStringLiteral("formtype")))
 		return false;
 	QMapIterator<QString,QVariant> it(config);
 	while(it.hasNext())
@@ -565,9 +565,9 @@ static bool configIsValid(const QVariantMap &config)
 
 static QVariantMap readConfig(const QString &name)
 {
-	QSettings settings("Affinix", "QCA2");
-	settings.beginGroup("ProviderConfig");
-	QStringList providerNames = settings.value("providerNames").toStringList();
+	QSettings settings(QStringLiteral("Affinix"), QStringLiteral("QCA2"));
+	settings.beginGroup(QStringLiteral("ProviderConfig"));
+	QStringList providerNames = settings.value(QStringLiteral("providerNames")).toStringList();
 	if(!providerNames.contains(name))
 		return QVariantMap();
 
@@ -585,17 +585,17 @@ static QVariantMap readConfig(const QString &name)
 
 static bool writeConfig(const QString &name, const QVariantMap &config, bool systemWide = false)
 {
-	QSettings settings(QSettings::NativeFormat, systemWide ? QSettings::SystemScope : QSettings::UserScope, "Affinix", "QCA2");
-	settings.beginGroup("ProviderConfig");
+	QSettings settings(QSettings::NativeFormat, systemWide ? QSettings::SystemScope : QSettings::UserScope, QStringLiteral("Affinix"), QStringLiteral("QCA2"));
+	settings.beginGroup(QStringLiteral("ProviderConfig"));
 
 	// version
-	settings.setValue("version", 2);
+	settings.setValue(QStringLiteral("version"), 2);
 
 	// add the entry if needed
-	QStringList providerNames = settings.value("providerNames").toStringList();
+	QStringList providerNames = settings.value(QStringLiteral("providerNames")).toStringList();
 	if(!providerNames.contains(name))
 		providerNames += name;
-	settings.setValue("providerNames", providerNames);
+	settings.setValue(QStringLiteral("providerNames"), providerNames);
 
 	settings.beginGroup(name);
 	QMapIterator<QString,QVariant> it(config);
@@ -661,7 +661,7 @@ QVariantMap getProviderConfig(const QString &name)
 
 	// if the config formtype doesn't match the provider's formtype,
 	//   then use the provider's
-	if(pconf["formtype"] != conf["formtype"])
+	if(pconf[QStringLiteral("formtype")] != conf[QStringLiteral("formtype")])
 		return pconf;
 
 	// otherwise, use the config loaded
@@ -710,7 +710,7 @@ QVariantMap getProviderConfig_internal(Provider *p)
 
 	// if the config formtype doesn't match the provider's formtype,
 	//   then use the provider's
-	if(pconf["formtype"] != conf["formtype"])
+	if(pconf[QStringLiteral("formtype")] != conf[QStringLiteral("formtype")])
 		return pconf;
 
 	// otherwise, use the config loaded
@@ -738,7 +738,7 @@ Logger *logger()
 bool haveSystemStore()
 {
 	// ensure the system store is loaded
-	KeyStoreManager::start("default");
+	KeyStoreManager::start(QStringLiteral("default"));
 	KeyStoreManager ksm;
 	ksm.waitForBusyFinished();
 
@@ -755,7 +755,7 @@ bool haveSystemStore()
 CertificateCollection systemStore()
 {
 	// ensure the system store is loaded
-	KeyStoreManager::start("default");
+	KeyStoreManager::start(QStringLiteral("default"));
 	KeyStoreManager ksm;
 	ksm.waitForBusyFinished();
 

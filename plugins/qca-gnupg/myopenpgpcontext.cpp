@@ -25,7 +25,7 @@ namespace gpgQCAPlugin
 {
 
 MyOpenPGPContext::MyOpenPGPContext(QCA::Provider *p)
-	: SMSContext(p, "openpgp")
+	: SMSContext(p, QStringLiteral("openpgp"))
 {
 	// TODO
 }

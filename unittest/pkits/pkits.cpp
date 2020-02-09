@@ -108,13 +108,13 @@ static QCA::CRL crlFromDERFile(const QString &fileName, const QString &provider)
 void Pkits::pkits4_1_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidCertificatePathTest1EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidCertificatePathTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCOMPARE( cert.policies().count(), 1 );
@@ -123,17 +123,17 @@ void Pkits::pkits4_1_1()
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -145,13 +145,13 @@ void Pkits::pkits4_1_1()
 void Pkits::pkits4_1_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidCASignatureTest2EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidCASignatureTest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCOMPARE( cert.policies().count(), 1 );
@@ -160,17 +160,17 @@ void Pkits::pkits4_1_2()
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/BadSignedCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/BadSignedCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/BadSignedCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/BadSignedCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -182,13 +182,13 @@ void Pkits::pkits4_1_2()
 void Pkits::pkits4_1_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidEESignatureTest3EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidEESignatureTest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCOMPARE( cert.policies().count(), 1 );
@@ -197,17 +197,17 @@ void Pkits::pkits4_1_3()
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -219,13 +219,13 @@ void Pkits::pkits4_1_3()
 void Pkits::pkits4_1_4()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidDSASignaturesTest4EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidDSASignaturesTest4EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCOMPARE( cert.policies().count(), 1 );
@@ -234,17 +234,17 @@ void Pkits::pkits4_1_4()
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/DSACACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/DSACACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/DSACACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/DSACACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -256,13 +256,13 @@ void Pkits::pkits4_1_4()
 void Pkits::pkits4_1_5()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidDSAParameterInheritanceTest5EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidDSAParameterInheritanceTest5EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    // QCOMPARE( cert.policies().count(), 1 );
@@ -271,24 +271,24 @@ void Pkits::pkits4_1_5()
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/DSACACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/DSACACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/DSACACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/DSACACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
-	    QCA::Certificate params = certFromDERFile("certs/DSAParametersInheritedCACert.crt", provider);
+	    QCA::Certificate params = certFromDERFile(QStringLiteral("certs/DSAParametersInheritedCACert.crt"), provider);
 	    QCOMPARE( params.isNull(), false );
 	    untrusted.addCertificate( params );
-	    QCA::CRL paramsCRL = crlFromDERFile("certs/DSAParametersInheritedCACRL.crl", provider);
+	    QCA::CRL paramsCRL = crlFromDERFile(QStringLiteral("certs/DSAParametersInheritedCACRL.crl"), provider);
 	    QCOMPARE( paramsCRL.isNull(), false );
 	    untrusted.addCRL( paramsCRL );
 
@@ -300,30 +300,30 @@ void Pkits::pkits4_1_5()
 void Pkits::pkits4_1_6()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidDSASignatureTest6EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidDSASignatureTest6EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/DSACACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/DSACACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/DSACACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/DSACACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -335,30 +335,30 @@ void Pkits::pkits4_1_6()
 void Pkits::pkits4_2_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidCAnotBeforeDateTest1EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidCAnotBeforeDateTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/BadnotBeforeDateCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/BadnotBeforeDateCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/BadnotBeforeDateCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/BadnotBeforeDateCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -370,30 +370,30 @@ void Pkits::pkits4_2_1()
 void Pkits::pkits4_2_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidEEnotBeforeDateTest2EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidEEnotBeforeDateTest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -405,30 +405,30 @@ void Pkits::pkits4_2_2()
 void Pkits::pkits4_2_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/Validpre2000UTCnotBeforeDateTest3EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/Validpre2000UTCnotBeforeDateTest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -440,30 +440,30 @@ void Pkits::pkits4_2_3()
 void Pkits::pkits4_2_4()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidGeneralizedTimenotBeforeDateTest4EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidGeneralizedTimenotBeforeDateTest4EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -476,30 +476,30 @@ void Pkits::pkits4_2_4()
 void Pkits::pkits4_2_5()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidCAnotAfterDateTest5EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidCAnotAfterDateTest5EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/BadnotAfterDateCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/BadnotAfterDateCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/BadnotAfterDateCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/BadnotAfterDateCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -511,30 +511,30 @@ void Pkits::pkits4_2_5()
 void Pkits::pkits4_2_6()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidEEnotAfterDateTest6EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidEEnotAfterDateTest6EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -546,30 +546,30 @@ void Pkits::pkits4_2_6()
 void Pkits::pkits4_2_7()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/Invalidpre2000UTCEEnotAfterDateTest7EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/Invalidpre2000UTCEEnotAfterDateTest7EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -581,30 +581,30 @@ void Pkits::pkits4_2_7()
 void Pkits::pkits4_2_8()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidGeneralizedTimenotAfterDateTest8EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidGeneralizedTimenotAfterDateTest8EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -616,30 +616,30 @@ void Pkits::pkits4_2_8()
 void Pkits::pkits4_3_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidNameChainingTest1EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidNameChainingTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -651,30 +651,30 @@ void Pkits::pkits4_3_1()
 void Pkits::pkits4_3_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidNameChainingOrderTest2EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidNameChainingOrderTest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -686,30 +686,30 @@ void Pkits::pkits4_3_2()
 void Pkits::pkits4_3_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidNameChainingWhitespaceTest3EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameChainingWhitespaceTest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -722,30 +722,30 @@ void Pkits::pkits4_3_3()
 void Pkits::pkits4_3_4()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidNameChainingWhitespaceTest4EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameChainingWhitespaceTest4EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -757,30 +757,30 @@ void Pkits::pkits4_3_4()
 void Pkits::pkits4_3_5()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidNameChainingCapitalizationTest5EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameChainingCapitalizationTest5EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -792,30 +792,30 @@ void Pkits::pkits4_3_5()
 void Pkits::pkits4_3_6()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidNameUIDsTest6EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameUIDsTest6EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/UIDCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/UIDCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/UIDCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/UIDCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -828,30 +828,30 @@ void Pkits::pkits4_3_6()
 void Pkits::pkits4_3_7()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidRFC3280MandatoryAttributeTypesTest7EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidRFC3280MandatoryAttributeTypesTest7EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/RFC3280MandatoryAttributeTypesCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/RFC3280MandatoryAttributeTypesCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/RFC3280MandatoryAttributeTypesCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/RFC3280MandatoryAttributeTypesCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -865,30 +865,30 @@ void Pkits::pkits4_3_7()
 void Pkits::pkits4_3_8()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidRFC3280OptionalAttributeTypesTest8EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidRFC3280OptionalAttributeTypesTest8EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/RFC3280OptionalAttributeTypesCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/RFC3280OptionalAttributeTypesCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/RFC3280OptionalAttributeTypesCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/RFC3280OptionalAttributeTypesCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -901,30 +901,30 @@ void Pkits::pkits4_3_8()
 void Pkits::pkits4_3_9()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidUTF8StringEncodedNamesTest9EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidUTF8StringEncodedNamesTest9EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/UTF8StringEncodedNamesCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/UTF8StringEncodedNamesCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/UTF8StringEncodedNamesCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/UTF8StringEncodedNamesCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -937,30 +937,30 @@ void Pkits::pkits4_3_9()
 void Pkits::pkits4_3_10()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidRolloverfromPrintableStringtoUTF8StringTest10EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidRolloverfromPrintableStringtoUTF8StringTest10EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/RolloverfromPrintableStringtoUTF8StringCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/RolloverfromPrintableStringtoUTF8StringCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/RolloverfromPrintableStringtoUTF8StringCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/RolloverfromPrintableStringtoUTF8StringCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -974,30 +974,30 @@ void Pkits::pkits4_3_10()
 void Pkits::pkits4_3_11()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/ValidUTF8StringCaseInsensitiveMatchTest11EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidUTF8StringCaseInsensitiveMatchTest11EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/UTF8StringCaseInsensitiveMatchCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/UTF8StringCaseInsensitiveMatchCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/UTF8StringCaseInsensitiveMatchCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/UTF8StringCaseInsensitiveMatchCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
@@ -1013,27 +1013,27 @@ void Pkits::pkits4_3_11()
 void Pkits::pkits4_4_1()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidMissingCRLTest1EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidMissingCRLTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/NoCRLCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/NoCRLCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
 
@@ -1048,37 +1048,37 @@ void Pkits::pkits4_4_1()
 void Pkits::pkits4_4_2()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidRevokedCATest2EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidRevokedCATest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 
-	    QCA::Certificate subca = certFromDERFile("certs/RevokedsubCACert.crt", provider);
+	    QCA::Certificate subca = certFromDERFile(QStringLiteral("certs/RevokedsubCACert.crt"), provider);
 	    QCOMPARE( subca.isNull(), false );
 	    untrusted.addCertificate( subca );
-	    QCA::CRL subcaCRL = crlFromDERFile("certs/RevokedsubCACRL.crl", provider);
+	    QCA::CRL subcaCRL = crlFromDERFile(QStringLiteral("certs/RevokedsubCACRL.crl"), provider);
 	    QCOMPARE( subcaCRL.isNull(), false );
 	    untrusted.addCRL( subcaCRL );
 
@@ -1093,30 +1093,30 @@ void Pkits::pkits4_4_2()
 void Pkits::pkits4_4_3()
 {
     QStringList providersToTest;
-    providersToTest.append("qca-ossl");
+    providersToTest.append(QStringLiteral("qca-ossl"));
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
             QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
         else {
-	    QCA::Certificate cert = certFromDERFile("certs/InvalidRevokedEETest3EE.crt", provider);
+	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidRevokedEETest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
 
 	    QCA::CertificateCollection trusted;
 	    QCA::CertificateCollection untrusted;
 	    QCOMPARE( cert.validate( trusted, untrusted ), QCA::ErrorInvalidCA );
 
-	    QCA::Certificate root = certFromDERFile("certs/TrustAnchorRootCertificate.crt", provider);
+	    QCA::Certificate root = certFromDERFile(QStringLiteral("certs/TrustAnchorRootCertificate.crt"), provider);
 	    QCOMPARE( root.isNull(), false );
 	    trusted.addCertificate( root );
-	    QCA::CRL rootCRL = crlFromDERFile("certs/TrustAnchorRootCRL.crl", provider);
+	    QCA::CRL rootCRL = crlFromDERFile(QStringLiteral("certs/TrustAnchorRootCRL.crl"), provider);
 	    QCOMPARE( rootCRL.isNull(), false );
 	    trusted.addCRL( rootCRL );
 
-	    QCA::Certificate ca = certFromDERFile("certs/GoodCACert.crt", provider);
+	    QCA::Certificate ca = certFromDERFile(QStringLiteral("certs/GoodCACert.crt"), provider);
 	    QCOMPARE( ca.isNull(), false );
 	    untrusted.addCertificate( ca );
-	    QCA::CRL caCRL = crlFromDERFile("certs/GoodCACRL.crl", provider);
+	    QCA::CRL caCRL = crlFromDERFile(QStringLiteral("certs/GoodCACRL.crl"), provider);
 	    QCOMPARE( caCRL.isNull(), false );
 	    untrusted.addCRL( caCRL );
 

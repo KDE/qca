@@ -151,7 +151,7 @@ void MetaTypeUnitTest::invokeMethodTest()
 
     result = QString();
     args.clear();
-    QString myString( "test words" );
+    QString myString = QStringLiteral( "test words" );
     args << myString;
     ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnArg" ), args, &result );
     QVERIFY( ret );
@@ -162,11 +162,11 @@ void MetaTypeUnitTest::invokeMethodTest()
     QCOMPARE( result.toString(), QString( myString + myString ) );
 
     // 9 arguments - no matching method
-    result = QString( "unchanged" );
+    result = QStringLiteral( "unchanged" );
     args << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0;
     ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "tenArgs" ), args, &result );
     QVERIFY( ret == false );
-    QCOMPARE( result.toString(), QString( "unchanged" ) );
+    QCOMPARE( result.toString(), QStringLiteral( "unchanged" ) );
 
     // 10 args
     args << 0;
@@ -175,11 +175,11 @@ void MetaTypeUnitTest::invokeMethodTest()
     QCOMPARE( result.toString(), myString );
 
     // 11 args
-    result = QString( "unchanged" );
+    result = QStringLiteral( "unchanged" );
     args << 0;
     ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "elevenArgs" ), args, &result );
     QVERIFY( ret == false );
-    QCOMPARE( result.toString(), QString( "unchanged" ) );
+    QCOMPARE( result.toString(), QStringLiteral( "unchanged" ) );
 
     delete testClass1;
 }

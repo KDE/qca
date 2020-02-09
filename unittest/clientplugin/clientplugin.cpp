@@ -62,17 +62,17 @@ public:
         QStringList features() const override
         {
                 QStringList list;
-                list += "testClientSideProviderFeature1";
-                list += "testClientSideProviderFeature2";
+                list += QStringLiteral("testClientSideProviderFeature1");
+                list += QStringLiteral("testClientSideProviderFeature2");
                 return list;
         }
 
         Provider::Context *createContext(const QString &type) override
         {
-            if(type == "testClientSideProviderFeature1")
+            if(type == QLatin1String("testClientSideProviderFeature1"))
                 // return new Feature1Context(this);
 		return nullptr;
-            else if (type == "testClientSideProviderFeature2")
+            else if (type == QLatin1String("testClientSideProviderFeature2"))
 		//  return new Feature2Context(this);
 		return nullptr;
             else

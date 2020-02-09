@@ -77,7 +77,7 @@ class StreamLogger : public QCA::AbstractLogDevice
 {
     Q_OBJECT
 public:
-	StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice( "Stream logger" ), _stream(stream)
+	StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice( QStringLiteral("Stream logger") ), _stream(stream)
 	{
 		QCA::logger()->registerLogDevice (this);
 	}
@@ -110,7 +110,7 @@ private:
 	}
 
 	inline QString now() {
-		static QString format = "yyyy-MM-dd hh:mm:ss";
+		static QString format = QStringLiteral("yyyy-MM-dd hh:mm:ss");
 		return QDateTime::currentDateTime ().toString (format);
 	}
 
@@ -429,11 +429,11 @@ private Q_SLOTS:
 
 		if(e.type() == QCA::Event::Password)
 		{
-			QString type = "password";
+			QString type = QStringLiteral("password");
 			if(e.passwordStyle() == QCA::Event::StylePassphrase)
-				type = "passphrase";
+				type = QStringLiteral("passphrase");
 			else if(e.passwordStyle() == QCA::Event::StylePIN)
-				type = "PIN";
+				type = QStringLiteral("PIN");
 
 			QString str;
 			if(e.source() == QCA::Event::KeyStore)
@@ -447,16 +447,16 @@ private Q_SLOTS:
 				else
 				{
 					if(e.keyStoreInfo().type() == QCA::KeyStore::SmartCard)
-						name = QString("the '") + e.keyStoreInfo().name() + "' token";
+						name = QStringLiteral("the '") + e.keyStoreInfo().name() + "' token";
 					else
 						name = e.keyStoreInfo().name();
 				}
-				str = QString("Enter %1 for %2").arg(type, name);
+				str = QStringLiteral("Enter %1 for %2").arg(type, name);
 			}
 			else if(!e.fileName().isEmpty())
-				str = QString("Enter %1 for %2").arg(type, e.fileName());
+				str = QStringLiteral("Enter %1 for %2").arg(type, e.fileName());
 			else
-				str = QString("Enter %1").arg(type);
+				str = QStringLiteral("Enter %1").arg(type);
 
 			if(!prompt)
 			{
@@ -532,14 +532,14 @@ private Q_SLOTS:
 			QString name;
 			if(!entry.isNull())
 			{
-				name = QString("Please make ") + entry.name() + " (of " + entry.storeName() + ") available";
+				name = QStringLiteral("Please make ") + entry.name() + " (of " + entry.storeName() + ") available";
 			}
 			else
 			{
-				name = QString("Please insert the '") + e.keyStoreInfo().name() + "' token";
+				name = QStringLiteral("Please insert the '") + e.keyStoreInfo().name() + "' token";
 			}
 
-			QString str = QString("%1 and press Enter (or 'q' to cancel) ...").arg(name);
+			QString str = QStringLiteral("%1 and press Enter (or 'q' to cancel) ...").arg(name);
 
 			if(!prompt)
 			{
@@ -711,11 +711,11 @@ protected:
 static bool promptForNewPassphrase(QCA::SecureArray *result)
 {
 	QCA::ConsolePrompt prompt;
-	prompt.getHidden("Enter new passphrase");
+	prompt.getHidden(QStringLiteral("Enter new passphrase"));
 	prompt.waitForFinished();
 	QCA::SecureArray out = prompt.result();
 
-	prompt.getHidden("Confirm new passphrase");
+	prompt.getHidden(QStringLiteral("Confirm new passphrase"));
 	prompt.waitForFinished();
 
 	if(prompt.result() != out)
@@ -743,9 +743,9 @@ static QString line_encode(const QString &in)
 	for(const QChar &c : in)
 	{
 		if(c == '\\')
-			out += "\\\\";
+			out += QStringLiteral("\\\\");
 		else if(c == '\n')
-			out += "\\n";
+			out += QStringLiteral("\\n");
 		else
 			out += c;
 	}
@@ -777,7 +777,7 @@ static QString line_decode(const QString &in)
 static QString make_ksentry_string(const QString &id)
 {
 	QString out;
-	out += "QCATOOL_KEYSTOREENTRY_1\n";
+	out += QStringLiteral("QCATOOL_KEYSTOREENTRY_1\n");
 	out += line_encode(id) + '\n';
 	return out;
 }
@@ -805,7 +805,7 @@ static QString read_ksentry_file(const QString &fileName)
 		QString line = ts.readLine();
 		if(linenum == 0)
 		{
-			if(line != "QCATOOL_KEYSTOREENTRY_1")
+			if(line != QLatin1String("QCATOOL_KEYSTOREENTRY_1"))
 				return out;
 		}
 		else
@@ -827,7 +827,7 @@ static bool is_pem_file(const QString &fileName)
 	if(!ts.atEnd())
 	{
 		QString line = ts.readLine();
-		if(line.startsWith("-----BEGIN"))
+		if(line.startsWith(QLatin1String("-----BEGIN")))
 			return true;
 	}
 	return false;
@@ -863,22 +863,22 @@ public:
 static QList<InfoType> makeInfoTypeList(bool legacyEmail = false)
 {
 	QList<InfoType> out;
-	out += InfoType(QCA::CommonName,             "CommonName",             "CN",  "Common Name (CN)",          "Full name, domain, anything");
-	out += InfoType(QCA::Email,                  "Email",                  "",    "Email Address",             "");
+	out += InfoType(QCA::CommonName,             QStringLiteral("CommonName"),             QStringLiteral("CN"),  QStringLiteral("Common Name (CN)"),          QStringLiteral("Full name, domain, anything"));
+	out += InfoType(QCA::Email,                  QStringLiteral("Email"),                  QLatin1String(""),     QStringLiteral("Email Address"),             QLatin1String(""));
 	if(legacyEmail)
-		out += InfoType(QCA::EmailLegacy,            "EmailLegacy",            "",    "PKCS#9 Email Address",      "");
-	out += InfoType(QCA::Organization,           "Organization",           "O",   "Organization (O)",          "Company, group, etc");
-	out += InfoType(QCA::OrganizationalUnit,     "OrganizationalUnit",     "OU",  "Organizational Unit (OU)",  "Division/branch of organization");
-	out += InfoType(QCA::Locality,               "Locality",               "",    "Locality (L)",              "City, shire, part of a state");
-	out += InfoType(QCA::State,                  "State",                  "",    "State (ST)",                "State within the country");
-	out += InfoType(QCA::Country,                "Country",                "C",   "Country Code (C)",          "2-letter code");
-	out += InfoType(QCA::IncorporationLocality,  "IncorporationLocality",  "",    "Incorporation Locality",    "For EV certificates");
-	out += InfoType(QCA::IncorporationState,     "IncorporationState",     "",    "Incorporation State",       "For EV certificates");
-	out += InfoType(QCA::IncorporationCountry,   "IncorporationCountry",   "",    "Incorporation Country",     "For EV certificates");
-	out += InfoType(QCA::URI,                    "URI",                    "",    "URI",                       "");
-	out += InfoType(QCA::DNS,                    "DNS",                    "",    "Domain Name",               "Domain (dnsName)");
-	out += InfoType(QCA::IPAddress,              "IPAddress",              "",    "IP Adddress",               "");
-	out += InfoType(QCA::XMPP,                   "XMPP",                   "",    "XMPP Address (JID)",        "From RFC 3920 (id-on-xmppAddr)");
+		out += InfoType(QCA::EmailLegacy,            QStringLiteral("EmailLegacy"),            QLatin1String(""),    QStringLiteral("PKCS#9 Email Address"),      QLatin1String(""));
+	out += InfoType(QCA::Organization,           QStringLiteral("Organization"),           QStringLiteral("O"),   QStringLiteral("Organization (O)"),          QStringLiteral("Company, group, etc"));
+	out += InfoType(QCA::OrganizationalUnit,     QStringLiteral("OrganizationalUnit"),     QStringLiteral("OU"),  QStringLiteral("Organizational Unit (OU)"),  QStringLiteral("Division/branch of organization"));
+	out += InfoType(QCA::Locality,               QStringLiteral("Locality"),               QLatin1String(""),     QStringLiteral("Locality (L)"),              QStringLiteral("City, shire, part of a state"));
+	out += InfoType(QCA::State,                  QStringLiteral("State"),                  QLatin1String(""),     QStringLiteral("State (ST)"),                QStringLiteral("State within the country"));
+	out += InfoType(QCA::Country,                QStringLiteral("Country"),                QStringLiteral("C"),   QStringLiteral("Country Code (C)"),          QStringLiteral("2-letter code"));
+	out += InfoType(QCA::IncorporationLocality,  QStringLiteral("IncorporationLocality"),  QLatin1String(""),     QStringLiteral("Incorporation Locality"),    QStringLiteral("For EV certificates"));
+	out += InfoType(QCA::IncorporationState,     QStringLiteral("IncorporationState"),     QLatin1String(""),     QStringLiteral("Incorporation State"),       QStringLiteral("For EV certificates"));
+	out += InfoType(QCA::IncorporationCountry,   QStringLiteral("IncorporationCountry"),   QLatin1String(""),     QStringLiteral("Incorporation Country"),     QStringLiteral("For EV certificates"));
+	out += InfoType(QCA::URI,                    QStringLiteral("URI"),                    QLatin1String(""),     QStringLiteral("URI"),                       QLatin1String(""));
+	out += InfoType(QCA::DNS,                    QStringLiteral("DNS"),                    QLatin1String(""),     QStringLiteral("Domain Name"),               QStringLiteral("Domain (dnsName)"));
+	out += InfoType(QCA::IPAddress,              QStringLiteral("IPAddress"),              QLatin1String(""),     QStringLiteral("IP Adddress"),               QLatin1String(""));
+	out += InfoType(QCA::XMPP,                   QStringLiteral("XMPP"),                   QLatin1String(""),     QStringLiteral("XMPP Address (JID)"),        QStringLiteral("From RFC 3920 (id-on-xmppAddr)"));
 	return out;
 }
 
@@ -903,24 +903,24 @@ public:
 static QList<MyConstraintType> makeConstraintTypeList()
 {
 	QList<MyConstraintType> out;
-	out += MyConstraintType(QCA::DigitalSignature,    "DigitalSignature",    "Digital Signature",      "Can be used for signing");
-	out += MyConstraintType(QCA::NonRepudiation,      "NonRepudiation",      "Non-Repudiation",        "Usage is legally binding");
-	out += MyConstraintType(QCA::KeyEncipherment,     "KeyEncipherment",     "Key Encipherment",       "Can encrypt other keys");
-	out += MyConstraintType(QCA::DataEncipherment,    "DataEncipherment",    "Data Encipherment",      "Can encrypt arbitrary data");
-	out += MyConstraintType(QCA::KeyAgreement,        "KeyAgreement",        "Key Agreement",          "Can perform key agreement (DH)");
-	out += MyConstraintType(QCA::KeyCertificateSign,  "KeyCertificateSign",  "Certificate Sign",       "Can sign other certificates");
-	out += MyConstraintType(QCA::CRLSign,             "CRLSign",             "CRL Sign",               "Can sign CRLs");
-	out += MyConstraintType(QCA::EncipherOnly,        "EncipherOnly",        "Encipher Only",          "Can be used for encrypting");
-	out += MyConstraintType(QCA::DecipherOnly,        "DecipherOnly",        "Decipher Only",          "Can be used for decrypting");
-	out += MyConstraintType(QCA::ServerAuth,          "ServerAuth",          "Server Authentication",  "TLS Server");
-	out += MyConstraintType(QCA::ClientAuth,          "ClientAuth",          "Client Authentication",  "TLS Client");
-	out += MyConstraintType(QCA::CodeSigning,         "CodeSigning",         "Code Signing",           "");
-	out += MyConstraintType(QCA::EmailProtection,     "EmailProtection",     "Email Protection",       "S/MIME");
-	out += MyConstraintType(QCA::IPSecEndSystem,      "IPSecEndSystem",      "IPSec End-System",       "");
-	out += MyConstraintType(QCA::IPSecTunnel,         "IPSecTunnel",         "IPSec Tunnel",           "");
-	out += MyConstraintType(QCA::IPSecUser,           "IPSecUser",           "IPSec User",             "");
-	out += MyConstraintType(QCA::TimeStamping,        "TimeStamping",        "Time Stamping",          "");
-	out += MyConstraintType(QCA::OCSPSigning,         "OCSPSigning",         "OCSP Signing",           "");
+	out += MyConstraintType(QCA::DigitalSignature,    QStringLiteral("DigitalSignature"),    QStringLiteral("Digital Signature"),      QStringLiteral("Can be used for signing"));
+	out += MyConstraintType(QCA::NonRepudiation,      QStringLiteral("NonRepudiation"),      QStringLiteral("Non-Repudiation"),        QStringLiteral("Usage is legally binding"));
+	out += MyConstraintType(QCA::KeyEncipherment,     QStringLiteral("KeyEncipherment"),     QStringLiteral("Key Encipherment"),       QStringLiteral("Can encrypt other keys"));
+	out += MyConstraintType(QCA::DataEncipherment,    QStringLiteral("DataEncipherment"),    QStringLiteral("Data Encipherment"),      QStringLiteral("Can encrypt arbitrary data"));
+	out += MyConstraintType(QCA::KeyAgreement,        QStringLiteral("KeyAgreement"),        QStringLiteral("Key Agreement"),          QStringLiteral("Can perform key agreement (DH)"));
+	out += MyConstraintType(QCA::KeyCertificateSign,  QStringLiteral("KeyCertificateSign"),  QStringLiteral("Certificate Sign"),       QStringLiteral("Can sign other certificates"));
+	out += MyConstraintType(QCA::CRLSign,             QStringLiteral("CRLSign"),             QStringLiteral("CRL Sign"),               QStringLiteral("Can sign CRLs"));
+	out += MyConstraintType(QCA::EncipherOnly,        QStringLiteral("EncipherOnly"),        QStringLiteral("Encipher Only"),          QStringLiteral("Can be used for encrypting"));
+	out += MyConstraintType(QCA::DecipherOnly,        QStringLiteral("DecipherOnly"),        QStringLiteral("Decipher Only"),          QStringLiteral("Can be used for decrypting"));
+	out += MyConstraintType(QCA::ServerAuth,          QStringLiteral("ServerAuth"),          QStringLiteral("Server Authentication"),  QStringLiteral("TLS Server"));
+	out += MyConstraintType(QCA::ClientAuth,          QStringLiteral("ClientAuth"),          QStringLiteral("Client Authentication"),  QStringLiteral("TLS Client"));
+	out += MyConstraintType(QCA::CodeSigning,         QStringLiteral("CodeSigning"),         QStringLiteral("Code Signing"),           QLatin1String(""));
+	out += MyConstraintType(QCA::EmailProtection,     QStringLiteral("EmailProtection"),     QStringLiteral("Email Protection"),       QStringLiteral("S/MIME"));
+	out += MyConstraintType(QCA::IPSecEndSystem,      QStringLiteral("IPSecEndSystem"),      QStringLiteral("IPSec End-System"),       QLatin1String(""));
+	out += MyConstraintType(QCA::IPSecTunnel,         QStringLiteral("IPSecTunnel"),         QStringLiteral("IPSec Tunnel"),           QLatin1String(""));
+	out += MyConstraintType(QCA::IPSecUser,           QStringLiteral("IPSecUser"),           QStringLiteral("IPSec User"),             QLatin1String(""));
+	out += MyConstraintType(QCA::TimeStamping,        QStringLiteral("TimeStamping"),        QStringLiteral("Time Stamping"),          QLatin1String(""));
+	out += MyConstraintType(QCA::OCSPSigning,         QStringLiteral("OCSPSigning"),         QStringLiteral("OCSP Signing"),           QLatin1String(""));
 	return out;
 }
 
@@ -1020,19 +1020,19 @@ static bool parseValidityLength(const QString &in, ValidityLength *vl)
 			return false;
 		str = str.trimmed(); // remove space
 
-		if(str == "y")
+		if(str == QLatin1String("y"))
 		{
 			if(vl->years != -1)
 				return false;
 			vl->years = x;
 		}
-		if(str == "m")
+		if(str == QLatin1String("m"))
 		{
 			if(vl->months != -1)
 				return false;
 			vl->months = x;
 		}
-		if(str == "d")
+		if(str == QLatin1String("d"))
 		{
 			if(vl->days != -1)
 				return false;
@@ -1071,16 +1071,16 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 		{
 			while(true)
 			{
-				QString str = prompt_for("Create an end user ('user') certificate or a CA ('ca') certificate? [user]");
+				QString str = prompt_for(QStringLiteral("Create an end user ('user') certificate or a CA ('ca') certificate? [user]"));
 				if(str.isEmpty())
-					str = "user";
-				if(str != "user" && str != "ca")
+					str = QStringLiteral("user");
+				if(str != QLatin1String("user") && str != QLatin1String("ca"))
 				{
 					printf("'%s' is not a valid entry.\n", qPrintable(str));
 					continue;
 				}
 
-				if(str == "ca")
+				if(str == QLatin1String("ca"))
 					opts.setAsCA();
 				break;
 			}
@@ -1088,7 +1088,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 
 			while(true)
 			{
-				QString str = prompt_for("Serial Number");
+				QString str = prompt_for(QStringLiteral("Serial Number"));
 				QCA::BigInteger num;
 				if(str.isEmpty() || !num.fromString(str))
 				{
@@ -1120,7 +1120,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 				int index;
 				while(true)
 				{
-					QString str = prompt_for("Select an attribute to add, or enter to move on");
+					QString str = prompt_for(QStringLiteral("Select an attribute to add, or enter to move on"));
 					if(str.isEmpty())
 					{
 						index = -1;
@@ -1163,7 +1163,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 				int index;
 				while(true)
 				{
-					QString str = prompt_for("Select an attribute to add, or enter to move on");
+					QString str = prompt_for(QStringLiteral("Select an attribute to add, or enter to move on"));
 					if(str.isEmpty())
 					{
 						index = -1;
@@ -1199,7 +1199,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 				"string format.\n\n");
 			while(true)
 			{
-				QString str = prompt_for("Enter a policy OID to add, or enter to move on");
+				QString str = prompt_for(QStringLiteral("Enter a policy OID to add, or enter to move on"));
 				if(str.isEmpty())
 					break;
 				if(!validOid(str))
@@ -1224,10 +1224,10 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 	else
 	{
 		QCA::CertificateInfo info;
-		info.insert(QCA::CommonName, prompt_for("Common Name"));
-		info.insert(QCA::Country, prompt_for("Country Code (2 letters)"));
-		info.insert(QCA::Organization, prompt_for("Organization"));
-		info.insert(QCA::Email, prompt_for("Email"));
+		info.insert(QCA::CommonName, prompt_for(QStringLiteral("Common Name")));
+		info.insert(QCA::Country, prompt_for(QStringLiteral("Country Code (2 letters)")));
+		info.insert(QCA::Organization, prompt_for(QStringLiteral("Organization")));
+		info.insert(QCA::Email, prompt_for(QStringLiteral("Email")));
 		opts.setInfo(info);
 
 		printf("\n");
@@ -1237,7 +1237,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 	{
 		while(true)
 		{
-			QString str = prompt_for("How long should the certificate be valid? (e.g. '1y2m3d')");
+			QString str = prompt_for(QStringLiteral("How long should the certificate be valid? (e.g. '1y2m3d')"));
 			ValidityLength vl;
 			if(!parseValidityLength(str, &vl))
 			{
@@ -1263,11 +1263,11 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 
 			QStringList parts;
 			if(vl.years > 0)
-				parts += QString("%1 year(s)").arg(vl.years);
+				parts += QStringLiteral("%1 year(s)").arg(vl.years);
 			if(vl.months > 0)
-				parts += QString("%1 month(s)").arg(vl.months);
+				parts += QStringLiteral("%1 month(s)").arg(vl.months);
 			if(vl.days > 0)
-				parts += QString("%1 day(s)").arg(vl.days);
+				parts += QStringLiteral("%1 day(s)").arg(vl.days);
 			QString out;
 			if(parts.count() == 1)
 				out = parts[0];
@@ -1294,7 +1294,7 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 static bool string_is_bool(const QString &in)
 {
 	QString lc = in.toLower();
-	if(lc == "true" || lc == "false")
+	if(lc == QLatin1String("true") || lc == QLatin1String("false"))
 		return true;
 	return false;
 }
@@ -1366,9 +1366,9 @@ static bool prompt_for_bool(const QString &prompt, bool def = false)
 		QString str = prompt_for_string(prompt);
 		if(str.isEmpty())
 			return def;
-		if(partial_compare_nocase(str, "true"))
+		if(partial_compare_nocase(str, QStringLiteral("true")))
 			return true;
-		else if(partial_compare_nocase(str, "false"))
+		else if(partial_compare_nocase(str, QStringLiteral("false")))
 			return false;
 		printf("'%s' is not a valid entry.\n\n", qPrintable(str));
 	}
@@ -1381,9 +1381,9 @@ static bool prompt_for_yesno(const QString &prompt, bool def = false)
 		QString str = prompt_for_string(prompt);
 		if(str.isEmpty())
 			return def;
-		if(partial_compare_nocase(str, "yes"))
+		if(partial_compare_nocase(str, QStringLiteral("yes")))
 			return true;
-		else if(partial_compare_nocase(str, "no"))
+		else if(partial_compare_nocase(str, QStringLiteral("no")))
 			return false;
 		printf("'%s' is not a valid entry.\n\n", qPrintable(str));
 	}
@@ -1396,12 +1396,12 @@ static QString prompt_for_slotevent_method(const QString &prompt, const QString 
 		QString str = prompt_for_string(prompt);
 		if(str.isEmpty())
 			return def;
-		if(partial_compare_nocase(str, "auto"))
-			return "auto";
-		else if(partial_compare_nocase(str, "trigger"))
-			return "trigger";
-		else if(partial_compare_nocase(str, "poll"))
-			return "poll";
+		if(partial_compare_nocase(str, QStringLiteral("auto")))
+			return QStringLiteral("auto");
+		else if(partial_compare_nocase(str, QStringLiteral("trigger")))
+			return QStringLiteral("trigger");
+		else if(partial_compare_nocase(str, QStringLiteral("poll")))
+			return QStringLiteral("poll");
 		printf("'%s' is not a valid entry.\n\n", qPrintable(str));
 	}
 }
@@ -1414,19 +1414,19 @@ static QVariantMap provider_config_edit_generic(const QVariantMap &in)
 	{
 		it.next();
 		QString var = it.key();
-		if(var == "formtype")
+		if(var == QLatin1String("formtype"))
 			continue;
 		QVariant val = it.value();
 
 		// fields must be bool, int, or string
 		QVariant newval;
-		QString prompt = QString("%1: [%2] ").arg(var, val.toString());
+		QString prompt = QStringLiteral("%1: [%2] ").arg(var, val.toString());
 		if(variant_is_bool(val))
-			newval = prompt_for_bool(QString("bool   ") + prompt, val.toBool());
+			newval = prompt_for_bool(QStringLiteral("bool   ") + prompt, val.toBool());
 		else if(variant_is_int(val))
-			newval = prompt_for_int(QString("int    ") + prompt, val.toInt());
+			newval = prompt_for_int(QStringLiteral("int    ") + prompt, val.toInt());
 		else if(val.canConvert<QString>())
-			newval = prompt_for_string(QString("string ") + prompt, val.toString());
+			newval = prompt_for_string(QStringLiteral("string ") + prompt, val.toString());
 		else
 			continue; // skip bogus fields
 
@@ -1453,7 +1453,7 @@ public:
 		cert_private(false),
 		enabled(false),
 		private_mask(0),
-		slotevent_method("auto"),
+		slotevent_method(QStringLiteral("auto")),
 		slotevent_timeout(0)
 	{
 	}
@@ -1461,27 +1461,27 @@ public:
 	QVariantMap toVariantMap() const
 	{
 		QVariantMap out;
-		out["allow_protected_authentication"] = allow_protected_authentication;
-		out["cert_private"] = cert_private;
-		out["enabled"] = enabled;
-		out["library"] = library;
-		out["name"] = name;
-		out["private_mask"] = private_mask;
-		out["slotevent_method"] = slotevent_method;
-		out["slotevent_timeout"] = slotevent_timeout;
+		out[QStringLiteral("allow_protected_authentication")] = allow_protected_authentication;
+		out[QStringLiteral("cert_private")] = cert_private;
+		out[QStringLiteral("enabled")] = enabled;
+		out[QStringLiteral("library")] = library;
+		out[QStringLiteral("name")] = name;
+		out[QStringLiteral("private_mask")] = private_mask;
+		out[QStringLiteral("slotevent_method")] = slotevent_method;
+		out[QStringLiteral("slotevent_timeout")] = slotevent_timeout;
 		return out;
 	}
 
 	bool fromVariantMap(const QVariantMap &in)
 	{
-		allow_protected_authentication = in["allow_protected_authentication"].toBool();
-		cert_private = in["cert_private"].toBool();
-		enabled = in["enabled"].toBool();
-		library = in["library"].toString();
-		name = in["name"].toString();
-		private_mask = in["private_mask"].toInt();
-		slotevent_method = in["slotevent_method"].toString();
-		slotevent_timeout = in["slotevent_timeout"].toInt();
+		allow_protected_authentication = in[QStringLiteral("allow_protected_authentication")].toBool();
+		cert_private = in[QStringLiteral("cert_private")].toBool();
+		enabled = in[QStringLiteral("enabled")].toBool();
+		library = in[QStringLiteral("library")].toString();
+		name = in[QStringLiteral("name")].toString();
+		private_mask = in[QStringLiteral("private_mask")].toInt();
+		slotevent_method = in[QStringLiteral("slotevent_method")].toString();
+		slotevent_timeout = in[QStringLiteral("slotevent_timeout")].toInt();
 		return true;
 	}
 };
@@ -1510,13 +1510,13 @@ public:
 		QVariantMap out = orig_config;
 
 		// form type
-		out["formtype"] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
+		out[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
 
 		// base settings
-		out["allow_load_rootca"] = allow_load_rootca;
-		out["allow_protected_authentication"] = allow_protected_authentication;
-		out["log_level"] = log_level;
-		out["pin_cache"] = pin_cache;
+		out[QStringLiteral("allow_load_rootca")] = allow_load_rootca;
+		out[QStringLiteral("allow_protected_authentication")] = allow_protected_authentication;
+		out[QStringLiteral("log_level")] = log_level;
+		out[QStringLiteral("pin_cache")] = pin_cache;
 
 		// provider settings (always write at least 10 providers)
 		for(int n = 0; n < 10 || n < providers.count(); ++n)
@@ -1541,13 +1541,13 @@ public:
 
 	bool fromVariantMap(const QVariantMap &in)
 	{
-		if(in["formtype"] != "http://affinix.com/qca/forms/qca-pkcs11#1.0")
+		if(in[QStringLiteral("formtype")] != "http://affinix.com/qca/forms/qca-pkcs11#1.0")
 			return false;
 
-		allow_load_rootca = in["allow_load_rootca"].toBool();
-		allow_protected_authentication = in["allow_protected_authentication"].toBool();
-		log_level = in["log_level"].toInt();
-		pin_cache = in["pin_cache"].toInt();
+		allow_load_rootca = in[QStringLiteral("allow_load_rootca")].toBool();
+		allow_protected_authentication = in[QStringLiteral("allow_protected_authentication")].toBool();
+		log_level = in[QStringLiteral("log_level")].toInt();
+		pin_cache = in[QStringLiteral("pin_cache")].toInt();
 
 		for(int n = 0;; ++n)
 		{
@@ -1615,9 +1615,9 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 		printf("  Allow protected authentication: %s\n", config.allow_protected_authentication ? "Yes" : "No");
 		QString str;
 		if(config.pin_cache == -1)
-			str = "No limit";
+			str = QStringLiteral("No limit");
 		else
-			str = QString("%1 seconds").arg(config.pin_cache);
+			str = QStringLiteral("%1 seconds").arg(config.pin_cache);
 		printf("  Maximum PIN cache time: %s\n", qPrintable(str));
 		printf("  Log level: %d\n", config.log_level);
 		printf("\n");
@@ -1640,7 +1640,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 		int index;
 		while(true)
 		{
-			QString str = prompt_for("Select an action, or enter to quit");
+			QString str = prompt_for(QStringLiteral("Select an action, or enter to quit"));
 			if(str.isEmpty())
 			{
 				index = -1;
@@ -1662,13 +1662,13 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 			printf("\n");
 
 			QString prompt;
-			prompt = QString("Allow loading of root CAs: [%1] ").arg(config.allow_load_rootca ? "Yes" : "No");
+			prompt = QStringLiteral("Allow loading of root CAs: [%1] ").arg(config.allow_load_rootca ? QStringLiteral("Yes") : QStringLiteral("No"));
 			config.allow_load_rootca = prompt_for_yesno(prompt, config.allow_load_rootca);
-			prompt = QString("Allow protected authentication: [%1] ").arg(config.allow_protected_authentication ? "Yes" : "No");
+			prompt = QStringLiteral("Allow protected authentication: [%1] ").arg(config.allow_protected_authentication ? QStringLiteral("Yes") : QStringLiteral("No"));
 			config.allow_protected_authentication = prompt_for_yesno(prompt, config.allow_protected_authentication);
-			prompt = QString("Maximum PIN cache time in seconds (-1 for no limit): [%1] ").arg(config.pin_cache);
+			prompt = QStringLiteral("Maximum PIN cache time in seconds (-1 for no limit): [%1] ").arg(config.pin_cache);
 			config.pin_cache = prompt_for_int(prompt, config.pin_cache);
-			prompt = QString("Log level: [%1] ").arg(config.log_level);
+			prompt = QStringLiteral("Log level: [%1] ").arg(config.log_level);
 			config.log_level = prompt_for_int(prompt, config.log_level);
 		}
 		else // 1, 2, 3
@@ -1690,7 +1690,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 				int index;
 				while(true)
 				{
-					QString str = prompt_for("Select a module, or enter to go back");
+					QString str = prompt_for(QStringLiteral("Select a module, or enter to go back"));
 					if(str.isEmpty())
 					{
 						index = -1;
@@ -1727,9 +1727,9 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 				while(true)
 				{
 					if(index == 1)
-						prompt = QString("Unique friendly name: ");
+						prompt = QStringLiteral("Unique friendly name: ");
 					else
-						prompt = QString("Unique friendly name: [%1] ").arg(provider.name);
+						prompt = QStringLiteral("Unique friendly name: [%1] ").arg(provider.name);
 					provider.name = prompt_for_string(prompt, provider.name);
 
 					if(provider.name.isEmpty())
@@ -1767,9 +1767,9 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 				while(true)
 				{
 					if(index == 1)
-						prompt = QString("Library filename: ");
+						prompt = QStringLiteral("Library filename: ");
 					else
-						prompt = QString("Library filename: [%1] ").arg(provider.library);
+						prompt = QStringLiteral("Library filename: [%1] ").arg(provider.library);
 					provider.library = prompt_for_string(prompt, provider.library);
 
 					if(provider.library.isEmpty())
@@ -1788,9 +1788,9 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 					break;
 				}
 
-				prompt = QString("Allow protected authentication: [%1] ").arg(provider.allow_protected_authentication ? "Yes" : "No");
+				prompt = QStringLiteral("Allow protected authentication: [%1] ").arg(provider.allow_protected_authentication ? QStringLiteral("Yes") : QStringLiteral("No"));
 				provider.allow_protected_authentication = prompt_for_yesno(prompt, provider.allow_protected_authentication);
-				prompt = QString("Provider stores certificates as private objects: [%1] ").arg(provider.cert_private ? "Yes" : "No");
+				prompt = QStringLiteral("Provider stores certificates as private objects: [%1] ").arg(provider.cert_private ? QStringLiteral("Yes") : QStringLiteral("No"));
 				provider.cert_private = prompt_for_yesno(prompt, provider.cert_private);
 				printf("\n");
 				printf("Provider private key mask:\n");
@@ -1799,18 +1799,18 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 				printf("    2        Use sign recover.\n");
 				printf("    4        Use decrypt.\n");
 				printf("    8        Use unwrap.\n");
-				prompt = QString("Mask value: [%1] ").arg(provider.private_mask);
+				prompt = QStringLiteral("Mask value: [%1] ").arg(provider.private_mask);
 				provider.private_mask = prompt_for_int(prompt, provider.private_mask);
 				printf("\n");
 				printf("Slot event method:\n");
 				printf("    auto     Determine automatically.\n");
 				printf("    trigger  Use trigger.\n");
 				printf("    poll     Use poll.\n");
-				prompt = QString("Method value: [%1] ").arg(provider.slotevent_method);
+				prompt = QStringLiteral("Method value: [%1] ").arg(provider.slotevent_method);
 				provider.slotevent_method = prompt_for_slotevent_method(prompt, provider.slotevent_method);
-				if(provider.slotevent_method == "poll")
+				if(provider.slotevent_method == QLatin1String("poll"))
 				{
-					prompt = QString("Poll timeout (0 for no preference): [%1] ").arg(provider.slotevent_timeout);
+					prompt = QStringLiteral("Poll timeout (0 for no preference): [%1] ").arg(provider.slotevent_timeout);
 					provider.slotevent_timeout = prompt_for_int(prompt, provider.slotevent_timeout);
 				}
 				else
@@ -1835,7 +1835,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 static QVariantMap provider_config_edit(const QVariantMap &in)
 {
 	// see if we have a configurator for a known form type
-	if(in["formtype"] == "http://affinix.com/qca/forms/qca-pkcs11#1.0")
+	if(in[QStringLiteral("formtype")] == "http://affinix.com/qca/forms/qca-pkcs11#1.0")
 		return provider_config_edit_pkcs11(in);
 
 	// otherwise, use the generic configurator
@@ -1860,12 +1860,12 @@ static QString kstype_to_string(QCA::KeyStore::Type _type)
 	QString type;
 	switch(_type)
 	{
-		case QCA::KeyStore::System:      type = "Sys "; break;
-		case QCA::KeyStore::User:        type = "User"; break;
-		case QCA::KeyStore::Application: type = "App "; break;
-		case QCA::KeyStore::SmartCard:   type = "Card"; break;
-		case QCA::KeyStore::PGPKeyring:  type = "PGP "; break;
-		default:                         type = "XXXX"; break;
+		case QCA::KeyStore::System:      type = QStringLiteral("Sys "); break;
+		case QCA::KeyStore::User:        type = QStringLiteral("User"); break;
+		case QCA::KeyStore::Application: type = QStringLiteral("App "); break;
+		case QCA::KeyStore::SmartCard:   type = QStringLiteral("Card"); break;
+		case QCA::KeyStore::PGPKeyring:  type = QStringLiteral("PGP "); break;
+		default:                         type = QStringLiteral("XXXX"); break;
 	}
 	return type;
 }
@@ -1875,37 +1875,37 @@ static QString ksentrytype_to_string(QCA::KeyStoreEntry::Type _type)
 	QString type;
 	switch(_type)
 	{
-		case QCA::KeyStoreEntry::TypeKeyBundle:    type = "Key "; break;
-		case QCA::KeyStoreEntry::TypeCertificate:  type = "Cert"; break;
-		case QCA::KeyStoreEntry::TypeCRL:          type = "CRL "; break;
-		case QCA::KeyStoreEntry::TypePGPSecretKey: type = "PSec"; break;
-		case QCA::KeyStoreEntry::TypePGPPublicKey: type = "PPub"; break;
-		default:                                   type = "XXXX"; break;
+		case QCA::KeyStoreEntry::TypeKeyBundle:    type = QStringLiteral("Key "); break;
+		case QCA::KeyStoreEntry::TypeCertificate:  type = QStringLiteral("Cert"); break;
+		case QCA::KeyStoreEntry::TypeCRL:          type = QStringLiteral("CRL "); break;
+		case QCA::KeyStoreEntry::TypePGPSecretKey: type = QStringLiteral("PSec"); break;
+		case QCA::KeyStoreEntry::TypePGPPublicKey: type = QStringLiteral("PPub"); break;
+		default:                                   type = QStringLiteral("XXXX"); break;
 	}
 	return type;
 }
 
-static void try_print_info(const QString &name, const QStringList &values)
+static void try_print_info(const char *name, const QStringList &values)
 {
 	if(!values.isEmpty())
 	{
-		QString value = values.join(", ");
-		printf("   %s: %s\n", qPrintable(name), value.toUtf8().data());
+		QString value = values.join(QStringLiteral(", "));
+		printf("   %s: %s\n", name, value.toUtf8().data());
 	}
 }
 
-static void print_info(const QString &title, const QCA::CertificateInfo &info)
+static void print_info(const char *title, const QCA::CertificateInfo &info)
 {
 	QList<InfoType> list = makeInfoTypeList();
-	printf("%s\n", title.toLatin1().data());
+	printf("%s\n", title);
 	foreach(const InfoType &t, list)
-		try_print_info(t.name, info.values(t.type));
+		try_print_info(qPrintable(t.name), info.values(t.type));
 }
 
-static void print_info_ordered(const QString &title, const QCA::CertificateInfoOrdered &info)
+static void print_info_ordered(const char *title, const QCA::CertificateInfoOrdered &info)
 {
 	QList<InfoType> list = makeInfoTypeList(true);
-	printf("%s\n", title.toLatin1().data());
+	printf("%s\n", title);
 	foreach(const QCA::CertificateInfoPair &pair, info)
 	{
 		QCA::CertificateInfoType type = pair.type();
@@ -1928,9 +1928,9 @@ static void print_info_ordered(const QString &title, const QCA::CertificateInfoO
 		else
 		{
 			if(pair.type().section() == QCA::CertificateInfoType::DN)
-				name = QString("DN:") + pair.type().id();
+				name = QStringLiteral("DN:") + pair.type().id();
 			else
-				name = QString("AN:") + pair.type().id();
+				name = QStringLiteral("AN:") + pair.type().id();
 		}
 
 		printf("   %s: %s\n", qPrintable(name), pair.value().toUtf8().data());
@@ -1953,13 +1953,13 @@ static QString sigalgo_to_string(QCA::SignatureAlgorithm algo)
 	QString str;
 	switch(algo)
 	{
-		case QCA::EMSA1_SHA1:       str = "EMSA1(SHA1)"; break;
-		case QCA::EMSA3_SHA1:       str = "EMSA3(SHA1)"; break;
-		case QCA::EMSA3_MD5:        str = "EMSA3(MD5)"; break;
-		case QCA::EMSA3_MD2:        str = "EMSA3(MD2)"; break;
-		case QCA::EMSA3_RIPEMD160:  str = "EMSA3(RIPEMD160)"; break;
-		case QCA::EMSA3_Raw:        str = "EMSA3(raw)"; break;
-		default:                    str = "Unknown"; break;
+		case QCA::EMSA1_SHA1:       str = QStringLiteral("EMSA1(SHA1)"); break;
+		case QCA::EMSA3_SHA1:       str = QStringLiteral("EMSA3(SHA1)"); break;
+		case QCA::EMSA3_MD5:        str = QStringLiteral("EMSA3(MD5)"); break;
+		case QCA::EMSA3_MD2:        str = QStringLiteral("EMSA3(MD2)"); break;
+		case QCA::EMSA3_RIPEMD160:  str = QStringLiteral("EMSA3(RIPEMD160)"); break;
+		case QCA::EMSA3_Raw:        str = QStringLiteral("EMSA3(raw)"); break;
+		default:                    str = QStringLiteral("Unknown"); break;
 	}
 	return str;
 }
@@ -2025,8 +2025,8 @@ static void print_cert(const QCA::Certificate &cert, bool ordered = false)
 	QCA::PublicKey key = cert.subjectPublicKey();
 	printf("Public Key:\n%s", key.toPEM().toLatin1().data());
 
-	printf("SHA1 Fingerprint: %s\n", qPrintable(get_fingerprint(cert, "sha1")));
-	printf("MD5 Fingerprint: %s\n", qPrintable(get_fingerprint(cert, "md5")));
+	printf("SHA1 Fingerprint: %s\n", qPrintable(get_fingerprint(cert, QStringLiteral("sha1"))));
+	printf("MD5 Fingerprint: %s\n", qPrintable(get_fingerprint(cert, QStringLiteral("md5"))));
 }
 
 static void print_certreq(const QCA::CertificateRequest &cert, bool ordered = false)
@@ -2138,41 +2138,41 @@ static QString validityToString(QCA::Validity v)
 	switch(v)
 	{
 		case QCA::ValidityGood:
-			s = "Validated";
+			s = QStringLiteral("Validated");
 			break;
 		case QCA::ErrorRejected:
-			s = "Root CA is marked to reject the specified purpose";
+			s = QStringLiteral("Root CA is marked to reject the specified purpose");
 			break;
 		case QCA::ErrorUntrusted:
-			s = "Certificate not trusted for the required purpose";
+			s = QStringLiteral("Certificate not trusted for the required purpose");
 			break;
 		case QCA::ErrorSignatureFailed:
-			s = "Invalid signature";
+			s = QStringLiteral("Invalid signature");
 			break;
 		case QCA::ErrorInvalidCA:
-			s = "Invalid CA certificate";
+			s = QStringLiteral("Invalid CA certificate");
 			break;
 		case QCA::ErrorInvalidPurpose:
-			s = "Invalid certificate purpose";
+			s = QStringLiteral("Invalid certificate purpose");
 			break;
 		case QCA::ErrorSelfSigned:
-			s = "Certificate is self-signed";
+			s = QStringLiteral("Certificate is self-signed");
 			break;
 		case QCA::ErrorRevoked:
-			s = "Certificate has been revoked";
+			s = QStringLiteral("Certificate has been revoked");
 			break;
 		case QCA::ErrorPathLengthExceeded:
-			s = "Maximum certificate chain length exceeded";
+			s = QStringLiteral("Maximum certificate chain length exceeded");
 			break;
 		case QCA::ErrorExpired:
-			s = "Certificate has expired";
+			s = QStringLiteral("Certificate has expired");
 			break;
 		case QCA::ErrorExpiredCA:
-			s = "CA has expired";
+			s = QStringLiteral("CA has expired");
 			break;
 		case QCA::ErrorValidityUnknown:
 		default:
-			s = "General certificate validation error";
+			s = QStringLiteral("General certificate validation error");
 			break;
 	}
 	return s;
@@ -2183,11 +2183,11 @@ static QString smIdentityResultToString(QCA::SecureMessageSignature::IdentityRes
 	QString str;
 	switch(r)
 	{
-		case QCA::SecureMessageSignature::Valid:             str = "Valid"; break;
-		case QCA::SecureMessageSignature::InvalidSignature:  str = "InvalidSignature"; break;
-		case QCA::SecureMessageSignature::InvalidKey:        str = "InvalidKey"; break;
-		case QCA::SecureMessageSignature::NoKey:             str = "NoKey"; break;
-		default:                                             str = "Unknown";
+		case QCA::SecureMessageSignature::Valid:             str = QStringLiteral("Valid"); break;
+		case QCA::SecureMessageSignature::InvalidSignature:  str = QStringLiteral("InvalidSignature"); break;
+		case QCA::SecureMessageSignature::InvalidKey:        str = QStringLiteral("InvalidKey"); break;
+		case QCA::SecureMessageSignature::NoKey:             str = QStringLiteral("NoKey"); break;
+		default:                                             str = QStringLiteral("Unknown");
 	}
 	return str;
 }
@@ -2195,16 +2195,16 @@ static QString smIdentityResultToString(QCA::SecureMessageSignature::IdentityRes
 static QString smErrorToString(QCA::SecureMessage::Error e)
 {
 	QMap<QCA::SecureMessage::Error,QString> map;
-	map[QCA::SecureMessage::ErrorPassphrase] = "ErrorPassphrase";
-	map[QCA::SecureMessage::ErrorFormat] = "ErrorFormat";
-	map[QCA::SecureMessage::ErrorSignerExpired] = "ErrorSignerExpired";
-	map[QCA::SecureMessage::ErrorSignerInvalid] = "ErrorSignerInvalid";
-	map[QCA::SecureMessage::ErrorEncryptExpired] = "ErrorEncryptExpired";
-	map[QCA::SecureMessage::ErrorEncryptUntrusted] = "ErrorEncryptUntrusted";
-	map[QCA::SecureMessage::ErrorEncryptInvalid] = "ErrorEncryptInvalid";
-	map[QCA::SecureMessage::ErrorNeedCard] = "ErrorNeedCard";
-	map[QCA::SecureMessage::ErrorCertKeyMismatch] = "ErrorCertKeyMismatch";
-	map[QCA::SecureMessage::ErrorUnknown] = "ErrorUnknown";
+	map[QCA::SecureMessage::ErrorPassphrase] = QStringLiteral("ErrorPassphrase");
+	map[QCA::SecureMessage::ErrorFormat] = QStringLiteral("ErrorFormat");
+	map[QCA::SecureMessage::ErrorSignerExpired] = QStringLiteral("ErrorSignerExpired");
+	map[QCA::SecureMessage::ErrorSignerInvalid] = QStringLiteral("ErrorSignerInvalid");
+	map[QCA::SecureMessage::ErrorEncryptExpired] = QStringLiteral("ErrorEncryptExpired");
+	map[QCA::SecureMessage::ErrorEncryptUntrusted] = QStringLiteral("ErrorEncryptUntrusted");
+	map[QCA::SecureMessage::ErrorEncryptInvalid] = QStringLiteral("ErrorEncryptInvalid");
+	map[QCA::SecureMessage::ErrorNeedCard] = QStringLiteral("ErrorNeedCard");
+	map[QCA::SecureMessage::ErrorCertKeyMismatch] = QStringLiteral("ErrorCertKeyMismatch");
+	map[QCA::SecureMessage::ErrorUnknown] = QStringLiteral("ErrorUnknown");
 	return map[e];
 }
 
@@ -2229,7 +2229,7 @@ static void smDisplaySignatures(const QList<QCA::SecureMessageSignature> &signer
 				QString emailStr;
 				QCA::CertificateInfo info = cert.subjectInfo();
 				if(info.contains(QCA::Email))
-					emailStr = QString(" (%1)").arg(info.value(QCA::Email));
+					emailStr = QStringLiteral(" (%1)").arg(info.value(QCA::Email));
 				fprintf(stderr, "From: %s%s\n", qPrintable(cert.commonName()), qPrintable(emailStr));
 			}
 		}
@@ -2295,7 +2295,7 @@ static QString add_cr(const QString &in)
 static QString rem_cr(const QString &in)
 {
 	QString out = in;
-	out.replace("\r\n", "\n");
+	out.replace(QLatin1String("\r\n"), QLatin1String("\n"));
 	return out;
 }
 
@@ -2355,7 +2355,7 @@ static QString open_mime_envelope(const QString &in)
 
 static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 {
-	int n = in.indexOf("boundary=");
+	int n = in.indexOf(QLatin1String("boundary="));
 	if(n == -1)
 		return false;
 	n += 9;
@@ -2375,8 +2375,8 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 	if(boundary[boundary.length() - 1] == '\"')
 		boundary.remove(boundary.length() - 1, 1);
 	//printf("boundary: [%s]\n", qPrintable(boundary));
-	QString boundary_end = QString("--") + boundary;
-	boundary = QString("--") + boundary;
+	QString boundary_end = QStringLiteral("--") + boundary;
+	boundary = QStringLiteral("--") + boundary;
 
 	QString work = open_mime_envelope(in);
 	//printf("work: [%s]\n", qPrintable(work));
@@ -2410,13 +2410,13 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 	QString tmp_sig = work.mid(next, n - next);
 
 	// nuke some newlines
-	if(tmp_data.right(2) == "\r\n")
+	if(tmp_data.right(2) == QLatin1String("\r\n"))
 		tmp_data.truncate(tmp_data.length() - 2);
-	else if(tmp_data.right(1) == "\n")
+	else if(tmp_data.right(1) == QLatin1String("\n"))
 		tmp_data.truncate(tmp_data.length() - 1);
-	if(tmp_sig.right(2) == "\r\n")
+	if(tmp_sig.right(2) == QLatin1String("\r\n"))
 		tmp_sig.truncate(tmp_sig.length() - 2);
-	else if(tmp_sig.right(1) == "\n")
+	else if(tmp_sig.right(1) == QLatin1String("\n"))
 		tmp_sig.truncate(tmp_sig.length() - 1);
 
 	tmp_sig = open_mime_envelope(tmp_sig);
@@ -2429,7 +2429,7 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 static QString idHash(const QString &id)
 {
 	// hash the id and take the rightmost 4 hex characters
-	return QCA::Hash("md5").hashToString(id.toUtf8()).right(4);
+	return QCA::Hash(QStringLiteral("md5")).hashToString(id.toUtf8()).right(4);
 }
 
 // first = ids, second = names
@@ -2788,7 +2788,7 @@ int main(int argc, char **argv)
 	for(int n = 0; n < args.count(); ++n)
 	{
 		QString s = args[n];
-		if(!s.startsWith("--"))
+		if(!s.startsWith(QLatin1String("--")))
 			continue;
 		QString var;
 		QString val;
@@ -2805,39 +2805,39 @@ int main(int argc, char **argv)
 
 		bool known = true;
 
-		if(var == "pass")
+		if(var == QLatin1String("pass"))
 		{
 			have_pass = true;
 			pass = val.toUtf8();
 		}
-		else if(var == "newpass")
+		else if(var == QLatin1String("newpass"))
 		{
 			have_newpass = true;
 			newpass = val.toUtf8();
 		}
-		else if(var == "log-file")
+		else if(var == QLatin1String("log-file"))
 		{
 			logFile.setFileName (val);
 			logFile.open (QIODevice::Append | QIODevice::Text | QIODevice::Unbuffered);
 			logStream.setDevice (&logFile);
 		}
-		else if(var == "log-level")
+		else if(var == QLatin1String("log-level"))
 		{
 			QCA::logger ()->setLevel ((QCA::Logger::Severity)val.toInt ());
 		}
-		else if(var == "noprompt")
+		else if(var == QLatin1String("noprompt"))
 			allowprompt = false;
-		else if(var == "ordered")
+		else if(var == QLatin1String("ordered"))
 			ordered = true;
-		else if(var == "debug")
+		else if(var == QLatin1String("debug"))
 			debug = true;
-		else if(var == "roots")
+		else if(var == QLatin1String("roots"))
 			rootsFile = val;
-		else if(var == "nonroots")
+		else if(var == QLatin1String("nonroots"))
 			nonRootsFile = val;
-		else if(var == "nosys")
+		else if(var == QLatin1String("nosys"))
 			nosys = true;
-		else if(var == "nobundle")
+		else if(var == QLatin1String("nobundle"))
 			nobundle = true;
 		else
 			known = false;
@@ -2850,14 +2850,14 @@ int main(int argc, char **argv)
 	}
 
 	// help
-	if(args.isEmpty() || args[0] == "help" || args[0] == "--help" || args[0] == "-h")
+	if(args.isEmpty() || args[0] == QLatin1String("help") || args[0] == QLatin1String("--help") || args[0] == QLatin1String("-h"))
 	{
 		usage();
 		return 0;
 	}
 
 	// version
-	if(args[0] == "version" || args[0] == "--version" || args[0] == "-v")
+	if(args[0] == QLatin1String("version") || args[0] == QLatin1String("--version") || args[0] == QLatin1String("-v"))
 	{
 		int ver = qcaVersion();
 		int maj = (ver >> 16) & 0xff;
@@ -2869,7 +2869,7 @@ int main(int argc, char **argv)
 	}
 
 	// show plugins
-	if(args[0] == "plugins")
+	if(args[0] == QLatin1String("plugins"))
 	{
 		QStringList paths = QCA::pluginPaths();
 		if(!paths.isEmpty())
@@ -2927,7 +2927,7 @@ int main(int argc, char **argv)
 	}
 
 	// config stuff
-	if(args[0] == "config")
+	if(args[0] == QLatin1String("config"))
 	{
 		if(args.count() < 2)
 		{
@@ -2935,7 +2935,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "save")
+		if(args[1] == QLatin1String("save"))
 		{
 			if(args.count() < 3)
 			{
@@ -2964,7 +2964,7 @@ int main(int argc, char **argv)
 			printf("Done.\n");
 			return 0;
 		}
-		else if(args[1] == "edit")
+		else if(args[1] == QLatin1String("edit"))
 		{
 			if(args.count() < 3)
 			{
@@ -3013,7 +3013,7 @@ int main(int argc, char **argv)
 	if(have_pass)
 		passphrasePrompt.pp->setExplicitPassword(pass);
 
-	if(args[0] == "key")
+	if(args[0] == QLatin1String("key"))
 	{
 		if(args.count() < 2)
 		{
@@ -3021,7 +3021,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "make")
+		if(args[1] == QLatin1String("make"))
 		{
 			if(args.count() < 4)
 			{
@@ -3032,7 +3032,7 @@ int main(int argc, char **argv)
 			bool genrsa;
 			int bits;
 
-			if(args[2] == "rsa")
+			if(args[2] == QLatin1String("rsa"))
 			{
 				if(!QCA::isSupported("rsa"))
 				{
@@ -3048,7 +3048,7 @@ int main(int argc, char **argv)
 					return 1;
 				}
 			}
-			else if(args[2] == "dsa")
+			else if(args[2] == QLatin1String("dsa"))
 			{
 				if(!QCA::isSupported("dsa"))
 				{
@@ -3089,8 +3089,8 @@ int main(int argc, char **argv)
 			{
 				// note: third arg is bogus, doesn't apply to RSA
 				priv = AnimatedKeyGen::makeKey(QCA::PKey::RSA, bits, QCA::DSA_512);
-				pubFileName = "rsapub.pem";
-				privFileName = "rsapriv.pem";
+				pubFileName = QStringLiteral("rsapub.pem");
+				privFileName = QStringLiteral("rsapriv.pem");
 			}
 			else // dsa
 			{
@@ -3104,8 +3104,8 @@ int main(int argc, char **argv)
 
 				// note: second arg is bogus, doesn't apply to DSA
 				priv = AnimatedKeyGen::makeKey(QCA::PKey::DSA, 0, set);
-				pubFileName = "dsapub.pem";
-				privFileName = "dsapriv.pem";
+				pubFileName = QStringLiteral("dsapub.pem");
+				privFileName = QStringLiteral("dsapriv.pem");
 			}
 
 			if(priv.isNull())
@@ -3146,7 +3146,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if(args[1] == "changepass")
+		else if(args[1] == QLatin1String("changepass"))
 		{
 			if(args.count() < 3)
 			{
@@ -3192,7 +3192,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-	else if(args[0] == "cert")
+	else if(args[0] == QLatin1String("cert"))
 	{
 		if(args.count() < 2)
 		{
@@ -3200,7 +3200,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "makereq" || args[1] == "makereqadv")
+		if(args[1] == QLatin1String("makereq") || args[1] == QLatin1String("makereqadv"))
 		{
 			if(args.count() < 3)
 			{
@@ -3220,12 +3220,12 @@ int main(int argc, char **argv)
 
 			printf("\n");
 
-			bool advanced = (args[1] == "makereqadv") ? true: false;
+			bool advanced = (args[1] == QLatin1String("makereqadv")) ? true: false;
 
 			QCA::CertificateOptions opts = promptForCertAttributes(advanced, true);
 			QCA::CertificateRequest req(opts, priv);
 
-			QString reqname = "certreq.pem";
+			QString reqname = QStringLiteral("certreq.pem");
 			if(req.toPEMFile(reqname))
 				printf("Certificate request saved to %s\n", qPrintable(reqname));
 			else
@@ -3234,7 +3234,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if(args[1] == "makeself" || args[1] == "makeselfadv")
+		else if(args[1] == QLatin1String("makeself") || args[1] == QLatin1String("makeselfadv"))
 		{
 			if(args.count() < 3)
 			{
@@ -3254,12 +3254,12 @@ int main(int argc, char **argv)
 
 			printf("\n");
 
-			bool advanced = (args[1] == "makeselfadv") ? true: false;
+			bool advanced = (args[1] == QLatin1String("makeselfadv")) ? true: false;
 
 			QCA::CertificateOptions opts = promptForCertAttributes(advanced, false);
 			QCA::Certificate cert(opts, priv);
 
-			QString certname = "cert.pem";
+			QString certname = QStringLiteral("cert.pem");
 			if(cert.toPEMFile(certname))
 				printf("Certificate saved to %s\n", qPrintable(certname));
 			else
@@ -3268,7 +3268,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if(args[1] == "validate")
+		else if(args[1] == QLatin1String("validate"))
 		{
 			if(args.count() < 3)
 			{
@@ -3307,7 +3307,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-	else if(args[0] == "keybundle")
+	else if(args[0] == QLatin1String("keybundle"))
 	{
 		if(args.count() < 2)
 		{
@@ -3315,7 +3315,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "make")
+		if(args[1] == QLatin1String("make"))
 		{
 			if(args.count() < 4)
 			{
@@ -3380,7 +3380,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 
-			QString newFileName = "cert.p12";
+			QString newFileName = QStringLiteral("cert.p12");
 
 			if(key.toFile(newFileName, newpass))
 				printf("Keybundle saved to %s\n", qPrintable(newFileName));
@@ -3390,7 +3390,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if(args[1] == "extract")
+		else if(args[1] == QLatin1String("extract"))
 		{
 			if(args.count() < 3)
 			{
@@ -3444,7 +3444,7 @@ int main(int argc, char **argv)
 				printf("(Key is not exportable)\n");
 			}
 		}
-		else if(args[1] == "changepass")
+		else if(args[1] == QLatin1String("changepass"))
 		{
 			if(args.count() < 3)
 			{
@@ -3500,7 +3500,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-	else if(args[0] == "keystore")
+	else if(args[0] == QLatin1String("keystore"))
 	{
 		if(args.count() < 2)
 		{
@@ -3508,7 +3508,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "list-stores")
+		if(args[1] == QLatin1String("list-stores"))
 		{
 			ksm_start_and_wait();
 
@@ -3525,7 +3525,7 @@ int main(int argc, char **argv)
 			if(debug)
 				output_keystore_diagnostic_text();
 		}
-		else if(args[1] == "list")
+		else if(args[1] == QLatin1String("list"))
 		{
 			if(args.count() < 3)
 			{
@@ -3557,14 +3557,14 @@ int main(int argc, char **argv)
 			if(debug)
 				output_keystore_diagnostic_text();
 		}
-		else if(args[1] == "monitor")
+		else if(args[1] == QLatin1String("monitor"))
 		{
 			KeyStoreMonitor::monitor();
 
 			if(debug)
 				output_keystore_diagnostic_text();
 		}
-		else if(args[1] == "export")
+		else if(args[1] == QLatin1String("export"))
 		{
 			if(args.count() < 3)
 			{
@@ -3593,7 +3593,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if(args[1] == "exportref")
+		else if(args[1] == QLatin1String("exportref"))
 		{
 			if(args.count() < 3)
 			{
@@ -3606,7 +3606,7 @@ int main(int argc, char **argv)
 				return 1;
 			printf("%s", make_ksentry_string(entry.toString()).toUtf8().data());
 		}
-		else if(args[1] == "addkb")
+		else if(args[1] == QLatin1String("addkb"))
 		{
 			if(args.count() < 4)
 			{
@@ -3636,7 +3636,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if(args[1] == "addpgp")
+		else if(args[1] == QLatin1String("addpgp"))
 		{
 			if(args.count() < 4)
 			{
@@ -3672,7 +3672,7 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if(args[1] == "remove")
+		else if(args[1] == QLatin1String("remove"))
 		{
 			if(args.count() < 3)
 			{
@@ -3706,7 +3706,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-	else if(args[0] == "show")
+	else if(args[0] == QLatin1String("show"))
 	{
 		if(args.count() < 2)
 		{
@@ -3714,7 +3714,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "cert")
+		if(args[1] == QLatin1String("cert"))
 		{
 			if(args.count() < 3)
 			{
@@ -3728,7 +3728,7 @@ int main(int argc, char **argv)
 
 			print_cert(cert, ordered);
 		}
-		else if(args[1] == "req")
+		else if(args[1] == QLatin1String("req"))
 		{
 			if(args.count() < 3)
 			{
@@ -3751,7 +3751,7 @@ int main(int argc, char **argv)
 
 			print_certreq(req, ordered);
 		}
-		else if(args[1] == "crl")
+		else if(args[1] == QLatin1String("crl"))
 		{
 			if(args.count() < 3)
 			{
@@ -3778,7 +3778,7 @@ int main(int argc, char **argv)
 
 			print_crl(crl, ordered);
 		}
-		else if(args[1] == "kb")
+		else if(args[1] == QLatin1String("kb"))
 		{
 			if(args.count() < 3)
 			{
@@ -3793,7 +3793,7 @@ int main(int argc, char **argv)
 			printf("Keybundle contains %d certificates.  Displaying primary:\n", key.certificateChain().count());
 			print_cert(key.certificateChain().primary(), ordered);
 		}
-		else if(args[1] == "pgp")
+		else if(args[1] == QLatin1String("pgp"))
 		{
 			if(args.count() < 3)
 			{
@@ -3818,7 +3818,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-	else if(args[0] == "message")
+	else if(args[0] == QLatin1String("message"))
 	{
 		if(args.count() < 2)
 		{
@@ -3826,7 +3826,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		if(args[1] == "sign")
+		if(args[1] == QLatin1String("sign"))
 		{
 			if(args.count() < 4)
 			{
@@ -3839,7 +3839,7 @@ int main(int argc, char **argv)
 			QCA::SecureMessage::SignMode mode;
 			bool pgp = false;
 
-			if(args[2] == "pgp")
+			if(args[2] == QLatin1String("pgp"))
 			{
 				if(!QCA::isSupported("openpgp"))
 				{
@@ -3856,7 +3856,7 @@ int main(int argc, char **argv)
 				mode = QCA::SecureMessage::Clearsign;
 				pgp = true;
 			}
-			else if(args[2] == "pgpdetach")
+			else if(args[2] == QLatin1String("pgpdetach"))
 			{
 				if(!QCA::isSupported("openpgp"))
 				{
@@ -3873,7 +3873,7 @@ int main(int argc, char **argv)
 				mode = QCA::SecureMessage::Detached;
 				pgp = true;
 			}
-			else if(args[2] == "smime")
+			else if(args[2] == QLatin1String("smime"))
 			{
 				if(!QCA::isSupported("cms"))
 				{
@@ -3976,7 +3976,7 @@ int main(int argc, char **argv)
 
 			printf("%s", output.data());
 		}
-		else if(args[1] == "encrypt")
+		else if(args[1] == QLatin1String("encrypt"))
 		{
 			if(args.count() < 4)
 			{
@@ -3988,7 +3988,7 @@ int main(int argc, char **argv)
 			QCA::SecureMessageKey skey;
 			bool pgp = false;
 
-			if(args[2] == "pgp")
+			if(args[2] == QLatin1String("pgp"))
 			{
 				if(!QCA::isSupported("openpgp"))
 				{
@@ -4004,7 +4004,7 @@ int main(int argc, char **argv)
 				skey.setPGPPublicKey(key);
 				pgp = true;
 			}
-			else if(args[2] == "smime")
+			else if(args[2] == QLatin1String("smime"))
 			{
 				if(!QCA::isSupported("cms"))
 				{
@@ -4079,7 +4079,7 @@ int main(int argc, char **argv)
 
 			printf("%s", output.data());
 		}
-		else if(args[1] == "signencrypt")
+		else if(args[1] == QLatin1String("signencrypt"))
 		{
 			if(args.count() < 4)
 			{
@@ -4161,7 +4161,7 @@ int main(int argc, char **argv)
 
 			printf("%s", output.data());
 		}
-		else if(args[1] == "verify")
+		else if(args[1] == QLatin1String("verify"))
 		{
 			if(args.count() < 3)
 			{
@@ -4172,7 +4172,7 @@ int main(int argc, char **argv)
 			QCA::SecureMessageSystem *sms;
 			bool pgp = false;
 
-			if(args[2] == "pgp")
+			if(args[2] == QLatin1String("pgp"))
 			{
 				if(!QCA::isSupported("openpgp"))
 				{
@@ -4183,7 +4183,7 @@ int main(int argc, char **argv)
 				sms = new QCA::OpenPGP;
 				pgp = true;
 			}
-			else if(args[2] == "smime")
+			else if(args[2] == QLatin1String("smime"))
 			{
 				if(!QCA::isSupported("cms"))
 				{
@@ -4335,7 +4335,7 @@ int main(int argc, char **argv)
 			if(!allgood)
 				return 1;
 		}
-		else if(args[1] == "decrypt")
+		else if(args[1] == QLatin1String("decrypt"))
 		{
 			if(args.count() < 3)
 			{
@@ -4346,7 +4346,7 @@ int main(int argc, char **argv)
 			QCA::SecureMessageSystem *sms;
 			bool pgp = false;
 
-			if(args[2] == "pgp")
+			if(args[2] == QLatin1String("pgp"))
 			{
 				if(!QCA::isSupported("openpgp"))
 				{
@@ -4357,7 +4357,7 @@ int main(int argc, char **argv)
 				sms = new QCA::OpenPGP;
 				pgp = true;
 			}
-			else if(args[2] == "smime")
+			else if(args[2] == QLatin1String("smime"))
 			{
 				if(args.count() < 4)
 				{
@@ -4486,7 +4486,7 @@ int main(int argc, char **argv)
 					return 1;
 			}
 		}
-		else if(args[1] == "exportcerts")
+		else if(args[1] == QLatin1String("exportcerts"))
 		{
 			if(!QCA::isSupported("cms"))
 			{

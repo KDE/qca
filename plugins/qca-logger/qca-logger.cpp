@@ -33,7 +33,7 @@ class StreamLogger : public QCA::AbstractLogDevice
 {
     Q_OBJECT
 public:
-	StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice( "Stream logger" ), _stream(stream)
+	StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice( QStringLiteral("Stream logger") ), _stream(stream)
 	{
 		QCA::logger()->registerLogDevice (this);
 	}
@@ -66,7 +66,7 @@ private:
 	}
 
 	inline QString now() {
-		static const QString format = "yyyy-MM-dd hh:mm:ss";
+		static const QString format = QStringLiteral("yyyy-MM-dd hh:mm:ss");
 		return QDateTime::currentDateTime ().toString (format);
 	}
 
@@ -134,13 +134,13 @@ public:
 
 	QString
 	name () const override {
-		return "qca-logger";
+		return QStringLiteral("qca-logger");
 	}
 
 	QStringList
 	features () const override {
 		QStringList list;
-		list += "log";
+		list += QStringLiteral("log");
 		return list;
 	}
 
@@ -156,10 +156,10 @@ public:
 	defaultConfig () const override {
 		QVariantMap mytemplate;
 
-		mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-logger#1.0";
-		mytemplate["enabled"] = false;
-		mytemplate["file"] = "";
-		mytemplate["level"] = (int)Logger::Quiet;
+		mytemplate[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-logger#1.0";
+		mytemplate[QStringLiteral("enabled")] = false;
+		mytemplate[QStringLiteral("file")] = "";
+		mytemplate[QStringLiteral("level")] = (int)Logger::Quiet;
 
 		return mytemplate;
 	}
@@ -170,10 +170,10 @@ public:
 			delete _streamLogger;
 			_streamLogger = nullptr;
 
-			if (config["enabled"].toBool ()) {
+			if (config[QStringLiteral("enabled")].toBool ()) {
 				createLogger (
-					config["level"].toInt (),
-					config["file"].toString ()
+					config[QStringLiteral("level")].toInt (),
+					config[QStringLiteral("file")].toString ()
 				);
 			}
 		}

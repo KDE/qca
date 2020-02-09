@@ -86,11 +86,11 @@ int main(int argc, char **argv)
 	// somewhere secure and has a good pass phrase
 	// You can use the same technique with the public key too.
 	QCA::SecureArray passPhrase = "pass phrase";
-	seckey.toPEMFile("keyprivate.pem", passPhrase);
+	seckey.toPEMFile(QStringLiteral("keyprivate.pem"), passPhrase);
 
 	// Read that key back in, checking if the read succeeded
 	QCA::ConvertResult conversionResult;
-	QCA::PrivateKey privateKey = QCA::PrivateKey::fromPEMFile( "keyprivate.pem",
+	QCA::PrivateKey privateKey = QCA::PrivateKey::fromPEMFile( QStringLiteral("keyprivate.pem"),
 								   passPhrase,
 								   &conversionResult);
 	if (! (QCA::ConvertGood == conversionResult) ) {

@@ -44,7 +44,7 @@ certificateHash (
 		return QString();
 	}
 	else {
-		return Hash ("sha1").hashToString (cert.toDER ());
+		return Hash (QStringLiteral("sha1")).hashToString (cert.toDER ());
 	}
 }
 
@@ -381,7 +381,7 @@ public:
 
 	QString
 	message () const {
-		return _msg + QString (" ") + pkcs11h_getMessage (_rv);
+		return _msg + QStringLiteral(" ") + pkcs11h_getMessage (_rv);
 	}
 };
 
@@ -419,7 +419,7 @@ public:
 		CK_RV rv;
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::pkcs11RSAContext1 - entry",
+			QStringLiteral("pkcs11RSAContext::pkcs11RSAContext1 - entry"),
 			Logger::Debug
 		);
 
@@ -436,11 +436,11 @@ public:
 				pkcs11h_certificate_id
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Memory error");
+			throw pkcs11Exception (rv, QStringLiteral("Memory error"));
 		}
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::pkcs11RSAContext1 - return",
+			QStringLiteral("pkcs11RSAContext::pkcs11RSAContext1 - return"),
 			Logger::Debug
 		);
 	}
@@ -449,7 +449,7 @@ public:
 		CK_RV rv;
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::pkcs11RSAContextC - entry",
+			QStringLiteral("pkcs11RSAContext::pkcs11RSAContextC - entry"),
 			Logger::Debug
 		);
 
@@ -467,18 +467,18 @@ public:
 				from._pkcs11h_certificate_id
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Memory error");
+			throw pkcs11Exception (rv, QStringLiteral("Memory error"));
 		}
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::pkcs11RSAContextC - return",
+			QStringLiteral("pkcs11RSAContext::pkcs11RSAContextC - return"),
 			Logger::Debug
 		);
 	}
 
 	~pkcs11RSAContext () override {
 		QCA_logTextMessage (
-			"pkcs11RSAContext::~pkcs11RSAContext - entry",
+			QStringLiteral("pkcs11RSAContext::~pkcs11RSAContext - entry"),
 			Logger::Debug
 		);
 
@@ -495,7 +495,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::~pkcs11RSAContext - return",
+			QStringLiteral("pkcs11RSAContext::~pkcs11RSAContext - return"),
 			Logger::Debug
 		);
 	}
@@ -529,7 +529,7 @@ public:
 	void
 	convertToPublic () override {
 		QCA_logTextMessage (
-			"pkcs11RSAContext::convertToPublic - entry",
+			QStringLiteral("pkcs11RSAContext::convertToPublic - entry"),
 			Logger::Debug
 		);
 
@@ -542,7 +542,7 @@ public:
 		}
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::convertToPublic - return",
+			QStringLiteral("pkcs11RSAContext::convertToPublic - return"),
 			Logger::Debug
 		);
 	}
@@ -598,7 +598,7 @@ public:
 					mech = CKM_RSA_PKCS_OAEP;
 				break;
 				default:
-					throw pkcs11Exception (CKR_FUNCTION_NOT_SUPPORTED, "Invalid algorithm");
+					throw pkcs11Exception (CKR_FUNCTION_NOT_SUPPORTED, QStringLiteral("Invalid algorithm"));
 				break;
 			}
 
@@ -609,7 +609,7 @@ public:
 					_pkcs11h_certificate
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Cannot lock session");
+				throw pkcs11Exception (rv, QStringLiteral("Cannot lock session"));
 			}
 			session_locked = true;
 
@@ -623,7 +623,7 @@ public:
 					&my_size
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Decryption error");
+				throw pkcs11Exception (rv, QStringLiteral("Decryption error"));
 			}
 
 			out->resize (my_size);
@@ -638,7 +638,7 @@ public:
 					&my_size
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Decryption error");
+				throw pkcs11Exception (rv, QStringLiteral("Decryption error"));
 			}
 
 			rv = out->resize (my_size);
@@ -648,7 +648,7 @@ public:
 					_pkcs11h_certificate
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Cannot release session");
+				throw pkcs11Exception (rv, QStringLiteral("Cannot release session"));
 			}
 			session_locked = false;
 
@@ -695,13 +695,13 @@ public:
 
 		switch (_sign_data.alg) {
 			case EMSA3_SHA1:
-				_sign_data.hash = new Hash ("sha1");
+				_sign_data.hash = new Hash(QStringLiteral("sha1"));
 			break;
 			case EMSA3_MD5:
-				_sign_data.hash = new Hash ("md5");
+				_sign_data.hash = new Hash(QStringLiteral("md5"));
 			break;
 			case EMSA3_MD2:
-				_sign_data.hash = new Hash ("md2");
+				_sign_data.hash = new Hash(QStringLiteral("md2"));
 			break;
 			case EMSA3_Raw:
 			break;
@@ -751,7 +751,7 @@ public:
 		bool session_locked = false;
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::endSign - entry",
+			QStringLiteral("pkcs11RSAContext::endSign - entry"),
 			Logger::Debug
 		);
 
@@ -774,7 +774,7 @@ public:
 			}
 
 			if (final.size () == 0) {
-				throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot encode signature");
+				throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Cannot encode signature"));
 			}
 
 			_ensureCertificate ();
@@ -786,7 +786,7 @@ public:
 					_pkcs11h_certificate
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Cannot lock session");
+				throw pkcs11Exception (rv, QStringLiteral("Cannot lock session"));
 			}
 			session_locked = true;
 
@@ -800,7 +800,7 @@ public:
 					&my_size
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Signature failed");
+				throw pkcs11Exception (rv, QStringLiteral("Signature failed"));
 			}
 
 			result.resize (my_size);
@@ -815,7 +815,7 @@ public:
 					&my_size
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Signature failed");
+				throw pkcs11Exception (rv, QStringLiteral("Signature failed"));
 			}
 
 			result.resize (my_size);
@@ -825,7 +825,7 @@ public:
 					_pkcs11h_certificate
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Cannot release session");
+				throw pkcs11Exception (rv, QStringLiteral("Cannot release session"));
 			}
 			session_locked = false;
 
@@ -943,7 +943,7 @@ public:
 		bool ret;
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::_ensureTokenAvailable - entry",
+			QStringLiteral("pkcs11RSAContext::_ensureTokenAvailable - entry"),
 			Logger::Debug
 		);
 
@@ -969,7 +969,7 @@ public:
 		bool ret;
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::_ensureTokenAccess - entry",
+			QStringLiteral("pkcs11RSAContext::_ensureTokenAccess - entry"),
 			Logger::Debug
 		);
 
@@ -1004,7 +1004,7 @@ private:
 		CK_RV rv;
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::_ensureCertificate - entry",
+			QStringLiteral("pkcs11RSAContext::_ensureCertificate - entry"),
 			Logger::Debug
 		);
 
@@ -1018,12 +1018,12 @@ private:
 					&_pkcs11h_certificate
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Cannot create low-level certificate");
+				throw pkcs11Exception (rv, QStringLiteral("Cannot create low-level certificate"));
 			}
 		}
 
 		QCA_logTextMessage (
-			"pkcs11RSAContext::_ensureCertificate - return",
+			QStringLiteral("pkcs11RSAContext::_ensureCertificate - return"),
 			Logger::Debug
 		);
 	}
@@ -1436,14 +1436,14 @@ pkcs11KeyStoreListContext::pkcs11KeyStoreListContext (Provider *p) : KeyStoreLis
 	_initialized = false;
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::pkcs11KeyStoreListContext - return",
+		QStringLiteral("pkcs11KeyStoreListContext::pkcs11KeyStoreListContext - return"),
 		Logger::Debug
 	);
 }
 
 pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext () {
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext - entry",
+		QStringLiteral("pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext - entry"),
 		Logger::Debug
 	);
 
@@ -1451,7 +1451,7 @@ pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext () {
 	_clearStores ();
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext - return",
+		QStringLiteral("pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext - return"),
 		Logger::Debug
 	);
 }
@@ -1459,7 +1459,7 @@ pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext () {
 Provider::Context *
 pkcs11KeyStoreListContext::clone () const {
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::clone - entry/return",
+		QStringLiteral("pkcs11KeyStoreListContext::clone - entry/return"),
 		Logger::Debug
 	);
 	return nullptr;
@@ -1468,14 +1468,14 @@ pkcs11KeyStoreListContext::clone () const {
 void
 pkcs11KeyStoreListContext::start () {
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::start - entry",
+		QStringLiteral("pkcs11KeyStoreListContext::start - entry"),
 		Logger::Debug
 	);
 
 	QMetaObject::invokeMethod(this, "doReady", Qt::QueuedConnection);
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::start - return",
+		QStringLiteral("pkcs11KeyStoreListContext::start - return"),
 		Logger::Debug
 	);
 }
@@ -1510,7 +1510,7 @@ pkcs11KeyStoreListContext::setUpdatesEnabled (bool enabled) {
 	}
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::setUpdatesEnabled - return",
+		QStringLiteral("pkcs11KeyStoreListContext::setUpdatesEnabled - return"),
 		Logger::Debug
 	);
 }
@@ -1550,7 +1550,7 @@ pkcs11KeyStoreListContext::entryPassive (
 	);
 
 	try {
-		if (serialized.startsWith ("qca-pkcs11/")) {
+		if (serialized.startsWith (QLatin1String("qca-pkcs11/"))) {
 			CertificateChain chain;
 			bool has_private;
 
@@ -1688,7 +1688,7 @@ pkcs11KeyStoreListContext::keyStores () {
 	QList<int> out;
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::keyStores - entry",
+		QStringLiteral("pkcs11KeyStoreListContext::keyStores - entry"),
 		Logger::Debug
 	);
 
@@ -1704,7 +1704,7 @@ pkcs11KeyStoreListContext::keyStores () {
 				&tokens
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Enumerating tokens");
+			throw pkcs11Exception (rv, QStringLiteral("Enumerating tokens"));
 		}
 
 		/*
@@ -1800,7 +1800,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 					&certs
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Enumerate certificates");
+				throw pkcs11Exception (rv, QStringLiteral("Enumerate certificates"));
 			}
 
 			for (
@@ -1855,7 +1855,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 			) {
 				try {
 					if (listIssuers[i].isNull ()) {
-						throw pkcs11Exception (CKR_ARGUMENTS_BAD, "Invalid certificate");
+						throw pkcs11Exception (CKR_ARGUMENTS_BAD, QStringLiteral("Invalid certificate"));
 					}
 
 					if (
@@ -1889,7 +1889,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 			) {
 				try {
 					if (listCerts[i].isNull ()) {
-						throw pkcs11Exception (CKR_ARGUMENTS_BAD, "Invalid certificate");
+						throw pkcs11Exception (CKR_ARGUMENTS_BAD, QStringLiteral("Invalid certificate"));
 					}
 
 					CertificateChain chain = CertificateChain (listCerts[i]).complete (listIssuersForComplete);
@@ -2067,7 +2067,7 @@ pkcs11KeyStoreListContext::_emit_diagnosticText (
 	emit diagnosticText (t);
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::_emit_diagnosticText - return",
+		QStringLiteral("pkcs11KeyStoreListContext::_emit_diagnosticText - return"),
 		Logger::Debug
 	);
 }
@@ -2075,14 +2075,14 @@ pkcs11KeyStoreListContext::_emit_diagnosticText (
 void
 pkcs11KeyStoreListContext::doReady () {
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::doReady - entry",
+		QStringLiteral("pkcs11KeyStoreListContext::doReady - entry"),
 		Logger::Debug
 	);
 
 	emit busyEnd ();
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::doReady - return",
+		QStringLiteral("pkcs11KeyStoreListContext::doReady - return"),
 		Logger::Debug
 	);
 }
@@ -2090,14 +2090,14 @@ pkcs11KeyStoreListContext::doReady () {
 void
 pkcs11KeyStoreListContext::doUpdated () {
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::doUpdated - entry",
+		QStringLiteral("pkcs11KeyStoreListContext::doUpdated - entry"),
 		Logger::Debug
 	);
 
 	emit updated ();
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::doUpdated - return",
+		QStringLiteral("pkcs11KeyStoreListContext::doUpdated - return"),
 		Logger::Debug
 	);
 }
@@ -2159,7 +2159,7 @@ pkcs11KeyStoreListContext::_registerTokenId (
 void
 pkcs11KeyStoreListContext::_clearStores () {
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::_clearStores - entry",
+		QStringLiteral("pkcs11KeyStoreListContext::_clearStores - entry"),
 		Logger::Debug
 	);
 
@@ -2173,7 +2173,7 @@ pkcs11KeyStoreListContext::_clearStores () {
 	_stores.clear ();
 
 	QCA_logTextMessage (
-		"pkcs11KeyStoreListContext::_clearStores - return",
+		QStringLiteral("pkcs11KeyStoreListContext::_clearStores - return"),
 		Logger::Debug
 	);
 }
@@ -2198,7 +2198,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 	);
 
 	if (certificate_id == nullptr) {
-		throw pkcs11Exception (CKR_ARGUMENTS_BAD, "Missing certificate object");
+		throw pkcs11Exception (CKR_ARGUMENTS_BAD, QStringLiteral("Missing certificate object"));
 	}
 
 	QString serialized = _serializeCertificate (
@@ -2210,7 +2210,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 	QString description = _description;
 	const Certificate &cert = chain.primary ();
 	if (description.isEmpty ()) {
-		description = cert.subjectInfoOrdered ().toString () + " by " + cert.issuerInfo ().value (CommonName, "Unknown");
+		description = cert.subjectInfoOrdered ().toString () + " by " + cert.issuerInfo ().value (CommonName, QStringLiteral("Unknown"));
 	}
 
 	if (has_private) {
@@ -2284,7 +2284,7 @@ pkcs11KeyStoreListContext::_tokenId2storeId (
 			token_id
 		) != CKR_OK
 	) {
-		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize token id");
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Cannot serialize token id"));
 	}
 
 	QByteArray buf;
@@ -2297,7 +2297,7 @@ pkcs11KeyStoreListContext::_tokenId2storeId (
 			token_id
 		) != CKR_OK
 	) {
-		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize token id");
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Cannot serialize token id"));
 	}
 
 	buf.resize ((int)len);
@@ -2340,7 +2340,7 @@ pkcs11KeyStoreListContext::_serializeCertificate (
 			certificate_id
 		) != CKR_OK
 	) {
-		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize certificate id");
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Cannot serialize certificate id"));
 	}
 
 	QByteArray buf;
@@ -2353,7 +2353,7 @@ pkcs11KeyStoreListContext::_serializeCertificate (
 			certificate_id
 		) != CKR_OK
 	) {
-		throw pkcs11Exception (CKR_FUNCTION_FAILED, "Cannot serialize certificate id");
+		throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Cannot serialize certificate id"));
 	}
 
 	buf.resize ((int)len);
@@ -2369,7 +2369,7 @@ pkcs11KeyStoreListContext::_serializeCertificate (
 		list += _escapeString (Base64 ().arrayToString (i.toDER ()));
 	}
 
-	serialized.append (list.join ("/"));
+	serialized.append (list.join (QStringLiteral("/")));
 
 	QCA_logTextMessage (
 		QString::asprintf (
@@ -2409,18 +2409,18 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 		*p_certificate_id = nullptr;
 		*p_has_private = false;
 
-		QStringList list = from.split ("/");
+		QStringList list = from.split (QStringLiteral("/"));
 
 		if (list.size () < 5) {
-			throw pkcs11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+			throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Invalid serialization"));
 		}
 
-		if (list[n++] != "qca-pkcs11") {
-			throw pkcs11Exception (CKR_FUNCTION_FAILED, "Invalid serialization");
+		if (list[n++] != QLatin1String("qca-pkcs11")) {
+			throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Invalid serialization"));
 		}
 
 		if (list[n++].toInt () != 0) {
-			throw pkcs11Exception (CKR_FUNCTION_FAILED, "Invalid serialization version");
+			throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Invalid serialization version"));
 		}
 
 		if (
@@ -2429,7 +2429,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 				myPrintable (_unescapeString (list[n++]))
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Invalid serialization");
+			throw pkcs11Exception (rv, QStringLiteral("Invalid serialization"));
 		}
 
 		*p_has_private = list[n++].toInt () != 0;
@@ -2438,7 +2438,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 		Certificate endCertificate = Certificate::fromDER (endCertificateBytes);
 
 		if (endCertificate.isNull ()) {
-			throw pkcs11Exception (rv, "Invalid certificate");
+			throw pkcs11Exception (rv, QStringLiteral("Invalid certificate"));
 		}
 
 		if (
@@ -2448,7 +2448,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 				(size_t)endCertificateBytes.size ()
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Invalid serialization");
+			throw pkcs11Exception (rv, QStringLiteral("Invalid serialization"));
 		}
 
 		chain = endCertificate;
@@ -2457,7 +2457,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 				Base64 ().stringToArray (_unescapeString (list[n++])).toByteArray ()
 			);
 			if (cert.isNull ()) {
-				throw pkcs11Exception (rv, "Invalid certificate");
+				throw pkcs11Exception (rv, QStringLiteral("Invalid certificate"));
 			}
 			chain += cert;
 		}
@@ -2534,7 +2534,7 @@ const int pkcs11Provider::_CONFIG_MAX_PROVIDERS = 10;
 pkcs11Provider::pkcs11Provider () {
 
 	QCA_logTextMessage (
-		"pkcs11Provider::pkcs11Provider - entry",
+		QStringLiteral("pkcs11Provider::pkcs11Provider - entry"),
 		Logger::Debug
 	);
 
@@ -2544,14 +2544,14 @@ pkcs11Provider::pkcs11Provider () {
 	_allowLoadRootCA = false;
 
 	QCA_logTextMessage (
-		"pkcs11Provider::pkcs11Provider - return",
+		QStringLiteral("pkcs11Provider::pkcs11Provider - return"),
 		Logger::Debug
 	);
 }
 
 pkcs11Provider::~pkcs11Provider () {
 	QCA_logTextMessage (
-		"pkcs11Provider::~pkcs11Provider - entry/return",
+		QStringLiteral("pkcs11Provider::~pkcs11Provider - entry/return"),
 		Logger::Debug
 	);
 }
@@ -2559,7 +2559,7 @@ pkcs11Provider::~pkcs11Provider () {
 int pkcs11Provider::qcaVersion() const
 {
 	QCA_logTextMessage (
-		"pkcs11Provider::qcaVersion - entry/return",
+		QStringLiteral("pkcs11Provider::qcaVersion - entry/return"),
 		Logger::Debug
 	);
 
@@ -2568,7 +2568,7 @@ int pkcs11Provider::qcaVersion() const
 
 void pkcs11Provider::init () {
 	QCA_logTextMessage (
-		"pkcs11Provider::init - entry",
+		QStringLiteral("pkcs11Provider::init - entry"),
 		Logger::Debug
 	);
 
@@ -2576,11 +2576,11 @@ void pkcs11Provider::init () {
 		CK_RV rv;
 
 		if ((rv = pkcs11h_engine_setCrypto (&pkcs11QCACrypto::crypto)) != CKR_OK) {
-			throw pkcs11Exception (rv, "Cannot set crypto");
+			throw pkcs11Exception (rv, QStringLiteral("Cannot set crypto"));
 		}
 
 		if ((rv = pkcs11h_initialize ()) != CKR_OK) {
-			throw pkcs11Exception (rv, "Cannot initialize");
+			throw pkcs11Exception (rv, QStringLiteral("Cannot initialize"));
 		}
 
 		if (
@@ -2589,7 +2589,7 @@ void pkcs11Provider::init () {
 				this
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Cannot set hook");
+			throw pkcs11Exception (rv, QStringLiteral("Cannot set hook"));
 		}
 
 		pkcs11h_setLogLevel (0);
@@ -2600,7 +2600,7 @@ void pkcs11Provider::init () {
 				this
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Cannot set hook");
+			throw pkcs11Exception (rv, QStringLiteral("Cannot set hook"));
 		}
 
 		if (
@@ -2609,7 +2609,7 @@ void pkcs11Provider::init () {
 				this
 			)) != CKR_OK
 		) {
-			throw pkcs11Exception (rv, "Cannot set hook");
+			throw pkcs11Exception (rv, QStringLiteral("Cannot set hook"));
 		}
 
 		_lowLevelInitialized = true;
@@ -2624,19 +2624,19 @@ void pkcs11Provider::init () {
 		);
 	}
 	catch (...) {
-		QCA_logTextMessage ("PKCS#11: Unknown error during provider initialization", Logger::Error);
-		appendPluginDiagnosticText ("Unknown error during initialization of qca-pkcs11 plugin\n");
+		QCA_logTextMessage (QStringLiteral("PKCS#11: Unknown error during provider initialization"), Logger::Error);
+		appendPluginDiagnosticText (QStringLiteral("Unknown error during initialization of qca-pkcs11 plugin\n"));
 	}
 
 	QCA_logTextMessage (
-		"pkcs11Provider::init - return",
+		QStringLiteral("pkcs11Provider::init - return"),
 		Logger::Debug
 	);
 }
 
 void pkcs11Provider::deinit () {
 	QCA_logTextMessage (
-		"pkcs11Provider::deinit - entry",
+		QStringLiteral("pkcs11Provider::deinit - entry"),
 		Logger::Debug
 	);
 
@@ -2646,7 +2646,7 @@ void pkcs11Provider::deinit () {
 	pkcs11h_terminate ();
 
 	QCA_logTextMessage (
-		"pkcs11Provider::deinit - return",
+		QStringLiteral("pkcs11Provider::deinit - return"),
 		Logger::Debug
 	);
 }
@@ -2654,24 +2654,24 @@ void pkcs11Provider::deinit () {
 QString
 pkcs11Provider::name () const {
 	QCA_logTextMessage (
-		"pkcs11Provider::name - entry/return",
+		QStringLiteral("pkcs11Provider::name - entry/return"),
 		Logger::Debug
 	);
 
-	return "qca-pkcs11";
+	return QStringLiteral("qca-pkcs11");
 }
 
 QStringList
 pkcs11Provider::features() const {
 	QCA_logTextMessage (
-		"pkcs11Provider::features - entry/return",
+		QStringLiteral("pkcs11Provider::features - entry/return"),
 		Logger::Debug
 	);
 
 	QStringList list;
-	list += "smartcard"; // indicator, not algorithm
-	list += "pkey";
-	list += "keystorelist";
+	list += QStringLiteral("smartcard"); // indicator, not algorithm
+	list += QStringLiteral("pkey");
+	list += QStringLiteral("keystorelist");
 	return list;
 }
 
@@ -2689,7 +2689,7 @@ pkcs11Provider::createContext (const QString &type) {
 	);
 
 	if (_lowLevelInitialized) {
-		if (type == "keystorelist") {
+		if (type == QLatin1String("keystorelist")) {
 			if (s_keyStoreList == nullptr) {
 				s_keyStoreList = new pkcs11KeyStoreListContext (this);
 			}
@@ -2713,7 +2713,7 @@ pkcs11Provider::startSlotEvents () {
 	CK_RV rv;
 
 	QCA_logTextMessage (
-		"pkcs11Provider::startSlotEvents - entry",
+		QStringLiteral("pkcs11Provider::startSlotEvents - entry"),
 		Logger::Debug
 	);
 
@@ -2725,7 +2725,7 @@ pkcs11Provider::startSlotEvents () {
 					this
 				)) != CKR_OK
 			) {
-				throw pkcs11Exception (rv, "Cannot start slot events");
+				throw pkcs11Exception (rv, QStringLiteral("Cannot start slot events"));
 			}
 
 			_slotEventsLowLevelActive = true;
@@ -2735,7 +2735,7 @@ pkcs11Provider::startSlotEvents () {
 	}
 
 	QCA_logTextMessage (
-		"pkcs11Provider::startSlotEvents - return",
+		QStringLiteral("pkcs11Provider::startSlotEvents - return"),
 		Logger::Debug
 	);
 }
@@ -2743,7 +2743,7 @@ pkcs11Provider::startSlotEvents () {
 void
 pkcs11Provider::stopSlotEvents () {
 	QCA_logTextMessage (
-		"pkcs11Provider::stopSlotEvents - entry/return",
+		QStringLiteral("pkcs11Provider::stopSlotEvents - entry/return"),
 		Logger::Debug
 	);
 
@@ -2755,15 +2755,15 @@ pkcs11Provider::defaultConfig () const {
 	QVariantMap mytemplate;
 
 	QCA_logTextMessage (
-		"pkcs11Provider::defaultConfig - entry/return",
+		QStringLiteral("pkcs11Provider::defaultConfig - entry/return"),
 		Logger::Debug
 	);
 
-	mytemplate["formtype"] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
-	mytemplate["allow_load_rootca"] = false;
-	mytemplate["allow_protected_authentication"] = true;
-	mytemplate["pin_cache"] = PKCS11H_PIN_CACHE_INFINITE;
-	mytemplate["log_level"] = 0;
+	mytemplate[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
+	mytemplate[QStringLiteral("allow_load_rootca")] = false;
+	mytemplate[QStringLiteral("allow_protected_authentication")] = true;
+	mytemplate[QStringLiteral("pin_cache")] = PKCS11H_PIN_CACHE_INFINITE;
+	mytemplate[QStringLiteral("log_level")] = 0;
 	for (int i=0;i<_CONFIG_MAX_PROVIDERS;i++) {
 		mytemplate[QString::asprintf ("provider_%02d_enabled", i)] = false;
 		mytemplate[QString::asprintf ("provider_%02d_name", i)] = "";
@@ -2783,22 +2783,22 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 	CK_RV rv = CKR_OK;
 
 	QCA_logTextMessage (
-		"pkcs11Provider::configChanged - entry",
+		QStringLiteral("pkcs11Provider::configChanged - entry"),
 		Logger::Debug
 	);
 
 	if (!_lowLevelInitialized) {
-		QCA_logTextMessage ("PKCS#11: Not initialized", Logger::Error);
+		QCA_logTextMessage (QStringLiteral("PKCS#11: Not initialized"), Logger::Error);
 		return;
 	}
 
-	_allowLoadRootCA = config["allow_load_rootca"].toBool ();
+	_allowLoadRootCA = config[QStringLiteral("allow_load_rootca")].toBool ();
 
-	pkcs11h_setLogLevel (config["log_level"].toInt ());
+	pkcs11h_setLogLevel (config[QStringLiteral("log_level")].toInt ());
 	pkcs11h_setProtectedAuthentication (
-		config["allow_protected_authentication"].toBool () != false ? TRUE : FALSE //krazy:exclude=captruefalse
+		config[QStringLiteral("allow_protected_authentication")].toBool () != false ? TRUE : FALSE //krazy:exclude=captruefalse
 	);
-	pkcs11h_setPINCachePeriod (config["pin_cache"].toInt ());
+	pkcs11h_setPINCachePeriod (config[QStringLiteral("pin_cache")].toInt ());
 
 	/*
 	 * Remove current providers
@@ -2817,10 +2817,10 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 		QString name = config[QString::asprintf ("provider_%02d_name", i)].toString ();
 		QString qslotevent = config[QString::asprintf ("provider_%02d_slotevent_method", i)].toString ();
 		unsigned slotevent = PKCS11H_SLOTEVENT_METHOD_AUTO;
-		if (qslotevent == "trigger") {
+		if (qslotevent == QLatin1String("trigger")) {
 			slotevent = PKCS11H_SLOTEVENT_METHOD_TRIGGER;
 		}
-		else if (qslotevent == "poll") {
+		else if (qslotevent == QLatin1String("poll")) {
 			slotevent = PKCS11H_SLOTEVENT_METHOD_POLL;
 		}
 
@@ -2882,7 +2882,7 @@ pkcs11Provider::configChanged (const QVariantMap &config) {
 	}
 
 	QCA_logTextMessage (
-		"pkcs11Provider::configChanged - return",
+		QStringLiteral("pkcs11Provider::configChanged - return"),
 		Logger::Debug
 	);
 }

@@ -117,7 +117,7 @@ QString find_bin()
 #ifdef Q_OS_WIN
 	bins << "gpg.exe" << "gpg2.exe";
 #else
-	bins << "gpg" << "gpg2";
+	bins << QStringLiteral("gpg") << QStringLiteral("gpg2");
 #endif
 
 	// Prefer bundled gpg
@@ -140,7 +140,7 @@ QString find_bin()
 #ifdef Q_OS_WIN
 	QString pathSep = ";";
 #else
-	QString pathSep = ":";
+	const QString pathSep = QStringLiteral(":");
 #endif
 
 	QStringList paths = QString::fromLocal8Bit(qgetenv("PATH")).split(pathSep, QString::SkipEmptyParts);
@@ -176,9 +176,9 @@ QString escape_string(const QString &in)
 	for(const QChar &c : in)
 	{
 		if(c == '\\')
-			out += "\\\\";
+			out += QStringLiteral("\\\\");
 		else if(c == ':')
-			out += "\\c";
+			out += QStringLiteral("\\c");
 		else
 			out += c;
 	}

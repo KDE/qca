@@ -39,29 +39,29 @@ static QString socketErrorToString(QAbstractSocket::SocketError x)
 	switch(x)
 	{
 		case QAbstractSocket::ConnectionRefusedError:
-			s = "connection refused or timed out"; break;
+			s = QStringLiteral("connection refused or timed out"); break;
 		case QAbstractSocket::RemoteHostClosedError:
-			s = "remote host closed the connection"; break;
+			s = QStringLiteral("remote host closed the connection"); break;
 		case QAbstractSocket::HostNotFoundError:
-			s = "host not found"; break;
+			s = QStringLiteral("host not found"); break;
 		case QAbstractSocket::SocketAccessError:
-			s = "access error"; break;
+			s = QStringLiteral("access error"); break;
 		case QAbstractSocket::SocketResourceError:
-			s = "too many sockets"; break;
+			s = QStringLiteral("too many sockets"); break;
 		case QAbstractSocket::SocketTimeoutError:
-			s = "operation timed out"; break;
+			s = QStringLiteral("operation timed out"); break;
 		case QAbstractSocket::DatagramTooLargeError:
-			s = "datagram was larger than system limit"; break;
+			s = QStringLiteral("datagram was larger than system limit"); break;
 		case QAbstractSocket::NetworkError:
-			s = "network error"; break;
+			s = QStringLiteral("network error"); break;
 		case QAbstractSocket::AddressInUseError:
-			s = "address is already in use"; break;
+			s = QStringLiteral("address is already in use"); break;
 		case QAbstractSocket::SocketAddressNotAvailableError:
-			s = "address does not belong to the host"; break;
+			s = QStringLiteral("address does not belong to the host"); break;
 		case QAbstractSocket::UnsupportedSocketOperationError:
-			s = "operation is not supported by the local operating system"; break;
+			s = QStringLiteral("operation is not supported by the local operating system"); break;
 		default:
-			s = "unknown socket error"; break;
+			s = QStringLiteral("unknown socket error"); break;
 	}
 	return s;
 }
@@ -72,28 +72,28 @@ static QString saslAuthConditionToString(QCA::SASL::AuthCondition x)
 	switch(x)
 	{
 		case QCA::SASL::NoMechanism:
-			s = "no appropriate mechanism could be negotiated"; break;
+			s = QStringLiteral("no appropriate mechanism could be negotiated"); break;
 		case QCA::SASL::BadProtocol:
-			s = "bad SASL protocol"; break;
+			s = QStringLiteral("bad SASL protocol"); break;
 		case QCA::SASL::BadAuth:
-			s = "authentication failed"; break;
+			s = QStringLiteral("authentication failed"); break;
 		case QCA::SASL::NoAuthzid:
-			s = "authorization failed"; break;
+			s = QStringLiteral("authorization failed"); break;
 		case QCA::SASL::TooWeak:
-			s = "mechanism too weak for this user"; break;
+			s = QStringLiteral("mechanism too weak for this user"); break;
 		case QCA::SASL::NeedEncrypt:
-			s = "encryption is needed to use this mechanism"; break;
+			s = QStringLiteral("encryption is needed to use this mechanism"); break;
 		case QCA::SASL::Expired:
-			s = "passphrase expired"; break;
+			s = QStringLiteral("passphrase expired"); break;
 		case QCA::SASL::Disabled:
-			s = "account is disabled"; break;
+			s = QStringLiteral("account is disabled"); break;
 		case QCA::SASL::NoUser:
-			s = "user not found"; break;
+			s = QStringLiteral("user not found"); break;
 		case QCA::SASL::RemoteUnavailable:
-			s = "needed remote service is unavailable"; break;
+			s = QStringLiteral("needed remote service is unavailable"); break;
 		// AuthFail or unknown (including those defined for client only)
 		default:
-			s = "generic authentication failure"; break;
+			s = QStringLiteral("generic authentication failure"); break;
 	};
 	return s;
 }
@@ -187,7 +187,7 @@ public:
 private Q_SLOTS:
 	void sasl_serverStarted()
 	{
-		sendLine(sasl->mechanismList().join(" "));
+		sendLine(sasl->mechanismList().join(QStringLiteral(" ")));
 	}
 
 	void sock_disconnected()
@@ -234,7 +234,7 @@ private Q_SLOTS:
 
 	void sasl_nextStep(const QByteArray &stepData)
 	{
-		QString line = "C";
+		QString line = QStringLiteral("C");
 		if(!stepData.isEmpty())
 		{
 			line += ',';
@@ -263,7 +263,7 @@ private Q_SLOTS:
 
 	void sasl_authenticated()
 	{
-		sendLine("A");
+		sendLine(QStringLiteral("A"));
 		printf("%d: Authentication success.\n", id);
 		mode = 2; // switch to app mode
 		printf("%d: SSF: %d\n", id, sasl->ssf());
@@ -291,7 +291,7 @@ private Q_SLOTS:
 		else if(e == QCA::SASL::ErrorHandshake)
 		{
 			QString errstr = saslAuthConditionToString(sasl->authCondition());
-			sendLine(QString("E,") + errstr);
+			sendLine(QStringLiteral("E,") + errstr);
 			printf("%d: Error: sasl: %s.\n", id, qPrintable(errstr));
 		}
 		else if(e == QCA::SASL::ErrorCrypt)
@@ -340,10 +340,10 @@ private:
 			else
 			{
 				type = line;
-				rest = "";
+				rest = QLatin1String("");
 			}
 
-			if(type == "C")
+			if(type == QLatin1String("C"))
 			{
 				sasl->putStep(stringToArray(rest));
 			}
@@ -441,17 +441,17 @@ int main(int argc, char **argv)
 	QCA::Initializer init;
 	QCoreApplication qapp(argc, argv);
 
-	QCA::setAppName("saslserver");
+	QCA::setAppName(QStringLiteral("saslserver"));
 
 	QStringList args = qapp.arguments();
 	args.removeFirst();
 
 	// options
-	QString proto = "qcatest"; // default protocol
+	QString proto = QStringLiteral("qcatest"); // default protocol
 	QString realm;
 	for(int n = 0; n < args.count(); ++n)
 	{
-		if(!args[n].startsWith("--"))
+		if(!args[n].startsWith(QLatin1String("--")))
 			continue;
 
 		QString opt = args[n].mid(2);
@@ -465,9 +465,9 @@ int main(int argc, char **argv)
 		else
 			var = opt;
 
-		if(var == "proto")
+		if(var == QLatin1String("proto"))
 			proto = val;
-		else if(var == "realm")
+		else if(var == QLatin1String("realm"))
 			realm = val;
 
 		args.removeAt(n);
@@ -484,7 +484,7 @@ int main(int argc, char **argv)
 	int port = 8001; // default port
 
 	QString hostinput = args[0];
-	QString str = "Hello, World";
+	QString str = QStringLiteral("Hello, World");
 	if(args.count() >= 2)
 		str = args[1];
 

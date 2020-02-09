@@ -61,22 +61,22 @@ public:
 
 static QString qcaHashToBotanHash(const QString &type)
 {
-    if ( type == "md2" )
-	return QString("MD2");
-    else if ( type == "md4" )
-	return QString("MD4");
-    else if ( type == "md5" )
-	return QString("MD5");
-    else if ( type == "sha1" )
-	return QString("SHA-1");
-    else if ( type == "sha256" )
-	return QString("SHA-256");
-    else if ( type == "sha384" )
-	return QString("SHA-384");
-    else if ( type == "sha512" )
-	return QString("SHA-512");
-    else if ( type == "ripemd160" )
-	return QString("RIPEMD-160");
+    if ( type == QLatin1String("md2") )
+	return QStringLiteral("MD2");
+    else if ( type == QLatin1String("md4") )
+	return QStringLiteral("MD4");
+    else if ( type == QLatin1String("md5") )
+	return QStringLiteral("MD5");
+    else if ( type == QLatin1String("sha1") )
+	return QStringLiteral("SHA-1");
+    else if ( type == QLatin1String("sha256") )
+	return QStringLiteral("SHA-256");
+    else if ( type == QLatin1String("sha384") )
+	return QStringLiteral("SHA-384");
+    else if ( type == QLatin1String("sha512") )
+	return QStringLiteral("SHA-512");
+    else if ( type == QLatin1String("ripemd160") )
+	return QStringLiteral("RIPEMD-160");
 
     return {};
 }
@@ -130,18 +130,18 @@ private:
 
 static QString qcaHmacToBotanHmac(const QString &type)
 {
-    if ( type == "hmac(md5)" )
-	return QString("MD5");
-    else if ( type == "hmac(sha1)" )
-	return QString("SHA-1");
-    else if ( type == "hmac(sha256)" )
-	return QString("SHA-256");
-    else if ( type == "hmac(sha384)" )
-	return QString("SHA-384");
-    else if ( type == "hmac(sha512)" )
-	return QString("SHA-512");
-    else if ( type == "hmac(ripemd160)" )
-	return QString("RIPEMD-160");
+    if ( type == QLatin1String("hmac(md5)") )
+	return QStringLiteral("MD5");
+    else if ( type == QLatin1String("hmac(sha1)") )
+	return QStringLiteral("SHA-1");
+    else if ( type == QLatin1String("hmac(sha256)") )
+	return QStringLiteral("SHA-256");
+    else if ( type == QLatin1String("hmac(sha384)") )
+	return QStringLiteral("SHA-384");
+    else if ( type == QLatin1String("hmac(sha512)") )
+	return QStringLiteral("SHA-512");
+    else if ( type == QLatin1String("hmac(ripemd160)") )
+	return QStringLiteral("RIPEMD-160");
 
     return {};
 }
@@ -290,8 +290,8 @@ protected:
 
 static QString qcaHkdfToBotanHkdf(const QString &type)
 {
-    if ( type == "hkdf(sha256)" )
-	return QString("SHA-256");
+    if ( type == QLatin1String("hkdf(sha256)") )
+	return QStringLiteral("SHA-256");
 
     return {};
 }
@@ -338,99 +338,99 @@ protected:
 
 static void qcaCipherToBotanCipher(const QString &type, std::string *algoName, std::string *algoMode, std::string *algoPadding)
 {
-    if (type == "aes128-ecb" ) {
+    if (type == QLatin1String("aes128-ecb") ) {
 	*algoName = "AES-128";
 	*algoMode = "ECB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes128-cbc" ) {
+    } else if ( type == QLatin1String("aes128-cbc") ) {
 	*algoName = "AES-128";
 	*algoMode = "CBC";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes128-cfb" ) {
+    } else if ( type == QLatin1String("aes128-cfb") ) {
 	*algoName = "AES-128";
 	*algoMode = "CFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes128-ofb" ) {
+    } else if ( type == QLatin1String("aes128-ofb") ) {
 	*algoName = "AES-128";
 	*algoMode = "OFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes192-ecb" ) {
+    } else if ( type == QLatin1String("aes192-ecb") ) {
 	*algoName = "AES-192";
 	*algoMode = "ECB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes192-cbc" ) {
+    } else if ( type == QLatin1String("aes192-cbc") ) {
 	*algoName = "AES-192";
 	*algoMode = "CBC";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes192-cfb" ) {
+    } else if ( type == QLatin1String("aes192-cfb") ) {
 	*algoName = "AES-192";
 	*algoMode = "CFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes192-ofb" ) {
+    } else if ( type == QLatin1String("aes192-ofb") ) {
 	*algoName = "AES-192";
 	*algoMode = "OFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes256-ecb" ) {
+    } else if ( type == QLatin1String("aes256-ecb") ) {
 	*algoName = "AES-256";
 	*algoMode = "ECB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes256-cbc" ) {
+    } else if ( type == QLatin1String("aes256-cbc") ) {
 	*algoName = "AES-256";
 	*algoMode = "CBC";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes256-cfb" ) {
+    } else if ( type == QLatin1String("aes256-cfb") ) {
 	*algoName = "AES-256";
 	*algoMode = "CFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "aes256-ofb" ) {
+    } else if ( type == QLatin1String("aes256-ofb") ) {
 	*algoName = "AES-256";
 	*algoMode = "OFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "blowfish-ecb" ) {
+    } else if ( type == QLatin1String("blowfish-ecb") ) {
 	*algoName = "Blowfish";
 	*algoMode = "ECB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "blowfish-cbc" ) {
+    } else if ( type == QLatin1String("blowfish-cbc") ) {
 	*algoName = "Blowfish";
 	*algoMode = "CBC";
 	*algoPadding = "NoPadding";
-    } else if ( type == "blowfish-cbc-pkcs7" ) {
+    } else if ( type == QLatin1String("blowfish-cbc-pkcs7") ) {
 	*algoName = "Blowfish";
 	*algoMode = "CBC";
 	*algoPadding = "PKCS7";
-    } else if ( type == "blowfish-cfb" ) {
+    } else if ( type == QLatin1String("blowfish-cfb") ) {
 	*algoName = "Blowfish";
 	*algoMode = "CFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "blowfish-ofb" ) {
+    } else if ( type == QLatin1String("blowfish-ofb") ) {
 	*algoName = "Blowfish";
 	*algoMode = "OFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "des-ecb" ) {
+    } else if ( type == QLatin1String("des-ecb") ) {
 	*algoName = "DES";
 	*algoMode = "ECB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "des-ecb-pkcs7" ) {
+    } else if ( type == QLatin1String("des-ecb-pkcs7") ) {
 	*algoName = "DES";
 	*algoMode = "ECB";
 	*algoPadding = "PKCS7";
-    } else if ( type == "des-cbc" ) {
+    } else if ( type == QLatin1String("des-cbc") ) {
 	*algoName = "DES";
 	*algoMode = "CBC";
 	*algoPadding = "NoPadding";
-    } else if ( type == "des-cbc-pkcs7" ) {
+    } else if ( type == QLatin1String("des-cbc-pkcs7") ) {
 	*algoName = "DES";
 	*algoMode = "CBC";
 	*algoPadding = "PKCS7";
-    } else if ( type == "des-cfb" ) {
+    } else if ( type == QLatin1String("des-cfb") ) {
 	*algoName = "DES";
 	*algoMode = "CFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "des-ofb" ) {
+    } else if ( type == QLatin1String("des-ofb") ) {
 	*algoName = "DES";
 	*algoMode = "OFB";
 	*algoPadding = "NoPadding";
-    } else if ( type == "tripledes-ecb" ) {
+    } else if ( type == QLatin1String("tripledes-ecb") ) {
 	*algoName = "TripleDES";
 	*algoMode = "ECB";
 	*algoPadding = "NoPadding";
@@ -578,18 +578,18 @@ public:
 
     QString name() const override
     {
-	return "qca-botan";
+	return QStringLiteral("qca-botan");
     }
 
     const QStringList &pbkdfTypes() const
     {
 	static QStringList list;
 	if (list.isEmpty()) {
-	    list += "pbkdf1(sha1)";
-	    std::unique_ptr<BotanPBKDFContext> pbkdf1md2(new BotanPBKDFContext( nullptr, "pbkdf1(md2)"));
+	    list += QStringLiteral("pbkdf1(sha1)");
+	    std::unique_ptr<BotanPBKDFContext> pbkdf1md2(new BotanPBKDFContext( nullptr, QStringLiteral("pbkdf1(md2)")));
 	    if (pbkdf1md2->isOk())
-		list += "pbkdf1(md2)";
-	    list += "pbkdf2(sha1)";
+		list += QStringLiteral("pbkdf1(md2)");
+	    list += QStringLiteral("pbkdf2(sha1)");
 	}
 	return list;
     }
@@ -599,14 +599,14 @@ public:
 	static QStringList supported;
 	if (supported.isEmpty()) {
 	    QStringList list;
-	    list += "md2";
-	    list += "md4";
-	    list += "md5";
-	    list += "sha1";
-	    list += "sha256";
-	    list += "sha384";
-	    list += "sha512";
-	    list += "ripemd160";
+	    list += QStringLiteral("md2");
+	    list += QStringLiteral("md4");
+	    list += QStringLiteral("md5");
+	    list += QStringLiteral("sha1");
+	    list += QStringLiteral("sha256");
+	    list += QStringLiteral("sha384");
+	    list += QStringLiteral("sha512");
+	    list += QStringLiteral("ripemd160");
 
 	    for (const QString &hash : qAsConst(list)) {
 		std::unique_ptr<BotanHashContext> hashContext(new BotanHashContext(nullptr, hash));
@@ -623,30 +623,30 @@ public:
 	static QStringList supported;
 	if (supported.isEmpty()) {
 	    QStringList list;
-	    list += "aes128-ecb";
-	    list += "aes128-cbc";
-	    list += "aes128-cfb";
-	    list += "aes128-ofb";
-	    list += "aes192-ecb";
-	    list += "aes192-cbc";
-	    list += "aes192-cfb";
-	    list += "aes192-ofb";
-	    list += "aes256-ecb";
-	    list += "aes256-cbc";
-	    list += "aes256-cfb";
-	    list += "aes256-ofb";
-	    list += "des-ecb";
-	    list += "des-ecb-pkcs7";
-	    list += "des-cbc";
-	    list += "des-cbc-pkcs7";
-	    list += "des-cfb";
-	    list += "des-ofb";
-	    list += "tripledes-ecb";
-	    list += "blowfish-ecb";
-	    list += "blowfish-cbc";
-	    list += "blowfish-cbc-pkcs7";
-	    list += "blowfish-cfb";
-	    list += "blowfish-ofb";
+	    list += QStringLiteral("aes128-ecb");
+	    list += QStringLiteral("aes128-cbc");
+	    list += QStringLiteral("aes128-cfb");
+	    list += QStringLiteral("aes128-ofb");
+	    list += QStringLiteral("aes192-ecb");
+	    list += QStringLiteral("aes192-cbc");
+	    list += QStringLiteral("aes192-cfb");
+	    list += QStringLiteral("aes192-ofb");
+	    list += QStringLiteral("aes256-ecb");
+	    list += QStringLiteral("aes256-cbc");
+	    list += QStringLiteral("aes256-cfb");
+	    list += QStringLiteral("aes256-ofb");
+	    list += QStringLiteral("des-ecb");
+	    list += QStringLiteral("des-ecb-pkcs7");
+	    list += QStringLiteral("des-cbc");
+	    list += QStringLiteral("des-cbc-pkcs7");
+	    list += QStringLiteral("des-cfb");
+	    list += QStringLiteral("des-ofb");
+	    list += QStringLiteral("tripledes-ecb");
+	    list += QStringLiteral("blowfish-ecb");
+	    list += QStringLiteral("blowfish-cbc");
+	    list += QStringLiteral("blowfish-cbc-pkcs7");
+	    list += QStringLiteral("blowfish-cfb");
+	    list += QStringLiteral("blowfish-ofb");
 
 	    for (const QString &cipher : qAsConst(list)) {
 		std::string algoName, algoMode, algoPadding;
@@ -666,13 +666,13 @@ public:
     {
 	static QStringList list;
 	if (list.isEmpty()) {
-	    list += "hmac(md5)";
-	    list += "hmac(sha1)";
+	    list += QStringLiteral("hmac(md5)");
+	    list += QStringLiteral("hmac(sha1)");
 	    // HMAC with SHA2 doesn't appear to work correctly in Botan.
-	    // list += "hmac(sha256)";
-	    // list += "hmac(sha384)";
-	    // list += "hmac(sha512)";
-	    list += "hmac(ripemd160)";
+	    // list += QStringLiteral("hmac(sha256)");
+	    // list += QStringLiteral("hmac(sha384)");
+	    // list += QStringLiteral("hmac(sha512)");
+	    list += QStringLiteral("hmac(ripemd160)");
 	}
 	return list;
     }
@@ -681,7 +681,7 @@ public:
     {
 	static QStringList list;
 	if (list.isEmpty()) {
-	    list += "hkdf(sha256)";
+	    list += QStringLiteral("hkdf(sha256)");
 	}
 	return list;
     }
@@ -690,7 +690,7 @@ public:
     {
 	static QStringList list;
 	if (list.isEmpty()) {
-	    list += "random";
+	    list += QStringLiteral("random");
 	    list += hmacTypes();
 	    list += pbkdfTypes();
 	    list += hkdfTypes();
@@ -702,7 +702,7 @@ public:
 
     Context *createContext(const QString &type) override
     {
-	if ( type == "random" )
+	if ( type == QLatin1String("random") )
 	    return new botanRandomContext( this );
 	else if ( hashTypes().contains(type) )
 	    return new BotanHashContext( this, type );

@@ -57,14 +57,14 @@ void KeyStore::nullKeystore()
 {
     QCA::KeyStoreManager manager;
     if ( QCA::isSupported( "keystore" ) ) {
-        QCA::KeyStore nullStore( QString( "null store" ), &manager );
+        QCA::KeyStore nullStore( QStringLiteral( "null store" ), &manager );
         QVERIFY( nullStore.isValid() );
 
         QVERIFY( nullStore.entryList().isEmpty() );
 
         QCOMPARE( nullStore.type(), QCA::KeyStore::User);
 
-        QCOMPARE( nullStore.id(), QString( "null store" ) );
+        QCOMPARE( nullStore.id(), QStringLiteral( "null store" ) );
         QCOMPARE( nullStore.holdsTrustedCertificates(), false );
         QCOMPARE( nullStore.holdsIdentities(), false );
         QCOMPARE( nullStore.holdsPGPPublicKeys(), false );

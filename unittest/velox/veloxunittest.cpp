@@ -75,7 +75,7 @@ private Q_SLOTS:
     {
         QCA::CertificateCollection rootCerts;
         QCA::ConvertResult resultRootCert;
-        QCA::Certificate rootCert = QCA::Certificate::fromPEMFile( "root.crt", &resultRootCert);
+        QCA::Certificate rootCert = QCA::Certificate::fromPEMFile( QStringLiteral("root.crt"), &resultRootCert);
         QCOMPARE( resultRootCert, QCA::ConvertGood );
         rootCerts.addCertificate( rootCert );
 
@@ -142,11 +142,11 @@ void VeloxUnitTest::cleanupTestCase()
 
 void VeloxUnitTest::sniAlice()
 {
-    if(!QCA::isSupported("tls", "qca-ossl"))
+    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
 	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( "alice.sni.velox.ch", 443 );
+        s->start( QStringLiteral("alice.sni.velox.ch"), 443 );
         s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
@@ -154,11 +154,11 @@ void VeloxUnitTest::sniAlice()
 
 void VeloxUnitTest::sniBob()
 {
-    if(!QCA::isSupported("tls", "qca-ossl"))
+    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
 	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( "bob.sni.velox.ch", 443 );
+        s->start( QStringLiteral("bob.sni.velox.ch"), 443 );
         s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
@@ -166,11 +166,11 @@ void VeloxUnitTest::sniBob()
 
 void VeloxUnitTest::sniCarol()
 {
-    if(!QCA::isSupported("tls", "qca-ossl"))
+    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
 	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( "carol.sni.velox.ch", 443 );
+        s->start( QStringLiteral("carol.sni.velox.ch"), 443 );
         s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
@@ -178,11 +178,11 @@ void VeloxUnitTest::sniCarol()
 
 void VeloxUnitTest::sniDave()
 {
-    if(!QCA::isSupported("tls", "qca-ossl"))
+    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
 	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( "dave.sni.velox.ch", 443 );
+        s->start( QStringLiteral("dave.sni.velox.ch"), 443 );
         s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
@@ -190,11 +190,11 @@ void VeloxUnitTest::sniDave()
 
 void VeloxUnitTest::sniMallory()
 {
-    if(!QCA::isSupported("tls", "qca-ossl"))
+    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
 	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( "mallory.sni.velox.ch", 443 );
+        s->start( QStringLiteral("mallory.sni.velox.ch"), 443 );
         s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }
@@ -203,11 +203,11 @@ void VeloxUnitTest::sniMallory()
 
 void VeloxUnitTest::sniIvan()
 {
-    if(!QCA::isSupported("tls", "qca-ossl"))
+    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
 	QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( "ivan.sni.velox.ch", 443 );
+        s->start( QStringLiteral("ivan.sni.velox.ch"), 443 );
         s->waitForHandshake();
         QVERIFY( s->isHandshaken() );
     }

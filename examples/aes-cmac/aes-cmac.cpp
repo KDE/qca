@@ -33,7 +33,7 @@ class AESCMACContext : public QCA::MACContext
 {
     Q_OBJECT
 public:
-    AESCMACContext(QCA::Provider *p) : QCA::MACContext(p, "cmac(aes)")
+    AESCMACContext(QCA::Provider *p) : QCA::MACContext(p, QStringLiteral("cmac(aes)"))
     {
     }
 
@@ -95,7 +95,7 @@ public:
 	m_residual = QCA::SecureArray();
 
 	// Figure 2.2, step 1.
-	QCA::Cipher aesObj(QString("aes128"),
+	QCA::Cipher aesObj(QStringLiteral("aes128"),
 			   QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			   QCA::Encode, key);
 	QCA::SecureArray L = aesObj.process(const_Zero);
@@ -144,7 +144,7 @@ public:
 
 	    m_Y = xorArray(m_X, thisBlock);
 
-	    QCA::Cipher aesObj(QString("aes128"),
+	    QCA::Cipher aesObj(QStringLiteral("aes128"),
 			       QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			       QCA::Encode, m_key);
 	    m_X = aesObj.process(m_Y);
@@ -172,7 +172,7 @@ public:
 	    lastBlock = xorArray(m_residual, m_k1);
 	}
 	m_Y = xorArray(m_X, lastBlock);
-	QCA::Cipher aesObj(QString("aes128"),
+	QCA::Cipher aesObj(QStringLiteral("aes128"),
 			   QCA::Cipher::ECB, QCA::Cipher::DefaultPadding,
 			   QCA::Encode, m_key);
 	*out = aesObj.process(m_Y);
@@ -205,20 +205,20 @@ public:
 
         QString name() const override
         {
-                return "exampleClientSideProvider";
+                return QStringLiteral("exampleClientSideProvider");
         }
 
         QStringList features() const override
         {
                 QStringList list;
-                list += "cmac(aes)";
+                list += QStringLiteral("cmac(aes)");
 		// you can add more features in here, if you have some.
                 return list;
         }
 
         Provider::Context *createContext(const QString &type) override
         {
-	    if(type == "cmac(aes)")
+	    if(type == QLatin1String("cmac(aes)"))
 		return new AESCMACContext(this);
 	    // else if (type == some other feature)
 	    //  return some other context.
@@ -236,7 +236,7 @@ class AES_CMAC: public QCA::MessageAuthenticationCode
 public:
     AES_CMAC(const QCA::SymmetricKey &key = QCA::SymmetricKey(),
 	     const QString &provider = QString()):
-	QCA::MessageAuthenticationCode( "cmac(aes)", key, provider)
+	QCA::MessageAuthenticationCode( QStringLiteral("cmac(aes)"), key, provider)
     {}
 };
 
@@ -268,7 +268,7 @@ int main(int argc, char **argv)
 	AES_CMAC cmacObject;
 
 	// create the key
-	QCA::SymmetricKey key(QCA::hexToArray("2b7e151628aed2a6abf7158809cf4f3c"));
+	QCA::SymmetricKey key(QCA::hexToArray(QStringLiteral("2b7e151628aed2a6abf7158809cf4f3c")));
 
 	// set the MAC to use the key
 	cmacObject.setup(key);

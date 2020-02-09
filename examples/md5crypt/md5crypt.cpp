@@ -38,7 +38,7 @@ QString to64 ( long v , int size )
 {
 
     // Character set of the encrypted password: A-Za-z0-9./
-    QString itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    QString itoa64 = QStringLiteral("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
     QString result;
 
     while ( --size >= 0 )
@@ -66,8 +66,8 @@ QString qca_md5crypt( const QCA::SecureArray &password, const QCA::SecureArray &
     QCA::SecureArray finalState, magic_string = "$1$";
 
     // The md5crypt algorithm uses two separate hashes
-    QCA::Hash hash1( "md5" );
-    QCA::Hash hash2( "md5" );
+    QCA::Hash hash1( QStringLiteral("md5") );
+    QCA::Hash hash2( QStringLiteral("md5") );
 
     // MD5 Hash #1: pwd, magic string and salt
     hash1.update ( password );

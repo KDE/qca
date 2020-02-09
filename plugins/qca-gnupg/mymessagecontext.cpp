@@ -27,7 +27,7 @@ namespace gpgQCAPlugin
 {
 
 MyMessageContext::MyMessageContext(MyOpenPGPContext *_sms, Provider *p)
-	: MessageContext(p, "pgpmsg")
+	: MessageContext(p, QStringLiteral("pgpmsg"))
 	, sms(_sms)
 	, op(Sign)
 	, signMode(SecureMessage::Detached)
@@ -94,7 +94,7 @@ void MyMessageContext::start(SecureMessage::Format f, Operation op)
 	format = f;
 	this->op = op;
 
-	if(getProperty("pgp-always-trust").toBool())
+	if(getProperty(QStringLiteral("pgp-always-trust")).toBool())
 		gpg.setAlwaysTrust(true);
 
 	if(format == SecureMessage::Ascii)
@@ -257,9 +257,9 @@ bool MyMessageContext::waitForFinished(int msecs)
 			else
 				keyId = e.keyId;
 			QStringList out;
-			out += escape_string("qca-gnupg-1");
+			out += escape_string(QStringLiteral("qca-gnupg-1"));
 			out += escape_string(keyId);
-			QString serialized = out.join(":");
+			QString serialized = out.join(QStringLiteral(":"));
 
 			KeyStoreEntry kse;
 			KeyStoreEntryContext *c = keyStoreList->entryPassive(serialized);
@@ -340,7 +340,7 @@ QByteArray MyMessageContext::signature() const
 QString MyMessageContext::hashName() const
 {
 	// TODO
-	return "sha1";
+	return QStringLiteral("sha1");
 }
 
 SecureMessageSignatureList MyMessageContext::signers() const
@@ -384,9 +384,9 @@ void MyMessageContext::gpg_needPassphrase(const QString &in_keyId)
 		keyId = in_keyId;
 	//emit keyStoreList->storeNeedPassphrase(0, 0, keyId);
 	QStringList out;
-	out += escape_string("qca-gnupg-1");
+	out += escape_string(QStringLiteral("qca-gnupg-1"));
 	out += escape_string(keyId);
-	QString serialized = out.join(":");
+	QString serialized = out.join(QStringLiteral(":"));
 
 	KeyStoreEntry kse;
 	MyKeyStoreList *keyStoreList = MyKeyStoreList::instance();

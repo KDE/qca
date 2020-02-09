@@ -111,8 +111,8 @@ public:
 			, updateCount(0)
 			, owner(nullptr)
 			, storeContextId(-1)
-			, storeId("")
-			, name("")
+			, storeId(QLatin1String(""))
+			, name(QLatin1String(""))
 			, type(KeyStore::System)
 			, isReadOnly(false)
 		{
@@ -211,7 +211,7 @@ public Q_SLOTS:
 		for(int n = 0; n < list.count(); ++n)
 		{
 			Provider *p = list[n];
-			if(p->features().contains("keystorelist") && !haveProviderSource(p))
+			if(p->features().contains(QStringLiteral("keystorelist")) && !haveProviderSource(p))
 				startProvider(p);
 		}
 
@@ -234,7 +234,7 @@ public Q_SLOTS:
 			}
 		}
 
-		if(p && p->features().contains("keystorelist") && !haveProviderSource(p))
+		if(p && p->features().contains(QStringLiteral("keystorelist")) && !haveProviderSource(p))
 			startProvider(p);
 	}
 
@@ -408,7 +408,7 @@ private:
 
 	void startProvider(Provider *p)
 	{
-		KeyStoreListContext *c = static_cast<KeyStoreListContext *>(getContext("keystorelist", p));
+		KeyStoreListContext *c = static_cast<KeyStoreListContext *>(getContext(QStringLiteral("keystorelist"), p));
 		if(!c)
 			return;
 
@@ -422,7 +422,7 @@ private:
 		c->start();
 		c->setUpdatesEnabled(true);
 
-		QCA_logTextMessage(QString("keystore: startProvider %1").arg(p->name()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("keystore: startProvider %1").arg(p->name()), Logger::Information);
 	}
 
 	bool updateStores(KeyStoreListContext *c)
@@ -438,7 +438,7 @@ private:
 		{
 			if(items[n].owner == c && !keyStores.contains(items[n].storeContextId))
 			{
-				QCA_logTextMessage(QString("keystore: updateStores remove %1").arg(items[n].storeContextId), Logger::Information);
+				QCA_logTextMessage(QStringLiteral("keystore: updateStores remove %1").arg(items[n].storeContextId), Logger::Information);
 
 				items.removeAt(n);
 				--n; // adjust position
@@ -470,7 +470,7 @@ private:
 				bool isReadOnly = c->isReadOnly(id);
 				if(i.name != name || i.isReadOnly != isReadOnly)
 				{
-					QCA_logTextMessage(QString("keystore: updateStores update %1").arg(id), Logger::Information);
+					QCA_logTextMessage(QStringLiteral("keystore: updateStores update %1").arg(id), Logger::Information);
 					i.name = name;
 					i.isReadOnly = isReadOnly;
 					changed = true;
@@ -479,7 +479,7 @@ private:
 			// otherwise, add it
 			else
 			{
-				QCA_logTextMessage(QString("keystore: updateStores add %1").arg(id), Logger::Information);
+				QCA_logTextMessage(QStringLiteral("keystore: updateStores add %1").arg(id), Logger::Information);
 
 				Item i;
 				i.trackerId = tracker_id_at++;
@@ -504,13 +504,13 @@ private Q_SLOTS:
 	{
 		KeyStoreListContext *c = (KeyStoreListContext *)sender();
 
-		QCA_logTextMessage(QString("keystore: ksl_busyStart %1").arg(c->provider()->name()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("keystore: ksl_busyStart %1").arg(c->provider()->name()), Logger::Information);
 
 		if(!busySources.contains(c))
 		{
 			busySources += c;
 
-			QCA_logTextMessage(QString("keystore: emitting updated"), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("keystore: emitting updated"), Logger::Information);
 			emit updated_p();
 		}
 	}
@@ -519,7 +519,7 @@ private Q_SLOTS:
 	{
 		KeyStoreListContext *c = (KeyStoreListContext *)sender();
 
-		QCA_logTextMessage(QString("keystore: ksl_busyEnd %1").arg(c->provider()->name()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("keystore: ksl_busyEnd %1").arg(c->provider()->name()), Logger::Information);
 
 		busySources.remove(c);
 		bool changed = updateStores(c);
@@ -534,7 +534,7 @@ private Q_SLOTS:
 
 		if(!any_busy || changed)
 		{
-			QCA_logTextMessage(QString("keystore: emitting updated"), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("keystore: emitting updated"), Logger::Information);
 			emit updated_p();
 		}
 	}
@@ -543,12 +543,12 @@ private Q_SLOTS:
 	{
 		KeyStoreListContext *c = (KeyStoreListContext *)sender();
 
-		QCA_logTextMessage(QString("keystore: ksl_updated %1").arg(c->provider()->name()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("keystore: ksl_updated %1").arg(c->provider()->name()), Logger::Information);
 
 		bool changed = updateStores(c);
 		if(changed)
 		{
-			QCA_logTextMessage(QString("keystore: emitting updated"), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("keystore: emitting updated"), Logger::Information);
 			emit updated_p();
 		}
 	}
@@ -564,7 +564,7 @@ private Q_SLOTS:
 	{
 		KeyStoreListContext *c = (KeyStoreListContext *)sender();
 
-		QCA_logTextMessage(QString("keystore: ksl_storeUpdated %1 %2").arg(c->provider()->name(), QString::number(id)), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("keystore: ksl_storeUpdated %1 %2").arg(c->provider()->name(), QString::number(id)), Logger::Information);
 
 		QMutexLocker locker(&m);
 		for(int n = 0; n < items.count(); ++n)
@@ -574,9 +574,9 @@ private Q_SLOTS:
 			{
 				++i.updateCount;
 
-				QCA_logTextMessage(QString("keystore: %1 updateCount = %2").arg(i.name, QString::number(i.updateCount)), Logger::Information);
+				QCA_logTextMessage(QStringLiteral("keystore: %1 updateCount = %2").arg(i.name, QString::number(i.updateCount)), Logger::Information);
 
-				QCA_logTextMessage(QString("keystore: emitting updated"), Logger::Information);
+				QCA_logTextMessage(QStringLiteral("keystore: emitting updated"), Logger::Information);
 				emit updated_p();
 				return;
 			}

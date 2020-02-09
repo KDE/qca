@@ -271,11 +271,11 @@ private:
 			callbacks = nullptr;
 		}
 
-		localAddr = "";
-		remoteAddr = "";
+		localAddr = QLatin1String("");
+		remoteAddr = QLatin1String("");
 		maxoutbuf = 128;
-		sc_username = "";
-		sc_authzid = "";
+		sc_username = QLatin1String("");
+		sc_authzid = QLatin1String("");
 
 		result_authCondition = SASL::AuthFail;
 		result_haveClientInit = false;
@@ -292,7 +292,7 @@ private:
 		secflags = 0;
 		ssf_min = 0;
 		ssf_max = 0;
-		ext_authid = "";
+		ext_authid = QLatin1String("");
 		ext_ssf = 0;
 	}
 
@@ -379,8 +379,9 @@ private:
 			const char *clientout, *m;
 			unsigned int clientoutlen;
 
+
 			need = nullptr;
-			QString list = result_mechlist.join(" ");
+			const QString list = result_mechlist.join(QStringLiteral(" "));
 			int r;
 			while(true) {
 				if(need)
@@ -603,8 +604,8 @@ public:
 	{
 		service = _service;
 		host = _host;
-		localAddr = local ? addrString(*local) : "";
-		remoteAddr = remote ? addrString(*remote) : "";
+		localAddr = local ? addrString(*local) : QLatin1String("");
+		remoteAddr = remote ? addrString(*remote) : QLatin1String("");
 		ext_authid = ext_id;
 		ext_ssf = _ext_ssf;
 	}
@@ -677,7 +678,7 @@ public:
 		Q_UNUSED(disableServerSendLast);
 		resetState();
 
-		g->appname = SASL_APP;
+		g->appname = QStringLiteral(SASL_APP);
 		if(!g->server_init) {
 			sasl_server_init(nullptr, QFile::encodeName(g->appname).constData());
 			g->server_init = true;
@@ -904,7 +905,7 @@ int saslProvider::qcaVersion() const
 
 QString saslProvider::name() const
 {
-	return "qca-cyrus-sasl";
+	return QStringLiteral("qca-cyrus-sasl");
 }
 
 QString saslProvider::credit() const
@@ -915,14 +916,14 @@ QString saslProvider::credit() const
 QStringList saslProvider::features() const
 {
 	QStringList list;
-	list += "sasl";
+	list += QStringLiteral("sasl");
 
 	return list;
 }
 
 Provider::Context *saslProvider::createContext(const QString &type)
 {
-	if ( type == "sasl" )
+	if ( type == QLatin1String("sasl") )
 		return new saslContext( this );
 
 	return nullptr;

@@ -38,25 +38,25 @@ public:
 
 	QString name() const override
 	{
-		return "qca-gnupg";
+		return QStringLiteral("qca-gnupg");
 	}
 
 	QStringList features() const override
 	{
 		QStringList list;
-		list += "pgpkey";
-		list += "openpgp";
-		list += "keystorelist";
+		list += QStringLiteral("pgpkey");
+		list += QStringLiteral("openpgp");
+		list += QStringLiteral("keystorelist");
 		return list;
 	}
 
 	Context *createContext(const QString &type) override
 	{
-		if(type == "pgpkey")
+		if(type == QLatin1String("pgpkey"))
 			return new MyPGPKeyContext(this);
-		else if(type == "openpgp")
+		else if(type == QLatin1String("openpgp"))
 			return new MyOpenPGPContext(this);
-		else if(type == "keystorelist")
+		else if(type == QLatin1String("keystorelist"))
 			return new MyKeyStoreList(this);
 		else
 			return nullptr;

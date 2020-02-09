@@ -621,7 +621,7 @@ SecureMessageSystem::~SecureMessageSystem()
 // OpenPGP
 //----------------------------------------------------------------------------
 OpenPGP::OpenPGP(QObject *parent, const QString &provider)
-:SecureMessageSystem(parent, "openpgp", provider)
+:SecureMessageSystem(parent, QStringLiteral("openpgp"), provider)
 {
 }
 
@@ -640,7 +640,7 @@ public:
 };
 
 CMS::CMS(QObject *parent, const QString &provider)
-:SecureMessageSystem(parent, "cms", provider)
+:SecureMessageSystem(parent, QStringLiteral("cms"), provider)
 {
 	d = new Private;
 }

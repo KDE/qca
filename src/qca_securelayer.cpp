@@ -372,14 +372,14 @@ public:
 		}
 		c->setMTU(packet_mtu);
 
-		QCA_logTextMessage(QString("tls[%1]: c->start()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("tls[%1]: c->start()").arg(q->objectName()), Logger::Information);
 		op = OpStart;
 		c->start();
 	}
 
 	void close()
 	{
-		QCA_logTextMessage(QString("tls[%1]: close").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("tls[%1]: close").arg(q->objectName()), Logger::Information);
 
 		if(state != Connected)
 			return;
@@ -390,7 +390,7 @@ public:
 
 	void continueAfterStep()
 	{
-		QCA_logTextMessage(QString("tls[%1]: continueAfterStep").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("tls[%1]: continueAfterStep").arg(q->objectName()), Logger::Information);
 
 		if(!blocked)
 			return;
@@ -405,7 +405,7 @@ public:
 		{
 			if(need_update)
 			{
-				QCA_logTextMessage(QString("tls[%1]: need_update").arg(q->objectName()), Logger::Information);
+				QCA_logTextMessage(QStringLiteral("tls[%1]: need_update").arg(q->objectName()), Logger::Information);
 				update();
 			}
 			return;
@@ -440,7 +440,7 @@ public:
 					actionTrigger.start();
 			}
 
-			QCA_logTextMessage(QString("tls[%1]: handshaken").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("tls[%1]: handshaken").arg(q->objectName()), Logger::Information);
 
 			if(connect_handshaken)
 			{
@@ -494,17 +494,17 @@ public:
 
 	void update()
 	{
-		QCA_logTextMessage(QString("tls[%1]: update").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("tls[%1]: update").arg(q->objectName()), Logger::Information);
 
 		if(blocked)
 		{
-			QCA_logTextMessage(QString("tls[%1]: ignoring update while blocked").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("tls[%1]: ignoring update while blocked").arg(q->objectName()), Logger::Information);
 			return;
 		}
 
 		if(!actionQueue.isEmpty())
 		{
-			QCA_logTextMessage(QString("tls[%1]: ignoring update while processing actions").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("tls[%1]: ignoring update while processing actions").arg(q->objectName()), Logger::Information);
 			need_update = true;
 			return;
 		}
@@ -512,7 +512,7 @@ public:
 		// only allow one operation at a time
 		if(op != -1)
 		{
-			QCA_logTextMessage(QString("tls[%1]: ignoring update while operation active").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("tls[%1]: ignoring update while operation active").arg(q->objectName()), Logger::Information);
 			need_update = true;
 			return;
 		}
@@ -569,14 +569,14 @@ public:
 
 		if(arg_from_net.isEmpty() && arg_from_app.isEmpty() && !maybe_input)
 		{
-			QCA_logTextMessage(QString("tls[%1]: ignoring update: no output and no expected input").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("tls[%1]: ignoring update: no output and no expected input").arg(q->objectName()), Logger::Information);
 			return;
 		}
 
 		// clear this flag
 		maybe_input = false;
 
-		QCA_logTextMessage(QString("tls[%1]: c->update").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("tls[%1]: c->update").arg(q->objectName()), Logger::Information);
 		op = OpUpdate;
 		c->update(arg_from_net, arg_from_app);
 	}
@@ -622,7 +622,7 @@ public:
 		QByteArray c_to_net = c->to_net();
 		if(!c_to_net.isEmpty())
 		{
-			QCA_logTextMessage(QString("tls[%1]: to_net %2").arg(q->objectName(), QString::number(c_to_net.size())), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("tls[%1]: to_net %2").arg(q->objectName(), QString::number(c_to_net.size())), Logger::Information);
 		}
 
 		if(state == Closing)
@@ -694,7 +694,7 @@ public:
 			QByteArray c_to_app = c->to_app();
 			if(!c_to_app.isEmpty())
 			{
-				QCA_logTextMessage(QString("tls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())), Logger::Information);
+				QCA_logTextMessage(QStringLiteral("tls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())), Logger::Information);
 			}
 
 			bool eof = c->eof();
@@ -758,7 +758,7 @@ public:
 
 			if(eof || io_pending)
 			{
-				QCA_logTextMessage(QString("tls[%1]: eof || io_pending").arg(q->objectName()), Logger::Information);
+				QCA_logTextMessage(QStringLiteral("tls[%1]: eof || io_pending").arg(q->objectName()), Logger::Information);
 				update();
 			}
 
@@ -770,7 +770,7 @@ public:
 private Q_SLOTS:
 	void tls_resultsReady()
 	{
-		QCA_logTextMessage(QString("tls[%1]: c->resultsReady()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("tls[%1]: c->resultsReady()").arg(q->objectName()), Logger::Information);
 
 		Q_ASSERT(op != -1);
 
@@ -785,7 +785,7 @@ private Q_SLOTS:
 
 	void tls_dtlsTimeout()
 	{
-		QCA_logTextMessage(QString("tls[%1]: c->dtlsTimeout()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("tls[%1]: c->dtlsTimeout()").arg(q->objectName()), Logger::Information);
 
 		maybe_input = true;
 		update();
@@ -798,13 +798,13 @@ private Q_SLOTS:
 };
 
 TLS::TLS(QObject *parent, const QString &provider)
-:SecureLayer(parent), Algorithm("tls", provider)
+:SecureLayer(parent), Algorithm(QStringLiteral("tls"), provider)
 {
 	d = new Private(this, TLS::Stream);
 }
 
 TLS::TLS(Mode mode, QObject *parent, const QString &provider)
-:SecureLayer(parent), Algorithm(mode == Stream ? "tls" : "dtls", provider)
+:SecureLayer(parent), Algorithm(mode == Stream ? QStringLiteral("tls") : QStringLiteral("dtls"), provider)
 {
 	d = new Private(this, mode);
 }
@@ -1074,7 +1074,7 @@ void TLS::write(const QByteArray &a)
 	}
 	else
 		d->packet_out.append(a);
-	QCA_logTextMessage(QString("tls[%1]: write").arg(objectName()), Logger::Information);
+	QCA_logTextMessage(QStringLiteral("tls[%1]: write").arg(objectName()), Logger::Information);
 	d->update();
 }
 
@@ -1101,7 +1101,7 @@ void TLS::writeIncoming(const QByteArray &a)
 		d->from_net.append(a);
 	else
 		d->packet_from_net.append(a);
-	QCA_logTextMessage(QString("tls[%1]: writeIncoming %2").arg(objectName(), QString::number(a.size())), Logger::Information);
+	QCA_logTextMessage(QStringLiteral("tls[%1]: writeIncoming %2").arg(objectName(), QString::number(a.size())), Logger::Information);
 	d->update();
 }
 
@@ -1466,12 +1466,12 @@ public:
 
 		if(server)
 		{
-			QCA_logTextMessage(QString("sasl[%1]: c->startServer()").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("sasl[%1]: c->startServer()").arg(q->objectName()), Logger::Information);
 			c->startServer(server_realm, disableServerSendLast);
 		}
 		else
 		{
-			QCA_logTextMessage(QString("sasl[%1]: c->startClient()").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("sasl[%1]: c->startClient()").arg(q->objectName()), Logger::Information);
 			c->startClient(mechlist, allowClientSendFirst);
 		}
 	}
@@ -1481,7 +1481,7 @@ public:
 		if(op != -1)
 			return;
 
-		QCA_logTextMessage(QString("sasl[%1]: c->serverFirstStep()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("sasl[%1]: c->serverFirstStep()").arg(q->objectName()), Logger::Information);
 		op = OpServerFirstStep;
 		c->serverFirstStep(mech, clientInit);
 	}
@@ -1491,7 +1491,7 @@ public:
 		if(op != -1)
 			return;
 
-		QCA_logTextMessage(QString("sasl[%1]: c->nextStep()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("sasl[%1]: c->nextStep()").arg(q->objectName()), Logger::Information);
 		op = OpNextStep;
 		c->nextStep(stepData);
 	}
@@ -1501,7 +1501,7 @@ public:
 		if(op != -1)
 			return;
 
-		QCA_logTextMessage(QString("sasl[%1]: c->tryAgain()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("sasl[%1]: c->tryAgain()").arg(q->objectName()), Logger::Information);
 		op = OpTryAgain;
 		c->tryAgain();
 	}
@@ -1544,7 +1544,7 @@ public:
 					actionTrigger.start();
 			}
 
-			QCA_logTextMessage(QString("sasl[%1]: authenticated").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("sasl[%1]: authenticated").arg(q->objectName()), Logger::Information);
 			emit q->authenticated();
 		}
 		else if(a.type == Action::ReadyRead)
@@ -1562,13 +1562,13 @@ public:
 		// defer writes while authenticating
 		if(!authed)
 		{
-			QCA_logTextMessage(QString("sasl[%1]: ignoring update while not yet authenticated").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("sasl[%1]: ignoring update while not yet authenticated").arg(q->objectName()), Logger::Information);
 			return;
 		}
 
 		if(!actionQueue.isEmpty())
 		{
-			QCA_logTextMessage(QString("sasl[%1]: ignoring update while processing actions").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("sasl[%1]: ignoring update while processing actions").arg(q->objectName()), Logger::Information);
 			need_update = true;
 			return;
 		}
@@ -1576,14 +1576,14 @@ public:
 		// only allow one operation at a time
 		if(op != -1)
 		{
-			QCA_logTextMessage(QString("sasl[%1]: ignoring update while operation active").arg(q->objectName()), Logger::Information);
+			QCA_logTextMessage(QStringLiteral("sasl[%1]: ignoring update while operation active").arg(q->objectName()), Logger::Information);
 			need_update = true;
 			return;
 		}
 
 		need_update = false;
 
-		QCA_logTextMessage(QString("sasl[%1]: c->update()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("sasl[%1]: c->update()").arg(q->objectName()), Logger::Information);
 		op = OpUpdate;
 		out_pending += out.size();
 		c->update(from_net, out);
@@ -1594,7 +1594,7 @@ public:
 private Q_SLOTS:
 	void sasl_resultsReady()
 	{
-		QCA_logTextMessage(QString("sasl[%1]: c->resultsReady()").arg(q->objectName()), Logger::Information);
+		QCA_logTextMessage(QStringLiteral("sasl[%1]: c->resultsReady()").arg(q->objectName()), Logger::Information);
 
 		int last_op = op;
 		op = -1;
@@ -1773,7 +1773,7 @@ private Q_SLOTS:
 };
 
 SASL::SASL(QObject *parent, const QString &provider)
-:SecureLayer(parent), Algorithm("sasl", provider)
+:SecureLayer(parent), Algorithm(QStringLiteral("sasl"), provider)
 {
 	d = new Private(this);
 }

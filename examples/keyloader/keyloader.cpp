@@ -50,7 +50,7 @@ private Q_SLOTS:
 		{
 			QCA::SecureArray pass;
 			QCA::ConsolePrompt prompt;
-			prompt.getHidden("Passphrase");
+			prompt.getHidden(QStringLiteral("Passphrase"));
 			prompt.waitForFinished();
 			pass = prompt.result();
 			handler.submitPassword(id, pass);

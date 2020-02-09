@@ -849,7 +849,7 @@ public:
 
 		if(c == '\r' || c == '\n')
 		{
-			writeString("\n");
+			writeString(QStringLiteral("\n"));
 			done = true;
 			return false;
 		}
@@ -859,7 +859,7 @@ public:
 			if(at > 0)
 			{
 				--at;
-				writeString("\b \b");
+				writeString(QStringLiteral("\b \b"));
 				result.resize(at * sizeof(ushort));
 			}
 			return true;
@@ -872,7 +872,7 @@ public:
 
 		appendChar(c);
 
-		writeString("*");
+		writeString(QStringLiteral("*"));
 		return true;
 	}
 

@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	} else {
 		// create the required object using HMAC with SHA-1, and an
 		// empty key.
-		QCA::MessageAuthenticationCode hmacObject(  "hmac(sha1)", QCA::SecureArray() );
+		QCA::MessageAuthenticationCode hmacObject(  QStringLiteral("hmac(sha1)"), QCA::SecureArray() );
 
 		// create the key
 		QCA::SymmetricKey keyObject(key);

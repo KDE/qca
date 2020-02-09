@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	QStringList capabilities = provider->features();
 	// we turn the string list back into a single string,
 	// and display it as well
-	std::cout << capabilities.join(", ").toLatin1().data() << std::endl;
+	std::cout << capabilities.join(QStringLiteral(", ")).toLatin1().data() << std::endl;
     }
 
     // Note that the default provider isn't included in
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     // However it is still possible to get the features
     // supported by the default provider
     QStringList capabilities = QCA::defaultFeatures();
-    std::cout << capabilities.join(", ").toLatin1().data() << std::endl;
+    std::cout << capabilities.join(QStringLiteral(", ")).toLatin1().data() << std::endl;
     return 0;
 }
 

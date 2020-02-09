@@ -504,7 +504,7 @@ class DefaultMD5Context : public HashContext
 {
     Q_OBJECT
 public:
-	DefaultMD5Context(Provider *p) : HashContext(p, "md5")
+	DefaultMD5Context(Provider *p) : HashContext(p, QStringLiteral("md5"))
 	{
 		clear();
 	}
@@ -599,7 +599,7 @@ public:
 #endif
 	bool secure;
 
-	DefaultSHA1Context(Provider *p) : HashContext(p, "sha1")
+	DefaultSHA1Context(Provider *p) : HashContext(p, QStringLiteral("sha1"))
 	{
 		clear();
 	}
@@ -780,13 +780,13 @@ static QString escape_string(const QString &in)
 	for(const QChar &c : in)
 	{
 		if(c == '\\')
-			out += "\\\\";
+			out += QLatin1String("\\\\");
 		else if(c == ':')
-			out += "\\c";
+			out += QLatin1String("\\c");
 		else if(c == ',')
-			out += "\\o";
+			out += QLatin1String("\\o");
 		else if(c == '\n')
-			out += "\\n";
+			out += QLatin1String("\\n");
 		else
 			out += c;
 	}
@@ -827,7 +827,7 @@ static QString escape_stringlist(const QStringList &in)
 	QStringList list;
 	for(int n = 0; n < in.count(); ++n)
 		list += escape_string(in[n]);
-	return list.join(":");
+	return list.join(QStringLiteral(":"));
 }
 
 static bool unescape_stringlist(const QString &in, QStringList *_out)
@@ -856,7 +856,7 @@ static bool unescape_stringlist(const QString &in, QStringList *_out)
 static QString entry_serialize(const QString &storeId, const QString &storeName, const QString &entryId, const QString &entryName, const QString &entryType, const QString &data)
 {
 	QStringList out;
-	out += "qca_def";
+	out += QStringLiteral("qca_def");
 	out += storeId;
 	out += storeName;
 	out += entryId;
@@ -873,7 +873,7 @@ static bool entry_deserialize(const QString &in, QString *storeId, QString *stor
 		return false;
 	if(list.count() != 7)
 		return false;
-	if(list[0] != "qca_def")
+	if(list[0] != QLatin1String("qca_def"))
 		return false;
 	*storeId   = list[1];
 	*storeName = list[2];
@@ -959,12 +959,12 @@ public:
 
 			if(_type == KeyStoreEntry::TypeCertificate)
 			{
-				typestr = "cert";
+				typestr = QStringLiteral("cert");
 				datastr = Base64().arrayToString(_cert.toDER());
 			}
 			else
 			{
-				typestr = "crl";
+				typestr = QStringLiteral("crl");
 				datastr = Base64().arrayToString(_crl.toDER());
 			}
 
@@ -983,14 +983,14 @@ public:
 			QByteArray data = Base64().stringToArray(datastr).toByteArray();
 			DefaultKeyStoreEntry *c;
 
-			if(typestr == "cert")
+			if(typestr == QLatin1String("cert"))
 			{
 				Certificate cert = Certificate::fromDER(data);
 				if(cert.isNull())
 					return nullptr;
 				c = new DefaultKeyStoreEntry(cert, storeId, storeName, provider);
 			}
-			else if(typestr == "crl")
+			else if(typestr == QLatin1String("crl"))
 			{
 				CRL crl = CRL::fromDER(data);
 				if(crl.isNull())
@@ -1092,12 +1092,12 @@ public:
 
 	QString storeId(int) const override
 	{
-		return "qca-default-systemstore";
+		return QStringLiteral("qca-default-systemstore");
 	}
 
 	QString name(int) const override
 	{
-		return "System Trusted Certificates";
+		return QStringLiteral("System Trusted Certificates");
 	}
 
 	QList<KeyStoreEntry::Type> entryTypes(int) const override
@@ -1210,28 +1210,28 @@ public:
 
 	QString name() const override
 	{
-		return "default";
+		return QStringLiteral("default");
 	}
 
 	QStringList features() const override
 	{
 		QStringList list;
-		list += "random";
-		list += "md5";
-		list += "sha1";
-		list += "keystorelist";
+		list += QStringLiteral("random");
+		list += QStringLiteral("md5");
+		list += QStringLiteral("sha1");
+		list += QStringLiteral("keystorelist");
 		return list;
 	}
 
 	Provider::Context *createContext(const QString &type) override
 	{
-		if(type == "random")
+		if(type == QLatin1String("random"))
 			return new DefaultRandomContext(this);
-		else if(type == "md5")
+		else if(type == QLatin1String("md5"))
 			return new DefaultMD5Context(this);
-		else if(type == "sha1")
+		else if(type == QLatin1String("sha1"))
 			return new DefaultSHA1Context(this);
-		else if(type == "keystorelist")
+		else if(type == QLatin1String("keystorelist"))
 			return new DefaultKeyStoreList(this, &shared);
 		else
 			return nullptr;
@@ -1240,20 +1240,20 @@ public:
 	QVariantMap defaultConfig() const override
 	{
 		QVariantMap config;
-		config["formtype"] = "http://affinix.com/qca/forms/default#1.0";
-		config["use_system"] = true;
-		config["roots_file"] = QString();
-		config["skip_plugins"] = QString();
-		config["plugin_priorities"] = QString();
+		config[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/default#1.0";
+		config[QStringLiteral("use_system")] = true;
+		config[QStringLiteral("roots_file")] = QString();
+		config[QStringLiteral("skip_plugins")] = QString();
+		config[QStringLiteral("plugin_priorities")] = QString();
 		return config;
 	}
 
 	void configChanged(const QVariantMap &config) override
 	{
-		bool use_system = config["use_system"].toBool();
-		QString roots_file = config["roots_file"].toString();
-		QString skip_plugins_str = config["skip_plugins"].toString();
-		QString plugin_priorities_str = config["plugin_priorities"].toString();
+		bool use_system = config[QStringLiteral("use_system")].toBool();
+		QString roots_file = config[QStringLiteral("roots_file")].toString();
+		QString skip_plugins_str = config[QStringLiteral("skip_plugins")].toString();
+		QString plugin_priorities_str = config[QStringLiteral("plugin_priorities")].toString();
 
 		QStringList tmp;
 

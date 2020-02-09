@@ -49,7 +49,7 @@ static void mergeList(QStringList *a, const QStringList &b)
 static QStringList get_hash_types(Provider *p)
 {
 	QStringList out;
-	InfoContext *c = static_cast<InfoContext *>(getContext("info", p));
+	InfoContext *c = static_cast<InfoContext *>(getContext(QStringLiteral("info"), p));
 	if(!c)
 		return out;
 	out = c->supportedHashTypes();
@@ -60,7 +60,7 @@ static QStringList get_hash_types(Provider *p)
 static QStringList get_cipher_types(Provider *p)
 {
 	QStringList out;
-	InfoContext *c = static_cast<InfoContext *>(getContext("info", p));
+	InfoContext *c = static_cast<InfoContext *>(getContext(QStringLiteral("info"), p));
 	if(!c)
 		return out;
 	out = c->supportedCipherTypes();
@@ -71,7 +71,7 @@ static QStringList get_cipher_types(Provider *p)
 static QStringList get_mac_types(Provider *p)
 {
 	QStringList out;
-	InfoContext *c = static_cast<InfoContext *>(getContext("info", p));
+	InfoContext *c = static_cast<InfoContext *>(getContext(QStringLiteral("info"), p));
 	if(!c)
 		return out;
 	out = c->supportedMACTypes();
@@ -116,7 +116,7 @@ static QStringList supportedMACTypes(const QString &provider)
 // Random
 //----------------------------------------------------------------------------
 Random::Random(const QString &provider)
-:Algorithm("random", provider)
+:Algorithm(QStringLiteral("random"), provider)
 {
 }
 
@@ -407,25 +407,25 @@ QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding
 	QString mode;
 	switch(modeType) {
 	case CBC:
-		mode = "cbc";
+		mode = QStringLiteral("cbc");
 		break;
 	case CFB:
-		mode = "cfb";
+		mode = QStringLiteral("cfb");
 		break;
 	case OFB:
-		mode = "ofb";
+		mode = QStringLiteral("ofb");
 		break;
 	case ECB:
-		mode = "ecb";
+		mode = QStringLiteral("ecb");
 		break;
 	case CTR:
-		mode = "ctr";
+		mode = QStringLiteral("ctr");
 		break;
 	case GCM:
-		mode = "gcm";
+		mode = QStringLiteral("gcm");
 		break;
 	case CCM:
-		mode = "ccm";
+		mode = QStringLiteral("ccm");
 		break;
 	default:
 		Q_ASSERT(0);
@@ -443,13 +443,13 @@ QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding
 
 	QString pad;
 	if(paddingType == NoPadding)
-		pad = "";
+		pad = QLatin1String("");
 	else
-		pad = "pkcs7";
+		pad = QStringLiteral("pkcs7");
 
 	QString result = cipherType + '-' + mode;
 	if(!pad.isEmpty())
-		result += QString("-") + pad;
+		result += QStringLiteral("-") + pad;
 
 	return result;
 }

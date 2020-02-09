@@ -61,41 +61,41 @@ static QString validityToString(QCA::Validity v)
 	switch(v)
 	{
 		case QCA::ValidityGood:
-			s = "Validated";
+			s = QStringLiteral("Validated");
 			break;
 		case QCA::ErrorRejected:
-			s = "Root CA is marked to reject the specified purpose";
+			s = QStringLiteral("Root CA is marked to reject the specified purpose");
 			break;
 		case QCA::ErrorUntrusted:
-			s = "Certificate not trusted for the required purpose";
+			s = QStringLiteral("Certificate not trusted for the required purpose");
 			break;
 		case QCA::ErrorSignatureFailed:
-			s = "Invalid signature";
+			s = QStringLiteral("Invalid signature");
 			break;
 		case QCA::ErrorInvalidCA:
-			s = "Invalid CA certificate";
+			s = QStringLiteral("Invalid CA certificate");
 			break;
 		case QCA::ErrorInvalidPurpose:
-			s = "Invalid certificate purpose";
+			s = QStringLiteral("Invalid certificate purpose");
 			break;
 		case QCA::ErrorSelfSigned:
-			s = "Certificate is self-signed";
+			s = QStringLiteral("Certificate is self-signed");
 			break;
 		case QCA::ErrorRevoked:
-			s = "Certificate has been revoked";
+			s = QStringLiteral("Certificate has been revoked");
 			break;
 		case QCA::ErrorPathLengthExceeded:
-			s = "Maximum certificate chain length exceeded";
+			s = QStringLiteral("Maximum certificate chain length exceeded");
 			break;
 		case QCA::ErrorExpired:
-			s = "Certificate has expired";
+			s = QStringLiteral("Certificate has expired");
 			break;
 		case QCA::ErrorExpiredCA:
-			s = "CA has expired";
+			s = QStringLiteral("CA has expired");
 			break;
 		case QCA::ErrorValidityUnknown:
 		default:
-			s = "General certificate validation error";
+			s = QStringLiteral("General certificate validation error");
 			break;
 	}
 	return s;
@@ -221,16 +221,16 @@ private Q_SLOTS:
 				showCertInfo(cert);
 		}
 
-		QString str = "Peer Identity: ";
+		QString str = QStringLiteral("Peer Identity: ");
 		if(r == QCA::TLS::Valid)
-			str += "Valid";
+			str += QStringLiteral("Valid");
 		else if(r == QCA::TLS::HostMismatch)
-			str += "Error: Wrong certificate";
+			str += QStringLiteral("Error: Wrong certificate");
 		else if(r == QCA::TLS::InvalidCertificate)
-			str += "Error: Invalid certificate.\n -> Reason: " +
+			str += QStringLiteral("Error: Invalid certificate.\n -> Reason: ") +
 				validityToString(ssl->peerCertificateValidity());
 		else
-			str += "Error: No certificate";
+			str += QStringLiteral("Error: No certificate");
 		printf("%s\n", qPrintable(str));
 
 		ssl->continueAfterStep();
@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 	QCA::Initializer init;
 
 	QCoreApplication app(argc, argv);
-	QString host = argc > 1 ? argv[1] : "andbit.net";
+	QString host = argc > 1 ? argv[1] : QStringLiteral("andbit.net");
 
 	if(!QCA::isSupported("tls"))
 	{

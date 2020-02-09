@@ -164,19 +164,19 @@ void PgpUnitTest::testKeyRing()
     // activate the KeyStoreManager
     QCA::KeyStoreManager::start();
 
-    if ( QCA::isSupported( QStringList( QString( "keystorelist" ) ),
-                            QString( "qca-gnupg" ) ) )
+    if ( QCA::isSupported( QStringList( QStringLiteral( "keystorelist" ) ),
+                            QStringLiteral( "qca-gnupg" ) ) )
     {
         QCA::KeyStoreManager keyManager(this);
 	keyManager.waitForBusyFinished();
 	QStringList storeIds = keyManager.keyStores();
-	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+	QVERIFY( storeIds.contains( QStringLiteral("qca-gnupg") ) );
 
-        QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+        QCA::KeyStore pgpStore( QStringLiteral("qca-gnupg"), &keyManager );
         QVERIFY( pgpStore.isValid() );
-        QCOMPARE( pgpStore.name(), QString( "GnuPG Keyring" ) );
+        QCOMPARE( pgpStore.name(), QStringLiteral( "GnuPG Keyring" ) );
         QCOMPARE( pgpStore.type(), QCA::KeyStore::PGPKeyring );
-        QCOMPARE( pgpStore.id(), QString( "qca-gnupg" ) );
+        QCOMPARE( pgpStore.id(), QStringLiteral( "qca-gnupg" ) );
         QCOMPARE( pgpStore.isReadOnly(), false );
         QCOMPARE( pgpStore.holdsTrustedCertificates(), false );
         QCOMPARE( pgpStore.holdsIdentities(), true );
@@ -198,12 +198,12 @@ void PgpUnitTest::testKeyRing()
             // We accumulate the names, and check them next
             nameList << key.name();
         }
-        QVERIFY( nameList.contains( "Steven Bakker <steven.bakker@ams-ix.net>" ) );
-        QVERIFY( nameList.contains( "Romeo Zwart <rz@ams-ix.net>" ) );
-        QVERIFY( nameList.contains( "Arien Vijn <arien.vijn@ams-ix.net>" ) );
-        QVERIFY( nameList.contains( "Niels Bakker <niels.bakker@ams-ix.net>" ) );
-        QVERIFY( nameList.contains( "Henk Steenman <Henk.Steenman@ams-ix.net>" ) );
-        QVERIFY( nameList.contains( "Geert Nijpels <geert.nijpels@ams-ix.net>" ) );
+        QVERIFY( nameList.contains( QStringLiteral("Steven Bakker <steven.bakker@ams-ix.net>") ) );
+        QVERIFY( nameList.contains( QStringLiteral("Romeo Zwart <rz@ams-ix.net>") ) );
+        QVERIFY( nameList.contains( QStringLiteral("Arien Vijn <arien.vijn@ams-ix.net>") ) );
+        QVERIFY( nameList.contains( QStringLiteral("Niels Bakker <niels.bakker@ams-ix.net>") ) );
+        QVERIFY( nameList.contains( QStringLiteral("Henk Steenman <Henk.Steenman@ams-ix.net>") ) );
+        QVERIFY( nameList.contains( QStringLiteral("Geert Nijpels <geert.nijpels@ams-ix.net>") ) );
 
         // TODO: We should test removeEntry() and writeEntry() here.
     }
@@ -219,15 +219,15 @@ void PgpUnitTest::testKeyRing()
 
     QCA::KeyStoreManager::start();
 
-    if ( QCA::isSupported( QStringList( QString( "keystorelist" ) ),
-                            QString( "qca-gnupg" ) ) )
+    if ( QCA::isSupported( QStringList( QStringLiteral( "keystorelist" ) ),
+                            QStringLiteral( "qca-gnupg" ) ) )
     {
         QCA::KeyStoreManager keyManager(this);
 	keyManager.waitForBusyFinished();
 	QStringList storeIds = keyManager.keyStores();
-	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+	QVERIFY( storeIds.contains( QStringLiteral("qca-gnupg") ) );
 
-        QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+        QCA::KeyStore pgpStore( QStringLiteral("qca-gnupg"), &keyManager );
 
         QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
         QCOMPARE( keylist.count(), 0 );
@@ -264,13 +264,13 @@ void PgpUnitTest::testMessageSign()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if ( QCA::isSupported( QStringList( QString( "openpgp" ) ), QString( "qca-gnupg" ) ) ||
-	 QCA::isSupported( QStringList( QString( "keystorelist" ) ), QString( "qca-gnupg" ) ) ) {
+    if ( QCA::isSupported( QStringList( QStringLiteral( "openpgp" ) ), QStringLiteral( "qca-gnupg" ) ) ||
+	 QCA::isSupported( QStringList( QStringLiteral( "keystorelist" ) ), QStringLiteral( "qca-gnupg" ) ) ) {
 
         QStringList storeIds = keyManager.keyStores();
-	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+	QVERIFY( storeIds.contains( QStringLiteral("qca-gnupg") ) );
     
-	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+	QCA::KeyStore pgpStore( QStringLiteral("qca-gnupg"), &keyManager );
 	QVERIFY( pgpStore.isValid() );
 
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
@@ -278,9 +278,9 @@ void PgpUnitTest::testMessageSign()
 
 	const QCA::KeyStoreEntry &myPGPKey = keylist.at(0);
 	QCOMPARE( myPGPKey.isNull(), false );
-	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
+	QCOMPARE( myPGPKey.name(), QStringLiteral("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
 	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );
-	QCOMPARE( myPGPKey.id(), QString("9E946237DAFCCFF4") );
+	QCOMPARE( myPGPKey.id(), QStringLiteral("9E946237DAFCCFF4") );
 	QVERIFY( myPGPKey.keyBundle().isNull() );
 	QVERIFY( myPGPKey.certificate().isNull() );
 	QVERIFY( myPGPKey.crl().isNull() );
@@ -394,13 +394,13 @@ void PgpUnitTest::testClearsign()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if ( QCA::isSupported( QStringList( QString( "openpgp" ) ), QString( "qca-gnupg" ) ) ||
-	 QCA::isSupported( QStringList( QString( "keystorelist" ) ), QString( "qca-gnupg" ) ) ) {
+    if ( QCA::isSupported( QStringList( QStringLiteral( "openpgp" ) ), QStringLiteral( "qca-gnupg" ) ) ||
+	 QCA::isSupported( QStringList( QStringLiteral( "keystorelist" ) ), QStringLiteral( "qca-gnupg" ) ) ) {
 
         QStringList storeIds = keyManager.keyStores();
-	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+	QVERIFY( storeIds.contains( QStringLiteral("qca-gnupg") ) );
     
-	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+	QCA::KeyStore pgpStore( QStringLiteral("qca-gnupg"), &keyManager );
 	QVERIFY( pgpStore.isValid() );
 
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
@@ -408,9 +408,9 @@ void PgpUnitTest::testClearsign()
 
 	const QCA::KeyStoreEntry &myPGPKey = keylist.at(0);
 	QCOMPARE( myPGPKey.isNull(), false );
-	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
+	QCOMPARE( myPGPKey.name(), QStringLiteral("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
 	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );
-	QCOMPARE( myPGPKey.id(), QString("9E946237DAFCCFF4") );
+	QCOMPARE( myPGPKey.id(), QStringLiteral("9E946237DAFCCFF4") );
 	QVERIFY( myPGPKey.keyBundle().isNull() );
 	QVERIFY( myPGPKey.certificate().isNull() );
 	QVERIFY( myPGPKey.crl().isNull() );
@@ -506,13 +506,13 @@ void PgpUnitTest::testDetachedSign()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if ( QCA::isSupported( QStringList( QString( "openpgp" ) ), QString( "qca-gnupg" ) ) ||
-	 QCA::isSupported( QStringList( QString( "keystorelist" ) ), QString( "qca-gnupg" ) ) ) {
+    if ( QCA::isSupported( QStringList( QStringLiteral( "openpgp" ) ), QStringLiteral( "qca-gnupg" ) ) ||
+	 QCA::isSupported( QStringList( QStringLiteral( "keystorelist" ) ), QStringLiteral( "qca-gnupg" ) ) ) {
 
         QStringList storeIds = keyManager.keyStores();
-	QVERIFY( storeIds.contains( "qca-gnupg" ) );
+	QVERIFY( storeIds.contains( QStringLiteral("qca-gnupg") ) );
     
-	QCA::KeyStore pgpStore( QString("qca-gnupg"), &keyManager );
+	QCA::KeyStore pgpStore( QStringLiteral("qca-gnupg"), &keyManager );
 	QVERIFY( pgpStore.isValid() );
 
 	QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
@@ -520,9 +520,9 @@ void PgpUnitTest::testDetachedSign()
 
 	const QCA::KeyStoreEntry &myPGPKey = keylist.at(0);
 	QCOMPARE( myPGPKey.isNull(), false );
-	QCOMPARE( myPGPKey.name(), QString("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
+	QCOMPARE( myPGPKey.name(), QStringLiteral("Qca Test Key (This key is only for QCA unit tests) <qca@example.com>") );
 	QCOMPARE( myPGPKey.type(),  QCA::KeyStoreEntry::TypePGPSecretKey );
-	QCOMPARE( myPGPKey.id(), QString("9E946237DAFCCFF4") );
+	QCOMPARE( myPGPKey.id(), QStringLiteral("9E946237DAFCCFF4") );
 	QVERIFY( myPGPKey.keyBundle().isNull() );
 	QVERIFY( myPGPKey.certificate().isNull() );
 	QVERIFY( myPGPKey.crl().isNull() );
@@ -625,28 +625,28 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
 	QCA::KeyStoreManager keyManager(this);
 	keyManager.waitForBusyFinished();
 
-	if (QCA::isSupported(QStringList(QString("openpgp")), QString("qca-gnupg")) ||
-	    QCA::isSupported(QStringList(QString("keystorelist")), QString( "qca-gnupg"))) {
+	if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg")) ||
+	    QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral( "qca-gnupg"))) {
 
 		QStringList storeIds = keyManager.keyStores();
-		QVERIFY(storeIds.contains("qca-gnupg"));
+		QVERIFY(storeIds.contains(QStringLiteral("qca-gnupg")));
 
-		QCA::KeyStore pgpStore(QString("qca-gnupg"), &keyManager);
+		QCA::KeyStore pgpStore(QStringLiteral("qca-gnupg"), &keyManager);
 		QVERIFY(pgpStore.isValid());
 
 		QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
 
 		QCA::KeyStoreEntry validKey;
 		foreach(const QCA::KeyStoreEntry key, keylist) {
-			if (key.id() == "DD773CA7E4E22769") {
+			if (key.id() == QLatin1String("DD773CA7E4E22769")) {
 				validKey = key;
 			}
 		}
 
 		QCOMPARE(validKey.isNull(), false);
-		QCOMPARE(validKey.name(), QString("QCA Test Key (Unit test key for expired subkeys) <qca@example.com>"));
+		QCOMPARE(validKey.name(), QStringLiteral("QCA Test Key (Unit test key for expired subkeys) <qca@example.com>"));
 		QCOMPARE(validKey.type(), QCA::KeyStoreEntry::TypePGPSecretKey);
-		QCOMPARE(validKey.id(), QString("DD773CA7E4E22769"));
+		QCOMPARE(validKey.id(), QStringLiteral("DD773CA7E4E22769"));
 		QCOMPARE(validKey.pgpSecretKey().isNull(), false);
 		QCOMPARE(validKey.pgpPublicKey().isNull(), false);
 
@@ -796,13 +796,13 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
 	QCA::KeyStoreManager keyManager(this);
 	keyManager.waitForBusyFinished();
 
-	if (QCA::isSupported(QStringList(QString("openpgp")), QString("qca-gnupg")) ||
-	    QCA::isSupported(QStringList(QString("keystorelist")), QString("qca-gnupg"))) {
+	if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg")) ||
+	    QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
 
 		QStringList storeIds = keyManager.keyStores();
-		QVERIFY(storeIds.contains("qca-gnupg"));
+		QVERIFY(storeIds.contains(QStringLiteral("qca-gnupg")));
 
-		QCA::KeyStore pgpStore(QString("qca-gnupg"), &keyManager);
+		QCA::KeyStore pgpStore(QStringLiteral("qca-gnupg"), &keyManager);
 		QVERIFY(pgpStore.isValid());
 
 		QList<QCA::KeyStoreEntry> keylist = pgpStore.entryList();
@@ -811,33 +811,33 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
 		QCA::KeyStoreEntry expiredKey;
 		QCA::KeyStoreEntry revokedKey;
 		foreach(const QCA::KeyStoreEntry key, keylist) {
-			if (key.id() == "FEF97E4C4C870810") {
+			if (key.id() == QLatin1String("FEF97E4C4C870810")) {
 				validKey = key;
-			} else if (key.id() == "DD773CA7E4E22769") {
+			} else if (key.id() == QLatin1String("DD773CA7E4E22769")) {
 				expiredKey = key;
-			} else if (key.id() == "1D6A028CC4F444A9") {
+			} else if (key.id() == QLatin1String("1D6A028CC4F444A9")) {
 				revokedKey = key;
 			}
 		}
 
 		QCOMPARE(validKey.isNull(), false);
-		QCOMPARE(validKey.name(), QString("QCA Test Key 2 (Non-expired encryption key with expired encryption subkey) <qca@example.com>"));
+		QCOMPARE(validKey.name(), QStringLiteral("QCA Test Key 2 (Non-expired encryption key with expired encryption subkey) <qca@example.com>"));
 		QCOMPARE(validKey.type(), QCA::KeyStoreEntry::TypePGPSecretKey);
-		QCOMPARE(validKey.id(), QString("FEF97E4C4C870810"));
+		QCOMPARE(validKey.id(), QStringLiteral("FEF97E4C4C870810"));
 		QCOMPARE(validKey.pgpSecretKey().isNull(), false);
 		QCOMPARE(validKey.pgpPublicKey().isNull(), false);
 
 		QCOMPARE(expiredKey.isNull(), false);
-		QCOMPARE(expiredKey.name(), QString("QCA Test Key (Unit test key for expired subkeys) <qca@example.com>"));
+		QCOMPARE(expiredKey.name(), QStringLiteral("QCA Test Key (Unit test key for expired subkeys) <qca@example.com>"));
 		QCOMPARE(expiredKey.type(), QCA::KeyStoreEntry::TypePGPSecretKey);
-		QCOMPARE(expiredKey.id(), QString("DD773CA7E4E22769"));
+		QCOMPARE(expiredKey.id(), QStringLiteral("DD773CA7E4E22769"));
 		QCOMPARE(expiredKey.pgpSecretKey().isNull(), false);
 		QCOMPARE(expiredKey.pgpPublicKey().isNull(), false);
 
 		QCOMPARE(revokedKey.isNull(), false);
-		QCOMPARE(revokedKey.name(), QString("QCA Test Key (Revoked unit test key) <qca@example.com>"));
+		QCOMPARE(revokedKey.name(), QStringLiteral("QCA Test Key (Revoked unit test key) <qca@example.com>"));
 		QCOMPARE(revokedKey.type(), QCA::KeyStoreEntry::TypePGPSecretKey);
-		QCOMPARE(revokedKey.id(), QString("1D6A028CC4F444A9"));
+		QCOMPARE(revokedKey.id(), QStringLiteral("1D6A028CC4F444A9"));
 		QCOMPARE(revokedKey.pgpSecretKey().isNull(), false);
 		QCOMPARE(revokedKey.pgpPublicKey().isNull(), false);
 

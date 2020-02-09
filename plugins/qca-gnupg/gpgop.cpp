@@ -179,30 +179,30 @@ void GpgOp::Private::act_finished()
 	output = act->output;
 
 	QMap<int, QString> errmap;
-	errmap[GpgOp::ErrorProcess] = "ErrorProcess";
-	errmap[GpgOp::ErrorPassphrase] = "ErrorPassphrase";
-	errmap[GpgOp::ErrorFormat] = "ErrorFormat";
-	errmap[GpgOp::ErrorSignerExpired] = "ErrorSignerExpired";
-	errmap[GpgOp::ErrorEncryptExpired] = "ErrorEncryptExpired";
-	errmap[GpgOp::ErrorEncryptUntrusted] = "ErrorEncryptUntrusted";
-	errmap[GpgOp::ErrorEncryptInvalid] = "ErrorEncryptInvalid";
-	errmap[GpgOp::ErrorDecryptNoKey] = "ErrorDecryptNoKey";
-	errmap[GpgOp::ErrorUnknown] = "ErrorUnknown";
+	errmap[GpgOp::ErrorProcess] = QStringLiteral("ErrorProcess");
+	errmap[GpgOp::ErrorPassphrase] = QStringLiteral("ErrorPassphrase");
+	errmap[GpgOp::ErrorFormat] = QStringLiteral("ErrorFormat");
+	errmap[GpgOp::ErrorSignerExpired] = QStringLiteral("ErrorSignerExpired");
+	errmap[GpgOp::ErrorEncryptExpired] = QStringLiteral("ErrorEncryptExpired");
+	errmap[GpgOp::ErrorEncryptUntrusted] = QStringLiteral("ErrorEncryptUntrusted");
+	errmap[GpgOp::ErrorEncryptInvalid] = QStringLiteral("ErrorEncryptInvalid");
+	errmap[GpgOp::ErrorDecryptNoKey] = QStringLiteral("ErrorDecryptNoKey");
+	errmap[GpgOp::ErrorUnknown] = QStringLiteral("ErrorUnknown");
 	if(output.success)
-		diagnosticText += "GpgAction success\n";
+		diagnosticText += QStringLiteral("GpgAction success\n");
 	else
-		diagnosticText += QString("GpgAction error: %1\n").arg(errmap[output.errorCode]);
+		diagnosticText += QStringLiteral("GpgAction error: %1\n").arg(errmap[output.errorCode]);
 
 	if(output.wasSigned)
 	{
-		QString s;
+		const char *s;
 		if(output.verifyResult == GpgOp::VerifyGood)
 			s = "VerifyGood";
 		else if(output.verifyResult == GpgOp::VerifyBad)
 			s = "VerifyBad";
 		else
 			s = "VerifyNoKey";
-		diagnosticText += QString("wasSigned: verifyResult: %1\n").arg(s);
+		diagnosticText += QStringLiteral("wasSigned: verifyResult: %1\n").arg(s);
 	}
 
 	//printf("diagnosticText:\n%s", qPrintable(diagnosticText));

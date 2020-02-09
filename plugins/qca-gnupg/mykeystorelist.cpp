@@ -58,7 +58,7 @@ Provider::Context *MyKeyStoreList::clone() const
 
 QString MyKeyStoreList::name(int) const
 {
-	return "GnuPG Keyring";
+	return QStringLiteral("GnuPG Keyring");
 }
 
 KeyStore::Type MyKeyStoreList::type(int) const
@@ -68,7 +68,7 @@ KeyStore::Type MyKeyStoreList::type(int) const
 
 QString MyKeyStoreList::storeId(int) const
 {
-	return "qca-gnupg";
+	return QStringLiteral("qca-gnupg");
 }
 
 QList<int> MyKeyStoreList::keyStores()
@@ -157,7 +157,7 @@ KeyStoreEntryContext *MyKeyStoreList::entryPassive(const QString &serialized)
 	QStringList parts = serialized.split(':');
 	if(parts.count() < 2)
 		return nullptr;
-	if(unescape_string(parts[0]) != "qca-gnupg-1")
+	if(unescape_string(parts[0]) != QLatin1String("qca-gnupg-1"))
 		return nullptr;
 
 	QString entryId = unescape_string(parts[1]);
@@ -453,7 +453,7 @@ void MyKeyStoreList::gpg_finished()
 
 void MyKeyStoreList::ring_changed(const QString &filePath)
 {
-	ext_keyStoreLog(QString("ring_changed: [%1]\n").arg(filePath));
+	ext_keyStoreLog(QStringLiteral("ring_changed: [%1]\n").arg(filePath));
 
 	if(filePath == secring)
 		sec_changed();
