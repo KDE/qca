@@ -41,35 +41,7 @@
 #include <openssl/pkcs12.h>
 #include <openssl/ssl.h>
 
-#include "ossl110-compat.h"
-
-#ifndef OSSL_097
-// comment this out if you'd rather use openssl 0.9.6
-#define OSSL_097
-#endif
-
-#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10000000L
-// OpenSSL 1.0.0 makes a few changes that aren't very C++ friendly...
-// Among other things, CHECKED_PTR_OF returns a void*, but is used in
-// contexts requiring STACK pointers.
-#undef CHECKED_PTR_OF
-#define CHECKED_PTR_OF(type, p) \
-	((_STACK*) (1 ? p : (type*)0))
-#endif
-
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-    #define OSSL_110
-#endif
-
-// OpenSSL 1.1.0 compatibility macros
-#ifdef OSSL_110
-#define M_ASN1_IA5STRING_new() ASN1_IA5STRING_new()
-#define RSA_F_RSA_EAY_PRIVATE_DECRYPT RSA_F_RSA_OSSL_PRIVATE_DECRYPT
-#endif
-
-#ifdef OSSL_110
 #include <openssl/kdf.h>
-#endif
 
 using namespace QCA;
 
@@ -425,7 +397,7 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	{
 		QByteArray buf = val.toLatin1();
 
-		ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
+		ASN1_IA5STRING *str = ASN1_IA5STRING_new();
 		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
 		name = GENERAL_NAME_new();
@@ -437,7 +409,7 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	{
 		QByteArray buf = val.toLatin1();
 
-		ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
+		ASN1_IA5STRING *str = ASN1_IA5STRING_new();
 		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
 		name = GENERAL_NAME_new();
@@ -449,7 +421,7 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	{
 		QByteArray buf = val.toLatin1();
 
-		ASN1_IA5STRING *str = M_ASN1_IA5STRING_new();
+		ASN1_IA5STRING *str = ASN1_IA5STRING_new();
 		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
 
 		name = GENERAL_NAME_new();
@@ -1283,7 +1255,6 @@ public:
 protected:
 };
 
-#ifdef OSSL_110
 class opensslHkdfContext : public HKDFContext
 {
     Q_OBJECT
@@ -1313,7 +1284,6 @@ public:
 		return out;
 	}
 };
-#endif
 
 class opensslHMACContext : public MACContext
 {
@@ -1323,9 +1293,6 @@ public:
 	{
 		m_algorithm = algorithm;
 		m_context = HMAC_CTX_new();
-#ifndef OSSL_110
-		HMAC_CTX_init( m_context );
-#endif
 	}
 
 	opensslHMACContext(const opensslHMACContext &other)
@@ -1360,11 +1327,7 @@ public:
 	{
 		SecureArray sa( EVP_MD_size( m_algorithm ), 0 );
 		HMAC_Final(m_context, (unsigned char *)sa.data(), 0 );
-#ifdef OSSL_110
 		HMAC_CTX_reset(m_context);
-#else
-		HMAC_CTX_cleanup(m_context);
-#endif
 		*out = sa;
 	}
 
@@ -2009,12 +1972,7 @@ public:
 
 		// put the DER public key back into openssl
 		evp.reset();
-		RSA *rsa;
-#ifdef OSSL_097
-		rsa = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, result.size());
-#else
-		rsa = d2i_RSAPublicKey(NULL, (unsigned char **)&p, result.size());
-#endif
+		RSA *rsa = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, result.size());
 		evp.pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_RSA(evp.pkey, rsa);
 		sec = false;
@@ -2406,12 +2364,7 @@ public:
 
 		// put the DER public key back into openssl
 		evp.reset();
-		DSA *dsa;
-#ifdef OSSL_097
-		dsa = d2i_DSAPublicKey(NULL, (const unsigned char **)&p, result.size());
-#else
-		dsa = d2i_DSAPublicKey(NULL, (unsigned char **)&p, result.size());
-#endif
+		DSA *dsa = d2i_DSAPublicKey(NULL, (const unsigned char **)&p, result.size());
 		evp.pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DSA(evp.pkey, dsa);
 		sec = false;
@@ -2833,9 +2786,6 @@ public:
 	{
 		key = _key;
 		RSA_set_method(rsa, rsa_method());
-#ifndef OSSL_110
-		rsa->flags |= RSA_FLAG_SIGN_VER;
-#endif
 		RSA_set_app_data(rsa, this);
 		BIGNUM *bnn = bi2bn(_key.n());
 		BIGNUM *bne = bi2bn(_key.e());
@@ -2852,11 +2802,7 @@ public:
 			ops = RSA_meth_dup(RSA_get_default_method());
 			RSA_meth_set_priv_enc(ops, NULL); //pkcs11_rsa_encrypt
 			RSA_meth_set_priv_dec(ops, rsa_priv_dec); //pkcs11_rsa_encrypt
-#ifdef OSSL_110
 			RSA_meth_set_sign(ops, NULL);
-#else
-			RSA_meth_set_sign(ops, rsa_sign);
-#endif
 			RSA_meth_set_verify(ops, NULL); //pkcs11_rsa_verify
 			RSA_meth_set_finish(ops, rsa_finish);
 		}
@@ -2877,7 +2823,7 @@ public:
 		}
 		else
 		{
-			RSAerr(RSA_F_RSA_EAY_PRIVATE_DECRYPT, RSA_R_UNKNOWN_PADDING_TYPE);
+			RSAerr(RSA_F_RSA_OSSL_PRIVATE_DECRYPT, RSA_R_UNKNOWN_PADDING_TYPE);
 			return -1;
 		}
 
@@ -2897,98 +2843,6 @@ public:
 		// XXX: An error should be set in this case too.
 		return -1;
 	}
-
-#ifndef OSSL_110
-	static int rsa_sign(int type, const unsigned char *m, unsigned int m_len, unsigned char *sigret, unsigned int *siglen, const RSA *rsa)
-	{
-		QCA_RSA_METHOD *self = (QCA_RSA_METHOD *)RSA_get_app_data(rsa);
-
-		// TODO: this is disgusting
-
-		unsigned char *p, *tmps = NULL;
-		const unsigned char *s = NULL;
-		int i,j;
-		j = 0;
-
-		if(type == NID_md5_sha1)
-		{
-		}
-		else
-		{
-			// make X509 packet
-			X509_SIG sig;
-			ASN1_TYPE parameter;
-
-			X509_ALGOR algor;
-			ASN1_OCTET_STRING digest;
-			int rsa_size = RSA_size(rsa);
-			//int rsa_size = 128;
-			//CK_ULONG sigsize = rsa_size;
-
-			sig.algor= &algor;
-			sig.algor->algorithm=OBJ_nid2obj(type);
-			if (sig.algor->algorithm == NULL)
-			{
-				//RSAerr(RSA_F_RSA_SIGN,RSA_R_UNKNOWN_ALGORITHM_TYPE);
-				return 0;
-			}
-			if (sig.algor->algorithm->length == 0)
-			{
-				//RSAerr(RSA_F_RSA_SIGN,RSA_R_THE_ASN1_OBJECT_IDENTIFIER_IS_NOT_KNOWN_FOR_THIS_MD);
-				return 0;
-			}
-			parameter.type=V_ASN1_NULL;
-			parameter.value.ptr=NULL;
-			sig.algor->parameter= &parameter;
-
-			sig.digest= &digest;
-			sig.digest->data=(unsigned char *)m; /* TMP UGLY CAST */
-			sig.digest->length=m_len;
-
-			i=i2d_X509_SIG(&sig,NULL);
-
-			j=rsa_size;
-			if (i > (j-RSA_PKCS1_PADDING_SIZE))
-			{
-				//RSAerr(RSA_F_RSA_SIGN,RSA_R_DIGEST_TOO_BIG_FOR_RSA_KEY);
-				return 0;
-			}
-
-			tmps=(unsigned char *)OPENSSL_malloc((unsigned int)j+1);
-			if (tmps == NULL)
-			{
-				//RSAerr(RSA_F_RSA_SIGN,ERR_R_MALLOC_FAILURE);
-				return 0;
-			}
-			p=tmps;
-			i2d_X509_SIG(&sig,&p);
-			s=tmps;
-			m = s;
-			m_len = i;
-		}
-
-		SecureArray input;
-		input.resize(m_len);
-		memcpy(input.data(), m, input.size());
-		SecureArray result = self->key.signMessage(input, EMSA3_Raw);
-
-		if(tmps)
-		{
-			OPENSSL_cleanse(tmps,(unsigned int)j+1);
-			OPENSSL_free(tmps);
-		}
-
-		// TODO: even though we return error here, PKCS7_sign will
-		//   not return error.  what gives?
-		if(result.isEmpty())
-			return 0;
-
-		memcpy(sigret, result.data(), result.size());
-		*siglen = result.size();
-
-		return 1;
-	}
-#endif
 
 	static int rsa_finish(RSA *rsa)
 	{
@@ -3345,12 +3199,8 @@ public:
 				X509_up_ref(cert);
 			if(req)
 			{
-#ifdef OSSL_110
 				// Not exposed, so copy
 				req = X509_REQ_dup(req);
-#else
-				CRYPTO_add(&req->references, 1, CRYPTO_LOCK_X509_REQ);
-#endif
 			}
 			if(crl)
 				X509_CRL_up_ref(crl);
@@ -3835,10 +3685,7 @@ public:
 				p.policies = get_cert_policies(ex);
 		}
 
-#ifdef OSSL_110
-		const
-#endif
-		ASN1_BIT_STRING *signature;
+		const ASN1_BIT_STRING *signature;
 
 		X509_get0_signature(&signature, NULL, x);
 		if(signature)
@@ -5585,11 +5432,7 @@ public:
 	QByteArray result_plain;
 
 	SSL *ssl;
-#if OPENSSL_VERSION_NUMBER >= 0x00909000L
 	const SSL_METHOD *method;
-#else
-	SSL_METHOD *method;
-#endif
 	SSL_CTX *context;
 	BIO *rbio, *wbio;
 	Validity vr;
@@ -5658,11 +5501,6 @@ public:
 		OpenSSL_add_ssl_algorithms();
 		SSL_CTX *ctx = 0;
 		switch (version) {
-#if !defined(OPENSSL_NO_SSL2) && !defined(OSSL_110)
-		case TLS::SSL_v2:
-			ctx = SSL_CTX_new(SSLv2_client_method());
-			break;
-#endif
 #ifndef OPENSSL_NO_SSL3_METHOD
 		case TLS::SSL_v3:
 			ctx = SSL_CTX_new(SSLv3_client_method());
@@ -7430,9 +7268,7 @@ public:
 #endif
 		list += "pbkdf1(sha1)";
 		list += "pbkdf2(sha1)";
-#ifdef OSSL_110
 		list += "hkdf(sha256)";
-#endif
 		list += "pkey";
 		list += "dlgroup";
 		list += "rsa";
@@ -7501,10 +7337,8 @@ public:
 #endif
 		else if ( type == "pbkdf2(sha1)" )
 			return new opensslPbkdf2Context( this, type );
-#ifdef OSSL_110
 		else if ( type == "hkdf(sha256)" )
 			return new opensslHkdfContext( this, type );
-#endif
 		else if ( type == "hmac(md5)" )
 			return new opensslHMACContext( EVP_md5(), this, type );
 		else if ( type == "hmac(sha1)" )
