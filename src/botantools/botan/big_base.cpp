@@ -94,6 +94,8 @@ BigInt::BigInt(const BigInt& b)
       }
    }
 
+BigInt &BigInt::operator=(const BigInt&) = default;
+
 /*************************************************
 * Construct a BigInt from a string               *
 *************************************************/

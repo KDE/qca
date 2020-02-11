@@ -150,6 +150,7 @@ class BigInt // clazy:exclude=rule-of-three TODO Needs checking if a real bug or
 #ifndef BOTAN_MINIMAL_BIGINT
       BigInt(NumberType, u32bit);
 #endif
+      BigInt &operator=(const BigInt&);
    private:
       void grow_to(u32bit) const;
       SecureVector<word> reg;
