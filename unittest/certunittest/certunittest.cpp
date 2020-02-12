@@ -257,15 +257,15 @@ void CertUnitTest::checkExpiredClientCerts()
 
 	    QCA::CertificateInfo subject1 = client1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QCOMPARE( subject1.values(QCA::Country).contains("de") == true, true );
-	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
-	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure User Test Cert") == true, true );
+	    QCOMPARE( subject1.values(QCA::Country).contains("de") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure User Test Cert") == true, true ); //clazy:exclude=container-anti-pattern
 
 	    QCA::CertificateInfo issuer1 = client1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QCOMPARE( issuer1.values(QCA::Country).contains("de") == true, true );
-	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
-	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only") == true, true );
+	    QCOMPARE( issuer1.values(QCA::Country).contains("de") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only") == true, true ); //clazy:exclude=container-anti-pattern
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("889E7EF729719D7B280F361AAE6D00D39DE1AADB").toByteArray();
 	    QCOMPARE( client1.subjectKeyId(), subjectKeyID );
@@ -365,16 +365,16 @@ void CertUnitTest::checkClientCerts()
 
 	    QCA::CertificateInfo subject2 = client2.subjectInfo();
 	    QCOMPARE( subject2.isEmpty(), false );
-	    QVERIFY( subject2.values(QCA::Country).contains("US") );
-	    QVERIFY( subject2.values(QCA::Organization).contains("Qca Development and Test") );
-	    QVERIFY( subject2.values(QCA::OrganizationalUnit).contains("Certificate Generation Section") );
-	    QVERIFY( subject2.values(QCA::CommonName).contains("Qca Test Client Certificate") );
+	    QVERIFY( subject2.values(QCA::Country).contains("US") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject2.values(QCA::Organization).contains("Qca Development and Test") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject2.values(QCA::OrganizationalUnit).contains("Certificate Generation Section") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject2.values(QCA::CommonName).contains("Qca Test Client Certificate") ); //clazy:exclude=container-anti-pattern
 
 	    QCA::CertificateInfo issuer2 = client2.issuerInfo();
 	    QCOMPARE( issuer2.isEmpty(), false );
-	    QVERIFY( issuer2.values(QCA::Country).contains("AU") );
-	    QVERIFY( issuer2.values(QCA::Organization).contains("Qca Development and Test") );
-	    QVERIFY( issuer2.values(QCA::CommonName).contains("Qca Test Root Certificate") );
+	    QVERIFY( issuer2.values(QCA::Country).contains("AU") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer2.values(QCA::Organization).contains("Qca Development and Test") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer2.values(QCA::CommonName).contains("Qca Test Root Certificate") ); //clazy:exclude=container-anti-pattern
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("1e604e03127d287ba40427a961b428a2d09b50d1").toByteArray();
 	    QCOMPARE( client2.subjectKeyId(), subjectKeyID );
@@ -545,16 +545,16 @@ void CertUnitTest::altName()
 
 	    QCA::CertificateInfo subject1 = client1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QVERIFY( subject1.values(QCA::Country).contains("US") );
-	    QVERIFY( subject1.values(QCA::Organization).contains("Test Certificates") );
-	    QVERIFY( subject1.values(QCA::CommonName).contains("Valid RFC822 nameConstraints EE Certificate Test21") );
-	    QVERIFY( subject1.values(QCA::Email).contains("Test21EE@mailserver.testcertificates.gov") );
+	    QVERIFY( subject1.values(QCA::Country).contains("US") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::Organization).contains("Test Certificates") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::CommonName).contains("Valid RFC822 nameConstraints EE Certificate Test21") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::Email).contains("Test21EE@mailserver.testcertificates.gov") ); //clazy:exclude=container-anti-pattern
 
 	    QCA::CertificateInfo issuer1 = client1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QVERIFY( issuer1.values(QCA::Country).contains("US") );
-	    QVERIFY( issuer1.values(QCA::Organization).contains("Test Certificates") );
-	    QVERIFY( issuer1.values(QCA::CommonName).contains("nameConstraints RFC822 CA1") );
+	    QVERIFY( issuer1.values(QCA::Country).contains("US") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::Organization).contains("Test Certificates") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::CommonName).contains("nameConstraints RFC822 CA1") ); //clazy:exclude=container-anti-pattern
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("b4200d42cd95ea87d463d54f0ed6d10fe5b73bfb").toByteArray();
 	    QCOMPARE( client1.subjectKeyId(), subjectKeyID );
@@ -599,21 +599,21 @@ void CertUnitTest::extXMPP()
 
 	    QCA::CertificateInfo subject1 = client1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QVERIFY( subject1.values(QCA::Country).contains("US") );
-	    QVERIFY( subject1.values(QCA::Organization).contains("Jabber, Inc.") );
-	    QVERIFY( subject1.values(QCA::Locality).contains("Denver") );
-	    QVERIFY( subject1.values(QCA::State).contains("Colorado") );
-	    QVERIFY( subject1.values(QCA::CommonName).contains("demo.jabber.com") );
-	    QVERIFY( subject1.values(QCA::DNS).contains("demo.jabber.com") );
-	    QVERIFY( subject1.values(QCA::XMPP).contains("demo.jabber.com") );
+	    QVERIFY( subject1.values(QCA::Country).contains("US") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::Organization).contains("Jabber, Inc.") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::Locality).contains("Denver") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::State).contains("Colorado") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::CommonName).contains("demo.jabber.com") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::DNS).contains("demo.jabber.com") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::XMPP).contains("demo.jabber.com") ); //clazy:exclude=container-anti-pattern
 
 	    QCA::CertificateInfo issuer1 = client1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QVERIFY( issuer1.values(QCA::Country).contains("US") );
-	    QVERIFY( issuer1.values(QCA::Organization).contains("Jabber, Inc.") );
-	    QVERIFY( issuer1.values(QCA::Locality).contains("Denver") );
-	    QVERIFY( issuer1.values(QCA::State).contains("Colorado") );
-	    QVERIFY( issuer1.values(QCA::CommonName).contains("demo.jabber.com") );
+	    QVERIFY( issuer1.values(QCA::Country).contains("US") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::Organization).contains("Jabber, Inc.") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::Locality).contains("Denver") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::State).contains("Colorado") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::CommonName).contains("demo.jabber.com") ); //clazy:exclude=container-anti-pattern
 	}
     }
 }
@@ -662,19 +662,19 @@ void CertUnitTest::altNames76()
 
             QCA::CertificateInfo subject1 = client1.subjectInfo();
             QCOMPARE( subject1.isEmpty(), false );
-            QVERIFY( subject1.values(QCA::Country).contains("SE") );
-            QVERIFY( subject1.values(QCA::Organization).contains("Stockholms universitet") );
-            QVERIFY( subject1.values(QCA::CommonName).contains("sip1.su.se") );
-            QCOMPARE( subject1.values(QCA::Email).count(), 0 );
-            QCOMPARE( subject1.values(QCA::DNS).count(), 8 );
-            QVERIFY( subject1.values(QCA::DNS).contains("incomingproxy.sip.su.se") );
-            QVERIFY( subject1.values(QCA::DNS).contains("incomingproxy1.sip.su.se") );
-            QVERIFY( subject1.values(QCA::DNS).contains("outgoingproxy.sip.su.se") );
-            QVERIFY( subject1.values(QCA::DNS).contains("outgoingproxy1.sip.su.se") );
-            QVERIFY( subject1.values(QCA::DNS).contains("out.sip.su.se") );
-            QVERIFY( subject1.values(QCA::DNS).contains("appserver.sip.su.se") );
-            QVERIFY( subject1.values(QCA::DNS).contains("appserver1.sip.su.se") );
-            QVERIFY( subject1.values(QCA::DNS).contains("sip1.su.se") );
+            QVERIFY( subject1.values(QCA::Country).contains("SE") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::Organization).contains("Stockholms universitet") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::CommonName).contains("sip1.su.se") ); //clazy:exclude=container-anti-pattern
+            QCOMPARE( subject1.values(QCA::Email).count(), 0 ); //clazy:exclude=container-anti-pattern
+            QCOMPARE( subject1.values(QCA::DNS).count(), 8 ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("incomingproxy.sip.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("incomingproxy1.sip.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("outgoingproxy.sip.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("outgoingproxy1.sip.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("out.sip.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("appserver.sip.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("appserver1.sip.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( subject1.values(QCA::DNS).contains("sip1.su.se") ); //clazy:exclude=container-anti-pattern
 
             QVERIFY( client1.matchesHostName("incomingproxy.sip.su.se") );
             QVERIFY( client1.matchesHostName("incomingproxy1.sip.su.se") );
@@ -687,11 +687,11 @@ void CertUnitTest::altNames76()
 
             QCA::CertificateInfo issuer1 = client1.issuerInfo();
             QCOMPARE( issuer1.isEmpty(), false );
-            QVERIFY( issuer1.values(QCA::Country).contains("SE") );
-            QVERIFY( issuer1.values(QCA::Organization).contains("Stockholms universitet") );
-            QVERIFY( issuer1.values(QCA::CommonName).contains("Stockholm University CA") );
-            QVERIFY( issuer1.values(QCA::URI).contains("http://ca.su.se") );
-            QVERIFY( issuer1.values(QCA::Email).contains("ca@su.se") );
+            QVERIFY( issuer1.values(QCA::Country).contains("SE") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( issuer1.values(QCA::Organization).contains("Stockholms universitet") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( issuer1.values(QCA::CommonName).contains("Stockholm University CA") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( issuer1.values(QCA::URI).contains("http://ca.su.se") ); //clazy:exclude=container-anti-pattern
+            QVERIFY( issuer1.values(QCA::Email).contains("ca@su.se") ); //clazy:exclude=container-anti-pattern
 
             QByteArray subjectKeyID = QCA::Hex().stringToArray("3a5c5cd1cc2c9edf73f73bd81b59b1eab83035c5").toByteArray();
             QCOMPARE( client1.subjectKeyId(), subjectKeyID );
@@ -800,15 +800,15 @@ void CertUnitTest::checkExpiredServerCerts()
 
 	    QCA::CertificateInfo subject1 = server1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QCOMPARE( subject1.values(QCA::Country).contains("de") == true, true );
-	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
-	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure Server Cert") == true, true );
+	    QCOMPARE( subject1.values(QCA::Country).contains("de") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( subject1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( subject1.values(QCA::CommonName).contains("Insecure Server Cert") == true, true ); //clazy:exclude=container-anti-pattern
 
 	    QCA::CertificateInfo issuer1 = server1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QCOMPARE( issuer1.values(QCA::Country).contains("de") == true, true );
-	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true );
-	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only") == true, true );
+	    QCOMPARE( issuer1.values(QCA::Country).contains("de") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( issuer1.values(QCA::Organization).contains("InsecureTestCertificate") == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( issuer1.values(QCA::CommonName).contains("For Tests Only") == true, true ); //clazy:exclude=container-anti-pattern
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("0234E2C906F6E0B44253BE04C0CBA7823A6DB509").toByteArray();
 	    QCOMPARE( server1.subjectKeyId(), subjectKeyID );
@@ -903,17 +903,17 @@ void CertUnitTest::checkServerCerts()
 
 	    QCA::CertificateInfo subject1 = server1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QVERIFY( subject1.values(QCA::Country).contains("IL") );
-	    QVERIFY( subject1.values(QCA::Organization).contains("Qca Development and Test") );
-	    QVERIFY( subject1.values(QCA::OrganizationalUnit).contains("Server Management Section") );
-	    QVERIFY( subject1.values(QCA::CommonName).contains("Qca Server Test certificate") );
+	    QVERIFY( subject1.values(QCA::Country).contains("IL") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::Organization).contains("Qca Development and Test") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::OrganizationalUnit).contains("Server Management Section") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject1.values(QCA::CommonName).contains("Qca Server Test certificate") ); //clazy:exclude=container-anti-pattern
 
 	    QCA::CertificateInfo issuer1 = server1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QVERIFY( issuer1.values(QCA::Country).contains("AU") );
-	    QVERIFY( issuer1.values(QCA::Organization).contains("Qca Development and Test") );
-	    QVERIFY( issuer1.values(QCA::OrganizationalUnit).contains("Certificate Generation Section") );
-	    QVERIFY( issuer1.values(QCA::CommonName).contains("Qca Test Root Certificate") );
+	    QVERIFY( issuer1.values(QCA::Country).contains("AU") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::Organization).contains("Qca Development and Test") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::OrganizationalUnit).contains("Certificate Generation Section") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer1.values(QCA::CommonName).contains("Qca Test Root Certificate") ); //clazy:exclude=container-anti-pattern
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray("819870c8b81eab53e72d0446b65790aa0d3eab1a").toByteArray();
 	    QCOMPARE( server1.subjectKeyId(), subjectKeyID );
@@ -994,9 +994,9 @@ void CertUnitTest::crl()
 
 	    QCA::CertificateInfo issuer = crl1.issuerInfo();
 	    QCOMPARE( issuer.isEmpty(), false );
-	    QVERIFY( issuer.values(QCA::Country).contains("de") );
-	    QVERIFY( issuer.values(QCA::Organization).contains("InsecureTestCertificate") );
-	    QVERIFY( issuer.values(QCA::CommonName).contains("For Tests Only") );
+	    QVERIFY( issuer.values(QCA::Country).contains("de") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer.values(QCA::Organization).contains("InsecureTestCertificate") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer.values(QCA::CommonName).contains("For Tests Only") ); //clazy:exclude=container-anti-pattern
 
 	    // No keyid extension on this crl
 	    QCOMPARE( QCA::arrayToHex( crl1.issuerKeyId() ), QString("") );
@@ -1053,9 +1053,9 @@ void CertUnitTest::crl2()
 
 	    QCA::CertificateInfo issuer = crl1.issuerInfo();
 	    QCOMPARE( issuer.isEmpty(), false );
-	    QVERIFY( issuer.values(QCA::Country).contains("US") );
-	    QVERIFY( issuer.values(QCA::Organization).contains("Test Certificates") );
-	    QVERIFY( issuer.values(QCA::CommonName).contains("Good CA") );
+	    QVERIFY( issuer.values(QCA::Country).contains("US") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer.values(QCA::Organization).contains("Test Certificates") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( issuer.values(QCA::CommonName).contains("Good CA") ); //clazy:exclude=container-anti-pattern
 
 	    QCOMPARE( crl1.thisUpdate(), QDateTime(QDate(2001, 4, 19), QTime(14, 57, 20), Qt::UTC) );
 	    QCOMPARE( crl1.nextUpdate(), QDateTime(QDate(2011, 4, 19), QTime(14, 57, 20), Qt::UTC) );
@@ -1125,12 +1125,12 @@ void CertUnitTest::csr()
 	    QCOMPARE( csr1.provider()->name(), provider );
 	    QCA::CertificateInfo subject = csr1.subjectInfo();
 	    QCOMPARE( subject.isEmpty(), false );
-	    QVERIFY( subject.values(QCA::Country).contains("AU") );
-	    QVERIFY( subject.values(QCA::State).contains("Victoria") );
-	    QVERIFY( subject.values(QCA::Locality).contains("Mitcham") );
-	    QVERIFY( subject.values(QCA::Organization).contains("GE Interlogix") );
-	    QVERIFY( subject.values(QCA::OrganizationalUnit).contains("Engineering") );
-	    QVERIFY( subject.values(QCA::CommonName).contains("coldfire") );
+	    QVERIFY( subject.values(QCA::Country).contains("AU") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::State).contains("Victoria") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::Locality).contains("Mitcham") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::Organization).contains("GE Interlogix") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::OrganizationalUnit).contains("Engineering") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::CommonName).contains("coldfire") ); //clazy:exclude=container-anti-pattern
 
 	    QCA::PublicKey pkey = csr1.subjectPublicKey();
 	    QCOMPARE( pkey.isNull(), false );
@@ -1163,12 +1163,12 @@ void CertUnitTest::csr2()
 	    QCOMPARE( csr1.provider()->name(), provider );
 	    QCA::CertificateInfo subject = csr1.subjectInfo();
 	    QCOMPARE( subject.isEmpty(), false );
-	    QVERIFY( subject.values(QCA::Country).contains("AI") );
-	    QVERIFY( subject.values(QCA::State).contains("Hutt River Province") );
-	    QVERIFY( subject.values(QCA::Locality).contains("Lesser Internet") );
-	    QVERIFY( subject.values(QCA::Organization).contains("My Company Ltd") );
-	    QVERIFY( subject.values(QCA::OrganizationalUnit).contains("Backwater Branch Office") );
-	    QVERIFY( subject.values(QCA::CommonName).contains("FirstName Surname") );
+	    QVERIFY( subject.values(QCA::Country).contains("AI") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::State).contains("Hutt River Province") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::Locality).contains("Lesser Internet") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::Organization).contains("My Company Ltd") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::OrganizationalUnit).contains("Backwater Branch Office") ); //clazy:exclude=container-anti-pattern
+	    QVERIFY( subject.values(QCA::CommonName).contains("FirstName Surname") ); //clazy:exclude=container-anti-pattern
 
 	    QCA::PublicKey pkey = csr1.subjectPublicKey();
 	    QCOMPARE( pkey.isNull(), false );

@@ -55,7 +55,7 @@ static void dumpCertificateInfo( const QCA::CertificateInfo &info)
     std::cout << "  Country: " << std::endl;
     // As above, however this shows a more compact way to represent
     // the iteration and output.
-    foreach( QString country, info.values(QCA::Country) ) {
+    foreach( QString country, info.values(QCA::Country) ) {  //clazy:exclude=container-anti-pattern
 	std::cout << "    " << qPrintable(country) << std::endl;
     }
 }

@@ -1647,25 +1647,16 @@ bool Certificate::matchesHostName(const QString &host) const
 	QByteArray ipaddr = ipaddr_str2bin(host);
 	if(!ipaddr.isEmpty()) // ip address
 	{
-		// check iPAddress
-		foreach(const QString &s, subjectInfo().values(IPAddress))
+		// check iPAddress, dNSName, commonName
+		const CertificateInfoOrdered subjectInfo = subjectInfoOrdered();
+		for(const CertificateInfoPair &p : subjectInfo)
 		{
-			if(cert_match_ipaddress(s, ipaddr))
-				return true;
-		}
-
-		// check dNSName
-		foreach(const QString &s, subjectInfo().values(DNS))
-		{
-			if(cert_match_ipaddress(s, ipaddr))
-				return true;
-		}
-
-		// check commonName
-		foreach(const QString &s, subjectInfo().values(CommonName))
-		{
-			if(cert_match_ipaddress(s, ipaddr))
-				return true;
+			const CertificateInfoType type = p.type();
+			if (type == IPAddress || type == DNS || type == CommonName)
+			{
+				if(cert_match_ipaddress(p.value(), ipaddr))
+					return true;
+			}
 		}
 	}
 	else // domain
@@ -1688,18 +1679,16 @@ bool Certificate::matchesHostName(const QString &host) const
 		if(name.isEmpty())
 			return false;
 
-		// check dNSName
-		foreach(const QString &s, subjectInfo().values(DNS))
+		// check dNSName, commonName
+		const CertificateInfoOrdered subjectInfo = subjectInfoOrdered();
+		for(const CertificateInfoPair &p : subjectInfo)
 		{
-			if(cert_match_domain(s, name))
-				return true;
-		}
-
-		// check commonName
-		foreach(const QString &s, subjectInfo().values(CommonName))
-		{
-			if(cert_match_domain(s, name))
-				return true;
+			const CertificateInfoType type = p.type();
+			if (type == DNS || type == CommonName)
+			{
+				if(cert_match_domain(p.value(), name))
+					return true;
+			}
 		}
 	}
 
