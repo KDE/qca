@@ -33,7 +33,7 @@
 #include <botan/hkdf.h>
 #include <botan/stream_cipher.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 
 //-----------------------------------------------------------
@@ -155,7 +155,7 @@ public:
     {
 	const QString hashName = qcaHmacToBotanHmac(type);
 	m_hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
-	if (0 == m_hashObj) {
+	if (nullptr == m_hashObj) {
 	    std::cout << "null context object" << std::endl;
 	}
     }
@@ -266,7 +266,7 @@ public:
 							  int msecInterval,
 							  unsigned int *iterationCount) override
 	{
-		Q_ASSERT(iterationCount != NULL);
+		Q_ASSERT(iterationCount != nullptr);
 		Botan::OctetString key;
 		QElapsedTimer timer;
 		std::string secretString(secret.data(), secret.size() );

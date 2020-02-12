@@ -23,7 +23,7 @@
 #include <QTextStream>
 #include <QFile>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 using namespace QCA;
 
@@ -103,7 +103,7 @@ private:
 public:
 	loggerProvider () {
 		_externalConfig = false;
-		_streamLogger = NULL;
+		_streamLogger = nullptr;
 
 		QByteArray level = qgetenv ("QCALOGGER_LEVEL");
 		QByteArray file = qgetenv ("QCALOGGER_FILE");
@@ -120,7 +120,7 @@ public:
 
 	~loggerProvider () override {
 		delete _streamLogger;
-		_streamLogger = NULL;
+		_streamLogger = nullptr;
 	}
 
 public:
@@ -149,7 +149,7 @@ public:
 		const QString &type
 	) override {
 		Q_UNUSED(type);
-		return NULL;
+		return nullptr;
 	}
 
 	QVariantMap
@@ -168,7 +168,7 @@ public:
 	configChanged (const QVariantMap &config) override {
 		if (!_externalConfig) {
 			delete _streamLogger;
-			_streamLogger = NULL;
+			_streamLogger = nullptr;
 
 			if (config["enabled"].toBool ()) {
 				createLogger (

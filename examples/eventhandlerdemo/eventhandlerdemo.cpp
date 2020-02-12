@@ -140,7 +140,7 @@ void asker_procedure()
 {
     QCA::PasswordAsker pwAsker;
 
-    pwAsker.ask( QCA::Event::StylePassword, "foo.tmp",  0 );
+    pwAsker.ask( QCA::Event::StylePassword, "foo.tmp",  nullptr );
 
     pwAsker.waitForResponse();
 
@@ -150,7 +150,7 @@ void asker_procedure()
 
     QCA::TokenAsker tokenAsker;
 
-    tokenAsker.ask( QCA::KeyStoreInfo( QCA::KeyStore::SmartCard, "Token Id", "Token Name" ), QCA::KeyStoreEntry(), 0 );
+    tokenAsker.ask( QCA::KeyStoreInfo( QCA::KeyStore::SmartCard, "Token Id", "Token Name" ), QCA::KeyStoreEntry(), nullptr );
 
     tokenAsker.waitForResponse();
 

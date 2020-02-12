@@ -263,12 +263,12 @@ private:
 	{
 		if(con) {
 			sasl_dispose(&con);
-			con = 0;
+			con = nullptr;
 		}
-		need = 0;
+		need = nullptr;
 		if(callbacks) {
 			delete callbacks;
-			callbacks = 0;
+			callbacks = nullptr;
 		}
 
 		localAddr = "";
@@ -302,8 +302,8 @@ private:
 		secprops.min_ssf = ssf_min;
 		secprops.max_ssf = ssf_max;
 		secprops.maxbufsize = SASL_BUFSIZE;
-		secprops.property_names = NULL;
-		secprops.property_values = NULL;
+		secprops.property_names = nullptr;
+		secprops.property_values = nullptr;
 		secprops.security_flags = secflags;
 		int r = sasl_setprop(con, SASL_SEC_PROPS, &secprops);
 		if(r != SASL_OK)
@@ -379,7 +379,7 @@ private:
 			const char *clientout, *m;
 			unsigned int clientoutlen;
 
-			need = 0;
+			need = nullptr;
 			QString list = result_mechlist.join(" ");
 			int r;
 			while(true) {
@@ -388,7 +388,7 @@ private:
 				if(in_sendFirst)
 					r = sasl_client_start(con, list.toLatin1().data(), &need, &clientout, &clientoutlen, &m);
 				else
-					r = sasl_client_start(con, list.toLatin1().data(), &need, NULL, NULL, &m);
+					r = sasl_client_start(con, list.toLatin1().data(), &need, nullptr, nullptr, &m);
 				if(r != SASL_INTERACT)
 					break;
 
@@ -460,7 +460,7 @@ private:
 	{
 		if(step == 0) {
 			if(!ca_skip) {
-				const char *clientin = 0;
+				const char *clientin = nullptr;
 				unsigned int clientinlen = 0;
 				if(in_useClientInit) {
 					clientin = in_clientInit.data();
@@ -572,8 +572,8 @@ public:
 	{
 		result_result = Success;
 		g = _g;
-		con = 0;
-		callbacks = 0;
+		con = nullptr;
+		callbacks = nullptr;
 
 		reset();
 	}
@@ -585,7 +585,7 @@ public:
 
 	Provider::Context *clone() const override
 	{
-		return 0;
+		return nullptr;
 	}
 
 	Result result() const override
@@ -621,35 +621,35 @@ public:
 		in_sendFirst = allowClientSendFirst;
 
 		if(!g->client_init) {
-			sasl_client_init(NULL);
+			sasl_client_init(nullptr);
 			g->client_init = true;
 		}
 
 		callbacks = new sasl_callback_t[5];
 
 		callbacks[0].id = SASL_CB_GETREALM;
-		callbacks[0].proc = 0;
-		callbacks[0].context = 0;
+		callbacks[0].proc = nullptr;
+		callbacks[0].context = nullptr;
 
 		callbacks[1].id = SASL_CB_USER;
-		callbacks[1].proc = 0;
-		callbacks[1].context = 0;
+		callbacks[1].proc = nullptr;
+		callbacks[1].context = nullptr;
 
 		callbacks[2].id = SASL_CB_AUTHNAME;
-		callbacks[2].proc = 0;
-		callbacks[2].context = 0;
+		callbacks[2].proc = nullptr;
+		callbacks[2].context = nullptr;
 
 		callbacks[3].id = SASL_CB_PASS;
-		callbacks[3].proc = 0;
-		callbacks[3].context = 0;
+		callbacks[3].proc = nullptr;
+		callbacks[3].context = nullptr;
 
 		callbacks[4].id = SASL_CB_LIST_END;
-		callbacks[4].proc = 0;
-		callbacks[4].context = 0;
+		callbacks[4].proc = nullptr;
+		callbacks[4].context = nullptr;
 
 		result_result = Error;
 
-		int r = sasl_client_new(service.toLatin1().data(), host.toLatin1().data(), localAddr.isEmpty() ? 0 : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? 0 : remoteAddr.toLatin1().data(), callbacks, 0, &con);
+		int r = sasl_client_new(service.toLatin1().data(), host.toLatin1().data(), localAddr.isEmpty() ? nullptr : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(), callbacks, 0, &con);
 		if(r != SASL_OK) {
 			setAuthCondition(r);
 			doResultsReady();
@@ -679,7 +679,7 @@ public:
 
 		g->appname = SASL_APP;
 		if(!g->server_init) {
-			sasl_server_init(NULL, QFile::encodeName(g->appname).constData());
+			sasl_server_init(nullptr, QFile::encodeName(g->appname).constData());
 			g->server_init = true;
 		}
 
@@ -690,12 +690,12 @@ public:
 		callbacks[0].context = this;
 
 		callbacks[1].id = SASL_CB_LIST_END;
-		callbacks[1].proc = 0;
-		callbacks[1].context = 0;
+		callbacks[1].proc = nullptr;
+		callbacks[1].context = nullptr;
 
 		result_result = Error;
 
-		int r = sasl_server_new(service.toLatin1().data(), host.toLatin1().data(), !realm.isEmpty() ? realm.toLatin1().data() : 0, localAddr.isEmpty() ? 0 : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? 0 : remoteAddr.toLatin1().data(), callbacks, 0, &con);
+		int r = sasl_server_new(service.toLatin1().data(), host.toLatin1().data(), !realm.isEmpty() ? realm.toLatin1().data() : nullptr, localAddr.isEmpty() ? nullptr : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(), callbacks, 0, &con);
 		if(r != SASL_OK) {
 			setAuthCondition(r);
 			doResultsReady();
@@ -709,7 +709,7 @@ public:
 		}
 
 		const char *ml;
-		r = sasl_listmech(con, 0, 0, " ", 0, &ml, 0, 0);
+		r = sasl_listmech(con, nullptr, nullptr, " ", nullptr, &ml, nullptr, nullptr);
 		if(r != SASL_OK)
 			return;
 		result_mechlist = QString::fromUtf8(ml).split(' ');
@@ -925,7 +925,7 @@ Provider::Context *saslProvider::createContext(const QString &type)
 	if ( type == "sasl" )
 		return new saslContext( this );
 
-	return 0;
+	return nullptr;
 }
 
 } // namespace saslQCAPlugin

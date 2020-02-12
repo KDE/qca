@@ -31,7 +31,7 @@ namespace gpgQCAPlugin {
 void releaseAndDeleteLater(QObject *owner, QObject *obj)
 {
 	obj->disconnect(owner);
-	obj->setParent(0);
+	obj->setParent(nullptr);
 	obj->deleteLater();
 }
 
@@ -47,8 +47,8 @@ GPGProc::Private::Private(GPGProc *_q)
 {
 	qRegisterMetaType<gpgQCAPlugin::GPGProc::Error>("gpgQCAPlugin::GPGProc::Error");
 
-	proc = 0;
-	proc_relay = 0;
+	proc = nullptr;
+	proc_relay = nullptr;
 	startTrigger.setSingleShot(true);
 	doneTrigger.setSingleShot(true);
 
@@ -102,11 +102,11 @@ void GPGProc::Private::reset(ResetMode mode)
 				proc->terminate();
 		}
 
-		proc->setParent(0);
+		proc->setParent(nullptr);
 		releaseAndDeleteLater(this, proc_relay);
-		proc_relay = 0;
+		proc_relay = nullptr;
 		delete proc; // should be safe to do thanks to relay
-		proc = 0;
+		proc = nullptr;
 	}
 
 #ifdef QT_PIPE_HACK

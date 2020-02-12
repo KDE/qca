@@ -26,7 +26,7 @@
 #include <QDebug>
 
 // needed for printf
-#include<stdio.h>
+#include<cstdio>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"

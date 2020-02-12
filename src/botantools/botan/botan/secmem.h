@@ -97,10 +97,10 @@ class MemoryRegion
 
       ~MemoryRegion() { deallocate(buf, allocated); }
    protected:
-      MemoryRegion() { buf = 0; alloc = 0; used = allocated = 0; }
+      MemoryRegion() { buf = nullptr; alloc = nullptr; used = allocated = 0; }
       MemoryRegion(const MemoryRegion<T>& copy)
          {
-         buf = 0;
+         buf = nullptr;
          used = allocated = 0;
          alloc = copy.alloc;
          set(copy.buf, copy.used);

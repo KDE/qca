@@ -75,7 +75,7 @@ QString truncate_log(const QString &in, int size)
 	return in.mid(at);
 }
 
-static ProviderManager *g_pluginman = 0;
+static ProviderManager *g_pluginman = nullptr;
 
 static void logDebug(const QString &str)
 {
@@ -104,7 +104,7 @@ private:
 	}
 
 public:
-	static PluginInstance *fromFile(const QString &fname, QString *errstr = 0)
+	static PluginInstance *fromFile(const QString &fname, QString *errstr = nullptr)
 	{
 		QPluginLoader *loader = new QPluginLoader(fname);
 		if(!loader->load())
@@ -112,7 +112,7 @@ public:
 			if(errstr)
 				*errstr = QString("failed to load: %1").arg(loader->errorString());
 			delete loader;
-			return 0;
+			return nullptr;
 		}
 		QObject *obj = loader->instance();
 		if(!obj)
@@ -121,7 +121,7 @@ public:
 				*errstr = "failed to get instance";
 			loader->unload();
 			delete loader;
-			return 0;
+			return nullptr;
 		}
 		PluginInstance *i = new PluginInstance;
 		i->_loader = loader;
@@ -133,7 +133,7 @@ public:
 	static PluginInstance *fromStatic(QObject *obj)
 	{
 		PluginInstance *i = new PluginInstance;
-		i->_loader = 0;
+		i->_loader = nullptr;
 		i->_instance = obj;
 		i->_ownInstance = false;
 		return i;
@@ -142,7 +142,7 @@ public:
 	static PluginInstance *fromInstance(QObject *obj)
 	{
 		PluginInstance *i = new PluginInstance;
-		i->_loader = 0;
+		i->_loader = nullptr;
 		i->_instance = obj;
 		i->_ownInstance = true;
 		return i;
@@ -166,9 +166,9 @@ public:
 	void claim()
 	{
 		if(_loader)
-			_loader->moveToThread(0);
+			_loader->moveToThread(nullptr);
 		if(_ownInstance)
-			_instance->moveToThread(0);
+			_instance->moveToThread(nullptr);
 	}
 
 	QObject *instance()
@@ -185,7 +185,7 @@ public:
 	int priority;
 	QMutex m;
 
-	static ProviderItem *load(const QString &fname, QString *out_errstr = 0)
+	static ProviderItem *load(const QString &fname, QString *out_errstr = nullptr)
 	{
 		QString errstr;
 		PluginInstance *i = PluginInstance::fromFile(fname, &errstr);
@@ -193,7 +193,7 @@ public:
 		{
 			if(out_errstr)
 				*out_errstr = errstr;
-			return 0;
+			return nullptr;
 		}
 		QCAPlugin *plugin = qobject_cast<QCAPlugin*>(i->instance());
 		if(!plugin)
@@ -201,7 +201,7 @@ public:
 			if(out_errstr)
 				*out_errstr = "does not offer QCAPlugin interface";
 			delete i;
-			return 0;
+			return nullptr;
 		}
 
 		Provider *p = plugin->createProvider();
@@ -210,7 +210,7 @@ public:
 			if(out_errstr)
 				*out_errstr = "unable to create provider";
 			delete i;
-			return 0;
+			return nullptr;
 		}
 
 		ProviderItem *pi = new ProviderItem(i, p);
@@ -218,7 +218,7 @@ public:
 		return pi;
 	}
 
-	static ProviderItem *loadStatic(QObject *instance, QString *errstr = 0)
+	static ProviderItem *loadStatic(QObject *instance, QString *errstr = nullptr)
 	{
 		PluginInstance *i = PluginInstance::fromStatic(instance);
 		QCAPlugin *plugin = qobject_cast<QCAPlugin*>(i->instance());
@@ -227,7 +227,7 @@ public:
 			if(errstr)
 				*errstr = "does not offer QCAPlugin interface";
 			delete i;
-			return 0;
+			return nullptr;
 		}
 
 		Provider *p = plugin->createProvider();
@@ -236,7 +236,7 @@ public:
 			if(errstr)
 				*errstr = "unable to create provider";
 			delete i;
-			return 0;
+			return nullptr;
 		}
 
 		ProviderItem *pi = new ProviderItem(i, p);
@@ -245,7 +245,7 @@ public:
 
 	static ProviderItem *fromClass(Provider *p)
 	{
-		ProviderItem *pi = new ProviderItem(0, p);
+		ProviderItem *pi = new ProviderItem(nullptr, p);
 		return pi;
 	}
 
@@ -281,7 +281,7 @@ public:
 		if(instance)
 			return instance->instance();
 		else
-			return 0;
+			return nullptr;
 	}
 
 private:
@@ -303,7 +303,7 @@ private:
 ProviderManager::ProviderManager()
 {
 	g_pluginman = this;
-	def = 0;
+	def = nullptr;
 	scanned_static = false;
 }
 
@@ -313,7 +313,7 @@ ProviderManager::~ProviderManager()
 		def->deinit();
 	unloadAll();
 	delete def;
-	g_pluginman = 0;
+	g_pluginman = nullptr;
 }
 
 void ProviderManager::scan()
@@ -549,8 +549,8 @@ void ProviderManager::setDefault(Provider *p)
 
 Provider *ProviderManager::find(Provider *_p) const
 {
-	ProviderItem *i = 0;
-	Provider *p = 0;
+	ProviderItem *i = nullptr;
+	Provider *p = nullptr;
 
 	providerMutex.lock();
 	if(_p == def)
@@ -579,8 +579,8 @@ Provider *ProviderManager::find(Provider *_p) const
 
 Provider *ProviderManager::find(const QString &name) const
 {
-	ProviderItem *i = 0;
-	Provider *p = 0;
+	ProviderItem *i = nullptr;
+	Provider *p = nullptr;
 
 	providerMutex.lock();
 	if(def && name == def->name())
@@ -631,14 +631,14 @@ Provider *ProviderManager::findFor(const QString &name, const QString &type) con
 		if(p && p->features().contains(type))
 			return p;
 
-		return 0;
+		return nullptr;
 	}
 	else
 	{
 		Provider *p = find(name);
 		if(p && p->features().contains(type))
 			return p;
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -646,7 +646,7 @@ void ProviderManager::changePriority(const QString &name, int priority)
 {
 	QMutexLocker locker(&providerMutex);
 
-	ProviderItem *i = 0;
+	ProviderItem *i = nullptr;
 	int n = 0;
 	for(; n < providerItemList.count(); ++n)
 	{
@@ -670,7 +670,7 @@ int ProviderManager::getPriority(const QString &name)
 {
 	QMutexLocker locker(&providerMutex);
 
-	ProviderItem *i = 0;
+	ProviderItem *i = nullptr;
 	for(int n = 0; n < providerItemList.count(); ++n)
 	{
 		ProviderItem *pi = providerItemList[n];

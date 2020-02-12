@@ -24,7 +24,7 @@
 #include "qdebug.h"
 
 #ifdef Q_OS_UNIX
-# include <stdlib.h>
+# include <cstdlib>
 # include <sys/mman.h>
 #endif
 #include "botantools/botantools.h"
@@ -58,7 +58,7 @@ static bool can_lock()
 
 // Botan shouldn't throw any exceptions in our init/deinit.
 
-static Botan::Allocator *alloc = 0;
+static Botan::Allocator *alloc = nullptr;
 
 void botan_throw_abort()
 {
@@ -107,8 +107,8 @@ void botan_deinit()
 {
 	try
 	{
-		alloc = 0;
-		Botan::set_global_state(0);
+		alloc = nullptr;
+		Botan::set_global_state(nullptr);
 	}
 	catch(std::exception &)
 	{
@@ -126,7 +126,7 @@ void *botan_secure_alloc(int bytes)
 	{
 		botan_throw_abort();
 	}
-	return 0; // never get here
+	return nullptr; // never get here
 }
 
 void botan_secure_free(void *p, int bytes)
@@ -174,7 +174,7 @@ void *qca_secure_realloc(void *p, int bytes)
 	// alloc the new chunk
 	char *new_p = (char *)qca_secure_alloc(bytes);
 	if(!new_p)
-		return 0;
+		return nullptr;
 
 	// move over the memory from the original block
 	memmove(new_p, p, qMin(oldsize, bytes));
@@ -230,9 +230,9 @@ bool ai_new(alloc_info *ai, int size, bool sec)
 
 	if(size == 0)
 	{
-		ai->sbuf = 0;
-		ai->qbuf = 0;
-		ai->data = 0;
+		ai->sbuf = nullptr;
+		ai->qbuf = nullptr;
+		ai->data = nullptr;
 		return true;
 	}
 
@@ -249,13 +249,13 @@ bool ai_new(alloc_info *ai, int size, bool sec)
 		}
 
 		(*(ai->sbuf))[size] = 0;
-		ai->qbuf = 0;
+		ai->qbuf = nullptr;
 		Botan::byte *bp = (Botan::byte *)(*(ai->sbuf));
 		ai->data = (char *)bp;
 	}
 	else
 	{
-		ai->sbuf = 0;
+		ai->sbuf = nullptr;
 		ai->qbuf = new QByteArray(size, 0);
 		ai->data = ai->qbuf->data();
 	}
@@ -270,9 +270,9 @@ bool ai_copy(alloc_info *ai, const alloc_info *from)
 
 	if(ai->size == 0)
 	{
-		ai->sbuf = 0;
-		ai->qbuf = 0;
-		ai->data = 0;
+		ai->sbuf = nullptr;
+		ai->qbuf = nullptr;
+		ai->data = nullptr;
 		return true;
 	}
 
@@ -288,13 +288,13 @@ bool ai_copy(alloc_info *ai, const alloc_info *from)
 			return false; // never get here
 		}
 
-		ai->qbuf = 0;
+		ai->qbuf = nullptr;
 		Botan::byte *bp = (Botan::byte *)(*(ai->sbuf));
 		ai->data = (char *)bp;
 	}
 	else
 	{
-		ai->sbuf = 0;
+		ai->sbuf = nullptr;
 		ai->qbuf = new QByteArray(*(from->qbuf));
 		ai->data = ai->qbuf->data();
 	}
@@ -316,16 +316,16 @@ bool ai_resize(alloc_info *ai, int new_size)
 			if(ai->sec)
 			{
 				delete ai->sbuf;
-				ai->sbuf = 0;
+				ai->sbuf = nullptr;
 			}
 			else
 			{
 				delete ai->qbuf;
-				ai->qbuf = 0;
+				ai->qbuf = nullptr;
 			}
 
 			ai->size = 0;
-			ai->data = 0;
+			ai->data = nullptr;
 		}
 
 		return true;
@@ -432,7 +432,7 @@ public:
 };
 
 MemoryRegion::MemoryRegion()
-:_secure(false), d(0)
+:_secure(false), d(nullptr)
 {
 }
 
@@ -499,7 +499,7 @@ QByteArray MemoryRegion::toByteArray() const
 }
 
 MemoryRegion::MemoryRegion(bool secure)
-:_secure(secure), d(0)
+:_secure(secure), d(nullptr)
 {
 }
 

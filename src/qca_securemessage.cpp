@@ -270,8 +270,8 @@ public:
 	Private(SecureMessage *_q) : readyReadTrigger(this), bytesWrittenTrigger(this), finishedTrigger(this)
 	{
 		q = _q;
-		c = 0;
-		system = 0;
+		c = nullptr;
+		system = nullptr;
 
 		readyReadTrigger.setSingleShot(true);
 		bytesWrittenTrigger.setSingleShot(true);

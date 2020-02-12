@@ -57,7 +57,7 @@ void TLSUnitTest::testCipherList()
     if(!QCA::isSupported("tls", "qca-ossl"))
 	QWARN("TLS not supported for qca-ossl");
     else {
-	QCA::TLS *tls = new QCA::TLS(QCA::TLS::Stream, 0, "qca-ossl");
+	QCA::TLS *tls = new QCA::TLS(QCA::TLS::Stream, nullptr, "qca-ossl");
 	QStringList cipherList = tls->supportedCipherSuites(QCA::TLS::TLS_v1);
 	QVERIFY( cipherList.contains("TLS_DHE_RSA_WITH_AES_256_CBC_SHA") );
 	QVERIFY( cipherList.contains("TLS_RSA_WITH_AES_256_CBC_SHA") );

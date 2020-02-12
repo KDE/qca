@@ -74,7 +74,7 @@ namespace Botan {
 *************************************************/
 namespace {
 
-Library_State* global_lib_state = 0;
+Library_State* global_lib_state = nullptr;
 
 }
 
@@ -194,7 +194,7 @@ void Library_State::set_default_allocator(const std::string& type) const
 #else
    config().set("conf", "base/default_allocator", type);
 #endif
-   cached_default_allocator = 0;
+   cached_default_allocator = nullptr;
    }
 
 #ifndef BOTAN_TOOLS_ONLY
@@ -440,7 +440,7 @@ Library_State::Library_State(Mutex_Factory* mutex_factory)
    locks["engine"] = get_mutex();
    rng = 0;
 #endif
-   cached_default_allocator = 0;
+   cached_default_allocator = nullptr;
 #ifndef BOTAN_TOOLS_ONLY
    x509_state_obj = 0;
    ui = 0;
@@ -470,7 +470,7 @@ Library_State::~Library_State()
    std::for_each(engines.begin(), engines.end(), del_fun<Engine>());
 #endif
 
-   cached_default_allocator = 0;
+   cached_default_allocator = nullptr;
 
    for(u32bit j = 0; j != allocators.size(); j++)
       {

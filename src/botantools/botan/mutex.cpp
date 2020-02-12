@@ -31,7 +31,7 @@ namespace QCA { // WRAPNS_LINE
 *************************************************/
 
 } // WRAPNS_LINE
-#include <stdlib.h>
+#include <cstdlib>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
 #include <botan/mutex.h>

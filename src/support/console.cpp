@@ -39,8 +39,8 @@
 # include <fcntl.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #define CONSOLEPROMPT_INPUT_MAX 56
 
@@ -378,7 +378,7 @@ public:
 		started = false;
 		mode = Console::Default;
 		thread = new ConsoleThread(this);
-		ref = 0;
+		ref = nullptr;
 	}
 
 	~ConsolePrivate() override
@@ -427,19 +427,19 @@ public:
 	}
 };
 
-static Console *g_tty_console = 0, *g_stdio_console = 0;
+static Console *g_tty_console = nullptr, *g_stdio_console = nullptr;
 
 Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent)
 :QObject(parent)
 {
 	if(type == Tty)
 	{
-		Q_ASSERT(g_tty_console == 0);
+		Q_ASSERT(g_tty_console == nullptr);
 		g_tty_console = this;
 	}
 	else
 	{
-		Q_ASSERT(g_stdio_console == 0);
+		Q_ASSERT(g_stdio_console == nullptr);
 		g_stdio_console = this;
 	}
 
@@ -508,9 +508,9 @@ Console::~Console()
 	Console::Type type = d->type;
 	delete d;
 	if(type == Tty)
-		g_tty_console = 0;
+		g_tty_console = nullptr;
 	else
-		g_stdio_console = 0;
+		g_stdio_console = nullptr;
 }
 
 Console::Type Console::type() const
@@ -596,8 +596,8 @@ public:
 
 	ConsoleReferencePrivate(ConsoleReference *_q) : QObject(_q), q(_q), lateTrigger(this)
 	{
-		console = 0;
-		thread = 0;
+		console = nullptr;
+		thread = nullptr;
 		connect(&lateTrigger, &SafeTimer::timeout, this, &ConsoleReferencePrivate::doLate);
 		lateTrigger.setSingleShot(true);
 	}
@@ -633,7 +633,7 @@ bool ConsoleReference::start(Console *console, SecurityMode mode)
 	Q_ASSERT(!d->console);
 
 	// one console reference at a time
-	Q_ASSERT(console->d->ref == 0);
+	Q_ASSERT(console->d->ref == nullptr);
 
 	// let's take it
 	d->console = console;
@@ -646,9 +646,9 @@ bool ConsoleReference::start(Console *console, SecurityMode mode)
 	// pipe already closed and no data?  consider this an error
 	if(!valid && avail == 0)
 	{
-		d->console->d->ref = 0;
-		d->thread = 0;
-		d->console = 0;
+		d->console->d->ref = nullptr;
+		d->thread = nullptr;
+		d->console = nullptr;
 		return false;
 	}
 
@@ -684,14 +684,14 @@ void ConsoleReference::stop()
 
 	d->lateTrigger.stop();
 
-	disconnect(d->thread, 0, this, 0);
+	disconnect(d->thread, nullptr, this, nullptr);
 
 	// automatically disable security when we go inactive
 	d->thread->setSecurityEnabled(false);
 
-	d->console->d->ref = 0;
-	d->thread = 0;
-	d->console = 0;
+	d->console->d->ref = nullptr;
+	d->thread = nullptr;
+	d->console = nullptr;
 }
 
 Console *ConsoleReference::console() const
@@ -766,7 +766,7 @@ public:
 		connect(&console, &ConsoleReference::readyRead, this, &Private::con_readyRead);
 		connect(&console, &ConsoleReference::inputClosed, this, &Private::con_inputClosed);
 
-		con = 0;
+		con = nullptr;
 		own_con = false;
 		waiting = false;
 
@@ -775,8 +775,8 @@ public:
 #else
 		codec = QTextCodec::codecForLocale();
 #endif
-		encstate = 0;
-		decstate = 0;
+		encstate = nullptr;
+		decstate = nullptr;
 	}
 
 	~Private() override
@@ -787,15 +787,15 @@ public:
 	void reset()
 	{
 		delete encstate;
-		encstate = 0;
+		encstate = nullptr;
 		delete decstate;
-		decstate = 0;
+		decstate = nullptr;
 
 		console.stop();
 		if(own_con)
 		{
 			delete con;
-			con = 0;
+			con = nullptr;
 			own_con = false;
 		}
 	}

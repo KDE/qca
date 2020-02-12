@@ -25,10 +25,10 @@
   (http://www-128.ibm.com/developerworks/linux/library/l-md5crypt/)
 */
 
-#include <QtCrypto>
 #include <QCoreApplication>
+#include <QtCrypto>
 #include <QtDebug>
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"

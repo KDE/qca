@@ -22,7 +22,7 @@
 
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>
-#include <stdio.h>
+#include <cstdio>
 
 #include <QCoreApplication>
 

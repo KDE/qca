@@ -21,10 +21,10 @@
 */
 
 #include <QCoreApplication>
-#include <QTimer>
-#include <QTcpSocket>
 #include <QTcpServer>
-#include <stdio.h>
+#include <QTcpSocket>
+#include <QTimer>
+#include <cstdio>
 
 // QtCrypto has the declarations for all of QCA
 #include <QtCrypto>

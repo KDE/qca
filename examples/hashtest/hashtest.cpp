@@ -24,7 +24,7 @@
 
 #include <QCoreApplication>
 
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"

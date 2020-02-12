@@ -146,7 +146,7 @@ public:
     {
 	NSS_NoDB_Init(".");
 
-	m_context = 0;
+	m_context = nullptr;
 	m_status = 0;
 
 	/* Get a slot to use for the crypto operations */
@@ -200,7 +200,7 @@ public:
 	PK11_DestroyContext(m_context, PR_TRUE);
 
 	SECItem noParams;
-	noParams.data = 0;
+	noParams.data = nullptr;
 	noParams.len = 0;
 
 	m_context = PK11_CreateContextBySymKey(m_macAlgo, CKA_SIGN, m_nssKey, &noParams);
@@ -228,10 +228,10 @@ public:
 	keyItem.data = (unsigned char*) key.data();
 	keyItem.len = key.size();
 
-	m_nssKey = PK11_ImportSymKey(m_slot, m_macAlgo, PK11_OriginUnwrap, CKA_SIGN, &keyItem, NULL);
+	m_nssKey = PK11_ImportSymKey(m_slot, m_macAlgo, PK11_OriginUnwrap, CKA_SIGN, &keyItem, nullptr);
 
 	SECItem noParams;
-	noParams.data = 0;
+	noParams.data = nullptr;
 	noParams.len = 0;
 
 	m_context = PK11_CreateContextBySymKey(m_macAlgo, CKA_SIGN, m_nssKey, &noParams);
@@ -316,7 +316,7 @@ public:
     {
 	Q_UNUSED(tag);
 	/* Get a slot to use for the crypto operations */
-	m_slot = PK11_GetBestSlot( m_cipherMechanism, NULL );
+	m_slot = PK11_GetBestSlot( m_cipherMechanism, nullptr );
 	if (!m_slot)
 	{
 	    qDebug() << "GetBestSlot failed";
@@ -331,12 +331,12 @@ public:
 	if (QCA::Encode == dir) {
 	    m_nssKey = PK11_ImportSymKey(m_slot, m_cipherMechanism,
 					 PK11_OriginUnwrap, CKA_ENCRYPT,
-					 &keyItem, NULL);
+					 &keyItem, nullptr);
 	} else {
 	    // decryption
 	    m_nssKey = PK11_ImportSymKey(m_slot, m_cipherMechanism,
 					 PK11_OriginUnwrap, CKA_DECRYPT,
-					 &keyItem, NULL);
+					 &keyItem, nullptr);
 	}
 
 	SECItem ivItem;
@@ -534,7 +534,7 @@ public:
 	if ( type == "tripledes-ecb" )
 	    return new nssCipherContext( this, type);
 	else
-	    return 0;
+	    return nullptr;
     }
 };
 

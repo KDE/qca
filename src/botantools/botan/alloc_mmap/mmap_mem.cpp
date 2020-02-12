@@ -58,7 +58,7 @@ namespace QCA { // WRAPNS_LINE
 #include <unistd.h>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
-#include <stdlib.h>
+#include <cstdlib>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
 #include <fcntl.h>
@@ -133,7 +133,7 @@ void* MemoryMapping_Allocator::alloc_block(u32bit n)
    if(write(file.get_fd(), "\0", 1) != 1)
       throw MemoryMapping_Failed("Could not write to file");
 
-   void* ptr = mmap(0, n, PROT_READ | PROT_WRITE, MAP_SHARED,
+   void* ptr = mmap(nullptr, n, PROT_READ | PROT_WRITE, MAP_SHARED,
                     file.get_fd(), 0);
 
    if(ptr == (void*)MAP_FAILED)
@@ -147,7 +147,7 @@ void* MemoryMapping_Allocator::alloc_block(u32bit n)
 *************************************************/
 void MemoryMapping_Allocator::dealloc_block(void* ptr, u32bit n)
    {
-   if(ptr == 0) return;
+   if(ptr == nullptr) return;
 #ifdef MLOCK_NOT_VOID_PTR
 # define MLOCK_TYPE_CAST (char *)
 #else

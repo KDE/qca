@@ -46,10 +46,10 @@ namespace QCA { // WRAPNS_LINE
 #include <cstring>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
-#include <stdlib.h>
+#include <cstdlib>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
-#include <string.h>
+#include <cstring>
 namespace QCA { // WRAPNS_LINE
 
 namespace Botan {
@@ -64,7 +64,7 @@ void* do_malloc(u32bit n, bool do_lock)
    void* ptr = malloc(n);
 
    if(!ptr)
-      return 0;
+      return nullptr;
 
    if(do_lock)
       lock_mem(ptr, n);

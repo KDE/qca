@@ -30,7 +30,7 @@ GpgOp::Private::Private(GpgOp *_q)
 	: QObject(_q)
 	, sync(_q)
 	, q(_q)
-	, act(0)
+	, act(nullptr)
 	, waiting(false)
 {
 	reset(ResetAll);
@@ -46,10 +46,10 @@ void GpgOp::Private::reset(ResetMode mode)
 	if(act)
 	{
 		act->disconnect(this);
-		act->setParent(0);
+		act->setParent(nullptr);
 		act->deleteLater();
 
-		act = 0;
+		act = nullptr;
 	}
 
 	if(mode >= ResetSessionAndData)

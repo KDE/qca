@@ -32,7 +32,7 @@ MyOpenPGPContext::MyOpenPGPContext(QCA::Provider *p)
 
 Provider::Context *MyOpenPGPContext::clone() const
 {
-	return 0;
+	return nullptr;
 }
 
 MessageContext *MyOpenPGPContext::createMessage()

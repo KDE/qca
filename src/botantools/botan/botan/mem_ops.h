@@ -40,7 +40,7 @@ namespace QCA { // WRAPNS_LINE
 #include <cstring>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
-#include <string.h>
+#include <cstring>
 namespace QCA { // WRAPNS_LINE
 
 namespace Botan {

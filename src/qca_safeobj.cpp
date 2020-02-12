@@ -30,7 +30,7 @@ namespace QCA {
 inline void releaseAndDeleteLater(QObject *owner, QObject *obj)
 {
 	obj->disconnect(owner);
-	obj->setParent(0);
+	obj->setParent(nullptr);
 	obj->deleteLater();
 }
 

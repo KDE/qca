@@ -106,12 +106,12 @@ bool Pooling_Allocator::Memory_Block::contains(void* ptr,
 byte* Pooling_Allocator::Memory_Block::alloc(u32bit n) throw()
    {
    if(n == 0 || n > BITMAP_SIZE)
-      return 0;
+      return nullptr;
 
    if(n == BITMAP_SIZE)
       {
       if(bitmap)
-         return 0;
+         return nullptr;
       else
          {
          bitmap = ~bitmap;
@@ -134,7 +134,7 @@ byte* Pooling_Allocator::Memory_Block::alloc(u32bit n) throw()
       }
 
    if(bitmap & mask)
-      return 0;
+      return nullptr;
 
    bitmap |= mask;
    return buffer + offset * BLOCK_SIZE;
@@ -234,7 +234,7 @@ void Pooling_Allocator::deallocate(void* ptr, u32bit n)
    const u32bit BITMAP_SIZE = Memory_Block::bitmap_size();
    const u32bit BLOCK_SIZE = Memory_Block::block_size();
 
-   if(ptr == 0 || n == 0)
+   if(ptr == nullptr || n == 0)
       return;
 
    Mutex_Holder lock(mutex);
@@ -261,7 +261,7 @@ void Pooling_Allocator::deallocate(void* ptr, u32bit n)
 byte* Pooling_Allocator::allocate_blocks(u32bit n)
    {
    if(blocks.empty())
-      return 0;
+      return nullptr;
 
    std::vector<Memory_Block>::iterator i = last_used;
 
@@ -280,7 +280,7 @@ byte* Pooling_Allocator::allocate_blocks(u32bit n)
       }
    while(i != last_used);
 
-   return 0;
+   return nullptr;
    }
 
 /*************************************************
@@ -297,7 +297,7 @@ void Pooling_Allocator::get_more_core(u32bit in_bytes)
    const u32bit to_allocate = in_blocks * TOTAL_BLOCK_SIZE;
 
    void* ptr = alloc_block(to_allocate);
-   if(ptr == 0)
+   if(ptr == nullptr)
       throw Memory_Exhaustion();
 
    allocated.emplace_back(ptr, to_allocate);

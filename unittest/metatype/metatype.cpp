@@ -38,7 +38,7 @@ class TestClass1 : public QObject
 
 public:
     TestClass1() { };
-    TestClass1(const TestClass1 & ):QObject( 0 ) { };
+    TestClass1(const TestClass1 & ):QObject( nullptr ) { };
 
 public Q_SLOTS:
     void voidMethod() { };
@@ -123,10 +123,10 @@ void MetaTypeUnitTest::invokeMethodTest()
     QVariantList args;
 
     bool ret;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "voidMethod" ), args, 0 );
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "voidMethod" ), args, nullptr );
     QVERIFY( ret );
 
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "noSuchMethod" ), args, 0 );
+    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "noSuchMethod" ), args, nullptr );
     QVERIFY( ret == false );
 
     QVariant stringRes;

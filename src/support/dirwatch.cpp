@@ -61,7 +61,7 @@ public:
 	QFileSystemWatcherRelay *watcher_relay;
 	QString dirName;
 
-	Private(DirWatch *_q) : QObject(_q), q(_q), watcher(0), watcher_relay(0)
+	Private(DirWatch *_q) : QObject(_q), q(_q), watcher(nullptr), watcher_relay(nullptr)
 	{
 	}
 
@@ -96,8 +96,8 @@ void DirWatch::setDirName(const QString &dir)
 	{
 		delete d->watcher;
 		delete d->watcher_relay;
-		d->watcher = 0;
-		d->watcher_relay = 0;
+		d->watcher = nullptr;
+		d->watcher_relay = nullptr;
 	}
 
 	d->dirName = dir;
@@ -127,7 +127,7 @@ public:
 	QString filePath; // absolute path of file, calculated by us
 	bool fileExisted;
 
-	Private(FileWatch *_q) : QObject(_q), q(_q), watcher(0), watcher_relay(0)
+	Private(FileWatch *_q) : QObject(_q), q(_q), watcher(nullptr), watcher_relay(nullptr)
 	{
 	}
 
@@ -182,8 +182,8 @@ public:
 		{
 			delete watcher;
 			delete watcher_relay;
-			watcher = 0;
-			watcher_relay = 0;
+			watcher = nullptr;
+			watcher_relay = nullptr;
 		}
 
 		fileName.clear();

@@ -71,12 +71,12 @@ public:
         {
             if(type == "testClientSideProviderFeature1")
                 // return new Feature1Context(this);
-		return 0;
+		return nullptr;
             else if (type == "testClientSideProviderFeature2")
 		//  return new Feature2Context(this);
-		return 0;
+		return nullptr;
             else
-                return 0;
+                return nullptr;
         }
 };
 
@@ -89,7 +89,7 @@ void ClientPlugin::testInsertRemovePlugin()
     QCOMPARE(QCA::providerPriority(providerName), 10);
 
     QVERIFY(QCA::unloadProvider(providerName));
-    QCOMPARE(QCA::findProvider(providerName), static_cast<QCA::Provider *>(0));
+    QCOMPARE(QCA::findProvider(providerName), static_cast<QCA::Provider *>(nullptr));
     QVERIFY(provider.isNull());
 }
 

@@ -104,8 +104,8 @@ public:
 		secmem = false;
 		loaded = false;
 		first_scan = false;
-		rng = 0;
-		logger = 0;
+		rng = nullptr;
+		logger = nullptr;
 		manager = new ProviderManager;
 	}
 
@@ -113,11 +113,11 @@ public:
 	{
 		KeyStoreManager::shutdown();
 		delete rng;
-		rng = 0;
+		rng = nullptr;
 		delete manager;
-		manager = 0;
+		manager = nullptr;
 		delete logger;
-		logger = 0;
+		logger = nullptr;
 	}
 
 	void ensure_loaded()
@@ -167,7 +167,7 @@ public:
 
 			// needed so deinit may delete the logger regardless
 			//   of what thread the logger was created from
-			logger->moveToThread(0);
+			logger->moveToThread(nullptr);
 		}
 		return logger;
 	}
@@ -181,7 +181,7 @@ public:
 		if(rng && (rng->provider() != manager->find("default")))
 		{
 			delete rng;
-			rng = 0;
+			rng = nullptr;
 		}
 		rng_mutex.unlock();
 
@@ -190,7 +190,7 @@ public:
 };
 
 Q_GLOBAL_STATIC(QMutex, global_mutex)
-static Global *global = 0;
+static Global *global = nullptr;
 
 static bool features_have(const QStringList &have, const QStringList &want)
 {
@@ -273,7 +273,7 @@ void deinit()
 		qRemovePostRoutine(deinit);
 
 		delete global;
-		global = 0;
+		global = nullptr;
 		botan_deinit();
 	}
 }
@@ -439,7 +439,7 @@ int providerPriority(const QString &name)
 Provider *findProvider(const QString &name)
 {
 	if(!global_check_load())
-		return 0;
+		return nullptr;
 
 	global->ensure_first_scan();
 
@@ -449,7 +449,7 @@ Provider *findProvider(const QString &name)
 Provider *defaultProvider()
 {
 	if(!global_check_load())
-		return 0;
+		return nullptr;
 
 	return global->manager->find("default");
 }
@@ -825,7 +825,7 @@ QByteArray base64ToArray(const QString &base64String)
 
 static Provider *getProviderForType(const QString &type, const QString &provider)
 {
-	Provider *p = 0;
+	Provider *p = nullptr;
 	bool scanned = global->ensure_first_scan();
 	if(!provider.isEmpty())
 	{
@@ -874,13 +874,13 @@ static inline Provider::Context *doCreateContext(Provider *p, const QString &typ
 Provider::Context *getContext(const QString &type, const QString &provider)
 {
 	if(!global_check_load())
-		return 0;
+		return nullptr;
 
 	Provider *p;
 	{
 		p = getProviderForType(type, provider);
 		if(!p)
-			return 0;
+			return nullptr;
 	}
 
 	return doCreateContext(p, type);
@@ -889,13 +889,13 @@ Provider::Context *getContext(const QString &type, const QString &provider)
 Provider::Context *getContext(const QString &type, Provider *_p)
 {
 	if(!global_check_load())
-		return 0;
+		return nullptr;
 
 	Provider *p;
 	{
 		p = global->manager->find(_p);
 		if(!p)
-			return 0;
+			return nullptr;
 	}
 
 	return doCreateContext(p, type);
@@ -987,13 +987,13 @@ bool Provider::Context::sameProvider(const Context *c) const
 BasicContext::BasicContext(Provider *parent, const QString &type)
 :Context(parent, type)
 {
-	moveToThread(0); // no thread association
+	moveToThread(nullptr); // no thread association
 }
 
 BasicContext::BasicContext(const BasicContext &from)
 :Context(from)
 {
-	moveToThread(0); // no thread association
+	moveToThread(nullptr); // no thread association
 }
 
 BasicContext::~BasicContext()
@@ -1168,7 +1168,7 @@ bool KeyStoreListContext::isReadOnly(int) const
 
 KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId)
 {
-	KeyStoreEntryContext *out = 0;
+	KeyStoreEntryContext *out = nullptr;
 	QList<KeyStoreEntryContext*> list = entryList(id);
 	for(int n = 0; n < list.count(); ++n)
 	{
@@ -1185,7 +1185,7 @@ KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId)
 KeyStoreEntryContext *KeyStoreListContext::entryPassive(const QString &serialized)
 {
 	Q_UNUSED(serialized);
-	return 0;
+	return nullptr;
 }
 
 QString KeyStoreListContext::writeEntry(int, const KeyBundle &)
@@ -1343,7 +1343,7 @@ Provider *Algorithm::provider() const
 	if(d)
 		return d->c->provider();
 	else
-		return 0;
+		return nullptr;
 }
 
 Provider::Context *Algorithm::context()
@@ -1351,7 +1351,7 @@ Provider::Context *Algorithm::context()
 	if(d)
 		return d->c;
 	else
-		return 0;
+		return nullptr;
 }
 
 const Provider::Context *Algorithm::context() const
@@ -1359,7 +1359,7 @@ const Provider::Context *Algorithm::context() const
 	if(d)
 		return d->c;
 	else
-		return 0;
+		return nullptr;
 }
 
 void Algorithm::change(Provider::Context *c)
@@ -1367,7 +1367,7 @@ void Algorithm::change(Provider::Context *c)
 	if(c)
 		d = new Private(c);
 	else
-		d = 0;
+		d = nullptr;
 }
 
 void Algorithm::change(const QString &type, const QString &provider)
@@ -1375,7 +1375,7 @@ void Algorithm::change(const QString &type, const QString &provider)
 	if(!type.isEmpty())
 		change(getContext(type, provider));
 	else
-		change(0);
+		change(nullptr);
 }
 
 Provider::Context *Algorithm::takeContext()
@@ -1383,12 +1383,12 @@ Provider::Context *Algorithm::takeContext()
 	if(d)
 	{
 		Provider::Context *c = d->c; // should cause a detach
-		d->c = 0;
-		d = 0;
+		d->c = nullptr;
+		d = nullptr;
 		return c;
 	}
 	else
-		return 0;
+		return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -1693,7 +1693,7 @@ static void asker_cancel(AskerBase *a);
 Q_GLOBAL_STATIC(QMutex, g_event_mutex)
 
 class EventGlobal;
-static EventGlobal *g_event = 0;
+static EventGlobal *g_event = nullptr;
 
 class EventGlobal
 {
@@ -1857,7 +1857,7 @@ void handler_remove(HandlerBase *h)
 	if(g_event->handlers.isEmpty())
 	{
 		delete g_event;
-		g_event = 0;
+		g_event = nullptr;
 	}
 }
 
@@ -2049,7 +2049,7 @@ public:
 	AskerPrivate(PasswordAsker *parent) : AskerBase(parent)
 	{
 		passwordAsker = parent;
-		tokenAsker = 0;
+		tokenAsker = nullptr;
 		type = Password;
 		accepted = false;
 		waiting = false;
@@ -2058,7 +2058,7 @@ public:
 
 	AskerPrivate(TokenAsker *parent) : AskerBase(parent)
 	{
-		passwordAsker = 0;
+		passwordAsker = nullptr;
 		tokenAsker = parent;
 		type = Token;
 		accepted = false;

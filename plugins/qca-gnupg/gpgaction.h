@@ -101,7 +101,7 @@ private:
 	void submitCommand(const QByteArray &a);
 
 	// since str is taken as a value, it is ok to use the same variable for 'rest'
-	QString nextArg(QString str, QString *rest = 0);
+	QString nextArg(QString str, QString *rest = nullptr);
 	void processStatusLine(const QString &line);
 	void processResult(int code);
 	void ensureDTextEmit();

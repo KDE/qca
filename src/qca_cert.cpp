@@ -28,7 +28,7 @@
 #include <QFile>
 #include <QUrl>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace QCA {
 
@@ -50,7 +50,7 @@ static bool get_pkcs12_der(const QByteArray &der, const QString &fileName, void 
 {
 	QString _name;
 	QList<CertContext*> list;
-	PKeyContext *kc = 0;
+	PKeyContext *kc = nullptr;
 
 	PKCS12Context *pix = static_cast<PKCS12Context *>(getContext("pkcs12", provider));
 	ConvertResult r = pix->fromPKCS12(der, passphrase, &_name, &list, &kc);
@@ -199,7 +199,7 @@ static const char OCSPSigning_id[]         = "1.3.6.1.5.5.7.3.9";
 
 static QString knownToId(CertificateInfoTypeKnown k)
 {
-	const char *out = 0;
+	const char *out = nullptr;
 	switch(k)
 	{
 		case CommonName:            out = CommonName_id; break;
@@ -294,12 +294,12 @@ static const char *knownToShortName(CertificateInfoTypeKnown k)
 		case EmailLegacy:        return "emailAddress";
 		default:                                      break;
 	}
-	return 0;
+	return nullptr;
 }
 
 static QString constraintKnownToId(ConstraintTypeKnown k)
 {
-	const char *out = 0;
+	const char *out = nullptr;
 	switch(k)
 	{
 		case DigitalSignature:   out = DigitalSignature_id; break;
@@ -529,7 +529,7 @@ static const char *constraintToString(const ConstraintType &type)
 		case TimeStamping:       return "TimeStamping";
 		case OCSPSigning:        return "OCSPSigning";
 	}
-	return 0;
+	return nullptr;
 }
 
 static QString uniqueConstraintValue(const ConstraintType &type, const QList<int> &items, const QList<Certificate> &certs, int i)
@@ -1430,7 +1430,7 @@ Certificate::Certificate()
 Certificate::Certificate(const QString &fileName)
 :d(new Private)
 {
-	*this = fromPEMFile(fileName, 0, QString());
+	*this = fromPEMFile(fileName, nullptr, QString());
 }
 
 Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
@@ -1813,7 +1813,7 @@ CertificateRequest::CertificateRequest()
 CertificateRequest::CertificateRequest(const QString &fileName)
 :d(new Private)
 {
-	*this = fromPEMFile(fileName, 0, QString());
+	*this = fromPEMFile(fileName, nullptr, QString());
 }
 
 CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
@@ -2436,13 +2436,13 @@ CertificateCollection CertificateCollection::fromFlatTextFile(const QString &fil
 			break;
 		if(isCRL)
 		{
-			CRL c = CRL::fromPEM(pem, 0, provider);
+			CRL c = CRL::fromPEM(pem, nullptr, provider);
 			if(!c.isNull())
 				certs.addCRL(c);
 		}
 		else
 		{
-			Certificate c = Certificate::fromPEM(pem, 0, provider);
+			Certificate c = Certificate::fromPEM(pem, nullptr, provider);
 			if(!c.isNull())
 				certs.addCertificate(c);
 		}
@@ -2570,7 +2570,7 @@ KeyBundle::KeyBundle()
 KeyBundle::KeyBundle(const QString &fileName, const SecureArray &passphrase)
 :d(new Private)
 {
-	*this = fromFile(fileName, passphrase, 0, QString());
+	*this = fromFile(fileName, passphrase, nullptr, QString());
 }
 
 KeyBundle::KeyBundle(const KeyBundle &from)
@@ -2655,7 +2655,7 @@ KeyBundle KeyBundle::fromFile(const QString &fileName, const SecureArray &passph
 	}
 
 	KeyBundle bundle;
-	get_pkcs12_der(der, fileName, 0, passphrase, result, provider, &bundle.d->name, &bundle.d->chain, &bundle.d->key);
+	get_pkcs12_der(der, fileName, nullptr, passphrase, result, provider, &bundle.d->name, &bundle.d->chain, &bundle.d->key);
 	return bundle;
 }
 
@@ -2668,7 +2668,7 @@ PGPKey::PGPKey()
 
 PGPKey::PGPKey(const QString &fileName)
 {
-	*this = fromFile(fileName, 0, QString());
+	*this = fromFile(fileName, nullptr, QString());
 }
 
 PGPKey::PGPKey(const PGPKey &from)
@@ -2877,7 +2877,7 @@ private Q_SLOTS:
 	{
 		out = thread->out;
 		delete thread;
-		thread = 0;
+		thread = nullptr;
 		active = false;
 
 		emit q->finished();

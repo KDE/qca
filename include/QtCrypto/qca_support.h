@@ -319,7 +319,7 @@ public:
 	   \param ok if not 0, true is stored here if the call succeeds,
 	   otherwise false is stored here.
 	*/
-	QVariant call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(), bool *ok = 0);
+	QVariant call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(), bool *ok = nullptr);
 
 protected:
 	/**

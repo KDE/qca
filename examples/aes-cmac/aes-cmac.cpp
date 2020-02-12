@@ -223,7 +223,7 @@ public:
 	    // else if (type == some other feature)
 	    //  return some other context.
 	    else
-		return 0;
+		return nullptr;
         }
 };
 

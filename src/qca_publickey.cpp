@@ -95,7 +95,7 @@ Provider *providerForName(const QString &name)
 		if(pl[n]->name() == name)
 			return pl[n];
 	}
-	return 0;
+	return nullptr;
 }
 
 bool use_asker_fallback(ConvertResult r)
@@ -249,12 +249,12 @@ Provider *providerForGroupSet(DLGroupSet set)
 		if(Getter_GroupSet::getList(pl[n]).contains(set))
 			return pl[n];
 	}
-	return 0;
+	return nullptr;
 }
 
-Provider *providerForPBE(PBEAlgorithm alg, PKey::Type ioType, const PKeyContext *prefer = 0)
+Provider *providerForPBE(PBEAlgorithm alg, PKey::Type ioType, const PKeyContext *prefer = nullptr)
 {
-	Provider *preferProvider = 0;
+	Provider *preferProvider = nullptr;
 	if(prefer)
 	{
 		preferProvider = prefer->provider();
@@ -271,12 +271,12 @@ Provider *providerForPBE(PBEAlgorithm alg, PKey::Type ioType, const PKeyContext 
 		if(Getter_PBE::getList(pl[n]).contains(alg) && Getter_IOType::getList(pl[n]).contains(ioType))
 			return pl[n];
 	}
-	return 0;
+	return nullptr;
 }
 
-Provider *providerForIOType(PKey::Type type, const PKeyContext *prefer = 0)
+Provider *providerForIOType(PKey::Type type, const PKeyContext *prefer = nullptr)
 {
-	Provider *preferProvider = 0;
+	Provider *preferProvider = nullptr;
 	if(prefer)
 	{
 		preferProvider = prefer->provider();
@@ -293,7 +293,7 @@ Provider *providerForIOType(PKey::Type type, const PKeyContext *prefer = 0)
 		if(Getter_IOType::getList(pl[n]).contains(type))
 			return pl[n];
 	}
-	return 0;
+	return nullptr;
 }
 
 template <typename T, typename G>
@@ -484,7 +484,7 @@ public:
 
 DLGroup::DLGroup()
 {
-	d = 0;
+	d = nullptr;
 }
 
 DLGroup::DLGroup(const BigInteger &p, const BigInteger &q, const BigInteger &g)
@@ -499,7 +499,7 @@ DLGroup::DLGroup(const BigInteger &p, const BigInteger &g)
 
 DLGroup::DLGroup(const DLGroup &from)
 {
-	d = 0;
+	d = nullptr;
 	*this = from;
 }
 
@@ -511,7 +511,7 @@ DLGroup::~DLGroup()
 DLGroup & DLGroup::operator=(const DLGroup &from)
 {
 	delete d;
-	d = 0;
+	d = nullptr;
 
 	if(from.d)
 		d = new Private(*from.d);
@@ -769,7 +769,7 @@ PublicKey::PublicKey(const PrivateKey &k)
 
 PublicKey::PublicKey(const QString &fileName)
 {
-	*this = fromPEMFile(fileName, 0, QString());
+	*this = fromPEMFile(fileName, nullptr, QString());
 }
 
 PublicKey::PublicKey(const PublicKey &from)
@@ -962,7 +962,7 @@ PrivateKey::PrivateKey(const QString &type, const QString &provider)
 
 PrivateKey::PrivateKey(const QString &fileName, const SecureArray &passphrase)
 {
-	*this = fromPEMFile(fileName, passphrase, 0, QString());
+	*this = fromPEMFile(fileName, passphrase, nullptr, QString());
 }
 
 PrivateKey::PrivateKey(const PrivateKey &from)
@@ -1130,7 +1130,7 @@ PrivateKey PrivateKey::fromPEMFile(const QString &fileName, const SecureArray &p
 			*result = ErrorFile;
 		return PrivateKey();
 	}
-	return get_privatekey_pem(pem, fileName, 0, passphrase, result, provider);
+	return get_privatekey_pem(pem, fileName, nullptr, passphrase, result, provider);
 }
 
 //----------------------------------------------------------------------------
@@ -1151,9 +1151,9 @@ public:
 
 	Private(KeyGenerator *_parent) : QObject(_parent), parent(_parent)
 	{
-		k = 0;
-		dest = 0;
-		dc = 0;
+		k = nullptr;
+		dest = nullptr;
+		dc = nullptr;
 	}
 
 	~Private() override
@@ -1170,21 +1170,21 @@ public Q_SLOTS:
 		{
 			if(!wasBlocking)
 			{
-				k->setParent(0);
-				k->moveToThread(0);
+				k->setParent(nullptr);
+				k->moveToThread(nullptr);
 			}
 			dest->setKey(k);
-			k = 0;
+			k = nullptr;
 
 			key.change(dest);
-			dest = 0;
+			dest = nullptr;
 		}
 		else
 		{
 			delete k;
-			k = 0;
+			k = nullptr;
 			delete dest;
-			dest = 0;
+			dest = nullptr;
 		}
 
 		if(!wasBlocking)
@@ -1200,7 +1200,7 @@ public Q_SLOTS:
 			group = DLGroup(p, q, g);
 		}
 		delete dc;
-		dc = 0;
+		dc = nullptr;
 
 		if(!wasBlocking)
 			emit parent->finished();

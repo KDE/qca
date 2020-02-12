@@ -25,7 +25,7 @@
 // NOTE: this API is private to QCA
 
 #include <QSocketNotifier>
-#include <stdio.h>
+#include <cstdio>
 
 namespace QCA {
 

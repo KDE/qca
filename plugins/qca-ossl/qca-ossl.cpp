@@ -30,8 +30,8 @@
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 
 #include <openssl/rand.h>
@@ -95,7 +95,7 @@ static BigInteger bn2bi(const BIGNUM *n)
 static BIGNUM *bi2bn(const BigInteger &n)
 {
 	SecureArray buf = n.toArray();
-	return BN_bin2bn((const unsigned char *)buf.data(), buf.size(), NULL);
+	return BN_bin2bn((const unsigned char *)buf.data(), buf.size(), nullptr);
 }
 
 // take lowest bytes of BIGNUM to fit
@@ -141,14 +141,14 @@ static SecureArray dsasig_raw_to_der(const SecureArray &in)
 	SecureArray part_s(20); BIGNUM *bns;
 	memcpy(part_r.data(), in.data(), 20);
 	memcpy(part_s.data(), in.data() + 20, 20);
-	bnr = BN_bin2bn((const unsigned char *)part_r.data(), part_r.size(), NULL);
-	bns = BN_bin2bn((const unsigned char *)part_s.data(), part_s.size(), NULL);
+	bnr = BN_bin2bn((const unsigned char *)part_r.data(), part_r.size(), nullptr);
+	bns = BN_bin2bn((const unsigned char *)part_s.data(), part_s.size(), nullptr);
 
 	if(DSA_SIG_set0(sig, bnr, bns) == 0)
 		return SecureArray();
 	// Not documented what happens in the failure case, free bnr and bns?
 
-	int len = i2d_DSA_SIG(sig, NULL);
+	int len = i2d_DSA_SIG(sig, nullptr);
 	SecureArray result(len);
 	unsigned char *p = (unsigned char *)result.data();
 	i2d_DSA_SIG(sig, &p);
@@ -267,7 +267,7 @@ static void try_add_name_item(X509_NAME **name, int nid, const QString &val)
 
 static X509_NAME *new_cert_name(const CertificateInfo &info)
 {
-	X509_NAME *name = 0;
+	X509_NAME *name = nullptr;
 	// FIXME support multiple items of each type
 	try_add_name_item(&name, NID_commonName, info.value(CommonName));
 	try_add_name_item(&name, NID_countryName, info.value(Country));
@@ -342,8 +342,8 @@ static X509_EXTENSION *new_subject_key_id(X509 *cert)
 {
 	X509V3_CTX ctx;
 	X509V3_set_ctx_nodb(&ctx);
-	X509V3_set_ctx(&ctx, NULL, cert, NULL, NULL, 0);
-	X509_EXTENSION *ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_subject_key_identifier, (char *)"hash");
+	X509V3_set_ctx(&ctx, nullptr, cert, nullptr, nullptr, 0);
+	X509_EXTENSION *ex = X509V3_EXT_conf_nid(nullptr, &ctx, NID_subject_key_identifier, (char *)"hash");
 	return ex;
 }
 
@@ -390,7 +390,7 @@ static QByteArray ipaddress_string_to_bytes(const QString &)
 
 static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QString &val)
 {
-	GENERAL_NAME *name = 0;
+	GENERAL_NAME *name = nullptr;
 	switch(t.known())
 	{
 	case Email:
@@ -482,7 +482,7 @@ static void try_add_general_name(GENERAL_NAMES **gn, const CertificateInfoType &
 
 static X509_EXTENSION *new_cert_subject_alt_name(const CertificateInfo &info)
 {
-	GENERAL_NAMES *gn = 0;
+	GENERAL_NAMES *gn = nullptr;
 	// FIXME support multiple items of each type
 	try_add_general_name(&gn, Email, info.value(Email));
 	try_add_general_name(&gn, URI, info.value(URI));
@@ -490,7 +490,7 @@ static X509_EXTENSION *new_cert_subject_alt_name(const CertificateInfo &info)
 	try_add_general_name(&gn, IPAddress, info.value(IPAddress));
 	try_add_general_name(&gn, XMPP, info.value(XMPP));
 	if(!gn)
-		return 0;
+		return nullptr;
 
 	X509_EXTENSION *ex = X509V3_EXT_i2d(NID_subject_alt_name, 0, gn);
 	sk_GENERAL_NAME_pop_free(gn, GENERAL_NAME_free);
@@ -500,7 +500,7 @@ static X509_EXTENSION *new_cert_subject_alt_name(const CertificateInfo &info)
 static GENERAL_NAME *find_next_general_name(GENERAL_NAMES *names, int type, int *pos)
 {
 	int temp = *pos;
-	GENERAL_NAME *gn = 0;
+	GENERAL_NAME *gn = nullptr;
 	*pos = -1;
 	for(int n = temp; n < sk_GENERAL_NAME_num(names); ++n)
 	{
@@ -643,7 +643,7 @@ static CertificateInfo get_cert_alt_name(X509_EXTENSION *ex)
 
 static X509_EXTENSION *new_cert_key_usage(const Constraints &constraints)
 {
-	ASN1_BIT_STRING *keyusage = 0;
+	ASN1_BIT_STRING *keyusage = nullptr;
 	for(int n = 0; n < constraints.count(); ++n)
 	{
 		int bit = -1;
@@ -687,7 +687,7 @@ static X509_EXTENSION *new_cert_key_usage(const Constraints &constraints)
 		}
 	}
 	if(!keyusage)
-		return 0;
+		return nullptr;
 
 	X509_EXTENSION *ex = X509V3_EXT_i2d(NID_key_usage, 1, keyusage); // 1 = critical
 	ASN1_BIT_STRING_free(keyusage);
@@ -722,7 +722,7 @@ static Constraints get_cert_key_usage(X509_EXTENSION *ex)
 
 static X509_EXTENSION *new_cert_ext_key_usage(const Constraints &constraints)
 {
-	EXTENDED_KEY_USAGE *extkeyusage = 0;
+	EXTENDED_KEY_USAGE *extkeyusage = nullptr;
 	for(int n = 0; n < constraints.count(); ++n)
 	{
 		int nid = -1;
@@ -768,7 +768,7 @@ static X509_EXTENSION *new_cert_ext_key_usage(const Constraints &constraints)
 		}
 	}
 	if(!extkeyusage)
-		return 0;
+		return nullptr;
 
 	X509_EXTENSION *ex = X509V3_EXT_i2d(NID_ext_key_usage, 0, extkeyusage); // 0 = not critical
 	sk_ASN1_OBJECT_pop_free(extkeyusage, ASN1_OBJECT_free);
@@ -831,7 +831,7 @@ static Constraints get_cert_ext_key_usage(X509_EXTENSION *ex)
 
 static X509_EXTENSION *new_cert_policies(const QStringList &policies)
 {
-	STACK_OF(POLICYINFO) *pols = 0;
+	STACK_OF(POLICYINFO) *pols = nullptr;
 	for(int n = 0; n < policies.count(); ++n)
 	{
 		QByteArray cs = policies[n].toLatin1();
@@ -845,7 +845,7 @@ static X509_EXTENSION *new_cert_policies(const QStringList &policies)
 		sk_POLICYINFO_push(pols, pol);
 	}
 	if(!pols)
-		return 0;
+		return nullptr;
 
 	X509_EXTENSION *ex = X509V3_EXT_i2d(NID_certificate_policies, 0, pols); // 0 = not critical
 	sk_POLICYINFO_pop_free(pols, POLICYINFO_free);
@@ -953,7 +953,7 @@ EVP_PKEY *qca_d2i_PKCS8PrivateKey(const SecureArray &in, EVP_PKEY **x, pem_passw
 	// first try unencrypted form
 	BIO *bi = BIO_new(BIO_s_mem());
 	BIO_write(bi, in.data(), in.size());
-	p8inf = d2i_PKCS8_PRIV_KEY_INFO_bio(bi, NULL);
+	p8inf = d2i_PKCS8_PRIV_KEY_INFO_bio(bi, nullptr);
 	BIO_free(bi);
 	if(!p8inf)
 	{
@@ -962,10 +962,10 @@ EVP_PKEY *qca_d2i_PKCS8PrivateKey(const SecureArray &in, EVP_PKEY **x, pem_passw
 		// now try encrypted form
 		bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
-		p8 = d2i_PKCS8_bio(bi, NULL);
+		p8 = d2i_PKCS8_bio(bi, nullptr);
 		BIO_free(bi);
 		if(!p8)
-			return NULL;
+			return nullptr;
 
 		// get passphrase
 		char psbuf[PEM_BUFSIZE];
@@ -978,20 +978,20 @@ EVP_PKEY *qca_d2i_PKCS8PrivateKey(const SecureArray &in, EVP_PKEY **x, pem_passw
 		{
 			PEMerr(PEM_F_D2I_PKCS8PRIVATEKEY_BIO, PEM_R_BAD_PASSWORD_READ);
 			X509_SIG_free(p8);
-			return NULL;
+			return nullptr;
 		}
 
 		// decrypt it
 		p8inf = PKCS8_decrypt(p8, psbuf, klen);
 		X509_SIG_free(p8);
 		if(!p8inf)
-			return NULL;
+			return nullptr;
 	}
 
 	EVP_PKEY *ret = EVP_PKCS82PKEY(p8inf);
 	PKCS8_PRIV_KEY_INFO_free(p8inf);
 	if(!ret)
-		return NULL;
+		return nullptr;
 	if(x)
 	{
 		if(*x)
@@ -1040,7 +1040,7 @@ public:
 	MemoryRegion final() override
 	{
 		SecureArray a( EVP_MD_size( m_algorithm ) );
-		EVP_DigestFinal( m_context, (unsigned char*)a.data(), 0 );
+		EVP_DigestFinal( m_context, (unsigned char*)a.data(), nullptr );
 		return a;
 	}
 
@@ -1113,13 +1113,13 @@ public:
 		EVP_DigestUpdate( m_context, (unsigned char*)secret.data(), secret.size() );
 		EVP_DigestUpdate( m_context, (unsigned char*)salt.data(), salt.size() );
 		SecureArray a( EVP_MD_size( m_algorithm ) );
-		EVP_DigestFinal( m_context, (unsigned char*)a.data(), 0 );
+		EVP_DigestFinal( m_context, (unsigned char*)a.data(), nullptr );
 
 		// calculate T_2 up to T_c
 		for ( unsigned int i = 2; i <= iterationCount; ++i ) {
 			EVP_DigestInit( m_context, m_algorithm );
 			EVP_DigestUpdate( m_context, (unsigned char*)a.data(), a.size() );
-			EVP_DigestFinal( m_context, (unsigned char*)a.data(), 0 );
+			EVP_DigestFinal( m_context, (unsigned char*)a.data(), nullptr );
 		}
 
 		// shrink a to become DK, of the required length
@@ -1137,7 +1137,7 @@ public:
 						 int msecInterval,
 						 unsigned int *iterationCount) override
 	{
-		Q_ASSERT(iterationCount != NULL);
+		Q_ASSERT(iterationCount != nullptr);
 		QElapsedTimer timer;
 
 		/* from RFC2898:
@@ -1168,7 +1168,7 @@ public:
 		EVP_DigestUpdate( m_context, (unsigned char*)secret.data(), secret.size() );
 		EVP_DigestUpdate( m_context, (unsigned char*)salt.data(), salt.size() );
 		SecureArray a( EVP_MD_size( m_algorithm ) );
-		EVP_DigestFinal( m_context, (unsigned char*)a.data(), 0 );
+		EVP_DigestFinal( m_context, (unsigned char*)a.data(), nullptr );
 
 		// calculate T_2 up to T_c
 		*iterationCount = 2 - 1;	// <- Have to remove 1, unless it computes one
@@ -1177,7 +1177,7 @@ public:
 		while (timer.elapsed() < msecInterval) {
 			EVP_DigestInit( m_context, m_algorithm );
 			EVP_DigestUpdate( m_context, (unsigned char*)a.data(), a.size() );
-			EVP_DigestFinal( m_context, (unsigned char*)a.data(), 0 );
+			EVP_DigestFinal( m_context, (unsigned char*)a.data(), nullptr );
 			++(*iterationCount);
 		}
 
@@ -1224,7 +1224,7 @@ public:
 						 int msecInterval,
 						 unsigned int *iterationCount) override
 	{
-		Q_ASSERT(iterationCount != NULL);
+		Q_ASSERT(iterationCount != nullptr);
 		QElapsedTimer timer;
 		SecureArray out(keyLength);
 
@@ -1272,7 +1272,7 @@ public:
 						 const InitializationVector &info, unsigned int keyLength) override
 	{
 		SecureArray out(keyLength);
-		EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
+		EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, nullptr);
 		EVP_PKEY_derive_init(pctx);
 		EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_sha256());
 		EVP_PKEY_CTX_set1_hkdf_salt(pctx, salt.data(), int(salt.size()));
@@ -1310,7 +1310,7 @@ public:
 
 	void setup(const SymmetricKey &key) override
 	{
-		HMAC_Init_ex( m_context, key.data(), key.size(), m_algorithm, 0 );
+		HMAC_Init_ex( m_context, key.data(), key.size(), m_algorithm, nullptr );
 	}
 
 	KeyLength keyLength() const override
@@ -1326,7 +1326,7 @@ public:
 	void final(MemoryRegion *out) override
 	{
 		SecureArray sa( EVP_MD_size( m_algorithm ), 0 );
-		HMAC_Final(m_context, (unsigned char *)sa.data(), 0 );
+		HMAC_Final(m_context, (unsigned char *)sa.data(), nullptr );
 		HMAC_CTX_reset(m_context);
 		*out = sa;
 	}
@@ -1358,7 +1358,7 @@ public:
 
 	EVPKey()
 	{
-		pkey = 0;
+		pkey = nullptr;
 		raw_type = false;
 		state = Idle;
 		mdctx = EVP_MD_CTX_new();
@@ -1386,7 +1386,7 @@ public:
 	{
 		if(pkey)
 			EVP_PKEY_free(pkey);
-		pkey = 0;
+		pkey = nullptr;
 		raw.clear ();
 		raw_type = false;
 	}
@@ -1403,7 +1403,7 @@ public:
 		{
 			raw_type = false;
 			EVP_MD_CTX_init(mdctx);
-			if(!EVP_SignInit_ex(mdctx, type, NULL))
+			if(!EVP_SignInit_ex(mdctx, type, nullptr))
 				state = SignError;
 		}
 	}
@@ -1420,7 +1420,7 @@ public:
 		{
 			raw_type = false;
 			EVP_MD_CTX_init(mdctx);
-			if(!EVP_VerifyInit_ex(mdctx, type, NULL))
+			if(!EVP_VerifyInit_ex(mdctx, type, nullptr))
 				state = VerifyError;
 		}
 	}
@@ -1658,7 +1658,7 @@ static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams
 		return false;
 
 	if (DSA_generate_parameters_ex(dsa.data(), bits, (const unsigned char *)seed.data(), seed.size(),
-			&ret_counter, NULL, NULL) != 1)
+			&ret_counter, nullptr, nullptr) != 1)
 		return false;
 
 	if(ret_counter != counter)
@@ -1748,13 +1748,13 @@ public:
 
 	MyDLGroup(Provider *p) : DLGroupContext(p)
 	{
-		gm = 0;
+		gm = nullptr;
 		empty = true;
 	}
 
 	MyDLGroup(const MyDLGroup &from) : DLGroupContext(from.provider())
 	{
-		gm = 0;
+		gm = nullptr;
 		empty = true;
 	}
 
@@ -1830,7 +1830,7 @@ private Q_SLOTS:
 			delete gm;
 		else
 			gm->deleteLater();
-		gm = 0;
+		gm = nullptr;
 
 		if(!wasBlocking)
 			emit finished();
@@ -1867,7 +1867,7 @@ public:
 	RSA *result;
 	int bits, exp;
 
-	RSAKeyMaker(int _bits, int _exp, QObject *parent = nullptr) : QThread(parent), result(0), bits(_bits), exp(_exp)
+	RSAKeyMaker(int _bits, int _exp, QObject *parent = nullptr) : QThread(parent), result(nullptr), bits(_bits), exp(_exp)
 	{
 	}
 
@@ -1892,7 +1892,7 @@ public:
 		if (BN_set_word(e.data(), exp) != 1)
 			return;
 
-		if (RSA_generate_key_ex(rsa.data(), bits, e.data(), NULL) == 0)
+		if (RSA_generate_key_ex(rsa.data(), bits, e.data(), nullptr) == 0)
 			return;
 
 		result = rsa.take();
@@ -1901,7 +1901,7 @@ public:
 	RSA *takeResult()
 	{
 		RSA *rsa = result;
-		result = 0;
+		result = nullptr;
 		return rsa;
 	}
 };
@@ -1917,13 +1917,13 @@ public:
 
 	RSAKey(Provider *p) : RSAContext(p)
 	{
-		keymaker = 0;
+		keymaker = nullptr;
 		sec = false;
 	}
 
 	RSAKey(const RSAKey &from) : RSAContext(from.provider()), evp(from.evp)
 	{
-		keymaker = 0;
+		keymaker = nullptr;
 		sec = from.sec;
 	}
 
@@ -1964,7 +1964,7 @@ public:
 
 		// extract the public key into DER format
 		RSA *rsa_pkey = EVP_PKEY_get0_RSA(evp.pkey);
-		int len = i2d_RSAPublicKey(rsa_pkey, NULL);
+		int len = i2d_RSAPublicKey(rsa_pkey, nullptr);
 		SecureArray result(len);
 		unsigned char *p = (unsigned char *)result.data();
 		i2d_RSAPublicKey(rsa_pkey, &p);
@@ -1972,7 +1972,7 @@ public:
 
 		// put the DER public key back into openssl
 		evp.reset();
-		RSA *rsa = d2i_RSAPublicKey(NULL, (const unsigned char **)&p, result.size());
+		RSA *rsa = d2i_RSAPublicKey(nullptr, (const unsigned char **)&p, result.size());
 		evp.pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_RSA(evp.pkey, rsa);
 		sec = false;
@@ -2062,7 +2062,7 @@ public:
 
 	void startSign(SignatureAlgorithm alg, SignatureFormat) override
 	{
-		const EVP_MD *md = 0;
+		const EVP_MD *md = nullptr;
 		if(alg == EMSA3_SHA1)
 			md = EVP_sha1();
 		else if(alg == EMSA3_MD5)
@@ -2090,7 +2090,7 @@ public:
 
 	void startVerify(SignatureAlgorithm alg, SignatureFormat) override
 	{
-		const EVP_MD *md = 0;
+		const EVP_MD *md = nullptr;
 		if(alg == EMSA3_SHA1)
 			md = EVP_sha1();
 		else if(alg == EMSA3_MD5)
@@ -2135,7 +2135,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new RSAKeyMaker(bits, exp, !block ? this : 0);
+		keymaker = new RSAKeyMaker(bits, exp, !block ? this : nullptr);
 		wasBlocking = block;
 		if(block)
 		{
@@ -2178,7 +2178,7 @@ public:
 		evp.reset();
 
 		RSA *rsa = RSA_new();
-		if(RSA_set0_key(rsa, bi2bn(n), bi2bn(e), NULL) == 0)
+		if(RSA_set0_key(rsa, bi2bn(n), bi2bn(e), nullptr) == 0)
 		{
 			RSA_free(rsa);
 			return;
@@ -2193,7 +2193,7 @@ public:
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnn;
-		RSA_get0_key(rsa, &bnn, NULL, NULL);
+		RSA_get0_key(rsa, &bnn, nullptr, nullptr);
 		return bn2bi(bnn);
 	}
 
@@ -2201,7 +2201,7 @@ public:
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bne;
-		RSA_get0_key(rsa, NULL, &bne, NULL);
+		RSA_get0_key(rsa, nullptr, &bne, nullptr);
 		return bn2bi(bne);
 	}
 
@@ -2209,7 +2209,7 @@ public:
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnp;
-		RSA_get0_factors(rsa, &bnp, NULL);
+		RSA_get0_factors(rsa, &bnp, nullptr);
 		return bn2bi(bnp);
 	}
 
@@ -2217,7 +2217,7 @@ public:
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnq;
-		RSA_get0_factors(rsa, NULL, &bnq);
+		RSA_get0_factors(rsa, nullptr, &bnq);
 		return bn2bi(bnq);
 	}
 
@@ -2225,7 +2225,7 @@ public:
 	{
 		RSA *rsa = EVP_PKEY_get0_RSA(evp.pkey);
 		const BIGNUM *bnd;
-		RSA_get0_key(rsa, NULL, NULL, &bnd);
+		RSA_get0_key(rsa, nullptr, nullptr, &bnd);
 		return bn2bi(bnd);
 	}
 
@@ -2237,7 +2237,7 @@ private Q_SLOTS:
 			delete keymaker;
 		else
 			keymaker->deleteLater();
-		keymaker = 0;
+		keymaker = nullptr;
 
 		if(rsa)
 		{
@@ -2261,7 +2261,7 @@ public:
 	DLGroup domain;
 	DSA *result;
 
-	DSAKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) : QThread(parent), domain(_domain), result(0)
+	DSAKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) : QThread(parent), domain(_domain), result(nullptr)
 	{
 	}
 
@@ -2291,7 +2291,7 @@ public:
 	DSA *takeResult()
 	{
 		DSA *dsa = result;
-		result = 0;
+		result = nullptr;
 		return dsa;
 	}
 };
@@ -2309,13 +2309,13 @@ public:
 
 	DSAKey(Provider *p) : DSAContext(p)
 	{
-		keymaker = 0;
+		keymaker = nullptr;
 		sec = false;
 	}
 
 	DSAKey(const DSAKey &from) : DSAContext(from.provider()), evp(from.evp)
 	{
-		keymaker = 0;
+		keymaker = nullptr;
 		sec = from.sec;
 	}
 
@@ -2356,7 +2356,7 @@ public:
 
 		// extract the public key into DER format
 		DSA *dsa_pkey = EVP_PKEY_get0_DSA(evp.pkey);
-		int len = i2d_DSAPublicKey(dsa_pkey, NULL);
+		int len = i2d_DSAPublicKey(dsa_pkey, nullptr);
 		SecureArray result(len);
 		unsigned char *p = (unsigned char *)result.data();
 		i2d_DSAPublicKey(dsa_pkey, &p);
@@ -2364,7 +2364,7 @@ public:
 
 		// put the DER public key back into openssl
 		evp.reset();
-		DSA *dsa = d2i_DSAPublicKey(NULL, (const unsigned char **)&p, result.size());
+		DSA *dsa = d2i_DSAPublicKey(nullptr, (const unsigned char **)&p, result.size());
 		evp.pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DSA(evp.pkey, dsa);
 		sec = false;
@@ -2425,7 +2425,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new DSAKeyMaker(domain, !block ? this : 0);
+		keymaker = new DSAKeyMaker(domain, !block ? this : nullptr);
 		wasBlocking = block;
 		if(block)
 		{
@@ -2473,7 +2473,7 @@ public:
 		BIGNUM *bnpub_key = bi2bn(y);
 
 		if(!DSA_set0_pqg(dsa, bnp, bnq, bng)
-		    || !DSA_set0_key(dsa, bnpub_key, NULL))
+		    || !DSA_set0_key(dsa, bnpub_key, nullptr))
 		{
 			DSA_free(dsa);
 			return;
@@ -2496,7 +2496,7 @@ public:
 	{
 		DSA *dsa = EVP_PKEY_get0_DSA(evp.pkey);
 		const BIGNUM *bnpub_key;
-		DSA_get0_key(dsa, &bnpub_key, NULL);
+		DSA_get0_key(dsa, &bnpub_key, nullptr);
 		return bn2bi(bnpub_key);
 	}
 
@@ -2504,7 +2504,7 @@ public:
 	{
 		DSA *dsa = EVP_PKEY_get0_DSA(evp.pkey);
 		const BIGNUM *bnpriv_key;
-		DSA_get0_key(dsa, NULL, &bnpriv_key);
+		DSA_get0_key(dsa, nullptr, &bnpriv_key);
 		return bn2bi(bnpriv_key);
 	}
 
@@ -2516,7 +2516,7 @@ private Q_SLOTS:
 			delete keymaker;
 		else
 			keymaker->deleteLater();
-		keymaker = 0;
+		keymaker = nullptr;
 
 		if(dsa)
 		{
@@ -2540,7 +2540,7 @@ public:
 	DLGroup domain;
 	DH *result;
 
-	DHKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) : QThread(parent), domain(_domain), result(0)
+	DHKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) : QThread(parent), domain(_domain), result(nullptr)
 	{
 	}
 
@@ -2556,7 +2556,7 @@ public:
 		DH *dh = DH_new();
 		BIGNUM *bnp = bi2bn(domain.p());
 		BIGNUM *bng = bi2bn(domain.g());
-		if(!DH_set0_pqg(dh, bnp, NULL, bng)
+		if(!DH_set0_pqg(dh, bnp, nullptr, bng)
 		        || !DH_generate_key(dh))
 		{
 			DH_free(dh);
@@ -2568,7 +2568,7 @@ public:
 	DH *takeResult()
 	{
 		DH *dh = result;
-		result = 0;
+		result = nullptr;
 		return dh;
 	}
 };
@@ -2584,13 +2584,13 @@ public:
 
 	DHKey(Provider *p) : DHContext(p)
 	{
-		keymaker = 0;
+		keymaker = nullptr;
 		sec = false;
 	}
 
 	DHKey(const DHKey &from) : DHContext(from.provider()), evp(from.evp)
 	{
-		keymaker = 0;
+		keymaker = nullptr;
 		sec = from.sec;
 	}
 
@@ -2632,11 +2632,11 @@ public:
 		DH *orig = EVP_PKEY_get0_DH(evp.pkey);
 		DH *dh = DH_new();
 		const BIGNUM *bnp, *bng, *bnpub_key;
-		DH_get0_pqg(orig, &bnp, NULL, &bng);
-		DH_get0_key(orig, &bnpub_key, NULL);
+		DH_get0_pqg(orig, &bnp, nullptr, &bng);
+		DH_get0_key(orig, &bnpub_key, nullptr);
 
-		DH_set0_key(dh, BN_dup(bnpub_key), NULL);
-		DH_set0_pqg(dh, BN_dup(bnp), NULL, BN_dup(bng));
+		DH_set0_key(dh, BN_dup(bnpub_key), nullptr);
+		DH_set0_pqg(dh, BN_dup(bnp), nullptr, BN_dup(bng));
 
 		evp.reset();
 
@@ -2655,7 +2655,7 @@ public:
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		DH *them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
 		const BIGNUM *bnpub_key;
-		DH_get0_key(them, &bnpub_key, NULL);
+		DH_get0_key(them, &bnpub_key, nullptr);
 
 		SecureArray result(DH_size(dh));
 		int ret = DH_compute_key((unsigned char *)result.data(), bnpub_key, dh);
@@ -2669,7 +2669,7 @@ public:
 	{
 		evp.reset();
 
-		keymaker = new DHKeyMaker(domain, !block ? this : 0);
+		keymaker = new DHKeyMaker(domain, !block ? this : nullptr);
 		wasBlocking = block;
 		if(block)
 		{
@@ -2694,7 +2694,7 @@ public:
 		BIGNUM *bnpriv_key = bi2bn(x);
 
 		if(!DH_set0_key(dh, bnpub_key, bnpriv_key)
-		    || !DH_set0_pqg(dh, bnp, NULL, bng))
+		    || !DH_set0_pqg(dh, bnp, nullptr, bng))
 		{
 			DH_free(dh);
 			return;
@@ -2714,8 +2714,8 @@ public:
 		BIGNUM *bng = bi2bn(domain.g());
 		BIGNUM *bnpub_key = bi2bn(y);
 
-        if(!DH_set0_key(dh, bnpub_key, NULL)
-                || !DH_set0_pqg(dh, bnp, NULL, bng))
+        if(!DH_set0_key(dh, bnpub_key, nullptr)
+                || !DH_set0_pqg(dh, bnp, nullptr, bng))
 		{
 			DH_free(dh);
 			return;
@@ -2730,7 +2730,7 @@ public:
 	{
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		const BIGNUM *bnp, *bng;
-		DH_get0_pqg(dh, &bnp, NULL, &bng);
+		DH_get0_pqg(dh, &bnp, nullptr, &bng);
 		return DLGroup(bn2bi(bnp), bn2bi(bng));
 	}
 
@@ -2738,7 +2738,7 @@ public:
 	{
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		const BIGNUM *bnpub_key;
-		DH_get0_key(dh, &bnpub_key, NULL);
+		DH_get0_key(dh, &bnpub_key, nullptr);
 		return bn2bi(bnpub_key);
 	}
 
@@ -2746,7 +2746,7 @@ public:
 	{
 		DH *dh = EVP_PKEY_get0_DH(evp.pkey);
 		const BIGNUM *bnpriv_key;
-		DH_get0_key(dh, NULL, &bnpriv_key);
+		DH_get0_key(dh, nullptr, &bnpriv_key);
 		return bn2bi(bnpriv_key);
 	}
 
@@ -2758,7 +2758,7 @@ private Q_SLOTS:
 			delete keymaker;
 		else
 			keymaker->deleteLater();
-		keymaker = 0;
+		keymaker = nullptr;
 
 		if(dh)
 		{
@@ -2790,20 +2790,20 @@ public:
 		BIGNUM *bnn = bi2bn(_key.n());
 		BIGNUM *bne = bi2bn(_key.e());
 
-		RSA_set0_key(rsa, bnn, bne, NULL);
+		RSA_set0_key(rsa, bnn, bne, nullptr);
 	}
 
 	RSA_METHOD *rsa_method()
 	{
-		static RSA_METHOD *ops = 0;
+		static RSA_METHOD *ops = nullptr;
 
 		if(!ops)
 		{
 			ops = RSA_meth_dup(RSA_get_default_method());
-			RSA_meth_set_priv_enc(ops, NULL); //pkcs11_rsa_encrypt
+			RSA_meth_set_priv_enc(ops, nullptr); //pkcs11_rsa_encrypt
 			RSA_meth_set_priv_dec(ops, rsa_priv_dec); //pkcs11_rsa_encrypt
-			RSA_meth_set_sign(ops, NULL);
-			RSA_meth_set_verify(ops, NULL); //pkcs11_rsa_verify
+			RSA_meth_set_sign(ops, nullptr);
+			RSA_meth_set_verify(ops, nullptr); //pkcs11_rsa_verify
 			RSA_meth_set_finish(ops, rsa_finish);
 		}
 		return ops;
@@ -2870,7 +2870,7 @@ public:
 
 	MyPKeyContext(Provider *p) : PKeyContext(p)
 	{
-		k = 0;
+		k = nullptr;
 	}
 
 	~MyPKeyContext() override
@@ -2944,7 +2944,7 @@ public:
 
 	PKeyBase *pkeyToBase(EVP_PKEY *pkey, bool sec) const
 	{
-		PKeyBase *nk = 0;
+		PKeyBase *nk = nullptr;
 		int pkey_type = EVP_PKEY_type(EVP_PKEY_id(pkey));
 		if(pkey_type == EVP_PKEY_RSA)
 		{
@@ -3009,11 +3009,11 @@ public:
 	ConvertResult publicFromDER(const QByteArray &in) override
 	{
 		delete k;
-		k = 0;
+		k = nullptr;
 
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
-		EVP_PKEY *pkey = d2i_PUBKEY_bio(bi, NULL);
+		EVP_PKEY *pkey = d2i_PUBKEY_bio(bi, nullptr);
 		BIO_free(bi);
 
 		if(!pkey)
@@ -3029,12 +3029,12 @@ public:
 	ConvertResult publicFromPEM(const QString &s) override
 	{
 		delete k;
-		k = 0;
+		k = nullptr;
 
 		QByteArray in = s.toLatin1();
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
-		EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, NULL, passphrase_cb, NULL);
+		EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, nullptr, passphrase_cb, nullptr);
 		BIO_free(bi);
 
 		if(!pkey)
@@ -3052,7 +3052,7 @@ public:
 		//if(pbe == PBEDefault)
 		//	pbe = PBES2_TripleDES_SHA1;
 
-		const EVP_CIPHER *cipher = 0;
+		const EVP_CIPHER *cipher = nullptr;
 		if(pbe == PBES2_TripleDES_SHA1)
 			cipher = EVP_des_ede3_cbc();
 		else if(pbe == PBES2_DES_SHA1)
@@ -3070,9 +3070,9 @@ public:
 
 		BIO *bo = BIO_new(BIO_s_mem());
 		if(!passphrase.isEmpty())
-			i2d_PKCS8PrivateKey_bio(bo, pkey, cipher, NULL, 0, NULL, (void *)passphrase.data());
+			i2d_PKCS8PrivateKey_bio(bo, pkey, cipher, nullptr, 0, nullptr, (void *)passphrase.data());
 		else
-			i2d_PKCS8PrivateKey_bio(bo, pkey, NULL, NULL, 0, NULL, NULL);
+			i2d_PKCS8PrivateKey_bio(bo, pkey, nullptr, nullptr, 0, nullptr, nullptr);
 		SecureArray buf = bio2buf(bo);
 		return buf;
 	}
@@ -3082,7 +3082,7 @@ public:
 		//if(pbe == PBEDefault)
 		//	pbe = PBES2_TripleDES_SHA1;
 
-		const EVP_CIPHER *cipher = 0;
+		const EVP_CIPHER *cipher = nullptr;
 		if(pbe == PBES2_TripleDES_SHA1)
 			cipher = EVP_des_ede3_cbc();
 		else if(pbe == PBES2_DES_SHA1)
@@ -3100,9 +3100,9 @@ public:
 
 		BIO *bo = BIO_new(BIO_s_mem());
 		if(!passphrase.isEmpty())
-			PEM_write_bio_PKCS8PrivateKey(bo, pkey, cipher, NULL, 0, NULL, (void *)passphrase.data());
+			PEM_write_bio_PKCS8PrivateKey(bo, pkey, cipher, nullptr, 0, nullptr, (void *)passphrase.data());
 		else
-			PEM_write_bio_PKCS8PrivateKey(bo, pkey, NULL, NULL, 0, NULL, NULL);
+			PEM_write_bio_PKCS8PrivateKey(bo, pkey, nullptr, nullptr, 0, nullptr, nullptr);
 		SecureArray buf = bio2buf(bo);
 		return QString::fromLatin1(buf.toByteArray());
 	}
@@ -3110,13 +3110,13 @@ public:
 	ConvertResult privateFromDER(const SecureArray &in, const SecureArray &passphrase) override
 	{
 		delete k;
-		k = 0;
+		k = nullptr;
 
 		EVP_PKEY *pkey;
 		if(!passphrase.isEmpty())
-			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, NULL, (void *)passphrase.data());
+			pkey = qca_d2i_PKCS8PrivateKey(in, nullptr, nullptr, (void *)passphrase.data());
 		else
-			pkey = qca_d2i_PKCS8PrivateKey(in, NULL, passphrase_cb, NULL);
+			pkey = qca_d2i_PKCS8PrivateKey(in, nullptr, passphrase_cb, nullptr);
 
 		if(!pkey)
 			return ErrorDecode;
@@ -3131,16 +3131,16 @@ public:
 	ConvertResult privateFromPEM(const QString &s, const SecureArray &passphrase) override
 	{
 		delete k;
-		k = 0;
+		k = nullptr;
 
 		QByteArray in = s.toLatin1();
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
 		EVP_PKEY *pkey;
 		if(!passphrase.isEmpty())
-			pkey = PEM_read_bio_PrivateKey(bi, NULL, NULL, (void *)passphrase.data());
+			pkey = PEM_read_bio_PrivateKey(bi, nullptr, nullptr, (void *)passphrase.data());
 		else
-			pkey = PEM_read_bio_PrivateKey(bi, NULL, passphrase_cb, NULL);
+			pkey = PEM_read_bio_PrivateKey(bi, nullptr, passphrase_cb, nullptr);
 		BIO_free(bi);
 
 		if(!pkey)
@@ -3168,16 +3168,16 @@ public:
 
 	X509Item()
 	{
-		cert = 0;
-		req = 0;
-		crl = 0;
+		cert = nullptr;
+		req = nullptr;
+		crl = nullptr;
 	}
 
 	X509Item(const X509Item &from)
 	{
-		cert = 0;
-		req = 0;
-		crl = 0;
+		cert = nullptr;
+		req = nullptr;
+		crl = nullptr;
 		*this = from;
 	}
 
@@ -3214,17 +3214,17 @@ public:
 		if(cert)
 		{
 			X509_free(cert);
-			cert = 0;
+			cert = nullptr;
 		}
 		if(req)
 		{
 			X509_REQ_free(req);
-			req = 0;
+			req = nullptr;
 		}
 		if(crl)
 		{
 			X509_CRL_free(crl);
-			crl = 0;
+			crl = nullptr;
 		}
 	}
 
@@ -3267,11 +3267,11 @@ public:
 		BIO_write(bi, in.data(), in.size());
 
 		if(t == TypeCert)
-			cert = d2i_X509_bio(bi, NULL);
+			cert = d2i_X509_bio(bi, nullptr);
 		else if(t == TypeReq)
-			req = d2i_X509_REQ_bio(bi, NULL);
+			req = d2i_X509_REQ_bio(bi, nullptr);
 		else if(t == TypeCRL)
-			crl = d2i_X509_CRL_bio(bi, NULL);
+			crl = d2i_X509_CRL_bio(bi, nullptr);
 
 		BIO_free(bi);
 
@@ -3290,11 +3290,11 @@ public:
 		BIO_write(bi, in.data(), in.size());
 
 		if(t == TypeCert)
-			cert = PEM_read_bio_X509(bi, NULL, passphrase_cb, NULL);
+			cert = PEM_read_bio_X509(bi, nullptr, passphrase_cb, nullptr);
 		else if(t == TypeReq)
-			req = PEM_read_bio_X509_REQ(bi, NULL, passphrase_cb, NULL);
+			req = PEM_read_bio_X509_REQ(bi, nullptr, passphrase_cb, nullptr);
 		else if(t == TypeCRL)
-			crl = PEM_read_bio_X509_CRL(bi, NULL, passphrase_cb, NULL);
+			crl = PEM_read_bio_X509_CRL(bi, nullptr, passphrase_cb, nullptr);
 
 		BIO_free(bi);
 
@@ -3619,14 +3619,14 @@ public:
 		ASN1_INTEGER *ai = X509_get_serialNumber(x);
 		if(ai)
 		{
-			char *rep = i2s_ASN1_INTEGER(NULL, ai);
+			char *rep = i2s_ASN1_INTEGER(nullptr, ai);
 			QString str = rep;
 			OPENSSL_free(rep);
 			p.serial.fromString(str);
 		}
 
-		p.start = ASN1_UTCTIME_QDateTime(X509_get_notBefore(x), NULL);
-		p.end = ASN1_UTCTIME_QDateTime(X509_get_notAfter(x), NULL);
+		p.start = ASN1_UTCTIME_QDateTime(X509_get_notBefore(x), nullptr);
+		p.end = ASN1_UTCTIME_QDateTime(X509_get_notAfter(x), nullptr);
 
 		CertificateInfo subject, issuer;
 
@@ -3687,7 +3687,7 @@ public:
 
 		const ASN1_BIT_STRING *signature;
 
-		X509_get0_signature(&signature, NULL, x);
+		X509_get0_signature(&signature, nullptr, x);
 		if(signature)
 		{
 			p.sig = QByteArray(signature->length, 0);
@@ -3789,7 +3789,7 @@ public:
 
 	MyCAContext(Provider *p) : CAContext(p)
 	{
-		privateKey = 0;
+		privateKey = nullptr;
 	}
 
 	MyCAContext(const MyCAContext &from) : CAContext(from), caCert(from.caCert)
@@ -3815,40 +3815,40 @@ public:
 		// TODO: implement
 		Q_UNUSED(pub)
 		Q_UNUSED(opts)
-		return 0;
+		return nullptr;
 	}
 
 	CRLContext *createCRL(const QDateTime &nextUpdate) const override
 	{
 		// TODO: implement
 		Q_UNUSED(nextUpdate)
-		return 0;
+		return nullptr;
 	}
 
 	void setup(const CertContext &cert, const PKeyContext &priv) override
 	{
 		caCert = static_cast<const MyCertContext&>(cert).item;
 		delete privateKey;
-		privateKey = 0;
+		privateKey = nullptr;
 		privateKey = static_cast<MyPKeyContext*>(priv.clone());
 	}
 
 	CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const override
 	{
-		MyCertContext *cert = 0;
-		const EVP_MD *md = 0;
-		X509 *x = 0;
+		MyCertContext *cert = nullptr;
+		const EVP_MD *md = nullptr;
+		X509 *x = nullptr;
 		const CertContextProps &props = *req.props();
 		CertificateOptions subjectOpts;
-		X509_NAME *subjectName = 0;
-		X509_EXTENSION *ex = 0;
+		X509_NAME *subjectName = nullptr;
+		X509_EXTENSION *ex = nullptr;
 
 		if(privateKey -> key()->type() == PKey::RSA)
 			md = EVP_sha1();
 		else if(privateKey -> key()->type() == PKey::DSA)
 			md = EVP_sha1();
 		else
-			return 0;
+			return nullptr;
 
 		cert = new MyCertContext(provider());
 
@@ -3923,7 +3923,7 @@ public:
 		{
 			X509_free(x);
 			delete cert;
-			return 0;
+			return nullptr;
 		}
 
 		cert->fromX509(x);
@@ -3937,7 +3937,7 @@ public:
 		Q_UNUSED(crl)
 		Q_UNUSED(entries)
 		Q_UNUSED(nextUpdate)
-		return 0;
+		return nullptr;
 	}
 
 	Provider::Context *clone() const override
@@ -4193,7 +4193,7 @@ public:
 
 		const ASN1_BIT_STRING *signature;
 
-		X509_REQ_get0_signature(x, &signature, NULL);
+		X509_REQ_get0_signature(x, &signature, nullptr);
 		if(signature)
 		{
 			p.sig = QByteArray(signature->length, 0);
@@ -4331,15 +4331,15 @@ public:
 
 		issuer = get_cert_name(X509_CRL_get_issuer(x));
 
-		p.thisUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_lastUpdate(x), NULL);
-		p.nextUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_nextUpdate(x), NULL);
+		p.thisUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_lastUpdate(x), nullptr);
+		p.nextUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_nextUpdate(x), nullptr);
 
 		STACK_OF(X509_REVOKED)* revokeStack  = X509_CRL_get_REVOKED(x);
 
 		for (int i = 0; i < sk_X509_REVOKED_num(revokeStack); ++i) {
 			X509_REVOKED *rev = sk_X509_REVOKED_value(revokeStack, i);
-			BigInteger serial = bn2bi(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), NULL));
-			QDateTime time = ASN1_UTCTIME_QDateTime( X509_REVOKED_get0_revocationDate(rev), NULL);
+			BigInteger serial = bn2bi(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
+			QDateTime time = ASN1_UTCTIME_QDateTime( X509_REVOKED_get0_revocationDate(rev), nullptr);
 			QCA::CRLEntry::Reason reason = QCA::CRLEntry::Unspecified;
 			int pos = X509_REVOKED_get_ext_by_NID(rev, NID_crl_reason, -1);
 			if (pos != -1) {
@@ -4390,7 +4390,7 @@ public:
 
 		const ASN1_BIT_STRING *signature;
 
-		X509_CRL_get0_signature(x, &signature, NULL);
+		X509_CRL_get0_signature(x, &signature, nullptr);
 		if(signature)
 		{
 			p.sig = QByteArray(signature->length, 0);
@@ -4492,13 +4492,13 @@ public:
 	{
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, a.data(), a.size());
-		PKCS7 *p7 = d2i_PKCS7_bio(bi, NULL);
+		PKCS7 *p7 = d2i_PKCS7_bio(bi, nullptr);
 		BIO_free(bi);
 		if(!p7)
 			return ErrorDecode;
 
-		STACK_OF(X509) *xcerts = 0;
-		STACK_OF(X509_CRL) *xcrls = 0;
+		STACK_OF(X509) *xcerts = nullptr;
+		STACK_OF(X509_CRL) *xcrls = nullptr;
 
 		int i = OBJ_obj2nid(p7->type);
 		if(i == NID_pkcs7_signed)
@@ -4754,7 +4754,7 @@ public:
 
 	Provider::Context *clone() const override
 	{
-		return 0;
+		return nullptr;
 	}
 
 	QByteArray toPKCS12(const QString &name, const QList<const CertContext*> &chain, const PKeyContext &priv, const SecureArray &passphrase) const override
@@ -4790,13 +4790,13 @@ public:
 	{
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
-		PKCS12 *p12 = d2i_PKCS12_bio(bi, NULL);
+		PKCS12 *p12 = d2i_PKCS12_bio(bi, nullptr);
 		if(!p12)
 			return ErrorDecode;
 
 		EVP_PKEY *pkey;
 		X509 *cert;
-		STACK_OF(X509) *ca = NULL;
+		STACK_OF(X509) *ca = nullptr;
 		if(!PKCS12_parse(p12, passphrase.data(), &pkey, &cert, &ca))
 		{
 			PKCS12_free(p12);
@@ -5447,8 +5447,8 @@ public:
 			ssl_init = true;
 		}
 
-		ssl = 0;
-		context = 0;
+		ssl = nullptr;
+		context = nullptr;
 		reset();
 	}
 
@@ -5459,7 +5459,7 @@ public:
 
 	Provider::Context *clone() const override
 	{
-		return 0;
+		return nullptr;
 	}
 
 	void reset() override
@@ -5467,12 +5467,12 @@ public:
 		if(ssl)
 		{
 			SSL_free(ssl);
-			ssl = 0;
+			ssl = nullptr;
 		}
 		if(context)
 		{
 			SSL_CTX_free(context);
-			context = 0;
+			context = nullptr;
 		}
 
 		cert = Certificate();
@@ -5499,7 +5499,7 @@ public:
 	QStringList supportedCipherSuites(const TLS::Version &version) const override
 	{
 		OpenSSL_add_ssl_algorithms();
-		SSL_CTX *ctx = 0;
+		SSL_CTX *ctx = nullptr;
 		switch (version) {
 #ifndef OPENSSL_NO_SSL3_METHOD
 		case TLS::SSL_v3:
@@ -5513,13 +5513,13 @@ public:
 		default:
 			/* should not happen - should be in a "dtls" provider*/
 			qWarning("Unexpected enum in cipherSuites");
-			ctx = 0;
+			ctx = nullptr;
 		}
-		if (NULL == ctx)
+		if (nullptr == ctx)
 			return QStringList();
 
 		SSL *ssl = SSL_new(ctx);
-		if (NULL == ssl) {
+		if (nullptr == ssl) {
 			SSL_CTX_free(ctx);
 			return QStringList();
 		}
@@ -5925,7 +5925,7 @@ public:
 
 		sessInfo.cipherMaxBits = SSL_get_cipher_bits(ssl, &(sessInfo.cipherBits));
 
-		sessInfo.id = 0; // TODO: session resuming
+		sessInfo.id = nullptr; // TODO: session resuming
 
 		return sessInfo;
 	}
@@ -5999,7 +5999,7 @@ public:
 		if(!ssl)
 		{
 			SSL_CTX_free(context);
-			context = 0;
+			context = nullptr;
 			return false;
 		}
 		SSL_set_ssl_method(ssl, method); // can this return error?
@@ -6223,7 +6223,7 @@ public:
 
 	Provider::Context *clone() const override
 	{
-		return 0;
+		return nullptr;
 	}
 
 	void setTrustedCertificates(const CertificateCollection &trusted) override
@@ -6252,7 +6252,7 @@ STACK_OF(X509) *get_pk7_certs(PKCS7 *p7)
 	else if(i == NID_pkcs7_signedAndEnveloped)
 		return p7->d.signed_and_enveloped->cert;
 	else
-		return 0;
+		return nullptr;
 }
 
 class MyMessageContextThread : public QThread
@@ -6351,7 +6351,7 @@ public:
 
 		ver_ret = 0;
 
-		thread = 0;
+		thread = nullptr;
 	}
 
 	~MyMessageContext() override
@@ -6360,7 +6360,7 @@ public:
 
 	Provider::Context *clone() const override
 	{
-		return 0;
+		return nullptr;
 	}
 
 	bool canSignMultiple() const override
@@ -6578,9 +6578,9 @@ public:
 			}
 			PKCS7 *p7;
 			if(format == SecureMessage::Binary)
-				p7 = d2i_PKCS7_bio(bi, NULL);
+				p7 = d2i_PKCS7_bio(bi, nullptr);
 			else // Ascii
-				p7 = PEM_read_bio_PKCS7(bi, NULL, passphrase_cb, NULL);
+				p7 = PEM_read_bio_PKCS7(bi, nullptr, passphrase_cb, nullptr);
 			BIO_free(bi);
 
 			if(!p7)
@@ -6685,10 +6685,10 @@ public:
 				// Detached signMode
 				bi = BIO_new(BIO_s_mem());
 				BIO_write(bi, in.data(), in.size());
-				ret = PKCS7_verify(p7, other_certs, store, bi, NULL, 0);
+				ret = PKCS7_verify(p7, other_certs, store, bi, nullptr, 0);
 				BIO_free(bi);
 			} else {
-				ret = PKCS7_verify(p7, other_certs, store, NULL, out, 0);
+				ret = PKCS7_verify(p7, other_certs, store, nullptr, out, 0);
 				// qDebug() << "Verify: " << ret;
 			}
 			//if(!ret)
@@ -6719,7 +6719,7 @@ public:
 
 				BIO *bi = BIO_new(BIO_s_mem());
 				BIO_write(bi, in.data(), in.size());
-				PKCS7 *p7 = d2i_PKCS7_bio(bi, NULL);
+				PKCS7 *p7 = d2i_PKCS7_bio(bi, nullptr);
 				BIO_free(bi);
 
 				if(!p7)
@@ -6886,23 +6886,23 @@ public:
 			m_cryptoAlgorithm = EVP_des_ede();
 		}
 		if (Encode == m_direction) {
-			EVP_EncryptInit_ex(m_context, m_cryptoAlgorithm, 0, 0, 0);
+			EVP_EncryptInit_ex(m_context, m_cryptoAlgorithm, nullptr, nullptr, nullptr);
 			EVP_CIPHER_CTX_set_key_length(m_context, key.size());
 			if (m_type.endsWith("gcm") || m_type.endsWith("ccm")) {
 				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
-				EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), NULL);
+				EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
 			}
-			EVP_EncryptInit_ex(m_context, 0, 0,
+			EVP_EncryptInit_ex(m_context, nullptr, nullptr,
 							   (const unsigned char*)(key.data()),
 							   (const unsigned char*)(iv.data()));
 		} else {
-			EVP_DecryptInit_ex(m_context, m_cryptoAlgorithm, 0, 0, 0);
+			EVP_DecryptInit_ex(m_context, m_cryptoAlgorithm, nullptr, nullptr, nullptr);
 			EVP_CIPHER_CTX_set_key_length(m_context, key.size());
 			if (m_type.endsWith("gcm") || m_type.endsWith("ccm")) {
 				int parameter = m_type.endsWith("gcm") ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
-				EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), NULL);
+				EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
 			}
-			EVP_DecryptInit_ex(m_context, 0, 0,
+			EVP_DecryptInit_ex(m_context, nullptr, nullptr,
 							   (const unsigned char*)(key.data()),
 							   (const unsigned char*)(iv.data()));
 		}
@@ -7215,7 +7215,7 @@ public:
 
 		// seed the RNG if it's not seeded yet
 		if (RAND_status() == 0) {
-			qsrand(time(NULL));
+			qsrand(time(nullptr));
 			char buf[128];
 			for(char &n : buf)
 				n = qrand();
@@ -7489,7 +7489,7 @@ public:
 			return new CMSContext( this );
 		else if ( type == "ca" )
 			return new MyCAContext( this );
-		return 0;
+		return nullptr;
 	}
 };
 

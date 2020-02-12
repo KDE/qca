@@ -28,8 +28,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-#include <stdlib.h> // abort
-#include <stdio.h>  // fprintf
+#include <cstdio>  // fprintf
+#include <cstdlib> // abort
 
 #include "qcaprovider.h"
 
@@ -109,7 +109,7 @@ public:
 		Item()
 			: trackerId(-1)
 			, updateCount(0)
-			, owner(0)
+			, owner(nullptr)
 			, storeContextId(-1)
 			, storeId("")
 			, name("")
@@ -150,7 +150,7 @@ public:
 	~KeyStoreTracker() override
 	{
 		qDeleteAll(sources);
-		self = 0;
+		self = nullptr;
 	}
 
 	static KeyStoreTracker *instance()
@@ -224,7 +224,7 @@ public Q_SLOTS:
 		ProviderList list = providers();
 		list.append(defaultProvider());
 
-		Provider *p = 0;
+		Provider *p = nullptr;
 		for(int n = 0; n < list.count(); ++n)
 		{
 			if(list[n]->name() == provider)
@@ -274,7 +274,7 @@ public Q_SLOTS:
 	// hack with void *
 	void *entry(const QString &storeId, const QString &entryId)
 	{
-		KeyStoreListContext *c = 0;
+		KeyStoreListContext *c = nullptr;
 		int contextId = -1;
 		m.lock();
 		foreach(const Item &i, items)
@@ -288,7 +288,7 @@ public Q_SLOTS:
 		}
 		m.unlock();
 		if(!c)
-			return 0;
+			return nullptr;
 
 		return c->entry(contextId, entryId);
 	}
@@ -303,7 +303,7 @@ public Q_SLOTS:
 			if(e)
 				return e;
 		}
-		return 0;
+		return nullptr;
 	}
 
 	QString writeEntry(int trackerId, const QVariant &v)
@@ -584,7 +584,7 @@ private Q_SLOTS:
 	}
 };
 
-KeyStoreTracker *KeyStoreTracker::self = 0;
+KeyStoreTracker *KeyStoreTracker::self = nullptr;
 
 //----------------------------------------------------------------------------
 // KeyStoreThread
@@ -622,7 +622,7 @@ public:
 class KeyStoreManagerGlobal;
 
 Q_GLOBAL_STATIC(QMutex, ksm_mutex)
-static KeyStoreManagerGlobal *g_ksm = 0;
+static KeyStoreManagerGlobal *g_ksm = nullptr;
 
 class KeyStoreManagerGlobal
 {
@@ -824,7 +824,7 @@ public:
 
 	Private(KeyStoreEntryWatcher *_q) : QObject(_q), q(_q), ksm(this)
 	{
-		ks = 0;
+		ks = nullptr;
 		avail = false;
 		connect(&ksm, &KeyStoreManager::keyStoreAvailable, this, &KeyStoreEntryWatcher::Private::ksm_available);
 	}
@@ -883,7 +883,7 @@ private Q_SLOTS:
 	void ks_unavailable()
 	{
 		delete ks;
-		ks = 0;
+		ks = nullptr;
 
 		if(avail)
 		{
@@ -1374,7 +1374,7 @@ void KeyStoreManager::shutdown()
 {
 	QMutexLocker locker(ksm_mutex());
 	delete g_ksm;
-	g_ksm = 0;
+	g_ksm = nullptr;
 }
 
 // object
@@ -1440,7 +1440,7 @@ public:
 			if(i->storeId == storeId)
 				return i;
 		}
-		return 0;
+		return nullptr;
 	}
 
 	KeyStoreTracker::Item *getItem(int trackerId)
@@ -1451,7 +1451,7 @@ public:
 			if(i->trackerId == trackerId)
 				return i;
 		}
-		return 0;
+		return nullptr;
 	}
 
 	void do_update()

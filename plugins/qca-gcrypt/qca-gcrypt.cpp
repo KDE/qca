@@ -196,7 +196,7 @@ public:
     int blockSize() const override
     {
 	size_t blockSize;
-	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, 0, &blockSize );
+	gcry_cipher_algo_info( m_cryptoAlgorithm, GCRYCTL_GET_BLKLEN, nullptr, &blockSize );
 	return blockSize;
     }
 
@@ -226,9 +226,9 @@ public:
 	if (m_pad) {
 	    result.resize( blockSize() );
 	    if (QCA::Encode == m_direction) {
-		err = gcry_cipher_encrypt( context, (unsigned char*)result.data(), result.size(), NULL, 0 );
+		err = gcry_cipher_encrypt( context, (unsigned char*)result.data(), result.size(), nullptr, 0 );
 	    } else {
-		err = gcry_cipher_decrypt( context, (unsigned char*)result.data(), result.size(), NULL, 0 );
+		err = gcry_cipher_decrypt( context, (unsigned char*)result.data(), result.size(), nullptr, 0 );
 	    }
 	    check_error( "final cipher encrypt/decrypt", err );
 	} else {
@@ -353,7 +353,7 @@ public:
 							  int msecInterval,
 							  unsigned int *iterationCount) override
 	{
-		Q_ASSERT(iterationCount != NULL);
+		Q_ASSERT(iterationCount != nullptr);
 		QElapsedTimer timer;
 
 		/*
@@ -452,7 +452,7 @@ public:
 							  int msecInterval,
 							  unsigned int *iterationCount) override
 	{
-		Q_ASSERT(iterationCount != NULL);
+		Q_ASSERT(iterationCount != nullptr);
 		QCA::SymmetricKey result(keyLength);
 		QElapsedTimer timer;
 
@@ -520,7 +520,7 @@ public:
 	    if (!gcry_check_version (GCRYPT_VERSION) )
 	    {
 		std::cout << "libgcrypt is too old (need " << GCRYPT_VERSION;
-		std::cout << ", have " << gcry_check_version(NULL) << ")" << std::endl;
+		std::cout << ", have " << gcry_check_version(nullptr) << ")" << std::endl;
 	    }
 	    gcry_set_allocation_handler (qca_func_malloc,
 					 qca_func_secure_malloc,
@@ -560,7 +560,7 @@ public:
 	list += "hmac(sha224)";
 #endif
 	list += "hmac(sha256)";
-	if ( ! ( NULL == gcry_check_version("1.3.0") ) ) {
+	if ( ! ( nullptr == gcry_check_version("1.3.0") ) ) {
 	    // 1.2 and earlier have broken implementation
 	    list += "hmac(sha384)";
 	    list += "hmac(sha512)";
@@ -582,7 +582,7 @@ public:
 // 	list += "des-ecb";
 	list += "des-cbc";
 	list += "des-cfb";
-	if ( ! ( NULL == gcry_check_version("1.3.0") ) ) {
+	if ( ! ( nullptr == gcry_check_version("1.3.0") ) ) {
 	    // 1.2 branch and earlier doesn't support OFB mode
 	    list += "aes128-ofb";
 	    list += "aes192-ofb";
@@ -682,7 +682,7 @@ public:
 	else if ( type == "pbkdf2(sha1)" )
 	    return new gcryptQCAPlugin::pbkdf2Context( GCRY_MD_SHA1, this, type );
 	else
-	    return 0;
+	    return nullptr;
     }
 };
 

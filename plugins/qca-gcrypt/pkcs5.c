@@ -176,7 +176,7 @@ gcry_pbkdf2 (int PRF, const char *P, size_t Plen, const char *S,
            gcry_md_write (prf, U, hLen);
 
          p = gcry_md_read (prf, PRF);
-         if (p == NULL)
+         if (p == nullptr)
            {
              rc = GPG_ERR_CONFIGURATION;
              goto done;

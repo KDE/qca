@@ -66,9 +66,9 @@ public:
 		return obj->findChild<TimerFixer *>() ? true : false;
 	}
 
-	TimerFixer(QObject *_target, TimerFixer *_fp = 0) : QObject(_target)
+	TimerFixer(QObject *_target, TimerFixer *_fp = nullptr) : QObject(_target)
 	{
-		ed = 0;
+		ed = nullptr;
 
 		target = _target;
 		fixerParent = _fp;
@@ -160,7 +160,7 @@ private Q_SLOTS:
 		if(ed)
 		{
 			disconnect(ed, &QAbstractEventDispatcher::aboutToBlock, this, &TimerFixer::ed_aboutToBlock);
-			ed = 0;
+			ed = nullptr;
 		}
 	}
 
@@ -206,7 +206,7 @@ private:
 
 	void unhook(QObject *obj)
 	{
-		TimerFixer *t = 0;
+		TimerFixer *t = nullptr;
 		for(int n = 0; n < fixerChildren.count(); ++n)
 		{
 			if(fixerChildren[n]->target == obj)
@@ -351,12 +351,12 @@ public:
 		, do_quit(false)
 		, cond_met(false)
 		, obj(_obj)
-		, loop(0)
-		, agent(0)
-		, fixer(0)
+		, loop(nullptr)
+		, agent(nullptr)
+		, fixer(nullptr)
 		, m(QMutex::NonRecursive)
 		, w()
-		, orig_thread(0)
+		, orig_thread(nullptr)
 	{
 		// SafeTimer has own method to fix timers, skip it too
 		if (!qobject_cast<SafeTimer*>(obj))
@@ -404,9 +404,9 @@ public:
 		// move object to the worker thread
 		cond_met = false;
 		orig_thread = QThread::currentThread();
-		q->setParent(0); // don't follow the object
+		q->setParent(nullptr); // don't follow the object
 		QObject *orig_parent = obj->parent();
-		obj->setParent(0); // unparent the target or the move will fail
+		obj->setParent(nullptr); // unparent the target or the move will fail
 		obj->moveToThread(this);
 
 		// tell the worker thread to start, wait for completion
@@ -465,17 +465,17 @@ protected:
 			eventLoop.exec();
 
 			delete agent;
-			agent = 0;
+			agent = nullptr;
 
 			// eventloop done, flush pending events
 			QCoreApplication::instance()->sendPostedEvents();
-			QCoreApplication::instance()->sendPostedEvents(0, QEvent::DeferredDelete);
+			QCoreApplication::instance()->sendPostedEvents(nullptr, QEvent::DeferredDelete);
 
 			// and move the object back
 			obj->moveToThread(orig_thread);
 
 			m.lock();
-			loop = 0;
+			loop = nullptr;
 			w.wakeOne();
 		}
 	}

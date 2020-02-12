@@ -191,7 +191,7 @@ private:
 		}
 
 		~pkcs11KeyStoreItem () {
-			if (_token_id != NULL) {
+			if (_token_id != nullptr) {
 				pkcs11h_token_freeTokenId (_token_id);
 			}
 		}
@@ -354,7 +354,7 @@ private:
 	) const;
 };
 
-static pkcs11KeyStoreListContext *s_keyStoreList = NULL;
+static pkcs11KeyStoreListContext *s_keyStoreList = nullptr;
 
 //----------------------------------------------------------------------------
 // pkcs11Exception
@@ -405,7 +405,7 @@ private:
 		QByteArray raw;
 
 		_sign_data_s() {
-			hash = NULL;
+			hash = nullptr;
 		}
 	} _sign_data;
 
@@ -424,8 +424,8 @@ public:
 		);
 
 		_has_privateKeyRole = true;
-		_pkcs11h_certificate_id = NULL;
-		_pkcs11h_certificate = NULL;
+		_pkcs11h_certificate_id = nullptr;
+		_pkcs11h_certificate = nullptr;
 		_pubkey = pubkey;
 		_serialized = serialized;
 		_clearSign ();
@@ -454,11 +454,11 @@ public:
 		);
 
 		_has_privateKeyRole = from._has_privateKeyRole;
-		_pkcs11h_certificate_id = NULL;
-		_pkcs11h_certificate = NULL;
+		_pkcs11h_certificate_id = nullptr;
+		_pkcs11h_certificate = nullptr;
 		_pubkey = from._pubkey;
 		_serialized = from._serialized;
-		_sign_data.hash = NULL;
+		_sign_data.hash = nullptr;
 		_clearSign ();
 
 		if (
@@ -484,14 +484,14 @@ public:
 
 		_clearSign ();
 
-		if (_pkcs11h_certificate != NULL) {
+		if (_pkcs11h_certificate != nullptr) {
 			pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
-			_pkcs11h_certificate = NULL;
+			_pkcs11h_certificate = nullptr;
 		}
 
-		if (_pkcs11h_certificate_id != NULL) {
+		if (_pkcs11h_certificate_id != nullptr) {
 			pkcs11h_certificate_freeCertificateId (_pkcs11h_certificate_id);
-			_pkcs11h_certificate_id = NULL;
+			_pkcs11h_certificate_id = nullptr;
 		}
 
 		QCA_logTextMessage (
@@ -534,9 +534,9 @@ public:
 		);
 
 		if (_has_privateKeyRole) {
-			if (_pkcs11h_certificate != NULL) {
+			if (_pkcs11h_certificate != nullptr) {
 				pkcs11h_certificate_freeCertificate (_pkcs11h_certificate);
-				_pkcs11h_certificate = NULL;
+				_pkcs11h_certificate = nullptr;
 			}
 			_has_privateKeyRole = false;
 		}
@@ -619,7 +619,7 @@ public:
 					mech,
 					(const unsigned char *)in.constData (),
 					in.size (),
-					NULL,
+					nullptr,
 					&my_size
 				)) != CKR_OK
 			) {
@@ -662,7 +662,7 @@ public:
 				session_locked = false;
 			}
 
-			if (s_keyStoreList != NULL) {
+			if (s_keyStoreList != nullptr) {
 				s_keyStoreList->_emit_diagnosticText (
 					QString::asprintf (
 						"PKCS#11: Cannot decrypt: %lu-'%s'.\n",
@@ -733,7 +733,7 @@ public:
 		const MemoryRegion &in
 	) override {
 		if (_has_privateKeyRole) {
-			if (_sign_data.hash != NULL) {
+			if (_sign_data.hash != nullptr) {
 				_sign_data.hash->update (in);
 			}
 			else {
@@ -762,7 +762,7 @@ public:
 			// from some strange reason I got 2047... (for some)	<---- BUG?!?!?!
 			int myrsa_size=(_pubkey.bitSize () + 7) / 8;
 
-			if (_sign_data.hash != NULL) {
+			if (_sign_data.hash != nullptr) {
 				final = emsa3Encode (
 					_sign_data.hash->type (),
 					_sign_data.hash->final ().toByteArray (),
@@ -796,7 +796,7 @@ public:
 					CKM_RSA_PKCS,
 					(const unsigned char *)final.constData (),
 					(size_t)final.size (),
-					NULL,
+					nullptr,
 					&my_size
 				)) != CKR_OK
 			) {
@@ -840,7 +840,7 @@ public:
 				session_locked = false;
 			}
 
-			if (s_keyStoreList != NULL) {
+			if (s_keyStoreList != nullptr) {
 				s_keyStoreList->_emit_diagnosticText (
 					QString::asprintf (
 						"PKCS#11: Cannot sign: %lu-'%s'.\n",
@@ -949,7 +949,7 @@ public:
 
 		ret = pkcs11h_token_ensureAccess (
 			_pkcs11h_certificate_id->token_id,
-			NULL,
+			nullptr,
 			0
 		) == CKR_OK;
 
@@ -975,7 +975,7 @@ public:
 
 		ret = pkcs11h_token_ensureAccess (
 			_pkcs11h_certificate_id->token_id,
-			NULL,
+			nullptr,
 			PKCS11H_PROMPT_MASK_ALLOW_ALL
 		) == CKR_OK;
 
@@ -996,7 +996,7 @@ private:
 		_sign_data.raw.clear ();
 		_sign_data.alg = SignatureUnknown;
 		delete _sign_data.hash;
-		_sign_data.hash = NULL;
+		_sign_data.hash = nullptr;
 	}
 
 	void
@@ -1008,7 +1008,7 @@ private:
 			Logger::Debug
 		);
 
-		if (_pkcs11h_certificate == NULL) {
+		if (_pkcs11h_certificate == nullptr) {
 			if (
 				(rv = pkcs11h_certificate_create (
 					_pkcs11h_certificate_id,
@@ -1041,12 +1041,12 @@ private:
 
 public:
 	pkcs11PKeyContext (Provider *p) : PKeyContext (p) {
-		_k = NULL;
+		_k = nullptr;
 	}
 
 	~pkcs11PKeyContext () override {
 		delete _k;
-		_k = NULL;
+		_k = nullptr;
 	}
 
 	Provider::Context *
@@ -1412,7 +1412,7 @@ public:
 };
 
 pkcs11h_engine_crypto_t pkcs11QCACrypto::crypto = {
-	NULL,
+	nullptr,
 	_pkcs11h_crypto_qca_initialize,
 	_pkcs11h_crypto_qca_uninitialize,
 	_pkcs11h_crypto_qca_certificate_get_expiration,
@@ -1447,7 +1447,7 @@ pkcs11KeyStoreListContext::~pkcs11KeyStoreListContext () {
 		Logger::Debug
 	);
 
-	s_keyStoreList = NULL;
+	s_keyStoreList = nullptr;
 	_clearStores ();
 
 	QCA_logTextMessage (
@@ -1462,7 +1462,7 @@ pkcs11KeyStoreListContext::clone () const {
 		"pkcs11KeyStoreListContext::clone - entry/return",
 		Logger::Debug
 	);
-	return NULL;
+	return nullptr;
 }
 
 void
@@ -1531,15 +1531,15 @@ pkcs11KeyStoreListContext::entry (
 
 	Q_UNUSED(id);
 	Q_UNUSED(entryId);
-	return NULL;
+	return nullptr;
 }
 
 KeyStoreEntryContext *
 pkcs11KeyStoreListContext::entryPassive (
 	const QString &serialized
 ) {
-	KeyStoreEntryContext *entry = NULL;
-	pkcs11h_certificate_id_t certificate_id = NULL;
+	KeyStoreEntryContext *entry = nullptr;
+	pkcs11h_certificate_id_t certificate_id = nullptr;
 
 	QCA_logTextMessage (
 		QString::asprintf (
@@ -1577,9 +1577,9 @@ pkcs11KeyStoreListContext::entryPassive (
 		);
 	}
 
-	if (certificate_id != NULL) {
+	if (certificate_id != nullptr) {
 		pkcs11h_certificate_freeCertificateId (certificate_id);
-		certificate_id = NULL;
+		certificate_id = nullptr;
 	}
 
 	QCA_logTextMessage (
@@ -1684,7 +1684,7 @@ pkcs11KeyStoreListContext::entryTypes (int id) const {
 
 QList<int>
 pkcs11KeyStoreListContext::keyStores () {
-	pkcs11h_token_id_list_t tokens = NULL;
+	pkcs11h_token_id_list_t tokens = nullptr;
 	QList<int> out;
 
 	QCA_logTextMessage (
@@ -1714,7 +1714,7 @@ pkcs11KeyStoreListContext::keyStores () {
 		QList<int> to_remove = _storesById.keys ();
 		for (
 			pkcs11h_token_id_list_t entry = tokens;
-			entry != NULL;
+			entry != nullptr;
 			entry = entry->next
 		) {
 			pkcs11KeyStoreItem *item = _registerTokenId (entry->token_id);
@@ -1736,7 +1736,7 @@ pkcs11KeyStoreListContext::keyStores () {
 				_stores.removeAll (item);
 
 				delete item;
-				item = NULL;
+				item = nullptr;
 			}
 		}
 	}
@@ -1750,7 +1750,7 @@ pkcs11KeyStoreListContext::keyStores () {
 		);
 	}
 
-	if (tokens != NULL) {
+	if (tokens != nullptr) {
 		pkcs11h_token_freeTokenIdList (tokens);
 	}
 
@@ -1767,7 +1767,7 @@ pkcs11KeyStoreListContext::keyStores () {
 
 QList<KeyStoreEntryContext*>
 pkcs11KeyStoreListContext::entryList (int id) {
-	pkcs11h_certificate_id_list_t certs = NULL;
+	pkcs11h_certificate_id_list_t certs = nullptr;
 	QList<KeyStoreEntryContext*> out;
 
 	QCA_logTextMessage (
@@ -1784,8 +1784,8 @@ pkcs11KeyStoreListContext::entryList (int id) {
 		if (_storesById.contains (id)) {
 			pkcs11KeyStoreItem *entry = _storesById[id];
 
-			pkcs11h_certificate_id_list_t issuers = NULL;
-			pkcs11h_certificate_id_list_t current = NULL;
+			pkcs11h_certificate_id_list_t issuers = nullptr;
+			pkcs11h_certificate_id_list_t current = nullptr;
 			QList<Certificate> listCerts;
 			QList<Certificate> listIssuers;
 			int i = 0;
@@ -1794,7 +1794,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 				(rv = pkcs11h_certificate_enumTokenCertificateIds (
 					entry->tokenId (),
 					PKCS11H_ENUM_METHOD_CACHE,
-					NULL,
+					nullptr,
 					PKCS11H_PROMPT_MASK_ALLOW_ALL,
 					&issuers,
 					&certs
@@ -1805,7 +1805,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 
 			for (
 				current=certs;
-				current!=NULL;
+				current!=nullptr;
 				current=current->next
 			) {
 				if (current->certificate_id->certificate_blob_size > 0) {
@@ -1820,7 +1820,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 
 			for (
 				current=issuers;
-				current!=NULL;
+				current!=nullptr;
 				current=current->next
 			) {
 				if (current->certificate_id->certificate_blob_size > 0) {
@@ -1850,7 +1850,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 
 			for (
 				i=0, current=issuers;
-				current!=NULL;
+				current!=nullptr;
 				i++, current=current->next
 			) {
 				try {
@@ -1884,7 +1884,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 
 			for (
 				i=0, current=certs;
-				current!=NULL;
+				current!=nullptr;
 				i++, current=current->next
 			) {
 				try {
@@ -1922,7 +1922,7 @@ pkcs11KeyStoreListContext::entryList (int id) {
 		);
 	}
 
-	if (certs != NULL) {
+	if (certs != nullptr) {
 		pkcs11h_certificate_freeCertificateIdList (certs);
 	}
 
@@ -1943,7 +1943,7 @@ pkcs11KeyStoreListContext::_tokenPrompt (
 	const pkcs11h_token_id_t token_id
 ) {
 	KeyStoreEntry entry;
-	KeyStoreEntryContext *context = NULL;
+	KeyStoreEntryContext *context = nullptr;
 	QString storeId, storeName;
 	bool ret = false;
 
@@ -1956,7 +1956,7 @@ pkcs11KeyStoreListContext::_tokenPrompt (
 		Logger::Debug
 	);
 
-	if (user_data != NULL) {
+	if (user_data != nullptr) {
 		QString *serialized = (QString *)user_data;
 		context = entryPassive (*serialized);
 		storeId = context->storeId ();
@@ -1998,7 +1998,7 @@ pkcs11KeyStoreListContext::_pinPrompt (
 	SecureArray &pin
 ) {
 	KeyStoreEntry entry;
-	KeyStoreEntryContext *context = NULL;
+	KeyStoreEntryContext *context = nullptr;
 	QString storeId, storeName;
 	bool ret = false;
 
@@ -2013,7 +2013,7 @@ pkcs11KeyStoreListContext::_pinPrompt (
 
 	pin = SecureArray();
 
-	if (user_data != NULL) {
+	if (user_data != nullptr) {
 		QString *serialized = (QString *)user_data;
 		context = entryPassive (*serialized);
 		storeId = context->storeId ();
@@ -2128,7 +2128,7 @@ pkcs11KeyStoreListContext::_registerTokenId (
 		i++;
 	}
 
-	pkcs11KeyStoreItem *entry = NULL;
+	pkcs11KeyStoreItem *entry = nullptr;
 
 	if (i == _stores.end ()) {
 		/*
@@ -2185,7 +2185,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 	const CertificateChain &chain,
 	const QString &_description
 ) const {
-	pkcs11KeyStoreEntryContext *entry = NULL;
+	pkcs11KeyStoreEntryContext *entry = nullptr;
 
 	QCA_logTextMessage (
 		QString::asprintf (
@@ -2197,7 +2197,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 		Logger::Debug
 	);
 
-	if (certificate_id == NULL) {
+	if (certificate_id == nullptr) {
 		throw pkcs11Exception (CKR_ARGUMENTS_BAD, "Missing certificate object");
 	}
 
@@ -2279,7 +2279,7 @@ pkcs11KeyStoreListContext::_tokenId2storeId (
 
 	if (
 		pkcs11h_token_serializeTokenId (
-			NULL,
+			nullptr,
 			&len,
 			token_id
 		) != CKR_OK
@@ -2335,7 +2335,7 @@ pkcs11KeyStoreListContext::_serializeCertificate (
 
 	if (
 		pkcs11h_certificate_serializeCertificateId (
-			NULL,
+			nullptr,
 			&len,
 			certificate_id
 		) != CKR_OK
@@ -2389,7 +2389,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 	bool * const p_has_private,
 	CertificateChain &chain
 ) const {
-	pkcs11h_certificate_id_t certificate_id = NULL;
+	pkcs11h_certificate_id_t certificate_id = nullptr;
 	chain.clear ();
 
 	QCA_logTextMessage (
@@ -2406,7 +2406,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 		int n = 0;
 		CK_RV rv;
 
-		*p_certificate_id = NULL;
+		*p_certificate_id = nullptr;
 		*p_has_private = false;
 
 		QStringList list = from.split ("/");
@@ -2463,12 +2463,12 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 		}
 
 		*p_certificate_id = certificate_id;
-		certificate_id = NULL;
+		certificate_id = nullptr;
 	}
 	catch (...) {
-		if (certificate_id != NULL) {
+		if (certificate_id != nullptr) {
 			pkcs11h_certificate_freeCertificateId (certificate_id);
-			certificate_id = NULL;
+			certificate_id = nullptr;
 		}
 		throw;
 	}
@@ -2511,7 +2511,7 @@ pkcs11KeyStoreListContext::_unescapeString (
 		QChar c = from[i];
 
 		if (c == '\\') {
-			to += QChar ((ushort)from.midRef (i+2, 4).toInt (0, 16));
+			to += QChar ((ushort)from.midRef (i+2, 4).toInt (nullptr, 16));
 			i+=5;
 		}
 		else {
@@ -2641,7 +2641,7 @@ void pkcs11Provider::deinit () {
 	);
 
 	delete s_keyStoreList;
-	s_keyStoreList = NULL;
+	s_keyStoreList = nullptr;
 
 	pkcs11h_terminate ();
 
@@ -2678,7 +2678,7 @@ pkcs11Provider::features() const {
 Provider::Context *
 pkcs11Provider::createContext (const QString &type) {
 
-	Provider::Context *context = NULL;
+	Provider::Context *context = nullptr;
 
 	QCA_logTextMessage (
 		QString::asprintf (
@@ -2690,7 +2690,7 @@ pkcs11Provider::createContext (const QString &type) {
 
 	if (_lowLevelInitialized) {
 		if (type == "keystorelist") {
-			if (s_keyStoreList == NULL) {
+			if (s_keyStoreList == nullptr) {
 				s_keyStoreList = new pkcs11KeyStoreListContext (this);
 			}
 			context = s_keyStoreList;
@@ -2978,7 +2978,7 @@ pkcs11Provider::_slotEventHook () {
 	 * This is called from a separate
 	 * thread.
 	 */
-	if (s_keyStoreList != NULL && _slotEventsActive) {
+	if (s_keyStoreList != nullptr && _slotEventsActive) {
 		QMetaObject::invokeMethod(s_keyStoreList, "doUpdated", Qt::QueuedConnection);
 	}
 }
@@ -2988,7 +2988,7 @@ pkcs11Provider::_tokenPromptHook (
 	void * const user_data,
 	const pkcs11h_token_id_t token
 ) {
-	if (s_keyStoreList != NULL) {
+	if (s_keyStoreList != nullptr) {
 		return s_keyStoreList->_tokenPrompt (user_data, token) ? TRUE : FALSE; //krazy:exclude=captruefalse
 	}
 
@@ -3004,7 +3004,7 @@ pkcs11Provider::_pinPromptHook (
 ) {
 	PKCS11H_BOOL ret = FALSE; //krazy:exclude=captruefalse
 
-	if (s_keyStoreList != NULL) {
+	if (s_keyStoreList != nullptr) {
 		SecureArray qpin;
 
 		if (s_keyStoreList->_pinPrompt (user_data, token, qpin)) {

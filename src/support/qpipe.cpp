@@ -27,8 +27,8 @@
 
 #include "qpipe.h"
 
-#include <stdlib.h>
-#include <limits.h>
+#include <climits>
+#include <cstdlib>
 
 // sorry, i've added this dependency for now, but it's easy enough to take
 //   with you if you want qpipe independent of qca
@@ -46,11 +46,11 @@
 #endif
 
 #ifdef Q_OS_UNIX
-# include <unistd.h>
+# include <cerrno>
+# include <csignal>
 # include <fcntl.h>
-# include <errno.h>
 # include <sys/ioctl.h>
-# include <signal.h>
+# include <unistd.h>
 # ifdef HAVE_SYS_FILIO_H
 #  include <sys/filio.h>
 # endif
@@ -83,7 +83,7 @@ static void ignore_sigpipe()
 		struct sigaction noaction;
 		memset(&noaction, 0, sizeof(noaction));
 		noaction.sa_handler = SIG_IGN;
-		sigaction(SIGPIPE, &noaction, 0);
+		sigaction(SIGPIPE, &noaction, nullptr);
 	}
 }
 #endif
@@ -139,7 +139,7 @@ static bool pipe_set_blocking(Q_PIPE_ID pipe, bool b)
 }
 
 // on windows, the pipe is closed and the new pipe is returned in newPipe
-static bool pipe_set_inheritable(Q_PIPE_ID pipe, bool b, Q_PIPE_ID *newPipe = 0)
+static bool pipe_set_inheritable(Q_PIPE_ID pipe, bool b, Q_PIPE_ID *newPipe = nullptr)
 {
 #ifdef Q_OS_WIN
 	// windows is required to accept a new pipe id
@@ -932,8 +932,8 @@ public:
 		dec = 0;
 #endif
 #ifdef Q_OS_UNIX
-		sn_read = 0;
-		sn_write = 0;
+		sn_read = nullptr;
+		sn_write = nullptr;
 #endif
 	}
 
@@ -961,9 +961,9 @@ public:
 #endif
 #ifdef Q_OS_UNIX
 		delete sn_read;
-		sn_read = 0;
+		sn_read = nullptr;
 		delete sn_write;
-		sn_write = 0;
+		sn_write = nullptr;
 #endif
 		if(pipe != INVALID_Q_PIPE_ID)
 		{
@@ -1212,7 +1212,7 @@ bool QPipeDevice::setInheritable(bool enabled)
 	return true;
 #endif
 #ifdef Q_OS_UNIX
-	return pipe_set_inheritable(d->pipe, enabled, 0);
+	return pipe_set_inheritable(d->pipe, enabled, nullptr);
 #endif
 }
 
@@ -2093,8 +2093,8 @@ bool QPipe::create()
 	int p[2];
 	if(pipe(p) == -1)
 		return false;
-	if(!pipe_set_inheritable(p[0], false, 0) ||
-		!pipe_set_inheritable(p[1], false, 0))
+	if(!pipe_set_inheritable(p[0], false, nullptr) ||
+		!pipe_set_inheritable(p[1], false, nullptr))
 	{
 		close(p[0]);
 		close(p[1]);

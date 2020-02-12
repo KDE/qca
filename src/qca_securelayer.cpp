@@ -257,7 +257,7 @@ public:
 	Private(TLS *_q, TLS::Mode _mode) : QObject(_q), q(_q), mode(_mode), actionTrigger(this)
 	{
 		// c is 0 during initial reset, so we don't redundantly reset it
-		c = 0;
+		c = nullptr;
 		connect_hostNameReceived = false;
 		connect_certificateRequested = false;
 		connect_peerCertificateAvailable = false;
@@ -281,7 +281,7 @@ public:
 	~Private() override
 	{
 		// context is owned by Algorithm, unparent so we don't double-delete
-		c->setParent(0);
+		c->setParent(nullptr);
 	}
 
 	void reset(ResetMode mode)
@@ -1357,7 +1357,7 @@ public:
 
 	Private(SASL *_q) : QObject(_q), q(_q), actionTrigger(this)
 	{
-		c = 0;
+		c = nullptr;
 		set_username = false;
 		set_authzid = false;
 		set_password = false;
@@ -1379,7 +1379,7 @@ public:
 	~Private() override
 	{
 		// context is owned by Algorithm, unparent so we don't double-delete
-		c->setParent(0);
+		c->setParent(nullptr);
 	}
 
 	void reset(ResetMode mode)
@@ -1439,13 +1439,13 @@ public:
 
 	void setup(const QString &service, const QString &host)
 	{
-		c->setup(service, host, localSet ? &local : 0, remoteSet ? &remote : 0, ext_authid, ext_ssf);
+		c->setup(service, host, localSet ? &local : nullptr, remoteSet ? &remote : nullptr, ext_authid, ext_ssf);
 		c->setConstraints(auth_flags, ssfmin, ssfmax);
 
-		QString *p_username = 0;
-		QString *p_authzid = 0;
-		SecureArray *p_password = 0;
-		QString *p_realm = 0;
+		QString *p_username = nullptr;
+		QString *p_authzid = nullptr;
+		SecureArray *p_password = nullptr;
+		QString *p_realm = nullptr;
 
 		if(set_username)
 			p_username = &username;
@@ -1869,7 +1869,7 @@ void SASL::startServer(const QString &service, const QString &host, const QStrin
 
 void SASL::putServerFirstStep(const QString &mech)
 {
-	d->putServerFirstStep(mech, 0);
+	d->putServerFirstStep(mech, nullptr);
 }
 
 void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
@@ -1886,28 +1886,28 @@ void SASL::setUsername(const QString &user)
 {
 	d->set_username = true;
 	d->username = user;
-	d->c->setClientParams(&user, 0, 0, 0);
+	d->c->setClientParams(&user, nullptr, nullptr, nullptr);
 }
 
 void SASL::setAuthzid(const QString &authzid)
 {
 	d->set_authzid = true;
 	d->authzid = authzid;
-	d->c->setClientParams(0, &authzid, 0, 0);
+	d->c->setClientParams(nullptr, &authzid, nullptr, nullptr);
 }
 
 void SASL::setPassword(const SecureArray &pass)
 {
 	d->set_password = true;
 	d->password = pass;
-	d->c->setClientParams(0, 0, &pass, 0);
+	d->c->setClientParams(nullptr, nullptr, &pass, nullptr);
 }
 
 void SASL::setRealm(const QString &realm)
 {
 	d->set_realm = true;
 	d->realm = realm;
-	d->c->setClientParams(0, 0, 0, &realm);
+	d->c->setClientParams(nullptr, nullptr, nullptr, &realm);
 }
 
 void SASL::continueAfterParams()

@@ -59,7 +59,7 @@ public:
 		else if(type == "keystorelist")
 			return new MyKeyStoreList(this);
 		else
-			return 0;
+			return nullptr;
 	}
 };
 

@@ -1263,7 +1263,7 @@ public:
 
 	   \sa validate
 	*/
-	inline CertificateChain complete(const QList<Certificate> &issuers = QList<Certificate>(), Validity *result = 0) const;
+	inline CertificateChain complete(const QList<Certificate> &issuers = QList<Certificate>(), Validity *result = nullptr) const;
 };
 
 inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const

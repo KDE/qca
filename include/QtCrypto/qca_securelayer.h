@@ -176,7 +176,7 @@ public:
 
 	   \param plainBytes the number of bytes that were read.
 	*/
-	virtual QByteArray readOutgoing(int *plainBytes = 0) = 0;
+	virtual QByteArray readOutgoing(int *plainBytes = nullptr) = 0;
 
 	/**
 	   This allows you to read data without having it
@@ -688,7 +688,7 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
 	void write(const QByteArray &a) override;
 	QByteArray read() override;
 	void writeIncoming(const QByteArray &a) override;
-	QByteArray readOutgoing(int *plainBytes = 0) override;
+	QByteArray readOutgoing(int *plainBytes = nullptr) override;
 	QByteArray readUnprocessed() override;
 	int convertBytesWritten(qint64 encryptedBytes) override;
 
@@ -1174,7 +1174,7 @@ public:
 	void write(const QByteArray &a) override;
 	QByteArray read() override;
 	void writeIncoming(const QByteArray &a) override;
-	QByteArray readOutgoing(int *plainBytes = 0) override;
+	QByteArray readOutgoing(int *plainBytes = nullptr) override;
 	int convertBytesWritten(qint64 encryptedBytes) override;
 
 Q_SIGNALS:

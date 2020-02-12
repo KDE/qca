@@ -30,7 +30,7 @@ using namespace QCA;
 namespace softstoreQCAPlugin {
 
 class softstoreKeyStoreListContext;
-static softstoreKeyStoreListContext *s_keyStoreList = NULL;
+static softstoreKeyStoreListContext *s_keyStoreList = nullptr;
 
 enum KeyType {
 	keyTypeInvalid,
@@ -328,7 +328,7 @@ public:
 		}
 		else {
 			KeyStoreEntry entry;
-			KeyStoreEntryContext *context = NULL;
+			KeyStoreEntryContext *context = nullptr;
 			QString storeId, storeName;
 			ConvertResult cresult;
 
@@ -339,7 +339,7 @@ public:
 
 			// too lazy to create scope
 			context = reinterpret_cast<KeyStoreListContext *> (s_keyStoreList)->entryPassive (_serialized);
-			if (context != NULL) {
+			if (context != nullptr) {
 				storeId = context->storeId ();
 				storeName = context->storeName ();
 				entry.change (context);
@@ -482,12 +482,12 @@ private:
 
 public:
 	softstorePKeyContext (Provider *p) : PKeyContext (p) {
-		_k = NULL;
+		_k = nullptr;
 	}
 
 	~softstorePKeyContext () override {
 		delete _k;
-		_k = NULL;
+		_k = nullptr;
 	}
 
 	Provider::Context *
@@ -739,7 +739,7 @@ public:
 			Logger::Debug
 		);
 
-		s_keyStoreList = NULL;
+		s_keyStoreList = nullptr;
 
 		QCA_logTextMessage (
 			"softstoreKeyStoreListContext::~softstoreKeyStoreListContext - return",
@@ -753,7 +753,7 @@ public:
 			"softstoreKeyStoreListContext::clone - entry/return",
 			Logger::Debug
 		);
-		return NULL;
+		return nullptr;
 	}
 
 public:
@@ -799,14 +799,14 @@ public:
 
 		Q_UNUSED(id);
 		Q_UNUSED(entryId);
-		return NULL;
+		return nullptr;
 	}
 
 	KeyStoreEntryContext *
 	entryPassive (
 		const QString &serialized
 	) override {
-		KeyStoreEntryContext *entry = NULL;
+		KeyStoreEntryContext *entry = nullptr;
 
 		QCA_logTextMessage (
 			QString::asprintf (
@@ -1232,7 +1232,7 @@ private:
 	_keyStoreEntryBySoftStoreEntry (
 		const SoftStoreEntry &sentry
 	) const {
-		softstoreKeyStoreEntryContext *entry = NULL;
+		softstoreKeyStoreEntryContext *entry = nullptr;
 
 		QCA_logTextMessage (
 			QString::asprintf (
@@ -1306,7 +1306,7 @@ private:
 			QChar c = from[i];
 
 			if (c == '\\') {
-				to += QChar ((ushort)from.midRef (i+2, 4).toInt (0, 16));
+				to += QChar ((ushort)from.midRef (i+2, 4).toInt (nullptr, 16));
 				i+=5;
 			}
 			else {
@@ -1368,7 +1368,7 @@ public:
 	createContext (
 		const QString &type
 	) override {
-		Provider::Context *context = NULL;
+		Provider::Context *context = nullptr;
 
 		QCA_logTextMessage (
 			QString::asprintf (
@@ -1379,7 +1379,7 @@ public:
 		);
 
 		if (type == "keystorelist") {
-			if (s_keyStoreList == NULL) {
+			if (s_keyStoreList == nullptr) {
 				s_keyStoreList = new softstoreKeyStoreListContext (this);
 				s_keyStoreList->_updateConfig (_config, _CONFIG_MAX_ENTRIES);
 			}
@@ -1431,7 +1431,7 @@ public:
 
 		_config = config;
 
-		if (s_keyStoreList != NULL) {
+		if (s_keyStoreList != nullptr) {
 			s_keyStoreList->_updateConfig (_config, _CONFIG_MAX_ENTRIES);
 		}
 

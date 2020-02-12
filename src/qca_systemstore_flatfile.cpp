@@ -32,7 +32,7 @@ bool qca_have_systemstore()
 
 CertificateCollection qca_get_systemstore(const QString &provider)
 {
-	return CertificateCollection::fromFlatTextFile(QCA_SYSTEMSTORE_PATH, 0, provider);
+	return CertificateCollection::fromFlatTextFile(QCA_SYSTEMSTORE_PATH, nullptr, provider);
 }
 
 }

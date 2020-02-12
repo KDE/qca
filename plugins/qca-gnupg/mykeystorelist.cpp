@@ -29,7 +29,7 @@ namespace gpgQCAPlugin
 
 Q_GLOBAL_STATIC(QMutex, ksl_mutex)
 
-static MyKeyStoreList *keyStoreList = 0;
+static MyKeyStoreList *keyStoreList = nullptr;
 MyKeyStoreList::MyKeyStoreList(Provider *p)
 	: KeyStoreListContext(p)
 	, initialized(false)
@@ -48,12 +48,12 @@ MyKeyStoreList::MyKeyStoreList(Provider *p)
 MyKeyStoreList::~MyKeyStoreList()
 {
 	QMutexLocker locker(ksl_mutex());
-	keyStoreList = 0;
+	keyStoreList = nullptr;
 }
 
 Provider::Context *MyKeyStoreList::clone() const
 {
-	return 0;
+	return nullptr;
 }
 
 QString MyKeyStoreList::name(int) const
@@ -139,7 +139,7 @@ KeyStoreEntryContext *MyKeyStoreList::entry(int, const QString &entryId)
 
 	PGPKey pub = getPubKey(entryId);
 	if(pub.isNull())
-		return 0;
+		return nullptr;
 
 	// optional
 	PGPKey sec = getSecKey(entryId, static_cast<MyPGPKeyContext *>(pub.context())->_props.userIds);
@@ -156,17 +156,17 @@ KeyStoreEntryContext *MyKeyStoreList::entryPassive(const QString &serialized)
 
 	QStringList parts = serialized.split(':');
 	if(parts.count() < 2)
-		return 0;
+		return nullptr;
 	if(unescape_string(parts[0]) != "qca-gnupg-1")
-		return 0;
+		return nullptr;
 
 	QString entryId = unescape_string(parts[1]);
 	if(entryId.isEmpty())
-		return 0;
+		return nullptr;
 
 	PGPKey pub = getPubKey(entryId);
 	if(pub.isNull())
-		return 0;
+		return nullptr;
 
 	// optional
 	PGPKey sec = getSecKey(entryId, static_cast<MyPGPKeyContext *>(pub.context())->_props.userIds);

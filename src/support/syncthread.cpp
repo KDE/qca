@@ -76,7 +76,7 @@ bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVar
 
 	if(metatype != QMetaType::Void)
 	{
-		retval = QVariant(metatype, (const void *)0);
+		retval = QVariant(metatype, (const void *)nullptr);
 		retarg = QGenericReturnArgument(retval.typeName(), retval.data());
 	}
 
@@ -107,8 +107,8 @@ public:
 
 	Private(SyncThread *_q) : QObject(_q), q(_q)
 	{
-		loop = 0;
-		agent = 0;
+		loop = nullptr;
+		agent = nullptr;
 	}
 
 public Q_SLOTS:
@@ -199,8 +199,8 @@ void SyncThread::run()
 	atEnd();
 	delete d->agent;
 	delete d->loop;
-	d->agent = 0;
-	d->loop = 0;
+	d->agent = nullptr;
+	d->loop = nullptr;
 	d->w.wakeOne();
 	d->m.unlock();
 }

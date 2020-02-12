@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 				while((pos = rx.indexIn(line, pos)) != -1)
 				{
 					QString str = rx.capturedTexts().at(1);
-					uchar c = str.toInt(0, 8);
+					uchar c = str.toInt(nullptr, 8);
 					buf.append(c);
 					pos += rx.matchedLength();
 				}

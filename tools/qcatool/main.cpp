@@ -368,7 +368,7 @@ public:
 		have_pass = false;
 		auto_accept = false;
 
-		prompt = 0;
+		prompt = nullptr;
 
 		connect(&handler, &QCA::EventHandler::eventReady, this, &PassphrasePrompt::ph_eventReady);
 		handler.start();
@@ -499,7 +499,7 @@ private Q_SLOTS:
 			{
 				QCA::KeyStoreEntry kse = e.keyStoreEntry();
 
-				QCA::KeyStore *ks = 0;
+				QCA::KeyStore *ks = nullptr;
 				foreach(QCA::KeyStore *i, keyStores)
 				{
 					if(i->id() == e.keyStoreInfo().id())
@@ -610,7 +610,7 @@ private Q_SLOTS:
 		else
 		{
 			delete prompt;
-			prompt = 0;
+			prompt = nullptr;
 		}
 	}
 

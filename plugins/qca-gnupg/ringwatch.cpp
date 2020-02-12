@@ -54,7 +54,7 @@ void RingWatch::add(const QString &filePath)
 		path = fi.absolutePath();
 
 	// watching this path already?
-	DirWatch *dirWatch = 0;
+	DirWatch *dirWatch = nullptr;
 	foreach(const DirItem &di, dirs)
 	{
 		if(di.dirWatch->dirName() == path)

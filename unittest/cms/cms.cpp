@@ -83,7 +83,7 @@ void CMSut::xcrypt()
         else if( !QCA::isSupported( "cms", provider ) )
 	    QWARN( QString( "CMS not supported for "+provider).toLocal8Bit().constData() );
 	else {
-	    QCA::Certificate pubCert = QCA::Certificate::fromPEMFile( "QcaTestClientCert.pem",0, provider );
+	    QCA::Certificate pubCert = QCA::Certificate::fromPEMFile( "QcaTestClientCert.pem",nullptr, provider );
 	    QCOMPARE( pubCert.isNull(), false );
 
 	    QCA::SecureMessageKey secMsgKey;

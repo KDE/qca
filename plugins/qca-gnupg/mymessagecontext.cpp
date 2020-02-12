@@ -50,7 +50,7 @@ MyMessageContext::MyMessageContext(MyOpenPGPContext *_sms, Provider *p)
 
 Provider::Context *MyMessageContext::clone() const
 {
-	return 0;
+	return nullptr;
 }
 
 bool MyMessageContext::canSignMultiple() const
@@ -266,7 +266,7 @@ bool MyMessageContext::waitForFinished(int msecs)
 			if(c)
 				kse.change(c);
 
-			asker.ask(Event::StylePassphrase, KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), kse, 0);
+			asker.ask(Event::StylePassphrase, KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), kse, nullptr);
 			asker.waitForResponse();
 
 			if(!asker.accepted())
@@ -279,7 +279,7 @@ bool MyMessageContext::waitForFinished(int msecs)
 		}
 		else if(e.type == GpgOp::Event::NeedCard)
 		{
-			tokenAsker.ask(KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), KeyStoreEntry(), 0);
+			tokenAsker.ask(KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), KeyStoreEntry(), nullptr);
 
 			if(!tokenAsker.accepted())
 			{
@@ -394,13 +394,13 @@ void MyMessageContext::gpg_needPassphrase(const QString &in_keyId)
 	if(c)
 		kse.change(c);
 
-	asker.ask(Event::StylePassphrase, KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), kse, 0);
+	asker.ask(Event::StylePassphrase, KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), kse, nullptr);
 }
 
 void MyMessageContext::gpg_needCard()
 {
 	MyKeyStoreList *keyStoreList = MyKeyStoreList::instance();
-	tokenAsker.ask(KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), KeyStoreEntry(), 0);
+	tokenAsker.ask(KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), KeyStoreEntry(), nullptr);
 }
 
 void MyMessageContext::gpg_readyReadDiagnosticText()

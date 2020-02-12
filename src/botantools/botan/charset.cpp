@@ -52,7 +52,7 @@ namespace QCA { // WRAPNS_LINE
 #include <cctype>
 namespace QCA { // WRAPNS_LINE
 } // WRAPNS_LINE
-#include <ctype.h>
+#include <cctype>
 namespace QCA { // WRAPNS_LINE
 
 namespace Botan {

@@ -301,7 +301,7 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 			* data without copying it. On arm do copying always
 			*/
 #ifndef Q_PROCESSOR_ARM
-			if (!((data - static_cast<const md5_byte_t*>(0)) & 3)) {
+			if (!((data - static_cast<const md5_byte_t*>(nullptr)) & 3)) {
 				/* data are properly aligned */
 				X = reinterpret_cast<const md5_word_t*>(data);
 			} else
@@ -987,25 +987,25 @@ public:
 			{
 				Certificate cert = Certificate::fromDER(data);
 				if(cert.isNull())
-					return 0;
+					return nullptr;
 				c = new DefaultKeyStoreEntry(cert, storeId, storeName, provider);
 			}
 			else if(typestr == "crl")
 			{
 				CRL crl = CRL::fromDER(data);
 				if(crl.isNull())
-					return 0;
+					return nullptr;
 				c = new DefaultKeyStoreEntry(crl, storeId, storeName, provider);
 			}
 			else
-				return 0;
+				return nullptr;
 
 			c->_id = id;
 			c->_name = name;
 			c->_serialized = in;
 			return c;
 		}
-		return 0;
+		return nullptr;
 	}
 
 	QString simpleId() const
@@ -1051,7 +1051,7 @@ public:
 
 	Provider::Context *clone() const override
 	{
-		return 0;
+		return nullptr;
 	}
 
 	void start() override
@@ -1234,7 +1234,7 @@ public:
 		else if(type == "keystorelist")
 			return new DefaultKeyStoreList(this, &shared);
 		else
-			return 0;
+			return nullptr;
 	}
 
 	QVariantMap defaultConfig() const override
