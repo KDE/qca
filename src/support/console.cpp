@@ -826,7 +826,7 @@ public:
 		}
 
 		if(!charMode)
-			writeString(promptStr + ": ");
+			writeString(promptStr + QStringLiteral(": "));
 
 		return true;
 	}
@@ -847,14 +847,14 @@ public:
 			return false;
 		}
 
-		if(c == '\r' || c == '\n')
+		if(c == QLatin1Char('\r') || c == QLatin1Char('\n'))
 		{
 			writeString(QStringLiteral("\n"));
 			done = true;
 			return false;
 		}
 
-		if(c == '\b' || c.unicode() == 0x7f)
+		if(c == QLatin1Char('\b') || c.unicode() == 0x7f)
 		{
 			if(at > 0)
 			{

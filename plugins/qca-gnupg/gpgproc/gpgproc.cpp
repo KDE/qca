@@ -196,7 +196,7 @@ void GPGProc::Private::setupArguments()
 	}
 
 	QString fullcmd = fullargs.join(QStringLiteral(" "));
-	emit q->debug(QStringLiteral("Running: [") + bin + ' ' + fullcmd + ']');
+	emit q->debug(QStringLiteral("Running: [") + bin + QLatin1Char(' ') + fullcmd + QLatin1Char(']'));
 
 	args = fullargs;
 }

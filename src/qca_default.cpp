@@ -779,13 +779,13 @@ static QString escape_string(const QString &in)
 	QString out;
 	for(const QChar &c : in)
 	{
-		if(c == '\\')
+		if(c == QLatin1Char('\\'))
 			out += QLatin1String("\\\\");
-		else if(c == ':')
+		else if(c == QLatin1Char(':'))
 			out += QLatin1String("\\c");
-		else if(c == ',')
+		else if(c == QLatin1Char(','))
 			out += QLatin1String("\\o");
-		else if(c == '\n')
+		else if(c == QLatin1Char('\n'))
 			out += QLatin1String("\\n");
 		else
 			out += c;
@@ -798,19 +798,19 @@ static bool unescape_string(const QString &in, QString *_out)
 	QString out;
 	for(int n = 0; n < in.length(); ++n)
 	{
-		if(in[n] == '\\')
+		if(in[n] == QLatin1Char('\\'))
 		{
 			if(n + 1 >= in.length())
 				return false;
 
-			if(in[n + 1] == '\\')
-				out += '\\';
-			else if(in[n + 1] == 'c')
-				out += ':';
-			else if(in[n + 1] == 'o')
-				out += ',';
-			else if(in[n + 1] == 'n')
-				out += '\n';
+			if(in[n + 1] == QLatin1Char('\\'))
+				out += QLatin1Char('\\');
+			else if(in[n + 1] == QLatin1Char('c'))
+				out += QLatin1Char(':');
+			else if(in[n + 1] == QLatin1Char('o'))
+				out += QLatin1Char(',');
+			else if(in[n + 1] == QLatin1Char('n'))
+				out += QLatin1Char('\n');
 			else
 				return false;
 			++n;
@@ -833,7 +833,7 @@ static QString escape_stringlist(const QStringList &in)
 static bool unescape_stringlist(const QString &in, QStringList *_out)
 {
 	QStringList out;
-	QStringList list = in.split(':');
+	const QStringList list = in.split(QLatin1Char(':'));
 	for(int n = 0; n < list.count(); ++n)
 	{
 		QString str;
@@ -1171,7 +1171,7 @@ public:
 static bool unescape_config_stringlist(const QString &in, QStringList *_out)
 {
 	QStringList out;
-	QStringList list = in.split(',');
+	const QStringList list = in.split(QLatin1Char(','));
 	for(int n = 0; n < list.count(); ++n)
 	{
 		QString str;
@@ -1240,7 +1240,7 @@ public:
 	QVariantMap defaultConfig() const override
 	{
 		QVariantMap config;
-		config[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/default#1.0";
+		config[QStringLiteral("formtype")] = QStringLiteral("http://affinix.com/qca/forms/default#1.0");
 		config[QStringLiteral("use_system")] = true;
 		config[QStringLiteral("roots_file")] = QString();
 		config[QStringLiteral("skip_plugins")] = QString();
@@ -1270,7 +1270,7 @@ public:
 			QString &s = plugin_priorities[n];
 
 			// make sure the entry ends with ":number"
-			int x = s.indexOf(':');
+			int x = s.indexOf(QLatin1Char(':'));
 			bool ok = false;
 			if(x != -1)
 				s.midRef(x + 1).toInt(&ok);

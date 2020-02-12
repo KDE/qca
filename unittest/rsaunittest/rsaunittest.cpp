@@ -64,7 +64,7 @@ void RSAUnitTest::testrsa()
 	if(!QCA::isSupported("pkey", provider) ||
 	   !QCA::PKey::supportedTypes(provider).contains(QCA::PKey::RSA) ||
 	   !QCA::PKey::supportedIOTypes(provider).contains(QCA::PKey::RSA))
-	    QWARN(QString("RSA not supported for "+provider).toLocal8Bit().constData());
+	    QWARN((QStringLiteral("RSA not supported for ")+provider).toLocal8Bit().constData());
 	else {
 	    QCA::KeyGenerator keygen;
 	    QCOMPARE( keygen.isBusy(), false );

@@ -195,13 +195,13 @@ void GpgOp::Private::act_finished()
 
 	if(output.wasSigned)
 	{
-		const char *s;
+		QString s;
 		if(output.verifyResult == GpgOp::VerifyGood)
-			s = "VerifyGood";
+			s = QStringLiteral("VerifyGood");
 		else if(output.verifyResult == GpgOp::VerifyBad)
-			s = "VerifyBad";
+			s = QStringLiteral("VerifyBad");
 		else
-			s = "VerifyNoKey";
+			s = QStringLiteral("VerifyNoKey");
 		diagnosticText += QStringLiteral("wasSigned: verifyResult: %1\n").arg(s);
 	}
 

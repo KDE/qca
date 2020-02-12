@@ -204,7 +204,7 @@ static QByteArray makeByteArray(const void *in, unsigned int len)
 
 static QString addrString(const SASLContext::HostPort &hp)
 {
-	return (hp.addr + ';' + QString::number(hp.port));
+	return (hp.addr + QLatin1Char(';') + QString::number(hp.port));
 }
 
 //----------------------------------------------------------------------------
@@ -365,8 +365,8 @@ private:
 	static int scb_checkauth(sasl_conn_t *, void *context, const char *requested_user, unsigned, const char *auth_identity, unsigned, const char *, unsigned, struct propctx *)
 	{
 		saslContext *that = (saslContext *)context;
-		that->sc_username = auth_identity; // yeah yeah, it looks
-		that->sc_authzid = requested_user; // backwards, but it is right
+		that->sc_username = QString::fromLatin1(auth_identity); // yeah yeah, it looks
+		that->sc_authzid = QString::fromLatin1(requested_user); // backwards, but it is right
 		that->ca_flag = true;
 		return SASL_OK;
 	}
@@ -395,7 +395,7 @@ private:
 
 				params.applyInteract(need);
 				if(params.missingAny()) {
-					out_mech = m;
+					out_mech = QString::fromLatin1(m);
 					result_result = Params;
 					return;
 				}
@@ -406,7 +406,7 @@ private:
 				return;
 			}
 
-			out_mech = m;
+			out_mech = QString::fromLatin1(m);
 			if(in_sendFirst && clientout) {
 				out_buf = makeByteArray(clientout, clientoutlen);
 				result_haveClientInit = true;
@@ -713,7 +713,7 @@ public:
 		r = sasl_listmech(con, nullptr, nullptr, " ", nullptr, &ml, nullptr, nullptr);
 		if(r != SASL_OK)
 			return;
-		result_mechlist = QString::fromUtf8(ml).split(' ');
+		result_mechlist = QString::fromUtf8(ml).split(QLatin1Char(' '));
 
 		servermode = true;
 		step = 0;

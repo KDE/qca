@@ -24,6 +24,7 @@
 #include <QtCrypto>
 
 #include <QCoreApplication>
+#include <QFile>
 
 #include <iostream>
 
@@ -108,7 +109,7 @@ int main(int argc, char** argv)
 	QCA::ConvertResult importResult;
 	// This imports all the PEM encoded certificates from the file specified as the argument
 	// Note that you pass in a pointer to the result argument.
-	filecerts = QCA::CertificateCollection::fromFlatTextFile( argv[1], &importResult );
+	filecerts = QCA::CertificateCollection::fromFlatTextFile( QFile::decodeName(argv[1]), &importResult );
 	if ( QCA::ConvertGood == importResult) {
 	    std::cout << "Import succeeded" << std::endl;
 	    // this turns the CertificateCollection into a QList of Certificate objects

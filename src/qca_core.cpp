@@ -365,7 +365,7 @@ bool isSupported(const QStringList &features, const QString &provider)
 
 bool isSupported(const char *features, const QString &provider)
 {
-	return isSupported(QString(features).split(',', QString::SkipEmptyParts), provider);
+	return isSupported(QString::fromLatin1(features).split(QLatin1Char(','), QString::SkipEmptyParts), provider);
 }
 
 QStringList supportedFeatures()
@@ -458,17 +458,17 @@ QStringList pluginPaths()
 {
 	QStringList paths;
 #ifndef DEVELOPER_MODE
-	const QString qcaPluginPath = qgetenv("QCA_PLUGIN_PATH");
+	const QByteArray qcaPluginPath = qgetenv("QCA_PLUGIN_PATH");
 	if (!qcaPluginPath.isEmpty())
 	{
 #ifdef Q_OS_WIN
-		QLatin1Char pathSep(';');
+		char pathSep(';');
 #else
-		QLatin1Char pathSep(':');
+		char pathSep(':');
 #endif
-		foreach (const QString &path, qcaPluginPath.split(pathSep))
+		foreach (const QByteArray &path, qcaPluginPath.split(pathSep))
 		{
-			QString canonicalPath = QDir(path).canonicalPath();
+			QString canonicalPath = QDir(QFile::decodeName(path)).canonicalPath();
 			if (!canonicalPath.isEmpty())
 				paths << canonicalPath;
 		}

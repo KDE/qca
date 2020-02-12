@@ -88,8 +88,8 @@ public:
 	connect(ssl, &QCA::TLS::closed, this, &SecureServer::ssl_closed);
 	connect(ssl, &QCA::TLS::error, this, &SecureServer::ssl_error);
 
-	cert = QCA::Certificate::fromPEM(pemdata_cert);
-	privkey = QCA::PrivateKey::fromPEM(pemdata_privkey);
+	cert = QCA::Certificate::fromPEM(QString::fromLatin1(pemdata_cert));
+	privkey = QCA::PrivateKey::fromPEM(QString::fromLatin1(pemdata_privkey));
 
 	mode = Idle;
     }
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
     QCA::Initializer init;
 
     QCoreApplication app(argc, argv);
-    int port = argc > 1 ? QString(argv[1]).toInt() : 8000;
+    int port = argc > 1 ? QString::fromLatin1(argv[1]).toInt() : 8000;
 
     if(!QCA::isSupported("tls")) {
 	qDebug() << "TLS not supported!";

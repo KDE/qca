@@ -156,9 +156,9 @@ public:
 	defaultConfig () const override {
 		QVariantMap mytemplate;
 
-		mytemplate[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-logger#1.0";
+		mytemplate[QStringLiteral("formtype")] = QStringLiteral("http://affinix.com/qca/forms/qca-logger#1.0");
 		mytemplate[QStringLiteral("enabled")] = false;
-		mytemplate[QStringLiteral("file")] = "";
+		mytemplate[QStringLiteral("file")] = QLatin1String("");
 		mytemplate[QStringLiteral("level")] = (int)Logger::Quiet;
 
 		return mytemplate;

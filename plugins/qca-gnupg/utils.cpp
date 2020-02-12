@@ -123,9 +123,9 @@ QString find_bin()
 	// Prefer bundled gpg
 	foreach (const QString &bin, bins)
 	{
-		if (check_bin(QCoreApplication::applicationDirPath() + "/" + bin))
+		if (check_bin(QCoreApplication::applicationDirPath() + QLatin1Char('/') + bin))
 		{
-			return QCoreApplication::applicationDirPath() + "/" + bin;
+			return QCoreApplication::applicationDirPath() + QLatin1Char('/') + bin;
 		}
 	}
 
@@ -159,9 +159,9 @@ QString find_bin()
 	{
 		foreach (const QString &bin, bins)
 		{
-			if (check_bin(path + "/" + bin))
+			if (check_bin(path + QLatin1Char('/') + bin))
 			{
-				return path + "/" + bin;
+				return path + QLatin1Char('/') + bin;
 			}
 		}
 	}
@@ -175,9 +175,9 @@ QString escape_string(const QString &in)
 	QString out;
 	for(const QChar &c : in)
 	{
-		if(c == '\\')
+		if(c == QLatin1Char('\\'))
 			out += QStringLiteral("\\\\");
-		else if(c == ':')
+		else if(c == QLatin1Char(':'))
 			out += QStringLiteral("\\c");
 		else
 			out += c;
@@ -190,14 +190,14 @@ QString unescape_string(const QString &in)
 	QString out;
 	for(int n = 0; n < in.length(); ++n)
 	{
-		if(in[n] == '\\')
+		if(in[n] == QLatin1Char('\\'))
 		{
 			if(n + 1 < in.length())
 			{
-				if(in[n + 1] == '\\')
-					out += '\\';
-				else if(in[n + 1] == 'c')
-					out += ':';
+				if(in[n + 1] == QLatin1Char('\\'))
+					out += QLatin1Char('\\');
+				else if(in[n + 1] == QLatin1Char('c'))
+					out += QLatin1Char(':');
 				++n;
 			}
 		}

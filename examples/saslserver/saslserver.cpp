@@ -213,7 +213,7 @@ private Q_SLOTS:
 	{
 		if(sock->canReadLine())
 		{
-			QString line = sock->readLine();
+			QString line = QString::fromLatin1(sock->readLine());
 			line.truncate(line.length() - 1); // chop the newline
 			handleLine(line);
 		}
@@ -237,7 +237,7 @@ private Q_SLOTS:
 		QString line = QStringLiteral("C");
 		if(!stepData.isEmpty())
 		{
-			line += ',';
+			line += QLatin1Char(',');
 			line += arrayToString(stepData);
 		}
 		sendLine(line);
@@ -317,11 +317,11 @@ private:
 		printf("%d: Reading: [%s]\n", id, qPrintable(line));
 		if(mode == 0)
 		{
-			int n = line.indexOf(' ');
+			int n = line.indexOf(QLatin1Char(' '));
 			if(n != -1)
 			{
 				QString mech = line.mid(0, n);
-				QString rest = line.mid(n + 1).toUtf8();
+				QString rest = QString::fromLatin1(line.mid(n + 1).toUtf8());
 				sasl->putServerFirstStep(mech, stringToArray(rest));
 			}
 			else
@@ -331,7 +331,7 @@ private:
 		else if(mode == 1)
 		{
 			QString type, rest;
-			int n = line.indexOf(',');
+			int n = line.indexOf(QLatin1Char(','));
 			if(n != -1)
 			{
 				type = line.mid(0, n);
@@ -371,7 +371,7 @@ private:
 	void sendLine(const QString &line)
 	{
 		printf("%d: Writing: {%s}\n", id, qPrintable(line));
-		QString s = line + '\n';
+		QString s = line + QLatin1Char('\n');
 		QByteArray a = s.toUtf8();
 		if(mode == 2) // app mode
 		{
@@ -456,7 +456,7 @@ int main(int argc, char **argv)
 
 		QString opt = args[n].mid(2);
 		QString var, val;
-		int at = opt.indexOf('=');
+		int at = opt.indexOf(QLatin1Char('='));
 		if(at != -1)
 		{
 			var = opt.mid(0, at);
@@ -488,7 +488,7 @@ int main(int argc, char **argv)
 	if(args.count() >= 2)
 		str = args[1];
 
-	int at = hostinput.indexOf(':');
+	int at = hostinput.indexOf(QLatin1Char(':'));
 	if(at != -1)
 	{
 		host = hostinput.mid(0, at);

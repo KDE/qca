@@ -381,7 +381,7 @@ public:
 
 	QString
 	message () const {
-		return _msg + QStringLiteral(" ") + pkcs11h_getMessage (_rv);
+		return _msg + QStringLiteral(" ") + QString::fromLatin1(pkcs11h_getMessage (_rv));
 	}
 };
 
@@ -1649,7 +1649,7 @@ pkcs11KeyStoreListContext::name (int id) const {
 	);
 
 	if (_storesById.contains (id)) {
-		ret = _storesById[id]->tokenId ()->label;
+		ret = QString::fromLatin1(_storesById[id]->tokenId ()->label);
 	}
 
 	QCA_logTextMessage (
@@ -1966,7 +1966,7 @@ pkcs11KeyStoreListContext::_tokenPrompt (
 	else {
 		_registerTokenId (token_id);
 		storeId = _tokenId2storeId (token_id);
-		storeName = token_id->label;
+		storeName = QString::fromLatin1(token_id->label);
 	}
 
 	TokenAsker asker;
@@ -2023,7 +2023,7 @@ pkcs11KeyStoreListContext::_pinPrompt (
 	else {
 		_registerTokenId (token_id);
 		storeId = _tokenId2storeId (token_id);
-		storeName = token_id->label;
+		storeName = QString::fromLatin1(token_id->label);
 	}
 
 	PasswordAsker asker;
@@ -2210,7 +2210,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 	QString description = _description;
 	const Certificate &cert = chain.primary ();
 	if (description.isEmpty ()) {
-		description = cert.subjectInfoOrdered ().toString () + " by " + cert.issuerInfo ().value (CommonName, QStringLiteral("Unknown"));
+		description = cert.subjectInfoOrdered ().toString () + QStringLiteral(" by ") + cert.issuerInfo ().value (CommonName, QStringLiteral("Unknown"));
 	}
 
 	if (has_private) {
@@ -2235,7 +2235,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 			key,
 			_tokenId2storeId (certificate_id->token_id),
 			serialized,
-			certificate_id->token_id->label,
+			QString::fromLatin1(certificate_id->token_id->label),
 			description,
 			provider ()
 		);
@@ -2245,7 +2245,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId (
 			cert,
 			_tokenId2storeId (certificate_id->token_id),
 			serialized,
-			certificate_id->token_id->label,
+			QString::fromLatin1(certificate_id->token_id->label),
 			description,
 			provider()
 		);
@@ -2302,7 +2302,7 @@ pkcs11KeyStoreListContext::_tokenId2storeId (
 
 	buf.resize ((int)len);
 
-	storeId = "qca-pkcs11/" + _escapeString (QString::fromUtf8 (buf));
+	storeId = QStringLiteral("qca-pkcs11/") + _escapeString (QString::fromUtf8 (buf));
 
 	QCA_logTextMessage (
 		QString::asprintf (
@@ -2490,7 +2490,7 @@ pkcs11KeyStoreListContext::_escapeString (
 	QString to;
 
 	foreach (QChar c, from) {
-		if (c == '/' || c == '\\') {
+		if (c == QLatin1Char('/') || c == QLatin1Char('\\')) {
 			to += QString::asprintf ("\\x%04x", c.unicode ());
 		}
 		else {
@@ -2510,7 +2510,7 @@ pkcs11KeyStoreListContext::_unescapeString (
 	for (int i=0;i<from.size ();i++) {
 		QChar c = from[i];
 
-		if (c == '\\') {
+		if (c == QLatin1Char('\\')) {
 			to += QChar ((ushort)from.midRef (i+2, 4).toInt (nullptr, 16));
 			i+=5;
 		}
@@ -2759,19 +2759,19 @@ pkcs11Provider::defaultConfig () const {
 		Logger::Debug
 	);
 
-	mytemplate[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
+	mytemplate[QStringLiteral("formtype")] = QStringLiteral("http://affinix.com/qca/forms/qca-pkcs11#1.0");
 	mytemplate[QStringLiteral("allow_load_rootca")] = false;
 	mytemplate[QStringLiteral("allow_protected_authentication")] = true;
 	mytemplate[QStringLiteral("pin_cache")] = PKCS11H_PIN_CACHE_INFINITE;
 	mytemplate[QStringLiteral("log_level")] = 0;
 	for (int i=0;i<_CONFIG_MAX_PROVIDERS;i++) {
 		mytemplate[QString::asprintf ("provider_%02d_enabled", i)] = false;
-		mytemplate[QString::asprintf ("provider_%02d_name", i)] = "";
-		mytemplate[QString::asprintf ("provider_%02d_library", i)] = "";
+		mytemplate[QString::asprintf ("provider_%02d_name", i)] = QLatin1String("");
+		mytemplate[QString::asprintf ("provider_%02d_library", i)] = QLatin1String("");
 		mytemplate[QString::asprintf ("provider_%02d_allow_protected_authentication", i)] = true;
 		mytemplate[QString::asprintf ("provider_%02d_cert_private", i)] = false;
 		mytemplate[QString::asprintf ("provider_%02d_private_mask", i)] = PKCS11H_PRIVATEMODE_MASK_AUTO;
-		mytemplate[QString::asprintf ("provider_%02d_slotevent_method", i)] = "auto";
+		mytemplate[QString::asprintf ("provider_%02d_slotevent_method", i)] = QStringLiteral("auto");
 		mytemplate[QString::asprintf ("provider_%02d_slotevent_timeout", i)] = 0;
 	}
 
@@ -2968,7 +2968,7 @@ pkcs11Provider::_logHook (
 	char buffer[2048];
 	qvsnprintf (buffer, sizeof (buffer)-1, format, args);
 	buffer[sizeof (buffer)-1] = '\x0';
-	QCA_logTextMessage (buffer, severity);
+	QCA_logTextMessage (QString::fromLatin1(buffer), severity);
 //@END-WORKAROUND
 }
 

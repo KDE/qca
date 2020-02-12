@@ -39,8 +39,8 @@ static QString prompt(const QString &s)
 	fflush(stdout);
 	char line[256];
 	fgets(line, 255, stdin);
-	QString result = line;
-	if(result[result.length()-1] == '\n')
+	QString result = QString::fromLatin1(line);
+	if(result[result.length()-1] == QLatin1Char('\n'))
 		result.truncate(result.length()-1);
 	return result;
 }
@@ -236,7 +236,7 @@ private Q_SLOTS:
 		{
 			if(sock->canReadLine())
 			{
-				QString line = sock->readLine();
+				QString line = QString::fromLatin1(sock->readLine());
 				line.truncate(line.length() - 1); // chop the newline
 				handleLine(line);
 			}
@@ -249,7 +249,7 @@ private Q_SLOTS:
 		QString line = sasl->mechanism();
 		if(clientInit)
 		{
-			line += ' ';
+			line += QLatin1Char(' ');
 			line += arrayToString(clientInitData);
 		}
 		sendLine(line);
@@ -260,7 +260,7 @@ private Q_SLOTS:
 		QString line = QStringLiteral("C");
 		if(!stepData.isEmpty())
 		{
-			line += ',';
+			line += QLatin1Char(',');
 			line += arrayToString(stepData);
 		}
 		sendLine(line);
@@ -388,7 +388,7 @@ private:
 	void sendLine(const QString &line)
 	{
 		printf("Writing: {%s}\n", qPrintable(line));
-		QString s = line + '\n';
+		QString s = line + QLatin1Char('\n');
 		QByteArray a = s.toUtf8();
 		if(mode == 2) // app mode
 			sasl->write(a); // write to sasl
@@ -418,14 +418,14 @@ private:
 		if(mode == 0)
 		{
 			// first line is the method list
-			QStringList mechlist = line.split(' ');
+			QStringList mechlist = line.split(QLatin1Char(' '));
 			mode = 1; // switch to sasl negotiation mode
 			sasl->startClient(proto, host, mechlist);
 		}
 		else if(mode == 1)
 		{
 			QString type, rest;
-			int n = line.indexOf(',');
+			int n = line.indexOf(QLatin1Char(','));
 			if(n != -1)
 			{
 				type = line.mid(0, n);
@@ -494,7 +494,7 @@ int main(int argc, char **argv)
 
 		QString opt = args[n].mid(2);
 		QString var, val;
-		int at = opt.indexOf('=');
+		int at = opt.indexOf(QLatin1Char('='));
 		if(at != -1)
 		{
 			var = opt.mid(0, at);
@@ -543,7 +543,7 @@ int main(int argc, char **argv)
 	if(args.count() >= 3)
 		pass = args[2];
 
-	int at = hostinput.indexOf(':');
+	int at = hostinput.indexOf(QLatin1Char(':'));
 	if(at != -1)
 	{
 		host = hostinput.mid(0, at);

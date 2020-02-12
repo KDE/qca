@@ -32,7 +32,7 @@ static QDateTime getTimestamp(const QString &s)
 	if(s.isEmpty())
 		return QDateTime();
 
-	if(s.contains('T'))
+	if(s.contains(QLatin1Char('T')))
 	{
 		return QDateTime::fromString(s, Qt::ISODate);
 	}
@@ -90,7 +90,7 @@ static QByteArray getCString(const QByteArray &a)
 static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QString *_keyring)
 {
 	GpgOp::KeyList keyList;
-	QStringList lines = outstr.split('\n');
+	const QStringList lines = outstr.split(QLatin1Char('\n'));
 
 	if(lines.count() < 1)
 		return false;
@@ -103,7 +103,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 	// if the second line isn't a divider, we are dealing
 	// with a new version of gnupg that doesn't give us
 	// the keyring file on gpg --list-keys --with-colons
-	if(it == lines.constEnd() || (*it).isEmpty() || (*it).at(0) != '-')
+	if(it == lines.constEnd() || (*it).isEmpty() || (*it).at(0) != QLatin1Char('-'))
 	{
 		// first line wasn't the keyring name...
 		keyring.clear();
@@ -118,7 +118,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 
 	for(; it != lines.constEnd(); ++it)
 	{
-		QStringList f = (*it).split(':');
+		const QStringList f = (*it).split(QLatin1Char(':'));
 		if(f.count() < 1)
 			continue;
 		QString type = f[0];
@@ -175,13 +175,13 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 			item.id = f[4];
 			item.creationDate = getTimestamp(f[5]);
 			item.expirationDate = getTimestamp(f[6]);
-			if(caps.contains('e'))
+			if(caps.contains(QLatin1Char('e')))
 				item.caps |= GpgOp::KeyItem::Encrypt;
-			if(caps.contains('s'))
+			if(caps.contains(QLatin1Char('s')))
 				item.caps |= GpgOp::KeyItem::Sign;
-			if(caps.contains('c'))
+			if(caps.contains(QLatin1Char('c')))
 				item.caps |= GpgOp::KeyItem::Certify;
-			if(caps.contains('a'))
+			if(caps.contains(QLatin1Char('a')))
 				item.caps |= GpgOp::KeyItem::Auth;
 
 			keyList.last().keyItems += item;
@@ -208,7 +208,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 
 static bool findKeyringFilename(const QString &outstr, QString *_keyring)
 {
-	QStringList lines = outstr.split('\n');
+	const QStringList lines = outstr.split(QLatin1Char('\n'));
 	if(lines.count() < 1)
 		return false;
 
@@ -605,7 +605,7 @@ void GpgAction::submitCommand(const QByteArray &a)
 // since str is taken as a value, it is ok to use the same variable for 'rest'
 QString GpgAction::nextArg(QString str, QString *rest)
 {
-	int n = str.indexOf(' ');
+	int n = str.indexOf(QLatin1Char(' '));
 	if(n == -1)
 	{
 		if(rest)
@@ -622,7 +622,7 @@ QString GpgAction::nextArg(QString str, QString *rest)
 
 void GpgAction::processStatusLine(const QString &line)
 {
-	appendDiagnosticText("{" + line + "}");
+	appendDiagnosticText(QStringLiteral("{") + line + QStringLiteral("}"));
 	ensureDTextEmit();
 
 	if(!proc.isActive())
@@ -748,14 +748,14 @@ void GpgAction::processStatusLine(const QString &line)
 	else if(s == QLatin1String("ERRSIG"))
 	{
 		output.wasSigned = true;
-		QStringList list = rest.split(' ', QString::SkipEmptyParts);
+		const QStringList list = rest.split(QLatin1Char(' '), QString::SkipEmptyParts);
 		output.signerId = list[0];
 		output.timestamp = getTimestamp(list[4]);
 		output.verifyResult = GpgOp::VerifyNoKey;
 	}
 	else if(s == QLatin1String("VALIDSIG"))
 	{
-		QStringList list = rest.split(' ', QString::SkipEmptyParts);
+		const QStringList list = rest.split(QLatin1Char(' '), QString::SkipEmptyParts);
 		output.timestamp = getTimestamp(list[2]);
 	}
 }
@@ -809,7 +809,7 @@ void GpgAction::processResult(int code)
 				if (!str.startsWith(QLatin1String("Home: ")))
 					continue;
 
-				output.homeDir = str.section(' ', 1);
+				output.homeDir = str.section(QLatin1Char(' '), 1);
 				break;
 			}
 			output.success = true;
@@ -939,7 +939,7 @@ void GpgAction::proc_bytesWrittenCommand(int)
 
 void GpgAction::proc_debug(const QString &str)
 {
-	appendDiagnosticText("GPGProc: " + str);
+	appendDiagnosticText(QStringLiteral("GPGProc: ") + str);
 	ensureDTextEmit();
 }
 

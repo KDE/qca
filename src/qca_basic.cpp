@@ -447,7 +447,7 @@ QString Cipher::withAlgorithms(const QString &cipherType, Mode modeType, Padding
 	else
 		pad = QStringLiteral("pkcs7");
 
-	QString result = cipherType + '-' + mode;
+	QString result = cipherType + QLatin1Char('-') + mode;
 	if(!pad.isEmpty())
 		result += QStringLiteral("-") + pad;
 
@@ -588,14 +588,14 @@ SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &secret,
 
 QString KeyDerivationFunction::withAlgorithm(const QString &kdfType, const QString &algType)
 {
-	return (kdfType + '(' + algType + ')');
+	return (kdfType + QLatin1Char('(') + algType + QLatin1Char(')'));
 }
 
 //----------------------------------------------------------------------------
 // HKDF
 //----------------------------------------------------------------------------
 HKDF::HKDF(const QString &algorithm, const QString &provider)
-: Algorithm(QStringLiteral("hkdf(") + algorithm + ')', provider)
+: Algorithm(QStringLiteral("hkdf(") + algorithm + QLatin1Char(')'), provider)
 {
 }
 

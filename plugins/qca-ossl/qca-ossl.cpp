@@ -1607,18 +1607,18 @@ static const int JCE_768_COUNTER = 263;
 static const char* JCE_1024_SEED = "8D515589 4229D5E6 89EE01E6 018A237E 2CAE64CD";
 static const int JCE_1024_COUNTER = 92;
 
-static QByteArray dehex(const QString &hex)
+static QByteArray dehex(const QByteArray &hex)
 {
 	QString str;
-	for(const QChar &c : hex)
+	for(const char c : hex)
 	{
 		if(c != ' ')
-			str += c;
+			str += QLatin1Char(c);
 	}
 	return hexToArray(str);
 }
 
-static BigInteger decode(const QString &prime)
+static BigInteger decode(const QByteArray &prime)
 {
 	QByteArray a(1, 0); // 1 byte of zero padding
 	a.append(dehex(prime));
@@ -1626,7 +1626,7 @@ static BigInteger decode(const QString &prime)
 }
 
 #ifndef OPENSSL_FIPS
-static QByteArray decode_seed(const QString &hex_seed)
+static QByteArray decode_seed(const QByteArray &hex_seed)
 {
 	return dehex(hex_seed);
 }
@@ -3620,7 +3620,7 @@ public:
 		if(ai)
 		{
 			char *rep = i2s_ASN1_INTEGER(nullptr, ai);
-			QString str = rep;
+			QString str = QString::fromLatin1(rep);
 			OPENSSL_free(rep);
 			p.serial.fromString(str);
 		}
@@ -7251,7 +7251,7 @@ public:
 
 	QString credit() const override
 	{
-		return QString(
+		return QStringLiteral(
 					   "This product includes cryptographic software "
 					   "written by Eric Young (eay@cryptsoft.com)");
 	}

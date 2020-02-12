@@ -154,7 +154,7 @@ KeyStoreEntryContext *MyKeyStoreList::entryPassive(const QString &serialized)
 {
 	QMutexLocker locker(&ringMutex);
 
-	QStringList parts = serialized.split(':');
+	const QStringList parts = serialized.split(QLatin1Char(':'));
 	if(parts.count() < 2)
 		return nullptr;
 	if(unescape_string(parts[0]) != QLatin1String("qca-gnupg-1"))
@@ -375,7 +375,7 @@ void MyKeyStoreList::gpg_finished()
 
 			if(secring.isEmpty())
 			{
-				secring = homeDir + "/secring.gpg";
+				secring = homeDir + QStringLiteral("/secring.gpg");
 			}
 			ringWatch.add(secring);
 
@@ -389,7 +389,7 @@ void MyKeyStoreList::gpg_finished()
 			pubring = QFileInfo(gpg.keyringFile()).canonicalFilePath();
 			if(pubring.isEmpty())
 			{
-				pubring = homeDir + "/pubring.gpg";
+				pubring = homeDir + QStringLiteral("/pubring.gpg");
 			}
 			ringWatch.add(pubring);
 

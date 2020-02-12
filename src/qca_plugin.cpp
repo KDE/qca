@@ -58,9 +58,9 @@ QString truncate_log(const QString &in, int size)
 
 	// if the previous char is a newline, then this is a perfect cut.
 	//   otherwise, we need to skip to after the next newline.
-	if(in[at - 1] != '\n')
+	if(in[at - 1] != QLatin1Char('\n'))
 	{
-		while(at < in.length() && in[at] != '\n')
+		while(at < in.length() && in[at] != QLatin1Char('\n'))
 		{
 			++at;
 		}
@@ -68,7 +68,7 @@ QString truncate_log(const QString &in, int size)
 		// at this point we either reached a newline, or end of
 		//   the entire buffer
 
-		if(in[at] == '\n')
+		if(in[at] == QLatin1Char('\n'))
 			++at;
 	}
 
@@ -80,7 +80,7 @@ static ProviderManager *g_pluginman = nullptr;
 static void logDebug(const QString &str)
 {
 	if(g_pluginman)
-		g_pluginman->appendDiagnosticText(str + '\n');
+		g_pluginman->appendDiagnosticText(str + QLatin1Char('\n'));
 }
 
 static bool validVersion(int ver)
@@ -801,7 +801,7 @@ int ProviderManager::get_default_priority(const QString &name) const
 	foreach(const QString &s, list)
 	{
 		// qca_default already sanity checks the strings
-		int n = s.indexOf(':');
+		int n = s.indexOf(QLatin1Char(':'));
 		QString sname = s.mid(0, n);
 		int spriority = s.midRef(n + 1).toInt();
 		if(sname == name)

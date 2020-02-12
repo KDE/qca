@@ -38,14 +38,14 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	QFile infile(argv[1]);
+	QFile infile(QString::fromLocal8Bit(argv[1]));
 	if(!infile.open(QFile::ReadOnly))
 	{
 		fprintf(stderr, "Error opening input file\n");
 		return 1;
 	}
 
-	QFile outfile(argv[2]);
+	QFile outfile(QString::fromLocal8Bit(argv[2]));
 	if(!outfile.open(QFile::WriteOnly | QFile::Truncate))
 	{
 		fprintf(stderr, "Error opening output file\n");
@@ -58,13 +58,13 @@ int main(int argc, char **argv)
 	while(!ts.atEnd())
 	{
 		QString line = ts.readLine();
-		if(QRegExp("^#").indexIn(line) != -1)
+		if(QRegExp(QLatin1String("^#")).indexIn(line) != -1)
 			continue;
-		if(QRegExp("^\\s*$").indexIn(line) != -1)
+		if(QRegExp(QLatin1String("^\\s*$")).indexIn(line) != -1)
 			continue;
 		line = line.trimmed();
 
-		if(QRegExp("CKA_LABEL").indexIn(line) != -1)
+		if(QRegExp(QLatin1String("CKA_LABEL")).indexIn(line) != -1)
 		{
 			QStringList list = splitWithQuotes(line, ' ');
 			if(list.count() != 3)
@@ -78,16 +78,16 @@ int main(int argc, char **argv)
 			//	.replace(QRegExp(","), "_") + ".pem";
 			continue;
 		}
-		else if(QRegExp("CKA_VALUE MULTILINE_OCTAL").indexIn(line) != -1)
+		else if(QRegExp(QLatin1String("CKA_VALUE MULTILINE_OCTAL")).indexIn(line) != -1)
 		{
 			QByteArray buf;
 			while(!ts.atEnd())
 			{
 				line = ts.readLine();
-				if(QRegExp("^END").indexIn(line) != -1)
+				if(QRegExp(QLatin1String("^END")).indexIn(line) != -1)
 					break;
 				line = line.trimmed();
-				QRegExp rx("\\\\([0-3][0-7][0-7])");
+				QRegExp rx(QLatin1String("\\\\([0-3][0-7][0-7])"));
 				int pos = 0;
 				while((pos = rx.indexIn(line, pos)) != -1)
 				{
@@ -120,7 +120,7 @@ int find_notchar(const QString &str, char c, int offset)
 {
 	for(int n = offset; n < str.length(); ++n)
 	{
-		if(str[n] != c)
+		if(str[n] != QLatin1Char(c))
 			return n;
 	}
 	return -1;
@@ -130,23 +130,23 @@ QStringList splitWithQuotes(const QString &in, char c)
 {
 	QStringList result;
 	int at = 0;
-	if(in[at] == c)
+	if(in[at] == QLatin1Char(c))
 		at = find_notchar(in, c, at);
 	while(at != -1)
 	{
 		bool quote = false;
 		int end;
 		QString str;
-		if(in[at] == '\"')
+		if(in[at] == QLatin1Char('\"'))
 		{
 			quote = true;
 			++at;
-			end = in.indexOf('\"', at);
+			end = in.indexOf(QLatin1Char('\"'), at);
 			if(end == -1)
 				break;
 		}
 		else
-			end = in.indexOf(c, at);
+			end = in.indexOf(QLatin1Char(c), at);
 
 		if(end != -1)
 			str = in.mid(at, end - at);
@@ -157,7 +157,7 @@ QStringList splitWithQuotes(const QString &in, char c)
 			result += str;
 
 		if(quote)
-			end = in.indexOf(c, end);
+			end = in.indexOf(QLatin1Char(c), end);
 
 		if(end != -1)
 			at = find_notchar(in, c, end);

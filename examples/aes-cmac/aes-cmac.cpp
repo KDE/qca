@@ -273,10 +273,10 @@ int main(int argc, char **argv)
 	// set the MAC to use the key
 	cmacObject.setup(key);
 
-	QCA::SecureArray message = QCA::hexToArray("6bc1bee22e409f96e93d7e117393172a"
+	QCA::SecureArray message = QCA::hexToArray(QStringLiteral("6bc1bee22e409f96e93d7e117393172a"
 					       "ae2d8a571e03ac9c9eb76fac45af8e51"
 					       "30c81c46a35ce411e5fbc1191a0a52ef"
-					       "f69f2445df4f9b17ad2b417be66c3710");
+					       "f69f2445df4f9b17ad2b417be66c3710"));
 	QCA::SecureArray message1(message);
 	message1.resize(0);
 	qDebug();

@@ -462,7 +462,7 @@ void PgpUnitTest::testClearsign()
 	if(msg2.success()) {
 	    // The trimmed() call is needed because clearsigning
 	    // trashes whitespace
-	    QCOMPARE( QString(msg2.read()).trimmed(), QString(plain).trimmed() );
+	    QCOMPARE( msg2.read().trimmed(), plain.trimmed() );
 	} else {
 	    qDebug() << "Failure:" <<  msg2.errorCode();
 	    QFAIL("Failed to verify clearsigned message");
@@ -673,7 +673,7 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
 		QByteArray signedResult = msg1.read();
 
 		QVERIFY(msg1.verifySuccess());
-		QCOMPARE(QString(signedResult).trimmed(), QString(validMessage).trimmed());
+		QCOMPARE(signedResult.trimmed(), validMessage.trimmed());
 
 		// Test signature made by the expired subkey
 		QByteArray expiredKeySignature("-----BEGIN PGP SIGNED MESSAGE-----\n"

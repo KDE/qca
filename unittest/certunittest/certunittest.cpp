@@ -77,7 +77,7 @@ void CertUnitTest::nullCert()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate nullCert;
 	    QVERIFY(nullCert.isNull());
@@ -96,7 +96,7 @@ void CertUnitTest::noSuchFile()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultNoFile;
 	    QCA::Certificate cert = QCA::Certificate::fromPEMFile( QStringLiteral("thisIsJustaFileNameThatWeDontHave"), &resultNoFile, provider);
@@ -114,7 +114,7 @@ void CertUnitTest::CAcertstest()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultca1;
 	    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/RootCAcert.pem"), &resultca1, provider);
@@ -165,7 +165,7 @@ void CertUnitTest::qualitysslcatest()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultca1;
 	    QCA::Certificate ca1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/QualitySSLIntermediateCA.crt"), &resultca1, provider);
@@ -217,7 +217,7 @@ void CertUnitTest::checkExpiredClientCerts()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultClient1;
 	    QCA::Certificate client1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/User.pem"), &resultClient1, provider);
@@ -325,7 +325,7 @@ void CertUnitTest::checkClientCerts()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultClient2;
 	    QCA::Certificate client2 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/QcaTestClientCert.pem"), &resultClient2, provider);
@@ -434,7 +434,7 @@ void CertUnitTest::derCAcertstest()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
             QFile f(QStringLiteral("certs/ov-root-ca-cert.crt"));
             QVERIFY(f.open(QFile::ReadOnly));
@@ -508,7 +508,7 @@ void CertUnitTest::altName()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultClient1;
 	    QCA::Certificate client1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/altname.pem"), &resultClient1, provider);
@@ -584,7 +584,7 @@ void CertUnitTest::extXMPP()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultClient1;
 	    QCA::Certificate client1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/xmppcert.pem"), &resultClient1, provider);
@@ -626,7 +626,7 @@ void CertUnitTest::altNames76()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
             QCA::ConvertResult resultClient1;
             QCA::Certificate client1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/76.pem"), &resultClient1, provider);
@@ -721,7 +721,7 @@ void CertUnitTest::sha256cert()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
             QFile f(QStringLiteral("certs/RAIZ2007_CERTIFICATE_AND_CRL_SIGNING_SHA256.crt"));
             QVERIFY(f.open(QFile::ReadOnly));
@@ -760,7 +760,7 @@ void CertUnitTest::checkExpiredServerCerts()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultServer1;
 	    QCA::Certificate server1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/Server.pem"), &resultServer1, provider);
@@ -863,7 +863,7 @@ void CertUnitTest::checkServerCerts()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultServer1;
 	    QCA::Certificate server1 = QCA::Certificate::fromPEMFile( QStringLiteral("certs/QcaTestServerCert.pem"), &resultServer1, provider);
@@ -982,7 +982,7 @@ void CertUnitTest::crl()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "crl", provider ) )
-            QWARN( QString( "Certificate revocation not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate revocation not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::CRL emptyCRL;
 	    QVERIFY( emptyCRL.isNull() );
@@ -1043,7 +1043,7 @@ void CertUnitTest::crl2()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "crl", provider ) )
-            QWARN( QString( "Certificate revocation not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate revocation not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultCrl;
 	    QCA::CRL crl1 = QCA::CRL::fromPEMFile( QStringLiteral("certs/GoodCACRL.pem"), &resultCrl, provider);
@@ -1110,7 +1110,7 @@ void CertUnitTest::csr()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "csr", provider ) )
-            QWARN( QString( "Certificate signing requests not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate signing requests not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::CertificateRequest nullCSR;
 	    QVERIFY( nullCSR.isNull() );
@@ -1154,7 +1154,7 @@ void CertUnitTest::csr2()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "csr", provider ) )
-            QWARN( QString( "Certificate signing requests not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate signing requests not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::ConvertResult resultCsr;
 	    QCA::CertificateRequest csr1 = QCA::CertificateRequest::fromPEMFile( QStringLiteral("certs/newreq.pem"), &resultCsr, provider);

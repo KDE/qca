@@ -805,7 +805,7 @@ BigInteger::BigInteger(int i)
 BigInteger::BigInteger(const char *c)
 {
 	d = new Private;
-	fromString(QString(c));
+	fromString(QString::fromLatin1(c));
 }
 
 BigInteger::BigInteger(const QString &s)
@@ -967,7 +967,7 @@ QString BigInteger::toString() const
 
 	QString str;
 	if(d->n.is_negative())
-		str += '-';
+		str += QLatin1Char('-');
 	str += QString::fromLatin1(cs);
 	return str;
 }
@@ -979,7 +979,7 @@ bool BigInteger::fromString(const QString &s)
 	QByteArray cs = s.toLatin1();
 
 	bool neg = false;
-	if(s[0] == '-')
+	if(s[0] == QLatin1Char('-'))
 		neg = true;
 
 	try

@@ -212,7 +212,7 @@ void MyPGPKeyContext::set(const GpgOp::Key &i, bool isSecret, bool inKeyring, bo
 void MyPGPKeyContext::cleanup_temp_keyring(const QString &name)
 {
 	QFile::remove(name);
-	QFile::remove(name + '~'); // remove possible backup file
+	QFile::remove(name + QLatin1Char('~')); // remove possible backup file
 }
 
 } // end namespace gpgQCAPlugin

@@ -146,9 +146,9 @@ QString qca_md5crypt( const QCA::SecureArray &password, const QCA::SecureArray &
     // Salt is part of the encoded password ($1$<string>$)
     QString encodedString;
 
-    encodedString.append ( magic_string.toByteArray() );
-    encodedString.append ( salt.toByteArray() );
-    encodedString.append ( "$" );
+    encodedString.append ( QString::fromLatin1( magic_string.toByteArray() ) );
+    encodedString.append ( QString::fromLatin1( salt.toByteArray() ) );
+    encodedString.append ( QStringLiteral("$") );
 
     long l;
 

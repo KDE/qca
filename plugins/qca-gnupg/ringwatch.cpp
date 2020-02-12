@@ -156,7 +156,7 @@ void RingWatch::handleChanged()
 	for(int n = 0; n < files.count(); ++n)
 	{
 		FileItem &i = files[n];
-		QString filePath = dir + '/' + i.fileName;
+		QString filePath = dir + QLatin1Char('/') + i.fileName;
 		QFileInfo fi(filePath);
 
 		// if the file didn't exist, and still doesn't, skip

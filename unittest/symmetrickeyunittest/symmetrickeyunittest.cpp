@@ -110,7 +110,7 @@ void SymmetricKeyUnitTest::weakKey()
     QFETCH( QByteArray, keyText );
     QFETCH( bool, isWeak );
 
-    QCA::SymmetricKey key( QCA::hexToArray( QByteArray( keyText ) ) );
+    QCA::SymmetricKey key( QCA::hexToArray( QString::fromLatin1(keyText) ) );
     QCOMPARE( key.isWeakDESKey(), isWeak );
 }
 

@@ -221,40 +221,40 @@ static QString knownToId(CertificateInfoTypeKnown k)
 	Q_ASSERT(out);
 	if(!out)
 		abort();
-	return QString(out);
+	return QString::fromLatin1(out);
 }
 
 static int idToKnown(const QString &id)
 {
-	if(id == CommonName_id)
+	if(id == QLatin1String(CommonName_id))
 		return CommonName;
-	else if(id == Email_id)
+	else if(id == QLatin1String(Email_id))
 		return Email;
-	else if(id == EmailLegacy_id)
+	else if(id == QLatin1String(EmailLegacy_id))
 		return EmailLegacy;
-	else if(id == Organization_id)
+	else if(id == QLatin1String(Organization_id))
 		return Organization;
-	else if(id == OrganizationalUnit_id)
+	else if(id == QLatin1String(OrganizationalUnit_id))
 		return OrganizationalUnit;
-	else if(id == Locality_id)
+	else if(id == QLatin1String(Locality_id))
 		return Locality;
-	else if(id == IncorporationLocality_id)
+	else if(id == QLatin1String(IncorporationLocality_id))
 		return IncorporationLocality;
-	else if(id == State_id)
+	else if(id == QLatin1String(State_id))
 		return State;
-	else if(id == IncorporationState_id)
+	else if(id == QLatin1String(IncorporationState_id))
 		return IncorporationState;
-	else if(id == Country_id)
+	else if(id == QLatin1String(Country_id))
 		return Country;
-	else if(id == IncorporationCountry_id)
+	else if(id == QLatin1String(IncorporationCountry_id))
 		return IncorporationCountry;
-	else if(id == URI_id)
+	else if(id == QLatin1String(URI_id))
 		return URI;
-	else if(id == DNS_id)
+	else if(id == QLatin1String(DNS_id))
 		return DNS;
-	else if(id == IPAddress_id)
+	else if(id == QLatin1String(IPAddress_id))
 		return IPAddress;
-	else if(id == XMPP_id)
+	else if(id == QLatin1String(XMPP_id))
 		return XMPP;
 	else
 		return -1;
@@ -324,46 +324,46 @@ static QString constraintKnownToId(ConstraintTypeKnown k)
 	Q_ASSERT(out);
 	if(!out)
 		abort();
-	return QString(out);
+	return QString::fromLatin1(out);
 }
 
 static int constraintIdToKnown(const QString &id)
 {
-	if(id == DigitalSignature_id)
+	if(id == QLatin1String(DigitalSignature_id))
 		return DigitalSignature;
-	else if(id == NonRepudiation_id)
+	else if(id == QLatin1String(NonRepudiation_id))
 		return NonRepudiation;
-	else if(id == KeyEncipherment_id)
+	else if(id == QLatin1String(KeyEncipherment_id))
 		return KeyEncipherment;
-	else if(id == DataEncipherment_id)
+	else if(id == QLatin1String(DataEncipherment_id))
 		return DataEncipherment;
-	else if(id == KeyAgreement_id)
+	else if(id == QLatin1String(KeyAgreement_id))
 		return KeyAgreement;
-	else if(id == KeyCertificateSign_id)
+	else if(id == QLatin1String(KeyCertificateSign_id))
 		return KeyCertificateSign;
-	else if(id == CRLSign_id)
+	else if(id == QLatin1String(CRLSign_id))
 		return CRLSign;
-	else if(id == EncipherOnly_id)
+	else if(id == QLatin1String(EncipherOnly_id))
 		return EncipherOnly;
-	else if(id == DecipherOnly_id)
+	else if(id == QLatin1String(DecipherOnly_id))
 		return DecipherOnly;
-	else if(id == ServerAuth_id)
+	else if(id == QLatin1String(ServerAuth_id))
 		return ServerAuth;
-	else if(id == ClientAuth_id)
+	else if(id == QLatin1String(ClientAuth_id))
 		return ClientAuth;
-	else if(id == CodeSigning_id)
+	else if(id == QLatin1String(CodeSigning_id))
 		return CodeSigning;
-	else if(id == EmailProtection_id)
+	else if(id == QLatin1String(EmailProtection_id))
 		return EmailProtection;
-	else if(id == IPSecEndSystem_id)
+	else if(id == QLatin1String(IPSecEndSystem_id))
 		return IPSecEndSystem;
-	else if(id == IPSecTunnel_id)
+	else if(id == QLatin1String(IPSecTunnel_id))
 		return IPSecTunnel;
-	else if(id == IPSecUser_id)
+	else if(id == QLatin1String(IPSecUser_id))
 		return IPSecUser;
-	else if(id == TimeStamping_id)
+	else if(id == QLatin1String(TimeStamping_id))
 		return TimeStamping;
-	else if(id == OCSPSigning_id)
+	else if(id == QLatin1String(OCSPSigning_id))
 		return OCSPSigning;
 	else
 		return -1;
@@ -393,7 +393,7 @@ static QString dnLabel(const CertificateInfoType &type)
 {
 	const char *str = knownToShortName(type.known());
 	if(str)
-		return str;
+		return QString::fromLatin1(str);
 
 	QString id = type.id();
 	// is it an oid?
@@ -412,7 +412,7 @@ QString orderedToDNString(const CertificateInfoOrdered &in)
 			continue;
 
 		QString name = dnLabel(i.type());
-		parts += name + '=' + i.value();
+		parts += name + QLatin1Char('=') + i.value();
 	}
 	return parts.join(QStringLiteral(", "));
 }
@@ -551,7 +551,7 @@ static QString uniqueConstraintValue(const ConstraintType &type, const QList<int
 		}
 
 		if(!found)
-			return QString(constraintToString(type));
+			return QString::fromLatin1(constraintToString(type));
 	}
 
 	return QString();
@@ -581,7 +581,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueSubjectValue(Email, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QStringLiteral(" <") + str + '>';
+		name = list[items[i]] + QStringLiteral(" <") + str + QLatin1Char('>');
 		goto end;
 	}
 
@@ -589,7 +589,7 @@ static QString makeUniqueName(const QList<int> &items, const QStringList &list, 
 	str = uniqueSubjectValue(XMPP, items, certs, i);
 	if(!str.isEmpty())
 	{
-		name = list[items[i]] + QStringLiteral(" <xmpp:") + str + '>';
+		name = list[items[i]] + QStringLiteral(" <xmpp:") + str + QLatin1Char('>');
 		goto end;
 	}
 
@@ -1199,9 +1199,9 @@ void CertificateOptions::setValidityPeriod(const QDateTime &start, const QDateTi
 static QByteArray ipaddr_str2bin(const QString &str)
 {
 	// ipv6
-	if(str.contains(':'))
+	if(str.contains(QLatin1Char(':')))
 	{
-		QStringList parts = str.split(':', QString::KeepEmptyParts);
+		QStringList parts = str.split(QLatin1Char(':'), QString::KeepEmptyParts);
 		if(parts.count() < 3 || parts.count() > 8)
 			return QByteArray();
 
@@ -1242,7 +1242,7 @@ static QByteArray ipaddr_str2bin(const QString &str)
 			}
 			else
 			{
-				if(parts[n].indexOf('.') == -1)
+				if(parts[n].indexOf(QLatin1Char('.')) == -1)
 				{
 					bool ok;
 					int x = parts[n].toInt(&ok, 16);
@@ -1271,9 +1271,9 @@ static QByteArray ipaddr_str2bin(const QString &str)
 
 		return ipv6;
 	}
-	else if(str.contains('.'))
+	else if(str.contains(QLatin1Char('.')))
 	{
-		QStringList parts = str.split('.', QString::KeepEmptyParts);
+		QStringList parts = str.split(QLatin1Char('.'), QString::KeepEmptyParts);
 		if(parts.count() != 4)
 			return QByteArray();
 
@@ -1301,7 +1301,7 @@ static bool cert_match_domain(const QString &certname, const QString &acedomain)
 
 	// KSSL strips trailing dot, even though the dot is probably not
 	//   legal anyway. (compat)
-	if(name.length() > 0 && name[name.length()-1] == '.')
+	if(name.length() > 0 && name[name.length()-1] == QLatin1Char('.'))
 		name.truncate(name.length()-1);
 
 	// after our compatibility modifications, make sure the name isn't
@@ -1313,23 +1313,23 @@ static bool cert_match_domain(const QString &certname, const QString &acedomain)
 	name = name.toLower();
 
 	// ensure the cert field contains valid characters only
-	if(QRegExp("[^a-z0-9\\.\\*\\-]").indexIn(name) >= 0)
+	if(QRegExp(QLatin1String("[^a-z0-9\\.\\*\\-]")).indexIn(name) >= 0)
 		return false;
 
 	// hack into parts, and require at least 1 part
-	QStringList parts_name = name.split('.', QString::KeepEmptyParts);
+	const QStringList parts_name = name.split(QLatin1Char('.'), QString::KeepEmptyParts);
 	if(parts_name.isEmpty())
 		return false;
 
 	// KSSL checks to make sure the last two parts don't contain
 	//   wildcards.  I don't know where it is written that this
 	//   should be done, but for compat sake we'll do it.
-	if(parts_name[parts_name.count()-1].contains('*'))
+	if(parts_name[parts_name.count()-1].contains(QLatin1Char('*')))
 		return false;
-	if(parts_name.count() >= 2 && parts_name[parts_name.count()-2].contains('*'))
+	if(parts_name.count() >= 2 && parts_name[parts_name.count()-2].contains(QLatin1Char('*')))
 		return false;
 
-	QStringList parts_compare = acedomain.split('.', QString::KeepEmptyParts);
+	QStringList parts_compare = acedomain.split(QLatin1Char('.'), QString::KeepEmptyParts);
 	if(parts_compare.isEmpty())
 		return false;
 
@@ -1382,7 +1382,7 @@ static bool cert_match_ipaddress(const QString &certname, const QByteArray &ipad
 	// KSSL accepts IPv6 in brackets, which is usually done for URIs, but
 	//   IMO sounds very strange for a certificate.  We'll follow this
 	//   behavior anyway. (compat)
-	if(name.length() >= 2 && name[0] == '[' && name[name.length()-1] == ']')
+	if(name.length() >= 2 && name[0] == QLatin1Char('[') && name[name.length()-1] == QLatin1Char(']'))
 		name = name.mid(1, name.length() - 2); // chop off brackets
 
 	// after our compatibility modifications, make sure the name isn't
@@ -1668,11 +1668,11 @@ bool Certificate::matchesHostName(const QString &host) const
 		name = QString::fromLatin1(QUrl::toAce(name));
 
 		// don't allow wildcards in the comparison host
-		if(name.contains('*'))
+		if(name.contains(QLatin1Char('*')))
 			return false;
 
 		// strip out trailing dot
-		if(name.length() > 0 && name[name.length()-1] == '.')
+		if(name.length() > 0 && name[name.length()-1] == QLatin1Char('.'))
 			name.truncate(name.length()-1);
 
 		// make sure the name is not empty after our modifications
@@ -2278,20 +2278,20 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 				if(line.contains(QLatin1String("CERTIFICATE")))
 				{
 					found = true;
-					pem += line + '\n';
+					pem += line + QLatin1Char('\n');
 					crl = false;
 				}
 				else if(line.contains(QLatin1String("CRL")))
 				{
 					found = true;
-					pem += line + '\n';
+					pem += line + QLatin1Char('\n');
 					crl = true;
 				}
 			}
 		}
 		else
 		{
-			pem += line + '\n';
+			pem += line + QLatin1Char('\n');
 			if(line.startsWith(QLatin1String("-----END ")))
 			{
 				done = true;

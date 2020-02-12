@@ -23,6 +23,7 @@
 #include <QtCrypto>
 
 #include <QCoreApplication>
+#include <QFile>
 #include <QTimer>
 
 #include <cstdio>
@@ -109,7 +110,7 @@ int main(int argc, char **argv)
 
 	PassphraseHandler passphraseHandler;
 	App app;
-	app.str = argv[1];
+	app.str = QFile::decodeName(argv[1]);
 	QObject::connect(&app, &App::quit, &qapp, QCoreApplication::quit);
 	QTimer::singleShot(0, &app, &App::start);
 	qapp.exec();

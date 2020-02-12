@@ -136,9 +136,9 @@ static void output_plugin_diagnostic_text()
 {
 	QString str = QCA::pluginDiagnosticText();
 	QCA::clearPluginDiagnosticText();
-	if(str[str.length()-1] == '\n')
+	if(str[str.length()-1] == QLatin1Char('\n'))
 		str.truncate(str.length()-1);
-	QStringList lines = str.split('\n', QString::KeepEmptyParts);
+	QStringList lines = str.split(QLatin1Char('\n'), QString::KeepEmptyParts);
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "plugin: %s\n", qPrintable(lines[n]));
 }
@@ -147,9 +147,9 @@ static void output_keystore_diagnostic_text()
 {
 	QString str = QCA::KeyStoreManager::diagnosticText();
 	QCA::KeyStoreManager::clearDiagnosticText();
-	if(str[str.length()-1] == '\n')
+	if(str[str.length()-1] == QLatin1Char('\n'))
 		str.truncate(str.length()-1);
-	QStringList lines = str.split('\n', QString::KeepEmptyParts);
+	QStringList lines = str.split(QLatin1Char('\n'), QString::KeepEmptyParts);
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
 }
@@ -157,9 +157,9 @@ static void output_keystore_diagnostic_text()
 static void output_message_diagnostic_text(QCA::SecureMessage *msg)
 {
 	QString str = msg->diagnosticText();
-	if(str[str.length()-1] == '\n')
+	if(str[str.length()-1] == QLatin1Char('\n'))
 		str.truncate(str.length()-1);
-	QStringList lines = str.split('\n', QString::KeepEmptyParts);
+	QStringList lines = str.split(QLatin1Char('\n'), QString::KeepEmptyParts);
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "message: %s\n", qPrintable(lines[n]));
 }
@@ -325,7 +325,7 @@ private Q_SLOTS:
 	void prompt_finished()
 	{
 		QChar c = prompt->resultChar();
-		if(c == 'q' || c == 'Q')
+		if(c == QLatin1Char('q') || c == QLatin1Char('Q'))
 		{
 			eventLoop->exit();
 			return;
@@ -447,7 +447,7 @@ private Q_SLOTS:
 				else
 				{
 					if(e.keyStoreInfo().type() == QCA::KeyStore::SmartCard)
-						name = QStringLiteral("the '") + e.keyStoreInfo().name() + "' token";
+						name = QStringLiteral("the '") + e.keyStoreInfo().name() + QStringLiteral("' token");
 					else
 						name = e.keyStoreInfo().name();
 				}
@@ -532,11 +532,11 @@ private Q_SLOTS:
 			QString name;
 			if(!entry.isNull())
 			{
-				name = QStringLiteral("Please make ") + entry.name() + " (of " + entry.storeName() + ") available";
+				name = QStringLiteral("Please make ") + entry.name() + QStringLiteral(" (of ") + entry.storeName() + QStringLiteral(") available");
 			}
 			else
 			{
-				name = QStringLiteral("Please insert the '") + e.keyStoreInfo().name() + "' token";
+				name = QStringLiteral("Please insert the '") + e.keyStoreInfo().name() + QStringLiteral("' token");
 			}
 
 			QString str = QStringLiteral("%1 and press Enter (or 'q' to cancel) ...").arg(name);
@@ -579,9 +579,9 @@ private Q_SLOTS:
 			else
 			{
 				QChar c = prompt->resultChar();
-				if(c == '\r' || c == '\n')
+				if(c == QLatin1Char('\r') || c == QLatin1Char('\n'))
 					handler.tokenOkay(prompt_id);
-				else if(c == 'q' || c == 'Q')
+				else if(c == QLatin1Char('q') || c == QLatin1Char('Q'))
 					handler.reject(prompt_id);
 				else
 				{
@@ -742,9 +742,9 @@ static QString line_encode(const QString &in)
 	QString out;
 	for(const QChar &c : in)
 	{
-		if(c == '\\')
+		if(c == QLatin1Char('\\'))
 			out += QStringLiteral("\\\\");
-		else if(c == '\n')
+		else if(c == QLatin1Char('\n'))
 			out += QStringLiteral("\\n");
 		else
 			out += c;
@@ -757,14 +757,14 @@ static QString line_decode(const QString &in)
 	QString out;
 	for(int n = 0; n < in.length(); ++n)
 	{
-		if(in[n] == '\\')
+		if(in[n] == QLatin1Char('\\'))
 		{
 			if(n + 1 < in.length())
 			{
-				if(in[n + 1] == '\\')
-					out += '\\';
-				else if(in[n + 1] == 'n')
-					out += '\n';
+				if(in[n + 1] == QLatin1Char('\\'))
+					out += QLatin1Char('\\');
+				else if(in[n + 1] == QLatin1Char('n'))
+					out += QLatin1Char('\n');
 				++n;
 			}
 		}
@@ -778,7 +778,7 @@ static QString make_ksentry_string(const QString &id)
 {
 	QString out;
 	out += QStringLiteral("QCATOOL_KEYSTOREENTRY_1\n");
-	out += line_encode(id) + '\n';
+	out += line_encode(id) + QLatin1Char('\n');
 	return out;
 }
 
@@ -946,7 +946,7 @@ static bool validOid(const QString &in)
 {
 	for(const QChar &c : in)
 	{
-		if(!c.isDigit() && c != '.')
+		if(!c.isDigit() && c != QLatin1Char('.'))
 			return false;
 	}
 	return true;
@@ -1272,9 +1272,9 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 			if(parts.count() == 1)
 				out = parts[0];
 			else if(parts.count() == 2)
-				out = parts[0] + " and " + parts[1];
+				out = parts[0] + QStringLiteral(" and ") + parts[1];
 			else if(parts.count() == 3)
-				out = parts[0] + ", " + parts[1] + ", and " + parts[2];
+				out = parts[0] + QStringLiteral(", ") + parts[1] + QStringLiteral(", and ") + parts[2];
 			printf("Certificate will be valid for %s.\n", qPrintable(out));
 			break;
 		}
@@ -1510,7 +1510,7 @@ public:
 		QVariantMap out = orig_config;
 
 		// form type
-		out[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-pkcs11#1.0";
+		out[QStringLiteral("formtype")] = QLatin1String("http://affinix.com/qca/forms/qca-pkcs11#1.0");
 
 		// base settings
 		out[QStringLiteral("allow_load_rootca")] = allow_load_rootca;
@@ -1541,7 +1541,7 @@ public:
 
 	bool fromVariantMap(const QVariantMap &in)
 	{
-		if(in[QStringLiteral("formtype")] != "http://affinix.com/qca/forms/qca-pkcs11#1.0")
+		if(in[QStringLiteral("formtype")] != QLatin1String("http://affinix.com/qca/forms/qca-pkcs11#1.0"))
 			return false;
 
 		allow_load_rootca = in[QStringLiteral("allow_load_rootca")].toBool();
@@ -1835,7 +1835,7 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
 static QVariantMap provider_config_edit(const QVariantMap &in)
 {
 	// see if we have a configurator for a known form type
-	if(in[QStringLiteral("formtype")] == "http://affinix.com/qca/forms/qca-pkcs11#1.0")
+	if(in[QStringLiteral("formtype")] == QLatin1String("http://affinix.com/qca/forms/qca-pkcs11#1.0"))
 		return provider_config_edit_pkcs11(in);
 
 	// otherwise, use the generic configurator
@@ -1849,7 +1849,7 @@ static QString get_fingerprint(const QCA::Certificate &cert, const QString &hash
 	for(int n = 0; n < hex.count(); ++n)
 	{
 		if(n != 0 && n % 2 == 0)
-			out += ':';
+			out += QLatin1Char(':');
 		out += hex[n];
 	}
 	return out;
@@ -2106,7 +2106,7 @@ static QString format_pgp_fingerprint(const QString &in)
 	for(int n = 0; n + 3 < in.length(); n += 4)
 	{
 		if(!first)
-			out += ' ';
+			out += QLatin1Char(' ');
 		else
 			first = false;
 		out += in.mid(n, 4).toUpper();
@@ -2279,12 +2279,12 @@ static QString add_cr(const QString &in)
 	int at = 0;
 	while(true)
 	{
-		at = out.indexOf('\n', at);
+		at = out.indexOf(QLatin1Char('\n'), at);
 		if(at == -1)
 			break;
-		if(at - 1 >= 0 && out[at - 1] != '\r')
+		if(at - 1 >= 0 && out[at - 1] != QLatin1Char('\r'))
 		{
-			out.insert(at, '\r');
+			out.insert(at, QLatin1Char('\r'));
 			++at;
 		}
 		++at;
@@ -2303,9 +2303,9 @@ static int indexOf_newline(const QString &in, int offset = 0)
 {
 	for(int n = offset; n < in.length(); ++n)
 	{
-		if(n + 1 < in.length() && in[n] == '\r' && in[n + 1] == '\n')
+		if(n + 1 < in.length() && in[n] == QLatin1Char('\r') && in[n + 1] == QLatin1Char('\n'))
 			return n;
-		if(in[n] == '\n')
+		if(in[n] == QLatin1Char('\n'))
 			return n;
 	}
 	return -1;
@@ -2327,7 +2327,7 @@ static int indexOf_doublenewline(const QString &in, int offset = 0)
 		}
 
 		at = n;
-		if(in[n] == '\n')
+		if(in[n] == QLatin1Char('\n'))
 			offset = n + 1;
 		else
 			offset = n + 2;
@@ -2338,7 +2338,7 @@ static int indexOf_doublenewline(const QString &in, int offset = 0)
 // this is so gross
 static int newline_len(const QString &in, int offset = 0)
 {
-	if(in[offset] == '\r')
+	if(in[offset] == QLatin1Char('\r'))
 		return 2;
 	else
 		return 1;
@@ -2364,15 +2364,15 @@ static bool open_mime_data_sig(const QString &in, QString *data, QString *sig)
 		return false;
 	QString boundary;
 	QString bregion = in.mid(n, i - n);
-	n = bregion.indexOf(';');
+	n = bregion.indexOf(QLatin1Char(';'));
 	if(n != -1)
 		boundary = bregion.mid(0, n);
 	else
 		boundary = bregion;
 
-	if(boundary[0] == '\"')
+	if(boundary[0] == QLatin1Char('\"'))
 		boundary.remove(0, 1);
-	if(boundary[boundary.length() - 1] == '\"')
+	if(boundary[boundary.length() - 1] == QLatin1Char('\"'))
 		boundary.remove(boundary.length() - 1, 1);
 	//printf("boundary: [%s]\n", qPrintable(boundary));
 	QString boundary_end = QStringLiteral("--") + boundary;
@@ -2526,7 +2526,7 @@ static QCA::KeyStoreEntry get_E(const QString &name, bool nopassiveerror = false
 
 	QCA::KeyStoreManager::start();
 
-	int n = name.indexOf(':');
+	int n = name.indexOf(QLatin1Char(':'));
 	if(n != -1)
 	{
 		ksm_start_and_wait();
@@ -2570,7 +2570,7 @@ static QCA::PrivateKey get_K(const QString &name)
 {
 	QCA::PrivateKey key;
 
-	int n = name.indexOf(':');
+	int n = name.indexOf(QLatin1Char(':'));
 	if(n != -1)
 	{
 		fprintf(stderr, "Error: cannot use store:obj notation for raw private keys.\n");
@@ -2792,7 +2792,7 @@ int main(int argc, char **argv)
 			continue;
 		QString var;
 		QString val;
-		int x = s.indexOf('=');
+		int x = s.indexOf(QLatin1Char('='));
 		if(x != -1)
 		{
 			var = s.mid(2, x - 2);
@@ -3484,7 +3484,7 @@ int main(int argc, char **argv)
 			}
 
 			QFileInfo fi(args[2]);
-			QString newFileName = fi.baseName() + "_new.p12";
+			QString newFileName = fi.baseName() + QStringLiteral("_new.p12");
 
 			if(key.toFile(newFileName, newpass))
 				printf("Keybundle saved to %s\n", qPrintable(newFileName));
@@ -3922,7 +3922,7 @@ int main(int argc, char **argv)
 			if(!pgp)
 			{
 				QString text = add_cr(QString::fromUtf8(plain));
-				plain = QString(mime_signpart).arg(text).toUtf8();
+				plain = QString::fromLatin1(mime_signpart).arg(text).toUtf8();
 			}
 
 			QCA::SecureMessage *msg = new QCA::SecureMessage(sms);
@@ -3970,7 +3970,7 @@ int main(int argc, char **argv)
 				enc.setLineBreaksEnabled(true);
 				enc.setLineBreaksColumn(76);
 				QString sigtext = add_cr(enc.arrayToString(output));
-				QString str = QString(mime_signed).arg(hashName, QString::fromUtf8(plain), sigtext);
+				QString str = QString::fromLatin1(mime_signed).arg(hashName, QString::fromUtf8(plain), sigtext);
 				output = str.toUtf8();
 			}
 
@@ -4073,7 +4073,7 @@ int main(int argc, char **argv)
 				enc.setLineBreaksEnabled(true);
 				enc.setLineBreaksColumn(76);
 				QString enctext = add_cr(enc.arrayToString(output));
-				QString str = QString(mime_enveloped).arg(enctext);
+				QString str = QString::fromLatin1(mime_enveloped).arg(enctext);
 				output = str.toUtf8();
 			}
 

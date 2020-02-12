@@ -132,7 +132,7 @@ public:
 
 	void start(const QString &_host)
 	{
-		int n = _host.indexOf(':');
+		int n = _host.indexOf(QLatin1Char(':'));
 		int port;
 		if(n != -1)
 		{
@@ -164,7 +164,7 @@ private Q_SLOTS:
 
 		// We add this one to show how, and to make it work with
 		// the server example.
-		rootCerts.addCertificate(QCA::Certificate::fromPEM(exampleCA_cert));
+		rootCerts.addCertificate(QCA::Certificate::fromPEM(QString::fromLatin1(exampleCA_cert)));
 
 		if(!QCA::haveSystemStore())
 			printf("Warning: no root certs\n");
@@ -236,7 +236,7 @@ private Q_SLOTS:
 		ssl->continueAfterStep();
 
 		printf("Let's try a GET request now.\n");
-		QString req = "GET / HTTP/1.0\nHost: " + host + "\n\n";
+		QString req = QStringLiteral("GET / HTTP/1.0\nHost: ") + host + QStringLiteral("\n\n");
 		ssl->write(req.toLatin1());
 	}
 
@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 	QCA::Initializer init;
 
 	QCoreApplication app(argc, argv);
-	QString host = argc > 1 ? argv[1] : QStringLiteral("andbit.net");
+	QString host = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QStringLiteral("andbit.net");
 
 	if(!QCA::isSupported("tls"))
 	{

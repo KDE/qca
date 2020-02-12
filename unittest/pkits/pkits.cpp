@@ -112,7 +112,7 @@ void Pkits::pkits4_1_1()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidCertificatePathTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -149,7 +149,7 @@ void Pkits::pkits4_1_2()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidCASignatureTest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -186,7 +186,7 @@ void Pkits::pkits4_1_3()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidEESignatureTest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -223,7 +223,7 @@ void Pkits::pkits4_1_4()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidDSASignaturesTest4EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -260,7 +260,7 @@ void Pkits::pkits4_1_5()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidDSAParameterInheritanceTest5EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -304,7 +304,7 @@ void Pkits::pkits4_1_6()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidDSASignatureTest6EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -339,7 +339,7 @@ void Pkits::pkits4_2_1()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidCAnotBeforeDateTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -374,7 +374,7 @@ void Pkits::pkits4_2_2()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidEEnotBeforeDateTest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -409,7 +409,7 @@ void Pkits::pkits4_2_3()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/Validpre2000UTCnotBeforeDateTest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -444,7 +444,7 @@ void Pkits::pkits4_2_4()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidGeneralizedTimenotBeforeDateTest4EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -480,7 +480,7 @@ void Pkits::pkits4_2_5()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidCAnotAfterDateTest5EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -515,7 +515,7 @@ void Pkits::pkits4_2_6()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidEEnotAfterDateTest6EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -550,7 +550,7 @@ void Pkits::pkits4_2_7()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/Invalidpre2000UTCEEnotAfterDateTest7EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -585,7 +585,7 @@ void Pkits::pkits4_2_8()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidGeneralizedTimenotAfterDateTest8EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -620,7 +620,7 @@ void Pkits::pkits4_3_1()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidNameChainingTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -655,7 +655,7 @@ void Pkits::pkits4_3_2()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidNameChainingOrderTest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -690,7 +690,7 @@ void Pkits::pkits4_3_3()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameChainingWhitespaceTest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -726,7 +726,7 @@ void Pkits::pkits4_3_4()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameChainingWhitespaceTest4EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -761,7 +761,7 @@ void Pkits::pkits4_3_5()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameChainingCapitalizationTest5EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -796,7 +796,7 @@ void Pkits::pkits4_3_6()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidNameUIDsTest6EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -832,7 +832,7 @@ void Pkits::pkits4_3_7()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidRFC3280MandatoryAttributeTypesTest7EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -869,7 +869,7 @@ void Pkits::pkits4_3_8()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidRFC3280OptionalAttributeTypesTest8EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -905,7 +905,7 @@ void Pkits::pkits4_3_9()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidUTF8StringEncodedNamesTest9EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -941,7 +941,7 @@ void Pkits::pkits4_3_10()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidRolloverfromPrintableStringtoUTF8StringTest10EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -978,7 +978,7 @@ void Pkits::pkits4_3_11()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/ValidUTF8StringCaseInsensitiveMatchTest11EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -1017,7 +1017,7 @@ void Pkits::pkits4_4_1()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidMissingCRLTest1EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -1052,7 +1052,7 @@ void Pkits::pkits4_4_2()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidRevokedCATest2EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );
@@ -1097,7 +1097,7 @@ void Pkits::pkits4_4_3()
 
     foreach(const QString provider, providersToTest) {
         if( !QCA::isSupported( "cert", provider ) )
-            QWARN( QString( "Certificate handling not supported for "+provider).toLocal8Bit().constData() );
+            QWARN( (QStringLiteral( "Certificate handling not supported for ")+provider).toLocal8Bit().constData() );
         else {
 	    QCA::Certificate cert = certFromDERFile(QStringLiteral("certs/InvalidRevokedEETest3EE.crt"), provider);
 	    QCOMPARE( cert.isNull(), false );

@@ -1285,7 +1285,7 @@ private:
 		QString to;
 
 		foreach (const QChar &c, from) {
-			if (c == '/' || c == '\\') {
+			if (c == QLatin1Char('/') || c == QLatin1Char('\\')) {
 				to += QString::asprintf ("\\x%04x", c.unicode ());
 			}
 			else {
@@ -1305,7 +1305,7 @@ private:
 		for (int i=0;i<from.size ();i++) {
 			QChar c = from[i];
 
-			if (c == '\\') {
+			if (c == QLatin1Char('\\')) {
 				to += QChar ((ushort)from.midRef (i+2, 4).toInt (nullptr, 16));
 				i+=5;
 			}
@@ -1406,14 +1406,14 @@ public:
 			Logger::Debug
 		);
 
-		mytemplate[QStringLiteral("formtype")] = "http://affinix.com/qca/forms/qca-softstore#1.0";
+		mytemplate[QStringLiteral("formtype")] = QStringLiteral("http://affinix.com/qca/forms/qca-softstore#1.0");
 		for (int i=0;i<_CONFIG_MAX_ENTRIES;i++) {
 			mytemplate[QString::asprintf ("entry_%02d_enabled", i)] = false;
-			mytemplate[QString::asprintf ("entry_%02d_name", i)] = "";
-			mytemplate[QString::asprintf ("entry_%02d_public_type", i)] = "";
-			mytemplate[QString::asprintf ("entry_%02d_private_type", i)] = "";
-			mytemplate[QString::asprintf ("entry_%02d_public", i)] = "";
-			mytemplate[QString::asprintf ("entry_%02d_private", i)] = "";
+			mytemplate[QString::asprintf ("entry_%02d_name", i)] = QLatin1String("");
+			mytemplate[QString::asprintf ("entry_%02d_public_type", i)] = QLatin1String("");
+			mytemplate[QString::asprintf ("entry_%02d_private_type", i)] = QLatin1String("");
+			mytemplate[QString::asprintf ("entry_%02d_public", i)] = QLatin1String("");
+			mytemplate[QString::asprintf ("entry_%02d_private", i)] = QLatin1String("");
 			mytemplate[QString::asprintf ("entry_%02d_unlock_timeout", i)] = -1;
 			mytemplate[QString::asprintf ("entry_%02d_no_passphrase", i)] = false;
 		}
