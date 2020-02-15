@@ -16,9 +16,9 @@ macro(set_enabled_plugin PLUGIN ENABLED)
   # To nice looks
   if(ENABLED)
     set(ENABLED "on")
-  else(ENABLED)
+  else()
     set(ENABLED "off")
-  endif(ENABLED)
+  endif()
   set(WITH_${PLUGIN}_PLUGIN_INTERNAL ${ENABLED} CACHE INTERNAL "")
 endmacro(set_enabled_plugin)
 
@@ -42,9 +42,9 @@ macro(target_link_qca_libraries TARGET)
       # Check plugin for enabled
       if(WITH_${PLUGIN}_PLUGIN_INTERNAL)
         target_link_libraries(${TARGET} qca-${PLUGIN})
-      endif(WITH_${PLUGIN}_PLUGIN_INTERNAL)
+      endif()
     endforeach(PLUGIN)
-  endif(STATIC_PLUGINS)
+  endif()
 endmacro(target_link_qca_libraries)
 
 # it used to build unittests
@@ -69,7 +69,7 @@ macro(install_pdb TARGET INSTALL_PATH)
     get_target_property(LOCATION ${TARGET} LOCATION_RELWITHDEBINFO)
     string(REGEX REPLACE "\\.[^.]*$" ".pdb" LOCATION "${LOCATION}")
     install(FILES ${LOCATION} DESTINATION ${INSTALL_PATH} CONFIGURATIONS RelWithDebInfo)
-  endif(MSVC)
+  endif()
 endmacro(install_pdb)
 
 macro(normalize_path PATH)

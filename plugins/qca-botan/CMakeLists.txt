@@ -26,6 +26,6 @@ if(BOTAN_FOUND)
     install_pdb(qca-botan ${QCA_CRYPTO_INSTALL_DIR})
   endif()
 
-else(BOTAN_FOUND)
+else()
   disable_plugin("botan")
-endif(BOTAN_FOUND)
+endif()

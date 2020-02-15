@@ -13,7 +13,7 @@ int main() { void *f = 0; return mlock(f,8); }
 if(NOT MLOCK_TAKES_VOID)
   MESSAGE(STATUS "mlock(2) does not take a void *")
   ADD_DEFINITIONS(-DMLOCK_NOT_VOID_PTR)
-endif(NOT MLOCK_TAKES_VOID)
+endif()
 
 if(DEVELOPER_MODE)
   add_definitions(-DQCA_PLUGIN_PATH="${CMAKE_BINARY_DIR}/lib/${QCA_LIB_NAME}")
@@ -84,7 +84,7 @@ ADD_DEFINITIONS(
 
 if(UNIX)
    ADD_DEFINITIONS( -DBOTAN_EXT_ALLOC_MMAP)
-endif(UNIX)
+endif()
 
 SET( botan_SOURCES
 	${botan_BASE}/util.cpp
@@ -128,7 +128,7 @@ TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} Qt5::Core)
 
 if(WIN32)
 	TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} crypt32 ws2_32)
-endif(WIN32)
+endif()
 
 if(APPLE)
   set(COREFOUNDATION_LIBRARY "-framework CoreFoundation")
@@ -140,7 +140,7 @@ if(APPLE)
                           INSTALL_NAME_DIR "${QCA_LIBRARY_INSTALL_DIR}"
     )
   endif()
-endif(APPLE)
+endif()
 
 if(NOT ANDROID)
   set_target_properties(${QCA_LIB_NAME} PROPERTIES

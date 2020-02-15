@@ -46,7 +46,7 @@ target_link_libraries(qca-gnupg Qt5::Core ${QCA_LIB_NAME})
 
 if (WIN32)
   target_link_libraries(qca-gnupg advapi32)
-endif (WIN32)
+endif()
 
 if(NOT DEVELOPER_MODE)
   install(TARGETS qca-gnupg DESTINATION

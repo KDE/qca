@@ -4,7 +4,7 @@ if(NOT CMAKE_INSTALL_PREFIX)
   set(QCA_INSTALL_IN_QT_PREFIX ON)
   # If CMAKE_INSTALL_PREFIX is set in cmake arguments
   unset(CMAKE_INSTALL_PREFIX CACHE)
-endif(NOT CMAKE_INSTALL_PREFIX)
+endif()
 
 # The cmake min. version should be set before calling project(...) too
 cmake_minimum_required(VERSION 3.4)
@@ -37,7 +37,7 @@ find_package(Doxygen)
 string(TOLOWER "${BUILD_PLUGINS}" BUILD_PLUGINS)
 if(NOT BUILD_PLUGINS)
   set(BUILD_PLUGINS "none")
-endif(NOT BUILD_PLUGINS)
+endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 
@@ -59,9 +59,9 @@ if(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
   set(STATIC_PLUGINS ON)
   add_definitions(-DQT_STATICPLUGIN)
   set(PLUGIN_TYPE "STATIC")
-else(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
+else()
   set(PLUGIN_TYPE "MODULE")
-endif(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
+endif()
 
 set(QCA_SUFFIX "${QCA_SUFFIX}" CACHE STRING "QCA common suffix")
 if(QCA_SUFFIX)
@@ -70,13 +70,13 @@ if(QCA_SUFFIX)
   set(MOZCERTS_NAME mozcerts-${QCA_SUFFIX})
   set(QCA_PC_NAME qca2-${QCA_SUFFIX}.pc)
   set(QCA_CONFIG_NAME_BASE "Qca-${QCA_SUFFIX}")
-else(QCA_SUFFIX)
+else()
   set(QCA_LIB_NAME qca)
   set(QCA_TOOL_NAME qcatool)
   set(MOZCERTS_NAME mozcerts)
   set(QCA_PC_NAME qca2.pc)
   set(QCA_CONFIG_NAME_BASE "Qca")
-endif(QCA_SUFFIX)
+endif()
 
 set(QCA_LIB_VERSION_STRING "${QCA_LIB_MAJOR_VERSION}.${QCA_LIB_MINOR_VERSION}.${QCA_LIB_PATCH_VERSION}")
 
@@ -87,7 +87,7 @@ if (WIN32)
  add_definitions(-DWIN32_LEAN_AND_MEAN)
 elseif (APPLE)
  set(CMAKE_DEBUG_POSTFIX "_debug")
-endif (WIN32)
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
    if (CMAKE_SYSTEM_NAME MATCHES Linux)
@@ -100,8 +100,8 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 
      set ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -Wundef -Werror-implicit-function-declaration -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
      set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -Wundef -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fno-check-new -fno-common -Wsuggest-override")
-   endif (CMAKE_SYSTEM_NAME MATCHES Linux)
-endif (CMAKE_COMPILER_IS_GNUCXX)
+   endif()
+endif()
 
 add_definitions(-DQT_NO_CAST_TO_ASCII
                 -DQT_NO_CAST_FROM_ASCII
@@ -165,7 +165,7 @@ if( QCA_INSTALL_IN_QT_PREFIX )
   endif()
   set(QCA_DOC_INSTALL_DIR "${QT_DOC_DIR}/html/qca/" CACHE PATH "Directory where qca documentation will install")
   set(QCA_MAN_INSTALL_DIR "${QT_DATA_DIR}/man" CACHE PATH "Directory where qca man pages will install")
-else( QCA_INSTALL_IN_QT_PREFIX )
+else()
   # Cmake says nothing about LIB_SUFFIX
   # de facto it is a standard way to specify lib suffix on many distros
   set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
@@ -185,7 +185,7 @@ else( QCA_INSTALL_IN_QT_PREFIX )
   endif()
   set(QCA_DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/${QCA_LIB_NAME}/html" CACHE PATH "Directory where qca documentation will install")
   set(QCA_MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Directory where qca man pages will install")
-endif( QCA_INSTALL_IN_QT_PREFIX )
+endif()
 
 set(PKGCONFIG_INSTALL_PREFIX "${QCA_LIBRARY_INSTALL_DIR}/pkgconfig" CACHE PATH "Base directory for pkgconfig files")
 
@@ -234,7 +234,7 @@ if(NOT WIN32)
   if(NOT DEVELOPER_MODE)
     install(FILES "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pkgconfig/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
   endif()
-endif(NOT WIN32)
+endif()
 
 # strip CMAKE_INSTALL_PREFIX in all paths
 if(USE_RELATIVE_PATHS)
@@ -270,20 +270,18 @@ endif()
 
 if (APPLE)
    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-endif (APPLE)
+endif()
 
 message(STATUS "Checking for certstore..")
 # fixme add OR mac
 if( WIN32 )
-# USE BUILTIN
-else ( WIN32 )
+    # USE BUILTIN
+else()
   if ( DEFINED ENV{QC_CERTSTORE_PATH} )
     if(EXISTS $ENV{QC_CERTSTORE_PATH})
       set( qca_CERTSTORE $ENV{QC_CERTSTORE_PATH})
-    else(EXISTS $ENV{QC_CERTSTORE_PATH})
-      # path to try
-    endif(EXISTS $ENV{QC_CERTSTORE_PATH})
-  else( DEFINED ENV{QC_CERTSTORE_PATH} )
+    endif()
+  else()
     set( toTry
       "/etc/ssl/certs/ca-certificates.crt"
       "/usr/share/ssl/cert.pem"
@@ -295,21 +293,21 @@ else ( WIN32 )
     foreach (_current_try ${toTry})
       if(EXISTS ${_current_try})
         set( qca_CERTSTORE ${_current_try})
-      endif(EXISTS ${_current_try})
+      endif()
     endforeach (_current_try)
-  endif( DEFINED ENV{QC_CERTSTORE_PATH} )
-endif(WIN32)
+  endif()
+endif()
 
 if (qca_CERTSTORE)
   message(STATUS "Found system certstore")
-else (qca_CERTSTORE)
+else()
   message(STATUS "Using built in certstore.")
   set( qca_CERTSTORE "${CMAKE_CURRENT_SOURCE_DIR}/certs/rootcerts.pem")
   # note that INSTALL_FILES targets are relative to the current installation prefix...
   if(NOT DEVELOPER_MODE)
     install(FILES "${qca_CERTSTORE}" DESTINATION "${QCA_PREFIX_INSTALL_DIR}/certs")
   endif()
-endif (qca_CERTSTORE)
+endif()
 message(STATUS "certstore path: " ${qca_CERTSTORE})
 add_definitions( -DQCA_SYSTEMSTORE_PATH="${qca_CERTSTORE}" )
 
@@ -361,18 +359,18 @@ if(STATIC_PLUGINS)
     if(WITH_${PLUGIN}_PLUGIN_INTERNAL)
       string(REPLACE "-" "_" IMPORT_NAME "qca-${PLUGIN}")
       file(APPEND "${CMAKE_BINARY_DIR}/import_plugins.h" "Q_IMPORT_PLUGIN(${IMPORT_NAME})\n")
-    endif(WITH_${PLUGIN}_PLUGIN_INTERNAL)
+    endif()
   endforeach(PLUGIN IN LISTS PLUGINS)
-endif(STATIC_PLUGINS)
+endif()
 
 if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(unittest)
   add_subdirectory(examples)
-endif(BUILD_TESTS)
+endif()
 if(BUILD_TOOLS)
   add_subdirectory(tools)
-endif(BUILD_TOOLS)
+endif()
 
 if(DOXYGEN_FOUND)
   configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
@@ -383,7 +381,7 @@ if(DOXYGEN_FOUND)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/images/qca-arch.png ${CMAKE_BINARY_DIR}/images/qca-arch.png
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
-endif(DOXYGEN_FOUND)
+endif()
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
@@ -413,7 +411,7 @@ if(NOT DEVELOPER_MODE)
     message("!! you MUST explicity define CMAKE_INSTALL_PREFIX !!")
     message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     message("${ESCAPE}[0m")
-  endif(QCA_INSTALL_IN_QT_PREFIX)
+  endif()
 
   message("")
   if(USE_RELATIVE_PATHS)
