@@ -126,18 +126,10 @@ private Q_SLOTS:
     void testDetachedSign();
     void testSignaturesWithExpiredSubkeys();
     void testEncryptionWithExpiredSubkeys();
-private:
-    QCA::Initializer* m_init;
 };
 
 void PgpUnitTest::initTestCase()
 {
-    // instead of initializing qca once, we will initialize it for every
-    //   test case.  this is the only way to get the keystore subsystem
-    //   to reload, which we need to do if we want qca-gnupg to respect
-    //   changes to $GNUPGHOME.
-    //m_init = new QCA::Initializer;
-
     // Change current directory to executable directory
     // it is need to find keys*_work directories
     if (!QCoreApplication::applicationDirPath().isEmpty())
@@ -146,7 +138,6 @@ void PgpUnitTest::initTestCase()
 
 void PgpUnitTest::cleanupTestCase()
 {
-    //delete m_init;
 }
 
 void PgpUnitTest::testKeyRing()
