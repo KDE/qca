@@ -147,7 +147,7 @@ void *qca_secure_alloc(int bytes)
 {
 	// allocate enough room to store a size value in front, return a pointer after it
 	char *c = (char *)QCA::botan_secure_alloc(bytes + sizeof(int));
-	((int *)c)[0] = bytes + sizeof(int);
+	reinterpret_cast<int *>(c)[0] = bytes + sizeof(int);
 	return c + sizeof(int);
 }
 
@@ -156,7 +156,7 @@ void qca_secure_free(void *p)
 	// backtrack to read the size value
 	char *c = (char *)p;
 	c -= sizeof(int);
-	int bytes = ((int *)c)[0];
+	const int bytes = reinterpret_cast<int *>(c)[0];
 	QCA::botan_secure_free(c, bytes);
 }
 
@@ -169,7 +169,7 @@ void *qca_secure_realloc(void *p, int bytes)
 	// backtrack to read the size value
 	char *c = (char *)p;
 	c -= sizeof(int);
-	int oldsize = ((int *)c)[0] - sizeof(int);
+	const int oldsize = reinterpret_cast<int *>(c)[0] - sizeof(int);
 
 	// alloc the new chunk
 	char *new_p = (char *)qca_secure_alloc(bytes);
