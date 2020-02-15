@@ -4449,9 +4449,9 @@ public:
 		{
 			X509_EXTENSION *ex = X509_CRL_get_ext(x, pos);
 			if(ex) {
-				int *result = (int*) X509V3_EXT_d2i(ex);
-				p.number = (*result);
-				ASN1_INTEGER_free((ASN1_INTEGER*)result);
+				ASN1_INTEGER *result = (ASN1_INTEGER*) X509V3_EXT_d2i(ex);
+				p.number = ASN1_INTEGER_get(result);
+				ASN1_INTEGER_free(result);
 			}
 		}
 
