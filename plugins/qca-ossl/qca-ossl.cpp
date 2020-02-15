@@ -4345,43 +4345,43 @@ public:
 			if (pos != -1) {
 				X509_EXTENSION *ex = X509_REVOKED_get_ext(rev, pos);
 				if(ex) {
-					int *result = (int*) X509V3_EXT_d2i(ex);
-					switch (*result) {
-					case 0:
+					ASN1_ENUMERATED *result = (ASN1_ENUMERATED *) X509V3_EXT_d2i(ex);
+					switch (ASN1_ENUMERATED_get(result)) {
+					case CRL_REASON_UNSPECIFIED:
 						reason = QCA::CRLEntry::Unspecified;
 						break;
-					case 1:
+					case CRL_REASON_KEY_COMPROMISE:
 						reason = QCA::CRLEntry::KeyCompromise;
 						break;
-					case 2:
+					case CRL_REASON_CA_COMPROMISE:
 						reason = QCA::CRLEntry::CACompromise;
 						break;
-					case 3:
+					case CRL_REASON_AFFILIATION_CHANGED:
 						reason = QCA::CRLEntry::AffiliationChanged;
 						break;
-					case 4:
+					case CRL_REASON_SUPERSEDED:
 						reason = QCA::CRLEntry::Superseded;
 						break;
-					case 5:
+					case CRL_REASON_CESSATION_OF_OPERATION:
 						reason = QCA::CRLEntry::CessationOfOperation;
 						break;
-					case 6:
+					case CRL_REASON_CERTIFICATE_HOLD:
 						reason = QCA::CRLEntry::CertificateHold;
 						break;
-					case 8:
+					case CRL_REASON_REMOVE_FROM_CRL:
 						reason = QCA::CRLEntry::RemoveFromCRL;
 						break;
-					case 9:
+					case CRL_REASON_PRIVILEGE_WITHDRAWN:
 						reason = QCA::CRLEntry::PrivilegeWithdrawn;
 						break;
-					case 10:
+					case CRL_REASON_AA_COMPROMISE:
 						reason = QCA::CRLEntry::AACompromise;
 						break;
 					default:
 						reason = QCA::CRLEntry::Unspecified;
 						break;
 					}
-					ASN1_INTEGER_free((ASN1_INTEGER*)result);
+					ASN1_ENUMERATED_free(result);
 				}
 			}
 			CRLEntry thisEntry( serial, time, reason);
