@@ -1134,7 +1134,7 @@ public:
 		}
 
 #ifdef FRIENDLY_NAMES
-		QStringList names = makeFriendlyNames(certs);
+		const QStringList names = makeFriendlyNames(certs);
 #endif
 		for(int n = 0; n < certs.count(); ++n)
 		{

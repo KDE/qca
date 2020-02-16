@@ -314,7 +314,7 @@ QList<T> getList(const QString &provider)
 		ProviderList pl = allProviders();
 		for(int n = 0; n < pl.count(); ++n)
 		{
-			QList<T> other = G::getList(pl[n]);
+			const QList<T> other = G::getList(pl[n]);
 			for(int k = 0; k < other.count(); ++k)
 			{
 				// only add what we don't have in the list

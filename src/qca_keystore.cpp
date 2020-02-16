@@ -251,7 +251,7 @@ public Q_SLOTS:
 		if(at == -1)
 			return out;
 		Item &i = items[at];
-		QList<KeyStoreEntryContext*> list = i.owner->entryList(i.storeContextId);
+		const QList<KeyStoreEntryContext*> list = i.owner->entryList(i.storeContextId);
 		for(int n = 0; n < list.count(); ++n)
 		{
 			KeyStoreEntry entry;
@@ -431,7 +431,7 @@ private:
 
 		QMutexLocker locker(&m);
 
-		QList<int> keyStores = c->keyStores();
+		const QList<int> keyStores = c->keyStores();
 
 		// remove any contexts that are gone
 		for(int n = 0; n < items.count(); ++n)
@@ -856,7 +856,7 @@ private Q_SLOTS:
 	void ks_updated()
 	{
 		bool found = false;
-		QList<KeyStoreEntry> list = ks->entryList();
+		const QList<KeyStoreEntry> list = ks->entryList();
 		foreach(const KeyStoreEntry &e, list)
 		{
 			if(e.id() == entryId && e.isAvailable())
@@ -1461,7 +1461,7 @@ public:
 		QPointer<QObject> self(this);
 
 		bool newbusy = KeyStoreTracker::instance()->isBusy();
-		QList<KeyStoreTracker::Item> newitems = KeyStoreTracker::instance()->getItems();
+		const QList<KeyStoreTracker::Item> newitems = KeyStoreTracker::instance()->getItems();
 
 		if(!busy && newbusy)
 		{
@@ -1515,7 +1515,7 @@ public:
 		// added
 		for(int n = 0; n < newitems.count(); ++n)
 		{
-			KeyStoreTracker::Item &i = newitems[n];
+			const KeyStoreTracker::Item &i = newitems[n];
 			bool found = false;
 			for(int k = 0; k < items.count(); ++k)
 			{

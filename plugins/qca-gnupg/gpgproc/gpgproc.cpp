@@ -582,7 +582,7 @@ QByteArray GPGProc::readStderr()
 
 QStringList GPGProc::readStatusLines()
 {
-	QStringList out = d->statusLines;
+	const QStringList out = d->statusLines;
 	d->statusLines.clear();
 	return out;
 }

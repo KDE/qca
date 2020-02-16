@@ -220,7 +220,7 @@ private:
 
 		QMap<QString, QString>
 		friendlyNames () {
-			QStringList names = makeFriendlyNames (_certs);
+			const QStringList names = makeFriendlyNames (_certs);
 			QMap<QString, QString> friendlyNames;
 
 			for (int i=0;i<names.size ();i++) {
@@ -2409,7 +2409,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 		*p_certificate_id = nullptr;
 		*p_has_private = false;
 
-		QStringList list = from.split (QStringLiteral("/"));
+		const QStringList list = from.split (QStringLiteral("/"));
 
 		if (list.size () < 5) {
 			throw pkcs11Exception (CKR_FUNCTION_FAILED, QStringLiteral("Invalid serialization"));

@@ -1085,7 +1085,7 @@ public:
 						goto cleanup1;
 					break;
 					case publicTypeX509Chain:
-						QStringList base64certs = config[QString::asprintf ("entry_%02d_public", i)].toString ().split (QStringLiteral("!"));
+						const QStringList base64certs = config[QString::asprintf ("entry_%02d_public", i)].toString ().split (QStringLiteral("!"));
 
 						foreach (const QString &s, base64certs) {
 							entry.chain += Certificate::fromDER (
@@ -1180,7 +1180,7 @@ private:
 
 		entry = SoftStoreEntry ();
 
-		QStringList list = serialized.split (QStringLiteral("/"));
+		const QStringList list = serialized.split (QStringLiteral("/"));
 		int n=0;
 
 		if (list.size () < 8) {

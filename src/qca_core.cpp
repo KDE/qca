@@ -567,12 +567,12 @@ static QVariantMap readConfig(const QString &name)
 {
 	QSettings settings(QStringLiteral("Affinix"), QStringLiteral("QCA2"));
 	settings.beginGroup(QStringLiteral("ProviderConfig"));
-	QStringList providerNames = settings.value(QStringLiteral("providerNames")).toStringList();
+	const QStringList providerNames = settings.value(QStringLiteral("providerNames")).toStringList();
 	if(!providerNames.contains(name))
 		return QVariantMap();
 
 	settings.beginGroup(name);
-	QStringList keys = settings.childKeys();
+	const QStringList keys = settings.childKeys();
 	QVariantMap map;
 	foreach(const QString &key, keys)
 		map[key] = settings.value(key);
@@ -742,7 +742,7 @@ bool haveSystemStore()
 	KeyStoreManager ksm;
 	ksm.waitForBusyFinished();
 
-	QStringList list = ksm.keyStores();
+	const QStringList list = ksm.keyStores();
 	for(int n = 0; n < list.count(); ++n)
 	{
 		KeyStore ks(list[n], &ksm);
@@ -760,7 +760,7 @@ CertificateCollection systemStore()
 	ksm.waitForBusyFinished();
 
 	CertificateCollection col;
-	QStringList list = ksm.keyStores();
+	const QStringList list = ksm.keyStores();
 	for(int n = 0; n < list.count(); ++n)
 	{
 		KeyStore ks(list[n], &ksm);
@@ -769,7 +769,7 @@ CertificateCollection systemStore()
 		if(ks.type() == KeyStore::System && ks.holdsTrustedCertificates())
 		{
 			// extract contents
-			QList<KeyStoreEntry> entries = ks.entryList();
+			const QList<KeyStoreEntry> entries = ks.entryList();
 			for(int i = 0; i < entries.count(); ++i)
 			{
 				if(entries[i].type() == KeyStoreEntry::TypeCertificate)
@@ -1835,7 +1835,7 @@ void handler_remove(HandlerBase *h)
 	if(at == -1)
 		return;
 
-	QList<int> ids = g_event->handlers[at].ids;
+	const QList<int> ids = g_event->handlers[at].ids;
 	g_event->handlers.removeAt(at);
 
 	// adjust handler positions within askers

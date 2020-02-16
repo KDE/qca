@@ -385,7 +385,7 @@ void ProviderManager::scan()
 			continue;
 		}
 
-		QStringList entryList = dir.entryList(QDir::Files);
+		const QStringList entryList = dir.entryList(QDir::Files);
 		if(entryList.isEmpty())
 		{
 			logDebug(QStringLiteral("  (No files in 'crypto' subdirectory)"));
@@ -612,7 +612,7 @@ Provider *ProviderManager::findFor(const QString &name, const QString &type) con
 	if(name.isEmpty())
 	{
 		providerMutex.lock();
-		QList<ProviderItem*> list = providerItemList;
+		const QList<ProviderItem*> list = providerItemList;
 		providerMutex.unlock();
 
 		// find the first one that can do it
@@ -697,7 +697,7 @@ QStringList ProviderManager::allFeatures() const
 		featureList = p->features();
 
 	providerMutex.lock();
-	QList<ProviderItem*> list = providerItemList;
+	const QList<ProviderItem*> list = providerItemList;
 	providerMutex.unlock();
 	for(int n = 0; n < list.count(); ++n)
 	{
@@ -797,7 +797,7 @@ void ProviderManager::mergeFeatures(QStringList *a, const QStringList &b)
 
 int ProviderManager::get_default_priority(const QString &name) const
 {
-	QStringList list = plugin_priorities(def);
+	const QStringList list = plugin_priorities(def);
 	foreach(const QString &s, list)
 	{
 		// qca_default already sanity checks the strings

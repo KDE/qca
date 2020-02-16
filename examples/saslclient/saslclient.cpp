@@ -418,7 +418,7 @@ private:
 		if(mode == 0)
 		{
 			// first line is the method list
-			QStringList mechlist = line.split(QLatin1Char(' '));
+			const QStringList mechlist = line.split(QLatin1Char(' '));
 			mode = 1; // switch to sasl negotiation mode
 			sasl->startClient(proto, host, mechlist);
 		}

@@ -173,7 +173,7 @@ public:
 
 	bool fromString(const QString &in)
 	{
-		QStringList parts = in.split(':');
+		const QStringList parts = in.split(':');
 		for(int n = 0; n < parts.count(); ++n)
 			parts[n] = unescape(parts[n]);
 

@@ -101,7 +101,7 @@ static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 		if(i.type().known() == EmailLegacy)
 		{
 			// de-dup
-			QList<QString> emails = out.values(Email);
+			const QList<QString> emails = out.values(Email);
 			if(!emails.contains(i.value()))
 				out.insert(Email, i.value());
 		}
@@ -112,7 +112,7 @@ static CertificateInfo orderedToMap(const CertificateInfoOrdered &info)
 
 static void moveMapValues(CertificateInfo *from, CertificateInfoOrdered *to, const CertificateInfoType &type)
 {
-	QList<QString> values = from->values(type);
+	const QList<QString> values = from->values(type);
 	from->remove(type);
 
 	// multimap values are stored in reverse.  we'll insert backwards in
@@ -140,7 +140,7 @@ static CertificateInfoOrdered mapToOrdered(const CertificateInfo &info)
 	moveMapValues(&in, &out, XMPP);
 
 	// get remaining types
-	QList<CertificateInfoType> typesLeft = in.keys();
+	const QList<CertificateInfoType> typesLeft = in.keys();
 
 	// dedup
 	QList<CertificateInfoType> types;
@@ -461,7 +461,7 @@ static QString uniqueSubjectValue(const CertificateInfoType &type, const QList<i
 			if(n == items[i])
 				continue;
 
-			QStringList other_vals = certs[n].subjectInfo().values(type);
+			const QStringList other_vals = certs[n].subjectInfo().values(type);
 			for(int k = 0; k < vals.count(); ++k)
 			{
 				if(other_vals.contains(vals[k]))
@@ -671,7 +671,7 @@ QStringList makeFriendlyNames(const QList<Certificate> &list)
 	foreach(const QString &name, names)
 	{
 		// anyone else using this name?
-		QList<int> items = findSameName(name, names);
+		const QList<int> items = findSameName(name, names);
 		if(items.count() > 1)
 		{
 			// don't save duplicate collisions
@@ -1201,7 +1201,7 @@ static QByteArray ipaddr_str2bin(const QString &str)
 	// ipv6
 	if(str.contains(QLatin1Char(':')))
 	{
-		QStringList parts = str.split(QLatin1Char(':'), QString::KeepEmptyParts);
+		const QStringList parts = str.split(QLatin1Char(':'), QString::KeepEmptyParts);
 		if(parts.count() < 3 || parts.count() > 8)
 			return QByteArray();
 
@@ -1273,7 +1273,7 @@ static QByteArray ipaddr_str2bin(const QString &str)
 	}
 	else if(str.contains(QLatin1Char('.')))
 	{
-		QStringList parts = str.split(QLatin1Char('.'), QString::KeepEmptyParts);
+		const QStringList parts = str.split(QLatin1Char('.'), QString::KeepEmptyParts);
 		if(parts.count() != 4)
 			return QByteArray();
 
@@ -1329,7 +1329,7 @@ static bool cert_match_domain(const QString &certname, const QString &acedomain)
 	if(parts_name.count() >= 2 && parts_name[parts_name.count()-2].contains(QLatin1Char('*')))
 		return false;
 
-	QStringList parts_compare = acedomain.split(QLatin1Char('.'), QString::KeepEmptyParts);
+	const QStringList parts_compare = acedomain.split(QLatin1Char('.'), QString::KeepEmptyParts);
 	if(parts_compare.isEmpty())
 		return false;
 
@@ -1575,7 +1575,7 @@ QByteArray Certificate::issuerKeyId() const
 
 Validity Certificate::validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u, ValidateFlags vf) const
 {
-	QList<Certificate> issuers = trusted.certificates() + untrusted.certificates();
+	const QList<Certificate> issuers = trusted.certificates() + untrusted.certificates();
 	CertificateChain chain;
 	chain += *this;
 	Validity result;

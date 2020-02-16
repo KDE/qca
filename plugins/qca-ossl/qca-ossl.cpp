@@ -325,7 +325,7 @@ static CertificateInfo get_cert_name(X509_NAME *name)
 	{
 		CertificateInfo p9_info;
 		try_get_name_item(name, NID_pkcs9_emailAddress, EmailLegacy, &p9_info);
-		QList<QString> emails = info.values(Email);
+		const QList<QString> emails = info.values(Email);
 		QMapIterator<CertificateInfoType,QString> it(p9_info);
 		while(it.hasNext())
 		{
@@ -5976,8 +5976,8 @@ public:
 		// setup the cert store
 		{
 			X509_STORE *store = SSL_CTX_get_cert_store(context);
-			QList<Certificate> cert_list = trusted.certificates();
-			QList<CRL> crl_list = trusted.crls();
+			const QList<Certificate> cert_list = trusted.certificates();
+			const QList<CRL> crl_list = trusted.crls();
 			int n;
 			for(n = 0; n < cert_list.count(); ++n)
 			{
@@ -6594,7 +6594,7 @@ public:
 			// intermediates/signers that may not be in the blob
 			STACK_OF(X509) *other_certs = sk_X509_new_null();
 			QList<Certificate> untrusted_list = cms->untrustedCerts.certificates();
-			QList<CRL> untrusted_crls = cms->untrustedCerts.crls(); // we'll use the crls later
+			const QList<CRL> untrusted_crls = cms->untrustedCerts.crls(); // we'll use the crls later
 			for(int n = 0; n < untrusted_list.count(); ++n)
 			{
 				X509 *x = static_cast<MyCertContext *>(untrusted_list[n].context())->item.cert;
@@ -6653,7 +6653,7 @@ public:
 			signerChain = chain;
 
 			X509_STORE *store = X509_STORE_new();
-			QList<Certificate> cert_list = cms->trustedCerts.certificates();
+			const QList<Certificate> cert_list = cms->trustedCerts.certificates();
 			QList<CRL> crl_list = cms->trustedCerts.crls();
 			for(int n = 0; n < cert_list.count(); ++n)
 			{

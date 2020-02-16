@@ -803,7 +803,7 @@ void GpgAction::processResult(int code)
 	{
 		if(input.op == GpgOp::Check)
 		{
-			QStringList strList = outstr.split(QStringLiteral("\n"));
+			const QStringList strList = outstr.split(QStringLiteral("\n"));
 			foreach (const QString &str, strList)
 			{
 				if (!str.startsWith(QLatin1String("Home: ")))
@@ -909,7 +909,7 @@ void GpgAction::proc_readyReadStderr()
 
 void GpgAction::proc_readyReadStatusLines()
 {
-	QStringList lines = proc.readStatusLines();
+	const QStringList lines = proc.readStatusLines();
 	for(int n = 0; n < lines.count(); ++n)
 		processStatusLine(lines[n]);
 }
