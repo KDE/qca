@@ -619,7 +619,7 @@ public:
 			return;
 		}
 
-		QByteArray c_to_net = c->to_net();
+		const QByteArray c_to_net = c->to_net();
 		if(!c_to_net.isEmpty())
 		{
 			QCA_logTextMessage(QStringLiteral("tls[%1]: to_net %2").arg(q->objectName(), QString::number(c_to_net.size())), Logger::Information);
@@ -691,7 +691,7 @@ public:
 		}
 		else // Connected
 		{
-			QByteArray c_to_app = c->to_app();
+			const QByteArray c_to_app = c->to_app();
 			if(!c_to_app.isEmpty())
 			{
 				QCA_logTextMessage(QStringLiteral("tls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())), Logger::Information);
@@ -1082,7 +1082,7 @@ QByteArray TLS::read()
 {
 	if(d->mode == Stream)
 	{
-		QByteArray a = d->in;
+		const QByteArray a = d->in;
 		d->in.clear();
 		return a;
 	}
@@ -1109,7 +1109,7 @@ QByteArray TLS::readOutgoing(int *plainBytes)
 {
 	if(d->mode == Stream)
 	{
-		QByteArray a = d->to_net;
+		const QByteArray a = d->to_net;
 		d->to_net.clear();
 		if(plainBytes)
 			*plainBytes = d->to_net_encoded;
@@ -1121,7 +1121,7 @@ QByteArray TLS::readOutgoing(int *plainBytes)
 	{
 		if(!d->packet_to_net.isEmpty())
 		{
-			QByteArray a = d->packet_to_net.takeFirst();
+			const QByteArray a = d->packet_to_net.takeFirst();
 			int x = d->packet_to_net_encoded.takeFirst();
 			if(plainBytes)
 				*plainBytes = x;
@@ -1140,7 +1140,7 @@ QByteArray TLS::readUnprocessed()
 {
 	if(d->mode == Stream)
 	{
-		QByteArray a = d->unprocessed;
+		const QByteArray a = d->unprocessed;
 		d->unprocessed.clear();
 		return a;
 	}
@@ -1732,8 +1732,8 @@ private Q_SLOTS:
 				return;
 			}
 
-			QByteArray c_to_net = c->to_net();
-			QByteArray c_to_app = c->to_app();
+			const QByteArray c_to_net = c->to_net();
+			const QByteArray c_to_app = c->to_app();
 			int enc = -1;
 			if(!c_to_net.isEmpty())
 				enc = c->encoded();
@@ -1959,7 +1959,7 @@ void SASL::write(const QByteArray &a)
 
 QByteArray SASL::read()
 {
-	QByteArray a = d->in;
+	const QByteArray a = d->in;
 	d->in.clear();
 	return a;
 }
@@ -1972,7 +1972,7 @@ void SASL::writeIncoming(const QByteArray &a)
 
 QByteArray SASL::readOutgoing(int *plainBytes)
 {
-	QByteArray a = d->to_net;
+	const QByteArray a = d->to_net;
 	d->to_net.clear();
 	if(plainBytes)
 		*plainBytes = d->to_net_encoded;

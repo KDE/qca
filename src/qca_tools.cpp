@@ -976,7 +976,7 @@ bool BigInteger::fromString(const QString &s)
 {
 	if(s.isEmpty())
 		return false;
-	QByteArray cs = s.toLatin1();
+	const QByteArray cs = s.toLatin1();
 
 	bool neg = false;
 	if(s[0] == QLatin1Char('-'))

@@ -423,7 +423,7 @@ void GPGProc::Private::doTryDone()
 
 bool GPGProc::Private::readAndProcessStatusData()
 {
-	QByteArray buf = pipeStatus.readEnd().read();
+	const QByteArray buf = pipeStatus.readEnd().read();
 	if(buf.isEmpty())
 		return false;
 
@@ -559,7 +559,7 @@ QByteArray GPGProc::readStdout()
 	}
 	else
 	{
-		QByteArray a = d->leftover_stdout;
+		const QByteArray a = d->leftover_stdout;
 		d->leftover_stdout.clear();
 		return a;
 	}
@@ -574,7 +574,7 @@ QByteArray GPGProc::readStderr()
 	}
 	else
 	{
-		QByteArray a = d->leftover_stderr;
+		const QByteArray a = d->leftover_stderr;
 		d->leftover_stderr.clear();
 		return a;
 	}

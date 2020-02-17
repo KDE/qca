@@ -396,7 +396,7 @@ QByteArray GpgOp::read()
 	}
 	else
 	{
-		QByteArray a = d->result;
+		const QByteArray a = d->result;
 		d->result.clear();
 		return a;
 	}

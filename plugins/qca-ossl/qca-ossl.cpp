@@ -259,10 +259,10 @@ static void try_add_name_item(X509_NAME **name, int nid, const QString &val)
 {
 	if(val.isEmpty())
 		return;
-	QByteArray buf = val.toLatin1();
+	const QByteArray buf = val.toLatin1();
 	if(!(*name))
 		*name = X509_NAME_new();
-	X509_NAME_add_entry_by_NID(*name, nid, MBSTRING_ASC, (unsigned char *)buf.data(), buf.size(), -1, 0);
+	X509_NAME_add_entry_by_NID(*name, nid, MBSTRING_ASC, (const unsigned char *)buf.data(), buf.size(), -1, 0);
 }
 
 static X509_NAME *new_cert_name(const CertificateInfo &info)
@@ -395,10 +395,10 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	{
 	case Email:
 	{
-		QByteArray buf = val.toLatin1();
+		const QByteArray buf = val.toLatin1();
 
 		ASN1_IA5STRING *str = ASN1_IA5STRING_new();
-		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_STRING_set((ASN1_STRING *)str, (const unsigned char *)buf.data(), buf.size());
 
 		name = GENERAL_NAME_new();
 		name->type = GEN_EMAIL;
@@ -407,10 +407,10 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	}
 	case URI:
 	{
-		QByteArray buf = val.toLatin1();
+		const QByteArray buf = val.toLatin1();
 
 		ASN1_IA5STRING *str = ASN1_IA5STRING_new();
-		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_STRING_set((ASN1_STRING *)str, (const unsigned char *)buf.data(), buf.size());
 
 		name = GENERAL_NAME_new();
 		name->type = GEN_URI;
@@ -419,10 +419,10 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	}
 	case DNS:
 	{
-		QByteArray buf = val.toLatin1();
+		const QByteArray buf = val.toLatin1();
 
 		ASN1_IA5STRING *str = ASN1_IA5STRING_new();
-		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_STRING_set((ASN1_STRING *)str, (const unsigned char *)buf.data(), buf.size());
 
 		name = GENERAL_NAME_new();
 		name->type = GEN_DNS;
@@ -431,10 +431,10 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	}
 	case IPAddress:
 	{
-		QByteArray buf = ipaddress_string_to_bytes(val);
+		const QByteArray buf = ipaddress_string_to_bytes(val);
 
 		ASN1_OCTET_STRING *str = ASN1_OCTET_STRING_new();
-		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_STRING_set((ASN1_STRING *)str, (const unsigned char *)buf.data(), buf.size());
 
 		name = GENERAL_NAME_new();
 		name->type = GEN_IPADD;
@@ -443,10 +443,10 @@ static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QStrin
 	}
 	case XMPP:
 	{
-		QByteArray buf = val.toUtf8();
+		const QByteArray buf = val.toUtf8();
 
 		ASN1_UTF8STRING *str = ASN1_UTF8STRING_new();
-		ASN1_STRING_set((ASN1_STRING *)str, (unsigned char *)buf.data(), buf.size());
+		ASN1_STRING_set((ASN1_STRING *)str, (const unsigned char *)buf.data(), buf.size());
 
 		ASN1_TYPE *at = ASN1_TYPE_new();
 		at->type = V_ASN1_UTF8STRING;
@@ -532,7 +532,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			GENERAL_NAME *gn = find_next_general_name(names, GEN_EMAIL, &pos);
 			if (pos != -1)
 			{
-				QByteArray cs = qca_ASN1_STRING_toByteArray(gn->d.rfc822Name);
+				const QByteArray cs = qca_ASN1_STRING_toByteArray(gn->d.rfc822Name);
 				info->insert(t, QString::fromLatin1(cs));
 				++pos;
 			}
@@ -547,7 +547,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			GENERAL_NAME *gn = find_next_general_name(names, GEN_URI, &pos);
 			if (pos != -1)
 			{
-				QByteArray cs= qca_ASN1_STRING_toByteArray(gn->d.uniformResourceIdentifier);
+				const QByteArray cs= qca_ASN1_STRING_toByteArray(gn->d.uniformResourceIdentifier);
 				info->insert(t, QString::fromLatin1(cs));
 				++pos;
 			}
@@ -562,7 +562,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			GENERAL_NAME *gn = find_next_general_name(names, GEN_DNS, &pos);
 			if (pos != -1)
 			{
-				QByteArray cs = qca_ASN1_STRING_toByteArray(gn->d.dNSName);
+				const QByteArray cs = qca_ASN1_STRING_toByteArray(gn->d.dNSName);
 				info->insert(t, QString::fromLatin1(cs));
 				++pos;
 			}
@@ -578,7 +578,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 			if (pos != -1)
 			{
 				ASN1_OCTET_STRING *str = gn->d.iPAddress;
-				QByteArray buf = qca_ASN1_STRING_toByteArray(str);
+				const QByteArray buf = qca_ASN1_STRING_toByteArray(str);
 
 				QString out;
 				// IPv4 (TODO: handle IPv6)
@@ -616,7 +616,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 					break;
 
 				ASN1_UTF8STRING *str = at->value.utf8string;
-				QByteArray buf = qca_ASN1_STRING_toByteArray(str);
+				const QByteArray buf = qca_ASN1_STRING_toByteArray(str);
 				info->insert(t, QString::fromUtf8(buf));
 				++pos;
 			}
@@ -834,7 +834,7 @@ static X509_EXTENSION *new_cert_policies(const QStringList &policies)
 	STACK_OF(POLICYINFO) *pols = nullptr;
 	for(int n = 0; n < policies.count(); ++n)
 	{
-		QByteArray cs = policies[n].toLatin1();
+		const QByteArray cs = policies[n].toLatin1();
 		ASN1_OBJECT *obj = OBJ_txt2obj(cs.data(), 1); // 1 = only accept dotted input
 		if(!obj)
 			continue;
@@ -870,7 +870,7 @@ static QStringList get_cert_policies(X509_EXTENSION *ex)
 static QByteArray get_cert_subject_key_id(X509_EXTENSION *ex)
 {
 	ASN1_OCTET_STRING *skid = (ASN1_OCTET_STRING *)X509V3_EXT_d2i(ex);
-	QByteArray out = qca_ASN1_STRING_toByteArray(skid);
+	const QByteArray out = qca_ASN1_STRING_toByteArray(skid);
 	ASN1_OCTET_STRING_free(skid);
 	return out;
 }
@@ -2986,7 +2986,7 @@ public:
 
 		BIO *bo = BIO_new(BIO_s_mem());
 		i2d_PUBKEY_bio(bo, pkey);
-		QByteArray buf = bio2ba(bo);
+		const QByteArray buf = bio2ba(bo);
 		return buf;
 	}
 
@@ -3002,7 +3002,7 @@ public:
 
 		BIO *bo = BIO_new(BIO_s_mem());
 		PEM_write_bio_PUBKEY(bo, pkey);
-		QByteArray buf = bio2ba(bo);
+		const QByteArray buf = bio2ba(bo);
 		return QString::fromLatin1(buf);
 	}
 
@@ -3031,7 +3031,7 @@ public:
 		delete k;
 		k = nullptr;
 
-		QByteArray in = s.toLatin1();
+		const QByteArray in = s.toLatin1();
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
 		EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, nullptr, passphrase_cb, nullptr);
@@ -3133,7 +3133,7 @@ public:
 		delete k;
 		k = nullptr;
 
-		QByteArray in = s.toLatin1();
+		const QByteArray in = s.toLatin1();
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
 		EVP_PKEY *pkey;
@@ -3242,7 +3242,7 @@ public:
 			i2d_X509_REQ_bio(bo, req);
 		else if(crl)
 			i2d_X509_CRL_bio(bo, crl);
-		QByteArray buf = bio2ba(bo);
+		const QByteArray buf = bio2ba(bo);
 		return buf;
 	}
 
@@ -3255,7 +3255,7 @@ public:
 			PEM_write_bio_X509_REQ(bo, req);
 		else if(crl)
 			PEM_write_bio_X509_CRL(bo, crl);
-		QByteArray buf = bio2ba(bo);
+		const QByteArray buf = bio2ba(bo);
 		return QString::fromLatin1(buf);
 	}
 
@@ -3285,7 +3285,7 @@ public:
 	{
 		reset();
 
-		QByteArray in = s.toLatin1();
+		const QByteArray in = s.toLatin1();
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
 
@@ -4045,7 +4045,7 @@ public:
 		X509_REQ_set_subject_name(x, name);
 
 		// challenge
-		QByteArray cs = opts.challenge().toLatin1();
+		const QByteArray cs = opts.challenge().toLatin1();
 		if(!cs.isEmpty())
 			X509_REQ_add1_attr_by_NID(x, NID_pkcs9_challengePassword, MBSTRING_UTF8, (const unsigned char *)cs.data(), -1);
 
@@ -4782,7 +4782,7 @@ public:
 
 		BIO *bo = BIO_new(BIO_s_mem());
 		i2d_PKCS12_bio(bo, p12);
-		QByteArray out = bio2ba(bo);
+		const QByteArray out = bio2ba(bo);
 		return out;
 	}
 
@@ -5849,7 +5849,7 @@ public:
 
 	QByteArray to_net() override
 	{
-		QByteArray a = result_to_net;
+		const QByteArray a = result_to_net;
 		result_to_net.clear();
 		return a;
 	}
@@ -5861,7 +5861,7 @@ public:
 
 	QByteArray to_app() override
 	{
-		QByteArray a = result_plain;
+		const QByteArray a = result_plain;
 		result_plain.clear();
 		return a;
 	}

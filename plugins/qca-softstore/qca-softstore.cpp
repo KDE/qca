@@ -247,7 +247,7 @@ public:
 
 	QByteArray
 	endSign () override {
-		QByteArray r = _privkeySign.signature ();
+		const QByteArray r = _privkeySign.signature ();
 		_privkeySign = PrivateKey ();
 		return r;
 	}
@@ -435,7 +435,7 @@ public:
 						{
 							QFile file (_entry.keyReference);
 							if (file.open (QIODevice::ReadOnly)) {
-								QByteArray contents = file.readAll ();
+								const QByteArray contents = file.readAll ();
 
 								PrivateKey k = PrivateKey::fromDER (
 									contents,

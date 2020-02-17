@@ -105,8 +105,8 @@ public:
 		_externalConfig = false;
 		_streamLogger = nullptr;
 
-		QByteArray level = qgetenv ("QCALOGGER_LEVEL");
-		QByteArray file = qgetenv ("QCALOGGER_FILE");
+		const QByteArray level = qgetenv ("QCALOGGER_LEVEL");
+		const QByteArray file = qgetenv ("QCALOGGER_FILE");
 
 		if (!level.isEmpty ()) {
 			printf ("XXXX %s %s\n", level.data (), file.data ());

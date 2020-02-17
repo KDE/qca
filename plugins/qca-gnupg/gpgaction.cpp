@@ -62,7 +62,7 @@ static QByteArray getCString(const QByteArray &a)
 			else if(c == 'x' && n + 2 < a.size())
 			{
 				++n;
-				QByteArray hex = a.mid(n, 2);
+				const QByteArray hex = a.mid(n, 2);
 				++n; // only skip one, loop will skip the next
 
 				bool ok;
@@ -188,7 +188,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 		}
 		else if(type == QLatin1String("uid"))
 		{
-			QByteArray uid = getCString(f[9].toUtf8());
+			const QByteArray uid = getCString(f[9].toUtf8());
 			keyList.last().userIds.append(QString::fromUtf8(uid));
 		}
 		else if(type == QLatin1String("fpr"))

@@ -1256,7 +1256,7 @@ static QByteArray ipaddr_str2bin(const QString &str)
 					if(n != parts.count() - 1)
 						return QByteArray();
 
-					QByteArray buf = ipaddr_str2bin(parts[n]);
+					const QByteArray buf = ipaddr_str2bin(parts[n]);
 					if(buf.isEmpty())
 						return QByteArray();
 
@@ -1391,7 +1391,7 @@ static bool cert_match_ipaddress(const QString &certname, const QByteArray &ipad
 		return false;
 
 	// convert to binary form
-	QByteArray addr = ipaddr_str2bin(name);
+	const QByteArray addr = ipaddr_str2bin(name);
 	if(addr.isEmpty())
 		return false;
 
@@ -1644,7 +1644,7 @@ Certificate Certificate::fromPEMFile(const QString &fileName, ConvertResult *res
 // for all else, check in dNSName, then commonName
 bool Certificate::matchesHostName(const QString &host) const
 {
-	QByteArray ipaddr = ipaddr_str2bin(host);
+	const QByteArray ipaddr = ipaddr_str2bin(host);
 	if(!ipaddr.isEmpty()) // ip address
 	{
 		// check iPAddress, dNSName, commonName
@@ -2410,7 +2410,7 @@ bool CertificateCollection::toPKCS7File(const QString &fileName, const QString &
 		crl_list += c;
 	}
 
-	QByteArray result = col->toPKCS7(cert_list, crl_list);
+	const QByteArray result = col->toPKCS7(cert_list, crl_list);
 	delete col;
 
 	return arrayToFile(fileName, result);
@@ -2626,7 +2626,7 @@ QByteArray KeyBundle::toArray(const SecureArray &passphrase, const QString &prov
 	QList<const CertContext*> list;
 	for(int n = 0; n < d->chain.count(); ++n)
 		list.append(static_cast<const CertContext *>(d->chain[n].context()));
-	QByteArray buf = pix->toPKCS12(d->name, list, *(static_cast<const PKeyContext *>(d->key.context())), passphrase);
+	const QByteArray buf = pix->toPKCS12(d->name, list, *(static_cast<const PKeyContext *>(d->key.context())), passphrase);
 	delete pix;
 
 	return buf;

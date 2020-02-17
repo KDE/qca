@@ -2434,7 +2434,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 
 		*p_has_private = list[n++].toInt () != 0;
 
-		QByteArray endCertificateBytes = Base64 ().stringToArray (_unescapeString (list[n++])).toByteArray ();
+		const QByteArray endCertificateBytes = Base64 ().stringToArray (_unescapeString (list[n++])).toByteArray ();
 		Certificate endCertificate = Certificate::fromDER (endCertificateBytes);
 
 		if (endCertificate.isNull ()) {
@@ -2444,7 +2444,7 @@ pkcs11KeyStoreListContext::_deserializeCertificate (
 		if (
 			(rv = pkcs11h_certificate_setCertificateIdCertificateBlob (
 				certificate_id,
-				(unsigned char *)endCertificateBytes.data (),
+				(const unsigned char *)endCertificateBytes.data (),
 				(size_t)endCertificateBytes.size ()
 			)) != CKR_OK
 		) {

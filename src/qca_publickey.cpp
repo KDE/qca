@@ -446,7 +446,7 @@ QByteArray get_hash_id(const QString &name)
 
 QByteArray emsa3Encode(const QString &hashName, const QByteArray &digest, int size)
 {
-	QByteArray hash_id = get_hash_id(hashName);
+	const QByteArray hash_id = get_hash_id(hashName);
 	if(hash_id.isEmpty())
 		return QByteArray();
 

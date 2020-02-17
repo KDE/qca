@@ -325,7 +325,7 @@ public Q_SLOTS:
 		bool sig_done = false;
 		int written = 0;
 		{
-			QByteArray a = c->read();
+			const QByteArray a = c->read();
 			if(!a.isEmpty())
 			{
 				sig_read = true;
@@ -525,7 +525,7 @@ void SecureMessage::update(const QByteArray &in)
 
 QByteArray SecureMessage::read()
 {
-	QByteArray a = d->in;
+	const QByteArray a = d->in;
 	d->in.clear();
 	return a;
 }

@@ -177,7 +177,7 @@ public:
 	{
 		if(i->result)
 			return;
-		QByteArray cs = s.toUtf8();
+		const QByteArray cs = s.toUtf8();
 		int len = cs.length();
 		char *p = new char[len+1];
 		memcpy(p, cs.data(), len);
@@ -856,7 +856,7 @@ public:
 
 	QByteArray to_net() override
 	{
-		QByteArray a = result_to_net;
+		const QByteArray a = result_to_net;
 		result_to_net.clear();
 		return a;
 	}
@@ -868,7 +868,7 @@ public:
 
 	QByteArray to_app() override
 	{
-		QByteArray a = result_plain;
+		const QByteArray a = result_plain;
 		result_plain.clear();
 		return a;
 	}

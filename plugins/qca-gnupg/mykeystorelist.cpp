@@ -181,7 +181,7 @@ KeyStoreEntryContext *MyKeyStoreList::entryPassive(const QString &serialized)
 QString MyKeyStoreList::writeEntry(int, const PGPKey &key)
 {
 	const MyPGPKeyContext *kc = static_cast<const MyPGPKeyContext *>(key.context());
-	QByteArray buf = kc->toBinary();
+	const QByteArray buf = kc->toBinary();
 
 	GpgOp gpg(find_bin());
 	gpg.doImport(buf);

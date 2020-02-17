@@ -483,7 +483,7 @@ MemoryRegion Base64::update(const MemoryRegion &m)
 	else
 	{
 		bool ok;
-		QByteArray out = b64decode(s, &ok);
+		const QByteArray out = b64decode(s, &ok);
 		if(!ok)
 			_ok = false;
 		return out;
@@ -502,7 +502,7 @@ MemoryRegion Base64::final()
 	else
 	{
 		bool ok;
-		QByteArray out = b64decode(partial, &ok);
+		const QByteArray out = b64decode(partial, &ok);
 		if(!ok)
 			_ok = false;
 		return out;

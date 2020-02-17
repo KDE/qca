@@ -146,7 +146,7 @@ void MyMessageContext::update(const QByteArray &in)
 
 QByteArray MyMessageContext::read()
 {
-	QByteArray a = out;
+	const QByteArray a = out;
 	out.clear();
 	return a;
 }

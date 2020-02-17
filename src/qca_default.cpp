@@ -980,7 +980,7 @@ public:
 
 		if(entry_deserialize(in, &storeId, &storeName, &id, &name, &typestr, &datastr))
 		{
-			QByteArray data = Base64().stringToArray(datastr).toByteArray();
+			const QByteArray data = Base64().stringToArray(datastr).toByteArray();
 			DefaultKeyStoreEntry *c;
 
 			if(typestr == QLatin1String("cert"))
