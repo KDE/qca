@@ -223,9 +223,10 @@ void init(MemoryMode mode, int prealloc)
 
 	bool secmem = botan_init(prealloc, allow_mmap_fallback);
 
-	if ((geteuid() == 0)  && drop_root)
+	if (drop_root)
 	{
-#if defined(Q_OS_UNIX)
+#ifdef Q_OS_UNIX
+	if (geteuid() == 0)
 		setuid(getuid());
 #endif
 	}
