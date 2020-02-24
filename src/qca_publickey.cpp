@@ -451,7 +451,7 @@ QByteArray emsa3Encode(const QString &hashName, const QByteArray &digest, int si
 		return QByteArray();
 
 	// logic adapted from Botan
-	int basesize = hash_id.size() + digest.size() + 2;
+	const int basesize = hash_id.size() + digest.size() + 2;
 	if(size == -1)
 		size = basesize + 1; // default to 1-byte pad
 	int padlen = size - basesize;

@@ -447,7 +447,7 @@ bool GPGProc::Private::processStatusData(const QByteArray &buf)
 		++n;
 		char *p = (char *)statusBuf.data();
 		QByteArray cs(p, n);
-		int newsize = statusBuf.size() - n;
+		const int newsize = statusBuf.size() - n;
 		memmove(p, p + n, newsize);
 		statusBuf.resize(newsize);
 

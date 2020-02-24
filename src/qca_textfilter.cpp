@@ -246,7 +246,7 @@ void Base64::setLineBreaksColumn(int column)
 static QByteArray b64encode(const QByteArray &s)
 {
 	int i;
-	int len = s.size();
+	const int len = s.size();
 	static const char tbl[] =
 		"ABCDEFGH"
 		"IJKLMNOP"
@@ -318,7 +318,7 @@ static QByteArray b64decode(const QByteArray &s, bool *ok)
 	*ok = true;
 
 	// this should be a multiple of 4
-	int len = s.size();
+	const int len = s.size();
 	if(len % 4)
 	{
 		*ok = false;
@@ -372,12 +372,12 @@ static QByteArray insert_linebreaks(const QByteArray &s, int *col, int lfAt)
 {
 	QByteArray out = s;
 
-	int needed = (out.size() + *col) / lfAt;   // how many newlines needed?
+	const int needed = (out.size() + *col) / lfAt;   // how many newlines needed?
 	if(needed > 0)
 	{
-		int firstlen = lfAt - *col;                // length of first chunk
+		const int firstlen = lfAt - *col;                // length of first chunk
 		int at = firstlen + (lfAt * (needed - 1)); // position of last newline
-		int lastlen = out.size() - at;             // length of last chunk
+		const int lastlen = out.size() - at;             // length of last chunk
 
 		//printf("size=%d,needed=%d,firstlen=%d,at=%d,lastlen=%d\n", out.size(), needed, firstlen, at, lastlen);
 
@@ -456,7 +456,7 @@ MemoryRegion Base64::update(const MemoryRegion &m)
 	else
 		chunk = 4;
 
-	int size = partial.size() + in.size();
+	const int size = partial.size() + in.size();
 	if(size < chunk)
 	{
 		appendArray(&partial, in);

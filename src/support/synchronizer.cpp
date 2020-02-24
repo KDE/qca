@@ -81,7 +81,7 @@ public:
 		edlink();
 		target->installEventFilter(this);
 
-		QObjectList list = target->children();
+		const QObjectList list = target->children();
 		for(int n = 0; n < list.count(); ++n)
 			hook(list[n]);
 	}
@@ -182,7 +182,7 @@ private Q_SLOTS:
 			QThread *objectThread = target->thread();
 			QAbstractEventDispatcher *ed = QAbstractEventDispatcher::instance(objectThread);
 
-			int timeLeft = qMax(info.interval - static_cast<int>(info.time.elapsed()), 0);
+			const int timeLeft = qMax(info.interval - static_cast<int>(info.time.elapsed()), 0);
 			info.fixInterval = true;
 			ed->unregisterTimer(info.id);
 			info.id = ed->registerTimer(timeLeft, Qt::CoarseTimer, target);

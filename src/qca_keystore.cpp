@@ -523,7 +523,7 @@ private Q_SLOTS:
 
 		busySources.remove(c);
 		bool changed = updateStores(c);
-		bool any_busy = !busySources.isEmpty();
+		const bool any_busy = !busySources.isEmpty();
 
 		if(!any_busy)
 		{
@@ -788,8 +788,8 @@ PGPKey KeyStoreEntry::pgpPublicKey() const
 
 bool KeyStoreEntry::ensureAvailable()
 {
-	QString storeId = this->storeId();
-	QString entryId = id();
+	const QString storeId = this->storeId();
+	const QString entryId = id();
 	KeyStoreEntryContext *c = (KeyStoreEntryContext *)trackercall("entry", QVariantList() << storeId << entryId).value<void*>();
 	if(c)
 		change(c);
@@ -803,7 +803,7 @@ bool KeyStoreEntry::ensureAccess()
 		d->accessible = false;
 		return false;
 	}
-	bool ok = static_cast<KeyStoreEntryContext *>(context())->ensureAccess();
+	const bool ok = static_cast<KeyStoreEntryContext *>(context())->ensureAccess();
 	d->accessible = ok;
 	return d->accessible;
 }
@@ -836,7 +836,7 @@ public:
 
 	void start()
 	{
-		QStringList list = ksm.keyStores();
+		const QStringList list = ksm.keyStores();
 		foreach(const QString &storeId, list)
 			ksm_available(storeId);
 	}
@@ -1460,7 +1460,7 @@ public:
 		//   use QPointer here for full SS.
 		QPointer<QObject> self(this);
 
-		bool newbusy = KeyStoreTracker::instance()->isBusy();
+		const bool newbusy = KeyStoreTracker::instance()->isBusy();
 		const QList<KeyStoreTracker::Item> newitems = KeyStoreTracker::instance()->getItems();
 
 		if(!busy && newbusy)

@@ -159,8 +159,8 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
 					keyList.last().isTrusted = true;
 			}
 
-			int key_type = f[3].toInt();
-			QString caps = f[11];
+			const int key_type = f[3].toInt();
+			const QString caps = f[11];
 
 			GpgOp::KeyItem item;
 			item.bits = f[2].toInt();
@@ -656,7 +656,7 @@ void GpgAction::processStatusLine(const QString &line)
 	}
 	else if(s == QLatin1String("INV_RECP"))
 	{
-		int r = nextArg(rest).toInt();
+		const int r = nextArg(rest).toInt();
 
 		if(curError == GpgOp::ErrorUnknown)
 		{

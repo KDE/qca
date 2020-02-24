@@ -1047,8 +1047,8 @@ public:
 				PublicType publicType = publicTypeInvalid;
 
 				entry.name = config[QString::asprintf ("entry_%02d_name", i)].toString ();
-				QString stringReferenceType  = config[QString::asprintf ("entry_%02d_private_type", i)].toString ();
-				QString stringPublicType  = config[QString::asprintf ("entry_%02d_public_type", i)].toString ();
+				const QString stringReferenceType  = config[QString::asprintf ("entry_%02d_private_type", i)].toString ();
+				const QString stringPublicType  = config[QString::asprintf ("entry_%02d_public_type", i)].toString ();
 				entry.noPassphrase = config[QString::asprintf ("entry_%02d_no_passphrase", i)].toBool ();
 				entry.unlockTimeout = config[QString::asprintf ("entry_%02d_unlock_timeout", i)].toInt ();
 

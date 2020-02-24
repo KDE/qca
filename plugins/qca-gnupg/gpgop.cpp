@@ -157,7 +157,7 @@ void GpgOp::Private::act_needCard()
 
 void GpgOp::Private::act_readyReadDiagnosticText()
 {
-	QString s = act->readDiagnosticText();
+	const QString s = act->readDiagnosticText();
 	//printf("dtext ready: [%s]\n", qPrintable(s));
 	diagnosticText += s;
 

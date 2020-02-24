@@ -332,7 +332,7 @@ public Q_SLOTS:
 				in.append(a);
 			}
 
-			int x = c->written();
+			const int x = c->written();
 			if(x > 0)
 			{
 				sig_written = true;

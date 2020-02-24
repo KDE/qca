@@ -74,7 +74,7 @@ SafeTimer::Private::Private(QObject *parent)
 void SafeTimer::Private::fixTimer()
 {
 	// Start special timer to align ressurected old timer
-	int msec = qMax(0, interval - static_cast<int>(elapsedTimer.elapsed()));
+	const int msec = qMax(0, interval - static_cast<int>(elapsedTimer.elapsed()));
 
 	fixerTimerId = startTimer(msec);
 #ifdef SAFETIMER_DEBUG

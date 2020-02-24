@@ -90,7 +90,7 @@ static QStringList get_types(QStringList (*get_func)(Provider *p), const QString
 	}
 	else
 	{
-		ProviderList pl = allProviders();
+		const ProviderList pl = allProviders();
 		foreach(Provider *p, pl)
 			mergeList(&out, get_func(p));
 	}
@@ -154,7 +154,7 @@ uchar Random::randomChar()
 int Random::randomInt()
 {
 	QMutexLocker locker(global_random_mutex());
-	SecureArray a = global_random()->nextBytes(sizeof(int));
+	const SecureArray a = global_random()->nextBytes(sizeof(int));
 	int x;
 	memcpy(&x, a.data(), a.size());
 	return x;
@@ -344,7 +344,7 @@ KeyLength Cipher::keyLength() const
 
 bool Cipher::validKeyLength(int n) const
 {
-	KeyLength len = keyLength();
+	const KeyLength len = keyLength();
 	return ((n >= len.minimum()) && (n <= len.maximum()) && (n % len.multiple() == 0));
 }
 
@@ -512,7 +512,7 @@ KeyLength MessageAuthenticationCode::keyLength() const
 
 bool MessageAuthenticationCode::validKeyLength(int n) const
 {
-	KeyLength len = keyLength();
+	const KeyLength len = keyLength();
 	return ((n >= len.minimum()) && (n <= len.maximum()) && (n % len.multiple() == 0));
 }
 

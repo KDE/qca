@@ -468,7 +468,7 @@ QStringList pluginPaths()
 #endif
 		foreach (const QByteArray &path, qcaPluginPath.split(pathSep))
 		{
-			QString canonicalPath = QDir(QFile::decodeName(path)).canonicalPath();
+			const QString canonicalPath = QDir(QFile::decodeName(path)).canonicalPath();
 			if (!canonicalPath.isEmpty())
 				paths << canonicalPath;
 		}
@@ -651,7 +651,7 @@ QVariantMap getProviderConfig(const QString &name)
 	Provider *p = findProvider(name);
 	if(!p)
 		return conf;
-	QVariantMap pconf = p->defaultConfig();
+	const QVariantMap pconf = p->defaultConfig();
 	if(!configIsValid(pconf))
 		return conf;
 
@@ -685,7 +685,7 @@ void saveProviderConfig(const QString &name)
 QVariantMap getProviderConfig_internal(Provider *p)
 {
 	QVariantMap conf;
-	QString name = p->name();
+	const QString name = p->name();
 
 	global->config_mutex.lock();
 
@@ -700,7 +700,7 @@ QVariantMap getProviderConfig_internal(Provider *p)
 
 	// if provider doesn't exist or doesn't have a valid config form,
 	//   use the config we loaded
-	QVariantMap pconf = p->defaultConfig();
+	const QVariantMap pconf = p->defaultConfig();
 	if(!configIsValid(pconf))
 		return conf;
 
@@ -1270,7 +1270,7 @@ MemoryRegion Filter::process(const MemoryRegion &a)
 	MemoryRegion buf = update(a);
 	if(!ok())
 		return MemoryRegion();
-	MemoryRegion fin = final();
+	const MemoryRegion fin = final();
 	if(!ok())
 		return MemoryRegion();
 	if(buf.isSecure() || fin.isSecure())
@@ -1928,7 +1928,7 @@ bool asker_ask(AskerBase *a, const Event &e)
 	i.event = e;
 	i.handler_pos = pos;
 	g_event->askers += i;
-	int asker_at = g_event->askers.count() - 1;
+	const int asker_at = g_event->askers.count() - 1;
 
 	g_event->ask(asker_at);
 	return true;

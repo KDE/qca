@@ -1125,7 +1125,7 @@ public:
 			crls += col.crls();
 		}
 
-		QString roots = shared->roots_file();
+		const QString roots = shared->roots_file();
 		if(!roots.isEmpty())
 		{
 			CertificateCollection col = CertificateCollection::fromFlatTextFile(roots);
@@ -1190,10 +1190,10 @@ public:
 
 	void init() override
 	{
-		QDateTime now = QDateTime::currentDateTime();
+		const QDateTime now = QDateTime::currentDateTime();
 
 		uint t = now.toTime_t();
-	        if(now.time().msec() > 0)
+		if(now.time().msec() > 0)
 			t /= now.time().msec();
 		qsrand(t);
 	}
@@ -1250,10 +1250,10 @@ public:
 
 	void configChanged(const QVariantMap &config) override
 	{
-		bool use_system = config[QStringLiteral("use_system")].toBool();
-		QString roots_file = config[QStringLiteral("roots_file")].toString();
-		QString skip_plugins_str = config[QStringLiteral("skip_plugins")].toString();
-		QString plugin_priorities_str = config[QStringLiteral("plugin_priorities")].toString();
+		const bool use_system = config[QStringLiteral("use_system")].toBool();
+		const QString roots_file = config[QStringLiteral("roots_file")].toString();
+		const QString skip_plugins_str = config[QStringLiteral("skip_plugins")].toString();
+		const QString plugin_priorities_str = config[QStringLiteral("plugin_priorities")].toString();
 
 		QStringList tmp;
 

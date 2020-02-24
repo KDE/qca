@@ -190,9 +190,9 @@ void MyMessageContext::complete()
 	{
 		if(gpg.wasSigned())
 		{
-			QString signerId = gpg.signerId();
-			QDateTime ts = gpg.timestamp();
-			GpgOp::VerifyResult vr = gpg.verifyResult();
+			const QString signerId = gpg.signerId();
+			const QDateTime ts = gpg.timestamp();
+			const GpgOp::VerifyResult vr = gpg.verifyResult();
 
 			SecureMessageSignature::IdentityResult ir;
 			Validity v;
@@ -417,7 +417,7 @@ void MyMessageContext::asker_responseReady()
 		return;
 	}
 
-	SecureArray a = asker.password();
+	const SecureArray a = asker.password();
 	gpg.submitPassphrase(a);
 }
 

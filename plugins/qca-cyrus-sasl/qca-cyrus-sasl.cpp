@@ -178,7 +178,7 @@ public:
 		if(i->result)
 			return;
 		const QByteArray cs = s.toUtf8();
-		int len = cs.length();
+		const int len = cs.length();
 		char *p = new char[len+1];
 		memcpy(p, cs.data(), len);
 		p[len] = 0;
@@ -470,7 +470,7 @@ private:
 				const char *serverout;
 				unsigned int serveroutlen;
 				ca_flag = false;
-				int r = sasl_server_start(con, in_mech.toLatin1().data(), clientin, clientinlen, &serverout, &serveroutlen);
+				const int r = sasl_server_start(con, in_mech.toLatin1().data(), clientin, clientinlen, &serverout, &serveroutlen);
 				if(r != SASL_OK && r != SASL_CONTINUE) {
 					setAuthCondition(r);
 					result_result = Error;
@@ -500,7 +500,7 @@ private:
 			if(!ca_skip) {
 				const char *serverout;
 				unsigned int serveroutlen;
-				int r = sasl_server_step(con, in_buf.data(), in_buf.size(), &serverout, &serveroutlen);
+				const int r = sasl_server_step(con, in_buf.data(), in_buf.size(), &serverout, &serveroutlen);
 				if(r != SASL_OK && r != SASL_CONTINUE) {
 					setAuthCondition(r);
 					result_result = Error;
@@ -554,7 +554,7 @@ private:
 				r = sasl_decode(con, in.data() + at, size, &outbuf, &len);
 			if(r != SASL_OK)
 				return false;
-			int oldsize = out->size();
+			const int oldsize = out->size();
 			out->resize(oldsize + len);
 			memcpy(out->data() + oldsize, outbuf, len);
 			at += size;
@@ -650,7 +650,7 @@ public:
 
 		result_result = Error;
 
-		int r = sasl_client_new(service.toLatin1().data(), host.toLatin1().data(), localAddr.isEmpty() ? nullptr : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(), callbacks, 0, &con);
+		const int r = sasl_client_new(service.toLatin1().data(), host.toLatin1().data(), localAddr.isEmpty() ? nullptr : localAddr.toLatin1().data(), remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(), callbacks, 0, &con);
 		if(r != SASL_OK) {
 			setAuthCondition(r);
 			doResultsReady();
@@ -739,7 +739,7 @@ public:
 
 	SASL::Params clientParams() const override
 	{
-		SASLParams::SParams sparams = params.missing();
+		const SASLParams::SParams sparams = params.missing();
 		return SASL::Params(sparams.user, sparams.authzid, sparams.pass, sparams.realm);
 	}
 

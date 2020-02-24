@@ -198,7 +198,7 @@ static int pipe_read(Q_PIPE_ID pipe, char *data, int max, bool *eof)
 	DWORD r = 0;
 	if(!ReadFile(pipe, data, maxread, &r, 0))
 	{
-		DWORD err = GetLastError();
+		const DWORD err = GetLastError();
 		if(err == ERROR_HANDLE_EOF)
 		{
 			if(eof)
@@ -1591,7 +1591,7 @@ public:
 	void takeArray(QByteArray *a, int len)
 	{
 		char *p = a->data();
-		int newsize = a->size() - len;
+		const int newsize = a->size() - len;
 		memmove(p, p + len, newsize);
 		a->resize(newsize);
 	}
@@ -1600,7 +1600,7 @@ public:
 	void takeArray(SecureArray *a, int len)
 	{
 		char *p = a->data();
-		int newsize = a->size() - len;
+		const int newsize = a->size() - len;
 		memmove(p, p + len, newsize);
 		a->resize(newsize);
 	}
@@ -1744,7 +1744,7 @@ public Q_SLOTS:
 
 	void doReadActual(bool sigs)
 	{
-		int left = pendingFreeSize();
+		const int left = pendingFreeSize();
 		if(left == 0)
 		{
 			canRead = true;

@@ -395,7 +395,7 @@ static QString dnLabel(const CertificateInfoType &type)
 	if(str)
 		return QString::fromLatin1(str);
 
-	QString id = type.id();
+	const QString id = type.id();
 	// is it an oid?
 	if(id[0].isDigit())
 		return QStringLiteral("OID.") + id;
@@ -411,7 +411,7 @@ QString orderedToDNString(const CertificateInfoOrdered &in)
 		if(i.type().section() != CertificateInfoType::DN)
 			continue;
 
-		QString name = dnLabel(i.type());
+		const QString name = dnLabel(i.type());
 		parts += name + QLatin1Char('=') + i.value();
 	}
 	return parts.join(QStringLiteral(", "));
@@ -484,7 +484,7 @@ static QString uniqueSubjectValue(const CertificateInfoType &type, const QList<i
 
 static QString uniqueIssuerName(const QList<int> &items, const QList<Certificate> &certs, int i)
 {
-	QString val = baseCertName(certs[items[i]].issuerInfo());
+	const QString val = baseCertName(certs[items[i]].issuerInfo());
 
 	bool found = false;
 	foreach(int n, items)
@@ -492,7 +492,7 @@ static QString uniqueIssuerName(const QList<int> &items, const QList<Certificate
 		if(n == items[i])
 			continue;
 
-		QString other_val = baseCertName(certs[n].issuerInfo());
+		const QString other_val = baseCertName(certs[n].issuerInfo());
 		if(other_val == val)
 		{
 			found = true;
@@ -2270,7 +2270,7 @@ static QString readNextPem(QTextStream *ts, bool *isCRL)
 	bool done = false;
 	while(!ts->atEnd())
 	{
-		QString line = ts->readLine();
+		const QString line = ts->readLine();
 		if(!found)
 		{
 			if(line.startsWith(QLatin1String("-----BEGIN ")))

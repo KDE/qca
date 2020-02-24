@@ -96,7 +96,7 @@ QByteArray LineConverter::update(const QByteArray &buf)
 				break;
 
 			int chunksize = n - at;
-			int oldsize = out.size();
+			const int oldsize = out.size();
 			out.resize(oldsize + chunksize + 2);
 			memcpy(out.data() + oldsize, buf.data() + at, chunksize);
 			memcpy(out.data() + oldsize + chunksize, "\r\n", 2);
@@ -109,8 +109,8 @@ QByteArray LineConverter::update(const QByteArray &buf)
 		}
 		if(at < buf.size())
 		{
-			int chunksize = buf.size() - at;
-			int oldsize = out.size();
+			const int chunksize = buf.size() - at;
+			const int oldsize = out.size();
 			out.resize(oldsize + chunksize);
 			memcpy(out.data() + oldsize, buf.data() + at, chunksize);
 		}

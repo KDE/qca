@@ -411,7 +411,7 @@ public:
 			return;
 		}
 
-		Action a = actionQueue.takeFirst();
+		const Action a = actionQueue.takeFirst();
 
 		// set up for the next one, if necessary
 		if(!actionQueue.isEmpty() || need_update)
@@ -583,7 +583,7 @@ public:
 
 	void start_finished()
 	{
-		bool ok = c->result() == TLSContext::Success;
+		const bool ok = c->result() == TLSContext::Success;
 		if(!ok)
 		{
 			reset(ResetSession);
@@ -601,7 +601,7 @@ public:
 
 	void update_finished()
 	{
-		TLSContext::Result r = c->result();
+		const TLSContext::Result r = c->result();
 		if(r == TLSContext::Error)
 		{
 			if(state == Handshaking || state == Closing)
@@ -697,7 +697,7 @@ public:
 				QCA_logTextMessage(QStringLiteral("tls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())), Logger::Information);
 			}
 
-			bool eof = c->eof();
+			const bool eof = c->eof();
 			int enc = -1;
 			if(!c_to_net.isEmpty())
 				enc = c->encoded();
@@ -1122,7 +1122,7 @@ QByteArray TLS::readOutgoing(int *plainBytes)
 		if(!d->packet_to_net.isEmpty())
 		{
 			const QByteArray a = d->packet_to_net.takeFirst();
-			int x = d->packet_to_net_encoded.takeFirst();
+			const int x = d->packet_to_net_encoded.takeFirst();
 			if(plainBytes)
 				*plainBytes = x;
 			return a;
@@ -1515,7 +1515,7 @@ public:
 			return;
 		}
 
-		Action a = actionQueue.takeFirst();
+		const Action a = actionQueue.takeFirst();
 
 		// set up for the next one, if necessary
 		if(!actionQueue.isEmpty() || need_update)
@@ -1599,7 +1599,7 @@ private Q_SLOTS:
 		int last_op = op;
 		op = -1;
 
-		SASLContext::Result r = c->result();
+		const SASLContext::Result r = c->result();
 
 		if(last_op == OpStart)
 		{
@@ -1680,7 +1680,7 @@ private Q_SLOTS:
 					}
 					else if(r == SASLContext::Params)
 					{
-						Params np = c->clientParams();
+						const Params np = c->clientParams();
 						emit q->needParams(np);
 						return;
 					}
@@ -1703,7 +1703,7 @@ private Q_SLOTS:
 					}
 					else if(r == SASLContext::Params)
 					{
-						Params np = c->clientParams();
+						const Params np = c->clientParams();
 						emit q->needParams(np);
 						return;
 					}

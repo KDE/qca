@@ -640,8 +640,8 @@ bool ConsoleReference::start(Console *console, SecurityMode mode)
 	d->thread = d->console->d->thread;
 	d->console->d->ref = this;
 
-	bool valid = d->thread->isValid();
-	int avail = d->thread->bytesAvailable();
+	const bool valid = d->thread->isValid();
+	const int avail = d->thread->bytesAvailable();
 
 	// pipe already closed and no data?  consider this an error
 	if(!valid && avail == 0)
@@ -1010,7 +1010,7 @@ SecureArray ConsolePrompt::result() const
 
 QChar ConsolePrompt::resultChar() const
 {
-	QString str = QString::fromUtf8(d->result.toByteArray());
+	const QString str = QString::fromUtf8(d->result.toByteArray());
 
 	// this will never happen if getChar completes
 	if(str.isEmpty())

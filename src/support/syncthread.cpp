@@ -32,11 +32,11 @@ QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method, co
 	for(int n = 0; n < obj->methodCount(); ++n)
 	{
 		QMetaMethod m = obj->method(n);
-		QByteArray sig = m.methodSignature();
+		const QByteArray sig = m.methodSignature();
 		int offset = sig.indexOf('(');
 		if(offset == -1)
 			continue;
-		QByteArray name = sig.mid(0, offset);
+		const QByteArray name = sig.mid(0, offset);
 		if(name != method)
 			continue;
 		if(m.parameterTypes() != argTypes)
@@ -59,7 +59,7 @@ bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVar
 
 	// get return type
 	int metatype = QMetaType::Void;
-	QByteArray retTypeName = methodReturnType(obj->metaObject(), method, argTypes);
+	const QByteArray retTypeName = methodReturnType(obj->metaObject(), method, argTypes);
 	if(!retTypeName.isEmpty() && retTypeName != "void")
 	{
 		metatype = QMetaType::type(retTypeName.data());

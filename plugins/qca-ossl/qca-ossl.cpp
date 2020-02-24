@@ -6438,7 +6438,7 @@ public:
 		// sign
 		if(op == Sign)
 		{
-			CertificateChain chain = signer.x509CertificateChain();
+			const CertificateChain chain = signer.x509CertificateChain();
 			Certificate cert = chain.primary();
 			QList<Certificate> nonroots;
 			if(chain.count() > 1)

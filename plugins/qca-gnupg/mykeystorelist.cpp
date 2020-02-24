@@ -114,7 +114,7 @@ QList<KeyStoreEntryContext*> MyKeyStoreList::entryList(int)
 	{
 		PGPKey pub, sec;
 
-		QString id = pkey.keyItems.first().id;
+		const QString id = pkey.keyItems.first().id;
 
 		MyPGPKeyContext *kc = new MyPGPKeyContext(provider());
 		// not secret, in keyring
@@ -142,7 +142,7 @@ KeyStoreEntryContext *MyKeyStoreList::entry(int, const QString &entryId)
 		return nullptr;
 
 	// optional
-	PGPKey sec = getSecKey(entryId, static_cast<MyPGPKeyContext *>(pub.context())->_props.userIds);
+	const PGPKey sec = getSecKey(entryId, static_cast<MyPGPKeyContext *>(pub.context())->_props.userIds);
 
 	MyKeyStoreEntry *c = new MyKeyStoreEntry(pub, sec, provider());
 	c->_storeId = storeId(0);
@@ -169,7 +169,7 @@ KeyStoreEntryContext *MyKeyStoreList::entryPassive(const QString &serialized)
 		return nullptr;
 
 	// optional
-	PGPKey sec = getSecKey(entryId, static_cast<MyPGPKeyContext *>(pub.context())->_props.userIds);
+	const PGPKey sec = getSecKey(entryId, static_cast<MyPGPKeyContext *>(pub.context())->_props.userIds);
 
 	MyKeyStoreEntry *c = new MyKeyStoreEntry(pub, sec, provider());
 	c->_storeId = storeId(0);
@@ -423,7 +423,7 @@ void MyKeyStoreList::gpg_finished()
 		if(!gpg.success())
 			return;
 
-		GpgOp::Type op = gpg.op();
+		const GpgOp::Type op = gpg.op();
 		if(op == GpgOp::SecretKeys)
 		{
 			ringMutex.lock();

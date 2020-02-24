@@ -710,7 +710,7 @@ QByteArray SecureArray::toByteArray() const
 
 SecureArray & SecureArray::append(const SecureArray &a)
 {
-	int oldsize = size();
+	const int oldsize = size();
 	resize(oldsize + a.size());
 	memcpy(data() + oldsize, a.data(), a.size());
 	return *this;
@@ -732,7 +732,7 @@ SecureArray & SecureArray::operator+=(const SecureArray &a)
 
 void SecureArray::fill(char fillChar, int fillToPosition)
 {
-	int len = (fillToPosition == -1) ? size() : qMin(fillToPosition, size());
+	const int len = (fillToPosition == -1) ? size() : qMin(fillToPosition, size());
 	if(len > 0)
 		memset(data(), (int)fillChar, len);
 }

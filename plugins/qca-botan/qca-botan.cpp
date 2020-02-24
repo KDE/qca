@@ -510,7 +510,7 @@ public:
 	m_crypter->write((Botan::byte*)in.data(), in.size());
 	QCA::SecureArray result( m_crypter->remaining() );
 	// Perhaps bytes_read is redundant and can be dropped
-	size_t bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
+	const size_t bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
 	result.resize(bytes_read);
         *out = result;
         return true;
@@ -521,7 +521,7 @@ public:
 	m_crypter->end_msg();
 	QCA::SecureArray result( m_crypter->remaining() );
 	// Perhaps bytes_read is redundant and can be dropped
-	size_t bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
+	const size_t bytes_read = m_crypter->read((Botan::byte*)result.data(), result.size());
 	result.resize(bytes_read);
         *out = result;
         return true;

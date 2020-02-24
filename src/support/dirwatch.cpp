@@ -143,7 +143,7 @@ public:
 		QFileInfo fi(fileName);
 		fi.makeAbsolute();
 		filePath = fi.filePath();
-		QDir dir = fi.dir();
+		const QDir dir = fi.dir();
 
 		// we watch both the directory and the file itself.  the
 		//   reason we watch the directory is so we can detect when
@@ -195,7 +195,7 @@ private Q_SLOTS:
 	{
 		Q_UNUSED(path);
 		QFileInfo fi(filePath);
-		bool exists = fi.exists();
+		const bool exists = fi.exists();
 		if(exists && !fileExisted)
 		{
 			// this means the file was created.  put a

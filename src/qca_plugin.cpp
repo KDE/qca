@@ -324,13 +324,13 @@ void ProviderManager::scan()
 	if(!scanned_static)
 	{
 		logDebug(QStringLiteral("Checking Qt static plugins:"));
-		QObjectList list = QPluginLoader::staticInstances();
+		const QObjectList list = QPluginLoader::staticInstances();
 		if(list.isEmpty())
 			logDebug(QStringLiteral("  (none)"));
 		for(int n = 0; n < list.count(); ++n)
 		{
 			QObject *instance = list[n];
-			QString className = QString::fromLatin1(instance->metaObject()->className());
+			const QString className = QString::fromLatin1(instance->metaObject()->className());
 
 			QString errstr;
 			ProviderItem *i = ProviderItem::loadStatic(instance, &errstr);
@@ -340,7 +340,7 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			QString providerName = i->p->name();
+			const QString providerName = i->p->name();
 			if(haveAlready(providerName))
 			{
 				logDebug(QStringLiteral("  %1: (as %2) already loaded provider, skipping").arg(className, providerName));
@@ -348,7 +348,7 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			int ver = i->p->qcaVersion();
+			const int ver = i->p->qcaVersion();
 			if(!validVersion(ver))
 			{
 				errstr = QString::asprintf("plugin version 0x%06x is in the future", ver);
@@ -394,10 +394,10 @@ void ProviderManager::scan()
 
 		foreach(const QString &maybeFile, entryList)
 		{
-			QFileInfo fi(dir.filePath(maybeFile));
+			const QFileInfo fi(dir.filePath(maybeFile));
 
-			QString filePath = fi.filePath(); // file name with path
-			QString fileName = fi.fileName(); // just file name
+			const QString filePath = fi.filePath(); // file name with path
+			const QString fileName = fi.fileName(); // just file name
 
 			if(!QLibrary::isLibrary(filePath))
 			{
@@ -430,9 +430,9 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			QString className = QString::fromLatin1(i->objectInstance()->metaObject()->className());
+			const QString className = QString::fromLatin1(i->objectInstance()->metaObject()->className());
 
-			QString providerName = i->p->name();
+			const QString providerName = i->p->name();
 			if(haveAlready(providerName))
 			{
 				logDebug(QStringLiteral("  %1: (class: %2, as %3) already loaded provider, skipping").arg(fileName, className, providerName));
@@ -440,7 +440,7 @@ void ProviderManager::scan()
 				continue;
 			}
 
-			int ver = i->p->qcaVersion();
+			const int ver = i->p->qcaVersion();
 			if(!validVersion(ver))
 			{
 				errstr = QString::asprintf("plugin version 0x%06x is in the future", ver);
@@ -467,7 +467,7 @@ bool ProviderManager::add(Provider *p, int priority)
 {
 	QMutexLocker locker(&providerMutex);
 
-	QString providerName = p->name();
+	const QString providerName = p->name();
 
 	if(haveAlready(providerName))
 	{
@@ -475,7 +475,7 @@ bool ProviderManager::add(Provider *p, int priority)
 		return false;
 	}
 
-	int ver = p->qcaVersion();
+	const int ver = p->qcaVersion();
 	if(!validVersion(ver))
 	{
 		QString errstr = QString::asprintf("plugin version 0x%06x is in the future", ver);
@@ -522,7 +522,7 @@ void ProviderManager::unloadAll()
 	while(!providerItemList.isEmpty())
 	{
 		ProviderItem *i = providerItemList.first();
-		QString name = i->p->name();
+		const QString name = i->p->name();
 		delete i;
 		providerItemList.removeFirst();
 		providerList.removeFirst();
@@ -745,7 +745,7 @@ void ProviderManager::addItem(ProviderItem *item, int priority)
 		// for -1, make the priority the same as the last item
 		if(!providerItemList.isEmpty())
 		{
-			ProviderItem *last = providerItemList.last();
+			const ProviderItem *last = providerItemList.last();
 			item->priority = last->priority;
 		}
 		else
@@ -760,7 +760,7 @@ void ProviderManager::addItem(ProviderItem *item, int priority)
 		int n = 0;
 		for(; n < providerItemList.count(); ++n)
 		{
-			ProviderItem *i = providerItemList[n];
+			const ProviderItem *i = providerItemList[n];
 			if(i->priority >= priority)
 				break;
 		}
@@ -801,9 +801,9 @@ int ProviderManager::get_default_priority(const QString &name) const
 	foreach(const QString &s, list)
 	{
 		// qca_default already sanity checks the strings
-		int n = s.indexOf(QLatin1Char(':'));
-		QString sname = s.mid(0, n);
-		int spriority = s.midRef(n + 1).toInt();
+		const int n = s.indexOf(QLatin1Char(':'));
+		const QString sname = s.mid(0, n);
+		const int spriority = s.midRef(n + 1).toInt();
 		if(sname == name)
 			return spriority;
 	}

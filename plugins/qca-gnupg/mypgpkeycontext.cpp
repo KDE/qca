@@ -100,7 +100,7 @@ ConvertResult MyPGPKeyContext::fromBinary(const QByteArray &a)
 		return ErrorDecode;
 	}
 
-	GpgOp::KeyList pubkeys = gpg.keys();
+	const GpgOp::KeyList pubkeys = gpg.keys();
 	if(!pubkeys.isEmpty())
 	{
 		key = pubkeys.first();
@@ -118,7 +118,7 @@ ConvertResult MyPGPKeyContext::fromBinary(const QByteArray &a)
 			return ErrorDecode;
 		}
 
-		GpgOp::KeyList seckeys = gpg.keys();
+		const GpgOp::KeyList seckeys = gpg.keys();
 		if(!seckeys.isEmpty())
 		{
 			key = seckeys.first();
