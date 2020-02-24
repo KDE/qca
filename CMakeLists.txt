@@ -12,8 +12,8 @@ cmake_minimum_required(VERSION 3.4)
 project(qca)
 
 set(QCA_LIB_MAJOR_VERSION "2")
-set(QCA_LIB_MINOR_VERSION "2")
-set(QCA_LIB_PATCH_VERSION "90")
+set(QCA_LIB_MINOR_VERSION "3")
+set(QCA_LIB_PATCH_VERSION "0")
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
