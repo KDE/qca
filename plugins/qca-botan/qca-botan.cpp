@@ -254,9 +254,9 @@ public:
 	if (!m_s2k)
 	    return {};
 
-	std::string secretString(secret.data(), secret.size() );
-	Botan::OctetString key = m_s2k->derive_key(keyLength, secretString, (const Botan::byte*)salt.data(), salt.size(), iterationCount);
-        QCA::SecureArray retval(QByteArray((const char*)key.begin(), key.length()));
+	const std::string secretString(secret.data(), secret.size() );
+	const Botan::OctetString key = m_s2k->derive_key(keyLength, secretString, (const Botan::byte*)salt.data(), salt.size(), iterationCount);
+	const QCA::SecureArray retval(QByteArray((const char*)key.begin(), key.length()));
 	return QCA::SymmetricKey(retval);
     }
 
@@ -269,7 +269,7 @@ public:
 		Q_ASSERT(iterationCount != nullptr);
 		Botan::OctetString key;
 		QElapsedTimer timer;
-		std::string secretString(secret.data(), secret.size() );
+		const std::string secretString(secret.data(), secret.size() );
 
 		*iterationCount = 0;
 		timer.start();
@@ -322,7 +322,6 @@ public:
     QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
 			      const QCA::InitializationVector &info, unsigned int keyLength) override
     {
-	std::string secretString(secret.data(), secret.size());
 	Botan::secure_vector<uint8_t> key(keyLength);
 	m_hkdf->kdf(key.data(), keyLength,
 		    reinterpret_cast<const Botan::byte*>(secret.data()), secret.size(),
@@ -455,7 +454,7 @@ public:
 	Q_UNUSED(tag);
 	try {
 	m_dir = dir;
-	Botan::SymmetricKey keyCopy((Botan::byte*)key.data(), key.size());
+	const Botan::SymmetricKey keyCopy((Botan::byte*)key.data(), key.size());
 
 	if (iv.size() == 0) {
 	    if (QCA::Encode == dir) {
@@ -467,7 +466,7 @@ public:
 							      keyCopy, Botan::DECRYPTION));
 	    }
 	} else {
-	    Botan::InitializationVector ivCopy((Botan::byte*)iv.data(), iv.size());
+	    const Botan::InitializationVector ivCopy((Botan::byte*)iv.data(), iv.size());
 	    if (QCA::Encode == dir) {
 		m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName+'/'+m_algoMode+'/'+m_algoPadding,
 							      keyCopy, ivCopy, Botan::ENCRYPTION));
