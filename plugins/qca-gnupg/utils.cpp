@@ -79,8 +79,7 @@ static bool get_reg_key(HKEY root, const char *path, QString &value)
 
 static QString find_reg_gpgProgram()
 {
-	QStringList bins;
-	bins << "gpg.exe" << "gpg2.exe";
+	const QStringList bins = { QStringLiteral("gpg.exe"), QStringLiteral("gpg2.exe") };
 
 	HKEY root;
 	root = HKEY_CURRENT_USER;
@@ -99,9 +98,9 @@ static QString find_reg_gpgProgram()
 	{
 		foreach (const QString &bin, bins)
 		{
-			if (check_bin(dir + "\\" + bin))
+			if (check_bin(dir + QStringLiteral("\\") + bin))
 			{
-				return dir + "\\" + bin;
+				return dir + QStringLiteral("\\") + bin;
 			}
 		}
 	}
@@ -115,7 +114,7 @@ QString find_bin()
 	// so any from them can be used
 	QStringList bins;
 #ifdef Q_OS_WIN
-	bins << "gpg.exe" << "gpg2.exe";
+	bins << QStringLiteral("gpg.exe") << QStringLiteral("gpg2.exe");
 #else
 	bins << QStringLiteral("gpg") << QStringLiteral("gpg2");
 #endif
@@ -138,7 +137,7 @@ QString find_bin()
 
 	// Look up at PATH environment
 #ifdef Q_OS_WIN
-	QString pathSep = ";";
+	const QString pathSep = QStringLiteral(";");
 #else
 	const QString pathSep = QStringLiteral(":");
 #endif
