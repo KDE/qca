@@ -150,7 +150,7 @@ QString find_bin()
 	// contain gpg
 	// Mac GPG and brew use /usr/local/bin
 	// MacPorts uses /opt/local/bin
-	paths << "/usr/local/bin" << "/opt/local/bin";
+	paths << QStringLiteral("/usr/local/bin") << QStringLiteral("/opt/local/bin");
 #endif
 	paths.removeDuplicates();
 
