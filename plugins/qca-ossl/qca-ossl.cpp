@@ -4881,264 +4881,201 @@ public:
 //==========================================================
 static QString cipherIDtoString( const TLS::Version version, const unsigned long cipherID)
 {
-	if (TLS::TLS_v1 == version) {
+	if (TLS::TLS_v1_3 == version) {
 		switch( cipherID & 0xFFFF ) {
-		case 0x0000:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_NULL_WITH_NULL_NULL");
-			break;
-		case 0x0001:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_WITH_NULL_MD5");
-			break;
-		case 0x0002:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_WITH_NULL_SHA");
-			break;
-		case 0x0003:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_EXPORT_WITH_RC4_40_MD5");
-			break;
-		case 0x0004:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_WITH_RC4_128_MD5");
-			break;
-		case 0x0005:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_WITH_RC4_128_SHA");
-			break;
-		case 0x0006:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5");
-			break;
-		case 0x0007:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_WITH_IDEA_CBC_SHA");
-			break;
-		case 0x0008:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_EXPORT_WITH_DES40_CBC_SHA");
-			break;
-		case 0x0009:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_WITH_DES_CBC_SHA");
-			break;
-		case 0x000A:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_RSA_WITH_3DES_EDE_CBC_SHA");
-			break;
-		case 0x000B:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_DSS_EXPORT_WITH_DES40_CBC_SHA");
-			break;
-		case 0x000C:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_DSS_WITH_DES_CBC_SHA");
-			break;
-		case 0x000D:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA");
-			break;
-		case 0x000E:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_RSA_EXPORT_WITH_DES40_CBC_SHA");
-			break;
-		case 0x000F:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_RSA_WITH_DES_CBC_SHA");
-			break;
-		case 0x0010:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA");
-			break;
-		case 0x0011:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
-			break;
-		case 0x0012:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DHE_DSS_WITH_DES_CBC_SHA");
-			break;
-		case 0x0013:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA");
-			break;
-		case 0x0014:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA");
-			break;
-		case 0x0015:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DHE_RSA_WITH_DES_CBC_SHA");
-			break;
-		case 0x0016:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA");
-			break;
-		case 0x0017:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_anon_EXPORT_WITH_RC4_40_MD5");
-			break;
-		case 0x0018:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_anon_WITH_RC4_128_MD5");
-			break;
-		case 0x0019:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA");
-			break;
-		case 0x001A:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_anon_WITH_DES_CBC_SHA");
-			break;
-		case 0x001B:
-			// RFC 2246 A.5
-			return QStringLiteral("TLS_DH_anon_WITH_3DES_EDE_CBC_SHA");
-			break;
-
-			// 0x001C and 0x001D are reserved to avoid collision with SSL3 Fortezza.
-		case 0x001E:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_DES_CBC_SHA");
-			break;
-		case 0x001F:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_3DES_EDE_CBC_SHA");
-			break;
-		case 0x0020:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_RC4_128_SHA");
-			break;
-		case 0x0021:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_IDEA_CBC_SHA");
-			break;
-		case 0x0022:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_DES_CBC_MD5");
-			break;
-		case 0x0023:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_3DES_EDE_CBC_MD5");
-			break;
-		case 0x0024:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_RC4_128_MD5");
-			break;
-		case 0x0025:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_WITH_IDEA_CBC_MD5");
-			break;
-		case 0x0026:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA");
-			break;
-		case 0x0027:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_SHA");
-			break;
-		case 0x0028:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC4_40_SHA");
-			break;
-		case 0x0029:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5");
-			break;
-		case 0x002A:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC2_CBC_40_MD5");
-			break;
-		case 0x002B:
-			// RFC 2712 Section 3
-			return QStringLiteral("TLS_KRB5_EXPORT_WITH_RC4_40_MD5");
-			break;
-
-		case 0x002F:
-			// RFC 3268
-			return QStringLiteral("TLS_RSA_WITH_AES_128_CBC_SHA");
-			break;
-		case 0x0030:
-			// RFC 3268
-			return QStringLiteral("TLS_DH_DSS_WITH_AES_128_CBC_SHA");
-			break;
-		case 0x0031:
-			// RFC 3268
-			return QStringLiteral("TLS_DH_RSA_WITH_AES_128_CBC_SHA");
-			break;
-		case 0x0032:
-			// RFC 3268
-			return QStringLiteral("TLS_DHE_DSS_WITH_AES_128_CBC_SHA");
-			break;
-		case 0x0033:
-			// RFC 3268
-			return QStringLiteral("TLS_DHE_RSA_WITH_AES_128_CBC_SHA");
-			break;
-		case 0x0034:
-			// RFC 3268
-			return QStringLiteral("TLS_DH_anon_WITH_AES_128_CBC_SHA");
-			break;
-		case 0x0035:
-			// RFC 3268
-			return QStringLiteral("TLS_RSA_WITH_AES_256_CBC_SHA");
-			break;
-		case 0x0036:
-			// RFC 3268
-			return QStringLiteral("TLS_DH_DSS_WITH_AES_256_CBC_SHA");
-			break;
-		case 0x0037:
-			// RFC 3268
-			return QStringLiteral("TLS_DH_RSA_WITH_AES_256_CBC_SHA");
-			break;
-		case 0x0038:
-			// RFC 3268
-			return QStringLiteral("TLS_DHE_DSS_WITH_AES_256_CBC_SHA");
-			break;
-		case 0x0039:
-			// RFC 3268
-			return QStringLiteral("TLS_DHE_RSA_WITH_AES_256_CBC_SHA");
-			break;
-		case 0x003A:
-			// RFC 3268
-			return QStringLiteral("TLS_DH_anon_WITH_AES_256_CBC_SHA");
-			break;
-
-			// TODO: 0x0041 -> 0x0046 are from RFC4132 (Camellia)
-
-		case 0x0060:
-			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
-			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_MD5");
-			break;
-		case 0x0061:
-			// Was meant to be from draft-ietf-tls-56-bit-ciphersuites-01.txt, but isn't
-			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_RC2_CBC_56_MD5");
-			break;
-		case 0x0062:
-			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_DES_CBC_SHA");
-			break;
-		case 0x0063:
-			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QStringLiteral("TLS_CK_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA");
-			break;
-		case 0x0064:
-			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QStringLiteral("TLS_CK_RSA_EXPORT1024_WITH_RC4_56_SHA");
-			break;
-		case 0x0065:
-			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QStringLiteral("TLS_CK_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA");
-			break;
-		case 0x0066:
-			// Apparently from draft-ietf-tls-56-bit-ciphersuites-01.txt
-			return QStringLiteral("TLS_CK_DHE_DSS_WITH_RC4_128_SHA");
-			break;
-
-			// TODO: 0x0084 -> 0x0089 are from RFC4132 (Camellia)
-
-			// TODO: 0x008A -> 0x0095 are from RFC4279 (PSK)
-
-			// TODO: 0xC000 -> 0xC019 are from the ECC draft
+		case 0x1301: return QLatin1String(TLS1_3_RFC_AES_128_GCM_SHA256);
+		case 0x1302: return QLatin1String(TLS1_3_RFC_AES_256_GCM_SHA384);
+		case 0x1303: return QLatin1String(TLS1_3_RFC_CHACHA20_POLY1305_SHA256);
+		case 0x1304: return QLatin1String(TLS1_3_RFC_AES_128_CCM_SHA256);
+		case 0x1305: return QLatin1String(TLS1_3_RFC_AES_128_CCM_8_SHA256);
+		}
+	}
+	if (TLS::TLS_v1_2 == version || TLS::TLS_v1_3 == version) {
+		// the list is generate with shell magic from https://ciphersuite.info (except insecure)
+		// cat ~/temp/ciphers2 | grep -v Insecure | sort | cut -d ' ' -f 2 | while read -r c; do grep -P '.*_TXT_.*"'$c'"' /usr/include/openssl/tls1.h; done | cut -d ' ' -f 3 | sed 's/.*_TXT_//' | while read -r c; do id=$(grep "define .*_CK_$c " /usr/include/openssl/tls1.h | sed 's/.*0x0300\(.*\)/0x\1/'); def=$(grep "define .*_RFC_$c " /usr/include/openssl/tls1.h | cut -d ' ' -f 3); echo  "case $id: return QLatin1String($def);";  done | sort -u
+        // where ciphers2 is copy paste directly from the web site
+		switch( cipherID & 0xFFFF ) {
+		case 0x002F: return QLatin1String(TLS1_RFC_RSA_WITH_AES_128_SHA);
+		case 0x0032: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_128_SHA);
+		case 0x0033: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_128_SHA);
+		case 0x0035: return QLatin1String(TLS1_RFC_RSA_WITH_AES_256_SHA);
+		case 0x0038: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_256_SHA);
+		case 0x0039: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_256_SHA);
+		case 0x003C: return QLatin1String(TLS1_RFC_RSA_WITH_AES_128_SHA256);
+		case 0x003D: return QLatin1String(TLS1_RFC_RSA_WITH_AES_256_SHA256);
+		case 0x0040: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_128_SHA256);
+		case 0x0041: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_128_CBC_SHA);
+		case 0x0044: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA);
+		case 0x0045: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA);
+		case 0x0067: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_128_SHA256);
+		case 0x006A: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_256_SHA256);
+		case 0x006B: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_256_SHA256);
+		case 0x0084: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_256_CBC_SHA);
+		case 0x0087: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA);
+		case 0x0088: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA);
+		case 0x008C: return QLatin1String(TLS1_RFC_PSK_WITH_AES_128_CBC_SHA);
+		case 0x008D: return QLatin1String(TLS1_RFC_PSK_WITH_AES_256_CBC_SHA);
+		case 0x0090: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_128_CBC_SHA);
+		case 0x0091: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_256_CBC_SHA);
+		case 0x0094: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_128_CBC_SHA);
+		case 0x0095: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_256_CBC_SHA);
+		case 0x0096: return QLatin1String(TLS1_RFC_RSA_WITH_SEED_SHA);
+		case 0x0099: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_SEED_SHA);
+		case 0x009A: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_SEED_SHA);
+		case 0x009C: return QLatin1String(TLS1_RFC_RSA_WITH_AES_128_GCM_SHA256);
+		case 0x009D: return QLatin1String(TLS1_RFC_RSA_WITH_AES_256_GCM_SHA384);
+		case 0x009E: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_128_GCM_SHA256);
+		case 0x009F: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_256_GCM_SHA384);
+		case 0x00A2: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_128_GCM_SHA256);
+		case 0x00A3: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_256_GCM_SHA384);
+		case 0x00A8: return QLatin1String(TLS1_RFC_PSK_WITH_AES_128_GCM_SHA256);
+		case 0x00A9: return QLatin1String(TLS1_RFC_PSK_WITH_AES_256_GCM_SHA384);
+		case 0x00AA: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_128_GCM_SHA256);
+		case 0x00AB: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_256_GCM_SHA384);
+		case 0x00AC: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_128_GCM_SHA256);
+		case 0x00AD: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_256_GCM_SHA384);
+		case 0x00AE: return QLatin1String(TLS1_RFC_PSK_WITH_AES_128_CBC_SHA256);
+		case 0x00AF: return QLatin1String(TLS1_RFC_PSK_WITH_AES_256_CBC_SHA384);
+		case 0x00B2: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_128_CBC_SHA256);
+		case 0x00B3: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_256_CBC_SHA384);
+		case 0x00B6: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_128_CBC_SHA256);
+		case 0x00B7: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_256_CBC_SHA384);
+		case 0x00BA: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0x00BD: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0x00BE: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0x00C0: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_256_CBC_SHA256);
+		case 0x00C3: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256);
+		case 0x00C4: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256);
+		case 0xC009: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_128_CBC_SHA);
+		case 0xC00A: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_256_CBC_SHA);
+		case 0xC013: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_128_CBC_SHA);
+		case 0xC014: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_256_CBC_SHA);
+		case 0xC01D: return QLatin1String(TLS1_RFC_SRP_SHA_WITH_AES_128_CBC_SHA);
+		case 0xC01E: return QLatin1String(TLS1_RFC_SRP_SHA_RSA_WITH_AES_128_CBC_SHA);
+		case 0xC01F: return QLatin1String(TLS1_RFC_SRP_SHA_DSS_WITH_AES_128_CBC_SHA);
+		case 0xC020: return QLatin1String(TLS1_RFC_SRP_SHA_WITH_AES_256_CBC_SHA);
+		case 0xC021: return QLatin1String(TLS1_RFC_SRP_SHA_RSA_WITH_AES_256_CBC_SHA);
+		case 0xC022: return QLatin1String(TLS1_RFC_SRP_SHA_DSS_WITH_AES_256_CBC_SHA);
+		case 0xC023: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_128_SHA256);
+		case 0xC024: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_256_SHA384);
+		case 0xC027: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_128_SHA256);
+		case 0xC028: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_256_SHA384);
+		case 0xC02B: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256);
+		case 0xC02C: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384);
+		case 0xC02F: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+		case 0xC030: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
+		case 0xC035: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_128_CBC_SHA);
+		case 0xC036: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_256_CBC_SHA);
+		case 0xC037: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_128_CBC_SHA256);
+		case 0xC038: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_256_CBC_SHA384);
+		case 0xC072: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC073: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC076: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC077: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC094: return QLatin1String(TLS1_RFC_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC095: return QLatin1String(TLS1_RFC_PSK_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC096: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC097: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC098: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC099: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC09A: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC09B: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC09C: return QLatin1String(TLS1_RFC_RSA_WITH_AES_128_CCM);
+		case 0xC09D: return QLatin1String(TLS1_RFC_RSA_WITH_AES_256_CCM);
+		case 0xC09E: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_128_CCM);
+		case 0xC09F: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_256_CCM);
+		case 0xC0A0: return QLatin1String(TLS1_RFC_RSA_WITH_AES_128_CCM_8);
+		case 0xC0A1: return QLatin1String(TLS1_RFC_RSA_WITH_AES_256_CCM_8);
+		case 0xC0A2: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_128_CCM_8);
+		case 0xC0A3: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_256_CCM_8);
+		case 0xC0A4: return QLatin1String(TLS1_RFC_PSK_WITH_AES_128_CCM);
+		case 0xC0A5: return QLatin1String(TLS1_RFC_PSK_WITH_AES_256_CCM);
+		case 0xC0A6: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_128_CCM);
+		case 0xC0A7: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_256_CCM);
+		case 0xC0A8: return QLatin1String(TLS1_RFC_PSK_WITH_AES_128_CCM_8);
+		case 0xC0A9: return QLatin1String(TLS1_RFC_PSK_WITH_AES_256_CCM_8);
+		case 0xC0AA: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_128_CCM_8);
+		case 0xC0AB: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_256_CCM_8);
+		case 0xC0AC: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_128_CCM);
+		case 0xC0AD: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_256_CCM);
+		case 0xC0AE: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_128_CCM_8);
+		case 0xC0AF: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_256_CCM_8);
+		case 0xCCA8: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_CHACHA20_POLY1305);
+		case 0xCCA9: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_CHACHA20_POLY1305);
+		case 0xCCAA: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CHACHA20_POLY1305);
+		case 0xCCAB: return QLatin1String(TLS1_RFC_PSK_WITH_CHACHA20_POLY1305);
+		case 0xCCAC: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_CHACHA20_POLY1305);
+		case 0xCCAD: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_CHACHA20_POLY1305);
+		case 0xCCAE: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_CHACHA20_POLY1305);
+		}
+	}
+	if (TLS::TLS_v1 == version || TLS::TLS_v1_1 == version || TLS::TLS_v1_2 == version || TLS::TLS_v1_3 == version) {
+		// same shell magic as above
+		switch( cipherID & 0xFFFF ) {
+		case 0x002F: return QLatin1String(TLS1_RFC_RSA_WITH_AES_128_SHA);
+		case 0x0032: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_128_SHA);
+		case 0x0033: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_128_SHA);
+		case 0x0035: return QLatin1String(TLS1_RFC_RSA_WITH_AES_256_SHA);
+		case 0x0038: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_AES_256_SHA);
+		case 0x0039: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_AES_256_SHA);
+		case 0x0041: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_128_CBC_SHA);
+		case 0x0044: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA);
+		case 0x0045: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA);
+		case 0x0084: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_256_CBC_SHA);
+		case 0x0087: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA);
+		case 0x0088: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA);
+		case 0x008B: return QLatin1String(TLS1_RFC_PSK_WITH_3DES_EDE_CBC_SHA);
+		case 0x008C: return QLatin1String(TLS1_RFC_PSK_WITH_AES_128_CBC_SHA);
+		case 0x008D: return QLatin1String(TLS1_RFC_PSK_WITH_AES_256_CBC_SHA);
+		case 0x008F: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_3DES_EDE_CBC_SHA);
+		case 0x0090: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_128_CBC_SHA);
+		case 0x0091: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_256_CBC_SHA);
+		case 0x0093: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_3DES_EDE_CBC_SHA);
+		case 0x0094: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_128_CBC_SHA);
+		case 0x0095: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_256_CBC_SHA);
+		case 0x0096: return QLatin1String(TLS1_RFC_RSA_WITH_SEED_SHA);
+		case 0x0099: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_SEED_SHA);
+		case 0x009A: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_SEED_SHA);
+		case 0x00AE: return QLatin1String(TLS1_RFC_PSK_WITH_AES_128_CBC_SHA256);
+		case 0x00AF: return QLatin1String(TLS1_RFC_PSK_WITH_AES_256_CBC_SHA384);
+		case 0x00B2: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_128_CBC_SHA256);
+		case 0x00B3: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_AES_256_CBC_SHA384);
+		case 0x00B6: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_128_CBC_SHA256);
+		case 0x00B7: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_AES_256_CBC_SHA384);
+		case 0x00BA: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0x00BD: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0x00BE: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0x00C0: return QLatin1String(TLS1_RFC_RSA_WITH_CAMELLIA_256_CBC_SHA256);
+		case 0x00C3: return QLatin1String(TLS1_RFC_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256);
+		case 0x00C4: return QLatin1String(TLS1_RFC_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256);
+		case 0xC008: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_DES_192_CBC3_SHA);
+		case 0xC009: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_128_CBC_SHA);
+		case 0xC00A: return QLatin1String(TLS1_RFC_ECDHE_ECDSA_WITH_AES_256_CBC_SHA);
+		case 0xC012: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_DES_192_CBC3_SHA);
+		case 0xC013: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_128_CBC_SHA);
+		case 0xC014: return QLatin1String(TLS1_RFC_ECDHE_RSA_WITH_AES_256_CBC_SHA);
+		case 0xC01A: return QLatin1String(TLS1_RFC_SRP_SHA_WITH_3DES_EDE_CBC_SHA);
+		case 0xC01B: return QLatin1String(TLS1_RFC_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA);
+		case 0xC01C: return QLatin1String(TLS1_RFC_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA);
+		case 0xC01D: return QLatin1String(TLS1_RFC_SRP_SHA_WITH_AES_128_CBC_SHA);
+		case 0xC01E: return QLatin1String(TLS1_RFC_SRP_SHA_RSA_WITH_AES_128_CBC_SHA);
+		case 0xC01F: return QLatin1String(TLS1_RFC_SRP_SHA_DSS_WITH_AES_128_CBC_SHA);
+		case 0xC020: return QLatin1String(TLS1_RFC_SRP_SHA_WITH_AES_256_CBC_SHA);
+		case 0xC021: return QLatin1String(TLS1_RFC_SRP_SHA_RSA_WITH_AES_256_CBC_SHA);
+		case 0xC022: return QLatin1String(TLS1_RFC_SRP_SHA_DSS_WITH_AES_256_CBC_SHA);
+		case 0xC034: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_3DES_EDE_CBC_SHA);
+		case 0xC035: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_128_CBC_SHA);
+		case 0xC036: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_256_CBC_SHA);
+		case 0xC037: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_128_CBC_SHA256);
+		case 0xC038: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_AES_256_CBC_SHA384);
+		case 0xC094: return QLatin1String(TLS1_RFC_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC095: return QLatin1String(TLS1_RFC_PSK_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC096: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC097: return QLatin1String(TLS1_RFC_DHE_PSK_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC098: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC099: return QLatin1String(TLS1_RFC_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384);
+		case 0xC09A: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_CAMELLIA_128_CBC_SHA256);
+		case 0xC09B: return QLatin1String(TLS1_RFC_ECDHE_PSK_WITH_CAMELLIA_256_CBC_SHA384);
 
 		default:
 			return QStringLiteral("TLS algo to be added: %1").arg(cipherID & 0xffff, 0, 16);
@@ -5524,7 +5461,14 @@ public:
 			break;
 #endif
 		case TLS::TLS_v1:
+		case TLS::TLS_v1_1:
+		case TLS::TLS_v1_2:
+		case TLS::TLS_v1_3:
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			ctx = SSL_CTX_new(TLS_client_method());
+#else
 			ctx = SSL_CTX_new(TLSv1_client_method());
+#endif
 			break;
 		case TLS::DTLS_v1:
 		default:
@@ -5926,15 +5870,21 @@ public:
 		sessInfo.isCompressed = (0 != SSL_SESSION_get_compress_id(session));
 		int ssl_version = SSL_version(ssl);
 
-		if (ssl_version == TLS1_VERSION)
+		if (ssl_version == TLS1_3_VERSION)
+			sessInfo.version = TLS::TLS_v1;
+		else if (ssl_version == TLS1_2_VERSION)
+			sessInfo.version = TLS::TLS_v1;
+		else if (ssl_version == TLS1_1_VERSION)
+			sessInfo.version = TLS::TLS_v1;
+		else if (ssl_version == TLS1_VERSION)
 			sessInfo.version = TLS::TLS_v1;
 		else if (ssl_version == SSL3_VERSION)
 			sessInfo.version = TLS::SSL_v3;
 		else if (ssl_version == SSL2_VERSION)
 			sessInfo.version = TLS::SSL_v2;
 		else {
-			qDebug("unexpected version response");
-			sessInfo.version = TLS::TLS_v1;
+			qDebug("unexpected version response: %s", SSL_get_version(ssl));
+			sessInfo.version = TLS::TLS_v1_2;
 		}
 
 		sessInfo.cipherSuite = cipherIDtoString( sessInfo.version,

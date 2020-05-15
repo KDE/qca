@@ -304,10 +304,13 @@ public:
 	*/
 	enum Version
 	{
-		TLS_v1, ///< Transport Layer Security, version 1
-		SSL_v3, ///< Secure Socket Layer, version 3
-		SSL_v2, ///< Secure Socket Layer, version 2
-		DTLS_v1 ///< Datagram Transport Layer Security, version 1
+		TLS_v1_3, ///< Transport Layer Security, version 1.3
+		TLS_v1_2, ///< Transport Layer Security, version 1.2
+		TLS_v1_1, ///< Transport Layer Security, version 1.1
+		TLS_v1,   ///< Transport Layer Security, version 1
+		SSL_v3,   ///< Secure Socket Layer, version 3
+		SSL_v2,   ///< Secure Socket Layer, version 2
+		DTLS_v1   ///< Datagram Transport Layer Security, version 1
 	};
 
 	/**
@@ -384,7 +387,7 @@ public:
 	   \return list of the names of the cipher suites
 	   supported.
 	*/
-	QStringList supportedCipherSuites(const Version &version = TLS_v1) const;
+	QStringList supportedCipherSuites(const Version &version = TLS_v1_2) const;
 
 	/**
 	   The local certificate to use. This is the
