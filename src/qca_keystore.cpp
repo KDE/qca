@@ -236,6 +236,15 @@ public Q_SLOTS:
 
 		if(p && p->features().contains(QStringLiteral("keystorelist")) && !haveProviderSource(p))
 			startProvider(p);
+		else {
+			if(busySources.isEmpty())
+			{
+				m.lock();
+				busy = false;
+				m.unlock();
+				emit updated_p();
+			}
+		}
 	}
 
 	void scan()
