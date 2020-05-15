@@ -82,7 +82,8 @@ enum SignatureAlgorithm
 	EMSA3_SHA224,     ///< SHA224, with EMSA3 (ie PKCS#1 Version 1.5) encoding
 	EMSA3_SHA256,     ///< SHA256, with EMSA3 (ie PKCS#1 Version 1.5) encoding
 	EMSA3_SHA384,     ///< SHA384, with EMSA3 (ie PKCS#1 Version 1.5) encoding
-	EMSA3_SHA512      ///< SHA512, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+	EMSA3_SHA512,      ///< SHA512, with EMSA3 (ie PKCS#1 Version 1.5) encoding
+	EMSA3_BLAKE2B512, ///< BLAKE2B512, https://tools.ietf.org/id/draft-wconner-blake2sigs-01.html
 };
 
 /**

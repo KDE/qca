@@ -2081,6 +2081,10 @@ public:
 			md = EVP_sha384();
 		else if(alg == EMSA3_SHA512)
 			md = EVP_sha512();
+#ifndef OPENSSL_NO_BLAKE2
+		else if(alg == EMSA3_BLAKE2B512)
+			md = EVP_blake2b512();
+#endif
 		else if(alg == EMSA3_Raw)
 		{
 			// md = 0
@@ -7049,6 +7053,9 @@ static QStringList all_hash_types()
 #ifdef OBJ_whirlpool
 	list += QStringLiteral("whirlpool");
 #endif
+#ifdef OBJ_blake2b512
+	list += QStringLiteral("blake2b512");
+#endif
 	return list;
 }
 
@@ -7329,6 +7336,8 @@ public:
 		else if ( type == QLatin1String("whirlpool") )
 			return new opensslHashContext( EVP_whirlpool(), this, type);
 #endif
+		else if ( type == QLatin1String("blake2b512") )
+			return new opensslHashContext( EVP_blake2b512(), this, type);
 		else if ( type == QLatin1String("pbkdf1(sha1)") )
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
 #ifdef HAVE_OPENSSL_MD2

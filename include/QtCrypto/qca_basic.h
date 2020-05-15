@@ -504,6 +504,22 @@ private:
    http://paginas.terra.com.br/informatica/paulobarreto/WhirlpoolPage.html
    or ISO/IEC 10118-3:2004. The label for Whirlpool is
    "whirlpool".
+
+   The Blake2b256 algorithm takes an arbitrary data stream, known as
+   the message (up to \f$2^{256}\f$ bits in length) and outputs a
+   condensed 256 bit (32 byte) representation of that data
+   stream, known as the message digest. The Blake2b256 algorithm is
+   considered secure in that it is considered computationally
+   infeasible to find the message that produced the message
+   digest. For more information on Blake2b256, see https://blake2.net/.
+
+   The Blake2b512 algorithm takes an arbitrary data stream, known as
+   the message (up to \f$2^{512}\f$ bits in length) and outputs a
+   condensed 512 bit (64 byte) representation of that data
+   stream, known as the message digest. The Blake2b512 algorithm is
+   considered secure in that it is considered computationally
+   infeasible to find the message that produced the message
+   digest. For more information on Blake2b512, see https://blake2.net/.
 */
 
 /**
