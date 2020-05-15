@@ -223,12 +223,13 @@ void init(MemoryMode mode, int prealloc)
 
 	bool secmem = botan_init(prealloc, allow_mmap_fallback);
 
-#if defined(Q_OS_UNIX)
-	if ((geteuid() == 0)  && drop_root)
+	if (drop_root)
 	{
-		setuid(getuid());
-	}
+#if defined(Q_OS_UNIX) && !defined(Q_OS_ANDROID)
+		if (geteuid() == 0)
+			setuid(getuid());
 #endif
+	}
 
 	global = new Global;
 	global->secmem = secmem;

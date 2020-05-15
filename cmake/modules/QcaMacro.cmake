@@ -62,14 +62,9 @@ endmacro(add_qca_test)
 
 macro(install_pdb TARGET INSTALL_PATH)
   if(MSVC)
-    get_target_property(LOCATION ${TARGET} LOCATION_DEBUG)
-    string(REGEX REPLACE "\\.[^.]*$" ".pdb" LOCATION "${LOCATION}")
-    install(FILES ${LOCATION} DESTINATION ${INSTALL_PATH} CONFIGURATIONS Debug)
-
-    get_target_property(LOCATION ${TARGET} LOCATION_RELWITHDEBINFO)
-    string(REGEX REPLACE "\\.[^.]*$" ".pdb" LOCATION "${LOCATION}")
-    install(FILES ${LOCATION} DESTINATION ${INSTALL_PATH} CONFIGURATIONS RelWithDebInfo)
-  endif()
+    install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS Debug)
+    install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS RelWithDebInfo)
+  endif(MSVC)
 endmacro(install_pdb)
 
 macro(normalize_path PATH)
