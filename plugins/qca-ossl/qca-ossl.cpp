@@ -5499,6 +5499,13 @@ public:
 		// don't terminate handshake in case of verification failure
 		return 1;
 	}
+	
+	static int ssl_error_callback(const char *message, size_t len, void *user_data)
+	{
+		auto context = reinterpret_cast<MyTLSContext*>(user_data);
+		qDebug() << "MyTLSContext:" << context << " " << message;
+		return len;
+	}
 
 	QStringList supportedCipherSuites(const TLS::Version &version) const override
 	{
@@ -5819,7 +5826,7 @@ public:
 			}
 			else if(ret <= 0)
 			{
-				ERR_print_errors_fp(stdout);
+				ERR_print_errors_cb(&MyTLSContext::ssl_error_callback, this);
 				int x = SSL_get_error(ssl, ret);
 				//printf("SSL_read error = %d\n", x);
 				if(x == SSL_ERROR_WANT_READ || x == SSL_ERROR_WANT_WRITE)
@@ -6279,6 +6286,13 @@ public:
 	}
 
 protected:
+	static int ssl_error_callback(const char *message, size_t len, void *user_data)
+	{
+		auto context = reinterpret_cast<MyMessageContextThread*>(user_data);
+		qDebug() << "MyMessageContextThread:" << context << " " << message;
+		return len;
+	}
+	
 	void run() override
 	{
 		MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
@@ -6318,7 +6332,7 @@ protected:
 		else
 		{
 			printf("bad here\n");
-			ERR_print_errors_fp(stdout);
+			ERR_print_errors_cb(&MyMessageContextThread::ssl_error_callback, this);
 		}
 	}
 };
