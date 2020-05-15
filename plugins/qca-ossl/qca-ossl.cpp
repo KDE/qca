@@ -3731,6 +3731,12 @@ public:
 		case NID_sha512WithRSAEncryption:
 			p.sigalgo = QCA::EMSA3_SHA512;
 			break;
+		case NID_ecdsa_with_SHA384:
+			p.sigalgo = QCA::EMSA3_SHA384;
+			break;
+		case NID_ecdsa_with_SHA256:
+			p.sigalgo = QCA::EMSA3_SHA256;
+			break;
 		default:
 			qDebug() << "Unknown signature value: " << X509_get_signature_nid(x);
 			p.sigalgo = QCA::SignatureUnknown;
