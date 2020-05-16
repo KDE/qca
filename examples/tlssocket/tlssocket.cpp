@@ -25,6 +25,18 @@
 #include "import_plugins.h"
 #endif
 
+void SimpleLogger::logTextMessage(const QString &message, QCA::Logger::Severity severity)
+{
+	Q_UNUSED(severity)
+	qDebug() << message;
+}
+
+void SimpleLogger::logBinaryMessage(const QByteArray &blob, QCA::Logger::Severity severity)
+{
+	Q_UNUSED(severity)
+	qDebug() << "data: " << blob;
+}
+
 class TLSSocket::Private : public QObject
 {
 	Q_OBJECT
@@ -48,6 +60,7 @@ public:
 		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &TLSSocket::Private::sock_error);
 
 		tls = new QCA::TLS(this);
+		connect(tls, &QCA::TLS::certificateRequested, tls, &QCA::TLS::continueAfterStep);
 		connect(tls, &QCA::TLS::handshaken, this, &TLSSocket::Private::tls_handshaken);
 		connect(tls, &QCA::TLS::readyRead, this, &TLSSocket::Private::tls_readyRead);
 		connect(tls, &QCA::TLS::readyReadOutgoing, this, &TLSSocket::Private::tls_readyReadOutgoing);
@@ -116,6 +129,7 @@ private Q_SLOTS:
 		{
 			//printf("valid\n");
 			encrypted = true;
+			tls->continueAfterStep();
 			//printf("%d bytes in writebuf\n", writebuf.size());
 			if(!writebuf.isEmpty())
 			{
@@ -133,6 +147,8 @@ private Q_SLOTS:
 		//printf("tls ready read\n");
 		if(waiting)
 			sync.conditionMet();
+		QByteArray a = tls->read();
+		printf("%s", a.data());
 	}
 
 	void tls_readyReadOutgoing()

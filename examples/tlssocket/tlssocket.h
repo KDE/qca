@@ -24,6 +24,17 @@
 #include <QtCrypto>
 #include <QTcpSocket>
 
+class SimpleLogger : public QCA::AbstractLogDevice
+{
+	Q_OBJECT
+public:
+	SimpleLogger(QObject *parent) : QCA::AbstractLogDevice(QLatin1String("simplelogger"), parent) {}
+	
+	void logTextMessage(const QString &message, QCA::Logger::Severity severity) override;
+	void logBinaryMessage(const QByteArray &blob, QCA::Logger::Severity severity) override;
+	
+};
+
 class TLSSocket : public QTcpSocket
 {
     Q_OBJECT

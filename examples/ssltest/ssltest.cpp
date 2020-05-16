@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 	QCA::Initializer init;
 
 	QCoreApplication app(argc, argv);
-	QString host = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QStringLiteral("andbit.net");
+	QString host = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QStringLiteral("tls13.1d.pw");
 
 	if(!QCA::isSupported("tls"))
 	{
