@@ -230,7 +230,7 @@ foreach(PATH QCA_PLUGINS_INSTALL_DIR
   endif()
 endforeach()
 
-if(NOT WIN32)
+if(NOT MSVC)
   if(OSX_FRAMEWORK)
     set(PKGCONFIG_CFLAGS "-F\${libdir} -I\${includedir}")
     set(PKGCONFIG_LIBS "-F\${libdir} -framework ${QCA_LIB_NAME}")
