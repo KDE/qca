@@ -46,7 +46,9 @@ if(OPENSSL_FOUND)
     message(WARNING "qca-ossl will be compiled without SHA-0 digest algorithm support")
   endif()
 
-  set(QCA_OSSL_SOURCES qca-ossl.cpp)
+  set(QCA_OSSL_SOURCES
+      tls-parameters.cpp
+      qca-ossl.cpp)
 
   add_library(qca-ossl ${PLUGIN_TYPE} ${QCA_OSSL_SOURCES})
 
