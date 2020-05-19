@@ -558,8 +558,8 @@ public:
 	list += QStringLiteral("sha3_256");
 	list += QStringLiteral("sha3_384");
 	list += QStringLiteral("sha3_512");
-	list += QStringLiteral("blake2b256");
-	list += QStringLiteral("blake2b512");
+	list += QStringLiteral("blake2b_256");
+	list += QStringLiteral("blake2b_512");
 	list += QStringLiteral("hmac(md5)");
 	list += QStringLiteral("hmac(sha1)");
 #ifdef GCRY_MD_SHA224
@@ -631,9 +631,9 @@ public:
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA3_384, this, type );
 	else if ( type == QLatin1String("sha3_512") )
 	    return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_SHA3_512, this, type );
-	else if ( type == QLatin1String("blake2b256") )
+	else if ( type == QLatin1String("blake2b_256") )
 		return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_BLAKE2B_256, this, type );
-	else if ( type == QLatin1String("blake2b512") )
+	else if ( type == QLatin1String("blake2b_512") )
 		return new gcryptQCAPlugin::gcryHashContext( GCRY_MD_BLAKE2B_512, this, type );
 	else if ( type == QLatin1String("hmac(md5)") )
 	    return new gcryptQCAPlugin::gcryHMACContext( GCRY_MD_MD5, this, type );

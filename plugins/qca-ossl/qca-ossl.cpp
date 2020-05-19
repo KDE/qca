@@ -5710,11 +5710,11 @@ public:
 		int ssl_version = SSL_version(ssl);
 
 		if (ssl_version == TLS1_3_VERSION)
-			sessInfo.version = TLS::TLS_v1;
+			sessInfo.version = TLS::TLS_v1_3;
 		else if (ssl_version == TLS1_2_VERSION)
-			sessInfo.version = TLS::TLS_v1;
+			sessInfo.version = TLS::TLS_v1_2;
 		else if (ssl_version == TLS1_1_VERSION)
-			sessInfo.version = TLS::TLS_v1;
+			sessInfo.version = TLS::TLS_v1_1;
 		else if (ssl_version == TLS1_VERSION)
 			sessInfo.version = TLS::TLS_v1;
 		else if (ssl_version == SSL3_VERSION)
@@ -6867,7 +6867,7 @@ static QStringList all_hash_types()
 	list += QStringLiteral("whirlpool");
 #endif
 #ifdef OBJ_blake2b512
-	list += QStringLiteral("blake2b512");
+	list += QStringLiteral("blake2b_512");
 #endif
 	return list;
 }
@@ -7157,7 +7157,7 @@ public:
 		else if ( type == QLatin1String("whirlpool") )
 			return new opensslHashContext( EVP_whirlpool(), this, type);
 #endif
-		else if ( type == QLatin1String("blake2b512") )
+		else if ( type == QLatin1String("blake2b_512") )
 			return new opensslHashContext( EVP_blake2b512(), this, type);
 		else if ( type == QLatin1String("pbkdf1(sha1)") )
 			return new opensslPbkdf1Context( EVP_sha1(), this, type );
