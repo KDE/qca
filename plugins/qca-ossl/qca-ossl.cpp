@@ -6859,6 +6859,10 @@ static QStringList all_hash_types()
 #ifdef SHA512_DIGEST_LENGTH
 	list += QStringLiteral("sha512");
 #endif
+	list += QStringLiteral("sha3_224");
+	list += QStringLiteral("sha3_256");
+	list += QStringLiteral("sha3_384");
+	list += QStringLiteral("sha3_512");
 #ifdef OBJ_whirlpool
 	list += QStringLiteral("whirlpool");
 #endif
@@ -7141,6 +7145,14 @@ public:
 		else if ( type == QLatin1String("sha512") )
 			return new opensslHashContext( EVP_sha512(), this, type);
 #endif
+		else if ( type == QLatin1String("sha3_224") )
+			return new opensslHashContext( EVP_sha3_224(), this, type);
+		else if ( type == QLatin1String("sha3_256") )
+			return new opensslHashContext( EVP_sha3_256(), this, type);
+		else if ( type == QLatin1String("sha3_384") )
+			return new opensslHashContext( EVP_sha3_384(), this, type);
+		else if ( type == QLatin1String("sha3_512") )
+			return new opensslHashContext( EVP_sha3_512(), this, type);
 #ifdef OBJ_whirlpool
 		else if ( type == QLatin1String("whirlpool") )
 			return new opensslHashContext( EVP_whirlpool(), this, type);

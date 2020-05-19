@@ -493,6 +493,9 @@ private:
    "Specifications for the Secure %Hash Standard", available from
    http://csrc.nist.gov/publications/. The label for SHA-512 is
    "sha512".
+   
+   The SHA3 algorithm series.
+   For detailed info please read https://en.wikipedia.org/wiki/SHA-3
 
    The Whirlpool algorithm takes an arbitrary data stream, known as
    the message (up to \f$2^{256}\f$ bits in length) and outputs a

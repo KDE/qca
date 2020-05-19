@@ -63,6 +63,9 @@ private Q_SLOTS:
     void sha512test_data();
     void sha512test();
     void sha512longtest();
+	void sha3_512test_data();
+	void sha3_512test();
+    void sha3_512longtest();
     void rmd160test_data();
     void rmd160test();
     void rmd160longtest();
@@ -653,6 +656,69 @@ void HashUnitTest::sha512longtest()
 		shaHash.update(fillerString);
 	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
 		     QStringLiteral("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") );
+	}
+    }
+}
+
+// These are as specified in FIPS 180-2, and from Aaron Gifford's SHA2 tests
+void HashUnitTest::sha3_512test_data()
+{
+    QTest::addColumn<QByteArray>("input");
+    QTest::addColumn<QString>("expectedHash");
+
+	// no copiable examples in the standard. Use `echo -n abc | openssl dgst -sha3-512 -` as a source of truth
+	
+    QTest::newRow("sha512(abc)") << QByteArray("abc")
+			      << QStringLiteral("b751850b1a57168a5693cd924b6b096e08f621827444f70d884f5d0240d2712e10e116e9192af3c91a7ec57647e3934057340b4cf408d5a56592f8274eec53f0");
+    QTest::newRow("sha512(a-u)") << QByteArray("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu")
+			      << QStringLiteral("afebb2ef542e6579c50cad06d2e578f9f8dd6881d7dc824d26360feebf18a4fa73e3261122948efcfd492e74e82e2189ed0fb440d187f382270cb455f21dd185");
+    QTest::newRow("sha512(a-q)") << QByteArray("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")
+			      << QStringLiteral("04a371e84ecfb5b8b77cb48610fca8182dd457ce6f326a0fd3d7ec2f1e91636dee691fbe0c985302ba1b0d8dc78c086346b533b49c030d99a27daf1139d6e75e");
+}
+
+void HashUnitTest::sha3_512test()
+{
+    bool anyProviderTested = false;
+    QFETCH(QByteArray, input);
+    QFETCH(QString, expectedHash);
+
+    foreach(QString provider, providersToTest) {
+	if(QCA::isSupported("sha3_512", provider)) {
+	    anyProviderTested = true;
+
+	    QCA::Hash hash = QCA::Hash(QStringLiteral("sha3_512"), provider);
+	    QCA::Hash copy = hash;
+	    hash.context(); // detach
+
+	    QCOMPARE( hash.hashToString(input), expectedHash );
+	    QCOMPARE( copy.hashToString(input), expectedHash );
+	}
+    }
+    if (!anyProviderTested) qWarning() << "NONE of the providers supports SHA3_512:" << providersToTest;
+}
+
+void HashUnitTest::sha3_512longtest()
+{
+    QByteArray fillerString;
+    fillerString.fill('a', 1000);
+	
+	// a source of truth
+	// for i in {1..1000000}; do echo -n a; done | openssl dgst -sha3-512 -
+
+    foreach(QString provider, providersToTest) {
+	if(QCA::isSupported("sha3_512", provider)) {
+	    QCA::Hash shaHash(QStringLiteral("sha3_512"), provider);
+
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
+		     QStringLiteral("3c3a876da14034ab60627c077bb98f7e120a2a5370212dffb3385a18d4f38859ed311d0a9d5141ce9cc5c66ee689b266a8aa18ace8282a0e0db596c90b0a7b87") );
+
+	    shaHash.clear();
+	    for (int i=0; i<1000; i++)
+		shaHash.update(fillerString);
+	    QCOMPARE( QString(QCA::arrayToHex(shaHash.final().toByteArray())),
+		     QStringLiteral("3c3a876da14034ab60627c077bb98f7e120a2a5370212dffb3385a18d4f38859ed311d0a9d5141ce9cc5c66ee689b266a8aa18ace8282a0e0db596c90b0a7b87") );
 	}
     }
 }
