@@ -58,10 +58,18 @@ void TLSUnitTest::testCipherList()
 	QWARN("TLS not supported for qca-ossl");
     else {
 	QCA::TLS *tls = new QCA::TLS(QCA::TLS::Stream, nullptr, QStringLiteral("qca-ossl"));
+	
+	// It seems recent openssl removed some insecure TLS<=1.1 ciphers suites. So no tests.
 	QStringList cipherList = tls->supportedCipherSuites(QCA::TLS::TLS_v1_2);
 	QVERIFY( cipherList.contains(QStringLiteral("TLS_DHE_RSA_WITH_AES_256_CBC_SHA")) );
 	QVERIFY( cipherList.contains(QStringLiteral("TLS_RSA_WITH_AES_256_CBC_SHA")) );
 	QVERIFY( cipherList.contains(QStringLiteral("TLS_DHE_RSA_WITH_AES_128_CBC_SHA")) );
+	QVERIFY( cipherList.contains(QStringLiteral("TLS_RSA_WITH_AES_128_CBC_SHA")) );
+	QVERIFY( !cipherList.contains(QStringLiteral("TLS_AES_128_GCM_SHA256")) );
+	QVERIFY( !cipherList.contains(QStringLiteral("TLS_KRB5_WITH_IDEA_CBC_SHA")) );
+	
+	cipherList = tls->supportedCipherSuites(QCA::TLS::TLS_v1_3);
+	QVERIFY( cipherList.contains(QStringLiteral("TLS_AES_128_GCM_SHA256")) );
 
 	// openSUSE TW OpenSSL 1.1 does not have this
 	// QVERIFY( cipherList.contains("TLS_DHE_DSS_WITH_AES_256_CBC_SHA") );

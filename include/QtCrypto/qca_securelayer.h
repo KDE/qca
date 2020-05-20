@@ -304,15 +304,21 @@ public:
 	*/
 	enum Version
 	{
-		TLS_v1,          ///< Transport Layer Security, version 1
-		SSL_v3,          ///< Secure Socket Layer, version 3
-		SSL_v2,          ///< Secure Socket Layer, version 2
-		DTLS_v1,         ///< Datagram Transport Layer Security, version 1
-		DTLS_v1_2,       ///< Datagram Transport Layer Security, version 1.2
-		DTLS_v1_3,       ///< Datagram Transport Layer Security, version 1.3
-		TLS_v1_1 = 0x10, ///< Transport Layer Security, version 1.1
-		TLS_v1_2,        ///< Transport Layer Security, version 1.2
-		TLS_v1_3         ///< Transport Layer Security, version 1.3
+		TLS_v1,              ///< Transport Layer Security, version 1
+		SSL_v3,              ///< Secure Socket Layer, version 3
+		SSL_v2,              ///< Secure Socket Layer, version 2
+		
+		DTLS_vMIN,
+		DTLS_v1 = DTLS_vMIN, ///< Datagram Transport Layer Security, version 1
+		DTLS_v1_2,           ///< Datagram Transport Layer Security, version 1.2
+		DTLS_v1_3,           ///< Datagram Transport Layer Security, version 1.3
+		DTLS_vMAX = DTLS_v1_3,
+		
+		TLS_vMIN = 0x10,
+		TLS_v1_1 = TLS_vMIN, ///< Transport Layer Security, version 1.1
+		TLS_v1_2,            ///< Transport Layer Security, version 1.2
+		TLS_v1_3,            ///< Transport Layer Security, version 1.3
+		TLS_vMAX = TLS_v1_3
 	};
 
 	/**
