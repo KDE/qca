@@ -4913,13 +4913,13 @@ public:
 	}
 };
 
-extern QString tlsCipherIdToString(unsigned long cipherID);
+extern QString cipherIdToStringTLS(const TLS::Version version, unsigned long cipherID);
 
 //==========================================================
-static QString cipherIDtoString( const TLS::Version version, const unsigned long cipherID)
+static QString cipherIDtoString(const TLS::Version version, const unsigned long cipherID)
 {
 	if (TLS::TLS_v1 == version || TLS::TLS_v1_1 == version || TLS::TLS_v1_2 == version || TLS::TLS_v1_3 == version) {
-		return tlsCipherIdToString(cipherID);
+		return cipherIdToStringTLS(version, cipherID);
 	} else if (TLS::SSL_v3 == version) {
 		switch( cipherID & 0xFFFF ) {
 		case 0x0000:
