@@ -47,7 +47,6 @@ if(OPENSSL_FOUND)
   endif()
 
   set(QCA_OSSL_SOURCES
-      tls-parameters.cpp
       qca-ossl.cpp)
 
   add_library(qca-ossl ${PLUGIN_TYPE} ${QCA_OSSL_SOURCES})
