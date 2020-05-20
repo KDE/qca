@@ -1,9 +1,9 @@
 # QCA OSSL
 
 if(WITH_ossl_PLUGIN STREQUAL "yes")
-  find_package(OpenSSL REQUIRED)
+  find_package(OpenSSL 1.1.1 REQUIRED)
 else()
-  find_package(OpenSSL)
+  find_package(OpenSSL 1.1.1)
 endif()
 
 if(OPENSSL_FOUND)
