@@ -1,0 +1,40 @@
+maintainer: sitter
+fancyname: QCA
+description: QCA (Qt Cryptographic Architecture) provides a straightforward and cross-platform crypto API
+platforms:
+    - name: Linux
+    - name: FreeBSD
+    - name: Windows
+#    - name: MacOSX
+#    - name: Android
+release: true
+public_lib: true
+public_source_dirs:
+    - include/QtCrypto
+    - examples
+public_doc_dir:
+    - docs
+public_example_dirs:
+    - examples/aes-cmac
+    - examples/base64test
+    - examples/certtest
+    - examples/ciphertest
+    - examples/cms
+    - examples/cmssigner
+    - examples/eventhandlerdemo
+    - examples/hashtest
+    - examples/hextest
+    - examples/keyloader
+    - examples/mactest
+    - examples/md5crypt
+    - examples/providertest
+    - examples/publickeyexample
+    - examples/randomtest
+    - examples/rsatest
+    - examples/saslclient
+    - examples/saslserver
+    - examples/ssltest
+    - examples/sslservtest
+    - examples/tlssocket
+irc: kde-devel
+mailinglist: kde-core-devel
