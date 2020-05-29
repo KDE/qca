@@ -89,13 +89,13 @@ public:
 
 	void logTextMessage( const QString &message, enum QCA::Logger::Severity severity ) override
 	{
-		_stream << now () << " " << severityName (severity) << " " << message << endl;
+		_stream << now () << " " << severityName (severity) << " " << message << Qt::endl;
 	}
 
 	void logBinaryMessage( const QByteArray &blob, enum QCA::Logger::Severity severity ) override
 	{
 		Q_UNUSED(blob);
-		_stream << now () << " " << severityName (severity) << " " << "Binary blob not implemented yet" << endl;
+		_stream << now () << " " << severityName (severity) << " " << "Binary blob not implemented yet" << Qt::endl;
 	}
 
 private:
@@ -138,7 +138,11 @@ static void output_plugin_diagnostic_text()
 	QCA::clearPluginDiagnosticText();
 	if(str[str.length()-1] == QLatin1Char('\n'))
 		str.truncate(str.length()-1);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+	const QStringList lines = str.split(QLatin1Char('\n'), Qt::KeepEmptyParts);
+#else
 	const QStringList lines = str.split(QLatin1Char('\n'), QString::KeepEmptyParts);
+#endif
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "plugin: %s\n", qPrintable(lines[n]));
 }
@@ -149,7 +153,11 @@ static void output_keystore_diagnostic_text()
 	QCA::KeyStoreManager::clearDiagnosticText();
 	if(str[str.length()-1] == QLatin1Char('\n'))
 		str.truncate(str.length()-1);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+	const QStringList lines = str.split(QLatin1Char('\n'), Qt::KeepEmptyParts);
+#else
 	const QStringList lines = str.split(QLatin1Char('\n'), QString::KeepEmptyParts);
+#endif
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
 }
@@ -159,7 +167,11 @@ static void output_message_diagnostic_text(QCA::SecureMessage *msg)
 	QString str = msg->diagnosticText();
 	if(str[str.length()-1] == QLatin1Char('\n'))
 		str.truncate(str.length()-1);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+	const QStringList lines = str.split(QLatin1Char('\n'), Qt::KeepEmptyParts);
+#else
 	const QStringList lines = str.split(QLatin1Char('\n'), QString::KeepEmptyParts);
+#endif
 	for(int n = 0; n < lines.count(); ++n)
 		fprintf(stderr, "message: %s\n", qPrintable(lines[n]));
 }

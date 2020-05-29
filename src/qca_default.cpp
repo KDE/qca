@@ -22,6 +22,10 @@
 #include "qca_core.h"
 
 #include <QMutex>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+# include <QRandomGenerator>
+#endif
+
 #include "qca_textfilter.h"
 #include "qca_cert.h"
 #include "qcaprovider.h"
@@ -100,7 +104,11 @@ public:
 	{
 		SecureArray buf(size);
 		for(int n = 0; n < (int)buf.size(); ++n)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+			buf[n] = (char)QRandomGenerator::global()->generate();
+#else
 			buf[n] = (char)qrand();
+#endif
 		return buf;
 	}
 };
@@ -1195,7 +1203,11 @@ public:
 		uint t = now.toTime_t();
 		if(now.time().msec() > 0)
 			t /= now.time().msec();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+		QRandomGenerator::global()->seed(t);
+#else
 		qsrand(t);
+#endif
 	}
 
 	int version() const override

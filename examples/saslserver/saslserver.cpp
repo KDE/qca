@@ -155,7 +155,11 @@ public:
 		sock->setParent(this);
 		connect(sock, &QTcpSocket::disconnected, this, &ServerTestHandler::sock_disconnected);
 		connect(sock, &QTcpSocket::readyRead, this, &ServerTestHandler::sock_readyRead);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this, &ServerTestHandler::sock_error);
+#else
 		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &ServerTestHandler::sock_error);
+#endif
 		connect(sock, &QTcpSocket::bytesWritten, this, &ServerTestHandler::sock_bytesWritten);
 
 		sasl = new QCA::SASL(this);

@@ -366,7 +366,11 @@ bool isSupported(const QStringList &features, const QString &provider)
 
 bool isSupported(const char *features, const QString &provider)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+	return isSupported(QString::fromLatin1(features).split(QLatin1Char(','), Qt::SkipEmptyParts), provider);
+#else
 	return isSupported(QString::fromLatin1(features).split(QLatin1Char(','), QString::SkipEmptyParts), provider);
+#endif
 }
 
 QStringList supportedFeatures()

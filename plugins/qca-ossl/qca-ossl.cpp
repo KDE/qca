@@ -26,6 +26,9 @@
 #include <QElapsedTimer>
 #include <QScopedPointer>
 #include <QtPlugin>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+# include <QRandomGenerator>
+#endif
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
@@ -6768,10 +6771,16 @@ public:
 
 		// seed the RNG if it's not seeded yet
 		if (RAND_status() == 0) {
-			qsrand(time(nullptr));
 			char buf[128];
-			for(char &n : buf)
-				n = qrand();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+			auto rg = QRandomGenerator::securelySeeded();
+			for (char &n : buf)
+				n = static_cast<char>(rg.bounded(256));
+#else
+			qsrand(static_cast<uint>(time(nullptr)));
+			for (char &n : buf)
+				n = static_cast<char>(qrand());
+#endif
 			RAND_seed(buf, 128);
 		}
 

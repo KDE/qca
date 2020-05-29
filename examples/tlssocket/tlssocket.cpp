@@ -57,7 +57,11 @@ public:
 		connect(sock, &QTcpSocket::connected, this, &TLSSocket::Private::sock_connected);
 		connect(sock, &QTcpSocket::readyRead, this, &TLSSocket::Private::sock_readyRead);
 		connect(sock, &QTcpSocket::bytesWritten, this, &TLSSocket::Private::sock_bytesWritten);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this, &TLSSocket::Private::sock_error);
+#else
 		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &TLSSocket::Private::sock_error);
+#endif
 
 		tls = new QCA::TLS(this);
 		connect(tls, &QCA::TLS::certificateRequested, tls, &QCA::TLS::continueAfterStep);
