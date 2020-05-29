@@ -1198,14 +1198,12 @@ public:
 
 	void init() override
 	{
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
 		const QDateTime now = QDateTime::currentDateTime();
 
 		uint t = now.toTime_t();
 		if(now.time().msec() > 0)
 			t /= now.time().msec();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-		QRandomGenerator::global()->seed(t);
-#else
 		qsrand(t);
 #endif
 	}
