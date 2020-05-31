@@ -1,0 +1,3 @@
+### KApiDox Project-specific Overrides File
+
+FILE_PATTERNS += *.doco

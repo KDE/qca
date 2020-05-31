@@ -169,7 +169,7 @@ The code below shows how to create an SSL client
 
 */
 
-/* \example tlssocket.cpp
+/** \example tlssocket.cpp
 
 The code below shows how to create a socket that can operate
 over an Transport Layer Security (TLS, also known as SSL) connection.

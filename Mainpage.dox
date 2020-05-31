@@ -150,9 +150,9 @@
    \subsection qca2code Releases
 
    The latest release packages can be found in the
-   <a href="http://delta.affinix.com/download/qca/2.0/">%QCA 2.0 download area</a>.
+   <a href="https://download.kde.org/stable/qca/">%QCA 2.x download area</a>.
 
-   See the <a href="http://delta.affinix.com/qca/">project web site</a> for
+   See the <a href="https://userbase.kde.org/QCA/">project web site</a> for
    further information about %QCA releases.
 
    \subsection qca2dev Current development
@@ -163,12 +163,12 @@
    to build and use %QCA.
 
    The Git code can be browsed
-   <a href="http://quickgit.kde.org/?p=qca.git">
+   <a href="https://commits.kde.org/qca">
    via the web</a>
 
    Use
    \verbatim
-   git clone git://anongit.kde.org/qca.git
+   git clone https://invent.kde.org/libraries/qca.git
    \endverbatim
    to get the latest sources.
  */
