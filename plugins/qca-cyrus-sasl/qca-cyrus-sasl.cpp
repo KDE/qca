@@ -685,9 +685,16 @@ public:
 		}
 
 		callbacks = new sasl_callback_t[2];
+        
+		union PtrCast {
+			int (*specific)(sasl_conn_t *, void *context, const char *requested_user, unsigned, const char *auth_identity, unsigned, const char *, unsigned, struct propctx *);
+			int (*generic)();
+		};
+		PtrCast cast;
+		cast.specific = scb_checkauth;
 
 		callbacks[0].id = SASL_CB_PROXY_POLICY;
-		callbacks[0].proc = (int(*)())scb_checkauth;
+		callbacks[0].proc = cast.generic;
 		callbacks[0].context = this;
 
 		callbacks[1].id = SASL_CB_LIST_END;
