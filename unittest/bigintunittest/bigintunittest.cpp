@@ -86,7 +86,11 @@ void BigIntUnitTest::allTests()
     // Check if the stream operator is any good
     QString testString;
     QTextStream ts( &testString, QIODevice::WriteOnly);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     ts << a << b << c << Qt::endl;
+#else
+    ts << a << b << c << endl;
+#endif
     QCOMPARE( testString, QStringLiteral( "4000000000000-40000000000002000000000000\n") );
 
     // Botan's addition tests
