@@ -545,6 +545,7 @@ private Q_SLOTS:
 		{
 			QCA_logTextMessage(QStringLiteral("keystore: emitting updated"), Logger::Information);
 			emit updated_p();
+			spinEventLoop();
 		}
 	}
 
