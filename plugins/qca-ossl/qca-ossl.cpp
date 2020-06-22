@@ -92,6 +92,13 @@ static BigInteger bn2bi(const BIGNUM *n)
 	return BigInteger(buf);
 }
 
+static BigInteger bn2bi_free(BIGNUM *n)
+{
+	BigInteger bi = bn2bi(n);
+	BN_free(n);
+	return bi;
+}
+
 static BIGNUM *bi2bn(const BigInteger &n)
 {
 	SecureArray buf = n.toArray();
@@ -4338,7 +4345,7 @@ public:
 
 		for (int i = 0; i < sk_X509_REVOKED_num(revokeStack); ++i) {
 			X509_REVOKED *rev = sk_X509_REVOKED_value(revokeStack, i);
-			BigInteger serial = bn2bi(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
+			BigInteger serial = bn2bi_free(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
 			QDateTime time = ASN1_UTCTIME_QDateTime( X509_REVOKED_get0_revocationDate(rev), nullptr);
 			QCA::CRLEntry::Reason reason = QCA::CRLEntry::Unspecified;
 			int pos = X509_REVOKED_get_ext_by_NID(rev, NID_crl_reason, -1);
