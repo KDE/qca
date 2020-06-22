@@ -5013,6 +5013,7 @@ public:
 			const SSL_CIPHER *thisCipher = sk_SSL_CIPHER_value(sk, i);
 			cipherList += QString::fromLatin1(SSL_CIPHER_standard_name(thisCipher));
 		}
+		sk_SSL_CIPHER_free(sk);
 
 		SSL_free(ssl);
 		SSL_CTX_free(ctx);
