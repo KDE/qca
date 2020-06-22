@@ -4791,6 +4791,7 @@ public:
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
 		PKCS12 *p12 = d2i_PKCS12_bio(bi, nullptr);
+		BIO_free(bi);
 		if(!p12)
 			return ErrorDecode;
 
