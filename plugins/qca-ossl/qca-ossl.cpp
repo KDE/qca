@@ -4822,6 +4822,14 @@ public:
 
 		MyPKeyContext *pk = new MyPKeyContext(provider());
 		PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+		if (!k) {
+			delete pk;
+			if(cert)
+				X509_free(cert);
+			if(ca)
+				sk_X509_pop_free(ca, X509_free);
+			return ErrorDecode;
+		}
 		pk->k = k;
 		*priv = pk;
 
