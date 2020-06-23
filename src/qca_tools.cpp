@@ -979,12 +979,38 @@ bool BigInteger::fromString(const QString &s)
 	const QByteArray cs = s.toLatin1();
 
 	bool neg = false;
-	if(s[0] == QLatin1Char('-'))
+	bool hex = false;
+	int size = cs.length();
+	const char *data = cs.data();
+	if(s[0] == QLatin1Char('-')) {
 		neg = true;
+		data++;
+		size--;
+	}
+	if (!size)
+		return false;
+
+	Botan::BigInt::Base base = Botan::BigInt::Decimal;
+	QByteArray hexDecoded;
+	if (size > 1 && (data[1] == 'x' || data[1] == 'X')) { // hex?
+		hex = true;
+		data += 2;
+		size -= 2;
+		if (!size || (size & 0x1))
+			return false;
+
+		// Botan is compiled with BOTAN_MINIMAL_BIGINT (no hex), let's do some Qt magic instead
+		hexDecoded = QByteArray::fromHex(QByteArray::fromRawData(data, size));
+		if (hexDecoded.size() != size / 2)
+			return false;
+		base = Botan::BigInt::Binary;
+		data = hexDecoded.data();
+		size = hexDecoded.size();
+	}
 
 	try
 	{
-		d->n = Botan::BigInt::decode((const Botan::byte *)cs.data() + (neg ? 1 : 0), cs.length() - (neg ? 1 : 0), Botan::BigInt::Decimal);
+		d->n = Botan::BigInt::decode((const Botan::byte *)data, size, base);
 	}
 	catch(std::exception &)
 	{
