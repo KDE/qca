@@ -99,6 +99,13 @@ static BigInteger bn2bi(const BIGNUM *n)
 	return BigInteger(buf);
 }
 
+static BigInteger bn2bi_free(BIGNUM *n)
+{
+	BigInteger bi = bn2bi(n);
+	BN_free(n);
+	return bi;
+}
+
 static BIGNUM *bi2bn(const BigInteger &n)
 {
 	SecureArray buf = n.toArray();
@@ -4386,7 +4393,7 @@ public:
 
 		for (int i = 0; i < sk_X509_REVOKED_num(revokeStack); ++i) {
 			X509_REVOKED *rev = sk_X509_REVOKED_value(revokeStack, i);
-			BigInteger serial = bn2bi(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
+			BigInteger serial = bn2bi_free(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
 			QDateTime time = ASN1_UTCTIME_QDateTime( X509_REVOKED_get0_revocationDate(rev), nullptr);
 			QCA::CRLEntry::Reason reason = QCA::CRLEntry::Unspecified;
 			int pos = X509_REVOKED_get_ext_by_NID(rev, NID_crl_reason, -1);
@@ -4839,6 +4846,7 @@ public:
 		BIO *bi = BIO_new(BIO_s_mem());
 		BIO_write(bi, in.data(), in.size());
 		PKCS12 *p12 = d2i_PKCS12_bio(bi, nullptr);
+		BIO_free(bi);
 		if(!p12)
 			return ErrorDecode;
 
@@ -4870,6 +4878,14 @@ public:
 
 		MyPKeyContext *pk = new MyPKeyContext(provider());
 		PKeyBase *k = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+		if (!k) {
+			delete pk;
+			if(cert)
+				X509_free(cert);
+			if(ca)
+				sk_X509_pop_free(ca, X509_free);
+			return ErrorDecode;
+		}
 		pk->k = k;
 		*priv = pk;
 
@@ -5067,6 +5083,7 @@ public:
 			const SSL_CIPHER *thisCipher = sk_SSL_CIPHER_value(sk, i);
 			cipherList += QString::fromLatin1(SSL_CIPHER_standard_name(thisCipher));
 		}
+		sk_SSL_CIPHER_free(sk);
 
 		SSL_free(ssl);
 		SSL_CTX_free(ctx);
