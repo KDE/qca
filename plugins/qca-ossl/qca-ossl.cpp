@@ -3358,42 +3358,12 @@ public:
 //
 // This code is mostly taken from OpenSSL v0.9.5a
 // by Eric Young
-QDateTime ASN1_UTCTIME_QDateTime(const ASN1_UTCTIME *tm, int *isGmt)
+QDateTime ASN1_UTCTIME_QDateTime(const ASN1_UTCTIME *asn1_tm)
 {
-	QDateTime qdt;
-	char *v;
-	int gmt=0;
-	int i;
-	int y=0,M=0,d=0,h=0,m=0,s=0;
-	QDate qdate;
-	QTime qtime;
-
-	i = tm->length;
-	v = (char *)tm->data;
-
-	if (i < 10) goto auq_err;
-	if (v[i-1] == 'Z') gmt=1;
-	for (i=0; i<10; i++)
-		if ((v[i] > '9') || (v[i] < '0')) goto auq_err;
-	y = (v[0]-'0')*10+(v[1]-'0');
-	if (y < 50) y+=100;
-	M = (v[2]-'0')*10+(v[3]-'0');
-	if ((M > 12) || (M < 1)) goto auq_err;
-	d = (v[4]-'0')*10+(v[5]-'0');
-	h = (v[6]-'0')*10+(v[7]-'0');
-	m =  (v[8]-'0')*10+(v[9]-'0');
-	if (    (v[10] >= '0') && (v[10] <= '9') &&
-			(v[11] >= '0') && (v[11] <= '9'))
-		s = (v[10]-'0')*10+(v[11]-'0');
-
-	// localize the date and display it.
-	qdate.setDate(y+1900, M, d);
-	qtime.setHMS(h,m,s);
-	qdt.setDate(qdate); qdt.setTime(qtime);
-	if (gmt) qdt.setTimeSpec(Qt::UTC);
- auq_err:
-	if (isGmt) *isGmt = gmt;
-	return qdt;
+	struct tm t;
+	ASN1_TIME_to_tm(asn1_tm, &t);
+	return QDateTime(QDate(1900 + t.tm_year, t.tm_mon + 1, t.tm_mday),
+					 QTime(t.tm_hour, t.tm_min, t.tm_sec), Qt::UTC);
 }
 
 class MyCertContext;
@@ -3674,8 +3644,9 @@ public:
 			p.serial.fromString(str);
 		}
 
-		p.start = ASN1_UTCTIME_QDateTime(X509_get_notBefore(x), nullptr);
-		p.end = ASN1_UTCTIME_QDateTime(X509_get_notAfter(x), nullptr);
+		p.start = ASN1_UTCTIME_QDateTime(X509_get0_notBefore(x));
+		p.end = ASN1_UTCTIME_QDateTime(X509_get0_notAfter(x));
+		//qDebug() << p.start << " - " << p.end;
 
 		CertificateInfo subject, issuer;
 
@@ -3811,7 +3782,7 @@ public:
 		p.issuer = opts.infoOrdered();
 
 		_props = p;
-		//printf("[%p] made props: [%s]\n", this, _props.subject[CommonName].toLatin1().data());
+		// printf("[%p] made props: [%s]\n", this, qPrintable(_props.subject[CommonName].value()));
 	}
 };
 
@@ -4386,15 +4357,15 @@ public:
 
 		issuer = get_cert_name(X509_CRL_get_issuer(x));
 
-		p.thisUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_lastUpdate(x), nullptr);
-		p.nextUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_nextUpdate(x), nullptr);
+		p.thisUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_lastUpdate(x));
+		p.nextUpdate = ASN1_UTCTIME_QDateTime(X509_CRL_get0_nextUpdate(x));
 
 		STACK_OF(X509_REVOKED)* revokeStack  = X509_CRL_get_REVOKED(x);
 
 		for (int i = 0; i < sk_X509_REVOKED_num(revokeStack); ++i) {
 			X509_REVOKED *rev = sk_X509_REVOKED_value(revokeStack, i);
 			BigInteger serial = bn2bi_free(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
-			QDateTime time = ASN1_UTCTIME_QDateTime( X509_REVOKED_get0_revocationDate(rev), nullptr);
+			QDateTime time = ASN1_UTCTIME_QDateTime( X509_REVOKED_get0_revocationDate(rev));
 			QCA::CRLEntry::Reason reason = QCA::CRLEntry::Unspecified;
 			int pos = X509_REVOKED_get_ext_by_NID(rev, NID_crl_reason, -1);
 			if (pos != -1) {
