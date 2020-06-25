@@ -105,7 +105,10 @@ int main(int argc, char **argv)
 			QCA::Base64 enc;
 			enc.setLineBreaksEnabled(true);
 			enc.setLineBreaksColumn(64);
-			ts << enc.arrayToString(buf) << '\n';
+			QString es = enc.arrayToString(buf);
+			ts << es;
+			if (es.size() && es[es.size() - 1] != QLatin1Char('\n'))
+				ts << '\n';
 			ts << "-----END CERTIFICATE-----" << '\n';
 
 			++count;
