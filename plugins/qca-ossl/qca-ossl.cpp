@@ -4994,9 +4994,10 @@ public:
 	
 	static int ssl_error_callback(const char *message, size_t len, void *user_data)
 	{
+		Q_UNUSED(len)
 		auto context = reinterpret_cast<MyTLSContext*>(user_data);
 		qDebug() << "MyTLSContext:" << context << " " << message;
-		return len;
+		return 1;
 	}
 
 	QStringList supportedCipherSuites(const TLS::Version &version) const override
@@ -5807,9 +5808,10 @@ public:
 protected:
 	static int ssl_error_callback(const char *message, size_t len, void *user_data)
 	{
+		Q_UNUSED(len)
 		auto context = reinterpret_cast<MyMessageContextThread*>(user_data);
 		qDebug() << "MyMessageContextThread:" << context << " " << message;
-		return len;
+		return 1;
 	}
 	
 	void run() override
