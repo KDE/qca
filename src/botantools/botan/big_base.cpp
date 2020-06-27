@@ -113,7 +113,7 @@ BigInt::BigInt(const std::string& str)
       { markers += 1; base = Octal; }
 
    *this = decode((const byte*)str.data() + markers,
-                  str.length() - markers, base);
+				  u32bit(str.length()) - markers, base);
 
    if(negative) set_sign(Negative);
    else         set_sign(Positive);

@@ -437,7 +437,7 @@ MemoryRegion::MemoryRegion()
 }
 
 MemoryRegion::MemoryRegion(const char *str)
-:_secure(false), d(new Private(QByteArray::fromRawData(str, strlen(str)), false))
+:_secure(false), d(new Private(QByteArray::fromRawData(str, int(strlen(str))), false))
 {
 }
 
@@ -612,7 +612,7 @@ SecureArray::SecureArray(int size, char ch)
 }
 
 SecureArray::SecureArray(const char *str)
-:MemoryRegion(QByteArray::fromRawData(str, strlen(str)), true)
+:MemoryRegion(QByteArray::fromRawData(str, int(strlen(str))), true)
 {
 }
 

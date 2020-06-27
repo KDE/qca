@@ -3931,8 +3931,8 @@ int main(int argc, char **argv)
 			while(!feof(stdin))
 			{
 				QByteArray block(1024, 0);
-				int n = fread(block.data(), 1, 1024, stdin);
-				if(n < 0)
+				int n = int(fread(block.data(), 1, 1024, stdin));
+				if(ferror(stdin))
 					break;
 				block.resize(n);
 				plain += block;
@@ -4050,8 +4050,8 @@ int main(int argc, char **argv)
 			while(!feof(stdin))
 			{
 				QByteArray block(1024, 0);
-				int n = fread(block.data(), 1, 1024, stdin);
-				if(n < 0)
+				int n = int(fread(block.data(), 1, 1024, stdin));
+				if(ferror(stdin))
 					break;
 				block.resize(n);
 				plain += block;
@@ -4136,8 +4136,8 @@ int main(int argc, char **argv)
 			while(!feof(stdin))
 			{
 				QByteArray block(1024, 0);
-				int n = fread(block.data(), 1, 1024, stdin);
-				if(n < 0)
+				int n = int(fread(block.data(), 1, 1024, stdin));
+				if(ferror(stdin))
 					break;
 				block.resize(n);
 				plain += block;
@@ -4242,8 +4242,8 @@ int main(int argc, char **argv)
 				while(!feof(stdin))
 				{
 					QByteArray block(1024, 0);
-					int n = fread(block.data(), 1, 1024, stdin);
-					if(n < 0)
+					int n = int(fread(block.data(), 1, 1024, stdin));
+					if(ferror(stdin))
 						break;
 					block.resize(n);
 					plain += block;
@@ -4425,8 +4425,8 @@ int main(int argc, char **argv)
 			while(!feof(stdin))
 			{
 				QByteArray block(1024, 0);
-				int n = fread(block.data(), 1, 1024, stdin);
-				if(n < 0)
+				int n = int(fread(block.data(), 1, 1024, stdin));
+				if(ferror(stdin))
 					break;
 				block.resize(n);
 				plain += block;
@@ -4524,8 +4524,8 @@ int main(int argc, char **argv)
 				while(!feof(stdin))
 				{
 					QByteArray block(1024, 0);
-					int n = fread(block.data(), 1, 1024, stdin);
-					if(n < 0)
+					int n = int(fread(block.data(), 1, 1024, stdin));
+					if(ferror(stdin))
 						break;
 					block.resize(n);
 					plain += block;
