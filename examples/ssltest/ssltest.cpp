@@ -28,6 +28,7 @@
 #include "import_plugins.h"
 #endif
 
+// clang-format off
 char exampleCA_cert[] =
 	"-----BEGIN CERTIFICATE-----\n"
 	"MIICSzCCAbSgAwIBAgIBADANBgkqhkiG9w0BAQUFADA4MRMwEQYDVQQDEwpFeGFt\n"
@@ -44,6 +45,7 @@ char exampleCA_cert[] =
 	"hwLzqgyZXd4mupIYlaOTZhuHDwWPCAOZS4LVsi2tndTRHKCP12441JjNKhmZRhkR\n"
 	"u5zzD60nWgM9dKTaxuZM\n"
 	"-----END CERTIFICATE-----\n";
+// clang-format on
 
 void showCertInfo(const QCA::Certificate &cert)
 {

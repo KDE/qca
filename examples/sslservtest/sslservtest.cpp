@@ -33,6 +33,7 @@
 #include "import_plugins.h"
 #endif
 
+// clang-format off
 char pemdata_cert[] =
 	"-----BEGIN CERTIFICATE-----\n"
 	"MIICeTCCAeKgAwIBAgIRAKKKnOj6Aarmwf0phApitVAwDQYJKoZIhvcNAQEFBQAw\n"
@@ -68,6 +69,7 @@ char pemdata_privkey[] =
 	"ASQx59xakpq11eOlTYz14rjwodr4QMyj26WxEPJtz7hKokx/+EH6fWuPIUSrROM5\n"
 	"07y2gaVbYxtis0s=\n"
 	"-----END PRIVATE KEY-----\n";
+// clang-format on
 
 class SecureServer : public QObject
 {

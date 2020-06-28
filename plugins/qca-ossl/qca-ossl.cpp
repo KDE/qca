@@ -1595,7 +1595,7 @@ public:
 //----------------------------------------------------------------------------
 // MyDLGroup
 //----------------------------------------------------------------------------
-
+// clang-format off
 // IETF primes from Botan
 static const char* IETF_1024_PRIME =
 	"FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
@@ -1641,6 +1641,7 @@ static const char* IETF_4096_PRIME =
 	"1F612970 CEE2D7AF B81BDD76 2170481C D0069127 D5B05AA9"
 	"93B4EA98 8D8FDDC1 86FFB7DC 90A6C08F 4DF435C9 34063199"
 	"FFFFFFFF FFFFFFFF";
+// clang-format on
 
 // JCE seeds from Botan
 static const char* JCE_512_SEED = "B869C82B 35D70E1B 1FF91B28 E37A62EC DC34409B";

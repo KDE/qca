@@ -293,6 +293,7 @@ static QByteArray b64decode(const QByteArray &s, bool *ok)
 	// 64 specifies eof
 	// everything else specifies data
 
+	// clang-format off
 	static const signed char tbl[] =
 	{
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
@@ -312,6 +313,7 @@ static QByteArray b64decode(const QByteArray &s, bool *ok)
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 	};
+	// clang-format on
 
 	// return value
 	QByteArray p;

@@ -882,6 +882,7 @@ public:
 
 static QList<InfoType> makeInfoTypeList(bool legacyEmail = false)
 {
+	// clang-format off
 	QList<InfoType> out;
 	out += InfoType(QCA::CommonName,             QStringLiteral("CommonName"),             QStringLiteral("CN"),  QStringLiteral("Common Name (CN)"),          QStringLiteral("Full name, domain, anything"));
 	out += InfoType(QCA::Email,                  QStringLiteral("Email"),                  QLatin1String(""),     QStringLiteral("Email Address"),             QLatin1String(""));
@@ -900,6 +901,7 @@ static QList<InfoType> makeInfoTypeList(bool legacyEmail = false)
 	out += InfoType(QCA::IPAddress,              QStringLiteral("IPAddress"),              QLatin1String(""),     QStringLiteral("IP Adddress"),               QLatin1String(""));
 	out += InfoType(QCA::XMPP,                   QStringLiteral("XMPP"),                   QLatin1String(""),     QStringLiteral("XMPP Address (JID)"),        QStringLiteral("From RFC 3920 (id-on-xmppAddr)"));
 	return out;
+	// clang-format on
 }
 
 class MyConstraintType
@@ -922,6 +924,7 @@ public:
 
 static QList<MyConstraintType> makeConstraintTypeList()
 {
+	// clang-format off
 	QList<MyConstraintType> out;
 	out += MyConstraintType(QCA::DigitalSignature,    QStringLiteral("DigitalSignature"),    QStringLiteral("Digital Signature"),      QStringLiteral("Can be used for signing"));
 	out += MyConstraintType(QCA::NonRepudiation,      QStringLiteral("NonRepudiation"),      QStringLiteral("Non-Repudiation"),        QStringLiteral("Usage is legally binding"));
@@ -942,6 +945,7 @@ static QList<MyConstraintType> makeConstraintTypeList()
 	out += MyConstraintType(QCA::TimeStamping,        QStringLiteral("TimeStamping"),        QStringLiteral("Time Stamping"),          QLatin1String(""));
 	out += MyConstraintType(QCA::OCSPSigning,         QStringLiteral("OCSPSigning"),         QStringLiteral("OCSP Signing"),           QLatin1String(""));
 	return out;
+	// clang-format on
 }
 
 const char *crlEntryReasonToString(QCA::CRLEntry::Reason r)

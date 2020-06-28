@@ -1418,6 +1418,7 @@ SymmetricKey::SymmetricKey(const QByteArray &a)
 	set(SecureArray(a));
 }
 
+// clang-format off
 /* from libgcrypt-1.2.0 */
 static const unsigned char desWeakKeyTable[64][8] =
 {
@@ -1486,6 +1487,7 @@ static const unsigned char desWeakKeyTable[64][8] =
 	{ 0xfe, 0xfe, 0xe0, 0xe0, 0xfe, 0xfe, 0xf0, 0xf0 },
 	{ 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe, 0xfe }  /*w*/
 };
+// clang-format on
 
 bool SymmetricKey::isWeakDESKey()
 {
