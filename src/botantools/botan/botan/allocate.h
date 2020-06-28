@@ -40,12 +40,6 @@ namespace QCA { // WRAPNS_LINE
 #include <string>
 namespace QCA { // WRAPNS_LINE
 
-#if __cplusplus >= 201103L
-#define QCA_NOEXCEPT(x) noexcept(x)
-#else
-#define QCA_NOEXCEPT(x)
-#endif
-
 namespace Botan {
 
 /*************************************************
@@ -64,7 +58,7 @@ class Allocator
       virtual void init() {}
       virtual void destroy() {}
 
-      virtual ~Allocator() QCA_NOEXCEPT(false) {}
+	  virtual ~Allocator() Q_DECL_NOEXCEPT {}
    };
 
 /*************************************************

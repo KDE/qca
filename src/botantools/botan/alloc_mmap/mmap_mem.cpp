@@ -107,11 +107,10 @@ void* MemoryMapping_Allocator::alloc_block(u32bit n)
             umask(old_umask);
             }
 
-         ~TemporaryFile() QCA_NOEXCEPT(false)
+         ~TemporaryFile()
             {
             delete[] filepath;
-            if(fd != -1 && close(fd) == -1)
-               throw MemoryMapping_Failed("Could not close file");
+            Q_ASSERT_X(fd == -1 || close(fd) != -1, "~TemporaryFile()", "Could not close file");
             }
 
          TemporaryFile(const TemporaryFile &) = delete;

@@ -171,11 +171,10 @@ Pooling_Allocator::Pooling_Allocator(u32bit p_size, bool) :
 /*************************************************
 * Pooling_Allocator Destructor                   *
 *************************************************/
-Pooling_Allocator::~Pooling_Allocator() QCA_NOEXCEPT(false)
+Pooling_Allocator::~Pooling_Allocator()
    {
    delete mutex;
-   if(blocks.size())
-      throw Invalid_State("Pooling_Allocator: Never released memory");
+   Q_ASSERT_X(blocks.size() == 0, "~Pooling_Allocator()", "Pooling_Allocator: Never released memory");
    }
 
 /*************************************************
