@@ -1,0 +1,4 @@
+BasedOnStyle: LLVM
+UseTab: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
