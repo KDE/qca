@@ -21,6 +21,8 @@
 
 #include "tlssocket.h"
 
+#include <QTimer>
+
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"
 #endif
@@ -58,7 +60,7 @@ public:
 		connect(sock, &QTcpSocket::readyRead, this, &TLSSocket::Private::sock_readyRead);
 		connect(sock, &QTcpSocket::bytesWritten, this, &TLSSocket::Private::sock_bytesWritten);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this, &TLSSocket::Private::sock_error);
+		connect(sock, &QTcpSocket::errorOccurred, this, &TLSSocket::Private::sock_error);
 #else
 		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &TLSSocket::Private::sock_error);
 #endif
@@ -114,6 +116,12 @@ private Q_SLOTS:
 	{
 		//printf("sock error: %d\n", x);
 		Q_UNUSED(x);
+		// if ssl resultsReady() was alreay enquued we have to stop after it
+		QTimer::singleShot(0, this, SLOT(setSocketClosed()));
+	}
+
+	void setSocketClosed()
+	{
 		done = true;
 		if(waiting)
 			sync.conditionMet();
