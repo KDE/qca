@@ -13,7 +13,7 @@ project(qca)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "3")
-set(QCA_LIB_PATCH_VERSION "0")
+set(QCA_LIB_PATCH_VERSION "1")
 
 option(BUILD_TESTS "Create test" ON)
 option(BUILD_TOOLS "Compile mozcerts and qcatool" ON)
