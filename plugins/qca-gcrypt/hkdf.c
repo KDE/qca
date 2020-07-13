@@ -22,7 +22,7 @@
 
 #include <gcrypt.h>
 
-gcry_error_t gcry_hkdf(int algo, const char *input, size_t n_input,
+static gcry_error_t gcry_hkdf(int algo, const char *input, size_t n_input,
                        const char *salt, size_t n_salt,
                        const char *info, size_t n_info,
                        char *output, size_t n_output)
