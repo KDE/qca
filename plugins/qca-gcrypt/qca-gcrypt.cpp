@@ -30,6 +30,7 @@
 namespace gcryptQCAPlugin {
 
 #include "pkcs5.c"
+#include "hkdf.c"
 
 void check_error( const char *label, gcry_error_t err )
 {
@@ -478,6 +479,40 @@ protected:
     int m_algorithm;
 };
 
+
+class hkdfContext : public QCA::HKDFContext
+{
+    Q_OBJECT
+public:
+    hkdfContext(int algorithm, QCA::Provider *p, const QString &type) : QCA::HKDFContext(p, type)
+    {
+	m_algorithm = algorithm;
+    }
+
+    Context *clone() const override
+    {
+	return new hkdfContext( *this );
+    }
+
+    QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
+                              const QCA::InitializationVector &info, unsigned int keyLength) override
+    {
+	QCA::SymmetricKey result(keyLength);
+	gcry_error_t retval = gcry_hkdf(m_algorithm, secret.data(), secret.size(),
+					salt.data(), salt.size(),
+					info.data(), info.size(),
+					result.data(), result.size());
+	if (retval == GPG_ERR_NO_ERROR) {
+	    return result;
+	} else {
+	    return QCA::SymmetricKey();
+	}
+    }
+
+protected:
+    int m_algorithm;
+};
+
 }
 
 extern "C"
@@ -593,6 +628,7 @@ public:
 	}
 	list += QStringLiteral("pbkdf1(sha1)");
 	list += QStringLiteral("pbkdf2(sha1)");
+	list += QStringLiteral("hkdf(sha256)");
 	return list;
     }
 
@@ -681,6 +717,8 @@ public:
 	    return new gcryptQCAPlugin::pbkdf1Context( GCRY_MD_SHA1, this, type );
 	else if ( type == QLatin1String("pbkdf2(sha1)") )
 	    return new gcryptQCAPlugin::pbkdf2Context( GCRY_MD_SHA1, this, type );
+	else if ( type == QLatin1String("hkdf(sha256)") )
+	    return new gcryptQCAPlugin::hkdfContext( GCRY_MD_SHA256, this, type );
 	else
 	    return nullptr;
     }
