@@ -73,10 +73,10 @@ macro(add_qca_test TARGET DESCRIPTION)
 endmacro(add_qca_test)
 
 macro(install_pdb TARGET INSTALL_PATH)
-  if(MSVC)
+  if(MSVC AND BUILD_SHARED_LIBS)
     install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS Debug)
     install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS RelWithDebInfo)
-  endif(MSVC)
+  endif()
 endmacro(install_pdb)
 
 macro(normalize_path PATH)
