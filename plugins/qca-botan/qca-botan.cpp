@@ -719,7 +719,7 @@ public:
 private:
 };
 
-class botanPlugin : public QObject, public QCAPlugin
+class qca_botan : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")

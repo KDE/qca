@@ -63,7 +63,7 @@ public:
 	}
 };
 
-class gnupgPlugin : public QObject, public QCAPlugin
+class qca_gnupg : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")

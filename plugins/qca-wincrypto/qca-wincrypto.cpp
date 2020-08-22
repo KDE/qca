@@ -99,7 +99,7 @@ public:
 };
 
 //-----------------------------------------------------------
-class WinCryptoPlugin : public QObject, public QCAPlugin
+class qca_wincrypto : public QObject, public QCAPlugin
 {
    Q_OBJECT
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")

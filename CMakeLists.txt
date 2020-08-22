@@ -25,6 +25,7 @@ set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible value
 # BUILD_SHARED_LIBS is cmake variable. Need to change default value.
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(DEVELOPER_MODE "Special developer mode" OFF)
+option(LOAD_SHARED_PLUGINS "Load plugins from file system" ON)
 
 if(APPLE)
   option(OSX_FRAMEWORK "Build a Mac OS X Framework" ON)
@@ -62,6 +63,10 @@ if(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
 else()
   set(PLUGIN_TYPE "MODULE")
 endif()
+if(NOT LOAD_SHARED_PLUGINS)
+  add_definitions(-DQCA_NO_PLUGINS)
+endif()
+
 
 set(QCA_SUFFIX "${QCA_SUFFIX}" CACHE STRING "QCA common suffix")
 if(QCA_SUFFIX)

@@ -3019,7 +3019,7 @@ pkcs11Provider::_pinPromptHook (
 	return ret; //krazy:exclude=captruefalse
 }
 
-class pkcs11Plugin : public QObject, public QCAPlugin
+class qca_pkcs11 : public QObject, public QCAPlugin
 {
 	Q_OBJECT
 	Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
