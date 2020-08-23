@@ -33,9 +33,9 @@
 #ifndef QCA_CERT_H
 #define QCA_CERT_H
 
-#include <QDateTime>
 #include "qca_core.h"
 #include "qca_publickey.h"
+#include <QDateTime>
 
 namespace QCA {
 
@@ -47,14 +47,13 @@ class CRL;
 class CertificateCollection;
 class CertificateChain;
 
-
 /**
    Certificate Request Format
 */
 enum CertificateRequestFormat
 {
-	PKCS10, ///< standard PKCS#10 format
-	SPKAC   ///< Signed Public Key and Challenge (Netscape) format
+    PKCS10, ///< standard PKCS#10 format
+    SPKAC   ///< Signed Public Key and Challenge (Netscape) format
 };
 
 /**
@@ -64,21 +63,21 @@ enum CertificateRequestFormat
 */
 enum CertificateInfoTypeKnown
 {
-	CommonName,             ///< The common name (eg person), id = "2.5.4.3"
-	Email,                  ///< Email address, id = "GeneralName.rfc822Name"
-	EmailLegacy,            ///< PKCS#9 Email field, id = "1.2.840.113549.1.9.1"
-	Organization,           ///< An organisation (eg company), id = "2.5.4.10"
-	OrganizationalUnit,     ///< An part of an organisation (eg a division or branch), id = "2.5.4.11"
-	Locality,               ///< The locality (eg city, a shire, or part of a state), id = "2.5.4.7"
-	IncorporationLocality,  ///< The locality of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.1"
-	State,                  ///< The state within the country, id = "2.5.4.8"
-	IncorporationState,     ///< The state of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.2"
-	Country,                ///< The country, id = "2.5.4.6"
-	IncorporationCountry,   ///< The country of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.3"
-	URI,                    ///< Uniform Resource Identifier, id = "GeneralName.uniformResourceIdentifier"
-	DNS,                    ///< DNS name, id = "GeneralName.dNSName"
-	IPAddress,              ///< IP address, id = "GeneralName.iPAddress"
-	XMPP                    ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt), id = "1.3.6.1.5.5.7.8.5"
+    CommonName,            ///< The common name (eg person), id = "2.5.4.3"
+    Email,                 ///< Email address, id = "GeneralName.rfc822Name"
+    EmailLegacy,           ///< PKCS#9 Email field, id = "1.2.840.113549.1.9.1"
+    Organization,          ///< An organisation (eg company), id = "2.5.4.10"
+    OrganizationalUnit,    ///< An part of an organisation (eg a division or branch), id = "2.5.4.11"
+    Locality,              ///< The locality (eg city, a shire, or part of a state), id = "2.5.4.7"
+    IncorporationLocality, ///< The locality of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.1"
+    State,                 ///< The state within the country, id = "2.5.4.8"
+    IncorporationState,    ///< The state of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.2"
+    Country,               ///< The country, id = "2.5.4.6"
+    IncorporationCountry,  ///< The country of incorporation (EV certificates), id = "1.3.6.1.4.1.311.60.2.1.3"
+    URI,                   ///< Uniform Resource Identifier, id = "GeneralName.uniformResourceIdentifier"
+    DNS,                   ///< DNS name, id = "GeneralName.dNSName"
+    IPAddress,             ///< IP address, id = "GeneralName.iPAddress"
+    XMPP                   ///< XMPP address (see http://www.ietf.org/rfc/rfc3920.txt), id = "1.3.6.1.5.5.7.8.5"
 };
 
 /**
@@ -120,120 +119,117 @@ enum CertificateInfoTypeKnown
 class QCA_EXPORT CertificateInfoType
 {
 public:
-	/**
-	   Section of the certificate that the information belongs in
-	*/
-	enum Section
-	{
-		DN,              ///< Distinguished name (the primary name)
-		AlternativeName  ///< Alternative name
-	};
+    /**
+       Section of the certificate that the information belongs in
+    */
+    enum Section
+    {
+        DN,             ///< Distinguished name (the primary name)
+        AlternativeName ///< Alternative name
+    };
 
-	/**
-	   Standard constructor
-	*/
-	CertificateInfoType();
+    /**
+       Standard constructor
+    */
+    CertificateInfoType();
 
-	/**
-	   Construct a new type
+    /**
+       Construct a new type
 
-	   The section will be derived by \a known.
+       The section will be derived by \a known.
 
-	   \param known the type as part of the CertificateInfoTypeKnown
-	   enumerator
-	*/
-	CertificateInfoType(CertificateInfoTypeKnown known);
+       \param known the type as part of the CertificateInfoTypeKnown
+       enumerator
+    */
+    CertificateInfoType(CertificateInfoTypeKnown known);
 
-	/**
-	   Construct a new type
+    /**
+       Construct a new type
 
-	   \param id the type as an identifier string (OID or internal)
-	   \param section the section this type belongs in
+       \param id the type as an identifier string (OID or internal)
+       \param section the section this type belongs in
 
-	   \sa id
-	*/
-	CertificateInfoType(const QString &id, Section section);
+       \sa id
+    */
+    CertificateInfoType(const QString &id, Section section);
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the certificate information to copy from
-	*/
-	CertificateInfoType(const CertificateInfoType &from);
+       \param from the certificate information to copy from
+    */
+    CertificateInfoType(const CertificateInfoType &from);
 
-	~CertificateInfoType();
+    ~CertificateInfoType();
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the certificate information to assign from
-	*/
-	CertificateInfoType & operator=(const CertificateInfoType &from);
+       \param from the certificate information to assign from
+    */
+    CertificateInfoType &operator=(const CertificateInfoType &from);
 
-	/**
-	   The section the type is part of
-	*/
-	Section section() const;
+    /**
+       The section the type is part of
+    */
+    Section section() const;
 
-	/**
-	   The type as part of the CertificateInfoTypeKnown enumerator
+    /**
+       The type as part of the CertificateInfoTypeKnown enumerator
 
-	   This function may return a value that does not exist in the
-	   enumerator.  In that case, you may use id() to determine the
-	   type.
-	*/
-	CertificateInfoTypeKnown known() const;
+       This function may return a value that does not exist in the
+       enumerator.  In that case, you may use id() to determine the
+       type.
+    */
+    CertificateInfoTypeKnown known() const;
 
-	/**
-	   The type as an identifier string
+    /**
+       The type as an identifier string
 
-	   For types that have OIDs, this function returns an OID in string
-	   form.  For types that do not have OIDs, this function returns an
-	   internal identifier string whose first character is not a digit
-	   (this allows you to tell the difference between an OID and an
-	   internal identifier).
+       For types that have OIDs, this function returns an OID in string
+       form.  For types that do not have OIDs, this function returns an
+       internal identifier string whose first character is not a digit
+       (this allows you to tell the difference between an OID and an
+       internal identifier).
 
-	   It is hereby stated that General Names (of the X.509 Subject
-	   Alternative Name) shall use the internal identifier format
-	   "GeneralName.[rfc field name]".  For example, the rfc822Name
-	   field would have the identifier "GeneralName.rfc822Name".
+       It is hereby stated that General Names (of the X.509 Subject
+       Alternative Name) shall use the internal identifier format
+       "GeneralName.[rfc field name]".  For example, the rfc822Name
+       field would have the identifier "GeneralName.rfc822Name".
 
-	   Applications should not store, use, or compare against internal
-	   identifiers unless the identifiers are explicitly documented
-	   (e.g. GeneralName).
-	*/
-	QString id() const;
+       Applications should not store, use, or compare against internal
+       identifiers unless the identifiers are explicitly documented
+       (e.g. GeneralName).
+    */
+    QString id() const;
 
-	/**
-	   Comparison operator
+    /**
+       Comparison operator
 
-	   \param other the certificate information to compare with this
-	   certificate information.
-	*/
-	bool operator<(const CertificateInfoType &other) const;
+       \param other the certificate information to compare with this
+       certificate information.
+    */
+    bool operator<(const CertificateInfoType &other) const;
 
-	/**
-	   Comparison operator
+    /**
+       Comparison operator
 
-	   \param other the certificate information to compare with this
-	   certificate information.
-	*/
-	bool operator==(const CertificateInfoType &other) const;
+       \param other the certificate information to compare with this
+       certificate information.
+    */
+    bool operator==(const CertificateInfoType &other) const;
 
-	/**
-	   Inequality operator
+    /**
+       Inequality operator
 
-	   \param other the certificate information to compare with this
-	   certificate information.
-	*/
-	inline bool operator!=(const CertificateInfoType &other) const
-	{
-		return !(*this == other);
-	}
+       \param other the certificate information to compare with this
+       certificate information.
+    */
+    inline bool operator!=(const CertificateInfoType &other) const { return !(*this == other); }
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -246,69 +242,65 @@ private:
 class QCA_EXPORT CertificateInfoPair
 {
 public:
-	/**
-	   Standard constructor
-	*/
-	CertificateInfoPair();
+    /**
+       Standard constructor
+    */
+    CertificateInfoPair();
 
-	/**
-	   Construct a new pair
+    /**
+       Construct a new pair
 
-	   \param type the type of information stored in this pair
-	   \param value the value of the information to be stored
-	*/
-	CertificateInfoPair(const CertificateInfoType &type, const QString &value);
+       \param type the type of information stored in this pair
+       \param value the value of the information to be stored
+    */
+    CertificateInfoPair(const CertificateInfoType &type, const QString &value);
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the information pair to copy from
-	*/
-	CertificateInfoPair(const CertificateInfoPair &from);
+       \param from the information pair to copy from
+    */
+    CertificateInfoPair(const CertificateInfoPair &from);
 
-	~CertificateInfoPair();
+    ~CertificateInfoPair();
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the information pair to assign from
-	*/
-	CertificateInfoPair & operator=(const CertificateInfoPair &from);
+       \param from the information pair to assign from
+    */
+    CertificateInfoPair &operator=(const CertificateInfoPair &from);
 
-	/**
-	   The type of information stored in the pair
-	*/
-	CertificateInfoType type() const;
+    /**
+       The type of information stored in the pair
+    */
+    CertificateInfoType type() const;
 
-	/**
-	   The value of the information stored in the pair
-	*/
-	QString value() const;
+    /**
+       The value of the information stored in the pair
+    */
+    QString value() const;
 
-	/**
-	   Comparison operator
+    /**
+       Comparison operator
 
-	   \param other the certificate information pair to compare with this
-	   certificate information pair.
-	*/
-	bool operator==(const CertificateInfoPair &other) const;
+       \param other the certificate information pair to compare with this
+       certificate information pair.
+    */
+    bool operator==(const CertificateInfoPair &other) const;
 
-	/**
-	   Inequality operator
+    /**
+       Inequality operator
 
-	   \param other the certificate information pair to compare with this
-	   certificate information pair.
-	*/
-	inline bool operator!=(const CertificateInfoPair &other) const
-	{
-		return !(*this == other);
-	}
+       \param other the certificate information pair to compare with this
+       certificate information pair.
+    */
+    inline bool operator!=(const CertificateInfoPair &other) const { return !(*this == other); }
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
-
 
 /**
    Known types of certificate constraints
@@ -317,27 +309,36 @@ private:
 */
 enum ConstraintTypeKnown
 {
-	// KeyUsage
-	DigitalSignature,    ///< %Certificate can be used to create digital signatures, id = "KeyUsage.digitalSignature"
-	NonRepudiation,      ///< %Certificate can be used for non-repudiation, id = "KeyUsage.nonRepudiation"
-	KeyEncipherment,     ///< %Certificate can be used for encrypting / decrypting keys, id = "KeyUsage.keyEncipherment"
-	DataEncipherment,    ///< %Certificate can be used for encrypting / decrypting data, id = "KeyUsage.dataEncipherment"
-	KeyAgreement,        ///< %Certificate can be used for key agreement, id = "KeyUsage.keyAgreement"
-	KeyCertificateSign,  ///< %Certificate can be used for key certificate signing, id = "KeyUsage.keyCertSign"
-	CRLSign,             ///< %Certificate can be used to sign %Certificate Revocation Lists, id = "KeyUsage.crlSign"
-	EncipherOnly,        ///< %Certificate can only be used for encryption, id = "KeyUsage.encipherOnly"
-	DecipherOnly,        ///< %Certificate can only be used for decryption, id = "KeyUsage.decipherOnly"
+    // KeyUsage
+    DigitalSignature,   ///< %Certificate can be used to create digital signatures, id = "KeyUsage.digitalSignature"
+    NonRepudiation,     ///< %Certificate can be used for non-repudiation, id = "KeyUsage.nonRepudiation"
+    KeyEncipherment,    ///< %Certificate can be used for encrypting / decrypting keys, id = "KeyUsage.keyEncipherment"
+    DataEncipherment,   ///< %Certificate can be used for encrypting / decrypting data, id = "KeyUsage.dataEncipherment"
+    KeyAgreement,       ///< %Certificate can be used for key agreement, id = "KeyUsage.keyAgreement"
+    KeyCertificateSign, ///< %Certificate can be used for key certificate signing, id = "KeyUsage.keyCertSign"
+    CRLSign,            ///< %Certificate can be used to sign %Certificate Revocation Lists, id = "KeyUsage.crlSign"
+    EncipherOnly,       ///< %Certificate can only be used for encryption, id = "KeyUsage.encipherOnly"
+    DecipherOnly,       ///< %Certificate can only be used for decryption, id = "KeyUsage.decipherOnly"
 
-	// ExtKeyUsage
-	ServerAuth,       ///< %Certificate can be used for server authentication (e.g. web server), id = "1.3.6.1.5.5.7.3.1". This is an extended usage constraint.
-	ClientAuth,       ///< %Certificate can be used for client authentication (e.g. web browser), id = "1.3.6.1.5.5.7.3.2". This is an extended usage constraint.
-	CodeSigning,      ///< %Certificate can be used to sign code, id = "1.3.6.1.5.5.7.3.3". This is an extended usage constraint.
-	EmailProtection,  ///< %Certificate can be used to sign / encrypt email, id = "1.3.6.1.5.5.7.3.4". This is an extended usage constraint.
-	IPSecEndSystem,   ///< %Certificate can be used to authenticate a endpoint in IPSEC, id = "1.3.6.1.5.5.7.3.5". This is an extended usage constraint.
-	IPSecTunnel,      ///< %Certificate can be used to authenticate a tunnel in IPSEC, id = "1.3.6.1.5.5.7.3.6". This is an extended usage constraint.
-	IPSecUser,        ///< %Certificate can be used to authenticate a user in IPSEC, id = "1.3.6.1.5.5.7.3.7". This is an extended usage constraint.
-	TimeStamping,     ///< %Certificate can be used to create a "time stamp" signature, id = "1.3.6.1.5.5.7.3.8". This is an extended usage constraint.
-	OCSPSigning       ///< %Certificate can be used to sign an Online %Certificate Status Protocol (OCSP) assertion, id = "1.3.6.1.5.5.7.3.9". This is an extended usage constraint.
+    // ExtKeyUsage
+    ServerAuth,  ///< %Certificate can be used for server authentication (e.g. web server), id = "1.3.6.1.5.5.7.3.1".
+                 ///< This is an extended usage constraint.
+    ClientAuth,  ///< %Certificate can be used for client authentication (e.g. web browser), id = "1.3.6.1.5.5.7.3.2".
+                 ///< This is an extended usage constraint.
+    CodeSigning, ///< %Certificate can be used to sign code, id = "1.3.6.1.5.5.7.3.3". This is an extended usage
+                 ///< constraint.
+    EmailProtection, ///< %Certificate can be used to sign / encrypt email, id = "1.3.6.1.5.5.7.3.4". This is an
+                     ///< extended usage constraint.
+    IPSecEndSystem, ///< %Certificate can be used to authenticate a endpoint in IPSEC, id = "1.3.6.1.5.5.7.3.5". This is
+                    ///< an extended usage constraint.
+    IPSecTunnel,  ///< %Certificate can be used to authenticate a tunnel in IPSEC, id = "1.3.6.1.5.5.7.3.6". This is an
+                  ///< extended usage constraint.
+    IPSecUser,    ///< %Certificate can be used to authenticate a user in IPSEC, id = "1.3.6.1.5.5.7.3.7". This is an
+                  ///< extended usage constraint.
+    TimeStamping, ///< %Certificate can be used to create a "time stamp" signature, id = "1.3.6.1.5.5.7.3.8". This is an
+                  ///< extended usage constraint.
+    OCSPSigning   ///< %Certificate can be used to sign an Online %Certificate Status Protocol (OCSP) assertion, id =
+                  ///< "1.3.6.1.5.5.7.3.9". This is an extended usage constraint.
 };
 
 /**
@@ -356,117 +357,114 @@ enum ConstraintTypeKnown
 class QCA_EXPORT ConstraintType
 {
 public:
-	/**
-	   Section of the certificate that the constraint belongs in
-	*/
-	enum Section
-	{
-		KeyUsage,          ///< Stored in the key usage section
-		ExtendedKeyUsage   ///< Stored in the extended key usage section
-	};
+    /**
+       Section of the certificate that the constraint belongs in
+    */
+    enum Section
+    {
+        KeyUsage,        ///< Stored in the key usage section
+        ExtendedKeyUsage ///< Stored in the extended key usage section
+    };
 
-	/**
-	   Standard constructor
-	*/
-	ConstraintType();
+    /**
+       Standard constructor
+    */
+    ConstraintType();
 
-	/**
-	   Construct a new constraint
+    /**
+       Construct a new constraint
 
-	   The section will be derived by \a known.
+       The section will be derived by \a known.
 
-	   \param known the type as part of the ConstraintTypeKnown
-	   enumerator
-	*/
-	ConstraintType(ConstraintTypeKnown known);
+       \param known the type as part of the ConstraintTypeKnown
+       enumerator
+    */
+    ConstraintType(ConstraintTypeKnown known);
 
-	/**
-	   Construct a new constraint
+    /**
+       Construct a new constraint
 
-	   \param id the type as an identifier string (OID or internal)
-	   \param section the section this type belongs in
+       \param id the type as an identifier string (OID or internal)
+       \param section the section this type belongs in
 
-	   \sa id
-	*/
-	ConstraintType(const QString &id, Section section);
+       \sa id
+    */
+    ConstraintType(const QString &id, Section section);
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the constraint type to copy from
-	*/
-	ConstraintType(const ConstraintType &from);
+       \param from the constraint type to copy from
+    */
+    ConstraintType(const ConstraintType &from);
 
-	~ConstraintType();
+    ~ConstraintType();
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the constraint type to assign from
-	*/
-	ConstraintType & operator=(const ConstraintType &from);
+       \param from the constraint type to assign from
+    */
+    ConstraintType &operator=(const ConstraintType &from);
 
-	/**
-	   The section the constraint is part of
-	*/
-	Section section() const;
+    /**
+       The section the constraint is part of
+    */
+    Section section() const;
 
-	/**
-	   The type as part of the ConstraintTypeKnown enumerator
+    /**
+       The type as part of the ConstraintTypeKnown enumerator
 
-	   This function may return a value that does not exist in the
-	   enumerator.  In that case, you may use id() to determine the
-	   type.
-	*/
-	ConstraintTypeKnown known() const;
+       This function may return a value that does not exist in the
+       enumerator.  In that case, you may use id() to determine the
+       type.
+    */
+    ConstraintTypeKnown known() const;
 
-	/**
-	   The type as an identifier string
+    /**
+       The type as an identifier string
 
-	   For types that have OIDs, this function returns an OID in string
-	   form.  For types that do not have OIDs, this function returns an
-	   internal identifier string whose first character is not a digit
-	   (this allows you to tell the difference between an OID and an
-	   internal identifier).
+       For types that have OIDs, this function returns an OID in string
+       form.  For types that do not have OIDs, this function returns an
+       internal identifier string whose first character is not a digit
+       (this allows you to tell the difference between an OID and an
+       internal identifier).
 
-	   It is hereby stated that the KeyUsage bit fields shall use the
-	   internal identifier format "KeyUsage.[rfc field name]".  For
-	   example, the keyEncipherment field would have the identifier
-	   "KeyUsage.keyEncipherment".
+       It is hereby stated that the KeyUsage bit fields shall use the
+       internal identifier format "KeyUsage.[rfc field name]".  For
+       example, the keyEncipherment field would have the identifier
+       "KeyUsage.keyEncipherment".
 
-	   Applications should not store, use, or compare against internal
-	   identifiers unless the identifiers are explicitly documented
-	   (e.g. KeyUsage).
-	*/
-	QString id() const;
+       Applications should not store, use, or compare against internal
+       identifiers unless the identifiers are explicitly documented
+       (e.g. KeyUsage).
+    */
+    QString id() const;
 
-	/**
-	   Comparison operator
+    /**
+       Comparison operator
 
-	   \param other the constraint type to compare with this constraint
-	*/
-	bool operator<(const ConstraintType &other) const;
+       \param other the constraint type to compare with this constraint
+    */
+    bool operator<(const ConstraintType &other) const;
 
-	/**
-	   Comparison operator
+    /**
+       Comparison operator
 
-	   \param other the constraint type to compare with this constraint
-	*/
-	bool operator==(const ConstraintType &other) const;
+       \param other the constraint type to compare with this constraint
+    */
+    bool operator==(const ConstraintType &other) const;
 
-	/**
-	   Inequality operator
+    /**
+       Inequality operator
 
-	   \param other the constraint type to compare with this constraint
-	*/
-	inline bool operator!=(const ConstraintType &other) const
-	{
-		return !(*this == other);
-	}
+       \param other the constraint type to compare with this constraint
+    */
+    inline bool operator!=(const ConstraintType &other) const { return !(*this == other); }
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -474,13 +472,13 @@ private:
 */
 enum UsageMode
 {
-	UsageAny             = 0x00, ///< Any application, or unspecified
-	UsageTLSServer       = 0x01, ///< server side of a TLS or SSL connection
-	UsageTLSClient       = 0x02, ///< client side of a TLS or SSL connection
-	UsageCodeSigning     = 0x04, ///< code signing certificate
-	UsageEmailProtection = 0x08, ///< email (S/MIME) certificate
-	UsageTimeStamping    = 0x10, ///< time stamping certificate
-	UsageCRLSigning      = 0x20  ///< certificate revocation list signing certificate
+    UsageAny             = 0x00, ///< Any application, or unspecified
+    UsageTLSServer       = 0x01, ///< server side of a TLS or SSL connection
+    UsageTLSClient       = 0x02, ///< client side of a TLS or SSL connection
+    UsageCodeSigning     = 0x04, ///< code signing certificate
+    UsageEmailProtection = 0x08, ///< email (S/MIME) certificate
+    UsageTimeStamping    = 0x10, ///< time stamping certificate
+    UsageCRLSigning      = 0x20  ///< certificate revocation list signing certificate
 };
 
 /**
@@ -488,18 +486,19 @@ enum UsageMode
 */
 enum Validity
 {
-	ValidityGood,            ///< The certificate is valid
-	ErrorRejected,           ///< The root CA rejected the certificate purpose
-	ErrorUntrusted,          ///< The certificate is not trusted
-	ErrorSignatureFailed,    ///< The signature does not match
-	ErrorInvalidCA,          ///< The Certificate Authority is invalid
-	ErrorInvalidPurpose,     ///< The purpose does not match the intended usage
-	ErrorSelfSigned,         ///< The certificate is self-signed, and is not found in the list of trusted certificates
-	ErrorRevoked,            ///< The certificate has been revoked
-	ErrorPathLengthExceeded, ///< The path length from the root CA to this certificate is too long
-	ErrorExpired,            ///< The certificate has expired, or is not yet valid (e.g. current time is earlier than notBefore time)
-	ErrorExpiredCA,          ///< The Certificate Authority has expired
-	ErrorValidityUnknown = 64  ///< Validity is unknown
+    ValidityGood,            ///< The certificate is valid
+    ErrorRejected,           ///< The root CA rejected the certificate purpose
+    ErrorUntrusted,          ///< The certificate is not trusted
+    ErrorSignatureFailed,    ///< The signature does not match
+    ErrorInvalidCA,          ///< The Certificate Authority is invalid
+    ErrorInvalidPurpose,     ///< The purpose does not match the intended usage
+    ErrorSelfSigned,         ///< The certificate is self-signed, and is not found in the list of trusted certificates
+    ErrorRevoked,            ///< The certificate has been revoked
+    ErrorPathLengthExceeded, ///< The path length from the root CA to this certificate is too long
+    ErrorExpired,   ///< The certificate has expired, or is not yet valid (e.g. current time is earlier than notBefore
+                    ///< time)
+    ErrorExpiredCA, ///< The Certificate Authority has expired
+    ErrorValidityUnknown = 64 ///< Validity is unknown
 };
 
 /**
@@ -507,10 +506,10 @@ enum Validity
 */
 enum ValidateFlags
 {
-	ValidateAll     = 0x00,  // Verify all conditions
-	ValidateRevoked = 0x01,  // Verify the certificate was not revoked
-	ValidateExpired = 0x02,  // Verify the certificate has not expired
-	ValidatePolicy  = 0x04   // Verify the certificate can be used for a specified purpose
+    ValidateAll     = 0x00, // Verify all conditions
+    ValidateRevoked = 0x01, // Verify the certificate was not revoked
+    ValidateExpired = 0x02, // Verify the certificate has not expired
+    ValidatePolicy  = 0x04  // Verify the certificate can be used for a specified purpose
 };
 
 /**
@@ -539,16 +538,16 @@ typedef QMultiMap<CertificateInfoType, QString> CertificateInfo;
 class CertificateInfoOrdered : public QList<CertificateInfoPair>
 {
 public:
-	/**
-	   Convert to RFC 1779 string format
-	*/
-	inline QString toString() const;
+    /**
+       Convert to RFC 1779 string format
+    */
+    inline QString toString() const;
 
-	/**
-	   Return a new CertificateInfoOrdered that only contains
-	   the Distinguished Name (DN) types found in this object.
-	*/
-	inline CertificateInfoOrdered dnOnly() const;
+    /**
+       Return a new CertificateInfoOrdered that only contains
+       the Distinguished Name (DN) types found in this object.
+    */
+    inline CertificateInfoOrdered dnOnly() const;
 };
 
 /**
@@ -566,15 +565,9 @@ QCA_EXPORT QString orderedToDNString(const CertificateInfoOrdered &in);
 */
 QCA_EXPORT CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in);
 
-inline QString CertificateInfoOrdered::toString() const
-{
-	return orderedToDNString(*this);
-}
+inline QString CertificateInfoOrdered::toString() const { return orderedToDNString(*this); }
 
-inline CertificateInfoOrdered CertificateInfoOrdered::dnOnly() const
-{
-	return orderedDNOnly(*this);
-}
+inline CertificateInfoOrdered CertificateInfoOrdered::dnOnly() const { return orderedDNOnly(*this); }
 
 /**
    %Certificate constraints type
@@ -601,239 +594,239 @@ QCA_EXPORT QStringList makeFriendlyNames(const QList<Certificate> &list);
 class QCA_EXPORT CertificateOptions
 {
 public:
-	/**
-	   Create a Certificate options set
+    /**
+       Create a Certificate options set
 
-	   \param format the format to create the certificate request in
-	*/
-	CertificateOptions(CertificateRequestFormat format = PKCS10);
+       \param format the format to create the certificate request in
+    */
+    CertificateOptions(CertificateRequestFormat format = PKCS10);
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the Certificate Options to copy into this object
-	*/
-	CertificateOptions(const CertificateOptions &from);
-	~CertificateOptions();
+       \param from the Certificate Options to copy into this object
+    */
+    CertificateOptions(const CertificateOptions &from);
+    ~CertificateOptions();
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the Certificate Options to copy into this object
-	*/
-	CertificateOptions & operator=(const CertificateOptions &from);
+       \param from the Certificate Options to copy into this object
+    */
+    CertificateOptions &operator=(const CertificateOptions &from);
 
-	/**
-	   test the format type for this certificate
-	*/
-	CertificateRequestFormat format() const;
+    /**
+       test the format type for this certificate
+    */
+    CertificateRequestFormat format() const;
 
-	/**
-	   Specify the format for this certificate
+    /**
+       Specify the format for this certificate
 
-	   \param f the format to use
-	*/
-	void setFormat(CertificateRequestFormat f);
+       \param f the format to use
+    */
+    void setFormat(CertificateRequestFormat f);
 
-	/**
-	   Test if the certificate options object is valid
+    /**
+       Test if the certificate options object is valid
 
-	   \return true if the certificate options object is valid
-	*/
-	bool isValid() const;
+       \return true if the certificate options object is valid
+    */
+    bool isValid() const;
 
-	/**
-	   The challenge part of the certificate
+    /**
+       The challenge part of the certificate
 
-	   For CertificateRequest only
+       For CertificateRequest only
 
-	   \sa setChallenge
-	*/
-	QString challenge() const;
+       \sa setChallenge
+    */
+    QString challenge() const;
 
-	/**
-	   Information on the subject of the certificate
+    /**
+       Information on the subject of the certificate
 
-	   \sa setInfo
-	*/
-	CertificateInfo info() const;
+       \sa setInfo
+    */
+    CertificateInfo info() const;
 
-	/**
-	   Information on the subject of the certificate, in the
-	   exact order the items will be written
+    /**
+       Information on the subject of the certificate, in the
+       exact order the items will be written
 
-	   \sa setInfoOrdered
-	*/
-	CertificateInfoOrdered infoOrdered() const;
+       \sa setInfoOrdered
+    */
+    CertificateInfoOrdered infoOrdered() const;
 
-	/**
-	   List the constraints on this certificate
-	*/
-	Constraints constraints() const;
+    /**
+       List the constraints on this certificate
+    */
+    Constraints constraints() const;
 
-	/**
-	   list the policies on this certificate
-	*/
-	QStringList policies() const;
+    /**
+       list the policies on this certificate
+    */
+    QStringList policies() const;
 
-	/**
-	   list of URI locations for CRL files
+    /**
+       list of URI locations for CRL files
 
-	   each URI refers to the same CRL file
+       each URI refers to the same CRL file
 
-	   For Certificate creation only
-	*/
-	QStringList crlLocations() const;
+       For Certificate creation only
+    */
+    QStringList crlLocations() const;
 
-	/**
-	   list of URI locations for issuer certificate files
+    /**
+       list of URI locations for issuer certificate files
 
-	   each URI refers to the same issuer file
+       each URI refers to the same issuer file
 
-	   For Certificate creation only
-	*/
-	QStringList issuerLocations() const;
+       For Certificate creation only
+    */
+    QStringList issuerLocations() const;
 
-	/**
-	   list of URI locations for OCSP services
+    /**
+       list of URI locations for OCSP services
 
-	   For Certificate creation only
-	*/
-	QStringList ocspLocations() const;
+       For Certificate creation only
+    */
+    QStringList ocspLocations() const;
 
-	/**
-	   test if the certificate is a CA cert
+    /**
+       test if the certificate is a CA cert
 
-	   \sa setAsCA
-	   \sa setAsUser
-	*/
-	bool isCA() const;
+       \sa setAsCA
+       \sa setAsUser
+    */
+    bool isCA() const;
 
-	/**
-	   return the path limit on this certificate
-	*/
-	int pathLimit() const;
+    /**
+       return the path limit on this certificate
+    */
+    int pathLimit() const;
 
-	/**
-	   The serial number for the certificate
+    /**
+       The serial number for the certificate
 
-	   For Certificate creation only
-	*/
-	BigInteger serialNumber() const;
+       For Certificate creation only
+    */
+    BigInteger serialNumber() const;
 
-	/**
-	   the first time the certificate will be valid
+    /**
+       the first time the certificate will be valid
 
-	   For Certificate creation only
-	*/
-	QDateTime notValidBefore() const;
+       For Certificate creation only
+    */
+    QDateTime notValidBefore() const;
 
-	/**
-	   the last time the certificate is valid
+    /**
+       the last time the certificate is valid
 
-	   For Certificate creation only
-	*/
-	QDateTime notValidAfter() const;
+       For Certificate creation only
+    */
+    QDateTime notValidAfter() const;
 
-	/**
-	   Specify the challenge associated with this
-	   certificate
+    /**
+       Specify the challenge associated with this
+       certificate
 
-	   \param s the challenge string
+       \param s the challenge string
 
-	   \sa challenge()
-	*/
-	void setChallenge(const QString &s);
+       \sa challenge()
+    */
+    void setChallenge(const QString &s);
 
-	/**
-	   Specify information for the subject associated with the
-	   certificate
+    /**
+       Specify information for the subject associated with the
+       certificate
 
-	   \param info the information for the subject
+       \param info the information for the subject
 
-	   \sa info()
-	*/
-	void setInfo(const CertificateInfo &info);
+       \sa info()
+    */
+    void setInfo(const CertificateInfo &info);
 
-	/**
-	   Specify information for the subject associated with the
-	   certificate
+    /**
+       Specify information for the subject associated with the
+       certificate
 
-	   \param info the information for the subject
+       \param info the information for the subject
 
-	   \sa info()
-	*/
-	void setInfoOrdered(const CertificateInfoOrdered &info);
+       \sa info()
+    */
+    void setInfoOrdered(const CertificateInfoOrdered &info);
 
-	/**
-	   set the constraints on the certificate
+    /**
+       set the constraints on the certificate
 
-	   \param constraints the constraints to be used for the certificate
-	*/
-	void setConstraints(const Constraints &constraints);
+       \param constraints the constraints to be used for the certificate
+    */
+    void setConstraints(const Constraints &constraints);
 
-	/**
-	   set the policies on the certificate
+    /**
+       set the policies on the certificate
 
-	   \param policies the policies to be used for the certificate
-	*/
-	void setPolicies(const QStringList &policies);
+       \param policies the policies to be used for the certificate
+    */
+    void setPolicies(const QStringList &policies);
 
-	/**
-	   set the CRL locations of the certificate
+    /**
+       set the CRL locations of the certificate
 
-	   each location refers to the same CRL.
+       each location refers to the same CRL.
 
-	   \param locations a list of URIs to CRL files
-	*/
-	void setCRLLocations(const QStringList &locations);
+       \param locations a list of URIs to CRL files
+    */
+    void setCRLLocations(const QStringList &locations);
 
-	/**
-	   set the issuer certificate locations of the certificate
+    /**
+       set the issuer certificate locations of the certificate
 
-	   each location refers to the same issuer file.
+       each location refers to the same issuer file.
 
-	   \param locations a list of URIs to issuer certificate files
-	*/
-	void setIssuerLocations(const QStringList &locations);
+       \param locations a list of URIs to issuer certificate files
+    */
+    void setIssuerLocations(const QStringList &locations);
 
-	/**
-	   set the OCSP service locations of the certificate
+    /**
+       set the OCSP service locations of the certificate
 
-	   \param locations a list of URIs to OCSP services
-	*/
-	void setOCSPLocations(const QStringList &locations);
+       \param locations a list of URIs to OCSP services
+    */
+    void setOCSPLocations(const QStringList &locations);
 
-	/**
-	   set the certificate to be a CA cert
+    /**
+       set the certificate to be a CA cert
 
-	   \param pathLimit the number of intermediate certificates allowable
-	*/
-	void setAsCA(int pathLimit = 8); // value from Botan
+       \param pathLimit the number of intermediate certificates allowable
+    */
+    void setAsCA(int pathLimit = 8); // value from Botan
 
-	/**
-	   set the certificate to be a user cert (this is the default)
-	*/
-	void setAsUser();
+    /**
+       set the certificate to be a user cert (this is the default)
+    */
+    void setAsUser();
 
-	/**
-	   Set the serial number property on this certificate
+    /**
+       Set the serial number property on this certificate
 
-	   \param i the serial number to use
-	*/
-	void setSerialNumber(const BigInteger &i);
+       \param i the serial number to use
+    */
+    void setSerialNumber(const BigInteger &i);
 
-	/**
-	   Set the validity period for the certificate
+    /**
+       Set the validity period for the certificate
 
-	   \param start the first time this certificate becomes valid
-	   \param end the last time this certificate is valid
-	*/
-	void setValidityPeriod(const QDateTime &start, const QDateTime &end);
+       \param start the first time this certificate becomes valid
+       \param end the last time this certificate is valid
+    */
+    void setValidityPeriod(const QDateTime &start, const QDateTime &end);
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -848,338 +841,340 @@ private:
 class QCA_EXPORT Certificate : public Algorithm
 {
 public:
-	/**
-	   Create an empty Certificate
-	*/
-	Certificate();
+    /**
+       Create an empty Certificate
+    */
+    Certificate();
 
-	/**
-	   Create a Certificate from a PEM encoded file
+    /**
+       Create a Certificate from a PEM encoded file
 
-	   \param fileName the name (and path, if required)
-	   of the file that contains the PEM encoded certificate
-	*/
-	Certificate(const QString &fileName);
+       \param fileName the name (and path, if required)
+       of the file that contains the PEM encoded certificate
+    */
+    Certificate(const QString &fileName);
 
-	/**
-	   Create a Certificate with specified options and a specified private
-	   key
+    /**
+       Create a Certificate with specified options and a specified private
+       key
 
-	   \param opts the options to use
-	   \param key the private key for this certificate
-	   \param provider the provider to use to create this key, if a
-	   particular provider is required
-	*/
-	Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
+       \param opts the options to use
+       \param key the private key for this certificate
+       \param provider the provider to use to create this key, if a
+       particular provider is required
+    */
+    Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the certificate to copy from
-	*/
-	Certificate(const Certificate &from);
+       \param from the certificate to copy from
+    */
+    Certificate(const Certificate &from);
 
-	~Certificate() override;
+    ~Certificate() override;
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the Certificate to assign from
-	*/
-	Certificate & operator=(const Certificate &from);
+       \param from the Certificate to assign from
+    */
+    Certificate &operator=(const Certificate &from);
 
-	/**
-	   Test if the certificate is empty (null)
-	   \return true if the certificate is null
-	*/
-	bool isNull() const;
+    /**
+       Test if the certificate is empty (null)
+       \return true if the certificate is null
+    */
+    bool isNull() const;
 
-	/**
-	   The earliest date that the certificate is valid
-	*/
-	QDateTime notValidBefore() const;
+    /**
+       The earliest date that the certificate is valid
+    */
+    QDateTime notValidBefore() const;
 
-	/**
-	   The latest date that the certificate is valid
-	*/
-	QDateTime notValidAfter() const;
+    /**
+       The latest date that the certificate is valid
+    */
+    QDateTime notValidAfter() const;
 
-	/**
-	   Properties of the subject of the certificate, as a QMultiMap
+    /**
+       Properties of the subject of the certificate, as a QMultiMap
 
-	   This is the method that provides information on the
-	   subject organisation, common name, DNS name, and so
-	   on. The list of information types (i.e. the key to
-	   the multi-map) is a CertificateInfoType. The values
-	   are a list of QString.
+       This is the method that provides information on the
+       subject organisation, common name, DNS name, and so
+       on. The list of information types (i.e. the key to
+       the multi-map) is a CertificateInfoType. The values
+       are a list of QString.
 
-	   An example of how you can iterate over the list is:
-	   \code
+       An example of how you can iterate over the list is:
+       \code
 foreach( QString dns, info.values(QCA::DNS) )
 {
-	std::cout << "    " << qPrintable(dns) << std::endl;
+    std::cout << "    " << qPrintable(dns) << std::endl;
 }
-	   \endcode
-	*/
-	CertificateInfo subjectInfo() const;
+       \endcode
+    */
+    CertificateInfo subjectInfo() const;
 
-	/**
-	   Properties of the subject of the certificate, as 
-	   an ordered list (QList of CertificateInfoPair).
+    /**
+       Properties of the subject of the certificate, as
+       an ordered list (QList of CertificateInfoPair).
 
-	   This allows access to the certificate information 
-	   in the same order as they appear in a certificate.
-	   Each pair in the list has a type and a value.
+       This allows access to the certificate information
+       in the same order as they appear in a certificate.
+       Each pair in the list has a type and a value.
 
-	   For example:
-	   \code
+       For example:
+       \code
 CertificateInfoOrdered info = cert.subjectInfoOrdered();
 // info[0].type == CommonName
 // info[0].value == "example.com"
-	   \endcode
+       \endcode
 
-	   \sa subjectInfo for an unordered version
-	   \sa issuerInfoOrdered for the ordered information on the issuer
-	   \sa CertificateInfoPair for the elements in the list
-	*/
-	CertificateInfoOrdered subjectInfoOrdered() const;
+       \sa subjectInfo for an unordered version
+       \sa issuerInfoOrdered for the ordered information on the issuer
+       \sa CertificateInfoPair for the elements in the list
+    */
+    CertificateInfoOrdered subjectInfoOrdered() const;
 
-	/**
-	   Properties of the issuer of the certificate
+    /**
+       Properties of the issuer of the certificate
 
-	   \sa subjectInfo for how the return value works.
-	*/
-	CertificateInfo issuerInfo() const;
+       \sa subjectInfo for how the return value works.
+    */
+    CertificateInfo issuerInfo() const;
 
-	/**
-	   Properties of the issuer of the certificate, as 
-	   an ordered list (QList of CertificateInfoPair).
+    /**
+       Properties of the issuer of the certificate, as
+       an ordered list (QList of CertificateInfoPair).
 
-	   This allows access to the certificate information 
-	   in the same order as they appear in a certificate.
-	   Each pair in the list has a type and a value.
+       This allows access to the certificate information
+       in the same order as they appear in a certificate.
+       Each pair in the list has a type and a value.
 
-	   \sa issuerInfo for an unordered version
-	   \sa subjectInfoOrdered for the ordered information on the subject
-	   \sa CertificateInfoPair for the elements in the list
-	*/
-	CertificateInfoOrdered issuerInfoOrdered() const;
+       \sa issuerInfo for an unordered version
+       \sa subjectInfoOrdered for the ordered information on the subject
+       \sa CertificateInfoPair for the elements in the list
+    */
+    CertificateInfoOrdered issuerInfoOrdered() const;
 
-	/**
-	   The constraints that apply to this certificate
-	*/
-	Constraints constraints() const;
+    /**
+       The constraints that apply to this certificate
+    */
+    Constraints constraints() const;
 
-	/**
-	   The policies that apply to this certificate
+    /**
+       The policies that apply to this certificate
 
-	   Policies are specified as strings containing OIDs
-	*/
-	QStringList policies() const;
+       Policies are specified as strings containing OIDs
+    */
+    QStringList policies() const;
 
-	/**
-	   List of URI locations for CRL files
+    /**
+       List of URI locations for CRL files
 
-	   Each URI refers to the same CRL file
-	*/
-	QStringList crlLocations() const;
+       Each URI refers to the same CRL file
+    */
+    QStringList crlLocations() const;
 
-	/**
-	   List of URI locations for issuer certificate files
+    /**
+       List of URI locations for issuer certificate files
 
-	   Each URI refers to the same issuer file
-	*/
-	QStringList issuerLocations() const;
+       Each URI refers to the same issuer file
+    */
+    QStringList issuerLocations() const;
 
-	/**
-	   List of URI locations for OCSP services
-	*/
-	QStringList ocspLocations() const;
+    /**
+       List of URI locations for OCSP services
+    */
+    QStringList ocspLocations() const;
 
-	/**
-	   The common name of the subject of the certificate
+    /**
+       The common name of the subject of the certificate
 
-	   Common names are normally the name of a person, company or
-	   organisation
-	*/
-	QString commonName() const;
+       Common names are normally the name of a person, company or
+       organisation
+    */
+    QString commonName() const;
 
-	/**
-	   The serial number of the certificate
-	*/
-	BigInteger serialNumber() const;
+    /**
+       The serial number of the certificate
+    */
+    BigInteger serialNumber() const;
 
-	/**
-	   The public key associated with the subject of the certificate
-	*/
-	PublicKey subjectPublicKey() const;
+    /**
+       The public key associated with the subject of the certificate
+    */
+    PublicKey subjectPublicKey() const;
 
-	/**
-	   Test if the Certificate is valid as a Certificate Authority
+    /**
+       Test if the Certificate is valid as a Certificate Authority
 
-	   \return true if the Certificate is valid as a Certificate Authority
-	*/
-	bool isCA() const;
+       \return true if the Certificate is valid as a Certificate Authority
+    */
+    bool isCA() const;
 
-	/**
-	   Test if the Certificate is self-signed
+    /**
+       Test if the Certificate is self-signed
 
-	   \return true if the certificate is self-signed
-	*/
-	bool isSelfSigned() const;
+       \return true if the certificate is self-signed
+    */
+    bool isSelfSigned() const;
 
-	/**
-	   Test if the Certificate has signed another Certificate
-	   object and is therefore the issuer
+    /**
+       Test if the Certificate has signed another Certificate
+       object and is therefore the issuer
 
-	   \param other the certificate to test
+       \param other the certificate to test
 
-	   \return true if this certificate is the issuer of the argument
-	*/
-	bool isIssuerOf(const Certificate &other) const;
+       \return true if this certificate is the issuer of the argument
+    */
+    bool isIssuerOf(const Certificate &other) const;
 
-	/**
-	   The upper bound of the number of links in the certificate
-	   chain, if any
-	*/
-	int pathLimit() const;
+    /**
+       The upper bound of the number of links in the certificate
+       chain, if any
+    */
+    int pathLimit() const;
 
-	/**
-	   The signature algorithm used for the signature on this certificate
-	*/
-	SignatureAlgorithm signatureAlgorithm() const;
+    /**
+       The signature algorithm used for the signature on this certificate
+    */
+    SignatureAlgorithm signatureAlgorithm() const;
 
-	/**
-	   The key identifier associated with the subject
-	*/
-	QByteArray subjectKeyId() const;
+    /**
+       The key identifier associated with the subject
+    */
+    QByteArray subjectKeyId() const;
 
-	/**
-	   The key identifier associated with the issuer
-	*/
-	QByteArray issuerKeyId() const;
+    /**
+       The key identifier associated with the issuer
+    */
+    QByteArray issuerKeyId() const;
 
-	/**
-	   Check the validity of a certificate
+    /**
+       Check the validity of a certificate
 
-	   \param trusted a collection of trusted certificates
-	   \param untrusted a collection of additional certificates, not
-	   necessarily trusted
-	   \param u the use required for the certificate
-	   \param vf the conditions to validate
+       \param trusted a collection of trusted certificates
+       \param untrusted a collection of additional certificates, not
+       necessarily trusted
+       \param u the use required for the certificate
+       \param vf the conditions to validate
 
-	   \note This function may block
-	*/
-	Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted, UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
+       \note This function may block
+    */
+    Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted,
+                      UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
 
-	/**
-	   Export the Certificate into a DER format
-	*/
-	QByteArray toDER() const;
+    /**
+       Export the Certificate into a DER format
+    */
+    QByteArray toDER() const;
 
-	/**
-	   Export the Certificate into a PEM format
-	*/
-	QString toPEM() const;
+    /**
+       Export the Certificate into a PEM format
+    */
+    QString toPEM() const;
 
-	/**
-	   Export the Certificate into PEM format in a file
+    /**
+       Export the Certificate into PEM format in a file
 
-	   \param fileName the name of the file to use
-	*/
-	bool toPEMFile(const QString &fileName) const;
+       \param fileName the name of the file to use
+    */
+    bool toPEMFile(const QString &fileName) const;
 
-	/**
-	   Import the certificate from DER
+    /**
+       Import the certificate from DER
 
-	   \param a the array containing the certificate in DER format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param a the array containing the certificate in DER format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the Certificate corresponding to the certificate in the
-	   provided array
-	*/
-	static Certificate fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the Certificate corresponding to the certificate in the
+       provided array
+    */
+    static Certificate fromDER(const QByteArray &a, ConvertResult *result = nullptr,
+                               const QString &provider = QString());
 
-	/**
-	   Import the certificate from PEM format
+    /**
+       Import the certificate from PEM format
 
-	   \param s the string containing the certificate in PEM format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param s the string containing the certificate in PEM format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the Certificate corresponding to the certificate in the
-	   provided string
-	*/
-	static Certificate fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the Certificate corresponding to the certificate in the
+       provided string
+    */
+    static Certificate fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
-	/**
-	   Import the certificate from a file
+    /**
+       Import the certificate from a file
 
-	   \param fileName the name (and path, if required) of the file
-	   containing the certificate in PEM format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param fileName the name (and path, if required) of the file
+       containing the certificate in PEM format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the Certificate corresponding to the certificate in the
-	   provided string
-	*/
-	static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the Certificate corresponding to the certificate in the
+       provided string
+    */
+    static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = nullptr,
+                                   const QString &provider = QString());
 
-	/**
-	   Test if the subject of the certificate matches a specified host
-	   name
+    /**
+       Test if the subject of the certificate matches a specified host
+       name
 
-	   This will return true (indicating a match), if the specified host
-	   name meets the RFC 2818 validation rules with this certificate.
+       This will return true (indicating a match), if the specified host
+       name meets the RFC 2818 validation rules with this certificate.
 
-	   If the host is an internationalized domain name, then it must be
-	   provided in unicode format, not in IDNA ACE/punycode format.
+       If the host is an internationalized domain name, then it must be
+       provided in unicode format, not in IDNA ACE/punycode format.
 
-	   \param host the name of the host to compare to
-	*/
-	bool matchesHostName(const QString &host) const;
+       \param host the name of the host to compare to
+    */
+    bool matchesHostName(const QString &host) const;
 
-	/**
-	   Test for equality of two certificates
+    /**
+       Test for equality of two certificates
 
-	   \param a the certificate to compare this certificate with
+       \param a the certificate to compare this certificate with
 
-	   \return true if the two certificates are the same
-	*/
-	bool operator==(const Certificate &a) const;
+       \return true if the two certificates are the same
+    */
+    bool operator==(const Certificate &a) const;
 
-	/**
-	   Inequality operator
+    /**
+       Inequality operator
 
-	   \param other the certificate to compare this certificate with
-	*/
-	inline bool operator!=(const Certificate &other) const
-	{
-		return !(*this == other);
-	}
+       \param other the certificate to compare this certificate with
+    */
+    inline bool operator!=(const Certificate &other) const { return !(*this == other); }
 
-	/**
-	   \internal
+    /**
+       \internal
 
-	   \param c context (internal)
-	*/
-	void change(CertContext *c);
+       \param c context (internal)
+    */
+    void change(CertContext *c);
 
 private:
-	class Private;
-	friend class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    friend class Private;
+    QSharedDataPointer<Private> d;
 
-	friend class CertificateChain;
-	Validity chain_validate(const CertificateChain &chain, const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const;
-	CertificateChain chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers, Validity *result) const;
+    friend class CertificateChain;
+    Validity         chain_validate(const CertificateChain &chain, const CertificateCollection &trusted,
+                                    const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const;
+    CertificateChain chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers,
+                                    Validity *result) const;
 };
 
 /**
@@ -1207,77 +1202,80 @@ private:
 class CertificateChain : public QList<Certificate>
 {
 public:
-	/**
-	   Create an empty certificate chain
-	*/
-	inline CertificateChain() {}
+    /**
+       Create an empty certificate chain
+    */
+    inline CertificateChain() { }
 
-	/**
-	   Create a certificate chain, starting at the specified certificate
+    /**
+       Create a certificate chain, starting at the specified certificate
 
-	   \param primary the end-user certificate that forms one end of the
-	   chain
-	*/
-	inline CertificateChain(const Certificate &primary) { append(primary); }
+       \param primary the end-user certificate that forms one end of the
+       chain
+    */
+    inline CertificateChain(const Certificate &primary) { append(primary); }
 
-	/**
-	   Return the primary (end-user) Certificate
-	*/
-	inline const Certificate & primary() const { return first(); }
+    /**
+       Return the primary (end-user) Certificate
+    */
+    inline const Certificate &primary() const { return first(); }
 
-	/**
-	   Check the validity of a certificate chain
+    /**
+       Check the validity of a certificate chain
 
-	   \param trusted a collection of trusted certificates
-	   \param untrusted_crls a list of additional CRLs, not necessarily
-	   trusted
-	   \param u the use required for the primary certificate
-	   \param vf the conditions to validate
+       \param trusted a collection of trusted certificates
+       \param untrusted_crls a list of additional CRLs, not necessarily
+       trusted
+       \param u the use required for the primary certificate
+       \param vf the conditions to validate
 
-	   \note This function may block
+       \note This function may block
 
-	   \sa Certificate::validate()
-	*/
-	inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls = QList<CRL>(), UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
+       \sa Certificate::validate()
+    */
+    inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls = QList<CRL>(),
+                             UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
 
-	/**
-	   Complete a certificate chain for the primary certificate, using the
-	   rest of the certificates in the chain object, as well as those in
-	   \a issuers, as possible issuers in the chain.  If there are issuers
-	   missing, then the chain might be incomplete (at the worst case, if
-	   no issuers exist for the primary certificate, then the resulting
-	   chain will consist of just the primary certificate).  Use the
-	   \a result argument to find out if there was a problem during
-	   completion.  A result of ValidityGood means the chain was completed
-	   successfully.
+    /**
+       Complete a certificate chain for the primary certificate, using the
+       rest of the certificates in the chain object, as well as those in
+       \a issuers, as possible issuers in the chain.  If there are issuers
+       missing, then the chain might be incomplete (at the worst case, if
+       no issuers exist for the primary certificate, then the resulting
+       chain will consist of just the primary certificate).  Use the
+       \a result argument to find out if there was a problem during
+       completion.  A result of ValidityGood means the chain was completed
+       successfully.
 
-	   The newly constructed CertificateChain is returned.
+       The newly constructed CertificateChain is returned.
 
-	   If the certificate chain is empty, then this will return an empty
-	   CertificateChain object.
+       If the certificate chain is empty, then this will return an empty
+       CertificateChain object.
 
-	   \param issuers a pool of issuers to draw from as necessary
-	   \param result the result of the completion operation
+       \param issuers a pool of issuers to draw from as necessary
+       \param result the result of the completion operation
 
-	   \note This function may block
+       \note This function may block
 
-	   \sa validate
-	*/
-	inline CertificateChain complete(const QList<Certificate> &issuers = QList<Certificate>(), Validity *result = nullptr) const;
+       \sa validate
+    */
+    inline CertificateChain complete(const QList<Certificate> &issuers = QList<Certificate>(),
+                                     Validity *                result  = nullptr) const;
 };
 
-inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const
+inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls,
+                                           UsageMode u, ValidateFlags vf) const
 {
-	if(isEmpty())
-		return ErrorValidityUnknown;
-	return first().chain_validate(*this, trusted, untrusted_crls, u, vf);
+    if (isEmpty())
+        return ErrorValidityUnknown;
+    return first().chain_validate(*this, trusted, untrusted_crls, u, vf);
 }
 
 inline CertificateChain CertificateChain::complete(const QList<Certificate> &issuers, Validity *result) const
 {
-	if(isEmpty())
-		return CertificateChain();
-	return first().chain_complete(*this, issuers, result);
+    if (isEmpty())
+        return CertificateChain();
+    return first().chain_complete(*this, issuers, result);
 }
 
 /**
@@ -1292,265 +1290,266 @@ inline CertificateChain CertificateChain::complete(const QList<Certificate> &iss
 class QCA_EXPORT CertificateRequest : public Algorithm
 {
 public:
-	/**
-	   Create an empty certificate request
-	*/
-	CertificateRequest();
+    /**
+       Create an empty certificate request
+    */
+    CertificateRequest();
 
-	/**
-	   Create a certificate request based on the contents of a file
+    /**
+       Create a certificate request based on the contents of a file
 
-	   \param fileName the file (and path, if necessary) containing a PEM
-	   encoded certificate request
-	*/
-	CertificateRequest(const QString &fileName);
+       \param fileName the file (and path, if necessary) containing a PEM
+       encoded certificate request
+    */
+    CertificateRequest(const QString &fileName);
 
-	/**
-	   Create a certificate request based on specified options
+    /**
+       Create a certificate request based on specified options
 
-	   \param opts the options to use in the certificate request
-	   \param key the private key that matches the certificate being
-	   requested
-	   \param provider the provider to use, if a specific provider is
-	   required
-	*/
-	CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
+       \param opts the options to use in the certificate request
+       \param key the private key that matches the certificate being
+       requested
+       \param provider the provider to use, if a specific provider is
+       required
+    */
+    CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider = QString());
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the request to copy from
-	*/
-	CertificateRequest(const CertificateRequest &from);
-
-	~CertificateRequest() override;
+       \param from the request to copy from
+    */
+    CertificateRequest(const CertificateRequest &from);
+
+    ~CertificateRequest() override;
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the request to assign from
-	*/
-	CertificateRequest & operator=(const CertificateRequest &from);
+       \param from the request to assign from
+    */
+    CertificateRequest &operator=(const CertificateRequest &from);
 
-	/**
-	   test if the certificate request is empty
+    /**
+       test if the certificate request is empty
 
-	   \return true if the certificate request is empty, otherwise false
-	*/
-	bool isNull() const;
+       \return true if the certificate request is empty, otherwise false
+    */
+    bool isNull() const;
 
-	/**
-	   Test if the certificate request can use a specified format
-
-	   \param f the format to test for
-	   \param provider the provider to use, if a specific provider is
-	   required
+    /**
+       Test if the certificate request can use a specified format
 
-	   \return true if the certificate request can use the specified
-	   format
-	*/
-	static bool canUseFormat(CertificateRequestFormat f, const QString &provider = QString());
+       \param f the format to test for
+       \param provider the provider to use, if a specific provider is
+       required
 
-	/**
-	   the format that this Certificate request is in
-	*/
-	CertificateRequestFormat format() const;
+       \return true if the certificate request can use the specified
+       format
+    */
+    static bool canUseFormat(CertificateRequestFormat f, const QString &provider = QString());
 
-	/**
-	   Information on the subject of the certificate being requested
+    /**
+       the format that this Certificate request is in
+    */
+    CertificateRequestFormat format() const;
 
-	   \note this only applies to PKCS#10 format certificate requests
+    /**
+       Information on the subject of the certificate being requested
 
-	   \sa subjectInfoOrdered for a version that maintains order
-	   in the subject information.
-	*/
-	CertificateInfo subjectInfo() const;
+       \note this only applies to PKCS#10 format certificate requests
 
-	/**
-	   Information on the subject of the certificate being requested, as 
-	   an ordered list (QList of CertificateInfoPair).
+       \sa subjectInfoOrdered for a version that maintains order
+       in the subject information.
+    */
+    CertificateInfo subjectInfo() const;
 
-	   \note this only applies to PKCS#10 format certificate requests
+    /**
+       Information on the subject of the certificate being requested, as
+       an ordered list (QList of CertificateInfoPair).
 
-	   \sa subjectInfo for a version that does not maintain order, but
-	   allows access based on a multimap.
-	   \sa CertificateInfoPair for the elements in the list
-	*/
-	CertificateInfoOrdered subjectInfoOrdered() const;
+       \note this only applies to PKCS#10 format certificate requests
 
-	/**
-	   The constraints that apply to this certificate request
+       \sa subjectInfo for a version that does not maintain order, but
+       allows access based on a multimap.
+       \sa CertificateInfoPair for the elements in the list
+    */
+    CertificateInfoOrdered subjectInfoOrdered() const;
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	Constraints constraints() const;
+    /**
+       The constraints that apply to this certificate request
 
-	/**
-	   The policies that apply to this certificate request
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    Constraints constraints() const;
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	QStringList policies() const;
+    /**
+       The policies that apply to this certificate request
 
-	/**
-	   The public key belonging to the issuer
-	*/
-	PublicKey subjectPublicKey() const;
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    QStringList policies() const;
 
-	/**
-	   Test if this Certificate Request is for a Certificate Authority
-	   certificate
+    /**
+       The public key belonging to the issuer
+    */
+    PublicKey subjectPublicKey() const;
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	bool isCA() const;
+    /**
+       Test if this Certificate Request is for a Certificate Authority
+       certificate
 
-	/**
-	   The path limit for the certificate in this Certificate Request
-
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	int pathLimit() const;
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    bool isCA() const;
 
-	/**
-	   The challenge associated with this certificate request
-	*/
-	QString challenge() const;
+    /**
+       The path limit for the certificate in this Certificate Request
 
-	/**
-	   The algorithm used to make the signature on this certificate
-	   request
-	*/
-	SignatureAlgorithm signatureAlgorithm() const;
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    int pathLimit() const;
 
-	/**
-	   Test for equality of two certificate requests
+    /**
+       The challenge associated with this certificate request
+    */
+    QString challenge() const;
 
-	   \param csr the certificate request to be compared to this certificate request
+    /**
+       The algorithm used to make the signature on this certificate
+       request
+    */
+    SignatureAlgorithm signatureAlgorithm() const;
 
-	   \return true if the two certificate requests are the same
-	*/
-	bool operator==(const CertificateRequest &csr) const;
+    /**
+       Test for equality of two certificate requests
 
-	/**
-	   Inequality operator
+       \param csr the certificate request to be compared to this certificate request
 
-	   \param other the certificate request to be compared to this certificate request
-	*/
-	inline bool operator!=(const CertificateRequest &other) const
-	{
-		return !(*this == other);
-	}
+       \return true if the two certificate requests are the same
+    */
+    bool operator==(const CertificateRequest &csr) const;
 
-	/**
-	   Export the Certificate Request into a DER format
+    /**
+       Inequality operator
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	QByteArray toDER() const;
+       \param other the certificate request to be compared to this certificate request
+    */
+    inline bool operator!=(const CertificateRequest &other) const { return !(*this == other); }
 
-	/**
-	   Export the Certificate Request into a PEM format
+    /**
+       Export the Certificate Request into a DER format
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	QString toPEM() const;
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    QByteArray toDER() const;
 
-	/**
-	   Export the Certificate into PEM format in a file
+    /**
+       Export the Certificate Request into a PEM format
 
-	   \param fileName the name of the file to use
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    QString toPEM() const;
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	bool toPEMFile(const QString &fileName) const;
+    /**
+       Export the Certificate into PEM format in a file
 
-	/**
-	   Import the certificate request from DER
+       \param fileName the name of the file to use
 
-	   \param a the array containing the certificate request in DER format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    bool toPEMFile(const QString &fileName) const;
 
-	   \return the CertificateRequest corresponding to the certificate
-	   request in the provided array
+    /**
+       Import the certificate request from DER
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	static CertificateRequest fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
+       \param a the array containing the certificate request in DER format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	/**
-	   Import the certificate request from PEM format
+       \return the CertificateRequest corresponding to the certificate
+       request in the provided array
 
-	   \param s the string containing the certificate request in PEM
-	   format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    static CertificateRequest fromDER(const QByteArray &a, ConvertResult *result = nullptr,
+                                      const QString &provider = QString());
 
-	   \return the CertificateRequest corresponding to the certificate
-	   request in the provided string
+    /**
+       Import the certificate request from PEM format
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	static CertificateRequest fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
+       \param s the string containing the certificate request in PEM
+       format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	/**
-	   Import the certificate request from a file
+       \return the CertificateRequest corresponding to the certificate
+       request in the provided string
 
-	   \param fileName the name (and path, if required) of the file
-	   containing the certificate request in PEM format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    static CertificateRequest fromPEM(const QString &s, ConvertResult *result = nullptr,
+                                      const QString &provider = QString());
 
-	   \return the CertificateRequest corresponding to the certificate
-	   request in the provided string
+    /**
+       Import the certificate request from a file
 
-	   \note this only applies to PKCS#10 format certificate requests
-	*/
-	static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
+       \param fileName the name (and path, if required) of the file
+       containing the certificate request in PEM format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	/**
-	   Export the CertificateRequest to a string
+       \return the CertificateRequest corresponding to the certificate
+       request in the provided string
 
-	   \return the string corresponding to the certificate request
+       \note this only applies to PKCS#10 format certificate requests
+    */
+    static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = nullptr,
+                                          const QString &provider = QString());
 
-	   \note this only applies to SPKAC format certificate requests
-	*/
-	QString toString() const;
+    /**
+       Export the CertificateRequest to a string
 
-	/**
-	   Import the CertificateRequest from a string
+       \return the string corresponding to the certificate request
 
-	   \param s the string containing to the certificate request
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \note this only applies to SPKAC format certificate requests
+    */
+    QString toString() const;
 
-	   \return the CertificateRequest corresponding to the certificate
-	   request in the provided string
+    /**
+       Import the CertificateRequest from a string
 
-	   \note this only applies to SPKAC format certificate requests
-	*/
-	static CertificateRequest fromString(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
+       \param s the string containing to the certificate request
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	/**
-	   \internal
+       \return the CertificateRequest corresponding to the certificate
+       request in the provided string
 
-	   \param c context (internal)
-	*/
-	void change(CSRContext *c);
+       \note this only applies to SPKAC format certificate requests
+    */
+    static CertificateRequest fromString(const QString &s, ConvertResult *result = nullptr,
+                                         const QString &provider = QString());
+
+    /**
+       \internal
+
+       \param c context (internal)
+    */
+    void change(CSRContext *c);
 
 private:
-	class Private;
-	friend class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    friend class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -1563,120 +1562,117 @@ private:
 class QCA_EXPORT CRLEntry
 {
 public:
-	/**
-	   The reason why the certificate has been revoked
-	*/
-	enum Reason
-	{
-		Unspecified,        ///< reason is unknown
-		KeyCompromise,      ///< private key has been compromised
-		CACompromise,       ///< certificate authority has been compromised
-		AffiliationChanged,
-		Superseded,         ///< certificate has been superseded
-		CessationOfOperation,
-		CertificateHold,    ///< certificate is on hold
-		RemoveFromCRL,      ///< certificate was previously in a CRL, but is now valid
-		PrivilegeWithdrawn,
-		AACompromise        ///< attribute authority has been compromised
-	};
+    /**
+       The reason why the certificate has been revoked
+    */
+    enum Reason
+    {
+        Unspecified,   ///< reason is unknown
+        KeyCompromise, ///< private key has been compromised
+        CACompromise,  ///< certificate authority has been compromised
+        AffiliationChanged,
+        Superseded, ///< certificate has been superseded
+        CessationOfOperation,
+        CertificateHold, ///< certificate is on hold
+        RemoveFromCRL,   ///< certificate was previously in a CRL, but is now valid
+        PrivilegeWithdrawn,
+        AACompromise ///< attribute authority has been compromised
+    };
 
-	/**
-	   create an empty CRL entry
-	*/
-	CRLEntry();
+    /**
+       create an empty CRL entry
+    */
+    CRLEntry();
 
-	/**
-	   create a CRL entry
+    /**
+       create a CRL entry
 
-	   \param c the certificate to revoke
-	   \param r the reason that the certificate is being revoked
-	*/
-	explicit CRLEntry(const Certificate &c, Reason r = Unspecified);
+       \param c the certificate to revoke
+       \param r the reason that the certificate is being revoked
+    */
+    explicit CRLEntry(const Certificate &c, Reason r = Unspecified);
 
-	/**
-	   create a CRL entry
+    /**
+       create a CRL entry
 
-	   \param serial the serial number of the Certificate being revoked
-	   \param time the time the Certificate was revoked (or will be
-	   revoked)
-	   \param r the reason that the certificate is being revoked
-	*/
-	CRLEntry(const BigInteger serial, const QDateTime &time, Reason r = Unspecified);
+       \param serial the serial number of the Certificate being revoked
+       \param time the time the Certificate was revoked (or will be
+       revoked)
+       \param r the reason that the certificate is being revoked
+    */
+    CRLEntry(const BigInteger serial, const QDateTime &time, Reason r = Unspecified);
 
-	/**
-	   Copy constructor
+    /**
+       Copy constructor
 
-	   \param from the CRLEntry to copy from
-	*/
-	CRLEntry(const CRLEntry &from);
+       \param from the CRLEntry to copy from
+    */
+    CRLEntry(const CRLEntry &from);
 
-	~CRLEntry();
+    ~CRLEntry();
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the CRLEntry to copy from
-	*/
-	CRLEntry & operator=(const CRLEntry &from);
+       \param from the CRLEntry to copy from
+    */
+    CRLEntry &operator=(const CRLEntry &from);
 
-	/**
-	   The serial number of the certificate that is the subject of this CRL entry
-	*/
-	BigInteger serialNumber() const;
+    /**
+       The serial number of the certificate that is the subject of this CRL entry
+    */
+    BigInteger serialNumber() const;
 
-	/**
-	   The time this CRL entry was created
-	*/
-	QDateTime time() const;
+    /**
+       The time this CRL entry was created
+    */
+    QDateTime time() const;
 
-	/**
-	   Test if this CRL entry is empty
-	*/
-	bool isNull() const;
+    /**
+       Test if this CRL entry is empty
+    */
+    bool isNull() const;
 
-	/**
-	   The reason that this CRL entry was created
+    /**
+       The reason that this CRL entry was created
 
-	   Alternatively, you might like to think of this as the reason that
-	   the subject certificate has been revoked
-	*/
-	Reason reason() const;
+       Alternatively, you might like to think of this as the reason that
+       the subject certificate has been revoked
+    */
+    Reason reason() const;
 
-	/**
-	   Test if one CRL entry is "less than" another
+    /**
+       Test if one CRL entry is "less than" another
 
-	   CRL entries are compared based on their serial number
+       CRL entries are compared based on their serial number
 
-	   \param a the CRL entry to be compared to this CRL entry.
-	*/
-	bool operator<(const CRLEntry &a) const;
+       \param a the CRL entry to be compared to this CRL entry.
+    */
+    bool operator<(const CRLEntry &a) const;
 
-	/**
-	   Test for equality of two CRL Entries
+    /**
+       Test for equality of two CRL Entries
 
-	   \param a the CRL entry to be compared to this CRL entry.
+       \param a the CRL entry to be compared to this CRL entry.
 
-	   \return true if the two certificates are the same
-	*/
-	bool operator==(const CRLEntry &a) const;
+       \return true if the two certificates are the same
+    */
+    bool operator==(const CRLEntry &a) const;
 
-	/**
-	   Inequality operator
+    /**
+       Inequality operator
 
-	   \param other the CRL entry to be compared to this CRL entry.
-	*/
-	inline bool operator!=(const CRLEntry &other) const
-	{
-		return !(*this == other);
-	}
+       \param other the CRL entry to be compared to this CRL entry.
+    */
+    inline bool operator!=(const CRLEntry &other) const { return !(*this == other); }
 
 private:
-	BigInteger _serial;
-	QDateTime _time;
-	Reason _reason;
+    BigInteger _serial;
+    QDateTime  _time;
+    Reason     _reason;
 
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -1702,176 +1698,174 @@ private:
 class QCA_EXPORT CRL : public Algorithm
 {
 public:
-	CRL();
+    CRL();
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the revocation list to copy from
-	*/
-	CRL(const CRL &from);
+       \param from the revocation list to copy from
+    */
+    CRL(const CRL &from);
 
-	~CRL() override;
+    ~CRL() override;
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the revocation list to assign from
-	*/
-	CRL & operator=(const CRL &from);
+       \param from the revocation list to assign from
+    */
+    CRL &operator=(const CRL &from);
 
-	/**
-	   Test if the CRL is empty
+    /**
+       Test if the CRL is empty
 
-	   \return true if the CRL is entry, otherwise return false
-	*/
-	bool isNull() const;
+       \return true if the CRL is entry, otherwise return false
+    */
+    bool isNull() const;
 
-	/**
-	   Information on the issuer of the CRL as a QMultiMap.
+    /**
+       Information on the issuer of the CRL as a QMultiMap.
 
-	   \sa issuerInfoOrdered for a version that maintains the order
-	   of information fields as per the underlying CRL.
-	*/
-	CertificateInfo issuerInfo() const;
+       \sa issuerInfoOrdered for a version that maintains the order
+       of information fields as per the underlying CRL.
+    */
+    CertificateInfo issuerInfo() const;
 
-	/**
-	   Information on the issuer of the CRL as an ordered list
-	   (QList of CertificateInfoPair).
+    /**
+       Information on the issuer of the CRL as an ordered list
+       (QList of CertificateInfoPair).
 
-	   \sa issuerInfo for a version that allows lookup based on
-	   a multimap.
-	   \sa CertificateInfoPair for the elements in the list
-	*/
-	CertificateInfoOrdered issuerInfoOrdered() const;
+       \sa issuerInfo for a version that allows lookup based on
+       a multimap.
+       \sa CertificateInfoPair for the elements in the list
+    */
+    CertificateInfoOrdered issuerInfoOrdered() const;
 
-	/**
-	   The CRL serial number. Note that serial numbers are a
-	   CRL extension, and not all certificates have one.
+    /**
+       The CRL serial number. Note that serial numbers are a
+       CRL extension, and not all certificates have one.
 
-	   \return the CRL serial number, or -1 if there is no serial number
-	*/
-	int number() const;
+       \return the CRL serial number, or -1 if there is no serial number
+    */
+    int number() const;
 
-	/**
-	   the time that this CRL became (or becomes) valid
-	*/
-	QDateTime thisUpdate() const;
+    /**
+       the time that this CRL became (or becomes) valid
+    */
+    QDateTime thisUpdate() const;
 
-	/**
-	   the time that this CRL will be obsoleted 
+    /**
+       the time that this CRL will be obsoleted
 
-	   you should obtain an updated CRL at this time
-	*/
-	QDateTime nextUpdate() const;
+       you should obtain an updated CRL at this time
+    */
+    QDateTime nextUpdate() const;
 
-	/**
-	    a list of the revoked certificates in this CRL
-	*/
-	QList<CRLEntry> revoked() const;
+    /**
+        a list of the revoked certificates in this CRL
+    */
+    QList<CRLEntry> revoked() const;
 
-	/**
-	   The signature algorithm used for the signature on this CRL
-	*/
-	SignatureAlgorithm signatureAlgorithm() const;
+    /**
+       The signature algorithm used for the signature on this CRL
+    */
+    SignatureAlgorithm signatureAlgorithm() const;
 
-	/**
-	   The key identification of the CRL issuer
-	*/
-	QByteArray issuerKeyId() const;
+    /**
+       The key identification of the CRL issuer
+    */
+    QByteArray issuerKeyId() const;
 
-	/**
-	   Test for equality of two %Certificate Revocation Lists
+    /**
+       Test for equality of two %Certificate Revocation Lists
 
-	   \param a the CRL to be compared to this CRL 
+       \param a the CRL to be compared to this CRL
 
-	   \return true if the two CRLs are the same
-	*/
-	bool operator==(const CRL &a) const;
+       \return true if the two CRLs are the same
+    */
+    bool operator==(const CRL &a) const;
 
-	/**
-	   Inequality operator
+    /**
+       Inequality operator
 
-	   \param other the CRL to be compared to this CRL 
-	*/
-	inline bool operator!=(const CRL &other) const
-	{
-		return !(*this == other);
-	}
+       \param other the CRL to be compared to this CRL
+    */
+    inline bool operator!=(const CRL &other) const { return !(*this == other); }
 
-	/**
-	   Export the %Certificate Revocation List (CRL) in DER format
+    /**
+       Export the %Certificate Revocation List (CRL) in DER format
 
-	   \return an array containing the CRL in DER format
-	*/
-	QByteArray toDER() const;
+       \return an array containing the CRL in DER format
+    */
+    QByteArray toDER() const;
 
-	/**
-	   Export the %Certificate Revocation List (CRL) in PEM format
+    /**
+       Export the %Certificate Revocation List (CRL) in PEM format
 
-	   \return a string containing the CRL in PEM format
-	*/
-	QString toPEM() const;
+       \return a string containing the CRL in PEM format
+    */
+    QString toPEM() const;
 
-	/**
-	   Export the %Certificate Revocation List (CRL) into PEM format in a
-	   file
+    /**
+       Export the %Certificate Revocation List (CRL) into PEM format in a
+       file
 
-	   \param fileName the name of the file to use
-	*/
-	bool toPEMFile(const QString &fileName) const;
+       \param fileName the name of the file to use
+    */
+    bool toPEMFile(const QString &fileName) const;
 
-	/**
-	   Import a DER encoded %Certificate Revocation List (CRL)
+    /**
+       Import a DER encoded %Certificate Revocation List (CRL)
 
-	   \param a the array containing the CRL in DER format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param a the array containing the CRL in DER format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the CRL corresponding to the contents of the array
-	*/
-	static CRL fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the CRL corresponding to the contents of the array
+    */
+    static CRL fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
-	/**
-	   Import a PEM encoded %Certificate Revocation List (CRL)
+    /**
+       Import a PEM encoded %Certificate Revocation List (CRL)
 
-	   \param s the string containing the CRL in PEM format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param s the string containing the CRL in PEM format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the CRL corresponding to the contents of the string
-	*/
-	static CRL fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the CRL corresponding to the contents of the string
+    */
+    static CRL fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
-	/**
-	   Import a PEM encoded %Certificate Revocation List (CRL) from a file
+    /**
+       Import a PEM encoded %Certificate Revocation List (CRL) from a file
 
-	   \param fileName the name (and path, if required) of the file
-	   containing the certificate in PEM format
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param fileName the name (and path, if required) of the file
+       containing the certificate in PEM format
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the CRL in the file
-	*/
-	static CRL fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the CRL in the file
+    */
+    static CRL fromPEMFile(const QString &fileName, ConvertResult *result = nullptr,
+                           const QString &provider = QString());
 
-	/**
-	   \internal
+    /**
+       \internal
 
-	   \param c context (internal)
-	*/
-	void change(CRLContext *c);
+       \param c context (internal)
+    */
+    void change(CRLContext *c);
 
 private:
-	class Private;
-	friend class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    friend class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -1890,140 +1884,142 @@ private:
 class QCA_EXPORT CertificateCollection
 {
 public:
-	/**
-	   Create an empty Certificate / CRL collection
-	*/
-	CertificateCollection();
+    /**
+       Create an empty Certificate / CRL collection
+    */
+    CertificateCollection();
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the CertificateCollection to copy from
-	*/
-	CertificateCollection(const CertificateCollection &from);
+       \param from the CertificateCollection to copy from
+    */
+    CertificateCollection(const CertificateCollection &from);
 
-	~CertificateCollection();
+    ~CertificateCollection();
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the CertificateCollection to copy from
-	*/
-	CertificateCollection & operator=(const CertificateCollection &from);
+       \param from the CertificateCollection to copy from
+    */
+    CertificateCollection &operator=(const CertificateCollection &from);
 
-	/**
-	   Append a Certificate to this collection
+    /**
+       Append a Certificate to this collection
 
-	   \param cert the Certificate to add to this CertificateCollection
-	*/
-	void addCertificate(const Certificate &cert);
+       \param cert the Certificate to add to this CertificateCollection
+    */
+    void addCertificate(const Certificate &cert);
 
-	/**
-	   Append a CRL to this collection
+    /**
+       Append a CRL to this collection
 
-	   \param crl the certificate revokation list to add to this
-	   CertificateCollection
-	*/
-	void addCRL(const CRL &crl);
+       \param crl the certificate revokation list to add to this
+       CertificateCollection
+    */
+    void addCRL(const CRL &crl);
 
-	/**
-	   The Certificates in this collection
-	*/
-	QList<Certificate> certificates() const;
+    /**
+       The Certificates in this collection
+    */
+    QList<Certificate> certificates() const;
 
-	/**
-	   The CRLs in this collection
-	*/
-	QList<CRL> crls() const;
+    /**
+       The CRLs in this collection
+    */
+    QList<CRL> crls() const;
 
-	/**
-	   Add another CertificateCollection to this collection
+    /**
+       Add another CertificateCollection to this collection
 
-	   \param other the CertificateCollection to add to this collection
-	*/
-	void append(const CertificateCollection &other);
+       \param other the CertificateCollection to add to this collection
+    */
+    void append(const CertificateCollection &other);
 
-	/**
-	   Add another CertificateCollection to this collection
+    /**
+       Add another CertificateCollection to this collection
 
-	   \param other the CertificateCollection to add to this collection
-	*/
-	CertificateCollection operator+(const CertificateCollection &other) const;
+       \param other the CertificateCollection to add to this collection
+    */
+    CertificateCollection operator+(const CertificateCollection &other) const;
 
-	/**
-	   Add another CertificateCollection to this collection
+    /**
+       Add another CertificateCollection to this collection
 
-	   \param other the CertificateCollection to add to this collection
-	*/
-	CertificateCollection & operator+=(const CertificateCollection &other);
+       \param other the CertificateCollection to add to this collection
+    */
+    CertificateCollection &operator+=(const CertificateCollection &other);
 
-	/**
-	   test if the CertificateCollection can be imported and exported to
-	   PKCS#7 format
+    /**
+       test if the CertificateCollection can be imported and exported to
+       PKCS#7 format
 
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return true if the CertificateCollection can be imported and
-	   exported to PKCS#7 format
-	*/
-	static bool canUsePKCS7(const QString &provider = QString());
+       \return true if the CertificateCollection can be imported and
+       exported to PKCS#7 format
+    */
+    static bool canUsePKCS7(const QString &provider = QString());
 
-	/**
-	   export the CertificateCollection to a plain text file
+    /**
+       export the CertificateCollection to a plain text file
 
-	   \param fileName the name (and path, if required) to write the
-	   contents of the CertificateCollection to
+       \param fileName the name (and path, if required) to write the
+       contents of the CertificateCollection to
 
-	   \return true if the export succeeded, otherwise false
-	*/
-	bool toFlatTextFile(const QString &fileName);
+       \return true if the export succeeded, otherwise false
+    */
+    bool toFlatTextFile(const QString &fileName);
 
-	/**
-	   export the CertificateCollection to a PKCS#7 file
+    /**
+       export the CertificateCollection to a PKCS#7 file
 
-	   \param fileName the name (and path, if required) to write the
-	   contents of the CertificateCollection to
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param fileName the name (and path, if required) to write the
+       contents of the CertificateCollection to
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return true if the export succeeded, otherwise false
-	*/
-	bool toPKCS7File(const QString &fileName, const QString &provider = QString());
+       \return true if the export succeeded, otherwise false
+    */
+    bool toPKCS7File(const QString &fileName, const QString &provider = QString());
 
-	/**
-	   import a CertificateCollection from a text file
+    /**
+       import a CertificateCollection from a text file
 
-	   \param fileName the name (and path, if required) to read the
-	   certificate collection from
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param fileName the name (and path, if required) to read the
+       certificate collection from
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the CertificateCollection corresponding to the contents of
-	   the file specified in fileName
-	*/
-	static CertificateCollection fromFlatTextFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the CertificateCollection corresponding to the contents of
+       the file specified in fileName
+    */
+    static CertificateCollection fromFlatTextFile(const QString &fileName, ConvertResult *result = nullptr,
+                                                  const QString &provider = QString());
 
-	/**
-	   import a CertificateCollection from a PKCS#7 file
+    /**
+       import a CertificateCollection from a PKCS#7 file
 
-	   \param fileName the name (and path, if required) to read the
-	   certificate collection from
-	   \param result a pointer to a ConvertResult, which if not-null will
-	   be set to the conversion status
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param fileName the name (and path, if required) to read the
+       certificate collection from
+       \param result a pointer to a ConvertResult, which if not-null will
+       be set to the conversion status
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \return the CertificateCollection corresponding to the contents of
-	   the file specified in fileName
-	*/
-	static CertificateCollection fromPKCS7File(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
+       \return the CertificateCollection corresponding to the contents of
+       the file specified in fileName
+    */
+    static CertificateCollection fromPKCS7File(const QString &fileName, ConvertResult *result = nullptr,
+                                               const QString &provider = QString());
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -2037,80 +2033,80 @@ private:
 class QCA_EXPORT CertificateAuthority : public Algorithm
 {
 public:
-	/**
-	   Create a new %Certificate Authority
+    /**
+       Create a new %Certificate Authority
 
-	   \param cert the CA certificate
-	   \param key the private key associated with the CA certificate
-	   \param provider the provider to use, if a specific provider is
-	   required
-	*/
-	CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
+       \param cert the CA certificate
+       \param key the private key associated with the CA certificate
+       \param provider the provider to use, if a specific provider is
+       required
+    */
+    CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider);
 
-	/**
-	   Copy constructor
+    /**
+       Copy constructor
 
-	   \param from the CertificateAuthority to copy from
-	*/
-	CertificateAuthority(const CertificateAuthority &from);
+       \param from the CertificateAuthority to copy from
+    */
+    CertificateAuthority(const CertificateAuthority &from);
 
-	~CertificateAuthority() override;
+    ~CertificateAuthority() override;
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the CertificateAuthority to copy from
-	*/
-	CertificateAuthority & operator=(const CertificateAuthority &from);
+       \param from the CertificateAuthority to copy from
+    */
+    CertificateAuthority &operator=(const CertificateAuthority &from);
 
-	/**
-	   The Certificate belonging to the %CertificateAuthority
+    /**
+       The Certificate belonging to the %CertificateAuthority
 
-	   This is the Certificate that was passed as an argument to the
-	   constructor
-	*/
-	Certificate certificate() const;
+       This is the Certificate that was passed as an argument to the
+       constructor
+    */
+    Certificate certificate() const;
 
-	/**
-	   Create a new Certificate by signing the provider CertificateRequest
+    /**
+       Create a new Certificate by signing the provider CertificateRequest
 
-	   \param req the CertificateRequest to sign
-	   \param notValidAfter the last date that the Certificate will be
-	   valid
-	*/
-	Certificate signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const;
+       \param req the CertificateRequest to sign
+       \param notValidAfter the last date that the Certificate will be
+       valid
+    */
+    Certificate signRequest(const CertificateRequest &req, const QDateTime &notValidAfter) const;
 
-	/**
-	   Create a new Certificate
+    /**
+       Create a new Certificate
 
-	   \param key the Public Key to use to create the Certificate
-	   \param opts the options to use for the new Certificate
-	*/
-	Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
+       \param key the Public Key to use to create the Certificate
+       \param opts the options to use for the new Certificate
+    */
+    Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
 
-	/**
-	   Create a new Certificate Revocation List (CRL)
+    /**
+       Create a new Certificate Revocation List (CRL)
 
-	   \param nextUpdate the date that the CRL will be updated
+       \param nextUpdate the date that the CRL will be updated
 
-	   \return an empty CRL
-	*/
-	CRL createCRL(const QDateTime &nextUpdate) const;
+       \return an empty CRL
+    */
+    CRL createCRL(const QDateTime &nextUpdate) const;
 
-	/**
-	   Update the CRL to include new entries
+    /**
+       Update the CRL to include new entries
 
-	   \param crl the CRL to update
-	   \param entries the entries to add to the CRL
-	   \param nextUpdate the date that this CRL will be updated
+       \param crl the CRL to update
+       \param entries the entries to add to the CRL
+       \param nextUpdate the date that this CRL will be updated
 
-	   \return the update CRL
-	*/
-	CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
+       \return the update CRL
+    */
+    CRL updateCRL(const CRL &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const;
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -2128,225 +2124,227 @@ private:
 
    For more information on PKCS12 "Personal Information
    Exchange Syntax Standard", see <a
-   href="ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-12/pkcs-12v1.pdf">ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-12/pkcs-12v1.pdf</a>. 
+   href="ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-12/pkcs-12v1.pdf">ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-12/pkcs-12v1.pdf</a>.
 
    \ingroup UserAPI
 */
 class QCA_EXPORT KeyBundle
 {
 public:
-	/**
-	   Create an empty KeyBundle
-	*/
-	KeyBundle();
+    /**
+       Create an empty KeyBundle
+    */
+    KeyBundle();
 
-	/**
-	   Create a KeyBundle from a PKCS12 (.p12) encoded
-	   file
+    /**
+       Create a KeyBundle from a PKCS12 (.p12) encoded
+       file
 
-	   This constructor requires appropriate plugin (provider)
-	   support. You must check for the "pkcs12" feature
-	   before using this constructor.
+       This constructor requires appropriate plugin (provider)
+       support. You must check for the "pkcs12" feature
+       before using this constructor.
 
-	   \param fileName the name of the file to read from
-	   \param passphrase the passphrase that is applicable to the file
+       \param fileName the name of the file to read from
+       \param passphrase the passphrase that is applicable to the file
 
-	   \sa fromFile for a more flexible version of the
-	   same capability.
+       \sa fromFile for a more flexible version of the
+       same capability.
 
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler.
-	*/
-	explicit KeyBundle(const QString &fileName, const SecureArray &passphrase = SecureArray());
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler.
+    */
+    explicit KeyBundle(const QString &fileName, const SecureArray &passphrase = SecureArray());
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the KeyBundle to use as source
-	*/
-	KeyBundle(const KeyBundle &from);
+       \param from the KeyBundle to use as source
+    */
+    KeyBundle(const KeyBundle &from);
 
-	~KeyBundle();
+    ~KeyBundle();
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the KeyBundle to use as source
-	*/
-	KeyBundle & operator=(const KeyBundle &from);
+       \param from the KeyBundle to use as source
+    */
+    KeyBundle &operator=(const KeyBundle &from);
 
-	/**
-	   Test if this key is empty (null)
-	*/
-	bool isNull() const;
+    /**
+       Test if this key is empty (null)
+    */
+    bool isNull() const;
 
-	/**
-	   The name associated with this key.
+    /**
+       The name associated with this key.
 
-	   This is also known as the "friendly name", and if
-	   present, is typically suitable to be displayed to
-	   the user.
+       This is also known as the "friendly name", and if
+       present, is typically suitable to be displayed to
+       the user.
 
-	   \sa setName
-	*/
-	QString name() const;
+       \sa setName
+    */
+    QString name() const;
 
-	/**
-	   The public certificate part of this bundle
+    /**
+       The public certificate part of this bundle
 
-	   \sa setCertificateChainAndKey
-	*/
-	CertificateChain certificateChain() const;
+       \sa setCertificateChainAndKey
+    */
+    CertificateChain certificateChain() const;
 
-	/**
-	   The private key part of this bundle
+    /**
+       The private key part of this bundle
 
-	   \sa setCertificateChainAndKey
-	*/
-	PrivateKey privateKey() const;
+       \sa setCertificateChainAndKey
+    */
+    PrivateKey privateKey() const;
 
-	/**
-	   Specify the name of this bundle
+    /**
+       Specify the name of this bundle
 
-	   \param s the name to use
-	*/
-	void setName(const QString &s);
+       \param s the name to use
+    */
+    void setName(const QString &s);
 
-	/**
-	   Set the public certificate and private key
+    /**
+       Set the public certificate and private key
 
-	   \param c the CertificateChain containing the public part of the
-	   Bundle
-	   \param key the private key part of the Bundle
+       \param c the CertificateChain containing the public part of the
+       Bundle
+       \param key the private key part of the Bundle
 
-	   \sa privateKey, certificateChain for getters
-	*/
-	void setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key);
+       \sa privateKey, certificateChain for getters
+    */
+    void setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key);
 
-	/**
-	   Export the key bundle to an array in PKCS12 format.
+    /**
+       Export the key bundle to an array in PKCS12 format.
 
-	   This method requires appropriate plugin (provider)
-	   support - you must check for the "pkcs12" feature,
-	   as shown below.
+       This method requires appropriate plugin (provider)
+       support - you must check for the "pkcs12" feature,
+       as shown below.
 
-	   \code
+       \code
 if( QCA::isSupported("pkcs12") )
 {
-	// can use I/O
-	byteArray = bundle.toArray( "pass phrase" );
+    // can use I/O
+    byteArray = bundle.toArray( "pass phrase" );
 }
 else
 {
-	// not possible to use I/O
+    // not possible to use I/O
 }
-	   \endcode
+       \endcode
 
-	   \param passphrase the passphrase to use to protect the bundle
-	   \param provider the provider to use, if a specific provider is
-	   required
-	*/
-	QByteArray toArray(const SecureArray &passphrase, const QString &provider = QString()) const;
+       \param passphrase the passphrase to use to protect the bundle
+       \param provider the provider to use, if a specific provider is
+       required
+    */
+    QByteArray toArray(const SecureArray &passphrase, const QString &provider = QString()) const;
 
-	/**
-	   Export the key bundle to a file in PKCS12 (.p12) format
+    /**
+       Export the key bundle to a file in PKCS12 (.p12) format
 
-	   This method requires appropriate plugin (provider)
-	   support - you must check for the "pkcs12" feature,
-	   as shown below.
+       This method requires appropriate plugin (provider)
+       support - you must check for the "pkcs12" feature,
+       as shown below.
 
-	   \code
+       \code
 if( QCA::isSupported("pkcs12") )
 {
-	// can use I/O
-	bool result = bundle.toFile( filename, "pass phrase" );
+    // can use I/O
+    bool result = bundle.toFile( filename, "pass phrase" );
 }
 else
 {
-	// not possible to use I/O
+    // not possible to use I/O
 }
-	   \endcode
+       \endcode
 
-	   \param fileName the name of the file to save to
-	   \param passphrase the passphrase to use to protect the bundle
-	   \param provider the provider to use, if a specific provider is
-	   required
-	*/
-	bool toFile(const QString &fileName, const SecureArray &passphrase, const QString &provider = QString()) const;
+       \param fileName the name of the file to save to
+       \param passphrase the passphrase to use to protect the bundle
+       \param provider the provider to use, if a specific provider is
+       required
+    */
+    bool toFile(const QString &fileName, const SecureArray &passphrase, const QString &provider = QString()) const;
 
-	/**
-	   Import the key bundle from an array in PKCS12 format
+    /**
+       Import the key bundle from an array in PKCS12 format
 
-	   This method requires appropriate plugin (provider)
-	   support - you must check for the "pkcs12" feature,
-	   as shown below.
+       This method requires appropriate plugin (provider)
+       support - you must check for the "pkcs12" feature,
+       as shown below.
 
-	   \code
+       \code
 if( QCA::isSupported("pkcs12") )
 {
-	// can use I/O
-	bundle = QCA::KeyBundle::fromArray( array, "pass phrase" );
+    // can use I/O
+    bundle = QCA::KeyBundle::fromArray( array, "pass phrase" );
 }
 else
 {
-	// not possible to use I/O
+    // not possible to use I/O
 }
-	   \endcode
+       \endcode
 
-	   \param a the array to import from
-	   \param passphrase the passphrase for the encoded bundle
-	   \param result pointer to the result of the import process
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param a the array to import from
+       \param passphrase the passphrase for the encoded bundle
+       \param result pointer to the result of the import process
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \sa QCA::KeyLoader for an asynchronous loader approach.
+       \sa QCA::KeyLoader for an asynchronous loader approach.
 
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler.
-	*/
-	static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(), ConvertResult *result = nullptr, const QString &provider = QString());
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler.
+    */
+    static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(),
+                               ConvertResult *result = nullptr, const QString &provider = QString());
 
-	/**
-	   Import the key bundle from a file in PKCS12 (.p12) format
+    /**
+       Import the key bundle from a file in PKCS12 (.p12) format
 
-	   This method requires appropriate plugin (provider)
-	   support - you must check for the "pkcs12" feature,
-	   as shown below.
+       This method requires appropriate plugin (provider)
+       support - you must check for the "pkcs12" feature,
+       as shown below.
 
-	   \code
+       \code
 if( QCA::isSupported("pkcs12") )
 {
-	// can use I/O
-	bundle = QCA::KeyBundle::fromFile( filename, "pass phrase" );
+    // can use I/O
+    bundle = QCA::KeyBundle::fromFile( filename, "pass phrase" );
 }
 else
 {
-	// not possible to use I/O
+    // not possible to use I/O
 }
-	   \endcode
+       \endcode
 
-	   \param fileName the name of the file to read from
-	   \param passphrase the passphrase for the encoded bundle
-	   \param result pointer to the result of the import process
-	   \param provider the provider to use, if a specific provider is
-	   required
+       \param fileName the name of the file to read from
+       \param passphrase the passphrase for the encoded bundle
+       \param result pointer to the result of the import process
+       \param provider the provider to use, if a specific provider is
+       required
 
-	   \sa QCA::KeyLoader for an asynchronous loader approach.
+       \sa QCA::KeyLoader for an asynchronous loader approach.
 
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler.
-	*/
-	static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(), ConvertResult *result = nullptr, const QString &provider = QString());
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler.
+    */
+    static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(),
+                              ConvertResult *result = nullptr, const QString &provider = QString());
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
    \class PGPKey qca_cert.h QtCrypto
 
-   Pretty Good Privacy key 
+   Pretty Good Privacy key
 
    This holds either a reference to an item in a real PGP keyring,
    or a standalone item created using the from*() functions.
@@ -2360,167 +2358,168 @@ private:
 class QCA_EXPORT PGPKey : public Algorithm
 {
 public:
-	/**
-	   Create an empty PGP key
-	*/
-	PGPKey();
+    /**
+       Create an empty PGP key
+    */
+    PGPKey();
 
-	/**
-	   Create a PGP key from an encoded file
+    /**
+       Create a PGP key from an encoded file
 
-	   \param fileName the name (and path, if required) of the file
-	   that the PGP key is to be loaded from.
+       \param fileName the name (and path, if required) of the file
+       that the PGP key is to be loaded from.
 
-	   \sa fromFile for a version that allows better error checking / validation 
-	   \sa toFile for a method to write out the key.
-	*/
-	PGPKey(const QString &fileName);
+       \sa fromFile for a version that allows better error checking / validation
+       \sa toFile for a method to write out the key.
+    */
+    PGPKey(const QString &fileName);
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the PGPKey to use as the source
-	*/
-	PGPKey(const PGPKey &from);
+       \param from the PGPKey to use as the source
+    */
+    PGPKey(const PGPKey &from);
 
-	~PGPKey() override;
+    ~PGPKey() override;
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the PGPKey to use as the source
-	*/
-	PGPKey & operator=(const PGPKey &from);
+       \param from the PGPKey to use as the source
+    */
+    PGPKey &operator=(const PGPKey &from);
 
-	/**
-	   Test if the PGP key is empty (null)
+    /**
+       Test if the PGP key is empty (null)
 
-	   \return true if the PGP key is null
-	*/
-	bool isNull() const;
+       \return true if the PGP key is null
+    */
+    bool isNull() const;
 
-	/**
-	   The Key identification for the PGP key
-	*/
-	QString keyId() const;
+    /**
+       The Key identification for the PGP key
+    */
+    QString keyId() const;
 
-	/**
-	   The primary user identification for the key
-	*/
-	QString primaryUserId() const;
+    /**
+       The primary user identification for the key
+    */
+    QString primaryUserId() const;
 
-	/**
-	   The list of all user identifications associated with the key
-	*/
-	QStringList userIds() const;
+    /**
+       The list of all user identifications associated with the key
+    */
+    QStringList userIds() const;
 
-	/**
-	   Test if the PGP key is the secret key
+    /**
+       Test if the PGP key is the secret key
 
-	   \return true if the PGP key is the secret key
-	*/
-	bool isSecret() const;
+       \return true if the PGP key is the secret key
+    */
+    bool isSecret() const;
 
-	/**
-	   The creation date for the key
-	*/
-	QDateTime creationDate() const;
+    /**
+       The creation date for the key
+    */
+    QDateTime creationDate() const;
 
-	/**
-	   The expiration date for the key
-	*/
-	QDateTime expirationDate() const;
+    /**
+       The expiration date for the key
+    */
+    QDateTime expirationDate() const;
 
-	/**
-	   The key fingerpint
+    /**
+       The key fingerpint
 
-	   This will return the PGP fingerprint as a string. It comprises 40
-	   hex digits, without spaces.
-	*/
-	QString fingerprint() const;
+       This will return the PGP fingerprint as a string. It comprises 40
+       hex digits, without spaces.
+    */
+    QString fingerprint() const;
 
-	/**
-	   Test if this key is in a keyring
+    /**
+       Test if this key is in a keyring
 
-	   \return true if the key is in a keyring
+       \return true if the key is in a keyring
 
-	   \note keys that are not in a keyring cannot be used for encryption,
-	   decryption, signing or verification
-	*/
-	bool inKeyring() const;
+       \note keys that are not in a keyring cannot be used for encryption,
+       decryption, signing or verification
+    */
+    bool inKeyring() const;
 
-	/**
-	   Test if the key is trusted
+    /**
+       Test if the key is trusted
 
-	   \return true if the key is trusted
-	*/
-	bool isTrusted() const;
+       \return true if the key is trusted
+    */
+    bool isTrusted() const;
 
-	/**
-	   Export the key to an array.
+    /**
+       Export the key to an array.
 
-	   This will export the key in a binary format (that is, not in an 
-	   "ascii armoured" form).
+       This will export the key in a binary format (that is, not in an
+       "ascii armoured" form).
 
-	   \sa fromArray for a static import method.
-	   \sa toString for an "ascii armoured" export method.
-	*/
-	QByteArray toArray() const;
+       \sa fromArray for a static import method.
+       \sa toString for an "ascii armoured" export method.
+    */
+    QByteArray toArray() const;
 
-	/**
-	   Export the key to a string
+    /**
+       Export the key to a string
 
-	   This will export the key in an "ascii armoured" form.
+       This will export the key in an "ascii armoured" form.
 
-	   \sa fromString for a static import method.
-	   \sa toArray for a binary format export method.
-	*/
-	QString toString() const;
+       \sa fromString for a static import method.
+       \sa toArray for a binary format export method.
+    */
+    QString toString() const;
 
-	/**
-	   Export the key to a file
+    /**
+       Export the key to a file
 
-	   \param fileName the name of the file to save the key to
-	*/
-	bool toFile(const QString &fileName) const;
+       \param fileName the name of the file to save the key to
+    */
+    bool toFile(const QString &fileName) const;
 
-	/**
-	   Import the key from an array
+    /**
+       Import the key from an array
 
-	   \param a the array to import from
-	   \param result if not null, this will be set to the result of the
-	   import process
-	   \param provider the provider to use, if a particular provider is
-	   required
-	*/
-	static PGPKey fromArray(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
+       \param a the array to import from
+       \param result if not null, this will be set to the result of the
+       import process
+       \param provider the provider to use, if a particular provider is
+       required
+    */
+    static PGPKey fromArray(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
-	/**
-	   Import the key from a string
+    /**
+       Import the key from a string
 
-	   \param s the string to import from
-	   \param result if not null, this will be set to the result of the
-	   import process
-	   \param provider the provider to use, if a particular provider is
-	   required
-	*/
-	static PGPKey fromString(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
+       \param s the string to import from
+       \param result if not null, this will be set to the result of the
+       import process
+       \param provider the provider to use, if a particular provider is
+       required
+    */
+    static PGPKey fromString(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
-	/**
-	   Import the key from a file
+    /**
+       Import the key from a file
 
-	   \param fileName string containing the name of the file to import
-	   from
-	   \param result if not null, this will be set to the result of the
-	   import process
-	   \param provider the provider to use, if a particular provider is
-	   required
-	*/
-	static PGPKey fromFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
+       \param fileName string containing the name of the file to import
+       from
+       \param result if not null, this will be set to the result of the
+       import process
+       \param provider the provider to use, if a particular provider is
+       required
+    */
+    static PGPKey fromFile(const QString &fileName, ConvertResult *result = nullptr,
+                           const QString &provider = QString());
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -2564,112 +2563,112 @@ private:
 */
 class QCA_EXPORT KeyLoader : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Create a KeyLoader object.
+    /**
+       Create a KeyLoader object.
 
-	   \param parent the parent object for this object
-	*/
-	KeyLoader(QObject *parent = nullptr);
-	~KeyLoader() override;
+       \param parent the parent object for this object
+    */
+    KeyLoader(QObject *parent = nullptr);
+    ~KeyLoader() override;
 
-	/**
-	   Initiate an asynchronous loading of a PrivateKey from a PEM format
-	   file.
+    /**
+       Initiate an asynchronous loading of a PrivateKey from a PEM format
+       file.
 
-	   This function will return immediately.
+       This function will return immediately.
 
-	   \param fileName the name of the file (and path, if necessary) to
-	   load the key from
-	*/
-	void loadPrivateKeyFromPEMFile(const QString &fileName);
+       \param fileName the name of the file (and path, if necessary) to
+       load the key from
+    */
+    void loadPrivateKeyFromPEMFile(const QString &fileName);
 
-	/**
-	   Initiate an asynchronous loading of a PrivateKey from a PEM format
-	   string.
+    /**
+       Initiate an asynchronous loading of a PrivateKey from a PEM format
+       string.
 
-	   This function will return immediately.
+       This function will return immediately.
 
-	   \param s the string containing the PEM formatted key
-	*/
-	void loadPrivateKeyFromPEM(const QString &s);
+       \param s the string containing the PEM formatted key
+    */
+    void loadPrivateKeyFromPEM(const QString &s);
 
-	/**
-	   Initiate an asynchronous loading of a PrivateKey from a DER format
-	   array.
+    /**
+       Initiate an asynchronous loading of a PrivateKey from a DER format
+       array.
 
-	   This function will return immediately.
+       This function will return immediately.
 
-	   \param a the array containing the DER formatted key
-	*/
-	void loadPrivateKeyFromDER(const SecureArray &a);
+       \param a the array containing the DER formatted key
+    */
+    void loadPrivateKeyFromDER(const SecureArray &a);
 
-	/**
-	   Initiate an asynchronous loading of a KeyBundle from a file
+    /**
+       Initiate an asynchronous loading of a KeyBundle from a file
 
-	   This function will return immediately.
+       This function will return immediately.
 
-	   \param fileName the name of the file (and path, if necessary) to
-	   load the key bundle from
-	*/
-	void loadKeyBundleFromFile(const QString &fileName);
+       \param fileName the name of the file (and path, if necessary) to
+       load the key bundle from
+    */
+    void loadKeyBundleFromFile(const QString &fileName);
 
-	/**
-	   Initiate an asynchronous loading of a KeyBundle from an array
+    /**
+       Initiate an asynchronous loading of a KeyBundle from an array
 
-	   This function will return immediately.
+       This function will return immediately.
 
-	   \param a the array containing the key bundle
-	*/
-	void loadKeyBundleFromArray(const QByteArray &a);
+       \param a the array containing the key bundle
+    */
+    void loadKeyBundleFromArray(const QByteArray &a);
 
-	/**
-	   The result of the loading process.
+    /**
+       The result of the loading process.
 
-	   This is not valid until the finished() signal has been emitted.
-	*/
-	ConvertResult convertResult() const;
+       This is not valid until the finished() signal has been emitted.
+    */
+    ConvertResult convertResult() const;
 
-	/**
-	   The private key that has been loaded.
+    /**
+       The private key that has been loaded.
 
-	   This is only valid if loadPrivateKeyFromPEMFile(),
-	   loadPrivateKeyFromPEM() or loadPrivateKeyFromDER() has been used,
-	   the load has completed (that is, finished() has been emitted), and
-	   the conversion succeeded (that is, convertResult() returned
-	   ConvertGood).
-	*/
-	PrivateKey privateKey() const;
+       This is only valid if loadPrivateKeyFromPEMFile(),
+       loadPrivateKeyFromPEM() or loadPrivateKeyFromDER() has been used,
+       the load has completed (that is, finished() has been emitted), and
+       the conversion succeeded (that is, convertResult() returned
+       ConvertGood).
+    */
+    PrivateKey privateKey() const;
 
-	/**
-	   The key bundle that has been loaded.
+    /**
+       The key bundle that has been loaded.
 
-	   This is only valid if loadKeyBundleFromFile() or
-	   loadKeyBundleFromArray() has been used, the load has completed
-	   (that is, finished() has been emitted), and the conversion
-	   succeeded (that is, convertResult() returned ConvertGood).
-	*/
-	KeyBundle keyBundle() const;
+       This is only valid if loadKeyBundleFromFile() or
+       loadKeyBundleFromArray() has been used, the load has completed
+       (that is, finished() has been emitted), and the conversion
+       succeeded (that is, convertResult() returned ConvertGood).
+    */
+    KeyBundle keyBundle() const;
 
 Q_SIGNALS:
-	/**
-	   Signal that is emitted when the load process has completed.
+    /**
+       Signal that is emitted when the load process has completed.
 
-	   \note The load process may not have completed successfully - check
-	   the result of convertResult() to confirm this before using the
-	   privateKey() or keyBundle() results.
-	*/
-	void finished();
+       \note The load process may not have completed successfully - check
+       the result of convertResult() to confirm this before using the
+       privateKey() or keyBundle() results.
+    */
+    void finished();
 
 private:
-	Q_DISABLE_COPY(KeyLoader)
+    Q_DISABLE_COPY(KeyLoader)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
-}
+} // namespace QCA
 
 #endif

@@ -37,45 +37,37 @@ class TestClass1 : public QObject
     Q_OBJECT
 
 public:
-    TestClass1() { };
-    TestClass1(const TestClass1 & ):QObject( nullptr ) { };
+    TestClass1() {};
+    TestClass1(const TestClass1 &) : QObject(nullptr) {};
 
 public Q_SLOTS:
-    void voidMethod() { };
-    QString qstringMethod()  { return QString(); };
-    bool boolMethod( const QString & )  { return true; };
-    QString returnArg( const QString &s )  { return s; };
-    QByteArray returnArg( const QByteArray &a )  { return a; };
-    QString returnRepeatArg( const QString &s )  { return QString( s+s ); };
-    QString tenArgs( const QString &s, int, int, int, int, int, int, int, int, int)
-    {
-        return QString( s );
-    };
-    QString elevenArgs( const QString &s, int, int, int, int, int, int, int, int, int, int)
-    {
-        return QString( s );
-    };
+    void       voidMethod() {};
+    QString    qstringMethod() { return QString(); };
+    bool       boolMethod(const QString &) { return true; };
+    QString    returnArg(const QString &s) { return s; };
+    QByteArray returnArg(const QByteArray &a) { return a; };
+    QString    returnRepeatArg(const QString &s) { return QString(s + s); };
+    QString    tenArgs(const QString &s, int, int, int, int, int, int, int, int, int) { return QString(s); };
+    QString    elevenArgs(const QString &s, int, int, int, int, int, int, int, int, int, int) { return QString(s); };
 };
 
-Q_DECLARE_METATYPE( TestClass1 )
+Q_DECLARE_METATYPE(TestClass1)
 
 class MetaTypeUnitTest : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void returnTypeTest();
     void invokeMethodTest();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *m_init;
 };
 
-void MetaTypeUnitTest::initTestCase()
-{
-    m_init = new QCA::Initializer;
-}
+void MetaTypeUnitTest::initTestCase() { m_init = new QCA::Initializer; }
 
 void MetaTypeUnitTest::cleanupTestCase()
 {
@@ -85,101 +77,109 @@ void MetaTypeUnitTest::cleanupTestCase()
 
 void MetaTypeUnitTest::returnTypeTest()
 {
-    TestClass1 testClass1;
+    TestClass1        testClass1;
     QList<QByteArray> args;
 
     // returns a null type name because that is what void does...
-    QCOMPARE( QByteArray( "void" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "voidMethod" ), args ) );
-    QCOMPARE( QByteArray( "QString" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "qstringMethod" ), args ) );
+    QCOMPARE(QByteArray("void"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("voidMethod"), args));
+    QCOMPARE(QByteArray("QString"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("qstringMethod"), args));
 
     // returns a null type, because args don't match
-    QCOMPARE( QByteArray( "" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "boolMethod" ), args ) );
+    QCOMPARE(QByteArray(""), QCA::methodReturnType(testClass1.metaObject(), QByteArray("boolMethod"), args));
 
     args << "QString";
-    QCOMPARE( QByteArray( "QString" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "returnArg" ), args ) );
-    QCOMPARE( QByteArray( "bool" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "boolMethod" ), args ) );
+    QCOMPARE(QByteArray("QString"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("returnArg"), args));
+    QCOMPARE(QByteArray("bool"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("boolMethod"), args));
     args.clear();
 
     args << "QByteArray";
-    QCOMPARE( QByteArray( "QByteArray" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "returnArg" ), args ) );
+    QCOMPARE(QByteArray("QByteArray"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("returnArg"), args));
     args.clear();
 
-    args << "QString" << "int" << "int" << "int" << "int" << "int" << "int" << "int" << "int";
+    args << "QString"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int";
 
     // wrong number of arguments - has 9, needs 10
-    QCOMPARE( QByteArray( "" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "tenArgs" ), args ) );
+    QCOMPARE(QByteArray(""), QCA::methodReturnType(testClass1.metaObject(), QByteArray("tenArgs"), args));
 
     // match
     args << "int";
-    QCOMPARE( QByteArray( "QString" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "tenArgs" ), args ) );
+    QCOMPARE(QByteArray("QString"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("tenArgs"), args));
 
     args << "int";
-    QCOMPARE( QByteArray( "QString" ), QCA::methodReturnType( testClass1.metaObject(), QByteArray( "elevenArgs" ), args ) );
+    QCOMPARE(QByteArray("QString"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("elevenArgs"), args));
 }
 
 void MetaTypeUnitTest::invokeMethodTest()
 {
-    TestClass1 *testClass1 = new TestClass1;
+    TestClass1 * testClass1 = new TestClass1;
     QVariantList args;
 
     bool ret;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "voidMethod" ), args, nullptr );
-    QVERIFY( ret );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("voidMethod"), args, nullptr);
+    QVERIFY(ret);
 
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "noSuchMethod" ), args, nullptr );
-    QVERIFY( ret == false );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("noSuchMethod"), args, nullptr);
+    QVERIFY(ret == false);
 
     QVariant stringRes;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "qstringMethod" ), args, &stringRes );
-    QVERIFY( ret );
-    QVERIFY( stringRes.isValid() );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("qstringMethod"), args, &stringRes);
+    QVERIFY(ret);
+    QVERIFY(stringRes.isValid());
 
-    QVariant result ( false );
-    QString fakeArg;
+    QVariant result(false);
+    QString  fakeArg;
     args << fakeArg;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "boolMethod" ), args, &result );
-    QVERIFY( ret );
-    QCOMPARE( result.toBool(), true );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("boolMethod"), args, &result);
+    QVERIFY(ret);
+    QCOMPARE(result.toBool(), true);
 
     result = QByteArray();
     args.clear();
-    QByteArray myArray( "array" );
+    QByteArray myArray("array");
     args << myArray;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnArg" ), args, &result );
-    QVERIFY( ret );
-    QCOMPARE( result.toByteArray(), myArray );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("returnArg"), args, &result);
+    QVERIFY(ret);
+    QCOMPARE(result.toByteArray(), myArray);
 
     result = QString();
     args.clear();
-    QString myString = QStringLiteral( "test words" );
+    QString myString = QStringLiteral("test words");
     args << myString;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnArg" ), args, &result );
-    QVERIFY( ret );
-    QCOMPARE( result.toString(), myString );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("returnArg"), args, &result);
+    QVERIFY(ret);
+    QCOMPARE(result.toString(), myString);
 
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "returnRepeatArg" ), args, &result );
-    QVERIFY( ret );
-    QCOMPARE( result.toString(), QString( myString + myString ) );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("returnRepeatArg"), args, &result);
+    QVERIFY(ret);
+    QCOMPARE(result.toString(), QString(myString + myString));
 
     // 9 arguments - no matching method
-    result = QStringLiteral( "unchanged" );
+    result = QStringLiteral("unchanged");
     args << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "tenArgs" ), args, &result );
-    QVERIFY( ret == false );
-    QCOMPARE( result.toString(), QStringLiteral( "unchanged" ) );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("tenArgs"), args, &result);
+    QVERIFY(ret == false);
+    QCOMPARE(result.toString(), QStringLiteral("unchanged"));
 
     // 10 args
     args << 0;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "tenArgs" ), args, &result );
-    QVERIFY( ret );
-    QCOMPARE( result.toString(), myString );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("tenArgs"), args, &result);
+    QVERIFY(ret);
+    QCOMPARE(result.toString(), myString);
 
     // 11 args
-    result = QStringLiteral( "unchanged" );
+    result = QStringLiteral("unchanged");
     args << 0;
-    ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "elevenArgs" ), args, &result );
-    QVERIFY( ret == false );
-    QCOMPARE( result.toString(), QStringLiteral( "unchanged" ) );
+    ret = QCA::invokeMethodWithVariants(testClass1, QByteArray("elevenArgs"), args, &result);
+    QVERIFY(ret == false);
+    QCOMPARE(result.toString(), QStringLiteral("unchanged"));
 
     delete testClass1;
 }

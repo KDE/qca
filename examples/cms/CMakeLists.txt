@@ -1,4 +1,4 @@
-set(cmsexample_bin_SRCS cmsexample.cpp)  
+set(cmsexample_bin_SRCS cmsexample.cpp)
 
 add_executable(cmsexample ${cmsexample_bin_SRCS})
 

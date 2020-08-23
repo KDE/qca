@@ -18,75 +18,74 @@
 
 #pragma once
 
-#include "qcaprovider.h"
 #include "gpgop.h"
+#include "qcaprovider.h"
 
-namespace gpgQCAPlugin
-{
+namespace gpgQCAPlugin {
 
 class MyOpenPGPContext;
 
 class MyMessageContext : public QCA::MessageContext
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	MyOpenPGPContext *sms;
+    MyOpenPGPContext *sms;
 
-	QString signerId;
-	QStringList recipIds;
-	QCA::MessageContext::Operation op;
-	QCA::SecureMessage::SignMode signMode;
-	QCA::SecureMessage::Format format;
-	QByteArray in, out, sig;
-	int wrote;
-	bool ok, wasSigned;
-	GpgOp::Error op_err;
-	QCA::SecureMessageSignature signer;
-	GpgOp gpg;
-	bool _finished;
-	QString dtext;
+    QString                        signerId;
+    QStringList                    recipIds;
+    QCA::MessageContext::Operation op;
+    QCA::SecureMessage::SignMode   signMode;
+    QCA::SecureMessage::Format     format;
+    QByteArray                     in, out, sig;
+    int                            wrote;
+    bool                           ok, wasSigned;
+    GpgOp::Error                   op_err;
+    QCA::SecureMessageSignature    signer;
+    GpgOp                          gpg;
+    bool                           _finished;
+    QString                        dtext;
 
-	QCA::PasswordAsker asker;
-	QCA::TokenAsker tokenAsker;
+    QCA::PasswordAsker asker;
+    QCA::TokenAsker    tokenAsker;
 
-	MyMessageContext(MyOpenPGPContext *_sms, QCA::Provider *p);
+    MyMessageContext(MyOpenPGPContext *_sms, QCA::Provider *p);
 
-	// reimplemented Provider::Context
-	QCA::Provider::Context *clone() const override;
+    // reimplemented Provider::Context
+    QCA::Provider::Context *clone() const override;
 
-	// reimplemented MessageContext
-	bool canSignMultiple() const override;
-	QCA::SecureMessage::Type type() const override;
-	void reset() override;
-	void setupEncrypt(const QCA::SecureMessageKeyList &keys) override;
-	void setupSign(const QCA::SecureMessageKeyList &keys, QCA::SecureMessage::SignMode m, bool, bool) override;
-	void setupVerify(const QByteArray &detachedSig) override;
-	void start(QCA::SecureMessage::Format f, QCA::MessageContext::Operation op) override;
-	void update(const QByteArray &in) override;
-	QByteArray read() override;
-	int written() override;
-	void end() override;
-	bool finished() const override;
-	bool waitForFinished(int msecs) override;
-	bool success() const override;
-	QCA::SecureMessage::Error errorCode() const override;
-	QByteArray signature() const override;
-	QString hashName() const override;
-	QCA::SecureMessageSignatureList signers() const override;
-	QString diagnosticText() const override;
+    // reimplemented MessageContext
+    bool                     canSignMultiple() const override;
+    QCA::SecureMessage::Type type() const override;
+    void                     reset() override;
+    void                     setupEncrypt(const QCA::SecureMessageKeyList &keys) override;
+    void       setupSign(const QCA::SecureMessageKeyList &keys, QCA::SecureMessage::SignMode m, bool, bool) override;
+    void       setupVerify(const QByteArray &detachedSig) override;
+    void       start(QCA::SecureMessage::Format f, QCA::MessageContext::Operation op) override;
+    void       update(const QByteArray &in) override;
+    QByteArray read() override;
+    int        written() override;
+    void       end() override;
+    bool       finished() const override;
+    bool       waitForFinished(int msecs) override;
+    bool       success() const override;
+    QCA::SecureMessage::Error       errorCode() const override;
+    QByteArray                      signature() const override;
+    QString                         hashName() const override;
+    QCA::SecureMessageSignatureList signers() const override;
+    QString                         diagnosticText() const override;
 
-	void seterror();
-	void complete();
+    void seterror();
+    void complete();
 
 private Q_SLOTS:
-	void gpg_readyRead();
-	void gpg_bytesWritten(int bytes);
-	void gpg_finished();
-	void gpg_needPassphrase(const QString &in_keyId);
-	void gpg_needCard();
-	void gpg_readyReadDiagnosticText();
-	void asker_responseReady();
-	void tokenAsker_responseReady();
+    void gpg_readyRead();
+    void gpg_bytesWritten(int bytes);
+    void gpg_finished();
+    void gpg_needPassphrase(const QString &in_keyId);
+    void gpg_needCard();
+    void gpg_readyReadDiagnosticText();
+    void asker_responseReady();
+    void tokenAsker_responseReady();
 };
 
 } // end namespace gpgQCAPlugin

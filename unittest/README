@@ -2,22 +2,22 @@ This directory holds simple unit tests for QCA.
 
 You can run the whole test suite by doing "make test" in this
 directory. You can also run a single set of tests by doing "make test"
-in the applicable subdirectory. See "TestPlan" for more detail. 
+in the applicable subdirectory. See "TestPlan" for more detail.
 
 The unittests were originally designed to be run through cmake,
 however they should work just fine without it. Please report any
 problems.
 
 The "testcerts" directory is not a unit test. It is the tools used
-to generate certificates used in unit tests, and is a copy of the 
-CA.pl script and associated configuration file provided with openssl. 
+to generate certificates used in unit tests, and is a copy of the
+CA.pl script and associated configuration file provided with openssl.
 
 These tests are implemented using the QTestLib test framework provided
 with Qt 4.1 and later. If you are having trouble with a test, you can
 get more information by running the test applicable directly (e.g. if
 you can't make the Base64 test work, you run the ./base64unittest
 executable) with the -v1 or -v2 options. You can also specify a single
-test to be run. 
+test to be run.
 
 Thanks to Trolltech for providing Qt and agreeing to release QTestLib,
 especially to Harald Fernengel for all the development work, a great

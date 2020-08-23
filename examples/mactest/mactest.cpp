@@ -26,7 +26,7 @@
 #include <QDebug>
 
 // needed for printf
-#include<cstdio>
+#include <cstdio>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"
@@ -34,53 +34,52 @@
 
 int main(int argc, char **argv)
 {
-	// the Initializer object sets things up, and
-	// also does cleanup when it goes out of scope
-	QCA::Initializer init;
+    // the Initializer object sets things up, and
+    // also does cleanup when it goes out of scope
+    QCA::Initializer init;
 
-	QCoreApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
-	qDebug() << "This example shows hashed MAC";
+    qDebug() << "This example shows hashed MAC";
 
-	// we use the first argument as the data to authenticate
-	// if an argument is provided. Use "hello" if no argument
-	QByteArray arg = (argc >= 2) ? argv[1] : "hello";
+    // we use the first argument as the data to authenticate
+    // if an argument is provided. Use "hello" if no argument
+    QByteArray arg = (argc >= 2) ? argv[1] : "hello";
 
-	// we use the second argument as the key to authenticate
-	// with, if two arguments are provided. Use "secret" as
-	// the key if less than two arguments.
-	QCA::SecureArray key((argc >= 3) ? argv[2] : "secret");
+    // we use the second argument as the key to authenticate
+    // with, if two arguments are provided. Use "secret" as
+    // the key if less than two arguments.
+    QCA::SecureArray key((argc >= 3) ? argv[2] : "secret");
 
-	// must always check that an algorithm is supported before using it
-	if( !QCA::isSupported("hmac(sha1)") ) {
-		printf("HMAC(SHA1) not supported!\n");
-	} else {
-		// create the required object using HMAC with SHA-1, and an
-		// empty key.
-		QCA::MessageAuthenticationCode hmacObject(  QStringLiteral("hmac(sha1)"), QCA::SecureArray() );
+    // must always check that an algorithm is supported before using it
+    if (!QCA::isSupported("hmac(sha1)")) {
+        printf("HMAC(SHA1) not supported!\n");
+    } else {
+        // create the required object using HMAC with SHA-1, and an
+        // empty key.
+        QCA::MessageAuthenticationCode hmacObject(QStringLiteral("hmac(sha1)"), QCA::SecureArray());
 
-		// create the key
-		QCA::SymmetricKey keyObject(key);
+        // create the key
+        QCA::SymmetricKey keyObject(key);
 
-		// set the HMAC object to use the key
-		hmacObject.setup(key);
-		// that could also have been done in the
-		// QCA::MessageAuthenticationCode constructor
+        // set the HMAC object to use the key
+        hmacObject.setup(key);
+        // that could also have been done in the
+        // QCA::MessageAuthenticationCode constructor
 
-		// we split it into two parts to show incremental update
-		QCA::SecureArray part1(arg.left(3)); // three chars - "hel"
-		QCA::SecureArray part2(arg.mid(3)); // the rest - "lo"
-		hmacObject.update(part1);
-		hmacObject.update(part2);
+        // we split it into two parts to show incremental update
+        QCA::SecureArray part1(arg.left(3)); // three chars - "hel"
+        QCA::SecureArray part2(arg.mid(3));  // the rest - "lo"
+        hmacObject.update(part1);
+        hmacObject.update(part2);
 
-		// no more updates after calling final.
-		QCA::SecureArray resultArray = hmacObject.final();
+        // no more updates after calling final.
+        QCA::SecureArray resultArray = hmacObject.final();
 
-		// convert the result into printable hexadecimal.
-		QString result = QCA::arrayToHex(resultArray.toByteArray());
-		printf("HMAC(SHA1) of \"%s\" with \"%s\" = [%s]\n", arg.data(), key.data(), result.toLatin1().data());
-	}
+        // convert the result into printable hexadecimal.
+        QString result = QCA::arrayToHex(resultArray.toByteArray());
+        printf("HMAC(SHA1) of \"%s\" with \"%s\" = [%s]\n", arg.data(), key.data(), result.toLatin1().data());
+    }
 
-	return 0;
+    return 0;
 }
-

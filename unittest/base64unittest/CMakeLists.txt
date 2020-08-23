@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(base64unittest_bin_SRCS base64unittest.cpp)  
+set(base64unittest_bin_SRCS base64unittest.cpp)
 
 add_executable(base64unittest ${base64unittest_bin_SRCS} )
 

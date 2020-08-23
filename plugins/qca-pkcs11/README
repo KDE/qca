@@ -1,89 +1,88 @@
 qca-pkcs11 2.0.0 -- PKCS#11 Plug-in to QCA
 
 ABOUT
-	qca-pkcs11 enables QCA smartcard integration.
+    qca-pkcs11 enables QCA smartcard integration.
 
-	qca-pkcs11 supports the following features:
-	 - Multiple providers.
-	 - Multiple tokens.
-	 - Private key signature and decryption.
-	 - Keystore objects serialization.
-	 - Keystore update notifications.
-	 - Asker integration for token and PIN.
+    qca-pkcs11 supports the following features:
+     - Multiple providers.
+     - Multiple tokens.
+     - Private key signature and decryption.
+     - Keystore objects serialization.
+     - Keystore update notifications.
+     - Asker integration for token and PIN.
 
 DEPENDENCIES
-	pkcs11-helper>=1.02
-		http://www.opensc-project.org/
+    pkcs11-helper>=1.02
+        http://www.opensc-project.org/
 
 INSTALL
-	For Unix/Linux/Mac:
-		./configure
-		make
-		make install
+    For Unix/Linux/Mac:
+        ./configure
+        make
+        make install
 
-	For Windows:
-		configwin rd
-		qmake
-		nmake (or make)
-		copy lib\*.dll qtdir\plugins\crypto
+    For Windows:
+        configwin rd
+        qmake
+        nmake (or make)
+        copy lib\*.dll qtdir\plugins\crypto
 
 CONFIGURATION
-	Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
-	generate default configuration use:
+    Configuration is stored at ~/.config/Affinix/QCA.conf, in order to
+    generate default configuration use:
 
-	$ qcatool config save qca-pkcs11
+    $ qcatool config save qca-pkcs11
 
-	Attributes:
-		allow_load_rootca (Boolean)
-			Allow loading root certificate authorities' certificate
-			from token. Loading root certificates from PKCS#11 enabled
-			tokens is highly insecure, as public objects can be added
-			without user notice.
+    Attributes:
+        allow_load_rootca (Boolean)
+            Allow loading root certificate authorities' certificate
+            from token. Loading root certificates from PKCS#11 enabled
+            tokens is highly insecure, as public objects can be added
+            without user notice.
 
-		allow_protected_authentication (Boolean)
-			Enable/disable global protected authentication support.
-			If disabled, no protected authentication will be allowed,
-			even if provider supports this feature.
+        allow_protected_authentication (Boolean)
+            Enable/disable global protected authentication support.
+            If disabled, no protected authentication will be allowed,
+            even if provider supports this feature.
 
-		pin_cache (Integer)
-			Maximum PIN/session cache period in seconds.
-			-1 is infinite, until provider invalidates session.
+        pin_cache (Integer)
+            Maximum PIN/session cache period in seconds.
+            -1 is infinite, until provider invalidates session.
 
-		log_level (Integer)
-			Log level of pkcs11-helper, can be from 0-5.
+        log_level (Integer)
+            Log level of pkcs11-helper, can be from 0-5.
 
-		provider_##_enabled (Boolean)
-			Provider at this index is enabled.
+        provider_##_enabled (Boolean)
+            Provider at this index is enabled.
 
-		provider_##_name (String)
-			Provider unique friendly name.
+        provider_##_name (String)
+            Provider unique friendly name.
 
-		provider_##_library (String)
-			Provider library to load.
+        provider_##_library (String)
+            Provider library to load.
 
-		provider_##_allow_protected_authentication (Boolean)
-			Enable protected authentication if provider supports the feature.
+        provider_##_allow_protected_authentication (Boolean)
+            Enable protected authentication if provider supports the feature.
 
-		provider_##_cert_private (Boolean)
-			Provider stores the certificates as private objects.
+        provider_##_cert_private (Boolean)
+            Provider stores the certificates as private objects.
 
-		provider_##_private_mask (Integer)
-			Provider private key mask:
-			0	Determine automatically.
-			1	Use sign.
-			2	Use sign recover.
-			4	Use decrypt.
-			8	Use unwrap.
+        provider_##_private_mask (Integer)
+            Provider private key mask:
+            0    Determine automatically.
+            1    Use sign.
+            2    Use sign recover.
+            4    Use decrypt.
+            8    Use unwrap.
 
-		provider_##_slotevent_method (String)
-			auto	Determine automatically.
-			trigger	Use trigger.
-			poll	Use poll.
+        provider_##_slotevent_method (String)
+            auto    Determine automatically.
+            trigger    Use trigger.
+            poll    Use poll.
 
-		provider_##_slotevent_timeout (Integer)
-			Timeout for slotevent in poll mode.
-			Specify 0 for default.
+        provider_##_slotevent_timeout (Integer)
+            Timeout for slotevent in poll mode.
+            Specify 0 for default.
 
 AUTHORS
-	Alon Bar-Lev <alon.barlev@gmail.com>
-
+    Alon Bar-Lev <alon.barlev@gmail.com>

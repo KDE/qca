@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set( kdfunittest_bin_SRCS kdfunittest.cpp)  
+set( kdfunittest_bin_SRCS kdfunittest.cpp)
 
 add_executable( kdfunittest ${kdfunittest_bin_SRCS} )
 

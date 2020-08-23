@@ -29,25 +29,25 @@ endif()
 
 
 SET( SOURCES
-	qca_tools.cpp
-	qca_plugin.cpp
-	qca_textfilter.cpp
-	qca_basic.cpp
-	support/logger.cpp
-	qca_cert.cpp
-	qca_core.cpp
-	qca_default.cpp
-	qca_keystore.cpp
-	qca_publickey.cpp
-	qca_safeobj.cpp
-	qca_safetimer.cpp
-	qca_securelayer.cpp
-	qca_securemessage.cpp
-	support/qpipe.cpp
-	support/console.cpp
-	support/synchronizer.cpp
-	support/dirwatch.cpp
-	support/syncthread.cpp
+    qca_tools.cpp
+    qca_plugin.cpp
+    qca_textfilter.cpp
+    qca_basic.cpp
+    support/logger.cpp
+    qca_cert.cpp
+    qca_core.cpp
+    qca_default.cpp
+    qca_keystore.cpp
+    qca_publickey.cpp
+    qca_safeobj.cpp
+    qca_safetimer.cpp
+    qca_securelayer.cpp
+    qca_securemessage.cpp
+    support/qpipe.cpp
+    support/console.cpp
+    support/synchronizer.cpp
+    support/dirwatch.cpp
+    support/syncthread.cpp
 )
 
 IF (WIN32)
@@ -68,11 +68,11 @@ SET( botan_BASE botantools/botan )
 INCLUDE_DIRECTORIES(support ${botan_BASE} )
 
 ADD_DEFINITIONS(
-	-DBOTAN_TYPES_QT
-	-DBOTAN_NO_INIT_H
-	-DBOTAN_NO_CONF_H
-	-DBOTAN_TOOLS_ONLY
-	-DBOTAN_MINIMAL_BIGINT
+    -DBOTAN_TYPES_QT
+    -DBOTAN_NO_INIT_H
+    -DBOTAN_NO_CONF_H
+    -DBOTAN_TOOLS_ONLY
+    -DBOTAN_MINIMAL_BIGINT
 )
 
 ADD_DEFINITIONS(
@@ -87,29 +87,29 @@ if(UNIX)
 endif()
 
 SET( botan_SOURCES
-	${botan_BASE}/util.cpp
-	${botan_BASE}/exceptn.cpp
-	${botan_BASE}/mutex.cpp
-	${botan_BASE}/mux_qt/mux_qt.cpp
-	${botan_BASE}/charset.cpp
-	${botan_BASE}/defalloc.cpp
-	${botan_BASE}/mp_comba.cpp
-	${botan_BASE}/mp_mul.cpp
-	${botan_BASE}/mp_shift.cpp
-	${botan_BASE}/mp_misc.cpp
-	${botan_BASE}/divide.cpp
-	${botan_BASE}/big_base.cpp
-	${botan_BASE}/big_code.cpp
-	${botan_BASE}/big_io.cpp
-	${botan_BASE}/big_ops2.cpp
-	${botan_BASE}/big_ops3.cpp
-	${botan_BASE}/bit_ops.cpp
-	${botan_BASE}/libstate.cpp
-	${botan_BASE}/mem_pool.cpp
-	${botan_BASE}/modules.cpp
-	${botan_BASE}/mp_asm.cpp
-	${botan_BASE}/mp_mulop.cpp
-	${botan_BASE}/parsing.cpp
+    ${botan_BASE}/util.cpp
+    ${botan_BASE}/exceptn.cpp
+    ${botan_BASE}/mutex.cpp
+    ${botan_BASE}/mux_qt/mux_qt.cpp
+    ${botan_BASE}/charset.cpp
+    ${botan_BASE}/defalloc.cpp
+    ${botan_BASE}/mp_comba.cpp
+    ${botan_BASE}/mp_mul.cpp
+    ${botan_BASE}/mp_shift.cpp
+    ${botan_BASE}/mp_misc.cpp
+    ${botan_BASE}/divide.cpp
+    ${botan_BASE}/big_base.cpp
+    ${botan_BASE}/big_code.cpp
+    ${botan_BASE}/big_io.cpp
+    ${botan_BASE}/big_ops2.cpp
+    ${botan_BASE}/big_ops3.cpp
+    ${botan_BASE}/bit_ops.cpp
+    ${botan_BASE}/libstate.cpp
+    ${botan_BASE}/mem_pool.cpp
+    ${botan_BASE}/modules.cpp
+    ${botan_BASE}/mp_asm.cpp
+    ${botan_BASE}/mp_mulop.cpp
+    ${botan_BASE}/parsing.cpp
 )
 
 IF (UNIX)
@@ -127,7 +127,7 @@ add_library(${QCA_LIB_NAME} ${SOURCES}  ${public_HEADERS})
 TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} Qt5::Core)
 
 if(WIN32)
-	TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} crypt32 ws2_32)
+    TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} crypt32 ws2_32)
 endif()
 
 if(APPLE)
@@ -170,4 +170,3 @@ if(NOT DEVELOPER_MODE)
   )
   install_pdb(${QCA_LIB_NAME} ${QCA_BINARY_INSTALL_DIR})
 endif()
-

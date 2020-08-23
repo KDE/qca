@@ -1,4 +1,4 @@
-set(md5crypt_bin_SRCS md5crypt.cpp)  
+set(md5crypt_bin_SRCS md5crypt.cpp)
 
 add_executable(md5crypt ${md5crypt_bin_SRCS})
 

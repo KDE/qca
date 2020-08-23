@@ -1,4 +1,4 @@
-set(aes-cmac_bin_SRCS aes-cmac.cpp)  
+set(aes-cmac_bin_SRCS aes-cmac.cpp)
 
 add_executable(aes-cmac ${aes-cmac_bin_SRCS})
 

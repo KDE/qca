@@ -21,146 +21,136 @@
 
 #include "certviewdlg.h"
 
-#include <QtCore>
-#include <QtGui>
-#include <QtCrypto>
 #include "ui_certview.h"
+#include <QtCore>
+#include <QtCrypto>
+#include <QtGui>
 
 // from qcatool
 class InfoType
 {
 public:
-	QCA::CertificateInfoType type;
-	QString varname;
-	QString shortname;
-	QString name;
-	QString desc;
+    QCA::CertificateInfoType type;
+    QString                  varname;
+    QString                  shortname;
+    QString                  name;
+    QString                  desc;
 
-	InfoType()
-	{
-	}
+    InfoType() { }
 
-	InfoType(QCA::CertificateInfoType _type, const QString &_varname, const QString &_shortname, const QString &_name, const QString &_desc) :
-		type(_type),
-		varname(_varname),
-		shortname(_shortname),
-		name(_name),
-		desc(_desc)
-	{
-	}
+    InfoType(QCA::CertificateInfoType _type, const QString &_varname, const QString &_shortname, const QString &_name,
+             const QString &_desc) :
+        type(_type),
+        varname(_varname), shortname(_shortname), name(_name), desc(_desc)
+    {
+    }
 };
 
 static QList<InfoType> makeInfoTypeList(bool legacyEmail = false)
 {
-	QList<InfoType> out;
-	out += InfoType(QCA::CommonName,             "CommonName",             "CN",  CertViewDlg::tr("Common Name (CN)"),          "Full name, domain, anything");
-	out += InfoType(QCA::Email,                  "Email",                  "",    CertViewDlg::tr("Email Address"),             "");
-	if(legacyEmail)
-		out += InfoType(QCA::EmailLegacy,            "EmailLegacy",       "",    CertViewDlg::tr("PKCS#9 Email Address"),      "");
-	out += InfoType(QCA::Organization,           "Organization",           "O",   CertViewDlg::tr("Organization (O)"),          "Company, group, etc");
-	out += InfoType(QCA::OrganizationalUnit,     "OrganizationalUnit",     "OU",  CertViewDlg::tr("Organizational Unit (OU)"),  "Division/branch of organization");
-	out += InfoType(QCA::Locality,               "Locality",               "",    CertViewDlg::tr("Locality (L)"),              "City, shire, part of a state");
-	out += InfoType(QCA::State,                  "State",                  "",    CertViewDlg::tr("State (ST)"),                "State within the country");
-	out += InfoType(QCA::Country,                "Country",                "C",   CertViewDlg::tr("Country Code (C)"),          "2-letter code");
-	out += InfoType(QCA::IncorporationLocality,  "IncorporationLocality",  "",    CertViewDlg::tr("Incorporation Locality"),    "For EV certificates");
-	out += InfoType(QCA::IncorporationState,     "IncorporationState",     "",    CertViewDlg::tr("Incorporation State"),       "For EV certificates");
-	out += InfoType(QCA::IncorporationCountry,   "IncorporationCountry",   "",    CertViewDlg::tr("Incorporation Country"),     "For EV certificates");
-	out += InfoType(QCA::URI,                    "URI",                    "",    CertViewDlg::tr("URI"),                       "");
-	out += InfoType(QCA::DNS,                    "DNS",                    "",    CertViewDlg::tr("Domain Name"),               "Domain (dnsName)");
-	out += InfoType(QCA::IPAddress,              "IPAddress",              "",    CertViewDlg::tr("IP Adddress"),               "");
-	out += InfoType(QCA::XMPP,                   "XMPP",                   "",    CertViewDlg::tr("XMPP Address (JID)"),        "From RFC 3920 (id-on-xmppAddr)");
-	return out;
+    QList<InfoType> out;
+    out += InfoType(QCA::CommonName, "CommonName", "CN", CertViewDlg::tr("Common Name (CN)"),
+                    "Full name, domain, anything");
+    out += InfoType(QCA::Email, "Email", "", CertViewDlg::tr("Email Address"), "");
+    if (legacyEmail)
+        out += InfoType(QCA::EmailLegacy, "EmailLegacy", "", CertViewDlg::tr("PKCS#9 Email Address"), "");
+    out += InfoType(QCA::Organization, "Organization", "O", CertViewDlg::tr("Organization (O)"), "Company, group, etc");
+    out += InfoType(QCA::OrganizationalUnit, "OrganizationalUnit", "OU", CertViewDlg::tr("Organizational Unit (OU)"),
+                    "Division/branch of organization");
+    out += InfoType(QCA::Locality, "Locality", "", CertViewDlg::tr("Locality (L)"), "City, shire, part of a state");
+    out += InfoType(QCA::State, "State", "", CertViewDlg::tr("State (ST)"), "State within the country");
+    out += InfoType(QCA::Country, "Country", "C", CertViewDlg::tr("Country Code (C)"), "2-letter code");
+    out += InfoType(QCA::IncorporationLocality, "IncorporationLocality", "", CertViewDlg::tr("Incorporation Locality"),
+                    "For EV certificates");
+    out += InfoType(QCA::IncorporationState, "IncorporationState", "", CertViewDlg::tr("Incorporation State"),
+                    "For EV certificates");
+    out += InfoType(QCA::IncorporationCountry, "IncorporationCountry", "", CertViewDlg::tr("Incorporation Country"),
+                    "For EV certificates");
+    out += InfoType(QCA::URI, "URI", "", CertViewDlg::tr("URI"), "");
+    out += InfoType(QCA::DNS, "DNS", "", CertViewDlg::tr("Domain Name"), "Domain (dnsName)");
+    out += InfoType(QCA::IPAddress, "IPAddress", "", CertViewDlg::tr("IP Adddress"), "");
+    out += InfoType(QCA::XMPP, "XMPP", "", CertViewDlg::tr("XMPP Address (JID)"), "From RFC 3920 (id-on-xmppAddr)");
+    return out;
 }
 
 static QString try_print_info(const QString &name, const QStringList &values)
 {
-	QString out;
-	if(!values.isEmpty())
-	{
-		QString value = values.join(", ");
-		out = QString("   ") + CertViewDlg::tr("%1: %2").arg(name, value) + '\n';
-	}
-	return out;
+    QString out;
+    if (!values.isEmpty()) {
+        QString value = values.join(", ");
+        out           = QString("   ") + CertViewDlg::tr("%1: %2").arg(name, value) + '\n';
+    }
+    return out;
 }
 
 static QString print_info(const QString &title, const QCA::CertificateInfo &info)
 {
-	QString out;
-	QList<InfoType> list = makeInfoTypeList();
-	out += title + '\n';
-	foreach(const InfoType &t, list)
-		out += try_print_info(t.name, info.values(t.type));
-	return out;
+    QString         out;
+    QList<InfoType> list = makeInfoTypeList();
+    out += title + '\n';
+    foreach (const InfoType &t, list)
+        out += try_print_info(t.name, info.values(t.type));
+    return out;
 }
 
 static QString cert_info_string(const QCA::Certificate &cert)
 {
-	QString out;
-	out += CertViewDlg::tr("Serial Number: %1").arg(cert.serialNumber().toString()) + '\n';
-	out += print_info(CertViewDlg::tr("Subject"), cert.subjectInfo());
-	out += print_info(CertViewDlg::tr("Issuer"), cert.issuerInfo());
-	out += CertViewDlg::tr("Validity") + '\n';
-	out += QString("   ") + CertViewDlg::tr("Not before: %1").arg(cert.notValidBefore().toString()) + '\n';
-	out += QString("   ") + CertViewDlg::tr("Not after:  %1").arg(cert.notValidAfter().toString()) + '\n';
-	return out;
+    QString out;
+    out += CertViewDlg::tr("Serial Number: %1").arg(cert.serialNumber().toString()) + '\n';
+    out += print_info(CertViewDlg::tr("Subject"), cert.subjectInfo());
+    out += print_info(CertViewDlg::tr("Issuer"), cert.issuerInfo());
+    out += CertViewDlg::tr("Validity") + '\n';
+    out += QString("   ") + CertViewDlg::tr("Not before: %1").arg(cert.notValidBefore().toString()) + '\n';
+    out += QString("   ") + CertViewDlg::tr("Not after:  %1").arg(cert.notValidAfter().toString()) + '\n';
+    return out;
 }
 
 class CertViewDlg::Private : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	CertViewDlg *q;
-	Ui_CertView ui;
-	QCA::CertificateChain chain;
+    CertViewDlg *         q;
+    Ui_CertView           ui;
+    QCA::CertificateChain chain;
 
-	Private(CertViewDlg *_q) :
-		QObject(_q),
-		q(_q)
-	{
-		ui.setupUi(q);
-		connect(ui.cb_chain, SIGNAL(activated(int)), SLOT(cb_activated(int)));
-		ui.lb_info->setTextInteractionFlags(Qt::TextSelectableByMouse);
-	}
+    Private(CertViewDlg *_q) : QObject(_q), q(_q)
+    {
+        ui.setupUi(q);
+        connect(ui.cb_chain, SIGNAL(activated(int)), SLOT(cb_activated(int)));
+        ui.lb_info->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    }
 
-	void update()
-	{
-		QStringList names = QCA::makeFriendlyNames(chain);
-		ui.cb_chain->clear();
-		foreach(const QString &s, names)
-			ui.cb_chain->insertItem(ui.cb_chain->count(), s);
-		updateInfo();
-	}
+    void update()
+    {
+        QStringList names = QCA::makeFriendlyNames(chain);
+        ui.cb_chain->clear();
+        foreach (const QString &s, names)
+            ui.cb_chain->insertItem(ui.cb_chain->count(), s);
+        updateInfo();
+    }
 
-	void updateInfo()
-	{
-		int x = ui.cb_chain->currentIndex();
-		if(x == -1)
-		{
-			ui.lb_info->setText("");
-			return;
-		}
+    void updateInfo()
+    {
+        int x = ui.cb_chain->currentIndex();
+        if (x == -1) {
+            ui.lb_info->setText("");
+            return;
+        }
 
-		ui.lb_info->setText(cert_info_string(chain[x]));
-	}
+        ui.lb_info->setText(cert_info_string(chain[x]));
+    }
 
 private Q_SLOTS:
-	void cb_activated(int)
-	{
-		updateInfo();
-	}
+    void cb_activated(int) { updateInfo(); }
 };
 
-CertViewDlg::CertViewDlg(const QCA::CertificateChain &chain, QWidget *parent) :
-	QDialog(parent)
+CertViewDlg::CertViewDlg(const QCA::CertificateChain &chain, QWidget *parent) : QDialog(parent)
 {
-	d = new Private(this);
-	d->chain = chain;
-	d->update();
+    d        = new Private(this);
+    d->chain = chain;
+    d->update();
 }
 
-CertViewDlg::~CertViewDlg()
-{
-	delete d;
-}
+CertViewDlg::~CertViewDlg() { delete d; }
 
 #include "certviewdlg.moc"

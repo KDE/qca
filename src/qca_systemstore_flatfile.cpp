@@ -26,13 +26,13 @@ namespace QCA {
 
 bool qca_have_systemstore()
 {
-	QFile f(QStringLiteral(QCA_SYSTEMSTORE_PATH));
-	return f.open(QFile::ReadOnly);
+    QFile f(QStringLiteral(QCA_SYSTEMSTORE_PATH));
+    return f.open(QFile::ReadOnly);
 }
 
 CertificateCollection qca_get_systemstore(const QString &provider)
 {
-	return CertificateCollection::fromFlatTextFile(QStringLiteral(QCA_SYSTEMSTORE_PATH), nullptr, provider);
+    return CertificateCollection::fromFlatTextFile(QStringLiteral(QCA_SYSTEMSTORE_PATH), nullptr, provider);
 }
 
 }

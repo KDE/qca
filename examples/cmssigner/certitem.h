@@ -28,11 +28,10 @@
 class QString;
 class QStringList;
 
-namespace QCA
-{
-	class PrivateKey;
-	class CertificateChain;
-	class KeyStoreEntry;
+namespace QCA {
+class PrivateKey;
+class CertificateChain;
+class KeyStoreEntry;
 }
 
 class CertItemStore;
@@ -42,105 +41,105 @@ class CertItemPrivateLoaderPrivate;
 class CertItem
 {
 public:
-	enum StorageType
-	{
-		File,
-		KeyStore
-	};
+    enum StorageType
+    {
+        File,
+        KeyStore
+    };
 
-	CertItem();
-	CertItem(const CertItem &from);
-	~CertItem();
-	CertItem & operator=(const CertItem &from);
+    CertItem();
+    CertItem(const CertItem &from);
+    ~CertItem();
+    CertItem &operator=(const CertItem &from);
 
-	QString name() const;
-	QCA::CertificateChain certificateChain() const;
-	bool havePrivate() const;
-	StorageType storageType() const; // private key storage type
-	bool isUsable() const; // file/provider present
+    QString               name() const;
+    QCA::CertificateChain certificateChain() const;
+    bool                  havePrivate() const;
+    StorageType           storageType() const; // private key storage type
+    bool                  isUsable() const;    // file/provider present
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 
-	friend class CertItemStore;
-	friend class CertItemStorePrivate;
-	friend class CertItemPrivateLoader;
-	friend class CertItemPrivateLoaderPrivate;
+    friend class CertItemStore;
+    friend class CertItemStorePrivate;
+    friend class CertItemPrivateLoader;
+    friend class CertItemPrivateLoaderPrivate;
 };
 
 class CertItemStore : public QAbstractListModel
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	enum IconType
-	{
-		IconCert,
-		IconCrl,
-		IconKeyBundle,
-		IconPgpPub,
-		IconPgpSec
-	};
+    enum IconType
+    {
+        IconCert,
+        IconCrl,
+        IconKeyBundle,
+        IconPgpPub,
+        IconPgpSec
+    };
 
-	CertItemStore(QObject *parent = nullptr);
-	~CertItemStore();
+    CertItemStore(QObject *parent = nullptr);
+    ~CertItemStore();
 
-	int idFromRow(int row) const;
-	int rowFromId(int id) const;
-	CertItem itemFromId(int id) const;
-	CertItem itemFromRow(int row) const;
+    int      idFromRow(int row) const;
+    int      rowFromId(int id) const;
+    CertItem itemFromId(int id) const;
+    CertItem itemFromRow(int row) const;
 
-	QList<CertItem> items() const;
+    QList<CertItem> items() const;
 
-	QStringList save() const;
-	bool load(const QStringList &in);
+    QStringList save() const;
+    bool        load(const QStringList &in);
 
-	// returns a reqId
-	int addFromFile(const QString &fileName);
-	int addFromKeyStore(const QCA::KeyStoreEntry &entry);
-	int addUser(const QCA::CertificateChain &chain);
+    // returns a reqId
+    int addFromFile(const QString &fileName);
+    int addFromKeyStore(const QCA::KeyStoreEntry &entry);
+    int addUser(const QCA::CertificateChain &chain);
 
-	void updateChain(int id, const QCA::CertificateChain &chain);
+    void updateChain(int id, const QCA::CertificateChain &chain);
 
-	void removeItem(int id);
+    void removeItem(int id);
 
-	void setIcon(IconType type, const QPixmap &icon);
+    void setIcon(IconType type, const QPixmap &icon);
 
-	// reimplemented
-	int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role) const;
-	Qt::ItemFlags flags(const QModelIndex &index) const;
-	bool setData(const QModelIndex &index, const QVariant &value, int role);
+    // reimplemented
+    int           rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant      data(const QModelIndex &index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+    bool          setData(const QModelIndex &index, const QVariant &value, int role);
 
 Q_SIGNALS:
-	void addSuccess(int reqId, int id);
-	void addFailed(int reqId);
+    void addSuccess(int reqId, int id);
+    void addFailed(int reqId);
 
 private:
-	friend class CertItemStorePrivate;
-	CertItemStorePrivate *d;
+    friend class CertItemStorePrivate;
+    CertItemStorePrivate *d;
 
-	friend class CertItemPrivateLoader;
-	friend class CertItemPrivateLoaderPrivate;
+    friend class CertItemPrivateLoader;
+    friend class CertItemPrivateLoaderPrivate;
 };
 
 class CertItemPrivateLoader : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit CertItemPrivateLoader(CertItemStore *store, QObject *parent = nullptr);
-	~CertItemPrivateLoader();
+    explicit CertItemPrivateLoader(CertItemStore *store, QObject *parent = nullptr);
+    ~CertItemPrivateLoader();
 
-	void start(int id);
+    void start(int id);
 
-	QCA::PrivateKey privateKey() const;
+    QCA::PrivateKey privateKey() const;
 
 Q_SIGNALS:
-	void finished();
+    void finished();
 
 private:
-	friend class CertItemPrivateLoaderPrivate;
-	CertItemPrivateLoaderPrivate *d;
+    friend class CertItemPrivateLoaderPrivate;
+    CertItemPrivateLoaderPrivate *d;
 };
 
 #endif

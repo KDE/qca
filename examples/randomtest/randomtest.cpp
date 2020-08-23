@@ -33,41 +33,40 @@
 
 int main(int argc, char **argv)
 {
-	// the Initializer object sets things up, and
-	// also does cleanup when it goes out of scope
-	QCA::Initializer init;
+    // the Initializer object sets things up, and
+    // also does cleanup when it goes out of scope
+    QCA::Initializer init;
 
-	QCoreApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
-	qDebug() << "This example generates random numbers";
+    qDebug() << "This example generates random numbers";
 
-	int randInt;
-	// This is the standard way to generate a random integer.
-	randInt = QCA::Random::randomInt();
-	qDebug() << "A random number: " << randInt;
+    int randInt;
+    // This is the standard way to generate a random integer.
+    randInt = QCA::Random::randomInt();
+    qDebug() << "A random number: " << randInt;
 
-	// If you wanted a random character (octet), you could
-	// use something like:
-	unsigned char randChar;
-	randChar = QCA::Random::randomChar();
-	// It might not be printable, so this may not produce output
-	std::cout << "A random character: " << randChar << std::endl;
+    // If you wanted a random character (octet), you could
+    // use something like:
+    unsigned char randChar;
+    randChar = QCA::Random::randomChar();
+    // It might not be printable, so this may not produce output
+    std::cout << "A random character: " << randChar << std::endl;
 
-	QCA::SecureArray tenBytes(10);
-	// If you need more random values, you may want to
-	// get an array, as shown below.
-	tenBytes = QCA::Random::randomArray(10);
+    QCA::SecureArray tenBytes(10);
+    // If you need more random values, you may want to
+    // get an array, as shown below.
+    tenBytes = QCA::Random::randomArray(10);
 
-	// To make this viewable, we convert to hexadecimal.
-	std::cout << "A random 10 byte array (in hex): ";
-	std::cout << qPrintable(QCA::Hex().arrayToString(tenBytes)) << std::endl;
+    // To make this viewable, we convert to hexadecimal.
+    std::cout << "A random 10 byte array (in hex): ";
+    std::cout << qPrintable(QCA::Hex().arrayToString(tenBytes)) << std::endl;
 
-	// Under some circumstances, you may want to create a
-	// Random object, rather than a static public member function.
-	// This isn't normally the easiest way, but it does work
-	QCA::Random myRandomObject;
-	randChar = myRandomObject.nextByte();
-	tenBytes = myRandomObject.nextBytes(10);
-	return 0;
+    // Under some circumstances, you may want to create a
+    // Random object, rather than a static public member function.
+    // This isn't normally the easiest way, but it does work
+    QCA::Random myRandomObject;
+    randChar = myRandomObject.nextByte();
+    tenBytes = myRandomObject.nextBytes(10);
+    return 0;
 }
-

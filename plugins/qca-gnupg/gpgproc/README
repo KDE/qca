@@ -5,4 +5,3 @@ for only a handful of operations.  If you are writing a Qt-based GPG front
 end, please use this class.
 
 GPGProc works on both Windows and Unix platforms.
-

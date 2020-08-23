@@ -36,8 +36,9 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void filewatchTest();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *m_init;
 };
 
 #endif

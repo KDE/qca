@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(hexunittest_bin_SRCS hexunittest.cpp)  
+set(hexunittest_bin_SRCS hexunittest.cpp)
 
 add_executable( hexunittest ${hexunittest_bin_SRCS} )
 

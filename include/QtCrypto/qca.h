@@ -33,16 +33,16 @@
 #ifndef QCA_H
 #define QCA_H
 
-#include "qca_core.h"
-#include "qca_textfilter.h"
 #include "qca_basic.h"
-#include "qca_publickey.h"
 #include "qca_cert.h"
+#include "qca_core.h"
 #include "qca_keystore.h"
+#include "qca_publickey.h"
+#include "qca_safetimer.h"
 #include "qca_securelayer.h"
 #include "qca_securemessage.h"
+#include "qca_textfilter.h"
 #include "qcaprovider.h"
 #include "qpipe.h"
-#include "qca_safetimer.h"
 
 #endif

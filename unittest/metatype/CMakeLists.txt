@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(metatype_bin_SRCS metatype.cpp)  
+set(metatype_bin_SRCS metatype.cpp)
 
 add_executable( metatypeunittest ${metatype_bin_SRCS} )
 

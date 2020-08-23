@@ -20,21 +20,19 @@
 
 #include "qcaprovider.h"
 
-namespace gpgQCAPlugin
-{
+namespace gpgQCAPlugin {
 
 class MyOpenPGPContext : public QCA::SMSContext
 {
     Q_OBJECT
 public:
-	MyOpenPGPContext(QCA::Provider *p);
+    MyOpenPGPContext(QCA::Provider *p);
 
-	// reimplemented Provider::Context
-	QCA::Provider::Context *clone() const override;
+    // reimplemented Provider::Context
+    QCA::Provider::Context *clone() const override;
 
-	// reimplemented SMSContext
-	QCA::MessageContext *createMessage() override;
+    // reimplemented SMSContext
+    QCA::MessageContext *createMessage() override;
 };
-
 
 } // end namespace gpgQCAPlugin

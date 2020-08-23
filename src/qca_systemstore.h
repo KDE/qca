@@ -28,7 +28,7 @@
 
 namespace QCA {
 
-bool qca_have_systemstore();
+bool                  qca_have_systemstore();
 CertificateCollection qca_get_systemstore(const QString &provider);
 
 }

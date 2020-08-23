@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set( dsaunittest_bin_SRCS dsaunittest.cpp)  
+set( dsaunittest_bin_SRCS dsaunittest.cpp)
 
 add_executable( dsaunittest ${dsaunittest_bin_SRCS} )
 

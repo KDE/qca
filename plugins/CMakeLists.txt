@@ -65,4 +65,3 @@ endforeach(PLUGIN IN LISTS PLUGINS)
 #         MESSAGE(STATUS "WinCrypto plugin enabled")
 #         ADD_SUBDIRECTORY(qca-wincrypto)
 # ENDIF (WIN32)
-

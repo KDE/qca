@@ -24,7 +24,7 @@
   consider a more readable implementation of qca_securelayer logic using the
     object-sessions concept (write the blog first :))
   vs2005: big_io.obj : warning LNK4221: no public symbols found; archive
-    member will be inaccessible 
+    member will be inaccessible
 
 * 2.1.0
   CertificateAuthority constructor provider argument should have default value

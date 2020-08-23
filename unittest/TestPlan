@@ -39,7 +39,7 @@ Execute the "qcatool" application with the "plugins" option
 
 Expected result: The plugin paths are displayed (which correspond with
 the appropriate plugin directory for Qt, and the current
-directory). 
+directory).
 
 The list of providers is displayed, or "(none)" is displayed if no
 providers are installed. Note: "(none)" should not be displayed if any
@@ -82,4 +82,3 @@ additional functionality.
 
 Depending on test requirements, consider using code in the "examples"
 directory to verify functionality.
-

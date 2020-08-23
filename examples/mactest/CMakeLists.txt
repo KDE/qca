@@ -1,4 +1,4 @@
-set(mactest_bin_SRCS mactest.cpp)  
+set(mactest_bin_SRCS mactest.cpp)
 
 add_executable(mactest ${mactest_bin_SRCS})
 

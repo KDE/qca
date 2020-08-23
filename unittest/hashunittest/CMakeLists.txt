@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(hashunittest_bin_SRCS hashunittest.cpp)  
+set(hashunittest_bin_SRCS hashunittest.cpp)
 
 add_executable( hashunittest ${hashunittest_bin_SRCS} )
 

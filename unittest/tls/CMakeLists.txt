@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(tlsunittest_bin_SRCS tlsunittest.cpp)  
+set(tlsunittest_bin_SRCS tlsunittest.cpp)
 
 add_executable(tlsunittest ${tlsunittest_bin_SRCS} )
 

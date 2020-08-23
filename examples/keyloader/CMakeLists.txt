@@ -1,4 +1,4 @@
-set(keyloader_bin_SRCS keyloader.cpp)  
+set(keyloader_bin_SRCS keyloader.cpp)
 
 add_executable(keyloader ${keyloader_bin_SRCS})
 

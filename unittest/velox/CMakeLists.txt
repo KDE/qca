@@ -2,7 +2,7 @@ find_package(Qt5 REQUIRED Network)
 
 ENABLE_TESTING()
 
-set(veloxunittest_bin_SRCS veloxunittest.cpp)  
+set(veloxunittest_bin_SRCS veloxunittest.cpp)
 
 add_executable(veloxunittest ${veloxunittest_bin_SRCS} )
 

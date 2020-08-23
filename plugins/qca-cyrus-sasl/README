@@ -26,4 +26,3 @@ For Windows:
   qmake
   nmake (or make)
   copy lib\*.dll qtdir\plugins\crypto
-

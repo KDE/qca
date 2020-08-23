@@ -1,4 +1,4 @@
-set(sslservtest_bin_SRCS sslservtest.cpp)  
+set(sslservtest_bin_SRCS sslservtest.cpp)
 
 add_executable(sslservtest ${sslservtest_bin_SRCS})
 

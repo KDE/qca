@@ -22,7 +22,7 @@
 /**
    \file qca_export.h
 
-   Preprocessor magic to allow export of library symbols. 
+   Preprocessor magic to allow export of library symbols.
 
    This is strictly internal.
 
@@ -37,16 +37,16 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_WIN
-# ifndef QCA_STATIC
-#  ifdef QCA_MAKEDLL
-#   define QCA_EXPORT Q_DECL_EXPORT
-#  else
-#   define QCA_EXPORT Q_DECL_IMPORT
-#  endif
-# endif
+#ifndef QCA_STATIC
+#ifdef QCA_MAKEDLL
+#define QCA_EXPORT Q_DECL_EXPORT
+#else
+#define QCA_EXPORT Q_DECL_IMPORT
+#endif
+#endif
 #endif
 #ifndef QCA_EXPORT
-# define QCA_EXPORT
+#define QCA_EXPORT
 #endif
 
 #endif

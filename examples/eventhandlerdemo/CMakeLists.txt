@@ -1,4 +1,4 @@
-set(eventhandlerdemo_bin_SRCS eventhandlerdemo.cpp)  
+set(eventhandlerdemo_bin_SRCS eventhandlerdemo.cpp)
 
 add_executable(eventhandlerdemo ${eventhandlerdemo_bin_SRCS})
 

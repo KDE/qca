@@ -1,4 +1,4 @@
-set(randomtest_bin_SRCS randomtest.cpp)  
+set(randomtest_bin_SRCS randomtest.cpp)
 
 add_executable(randomtest ${randomtest_bin_SRCS})
 

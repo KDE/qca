@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(macunittest_bin_SRCS macunittest.cpp)  
+set(macunittest_bin_SRCS macunittest.cpp)
 
 add_executable( macunittest ${macunittest_bin_SRCS} )
 

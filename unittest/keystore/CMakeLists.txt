@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(keystoreunittest_bin_SRCS keystore.cpp)  
+set(keystoreunittest_bin_SRCS keystore.cpp)
 
 add_executable( keystore ${keystoreunittest_bin_SRCS} )
 

@@ -5,4 +5,3 @@ Implementation:
 * Cipher is incomplete - it can't handle cases where
   data is not provided in blocksize chunks. Needs buffering
   and padding to be added.
-

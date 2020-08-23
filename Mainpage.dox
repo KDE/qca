@@ -57,20 +57,20 @@
          - HMAC with SHA-1
          - HMAC with MD5
          - HMAC with RIPEMD160
-	 - HMAC with SHA-224
-	 - HMAC with SHA-256
-	 - HMAC with SHA-384
-	 - HMAC with SHA-512
-     - Encoding and decoding of hexadecimal (QCA::Hex) and 
+     - HMAC with SHA-224
+     - HMAC with SHA-256
+     - HMAC with SHA-384
+     - HMAC with SHA-512
+     - Encoding and decoding of hexadecimal (QCA::Hex) and
      Base64 (QCA::Base64) strings.
-  
+
    Functionality is supplied via plugins.  This is useful for avoiding
    dependence on a particular crypto library and makes upgrading easier,
    as there is no need to recompile your application when adding or
    upgrading a crypto plugin.  Also, by pushing crypto functionality into
    plugins, your application is free of legal issues, such as export
    regulation.
- 
+
    And of course, you get a very simple crypto API for Qt, where you can
    do things like:
    \code
@@ -92,13 +92,13 @@
    do need to know though, to build reliable applications:
    - %QCA needs to be initialized before you use any class that
      requires plugin support, or uses secure memory. That is most
-     of %QCA, so you should assume that you need to perform 
+     of %QCA, so you should assume that you need to perform
      initialization. The easiest way to do this is to instantiate
      a QCA::Initializer object and ensure it is not deleted (or
-     allowed to go out of scope) until you have finished using 
+     allowed to go out of scope) until you have finished using
      %QCA.
    - Most features/algorithms are provided by plugins/\ref providers.
-     You should check that the required feature is actually 
+     You should check that the required feature is actually
      available (using QCA::isSupported()) before trying to create
      it. If you try to create a class and suitable provider support
      is not available, you will get back a null object, and when
@@ -112,23 +112,23 @@
    \subsection tute2 Thoughts on security
 
    %QCA tries to be flexible in what it supports. That does not mean that
-   every possible combination of features makes sense though. 
+   every possible combination of features makes sense though.
 
    We strongly recommend against coming up with your own design made up
    of low-level cryptographic primitives (e.g. QCA::Hash, QCA::Cipher and
    similar features) and trying to use higher level capabilities. In particular,
    we recommend looking at QCA::TLS, QCA::SASL, QCA::CMS and QCA::OpenPGP
-   as starting points. 
+   as starting points.
 
    When selecting a particular cryptographic feature, you should make sure
    that you understand what sort of threats your application is likely
-   to be exposed to, and how that threat can be effectively countered. In 
+   to be exposed to, and how that threat can be effectively countered. In
    addition, you should consider whether you can avoid adding cryptographic
    features directly to your application (e.g. for secure transport, you
    may be able to tunnel your application over SSH).
 
    Also, you may need to look beyond %QCA for some security needs (e.g.
-   for authentication, your situation may be more suited to using 
+   for authentication, your situation may be more suited to using
    Kerberos than SASL or TLS).
 
    \subsection intro-design Design
@@ -144,7 +144,7 @@
 
    For more information on the design of %QCA, you might like to review
    the \ref architecture description.
- 
+
    \section availability Availability
 
    \subsection qca2code Releases
@@ -236,12 +236,12 @@ this case, a HashContext).
 be varied in its implementation, including being changed at run-time. The
 application doesn't need to know how HashContext is implemented, because
   it just has to deal with the Hash class interface. In fact, HashContext
-  may not be implemented, so the application should check (using 
+  may not be implemented, so the application should check (using
   QCA::isSupported()) before trying to use features that are implemented
 with plugins.
 
   The code for one implementation (in this case, calling OpenSSL) is shown
-below. 
+below.
 \code
 class opensslHashContext : public HashContext
 {
@@ -306,9 +306,9 @@ because the plugins are often based on existing libraries.
                         return new opensslCipherContext( EVP_aes_128_cfb(), 0, this, type);
                 else if ( type == "aes128-cbc" )
                         return new opensslCipherContext( EVP_aes_128_cbc(), 0, this, type);
-		else
-		        return 0;
-	}
+        else
+                return 0;
+    }
 \endcode
 
 The resulting effect is that %QCA can ask the provider to provide an appropriate
@@ -320,30 +320,30 @@ CipherContext and MACContext can also do this), we need to be able to let applic
 determine which algorithms are supported. This is handled through the InfoContext class.
 A typical example is shown below:
 \code
-	class opensslInfoContext : public InfoContext
-	{
-        	Q_OBJECT
-	public:
-        	opensslInfoContext(Provider *p) : InfoContext(p)
-	        {
-	        }
+    class opensslInfoContext : public InfoContext
+    {
+            Q_OBJECT
+    public:
+            opensslInfoContext(Provider *p) : InfoContext(p)
+            {
+            }
 
-	        Context *clone() const
-        	{
-                	return new opensslInfoContext(*this);
-	        }
+            Context *clone() const
+            {
+                    return new opensslInfoContext(*this);
+            }
 
-        	QStringList supportedHashTypes() const
-	        {
-			QStringList list;
-			list += "sha1";
-			list += "sha0";
-			list += "md5";
-        	        return list;
-        	}
+            QStringList supportedHashTypes() const
+            {
+            QStringList list;
+            list += "sha1";
+            list += "sha0";
+            list += "md5";
+                    return list;
+            }
 
-		// MAC and Cipher types can go in here
-	};
+        // MAC and Cipher types can go in here
+    };
 \endcode
 
 Note that InfoContext is itself a feature, so you have to add it to the createContext()
@@ -359,9 +359,9 @@ method for the provider, as shown below:
                         return new opensslHashContext( EVP_md5(), this, type);
                 else if ( type == "info" )
                         return new opensslInfoContext( this );
-		else
-		        return 0;
-	}
+        else
+                return 0;
+    }
 \endcode
 
 */
@@ -372,7 +372,7 @@ method for the provider, as shown below:
 internal provider (named "default"), but most of the work is
 done in plugin modules.
 
-The logic to selection of a provider is fairly simple. The user can 
+The logic to selection of a provider is fairly simple. The user can
 specify a provider name - if that name exists, and the provider supports
 the requested feature, then the named provider is used. If that
 didn't work, then the available plugins are searched (based on a
@@ -397,4 +397,3 @@ create a client-side provider, and add it using the
 QCA::insertProvider call. There is an example of this - see
 <a href="aes-cmac_8cpp-example.html">the AES-CMAC example</a>.
 */
-

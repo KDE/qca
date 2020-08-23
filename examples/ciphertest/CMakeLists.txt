@@ -1,4 +1,4 @@
-set(ciphertest_bin_SRCS ciphertest.cpp)  
+set(ciphertest_bin_SRCS ciphertest.cpp)
 
 add_executable(ciphertest ${ciphertest_bin_SRCS})
 

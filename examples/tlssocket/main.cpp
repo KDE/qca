@@ -25,16 +25,16 @@
 
 int main(int argc, char **argv)
 {
-	QCA::Initializer init;
-	QCoreApplication qapp(argc, argv);
-	QCA::logger()->setLevel(QCA::Logger::Debug);
-	QCA::logger()->registerLogDevice(new SimpleLogger(&qapp));
+    QCA::Initializer init;
+    QCoreApplication qapp(argc, argv);
+    QCA::logger()->setLevel(QCA::Logger::Debug);
+    QCA::logger()->registerLogDevice(new SimpleLogger(&qapp));
 
-	TLSSocket socket;
-	socket.connectToHostEncrypted(QStringLiteral("tls13.1d.pw"), 443);
-	socket.write("GET / HTTP/1.0\r\n\r\n");
-	while(socket.waitForReadyRead())
-		printf("%s", socket.readAll().constData());
+    TLSSocket socket;
+    socket.connectToHostEncrypted(QStringLiteral("tls13.1d.pw"), 443);
+    socket.write("GET / HTTP/1.0\r\n\r\n");
+    while (socket.waitForReadyRead())
+        printf("%s", socket.readAll().constData());
 
-	return 0;
+    return 0;
 }

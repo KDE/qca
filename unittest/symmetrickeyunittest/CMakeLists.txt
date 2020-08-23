@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(symmetrickeyunittest_bin_SRCS symmetrickeyunittest.cpp)  
+set(symmetrickeyunittest_bin_SRCS symmetrickeyunittest.cpp)
 
 add_executable( symmetrickeyunittest ${symmetrickeyunittest_bin_SRCS} )
 

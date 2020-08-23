@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(staticunittest_bin_SRCS staticunittest.cpp)  
+set(staticunittest_bin_SRCS staticunittest.cpp)
 
 add_executable( staticunittest ${staticunittest_bin_SRCS} )
 

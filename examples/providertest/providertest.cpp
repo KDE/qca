@@ -20,8 +20,8 @@
 */
 
 // QtCrypto has the declarations for all of QCA
-#include <QtCrypto>
 #include <QCoreApplication>
+#include <QtCrypto>
 
 #include <iostream>
 #include <qstringlist.h>
@@ -46,13 +46,13 @@ int main(int argc, char **argv)
     // this gives us all the plugin providers as a list
     const QCA::ProviderList qcaProviders = QCA::providers();
     for (const QCA::Provider *provider : qcaProviders) {
-	// each provider has a name, which we can display
-	std::cout << provider->name().toLatin1().data() << ": ";
-	// ... and also a list of features
-	QStringList capabilities = provider->features();
-	// we turn the string list back into a single string,
-	// and display it as well
-	std::cout << capabilities.join(QStringLiteral(", ")).toLatin1().data() << std::endl;
+        // each provider has a name, which we can display
+        std::cout << provider->name().toLatin1().data() << ": ";
+        // ... and also a list of features
+        QStringList capabilities = provider->features();
+        // we turn the string list back into a single string,
+        // and display it as well
+        std::cout << capabilities.join(QStringLiteral(", ")).toLatin1().data() << std::endl;
     }
 
     // Note that the default provider isn't included in
@@ -64,4 +64,3 @@ int main(int argc, char **argv)
     std::cout << capabilities.join(QStringLiteral(", ")).toLatin1().data() << std::endl;
     return 0;
 }
-

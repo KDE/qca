@@ -1,4 +1,4 @@
-set(saslserver_bin_SRCS saslserver.cpp)  
+set(saslserver_bin_SRCS saslserver.cpp)
 
 add_executable(saslserver ${saslserver_bin_SRCS})
 

@@ -32,39 +32,38 @@
 
 int main(int argc, char **argv)
 {
-	// the Initializer object sets things up, and
-	// also does cleanup when it goes out of scope
-	QCA::Initializer init;
+    // the Initializer object sets things up, and
+    // also does cleanup when it goes out of scope
+    QCA::Initializer init;
 
-	QCoreApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
-	// we use the first argument as the data to encode / decode
-	// if an argument is provided. Use "hello" if no argument
-	QByteArray arg; // empty array
-	arg.append((argc >= 2) ? argv[1] : "hello");
+    // we use the first argument as the data to encode / decode
+    // if an argument is provided. Use "hello" if no argument
+    QByteArray arg; // empty array
+    arg.append((argc >= 2) ? argv[1] : "hello");
 
-	// create our object, which does encoding by default
-	// QCA::Hex encoder(QCA::Encode); is equivalent
-	QCA::Hex encoder;
+    // create our object, which does encoding by default
+    // QCA::Hex encoder(QCA::Encode); is equivalent
+    QCA::Hex encoder;
 
-	// You might prefer to use encoder.encode(); and have
-	// it return a QCA::SecureArray, depending on your needs
-	QString encoded = encoder.arrayToString(arg);
+    // You might prefer to use encoder.encode(); and have
+    // it return a QCA::SecureArray, depending on your needs
+    QString encoded = encoder.arrayToString(arg);
 
-	std::cout << arg.data() << " in hex encoding is ";
-	std::cout << encoded.toLatin1().data() << std::endl;
+    std::cout << arg.data() << " in hex encoding is ";
+    std::cout << encoded.toLatin1().data() << std::endl;
 
-	// This time, we'll create an object to decode hexadecimal.
-	// We could also have reused the existing object, calling
-	// clear(); and setup(QCA::Decode); on it.
-	QCA::Hex decoder(QCA::Decode);
+    // This time, we'll create an object to decode hexadecimal.
+    // We could also have reused the existing object, calling
+    // clear(); and setup(QCA::Decode); on it.
+    QCA::Hex decoder(QCA::Decode);
 
-	// This time, we convert a QString into a QString
-	QString decoded = decoder.decodeString(encoded);
+    // This time, we convert a QString into a QString
+    QString decoded = decoder.decodeString(encoded);
 
-	std::cout << encoded.toLatin1().data() << " decoded from hex is ";
-	std::cout << decoded.toLatin1().data() << std::endl;
+    std::cout << encoded.toLatin1().data() << " decoded from hex is ";
+    std::cout << decoded.toLatin1().data() << std::endl;
 
-	return 0;
+    return 0;
 }
-

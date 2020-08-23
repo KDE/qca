@@ -32,89 +32,78 @@
 #include "import_plugins.h"
 #endif
 
-class PassphraseHandler: public QObject
+class PassphraseHandler : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	QCA::EventHandler handler;
+    QCA::EventHandler handler;
 
-	PassphraseHandler(QObject *parent = nullptr) : QObject(parent)
-	{
-		connect(&handler, &QCA::EventHandler::eventReady, this, &PassphraseHandler::eh_eventReady);
-		handler.start();
-	}
+    PassphraseHandler(QObject *parent = nullptr) : QObject(parent)
+    {
+        connect(&handler, &QCA::EventHandler::eventReady, this, &PassphraseHandler::eh_eventReady);
+        handler.start();
+    }
 
 private Q_SLOTS:
-	void eh_eventReady(int id, const QCA::Event &event)
-	{
-		if(event.type() == QCA::Event::Password)
-		{
-			QCA::SecureArray pass;
-			QCA::ConsolePrompt prompt;
-			prompt.getHidden(QStringLiteral("Passphrase"));
-			prompt.waitForFinished();
-			pass = prompt.result();
-			handler.submitPassword(id, pass);
-		}
-		else
-			handler.reject(id);
-	}
+    void eh_eventReady(int id, const QCA::Event &event)
+    {
+        if (event.type() == QCA::Event::Password) {
+            QCA::SecureArray   pass;
+            QCA::ConsolePrompt prompt;
+            prompt.getHidden(QStringLiteral("Passphrase"));
+            prompt.waitForFinished();
+            pass = prompt.result();
+            handler.submitPassword(id, pass);
+        } else
+            handler.reject(id);
+    }
 };
 
 class App : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	QCA::KeyLoader keyLoader;
-	QString str;
+    QCA::KeyLoader keyLoader;
+    QString        str;
 
-	App()
-	{
-		connect(&keyLoader, &QCA::KeyLoader::finished, this, &App::kl_finished);
-	}
+    App() { connect(&keyLoader, &QCA::KeyLoader::finished, this, &App::kl_finished); }
 
 public Q_SLOTS:
-	void start()
-	{
-		keyLoader.loadPrivateKeyFromPEMFile(str);
-	}
+    void start() { keyLoader.loadPrivateKeyFromPEMFile(str); }
 
 Q_SIGNALS:
-	void quit();
+    void quit();
 
 private Q_SLOTS:
-	void kl_finished()
-	{
-		if(keyLoader.convertResult() == QCA::ConvertGood)
-		{
-			QCA::PrivateKey key = keyLoader.privateKey();
-			printf("Loaded successfully.  Bits: %d\n", key.bitSize());
-		}
-		else
-			printf("Unable to load.\n");
+    void kl_finished()
+    {
+        if (keyLoader.convertResult() == QCA::ConvertGood) {
+            QCA::PrivateKey key = keyLoader.privateKey();
+            printf("Loaded successfully.  Bits: %d\n", key.bitSize());
+        } else
+            printf("Unable to load.\n");
 
-		emit quit();
-	}
+        emit quit();
+    }
 };
 
 int main(int argc, char **argv)
 {
-	QCA::Initializer init;
-	QCoreApplication qapp(argc, argv);
+    QCA::Initializer init;
+    QCoreApplication qapp(argc, argv);
 
-	if(argc < 2)
-	{
-		printf("usage: keyloader [privatekey.pem]\n");
-		return 0;
-	}
+    if (argc < 2) {
+        printf("usage: keyloader [privatekey.pem]\n");
+        return 0;
+    }
 
-	PassphraseHandler passphraseHandler;
-	App app;
-	app.str = QFile::decodeName(argv[1]);
-	QObject::connect(&app, &App::quit, &qapp, QCoreApplication::quit);
-	QTimer::singleShot(0, &app, &App::start);
-	qapp.exec();
-	return 0;
+    PassphraseHandler passphraseHandler;
+    App               app;
+    app.str = QFile::decodeName(argv[1]);
+    QObject::connect(&app, &App::quit, &qapp, QCoreApplication::quit);
+    QTimer::singleShot(0, &app, &App::start);
+    qapp.exec();
+    return 0;
 }
 
 #include "keyloader.moc"

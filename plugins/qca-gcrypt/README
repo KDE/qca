@@ -14,4 +14,3 @@ Installation procedure:
   ./configure
   make
   su -c "make install"
-

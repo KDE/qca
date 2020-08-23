@@ -34,15 +34,15 @@
 #ifndef QCA_CORE_H
 #define QCA_CORE_H
 
-#include <QString>
-#include <QStringList>
-#include <QList>
-#include <QSharedData>
-#include <QSharedDataPointer>
 #include "qca_export.h"
 #include "qca_support.h"
 #include "qca_tools.h"
 #include "qca_version.h"
+#include <QList>
+#include <QSharedData>
+#include <QSharedDataPointer>
+#include <QString>
+#include <QStringList>
 
 /**
    The current version of %QCA.
@@ -108,14 +108,14 @@ class Logger;
    \sa ProviderListIterator
    \sa providers()
 */
-typedef QList<Provider*> ProviderList;
+typedef QList<Provider *> ProviderList;
 
 /**
    Mode settings for memory allocation
 
    QCA can use secure memory, however most operating systems
    restrict the amount of memory that can be pinned by user
-   applications, to prevent a denial-of-service attack. 
+   applications, to prevent a denial-of-service attack.
 
    QCA supports two approaches to getting memory - the mlock
    method, which generally requires root (administrator) level
@@ -126,9 +126,9 @@ typedef QList<Provider*> ProviderList;
 */
 enum MemoryMode
 {
-	Practical, ///< mlock and drop root if available, else mmap
-	Locking, ///< mlock and drop root
-	LockingKeepPrivileges ///< mlock, retaining root privileges
+    Practical,            ///< mlock and drop root if available, else mmap
+    Locking,              ///< mlock and drop root
+    LockingKeepPrivileges ///< mlock, retaining root privileges
 };
 
 /**
@@ -139,8 +139,8 @@ enum MemoryMode
 */
 enum Direction
 {
-	Encode, ///< Operate in the "forward" direction; for example, encrypting
-	Decode  ///< Operate in the "reverse" direction; for example, decrypting
+    Encode, ///< Operate in the "forward" direction; for example, encrypting
+    Decode  ///< Operate in the "reverse" direction; for example, decrypting
 };
 
 /**
@@ -194,11 +194,11 @@ QCA_EXPORT bool haveSecureRandom();
    \code
 QCA::init();
 if(!QCA::isSupported("sha1"))
-	printf("SHA1 not supported!\n");
+    printf("SHA1 not supported!\n");
 else
 {
-	QString result = QCA::SHA1::hashToString(myString);
-	printf("sha1(\"%s\") = [%s]\n", myString.data(), qPrintable(result));
+    QString result = QCA::SHA1::hashToString(myString);
+    printf("sha1(\"%s\") = [%s]\n", myString.data(), qPrintable(result));
 }
    \endcode
 
@@ -268,7 +268,7 @@ QCA_EXPORT QStringList defaultFeatures();
 /**
    Add a provider to the current list of providers
 
-   This function allows you to add a provider to the 
+   This function allows you to add a provider to the
    current plugin providers at a specified priority. If
    a provider with the name already exists, this call fails.
 
@@ -315,7 +315,7 @@ QCA_EXPORT bool unloadProvider(const QString &name);
    - if no provider is nominated, or it doesn't support the required
    algorithm, then the provider with the lowest priority number will be used,
    if that provider supports the algorithm.
-   - if the provider with the lowest priority number doesn't support 
+   - if the provider with the lowest priority number doesn't support
    the required algorithm, the provider with the next lowest priority number
    will be tried, and so on through to the provider with the largest priority
    number
@@ -335,7 +335,7 @@ QCA_EXPORT void setProviderPriority(const QString &name, int priority);
 /**
    Return the priority of a specified provider
 
-   The name of the provider (eg "qca-ossl") is used to look up the 
+   The name of the provider (eg "qca-ossl") is used to look up the
    current priority associated with that provider. If the provider
    is not found (or something else went wrong), -1 is returned.
 
@@ -476,7 +476,7 @@ QCA_EXPORT void setGlobalRandomProvider(const QString &provider);
    Return a reference to the %QCA Logger, which is used for diagnostics
    and error recording.
 
-   The system Logger is automatically created for you on start. 
+   The system Logger is automatically created for you on start.
 */
 QCA_EXPORT Logger *logger();
 
@@ -490,14 +490,14 @@ QCA_EXPORT Logger *logger();
 
    \note This is a macro, so arguments may or may not be evaluated.
 */
-#define QCA_logTextMessage(message, severity) \
-	do { \
-		QCA::Logger::Severity s = severity; \
-		QCA::Logger *l = QCA::logger (); \
-		if (s <= l->level ()) { \
-			l->logTextMessage (message, s); \
-		} \
-	} while (false)
+#define QCA_logTextMessage(message, severity)                                                                          \
+    do {                                                                                                               \
+        QCA::Logger::Severity s = severity;                                                                            \
+        QCA::Logger *         l = QCA::logger();                                                                       \
+        if (s <= l->level()) {                                                                                         \
+            l->logTextMessage(message, s);                                                                             \
+        }                                                                                                              \
+    } while (false)
 
 /**
    Log a binary message. This is an efficient function
@@ -509,14 +509,14 @@ QCA_EXPORT Logger *logger();
 
    \note This is a macro, so arguments may or may not be evaluated.
 */
-#define QCA_logBinaryMessage(blob, severity) \
-	do { \
-		QCA::Logger::Severity s = severity; \
-		QCA::Logger *l = QCA::logger (); \
-		if (s <= l->level ()) { \
-			l->logBinaryMessage (blob, s); \
-		} \
-	} while (false)
+#define QCA_logBinaryMessage(blob, severity)                                                                           \
+    do {                                                                                                               \
+        QCA::Logger::Severity s = severity;                                                                            \
+        QCA::Logger *         l = QCA::logger();                                                                       \
+        if (s <= l->level()) {                                                                                         \
+            l->logBinaryMessage(blob, s);                                                                              \
+        }                                                                                                              \
+    } while (false)
 
 /**
    Test if QCA can access the root CA certificates
@@ -538,9 +538,9 @@ QCA_EXPORT bool haveSystemStore();
    are used for system updates. They are provided in different ways
    for different systems.
 
-   This function provides an common way to access the system 
+   This function provides an common way to access the system
    certificates. There are other ways to access certificates - see
-   the various I/O methods (such as fromDER() and fromPEM()) 
+   the various I/O methods (such as fromDER() and fromPEM())
    in the Certificate and CertificateCollection classes.
 
    \note Availability of the system certificates depends on how
@@ -563,7 +563,7 @@ QCA_EXPORT QString appName();
    Set the application name that will be used by SASL server mode
 
    The application name is used by SASL in server mode, as some systems might
-   have different security policies depending on the app. This should be set 
+   have different security policies depending on the app. This should be set
    before using SASL objects, and it cannot be changed later.
 
    \param name the name string to use for SASL server mode
@@ -583,7 +583,7 @@ test.fill('a');
 // 0x61 is 'a' in ASCII
 if (QString("61616161616161616161") == QCA::arrayToHex(test) )
 {
-	printf ("arrayToHex passed\n");
+    printf ("arrayToHex passed\n");
 }
    \endcode
 
@@ -609,7 +609,7 @@ test[7] = 0x00; // can handle strings with nulls
 
 if (QCA::hexToArray(QString("62626262626262006262") ) == test )
 {
-	printf ("hexToArray passed\n");
+    printf ("hexToArray passed\n");
 }
    \endcode
 
@@ -659,18 +659,18 @@ QCA_EXPORT QByteArray base64ToArray(const QString &base64String);
 class QCA_EXPORT Initializer
 {
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param m the MemoryMode to use for secure memory
-	   \param prealloc the amount of secure memory to pre-allocate,
-	   in units of 1024 bytes (1K).
-	*/
-	explicit Initializer(MemoryMode m = Practical, int prealloc = 64);
-	~Initializer();
+       \param m the MemoryMode to use for secure memory
+       \param prealloc the amount of secure memory to pre-allocate,
+       in units of 1024 bytes (1K).
+    */
+    explicit Initializer(MemoryMode m = Practical, int prealloc = 64);
+    ~Initializer();
 
-	Initializer(const Initializer &) = delete;
-	Initializer &operator=(const Initializer &) = delete;
+    Initializer(const Initializer &) = delete;
+    Initializer &operator=(const Initializer &) = delete;
 };
 
 /**
@@ -700,38 +700,36 @@ KeyLength( 0, std::numeric_limits<int>::max(), 1 );
 class QCA_EXPORT KeyLength
 {
 public:
-	/**
-	   Construct a %KeyLength object
+    /**
+       Construct a %KeyLength object
 
-	   \param min the minimum length of the key, in bytes
-	   \param max the maximum length of the key, in bytes
-	   \param multiple the number of bytes that the key must be a 
-	   multiple of.
-	*/
-	KeyLength(int min, int max, int multiple)
-		: _min( min ), _max(max), _multiple( multiple )
-	{ }
+       \param min the minimum length of the key, in bytes
+       \param max the maximum length of the key, in bytes
+       \param multiple the number of bytes that the key must be a
+       multiple of.
+    */
+    KeyLength(int min, int max, int multiple) : _min(min), _max(max), _multiple(multiple) { }
 
-	/**
-	   Obtain the minimum length for the key, in bytes
-	*/
-	int minimum() const { return _min; }
+    /**
+       Obtain the minimum length for the key, in bytes
+    */
+    int minimum() const { return _min; }
 
-	/**
-	   Obtain the maximum length for the key, in bytes
-	*/
-	int maximum() const { return _max; }
+    /**
+       Obtain the maximum length for the key, in bytes
+    */
+    int maximum() const { return _max; }
 
-	/**
-	   Return the number of bytes that the key must be a multiple of
+    /**
+       Return the number of bytes that the key must be a multiple of
 
-	   If this is one, then anything between minimum and maximum (inclusive)
-	   is acceptable.
-	*/
-	int multiple() const { return _multiple; }
+       If this is one, then anything between minimum and maximum (inclusive)
+       is acceptable.
+    */
+    int multiple() const { return _multiple; }
 
 private:
-	const int _min, _max, _multiple;
+    const int _min, _max, _multiple;
 };
 
 /**
@@ -741,8 +739,8 @@ private:
 
    Provider represents a plugin provider (or as a special case, the
    built-in provider). This is the class you need to inherit
-   from to create your own plugin. You don't normally need to 
-   worry about this class if you are just using existing 
+   from to create your own plugin. You don't normally need to
+   worry about this class if you are just using existing
    QCA capabilities and plugins, however there is nothing stopping
    you from using it to obtain information about specific plugins,
    as shown in the example below.
@@ -752,167 +750,167 @@ private:
 class QCA_EXPORT Provider
 {
 public:
-	virtual ~Provider();
+    virtual ~Provider();
 
-	class Context;
+    class Context;
 
-	/**
-	   Initialisation routine
+    /**
+       Initialisation routine
 
-	   This routine will be called when your plugin
-	   is loaded, so this is a good place to do any
-	   one-off initialisation tasks. If you don't need
-	   any initialisation, just implement it as an empty
-	   routine.
-	*/
-	virtual void init();
+       This routine will be called when your plugin
+       is loaded, so this is a good place to do any
+       one-off initialisation tasks. If you don't need
+       any initialisation, just implement it as an empty
+       routine.
+    */
+    virtual void init();
 
-	/**
-	   Deinitialisation routine
+    /**
+       Deinitialisation routine
 
-	   This routine will be called just before provider destruction.
-	   Notably, during QCA shutdown, deinit() will be called on all
-	   providers before any of the providers are destructed.  Use this
-	   opportunity to free any resources that may be used by other
-	   providers.
-	*/
-	virtual void deinit();
+       This routine will be called just before provider destruction.
+       Notably, during QCA shutdown, deinit() will be called on all
+       providers before any of the providers are destructed.  Use this
+       opportunity to free any resources that may be used by other
+       providers.
+    */
+    virtual void deinit();
 
-	/**
-	   Version number of the plugin
+    /**
+       Version number of the plugin
 
-	   The format is the same as QCA itself.  Version 1.2.3 would be
-	   represented as 0x010203.
+       The format is the same as QCA itself.  Version 1.2.3 would be
+       represented as 0x010203.
 
-	   The default returns 0 (version 0.0.0).
-	*/
-	virtual int version() const;
+       The default returns 0 (version 0.0.0).
+    */
+    virtual int version() const;
 
-	/**
-	   Target QCA version for the provider.
+    /**
+       Target QCA version for the provider.
 
-	   This is used to verify compatibility between the
-	   provider and QCA.  For a provider to be used, it
-	   must supply major and minor version numbers here that are
-	   less-than or equal to the actual QCA version (the patch
-	   version number is ignored).  This means an older
-	   provider may be used with a newer QCA, but a newer
-	   provider cannot be used with an older QCA.
-	*/
-	virtual int qcaVersion() const = 0;
+       This is used to verify compatibility between the
+       provider and QCA.  For a provider to be used, it
+       must supply major and minor version numbers here that are
+       less-than or equal to the actual QCA version (the patch
+       version number is ignored).  This means an older
+       provider may be used with a newer QCA, but a newer
+       provider cannot be used with an older QCA.
+    */
+    virtual int qcaVersion() const = 0;
 
-	/**
-	   The name of the provider.
+    /**
+       The name of the provider.
 
-	   Typically you just return a string containing a 
-	   convenient name.
+       Typically you just return a string containing a
+       convenient name.
 
-	   \code
+       \code
 QString name() const
 {
-	return "qca-myplugin";
+    return "qca-myplugin";
 }
-	   \endcode
+       \endcode
 
-	   \note  The name is used to tell if a provider is
-	   already loaded, so you need to make sure it is
-	   unique amongst the various plugins.
-	*/
-	virtual QString name() const = 0;
+       \note  The name is used to tell if a provider is
+       already loaded, so you need to make sure it is
+       unique amongst the various plugins.
+    */
+    virtual QString name() const = 0;
 
-	/**
-	   The capabilities (algorithms) of the provider.
+    /**
+       The capabilities (algorithms) of the provider.
 
-	   Typically you just return a fixed QStringList:
-	   \code
+       Typically you just return a fixed QStringList:
+       \code
 QStringList features() const
 {
-	QStringList list;
-	list += "sha1";
-	list += "sha256";
-	list += "hmac(sha1)";
-	return list;
+    QStringList list;
+    list += "sha1";
+    list += "sha256";
+    list += "hmac(sha1)";
+    return list;
 }
-	   \endcode
-	*/
-	virtual QStringList features() const = 0;
+       \endcode
+    */
+    virtual QStringList features() const = 0;
 
-	/**
-	   Optional credit text for the provider.
+    /**
+       Optional credit text for the provider.
 
-	   You might display this information in a credits or
-	   "About" dialog.  Returns an empty string if the
-	   provider has no credit text.  Only report credit text
-	   when absolutely required (for example, an "advertisement
-	   clause" related to licensing).  Do not use it for
-	   reporting general author information.
-	*/
-	virtual QString credit() const;
+       You might display this information in a credits or
+       "About" dialog.  Returns an empty string if the
+       provider has no credit text.  Only report credit text
+       when absolutely required (for example, an "advertisement
+       clause" related to licensing).  Do not use it for
+       reporting general author information.
+    */
+    virtual QString credit() const;
 
-	/**
-	   Routine to create a plugin context
+    /**
+       Routine to create a plugin context
 
-	   You need to return a pointer to an algorithm
-	   Context that corresponds with the algorithm
-	   name specified. 
+       You need to return a pointer to an algorithm
+       Context that corresponds with the algorithm
+       name specified.
 
-	   \param type the name of the algorithm required
+       \param type the name of the algorithm required
 
-	   \code
+       \code
 Context *createContext(const QString &type)
 {
-	if ( type == "sha1" )
-		return new SHA1Context( this );
-	else if ( type == "sha256" )
-		return new SHA0256Context( this );
-	else if ( type == "hmac(sha1)" )
-		return new HMACSHA1Context( this );
-	else
-		return 0;
+    if ( type == "sha1" )
+        return new SHA1Context( this );
+    else if ( type == "sha256" )
+        return new SHA0256Context( this );
+    else if ( type == "hmac(sha1)" )
+        return new HMACSHA1Context( this );
+    else
+        return 0;
 }
-	   \endcode
+       \endcode
 
-	   Naturally you also need to implement
-	   the specified Context subclasses as well.
-	*/
-	virtual Context *createContext(const QString &type) = 0;
+       Naturally you also need to implement
+       the specified Context subclasses as well.
+    */
+    virtual Context *createContext(const QString &type) = 0;
 
-	/**
-	   Method to set up the default configuration options.
+    /**
+       Method to set up the default configuration options.
 
-	   If your provider needs some configuration options,
-	   this method allows you to establish default options.
-	   The user can then change the configuration options 
-	   as required, and set them using configChanged().
+       If your provider needs some configuration options,
+       this method allows you to establish default options.
+       The user can then change the configuration options
+       as required, and set them using configChanged().
 
-	   You need to return a QVariantMap that has configuration
-	   options as the keys, and the default configuration 
-	   as the values, as shown below:
-	   \code
+       You need to return a QVariantMap that has configuration
+       options as the keys, and the default configuration
+       as the values, as shown below:
+       \code
 QVariantMap defaultConfig() const
 {
-	QVariantMap myConfig;
-	myConfig[ "firstOption" ] = QString("firstOptionValue");
-	myConfig[ "secondOption" ] = true;
-	myConfig[ "thirdOpt" ] = 1243;
-	return myConfig;
+    QVariantMap myConfig;
+    myConfig[ "firstOption" ] = QString("firstOptionValue");
+    myConfig[ "secondOption" ] = true;
+    myConfig[ "thirdOpt" ] = 1243;
+    return myConfig;
 }
-	   \endcode
+       \endcode
 
-	   \sa configChanged for how to set the configuration;
-	*/
-	virtual QVariantMap defaultConfig() const;
+       \sa configChanged for how to set the configuration;
+    */
+    virtual QVariantMap defaultConfig() const;
 
-	/**
-	   Method to set the configuration options.
+    /**
+       Method to set the configuration options.
 
-	   If your provider supports configuration options, you
-	   will be advised of user changes to the configuration 
-	   when this method is called.
+       If your provider supports configuration options, you
+       will be advised of user changes to the configuration
+       when this method is called.
 
-	   \param config the new configuration to be used by the provider
-	*/
-	virtual void configChanged(const QVariantMap &config);
+       \param config the new configuration to be used by the provider
+    */
+    virtual void configChanged(const QVariantMap &config);
 };
 
 /**
@@ -926,58 +924,58 @@ QVariantMap defaultConfig() const
 */
 class QCA_EXPORT Provider::Context : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	~Context() override;
+    ~Context() override;
 
-	/**
-	   The Provider associated with this Context
-	*/
-	Provider *provider() const;
+    /**
+       The Provider associated with this Context
+    */
+    Provider *provider() const;
 
-	/**
-	   The type of context, as passed to the constructor
-	*/
-	QString type() const;
+    /**
+       The type of context, as passed to the constructor
+    */
+    QString type() const;
 
-	/**
-	   Create a duplicate of this Context
-	*/
-	virtual Context *clone() const = 0;
+    /**
+       Create a duplicate of this Context
+    */
+    virtual Context *clone() const = 0;
 
-	/**
-	   Test if two Contexts have the same Provider
+    /**
+       Test if two Contexts have the same Provider
 
-	   \param c pointer to the Context to compare to
+       \param c pointer to the Context to compare to
 
-	   \return true if the argument and this Context
-	   have the same provider.
-	*/
-	bool sameProvider(const Context *c) const;
+       \return true if the argument and this Context
+       have the same provider.
+    */
+    bool sameProvider(const Context *c) const;
 
 protected:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param parent the parent provider for this 
-	   context
-	   \param type the name of the provider context type
-	*/
-	Context(Provider *parent, const QString &type);
+       \param parent the parent provider for this
+       context
+       \param type the name of the provider context type
+    */
+    Context(Provider *parent, const QString &type);
 
-	/**
-	   Copy constructor
+    /**
+       Copy constructor
 
-	   \param from the Context to copy from
-	*/
-	Context(const Context &from);
+       \param from the Context to copy from
+    */
+    Context(const Context &from);
 
 private:
-	// disable assignment
-	Context & operator=(const Context &from);
+    // disable assignment
+    Context &operator=(const Context &from);
 
-	Provider *_provider;
-	QString _type;
+    Provider *_provider;
+    QString   _type;
 };
 
 /**
@@ -996,30 +994,30 @@ private:
 */
 class QCA_EXPORT BasicContext : public Provider::Context
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	~BasicContext() override;
+    ~BasicContext() override;
 
 protected:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param parent the parent provider for this 
-	   context
-	   \param type the name of the provider context type
-	*/
-	BasicContext(Provider *parent, const QString &type);
+       \param parent the parent provider for this
+       context
+       \param type the name of the provider context type
+    */
+    BasicContext(Provider *parent, const QString &type);
 
-	/**
-	   Copy constructor
+    /**
+       Copy constructor
 
-	   \param from the Context to copy from
-	*/
-	BasicContext(const BasicContext &from);
+       \param from the Context to copy from
+    */
+    BasicContext(const BasicContext &from);
 
 private:
-	// disable assignment
-	BasicContext & operator=(const BasicContext &from);
+    // disable assignment
+    BasicContext &operator=(const BasicContext &from);
 };
 
 /**
@@ -1039,39 +1037,39 @@ private:
 class QCA_EXPORT BufferedComputation
 {
 public:
-	virtual ~BufferedComputation();
+    virtual ~BufferedComputation();
 
-	/**
-	   Reset the internal state
-	*/
-	virtual void clear() = 0;
+    /**
+       Reset the internal state
+    */
+    virtual void clear() = 0;
 
-	/**
-	   Update the internal state with a byte array
+    /**
+       Update the internal state with a byte array
 
-	   \param a the byte array of data that is to 
-	   be used to update the internal state.
-	*/
-	virtual void update(const MemoryRegion &a) = 0;
+       \param a the byte array of data that is to
+       be used to update the internal state.
+    */
+    virtual void update(const MemoryRegion &a) = 0;
 
-	/**
-	   Complete the algorithm and return the internal state
-	*/
-	virtual MemoryRegion final() = 0;
+    /**
+       Complete the algorithm and return the internal state
+    */
+    virtual MemoryRegion final() = 0;
 
-	/**
-	   Perform an "all in one" update, returning
-	   the result. This is appropriate if you
-	   have all the data in one array - just
-	   call process on that array, and you will
-	   get back the results of the computation.
+    /**
+       Perform an "all in one" update, returning
+       the result. This is appropriate if you
+       have all the data in one array - just
+       call process on that array, and you will
+       get back the results of the computation.
 
-	   \note This will invalidate any previous
-	   computation using this object.
+       \note This will invalidate any previous
+       computation using this object.
 
-	   \param a the data to process.
-	*/
-	MemoryRegion process(const MemoryRegion &a);
+       \param a the data to process.
+    */
+    MemoryRegion process(const MemoryRegion &a);
 };
 
 /**
@@ -1095,53 +1093,53 @@ public:
 class QCA_EXPORT Filter
 {
 public:
-	virtual ~Filter();
+    virtual ~Filter();
 
-	/**
-	   Reset the internal state
-	*/
-	virtual void clear() = 0;
+    /**
+       Reset the internal state
+    */
+    virtual void clear() = 0;
 
-	/**
-	   Process more data, returning the corresponding
-	   filtered version of the data.
+    /**
+       Process more data, returning the corresponding
+       filtered version of the data.
 
-	   \param a the array containing data to process
-	*/
-	virtual MemoryRegion update(const MemoryRegion &a) = 0;
+       \param a the array containing data to process
+    */
+    virtual MemoryRegion update(const MemoryRegion &a) = 0;
 
-	/**
-	   Complete the algorithm, returning any 
-	   additional results.
-	*/
-	virtual MemoryRegion final() = 0;
+    /**
+       Complete the algorithm, returning any
+       additional results.
+    */
+    virtual MemoryRegion final() = 0;
 
-	/**
-	   Test if an update() or final() call succeeded.
+    /**
+       Test if an update() or final() call succeeded.
 
-	   \return true if the previous call succeeded
-	*/
-	virtual bool ok() const = 0;
+       \return true if the previous call succeeded
+    */
+    virtual bool ok() const = 0;
 
-	/**
-	   Perform an "all in one" update, returning
-	   the result. This is appropriate if you
-	   have all the data in one array - just
-	   call process on that array, and you will
-	   get back the results of the computation.
+    /**
+       Perform an "all in one" update, returning
+       the result. This is appropriate if you
+       have all the data in one array - just
+       call process on that array, and you will
+       get back the results of the computation.
 
-	   \note This will invalidate any previous
-	   computation using this object.
+       \note This will invalidate any previous
+       computation using this object.
 
-	   \param a the data to process in this step
-	*/
-	MemoryRegion process(const MemoryRegion &a);
+       \param a the data to process in this step
+    */
+    MemoryRegion process(const MemoryRegion &a);
 };
 
 /**
    \class Algorithm qca_core.h QtCrypto
 
-   General superclass for an algorithm. 
+   General superclass for an algorithm.
 
    This is a fairly abstract class, mainly used for
    implementing the backend "provider" interface.
@@ -1151,94 +1149,94 @@ public:
 class QCA_EXPORT Algorithm
 {
 public:
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the Algorithm to copy from
-	*/
-	Algorithm(const Algorithm &from);
+       \param from the Algorithm to copy from
+    */
+    Algorithm(const Algorithm &from);
 
-	virtual ~Algorithm();
+    virtual ~Algorithm();
 
-	/**
-	   Assignment operator
+    /**
+       Assignment operator
 
-	   \param from the Algorithm to copy state from
-	*/
-	Algorithm & operator=(const Algorithm &from);
+       \param from the Algorithm to copy state from
+    */
+    Algorithm &operator=(const Algorithm &from);
 
-	/**
-	   The name of the algorithm type.
-	*/
-	QString type() const;
+    /**
+       The name of the algorithm type.
+    */
+    QString type() const;
 
-	/**
-	   The name of the provider
+    /**
+       The name of the provider
 
-	   Each algorithm is implemented by a provider. This
-	   allows you to figure out which provider is associated
-	*/
-	Provider *provider() const;
+       Each algorithm is implemented by a provider. This
+       allows you to figure out which provider is associated
+    */
+    Provider *provider() const;
 
-	// Note: The next five functions are not public!
+    // Note: The next five functions are not public!
 
-	/**
-	   \internal
+    /**
+       \internal
 
-	   The context associated with this algorithm
-	*/
-	Provider::Context *context();
+       The context associated with this algorithm
+    */
+    Provider::Context *context();
 
-	/**
-	   \internal
+    /**
+       \internal
 
-	   The context associated with this algorithm
-	*/
-	const Provider::Context *context() const;
+       The context associated with this algorithm
+    */
+    const Provider::Context *context() const;
 
-	/**
-	   \internal
+    /**
+       \internal
 
-	   Set the Provider for this algorithm
+       Set the Provider for this algorithm
 
-	   \param c the context for the Provider to use
-	*/
-	void change(Provider::Context *c);
+       \param c the context for the Provider to use
+    */
+    void change(Provider::Context *c);
 
-	/**
-	   \internal
+    /**
+       \internal
 
-	   \overload
+       \overload
 
-	   \param type the name of the algorithm to use
-	   \param provider the name of the preferred provider
-	*/
-	void change(const QString &type, const QString &provider);
+       \param type the name of the algorithm to use
+       \param provider the name of the preferred provider
+    */
+    void change(const QString &type, const QString &provider);
 
-	/**
-	   \internal
+    /**
+       \internal
 
-	   Take the Provider from this algorithm
-	*/
-	Provider::Context *takeContext();
+       Take the Provider from this algorithm
+    */
+    Provider::Context *takeContext();
 
 protected:
-	/**
-	   Constructor for empty algorithm
-	*/
-	Algorithm();
+    /**
+       Constructor for empty algorithm
+    */
+    Algorithm();
 
-	/**
-	   Constructor of a particular algorithm.
+    /**
+       Constructor of a particular algorithm.
 
-	   \param type the algorithm to construct
-	   \param provider the name of a particular Provider
-	*/
-	Algorithm(const QString &type, const QString &provider);
+       \param type the algorithm to construct
+       \param provider the name of a particular Provider
+    */
+    Algorithm(const QString &type, const QString &provider);
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -1251,40 +1249,40 @@ private:
 class QCA_EXPORT SymmetricKey : public SecureArray
 {
 public:
-	/**
-	   Construct an empty (zero length) key
-	*/
-	SymmetricKey();
+    /**
+       Construct an empty (zero length) key
+    */
+    SymmetricKey();
 
-	/**
-	   Construct an key of specified size, with random contents
+    /**
+       Construct an key of specified size, with random contents
 
-	   This is intended to be used as a random session key.
+       This is intended to be used as a random session key.
 
-	   \param size the number of bytes for the key
-	*/
-	SymmetricKey(int size);
+       \param size the number of bytes for the key
+    */
+    SymmetricKey(int size);
 
-	/**
-	   Construct a key from a provided byte array
+    /**
+       Construct a key from a provided byte array
 
-	   \param a the byte array to copy
-	*/
-	SymmetricKey(const SecureArray &a);
+       \param a the byte array to copy
+    */
+    SymmetricKey(const SecureArray &a);
 
-	/**
-	   Construct a key from a provided byte array
+    /**
+       Construct a key from a provided byte array
 
-	   \param a the byte array to copy
-	*/
-	SymmetricKey(const QByteArray &a);
+       \param a the byte array to copy
+    */
+    SymmetricKey(const QByteArray &a);
 
-	/**
-	   Test for weak DES keys
+    /**
+       Test for weak DES keys
 
-	  \return true if the key is a weak key for DES
-	*/
-	bool isWeakDESKey();
+      \return true if the key is a weak key for DES
+    */
+    bool isWeakDESKey();
 };
 
 /**
@@ -1297,31 +1295,31 @@ public:
 class QCA_EXPORT InitializationVector : public SecureArray
 {
 public:
-	/**
-	   Construct an empty (zero length) initisation vector
-	*/
-	InitializationVector();
+    /**
+       Construct an empty (zero length) initisation vector
+    */
+    InitializationVector();
 
-	/**
-	   Construct an initialisation vector of the specified size
+    /**
+       Construct an initialisation vector of the specified size
 
-	   \param size the length of the initialisation vector, in bytes
-	*/
-	InitializationVector(int size);
+       \param size the length of the initialisation vector, in bytes
+    */
+    InitializationVector(int size);
 
-	/**
-	   Construct an initialisation vector from a provided byte array
+    /**
+       Construct an initialisation vector from a provided byte array
 
-	   \param a the byte array to copy
-	*/
-	InitializationVector(const SecureArray &a);
+       \param a the byte array to copy
+    */
+    InitializationVector(const SecureArray &a);
 
-	/**
-	   Construct an initialisation vector from a provided byte array
+    /**
+       Construct an initialisation vector from a provided byte array
 
-	   \param a the byte array to copy
-	*/
-	InitializationVector(const QByteArray &a);
+       \param a the byte array to copy
+    */
+    InitializationVector(const QByteArray &a);
 };
 
 /**
@@ -1334,31 +1332,31 @@ public:
 class QCA_EXPORT AuthTag : public SecureArray
 {
 public:
-	/**
-	   Construct an empty authentication tag
-	*/
-	AuthTag();
+    /**
+       Construct an empty authentication tag
+    */
+    AuthTag();
 
-	/**
-	   Construct an empty authentication tag of the specified size
+    /**
+       Construct an empty authentication tag of the specified size
 
-	   \param size the length of the authentication tag, in bytes
-	*/
-	AuthTag(int size);
+       \param size the length of the authentication tag, in bytes
+    */
+    AuthTag(int size);
 
-	/**
-	   Construct an authentication tag from a provided byte array
+    /**
+       Construct an authentication tag from a provided byte array
 
-	   \param a the byte array to copy
-	*/
-	AuthTag(const SecureArray &a);
+       \param a the byte array to copy
+    */
+    AuthTag(const SecureArray &a);
 
-	/**
-	   Construct an authentication tag from a provided byte array
+    /**
+       Construct an authentication tag from a provided byte array
 
-	   \param a the byte array to copy
-	*/
-	AuthTag(const QByteArray &a);
+       \param a the byte array to copy
+    */
+    AuthTag(const QByteArray &a);
 };
 
 /**
@@ -1378,169 +1376,170 @@ public:
 class QCA_EXPORT Event
 {
 public:
-	/**
-	   %Type of event
+    /**
+       %Type of event
 
-	   \sa type()
-	*/
-	enum Type
-	{
-		Password,   ///< Asking for a password, PIN or passphrase.
-		Token       ///< Asking for a token
-	};
+       \sa type()
+    */
+    enum Type
+    {
+        Password, ///< Asking for a password, PIN or passphrase.
+        Token     ///< Asking for a token
+    };
 
-	/**
-	   %Source of the event
+    /**
+       %Source of the event
 
-	   Events are associated with access to a KeyStore, or access to 
-	   a file (or bytearray/stream or equivalent). This tells you the
-	   type of source that caused the Event.
+       Events are associated with access to a KeyStore, or access to
+       a file (or bytearray/stream or equivalent). This tells you the
+       type of source that caused the Event.
 
-	   \sa source()
-	   \sa fileName() for the name, if source is Event::Data
-	   \sa keyStoreInfo() and keyStoreEntry() for the keystore and entry,
-	   if the source is Event::KeyStore
-	*/
-	enum Source
-	{
-		KeyStore,   ///< KeyStore generated the event
-		Data        ///< File or bytearray generated the event
-	};
+       \sa source()
+       \sa fileName() for the name, if source is Event::Data
+       \sa keyStoreInfo() and keyStoreEntry() for the keystore and entry,
+       if the source is Event::KeyStore
+    */
+    enum Source
+    {
+        KeyStore, ///< KeyStore generated the event
+        Data      ///< File or bytearray generated the event
+    };
 
-	/**
-	   password variation
+    /**
+       password variation
 
-	   If the Type of Event is Password, PasswordStyle tells you whether 
-	   it is a PIN, passphrase or password.
+       If the Type of Event is Password, PasswordStyle tells you whether
+       it is a PIN, passphrase or password.
 
-	   \sa passwordStyle()
-	*/
-	enum PasswordStyle
-	{
-		StylePassword,   ///< User should be prompted for a "Password"
-		StylePassphrase, ///< User should be prompted for a "Passphrase"
-		StylePIN         ///< User should be prompted for a "PIN"
-	};
+       \sa passwordStyle()
+    */
+    enum PasswordStyle
+    {
+        StylePassword,   ///< User should be prompted for a "Password"
+        StylePassphrase, ///< User should be prompted for a "Passphrase"
+        StylePIN         ///< User should be prompted for a "PIN"
+    };
 
-	/**
-	   Constructor
-	*/
-	Event();
+    /**
+       Constructor
+    */
+    Event();
 
-	/**
-	   Copy constructor
+    /**
+       Copy constructor
 
-	   \param from the Event to copy from
-	*/
-	Event(const Event &from);
+       \param from the Event to copy from
+    */
+    Event(const Event &from);
 
-	/**
-	   Destructor
-	*/
-	~Event();
+    /**
+       Destructor
+    */
+    ~Event();
 
-	/**
-	   Assignment operator
+    /**
+       Assignment operator
 
-	   \param from the Event to copy from
-	*/
-	Event & operator=(const Event &from);
+       \param from the Event to copy from
+    */
+    Event &operator=(const Event &from);
 
-	/**
-	   test if this event has been setup correctly
-	*/
-	bool isNull() const;
+    /**
+       test if this event has been setup correctly
+    */
+    bool isNull() const;
 
-	/**
-	   the Type of this event
-	*/
-	Type type() const;
+    /**
+       the Type of this event
+    */
+    Type type() const;
 
-	/**
-	   the Source of this event
-	*/
-	Source source() const;
+    /**
+       the Source of this event
+    */
+    Source source() const;
 
-	/**
-	   the style of password required.
+    /**
+       the style of password required.
 
-	   This is not meaningful unless the Type is Event::Password.
+       This is not meaningful unless the Type is Event::Password.
 
-	   \sa PasswordStyle
-	*/
-	PasswordStyle passwordStyle() const;
+       \sa PasswordStyle
+    */
+    PasswordStyle passwordStyle() const;
 
-	/**
-	   The info of the KeyStore associated with this event
+    /**
+       The info of the KeyStore associated with this event
 
-	   This is not meaningful unless the Source is KeyStore.
-	*/
-	KeyStoreInfo keyStoreInfo() const;
+       This is not meaningful unless the Source is KeyStore.
+    */
+    KeyStoreInfo keyStoreInfo() const;
 
-	/**
-	   The KeyStoreEntry associated with this event
+    /**
+       The KeyStoreEntry associated with this event
 
-	   This is not meaningful unless the Source is KeyStore.
-	*/
-	KeyStoreEntry keyStoreEntry() const;
+       This is not meaningful unless the Source is KeyStore.
+    */
+    KeyStoreEntry keyStoreEntry() const;
 
-	/**
-	   Name or other identifier for the file or byte array
-	   associated with this event.
+    /**
+       Name or other identifier for the file or byte array
+       associated with this event.
 
-	   This is not meaningful unless the Source is Data.
-	*/
-	QString fileName() const;
+       This is not meaningful unless the Source is Data.
+    */
+    QString fileName() const;
 
-	/**
-	   opaque data
-	*/
-	void *ptr() const;
+    /**
+       opaque data
+    */
+    void *ptr() const;
 
-	/**
-	   Set the values for this Event
+    /**
+       Set the values for this Event
 
-	   This creates a Password type event, for a keystore.
+       This creates a Password type event, for a keystore.
 
-	   \param pstyle the style of information required (e.g. PIN,
-	   password or passphrase)
-	   \param keyStoreInfo info about the keystore that the information
-	   is required for
-	   \param keyStoreEntry the entry in the keystore that the
-	   information is required for
-	   \param ptr opaque data
-	*/
-	void setPasswordKeyStore(PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
+       \param pstyle the style of information required (e.g. PIN,
+       password or passphrase)
+       \param keyStoreInfo info about the keystore that the information
+       is required for
+       \param keyStoreEntry the entry in the keystore that the
+       information is required for
+       \param ptr opaque data
+    */
+    void setPasswordKeyStore(PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry,
+                             void *ptr);
 
-	/**
-	   Set the values for this Event
+    /**
+       Set the values for this Event
 
-	   This creates a Password type event, for a file.
+       This creates a Password type event, for a file.
 
-	   \param pstyle the style of information required (e.g. PIN,
-	   password or passphrase)
-	   \param fileName the name of the file (or other identifier) that
-	   the information is required for
-	   \param ptr opaque data
-	*/
-	void setPasswordData(PasswordStyle pstyle, const QString &fileName, void *ptr);
+       \param pstyle the style of information required (e.g. PIN,
+       password or passphrase)
+       \param fileName the name of the file (or other identifier) that
+       the information is required for
+       \param ptr opaque data
+    */
+    void setPasswordData(PasswordStyle pstyle, const QString &fileName, void *ptr);
 
-	/**
-	   Set the values for this Event
+    /**
+       Set the values for this Event
 
-	   This creates a Token type event.
+       This creates a Token type event.
 
-	   \param keyStoreInfo info about the keystore that the token is
-	   required for
-	   \param keyStoreEntry the entry in the keystore that the token is
-	   required for
-	   \param ptr opaque data
-	*/
-	void setToken(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
+       \param keyStoreInfo info about the keystore that the token is
+       required for
+       \param keyStoreEntry the entry in the keystore that the token is
+       required for
+       \param ptr opaque data
+    */
+    void setToken(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -1562,75 +1561,75 @@ private:
 */
 class QCA_EXPORT EventHandler : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Constructor
+    /**
+       Constructor
 
-	   \param parent the parent object for this object
-	*/
-	EventHandler(QObject *parent = nullptr);
-	~EventHandler() override;
+       \param parent the parent object for this object
+    */
+    EventHandler(QObject *parent = nullptr);
+    ~EventHandler() override;
 
-	/**
-	   mandatory function to call after connecting the
-	   signal to a slot in your application specific password
-	   / passphrase / PIN or token handler
-	*/
-	void start();
+    /**
+       mandatory function to call after connecting the
+       signal to a slot in your application specific password
+       / passphrase / PIN or token handler
+    */
+    void start();
 
-	/**
-	   function to call to return the user provided
-	   password, passphrase or PIN.
+    /**
+       function to call to return the user provided
+       password, passphrase or PIN.
 
-	   \param id the id corresponding to the password request
-	   \param password the user-provided password, passphrase or PIN.
+       \param id the id corresponding to the password request
+       \param password the user-provided password, passphrase or PIN.
 
-	   \note the id parameter is the same as that provided in the
-	   eventReady() signal.
-	*/
-	void submitPassword(int id, const SecureArray &password);
+       \note the id parameter is the same as that provided in the
+       eventReady() signal.
+    */
+    void submitPassword(int id, const SecureArray &password);
 
-	/**
-	   function to call to indicate that the token has been inserted
-	   by the user.
+    /**
+       function to call to indicate that the token has been inserted
+       by the user.
 
-	   \param id the id corresponding to the password request
+       \param id the id corresponding to the password request
 
-	   \note the id parameter is the same as that provided in the
-	   eventReady() signal.
-	*/
-	void tokenOkay(int id);
+       \note the id parameter is the same as that provided in the
+       eventReady() signal.
+    */
+    void tokenOkay(int id);
 
-	/**
-	   function to call to indicate that the user declined to 
-	   provide a password, passphrase, PIN or token.
+    /**
+       function to call to indicate that the user declined to
+       provide a password, passphrase, PIN or token.
 
-	   \param id the id corresponding to the password request
+       \param id the id corresponding to the password request
 
-	   \note the id parameter is the same as that provided in the
-	   eventReady() signal.
-	*/
-	void reject(int id);
+       \note the id parameter is the same as that provided in the
+       eventReady() signal.
+    */
+    void reject(int id);
 
 Q_SIGNALS:
-	/**
-	   signal emitted when an Event requires attention.
+    /**
+       signal emitted when an Event requires attention.
 
-	   You typically need to connect this signal to
-	   a compatible slot in your callback handler
+       You typically need to connect this signal to
+       a compatible slot in your callback handler
 
-	   \param id the identification number for the event 
-	   \param context information about the type of response required
-	*/
-	void eventReady(int id, const QCA::Event &context);
+       \param id the identification number for the event
+       \param context information about the type of response required
+    */
+    void eventReady(int id, const QCA::Event &context);
 
 private:
-	Q_DISABLE_COPY(EventHandler)
+    Q_DISABLE_COPY(EventHandler)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 /**
@@ -1644,85 +1643,86 @@ private:
 */
 class QCA_EXPORT PasswordAsker : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Construct a new asker
+    /**
+       Construct a new asker
 
-	   \param parent the parent object for this QObject
-	*/
-	PasswordAsker(QObject *parent = nullptr);
-	~PasswordAsker() override;
+       \param parent the parent object for this QObject
+    */
+    PasswordAsker(QObject *parent = nullptr);
+    ~PasswordAsker() override;
 
-	/**
-	   queue a password / passphrase request associated with a key store
+    /**
+       queue a password / passphrase request associated with a key store
 
-	   \param pstyle the type of information required (e.g. PIN,
-	   passphrase or password)
-	   \param keyStoreInfo info of the key store that the information is
-	   required for
-	   \param keyStoreEntry the item in the key store that the
-	   information is required for (if applicable)
-	   \param ptr opaque data
-	*/
-	void ask(Event::PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
+       \param pstyle the type of information required (e.g. PIN,
+       passphrase or password)
+       \param keyStoreInfo info of the key store that the information is
+       required for
+       \param keyStoreEntry the item in the key store that the
+       information is required for (if applicable)
+       \param ptr opaque data
+    */
+    void ask(Event::PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry,
+             void *ptr);
 
-	/**
-	   queue a password / passphrase request associated with a file
+    /**
+       queue a password / passphrase request associated with a file
 
-	   \param pstyle the type of information required (e.g. PIN,
-	   passphrase or password)
-	   \param fileName the name of the file that the information is
-	   required for
-	   \param ptr opaque data
-	*/
-	void ask(Event::PasswordStyle pstyle, const QString &fileName, void *ptr);
+       \param pstyle the type of information required (e.g. PIN,
+       passphrase or password)
+       \param fileName the name of the file that the information is
+       required for
+       \param ptr opaque data
+    */
+    void ask(Event::PasswordStyle pstyle, const QString &fileName, void *ptr);
 
-	/**
-	   Cancel the pending password / passphrase request
-	*/
-	void cancel();
+    /**
+       Cancel the pending password / passphrase request
+    */
+    void cancel();
 
-	/**
-	   Block until the password / passphrase request is
-	   completed
+    /**
+       Block until the password / passphrase request is
+       completed
 
-	   You can use the responseReady signal instead of
-	   blocking, if appropriate.
-	*/
-	void waitForResponse();
+       You can use the responseReady signal instead of
+       blocking, if appropriate.
+    */
+    void waitForResponse();
 
-	/**
-	   Determine whether the password / passphrase was accepted or not
+    /**
+       Determine whether the password / passphrase was accepted or not
 
-	   In this context, returning true is indicative of the user clicking
-	   "Ok" or equivalent; and returning false indicates that either the
-	   user clicked "Cancel" or equivalent, or that the cancel() function
-	   was called, or that the request is still pending.
-	*/
-	bool accepted() const;
+       In this context, returning true is indicative of the user clicking
+       "Ok" or equivalent; and returning false indicates that either the
+       user clicked "Cancel" or equivalent, or that the cancel() function
+       was called, or that the request is still pending.
+    */
+    bool accepted() const;
 
-	/**
-	   The password / passphrase / PIN provided by the user in response
-	   to the asker request. This may be empty.
-	*/
-	SecureArray password() const;
+    /**
+       The password / passphrase / PIN provided by the user in response
+       to the asker request. This may be empty.
+    */
+    SecureArray password() const;
 
 Q_SIGNALS:
-	/**
-	   Emitted when the asker process has been completed. 
+    /**
+       Emitted when the asker process has been completed.
 
-	   You should check whether the user accepted() the response
-	   prior to relying on the password().
-	*/
-	void responseReady();
+       You should check whether the user accepted() the response
+       prior to relying on the password().
+    */
+    void responseReady();
 
 private:
-	Q_DISABLE_COPY(PasswordAsker)
+    Q_DISABLE_COPY(PasswordAsker)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 /**
@@ -1736,64 +1736,64 @@ private:
 */
 class QCA_EXPORT TokenAsker : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Construct a new asker
+    /**
+       Construct a new asker
 
-	   \param parent the parent object for this QObject
-	*/
-	TokenAsker(QObject *parent = nullptr);
-	~TokenAsker() override;
+       \param parent the parent object for this QObject
+    */
+    TokenAsker(QObject *parent = nullptr);
+    ~TokenAsker() override;
 
-	/**
-	   queue a token request associated with a key store
-	
-	   \param keyStoreInfo info of the key store that the information is
-	   required for
-	   \param keyStoreEntry the item in the key store that the
-	   information is required for (if applicable)
-	   \param ptr opaque data
-	*/
-	void ask(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
+    /**
+       queue a token request associated with a key store
 
-	/**
-	   Cancel the pending password / passphrase request
-	*/
-	void cancel();
+       \param keyStoreInfo info of the key store that the information is
+       required for
+       \param keyStoreEntry the item in the key store that the
+       information is required for (if applicable)
+       \param ptr opaque data
+    */
+    void ask(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
-	/**
-	   Block until the token request is completed
+    /**
+       Cancel the pending password / passphrase request
+    */
+    void cancel();
 
-	   You can use the responseReady signal instead of
-	   blocking, if appropriate.
-	*/
-	void waitForResponse();
+    /**
+       Block until the token request is completed
 
-	/**
-	   Test if the token request was accepted or not.
+       You can use the responseReady signal instead of
+       blocking, if appropriate.
+    */
+    void waitForResponse();
 
-	   \return true if the token request was accepted
-	*/
-	bool accepted() const;
+    /**
+       Test if the token request was accepted or not.
+
+       \return true if the token request was accepted
+    */
+    bool accepted() const;
 
 Q_SIGNALS:
-	/**
-	   Emitted when the asker process has been completed. 
+    /**
+       Emitted when the asker process has been completed.
 
-	   You should check whether the user accepted() the response
-	   prior to relying on token being present.
-	*/
-	void responseReady();
+       You should check whether the user accepted() the response
+       prior to relying on token being present.
+    */
+    void responseReady();
 
 private:
-	Q_DISABLE_COPY(TokenAsker)
+    Q_DISABLE_COPY(TokenAsker)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
-}
+} // namespace QCA
 
 #endif

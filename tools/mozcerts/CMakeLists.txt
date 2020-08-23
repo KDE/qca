@@ -1,6 +1,6 @@
 project(mozcerts)
 
-set(mozcerts_bin_SRCS main.cpp)  
+set(mozcerts_bin_SRCS main.cpp)
 
 add_executable(${MOZCERTS_NAME} ${mozcerts_bin_SRCS})
 

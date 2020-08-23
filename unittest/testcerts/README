@@ -8,4 +8,3 @@ to read and understand the openssl.cnf options to make any
 kind of sensible certificate.
 
 The PEM passphrase is always "start".
-

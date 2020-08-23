@@ -27,65 +27,67 @@
 
 namespace QCA {
 
-QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> argTypes) // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param) TODO make argTypes const & when we break ABI
+QByteArray methodReturnType(
+    const QMetaObject *obj, const QByteArray &method,
+    const QList<QByteArray> argTypes) // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param)
+                                      // TODO make argTypes const & when we break ABI
 {
-	for(int n = 0; n < obj->methodCount(); ++n)
-	{
-		QMetaMethod m = obj->method(n);
-		const QByteArray sig = m.methodSignature();
-		int offset = sig.indexOf('(');
-		if(offset == -1)
-			continue;
-		const QByteArray name = sig.mid(0, offset);
-		if(name != method)
-			continue;
-		if(m.parameterTypes() != argTypes)
-			continue;
+    for (int n = 0; n < obj->methodCount(); ++n) {
+        QMetaMethod      m      = obj->method(n);
+        const QByteArray sig    = m.methodSignature();
+        int              offset = sig.indexOf('(');
+        if (offset == -1)
+            continue;
+        const QByteArray name = sig.mid(0, offset);
+        if (name != method)
+            continue;
+        if (m.parameterTypes() != argTypes)
+            continue;
 
-		return m.typeName();
-	}
-	return QByteArray();
+        return m.typeName();
+    }
+    return QByteArray();
 }
 
-bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args, QVariant *ret, Qt::ConnectionType type)
+bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args, QVariant *ret,
+                              Qt::ConnectionType type)
 {
-	// QMetaObject::invokeMethod() has a 10 argument maximum
-	if(args.count() > 10)
-		return false;
+    // QMetaObject::invokeMethod() has a 10 argument maximum
+    if (args.count() > 10)
+        return false;
 
-	QList<QByteArray> argTypes;
-	for(int n = 0; n < args.count(); ++n)
-		argTypes += args[n].typeName();
+    QList<QByteArray> argTypes;
+    for (int n = 0; n < args.count(); ++n)
+        argTypes += args[n].typeName();
 
-	// get return type
-	int metatype = QMetaType::Void;
-	const QByteArray retTypeName = methodReturnType(obj->metaObject(), method, argTypes);
-	if(!retTypeName.isEmpty() && retTypeName != "void")
-	{
-		metatype = QMetaType::type(retTypeName.data());
-		if(metatype == QMetaType::UnknownType) // lookup failed
-			return false;
-	}
+    // get return type
+    int              metatype    = QMetaType::Void;
+    const QByteArray retTypeName = methodReturnType(obj->metaObject(), method, argTypes);
+    if (!retTypeName.isEmpty() && retTypeName != "void") {
+        metatype = QMetaType::type(retTypeName.data());
+        if (metatype == QMetaType::UnknownType) // lookup failed
+            return false;
+    }
 
-	QGenericArgument arg[10];
-	for(int n = 0; n < args.count(); ++n)
-		arg[n] = QGenericArgument(args[n].typeName(), args[n].constData());
+    QGenericArgument arg[10];
+    for (int n = 0; n < args.count(); ++n)
+        arg[n] = QGenericArgument(args[n].typeName(), args[n].constData());
 
-	QGenericReturnArgument retarg;
-	QVariant retval;
+    QGenericReturnArgument retarg;
+    QVariant               retval;
 
-	if(metatype != QMetaType::Void)
-	{
-		retval = QVariant(metatype, (const void *)nullptr);
-		retarg = QGenericReturnArgument(retval.typeName(), retval.data());
-	}
+    if (metatype != QMetaType::Void) {
+        retval = QVariant(metatype, (const void *)nullptr);
+        retarg = QGenericReturnArgument(retval.typeName(), retval.data());
+    }
 
-	if(!QMetaObject::invokeMethod(obj, method.data(), type, retarg, arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]))
-		return false;
+    if (!QMetaObject::invokeMethod(obj, method.data(), type, retarg, arg[0], arg[1], arg[2], arg[3], arg[4], arg[5],
+                                   arg[6], arg[7], arg[8], arg[9]))
+        return false;
 
-	if(retval.isValid() && ret)
-		*ret = retval;
-	return true;
+    if (retval.isValid() && ret)
+        *ret = retval;
+    return true;
 }
 
 //----------------------------------------------------------------------------
@@ -95,129 +97,127 @@ class SyncThreadAgent;
 
 class SyncThread::Private : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	SyncThread *q;
-	QMutex m;
-	QWaitCondition w;
-	QEventLoop *loop;
-	SyncThreadAgent *agent;
-	bool last_success;
-	QVariant last_ret;
+    SyncThread *     q;
+    QMutex           m;
+    QWaitCondition   w;
+    QEventLoop *     loop;
+    SyncThreadAgent *agent;
+    bool             last_success;
+    QVariant         last_ret;
 
-	Private(SyncThread *_q) : QObject(_q), q(_q)
-	{
-		loop = nullptr;
-		agent = nullptr;
-	}
+    Private(SyncThread *_q) : QObject(_q), q(_q)
+    {
+        loop  = nullptr;
+        agent = nullptr;
+    }
 
 public Q_SLOTS:
-	void agent_started();
-	void agent_call_ret(bool success, const QVariant &ret);
+    void agent_started();
+    void agent_call_ret(bool success, const QVariant &ret);
 };
 
 class SyncThreadAgent : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	SyncThreadAgent(QObject *parent = nullptr) : QObject(parent)
-	{
-		QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
-	}
+    SyncThreadAgent(QObject *parent = nullptr) : QObject(parent)
+    {
+        QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
+    }
 
 Q_SIGNALS:
-	void started();
-	void call_ret(bool success, const QVariant &ret);
+    void started();
+    void call_ret(bool success, const QVariant &ret);
 
 public Q_SLOTS:
-	void call_do(QObject *obj, const QByteArray &method, const QVariantList &args)
-	{
-		QVariant ret;
-		bool ok = invokeMethodWithVariants(obj, method, args, &ret, Qt::DirectConnection);
-		emit call_ret(ok, ret);
-	}
+    void call_do(QObject *obj, const QByteArray &method, const QVariantList &args)
+    {
+        QVariant ret;
+        bool     ok = invokeMethodWithVariants(obj, method, args, &ret, Qt::DirectConnection);
+        emit     call_ret(ok, ret);
+    }
 };
 
-SyncThread::SyncThread(QObject *parent)
-:QThread(parent)
+SyncThread::SyncThread(QObject *parent) : QThread(parent)
 {
-	d = new Private(this);
-	qRegisterMetaType<QVariant>("QVariant");
-	qRegisterMetaType<QVariantList>("QVariantList");
+    d = new Private(this);
+    qRegisterMetaType<QVariant>("QVariant");
+    qRegisterMetaType<QVariantList>("QVariantList");
 }
 
 SyncThread::~SyncThread()
 {
-	stop();
-	delete d;
+    stop();
+    delete d;
 }
 
 void SyncThread::start()
 {
-	QMutexLocker locker(&d->m);
-	Q_ASSERT(!d->loop);
-	QThread::start();
-	d->w.wait(&d->m);
+    QMutexLocker locker(&d->m);
+    Q_ASSERT(!d->loop);
+    QThread::start();
+    d->w.wait(&d->m);
 }
 
 void SyncThread::stop()
 {
-	QMutexLocker locker(&d->m);
-	if(!d->loop)
-		return;
-	QMetaObject::invokeMethod(d->loop, "quit");
-	d->w.wait(&d->m);
-	wait();
+    QMutexLocker locker(&d->m);
+    if (!d->loop)
+        return;
+    QMetaObject::invokeMethod(d->loop, "quit");
+    d->w.wait(&d->m);
+    wait();
 }
 
 QVariant SyncThread::call(QObject *obj, const QByteArray &method, const QVariantList &args, bool *ok)
 {
-	QMutexLocker locker(&d->m);
-	bool ret;
-	Q_UNUSED(ret); // In really ret is used. I use this hack to suppress a compiler warning
-	ret = QMetaObject::invokeMethod(d->agent, "call_do",
-		Qt::QueuedConnection, Q_ARG(QObject*, obj),
-		Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
-	Q_ASSERT(ret);
-	d->w.wait(&d->m);
-	if(ok)
-		*ok = d->last_success;
-	QVariant v = d->last_ret;
-	d->last_ret = QVariant();
-	return v;
+    QMutexLocker locker(&d->m);
+    bool         ret;
+    Q_UNUSED(ret); // In really ret is used. I use this hack to suppress a compiler warning
+    ret = QMetaObject::invokeMethod(d->agent, "call_do", Qt::QueuedConnection, Q_ARG(QObject *, obj),
+                                    Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
+    Q_ASSERT(ret);
+    d->w.wait(&d->m);
+    if (ok)
+        *ok = d->last_success;
+    QVariant v  = d->last_ret;
+    d->last_ret = QVariant();
+    return v;
 }
 
 void SyncThread::run()
 {
-	d->m.lock();
-	d->loop = new QEventLoop;
-	d->agent = new SyncThreadAgent;
-	connect(d->agent, &SyncThreadAgent::started, d, &Private::agent_started, Qt::DirectConnection);
-	connect(d->agent, &SyncThreadAgent::call_ret, d, &Private::agent_call_ret, Qt::DirectConnection);
-	d->loop->exec();
-	d->m.lock();
-	atEnd();
-	delete d->agent;
-	delete d->loop;
-	d->agent = nullptr;
-	d->loop = nullptr;
-	d->w.wakeOne();
-	d->m.unlock();
+    d->m.lock();
+    d->loop  = new QEventLoop;
+    d->agent = new SyncThreadAgent;
+    connect(d->agent, &SyncThreadAgent::started, d, &Private::agent_started, Qt::DirectConnection);
+    connect(d->agent, &SyncThreadAgent::call_ret, d, &Private::agent_call_ret, Qt::DirectConnection);
+    d->loop->exec();
+    d->m.lock();
+    atEnd();
+    delete d->agent;
+    delete d->loop;
+    d->agent = nullptr;
+    d->loop  = nullptr;
+    d->w.wakeOne();
+    d->m.unlock();
 }
 
 void SyncThread::Private::agent_started()
 {
-	q->atStart();
-	w.wakeOne();
-	m.unlock();
+    q->atStart();
+    w.wakeOne();
+    m.unlock();
 }
 
 void SyncThread::Private::agent_call_ret(bool success, const QVariant &ret)
 {
-	QMutexLocker locker(&m);
-	last_success = success;
-	last_ret = ret;
-	w.wakeOne();
+    QMutexLocker locker(&m);
+    last_success = success;
+    last_ret     = ret;
+    w.wakeOne();
 }
 
 }

@@ -26,19 +26,19 @@ namespace gpgQCAPlugin {
 
 class SProcess : public QProcess
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	SProcess(QObject *parent = nullptr);
-	~SProcess() override;
+    SProcess(QObject *parent = nullptr);
+    ~SProcess() override;
 
 #ifdef Q_OS_UNIX
-	void setInheritPipeList(const QList<int> &);
+    void setInheritPipeList(const QList<int> &);
 
 protected:
-	void setupChildProcess() override;
+    void setupChildProcess() override;
 
 private:
-	QList<int> pipeList;
+    QList<int> pipeList;
 #endif
 };
 

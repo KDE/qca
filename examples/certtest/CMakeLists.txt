@@ -1,4 +1,4 @@
-set(certtest_bin_SRCS certtest.cpp)  
+set(certtest_bin_SRCS certtest.cpp)
 
 add_executable(certtest ${certtest_bin_SRCS})
 

@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set( keygenunittest_bin_SRCS keygenunittest.cpp)  
+set( keygenunittest_bin_SRCS keygenunittest.cpp)
 
 add_executable( keygenunittest ${keygenunittest_bin_SRCS} )
 

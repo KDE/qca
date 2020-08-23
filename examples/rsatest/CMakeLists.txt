@@ -1,4 +1,4 @@
-set(rsatest_bin_SRCS rsatest.cpp)  
+set(rsatest_bin_SRCS rsatest.cpp)
 
 add_executable(rsatest ${rsatest_bin_SRCS})
 

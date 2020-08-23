@@ -21,41 +21,40 @@
 
 #ifndef TLSSOCKET_H
 
-#include <QtCrypto>
 #include <QTcpSocket>
+#include <QtCrypto>
 
 class SimpleLogger : public QCA::AbstractLogDevice
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	SimpleLogger(QObject *parent) : QCA::AbstractLogDevice(QLatin1String("simplelogger"), parent) {}
-	
-	void logTextMessage(const QString &message, QCA::Logger::Severity severity) override;
-	void logBinaryMessage(const QByteArray &blob, QCA::Logger::Severity severity) override;
-	
+    SimpleLogger(QObject *parent) : QCA::AbstractLogDevice(QLatin1String("simplelogger"), parent) { }
+
+    void logTextMessage(const QString &message, QCA::Logger::Severity severity) override;
+    void logBinaryMessage(const QByteArray &blob, QCA::Logger::Severity severity) override;
 };
 
 class TLSSocket : public QTcpSocket
 {
     Q_OBJECT
 public:
-	TLSSocket(QObject *parent = nullptr);
-	~TLSSocket() override;
+    TLSSocket(QObject *parent = nullptr);
+    ~TLSSocket() override;
 
-	void connectToHostEncrypted(const QString &host, quint16 port);
-	QCA::TLS *tls();
+    void      connectToHostEncrypted(const QString &host, quint16 port);
+    QCA::TLS *tls();
 
-	bool waitForReadyRead(int msecs = -1) override;
+    bool waitForReadyRead(int msecs = -1) override;
 
 protected:
-	// from qiodevice
-	qint64 readData(char *data, qint64 maxlen) override;
-	qint64 writeData(const char *data, qint64 len) override;
+    // from qiodevice
+    qint64 readData(char *data, qint64 maxlen) override;
+    qint64 writeData(const char *data, qint64 len) override;
 
 private:
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 #endif

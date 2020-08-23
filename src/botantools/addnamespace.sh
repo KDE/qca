@@ -1,6 +1,5 @@
 #!/bin/sh
 
 for f in `find botan -name \*.cpp -o -name \*.h` ; do
-	./wrapns $f QCA
+    ./wrapns $f QCA
 done
-

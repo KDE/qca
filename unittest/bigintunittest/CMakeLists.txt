@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(bigintunittest_bin_SRCS bigintunittest.cpp)  
+set(bigintunittest_bin_SRCS bigintunittest.cpp)
 
 add_executable(bigintunittest ${bigintunittest_bin_SRCS} )
 

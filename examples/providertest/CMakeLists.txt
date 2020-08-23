@@ -1,4 +1,4 @@
-set(providertest_bin_SRCS providertest.cpp)  
+set(providertest_bin_SRCS providertest.cpp)
 
 add_executable(providertest ${providertest_bin_SRCS})
 

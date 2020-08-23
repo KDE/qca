@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(pipeunittest_bin_SRCS pipeunittest.cpp)  
+set(pipeunittest_bin_SRCS pipeunittest.cpp)
 
 add_executable( pipeunittest ${pipeunittest_bin_SRCS} )
 

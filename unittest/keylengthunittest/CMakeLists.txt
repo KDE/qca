@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(keylengthunittest_bin_SRCS keylengthunittest.cpp)  
+set(keylengthunittest_bin_SRCS keylengthunittest.cpp)
 
 add_executable( keylengthunittest ${keylengthunittest_bin_SRCS} )
 

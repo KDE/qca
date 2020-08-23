@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(securearrayunittest_bin_SRCS securearrayunittest.cpp)  
+set(securearrayunittest_bin_SRCS securearrayunittest.cpp)
 
 add_executable( securearrayunittest ${securearrayunittest_bin_SRCS} )
 

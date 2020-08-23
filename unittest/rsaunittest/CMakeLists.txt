@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(rsaunittest_bin_SRCS rsaunittest.cpp)  
+set(rsaunittest_bin_SRCS rsaunittest.cpp)
 
 add_executable(rsaunittest ${rsaunittest_bin_SRCS} )
 

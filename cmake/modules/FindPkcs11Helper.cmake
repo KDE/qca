@@ -1,7 +1,7 @@
 # - Try to find the pkcs11-helper library
 # Once done this will define
 #
-#  PKCS11H_FOUND - system has pkcs11-helper 
+#  PKCS11H_FOUND - system has pkcs11-helper
 #  PKCS11H_INCLUDE_DIRS - the pkcs11-helper include directories
 #  PKCS11H_LDFLAGS - Link to these to use pkcs11-helper
 #  PKCS11H_CFLAGS_OTHER - Compiler switches required for using pkcs11-helper
@@ -34,7 +34,7 @@ else()
       message(FATAL_ERROR "Could NOT find pkcs11-helper")
     endif()
   endif()
-  
+
   mark_as_advanced(PKCS11H_INCLUDE_DIRS PKCS11H_LDFLAGS PKCS11H_CFLAGS_OTHER)
-  
+
 endif()

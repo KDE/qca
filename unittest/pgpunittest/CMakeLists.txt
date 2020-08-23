@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 
-set(pgpunittest_bin_SRCS pgpunittest.cpp)  
+set(pgpunittest_bin_SRCS pgpunittest.cpp)
 
 add_executable(pgpunittest ${pgpunittest_bin_SRCS} )
 

@@ -1,4 +1,4 @@
-/** \example aes-cmac.cpp 
+/** \example aes-cmac.cpp
 
 This example shows how to implement a client side "provider".
 
@@ -24,7 +24,7 @@ between QCA::SecureArray and QString.
 /** \example certtest.cpp
 
 This example shows how QCA::Certificate and QCA::CertificateCollection
-can be used. Note that the argument, if you provide it, must be a 
+can be used. Note that the argument, if you provide it, must be a
 PEM encoded file collection.
 
 */
@@ -154,7 +154,7 @@ The code below shows how to create an SSL server.
 Note that this server returns a self-signed certificate
 for "example.com", and that the certificate is expired.
 
-The design used here only allows for one connection 
+The design used here only allows for one connection
 at a time. If you want to allow for more, you should
 probably create a "TlsConnection" object that agregates
 a QCA::TLS object and a QTcpSocket (plus a little bit of
@@ -165,7 +165,7 @@ just create a TlsConnection for each server connection.
 
 /** \example ssltest.cpp
 
-The code below shows how to create an SSL client 
+The code below shows how to create an SSL client
 
 */
 
@@ -177,6 +177,3 @@ over an Transport Layer Security (TLS, also known as SSL) connection.
 \include tlssocket/tlssocket.h
 \include tlssocket/main.cpp
 */
-
-
-
