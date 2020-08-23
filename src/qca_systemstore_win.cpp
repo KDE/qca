@@ -23,8 +23,8 @@
 
 #include "qca_systemstore.h"
 
-#include <wincrypt.h>
 #include <windows.h>
+#include <wincrypt.h>
 
 namespace QCA {
 
