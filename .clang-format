@@ -1,6 +1,17 @@
-BasedOnStyle: LLVM
-UseTab: true
-TabWidth: 4
-IndentWidth: 4
+BasedOnStyle: WebKit
+BreakConstructorInitializers: AfterColon
+PointerAlignment: Right
+AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
+AlignTrailingComments: true
+ColumnLimit: 120
+CompactNamespaces: true
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: true
+  AfterClass: true
+  AfterCaseLabel: true
+  AfterFunction: true
