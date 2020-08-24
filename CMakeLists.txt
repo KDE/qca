@@ -58,7 +58,7 @@ set(QCA_SUFFIX "qt5")
 # if Qt is static.
 if(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
   set(STATIC_PLUGINS ON)
-  add_definitions(-DQT_STATICPLUGIN)
+  add_definitions(-DQT_STATICPLUGIN -DQCA_STATIC)
   set(PLUGIN_TYPE "STATIC")
 else()
   set(PLUGIN_TYPE "MODULE")
