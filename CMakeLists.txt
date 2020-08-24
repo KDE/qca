@@ -26,7 +26,6 @@ set(BUILD_PLUGINS "auto" CACHE STRING "Plugins for building (also possible value
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(DEVELOPER_MODE "Special developer mode" OFF)
 option(LOAD_SHARED_PLUGINS "Load plugins from file system" ON)
-option(EXTERNAL_PROJECT "Build QCA library as ExternalProject" OFF)
 
 if(APPLE)
   option(OSX_FRAMEWORK "Build a Mac OS X Framework" ON)
@@ -55,20 +54,11 @@ setup_qt5_dirs()
 set(QCA_QT_PC_VERSION "Qt5Core")
 set(QCA_SUFFIX "qt5")
 
-#If QCA is an external project enable static, disable tools and tests
-if(EXTERNAL_PROJECT)
-  set(BUILD_SHARED_LIBS OFF)
-  add_definitions(-DQCA_STATIC)
-  set(BUILD_TOOLS OFF)
-  set(BUILD_TESTS OFF)
-  set(LOAD_SHARED_PLUGINS OFF)
-endif()
-
 # QCA can be shared but plugins will be static
 # if Qt is static.
 if(NOT BUILD_SHARED_LIBS OR QT_IS_STATIC)
   set(STATIC_PLUGINS ON)
-  add_definitions(-DQT_STATICPLUGIN)
+  add_definitions(-DQT_STATICPLUGIN -DQCA_STATIC)
   set(PLUGIN_TYPE "STATIC")
 else()
   set(PLUGIN_TYPE "MODULE")
