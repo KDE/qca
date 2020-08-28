@@ -47,7 +47,26 @@ if(OPENSSL_FOUND)
   endif()
 
   set(QCA_OSSL_SOURCES
-      qca-ossl.cpp)
+      qca-ossl.cpp
+      basetlscontext.cpp
+      basetlscontext.h
+      tlscontext.cpp
+      tlscontext.h
+      certcontext.cpp
+      certcontext.h
+      pkeycontext.cpp
+      pkeycontext.h
+      utils.cpp
+      utils.h
+      rsakey.cpp
+      rsakey.h
+      dsakey.cpp
+      dsakey.h
+      dhkey.cpp
+      dhkey.h
+      evpkey.cpp
+      evpkey.h
+      )
 
   add_library(qca-ossl ${PLUGIN_TYPE} ${QCA_OSSL_SOURCES})
 
