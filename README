@@ -1,6 +1,22 @@
 Qt Cryptographic Architecture (QCA)
 -----------------------------------
 
+
+This is a fork
+--------------
+
+  This is a fork of https://invent.kde.org/libraries/qca.
+Unfortunately it's not possible to keep development under the hood of KDE project since KDE developers are very conservative and do not accept new applications to the KDE developers. Approximately the same can be said about any new feature brought into the project.
+  Previously QCA was developed by Justin Kerneges, same developer who invented Psi IM where QCA was heavily used. At some moment the QCA maintenance has been moved to KDE and it's mostly inactive there. Currently Psi IM needs a set of features from QCA and to quicken the implementation this fork was born.
+
+  Changes to mainstream:
+    * Fixed a few issues in keystore leading to hard lock on QCA initialization
+    * Applied a few patches from various distros mostly fixing compilation
+    * Added a few hash algorithms like SHA3 and Blake2b
+    * Added DTLS support
+
+  Currently the diff with mainstream may look like 99% rewrite mostly because of reformatting all the sources with clang-format. Which could be the main reason why this fork will never be merged back. Even without reformatting making nice feature-dedicated PRs would be quite time consuming and probably doesn't worth it.
+
 Description
 -----------
 
