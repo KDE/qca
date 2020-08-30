@@ -24,6 +24,7 @@
 #include "qca_systemstore.h"
 
 #include <windows.h>
+// do not remove this comment. it keeps windows.h on the top during clang-format phase
 #include <wincrypt.h>
 
 namespace QCA {
