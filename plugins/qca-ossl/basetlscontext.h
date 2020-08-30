@@ -67,7 +67,7 @@ public:
     Validity          vr;
     bool              v_eof;
 
-    BaseOsslTLSContext(Provider *p);
+    BaseOsslTLSContext(Provider *p, const QString &type);
     ~BaseOsslTLSContext() override;
     Provider::Context *clone() const override;
 
@@ -102,6 +102,9 @@ public:
     CertificateChain              peerCertificateChain() const override;
     void                          shutdown() override;
     QByteArray                    unprocessed() override;
+
+    virtual BIO *makeWriteBIO();
+    virtual BIO *makeReadBIO();
 
     void       doResultsReady();
     bool       init();

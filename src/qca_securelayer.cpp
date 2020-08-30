@@ -547,36 +547,40 @@ public:
             return;
         }
 
-        const QByteArray c_to_net = c->to_net();
-        if (!c_to_net.isEmpty()) {
-            QCA_logTextMessage(
-                QStringLiteral("tls[%1]: to_net %2").arg(q->objectName(), QString::number(c_to_net.size())),
-                Logger::Information);
+        QByteArray c_to_net;
+        bool       has_to_net   = false;
+        int        count_to_net = 0;
+        if (mode == TLS::Stream) {
+            c_to_net = c->to_net();
+            if (!c_to_net.isEmpty()) {
+                has_to_net = true;
+                to_net += c_to_net;
+                count_to_net++;
+                QCA_logTextMessage(
+                    QStringLiteral("tls[%1]: to_net %2").arg(q->objectName(), QString::number(c_to_net.size())),
+                    Logger::Information);
+            }
+        } else {
+            while ((c_to_net = c->to_net()).size() > 0) {
+                has_to_net = true;
+                packet_to_net += c_to_net;
+                count_to_net++;
+                QCA_logTextMessage(
+                    QStringLiteral("dtls[%1]: to_net %2").arg(q->objectName(), QString::number(c_to_net.size())),
+                    Logger::Information);
+            }
         }
 
+        if (has_to_net)
+            actionQueue += Action(Action::ReadyReadOutgoing);
+
         if (state == Closing) {
-            if (mode == TLS::Stream)
-                to_net += c_to_net;
-            else
-                packet_to_net += c_to_net;
-
-            if (!c_to_net.isEmpty())
-                actionQueue += Action(Action::ReadyReadOutgoing);
-
             if (r == TLSContext::Success)
                 actionQueue += Action(Action::Close);
 
             processNextAction();
             return;
         } else if (state == Handshaking) {
-            if (mode == TLS::Stream)
-                to_net += c_to_net;
-            else
-                packet_to_net += c_to_net;
-
-            if (!c_to_net.isEmpty())
-                actionQueue += Action(Action::ReadyReadOutgoing);
-
             bool clientHello = false;
             bool serverHello = false;
             if (server)
@@ -613,21 +617,38 @@ public:
             return;
         } else // Connected
         {
-            const QByteArray c_to_app = c->to_app();
-            if (!c_to_app.isEmpty()) {
-                QCA_logTextMessage(
-                    QStringLiteral("tls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())),
-                    Logger::Information);
+            QByteArray c_to_app;
+            bool       has_to_app = false;
+            if (mode == TLS::Stream) {
+                c_to_app = c->to_app();
+                if (!c_to_app.isEmpty()) {
+                    has_to_app = true;
+                    in += c_to_app;
+                    QCA_logTextMessage(
+                        QStringLiteral("tls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())),
+                        Logger::Information);
+                }
+            } else {
+                while ((c_to_app = c->to_app()).size() > 0) {
+                    has_to_app = true;
+                    packet_in += c_to_app;
+                    QCA_logTextMessage(
+                        QStringLiteral("dtls[%1]: to_app %2").arg(q->objectName(), QString::number(c_to_app.size())),
+                        Logger::Information);
+                }
             }
+
+            if (has_to_app)
+                actionQueue += Action(Action::ReadyRead);
 
             const bool eof = c->eof();
             int        enc = -1;
-            if (!c_to_net.isEmpty())
+            if (has_to_net)
                 enc = c->encoded();
 
             bool io_pending = false;
             if (mode == TLS::Stream) {
-                if (!c_to_net.isEmpty())
+                if (has_to_net)
                     out_pending -= enc;
 
                 if (out_pending > 0) {
@@ -638,8 +659,15 @@ public:
                 if (!out.isEmpty())
                     io_pending = true;
             } else {
-                if (!c_to_net.isEmpty())
-                    --packet_out_pending;
+                if (has_to_net) {
+                    packet_out_pending -= count_to_net;
+                    if (packet_out_pending < 0) {
+                        QCA_logTextMessage(QStringLiteral("dtls[%1]: packet_out_pending < 0: %2")
+                                               .arg(q->objectName(), QString::number(packet_out_pending)),
+                                           Logger::Error);
+                        packet_out_pending = 0;
+                    }
+                }
 
                 if (packet_out_pending > 0) {
                     maybe_input = true;
@@ -651,19 +679,8 @@ public:
             }
 
             if (mode == TLS::Stream) {
-                to_net += c_to_net;
-                in += c_to_app;
                 to_net_encoded += enc;
-            } else {
-                packet_to_net += c_to_net;
-                packet_in += c_to_app;
             }
-
-            if (!c_to_net.isEmpty())
-                actionQueue += Action(Action::ReadyReadOutgoing);
-
-            if (!c_to_app.isEmpty())
-                actionQueue += Action(Action::ReadyRead);
 
             if (eof) {
                 close();
@@ -955,9 +972,11 @@ QByteArray TLS::readOutgoing(int *plainBytes)
     } else {
         if (!d->packet_to_net.isEmpty()) {
             const QByteArray a = d->packet_to_net.takeFirst();
-            const int        x = d->packet_to_net_encoded.takeFirst();
-            if (plainBytes)
-                *plainBytes = x;
+            if (d->packet_to_net_encoded.size()) {
+                const int x = d->packet_to_net_encoded.takeFirst();
+                if (plainBytes)
+                    *plainBytes = x;
+            }
             return a;
         } else {
             if (plainBytes)

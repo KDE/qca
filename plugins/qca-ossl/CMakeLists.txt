@@ -50,6 +50,8 @@ if(OPENSSL_FOUND)
       qca-ossl.cpp
       basetlscontext.cpp
       basetlscontext.h
+      dtlscontext.cpp
+      dtlscontext.h
       tlscontext.cpp
       tlscontext.h
       certcontext.cpp

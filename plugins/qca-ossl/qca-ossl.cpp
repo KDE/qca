@@ -23,6 +23,7 @@
 #include "certcontext.h"
 #include "dhkey.h"
 #include "dsakey.h"
+#include "dtlscontext.h"
 #include "pkeycontext.h"
 #include "rsakey.h"
 #include "tlscontext.h"
@@ -1901,6 +1902,7 @@ public:
         list += QStringLiteral("certcollection");
         list += QStringLiteral("pkcs12");
         list += QStringLiteral("tls");
+        list += QStringLiteral("dtls");
         list += QStringLiteral("cms");
         list += QStringLiteral("ca");
 
@@ -2116,6 +2118,8 @@ public:
             return new MyPKCS12Context(this);
         else if (type == QLatin1String("tls"))
             return new OsslTLSContext(this);
+        else if (type == QLatin1String("dtls"))
+            return new OsslDTLSContext(this);
         else if (type == QLatin1String("cms"))
             return new CMSContext(this);
         else if (type == QLatin1String("ca"))

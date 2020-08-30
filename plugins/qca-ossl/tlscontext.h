@@ -37,7 +37,7 @@ public:
     QByteArray result_to_net;
     QByteArray result_plain;
 
-    using BaseOsslTLSContext::BaseOsslTLSContext;
+    OsslTLSContext(Provider *p);
 
     void       reset() override;
     void       start() override;

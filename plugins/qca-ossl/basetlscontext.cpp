@@ -32,7 +32,7 @@ namespace opensslQCAPlugin {
 // TODO: test to ensure there is no cert-test lag
 static bool ssl_init = false;
 
-BaseOsslTLSContext::BaseOsslTLSContext(Provider *p) : TLSContext(p, QStringLiteral("tls"))
+BaseOsslTLSContext::BaseOsslTLSContext(Provider *p, const QString &type) : TLSContext(p, type)
 {
     if (!ssl_init) {
         SSL_library_init();
@@ -159,7 +159,8 @@ CertificateChain BaseOsslTLSContext::peerCertificateChain() const
 {
     // TODO: support whole chain
     CertificateChain chain;
-    chain.append(peercert);
+    if (!peercert.isNull())
+        chain.append(peercert);
     return chain;
 }
 
@@ -242,6 +243,10 @@ QByteArray BaseOsslTLSContext::unprocessed()
     return a;
 }
 
+BIO *BaseOsslTLSContext::makeWriteBIO() { return BIO_new(BIO_s_mem()); }
+
+BIO *BaseOsslTLSContext::makeReadBIO() { return BIO_new(BIO_s_mem()); }
+
 void BaseOsslTLSContext::reset()
 {
     if (ssl) {
@@ -275,7 +280,9 @@ int BaseOsslTLSContext::ssl_error_callback(const char *message, size_t len, void
 {
     Q_UNUSED(len)
     auto context = reinterpret_cast<BaseOsslTLSContext *>(user_data);
-    qDebug() << "BaseOsslTLSContext:" << context << " " << message;
+    QCA_logTextMessage(
+        QStringLiteral("%1: ssl_error_callback: %2").arg(context->type(), QString::fromLocal8Bit(message, len)),
+        Logger::Error);
     return 1;
 }
 
@@ -356,6 +363,10 @@ TLSContext::SessionInfo BaseOsslTLSContext::sessionInfo() const
         sessInfo.version = TLS::TLS_v1_2;
     else if (ssl_version == TLS1_1_VERSION)
         sessInfo.version = TLS::TLS_v1_1;
+    else if (ssl_version == DTLS1_VERSION)
+        sessInfo.version = TLS::DTLS_v1;
+    else if (ssl_version == DTLS1_2_VERSION)
+        sessInfo.version = TLS::DTLS_v1_2;
     else if (ssl_version == TLS1_VERSION)
         sessInfo.version = TLS::TLS_v1;
     else if (ssl_version == SSL3_VERSION)
@@ -420,8 +431,8 @@ bool BaseOsslTLSContext::init()
 #endif
 
     // setup the memory bio
-    rbio = BIO_new(BIO_s_mem());
-    wbio = BIO_new(BIO_s_mem());
+    rbio = makeReadBIO();
+    wbio = makeWriteBIO();
 
     // this passes control of the bios to ssl.  we don't need to free them.
     SSL_set_bio(ssl, rbio, wbio);
@@ -481,7 +492,13 @@ void BaseOsslTLSContext::getCert()
         CertificateChain chain;
 
         if (serv) {
-            X509 *         x  = SSL_get_peer_certificate(ssl);
+            X509 *x = SSL_get_peer_certificate(ssl);
+            if (!x) {
+                vr       = code;
+                peercert = Certificate();
+                QCA_logTextMessage(QStringLiteral("%1: getCert: no certificate").arg(type()), Logger::Error);
+                return;
+            }
             MyCertContext *cc = new MyCertContext(provider());
             cc->fromX509(x);
             Certificate cert;
@@ -506,8 +523,12 @@ void BaseOsslTLSContext::getCert()
         int ret = SSL_get_verify_result(ssl);
         if (ret == X509_V_OK)
             code = ValidityGood;
-        else
+        else {
+            QCA_logTextMessage(
+                QStringLiteral("%1: getCert: SSL_get_verify_result failed: %2").arg(type(), QString::number(ret)),
+                Logger::Warning);
             code = convert_verify_error(ret);
+        }
 #endif
     } else {
         peercert = Certificate();

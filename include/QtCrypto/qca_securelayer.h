@@ -720,14 +720,14 @@ foreach(const CertificateInfoOrdered &info, tls->issuerList())
     int packetsOutgoingAvailable() const;
 
     /**
-       Return the currently configured maximum packet size
+       Return the currently configured maximum packet size excluding IP/UDP/etc overhead.
 
        \note this is only used with DTLS
     */
     int packetMTU() const;
 
     /**
-       Set the maximum packet size to use.
+       Set the maximum packet size to use excluding IP/UDP/etc overhead.
 
        \param size the number of bytes to set as the MTU.
 
