@@ -38,14 +38,14 @@ int main(int argc, char **argv)
             QObject::connect(socket, &DTLSSocket::readyRead, [socket]() {
                 auto data = socket->readDatagram();
                 qDebug("got %s. sending reply", data.data());
-                socket->writeDatagram("reply");
+                socket->writeDatagram("world");
             });
         });
         qDebug("DTLS server started");
 
     } else {
         auto client = new DTLSSocket(&qapp);
-        QObject::connect(client, &DTLSSocket::connected, [client]() { client->writeDatagram("Hello world"); });
+        QObject::connect(client, &DTLSSocket::connected, [client]() { client->writeDatagram("Hello"); });
         QObject::connect(client, &DTLSSocket::readyRead, [client]() {
             auto data = client->readDatagram();
             qDebug("got reply: %s", data.data());

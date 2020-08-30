@@ -89,10 +89,6 @@ public:
     DTLSSocket *     q;
     QUdpSocket *     sock = nullptr;
     QCA::TLS *       tls;
-    QString          host;
-    bool             encrypted = false;
-    bool             error     = false;
-    bool             waiting   = false;
     QCA::Certificate cert;
     QCA::PrivateKey  privkey;
     QHostAddress     dstHost;
@@ -110,10 +106,10 @@ public:
         connect(tls, &QCA::TLS::readyReadOutgoing, this, &DTLSSocket::Private::tls_readyReadOutgoing);
         connect(tls, &QCA::TLS::closed, this, &DTLSSocket::Private::tls_closed);
         connect(tls, &QCA::TLS::error, this, &DTLSSocket::Private::tls_error);
-        tls->setTrustedCertificates(QCA::systemStore());
-        encrypted = false;
-        error     = false;
-        waiting   = false;
+
+        QCA::CertificateCollection rootCerts = QCA::systemStore();
+        rootCerts.addCertificate(cert);
+        tls->setTrustedCertificates(rootCerts);
     }
 
     void connectToServer(const QHostAddress &host, quint16 port)
@@ -129,17 +125,6 @@ public:
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QUdpSocket::error), this,
                 [this](QAbstractSocket::SocketError) { qDebug("socket failed: %s", qPrintable(sock->errorString())); });
 #endif
-
-        QCA::CertificateCollection rootCerts = QCA::systemStore();
-
-        // We add this one to show how, and to make it work with
-        // the server example.
-        rootCerts.addCertificate(cert);
-
-        if (!QCA::haveSystemStore())
-            qWarning("Warning: no root certs");
-        else
-            tls->setTrustedCertificates(rootCerts);
 
         sock->bind();
         sock->connectToHost(host, port);
@@ -184,7 +169,6 @@ private Q_SLOTS:
              error = true;
          } else {
              DTLS_DEBUG("valid");*/
-        encrypted = true;
         tls->continueAfterStep();
         //}
         emit q->connected();

@@ -39,7 +39,7 @@ public:
     QQueue<QByteArray> result_to_net;
     QQueue<QByteArray> result_plain;
 
-    int mtuSize = 1200;
+    int mtuSize = 1400;
 
     OsslDTLSContext(Provider *p);
 

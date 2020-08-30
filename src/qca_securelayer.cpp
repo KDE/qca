@@ -611,6 +611,8 @@ public:
                 }
 
                 actionQueue += Action(Action::Handshaken);
+            } else if (r == TLSContext::Continue && mode == Datagram && !packet_from_net.isEmpty()) {
+                need_update = true; // pass more data from from network to tls. (is it valid for tcp?)
             }
 
             processNextAction();

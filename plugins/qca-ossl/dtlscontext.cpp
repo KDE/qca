@@ -313,11 +313,12 @@ bool OsslDTLSContext::priv_decode(const QByteArray &from_net, QQueue<QByteArray>
 
     QByteArray a;
     if (!v_eof) {
-        a.resize(2048); // SSL_pending(ssl)
+        int pending = SSL_pending(ssl);
+        a.resize(pending ? pending : 16384);
         int ret = SSL_read(ssl, a.data(), a.size());
         // printf("SSL_read = %d\n", ret);
         if (ret > 0) {
-            if (ret != (int)a.size())
+            if (ret != int(a.size()))
                 a.resize(ret);
             // printf("SSL_read chunk: [%s]\n", qPrintable(arrayToHex(a)));
             recvQueue.enqueue(a);
