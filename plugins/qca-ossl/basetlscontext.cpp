@@ -159,7 +159,7 @@ CertificateChain BaseOsslTLSContext::peerCertificateChain() const
 {
     // TODO: support whole chain
     CertificateChain chain;
-    if (!peercert.isNull())
+    if (vr != ErrorValidityUnknown)
         chain.append(peercert);
     return chain;
 }
@@ -496,7 +496,6 @@ void BaseOsslTLSContext::getCert()
             if (!x) {
                 vr       = code;
                 peercert = Certificate();
-                QCA_logTextMessage(QStringLiteral("%1: getCert: no certificate").arg(type()), Logger::Error);
                 return;
             }
             MyCertContext *cc = new MyCertContext(provider());

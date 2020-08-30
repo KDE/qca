@@ -134,7 +134,8 @@ void OsslDTLSContext::update(const QByteArray &from_net, const QByteArray &from_
     // printf("update (from_net=%d, to_net=%d, from_app=%d, to_app=%d)\n", from_net.size(), result_to_net.size(),
     // from_app.size(), result_plain.size());
 
-    doResultsReady();
+    if (mode != Idle)
+        doResultsReady();
 }
 
 void OsslDTLSContext::setMTU(int size)
