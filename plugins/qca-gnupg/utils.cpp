@@ -130,7 +130,11 @@ QString find_bin()
     const QString pathSep = QStringLiteral(":");
 #endif
 
-    QStringList paths = QString::fromLocal8Bit(qgetenv("PATH")).split(pathSep, QString::SkipEmptyParts);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    QStringList paths = QString::fromLocal8Bit(qgetenv("PATH")).split(pathSep, Qt::SkipEmptyParts);
+#else
+    QStringList   paths   = QString::fromLocal8Bit(qgetenv("PATH")).split(pathSep, QString::SkipEmptyParts);
+#endif
 
 #ifdef Q_OS_MAC
     // On Mac OS bundled always uses system default PATH
