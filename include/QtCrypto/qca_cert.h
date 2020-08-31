@@ -1067,6 +1067,15 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
                       UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
 
     /**
+     * Computes hash from the entire certificate in DER format
+     *
+     * See "fingerprint" documentation at https://www.openssl.org/docs/man1.0.2/man1/x509.html
+     *
+     * @param hashType e.g. "sha1"
+     */
+    QByteArray fingerprint(const QString &hashType) const;
+
+    /**
        Export the Certificate into a DER format
     */
     QByteArray toDER() const;

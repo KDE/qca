@@ -1435,6 +1435,16 @@ Validity Certificate::validate(const CertificateCollection &trusted, const Certi
     return chain.validate(trusted, untrusted.crls(), u, vf);
 }
 
+QByteArray Certificate::fingerprint(const QString &hashType) const
+{
+    auto hash = QCA::Hash(hashType);
+    if (!hash.context()) {
+        return QByteArray(); // unsupported
+    }
+    hash.update(toDER());
+    return hash.final().toByteArray();
+}
+
 QByteArray Certificate::toDER() const { return static_cast<const CertContext *>(context())->toDER(); }
 
 QString Certificate::toPEM() const { return static_cast<const CertContext *>(context())->toPEM(); }
