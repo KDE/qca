@@ -809,8 +809,8 @@ bool MyCertContext::createSelfSigned(const CertificateOptions &opts, const PKeyC
     BN_free(bn);
 
     // validity period
-    ASN1_TIME_set(X509_get_notBefore(x), opts.notValidBefore().toTime_t());
-    ASN1_TIME_set(X509_get_notAfter(x), opts.notValidAfter().toTime_t());
+    ASN1_TIME_set(X509_getm_notBefore(x), opts.notValidBefore().toTime_t());
+    ASN1_TIME_set(X509_getm_notAfter(x), opts.notValidAfter().toTime_t());
 
     // public key
     X509_set_pubkey(x, pk);
@@ -935,7 +935,7 @@ bool MyCertContext::isIssuerOf(const CertContext *other) const
     X509_verify_cert(ctx);
 
     // grab the chain, which may not be fully populated
-    STACK_OF(X509) *chain = X509_STORE_CTX_get_chain(ctx);
+    STACK_OF(X509) *chain = X509_STORE_CTX_get0_chain(ctx);
 
     bool ok = false;
 
@@ -1271,7 +1271,7 @@ Validity MyCertContext::validate(const QList<CertContext *> &trusted, const QLis
     X509_STORE_CTX_init(ctx, store, x, untrusted_list);
 
     // this initializes the trusted certs
-    X509_STORE_CTX_trusted_stack(ctx, trusted_list);
+    X509_STORE_CTX_set0_trusted_stack(ctx, trusted_list);
 
     // verify!
     int ret = X509_verify_cert(ctx);
@@ -1342,7 +1342,7 @@ Validity MyCertContext::validate_chain(const QList<CertContext *> &chain, const 
     X509_STORE_CTX_init(ctx, store, x, untrusted_list);
 
     // this initializes the trusted certs
-    X509_STORE_CTX_trusted_stack(ctx, trusted_list);
+    X509_STORE_CTX_set0_trusted_stack(ctx, trusted_list);
 
     // verify!
     int ret = X509_verify_cert(ctx);
@@ -1351,7 +1351,7 @@ Validity MyCertContext::validate_chain(const QList<CertContext *> &chain, const 
         err = X509_STORE_CTX_get_error(ctx);
 
     // grab the chain, which may not be fully populated
-    STACK_OF(X509) *xchain = X509_STORE_CTX_get_chain(ctx);
+    STACK_OF(X509) *xchain = X509_STORE_CTX_get0_chain(ctx);
 
     // make sure the chain is what we expect.  the reason we need to do
     //   this is because I don't think openssl cares about the order of
@@ -1660,8 +1660,8 @@ CertContext *MyCAContext::signRequest(const CSRContext &req, const QDateTime &no
     BN_free(bn);
 
     // validity period
-    ASN1_TIME_set(X509_get_notBefore(x), QDateTime::currentDateTimeUtc().toTime_t());
-    ASN1_TIME_set(X509_get_notAfter(x), notValidAfter.toTime_t());
+    ASN1_TIME_set(X509_getm_notBefore(x), QDateTime::currentDateTimeUtc().toTime_t());
+    ASN1_TIME_set(X509_getm_notAfter(x), notValidAfter.toTime_t());
 
     X509_set_pubkey(x, static_cast<const MyPKeyContext *>(req.subjectPublicKey())->get_pkey());
     X509_set_subject_name(x, subjectName);

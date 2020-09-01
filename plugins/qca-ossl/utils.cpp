@@ -23,6 +23,7 @@
 #include "utils.h"
 
 #include <openssl/err.h>
+#include <openssl/rsa.h>
 #include <openssl/x509v3.h>
 
 #ifndef RSA_F_RSA_OSSL_PRIVATE_DECRYPT

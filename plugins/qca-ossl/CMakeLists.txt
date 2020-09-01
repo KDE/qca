@@ -48,10 +48,11 @@ if(OPENSSL_FOUND)
 
   macro(hash_detect)
     check_function_exists(EVP_${ARGV0} HAVE_OPENSSL_${ARGV1})
-    if(HAVE_OPENSSL_${ARGV1})
+    if(${HAVE_OPENSSL_${ARGV1}})
       add_definitions(-DHAVE_OPENSSL_${ARGV1})
     endif()
   endmacro()
+
   hash_detect(sha3_224 SHA3_224)
   hash_detect(sha3_256 SHA3_256)
   hash_detect(sha3_384 SHA3_384)

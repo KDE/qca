@@ -25,6 +25,7 @@
 #include "qcaprovider.h"
 
 #include <openssl/asn1.h>
+#include <openssl/bn.h>
 #include <openssl/x509v3.h>
 
 using namespace QCA;

@@ -29,17 +29,9 @@
 #include <QDebug>
 
 namespace opensslQCAPlugin {
-// TODO: test to ensure there is no cert-test lag
-static bool ssl_init = false;
 
 BaseOsslTLSContext::BaseOsslTLSContext(Provider *p, const QString &type) : TLSContext(p, type)
 {
-    if (!ssl_init) {
-        SSL_library_init();
-        SSL_load_error_strings();
-        ssl_init = true;
-    }
-
     ssl     = nullptr;
     context = nullptr;
     reset();
@@ -288,7 +280,6 @@ int BaseOsslTLSContext::ssl_error_callback(const char *message, size_t len, void
 
 QStringList BaseOsslTLSContext::supportedCipherSuites(const TLS::Version &version) const
 {
-    OpenSSL_add_ssl_algorithms();
     SSL_CTX *ctx = nullptr;
 
     // most likely scenario first

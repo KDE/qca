@@ -222,7 +222,7 @@ void HashUnitTest::md5test()
 void HashUnitTest::md5filetest()
 {
     foreach (QString provider, providersToTest) {
-        if (!QCA::isSupported("md5", provider)) {
+        if (QCA::isSupported("md5", provider)) {
             QFile f1(QStringLiteral(TEST_DATA_DIR "/data/empty"));
             QVERIFY(f1.open(QIODevice::ReadOnly));
             {

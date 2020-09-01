@@ -1512,7 +1512,7 @@ public:
     {
         m_cryptoAlgorithm = algorithm;
         m_context         = EVP_CIPHER_CTX_new();
-        EVP_CIPHER_CTX_init(m_context);
+        EVP_CIPHER_CTX_reset(m_context);
         m_pad  = pad;
         m_type = type;
     }
@@ -1530,7 +1530,7 @@ public:
 
     ~opensslCipherContext() override
     {
-        EVP_CIPHER_CTX_cleanup(m_context);
+        EVP_CIPHER_CTX_reset(m_context);
         EVP_CIPHER_CTX_free(m_context);
     }
 
@@ -1841,9 +1841,6 @@ public:
 
     void init() override
     {
-        OpenSSL_add_all_algorithms();
-        ERR_load_crypto_strings();
-
         // seed the RNG if it's not seeded yet
         if (RAND_status() == 0) {
             char buf[128];
