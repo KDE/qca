@@ -792,7 +792,6 @@ bool BigInteger::fromString(const QString &s)
     const QByteArray cs = s.toLatin1();
 
     bool        neg  = false;
-    bool        hex  = false;
     int         size = cs.length();
     const char *data = cs.data();
     if (s[0] == QLatin1Char('-')) {
@@ -806,7 +805,6 @@ bool BigInteger::fromString(const QString &s)
     Botan::BigInt::Base base = Botan::BigInt::Decimal;
     QByteArray          hexDecoded;
     if (size > 1 && (data[1] == 'x' || data[1] == 'X')) { // hex?
-        hex = true;
         data += 2;
         size -= 2;
         if (!size || (size & 0x1))
