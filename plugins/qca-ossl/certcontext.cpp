@@ -3,6 +3,7 @@
  * Copyright (C) 2004-2006  Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2013-2016  Ivan Romanov <drizt@land.ru>
  * Copyright (C) 2017       Fabian Vogt <fabian@ritter-vogt.de>
+ * Copyright (C) 2020       Sergey Ilinykh <rion4ik@gmail.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,9 +48,79 @@ static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
 // by Eric Young
 static QDateTime ASN1_UTCTIME_QDateTime(const ASN1_UTCTIME *asn1_tm)
 {
+#ifdef LIBRESSL_VERSION_NUMBER
+    auto d = QByteArray::fromRawData(reinterpret_cast<const char *>(asn1_tm->data), asn1_tm->length);
+    if (d.size() < 10)
+        return QDateTime();
+    int tzInd    = 0;
+    int fractInd = 0;
+    for (int i = 0; i < d.size(); i++) {
+        if (d[i] >= '0' && d[i] <= '9')
+            continue;
+        if (i < 10)
+            return QDateTime();
+        if (d[i] == 'Z' && i > 0) {
+            tzInd = i;
+            if (i != d.size() - 1)  // not final Z or invalid fraction
+                return QDateTime(); // Z has to be the final char
+        } else if ((d[i] == '+' || d[i] == '-') && i > 0 && !tzInd) {
+            if (d.size() != i + 5) // not +HHMM or invalid fraction
+                return QDateTime();
+            tzInd = i;
+        } else if (d[i] == '.' && i > 0 && asn1_tm->type == V_ASN1_GENERALIZEDTIME && !fractInd && !tzInd) {
+            fractInd = i;
+        } else
+            return QDateTime();
+    }
+    int fraction = 0;
+    if (fractInd) {
+        int fractSize = tzInd ? tzInd - fractInd : d.size() - fractInd;
+        if (fractSize < 2 || fractSize > 4) // ".d[d[d]]"
+            return QDateTime();
+        fraction = QByteArray::fromRawData(d.data() + fractInd + 1, fractSize - 1).toInt();
+        if (fractSize == 2) // ".d"
+            fraction *= 100;
+        if (fractSize == 3) // ".dd"
+            fraction *= 10;
+    }
+
+    int tzOffset = 0;
+    if (tzInd && d[tzInd] != 'Z') {
+        tzOffset = (QByteArray::fromRawData(d.data() + tzInd + 1, 2).toInt() * 3600
+                    + QByteArray::fromRawData(d.data() + tzInd + 3, 2).toInt() * 60)
+            * (d[tzInd] == '+' ? 1 : -1);
+    }
+
+    int year, month, day, hour, minute = 0, second = 0;
+    int dateSize = fractInd ? fractInd : tzInd ? tzInd : d.size();
+    if (asn1_tm->type == V_ASN1_GENERALIZEDTIME) {
+        year  = QByteArray::fromRawData(d.data(), 4).toInt();
+        month = QByteArray::fromRawData(d.data() + 4, 2).toInt();
+        day   = QByteArray::fromRawData(d.data() + 6, 2).toInt();
+        hour  = QByteArray::fromRawData(d.data() + 8, 2).toInt();
+        if (dateSize >= 12)
+            minute = QByteArray::fromRawData(d.data() + 10, 2).toInt();
+        if (dateSize == 14)
+            second = QByteArray::fromRawData(d.data() + 12, 2).toInt();
+    } else {
+        year = 2000 + QByteArray::fromRawData(d.data(), 2).toInt();
+        if (year >= 2050)
+            year -= 100;
+        month  = QByteArray::fromRawData(d.data() + 2, 2).toInt();
+        day    = QByteArray::fromRawData(d.data() + 4, 2).toInt();
+        hour   = QByteArray::fromRawData(d.data() + 6, 2).toInt();
+        minute = QByteArray::fromRawData(d.data() + 8, 2).toInt();
+        if (dateSize == 12)
+            second = QByteArray::fromRawData(d.data() + 10, 2).toInt();
+    }
+
+    return QDateTime(QDate(year, month, day), QTime(hour, minute, second, fraction),
+                     tzInd ? Qt::OffsetFromUTC : Qt::LocalTime, tzOffset);
+#else
     struct tm t;
     ASN1_TIME_to_tm(asn1_tm, &t);
     return QDateTime(QDate(1900 + t.tm_year, t.tm_mon + 1, t.tm_mday), QTime(t.tm_hour, t.tm_min, t.tm_sec), Qt::UTC);
+#endif
 }
 
 static X509_EXTENSION *new_subject_key_id(X509 *cert)

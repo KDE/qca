@@ -297,10 +297,13 @@ QStringList BaseOsslTLSContext::supportedCipherSuites(const TLS::Version &versio
         {
             TLS::Version ver;
             int          ssl_ver;
-        } limits[] = { { TLS::TLS_v1, TLS1_VERSION },     { TLS::TLS_v1_1, TLS1_1_VERSION },
-                       { TLS::TLS_v1_2, TLS1_2_VERSION }, { TLS::TLS_v1_3, TLS1_3_VERSION },
-                       { TLS::DTLS_v1, TLS1_1_VERSION },  { TLS::DTLS_v1_2, TLS1_2_VERSION },
-                       { TLS::DTLS_v1_3, TLS1_3_VERSION } };
+        } limits[] = {
+            { TLS::TLS_v1, TLS1_VERSION },     { TLS::TLS_v1_1, TLS1_1_VERSION },  { TLS::TLS_v1_2, TLS1_2_VERSION },
+            { TLS::DTLS_v1, TLS1_1_VERSION },  { TLS::DTLS_v1_2, TLS1_2_VERSION },
+#ifdef TLS1_3_VERSION
+            { TLS::TLS_v1_3, TLS1_3_VERSION }, { TLS::DTLS_v1_3, TLS1_3_VERSION },
+#endif
+        };
         for (size_t i = 0; i < sizeof(limits) / sizeof(limits[0]); i++) {
             if (limits[i].ver == version) {
                 auto method = (limits[i].ver >= TLS::DTLS_v1 && limits[i].ver <= TLS::DTLS_vMAX) ? DTLS_client_method()
@@ -339,7 +342,11 @@ QStringList BaseOsslTLSContext::supportedCipherSuites(const TLS::Version &versio
     QStringList cipherList;
     for (int i = 0; i < sk_SSL_CIPHER_num(sk); ++i) {
         const SSL_CIPHER *thisCipher = sk_SSL_CIPHER_value(sk, i);
+#ifndef LIBRESSL_VERSION_NUMBER
         cipherList += QString::fromLatin1(SSL_CIPHER_standard_name(thisCipher));
+#else
+        cipherList += QString::fromLatin1(SSL_CIPHER_get_name(thisCipher));
+#endif
     }
     sk_SSL_CIPHER_free(sk);
 
@@ -357,16 +364,21 @@ TLSContext::SessionInfo BaseOsslTLSContext::sessionInfo() const
     sessInfo.isCompressed = (0 != SSL_SESSION_get_compress_id(session));
     int ssl_version       = SSL_version(ssl);
 
+#ifdef TLS1_3_VERSION
     if (ssl_version == TLS1_3_VERSION)
         sessInfo.version = TLS::TLS_v1_3;
-    else if (ssl_version == TLS1_2_VERSION)
+    else
+#endif
+        if (ssl_version == TLS1_2_VERSION)
         sessInfo.version = TLS::TLS_v1_2;
     else if (ssl_version == TLS1_1_VERSION)
         sessInfo.version = TLS::TLS_v1_1;
     else if (ssl_version == DTLS1_VERSION)
         sessInfo.version = TLS::DTLS_v1;
+#ifdef DTLS1_2_VERSION
     else if (ssl_version == DTLS1_2_VERSION)
         sessInfo.version = TLS::DTLS_v1_2;
+#endif
     else if (ssl_version == TLS1_VERSION)
         sessInfo.version = TLS::TLS_v1;
     else if (ssl_version == SSL3_VERSION)
@@ -378,7 +390,11 @@ TLSContext::SessionInfo BaseOsslTLSContext::sessionInfo() const
         sessInfo.version = TLS::TLS_v1_2;
     }
 
+#ifndef LIBRESSL_VERSION_NUMBER
     sessInfo.cipherSuite = QString::fromLatin1(SSL_CIPHER_standard_name(SSL_get_current_cipher(ssl)));
+#else
+    sessInfo.cipherSuite = QString::fromLatin1(SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)));
+#endif
 
     sessInfo.cipherMaxBits = SSL_get_cipher_bits(ssl, &(sessInfo.cipherBits));
 

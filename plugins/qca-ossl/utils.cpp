@@ -25,6 +25,10 @@
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
 
+#ifndef RSA_F_RSA_OSSL_PRIVATE_DECRYPT
+#define RSA_F_RSA_OSSL_PRIVATE_DECRYPT RSA_F_RSA_EAY_PRIVATE_DECRYPT
+#endif
+
 namespace opensslQCAPlugin {
 
 int passphrase_cb(char *buf, int size, int rwflag, void *u)

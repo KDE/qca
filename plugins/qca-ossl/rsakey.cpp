@@ -265,7 +265,7 @@ void RSAKey::startSign(SignatureAlgorithm alg, SignatureFormat)
         md = EVP_sha384();
     else if (alg == EMSA3_SHA512)
         md = EVP_sha512();
-#ifndef OPENSSL_NO_BLAKE2
+#ifdef HAVE_OPENSSL_BLAKE2_512
     else if (alg == EMSA3_BLAKE2B512)
         md = EVP_blake2b512();
 #endif

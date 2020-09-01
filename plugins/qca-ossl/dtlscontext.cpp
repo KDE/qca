@@ -83,8 +83,10 @@ static long ctrlDTLSBio(BIO *bio, int cmd, [[maybe_unused]] long num, [[maybe_un
     case BIO_CTRL_DGRAM_QUERY_MTU:
         QCA_logTextMessage(QStringLiteral("dtls: ctrlDTLSBio force MTU: %1").arg(dtls->mtuSize), Logger::Information);
         return dtls->mtuSize; // this is already w/o overhead, so return 0 below
+#ifdef BIO_CTRL_DGRAM_GET_MTU_OVERHEAD
     case BIO_CTRL_DGRAM_GET_MTU_OVERHEAD:
         return 0L;
+#endif
     case BIO_CTRL_WPENDING:
     case BIO_CTRL_PENDING:
     case BIO_CTRL_PUSH: // OpenSSL ignores those for some BIOs too (e.g BIO_s_mem)

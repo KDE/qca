@@ -46,6 +46,18 @@ if(OPENSSL_FOUND)
     message(WARNING "qca-ossl will be compiled without SHA-0 digest algorithm support")
   endif()
 
+  macro(hash_detect)
+    check_function_exists(EVP_${ARGV0} HAVE_OPENSSL_${ARGV1})
+    if(HAVE_OPENSSL_${ARGV1})
+      add_definitions(-DHAVE_OPENSSL_${ARGV1})
+    endif()
+  endmacro()
+  hash_detect(sha3_224 SHA3_224)
+  hash_detect(sha3_256 SHA3_256)
+  hash_detect(sha3_384 SHA3_384)
+  hash_detect(sha3_512 SHA3_512)
+  hash_detect(blake2b512 BLAKE2B_512)
+
   set(QCA_OSSL_SOURCES
       qca-ossl.cpp
       basetlscontext.cpp
