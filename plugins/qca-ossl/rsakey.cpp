@@ -265,8 +265,8 @@ void RSAKey::startSign(SignatureAlgorithm alg, SignatureFormat)
         md = EVP_sha384();
     else if (alg == EMSA3_SHA512)
         md = EVP_sha512();
-#ifdef HAVE_OPENSSL_BLAKE2_512
-    else if (alg == EMSA3_BLAKE2B512)
+#ifdef HAVE_OPENSSL_BLAKE2B_512
+    else if (alg == EMSA3_BLAKE2B512) // https://tools.ietf.org/id/draft-wconner-blake2sigs-01.html
         md = EVP_blake2b512();
 #endif
     else if (alg == EMSA3_Raw) {
