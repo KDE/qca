@@ -163,6 +163,8 @@ int main(int argc, char **argv)
         std::cout << ", until " << qPrintable(cert.notValidAfter().toString());
         std::cout << std::endl;
 
+        std::cout << "Fingerprint: " << cert.fingerprint().toHex(':').toUpper().data() << std::endl;
+
         // You can get the certificate in PEM encoding with a simple toPEM() call
         std::cout << "PEM:" << std::endl;
         std::cout << qPrintable(cert.toPEM());

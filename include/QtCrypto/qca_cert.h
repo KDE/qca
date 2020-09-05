@@ -1070,10 +1070,12 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
      * Computes hash from the entire certificate in DER format
      *
      * See "fingerprint" documentation at https://www.openssl.org/docs/man1.0.2/man1/x509.html
+     * empty resulting QByteArray means error.
      *
-     * @param hashType e.g. "sha1"
+     * @param hashType e.g. "sha1". empty - to use same algo like in signature
+     *
      */
-    QByteArray fingerprint(const QString &hashType) const;
+    QByteArray fingerprint(const QString &hashType = QString()) const;
 
     /**
        Export the Certificate into a DER format
