@@ -800,15 +800,15 @@ void CertUnitTest::checkExpiredServerCerts()
 
 	    QCA::CertificateInfo subject1 = server1.subjectInfo();
 	    QCOMPARE( subject1.isEmpty(), false );
-	    QCOMPARE( subject1.values(QCA::Country).contains(QStringLiteral("de")) == true, true ); //clazy:exclude=container-anti-pattern
-	    QCOMPARE( subject1.values(QCA::Organization).contains(QStringLiteral("InsecureTestCertificate")) == true, true ); //clazy:exclude=container-anti-pattern
-	    QCOMPARE( subject1.values(QCA::CommonName).contains(QStringLiteral("Insecure Server Cert")) == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( subject1.contains(QCA::Country, QStringLiteral("de")) == true, true );
+	    QCOMPARE( subject1.contains(QCA::Organization, QStringLiteral("InsecureTestCertificate")) == true, true );
+	    QCOMPARE( subject1.contains(QCA::CommonName, QStringLiteral("Insecure Server Cert")) == true, true );
 
 	    QCA::CertificateInfo issuer1 = server1.issuerInfo();
 	    QCOMPARE( issuer1.isEmpty(), false );
-	    QCOMPARE( issuer1.values(QCA::Country).contains(QStringLiteral("de")) == true, true ); //clazy:exclude=container-anti-pattern
-	    QCOMPARE( issuer1.values(QCA::Organization).contains(QStringLiteral("InsecureTestCertificate")) == true, true ); //clazy:exclude=container-anti-pattern
-	    QCOMPARE( issuer1.values(QCA::CommonName).contains(QStringLiteral("For Tests Only")) == true, true ); //clazy:exclude=container-anti-pattern
+	    QCOMPARE( issuer1.contains(QCA::Country, QStringLiteral("de")) == true, true );
+	    QCOMPARE( issuer1.contains(QCA::Organization, QStringLiteral("InsecureTestCertificate")) == true, true );
+	    QCOMPARE( issuer1.contains(QCA::CommonName, QStringLiteral("For Tests Only")) == true, true );
 
 	    QByteArray subjectKeyID = QCA::Hex().stringToArray(QStringLiteral("0234E2C906F6E0B44253BE04C0CBA7823A6DB509")).toByteArray();
 	    QCOMPARE( server1.subjectKeyId(), subjectKeyID );
