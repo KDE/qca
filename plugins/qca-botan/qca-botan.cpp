@@ -436,6 +436,12 @@ static void qcaCipherToBotanCipher(const QString &type, std::string *algoName, s
     }
 }
 
+static std::string qcaCipherToBotanCipher(const QString &qcaCipher) {
+    std::string algoName, algoMode, algoPadding;
+    qcaCipherToBotanCipher(qcaCipher, &algoName, &algoMode, &algoPadding);
+    return algoName+'/'+algoMode+'/'+algoPadding; // NOLINT(performance-inefficient-string-concatenation)
+}
+
 //-----------------------------------------------------------
 class BotanCipherContext : public QCA::CipherContext
 {
@@ -648,11 +654,10 @@ public:
 	    list += QStringLiteral("blowfish-ofb");
 
 	    for (const QString &cipher : qAsConst(list)) {
-		std::string algoName, algoMode, algoPadding;
-		qcaCipherToBotanCipher(cipher, &algoName, &algoMode, &algoPadding);
+		const std::string bothanCipher = qcaCipherToBotanCipher(cipher);
 		try {
-		    std::unique_ptr<Botan::Keyed_Filter> enc(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::ENCRYPTION)); // NOLINT(performance-inefficient-string-concatenation)
-		    std::unique_ptr<Botan::Keyed_Filter> dec(Botan::get_cipher(algoName+'/'+algoMode+'/'+algoPadding, Botan::DECRYPTION)); // NOLINT(performance-inefficient-string-concatenation)
+		    std::unique_ptr<Botan::Keyed_Filter> enc(Botan::get_cipher(bothanCipher, Botan::ENCRYPTION));
+		    std::unique_ptr<Botan::Keyed_Filter> dec(Botan::get_cipher(bothanCipher, Botan::DECRYPTION));
 		    supported += cipher;
 		} catch (Botan::Exception& e) {
 		}

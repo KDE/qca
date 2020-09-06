@@ -64,7 +64,8 @@ void HexUnitTest::testHexString_data()
     QTest::newRow("ABCD") << QStringLiteral("ABCD") << QStringLiteral("41424344");
     QTest::newRow("empty") << QString(QLatin1String("")) << QString(QLatin1String(""));
     QTest::newRow("abcddef") << QStringLiteral("abcddef") << QStringLiteral("61626364646566");
-    QTest::newRow("empty too") << QString::fromLatin1("\0") << QString::fromLatin1("");   // Empty QString. clazy:exclude=qstring-allocations
+    QTest::newRow("empty too") << QString::fromLatin1("\0") // clazy:exclude=qstring-allocations
+                               << QString::fromLatin1(""); // Empty QString. clazy:exclude=qstring-allocations
     QTest::newRow("BEL") << QStringLiteral("\a") << QStringLiteral("07"); // BEL
     QTest::newRow("BS") << QStringLiteral("\b") << QStringLiteral("08"); // BS
     QTest::newRow("HT") << QStringLiteral("\t") << QStringLiteral("09"); // HT

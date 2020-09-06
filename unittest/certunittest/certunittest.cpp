@@ -81,7 +81,8 @@ void CertUnitTest::nullCert()
         else {
 	    QCA::Certificate nullCert;
 	    QVERIFY(nullCert.isNull());
-	    QCA::Certificate anotherNullCert = nullCert; // NOLINT(performance-unnecessary-copy-initialization) This is copied on purpose to check the assignment operator
+	    // This is copied on purpose to check the assignment operator
+	    QCA::Certificate anotherNullCert = nullCert; // NOLINT(performance-unnecessary-copy-initialization)
 	    QVERIFY( anotherNullCert.isNull() );
 	    QCOMPARE( nullCert, anotherNullCert );
 	}
@@ -1114,7 +1115,8 @@ void CertUnitTest::csr()
         else {
 	    QCA::CertificateRequest nullCSR;
 	    QVERIFY( nullCSR.isNull() );
-	    QCA::CertificateRequest anotherNullCSR = nullCSR; // NOLINT(performance-unnecessary-copy-initialization) This is copied on purpose to check the assignment operator
+	    // This is copied on purpose to check the assignment operator
+	    QCA::CertificateRequest anotherNullCSR = nullCSR; // NOLINT(performance-unnecessary-copy-initialization)
 	    QVERIFY( anotherNullCSR.isNull() );
 	    QCOMPARE( nullCSR, anotherNullCSR);
 
