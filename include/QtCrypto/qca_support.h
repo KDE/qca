@@ -36,17 +36,17 @@
 #ifndef QCA_SUPPORT_H
 #define QCA_SUPPORT_H
 
-#include <QByteArray>
-#include <QString>
-#include <QObject>
-#include <QVariant>
-#include <QVariantList>
-#include <QStringList>
-#include <QList>
-#include <QMetaObject>
-#include <QThread>
 #include "qca_export.h"
 #include "qca_tools.h"
+#include <QByteArray>
+#include <QList>
+#include <QMetaObject>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QThread>
+#include <QVariant>
+#include <QVariantList>
 
 namespace QCA {
 
@@ -88,7 +88,7 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
 
    \param obj the QMetaObject for the object
    \param method the name of the method (without the arguments or brackets)
-   \param argTypes the list of argument types of the method 
+   \param argTypes the list of argument types of the method
 
    \return the name of the type that this method will return with the specified
    argument types.
@@ -98,7 +98,9 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
    \relates SyncThread
 */
 
-QCA_EXPORT QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> argTypes);
+QCA_EXPORT QByteArray methodReturnType(const QMetaObject *     obj,
+                                       const QByteArray &      method,
+                                       const QList<QByteArray> argTypes);
 
 /**
    Convenience method to invoke a method by name, using a variant
@@ -141,7 +143,11 @@ ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "boolMethod" ), arg
 
    \relates SyncThread
 */
-QCA_EXPORT bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args, QVariant *ret, Qt::ConnectionType type = Qt::AutoConnection);
+QCA_EXPORT bool invokeMethodWithVariants(QObject *           obj,
+                                         const QByteArray &  method,
+                                         const QVariantList &args,
+                                         QVariant *          ret,
+                                         Qt::ConnectionType  type = Qt::AutoConnection);
 
 /**
    \class SyncThread qca_support.h QtCrypto
@@ -170,35 +176,35 @@ QCA_EXPORT bool invokeMethodWithVariants(QObject *obj, const QByteArray &method,
 \code
 class Counter : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 private:
-	int x;
-	QTimer timer;
+    int x;
+    QTimer timer;
 
 public:
-	Counter() : timer(this)
-	{
-		x = 0;
-		connect(&timer, &QTimer::timeout, this, &Counter::t_timeout);
-	}
+    Counter() : timer(this)
+    {
+        x = 0;
+        connect(&timer, &QTimer::timeout, this, &Counter::t_timeout);
+    }
 
 public slots:
-	void start(int seconds)
-	{
-		timer.setInterval(seconds * 1000);
-		timer.start();
-	}
+    void start(int seconds)
+    {
+        timer.setInterval(seconds * 1000);
+        timer.start();
+    }
 
-	int value() const
-	{
-		return x;
-	}
+    int value() const
+    {
+        return x;
+    }
 
 private Q_SLOTS:
-	void t_timeout()
-	{
-		++x;
-	}
+    void t_timeout()
+    {
+        ++x;
+    }
 };
 \endcode
 
@@ -210,34 +216,34 @@ private Q_SLOTS:
 \code
 class CounterThread : public SyncThread
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	Counter *counter;
+    Counter *counter;
 
-	CounterThread(QObject *parent) : SyncThread(parent)
-	{
-		counter = 0;
-	}
+    CounterThread(QObject *parent) : SyncThread(parent)
+    {
+        counter = 0;
+    }
 
-	~CounterThread()
-	{
-		// SyncThread will stop the thread on destruct, but since our
-		//   atStop() function makes references to CounterThread's
-		//   members, we need to shutdown here, before CounterThread
-		//   destructs.
-		stop();
-	}
+    ~CounterThread()
+    {
+        // SyncThread will stop the thread on destruct, but since our
+        //   atStop() function makes references to CounterThread's
+        //   members, we need to shutdown here, before CounterThread
+        //   destructs.
+        stop();
+    }
 
 protected:
-	virtual void atStart()
-	{
-		counter = new Counter;
-	}
+    virtual void atStart()
+    {
+        counter = new Counter;
+    }
 
-	virtual void atStop()
-	{
-		delete counter;
-	}
+    virtual void atStop()
+    {
+        delete counter;
+    }
 };
 \endcode
 
@@ -271,78 +277,79 @@ delete thread;
 */
 class QCA_EXPORT SyncThread : public QThread
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param parent the parent object for this parent.
-	*/
-	SyncThread(QObject *parent = nullptr);
+       \param parent the parent object for this parent.
+    */
+    SyncThread(QObject *parent = nullptr);
 
-	/**
-	   Calls stop() and then destructs
+    /**
+       Calls stop() and then destructs
 
-	   \note Subclasses should call stop() in their own destructor
-	*/
-	~SyncThread() override;
+       \note Subclasses should call stop() in their own destructor
+    */
+    ~SyncThread() override;
 
-	/**
-	   Starts the thread, begins the event loop the thread, and then
-	   calls atStart() in the thread.  This function will block until
-	   atStart() has returned.
-	*/
-	void start();
+    /**
+       Starts the thread, begins the event loop the thread, and then
+       calls atStart() in the thread.  This function will block until
+       atStart() has returned.
+    */
+    void start();
 
-	/**
-	   Stops the event loop of the thread, calls atStop() in the thread,
-	   and instructs the thread to finish.  This function will block
-	   until the thread has finished.
-	*/
-	void stop();
+    /**
+       Stops the event loop of the thread, calls atStop() in the thread,
+       and instructs the thread to finish.  This function will block
+       until the thread has finished.
+    */
+    void stop();
 
-	/**
-	   Calls a slot of an object in the thread.  This function will block
-	   until the slot has returned.
+    /**
+       Calls a slot of an object in the thread.  This function will block
+       until the slot has returned.
 
-	   It is possible for the call to fail, for example if the method
-	   does not exist.
+       It is possible for the call to fail, for example if the method
+       does not exist.
 
-	   The arguments and return value of the call use QVariant.  If the
-	   method has no return value (returns void), then the returned
-	   QVariant will be null.
+       The arguments and return value of the call use QVariant.  If the
+       method has no return value (returns void), then the returned
+       QVariant will be null.
 
-	   \param obj the object to call the method on
-	   \param method the name of the method (without the arguments or
-	   brackets)
-	   \param args the list of arguments to use in the method call
-	   \param ok if not 0, true is stored here if the call succeeds,
-	   otherwise false is stored here.
-	*/
-	QVariant call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(), bool *ok = nullptr);
+       \param obj the object to call the method on
+       \param method the name of the method (without the arguments or
+       brackets)
+       \param args the list of arguments to use in the method call
+       \param ok if not 0, true is stored here if the call succeeds,
+       otherwise false is stored here.
+    */
+    QVariant
+    call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(), bool *ok = nullptr);
 
 protected:
-	/**
-	   Reimplement this to perform your initialization
-	*/
-	virtual void atStart() = 0;
+    /**
+       Reimplement this to perform your initialization
+    */
+    virtual void atStart() = 0;
 
-	/**
-	   Reimplement this to perform your deinitialization
-	*/
-	virtual void atEnd() = 0;
+    /**
+       Reimplement this to perform your deinitialization
+    */
+    virtual void atEnd() = 0;
 
-	/**
-	   Starts the event loop and calls atStart and atStop as necessary
-	*/
-	void run() override;
+    /**
+       Starts the event loop and calls atStart and atStop as necessary
+    */
+    void run() override;
 
 private:
-	Q_DISABLE_COPY(SyncThread)
+    Q_DISABLE_COPY(SyncThread)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 /**
@@ -352,35 +359,35 @@ private:
 */
 class QCA_EXPORT Synchronizer : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	  Standard constructor
+    /**
+      Standard constructor
 
-	  \param parent the parent object to this object
-	*/
-	Synchronizer(QObject *parent);
-	~Synchronizer() override;
+      \param parent the parent object to this object
+    */
+    Synchronizer(QObject *parent);
+    ~Synchronizer() override;
 
-	/**
-	   Call to pause execution in this thread. This function
-	   will block until conditionMet() is called.
+    /**
+       Call to pause execution in this thread. This function
+       will block until conditionMet() is called.
 
-	   \param msecs the time to wait before proceeding. The default
-	   timeout value (-1) indicates to wait indefinitely.
-	*/
-	bool waitForCondition(int msecs = -1);
+       \param msecs the time to wait before proceeding. The default
+       timeout value (-1) indicates to wait indefinitely.
+    */
+    bool waitForCondition(int msecs = -1);
 
-	/**
-	   Call to continue execution in the paused thread.
-	*/
-	void conditionMet();
+    /**
+       Call to continue execution in the paused thread.
+    */
+    void conditionMet();
 
 private:
-	Q_DISABLE_COPY(Synchronizer)
+    Q_DISABLE_COPY(Synchronizer)
 
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -392,7 +399,7 @@ private:
    the directory changes, the changed() signal is emitted.
 
    \note QFileSystemWatcher has very similar functionality
-   to this class. You should evaluate this class and 
+   to this class. You should evaluate this class and
    QFileSystemWatcher to determine which better suits your
    application needs.
 
@@ -400,45 +407,45 @@ private:
 */
 class QCA_EXPORT DirWatch : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param dir the name of the directory to watch. If not
-	   set in the constructor, you can set it using setDirName()
-	   \param parent the parent object for this object
-	*/
-	explicit DirWatch(const QString &dir = QString(), QObject *parent = nullptr);
-	~DirWatch() override;
+       \param dir the name of the directory to watch. If not
+       set in the constructor, you can set it using setDirName()
+       \param parent the parent object for this object
+    */
+    explicit DirWatch(const QString &dir = QString(), QObject *parent = nullptr);
+    ~DirWatch() override;
 
-	/**
-	   The name of the directory that is being monitored
-	*/
-	QString dirName() const;
+    /**
+       The name of the directory that is being monitored
+    */
+    QString dirName() const;
 
-	/**
-	   Change the directory being monitored
+    /**
+       Change the directory being monitored
 
-	   \param dir the name of the directory to monitor
-	*/
-	void setDirName(const QString &dir);
+       \param dir the name of the directory to monitor
+    */
+    void setDirName(const QString &dir);
 
 Q_SIGNALS:
-	/**
-	   The changed signal is emitted when the directory is
-	   changed (e.g. modified by addition or deletion of a
-	   file within the directory, or the deletion of the
-	   directory)
-	*/
-	void changed();
+    /**
+       The changed signal is emitted when the directory is
+       changed (e.g. modified by addition or deletion of a
+       file within the directory, or the deletion of the
+       directory)
+    */
+    void changed();
 
 private:
-	Q_DISABLE_COPY(DirWatch)
+    Q_DISABLE_COPY(DirWatch)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 /**
@@ -450,7 +457,7 @@ private:
    the file changes, the changed() signal is emitted.
 
    \note QFileSystemWatcher has very similar functionality
-   to this class. You should evaluate this class and 
+   to this class. You should evaluate this class and
    QFileSystemWatcher to determine which better suits your
    application needs.
 
@@ -458,43 +465,43 @@ private:
 */
 class QCA_EXPORT FileWatch : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param file the name of the file to watch. If not
-	   in this object, you can set it using setFileName()
-	   \param parent the parent object for this object
-	*/
-	explicit FileWatch(const QString &file = QString(), QObject *parent = nullptr);
-	~FileWatch() override;
+       \param file the name of the file to watch. If not
+       in this object, you can set it using setFileName()
+       \param parent the parent object for this object
+    */
+    explicit FileWatch(const QString &file = QString(), QObject *parent = nullptr);
+    ~FileWatch() override;
 
-	/**
-	   The name of the file that is being monitored
-	*/
-	QString fileName() const;
+    /**
+       The name of the file that is being monitored
+    */
+    QString fileName() const;
 
-	/**
-	   Change the file being monitored
+    /**
+       Change the file being monitored
 
-	   \param file the name of the file to monitor
-	*/
-	void setFileName(const QString &file);
+       \param file the name of the file to monitor
+    */
+    void setFileName(const QString &file);
 
 Q_SIGNALS:
-	/**
-	   The changed signal is emitted when the file is
-	   changed (e.g. modified, deleted)
-	*/
-	void changed();
+    /**
+       The changed signal is emitted when the file is
+       changed (e.g. modified, deleted)
+    */
+    void changed();
 
 private:
-	Q_DISABLE_COPY(FileWatch)
+    Q_DISABLE_COPY(FileWatch)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 class ConsolePrivate;
@@ -551,125 +558,125 @@ class ConsoleReference;
 */
 class QCA_EXPORT Console : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   The type of console object
-	*/
-	enum Type
-	{
-		Tty,         ///< physical console
-		Stdio        ///< stdin/stdout
-	};
-	/**
-	   The type of I/O to use with the console object.
-	*/
-	enum ChannelMode
-	{
-		Read,        ///< Read only (equivalent to stdin)
-		ReadWrite    ///< Read/write (equivalent to stdin and stdout)
-	};
+    /**
+       The type of console object
+    */
+    enum Type
+    {
+        Tty,  ///< physical console
+        Stdio ///< stdin/stdout
+    };
+    /**
+       The type of I/O to use with the console object.
+    */
+    enum ChannelMode
+    {
+        Read,     ///< Read only (equivalent to stdin)
+        ReadWrite ///< Read/write (equivalent to stdin and stdout)
+    };
 
-	/**
-	   The nature of the console operation
-	*/
-	enum TerminalMode
-	{
-		Default,     ///< use default terminal settings
-		Interactive  ///< char-by-char input, no echo
-	};
+    /**
+       The nature of the console operation
+    */
+    enum TerminalMode
+    {
+        Default,    ///< use default terminal settings
+        Interactive ///< char-by-char input, no echo
+    };
 
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   Note that library code should not create a new Console object
-	   without checking whether there is already a Console object of
-	   the required Type. See the main documentation for Console for the 
-	   rationale for this.
+       Note that library code should not create a new Console object
+       without checking whether there is already a Console object of
+       the required Type. See the main documentation for Console for the
+       rationale for this.
 
-	   \param type the Type of Console object to create
-	   \param cmode the ChannelMode (I/O type) to use
-	   \param tmode the TerminalMode to use
-	   \param parent the parent object for this object
+       \param type the Type of Console object to create
+       \param cmode the ChannelMode (I/O type) to use
+       \param tmode the TerminalMode to use
+       \param parent the parent object for this object
 
-	   \sa ttyInstance() and stdioInstance for static methods that allow
-	   you to test whether there is already a Console object of the 
-	   required Type, and if there is, obtain a reference to that object.
-	*/
-	Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = nullptr);
-	~Console() override;
+       \sa ttyInstance() and stdioInstance for static methods that allow
+       you to test whether there is already a Console object of the
+       required Type, and if there is, obtain a reference to that object.
+    */
+    Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent = nullptr);
+    ~Console() override;
 
-	/**
-	   The Type of this Console object
-	*/
-	Type type() const;
+    /**
+       The Type of this Console object
+    */
+    Type type() const;
 
-	/**
-	   The ChannelMode of this Console object
-	*/
-	ChannelMode channelMode() const;
+    /**
+       The ChannelMode of this Console object
+    */
+    ChannelMode channelMode() const;
 
-	/**
-	   The TerminalMode of this Console object
-	*/
-	TerminalMode terminalMode() const;
+    /**
+       The TerminalMode of this Console object
+    */
+    TerminalMode terminalMode() const;
 
-	/**
-	   Test whether standard input is redirected.
+    /**
+       Test whether standard input is redirected.
 
-	   \sa type() and channelMode()
-	*/
-	static bool isStdinRedirected();
+       \sa type() and channelMode()
+    */
+    static bool isStdinRedirected();
 
-	/**
-	   Test whether standard output is redirected.
+    /**
+       Test whether standard output is redirected.
 
-	   \sa type() and channelMode()
-	*/
-	static bool isStdoutRedirected();
+       \sa type() and channelMode()
+    */
+    static bool isStdoutRedirected();
 
-	/**
-	   The current terminal-type console object
+    /**
+       The current terminal-type console object
 
-	   \return null if there is no current Console
-	   of this type, otherwise the Console to use
-	*/
-	static Console *ttyInstance();
+       \return null if there is no current Console
+       of this type, otherwise the Console to use
+    */
+    static Console *ttyInstance();
 
-	/**
-	   The current stdio-type console object
+    /**
+       The current stdio-type console object
 
-	   \return null if there is no current Console
-	   of this type, otherwise the Console to use
-	*/
-	static Console *stdioInstance();
+       \return null if there is no current Console
+       of this type, otherwise the Console to use
+    */
+    static Console *stdioInstance();
 
-	/**
-	  Release the Console
+    /**
+      Release the Console
 
-	  This allows access to buffers containing any remaining data
-	*/
-	void release();
+      This allows access to buffers containing any remaining data
+    */
+    void release();
 
-	/**
-	   Obtain remaining data from the Console, awaiting
-	   a read operation
-	*/
-	QByteArray bytesLeftToRead();
+    /**
+       Obtain remaining data from the Console, awaiting
+       a read operation
+    */
+    QByteArray bytesLeftToRead();
 
-	/**
-	   Obtain remaining data from the Console, awaiting
-	   a write operation
-	*/
-	QByteArray bytesLeftToWrite();
+    /**
+       Obtain remaining data from the Console, awaiting
+       a write operation
+    */
+    QByteArray bytesLeftToWrite();
 
 private:
-	Q_DISABLE_COPY(Console)
+    Q_DISABLE_COPY(Console)
 
-	friend class ConsolePrivate;
-	ConsolePrivate *d;
+    friend class ConsolePrivate;
+    ConsolePrivate *d;
 
-	friend class ConsoleReference;
+    friend class ConsoleReference;
 };
 
 /**
@@ -683,153 +690,153 @@ private:
 */
 class QCA_EXPORT ConsoleReference : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   The security setting to use for the Console being managed.
-	*/
-	enum SecurityMode
-	{
-		SecurityDisabled,
-		SecurityEnabled
-	};
+    /**
+       The security setting to use for the Console being managed.
+    */
+    enum SecurityMode
+    {
+        SecurityDisabled,
+        SecurityEnabled
+    };
 
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param parent the parent object for this object
-	*/
-	ConsoleReference(QObject *parent = nullptr);
-	~ConsoleReference() override;
+       \param parent the parent object for this object
+    */
+    ConsoleReference(QObject *parent = nullptr);
+    ~ConsoleReference() override;
 
-	/**
-	   Set the Console object to be managed, and start processing.
+    /**
+       Set the Console object to be managed, and start processing.
 
-	   You typically want to use Console::ttyInstance() or
-	   Console::stdioInstance() to obtain the required Console
-	   reference.
+       You typically want to use Console::ttyInstance() or
+       Console::stdioInstance() to obtain the required Console
+       reference.
 
-	   \param console reference to the Console to be managed
-	   \param mode the SecurityMode to use for this Console.
+       \param console reference to the Console to be managed
+       \param mode the SecurityMode to use for this Console.
 
-	   \sa QCA::Console for more information on how to handle the
-	   console aspects of your application or library code.
-	*/
-	bool start(Console *console, SecurityMode mode = SecurityDisabled);
+       \sa QCA::Console for more information on how to handle the
+       console aspects of your application or library code.
+    */
+    bool start(Console *console, SecurityMode mode = SecurityDisabled);
 
-	/**
-	   Stop processing, and release the Console
-	*/
-	void stop();
+    /**
+       Stop processing, and release the Console
+    */
+    void stop();
 
-	/**
-	   The Console object managed by this object
+    /**
+       The Console object managed by this object
 
-	   \sa start() to set the Console to be managed
-	*/
-	Console *console() const;
+       \sa start() to set the Console to be managed
+    */
+    Console *console() const;
 
-	/**
-	   The security mode setting for the Console object
-	   managed by this object.
+    /**
+       The security mode setting for the Console object
+       managed by this object.
 
-	   \sa start() to set the SecurityMode
-	*/
-	SecurityMode securityMode() const;
+       \sa start() to set the SecurityMode
+    */
+    SecurityMode securityMode() const;
 
-	/**
-	   Read data from the Console.
+    /**
+       Read data from the Console.
 
-	   \param bytes the number of bytes to read. The default 
-	   is to read all available bytes
+       \param bytes the number of bytes to read. The default
+       is to read all available bytes
 
-	   \sa readSecure() for a method suitable for reading 
-	   sensitive data.
-	*/
-	QByteArray read(int bytes = -1);
+       \sa readSecure() for a method suitable for reading
+       sensitive data.
+    */
+    QByteArray read(int bytes = -1);
 
-	/**
-	   Write data to the Console.
+    /**
+       Write data to the Console.
 
-	   \param a the array of data to write to the Console
+       \param a the array of data to write to the Console
 
-	   \sa writeSecure() for a method suitable for writing
-	   sensitive data.
-	*/
-	void write(const QByteArray &a);
+       \sa writeSecure() for a method suitable for writing
+       sensitive data.
+    */
+    void write(const QByteArray &a);
 
-	/**
-	   Read secure data from the Console
+    /**
+       Read secure data from the Console
 
-	   \param bytes the number of bytes to read. The default 
-	   is to read all available bytes
+       \param bytes the number of bytes to read. The default
+       is to read all available bytes
 
-	   \sa read() which is suitable for non-sensitive data
-	*/
-	SecureArray readSecure(int bytes = -1);
+       \sa read() which is suitable for non-sensitive data
+    */
+    SecureArray readSecure(int bytes = -1);
 
-	/**
-	   Write secure data to the Console
+    /**
+       Write secure data to the Console
 
-	   \param a the array of data to write to the Console
+       \param a the array of data to write to the Console
 
-	   \sa write() which is suitable for non-sensitive data
-	*/
-	void writeSecure(const SecureArray &a);
+       \sa write() which is suitable for non-sensitive data
+    */
+    void writeSecure(const SecureArray &a);
 
-	/**
-	   Close the write channel
+    /**
+       Close the write channel
 
-	   You only need to call this if writing is enabled
-	   on the Console being managed.
-	*/
-	void closeOutput();
+       You only need to call this if writing is enabled
+       on the Console being managed.
+    */
+    void closeOutput();
 
-	/**
-	   The number of bytes available to read from the 
-	   Console being managed.
-	*/
-	int bytesAvailable() const;
+    /**
+       The number of bytes available to read from the
+       Console being managed.
+    */
+    int bytesAvailable() const;
 
-	/**
-	   The number of bytes remaining to be written
-	   to the Console being managed
-	*/
-	int bytesToWrite() const;
+    /**
+       The number of bytes remaining to be written
+       to the Console being managed
+    */
+    int bytesToWrite() const;
 
 Q_SIGNALS:
-	/**
-	   Emitted when there are bytes available to read from
-	   the Console being managed
-	*/
-	void readyRead();
+    /**
+       Emitted when there are bytes available to read from
+       the Console being managed
+    */
+    void readyRead();
 
-	/**
-	   Emitted when bytes are written to the Console
+    /**
+       Emitted when bytes are written to the Console
 
-	   \param bytes the number of bytes that were written
+       \param bytes the number of bytes that were written
 
-	   \sa bytesAvailable()
-	*/
-	void bytesWritten(int bytes);
+       \sa bytesAvailable()
+    */
+    void bytesWritten(int bytes);
 
-	/**
-	   Emitted when the console input is closed
-	*/
-	void inputClosed();
+    /**
+       Emitted when the console input is closed
+    */
+    void inputClosed();
 
-	/**
-	   Emitted when the console output is closed
-	*/
-	void outputClosed();
+    /**
+       Emitted when the console output is closed
+    */
+    void outputClosed();
 
 private:
-	Q_DISABLE_COPY(ConsoleReference)
+    Q_DISABLE_COPY(ConsoleReference)
 
-	friend class ConsoleReferencePrivate;
-	ConsoleReferencePrivate *d;
+    friend class ConsoleReferencePrivate;
+    ConsoleReferencePrivate *d;
 
-	friend class Console;
+    friend class Console;
 };
 
 /**
@@ -854,78 +861,78 @@ QCA:SecureArray pass = prompt.result();
 */
 class QCA_EXPORT ConsolePrompt : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param parent the parent object for this object
-	*/
-	ConsolePrompt(QObject *parent = nullptr);
-	~ConsolePrompt() override;
+       \param parent the parent object for this object
+    */
+    ConsolePrompt(QObject *parent = nullptr);
+    ~ConsolePrompt() override;
 
-	/**
-	   Allow the user to enter data without it being echo'd to 
-	   the terminal. This is particularly useful for entry
-	   of passwords, passphrases and PINs.
+    /**
+       Allow the user to enter data without it being echo'd to
+       the terminal. This is particularly useful for entry
+       of passwords, passphrases and PINs.
 
-	   \param promptStr the prompt to display to the user
+       \param promptStr the prompt to display to the user
 
-	   \sa result() for how to get the input back.
-	*/
-	void getHidden(const QString &promptStr);
+       \sa result() for how to get the input back.
+    */
+    void getHidden(const QString &promptStr);
 
-	/**
-	   Obtain one character from the user
+    /**
+       Obtain one character from the user
 
-	   \sa resultChar() for how to get the input back.
-	*/
-	void getChar();
+       \sa resultChar() for how to get the input back.
+    */
+    void getChar();
 
-	/**
-	   Block waiting for user input.
+    /**
+       Block waiting for user input.
 
-	   You may wish to use the finished() signal to
-	   avoid blocking.
-	*/
-	void waitForFinished();
+       You may wish to use the finished() signal to
+       avoid blocking.
+    */
+    void waitForFinished();
 
-	/**
-	   Obtain the result of the user input.
+    /**
+       Obtain the result of the user input.
 
-	   This method is usually called to obtain data
-	   from the user that was requested by the getHidden()
-	   call.
-	*/
-	SecureArray result() const;
+       This method is usually called to obtain data
+       from the user that was requested by the getHidden()
+       call.
+    */
+    SecureArray result() const;
 
-	/**
-	   Obtain the result of the user input.
+    /**
+       Obtain the result of the user input.
 
-	   This method is usually called to obtain data
-	   from the user that was requested by the getChar()
-	   call.
-	*/
-	QChar resultChar() const;
+       This method is usually called to obtain data
+       from the user that was requested by the getChar()
+       call.
+    */
+    QChar resultChar() const;
 
 Q_SIGNALS:
-	/**
-	   Emitted when the user input activity has been
-	   completed.
+    /**
+       Emitted when the user input activity has been
+       completed.
 
-	   This corresponds to the provision of a string
-	   for getHidden() or a single character for getChar().
+       This corresponds to the provision of a string
+       for getHidden() or a single character for getChar().
 
-	   \sa waitForFinished
-	*/
-	void finished();
+       \sa waitForFinished
+    */
+    void finished();
 
 private:
-	Q_DISABLE_COPY(ConsolePrompt)
+    Q_DISABLE_COPY(ConsolePrompt)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 class AbstractLogDevice;
@@ -953,97 +960,100 @@ class AbstractLogDevice;
 */
 class QCA_EXPORT Logger : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   The severity of the message
+    /**
+       The severity of the message
 
-	   This information may be used by the log device to determine
-	   what the appropriate action is.
-	*/
-	enum Severity
-	{
-		Quiet = 0,       ///< Quiet: turn of logging
-		Emergency = 1,   ///< Emergency: system is unusable
-		Alert = 2,       ///< Alert: action must be taken immediately
-		Critical = 3,    ///< Critical: critical conditions
-		Error = 4,       ///< Error: error conditions
-		Warning = 5,     ///< Warning: warning conditions
-		Notice = 6,      ///< Notice: normal but significant condition
-		Information = 7, ///< Informational: informational messages
-		Debug = 8        ///< Debug: debug-level messages
-	};
+       This information may be used by the log device to determine
+       what the appropriate action is.
+    */
+    enum Severity
+    {
+        Quiet       = 0, ///< Quiet: turn of logging
+        Emergency   = 1, ///< Emergency: system is unusable
+        Alert       = 2, ///< Alert: action must be taken immediately
+        Critical    = 3, ///< Critical: critical conditions
+        Error       = 4, ///< Error: error conditions
+        Warning     = 5, ///< Warning: warning conditions
+        Notice      = 6, ///< Notice: normal but significant condition
+        Information = 7, ///< Informational: informational messages
+        Debug       = 8  ///< Debug: debug-level messages
+    };
 
-	/**
-	   Get the current logging level
+    /**
+       Get the current logging level
 
-	   \return Current level
-	*/
-	inline Severity level() const { return m_logLevel; }
+       \return Current level
+    */
+    inline Severity level() const
+    {
+        return m_logLevel;
+    }
 
-	/**
-	   Set the current logging level
+    /**
+       Set the current logging level
 
-	   \param level new logging level
+       \param level new logging level
 
-	   Only severities less or equal than the log level one will be logged
-	*/
-	void setLevel(Severity level);
+       Only severities less or equal than the log level one will be logged
+    */
+    void setLevel(Severity level);
 
-	/**
-	   Log a message to all available log devices
+    /**
+       Log a message to all available log devices
 
-	   \param message the text to log
-	*/
-	void logTextMessage(const QString &message, Severity = Information);
+       \param message the text to log
+    */
+    void logTextMessage(const QString &message, Severity = Information);
 
-	/**
-	   Log a binary blob to all available log devices
+    /**
+       Log a binary blob to all available log devices
 
-	   \param blob the information to log
+       \param blob the information to log
 
-	   \note how this is handled is quite logger specific. For
-	   example, it might be logged as a binary, or it might be
-	   encoded in some way
-	*/
-	void logBinaryMessage(const QByteArray &blob, Severity = Information);
+       \note how this is handled is quite logger specific. For
+       example, it might be logged as a binary, or it might be
+       encoded in some way
+    */
+    void logBinaryMessage(const QByteArray &blob, Severity = Information);
 
-	/**
-	   Add an AbstractLogDevice subclass to the existing list of loggers
+    /**
+       Add an AbstractLogDevice subclass to the existing list of loggers
 
-	   \param logger the LogDevice to add
-	*/
-	void registerLogDevice(AbstractLogDevice *logger);
+       \param logger the LogDevice to add
+    */
+    void registerLogDevice(AbstractLogDevice *logger);
 
-	/**
-	   Remove an AbstractLogDevice subclass from the existing list of loggers
+    /**
+       Remove an AbstractLogDevice subclass from the existing list of loggers
 
-	   \param loggerName the name of the LogDevice to remove
+       \param loggerName the name of the LogDevice to remove
 
-	   \note If there are several log devices with the same name, all will be removed.
-	*/
-	void unregisterLogDevice(const QString &loggerName);
+       \note If there are several log devices with the same name, all will be removed.
+    */
+    void unregisterLogDevice(const QString &loggerName);
 
-	/**
-	   Get a list of the names of all registered log devices
-	*/
-	QStringList currentLogDevices() const;
+    /**
+       Get a list of the names of all registered log devices
+    */
+    QStringList currentLogDevices() const;
 
 private:
-	Q_DISABLE_COPY(Logger)
+    Q_DISABLE_COPY(Logger)
 
-	friend class Global;
+    friend class Global;
 
-	/**
-	   Create a new message logger
-	*/
-	Logger();
+    /**
+       Create a new message logger
+    */
+    Logger();
 
-	~Logger() override;
+    ~Logger() override;
 
-	QStringList m_loggerNames;
-	QList<AbstractLogDevice*> m_loggers;
-	Severity m_logLevel;
+    QStringList                m_loggerNames;
+    QList<AbstractLogDevice *> m_loggers;
+    Severity                   m_logLevel;
 };
 
 /**
@@ -1055,55 +1065,55 @@ private:
 */
 class QCA_EXPORT AbstractLogDevice : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   The name of this log device
-	*/
-	QString name() const;
+    /**
+       The name of this log device
+    */
+    QString name() const;
 
-	/**
-	   Log a message
+    /**
+       Log a message
 
-	   The default implementation does nothing - you should
-	   override this method in your subclass to do whatever
-	   logging is required
+       The default implementation does nothing - you should
+       override this method in your subclass to do whatever
+       logging is required
 
-	   \param message the message to log
-	   \param severity the severity level of the message
-	*/
-	virtual void logTextMessage(const QString &message, Logger::Severity severity);
+       \param message the message to log
+       \param severity the severity level of the message
+    */
+    virtual void logTextMessage(const QString &message, Logger::Severity severity);
 
-	/**
-	   Log a binary blob
+    /**
+       Log a binary blob
 
-	   The default implementation does nothing - you should
-	   override this method in your subclass to do whatever
-	   logging is required
+       The default implementation does nothing - you should
+       override this method in your subclass to do whatever
+       logging is required
 
-	   \param blob the message (as a byte array) to log
-	   \param severity the severity level of the message
-	*/
-	virtual void logBinaryMessage(const QByteArray &blob, Logger::Severity severity);
+       \param blob the message (as a byte array) to log
+       \param severity the severity level of the message
+    */
+    virtual void logBinaryMessage(const QByteArray &blob, Logger::Severity severity);
 
 protected:
-	/**
-	   Create a new message logger
+    /**
+       Create a new message logger
 
-	   \param name the name of this log device
-	   \param parent the parent for this logger
-	*/
-	explicit AbstractLogDevice(const QString &name, QObject *parent = nullptr);
+       \param name the name of this log device
+       \param parent the parent for this logger
+    */
+    explicit AbstractLogDevice(const QString &name, QObject *parent = nullptr);
 
-	~AbstractLogDevice() override = 0;
+    ~AbstractLogDevice() override = 0;
 
 private:
-	Q_DISABLE_COPY(AbstractLogDevice)
+    Q_DISABLE_COPY(AbstractLogDevice)
 
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 
-	QString m_name;
+    QString m_name;
 };
 
 }

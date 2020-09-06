@@ -24,34 +24,33 @@
 
 #include <QObject>
 
-namespace QCA
-{
-	class SecureArray;
-	class Event;
+namespace QCA {
+class SecureArray;
+class Event;
 }
 
 class Prompter : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	Prompter(QObject *parent = nullptr);
-	~Prompter();
+    Prompter(QObject *parent = nullptr);
+    ~Prompter();
 
 protected:
-	// called with every password event, to check for a known value.
-	//   reimplement it to provide known/cached passwords.
-	virtual QCA::SecureArray knownPassword(const QCA::Event &event);
+    // called with every password event, to check for a known value.
+    //   reimplement it to provide known/cached passwords.
+    virtual QCA::SecureArray knownPassword(const QCA::Event &event);
 
-	// called when a user-entered password is submitted.  note that this
-	//   does not mean the password was correct.  to know if the password
-	//   was correct, you'll have to match up the event information with
-	//   the operation that triggered it.
-	virtual void userSubmitted(const QCA::SecureArray &password, const QCA::Event &event);
+    // called when a user-entered password is submitted.  note that this
+    //   does not mean the password was correct.  to know if the password
+    //   was correct, you'll have to match up the event information with
+    //   the operation that triggered it.
+    virtual void userSubmitted(const QCA::SecureArray &password, const QCA::Event &event);
 
 private:
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 #endif

@@ -32,40 +32,39 @@
 
 int main(int argc, char **argv)
 {
-	QCoreApplication(argc, argv);
+    QCoreApplication(argc, argv);
 
-	// the Initializer object sets things up, and
-	// also does cleanup when it goes out of scope
-	QCA::Initializer init;
+    // the Initializer object sets things up, and
+    // also does cleanup when it goes out of scope
+    QCA::Initializer init;
 
-	// we use the first argument as the data to encode
-	// if an argument is provided. Use "hello" if no argument
-	QByteArray arg; // empty array
-	arg.append((argc >= 2) ? argv[1] : "hello");
+    // we use the first argument as the data to encode
+    // if an argument is provided. Use "hello" if no argument
+    QByteArray arg; // empty array
+    arg.append((argc >= 2) ? argv[1] : "hello");
 
-	// create our object, which does encoding by default
-	// QCA::Base64 encoder(QCA::Encode); is equivalent
-	QCA::Base64 encoder;
+    // create our object, which does encoding by default
+    // QCA::Base64 encoder(QCA::Encode); is equivalent
+    QCA::Base64 encoder;
 
-	// This does the actual conversion (encoding).
-	// You might prefer to use encoder.encode(); and have
-	// it return a QCA::SecureArray, depending on your needs
-	QString encoded = encoder.arrayToString(arg);
+    // This does the actual conversion (encoding).
+    // You might prefer to use encoder.encode(); and have
+    // it return a QCA::SecureArray, depending on your needs
+    QString encoded = encoder.arrayToString(arg);
 
-	std::cout << arg.data() << " in base64 encoding is ";
-	std::cout << encoded.toLatin1().data() << std::endl;
+    std::cout << arg.data() << " in base64 encoding is ";
+    std::cout << encoded.toLatin1().data() << std::endl;
 
-	// This time, we'll create an object to decode base64. We
-	// could also have reused the existing object, calling
-	// clear(); and setup(QCA::Decode); on it.
-	QCA::Base64 decoder(QCA::Decode);
+    // This time, we'll create an object to decode base64. We
+    // could also have reused the existing object, calling
+    // clear(); and setup(QCA::Decode); on it.
+    QCA::Base64 decoder(QCA::Decode);
 
-	// This time, we convert a QString into a QString
-	QString decoded = decoder.decodeString(encoded);
+    // This time, we convert a QString into a QString
+    QString decoded = decoder.decodeString(encoded);
 
-	std::cout << encoded.toLatin1().data() << " decoded from base64 is ";
-	std::cout << decoded.toLatin1().data() << std::endl;
+    std::cout << encoded.toLatin1().data() << " decoded from base64 is ";
+    std::cout << decoded.toLatin1().data() << std::endl;
 
-	return 0;
+    return 0;
 }
-

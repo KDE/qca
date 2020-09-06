@@ -22,98 +22,92 @@
 
 namespace QCA {
 
-AbstractLogDevice::AbstractLogDevice(const QString &name, QObject *parent) :
-        QObject( parent ), m_name( name )
+AbstractLogDevice::AbstractLogDevice(const QString &name, QObject *parent)
+    : QObject(parent)
+    , m_name(name)
 {
 }
 
 AbstractLogDevice::~AbstractLogDevice()
-{}
+{
+}
 
 QString AbstractLogDevice::name() const
 {
-        return m_name;
+    return m_name;
 }
 
-void AbstractLogDevice::logTextMessage( const QString &message, Logger::Severity severity )
+void AbstractLogDevice::logTextMessage(const QString &message, Logger::Severity severity)
 {
-        Q_UNUSED( message );
-        Q_UNUSED( severity );
+    Q_UNUSED(message);
+    Q_UNUSED(severity);
 }
 
-void AbstractLogDevice::logBinaryMessage( const QByteArray &blob, Logger::Severity severity )
+void AbstractLogDevice::logBinaryMessage(const QByteArray &blob, Logger::Severity severity)
 {
-        Q_UNUSED( blob );
-        Q_UNUSED( severity );
+    Q_UNUSED(blob);
+    Q_UNUSED(severity);
 }
 
 Logger::Logger()
 {
-        // d pointer?
-	m_logLevel = Logger::Notice;
+    // d pointer?
+    m_logLevel = Logger::Notice;
 }
 
 Logger::~Logger()
 {
-        // delete d;
+    // delete d;
 }
 
 QStringList Logger::currentLogDevices() const
 {
-        return m_loggerNames;
+    return m_loggerNames;
 }
 
-void Logger::registerLogDevice(AbstractLogDevice* logger)
+void Logger::registerLogDevice(AbstractLogDevice *logger)
 {
-        m_loggers.append( logger );
-        m_loggerNames.append( logger->name() );
+    m_loggers.append(logger);
+    m_loggerNames.append(logger->name());
 }
 
 void Logger::unregisterLogDevice(const QString &loggerName)
 {
-        for ( int i = 0; i < m_loggers.size(); ++i )
-        {
-                if ( m_loggers[i]->name() == loggerName )
-                {
-                        m_loggers.removeAt( i );
-                        --i; // we backstep, to make sure we check the new entry in this position.
-                }
+    for (int i = 0; i < m_loggers.size(); ++i) {
+        if (m_loggers[i]->name() == loggerName) {
+            m_loggers.removeAt(i);
+            --i; // we backstep, to make sure we check the new entry in this position.
         }
-        for ( int i = 0; i < m_loggerNames.size(); ++i )
-        {
-                if ( m_loggerNames[i] == loggerName )
-                {
-                        m_loggerNames.removeAt( i );
-                        --i; // we backstep, to make sure we check the new entry in this position.
-                }
+    }
+    for (int i = 0; i < m_loggerNames.size(); ++i) {
+        if (m_loggerNames[i] == loggerName) {
+            m_loggerNames.removeAt(i);
+            --i; // we backstep, to make sure we check the new entry in this position.
         }
+    }
 }
 
-void Logger::setLevel (Severity level)
+void Logger::setLevel(Severity level)
 {
-	m_logLevel = level;
+    m_logLevel = level;
 }
 
-void Logger::logTextMessage(const QString &message, Severity severity )
+void Logger::logTextMessage(const QString &message, Severity severity)
 {
-	if (severity <= level ()) {
-		for ( AbstractLogDevice *logger : qAsConst( m_loggers ) )
-		{
-			logger->logTextMessage( message, severity );
-		}
-	}
+    if (severity <= level()) {
+        for (AbstractLogDevice *logger : qAsConst(m_loggers)) {
+            logger->logTextMessage(message, severity);
+        }
+    }
 }
 
-void Logger::logBinaryMessage(const QByteArray &blob, Severity severity )
+void Logger::logBinaryMessage(const QByteArray &blob, Severity severity)
 {
-	if (severity <= level ()) {
-		for ( AbstractLogDevice *logger : qAsConst( m_loggers ) )
-		{
-			logger->logBinaryMessage( blob, severity );
-		}
-	}
+    if (severity <= level()) {
+        for (AbstractLogDevice *logger : qAsConst(m_loggers)) {
+            logger->logBinaryMessage(blob, severity);
+        }
+    }
 }
 
 }
-
-

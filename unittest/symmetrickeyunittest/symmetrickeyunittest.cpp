@@ -40,8 +40,9 @@ private Q_SLOTS:
     void test1();
     void weakKey_data();
     void weakKey();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *m_init;
 };
 
 void SymmetricKeyUnitTest::initTestCase()
@@ -57,33 +58,33 @@ void SymmetricKeyUnitTest::cleanupTestCase()
 void SymmetricKeyUnitTest::test1()
 {
     QCA::SymmetricKey emptyKey;
-    QCOMPARE( emptyKey.size(), 0 );
+    QCOMPARE(emptyKey.size(), 0);
 
     QCA::SymmetricKey randomKey(10);
-    QCOMPARE( randomKey.size(),10 );
+    QCOMPARE(randomKey.size(), 10);
 
-    QByteArray byteArray(10, 'c');
-    QCA::SecureArray secureArray( byteArray );
+    QByteArray        byteArray(10, 'c');
+    QCA::SecureArray  secureArray(byteArray);
     QCA::SymmetricKey keyArray = secureArray;
-    QCOMPARE( secureArray.size(), 10 );
-    QCOMPARE( keyArray.size(), secureArray.size() );
-    QCOMPARE( QCA::arrayToHex ( keyArray.toByteArray() ), QStringLiteral( "63636363636363636363" ) );
-    QCOMPARE( QCA::arrayToHex ( secureArray.toByteArray() ), QStringLiteral( "63636363636363636363" ) );
+    QCOMPARE(secureArray.size(), 10);
+    QCOMPARE(keyArray.size(), secureArray.size());
+    QCOMPARE(QCA::arrayToHex(keyArray.toByteArray()), QStringLiteral("63636363636363636363"));
+    QCOMPARE(QCA::arrayToHex(secureArray.toByteArray()), QStringLiteral("63636363636363636363"));
     keyArray[3] = 0x00; // test keyArray detaches OK
-    QCOMPARE( QCA::arrayToHex ( keyArray.toByteArray() ), QStringLiteral( "63636300636363636363" ) );
-    QCOMPARE( QCA::arrayToHex ( secureArray.toByteArray() ), QStringLiteral( "63636363636363636363" ) );
+    QCOMPARE(QCA::arrayToHex(keyArray.toByteArray()), QStringLiteral("63636300636363636363"));
+    QCOMPARE(QCA::arrayToHex(secureArray.toByteArray()), QStringLiteral("63636363636363636363"));
 
     QCA::SymmetricKey anotherKey;
     anotherKey = keyArray;
-    QCOMPARE( QCA::arrayToHex ( anotherKey.toByteArray() ), QStringLiteral( "63636300636363636363" ) );
-    QCA::SymmetricKey bigKey( 100 );
+    QCOMPARE(QCA::arrayToHex(anotherKey.toByteArray()), QStringLiteral("63636300636363636363"));
+    QCA::SymmetricKey bigKey(100);
     anotherKey = bigKey;
-    QCOMPARE( anotherKey.size(), 100 );
+    QCOMPARE(anotherKey.size(), 100);
     anotherKey = secureArray;
-    QCOMPARE( QCA::arrayToHex ( secureArray.toByteArray() ), QStringLiteral( "63636363636363636363" ) );
-    QCOMPARE( anotherKey.size(), 10 );
+    QCOMPARE(QCA::arrayToHex(secureArray.toByteArray()), QStringLiteral("63636363636363636363"));
+    QCOMPARE(anotherKey.size(), 10);
     anotherKey = emptyKey;
-    QCOMPARE( anotherKey.size(), 0 );
+    QCOMPARE(anotherKey.size(), 0);
 }
 
 // These are from the Botan test suite
@@ -91,7 +92,6 @@ void SymmetricKeyUnitTest::weakKey_data()
 {
     QTest::addColumn<QByteArray>("keyText");
     QTest::addColumn<bool>("isWeak");
-
 
     QTest::newRow("") << QByteArray("ffffffffffffffff") << true;
     QTest::newRow("") << QByteArray("0000000000000000") << true;
@@ -101,20 +101,17 @@ void SymmetricKeyUnitTest::weakKey_data()
     QTest::newRow("") << QByteArray("1007103489988020") << false;
     QTest::newRow("") << QByteArray("10071034c8980120") << false;
     QTest::newRow("") << QByteArray("1046103489988020") << false;
-
 }
-
 
 void SymmetricKeyUnitTest::weakKey()
 {
-    QFETCH( QByteArray, keyText );
-    QFETCH( bool, isWeak );
+    QFETCH(QByteArray, keyText);
+    QFETCH(bool, isWeak);
 
-    QCA::SymmetricKey key( QCA::hexToArray( QString::fromLatin1(keyText) ) );
-    QCOMPARE( key.isWeakDESKey(), isWeak );
+    QCA::SymmetricKey key(QCA::hexToArray(QString::fromLatin1(keyText)));
+    QCOMPARE(key.isWeakDESKey(), isWeak);
 }
 
 QTEST_MAIN(SymmetricKeyUnitTest)
 
 #include "symmetrickeyunittest.moc"
-

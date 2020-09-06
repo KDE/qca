@@ -23,160 +23,138 @@ namespace gpgQCAPlugin {
 
 void LineConverter::setup(LineConverter::Mode m)
 {
-	state = Normal;
-	mode = m;
-	prebytes = 0;
-	list.clear();
+    state    = Normal;
+    mode     = m;
+    prebytes = 0;
+    list.clear();
 }
 
 QByteArray LineConverter::update(const QByteArray &buf)
 {
-	if(mode == Read)
-	{
-		// Convert buf to UNIX line ending style
-		// If buf ends with '\r' set state to Partival
+    if (mode == Read) {
+        // Convert buf to UNIX line ending style
+        // If buf ends with '\r' set state to Partival
 
-		QByteArray out;
+        QByteArray out;
 
-		if(state == Normal)
-		{
-			out = buf;
-		}
-		else
-		{
-			out.resize(buf.size() + 1);
-			out[0] = '\r';
-			memcpy(out.data() + 1, buf.data(), buf.size());
-		}
+        if (state == Normal) {
+            out = buf;
+        } else {
+            out.resize(buf.size() + 1);
+            out[0] = '\r';
+            memcpy(out.data() + 1, buf.data(), buf.size());
+        }
 
-		int n = 0;
-		while(true)
-		{
-			n = out.indexOf('\r', n);
-			// not found
-			if(n == -1)
-			{
-				break;
-			}
-			// found, not last character
-			if(n < (buf.size() - 1))
-			{
-				// found windows line ending "\r\n"
-				if(out[n + 1] == '\n')
-				{
-					// clip out the '\r'
-					memmove(out.data() + n, out.data() + n + 1, out.size() - n - 1);
-					out.resize(out.size() - 1);
-				}
-			}
-			// found, last character
-			else
-			{
-				state = Partial;
-				break;
-			}
-			++n;
-		}
+        int n = 0;
+        while (true) {
+            n = out.indexOf('\r', n);
+            // not found
+            if (n == -1) {
+                break;
+            }
+            // found, not last character
+            if (n < (buf.size() - 1)) {
+                // found windows line ending "\r\n"
+                if (out[n + 1] == '\n') {
+                    // clip out the '\r'
+                    memmove(out.data() + n, out.data() + n + 1, out.size() - n - 1);
+                    out.resize(out.size() - 1);
+                }
+            }
+            // found, last character
+            else {
+                state = Partial;
+                break;
+            }
+            ++n;
+        }
 
-		return out;
-	}
-	else
-	{
-		// On Windows use DOS line ending style.
-		// On UNIX don't do any convertation. Return buf as is.
+        return out;
+    } else {
+        // On Windows use DOS line ending style.
+        // On UNIX don't do any convertation. Return buf as is.
 #ifdef Q_OS_WIN
-		QByteArray out;
-		int prev = 0;
-		int at = 0;
+        QByteArray out;
+        int        prev = 0;
+        int        at   = 0;
 
-		while(1)
-		{
-			int n = buf.indexOf('\n', at);
-			if(n == -1)
-				break;
+        while (1) {
+            int n = buf.indexOf('\n', at);
+            if (n == -1)
+                break;
 
-			int chunksize = n - at;
-			const int oldsize = out.size();
-			out.resize(oldsize + chunksize + 2);
-			memcpy(out.data() + oldsize, buf.data() + at, chunksize);
-			memcpy(out.data() + oldsize + chunksize, "\r\n", 2);
+            int       chunksize = n - at;
+            const int oldsize   = out.size();
+            out.resize(oldsize + chunksize + 2);
+            memcpy(out.data() + oldsize, buf.data() + at, chunksize);
+            memcpy(out.data() + oldsize + chunksize, "\r\n", 2);
 
-			list.append(prebytes + n + 1 - prev);
-			prebytes = 0;
-			prev = n;
+            list.append(prebytes + n + 1 - prev);
+            prebytes = 0;
+            prev     = n;
 
-			at = n + 1;
-		}
-		if(at < buf.size())
-		{
-			const int chunksize = buf.size() - at;
-			const int oldsize = out.size();
-			out.resize(oldsize + chunksize);
-			memcpy(out.data() + oldsize, buf.data() + at, chunksize);
-		}
+            at = n + 1;
+        }
+        if (at < buf.size()) {
+            const int chunksize = buf.size() - at;
+            const int oldsize   = out.size();
+            out.resize(oldsize + chunksize);
+            memcpy(out.data() + oldsize, buf.data() + at, chunksize);
+        }
 
-		prebytes += buf.size() - prev;
-		return out;
+        prebytes += buf.size() - prev;
+        return out;
 #else
-		return buf;
+        return buf;
 #endif
-	}
+    }
 }
 
 QByteArray LineConverter::final()
 {
-	if(mode == Read)
-	{
-		QByteArray out;
-		if(state == Partial)
-		{
-			out.resize(1);
-			out[0] = '\n';
-		}
-		return out;
-	}
-	else
-	{
-		return QByteArray();
-	}
+    if (mode == Read) {
+        QByteArray out;
+        if (state == Partial) {
+            out.resize(1);
+            out[0] = '\n';
+        }
+        return out;
+    } else {
+        return QByteArray();
+    }
 }
 
 QByteArray LineConverter::process(const QByteArray &buf)
 {
-	return update(buf) + final();
+    return update(buf) + final();
 }
 
 int LineConverter::writtenToActual(int bytes)
 {
 #ifdef Q_OS_WIN
-	int n = 0;
-	int counter = bytes;
-	while(counter > 0)
-	{
-		if(!list.isEmpty() && bytes >= list.first())
-		{
-			++n;
-			counter -= list.takeFirst();
-		}
-		else
-		{
-			if(list.isEmpty())
-				prebytes -= counter;
-			else
-				list.first() -= counter;
+    int n       = 0;
+    int counter = bytes;
+    while (counter > 0) {
+        if (!list.isEmpty() && bytes >= list.first()) {
+            ++n;
+            counter -= list.takeFirst();
+        } else {
+            if (list.isEmpty())
+                prebytes -= counter;
+            else
+                list.first() -= counter;
 
-			if(prebytes < 0)
-			{
-				bytes += prebytes;
-				prebytes = 0;
-			}
+            if (prebytes < 0) {
+                bytes += prebytes;
+                prebytes = 0;
+            }
 
-			break;
-		}
-	}
-	return bytes - n;
+            break;
+        }
+    }
+    return bytes - n;
 #else
-	return bytes;
+    return bytes;
 #endif
 }
 

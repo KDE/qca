@@ -37,8 +37,7 @@ private Q_SLOTS:
     void testInsertRemovePlugin();
 
 private:
-    QCA::Initializer* m_init;
-
+    QCA::Initializer *m_init;
 };
 
 #endif

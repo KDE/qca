@@ -33,16 +33,17 @@
 /**
    We need a class on the client side to handle password requests.
 */
-class ClientPassphraseHandler: public QObject
+class ClientPassphraseHandler : public QObject
 {
     Q_OBJECT
 public:
-    ClientPassphraseHandler(QObject *parent = nullptr) : QObject( parent )
+    ClientPassphraseHandler(QObject *parent = nullptr)
+        : QObject(parent)
     {
         // When the PasswordAsker or TokenAsker needs to interact
         // with the user, it raises a signal. We connect that to a
         // local slot to get the required information.
-        connect( &m_handler, &QCA::EventHandler::eventReady, this, &ClientPassphraseHandler::my_eventReady );
+        connect(&m_handler, &QCA::EventHandler::eventReady, this, &ClientPassphraseHandler::my_eventReady);
 
         // Now that we are set up, we can start the EventHandler. Nothing
         // will happen if you don't call this method.
@@ -55,54 +56,54 @@ private Q_SLOTS:
     void my_eventReady(int id, const QCA::Event &event)
     {
         // We can sanity check the event
-        if ( event.isNull() ) {
+        if (event.isNull()) {
             return;
         }
 
         // Events can be associated with a a keystore or a file/bytearray
         // You can tell which by looking at the Source
-        if ( event.source() == QCA::Event::KeyStore ) {
+        if (event.source() == QCA::Event::KeyStore) {
             std::cout << "Event is associated with a key store operation" << std::endl;
-        } else if ( event.source() == QCA::Event::Data ) {
+        } else if (event.source() == QCA::Event::Data) {
             std::cout << "Event is associated with a file or some other data" << std::endl;
             // if the event comes from a file type operation, you can get the
             // name / label using fileName()
-            std::cout << "   Filename: " << qPrintable( event.fileName() ) << std::endl;
+            std::cout << "   Filename: " << qPrintable(event.fileName()) << std::endl;
         } else {
             std::cout << "Unexpected Source for Event" << std::endl;
         }
 
         // There are different kinds of events.
-        if ( event.type() == QCA::Event::Token ) {
+        if (event.type() == QCA::Event::Token) {
             // You would typically ask the user to insert the token here
             std::cout << "Request for token" << std::endl;
             // we just fake it for this demo.
-            m_handler.tokenOkay( id );
+            m_handler.tokenOkay(id);
             // you could use m_handler.reject( id ) to refuse the token request
 
-        } else if ( event.type() == QCA::Event::Password ) {
+        } else if (event.type() == QCA::Event::Password) {
             std::cout << "Request for password, passphrase or PIN" << std::endl;
             // and within the Password type, we have a few different styles.
-            if ( event.passwordStyle() == QCA::Event::StylePassword ) {
+            if (event.passwordStyle() == QCA::Event::StylePassword) {
                 std::cout << "   [Password request]" << std::endl;
-            } else if ( event.passwordStyle() == QCA::Event::StylePassphrase ) {
+            } else if (event.passwordStyle() == QCA::Event::StylePassphrase) {
                 std::cout << "   [Passphrase request]" << std::endl;
-            } else if ( event.passwordStyle() == QCA::Event::StylePIN ){
+            } else if (event.passwordStyle() == QCA::Event::StylePIN) {
                 std::cout << "   [PIN request]" << std::endl;
             } else {
                 std::cout << "   [unexpect request style]" << std::endl;
             }
             // You would typically request the password/PIN/passphrase.
             // again, we just fake it.
-            m_handler.submitPassword( id,  QCA::SecureArray( "hello" ) );
+            m_handler.submitPassword(id, QCA::SecureArray("hello"));
 
         } else {
             std::cout << "Unexpected event type" << std::endl;
         }
     }
+
 private:
     QCA::EventHandler m_handler;
-
 };
 
 void asker_procedure();
@@ -140,7 +141,7 @@ void asker_procedure()
 {
     QCA::PasswordAsker pwAsker;
 
-    pwAsker.ask( QCA::Event::StylePassword, QStringLiteral("foo.tmp"),  nullptr );
+    pwAsker.ask(QCA::Event::StylePassword, QStringLiteral("foo.tmp"), nullptr);
 
     pwAsker.waitForResponse();
 
@@ -150,11 +151,14 @@ void asker_procedure()
 
     QCA::TokenAsker tokenAsker;
 
-    tokenAsker.ask( QCA::KeyStoreInfo( QCA::KeyStore::SmartCard, QStringLiteral("Token Id"), QStringLiteral("Token Name") ), QCA::KeyStoreEntry(), nullptr );
+    tokenAsker.ask(
+        QCA::KeyStoreInfo(QCA::KeyStore::SmartCard, QStringLiteral("Token Id"), QStringLiteral("Token Name")),
+        QCA::KeyStoreEntry(),
+        nullptr);
 
     tokenAsker.waitForResponse();
 
-    if ( tokenAsker.accepted() ) {
+    if (tokenAsker.accepted()) {
         std::cout << "Token was accepted" << std::endl;
     } else {
         std::cout << "Token was not accepted" << std::endl;

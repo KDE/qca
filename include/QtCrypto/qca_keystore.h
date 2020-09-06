@@ -33,8 +33,8 @@
 #ifndef QCA_KEYSTORE_H
 #define QCA_KEYSTORE_H
 
-#include "qca_core.h"
 #include "qca_cert.h"
+#include "qca_core.h"
 
 namespace QCA {
 
@@ -140,192 +140,192 @@ if(entry.ensureAccess())
 class QCA_EXPORT KeyStoreEntry : public Algorithm
 {
 public:
-	/**
-	   The type of entry in the KeyStore
-	*/
-	enum Type
-	{
-		TypeKeyBundle,
-		TypeCertificate,
-		TypeCRL,
-		TypePGPSecretKey,
-		TypePGPPublicKey
-	};
+    /**
+       The type of entry in the KeyStore
+    */
+    enum Type
+    {
+        TypeKeyBundle,
+        TypeCertificate,
+        TypeCRL,
+        TypePGPSecretKey,
+        TypePGPPublicKey
+    };
 
-	/**
-	   Create an empty KeyStoreEntry
-	*/
-	KeyStoreEntry();
+    /**
+       Create an empty KeyStoreEntry
+    */
+    KeyStoreEntry();
 
-	/**
-	   Create a passive KeyStoreEntry based on a serialized
-	   string
+    /**
+       Create a passive KeyStoreEntry based on a serialized
+       string
 
-	   \param serialized the string containing the keystore entry information
+       \param serialized the string containing the keystore entry information
 
-	   \sa fromString
-	*/
-	KeyStoreEntry(const QString &serialized);
+       \sa fromString
+    */
+    KeyStoreEntry(const QString &serialized);
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the source entry
-	*/
-	KeyStoreEntry(const KeyStoreEntry &from);
+       \param from the source entry
+    */
+    KeyStoreEntry(const KeyStoreEntry &from);
 
-	~KeyStoreEntry() override;
+    ~KeyStoreEntry() override;
 
-	/**
-	   Standard assignment operator
+    /**
+       Standard assignment operator
 
-	   \param from the source entry
-	*/
-	KeyStoreEntry & operator=(const KeyStoreEntry &from);
+       \param from the source entry
+    */
+    KeyStoreEntry &operator=(const KeyStoreEntry &from);
 
-	/**
-	   Test if this key is empty (null)
-	*/
-	bool isNull() const;
+    /**
+       Test if this key is empty (null)
+    */
+    bool isNull() const;
 
-	/**
-	   Test if the key is available for use.
+    /**
+       Test if the key is available for use.
 
-	   A key is considered available if the key's private
-	   content is present.
+       A key is considered available if the key's private
+       content is present.
 
-	   \sa ensureAvailable
-	   \sa isAccessible
-	*/
-	bool isAvailable() const;
+       \sa ensureAvailable
+       \sa isAccessible
+    */
+    bool isAvailable() const;
 
-	/**
-	   Test if the key is currently accessible.
+    /**
+       Test if the key is currently accessible.
 
-	   This means that the private key part can be used
-	   at this time. For a smartcard, this means that all
-	   required operations (e.g. login / PIN entry) are
-	   completed.
+       This means that the private key part can be used
+       at this time. For a smartcard, this means that all
+       required operations (e.g. login / PIN entry) are
+       completed.
 
-	   If isAccessible() is true, then the key
-	   is necessarily available (i.e. isAvailable() is
-	   also true).
+       If isAccessible() is true, then the key
+       is necessarily available (i.e. isAvailable() is
+       also true).
 
-	   \sa ensureAccessible
-	   \sa isAvailable
-	*/
-	bool isAccessible() const;
+       \sa ensureAccessible
+       \sa isAvailable
+    */
+    bool isAccessible() const;
 
-	/**
-	   Determine the type of key stored in this object 
-	*/
-	Type type() const;
+    /**
+       Determine the type of key stored in this object
+    */
+    Type type() const;
 
-	/**
-	   The name associated with the key stored in this object
-	*/
-	QString name() const;
+    /**
+       The name associated with the key stored in this object
+    */
+    QString name() const;
 
-	/**
-	   The ID associated with the key stored in this object.
-	*/
-	QString id() const;
+    /**
+       The ID associated with the key stored in this object.
+    */
+    QString id() const;
 
-	/**
-	   The name of the KeyStore for this key object
-	*/
-	QString storeName() const;
+    /**
+       The name of the KeyStore for this key object
+    */
+    QString storeName() const;
 
-	/**
-	   The id of the KeyStore for this key object
+    /**
+       The id of the KeyStore for this key object
 
-	   \sa KeyStore::id()
-	*/
-	QString storeId() const;
+       \sa KeyStore::id()
+    */
+    QString storeId() const;
 
-	/**
-	   Serialize into a string for use as a passive entry
-	*/
-	QString toString() const;
+    /**
+       Serialize into a string for use as a passive entry
+    */
+    QString toString() const;
 
-	/**
-	   Load a passive entry by using a serialized string
-	   as input
+    /**
+       Load a passive entry by using a serialized string
+       as input
 
-	   \param serialized the string containing the keystore entry information
+       \param serialized the string containing the keystore entry information
 
-	   \return the newly created KeyStoreEntry
-	*/
-	static KeyStoreEntry fromString(const QString &serialized);
+       \return the newly created KeyStoreEntry
+    */
+    static KeyStoreEntry fromString(const QString &serialized);
 
-	/**
-	   If a KeyBundle is stored in this object, return that
-	   bundle.
-	*/
-	KeyBundle keyBundle() const;
+    /**
+       If a KeyBundle is stored in this object, return that
+       bundle.
+    */
+    KeyBundle keyBundle() const;
 
-	/**
-	   If a Certificate is stored in this object, return that
-	   certificate.
-	*/
-	Certificate certificate() const;
+    /**
+       If a Certificate is stored in this object, return that
+       certificate.
+    */
+    Certificate certificate() const;
 
-	/**
-	   If a CRL is stored in this object, return the value
-	   of the CRL
-	*/
-	CRL crl() const;
+    /**
+       If a CRL is stored in this object, return the value
+       of the CRL
+    */
+    CRL crl() const;
 
-	/**
-	   If the key stored in this object is a private
-	   PGP key, return the contents of that key.
-	*/
-	PGPKey pgpSecretKey() const;
+    /**
+       If the key stored in this object is a private
+       PGP key, return the contents of that key.
+    */
+    PGPKey pgpSecretKey() const;
 
-	/**
-	   If the key stored in this object is either an 
-	   public or private PGP key, extract the public key
-	   part of that PGP key.
-	*/
-	PGPKey pgpPublicKey() const;
+    /**
+       If the key stored in this object is either an
+       public or private PGP key, extract the public key
+       part of that PGP key.
+    */
+    PGPKey pgpPublicKey() const;
 
-	/**
-	   Returns true if the entry is available, otherwise false.
+    /**
+       Returns true if the entry is available, otherwise false.
 
-	   Available means that any private content for this entry is
-	   present and ready for use.  In the case of a smart card, this
-	   will ensure the card is inserted, and may invoke a token
-	   prompt.
+       Available means that any private content for this entry is
+       present and ready for use.  In the case of a smart card, this
+       will ensure the card is inserted, and may invoke a token
+       prompt.
 
-	   Calling this function on an already available entry may cause
-	   the entry to be refreshed.
+       Calling this function on an already available entry may cause
+       the entry to be refreshed.
 
-	   \sa isAvailable
-	   \sa ensureAccess
+       \sa isAvailable
+       \sa ensureAccess
 
-	   \note This function is blocking.
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler.
-	*/
-	bool ensureAvailable();
+       \note This function is blocking.
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler.
+    */
+    bool ensureAvailable();
 
-	/**
-	   Like ensureAvailable, but will also ensure
-	   that the PIN is provided if needed.
+    /**
+       Like ensureAvailable, but will also ensure
+       that the PIN is provided if needed.
 
-	   \sa isAccessible
-	   \sa ensureAvailable
+       \sa isAccessible
+       \sa ensureAvailable
 
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler.
-	*/
-	bool ensureAccess();
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler.
+    */
+    bool ensureAccess();
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 
-	friend class KeyStoreTracker;
+    friend class KeyStoreTracker;
 };
 
 /**
@@ -335,60 +335,60 @@ private:
 
    Some KeyStore types have the concept of an entry that can be
    available only part of the time (for example, a smart card that
-   can be removed). This class allows you to identify when a 
+   can be removed). This class allows you to identify when a
    KeyStoreEntry becomes available / unavailable.
 
    \note You can also monitor availability of a whole KeyStore,
    using KeyStoreManager::keyStoreAvailable() signal, and
-   the KeyStore::unavailable() signal. 
+   the KeyStore::unavailable() signal.
 
-   \sa KeyStore for more discussion on availability of 
+   \sa KeyStore for more discussion on availability of
    keys and related objects.
 
    \ingroup UserAPI
 */
 class QCA_EXPORT KeyStoreEntryWatcher : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   Standard constructor.
+    /**
+       Standard constructor.
 
-	   This creates an object that monitors the specified KeyStore entry,
-	   emitting available() and unavailable() as the entry becomes available
-	   and unavailable respectively.
+       This creates an object that monitors the specified KeyStore entry,
+       emitting available() and unavailable() as the entry becomes available
+       and unavailable respectively.
 
-	   \param e the KeyStoreEntry to monitor
-	   \param parent the parent object for this object
-	*/
-	explicit KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = nullptr);
+       \param e the KeyStoreEntry to monitor
+       \param parent the parent object for this object
+    */
+    explicit KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent = nullptr);
 
-	~KeyStoreEntryWatcher() override;
+    ~KeyStoreEntryWatcher() override;
 
-	/**
-	   The KeyStoreEntry that is being monitored
-	*/
-	KeyStoreEntry entry() const;
+    /**
+       The KeyStoreEntry that is being monitored
+    */
+    KeyStoreEntry entry() const;
 
 Q_SIGNALS:
-	/**
-	   This signal is emitted when the entry that is being monitored
-	   becomes available.
-	*/
-	void available();
+    /**
+       This signal is emitted when the entry that is being monitored
+       becomes available.
+    */
+    void available();
 
-	/**
-	   This signal is emitted when the entry that is being monitored
-	   becomes unavailble.
-	*/
-	void unavailable();
+    /**
+       This signal is emitted when the entry that is being monitored
+       becomes unavailble.
+    */
+    void unavailable();
 
 private:
-	Q_DISABLE_COPY(KeyStoreEntryWatcher)
+    Q_DISABLE_COPY(KeyStoreEntryWatcher)
 
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 /**
@@ -415,190 +415,190 @@ private:
 */
 class QCA_EXPORT KeyStore : public QObject, public Algorithm
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/**
-	   The type of keystore
-	*/
-	enum Type
-	{
-		System,      ///< objects such as root certificates
-		User,        ///< objects such as Apple Keychain, KDE Wallet
-		Application, ///< for caching accepted self-signed certificates
-		SmartCard,   ///< for smartcards
-		PGPKeyring   ///< for a PGP keyring
-	};
+    /**
+       The type of keystore
+    */
+    enum Type
+    {
+        System,      ///< objects such as root certificates
+        User,        ///< objects such as Apple Keychain, KDE Wallet
+        Application, ///< for caching accepted self-signed certificates
+        SmartCard,   ///< for smartcards
+        PGPKeyring   ///< for a PGP keyring
+    };
 
-	/**
-	   Obtain a specific KeyStore
+    /**
+       Obtain a specific KeyStore
 
-	   \param id the identification for the key store
-	   \param keyStoreManager the parent manager for this keystore
-	*/
-	KeyStore(const QString &id, KeyStoreManager *keyStoreManager);
+       \param id the identification for the key store
+       \param keyStoreManager the parent manager for this keystore
+    */
+    KeyStore(const QString &id, KeyStoreManager *keyStoreManager);
 
-	~KeyStore() override;
+    ~KeyStore() override;
 
-	/**
-	   Check if this KeyStore is valid
+    /**
+       Check if this KeyStore is valid
 
-	   \return true if the KeyStore is valid
-	*/
-	bool isValid() const;
+       \return true if the KeyStore is valid
+    */
+    bool isValid() const;
 
-	/**
-	   The KeyStore Type
-	*/
-	Type type() const;
+    /**
+       The KeyStore Type
+    */
+    Type type() const;
 
-	/**
-	   The name associated with the KeyStore
-	*/
-	QString name() const;
+    /**
+       The name associated with the KeyStore
+    */
+    QString name() const;
 
-	/**
-	   The ID associated with the KeyStore
-	*/
-	QString id() const;
+    /**
+       The ID associated with the KeyStore
+    */
+    QString id() const;
 
-	/**
-	   Test if the KeyStore is writeable or not
+    /**
+       Test if the KeyStore is writeable or not
 
-	   \return true if the KeyStore is read-only
-	*/
-	bool isReadOnly() const;
+       \return true if the KeyStore is read-only
+    */
+    bool isReadOnly() const;
 
-	/**
-	   Turns on asynchronous mode for this KeyStore instance.
+    /**
+       Turns on asynchronous mode for this KeyStore instance.
 
-	   Normally, entryList() and writeEntry() are blocking
-	   calls.  However, if startAsynchronousMode() is called,
-	   then these functions will return immediately.  entryList()
-	   will return with the latest known entries, or an empty
-	   list if none are known yet (in this mode, updated() will
-	   be emitted once the initial entries are known, even if the
-	   store has not actually been altered).  writeEntry() will
-	   always return an empty string, and the entryWritten()
-	   signal indicates the result of a write.
-	*/
-	void startAsynchronousMode();
+       Normally, entryList() and writeEntry() are blocking
+       calls.  However, if startAsynchronousMode() is called,
+       then these functions will return immediately.  entryList()
+       will return with the latest known entries, or an empty
+       list if none are known yet (in this mode, updated() will
+       be emitted once the initial entries are known, even if the
+       store has not actually been altered).  writeEntry() will
+       always return an empty string, and the entryWritten()
+       signal indicates the result of a write.
+    */
+    void startAsynchronousMode();
 
-	/**
-	   A list of the KeyStoreEntry objects in this store
+    /**
+       A list of the KeyStoreEntry objects in this store
 
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler
-	   (this is not a concern if asynchronous mode is enabled).
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler
+       (this is not a concern if asynchronous mode is enabled).
 
-	   \sa startAsynchronousMode
-	*/
-	QList<KeyStoreEntry> entryList() const;
+       \sa startAsynchronousMode
+    */
+    QList<KeyStoreEntry> entryList() const;
 
-	/**
-	   test if the KeyStore holds trusted certificates (and CRLs)
-	*/
-	bool holdsTrustedCertificates() const;
+    /**
+       test if the KeyStore holds trusted certificates (and CRLs)
+    */
+    bool holdsTrustedCertificates() const;
 
-	/**
-	   test if the KeyStore holds identities (eg KeyBundle or PGPSecretKey)
-	*/
-	bool holdsIdentities() const;
+    /**
+       test if the KeyStore holds identities (eg KeyBundle or PGPSecretKey)
+    */
+    bool holdsIdentities() const;
 
-	/**
-	   test if the KeyStore holds PGPPublicKey objects
-	*/
-	bool holdsPGPPublicKeys() const;
+    /**
+       test if the KeyStore holds PGPPublicKey objects
+    */
+    bool holdsPGPPublicKeys() const;
 
-	/**
-	   Add a entry to the KeyStore
+    /**
+       Add a entry to the KeyStore
 
-	   Returns the entryId of the written entry or an empty
-	   string on failure.
+       Returns the entryId of the written entry or an empty
+       string on failure.
 
-	   \param kb the KeyBundle to add to the KeyStore
+       \param kb the KeyBundle to add to the KeyStore
 
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler
-	   (this is not a concern if asynchronous mode is enabled).
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler
+       (this is not a concern if asynchronous mode is enabled).
 
-	   \sa startAsynchronousMode
-	*/
-	QString writeEntry(const KeyBundle &kb);
+       \sa startAsynchronousMode
+    */
+    QString writeEntry(const KeyBundle &kb);
 
-	/**
-	   \overload
+    /**
+       \overload
 
-	   \param cert the Certificate to add to the KeyStore
-	*/
-	QString writeEntry(const Certificate &cert);
+       \param cert the Certificate to add to the KeyStore
+    */
+    QString writeEntry(const Certificate &cert);
 
-	/**
-	   \overload
+    /**
+       \overload
 
-	   \param crl the CRL to add to the KeyStore
-	*/
-	QString writeEntry(const CRL &crl);
+       \param crl the CRL to add to the KeyStore
+    */
+    QString writeEntry(const CRL &crl);
 
-	/**
-	   \overload
+    /**
+       \overload
 
-	   \param key the PGPKey to add to the KeyStore
+       \param key the PGPKey to add to the KeyStore
 
-	   \return a ref to the key in the keyring
-	*/
-	QString writeEntry(const PGPKey &key);
+       \return a ref to the key in the keyring
+    */
+    QString writeEntry(const PGPKey &key);
 
-	/**
-	   Delete the a specified KeyStoreEntry from this KeyStore
+    /**
+       Delete the a specified KeyStoreEntry from this KeyStore
 
-	   \param id the ID for the entry to be deleted
+       \param id the ID for the entry to be deleted
 
-	   \note This synchronous operation may require event handling, and so
-	   it must not be called from the same thread as an EventHandler
-	   (this is not a concern if asynchronous mode is enabled).
+       \note This synchronous operation may require event handling, and so
+       it must not be called from the same thread as an EventHandler
+       (this is not a concern if asynchronous mode is enabled).
 
-	   \sa startAsynchronousMode
-	*/
-	bool removeEntry(const QString &id);
+       \sa startAsynchronousMode
+    */
+    bool removeEntry(const QString &id);
 
 Q_SIGNALS:
-	/**
-	   Emitted when the KeyStore is changed
+    /**
+       Emitted when the KeyStore is changed
 
-	   This occurs if entries are added, removed, or changed in this
-	   KeyStore, including changes in entry availability.
-	*/
-	void updated();
+       This occurs if entries are added, removed, or changed in this
+       KeyStore, including changes in entry availability.
+    */
+    void updated();
 
-	/**
-	   Emitted when the KeyStore becomes unavailable
-	*/
-	void unavailable();
+    /**
+       Emitted when the KeyStore becomes unavailable
+    */
+    void unavailable();
 
-	/**
-	   Emitted when an entry has been written, in asynchronous
-	   mode.  
+    /**
+       Emitted when an entry has been written, in asynchronous
+       mode.
 
-	   \param entryId is the newly written entry id on success,
-	   or an empty string if the write failed.
-	*/
-	void entryWritten(const QString &entryId);
+       \param entryId is the newly written entry id on success,
+       or an empty string if the write failed.
+    */
+    void entryWritten(const QString &entryId);
 
-	/**
-	   Emitted when an entry has been removed, in asynchronous
-	   mode.  
+    /**
+       Emitted when an entry has been removed, in asynchronous
+       mode.
 
-	   \param success indicates if the removal succeeded (true) or not (false).
-	*/
-	void entryRemoved(bool success);
+       \param success indicates if the removal succeeded (true) or not (false).
+    */
+    void entryRemoved(bool success);
 
 private:
-	Q_DISABLE_COPY(KeyStore)
+    Q_DISABLE_COPY(KeyStore)
 
-	friend class KeyStorePrivate;
-	KeyStorePrivate *d;
+    friend class KeyStorePrivate;
+    KeyStorePrivate *d;
 
-	friend class KeyStoreManagerPrivate;
+    friend class KeyStoreManagerPrivate;
 };
 
 /**
@@ -611,9 +611,9 @@ private:
    to describe the key store source of the Event.
 
    Each KeyStoreInfo represents a single KeyStore, and describes
-   the type of store (e.g. smartcard or PGP keyring - see 
+   the type of store (e.g. smartcard or PGP keyring - see
    KeyStore::Type), and a couple of names. The id() of a KeyStore
-   is used to reference it, and is typically of the form 
+   is used to reference it, and is typically of the form
    "qca-mystorename". The name() of a KeyStore is used to describe
    it (i.e. this is the "pretty" name to show the user), and is
    typically of the form "My Store Name".
@@ -623,71 +623,71 @@ private:
 class QCA_EXPORT KeyStoreInfo
 {
 public:
-	/**
-	   Constructor.
+    /**
+       Constructor.
 
-	   \note This form of constructor for KeyStoreInfo
-	   produces an object that does not describe any 
-	   KeyStore, and isNull() will return true.
-	*/
-	KeyStoreInfo();
+       \note This form of constructor for KeyStoreInfo
+       produces an object that does not describe any
+       KeyStore, and isNull() will return true.
+    */
+    KeyStoreInfo();
 
-	/**
-	   Standard constructor.
+    /**
+       Standard constructor.
 
-	   This builds a KeyStoreInfo object that descibes a
-	   KeyStore.
+       This builds a KeyStoreInfo object that descibes a
+       KeyStore.
 
-	   \param type the type of KeyStore
-	   \param id the identification of the KeyStore
-	   \param name the descriptive name of the KeyStore
-	*/
-	KeyStoreInfo(KeyStore::Type type, const QString &id, const QString &name);
+       \param type the type of KeyStore
+       \param id the identification of the KeyStore
+       \param name the descriptive name of the KeyStore
+    */
+    KeyStoreInfo(KeyStore::Type type, const QString &id, const QString &name);
 
-	/**
-	   Copy constructor.
+    /**
+       Copy constructor.
 
-	   \param from the KeyStoreInfo to copy from
-	*/
-	KeyStoreInfo(const KeyStoreInfo &from);
+       \param from the KeyStoreInfo to copy from
+    */
+    KeyStoreInfo(const KeyStoreInfo &from);
 
-	~KeyStoreInfo();
+    ~KeyStoreInfo();
 
-	/**
-	   Assignment operator.
+    /**
+       Assignment operator.
 
-	   \param from the KeyStoreInfo to copy from
-	*/
-	KeyStoreInfo & operator=(const KeyStoreInfo &from);
+       \param from the KeyStoreInfo to copy from
+    */
+    KeyStoreInfo &operator=(const KeyStoreInfo &from);
 
-	/**
-	   Test if this object is valid
+    /**
+       Test if this object is valid
 
-	   \return true if the object is not valid
-	*/
-	bool isNull() const;
+       \return true if the object is not valid
+    */
+    bool isNull() const;
 
-	/**
-	   The Type of KeyStore that this KeyStoreInfo object
-	   describes.
-	*/
-	KeyStore::Type type() const;
+    /**
+       The Type of KeyStore that this KeyStoreInfo object
+       describes.
+    */
+    KeyStore::Type type() const;
 
-	/**
-	   The unique identification of the KeyStore that
-	   this KeyStoreInfo object describes.
-	*/
-	QString id() const;
+    /**
+       The unique identification of the KeyStore that
+       this KeyStoreInfo object describes.
+    */
+    QString id() const;
 
-	/**
-	   The descriptive name of the KeyStore that this
-	   KeyStoreInfo object describes.
-	*/
-	QString name() const;
+    /**
+       The descriptive name of the KeyStore that this
+       KeyStoreInfo object describes.
+    */
+    QString name() const;
 
 private:
-	class Private;
-	QSharedDataPointer<Private> d;
+    class Private;
+    QSharedDataPointer<Private> d;
 };
 
 /**
@@ -708,89 +708,89 @@ private:
 */
 class QCA_EXPORT KeyStoreManager : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-        /**
-	   Create a new KeyStoreManager
+    /**
+   Create a new KeyStoreManager
 
-	   \param parent the parent for this object
-	*/
-	KeyStoreManager(QObject *parent = nullptr);
-	~KeyStoreManager() override;
+   \param parent the parent for this object
+*/
+    KeyStoreManager(QObject *parent = nullptr);
+    ~KeyStoreManager() override;
 
-	/**
-	   Initialize all key store providers
-	*/
-	static void start();
+    /**
+       Initialize all key store providers
+    */
+    static void start();
 
-	/**
-	   Initialize a specific key store provider
+    /**
+       Initialize a specific key store provider
 
-	   \param provider the name of the provider to start
-	*/
-	static void start(const QString &provider);
+       \param provider the name of the provider to start
+    */
+    static void start(const QString &provider);
 
-	/**
-	   Indicates if the manager is busy looking for key stores
-	*/
-	bool isBusy() const;
+    /**
+       Indicates if the manager is busy looking for key stores
+    */
+    bool isBusy() const;
 
-	/**
-	   Blocks until the manager is done looking for key stores
-	*/
-	void waitForBusyFinished();
+    /**
+       Blocks until the manager is done looking for key stores
+    */
+    void waitForBusyFinished();
 
-	/**
-	   A list of all the key stores
-	*/
-	QStringList keyStores() const;
+    /**
+       A list of all the key stores
+    */
+    QStringList keyStores() const;
 
-	/**
-	   The diagnostic result of key store operations, such as
-	   warnings and errors
-	*/
-	static QString diagnosticText();
+    /**
+       The diagnostic result of key store operations, such as
+       warnings and errors
+    */
+    static QString diagnosticText();
 
-	/**
-	   Clears the diagnostic result log
-	*/
-	static void clearDiagnosticText();
+    /**
+       Clears the diagnostic result log
+    */
+    static void clearDiagnosticText();
 
-	/**
-	   If you are not using the eventloop, call this to update
-	   the object state to the present
-	*/
-	void sync();
+    /**
+       If you are not using the eventloop, call this to update
+       the object state to the present
+    */
+    void sync();
 
 Q_SIGNALS:
-	/**
-	   emitted when the manager has started looking for key stores
-	*/
-	void busyStarted();
+    /**
+       emitted when the manager has started looking for key stores
+    */
+    void busyStarted();
 
-	/**
-	   emitted when the manager has finished looking for key stores
-	*/
-	void busyFinished();
+    /**
+       emitted when the manager has finished looking for key stores
+    */
+    void busyFinished();
 
-	/**
-	   emitted when a new key store becomes available
+    /**
+       emitted when a new key store becomes available
 
-	   \param id the name of the key store that has become available
-	*/
-	void keyStoreAvailable(const QString &id);
+       \param id the name of the key store that has become available
+    */
+    void keyStoreAvailable(const QString &id);
 
 private:
-	Q_DISABLE_COPY(KeyStoreManager)
+    Q_DISABLE_COPY(KeyStoreManager)
 
-	friend class KeyStoreManagerPrivate;
-	KeyStoreManagerPrivate *d;
+    friend class KeyStoreManagerPrivate;
+    KeyStoreManagerPrivate *d;
 
-	friend class Global;
-	friend class KeyStorePrivate;
+    friend class Global;
+    friend class KeyStorePrivate;
 
-	static void scan();
-	static void shutdown();
+    static void scan();
+    static void shutdown();
 };
 
 }

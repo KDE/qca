@@ -65,91 +65,91 @@ namespace QCA {
 class QCA_EXPORT Random : public Algorithm
 {
 public:
-	/**
-	   Standard Constructor
+    /**
+       Standard Constructor
 
-	   \param provider the name of the provider library for the random
+       \param provider the name of the provider library for the random
            number generation
-	*/
-	Random(const QString &provider = QString());
+    */
+    Random(const QString &provider = QString());
 
-	/**
-	   Copy constructor
+    /**
+       Copy constructor
 
-	   \param from the %Random object to copy from
+       \param from the %Random object to copy from
         */
-	Random(const Random &from);
+    Random(const Random &from);
 
-	~Random() override;
+    ~Random() override;
 
-        /**
-	   Assignment operator
+    /**
+   Assignment operator
 
-	   \param from the %Random object to copy state from
-        */
-	Random & operator=(const Random &from);
+   \param from the %Random object to copy state from
+    */
+    Random &operator=(const Random &from);
 
-	/**
-	   Provide a random byte.
+    /**
+       Provide a random byte.
 
-	   This method isn't normally required - you should use
-	   the static randomChar() method instead.
+       This method isn't normally required - you should use
+       the static randomChar() method instead.
 
-	   \sa randomChar
-	*/
-	uchar nextByte();
+       \sa randomChar
+    */
+    uchar nextByte();
 
-	/**
-	   Provide a specified number of random bytes.
+    /**
+       Provide a specified number of random bytes.
 
-	   This method isn't normally required - you should use
-	   the static randomArray() method instead.
+       This method isn't normally required - you should use
+       the static randomArray() method instead.
 
-	   \param size the number of bytes to provide
+       \param size the number of bytes to provide
 
-	   \sa randomArray
-	*/
-	SecureArray nextBytes(int size);
+       \sa randomArray
+    */
+    SecureArray nextBytes(int size);
 
-	/**
-	   Provide a random character (byte)
+    /**
+       Provide a random character (byte)
 
-	   This is the normal way of obtaining a single random char
-	   (ie. 8 bit byte), as shown below:
-	   \code
+       This is the normal way of obtaining a single random char
+       (ie. 8 bit byte), as shown below:
+       \code
 myRandomChar = QCA::Random::randomChar();
-	   \endcode
+       \endcode
 
-	   If you need a number of bytes, perhaps randomArray() may be of use.
-	*/
-	static uchar randomChar();
+       If you need a number of bytes, perhaps randomArray() may be of use.
+    */
+    static uchar randomChar();
 
-	/**
-	   Provide a random integer.
+    /**
+       Provide a random integer.
 
-	   This is the normal way of obtaining a single random integer,
-	   as shown below:
-	   \code
+       This is the normal way of obtaining a single random integer,
+       as shown below:
+       \code
 myRandomInt = QCA::Random::randomInt();
-	   \endcode
-	*/
-	static int randomInt();
+       \endcode
+    */
+    static int randomInt();
 
-	/**
-	   Provide a specified number of random bytes.
+    /**
+       Provide a specified number of random bytes.
 
-	   \code
+       \code
 // build a 30 byte secure array.
 SecureArray arry = QCA::Random::randomArray(30);
-	   \endcode
+       \endcode
 
-	   \param size the number of bytes to provide
-	*/
-	static SecureArray randomArray(int size);
+       \param size the number of bytes to provide
+    */
+    static SecureArray randomArray(int size);
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -171,24 +171,24 @@ private:
 
    \code
 if(!QCA::isSupported("sha1"))
-	printf("SHA1 not supported!\n");
+    printf("SHA1 not supported!\n");
 else
 {
-	QByteArray fillerString;
-	fillerString.fill('a', 1000);
+    QByteArray fillerString;
+    fillerString.fill('a', 1000);
 
-	QCA::Hash shaHash("sha1");
-	for (int i=0; i<1000; i++)
-		shaHash.update(fillerString);
-	QByteArray hashResult = shaHash.final();
-	if ( "34aa973cd4c4daa4f61eeb2bdbad27316534016f" == QCA::arrayToHex(hashResult) )
-	{
-		printf("big SHA1 is OK\n");
-	}
-	else
-	{
-		printf("big SHA1 failed\n");
-	}
+    QCA::Hash shaHash("sha1");
+    for (int i=0; i<1000; i++)
+        shaHash.update(fillerString);
+    QByteArray hashResult = shaHash.final();
+    if ( "34aa973cd4c4daa4f61eeb2bdbad27316534016f" == QCA::arrayToHex(hashResult) )
+    {
+        printf("big SHA1 is OK\n");
+    }
+    else
+    {
+        printf("big SHA1 failed\n");
+    }
 }
    \endcode
 
@@ -208,174 +208,174 @@ else
 class QCA_EXPORT Hash : public Algorithm, public BufferedComputation
 {
 public:
-	/**
-	   Constructor
+    /**
+       Constructor
 
-	   \param type label for the type of hash to be
-	   created (for example, "sha1" or "md2")
-	   \param provider the name of the provider plugin
-	   for the subclass (eg "qca-ossl")
-	*/
-	explicit Hash(const QString &type, const QString &provider = QString());
+       \param type label for the type of hash to be
+       created (for example, "sha1" or "md2")
+       \param provider the name of the provider plugin
+       for the subclass (eg "qca-ossl")
+    */
+    explicit Hash(const QString &type, const QString &provider = QString());
 
-	/**
-	   Copy constructor
+    /**
+       Copy constructor
 
-	   \param from the Hash object to copy from
+       \param from the Hash object to copy from
         */
-	Hash(const Hash &from);
+    Hash(const Hash &from);
 
-	~Hash() override;
+    ~Hash() override;
 
-	/**
-	   Assignment operator
+    /**
+       Assignment operator
 
-	   \param from the Hash object to copy state from
+       \param from the Hash object to copy state from
         */
-	Hash & operator=(const Hash &from);
+    Hash &operator=(const Hash &from);
 
-	/**
-	   Returns a list of all of the hash types available
+    /**
+       Returns a list of all of the hash types available
 
-	   \param provider the name of the provider to get a list from, if one
-	   provider is required. If not specified, available hash types from all
-	   providers will be returned.
-	*/
-	static QStringList supportedTypes(const QString &provider = QString());
+       \param provider the name of the provider to get a list from, if one
+       provider is required. If not specified, available hash types from all
+       providers will be returned.
+    */
+    static QStringList supportedTypes(const QString &provider = QString());
 
-	/**
-	   Return the hash type
-	*/
-	QString type() const;
+    /**
+       Return the hash type
+    */
+    QString type() const;
 
-	/**
-	   Reset a hash, dumping all previous parts of the
-	   message.
+    /**
+       Reset a hash, dumping all previous parts of the
+       message.
 
-	   This method clears (or resets) the hash algorithm,
-	   effectively undoing any previous update()
-	   calls. You should use this call if you are re-using
-	   a Hash sub-class object to calculate additional
-	   hashes.
-	*/
-	void clear() override;
+       This method clears (or resets) the hash algorithm,
+       effectively undoing any previous update()
+       calls. You should use this call if you are re-using
+       a Hash sub-class object to calculate additional
+       hashes.
+    */
+    void clear() override;
 
-	/**
-	   Update a hash, adding more of the message contents
-	   to the digest. The whole message needs to be added
-	   using this method before you call final().
+    /**
+       Update a hash, adding more of the message contents
+       to the digest. The whole message needs to be added
+       using this method before you call final().
 
-	   If you find yourself only calling update() once,
-	   you may be better off using a convenience method
-	   such as hash() or hashToString() instead.
+       If you find yourself only calling update() once,
+       you may be better off using a convenience method
+       such as hash() or hashToString() instead.
 
-	   \param a the byte array to add to the hash
-	*/
-	void update(const MemoryRegion &a) override;
+       \param a the byte array to add to the hash
+    */
+    void update(const MemoryRegion &a) override;
 
-	/**
-	   \overload
+    /**
+       \overload
 
-	   \param a the QByteArray to add to the hash
-	*/
-	void update(const QByteArray &a);
+       \param a the QByteArray to add to the hash
+    */
+    void update(const QByteArray &a);
 
-	/**
-	   \overload
+    /**
+       \overload
 
-	   This method is provided to assist with code that
-	   already exists, and is being ported to %QCA. You are
-	   better off passing a SecureArray (as shown above)
-	   if you are writing new code.
+       This method is provided to assist with code that
+       already exists, and is being ported to %QCA. You are
+       better off passing a SecureArray (as shown above)
+       if you are writing new code.
 
-	   \param data pointer to a char array
-	   \param len the length of the array. If not specified
-	   (or specified as a negative number), the length will be
-	   determined with strlen(), which may not be what you want
-	   if the array contains a null (0x00) character.
-	*/
-	void update(const char *data, int len = -1);
+       \param data pointer to a char array
+       \param len the length of the array. If not specified
+       (or specified as a negative number), the length will be
+       determined with strlen(), which may not be what you want
+       if the array contains a null (0x00) character.
+    */
+    void update(const char *data, int len = -1);
 
-	/**
-	   \overload
+    /**
+       \overload
 
-	   This allows you to read from a file or other
-	   I/O device. Note that the device must be already
-	   open for reading
+       This allows you to read from a file or other
+       I/O device. Note that the device must be already
+       open for reading
 
-	   \param file an I/O device
+       \param file an I/O device
 
-	   If you are trying to calculate the hash of
-	   a whole file (and it isn't already open), you
-	   might want to use code like this:
-	   \code
+       If you are trying to calculate the hash of
+       a whole file (and it isn't already open), you
+       might want to use code like this:
+       \code
 QFile f( "file.dat" );
 if ( f.open( QIODevice::ReadOnly ) )
 {
-	QCA::Hash hashObj("sha1");
-	hashObj.update( &f );
-	QByteArray output = hashObj.final().toByteArray();
+    QCA::Hash hashObj("sha1");
+    hashObj.update( &f );
+    QByteArray output = hashObj.final().toByteArray();
 }
-	   \endcode
-	*/
-	void update(QIODevice *file);
+       \endcode
+    */
+    void update(QIODevice *file);
 
-	/**
-	   Finalises input and returns the hash result
+    /**
+       Finalises input and returns the hash result
 
-	   After calling update() with the required data, the
-	   hash results are finalised and produced.
+       After calling update() with the required data, the
+       hash results are finalised and produced.
 
-	   Note that it is not possible to add further data (with
-	   update()) after calling final(), because of the way
-	   the hashing works - null bytes are inserted to pad
-	   the results up to a fixed size. If you want to
-	   reuse the Hash object, you should call clear() and
-	   start to update() again.
-	*/
-	MemoryRegion final() override;
+       Note that it is not possible to add further data (with
+       update()) after calling final(), because of the way
+       the hashing works - null bytes are inserted to pad
+       the results up to a fixed size. If you want to
+       reuse the Hash object, you should call clear() and
+       start to update() again.
+    */
+    MemoryRegion final() override;
 
-	/**
-	   %Hash a byte array, returning it as another
-	   byte array
+    /**
+       %Hash a byte array, returning it as another
+       byte array
 
-	   This is a convenience method that returns the
-	   hash of a SecureArray.
+       This is a convenience method that returns the
+       hash of a SecureArray.
 
-	   \code
+       \code
 SecureArray sampleArray(3);
 sampleArray.fill('a');
 SecureArray outputArray = QCA::Hash("md2")::hash(sampleArray);
-	   \endcode
+       \endcode
 
-	   \param array the QByteArray to hash
+       \param array the QByteArray to hash
 
-	   If you need more flexibility (e.g. you are constructing
-	   a large byte array object just to pass it to hash(), then
-	   consider creating an Hash object, and then calling
-	   update() and final().
-	*/
-	MemoryRegion hash(const MemoryRegion &array);
+       If you need more flexibility (e.g. you are constructing
+       a large byte array object just to pass it to hash(), then
+       consider creating an Hash object, and then calling
+       update() and final().
+    */
+    MemoryRegion hash(const MemoryRegion &array);
 
-	/**
-	   %Hash a byte array, returning it as a printable
-	   string
+    /**
+       %Hash a byte array, returning it as a printable
+       string
 
-	   This is a convenience method that returns the
-	   hash of a SecureArray as a hexadecimal
-	   representation encoded in a QString.
+       This is a convenience method that returns the
+       hash of a SecureArray as a hexadecimal
+       representation encoded in a QString.
 
-	   \param array the QByteArray to hash
+       \param array the QByteArray to hash
 
-	   If you need more flexibility, you can create a Hash
-	   object, call Hash::update() as required, then call 
-	   Hash::final(), before using the static arrayToHex() method.
-	*/
-	QString hashToString(const MemoryRegion &array);
+       If you need more flexibility, you can create a Hash
+       object, call Hash::update() as required, then call
+       Hash::final(), before using the static arrayToHex() method.
+    */
+    QString hashToString(const MemoryRegion &array);
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -500,7 +500,7 @@ private:
    stream, known as the message digest. The Whirlpool algorithm is
    considered secure in that it is considered computationally
    infeasible to find the message that produced the message
-   digest. For more information on Whirlpool, see 
+   digest. For more information on Whirlpool, see
    http://paginas.terra.com.br/informatica/paulobarreto/WhirlpoolPage.html
    or ISO/IEC 10118-3:2004. The label for Whirlpool is
    "whirlpool".
@@ -518,13 +518,13 @@ private:
    padding modes that %QCA supports, including not doing any padding
    at all.
 
-   If you are not going to use padding, then you can pass 
+   If you are not going to use padding, then you can pass
    QCA::Cipher::NoPadding as the pad argument to the Cipher sub-class,
    however it is then your responsibility to pass in appropriate data for
    the mode that you are using.
 
    The most common padding scheme is known as PKCS#7 (also PKCS#1), and
-   it specifies that the pad bytes are all equal to the length of the 
+   it specifies that the pad bytes are all equal to the length of the
    padding ( for example, if you need three pad bytes to complete the block,
    then the padding is 0x03 0x03 0x03 ). PKCS#5 padding is a subset of
    PKCS#7 padding for 8 byte block sizes. For explanation, see
@@ -571,9 +571,9 @@ private:
    padding, so they are always just the cipher name followed
    by the mode (e.g. "blowfish-cfb" or "aes192-ofb"). If
    you are not using padding with CBC mode (i.e. you are
-   ensuring block size operations yourself), just use 
+   ensuring block size operations yourself), just use
    the cipher name followed by "-cbc" (e.g. "blowfish-cbc"
-   or "aes256-cbc"). 
+   or "aes256-cbc").
 
    \ingroup UserAPI
 */
@@ -581,219 +581,227 @@ private:
 class QCA_EXPORT Cipher : public Algorithm, public Filter
 {
 public:
-	/**
-	   Mode settings for cipher algorithms.
+    /**
+       Mode settings for cipher algorithms.
 
-	   \note ECB is almost never what you want, unless you
-	   are trying to implement a %Cipher variation that is not
-	   supported by %QCA.
-	*/
-	enum Mode
-	{
-		CBC, ///< operate in %Cipher Block Chaining mode
-		CFB, ///< operate in %Cipher FeedBack mode
-		ECB, ///< operate in Electronic Code Book mode
-		OFB, ///< operate in Output FeedBack Mode
-		CTR, ///< operate in CounTer Mode
-		GCM, ///< operate in Galois Counter Mode
-		CCM  ///< operate in Counter with CBC-MAC
-	};
+       \note ECB is almost never what you want, unless you
+       are trying to implement a %Cipher variation that is not
+       supported by %QCA.
+    */
+    enum Mode
+    {
+        CBC, ///< operate in %Cipher Block Chaining mode
+        CFB, ///< operate in %Cipher FeedBack mode
+        ECB, ///< operate in Electronic Code Book mode
+        OFB, ///< operate in Output FeedBack Mode
+        CTR, ///< operate in CounTer Mode
+        GCM, ///< operate in Galois Counter Mode
+        CCM  ///< operate in Counter with CBC-MAC
+    };
 
-	/**
-	   Padding variations for cipher algorithms.
+    /**
+       Padding variations for cipher algorithms.
 
-	   See the \ref paddingDescription description for more details on
-	   padding schemes.
-	*/
-	enum Padding
-	{
-		DefaultPadding, ///< Default for cipher-mode
-		NoPadding,      ///< Do not use padding
-		PKCS7           ///< Pad using the scheme in PKCS#7
-	};
+       See the \ref paddingDescription description for more details on
+       padding schemes.
+    */
+    enum Padding
+    {
+        DefaultPadding, ///< Default for cipher-mode
+        NoPadding,      ///< Do not use padding
+        PKCS7           ///< Pad using the scheme in PKCS#7
+    };
 
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param type the name of the cipher specialisation to use (e.g.
-	   "aes128")
-	   \param mode the operating Mode to use (e.g. QCA::Cipher::CBC)
-	   \param pad the type of Padding to use
-	   \param dir the Direction that this Cipher should use (Encode for
-	   encryption, Decode for decryption)
-	   \param key the SymmetricKey array that is the key
-	   \param iv the InitializationVector to use (not used for ECB mode)
-	   \param provider the name of the Provider to use
+       \param type the name of the cipher specialisation to use (e.g.
+       "aes128")
+       \param mode the operating Mode to use (e.g. QCA::Cipher::CBC)
+       \param pad the type of Padding to use
+       \param dir the Direction that this Cipher should use (Encode for
+       encryption, Decode for decryption)
+       \param key the SymmetricKey array that is the key
+       \param iv the InitializationVector to use (not used for ECB mode)
+       \param provider the name of the Provider to use
 
-	   \note Padding only applies to CBC and ECB modes.  CFB and OFB
-	   ciphertext is always the length of the plaintext.
-	*/
-	Cipher(const QString &type, Mode mode, Padding pad = DefaultPadding,
-		Direction dir = Encode, const SymmetricKey &key = SymmetricKey(), 
-		const InitializationVector &iv = InitializationVector(),
-		const QString &provider = QString());
+       \note Padding only applies to CBC and ECB modes.  CFB and OFB
+       ciphertext is always the length of the plaintext.
+    */
+    Cipher(const QString &             type,
+           Mode                        mode,
+           Padding                     pad      = DefaultPadding,
+           Direction                   dir      = Encode,
+           const SymmetricKey &        key      = SymmetricKey(),
+           const InitializationVector &iv       = InitializationVector(),
+           const QString &             provider = QString());
 
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param type the name of the cipher specialisation to use (e.g.
-	   "aes128")
-	   \param mode the operating Mode to use (e.g. QCA::Cipher::CBC)
-	   \param pad the type of Padding to use
-	   \param dir the Direction that this Cipher should use (Encode for
-	   encryption, Decode for decryption)
-	   \param key the SymmetricKey array that is the key
-	   \param iv the InitializationVector to use (not used for ECB mode)
-	   \param tag the AuthTag to use (only for GCM and CCM modes)
-	   \param provider the name of the Provider to use
+       \param type the name of the cipher specialisation to use (e.g.
+       "aes128")
+       \param mode the operating Mode to use (e.g. QCA::Cipher::CBC)
+       \param pad the type of Padding to use
+       \param dir the Direction that this Cipher should use (Encode for
+       encryption, Decode for decryption)
+       \param key the SymmetricKey array that is the key
+       \param iv the InitializationVector to use (not used for ECB mode)
+       \param tag the AuthTag to use (only for GCM and CCM modes)
+       \param provider the name of the Provider to use
 
-	   \note Padding only applies to CBC and ECB modes.  CFB and OFB
-	   ciphertext is always the length of the plaintext.
-	*/
-	Cipher(const QString &type, Mode mode, Padding pad,
-		Direction dir, const SymmetricKey &key,
-		const InitializationVector &iv, const AuthTag &tag,
-		const QString &provider = QString());
+       \note Padding only applies to CBC and ECB modes.  CFB and OFB
+       ciphertext is always the length of the plaintext.
+    */
+    Cipher(const QString &             type,
+           Mode                        mode,
+           Padding                     pad,
+           Direction                   dir,
+           const SymmetricKey &        key,
+           const InitializationVector &iv,
+           const AuthTag &             tag,
+           const QString &             provider = QString());
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the Cipher to copy state from
-	*/
-	Cipher(const Cipher &from);
+       \param from the Cipher to copy state from
+    */
+    Cipher(const Cipher &from);
 
-	~Cipher() override;
+    ~Cipher() override;
 
-	/**
-	   Assignment operator
+    /**
+       Assignment operator
 
-	   \param from the Cipher to copy state from
-	*/
-	Cipher & operator=(const Cipher &from);
+       \param from the Cipher to copy state from
+    */
+    Cipher &operator=(const Cipher &from);
 
-	/**
-	   Returns a list of all of the cipher types available
+    /**
+       Returns a list of all of the cipher types available
 
-	   \param provider the name of the provider to get a list from, if one
-	   provider is required. If not specified, available cipher types from all
-	   providers will be returned.
-	*/
-	static QStringList supportedTypes(const QString &provider = QString());
+       \param provider the name of the provider to get a list from, if one
+       provider is required. If not specified, available cipher types from all
+       providers will be returned.
+    */
+    static QStringList supportedTypes(const QString &provider = QString());
 
-	/**
-	   Return the cipher type
-	*/
-	QString type() const;
+    /**
+       Return the cipher type
+    */
+    QString type() const;
 
-	/**
-	   Return the cipher mode
-	*/
-	Mode mode() const;
+    /**
+       Return the cipher mode
+    */
+    Mode mode() const;
 
-	/**
-	   Return the cipher padding type
-	*/
-	Padding padding() const;
+    /**
+       Return the cipher padding type
+    */
+    Padding padding() const;
 
-	/**
-	   Return the cipher direction
-	*/
-	Direction direction() const;
+    /**
+       Return the cipher direction
+    */
+    Direction direction() const;
 
-	/**
-	   Return acceptable key lengths
-	*/
-	KeyLength keyLength() const;
+    /**
+       Return acceptable key lengths
+    */
+    KeyLength keyLength() const;
 
-	/**
-	   Test if a key length is valid for the cipher algorithm
+    /**
+       Test if a key length is valid for the cipher algorithm
 
-	   \param n the key length in bytes
-	   \return true if the key would be valid for the current algorithm
-	*/
-	bool validKeyLength(int n) const;
+       \param n the key length in bytes
+       \return true if the key would be valid for the current algorithm
+    */
+    bool validKeyLength(int n) const;
 
-	/**
-	   return the block size for the cipher object
-	*/
-	int blockSize() const;
+    /**
+       return the block size for the cipher object
+    */
+    int blockSize() const;
 
-	/**
-	   return the authentication tag for the cipher object
-	*/
-	AuthTag tag() const;
+    /**
+       return the authentication tag for the cipher object
+    */
+    AuthTag tag() const;
 
-	/**
-	   reset the cipher object, to allow re-use
-	*/
-	void clear() override;
+    /**
+       reset the cipher object, to allow re-use
+    */
+    void clear() override;
 
-	/**
-	   pass in a byte array of data, which will be encrypted or decrypted
-	   (according to the Direction that was set in the constructor or in
-	   setup() ) and returned.
+    /**
+       pass in a byte array of data, which will be encrypted or decrypted
+       (according to the Direction that was set in the constructor or in
+       setup() ) and returned.
 
-	   \param a the array of data to encrypt / decrypt
-	*/
-	MemoryRegion update(const MemoryRegion &a) override;
+       \param a the array of data to encrypt / decrypt
+    */
+    MemoryRegion update(const MemoryRegion &a) override;
 
-	/**
-	   complete the block of data, padding as required, and returning
-	   the completed block
-	*/
-	MemoryRegion final() override;
+    /**
+       complete the block of data, padding as required, and returning
+       the completed block
+    */
+    MemoryRegion final() override;
 
-	/**
-	   Test if an update() or final() call succeeded.
+    /**
+       Test if an update() or final() call succeeded.
 
-	   \return true if the previous call succeeded
-	*/
-	bool ok() const override;
+       \return true if the previous call succeeded
+    */
+    bool ok() const override;
 
-	/**
-	   Reset / reconfigure the Cipher
+    /**
+       Reset / reconfigure the Cipher
 
-	   You can use this to re-use an existing Cipher, rather than creating
-	   a new object with a slightly different configuration.
+       You can use this to re-use an existing Cipher, rather than creating
+       a new object with a slightly different configuration.
 
-	   \param dir the Direction that this Cipher should use (Encode for
-	   encryption, Decode for decryption)
-	   \param key the SymmetricKey array that is the key
-	   \param iv the InitializationVector to use (not used for ECB Mode)
+       \param dir the Direction that this Cipher should use (Encode for
+       encryption, Decode for decryption)
+       \param key the SymmetricKey array that is the key
+       \param iv the InitializationVector to use (not used for ECB Mode)
 
-	   \note You should not leave iv empty for any Mode except ECB.
-	*/
-	void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector());
+       \note You should not leave iv empty for any Mode except ECB.
+    */
+    void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv = InitializationVector());
 
-	/**
-	   Reset / reconfigure the Cipher
+    /**
+       Reset / reconfigure the Cipher
 
-	   You can use this to re-use an existing Cipher, rather than creating
-	   a new object with a slightly different configuration.
+       You can use this to re-use an existing Cipher, rather than creating
+       a new object with a slightly different configuration.
 
-	   \param dir the Direction that this Cipher should use (Encode for
-	   encryption, Decode for decryption)
-	   \param key the SymmetricKey array that is the key
-	   \param iv the InitializationVector to use (not used for ECB Mode)
-	   \param tag the AuthTag to use (only for GCM and CCM modes)
+       \param dir the Direction that this Cipher should use (Encode for
+       encryption, Decode for decryption)
+       \param key the SymmetricKey array that is the key
+       \param iv the InitializationVector to use (not used for ECB Mode)
+       \param tag the AuthTag to use (only for GCM and CCM modes)
 
-	   \note You should not leave iv empty for any Mode except ECB.
-	*/
-	void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv, const AuthTag &tag);
+       \note You should not leave iv empty for any Mode except ECB.
+    */
+    void setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv, const AuthTag &tag);
 
-	/**
-	   Construct a Cipher type string
+    /**
+       Construct a Cipher type string
 
-	   \param cipherType the name of the algorithm (eg AES128, DES)
-	   \param modeType the mode to operate the cipher in (eg QCA::CBC,
-	   QCA::CFB)
-	   \param paddingType the padding required (eg QCA::NoPadding,
-	   QCA::PCKS7)
-	*/
-	static QString withAlgorithms(const QString &cipherType, Mode modeType, Padding paddingType);
+       \param cipherType the name of the algorithm (eg AES128, DES)
+       \param modeType the mode to operate the cipher in (eg QCA::CBC,
+       QCA::CFB)
+       \param paddingType the padding required (eg QCA::NoPadding,
+       QCA::PCKS7)
+    */
+    static QString withAlgorithms(const QString &cipherType, Mode modeType, Padding paddingType);
+
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -801,7 +809,7 @@ private:
 
    General class for message authentication code (MAC) algorithms.
 
-   MessageAuthenticationCode is a class for accessing the various 
+   MessageAuthenticationCode is a class for accessing the various
    message authentication code algorithms within %QCA.
    HMAC using SHA1 ("hmac(sha1)") or HMAC using SHA256 ("hmac(sha256)")
    is recommended for new applications.
@@ -811,7 +819,7 @@ private:
    counter in the message that is covered by the MAC, and check that the
    counter is always incremented every time you receive a message and MAC.
 
-   For more information on HMAC, see H. Krawczyk et al. RFC2104 
+   For more information on HMAC, see H. Krawczyk et al. RFC2104
    "HMAC: Keyed-Hashing for Message Authentication"
 
    \ingroup UserAPI
@@ -819,113 +827,113 @@ private:
 class QCA_EXPORT MessageAuthenticationCode : public Algorithm, public BufferedComputation
 {
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param type the name of the MAC (and algorithm, if applicable) to
-	   use
-	   \param key the shared key
-	   \param provider the provider to use, if a particular provider is
-	   required
-	*/
-	MessageAuthenticationCode(const QString &type, const SymmetricKey &key, const QString &provider = QString());
+       \param type the name of the MAC (and algorithm, if applicable) to
+       use
+       \param key the shared key
+       \param provider the provider to use, if a particular provider is
+       required
+    */
+    MessageAuthenticationCode(const QString &type, const SymmetricKey &key, const QString &provider = QString());
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   Copies the state (including key) from one MessageAuthenticationCode
-	   to another
+       Copies the state (including key) from one MessageAuthenticationCode
+       to another
 
-	   \param from the MessageAuthenticationCode to copy state from
-	*/
-	MessageAuthenticationCode(const MessageAuthenticationCode &from);
+       \param from the MessageAuthenticationCode to copy state from
+    */
+    MessageAuthenticationCode(const MessageAuthenticationCode &from);
 
-	~MessageAuthenticationCode() override;
+    ~MessageAuthenticationCode() override;
 
-	/**
-	   Assignment operator.
+    /**
+       Assignment operator.
 
-	   Copies the state (including key) from one MessageAuthenticationCode
-	   to another
+       Copies the state (including key) from one MessageAuthenticationCode
+       to another
 
-	   \param from the MessageAuthenticationCode to assign from.
-	*/
-	MessageAuthenticationCode & operator=(const MessageAuthenticationCode &from);
+       \param from the MessageAuthenticationCode to assign from.
+    */
+    MessageAuthenticationCode &operator=(const MessageAuthenticationCode &from);
 
-	/**
-	   Returns a list of all of the message authentication code types
-	   available
+    /**
+       Returns a list of all of the message authentication code types
+       available
 
-	   \param provider the name of the provider to get a list from, if one
-	   provider is required. If not specified, available message authentication
-	   codes types from all providers will be returned.
-	*/
-	static QStringList supportedTypes(const QString &provider = QString());
+       \param provider the name of the provider to get a list from, if one
+       provider is required. If not specified, available message authentication
+       codes types from all providers will be returned.
+    */
+    static QStringList supportedTypes(const QString &provider = QString());
 
-	/**
-	   Return the MAC type
-	*/
-	QString type() const;
+    /**
+       Return the MAC type
+    */
+    QString type() const;
 
-	/**
-	   Return acceptable key lengths
-	*/
-	KeyLength keyLength() const;
+    /**
+       Return acceptable key lengths
+    */
+    KeyLength keyLength() const;
 
-	/**
-	   Test if a key length is valid for the MAC algorithm
+    /**
+       Test if a key length is valid for the MAC algorithm
 
-	   \param n the key length in bytes
-	   \return true if the key would be valid for the current algorithm
-	*/
-	bool validKeyLength(int n) const;
+       \param n the key length in bytes
+       \return true if the key would be valid for the current algorithm
+    */
+    bool validKeyLength(int n) const;
 
-	/**
-	   Reset a MessageAuthenticationCode, dumping all
-	   previous parts of the message.
+    /**
+       Reset a MessageAuthenticationCode, dumping all
+       previous parts of the message.
 
-	   This method clears (or resets) the algorithm,
-	   effectively undoing any previous update()
-	   calls. You should use this call if you are re-using
-	   a %MessageAuthenticationCode sub-class object
-	   to calculate additional MACs. Note that if the key
-	   doesn't need to be changed, you don't need to call
-	   setup() again, since the key can just be reused.
-	*/
-	void clear() override;
+       This method clears (or resets) the algorithm,
+       effectively undoing any previous update()
+       calls. You should use this call if you are re-using
+       a %MessageAuthenticationCode sub-class object
+       to calculate additional MACs. Note that if the key
+       doesn't need to be changed, you don't need to call
+       setup() again, since the key can just be reused.
+    */
+    void clear() override;
 
-	/**
-	   Update the MAC, adding more of the message contents
-	   to the digest. The whole message needs to be added
-	   using this method before you call final().
+    /**
+       Update the MAC, adding more of the message contents
+       to the digest. The whole message needs to be added
+       using this method before you call final().
 
-	   \param array the message contents
-	*/
-	void update(const MemoryRegion &array) override;
+       \param array the message contents
+    */
+    void update(const MemoryRegion &array) override;
 
-	/**
-	   Finalises input and returns the MAC result
+    /**
+       Finalises input and returns the MAC result
 
-	   After calling update() with the required data, the
-	   hash results are finalised and produced.
+       After calling update() with the required data, the
+       hash results are finalised and produced.
 
-	   Note that it is not possible to add further data (with
-	   update()) after calling final(). If you want to
-	   reuse the %MessageAuthenticationCode object, you
-	   should call clear() and start to update() again.
-	*/
-	MemoryRegion final() override;
+       Note that it is not possible to add further data (with
+       update()) after calling final(). If you want to
+       reuse the %MessageAuthenticationCode object, you
+       should call clear() and start to update() again.
+    */
+    MemoryRegion final() override;
 
-	/**
-	   Initialise the MAC algorithm
+    /**
+       Initialise the MAC algorithm
 
-	   \param key the key to use for the algorithm
-	*/
-	void setup(const SymmetricKey &key);
+       \param key the key to use for the algorithm
+    */
+    void setup(const SymmetricKey &key);
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -933,7 +941,7 @@ private:
 
    General superclass for key derivation algorithms.
 
-   %KeyDerivationFunction is a superclass for the various 
+   %KeyDerivationFunction is a superclass for the various
    key derivation function algorithms within %QCA. You should
    not need to use it directly unless you are
    adding another key derivation capability to %QCA - you should be
@@ -945,84 +953,87 @@ private:
 class QCA_EXPORT KeyDerivationFunction : public Algorithm
 {
 public:
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the KeyDerivationFunction to copy from
-	*/
-	KeyDerivationFunction(const KeyDerivationFunction &from);
+       \param from the KeyDerivationFunction to copy from
+    */
+    KeyDerivationFunction(const KeyDerivationFunction &from);
 
-	~KeyDerivationFunction() override;
+    ~KeyDerivationFunction() override;
 
-	/**
-	   Assignment operator
+    /**
+       Assignment operator
 
-	   Copies the state (including key) from one KeyDerivationFunction
-	   to another
+       Copies the state (including key) from one KeyDerivationFunction
+       to another
 
-	   \param from the KeyDerivationFunction to assign from
-	*/
-	KeyDerivationFunction & operator=(const KeyDerivationFunction &from);
+       \param from the KeyDerivationFunction to assign from
+    */
+    KeyDerivationFunction &operator=(const KeyDerivationFunction &from);
 
-	/**
-	   Generate the key from a specified secret and salt value
+    /**
+       Generate the key from a specified secret and salt value
 
-	   \note key length is ignored for some functions
+       \note key length is ignored for some functions
 
-	   \param secret the secret (password or passphrase)
-	   \param salt the salt to use
-	   \param keyLength the length of key to return
-	   \param iterationCount the number of iterations to perform
+       \param secret the secret (password or passphrase)
+       \param salt the salt to use
+       \param keyLength the length of key to return
+       \param iterationCount the number of iterations to perform
 
-	   \return the derived key
-	*/
-	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength, unsigned int iterationCount);
+       \return the derived key
+    */
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         unsigned int                iterationCount);
 
-	/**
-	   Generate the key from a specified secret and salt value
+    /**
+       Generate the key from a specified secret and salt value
 
-	   \note key length is ignored for some functions
+       \note key length is ignored for some functions
 
-	   \param secret the secret (password or passphrase)
-	   \param salt the salt to use
-	   \param keyLength the length of key to return
-	   \param msecInterval the maximum time to compute the key, in milliseconds
-	   \param iterationCount a pointer to store the number of iteration done for the specified time
+       \param secret the secret (password or passphrase)
+       \param salt the salt to use
+       \param keyLength the length of key to return
+       \param msecInterval the maximum time to compute the key, in milliseconds
+       \param iterationCount a pointer to store the number of iteration done for the specified time
 
-	   \return the derived key
-	*/
-	SymmetricKey makeKey(const SecureArray &secret,
-						 const InitializationVector &salt,
-						 unsigned int keyLength,
-						 int msecInterval,
-						 unsigned int *iterationCount);
+       \return the derived key
+    */
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         int                         msecInterval,
+                         unsigned int *              iterationCount);
 
-	/**
-	   Construct the name of the algorithm
+    /**
+       Construct the name of the algorithm
 
-	   You can use this to build a standard name string.
-	   You probably only need this method if you are 
-	   creating a new subclass.
+       You can use this to build a standard name string.
+       You probably only need this method if you are
+       creating a new subclass.
 
-	   \param kdfType the type of key derivation function
-	   \param algType the name of the algorithm to use with the key derivation function
+       \param kdfType the type of key derivation function
+       \param algType the name of the algorithm to use with the key derivation function
 
-	   \return the name of the KDF/algorithm pair
-	*/
-	static QString withAlgorithm(const QString &kdfType, const QString &algType);
+       \return the name of the KDF/algorithm pair
+    */
+    static QString withAlgorithm(const QString &kdfType, const QString &algType);
 
 protected:
-	/**
-	   Special constructor for subclass initialisation
+    /**
+       Special constructor for subclass initialisation
 
-	   \param type the algorithm to create
-	   \param provider the name of the provider to create the key derivation function in.
-	*/
-	KeyDerivationFunction(const QString &type, const QString &provider);
+       \param type the algorithm to create
+       \param provider the name of the provider to create the key derivation function in.
+    */
+    KeyDerivationFunction(const QString &type, const QString &provider);
 
 private:
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 /**
@@ -1038,14 +1049,16 @@ private:
 class QCA_EXPORT PBKDF1 : public KeyDerivationFunction
 {
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param algorithm the name of the hashing algorithm to use
-	   \param provider the name of the provider to use, if available
-	*/
-	explicit PBKDF1(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
-		: KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf1"), algorithm), provider) {}
+       \param algorithm the name of the hashing algorithm to use
+       \param provider the name of the provider to use, if available
+    */
+    explicit PBKDF1(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
+        : KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf1"), algorithm), provider)
+    {
+    }
 };
 
 /**
@@ -1061,14 +1074,16 @@ public:
 class QCA_EXPORT PBKDF2 : public KeyDerivationFunction
 {
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param algorithm the name of the hashing algorithm to use
-	   \param provider the name of the provider to use, if available
-	*/
-	explicit PBKDF2(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
-		: KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf2"), algorithm), provider) {}
+       \param algorithm the name of the hashing algorithm to use
+       \param provider the name of the provider to use, if available
+    */
+    explicit PBKDF2(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
+        : KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf2"), algorithm), provider)
+    {
+    }
 };
 
 /**
@@ -1085,47 +1100,49 @@ public:
 class QCA_EXPORT HKDF : public Algorithm
 {
 public:
-	/**
-	   Standard constructor
+    /**
+       Standard constructor
 
-	   \param algorithm the name of the hashing algorithm to use
-	   \param provider the name of the provider to use, if available
-	*/
-	explicit HKDF(const QString &algorithm = QStringLiteral("sha256"), const QString &provider = QString());
+       \param algorithm the name of the hashing algorithm to use
+       \param provider the name of the provider to use, if available
+    */
+    explicit HKDF(const QString &algorithm = QStringLiteral("sha256"), const QString &provider = QString());
 
-	/**
-	   Standard copy constructor
+    /**
+       Standard copy constructor
 
-	   \param from the KeyDerivationFunction to copy from
-	*/
-	HKDF(const HKDF &from);
+       \param from the KeyDerivationFunction to copy from
+    */
+    HKDF(const HKDF &from);
 
-	~HKDF() override;
+    ~HKDF() override;
 
-	/**
-	   Assignment operator
+    /**
+       Assignment operator
 
-	   Copies the state (including key) from one HKDF
-	   to another
+       Copies the state (including key) from one HKDF
+       to another
 
-	   \param from the HKDF to assign from
-	*/
-	HKDF & operator=(const HKDF &from);
+       \param from the HKDF to assign from
+    */
+    HKDF &operator=(const HKDF &from);
 
-	/**
-	   Generate the key from a specified secret, salt value, and an additional info
+    /**
+       Generate the key from a specified secret, salt value, and an additional info
 
-	   \note key length is ignored for some functions
+       \note key length is ignored for some functions
 
-	   \param secret the secret (password or passphrase)
-	   \param salt the salt to use
-	   \param info the info to use
-	   \param keyLength the length of key to return
+       \param secret the secret (password or passphrase)
+       \param salt the salt to use
+       \param info the info to use
+       \param keyLength the length of key to return
 
-	   \return the derived key
-	*/
-	SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
-						 const InitializationVector &info, unsigned int keyLength);
+       \return the derived key
+    */
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         const InitializationVector &info,
+                         unsigned int                keyLength);
 };
 
 }

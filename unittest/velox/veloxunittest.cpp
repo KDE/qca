@@ -24,8 +24,8 @@
  */
 
 #include <QTcpSocket>
-#include <QtTest/QtTest>
 #include <QtCrypto>
+#include <QtTest/QtTest>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"
@@ -37,15 +37,15 @@ class TlsTest : public QObject
 public:
     TlsTest()
     {
-        sock = new QTcpSocket( this );
+        sock = new QTcpSocket(this);
         connect(sock, &QTcpSocket::connected, this, &TlsTest::sock_connected);
         connect(sock, &QTcpSocket::readyRead, this, &TlsTest::sock_readyRead);
 
-        ssl = new QCA::TLS( this );
+        ssl = new QCA::TLS(this);
         connect(ssl, &QCA::TLS::handshaken, this, &TlsTest::ssl_handshaken);
         connect(ssl, &QCA::TLS::readyReadOutgoing, this, &TlsTest::ssl_readyReadOutgoing);
 
-        sync = new QCA::Synchronizer( this );
+        sync = new QCA::Synchronizer(this);
     }
 
     ~TlsTest() override
@@ -60,9 +60,9 @@ public:
         sock->connectToHost(host, port);
     }
 
-    void waitForHandshake( int timeout = 20000 )
+    void waitForHandshake(int timeout = 20000)
     {
-        sync->waitForCondition( timeout );
+        sync->waitForCondition(timeout);
     }
 
     bool isHandshaken()
@@ -74,10 +74,10 @@ private Q_SLOTS:
     void sock_connected()
     {
         QCA::CertificateCollection rootCerts;
-        QCA::ConvertResult resultRootCert;
-        QCA::Certificate rootCert = QCA::Certificate::fromPEMFile( QStringLiteral("root.crt"), &resultRootCert);
-        QCOMPARE( resultRootCert, QCA::ConvertGood );
-        rootCerts.addCertificate( rootCert );
+        QCA::ConvertResult         resultRootCert;
+        QCA::Certificate rootCert = QCA::Certificate::fromPEMFile(QStringLiteral("root.crt"), &resultRootCert);
+        QCOMPARE(resultRootCert, QCA::ConvertGood);
+        rootCerts.addCertificate(rootCert);
 
         ssl->setTrustedCertificates(rootCerts);
 
@@ -93,7 +93,7 @@ private Q_SLOTS:
     {
         QCA::TLS::IdentityResult r = ssl->peerIdentityResult();
 
-        QCOMPARE( r,  QCA::TLS::Valid );
+        QCOMPARE(r, QCA::TLS::Valid);
 
         sync->conditionMet();
     }
@@ -104,13 +104,12 @@ private Q_SLOTS:
     }
 
 private:
-    QString host;
-    QTcpSocket *sock;
-    QCA::TLS *ssl;
-    QCA::Certificate cert;
+    QString            host;
+    QTcpSocket *       sock;
+    QCA::TLS *         ssl;
+    QCA::Certificate   cert;
     QCA::Synchronizer *sync;
 };
-
 
 class VeloxUnitTest : public QObject
 {
@@ -125,8 +124,9 @@ private Q_SLOTS:
     void sniDave();
     void sniMallory();
     void sniIvan();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *         m_init;
     QCA::CertificateCollection rootCerts;
 };
 
@@ -142,74 +142,73 @@ void VeloxUnitTest::cleanupTestCase()
 
 void VeloxUnitTest::sniAlice()
 {
-    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
-	QWARN("TLS not supported for qca-ossl");
+    if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
+        QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( QStringLiteral("alice.sni.velox.ch"), 443 );
+        s->start(QStringLiteral("alice.sni.velox.ch"), 443);
         s->waitForHandshake();
-        QVERIFY( s->isHandshaken() );
+        QVERIFY(s->isHandshaken());
     }
 }
 
 void VeloxUnitTest::sniBob()
 {
-    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
-	QWARN("TLS not supported for qca-ossl");
+    if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
+        QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( QStringLiteral("bob.sni.velox.ch"), 443 );
+        s->start(QStringLiteral("bob.sni.velox.ch"), 443);
         s->waitForHandshake();
-        QVERIFY( s->isHandshaken() );
+        QVERIFY(s->isHandshaken());
     }
 }
 
 void VeloxUnitTest::sniCarol()
 {
-    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
-	QWARN("TLS not supported for qca-ossl");
+    if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
+        QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( QStringLiteral("carol.sni.velox.ch"), 443 );
+        s->start(QStringLiteral("carol.sni.velox.ch"), 443);
         s->waitForHandshake();
-        QVERIFY( s->isHandshaken() );
+        QVERIFY(s->isHandshaken());
     }
 }
 
 void VeloxUnitTest::sniDave()
 {
-    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
-	QWARN("TLS not supported for qca-ossl");
+    if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
+        QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( QStringLiteral("dave.sni.velox.ch"), 443 );
+        s->start(QStringLiteral("dave.sni.velox.ch"), 443);
         s->waitForHandshake();
-        QVERIFY( s->isHandshaken() );
+        QVERIFY(s->isHandshaken());
     }
 }
 
 void VeloxUnitTest::sniMallory()
 {
-    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
-	QWARN("TLS not supported for qca-ossl");
+    if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
+        QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( QStringLiteral("mallory.sni.velox.ch"), 443 );
+        s->start(QStringLiteral("mallory.sni.velox.ch"), 443);
         s->waitForHandshake();
-        QVERIFY( s->isHandshaken() );
+        QVERIFY(s->isHandshaken());
     }
 }
 
-
 void VeloxUnitTest::sniIvan()
 {
-    if(!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
-	QWARN("TLS not supported for qca-ossl");
+    if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
+        QWARN("TLS not supported for qca-ossl");
     else {
         TlsTest *s = new TlsTest;
-        s->start( QStringLiteral("ivan.sni.velox.ch"), 443 );
+        s->start(QStringLiteral("ivan.sni.velox.ch"), 443);
         s->waitForHandshake();
-        QVERIFY( s->isHandshaken() );
+        QVERIFY(s->isHandshaken());
     }
 }
 

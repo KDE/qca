@@ -34,14 +34,15 @@
 
 class KeyLengthUnitTest : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void doTest();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *m_init;
 };
 
 void KeyLengthUnitTest::initTestCase()
@@ -57,21 +58,20 @@ void KeyLengthUnitTest::cleanupTestCase()
 
 void KeyLengthUnitTest::doTest()
 {
-    QCA::KeyLength keylen1( 0, 0, 0 );
-    QCOMPARE( keylen1.minimum(), 0 );
-    QCOMPARE( keylen1.maximum(), 0 );
-    QCOMPARE( keylen1.multiple(), 0 );
+    QCA::KeyLength keylen1(0, 0, 0);
+    QCOMPARE(keylen1.minimum(), 0);
+    QCOMPARE(keylen1.maximum(), 0);
+    QCOMPARE(keylen1.multiple(), 0);
 
-    QCA::KeyLength keylen2( 3, 40, 1 );
-    QCOMPARE( keylen2.minimum(), 3 );
-    QCOMPARE( keylen2.maximum(), 40 );
-    QCOMPARE( keylen2.multiple(), 1 );
+    QCA::KeyLength keylen2(3, 40, 1);
+    QCOMPARE(keylen2.minimum(), 3);
+    QCOMPARE(keylen2.maximum(), 40);
+    QCOMPARE(keylen2.multiple(), 1);
 
-    QCA::KeyLength keylen3( 1, INT_MAX, 1 );
-    QCOMPARE( keylen3.minimum(), 1 );
-    QCOMPARE( keylen3.maximum(), INT_MAX );
-    QCOMPARE( keylen3.multiple(), 1 );
-
+    QCA::KeyLength keylen3(1, INT_MAX, 1);
+    QCOMPARE(keylen3.minimum(), 1);
+    QCOMPARE(keylen3.maximum(), INT_MAX);
+    QCOMPARE(keylen3.multiple(), 1);
 }
 
 QTEST_MAIN(KeyLengthUnitTest)

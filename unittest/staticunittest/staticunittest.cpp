@@ -40,8 +40,9 @@ private Q_SLOTS:
     void hexConversions();
     void capabilities();
     void secureMemory();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *m_init;
 };
 
 void StaticUnitTest::initTestCase()
@@ -58,32 +59,31 @@ void StaticUnitTest::hexConversions()
 {
     QByteArray test(10, 'a');
 
-    QCOMPARE( QCA::arrayToHex(test), QStringLiteral("61616161616161616161") );
+    QCOMPARE(QCA::arrayToHex(test), QStringLiteral("61616161616161616161"));
 
     test.fill('b');
     test[7] = 0x00;
 
-    QCOMPARE( test == QCA::hexToArray(QStringLiteral("62626262626262006262")), true );
+    QCOMPARE(test == QCA::hexToArray(QStringLiteral("62626262626262006262")), true);
 
     QCA::SecureArray testArray(10);
-    //testArray.fill( 'a' );
+    // testArray.fill( 'a' );
     for (int i = 0; i < testArray.size(); i++) {
-	testArray[ i ] = 0x61;
+        testArray[i] = 0x61;
     }
-    QCOMPARE( QCA::arrayToHex( testArray.toByteArray() ), QStringLiteral( "61616161616161616161" ) );
-    //testArray.fill( 'b' );
+    QCOMPARE(QCA::arrayToHex(testArray.toByteArray()), QStringLiteral("61616161616161616161"));
+    // testArray.fill( 'b' );
     for (int i = 0; i < testArray.size(); i++) {
-	testArray[ i ] = 0x62;
+        testArray[i] = 0x62;
     }
     testArray[6] = 0x00;
-    QCOMPARE( testArray == QCA::hexToArray(QStringLiteral("62626262626200626262")), true );
+    QCOMPARE(testArray == QCA::hexToArray(QStringLiteral("62626262626200626262")), true);
 
-    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray.toByteArray() ) ), true );
+    QCOMPARE(testArray == QCA::hexToArray(QCA::arrayToHex(testArray.toByteArray())), true);
 
     testArray[9] = 0x00;
-    QCOMPARE( testArray == QCA::hexToArray( QCA::arrayToHex( testArray.toByteArray() ) ), true );
+    QCOMPARE(testArray == QCA::hexToArray(QCA::arrayToHex(testArray.toByteArray())), true);
 }
-
 
 void StaticUnitTest::capabilities()
 {
@@ -91,27 +91,26 @@ void StaticUnitTest::capabilities()
     // doing a direct comparison, since they change
     // We try to work around that using contains()
     QStringList defaultCapabilities = QCA::defaultFeatures();
-    QVERIFY( defaultCapabilities.contains(QStringLiteral("random")) );
-    QVERIFY( defaultCapabilities.contains(QStringLiteral("sha1")) );
-    QVERIFY( defaultCapabilities.contains(QStringLiteral("md5")) );
+    QVERIFY(defaultCapabilities.contains(QStringLiteral("random")));
+    QVERIFY(defaultCapabilities.contains(QStringLiteral("sha1")));
+    QVERIFY(defaultCapabilities.contains(QStringLiteral("md5")));
 
     QStringList capList;
     capList << QStringLiteral("random") << QStringLiteral("sha1");
-    QCOMPARE( QCA::isSupported(capList), true );
+    QCOMPARE(QCA::isSupported(capList), true);
     capList.append(QStringLiteral("noSuch"));
-    QCOMPARE( QCA::isSupported(capList), false );
+    QCOMPARE(QCA::isSupported(capList), false);
     capList.clear();
     capList.append(QStringLiteral("noSuch"));
-    QCOMPARE( QCA::isSupported(capList), false );
+    QCOMPARE(QCA::isSupported(capList), false);
 }
 
 void StaticUnitTest::secureMemory()
 {
     // this should be reliably true
-    QCOMPARE( QCA::haveSecureMemory(), true );
+    QCOMPARE(QCA::haveSecureMemory(), true);
 }
 
 QTEST_MAIN(StaticUnitTest)
 
 #include "staticunittest.moc"
-

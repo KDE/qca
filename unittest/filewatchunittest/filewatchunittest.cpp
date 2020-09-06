@@ -43,55 +43,54 @@ void FileWatchUnitTest::filewatchTest()
     QWARN("Unittest will take about 1 minute. Please wait.");
 
     QCA::FileWatch watcher;
-    QCOMPARE( watcher.fileName(), QString() );
+    QCOMPARE(watcher.fileName(), QString());
 
-    QSignalSpy spy( &watcher, &QCA::FileWatch::changed );
-    QVERIFY( spy.isValid() );
-    QCOMPARE( spy.count(), 0 );
+    QSignalSpy spy(&watcher, &QCA::FileWatch::changed);
+    QVERIFY(spy.isValid());
+    QCOMPARE(spy.count(), 0);
 
     QTemporaryFile *tempFile = new QTemporaryFile;
 
     tempFile->open();
 
-    watcher.setFileName( tempFile->fileName() );
-    QCOMPARE( watcher.fileName(), tempFile->fileName() );
+    watcher.setFileName(tempFile->fileName());
+    QCOMPARE(watcher.fileName(), tempFile->fileName());
     QTest::qWait(7000);
-    QCOMPARE( spy.count(), 0 );
+    QCOMPARE(spy.count(), 0);
     tempFile->close();
     QTest::qWait(7000);
-    QCOMPARE( spy.count(), 0 );
+    QCOMPARE(spy.count(), 0);
 
     tempFile->open();
     tempFile->write("foo");
     tempFile->flush();
     QTest::qWait(7000);
-    QCOMPARE( spy.count(), 1 );
+    QCOMPARE(spy.count(), 1);
 
     tempFile->close();
     QTest::qWait(7000);
 
-    QCOMPARE( spy.count(), 1 );
+    QCOMPARE(spy.count(), 1);
 
     tempFile->open();
     tempFile->write("foo");
     tempFile->flush();
     QTest::qWait(7000);
-    QCOMPARE( spy.count(), 2 );
+    QCOMPARE(spy.count(), 2);
 
     tempFile->write("bar");
     tempFile->flush();
     QTest::qWait(7000);
-    QCOMPARE( spy.count(), 3 );
+    QCOMPARE(spy.count(), 3);
 
     tempFile->close();
     QTest::qWait(7000);
 
-    QCOMPARE( spy.count(), 3 );
+    QCOMPARE(spy.count(), 3);
 
     delete tempFile;
     QTest::qWait(7000);
-    QCOMPARE( spy.count(), 4 );
-    
+    QCOMPARE(spy.count(), 4);
 }
 
 QTEST_MAIN(FileWatchUnitTest)

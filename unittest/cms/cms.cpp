@@ -32,8 +32,7 @@
 
 class CMSut : public QObject
 {
-
-  Q_OBJECT
+    Q_OBJECT
 
 private Q_SLOTS:
     void initTestCase();
@@ -46,11 +45,10 @@ private Q_SLOTS:
     void signverify_message();
     void signverify_message_invalid_data();
     void signverify_message_invalid();
+
 private:
-    QCA::Initializer* m_init;
-
+    QCA::Initializer *m_init;
 };
-
 
 void CMSut::initTestCase()
 {
@@ -77,86 +75,88 @@ void CMSut::xcrypt()
     QStringList providersToTest;
     providersToTest.append(QStringLiteral("qca-ossl"));
 
-    foreach(const QString provider, providersToTest) {
-        if( !QCA::isSupported( "cert", provider ) )
-            QWARN( (QStringLiteral( "Certificate not supported for ")+provider).toLocal8Bit().constData() );
-        else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( (QStringLiteral( "CMS not supported for ")+provider).toLocal8Bit().constData() );
-	else {
-	    QCA::Certificate pubCert = QCA::Certificate::fromPEMFile( QStringLiteral("QcaTestClientCert.pem"),nullptr, provider );
-	    QCOMPARE( pubCert.isNull(), false );
+    foreach (const QString provider, providersToTest) {
+        if (!QCA::isSupported("cert", provider))
+            QWARN((QStringLiteral("Certificate not supported for ") + provider).toLocal8Bit().constData());
+        else if (!QCA::isSupported("cms", provider))
+            QWARN((QStringLiteral("CMS not supported for ") + provider).toLocal8Bit().constData());
+        else {
+            QCA::Certificate pubCert =
+                QCA::Certificate::fromPEMFile(QStringLiteral("QcaTestClientCert.pem"), nullptr, provider);
+            QCOMPARE(pubCert.isNull(), false);
 
-	    QCA::SecureMessageKey secMsgKey;
-	    QCA::CertificateChain chain;
-	    chain += pubCert;
-	    secMsgKey.setX509CertificateChain( chain );
+            QCA::SecureMessageKey secMsgKey;
+            QCA::CertificateChain chain;
+            chain += pubCert;
+            secMsgKey.setX509CertificateChain(chain);
 
-	    QCA::CMS cms;
-	    QCA::SecureMessage msg(&cms);
-	    QCOMPARE( msg.canClearsign(), false );
-	    QCOMPARE( msg.canSignAndEncrypt(), false );
-	    QCOMPARE( msg.type(), QCA::SecureMessage::CMS );
+            QCA::CMS           cms;
+            QCA::SecureMessage msg(&cms);
+            QCOMPARE(msg.canClearsign(), false);
+            QCOMPARE(msg.canSignAndEncrypt(), false);
+            QCOMPARE(msg.type(), QCA::SecureMessage::CMS);
 
-	    msg.setRecipient(secMsgKey);
+            msg.setRecipient(secMsgKey);
 
-	    QFETCH( QByteArray, testText );
+            QFETCH(QByteArray, testText);
 
-	    msg.startEncrypt();
-	    msg.update(testText);
-	    msg.end();
+            msg.startEncrypt();
+            msg.update(testText);
+            msg.end();
 
-	    msg.waitForFinished(-1);
+            msg.waitForFinished(-1);
 
-	    QByteArray encryptedResult1 = msg.read();
-	    QCOMPARE( encryptedResult1.isEmpty(), false );
+            QByteArray encryptedResult1 = msg.read();
+            QCOMPARE(encryptedResult1.isEmpty(), false);
 
-	    msg.reset();
-	    msg.setRecipient(secMsgKey);
-	    msg.startEncrypt();
-	    msg.update( testText );
-	    msg.end();
+            msg.reset();
+            msg.setRecipient(secMsgKey);
+            msg.startEncrypt();
+            msg.update(testText);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.success() );
+            msg.waitForFinished(-1);
+            QVERIFY(msg.success());
 
-	    QByteArray encryptedResult2 = msg.read();
-	    QCOMPARE( encryptedResult2.isEmpty(), false );
+            QByteArray encryptedResult2 = msg.read();
+            QCOMPARE(encryptedResult2.isEmpty(), false);
 
-	    QCA::ConvertResult res;
-	    QCA::SecureArray passPhrase = "start";
-	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res );
-	    QCOMPARE( res, QCA::ConvertGood );
+            QCA::ConvertResult res;
+            QCA::SecureArray   passPhrase = "start";
+            QCA::PrivateKey    privKey =
+                QCA::PrivateKey::fromPEMFile(QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res);
+            QCOMPARE(res, QCA::ConvertGood);
 
-	    secMsgKey.setX509PrivateKey( privKey );
-	    QCA::SecureMessageKeyList privKeyList;
-	    privKeyList += secMsgKey;
-	    QCA::CMS cms2;
-	    cms2.setPrivateKeys( privKeyList );
+            secMsgKey.setX509PrivateKey(privKey);
+            QCA::SecureMessageKeyList privKeyList;
+            privKeyList += secMsgKey;
+            QCA::CMS cms2;
+            cms2.setPrivateKeys(privKeyList);
 
-	    QCA::SecureMessage msg2( &cms2 );
+            QCA::SecureMessage msg2(&cms2);
 
-	    msg2.startDecrypt();
-	    msg2.update( encryptedResult1 );
-	    msg2.end();
-	    msg2.waitForFinished(-1);
-	    QVERIFY( msg2.success() );
-	    QByteArray decryptedResult1 = msg2.read();
-	    QCOMPARE( decryptedResult1, testText );
+            msg2.startDecrypt();
+            msg2.update(encryptedResult1);
+            msg2.end();
+            msg2.waitForFinished(-1);
+            QVERIFY(msg2.success());
+            QByteArray decryptedResult1 = msg2.read();
+            QCOMPARE(decryptedResult1, testText);
 
-	    msg2.reset();
-	    msg2.startDecrypt();
-	    msg2.update( encryptedResult1 );
-	    msg2.end();
-	    msg2.waitForFinished(-1);
-	    QVERIFY( msg2.success() );
-	    QByteArray decryptedResult2 = msg2.read();
+            msg2.reset();
+            msg2.startDecrypt();
+            msg2.update(encryptedResult1);
+            msg2.end();
+            msg2.waitForFinished(-1);
+            QVERIFY(msg2.success());
+            QByteArray decryptedResult2 = msg2.read();
 
-	    QCOMPARE( decryptedResult1, decryptedResult2 );
+            QCOMPARE(decryptedResult1, decryptedResult2);
 
-	    QCOMPARE( msg2.canClearsign(), false );
-	    QCOMPARE( msg2.canSignAndEncrypt(), false );
-	    QCOMPARE( msg2.type(), QCA::SecureMessage::CMS );
-	}
+            QCOMPARE(msg2.canClearsign(), false);
+            QCOMPARE(msg2.canSignAndEncrypt(), false);
+            QCOMPARE(msg2.type(), QCA::SecureMessage::CMS);
+        }
     }
 }
 
@@ -176,121 +176,123 @@ void CMSut::signverify()
     QStringList providersToTest;
     providersToTest.append(QStringLiteral("qca-ossl"));
 
-    foreach(const QString provider, providersToTest) {
-        if( !QCA::isSupported( "cert", provider ) )
-            QWARN( (QStringLiteral( "Certificate not supported for ")+provider).toLocal8Bit().constData() );
-        else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( (QStringLiteral( "CMS not supported for ")+provider).toLocal8Bit().constData() );
-	else {
-	    QCA::ConvertResult res;
-	    QCA::SecureArray passPhrase = "start";
-	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
+    foreach (const QString provider, providersToTest) {
+        if (!QCA::isSupported("cert", provider))
+            QWARN((QStringLiteral("Certificate not supported for ") + provider).toLocal8Bit().constData());
+        else if (!QCA::isSupported("cms", provider))
+            QWARN((QStringLiteral("CMS not supported for ") + provider).toLocal8Bit().constData());
+        else {
+            QCA::ConvertResult res;
+            QCA::SecureArray   passPhrase = "start";
+            QCA::PrivateKey    privKey =
+                QCA::PrivateKey::fromPEMFile(QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
 
-	    QCA::Certificate pubCert = QCA::Certificate::fromPEMFile( QStringLiteral("QcaTestClientCert.pem"), &res, provider);
-	    QCOMPARE( res, QCA::ConvertGood );
-	    QCOMPARE( pubCert.isNull(), false );
+            QCA::Certificate pubCert =
+                QCA::Certificate::fromPEMFile(QStringLiteral("QcaTestClientCert.pem"), &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
+            QCOMPARE(pubCert.isNull(), false);
 
-	    QCA::CertificateChain chain;
-	    chain += pubCert;
-	    QCA::SecureMessageKey secMsgKey;
-	    secMsgKey.setX509CertificateChain( chain );
-	    secMsgKey.setX509PrivateKey( privKey );
+            QCA::CertificateChain chain;
+            chain += pubCert;
+            QCA::SecureMessageKey secMsgKey;
+            secMsgKey.setX509CertificateChain(chain);
+            secMsgKey.setX509PrivateKey(privKey);
 
-	    QCA::SecureMessageKeyList privKeyList;
-	    privKeyList += secMsgKey;
-	    QCA::CMS cms2;
-	    cms2.setPrivateKeys( privKeyList );
+            QCA::SecureMessageKeyList privKeyList;
+            privKeyList += secMsgKey;
+            QCA::CMS cms2;
+            cms2.setPrivateKeys(privKeyList);
 
-	    QCA::SecureMessage msg2( &cms2 );
-	    msg2.setSigners( privKeyList );
-	    QCOMPARE( msg2.canClearsign(), false );
-	    QCOMPARE( msg2.canSignAndEncrypt(), false );
-	    QCOMPARE( msg2.type(), QCA::SecureMessage::CMS );
+            QCA::SecureMessage msg2(&cms2);
+            msg2.setSigners(privKeyList);
+            QCOMPARE(msg2.canClearsign(), false);
+            QCOMPARE(msg2.canSignAndEncrypt(), false);
+            QCOMPARE(msg2.type(), QCA::SecureMessage::CMS);
 
-	    QFETCH( QByteArray, testText );
+            QFETCH(QByteArray, testText);
 
-	    msg2.startSign(QCA::SecureMessage::Detached);
-	    msg2.update( testText );
-	    msg2.end();
-	    msg2.waitForFinished(-1);
-	    QVERIFY( msg2.success() );
-	    QByteArray signedResult1 = msg2.signature();
-	    QCOMPARE( signedResult1.isEmpty(), false );
+            msg2.startSign(QCA::SecureMessage::Detached);
+            msg2.update(testText);
+            msg2.end();
+            msg2.waitForFinished(-1);
+            QVERIFY(msg2.success());
+            QByteArray signedResult1 = msg2.signature();
+            QCOMPARE(signedResult1.isEmpty(), false);
 
-	    msg2.reset();
+            msg2.reset();
 
-	    msg2.setSigners( privKeyList );
-	    msg2.startSign(QCA::SecureMessage::Detached);
-	    msg2.update( testText );
-	    msg2.end();
-	    msg2.waitForFinished(-1);
-	    QVERIFY( msg2.success() );
-	    QByteArray signedResult2 = msg2.signature();
+            msg2.setSigners(privKeyList);
+            msg2.startSign(QCA::SecureMessage::Detached);
+            msg2.update(testText);
+            msg2.end();
+            msg2.waitForFinished(-1);
+            QVERIFY(msg2.success());
+            QByteArray signedResult2 = msg2.signature();
 
-	    QCOMPARE( signedResult2.isEmpty(), false );
+            QCOMPARE(signedResult2.isEmpty(), false);
 
-	    QCA::CMS cms;
-	    QCA::Certificate caCert = QCA::Certificate::fromPEMFile( QStringLiteral("QcaTestRootCert.pem"), &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
-	    QCA::CertificateCollection caCertCollection;
-	    caCertCollection.addCertificate(caCert);
+            QCA::CMS         cms;
+            QCA::Certificate caCert =
+                QCA::Certificate::fromPEMFile(QStringLiteral("QcaTestRootCert.pem"), &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
+            QCA::CertificateCollection caCertCollection;
+            caCertCollection.addCertificate(caCert);
 
-	    cms.setTrustedCertificates( caCertCollection );
-	    QCA::SecureMessage msg( &cms );
-	    QCOMPARE( msg.canClearsign(), false );
-	    QCOMPARE( msg.canSignAndEncrypt(), false );
-	    QCOMPARE( msg.type(), QCA::SecureMessage::CMS );
+            cms.setTrustedCertificates(caCertCollection);
+            QCA::SecureMessage msg(&cms);
+            QCOMPARE(msg.canClearsign(), false);
+            QCOMPARE(msg.canSignAndEncrypt(), false);
+            QCOMPARE(msg.type(), QCA::SecureMessage::CMS);
 
-	    msg.startVerify( signedResult1 );
-	    msg.update( testText );
-	    msg.end();
+            msg.startVerify(signedResult1);
+            msg.update(testText);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QEXPECT_FAIL( "empty", "We don't seem to be able to verify signature of a zero length message", Continue);
-	    QVERIFY( msg.verifySuccess() );
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QEXPECT_FAIL("empty", "We don't seem to be able to verify signature of a zero length message", Continue);
+            QVERIFY(msg.verifySuccess());
 
-	    msg.reset();
+            msg.reset();
 
-	    msg.startVerify( signedResult2);
-	    msg.update( testText );
-	    msg.end();
+            msg.startVerify(signedResult2);
+            msg.update(testText);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QEXPECT_FAIL( "empty", "We don't seem to be able to verify signature of a zero length message", Continue);
-	    QVERIFY( msg.verifySuccess() );
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QEXPECT_FAIL("empty", "We don't seem to be able to verify signature of a zero length message", Continue);
+            QVERIFY(msg.verifySuccess());
 
-	    msg.reset();
+            msg.reset();
 
-	    // This tests junk on the end of the signature - should fail
-	    msg.startVerify( signedResult2 + "junk");
-	    msg.update( testText );
-	    msg.end();
+            // This tests junk on the end of the signature - should fail
+            msg.startVerify(signedResult2 + "junk");
+            msg.update(testText);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QCOMPARE( msg.verifySuccess(), false );
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QCOMPARE(msg.verifySuccess(), false);
 
-	    msg.reset();
+            msg.reset();
 
-	    // This tests junk on the end of the message - should fail
-	    msg.startVerify( signedResult2 );
-	    msg.update( testText+"junk" );
-	    msg.end();
+            // This tests junk on the end of the message - should fail
+            msg.startVerify(signedResult2);
+            msg.update(testText + "junk");
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QCOMPARE( msg.verifySuccess(), false );
-	}
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QCOMPARE(msg.verifySuccess(), false);
+        }
     }
 }
-
 
 void CMSut::signverify_message_data()
 {
@@ -308,104 +310,107 @@ void CMSut::signverify_message()
     QStringList providersToTest;
     providersToTest.append(QStringLiteral("qca-ossl"));
 
-    foreach(const QString provider, providersToTest) {
-        if( !QCA::isSupported( "cert", provider ) )
-            QWARN( (QStringLiteral( "Certificate not supported for ")+provider).toLocal8Bit().constData() );
-        else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( (QStringLiteral( "CMS not supported for ")+provider).toLocal8Bit().constData() );
-	else {
-	    QCA::ConvertResult res;
-	    QCA::SecureArray passPhrase = "start";
-	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
+    foreach (const QString provider, providersToTest) {
+        if (!QCA::isSupported("cert", provider))
+            QWARN((QStringLiteral("Certificate not supported for ") + provider).toLocal8Bit().constData());
+        else if (!QCA::isSupported("cms", provider))
+            QWARN((QStringLiteral("CMS not supported for ") + provider).toLocal8Bit().constData());
+        else {
+            QCA::ConvertResult res;
+            QCA::SecureArray   passPhrase = "start";
+            QCA::PrivateKey    privKey =
+                QCA::PrivateKey::fromPEMFile(QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
 
-	    QCA::Certificate pubCert = QCA::Certificate::fromPEMFile( QStringLiteral("QcaTestClientCert.pem"), &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
-	    QCOMPARE( pubCert.isNull(), false );
+            QCA::Certificate pubCert =
+                QCA::Certificate::fromPEMFile(QStringLiteral("QcaTestClientCert.pem"), &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
+            QCOMPARE(pubCert.isNull(), false);
 
-	    QCA::CertificateChain chain;
-	    chain += pubCert;
-	    QCA::SecureMessageKey secMsgKey;
-	    secMsgKey.setX509CertificateChain( chain );
-	    secMsgKey.setX509PrivateKey( privKey );
+            QCA::CertificateChain chain;
+            chain += pubCert;
+            QCA::SecureMessageKey secMsgKey;
+            secMsgKey.setX509CertificateChain(chain);
+            secMsgKey.setX509PrivateKey(privKey);
 
-	    QCA::SecureMessageKeyList privKeyList;
-	    privKeyList += secMsgKey;
-	    QCA::CMS cms2;
-	    cms2.setPrivateKeys( privKeyList );
+            QCA::SecureMessageKeyList privKeyList;
+            privKeyList += secMsgKey;
+            QCA::CMS cms2;
+            cms2.setPrivateKeys(privKeyList);
 
-	    QCA::SecureMessage msg2( &cms2 );
-	    msg2.setSigners( privKeyList );
-	    QCOMPARE( msg2.canClearsign(), false );
-	    QCOMPARE( msg2.canSignAndEncrypt(), false );
-	    QCOMPARE( msg2.type(), QCA::SecureMessage::CMS );
+            QCA::SecureMessage msg2(&cms2);
+            msg2.setSigners(privKeyList);
+            QCOMPARE(msg2.canClearsign(), false);
+            QCOMPARE(msg2.canSignAndEncrypt(), false);
+            QCOMPARE(msg2.type(), QCA::SecureMessage::CMS);
 
-	    QFETCH( QByteArray, testText );
+            QFETCH(QByteArray, testText);
 
-	    msg2.startSign( QCA::SecureMessage::Message );
-	    msg2.update( testText );
-	    msg2.end();
-	    msg2.waitForFinished(-1);
-	    QVERIFY( msg2.success() );
-	    QByteArray signedResult1 = msg2.read();
-	    QCOMPARE( signedResult1.isEmpty(), false );
+            msg2.startSign(QCA::SecureMessage::Message);
+            msg2.update(testText);
+            msg2.end();
+            msg2.waitForFinished(-1);
+            QVERIFY(msg2.success());
+            QByteArray signedResult1 = msg2.read();
+            QCOMPARE(signedResult1.isEmpty(), false);
 
-	    msg2.reset();
+            msg2.reset();
 
-	    msg2.setSigners( privKeyList );
-	    msg2.startSign(QCA::SecureMessage::Message);
-	    msg2.update( testText );
-	    msg2.end();
-	    msg2.waitForFinished(-1);
-	    QVERIFY( msg2.success() );
-	    QByteArray signedResult2 = msg2.read();
+            msg2.setSigners(privKeyList);
+            msg2.startSign(QCA::SecureMessage::Message);
+            msg2.update(testText);
+            msg2.end();
+            msg2.waitForFinished(-1);
+            QVERIFY(msg2.success());
+            QByteArray signedResult2 = msg2.read();
 
-	    QCOMPARE( signedResult2.isEmpty(), false );
+            QCOMPARE(signedResult2.isEmpty(), false);
 
-	    QCA::CMS cms;
-	    QCA::Certificate caCert = QCA::Certificate::fromPEMFile( QStringLiteral("QcaTestRootCert.pem"), &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
+            QCA::CMS         cms;
+            QCA::Certificate caCert =
+                QCA::Certificate::fromPEMFile(QStringLiteral("QcaTestRootCert.pem"), &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
 
-	    QCA::CertificateCollection caCertCollection;
-	    caCertCollection.addCertificate(caCert);
+            QCA::CertificateCollection caCertCollection;
+            caCertCollection.addCertificate(caCert);
 
-	    cms.setTrustedCertificates( caCertCollection );
-	    QCA::SecureMessage msg( &cms );
-	    QCOMPARE( msg.canClearsign(), false );
-	    QCOMPARE( msg.canSignAndEncrypt(), false );
-	    QCOMPARE( msg.type(), QCA::SecureMessage::CMS );
+            cms.setTrustedCertificates(caCertCollection);
+            QCA::SecureMessage msg(&cms);
+            QCOMPARE(msg.canClearsign(), false);
+            QCOMPARE(msg.canSignAndEncrypt(), false);
+            QCOMPARE(msg.type(), QCA::SecureMessage::CMS);
 
-	    msg.startVerify( );
-	    msg.update( signedResult1 );
-	    msg.end();
+            msg.startVerify();
+            msg.update(signedResult1);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QVERIFY( msg.verifySuccess() );
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QVERIFY(msg.verifySuccess());
 
-	    msg.reset();
+            msg.reset();
 
-	    msg.startVerify( );
-	    msg.update( signedResult2 );
-	    msg.end();
+            msg.startVerify();
+            msg.update(signedResult2);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QVERIFY( msg.verifySuccess() );
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QVERIFY(msg.verifySuccess());
 
-	    msg.reset();
+            msg.reset();
 
-	    msg.startVerify( );
-	    msg.update( signedResult2 );
-	    msg.end();
+            msg.startVerify();
+            msg.update(signedResult2);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QCOMPARE( msg.verifySuccess(), true );
-	}
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QCOMPARE(msg.verifySuccess(), true);
+        }
     }
 }
 
@@ -419,86 +424,86 @@ void CMSut::signverify_message_invalid_data()
     QTest::newRow("dubious") << QByteArray("~!#**$#&&%^@#^&()");
 }
 
-
 // This one tests Message format
 void CMSut::signverify_message_invalid()
 {
     QStringList providersToTest;
     providersToTest.append(QStringLiteral("qca-ossl"));
 
-    foreach(const QString provider, providersToTest) {
-        if( !QCA::isSupported( "cert", provider ) )
-            QWARN( (QStringLiteral( "Certificate not supported for ")+provider).toLocal8Bit().constData() );
-        else if( !QCA::isSupported( "cms", provider ) )
-	    QWARN( (QStringLiteral( "CMS not supported for ")+provider).toLocal8Bit().constData() );
-	else {
-	    QCA::ConvertResult res;
-	    QCA::SecureArray passPhrase = "start";
-	    QCA::PrivateKey privKey = QCA::PrivateKey::fromPEMFile( QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
+    foreach (const QString provider, providersToTest) {
+        if (!QCA::isSupported("cert", provider))
+            QWARN((QStringLiteral("Certificate not supported for ") + provider).toLocal8Bit().constData());
+        else if (!QCA::isSupported("cms", provider))
+            QWARN((QStringLiteral("CMS not supported for ") + provider).toLocal8Bit().constData());
+        else {
+            QCA::ConvertResult res;
+            QCA::SecureArray   passPhrase = "start";
+            QCA::PrivateKey    privKey =
+                QCA::PrivateKey::fromPEMFile(QStringLiteral("QcaTestClientKey.pem"), passPhrase, &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
 
-	    QCA::Certificate pubCert = QCA::Certificate::fromPEMFile( QStringLiteral("QcaTestClientCert.pem"), &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
-	    QCOMPARE( pubCert.isNull(), false );
+            QCA::Certificate pubCert =
+                QCA::Certificate::fromPEMFile(QStringLiteral("QcaTestClientCert.pem"), &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
+            QCOMPARE(pubCert.isNull(), false);
 
-	    QCA::CertificateChain chain;
-	    chain += pubCert;
-	    QCA::SecureMessageKey secMsgKey;
-	    secMsgKey.setX509CertificateChain( chain );
-	    secMsgKey.setX509PrivateKey( privKey );
+            QCA::CertificateChain chain;
+            chain += pubCert;
+            QCA::SecureMessageKey secMsgKey;
+            secMsgKey.setX509CertificateChain(chain);
+            secMsgKey.setX509PrivateKey(privKey);
 
-	    QCA::SecureMessageKeyList privKeyList;
-	    privKeyList += secMsgKey;
-	    QCA::CMS cms2;
-	    cms2.setPrivateKeys( privKeyList );
+            QCA::SecureMessageKeyList privKeyList;
+            privKeyList += secMsgKey;
+            QCA::CMS cms2;
+            cms2.setPrivateKeys(privKeyList);
 
-	    QCA::SecureMessage msg2( &cms2 );
-	    msg2.setSigners( privKeyList );
-	    QCOMPARE( msg2.canClearsign(), false );
-	    QCOMPARE( msg2.canSignAndEncrypt(), false );
-	    QCOMPARE( msg2.type(), QCA::SecureMessage::CMS );
+            QCA::SecureMessage msg2(&cms2);
+            msg2.setSigners(privKeyList);
+            QCOMPARE(msg2.canClearsign(), false);
+            QCOMPARE(msg2.canSignAndEncrypt(), false);
+            QCOMPARE(msg2.type(), QCA::SecureMessage::CMS);
 
-	    QFETCH( QByteArray, testText );
+            QFETCH(QByteArray, testText);
 
-	    msg2.startSign( QCA::SecureMessage::Message );
-	    msg2.update( testText );
-	    msg2.end();
-	    msg2.waitForFinished(-1);
-	    QVERIFY( msg2.success() );
-	    QByteArray signedResult1 = msg2.read();
-	    QCOMPARE( signedResult1.isEmpty(), false );
+            msg2.startSign(QCA::SecureMessage::Message);
+            msg2.update(testText);
+            msg2.end();
+            msg2.waitForFinished(-1);
+            QVERIFY(msg2.success());
+            QByteArray signedResult1 = msg2.read();
+            QCOMPARE(signedResult1.isEmpty(), false);
 
-	    QCA::CMS cms;
-	    QCA::Certificate caCert = QCA::Certificate::fromPEMFile( QStringLiteral("QcaTestRootCert.pem"), &res, provider );
-	    QCOMPARE( res, QCA::ConvertGood );
+            QCA::CMS         cms;
+            QCA::Certificate caCert =
+                QCA::Certificate::fromPEMFile(QStringLiteral("QcaTestRootCert.pem"), &res, provider);
+            QCOMPARE(res, QCA::ConvertGood);
 
-	    QCA::CertificateCollection caCertCollection;
-	    caCertCollection.addCertificate(caCert);
+            QCA::CertificateCollection caCertCollection;
+            caCertCollection.addCertificate(caCert);
 
-	    cms.setTrustedCertificates( caCertCollection );
-	    QCA::SecureMessage msg( &cms );
-	    QCOMPARE( msg.canClearsign(), false );
-	    QCOMPARE( msg.canSignAndEncrypt(), false );
-	    QCOMPARE( msg.type(), QCA::SecureMessage::CMS );
+            cms.setTrustedCertificates(caCertCollection);
+            QCA::SecureMessage msg(&cms);
+            QCOMPARE(msg.canClearsign(), false);
+            QCOMPARE(msg.canSignAndEncrypt(), false);
+            QCOMPARE(msg.type(), QCA::SecureMessage::CMS);
 
-	    // This is just to break things
-	    // signedResult1[30] = signedResult1[30] + 1;
-	    signedResult1[signedResult1.size()-2] = 0x00;
+            // This is just to break things
+            // signedResult1[30] = signedResult1[30] + 1;
+            signedResult1[signedResult1.size() - 2] = 0x00;
 
-	    msg.startVerify( );
-	    msg.update( signedResult1 );
-	    msg.end();
+            msg.startVerify();
+            msg.update(signedResult1);
+            msg.end();
 
-	    msg.waitForFinished(-1);
-	    QVERIFY( msg.wasSigned() );
-	    QVERIFY( msg.success() );
-	    QCOMPARE( msg.verifySuccess(), false );
-	}
+            msg.waitForFinished(-1);
+            QVERIFY(msg.wasSigned());
+            QVERIFY(msg.success());
+            QCOMPARE(msg.verifySuccess(), false);
+        }
     }
 }
-
 
 QTEST_MAIN(CMSut)
 
 #include "cms.moc"
-

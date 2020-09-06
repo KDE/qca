@@ -32,14 +32,15 @@
 
 class KeyStore : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void nullKeystore();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *m_init;
 };
 
 void KeyStore::initTestCase()
@@ -56,18 +57,18 @@ void KeyStore::cleanupTestCase()
 void KeyStore::nullKeystore()
 {
     QCA::KeyStoreManager manager;
-    if ( QCA::isSupported( "keystore" ) ) {
-        QCA::KeyStore nullStore( QStringLiteral( "null store" ), &manager );
-        QVERIFY( nullStore.isValid() );
+    if (QCA::isSupported("keystore")) {
+        QCA::KeyStore nullStore(QStringLiteral("null store"), &manager);
+        QVERIFY(nullStore.isValid());
 
-        QVERIFY( nullStore.entryList().isEmpty() );
+        QVERIFY(nullStore.entryList().isEmpty());
 
-        QCOMPARE( nullStore.type(), QCA::KeyStore::User);
+        QCOMPARE(nullStore.type(), QCA::KeyStore::User);
 
-        QCOMPARE( nullStore.id(), QStringLiteral( "null store" ) );
-        QCOMPARE( nullStore.holdsTrustedCertificates(), false );
-        QCOMPARE( nullStore.holdsIdentities(), false );
-        QCOMPARE( nullStore.holdsPGPPublicKeys(), false );
+        QCOMPARE(nullStore.id(), QStringLiteral("null store"));
+        QCOMPARE(nullStore.holdsTrustedCertificates(), false);
+        QCOMPARE(nullStore.holdsIdentities(), false);
+        QCOMPARE(nullStore.holdsPGPPublicKeys(), false);
     }
 }
 

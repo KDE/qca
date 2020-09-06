@@ -24,8 +24,8 @@
 #include "qdebug.h"
 
 #ifdef Q_OS_UNIX
-# include <cstdlib>
-# include <sys/mman.h>
+#include <cstdlib>
+#include <sys/mman.h>
 #endif
 #include "botantools/botantools.h"
 
@@ -34,25 +34,24 @@ namespace QCA {
 static bool can_lock()
 {
 #ifdef Q_OS_UNIX
-	bool ok = false;
+    bool ok = false;
 #ifdef MLOCK_NOT_VOID_PTR
-# define MLOCK_TYPE char *
-# define MLOCK_TYPE_CAST (MLOCK_TYPE)
+#define MLOCK_TYPE char *
+#define MLOCK_TYPE_CAST (MLOCK_TYPE)
 #else
-# define MLOCK_TYPE void *
-# define MLOCK_TYPE_CAST
+#define MLOCK_TYPE void *
+#define MLOCK_TYPE_CAST
 #endif
 
-	MLOCK_TYPE d = MLOCK_TYPE_CAST malloc(256);
-	if(mlock(d, 256) == 0)
-	{
-		munlock(d, 256);
-		ok = true;
-	}
-	free(d);
-	return ok;
+    MLOCK_TYPE d = MLOCK_TYPE_CAST malloc(256);
+    if (mlock(d, 256) == 0) {
+        munlock(d, 256);
+        ok = true;
+    }
+    free(d);
+    return ok;
 #else
-	return true;
+    return true;
 #endif
 }
 
@@ -62,128 +61,113 @@ static Botan::Allocator *alloc = nullptr;
 
 void botan_throw_abort()
 {
-	fprintf(stderr, "QCA: Exception from internal Botan\n");
-	abort();
+    fprintf(stderr, "QCA: Exception from internal Botan\n");
+    abort();
 }
 
 bool botan_init(int prealloc, bool mmap)
 {
-	// 64k minimum
-	if(prealloc < 64)
-		prealloc = 64;
+    // 64k minimum
+    if (prealloc < 64)
+        prealloc = 64;
 
-	bool secmem = false;
+    bool secmem = false;
 
-	try
-	{
-		Botan::Builtin_Modules modules;
-		Botan::Library_State *libstate = new Botan::Library_State(modules.mutex_factory());
-		libstate->prealloc_size = prealloc * 1024;
-		Botan::set_global_state(libstate);
-		Botan::global_state().load(modules);
+    try {
+        Botan::Builtin_Modules modules;
+        Botan::Library_State * libstate = new Botan::Library_State(modules.mutex_factory());
+        libstate->prealloc_size         = prealloc * 1024;
+        Botan::set_global_state(libstate);
+        Botan::global_state().load(modules);
 
-		if(can_lock())
-		{
-			Botan::global_state().set_default_allocator("locking");
-			secmem = true;
-		}
-		else if(mmap)
-		{
-			Botan::global_state().set_default_allocator("mmap");
-			secmem = true;
-		}
-		alloc = Botan::Allocator::get(true);
-	}
-	catch(std::exception &)
-	{
-		fprintf(stderr, "QCA: Error initializing internal Botan\n");
-		abort();
-	}
+        if (can_lock()) {
+            Botan::global_state().set_default_allocator("locking");
+            secmem = true;
+        } else if (mmap) {
+            Botan::global_state().set_default_allocator("mmap");
+            secmem = true;
+        }
+        alloc = Botan::Allocator::get(true);
+    } catch (std::exception &) {
+        fprintf(stderr, "QCA: Error initializing internal Botan\n");
+        abort();
+    }
 
-	return secmem;
+    return secmem;
 }
 
 void botan_deinit()
 {
-	try
-	{
-		alloc = nullptr;
-		Botan::set_global_state(nullptr);
-	}
-	catch(std::exception &)
-	{
-		botan_throw_abort();
-	}
+    try {
+        alloc = nullptr;
+        Botan::set_global_state(nullptr);
+    } catch (std::exception &) {
+        botan_throw_abort();
+    }
 }
 
 void *botan_secure_alloc(int bytes)
 {
-	try
-	{
-		return alloc->allocate((Botan::u32bit)bytes);
-	}
-	catch(std::exception &)
-	{
-		botan_throw_abort();
-	}
-	return nullptr; // never get here
+    try {
+        return alloc->allocate((Botan::u32bit)bytes);
+    } catch (std::exception &) {
+        botan_throw_abort();
+    }
+    return nullptr; // never get here
 }
 
 void botan_secure_free(void *p, int bytes)
 {
-	try
-	{
-		alloc->deallocate(p, (Botan::u32bit)bytes);
-	}
-	catch(std::exception &)
-	{
-		botan_throw_abort();
-	}
+    try {
+        alloc->deallocate(p, (Botan::u32bit)bytes);
+    } catch (std::exception &) {
+        botan_throw_abort();
+    }
 }
 
 } // end namespace QCA
 
 void *qca_secure_alloc(int bytes)
 {
-	// allocate enough room to store a size value in front, return a pointer after it
-	char *c = (char *)QCA::botan_secure_alloc(bytes + sizeof(int));
-	reinterpret_cast<int *>(c)[0] = bytes + sizeof(int);
-	return c + sizeof(int);
+    // allocate enough room to store a size value in front, return a pointer after it
+    char *c                       = (char *)QCA::botan_secure_alloc(bytes + sizeof(int));
+    reinterpret_cast<int *>(c)[0] = bytes + sizeof(int);
+    return c + sizeof(int);
 }
 
 void qca_secure_free(void *p)
 {
-	// backtrack to read the size value
-	char *c = (char *)p;
-	c -= sizeof(int);
-	const int bytes = reinterpret_cast<int *>(c)[0];
-	QCA::botan_secure_free(c, bytes);
+    // backtrack to read the size value
+    char *c = (char *)p;
+    c -= sizeof(int);
+    const int bytes = reinterpret_cast<int *>(c)[0];
+    QCA::botan_secure_free(c, bytes);
 }
 
 void *qca_secure_realloc(void *p, int bytes)
 {
-	// if null, do a plain alloc (just like how realloc() works)
-	if(!p)
-		return qca_secure_alloc(bytes);
+    // if null, do a plain alloc (just like how realloc() works)
+    if (!p)
+        return qca_secure_alloc(bytes);
 
-	// backtrack to read the size value
-	char *c = (char *)p;
-	c -= sizeof(int);
-	const int oldsize = reinterpret_cast<int *>(c)[0] - sizeof(int);
+    // backtrack to read the size value
+    char *c = (char *)p;
+    c -= sizeof(int);
+    const int oldsize = reinterpret_cast<int *>(c)[0] - sizeof(int);
 
-	// alloc the new chunk
-	char *new_p = (char *)qca_secure_alloc(bytes);
-	if(!new_p)
-		return nullptr;
+    // alloc the new chunk
+    char *new_p = (char *)qca_secure_alloc(bytes);
+    if (!new_p)
+        return nullptr;
 
-	// move over the memory from the original block
-	memmove(new_p, p, qMin(oldsize, bytes));
+    // move over the memory from the original block
+    memmove(new_p, p, qMin(oldsize, bytes));
 
-	// free the original
-	qca_secure_free(p);
+    // free the original
+    qca_secure_free(p);
 
-	// done
-	return new_p;
+    // done
+    return new_p;
 }
 
 namespace QCA {
@@ -192,13 +176,13 @@ namespace QCA {
 // buffer size of 0 is okay (sbuf/qbuf will be 0).
 struct alloc_info
 {
-	bool sec;
-	char *data;
-	int size;
+    bool  sec;
+    char *data;
+    int   size;
 
-	// internal
-	Botan::SecureVector<Botan::byte> *sbuf;
-	QByteArray *qbuf;
+    // internal
+    Botan::SecureVector<Botan::byte> *sbuf;
+    QByteArray *                      qbuf;
 };
 
 // note: these functions don't return error if memory allocation/resizing
@@ -222,163 +206,136 @@ static void ai_delete(alloc_info *ai);
 
 bool ai_new(alloc_info *ai, int size, bool sec)
 {
-	if(size < 0)
-		return false;
+    if (size < 0)
+        return false;
 
-	ai->size = size;
-	ai->sec = sec;
+    ai->size = size;
+    ai->sec  = sec;
 
-	if(size == 0)
-	{
-		ai->sbuf = nullptr;
-		ai->qbuf = nullptr;
-		ai->data = nullptr;
-		return true;
-	}
+    if (size == 0) {
+        ai->sbuf = nullptr;
+        ai->qbuf = nullptr;
+        ai->data = nullptr;
+        return true;
+    }
 
-	if(sec)
-	{
-		try
-		{
-			ai->sbuf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size + 1);
-		}
-		catch(std::exception &)
-		{
-			botan_throw_abort();
-			return false; // never get here
-		}
+    if (sec) {
+        try {
+            ai->sbuf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)size + 1);
+        } catch (std::exception &) {
+            botan_throw_abort();
+            return false; // never get here
+        }
 
-		(*(ai->sbuf))[size] = 0;
-		ai->qbuf = nullptr;
-		Botan::byte *bp = (Botan::byte *)(*(ai->sbuf));
-		ai->data = (char *)bp;
-	}
-	else
-	{
-		ai->sbuf = nullptr;
-		ai->qbuf = new QByteArray(size, 0);
-		ai->data = ai->qbuf->data();
-	}
+        (*(ai->sbuf))[size] = 0;
+        ai->qbuf            = nullptr;
+        Botan::byte *bp     = (Botan::byte *)(*(ai->sbuf));
+        ai->data            = (char *)bp;
+    } else {
+        ai->sbuf = nullptr;
+        ai->qbuf = new QByteArray(size, 0);
+        ai->data = ai->qbuf->data();
+    }
 
-	return true;
+    return true;
 }
 
 bool ai_copy(alloc_info *ai, const alloc_info *from)
 {
-	ai->size = from->size;
-	ai->sec = from->sec;
+    ai->size = from->size;
+    ai->sec  = from->sec;
 
-	if(ai->size == 0)
-	{
-		ai->sbuf = nullptr;
-		ai->qbuf = nullptr;
-		ai->data = nullptr;
-		return true;
-	}
+    if (ai->size == 0) {
+        ai->sbuf = nullptr;
+        ai->qbuf = nullptr;
+        ai->data = nullptr;
+        return true;
+    }
 
-	if(ai->sec)
-	{
-		try
-		{
-			ai->sbuf = new Botan::SecureVector<Botan::byte>(*(from->sbuf));
-		}
-		catch(std::exception &)
-		{
-			botan_throw_abort();
-			return false; // never get here
-		}
+    if (ai->sec) {
+        try {
+            ai->sbuf = new Botan::SecureVector<Botan::byte>(*(from->sbuf));
+        } catch (std::exception &) {
+            botan_throw_abort();
+            return false; // never get here
+        }
 
-		ai->qbuf = nullptr;
-		Botan::byte *bp = (Botan::byte *)(*(ai->sbuf));
-		ai->data = (char *)bp;
-	}
-	else
-	{
-		ai->sbuf = nullptr;
-		ai->qbuf = new QByteArray(*(from->qbuf));
-		ai->data = ai->qbuf->data();
-	}
+        ai->qbuf        = nullptr;
+        Botan::byte *bp = (Botan::byte *)(*(ai->sbuf));
+        ai->data        = (char *)bp;
+    } else {
+        ai->sbuf = nullptr;
+        ai->qbuf = new QByteArray(*(from->qbuf));
+        ai->data = ai->qbuf->data();
+    }
 
-	return true;
+    return true;
 }
 
 bool ai_resize(alloc_info *ai, int new_size)
 {
-	if(new_size < 0)
-		return false;
+    if (new_size < 0)
+        return false;
 
-	// new size is empty
-	if(new_size == 0)
-	{
-		// we currently aren't empty
-		if(ai->size > 0)
-		{
-			if(ai->sec)
-			{
-				delete ai->sbuf;
-				ai->sbuf = nullptr;
-			}
-			else
-			{
-				delete ai->qbuf;
-				ai->qbuf = nullptr;
-			}
+    // new size is empty
+    if (new_size == 0) {
+        // we currently aren't empty
+        if (ai->size > 0) {
+            if (ai->sec) {
+                delete ai->sbuf;
+                ai->sbuf = nullptr;
+            } else {
+                delete ai->qbuf;
+                ai->qbuf = nullptr;
+            }
 
-			ai->size = 0;
-			ai->data = nullptr;
-		}
+            ai->size = 0;
+            ai->data = nullptr;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	if(ai->sec)
-	{
-		Botan::SecureVector<Botan::byte> *new_buf;
-		try
-		{
-			new_buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)new_size + 1);
-		}
-		catch(std::exception &)
-		{
-			botan_throw_abort();
-			return false; // never get here
-		}
+    if (ai->sec) {
+        Botan::SecureVector<Botan::byte> *new_buf;
+        try {
+            new_buf = new Botan::SecureVector<Botan::byte>((Botan::u32bit)new_size + 1);
+        } catch (std::exception &) {
+            botan_throw_abort();
+            return false; // never get here
+        }
 
-		Botan::byte *new_p = (Botan::byte *)(*new_buf);
-		if(ai->size > 0)
-		{
-			const Botan::byte *old_p = (const Botan::byte *)(*(ai->sbuf));
-			memcpy(new_p, old_p, qMin(new_size, ai->size));
-			delete ai->sbuf;
-		}
-		ai->sbuf = new_buf;
-		ai->size = new_size;
-		(*(ai->sbuf))[new_size] = 0;
-		ai->data = (char *)new_p;
-	}
-	else
-	{
-		if(ai->size > 0)
-			ai->qbuf->resize(new_size);
-		else
-			ai->qbuf = new QByteArray(new_size, 0);
+        Botan::byte *new_p = (Botan::byte *)(*new_buf);
+        if (ai->size > 0) {
+            const Botan::byte *old_p = (const Botan::byte *)(*(ai->sbuf));
+            memcpy(new_p, old_p, qMin(new_size, ai->size));
+            delete ai->sbuf;
+        }
+        ai->sbuf                = new_buf;
+        ai->size                = new_size;
+        (*(ai->sbuf))[new_size] = 0;
+        ai->data                = (char *)new_p;
+    } else {
+        if (ai->size > 0)
+            ai->qbuf->resize(new_size);
+        else
+            ai->qbuf = new QByteArray(new_size, 0);
 
-		ai->size = new_size;
-		ai->data = ai->qbuf->data();
-	}
+        ai->size = new_size;
+        ai->data = ai->qbuf->data();
+    }
 
-	return true;
+    return true;
 }
 
 void ai_delete(alloc_info *ai)
 {
-	if(ai->size > 0)
-	{
-		if(ai->sec)
-			delete ai->sbuf;
-		else
-			delete ai->qbuf;
-	}
+    if (ai->size > 0) {
+        if (ai->sec)
+            delete ai->sbuf;
+        else
+            delete ai->qbuf;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -389,65 +346,70 @@ static char blank[] = "";
 class MemoryRegion::Private : public QSharedData
 {
 public:
-	alloc_info ai;
+    alloc_info ai;
 
-	Private(int size, bool sec)
-	{
-		ai_new(&ai, size, sec);
-	}
+    Private(int size, bool sec)
+    {
+        ai_new(&ai, size, sec);
+    }
 
-	Private(const QByteArray &from, bool sec)
-	{
-		ai_new(&ai, from.size(), sec);
-		memcpy(ai.data, from.data(), ai.size);
-	}
+    Private(const QByteArray &from, bool sec)
+    {
+        ai_new(&ai, from.size(), sec);
+        memcpy(ai.data, from.data(), ai.size);
+    }
 
-	Private(const Private &from) : QSharedData(from)
-	{
-		ai_copy(&ai, &from.ai);
-	}
+    Private(const Private &from)
+        : QSharedData(from)
+    {
+        ai_copy(&ai, &from.ai);
+    }
 
-	~Private()
-	{
-		ai_delete(&ai);
-	}
+    ~Private()
+    {
+        ai_delete(&ai);
+    }
 
-	bool resize(int new_size)
-	{
-		return ai_resize(&ai, new_size);
-	}
+    bool resize(int new_size)
+    {
+        return ai_resize(&ai, new_size);
+    }
 
-	void setSecure(bool sec)
-	{
-		// if same mode, do nothing
-		if(ai.sec == sec)
-			return;
+    void setSecure(bool sec)
+    {
+        // if same mode, do nothing
+        if (ai.sec == sec)
+            return;
 
-		alloc_info other;
-		ai_new(&other, ai.size, sec);
-		memcpy(other.data, ai.data, ai.size);
-		ai_delete(&ai);
-		ai = other;
-	}
+        alloc_info other;
+        ai_new(&other, ai.size, sec);
+        memcpy(other.data, ai.data, ai.size);
+        ai_delete(&ai);
+        ai = other;
+    }
 };
 
 MemoryRegion::MemoryRegion()
-:_secure(false), d(nullptr)
+    : _secure(false)
+    , d(nullptr)
 {
 }
 
 MemoryRegion::MemoryRegion(const char *str)
-:_secure(false), d(new Private(QByteArray::fromRawData(str, strlen(str)), false))
+    : _secure(false)
+    , d(new Private(QByteArray::fromRawData(str, strlen(str)), false))
 {
 }
 
 MemoryRegion::MemoryRegion(const QByteArray &from)
-:_secure(false), d(new Private(from, false))
+    : _secure(false)
+    , d(new Private(from, false))
 {
 }
 
 MemoryRegion::MemoryRegion(const MemoryRegion &from)
-:_secure(from._secure), d(from.d)
+    : _secure(from._secure)
+    , d(from.d)
 {
 }
 
@@ -455,180 +417,178 @@ MemoryRegion::~MemoryRegion()
 {
 }
 
-MemoryRegion & MemoryRegion::operator=(const MemoryRegion &from)
+MemoryRegion &MemoryRegion::operator=(const MemoryRegion &from)
 {
-	_secure = from._secure;
-	d = from.d;
-	return *this;
+    _secure = from._secure;
+    d       = from.d;
+    return *this;
 }
 
-MemoryRegion & MemoryRegion::operator=(const QByteArray &from)
+MemoryRegion &MemoryRegion::operator=(const QByteArray &from)
 {
-	set(from, false);
-	return *this;
+    set(from, false);
+    return *this;
 }
 
 bool MemoryRegion::isNull() const
 {
-	return (d ? false : true);
+    return (d ? false : true);
 }
 
 bool MemoryRegion::isSecure() const
 {
-	return _secure;
+    return _secure;
 }
 
 QByteArray MemoryRegion::toByteArray() const
 {
-	if(!d)
-		return QByteArray();
+    if (!d)
+        return QByteArray();
 
-	if(d->ai.sec)
-	{
-		QByteArray buf(d->ai.size, 0);
-		memcpy(buf.data(), d->ai.data, d->ai.size);
-		return buf;
-	}
-	else
-	{
-		if(d->ai.size > 0)
-			return *(d->ai.qbuf);
-		else
-			return QByteArray((int)0, (char)0);
-	}
+    if (d->ai.sec) {
+        QByteArray buf(d->ai.size, 0);
+        memcpy(buf.data(), d->ai.data, d->ai.size);
+        return buf;
+    } else {
+        if (d->ai.size > 0)
+            return *(d->ai.qbuf);
+        else
+            return QByteArray((int)0, (char)0);
+    }
 }
 
 MemoryRegion::MemoryRegion(bool secure)
-:_secure(secure), d(nullptr)
+    : _secure(secure)
+    , d(nullptr)
 {
 }
 
 MemoryRegion::MemoryRegion(int size, bool secure)
-:_secure(secure), d(new Private(size, secure))
+    : _secure(secure)
+    , d(new Private(size, secure))
 {
 }
 
 MemoryRegion::MemoryRegion(const QByteArray &from, bool secure)
-:_secure(secure), d(new Private(from, secure))
+    : _secure(secure)
+    , d(new Private(from, secure))
 {
 }
 
 char *MemoryRegion::data()
 {
-	if(!d)
-		return blank;
-	return d->ai.data;
+    if (!d)
+        return blank;
+    return d->ai.data;
 }
 
 const char *MemoryRegion::data() const
 {
-	if(!d)
-		return blank;
-	return d->ai.data;
+    if (!d)
+        return blank;
+    return d->ai.data;
 }
 
 const char *MemoryRegion::constData() const
 {
-	if(!d)
-		return blank;
-	return d->ai.data;
+    if (!d)
+        return blank;
+    return d->ai.data;
 }
 
-char & MemoryRegion::at(int index)
+char &MemoryRegion::at(int index)
 {
-	return *(d->ai.data + index);
+    return *(d->ai.data + index);
 }
 
-const char & MemoryRegion::at(int index) const
+const char &MemoryRegion::at(int index) const
 {
-	return *(d->ai.data + index);
+    return *(d->ai.data + index);
 }
 
 int MemoryRegion::size() const
 {
-	if(!d)
-		return 0;
-	return d->ai.size;
+    if (!d)
+        return 0;
+    return d->ai.size;
 }
 
 bool MemoryRegion::isEmpty() const
 {
-	if(!d)
-		return true;
-	return (d->ai.size > 0 ? false : true);
+    if (!d)
+        return true;
+    return (d->ai.size > 0 ? false : true);
 }
 
 bool MemoryRegion::resize(int size)
 {
-	if(!d)
-	{
-		d = new Private(size, _secure);
-		return true;
-	}
+    if (!d) {
+        d = new Private(size, _secure);
+        return true;
+    }
 
-	if(d->ai.size == size)
-		return true;
+    if (d->ai.size == size)
+        return true;
 
-	return d->resize(size);
+    return d->resize(size);
 }
 
 void MemoryRegion::set(const QByteArray &from, bool secure)
 {
-	_secure = secure;
+    _secure = secure;
 
-	if(!from.isEmpty())
-		d = new Private(from, secure);
-	else
-		d = new Private(0, secure);
+    if (!from.isEmpty())
+        d = new Private(from, secure);
+    else
+        d = new Private(0, secure);
 }
 
 void MemoryRegion::setSecure(bool secure)
 {
-	_secure = secure;
+    _secure = secure;
 
-	if(!d)
-	{
-		d = new Private(0, secure);
-		return;
-	}
+    if (!d) {
+        d = new Private(0, secure);
+        return;
+    }
 
-	d->setSecure(secure);
+    d->setSecure(secure);
 }
 
 //----------------------------------------------------------------------------
 // SecureArray
 //----------------------------------------------------------------------------
 SecureArray::SecureArray()
-:MemoryRegion(true)
+    : MemoryRegion(true)
 {
 }
 
 SecureArray::SecureArray(int size, char ch)
-:MemoryRegion(size, true)
+    : MemoryRegion(size, true)
 {
-	// ai_new fills with zeros for us
-	if(ch != 0)
-		fill(ch, size);
+    // ai_new fills with zeros for us
+    if (ch != 0)
+        fill(ch, size);
 }
 
 SecureArray::SecureArray(const char *str)
-:MemoryRegion(QByteArray::fromRawData(str, strlen(str)), true)
+    : MemoryRegion(QByteArray::fromRawData(str, strlen(str)), true)
 {
 }
 
 SecureArray::SecureArray(const QByteArray &a)
-:MemoryRegion(a, true)
+    : MemoryRegion(a, true)
 {
 }
 
 SecureArray::SecureArray(const MemoryRegion &a)
-:MemoryRegion(a)
+    : MemoryRegion(a)
 {
-	setSecure(true);
+    setSecure(true);
 }
 
 SecureArray::SecureArray(const SecureArray &from)
-:MemoryRegion(from)
+    : MemoryRegion(from)
 {
 }
 
@@ -636,121 +596,121 @@ SecureArray::~SecureArray()
 {
 }
 
-SecureArray & SecureArray::operator=(const SecureArray &from)
+SecureArray &SecureArray::operator=(const SecureArray &from)
 {
-	MemoryRegion::operator=(from);
-	return *this;
+    MemoryRegion::operator=(from);
+    return *this;
 }
 
-SecureArray & SecureArray::operator=(const QByteArray &from)
+SecureArray &SecureArray::operator=(const QByteArray &from)
 {
-	MemoryRegion::set(from, true);
-	return *this;
+    MemoryRegion::set(from, true);
+    return *this;
 }
 
 void SecureArray::clear()
 {
-	MemoryRegion::resize(0);
+    MemoryRegion::resize(0);
 }
 
 bool SecureArray::resize(int size)
 {
-	return MemoryRegion::resize(size);
+    return MemoryRegion::resize(size);
 }
 
-char & SecureArray::operator[](int index)
+char &SecureArray::operator[](int index)
 {
-	return at(index);
+    return at(index);
 }
 
-const char & SecureArray::operator[](int index) const
+const char &SecureArray::operator[](int index) const
 {
-	return at(index);
+    return at(index);
 }
 
-char & SecureArray::at(int index)
+char &SecureArray::at(int index)
 {
-	return MemoryRegion::at(index);
+    return MemoryRegion::at(index);
 }
 
-const char & SecureArray::at(int index) const
+const char &SecureArray::at(int index) const
 {
-	return MemoryRegion::at(index);
+    return MemoryRegion::at(index);
 }
 
 char *SecureArray::data()
 {
-	return MemoryRegion::data();
+    return MemoryRegion::data();
 }
 
 const char *SecureArray::data() const
 {
-	return MemoryRegion::data();
+    return MemoryRegion::data();
 }
 
 const char *SecureArray::constData() const
 {
-	return MemoryRegion::constData();
+    return MemoryRegion::constData();
 }
 
 int SecureArray::size() const
 {
-	return MemoryRegion::size();
+    return MemoryRegion::size();
 }
 
 bool SecureArray::isEmpty() const
 {
-	return MemoryRegion::isEmpty();
+    return MemoryRegion::isEmpty();
 }
 
 QByteArray SecureArray::toByteArray() const
 {
-	return MemoryRegion::toByteArray();
+    return MemoryRegion::toByteArray();
 }
 
-SecureArray & SecureArray::append(const SecureArray &a)
+SecureArray &SecureArray::append(const SecureArray &a)
 {
-	const int oldsize = size();
-	resize(oldsize + a.size());
-	memcpy(data() + oldsize, a.data(), a.size());
-	return *this;
+    const int oldsize = size();
+    resize(oldsize + a.size());
+    memcpy(data() + oldsize, a.data(), a.size());
+    return *this;
 }
 
 bool SecureArray::operator==(const MemoryRegion &other) const
 {
-	if(this == &other)
-		return true;
-	if(size() == other.size() && memcmp(data(), other.data(), size()) == 0)
-		return true;
-	return false;
+    if (this == &other)
+        return true;
+    if (size() == other.size() && memcmp(data(), other.data(), size()) == 0)
+        return true;
+    return false;
 }
 
-SecureArray & SecureArray::operator+=(const SecureArray &a)
+SecureArray &SecureArray::operator+=(const SecureArray &a)
 {
-	return append(a);
+    return append(a);
 }
 
 void SecureArray::fill(char fillChar, int fillToPosition)
 {
-	const int len = (fillToPosition == -1) ? size() : qMin(fillToPosition, size());
-	if(len > 0)
-		memset(data(), (int)fillChar, len);
+    const int len = (fillToPosition == -1) ? size() : qMin(fillToPosition, size());
+    if (len > 0)
+        memset(data(), (int)fillChar, len);
 }
 
 void SecureArray::set(const SecureArray &from)
 {
-	*this = from;
+    *this = from;
 }
 
 void SecureArray::set(const QByteArray &from)
 {
-	*this = from;
+    *this = from;
 }
 
 const SecureArray operator+(const SecureArray &a, const SecureArray &b)
 {
-	SecureArray c = a;
-	return c.append(b);
+    SecureArray c = a;
+    return c.append(b);
 }
 
 //----------------------------------------------------------------------------
@@ -758,244 +718,222 @@ const SecureArray operator+(const SecureArray &a, const SecureArray &b)
 //----------------------------------------------------------------------------
 static void negate_binary(char *a, int size)
 {
-	// negate = two's compliment + 1
-	bool done = false;
-	for(int n = size - 1; n >= 0; --n)
-	{
-		a[n] = ~a[n];
-		if(!done)
-		{
-			if((unsigned char)a[n] < 0xff)
-			{
-				++a[n];
-				done = true;
-			}
-			else
-				a[n] = 0;
-		}
-	}
+    // negate = two's compliment + 1
+    bool done = false;
+    for (int n = size - 1; n >= 0; --n) {
+        a[n] = ~a[n];
+        if (!done) {
+            if ((unsigned char)a[n] < 0xff) {
+                ++a[n];
+                done = true;
+            } else
+                a[n] = 0;
+        }
+    }
 }
 
 class BigInteger::Private : public QSharedData
 {
 public:
-	Botan::BigInt n;
+    Botan::BigInt n;
 };
 
 BigInteger::BigInteger()
 {
-	d = new Private;
+    d = new Private;
 }
 
 BigInteger::BigInteger(int i)
 {
-	d = new Private;
-	if(i < 0)
-	{
-		d->n = Botan::BigInt(i * (-1));
-		d->n.set_sign(Botan::BigInt::Negative);
-	}
-	else
-	{
-		d->n = Botan::BigInt(i);
-		d->n.set_sign(Botan::BigInt::Positive);
-	}
+    d = new Private;
+    if (i < 0) {
+        d->n = Botan::BigInt(i * (-1));
+        d->n.set_sign(Botan::BigInt::Negative);
+    } else {
+        d->n = Botan::BigInt(i);
+        d->n.set_sign(Botan::BigInt::Positive);
+    }
 }
 
 BigInteger::BigInteger(const char *c)
 {
-	d = new Private;
-	fromString(QString::fromLatin1(c));
+    d = new Private;
+    fromString(QString::fromLatin1(c));
 }
 
 BigInteger::BigInteger(const QString &s)
 {
-	d = new Private;
-	fromString(s);
+    d = new Private;
+    fromString(s);
 }
 
 BigInteger::BigInteger(const SecureArray &a)
 {
-	d = new Private;
-	fromArray(a);
+    d = new Private;
+    fromArray(a);
 }
 
 BigInteger::BigInteger(const BigInteger &from)
 {
-	*this = from;
+    *this = from;
 }
 
 BigInteger::~BigInteger()
 {
 }
 
-BigInteger & BigInteger::operator=(const BigInteger &from)
+BigInteger &BigInteger::operator=(const BigInteger &from)
 {
-	d = from.d;
-	return *this;
+    d = from.d;
+    return *this;
 }
 
-BigInteger & BigInteger::operator+=(const BigInteger &i)
+BigInteger &BigInteger::operator+=(const BigInteger &i)
 {
-	d->n += i.d->n;
-	return *this;
+    d->n += i.d->n;
+    return *this;
 }
 
-BigInteger & BigInteger::operator-=(const BigInteger &i)
+BigInteger &BigInteger::operator-=(const BigInteger &i)
 {
-	d->n -= i.d->n;
-	return *this;
+    d->n -= i.d->n;
+    return *this;
 }
 
-BigInteger & BigInteger::operator*=(const BigInteger &i)
+BigInteger &BigInteger::operator*=(const BigInteger &i)
 {
-	d->n *= i.d->n;
-	return *this;
+    d->n *= i.d->n;
+    return *this;
 }
 
-BigInteger & BigInteger::operator/=(const BigInteger &i)
+BigInteger &BigInteger::operator/=(const BigInteger &i)
 {
-	try
-	{
-		d->n /= i.d->n;
-	}
-	catch(std::exception &)
-	{
-		fprintf(stderr, "QCA: Botan integer division error\n");
-		abort();
-	}
-	return *this;
+    try {
+        d->n /= i.d->n;
+    } catch (std::exception &) {
+        fprintf(stderr, "QCA: Botan integer division error\n");
+        abort();
+    }
+    return *this;
 }
 
-BigInteger & BigInteger::operator%=(const BigInteger &i)
+BigInteger &BigInteger::operator%=(const BigInteger &i)
 {
-	try
-	{
-		d->n %= i.d->n;
-	}
-	catch(std::exception &)
-	{
-		fprintf(stderr, "QCA: Botan integer division error\n");
-		abort();
-	}
-	return *this;
+    try {
+        d->n %= i.d->n;
+    } catch (std::exception &) {
+        fprintf(stderr, "QCA: Botan integer division error\n");
+        abort();
+    }
+    return *this;
 }
 
-BigInteger & BigInteger::operator=(const QString &s)
+BigInteger &BigInteger::operator=(const QString &s)
 {
-	fromString(s);
-	return *this;
+    fromString(s);
+    return *this;
 }
 
 int BigInteger::compare(const BigInteger &n) const
 {
-	return ( (d->n).cmp( n.d->n, true) );
+    return ((d->n).cmp(n.d->n, true));
 }
 
-QTextStream &operator<<(QTextStream &stream, const BigInteger& b)
+QTextStream &operator<<(QTextStream &stream, const BigInteger &b)
 {
-	stream << b.toString();
-	return stream;
+    stream << b.toString();
+    return stream;
 }
 
 SecureArray BigInteger::toArray() const
 {
-	int size = d->n.encoded_size(Botan::BigInt::Binary);
+    int size = d->n.encoded_size(Botan::BigInt::Binary);
 
-	// return at least 8 bits
-	if(size == 0)
-	{
-		SecureArray a(1);
-		a[0] = 0;
-		return a;
-	}
+    // return at least 8 bits
+    if (size == 0) {
+        SecureArray a(1);
+        a[0] = 0;
+        return a;
+    }
 
-	int offset = 0;
-	SecureArray a;
+    int         offset = 0;
+    SecureArray a;
 
-	// make room for a sign bit if needed
-	if(d->n.get_bit((size * 8) - 1))
-	{
-		++size;
-		a.resize(size);
-		a[0] = 0;
-		++offset;
-	}
-	else
-		a.resize(size);
+    // make room for a sign bit if needed
+    if (d->n.get_bit((size * 8) - 1)) {
+        ++size;
+        a.resize(size);
+        a[0] = 0;
+        ++offset;
+    } else
+        a.resize(size);
 
-	Botan::BigInt::encode((Botan::byte *)a.data() + offset, d->n, Botan::BigInt::Binary);
+    Botan::BigInt::encode((Botan::byte *)a.data() + offset, d->n, Botan::BigInt::Binary);
 
-	if(d->n.is_negative())
-		negate_binary(a.data(), a.size());
+    if (d->n.is_negative())
+        negate_binary(a.data(), a.size());
 
-	return a;
+    return a;
 }
 
 void BigInteger::fromArray(const SecureArray &_a)
 {
-	if(_a.isEmpty())
-	{
-		d->n = Botan::BigInt(0);
-		return;
-	}
-	SecureArray a = _a;
+    if (_a.isEmpty()) {
+        d->n = Botan::BigInt(0);
+        return;
+    }
+    SecureArray a = _a;
 
-	Botan::BigInt::Sign sign = Botan::BigInt::Positive;
-	if(a[0] & 0x80)
-		sign = Botan::BigInt::Negative;
+    Botan::BigInt::Sign sign = Botan::BigInt::Positive;
+    if (a[0] & 0x80)
+        sign = Botan::BigInt::Negative;
 
-	if(sign == Botan::BigInt::Negative)
-		negate_binary(a.data(), a.size());
+    if (sign == Botan::BigInt::Negative)
+        negate_binary(a.data(), a.size());
 
-	d->n = Botan::BigInt::decode((const Botan::byte *)a.data(), a.size(), Botan::BigInt::Binary);
-	d->n.set_sign(sign);
+    d->n = Botan::BigInt::decode((const Botan::byte *)a.data(), a.size(), Botan::BigInt::Binary);
+    d->n.set_sign(sign);
 }
 
 QString BigInteger::toString() const
 {
-	QByteArray cs;
-	try
-	{
-		cs.resize(d->n.encoded_size(Botan::BigInt::Decimal));
-		Botan::BigInt::encode((Botan::byte *)cs.data(), d->n, Botan::BigInt::Decimal);
-	}
-	catch(std::exception &)
-	{
-		return QString();
-	}
+    QByteArray cs;
+    try {
+        cs.resize(d->n.encoded_size(Botan::BigInt::Decimal));
+        Botan::BigInt::encode((Botan::byte *)cs.data(), d->n, Botan::BigInt::Decimal);
+    } catch (std::exception &) {
+        return QString();
+    }
 
-	QString str;
-	if(d->n.is_negative())
-		str += QLatin1Char('-');
-	str += QString::fromLatin1(cs);
-	return str;
+    QString str;
+    if (d->n.is_negative())
+        str += QLatin1Char('-');
+    str += QString::fromLatin1(cs);
+    return str;
 }
 
 bool BigInteger::fromString(const QString &s)
 {
-	if(s.isEmpty())
-		return false;
-	const QByteArray cs = s.toLatin1();
+    if (s.isEmpty())
+        return false;
+    const QByteArray cs = s.toLatin1();
 
-	bool neg = false;
-	if(s[0] == QLatin1Char('-'))
-		neg = true;
+    bool neg = false;
+    if (s[0] == QLatin1Char('-'))
+        neg = true;
 
-	try
-	{
-		d->n = Botan::BigInt::decode((const Botan::byte *)cs.data() + (neg ? 1 : 0), cs.length() - (neg ? 1 : 0), Botan::BigInt::Decimal);
-	}
-	catch(std::exception &)
-	{
-		return false;
-	}
+    try {
+        d->n = Botan::BigInt::decode(
+            (const Botan::byte *)cs.data() + (neg ? 1 : 0), cs.length() - (neg ? 1 : 0), Botan::BigInt::Decimal);
+    } catch (std::exception &) {
+        return false;
+    }
 
-	if(neg)
-		d->n.set_sign(Botan::BigInt::Negative);
-	else
-		d->n.set_sign(Botan::BigInt::Positive);
-	return true;
+    if (neg)
+        d->n.set_sign(Botan::BigInt::Negative);
+    else
+        d->n.set_sign(Botan::BigInt::Positive);
+    return true;
 }
 
 }

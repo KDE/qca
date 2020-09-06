@@ -27,191 +27,192 @@
 
 class TLSSocket::Private : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	TLSSocket *q;
-	QTcpSocket *sock;
-	QCA::TLS *tls;
-	QString host;
-	bool encrypted;
-	bool error, done;
-	QByteArray readbuf, writebuf;
-	QCA::Synchronizer sync;
-	bool waiting;
+    TLSSocket *       q;
+    QTcpSocket *      sock;
+    QCA::TLS *        tls;
+    QString           host;
+    bool              encrypted;
+    bool              error, done;
+    QByteArray        readbuf, writebuf;
+    QCA::Synchronizer sync;
+    bool              waiting;
 
-	Private(TLSSocket *_q) : QObject(_q), q(_q), sync(_q)
-	{
-		sock = new QTcpSocket(this);
-		connect(sock, &QTcpSocket::connected, this, &TLSSocket::Private::sock_connected);
-		connect(sock, &QTcpSocket::readyRead, this, &TLSSocket::Private::sock_readyRead);
-		connect(sock, &QTcpSocket::bytesWritten, this, &TLSSocket::Private::sock_bytesWritten);
-		connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &TLSSocket::Private::sock_error);
+    Private(TLSSocket *_q)
+        : QObject(_q)
+        , q(_q)
+        , sync(_q)
+    {
+        sock = new QTcpSocket(this);
+        connect(sock, &QTcpSocket::connected, this, &TLSSocket::Private::sock_connected);
+        connect(sock, &QTcpSocket::readyRead, this, &TLSSocket::Private::sock_readyRead);
+        connect(sock, &QTcpSocket::bytesWritten, this, &TLSSocket::Private::sock_bytesWritten);
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error),
+                this,
+                &TLSSocket::Private::sock_error);
 
-		tls = new QCA::TLS(this);
-		connect(tls, &QCA::TLS::handshaken, this, &TLSSocket::Private::tls_handshaken);
-		connect(tls, &QCA::TLS::readyRead, this, &TLSSocket::Private::tls_readyRead);
-		connect(tls, &QCA::TLS::readyReadOutgoing, this, &TLSSocket::Private::tls_readyReadOutgoing);
-		connect(tls, &QCA::TLS::closed, this, &TLSSocket::Private::tls_closed);
-		connect(tls, &QCA::TLS::error, this, &TLSSocket::Private::tls_error);
-		tls->setTrustedCertificates(QCA::systemStore());
-		encrypted = false;
-		error = false;
-		waiting = false;
-		done = false;
-	}
+        tls = new QCA::TLS(this);
+        connect(tls, &QCA::TLS::handshaken, this, &TLSSocket::Private::tls_handshaken);
+        connect(tls, &QCA::TLS::readyRead, this, &TLSSocket::Private::tls_readyRead);
+        connect(tls, &QCA::TLS::readyReadOutgoing, this, &TLSSocket::Private::tls_readyReadOutgoing);
+        connect(tls, &QCA::TLS::closed, this, &TLSSocket::Private::tls_closed);
+        connect(tls, &QCA::TLS::error, this, &TLSSocket::Private::tls_error);
+        tls->setTrustedCertificates(QCA::systemStore());
+        encrypted = false;
+        error     = false;
+        waiting   = false;
+        done      = false;
+    }
 
-	bool waitForReadyRead(int msecs)
-	{
-		waiting = true;
-		bool ok = sync.waitForCondition(msecs);
-		//while(1)
-		//	QCoreApplication::instance()->processEvents();
-		waiting = false;
-		if(error || done)
-			return false;
-		return ok;
-	}
+    bool waitForReadyRead(int msecs)
+    {
+        waiting = true;
+        bool ok = sync.waitForCondition(msecs);
+        // while(1)
+        //	QCoreApplication::instance()->processEvents();
+        waiting = false;
+        if (error || done)
+            return false;
+        return ok;
+    }
 
 private Q_SLOTS:
-	void sock_connected()
-	{
-		//printf("sock connected\n");
-		tls->startClient(host);
-	}
+    void sock_connected()
+    {
+        // printf("sock connected\n");
+        tls->startClient(host);
+    }
 
-	void sock_readyRead()
-	{
-		//printf("sock ready read\n");
-		QByteArray buf = sock->readAll();
-		//printf("%d bytes\n", buf.size());
-		tls->writeIncoming(buf);
-	}
+    void sock_readyRead()
+    {
+        // printf("sock ready read\n");
+        QByteArray buf = sock->readAll();
+        // printf("%d bytes\n", buf.size());
+        tls->writeIncoming(buf);
+    }
 
-	void sock_bytesWritten(qint64 x)
-	{
-		Q_UNUSED(x);
-		//printf("sock bytes written: %d\n", (int)x);
-	}
+    void sock_bytesWritten(qint64 x)
+    {
+        Q_UNUSED(x);
+        // printf("sock bytes written: %d\n", (int)x);
+    }
 
-	void sock_error(QAbstractSocket::SocketError x)
-	{
-		//printf("sock error: %d\n", x);
-		Q_UNUSED(x);
-		done = true;
-		if(waiting)
-			sync.conditionMet();
-	}
+    void sock_error(QAbstractSocket::SocketError x)
+    {
+        // printf("sock error: %d\n", x);
+        Q_UNUSED(x);
+        done = true;
+        if (waiting)
+            sync.conditionMet();
+    }
 
-	void tls_handshaken()
-	{
-		//printf("tls handshaken\n");
-		if(tls->peerIdentityResult() != QCA::TLS::Valid)
-		{
-			printf("not valid\n");
-			sock->abort();
-			tls->reset();
-			error = true;
-		}
-		else
-		{
-			//printf("valid\n");
-			encrypted = true;
-			//printf("%d bytes in writebuf\n", writebuf.size());
-			if(!writebuf.isEmpty())
-			{
-				//printf("[%s]\n", writebuf.data());
-				tls->write(writebuf);
-				writebuf.clear();
-			}
-		}
-		if(waiting)
-			sync.conditionMet();
-	}
+    void tls_handshaken()
+    {
+        // printf("tls handshaken\n");
+        if (tls->peerIdentityResult() != QCA::TLS::Valid) {
+            printf("not valid\n");
+            sock->abort();
+            tls->reset();
+            error = true;
+        } else {
+            // printf("valid\n");
+            encrypted = true;
+            // printf("%d bytes in writebuf\n", writebuf.size());
+            if (!writebuf.isEmpty()) {
+                // printf("[%s]\n", writebuf.data());
+                tls->write(writebuf);
+                writebuf.clear();
+            }
+        }
+        if (waiting)
+            sync.conditionMet();
+    }
 
-	void tls_readyRead()
-	{
-		//printf("tls ready read\n");
-		if(waiting)
-			sync.conditionMet();
-	}
+    void tls_readyRead()
+    {
+        // printf("tls ready read\n");
+        if (waiting)
+            sync.conditionMet();
+    }
 
-	void tls_readyReadOutgoing()
-	{
-		//printf("tls ready read outgoing\n");
-		QByteArray buf = tls->readOutgoing();
-		//printf("%d bytes\n", buf.size());
-		sock->write(buf);
-	}
+    void tls_readyReadOutgoing()
+    {
+        // printf("tls ready read outgoing\n");
+        QByteArray buf = tls->readOutgoing();
+        // printf("%d bytes\n", buf.size());
+        sock->write(buf);
+    }
 
-	void tls_closed()
-	{
-		//printf("tls closed\n");
-	}
+    void tls_closed()
+    {
+        // printf("tls closed\n");
+    }
 
-	void tls_error()
-	{
-		//printf("tls error\n");
-	}
+    void tls_error()
+    {
+        // printf("tls error\n");
+    }
 };
 
 TLSSocket::TLSSocket(QObject *parent)
-:QTcpSocket(parent)
+    : QTcpSocket(parent)
 {
-	d = new Private(this);
-
+    d = new Private(this);
 }
 
 TLSSocket::~TLSSocket()
 {
-	delete d;
+    delete d;
 }
 
 void TLSSocket::connectToHostEncrypted(const QString &host, quint16 port)
 {
-	d->host = host;
-	setOpenMode(QIODevice::ReadWrite);
-	d->sock->connectToHost(host, port);
+    d->host = host;
+    setOpenMode(QIODevice::ReadWrite);
+    d->sock->connectToHost(host, port);
 }
 
 QCA::TLS *TLSSocket::tls()
 {
-	return d->tls;
+    return d->tls;
 }
 
 bool TLSSocket::waitForReadyRead(int msecs)
 {
-	/*if(d->readbuf.isEmpty())
-		return false;
+    /*if(d->readbuf.isEmpty())
+        return false;
 
-	if(d->tls->bytesAvailable() == 0)
-		return false;*/
+    if(d->tls->bytesAvailable() == 0)
+        return false;*/
 
-	return d->waitForReadyRead(msecs);
+    return d->waitForReadyRead(msecs);
 }
 
 qint64 TLSSocket::readData(char *data, qint64 maxlen)
 {
-	if(!d->error)
-		d->readbuf += d->tls->read();
-	unsigned char *p = (unsigned char *)d->readbuf.data();
-	int size = d->readbuf.size();
-	int readsize = qMin(size, (int)maxlen);
-	int newsize = size - readsize;
-	memcpy(data, p, readsize);
-	memmove(p, p + readsize, newsize);
-	d->readbuf.resize(newsize);
-	return readsize;
+    if (!d->error)
+        d->readbuf += d->tls->read();
+    unsigned char *p        = (unsigned char *)d->readbuf.data();
+    int            size     = d->readbuf.size();
+    int            readsize = qMin(size, (int)maxlen);
+    int            newsize  = size - readsize;
+    memcpy(data, p, readsize);
+    memmove(p, p + readsize, newsize);
+    d->readbuf.resize(newsize);
+    return readsize;
 }
 
 qint64 TLSSocket::writeData(const char *data, qint64 len)
 {
-	//printf("write %d bytes\n", (int)len);
-	QByteArray buf(data, len);
-	if(d->encrypted)
-		d->tls->write(buf);
-	else
-		d->writebuf += buf;
-	return len;
+    // printf("write %d bytes\n", (int)len);
+    QByteArray buf(data, len);
+    if (d->encrypted)
+        d->tls->write(buf);
+    else
+        d->writebuf += buf;
+    return len;
 }
 
 #include "tlssocket.moc"

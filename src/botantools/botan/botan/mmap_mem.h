@@ -26,9 +26,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Memory Mapping Allocator Header File           *
-* (C) 1999-2007 The Botan Project                *
-*************************************************/
+ * Memory Mapping Allocator Header File           *
+ * (C) 1999-2007 The Botan Project                *
+ *************************************************/
 
 #ifndef BOTAN_EXT_MMAP_ALLOCATOR_H__
 #define BOTAN_EXT_MMAP_ALLOCATOR_H__
@@ -40,17 +40,24 @@ namespace QCA { // WRAPNS_LINE
 namespace Botan {
 
 /*************************************************
-* Memory Mapping Allocator                       *
-*************************************************/
+ * Memory Mapping Allocator                       *
+ *************************************************/
 class MemoryMapping_Allocator : public Pooling_Allocator
-   {
-   public:
-      MemoryMapping_Allocator() : Pooling_Allocator(64*1024, false) {}
-      std::string type() const override { return "mmap"; }
-   private:
-      void* alloc_block(u32bit) override;
-      void dealloc_block(void*, u32bit) override;
-   };
+{
+public:
+    MemoryMapping_Allocator()
+        : Pooling_Allocator(64 * 1024, false)
+    {
+    }
+    std::string type() const override
+    {
+        return "mmap";
+    }
+
+private:
+    void *alloc_block(u32bit) override;
+    void  dealloc_block(void *, u32bit) override;
+};
 
 }
 

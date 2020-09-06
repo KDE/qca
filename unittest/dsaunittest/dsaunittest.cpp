@@ -40,8 +40,7 @@ private Q_SLOTS:
     void testdsa();
 
 private:
-    QCA::Initializer* m_init;
-
+    QCA::Initializer *m_init;
 };
 
 void DSAUnitTest::initTestCase()
@@ -56,67 +55,63 @@ void DSAUnitTest::cleanupTestCase()
 
 void DSAUnitTest::testdsa()
 {
-	if(!QCA::isSupported("pkey") ||
-	   !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
-	   !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
-	{
-		QSKIP("DSA not supported!");
-	}
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA)) {
+        QSKIP("DSA not supported!");
+    }
 
-	if (!QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_1024))
-	{
-		QSKIP("DSA_1024 discrete logarithm group sets not supported!");
-	}
+    if (!QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_1024)) {
+        QSKIP("DSA_1024 discrete logarithm group sets not supported!");
+    }
 
-	QCA::KeyGenerator keygen;
-	QCOMPARE( keygen.isBusy(), false );
-	QCOMPARE( keygen.blockingEnabled(), true );
-	QCA::DLGroup group = keygen.createDLGroup(QCA::DSA_1024);
-	QCOMPARE( group.isNull(), false );
+    QCA::KeyGenerator keygen;
+    QCOMPARE(keygen.isBusy(), false);
+    QCOMPARE(keygen.blockingEnabled(), true);
+    QCA::DLGroup group = keygen.createDLGroup(QCA::DSA_1024);
+    QCOMPARE(group.isNull(), false);
 
-	QCA::PrivateKey dsaKey = keygen.createDSA( group );
-	QCOMPARE( dsaKey.isNull(), false );
-	QCOMPARE( dsaKey.isRSA(), false );
-	QCOMPARE( dsaKey.isDSA(), true );
-	QCOMPARE( dsaKey.isDH(), false );
-	QCOMPARE( dsaKey.isPrivate(), true );
-	QCOMPARE( dsaKey.isPublic(), false );
-	QCOMPARE( dsaKey.canSign(), true );
-	QCOMPARE( dsaKey.canDecrypt(), false );
+    QCA::PrivateKey dsaKey = keygen.createDSA(group);
+    QCOMPARE(dsaKey.isNull(), false);
+    QCOMPARE(dsaKey.isRSA(), false);
+    QCOMPARE(dsaKey.isDSA(), true);
+    QCOMPARE(dsaKey.isDH(), false);
+    QCOMPARE(dsaKey.isPrivate(), true);
+    QCOMPARE(dsaKey.isPublic(), false);
+    QCOMPARE(dsaKey.canSign(), true);
+    QCOMPARE(dsaKey.canDecrypt(), false);
 
-	QCOMPARE( dsaKey.bitSize(), 1024 );
-	QCA::DSAPrivateKey dsaPrivKey = dsaKey.toDSA();
-	QCOMPARE( dsaPrivKey.bitSize(), 1024 );
+    QCOMPARE(dsaKey.bitSize(), 1024);
+    QCA::DSAPrivateKey dsaPrivKey = dsaKey.toDSA();
+    QCOMPARE(dsaPrivKey.bitSize(), 1024);
 
-	QCA::SecureArray dsaDER = dsaKey.toDER();
-	QCOMPARE( dsaDER.isEmpty(), false );
+    QCA::SecureArray dsaDER = dsaKey.toDER();
+    QCOMPARE(dsaDER.isEmpty(), false);
 
-	QString dsaPEM = dsaKey.toPEM();
-	QCOMPARE( dsaPEM.isEmpty(), false );
+    QString dsaPEM = dsaKey.toPEM();
+    QCOMPARE(dsaPEM.isEmpty(), false);
 
-	QCA::ConvertResult checkResult;
-	QCA::PrivateKey fromPEMkey = QCA::PrivateKey::fromPEM(dsaPEM, QCA::SecureArray(), &checkResult);
-	QCOMPARE( checkResult, QCA::ConvertGood );
-	QCOMPARE( fromPEMkey.isNull(), false );
-	QCOMPARE( fromPEMkey.isRSA(), false );
-	QCOMPARE( fromPEMkey.isDSA(), true );
-	QCOMPARE( fromPEMkey.isDH(), false );
-	QCOMPARE( fromPEMkey.isPrivate(), true );
-	QCOMPARE( fromPEMkey.isPublic(), false );
-	QVERIFY( dsaKey == fromPEMkey );
+    QCA::ConvertResult checkResult;
+    QCA::PrivateKey    fromPEMkey = QCA::PrivateKey::fromPEM(dsaPEM, QCA::SecureArray(), &checkResult);
+    QCOMPARE(checkResult, QCA::ConvertGood);
+    QCOMPARE(fromPEMkey.isNull(), false);
+    QCOMPARE(fromPEMkey.isRSA(), false);
+    QCOMPARE(fromPEMkey.isDSA(), true);
+    QCOMPARE(fromPEMkey.isDH(), false);
+    QCOMPARE(fromPEMkey.isPrivate(), true);
+    QCOMPARE(fromPEMkey.isPublic(), false);
+    QVERIFY(dsaKey == fromPEMkey);
 
-	QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(dsaDER, QCA::SecureArray(), &checkResult);
-	QCOMPARE( checkResult, QCA::ConvertGood );
-	QCOMPARE( fromDERkey.isNull(), false );
-	QCOMPARE( fromDERkey.isRSA(), false );
-	QCOMPARE( fromDERkey.isDSA(), true );
-	QCOMPARE( fromDERkey.isDH(), false );
-	QCOMPARE( fromDERkey.isPrivate(), true );
-	QCOMPARE( fromDERkey.isPublic(), false );
-	QVERIFY( dsaKey == fromDERkey );
+    QCA::PrivateKey fromDERkey = QCA::PrivateKey::fromDER(dsaDER, QCA::SecureArray(), &checkResult);
+    QCOMPARE(checkResult, QCA::ConvertGood);
+    QCOMPARE(fromDERkey.isNull(), false);
+    QCOMPARE(fromDERkey.isRSA(), false);
+    QCOMPARE(fromDERkey.isDSA(), true);
+    QCOMPARE(fromDERkey.isDH(), false);
+    QCOMPARE(fromDERkey.isPrivate(), true);
+    QCOMPARE(fromDERkey.isPublic(), false);
+    QVERIFY(dsaKey == fromDERkey);
 }
 
 QTEST_MAIN(DSAUnitTest)
 
 #include "dsaunittest.moc"
-

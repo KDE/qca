@@ -26,9 +26,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Parser Functions Header File                   *
-* (C) 1999-2007 The Botan Project                *
-*************************************************/
+ * Parser Functions Header File                   *
+ * (C) 1999-2007 The Botan Project                *
+ *************************************************/
 
 #ifndef BOTAN_PARSER_H__
 #define BOTAN_PARSER_H__
@@ -46,22 +46,22 @@ namespace QCA { // WRAPNS_LINE
 namespace Botan {
 
 /*************************************************
-* String Parsing Functions                       *
-*************************************************/
+ * String Parsing Functions                       *
+ *************************************************/
 #ifndef BOTAN_TOOLS_ONLY
-std::vector<std::string> parse_algorithm_name(const std::string&);
-std::vector<std::string> split_on(const std::string&, char);
-std::vector<u32bit> parse_asn1_oid(const std::string&);
-bool x500_name_cmp(const std::string&, const std::string&);
-u32bit parse_expr(const std::string&);
+std::vector<std::string> parse_algorithm_name(const std::string &);
+std::vector<std::string> split_on(const std::string &, char);
+std::vector<u32bit>      parse_asn1_oid(const std::string &);
+bool                     x500_name_cmp(const std::string &, const std::string &);
+u32bit                   parse_expr(const std::string &);
 #endif
 
 /*************************************************
-* String/Integer Conversions                     *
-*************************************************/
+ * String/Integer Conversions                     *
+ *************************************************/
 std::string to_string(u64bit, u32bit = 0);
 #ifndef BOTAN_TOOLS_ONLY
-u32bit to_u32bit(const std::string&);
+u32bit to_u32bit(const std::string &);
 #endif
 
 }

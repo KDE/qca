@@ -22,9 +22,9 @@
 
 #include <QtGlobal>
 #include <botan/allocate.h>
-#include <botan/secmem.h>
-#include <botan/modules.h>
-#include <botan/libstate.h>
 #include <botan/bigint.h>
+#include <botan/libstate.h>
+#include <botan/modules.h>
+#include <botan/secmem.h>
 
 #endif

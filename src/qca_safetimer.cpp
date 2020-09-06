@@ -21,8 +21,8 @@
 
 #include "qca_safetimer.h"
 #include <QElapsedTimer>
-#include <qmath.h>
 #include <QTimerEvent>
+#include <qmath.h>
 
 // #define SAFETIMER_DEBUG
 
@@ -30,111 +30,108 @@
 #include <QDebug>
 #endif
 
-namespace QCA
-{
+namespace QCA {
 
 class SafeTimer::Private : public QObject
 {
-	Q_OBJECT
-	friend class SafeTimer;
+    Q_OBJECT
+    friend class SafeTimer;
 
 public:
-	Private(QObject *parent = nullptr);
+    Private(QObject *parent = nullptr);
 
-	int timerId;
-	int fixerTimerId;
-	bool isSingleShot;
-	int interval;
-	bool isActive;
-	QElapsedTimer elapsedTimer;
+    int           timerId;
+    int           fixerTimerId;
+    bool          isSingleShot;
+    int           interval;
+    bool          isActive;
+    QElapsedTimer elapsedTimer;
 
 public Q_SLOTS:
-	void fixTimer();
+    void fixTimer();
 
 Q_SIGNALS:
-	void needFix();
+    void needFix();
 
 protected:
-	bool event(QEvent *event) override;
-	void timerEvent(QTimerEvent *event) override;
+    bool event(QEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
 };
 
 SafeTimer::Private::Private(QObject *parent)
-	: QObject(parent)
-	, timerId(0)
-	, fixerTimerId(0)
-	, isSingleShot(false)
-	, interval(0)
-	, isActive(false)
-	, elapsedTimer(QElapsedTimer())
+    : QObject(parent)
+    , timerId(0)
+    , fixerTimerId(0)
+    , isSingleShot(false)
+    , interval(0)
+    , isActive(false)
+    , elapsedTimer(QElapsedTimer())
 {
-	connect(this, &Private::needFix, this, &Private::fixTimer, Qt::QueuedConnection);
+    connect(this, &Private::needFix, this, &Private::fixTimer, Qt::QueuedConnection);
 }
 
 void SafeTimer::Private::fixTimer()
 {
-	// Start special timer to align ressurected old timer
-	const int msec = qMax(0, interval - static_cast<int>(elapsedTimer.elapsed()));
+    // Start special timer to align ressurected old timer
+    const int msec = qMax(0, interval - static_cast<int>(elapsedTimer.elapsed()));
 
-	fixerTimerId = startTimer(msec);
+    fixerTimerId = startTimer(msec);
 #ifdef SAFETIMER_DEBUG
-	qDebug() << "START FIXTIMER: id =" << fixerTimerId << ", thread =" << thread() << ", interval =" << msec << parent();
+    qDebug() << "START FIXTIMER: id =" << fixerTimerId << ", thread =" << thread() << ", interval =" << msec
+             << parent();
 #endif
 }
 
 bool SafeTimer::Private::event(QEvent *event)
 {
-	if (event->type() == QEvent::ThreadChange && fixerTimerId /* timer is actived */)
-	{
-		// Timer dies when an object changes owner thread. This trick
-		// used to ressurect old timer in the new thread.
-		// Signal is emited in the old thread but will be gotten in the new one.
+    if (event->type() == QEvent::ThreadChange && fixerTimerId /* timer is actived */) {
+        // Timer dies when an object changes owner thread. This trick
+        // used to ressurect old timer in the new thread.
+        // Signal is emited in the old thread but will be gotten in the new one.
 #ifdef SAFETIMER_DEBUG
-		qDebug() << "STOP FIXTIMER ON CHANGE THREAD: id =" << fixerTimerId << ", thread =" << thread() << parent();
+        qDebug() << "STOP FIXTIMER ON CHANGE THREAD: id =" << fixerTimerId << ", thread =" << thread() << parent();
 #endif
-		killTimer(fixerTimerId);
-		fixerTimerId = 0;
-		emit needFix();
-	}
+        killTimer(fixerTimerId);
+        fixerTimerId = 0;
+        emit needFix();
+    }
 
-	return QObject::event(event);
+    return QObject::event(event);
 }
 
 void SafeTimer::Private::timerEvent(QTimerEvent *event)
 {
-	if (event->timerId() == fixerTimerId)
-	{
+    if (event->timerId() == fixerTimerId) {
 #ifdef SAFETIMER_DEBUG
-		qDebug() << "STOP FIXTIMER ON TIMEOUT: id =" << fixerTimerId << ", thread =" << thread() << parent();
+        qDebug() << "STOP FIXTIMER ON TIMEOUT: id =" << fixerTimerId << ", thread =" << thread() << parent();
 #endif
-		killTimer(fixerTimerId);
-		fixerTimerId = 0;
+        killTimer(fixerTimerId);
+        fixerTimerId = 0;
 
-		SafeTimer *safeTimer = qobject_cast<SafeTimer*>(parent());
-		// Emulate timeout signal of not yet ressurected timer
-		emit safeTimer->timeout();
-		// Ressurect timer here if not a singleshot
-		if (!isSingleShot)
-			safeTimer->start();
-		else
-			isActive = false;
-	}
-	else
-	{
+        SafeTimer *safeTimer = qobject_cast<SafeTimer *>(parent());
+        // Emulate timeout signal of not yet ressurected timer
+        emit safeTimer->timeout();
+        // Ressurect timer here if not a singleshot
+        if (!isSingleShot)
+            safeTimer->start();
+        else
+            isActive = false;
+    } else {
 #ifdef SAFETIMER_DEBUG
-		qDebug() << "BAD PRIVATE TIME EVENT: id =" << timerId << ", thread =" << thread() << this << ", badId =" << event->timerId() << parent();
+        qDebug() << "BAD PRIVATE TIME EVENT: id =" << timerId << ", thread =" << thread() << this
+                 << ", badId =" << event->timerId() << parent();
 #endif
-	}
+    }
 }
 
 SafeTimer::SafeTimer(QObject *parent)
-	: QObject()
-	, d(new Private())
+    : QObject()
+    , d(new Private())
 {
-	// It must be done here. Initialization list can't be used.
-	// Need to have proper class name. Look at TimerFixer::hook.
-	setParent(parent);
-	d->setParent(this);
+    // It must be done here. Initialization list can't be used.
+    // Need to have proper class name. Look at TimerFixer::hook.
+    setParent(parent);
+    d->setParent(this);
 }
 
 SafeTimer::~SafeTimer()
@@ -143,102 +140,97 @@ SafeTimer::~SafeTimer()
 
 int SafeTimer::interval() const
 {
-	return d->interval;
+    return d->interval;
 }
 
 bool SafeTimer::isActive() const
 {
-	return d->isActive;
+    return d->isActive;
 }
 
 bool SafeTimer::isSingleShot() const
 {
-	return d->isSingleShot;
+    return d->isSingleShot;
 }
 
 void SafeTimer::setInterval(int msec)
 {
-	d->interval = msec;
+    d->interval = msec;
 }
 
 void SafeTimer::setSingleShot(bool singleShot)
 {
-	d->isSingleShot = singleShot;
+    d->isSingleShot = singleShot;
 }
 
 void SafeTimer::start(int msec)
 {
-	d->interval = msec;
-	start();
+    d->interval = msec;
+    start();
 }
 
 void SafeTimer::start()
 {
-	stop();
+    stop();
 
-	d->elapsedTimer.start();
-	d->timerId = QObject::startTimer(d->interval);
-	d->isActive = d->timerId > 0;
+    d->elapsedTimer.start();
+    d->timerId  = QObject::startTimer(d->interval);
+    d->isActive = d->timerId > 0;
 
 #ifdef SAFETIMER_DEBUG
-	qDebug() << "START TIMER: id =" << d->timerId << ", thread =" << thread() << ", interval =" << d->interval << this;
+    qDebug() << "START TIMER: id =" << d->timerId << ", thread =" << thread() << ", interval =" << d->interval << this;
 #endif
 }
 
 void SafeTimer::stop()
 {
-	if (d->timerId)
-	{
-		QObject::killTimer(d->timerId);
+    if (d->timerId) {
+        QObject::killTimer(d->timerId);
 #ifdef SAFETIMER_DEBUG
-		qDebug() << "STOP TIMER: id =" << d->timerId << ", thread =" << thread() << this;
+        qDebug() << "STOP TIMER: id =" << d->timerId << ", thread =" << thread() << this;
 #endif
-		d->timerId = 0;
-	}
+        d->timerId = 0;
+    }
 
-	if (d->fixerTimerId)
-	{
+    if (d->fixerTimerId) {
 #ifdef SAFETIMER_DEBUG
-		qDebug() << "STOP FIXER TIMER: id =" << d->fixerTimerId << ", thread =" << thread() << this;
+        qDebug() << "STOP FIXER TIMER: id =" << d->fixerTimerId << ", thread =" << thread() << this;
 #endif
-		d->killTimer(d->fixerTimerId);
-		d->fixerTimerId = 0;
-	}
-	d->isActive = false;
+        d->killTimer(d->fixerTimerId);
+        d->fixerTimerId = 0;
+    }
+    d->isActive = false;
 }
 
 bool SafeTimer::event(QEvent *event)
 {
-	if (event->type() == QEvent::ThreadChange && d->timerId /* timer is actived */)
-	{
-		// Timer dies when an object changes owner thread. This trick
-		// used to ressurect old timer in the new thread.
-		// Signal is emited in the old thread but will be gotten in the new one.
+    if (event->type() == QEvent::ThreadChange && d->timerId /* timer is actived */) {
+        // Timer dies when an object changes owner thread. This trick
+        // used to ressurect old timer in the new thread.
+        // Signal is emited in the old thread but will be gotten in the new one.
 #ifdef SAFETIMER_DEBUG
-		qDebug() << "CHANGE THREAD: id =" << d->timerId << ", thread =" << thread() << this;
+        qDebug() << "CHANGE THREAD: id =" << d->timerId << ", thread =" << thread() << this;
 #endif
-		killTimer(d->timerId);
-		d->timerId = 0;
-		emit d->needFix();
-	}
+        killTimer(d->timerId);
+        d->timerId = 0;
+        emit d->needFix();
+    }
 
-	return QObject::event(event);
+    return QObject::event(event);
 }
 
 void SafeTimer::timerEvent(QTimerEvent *event)
 {
-	if (event->timerId() == d->timerId)
-	{
-		if (d->isSingleShot)
-			stop();
-		emit timeout();
-	}
-	else
-	{
+    if (event->timerId() == d->timerId) {
+        if (d->isSingleShot)
+            stop();
+        emit timeout();
+    } else {
 #ifdef SAFETIMER_DEBUG
-		qDebug() << "BAD TIME EVENT: id =" << d->timerId << ", thread =" << thread() << this << ", badId =" << event->timerId() << this;
+        qDebug() << "BAD TIME EVENT: id =" << d->timerId << ", thread =" << thread() << this
+                 << ", badId =" << event->timerId() << this;
 #endif
-	}
+    }
 }
 
 } // end namespace QCA

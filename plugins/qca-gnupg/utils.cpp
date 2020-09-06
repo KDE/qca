@@ -19,209 +19,189 @@
 
 #include "utils.h"
 #include "mykeystorelist.h"
+#include <QCoreApplication>
 #include <QFileInfo>
 #include <QStringList>
-#include <QCoreApplication>
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
 
 using namespace QCA;
 
-namespace gpgQCAPlugin
-{
+namespace gpgQCAPlugin {
 
 void gpg_waitForFinished(GpgOp *gpg)
 {
-	while(true)
-	{
-		GpgOp::Event e = gpg->waitForEvent(-1);
-		if(e.type == GpgOp::Event::Finished)
-			break;
-	}
+    while (true) {
+        GpgOp::Event e = gpg->waitForEvent(-1);
+        if (e.type == GpgOp::Event::Finished)
+            break;
+    }
 }
 
 void gpg_keyStoreLog(const QString &str)
 {
-	MyKeyStoreList *ksl = MyKeyStoreList::instance();
-	if(ksl)
-		ksl->ext_keyStoreLog(str);
+    MyKeyStoreList *ksl = MyKeyStoreList::instance();
+    if (ksl)
+        ksl->ext_keyStoreLog(str);
 }
 
 inline bool check_bin(const QString &bin)
 {
-	QFileInfo fi(bin);
-	return fi.exists();
+    QFileInfo fi(bin);
+    return fi.exists();
 }
 
 #ifdef Q_OS_WIN
 static bool get_reg_key(HKEY root, const char *path, QString &value)
 {
-	HKEY hkey = 0;
+    HKEY hkey = 0;
 
-	char szValue[256];
-	DWORD dwLen = 256;
+    char  szValue[256];
+    DWORD dwLen = 256;
 
-	bool res = false;
+    bool res = false;
 
-	if(RegOpenKeyExA(root, path, 0, KEY_QUERY_VALUE, &hkey) == ERROR_SUCCESS)
-	{
-		if (RegQueryValueExA(hkey, "Install Directory", NULL, NULL, (LPBYTE)szValue, &dwLen) == ERROR_SUCCESS)
-		{
-			value = QString::fromLocal8Bit(szValue);
-			res = true;
-		}
-		RegCloseKey(hkey);
-	}
-	return res;
+    if (RegOpenKeyExA(root, path, 0, KEY_QUERY_VALUE, &hkey) == ERROR_SUCCESS) {
+        if (RegQueryValueExA(hkey, "Install Directory", NULL, NULL, (LPBYTE)szValue, &dwLen) == ERROR_SUCCESS) {
+            value = QString::fromLocal8Bit(szValue);
+            res   = true;
+        }
+        RegCloseKey(hkey);
+    }
+    return res;
 }
-
 
 static QString find_reg_gpgProgram()
 {
-	const QStringList bins = { QStringLiteral("gpg.exe"), QStringLiteral("gpg2.exe") };
+    const QStringList bins = {QStringLiteral("gpg.exe"), QStringLiteral("gpg2.exe")};
 
-	HKEY root;
-	root = HKEY_CURRENT_USER;
+    HKEY root;
+    root = HKEY_CURRENT_USER;
 
-	const char *path = "Software\\GNU\\GnuPG";
-	const char *path2 = "Software\\Wow6432Node\\GNU\\GnuPG";
+    const char *path  = "Software\\GNU\\GnuPG";
+    const char *path2 = "Software\\Wow6432Node\\GNU\\GnuPG";
 
-	QString dir;
-	// check list of possible places in registry
-	get_reg_key(HKEY_CURRENT_USER, path, dir)  ||
-	get_reg_key(HKEY_CURRENT_USER, path2, dir) ||
-	get_reg_key(HKEY_LOCAL_MACHINE, path, dir) ||
-	get_reg_key(HKEY_LOCAL_MACHINE, path2, dir);
+    QString dir;
+    // check list of possible places in registry
+    get_reg_key(HKEY_CURRENT_USER, path, dir) || get_reg_key(HKEY_CURRENT_USER, path2, dir) ||
+        get_reg_key(HKEY_LOCAL_MACHINE, path, dir) || get_reg_key(HKEY_LOCAL_MACHINE, path2, dir);
 
-	if (!dir.isEmpty())
-	{
-		foreach (const QString &bin, bins)
-		{
-			if (check_bin(dir + QStringLiteral("\\") + bin))
-			{
-				return dir + QStringLiteral("\\") + bin;
-			}
-		}
-	}
-	return QString();
+    if (!dir.isEmpty()) {
+        foreach (const QString &bin, bins) {
+            if (check_bin(dir + QStringLiteral("\\") + bin)) {
+                return dir + QStringLiteral("\\") + bin;
+            }
+        }
+    }
+    return QString();
 }
 #endif
 
 QString find_bin()
 {
-	// gpg and gpg2 has identical semantics
-	// so any from them can be used
-	QStringList bins;
+    // gpg and gpg2 has identical semantics
+    // so any from them can be used
+    QStringList bins;
 #ifdef Q_OS_WIN
-	bins << QStringLiteral("gpg.exe") << QStringLiteral("gpg2.exe");
+    bins << QStringLiteral("gpg.exe") << QStringLiteral("gpg2.exe");
 #else
-	bins << QStringLiteral("gpg") << QStringLiteral("gpg2");
+    bins << QStringLiteral("gpg") << QStringLiteral("gpg2");
 #endif
 
-	// Prefer bundled gpg
-	foreach (const QString &bin, bins)
-	{
-		if (check_bin(QCoreApplication::applicationDirPath() + QLatin1Char('/') + bin))
-		{
-			return QCoreApplication::applicationDirPath() + QLatin1Char('/') + bin;
-		}
-	}
+    // Prefer bundled gpg
+    foreach (const QString &bin, bins) {
+        if (check_bin(QCoreApplication::applicationDirPath() + QLatin1Char('/') + bin)) {
+            return QCoreApplication::applicationDirPath() + QLatin1Char('/') + bin;
+        }
+    }
 
 #ifdef Q_OS_WIN
-	// On Windows look up at registry
-	QString bin = find_reg_gpgProgram();
-	if (!bin.isEmpty())
-		return bin;
+    // On Windows look up at registry
+    QString bin = find_reg_gpgProgram();
+    if (!bin.isEmpty())
+        return bin;
 #endif
 
-	// Look up at PATH environment
+        // Look up at PATH environment
 #ifdef Q_OS_WIN
-	const QString pathSep = QStringLiteral(";");
+    const QString pathSep = QStringLiteral(";");
 #else
-	const QString pathSep = QStringLiteral(":");
+    const QString pathSep = QStringLiteral(":");
 #endif
 
-	QStringList paths = QString::fromLocal8Bit(qgetenv("PATH")).split(pathSep, QString::SkipEmptyParts);
+    QStringList paths = QString::fromLocal8Bit(qgetenv("PATH")).split(pathSep, QString::SkipEmptyParts);
 
 #ifdef Q_OS_MAC
-	// On Mac OS bundled always uses system default PATH
-	// so it need explicity add extra paths which can
-	// contain gpg
-	// Mac GPG and brew use /usr/local/bin
-	// MacPorts uses /opt/local/bin
-	paths << QStringLiteral("/usr/local/bin") << QStringLiteral("/opt/local/bin");
+    // On Mac OS bundled always uses system default PATH
+    // so it need explicity add extra paths which can
+    // contain gpg
+    // Mac GPG and brew use /usr/local/bin
+    // MacPorts uses /opt/local/bin
+    paths << QStringLiteral("/usr/local/bin") << QStringLiteral("/opt/local/bin");
 #endif
-	paths.removeDuplicates();
+    paths.removeDuplicates();
 
-	foreach (const QString &path, paths)
-	{
-		foreach (const QString &bin, bins)
-		{
-			if (check_bin(path + QLatin1Char('/') + bin))
-			{
-				return path + QLatin1Char('/') + bin;
-			}
-		}
-	}
+    foreach (const QString &path, paths) {
+        foreach (const QString &bin, bins) {
+            if (check_bin(path + QLatin1Char('/') + bin)) {
+                return path + QLatin1Char('/') + bin;
+            }
+        }
+    }
 
-	// Return nothing if gpg not found
-	return QString();
+    // Return nothing if gpg not found
+    return QString();
 }
 
 QString escape_string(const QString &in)
 {
-	QString out;
-	for(const QChar &c : in)
-	{
-		if(c == QLatin1Char('\\'))
-			out += QStringLiteral("\\\\");
-		else if(c == QLatin1Char(':'))
-			out += QStringLiteral("\\c");
-		else
-			out += c;
-	}
-	return out;
+    QString out;
+    for (const QChar &c : in) {
+        if (c == QLatin1Char('\\'))
+            out += QStringLiteral("\\\\");
+        else if (c == QLatin1Char(':'))
+            out += QStringLiteral("\\c");
+        else
+            out += c;
+    }
+    return out;
 }
 
 QString unescape_string(const QString &in)
 {
-	QString out;
-	for(int n = 0; n < in.length(); ++n)
-	{
-		if(in[n] == QLatin1Char('\\'))
-		{
-			if(n + 1 < in.length())
-			{
-				if(in[n + 1] == QLatin1Char('\\'))
-					out += QLatin1Char('\\');
-				else if(in[n + 1] == QLatin1Char('c'))
-					out += QLatin1Char(':');
-				++n;
-			}
-		}
-		else
-			out += in[n];
-	}
-	return out;
+    QString out;
+    for (int n = 0; n < in.length(); ++n) {
+        if (in[n] == QLatin1Char('\\')) {
+            if (n + 1 < in.length()) {
+                if (in[n + 1] == QLatin1Char('\\'))
+                    out += QLatin1Char('\\');
+                else if (in[n + 1] == QLatin1Char('c'))
+                    out += QLatin1Char(':');
+                ++n;
+            }
+        } else
+            out += in[n];
+    }
+    return out;
 }
 
 PGPKey publicKeyFromId(const QString &id)
 {
-	MyKeyStoreList *ksl = MyKeyStoreList::instance();
-	if(!ksl)
-		return PGPKey();
+    MyKeyStoreList *ksl = MyKeyStoreList::instance();
+    if (!ksl)
+        return PGPKey();
 
-	return ksl->publicKeyFromId(id);
+    return ksl->publicKeyFromId(id);
 }
 
 PGPKey secretKeyFromId(const QString &id)
 {
-	MyKeyStoreList *ksl = MyKeyStoreList::instance();
-	if(!ksl)
-		return PGPKey();
+    MyKeyStoreList *ksl = MyKeyStoreList::instance();
+    if (!ksl)
+        return PGPKey();
 
-	return ksl->secretKeyFromId(id);
+    return ksl->secretKeyFromId(id);
 }
 
 } // end namespace gpgQCAPlugin

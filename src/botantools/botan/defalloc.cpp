@@ -26,9 +26,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Basic Allocators Source File                   *
-* (C) 1999-2007 The Botan Project                *
-*************************************************/
+ * Basic Allocators Source File                   *
+ * (C) 1999-2007 The Botan Project                *
+ *************************************************/
 
 } // WRAPNS_LINE
 #include <botan/defalloc.h>
@@ -57,86 +57,86 @@ namespace Botan {
 namespace {
 
 /*************************************************
-* Perform Memory Allocation                      *
-*************************************************/
-void* do_malloc(u32bit n, bool do_lock)
-   {
-   void* ptr = malloc(n);
+ * Perform Memory Allocation                      *
+ *************************************************/
+void *do_malloc(u32bit n, bool do_lock)
+{
+    void *ptr = malloc(n);
 
-   if(!ptr)
-      return nullptr;
+    if (!ptr)
+        return nullptr;
 
-   if(do_lock)
-      lock_mem(ptr, n);
+    if (do_lock)
+        lock_mem(ptr, n);
 
-   memset(ptr, 0, n);
-   return ptr;
-   }
+    memset(ptr, 0, n);
+    return ptr;
+}
 
 /*************************************************
-* Perform Memory Deallocation                    *
-*************************************************/
-void do_free(void* ptr, u32bit n, bool do_lock)
-   {
-   if(!ptr)
-      return;
+ * Perform Memory Deallocation                    *
+ *************************************************/
+void do_free(void *ptr, u32bit n, bool do_lock)
+{
+    if (!ptr)
+        return;
 
-   memset(ptr, 0, n);
-   if(do_lock)
-      unlock_mem(ptr, n);
+    memset(ptr, 0, n);
+    if (do_lock)
+        unlock_mem(ptr, n);
 
-   free(ptr);
-   }
+    free(ptr);
+}
 
 }
 
 /*************************************************
-* Malloc_Allocator's Allocation                  *
-*************************************************/
-void* Malloc_Allocator::alloc_block(u32bit n)
-   {
-   return do_malloc(n, false);
-   }
+ * Malloc_Allocator's Allocation                  *
+ *************************************************/
+void *Malloc_Allocator::alloc_block(u32bit n)
+{
+    return do_malloc(n, false);
+}
 
 /*************************************************
-* Malloc_Allocator's Deallocation                *
-*************************************************/
-void Malloc_Allocator::dealloc_block(void* ptr, u32bit n)
-   {
-   do_free(ptr, n, false);
-   }
+ * Malloc_Allocator's Deallocation                *
+ *************************************************/
+void Malloc_Allocator::dealloc_block(void *ptr, u32bit n)
+{
+    do_free(ptr, n, false);
+}
 
 /*************************************************
-* Locking_Allocator's Allocation                 *
-*************************************************/
-void* Locking_Allocator::alloc_block(u32bit n)
-   {
-   return do_malloc(n, true);
-   }
+ * Locking_Allocator's Allocation                 *
+ *************************************************/
+void *Locking_Allocator::alloc_block(u32bit n)
+{
+    return do_malloc(n, true);
+}
 
 /*************************************************
-* Locking_Allocator's Deallocation               *
-*************************************************/
-void Locking_Allocator::dealloc_block(void* ptr, u32bit n)
-   {
-   do_free(ptr, n, true);
-   }
+ * Locking_Allocator's Deallocation               *
+ *************************************************/
+void Locking_Allocator::dealloc_block(void *ptr, u32bit n)
+{
+    do_free(ptr, n, true);
+}
 
 /*************************************************
-* Get an allocator                               *
-*************************************************/
-Allocator* Allocator::get(bool locking)
-   {
-   std::string type = "";
-   if(!locking)
-      type = "malloc";
+ * Get an allocator                               *
+ *************************************************/
+Allocator *Allocator::get(bool locking)
+{
+    std::string type = "";
+    if (!locking)
+        type = "malloc";
 
-   Allocator* alloc = global_state().get_allocator(type);
-   if(alloc)
-      return alloc;
+    Allocator *alloc = global_state().get_allocator(type);
+    if (alloc)
+        return alloc;
 
-   throw Exception("Couldn't find an allocator to use in get_allocator");
-   }
+    throw Exception("Couldn't find an allocator to use in get_allocator");
+}
 
 }
 } // WRAPNS_LINE

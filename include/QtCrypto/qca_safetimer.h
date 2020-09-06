@@ -32,37 +32,41 @@ namespace QCA {
 
 class QCA_EXPORT SafeTimer : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	SafeTimer(QObject *parent = nullptr);
-	~SafeTimer() override;
+    SafeTimer(QObject *parent = nullptr);
+    ~SafeTimer() override;
 
-	int interval() const;
-	bool isActive() const;
-	bool isSingleShot() const;
-	void setInterval(int msec);
-	void setSingleShot(bool singleShot);
-	int timerId() const;
+    int  interval() const;
+    bool isActive() const;
+    bool isSingleShot() const;
+    void setInterval(int msec);
+    void setSingleShot(bool singleShot);
+    int  timerId() const;
 
 public Q_SLOTS:
-	void start(int msec);
-	void start();
-	void stop();
+    void start(int msec);
+    void start();
+    void stop();
 
 Q_SIGNALS:
-	void timeout();
+    void timeout();
 
 protected:
-	bool event(QEvent *event) override;
-	void timerEvent(QTimerEvent *event) override;
+    bool event(QEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
 
 private:
-	// Functions is used internally. Outer world mustn't have access them.
-	void startTimer() {}
-	void killTimer(int) {}
+    // Functions is used internally. Outer world mustn't have access them.
+    void startTimer()
+    {
+    }
+    void killTimer(int)
+    {
+    }
 
-	class Private;
-	Private *d;
+    class Private;
+    Private *d;
 };
 
 }

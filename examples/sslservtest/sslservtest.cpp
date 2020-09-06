@@ -34,90 +34,97 @@
 #endif
 
 char pemdata_cert[] =
-	"-----BEGIN CERTIFICATE-----\n"
-	"MIICeTCCAeKgAwIBAgIRAKKKnOj6Aarmwf0phApitVAwDQYJKoZIhvcNAQEFBQAw\n"
-	"ODELMAkGA1UEBhMCVVMxFDASBgNVBAoTC0V4YW1wbGUgT3JnMRMwEQYDVQQDEwpF\n"
-	"eGFtcGxlIENBMB4XDTA2MDMxNTA3MDU1MloXDTA3MDMxNTA3MDU1MlowOjEVMBMG\n"
-	"A1UEAxMMRXhhbXBsZSBVc2VyMQswCQYDVQQGEwJVUzEUMBIGA1UEChMLRXhhbXBs\n"
-	"ZSBPcmcwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAPkKn0FfHMvRZv+3uFcw\n"
-	"VrOadJmANzLVeVW/DHZp4CXokXSksM66ZMqFuQRBk5rnIZZpZmVp1tTRDVt9sEAY\n"
-	"YNa8CRM4HXkVlU0lCKdey18CSq2VuSvNtw8dDpoBmQt3nr9tePvKHnpS3nm6YjR2\n"
-	"NEvIKt1P4mHzYXLmwoF24C1bAgMBAAGjgYAwfjAdBgNVHQ4EFgQUmQIdzyDaPYWF\n"
-	"fPJ8PPOOm1eSsucwHwYDVR0jBBgwFoAUkCglAizTO7iqwLeaO6r/8kJuqhMwDAYD\n"
-	"VR0TAQH/BAIwADAeBgNVHREEFzAVgRNleGFtcGxlQGV4YW1wbGUuY29tMA4GA1Ud\n"
-	"DwEB/wQEAwIF4DANBgkqhkiG9w0BAQUFAAOBgQAuhbiUgy2a++EUccaonID7eTJZ\n"
-	"F3D5qXMqUpQxlYxU8du+9AxDD7nFxTMkQC2pzfmEc1znRNmJ1ZeLRL72VYsVndcT\n"
-	"psyM8ABkvPp1d2jWIyccVjGpt+/RN5IPKm/YIbtIZcywvWuXrOp1lanVmppLfPnO\n"
-	"6yneBkC9iqjOv/+Q+A==\n"
-	"-----END CERTIFICATE-----\n";
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIICeTCCAeKgAwIBAgIRAKKKnOj6Aarmwf0phApitVAwDQYJKoZIhvcNAQEFBQAw\n"
+    "ODELMAkGA1UEBhMCVVMxFDASBgNVBAoTC0V4YW1wbGUgT3JnMRMwEQYDVQQDEwpF\n"
+    "eGFtcGxlIENBMB4XDTA2MDMxNTA3MDU1MloXDTA3MDMxNTA3MDU1MlowOjEVMBMG\n"
+    "A1UEAxMMRXhhbXBsZSBVc2VyMQswCQYDVQQGEwJVUzEUMBIGA1UEChMLRXhhbXBs\n"
+    "ZSBPcmcwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAPkKn0FfHMvRZv+3uFcw\n"
+    "VrOadJmANzLVeVW/DHZp4CXokXSksM66ZMqFuQRBk5rnIZZpZmVp1tTRDVt9sEAY\n"
+    "YNa8CRM4HXkVlU0lCKdey18CSq2VuSvNtw8dDpoBmQt3nr9tePvKHnpS3nm6YjR2\n"
+    "NEvIKt1P4mHzYXLmwoF24C1bAgMBAAGjgYAwfjAdBgNVHQ4EFgQUmQIdzyDaPYWF\n"
+    "fPJ8PPOOm1eSsucwHwYDVR0jBBgwFoAUkCglAizTO7iqwLeaO6r/8kJuqhMwDAYD\n"
+    "VR0TAQH/BAIwADAeBgNVHREEFzAVgRNleGFtcGxlQGV4YW1wbGUuY29tMA4GA1Ud\n"
+    "DwEB/wQEAwIF4DANBgkqhkiG9w0BAQUFAAOBgQAuhbiUgy2a++EUccaonID7eTJZ\n"
+    "F3D5qXMqUpQxlYxU8du+9AxDD7nFxTMkQC2pzfmEc1znRNmJ1ZeLRL72VYsVndcT\n"
+    "psyM8ABkvPp1d2jWIyccVjGpt+/RN5IPKm/YIbtIZcywvWuXrOp1lanVmppLfPnO\n"
+    "6yneBkC9iqjOv/+Q+A==\n"
+    "-----END CERTIFICATE-----\n";
 
 char pemdata_privkey[] =
-	"-----BEGIN PRIVATE KEY-----\n"
-	"MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAPkKn0FfHMvRZv+3\n"
-	"uFcwVrOadJmANzLVeVW/DHZp4CXokXSksM66ZMqFuQRBk5rnIZZpZmVp1tTRDVt9\n"
-	"sEAYYNa8CRM4HXkVlU0lCKdey18CSq2VuSvNtw8dDpoBmQt3nr9tePvKHnpS3nm6\n"
-	"YjR2NEvIKt1P4mHzYXLmwoF24C1bAgMBAAECgYEAyIjJHDaeVXDU42zovyxpZE4n\n"
-	"PcOEryY+gdFJE8DFgUD4f1huFsj4iCuNg+PaG42p+hf9IARNvSho/RcEaVg4AJrV\n"
-	"jRP8r7fSqcIGr6lGuvDFFv3SU5ddy84g5oqLYGKvuPSHMGfVsZSxAwOrzD4bH19L\n"
-	"SNqtNcpdBsBd7ZiEE4ECQQD/oJGui9D5Dx3QVcS+QV4F8wuyN9jYIANmX/17o0fl\n"
-	"BL0bwRU4RICwadrcybi5N0JQLIYSUm2HGqNvAJbtnuQxAkEA+WeYLLYPeawcy+WU\n"
-	"kGcOR7BUjHiG71+6cvU4XIDW2bezA04fqWXkZRFAwHTMpQb785/XalFftgS21kql\n"
-	"8yLDSwJAHkeT2hwftdDPlEUEmBDAJW5DvWmWGwu3u2G1cfbGZl9oUyhM7ixXHg57\n"
-	"6VlPs0jTZxHPE86FwNIr99MXDbCbkQJBAMDFOJK+ecGirXNP1P+0GA6DFSap9inJ\n"
-	"BRTbwx+EmgwX966DUOefEOSpbDIVVSPs/Qr2LgtIMEFA7Y0+j3wZD3cCQBsTwccd\n"
-	"ASQx59xakpq11eOlTYz14rjwodr4QMyj26WxEPJtz7hKokx/+EH6fWuPIUSrROM5\n"
-	"07y2gaVbYxtis0s=\n"
-	"-----END PRIVATE KEY-----\n";
+    "-----BEGIN PRIVATE KEY-----\n"
+    "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAPkKn0FfHMvRZv+3\n"
+    "uFcwVrOadJmANzLVeVW/DHZp4CXokXSksM66ZMqFuQRBk5rnIZZpZmVp1tTRDVt9\n"
+    "sEAYYNa8CRM4HXkVlU0lCKdey18CSq2VuSvNtw8dDpoBmQt3nr9tePvKHnpS3nm6\n"
+    "YjR2NEvIKt1P4mHzYXLmwoF24C1bAgMBAAECgYEAyIjJHDaeVXDU42zovyxpZE4n\n"
+    "PcOEryY+gdFJE8DFgUD4f1huFsj4iCuNg+PaG42p+hf9IARNvSho/RcEaVg4AJrV\n"
+    "jRP8r7fSqcIGr6lGuvDFFv3SU5ddy84g5oqLYGKvuPSHMGfVsZSxAwOrzD4bH19L\n"
+    "SNqtNcpdBsBd7ZiEE4ECQQD/oJGui9D5Dx3QVcS+QV4F8wuyN9jYIANmX/17o0fl\n"
+    "BL0bwRU4RICwadrcybi5N0JQLIYSUm2HGqNvAJbtnuQxAkEA+WeYLLYPeawcy+WU\n"
+    "kGcOR7BUjHiG71+6cvU4XIDW2bezA04fqWXkZRFAwHTMpQb785/XalFftgS21kql\n"
+    "8yLDSwJAHkeT2hwftdDPlEUEmBDAJW5DvWmWGwu3u2G1cfbGZl9oUyhM7ixXHg57\n"
+    "6VlPs0jTZxHPE86FwNIr99MXDbCbkQJBAMDFOJK+ecGirXNP1P+0GA6DFSap9inJ\n"
+    "BRTbwx+EmgwX966DUOefEOSpbDIVVSPs/Qr2LgtIMEFA7Y0+j3wZD3cCQBsTwccd\n"
+    "ASQx59xakpq11eOlTYz14rjwodr4QMyj26WxEPJtz7hKokx/+EH6fWuPIUSrROM5\n"
+    "07y2gaVbYxtis0s=\n"
+    "-----END PRIVATE KEY-----\n";
 
 class SecureServer : public QObject
 {
     Q_OBJECT
 
 public:
-    enum { Idle, Handshaking, Active, Closing };
-
-    SecureServer(quint16 _port) : port(_port)
+    enum
     {
-	server = new QTcpServer;
-	connect( server, &QTcpServer::newConnection, this, &SecureServer::server_handleConnection );
+        Idle,
+        Handshaking,
+        Active,
+        Closing
+    };
 
-	ssl = new QCA::TLS;
-	connect(ssl, &QCA::TLS::handshaken, this, &SecureServer::ssl_handshaken);
-	connect(ssl, &QCA::TLS::readyRead, this, &SecureServer::ssl_readyRead);
-	connect(ssl, &QCA::TLS::readyReadOutgoing, this, &SecureServer::ssl_readyReadOutgoing);
-	connect(ssl, &QCA::TLS::closed, this, &SecureServer::ssl_closed);
-	connect(ssl, &QCA::TLS::error, this, &SecureServer::ssl_error);
+    SecureServer(quint16 _port)
+        : port(_port)
+    {
+        server = new QTcpServer;
+        connect(server, &QTcpServer::newConnection, this, &SecureServer::server_handleConnection);
 
-	cert = QCA::Certificate::fromPEM(QString::fromLatin1(pemdata_cert));
-	privkey = QCA::PrivateKey::fromPEM(QString::fromLatin1(pemdata_privkey));
+        ssl = new QCA::TLS;
+        connect(ssl, &QCA::TLS::handshaken, this, &SecureServer::ssl_handshaken);
+        connect(ssl, &QCA::TLS::readyRead, this, &SecureServer::ssl_readyRead);
+        connect(ssl, &QCA::TLS::readyReadOutgoing, this, &SecureServer::ssl_readyReadOutgoing);
+        connect(ssl, &QCA::TLS::closed, this, &SecureServer::ssl_closed);
+        connect(ssl, &QCA::TLS::error, this, &SecureServer::ssl_error);
 
-	mode = Idle;
+        cert    = QCA::Certificate::fromPEM(QString::fromLatin1(pemdata_cert));
+        privkey = QCA::PrivateKey::fromPEM(QString::fromLatin1(pemdata_privkey));
+
+        mode = Idle;
     }
 
     ~SecureServer() override
     {
-	delete ssl;
-	delete server;
+        delete ssl;
+        delete server;
     }
 
     void start()
     {
-	if(cert.isNull()) {
-	    qDebug() << "Error loading cert!";
-	    QTimer::singleShot(0, this, &SecureServer::quit);
-	    return;
-	}
-	if(privkey.isNull()) {
-	    qDebug() << "Error loading private key!";
-	    QTimer::singleShot(0, this, &SecureServer::quit);
-	    return;
-	}
-	if(false == server->listen(QHostAddress::Any, port)) {
-	    qDebug() << "Error binding to port " << port;
-	    QTimer::singleShot(0, this, &SecureServer::quit);
-	    return;
-	}
-	qDebug() << "Listening on port" << port;
+        if (cert.isNull()) {
+            qDebug() << "Error loading cert!";
+            QTimer::singleShot(0, this, &SecureServer::quit);
+            return;
+        }
+        if (privkey.isNull()) {
+            qDebug() << "Error loading private key!";
+            QTimer::singleShot(0, this, &SecureServer::quit);
+            return;
+        }
+        if (false == server->listen(QHostAddress::Any, port)) {
+            qDebug() << "Error binding to port " << port;
+            QTimer::singleShot(0, this, &SecureServer::quit);
+            return;
+        }
+        qDebug() << "Listening on port" << port;
     }
 
 Q_SIGNALS:
@@ -126,125 +133,124 @@ Q_SIGNALS:
 private Q_SLOTS:
     void sock_readyRead()
     {
-	QByteArray buf(sock->bytesAvailable(), 0x00);
+        QByteArray buf(sock->bytesAvailable(), 0x00);
 
-	int num = sock->read(buf.data(), buf.size());
+        int num = sock->read(buf.data(), buf.size());
 
-	if ( -1 == num )
-	    qDebug() << "Error reading data from socket";
+        if (-1 == num)
+            qDebug() << "Error reading data from socket";
 
-	if (num < buf.size() )
-	    buf.resize(num);
+        if (num < buf.size())
+            buf.resize(num);
 
-	ssl->writeIncoming(buf);
+        ssl->writeIncoming(buf);
     }
 
     void server_handleConnection()
     {
-	// Note: only 1 connection supported at a time in this example!
-	if(mode != Idle) {
-	    QTcpSocket* tmp = server->nextPendingConnection();
-	    tmp->close();
-	    connect(tmp, &QTcpSocket::disconnected, tmp, &QTcpSocket::deleteLater);
-	    qDebug() << "throwing away extra connection";
-	    return;
-	}
-	mode = Handshaking;
-	sock = server->nextPendingConnection();
-	connect(sock, &QTcpSocket::readyRead, this, &SecureServer::sock_readyRead);
-	connect(sock, &QTcpSocket::disconnected, this, &SecureServer::sock_disconnected);
-	connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureServer::sock_error);
-	connect(sock, &QTcpSocket::bytesWritten, this, &SecureServer::sock_bytesWritten);
+        // Note: only 1 connection supported at a time in this example!
+        if (mode != Idle) {
+            QTcpSocket *tmp = server->nextPendingConnection();
+            tmp->close();
+            connect(tmp, &QTcpSocket::disconnected, tmp, &QTcpSocket::deleteLater);
+            qDebug() << "throwing away extra connection";
+            return;
+        }
+        mode = Handshaking;
+        sock = server->nextPendingConnection();
+        connect(sock, &QTcpSocket::readyRead, this, &SecureServer::sock_readyRead);
+        connect(sock, &QTcpSocket::disconnected, this, &SecureServer::sock_disconnected);
+        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureServer::sock_error);
+        connect(sock, &QTcpSocket::bytesWritten, this, &SecureServer::sock_bytesWritten);
 
-	qDebug() << "Connection received!  Starting TLS handshake.";
-	ssl->setCertificate(cert, privkey);
-	ssl->startServer();
+        qDebug() << "Connection received!  Starting TLS handshake.";
+        ssl->setCertificate(cert, privkey);
+        ssl->startServer();
     }
 
     void sock_disconnected()
     {
-	qDebug() << "Connection closed.";
+        qDebug() << "Connection closed.";
     }
 
     void sock_bytesWritten(qint64 x)
     {
-	if(mode == Active && sent) {
-	    qint64 bytes = ssl->convertBytesWritten(x);
-	    bytesLeft -= bytes;
+        if (mode == Active && sent) {
+            qint64 bytes = ssl->convertBytesWritten(x);
+            bytesLeft -= bytes;
 
-	    if(bytesLeft == 0) {
-		mode = Closing;
-		qDebug() << "Data transfer complete - SSL shutting down";
-		ssl->close();
-	    }
-	}
+            if (bytesLeft == 0) {
+                mode = Closing;
+                qDebug() << "Data transfer complete - SSL shutting down";
+                ssl->close();
+            }
+        }
     }
 
     void sock_error(QAbstractSocket::SocketError error)
     {
-	qDebug() << "Socket error: " << (unsigned) error;
+        qDebug() << "Socket error: " << (unsigned)error;
     }
 
     void ssl_handshaken()
     {
-	qDebug() << "Successful SSL handshake.  Waiting for newline.";
-	bytesLeft = 0;
-	sent = false;
-	mode = Active;
-	ssl->continueAfterStep();
+        qDebug() << "Successful SSL handshake.  Waiting for newline.";
+        bytesLeft = 0;
+        sent      = false;
+        mode      = Active;
+        ssl->continueAfterStep();
     }
 
     void ssl_readyRead()
     {
-	ssl->read();
-	QByteArray b =
-	    "<html>\n"
-	    "<head><title>Test</title></head>\n"
-	    "<body>this is only a test</body>\n"
-	    "</html>\n";
+        ssl->read();
+        QByteArray b =
+            "<html>\n"
+            "<head><title>Test</title></head>\n"
+            "<body>this is only a test</body>\n"
+            "</html>\n";
 
-	qDebug() << "Sending test response.";
-	sent = true;
-	ssl->write(b);
+        qDebug() << "Sending test response.";
+        sent = true;
+        ssl->write(b);
     }
 
     void ssl_readyReadOutgoing()
     {
-	int plainBytes;
-	QByteArray outgoingData = ssl->readOutgoing(&plainBytes);
-	sock->write( outgoingData );
+        int        plainBytes;
+        QByteArray outgoingData = ssl->readOutgoing(&plainBytes);
+        sock->write(outgoingData);
     }
 
     void ssl_closed()
     {
-	qDebug() << "Closing socket.";
-	sock->close();
-	mode = Idle;
+        qDebug() << "Closing socket.";
+        sock->close();
+        mode = Idle;
     }
 
     void ssl_error()
     {
-	if(ssl->errorCode() == QCA::TLS::ErrorHandshake) {
-	    qDebug() << "SSL Handshake Error!  Closing.";
-	    sock->close();
-	}
-	else {
-	    qDebug() << "SSL Error!  Closing.";
-	    sock->close();
-	}
-	mode = Idle;
+        if (ssl->errorCode() == QCA::TLS::ErrorHandshake) {
+            qDebug() << "SSL Handshake Error!  Closing.";
+            sock->close();
+        } else {
+            qDebug() << "SSL Error!  Closing.";
+            sock->close();
+        }
+        mode = Idle;
     }
 
 private:
-    quint16 port;
-    QTcpServer *server;
-    QTcpSocket *sock;
-    QCA::TLS *ssl;
+    quint16          port;
+    QTcpServer *     server;
+    QTcpSocket *     sock;
+    QCA::TLS *       ssl;
     QCA::Certificate cert;
-    QCA::PrivateKey privkey;
+    QCA::PrivateKey  privkey;
 
-    bool sent;
-    int mode;
+    bool   sent;
+    int    mode;
     qint64 bytesLeft;
 };
 
@@ -255,11 +261,11 @@ int main(int argc, char **argv)
     QCA::Initializer init;
 
     QCoreApplication app(argc, argv);
-    int port = argc > 1 ? QString::fromLatin1(argv[1]).toInt() : 8000;
+    int              port = argc > 1 ? QString::fromLatin1(argv[1]).toInt() : 8000;
 
-    if(!QCA::isSupported("tls")) {
-	qDebug() << "TLS not supported!";
-	return 1;
+    if (!QCA::isSupported("tls")) {
+        qDebug() << "TLS not supported!";
+        return 1;
     }
 
     SecureServer *server = new SecureServer(port);

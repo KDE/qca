@@ -20,12 +20,12 @@
 
 #include "qca_support.h"
 
-#include <QFileSystemWatcher>
-#include <QFileInfo>
-#include <QDir>
-#include <QList>
-#include <QDateTime>
 #include "qca_safeobj.h"
+#include <QDateTime>
+#include <QDir>
+#include <QFileInfo>
+#include <QFileSystemWatcher>
+#include <QList>
 
 namespace QCA {
 
@@ -33,20 +33,29 @@ namespace QCA {
 // we assume QFileSystemWatcher complies to DS,NE.
 class QFileSystemWatcherRelay : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	QFileSystemWatcher *watcher;
+    QFileSystemWatcher *watcher;
 
-	QFileSystemWatcherRelay(QFileSystemWatcher *_watcher, QObject *parent = nullptr)
-	:QObject(parent), watcher(_watcher)
-	{
-		connect(watcher, &QFileSystemWatcher::directoryChanged, this, &QFileSystemWatcherRelay::directoryChanged, Qt::QueuedConnection);
-		connect(watcher, &QFileSystemWatcher::fileChanged, this, &QFileSystemWatcherRelay::fileChanged, Qt::QueuedConnection);
-	}
+    QFileSystemWatcherRelay(QFileSystemWatcher *_watcher, QObject *parent = nullptr)
+        : QObject(parent)
+        , watcher(_watcher)
+    {
+        connect(watcher,
+                &QFileSystemWatcher::directoryChanged,
+                this,
+                &QFileSystemWatcherRelay::directoryChanged,
+                Qt::QueuedConnection);
+        connect(watcher,
+                &QFileSystemWatcher::fileChanged,
+                this,
+                &QFileSystemWatcherRelay::fileChanged,
+                Qt::QueuedConnection);
+    }
 
 Q_SIGNALS:
-	void directoryChanged(const QString &path);
-	void fileChanged(const QString &path);
+    void directoryChanged(const QString &path);
+    void fileChanged(const QString &path);
 };
 
 //----------------------------------------------------------------------------
@@ -54,62 +63,64 @@ Q_SIGNALS:
 //----------------------------------------------------------------------------
 class DirWatch::Private : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	DirWatch *q;
-	QFileSystemWatcher *watcher;
-	QFileSystemWatcherRelay *watcher_relay;
-	QString dirName;
+    DirWatch *               q;
+    QFileSystemWatcher *     watcher;
+    QFileSystemWatcherRelay *watcher_relay;
+    QString                  dirName;
 
-	Private(DirWatch *_q) : QObject(_q), q(_q), watcher(nullptr), watcher_relay(nullptr)
-	{
-	}
+    Private(DirWatch *_q)
+        : QObject(_q)
+        , q(_q)
+        , watcher(nullptr)
+        , watcher_relay(nullptr)
+    {
+    }
 
 public Q_SLOTS:
-	void watcher_changed(const QString &path)
-	{
-		Q_UNUSED(path);
-		emit q->changed();
-	}
+    void watcher_changed(const QString &path)
+    {
+        Q_UNUSED(path);
+        emit q->changed();
+    }
 };
 
 DirWatch::DirWatch(const QString &dir, QObject *parent)
-:QObject(parent)
+    : QObject(parent)
 {
-	d = new Private(this);
-	setDirName(dir);
+    d = new Private(this);
+    setDirName(dir);
 }
 
 DirWatch::~DirWatch()
 {
-	delete d;
+    delete d;
 }
 
 QString DirWatch::dirName() const
 {
-	return d->dirName;
+    return d->dirName;
 }
 
 void DirWatch::setDirName(const QString &dir)
 {
-	if(d->watcher)
-	{
-		delete d->watcher;
-		delete d->watcher_relay;
-		d->watcher = nullptr;
-		d->watcher_relay = nullptr;
-	}
+    if (d->watcher) {
+        delete d->watcher;
+        delete d->watcher_relay;
+        d->watcher       = nullptr;
+        d->watcher_relay = nullptr;
+    }
 
-	d->dirName = dir;
+    d->dirName = dir;
 
-	if(!d->dirName.isEmpty() && QFileInfo(d->dirName).isDir())
-	{
-		d->watcher = new QFileSystemWatcher(this);
-		d->watcher_relay = new QFileSystemWatcherRelay(d->watcher, this);
-		connect(d->watcher_relay, &QFileSystemWatcherRelay::directoryChanged, d, &Private::watcher_changed);
+    if (!d->dirName.isEmpty() && QFileInfo(d->dirName).isDir()) {
+        d->watcher       = new QFileSystemWatcher(this);
+        d->watcher_relay = new QFileSystemWatcherRelay(d->watcher, this);
+        connect(d->watcher_relay, &QFileSystemWatcherRelay::directoryChanged, d, &Private::watcher_changed);
 
-		d->watcher->addPath(d->dirName);
-	}
+        d->watcher->addPath(d->dirName);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -118,136 +129,137 @@ void DirWatch::setDirName(const QString &dir)
 
 class FileWatch::Private : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	FileWatch *q;
-	QFileSystemWatcher *watcher;
-	QFileSystemWatcherRelay *watcher_relay;
-	QString fileName; // file (optionally w/ path) as provided by user
-	QString filePath; // absolute path of file, calculated by us
-	bool fileExisted;
+    FileWatch *              q;
+    QFileSystemWatcher *     watcher;
+    QFileSystemWatcherRelay *watcher_relay;
+    QString                  fileName; // file (optionally w/ path) as provided by user
+    QString                  filePath; // absolute path of file, calculated by us
+    bool                     fileExisted;
 
-	Private(FileWatch *_q) : QObject(_q), q(_q), watcher(nullptr), watcher_relay(nullptr)
-	{
-	}
+    Private(FileWatch *_q)
+        : QObject(_q)
+        , q(_q)
+        , watcher(nullptr)
+        , watcher_relay(nullptr)
+    {
+    }
 
-	void start(const QString &_fileName)
-	{
-		fileName = _fileName;
+    void start(const QString &_fileName)
+    {
+        fileName = _fileName;
 
-		watcher = new QFileSystemWatcher(this);
-		watcher_relay = new QFileSystemWatcherRelay(watcher, this);
-		connect(watcher_relay, &QFileSystemWatcherRelay::directoryChanged, this, &Private::dir_changed);
-		connect(watcher_relay, &QFileSystemWatcherRelay::fileChanged, this, &Private::file_changed);
+        watcher       = new QFileSystemWatcher(this);
+        watcher_relay = new QFileSystemWatcherRelay(watcher, this);
+        connect(watcher_relay, &QFileSystemWatcherRelay::directoryChanged, this, &Private::dir_changed);
+        connect(watcher_relay, &QFileSystemWatcherRelay::fileChanged, this, &Private::file_changed);
 
-		QFileInfo fi(fileName);
-		fi.makeAbsolute();
-		filePath = fi.filePath();
-		const QDir dir = fi.dir();
+        QFileInfo fi(fileName);
+        fi.makeAbsolute();
+        filePath       = fi.filePath();
+        const QDir dir = fi.dir();
 
-		// we watch both the directory and the file itself.  the
-		//   reason we watch the directory is so we can detect when
-		//   the file is deleted/created
+        // we watch both the directory and the file itself.  the
+        //   reason we watch the directory is so we can detect when
+        //   the file is deleted/created
 
-		// we don't bother checking for dir existence before adding,
-		//   since there isn't an atomic way to do both at once.  if
-		//   it turns out that the dir doesn't exist, then the
-		//   monitoring will just silently not work at all.
+        // we don't bother checking for dir existence before adding,
+        //   since there isn't an atomic way to do both at once.  if
+        //   it turns out that the dir doesn't exist, then the
+        //   monitoring will just silently not work at all.
 
-		watcher->addPath(dir.path());
+        watcher->addPath(dir.path());
 
-		// can't watch for non-existent directory
-		if(!watcher->directories().contains(dir.path()))
-		{
-			stop();
-			return;
-		}
+        // can't watch for non-existent directory
+        if (!watcher->directories().contains(dir.path())) {
+            stop();
+            return;
+        }
 
-		// save whether or not the file exists
-		fileExisted = fi.exists();
+        // save whether or not the file exists
+        fileExisted = fi.exists();
 
-		// add only if file existent
-		// if no it will be added on directoryChanged signal
-		if(fileExisted)
-			watcher->addPath(filePath);
+        // add only if file existent
+        // if no it will be added on directoryChanged signal
+        if (fileExisted)
+            watcher->addPath(filePath);
 
-		// TODO: address race conditions and think about error
-		//   reporting instead of silently failing.  probably this
-		//   will require a Qt API update.
-	}
+        // TODO: address race conditions and think about error
+        //   reporting instead of silently failing.  probably this
+        //   will require a Qt API update.
+    }
 
-	void stop()
-	{
-		if(watcher)
-		{
-			delete watcher;
-			delete watcher_relay;
-			watcher = nullptr;
-			watcher_relay = nullptr;
-		}
+    void stop()
+    {
+        if (watcher) {
+            delete watcher;
+            delete watcher_relay;
+            watcher       = nullptr;
+            watcher_relay = nullptr;
+        }
 
-		fileName.clear();
-		filePath.clear();
-	}
+        fileName.clear();
+        filePath.clear();
+    }
 
 private Q_SLOTS:
-	void dir_changed(const QString &path)
-	{
-		Q_UNUSED(path);
-		QFileInfo fi(filePath);
-		const bool exists = fi.exists();
-		if(exists && !fileExisted)
-		{
-			// this means the file was created.  put a
-			//   watch on it.
-			fileExisted = true;
-			watcher->addPath(filePath);
-			emit q->changed();
-		}
-	}
+    void dir_changed(const QString &path)
+    {
+        Q_UNUSED(path);
+        QFileInfo  fi(filePath);
+        const bool exists = fi.exists();
+        if (exists && !fileExisted) {
+            // this means the file was created.  put a
+            //   watch on it.
+            fileExisted = true;
+            watcher->addPath(filePath);
+            emit q->changed();
+        }
+    }
 
-	void file_changed(const QString &path)
-	{
-		Q_UNUSED(path);
-		QFileInfo fi(filePath);
-		if (!fi.exists() && !fileExisted) {
-			// Got a file changed signal on a file that does not exist
-			// and is not actively watched. This happens when we
-			// previously watched a file but it was deleted and after
-			// the original deletion changed-signal we get another one
-			// (for example because of bad signal timing). In this scenario
-			// we must ignore the change as the change, whatever it may
-			// have been, is of no interest to us because we don't watch
-			// the file and furthermore the file does not even exist.
-			return;
-		} else if (!fi.exists()) {
-			fileExisted = false;
-		};
-		emit q->changed();
-	}
+    void file_changed(const QString &path)
+    {
+        Q_UNUSED(path);
+        QFileInfo fi(filePath);
+        if (!fi.exists() && !fileExisted) {
+            // Got a file changed signal on a file that does not exist
+            // and is not actively watched. This happens when we
+            // previously watched a file but it was deleted and after
+            // the original deletion changed-signal we get another one
+            // (for example because of bad signal timing). In this scenario
+            // we must ignore the change as the change, whatever it may
+            // have been, is of no interest to us because we don't watch
+            // the file and furthermore the file does not even exist.
+            return;
+        } else if (!fi.exists()) {
+            fileExisted = false;
+        };
+        emit q->changed();
+    }
 };
 
 FileWatch::FileWatch(const QString &file, QObject *parent)
-:QObject(parent)
+    : QObject(parent)
 {
-	d = new Private(this);
-	d->start(file);
+    d = new Private(this);
+    d->start(file);
 }
 
 FileWatch::~FileWatch()
 {
-	delete d;
+    delete d;
 }
 
 QString FileWatch::fileName() const
 {
-	return d->fileName;
+    return d->fileName;
 }
 
 void FileWatch::setFileName(const QString &file)
 {
-	d->stop();
-	d->start(file);
+    d->stop();
+    d->start(file);
 }
 
 }

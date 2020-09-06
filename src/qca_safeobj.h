@@ -31,25 +31,36 @@ namespace QCA {
 
 class SafeSocketNotifier : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	SafeSocketNotifier(int socket, QSocketNotifier::Type type,
-		QObject *parent = nullptr);
+    SafeSocketNotifier(int socket, QSocketNotifier::Type type, QObject *parent = nullptr);
 
-	~SafeSocketNotifier() override;
+    ~SafeSocketNotifier() override;
 
-	bool isEnabled() const             { return sn->isEnabled(); }
-	int socket() const                 { return sn->socket(); }
-	QSocketNotifier::Type type() const { return sn->type(); }
+    bool isEnabled() const
+    {
+        return sn->isEnabled();
+    }
+    int socket() const
+    {
+        return sn->socket();
+    }
+    QSocketNotifier::Type type() const
+    {
+        return sn->type();
+    }
 
 public Q_SLOTS:
-	void setEnabled(bool enable)       { sn->setEnabled(enable); }
+    void setEnabled(bool enable)
+    {
+        sn->setEnabled(enable);
+    }
 
 Q_SIGNALS:
-	void activated(int socket);
+    void activated(int socket);
 
 private:
-	QSocketNotifier *sn;
+    QSocketNotifier *sn;
 };
 
 }

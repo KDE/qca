@@ -35,38 +35,38 @@ class ProviderItem;
 class ProviderManager
 {
 public:
-	ProviderManager();
-	~ProviderManager();
+    ProviderManager();
+    ~ProviderManager();
 
-	void scan();
-	bool add(Provider *p, int priority);
-	bool unload(const QString &name);
-	void unloadAll();
-	void setDefault(Provider *p);
-	Provider *find(Provider *p) const;
-	Provider *find(const QString &name) const;
-	Provider *findFor(const QString &name, const QString &type) const;
-	void changePriority(const QString &name, int priority);
-	int getPriority(const QString &name);
-	QStringList allFeatures() const;
-	ProviderList providers() const;
+    void         scan();
+    bool         add(Provider *p, int priority);
+    bool         unload(const QString &name);
+    void         unloadAll();
+    void         setDefault(Provider *p);
+    Provider *   find(Provider *p) const;
+    Provider *   find(const QString &name) const;
+    Provider *   findFor(const QString &name, const QString &type) const;
+    void         changePriority(const QString &name, int priority);
+    int          getPriority(const QString &name);
+    QStringList  allFeatures() const;
+    ProviderList providers() const;
 
-	static void mergeFeatures(QStringList *a, const QStringList &b);
+    static void mergeFeatures(QStringList *a, const QStringList &b);
 
-	QString diagnosticText() const;
-	void appendDiagnosticText(const QString &str);
-	void clearDiagnosticText();
+    QString diagnosticText() const;
+    void    appendDiagnosticText(const QString &str);
+    void    clearDiagnosticText();
 
 private:
-	mutable QMutex logMutex, providerMutex;
-	QString dtext;
-	QList<ProviderItem*> providerItemList;
-	ProviderList providerList;
-	Provider *def;
-	bool scanned_static;
-	void addItem(ProviderItem *i, int priority);
-	bool haveAlready(const QString &name) const;
-	int get_default_priority(const QString &name) const;
+    mutable QMutex        logMutex, providerMutex;
+    QString               dtext;
+    QList<ProviderItem *> providerItemList;
+    ProviderList          providerList;
+    Provider *            def;
+    bool                  scanned_static;
+    void                  addItem(ProviderItem *i, int priority);
+    bool                  haveAlready(const QString &name) const;
+    int                   get_default_priority(const QString &name) const;
 };
 
 }

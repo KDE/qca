@@ -30,47 +30,56 @@ namespace gpgQCAPlugin {
 //   The debug() signal, as well as stderr, can be used for diagnostic text.
 class GPGProc : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	enum Error { FailedToStart, UnexpectedExit, ErrorWrite };
-	enum Mode { NormalMode, ExtendedMode };
-	GPGProc(QObject *parent = nullptr);
-	~GPGProc() override;
+    enum Error
+    {
+        FailedToStart,
+        UnexpectedExit,
+        ErrorWrite
+    };
+    enum Mode
+    {
+        NormalMode,
+        ExtendedMode
+    };
+    GPGProc(QObject *parent = nullptr);
+    ~GPGProc() override;
 
-	void reset();
+    void reset();
 
-	bool isActive() const;
-	void start(const QString &bin, const QStringList &args, Mode m = ExtendedMode);
+    bool isActive() const;
+    void start(const QString &bin, const QStringList &args, Mode m = ExtendedMode);
 
-	QByteArray readStdout();
-	QByteArray readStderr();
-	QStringList readStatusLines();
-	void writeStdin(const QByteArray &a);
-	void writeAux(const QByteArray &a);
+    QByteArray  readStdout();
+    QByteArray  readStderr();
+    QStringList readStatusLines();
+    void        writeStdin(const QByteArray &a);
+    void        writeAux(const QByteArray &a);
 #ifdef QPIPE_SECURE
-	void writeCommand(const QCA::SecureArray &a);
+    void writeCommand(const QCA::SecureArray &a);
 #else
-	void writeCommand(const QByteArray &a);
+    void writeCommand(const QByteArray &a);
 #endif
-	void closeStdin();
-	void closeAux();
-	void closeCommand();
+    void closeStdin();
+    void closeAux();
+    void closeCommand();
 
 Q_SIGNALS:
-	void error(gpgQCAPlugin::GPGProc::Error error);
-	void finished(int exitCode);
-	void readyReadStdout();
-	void readyReadStderr();
-	void readyReadStatusLines();
-	void bytesWrittenStdin(int bytes);
-	void bytesWrittenAux(int bytes);
-	void bytesWrittenCommand(int bytes);
-	void debug(const QString &str); // not signal-safe
+    void error(gpgQCAPlugin::GPGProc::Error error);
+    void finished(int exitCode);
+    void readyReadStdout();
+    void readyReadStderr();
+    void readyReadStatusLines();
+    void bytesWrittenStdin(int bytes);
+    void bytesWrittenAux(int bytes);
+    void bytesWrittenCommand(int bytes);
+    void debug(const QString &str); // not signal-safe
 
 private:
-	class Private;
-	friend class Private;
-	Private *d;
+    class Private;
+    friend class Private;
+    Private *d;
 };
 
 }

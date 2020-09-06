@@ -31,44 +31,38 @@ namespace QCA {
 
 bool qca_have_systemstore()
 {
-	bool ok = false;
-	HCERTSTORE hSystemStore;
-	hSystemStore = CertOpenSystemStoreA(0, "ROOT");
-	if(hSystemStore)
-		ok = true;
-	CertCloseStore(hSystemStore, 0);
-	return ok;
+    bool       ok = false;
+    HCERTSTORE hSystemStore;
+    hSystemStore = CertOpenSystemStoreA(0, "ROOT");
+    if (hSystemStore)
+        ok = true;
+    CertCloseStore(hSystemStore, 0);
+    return ok;
 }
 
 CertificateCollection qca_get_systemstore(const QString &provider)
 {
-	CertificateCollection col;
-	HCERTSTORE hSystemStore;
-	hSystemStore = CertOpenSystemStoreA(0, "ROOT");
-	if(!hSystemStore)
-		return col;
-	PCCERT_CONTEXT pc = NULL;
-	while(1)
-	{
-		pc = CertFindCertificateInStore(
-			hSystemStore,
-			X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
-			0,
-			CERT_FIND_ANY,
-			NULL,
-			pc);
-		if(!pc)
-			break;
-		int size = pc->cbCertEncoded;
-		QByteArray der(size, 0);
-		memcpy(der.data(), pc->pbCertEncoded, size);
+    CertificateCollection col;
+    HCERTSTORE            hSystemStore;
+    hSystemStore = CertOpenSystemStoreA(0, "ROOT");
+    if (!hSystemStore)
+        return col;
+    PCCERT_CONTEXT pc = NULL;
+    while (1) {
+        pc = CertFindCertificateInStore(
+            hSystemStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_ANY, NULL, pc);
+        if (!pc)
+            break;
+        int        size = pc->cbCertEncoded;
+        QByteArray der(size, 0);
+        memcpy(der.data(), pc->pbCertEncoded, size);
 
-		Certificate cert = Certificate::fromDER(der, 0, provider);
-		if(!cert.isNull())
-			col.addCertificate(cert);
-	}
-	CertCloseStore(hSystemStore, 0);
-	return col;
+        Certificate cert = Certificate::fromDER(der, 0, provider);
+        if (!cert.isNull())
+            col.addCertificate(cert);
+    }
+    CertCloseStore(hSystemStore, 0);
+    return col;
 }
 
 }

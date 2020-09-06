@@ -40,8 +40,9 @@ private Q_SLOTS:
     void testRSA();
     void testDSA();
     void testDH();
+
 private:
-    QCA::Initializer* m_init;
+    QCA::Initializer *m_init;
 };
 
 void KeyGenUnitTest::initTestCase()
@@ -54,105 +55,97 @@ void KeyGenUnitTest::cleanupTestCase()
     delete m_init;
 }
 
-
 void KeyGenUnitTest::testRSA()
 {
     QCA::KeyGenerator keygen;
-    QCOMPARE( keygen.isBusy(), false );
-    QCOMPARE( keygen.blockingEnabled(), true );
+    QCOMPARE(keygen.isBusy(), false);
+    QCOMPARE(keygen.blockingEnabled(), true);
 
-    if(!QCA::isSupported("pkey") ||
-       !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) ||
-       !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
         QSKIP("RSA not supported!");
 
-    QCA::PrivateKey priv1 = keygen.createRSA( 1024, 65537 );
-    QCA::RSAPrivateKey rsa1 = priv1.toRSA();
-    QCOMPARE( rsa1.isNull(), false );
-    QCOMPARE( rsa1.e(), QCA::BigInteger(65537) );
-    QCOMPARE( rsa1.bitSize(), 1024);
+    QCA::PrivateKey    priv1 = keygen.createRSA(1024, 65537);
+    QCA::RSAPrivateKey rsa1  = priv1.toRSA();
+    QCOMPARE(rsa1.isNull(), false);
+    QCOMPARE(rsa1.e(), QCA::BigInteger(65537));
+    QCOMPARE(rsa1.bitSize(), 1024);
 
-    priv1 = keygen.createRSA( 512, 17 );
-    rsa1 = priv1.toRSA();
-    QCOMPARE( rsa1.isNull(), false );
-    QCOMPARE( rsa1.e(), QCA::BigInteger(17) );
-    QCOMPARE( rsa1.bitSize(), 512);
+    priv1 = keygen.createRSA(512, 17);
+    rsa1  = priv1.toRSA();
+    QCOMPARE(rsa1.isNull(), false);
+    QCOMPARE(rsa1.e(), QCA::BigInteger(17));
+    QCOMPARE(rsa1.bitSize(), 512);
 
-    priv1 = keygen.createRSA( 512, 3 );
-    rsa1 = priv1.toRSA();
-    QCOMPARE( rsa1.isNull(), false );
-    QCOMPARE( rsa1.e(), QCA::BigInteger(3) );
-    QCOMPARE( rsa1.bitSize(), 512);
+    priv1 = keygen.createRSA(512, 3);
+    rsa1  = priv1.toRSA();
+    QCOMPARE(rsa1.isNull(), false);
+    QCOMPARE(rsa1.e(), QCA::BigInteger(3));
+    QCOMPARE(rsa1.bitSize(), 512);
 }
 
 void KeyGenUnitTest::testDSA()
 {
     QCA::KeyGenerator keygen;
-    QCOMPARE( keygen.isBusy(), false );
-    QCOMPARE( keygen.blockingEnabled(), true );
+    QCOMPARE(keygen.isBusy(), false);
+    QCOMPARE(keygen.blockingEnabled(), true);
 
-    if(!QCA::isSupported("pkey") ||
-       !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
-       !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
-	QSKIP("DSA not supported!");
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
+        QSKIP("DSA not supported!");
 
-	QCA::DLGroup group;
-	QCA::PrivateKey priv2;
-	QCA::DSAPrivateKey dsa1;
+    QCA::DLGroup       group;
+    QCA::PrivateKey    priv2;
+    QCA::DSAPrivateKey dsa1;
 
-	if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_512))
-	{
-		group = keygen.createDLGroup( QCA::DSA_512 );
-		priv2 = keygen.createDSA( group );
-		dsa1 = priv2.toDSA();
-		QCOMPARE( dsa1.isNull(), false );
-		QCOMPARE( dsa1.bitSize(), 512 );
-	}
+    if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_512)) {
+        group = keygen.createDLGroup(QCA::DSA_512);
+        priv2 = keygen.createDSA(group);
+        dsa1  = priv2.toDSA();
+        QCOMPARE(dsa1.isNull(), false);
+        QCOMPARE(dsa1.bitSize(), 512);
+    }
 
-	if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_768))
-	{
-		group = keygen.createDLGroup( QCA::DSA_768 );
-		priv2 = keygen.createDSA( group );
-		dsa1 = priv2.toDSA();
-		QCOMPARE( dsa1.isNull(), false );
-		QCOMPARE( dsa1.bitSize(), 768 );
-	}
+    if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_768)) {
+        group = keygen.createDLGroup(QCA::DSA_768);
+        priv2 = keygen.createDSA(group);
+        dsa1  = priv2.toDSA();
+        QCOMPARE(dsa1.isNull(), false);
+        QCOMPARE(dsa1.bitSize(), 768);
+    }
 
-	if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_1024))
-	{
-		group = keygen.createDLGroup( QCA::DSA_1024 );
-		priv2 = keygen.createDSA( group );
-		dsa1 = priv2.toDSA();
-		QCOMPARE( dsa1.isNull(), false );
-		QCOMPARE( dsa1.bitSize(), 1024 );
-	}
+    if (QCA::DLGroup::supportedGroupSets().contains(QCA::DSA_1024)) {
+        group = keygen.createDLGroup(QCA::DSA_1024);
+        priv2 = keygen.createDSA(group);
+        dsa1  = priv2.toDSA();
+        QCOMPARE(dsa1.isNull(), false);
+        QCOMPARE(dsa1.bitSize(), 1024);
+    }
 }
 
 void KeyGenUnitTest::testDH()
 {
     QCA::KeyGenerator keygen;
-    QCOMPARE( keygen.isBusy(), false );
-    QCOMPARE( keygen.blockingEnabled(), true );
+    QCOMPARE(keygen.isBusy(), false);
+    QCOMPARE(keygen.blockingEnabled(), true);
 
-    if(!QCA::isSupported("pkey") ||
-       !QCA::PKey::supportedTypes().contains(QCA::PKey::DH) ||
-       !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DH))
-	QSKIP("DH not supported!");
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DH) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DH))
+        QSKIP("DH not supported!");
 
-    QCA::DLGroup group = keygen.createDLGroup( QCA::IETF_1024 );
-    QCA::PrivateKey priv3 = keygen.createDH( group );
-    QCA::DHPrivateKey dh1 = priv3.toDH();
-    QCOMPARE( dh1.isNull(), false );
-    QCOMPARE( dh1.bitSize(), 1024 );
+    QCA::DLGroup      group = keygen.createDLGroup(QCA::IETF_1024);
+    QCA::PrivateKey   priv3 = keygen.createDH(group);
+    QCA::DHPrivateKey dh1   = priv3.toDH();
+    QCOMPARE(dh1.isNull(), false);
+    QCOMPARE(dh1.bitSize(), 1024);
 
-    group = keygen.createDLGroup( QCA::IETF_2048 );
-    priv3 = keygen.createDH( group );
-    dh1 = priv3.toDH();
-    QCOMPARE( dh1.isNull(), false );
-    QCOMPARE( dh1.bitSize(), 2048 );
+    group = keygen.createDLGroup(QCA::IETF_2048);
+    priv3 = keygen.createDH(group);
+    dh1   = priv3.toDH();
+    QCOMPARE(dh1.isNull(), false);
+    QCOMPARE(dh1.bitSize(), 2048);
 }
 
 QTEST_MAIN(KeyGenUnitTest)
 
 #include "keygenunittest.moc"
-

@@ -25,14 +25,14 @@
 
 int main(int argc, char **argv)
 {
-	QCA::Initializer init;
-	QCoreApplication qapp(argc, argv);
+    QCA::Initializer init;
+    QCoreApplication qapp(argc, argv);
 
-	TLSSocket socket;
-	socket.connectToHostEncrypted(QStringLiteral("www.paypal.com"), 443);
-	socket.write("GET / HTTP/1.0\r\n\r\n");
-	while(socket.waitForReadyRead())
-		printf("%s", socket.readAll().constData());
+    TLSSocket socket;
+    socket.connectToHostEncrypted(QStringLiteral("www.paypal.com"), 443);
+    socket.write("GET / HTTP/1.0\r\n\r\n");
+    while (socket.waitForReadyRead())
+        printf("%s", socket.readAll().constData());
 
-	return 0;
+    return 0;
 }

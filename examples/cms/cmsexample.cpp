@@ -20,7 +20,6 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
 #include <QtCrypto>
 
 #include <QCoreApplication>
@@ -30,7 +29,7 @@
 #include "import_plugins.h"
 #endif
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     // the Initializer object sets things up, and
     // also does cleanup when it goes out of scope
@@ -39,31 +38,31 @@ int main(int argc, char** argv)
     QCoreApplication app(argc, argv);
 
     // We need to ensure that we have certificate handling support
-    if ( !QCA::isSupported( "cert" ) ) {
-	qWarning() << "Sorry, no PKI certificate support";
-    	return 1;
+    if (!QCA::isSupported("cert")) {
+        qWarning() << "Sorry, no PKI certificate support";
+        return 1;
     }
 
     // Read in a public key cert
     // you could also build this using the fromPEMFile() method
-    QCA::Certificate pubCert( QStringLiteral("User.pem") );
-    if ( pubCert.isNull() ) {
-	qWarning() << "Sorry, could not import public key certificate";
-	return 1;
+    QCA::Certificate pubCert(QStringLiteral("User.pem"));
+    if (pubCert.isNull()) {
+        qWarning() << "Sorry, could not import public key certificate";
+        return 1;
     }
     // We are building the certificate into a SecureMessageKey object, via a
     // CertificateChain
     QCA::SecureMessageKey secMsgKey;
     QCA::CertificateChain chain;
     chain += pubCert;
-    secMsgKey.setX509CertificateChain( chain );
+    secMsgKey.setX509CertificateChain(chain);
 
     // build up a SecureMessage object, based on our public key certificate
-    if ( !QCA::isSupported( "cms" ) ) {
-	qWarning() << "Sorry, no CMS support";
-    	return 1;
+    if (!QCA::isSupported("cms")) {
+        qWarning() << "Sorry, no CMS support";
+        return 1;
     }
-    QCA::CMS cms;
+    QCA::CMS           cms;
     QCA::SecureMessage msg(&cms);
     msg.setRecipient(secMsgKey);
 
@@ -78,35 +77,34 @@ int main(int argc, char** argv)
     msg.waitForFinished(1000);
 
     // check to see if it worked
-    if(!msg.success())
-    {
-	qWarning() << "Error encrypting: " << msg.errorCode();
-	return 1;
+    if (!msg.success()) {
+        qWarning() << "Error encrypting: " << msg.errorCode();
+        return 1;
     }
 
     // get the result
-    QByteArray cipherText = msg.read();
+    QByteArray  cipherText = msg.read();
     QCA::Base64 enc;
     qDebug() << "'" << plainText.data() << "' encrypts to (in base 64): ";
-    qDebug() << enc.arrayToString( cipherText );
+    qDebug() << enc.arrayToString(cipherText);
     qDebug() << "Message uses" << msg.hashName() << "hashing algorithm";
     qDebug();
 
     // Show we can decrypt it with the private key
 
     // Read in a private key
-    QCA::PrivateKey privKey;
+    QCA::PrivateKey    privKey;
     QCA::ConvertResult convRes;
-    QCA::SecureArray passPhrase = "start";
-    privKey = QCA::PrivateKey::fromPEMFile( QStringLiteral("Userkey.pem"), passPhrase, &convRes );
-    if ( convRes != QCA::ConvertGood ) {
-	qWarning() << "Sorry, could not import Private Key";
-	return 1;
+    QCA::SecureArray   passPhrase = "start";
+    privKey                       = QCA::PrivateKey::fromPEMFile(QStringLiteral("Userkey.pem"), passPhrase, &convRes);
+    if (convRes != QCA::ConvertGood) {
+        qWarning() << "Sorry, could not import Private Key";
+        return 1;
     }
 
     QCA::SecureMessageKey secMsgKey2;
     // needed?
-    secMsgKey2.setX509CertificateChain( chain );
+    secMsgKey2.setX509CertificateChain(chain);
     secMsgKey2.setX509PrivateKey(privKey);
     QCA::SecureMessageKeyList privKeyList;
     privKeyList += secMsgKey2;
@@ -116,35 +114,31 @@ int main(int argc, char** argv)
     // this example simulates encryption and one end, and decryption
     // at the other
     QCA::CMS anotherCms;
-    anotherCms.setPrivateKeys( privKeyList );
+    anotherCms.setPrivateKeys(privKeyList);
 
-    QCA::SecureMessage msg2( &anotherCms );
+    QCA::SecureMessage msg2(&anotherCms);
 
     msg2.startDecrypt();
-    msg2.update( cipherText );
+    msg2.update(cipherText);
     msg2.end();
 
     // I think it is reasonable to wait for 1 second for this
     msg2.waitForFinished(1000);
 
     // check to see if it worked
-    if(!msg2.success())
-    {
-	qWarning() << "Error encrypting: " << msg2.errorCode();
-	return 1;
+    if (!msg2.success()) {
+        qWarning() << "Error encrypting: " << msg2.errorCode();
+        return 1;
     }
 
     QCA::SecureArray plainTextResult = msg2.read();
 
-    qDebug() << enc.arrayToString( cipherText )
-	     << " (in base 64) decrypts to: "
-	     << plainTextResult.data();
+    qDebug() << enc.arrayToString(cipherText) << " (in base 64) decrypts to: " << plainTextResult.data();
 
     if (msg2.wasSigned()) {
-	qDebug() << "Message was signed at "
-		 << msg2.signer().timestamp();
+        qDebug() << "Message was signed at " << msg2.signer().timestamp();
     } else {
-	qDebug() << "Message was not signed";
+        qDebug() << "Message was not signed";
     }
 
     qDebug() << "Message used" << msg2.hashName() << "hashing algorithm";
@@ -155,7 +149,7 @@ int main(int argc, char** argv)
     QByteArray text("Got your message");
 
     // Re-use the CMS and SecureMessageKeyList objects from the decrypt...
-    QCA::SecureMessage signing( &anotherCms );
+    QCA::SecureMessage signing(&anotherCms);
     signing.setSigners(privKeyList);
 
     signing.startSign(QCA::SecureMessage::Detached);
@@ -166,23 +160,21 @@ int main(int argc, char** argv)
     signing.waitForFinished(1000);
 
     // check to see if it worked
-    if(!signing.success())
-    {
-	qWarning() << "Error signing: " << signing.errorCode();
-	return 1;
+    if (!signing.success()) {
+        qWarning() << "Error signing: " << signing.errorCode();
+        return 1;
     }
 
     // get the result
     QByteArray signature = signing.signature();
 
     qDebug() << "'" << text.data() << "', signature (converted to base 64), is: ";
-    qDebug() << enc.arrayToString( signature );
+    qDebug() << enc.arrayToString(signature);
     qDebug() << "Message uses" << signing.hashName() << "hashing algorithm";
     qDebug();
 
-
     // Now we go back to the first CMS, and re-use that.
-    QCA::SecureMessage verifying( &cms );
+    QCA::SecureMessage verifying(&cms);
 
     // You have to pass the signature to startVerify(),
     // and the message to update()
@@ -193,23 +185,20 @@ int main(int argc, char** argv)
     verifying.waitForFinished(1000);
 
     // check to see if it worked
-    if(!verifying.success())
-    {
-	qWarning() << "Error verifying: " << verifying.errorCode();
-	return 1;
+    if (!verifying.success()) {
+        qWarning() << "Error verifying: " << verifying.errorCode();
+        return 1;
     }
 
     QCA::SecureMessageSignature sign;
     sign = verifying.signer();
     // todo: dump some data out about the signer
 
-    if(verifying.verifySuccess())
-    {
-	qDebug() << "Message verified";
+    if (verifying.verifySuccess()) {
+        qDebug() << "Message verified";
     } else {
-	qDebug() << "Message failed to verify:" << verifying.errorCode();
+        qDebug() << "Message failed to verify:" << verifying.errorCode();
     }
 
     return 0;
 }
-

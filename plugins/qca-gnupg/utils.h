@@ -22,15 +22,14 @@
 #include "qca_cert.h"
 #include <QString>
 
-namespace gpgQCAPlugin
-{
+namespace gpgQCAPlugin {
 
 class GpgOp;
-void gpg_waitForFinished(GpgOp *gpg);
-void gpg_keyStoreLog(const QString &str);
-QString find_bin();
-QString escape_string(const QString &in);
-QString unescape_string(const QString &in);
+void        gpg_waitForFinished(GpgOp *gpg);
+void        gpg_keyStoreLog(const QString &str);
+QString     find_bin();
+QString     escape_string(const QString &in);
+QString     unescape_string(const QString &in);
 QCA::PGPKey publicKeyFromId(const QString &id);
 QCA::PGPKey secretKeyFromId(const QString &id);
 

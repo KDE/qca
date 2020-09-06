@@ -18,40 +18,39 @@
 
 #pragma once
 
+#include "gpgop.h"
 #include "qcaprovider.h"
 #include "ringwatch.h"
-#include "gpgop.h"
 
-namespace gpgQCAPlugin
-{
+namespace gpgQCAPlugin {
 
 class MyPGPKeyContext : public QCA::PGPKeyContext
 {
     Q_OBJECT
 public:
-	QCA::PGPKeyContextProps _props;
+    QCA::PGPKeyContextProps _props;
 
-	// keys loaded externally (not from the keyring) need to have these
-	//   values cached, since we can't extract them later
-	QByteArray cacheExportBinary;
-	QString cacheExportAscii;
+    // keys loaded externally (not from the keyring) need to have these
+    //   values cached, since we can't extract them later
+    QByteArray cacheExportBinary;
+    QString    cacheExportAscii;
 
-	MyPGPKeyContext(QCA::Provider *p);
+    MyPGPKeyContext(QCA::Provider *p);
 
-	// reimplemented Provider::Context
-	QCA::Provider::Context *clone() const override;
+    // reimplemented Provider::Context
+    QCA::Provider::Context *clone() const override;
 
-	// reimplemented PGPKeyContext
-	const QCA::PGPKeyContextProps *props() const override;
+    // reimplemented PGPKeyContext
+    const QCA::PGPKeyContextProps *props() const override;
 
-	QByteArray toBinary() const override;
-	QCA::ConvertResult fromBinary(const QByteArray &a) override;
+    QByteArray         toBinary() const override;
+    QCA::ConvertResult fromBinary(const QByteArray &a) override;
 
-	QString toAscii() const override;
-	QCA::ConvertResult fromAscii(const QString &s) override;
+    QString            toAscii() const override;
+    QCA::ConvertResult fromAscii(const QString &s) override;
 
-	void set(const GpgOp::Key &i, bool isSecret, bool inKeyring, bool isTrusted);
-	static void cleanup_temp_keyring(const QString &name);
+    void        set(const GpgOp::Key &i, bool isSecret, bool inKeyring, bool isTrusted);
+    static void cleanup_temp_keyring(const QString &name);
 };
 
 } // end namespace gpgQCAPlugin

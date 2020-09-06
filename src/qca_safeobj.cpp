@@ -29,22 +29,22 @@ namespace QCA {
 //   obj->deleteLater();     // now we can forget about the object
 inline void releaseAndDeleteLater(QObject *owner, QObject *obj)
 {
-	obj->disconnect(owner);
-	obj->setParent(nullptr);
-	obj->deleteLater();
+    obj->disconnect(owner);
+    obj->setParent(nullptr);
+    obj->deleteLater();
 }
 
-SafeSocketNotifier::SafeSocketNotifier(int socket, QSocketNotifier::Type type, QObject *parent) :
-	QObject(parent)
+SafeSocketNotifier::SafeSocketNotifier(int socket, QSocketNotifier::Type type, QObject *parent)
+    : QObject(parent)
 {
-	sn = new QSocketNotifier(socket, type, this);
-	connect(sn, &QSocketNotifier::activated, this, &SafeSocketNotifier::activated);
+    sn = new QSocketNotifier(socket, type, this);
+    connect(sn, &QSocketNotifier::activated, this, &SafeSocketNotifier::activated);
 }
 
 SafeSocketNotifier::~SafeSocketNotifier()
 {
-	sn->setEnabled(false);
-	releaseAndDeleteLater(this, sn);
+    sn->setEnabled(false);
+    releaseAndDeleteLater(this, sn);
 }
 
 }
