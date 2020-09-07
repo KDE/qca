@@ -151,7 +151,7 @@ CertificateChain BaseOsslTLSContext::peerCertificateChain() const
 {
     // TODO: support whole chain
     CertificateChain chain;
-    if (vr != ErrorValidityUnknown)
+    if (!peercert.isNull())
         chain.append(peercert);
     return chain;
 }
