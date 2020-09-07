@@ -1856,9 +1856,10 @@ CRLEntry::CRLEntry(const Certificate &c, Reason r)
     _reason = r;
 }
 
-CRLEntry::CRLEntry(const BigInteger serial, const QDateTime &time,
-                   Reason r) // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param) TODO make
-                             // serial const & when we break ABI
+// TODO make serial const & when we break ABI
+CRLEntry::CRLEntry(
+    const BigInteger serial, // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param)
+    const QDateTime &time, Reason r)
 {
     _serial = serial;
     _time   = time;
