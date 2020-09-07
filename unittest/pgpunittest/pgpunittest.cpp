@@ -65,7 +65,8 @@ class PGPPassphraseProvider : public QObject
 {
     Q_OBJECT
 public:
-    PGPPassphraseProvider(QObject *parent = nullptr) : QObject(parent)
+    PGPPassphraseProvider(QObject *parent = nullptr)
+        : QObject(parent)
     {
         connect(&m_handler, &QCA::EventHandler::eventReady, this, &PGPPassphraseProvider::eh_eventReady);
         m_handler.start();
@@ -90,12 +91,21 @@ class PGPPassphraseProviderThread : public QCA::SyncThread
 {
     Q_OBJECT
 public:
-    ~PGPPassphraseProviderThread() override { stop(); }
+    ~PGPPassphraseProviderThread() override
+    {
+        stop();
+    }
 
 protected:
-    void atStart() override { prov = new PGPPassphraseProvider; }
+    void atStart() override
+    {
+        prov = new PGPPassphraseProvider;
+    }
 
-    void atEnd() override { delete prov; }
+    void atEnd() override
+    {
+        delete prov;
+    }
 
 private:
     PGPPassphraseProvider *prov;
@@ -124,7 +134,9 @@ void PgpUnitTest::initTestCase()
         QDir::setCurrent(QCoreApplication::applicationDirPath());
 }
 
-void PgpUnitTest::cleanupTestCase() { }
+void PgpUnitTest::cleanupTestCase()
+{
+}
 
 void PgpUnitTest::testKeyRing()
 {
@@ -234,9 +246,8 @@ void PgpUnitTest::testMessageSign()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg"))
-        || QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
-
+    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg")) ||
+        QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
         QStringList storeIds = keyManager.keyStores();
         QVERIFY(storeIds.contains(QStringLiteral("qca-gnupg")));
 
@@ -363,9 +374,8 @@ void PgpUnitTest::testClearsign()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg"))
-        || QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
-
+    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg")) ||
+        QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
         QStringList storeIds = keyManager.keyStores();
         QVERIFY(storeIds.contains(QStringLiteral("qca-gnupg")));
 
@@ -475,9 +485,8 @@ void PgpUnitTest::testDetachedSign()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg"))
-        || QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
-
+    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg")) ||
+        QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
         QStringList storeIds = keyManager.keyStores();
         QVERIFY(storeIds.contains(QStringLiteral("qca-gnupg")));
 
@@ -592,9 +601,8 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg"))
-        || QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
-
+    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg")) ||
+        QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
         QStringList storeIds = keyManager.keyStores();
         QVERIFY(storeIds.contains(QStringLiteral("qca-gnupg")));
 
@@ -652,21 +660,22 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
         QCOMPARE(signedResult.trimmed(), validMessage.trimmed());
 
         // Test signature made by the expired subkey
-        QByteArray expiredKeySignature("-----BEGIN PGP SIGNED MESSAGE-----\n"
-                                       "Hash: SHA1\n"
-                                       "\n"
-                                       "Expired signature\n"
-                                       "-----BEGIN PGP SIGNATURE-----\n"
-                                       "Version: GnuPG v1\n"
-                                       "\n"
-                                       "iQEcBAEBAgAGBQJTaI2VAAoJEPddwMGvBiCrA18H/RMJxnEnyNERd19ffTdSLvHH\n"
-                                       "iwsfTEPmFQSpmCUnmjK2IIMXWTi6ofinGTWEsXKHSTqgytz715Q16OICwnFoeHin\n"
-                                       "0SnsTgi5lH5QcJPJ5PqoRwgAy8vhy73EpYrv7zqLom1Qm/9NeGtNZsohjp0ECFEk\n"
-                                       "4UmZiJF7u5Yn6hBl9btIPRTjI2FrXjr3Zy8jZijRaZMutnz5VveBHCLu00NvJQkG\n"
-                                       "PC/ZvvfGOk9SeaApnrnntfdKJ4geKxoT0+r+Yz1kQ1VKG5Af3JziBwwNID6g/FYv\n"
-                                       "cDK2no5KD7lyASAt6veCDXBdUmNatBO5Au9eE0jJwsSV6LZCpEYEcgBsnfDwxls=\n"
-                                       "=UM6K\n"
-                                       "-----END PGP SIGNATURE-----\n");
+        QByteArray expiredKeySignature(
+            "-----BEGIN PGP SIGNED MESSAGE-----\n"
+            "Hash: SHA1\n"
+            "\n"
+            "Expired signature\n"
+            "-----BEGIN PGP SIGNATURE-----\n"
+            "Version: GnuPG v1\n"
+            "\n"
+            "iQEcBAEBAgAGBQJTaI2VAAoJEPddwMGvBiCrA18H/RMJxnEnyNERd19ffTdSLvHH\n"
+            "iwsfTEPmFQSpmCUnmjK2IIMXWTi6ofinGTWEsXKHSTqgytz715Q16OICwnFoeHin\n"
+            "0SnsTgi5lH5QcJPJ5PqoRwgAy8vhy73EpYrv7zqLom1Qm/9NeGtNZsohjp0ECFEk\n"
+            "4UmZiJF7u5Yn6hBl9btIPRTjI2FrXjr3Zy8jZijRaZMutnz5VveBHCLu00NvJQkG\n"
+            "PC/ZvvfGOk9SeaApnrnntfdKJ4geKxoT0+r+Yz1kQ1VKG5Af3JziBwwNID6g/FYv\n"
+            "cDK2no5KD7lyASAt6veCDXBdUmNatBO5Au9eE0jJwsSV6LZCpEYEcgBsnfDwxls=\n"
+            "=UM6K\n"
+            "-----END PGP SIGNATURE-----\n");
 
         QCA::OpenPGP       pgp2;
         QCA::SecureMessage msg2(&pgp2);
@@ -680,21 +689,22 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
         QCOMPARE(msg2.errorCode(), QCA::SecureMessage::ErrorSignerExpired);
 
         // Test signature made by the revoked subkey
-        QByteArray revokedKeySignature("-----BEGIN PGP SIGNED MESSAGE-----\n"
-                                       "Hash: SHA1\n"
-                                       "\n"
-                                       "Revoked signature\n"
-                                       "-----BEGIN PGP SIGNATURE-----\n"
-                                       "Version: GnuPG v1\n"
-                                       "\n"
-                                       "iQEcBAEBAgAGBQJTd2AmAAoJEJwx7xWvfHTUCZMH/310hMg68H9kYWqKO12Qvyl7\n"
-                                       "SlkHBxRsD1sKIBM10qxh6262582mbdAbObVCSFlHVR5NU2tDN5B67J9NU2KnwCcq\n"
-                                       "Ny7Oj06UGEkZRmGA23BZ78w/xhPr2Xg80lckBIfGWCvezjSoAeOonk4WREpqzSUr\n"
-                                       "sXX8iioBh98ySuQp4rtzf1j0sGB2Tui/bZybiLwz+/fBzW9ITSV0OXmeT5BfBhJU\n"
-                                       "XXnOBXDwPUrJQPHxpGpX0s7iyElfZ2ws/PNqUJiWdmxqwLnndn1y5UECDC2T0FpC\n"
-                                       "erOM27tQeEthdrZTjMjV47p1ilNgNJrMI328ovehABYyobK9UlnFHcUnn/1OFRw=\n"
-                                       "=sE1o\n"
-                                       "-----END PGP SIGNATURE-----\n");
+        QByteArray revokedKeySignature(
+            "-----BEGIN PGP SIGNED MESSAGE-----\n"
+            "Hash: SHA1\n"
+            "\n"
+            "Revoked signature\n"
+            "-----BEGIN PGP SIGNATURE-----\n"
+            "Version: GnuPG v1\n"
+            "\n"
+            "iQEcBAEBAgAGBQJTd2AmAAoJEJwx7xWvfHTUCZMH/310hMg68H9kYWqKO12Qvyl7\n"
+            "SlkHBxRsD1sKIBM10qxh6262582mbdAbObVCSFlHVR5NU2tDN5B67J9NU2KnwCcq\n"
+            "Ny7Oj06UGEkZRmGA23BZ78w/xhPr2Xg80lckBIfGWCvezjSoAeOonk4WREpqzSUr\n"
+            "sXX8iioBh98ySuQp4rtzf1j0sGB2Tui/bZybiLwz+/fBzW9ITSV0OXmeT5BfBhJU\n"
+            "XXnOBXDwPUrJQPHxpGpX0s7iyElfZ2ws/PNqUJiWdmxqwLnndn1y5UECDC2T0FpC\n"
+            "erOM27tQeEthdrZTjMjV47p1ilNgNJrMI328ovehABYyobK9UlnFHcUnn/1OFRw=\n"
+            "=sE1o\n"
+            "-----END PGP SIGNATURE-----\n");
 
         QCA::OpenPGP       pgp3;
         QCA::SecureMessage msg3(&pgp3);
@@ -708,22 +718,23 @@ void PgpUnitTest::testSignaturesWithExpiredSubkeys()
         QCOMPARE(msg3.errorCode(), QCA::SecureMessage::ErrorSignerRevoked);
 
         // Test expired signature
-        QByteArray expiredSignature("-----BEGIN PGP SIGNED MESSAGE-----\n"
-                                    "Hash: SHA1\n"
-                                    "\n"
-                                    "Valid key, expired signature\n"
-                                    "-----BEGIN PGP SIGNATURE-----\n"
-                                    "Version: GnuPG v1\n"
-                                    "\n"
-                                    "iQEiBAEBAgAMBQJTkjUvBYMAAVGAAAoJEN13PKfk4idpItIH/1BpFQkPm8fQV0bd\n"
-                                    "37qaXf7IWr7bsPBcb7NjR9EmB6Zl6wnmSKW9mvKvs0ZJ1HxyHx0yC5UQWsgTj3do\n"
-                                    "xGDP4nJvi0L7EDUukZApWu98nFwrnTrLEd+JMwlpYDhtaljq2qQo7u7CsqyoE2cL\n"
-                                    "nRuPkc+lRbDMlqGXk2QFPL8Wu7gW/ndJ8nQ0Dq+22q77Hh1PcyFlggTBxhLA4Svk\n"
-                                    "Hx2I4bUjaUq5P4g9kFeXx6/0n31FCa+uThSkWWjH1OeLEXrUZSH/8nBWcnJ3IGbt\n"
-                                    "W2bmHhTUx3tYt9aHc+1kje2bAT01xN974r+wS/XNT4cWw7ZSSvukEIjjieUMP4eQ\n"
-                                    "S/H6RmM=\n"
-                                    "=9pAJ\n"
-                                    "-----END PGP SIGNATURE-----\n");
+        QByteArray expiredSignature(
+            "-----BEGIN PGP SIGNED MESSAGE-----\n"
+            "Hash: SHA1\n"
+            "\n"
+            "Valid key, expired signature\n"
+            "-----BEGIN PGP SIGNATURE-----\n"
+            "Version: GnuPG v1\n"
+            "\n"
+            "iQEiBAEBAgAMBQJTkjUvBYMAAVGAAAoJEN13PKfk4idpItIH/1BpFQkPm8fQV0bd\n"
+            "37qaXf7IWr7bsPBcb7NjR9EmB6Zl6wnmSKW9mvKvs0ZJ1HxyHx0yC5UQWsgTj3do\n"
+            "xGDP4nJvi0L7EDUukZApWu98nFwrnTrLEd+JMwlpYDhtaljq2qQo7u7CsqyoE2cL\n"
+            "nRuPkc+lRbDMlqGXk2QFPL8Wu7gW/ndJ8nQ0Dq+22q77Hh1PcyFlggTBxhLA4Svk\n"
+            "Hx2I4bUjaUq5P4g9kFeXx6/0n31FCa+uThSkWWjH1OeLEXrUZSH/8nBWcnJ3IGbt\n"
+            "W2bmHhTUx3tYt9aHc+1kje2bAT01xN974r+wS/XNT4cWw7ZSSvukEIjjieUMP4eQ\n"
+            "S/H6RmM=\n"
+            "=9pAJ\n"
+            "-----END PGP SIGNATURE-----\n");
 
         QCA::OpenPGP       pgp4;
         QCA::SecureMessage msg4(&pgp4);
@@ -763,9 +774,8 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
     QCA::KeyStoreManager keyManager(this);
     keyManager.waitForBusyFinished();
 
-    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg"))
-        || QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
-
+    if (QCA::isSupported(QStringList(QStringLiteral("openpgp")), QStringLiteral("qca-gnupg")) ||
+        QCA::isSupported(QStringList(QStringLiteral("keystorelist")), QStringLiteral("qca-gnupg"))) {
         QStringList storeIds = keyManager.keyStores();
         QVERIFY(storeIds.contains(QStringLiteral("qca-gnupg")));
 
@@ -860,8 +870,8 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
         // Note: If gpg worked as expected, msg.errorCode() should
         // equal QCA::SecureMessage::ErrorEncryptExpired, but currently
         // it omits the reason for failure, so we check for both values.
-        QVERIFY((msg2.errorCode() == QCA::SecureMessage::ErrorEncryptExpired)
-                || (msg2.errorCode() == QCA::SecureMessage::ErrorEncryptInvalid));
+        QVERIFY((msg2.errorCode() == QCA::SecureMessage::ErrorEncryptExpired) ||
+                (msg2.errorCode() == QCA::SecureMessage::ErrorEncryptInvalid));
 
         // Test encrypting to the revoked key
         QByteArray revokedMessage("Encrypting to the revoked key");
@@ -882,8 +892,8 @@ void PgpUnitTest::testEncryptionWithExpiredSubkeys()
         // Note: If gpg worked as expected, msg.errorCode() should
         // equal QCA::SecureMessage::ErrorEncryptRevoked, but currently
         // it omits the reason for failure, so we check for both values.
-        QVERIFY((msg3.errorCode() == QCA::SecureMessage::ErrorEncryptRevoked)
-                || (msg3.errorCode() == QCA::SecureMessage::ErrorEncryptInvalid));
+        QVERIFY((msg3.errorCode() == QCA::SecureMessage::ErrorEncryptRevoked) ||
+                (msg3.errorCode() == QCA::SecureMessage::ErrorEncryptInvalid));
     }
 
     if (!oldGNUPGHOME.isNull()) {

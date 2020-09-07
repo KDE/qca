@@ -46,9 +46,15 @@ Provider *   providerForName(const QString &name);
 bool         use_asker_fallback(ConvertResult r);
 
 // last 3 arguments must be valid, and chain must be empty
-static bool get_pkcs12_der(const QByteArray &der, const QString &fileName, void *ptr, const SecureArray &passphrase,
-                           ConvertResult *result, const QString &provider, QString *name, CertificateChain *chain,
-                           PrivateKey *key)
+static bool get_pkcs12_der(const QByteArray & der,
+                           const QString &    fileName,
+                           void *             ptr,
+                           const SecureArray &passphrase,
+                           ConvertResult *    result,
+                           const QString &    provider,
+                           QString *          name,
+                           CertificateChain * chain,
+                           PrivateKey *       key)
 {
     QString              _name;
     QList<CertContext *> list;
@@ -511,8 +517,8 @@ static QList<int> findSameName(const QString &name, const QStringList &list)
     return out;
 }
 
-static QString uniqueSubjectValue(const CertificateInfoType &type, const QList<int> &items,
-                                  const QList<Certificate> &certs, int i)
+static QString
+uniqueSubjectValue(const CertificateInfoType &type, const QList<int> &items, const QList<Certificate> &certs, int i)
 {
     QStringList vals = certs[items[i]].subjectInfo().values(type);
     if (!vals.isEmpty()) {
@@ -604,8 +610,8 @@ static const char *constraintToString(const ConstraintType &type)
     return nullptr;
 }
 
-static QString uniqueConstraintValue(const ConstraintType &type, const QList<int> &items,
-                                     const QList<Certificate> &certs, int i)
+static QString
+uniqueConstraintValue(const ConstraintType &type, const QList<int> &items, const QList<Certificate> &certs, int i)
 {
     if (certs[items[i]].constraints().contains(type)) {
         bool found = false;
@@ -775,28 +781,42 @@ public:
     int                          known;
     QString                      id;
 
-    Private() : section(CertificateInfoType::DN), known(-1) { }
+    Private()
+        : section(CertificateInfoType::DN)
+        , known(-1)
+    {
+    }
 };
 
-CertificateInfoType::CertificateInfoType() : d(new Private) { }
+CertificateInfoType::CertificateInfoType()
+    : d(new Private)
+{
+}
 
-CertificateInfoType::CertificateInfoType(CertificateInfoTypeKnown known) : d(new Private)
+CertificateInfoType::CertificateInfoType(CertificateInfoTypeKnown known)
+    : d(new Private)
 {
     d->section = knownToSection(known);
     d->known   = known;
     d->id      = knownToId(known); // always valid
 }
 
-CertificateInfoType::CertificateInfoType(const QString &id, Section section) : d(new Private)
+CertificateInfoType::CertificateInfoType(const QString &id, Section section)
+    : d(new Private)
 {
     d->section = section;
     d->known   = idToKnown(id); // can be -1 for unknown
     d->id      = id;
 }
 
-CertificateInfoType::CertificateInfoType(const CertificateInfoType &from) : d(from.d) { }
+CertificateInfoType::CertificateInfoType(const CertificateInfoType &from)
+    : d(from.d)
+{
+}
 
-CertificateInfoType::~CertificateInfoType() { }
+CertificateInfoType::~CertificateInfoType()
+{
+}
 
 CertificateInfoType &CertificateInfoType::operator=(const CertificateInfoType &from)
 {
@@ -804,11 +824,20 @@ CertificateInfoType &CertificateInfoType::operator=(const CertificateInfoType &f
     return *this;
 }
 
-CertificateInfoType::Section CertificateInfoType::section() const { return d->section; }
+CertificateInfoType::Section CertificateInfoType::section() const
+{
+    return d->section;
+}
 
-CertificateInfoTypeKnown CertificateInfoType::known() const { return (CertificateInfoTypeKnown)d->known; }
+CertificateInfoTypeKnown CertificateInfoType::known() const
+{
+    return (CertificateInfoTypeKnown)d->known;
+}
 
-QString CertificateInfoType::id() const { return d->id; }
+QString CertificateInfoType::id() const
+{
+    return d->id;
+}
 
 bool CertificateInfoType::operator<(const CertificateInfoType &other) const
 {
@@ -859,17 +888,26 @@ public:
     QString             value;
 };
 
-CertificateInfoPair::CertificateInfoPair() : d(new Private) { }
+CertificateInfoPair::CertificateInfoPair()
+    : d(new Private)
+{
+}
 
-CertificateInfoPair::CertificateInfoPair(const CertificateInfoType &type, const QString &value) : d(new Private)
+CertificateInfoPair::CertificateInfoPair(const CertificateInfoType &type, const QString &value)
+    : d(new Private)
 {
     d->type  = type;
     d->value = value;
 }
 
-CertificateInfoPair::CertificateInfoPair(const CertificateInfoPair &from) : d(from.d) { }
+CertificateInfoPair::CertificateInfoPair(const CertificateInfoPair &from)
+    : d(from.d)
+{
+}
 
-CertificateInfoPair::~CertificateInfoPair() { }
+CertificateInfoPair::~CertificateInfoPair()
+{
+}
 
 CertificateInfoPair &CertificateInfoPair::operator=(const CertificateInfoPair &from)
 {
@@ -877,9 +915,15 @@ CertificateInfoPair &CertificateInfoPair::operator=(const CertificateInfoPair &f
     return *this;
 }
 
-CertificateInfoType CertificateInfoPair::type() const { return d->type; }
+CertificateInfoType CertificateInfoPair::type() const
+{
+    return d->type;
+}
 
-QString CertificateInfoPair::value() const { return d->value; }
+QString CertificateInfoPair::value() const
+{
+    return d->value;
+}
 
 bool CertificateInfoPair::operator==(const CertificateInfoPair &other) const
 {
@@ -898,28 +942,42 @@ public:
     int                     known;
     QString                 id;
 
-    Private() : section(ConstraintType::KeyUsage), known(-1) { }
+    Private()
+        : section(ConstraintType::KeyUsage)
+        , known(-1)
+    {
+    }
 };
 
-ConstraintType::ConstraintType() : d(new Private) { }
+ConstraintType::ConstraintType()
+    : d(new Private)
+{
+}
 
-ConstraintType::ConstraintType(ConstraintTypeKnown known) : d(new Private)
+ConstraintType::ConstraintType(ConstraintTypeKnown known)
+    : d(new Private)
 {
     d->section = constraintKnownToSection(known);
     d->known   = known;
     d->id      = constraintKnownToId(known); // always valid
 }
 
-ConstraintType::ConstraintType(const QString &id, Section section) : d(new Private)
+ConstraintType::ConstraintType(const QString &id, Section section)
+    : d(new Private)
 {
     d->section = section;
     d->known   = constraintIdToKnown(id); // can be -1 for unknown
     d->id      = id;
 }
 
-ConstraintType::ConstraintType(const ConstraintType &from) : d(from.d) { }
+ConstraintType::ConstraintType(const ConstraintType &from)
+    : d(from.d)
+{
+}
 
-ConstraintType::~ConstraintType() { }
+ConstraintType::~ConstraintType()
+{
+}
 
 ConstraintType &ConstraintType::operator=(const ConstraintType &from)
 {
@@ -927,11 +985,20 @@ ConstraintType &ConstraintType::operator=(const ConstraintType &from)
     return *this;
 }
 
-ConstraintType::Section ConstraintType::section() const { return d->section; }
+ConstraintType::Section ConstraintType::section() const
+{
+    return d->section;
+}
 
-ConstraintTypeKnown ConstraintType::known() const { return (ConstraintTypeKnown)d->known; }
+ConstraintTypeKnown ConstraintType::known() const
+{
+    return (ConstraintTypeKnown)d->known;
+}
 
-QString ConstraintType::id() const { return d->id; }
+QString ConstraintType::id() const
+{
+    return d->id;
+}
 
 bool ConstraintType::operator<(const ConstraintType &other) const
 {
@@ -991,7 +1058,11 @@ public:
     BigInteger             serial;
     QDateTime              start, end;
 
-    Private() : isCA(false), pathLimit(0) { }
+    Private()
+        : isCA(false)
+        , pathLimit(0)
+    {
+    }
 };
 
 CertificateOptions::CertificateOptions(CertificateRequestFormat f)
@@ -1000,9 +1071,15 @@ CertificateOptions::CertificateOptions(CertificateRequestFormat f)
     d->format = f;
 }
 
-CertificateOptions::CertificateOptions(const CertificateOptions &from) { d = new Private(*from.d); }
+CertificateOptions::CertificateOptions(const CertificateOptions &from)
+{
+    d = new Private(*from.d);
+}
 
-CertificateOptions::~CertificateOptions() { delete d; }
+CertificateOptions::~CertificateOptions()
+{
+    delete d;
+}
 
 CertificateOptions &CertificateOptions::operator=(const CertificateOptions &from)
 {
@@ -1010,9 +1087,15 @@ CertificateOptions &CertificateOptions::operator=(const CertificateOptions &from
     return *this;
 }
 
-CertificateRequestFormat CertificateOptions::format() const { return d->format; }
+CertificateRequestFormat CertificateOptions::format() const
+{
+    return d->format;
+}
 
-void CertificateOptions::setFormat(CertificateRequestFormat f) { d->format = f; }
+void CertificateOptions::setFormat(CertificateRequestFormat f)
+{
+    d->format = f;
+}
 
 bool CertificateOptions::isValid() const
 {
@@ -1026,33 +1109,75 @@ bool CertificateOptions::isValid() const
     return true;
 }
 
-QString CertificateOptions::challenge() const { return d->challenge; }
+QString CertificateOptions::challenge() const
+{
+    return d->challenge;
+}
 
-CertificateInfo CertificateOptions::info() const { return d->infoMap; }
+CertificateInfo CertificateOptions::info() const
+{
+    return d->infoMap;
+}
 
-CertificateInfoOrdered CertificateOptions::infoOrdered() const { return d->info; }
+CertificateInfoOrdered CertificateOptions::infoOrdered() const
+{
+    return d->info;
+}
 
-Constraints CertificateOptions::constraints() const { return d->constraints; }
+Constraints CertificateOptions::constraints() const
+{
+    return d->constraints;
+}
 
-QStringList CertificateOptions::policies() const { return d->policies; }
+QStringList CertificateOptions::policies() const
+{
+    return d->policies;
+}
 
-QStringList CertificateOptions::crlLocations() const { return d->crlLocations; }
+QStringList CertificateOptions::crlLocations() const
+{
+    return d->crlLocations;
+}
 
-QStringList CertificateOptions::issuerLocations() const { return d->issuerLocations; }
+QStringList CertificateOptions::issuerLocations() const
+{
+    return d->issuerLocations;
+}
 
-QStringList CertificateOptions::ocspLocations() const { return d->ocspLocations; }
+QStringList CertificateOptions::ocspLocations() const
+{
+    return d->ocspLocations;
+}
 
-bool CertificateOptions::isCA() const { return d->isCA; }
+bool CertificateOptions::isCA() const
+{
+    return d->isCA;
+}
 
-int CertificateOptions::pathLimit() const { return d->pathLimit; }
+int CertificateOptions::pathLimit() const
+{
+    return d->pathLimit;
+}
 
-BigInteger CertificateOptions::serialNumber() const { return d->serial; }
+BigInteger CertificateOptions::serialNumber() const
+{
+    return d->serial;
+}
 
-QDateTime CertificateOptions::notValidBefore() const { return d->start; }
+QDateTime CertificateOptions::notValidBefore() const
+{
+    return d->start;
+}
 
-QDateTime CertificateOptions::notValidAfter() const { return d->end; }
+QDateTime CertificateOptions::notValidAfter() const
+{
+    return d->end;
+}
 
-void CertificateOptions::setChallenge(const QString &s) { d->challenge = s; }
+void CertificateOptions::setChallenge(const QString &s)
+{
+    d->challenge = s;
+}
 
 void CertificateOptions::setInfo(const CertificateInfo &info)
 {
@@ -1066,15 +1191,30 @@ void CertificateOptions::setInfoOrdered(const CertificateInfoOrdered &info)
     d->infoMap = orderedToMap(info);
 }
 
-void CertificateOptions::setConstraints(const Constraints &constraints) { d->constraints = constraints; }
+void CertificateOptions::setConstraints(const Constraints &constraints)
+{
+    d->constraints = constraints;
+}
 
-void CertificateOptions::setPolicies(const QStringList &policies) { d->policies = policies; }
+void CertificateOptions::setPolicies(const QStringList &policies)
+{
+    d->policies = policies;
+}
 
-void CertificateOptions::setCRLLocations(const QStringList &locations) { d->crlLocations = locations; }
+void CertificateOptions::setCRLLocations(const QStringList &locations)
+{
+    d->crlLocations = locations;
+}
 
-void CertificateOptions::setIssuerLocations(const QStringList &locations) { d->issuerLocations = locations; }
+void CertificateOptions::setIssuerLocations(const QStringList &locations)
+{
+    d->issuerLocations = locations;
+}
 
-void CertificateOptions::setOCSPLocations(const QStringList &locations) { d->ocspLocations = locations; }
+void CertificateOptions::setOCSPLocations(const QStringList &locations)
+{
+    d->ocspLocations = locations;
+}
 
 void CertificateOptions::setAsCA(int pathLimit)
 {
@@ -1088,7 +1228,10 @@ void CertificateOptions::setAsUser()
     d->pathLimit = 0;
 }
 
-void CertificateOptions::setSerialNumber(const BigInteger &i) { d->serial = i; }
+void CertificateOptions::setSerialNumber(const BigInteger &i)
+{
+    d->serial = i;
+}
 
 void CertificateOptions::setValidityPeriod(const QDateTime &start, const QDateTime &end)
 {
@@ -1319,15 +1462,19 @@ public:
     }
 };
 
-Certificate::Certificate() : d(new Private) { }
+Certificate::Certificate()
+    : d(new Private)
+{
+}
 
-Certificate::Certificate(const QString &fileName) : d(new Private)
+Certificate::Certificate(const QString &fileName)
+    : d(new Private)
 {
     *this = fromPEMFile(fileName, nullptr, QString());
 }
 
-Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider) :
-    d(new Private)
+Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
+    : d(new Private)
 {
     CertContext *c = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
     if (c->createSelfSigned(opts, *(static_cast<const PKeyContext *>(key.context()))))
@@ -1336,9 +1483,15 @@ Certificate::Certificate(const CertificateOptions &opts, const PrivateKey &key, 
         delete c;
 }
 
-Certificate::Certificate(const Certificate &from) : Algorithm(from), d(from.d) { }
+Certificate::Certificate(const Certificate &from)
+    : Algorithm(from)
+    , d(from.d)
+{
+}
 
-Certificate::~Certificate() { }
+Certificate::~Certificate()
+{
+}
 
 Certificate &Certificate::operator=(const Certificate &from)
 {
@@ -1347,20 +1500,35 @@ Certificate &Certificate::operator=(const Certificate &from)
     return *this;
 }
 
-bool Certificate::isNull() const { return (!context() ? true : false); }
+bool Certificate::isNull() const
+{
+    return (!context() ? true : false);
+}
 
-QDateTime Certificate::notValidBefore() const { return static_cast<const CertContext *>(context())->props()->start; }
+QDateTime Certificate::notValidBefore() const
+{
+    return static_cast<const CertContext *>(context())->props()->start;
+}
 
-QDateTime Certificate::notValidAfter() const { return static_cast<const CertContext *>(context())->props()->end; }
+QDateTime Certificate::notValidAfter() const
+{
+    return static_cast<const CertContext *>(context())->props()->end;
+}
 
-CertificateInfo Certificate::subjectInfo() const { return d->subjectInfoMap; }
+CertificateInfo Certificate::subjectInfo() const
+{
+    return d->subjectInfoMap;
+}
 
 CertificateInfoOrdered Certificate::subjectInfoOrdered() const
 {
     return static_cast<const CertContext *>(context())->props()->subject;
 }
 
-CertificateInfo Certificate::issuerInfo() const { return d->issuerInfoMap; }
+CertificateInfo Certificate::issuerInfo() const
+{
+    return d->issuerInfoMap;
+}
 
 CertificateInfoOrdered Certificate::issuerInfoOrdered() const
 {
@@ -1372,7 +1540,10 @@ Constraints Certificate::constraints() const
     return static_cast<const CertContext *>(context())->props()->constraints;
 }
 
-QStringList Certificate::policies() const { return static_cast<const CertContext *>(context())->props()->policies; }
+QStringList Certificate::policies() const
+{
+    return static_cast<const CertContext *>(context())->props()->policies;
+}
 
 QStringList Certificate::crlLocations() const
 {
@@ -1389,9 +1560,15 @@ QStringList Certificate::ocspLocations() const
     return static_cast<const CertContext *>(context())->props()->ocspLocations;
 }
 
-QString Certificate::commonName() const { return d->subjectInfoMap.value(CommonName); }
+QString Certificate::commonName() const
+{
+    return d->subjectInfoMap.value(CommonName);
+}
 
-BigInteger Certificate::serialNumber() const { return static_cast<const CertContext *>(context())->props()->serial; }
+BigInteger Certificate::serialNumber() const
+{
+    return static_cast<const CertContext *>(context())->props()->serial;
+}
 
 PublicKey Certificate::subjectPublicKey() const
 {
@@ -1401,9 +1578,15 @@ PublicKey Certificate::subjectPublicKey() const
     return key;
 }
 
-bool Certificate::isCA() const { return static_cast<const CertContext *>(context())->props()->isCA; }
+bool Certificate::isCA() const
+{
+    return static_cast<const CertContext *>(context())->props()->isCA;
+}
 
-bool Certificate::isSelfSigned() const { return static_cast<const CertContext *>(context())->props()->isSelfSigned; }
+bool Certificate::isSelfSigned() const
+{
+    return static_cast<const CertContext *>(context())->props()->isSelfSigned;
+}
 
 bool Certificate::isIssuerOf(const Certificate &other) const
 {
@@ -1411,19 +1594,30 @@ bool Certificate::isIssuerOf(const Certificate &other) const
     return static_cast<const CertContext *>(context())->isIssuerOf(cc);
 }
 
-int Certificate::pathLimit() const { return static_cast<const CertContext *>(context())->props()->pathLimit; }
+int Certificate::pathLimit() const
+{
+    return static_cast<const CertContext *>(context())->props()->pathLimit;
+}
 
 SignatureAlgorithm Certificate::signatureAlgorithm() const
 {
     return static_cast<const CertContext *>(context())->props()->sigalgo;
 }
 
-QByteArray Certificate::subjectKeyId() const { return static_cast<const CertContext *>(context())->props()->subjectId; }
+QByteArray Certificate::subjectKeyId() const
+{
+    return static_cast<const CertContext *>(context())->props()->subjectId;
+}
 
-QByteArray Certificate::issuerKeyId() const { return static_cast<const CertContext *>(context())->props()->issuerId; }
+QByteArray Certificate::issuerKeyId() const
+{
+    return static_cast<const CertContext *>(context())->props()->issuerId;
+}
 
-Validity Certificate::validate(const CertificateCollection &trusted, const CertificateCollection &untrusted,
-                               UsageMode u, ValidateFlags vf) const
+Validity Certificate::validate(const CertificateCollection &trusted,
+                               const CertificateCollection &untrusted,
+                               UsageMode                    u,
+                               ValidateFlags                vf) const
 {
     const QList<Certificate> issuers = trusted.certificates() + untrusted.certificates();
     CertificateChain         chain;
@@ -1483,11 +1677,20 @@ QByteArray Certificate::fingerprint(const QString &hashType) const
     return hash.final().toByteArray();
 }
 
-QByteArray Certificate::toDER() const { return static_cast<const CertContext *>(context())->toDER(); }
+QByteArray Certificate::toDER() const
+{
+    return static_cast<const CertContext *>(context())->toDER();
+}
 
-QString Certificate::toPEM() const { return static_cast<const CertContext *>(context())->toPEM(); }
+QString Certificate::toPEM() const
+{
+    return static_cast<const CertContext *>(context())->toPEM();
+}
 
-bool Certificate::toPEMFile(const QString &fileName) const { return stringToFile(fileName, toPEM()); }
+bool Certificate::toPEMFile(const QString &fileName) const
+{
+    return stringToFile(fileName, toPEM());
+}
 
 Certificate Certificate::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
@@ -1598,8 +1801,11 @@ void Certificate::change(CertContext *c)
     d->update(static_cast<CertContext *>(context()));
 }
 
-Validity Certificate::chain_validate(const CertificateChain &chain, const CertificateCollection &trusted,
-                                     const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const
+Validity Certificate::chain_validate(const CertificateChain &     chain,
+                                     const CertificateCollection &trusted,
+                                     const QList<CRL> &           untrusted_crls,
+                                     UsageMode                    u,
+                                     ValidateFlags                vf) const
 {
     QList<CertContext *> chain_list;
     QList<CertContext *> trusted_list;
@@ -1625,8 +1831,8 @@ Validity Certificate::chain_validate(const CertificateChain &chain, const Certif
     return static_cast<const CertContext *>(context())->validate_chain(chain_list, trusted_list, crl_list, u, vf);
 }
 
-CertificateChain Certificate::chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers,
-                                             Validity *result) const
+CertificateChain
+Certificate::chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers, Validity *result) const
 {
     CertificateChain   out;
     QList<Certificate> pool = issuers + chain.mid(1);
@@ -1681,15 +1887,19 @@ public:
     }
 };
 
-CertificateRequest::CertificateRequest() : d(new Private) { }
+CertificateRequest::CertificateRequest()
+    : d(new Private)
+{
+}
 
-CertificateRequest::CertificateRequest(const QString &fileName) : d(new Private)
+CertificateRequest::CertificateRequest(const QString &fileName)
+    : d(new Private)
 {
     *this = fromPEMFile(fileName, nullptr, QString());
 }
 
-CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider) :
-    d(new Private)
+CertificateRequest::CertificateRequest(const CertificateOptions &opts, const PrivateKey &key, const QString &provider)
+    : d(new Private)
 {
     CSRContext *c = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
     if (c->createRequest(opts, *(static_cast<const PKeyContext *>(key.context()))))
@@ -1698,9 +1908,15 @@ CertificateRequest::CertificateRequest(const CertificateOptions &opts, const Pri
         delete c;
 }
 
-CertificateRequest::CertificateRequest(const CertificateRequest &from) : Algorithm(from), d(from.d) { }
+CertificateRequest::CertificateRequest(const CertificateRequest &from)
+    : Algorithm(from)
+    , d(from.d)
+{
+}
 
-CertificateRequest::~CertificateRequest() { }
+CertificateRequest::~CertificateRequest()
+{
+}
 
 CertificateRequest &CertificateRequest::operator=(const CertificateRequest &from)
 {
@@ -1709,7 +1925,10 @@ CertificateRequest &CertificateRequest::operator=(const CertificateRequest &from
     return *this;
 }
 
-bool CertificateRequest::isNull() const { return (!context() ? true : false); }
+bool CertificateRequest::isNull() const
+{
+    return (!context() ? true : false);
+}
 
 bool CertificateRequest::canUseFormat(CertificateRequestFormat f, const QString &provider)
 {
@@ -1726,7 +1945,10 @@ CertificateRequestFormat CertificateRequest::format() const
     return static_cast<const CSRContext *>(context())->props()->format;
 }
 
-CertificateInfo CertificateRequest::subjectInfo() const { return d->subjectInfoMap; }
+CertificateInfo CertificateRequest::subjectInfo() const
+{
+    return d->subjectInfoMap;
+}
 
 CertificateInfoOrdered CertificateRequest::subjectInfoOrdered() const
 {
@@ -1751,11 +1973,20 @@ PublicKey CertificateRequest::subjectPublicKey() const
     return key;
 }
 
-bool CertificateRequest::isCA() const { return static_cast<const CSRContext *>(context())->props()->isCA; }
+bool CertificateRequest::isCA() const
+{
+    return static_cast<const CSRContext *>(context())->props()->isCA;
+}
 
-int CertificateRequest::pathLimit() const { return static_cast<const CSRContext *>(context())->props()->pathLimit; }
+int CertificateRequest::pathLimit() const
+{
+    return static_cast<const CSRContext *>(context())->props()->pathLimit;
+}
 
-QString CertificateRequest::challenge() const { return static_cast<const CSRContext *>(context())->props()->challenge; }
+QString CertificateRequest::challenge() const
+{
+    return static_cast<const CSRContext *>(context())->props()->challenge;
+}
 
 SignatureAlgorithm CertificateRequest::signatureAlgorithm() const
 {
@@ -1776,11 +2007,20 @@ bool CertificateRequest::operator==(const CertificateRequest &otherCsr) const
     return static_cast<const CSRContext *>(context())->compare(other);
 }
 
-QByteArray CertificateRequest::toDER() const { return static_cast<const CSRContext *>(context())->toDER(); }
+QByteArray CertificateRequest::toDER() const
+{
+    return static_cast<const CSRContext *>(context())->toDER();
+}
 
-QString CertificateRequest::toPEM() const { return static_cast<const CSRContext *>(context())->toPEM(); }
+QString CertificateRequest::toPEM() const
+{
+    return static_cast<const CSRContext *>(context())->toPEM();
+}
 
-bool CertificateRequest::toPEMFile(const QString &fileName) const { return stringToFile(fileName, toPEM()); }
+bool CertificateRequest::toPEMFile(const QString &fileName) const
+{
+    return stringToFile(fileName, toPEM());
+}
 
 CertificateRequest CertificateRequest::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
@@ -1810,8 +2050,8 @@ CertificateRequest CertificateRequest::fromPEM(const QString &s, ConvertResult *
     return c;
 }
 
-CertificateRequest CertificateRequest::fromPEMFile(const QString &fileName, ConvertResult *result,
-                                                   const QString &provider)
+CertificateRequest
+CertificateRequest::fromPEMFile(const QString &fileName, ConvertResult *result, const QString &provider)
 {
     QString pem;
     if (!stringFromFile(fileName, &pem)) {
@@ -1822,7 +2062,10 @@ CertificateRequest CertificateRequest::fromPEMFile(const QString &fileName, Conv
     return fromPEM(pem, result, provider);
 }
 
-QString CertificateRequest::toString() const { return static_cast<const CSRContext *>(context())->toSPKAC(); }
+QString CertificateRequest::toString() const
+{
+    return static_cast<const CSRContext *>(context())->toSPKAC();
+}
 
 CertificateRequest CertificateRequest::fromString(const QString &s, ConvertResult *result, const QString &provider)
 {
@@ -1847,7 +2090,10 @@ void CertificateRequest::change(CSRContext *c)
 //----------------------------------------------------------------------------
 // CRLEntry
 //----------------------------------------------------------------------------
-CRLEntry::CRLEntry() { _reason = Unspecified; }
+CRLEntry::CRLEntry()
+{
+    _reason = Unspecified;
+}
 
 CRLEntry::CRLEntry(const Certificate &c, Reason r)
 {
@@ -1859,16 +2105,24 @@ CRLEntry::CRLEntry(const Certificate &c, Reason r)
 // TODO make serial const & when we break ABI
 CRLEntry::CRLEntry(
     const BigInteger serial, // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param)
-    const QDateTime &time, Reason r)
+    const QDateTime &time,
+    Reason           r)
 {
     _serial = serial;
     _time   = time;
     _reason = r;
 }
 
-CRLEntry::CRLEntry(const CRLEntry &from) : _serial(from._serial), _time(from._time), _reason(from._reason) { }
+CRLEntry::CRLEntry(const CRLEntry &from)
+    : _serial(from._serial)
+    , _time(from._time)
+    , _reason(from._reason)
+{
+}
 
-CRLEntry::~CRLEntry() { }
+CRLEntry::~CRLEntry()
+{
+}
 
 CRLEntry &CRLEntry::operator=(const CRLEntry &from)
 {
@@ -1878,13 +2132,25 @@ CRLEntry &CRLEntry::operator=(const CRLEntry &from)
     return *this;
 }
 
-bool CRLEntry::isNull() const { return (_time.isNull()); }
+bool CRLEntry::isNull() const
+{
+    return (_time.isNull());
+}
 
-BigInteger CRLEntry::serialNumber() const { return _serial; }
+BigInteger CRLEntry::serialNumber() const
+{
+    return _serial;
+}
 
-QDateTime CRLEntry::time() const { return _time; }
+QDateTime CRLEntry::time() const
+{
+    return _time;
+}
 
-CRLEntry::Reason CRLEntry::reason() const { return _reason; }
+CRLEntry::Reason CRLEntry::reason() const
+{
+    return _reason;
+}
 
 bool CRLEntry::operator==(const CRLEntry &otherEntry) const
 {
@@ -1930,11 +2196,20 @@ public:
     }
 };
 
-CRL::CRL() : d(new Private) { }
+CRL::CRL()
+    : d(new Private)
+{
+}
 
-CRL::CRL(const CRL &from) : Algorithm(from), d(from.d) { }
+CRL::CRL(const CRL &from)
+    : Algorithm(from)
+    , d(from.d)
+{
+}
 
-CRL::~CRL() { }
+CRL::~CRL()
+{
+}
 
 CRL &CRL::operator=(const CRL &from)
 {
@@ -1943,33 +2218,60 @@ CRL &CRL::operator=(const CRL &from)
     return *this;
 }
 
-bool CRL::isNull() const { return (!context() ? true : false); }
+bool CRL::isNull() const
+{
+    return (!context() ? true : false);
+}
 
-CertificateInfo CRL::issuerInfo() const { return d->issuerInfoMap; }
+CertificateInfo CRL::issuerInfo() const
+{
+    return d->issuerInfoMap;
+}
 
 CertificateInfoOrdered CRL::issuerInfoOrdered() const
 {
     return static_cast<const CRLContext *>(context())->props()->issuer;
 }
 
-int CRL::number() const { return static_cast<const CRLContext *>(context())->props()->number; }
+int CRL::number() const
+{
+    return static_cast<const CRLContext *>(context())->props()->number;
+}
 
-QDateTime CRL::thisUpdate() const { return static_cast<const CRLContext *>(context())->props()->thisUpdate; }
+QDateTime CRL::thisUpdate() const
+{
+    return static_cast<const CRLContext *>(context())->props()->thisUpdate;
+}
 
-QDateTime CRL::nextUpdate() const { return static_cast<const CRLContext *>(context())->props()->nextUpdate; }
+QDateTime CRL::nextUpdate() const
+{
+    return static_cast<const CRLContext *>(context())->props()->nextUpdate;
+}
 
-QList<CRLEntry> CRL::revoked() const { return static_cast<const CRLContext *>(context())->props()->revoked; }
+QList<CRLEntry> CRL::revoked() const
+{
+    return static_cast<const CRLContext *>(context())->props()->revoked;
+}
 
 SignatureAlgorithm CRL::signatureAlgorithm() const
 {
     return static_cast<const CRLContext *>(context())->props()->sigalgo;
 }
 
-QByteArray CRL::issuerKeyId() const { return static_cast<const CRLContext *>(context())->props()->issuerId; }
+QByteArray CRL::issuerKeyId() const
+{
+    return static_cast<const CRLContext *>(context())->props()->issuerId;
+}
 
-QByteArray CRL::toDER() const { return static_cast<const CRLContext *>(context())->toDER(); }
+QByteArray CRL::toDER() const
+{
+    return static_cast<const CRLContext *>(context())->toDER();
+}
 
-QString CRL::toPEM() const { return static_cast<const CRLContext *>(context())->toPEM(); }
+QString CRL::toPEM() const
+{
+    return static_cast<const CRLContext *>(context())->toPEM();
+}
 
 bool CRL::operator==(const CRL &otherCrl) const
 {
@@ -2024,7 +2326,10 @@ CRL CRL::fromPEMFile(const QString &fileName, ConvertResult *result, const QStri
     return fromPEM(pem, result, provider);
 }
 
-bool CRL::toPEMFile(const QString &fileName) const { return stringToFile(fileName, toPEM()); }
+bool CRL::toPEMFile(const QString &fileName) const
+{
+    return stringToFile(fileName, toPEM());
+}
 
 void CRL::change(CRLContext *c)
 {
@@ -2079,11 +2384,19 @@ public:
     QList<CRL>         crls;
 };
 
-CertificateCollection::CertificateCollection() : d(new Private) { }
+CertificateCollection::CertificateCollection()
+    : d(new Private)
+{
+}
 
-CertificateCollection::CertificateCollection(const CertificateCollection &from) : d(from.d) { }
+CertificateCollection::CertificateCollection(const CertificateCollection &from)
+    : d(from.d)
+{
+}
 
-CertificateCollection::~CertificateCollection() { }
+CertificateCollection::~CertificateCollection()
+{
+}
 
 CertificateCollection &CertificateCollection::operator=(const CertificateCollection &from)
 {
@@ -2091,13 +2404,25 @@ CertificateCollection &CertificateCollection::operator=(const CertificateCollect
     return *this;
 }
 
-void CertificateCollection::addCertificate(const Certificate &cert) { d->certs.append(cert); }
+void CertificateCollection::addCertificate(const Certificate &cert)
+{
+    d->certs.append(cert);
+}
 
-void CertificateCollection::addCRL(const CRL &crl) { d->crls.append(crl); }
+void CertificateCollection::addCRL(const CRL &crl)
+{
+    d->crls.append(crl);
+}
 
-QList<Certificate> CertificateCollection::certificates() const { return d->certs; }
+QList<Certificate> CertificateCollection::certificates() const
+{
+    return d->certs;
+}
 
-QList<CRL> CertificateCollection::crls() const { return d->crls; }
+QList<CRL> CertificateCollection::crls() const
+{
+    return d->crls;
+}
 
 void CertificateCollection::append(const CertificateCollection &other)
 {
@@ -2118,7 +2443,10 @@ CertificateCollection &CertificateCollection::operator+=(const CertificateCollec
     return *this;
 }
 
-bool CertificateCollection::canUsePKCS7(const QString &provider) { return isSupported("certcollection", provider); }
+bool CertificateCollection::canUsePKCS7(const QString &provider)
+{
+    return isSupported("certcollection", provider);
+}
 
 bool CertificateCollection::toFlatTextFile(const QString &fileName)
 {
@@ -2137,8 +2465,8 @@ bool CertificateCollection::toFlatTextFile(const QString &fileName)
 
 bool CertificateCollection::toPKCS7File(const QString &fileName, const QString &provider)
 {
-    CertCollectionContext *col
-        = static_cast<CertCollectionContext *>(getContext(QStringLiteral("certcollection"), provider));
+    CertCollectionContext *col =
+        static_cast<CertCollectionContext *>(getContext(QStringLiteral("certcollection"), provider));
 
     QList<CertContext *> cert_list;
     QList<CRLContext *>  crl_list;
@@ -2158,8 +2486,8 @@ bool CertificateCollection::toPKCS7File(const QString &fileName, const QString &
     return arrayToFile(fileName, result);
 }
 
-CertificateCollection CertificateCollection::fromFlatTextFile(const QString &fileName, ConvertResult *result,
-                                                              const QString &provider)
+CertificateCollection
+CertificateCollection::fromFlatTextFile(const QString &fileName, ConvertResult *result, const QString &provider)
 {
     QFile f(fileName);
     if (!f.open(QFile::ReadOnly)) {
@@ -2192,8 +2520,8 @@ CertificateCollection CertificateCollection::fromFlatTextFile(const QString &fil
     return certs;
 }
 
-CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileName, ConvertResult *result,
-                                                           const QString &provider)
+CertificateCollection
+CertificateCollection::fromPKCS7File(const QString &fileName, ConvertResult *result, const QString &provider)
 {
     QByteArray der;
     if (!arrayFromFile(fileName, &der)) {
@@ -2206,8 +2534,8 @@ CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileNa
 
     QList<CertContext *>   cert_list;
     QList<CRLContext *>    crl_list;
-    CertCollectionContext *col
-        = static_cast<CertCollectionContext *>(getContext(QStringLiteral("certcollection"), provider));
+    CertCollectionContext *col =
+        static_cast<CertCollectionContext *>(getContext(QStringLiteral("certcollection"), provider));
     ConvertResult r = col->fromPKCS7(der, &cert_list, &crl_list);
     delete col;
 
@@ -2232,16 +2560,21 @@ CertificateCollection CertificateCollection::fromPKCS7File(const QString &fileNa
 //----------------------------------------------------------------------------
 // CertificateAuthority
 //----------------------------------------------------------------------------
-CertificateAuthority::CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider) :
-    Algorithm(QStringLiteral("ca"), provider)
+CertificateAuthority::CertificateAuthority(const Certificate &cert, const PrivateKey &key, const QString &provider)
+    : Algorithm(QStringLiteral("ca"), provider)
 {
     static_cast<CAContext *>(context())->setup(*(static_cast<const CertContext *>(cert.context())),
                                                *(static_cast<const PKeyContext *>(key.context())));
 }
 
-CertificateAuthority::CertificateAuthority(const CertificateAuthority &from) : Algorithm(from) { }
+CertificateAuthority::CertificateAuthority(const CertificateAuthority &from)
+    : Algorithm(from)
+{
+}
 
-CertificateAuthority::~CertificateAuthority() { }
+CertificateAuthority::~CertificateAuthority()
+{
+}
 
 CertificateAuthority &CertificateAuthority::operator=(const CertificateAuthority &from)
 {
@@ -2296,16 +2629,25 @@ public:
     PrivateKey       key;
 };
 
-KeyBundle::KeyBundle() : d(new Private) { }
+KeyBundle::KeyBundle()
+    : d(new Private)
+{
+}
 
-KeyBundle::KeyBundle(const QString &fileName, const SecureArray &passphrase) : d(new Private)
+KeyBundle::KeyBundle(const QString &fileName, const SecureArray &passphrase)
+    : d(new Private)
 {
     *this = fromFile(fileName, passphrase, nullptr, QString());
 }
 
-KeyBundle::KeyBundle(const KeyBundle &from) : d(from.d) { }
+KeyBundle::KeyBundle(const KeyBundle &from)
+    : d(from.d)
+{
+}
 
-KeyBundle::~KeyBundle() { }
+KeyBundle::~KeyBundle()
+{
+}
 
 KeyBundle &KeyBundle::operator=(const KeyBundle &from)
 {
@@ -2313,15 +2655,30 @@ KeyBundle &KeyBundle::operator=(const KeyBundle &from)
     return *this;
 }
 
-bool KeyBundle::isNull() const { return d->chain.isEmpty(); }
+bool KeyBundle::isNull() const
+{
+    return d->chain.isEmpty();
+}
 
-QString KeyBundle::name() const { return d->name; }
+QString KeyBundle::name() const
+{
+    return d->name;
+}
 
-CertificateChain KeyBundle::certificateChain() const { return d->chain; }
+CertificateChain KeyBundle::certificateChain() const
+{
+    return d->chain;
+}
 
-PrivateKey KeyBundle::privateKey() const { return d->key; }
+PrivateKey KeyBundle::privateKey() const
+{
+    return d->key;
+}
 
-void KeyBundle::setName(const QString &s) { d->name = s; }
+void KeyBundle::setName(const QString &s)
+{
+    d->name = s;
+}
 
 void KeyBundle::setCertificateChainAndKey(const CertificateChain &c, const PrivateKey &key)
 {
@@ -2336,8 +2693,8 @@ QByteArray KeyBundle::toArray(const SecureArray &passphrase, const QString &prov
     QList<const CertContext *> list;
     for (int n = 0; n < d->chain.count(); ++n)
         list.append(static_cast<const CertContext *>(d->chain[n].context()));
-    const QByteArray buf
-        = pix->toPKCS12(d->name, list, *(static_cast<const PKeyContext *>(d->key.context())), passphrase);
+    const QByteArray buf =
+        pix->toPKCS12(d->name, list, *(static_cast<const PKeyContext *>(d->key.context())), passphrase);
     delete pix;
 
     return buf;
@@ -2348,17 +2705,19 @@ bool KeyBundle::toFile(const QString &fileName, const SecureArray &passphrase, c
     return arrayToFile(fileName, toArray(passphrase, provider));
 }
 
-KeyBundle KeyBundle::fromArray(const QByteArray &a, const SecureArray &passphrase, ConvertResult *result,
-                               const QString &provider)
+KeyBundle
+KeyBundle::fromArray(const QByteArray &a, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
     KeyBundle bundle;
-    get_pkcs12_der(a, QString(), (void *)&a, passphrase, result, provider, &bundle.d->name, &bundle.d->chain,
-                   &bundle.d->key);
+    get_pkcs12_der(
+        a, QString(), (void *)&a, passphrase, result, provider, &bundle.d->name, &bundle.d->chain, &bundle.d->key);
     return bundle;
 }
 
-KeyBundle KeyBundle::fromFile(const QString &fileName, const SecureArray &passphrase, ConvertResult *result,
-                              const QString &provider)
+KeyBundle KeyBundle::fromFile(const QString &    fileName,
+                              const SecureArray &passphrase,
+                              ConvertResult *    result,
+                              const QString &    provider)
 {
     QByteArray der;
     if (!arrayFromFile(fileName, &der)) {
@@ -2368,21 +2727,31 @@ KeyBundle KeyBundle::fromFile(const QString &fileName, const SecureArray &passph
     }
 
     KeyBundle bundle;
-    get_pkcs12_der(der, fileName, nullptr, passphrase, result, provider, &bundle.d->name, &bundle.d->chain,
-                   &bundle.d->key);
+    get_pkcs12_der(
+        der, fileName, nullptr, passphrase, result, provider, &bundle.d->name, &bundle.d->chain, &bundle.d->key);
     return bundle;
 }
 
 //----------------------------------------------------------------------------
 // PGPKey
 //----------------------------------------------------------------------------
-PGPKey::PGPKey() { }
+PGPKey::PGPKey()
+{
+}
 
-PGPKey::PGPKey(const QString &fileName) { *this = fromFile(fileName, nullptr, QString()); }
+PGPKey::PGPKey(const QString &fileName)
+{
+    *this = fromFile(fileName, nullptr, QString());
+}
 
-PGPKey::PGPKey(const PGPKey &from) : Algorithm(from) { }
+PGPKey::PGPKey(const PGPKey &from)
+    : Algorithm(from)
+{
+}
 
-PGPKey::~PGPKey() { }
+PGPKey::~PGPKey()
+{
+}
 
 PGPKey &PGPKey::operator=(const PGPKey &from)
 {
@@ -2390,37 +2759,70 @@ PGPKey &PGPKey::operator=(const PGPKey &from)
     return *this;
 }
 
-bool PGPKey::isNull() const { return (!context() ? true : false); }
+bool PGPKey::isNull() const
+{
+    return (!context() ? true : false);
+}
 
-QString PGPKey::keyId() const { return static_cast<const PGPKeyContext *>(context())->props()->keyId; }
+QString PGPKey::keyId() const
+{
+    return static_cast<const PGPKeyContext *>(context())->props()->keyId;
+}
 
 QString PGPKey::primaryUserId() const
 {
     return static_cast<const PGPKeyContext *>(context())->props()->userIds.first();
 }
 
-QStringList PGPKey::userIds() const { return static_cast<const PGPKeyContext *>(context())->props()->userIds; }
+QStringList PGPKey::userIds() const
+{
+    return static_cast<const PGPKeyContext *>(context())->props()->userIds;
+}
 
-bool PGPKey::isSecret() const { return static_cast<const PGPKeyContext *>(context())->props()->isSecret; }
+bool PGPKey::isSecret() const
+{
+    return static_cast<const PGPKeyContext *>(context())->props()->isSecret;
+}
 
-QDateTime PGPKey::creationDate() const { return static_cast<const PGPKeyContext *>(context())->props()->creationDate; }
+QDateTime PGPKey::creationDate() const
+{
+    return static_cast<const PGPKeyContext *>(context())->props()->creationDate;
+}
 
 QDateTime PGPKey::expirationDate() const
 {
     return static_cast<const PGPKeyContext *>(context())->props()->expirationDate;
 }
 
-QString PGPKey::fingerprint() const { return static_cast<const PGPKeyContext *>(context())->props()->fingerprint; }
+QString PGPKey::fingerprint() const
+{
+    return static_cast<const PGPKeyContext *>(context())->props()->fingerprint;
+}
 
-bool PGPKey::inKeyring() const { return static_cast<const PGPKeyContext *>(context())->props()->inKeyring; }
+bool PGPKey::inKeyring() const
+{
+    return static_cast<const PGPKeyContext *>(context())->props()->inKeyring;
+}
 
-bool PGPKey::isTrusted() const { return static_cast<const PGPKeyContext *>(context())->props()->isTrusted; }
+bool PGPKey::isTrusted() const
+{
+    return static_cast<const PGPKeyContext *>(context())->props()->isTrusted;
+}
 
-QByteArray PGPKey::toArray() const { return static_cast<const PGPKeyContext *>(context())->toBinary(); }
+QByteArray PGPKey::toArray() const
+{
+    return static_cast<const PGPKeyContext *>(context())->toBinary();
+}
 
-QString PGPKey::toString() const { return static_cast<const PGPKeyContext *>(context())->toAscii(); }
+QString PGPKey::toString() const
+{
+    return static_cast<const PGPKeyContext *>(context())->toAscii();
+}
 
-bool PGPKey::toFile(const QString &fileName) const { return stringToFile(fileName, toString()); }
+bool PGPKey::toFile(const QString &fileName) const
+{
+    return stringToFile(fileName, toString());
+}
 
 PGPKey PGPKey::fromArray(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
@@ -2497,7 +2899,10 @@ public:
     In  in;
     Out out;
 
-    KeyLoaderThread(QObject *parent = nullptr) : QThread(parent) { }
+    KeyLoaderThread(QObject *parent = nullptr)
+        : QThread(parent)
+    {
+    }
 
 protected:
     void run() override
@@ -2526,7 +2931,12 @@ public:
     KeyLoaderThread::In  in;
     KeyLoaderThread::Out out;
 
-    Private(KeyLoader *_q) : QObject(_q), q(_q) { active = false; }
+    Private(KeyLoader *_q)
+        : QObject(_q)
+        , q(_q)
+    {
+        active = false;
+    }
 
     void reset()
     {
@@ -2556,9 +2966,16 @@ private Q_SLOTS:
     }
 };
 
-KeyLoader::KeyLoader(QObject *parent) : QObject(parent) { d = new Private(this); }
+KeyLoader::KeyLoader(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-KeyLoader::~KeyLoader() { delete d; }
+KeyLoader::~KeyLoader()
+{
+    delete d;
+}
 
 void KeyLoader::loadPrivateKeyFromPEMFile(const QString &fileName)
 {
@@ -2620,11 +3037,20 @@ void KeyLoader::loadKeyBundleFromArray(const QByteArray &a)
     d->start();
 }
 
-ConvertResult KeyLoader::convertResult() const { return d->out.convertResult; }
+ConvertResult KeyLoader::convertResult() const
+{
+    return d->out.convertResult;
+}
 
-PrivateKey KeyLoader::privateKey() const { return d->out.privateKey; }
+PrivateKey KeyLoader::privateKey() const
+{
+    return d->out.privateKey;
+}
 
-KeyBundle KeyLoader::keyBundle() const { return d->out.keyBundle; }
+KeyBundle KeyLoader::keyBundle() const
+{
+    return d->out.keyBundle;
+}
 
 }
 

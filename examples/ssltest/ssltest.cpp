@@ -51,7 +51,8 @@ void showCertInfo(const QCA::Certificate &cert)
 {
     printf("-- Cert --\n");
     printf(" CN: %s\n", qPrintable(cert.commonName()));
-    printf(" Valid from: %s, until %s\n", qPrintable(cert.notValidBefore().toString()),
+    printf(" Valid from: %s, until %s\n",
+           qPrintable(cert.notValidBefore().toString()),
            qPrintable(cert.notValidAfter().toString()));
     printf(" PEM:\n%s\n", qPrintable(cert.toPEM()));
 }
@@ -117,7 +118,9 @@ public:
         connect(sock, &QTcpSocket::connected, this, &SecureTest::sock_connected);
         connect(sock, &QTcpSocket::readyRead, this, &SecureTest::sock_readyRead);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this,
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
+                this,
                 &SecureTest::sock_error);
 #else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureTest::sock_error);
@@ -214,7 +217,9 @@ private Q_SLOTS:
 
         QCA::TLS::IdentityResult r = ssl->peerIdentityResult();
 
-        printf("Successful SSL handshake using %s (%i of %i bits)\n", qPrintable(ssl->cipherSuite()), ssl->cipherBits(),
+        printf("Successful SSL handshake using %s (%i of %i bits)\n",
+               qPrintable(ssl->cipherSuite()),
+               ssl->cipherBits(),
                ssl->cipherMaxBits());
         if (r != QCA::TLS::NoCertificate) {
             cert = ssl->peerCertificateChain().primary();
@@ -228,8 +233,8 @@ private Q_SLOTS:
         else if (r == QCA::TLS::HostMismatch)
             str += QStringLiteral("Error: Wrong certificate");
         else if (r == QCA::TLS::InvalidCertificate)
-            str += QStringLiteral("Error: Invalid certificate.\n -> Reason: ")
-                + validityToString(ssl->peerCertificateValidity());
+            str += QStringLiteral("Error: Invalid certificate.\n -> Reason: ") +
+                validityToString(ssl->peerCertificateValidity());
         else
             str += QStringLiteral("Error: No certificate");
         printf("%s\n", qPrintable(str));

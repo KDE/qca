@@ -163,10 +163,18 @@ private:
     int         toWrite;
 
 public:
-    ServerTestHandler(ServerTest *_serverTest, QTcpSocket *_sock, const QString &_host, const QString &_proto,
-                      const QString &_realm, const QString &_str) :
-        serverTest(_serverTest),
-        sock(_sock), host(_host), proto(_proto), realm(_realm), str(_str)
+    ServerTestHandler(ServerTest *   _serverTest,
+                      QTcpSocket *   _sock,
+                      const QString &_host,
+                      const QString &_proto,
+                      const QString &_realm,
+                      const QString &_str)
+        : serverTest(_serverTest)
+        , sock(_sock)
+        , host(_host)
+        , proto(_proto)
+        , realm(_realm)
+        , str(_str)
     {
         id = serverTest->reserveId();
 
@@ -174,10 +182,14 @@ public:
         connect(sock, &QTcpSocket::disconnected, this, &ServerTestHandler::sock_disconnected);
         connect(sock, &QTcpSocket::readyRead, this, &ServerTestHandler::sock_readyRead);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this,
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
+                this,
                 &ServerTestHandler::sock_error);
 #else
-        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this,
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error),
+                this,
                 &ServerTestHandler::sock_error);
 #endif
         connect(sock, &QTcpSocket::bytesWritten, this, &ServerTestHandler::sock_bytesWritten);
@@ -203,10 +215,16 @@ public:
         sasl->startServer(proto, host, realm);
     }
 
-    ~ServerTestHandler() override { serverTest->releaseId(id); }
+    ~ServerTestHandler() override
+    {
+        serverTest->releaseId(id);
+    }
 
 private Q_SLOTS:
-    void sasl_serverStarted() { sendLine(sasl->mechanismList().join(QStringLiteral(" "))); }
+    void sasl_serverStarted()
+    {
+        sendLine(sasl->mechanismList().join(QStringLiteral(" ")));
+    }
 
     void sock_disconnected()
     {
@@ -290,7 +308,10 @@ private Q_SLOTS:
         printf("%d: Warning, client sent %d bytes unexpectedly.\n", id, a.size());
     }
 
-    void sasl_readyReadOutgoing() { sock->write(sasl->readOutgoing()); }
+    void sasl_readyReadOutgoing()
+    {
+        sock->write(sasl->readOutgoing());
+    }
 
     void sasl_error()
     {
@@ -311,7 +332,10 @@ private Q_SLOTS:
     }
 
 private:
-    void discard() { deleteLater(); }
+    void discard()
+    {
+        deleteLater();
+    }
 
     void handleLine(const QString &line)
     {
@@ -374,10 +398,16 @@ private:
 
 // --- ServerTest implementation
 
-ServerTest::ServerTest(const QString &_host, int _port, const QString &_proto, const QString &_realm,
-                       const QString &_str) :
-    host(_host),
-    proto(_proto), realm(_realm), str(_str), port(_port)
+ServerTest::ServerTest(const QString &_host,
+                       int            _port,
+                       const QString &_proto,
+                       const QString &_realm,
+                       const QString &_str)
+    : host(_host)
+    , proto(_proto)
+    , realm(_realm)
+    , str(_str)
+    , port(_port)
 {
     tcpServer = new QTcpServer(this);
     connect(tcpServer, &QTcpServer::newConnection, this, &ServerTest::server_newConnection);
@@ -392,7 +422,10 @@ int ServerTest::reserveId()
     return n;
 }
 
-void ServerTest::releaseId(int id) { ids.removeAll(id); }
+void ServerTest::releaseId(int id)
+{
+    ids.removeAll(id);
+}
 
 void ServerTest::start()
 {

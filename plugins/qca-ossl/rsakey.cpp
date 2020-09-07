@@ -29,23 +29,23 @@ namespace opensslQCAPlugin {
 // RSAKey
 //----------------------------------------------------------------------------
 namespace {
-    struct RsaDeleter
+struct RsaDeleter
+{
+    static inline void cleanup(void *pointer)
     {
-        static inline void cleanup(void *pointer)
-        {
-            if (pointer)
-                RSA_free((RSA *)pointer);
-        }
-    };
+        if (pointer)
+            RSA_free((RSA *)pointer);
+    }
+};
 
-    struct BnDeleter
+struct BnDeleter
+{
+    static inline void cleanup(void *pointer)
     {
-        static inline void cleanup(void *pointer)
-        {
-            if (pointer)
-                BN_free((BIGNUM *)pointer);
-        }
-    };
+        if (pointer)
+            BN_free((BIGNUM *)pointer);
+    }
+};
 } // end of anonymous namespace
 
 class RSAKeyMaker : public QThread
@@ -55,8 +55,11 @@ public:
     RSA *result;
     int  bits, exp;
 
-    RSAKeyMaker(int _bits, int _exp, QObject *parent = nullptr) :
-        QThread(parent), result(nullptr), bits(_bits), exp(_exp)
+    RSAKeyMaker(int _bits, int _exp, QObject *parent = nullptr)
+        : QThread(parent)
+        , result(nullptr)
+        , bits(_bits)
+        , exp(_exp)
     {
     }
 
@@ -95,29 +98,50 @@ public:
     }
 };
 
-RSAKey::RSAKey(Provider *p) : RSAContext(p)
+RSAKey::RSAKey(Provider *p)
+    : RSAContext(p)
 {
     keymaker = nullptr;
     sec      = false;
 }
 
-RSAKey::RSAKey(const RSAKey &from) : RSAContext(from.provider()), evp(from.evp)
+RSAKey::RSAKey(const RSAKey &from)
+    : RSAContext(from.provider())
+    , evp(from.evp)
 {
     keymaker = nullptr;
     sec      = from.sec;
 }
 
-RSAKey::~RSAKey() { delete keymaker; }
+RSAKey::~RSAKey()
+{
+    delete keymaker;
+}
 
-Provider::Context *RSAKey::clone() const { return new RSAKey(*this); }
+Provider::Context *RSAKey::clone() const
+{
+    return new RSAKey(*this);
+}
 
-bool RSAKey::isNull() const { return (evp.pkey ? false : true); }
+bool RSAKey::isNull() const
+{
+    return (evp.pkey ? false : true);
+}
 
-PKey::Type RSAKey::type() const { return PKey::RSA; }
+PKey::Type RSAKey::type() const
+{
+    return PKey::RSA;
+}
 
-bool RSAKey::isPrivate() const { return sec; }
+bool RSAKey::isPrivate() const
+{
+    return sec;
+}
 
-bool RSAKey::canExport() const { return true; }
+bool RSAKey::canExport() const
+{
+    return true;
+}
 
 void RSAKey::convertToPublic()
 {
@@ -140,7 +164,10 @@ void RSAKey::convertToPublic()
     sec = false;
 }
 
-int RSAKey::bits() const { return EVP_PKEY_bits(evp.pkey); }
+int RSAKey::bits() const
+{
+    return EVP_PKEY_bits(evp.pkey);
+}
 
 int RSAKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 {
@@ -302,11 +329,20 @@ void RSAKey::startVerify(SignatureAlgorithm alg, SignatureFormat)
     evp.startVerify(md);
 }
 
-void RSAKey::update(const MemoryRegion &in) { evp.update(in); }
+void RSAKey::update(const MemoryRegion &in)
+{
+    evp.update(in);
+}
 
-QByteArray RSAKey::endSign() { return evp.endSign().toByteArray(); }
+QByteArray RSAKey::endSign()
+{
+    return evp.endSign().toByteArray();
+}
 
-bool RSAKey::endVerify(const QByteArray &sig) { return evp.endVerify(sig); }
+bool RSAKey::endVerify(const QByteArray &sig)
+{
+    return evp.endVerify(sig);
+}
 
 void RSAKey::createPrivate(int bits, int exp, bool block)
 {
@@ -323,7 +359,10 @@ void RSAKey::createPrivate(int bits, int exp, bool block)
     }
 }
 
-void RSAKey::createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q,
+void RSAKey::createPrivate(const BigInteger &n,
+                           const BigInteger &e,
+                           const BigInteger &p,
+                           const BigInteger &q,
                            const BigInteger &d)
 {
     evp.reset();

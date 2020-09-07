@@ -26,9 +26,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Qt Thread Mutex Source File                    *
-* (C) 1999-2007 The Botan Project                *
-*************************************************/
+ * Qt Thread Mutex Source File                    *
+ * (C) 1999-2007 The Botan Project                *
+ *************************************************/
 
 } // WRAPNS_LINE
 #include <botan/mux_qt.h>
@@ -40,21 +40,28 @@ namespace QCA { // WRAPNS_LINE
 namespace Botan {
 
 /*************************************************
-* Qt Mutex Factory                               *
-*************************************************/
-Mutex* Qt_Mutex_Factory::make()
-   {
-   class Qt_Mutex : public Mutex
-      {
-      public:
-         void lock() override { mutex.lock(); }
-         void unlock() override { mutex.unlock(); }
-      private:
-         QMutex mutex;
-      };
+ * Qt Mutex Factory                               *
+ *************************************************/
+Mutex *Qt_Mutex_Factory::make()
+{
+    class Qt_Mutex : public Mutex
+    {
+    public:
+        void lock() override
+        {
+            mutex.lock();
+        }
+        void unlock() override
+        {
+            mutex.unlock();
+        }
 
-   return new Qt_Mutex();
-   }
+    private:
+        QMutex mutex;
+    };
+
+    return new Qt_Mutex();
+}
 
 }
 } // WRAPNS_LINE

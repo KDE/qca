@@ -60,9 +60,15 @@ public:
         sock->connectToHost(host, port);
     }
 
-    void waitForHandshake(int timeout = 20000) { sync->waitForCondition(timeout); }
+    void waitForHandshake(int timeout = 20000)
+    {
+        sync->waitForCondition(timeout);
+    }
 
-    bool isHandshaken() { return ssl->isHandshaken(); }
+    bool isHandshaken()
+    {
+        return ssl->isHandshaken();
+    }
 
 private Q_SLOTS:
     void sock_connected()
@@ -78,7 +84,10 @@ private Q_SLOTS:
         ssl->startClient(host);
     }
 
-    void sock_readyRead() { ssl->writeIncoming(sock->readAll()); }
+    void sock_readyRead()
+    {
+        ssl->writeIncoming(sock->readAll());
+    }
 
     void ssl_handshaken()
     {
@@ -89,7 +98,10 @@ private Q_SLOTS:
         sync->conditionMet();
     }
 
-    void ssl_readyReadOutgoing() { sock->write(ssl->readOutgoing()); }
+    void ssl_readyReadOutgoing()
+    {
+        sock->write(ssl->readOutgoing());
+    }
 
 private:
     QString            host;
@@ -118,9 +130,15 @@ private:
     QCA::CertificateCollection rootCerts;
 };
 
-void VeloxUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void VeloxUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void VeloxUnitTest::cleanupTestCase() { delete m_init; }
+void VeloxUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void VeloxUnitTest::sniAlice()
 {

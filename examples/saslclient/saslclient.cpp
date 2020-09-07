@@ -126,17 +126,34 @@ private:
     int         waitCycles;
 
 public:
-    ClientTest(const QString &_host, int _port, const QString &_proto, const QString &_authzid, const QString &_realm,
-               const QString &_user, const QString &_pass, bool _no_authzid, bool _no_realm) :
-        host(_host),
-        proto(_proto), authzid(_authzid), realm(_realm), user(_user), pass(_pass), port(_port), no_authzid(_no_authzid),
-        no_realm(_no_realm), sock_done(false), waitCycles(0)
+    ClientTest(const QString &_host,
+               int            _port,
+               const QString &_proto,
+               const QString &_authzid,
+               const QString &_realm,
+               const QString &_user,
+               const QString &_pass,
+               bool           _no_authzid,
+               bool           _no_realm)
+        : host(_host)
+        , proto(_proto)
+        , authzid(_authzid)
+        , realm(_realm)
+        , user(_user)
+        , pass(_pass)
+        , port(_port)
+        , no_authzid(_no_authzid)
+        , no_realm(_no_realm)
+        , sock_done(false)
+        , waitCycles(0)
     {
         sock = new QTcpSocket(this);
         connect(sock, &QTcpSocket::connected, this, &ClientTest::sock_connected);
         connect(sock, &QTcpSocket::readyRead, this, &ClientTest::sock_readyRead);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this,
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
+                this,
                 &ClientTest::sock_error);
 #else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &ClientTest::sock_error);
@@ -178,7 +195,10 @@ Q_SIGNALS:
     void quit();
 
 private Q_SLOTS:
-    void sock_connected() { printf("Connected to server.  Awaiting mechanism list...\n"); }
+    void sock_connected()
+    {
+        printf("Connected to server.  Awaiting mechanism list...\n");
+    }
 
     void sock_error(QAbstractSocket::SocketError x)
     {
@@ -370,9 +390,15 @@ private:
         }
     }
 
-    QString arrayToString(const QByteArray &ba) { return QCA::Base64().arrayToString(ba); }
+    QString arrayToString(const QByteArray &ba)
+    {
+        return QCA::Base64().arrayToString(ba);
+    }
 
-    QByteArray stringToArray(const QString &s) { return QCA::Base64().stringToArray(s).toByteArray(); }
+    QByteArray stringToArray(const QString &s)
+    {
+        return QCA::Base64().stringToArray(s).toByteArray();
+    }
 
     void sendLine(const QString &line)
     {

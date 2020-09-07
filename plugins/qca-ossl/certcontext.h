@@ -110,10 +110,16 @@ public:
     PKeyContext *subjectPublicKey() const override;
     bool         isIssuerOf(const CertContext *other) const override;
     // implemented later because it depends on MyCRLContext
-    Validity validate(const QList<CertContext *> &trusted, const QList<CertContext *> &untrusted,
-                      const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const override;
-    Validity validate_chain(const QList<CertContext *> &chain, const QList<CertContext *> &trusted,
-                            const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const override;
+    Validity validate(const QList<CertContext *> &trusted,
+                      const QList<CertContext *> &untrusted,
+                      const QList<CRLContext *> & crls,
+                      UsageMode                   u,
+                      ValidateFlags               vf) const override;
+    Validity validate_chain(const QList<CertContext *> &chain,
+                            const QList<CertContext *> &trusted,
+                            const QList<CRLContext *> & crls,
+                            UsageMode                   u,
+                            ValidateFlags               vf) const override;
     void     make_props();
 };
 
@@ -130,13 +136,13 @@ public:
     MyCAContext(const MyCAContext &from);
     ~MyCAContext() override;
 
-    CertContext *      certificate() const override;
-    CertContext *      createCertificate(const PKeyContext &pub, const CertificateOptions &opts) const override;
-    CRLContext *       createCRL(const QDateTime &nextUpdate) const override;
-    void               setup(const CertContext &cert, const PKeyContext &priv) override;
-    CertContext *      signRequest(const CSRContext &req, const QDateTime &notValidAfter) const override;
-    CRLContext *       updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries,
-                                 const QDateTime &nextUpdate) const override;
+    CertContext *certificate() const override;
+    CertContext *createCertificate(const PKeyContext &pub, const CertificateOptions &opts) const override;
+    CRLContext * createCRL(const QDateTime &nextUpdate) const override;
+    void         setup(const CertContext &cert, const PKeyContext &priv) override;
+    CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const override;
+    CRLContext *
+                       updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const override;
     Provider::Context *clone() const override;
 };
 

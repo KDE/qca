@@ -43,9 +43,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void SecureArrayUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void SecureArrayUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void SecureArrayUnitTest::cleanupTestCase() { delete m_init; }
+void SecureArrayUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void SecureArrayUnitTest::testAll()
 {

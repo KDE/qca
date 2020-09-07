@@ -60,9 +60,18 @@ private:
     QByteArray in_left, out_left;
 
 public:
-    ConsoleWorker(QObject *parent = nullptr) : QObject(parent), in(this), out(this) { started = false; }
+    ConsoleWorker(QObject *parent = nullptr)
+        : QObject(parent)
+        , in(this)
+        , out(this)
+    {
+        started = false;
+    }
 
-    ~ConsoleWorker() override { stop(); }
+    ~ConsoleWorker() override
+    {
+        stop();
+    }
 
     void start(Q_PIPE_ID in_id, Q_PIPE_ID out_id)
     {
@@ -102,11 +111,20 @@ public:
         started = false;
     }
 
-    Q_INVOKABLE bool isValid() const { return in.isValid(); }
+    Q_INVOKABLE bool isValid() const
+    {
+        return in.isValid();
+    }
 
-    Q_INVOKABLE int bytesAvailable() const { return in.bytesAvailable(); }
+    Q_INVOKABLE int bytesAvailable() const
+    {
+        return in.bytesAvailable();
+    }
 
-    Q_INVOKABLE int bytesToWrite() const { return in.bytesToWrite(); }
+    Q_INVOKABLE int bytesToWrite() const
+    {
+        return in.bytesToWrite();
+    }
 
 public Q_SLOTS:
 
@@ -118,15 +136,30 @@ public Q_SLOTS:
             out.setSecurityEnabled(enabled);
     }
 
-    QByteArray read(int bytes = -1) { return in.read(bytes); }
+    QByteArray read(int bytes = -1)
+    {
+        return in.read(bytes);
+    }
 
-    void write(const QByteArray &a) { out.write(a); }
+    void write(const QByteArray &a)
+    {
+        out.write(a);
+    }
 
-    QCA::SecureArray readSecure(int bytes = -1) { return in.readSecure(bytes); }
+    QCA::SecureArray readSecure(int bytes = -1)
+    {
+        return in.readSecure(bytes);
+    }
 
-    void writeSecure(const QCA::SecureArray &a) { out.writeSecure(a); }
+    void writeSecure(const QCA::SecureArray &a)
+    {
+        out.writeSecure(a);
+    }
 
-    void closeOutput() { out.close(); }
+    void closeOutput()
+    {
+        out.close();
+    }
 
 public:
     QByteArray takeBytesToRead()
@@ -150,15 +183,30 @@ Q_SIGNALS:
     void outputClosed();
 
 private Q_SLOTS:
-    void in_readyRead() { emit readyRead(); }
+    void in_readyRead()
+    {
+        emit readyRead();
+    }
 
-    void out_bytesWritten(int bytes) { emit bytesWritten(bytes); }
+    void out_bytesWritten(int bytes)
+    {
+        emit bytesWritten(bytes);
+    }
 
-    void in_closed() { emit inputClosed(); }
+    void in_closed()
+    {
+        emit inputClosed();
+    }
 
-    void in_error(QCA::QPipeEnd::Error) { emit inputClosed(); }
+    void in_error(QCA::QPipeEnd::Error)
+    {
+        emit inputClosed();
+    }
 
-    void out_closed() { emit outputClosed(); }
+    void out_closed()
+    {
+        emit outputClosed();
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -173,12 +221,16 @@ public:
     QByteArray     in_left, out_left;
     QMutex         call_mutex;
 
-    ConsoleThread(QObject *parent = nullptr) : SyncThread(parent)
+    ConsoleThread(QObject *parent = nullptr)
+        : SyncThread(parent)
     {
         qRegisterMetaType<SecureArray>("QCA::SecureArray");
     }
 
-    ~ConsoleThread() override { stop(); }
+    ~ConsoleThread() override
+    {
+        stop();
+    }
 
     void start(Q_PIPE_ID in_id, Q_PIPE_ID out_id)
     {
@@ -187,7 +239,10 @@ public:
         SyncThread::start();
     }
 
-    void stop() { SyncThread::stop(); }
+    void stop()
+    {
+        SyncThread::stop();
+    }
 
     QVariant mycall(QObject *obj, const char *method, const QVariantList &args = QVariantList())
     {
@@ -207,13 +262,25 @@ public:
         return ret;
     }
 
-    bool isValid() { return mycall(worker, "isValid").toBool(); }
+    bool isValid()
+    {
+        return mycall(worker, "isValid").toBool();
+    }
 
-    void setSecurityEnabled(bool enabled) { mycall(worker, "setSecurityEnabled", QVariantList() << enabled); }
+    void setSecurityEnabled(bool enabled)
+    {
+        mycall(worker, "setSecurityEnabled", QVariantList() << enabled);
+    }
 
-    QByteArray read(int bytes = -1) { return mycall(worker, "read", QVariantList() << bytes).toByteArray(); }
+    QByteArray read(int bytes = -1)
+    {
+        return mycall(worker, "read", QVariantList() << bytes).toByteArray();
+    }
 
-    void write(const QByteArray &a) { mycall(worker, "write", QVariantList() << a); }
+    void write(const QByteArray &a)
+    {
+        mycall(worker, "write", QVariantList() << a);
+    }
 
     SecureArray readSecure(int bytes = -1)
     {
@@ -225,11 +292,20 @@ public:
         mycall(worker, "writeSecure", QVariantList() << QVariant::fromValue<SecureArray>(a));
     }
 
-    void closeOutput() { mycall(worker, "closeOutput"); }
+    void closeOutput()
+    {
+        mycall(worker, "closeOutput");
+    }
 
-    int bytesAvailable() { return mycall(worker, "bytesAvailable").toInt(); }
+    int bytesAvailable()
+    {
+        return mycall(worker, "bytesAvailable").toInt();
+    }
 
-    int bytesToWrite() { return mycall(worker, "bytesToWrite").toInt(); }
+    int bytesToWrite()
+    {
+        return mycall(worker, "bytesToWrite").toInt();
+    }
 
     QByteArray takeBytesToRead()
     {
@@ -298,7 +374,9 @@ public:
     struct termios old_term_attr;
 #endif
 
-    ConsolePrivate(Console *_q) : QObject(_q), q(_q)
+    ConsolePrivate(Console *_q)
+        : QObject(_q)
+        , q(_q)
     {
         started = false;
         mode    = Console::Default;
@@ -351,7 +429,8 @@ public:
 
 static Console *g_tty_console = nullptr, *g_stdio_console = nullptr;
 
-Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent) : QObject(parent)
+Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *parent)
+    : QObject(parent)
 {
     if (type == Tty) {
         Q_ASSERT(g_tty_console == nullptr);
@@ -370,8 +449,8 @@ Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *pare
 
 #ifdef Q_OS_WIN
     if (type == Tty) {
-        in = CreateFileA("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                         OPEN_EXISTING, 0, NULL);
+        in = CreateFileA(
+            "CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
     } else {
         in = GetStdHandle(STD_INPUT_HANDLE);
     }
@@ -385,8 +464,13 @@ Console::Console(Type type, ChannelMode cmode, TerminalMode tmode, QObject *pare
     if (cmode == ReadWrite) {
 #ifdef Q_OS_WIN
         if (type == Tty) {
-            out = CreateFileA("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                              OPEN_EXISTING, 0, NULL);
+            out = CreateFileA("CONOUT$",
+                              GENERIC_READ | GENERIC_WRITE,
+                              FILE_SHARE_READ | FILE_SHARE_WRITE,
+                              NULL,
+                              OPEN_EXISTING,
+                              0,
+                              NULL);
         } else {
             out = GetStdHandle(STD_OUTPUT_HANDLE);
         }
@@ -415,11 +499,20 @@ Console::~Console()
         g_stdio_console = nullptr;
 }
 
-Console::Type Console::type() const { return d->type; }
+Console::Type Console::type() const
+{
+    return d->type;
+}
 
-Console::ChannelMode Console::channelMode() const { return d->cmode; }
+Console::ChannelMode Console::channelMode() const
+{
+    return d->cmode;
+}
 
-Console::TerminalMode Console::terminalMode() const { return d->mode; }
+Console::TerminalMode Console::terminalMode() const
+{
+    return d->mode;
+}
 
 bool Console::isStdinRedirected()
 {
@@ -447,15 +540,30 @@ bool Console::isStdoutRedirected()
 #endif
 }
 
-Console *Console::ttyInstance() { return g_tty_console; }
+Console *Console::ttyInstance()
+{
+    return g_tty_console;
+}
 
-Console *Console::stdioInstance() { return g_stdio_console; }
+Console *Console::stdioInstance()
+{
+    return g_stdio_console;
+}
 
-void Console::release() { d->thread->stop(); }
+void Console::release()
+{
+    d->thread->stop();
+}
 
-QByteArray Console::bytesLeftToRead() { return d->thread->takeBytesToRead(); }
+QByteArray Console::bytesLeftToRead()
+{
+    return d->thread->takeBytesToRead();
+}
 
-QByteArray Console::bytesLeftToWrite() { return d->thread->takeBytesToWrite(); }
+QByteArray Console::bytesLeftToWrite()
+{
+    return d->thread->takeBytesToWrite();
+}
 
 //----------------------------------------------------------------------------
 // ConsoleReference
@@ -472,7 +580,10 @@ public:
     SafeTimer                      lateTrigger;
     bool                           late_read, late_close;
 
-    ConsoleReferencePrivate(ConsoleReference *_q) : QObject(_q), q(_q), lateTrigger(this)
+    ConsoleReferencePrivate(ConsoleReference *_q)
+        : QObject(_q)
+        , q(_q)
+        , lateTrigger(this)
     {
         console = nullptr;
         thread  = nullptr;
@@ -493,7 +604,11 @@ private Q_SLOTS:
     }
 };
 
-ConsoleReference::ConsoleReference(QObject *parent) : QObject(parent) { d = new ConsoleReferencePrivate(this); }
+ConsoleReference::ConsoleReference(QObject *parent)
+    : QObject(parent)
+{
+    d = new ConsoleReferencePrivate(this);
+}
 
 ConsoleReference::~ConsoleReference()
 {
@@ -567,23 +682,50 @@ void ConsoleReference::stop()
     d->console         = nullptr;
 }
 
-Console *ConsoleReference::console() const { return d->console; }
+Console *ConsoleReference::console() const
+{
+    return d->console;
+}
 
-ConsoleReference::SecurityMode ConsoleReference::securityMode() const { return d->smode; }
+ConsoleReference::SecurityMode ConsoleReference::securityMode() const
+{
+    return d->smode;
+}
 
-QByteArray ConsoleReference::read(int bytes) { return d->thread->read(bytes); }
+QByteArray ConsoleReference::read(int bytes)
+{
+    return d->thread->read(bytes);
+}
 
-void ConsoleReference::write(const QByteArray &a) { d->thread->write(a); }
+void ConsoleReference::write(const QByteArray &a)
+{
+    d->thread->write(a);
+}
 
-SecureArray ConsoleReference::readSecure(int bytes) { return d->thread->readSecure(bytes); }
+SecureArray ConsoleReference::readSecure(int bytes)
+{
+    return d->thread->readSecure(bytes);
+}
 
-void ConsoleReference::writeSecure(const SecureArray &a) { d->thread->writeSecure(a); }
+void ConsoleReference::writeSecure(const SecureArray &a)
+{
+    d->thread->writeSecure(a);
+}
 
-void ConsoleReference::closeOutput() { d->thread->closeOutput(); }
+void ConsoleReference::closeOutput()
+{
+    d->thread->closeOutput();
+}
 
-int ConsoleReference::bytesAvailable() const { return d->thread->bytesAvailable(); }
+int ConsoleReference::bytesAvailable() const
+{
+    return d->thread->bytesAvailable();
+}
 
-int ConsoleReference::bytesToWrite() const { return d->thread->bytesToWrite(); }
+int ConsoleReference::bytesToWrite() const
+{
+    return d->thread->bytesToWrite();
+}
 
 //----------------------------------------------------------------------------
 // ConsolePrompt
@@ -607,7 +749,11 @@ public:
     QTextCodec *                codec;
     QTextCodec::ConverterState *encstate, *decstate;
 
-    Private(ConsolePrompt *_q) : QObject(_q), q(_q), sync(_q), console(this)
+    Private(ConsolePrompt *_q)
+        : QObject(_q)
+        , q(_q)
+        , sync(_q)
+        , console(this)
     {
         connect(&console, &ConsoleReference::readyRead, this, &Private::con_readyRead);
         connect(&console, &ConsoleReference::inputClosed, this, &Private::con_inputClosed);
@@ -625,7 +771,10 @@ public:
         decstate = nullptr;
     }
 
-    ~Private() override { reset(); }
+    ~Private() override
+    {
+        reset();
+    }
 
     void reset()
     {
@@ -782,9 +931,16 @@ private Q_SLOTS:
     }
 };
 
-ConsolePrompt::ConsolePrompt(QObject *parent) : QObject(parent) { d = new Private(this); }
+ConsolePrompt::ConsolePrompt(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-ConsolePrompt::~ConsolePrompt() { delete d; }
+ConsolePrompt::~ConsolePrompt()
+{
+    delete d;
+}
 
 void ConsolePrompt::getHidden(const QString &promptStr)
 {
@@ -823,7 +979,10 @@ void ConsolePrompt::waitForFinished()
         d->con->setParent(orig_parent);
 }
 
-SecureArray ConsolePrompt::result() const { return d->result; }
+SecureArray ConsolePrompt::result() const
+{
+    return d->result;
+}
 
 QChar ConsolePrompt::resultChar() const
 {

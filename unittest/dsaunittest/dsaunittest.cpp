@@ -43,14 +43,20 @@ private:
     QCA::Initializer *m_init;
 };
 
-void DSAUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void DSAUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void DSAUnitTest::cleanupTestCase() { delete m_init; }
+void DSAUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void DSAUnitTest::testdsa()
 {
-    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA)
-        || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA)) {
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA)) {
         QSKIP("DSA not supported!");
     }
 

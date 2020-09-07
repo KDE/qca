@@ -28,9 +28,15 @@
 #include "import_plugins.h"
 #endif
 
-void FileWatchUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void FileWatchUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void FileWatchUnitTest::cleanupTestCase() { delete m_init; }
+void FileWatchUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void FileWatchUnitTest::filewatchTest()
 {

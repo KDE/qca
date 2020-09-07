@@ -50,7 +50,12 @@ public:
         QString     export_key_id;
         QString     delete_key_fingerprint;
 
-        Input() : opt_ascii(false), opt_noagent(false), opt_alwaystrust(false) { }
+        Input()
+            : opt_ascii(false)
+            , opt_noagent(false)
+            , opt_alwaystrust(false)
+        {
+        }
     };
 
     struct Output
@@ -66,7 +71,12 @@ public:
         GpgOp::VerifyResult verifyResult;
         QString             homeDir;
 
-        Output() : success(false), errorCode(GpgOp::ErrorUnknown), wasSigned(false) { }
+        Output()
+            : success(false)
+            , errorCode(GpgOp::ErrorUnknown)
+            , wasSigned(false)
+        {
+        }
     };
 
     Input  input;

@@ -33,9 +33,15 @@
 #include "import_plugins.h"
 #endif
 
-void ClientPlugin::initTestCase() { m_init = new QCA::Initializer; }
+void ClientPlugin::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void ClientPlugin::cleanupTestCase() { delete m_init; }
+void ClientPlugin::cleanupTestCase()
+{
+    delete m_init;
+}
 
 static const QLatin1String providerName("testClientSideProvider");
 
@@ -43,9 +49,15 @@ class TestClientProvider : public QObject, public QCA::Provider
 {
     Q_OBJECT
 public:
-    int qcaVersion() const override { return QCA_VERSION; }
+    int qcaVersion() const override
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const override { return providerName; }
+    QString name() const override
+    {
+        return providerName;
+    }
 
     QStringList features() const override
     {

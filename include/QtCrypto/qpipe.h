@@ -514,12 +514,18 @@ public:
     /**
        The read end of the pipe.
     */
-    QPipeEnd &readEnd() { return i; }
+    QPipeEnd &readEnd()
+    {
+        return i;
+    }
 
     /**
        The write end of the pipe.
     */
-    QPipeEnd &writeEnd() { return o; }
+    QPipeEnd &writeEnd()
+    {
+        return o;
+    }
 
 private:
     Q_DISABLE_COPY(QPipe)

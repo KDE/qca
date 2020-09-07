@@ -8,7 +8,8 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
-MyPGPKeyContext::MyPGPKeyContext(Provider *p) : PGPKeyContext(p)
+MyPGPKeyContext::MyPGPKeyContext(Provider *p)
+    : PGPKeyContext(p)
 {
     // zero out the props
     _props.isSecret  = false;
@@ -16,9 +17,15 @@ MyPGPKeyContext::MyPGPKeyContext(Provider *p) : PGPKeyContext(p)
     _props.isTrusted = false;
 }
 
-Provider::Context *MyPGPKeyContext::clone() const { return new MyPGPKeyContext(*this); }
+Provider::Context *MyPGPKeyContext::clone() const
+{
+    return new MyPGPKeyContext(*this);
+}
 
-const PGPKeyContextProps *MyPGPKeyContext::props() const { return &_props; }
+const PGPKeyContextProps *MyPGPKeyContext::props() const
+{
+    return &_props;
+}
 
 QByteArray MyPGPKeyContext::toBinary() const
 {

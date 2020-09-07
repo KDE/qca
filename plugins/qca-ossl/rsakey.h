@@ -60,7 +60,10 @@ public:
     QByteArray         endSign() override;
     bool               endVerify(const QByteArray &sig) override;
     void               createPrivate(int bits, int exp, bool block) override;
-    void               createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q,
+    void               createPrivate(const BigInteger &n,
+                                     const BigInteger &e,
+                                     const BigInteger &p,
+                                     const BigInteger &q,
                                      const BigInteger &d) override;
     void               createPublic(const BigInteger &n, const BigInteger &e) override;
 

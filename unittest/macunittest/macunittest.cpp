@@ -49,9 +49,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void MACUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void MACUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void MACUnitTest::cleanupTestCase() { delete m_init; }
+void MACUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void MACUnitTest::HMACMD5()
 {
@@ -218,8 +224,9 @@ void MACUnitTest::HMACSHA256()
                      QStringLiteral("60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54"));
 
             hmac6.clear(); // reuse the same key
-            QCA::SecureArray data7("This is a test using a larger than block-size key and a larger than block-size "
-                                   "data. The key needs to be hashed before being used by the HMAC algorithm.");
+            QCA::SecureArray data7(
+                "This is a test using a larger than block-size key and a larger than block-size "
+                "data. The key needs to be hashed before being used by the HMAC algorithm.");
             hmac6.update(data7);
             QCOMPARE(QCA::arrayToHex(hmac6.final().toByteArray()),
                      QStringLiteral("9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2"));
@@ -304,8 +311,9 @@ void MACUnitTest::HMACSHA224()
                      QStringLiteral("95e9a0db962095adaebe9b2d6f0dbce2d499f112f2d2b7273fa6870e"));
 
             hmac6.clear(); // reuse the same key
-            QCA::SecureArray data7("This is a test using a larger than block-size key and a larger than block-size "
-                                   "data. The key needs to be hashed before being used by the HMAC algorithm.");
+            QCA::SecureArray data7(
+                "This is a test using a larger than block-size key and a larger than block-size "
+                "data. The key needs to be hashed before being used by the HMAC algorithm.");
             hmac6.update(data7);
             QCOMPARE(QCA::arrayToHex(hmac6.final().toByteArray()),
                      QStringLiteral("3a854166ac5d9f023f54d517d0b39dbd946770db9c2b95c9f6f565d1"));
@@ -396,8 +404,9 @@ void MACUnitTest::HMACSHA384()
                                     "248df163f44952"));
 
             hmac6.clear(); // reuse the same key
-            QCA::SecureArray data7("This is a test using a larger than block-size key and a larger than block-size "
-                                   "data. The key needs to be hashed before being used by the HMAC algorithm.");
+            QCA::SecureArray data7(
+                "This is a test using a larger than block-size key and a larger than block-size "
+                "data. The key needs to be hashed before being used by the HMAC algorithm.");
             hmac6.update(data7);
             QCOMPARE(QCA::arrayToHex(hmac6.final().toByteArray()),
                      QStringLiteral("6617178e941f020d351e2f254e8fd32c602420feb0b8fb9adccebb82461e99c5a678cc31e799176d38"
@@ -489,8 +498,9 @@ void MACUnitTest::HMACSHA512()
                                     "0fd2215d6a1e5295e64f73f63f0aec8b915a985d786598"));
 
             hmac6.clear(); // reuse the same key
-            QCA::SecureArray data7("This is a test using a larger than block-size key and a larger than block-size "
-                                   "data. The key needs to be hashed before being used by the HMAC algorithm.");
+            QCA::SecureArray data7(
+                "This is a test using a larger than block-size key and a larger than block-size "
+                "data. The key needs to be hashed before being used by the HMAC algorithm.");
             hmac6.update(data7);
             QCOMPARE(QCA::arrayToHex(hmac6.final().toByteArray()),
                      QStringLiteral("e37b6a775dc87dbaa4dfa9f96e5e3ffddebd71f8867289865df5a32d20cdc944b6022cac3c4982b10d"
@@ -597,8 +607,8 @@ void MACUnitTest::HMACRMD160()
         if (!QCA::isSupported("hmac(ripemd160)", provider))
             QWARN((QStringLiteral("HMAC(RIPEMD160) not supported for ") + provider).toLocal8Bit().constData());
         else {
-            QCA::MessageAuthenticationCode ripemd160hmacLenTest(QStringLiteral("hmac(ripemd160)"), QCA::SymmetricKey(),
-                                                                provider);
+            QCA::MessageAuthenticationCode ripemd160hmacLenTest(
+                QStringLiteral("hmac(ripemd160)"), QCA::SymmetricKey(), provider);
             QCOMPARE(ripemd160hmacLenTest.validKeyLength(0), true);
             QCOMPARE(ripemd160hmacLenTest.validKeyLength(1), true);
             QCOMPARE(ripemd160hmacLenTest.validKeyLength(848888), true);

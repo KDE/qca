@@ -101,9 +101,16 @@ static SecureArray bio2buf(BIO *b)
     return buf;
 }
 
-MyPKeyContext::MyPKeyContext(Provider *p) : PKeyContext(p) { k = nullptr; }
+MyPKeyContext::MyPKeyContext(Provider *p)
+    : PKeyContext(p)
+{
+    k = nullptr;
+}
 
-MyPKeyContext::~MyPKeyContext() { delete k; }
+MyPKeyContext::~MyPKeyContext()
+{
+    delete k;
+}
 
 Provider::Context *MyPKeyContext::clone() const
 {
@@ -137,11 +144,20 @@ QList<PBEAlgorithm> MyPKeyContext::supportedPBEAlgorithms() const
     return list;
 }
 
-PKeyBase *MyPKeyContext::key() { return k; }
+PKeyBase *MyPKeyContext::key()
+{
+    return k;
+}
 
-const PKeyBase *MyPKeyContext::key() const { return k; }
+const PKeyBase *MyPKeyContext::key() const
+{
+    return k;
+}
 
-void MyPKeyContext::setKey(PKeyBase *key) { k = key; }
+void MyPKeyContext::setKey(PKeyBase *key)
+{
+    k = key;
+}
 
 bool MyPKeyContext::importKey(const PKeyBase *key)
 {

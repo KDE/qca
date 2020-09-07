@@ -124,7 +124,10 @@ QByteArray LineConverter::final()
     }
 }
 
-QByteArray LineConverter::process(const QByteArray &buf) { return update(buf) + final(); }
+QByteArray LineConverter::process(const QByteArray &buf)
+{
+    return update(buf) + final();
+}
 
 int LineConverter::writtenToActual(int bytes)
 {

@@ -43,7 +43,10 @@ private:
     QCA::Initializer *m_init;
 };
 
-void KeyStore::initTestCase() { m_init = new QCA::Initializer; }
+void KeyStore::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
 void KeyStore::cleanupTestCase()
 {

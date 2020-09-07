@@ -74,7 +74,7 @@ static bool get_reg_key(HKEY root, const char *path, QString &value)
 
 static QString find_reg_gpgProgram()
 {
-    const QStringList bins = { QStringLiteral("gpg.exe"), QStringLiteral("gpg2.exe") };
+    const QStringList bins = {QStringLiteral("gpg.exe"), QStringLiteral("gpg2.exe")};
 
     HKEY root;
     root = HKEY_CURRENT_USER;
@@ -84,8 +84,8 @@ static QString find_reg_gpgProgram()
 
     QString dir;
     // check list of possible places in registry
-    get_reg_key(HKEY_CURRENT_USER, path, dir) || get_reg_key(HKEY_CURRENT_USER, path2, dir)
-        || get_reg_key(HKEY_LOCAL_MACHINE, path, dir) || get_reg_key(HKEY_LOCAL_MACHINE, path2, dir);
+    get_reg_key(HKEY_CURRENT_USER, path, dir) || get_reg_key(HKEY_CURRENT_USER, path2, dir) ||
+        get_reg_key(HKEY_LOCAL_MACHINE, path, dir) || get_reg_key(HKEY_LOCAL_MACHINE, path2, dir);
 
     if (!dir.isEmpty()) {
         foreach (const QString &bin, bins) {

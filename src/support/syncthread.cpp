@@ -28,7 +28,8 @@
 namespace QCA {
 
 QByteArray methodReturnType(
-    const QMetaObject *obj, const QByteArray &method,
+    const QMetaObject *     obj,
+    const QByteArray &      method,
     const QList<QByteArray> argTypes) // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param)
                                       // TODO make argTypes const & when we break ABI
 {
@@ -49,8 +50,11 @@ QByteArray methodReturnType(
     return QByteArray();
 }
 
-bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args, QVariant *ret,
-                              Qt::ConnectionType type)
+bool invokeMethodWithVariants(QObject *           obj,
+                              const QByteArray &  method,
+                              const QVariantList &args,
+                              QVariant *          ret,
+                              Qt::ConnectionType  type)
 {
     // QMetaObject::invokeMethod() has a 10 argument maximum
     if (args.count() > 10)
@@ -81,8 +85,20 @@ bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVar
         retarg = QGenericReturnArgument(retval.typeName(), retval.data());
     }
 
-    if (!QMetaObject::invokeMethod(obj, method.data(), type, retarg, arg[0], arg[1], arg[2], arg[3], arg[4], arg[5],
-                                   arg[6], arg[7], arg[8], arg[9]))
+    if (!QMetaObject::invokeMethod(obj,
+                                   method.data(),
+                                   type,
+                                   retarg,
+                                   arg[0],
+                                   arg[1],
+                                   arg[2],
+                                   arg[3],
+                                   arg[4],
+                                   arg[5],
+                                   arg[6],
+                                   arg[7],
+                                   arg[8],
+                                   arg[9]))
         return false;
 
     if (retval.isValid() && ret)
@@ -107,7 +123,9 @@ public:
     bool             last_success;
     QVariant         last_ret;
 
-    Private(SyncThread *_q) : QObject(_q), q(_q)
+    Private(SyncThread *_q)
+        : QObject(_q)
+        , q(_q)
     {
         loop  = nullptr;
         agent = nullptr;
@@ -122,7 +140,8 @@ class SyncThreadAgent : public QObject
 {
     Q_OBJECT
 public:
-    SyncThreadAgent(QObject *parent = nullptr) : QObject(parent)
+    SyncThreadAgent(QObject *parent = nullptr)
+        : QObject(parent)
     {
         QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
     }
@@ -140,7 +159,8 @@ public Q_SLOTS:
     }
 };
 
-SyncThread::SyncThread(QObject *parent) : QThread(parent)
+SyncThread::SyncThread(QObject *parent)
+    : QThread(parent)
 {
     d = new Private(this);
     qRegisterMetaType<QVariant>("QVariant");
@@ -173,22 +193,22 @@ void SyncThread::stop()
 
 QVariant SyncThread::call(QObject *obj, const QByteArray &method, const QVariantList &args, bool *ok)
 {
-	QMutexLocker locker(&d->m);
-	bool ret;
-	Q_UNUSED(ret); // In really ret is used. I use this hack to suppress a compiler warning
-	// clang-format off
+    QMutexLocker locker(&d->m);
+    bool         ret;
+    Q_UNUSED(ret); // In really ret is used. I use this hack to suppress a compiler warning
+    // clang-format off
 	// Otherwise the QObject* gets turned into Object * that is not normalized and is slightly slower
 	ret = QMetaObject::invokeMethod(d->agent, "call_do",
 		Qt::QueuedConnection, Q_ARG(QObject*, obj),
 		Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
-	// clang-format on
-	Q_ASSERT(ret);
-	d->w.wait(&d->m);
-	if(ok)
-		*ok = d->last_success;
-	QVariant v = d->last_ret;
-	d->last_ret = QVariant();
-	return v;
+    // clang-format on
+    Q_ASSERT(ret);
+    d->w.wait(&d->m);
+    if (ok)
+        *ok = d->last_success;
+    QVariant v  = d->last_ret;
+    d->last_ret = QVariant();
+    return v;
 }
 
 void SyncThread::run()

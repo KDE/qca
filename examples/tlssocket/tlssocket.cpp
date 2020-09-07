@@ -53,7 +53,10 @@ public:
     QCA::Synchronizer sync;
     bool              waiting;
 
-    Private(TLSSocket *_q) : QObject(_q), q(_q), sync(_q)
+    Private(TLSSocket *_q)
+        : QObject(_q)
+        , q(_q)
+        , sync(_q)
     {
         sock = new QTcpSocket(this);
         connect(sock, &QTcpSocket::connected, this, &TLSSocket::Private::sock_connected);
@@ -62,7 +65,9 @@ public:
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
         connect(sock, &QTcpSocket::errorOccurred, this, &TLSSocket::Private::sock_error);
 #else
-        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this,
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error),
+                this,
                 &TLSSocket::Private::sock_error);
 #endif
 
@@ -179,9 +184,16 @@ private Q_SLOTS:
     }
 };
 
-TLSSocket::TLSSocket(QObject *parent) : QTcpSocket(parent) { d = new Private(this); }
+TLSSocket::TLSSocket(QObject *parent)
+    : QTcpSocket(parent)
+{
+    d = new Private(this);
+}
 
-TLSSocket::~TLSSocket() { delete d; }
+TLSSocket::~TLSSocket()
+{
+    delete d;
+}
 
 void TLSSocket::connectToHostEncrypted(const QString &host, quint16 port)
 {
@@ -190,7 +202,10 @@ void TLSSocket::connectToHostEncrypted(const QString &host, quint16 port)
     d->sock->connectToHost(host, port);
 }
 
-QCA::TLS *TLSSocket::tls() { return d->tls; }
+QCA::TLS *TLSSocket::tls()
+{
+    return d->tls;
+}
 
 bool TLSSocket::waitForReadyRead(int msecs)
 {

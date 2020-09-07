@@ -45,9 +45,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void StaticUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void StaticUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void StaticUnitTest::cleanupTestCase() { delete m_init; }
+void StaticUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void StaticUnitTest::hexConversions()
 {

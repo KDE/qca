@@ -46,9 +46,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void HexUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void HexUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void HexUnitTest::cleanupTestCase() { delete m_init; }
+void HexUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void HexUnitTest::testHexString_data()
 {

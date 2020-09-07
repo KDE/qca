@@ -56,11 +56,14 @@ int main(int argc, char **argv)
         QCA::InitializationVector iv(16);
 
         // create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
-        QCA::Cipher cipher(QStringLiteral("aes128"), QCA::Cipher::CBC,
+        QCA::Cipher cipher(QStringLiteral("aes128"),
+                           QCA::Cipher::CBC,
                            // use Default padding, which is equivalent to PKCS7 for CBC
                            QCA::Cipher::DefaultPadding,
                            // this object will encrypt
-                           QCA::Encode, key, iv);
+                           QCA::Encode,
+                           key,
+                           iv);
 
         // we use the cipher object to encrypt the argument we passed in
         // the result of that is returned - note that if there is less than
@@ -104,7 +107,8 @@ int main(int argc, char **argv)
         }
 
         // output results
-        printf("Decryption using AES128 of [0x%s] is %s\n", qPrintable(QCA::arrayToHex(cipherText.toByteArray())),
+        printf("Decryption using AES128 of [0x%s] is %s\n",
+               qPrintable(QCA::arrayToHex(cipherText.toByteArray())),
                plainText.data());
 
         // Again we need to call final(), to get the last block (with its padding removed)

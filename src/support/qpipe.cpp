@@ -397,9 +397,14 @@ class QPipeWriter : public QThread
 {
     Q_OBJECT
 public:
-    QPipeWriter(QObject *parent = nullptr) : QThread(parent) { }
+    QPipeWriter(QObject *parent = nullptr)
+        : QThread(parent)
+    {
+    }
 
-    virtual ~QPipeWriter() { }
+    virtual ~QPipeWriter()
+    {
+    }
 
     // start
     virtual void start() = 0;
@@ -430,9 +435,14 @@ class QPipeReader : public QThread
 {
     Q_OBJECT
 public:
-    QPipeReader(QObject *parent = nullptr) : QThread(parent) { }
+    QPipeReader(QObject *parent = nullptr)
+        : QThread(parent)
+    {
+    }
 
-    virtual ~QPipeReader() { }
+    virtual ~QPipeReader()
+    {
+    }
 
     // start
     virtual void start() = 0;
@@ -469,7 +479,8 @@ public:
     const char *   data;
     int            size;
 
-    QPipeWriterThread(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeWriter(parent)
+    QPipeWriterThread(Q_PIPE_ID id, QObject *parent = nullptr)
+        : QPipeWriter(parent)
     {
         do_quit = false;
         data    = 0;
@@ -598,16 +609,23 @@ public:
     SafeTimer   timer;
     int         total;
 
-    QPipeWriterPoll(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeWriter(parent), timer(this)
+    QPipeWriterPoll(Q_PIPE_ID id, QObject *parent = nullptr)
+        : QPipeWriter(parent)
+        , timer(this)
     {
         pipe = id;
         data = 0;
         connect(&timer, &SafeTimer::timeout, this, &QPipeWriterPoll::tryNextWrite);
     }
 
-    virtual ~QPipeWriterPoll() { }
+    virtual ~QPipeWriterPoll()
+    {
+    }
 
-    virtual void start() { pipe_set_blocking(pipe, false); }
+    virtual void start()
+    {
+        pipe_set_blocking(pipe, false);
+    }
 
     // return number of bytes written
     virtual int stop()
@@ -665,7 +683,8 @@ public:
     QWaitCondition w;
     bool           do_quit, active;
 
-    QPipeReaderThread(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeReader(parent)
+    QPipeReaderThread(Q_PIPE_ID id, QObject *parent = nullptr)
+        : QPipeReader(parent)
     {
         do_quit = false;
         active  = true;
@@ -760,13 +779,17 @@ public:
     SafeTimer timer;
     bool      consoleMode;
 
-    QPipeReaderPoll(Q_PIPE_ID id, QObject *parent = nullptr) : QPipeReader(parent), timer(this)
+    QPipeReaderPoll(Q_PIPE_ID id, QObject *parent = nullptr)
+        : QPipeReader(parent)
+        , timer(this)
     {
         pipe = id;
         connect(&timer, &SafeTimer::timeout, this, &QPipeReaderPoll::tryRead);
     }
 
-    virtual ~QPipeReaderPoll() { }
+    virtual ~QPipeReaderPoll()
+    {
+    }
 
     virtual void start()
     {
@@ -775,7 +798,10 @@ public:
         resume();
     }
 
-    virtual void resume() { timer.start(0); }
+    virtual void resume()
+    {
+        timer.start(0);
+    }
 
 private Q_SLOTS:
     void tryRead()
@@ -869,7 +895,10 @@ public:
     SafeSocketNotifier *sn_read, *sn_write;
 #endif
 
-    Private(QPipeDevice *_q) : QObject(_q), q(_q), pipe(INVALID_Q_PIPE_ID)
+    Private(QPipeDevice *_q)
+        : QObject(_q)
+        , q(_q)
+        , pipe(INVALID_Q_PIPE_ID)
     {
 #ifdef Q_OS_WIN
         readTimer  = 0;
@@ -883,7 +912,10 @@ public:
 #endif
     }
 
-    ~Private() override { reset(); }
+    ~Private() override
+    {
+        reset();
+    }
 
     void reset()
     {
@@ -1067,15 +1099,31 @@ public Q_SLOTS:
     }
 };
 
-QPipeDevice::QPipeDevice(QObject *parent) : QObject(parent) { d = new Private(this); }
+QPipeDevice::QPipeDevice(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-QPipeDevice::~QPipeDevice() { delete d; }
+QPipeDevice::~QPipeDevice()
+{
+    delete d;
+}
 
-QPipeDevice::Type QPipeDevice::type() const { return d->type; }
+QPipeDevice::Type QPipeDevice::type() const
+{
+    return d->type;
+}
 
-bool QPipeDevice::isValid() const { return (d->pipe != INVALID_Q_PIPE_ID); }
+bool QPipeDevice::isValid() const
+{
+    return (d->pipe != INVALID_Q_PIPE_ID);
+}
 
-Q_PIPE_ID QPipeDevice::id() const { return d->pipe; }
+Q_PIPE_ID QPipeDevice::id() const
+{
+    return d->pipe;
+}
 
 int QPipeDevice::idAsInt() const
 {
@@ -1103,7 +1151,10 @@ void QPipeDevice::enable()
     d->enable();
 }
 
-void QPipeDevice::close() { d->reset(); }
+void QPipeDevice::close()
+{
+    d->reset();
+}
 
 void QPipeDevice::release()
 {
@@ -1402,9 +1453,14 @@ public:
     bool      closeLater;
     bool      closing;
 
-    Private(QPipeEnd *_q) :
-        QObject(_q), q(_q), pipe(this), readTrigger(this), writeTrigger(this), closeTrigger(this),
-        writeErrorTrigger(this)
+    Private(QPipeEnd *_q)
+        : QObject(_q)
+        , q(_q)
+        , pipe(this)
+        , readTrigger(this)
+        , writeTrigger(this)
+        , closeTrigger(this)
+        , writeErrorTrigger(this)
     {
         readTrigger.setSingleShot(true);
         writeTrigger.setSingleShot(true);
@@ -1473,10 +1529,16 @@ public:
             return qMax(PIPEEND_READBUF - buf.size(), 0);
     }
 
-    void appendArray(QByteArray *a, const QByteArray &b) { (*a) += b; }
+    void appendArray(QByteArray *a, const QByteArray &b)
+    {
+        (*a) += b;
+    }
 
 #ifdef QPIPE_SECURE
-    void appendArray(SecureArray *a, const SecureArray &b) { a->append(b); }
+    void appendArray(SecureArray *a, const SecureArray &b)
+    {
+        a->append(b);
+    }
 #endif
 
     void takeArray(QByteArray *a, int len)
@@ -1610,7 +1672,10 @@ public Q_SLOTS:
         }
     }
 
-    void doRead() { doReadActual(true); }
+    void doRead()
+    {
+        doReadActual(true);
+    }
 
     void doReadActual(bool sigs)
     {
@@ -1714,19 +1779,41 @@ public Q_SLOTS:
     }
 };
 
-QPipeEnd::QPipeEnd(QObject *parent) : QObject(parent) { d = new Private(this); }
+QPipeEnd::QPipeEnd(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-QPipeEnd::~QPipeEnd() { delete d; }
+QPipeEnd::~QPipeEnd()
+{
+    delete d;
+}
 
-void QPipeEnd::reset() { d->reset(ResetAll); }
+void QPipeEnd::reset()
+{
+    d->reset(ResetAll);
+}
 
-QPipeDevice::Type QPipeEnd::type() const { return d->pipe.type(); }
+QPipeDevice::Type QPipeEnd::type() const
+{
+    return d->pipe.type();
+}
 
-bool QPipeEnd::isValid() const { return d->pipe.isValid(); }
+bool QPipeEnd::isValid() const
+{
+    return d->pipe.isValid();
+}
 
-Q_PIPE_ID QPipeEnd::id() const { return d->pipe.id(); }
+Q_PIPE_ID QPipeEnd::id() const
+{
+    return d->pipe.id();
+}
 
-int QPipeEnd::idAsInt() const { return d->pipe.idAsInt(); }
+int QPipeEnd::idAsInt() const
+{
+    return d->pipe.idAsInt();
+}
 
 void QPipeEnd::take(Q_PIPE_ID id, QPipeDevice::Type t)
 {
@@ -1753,7 +1840,10 @@ void QPipeEnd::setSecurityEnabled(bool secure)
 }
 #endif
 
-void QPipeEnd::enable() { d->pipe.enable(); }
+void QPipeEnd::enable()
+{
+    d->pipe.enable();
+}
 
 void QPipeEnd::close()
 {
@@ -1777,7 +1867,10 @@ void QPipeEnd::release()
     d->reset(ResetSession);
 }
 
-bool QPipeEnd::setInheritable(bool enabled) { return d->pipe.setInheritable(enabled); }
+bool QPipeEnd::setInheritable(bool enabled)
+{
+    return d->pipe.setInheritable(enabled);
+}
 
 void QPipeEnd::finalize()
 {
@@ -1800,11 +1893,20 @@ void QPipeEnd::finalizeAndRelease()
     d->reset(ResetSession);
 }
 
-int QPipeEnd::bytesAvailable() const { return d->pendingSize(); }
+int QPipeEnd::bytesAvailable() const
+{
+    return d->pendingSize();
+}
 
-int QPipeEnd::bytesToWrite() const { return d->pendingSize(); }
+int QPipeEnd::bytesToWrite() const
+{
+    return d->pendingSize();
+}
 
-QByteArray QPipeEnd::read(int bytes) { return d->read(&d->buf, bytes); }
+QByteArray QPipeEnd::read(int bytes)
+{
+    return d->read(&d->buf, bytes);
+}
 
 void QPipeEnd::write(const QByteArray &buf)
 {
@@ -1823,7 +1925,10 @@ void QPipeEnd::write(const QByteArray &buf)
 }
 
 #ifdef QPIPE_SECURE
-SecureArray QPipeEnd::readSecure(int bytes) { return d->readSecure(&d->sec_buf, bytes); }
+SecureArray QPipeEnd::readSecure(int bytes)
+{
+    return d->readSecure(&d->sec_buf, bytes);
+}
 
 void QPipeEnd::writeSecure(const SecureArray &buf)
 {
@@ -1867,9 +1972,15 @@ SecureArray QPipeEnd::takeBytesToWriteSecure()
 //----------------------------------------------------------------------------
 // QPipe
 //----------------------------------------------------------------------------
-QPipe::QPipe(QObject *parent) : i(parent), o(parent) { }
+QPipe::QPipe(QObject *parent)
+    : i(parent)
+    , o(parent)
+{
+}
 
-QPipe::~QPipe() { }
+QPipe::~QPipe()
+{
+}
 
 void QPipe::reset()
 {

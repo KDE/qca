@@ -186,7 +186,11 @@ static bool findKeyringFilename(const QString &outstr, QString *_keyring)
     return true;
 }
 
-GpgAction::GpgAction(QObject *parent) : QObject(parent), proc(this), dtextTimer(this), utf8Output(false)
+GpgAction::GpgAction(QObject *parent)
+    : QObject(parent)
+    , proc(this)
+    , dtextTimer(this)
+    , utf8Output(false)
 {
     dtextTimer.setSingleShot(true);
 
@@ -204,7 +208,10 @@ GpgAction::GpgAction(QObject *parent) : QObject(parent), proc(this), dtextTimer(
     reset();
 }
 
-GpgAction::~GpgAction() { reset(); }
+GpgAction::~GpgAction()
+{
+    reset();
+}
 
 void GpgAction::reset()
 {
@@ -550,7 +557,10 @@ QString GpgAction::readDiagnosticText()
     return s;
 }
 
-void GpgAction::submitCommand(const QByteArray &a) { proc.writeCommand(a); }
+void GpgAction::submitCommand(const QByteArray &a)
+{
+    proc.writeCommand(a);
+}
 
 // since str is taken as a value, it is ok to use the same variable for 'rest'
 QString GpgAction::nextArg(QString str, QString *rest)
@@ -757,7 +767,10 @@ void GpgAction::ensureDTextEmit()
         dtextTimer.start();
 }
 
-void GpgAction::t_dtext() { emit readyReadDiagnosticText(); }
+void GpgAction::t_dtext()
+{
+    emit readyReadDiagnosticText();
+}
 
 void GpgAction::proc_error(gpgQCAPlugin::GPGProc::Error e)
 {
@@ -795,7 +808,10 @@ void GpgAction::proc_readyReadStdout()
         emit readyRead();
 }
 
-void GpgAction::proc_readyReadStderr() { buf_stderr.append(proc.readStderr()); }
+void GpgAction::proc_readyReadStderr()
+{
+    buf_stderr.append(proc.readStderr());
+}
 
 void GpgAction::proc_readyReadStatusLines()
 {

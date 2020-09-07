@@ -31,7 +31,8 @@ class nssHashContext : public QCA::HashContext
 {
     Q_OBJECT
 public:
-    nssHashContext(QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
+    nssHashContext(QCA::Provider *p, const QString &type)
+        : QCA::HashContext(p, type)
     {
         SECStatus s;
 
@@ -84,7 +85,10 @@ public:
             PK11_FreeSlot(m_slot);
     }
 
-    Context *clone() const override { return new nssHashContext(provider(), type()); }
+    Context *clone() const override
+    {
+        return new nssHashContext(provider(), type());
+    }
 
     void clear() override
     {
@@ -131,7 +135,8 @@ class nssHmacContext : public QCA::MACContext
 {
     Q_OBJECT
 public:
-    nssHmacContext(QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    nssHmacContext(QCA::Provider *p, const QString &type)
+        : QCA::MACContext(p, type)
     {
         NSS_NoDB_Init(".");
 
@@ -172,7 +177,10 @@ public:
             PK11_FreeSlot(m_slot);
     }
 
-    Context *clone() const override { return new nssHmacContext(provider(), type()); }
+    Context *clone() const override
+    {
+        return new nssHmacContext(provider(), type());
+    }
 
     void clear()
     {
@@ -195,7 +203,10 @@ public:
         }
     }
 
-    QCA::KeyLength keyLength() const override { return anyKeyLength(); }
+    QCA::KeyLength keyLength() const override
+    {
+        return anyKeyLength();
+    }
 
     void setup(const QCA::SymmetricKey &key) override
     {
@@ -253,7 +264,8 @@ class nssCipherContext : public QCA::CipherContext
 {
     Q_OBJECT
 public:
-    nssCipherContext(QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+    nssCipherContext(QCA::Provider *p, const QString &type)
+        : QCA::CipherContext(p, type)
     {
         NSS_NoDB_Init(".");
 
@@ -275,10 +287,14 @@ public:
         }
     }
 
-    ~nssCipherContext() override { }
+    ~nssCipherContext() override
+    {
+    }
 
-    void setup(QCA::Direction dir, const QCA::SymmetricKey &key, const QCA::InitializationVector &iv,
-               const QCA::AuthTag &tag) override
+    void setup(QCA::Direction                   dir,
+               const QCA::SymmetricKey &        key,
+               const QCA::InitializationVector &iv,
+               const QCA::AuthTag &             tag) override
     {
         Q_UNUSED(tag);
         /* Get a slot to use for the crypto operations */
@@ -319,9 +335,15 @@ public:
         }
     }
 
-    QCA::Provider::Context *clone() const override { return new nssCipherContext(*this); }
+    QCA::Provider::Context *clone() const override
+    {
+        return new nssCipherContext(*this);
+    }
 
-    int blockSize() const override { return PK11_GetBlockSize(m_cipherMechanism, m_params); }
+    int blockSize() const override
+    {
+        return PK11_GetBlockSize(m_cipherMechanism, m_params);
+    }
 
     QCA::AuthTag tag() const override
     {
@@ -334,8 +356,8 @@ public:
         out->resize(in.size() + blockSize());
         int resultLength;
 
-        PK11_CipherOp(m_context, (unsigned char *)out->data(), &resultLength, out->size(), (unsigned char *)in.data(),
-                      in.size());
+        PK11_CipherOp(
+            m_context, (unsigned char *)out->data(), &resultLength, out->size(), (unsigned char *)in.data(), in.size());
         out->resize(resultLength);
 
         return true;
@@ -394,13 +416,23 @@ private:
 class nssProvider : public QCA::Provider
 {
 public:
-    void init() override { }
+    void init() override
+    {
+    }
 
-    ~nssProvider() override { }
+    ~nssProvider() override
+    {
+    }
 
-    int qcaVersion() const override { return QCA_VERSION; }
+    int qcaVersion() const override
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const override { return QStringLiteral("qca-nss"); }
+    QString name() const override
+    {
+        return QStringLiteral("qca-nss");
+    }
 
     QStringList features() const override
     {
@@ -482,7 +514,10 @@ class qca_nss : public QObject, public QCAPlugin
     Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
     Q_INTERFACES(QCAPlugin)
 public:
-    QCA::Provider *createProvider() override { return new nssProvider; }
+    QCA::Provider *createProvider() override
+    {
+        return new nssProvider;
+    }
 };
 
 #include "qca-nss.moc"

@@ -348,7 +348,10 @@ class MemoryRegion::Private : public QSharedData
 public:
     alloc_info ai;
 
-    Private(int size, bool sec) { ai_new(&ai, size, sec); }
+    Private(int size, bool sec)
+    {
+        ai_new(&ai, size, sec);
+    }
 
     Private(const QByteArray &from, bool sec)
     {
@@ -356,11 +359,21 @@ public:
         memcpy(ai.data, from.data(), ai.size);
     }
 
-    Private(const Private &from) : QSharedData(from) { ai_copy(&ai, &from.ai); }
+    Private(const Private &from)
+        : QSharedData(from)
+    {
+        ai_copy(&ai, &from.ai);
+    }
 
-    ~Private() { ai_delete(&ai); }
+    ~Private()
+    {
+        ai_delete(&ai);
+    }
 
-    bool resize(int new_size) { return ai_resize(&ai, new_size); }
+    bool resize(int new_size)
+    {
+        return ai_resize(&ai, new_size);
+    }
 
     void setSecure(bool sec)
     {
@@ -376,18 +389,33 @@ public:
     }
 };
 
-MemoryRegion::MemoryRegion() : _secure(false), d(nullptr) { }
-
-MemoryRegion::MemoryRegion(const char *str) :
-    _secure(false), d(new Private(QByteArray::fromRawData(str, int(strlen(str))), false))
+MemoryRegion::MemoryRegion()
+    : _secure(false)
+    , d(nullptr)
 {
 }
 
-MemoryRegion::MemoryRegion(const QByteArray &from) : _secure(false), d(new Private(from, false)) { }
+MemoryRegion::MemoryRegion(const char *str)
+    : _secure(false)
+    , d(new Private(QByteArray::fromRawData(str, int(strlen(str))), false))
+{
+}
 
-MemoryRegion::MemoryRegion(const MemoryRegion &from) : _secure(from._secure), d(from.d) { }
+MemoryRegion::MemoryRegion(const QByteArray &from)
+    : _secure(false)
+    , d(new Private(from, false))
+{
+}
 
-MemoryRegion::~MemoryRegion() { }
+MemoryRegion::MemoryRegion(const MemoryRegion &from)
+    : _secure(from._secure)
+    , d(from.d)
+{
+}
+
+MemoryRegion::~MemoryRegion()
+{
+}
 
 MemoryRegion &MemoryRegion::operator=(const MemoryRegion &from)
 {
@@ -402,9 +430,15 @@ MemoryRegion &MemoryRegion::operator=(const QByteArray &from)
     return *this;
 }
 
-bool MemoryRegion::isNull() const { return (d ? false : true); }
+bool MemoryRegion::isNull() const
+{
+    return (d ? false : true);
+}
 
-bool MemoryRegion::isSecure() const { return _secure; }
+bool MemoryRegion::isSecure() const
+{
+    return _secure;
+}
 
 QByteArray MemoryRegion::toByteArray() const
 {
@@ -423,11 +457,23 @@ QByteArray MemoryRegion::toByteArray() const
     }
 }
 
-MemoryRegion::MemoryRegion(bool secure) : _secure(secure), d(nullptr) { }
+MemoryRegion::MemoryRegion(bool secure)
+    : _secure(secure)
+    , d(nullptr)
+{
+}
 
-MemoryRegion::MemoryRegion(int size, bool secure) : _secure(secure), d(new Private(size, secure)) { }
+MemoryRegion::MemoryRegion(int size, bool secure)
+    : _secure(secure)
+    , d(new Private(size, secure))
+{
+}
 
-MemoryRegion::MemoryRegion(const QByteArray &from, bool secure) : _secure(secure), d(new Private(from, secure)) { }
+MemoryRegion::MemoryRegion(const QByteArray &from, bool secure)
+    : _secure(secure)
+    , d(new Private(from, secure))
+{
+}
 
 char *MemoryRegion::data()
 {
@@ -450,9 +496,15 @@ const char *MemoryRegion::constData() const
     return d->ai.data;
 }
 
-char &MemoryRegion::at(int index) { return *(d->ai.data + index); }
+char &MemoryRegion::at(int index)
+{
+    return *(d->ai.data + index);
+}
 
-const char &MemoryRegion::at(int index) const { return *(d->ai.data + index); }
+const char &MemoryRegion::at(int index) const
+{
+    return *(d->ai.data + index);
+}
 
 int MemoryRegion::size() const
 {
@@ -506,24 +558,43 @@ void MemoryRegion::setSecure(bool secure)
 //----------------------------------------------------------------------------
 // SecureArray
 //----------------------------------------------------------------------------
-SecureArray::SecureArray() : MemoryRegion(true) { }
+SecureArray::SecureArray()
+    : MemoryRegion(true)
+{
+}
 
-SecureArray::SecureArray(int size, char ch) : MemoryRegion(size, true)
+SecureArray::SecureArray(int size, char ch)
+    : MemoryRegion(size, true)
 {
     // ai_new fills with zeros for us
     if (ch != 0)
         fill(ch, size);
 }
 
-SecureArray::SecureArray(const char *str) : MemoryRegion(QByteArray::fromRawData(str, int(strlen(str))), true) { }
+SecureArray::SecureArray(const char *str)
+    : MemoryRegion(QByteArray::fromRawData(str, int(strlen(str))), true)
+{
+}
 
-SecureArray::SecureArray(const QByteArray &a) : MemoryRegion(a, true) { }
+SecureArray::SecureArray(const QByteArray &a)
+    : MemoryRegion(a, true)
+{
+}
 
-SecureArray::SecureArray(const MemoryRegion &a) : MemoryRegion(a) { setSecure(true); }
+SecureArray::SecureArray(const MemoryRegion &a)
+    : MemoryRegion(a)
+{
+    setSecure(true);
+}
 
-SecureArray::SecureArray(const SecureArray &from) : MemoryRegion(from) { }
+SecureArray::SecureArray(const SecureArray &from)
+    : MemoryRegion(from)
+{
+}
 
-SecureArray::~SecureArray() { }
+SecureArray::~SecureArray()
+{
+}
 
 SecureArray &SecureArray::operator=(const SecureArray &from)
 {
@@ -537,29 +608,65 @@ SecureArray &SecureArray::operator=(const QByteArray &from)
     return *this;
 }
 
-void SecureArray::clear() { MemoryRegion::resize(0); }
+void SecureArray::clear()
+{
+    MemoryRegion::resize(0);
+}
 
-bool SecureArray::resize(int size) { return MemoryRegion::resize(size); }
+bool SecureArray::resize(int size)
+{
+    return MemoryRegion::resize(size);
+}
 
-char &SecureArray::operator[](int index) { return at(index); }
+char &SecureArray::operator[](int index)
+{
+    return at(index);
+}
 
-const char &SecureArray::operator[](int index) const { return at(index); }
+const char &SecureArray::operator[](int index) const
+{
+    return at(index);
+}
 
-char &SecureArray::at(int index) { return MemoryRegion::at(index); }
+char &SecureArray::at(int index)
+{
+    return MemoryRegion::at(index);
+}
 
-const char &SecureArray::at(int index) const { return MemoryRegion::at(index); }
+const char &SecureArray::at(int index) const
+{
+    return MemoryRegion::at(index);
+}
 
-char *SecureArray::data() { return MemoryRegion::data(); }
+char *SecureArray::data()
+{
+    return MemoryRegion::data();
+}
 
-const char *SecureArray::data() const { return MemoryRegion::data(); }
+const char *SecureArray::data() const
+{
+    return MemoryRegion::data();
+}
 
-const char *SecureArray::constData() const { return MemoryRegion::constData(); }
+const char *SecureArray::constData() const
+{
+    return MemoryRegion::constData();
+}
 
-int SecureArray::size() const { return MemoryRegion::size(); }
+int SecureArray::size() const
+{
+    return MemoryRegion::size();
+}
 
-bool SecureArray::isEmpty() const { return MemoryRegion::isEmpty(); }
+bool SecureArray::isEmpty() const
+{
+    return MemoryRegion::isEmpty();
+}
 
-QByteArray SecureArray::toByteArray() const { return MemoryRegion::toByteArray(); }
+QByteArray SecureArray::toByteArray() const
+{
+    return MemoryRegion::toByteArray();
+}
 
 SecureArray &SecureArray::append(const SecureArray &a)
 {
@@ -578,7 +685,10 @@ bool SecureArray::operator==(const MemoryRegion &other) const
     return false;
 }
 
-SecureArray &SecureArray::operator+=(const SecureArray &a) { return append(a); }
+SecureArray &SecureArray::operator+=(const SecureArray &a)
+{
+    return append(a);
+}
 
 void SecureArray::fill(char fillChar, int fillToPosition)
 {
@@ -587,9 +697,15 @@ void SecureArray::fill(char fillChar, int fillToPosition)
         memset(data(), (int)fillChar, len);
 }
 
-void SecureArray::set(const SecureArray &from) { *this = from; }
+void SecureArray::set(const SecureArray &from)
+{
+    *this = from;
+}
 
-void SecureArray::set(const QByteArray &from) { *this = from; }
+void SecureArray::set(const QByteArray &from)
+{
+    *this = from;
+}
 
 const SecureArray operator+(const SecureArray &a, const SecureArray &b)
 {
@@ -622,7 +738,10 @@ public:
     Botan::BigInt n;
 };
 
-BigInteger::BigInteger() { d = new Private; }
+BigInteger::BigInteger()
+{
+    d = new Private;
+}
 
 BigInteger::BigInteger(int i)
 {
@@ -654,9 +773,14 @@ BigInteger::BigInteger(const SecureArray &a)
     fromArray(a);
 }
 
-BigInteger::BigInteger(const BigInteger &from) { *this = from; }
+BigInteger::BigInteger(const BigInteger &from)
+{
+    *this = from;
+}
 
-BigInteger::~BigInteger() { }
+BigInteger::~BigInteger()
+{
+}
 
 BigInteger &BigInteger::operator=(const BigInteger &from)
 {
@@ -710,7 +834,10 @@ BigInteger &BigInteger::operator=(const QString &s)
     return *this;
 }
 
-int BigInteger::compare(const BigInteger &n) const { return ((d->n).cmp(n.d->n, true)); }
+int BigInteger::compare(const BigInteger &n) const
+{
+    return ((d->n).cmp(n.d->n, true));
+}
 
 QTextStream &operator<<(QTextStream &stream, const BigInteger &b)
 {

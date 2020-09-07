@@ -26,16 +26,16 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Memory Locking Functions Source File           *
-* (C) 1999-2007 The Botan Project                *
-*************************************************/
+ * Memory Locking Functions Source File           *
+ * (C) 1999-2007 The Botan Project                *
+ *************************************************/
 
 } // WRAPNS_LINE
 #include <botan/util.h>
 namespace QCA { // WRAPNS_LINE
 
 #ifndef _POSIX_C_SOURCE
-  #define _POSIX_C_SOURCE 199309
+#define _POSIX_C_SOURCE 199309
 #endif
 
 } // WRAPNS_LINE
@@ -48,20 +48,20 @@ namespace QCA { // WRAPNS_LINE
 namespace Botan {
 
 /*************************************************
-* Lock an area of memory into RAM                *
-*************************************************/
-void lock_mem(void* ptr, u32bit bytes)
-   {
-   mlock(ptr, bytes);
-   }
+ * Lock an area of memory into RAM                *
+ *************************************************/
+void lock_mem(void *ptr, u32bit bytes)
+{
+    mlock(ptr, bytes);
+}
 
 /*************************************************
-* Unlock a previously locked region of memory    *
-*************************************************/
-void unlock_mem(void* ptr, u32bit bytes)
-   {
-   munlock(ptr, bytes);
-   }
+ * Unlock a previously locked region of memory    *
+ *************************************************/
+void unlock_mem(void *ptr, u32bit bytes)
+{
+    munlock(ptr, bytes);
+}
 
 }
 } // WRAPNS_LINE

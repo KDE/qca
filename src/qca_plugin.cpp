@@ -96,7 +96,9 @@ private:
     QObject *      _instance;
     bool           _ownInstance;
 
-    PluginInstance() { }
+    PluginInstance()
+    {
+    }
 
 public:
     static PluginInstance *fromFile(const QString &fname, QString *errstr = nullptr)
@@ -163,7 +165,10 @@ public:
             _instance->moveToThread(nullptr);
     }
 
-    QObject *instance() { return _instance; }
+    QObject *instance()
+    {
+        return _instance;
+    }
 };
 
 class ProviderItem
@@ -254,7 +259,10 @@ public:
             p->configChanged(conf);
     }
 
-    bool initted() const { return init_done; }
+    bool initted() const
+    {
+        return init_done;
+    }
 
     // null if not a plugin
     QObject *objectInstance() const

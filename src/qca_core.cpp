@@ -41,15 +41,30 @@
 #include <unistd.h>
 #endif
 
-int qcaVersion() { return QCA_VERSION; }
+int qcaVersion()
+{
+    return QCA_VERSION;
+}
 
-const char *qcaVersionStr() { return QCA_VERSION_STR; }
+const char *qcaVersionStr()
+{
+    return QCA_VERSION_STR;
+}
 
-int qcaMajorVersion() { return QCA_MAJOR_VERSION; }
+int qcaMajorVersion()
+{
+    return QCA_MAJOR_VERSION;
+}
 
-int qcaMinorVersion() { return QCA_MINOR_VERSION; }
+int qcaMinorVersion()
+{
+    return QCA_MINOR_VERSION;
+}
 
-int qcaPatchVersion() { return QCA_PATCH_VERSION; }
+int qcaPatchVersion()
+{
+    return QCA_PATCH_VERSION;
+}
 
 namespace QCA {
 
@@ -136,7 +151,10 @@ public:
         scan_mutex.unlock();
     }
 
-    void ksm_scan() { KeyStoreManager::scan(); }
+    void ksm_scan()
+    {
+        KeyStoreManager::scan();
+    }
 
     Logger *get_logger()
     {
@@ -224,7 +242,10 @@ void init(MemoryMode mode, int prealloc)
     qAddPostRoutine(deinit);
 }
 
-void init() { init(Practical, 64); }
+void init()
+{
+    init(Practical, 64);
+}
 
 void deinit()
 {
@@ -265,7 +286,10 @@ static bool global_check_load()
     return true;
 }
 
-QMutex *global_random_mutex() { return &global->rng_mutex; }
+QMutex *global_random_mutex()
+{
+    return &global->rng_mutex;
+}
 
 Random *global_random()
 {
@@ -550,8 +574,10 @@ static QVariantMap readConfig(const QString &name)
 
 static bool writeConfig(const QString &name, const QVariantMap &config, bool systemWide = false)
 {
-    QSettings settings(QSettings::NativeFormat, systemWide ? QSettings::SystemScope : QSettings::UserScope,
-                       QStringLiteral("Affinix"), QStringLiteral("QCA2"));
+    QSettings settings(QSettings::NativeFormat,
+                       systemWide ? QSettings::SystemScope : QSettings::UserScope,
+                       QStringLiteral("Affinix"),
+                       QStringLiteral("QCA2"));
     settings.beginGroup(QStringLiteral("ProviderConfig"));
 
     // version
@@ -695,7 +721,10 @@ void setGlobalRandomProvider(const QString &provider)
     global->rng = new Random(provider);
 }
 
-Logger *logger() { return global->get_logger(); }
+Logger *logger()
+{
+    return global->get_logger();
+}
 
 bool haveSystemStore()
 {
@@ -761,13 +790,25 @@ void setAppName(const QString &s)
     global->app_name = s;
 }
 
-QString arrayToHex(const QByteArray &a) { return Hex().arrayToString(a); }
+QString arrayToHex(const QByteArray &a)
+{
+    return Hex().arrayToString(a);
+}
 
-QByteArray hexToArray(const QString &str) { return Hex().stringToArray(str).toByteArray(); }
+QByteArray hexToArray(const QString &str)
+{
+    return Hex().stringToArray(str).toByteArray();
+}
 
-QString arrayToBase64(const QByteArray &a) { return Base64().arrayToString(a); }
+QString arrayToBase64(const QByteArray &a)
+{
+    return Base64().arrayToString(a);
+}
 
-QByteArray base64ToArray(const QString &base64String) { return Base64().stringToArray(base64String).toByteArray(); }
+QByteArray base64ToArray(const QString &base64String)
+{
+    return Base64().stringToArray(base64String).toByteArray();
+}
 
 static Provider *getProviderForType(const QString &type, const QString &provider)
 {
@@ -808,7 +849,10 @@ static Provider *getProviderForType(const QString &type, const QString &provider
     return p;
 }
 
-static inline Provider::Context *doCreateContext(Provider *p, const QString &type) { return p->createContext(type); }
+static inline Provider::Context *doCreateContext(Provider *p, const QString &type)
+{
+    return p->createContext(type);
+}
 
 Provider::Context *getContext(const QString &type, const QString &provider)
 {
@@ -843,138 +887,267 @@ Provider::Context *getContext(const QString &type, Provider *_p)
 //----------------------------------------------------------------------------
 // Initializer
 //----------------------------------------------------------------------------
-Initializer::Initializer(MemoryMode m, int prealloc) { init(m, prealloc); }
+Initializer::Initializer(MemoryMode m, int prealloc)
+{
+    init(m, prealloc);
+}
 
-Initializer::~Initializer() { deinit(); }
+Initializer::~Initializer()
+{
+    deinit();
+}
 
 //----------------------------------------------------------------------------
 // Provider
 //----------------------------------------------------------------------------
-Provider::~Provider() { }
+Provider::~Provider()
+{
+}
 
-void Provider::init() { }
+void Provider::init()
+{
+}
 
-void Provider::deinit() { }
+void Provider::deinit()
+{
+}
 
-int Provider::version() const { return 0; }
+int Provider::version() const
+{
+    return 0;
+}
 
-QString Provider::credit() const { return QString(); }
+QString Provider::credit() const
+{
+    return QString();
+}
 
-QVariantMap Provider::defaultConfig() const { return QVariantMap(); }
+QVariantMap Provider::defaultConfig() const
+{
+    return QVariantMap();
+}
 
-void Provider::configChanged(const QVariantMap &) { }
+void Provider::configChanged(const QVariantMap &)
+{
+}
 
-Provider::Context::Context(Provider *parent, const QString &type) : QObject()
+Provider::Context::Context(Provider *parent, const QString &type)
+    : QObject()
 {
     _provider = parent;
     _type     = type;
 }
 
-Provider::Context::Context(const Context &from) : QObject()
+Provider::Context::Context(const Context &from)
+    : QObject()
 {
     _provider = from._provider;
     _type     = from._type;
 }
 
-Provider::Context::~Context() { }
+Provider::Context::~Context()
+{
+}
 
-Provider *Provider::Context::provider() const { return _provider; }
+Provider *Provider::Context::provider() const
+{
+    return _provider;
+}
 
-QString Provider::Context::type() const { return _type; }
+QString Provider::Context::type() const
+{
+    return _type;
+}
 
-bool Provider::Context::sameProvider(const Context *c) const { return (c->provider() == _provider); }
+bool Provider::Context::sameProvider(const Context *c) const
+{
+    return (c->provider() == _provider);
+}
 
 //----------------------------------------------------------------------------
 // BasicContext
 //----------------------------------------------------------------------------
-BasicContext::BasicContext(Provider *parent, const QString &type) : Context(parent, type)
+BasicContext::BasicContext(Provider *parent, const QString &type)
+    : Context(parent, type)
 {
     moveToThread(nullptr); // no thread association
 }
 
-BasicContext::BasicContext(const BasicContext &from) : Context(from)
+BasicContext::BasicContext(const BasicContext &from)
+    : Context(from)
 {
     moveToThread(nullptr); // no thread association
 }
 
-BasicContext::~BasicContext() { }
+BasicContext::~BasicContext()
+{
+}
 
 //----------------------------------------------------------------------------
 // InfoContext
 //----------------------------------------------------------------------------
-QStringList InfoContext::supportedHashTypes() const { return QStringList(); }
+QStringList InfoContext::supportedHashTypes() const
+{
+    return QStringList();
+}
 
-QStringList InfoContext::supportedCipherTypes() const { return QStringList(); }
+QStringList InfoContext::supportedCipherTypes() const
+{
+    return QStringList();
+}
 
-QStringList InfoContext::supportedMACTypes() const { return QStringList(); }
+QStringList InfoContext::supportedMACTypes() const
+{
+    return QStringList();
+}
 
 //----------------------------------------------------------------------------
 // PKeyBase
 //----------------------------------------------------------------------------
-PKeyBase::PKeyBase(Provider *p, const QString &type) : BasicContext(p, type) { }
+PKeyBase::PKeyBase(Provider *p, const QString &type)
+    : BasicContext(p, type)
+{
+}
 
-int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const { return 0; }
+int PKeyBase::maximumEncryptSize(EncryptionAlgorithm) const
+{
+    return 0;
+}
 
-SecureArray PKeyBase::encrypt(const SecureArray &, EncryptionAlgorithm) { return SecureArray(); }
+SecureArray PKeyBase::encrypt(const SecureArray &, EncryptionAlgorithm)
+{
+    return SecureArray();
+}
 
-bool PKeyBase::decrypt(const SecureArray &, SecureArray *, EncryptionAlgorithm) { return false; }
+bool PKeyBase::decrypt(const SecureArray &, SecureArray *, EncryptionAlgorithm)
+{
+    return false;
+}
 
-void PKeyBase::startSign(SignatureAlgorithm, SignatureFormat) { }
+void PKeyBase::startSign(SignatureAlgorithm, SignatureFormat)
+{
+}
 
-void PKeyBase::startVerify(SignatureAlgorithm, SignatureFormat) { }
+void PKeyBase::startVerify(SignatureAlgorithm, SignatureFormat)
+{
+}
 
-void PKeyBase::update(const MemoryRegion &) { }
+void PKeyBase::update(const MemoryRegion &)
+{
+}
 
-QByteArray PKeyBase::endSign() { return QByteArray(); }
+QByteArray PKeyBase::endSign()
+{
+    return QByteArray();
+}
 
-bool PKeyBase::endVerify(const QByteArray &) { return false; }
+bool PKeyBase::endVerify(const QByteArray &)
+{
+    return false;
+}
 
-SymmetricKey PKeyBase::deriveKey(const PKeyBase &) { return SymmetricKey(); }
+SymmetricKey PKeyBase::deriveKey(const PKeyBase &)
+{
+    return SymmetricKey();
+}
 
 //----------------------------------------------------------------------------
 // PKeyContext
 //----------------------------------------------------------------------------
-QByteArray PKeyContext::publicToDER() const { return QByteArray(); }
+QByteArray PKeyContext::publicToDER() const
+{
+    return QByteArray();
+}
 
-QString PKeyContext::publicToPEM() const { return QString(); }
+QString PKeyContext::publicToPEM() const
+{
+    return QString();
+}
 
-ConvertResult PKeyContext::publicFromDER(const QByteArray &) { return ErrorDecode; }
+ConvertResult PKeyContext::publicFromDER(const QByteArray &)
+{
+    return ErrorDecode;
+}
 
-ConvertResult PKeyContext::publicFromPEM(const QString &) { return ErrorDecode; }
+ConvertResult PKeyContext::publicFromPEM(const QString &)
+{
+    return ErrorDecode;
+}
 
-SecureArray PKeyContext::privateToDER(const SecureArray &, PBEAlgorithm) const { return SecureArray(); }
+SecureArray PKeyContext::privateToDER(const SecureArray &, PBEAlgorithm) const
+{
+    return SecureArray();
+}
 
-QString PKeyContext::privateToPEM(const SecureArray &, PBEAlgorithm) const { return QString(); }
+QString PKeyContext::privateToPEM(const SecureArray &, PBEAlgorithm) const
+{
+    return QString();
+}
 
-ConvertResult PKeyContext::privateFromDER(const SecureArray &, const SecureArray &) { return ErrorDecode; }
+ConvertResult PKeyContext::privateFromDER(const SecureArray &, const SecureArray &)
+{
+    return ErrorDecode;
+}
 
-ConvertResult PKeyContext::privateFromPEM(const QString &, const SecureArray &) { return ErrorDecode; }
+ConvertResult PKeyContext::privateFromPEM(const QString &, const SecureArray &)
+{
+    return ErrorDecode;
+}
 
 //----------------------------------------------------------------------------
 // KeyStoreEntryContext
 //----------------------------------------------------------------------------
-bool KeyStoreEntryContext::isAvailable() const { return true; }
+bool KeyStoreEntryContext::isAvailable() const
+{
+    return true;
+}
 
-KeyBundle KeyStoreEntryContext::keyBundle() const { return KeyBundle(); }
+KeyBundle KeyStoreEntryContext::keyBundle() const
+{
+    return KeyBundle();
+}
 
-Certificate KeyStoreEntryContext::certificate() const { return Certificate(); }
+Certificate KeyStoreEntryContext::certificate() const
+{
+    return Certificate();
+}
 
-CRL KeyStoreEntryContext::crl() const { return CRL(); }
+CRL KeyStoreEntryContext::crl() const
+{
+    return CRL();
+}
 
-PGPKey KeyStoreEntryContext::pgpSecretKey() const { return PGPKey(); }
+PGPKey KeyStoreEntryContext::pgpSecretKey() const
+{
+    return PGPKey();
+}
 
-PGPKey KeyStoreEntryContext::pgpPublicKey() const { return PGPKey(); }
+PGPKey KeyStoreEntryContext::pgpPublicKey() const
+{
+    return PGPKey();
+}
 
-bool KeyStoreEntryContext::ensureAccess() { return true; }
+bool KeyStoreEntryContext::ensureAccess()
+{
+    return true;
+}
 
 //----------------------------------------------------------------------------
 // KeyStoreListContext
 //----------------------------------------------------------------------------
-void KeyStoreListContext::start() { QMetaObject::invokeMethod(this, "busyEnd", Qt::QueuedConnection); }
+void KeyStoreListContext::start()
+{
+    QMetaObject::invokeMethod(this, "busyEnd", Qt::QueuedConnection);
+}
 
-void KeyStoreListContext::setUpdatesEnabled(bool) { }
+void KeyStoreListContext::setUpdatesEnabled(bool)
+{
+}
 
-bool KeyStoreListContext::isReadOnly(int) const { return true; }
+bool KeyStoreListContext::isReadOnly(int) const
+{
+    return true;
+}
 
 KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId)
 {
@@ -996,39 +1169,67 @@ KeyStoreEntryContext *KeyStoreListContext::entryPassive(const QString &serialize
     return nullptr;
 }
 
-QString KeyStoreListContext::writeEntry(int, const KeyBundle &) { return QString(); }
+QString KeyStoreListContext::writeEntry(int, const KeyBundle &)
+{
+    return QString();
+}
 
-QString KeyStoreListContext::writeEntry(int, const Certificate &) { return QString(); }
+QString KeyStoreListContext::writeEntry(int, const Certificate &)
+{
+    return QString();
+}
 
-QString KeyStoreListContext::writeEntry(int, const CRL &) { return QString(); }
+QString KeyStoreListContext::writeEntry(int, const CRL &)
+{
+    return QString();
+}
 
-QString KeyStoreListContext::writeEntry(int, const PGPKey &) { return QString(); }
+QString KeyStoreListContext::writeEntry(int, const PGPKey &)
+{
+    return QString();
+}
 
-bool KeyStoreListContext::removeEntry(int, const QString &) { return false; }
+bool KeyStoreListContext::removeEntry(int, const QString &)
+{
+    return false;
+}
 
 //----------------------------------------------------------------------------
 // TLSContext
 //----------------------------------------------------------------------------
-void TLSContext::setMTU(int) { }
+void TLSContext::setMTU(int)
+{
+}
 
 //----------------------------------------------------------------------------
 // MessageContext
 //----------------------------------------------------------------------------
-QString MessageContext::diagnosticText() const { return QString(); }
+QString MessageContext::diagnosticText() const
+{
+    return QString();
+}
 
 //----------------------------------------------------------------------------
 // SMSContext
 //----------------------------------------------------------------------------
-void SMSContext::setTrustedCertificates(const CertificateCollection &) { }
+void SMSContext::setTrustedCertificates(const CertificateCollection &)
+{
+}
 
-void SMSContext::setUntrustedCertificates(const CertificateCollection &) { }
+void SMSContext::setUntrustedCertificates(const CertificateCollection &)
+{
+}
 
-void SMSContext::setPrivateKeys(const QList<SecureMessageKey> &) { }
+void SMSContext::setPrivateKeys(const QList<SecureMessageKey> &)
+{
+}
 
 //----------------------------------------------------------------------------
 // BufferedComputation
 //----------------------------------------------------------------------------
-BufferedComputation::~BufferedComputation() { }
+BufferedComputation::~BufferedComputation()
+{
+}
 
 MemoryRegion BufferedComputation::process(const MemoryRegion &a)
 {
@@ -1040,7 +1241,9 @@ MemoryRegion BufferedComputation::process(const MemoryRegion &a)
 //----------------------------------------------------------------------------
 // Filter
 //----------------------------------------------------------------------------
-Filter::~Filter() { }
+Filter::~Filter()
+{
+}
 
 MemoryRegion Filter::process(const MemoryRegion &a)
 {
@@ -1071,7 +1274,8 @@ public:
         // printf("** [%p] Algorithm Created\n", c);
     }
 
-    Private(const Private &from) : QSharedData(from)
+    Private(const Private &from)
+        : QSharedData(from)
     {
         c = from.c->clone();
         // printf("** [%p] Algorithm Copied (to [%p])\n", from.c, c);
@@ -1084,13 +1288,23 @@ public:
     }
 };
 
-Algorithm::Algorithm() { }
+Algorithm::Algorithm()
+{
+}
 
-Algorithm::Algorithm(const QString &type, const QString &provider) { change(type, provider); }
+Algorithm::Algorithm(const QString &type, const QString &provider)
+{
+    change(type, provider);
+}
 
-Algorithm::Algorithm(const Algorithm &from) { *this = from; }
+Algorithm::Algorithm(const Algorithm &from)
+{
+    *this = from;
+}
 
-Algorithm::~Algorithm() { }
+Algorithm::~Algorithm()
+{
+}
 
 Algorithm &Algorithm::operator=(const Algorithm &from)
 {
@@ -1160,13 +1374,24 @@ Provider::Context *Algorithm::takeContext()
 //----------------------------------------------------------------------------
 // SymmetricKey
 //----------------------------------------------------------------------------
-SymmetricKey::SymmetricKey() { }
+SymmetricKey::SymmetricKey()
+{
+}
 
-SymmetricKey::SymmetricKey(int size) { set(Random::randomArray(size)); }
+SymmetricKey::SymmetricKey(int size)
+{
+    set(Random::randomArray(size));
+}
 
-SymmetricKey::SymmetricKey(const SecureArray &a) { set(a); }
+SymmetricKey::SymmetricKey(const SecureArray &a)
+{
+    set(a);
+}
 
-SymmetricKey::SymmetricKey(const QByteArray &a) { set(SecureArray(a)); }
+SymmetricKey::SymmetricKey(const QByteArray &a)
+{
+    set(SecureArray(a));
+}
 
 // clang-format off
 /* from libgcrypt-1.2.0 */
@@ -1258,24 +1483,46 @@ bool SymmetricKey::isWeakDESKey()
 //----------------------------------------------------------------------------
 // InitializationVector
 //----------------------------------------------------------------------------
-InitializationVector::InitializationVector() { }
+InitializationVector::InitializationVector()
+{
+}
 
-InitializationVector::InitializationVector(int size) { set(Random::randomArray(size)); }
+InitializationVector::InitializationVector(int size)
+{
+    set(Random::randomArray(size));
+}
 
-InitializationVector::InitializationVector(const SecureArray &a) { set(a); }
+InitializationVector::InitializationVector(const SecureArray &a)
+{
+    set(a);
+}
 
-InitializationVector::InitializationVector(const QByteArray &a) { set(SecureArray(a)); }
+InitializationVector::InitializationVector(const QByteArray &a)
+{
+    set(SecureArray(a));
+}
 
 //----------------------------------------------------------------------------
 // AuthTag
 //----------------------------------------------------------------------------
-AuthTag::AuthTag() { }
+AuthTag::AuthTag()
+{
+}
 
-AuthTag::AuthTag(int size) { resize(size); }
+AuthTag::AuthTag(int size)
+{
+    resize(size);
+}
 
-AuthTag::AuthTag(const SecureArray &a) { set(a); }
+AuthTag::AuthTag(const SecureArray &a)
+{
+    set(a);
+}
 
-AuthTag::AuthTag(const QByteArray &a) { set(SecureArray(a)); }
+AuthTag::AuthTag(const QByteArray &a)
+{
+    set(SecureArray(a));
+}
 
 //----------------------------------------------------------------------------
 // Event
@@ -1292,11 +1539,18 @@ public:
     void *        ptr;
 };
 
-Event::Event() { }
+Event::Event()
+{
+}
 
-Event::Event(const Event &from) : d(from.d) { }
+Event::Event(const Event &from)
+    : d(from.d)
+{
+}
 
-Event::~Event() { }
+Event::~Event()
+{
+}
 
 Event &Event::operator=(const Event &from)
 {
@@ -1304,24 +1558,50 @@ Event &Event::operator=(const Event &from)
     return *this;
 }
 
-bool Event::isNull() const { return (d ? false : true); }
+bool Event::isNull() const
+{
+    return (d ? false : true);
+}
 
-Event::Type Event::type() const { return d->type; }
+Event::Type Event::type() const
+{
+    return d->type;
+}
 
-Event::Source Event::source() const { return d->source; }
+Event::Source Event::source() const
+{
+    return d->source;
+}
 
-Event::PasswordStyle Event::passwordStyle() const { return d->style; }
+Event::PasswordStyle Event::passwordStyle() const
+{
+    return d->style;
+}
 
-KeyStoreInfo Event::keyStoreInfo() const { return d->ksi; }
+KeyStoreInfo Event::keyStoreInfo() const
+{
+    return d->ksi;
+}
 
-KeyStoreEntry Event::keyStoreEntry() const { return d->kse; }
+KeyStoreEntry Event::keyStoreEntry() const
+{
+    return d->kse;
+}
 
-QString Event::fileName() const { return d->fname; }
+QString Event::fileName() const
+{
+    return d->fname;
+}
 
-void *Event::ptr() const { return d->ptr; }
+void *Event::ptr() const
+{
+    return d->ptr;
+}
 
-void Event::setPasswordKeyStore(PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo,
-                                const KeyStoreEntry &keyStoreEntry, void *ptr)
+void Event::setPasswordKeyStore(PasswordStyle        pstyle,
+                                const KeyStoreInfo & keyStoreInfo,
+                                const KeyStoreEntry &keyStoreEntry,
+                                void *               ptr)
 {
     if (!d)
         d = new Private;
@@ -1367,7 +1647,10 @@ class HandlerBase : public QObject
 {
     Q_OBJECT
 public:
-    HandlerBase(QObject *parent = nullptr) : QObject(parent) { }
+    HandlerBase(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+    }
 
 protected Q_SLOTS:
     virtual void ask(int id, const QCA::Event &e) = 0;
@@ -1377,7 +1660,10 @@ class AskerBase : public QObject
 {
     Q_OBJECT
 public:
-    AskerBase(QObject *parent = nullptr) : QObject(parent) { }
+    AskerBase(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+    }
 
     virtual void set_accepted(const SecureArray &password) = 0;
     virtual void set_rejected()                            = 0;
@@ -1458,8 +1744,8 @@ public:
         AskerItem &i = askers[asker_at];
 
         g_event->handlers[i.handler_pos].ids += i.id;
-        QMetaObject::invokeMethod(handlers[i.handler_pos].h, "ask", Qt::QueuedConnection, Q_ARG(int, i.id),
-                                  Q_ARG(QCA::Event, i.event));
+        QMetaObject::invokeMethod(
+            handlers[i.handler_pos].h, "ask", Qt::QueuedConnection, Q_ARG(int, i.id), Q_ARG(QCA::Event, i.event));
     }
 
     void reject(int asker_at)
@@ -1646,7 +1932,12 @@ public:
     bool          started;
     QList<int>    activeIds;
 
-    Private(EventHandler *_q) : HandlerBase(_q), q(_q) { started = false; }
+    Private(EventHandler *_q)
+        : HandlerBase(_q)
+        , q(_q)
+    {
+        started = false;
+    }
 
 public Q_SLOTS:
     void ask(int id, const QCA::Event &e) override
@@ -1656,7 +1947,11 @@ public Q_SLOTS:
     }
 };
 
-EventHandler::EventHandler(QObject *parent) : QObject(parent) { d = new Private(this); }
+EventHandler::EventHandler(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
 EventHandler::~EventHandler()
 {
@@ -1728,7 +2023,8 @@ public:
     bool        waiting;
     bool        done;
 
-    AskerPrivate(PasswordAsker *parent) : AskerBase(parent)
+    AskerPrivate(PasswordAsker *parent)
+        : AskerBase(parent)
     {
         passwordAsker = parent;
         tokenAsker    = nullptr;
@@ -1738,7 +2034,8 @@ public:
         done          = true;
     }
 
-    AskerPrivate(TokenAsker *parent) : AskerBase(parent)
+    AskerPrivate(TokenAsker *parent)
+        : AskerBase(parent)
     {
         passwordAsker = nullptr;
         tokenAsker    = parent;
@@ -1807,17 +2104,32 @@ class PasswordAsker::Private : public AskerPrivate
 {
     Q_OBJECT
 public:
-    Private(PasswordAsker *_q) : AskerPrivate(_q) { }
+    Private(PasswordAsker *_q)
+        : AskerPrivate(_q)
+    {
+    }
 
-    void emitResponseReady() override { emit passwordAsker->responseReady(); }
+    void emitResponseReady() override
+    {
+        emit passwordAsker->responseReady();
+    }
 };
 
-PasswordAsker::PasswordAsker(QObject *parent) : QObject(parent) { d = new Private(this); }
+PasswordAsker::PasswordAsker(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-PasswordAsker::~PasswordAsker() { delete d; }
+PasswordAsker::~PasswordAsker()
+{
+    delete d;
+}
 
-void PasswordAsker::ask(Event::PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo,
-                        const KeyStoreEntry &keyStoreEntry, void *ptr)
+void PasswordAsker::ask(Event::PasswordStyle pstyle,
+                        const KeyStoreInfo & keyStoreInfo,
+                        const KeyStoreEntry &keyStoreEntry,
+                        void *               ptr)
 {
     Event e;
     e.setPasswordKeyStore(pstyle, keyStoreInfo, keyStoreEntry, ptr);
@@ -1831,13 +2143,25 @@ void PasswordAsker::ask(Event::PasswordStyle pstyle, const QString &fileName, vo
     d->ask(e);
 }
 
-void PasswordAsker::cancel() { d->cancel(); }
+void PasswordAsker::cancel()
+{
+    d->cancel();
+}
 
-void PasswordAsker::waitForResponse() { d->waitForResponse(); }
+void PasswordAsker::waitForResponse()
+{
+    d->waitForResponse();
+}
 
-bool PasswordAsker::accepted() const { return d->accepted; }
+bool PasswordAsker::accepted() const
+{
+    return d->accepted;
+}
 
-SecureArray PasswordAsker::password() const { return d->password; }
+SecureArray PasswordAsker::password() const
+{
+    return d->password;
+}
 
 //----------------------------------------------------------------------------
 // TokenAsker
@@ -1846,14 +2170,27 @@ class TokenAsker::Private : public AskerPrivate
 {
     Q_OBJECT
 public:
-    Private(TokenAsker *_q) : AskerPrivate(_q) { }
+    Private(TokenAsker *_q)
+        : AskerPrivate(_q)
+    {
+    }
 
-    void emitResponseReady() override { emit tokenAsker->responseReady(); }
+    void emitResponseReady() override
+    {
+        emit tokenAsker->responseReady();
+    }
 };
 
-TokenAsker::TokenAsker(QObject *parent) : QObject(parent) { d = new Private(this); }
+TokenAsker::TokenAsker(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-TokenAsker::~TokenAsker() { delete d; }
+TokenAsker::~TokenAsker()
+{
+    delete d;
+}
 
 void TokenAsker::ask(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr)
 {
@@ -1862,11 +2199,20 @@ void TokenAsker::ask(const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyS
     d->ask(e);
 }
 
-void TokenAsker::cancel() { d->cancel(); }
+void TokenAsker::cancel()
+{
+    d->cancel();
+}
 
-void TokenAsker::waitForResponse() { d->waitForResponse(); }
+void TokenAsker::waitForResponse()
+{
+    d->waitForResponse();
+}
 
-bool TokenAsker::accepted() const { return d->accepted; }
+bool TokenAsker::accepted() const
+{
+    return d->accepted;
+}
 
 }
 

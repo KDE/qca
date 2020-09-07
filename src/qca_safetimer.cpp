@@ -58,9 +58,14 @@ protected:
     void timerEvent(QTimerEvent *event) override;
 };
 
-SafeTimer::Private::Private(QObject *parent) :
-    QObject(parent), timerId(0), fixerTimerId(0), isSingleShot(false), interval(0), isActive(false),
-    elapsedTimer(QElapsedTimer())
+SafeTimer::Private::Private(QObject *parent)
+    : QObject(parent)
+    , timerId(0)
+    , fixerTimerId(0)
+    , isSingleShot(false)
+    , interval(0)
+    , isActive(false)
+    , elapsedTimer(QElapsedTimer())
 {
     connect(this, &Private::needFix, this, &Private::fixTimer, Qt::QueuedConnection);
 }
@@ -119,7 +124,9 @@ void SafeTimer::Private::timerEvent(QTimerEvent *event)
     }
 }
 
-SafeTimer::SafeTimer(QObject *parent) : QObject(), d(new Private())
+SafeTimer::SafeTimer(QObject *parent)
+    : QObject()
+    , d(new Private())
 {
     // It must be done here. Initialization list can't be used.
     // Need to have proper class name. Look at TimerFixer::hook.
@@ -127,17 +134,34 @@ SafeTimer::SafeTimer(QObject *parent) : QObject(), d(new Private())
     d->setParent(this);
 }
 
-SafeTimer::~SafeTimer() { }
+SafeTimer::~SafeTimer()
+{
+}
 
-int SafeTimer::interval() const { return d->interval; }
+int SafeTimer::interval() const
+{
+    return d->interval;
+}
 
-bool SafeTimer::isActive() const { return d->isActive; }
+bool SafeTimer::isActive() const
+{
+    return d->isActive;
+}
 
-bool SafeTimer::isSingleShot() const { return d->isSingleShot; }
+bool SafeTimer::isSingleShot() const
+{
+    return d->isSingleShot;
+}
 
-void SafeTimer::setInterval(int msec) { d->interval = msec; }
+void SafeTimer::setInterval(int msec)
+{
+    d->interval = msec;
+}
 
-void SafeTimer::setSingleShot(bool singleShot) { d->isSingleShot = singleShot; }
+void SafeTimer::setSingleShot(bool singleShot)
+{
+    d->isSingleShot = singleShot;
+}
 
 void SafeTimer::start(int msec)
 {

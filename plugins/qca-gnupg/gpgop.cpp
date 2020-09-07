@@ -26,9 +26,20 @@ namespace gpgQCAPlugin {
 //----------------------------------------------------------------------------
 // GpgOp
 //----------------------------------------------------------------------------
-GpgOp::Private::Private(GpgOp *_q) : QObject(_q), sync(_q), q(_q), act(nullptr), waiting(false) { reset(ResetAll); }
+GpgOp::Private::Private(GpgOp *_q)
+    : QObject(_q)
+    , sync(_q)
+    , q(_q)
+    , act(nullptr)
+    , waiting(false)
+{
+    reset(ResetAll);
+}
 
-GpgOp::Private::~Private() { reset(ResetAll); }
+GpgOp::Private::~Private()
+{
+    reset(ResetAll);
+}
 
 void GpgOp::Private::reset(ResetMode mode)
 {
@@ -200,25 +211,47 @@ void GpgOp::Private::act_finished()
         emit q->finished();
 }
 
-GpgOp::GpgOp(const QString &bin, QObject *parent) : QObject(parent)
+GpgOp::GpgOp(const QString &bin, QObject *parent)
+    : QObject(parent)
 {
     d      = new Private(this);
     d->bin = bin;
 }
 
-GpgOp::~GpgOp() { delete d; }
+GpgOp::~GpgOp()
+{
+    delete d;
+}
 
-void GpgOp::reset() { d->reset(ResetAll); }
+void GpgOp::reset()
+{
+    d->reset(ResetAll);
+}
 
-bool GpgOp::isActive() const { return (d->act ? true : false); }
+bool GpgOp::isActive() const
+{
+    return (d->act ? true : false);
+}
 
-GpgOp::Type GpgOp::op() const { return d->op; }
+GpgOp::Type GpgOp::op() const
+{
+    return d->op;
+}
 
-void GpgOp::setAsciiFormat(bool b) { d->opt_ascii = b; }
+void GpgOp::setAsciiFormat(bool b)
+{
+    d->opt_ascii = b;
+}
 
-void GpgOp::setDisableAgent(bool b) { d->opt_noagent = b; }
+void GpgOp::setDisableAgent(bool b)
+{
+    d->opt_noagent = b;
+}
 
-void GpgOp::setAlwaysTrust(bool b) { d->opt_alwaystrust = b; }
+void GpgOp::setAlwaysTrust(bool b)
+{
+    d->opt_alwaystrust = b;
+}
 
 void GpgOp::setKeyrings(const QString &pubfile, const QString &secfile)
 {
@@ -346,7 +379,10 @@ void GpgOp::submitPassphrase(const QByteArray &a)
     d->act->submitPassphrase(a);
 }
 
-void GpgOp::cardOkay() { d->act->cardOkay(); }
+void GpgOp::cardOkay()
+{
+    d->act->cardOkay();
+}
 
 QByteArray GpgOp::read()
 {
@@ -359,9 +395,15 @@ QByteArray GpgOp::read()
     }
 }
 
-void GpgOp::write(const QByteArray &in) { d->act->write(in); }
+void GpgOp::write(const QByteArray &in)
+{
+    d->act->write(in);
+}
 
-void GpgOp::endWrite() { d->act->endWrite(); }
+void GpgOp::endWrite()
+{
+    d->act->endWrite();
+}
 
 QString GpgOp::readDiagnosticText()
 {
@@ -387,24 +429,54 @@ GpgOp::Event GpgOp::waitForEvent(int msecs)
         return GpgOp::Event();
 }
 
-bool GpgOp::success() const { return d->output.success; }
+bool GpgOp::success() const
+{
+    return d->output.success;
+}
 
-GpgOp::Error GpgOp::errorCode() const { return d->output.errorCode; }
+GpgOp::Error GpgOp::errorCode() const
+{
+    return d->output.errorCode;
+}
 
-GpgOp::KeyList GpgOp::keys() const { return d->output.keys; }
+GpgOp::KeyList GpgOp::keys() const
+{
+    return d->output.keys;
+}
 
-QString GpgOp::keyringFile() const { return d->output.keyringFile; }
+QString GpgOp::keyringFile() const
+{
+    return d->output.keyringFile;
+}
 
-QString GpgOp::homeDir() const { return d->output.homeDir; }
+QString GpgOp::homeDir() const
+{
+    return d->output.homeDir;
+}
 
-QString GpgOp::encryptedToId() const { return d->output.encryptedToId; }
+QString GpgOp::encryptedToId() const
+{
+    return d->output.encryptedToId;
+}
 
-bool GpgOp::wasSigned() const { return d->output.wasSigned; }
+bool GpgOp::wasSigned() const
+{
+    return d->output.wasSigned;
+}
 
-QString GpgOp::signerId() const { return d->output.signerId; }
+QString GpgOp::signerId() const
+{
+    return d->output.signerId;
+}
 
-QDateTime GpgOp::timestamp() const { return d->output.timestamp; }
+QDateTime GpgOp::timestamp() const
+{
+    return d->output.timestamp;
+}
 
-GpgOp::VerifyResult GpgOp::verifyResult() const { return d->output.verifyResult; }
+GpgOp::VerifyResult GpgOp::verifyResult() const
+{
+    return d->output.verifyResult;
+}
 
 }

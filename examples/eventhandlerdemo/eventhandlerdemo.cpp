@@ -37,7 +37,8 @@ class ClientPassphraseHandler : public QObject
 {
     Q_OBJECT
 public:
-    ClientPassphraseHandler(QObject *parent = nullptr) : QObject(parent)
+    ClientPassphraseHandler(QObject *parent = nullptr)
+        : QObject(parent)
     {
         // When the PasswordAsker or TokenAsker needs to interact
         // with the user, it raises a signal. We connect that to a
@@ -111,7 +112,10 @@ class AskerThread : public QThread
 {
     Q_OBJECT
 protected:
-    void run() override { asker_procedure(); }
+    void run() override
+    {
+        asker_procedure();
+    }
 };
 
 int main(int argc, char **argv)
@@ -149,7 +153,8 @@ void asker_procedure()
 
     tokenAsker.ask(
         QCA::KeyStoreInfo(QCA::KeyStore::SmartCard, QStringLiteral("Token Id"), QStringLiteral("Token Name")),
-        QCA::KeyStoreEntry(), nullptr);
+        QCA::KeyStoreEntry(),
+        nullptr);
 
     tokenAsker.waitForResponse();
 

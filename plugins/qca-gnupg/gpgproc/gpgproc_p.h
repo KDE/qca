@@ -30,17 +30,27 @@ class QProcessSignalRelay : public QObject
 {
     Q_OBJECT
 public:
-    QProcessSignalRelay(QProcess *proc, QObject *parent = nullptr) : QObject(parent)
+    QProcessSignalRelay(QProcess *proc, QObject *parent = nullptr)
+        : QObject(parent)
     {
         qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
         connect(proc, &QProcess::started, this, &QProcessSignalRelay::proc_started, Qt::QueuedConnection);
-        connect(proc, &QProcess::readyReadStandardOutput, this, &QProcessSignalRelay::proc_readyReadStandardOutput,
+        connect(proc,
+                &QProcess::readyReadStandardOutput,
+                this,
+                &QProcessSignalRelay::proc_readyReadStandardOutput,
                 Qt::QueuedConnection);
-        connect(proc, &QProcess::readyReadStandardError, this, &QProcessSignalRelay::proc_readyReadStandardError,
+        connect(proc,
+                &QProcess::readyReadStandardError,
+                this,
+                &QProcessSignalRelay::proc_readyReadStandardError,
                 Qt::QueuedConnection);
         connect(proc, &QProcess::bytesWritten, this, &QProcessSignalRelay::proc_bytesWritten, Qt::QueuedConnection);
-        connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
-                &QProcessSignalRelay::proc_finished, Qt::QueuedConnection);
+        connect(proc,
+                QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                this,
+                &QProcessSignalRelay::proc_finished,
+                Qt::QueuedConnection);
         connect(proc, &QProcess::errorOccurred, this, &QProcessSignalRelay::proc_error, Qt::QueuedConnection);
     }
 
@@ -53,17 +63,35 @@ Q_SIGNALS:
     void error(QProcess::ProcessError);
 
 public Q_SLOTS:
-    void proc_started() { emit started(); }
+    void proc_started()
+    {
+        emit started();
+    }
 
-    void proc_readyReadStandardOutput() { emit readyReadStandardOutput(); }
+    void proc_readyReadStandardOutput()
+    {
+        emit readyReadStandardOutput();
+    }
 
-    void proc_readyReadStandardError() { emit readyReadStandardError(); }
+    void proc_readyReadStandardError()
+    {
+        emit readyReadStandardError();
+    }
 
-    void proc_bytesWritten(qint64 x) { emit bytesWritten(x); }
+    void proc_bytesWritten(qint64 x)
+    {
+        emit bytesWritten(x);
+    }
 
-    void proc_finished(int x) { emit finished(x); }
+    void proc_finished(int x)
+    {
+        emit finished(x);
+    }
 
-    void proc_error(QProcess::ProcessError x) { emit error(x); }
+    void proc_error(QProcess::ProcessError x)
+    {
+        emit error(x);
+    }
 };
 
 enum ResetMode

@@ -48,7 +48,10 @@ private:
     QCA::Initializer *m_init;
 };
 
-void PipeUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void PipeUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
 void PipeUnitTest::cleanupTestCase()
 {

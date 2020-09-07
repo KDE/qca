@@ -33,12 +33,17 @@ class StreamLogger : public QCA::AbstractLogDevice
 {
     Q_OBJECT
 public:
-    StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice(QStringLiteral("Stream logger")), _stream(stream)
+    StreamLogger(QTextStream &stream)
+        : QCA::AbstractLogDevice(QStringLiteral("Stream logger"))
+        , _stream(stream)
     {
         QCA::logger()->registerLogDevice(this);
     }
 
-    ~StreamLogger() override { QCA::logger()->unregisterLogDevice(name()); }
+    ~StreamLogger() override
+    {
+        QCA::logger()->unregisterLogDevice(name());
+    }
 
     void logTextMessage(const QString &message, enum QCA::Logger::Severity severity) override
     {
@@ -82,7 +87,7 @@ private:
     QTextStream &      _stream;
 };
 
-const char *StreamLogger::s_severityNames[] = { "Q", "M", "A", "C", "E", "W", "N", "I", "D", "U" };
+const char *StreamLogger::s_severityNames[] = {"Q", "M", "A", "C", "E", "W", "N", "I", "D", "U"};
 
 }
 
@@ -119,11 +124,19 @@ public:
     }
 
 public:
-    int qcaVersion() const override { return QCA_VERSION; }
+    int qcaVersion() const override
+    {
+        return QCA_VERSION;
+    }
 
-    void init() override { }
+    void init() override
+    {
+    }
 
-    QString name() const override { return QStringLiteral("qca-logger"); }
+    QString name() const override
+    {
+        return QStringLiteral("qca-logger");
+    }
 
     QStringList features() const override
     {
@@ -188,7 +201,10 @@ class qca_logger : public QObject, public QCAPlugin
     Q_INTERFACES(QCAPlugin)
 
 public:
-    Provider *createProvider() override { return new loggerProvider; }
+    Provider *createProvider() override
+    {
+        return new loggerProvider;
+    }
 };
 
 #include "qca-logger.moc"

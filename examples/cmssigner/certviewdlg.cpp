@@ -36,12 +36,20 @@ public:
     QString                  name;
     QString                  desc;
 
-    InfoType() { }
+    InfoType()
+    {
+    }
 
-    InfoType(QCA::CertificateInfoType _type, const QString &_varname, const QString &_shortname, const QString &_name,
-             const QString &_desc) :
-        type(_type),
-        varname(_varname), shortname(_shortname), name(_name), desc(_desc)
+    InfoType(QCA::CertificateInfoType _type,
+             const QString &          _varname,
+             const QString &          _shortname,
+             const QString &          _name,
+             const QString &          _desc)
+        : type(_type)
+        , varname(_varname)
+        , shortname(_shortname)
+        , name(_name)
+        , desc(_desc)
     {
     }
 };
@@ -49,22 +57,34 @@ public:
 static QList<InfoType> makeInfoTypeList(bool legacyEmail = false)
 {
     QList<InfoType> out;
-    out += InfoType(QCA::CommonName, "CommonName", "CN", CertViewDlg::tr("Common Name (CN)"),
-                    "Full name, domain, anything");
+    out += InfoType(
+        QCA::CommonName, "CommonName", "CN", CertViewDlg::tr("Common Name (CN)"), "Full name, domain, anything");
     out += InfoType(QCA::Email, "Email", "", CertViewDlg::tr("Email Address"), "");
     if (legacyEmail)
         out += InfoType(QCA::EmailLegacy, "EmailLegacy", "", CertViewDlg::tr("PKCS#9 Email Address"), "");
     out += InfoType(QCA::Organization, "Organization", "O", CertViewDlg::tr("Organization (O)"), "Company, group, etc");
-    out += InfoType(QCA::OrganizationalUnit, "OrganizationalUnit", "OU", CertViewDlg::tr("Organizational Unit (OU)"),
+    out += InfoType(QCA::OrganizationalUnit,
+                    "OrganizationalUnit",
+                    "OU",
+                    CertViewDlg::tr("Organizational Unit (OU)"),
                     "Division/branch of organization");
     out += InfoType(QCA::Locality, "Locality", "", CertViewDlg::tr("Locality (L)"), "City, shire, part of a state");
     out += InfoType(QCA::State, "State", "", CertViewDlg::tr("State (ST)"), "State within the country");
     out += InfoType(QCA::Country, "Country", "C", CertViewDlg::tr("Country Code (C)"), "2-letter code");
-    out += InfoType(QCA::IncorporationLocality, "IncorporationLocality", "", CertViewDlg::tr("Incorporation Locality"),
+    out += InfoType(QCA::IncorporationLocality,
+                    "IncorporationLocality",
+                    "",
+                    CertViewDlg::tr("Incorporation Locality"),
                     "For EV certificates");
-    out += InfoType(QCA::IncorporationState, "IncorporationState", "", CertViewDlg::tr("Incorporation State"),
+    out += InfoType(QCA::IncorporationState,
+                    "IncorporationState",
+                    "",
+                    CertViewDlg::tr("Incorporation State"),
                     "For EV certificates");
-    out += InfoType(QCA::IncorporationCountry, "IncorporationCountry", "", CertViewDlg::tr("Incorporation Country"),
+    out += InfoType(QCA::IncorporationCountry,
+                    "IncorporationCountry",
+                    "",
+                    CertViewDlg::tr("Incorporation Country"),
                     "For EV certificates");
     out += InfoType(QCA::URI, "URI", "", CertViewDlg::tr("URI"), "");
     out += InfoType(QCA::DNS, "DNS", "", CertViewDlg::tr("Domain Name"), "Domain (dnsName)");
@@ -113,7 +133,9 @@ public:
     Ui_CertView           ui;
     QCA::CertificateChain chain;
 
-    Private(CertViewDlg *_q) : QObject(_q), q(_q)
+    Private(CertViewDlg *_q)
+        : QObject(_q)
+        , q(_q)
     {
         ui.setupUi(q);
         connect(ui.cb_chain, SIGNAL(activated(int)), SLOT(cb_activated(int)));
@@ -141,16 +163,23 @@ public:
     }
 
 private Q_SLOTS:
-    void cb_activated(int) { updateInfo(); }
+    void cb_activated(int)
+    {
+        updateInfo();
+    }
 };
 
-CertViewDlg::CertViewDlg(const QCA::CertificateChain &chain, QWidget *parent) : QDialog(parent)
+CertViewDlg::CertViewDlg(const QCA::CertificateChain &chain, QWidget *parent)
+    : QDialog(parent)
 {
     d        = new Private(this);
     d->chain = chain;
     d->update();
 }
 
-CertViewDlg::~CertViewDlg() { delete d; }
+CertViewDlg::~CertViewDlg()
+{
+    delete d;
+}
 
 #include "certviewdlg.moc"

@@ -35,8 +35,12 @@ public:
     DLGroup domain;
     DH *    result;
 
-    DHKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) :
-        QThread(parent), domain(_domain), result(nullptr) { }
+    DHKeyMaker(const DLGroup &_domain, QObject *parent = nullptr)
+        : QThread(parent)
+        , domain(_domain)
+        , result(nullptr)
+    {
+    }
 
     ~DHKeyMaker() override
     {
@@ -65,29 +69,50 @@ public:
     }
 };
 
-DHKey::DHKey(Provider *p) : DHContext(p)
+DHKey::DHKey(Provider *p)
+    : DHContext(p)
 {
     keymaker = nullptr;
     sec      = false;
 }
 
-DHKey::DHKey(const DHKey &from) : DHContext(from.provider()), evp(from.evp)
+DHKey::DHKey(const DHKey &from)
+    : DHContext(from.provider())
+    , evp(from.evp)
 {
     keymaker = nullptr;
     sec      = from.sec;
 }
 
-DHKey::~DHKey() { delete keymaker; }
+DHKey::~DHKey()
+{
+    delete keymaker;
+}
 
-Provider::Context *DHKey::clone() const { return new DHKey(*this); }
+Provider::Context *DHKey::clone() const
+{
+    return new DHKey(*this);
+}
 
-bool DHKey::isNull() const { return (evp.pkey ? false : true); }
+bool DHKey::isNull() const
+{
+    return (evp.pkey ? false : true);
+}
 
-PKey::Type DHKey::type() const { return PKey::DH; }
+PKey::Type DHKey::type() const
+{
+    return PKey::DH;
+}
 
-bool DHKey::isPrivate() const { return sec; }
+bool DHKey::isPrivate() const
+{
+    return sec;
+}
 
-bool DHKey::canExport() const { return true; }
+bool DHKey::canExport() const
+{
+    return true;
+}
 
 void DHKey::convertToPublic()
 {
@@ -110,7 +135,10 @@ void DHKey::convertToPublic()
     sec = false;
 }
 
-int DHKey::bits() const { return EVP_PKEY_bits(evp.pkey); }
+int DHKey::bits() const
+{
+    return EVP_PKEY_bits(evp.pkey);
+}
 
 SymmetricKey DHKey::deriveKey(const PKeyBase &theirs)
 {

@@ -60,9 +60,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void CertUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void CertUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void CertUnitTest::cleanupTestCase() { delete m_init; }
+void CertUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void CertUnitTest::nullCert()
 {
@@ -95,8 +101,8 @@ void CertUnitTest::noSuchFile()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultNoFile;
-            QCA::Certificate   cert = QCA::Certificate::fromPEMFile(QStringLiteral("thisIsJustaFileNameThatWeDontHave"),
-                                                                  &resultNoFile, provider);
+            QCA::Certificate   cert = QCA::Certificate::fromPEMFile(
+                QStringLiteral("thisIsJustaFileNameThatWeDontHave"), &resultNoFile, provider);
             QCOMPARE(resultNoFile, QCA::ErrorFile);
             QVERIFY(cert.isNull());
         }
@@ -114,8 +120,8 @@ void CertUnitTest::CAcertstest()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultca1;
-            QCA::Certificate   ca1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/RootCAcert.pem"), &resultca1, provider);
+            QCA::Certificate   ca1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/RootCAcert.pem"), &resultca1, provider);
 
             QCOMPARE(resultca1, QCA::ConvertGood);
             QCOMPARE(ca1.isNull(), false);
@@ -168,8 +174,8 @@ void CertUnitTest::qualitysslcatest()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultca1;
-            QCA::Certificate   ca1 = QCA::Certificate::fromPEMFile(QStringLiteral("certs/QualitySSLIntermediateCA.crt"),
-                                                                 &resultca1, provider);
+            QCA::Certificate   ca1 = QCA::Certificate::fromPEMFile(
+                QStringLiteral("certs/QualitySSLIntermediateCA.crt"), &resultca1, provider);
 
             QCOMPARE(resultca1, QCA::ConvertGood);
             QCOMPARE(ca1.isNull(), false);
@@ -222,8 +228,8 @@ void CertUnitTest::checkExpiredClientCerts()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultClient1;
-            QCA::Certificate   client1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/User.pem"), &resultClient1, provider);
+            QCA::Certificate   client1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/User.pem"), &resultClient1, provider);
             QCOMPARE(resultClient1, QCA::ConvertGood);
             QCOMPARE(client1.isNull(), false);
             QCOMPARE(client1.isCA(), false);
@@ -272,8 +278,8 @@ void CertUnitTest::checkExpiredClientCerts()
             QCOMPARE(issuer1.contains(QCA::Organization, QStringLiteral("InsecureTestCertificate")) == true, true);
             QCOMPARE(issuer1.contains(QCA::CommonName, QStringLiteral("For Tests Only")) == true, true);
 
-            QByteArray subjectKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("889E7EF729719D7B280F361AAE6D00D39DE1AADB")).toByteArray();
+            QByteArray subjectKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("889E7EF729719D7B280F361AAE6D00D39DE1AADB")).toByteArray();
             QCOMPARE(client1.subjectKeyId(), subjectKeyID);
             QCOMPARE(QCA::Hex().arrayToString(client1.issuerKeyId()),
                      QStringLiteral("bf53438278d09ec380e51b67ca0500dfb94883a5"));
@@ -296,8 +302,8 @@ void CertUnitTest::checkExpiredClientCerts()
             QCOMPARE(client1.validate(trusted, untrusted), QCA::ErrorInvalidCA);
 
             QCA::ConvertResult resultca1;
-            QCA::Certificate   ca1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/RootCAcert.pem"), &resultca1, provider);
+            QCA::Certificate   ca1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/RootCAcert.pem"), &resultca1, provider);
             QCOMPARE(resultca1, QCA::ConvertGood);
             trusted.addCertificate(ca1);
 
@@ -336,8 +342,8 @@ void CertUnitTest::checkClientCerts()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultClient2;
-            QCA::Certificate   client2 = QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestClientCert.pem"),
-                                                                     &resultClient2, provider);
+            QCA::Certificate   client2 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestClientCert.pem"), &resultClient2, provider);
             QCOMPARE(resultClient2, QCA::ConvertGood);
             QCOMPARE(client2.isNull(), false);
             QCOMPARE(client2.isCA(), false);
@@ -387,8 +393,8 @@ void CertUnitTest::checkClientCerts()
             QVERIFY(issuer2.contains(QCA::Organization, QStringLiteral("Qca Development and Test")));
             QVERIFY(issuer2.contains(QCA::CommonName, QStringLiteral("Qca Test Root Certificate")));
 
-            QByteArray subjectKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("1e604e03127d287ba40427a961b428a2d09b50d1")).toByteArray();
+            QByteArray subjectKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("1e604e03127d287ba40427a961b428a2d09b50d1")).toByteArray();
             QCOMPARE(client2.subjectKeyId(), subjectKeyID);
             QCOMPARE(QCA::Hex().arrayToString(client2.issuerKeyId()),
                      QStringLiteral("f61c451de1b0458138c60568c1a7cb0f7ade0363"));
@@ -411,8 +417,8 @@ void CertUnitTest::checkClientCerts()
             QCOMPARE(client2.validate(trusted, untrusted), QCA::ErrorInvalidCA);
 
             QCA::ConvertResult resultca2;
-            QCA::Certificate   ca2
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestRootCert.pem"), &resultca2, provider);
+            QCA::Certificate   ca2 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestRootCert.pem"), &resultca2, provider);
             QCOMPARE(resultca2, QCA::ConvertGood);
             trusted.addCertificate(ca2);
 
@@ -523,8 +529,8 @@ void CertUnitTest::altName()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultClient1;
-            QCA::Certificate   client1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/altname.pem"), &resultClient1, provider);
+            QCA::Certificate   client1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/altname.pem"), &resultClient1, provider);
             QCOMPARE(resultClient1, QCA::ConvertGood);
             QCOMPARE(client1.isNull(), false);
             QCOMPARE(client1.isCA(), false);
@@ -570,8 +576,8 @@ void CertUnitTest::altName()
             QVERIFY(issuer1.contains(QCA::Organization, QStringLiteral("Test Certificates")));
             QVERIFY(issuer1.contains(QCA::CommonName, QStringLiteral("nameConstraints RFC822 CA1")));
 
-            QByteArray subjectKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("b4200d42cd95ea87d463d54f0ed6d10fe5b73bfb")).toByteArray();
+            QByteArray subjectKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("b4200d42cd95ea87d463d54f0ed6d10fe5b73bfb")).toByteArray();
             QCOMPARE(client1.subjectKeyId(), subjectKeyID);
             QCOMPARE(QCA::Hex().arrayToString(client1.issuerKeyId()),
                      QStringLiteral("e37f857a8ea23b9eeeb8121d7913aac4bd2e59ad"));
@@ -603,8 +609,8 @@ void CertUnitTest::extXMPP()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultClient1;
-            QCA::Certificate   client1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/xmppcert.pem"), &resultClient1, provider);
+            QCA::Certificate   client1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/xmppcert.pem"), &resultClient1, provider);
             QCOMPARE(resultClient1, QCA::ConvertGood);
             QCOMPARE(client1.isNull(), false);
             QCOMPARE(client1.isCA(), false);
@@ -646,8 +652,8 @@ void CertUnitTest::altNames76()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultClient1;
-            QCA::Certificate   client1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/76.pem"), &resultClient1, provider);
+            QCA::Certificate   client1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/76.pem"), &resultClient1, provider);
             QCOMPARE(resultClient1, QCA::ConvertGood);
             QCOMPARE(client1.isNull(), false);
             QCOMPARE(client1.isCA(), false);
@@ -711,8 +717,8 @@ void CertUnitTest::altNames76()
             QVERIFY(issuer1.contains(QCA::URI, QStringLiteral("http://ca.su.se")));
             QVERIFY(issuer1.contains(QCA::Email, QStringLiteral("ca@su.se")));
 
-            QByteArray subjectKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("3a5c5cd1cc2c9edf73f73bd81b59b1eab83035c5")).toByteArray();
+            QByteArray subjectKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("3a5c5cd1cc2c9edf73f73bd81b59b1eab83035c5")).toByteArray();
             QCOMPARE(client1.subjectKeyId(), subjectKeyID);
             QCOMPARE(QCA::Hex().arrayToString(client1.issuerKeyId()),
                      QStringLiteral("9e2e30ba37d95144c99dbf1821f1bd7eeeb58648"));
@@ -781,8 +787,8 @@ void CertUnitTest::checkExpiredServerCerts()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultServer1;
-            QCA::Certificate   server1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/Server.pem"), &resultServer1, provider);
+            QCA::Certificate   server1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/Server.pem"), &resultServer1, provider);
             QCOMPARE(resultServer1, QCA::ConvertGood);
             QCOMPARE(server1.isNull(), false);
             QCOMPARE(server1.isCA(), false);
@@ -831,11 +837,11 @@ void CertUnitTest::checkExpiredServerCerts()
             QCOMPARE(issuer1.contains(QCA::Organization, QStringLiteral("InsecureTestCertificate")) == true, true);
             QCOMPARE(issuer1.contains(QCA::CommonName, QStringLiteral("For Tests Only")) == true, true);
 
-            QByteArray subjectKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("0234E2C906F6E0B44253BE04C0CBA7823A6DB509")).toByteArray();
+            QByteArray subjectKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("0234E2C906F6E0B44253BE04C0CBA7823A6DB509")).toByteArray();
             QCOMPARE(server1.subjectKeyId(), subjectKeyID);
-            QByteArray authorityKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("BF53438278D09EC380E51B67CA0500DFB94883A5")).toByteArray();
+            QByteArray authorityKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("BF53438278D09EC380E51B67CA0500DFB94883A5")).toByteArray();
             QCOMPARE(server1.issuerKeyId(), authorityKeyID);
 
             QCA::PublicKey pubkey1 = server1.subjectPublicKey();
@@ -856,8 +862,8 @@ void CertUnitTest::checkExpiredServerCerts()
             QCOMPARE(server1.validate(trusted, untrusted), QCA::ErrorInvalidCA);
 
             QCA::ConvertResult resultca1;
-            QCA::Certificate   ca1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/RootCAcert.pem"), &resultca1, provider);
+            QCA::Certificate   ca1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/RootCAcert.pem"), &resultca1, provider);
             QCOMPARE(resultca1, QCA::ConvertGood);
             trusted.addCertificate(ca1);
             QCOMPARE(server1.validate(trusted, untrusted), QCA::ErrorExpired);
@@ -889,8 +895,8 @@ void CertUnitTest::checkServerCerts()
             QWARN((QStringLiteral("Certificate handling not supported for ") + provider).toLocal8Bit().constData());
         else {
             QCA::ConvertResult resultServer1;
-            QCA::Certificate   server1 = QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestServerCert.pem"),
-                                                                     &resultServer1, provider);
+            QCA::Certificate   server1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestServerCert.pem"), &resultServer1, provider);
             QCOMPARE(resultServer1, QCA::ConvertGood);
             QCOMPARE(server1.isNull(), false);
             QCOMPARE(server1.isCA(), false);
@@ -941,11 +947,11 @@ void CertUnitTest::checkServerCerts()
             QVERIFY(issuer1.contains(QCA::OrganizationalUnit, QStringLiteral("Certificate Generation Section")));
             QVERIFY(issuer1.contains(QCA::CommonName, QStringLiteral("Qca Test Root Certificate")));
 
-            QByteArray subjectKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("819870c8b81eab53e72d0446b65790aa0d3eab1a")).toByteArray();
+            QByteArray subjectKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("819870c8b81eab53e72d0446b65790aa0d3eab1a")).toByteArray();
             QCOMPARE(server1.subjectKeyId(), subjectKeyID);
-            QByteArray authorityKeyID
-                = QCA::Hex().stringToArray(QStringLiteral("f61c451de1b0458138c60568c1a7cb0f7ade0363")).toByteArray();
+            QByteArray authorityKeyID =
+                QCA::Hex().stringToArray(QStringLiteral("f61c451de1b0458138c60568c1a7cb0f7ade0363")).toByteArray();
             QCOMPARE(server1.issuerKeyId(), authorityKeyID);
 
             QCA::PublicKey pubkey1 = server1.subjectPublicKey();
@@ -966,8 +972,8 @@ void CertUnitTest::checkServerCerts()
             QCOMPARE(server1.validate(trusted, untrusted), QCA::ErrorInvalidCA);
 
             QCA::ConvertResult resultca1;
-            QCA::Certificate   ca1
-                = QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestRootCert.pem"), &resultca1, provider);
+            QCA::Certificate   ca1 =
+                QCA::Certificate::fromPEMFile(QStringLiteral("certs/QcaTestRootCert.pem"), &resultca1, provider);
             QCOMPARE(resultca1, QCA::ConvertGood);
             trusted.addCertificate(ca1);
             QCOMPARE(server1.validate(trusted, untrusted), QCA::ValidityGood);
@@ -1150,8 +1156,8 @@ void CertUnitTest::csr()
             QCOMPARE(nullCSR, anotherNullCSR);
 
             QCA::ConvertResult      resultCsr;
-            QCA::CertificateRequest csr1
-                = QCA::CertificateRequest::fromPEMFile(QStringLiteral("certs/csr1.pem"), &resultCsr, provider);
+            QCA::CertificateRequest csr1 =
+                QCA::CertificateRequest::fromPEMFile(QStringLiteral("certs/csr1.pem"), &resultCsr, provider);
             QCOMPARE(resultCsr, QCA::ConvertGood);
             QCOMPARE(csr1.isNull(), false);
             QCOMPARE(csr1.provider()->name(), provider);
@@ -1195,8 +1201,8 @@ void CertUnitTest::csr2()
                       .constData());
         else {
             QCA::ConvertResult      resultCsr;
-            QCA::CertificateRequest csr1
-                = QCA::CertificateRequest::fromPEMFile(QStringLiteral("certs/newreq.pem"), &resultCsr, provider);
+            QCA::CertificateRequest csr1 =
+                QCA::CertificateRequest::fromPEMFile(QStringLiteral("certs/newreq.pem"), &resultCsr, provider);
             QCOMPARE(resultCsr, QCA::ConvertGood);
             QCOMPARE(csr1.isNull(), false);
             QCOMPARE(csr1.provider()->name(), provider);

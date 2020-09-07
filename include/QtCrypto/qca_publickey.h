@@ -694,8 +694,10 @@ if( pubkey.canVerify() )
 
        \return true if the signature is valid for the message
     */
-    bool verifyMessage(const MemoryRegion &a, const QByteArray &sig, SignatureAlgorithm alg,
-                       SignatureFormat format = DefaultFormat);
+    bool verifyMessage(const MemoryRegion &a,
+                       const QByteArray &  sig,
+                       SignatureAlgorithm  alg,
+                       SignatureFormat     format = DefaultFormat);
 
     /**
        Export the key in Distinguished Encoding Rules (DER) format
@@ -803,8 +805,8 @@ if (! QCA::ConvertGood == conversionResult)
 
        \note there is also a constructor form that can import from a file
     */
-    static PublicKey fromPEMFile(const QString &fileName, ConvertResult *result = nullptr,
-                                 const QString &provider = QString());
+    static PublicKey
+    fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 protected:
     /**
@@ -1030,8 +1032,9 @@ public:
        \sa fromPEM provides an inverse of toPEM, converting the PEM
        encoded key back to a PrivateKey
     */
-    bool toPEMFile(const QString &fileName, const SecureArray &passphrase = SecureArray(),
-                   PBEAlgorithm pbe = PBEDefault) const;
+    bool toPEMFile(const QString &    fileName,
+                   const SecureArray &passphrase = SecureArray(),
+                   PBEAlgorithm       pbe        = PBEDefault) const;
 
     /**
        Import the key from Distinguished Encoding Rules (DER) format
@@ -1051,8 +1054,10 @@ public:
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static PrivateKey fromDER(const SecureArray &a, const SecureArray &passphrase = SecureArray(),
-                              ConvertResult *result = nullptr, const QString &provider = QString());
+    static PrivateKey fromDER(const SecureArray &a,
+                              const SecureArray &passphrase = SecureArray(),
+                              ConvertResult *    result     = nullptr,
+                              const QString &    provider   = QString());
 
     /**
        Import the key from Privacy Enhanced Mail (PEM) format
@@ -1072,8 +1077,10 @@ public:
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static PrivateKey fromPEM(const QString &s, const SecureArray &passphrase = SecureArray(),
-                              ConvertResult *result = nullptr, const QString &provider = QString());
+    static PrivateKey fromPEM(const QString &    s,
+                              const SecureArray &passphrase = SecureArray(),
+                              ConvertResult *    result     = nullptr,
+                              const QString &    provider   = QString());
 
     /**
        Import the key in Privacy Enhanced Mail (PEM) format from a file
@@ -1097,8 +1104,10 @@ public:
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static PrivateKey fromPEMFile(const QString &fileName, const SecureArray &passphrase = SecureArray(),
-                                  ConvertResult *result = nullptr, const QString &provider = QString());
+    static PrivateKey fromPEMFile(const QString &    fileName,
+                                  const SecureArray &passphrase = SecureArray(),
+                                  ConvertResult *    result     = nullptr,
+                                  const QString &    provider   = QString());
 
 protected:
     /**
@@ -1334,8 +1343,12 @@ public:
        \param provider the provider to use, if a particular provider is
        required
     */
-    RSAPrivateKey(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q,
-                  const BigInteger &d, const QString &provider = QString());
+    RSAPrivateKey(const BigInteger &n,
+                  const BigInteger &e,
+                  const BigInteger &p,
+                  const BigInteger &q,
+                  const BigInteger &d,
+                  const QString &   provider = QString());
 
     /**
        The public key value

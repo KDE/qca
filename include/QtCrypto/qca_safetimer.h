@@ -58,8 +58,12 @@ protected:
 
 private:
     // Functions is used internally. Outer world mustn't have access them.
-    void startTimer() { }
-    void killTimer(int) { }
+    void startTimer()
+    {
+    }
+    void killTimer(int)
+    {
+    }
 
     class Private;
     Private *d;

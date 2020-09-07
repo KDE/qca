@@ -38,17 +38,39 @@ class TestClass1 : public QObject
 
 public:
     TestClass1() {};
-    TestClass1(const TestClass1 &) : QObject(nullptr) {};
+    TestClass1(const TestClass1 &)
+        : QObject(nullptr) {};
 
 public Q_SLOTS:
-    void       voidMethod() {};
-    QString    qstringMethod() { return QString(); };
-    bool       boolMethod(const QString &) { return true; };
-    QString    returnArg(const QString &s) { return s; };
-    QByteArray returnArg(const QByteArray &a) { return a; };
-    QString    returnRepeatArg(const QString &s) { return QString(s + s); };
-    QString    tenArgs(const QString &s, int, int, int, int, int, int, int, int, int) { return QString(s); };
-    QString    elevenArgs(const QString &s, int, int, int, int, int, int, int, int, int, int) { return QString(s); };
+    void    voidMethod() {};
+    QString qstringMethod()
+    {
+        return QString();
+    };
+    bool boolMethod(const QString &)
+    {
+        return true;
+    };
+    QString returnArg(const QString &s)
+    {
+        return s;
+    };
+    QByteArray returnArg(const QByteArray &a)
+    {
+        return a;
+    };
+    QString returnRepeatArg(const QString &s)
+    {
+        return QString(s + s);
+    };
+    QString tenArgs(const QString &s, int, int, int, int, int, int, int, int, int)
+    {
+        return QString(s);
+    };
+    QString elevenArgs(const QString &s, int, int, int, int, int, int, int, int, int, int)
+    {
+        return QString(s);
+    };
 };
 
 Q_DECLARE_METATYPE(TestClass1)
@@ -67,7 +89,10 @@ private:
     QCA::Initializer *m_init;
 };
 
-void MetaTypeUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void MetaTypeUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
 void MetaTypeUnitTest::cleanupTestCase()
 {

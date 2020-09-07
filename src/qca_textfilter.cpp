@@ -26,11 +26,20 @@ namespace QCA {
 //----------------------------------------------------------------------------
 // TextFilter
 //----------------------------------------------------------------------------
-TextFilter::TextFilter(Direction dir) { setup(dir); }
+TextFilter::TextFilter(Direction dir)
+{
+    setup(dir);
+}
 
-void TextFilter::setup(Direction dir) { _dir = dir; }
+void TextFilter::setup(Direction dir)
+{
+    _dir = dir;
+}
 
-Direction TextFilter::direction() const { return _dir; }
+Direction TextFilter::direction() const
+{
+    return _dir;
+}
 
 MemoryRegion TextFilter::encode(const MemoryRegion &a)
 {
@@ -44,7 +53,10 @@ MemoryRegion TextFilter::decode(const MemoryRegion &a)
     return process(a);
 }
 
-QString TextFilter::arrayToString(const MemoryRegion &a) { return QString::fromLatin1(encode(a).toByteArray()); }
+QString TextFilter::arrayToString(const MemoryRegion &a)
+{
+    return QString::fromLatin1(encode(a).toByteArray());
+}
 
 MemoryRegion TextFilter::stringToArray(const QString &s)
 {
@@ -53,9 +65,15 @@ MemoryRegion TextFilter::stringToArray(const QString &s)
     return decode(s.toLatin1());
 }
 
-QString TextFilter::encodeString(const QString &s) { return arrayToString(s.toUtf8()); }
+QString TextFilter::encodeString(const QString &s)
+{
+    return arrayToString(s.toUtf8());
+}
 
-QString TextFilter::decodeString(const QString &s) { return QString::fromUtf8(stringToArray(s).toByteArray()); }
+QString TextFilter::decodeString(const QString &s)
+{
+    return QString::fromUtf8(stringToArray(s).toByteArray());
+}
 
 //----------------------------------------------------------------------------
 // Hex
@@ -82,7 +100,11 @@ static int dehex(char c)
         return -1;
 }
 
-Hex::Hex(Direction dir) : TextFilter(dir) { clear(); }
+Hex::Hex(Direction dir)
+    : TextFilter(dir)
+{
+    clear();
+}
 
 void Hex::clear()
 {
@@ -163,12 +185,16 @@ MemoryRegion Hex::final()
     return MemoryRegion();
 }
 
-bool Hex::ok() const { return _ok; }
+bool Hex::ok() const
+{
+    return _ok;
+}
 
 //----------------------------------------------------------------------------
 // Base64
 //----------------------------------------------------------------------------
-Base64::Base64(Direction dir) : TextFilter(dir)
+Base64::Base64(Direction dir)
+    : TextFilter(dir)
 {
     _lb_enabled = false;
     _lb_column  = 76;
@@ -181,11 +207,20 @@ void Base64::clear()
     col = 0;
 }
 
-bool Base64::lineBreaksEnabled() const { return _lb_enabled; }
+bool Base64::lineBreaksEnabled() const
+{
+    return _lb_enabled;
+}
 
-int Base64::lineBreaksColumn() const { return _lb_column; }
+int Base64::lineBreaksColumn() const
+{
+    return _lb_column;
+}
 
-void Base64::setLineBreaksEnabled(bool b) { _lb_enabled = b; }
+void Base64::setLineBreaksEnabled(bool b)
+{
+    _lb_enabled = b;
+}
 
 void Base64::setLineBreaksColumn(int column)
 {
@@ -198,16 +233,17 @@ void Base64::setLineBreaksColumn(int column)
 static QByteArray b64encode(const QByteArray &s)
 {
     int               i;
-    const int         len   = s.size();
-    static const char tbl[] = "ABCDEFGH"
-                              "IJKLMNOP"
-                              "QRSTUVWX"
-                              "YZabcdef"
-                              "ghijklmn"
-                              "opqrstuv"
-                              "wxyz0123"
-                              "456789+/"
-                              "=";
+    const int         len = s.size();
+    static const char tbl[] =
+        "ABCDEFGH"
+        "IJKLMNOP"
+        "QRSTUVWX"
+        "YZabcdef"
+        "ghijklmn"
+        "opqrstuv"
+        "wxyz0123"
+        "456789+/"
+        "=";
     int a, b, c;
 
     QByteArray p((len + 2) / 3 * 4, 0);
@@ -373,7 +409,10 @@ static QByteArray remove_linebreaks(const QByteArray &s)
     return out;
 }
 
-static void appendArray(QByteArray *a, const QByteArray &b) { a->append(b); }
+static void appendArray(QByteArray *a, const QByteArray &b)
+{
+    a->append(b);
+}
 
 MemoryRegion Base64::update(const MemoryRegion &m)
 {
@@ -438,6 +477,9 @@ MemoryRegion Base64::final()
     }
 }
 
-bool Base64::ok() const { return _ok; }
+bool Base64::ok() const
+{
+    return _ok;
+}
 
 }

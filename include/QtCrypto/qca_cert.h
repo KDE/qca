@@ -225,7 +225,10 @@ public:
        \param other the certificate information to compare with this
        certificate information.
     */
-    inline bool operator!=(const CertificateInfoType &other) const { return !(*this == other); }
+    inline bool operator!=(const CertificateInfoType &other) const
+    {
+        return !(*this == other);
+    }
 
 private:
     class Private;
@@ -295,7 +298,10 @@ public:
        \param other the certificate information pair to compare with this
        certificate information pair.
     */
-    inline bool operator!=(const CertificateInfoPair &other) const { return !(*this == other); }
+    inline bool operator!=(const CertificateInfoPair &other) const
+    {
+        return !(*this == other);
+    }
 
 private:
     class Private;
@@ -460,7 +466,10 @@ public:
 
        \param other the constraint type to compare with this constraint
     */
-    inline bool operator!=(const ConstraintType &other) const { return !(*this == other); }
+    inline bool operator!=(const ConstraintType &other) const
+    {
+        return !(*this == other);
+    }
 
 private:
     class Private;
@@ -566,9 +575,15 @@ QCA_EXPORT QString orderedToDNString(const CertificateInfoOrdered &in);
 */
 QCA_EXPORT CertificateInfoOrdered orderedDNOnly(const CertificateInfoOrdered &in);
 
-inline QString CertificateInfoOrdered::toString() const { return orderedToDNString(*this); }
+inline QString CertificateInfoOrdered::toString() const
+{
+    return orderedToDNString(*this);
+}
 
-inline CertificateInfoOrdered CertificateInfoOrdered::dnOnly() const { return orderedDNOnly(*this); }
+inline CertificateInfoOrdered CertificateInfoOrdered::dnOnly() const
+{
+    return orderedDNOnly(*this);
+}
 
 /**
    %Certificate constraints type
@@ -1064,8 +1079,10 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 
        \note This function may block
     */
-    Validity validate(const CertificateCollection &trusted, const CertificateCollection &untrusted,
-                      UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
+    Validity validate(const CertificateCollection &trusted,
+                      const CertificateCollection &untrusted,
+                      UsageMode                    u  = UsageAny,
+                      ValidateFlags                vf = ValidateAll) const;
 
     /**
      * Computes hash from the entire certificate in DER format
@@ -1107,8 +1124,8 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
        \return the Certificate corresponding to the certificate in the
        provided array
     */
-    static Certificate fromDER(const QByteArray &a, ConvertResult *result = nullptr,
-                               const QString &provider = QString());
+    static Certificate
+    fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        Import the certificate from PEM format
@@ -1137,8 +1154,8 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
        \return the Certificate corresponding to the certificate in the
        provided string
     */
-    static Certificate fromPEMFile(const QString &fileName, ConvertResult *result = nullptr,
-                                   const QString &provider = QString());
+    static Certificate
+    fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        Test if the subject of the certificate matches a specified host
@@ -1168,7 +1185,10 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
 
        \param other the certificate to compare this certificate with
     */
-    inline bool operator!=(const Certificate &other) const { return !(*this == other); }
+    inline bool operator!=(const Certificate &other) const
+    {
+        return !(*this == other);
+    }
 
     /**
        \internal
@@ -1183,10 +1203,13 @@ private:
     QSharedDataPointer<Private> d;
 
     friend class CertificateChain;
-    Validity         chain_validate(const CertificateChain &chain, const CertificateCollection &trusted,
-                                    const QList<CRL> &untrusted_crls, UsageMode u, ValidateFlags vf) const;
-    CertificateChain chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers,
-                                    Validity *result) const;
+    Validity chain_validate(const CertificateChain &     chain,
+                            const CertificateCollection &trusted,
+                            const QList<CRL> &           untrusted_crls,
+                            UsageMode                    u,
+                            ValidateFlags                vf) const;
+    CertificateChain
+    chain_complete(const CertificateChain &chain, const QList<Certificate> &issuers, Validity *result) const;
 };
 
 /**
@@ -1217,7 +1240,9 @@ public:
     /**
        Create an empty certificate chain
     */
-    inline CertificateChain() { }
+    inline CertificateChain()
+    {
+    }
 
     /**
        Create a certificate chain, starting at the specified certificate
@@ -1225,12 +1250,18 @@ public:
        \param primary the end-user certificate that forms one end of the
        chain
     */
-    inline CertificateChain(const Certificate &primary) { append(primary); }
+    inline CertificateChain(const Certificate &primary)
+    {
+        append(primary);
+    }
 
     /**
        Return the primary (end-user) Certificate
     */
-    inline const Certificate &primary() const { return first(); }
+    inline const Certificate &primary() const
+    {
+        return first();
+    }
 
     /**
        Check the validity of a certificate chain
@@ -1245,8 +1276,10 @@ public:
 
        \sa Certificate::validate()
     */
-    inline Validity validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls = QList<CRL>(),
-                             UsageMode u = UsageAny, ValidateFlags vf = ValidateAll) const;
+    inline Validity validate(const CertificateCollection &trusted,
+                             const QList<CRL> &           untrusted_crls = QList<CRL>(),
+                             UsageMode                    u              = UsageAny,
+                             ValidateFlags                vf             = ValidateAll) const;
 
     /**
        Complete a certificate chain for the primary certificate, using the
@@ -1275,8 +1308,10 @@ public:
                                      Validity *                result  = nullptr) const;
 };
 
-inline Validity CertificateChain::validate(const CertificateCollection &trusted, const QList<CRL> &untrusted_crls,
-                                           UsageMode u, ValidateFlags vf) const
+inline Validity CertificateChain::validate(const CertificateCollection &trusted,
+                                           const QList<CRL> &           untrusted_crls,
+                                           UsageMode                    u,
+                                           ValidateFlags                vf) const
 {
     if (isEmpty())
         return ErrorValidityUnknown;
@@ -1447,7 +1482,10 @@ public:
 
        \param other the certificate request to be compared to this certificate request
     */
-    inline bool operator!=(const CertificateRequest &other) const { return !(*this == other); }
+    inline bool operator!=(const CertificateRequest &other) const
+    {
+        return !(*this == other);
+    }
 
     /**
        Export the Certificate Request into a DER format
@@ -1486,8 +1524,8 @@ public:
 
        \note this only applies to PKCS#10 format certificate requests
     */
-    static CertificateRequest fromDER(const QByteArray &a, ConvertResult *result = nullptr,
-                                      const QString &provider = QString());
+    static CertificateRequest
+    fromDER(const QByteArray &a, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        Import the certificate request from PEM format
@@ -1504,8 +1542,8 @@ public:
 
        \note this only applies to PKCS#10 format certificate requests
     */
-    static CertificateRequest fromPEM(const QString &s, ConvertResult *result = nullptr,
-                                      const QString &provider = QString());
+    static CertificateRequest
+    fromPEM(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        Import the certificate request from a file
@@ -1522,8 +1560,8 @@ public:
 
        \note this only applies to PKCS#10 format certificate requests
     */
-    static CertificateRequest fromPEMFile(const QString &fileName, ConvertResult *result = nullptr,
-                                          const QString &provider = QString());
+    static CertificateRequest
+    fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        Export the CertificateRequest to a string
@@ -1548,8 +1586,8 @@ public:
 
        \note this only applies to SPKAC format certificate requests
     */
-    static CertificateRequest fromString(const QString &s, ConvertResult *result = nullptr,
-                                         const QString &provider = QString());
+    static CertificateRequest
+    fromString(const QString &s, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        \internal
@@ -1676,7 +1714,10 @@ public:
 
        \param other the CRL entry to be compared to this CRL entry.
     */
-    inline bool operator!=(const CRLEntry &other) const { return !(*this == other); }
+    inline bool operator!=(const CRLEntry &other) const
+    {
+        return !(*this == other);
+    }
 
 private:
     BigInteger _serial;
@@ -1802,7 +1843,10 @@ public:
 
        \param other the CRL to be compared to this CRL
     */
-    inline bool operator!=(const CRL &other) const { return !(*this == other); }
+    inline bool operator!=(const CRL &other) const
+    {
+        return !(*this == other);
+    }
 
     /**
        Export the %Certificate Revocation List (CRL) in DER format
@@ -1864,8 +1908,8 @@ public:
 
        \return the CRL in the file
     */
-    static CRL fromPEMFile(const QString &fileName, ConvertResult *result = nullptr,
-                           const QString &provider = QString());
+    static CRL
+    fromPEMFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        \internal
@@ -2010,8 +2054,8 @@ public:
        \return the CertificateCollection corresponding to the contents of
        the file specified in fileName
     */
-    static CertificateCollection fromFlatTextFile(const QString &fileName, ConvertResult *result = nullptr,
-                                                  const QString &provider = QString());
+    static CertificateCollection
+    fromFlatTextFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
     /**
        import a CertificateCollection from a PKCS#7 file
@@ -2026,8 +2070,8 @@ public:
        \return the CertificateCollection corresponding to the contents of
        the file specified in fileName
     */
-    static CertificateCollection fromPKCS7File(const QString &fileName, ConvertResult *result = nullptr,
-                                               const QString &provider = QString());
+    static CertificateCollection
+    fromPKCS7File(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 private:
     class Private;
@@ -2312,8 +2356,10 @@ else
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static KeyBundle fromArray(const QByteArray &a, const SecureArray &passphrase = SecureArray(),
-                               ConvertResult *result = nullptr, const QString &provider = QString());
+    static KeyBundle fromArray(const QByteArray & a,
+                               const SecureArray &passphrase = SecureArray(),
+                               ConvertResult *    result     = nullptr,
+                               const QString &    provider   = QString());
 
     /**
        Import the key bundle from a file in PKCS12 (.p12) format
@@ -2345,8 +2391,10 @@ else
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static KeyBundle fromFile(const QString &fileName, const SecureArray &passphrase = SecureArray(),
-                              ConvertResult *result = nullptr, const QString &provider = QString());
+    static KeyBundle fromFile(const QString &    fileName,
+                              const SecureArray &passphrase = SecureArray(),
+                              ConvertResult *    result     = nullptr,
+                              const QString &    provider   = QString());
 
 private:
     class Private;
@@ -2526,8 +2574,8 @@ public:
        \param provider the provider to use, if a particular provider is
        required
     */
-    static PGPKey fromFile(const QString &fileName, ConvertResult *result = nullptr,
-                           const QString &provider = QString());
+    static PGPKey
+    fromFile(const QString &fileName, ConvertResult *result = nullptr, const QString &provider = QString());
 
 private:
     class Private;

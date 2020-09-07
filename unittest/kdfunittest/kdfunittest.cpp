@@ -63,7 +63,10 @@ void KDFUnitTest::initTestCase()
         providersToTest << provider->name();
 }
 
-void KDFUnitTest::cleanupTestCase() { delete m_init; }
+void KDFUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void KDFUnitTest::pbkdf1md2Tests_data()
 {
@@ -107,8 +110,8 @@ void KDFUnitTest::pbkdf1md2Tests()
             anyProviderTested                  = true;
             QCA::SecureArray          password = QCA::hexToArray(secret);
             QCA::InitializationVector iv(QCA::hexToArray(salt));
-            QCA::SymmetricKey         key
-                = QCA::PBKDF1(QStringLiteral("md2"), provider).makeKey(password, iv, outputLength, iterationCount);
+            QCA::SymmetricKey         key =
+                QCA::PBKDF1(QStringLiteral("md2"), provider).makeKey(password, iv, outputLength, iterationCount);
             QCOMPARE(QCA::arrayToHex(key.toByteArray()), output);
         }
     }
@@ -248,8 +251,9 @@ void KDFUnitTest::pbkdf2Tests_data()
                        << static_cast<unsigned int>(100);
 
     QTest::newRow("9") << QStringLiteral("67777278707178756d7364736d626d6866686d666463766c63766e677a6b6967")
-                       << QStringLiteral("4c9db7ba24955225d5b845f65ef24ef1b0c6e86f2e39c8ddaa4b8abd26082d1f350381fadeaeb"
-                                         "560dc447afc68a6b47e6ea1e7412f6cf7b2d82342fccd11d3b4")
+                       << QStringLiteral(
+                              "4c9db7ba24955225d5b845f65ef24ef1b0c6e86f2e39c8ddaa4b8abd26082d1f350381fadeaeb"
+                              "560dc447afc68a6b47e6ea1e7412f6cf7b2d82342fccd11d3b4")
                        << QStringLiteral("a39b76c6eec8374a11493ad08c246a3e40dfae5064f4ee3489c273646178")
                        << static_cast<unsigned int>(64) << static_cast<unsigned int>(1000);
 }
@@ -310,8 +314,8 @@ void KDFUnitTest::pbkdf2extraTests()
                 QCA::InitializationVector salt(QCA::SecureArray("what do ya want for nothing?"));
                 QCA::SecureArray          password("Jefe");
                 int                       iterations = 1000;
-                QCA::SymmetricKey         passwordOut
-                    = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                QCA::SymmetricKey         passwordOut =
+                    QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                 QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                          QStringLiteral("6349e09cb6b8c1485cfa9780ee3264df"));
             }
@@ -321,8 +325,8 @@ void KDFUnitTest::pbkdf2extraTests()
                 QCA::InitializationVector salt(QCA::SecureArray("ATHENA.MIT.EDUraeburn"));
                 QCA::SecureArray          password("password");
                 int                       iterations = 1;
-                QCA::SymmetricKey         passwordOut
-                    = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                QCA::SymmetricKey         passwordOut =
+                    QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                 QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                          QStringLiteral("cdedb5281bb2f801565a1122b2563515"));
                 passwordOut = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 32, iterations);
@@ -335,8 +339,8 @@ void KDFUnitTest::pbkdf2extraTests()
                 QCA::InitializationVector salt(QCA::SecureArray("ATHENA.MIT.EDUraeburn"));
                 QCA::SecureArray          password("password");
                 int                       iterations = 2;
-                QCA::SymmetricKey         passwordOut
-                    = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                QCA::SymmetricKey         passwordOut =
+                    QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                 QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                          QStringLiteral("01dbee7f4a9e243e988b62c73cda935d"));
                 passwordOut = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 32, iterations);
@@ -349,8 +353,8 @@ void KDFUnitTest::pbkdf2extraTests()
                 QCA::InitializationVector salt(QCA::SecureArray("ATHENA.MIT.EDUraeburn"));
                 QCA::SecureArray          password("password");
                 int                       iterations = 1200;
-                QCA::SymmetricKey         passwordOut
-                    = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                QCA::SymmetricKey         passwordOut =
+                    QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                 QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                          QStringLiteral("5c08eb61fdf71e4e4ec3cf6ba1f5512b"));
                 passwordOut = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 32, iterations);
@@ -363,8 +367,8 @@ void KDFUnitTest::pbkdf2extraTests()
                 QCA::InitializationVector salt(QCA::hexToArray(QStringLiteral("1234567878563412")));
                 QCA::SecureArray          password("password");
                 int                       iterations = 5;
-                QCA::SymmetricKey         passwordOut
-                    = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                QCA::SymmetricKey         passwordOut =
+                    QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                 QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                          QStringLiteral("d1daa78615f287e6a1c8b120d7062a49"));
                 passwordOut = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 32, iterations);
@@ -379,8 +383,8 @@ void KDFUnitTest::pbkdf2extraTests()
                 QCA::InitializationVector salt(QCA::SecureArray("pass phrase equals block size"));
                 QCA::SecureArray          password("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                 int                       iterations = 1200;
-                QCA::SymmetricKey         passwordOut
-                    = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                QCA::SymmetricKey         passwordOut =
+                    QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                 QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                          QStringLiteral("139c30c0966bc32ba55fdbf212530ac9"));
                 passwordOut = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 32, iterations);
@@ -394,8 +398,8 @@ void KDFUnitTest::pbkdf2extraTests()
                     QCA::InitializationVector salt(QCA::SecureArray("pass phrase exceeds block size"));
                     QCA::SecureArray  password("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                     int               iterations = 1200;
-                    QCA::SymmetricKey passwordOut
-                        = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                    QCA::SymmetricKey passwordOut =
+                        QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                     QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                              QStringLiteral("9ccad6d468770cd51b10e6a68721be61"));
                     passwordOut = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 32, iterations);
@@ -414,8 +418,8 @@ void KDFUnitTest::pbkdf2extraTests()
                 QCA::InitializationVector salt(QCA::SecureArray("EXAMPLE.COMpianist"));
                 QCA::SecureArray          password(QCA::hexToArray(QStringLiteral("f09d849e")));
                 int                       iterations = 50;
-                QCA::SymmetricKey         passwordOut
-                    = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
+                QCA::SymmetricKey         passwordOut =
+                    QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 16, iterations);
                 QCOMPARE(QCA::arrayToHex(passwordOut.toByteArray()),
                          QStringLiteral("6b9cf26d45455a43a5b8bb276a403b39"));
                 passwordOut = QCA::PBKDF2(QStringLiteral("sha1"), provider).makeKey(password, salt, 32, iterations);
@@ -440,14 +444,18 @@ void KDFUnitTest::hkdfTests_data()
                               "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865");
 
     QTest::newRow("2")
-        << QStringLiteral("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d"
-                          "2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f")
-        << QStringLiteral("606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d"
-                          "8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf")
-        << QStringLiteral("b0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdd"
-                          "dedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff")
-        << QStringLiteral("b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e59"
-                          "0e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87");
+        << QStringLiteral(
+               "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d"
+               "2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f")
+        << QStringLiteral(
+               "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d"
+               "8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf")
+        << QStringLiteral(
+               "b0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdd"
+               "dedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff")
+        << QStringLiteral(
+               "b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e59"
+               "0e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87");
 
     QTest::newRow("3") << QStringLiteral("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b") << QString() << QString()
                        << QStringLiteral(

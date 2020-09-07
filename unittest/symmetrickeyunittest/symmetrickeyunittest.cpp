@@ -45,9 +45,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void SymmetricKeyUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void SymmetricKeyUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void SymmetricKeyUnitTest::cleanupTestCase() { delete m_init; }
+void SymmetricKeyUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void SymmetricKeyUnitTest::test1()
 {

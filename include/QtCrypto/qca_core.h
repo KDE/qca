@@ -708,17 +708,28 @@ public:
        \param multiple the number of bytes that the key must be a
        multiple of.
     */
-    KeyLength(int min, int max, int multiple) : _min(min), _max(max), _multiple(multiple) { }
+    KeyLength(int min, int max, int multiple)
+        : _min(min)
+        , _max(max)
+        , _multiple(multiple)
+    {
+    }
 
     /**
        Obtain the minimum length for the key, in bytes
     */
-    int minimum() const { return _min; }
+    int minimum() const
+    {
+        return _min;
+    }
 
     /**
        Obtain the maximum length for the key, in bytes
     */
-    int maximum() const { return _max; }
+    int maximum() const
+    {
+        return _max;
+    }
 
     /**
        Return the number of bytes that the key must be a multiple of
@@ -726,7 +737,10 @@ public:
        If this is one, then anything between minimum and maximum (inclusive)
        is acceptable.
     */
-    int multiple() const { return _multiple; }
+    int multiple() const
+    {
+        return _multiple;
+    }
 
 private:
     const int _min, _max, _multiple;
@@ -1508,8 +1522,10 @@ public:
        information is required for
        \param ptr opaque data
     */
-    void setPasswordKeyStore(PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry,
-                             void *ptr);
+    void setPasswordKeyStore(PasswordStyle        pstyle,
+                             const KeyStoreInfo & keyStoreInfo,
+                             const KeyStoreEntry &keyStoreEntry,
+                             void *               ptr);
 
     /**
        Set the values for this Event
@@ -1664,8 +1680,8 @@ public:
        information is required for (if applicable)
        \param ptr opaque data
     */
-    void ask(Event::PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry,
-             void *ptr);
+    void
+    ask(Event::PasswordStyle pstyle, const KeyStoreInfo &keyStoreInfo, const KeyStoreEntry &keyStoreEntry, void *ptr);
 
     /**
        queue a password / passphrase request associated with a file

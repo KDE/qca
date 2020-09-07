@@ -45,9 +45,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void KeyGenUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void KeyGenUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void KeyGenUnitTest::cleanupTestCase() { delete m_init; }
+void KeyGenUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void KeyGenUnitTest::testRSA()
 {
@@ -55,8 +61,8 @@ void KeyGenUnitTest::testRSA()
     QCOMPARE(keygen.isBusy(), false);
     QCOMPARE(keygen.blockingEnabled(), true);
 
-    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA)
-        || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::RSA) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::RSA))
         QSKIP("RSA not supported!");
 
     QCA::PrivateKey    priv1 = keygen.createRSA(1024, 65537);
@@ -84,8 +90,8 @@ void KeyGenUnitTest::testDSA()
     QCOMPARE(keygen.isBusy(), false);
     QCOMPARE(keygen.blockingEnabled(), true);
 
-    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA)
-        || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DSA) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DSA))
         QSKIP("DSA not supported!");
 
     QCA::DLGroup       group;
@@ -123,8 +129,8 @@ void KeyGenUnitTest::testDH()
     QCOMPARE(keygen.isBusy(), false);
     QCOMPARE(keygen.blockingEnabled(), true);
 
-    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DH)
-        || !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DH))
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DH) ||
+        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DH))
         QSKIP("DH not supported!");
 
     QCA::DLGroup      group = keygen.createDLGroup(QCA::IETF_1024);

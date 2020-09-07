@@ -38,7 +38,8 @@ class PassphraseHandler : public QObject
 public:
     QCA::EventHandler handler;
 
-    PassphraseHandler(QObject *parent = nullptr) : QObject(parent)
+    PassphraseHandler(QObject *parent = nullptr)
+        : QObject(parent)
     {
         connect(&handler, &QCA::EventHandler::eventReady, this, &PassphraseHandler::eh_eventReady);
         handler.start();
@@ -66,10 +67,16 @@ public:
     QCA::KeyLoader keyLoader;
     QString        str;
 
-    App() { connect(&keyLoader, &QCA::KeyLoader::finished, this, &App::kl_finished); }
+    App()
+    {
+        connect(&keyLoader, &QCA::KeyLoader::finished, this, &App::kl_finished);
+    }
 
 public Q_SLOTS:
-    void start() { keyLoader.loadPrivateKeyFromPEMFile(str); }
+    void start()
+    {
+        keyLoader.loadPrivateKeyFromPEMFile(str);
+    }
 
 Q_SIGNALS:
     void quit();

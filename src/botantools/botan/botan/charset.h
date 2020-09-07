@@ -26,9 +26,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Character Set Handling Header File             *
-* (C) 1999-2007 The Botan Project                *
-*************************************************/
+ * Character Set Handling Header File             *
+ * (C) 1999-2007 The Botan Project                *
+ *************************************************/
 
 #ifndef BOTAN_CHARSET_H__
 #define BOTAN_CHARSET_H__
@@ -48,26 +48,27 @@ namespace QCA { // WRAPNS_LINE
 namespace Botan {
 
 /*************************************************
-* Character Set Transcoder Interface             *
-*************************************************/
+ * Character Set Transcoder Interface             *
+ *************************************************/
 #ifndef BOTAN_TOOLS_ONLY
 class Charset_Transcoder
-   {
-   public:
-      virtual std::string transcode(const std::string&,
-                                    Character_Set, Character_Set) const = 0;
+{
+public:
+    virtual std::string transcode(const std::string &, Character_Set, Character_Set) const = 0;
 
-      virtual ~Charset_Transcoder() {}
-   };
+    virtual ~Charset_Transcoder()
+    {
+    }
+};
 #endif
 
 namespace Charset {
 
 /*************************************************
-* Character Set Handling                         *
-*************************************************/
+ * Character Set Handling                         *
+ *************************************************/
 #ifndef BOTAN_TOOLS_ONLY
-std::string transcode(const std::string&, Character_Set, Character_Set);
+std::string transcode(const std::string &, Character_Set, Character_Set);
 #endif
 
 bool is_digit(char);

@@ -93,20 +93,37 @@ static QStringList get_types(QStringList (*get_func)(Provider *p), const QString
     return out;
 }
 
-static QStringList supportedHashTypes(const QString &provider) { return get_types(get_hash_types, provider); }
+static QStringList supportedHashTypes(const QString &provider)
+{
+    return get_types(get_hash_types, provider);
+}
 
-static QStringList supportedCipherTypes(const QString &provider) { return get_types(get_cipher_types, provider); }
+static QStringList supportedCipherTypes(const QString &provider)
+{
+    return get_types(get_cipher_types, provider);
+}
 
-static QStringList supportedMACTypes(const QString &provider) { return get_types(get_mac_types, provider); }
+static QStringList supportedMACTypes(const QString &provider)
+{
+    return get_types(get_mac_types, provider);
+}
 
 //----------------------------------------------------------------------------
 // Random
 //----------------------------------------------------------------------------
-Random::Random(const QString &provider) : Algorithm(QStringLiteral("random"), provider) { }
+Random::Random(const QString &provider)
+    : Algorithm(QStringLiteral("random"), provider)
+{
+}
 
-Random::Random(const Random &from) : Algorithm(from) { }
+Random::Random(const Random &from)
+    : Algorithm(from)
+{
+}
 
-Random::~Random() { }
+Random::~Random()
+{
+}
 
 Random &Random::operator=(const Random &from)
 {
@@ -114,9 +131,15 @@ Random &Random::operator=(const Random &from)
     return *this;
 }
 
-uchar Random::nextByte() { return (uchar)(nextBytes(1)[0]); }
+uchar Random::nextByte()
+{
+    return (uchar)(nextBytes(1)[0]);
+}
 
-SecureArray Random::nextBytes(int size) { return static_cast<RandomContext *>(context())->nextBytes(size); }
+SecureArray Random::nextBytes(int size)
+{
+    return static_cast<RandomContext *>(context())->nextBytes(size);
+}
 
 uchar Random::randomChar()
 {
@@ -142,11 +165,20 @@ SecureArray Random::randomArray(int size)
 //----------------------------------------------------------------------------
 // Hash
 //----------------------------------------------------------------------------
-Hash::Hash(const QString &type, const QString &provider) : Algorithm(type, provider) { }
+Hash::Hash(const QString &type, const QString &provider)
+    : Algorithm(type, provider)
+{
+}
 
-Hash::Hash(const Hash &from) : Algorithm(from), BufferedComputation(from) { }
+Hash::Hash(const Hash &from)
+    : Algorithm(from)
+    , BufferedComputation(from)
+{
+}
 
-Hash::~Hash() { }
+Hash::~Hash()
+{
+}
 
 Hash &Hash::operator=(const Hash &from)
 {
@@ -154,7 +186,10 @@ Hash &Hash::operator=(const Hash &from)
     return *this;
 }
 
-QStringList Hash::supportedTypes(const QString &provider) { return supportedHashTypes(provider); }
+QStringList Hash::supportedTypes(const QString &provider)
+{
+    return supportedHashTypes(provider);
+}
 
 QString Hash::type() const
 {
@@ -162,11 +197,20 @@ QString Hash::type() const
     return Algorithm::type();
 }
 
-void Hash::clear() { static_cast<HashContext *>(context())->clear(); }
+void Hash::clear()
+{
+    static_cast<HashContext *>(context())->clear();
+}
 
-void Hash::update(const MemoryRegion &a) { static_cast<HashContext *>(context())->update(a); }
+void Hash::update(const MemoryRegion &a)
+{
+    static_cast<HashContext *>(context())->update(a);
+}
 
-void Hash::update(const QByteArray &a) { update(MemoryRegion(a)); }
+void Hash::update(const QByteArray &a)
+{
+    update(MemoryRegion(a));
+}
 
 void Hash::update(const char *data, int len)
 {
@@ -188,11 +232,20 @@ void Hash::update(QIODevice *file)
         update(buffer, len);
 }
 
-MemoryRegion Hash::final() { return static_cast<HashContext *>(context())->final(); }
+MemoryRegion Hash::final()
+{
+    return static_cast<HashContext *>(context())->final();
+}
 
-MemoryRegion Hash::hash(const MemoryRegion &a) { return process(a); }
+MemoryRegion Hash::hash(const MemoryRegion &a)
+{
+    return process(a);
+}
 
-QString Hash::hashToString(const MemoryRegion &a) { return arrayToHex(hash(a).toByteArray()); }
+QString Hash::hashToString(const MemoryRegion &a)
+{
+    return arrayToHex(hash(a).toByteArray());
+}
 
 //----------------------------------------------------------------------------
 // Cipher
@@ -211,9 +264,14 @@ public:
     bool ok, done;
 };
 
-Cipher::Cipher(const QString &type, Mode mode, Padding pad, Direction dir, const SymmetricKey &key,
-               const InitializationVector &iv, const QString &provider) :
-    Algorithm(withAlgorithms(type, mode, pad), provider)
+Cipher::Cipher(const QString &             type,
+               Mode                        mode,
+               Padding                     pad,
+               Direction                   dir,
+               const SymmetricKey &        key,
+               const InitializationVector &iv,
+               const QString &             provider)
+    : Algorithm(withAlgorithms(type, mode, pad), provider)
 {
     d       = new Private;
     d->type = type;
@@ -223,9 +281,15 @@ Cipher::Cipher(const QString &type, Mode mode, Padding pad, Direction dir, const
         setup(dir, key, iv);
 }
 
-Cipher::Cipher(const QString &type, Cipher::Mode mode, Cipher::Padding pad, Direction dir, const SymmetricKey &key,
-               const InitializationVector &iv, const AuthTag &tag, const QString &provider) :
-    Algorithm(withAlgorithms(type, mode, pad), provider)
+Cipher::Cipher(const QString &             type,
+               Cipher::Mode                mode,
+               Cipher::Padding             pad,
+               Direction                   dir,
+               const SymmetricKey &        key,
+               const InitializationVector &iv,
+               const AuthTag &             tag,
+               const QString &             provider)
+    : Algorithm(withAlgorithms(type, mode, pad), provider)
 {
     d       = new Private;
     d->type = type;
@@ -236,9 +300,17 @@ Cipher::Cipher(const QString &type, Cipher::Mode mode, Cipher::Padding pad, Dire
         setup(dir, key, iv, tag);
 }
 
-Cipher::Cipher(const Cipher &from) : Algorithm(from), Filter(from) { d = new Private(*from.d); }
+Cipher::Cipher(const Cipher &from)
+    : Algorithm(from)
+    , Filter(from)
+{
+    d = new Private(*from.d);
+}
 
-Cipher::~Cipher() { delete d; }
+Cipher::~Cipher()
+{
+    delete d;
+}
 
 Cipher &Cipher::operator=(const Cipher &from)
 {
@@ -247,17 +319,35 @@ Cipher &Cipher::operator=(const Cipher &from)
     return *this;
 }
 
-QStringList Cipher::supportedTypes(const QString &provider) { return supportedCipherTypes(provider); }
+QStringList Cipher::supportedTypes(const QString &provider)
+{
+    return supportedCipherTypes(provider);
+}
 
-QString Cipher::type() const { return d->type; }
+QString Cipher::type() const
+{
+    return d->type;
+}
 
-Cipher::Mode Cipher::mode() const { return d->mode; }
+Cipher::Mode Cipher::mode() const
+{
+    return d->mode;
+}
 
-Cipher::Padding Cipher::padding() const { return d->pad; }
+Cipher::Padding Cipher::padding() const
+{
+    return d->pad;
+}
 
-Direction Cipher::direction() const { return d->dir; }
+Direction Cipher::direction() const
+{
+    return d->dir;
+}
 
-KeyLength Cipher::keyLength() const { return static_cast<const CipherContext *>(context())->keyLength(); }
+KeyLength Cipher::keyLength() const
+{
+    return static_cast<const CipherContext *>(context())->keyLength();
+}
 
 bool Cipher::validKeyLength(int n) const
 {
@@ -265,9 +355,15 @@ bool Cipher::validKeyLength(int n) const
     return ((n >= len.minimum()) && (n <= len.maximum()) && (n % len.multiple() == 0));
 }
 
-int Cipher::blockSize() const { return static_cast<const CipherContext *>(context())->blockSize(); }
+int Cipher::blockSize() const
+{
+    return static_cast<const CipherContext *>(context())->blockSize();
+}
 
-AuthTag Cipher::tag() const { return static_cast<const CipherContext *>(context())->tag(); }
+AuthTag Cipher::tag() const
+{
+    return static_cast<const CipherContext *>(context())->tag();
+}
 
 void Cipher::clear()
 {
@@ -294,7 +390,10 @@ MemoryRegion Cipher::final()
     return out;
 }
 
-bool Cipher::ok() const { return d->ok; }
+bool Cipher::ok() const
+{
+    return d->ok;
+}
 
 void Cipher::setup(Direction dir, const SymmetricKey &key, const InitializationVector &iv)
 {
@@ -373,21 +472,26 @@ public:
     MemoryRegion buf;
 };
 
-MessageAuthenticationCode::MessageAuthenticationCode(const QString &type, const SymmetricKey &key,
-                                                     const QString &provider) :
-    Algorithm(type, provider)
+MessageAuthenticationCode::MessageAuthenticationCode(const QString &     type,
+                                                     const SymmetricKey &key,
+                                                     const QString &     provider)
+    : Algorithm(type, provider)
 {
     d = new Private;
     setup(key);
 }
 
-MessageAuthenticationCode::MessageAuthenticationCode(const MessageAuthenticationCode &from) :
-    Algorithm(from), BufferedComputation(from)
+MessageAuthenticationCode::MessageAuthenticationCode(const MessageAuthenticationCode &from)
+    : Algorithm(from)
+    , BufferedComputation(from)
 {
     d = new Private(*from.d);
 }
 
-MessageAuthenticationCode::~MessageAuthenticationCode() { delete d; }
+MessageAuthenticationCode::~MessageAuthenticationCode()
+{
+    delete d;
+}
 
 MessageAuthenticationCode &MessageAuthenticationCode::operator=(const MessageAuthenticationCode &from)
 {
@@ -396,7 +500,10 @@ MessageAuthenticationCode &MessageAuthenticationCode::operator=(const MessageAut
     return *this;
 }
 
-QStringList MessageAuthenticationCode::supportedTypes(const QString &provider) { return supportedMACTypes(provider); }
+QStringList MessageAuthenticationCode::supportedTypes(const QString &provider)
+{
+    return supportedMACTypes(provider);
+}
 
 QString MessageAuthenticationCode::type() const
 {
@@ -446,13 +553,19 @@ void MessageAuthenticationCode::setup(const SymmetricKey &key)
 //----------------------------------------------------------------------------
 // Key Derivation Function
 //----------------------------------------------------------------------------
-KeyDerivationFunction::KeyDerivationFunction(const QString &type, const QString &provider) : Algorithm(type, provider)
+KeyDerivationFunction::KeyDerivationFunction(const QString &type, const QString &provider)
+    : Algorithm(type, provider)
 {
 }
 
-KeyDerivationFunction::KeyDerivationFunction(const KeyDerivationFunction &from) : Algorithm(from) { }
+KeyDerivationFunction::KeyDerivationFunction(const KeyDerivationFunction &from)
+    : Algorithm(from)
+{
+}
 
-KeyDerivationFunction::~KeyDerivationFunction() { }
+KeyDerivationFunction::~KeyDerivationFunction()
+{
+}
 
 KeyDerivationFunction &KeyDerivationFunction::operator=(const KeyDerivationFunction &from)
 {
@@ -460,14 +573,19 @@ KeyDerivationFunction &KeyDerivationFunction::operator=(const KeyDerivationFunct
     return *this;
 }
 
-SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &secret, const InitializationVector &salt,
-                                            unsigned int keyLength, unsigned int iterationCount)
+SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &         secret,
+                                            const InitializationVector &salt,
+                                            unsigned int                keyLength,
+                                            unsigned int                iterationCount)
 {
     return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, iterationCount);
 }
 
-SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &secret, const InitializationVector &salt,
-                                            unsigned int keyLength, int msecInterval, unsigned int *iterationCount)
+SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &         secret,
+                                            const InitializationVector &salt,
+                                            unsigned int                keyLength,
+                                            int                         msecInterval,
+                                            unsigned int *              iterationCount)
 {
     return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, msecInterval, iterationCount);
 }
@@ -480,14 +598,19 @@ QString KeyDerivationFunction::withAlgorithm(const QString &kdfType, const QStri
 //----------------------------------------------------------------------------
 // HKDF
 //----------------------------------------------------------------------------
-HKDF::HKDF(const QString &algorithm, const QString &provider) :
-    Algorithm(QStringLiteral("hkdf(") + algorithm + QLatin1Char(')'), provider)
+HKDF::HKDF(const QString &algorithm, const QString &provider)
+    : Algorithm(QStringLiteral("hkdf(") + algorithm + QLatin1Char(')'), provider)
 {
 }
 
-HKDF::HKDF(const HKDF &from) : Algorithm(from) { }
+HKDF::HKDF(const HKDF &from)
+    : Algorithm(from)
+{
+}
 
-HKDF::~HKDF() { }
+HKDF::~HKDF()
+{
+}
 
 HKDF &HKDF::operator=(const HKDF &from)
 {
@@ -495,8 +618,10 @@ HKDF &HKDF::operator=(const HKDF &from)
     return *this;
 }
 
-SymmetricKey HKDF::makeKey(const SecureArray &secret, const InitializationVector &salt,
-                           const InitializationVector &info, unsigned int keyLength)
+SymmetricKey HKDF::makeKey(const SecureArray &         secret,
+                           const InitializationVector &salt,
+                           const InitializationVector &info,
+                           unsigned int                keyLength)
 {
     return static_cast<HKDFContext *>(context())->makeKey(secret, salt, info, keyLength);
 }

@@ -40,7 +40,10 @@ private:
     QMap<QString, QCA::SecureArray> maybe;
 
 public:
-    MyPrompter(QObject *parent = 0) : Prompter(parent) { }
+    MyPrompter(QObject *parent = 0)
+        : Prompter(parent)
+    {
+    }
 
     void fileSuccess(const QString &fileName)
     {
@@ -124,7 +127,12 @@ public:
     QCA::KeyStoreEntry keyStoreEntry;
     QString            keyStoreEntryString;
 
-    Private() : havePrivate(false), storageType(File), usable(false) { }
+    Private()
+        : havePrivate(false)
+        , storageType(File)
+        , usable(false)
+    {
+    }
 
     QString toString() const
     {
@@ -199,11 +207,18 @@ public:
     }
 };
 
-CertItem::CertItem() { }
+CertItem::CertItem()
+{
+}
 
-CertItem::CertItem(const CertItem &from) : d(from.d) { }
+CertItem::CertItem(const CertItem &from)
+    : d(from.d)
+{
+}
 
-CertItem::~CertItem() { }
+CertItem::~CertItem()
+{
+}
 
 CertItem &CertItem::operator=(const CertItem &from)
 {
@@ -211,15 +226,30 @@ CertItem &CertItem::operator=(const CertItem &from)
     return *this;
 }
 
-QString CertItem::name() const { return d->name; }
+QString CertItem::name() const
+{
+    return d->name;
+}
 
-QCA::CertificateChain CertItem::certificateChain() const { return d->chain; }
+QCA::CertificateChain CertItem::certificateChain() const
+{
+    return d->chain;
+}
 
-bool CertItem::havePrivate() const { return d->havePrivate; }
+bool CertItem::havePrivate() const
+{
+    return d->havePrivate;
+}
 
-CertItem::StorageType CertItem::storageType() const { return d->storageType; }
+CertItem::StorageType CertItem::storageType() const
+{
+    return d->storageType;
+}
 
-bool CertItem::isUsable() const { return d->usable; }
+bool CertItem::isUsable() const
+{
+    return d->usable;
+}
 
 //----------------------------------------------------------------------------
 // CertItemStore
@@ -249,7 +279,11 @@ public:
 
     QList<LoaderItem> loaders;
 
-    CertItemStorePrivate(CertItemStore *_q) : QObject(_q), q(_q), next_id(0), next_req_id(0)
+    CertItemStorePrivate(CertItemStore *_q)
+        : QObject(_q)
+        , q(_q)
+        , next_id(0)
+        , next_req_id(0)
     {
         if (!g_prompter) {
             g_prompter      = new MyPrompter;
@@ -335,7 +369,8 @@ public Q_SLOTS:
             delete keyLoader;
             prompter->fileFailed(fileName);
             QMessageBox::information(
-                0, tr("Error"),
+                0,
+                tr("Error"),
                 tr("Error importing certificate and private key.\nReason: %1").arg(convertErrorToString(r)));
             emit q->addFailed(req_id);
             return;
@@ -371,11 +406,21 @@ public Q_SLOTS:
     }
 };
 
-CertItemStore::CertItemStore(QObject *parent) : QAbstractListModel(parent) { d = new CertItemStorePrivate(this); }
+CertItemStore::CertItemStore(QObject *parent)
+    : QAbstractListModel(parent)
+{
+    d = new CertItemStorePrivate(this);
+}
 
-CertItemStore::~CertItemStore() { delete d; }
+CertItemStore::~CertItemStore()
+{
+    delete d;
+}
 
-int CertItemStore::idFromRow(int row) const { return d->idList[row]; }
+int CertItemStore::idFromRow(int row) const
+{
+    return d->idList[row];
+}
 
 int CertItemStore::rowFromId(int id) const
 {
@@ -386,11 +431,20 @@ int CertItemStore::rowFromId(int id) const
     return -1;
 }
 
-CertItem CertItemStore::itemFromId(int id) const { return d->list[rowFromId(id)]; }
+CertItem CertItemStore::itemFromId(int id) const
+{
+    return d->list[rowFromId(id)];
+}
 
-CertItem CertItemStore::itemFromRow(int row) const { return d->list[row]; }
+CertItem CertItemStore::itemFromRow(int row) const
+{
+    return d->list[row];
+}
 
-QList<CertItem> CertItemStore::items() const { return d->list; }
+QList<CertItem> CertItemStore::items() const
+{
+    return d->list;
+}
 
 QStringList CertItemStore::save() const
 {
@@ -505,7 +559,10 @@ void CertItemStore::removeItem(int id)
     endRemoveRows();
 }
 
-void CertItemStore::setIcon(IconType type, const QPixmap &icon) { d->iconset[type] = icon; }
+void CertItemStore::setIcon(IconType type, const QPixmap &icon)
+{
+    d->iconset[type] = icon;
+}
 
 int CertItemStore::rowCount(const QModelIndex &parent) const
 {
@@ -572,7 +629,11 @@ public:
     QString                fileName;
     QCA::PrivateKey        key;
 
-    CertItemPrivateLoaderPrivate(CertItemPrivateLoader *_q) : QObject(_q), q(_q) { }
+    CertItemPrivateLoaderPrivate(CertItemPrivateLoader *_q)
+        : QObject(_q)
+        , q(_q)
+    {
+    }
 
 public Q_SLOTS:
     void loader_finished()
@@ -583,7 +644,8 @@ public Q_SLOTS:
             loader = 0;
             store->d->prompter->fileFailed(fileName);
             QMessageBox::information(
-                0, tr("Error"),
+                0,
+                tr("Error"),
                 tr("Error accessing private key.\nReason: %1").arg(CertItemStorePrivate::convertErrorToString(r)));
             emit q->finished();
             return;
@@ -598,13 +660,17 @@ public Q_SLOTS:
     }
 };
 
-CertItemPrivateLoader::CertItemPrivateLoader(CertItemStore *store, QObject *parent) : QObject(parent)
+CertItemPrivateLoader::CertItemPrivateLoader(CertItemStore *store, QObject *parent)
+    : QObject(parent)
 {
     d        = new CertItemPrivateLoaderPrivate(this);
     d->store = store;
 }
 
-CertItemPrivateLoader::~CertItemPrivateLoader() { delete d; }
+CertItemPrivateLoader::~CertItemPrivateLoader()
+{
+    delete d;
+}
 
 void CertItemPrivateLoader::start(int id)
 {
@@ -623,6 +689,9 @@ void CertItemPrivateLoader::start(int id)
     d->loader->loadKeyBundleFromFile(d->fileName);
 }
 
-QCA::PrivateKey CertItemPrivateLoader::privateKey() const { return d->key; }
+QCA::PrivateKey CertItemPrivateLoader::privateKey() const
+{
+    return d->key;
+}
 
 #include "certitem.moc"

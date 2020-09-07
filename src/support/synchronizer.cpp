@@ -51,7 +51,10 @@ public:
         QElapsedTimer time;
         bool          fixInterval;
 
-        TimerInfo() : fixInterval(false) { }
+        TimerInfo()
+            : fixInterval(false)
+        {
+        }
     };
 
     TimerFixer *        fixerParent;
@@ -61,9 +64,13 @@ public:
     QAbstractEventDispatcher *ed;
     QList<TimerInfo>          timers;
 
-    static bool haveFixer(QObject *obj) { return obj->findChild<TimerFixer *>() ? true : false; }
+    static bool haveFixer(QObject *obj)
+    {
+        return obj->findChild<TimerFixer *>() ? true : false;
+    }
 
-    TimerFixer(QObject *_target, TimerFixer *_fp = nullptr) : QObject(_target)
+    TimerFixer(QObject *_target, TimerFixer *_fp = nullptr)
+        : QObject(_target)
     {
         ed = nullptr;
 
@@ -297,7 +304,8 @@ class SynchronizerAgent : public QObject
 {
     Q_OBJECT
 public:
-    SynchronizerAgent(QObject *parent = nullptr) : QObject(parent)
+    SynchronizerAgent(QObject *parent = nullptr)
+        : QObject(parent)
     {
         QMetaObject::invokeMethod(this, "started", Qt::QueuedConnection);
     }
@@ -324,9 +332,19 @@ public:
     QWaitCondition     w;
     QThread *          orig_thread;
 
-    Private(QObject *_obj, Synchronizer *_q) :
-        QThread(_q), q(_q), active(false), do_quit(false), cond_met(false), obj(_obj), loop(nullptr), agent(nullptr),
-        fixer(nullptr), m(QMutex::NonRecursive), w(), orig_thread(nullptr)
+    Private(QObject *_obj, Synchronizer *_q)
+        : QThread(_q)
+        , q(_q)
+        , active(false)
+        , do_quit(false)
+        , cond_met(false)
+        , obj(_obj)
+        , loop(nullptr)
+        , agent(nullptr)
+        , fixer(nullptr)
+        , m(QMutex::NonRecursive)
+        , w()
+        , orig_thread(nullptr)
     {
         // SafeTimer has own method to fix timers, skip it too
         if (!qobject_cast<SafeTimer *>(obj))
@@ -447,12 +465,22 @@ protected:
     }
 
 private Q_SLOTS:
-    void agent_started() { m.unlock(); }
+    void agent_started()
+    {
+        m.unlock();
+    }
 };
 
-Synchronizer::Synchronizer(QObject *parent) : QObject(parent) { d = new Private(parent, this); }
+Synchronizer::Synchronizer(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(parent, this);
+}
 
-Synchronizer::~Synchronizer() { delete d; }
+Synchronizer::~Synchronizer()
+{
+    delete d;
+}
 
 bool Synchronizer::waitForCondition(int msecs)
 {
@@ -460,7 +488,10 @@ bool Synchronizer::waitForCondition(int msecs)
     return d->waitForCondition(msecs);
 }
 
-void Synchronizer::conditionMet() { d->conditionMet(); }
+void Synchronizer::conditionMet()
+{
+    d->conditionMet();
+}
 
 }
 

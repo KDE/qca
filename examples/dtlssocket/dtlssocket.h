@@ -31,7 +31,10 @@ struct SourceAddress
     QHostAddress host;
     quint16      port;
 
-    bool operator==(const SourceAddress &other) const { return host == other.host && port == other.port; }
+    bool operator==(const SourceAddress &other) const
+    {
+        return host == other.host && port == other.port;
+    }
 };
 
 class QUdpSocket;
@@ -39,7 +42,10 @@ class SimpleLogger : public QCA::AbstractLogDevice
 {
     Q_OBJECT
 public:
-    SimpleLogger(QObject *parent) : QCA::AbstractLogDevice(QLatin1String("simplelogger"), parent) { }
+    SimpleLogger(QObject *parent)
+        : QCA::AbstractLogDevice(QLatin1String("simplelogger"), parent)
+    {
+    }
 
     void logTextMessage(const QString &message, QCA::Logger::Severity severity) override;
     void logBinaryMessage(const QByteArray &blob, QCA::Logger::Severity severity) override;
@@ -82,7 +88,8 @@ class DTLSServer : public QObject
     Q_OBJECT
 public:
     DTLSServer(QObject *parent = nullptr);
-    bool start(const QHostAddress &address, quint16 port = 0,
+    bool start(const QHostAddress &      address,
+               quint16                   port = 0,
                QAbstractSocket::BindMode mode = QAbstractSocket::DefaultForPlatform);
 Q_SIGNALS:
     void incomingConnection(DTLSSocket *);

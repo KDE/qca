@@ -40,7 +40,10 @@ public:
     CertificateChain       cert_pub;
     PrivateKey             cert_sec;
 
-    Private() { type = SecureMessageKey::None; }
+    Private()
+    {
+        type = SecureMessageKey::None;
+    }
 
     // set the proper type, and reset the opposite data structures if needed
     void ensureType(SecureMessageKey::Type t)
@@ -59,11 +62,19 @@ public:
     }
 };
 
-SecureMessageKey::SecureMessageKey() : d(new Private) { }
+SecureMessageKey::SecureMessageKey()
+    : d(new Private)
+{
+}
 
-SecureMessageKey::SecureMessageKey(const SecureMessageKey &from) : d(from.d) { }
+SecureMessageKey::SecureMessageKey(const SecureMessageKey &from)
+    : d(from.d)
+{
+}
 
-SecureMessageKey::~SecureMessageKey() { }
+SecureMessageKey::~SecureMessageKey()
+{
+}
 
 SecureMessageKey &SecureMessageKey::operator=(const SecureMessageKey &from)
 {
@@ -71,13 +82,25 @@ SecureMessageKey &SecureMessageKey::operator=(const SecureMessageKey &from)
     return *this;
 }
 
-bool SecureMessageKey::isNull() const { return (d->type == None); }
+bool SecureMessageKey::isNull() const
+{
+    return (d->type == None);
+}
 
-SecureMessageKey::Type SecureMessageKey::type() const { return d->type; }
+SecureMessageKey::Type SecureMessageKey::type() const
+{
+    return d->type;
+}
 
-PGPKey SecureMessageKey::pgpPublicKey() const { return d->pgp_pub; }
+PGPKey SecureMessageKey::pgpPublicKey() const
+{
+    return d->pgp_pub;
+}
 
-PGPKey SecureMessageKey::pgpSecretKey() const { return d->pgp_sec; }
+PGPKey SecureMessageKey::pgpSecretKey() const
+{
+    return d->pgp_sec;
+}
 
 void SecureMessageKey::setPGPPublicKey(const PGPKey &pub)
 {
@@ -92,9 +115,15 @@ void SecureMessageKey::setPGPSecretKey(const PGPKey &sec)
     d->pgp_sec = sec;
 }
 
-CertificateChain SecureMessageKey::x509CertificateChain() const { return d->cert_pub; }
+CertificateChain SecureMessageKey::x509CertificateChain() const
+{
+    return d->cert_pub;
+}
 
-PrivateKey SecureMessageKey::x509PrivateKey() const { return d->cert_sec; }
+PrivateKey SecureMessageKey::x509PrivateKey() const
+{
+    return d->cert_sec;
+}
 
 void SecureMessageKey::setX509CertificateChain(const CertificateChain &c)
 {
@@ -151,11 +180,16 @@ public:
     }
 };
 
-SecureMessageSignature::SecureMessageSignature() : d(new Private) { }
+SecureMessageSignature::SecureMessageSignature()
+    : d(new Private)
+{
+}
 
-SecureMessageSignature::SecureMessageSignature(IdentityResult r, Validity v, const SecureMessageKey &key,
-                                               const QDateTime &ts) :
-    d(new Private)
+SecureMessageSignature::SecureMessageSignature(IdentityResult          r,
+                                               Validity                v,
+                                               const SecureMessageKey &key,
+                                               const QDateTime &       ts)
+    : d(new Private)
 {
     d->r   = r;
     d->v   = v;
@@ -163,9 +197,14 @@ SecureMessageSignature::SecureMessageSignature(IdentityResult r, Validity v, con
     d->ts  = ts;
 }
 
-SecureMessageSignature::SecureMessageSignature(const SecureMessageSignature &from) : d(from.d) { }
+SecureMessageSignature::SecureMessageSignature(const SecureMessageSignature &from)
+    : d(from.d)
+{
+}
 
-SecureMessageSignature::~SecureMessageSignature() { }
+SecureMessageSignature::~SecureMessageSignature()
+{
+}
 
 SecureMessageSignature &SecureMessageSignature::operator=(const SecureMessageSignature &from)
 {
@@ -173,13 +212,25 @@ SecureMessageSignature &SecureMessageSignature::operator=(const SecureMessageSig
     return *this;
 }
 
-SecureMessageSignature::IdentityResult SecureMessageSignature::identityResult() const { return d->r; }
+SecureMessageSignature::IdentityResult SecureMessageSignature::identityResult() const
+{
+    return d->r;
+}
 
-Validity SecureMessageSignature::keyValidity() const { return d->v; }
+Validity SecureMessageSignature::keyValidity() const
+{
+    return d->v;
+}
 
-SecureMessageKey SecureMessageSignature::key() const { return d->key; }
+SecureMessageKey SecureMessageSignature::key() const
+{
+    return d->key;
+}
 
-QDateTime SecureMessageSignature::timestamp() const { return d->ts; }
+QDateTime SecureMessageSignature::timestamp() const
+{
+    return d->ts;
+}
 
 //----------------------------------------------------------------------------
 // SecureMessage
@@ -215,7 +266,10 @@ public:
     QList<int> bytesWrittenArgs;
     SafeTimer  readyReadTrigger, bytesWrittenTrigger, finishedTrigger;
 
-    Private(SecureMessage *_q) : readyReadTrigger(this), bytesWrittenTrigger(this), finishedTrigger(this)
+    Private(SecureMessage *_q)
+        : readyReadTrigger(this)
+        , bytesWrittenTrigger(this)
+        , finishedTrigger(this)
     {
         q      = _q;
         c      = nullptr;
@@ -231,7 +285,10 @@ public:
         reset(ResetAll);
     }
 
-    void init() { connect(c, &MessageContext::updated, this, &Private::updated); }
+    void init()
+    {
+        connect(c, &MessageContext::updated, this, &Private::updated);
+    }
 
     void reset(ResetMode mode)
     {
@@ -305,11 +362,20 @@ public Q_SLOTS:
             finishedTrigger.start();
     }
 
-    void t_readyRead() { emit q->readyRead(); }
+    void t_readyRead()
+    {
+        emit q->readyRead();
+    }
 
-    void t_bytesWritten() { emit q->bytesWritten(bytesWrittenArgs.takeFirst()); }
+    void t_bytesWritten()
+    {
+        emit q->bytesWritten(bytesWrittenArgs.takeFirst());
+    }
 
-    void t_finished() { emit q->finished(); }
+    void t_finished()
+    {
+        emit q->finished();
+    }
 };
 
 SecureMessage::SecureMessage(SecureMessageSystem *system)
@@ -321,41 +387,95 @@ SecureMessage::SecureMessage(SecureMessageSystem *system)
     d->init();
 }
 
-SecureMessage::~SecureMessage() { delete d; }
+SecureMessage::~SecureMessage()
+{
+    delete d;
+}
 
-SecureMessage::Type SecureMessage::type() const { return d->c->type(); }
+SecureMessage::Type SecureMessage::type() const
+{
+    return d->c->type();
+}
 
-bool SecureMessage::canSignMultiple() const { return d->c->canSignMultiple(); }
+bool SecureMessage::canSignMultiple() const
+{
+    return d->c->canSignMultiple();
+}
 
-bool SecureMessage::canClearsign() const { return (type() == OpenPGP); }
+bool SecureMessage::canClearsign() const
+{
+    return (type() == OpenPGP);
+}
 
-bool SecureMessage::canSignAndEncrypt() const { return (type() == OpenPGP); }
+bool SecureMessage::canSignAndEncrypt() const
+{
+    return (type() == OpenPGP);
+}
 
-void SecureMessage::reset() { d->reset(ResetAll); }
+void SecureMessage::reset()
+{
+    d->reset(ResetAll);
+}
 
-bool SecureMessage::bundleSignerEnabled() const { return d->bundleSigner; }
+bool SecureMessage::bundleSignerEnabled() const
+{
+    return d->bundleSigner;
+}
 
-bool SecureMessage::smimeAttributesEnabled() const { return d->smime; }
+bool SecureMessage::smimeAttributesEnabled() const
+{
+    return d->smime;
+}
 
-SecureMessage::Format SecureMessage::format() const { return d->format; }
+SecureMessage::Format SecureMessage::format() const
+{
+    return d->format;
+}
 
-SecureMessageKeyList SecureMessage::recipientKeys() const { return d->to; }
+SecureMessageKeyList SecureMessage::recipientKeys() const
+{
+    return d->to;
+}
 
-SecureMessageKeyList SecureMessage::signerKeys() const { return d->from; }
+SecureMessageKeyList SecureMessage::signerKeys() const
+{
+    return d->from;
+}
 
-void SecureMessage::setBundleSignerEnabled(bool b) { d->bundleSigner = b; }
+void SecureMessage::setBundleSignerEnabled(bool b)
+{
+    d->bundleSigner = b;
+}
 
-void SecureMessage::setSMIMEAttributesEnabled(bool b) { d->smime = b; }
+void SecureMessage::setSMIMEAttributesEnabled(bool b)
+{
+    d->smime = b;
+}
 
-void SecureMessage::setFormat(Format f) { d->format = f; }
+void SecureMessage::setFormat(Format f)
+{
+    d->format = f;
+}
 
-void SecureMessage::setRecipient(const SecureMessageKey &key) { d->to = SecureMessageKeyList() << key; }
+void SecureMessage::setRecipient(const SecureMessageKey &key)
+{
+    d->to = SecureMessageKeyList() << key;
+}
 
-void SecureMessage::setRecipients(const SecureMessageKeyList &keys) { d->to = keys; }
+void SecureMessage::setRecipients(const SecureMessageKeyList &keys)
+{
+    d->to = keys;
+}
 
-void SecureMessage::setSigner(const SecureMessageKey &key) { d->from = SecureMessageKeyList() << key; }
+void SecureMessage::setSigner(const SecureMessageKey &key)
+{
+    d->from = SecureMessageKeyList() << key;
+}
 
-void SecureMessage::setSigners(const SecureMessageKeyList &keys) { d->from = keys; }
+void SecureMessage::setSigners(const SecureMessageKeyList &keys)
+{
+    d->from = keys;
+}
 
 void SecureMessage::startEncrypt()
 {
@@ -393,7 +513,10 @@ void SecureMessage::startSignAndEncrypt()
     d->c->start(d->format, MessageContext::SignAndEncrypt);
 }
 
-void SecureMessage::update(const QByteArray &in) { d->c->update(in); }
+void SecureMessage::update(const QByteArray &in)
+{
+    d->c->update(in);
+}
 
 QByteArray SecureMessage::read()
 {
@@ -402,9 +525,15 @@ QByteArray SecureMessage::read()
     return a;
 }
 
-int SecureMessage::bytesAvailable() const { return d->in.size(); }
+int SecureMessage::bytesAvailable() const
+{
+    return d->in.size();
+}
 
-void SecureMessage::end() { d->c->end(); }
+void SecureMessage::end()
+{
+    d->c->end();
+}
 
 bool SecureMessage::waitForFinished(int msecs)
 {
@@ -413,15 +542,30 @@ bool SecureMessage::waitForFinished(int msecs)
     return d->success;
 }
 
-bool SecureMessage::success() const { return d->success; }
+bool SecureMessage::success() const
+{
+    return d->success;
+}
 
-SecureMessage::Error SecureMessage::errorCode() const { return d->errorCode; }
+SecureMessage::Error SecureMessage::errorCode() const
+{
+    return d->errorCode;
+}
 
-QByteArray SecureMessage::signature() const { return d->detachedSig; }
+QByteArray SecureMessage::signature() const
+{
+    return d->detachedSig;
+}
 
-QString SecureMessage::hashName() const { return d->hashName; }
+QString SecureMessage::hashName() const
+{
+    return d->hashName;
+}
 
-bool SecureMessage::wasSigned() const { return !d->signers.isEmpty(); }
+bool SecureMessage::wasSigned() const
+{
+    return !d->signers.isEmpty();
+}
 
 bool SecureMessage::verifySuccess() const
 {
@@ -445,29 +589,40 @@ SecureMessageSignature SecureMessage::signer() const
     return d->signers.first();
 }
 
-SecureMessageSignatureList SecureMessage::signers() const { return d->signers; }
+SecureMessageSignatureList SecureMessage::signers() const
+{
+    return d->signers;
+}
 
-QString SecureMessage::diagnosticText() const { return d->dtext; }
+QString SecureMessage::diagnosticText() const
+{
+    return d->dtext;
+}
 
 //----------------------------------------------------------------------------
 // SecureMessageSystem
 //----------------------------------------------------------------------------
-SecureMessageSystem::SecureMessageSystem(QObject *parent, const QString &type, const QString &provider) :
-    QObject(parent), Algorithm(type, provider)
+SecureMessageSystem::SecureMessageSystem(QObject *parent, const QString &type, const QString &provider)
+    : QObject(parent)
+    , Algorithm(type, provider)
 {
 }
 
-SecureMessageSystem::~SecureMessageSystem() { }
+SecureMessageSystem::~SecureMessageSystem()
+{
+}
 
 //----------------------------------------------------------------------------
 // OpenPGP
 //----------------------------------------------------------------------------
-OpenPGP::OpenPGP(QObject *parent, const QString &provider) :
-    SecureMessageSystem(parent, QStringLiteral("openpgp"), provider)
+OpenPGP::OpenPGP(QObject *parent, const QString &provider)
+    : SecureMessageSystem(parent, QStringLiteral("openpgp"), provider)
 {
 }
 
-OpenPGP::~OpenPGP() { }
+OpenPGP::~OpenPGP()
+{
+}
 
 //----------------------------------------------------------------------------
 // CMS
@@ -479,18 +634,31 @@ public:
     SecureMessageKeyList  privateKeys;
 };
 
-CMS::CMS(QObject *parent, const QString &provider) : SecureMessageSystem(parent, QStringLiteral("cms"), provider)
+CMS::CMS(QObject *parent, const QString &provider)
+    : SecureMessageSystem(parent, QStringLiteral("cms"), provider)
 {
     d = new Private;
 }
 
-CMS::~CMS() { delete d; }
+CMS::~CMS()
+{
+    delete d;
+}
 
-CertificateCollection CMS::trustedCertificates() const { return d->trusted; }
+CertificateCollection CMS::trustedCertificates() const
+{
+    return d->trusted;
+}
 
-CertificateCollection CMS::untrustedCertificates() const { return d->untrusted; }
+CertificateCollection CMS::untrustedCertificates() const
+{
+    return d->untrusted;
+}
 
-SecureMessageKeyList CMS::privateKeys() const { return d->privateKeys; }
+SecureMessageKeyList CMS::privateKeys() const
+{
+    return d->privateKeys;
+}
 
 void CMS::setTrustedCertificates(const CertificateCollection &trusted)
 {

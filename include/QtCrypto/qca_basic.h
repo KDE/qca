@@ -647,9 +647,13 @@ public:
        \note Padding only applies to CBC and ECB modes.  CFB and OFB
        ciphertext is always the length of the plaintext.
     */
-    Cipher(const QString &type, Mode mode, Padding pad = DefaultPadding, Direction dir = Encode,
-           const SymmetricKey &key = SymmetricKey(), const InitializationVector &iv = InitializationVector(),
-           const QString &provider = QString());
+    Cipher(const QString &             type,
+           Mode                        mode,
+           Padding                     pad      = DefaultPadding,
+           Direction                   dir      = Encode,
+           const SymmetricKey &        key      = SymmetricKey(),
+           const InitializationVector &iv       = InitializationVector(),
+           const QString &             provider = QString());
 
     /**
        Standard constructor
@@ -668,8 +672,14 @@ public:
        \note Padding only applies to CBC and ECB modes.  CFB and OFB
        ciphertext is always the length of the plaintext.
     */
-    Cipher(const QString &type, Mode mode, Padding pad, Direction dir, const SymmetricKey &key,
-           const InitializationVector &iv, const AuthTag &tag, const QString &provider = QString());
+    Cipher(const QString &             type,
+           Mode                        mode,
+           Padding                     pad,
+           Direction                   dir,
+           const SymmetricKey &        key,
+           const InitializationVector &iv,
+           const AuthTag &             tag,
+           const QString &             provider = QString());
 
     /**
        Standard copy constructor
@@ -993,8 +1003,10 @@ public:
 
        \return the derived key
     */
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                         unsigned int iterationCount);
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         unsigned int                iterationCount);
 
     /**
        Generate the key from a specified secret and salt value
@@ -1009,8 +1021,11 @@ public:
 
        \return the derived key
     */
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                         int msecInterval, unsigned int *iterationCount);
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         int                         msecInterval,
+                         unsigned int *              iterationCount);
 
     /**
        Construct the name of the algorithm
@@ -1059,8 +1074,8 @@ public:
        \param algorithm the name of the hashing algorithm to use
        \param provider the name of the provider to use, if available
     */
-    explicit PBKDF1(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString()) :
-        KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf1"), algorithm), provider)
+    explicit PBKDF1(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
+        : KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf1"), algorithm), provider)
     {
     }
 };
@@ -1084,8 +1099,8 @@ public:
        \param algorithm the name of the hashing algorithm to use
        \param provider the name of the provider to use, if available
     */
-    explicit PBKDF2(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString()) :
-        KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf2"), algorithm), provider)
+    explicit PBKDF2(const QString &algorithm = QStringLiteral("sha1"), const QString &provider = QString())
+        : KeyDerivationFunction(withAlgorithm(QStringLiteral("pbkdf2"), algorithm), provider)
     {
     }
 };
@@ -1143,8 +1158,10 @@ public:
 
        \return the derived key
     */
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, const InitializationVector &info,
-                         unsigned int keyLength);
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         const InitializationVector &info,
+                         unsigned int                keyLength);
 };
 
 } // namespace QCA

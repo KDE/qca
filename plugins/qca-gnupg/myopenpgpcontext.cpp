@@ -23,13 +23,20 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
-MyOpenPGPContext::MyOpenPGPContext(QCA::Provider *p) : SMSContext(p, QStringLiteral("openpgp"))
+MyOpenPGPContext::MyOpenPGPContext(QCA::Provider *p)
+    : SMSContext(p, QStringLiteral("openpgp"))
 {
     // TODO
 }
 
-Provider::Context *MyOpenPGPContext::clone() const { return nullptr; }
+Provider::Context *MyOpenPGPContext::clone() const
+{
+    return nullptr;
+}
 
-MessageContext *MyOpenPGPContext::createMessage() { return new MyMessageContext(this, provider()); }
+MessageContext *MyOpenPGPContext::createMessage()
+{
+    return new MyMessageContext(this, provider());
+}
 
 } // end namespace gpgQCAPlugin

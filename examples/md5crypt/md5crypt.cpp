@@ -36,7 +36,6 @@
 
 QString to64(long v, int size)
 {
-
     // Character set of the encrypted password: A-Za-z0-9./
     QString itoa64 = QStringLiteral("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
     QString result;
@@ -51,7 +50,6 @@ QString to64(long v, int size)
 
 int byte2unsigned(int byteValue)
 {
-
     int integerToReturn;
     integerToReturn = (int)byteValue & 0xff;
     return integerToReturn;
@@ -98,7 +96,6 @@ QString qca_md5crypt(const QCA::SecureArray &password, const QCA::SecureArray &s
 
     // Now build a 1000 entry dictionary...
     for (int i = 0; i < 1000; i++) {
-
         hash2.clear();
 
         if ((i & 1) != 0) {
@@ -134,24 +131,24 @@ QString qca_md5crypt(const QCA::SecureArray &password, const QCA::SecureArray &s
 
     long l;
 
-    l = (byte2unsigned(finalState.toByteArray().at(0)) << 16 | (byte2unsigned(finalState.toByteArray().at(6))) << 8
-         | byte2unsigned(finalState.toByteArray().at(12)));
+    l = (byte2unsigned(finalState.toByteArray().at(0)) << 16 | (byte2unsigned(finalState.toByteArray().at(6))) << 8 |
+         byte2unsigned(finalState.toByteArray().at(12)));
     encodedString.append(to64(l, 4));
 
-    l = (byte2unsigned(finalState.toByteArray().at(1)) << 16 | (byte2unsigned(finalState.toByteArray().at(7))) << 8
-         | byte2unsigned(finalState.toByteArray().at(13)));
+    l = (byte2unsigned(finalState.toByteArray().at(1)) << 16 | (byte2unsigned(finalState.toByteArray().at(7))) << 8 |
+         byte2unsigned(finalState.toByteArray().at(13)));
     encodedString.append(to64(l, 4));
 
-    l = (byte2unsigned(finalState.toByteArray().at(2)) << 16 | (byte2unsigned(finalState.toByteArray().at(8))) << 8
-         | byte2unsigned(finalState.toByteArray().at(14)));
+    l = (byte2unsigned(finalState.toByteArray().at(2)) << 16 | (byte2unsigned(finalState.toByteArray().at(8))) << 8 |
+         byte2unsigned(finalState.toByteArray().at(14)));
     encodedString.append(to64(l, 4));
 
-    l = (byte2unsigned(finalState.toByteArray().at(3)) << 16 | (byte2unsigned(finalState.toByteArray().at(9))) << 8
-         | byte2unsigned(finalState.toByteArray().at(15)));
+    l = (byte2unsigned(finalState.toByteArray().at(3)) << 16 | (byte2unsigned(finalState.toByteArray().at(9))) << 8 |
+         byte2unsigned(finalState.toByteArray().at(15)));
     encodedString.append(to64(l, 4));
 
-    l = (byte2unsigned(finalState.toByteArray().at(4)) << 16 | (byte2unsigned(finalState.toByteArray().at(10))) << 8
-         | byte2unsigned(finalState.toByteArray().at(5)));
+    l = (byte2unsigned(finalState.toByteArray().at(4)) << 16 | (byte2unsigned(finalState.toByteArray().at(10))) << 8 |
+         byte2unsigned(finalState.toByteArray().at(5)));
     encodedString.append(to64(l, 4));
 
     l = byte2unsigned(finalState.toByteArray().at(11));
@@ -162,7 +159,6 @@ QString qca_md5crypt(const QCA::SecureArray &password, const QCA::SecureArray &s
 
 int main(int argc, char **argv)
 {
-
     // the Initializer object sets things up, and
     // also does cleanup when it goes out of scope
     QCA::Initializer init;

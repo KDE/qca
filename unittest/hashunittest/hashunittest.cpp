@@ -107,9 +107,9 @@ void HashUnitTest::md2test_data()
                                 << QStringLiteral("4e8ddff3650292ab5a4108c3aa47940b");
     QTest::newRow("md2([A-z,0-9])") << QByteArray("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
                                     << QStringLiteral("da33def2a42df13975352846c30338cd");
-    QTest::newRow("md2(nums)") << QByteArray(
-        "12345678901234567890123456789012345678901234567890123456789012345678901234567890")
-                               << QStringLiteral("d5976f79d83d3a0dc9806c3c66f3efd8");
+    QTest::newRow("md2(nums)")
+        << QByteArray("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+        << QStringLiteral("d5976f79d83d3a0dc9806c3c66f3efd8");
 }
 
 void HashUnitTest::md2test()
@@ -149,9 +149,9 @@ void HashUnitTest::md4test_data()
                                 << QStringLiteral("d79e1c308aa5bbcdeea8ed63df412da9");
     QTest::newRow("md4([A-z,0-9])") << QByteArray("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
                                     << QStringLiteral("043f8582f241db351ce627e153e7f0e4");
-    QTest::newRow("md4(nums)") << QByteArray(
-        "12345678901234567890123456789012345678901234567890123456789012345678901234567890")
-                               << QStringLiteral("e33b4ddc9c38f2199c3e7b164fcc0536");
+    QTest::newRow("md4(nums)")
+        << QByteArray("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+        << QStringLiteral("e33b4ddc9c38f2199c3e7b164fcc0536");
 }
 
 void HashUnitTest::md4test()
@@ -192,9 +192,9 @@ void HashUnitTest::md5test_data()
                                 << QStringLiteral("c3fcd3d76192e4007dfb496cca67e13b");
     QTest::newRow("md5([A-z,0-9])") << QByteArray("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
                                     << QStringLiteral("d174ab98d277d9f5a5611c2c9f419d9f");
-    QTest::newRow("md5(nums)") << QByteArray(
-        "12345678901234567890123456789012345678901234567890123456789012345678901234567890")
-                               << QStringLiteral("57edf4a22be3c955ac49da2e2107b67a");
+    QTest::newRow("md5(nums)")
+        << QByteArray("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+        << QStringLiteral("57edf4a22be3c955ac49da2e2107b67a");
 }
 
 void HashUnitTest::md5test()
@@ -542,8 +542,9 @@ void HashUnitTest::sha384test_data()
 
     // FIPS 180-2, Appendix B.2
     QTest::newRow("sha384(a-u)")
-        << QByteArray("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrs"
-                      "mnopqrstnopqrstu")
+        << QByteArray(
+               "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrs"
+               "mnopqrstnopqrstu")
         << QStringLiteral(
                "09330c33f71147e83d192fc782cd1b4753111b173b3b05d22fa08086e3b0f712fcc7c71a557e2db966c3e9fa91746039");
 
@@ -613,18 +614,22 @@ void HashUnitTest::sha512test_data()
 
     // FIPS 180-2, Appendix C.1
     QTest::newRow("sha512(abc)") << QByteArray("abc")
-                                 << QStringLiteral("ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a219"
-                                                   "2992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f");
+                                 << QStringLiteral(
+                                        "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a219"
+                                        "2992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f");
     // FIPS 180-2, Appendix C.2
-    QTest::newRow("sha512(a-u)") << QByteArray("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmno"
-                                               "pjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu")
-                                 << QStringLiteral("8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501"
-                                                   "d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909");
+    QTest::newRow("sha512(a-u)") << QByteArray(
+                                        "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmno"
+                                        "pjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu")
+                                 << QStringLiteral(
+                                        "8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501"
+                                        "d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909");
 
     // Aaron Gifford, vector002.info
     QTest::newRow("sha512(a-q)") << QByteArray("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")
-                                 << QStringLiteral("204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596f"
-                                                   "d15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445");
+                                 << QStringLiteral(
+                                        "204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596f"
+                                        "d15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445");
 }
 
 void HashUnitTest::sha512test()
@@ -684,15 +689,19 @@ void HashUnitTest::sha3_512test_data()
     // no copiable examples in the standard. Use `echo -n abc | openssl dgst -sha3-512 -` as a source of truth
 
     QTest::newRow("sha512(abc)") << QByteArray("abc")
-                                 << QStringLiteral("b751850b1a57168a5693cd924b6b096e08f621827444f70d884f5d0240d2712e10e"
-                                                   "116e9192af3c91a7ec57647e3934057340b4cf408d5a56592f8274eec53f0");
-    QTest::newRow("sha512(a-u)") << QByteArray("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmno"
-                                               "pjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu")
-                                 << QStringLiteral("afebb2ef542e6579c50cad06d2e578f9f8dd6881d7dc824d26360feebf18a4fa73e"
-                                                   "3261122948efcfd492e74e82e2189ed0fb440d187f382270cb455f21dd185");
+                                 << QStringLiteral(
+                                        "b751850b1a57168a5693cd924b6b096e08f621827444f70d884f5d0240d2712e10e"
+                                        "116e9192af3c91a7ec57647e3934057340b4cf408d5a56592f8274eec53f0");
+    QTest::newRow("sha512(a-u)") << QByteArray(
+                                        "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmno"
+                                        "pjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu")
+                                 << QStringLiteral(
+                                        "afebb2ef542e6579c50cad06d2e578f9f8dd6881d7dc824d26360feebf18a4fa73e"
+                                        "3261122948efcfd492e74e82e2189ed0fb440d187f382270cb455f21dd185");
     QTest::newRow("sha512(a-q)") << QByteArray("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")
-                                 << QStringLiteral("04a371e84ecfb5b8b77cb48610fca8182dd457ce6f326a0fd3d7ec2f1e91636dee6"
-                                                   "91fbe0c985302ba1b0d8dc78c086346b533b49c030d99a27daf1139d6e75e");
+                                 << QStringLiteral(
+                                        "04a371e84ecfb5b8b77cb48610fca8182dd457ce6f326a0fd3d7ec2f1e91636dee6"
+                                        "91fbe0c985302ba1b0d8dc78c086346b533b49c030d99a27daf1139d6e75e");
 }
 
 void HashUnitTest::sha3_512test()
@@ -763,9 +772,9 @@ void HashUnitTest::rmd160test_data()
                                  << QStringLiteral("12a053384a9c0c88e405a06c27dcf49ada62eb2b");
     QTest::newRow("rmd160(A-9)") << QByteArray("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
                                  << QStringLiteral("b0e20b6e3116640286ed3a87a5713079b21f5189");
-    QTest::newRow("rmd160(1-0)") << QByteArray(
-        "12345678901234567890123456789012345678901234567890123456789012345678901234567890")
-                                 << QStringLiteral("9b752e45573d4b39f4dbd3323cab82bf63326bfb");
+    QTest::newRow("rmd160(1-0)")
+        << QByteArray("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+        << QStringLiteral("9b752e45573d4b39f4dbd3323cab82bf63326bfb");
 }
 
 void HashUnitTest::rmd160test()
@@ -813,7 +822,7 @@ void HashUnitTest::rmd160longtest()
 
             // This is the "8 rounds of 1234567890" test.
             // It also ensure that we can re-use hash objects correctly.
-            static char bindata[] = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30 };
+            static char bindata[] = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30};
             QByteArray  fillerArray(bindata, sizeof(bindata)); // "1234567890"
             rmdHash.clear();
             for (int i = 0; i < 8; i++)
@@ -831,18 +840,21 @@ void HashUnitTest::whirlpooltest_data()
     QTest::addColumn<QString>("expectedHash");
 
     QTest::newRow("whirlpool()") << QByteArray("")
-                                 << QStringLiteral("19fa61d75522a4669b44e39c1d2e1726c530232130d407f89afee0964997f7a73e8"
-                                                   "3be698b288febcf88e3e03c4f0757ea8964e59b63d93708b138cc42a66eb3");
+                                 << QStringLiteral(
+                                        "19fa61d75522a4669b44e39c1d2e1726c530232130d407f89afee0964997f7a73e8"
+                                        "3be698b288febcf88e3e03c4f0757ea8964e59b63d93708b138cc42a66eb3");
     QTest::newRow("whirlpool(a)") << QByteArray("a")
-                                  << QStringLiteral("8aca2602792aec6f11a67206531fb7d7f0dff59413145e6973c45001d0087b42d1"
-                                                    "1bc645413aeff63a42391a39145a591a92200d560195e53b478584fdae231a");
+                                  << QStringLiteral(
+                                         "8aca2602792aec6f11a67206531fb7d7f0dff59413145e6973c45001d0087b42d1"
+                                         "1bc645413aeff63a42391a39145a591a92200d560195e53b478584fdae231a");
     QTest::newRow("whirlpool(abc)") << QByteArray("abc")
                                     << QStringLiteral(
                                            "4e2448a4c6f486bb16b6562c73b4020bf3043e3a731bce721ae1b303d97e6d4c7181eebdb6c"
                                            "57e277d0e34957114cbd6c797fc9d95d8b582d225292076d4eef5");
     QTest::newRow("whirlpool(md)") << QByteArray("message digest")
-                                   << QStringLiteral("378c84a4126e2dc6e56dcc7458377aac838d00032230f53ce1f5700c0ffb4d3b8"
-                                                     "421557659ef55c106b4b52ac5a4aaa692ed920052838f3362e86dbd37a8903e");
+                                   << QStringLiteral(
+                                          "378c84a4126e2dc6e56dcc7458377aac838d00032230f53ce1f5700c0ffb4d3b8"
+                                          "421557659ef55c106b4b52ac5a4aaa692ed920052838f3362e86dbd37a8903e");
     QTest::newRow("whirlpool(a-k)") << QByteArray("abcdbcdecdefdefgefghfghighijhijk")
                                     << QStringLiteral(
                                            "2a987ea40f917061f5d6f0a0e4644f488a7a5a52deee656207c562f988e95c6916bdc8031bc"
@@ -857,8 +869,9 @@ void HashUnitTest::whirlpooltest_data()
                                            "29d8fb7cb57211b9281a65517cc879d7b962142c65f5a7af01467");
     QTest::newRow("whirlpool(1-0)")
         << QByteArray("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
-        << QStringLiteral("466ef18babb0154d25b9d38a6414f5c08784372bccb204d6549c4afadb6014294d5bd8df2a6c44e538cd047b2681"
-                          "a51a2c60481e88c5a20b2c2a80cf3a9a083b");
+        << QStringLiteral(
+               "466ef18babb0154d25b9d38a6414f5c08784372bccb204d6549c4afadb6014294d5bd8df2a6c44e538cd047b2681"
+               "a51a2c60481e88c5a20b2c2a80cf3a9a083b");
 }
 
 void HashUnitTest::whirlpooltest()
@@ -908,7 +921,7 @@ void HashUnitTest::whirlpoollongtest()
 
             // This is the "8 rounds of 1234567890" test.
             // It also ensure that we can re-use hash objects correctly.
-            static char bindata[] = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30 };
+            static char bindata[] = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30};
             QByteArray  fillerArray(bindata, sizeof(bindata)); // "1234567890"
             rmdHash.clear();
             for (int i = 0; i < 8; i++)

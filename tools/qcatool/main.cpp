@@ -71,12 +71,17 @@ class StreamLogger : public QCA::AbstractLogDevice
 {
     Q_OBJECT
 public:
-    StreamLogger(QTextStream &stream) : QCA::AbstractLogDevice(QStringLiteral("Stream logger")), _stream(stream)
+    StreamLogger(QTextStream &stream)
+        : QCA::AbstractLogDevice(QStringLiteral("Stream logger"))
+        , _stream(stream)
     {
         QCA::logger()->registerLogDevice(this);
     }
 
-    ~StreamLogger() override { QCA::logger()->unregisterLogDevice(name()); }
+    ~StreamLogger() override
+    {
+        QCA::logger()->unregisterLogDevice(name());
+    }
 
     void logTextMessage(const QString &message, enum QCA::Logger::Severity severity) override
     {
@@ -120,7 +125,7 @@ private:
     QTextStream &      _stream;
 };
 
-const char *StreamLogger::s_severityNames[] = { "Q", "M", "A", "C", "E", "W", "N", "I", "D", "U" };
+const char *StreamLogger::s_severityNames[] = {"Q", "M", "A", "C", "E", "W", "N", "I", "D", "U"};
 
 static void output_plugin_diagnostic_text()
 {
@@ -360,7 +365,9 @@ public:
     QCA::KeyStoreManager   ksm;
     QList<QCA::KeyStore *> keyStores;
 
-    PassphrasePrompt() : handler(this), ksm(this)
+    PassphrasePrompt()
+        : handler(this)
+        , ksm(this)
     {
         allowPrompt = true;
         warned      = false;
@@ -504,8 +511,8 @@ private Q_SLOTS:
             QCA::KeyStoreEntry entry = e.keyStoreEntry();
             QString            name;
             if (!entry.isNull()) {
-                name = QStringLiteral("Please make ") + entry.name() + QStringLiteral(" (of ") + entry.storeName()
-                    + QStringLiteral(") available");
+                name = QStringLiteral("Please make ") + entry.name() + QStringLiteral(" (of ") + entry.storeName() +
+                    QStringLiteral(") available");
             } else {
                 name = QStringLiteral("Please insert the '") + e.keyStoreInfo().name() + QStringLiteral("' token");
             }
@@ -634,14 +641,26 @@ class PassphrasePromptThread : public QCA::SyncThread
 public:
     PassphrasePrompt *pp;
 
-    PassphrasePromptThread() { start(); }
+    PassphrasePromptThread()
+    {
+        start();
+    }
 
-    ~PassphrasePromptThread() override { stop(); }
+    ~PassphrasePromptThread() override
+    {
+        stop();
+    }
 
 protected:
-    void atStart() override { pp = new PassphrasePrompt; }
+    void atStart() override
+    {
+        pp = new PassphrasePrompt;
+    }
 
-    void atEnd() override { delete pp; }
+    void atEnd() override
+    {
+        delete pp;
+    }
 };
 
 static bool promptForNewPassphrase(QCA::SecureArray *result)
@@ -775,12 +794,20 @@ public:
     QString                  name;
     QString                  desc;
 
-    InfoType() { }
+    InfoType()
+    {
+    }
 
-    InfoType(const QCA::CertificateInfoType &_type, const QString &_varname, const QString &_shortname,
-             const QString &_name, const QString &_desc) :
-        type(_type),
-        varname(_varname), shortname(_shortname), name(_name), desc(_desc)
+    InfoType(const QCA::CertificateInfoType &_type,
+             const QString &                 _varname,
+             const QString &                 _shortname,
+             const QString &                 _name,
+             const QString &                 _desc)
+        : type(_type)
+        , varname(_varname)
+        , shortname(_shortname)
+        , name(_name)
+        , desc(_desc)
     {
     }
 };
@@ -817,12 +844,18 @@ public:
     QString             name;
     QString             desc;
 
-    MyConstraintType() { }
+    MyConstraintType()
+    {
+    }
 
-    MyConstraintType(const QCA::ConstraintType &_type, const QString &_varname, const QString &_name,
-                     const QString &_desc) :
-        type(_type),
-        varname(_varname), name(_name), desc(_desc)
+    MyConstraintType(const QCA::ConstraintType &_type,
+                     const QString &            _varname,
+                     const QString &            _name,
+                     const QString &            _desc)
+        : type(_type)
+        , varname(_varname)
+        , name(_name)
+        , desc(_desc)
     {
     }
 };
@@ -1031,8 +1064,9 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
 
         {
             QCA::CertificateInfoOrdered info;
-            printf("Choose the information attributes to add to the certificate.  They will be\n"
-                   "added in the order they are entered.\n\n");
+            printf(
+                "Choose the information attributes to add to the certificate.  They will be\n"
+                "added in the order they are entered.\n\n");
             printf("Available information attributes:\n");
             QList<InfoType> list = makeInfoTypeList();
             for (int n = 0; n < list.count(); ++n) {
@@ -1111,8 +1145,9 @@ static QCA::CertificateOptions promptForCertAttributes(bool advanced, bool req)
         {
             QStringList policies;
             printf("\n");
-            printf("Are there any policy OID attributes that you wish to add?  Use the dotted\n"
-                   "string format.\n\n");
+            printf(
+                "Are there any policy OID attributes that you wish to add?  Use the dotted\n"
+                "string format.\n\n");
             while (true) {
                 QString str = prompt_for(QStringLiteral("Enter a policy OID to add, or enter to move on"));
                 if (str.isEmpty())
@@ -1350,9 +1385,13 @@ public:
     QString slotevent_method;
     int     slotevent_timeout;
 
-    Pkcs11ProviderConfig() :
-        allow_protected_authentication(true), cert_private(false), enabled(false), private_mask(0),
-        slotevent_method(QStringLiteral("auto")), slotevent_timeout(0)
+    Pkcs11ProviderConfig()
+        : allow_protected_authentication(true)
+        , cert_private(false)
+        , enabled(false)
+        , private_mask(0)
+        , slotevent_method(QStringLiteral("auto"))
+        , slotevent_timeout(0)
     {
     }
 
@@ -1395,7 +1434,13 @@ public:
 
     QVariantMap orig_config;
 
-    Pkcs11Config() : allow_load_rootca(false), allow_protected_authentication(true), log_level(0), pin_cache(-1) { }
+    Pkcs11Config()
+        : allow_load_rootca(false)
+        , allow_protected_authentication(true)
+        , log_level(0)
+        , pin_cache(-1)
+    {
+    }
 
     QVariantMap toVariantMap() const
     {
@@ -1654,11 +1699,11 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
                     break;
                 }
 
-                prompt
-                    = QStringLiteral("Allow protected authentication: [%1] ")
-                          .arg(provider.allow_protected_authentication ? QStringLiteral("Yes") : QStringLiteral("No"));
-                provider.allow_protected_authentication
-                    = prompt_for_yesno(prompt, provider.allow_protected_authentication);
+                prompt =
+                    QStringLiteral("Allow protected authentication: [%1] ")
+                        .arg(provider.allow_protected_authentication ? QStringLiteral("Yes") : QStringLiteral("No"));
+                provider.allow_protected_authentication =
+                    prompt_for_yesno(prompt, provider.allow_protected_authentication);
                 prompt = QStringLiteral("Provider stores certificates as private objects: [%1] ")
                              .arg(provider.cert_private ? QStringLiteral("Yes") : QStringLiteral("No"));
                 provider.cert_private = prompt_for_yesno(prompt, provider.cert_private);
@@ -1679,8 +1724,8 @@ static QVariantMap provider_config_edit_pkcs11(const QVariantMap &in)
                 prompt                    = QStringLiteral("Method value: [%1] ").arg(provider.slotevent_method);
                 provider.slotevent_method = prompt_for_slotevent_method(prompt, provider.slotevent_method);
                 if (provider.slotevent_method == QLatin1String("poll")) {
-                    prompt
-                        = QStringLiteral("Poll timeout (0 for no preference): [%1] ").arg(provider.slotevent_timeout);
+                    prompt =
+                        QStringLiteral("Poll timeout (0 for no preference): [%1] ").arg(provider.slotevent_timeout);
                     provider.slotevent_timeout = prompt_for_int(prompt, provider.slotevent_timeout);
                 } else
                     provider.slotevent_timeout = 0;
@@ -1975,7 +2020,9 @@ static void print_crl(const QCA::CRL &crl, bool ordered = false)
 
     QList<QCA::CRLEntry> revokedList = crl.revoked();
     foreach (const QCA::CRLEntry &entry, revokedList) {
-        printf("   %s: %s, %s\n", qPrintable(entry.serialNumber().toString()), crlEntryReasonToString(entry.reason()),
+        printf("   %s: %s, %s\n",
+               qPrintable(entry.serialNumber().toString()),
+               crlEntryReasonToString(entry.reason()),
                qPrintable(entry.time().toString()));
     }
 }
@@ -2120,39 +2167,42 @@ static void smDisplaySignatures(const QList<QCA::SecureMessageSignature> &signer
     }
 }
 
-static const char *mime_signpart = "Content-Type: text/plain; charset=UTF-8\r\n"
-                                   "Content-Transfer-Encoding: 8bit\r\n"
-                                   "\r\n"
-                                   "%1";
+static const char *mime_signpart =
+    "Content-Type: text/plain; charset=UTF-8\r\n"
+    "Content-Transfer-Encoding: 8bit\r\n"
+    "\r\n"
+    "%1";
 
-static const char *mime_signed = "Content-Type: multipart/signed;\r\n"
-                                 "    micalg=%1;\r\n"
-                                 "    boundary=QCATOOL-0001;\r\n"
-                                 "    protocol=\"application/pkcs7-signature\"\r\n"
-                                 "\r\n"
-                                 "\r\n"
-                                 "--QCATOOL-0001\r\n"
-                                 "%2\r\n"
-                                 "--QCATOOL-0001\r\n"
-                                 "Content-Transfer-Encoding: base64\r\n"
-                                 "Content-Type: application/pkcs7-signature;\r\n"
-                                 "    name=smime.p7s\r\n"
-                                 "Content-Disposition: attachment;\r\n"
-                                 "    filename=smime.p7s\r\n"
-                                 "\r\n"
-                                 "%3\r\n"
-                                 "\r\n"
-                                 "--QCATOOL-0001--\r\n";
+static const char *mime_signed =
+    "Content-Type: multipart/signed;\r\n"
+    "    micalg=%1;\r\n"
+    "    boundary=QCATOOL-0001;\r\n"
+    "    protocol=\"application/pkcs7-signature\"\r\n"
+    "\r\n"
+    "\r\n"
+    "--QCATOOL-0001\r\n"
+    "%2\r\n"
+    "--QCATOOL-0001\r\n"
+    "Content-Transfer-Encoding: base64\r\n"
+    "Content-Type: application/pkcs7-signature;\r\n"
+    "    name=smime.p7s\r\n"
+    "Content-Disposition: attachment;\r\n"
+    "    filename=smime.p7s\r\n"
+    "\r\n"
+    "%3\r\n"
+    "\r\n"
+    "--QCATOOL-0001--\r\n";
 
-static const char *mime_enveloped = "Mime-Version: 1.0\r\n"
-                                    "Content-Transfer-Encoding: base64\r\n"
-                                    "Content-Type: application/pkcs7-mime;\r\n"
-                                    "    name=smime.p7m;\r\n"
-                                    "    smime-type=enveloped-data\r\n"
-                                    "Content-Disposition: attachment;\r\n"
-                                    "    filename=smime.p7m\r\n"
-                                    "\r\n"
-                                    "%1\r\n";
+static const char *mime_enveloped =
+    "Mime-Version: 1.0\r\n"
+    "Content-Transfer-Encoding: base64\r\n"
+    "Content-Type: application/pkcs7-mime;\r\n"
+    "    name=smime.p7m;\r\n"
+    "    smime-type=enveloped-data\r\n"
+    "Content-Disposition: attachment;\r\n"
+    "    filename=smime.p7m\r\n"
+    "\r\n"
+    "%1\r\n";
 
 static QString add_cr(const QString &in)
 {
@@ -2515,8 +2565,8 @@ static QCA::PGPKey get_P(const QString &name)
 {
     QCA::KeyStoreEntry entry = get_E(name, true);
     if (!entry.isNull()) {
-        if (entry.type() != QCA::KeyStoreEntry::TypePGPPublicKey
-            && entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey) {
+        if (entry.type() != QCA::KeyStoreEntry::TypePGPPublicKey &&
+            entry.type() != QCA::KeyStoreEntry::TypePGPSecretKey) {
             fprintf(stderr, "Error: entry is not a pgp public key.\n");
             return QCA::PGPKey();
         }
@@ -2689,15 +2739,15 @@ int main(int argc, char **argv)
     }
 
     // help
-    if (args.isEmpty() || args[0] == QLatin1String("help") || args[0] == QLatin1String("--help")
-        || args[0] == QLatin1String("-h")) {
+    if (args.isEmpty() || args[0] == QLatin1String("help") || args[0] == QLatin1String("--help") ||
+        args[0] == QLatin1String("-h")) {
         usage();
         return 0;
     }
 
     // version
-    if (args[0] == QLatin1String("version") || args[0] == QLatin1String("--version")
-        || args[0] == QLatin1String("-v")) {
+    if (args[0] == QLatin1String("version") || args[0] == QLatin1String("--version") ||
+        args[0] == QLatin1String("-v")) {
         int ver = qcaVersion();
         int maj = (ver >> 16) & 0xff;
         int min = (ver >> 8) & 0xff;
@@ -3294,8 +3344,8 @@ int main(int argc, char **argv)
                 printf("%s", qPrintable(entry.certificate().toPEM()));
             else if (entry.type() == QCA::KeyStoreEntry::TypeCRL)
                 printf("%s", qPrintable(entry.crl().toPEM()));
-            else if (entry.type() == QCA::KeyStoreEntry::TypePGPPublicKey
-                     || entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
+            else if (entry.type() == QCA::KeyStoreEntry::TypePGPPublicKey ||
+                     entry.type() == QCA::KeyStoreEntry::TypePGPSecretKey)
                 printf("%s", qPrintable(entry.pgpPublicKey().toString()));
             else if (entry.type() == QCA::KeyStoreEntry::TypeKeyBundle) {
                 fprintf(stderr, "Error: use 'keybundle extract' command instead.\n");

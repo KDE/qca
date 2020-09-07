@@ -30,16 +30,23 @@
 
 namespace opensslQCAPlugin {
 
-BaseOsslTLSContext::BaseOsslTLSContext(Provider *p, const QString &type) : TLSContext(p, type)
+BaseOsslTLSContext::BaseOsslTLSContext(Provider *p, const QString &type)
+    : TLSContext(p, type)
 {
     ssl     = nullptr;
     context = nullptr;
     reset();
 }
 
-BaseOsslTLSContext::~BaseOsslTLSContext() { reset(); }
+BaseOsslTLSContext::~BaseOsslTLSContext()
+{
+    reset();
+}
 
-Provider::Context *BaseOsslTLSContext::clone() const { return nullptr; }
+Provider::Context *BaseOsslTLSContext::clone() const
+{
+    return nullptr;
+}
 
 bool BaseOsslTLSContext::canCompress() const
 {
@@ -82,7 +89,10 @@ void BaseOsslTLSContext::setup(bool serverMode, const QString &hostName, bool co
     Q_UNUSED(compress); // TODO
 }
 
-void BaseOsslTLSContext::setTrustedCertificates(const CertificateCollection &_trusted) { trusted = _trusted; }
+void BaseOsslTLSContext::setTrustedCertificates(const CertificateCollection &_trusted)
+{
+    trusted = _trusted;
+}
 
 void BaseOsslTLSContext::setIssuerList(const QList<CertificateInfoOrdered> &issuerList)
 {
@@ -139,13 +149,25 @@ bool BaseOsslTLSContext::waitForResultsReady(int msecs)
     return true;
 }
 
-TLSContext::Result BaseOsslTLSContext::result() const { return result_result; }
+TLSContext::Result BaseOsslTLSContext::result() const
+{
+    return result_result;
+}
 
-int BaseOsslTLSContext::encoded() const { return result_encoded; }
+int BaseOsslTLSContext::encoded() const
+{
+    return result_encoded;
+}
 
-bool BaseOsslTLSContext::eof() const { return v_eof; }
+bool BaseOsslTLSContext::eof() const
+{
+    return v_eof;
+}
 
-Validity BaseOsslTLSContext::peerCertificateValidity() const { return vr; }
+Validity BaseOsslTLSContext::peerCertificateValidity() const
+{
+    return vr;
+}
 
 CertificateChain BaseOsslTLSContext::peerCertificateChain() const
 {
@@ -156,7 +178,10 @@ CertificateChain BaseOsslTLSContext::peerCertificateChain() const
     return chain;
 }
 
-void BaseOsslTLSContext::doResultsReady() { QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection); }
+void BaseOsslTLSContext::doResultsReady()
+{
+    QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+}
 
 int BaseOsslTLSContext::doConnect()
 {
@@ -200,7 +225,10 @@ int BaseOsslTLSContext::doHandshake()
     return Good;
 }
 
-void BaseOsslTLSContext::shutdown() { mode = Closing; }
+void BaseOsslTLSContext::shutdown()
+{
+    mode = Closing;
+}
 
 int BaseOsslTLSContext::doShutdown()
 {
@@ -235,9 +263,15 @@ QByteArray BaseOsslTLSContext::unprocessed()
     return a;
 }
 
-BIO *BaseOsslTLSContext::makeWriteBIO() { return BIO_new(BIO_s_mem()); }
+BIO *BaseOsslTLSContext::makeWriteBIO()
+{
+    return BIO_new(BIO_s_mem());
+}
 
-BIO *BaseOsslTLSContext::makeReadBIO() { return BIO_new(BIO_s_mem()); }
+BIO *BaseOsslTLSContext::makeReadBIO()
+{
+    return BIO_new(BIO_s_mem());
+}
 
 void BaseOsslTLSContext::reset()
 {
@@ -289,10 +323,14 @@ QStringList BaseOsslTLSContext::supportedCipherSuites(const TLS::Version &versio
             TLS::Version ver;
             int          ssl_ver;
         } limits[] = {
-            { TLS::TLS_v1, TLS1_VERSION },     { TLS::TLS_v1_1, TLS1_1_VERSION },  { TLS::TLS_v1_2, TLS1_2_VERSION },
-            { TLS::DTLS_v1, TLS1_1_VERSION },  { TLS::DTLS_v1_2, TLS1_2_VERSION },
+            {TLS::TLS_v1, TLS1_VERSION},
+            {TLS::TLS_v1_1, TLS1_1_VERSION},
+            {TLS::TLS_v1_2, TLS1_2_VERSION},
+            {TLS::DTLS_v1, TLS1_1_VERSION},
+            {TLS::DTLS_v1_2, TLS1_2_VERSION},
 #ifdef TLS1_3_VERSION
-            { TLS::TLS_v1_3, TLS1_3_VERSION }, { TLS::DTLS_v1_3, TLS1_3_VERSION },
+            {TLS::TLS_v1_3, TLS1_3_VERSION},
+            {TLS::DTLS_v1_3, TLS1_3_VERSION},
 #endif
         };
         for (size_t i = 0; i < sizeof(limits) / sizeof(limits[0]); i++) {

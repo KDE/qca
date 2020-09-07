@@ -23,7 +23,8 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
-MyKeyStoreEntry::MyKeyStoreEntry(const PGPKey &_pub, const PGPKey &_sec, Provider *p) : KeyStoreEntryContext(p)
+MyKeyStoreEntry::MyKeyStoreEntry(const PGPKey &_pub, const PGPKey &_sec, Provider *p)
+    : KeyStoreEntryContext(p)
 {
     pub = _pub;
     sec = _sec;
@@ -33,25 +34,54 @@ MyKeyStoreEntry::MyKeyStoreEntry(const PGPKey &_pub, const PGPKey &_sec, Provide
         item_type = KeyStoreEntry::TypePGPPublicKey;
 }
 
-MyKeyStoreEntry::MyKeyStoreEntry(const MyKeyStoreEntry &from) : KeyStoreEntryContext(from) { }
+MyKeyStoreEntry::MyKeyStoreEntry(const MyKeyStoreEntry &from)
+    : KeyStoreEntryContext(from)
+{
+}
 
-MyKeyStoreEntry::~MyKeyStoreEntry() { }
+MyKeyStoreEntry::~MyKeyStoreEntry()
+{
+}
 
-Provider::Context *MyKeyStoreEntry::clone() const { return new MyKeyStoreEntry(*this); }
+Provider::Context *MyKeyStoreEntry::clone() const
+{
+    return new MyKeyStoreEntry(*this);
+}
 
-KeyStoreEntry::Type MyKeyStoreEntry::type() const { return item_type; }
+KeyStoreEntry::Type MyKeyStoreEntry::type() const
+{
+    return item_type;
+}
 
-QString MyKeyStoreEntry::name() const { return pub.primaryUserId(); }
+QString MyKeyStoreEntry::name() const
+{
+    return pub.primaryUserId();
+}
 
-QString MyKeyStoreEntry::id() const { return pub.keyId(); }
+QString MyKeyStoreEntry::id() const
+{
+    return pub.keyId();
+}
 
-QString MyKeyStoreEntry::storeId() const { return _storeId; }
+QString MyKeyStoreEntry::storeId() const
+{
+    return _storeId;
+}
 
-QString MyKeyStoreEntry::storeName() const { return _storeName; }
+QString MyKeyStoreEntry::storeName() const
+{
+    return _storeName;
+}
 
-PGPKey MyKeyStoreEntry::pgpSecretKey() const { return sec; }
+PGPKey MyKeyStoreEntry::pgpSecretKey() const
+{
+    return sec;
+}
 
-PGPKey MyKeyStoreEntry::pgpPublicKey() const { return pub; }
+PGPKey MyKeyStoreEntry::pgpPublicKey() const
+{
+    return pub;
+}
 
 QString MyKeyStoreEntry::serialize() const
 {

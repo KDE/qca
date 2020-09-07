@@ -29,12 +29,20 @@ namespace gpgQCAPlugin {
 //----------------------------------------------------------------------------
 // SProcess
 //----------------------------------------------------------------------------
-SProcess::SProcess(QObject *parent) : QProcess(parent) { }
+SProcess::SProcess(QObject *parent)
+    : QProcess(parent)
+{
+}
 
-SProcess::~SProcess() { }
+SProcess::~SProcess()
+{
+}
 
 #ifdef Q_OS_UNIX
-void SProcess::setInheritPipeList(const QList<int> &list) { pipeList = list; }
+void SProcess::setInheritPipeList(const QList<int> &list)
+{
+    pipeList = list;
+}
 
 void SProcess::setupChildProcess()
 {

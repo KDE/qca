@@ -85,7 +85,9 @@ public:
     /**
        Destructs the object
     */
-    virtual ~QCAPlugin() { }
+    virtual ~QCAPlugin()
+    {
+    }
 
     /**
        Returns a newly allocated Provider instance.
@@ -116,7 +118,10 @@ public:
 
        \param p the provider associated with this context
     */
-    InfoContext(Provider *p) : BasicContext(p, QStringLiteral("info")) { }
+    InfoContext(Provider *p)
+        : BasicContext(p, QStringLiteral("info"))
+    {
+    }
 
     /**
        The hash algorithms supported by the provider
@@ -153,7 +158,10 @@ public:
 
        \param p the provider associated with this context
     */
-    RandomContext(Provider *p) : BasicContext(p, QStringLiteral("random")) { }
+    RandomContext(Provider *p)
+        : BasicContext(p, QStringLiteral("random"))
+    {
+    }
 
     /**
        Return an array of random bytes
@@ -183,7 +191,10 @@ public:
        \param p the provider associated with this context
        \param type the name of the type of hash provided by this context
     */
-    HashContext(Provider *p, const QString &type) : BasicContext(p, type) { }
+    HashContext(Provider *p, const QString &type)
+        : BasicContext(p, type)
+    {
+    }
 
     /**
        Reset the object to its initial state
@@ -226,7 +237,10 @@ public:
        \note type includes the name of the cipher (e.g. "aes256"), the operating
        mode (e.g. "cbc" or "ofb") and the padding type (e.g. "pkcs7") if any.
     */
-    CipherContext(Provider *p, const QString &type) : BasicContext(p, type) { }
+    CipherContext(Provider *p, const QString &type)
+        : BasicContext(p, type)
+    {
+    }
 
     /**
        Set up the object for encrypt/decrypt
@@ -289,7 +303,10 @@ public:
        \param p the provider associated with this context
        \param type the name of the type of MAC algorithm provided by this context
     */
-    MACContext(Provider *p, const QString &type) : BasicContext(p, type) { }
+    MACContext(Provider *p, const QString &type)
+        : BasicContext(p, type)
+    {
+    }
 
     /**
        Set up the object for hashing
@@ -351,7 +368,10 @@ public:
        \param p the provider associated with this context
        \param type the name of the KDF provided by this context (including algorithm)
     */
-    KDFContext(Provider *p, const QString &type) : BasicContext(p, type) { }
+    KDFContext(Provider *p, const QString &type)
+        : BasicContext(p, type)
+    {
+    }
 
     /**
        Create a key and return it
@@ -361,9 +381,10 @@ public:
        \param keyLength the length of the key to be produced
        \param iterationCount the number of iterations of the derivation algorith,
     */
-    virtual SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                                 unsigned int iterationCount)
-        = 0;
+    virtual SymmetricKey makeKey(const SecureArray &         secret,
+                                 const InitializationVector &salt,
+                                 unsigned int                keyLength,
+                                 unsigned int                iterationCount) = 0;
 
     /**
        Create a key and return it
@@ -374,9 +395,11 @@ public:
        \param msecInterval the maximum time to compute the key, in milliseconds
        \param iterationCount a pointer to store the number of iterations of the derivation algorithm,
     */
-    virtual SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                                 int msecInterval, unsigned int *iterationCount)
-        = 0;
+    virtual SymmetricKey makeKey(const SecureArray &         secret,
+                                 const InitializationVector &salt,
+                                 unsigned int                keyLength,
+                                 int                         msecInterval,
+                                 unsigned int *              iterationCount) = 0;
 };
 
 /**
@@ -399,7 +422,10 @@ public:
        \param p the provider associated with this context
        \param type the name of the HKDF provided by this context (including algorithm)
     */
-    HKDFContext(Provider *p, const QString &type) : BasicContext(p, type) { }
+    HKDFContext(Provider *p, const QString &type)
+        : BasicContext(p, type)
+    {
+    }
 
     /**
        Create a key and return it
@@ -409,9 +435,10 @@ public:
        \param info the info / initialization vector
        \param keyLength the length of the key to be produced
     */
-    virtual SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt,
-                                 const InitializationVector &info, unsigned int keyLength)
-        = 0;
+    virtual SymmetricKey makeKey(const SecureArray &         secret,
+                                 const InitializationVector &salt,
+                                 const InitializationVector &info,
+                                 unsigned int                keyLength) = 0;
 };
 
 /**
@@ -433,7 +460,10 @@ public:
 
        \param p the provider associated with this context
     */
-    DLGroupContext(Provider *p) : Provider::Context(p, QStringLiteral("dlgroup")) { }
+    DLGroupContext(Provider *p)
+        : Provider::Context(p, QStringLiteral("dlgroup"))
+    {
+    }
 
     /**
        The DLGroupSets supported by this object
@@ -642,7 +672,10 @@ public:
 
        \param p the provider associated with this context
     */
-    RSAContext(Provider *p) : PKeyBase(p, QStringLiteral("rsa")) { }
+    RSAContext(Provider *p)
+        : PKeyBase(p, QStringLiteral("rsa"))
+    {
+    }
 
     /**
        Generate an RSA private key
@@ -669,9 +702,11 @@ public:
        \param q the Q parameter
        \param d the D parameter
     */
-    virtual void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q,
-                               const BigInteger &d)
-        = 0;
+    virtual void createPrivate(const BigInteger &n,
+                               const BigInteger &e,
+                               const BigInteger &p,
+                               const BigInteger &q,
+                               const BigInteger &d) = 0;
 
     /**
        Create an RSA public key based on the two public components
@@ -727,7 +762,10 @@ public:
 
        \param p the provider associated with this context
     */
-    DSAContext(Provider *p) : PKeyBase(p, QStringLiteral("dsa")) { }
+    DSAContext(Provider *p)
+        : PKeyBase(p, QStringLiteral("dsa"))
+    {
+    }
 
     /**
        Generate a DSA private key
@@ -797,7 +835,10 @@ public:
 
        \param p the provider associated with this context
     */
-    DHContext(Provider *p) : PKeyBase(p, QStringLiteral("dh")) { }
+    DHContext(Provider *p)
+        : PKeyBase(p, QStringLiteral("dh"))
+    {
+    }
 
     /**
        Generate a Diffie-Hellman private key
@@ -873,7 +914,10 @@ public:
 
        \param p the provider associated with this context
     */
-    PKeyContext(Provider *p) : BasicContext(p, QStringLiteral("pkey")) { }
+    PKeyContext(Provider *p)
+        : BasicContext(p, QStringLiteral("pkey"))
+    {
+    }
 
     /**
        Returns a list of supported public key types
@@ -1024,7 +1068,10 @@ public:
        \param p the provider associated with this context
        \param type the type of certificate-like object provided by this context
     */
-    CertBase(Provider *p, const QString &type) : BasicContext(p, type) { }
+    CertBase(Provider *p, const QString &type)
+        : BasicContext(p, type)
+    {
+    }
 
     /**
        Convert this object to DER format, and return the value
@@ -1283,7 +1330,10 @@ public:
 
        \param p the provider associated with this context
     */
-    CertContext(Provider *p) : CertBase(p, QStringLiteral("cert")) { }
+    CertContext(Provider *p)
+        : CertBase(p, QStringLiteral("cert"))
+    {
+    }
 
     /**
        Create a self-signed certificate based on the given options and
@@ -1336,8 +1386,11 @@ public:
        \param u the desired usage for this certificate
        \param vf validation options
     */
-    virtual Validity validate(const QList<CertContext *> &trusted, const QList<CertContext *> &untrusted,
-                              const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const = 0;
+    virtual Validity validate(const QList<CertContext *> &trusted,
+                              const QList<CertContext *> &untrusted,
+                              const QList<CRLContext *> & crls,
+                              UsageMode                   u,
+                              ValidateFlags               vf) const = 0;
 
     /**
        Validate a certificate chain.  This function makes no use of the
@@ -1354,8 +1407,11 @@ public:
        \param u the desired usage for the user certificate in the chain
        \param vf validation options
     */
-    virtual Validity validate_chain(const QList<CertContext *> &chain, const QList<CertContext *> &trusted,
-                                    const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const = 0;
+    virtual Validity validate_chain(const QList<CertContext *> &chain,
+                                    const QList<CertContext *> &trusted,
+                                    const QList<CRLContext *> & crls,
+                                    UsageMode                   u,
+                                    ValidateFlags               vf) const = 0;
 };
 
 /**
@@ -1378,7 +1434,10 @@ public:
 
        \param p the provider associated with this context
     */
-    CSRContext(Provider *p) : CertBase(p, QStringLiteral("csr")) { }
+    CSRContext(Provider *p)
+        : CertBase(p, QStringLiteral("csr"))
+    {
+    }
 
     /**
        Returns true if the provider of this object supports the specified
@@ -1459,7 +1518,10 @@ public:
 
        \param p the provider associated with this context
     */
-    CRLContext(Provider *p) : CertBase(p, QStringLiteral("crl")) { }
+    CRLContext(Provider *p)
+        : CertBase(p, QStringLiteral("crl"))
+    {
+    }
 
     /**
        Returns a pointer to the properties of this CRL
@@ -1494,7 +1556,10 @@ public:
 
        \param p the provider associated with this context
     */
-    CertCollectionContext(Provider *p) : BasicContext(p, QStringLiteral("certcollection")) { }
+    CertCollectionContext(Provider *p)
+        : BasicContext(p, QStringLiteral("certcollection"))
+    {
+    }
 
     /**
        Create PKCS#7 DER output based on the input certificates and CRLs
@@ -1519,8 +1584,8 @@ public:
        \param certs the destination list for the certificates
        \param crls the destination list for the CRLs
     */
-    virtual ConvertResult fromPKCS7(const QByteArray &a, QList<CertContext *> *certs,
-                                    QList<CRLContext *> *crls) const = 0;
+    virtual ConvertResult
+    fromPKCS7(const QByteArray &a, QList<CertContext *> *certs, QList<CRLContext *> *crls) const = 0;
 };
 
 /**
@@ -1543,7 +1608,10 @@ public:
 
        \param p the Provider associated with this context
     */
-    CAContext(Provider *p) : BasicContext(p, QStringLiteral("ca")) { }
+    CAContext(Provider *p)
+        : BasicContext(p, QStringLiteral("ca"))
+    {
+    }
 
     /**
        Prepare the object for usage
@@ -1598,8 +1666,8 @@ public:
        \param entries the list of revoked entries
        \param nextUpdate the expiration date of the new CRL
     */
-    virtual CRLContext *updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries,
-                                  const QDateTime &nextUpdate) const = 0;
+    virtual CRLContext *
+    updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const = 0;
 };
 
 /**
@@ -1621,7 +1689,10 @@ public:
 
        \param p the Provider associated with this context
     */
-    PKCS12Context(Provider *p) : BasicContext(p, QStringLiteral("pkcs12")) { }
+    PKCS12Context(Provider *p)
+        : BasicContext(p, QStringLiteral("pkcs12"))
+    {
+    }
 
     /**
        Create PKCS#12 DER output based on a set of input items
@@ -1633,8 +1704,10 @@ public:
        \param priv the private key to store
        \param passphrase the passphrase to encrypt the PKCS#12 data with
     */
-    virtual QByteArray toPKCS12(const QString &name, const QList<const CertContext *> &chain, const PKeyContext &priv,
-                                const SecureArray &passphrase) const = 0;
+    virtual QByteArray toPKCS12(const QString &                   name,
+                                const QList<const CertContext *> &chain,
+                                const PKeyContext &               priv,
+                                const SecureArray &               passphrase) const = 0;
 
     /**
        Read PKCS#12 DER input and convert it into a set of output items
@@ -1650,8 +1723,11 @@ public:
        \param chain the destination list for the certificate chain
        \param priv address of a pointer to accept the private key
     */
-    virtual ConvertResult fromPKCS12(const QByteArray &in, const SecureArray &passphrase, QString *name,
-                                     QList<CertContext *> *chain, PKeyContext **priv) const = 0;
+    virtual ConvertResult fromPKCS12(const QByteArray &    in,
+                                     const SecureArray &   passphrase,
+                                     QString *             name,
+                                     QList<CertContext *> *chain,
+                                     PKeyContext **        priv) const = 0;
 };
 
 /**
@@ -1734,7 +1810,10 @@ public:
 
        \param p the Provider associated with this context
     */
-    PGPKeyContext(Provider *p) : BasicContext(p, QStringLiteral("pgpkey")) { }
+    PGPKeyContext(Provider *p)
+        : BasicContext(p, QStringLiteral("pgpkey"))
+    {
+    }
 
     /**
        Returns a pointer to the properties of this key
@@ -1792,7 +1871,10 @@ public:
 
        \param p the Provider associated with this context
     */
-    KeyStoreEntryContext(Provider *p) : BasicContext(p, QStringLiteral("keystoreentry")) { }
+    KeyStoreEntryContext(Provider *p)
+        : BasicContext(p, QStringLiteral("keystoreentry"))
+    {
+    }
 
     /**
        Returns the entry type
@@ -1897,7 +1979,10 @@ public:
 
        \param p the Provider associated with this context
     */
-    KeyStoreListContext(Provider *p) : Provider::Context(p, QStringLiteral("keystorelist")) { }
+    KeyStoreListContext(Provider *p)
+        : Provider::Context(p, QStringLiteral("keystorelist"))
+    {
+    }
 
     /**
        Starts the keystore provider
@@ -2135,7 +2220,10 @@ public:
 
        \param p the Provider associated with this context
     */
-    TLSSessionContext(Provider *p) : BasicContext(p, QStringLiteral("tlssession")) { }
+    TLSSessionContext(Provider *p)
+        : BasicContext(p, QStringLiteral("tlssession"))
+    {
+    }
 };
 
 /**
@@ -2215,7 +2303,10 @@ public:
        \param p the Provider associated with this context
        \param type the name of the type of feature that supported by this context
     */
-    TLSContext(Provider *p, const QString &type) : Provider::Context(p, type) { }
+    TLSContext(Provider *p, const QString &type)
+        : Provider::Context(p, type)
+    {
+    }
 
     /**
        Reset the object to its initial state
@@ -2551,7 +2642,10 @@ public:
 
        \param p the Provider associated with this context
     */
-    SASLContext(Provider *p) : Provider::Context(p, QStringLiteral("sasl")) { }
+    SASLContext(Provider *p)
+        : Provider::Context(p, QStringLiteral("sasl"))
+    {
+    }
 
     /**
        Reset the object to its initial state
@@ -2579,9 +2673,12 @@ public:
        \param ext_ssf the SSF of the external authentication channel
        (client only)
     */
-    virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote,
-                       const QString &ext_id, int ext_ssf)
-        = 0;
+    virtual void setup(const QString & service,
+                       const QString & host,
+                       const HostPort *local,
+                       const HostPort *remote,
+                       const QString & ext_id,
+                       int             ext_ssf) = 0;
 
     /**
        Set the constraints of the session using SSF values
@@ -2768,9 +2865,8 @@ public:
        \param pass the password
        \param realm the realm to authenticate in
     */
-    virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass,
-                                 const QString *realm)
-        = 0;
+    virtual void
+    setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm) = 0;
 
     /**
        Returns the realm list (client mode only)
@@ -2835,7 +2931,10 @@ public:
        \param p the Provider associated with this context
        \param type the name of the type of secure message to be created
     */
-    MessageContext(Provider *p, const QString &type) : Provider::Context(p, type) { }
+    MessageContext(Provider *p, const QString &type)
+        : Provider::Context(p, type)
+    {
+    }
 
     /**
        Returns true if the provider supports multiple signers for
@@ -2868,8 +2967,8 @@ public:
        \param bundleSigner whether to bundle the signing keys (true) or not (false)
        \param smime whether to use smime format (true) or not (false)
     */
-    virtual void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime)
-        = 0;
+    virtual void
+    setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime) = 0;
 
     /**
        Configure a new verify operation
@@ -3009,7 +3108,10 @@ public:
        \param p the provider associated with this context
        \param type the name of the type of secure message system
     */
-    SMSContext(Provider *p, const QString &type) : BasicContext(p, type) { }
+    SMSContext(Provider *p, const QString &type)
+        : BasicContext(p, type)
+    {
+    }
 
     /**
        Set the trusted certificates and for this secure message system,

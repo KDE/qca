@@ -29,8 +29,13 @@ namespace gpgQCAPlugin {
 Q_GLOBAL_STATIC(QMutex, ksl_mutex)
 
 static MyKeyStoreList *keyStoreList = nullptr;
-MyKeyStoreList::MyKeyStoreList(Provider *p) :
-    KeyStoreListContext(p), initialized(false), gpg(find_bin(), this), pubdirty(false), secdirty(false), ringWatch(this)
+MyKeyStoreList::MyKeyStoreList(Provider *p)
+    : KeyStoreListContext(p)
+    , initialized(false)
+    , gpg(find_bin(), this)
+    , pubdirty(false)
+    , secdirty(false)
+    , ringWatch(this)
 {
     QMutexLocker locker(ksl_mutex());
     keyStoreList = this;
@@ -45,13 +50,25 @@ MyKeyStoreList::~MyKeyStoreList()
     keyStoreList = nullptr;
 }
 
-Provider::Context *MyKeyStoreList::clone() const { return nullptr; }
+Provider::Context *MyKeyStoreList::clone() const
+{
+    return nullptr;
+}
 
-QString MyKeyStoreList::name(int) const { return QStringLiteral("GnuPG Keyring"); }
+QString MyKeyStoreList::name(int) const
+{
+    return QStringLiteral("GnuPG Keyring");
+}
 
-KeyStore::Type MyKeyStoreList::type(int) const { return KeyStore::PGPKeyring; }
+KeyStore::Type MyKeyStoreList::type(int) const
+{
+    return KeyStore::PGPKeyring;
+}
 
-QString MyKeyStoreList::storeId(int) const { return QStringLiteral("qca-gnupg"); }
+QString MyKeyStoreList::storeId(int) const
+{
+    return QStringLiteral("qca-gnupg");
+}
 
 QList<int> MyKeyStoreList::keyStores()
 {
@@ -73,7 +90,10 @@ void MyKeyStoreList::start()
     gpg.doCheck();
 }
 
-bool MyKeyStoreList::isReadOnly(int) const { return false; }
+bool MyKeyStoreList::isReadOnly(int) const
+{
+    return false;
+}
 
 QList<KeyStoreEntry::Type> MyKeyStoreList::entryTypes(int) const
 {

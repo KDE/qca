@@ -25,10 +25,18 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
-MyMessageContext::MyMessageContext(MyOpenPGPContext *_sms, Provider *p) :
-    MessageContext(p, QStringLiteral("pgpmsg")), sms(_sms), op(Sign), signMode(SecureMessage::Detached),
-    format(SecureMessage::Ascii), wrote(0), ok(false), wasSigned(false), op_err(GpgOp::ErrorUnknown), gpg(find_bin()),
-    _finished(false)
+MyMessageContext::MyMessageContext(MyOpenPGPContext *_sms, Provider *p)
+    : MessageContext(p, QStringLiteral("pgpmsg"))
+    , sms(_sms)
+    , op(Sign)
+    , signMode(SecureMessage::Detached)
+    , format(SecureMessage::Ascii)
+    , wrote(0)
+    , ok(false)
+    , wasSigned(false)
+    , op_err(GpgOp::ErrorUnknown)
+    , gpg(find_bin())
+    , _finished(false)
 {
     connect(&gpg, &GpgOp::readyRead, this, &MyMessageContext::gpg_readyRead);
     connect(&gpg, &GpgOp::bytesWritten, this, &MyMessageContext::gpg_bytesWritten);
@@ -41,11 +49,20 @@ MyMessageContext::MyMessageContext(MyOpenPGPContext *_sms, Provider *p) :
     connect(&tokenAsker, &QCA::TokenAsker::responseReady, this, &MyMessageContext::tokenAsker_responseReady);
 }
 
-Provider::Context *MyMessageContext::clone() const { return nullptr; }
+Provider::Context *MyMessageContext::clone() const
+{
+    return nullptr;
+}
 
-bool MyMessageContext::canSignMultiple() const { return false; }
+bool MyMessageContext::canSignMultiple() const
+{
+    return false;
+}
 
-SecureMessage::Type MyMessageContext::type() const { return SecureMessage::OpenPGP; }
+SecureMessage::Type MyMessageContext::type() const
+{
+    return SecureMessage::OpenPGP;
+}
 
 void MyMessageContext::reset()
 {
@@ -67,7 +84,10 @@ void MyMessageContext::setupSign(const SecureMessageKeyList &keys, SecureMessage
     signMode = m;
 }
 
-void MyMessageContext::setupVerify(const QByteArray &detachedSig) { sig = detachedSig; }
+void MyMessageContext::setupVerify(const QByteArray &detachedSig)
+{
+    sig = detachedSig;
+}
 
 void MyMessageContext::start(SecureMessage::Format f, Operation op)
 {
@@ -126,7 +146,10 @@ int MyMessageContext::written()
     return x;
 }
 
-void MyMessageContext::end() { gpg.endWrite(); }
+void MyMessageContext::end()
+{
+    gpg.endWrite();
+}
 
 void MyMessageContext::seterror()
 {
@@ -186,7 +209,10 @@ void MyMessageContext::complete()
         op_err = gpg.errorCode();
 }
 
-bool MyMessageContext::finished() const { return _finished; }
+bool MyMessageContext::finished() const
+{
+    return _finished;
+}
 
 bool MyMessageContext::waitForFinished(int msecs)
 {
@@ -218,7 +244,8 @@ bool MyMessageContext::waitForFinished(int msecs)
                 kse.change(c);
 
             asker.ask(Event::StylePassphrase,
-                      KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), kse,
+                      KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)),
+                      kse,
                       nullptr);
             asker.waitForResponse();
 
@@ -230,7 +257,8 @@ bool MyMessageContext::waitForFinished(int msecs)
             gpg.submitPassphrase(asker.password());
         } else if (e.type == GpgOp::Event::NeedCard) {
             tokenAsker.ask(KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)),
-                           KeyStoreEntry(), nullptr);
+                           KeyStoreEntry(),
+                           nullptr);
 
             if (!tokenAsker.accepted()) {
                 seterror();
@@ -246,7 +274,10 @@ bool MyMessageContext::waitForFinished(int msecs)
     return true;
 }
 
-bool MyMessageContext::success() const { return ok; }
+bool MyMessageContext::success() const
+{
+    return ok;
+}
 
 SecureMessage::Error MyMessageContext::errorCode() const
 {
@@ -278,7 +309,10 @@ SecureMessage::Error MyMessageContext::errorCode() const
     return e;
 }
 
-QByteArray MyMessageContext::signature() const { return sig; }
+QByteArray MyMessageContext::signature() const
+{
+    return sig;
+}
 
 QString MyMessageContext::hashName() const
 {
@@ -294,11 +328,20 @@ SecureMessageSignatureList MyMessageContext::signers() const
     return list;
 }
 
-QString MyMessageContext::diagnosticText() const { return dtext; }
+QString MyMessageContext::diagnosticText() const
+{
+    return dtext;
+}
 
-void MyMessageContext::gpg_readyRead() { emit updated(); }
+void MyMessageContext::gpg_readyRead()
+{
+    emit updated();
+}
 
-void MyMessageContext::gpg_bytesWritten(int bytes) { wrote += bytes; }
+void MyMessageContext::gpg_bytesWritten(int bytes)
+{
+    wrote += bytes;
+}
 
 void MyMessageContext::gpg_finished()
 {
@@ -329,14 +372,16 @@ void MyMessageContext::gpg_needPassphrase(const QString &in_keyId)
         kse.change(c);
 
     asker.ask(Event::StylePassphrase,
-              KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), kse, nullptr);
+              KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)),
+              kse,
+              nullptr);
 }
 
 void MyMessageContext::gpg_needCard()
 {
     MyKeyStoreList *keyStoreList = MyKeyStoreList::instance();
-    tokenAsker.ask(KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), KeyStoreEntry(),
-                   nullptr);
+    tokenAsker.ask(
+        KeyStoreInfo(KeyStore::PGPKeyring, keyStoreList->storeId(0), keyStoreList->name(0)), KeyStoreEntry(), nullptr);
 }
 
 void MyMessageContext::gpg_readyReadDiagnosticText()

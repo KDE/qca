@@ -22,11 +22,20 @@
 
 namespace QCA {
 
-AbstractLogDevice::AbstractLogDevice(const QString &name, QObject *parent) : QObject(parent), m_name(name) { }
+AbstractLogDevice::AbstractLogDevice(const QString &name, QObject *parent)
+    : QObject(parent)
+    , m_name(name)
+{
+}
 
-AbstractLogDevice::~AbstractLogDevice() { }
+AbstractLogDevice::~AbstractLogDevice()
+{
+}
 
-QString AbstractLogDevice::name() const { return m_name; }
+QString AbstractLogDevice::name() const
+{
+    return m_name;
+}
 
 void AbstractLogDevice::logTextMessage(const QString &message, Logger::Severity severity)
 {
@@ -51,7 +60,10 @@ Logger::~Logger()
     // delete d;
 }
 
-QStringList Logger::currentLogDevices() const { return m_loggerNames; }
+QStringList Logger::currentLogDevices() const
+{
+    return m_loggerNames;
+}
 
 void Logger::registerLogDevice(AbstractLogDevice *logger)
 {
@@ -75,7 +87,10 @@ void Logger::unregisterLogDevice(const QString &loggerName)
     }
 }
 
-void Logger::setLevel(Severity level) { m_logLevel = level; }
+void Logger::setLevel(Severity level)
+{
+    m_logLevel = level;
+}
 
 void Logger::logTextMessage(const QString &message, Severity severity)
 {

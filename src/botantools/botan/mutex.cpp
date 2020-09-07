@@ -26,9 +26,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // LICENSEHEADER_END
 namespace QCA { // WRAPNS_LINE
 /*************************************************
-* Mutex Source File                              *
-* (C) 1999-2007 The Botan Project                *
-*************************************************/
+ * Mutex Source File                              *
+ * (C) 1999-2007 The Botan Project                *
+ *************************************************/
 
 } // WRAPNS_LINE
 #include <cstdlib>
@@ -45,89 +45,95 @@ namespace QCA { // WRAPNS_LINE
 namespace Botan {
 
 /*************************************************
-* Mutex_Holder Constructor                       *
-*************************************************/
-Mutex_Holder::Mutex_Holder(Mutex* m) : mux(m)
-   {
-   if(!mux)
-      throw Invalid_Argument("Mutex_Holder: Argument was NULL");
-   mux->lock();
-   }
+ * Mutex_Holder Constructor                       *
+ *************************************************/
+Mutex_Holder::Mutex_Holder(Mutex *m)
+    : mux(m)
+{
+    if (!mux)
+        throw Invalid_Argument("Mutex_Holder: Argument was NULL");
+    mux->lock();
+}
 
 /*************************************************
-* Mutex_Holder Destructor                        *
-*************************************************/
+ * Mutex_Holder Destructor                        *
+ *************************************************/
 Mutex_Holder::~Mutex_Holder()
-   {
-   mux->unlock();
-   }
+{
+    mux->unlock();
+}
 
 #ifndef BOTAN_NO_LIBSTATE
 /*************************************************
-* Named_Mutex_Holder Constructor                 *
-*************************************************/
-Named_Mutex_Holder::Named_Mutex_Holder(const std::string& name) :
-   mutex_name(name)
-   {
-   global_state().get_named_mutex(mutex_name)->lock();
-   }
+ * Named_Mutex_Holder Constructor                 *
+ *************************************************/
+Named_Mutex_Holder::Named_Mutex_Holder(const std::string &name)
+    : mutex_name(name)
+{
+    global_state().get_named_mutex(mutex_name)->lock();
+}
 
 /*************************************************
-* Named_Mutex_Holder Destructor                  *
-*************************************************/
+ * Named_Mutex_Holder Destructor                  *
+ *************************************************/
 Named_Mutex_Holder::~Named_Mutex_Holder()
-   {
-   global_state().get_named_mutex(mutex_name)->unlock();
-   }
+{
+    global_state().get_named_mutex(mutex_name)->unlock();
+}
 #endif
 
 /*************************************************
-* Default Mutex Factory                          *
-*************************************************/
+ * Default Mutex Factory                          *
+ *************************************************/
 #ifdef BOTAN_FIX_GDB
 namespace {
 #else
-Mutex* Default_Mutex_Factory::make()
-   {
+Mutex *Default_Mutex_Factory::make()
+{
 #endif
-   class Default_Mutex : public Mutex
-      {
-      public:
-         class Mutex_State_Error : public Internal_Error
-            {
-            public:
-               Mutex_State_Error(const std::string& where) :
-                  Internal_Error("Default_Mutex::" + where + ": " +
-                                 "Mutex is already " + where + "ed") {}
-            };
+class Default_Mutex : public Mutex
+{
+public:
+    class Mutex_State_Error : public Internal_Error
+    {
+    public:
+        Mutex_State_Error(const std::string &where)
+            : Internal_Error("Default_Mutex::" + where + ": " + "Mutex is already " + where + "ed")
+        {
+        }
+    };
 
-         void lock() override
-            {
-            if(locked)
-               throw Mutex_State_Error("lock");
-            locked = true;
-            }
+    void lock() override
+    {
+        if (locked)
+            throw Mutex_State_Error("lock");
+        locked = true;
+    }
 
-         void unlock() override
-            {
-            if(!locked)
-               throw Mutex_State_Error("unlock");
-            locked = false;
-            }
+    void unlock() override
+    {
+        if (!locked)
+            throw Mutex_State_Error("unlock");
+        locked = false;
+    }
 
-         Default_Mutex() { locked = false; }
-      private:
-         bool locked;
-      };
+    Default_Mutex()
+    {
+        locked = false;
+    }
+
+private:
+    bool locked;
+};
 
 #ifdef BOTAN_FIX_GDB
-   } // end unnamed namespace
-Mutex* Default_Mutex_Factory::make()
-   {
+} // end unnamed namespace
+Mutex *Default_Mutex_Factory::make()
+{
 #endif
 
-   return new Default_Mutex;
-   }
+    return new Default_Mutex;
+}
 
 }
 } // WRAPNS_LINE

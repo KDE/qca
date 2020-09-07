@@ -34,8 +34,14 @@ void releaseAndDeleteLater(QObject *owner, QObject *obj)
     obj->deleteLater();
 }
 
-GPGProc::Private::Private(GPGProc *_q) :
-    QObject(_q), q(_q), pipeAux(this), pipeCommand(this), pipeStatus(this), startTrigger(this), doneTrigger(this)
+GPGProc::Private::Private(GPGProc *_q)
+    : QObject(_q)
+    , q(_q)
+    , pipeAux(this)
+    , pipeCommand(this)
+    , pipeStatus(this)
+    , startTrigger(this)
+    , doneTrigger(this)
 {
     qRegisterMetaType<gpgQCAPlugin::GPGProc::Error>("gpgQCAPlugin::GPGProc::Error");
 
@@ -56,7 +62,10 @@ GPGProc::Private::Private(GPGProc *_q) :
     reset(ResetSessionAndData);
 }
 
-GPGProc::Private::~Private() { reset(ResetSession); }
+GPGProc::Private::~Private()
+{
+    reset(ResetSession);
+}
 
 void GPGProc::Private::closePipes()
 {
@@ -205,7 +214,10 @@ void GPGProc::Private::doStart()
     pipeStatus.writeEnd().close();
 }
 
-void GPGProc::Private::aux_written(int x) { emit q->bytesWrittenAux(x); }
+void GPGProc::Private::aux_written(int x)
+{
+    emit q->bytesWrittenAux(x);
+}
 
 void GPGProc::Private::aux_error(QCA::QPipeEnd::Error)
 {
@@ -214,7 +226,10 @@ void GPGProc::Private::aux_error(QCA::QPipeEnd::Error)
     emit q->error(GPGProc::ErrorWrite);
 }
 
-void GPGProc::Private::command_written(int x) { emit q->bytesWrittenCommand(x); }
+void GPGProc::Private::command_written(int x)
+{
+    emit q->bytesWrittenCommand(x);
+}
 
 void GPGProc::Private::command_error(QCA::QPipeEnd::Error)
 {
@@ -280,9 +295,15 @@ void GPGProc::Private::proc_started()
         pipeCommand.writeEnd().close();
 }
 
-void GPGProc::Private::proc_readyReadStandardOutput() { emit q->readyReadStdout(); }
+void GPGProc::Private::proc_readyReadStandardOutput()
+{
+    emit q->readyReadStdout();
+}
 
-void GPGProc::Private::proc_readyReadStandardError() { emit q->readyReadStderr(); }
+void GPGProc::Private::proc_readyReadStandardError()
+{
+    emit q->readyReadStderr();
+}
 
 void GPGProc::Private::proc_bytesWritten(qint64 lx)
 {
@@ -434,13 +455,26 @@ bool GPGProc::Private::processStatusData(const QByteArray &buf)
     return true;
 }
 
-GPGProc::GPGProc(QObject *parent) : QObject(parent) { d = new Private(this); }
+GPGProc::GPGProc(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-GPGProc::~GPGProc() { delete d; }
+GPGProc::~GPGProc()
+{
+    delete d;
+}
 
-void GPGProc::reset() { d->reset(ResetAll); }
+void GPGProc::reset()
+{
+    d->reset(ResetAll);
+}
 
-bool GPGProc::isActive() const { return (d->proc ? true : false); }
+bool GPGProc::isActive() const
+{
+    return (d->proc ? true : false);
+}
 
 void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 {
@@ -452,8 +486,8 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
             d->error = FailedToStart;
 
             // emit later
-            QMetaObject::invokeMethod(this, "error", Qt::QueuedConnection,
-                                      Q_ARG(gpgQCAPlugin::GPGProc::Error, d->error));
+            QMetaObject::invokeMethod(
+                this, "error", Qt::QueuedConnection, Q_ARG(gpgQCAPlugin::GPGProc::Error, d->error));
             return;
         }
 
@@ -485,10 +519,12 @@ void GPGProc::start(const QString &bin, const QStringList &args, Mode mode)
 
     d->proc_relay = new QProcessSignalRelay(d->proc, d);
     connect(d->proc_relay, &QProcessSignalRelay::started, d, &GPGProc::Private::proc_started);
-    connect(d->proc_relay, &QProcessSignalRelay::readyReadStandardOutput, d,
+    connect(d->proc_relay,
+            &QProcessSignalRelay::readyReadStandardOutput,
+            d,
             &GPGProc::Private::proc_readyReadStandardOutput);
-    connect(d->proc_relay, &QProcessSignalRelay::readyReadStandardError, d,
-            &GPGProc::Private::proc_readyReadStandardError);
+    connect(
+        d->proc_relay, &QProcessSignalRelay::readyReadStandardError, d, &GPGProc::Private::proc_readyReadStandardError);
     connect(d->proc_relay, &QProcessSignalRelay::bytesWritten, d, &GPGProc::Private::proc_bytesWritten);
     connect(d->proc_relay, &QProcessSignalRelay::finished, d, &GPGProc::Private::proc_finished);
     connect(d->proc_relay, &QProcessSignalRelay::error, d, &GPGProc::Private::proc_error);

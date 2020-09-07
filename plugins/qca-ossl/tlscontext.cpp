@@ -26,7 +26,10 @@
 
 namespace opensslQCAPlugin {
 
-OsslTLSContext::OsslTLSContext(Provider *p) : BaseOsslTLSContext(p, QStringLiteral("tls")) { }
+OsslTLSContext::OsslTLSContext(Provider *p)
+    : BaseOsslTLSContext(p, QStringLiteral("tls"))
+{
+}
 
 void OsslTLSContext::reset()
 {

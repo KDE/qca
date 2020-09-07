@@ -513,7 +513,10 @@ public:
 
        \param other the MemoryRegion to compare to
     */
-    inline bool operator!=(const MemoryRegion &other) const { return !(*this == other); }
+    inline bool operator!=(const MemoryRegion &other) const
+    {
+        return !(*this == other);
+    }
 
     /**
        Append a secure byte array to the end of this array
@@ -763,7 +766,10 @@ result = b.compare( c );        // return negative, -400 < 200
 
        \param other the BigInteger to compare to
     */
-    inline bool operator==(const BigInteger &other) const { return (compare(other) == 0); }
+    inline bool operator==(const BigInteger &other) const
+    {
+        return (compare(other) == 0);
+    }
 
     /**
        Inequality operator. Returns true if the two BigInteger values
@@ -771,7 +777,10 @@ result = b.compare( c );        // return negative, -400 < 200
 
        \param other the BigInteger to compare to
     */
-    inline bool operator!=(const BigInteger &other) const { return !(*this == other); }
+    inline bool operator!=(const BigInteger &other) const
+    {
+        return !(*this == other);
+    }
 
     /**
        Less than or equal operator. Returns true if the BigInteger value
@@ -780,7 +789,10 @@ result = b.compare( c );        // return negative, -400 < 200
 
        \param other the BigInteger to compare to
     */
-    inline bool operator<=(const BigInteger &other) const { return (compare(other) <= 0); }
+    inline bool operator<=(const BigInteger &other) const
+    {
+        return (compare(other) <= 0);
+    }
 
     /**
        Greater than or equal operator. Returns true if the BigInteger
@@ -789,7 +801,10 @@ result = b.compare( c );        // return negative, -400 < 200
 
        \param other the BigInteger to compare to
     */
-    inline bool operator>=(const BigInteger &other) const { return (compare(other) >= 0); }
+    inline bool operator>=(const BigInteger &other) const
+    {
+        return (compare(other) >= 0);
+    }
 
     /**
        Less than operator. Returns true if the BigInteger value
@@ -798,7 +813,10 @@ result = b.compare( c );        // return negative, -400 < 200
 
        \param other the BigInteger to compare to
     */
-    inline bool operator<(const BigInteger &other) const { return (compare(other) < 0); }
+    inline bool operator<(const BigInteger &other) const
+    {
+        return (compare(other) < 0);
+    }
 
     /**
        Greater than operator. Returns true if the BigInteger value
@@ -807,7 +825,10 @@ result = b.compare( c );        // return negative, -400 < 200
 
        \param other the BigInteger to compare to
     */
-    inline bool operator>(const BigInteger &other) const { return (compare(other) > 0); }
+    inline bool operator>(const BigInteger &other) const
+    {
+        return (compare(other) > 0);
+    }
 
 private:
     class Private;

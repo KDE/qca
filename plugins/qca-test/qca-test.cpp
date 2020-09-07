@@ -22,22 +22,24 @@
 
 using namespace QCA;
 
-static char cert_pem[] = "-----BEGIN CERTIFICATE-----\n"
-                         "MIIBsTCCAVugAwIBAgIBADANBgkqhkiG9w0BAQUFADA4MRQwEgYDVQQDEwtUZXN0\n"
-                         "IENlcnQgMTELMAkGA1UEBhMCVVMxEzARBgNVBAoTClRlc3QgT3JnIDEwHhcNMDcw\n"
-                         "NjE5MjAzOTI4WhcNMTIwNjE5MjAzOTI4WjA4MRQwEgYDVQQDEwtUZXN0IENlcnQg\n"
-                         "MTELMAkGA1UEBhMCVVMxEzARBgNVBAoTClRlc3QgT3JnIDEwXDANBgkqhkiG9w0B\n"
-                         "AQEFAANLADBIAkEA3645RS/xBlWnjju6moaRYQuIDo7fwM+GxhE91HECLAg3Hnkr\n"
-                         "I+qx96VXd006olOn8MrkbjSqcTJ4LcDaCGI1YwIDAQABo1AwTjAdBgNVHQ4EFgQU\n"
-                         "nm5lNkkblHdoB0gLeh8mB6Ed+TMwDwYDVR0TAQH/BAUwAwIBADAcBgNVHREEFTAT\n"
-                         "gRF0ZXN0MUBleGFtcGxlLmNvbTANBgkqhkiG9w0BAQUFAANBAFTtXtwfYcJZBsXJ\n"
-                         "+Ckm9qbg7qR/XRERDzeR0yhHZE7F/jU5YQv7+iJL4l95iH9PkZNOk15Tu/Kzzekx\n"
-                         "6CTXzKA=\n"
-                         "-----END CERTIFICATE-----";
+static char cert_pem[] =
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIBsTCCAVugAwIBAgIBADANBgkqhkiG9w0BAQUFADA4MRQwEgYDVQQDEwtUZXN0\n"
+    "IENlcnQgMTELMAkGA1UEBhMCVVMxEzARBgNVBAoTClRlc3QgT3JnIDEwHhcNMDcw\n"
+    "NjE5MjAzOTI4WhcNMTIwNjE5MjAzOTI4WjA4MRQwEgYDVQQDEwtUZXN0IENlcnQg\n"
+    "MTELMAkGA1UEBhMCVVMxEzARBgNVBAoTClRlc3QgT3JnIDEwXDANBgkqhkiG9w0B\n"
+    "AQEFAANLADBIAkEA3645RS/xBlWnjju6moaRYQuIDo7fwM+GxhE91HECLAg3Hnkr\n"
+    "I+qx96VXd006olOn8MrkbjSqcTJ4LcDaCGI1YwIDAQABo1AwTjAdBgNVHQ4EFgQU\n"
+    "nm5lNkkblHdoB0gLeh8mB6Ed+TMwDwYDVR0TAQH/BAUwAwIBADAcBgNVHREEFTAT\n"
+    "gRF0ZXN0MUBleGFtcGxlLmNvbTANBgkqhkiG9w0BAQUFAANBAFTtXtwfYcJZBsXJ\n"
+    "+Ckm9qbg7qR/XRERDzeR0yhHZE7F/jU5YQv7+iJL4l95iH9PkZNOk15Tu/Kzzekx\n"
+    "6CTXzKA=\n"
+    "-----END CERTIFICATE-----";
 
-static char key_n_dec[] = "1171510158037441543813157379806833168225785177834459013412026750"
-                          "9262193808059395366696241600386200064326196137137376912654785051"
-                          "560621331316573341676090723";
+static char key_n_dec[] =
+    "1171510158037441543813157379806833168225785177834459013412026750"
+    "9262193808059395366696241600386200064326196137137376912654785051"
+    "560621331316573341676090723";
 
 static char key_e_dec[] = "65537";
 
@@ -47,22 +49,40 @@ static char key_e_dec[] = "65537";
 class TestProvider : public Provider
 {
 public:
-    TestProvider() { appendPluginDiagnosticText("TestProvider constructed\n"); }
+    TestProvider()
+    {
+        appendPluginDiagnosticText("TestProvider constructed\n");
+    }
 
-    void init() { appendPluginDiagnosticText("TestProvider initialized\n"); }
+    void init()
+    {
+        appendPluginDiagnosticText("TestProvider initialized\n");
+    }
 
-    void deinit() { appendPluginDiagnosticText("TestProvider deinitialized\n"); }
+    void deinit()
+    {
+        appendPluginDiagnosticText("TestProvider deinitialized\n");
+    }
 
-    ~TestProvider() { appendPluginDiagnosticText("TestProvider destructed\n"); }
+    ~TestProvider()
+    {
+        appendPluginDiagnosticText("TestProvider destructed\n");
+    }
 
     int version() const
     {
         return 0x010203; // 1.2.3
     }
 
-    int qcaVersion() const { return QCA_VERSION; }
+    int qcaVersion() const
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const { return "qca-test"; }
+    QString name() const
+    {
+        return "qca-test";
+    }
 
     QStringList features() const
     {
@@ -89,7 +109,13 @@ public:
 
     QList<KeyBundle> certs;
 
-    TestKeyStore() : contextId(-1), type(KeyStore::SmartCard), readOnly(true), avail(true) { }
+    TestKeyStore()
+        : contextId(-1)
+        , type(KeyStore::SmartCard)
+        , readOnly(true)
+        , avail(true)
+    {
+    }
 };
 
 class TestData
@@ -98,7 +124,10 @@ public:
     int                 context_at;
     QList<TestKeyStore> stores;
 
-    TestData() : context_at(0) { }
+    TestData()
+        : context_at(0)
+    {
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -113,23 +142,54 @@ public:
     bool          priv;
     TestKeyStore *store;
 
-    TestRSAContext(Provider *p) : RSAContext(p), priv(true), store(0) { }
+    TestRSAContext(Provider *p)
+        : RSAContext(p)
+        , priv(true)
+        , store(0)
+    {
+    }
 
-    TestRSAContext(const TestRSAContext &from) : RSAContext(from), priv(from.priv), store(from.store) { }
+    TestRSAContext(const TestRSAContext &from)
+        : RSAContext(from)
+        , priv(from.priv)
+        , store(from.store)
+    {
+    }
 
-    Context *clone() const { return new TestRSAContext(*this); }
+    Context *clone() const
+    {
+        return new TestRSAContext(*this);
+    }
 
-    virtual bool isNull() const { return false; }
+    virtual bool isNull() const
+    {
+        return false;
+    }
 
-    virtual PKey::Type type() const { return PKey::RSA; }
+    virtual PKey::Type type() const
+    {
+        return PKey::RSA;
+    }
 
-    virtual bool isPrivate() const { return priv; }
+    virtual bool isPrivate() const
+    {
+        return priv;
+    }
 
-    virtual bool canExport() const { return false; }
+    virtual bool canExport() const
+    {
+        return false;
+    }
 
-    virtual void convertToPublic() { priv = false; }
+    virtual void convertToPublic()
+    {
+        priv = false;
+    }
 
-    virtual int bits() const { return 2048; }
+    virtual int bits() const
+    {
+        return 2048;
+    }
 
     virtual void startSign(SignatureAlgorithm alg, SignatureFormat format)
     {
@@ -137,7 +197,10 @@ public:
         Q_UNUSED(format);
     }
 
-    virtual void update(const MemoryRegion &in) { Q_UNUSED(in); }
+    virtual void update(const MemoryRegion &in)
+    {
+        Q_UNUSED(in);
+    }
 
     virtual QByteArray endSign()
     {
@@ -165,7 +228,10 @@ public:
         Q_UNUSED(block);
     }
 
-    virtual void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q,
+    virtual void createPrivate(const BigInteger &n,
+                               const BigInteger &e,
+                               const BigInteger &p,
+                               const BigInteger &q,
                                const BigInteger &d)
     {
         Q_UNUSED(n);
@@ -181,15 +247,30 @@ public:
         Q_UNUSED(e);
     }
 
-    virtual BigInteger n() const { return BigInteger(QString(key_n_dec)); }
+    virtual BigInteger n() const
+    {
+        return BigInteger(QString(key_n_dec));
+    }
 
-    virtual BigInteger e() const { return BigInteger(QString(key_e_dec)); }
+    virtual BigInteger e() const
+    {
+        return BigInteger(QString(key_e_dec));
+    }
 
-    virtual BigInteger p() const { return BigInteger(); }
+    virtual BigInteger p() const
+    {
+        return BigInteger();
+    }
 
-    virtual BigInteger q() const { return BigInteger(); }
+    virtual BigInteger q() const
+    {
+        return BigInteger();
+    }
 
-    virtual BigInteger d() const { return BigInteger(); }
+    virtual BigInteger d() const
+    {
+        return BigInteger();
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -201,17 +282,29 @@ class TestPKeyContext : public PKeyContext
 public:
     TestRSAContext *_key;
 
-    TestPKeyContext(Provider *p) : PKeyContext(p), _key(0) { }
+    TestPKeyContext(Provider *p)
+        : PKeyContext(p)
+        , _key(0)
+    {
+    }
 
-    TestPKeyContext(const TestPKeyContext &from) : PKeyContext(from), _key(0)
+    TestPKeyContext(const TestPKeyContext &from)
+        : PKeyContext(from)
+        , _key(0)
     {
         if (from._key)
             _key = (TestRSAContext *)from._key->clone();
     }
 
-    ~TestPKeyContext() { delete _key; }
+    ~TestPKeyContext()
+    {
+        delete _key;
+    }
 
-    Context *clone() const { return new TestPKeyContext(*this); }
+    Context *clone() const
+    {
+        return new TestPKeyContext(*this);
+    }
 
     virtual QList<PKey::Type> supportedTypes() const
     {
@@ -220,13 +313,25 @@ public:
         return list;
     }
 
-    virtual QList<PKey::Type> supportedIOTypes() const { return QList<PKey::Type>(); }
+    virtual QList<PKey::Type> supportedIOTypes() const
+    {
+        return QList<PKey::Type>();
+    }
 
-    virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const { return QList<PBEAlgorithm>(); }
+    virtual QList<PBEAlgorithm> supportedPBEAlgorithms() const
+    {
+        return QList<PBEAlgorithm>();
+    }
 
-    virtual PKeyBase *key() { return _key; }
+    virtual PKeyBase *key()
+    {
+        return _key;
+    }
 
-    virtual const PKeyBase *key() const { return _key; }
+    virtual const PKeyBase *key() const
+    {
+        return _key;
+    }
 
     virtual void setKey(PKeyBase *key)
     {
@@ -250,9 +355,15 @@ class TestCertContext : public CertContext
 public:
     CertContextProps _props;
 
-    TestCertContext(Provider *p) : CertContext(p) { }
+    TestCertContext(Provider *p)
+        : CertContext(p)
+    {
+    }
 
-    Context *clone() const { return new TestCertContext(*this); }
+    Context *clone() const
+    {
+        return new TestCertContext(*this);
+    }
 
     virtual QByteArray toDER() const
     {
@@ -263,7 +374,10 @@ public:
         return Base64().stringToArray(enc).toByteArray();
     }
 
-    virtual QString toPEM() const { return QString(cert_pem); }
+    virtual QString toPEM() const
+    {
+        return QString(cert_pem);
+    }
 
     virtual ConvertResult fromDER(const QByteArray &a)
     {
@@ -284,7 +398,10 @@ public:
         return false;
     }
 
-    virtual const CertContextProps *props() const { return &_props; }
+    virtual const CertContextProps *props() const
+    {
+        return &_props;
+    }
 
     virtual bool compare(const CertContext *other) const
     {
@@ -307,8 +424,11 @@ public:
         return false;
     }
 
-    virtual Validity validate(const QList<CertContext *> &trusted, const QList<CertContext *> &untrusted,
-                              const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const
+    virtual Validity validate(const QList<CertContext *> &trusted,
+                              const QList<CertContext *> &untrusted,
+                              const QList<CRLContext *> & crls,
+                              UsageMode                   u,
+                              ValidateFlags               vf) const
     {
         Q_UNUSED(trusted);
         Q_UNUSED(untrusted);
@@ -318,8 +438,11 @@ public:
         return ErrorValidityUnknown;
     }
 
-    virtual Validity validate_chain(const QList<CertContext *> &chain, const QList<CertContext *> &trusted,
-                                    const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const
+    virtual Validity validate_chain(const QList<CertContext *> &chain,
+                                    const QList<CertContext *> &trusted,
+                                    const QList<CRLContext *> & crls,
+                                    UsageMode                   u,
+                                    ValidateFlags               vf) const
     {
         Q_UNUSED(chain);
         Q_UNUSED(trusted);
@@ -341,27 +464,60 @@ public:
     KeyBundle     kb;
     TestKeyStore *store;
 
-    TestKeyStoreEntryContext(Provider *p) : KeyStoreEntryContext(p) { }
+    TestKeyStoreEntryContext(Provider *p)
+        : KeyStoreEntryContext(p)
+    {
+    }
 
-    virtual Context *clone() const { return new TestKeyStoreEntryContext(*this); }
+    virtual Context *clone() const
+    {
+        return new TestKeyStoreEntryContext(*this);
+    }
 
-    virtual KeyStoreEntry::Type type() const { return KeyStoreEntry::TypeKeyBundle; }
+    virtual KeyStoreEntry::Type type() const
+    {
+        return KeyStoreEntry::TypeKeyBundle;
+    }
 
-    virtual QString id() const { return _id; }
+    virtual QString id() const
+    {
+        return _id;
+    }
 
-    virtual QString name() const { return _name; }
+    virtual QString name() const
+    {
+        return _name;
+    }
 
-    virtual QString storeId() const { return _storeId; }
+    virtual QString storeId() const
+    {
+        return _storeId;
+    }
 
-    virtual QString storeName() const { return _storeName; }
+    virtual QString storeName() const
+    {
+        return _storeName;
+    }
 
-    virtual bool isAvailable() const { return store->avail; }
+    virtual bool isAvailable() const
+    {
+        return store->avail;
+    }
 
-    virtual QString serialize() const { return QString("qca-test-1/fake_serialized"); }
+    virtual QString serialize() const
+    {
+        return QString("qca-test-1/fake_serialized");
+    }
 
-    virtual KeyBundle keyBundle() const { return kb; }
+    virtual KeyBundle keyBundle() const
+    {
+        return kb;
+    }
 
-    virtual bool ensureAccess() { return true; }
+    virtual bool ensureAccess()
+    {
+        return true;
+    }
 };
 
 KeyStoreEntry make_entry(Provider *p, TestKeyStore *store)
@@ -391,7 +547,9 @@ public:
     bool     first;
     int      next_id;
 
-    TestKeyStoreListContext(Provider *p) : KeyStoreListContext(p), t(this)
+    TestKeyStoreListContext(Provider *p)
+        : KeyStoreListContext(p)
+        , t(this)
     {
         step    = 0;
         next_id = 1;
@@ -435,7 +593,10 @@ public:
         return -1;
     }
 
-    virtual Context *clone() const { return 0; }
+    virtual Context *clone() const
+    {
+        return 0;
+    }
 
     virtual void start()
     {
@@ -444,7 +605,10 @@ public:
         t.start(2000);
     }
 
-    virtual void setUpdatesEnabled(bool enabled) { Q_UNUSED(enabled); }
+    virtual void setUpdatesEnabled(bool enabled)
+    {
+        Q_UNUSED(enabled);
+    }
 
     virtual QList<int> keyStores()
     {
@@ -632,7 +796,10 @@ class qca_test : public QObject, public QCAPlugin
     Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
     Q_INTERFACES(QCAPlugin)
 public:
-    virtual Provider *createProvider() { return new TestProvider; }
+    virtual Provider *createProvider()
+    {
+        return new TestProvider;
+    }
 };
 
 #include "qca-test.moc"

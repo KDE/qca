@@ -69,7 +69,10 @@ public:
         bool user, authzid, pass, realm;
     };
 
-    SASLParams() { reset(); }
+    SASLParams()
+    {
+        reset();
+    }
 
     void reset()
     {
@@ -383,8 +386,15 @@ private:
             maxoutbuf = *(const int *)maybe_maxoutbuf;
     }
 
-    static int scb_checkauth(sasl_conn_t *, void *context, const char *requested_user, unsigned,
-                             const char *auth_identity, unsigned, const char *, unsigned, struct propctx *)
+    static int scb_checkauth(sasl_conn_t *,
+                             void *      context,
+                             const char *requested_user,
+                             unsigned,
+                             const char *auth_identity,
+                             unsigned,
+                             const char *,
+                             unsigned,
+                             struct propctx *)
     {
         saslContext *that = (saslContext *)context;
         that->sc_username = QString::fromLatin1(auth_identity);  // yeah yeah, it looks
@@ -490,9 +500,9 @@ private:
                 }
                 const char * serverout;
                 unsigned int serveroutlen;
-                ca_flag     = false;
-                const int r = sasl_server_start(con, in_mech.toLatin1().data(), clientin, clientinlen, &serverout,
-                                                &serveroutlen);
+                ca_flag = false;
+                const int r =
+                    sasl_server_start(con, in_mech.toLatin1().data(), clientin, clientinlen, &serverout, &serveroutlen);
                 if (r != SASL_OK && r != SASL_CONTINUE) {
                     setAuthCondition(r);
                     result_result = Error;
@@ -583,10 +593,14 @@ private:
         return true;
     }
 
-    void doResultsReady() { QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection); }
+    void doResultsReady()
+    {
+        QMetaObject::invokeMethod(this, "resultsReady", Qt::QueuedConnection);
+    }
 
 public:
-    saslContext(saslProvider *_g) : SASLContext(_g)
+    saslContext(saslProvider *_g)
+        : SASLContext(_g)
     {
         result_result = Success;
         g             = _g;
@@ -596,11 +610,20 @@ public:
         reset();
     }
 
-    ~saslContext() override { reset(); }
+    ~saslContext() override
+    {
+        reset();
+    }
 
-    Provider::Context *clone() const override { return nullptr; }
+    Provider::Context *clone() const override
+    {
+        return nullptr;
+    }
 
-    Result result() const override { return result_result; }
+    Result result() const override
+    {
+        return result_result;
+    }
 
     void reset() override
     {
@@ -608,8 +631,12 @@ public:
         resetParams();
     }
 
-    void setup(const QString &_service, const QString &_host, const HostPort *local, const HostPort *remote,
-               const QString &ext_id, int _ext_ssf) override
+    void setup(const QString & _service,
+               const QString & _host,
+               const HostPort *local,
+               const HostPort *remote,
+               const QString & ext_id,
+               int             _ext_ssf) override
     {
         service    = _service;
         host       = _host;
@@ -619,7 +646,10 @@ public:
         ext_ssf    = _ext_ssf;
     }
 
-    int ssf() const override { return result_ssf; }
+    int ssf() const override
+    {
+        return result_ssf;
+    }
 
     void startClient(const QStringList &mechlist, bool allowClientSendFirst) override
     {
@@ -656,10 +686,13 @@ public:
 
         result_result = Error;
 
-        const int r
-            = sasl_client_new(service.toLatin1().data(), host.toLatin1().data(),
-                              localAddr.isEmpty() ? nullptr : localAddr.toLatin1().data(),
-                              remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(), callbacks, 0, &con);
+        const int r = sasl_client_new(service.toLatin1().data(),
+                                      host.toLatin1().data(),
+                                      localAddr.isEmpty() ? nullptr : localAddr.toLatin1().data(),
+                                      remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(),
+                                      callbacks,
+                                      0,
+                                      &con);
         if (r != SASL_OK) {
             setAuthCondition(r);
             doResultsReady();
@@ -695,8 +728,15 @@ public:
         callbacks = new sasl_callback_t[2];
 
         union PtrCast {
-            int (*specific)(sasl_conn_t *, void *context, const char *requested_user, unsigned,
-                            const char *auth_identity, unsigned, const char *, unsigned, struct propctx *);
+            int (*specific)(sasl_conn_t *,
+                            void *      context,
+                            const char *requested_user,
+                            unsigned,
+                            const char *auth_identity,
+                            unsigned,
+                            const char *,
+                            unsigned,
+                            struct propctx *);
             int (*generic)();
         };
         PtrCast cast;
@@ -712,10 +752,14 @@ public:
 
         result_result = Error;
 
-        int r = sasl_server_new(service.toLatin1().data(), host.toLatin1().data(),
+        int r = sasl_server_new(service.toLatin1().data(),
+                                host.toLatin1().data(),
                                 !realm.isEmpty() ? realm.toLatin1().data() : nullptr,
                                 localAddr.isEmpty() ? nullptr : localAddr.toLatin1().data(),
-                                remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(), callbacks, 0, &con);
+                                remoteAddr.isEmpty() ? nullptr : remoteAddr.toLatin1().data(),
+                                callbacks,
+                                0,
+                                &con);
         if (r != SASL_OK) {
             setAuthCondition(r);
             doResultsReady();
@@ -760,8 +804,8 @@ public:
         return SASL::Params(sparams.user, sparams.authzid, sparams.pass, sparams.realm);
     }
 
-    void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass,
-                         const QString *realm) override
+    void
+    setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm) override
     {
         if (user)
             params.setUsername(*user);
@@ -773,9 +817,15 @@ public:
             params.setRealm(*realm);
     }
 
-    QString username() const override { return sc_username; }
+    QString username() const override
+    {
+        return sc_username;
+    }
 
-    QString authzid() const override { return sc_authzid; }
+    QString authzid() const override
+    {
+        return sc_authzid;
+    }
 
     void nextStep(const QByteArray &from_net) override
     {
@@ -800,7 +850,10 @@ public:
             return out_mech;
     }
 
-    QStringList mechlist() const override { return result_mechlist; }
+    QStringList mechlist() const override
+    {
+        return result_mechlist;
+    }
 
     QStringList realmlist() const override
     {
@@ -854,9 +907,15 @@ public:
         doResultsReady();
     }
 
-    bool haveClientInit() const override { return result_haveClientInit; }
+    bool haveClientInit() const override
+    {
+        return result_haveClientInit;
+    }
 
-    QByteArray stepData() const override { return out_buf; }
+    QByteArray stepData() const override
+    {
+        return out_buf;
+    }
 
     QByteArray to_net() override
     {
@@ -865,7 +924,10 @@ public:
         return a;
     }
 
-    int encoded() const override { return result_encoded; }
+    int encoded() const override
+    {
+        return result_encoded;
+    }
 
     QByteArray to_app() override
     {
@@ -874,7 +936,10 @@ public:
         return a;
     }
 
-    SASL::AuthCondition authCondition() const override { return result_authCondition; }
+    SASL::AuthCondition authCondition() const override
+    {
+        return result_authCondition;
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -886,7 +951,9 @@ saslProvider::saslProvider()
     server_init = false;
 }
 
-void saslProvider::init() { }
+void saslProvider::init()
+{
+}
 
 saslProvider::~saslProvider()
 {
@@ -894,9 +961,15 @@ saslProvider::~saslProvider()
         sasl_done();
 }
 
-int saslProvider::qcaVersion() const { return QCA_VERSION; }
+int saslProvider::qcaVersion() const
+{
+    return QCA_VERSION;
+}
 
-QString saslProvider::name() const { return QStringLiteral("qca-cyrus-sasl"); }
+QString saslProvider::name() const
+{
+    return QStringLiteral("qca-cyrus-sasl");
+}
 
 QString saslProvider::credit() const
 {
@@ -933,7 +1006,10 @@ class qca_cyrus_sasl : public QObject, public QCAPlugin
     Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
     Q_INTERFACES(QCAPlugin)
 public:
-    Provider *createProvider() override { return new saslProvider; }
+    Provider *createProvider() override
+    {
+        return new saslProvider;
+    }
 };
 
 #include "qca-cyrus-sasl.moc"

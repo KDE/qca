@@ -45,7 +45,10 @@ private:
     QCA::Initializer *m_init;
 };
 
-void KeyLengthUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void KeyLengthUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
 void KeyLengthUnitTest::cleanupTestCase()
 {

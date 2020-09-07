@@ -48,7 +48,10 @@ private:
     QCA::Initializer *m_init;
 };
 
-void KeyBundleTest::initTestCase() { m_init = new QCA::Initializer; }
+void KeyBundleTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
 void KeyBundleTest::cleanupTestCase()
 {
@@ -185,8 +188,8 @@ void KeyBundleTest::createBundle()
             bool result = newBundle->toFile(tempFile.fileName(), "file passphrase", provider);
             QVERIFY(result);
 
-            QCA::KeyBundle bundleFromFile
-                = QCA::KeyBundle::fromFile(tempFile.fileName(), "file passphrase", &res, provider);
+            QCA::KeyBundle bundleFromFile =
+                QCA::KeyBundle::fromFile(tempFile.fileName(), "file passphrase", &res, provider);
             QCOMPARE(res, QCA::ConvertGood);
             QCOMPARE(bundleFromFile.isNull(), false);
             QCOMPARE(bundleFromFile.name(), QStringLiteral("My New Key Bundle"));

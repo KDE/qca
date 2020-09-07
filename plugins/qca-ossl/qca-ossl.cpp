@@ -162,21 +162,26 @@ class opensslHashContext : public HashContext
 {
     Q_OBJECT
 public:
-    opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type) : HashContext(p, type)
+    opensslHashContext(const EVP_MD *algorithm, Provider *p, const QString &type)
+        : HashContext(p, type)
     {
         m_algorithm = algorithm;
         m_context   = EVP_MD_CTX_new();
         EVP_DigestInit(m_context, m_algorithm);
     }
 
-    opensslHashContext(const opensslHashContext &other) : HashContext(other)
+    opensslHashContext(const opensslHashContext &other)
+        : HashContext(other)
     {
         m_algorithm = other.m_algorithm;
         m_context   = EVP_MD_CTX_new();
         EVP_MD_CTX_copy_ex(m_context, other.m_context);
     }
 
-    ~opensslHashContext() override { EVP_MD_CTX_free(m_context); }
+    ~opensslHashContext() override
+    {
+        EVP_MD_CTX_free(m_context);
+    }
 
     void clear() override
     {
@@ -185,7 +190,10 @@ public:
         EVP_DigestInit(m_context, m_algorithm);
     }
 
-    void update(const MemoryRegion &a) override { EVP_DigestUpdate(m_context, (unsigned char *)a.data(), a.size()); }
+    void update(const MemoryRegion &a) override
+    {
+        EVP_DigestUpdate(m_context, (unsigned char *)a.data(), a.size());
+    }
 
     MemoryRegion final() override
     {
@@ -194,7 +202,10 @@ public:
         return a;
     }
 
-    Provider::Context *clone() const override { return new opensslHashContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new opensslHashContext(*this);
+    }
 
 protected:
     const EVP_MD *m_algorithm;
@@ -205,26 +216,36 @@ class opensslPbkdf1Context : public KDFContext
 {
     Q_OBJECT
 public:
-    opensslPbkdf1Context(const EVP_MD *algorithm, Provider *p, const QString &type) : KDFContext(p, type)
+    opensslPbkdf1Context(const EVP_MD *algorithm, Provider *p, const QString &type)
+        : KDFContext(p, type)
     {
         m_algorithm = algorithm;
         m_context   = EVP_MD_CTX_new();
         EVP_DigestInit(m_context, m_algorithm);
     }
 
-    opensslPbkdf1Context(const opensslPbkdf1Context &other) : KDFContext(other)
+    opensslPbkdf1Context(const opensslPbkdf1Context &other)
+        : KDFContext(other)
     {
         m_algorithm = other.m_algorithm;
         m_context   = EVP_MD_CTX_new();
         EVP_MD_CTX_copy(m_context, other.m_context);
     }
 
-    ~opensslPbkdf1Context() override { EVP_MD_CTX_free(m_context); }
+    ~opensslPbkdf1Context() override
+    {
+        EVP_MD_CTX_free(m_context);
+    }
 
-    Provider::Context *clone() const override { return new opensslPbkdf1Context(*this); }
+    Provider::Context *clone() const override
+    {
+        return new opensslPbkdf1Context(*this);
+    }
 
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                         unsigned int iterationCount) override
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         unsigned int                iterationCount) override
     {
         /* from RFC2898:
            Steps:
@@ -270,8 +291,11 @@ public:
         return a;
     }
 
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                         int msecInterval, unsigned int *iterationCount) override
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         int                         msecInterval,
+                         unsigned int *              iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QElapsedTimer timer;
@@ -335,21 +359,37 @@ class opensslPbkdf2Context : public KDFContext
 {
     Q_OBJECT
 public:
-    opensslPbkdf2Context(Provider *p, const QString &type) : KDFContext(p, type) { }
+    opensslPbkdf2Context(Provider *p, const QString &type)
+        : KDFContext(p, type)
+    {
+    }
 
-    Provider::Context *clone() const override { return new opensslPbkdf2Context(*this); }
+    Provider::Context *clone() const override
+    {
+        return new opensslPbkdf2Context(*this);
+    }
 
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                         unsigned int iterationCount) override
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         unsigned int                iterationCount) override
     {
         SecureArray out(keyLength);
-        PKCS5_PBKDF2_HMAC_SHA1((char *)secret.data(), secret.size(), (unsigned char *)salt.data(), salt.size(),
-                               iterationCount, keyLength, (unsigned char *)out.data());
+        PKCS5_PBKDF2_HMAC_SHA1((char *)secret.data(),
+                               secret.size(),
+                               (unsigned char *)salt.data(),
+                               salt.size(),
+                               iterationCount,
+                               keyLength,
+                               (unsigned char *)out.data());
         return out;
     }
 
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, unsigned int keyLength,
-                         int msecInterval, unsigned int *iterationCount) override
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         unsigned int                keyLength,
+                         int                         msecInterval,
+                         unsigned int *              iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QElapsedTimer timer;
@@ -362,8 +402,13 @@ public:
         // So we need to calculate first the number of iterations for
         // That time interval, then feed the iterationCounts to PBKDF2
         while (timer.elapsed() < msecInterval) {
-            PKCS5_PBKDF2_HMAC_SHA1((char *)secret.data(), secret.size(), (unsigned char *)salt.data(), salt.size(), 1,
-                                   keyLength, (unsigned char *)out.data());
+            PKCS5_PBKDF2_HMAC_SHA1((char *)secret.data(),
+                                   secret.size(),
+                                   (unsigned char *)salt.data(),
+                                   salt.size(),
+                                   1,
+                                   keyLength,
+                                   (unsigned char *)out.data());
             ++(*iterationCount);
         }
 
@@ -381,12 +426,20 @@ class opensslHkdfContext : public HKDFContext
 {
     Q_OBJECT
 public:
-    opensslHkdfContext(Provider *p, const QString &type) : HKDFContext(p, type) { }
+    opensslHkdfContext(Provider *p, const QString &type)
+        : HKDFContext(p, type)
+    {
+    }
 
-    Provider::Context *clone() const override { return new opensslHkdfContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new opensslHkdfContext(*this);
+    }
 
-    SymmetricKey makeKey(const SecureArray &secret, const InitializationVector &salt, const InitializationVector &info,
-                         unsigned int keyLength) override
+    SymmetricKey makeKey(const SecureArray &         secret,
+                         const InitializationVector &salt,
+                         const InitializationVector &info,
+                         unsigned int                keyLength) override
     {
         SecureArray out(keyLength);
 #ifdef EVP_PKEY_HKDF
@@ -403,8 +456,13 @@ public:
         unsigned char  prk[EVP_MAX_MD_SIZE];
         unsigned char *ret;
         unsigned int   prk_len;
-        HMAC(EVP_sha256(), salt.data(), salt.size(), reinterpret_cast<const unsigned char *>(secret.data()),
-             secret.size(), prk, &prk_len);
+        HMAC(EVP_sha256(),
+             salt.data(),
+             salt.size(),
+             reinterpret_cast<const unsigned char *>(secret.data()),
+             secret.size(),
+             prk,
+             &prk_len);
         HMAC_CTX      hmac;
         unsigned char prev[EVP_MAX_MD_SIZE];
         size_t        done_len = 0;
@@ -438,29 +496,40 @@ class opensslHMACContext : public MACContext
 {
     Q_OBJECT
 public:
-    opensslHMACContext(const EVP_MD *algorithm, Provider *p, const QString &type) : MACContext(p, type)
+    opensslHMACContext(const EVP_MD *algorithm, Provider *p, const QString &type)
+        : MACContext(p, type)
     {
         m_algorithm = algorithm;
         m_context   = HMAC_CTX_new();
     }
 
-    opensslHMACContext(const opensslHMACContext &other) : MACContext(other)
+    opensslHMACContext(const opensslHMACContext &other)
+        : MACContext(other)
     {
         m_algorithm = other.m_algorithm;
         m_context   = HMAC_CTX_new();
         HMAC_CTX_copy(m_context, other.m_context);
     }
 
-    ~opensslHMACContext() override { HMAC_CTX_free(m_context); }
+    ~opensslHMACContext() override
+    {
+        HMAC_CTX_free(m_context);
+    }
 
     void setup(const SymmetricKey &key) override
     {
         HMAC_Init_ex(m_context, key.data(), key.size(), m_algorithm, nullptr);
     }
 
-    KeyLength keyLength() const override { return anyKeyLength(); }
+    KeyLength keyLength() const override
+    {
+        return anyKeyLength();
+    }
 
-    void update(const MemoryRegion &a) override { HMAC_Update(m_context, (unsigned char *)a.data(), a.size()); }
+    void update(const MemoryRegion &a) override
+    {
+        HMAC_Update(m_context, (unsigned char *)a.data(), a.size());
+    }
 
     void final(MemoryRegion *out) override
     {
@@ -470,7 +539,10 @@ public:
         *out = sa;
     }
 
-    Provider::Context *clone() const override { return new opensslHMACContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new opensslHMACContext(*this);
+    }
 
 protected:
     HMAC_CTX *    m_context;
@@ -556,7 +628,10 @@ static BigInteger decode(const QByteArray &prime)
 }
 
 #ifndef OPENSSL_FIPS
-static QByteArray decode_seed(const QByteArray &hex_seed) { return dehex(hex_seed); }
+static QByteArray decode_seed(const QByteArray &hex_seed)
+{
+    return dehex(hex_seed);
+}
 #endif
 
 class DLParams
@@ -567,14 +642,14 @@ public:
 
 #ifndef OPENSSL_FIPS
 namespace {
-    struct DsaDeleter
+struct DsaDeleter
+{
+    static inline void cleanup(void *pointer)
     {
-        static inline void cleanup(void *pointer)
-        {
-            if (pointer)
-                DSA_free((DSA *)pointer);
-        }
-    };
+        if (pointer)
+            DSA_free((DSA *)pointer);
+    }
+};
 } // end of anonymous namespace
 
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
@@ -584,9 +659,8 @@ static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams
     if (!dsa)
         return false;
 
-    if (DSA_generate_parameters_ex(dsa.data(), bits, (const unsigned char *)seed.data(), seed.size(), &ret_counter,
-                                   nullptr, nullptr)
-        != 1)
+    if (DSA_generate_parameters_ex(
+            dsa.data(), bits, (const unsigned char *)seed.data(), seed.size(), &ret_counter, nullptr, nullptr) != 1)
         return false;
 
     if (ret_counter != counter)
@@ -618,9 +692,15 @@ public:
     bool       ok;
     DLParams   params;
 
-    DLGroupMaker(DLGroupSet _set) { set = _set; }
+    DLGroupMaker(DLGroupSet _set)
+    {
+        set = _set;
+    }
 
-    ~DLGroupMaker() override { wait(); }
+    ~DLGroupMaker() override
+    {
+        wait();
+    }
 
     void run() override
     {
@@ -667,21 +747,29 @@ public:
     DLParams      params;
     bool          empty;
 
-    MyDLGroup(Provider *p) : DLGroupContext(p)
+    MyDLGroup(Provider *p)
+        : DLGroupContext(p)
     {
         gm    = nullptr;
         empty = true;
     }
 
-    MyDLGroup(const MyDLGroup &from) : DLGroupContext(from.provider())
+    MyDLGroup(const MyDLGroup &from)
+        : DLGroupContext(from.provider())
     {
         gm    = nullptr;
         empty = true;
     }
 
-    ~MyDLGroup() override { delete gm; }
+    ~MyDLGroup() override
+    {
+        delete gm;
+    }
 
-    Provider::Context *clone() const override { return new MyDLGroup(*this); }
+    Provider::Context *clone() const override
+    {
+        return new MyDLGroup(*this);
+    }
 
     QList<DLGroupSet> supportedGroupSets() const override
     {
@@ -700,7 +788,10 @@ public:
         return list;
     }
 
-    bool isNull() const override { return empty; }
+    bool isNull() const override
+    {
+        return empty;
+    }
 
     void fetchGroup(DLGroupSet set, bool block) override
     {
@@ -752,9 +843,15 @@ class MyCertCollectionContext : public CertCollectionContext
 {
     Q_OBJECT
 public:
-    MyCertCollectionContext(Provider *p) : CertCollectionContext(p) { }
+    MyCertCollectionContext(Provider *p)
+        : CertCollectionContext(p)
+    {
+    }
 
-    Provider::Context *clone() const override { return new MyCertCollectionContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new MyCertCollectionContext(*this);
+    }
 
     QByteArray toPKCS7(const QList<CertContext *> &certs, const QList<CRLContext *> &crls) const override
     {
@@ -816,14 +913,24 @@ class MyPKCS12Context : public PKCS12Context
 {
     Q_OBJECT
 public:
-    MyPKCS12Context(Provider *p) : PKCS12Context(p) { }
+    MyPKCS12Context(Provider *p)
+        : PKCS12Context(p)
+    {
+    }
 
-    ~MyPKCS12Context() override { }
+    ~MyPKCS12Context() override
+    {
+    }
 
-    Provider::Context *clone() const override { return nullptr; }
+    Provider::Context *clone() const override
+    {
+        return nullptr;
+    }
 
-    QByteArray toPKCS12(const QString &name, const QList<const CertContext *> &chain, const PKeyContext &priv,
-                        const SecureArray &passphrase) const override
+    QByteArray toPKCS12(const QString &                   name,
+                        const QList<const CertContext *> &chain,
+                        const PKeyContext &               priv,
+                        const SecureArray &               passphrase) const override
     {
         if (chain.count() < 1)
             return QByteArray();
@@ -837,9 +944,9 @@ public:
                 sk_X509_push(ca, x);
             }
         }
-        const MyPKeyContext &pk = static_cast<const MyPKeyContext &>(priv);
-        PKCS12 *p12 = PKCS12_create((char *)passphrase.data(), (char *)name.toLatin1().data(), pk.get_pkey(), cert, ca,
-                                    0, 0, 0, 0, 0);
+        const MyPKeyContext &pk  = static_cast<const MyPKeyContext &>(priv);
+        PKCS12 *             p12 = PKCS12_create(
+            (char *)passphrase.data(), (char *)name.toLatin1().data(), pk.get_pkey(), cert, ca, 0, 0, 0, 0, 0);
         sk_X509_pop_free(ca, X509_free);
 
         if (!p12)
@@ -851,8 +958,11 @@ public:
         return out;
     }
 
-    ConvertResult fromPKCS12(const QByteArray &in, const SecureArray &passphrase, QString *name,
-                             QList<CertContext *> *chain, PKeyContext **priv) const override
+    ConvertResult fromPKCS12(const QByteArray &    in,
+                             const SecureArray &   passphrase,
+                             QString *             name,
+                             QList<CertContext *> *chain,
+                             PKeyContext **        priv) const override
     {
         BIO *bi = BIO_new(BIO_s_mem());
         BIO_write(bi, in.data(), in.size());
@@ -944,17 +1054,34 @@ public:
     CertificateCollection   untrustedCerts;
     QList<SecureMessageKey> privateKeys;
 
-    CMSContext(Provider *p) : SMSContext(p, QStringLiteral("cms")) { }
+    CMSContext(Provider *p)
+        : SMSContext(p, QStringLiteral("cms"))
+    {
+    }
 
-    ~CMSContext() override { }
+    ~CMSContext() override
+    {
+    }
 
-    Provider::Context *clone() const override { return nullptr; }
+    Provider::Context *clone() const override
+    {
+        return nullptr;
+    }
 
-    void setTrustedCertificates(const CertificateCollection &trusted) override { trustedCerts = trusted; }
+    void setTrustedCertificates(const CertificateCollection &trusted) override
+    {
+        trustedCerts = trusted;
+    }
 
-    void setUntrustedCertificates(const CertificateCollection &untrusted) override { untrustedCerts = untrusted; }
+    void setUntrustedCertificates(const CertificateCollection &untrusted) override
+    {
+        untrustedCerts = untrusted;
+    }
 
-    void setPrivateKeys(const QList<SecureMessageKey> &keys) override { privateKeys = keys; }
+    void setPrivateKeys(const QList<SecureMessageKey> &keys) override
+    {
+        privateKeys = keys;
+    }
 
     MessageContext *createMessage() override;
 };
@@ -985,7 +1112,11 @@ public:
     bool       ok;
     QByteArray out, sig;
 
-    MyMessageContextThread(QObject *parent = nullptr) : QThread(parent), ok(false) { }
+    MyMessageContextThread(QObject *parent = nullptr)
+        : QThread(parent)
+        , ok(false)
+    {
+    }
 
 protected:
     static int ssl_error_callback(const char *message, size_t len, void *user_data)
@@ -1061,7 +1192,8 @@ public:
 
     MyMessageContextThread *thread;
 
-    MyMessageContext(CMSContext *_cms, Provider *p) : MessageContext(p, QStringLiteral("cmsmsg"))
+    MyMessageContext(CMSContext *_cms, Provider *p)
+        : MessageContext(p, QStringLiteral("cmsmsg"))
     {
         cms = _cms;
 
@@ -1072,17 +1204,33 @@ public:
         thread = nullptr;
     }
 
-    ~MyMessageContext() override { }
+    ~MyMessageContext() override
+    {
+    }
 
-    Provider::Context *clone() const override { return nullptr; }
+    Provider::Context *clone() const override
+    {
+        return nullptr;
+    }
 
-    bool canSignMultiple() const override { return false; }
+    bool canSignMultiple() const override
+    {
+        return false;
+    }
 
-    SecureMessage::Type type() const override { return SecureMessage::CMS; }
+    SecureMessage::Type type() const override
+    {
+        return SecureMessage::CMS;
+    }
 
-    void reset() override { }
+    void reset() override
+    {
+    }
 
-    void setupEncrypt(const SecureMessageKeyList &keys) override { to = keys; }
+    void setupEncrypt(const SecureMessageKeyList &keys) override
+    {
+        to = keys;
+    }
 
     void setupSign(const SecureMessageKeyList &keys, SecureMessage::SignMode m, bool bundleSigner, bool smime) override
     {
@@ -1121,7 +1269,10 @@ public:
         QMetaObject::invokeMethod(this, "updated", Qt::QueuedConnection);
     }
 
-    QByteArray read() override { return out; }
+    QByteArray read() override
+    {
+        return out;
+    }
 
     int written() override
     {
@@ -1420,7 +1571,10 @@ public:
         }
     }
 
-    bool finished() const override { return _finished; }
+    bool finished() const override
+    {
+        return _finished;
+    }
 
     bool waitForFinished(int msecs) override
     {
@@ -1446,7 +1600,10 @@ public:
         return SecureMessage::ErrorUnknown;
     }
 
-    QByteArray signature() const override { return sig; }
+    QByteArray signature() const override
+    {
+        return sig;
+    }
 
     QString hashName() const override
     {
@@ -1501,14 +1658,17 @@ private Q_SLOTS:
     }
 };
 
-MessageContext *CMSContext::createMessage() { return new MyMessageContext(this, provider()); }
+MessageContext *CMSContext::createMessage()
+{
+    return new MyMessageContext(this, provider());
+}
 
 class opensslCipherContext : public CipherContext
 {
     Q_OBJECT
 public:
-    opensslCipherContext(const EVP_CIPHER *algorithm, const int pad, Provider *p, const QString &type) :
-        CipherContext(p, type)
+    opensslCipherContext(const EVP_CIPHER *algorithm, const int pad, Provider *p, const QString &type)
+        : CipherContext(p, type)
     {
         m_cryptoAlgorithm = algorithm;
         m_context         = EVP_CIPHER_CTX_new();
@@ -1517,7 +1677,8 @@ public:
         m_type = type;
     }
 
-    opensslCipherContext(const opensslCipherContext &other) : CipherContext(other)
+    opensslCipherContext(const opensslCipherContext &other)
+        : CipherContext(other)
     {
         m_cryptoAlgorithm = other.m_cryptoAlgorithm;
         m_context         = EVP_CIPHER_CTX_new();
@@ -1549,8 +1710,8 @@ public:
                 int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
                 EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
             }
-            EVP_EncryptInit_ex(m_context, nullptr, nullptr, (const unsigned char *)(key.data()),
-                               (const unsigned char *)(iv.data()));
+            EVP_EncryptInit_ex(
+                m_context, nullptr, nullptr, (const unsigned char *)(key.data()), (const unsigned char *)(iv.data()));
         } else {
             EVP_DecryptInit_ex(m_context, m_cryptoAlgorithm, nullptr, nullptr, nullptr);
             EVP_CIPHER_CTX_set_key_length(m_context, key.size());
@@ -1558,18 +1719,27 @@ public:
                 int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
                 EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
             }
-            EVP_DecryptInit_ex(m_context, nullptr, nullptr, (const unsigned char *)(key.data()),
-                               (const unsigned char *)(iv.data()));
+            EVP_DecryptInit_ex(
+                m_context, nullptr, nullptr, (const unsigned char *)(key.data()), (const unsigned char *)(iv.data()));
         }
 
         EVP_CIPHER_CTX_set_padding(m_context, m_pad);
     }
 
-    Provider::Context *clone() const override { return new opensslCipherContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new opensslCipherContext(*this);
+    }
 
-    int blockSize() const override { return EVP_CIPHER_CTX_block_size(m_context); }
+    int blockSize() const override
+    {
+        return EVP_CIPHER_CTX_block_size(m_context);
+    }
 
-    AuthTag tag() const override { return m_tag; }
+    AuthTag tag() const override
+    {
+        return m_tag;
+    }
 
     bool update(const SecureArray &in, SecureArray *out) override
     {
@@ -1581,15 +1751,15 @@ public:
         out->resize(in.size() + blockSize());
         int resultLength;
         if (Encode == m_direction) {
-            if (0
-                == EVP_EncryptUpdate(m_context, (unsigned char *)out->data(), &resultLength, (unsigned char *)in.data(),
-                                     in.size())) {
+            if (0 ==
+                EVP_EncryptUpdate(
+                    m_context, (unsigned char *)out->data(), &resultLength, (unsigned char *)in.data(), in.size())) {
                 return false;
             }
         } else {
-            if (0
-                == EVP_DecryptUpdate(m_context, (unsigned char *)out->data(), &resultLength, (unsigned char *)in.data(),
-                                     in.size())) {
+            if (0 ==
+                EVP_DecryptUpdate(
+                    m_context, (unsigned char *)out->data(), &resultLength, (unsigned char *)in.data(), in.size())) {
                 return false;
             }
         }
@@ -1795,24 +1965,45 @@ class opensslInfoContext : public InfoContext
 {
     Q_OBJECT
 public:
-    opensslInfoContext(Provider *p) : InfoContext(p) { }
+    opensslInfoContext(Provider *p)
+        : InfoContext(p)
+    {
+    }
 
-    Provider::Context *clone() const override { return new opensslInfoContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new opensslInfoContext(*this);
+    }
 
-    QStringList supportedHashTypes() const override { return all_hash_types(); }
+    QStringList supportedHashTypes() const override
+    {
+        return all_hash_types();
+    }
 
-    QStringList supportedCipherTypes() const override { return all_cipher_types(); }
+    QStringList supportedCipherTypes() const override
+    {
+        return all_cipher_types();
+    }
 
-    QStringList supportedMACTypes() const override { return all_mac_types(); }
+    QStringList supportedMACTypes() const override
+    {
+        return all_mac_types();
+    }
 };
 
 class opensslRandomContext : public RandomContext
 {
     Q_OBJECT
 public:
-    opensslRandomContext(QCA::Provider *p) : RandomContext(p) { }
+    opensslRandomContext(QCA::Provider *p)
+        : RandomContext(p)
+    {
+    }
 
-    Context *clone() const override { return new opensslRandomContext(*this); }
+    Context *clone() const override
+    {
+        return new opensslRandomContext(*this);
+    }
 
     QCA::SecureArray nextBytes(int size) override
     {
@@ -1837,7 +2028,10 @@ class opensslProvider : public Provider
 public:
     bool openssl_initted;
 
-    opensslProvider() { openssl_initted = false; }
+    opensslProvider()
+    {
+        openssl_initted = false;
+    }
 
     void init() override
     {
@@ -1873,14 +2067,21 @@ public:
         ERR_free_strings();*/
     }
 
-    int qcaVersion() const override { return QCA_VERSION; }
+    int qcaVersion() const override
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const override { return QStringLiteral("qca-ossl"); }
+    QString name() const override
+    {
+        return QStringLiteral("qca-ossl");
+    }
 
     QString credit() const override
     {
-        return QStringLiteral("This product includes cryptographic software "
-                              "written by Eric Young (eay@cryptsoft.com)");
+        return QStringLiteral(
+            "This product includes cryptographic software "
+            "written by Eric Young (eay@cryptsoft.com)");
     }
 
     QStringList features() const override
@@ -2149,7 +2350,10 @@ class qca_ossl : public QObject, public QCAPlugin
     Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
     Q_INTERFACES(QCAPlugin)
 public:
-    Provider *createProvider() override { return new opensslProvider; }
+    Provider *createProvider() override
+    {
+        return new opensslProvider;
+    }
 };
 
 #include "qca-ossl.moc"

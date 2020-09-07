@@ -43,9 +43,13 @@ public:
     QString slotevent_method;
     int     slotevent_timeout;
 
-    Pkcs11ProviderConfig() :
-        allow_protected_authentication(true), cert_private(false), enabled(false), private_mask(0),
-        slotevent_method("auto"), slotevent_timeout(0)
+    Pkcs11ProviderConfig()
+        : allow_protected_authentication(true)
+        , cert_private(false)
+        , enabled(false)
+        , private_mask(0)
+        , slotevent_method("auto")
+        , slotevent_timeout(0)
     {
     }
 
@@ -91,7 +95,13 @@ public:
 
     QVariantMap orig_config;
 
-    Pkcs11Config() : allow_load_rootca(false), allow_protected_authentication(true), log_level(0), pin_cache(-1) { }
+    Pkcs11Config()
+        : allow_load_rootca(false)
+        , allow_protected_authentication(true)
+        , log_level(0)
+        , pin_cache(-1)
+    {
+    }
 
     QVariantMap toVariantMap() const
     {
@@ -189,7 +199,10 @@ class ModuleListModel : public QAbstractListModel
 public:
     QList<Pkcs11ProviderConfig> list;
 
-    ModuleListModel(QObject *parent = 0) : QAbstractListModel(parent) { }
+    ModuleListModel(QObject *parent = 0)
+        : QAbstractListModel(parent)
+    {
+    }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const
     {
@@ -327,9 +340,14 @@ public:
     // for ignoring modifications that we cause when populating fields
     bool ignore_dataChanged;
 
-    Private(Pkcs11ConfigDlg *_q, const QString &_providerName, const QVariantMap &configmap) :
-        QObject(_q), q(_q), providerName(_providerName), dirty(false), allow_close(true), done(false),
-        ignore_dataChanged(true)
+    Private(Pkcs11ConfigDlg *_q, const QString &_providerName, const QVariantMap &configmap)
+        : QObject(_q)
+        , q(_q)
+        , providerName(_providerName)
+        , dirty(false)
+        , allow_close(true)
+        , done(false)
+        , ignore_dataChanged(true)
     {
         ui.setupUi(q);
         q->resize(q->minimumSize());
@@ -344,16 +362,18 @@ public:
         //   2) if the user accepts/rejects the dialog while editing,
         //      it is easy to ensure that the signal is not processed
         //    (if it gets delivered at all).
-        connect(model, SIGNAL(editFailed(const QModelIndex &, const QString &)),
-                SLOT(model_editFailed(const QModelIndex &, const QString &)), Qt::QueuedConnection);
+        connect(model,
+                SIGNAL(editFailed(const QModelIndex &, const QString &)),
+                SLOT(model_editFailed(const QModelIndex &, const QString &)),
+                Qt::QueuedConnection);
 
         // set up widgets
         ui.rb_pincache_nolimit->setChecked(true);
         ui.sb_pincache_time->setEnabled(false);
         ui.sb_pincache_time->setValue(300);
         ui.lv_modules->setModel(model);
-        ui.lv_modules->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked
-                                       | QAbstractItemView::EditKeyPressed);
+        ui.lv_modules->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked |
+                                       QAbstractItemView::EditKeyPressed);
         ui.pb_remove->setEnabled(false);
         ui.tb_details->setEnabled(false);
         ui.gb_poll->setEnabled(false);
@@ -655,8 +675,8 @@ private Q_SLOTS:
 
     void library_browse()
     {
-        QString fileName
-            = QFileDialog::getOpenFileName(q, tr("Select PKCS#11 Module"), QString(), tr("PKCS#11 Modules (*.*)"));
+        QString fileName =
+            QFileDialog::getOpenFileName(q, tr("Select PKCS#11 Module"), QString(), tr("PKCS#11 Modules (*.*)"));
         if (fileName.isEmpty())
             return;
 
@@ -685,8 +705,8 @@ private Q_SLOTS:
             if (ui.ck_modeunwrap->isChecked())
                 ui.ck_modeunwrap->setChecked(false);
         } else {
-            if (!ui.ck_modesign->isChecked() && !ui.ck_modesignrecover->isChecked() && !ui.ck_modedecrypt->isChecked()
-                && !ui.ck_modeunwrap->isChecked()) {
+            if (!ui.ck_modesign->isChecked() && !ui.ck_modesignrecover->isChecked() &&
+                !ui.ck_modedecrypt->isChecked() && !ui.ck_modeunwrap->isChecked()) {
                 ui.ck_modesign->setChecked(true);
                 ui.ck_modesignrecover->setChecked(true);
                 ui.ck_modedecrypt->setChecked(true);
@@ -703,8 +723,8 @@ private Q_SLOTS:
             if (ui.ck_modeauto->isChecked())
                 ui.ck_modeauto->setChecked(false);
         } else {
-            if (!ui.ck_modesign->isChecked() && !ui.ck_modesignrecover->isChecked() && !ui.ck_modedecrypt->isChecked()
-                && !ui.ck_modeunwrap->isChecked()) {
+            if (!ui.ck_modesign->isChecked() && !ui.ck_modesignrecover->isChecked() &&
+                !ui.ck_modedecrypt->isChecked() && !ui.ck_modeunwrap->isChecked()) {
                 ui.ck_modeauto->setChecked(true);
             }
         }
@@ -713,7 +733,8 @@ private Q_SLOTS:
     }
 };
 
-Pkcs11ConfigDlg::Pkcs11ConfigDlg(QWidget *parent) : QDialog(parent)
+Pkcs11ConfigDlg::Pkcs11ConfigDlg(QWidget *parent)
+    : QDialog(parent)
 {
     QVariantMap    config;
     QCA::Provider *p = get_pkcs11_provider(&config);
@@ -723,13 +744,16 @@ Pkcs11ConfigDlg::Pkcs11ConfigDlg(QWidget *parent) : QDialog(parent)
         d = new Private(this, QString(), QVariantMap());
 }
 
-Pkcs11ConfigDlg::Pkcs11ConfigDlg(const QString &providerName, const QVariantMap &config, QWidget *parent) :
-    QDialog(parent)
+Pkcs11ConfigDlg::Pkcs11ConfigDlg(const QString &providerName, const QVariantMap &config, QWidget *parent)
+    : QDialog(parent)
 {
     d = new Private(this, providerName, config);
 }
 
-Pkcs11ConfigDlg::~Pkcs11ConfigDlg() { delete d; }
+Pkcs11ConfigDlg::~Pkcs11ConfigDlg()
+{
+    delete d;
+}
 
 void Pkcs11ConfigDlg::done(int r)
 {
@@ -742,6 +766,9 @@ void Pkcs11ConfigDlg::done(int r)
     QDialog::done(r);
 }
 
-bool Pkcs11ConfigDlg::isSupported() { return (get_pkcs11_provider() ? true : false); }
+bool Pkcs11ConfigDlg::isSupported()
+{
+    return (get_pkcs11_provider() ? true : false);
+}
 
 #include "pkcs11configdlg.moc"

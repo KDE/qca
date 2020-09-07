@@ -50,7 +50,13 @@ public:
     QCA::KeyStoreManager   ksm;
     QList<QCA::KeyStore *> keyStores;
 
-    Private(Prompter *_q) : QObject(_q), q(_q), handler(this), prompting(false), token_prompt(0), ksm(this)
+    Private(Prompter *_q)
+        : QObject(_q)
+        , q(_q)
+        , handler(this)
+        , prompting(false)
+        , token_prompt(0)
+        , ksm(this)
     {
         connect(&handler, SIGNAL(eventReady(int, const QCA::Event &)), SLOT(ph_eventReady(int, const QCA::Event &)));
         handler.start();
@@ -122,8 +128,12 @@ private Q_SLOTS:
                 str = Prompter::tr("Enter %1:").arg(type);
 
             bool    ok;
-            QString pass = QInputDialog::getText(0, QApplication::instance()->applicationName() + ": " + tr("Prompt"),
-                                                 str, QLineEdit::Password, QString(), &ok);
+            QString pass = QInputDialog::getText(0,
+                                                 QApplication::instance()->applicationName() + ": " + tr("Prompt"),
+                                                 str,
+                                                 QLineEdit::Password,
+                                                 QString(),
+                                                 &ok);
             if (ok) {
                 QCA::SecureArray password = pass.toUtf8();
                 q->userSubmitted(password, event);
@@ -183,8 +193,10 @@ private Q_SLOTS:
             QString str = Prompter::tr("%1 and click OK.").arg(name);
 
             QMessageBox msgBox(QMessageBox::Information,
-                               QApplication::instance()->applicationName() + ": " + tr("Prompt"), str,
-                               QMessageBox::Ok | QMessageBox::Cancel, 0);
+                               QApplication::instance()->applicationName() + ": " + tr("Prompt"),
+                               str,
+                               QMessageBox::Ok | QMessageBox::Cancel,
+                               0);
             token_prompt = &msgBox;
             auto_accept  = false;
             if (msgBox.exec() == QMessageBox::Ok || auto_accept)
@@ -212,8 +224,8 @@ private Q_SLOTS:
         ks->startAsynchronousMode();
 
         // are we currently in a token-only prompt?
-        if (token_prompt && pending.first().event.type() == QCA::Event::Token
-            && pending.first().event.keyStoreEntry().isNull()) {
+        if (token_prompt && pending.first().event.type() == QCA::Event::Token &&
+            pending.first().event.keyStoreEntry().isNull()) {
             // was the token we're looking for just inserted?
             if (pending.first().event.keyStoreInfo().id() == keyStoreId) {
                 // auto-accept
@@ -235,8 +247,8 @@ private Q_SLOTS:
         QCA::KeyStore *ks = (QCA::KeyStore *)sender();
 
         // are we currently in a token-entry prompt?
-        if (token_prompt && pending.first().event.type() == QCA::Event::Token
-            && !pending.first().event.keyStoreEntry().isNull()) {
+        if (token_prompt && pending.first().event.type() == QCA::Event::Token &&
+            !pending.first().event.keyStoreEntry().isNull()) {
             QCA::KeyStoreEntry kse = pending.first().event.keyStoreEntry();
 
             // was the token of the entry we're looking for updated?
@@ -260,9 +272,16 @@ private Q_SLOTS:
     }
 };
 
-Prompter::Prompter(QObject *parent) : QObject(parent) { d = new Private(this); }
+Prompter::Prompter(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-Prompter::~Prompter() { delete d; }
+Prompter::~Prompter()
+{
+    delete d;
+}
 
 QCA::SecureArray Prompter::knownPassword(const QCA::Event &event)
 {

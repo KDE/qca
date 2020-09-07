@@ -91,7 +91,9 @@ public:
     QCA::KeyStore *    keyStore;
     QCA::KeyStoreEntry keyStoreEntry;
 
-    KeyStoreItem(Type type, KeyStoreItemShared *shared) : _type(type), _shared(shared)
+    KeyStoreItem(Type type, KeyStoreItemShared *shared)
+        : _type(type)
+        , _shared(shared)
     {
         setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     }
@@ -132,9 +134,15 @@ public:
             return QStandardItem::data(role);
     }
 
-    virtual int type() const { return _type; }
+    virtual int type() const
+    {
+        return _type;
+    }
 
-    virtual QStandardItem *clone() const { return new KeyStoreItem(*this); }
+    virtual QStandardItem *clone() const
+    {
+        return new KeyStoreItem(*this);
+    }
 };
 
 class KeyStoreModel : public QStandardItemModel
@@ -145,7 +153,9 @@ public:
 
     QCA::KeyStoreManager ksm;
 
-    KeyStoreModel(QObject *parent = 0) : QStandardItemModel(parent), ksm(this)
+    KeyStoreModel(QObject *parent = 0)
+        : QStandardItemModel(parent)
+        , ksm(this)
     {
         shared.notAvailableString = tr("(not available)");
 
@@ -285,7 +295,9 @@ public:
     QCA::KeyStoreEntry cur_entry;
     QAction *          actionView;
 
-    Private(KeySelectDlg *_q) : QObject(_q), q(_q)
+    Private(KeySelectDlg *_q)
+        : QObject(_q)
+        , q(_q)
     {
         ui.setupUi(q);
 
@@ -302,7 +314,8 @@ public:
         connect(ui.lv_stores->selectionModel(),
                 SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 SLOT(stores_selectionChanged(const QItemSelection &, const QItemSelection &)));
-        connect(ui.lv_stores, SIGNAL(customContextMenuRequested(const QPoint &)),
+        connect(ui.lv_stores,
+                SIGNAL(customContextMenuRequested(const QPoint &)),
                 SLOT(stores_customContextMenuRequested(const QPoint &)));
 
         actionView = new QAction(tr("&View"), this);
@@ -311,9 +324,15 @@ public:
     }
 
 private Q_SLOTS:
-    void ksm_busyStarted() { ui.lb_busy->setText(tr("Looking for devices...")); }
+    void ksm_busyStarted()
+    {
+        ui.lb_busy->setText(tr("Looking for devices..."));
+    }
 
-    void ksm_busyFinished() { ui.lb_busy->setText(""); }
+    void ksm_busyFinished()
+    {
+        ui.lb_busy->setText("");
+    }
 
     void stores_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
     {
@@ -363,14 +382,27 @@ private Q_SLOTS:
         }
     }
 
-    void view() { emit q->viewCertificate(cur_entry.keyBundle().certificateChain()); }
+    void view()
+    {
+        emit q->viewCertificate(cur_entry.keyBundle().certificateChain());
+    }
 };
 
-KeySelectDlg::KeySelectDlg(QWidget *parent) : QDialog(parent) { d = new Private(this); }
+KeySelectDlg::KeySelectDlg(QWidget *parent)
+    : QDialog(parent)
+{
+    d = new Private(this);
+}
 
-KeySelectDlg::~KeySelectDlg() { delete d; }
+KeySelectDlg::~KeySelectDlg()
+{
+    delete d;
+}
 
-void KeySelectDlg::setIcon(IconType type, const QPixmap &icon) { d->model->shared.iconset[type] = icon; }
+void KeySelectDlg::setIcon(IconType type, const QPixmap &icon)
+{
+    d->model->shared.iconset[type] = icon;
+}
 
 void KeySelectDlg::accept()
 {

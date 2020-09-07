@@ -264,7 +264,10 @@ QString SECURITY_STATUS_toString(SECURITY_STATUS i)
         return QString::number(i);
 }
 
-QString ptr_toString(const void *p) { return QString().sprintf("%p", p); }
+QString ptr_toString(const void *p)
+{
+    return QString().sprintf("%p", p);
+}
 
 bool sspi_load()
 {
@@ -381,7 +384,7 @@ void sspi_refresh_packagelist()
     sspi_refresh_packagelist_internal();
 }
 
-template <typename T> inline T cap_to_int(const T &t)
+template<typename T> inline T cap_to_int(const T &t)
 {
     if (sizeof(int) <= sizeof(T))
         return (int)((t > INT_MAX) ? INT_MAX : t);
@@ -430,7 +433,11 @@ public:
     SecPkgContext_Sizes       ctx_sizes;
     SecPkgContext_StreamSizes ctx_streamSizes;
 
-    KerberosSession() : initialized(false), have_sizes(false) { }
+    KerberosSession()
+        : initialized(false)
+        , have_sizes(false)
+    {
+    }
 
     ~KerberosSession()
     {
@@ -468,14 +475,15 @@ public:
             return ErrorKerberosNotFound;
 
         // get the logged-in user's credentials
-        SECURITY_STATUS ret
-            = sspi.W->AcquireCredentialsHandleW((SEC_WCHAR *)0, // we want creds of logged-in user
-                                                (SEC_WCHAR *)QString("Kerberos").utf16(), SECPKG_CRED_OUTBOUND,
-                                                0, // don't need a LUID
-                                                0, // default credentials for kerberos
-                                                0, // not used
-                                                0, // not used
-                                                &user_cred, &user_cred_expiry);
+        SECURITY_STATUS ret = sspi.W->AcquireCredentialsHandleW((SEC_WCHAR *)0, // we want creds of logged-in user
+                                                                (SEC_WCHAR *)QString("Kerberos").utf16(),
+                                                                SECPKG_CRED_OUTBOUND,
+                                                                0, // don't need a LUID
+                                                                0, // default credentials for kerberos
+                                                                0, // not used
+                                                                0, // not used
+                                                                &user_cred,
+                                                                &user_cred_expiry);
         sspi_log(QString("AcquireCredentialsHandle() = %1\n").arg(SECURITY_STATUS_toString(ret)));
         if (ret != SEC_E_OK) {
             lastErrorCode = ret;
@@ -520,9 +528,15 @@ public:
 
         ret = sspi.W->InitializeSecurityContextW(&user_cred,
                                                  0, // NULL for the first call
-                                                 (SEC_WCHAR *)spn.utf16(), ctx_attr_req, 0, SECURITY_NETWORK_DREP,
+                                                 (SEC_WCHAR *)spn.utf16(),
+                                                 ctx_attr_req,
+                                                 0,
+                                                 SECURITY_NETWORK_DREP,
                                                  0, // NULL for first call
-                                                 0, &ctx, &outbufdesc, &ctx_attr,
+                                                 0,
+                                                 &ctx,
+                                                 &outbufdesc,
+                                                 &ctx_attr,
                                                  0); // don't care about expiration
         sspi_log(QString("InitializeSecurityContext(*, 0, ...) = %1\n").arg(SECURITY_STATUS_toString(ret)));
         if (ret == SEC_E_OK || ret == SEC_I_CONTINUE_NEEDED) {
@@ -592,10 +606,18 @@ public:
             inbufdesc.cBuffers  = 1;
             inbufdesc.pBuffers  = &inbuf;
 
-            SECURITY_STATUS ret
-                = sspi.W->InitializeSecurityContextW(&user_cred, &ctx, (SEC_WCHAR *)spn.utf16(), ctx_attr_req, 0,
-                                                     SECURITY_NETWORK_DREP, &inbufdesc, 0, &ctx, &outbufdesc, &ctx_attr,
-                                                     0); // don't care about expiration
+            SECURITY_STATUS ret = sspi.W->InitializeSecurityContextW(&user_cred,
+                                                                     &ctx,
+                                                                     (SEC_WCHAR *)spn.utf16(),
+                                                                     ctx_attr_req,
+                                                                     0,
+                                                                     SECURITY_NETWORK_DREP,
+                                                                     &inbufdesc,
+                                                                     0,
+                                                                     &ctx,
+                                                                     &outbufdesc,
+                                                                     &ctx_attr,
+                                                                     0); // don't care about expiration
             sspi_log(QString("InitializeSecurityContext(*, ctx, ...) = %1\n").arg(SECURITY_STATUS_toString(ret)));
             if (ret == SEC_E_OK || ret == SEC_I_CONTINUE_NEEDED) {
                 if (outbuf.pvBuffer) {
@@ -816,7 +838,9 @@ public:
     // read-only
     bool do_layer, do_conf;
 
-    SaslGssapiSession() { }
+    SaslGssapiSession()
+    {
+    }
 
     ReturnCode init(const QString &proto, const QString &fqdn, int _secflags)
     {
@@ -854,8 +878,8 @@ public:
         } else if (mode == 1) {
             bool layerPossible      = false;
             bool encryptionPossible = false;
-            if (sess.ctx_attr & ISC_RET_INTEGRITY && sess.ctx_attr & ISC_RET_MUTUAL_AUTH
-                && sess.ctx_attr & ISC_RET_SEQUENCE_DETECT) {
+            if (sess.ctx_attr & ISC_RET_INTEGRITY && sess.ctx_attr & ISC_RET_MUTUAL_AUTH &&
+                sess.ctx_attr & ISC_RET_SEQUENCE_DETECT) {
                 layerPossible = true;
 
                 if (sess.ctx_attr & ISC_RET_CONFIDENTIALITY)
@@ -890,7 +914,10 @@ public:
             }
 
             QString str;
-            str.sprintf("%02x%02x%02x%02x", (unsigned int)decbuf[0], (unsigned int)decbuf[1], (unsigned int)decbuf[2],
+            str.sprintf("%02x%02x%02x%02x",
+                        (unsigned int)decbuf[0],
+                        (unsigned int)decbuf[1],
+                        (unsigned int)decbuf[2],
                         (unsigned int)decbuf[3]);
             sspi_log(QString("Received application token: [%1]\n").arg(str));
 
@@ -1156,13 +1183,19 @@ public:
 
     QString opt_authzid;
 
-    SaslWinGss(Provider *p) : SASLContext(p), sess(0), resultsReadyTrigger(this)
+    SaslWinGss(Provider *p)
+        : SASLContext(p)
+        , sess(0)
+        , resultsReadyTrigger(this)
     {
         connect(&resultsReadyTrigger, SIGNAL(timeout()), SIGNAL(resultsReady()));
         resultsReadyTrigger.setSingleShot(true);
     }
 
-    Provider::Context *clone() const { return 0; }
+    Provider::Context *clone() const
+    {
+        return 0;
+    }
 
     virtual void reset()
     {
@@ -1180,8 +1213,12 @@ public:
         opt_authzid.clear();
     }
 
-    virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote,
-                       const QString &ext_id, int ext_ssf)
+    virtual void setup(const QString & service,
+                       const QString & host,
+                       const HostPort *local,
+                       const HostPort *remote,
+                       const QString & ext_id,
+                       int             ext_ssf)
     {
         // unused by this provider
         Q_UNUSED(local);
@@ -1211,8 +1248,8 @@ public:
         }
 
         // GSSAPI (or this provider) doesn't meet these requirements
-        if (opt_flags & SASL::RequireForwardSecrecy || opt_flags & SASL::RequirePassCredentials
-            || !allowClientSendFirst) {
+        if (opt_flags & SASL::RequireForwardSecrecy || opt_flags & SASL::RequirePassCredentials ||
+            !allowClientSendFirst) {
             _result        = Error;
             _authCondition = SASL::NoMechanism;
             resultsReadyTrigger.start();
@@ -1334,7 +1371,10 @@ public:
         return true;
     }
 
-    virtual Result result() const { return _result; }
+    virtual Result result() const
+    {
+        return _result;
+    }
 
     virtual QStringList mechlist() const
     {
@@ -1354,7 +1394,10 @@ public:
         return true;
     }
 
-    virtual QByteArray stepData() const { return _step_to_net; }
+    virtual QByteArray stepData() const
+    {
+        return _step_to_net;
+    }
 
     virtual QByteArray to_net()
     {
@@ -1364,7 +1407,10 @@ public:
         return a;
     }
 
-    virtual int encoded() const { return enc; }
+    virtual int encoded() const
+    {
+        return enc;
+    }
 
     virtual QByteArray to_app()
     {
@@ -1387,7 +1433,10 @@ public:
             return 1;
     }
 
-    virtual SASL::AuthCondition authCondition() const { return _authCondition; }
+    virtual SASL::AuthCondition authCondition() const
+    {
+        return _authCondition;
+    }
 
     virtual SASL::Params clientParams() const
     {
@@ -1395,8 +1444,8 @@ public:
         return SASL::Params();
     }
 
-    virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass,
-                                 const QString *realm)
+    virtual void
+    setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm)
     {
         // unused by this provider
         Q_UNUSED(user);
@@ -1475,7 +1524,11 @@ public:
         bool         ready;
         QStringList  mechlist;
 
-        SaslProvider() : sasl(0), ready(false) { }
+        SaslProvider()
+            : sasl(0)
+            , ready(false)
+        {
+        }
     };
 
     QList<SaslProvider> saslProviders;
@@ -1483,8 +1536,12 @@ public:
     Result              serverInit_result;
     QStringList         serverInit_mechlist;
 
-    MetaSasl(Provider *p) :
-        SASLContext(p), resultsReadyTrigger(this), sync(this), waiting(false), serverInit_active(false)
+    MetaSasl(Provider *p)
+        : SASLContext(p)
+        , resultsReadyTrigger(this)
+        , sync(this)
+        , waiting(false)
+        , serverInit_active(false)
     {
         s = 0;
 
@@ -1497,9 +1554,15 @@ public:
         resultsReadyTrigger.setSingleShot(true);
     }
 
-    ~MetaSasl() { delete s; }
+    ~MetaSasl()
+    {
+        delete s;
+    }
 
-    virtual Provider::Context *clone() const { return 0; }
+    virtual Provider::Context *clone() const
+    {
+        return 0;
+    }
 
     void clearSaslProviders()
     {
@@ -1534,8 +1597,12 @@ public:
         serverInit_mechlist.clear();
     }
 
-    virtual void setup(const QString &service, const QString &host, const HostPort *local, const HostPort *remote,
-                       const QString &ext_id, int ext_ssf)
+    virtual void setup(const QString & service,
+                       const QString & host,
+                       const HostPort *local,
+                       const HostPort *remote,
+                       const QString & ext_id,
+                       int             ext_ssf)
     {
         opt_service     = service;
         opt_host        = host;
@@ -1699,11 +1766,20 @@ public:
         s->serverFirstStep(mech, clientInit);
     }
 
-    virtual void nextStep(const QByteArray &from_net) { s->nextStep(from_net); }
+    virtual void nextStep(const QByteArray &from_net)
+    {
+        s->nextStep(from_net);
+    }
 
-    virtual void tryAgain() { s->tryAgain(); }
+    virtual void tryAgain()
+    {
+        s->tryAgain();
+    }
 
-    virtual void update(const QByteArray &from_net, const QByteArray &from_app) { s->update(from_net, from_app); }
+    virtual void update(const QByteArray &from_net, const QByteArray &from_app)
+    {
+        s->update(from_net, from_app);
+    }
 
     virtual bool waitForResultsReady(int msecs)
     {
@@ -1728,7 +1804,10 @@ public:
             return _result;
     }
 
-    virtual QStringList mechlist() const { return serverInit_mechlist; }
+    virtual QStringList mechlist() const
+    {
+        return serverInit_mechlist;
+    }
 
     virtual QString mech() const
     {
@@ -1738,17 +1817,35 @@ public:
             return QString();
     }
 
-    virtual bool haveClientInit() const { return s->haveClientInit(); }
+    virtual bool haveClientInit() const
+    {
+        return s->haveClientInit();
+    }
 
-    virtual QByteArray stepData() const { return s->stepData(); }
+    virtual QByteArray stepData() const
+    {
+        return s->stepData();
+    }
 
-    virtual QByteArray to_net() { return s->to_net(); }
+    virtual QByteArray to_net()
+    {
+        return s->to_net();
+    }
 
-    virtual int encoded() const { return s->encoded(); }
+    virtual int encoded() const
+    {
+        return s->encoded();
+    }
 
-    virtual QByteArray to_app() { return s->to_app(); }
+    virtual QByteArray to_app()
+    {
+        return s->to_app();
+    }
 
-    virtual int ssf() const { return s->ssf(); }
+    virtual int ssf() const
+    {
+        return s->ssf();
+    }
 
     virtual SASL::AuthCondition authCondition() const
     {
@@ -1758,10 +1855,13 @@ public:
             return _authCondition;
     }
 
-    virtual SASL::Params clientParams() const { return s->clientParams(); }
+    virtual SASL::Params clientParams() const
+    {
+        return s->clientParams();
+    }
 
-    virtual void setClientParams(const QString *user, const QString *authzid, const SecureArray *pass,
-                                 const QString *realm)
+    virtual void
+    setClientParams(const QString *user, const QString *authzid, const SecureArray *pass, const QString *realm)
     {
         if (!s) {
             if (user) {
@@ -1785,14 +1885,26 @@ public:
         }
     }
 
-    virtual QStringList realmlist() const { return s->realmlist(); }
+    virtual QStringList realmlist() const
+    {
+        return s->realmlist();
+    }
 
-    virtual QString username() const { return s->username(); }
+    virtual QString username() const
+    {
+        return s->username();
+    }
 
-    virtual QString authzid() const { return s->authzid(); }
+    virtual QString authzid() const
+    {
+        return s->authzid();
+    }
 
 private Q_SLOTS:
-    void s_resultsReady() { emit resultsReady(); }
+    void s_resultsReady()
+    {
+        emit resultsReady();
+    }
 
     void serverInit_resultsReady()
     {
@@ -1892,7 +2004,11 @@ public:
     mutable bool   forced_priority;
     bool           have_sspi;
 
-    wingssProvider() : forced_priority(false), have_sspi(false) { }
+    wingssProvider()
+        : forced_priority(false)
+        , have_sspi(false)
+    {
+    }
 
     virtual void init()
     {
@@ -1910,9 +2026,15 @@ public:
 #endif
     }
 
-    virtual int qcaVersion() const { return QCA_VERSION; }
+    virtual int qcaVersion() const
+    {
+        return QCA_VERSION;
+    }
 
-    virtual QString name() const { return PROVIDER_NAME; }
+    virtual QString name() const
+    {
+        return PROVIDER_NAME;
+    }
 
     virtual QStringList features() const
     {
@@ -1952,12 +2074,18 @@ public:
     }
 
 #ifndef FORWARD_ONLY
-    static void do_log(const QString &str) { QCA_logTextMessage(str, Logger::Debug); }
+    static void do_log(const QString &str)
+    {
+        QCA_logTextMessage(str, Logger::Debug);
+    }
 #endif
 };
 
 #ifndef FORWARD_ONLY
-bool wingssProvider_have_sspi(wingssProvider *provider) { return provider->have_sspi; }
+bool wingssProvider_have_sspi(wingssProvider *provider)
+{
+    return provider->have_sspi;
+}
 #endif
 
 }
@@ -1975,7 +2103,10 @@ class qca_wingss : public QObject, public QCAPlugin
     Q_INTERFACES(QCAPlugin)
 
 public:
-    virtual Provider *createProvider() { return new wingssProvider; }
+    virtual Provider *createProvider()
+    {
+        return new wingssProvider;
+    }
 };
 
 #include "qca-wingss.moc"

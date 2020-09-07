@@ -84,7 +84,8 @@ public:
         Closing
     };
 
-    SecureServer(quint16 _port) : port(_port)
+    SecureServer(quint16 _port)
+        : port(_port)
     {
         server = new QTcpServer;
         connect(server, &QTcpServer::newConnection, this, &SecureServer::server_handleConnection);
@@ -162,7 +163,9 @@ private Q_SLOTS:
         connect(sock, &QTcpSocket::readyRead, this, &SecureServer::sock_readyRead);
         connect(sock, &QTcpSocket::disconnected, this, &SecureServer::sock_disconnected);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this,
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
+                this,
                 &SecureServer::sock_error);
 #else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureServer::sock_error);
@@ -174,7 +177,10 @@ private Q_SLOTS:
         ssl->startServer();
     }
 
-    void sock_disconnected() { qDebug() << "Connection closed."; }
+    void sock_disconnected()
+    {
+        qDebug() << "Connection closed.";
+    }
 
     void sock_bytesWritten(qint64 x)
     {
@@ -190,7 +196,10 @@ private Q_SLOTS:
         }
     }
 
-    void sock_error(QAbstractSocket::SocketError error) { qDebug() << "Socket error: " << (unsigned)error; }
+    void sock_error(QAbstractSocket::SocketError error)
+    {
+        qDebug() << "Socket error: " << (unsigned)error;
+    }
 
     void ssl_handshaken()
     {
@@ -204,10 +213,11 @@ private Q_SLOTS:
     void ssl_readyRead()
     {
         ssl->read();
-        QByteArray b = "<html>\n"
-                       "<head><title>Test</title></head>\n"
-                       "<body>this is only a test</body>\n"
-                       "</html>\n";
+        QByteArray b =
+            "<html>\n"
+            "<head><title>Test</title></head>\n"
+            "<body>this is only a test</body>\n"
+            "</html>\n";
 
         qDebug() << "Sending test response.";
         sent = true;

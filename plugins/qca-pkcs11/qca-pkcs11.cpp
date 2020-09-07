@@ -89,11 +89,17 @@ protected:
 
     static void __slotEventHook(void *const global_data);
 
-    static PKCS11H_BOOL __tokenPromptHook(void *const global_data, void *const user_data,
-                                          const pkcs11h_token_id_t token, const unsigned retry);
+    static PKCS11H_BOOL __tokenPromptHook(void *const              global_data,
+                                          void *const              user_data,
+                                          const pkcs11h_token_id_t token,
+                                          const unsigned           retry);
 
-    static PKCS11H_BOOL __pinPromptHook(void *const global_data, void *const user_data, const pkcs11h_token_id_t token,
-                                        const unsigned retry, char *const pin, const size_t pin_max);
+    static PKCS11H_BOOL __pinPromptHook(void *const              global_data,
+                                        void *const              user_data,
+                                        const pkcs11h_token_id_t token,
+                                        const unsigned           retry,
+                                        char *const              pin,
+                                        const size_t             pin_max);
 
     void _logHook(const unsigned flags, const char *const format, va_list args);
 
@@ -120,7 +126,6 @@ class pkcs11KeyStoreListContext : public KeyStoreListContext
 private:
     struct pkcs11KeyStoreItem
     {
-
     protected:
         int                _id;
         pkcs11h_token_id_t _token_id;
@@ -144,9 +149,15 @@ private:
         pkcs11KeyStoreItem(const pkcs11KeyStoreItem &) = delete;
         pkcs11KeyStoreItem &operator=(const pkcs11KeyStoreItem &) = delete;
 
-        inline int id() const { return _id; }
+        inline int id() const
+        {
+            return _id;
+        }
 
-        inline pkcs11h_token_id_t tokenId() const { return _token_id; }
+        inline pkcs11h_token_id_t tokenId() const
+        {
+            return _token_id;
+        }
 
         void registerCertificates(const QList<Certificate> &certs)
         {
@@ -221,16 +232,20 @@ private:
     void _clearStores();
 
     pkcs11KeyStoreEntryContext *_keyStoreEntryByCertificateId(const pkcs11h_certificate_id_t certificate_id,
-                                                              const bool has_private, const CertificateChain &chain,
-                                                              const QString &description) const;
+                                                              const bool                     has_private,
+                                                              const CertificateChain &       chain,
+                                                              const QString &                description) const;
 
     QString _tokenId2storeId(const pkcs11h_token_id_t token_id) const;
 
-    QString _serializeCertificate(const pkcs11h_certificate_id_t certificate_id, const CertificateChain &chain,
-                                  const bool has_private) const;
+    QString _serializeCertificate(const pkcs11h_certificate_id_t certificate_id,
+                                  const CertificateChain &       chain,
+                                  const bool                     has_private) const;
 
-    void _deserializeCertificate(const QString &from, pkcs11h_certificate_id_t *const p_certificate_id,
-                                 bool *const p_has_private, CertificateChain &chain) const;
+    void _deserializeCertificate(const QString &                 from,
+                                 pkcs11h_certificate_id_t *const p_certificate_id,
+                                 bool *const                     p_has_private,
+                                 CertificateChain &              chain) const;
 
     QString _escapeString(const QString &from) const;
 
@@ -244,13 +259,14 @@ static pkcs11KeyStoreListContext *s_keyStoreList = nullptr;
 //----------------------------------------------------------------------------
 class pkcs11Exception
 {
-
 private:
     CK_RV   _rv;
     QString _msg;
 
 private:
-    pkcs11Exception() { }
+    pkcs11Exception()
+    {
+    }
 
 public:
     pkcs11Exception(const CK_RV rv, const QString &msg)
@@ -260,9 +276,15 @@ public:
     }
 
     CK_RV
-    rv() const { return _rv; }
+    rv() const
+    {
+        return _rv;
+    }
 
-    QString message() const { return _msg + QStringLiteral(" ") + QString::fromLatin1(pkcs11h_getMessage(_rv)); }
+    QString message() const
+    {
+        return _msg + QStringLiteral(" ") + QString::fromLatin1(pkcs11h_getMessage(_rv));
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -285,13 +307,18 @@ private:
         Hash *             hash;
         QByteArray         raw;
 
-        _sign_data_s() { hash = nullptr; }
+        _sign_data_s()
+        {
+            hash = nullptr;
+        }
     } _sign_data;
 
 public:
-    pkcs11RSAContext(Provider *p, const pkcs11h_certificate_id_t pkcs11h_certificate_id, const QString &serialized,
-                     const RSAPublicKey &pubkey) :
-        RSAContext(p)
+    pkcs11RSAContext(Provider *                     p,
+                     const pkcs11h_certificate_id_t pkcs11h_certificate_id,
+                     const QString &                serialized,
+                     const RSAPublicKey &           pubkey)
+        : RSAContext(p)
     {
         CK_RV rv;
 
@@ -304,15 +331,16 @@ public:
         _serialized             = serialized;
         _clearSign();
 
-        if ((rv = pkcs11h_certificate_duplicateCertificateId(&_pkcs11h_certificate_id, pkcs11h_certificate_id))
-            != CKR_OK) {
+        if ((rv = pkcs11h_certificate_duplicateCertificateId(&_pkcs11h_certificate_id, pkcs11h_certificate_id)) !=
+            CKR_OK) {
             throw pkcs11Exception(rv, QStringLiteral("Memory error"));
         }
 
         QCA_logTextMessage(QStringLiteral("pkcs11RSAContext::pkcs11RSAContext1 - return"), Logger::Debug);
     }
 
-    pkcs11RSAContext(const pkcs11RSAContext &from) : RSAContext(from.provider())
+    pkcs11RSAContext(const pkcs11RSAContext &from)
+        : RSAContext(from.provider())
     {
         CK_RV rv;
 
@@ -326,8 +354,8 @@ public:
         _sign_data.hash         = nullptr;
         _clearSign();
 
-        if ((rv = pkcs11h_certificate_duplicateCertificateId(&_pkcs11h_certificate_id, from._pkcs11h_certificate_id))
-            != CKR_OK) {
+        if ((rv = pkcs11h_certificate_duplicateCertificateId(&_pkcs11h_certificate_id, from._pkcs11h_certificate_id)) !=
+            CKR_OK) {
             throw pkcs11Exception(rv, QStringLiteral("Memory error"));
         }
 
@@ -353,16 +381,31 @@ public:
         QCA_logTextMessage(QStringLiteral("pkcs11RSAContext::~pkcs11RSAContext - return"), Logger::Debug);
     }
 
-    Provider::Context *clone() const override { return new pkcs11RSAContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new pkcs11RSAContext(*this);
+    }
 
 public:
-    bool isNull() const override { return _pubkey.isNull(); }
+    bool isNull() const override
+    {
+        return _pubkey.isNull();
+    }
 
-    PKey::Type type() const override { return _pubkey.type(); }
+    PKey::Type type() const override
+    {
+        return _pubkey.type();
+    }
 
-    bool isPrivate() const override { return _has_privateKeyRole; }
+    bool isPrivate() const override
+    {
+        return _has_privateKeyRole;
+    }
 
-    bool canExport() const override { return !_has_privateKeyRole; }
+    bool canExport() const override
+    {
+        return !_has_privateKeyRole;
+    }
 
     void convertToPublic() override
     {
@@ -379,11 +422,20 @@ public:
         QCA_logTextMessage(QStringLiteral("pkcs11RSAContext::convertToPublic - return"), Logger::Debug);
     }
 
-    int bits() const override { return _pubkey.bitSize(); }
+    int bits() const override
+    {
+        return _pubkey.bitSize();
+    }
 
-    int maximumEncryptSize(EncryptionAlgorithm alg) const override { return _pubkey.maximumEncryptSize(alg); }
+    int maximumEncryptSize(EncryptionAlgorithm alg) const override
+    {
+        return _pubkey.maximumEncryptSize(alg);
+    }
 
-    SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg) override { return _pubkey.encrypt(in, alg); }
+    SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg) override
+    {
+        return _pubkey.encrypt(in, alg);
+    }
 
     bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg) override
     {
@@ -418,17 +470,23 @@ public:
             }
             session_locked = true;
 
-            if ((rv = pkcs11h_certificate_decryptAny(_pkcs11h_certificate, mech, (const unsigned char *)in.constData(),
-                                                     in.size(), nullptr, &my_size))
-                != CKR_OK) {
+            if ((rv = pkcs11h_certificate_decryptAny(_pkcs11h_certificate,
+                                                     mech,
+                                                     (const unsigned char *)in.constData(),
+                                                     in.size(),
+                                                     nullptr,
+                                                     &my_size)) != CKR_OK) {
                 throw pkcs11Exception(rv, QStringLiteral("Decryption error"));
             }
 
             out->resize(my_size);
 
-            if ((rv = pkcs11h_certificate_decryptAny(_pkcs11h_certificate, mech, (const unsigned char *)in.constData(),
-                                                     in.size(), (unsigned char *)out->data(), &my_size))
-                != CKR_OK) {
+            if ((rv = pkcs11h_certificate_decryptAny(_pkcs11h_certificate,
+                                                     mech,
+                                                     (const unsigned char *)in.constData(),
+                                                     in.size(),
+                                                     (unsigned char *)out->data(),
+                                                     &my_size)) != CKR_OK) {
                 throw pkcs11Exception(rv, QStringLiteral("Decryption error"));
             }
 
@@ -486,7 +544,10 @@ public:
         }
     }
 
-    void startVerify(SignatureAlgorithm alg, SignatureFormat sf) override { _pubkey.startVerify(alg, sf); }
+    void startVerify(SignatureAlgorithm alg, SignatureFormat sf) override
+    {
+        _pubkey.startVerify(alg, sf);
+    }
 
     void update(const MemoryRegion &in) override
     {
@@ -534,19 +595,23 @@ public:
             }
             session_locked = true;
 
-            if ((rv = pkcs11h_certificate_signAny(_pkcs11h_certificate, CKM_RSA_PKCS,
-                                                  (const unsigned char *) final.constData(), (size_t) final.size(),
-                                                  nullptr, &my_size))
-                != CKR_OK) {
+            if ((rv = pkcs11h_certificate_signAny(_pkcs11h_certificate,
+                                                  CKM_RSA_PKCS,
+                                                  (const unsigned char *) final.constData(),
+                                                  (size_t) final.size(),
+                                                  nullptr,
+                                                  &my_size)) != CKR_OK) {
                 throw pkcs11Exception(rv, QStringLiteral("Signature failed"));
             }
 
             result.resize(my_size);
 
-            if ((rv = pkcs11h_certificate_signAny(_pkcs11h_certificate, CKM_RSA_PKCS,
-                                                  (const unsigned char *) final.constData(), (size_t) final.size(),
-                                                  (unsigned char *)result.data(), &my_size))
-                != CKR_OK) {
+            if ((rv = pkcs11h_certificate_signAny(_pkcs11h_certificate,
+                                                  CKM_RSA_PKCS,
+                                                  (const unsigned char *) final.constData(),
+                                                  (size_t) final.size(),
+                                                  (unsigned char *)result.data(),
+                                                  &my_size)) != CKR_OK) {
                 throw pkcs11Exception(rv, QStringLiteral("Signature failed"));
             }
 
@@ -579,7 +644,10 @@ public:
         return result;
     }
 
-    virtual bool validSignature(const QByteArray &sig) { return _pubkey.validSignature(sig); }
+    virtual bool validSignature(const QByteArray &sig)
+    {
+        return _pubkey.validSignature(sig);
+    }
 
     void createPrivate(int bits, int exp, bool block) override
     {
@@ -588,7 +656,10 @@ public:
         Q_UNUSED(block);
     }
 
-    void createPrivate(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q,
+    void createPrivate(const BigInteger &n,
+                       const BigInteger &e,
+                       const BigInteger &p,
+                       const BigInteger &q,
                        const BigInteger &d) override
     {
         Q_UNUSED(n);
@@ -604,18 +675,36 @@ public:
         Q_UNUSED(e);
     }
 
-    BigInteger n() const override { return _pubkey.n(); }
+    BigInteger n() const override
+    {
+        return _pubkey.n();
+    }
 
-    BigInteger e() const override { return _pubkey.e(); }
+    BigInteger e() const override
+    {
+        return _pubkey.e();
+    }
 
-    BigInteger p() const override { return BigInteger(); }
+    BigInteger p() const override
+    {
+        return BigInteger();
+    }
 
-    BigInteger q() const override { return BigInteger(); }
+    BigInteger q() const override
+    {
+        return BigInteger();
+    }
 
-    BigInteger d() const override { return BigInteger(); }
+    BigInteger d() const override
+    {
+        return BigInteger();
+    }
 
 public:
-    PublicKey _publicKey() const { return _pubkey; }
+    PublicKey _publicKey() const
+    {
+        return _pubkey;
+    }
 
     bool _isTokenAvailable() const
     {
@@ -637,8 +726,8 @@ public:
 
         QCA_logTextMessage(QStringLiteral("pkcs11RSAContext::_ensureTokenAccess - entry"), Logger::Debug);
 
-        ret = pkcs11h_token_ensureAccess(_pkcs11h_certificate_id->token_id, nullptr, PKCS11H_PROMPT_MASK_ALLOW_ALL)
-            == CKR_OK;
+        ret = pkcs11h_token_ensureAccess(_pkcs11h_certificate_id->token_id, nullptr, PKCS11H_PROMPT_MASK_ALLOW_ALL) ==
+            CKR_OK;
 
         QCA_logTextMessage(QString::asprintf("pkcs11RSAContext::_ensureTokenAccess - return ret=%d", ret ? 1 : 0),
                            Logger::Debug);
@@ -662,9 +751,11 @@ private:
         QCA_logTextMessage(QStringLiteral("pkcs11RSAContext::_ensureCertificate - entry"), Logger::Debug);
 
         if (_pkcs11h_certificate == nullptr) {
-            if ((rv = pkcs11h_certificate_create(_pkcs11h_certificate_id, &_serialized, PKCS11H_PROMPT_MASK_ALLOW_ALL,
-                                                 PKCS11H_PIN_CACHE_INFINITE, &_pkcs11h_certificate))
-                != CKR_OK) {
+            if ((rv = pkcs11h_certificate_create(_pkcs11h_certificate_id,
+                                                 &_serialized,
+                                                 PKCS11H_PROMPT_MASK_ALLOW_ALL,
+                                                 PKCS11H_PIN_CACHE_INFINITE,
+                                                 &_pkcs11h_certificate)) != CKR_OK) {
                 throw pkcs11Exception(rv, QStringLiteral("Cannot create low-level certificate"));
             }
         }
@@ -684,7 +775,11 @@ private:
     PKeyBase *_k;
 
 public:
-    pkcs11PKeyContext(Provider *p) : PKeyContext(p) { _k = nullptr; }
+    pkcs11PKeyContext(Provider *p)
+        : PKeyContext(p)
+    {
+        _k = nullptr;
+    }
 
     ~pkcs11PKeyContext() override
     {
@@ -720,9 +815,15 @@ public:
         return list;
     }
 
-    PKeyBase *key() override { return _k; }
+    PKeyBase *key() override
+    {
+        return _k;
+    }
 
-    const PKeyBase *key() const override { return _k; }
+    const PKeyBase *key() const override
+    {
+        return _k;
+    }
 
     void setKey(PKeyBase *key) override
     {
@@ -745,9 +846,15 @@ public:
         return 0;
     }
 
-    QByteArray publicToDER() const override { return static_cast<pkcs11RSAContext *>(_k)->_publicKey().toDER(); }
+    QByteArray publicToDER() const override
+    {
+        return static_cast<pkcs11RSAContext *>(_k)->_publicKey().toDER();
+    }
 
-    QString publicToPEM() const override { return static_cast<pkcs11RSAContext *>(_k)->_publicKey().toPEM(); }
+    QString publicToPEM() const override
+    {
+        return static_cast<pkcs11RSAContext *>(_k)->_publicKey().toPEM();
+    }
 
     ConvertResult publicFromDER(const QByteArray &in) override
     {
@@ -807,9 +914,13 @@ private:
     QString             _name;
 
 public:
-    pkcs11KeyStoreEntryContext(const Certificate &cert, const QString &storeId, const QString &serialized,
-                               const QString &storeName, const QString &name, Provider *p) :
-        KeyStoreEntryContext(p)
+    pkcs11KeyStoreEntryContext(const Certificate &cert,
+                               const QString &    storeId,
+                               const QString &    serialized,
+                               const QString &    storeName,
+                               const QString &    name,
+                               Provider *         p)
+        : KeyStoreEntryContext(p)
     {
         _item_type  = KeyStoreEntry::TypeCertificate;
         _cert       = cert;
@@ -820,9 +931,13 @@ public:
         _name       = name;
     }
 
-    pkcs11KeyStoreEntryContext(const KeyBundle &key, const QString &storeId, const QString &serialized,
-                               const QString &storeName, const QString &name, Provider *p) :
-        KeyStoreEntryContext(p)
+    pkcs11KeyStoreEntryContext(const KeyBundle &key,
+                               const QString &  storeId,
+                               const QString &  serialized,
+                               const QString &  storeName,
+                               const QString &  name,
+                               Provider *       p)
+        : KeyStoreEntryContext(p)
     {
         _item_type = KeyStoreEntry::TypeKeyBundle;
         _key       = key;
@@ -832,7 +947,8 @@ public:
         _name       = name;
     }
 
-    pkcs11KeyStoreEntryContext(const pkcs11KeyStoreEntryContext &from) : KeyStoreEntryContext(from)
+    pkcs11KeyStoreEntryContext(const pkcs11KeyStoreEntryContext &from)
+        : KeyStoreEntryContext(from)
     {
         _item_type  = from._item_type;
         _key        = from._key;
@@ -843,22 +959,46 @@ public:
         _name       = from._name;
     }
 
-    Provider::Context *clone() const override { return new pkcs11KeyStoreEntryContext(*this); }
+    Provider::Context *clone() const override
+    {
+        return new pkcs11KeyStoreEntryContext(*this);
+    }
 
 public:
-    KeyStoreEntry::Type type() const override { return _item_type; }
+    KeyStoreEntry::Type type() const override
+    {
+        return _item_type;
+    }
 
-    QString name() const override { return _name; }
+    QString name() const override
+    {
+        return _name;
+    }
 
-    QString id() const override { return _id; }
+    QString id() const override
+    {
+        return _id;
+    }
 
-    KeyBundle keyBundle() const override { return _key; }
+    KeyBundle keyBundle() const override
+    {
+        return _key;
+    }
 
-    Certificate certificate() const override { return _cert; }
+    Certificate certificate() const override
+    {
+        return _cert;
+    }
 
-    QString storeId() const override { return _storeId; }
+    QString storeId() const override
+    {
+        return _storeId;
+    }
 
-    QString storeName() const override { return _storeName; }
+    QString storeName() const override
+    {
+        return _storeName;
+    }
 
     bool isAvailable() const override
     {
@@ -872,7 +1012,10 @@ public:
             ->_ensureTokenAccess();
     }
 
-    QString serialize() const override { return _serialized; }
+    QString serialize() const override
+    {
+        return _serialized;
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -880,7 +1023,6 @@ public:
 //----------------------------------------------------------------------------
 class pkcs11QCACrypto
 {
-
 private:
     static int _pkcs11h_crypto_qca_initialize(void *const global_data)
     {
@@ -896,8 +1038,10 @@ private:
         return TRUE; // krazy:exclude=captruefalse
     }
 
-    static int _pkcs11h_crypto_qca_certificate_get_expiration(void *const global_data, const unsigned char *const blob,
-                                                              const size_t blob_size, time_t *const expiration)
+    static int _pkcs11h_crypto_qca_certificate_get_expiration(void *const                global_data,
+                                                              const unsigned char *const blob,
+                                                              const size_t               blob_size,
+                                                              time_t *const              expiration)
     {
         Q_UNUSED(global_data);
 
@@ -908,8 +1052,11 @@ private:
         return TRUE; // krazy:exclude=captruefalse
     }
 
-    static int _pkcs11h_crypto_qca_certificate_get_dn(void *const global_data, const unsigned char *const blob,
-                                                      const size_t blob_size, char *const dn, const size_t dn_max)
+    static int _pkcs11h_crypto_qca_certificate_get_dn(void *const                global_data,
+                                                      const unsigned char *const blob,
+                                                      const size_t               blob_size,
+                                                      char *const                dn,
+                                                      const size_t               dn_max)
     {
         Q_UNUSED(global_data);
 
@@ -943,17 +1090,18 @@ public:
     static pkcs11h_engine_crypto_t crypto;
 };
 
-pkcs11h_engine_crypto_t pkcs11QCACrypto::crypto = { nullptr,
-                                                    _pkcs11h_crypto_qca_initialize,
-                                                    _pkcs11h_crypto_qca_uninitialize,
-                                                    _pkcs11h_crypto_qca_certificate_get_expiration,
-                                                    _pkcs11h_crypto_qca_certificate_get_dn,
-                                                    _pkcs11h_crypto_qca_certificate_is_issuer };
+pkcs11h_engine_crypto_t pkcs11QCACrypto::crypto = {nullptr,
+                                                   _pkcs11h_crypto_qca_initialize,
+                                                   _pkcs11h_crypto_qca_uninitialize,
+                                                   _pkcs11h_crypto_qca_certificate_get_expiration,
+                                                   _pkcs11h_crypto_qca_certificate_get_dn,
+                                                   _pkcs11h_crypto_qca_certificate_is_issuer};
 
 //----------------------------------------------------------------------------
 // pkcs11KeyStoreListContext
 //----------------------------------------------------------------------------
-pkcs11KeyStoreListContext::pkcs11KeyStoreListContext(Provider *p) : KeyStoreListContext(p)
+pkcs11KeyStoreListContext::pkcs11KeyStoreListContext(Provider *p)
+    : KeyStoreListContext(p)
 {
     QCA_logTextMessage(
         QString::asprintf("pkcs11KeyStoreListContext::pkcs11KeyStoreListContext - entry Provider=%p", (void *)p),
@@ -1013,7 +1161,8 @@ void pkcs11KeyStoreListContext::setUpdatesEnabled(bool enabled)
 
 KeyStoreEntryContext *pkcs11KeyStoreListContext::entry(int id, const QString &entryId)
 {
-    QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::entry - entry/return id=%d entryId='%s'", id,
+    QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::entry - entry/return id=%d entryId='%s'",
+                                         id,
                                          myPrintable(entryId)),
                        Logger::Debug);
 
@@ -1041,8 +1190,8 @@ KeyStoreEntryContext *pkcs11KeyStoreListContext::entryPassive(const QString &ser
             sentry->registerCertificates(chain);
             QMap<QString, QString> friendlyNames = sentry->friendlyNames();
 
-            entry = _keyStoreEntryByCertificateId(certificate_id, has_private, chain,
-                                                  friendlyNames[certificateHash(chain.primary())]);
+            entry = _keyStoreEntryByCertificateId(
+                certificate_id, has_private, chain, friendlyNames[certificateHash(chain.primary())]);
         }
     } catch (const pkcs11Exception &e) {
         s_keyStoreList->_emit_diagnosticText(
@@ -1062,7 +1211,6 @@ KeyStoreEntryContext *pkcs11KeyStoreListContext::entryPassive(const QString &ser
 
 KeyStore::Type pkcs11KeyStoreListContext::type(int id) const
 {
-
     Q_UNUSED(id);
 
     QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::type - entry/return id=%d", id), Logger::Debug);
@@ -1104,7 +1252,6 @@ QString pkcs11KeyStoreListContext::name(int id) const
 
 QList<KeyStoreEntry::Type> pkcs11KeyStoreListContext::entryTypes(int id) const
 {
-
     Q_UNUSED(id);
 
     QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::entryTypes - entry/return id=%d", id),
@@ -1195,9 +1342,12 @@ QList<KeyStoreEntryContext *> pkcs11KeyStoreListContext::entryList(int id)
             QList<Certificate>            listIssuers;
             int                           i = 0;
 
-            if ((rv = pkcs11h_certificate_enumTokenCertificateIds(entry->tokenId(), PKCS11H_ENUM_METHOD_CACHE, nullptr,
-                                                                  PKCS11H_PROMPT_MASK_ALLOW_ALL, &issuers, &certs))
-                != CKR_OK) {
+            if ((rv = pkcs11h_certificate_enumTokenCertificateIds(entry->tokenId(),
+                                                                  PKCS11H_ENUM_METHOD_CACHE,
+                                                                  nullptr,
+                                                                  PKCS11H_PROMPT_MASK_ALLOW_ALL,
+                                                                  &issuers,
+                                                                  &certs)) != CKR_OK) {
                 throw pkcs11Exception(rv, QStringLiteral("Enumerate certificates"));
             }
 
@@ -1237,12 +1387,12 @@ QList<KeyStoreEntryContext *> pkcs11KeyStoreListContext::entryList(int id)
 
                     if (listIssuers[i].isSelfSigned() && dynamic_cast<pkcs11Provider *>(provider())->_allowLoadRootCA) {
                         CertificateChain chain = CertificateChain(listIssuers[i]).complete(listIssuersForComplete);
-                        out += _keyStoreEntryByCertificateId(current->certificate_id, false, chain,
-                                                             friendlyNames[certificateHash(chain.primary())]);
+                        out += _keyStoreEntryByCertificateId(
+                            current->certificate_id, false, chain, friendlyNames[certificateHash(chain.primary())]);
                     }
                 } catch (const pkcs11Exception &e) {
-                    s_keyStoreList->_emit_diagnosticText(QString::asprintf("PKCS#11: Add key store entry %lu-'%s'.\n",
-                                                                           e.rv(), myPrintable(e.message())));
+                    s_keyStoreList->_emit_diagnosticText(QString::asprintf(
+                        "PKCS#11: Add key store entry %lu-'%s'.\n", e.rv(), myPrintable(e.message())));
                 }
             }
 
@@ -1253,11 +1403,11 @@ QList<KeyStoreEntryContext *> pkcs11KeyStoreListContext::entryList(int id)
                     }
 
                     CertificateChain chain = CertificateChain(listCerts[i]).complete(listIssuersForComplete);
-                    out += _keyStoreEntryByCertificateId(current->certificate_id, true, chain,
-                                                         friendlyNames[certificateHash(chain.primary())]);
+                    out += _keyStoreEntryByCertificateId(
+                        current->certificate_id, true, chain, friendlyNames[certificateHash(chain.primary())]);
                 } catch (const pkcs11Exception &e) {
-                    s_keyStoreList->_emit_diagnosticText(QString::asprintf("PKCS#11: Add key store entry %lu-'%s'.\n",
-                                                                           e.rv(), myPrintable(e.message())));
+                    s_keyStoreList->_emit_diagnosticText(QString::asprintf(
+                        "PKCS#11: Add key store entry %lu-'%s'.\n", e.rv(), myPrintable(e.message())));
                 }
             }
         }
@@ -1284,7 +1434,8 @@ bool pkcs11KeyStoreListContext::_tokenPrompt(void *const user_data, const pkcs11
     bool                  ret = false;
 
     QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::_tokenPrompt - entry user_data=%p, token_id=%p",
-                                         user_data, (void *)token_id),
+                                         user_data,
+                                         (void *)token_id),
                        Logger::Debug);
 
     if (user_data != nullptr) {
@@ -1320,7 +1471,8 @@ bool pkcs11KeyStoreListContext::_pinPrompt(void *const user_data, const pkcs11h_
     bool                  ret = false;
 
     QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::_pinPrompt - entry user_data=%p, token_id=%p",
-                                         user_data, (void *)token_id),
+                                         user_data,
+                                         (void *)token_id),
                        Logger::Debug);
 
     pin = SecureArray();
@@ -1439,14 +1591,17 @@ void pkcs11KeyStoreListContext::_clearStores()
 
 pkcs11KeyStoreEntryContext *
 pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId(const pkcs11h_certificate_id_t certificate_id,
-                                                         const bool has_private, const CertificateChain &chain,
-                                                         const QString &_description) const
+                                                         const bool                     has_private,
+                                                         const CertificateChain &       chain,
+                                                         const QString &                _description) const
 {
     pkcs11KeyStoreEntryContext *entry = nullptr;
 
     QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId - entry "
                                          "certificate_id=%p, has_private=%d, chain.size()=%d",
-                                         (void *)certificate_id, has_private ? 1 : 0, chain.size()),
+                                         (void *)certificate_id,
+                                         has_private ? 1 : 0,
+                                         chain.size()),
                        Logger::Debug);
 
     if (certificate_id == nullptr) {
@@ -1458,13 +1613,13 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId(const pkcs11h_certifica
     QString            description = _description;
     const Certificate &cert        = chain.primary();
     if (description.isEmpty()) {
-        description = cert.subjectInfoOrdered().toString() + QStringLiteral(" by ")
-            + cert.issuerInfo().value(CommonName, QStringLiteral("Unknown"));
+        description = cert.subjectInfoOrdered().toString() + QStringLiteral(" by ") +
+            cert.issuerInfo().value(CommonName, QStringLiteral("Unknown"));
     }
 
     if (has_private) {
-        pkcs11RSAContext *rsakey
-            = new pkcs11RSAContext(provider(), certificate_id, serialized, cert.subjectPublicKey().toRSA());
+        pkcs11RSAContext *rsakey =
+            new pkcs11RSAContext(provider(), certificate_id, serialized, cert.subjectPublicKey().toRSA());
 
         pkcs11PKeyContext *pkc = new pkcs11PKeyContext(provider());
         pkc->setKey(rsakey);
@@ -1473,12 +1628,18 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId(const pkcs11h_certifica
         KeyBundle key;
         key.setCertificateChainAndKey(chain, privkey);
 
-        entry = new pkcs11KeyStoreEntryContext(key, _tokenId2storeId(certificate_id->token_id), serialized,
-                                               QString::fromLatin1(certificate_id->token_id->label), description,
+        entry = new pkcs11KeyStoreEntryContext(key,
+                                               _tokenId2storeId(certificate_id->token_id),
+                                               serialized,
+                                               QString::fromLatin1(certificate_id->token_id->label),
+                                               description,
                                                provider());
     } else {
-        entry = new pkcs11KeyStoreEntryContext(cert, _tokenId2storeId(certificate_id->token_id), serialized,
-                                               QString::fromLatin1(certificate_id->token_id->label), description,
+        entry = new pkcs11KeyStoreEntryContext(cert,
+                                               _tokenId2storeId(certificate_id->token_id),
+                                               serialized,
+                                               QString::fromLatin1(certificate_id->token_id->label),
+                                               description,
                                                provider());
     }
 
@@ -1521,7 +1682,8 @@ QString pkcs11KeyStoreListContext::_tokenId2storeId(const pkcs11h_token_id_t tok
 }
 
 QString pkcs11KeyStoreListContext::_serializeCertificate(const pkcs11h_certificate_id_t certificate_id,
-                                                         const CertificateChain &chain, const bool has_private) const
+                                                         const CertificateChain &       chain,
+                                                         const bool                     has_private) const
 {
     QString serialized;
     size_t  len;
@@ -1529,7 +1691,8 @@ QString pkcs11KeyStoreListContext::_serializeCertificate(const pkcs11h_certifica
     QCA_logTextMessage(
         QString::asprintf(
             "pkcs11KeyStoreListContext::_serializeCertificate - entry certificate_id=%p, xx, has_private=%d",
-            (void *)certificate_id, has_private ? 1 : 0),
+            (void *)certificate_id,
+            has_private ? 1 : 0),
         Logger::Debug);
 
     if (pkcs11h_certificate_serializeCertificateId(nullptr, &len, certificate_id) != CKR_OK) {
@@ -1545,8 +1708,8 @@ QString pkcs11KeyStoreListContext::_serializeCertificate(const pkcs11h_certifica
 
     buf.resize((int)len);
 
-    serialized = QString::asprintf("qca-pkcs11/0/%s/%d/", myPrintable(_escapeString(QString::fromUtf8(buf))),
-                                   has_private ? 1 : 0);
+    serialized = QString::asprintf(
+        "qca-pkcs11/0/%s/%d/", myPrintable(_escapeString(QString::fromUtf8(buf))), has_private ? 1 : 0);
 
     QStringList list;
     foreach (Certificate i, chain) {
@@ -1564,14 +1727,17 @@ QString pkcs11KeyStoreListContext::_serializeCertificate(const pkcs11h_certifica
 
 void pkcs11KeyStoreListContext::_deserializeCertificate(const QString &                 from,
                                                         pkcs11h_certificate_id_t *const p_certificate_id,
-                                                        bool *const p_has_private, CertificateChain &chain) const
+                                                        bool *const                     p_has_private,
+                                                        CertificateChain &              chain) const
 {
     pkcs11h_certificate_id_t certificate_id = nullptr;
     chain.clear();
 
     QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::_deserializeCertificate - entry from='%s', "
                                          "p_certificate_id=%p, p_has_private=%p",
-                                         myPrintable(from), (void *)p_certificate_id, (void *)p_has_private),
+                                         myPrintable(from),
+                                         (void *)p_certificate_id,
+                                         (void *)p_has_private),
                        Logger::Debug);
 
     try {
@@ -1595,9 +1761,8 @@ void pkcs11KeyStoreListContext::_deserializeCertificate(const QString &         
             throw pkcs11Exception(CKR_FUNCTION_FAILED, QStringLiteral("Invalid serialization version"));
         }
 
-        if ((rv
-             = pkcs11h_certificate_deserializeCertificateId(&certificate_id, myPrintable(_unescapeString(list[n++]))))
-            != CKR_OK) {
+        if ((rv = pkcs11h_certificate_deserializeCertificateId(&certificate_id,
+                                                               myPrintable(_unescapeString(list[n++])))) != CKR_OK) {
             throw pkcs11Exception(rv, QStringLiteral("Invalid serialization"));
         }
 
@@ -1610,9 +1775,9 @@ void pkcs11KeyStoreListContext::_deserializeCertificate(const QString &         
             throw pkcs11Exception(rv, QStringLiteral("Invalid certificate"));
         }
 
-        if ((rv = pkcs11h_certificate_setCertificateIdCertificateBlob(
-                 certificate_id, (const unsigned char *)endCertificateBytes.data(), (size_t)endCertificateBytes.size()))
-            != CKR_OK) {
+        if ((rv = pkcs11h_certificate_setCertificateIdCertificateBlob(certificate_id,
+                                                                      (const unsigned char *)endCertificateBytes.data(),
+                                                                      (size_t)endCertificateBytes.size())) != CKR_OK) {
             throw pkcs11Exception(rv, QStringLiteral("Invalid serialization"));
         }
 
@@ -1638,7 +1803,8 @@ void pkcs11KeyStoreListContext::_deserializeCertificate(const QString &         
     QCA_logTextMessage(
         QString::asprintf(
             "pkcs11KeyStoreListContext::_deserializeCertificate - return *p_certificate_id=%p, chain.size()=%d",
-            (void *)*p_certificate_id, chain.size()),
+            (void *)*p_certificate_id,
+            chain.size()),
         Logger::Debug);
 }
 
@@ -1686,7 +1852,6 @@ const int pkcs11Provider::_CONFIG_MAX_PROVIDERS = 10;
 //----------------------------------------------------------------------------
 pkcs11Provider::pkcs11Provider()
 {
-
     QCA_logTextMessage(QStringLiteral("pkcs11Provider::pkcs11Provider - entry"), Logger::Debug);
 
     _lowLevelInitialized      = false;
@@ -1783,7 +1948,6 @@ QStringList pkcs11Provider::features() const
 
 Provider::Context *pkcs11Provider::createContext(const QString &type)
 {
-
     Provider::Context *context = nullptr;
 
     QCA_logTextMessage(QString::asprintf("pkcs11Provider::createContext - entry type='%s'", myPrintable(type)),
@@ -1905,25 +2069,27 @@ void pkcs11Provider::configChanged(const QVariantMap &config)
         }
 
         if (enabled && !provider.isEmpty()) {
-
             QCA_logTextMessage(
                 QString::asprintf("Loading PKCS#11 provider '%s' (%s)", myPrintable(name), myPrintable(provider)),
                 Logger::Information);
 
             if ((rv = pkcs11h_addProvider(
-                     myPrintable(name), myPrintable(provider),
+                     myPrintable(name),
+                     myPrintable(provider),
                      config[QString::asprintf("provider_%02d_allow_protected_authentication", i)].toBool() != false
                          ? TRUE
                          : FALSE, // krazy:exclude=captruefalse
-                     (unsigned)config[QString::asprintf("provider_%02d_private_mask", i)].toInt(), slotevent,
+                     (unsigned)config[QString::asprintf("provider_%02d_private_mask", i)].toInt(),
+                     slotevent,
                      (unsigned)config[QString::asprintf("provider_%02d_slotevent_timeout", i)].toInt(),
                      config[QString::asprintf("provider_%02d_cert_private", i)].toBool() != false
                          ? TRUE
                          : FALSE // krazy:exclude=captruefalse
-                     ))
-                != CKR_OK) {
+                     )) != CKR_OK) {
                 QCA_logTextMessage(QString::asprintf("PKCS#11: Cannot log provider '%s'-'%s' %lu-'%s'.\n",
-                                                     myPrintable(name), myPrintable(provider), rv,
+                                                     myPrintable(name),
+                                                     myPrintable(provider),
+                                                     rv,
                                                      pkcs11h_getMessage(rv)),
                                    Logger::Error);
                 appendPluginDiagnosticText(QString::asprintf("Cannot load PKCS#11 provider '%s'\n", myPrintable(name)));
@@ -1949,8 +2115,10 @@ void pkcs11Provider::__slotEventHook(void *const global_data)
 }
 
 PKCS11H_BOOL
-pkcs11Provider::__tokenPromptHook(void *const global_data, void *const user_data, const pkcs11h_token_id_t token,
-                                  const unsigned retry)
+pkcs11Provider::__tokenPromptHook(void *const              global_data,
+                                  void *const              user_data,
+                                  const pkcs11h_token_id_t token,
+                                  const unsigned           retry)
 {
     Q_UNUSED(retry);
 
@@ -1959,8 +2127,12 @@ pkcs11Provider::__tokenPromptHook(void *const global_data, void *const user_data
 }
 
 PKCS11H_BOOL
-pkcs11Provider::__pinPromptHook(void *const global_data, void *const user_data, const pkcs11h_token_id_t token,
-                                const unsigned retry, char *const pin, const size_t pin_max)
+pkcs11Provider::__pinPromptHook(void *const              global_data,
+                                void *const              user_data,
+                                const pkcs11h_token_id_t token,
+                                const unsigned           retry,
+                                char *const              pin,
+                                const size_t             pin_max)
 {
     Q_UNUSED(retry);
 
@@ -2023,8 +2195,10 @@ pkcs11Provider::_tokenPromptHook(void *const user_data, const pkcs11h_token_id_t
 }
 
 PKCS11H_BOOL
-pkcs11Provider::_pinPromptHook(void *const user_data, const pkcs11h_token_id_t token, char *const pin,
-                               const size_t pin_max)
+pkcs11Provider::_pinPromptHook(void *const              user_data,
+                               const pkcs11h_token_id_t token,
+                               char *const              pin,
+                               const size_t             pin_max)
 {
     PKCS11H_BOOL ret = FALSE; // krazy:exclude=captruefalse
 
@@ -2050,7 +2224,10 @@ class qca_pkcs11 : public QObject, public QCAPlugin
     Q_INTERFACES(QCAPlugin)
 
 public:
-    Provider *createProvider() override { return new pkcs11Provider; }
+    Provider *createProvider() override
+    {
+        return new pkcs11Provider;
+    }
 };
 
 #include "qca-pkcs11.moc"

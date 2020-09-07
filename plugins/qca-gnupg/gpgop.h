@@ -90,7 +90,11 @@ public:
         int     written; // BytesWritten
         QString keyId;   // NeedPassphrase
 
-        Event() : type(None), written(0) { }
+        Event()
+            : type(None)
+            , written(0)
+        {
+        }
     };
 
     class KeyItem
@@ -120,7 +124,12 @@ public:
         int       caps; // flags OR'd together
         QString   fingerprint;
 
-        KeyItem() : type(Unknown), bits(0), caps(0) { }
+        KeyItem()
+            : type(Unknown)
+            , bits(0)
+            , caps(0)
+        {
+        }
     };
 
     class Key
@@ -130,7 +139,10 @@ public:
         QStringList    userIds;
         bool           isTrusted;
 
-        Key() : isTrusted(false) { }
+        Key()
+            : isTrusted(false)
+        {
+        }
     };
     typedef QList<Key> KeyList;
 

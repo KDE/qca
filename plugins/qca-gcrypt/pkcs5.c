@@ -45,8 +45,14 @@
  *  Output:         DK         derived key, a dkLen-octet string
  */
 
-static gcry_error_t gcry_pbkdf2(int PRF, const char *P, size_t Plen, const char *S, size_t Slen, unsigned int c,
-                                unsigned int dkLen, char *DK)
+static gcry_error_t gcry_pbkdf2(int          PRF,
+                                const char * P,
+                                size_t       Plen,
+                                const char * S,
+                                size_t       Slen,
+                                unsigned int c,
+                                unsigned int dkLen,
+                                char *       DK)
 {
     gcry_md_hd_t   prf;
     gcry_error_t   rc;

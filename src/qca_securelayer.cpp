@@ -55,7 +55,10 @@ private:
     QList<Item> list;
 
 public:
-    LayerTracker() { p = 0; }
+    LayerTracker()
+    {
+        p = 0;
+    }
 
     void reset()
     {
@@ -63,7 +66,10 @@ public:
         list.clear();
     }
 
-    void addPlain(int plain) { p += plain; }
+    void addPlain(int plain)
+    {
+        p += plain;
+    }
 
     void specifyEncoded(int encoded, int plain)
     {
@@ -100,22 +106,40 @@ public:
 //----------------------------------------------------------------------------
 // SecureLayer
 //----------------------------------------------------------------------------
-SecureLayer::SecureLayer(QObject *parent) : QObject(parent) { }
+SecureLayer::SecureLayer(QObject *parent)
+    : QObject(parent)
+{
+}
 
-bool SecureLayer::isClosable() const { return false; }
+bool SecureLayer::isClosable() const
+{
+    return false;
+}
 
-void SecureLayer::close() { }
+void SecureLayer::close()
+{
+}
 
-QByteArray SecureLayer::readUnprocessed() { return QByteArray(); }
+QByteArray SecureLayer::readUnprocessed()
+{
+    return QByteArray();
+}
 
 //----------------------------------------------------------------------------
 // TLSSession
 //----------------------------------------------------------------------------
-TLSSession::TLSSession() { }
+TLSSession::TLSSession()
+{
+}
 
-TLSSession::TLSSession(const TLSSession &from) : Algorithm(from) { }
+TLSSession::TLSSession(const TLSSession &from)
+    : Algorithm(from)
+{
+}
 
-TLSSession::~TLSSession() { }
+TLSSession::~TLSSession()
+{
+}
 
 TLSSession &TLSSession::operator=(const TLSSession &from)
 {
@@ -123,7 +147,10 @@ TLSSession &TLSSession::operator=(const TLSSession &from)
     return *this;
 }
 
-bool TLSSession::isNull() const { return (!context() ? true : false); }
+bool TLSSession::isNull() const
+{
+    return (!context() ? true : false);
+}
 
 //----------------------------------------------------------------------------
 // TLS
@@ -163,7 +190,10 @@ public:
 
         int type;
 
-        Action(int _type) : type(_type) { }
+        Action(int _type)
+            : type(_type)
+        {
+        }
     };
 
     TLS *       q;
@@ -223,7 +253,11 @@ public:
     int               packet_out_pending; // packet count
     QList<int>        packet_to_net_encoded;
 
-    Private(TLS *_q, TLS::Mode _mode) : QObject(_q), q(_q), mode(_mode), actionTrigger(this)
+    Private(TLS *_q, TLS::Mode _mode)
+        : QObject(_q)
+        , q(_q)
+        , mode(_mode)
+        , actionTrigger(this)
     {
         // c is 0 during initial reset, so we don't redundantly reset it
         c                                = nullptr;
@@ -724,23 +758,35 @@ private Q_SLOTS:
         update();
     }
 
-    void doNextAction() { processNextAction(); }
+    void doNextAction()
+    {
+        processNextAction();
+    }
 };
 
-TLS::TLS(QObject *parent, const QString &provider) : SecureLayer(parent), Algorithm(QStringLiteral("tls"), provider)
+TLS::TLS(QObject *parent, const QString &provider)
+    : SecureLayer(parent)
+    , Algorithm(QStringLiteral("tls"), provider)
 {
     d = new Private(this, TLS::Stream);
 }
 
-TLS::TLS(Mode mode, QObject *parent, const QString &provider) :
-    SecureLayer(parent), Algorithm(mode == Stream ? QStringLiteral("tls") : QStringLiteral("dtls"), provider)
+TLS::TLS(Mode mode, QObject *parent, const QString &provider)
+    : SecureLayer(parent)
+    , Algorithm(mode == Stream ? QStringLiteral("tls") : QStringLiteral("dtls"), provider)
 {
     d = new Private(this, mode);
 }
 
-TLS::~TLS() { delete d; }
+TLS::~TLS()
+{
+    delete d;
+}
 
-void TLS::reset() { d->reset(ResetAll); }
+void TLS::reset()
+{
+    d->reset(ResetAll);
+}
 
 QStringList TLS::supportedCipherSuites(
     const Version &version) const // clazy:exclude=function-args-by-value TODO make it remove the & when we break ABI
@@ -756,9 +802,15 @@ void TLS::setCertificate(const CertificateChain &cert, const PrivateKey &key)
         d->c->setCertificate(cert, key);
 }
 
-void TLS::setCertificate(const KeyBundle &kb) { setCertificate(kb.certificateChain(), kb.privateKey()); }
+void TLS::setCertificate(const KeyBundle &kb)
+{
+    setCertificate(kb.certificateChain(), kb.privateKey());
+}
 
-CertificateCollection TLS::trustedCertificates() const { return d->trusted; }
+CertificateCollection TLS::trustedCertificates() const
+{
+    return d->trusted;
+}
 
 void TLS::setTrustedCertificates(const CertificateCollection &trusted)
 {
@@ -818,7 +870,10 @@ void TLS::setConstraints(const QStringList &cipherSuiteList)
         d->c->setConstraints(d->con_cipherSuites);
 }
 
-QList<CertificateInfoOrdered> TLS::issuerList() const { return d->issuerList; }
+QList<CertificateInfoOrdered> TLS::issuerList() const
+{
+    return d->issuerList;
+}
 
 void TLS::setIssuerList(const QList<CertificateInfoOrdered> &issuers)
 {
@@ -827,15 +882,30 @@ void TLS::setIssuerList(const QList<CertificateInfoOrdered> &issuers)
         d->c->setIssuerList(issuers);
 }
 
-void TLS::setSession(const TLSSession &session) { d->session = session; }
+void TLS::setSession(const TLSSession &session)
+{
+    d->session = session;
+}
 
-bool TLS::canCompress() const { return d->c->canCompress(); }
+bool TLS::canCompress() const
+{
+    return d->c->canCompress();
+}
 
-bool TLS::canSetHostName() const { return d->c->canSetHostName(); }
+bool TLS::canSetHostName() const
+{
+    return d->c->canSetHostName();
+}
 
-bool TLS::compressionEnabled() const { return d->tryCompress; }
+bool TLS::compressionEnabled() const
+{
+    return d->tryCompress;
+}
 
-void TLS::setCompressionEnabled(bool b) { d->tryCompress = b; }
+void TLS::setCompressionEnabled(bool b)
+{
+    d->tryCompress = b;
+}
 
 void TLS::startClient(const QString &host)
 {
@@ -855,7 +925,10 @@ void TLS::startServer()
     d->start(true);
 }
 
-void TLS::continueAfterStep() { d->continueAfterStep(); }
+void TLS::continueAfterStep()
+{
+    d->continueAfterStep();
+}
 
 bool TLS::isHandshaken() const
 {
@@ -865,19 +938,40 @@ bool TLS::isHandshaken() const
         return false;
 }
 
-bool TLS::isCompressed() const { return d->sessionInfo.isCompressed; }
+bool TLS::isCompressed() const
+{
+    return d->sessionInfo.isCompressed;
+}
 
-TLS::Version TLS::version() const { return d->sessionInfo.version; }
+TLS::Version TLS::version() const
+{
+    return d->sessionInfo.version;
+}
 
-QString TLS::cipherSuite() const { return d->sessionInfo.cipherSuite; }
+QString TLS::cipherSuite() const
+{
+    return d->sessionInfo.cipherSuite;
+}
 
-int TLS::cipherBits() const { return d->sessionInfo.cipherBits; }
+int TLS::cipherBits() const
+{
+    return d->sessionInfo.cipherBits;
+}
 
-int TLS::cipherMaxBits() const { return d->sessionInfo.cipherMaxBits; }
+int TLS::cipherMaxBits() const
+{
+    return d->sessionInfo.cipherMaxBits;
+}
 
-TLSSession TLS::session() const { return d->session; }
+TLSSession TLS::session() const
+{
+    return d->session;
+}
 
-TLS::Error TLS::errorCode() const { return d->errorCode; }
+TLS::Error TLS::errorCode() const
+{
+    return d->errorCode;
+}
 
 TLS::IdentityResult TLS::peerIdentityResult() const
 {
@@ -893,15 +987,30 @@ TLS::IdentityResult TLS::peerIdentityResult() const
     return Valid;
 }
 
-Validity TLS::peerCertificateValidity() const { return d->peerValidity; }
+Validity TLS::peerCertificateValidity() const
+{
+    return d->peerValidity;
+}
 
-CertificateChain TLS::localCertificateChain() const { return d->localCert; }
+CertificateChain TLS::localCertificateChain() const
+{
+    return d->localCert;
+}
 
-PrivateKey TLS::localPrivateKey() const { return d->localKey; }
+PrivateKey TLS::localPrivateKey() const
+{
+    return d->localKey;
+}
 
-CertificateChain TLS::peerCertificateChain() const { return d->peerCert; }
+CertificateChain TLS::peerCertificateChain() const
+{
+    return d->peerCert;
+}
 
-bool TLS::isClosable() const { return true; }
+bool TLS::isClosable() const
+{
+    return true;
+}
 
 int TLS::bytesAvailable() const
 {
@@ -998,13 +1107,25 @@ QByteArray TLS::readUnprocessed()
         return QByteArray();
 }
 
-int TLS::convertBytesWritten(qint64 bytes) { return d->layer.finished(bytes); }
+int TLS::convertBytesWritten(qint64 bytes)
+{
+    return d->layer.finished(bytes);
+}
 
-int TLS::packetsAvailable() const { return d->packet_in.count(); }
+int TLS::packetsAvailable() const
+{
+    return d->packet_in.count();
+}
 
-int TLS::packetsOutgoingAvailable() const { return d->packet_to_net.count(); }
+int TLS::packetsOutgoingAvailable() const
+{
+    return d->packet_to_net.count();
+}
 
-int TLS::packetMTU() const { return d->packet_mtu; }
+int TLS::packetMTU() const
+{
+    return d->packet_mtu;
+}
 
 void TLS::setPacketMTU(int size) const
 {
@@ -1046,9 +1167,13 @@ public:
     bool needUsername, canSendAuthzid, needPassword, canSendRealm;
 };
 
-SASL::Params::Params() : d(new Private) { }
+SASL::Params::Params()
+    : d(new Private)
+{
+}
 
-SASL::Params::Params(bool user, bool authzid, bool pass, bool realm) : d(new Private)
+SASL::Params::Params(bool user, bool authzid, bool pass, bool realm)
+    : d(new Private)
 {
     d->needUsername   = user;
     d->canSendAuthzid = authzid;
@@ -1056,9 +1181,15 @@ SASL::Params::Params(bool user, bool authzid, bool pass, bool realm) : d(new Pri
     d->canSendRealm   = realm;
 }
 
-SASL::Params::Params(const SASL::Params &from) : d(new Private(*from.d)) { }
+SASL::Params::Params(const SASL::Params &from)
+    : d(new Private(*from.d))
+{
+}
 
-SASL::Params::~Params() { delete d; }
+SASL::Params::~Params()
+{
+    delete d;
+}
 
 SASL::Params &SASL::Params::operator=(const SASL::Params &from)
 {
@@ -1066,13 +1197,25 @@ SASL::Params &SASL::Params::operator=(const SASL::Params &from)
     return *this;
 }
 
-bool SASL::Params::needUsername() const { return d->needUsername; }
+bool SASL::Params::needUsername() const
+{
+    return d->needUsername;
+}
 
-bool SASL::Params::canSendAuthzid() const { return d->canSendAuthzid; }
+bool SASL::Params::canSendAuthzid() const
+{
+    return d->canSendAuthzid;
+}
 
-bool SASL::Params::needPassword() const { return d->needPassword; }
+bool SASL::Params::needPassword() const
+{
+    return d->needPassword;
+}
 
-bool SASL::Params::canSendRealm() const { return d->canSendRealm; }
+bool SASL::Params::canSendRealm() const
+{
+    return d->canSendRealm;
+}
 
 //----------------------------------------------------------------------------
 // SASL
@@ -1120,12 +1263,21 @@ public:
         QByteArray stepData;
         bool       haveInit;
 
-        Action(int _type) : type(_type) { }
+        Action(int _type)
+            : type(_type)
+        {
+        }
 
-        Action(int _type, const QByteArray &_stepData) : type(_type), stepData(_stepData) { }
+        Action(int _type, const QByteArray &_stepData)
+            : type(_type)
+            , stepData(_stepData)
+        {
+        }
 
-        Action(int _type, bool _haveInit, const QByteArray &_stepData) :
-            type(_type), stepData(_stepData), haveInit(_haveInit)
+        Action(int _type, bool _haveInit, const QByteArray &_stepData)
+            : type(_type)
+            , stepData(_stepData)
+            , haveInit(_haveInit)
         {
         }
     };
@@ -1168,7 +1320,10 @@ public:
     int          to_net_encoded;
     LayerTracker layer;
 
-    Private(SASL *_q) : QObject(_q), q(_q), actionTrigger(this)
+    Private(SASL *_q)
+        : QObject(_q)
+        , q(_q)
+        , actionTrigger(this)
     {
         c            = nullptr;
         set_username = false;
@@ -1531,21 +1686,38 @@ private Q_SLOTS:
         }
     }
 
-    void doNextAction() { processNextAction(); }
+    void doNextAction()
+    {
+        processNextAction();
+    }
 };
 
-SASL::SASL(QObject *parent, const QString &provider) : SecureLayer(parent), Algorithm(QStringLiteral("sasl"), provider)
+SASL::SASL(QObject *parent, const QString &provider)
+    : SecureLayer(parent)
+    , Algorithm(QStringLiteral("sasl"), provider)
 {
     d = new Private(this);
 }
 
-SASL::~SASL() { delete d; }
+SASL::~SASL()
+{
+    delete d;
+}
 
-void SASL::reset() { d->reset(ResetAll); }
+void SASL::reset()
+{
+    d->reset(ResetAll);
+}
 
-SASL::Error SASL::errorCode() const { return d->errorCode; }
+SASL::Error SASL::errorCode() const
+{
+    return d->errorCode;
+}
 
-SASL::AuthCondition SASL::authCondition() const { return d->c->authCondition(); }
+SASL::AuthCondition SASL::authCondition() const
+{
+    return d->c->authCondition();
+}
 
 void SASL::setConstraints(AuthFlags f, SecurityLevel s)
 {
@@ -1572,9 +1744,15 @@ void SASL::setConstraints(AuthFlags f, int minSSF, int maxSSF)
     d->ssfmax = maxSSF;
 }
 
-void SASL::setExternalAuthId(const QString &authid) { d->ext_authid = authid; }
+void SASL::setExternalAuthId(const QString &authid)
+{
+    d->ext_authid = authid;
+}
 
-void SASL::setExternalSSF(int strength) { d->ext_ssf = strength; }
+void SASL::setExternalSSF(int strength)
+{
+    d->ext_ssf = strength;
+}
 
 void SASL::setLocalAddress(const QString &addr, quint16 port)
 {
@@ -1610,14 +1788,20 @@ void SASL::startServer(const QString &service, const QString &host, const QStrin
     d->start();
 }
 
-void SASL::putServerFirstStep(const QString &mech) { d->putServerFirstStep(mech, nullptr); }
+void SASL::putServerFirstStep(const QString &mech)
+{
+    d->putServerFirstStep(mech, nullptr);
+}
 
 void SASL::putServerFirstStep(const QString &mech, const QByteArray &clientInit)
 {
     d->putServerFirstStep(mech, &clientInit);
 }
 
-void SASL::putStep(const QByteArray &stepData) { d->putStep(stepData); }
+void SASL::putStep(const QByteArray &stepData)
+{
+    d->putStep(stepData);
+}
 
 void SASL::setUsername(const QString &user)
 {
@@ -1647,21 +1831,45 @@ void SASL::setRealm(const QString &realm)
     d->c->setClientParams(nullptr, nullptr, nullptr, &realm);
 }
 
-void SASL::continueAfterParams() { d->tryAgain(); }
+void SASL::continueAfterParams()
+{
+    d->tryAgain();
+}
 
-void SASL::continueAfterAuthCheck() { d->tryAgain(); }
+void SASL::continueAfterAuthCheck()
+{
+    d->tryAgain();
+}
 
-QString SASL::mechanism() const { return d->mech; }
+QString SASL::mechanism() const
+{
+    return d->mech;
+}
 
-QStringList SASL::mechanismList() const { return d->c->mechlist(); }
+QStringList SASL::mechanismList() const
+{
+    return d->c->mechlist();
+}
 
-QStringList SASL::realmList() const { return d->c->realmlist(); }
+QStringList SASL::realmList() const
+{
+    return d->c->realmlist();
+}
 
-int SASL::ssf() const { return d->c->ssf(); }
+int SASL::ssf() const
+{
+    return d->c->ssf();
+}
 
-int SASL::bytesAvailable() const { return d->in.size(); }
+int SASL::bytesAvailable() const
+{
+    return d->in.size();
+}
 
-int SASL::bytesOutgoingAvailable() const { return d->to_net.size(); }
+int SASL::bytesOutgoingAvailable() const
+{
+    return d->to_net.size();
+}
 
 void SASL::write(const QByteArray &a)
 {
@@ -1694,7 +1902,10 @@ QByteArray SASL::readOutgoing(int *plainBytes)
     return a;
 }
 
-int SASL::convertBytesWritten(qint64 bytes) { return d->layer.finished(bytes); }
+int SASL::convertBytesWritten(qint64 bytes)
+{
+    return d->layer.finished(bytes);
+}
 
 }
 

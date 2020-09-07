@@ -96,7 +96,10 @@ public:
     DLGroup domain;
     DSA *   result;
 
-    DSAKeyMaker(const DLGroup &_domain, QObject *parent = nullptr) : QThread(parent), domain(_domain), result(nullptr)
+    DSAKeyMaker(const DLGroup &_domain, QObject *parent = nullptr)
+        : QThread(parent)
+        , domain(_domain)
+        , result(nullptr)
     {
     }
 
@@ -127,29 +130,50 @@ public:
     }
 };
 
-DSAKey::DSAKey(Provider *p) : DSAContext(p)
+DSAKey::DSAKey(Provider *p)
+    : DSAContext(p)
 {
     keymaker = nullptr;
     sec      = false;
 }
 
-DSAKey::DSAKey(const DSAKey &from) : DSAContext(from.provider()), evp(from.evp)
+DSAKey::DSAKey(const DSAKey &from)
+    : DSAContext(from.provider())
+    , evp(from.evp)
 {
     keymaker = nullptr;
     sec      = from.sec;
 }
 
-DSAKey::~DSAKey() { delete keymaker; }
+DSAKey::~DSAKey()
+{
+    delete keymaker;
+}
 
-Provider::Context *DSAKey::clone() const { return new DSAKey(*this); }
+Provider::Context *DSAKey::clone() const
+{
+    return new DSAKey(*this);
+}
 
-bool DSAKey::isNull() const { return (evp.pkey ? false : true); }
+bool DSAKey::isNull() const
+{
+    return (evp.pkey ? false : true);
+}
 
-PKey::Type DSAKey::type() const { return PKey::DSA; }
+PKey::Type DSAKey::type() const
+{
+    return PKey::DSA;
+}
 
-bool DSAKey::isPrivate() const { return sec; }
+bool DSAKey::isPrivate() const
+{
+    return sec;
+}
 
-bool DSAKey::canExport() const { return true; }
+bool DSAKey::canExport() const
+{
+    return true;
+}
 
 void DSAKey::convertToPublic()
 {
@@ -172,7 +196,10 @@ void DSAKey::convertToPublic()
     sec = false;
 }
 
-int DSAKey::bits() const { return EVP_PKEY_bits(evp.pkey); }
+int DSAKey::bits() const
+{
+    return EVP_PKEY_bits(evp.pkey);
+}
 
 void DSAKey::startSign(SignatureAlgorithm, SignatureFormat format)
 {
@@ -196,7 +223,10 @@ void DSAKey::startVerify(SignatureAlgorithm, SignatureFormat format)
     evp.startVerify(EVP_sha1());
 }
 
-void DSAKey::update(const MemoryRegion &in) { evp.update(in); }
+void DSAKey::update(const MemoryRegion &in)
+{
+    evp.update(in);
+}
 
 QByteArray DSAKey::endSign()
 {

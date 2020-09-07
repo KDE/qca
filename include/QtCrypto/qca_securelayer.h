@@ -1062,8 +1062,10 @@ public:
        \param mechlist the list of mechanisms which can be used
        \param mode the mode to use on the client side
     */
-    void startClient(const QString &service, const QString &host, const QStringList &mechlist,
-                     ClientSendMode mode = AllowClientSendFirst);
+    void startClient(const QString &    service,
+                     const QString &    host,
+                     const QStringList &mechlist,
+                     ClientSendMode     mode = AllowClientSendFirst);
 
     /**
        Initialise the server side of the connection
@@ -1076,7 +1078,9 @@ public:
        \param realm the realm to use
        \param mode which mode to use on the server side
     */
-    void startServer(const QString &service, const QString &host, const QString &realm,
+    void startServer(const QString &service,
+                     const QString &host,
+                     const QString &realm,
                      ServerSendMode mode = DisableServerSendLast);
 
     /**

@@ -98,7 +98,8 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
    \relates SyncThread
 */
 
-QCA_EXPORT QByteArray methodReturnType(const QMetaObject *obj, const QByteArray &method,
+QCA_EXPORT QByteArray methodReturnType(const QMetaObject *     obj,
+                                       const QByteArray &      method,
                                        const QList<QByteArray> argTypes);
 
 /**
@@ -142,8 +143,11 @@ ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "boolMethod" ), arg
 
    \relates SyncThread
 */
-QCA_EXPORT bool invokeMethodWithVariants(QObject *obj, const QByteArray &method, const QVariantList &args,
-                                         QVariant *ret, Qt::ConnectionType type = Qt::AutoConnection);
+QCA_EXPORT bool invokeMethodWithVariants(QObject *           obj,
+                                         const QByteArray &  method,
+                                         const QVariantList &args,
+                                         QVariant *          ret,
+                                         Qt::ConnectionType  type = Qt::AutoConnection);
 
 /**
    \class SyncThread qca_support.h QtCrypto
@@ -321,8 +325,8 @@ public:
        \param ok if not 0, true is stored here if the call succeeds,
        otherwise false is stored here.
     */
-    QVariant call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(),
-                  bool *ok = nullptr);
+    QVariant
+    call(QObject *obj, const QByteArray &method, const QVariantList &args = QVariantList(), bool *ok = nullptr);
 
 protected:
     /**
@@ -982,7 +986,10 @@ public:
 
        \return Current level
     */
-    inline Severity level() const { return m_logLevel; }
+    inline Severity level() const
+    {
+        return m_logLevel;
+    }
 
     /**
        Set the current logging level

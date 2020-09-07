@@ -98,7 +98,10 @@ static long ctrlDTLSBio(BIO *bio, int cmd, [[maybe_unused]] long num, [[maybe_un
     return 0L;
 }
 
-OsslDTLSContext::OsslDTLSContext(Provider *p) : BaseOsslTLSContext(p, QStringLiteral("dtls")) { }
+OsslDTLSContext::OsslDTLSContext(Provider *p)
+    : BaseOsslTLSContext(p, QStringLiteral("dtls"))
+{
+}
 
 void OsslDTLSContext::reset()
 {

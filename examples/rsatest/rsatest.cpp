@@ -89,8 +89,8 @@ int main(int argc, char **argv)
 
         // Read that key back in, checking if the read succeeded
         QCA::ConvertResult conversionResult;
-        QCA::PrivateKey    privateKey
-            = QCA::PrivateKey::fromPEMFile(QStringLiteral("keyprivate.pem"), passPhrase, &conversionResult);
+        QCA::PrivateKey    privateKey =
+            QCA::PrivateKey::fromPEMFile(QStringLiteral("keyprivate.pem"), passPhrase, &conversionResult);
         if (!(QCA::ConvertGood == conversionResult)) {
             std::cout << "Private key read failed" << std::endl;
         }

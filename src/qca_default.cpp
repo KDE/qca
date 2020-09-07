@@ -48,7 +48,10 @@ private:
     QStringList    _plugin_priorities;
 
 public:
-    DefaultShared() : _use_system(true) { }
+    DefaultShared()
+        : _use_system(true)
+    {
+    }
 
     bool use_system() const
     {
@@ -74,7 +77,9 @@ public:
         return _plugin_priorities;
     }
 
-    void set(bool use_system, const QString &roots_file, const QStringList &skip_plugins,
+    void set(bool               use_system,
+             const QString &    roots_file,
+             const QStringList &skip_plugins,
              const QStringList &plugin_priorities)
     {
         QMutexLocker locker(&m);
@@ -92,9 +97,15 @@ class DefaultRandomContext : public RandomContext
 {
     Q_OBJECT
 public:
-    DefaultRandomContext(Provider *p) : RandomContext(p) { }
+    DefaultRandomContext(Provider *p)
+        : RandomContext(p)
+    {
+    }
 
-    Provider::Context *clone() const override { return new DefaultRandomContext(provider()); }
+    Provider::Context *clone() const override
+    {
+        return new DefaultRandomContext(provider());
+    }
 
     SecureArray nextBytes(int size) override
     {
@@ -476,11 +487,11 @@ void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
 
 void md5_finish(md5_state_t *pms, md5_byte_t digest[16])
 {
-    static const md5_byte_t pad[64]
-        = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    md5_byte_t data[8];
-    int        i;
+    static const md5_byte_t pad[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                       0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                       0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    md5_byte_t              data[8];
+    int                     i;
 
     /* Save the length before padding. */
     for (i = 0; i < 8; ++i)
@@ -497,9 +508,16 @@ class DefaultMD5Context : public HashContext
 {
     Q_OBJECT
 public:
-    DefaultMD5Context(Provider *p) : HashContext(p, QStringLiteral("md5")) { clear(); }
+    DefaultMD5Context(Provider *p)
+        : HashContext(p, QStringLiteral("md5"))
+    {
+        clear();
+    }
 
-    Provider::Context *clone() const override { return new DefaultMD5Context(*this); }
+    Provider::Context *clone() const override
+    {
+        return new DefaultMD5Context(*this);
+    }
 
     void clear() override
     {
@@ -544,8 +562,8 @@ public:
     (block.l[i & 15] = rol(block.l[(i + 13) & 15] ^ block.l[(i + 8) & 15] ^ block.l[(i + 2) & 15] ^ block.l[i & 15], 1))
 #else
 #define blk(i)                                                                                                         \
-    (block->l[i & 15]                                                                                                  \
-     = rol(block->l[(i + 13) & 15] ^ block->l[(i + 8) & 15] ^ block->l[(i + 2) & 15] ^ block->l[i & 15], 1))
+    (block->l[i & 15] =                                                                                                \
+         rol(block->l[(i + 13) & 15] ^ block->l[(i + 8) & 15] ^ block->l[(i + 2) & 15] ^ block->l[i & 15], 1))
 #endif
 
 /* (R0+R1), R2, R3, R4 are the different operations used in SHA1 */
@@ -596,9 +614,16 @@ public:
 #endif
     bool secure;
 
-    DefaultSHA1Context(Provider *p) : HashContext(p, QStringLiteral("sha1")) { clear(); }
+    DefaultSHA1Context(Provider *p)
+        : HashContext(p, QStringLiteral("sha1"))
+    {
+        clear();
+    }
 
-    Provider::Context *clone() const override { return new DefaultSHA1Context(*this); }
+    Provider::Context *clone() const override
+    {
+        return new DefaultSHA1Context(*this);
+    }
 
     void clear() override
     {
@@ -734,8 +759,8 @@ public:
         unsigned char finalcount[8];
 
         for (i = 0; i < 8; i++) {
-            finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8))
-                                            & 255); // Endian independent
+            finalcount[i] =
+                (unsigned char)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255); // Endian independent
         }
         sha1_update(context, (unsigned char *)"\200", 1);
         while ((context->count[0] & 504) != 448) {
@@ -836,8 +861,12 @@ static bool unescape_stringlist(const QString &in, QStringList *_out)
 //  4 - entry name
 //  5 - entry type (e.g. "cert")
 //  6 - string encoding of object (e.g. DER encoded in Base64)
-static QString entry_serialize(const QString &storeId, const QString &storeName, const QString &entryId,
-                               const QString &entryName, const QString &entryType, const QString &data)
+static QString entry_serialize(const QString &storeId,
+                               const QString &storeName,
+                               const QString &entryId,
+                               const QString &entryName,
+                               const QString &entryType,
+                               const QString &data)
 {
     QStringList out;
     out += QStringLiteral("qca_def");
@@ -850,8 +879,13 @@ static QString entry_serialize(const QString &storeId, const QString &storeName,
     return escape_stringlist(out);
 }
 
-static bool entry_deserialize(const QString &in, QString *storeId, QString *storeName, QString *entryId,
-                              QString *entryName, QString *entryType, QString *data)
+static bool entry_deserialize(const QString &in,
+                              QString *      storeId,
+                              QString *      storeName,
+                              QString *      entryId,
+                              QString *      entryName,
+                              QString *      entryType,
+                              QString *      data)
 {
     QStringList list;
     if (!unescape_stringlist(in, &list))
@@ -879,8 +913,8 @@ public:
     CRL                 _crl;
     mutable QString     _serialized;
 
-    DefaultKeyStoreEntry(const Certificate &cert, const QString &storeId, const QString &storeName, Provider *p) :
-        KeyStoreEntryContext(p)
+    DefaultKeyStoreEntry(const Certificate &cert, const QString &storeId, const QString &storeName, Provider *p)
+        : KeyStoreEntryContext(p)
     {
         _type      = KeyStoreEntry::TypeCertificate;
         _storeId   = storeId;
@@ -888,8 +922,8 @@ public:
         _cert      = cert;
     }
 
-    DefaultKeyStoreEntry(const CRL &crl, const QString &storeId, const QString &storeName, Provider *p) :
-        KeyStoreEntryContext(p)
+    DefaultKeyStoreEntry(const CRL &crl, const QString &storeId, const QString &storeName, Provider *p)
+        : KeyStoreEntryContext(p)
     {
         _type      = KeyStoreEntry::TypeCRL;
         _storeId   = storeId;
@@ -897,21 +931,45 @@ public:
         _crl       = crl;
     }
 
-    Provider::Context *clone() const override { return new DefaultKeyStoreEntry(*this); }
+    Provider::Context *clone() const override
+    {
+        return new DefaultKeyStoreEntry(*this);
+    }
 
-    KeyStoreEntry::Type type() const override { return _type; }
+    KeyStoreEntry::Type type() const override
+    {
+        return _type;
+    }
 
-    QString id() const override { return _id; }
+    QString id() const override
+    {
+        return _id;
+    }
 
-    QString name() const override { return _name; }
+    QString name() const override
+    {
+        return _name;
+    }
 
-    QString storeId() const override { return _storeId; }
+    QString storeId() const override
+    {
+        return _storeId;
+    }
 
-    QString storeName() const override { return _storeName; }
+    QString storeName() const override
+    {
+        return _storeName;
+    }
 
-    Certificate certificate() const override { return _cert; }
+    Certificate certificate() const override
+    {
+        return _cert;
+    }
 
-    CRL crl() const override { return _crl; }
+    CRL crl() const override
+    {
+        return _crl;
+    }
 
     QString serialize() const override
     {
@@ -993,11 +1051,20 @@ public:
     bool           x509_supported;
     DefaultShared *shared;
 
-    DefaultKeyStoreList(Provider *p, DefaultShared *_shared) : KeyStoreListContext(p), shared(_shared) { }
+    DefaultKeyStoreList(Provider *p, DefaultShared *_shared)
+        : KeyStoreListContext(p)
+        , shared(_shared)
+    {
+    }
 
-    ~DefaultKeyStoreList() override { }
+    ~DefaultKeyStoreList() override
+    {
+    }
 
-    Provider::Context *clone() const override { return nullptr; }
+    Provider::Context *clone() const override
+    {
+        return nullptr;
+    }
 
     void start() override
     {
@@ -1029,11 +1096,20 @@ public:
         return list;
     }
 
-    KeyStore::Type type(int) const override { return KeyStore::System; }
+    KeyStore::Type type(int) const override
+    {
+        return KeyStore::System;
+    }
 
-    QString storeId(int) const override { return QStringLiteral("qca-default-systemstore"); }
+    QString storeId(int) const override
+    {
+        return QStringLiteral("qca-default-systemstore");
+    }
 
-    QString name(int) const override { return QStringLiteral("System Trusted Certificates"); }
+    QString name(int) const override
+    {
+        return QStringLiteral("System Trusted Certificates");
+    }
 
     QList<KeyStoreEntry::Type> entryTypes(int) const override
     {
@@ -1130,11 +1206,20 @@ public:
 #endif
     }
 
-    int version() const override { return QCA_VERSION; }
+    int version() const override
+    {
+        return QCA_VERSION;
+    }
 
-    int qcaVersion() const override { return QCA_VERSION; }
+    int qcaVersion() const override
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const override { return QStringLiteral("default"); }
+    QString name() const override
+    {
+        return QStringLiteral("default");
+    }
 
     QStringList features() const override
     {
@@ -1206,7 +1291,10 @@ public:
     }
 };
 
-Provider *create_default_provider() { return new DefaultProvider; }
+Provider *create_default_provider()
+{
+    return new DefaultProvider;
+}
 
 QStringList skip_plugins(Provider *defaultProvider)
 {

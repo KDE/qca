@@ -37,12 +37,19 @@ class QFileSystemWatcherRelay : public QObject
 public:
     QFileSystemWatcher *watcher;
 
-    QFileSystemWatcherRelay(QFileSystemWatcher *_watcher, QObject *parent = nullptr) :
-        QObject(parent), watcher(_watcher)
+    QFileSystemWatcherRelay(QFileSystemWatcher *_watcher, QObject *parent = nullptr)
+        : QObject(parent)
+        , watcher(_watcher)
     {
-        connect(watcher, &QFileSystemWatcher::directoryChanged, this, &QFileSystemWatcherRelay::directoryChanged,
+        connect(watcher,
+                &QFileSystemWatcher::directoryChanged,
+                this,
+                &QFileSystemWatcherRelay::directoryChanged,
                 Qt::QueuedConnection);
-        connect(watcher, &QFileSystemWatcher::fileChanged, this, &QFileSystemWatcherRelay::fileChanged,
+        connect(watcher,
+                &QFileSystemWatcher::fileChanged,
+                this,
+                &QFileSystemWatcherRelay::fileChanged,
                 Qt::QueuedConnection);
     }
 
@@ -63,7 +70,13 @@ public:
     QFileSystemWatcherRelay *watcher_relay;
     QString                  dirName;
 
-    Private(DirWatch *_q) : QObject(_q), q(_q), watcher(nullptr), watcher_relay(nullptr) { }
+    Private(DirWatch *_q)
+        : QObject(_q)
+        , q(_q)
+        , watcher(nullptr)
+        , watcher_relay(nullptr)
+    {
+    }
 
 public Q_SLOTS:
     void watcher_changed(const QString &path)
@@ -73,15 +86,22 @@ public Q_SLOTS:
     }
 };
 
-DirWatch::DirWatch(const QString &dir, QObject *parent) : QObject(parent)
+DirWatch::DirWatch(const QString &dir, QObject *parent)
+    : QObject(parent)
 {
     d = new Private(this);
     setDirName(dir);
 }
 
-DirWatch::~DirWatch() { delete d; }
+DirWatch::~DirWatch()
+{
+    delete d;
+}
 
-QString DirWatch::dirName() const { return d->dirName; }
+QString DirWatch::dirName() const
+{
+    return d->dirName;
+}
 
 void DirWatch::setDirName(const QString &dir)
 {
@@ -118,7 +138,13 @@ public:
     QString                  filePath; // absolute path of file, calculated by us
     bool                     fileExisted;
 
-    Private(FileWatch *_q) : QObject(_q), q(_q), watcher(nullptr), watcher_relay(nullptr) { }
+    Private(FileWatch *_q)
+        : QObject(_q)
+        , q(_q)
+        , watcher(nullptr)
+        , watcher_relay(nullptr)
+    {
+    }
 
     void start(const QString &_fileName)
     {
@@ -213,15 +239,22 @@ private Q_SLOTS:
     }
 };
 
-FileWatch::FileWatch(const QString &file, QObject *parent) : QObject(parent)
+FileWatch::FileWatch(const QString &file, QObject *parent)
+    : QObject(parent)
 {
     d = new Private(this);
     d->start(file);
 }
 
-FileWatch::~FileWatch() { delete d; }
+FileWatch::~FileWatch()
+{
+    delete d;
+}
 
-QString FileWatch::fileName() const { return d->fileName; }
+QString FileWatch::fileName() const
+{
+    return d->fileName;
+}
 
 void FileWatch::setFileName(const QString &file)
 {

@@ -106,9 +106,15 @@ public:
         KeyStore::Type type;
         bool           isReadOnly;
 
-        Item() :
-            trackerId(-1), updateCount(0), owner(nullptr), storeContextId(-1), storeId(QLatin1String("")),
-            name(QLatin1String("")), type(KeyStore::System), isReadOnly(false)
+        Item()
+            : trackerId(-1)
+            , updateCount(0)
+            , owner(nullptr)
+            , storeContextId(-1)
+            , storeId(QLatin1String(""))
+            , name(QLatin1String(""))
+            , type(KeyStore::System)
+            , isReadOnly(false)
         {
         }
     };
@@ -147,7 +153,10 @@ public:
         self = nullptr;
     }
 
-    static KeyStoreTracker *instance() { return self; }
+    static KeyStoreTracker *instance()
+    {
+        return self;
+    }
 
     // thread-safe
     bool isBusy()
@@ -188,7 +197,10 @@ public:
     }
 
 public Q_SLOTS:
-    void spinEventLoop() { QAbstractEventDispatcher::instance()->processEvents(QEventLoop::AllEvents); }
+    void spinEventLoop()
+    {
+        QAbstractEventDispatcher::instance()->processEvents(QEventLoop::AllEvents);
+    }
 
     void start()
     {
@@ -576,13 +588,25 @@ public:
     KeyStoreTracker *tracker;
     QMutex           call_mutex;
 
-    KeyStoreThread(QObject *parent = nullptr) : SyncThread(parent) { }
+    KeyStoreThread(QObject *parent = nullptr)
+        : SyncThread(parent)
+    {
+    }
 
-    ~KeyStoreThread() override { stop(); }
+    ~KeyStoreThread() override
+    {
+        stop();
+    }
 
-    void atStart() override { tracker = new KeyStoreTracker; }
+    void atStart() override
+    {
+        tracker = new KeyStoreTracker;
+    }
 
-    void atEnd() override { delete tracker; }
+    void atEnd() override
+    {
+        delete tracker;
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -605,7 +629,10 @@ public:
         thread->start();
     }
 
-    ~KeyStoreManagerGlobal() { delete thread; }
+    ~KeyStoreManagerGlobal()
+    {
+        delete thread;
+    }
 
     KeyStoreManagerGlobal(const KeyStoreManagerGlobal &) = delete;
     KeyStoreManagerGlobal &operator=(const KeyStoreManagerGlobal &) = delete;
@@ -638,16 +665,33 @@ class KeyStoreEntry::Private
 public:
     bool accessible;
 
-    Private() { accessible = false; }
+    Private()
+    {
+        accessible = false;
+    }
 };
 
-KeyStoreEntry::KeyStoreEntry() : d(new Private) { }
+KeyStoreEntry::KeyStoreEntry()
+    : d(new Private)
+{
+}
 
-KeyStoreEntry::KeyStoreEntry(const QString &serialized) : d(new Private) { *this = fromString(serialized); }
+KeyStoreEntry::KeyStoreEntry(const QString &serialized)
+    : d(new Private)
+{
+    *this = fromString(serialized);
+}
 
-KeyStoreEntry::KeyStoreEntry(const KeyStoreEntry &from) : Algorithm(from), d(new Private(*from.d)) { }
+KeyStoreEntry::KeyStoreEntry(const KeyStoreEntry &from)
+    : Algorithm(from)
+    , d(new Private(*from.d))
+{
+}
 
-KeyStoreEntry::~KeyStoreEntry() { delete d; }
+KeyStoreEntry::~KeyStoreEntry()
+{
+    delete d;
+}
 
 KeyStoreEntry &KeyStoreEntry::operator=(const KeyStoreEntry &from)
 {
@@ -656,23 +700,50 @@ KeyStoreEntry &KeyStoreEntry::operator=(const KeyStoreEntry &from)
     return *this;
 }
 
-bool KeyStoreEntry::isNull() const { return (!context() ? true : false); }
+bool KeyStoreEntry::isNull() const
+{
+    return (!context() ? true : false);
+}
 
-bool KeyStoreEntry::isAvailable() const { return static_cast<const KeyStoreEntryContext *>(context())->isAvailable(); }
+bool KeyStoreEntry::isAvailable() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->isAvailable();
+}
 
-bool KeyStoreEntry::isAccessible() const { return d->accessible; }
+bool KeyStoreEntry::isAccessible() const
+{
+    return d->accessible;
+}
 
-KeyStoreEntry::Type KeyStoreEntry::type() const { return static_cast<const KeyStoreEntryContext *>(context())->type(); }
+KeyStoreEntry::Type KeyStoreEntry::type() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->type();
+}
 
-QString KeyStoreEntry::name() const { return static_cast<const KeyStoreEntryContext *>(context())->name(); }
+QString KeyStoreEntry::name() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->name();
+}
 
-QString KeyStoreEntry::id() const { return static_cast<const KeyStoreEntryContext *>(context())->id(); }
+QString KeyStoreEntry::id() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->id();
+}
 
-QString KeyStoreEntry::storeName() const { return static_cast<const KeyStoreEntryContext *>(context())->storeName(); }
+QString KeyStoreEntry::storeName() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->storeName();
+}
 
-QString KeyStoreEntry::storeId() const { return static_cast<const KeyStoreEntryContext *>(context())->storeId(); }
+QString KeyStoreEntry::storeId() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->storeId();
+}
 
-QString KeyStoreEntry::toString() const { return static_cast<const KeyStoreEntryContext *>(context())->serialize(); }
+QString KeyStoreEntry::toString() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->serialize();
+}
 
 KeyStoreEntry KeyStoreEntry::fromString(const QString &serialized)
 {
@@ -683,14 +754,20 @@ KeyStoreEntry KeyStoreEntry::fromString(const QString &serialized)
     return e;
 }
 
-KeyBundle KeyStoreEntry::keyBundle() const { return static_cast<const KeyStoreEntryContext *>(context())->keyBundle(); }
+KeyBundle KeyStoreEntry::keyBundle() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->keyBundle();
+}
 
 Certificate KeyStoreEntry::certificate() const
 {
     return static_cast<const KeyStoreEntryContext *>(context())->certificate();
 }
 
-CRL KeyStoreEntry::crl() const { return static_cast<const KeyStoreEntryContext *>(context())->crl(); }
+CRL KeyStoreEntry::crl() const
+{
+    return static_cast<const KeyStoreEntryContext *>(context())->crl();
+}
 
 PGPKey KeyStoreEntry::pgpSecretKey() const
 {
@@ -706,8 +783,8 @@ bool KeyStoreEntry::ensureAvailable()
 {
     const QString         storeId = this->storeId();
     const QString         entryId = id();
-    KeyStoreEntryContext *c
-        = (KeyStoreEntryContext *)trackercall("entry", QVariantList() << storeId << entryId).value<void *>();
+    KeyStoreEntryContext *c =
+        (KeyStoreEntryContext *)trackercall("entry", QVariantList() << storeId << entryId).value<void *>();
     if (c)
         change(c);
     return isAvailable();
@@ -738,14 +815,20 @@ public:
     KeyStore *            ks;
     bool                  avail;
 
-    Private(KeyStoreEntryWatcher *_q) : QObject(_q), q(_q), ksm(this)
+    Private(KeyStoreEntryWatcher *_q)
+        : QObject(_q)
+        , q(_q)
+        , ksm(this)
     {
         ks    = nullptr;
         avail = false;
         connect(&ksm, &KeyStoreManager::keyStoreAvailable, this, &KeyStoreEntryWatcher::Private::ksm_available);
     }
 
-    ~Private() override { delete ks; }
+    ~Private() override
+    {
+        delete ks;
+    }
 
     void start()
     {
@@ -799,7 +882,8 @@ private Q_SLOTS:
     }
 };
 
-KeyStoreEntryWatcher::KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent) : QObject(parent)
+KeyStoreEntryWatcher::KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *parent)
+    : QObject(parent)
 {
     d = new Private(this);
     if (!e.isNull()) {
@@ -810,9 +894,15 @@ KeyStoreEntryWatcher::KeyStoreEntryWatcher(const KeyStoreEntry &e, QObject *pare
     }
 }
 
-KeyStoreEntryWatcher::~KeyStoreEntryWatcher() { delete d; }
+KeyStoreEntryWatcher::~KeyStoreEntryWatcher()
+{
+    delete d;
+}
 
-KeyStoreEntry KeyStoreEntryWatcher::entry() const { return d->entry; }
+KeyStoreEntry KeyStoreEntryWatcher::entry() const
+{
+    return d->entry;
+}
 
 //----------------------------------------------------------------------------
 // KeyStore
@@ -835,15 +925,33 @@ public:
     CRL         crl;
     PGPKey      pgpKey;
 
-    KeyStoreWriteEntry() { }
+    KeyStoreWriteEntry()
+    {
+    }
 
-    KeyStoreWriteEntry(const KeyBundle &_keyBundle) : type(TypeKeyBundle), keyBundle(_keyBundle) { }
+    KeyStoreWriteEntry(const KeyBundle &_keyBundle)
+        : type(TypeKeyBundle)
+        , keyBundle(_keyBundle)
+    {
+    }
 
-    KeyStoreWriteEntry(const Certificate &_cert) : type(TypeCertificate), cert(_cert) { }
+    KeyStoreWriteEntry(const Certificate &_cert)
+        : type(TypeCertificate)
+        , cert(_cert)
+    {
+    }
 
-    KeyStoreWriteEntry(const CRL &_crl) : type(TypeCRL), crl(_crl) { }
+    KeyStoreWriteEntry(const CRL &_crl)
+        : type(TypeCRL)
+        , crl(_crl)
+    {
+    }
 
-    KeyStoreWriteEntry(const PGPKey &_pgpKey) : type(TypePGPKey), pgpKey(_pgpKey) { }
+    KeyStoreWriteEntry(const PGPKey &_pgpKey)
+        : type(TypePGPKey)
+        , pgpKey(_pgpKey)
+    {
+    }
 };
 
 class KeyStoreOperation : public QThread
@@ -865,9 +973,15 @@ public:
     QString              entryId;   // in: RemoveEntry, out: WriteEntry
     bool                 success;   // out: RemoveEntry
 
-    KeyStoreOperation(QObject *parent = nullptr) : QThread(parent) { }
+    KeyStoreOperation(QObject *parent = nullptr)
+        : QThread(parent)
+    {
+    }
 
-    ~KeyStoreOperation() override { wait(); }
+    ~KeyStoreOperation() override
+    {
+        wait();
+    }
 
 protected:
     void run() override
@@ -914,9 +1028,17 @@ public:
     QList<KeyStoreEntry>       latestEntryList;
     QList<KeyStoreOperation *> ops;
 
-    KeyStorePrivate(KeyStore *_q) : QObject(_q), q(_q), async(false) { }
+    KeyStorePrivate(KeyStore *_q)
+        : QObject(_q)
+        , q(_q)
+        , async(false)
+    {
+    }
 
-    ~KeyStorePrivate() override { qDeleteAll(ops); }
+    ~KeyStorePrivate() override
+    {
+        qDeleteAll(ops);
+    }
 
     // implemented below, after KeyStorePrivate is declared
     void                   reg();
@@ -1018,7 +1140,8 @@ private Q_SLOTS:
     }
 };
 
-KeyStore::KeyStore(const QString &id, KeyStoreManager *keyStoreManager) : QObject(keyStoreManager)
+KeyStore::KeyStore(const QString &id, KeyStoreManager *keyStoreManager)
+    : QObject(keyStoreManager)
 {
     d      = new KeyStorePrivate(this);
     d->ksm = keyStoreManager;
@@ -1039,15 +1162,30 @@ KeyStore::~KeyStore()
     delete d;
 }
 
-bool KeyStore::isValid() const { return (d->getItem(d->trackerId) ? true : false); }
+bool KeyStore::isValid() const
+{
+    return (d->getItem(d->trackerId) ? true : false);
+}
 
-KeyStore::Type KeyStore::type() const { return d->item.type; }
+KeyStore::Type KeyStore::type() const
+{
+    return d->item.type;
+}
 
-QString KeyStore::name() const { return d->item.name; }
+QString KeyStore::name() const
+{
+    return d->item.name;
+}
 
-QString KeyStore::id() const { return d->item.storeId; }
+QString KeyStore::id() const
+{
+    return d->item.storeId;
+}
 
-bool KeyStore::isReadOnly() const { return d->item.isReadOnly; }
+bool KeyStore::isReadOnly() const
+{
+    return d->item.isReadOnly;
+}
 
 void KeyStore::startAsynchronousMode()
 {
@@ -1234,7 +1372,9 @@ public:
     QMultiHash<int, KeyStore *> keyStoreForTrackerId;
     QHash<KeyStore *, int>      trackerIdForKeyStore;
 
-    KeyStoreManagerPrivate(KeyStoreManager *_q) : QObject(_q), q(_q)
+    KeyStoreManagerPrivate(KeyStoreManager *_q)
+        : QObject(_q)
+        , q(_q)
     {
         pending = false;
         waiting = false;
@@ -1423,15 +1563,28 @@ void KeyStoreTracker::addTarget(KeyStoreManagerPrivate *ksm)
 }
 
 // from KeyStorePrivate
-void KeyStorePrivate::reg() { ksm->d->reg(q, trackerId); }
+void KeyStorePrivate::reg()
+{
+    ksm->d->reg(q, trackerId);
+}
 
-void KeyStorePrivate::unreg() { ksm->d->unreg(q); }
+void KeyStorePrivate::unreg()
+{
+    ksm->d->unreg(q);
+}
 
-KeyStoreTracker::Item *KeyStorePrivate::getItem(const QString &storeId) { return ksm->d->getItem(storeId); }
+KeyStoreTracker::Item *KeyStorePrivate::getItem(const QString &storeId)
+{
+    return ksm->d->getItem(storeId);
+}
 
-KeyStoreTracker::Item *KeyStorePrivate::getItem(int trackerId) { return ksm->d->getItem(trackerId); }
+KeyStoreTracker::Item *KeyStorePrivate::getItem(int trackerId)
+{
+    return ksm->d->getItem(trackerId);
+}
 
-KeyStoreManager::KeyStoreManager(QObject *parent) : QObject(parent)
+KeyStoreManager::KeyStoreManager(QObject *parent)
+    : QObject(parent)
 {
     ensure_init();
     d = new KeyStoreManagerPrivate(this);
@@ -1446,7 +1599,10 @@ KeyStoreManager::~KeyStoreManager()
     delete d;
 }
 
-bool KeyStoreManager::isBusy() const { return d->busy; }
+bool KeyStoreManager::isBusy() const
+{
+    return d->busy;
+}
 
 void KeyStoreManager::waitForBusyFinished()
 {
@@ -1484,18 +1640,26 @@ public:
     QString        id, name;
 };
 
-KeyStoreInfo::KeyStoreInfo() { }
+KeyStoreInfo::KeyStoreInfo()
+{
+}
 
-KeyStoreInfo::KeyStoreInfo(KeyStore::Type type, const QString &id, const QString &name) : d(new Private)
+KeyStoreInfo::KeyStoreInfo(KeyStore::Type type, const QString &id, const QString &name)
+    : d(new Private)
 {
     d->type = type;
     d->id   = id;
     d->name = name;
 }
 
-KeyStoreInfo::KeyStoreInfo(const KeyStoreInfo &from) : d(from.d) { }
+KeyStoreInfo::KeyStoreInfo(const KeyStoreInfo &from)
+    : d(from.d)
+{
+}
 
-KeyStoreInfo::~KeyStoreInfo() { }
+KeyStoreInfo::~KeyStoreInfo()
+{
+}
 
 KeyStoreInfo &KeyStoreInfo::operator=(const KeyStoreInfo &from)
 {
@@ -1503,13 +1667,25 @@ KeyStoreInfo &KeyStoreInfo::operator=(const KeyStoreInfo &from)
     return *this;
 }
 
-bool KeyStoreInfo::isNull() const { return (d ? false : true); }
+bool KeyStoreInfo::isNull() const
+{
+    return (d ? false : true);
+}
 
-KeyStore::Type KeyStoreInfo::type() const { return d->type; }
+KeyStore::Type KeyStoreInfo::type() const
+{
+    return d->type;
+}
 
-QString KeyStoreInfo::id() const { return d->id; }
+QString KeyStoreInfo::id() const
+{
+    return d->id;
+}
 
-QString KeyStoreInfo::name() const { return d->name; }
+QString KeyStoreInfo::name() const
+{
+    return d->name;
+}
 
 }
 

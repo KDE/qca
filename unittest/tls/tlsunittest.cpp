@@ -43,9 +43,15 @@ private:
     QCA::Initializer *m_init;
 };
 
-void TLSUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void TLSUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
-void TLSUnitTest::cleanupTestCase() { delete m_init; }
+void TLSUnitTest::cleanupTestCase()
+{
+    delete m_init;
+}
 
 void TLSUnitTest::testCipherList()
 {

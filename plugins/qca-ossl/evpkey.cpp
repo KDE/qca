@@ -112,10 +112,9 @@ SecureArray EVPKey::endSign()
 
             if (type == EVP_PKEY_RSA) {
                 RSA *rsa = EVP_PKEY_get0_RSA(pkey);
-                if (RSA_private_encrypt(raw.size(), (unsigned char *)raw.data(), (unsigned char *)out.data(), rsa,
-                                        RSA_PKCS1_PADDING)
-                    == -1) {
-
+                if (RSA_private_encrypt(
+                        raw.size(), (unsigned char *)raw.data(), (unsigned char *)out.data(), rsa, RSA_PKCS1_PADDING) ==
+                    -1) {
                     state = SignError;
                     return SecureArray();
                 }
@@ -150,10 +149,11 @@ bool EVPKey::endVerify(const SecureArray &sig)
 
             if (type == EVP_PKEY_RSA) {
                 RSA *rsa = EVP_PKEY_get0_RSA(pkey);
-                if ((len = RSA_public_decrypt(sig.size(), (unsigned char *)sig.data(), (unsigned char *)out.data(), rsa,
-                                              RSA_PKCS1_PADDING))
-                    == -1) {
-
+                if ((len = RSA_public_decrypt(sig.size(),
+                                              (unsigned char *)sig.data(),
+                                              (unsigned char *)out.data(),
+                                              rsa,
+                                              RSA_PKCS1_PADDING)) == -1) {
                     state = VerifyError;
                     return false;
                 }

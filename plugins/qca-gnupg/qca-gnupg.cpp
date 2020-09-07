@@ -27,11 +27,19 @@ using namespace gpgQCAPlugin;
 class gnupgProvider : public QCA::Provider
 {
 public:
-    void init() override { }
+    void init() override
+    {
+    }
 
-    int qcaVersion() const override { return QCA_VERSION; }
+    int qcaVersion() const override
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const override { return QStringLiteral("qca-gnupg"); }
+    QString name() const override
+    {
+        return QStringLiteral("qca-gnupg");
+    }
 
     QStringList features() const override
     {
@@ -61,7 +69,10 @@ class qca_gnupg : public QObject, public QCAPlugin
     Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
     Q_INTERFACES(QCAPlugin)
 public:
-    QCA::Provider *createProvider() override { return new gnupgProvider; }
+    QCA::Provider *createProvider() override
+    {
+        return new gnupgProvider;
+    }
 };
 
 #include "qca-gnupg.moc"

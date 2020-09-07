@@ -41,9 +41,15 @@ class botanRandomContext : public QCA::RandomContext
 {
     Q_OBJECT
 public:
-    botanRandomContext(QCA::Provider *p) : RandomContext(p) { }
+    botanRandomContext(QCA::Provider *p)
+        : RandomContext(p)
+    {
+    }
 
-    Context *clone() const override { return new botanRandomContext(*this); }
+    Context *clone() const override
+    {
+        return new botanRandomContext(*this);
+    }
 
     QCA::SecureArray nextBytes(int size) override
     {
@@ -81,21 +87,37 @@ class BotanHashContext : public QCA::HashContext
 {
     Q_OBJECT
 public:
-    BotanHashContext(QCA::Provider *p, const QString &type) : QCA::HashContext(p, type)
+    BotanHashContext(QCA::Provider *p, const QString &type)
+        : QCA::HashContext(p, type)
     {
         const QString hashName = qcaHashToBotanHash(type);
         m_hashObj              = Botan::HashFunction::create(hashName.toStdString()).release();
     }
 
-    ~BotanHashContext() override { delete m_hashObj; }
+    ~BotanHashContext() override
+    {
+        delete m_hashObj;
+    }
 
-    bool isOk() const { return m_hashObj; }
+    bool isOk() const
+    {
+        return m_hashObj;
+    }
 
-    Context *clone() const override { return new BotanHashContext(provider(), type()); }
+    Context *clone() const override
+    {
+        return new BotanHashContext(provider(), type());
+    }
 
-    void clear() override { m_hashObj->clear(); }
+    void clear() override
+    {
+        m_hashObj->clear();
+    }
 
-    void update(const QCA::MemoryRegion &a) override { m_hashObj->update((const Botan::byte *)a.data(), a.size()); }
+    void update(const QCA::MemoryRegion &a) override
+    {
+        m_hashObj->update((const Botan::byte *)a.data(), a.size());
+    }
 
     QCA::MemoryRegion final() override
     {
@@ -131,7 +153,8 @@ class BotanHMACContext : public QCA::MACContext
 {
     Q_OBJECT
 public:
-    BotanHMACContext(QCA::Provider *p, const QString &type) : QCA::MACContext(p, type)
+    BotanHMACContext(QCA::Provider *p, const QString &type)
+        : QCA::MACContext(p, type)
     {
         const QString hashName = qcaHmacToBotanHmac(type);
         m_hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
@@ -140,7 +163,10 @@ public:
         }
     }
 
-    ~BotanHMACContext() override { delete m_hashObj; }
+    ~BotanHMACContext() override
+    {
+        delete m_hashObj;
+    }
 
     void setup(const QCA::SymmetricKey &key) override
     {
@@ -152,13 +178,25 @@ public:
         }
     }
 
-    Context *clone() const override { return new BotanHMACContext(provider(), type()); }
+    Context *clone() const override
+    {
+        return new BotanHMACContext(provider(), type());
+    }
 
-    void clear() { m_hashObj->clear(); }
+    void clear()
+    {
+        m_hashObj->clear();
+    }
 
-    QCA::KeyLength keyLength() const override { return anyKeyLength(); }
+    QCA::KeyLength keyLength() const override
+    {
+        return anyKeyLength();
+    }
 
-    void update(const QCA::MemoryRegion &a) override { m_hashObj->update((const Botan::byte *)a.data(), a.size()); }
+    void update(const QCA::MemoryRegion &a) override
+    {
+        m_hashObj->update((const Botan::byte *)a.data(), a.size());
+    }
 
     void final(QCA::MemoryRegion *out) override
     {
@@ -188,7 +226,8 @@ class BotanPBKDFContext : public QCA::KDFContext
 {
     Q_OBJECT
 public:
-    BotanPBKDFContext(QCA::Provider *p, const QString &type) : QCA::KDFContext(p, type)
+    BotanPBKDFContext(QCA::Provider *p, const QString &type)
+        : QCA::KDFContext(p, type)
     {
         try {
             const QString kdfName = qcaPbkdfToBotanPbkdf(type);
@@ -198,27 +237,41 @@ public:
         }
     }
 
-    ~BotanPBKDFContext() override { delete m_s2k; }
+    ~BotanPBKDFContext() override
+    {
+        delete m_s2k;
+    }
 
-    bool isOk() const { return m_s2k; }
+    bool isOk() const
+    {
+        return m_s2k;
+    }
 
-    Context *clone() const override { return new BotanPBKDFContext(provider(), type()); }
+    Context *clone() const override
+    {
+        return new BotanPBKDFContext(provider(), type());
+    }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
-                              unsigned int keyLength, unsigned int iterationCount) override
+    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+                              const QCA::InitializationVector &salt,
+                              unsigned int                     keyLength,
+                              unsigned int                     iterationCount) override
     {
         if (!m_s2k)
             return {};
 
         const std::string        secretString(secret.data(), secret.size());
-        const Botan::OctetString key
-            = m_s2k->derive_key(keyLength, secretString, (const Botan::byte *)salt.data(), salt.size(), iterationCount);
+        const Botan::OctetString key =
+            m_s2k->derive_key(keyLength, secretString, (const Botan::byte *)salt.data(), salt.size(), iterationCount);
         const QCA::SecureArray retval(QByteArray((const char *)key.begin(), key.length()));
         return QCA::SymmetricKey(retval);
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
-                              unsigned int keyLength, int msecInterval, unsigned int *iterationCount) override
+    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+                              const QCA::InitializationVector &salt,
+                              unsigned int                     keyLength,
+                              int                              msecInterval,
+                              unsigned int *                   iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         Botan::OctetString key;
@@ -251,7 +304,8 @@ class BotanHKDFContext : public QCA::HKDFContext
 {
     Q_OBJECT
 public:
-    BotanHKDFContext(QCA::Provider *p, const QString &type) : QCA::HKDFContext(p, type)
+    BotanHKDFContext(QCA::Provider *p, const QString &type)
+        : QCA::HKDFContext(p, type)
     {
         const QString hashName = qcaHkdfToBotanHkdf(type);
         Botan::HMAC * hashObj;
@@ -259,17 +313,30 @@ public:
         m_hkdf  = new Botan::HKDF(hashObj);
     }
 
-    ~BotanHKDFContext() override { delete m_hkdf; }
+    ~BotanHKDFContext() override
+    {
+        delete m_hkdf;
+    }
 
-    Context *clone() const override { return new BotanHKDFContext(provider(), type()); }
+    Context *clone() const override
+    {
+        return new BotanHKDFContext(provider(), type());
+    }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &secret, const QCA::InitializationVector &salt,
-                              const QCA::InitializationVector &info, unsigned int keyLength) override
+    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+                              const QCA::InitializationVector &salt,
+                              const QCA::InitializationVector &info,
+                              unsigned int                     keyLength) override
     {
         Botan::secure_vector<uint8_t> key(keyLength);
-        m_hkdf->kdf(key.data(), keyLength, reinterpret_cast<const Botan::byte *>(secret.data()), secret.size(),
-                    reinterpret_cast<const Botan::byte *>(salt.data()), salt.size(),
-                    reinterpret_cast<const Botan::byte *>(info.data()), info.size());
+        m_hkdf->kdf(key.data(),
+                    keyLength,
+                    reinterpret_cast<const Botan::byte *>(secret.data()),
+                    secret.size(),
+                    reinterpret_cast<const Botan::byte *>(salt.data()),
+                    salt.size(),
+                    reinterpret_cast<const Botan::byte *>(info.data()),
+                    info.size());
         QCA::SecureArray retval(QByteArray::fromRawData(reinterpret_cast<const char *>(key.data()), key.size()));
         return QCA::SymmetricKey(retval);
     }
@@ -278,8 +345,8 @@ protected:
     Botan::HKDF *m_hkdf;
 };
 
-static void qcaCipherToBotanCipher(const QString &type, std::string *algoName, std::string *algoMode,
-                                   std::string *algoPadding)
+static void
+qcaCipherToBotanCipher(const QString &type, std::string *algoName, std::string *algoMode, std::string *algoPadding)
 {
     if (type == QLatin1String("aes128-ecb")) {
         *algoName    = "AES-128";
@@ -392,13 +459,16 @@ class BotanCipherContext : public QCA::CipherContext
 {
     Q_OBJECT
 public:
-    BotanCipherContext(QCA::Provider *p, const QString &type) : QCA::CipherContext(p, type)
+    BotanCipherContext(QCA::Provider *p, const QString &type)
+        : QCA::CipherContext(p, type)
     {
         qcaCipherToBotanCipher(type, &m_algoName, &m_algoMode, &m_algoPadding);
     }
 
-    void setup(QCA::Direction dir, const QCA::SymmetricKey &key, const QCA::InitializationVector &iv,
-               const QCA::AuthTag &tag) override
+    void setup(QCA::Direction                   dir,
+               const QCA::SymmetricKey &        key,
+               const QCA::InitializationVector &iv,
+               const QCA::AuthTag &             tag) override
     {
         Q_UNUSED(tag);
         try {
@@ -407,20 +477,20 @@ public:
 
             if (iv.size() == 0) {
                 if (QCA::Encode == dir) {
-                    m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName + '/' + m_algoMode + '/' + m_algoPadding,
-                                                                  keyCopy, Botan::ENCRYPTION));
+                    m_crypter = new Botan::Pipe(Botan::get_cipher(
+                        m_algoName + '/' + m_algoMode + '/' + m_algoPadding, keyCopy, Botan::ENCRYPTION));
                 } else {
-                    m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName + '/' + m_algoMode + '/' + m_algoPadding,
-                                                                  keyCopy, Botan::DECRYPTION));
+                    m_crypter = new Botan::Pipe(Botan::get_cipher(
+                        m_algoName + '/' + m_algoMode + '/' + m_algoPadding, keyCopy, Botan::DECRYPTION));
                 }
             } else {
                 const Botan::InitializationVector ivCopy((Botan::byte *)iv.data(), iv.size());
                 if (QCA::Encode == dir) {
-                    m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName + '/' + m_algoMode + '/' + m_algoPadding,
-                                                                  keyCopy, ivCopy, Botan::ENCRYPTION));
+                    m_crypter = new Botan::Pipe(Botan::get_cipher(
+                        m_algoName + '/' + m_algoMode + '/' + m_algoPadding, keyCopy, ivCopy, Botan::ENCRYPTION));
                 } else {
-                    m_crypter = new Botan::Pipe(Botan::get_cipher(m_algoName + '/' + m_algoMode + '/' + m_algoPadding,
-                                                                  keyCopy, ivCopy, Botan::DECRYPTION));
+                    m_crypter = new Botan::Pipe(Botan::get_cipher(
+                        m_algoName + '/' + m_algoMode + '/' + m_algoPadding, keyCopy, ivCopy, Botan::DECRYPTION));
                 }
             }
             m_crypter->start_msg();
@@ -430,7 +500,10 @@ public:
         }
     }
 
-    Context *clone() const override { return new BotanCipherContext(*this); }
+    Context *clone() const override
+    {
+        return new BotanCipherContext(*this);
+    }
 
     int blockSize() const override
     {
@@ -477,13 +550,16 @@ public:
             kls = bc->key_spec();
         else if (const std::unique_ptr<Botan::StreamCipher> sc = Botan::StreamCipher::create(m_algoName))
             kls = sc->key_spec();
-        else if (const std::unique_ptr<Botan::MessageAuthenticationCode> mac
-                 = Botan::MessageAuthenticationCode::create(m_algoName))
+        else if (const std::unique_ptr<Botan::MessageAuthenticationCode> mac =
+                     Botan::MessageAuthenticationCode::create(m_algoName))
             kls = mac->key_spec();
         return QCA::KeyLength(kls.minimum_keylength(), kls.maximum_keylength(), kls.keylength_multiple());
     }
 
-    ~BotanCipherContext() override { delete m_crypter; }
+    ~BotanCipherContext() override
+    {
+        delete m_crypter;
+    }
 
 protected:
     QCA::Direction       m_dir;
@@ -498,7 +574,9 @@ protected:
 class botanProvider : public QCA::Provider
 {
 public:
-    void init() override { }
+    void init() override
+    {
+    }
 
     ~botanProvider() override
     {
@@ -507,9 +585,15 @@ public:
         // delete m_init;
     }
 
-    int qcaVersion() const override { return QCA_VERSION; }
+    int qcaVersion() const override
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const override { return QStringLiteral("qca-botan"); }
+    QString name() const override
+    {
+        return QStringLiteral("qca-botan");
+    }
 
     const QStringList &pbkdfTypes() const
     {
@@ -656,7 +740,10 @@ class qca_botan : public QObject, public QCAPlugin
     Q_PLUGIN_METADATA(IID "com.affinix.qca.Plugin/1.0")
     Q_INTERFACES(QCAPlugin)
 public:
-    QCA::Provider *createProvider() override { return new botanProvider; }
+    QCA::Provider *createProvider() override
+    {
+        return new botanProvider;
+    }
 };
 
 #include "qca-botan.moc"

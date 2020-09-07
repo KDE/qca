@@ -49,8 +49,8 @@ CertificateCollection qca_get_systemstore(const QString &provider)
         return col;
     PCCERT_CONTEXT pc = NULL;
     while (1) {
-        pc = CertFindCertificateInStore(hSystemStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_ANY, NULL,
-                                        pc);
+        pc = CertFindCertificateInStore(
+            hSystemStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_ANY, NULL, pc);
         if (!pc)
             break;
         int        size = pc->cbCertEncoded;

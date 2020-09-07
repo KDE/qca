@@ -52,7 +52,10 @@ class Operation : public QObject
 {
     Q_OBJECT
 public:
-    Operation(QObject *parent = 0) : QObject(parent) { }
+    Operation(QObject *parent = 0)
+        : QObject(parent)
+    {
+    }
 
 Q_SIGNALS:
     void error(const QString &str);
@@ -177,8 +180,13 @@ private:
     int                    pending;
 
 public:
-    SignOperation(const QByteArray &_in, CertItemStore *_store, int _id, QCA::CMS *_cms, QObject *parent = 0) :
-        Operation(parent), in(_in), store(_store), id(_id), cms(_cms), msg(0)
+    SignOperation(const QByteArray &_in, CertItemStore *_store, int _id, QCA::CMS *_cms, QObject *parent = 0)
+        : Operation(parent)
+        , in(_in)
+        , store(_store)
+        , id(_id)
+        , cms(_cms)
+        , msg(0)
     {
         loader = new CertItemPrivateLoader(store, this);
         connect(loader, SIGNAL(finished()), SLOT(loader_finished()));
@@ -265,8 +273,12 @@ private:
 public:
     QCA::SecureMessageSignature signer;
 
-    VerifyOperation(const QByteArray &_in, const QByteArray &_sig, QCA::CMS *_cms, QObject *parent = 0) :
-        Operation(parent), in(_in), sig(_sig), cms(_cms), msg(0)
+    VerifyOperation(const QByteArray &_in, const QByteArray &_sig, QCA::CMS *_cms, QObject *parent = 0)
+        : Operation(parent)
+        , in(_in)
+        , sig(_sig)
+        , cms(_cms)
+        , msg(0)
     {
         msg = new QCA::SecureMessage(cms);
         connect(msg, SIGNAL(bytesWritten(int)), SLOT(msg_bytesWritten(int)));
@@ -352,7 +364,10 @@ private:
     int              auto_import_req_id;
 
 public:
-    MainWin(QWidget *parent = 0) : QMainWindow(parent), op(0), auto_import_req_id(-1)
+    MainWin(QWidget *parent = 0)
+        : QMainWindow(parent)
+        , op(0)
+        , auto_import_req_id(-1)
     {
         ui.setupUi(this);
 
@@ -362,8 +377,8 @@ public:
         g_icons->keybundle = QPixmap(":/gfx/icons/keybundle16.png");
         g_icons->pgppub    = QPixmap(":/gfx/icons/publickey16.png");
         g_icons->pgpsec    = QPixmap(":/gfx/icons/keypair16.png");
-        if (g_icons->cert.isNull() || g_icons->crl.isNull() || g_icons->keybundle.isNull() || g_icons->pgppub.isNull()
-            || g_icons->pgpsec.isNull())
+        if (g_icons->cert.isNull() || g_icons->crl.isNull() || g_icons->keybundle.isNull() ||
+            g_icons->pgppub.isNull() || g_icons->pgpsec.isNull())
             printf("Warning: not all icons loaded\n");
 
         users = new CertItemStore(this);
@@ -395,17 +410,20 @@ public:
         ui.pb_sign->setEnabled(false);
 
         ui.lv_users->setModel(users);
-        connect(ui.lv_users->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+        connect(ui.lv_users->selectionModel(),
+                SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 SLOT(users_selectionChanged(const QItemSelection &, const QItemSelection &)));
 
         ui.lv_users->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(ui.lv_users, SIGNAL(customContextMenuRequested(const QPoint &)),
+        connect(ui.lv_users,
+                SIGNAL(customContextMenuRequested(const QPoint &)),
                 SLOT(users_customContextMenuRequested(const QPoint &)));
 
         ui.lv_authorities->setModel(roots);
 
         ui.lv_authorities->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(ui.lv_authorities, SIGNAL(customContextMenuRequested(const QPoint &)),
+        connect(ui.lv_authorities,
+                SIGNAL(customContextMenuRequested(const QPoint &)),
                 SLOT(roots_customContextMenuRequested(const QPoint &)));
 
         cms = new QCA::CMS(this);
@@ -471,8 +489,8 @@ public:
 private Q_SLOTS:
     void load_file()
     {
-        QString fileName
-            = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Identities (*.p12 *.pfx)"));
+        QString fileName =
+            QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Identities (*.p12 *.pfx)"));
         if (fileName.isEmpty())
             return;
 
@@ -485,9 +503,10 @@ private Q_SLOTS:
         KeySelectDlg *w = new KeySelectDlg(this);
         w->setAttribute(Qt::WA_DeleteOnClose, true);
         w->setWindowModality(Qt::WindowModal);
-        connect(w, SIGNAL(selected(const QCA::KeyStoreEntry &)),
-                SLOT(load_device_finished(const QCA::KeyStoreEntry &)));
-        connect(w, SIGNAL(viewCertificate(const QCA::CertificateChain &)),
+        connect(
+            w, SIGNAL(selected(const QCA::KeyStoreEntry &)), SLOT(load_device_finished(const QCA::KeyStoreEntry &)));
+        connect(w,
+                SIGNAL(viewCertificate(const QCA::CertificateChain &)),
                 SLOT(keyselect_viewCertificate(const QCA::CertificateChain &)));
         w->setIcon(KeySelectDlg::IconCert, g_icons->cert);
         w->setIcon(KeySelectDlg::IconCrl, g_icons->crl);
@@ -497,12 +516,15 @@ private Q_SLOTS:
         w->show();
     }
 
-    void load_device_finished(const QCA::KeyStoreEntry &entry) { users->addFromKeyStore(entry); }
+    void load_device_finished(const QCA::KeyStoreEntry &entry)
+    {
+        users->addFromKeyStore(entry);
+    }
 
     void load_root()
     {
-        QString fileName
-            = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Certificates (*.pem *.crt)"));
+        QString fileName =
+            QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("X.509 Certificates (*.pem *.crt)"));
         if (fileName.isEmpty())
             return;
 
@@ -522,7 +544,8 @@ private Q_SLOTS:
 
             CertItem i = users->itemFromId(id);
 
-            QMessageBox::information(this, tr("User added"),
+            QMessageBox::information(this,
+                                     tr("User added"),
                                      tr("This signature was made by a previously unknown user, and so the "
                                         "user has now been added to the keyring as \"%1\".")
                                          .arg(i.name()));
@@ -532,8 +555,8 @@ private Q_SLOTS:
         }
 
         ui.lv_users->selectionModel()->select(users->index(users->rowFromId(id)),
-                                              QItemSelectionModel::Clear | QItemSelectionModel::Select
-                                                  | QItemSelectionModel::Current);
+                                              QItemSelectionModel::Clear | QItemSelectionModel::Select |
+                                                  QItemSelectionModel::Current);
 
         setEnabled(true);
     }
@@ -548,8 +571,8 @@ private Q_SLOTS:
     void mod_config()
     {
         if (!Pkcs11ConfigDlg::isSupported()) {
-            QMessageBox::information(this, tr("Error"),
-                                     tr("No provider available supporting standard PKCS#11 configuration."));
+            QMessageBox::information(
+                this, tr("Error"), tr("No provider available supporting standard PKCS#11 configuration."));
             return;
         }
 
@@ -651,7 +674,10 @@ private Q_SLOTS:
         ui.lv_users->edit(index);
     }
 
-    void users_remove(int at) { users->removeItem(users->idFromRow(at)); }
+    void users_remove(int at)
+    {
+        users->removeItem(users->idFromRow(at));
+    }
 
     void roots_view(int at)
     {
@@ -671,7 +697,10 @@ private Q_SLOTS:
         ui.lv_authorities->edit(index);
     }
 
-    void roots_remove(int at) { roots->removeItem(roots->idFromRow(at)); }
+    void roots_remove(int at)
+    {
+        roots->removeItem(roots->idFromRow(at));
+    }
 
     void keyselect_viewCertificate(const QCA::CertificateChain &chain)
     {
@@ -870,7 +899,8 @@ private Q_SLOTS:
                 QCA::Certificate cert = chain.primary();
 
                 int ret = QMessageBox::warning(
-                    this, tr("Self-signed certificate"),
+                    this,
+                    tr("Self-signed certificate"),
                     tr("<qt>The signature is made by an unknown user, and the certificate is self-signed.<br>\n"
                        "<br>\n"
                        "<nobr>Common Name: %1</nobr><br>\n"
@@ -878,7 +908,8 @@ private Q_SLOTS:
                        "<br>\n"
                        "Trust the certificate?</qt>")
                         .arg(cert.commonName(), get_fingerprint(cert)),
-                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                    QMessageBox::Yes | QMessageBox::No,
+                    QMessageBox::No);
 
                 if (ret == QMessageBox::Yes) {
                     self_signed_verify_cert = cert;
@@ -903,7 +934,8 @@ int main(int argc, char **argv)
 
     if (!QCA::isSupported("cert,crl,cms")) {
         QMessageBox::critical(
-            0, qapp.applicationName() + ": " + MainWin::tr("Error"),
+            0,
+            qapp.applicationName() + ": " + MainWin::tr("Error"),
             MainWin::tr(
                 "No support for CMS is available.  Please install an appropriate QCA plugin, such as qca-ossl."));
         return 1;

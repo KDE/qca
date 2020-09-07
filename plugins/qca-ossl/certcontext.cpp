@@ -86,9 +86,9 @@ static QDateTime ASN1_UTCTIME_QDateTime(const ASN1_UTCTIME *asn1_tm)
 
     int tzOffset = 0;
     if (tzInd && d[tzInd] != 'Z') {
-        tzOffset = (QByteArray::fromRawData(d.data() + tzInd + 1, 2).toInt() * 3600
-                    + QByteArray::fromRawData(d.data() + tzInd + 3, 2).toInt() * 60)
-            * (d[tzInd] == '+' ? 1 : -1);
+        tzOffset = (QByteArray::fromRawData(d.data() + tzInd + 1, 2).toInt() * 3600 +
+                    QByteArray::fromRawData(d.data() + tzInd + 3, 2).toInt() * 60) *
+            (d[tzInd] == '+' ? 1 : -1);
     }
 
     int year, month, day, hour, minute = 0, second = 0;
@@ -114,8 +114,10 @@ static QDateTime ASN1_UTCTIME_QDateTime(const ASN1_UTCTIME *asn1_tm)
             second = QByteArray::fromRawData(d.data() + 10, 2).toInt();
     }
 
-    return QDateTime(QDate(year, month, day), QTime(hour, minute, second, fraction),
-                     tzInd ? Qt::OffsetFromUTC : Qt::LocalTime, tzOffset);
+    return QDateTime(QDate(year, month, day),
+                     QTime(hour, minute, second, fraction),
+                     tzInd ? Qt::OffsetFromUTC : Qt::LocalTime,
+                     tzOffset);
 #else
     struct tm t;
     ASN1_TIME_to_tm(asn1_tm, &t);
@@ -156,8 +158,8 @@ static void try_get_name_item(X509_NAME *name, int nid, const CertificateInfoTyp
     }
 }
 
-static void try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, const CertificateInfoType &t,
-                                     CertificateInfo *info)
+static void
+try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, const CertificateInfoType &t, CertificateInfo *info)
 {
     ASN1_OBJECT *oid = OBJ_txt2obj(oidText.toLatin1().data(), 1); // 1 = only accept dotted input
     if (!oid)
@@ -339,7 +341,10 @@ static CertificateInfo get_cert_alt_name(X509_EXTENSION *ex)
     return info;
 }
 
-static QByteArray ipaddress_string_to_bytes(const QString &) { return QByteArray(4, 0); }
+static QByteArray ipaddress_string_to_bytes(const QString &)
+{
+    return QByteArray(4, 0);
+}
 
 static GENERAL_NAME *new_general_name(const CertificateInfoType &t, const QString &val)
 {
@@ -514,8 +519,15 @@ static X509_EXTENSION *new_cert_key_usage(const Constraints &constraints)
 static Constraints get_cert_key_usage(X509_EXTENSION *ex)
 {
     Constraints constraints;
-    int         bit_table[9] = { DigitalSignature,   NonRepudiation, KeyEncipherment, DataEncipherment, KeyAgreement,
-                         KeyCertificateSign, CRLSign,        EncipherOnly,    DecipherOnly };
+    int         bit_table[9] = {DigitalSignature,
+                        NonRepudiation,
+                        KeyEncipherment,
+                        DataEncipherment,
+                        KeyAgreement,
+                        KeyCertificateSign,
+                        CRLSign,
+                        EncipherOnly,
+                        DecipherOnly};
 
     ASN1_BIT_STRING *keyusage = (ASN1_BIT_STRING *)X509V3_EXT_d2i(ex);
     for (int n = 0; n < 9; ++n) {
@@ -723,12 +735,16 @@ static bool usage_check(const MyCertContext &cc, UsageMode u)
     }
 }
 
-MyCertContext::MyCertContext(Provider *p) : CertContext(p)
+MyCertContext::MyCertContext(Provider *p)
+    : CertContext(p)
 {
     // printf("[%p] ** created\n", this);
 }
 
-MyCertContext::MyCertContext(const MyCertContext &from) : CertContext(from), item(from.item), _props(from._props)
+MyCertContext::MyCertContext(const MyCertContext &from)
+    : CertContext(from)
+    , item(from.item)
+    , _props(from._props)
 {
     // printf("[%p] ** created as copy (from [%p])\n", this, &from);
 }
@@ -738,11 +754,20 @@ MyCertContext::~MyCertContext()
     // printf("[%p] ** deleted\n", this);
 }
 
-Provider::Context *MyCertContext::clone() const { return new MyCertContext(*this); }
+Provider::Context *MyCertContext::clone() const
+{
+    return new MyCertContext(*this);
+}
 
-QByteArray MyCertContext::toDER() const { return item.toDER(); }
+QByteArray MyCertContext::toDER() const
+{
+    return item.toDER();
+}
 
-QString MyCertContext::toPEM() const { return item.toPEM(); }
+QString MyCertContext::toPEM() const
+{
+    return item.toPEM();
+}
 
 ConvertResult MyCertContext::fromDER(const QByteArray &a)
 {
@@ -914,7 +939,6 @@ PKeyContext *MyCertContext::subjectPublicKey() const
 
 bool MyCertContext::isIssuerOf(const CertContext *other) const
 {
-
     // to check a single issuer, we make a list of 1
     STACK_OF(X509) *untrusted_list = sk_X509_new_null();
 
@@ -1114,7 +1138,10 @@ X509Item::X509Item(const X509Item &from)
     *this = from;
 }
 
-X509Item::~X509Item() { reset(); }
+X509Item::~X509Item()
+{
+    reset();
+}
 
 X509Item &X509Item::operator=(const X509Item &from)
 {
@@ -1153,7 +1180,10 @@ void X509Item::reset()
     }
 }
 
-bool X509Item::isNull() const { return (!cert && !req && !crl); }
+bool X509Item::isNull() const
+{
+    return (!cert && !req && !crl);
+}
 
 QByteArray X509Item::toDER() const
 {
@@ -1226,8 +1256,11 @@ ConvertResult X509Item::fromPEM(const QString &s, X509Item::Type t)
     return ConvertGood;
 }
 
-Validity MyCertContext::validate(const QList<CertContext *> &trusted, const QList<CertContext *> &untrusted,
-                                 const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const
+Validity MyCertContext::validate(const QList<CertContext *> &trusted,
+                                 const QList<CertContext *> &untrusted,
+                                 const QList<CRLContext *> & crls,
+                                 UsageMode                   u,
+                                 ValidateFlags               vf) const
 {
     // TODO
     Q_UNUSED(vf);
@@ -1297,8 +1330,11 @@ Validity MyCertContext::validate(const QList<CertContext *> &trusted, const QLis
     return ValidityGood;
 }
 
-Validity MyCertContext::validate_chain(const QList<CertContext *> &chain, const QList<CertContext *> &trusted,
-                                       const QList<CRLContext *> &crls, UsageMode u, ValidateFlags vf) const
+Validity MyCertContext::validate_chain(const QList<CertContext *> &chain,
+                                       const QList<CertContext *> &trusted,
+                                       const QList<CRLContext *> & crls,
+                                       UsageMode                   u,
+                                       ValidateFlags               vf) const
 {
     // TODO
     Q_UNUSED(vf);
@@ -1387,15 +1423,31 @@ Validity MyCertContext::validate_chain(const QList<CertContext *> &chain, const 
 // ---------------------------------------------------------------------
 // MyCRLContext
 // ---------------------------------------------------------------------
-MyCRLContext::MyCRLContext(Provider *p) : CRLContext(p) { }
+MyCRLContext::MyCRLContext(Provider *p)
+    : CRLContext(p)
+{
+}
 
-MyCRLContext::MyCRLContext(const MyCRLContext &from) : CRLContext(from), item(from.item) { }
+MyCRLContext::MyCRLContext(const MyCRLContext &from)
+    : CRLContext(from)
+    , item(from.item)
+{
+}
 
-Provider::Context *MyCRLContext::clone() const { return new MyCRLContext(*this); }
+Provider::Context *MyCRLContext::clone() const
+{
+    return new MyCRLContext(*this);
+}
 
-QByteArray MyCRLContext::toDER() const { return item.toDER(); }
+QByteArray MyCRLContext::toDER() const
+{
+    return item.toDER();
+}
 
-QString MyCRLContext::toPEM() const { return item.toPEM(); }
+QString MyCRLContext::toPEM() const
+{
+    return item.toPEM();
+}
 
 ConvertResult MyCRLContext::fromDER(const QByteArray &a)
 {
@@ -1421,7 +1473,10 @@ void MyCRLContext::fromX509(X509_CRL *x)
     make_props();
 }
 
-const CRLContextProps *MyCRLContext::props() const { return &_props; }
+const CRLContextProps *MyCRLContext::props() const
+{
+    return &_props;
+}
 
 bool MyCRLContext::compare(const CRLContext *other) const
 {
@@ -1588,14 +1643,23 @@ void MyCRLContext::make_props()
 //----------------------------------------------------------------------------
 // MyCAContext
 //----------------------------------------------------------------------------
-MyCAContext::MyCAContext(Provider *p) : CAContext(p) { privateKey = nullptr; }
+MyCAContext::MyCAContext(Provider *p)
+    : CAContext(p)
+{
+    privateKey = nullptr;
+}
 
-MyCAContext::MyCAContext(const MyCAContext &from) : CAContext(from), caCert(from.caCert)
+MyCAContext::MyCAContext(const MyCAContext &from)
+    : CAContext(from)
+    , caCert(from.caCert)
 {
     privateKey = static_cast<MyPKeyContext *>(from.privateKey->clone());
 }
 
-MyCAContext::~MyCAContext() { delete privateKey; }
+MyCAContext::~MyCAContext()
+{
+    delete privateKey;
+}
 
 CertContext *MyCAContext::certificate() const
 {
@@ -1720,8 +1784,8 @@ CertContext *MyCAContext::signRequest(const CSRContext &req, const QDateTime &no
     return cert;
 }
 
-CRLContext *MyCAContext::updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries,
-                                   const QDateTime &nextUpdate) const
+CRLContext *
+MyCAContext::updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const
 {
     // TODO: implement
     Q_UNUSED(crl)
@@ -1730,20 +1794,40 @@ CRLContext *MyCAContext::updateCRL(const CRLContext &crl, const QList<CRLEntry> 
     return nullptr;
 }
 
-Provider::Context *MyCAContext::clone() const { return new MyCAContext(*this); }
+Provider::Context *MyCAContext::clone() const
+{
+    return new MyCAContext(*this);
+}
 
 //----------------------------------------------------------------------------
 // MyCSRContext
 //----------------------------------------------------------------------------
-MyCSRContext::MyCSRContext(Provider *p) : CSRContext(p) { }
+MyCSRContext::MyCSRContext(Provider *p)
+    : CSRContext(p)
+{
+}
 
-MyCSRContext::MyCSRContext(const MyCSRContext &from) : CSRContext(from), item(from.item), _props(from._props) { }
+MyCSRContext::MyCSRContext(const MyCSRContext &from)
+    : CSRContext(from)
+    , item(from.item)
+    , _props(from._props)
+{
+}
 
-Provider::Context *MyCSRContext::clone() const { return new MyCSRContext(*this); }
+Provider::Context *MyCSRContext::clone() const
+{
+    return new MyCSRContext(*this);
+}
 
-QByteArray MyCSRContext::toDER() const { return item.toDER(); }
+QByteArray MyCSRContext::toDER() const
+{
+    return item.toDER();
+}
 
-QString MyCSRContext::toPEM() const { return item.toPEM(); }
+QString MyCSRContext::toPEM() const
+{
+    return item.toPEM();
+}
 
 ConvertResult MyCSRContext::fromDER(const QByteArray &a)
 {
@@ -1854,7 +1938,10 @@ bool MyCSRContext::createRequest(const CertificateOptions &opts, const PKeyConte
     return true;
 }
 
-const CertContextProps *MyCSRContext::props() const { return &_props; }
+const CertContextProps *MyCSRContext::props() const
+{
+    return &_props;
+}
 
 bool MyCSRContext::compare(const CSRContext *other) const
 {
@@ -1884,7 +1971,10 @@ PKeyContext *MyCSRContext::subjectPublicKey() const // does a new
     return kc;
 }
 
-QString MyCSRContext::toSPKAC() const { return QString(); }
+QString MyCSRContext::toSPKAC() const
+{
+    return QString();
+}
 
 ConvertResult MyCSRContext::fromSPKAC(const QString &s)
 {

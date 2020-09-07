@@ -166,14 +166,20 @@ public:
     }
 };
 
-template <typename I> class Getter_PublicKey
+template<typename I> class Getter_PublicKey
 {
 public:
     // DER
-    static ConvertResult fromData(PKeyContext *c, const QByteArray &in) { return c->publicFromDER(in); }
+    static ConvertResult fromData(PKeyContext *c, const QByteArray &in)
+    {
+        return c->publicFromDER(in);
+    }
 
     // PEM
-    static ConvertResult fromData(PKeyContext *c, const QString &in) { return c->publicFromPEM(in); }
+    static ConvertResult fromData(PKeyContext *c, const QString &in)
+    {
+        return c->publicFromPEM(in);
+    }
 
     static PublicKey getKey(Provider *p, const I &in, const SecureArray &, ConvertResult *result)
     {
@@ -195,7 +201,7 @@ public:
     }
 };
 
-template <typename I> class Getter_PrivateKey
+template<typename I> class Getter_PrivateKey
 {
 public:
     // DER
@@ -280,7 +286,7 @@ Provider *providerForIOType(PKey::Type type, const PKeyContext *prefer = nullptr
     return nullptr;
 }
 
-template <typename T, typename G> QList<T> getList(const QString &provider)
+template<typename T, typename G> QList<T> getList(const QString &provider)
 {
     QList<T> list;
 
@@ -306,7 +312,7 @@ template <typename T, typename G> QList<T> getList(const QString &provider)
     return list;
 }
 
-template <typename T, typename G, typename I>
+template<typename T, typename G, typename I>
 T getKey(const QString &provider, const I &in, const SecureArray &passphrase, ConvertResult *result)
 {
     T k;
@@ -336,10 +342,17 @@ T getKey(const QString &provider, const I &in, const SecureArray &passphrase, Co
     return k;
 }
 
-PBEAlgorithm get_pbe_default() { return PBES2_TripleDES_SHA1; }
+PBEAlgorithm get_pbe_default()
+{
+    return PBES2_TripleDES_SHA1;
+}
 
-static PrivateKey get_privatekey_der(const SecureArray &der, const QString &fileName, void *ptr,
-                                     const SecureArray &passphrase, ConvertResult *result, const QString &provider)
+static PrivateKey get_privatekey_der(const SecureArray &der,
+                                     const QString &    fileName,
+                                     void *             ptr,
+                                     const SecureArray &passphrase,
+                                     ConvertResult *    result,
+                                     const QString &    provider)
 {
     PrivateKey    out;
     ConvertResult r;
@@ -356,8 +369,12 @@ static PrivateKey get_privatekey_der(const SecureArray &der, const QString &file
     return out;
 }
 
-static PrivateKey get_privatekey_pem(const QString &pem, const QString &fileName, void *ptr,
-                                     const SecureArray &passphrase, ConvertResult *result, const QString &provider)
+static PrivateKey get_privatekey_pem(const QString &    pem,
+                                     const QString &    fileName,
+                                     void *             ptr,
+                                     const SecureArray &passphrase,
+                                     ConvertResult *    result,
+                                     const QString &    provider)
 {
     PrivateKey    out;
     ConvertResult r;
@@ -379,17 +396,17 @@ static PrivateKey get_privatekey_pem(const QString &pem, const QString &fileName
 //----------------------------------------------------------------------------
 
 // adapted from Botan
-static const unsigned char pkcs_sha1[]
-    = { 0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14 };
+static const unsigned char pkcs_sha1[] =
+    {0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14};
 
-static const unsigned char pkcs_md5[]
-    = { 0x30, 0x20, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x02, 0x05, 0x05, 0x00, 0x04, 0x10 };
+static const unsigned char pkcs_md5[] =
+    {0x30, 0x20, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x02, 0x05, 0x05, 0x00, 0x04, 0x10};
 
-static const unsigned char pkcs_md2[]
-    = { 0x30, 0x20, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x02, 0x02, 0x05, 0x00, 0x04, 0x10 };
+static const unsigned char pkcs_md2[] =
+    {0x30, 0x20, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x02, 0x02, 0x05, 0x00, 0x04, 0x10};
 
-static const unsigned char pkcs_ripemd160[]
-    = { 0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x24, 0x03, 0x02, 0x01, 0x05, 0x00, 0x04, 0x14 };
+static const unsigned char pkcs_ripemd160[] =
+    {0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x24, 0x03, 0x02, 0x01, 0x05, 0x00, 0x04, 0x14};
 
 QByteArray get_hash_id(const QString &name)
 {
@@ -437,14 +454,28 @@ class DLGroup::Private
 public:
     BigInteger p, q, g;
 
-    Private(const BigInteger &p1, const BigInteger &q1, const BigInteger &g1) : p(p1), q(q1), g(g1) { }
+    Private(const BigInteger &p1, const BigInteger &q1, const BigInteger &g1)
+        : p(p1)
+        , q(q1)
+        , g(g1)
+    {
+    }
 };
 
-DLGroup::DLGroup() { d = nullptr; }
+DLGroup::DLGroup()
+{
+    d = nullptr;
+}
 
-DLGroup::DLGroup(const BigInteger &p, const BigInteger &q, const BigInteger &g) { d = new Private(p, q, g); }
+DLGroup::DLGroup(const BigInteger &p, const BigInteger &q, const BigInteger &g)
+{
+    d = new Private(p, q, g);
+}
 
-DLGroup::DLGroup(const BigInteger &p, const BigInteger &g) { d = new Private(p, 0, g); }
+DLGroup::DLGroup(const BigInteger &p, const BigInteger &g)
+{
+    d = new Private(p, 0, g);
+}
 
 DLGroup::DLGroup(const DLGroup &from)
 {
@@ -452,7 +483,10 @@ DLGroup::DLGroup(const DLGroup &from)
     *this = from;
 }
 
-DLGroup::~DLGroup() { delete d; }
+DLGroup::~DLGroup()
+{
+    delete d;
+}
 
 DLGroup &DLGroup::operator=(const DLGroup &from)
 {
@@ -470,7 +504,10 @@ QList<DLGroupSet> DLGroup::supportedGroupSets(const QString &provider)
     return getList<DLGroupSet, Getter_GroupSet>(provider);
 }
 
-bool DLGroup::isNull() const { return (d ? false : true); }
+bool DLGroup::isNull() const
+{
+    return (d ? false : true);
+}
 
 BigInteger DLGroup::p() const
 {
@@ -498,17 +535,28 @@ class PKey::Private
 public:
 };
 
-PKey::PKey() { d = new Private; }
+PKey::PKey()
+{
+    d = new Private;
+}
 
-PKey::PKey(const QString &type, const QString &provider) : Algorithm(type, provider) { d = new Private; }
+PKey::PKey(const QString &type, const QString &provider)
+    : Algorithm(type, provider)
+{
+    d = new Private;
+}
 
-PKey::PKey(const PKey &from) : Algorithm(from)
+PKey::PKey(const PKey &from)
+    : Algorithm(from)
 {
     d     = new Private;
     *this = from;
 }
 
-PKey::~PKey() { delete d; }
+PKey::~PKey()
+{
+    delete d;
+}
 
 PKey &PKey::operator=(const PKey &from)
 {
@@ -517,7 +565,10 @@ PKey &PKey::operator=(const PKey &from)
     return *this;
 }
 
-void PKey::set(const PKey &k) { *this = k; }
+void PKey::set(const PKey &k)
+{
+    *this = k;
+}
 
 void PKey::assignToPublic(PKey *dest) const
 {
@@ -528,13 +579,25 @@ void PKey::assignToPublic(PKey *dest) const
         static_cast<PKeyContext *>(dest->context())->key()->convertToPublic();
 }
 
-void PKey::assignToPrivate(PKey *dest) const { dest->set(*this); }
+void PKey::assignToPrivate(PKey *dest) const
+{
+    dest->set(*this);
+}
 
-QList<PKey::Type> PKey::supportedTypes(const QString &provider) { return getList<Type, Getter_Type>(provider); }
+QList<PKey::Type> PKey::supportedTypes(const QString &provider)
+{
+    return getList<Type, Getter_Type>(provider);
+}
 
-QList<PKey::Type> PKey::supportedIOTypes(const QString &provider) { return getList<Type, Getter_IOType>(provider); }
+QList<PKey::Type> PKey::supportedIOTypes(const QString &provider)
+{
+    return getList<Type, Getter_IOType>(provider);
+}
 
-bool PKey::isNull() const { return (!context() ? true : false); }
+bool PKey::isNull() const
+{
+    return (!context() ? true : false);
+}
 
 PKey::Type PKey::type() const
 {
@@ -543,13 +606,25 @@ PKey::Type PKey::type() const
     return static_cast<const PKeyContext *>(context())->key()->type();
 }
 
-int PKey::bitSize() const { return static_cast<const PKeyContext *>(context())->key()->bits(); }
+int PKey::bitSize() const
+{
+    return static_cast<const PKeyContext *>(context())->key()->bits();
+}
 
-bool PKey::isRSA() const { return (type() == RSA); }
+bool PKey::isRSA() const
+{
+    return (type() == RSA);
+}
 
-bool PKey::isDSA() const { return (type() == DSA); }
+bool PKey::isDSA() const
+{
+    return (type() == DSA);
+}
 
-bool PKey::isDH() const { return (type() == DH); }
+bool PKey::isDH() const
+{
+    return (type() == DH);
+}
 
 bool PKey::isPublic() const
 {
@@ -565,9 +640,15 @@ bool PKey::isPrivate() const
     return static_cast<const PKeyContext *>(context())->key()->isPrivate();
 }
 
-bool PKey::canExport() const { return static_cast<const PKeyContext *>(context())->key()->canExport(); }
+bool PKey::canExport() const
+{
+    return static_cast<const PKeyContext *>(context())->key()->canExport();
+}
 
-bool PKey::canKeyAgree() const { return isDH(); }
+bool PKey::canKeyAgree() const
+{
+    return isDH();
+}
 
 PublicKey PKey::toPublicKey() const
 {
@@ -644,22 +725,41 @@ bool PKey::operator==(const PKey &a) const
         return (toPublicKey().toDER() == a.toPublicKey().toDER());
 }
 
-bool PKey::operator!=(const PKey &a) const { return !(*this == a); }
+bool PKey::operator!=(const PKey &a) const
+{
+    return !(*this == a);
+}
 
 //----------------------------------------------------------------------------
 // PublicKey
 //----------------------------------------------------------------------------
-PublicKey::PublicKey() { }
+PublicKey::PublicKey()
+{
+}
 
-PublicKey::PublicKey(const QString &type, const QString &provider) : PKey(type, provider) { }
+PublicKey::PublicKey(const QString &type, const QString &provider)
+    : PKey(type, provider)
+{
+}
 
-PublicKey::PublicKey(const PrivateKey &k) { set(k.toPublicKey()); }
+PublicKey::PublicKey(const PrivateKey &k)
+{
+    set(k.toPublicKey());
+}
 
-PublicKey::PublicKey(const QString &fileName) { *this = fromPEMFile(fileName, nullptr, QString()); }
+PublicKey::PublicKey(const QString &fileName)
+{
+    *this = fromPEMFile(fileName, nullptr, QString());
+}
 
-PublicKey::PublicKey(const PublicKey &from) : PKey(from) { }
+PublicKey::PublicKey(const PublicKey &from)
+    : PKey(from)
+{
+}
 
-PublicKey::~PublicKey() { }
+PublicKey::~PublicKey()
+{
+}
 
 PublicKey &PublicKey::operator=(const PublicKey &from)
 {
@@ -667,17 +767,35 @@ PublicKey &PublicKey::operator=(const PublicKey &from)
     return *this;
 }
 
-RSAPublicKey PublicKey::toRSA() const { return toRSAPublicKey(); }
+RSAPublicKey PublicKey::toRSA() const
+{
+    return toRSAPublicKey();
+}
 
-DSAPublicKey PublicKey::toDSA() const { return toDSAPublicKey(); }
+DSAPublicKey PublicKey::toDSA() const
+{
+    return toDSAPublicKey();
+}
 
-DHPublicKey PublicKey::toDH() const { return toDHPublicKey(); }
+DHPublicKey PublicKey::toDH() const
+{
+    return toDHPublicKey();
+}
 
-bool PublicKey::canEncrypt() const { return isRSA(); }
+bool PublicKey::canEncrypt() const
+{
+    return isRSA();
+}
 
-bool PublicKey::canDecrypt() const { return isRSA(); }
+bool PublicKey::canDecrypt() const
+{
+    return isRSA();
+}
 
-bool PublicKey::canVerify() const { return (isRSA() || isDSA()); }
+bool PublicKey::canVerify() const
+{
+    return (isRSA() || isDSA());
+}
 
 int PublicKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 {
@@ -731,8 +849,10 @@ bool PublicKey::validSignature(const QByteArray &sig)
     return false;
 }
 
-bool PublicKey::verifyMessage(const MemoryRegion &a, const QByteArray &sig, SignatureAlgorithm alg,
-                              SignatureFormat format)
+bool PublicKey::verifyMessage(const MemoryRegion &a,
+                              const QByteArray &  sig,
+                              SignatureAlgorithm  alg,
+                              SignatureFormat     format)
 {
     startVerify(alg, format);
     update(a);
@@ -777,7 +897,10 @@ QString PublicKey::toPEM() const
     return out;
 }
 
-bool PublicKey::toPEMFile(const QString &fileName) const { return stringToFile(fileName, toPEM()); }
+bool PublicKey::toPEMFile(const QString &fileName) const
+{
+    return stringToFile(fileName, toPEM());
+}
 
 PublicKey PublicKey::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
@@ -803,18 +926,28 @@ PublicKey PublicKey::fromPEMFile(const QString &fileName, ConvertResult *result,
 //----------------------------------------------------------------------------
 // PrivateKey
 //----------------------------------------------------------------------------
-PrivateKey::PrivateKey() { }
+PrivateKey::PrivateKey()
+{
+}
 
-PrivateKey::PrivateKey(const QString &type, const QString &provider) : PKey(type, provider) { }
+PrivateKey::PrivateKey(const QString &type, const QString &provider)
+    : PKey(type, provider)
+{
+}
 
 PrivateKey::PrivateKey(const QString &fileName, const SecureArray &passphrase)
 {
     *this = fromPEMFile(fileName, passphrase, nullptr, QString());
 }
 
-PrivateKey::PrivateKey(const PrivateKey &from) : PKey(from) { }
+PrivateKey::PrivateKey(const PrivateKey &from)
+    : PKey(from)
+{
+}
 
-PrivateKey::~PrivateKey() { }
+PrivateKey::~PrivateKey()
+{
+}
 
 PrivateKey &PrivateKey::operator=(const PrivateKey &from)
 {
@@ -822,17 +955,35 @@ PrivateKey &PrivateKey::operator=(const PrivateKey &from)
     return *this;
 }
 
-RSAPrivateKey PrivateKey::toRSA() const { return toRSAPrivateKey(); }
+RSAPrivateKey PrivateKey::toRSA() const
+{
+    return toRSAPrivateKey();
+}
 
-DSAPrivateKey PrivateKey::toDSA() const { return toDSAPrivateKey(); }
+DSAPrivateKey PrivateKey::toDSA() const
+{
+    return toDSAPrivateKey();
+}
 
-DHPrivateKey PrivateKey::toDH() const { return toDHPrivateKey(); }
+DHPrivateKey PrivateKey::toDH() const
+{
+    return toDHPrivateKey();
+}
 
-bool PrivateKey::canDecrypt() const { return isRSA(); }
+bool PrivateKey::canDecrypt() const
+{
+    return isRSA();
+}
 
-bool PrivateKey::canEncrypt() const { return isRSA(); }
+bool PrivateKey::canEncrypt() const
+{
+    return isRSA();
+}
 
-bool PrivateKey::canSign() const { return (isRSA() || isDSA()); }
+bool PrivateKey::canSign() const
+{
+    return (isRSA() || isDSA());
+}
 
 int PrivateKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 {
@@ -856,9 +1007,15 @@ void PrivateKey::startSign(SignatureAlgorithm alg, SignatureFormat format)
     static_cast<PKeyContext *>(context())->key()->startSign(alg, format);
 }
 
-void PrivateKey::update(const MemoryRegion &a) { static_cast<PKeyContext *>(context())->key()->update(a); }
+void PrivateKey::update(const MemoryRegion &a)
+{
+    static_cast<PKeyContext *>(context())->key()->update(a);
+}
 
-QByteArray PrivateKey::signature() { return static_cast<PKeyContext *>(context())->key()->endSign(); }
+QByteArray PrivateKey::signature()
+{
+    return static_cast<PKeyContext *>(context())->key()->endSign();
+}
 
 QByteArray PrivateKey::signMessage(const MemoryRegion &a, SignatureAlgorithm alg, SignatureFormat format)
 {
@@ -923,20 +1080,22 @@ bool PrivateKey::toPEMFile(const QString &fileName, const SecureArray &passphras
     return stringToFile(fileName, toPEM(passphrase, pbe));
 }
 
-PrivateKey PrivateKey::fromDER(const SecureArray &a, const SecureArray &passphrase, ConvertResult *result,
-                               const QString &provider)
+PrivateKey
+PrivateKey::fromDER(const SecureArray &a, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
     return get_privatekey_der(a, QString(), (void *)&a, passphrase, result, provider);
 }
 
-PrivateKey PrivateKey::fromPEM(const QString &s, const SecureArray &passphrase, ConvertResult *result,
-                               const QString &provider)
+PrivateKey
+PrivateKey::fromPEM(const QString &s, const SecureArray &passphrase, ConvertResult *result, const QString &provider)
 {
     return get_privatekey_pem(s, QString(), (void *)&s, passphrase, result, provider);
 }
 
-PrivateKey PrivateKey::fromPEMFile(const QString &fileName, const SecureArray &passphrase, ConvertResult *result,
-                                   const QString &provider)
+PrivateKey PrivateKey::fromPEMFile(const QString &    fileName,
+                                   const SecureArray &passphrase,
+                                   ConvertResult *    result,
+                                   const QString &    provider)
 {
     QString pem;
     if (!stringFromFile(fileName, &pem)) {
@@ -963,7 +1122,9 @@ public:
     PKeyContext *   dest;
     DLGroupContext *dc;
 
-    Private(KeyGenerator *_parent) : QObject(_parent), parent(_parent)
+    Private(KeyGenerator *_parent)
+        : QObject(_parent)
+        , parent(_parent)
     {
         k    = nullptr;
         dest = nullptr;
@@ -1016,19 +1177,32 @@ public Q_SLOTS:
     }
 };
 
-KeyGenerator::KeyGenerator(QObject *parent) : QObject(parent)
+KeyGenerator::KeyGenerator(QObject *parent)
+    : QObject(parent)
 {
     d           = new Private(this);
     d->blocking = true;
 }
 
-KeyGenerator::~KeyGenerator() { delete d; }
+KeyGenerator::~KeyGenerator()
+{
+    delete d;
+}
 
-bool KeyGenerator::blockingEnabled() const { return d->blocking; }
+bool KeyGenerator::blockingEnabled() const
+{
+    return d->blocking;
+}
 
-void KeyGenerator::setBlockingEnabled(bool b) { d->blocking = b; }
+void KeyGenerator::setBlockingEnabled(bool b)
+{
+    d->blocking = b;
+}
 
-bool KeyGenerator::isBusy() const { return (d->k ? true : false); }
+bool KeyGenerator::isBusy() const
+{
+    return (d->k ? true : false);
+}
 
 PrivateKey KeyGenerator::createRSA(int bits, int exp, const QString &provider)
 {
@@ -1101,7 +1275,10 @@ PrivateKey KeyGenerator::createDH(const DLGroup &domain, const QString &provider
     return d->key;
 }
 
-PrivateKey KeyGenerator::key() const { return d->key; }
+PrivateKey KeyGenerator::key() const
+{
+    return d->key;
+}
 
 DLGroup KeyGenerator::createDLGroup(QCA::DLGroupSet set, const QString &provider)
 {
@@ -1131,12 +1308,17 @@ DLGroup KeyGenerator::createDLGroup(QCA::DLGroupSet set, const QString &provider
     return d->group;
 }
 
-DLGroup KeyGenerator::dlGroup() const { return d->group; }
+DLGroup KeyGenerator::dlGroup() const
+{
+    return d->group;
+}
 
 //----------------------------------------------------------------------------
 // RSAPublicKey
 //----------------------------------------------------------------------------
-RSAPublicKey::RSAPublicKey() { }
+RSAPublicKey::RSAPublicKey()
+{
+}
 
 RSAPublicKey::RSAPublicKey(const BigInteger &n, const BigInteger &e, const QString &provider)
 {
@@ -1147,7 +1329,10 @@ RSAPublicKey::RSAPublicKey(const BigInteger &n, const BigInteger &e, const QStri
     change(c);
 }
 
-RSAPublicKey::RSAPublicKey(const RSAPrivateKey &k) : PublicKey(k) { }
+RSAPublicKey::RSAPublicKey(const RSAPrivateKey &k)
+    : PublicKey(k)
+{
+}
 
 BigInteger RSAPublicKey::n() const
 {
@@ -1162,10 +1347,16 @@ BigInteger RSAPublicKey::e() const
 //----------------------------------------------------------------------------
 // RSAPrivateKey
 //----------------------------------------------------------------------------
-RSAPrivateKey::RSAPrivateKey() { }
+RSAPrivateKey::RSAPrivateKey()
+{
+}
 
-RSAPrivateKey::RSAPrivateKey(const BigInteger &n, const BigInteger &e, const BigInteger &p, const BigInteger &q,
-                             const BigInteger &d, const QString &provider)
+RSAPrivateKey::RSAPrivateKey(const BigInteger &n,
+                             const BigInteger &e,
+                             const BigInteger &p,
+                             const BigInteger &q,
+                             const BigInteger &d,
+                             const QString &   provider)
 {
     RSAContext *k = static_cast<RSAContext *>(getContext(QStringLiteral("rsa"), provider));
     k->createPrivate(n, e, p, q, d);
@@ -1202,7 +1393,9 @@ BigInteger RSAPrivateKey::d() const
 //----------------------------------------------------------------------------
 // DSAPublicKey
 //----------------------------------------------------------------------------
-DSAPublicKey::DSAPublicKey() { }
+DSAPublicKey::DSAPublicKey()
+{
+}
 
 DSAPublicKey::DSAPublicKey(const DLGroup &domain, const BigInteger &y, const QString &provider)
 {
@@ -1213,7 +1406,10 @@ DSAPublicKey::DSAPublicKey(const DLGroup &domain, const BigInteger &y, const QSt
     change(c);
 }
 
-DSAPublicKey::DSAPublicKey(const DSAPrivateKey &k) : PublicKey(k) { }
+DSAPublicKey::DSAPublicKey(const DSAPrivateKey &k)
+    : PublicKey(k)
+{
+}
 
 DLGroup DSAPublicKey::domain() const
 {
@@ -1228,7 +1424,9 @@ BigInteger DSAPublicKey::y() const
 //----------------------------------------------------------------------------
 // DSAPrivateKey
 //----------------------------------------------------------------------------
-DSAPrivateKey::DSAPrivateKey() { }
+DSAPrivateKey::DSAPrivateKey()
+{
+}
 
 DSAPrivateKey::DSAPrivateKey(const DLGroup &domain, const BigInteger &y, const BigInteger &x, const QString &provider)
 {
@@ -1257,7 +1455,9 @@ BigInteger DSAPrivateKey::x() const
 //----------------------------------------------------------------------------
 // DHPublicKey
 //----------------------------------------------------------------------------
-DHPublicKey::DHPublicKey() { }
+DHPublicKey::DHPublicKey()
+{
+}
 
 DHPublicKey::DHPublicKey(const DLGroup &domain, const BigInteger &y, const QString &provider)
 {
@@ -1268,7 +1468,10 @@ DHPublicKey::DHPublicKey(const DLGroup &domain, const BigInteger &y, const QStri
     change(c);
 }
 
-DHPublicKey::DHPublicKey(const DHPrivateKey &k) : PublicKey(k) { }
+DHPublicKey::DHPublicKey(const DHPrivateKey &k)
+    : PublicKey(k)
+{
+}
 
 DLGroup DHPublicKey::domain() const
 {
@@ -1283,7 +1486,9 @@ BigInteger DHPublicKey::y() const
 //----------------------------------------------------------------------------
 // DHPrivateKey
 //----------------------------------------------------------------------------
-DHPrivateKey::DHPrivateKey() { }
+DHPrivateKey::DHPrivateKey()
+{
+}
 
 DHPrivateKey::DHPrivateKey(const DLGroup &domain, const BigInteger &y, const BigInteger &x, const QString &provider)
 {

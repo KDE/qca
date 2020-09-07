@@ -34,7 +34,8 @@ inline void releaseAndDeleteLater(QObject *owner, QObject *obj)
     obj->deleteLater();
 }
 
-SafeSocketNotifier::SafeSocketNotifier(int socket, QSocketNotifier::Type type, QObject *parent) : QObject(parent)
+SafeSocketNotifier::SafeSocketNotifier(int socket, QSocketNotifier::Type type, QObject *parent)
+    : QObject(parent)
 {
     sn = new QSocketNotifier(socket, type, this);
     connect(sn, &QSocketNotifier::activated, this, &SafeSocketNotifier::activated);

@@ -51,14 +51,20 @@ class NullLogger : public QCA::AbstractLogDevice
 {
     Q_OBJECT
 public:
-    NullLogger() : QCA::AbstractLogDevice(QStringLiteral("null logger")) { }
+    NullLogger()
+        : QCA::AbstractLogDevice(QStringLiteral("null logger"))
+    {
+    }
 };
 
 class LastLogger : public QCA::AbstractLogDevice
 {
     Q_OBJECT
 public:
-    LastLogger() : QCA::AbstractLogDevice(QStringLiteral("last logger")) { }
+    LastLogger()
+        : QCA::AbstractLogDevice(QStringLiteral("last logger"))
+    {
+    }
 
     void logTextMessage(const QString &message, enum QCA::Logger::Severity severity) override
     {
@@ -66,7 +72,10 @@ public:
         m_messageSeverity = severity;
     }
 
-    QString lastMessage() const { return m_lastMessage; }
+    QString lastMessage() const
+    {
+        return m_lastMessage;
+    }
 
     void logBinaryMessage(const QByteArray &blob, enum QCA::Logger::Severity severity) override
     {
@@ -74,11 +83,20 @@ public:
         m_blobSeverity = severity;
     }
 
-    QByteArray lastBlob() const { return m_lastBlob; }
+    QByteArray lastBlob() const
+    {
+        return m_lastBlob;
+    }
 
-    QCA::Logger::Severity lastMessageSeverity() const { return m_messageSeverity; }
+    QCA::Logger::Severity lastMessageSeverity() const
+    {
+        return m_messageSeverity;
+    }
 
-    QCA::Logger::Severity lastBlobSeverity() const { return m_blobSeverity; }
+    QCA::Logger::Severity lastBlobSeverity() const
+    {
+        return m_blobSeverity;
+    }
 
 private:
     QString               m_lastMessage;
@@ -87,7 +105,10 @@ private:
     QCA::Logger::Severity m_blobSeverity;
 };
 
-void LoggerUnitTest::initTestCase() { m_init = new QCA::Initializer; }
+void LoggerUnitTest::initTestCase()
+{
+    m_init = new QCA::Initializer;
+}
 
 void LoggerUnitTest::cleanupTestCase()
 {

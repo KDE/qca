@@ -27,9 +27,15 @@
 class WinCryptoRandomContext : public QCA::RandomContext
 {
 public:
-    WinCryptoRandomContext(QCA::Provider *p) : RandomContext(p) { }
+    WinCryptoRandomContext(QCA::Provider *p)
+        : RandomContext(p)
+    {
+    }
 
-    Context *clone() const { return new WinCryptoRandomContext(*this); }
+    Context *clone() const
+    {
+        return new WinCryptoRandomContext(*this);
+    }
 
     QCA::SecureArray nextBytes(int size)
     {
@@ -58,13 +64,23 @@ public:
 class WinCryptoProvider : public QCA::Provider
 {
 public:
-    void init() { }
+    void init()
+    {
+    }
 
-    ~WinCryptoProvider() { }
+    ~WinCryptoProvider()
+    {
+    }
 
-    int qcaVersion() const { return QCA_VERSION; }
+    int qcaVersion() const
+    {
+        return QCA_VERSION;
+    }
 
-    QString name() const { return "qca-wincrypto"; }
+    QString name() const
+    {
+        return "qca-wincrypto";
+    }
 
     QStringList features() const
     {
@@ -90,7 +106,10 @@ class qca_wincrypto : public QObject, public QCAPlugin
     Q_INTERFACES(QCAPlugin)
 
 public:
-    virtual QCA::Provider *createProvider() { return new WinCryptoProvider; }
+    virtual QCA::Provider *createProvider()
+    {
+        return new WinCryptoProvider;
+    }
 };
 
 Q_EXPORT_PLUGIN2(qca_wincrypto, WinCryptoPlugin);

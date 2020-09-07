@@ -34,9 +34,15 @@ using namespace QCA;
 
 namespace gpgQCAPlugin {
 
-RingWatch::RingWatch(QObject *parent) : QObject(parent) { }
+RingWatch::RingWatch(QObject *parent)
+    : QObject(parent)
+{
+}
 
-RingWatch::~RingWatch() { clear(); }
+RingWatch::~RingWatch()
+{
+    clear();
+}
 
 void RingWatch::add(const QString &filePath)
 {

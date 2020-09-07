@@ -153,7 +153,9 @@ public:
     quint16          dstPort    = 0;
     bool             serverMode = false;
 
-    Private(DTLSSocket *_q) : QObject(_q), q(_q)
+    Private(DTLSSocket *_q)
+        : QObject(_q)
+        , q(_q)
     {
         cert    = QCA::Certificate::fromPEM(QString::fromLatin1(pemdata_cert));
         privkey = QCA::PrivateKey::fromPEM(QString::fromLatin1(pemdata_privkey));
@@ -179,10 +181,13 @@ public:
         sock       = new QUdpSocket(this);
         connect(sock, &QUdpSocket::readyRead, this, &DTLSSocket::Private::sock_readyRead);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock, &QUdpSocket::errorOccurred, this,
-                [this]() { qDebug("socket failed: %s", qPrintable(sock->errorString())); });
+        connect(sock, &QUdpSocket::errorOccurred, this, [this]() {
+            qDebug("socket failed: %s", qPrintable(sock->errorString()));
+        });
 #else
-        connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QUdpSocket::error), this,
+        connect(sock,
+                QOverload<QAbstractSocket::SocketError>::of(&QUdpSocket::error),
+                this,
                 [this](QAbstractSocket::SocketError) { qDebug("socket failed: %s", qPrintable(sock->errorString())); });
 #endif
 
@@ -255,18 +260,37 @@ private Q_SLOTS:
         }
     }
 
-    void tls_closed() { DTLS_DEBUG("dtls closed"); }
+    void tls_closed()
+    {
+        DTLS_DEBUG("dtls closed");
+    }
 
-    void tls_error() { DTLS_DEBUG("dtls error: %d", tls->errorCode()); }
+    void tls_error()
+    {
+        DTLS_DEBUG("dtls error: %d", tls->errorCode());
+    }
 };
 
-DTLSSocket::DTLSSocket(QObject *parent) : QObject(parent) { d = new Private(this); }
+DTLSSocket::DTLSSocket(QObject *parent)
+    : QObject(parent)
+{
+    d = new Private(this);
+}
 
-DTLSSocket::~DTLSSocket() { delete d; }
+DTLSSocket::~DTLSSocket()
+{
+    delete d;
+}
 
-void DTLSSocket::connectToServer(const QHostAddress &host, quint16 port) { d->connectToServer(host, port); }
+void DTLSSocket::connectToServer(const QHostAddress &host, quint16 port)
+{
+    d->connectToServer(host, port);
+}
 
-QCA::TLS *DTLSSocket::tls() { return d->tls; }
+QCA::TLS *DTLSSocket::tls()
+{
+    return d->tls;
+}
 
 void DTLSSocket::startServer(QUdpSocket *socket, const SourceAddress &destination)
 {
@@ -291,12 +315,16 @@ void DTLSSocket::writeDatagram(const QByteArray &data)
     d->tls->write(data);
 }
 
-void DTLSSocket::handleIncomingSocketData(const QByteArray &data) { d->tls->writeIncoming(data); }
+void DTLSSocket::handleIncomingSocketData(const QByteArray &data)
+{
+    d->tls->writeIncoming(data);
+}
 
 // ----------------
 // DTLSServer
 // ----------------
-DTLSServer::DTLSServer(QObject *parent) : QObject(parent)
+DTLSServer::DTLSServer(QObject *parent)
+    : QObject(parent)
 {
     socket = new QUdpSocket(this);
     connect(socket, &QUdpSocket::readyRead, this, &DTLSServer::sock_readyRead);
@@ -306,7 +334,9 @@ DTLSServer::DTLSServer(QObject *parent) : QObject(parent)
         qApp->quit();
     });
 #else
-    connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QUdpSocket::error), this,
+    connect(socket,
+            QOverload<QAbstractSocket::SocketError>::of(&QUdpSocket::error),
+            this,
             [this](QAbstractSocket::SocketError) {
                 qDebug("socket failed: %s", qPrintable(socket->errorString()));
                 qApp->quit();
@@ -335,8 +365,8 @@ void DTLSServer::sock_readyRead()
             clientSockets.insert(source, dtlsSocket);
             dtlsSocket->startServer(socket, source);
             Q_EMIT incomingConnection(dtlsSocket);
-            connect(dtlsSocket, &DTLSSocket::connected, this,
-                    [dtlsSocket, this]() { Q_EMIT sessionReady(dtlsSocket); });
+            connect(
+                dtlsSocket, &DTLSSocket::connected, this, [dtlsSocket, this]() { Q_EMIT sessionReady(dtlsSocket); });
         }
         dtlsSocket->handleIncomingSocketData(ba);
     }
