@@ -197,10 +197,10 @@ QVariant SyncThread::call(QObject *obj, const QByteArray &method, const QVariant
     bool         ret;
     Q_UNUSED(ret); // In really ret is used. I use this hack to suppress a compiler warning
     // clang-format off
-	// Otherwise the QObject* gets turned into Object * that is not normalized and is slightly slower
-	ret = QMetaObject::invokeMethod(d->agent, "call_do",
-		Qt::QueuedConnection, Q_ARG(QObject*, obj),
-		Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
+    // Otherwise the QObject* gets turned into Object * that is not normalized and is slightly slower
+    ret = QMetaObject::invokeMethod(d->agent, "call_do",
+        Qt::QueuedConnection, Q_ARG(QObject*, obj),
+        Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
     // clang-format on
     Q_ASSERT(ret);
     d->w.wait(&d->m);
