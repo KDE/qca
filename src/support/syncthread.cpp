@@ -173,18 +173,22 @@ void SyncThread::stop()
 
 QVariant SyncThread::call(QObject *obj, const QByteArray &method, const QVariantList &args, bool *ok)
 {
-    QMutexLocker locker(&d->m);
-    bool         ret;
-    Q_UNUSED(ret); // In really ret is used. I use this hack to suppress a compiler warning
-    ret = QMetaObject::invokeMethod(d->agent, "call_do", Qt::QueuedConnection, Q_ARG(QObject *, obj),
-                                    Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
-    Q_ASSERT(ret);
-    d->w.wait(&d->m);
-    if (ok)
-        *ok = d->last_success;
-    QVariant v  = d->last_ret;
-    d->last_ret = QVariant();
-    return v;
+	QMutexLocker locker(&d->m);
+	bool ret;
+	Q_UNUSED(ret); // In really ret is used. I use this hack to suppress a compiler warning
+	// clang-format off
+	// Otherwise the QObject* gets turned into Object * that is not normalized and is slightly slower
+	ret = QMetaObject::invokeMethod(d->agent, "call_do",
+		Qt::QueuedConnection, Q_ARG(QObject*, obj),
+		Q_ARG(QByteArray, method), Q_ARG(QVariantList, args));
+	// clang-format on
+	Q_ASSERT(ret);
+	d->w.wait(&d->m);
+	if(ok)
+		*ok = d->last_success;
+	QVariant v = d->last_ret;
+	d->last_ret = QVariant();
+	return v;
 }
 
 void SyncThread::run()
