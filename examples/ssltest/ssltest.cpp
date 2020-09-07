@@ -93,6 +93,9 @@ static QString validityToString(QCA::Validity v)
     case QCA::ErrorExpiredCA:
         s = QStringLiteral("CA has expired");
         break;
+    case QCA::ErrorSecurityLevel:
+        s = QStringLiteral("Certificate is insecure");
+        break;
     case QCA::ErrorValidityUnknown:
     default:
         s = QStringLiteral("General certificate validation error");

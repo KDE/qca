@@ -498,6 +498,7 @@ enum Validity
     ErrorExpired,   ///< The certificate has expired, or is not yet valid (e.g. current time is earlier than notBefore
                     ///< time)
     ErrorExpiredCA, ///< The Certificate Authority has expired
+    ErrorSecurityLevel,       ///< keys / signature algo / etc too small/weak
     ErrorValidityUnknown = 64 ///< Validity is unknown
 };
 
@@ -2441,7 +2442,7 @@ public:
     QDateTime expirationDate() const;
 
     /**
-       The key fingerpint
+       The key fingerprint
 
        This will return the PGP fingerprint as a string. It comprises 40
        hex digits, without spaces.
