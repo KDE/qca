@@ -11,7 +11,7 @@ Unfortunately it's not possible to keep development under the hood of KDE projec
 
   Changes to mainstream:
     * Fixed a few issues in keystore leading to hard lock on QCA initialization
-    * Applied a few patches from various distros mostly fixing compilation
+    * Applied a few patches from various distros mostly fixing compilation (libressl, Android etc)
     * Added a few hash algorithms like SHA3 and Blake2b
     * Added DTLS support
 
