@@ -169,11 +169,13 @@ Validity convert_verify_error(int err)
     case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
         rc = ErrorExpired;
         break;
+#ifndef LIBRESSL_VERSION_NUMBER
     case X509_V_ERR_EE_KEY_TOO_SMALL:
     case X509_V_ERR_CA_KEY_TOO_SMALL:
     case X509_V_ERR_CA_MD_TOO_WEAK:
         rc = ErrorSecurityLevel;
         break;
+#endif
     case X509_V_ERR_APPLICATION_VERIFICATION:
     case X509_V_ERR_OUT_OF_MEM:
     case X509_V_ERR_UNABLE_TO_GET_CRL:
