@@ -55,7 +55,9 @@
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
+#ifndef LIBRESSL_VERSION_NUMBER
 #include <openssl/kdf.h>
+#endif
 
 #ifndef RSA_F_RSA_OSSL_PRIVATE_DECRYPT
 #define RSA_F_RSA_OSSL_PRIVATE_DECRYPT RSA_F_RSA_EAY_PRIVATE_DECRYPT
