@@ -499,7 +499,11 @@ void CMSut::signverify_message_invalid()
 
             // This is just to break things
             // signedResult1[30] = signedResult1[30] + 1;
-            signedResult1[signedResult1.size() - 2] = 0x00;
+            if (signedResult1.at(signedResult1.size() - 2) != 0) {
+                signedResult1[signedResult1.size() - 2] = 0x00;
+            } else {
+                signedResult1[signedResult1.size() - 2] = 0x01;
+            }
 
             msg.startVerify();
             msg.update(signedResult1);
