@@ -30,6 +30,8 @@
 #include "import_plugins.h"
 #endif
 
+#include <openssl/opensslv.h>
+
 class CMSut : public QObject
 {
     Q_OBJECT
@@ -252,7 +254,9 @@ void CMSut::signverify()
             msg.waitForFinished(-1);
             QVERIFY(msg.wasSigned());
             QVERIFY(msg.success());
+#if OPENSSL_VERSION_NUMBER < 0x1010109fL
             QEXPECT_FAIL("empty", "We don't seem to be able to verify signature of a zero length message", Continue);
+#endif
             QVERIFY(msg.verifySuccess());
 
             msg.reset();
@@ -264,7 +268,9 @@ void CMSut::signverify()
             msg.waitForFinished(-1);
             QVERIFY(msg.wasSigned());
             QVERIFY(msg.success());
+#if OPENSSL_VERSION_NUMBER < 0x1010109fL
             QEXPECT_FAIL("empty", "We don't seem to be able to verify signature of a zero length message", Continue);
+#endif
             QVERIFY(msg.verifySuccess());
 
             msg.reset();
@@ -277,6 +283,9 @@ void CMSut::signverify()
             msg.waitForFinished(-1);
             QVERIFY(msg.wasSigned());
             QVERIFY(msg.success());
+#if OPENSSL_VERSION_NUMBER >= 0x1010109fL
+            QEXPECT_FAIL("empty", "On newer openssl verifaction of zero length message always succeeds", Continue);
+#endif
             QCOMPARE(msg.verifySuccess(), false);
 
             msg.reset();
