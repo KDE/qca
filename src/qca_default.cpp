@@ -1308,6 +1308,6 @@ QStringList plugin_priorities(Provider *defaultProvider)
     return that->shared.plugin_priorities();
 }
 
-#include "qca_default.moc"
-
 }
+
+#include "qca_default.moc"

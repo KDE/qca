@@ -44,6 +44,8 @@ static bool can_lock()
 #endif
 
     MLOCK_TYPE d = MLOCK_TYPE_CAST malloc(256);
+    if (d == nullptr)
+        abort();
     if (mlock(d, 256) == 0) {
         munlock(d, 256);
         ok = true;
