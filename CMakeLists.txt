@@ -13,7 +13,7 @@ project(qca)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "3")
-set(QCA_LIB_PATCH_VERSION "1")
+set(QCA_LIB_PATCH_VERSION "2")
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
@@ -45,7 +45,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" )
 # Do not automatically link Qt executables to qtmain target on Windows.
 # QCA exucatables use console mode only. Not need to link against qtmain.lib.
 set(Qt5_NO_LINK_QTMAIN ON)
-find_package(Qt5 5.6 REQUIRED Core)
+find_package(Qt5 5.9 REQUIRED Core)
 set(CMAKE_AUTOMOC ON)
 
 include(QcaMacro)
