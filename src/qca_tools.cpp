@@ -46,10 +46,13 @@ static bool can_lock()
     MLOCK_TYPE d = MLOCK_TYPE_CAST malloc(256);
     if (d == nullptr)
         abort();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     if (mlock(d, 256) == 0) {
         munlock(d, 256);
         ok = true;
     }
+#pragma GCC diagnostic pop
     free(d);
     return ok;
 #else
