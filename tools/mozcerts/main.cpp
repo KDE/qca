@@ -89,7 +89,7 @@ int main(int argc, char **argv)
                 }
             }
 
-            printf(">> [%s], %d bytes\n", qPrintable(name), buf.size());
+            printf(">> [%s], %d bytes\n", qPrintable(name), int(buf.size()));
 
             QTextStream ts(&outfile);
             ts << "-----BEGIN CERTIFICATE-----" << '\n';

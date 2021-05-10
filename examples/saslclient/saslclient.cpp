@@ -223,7 +223,7 @@ private Q_SLOTS:
         if (mode == 2) // app mode
         {
             QByteArray a = sock->readAll();
-            printf("Read %d bytes\n", a.size());
+            printf("Read %d bytes\n", int(a.size()));
 
             // there is a possible flaw in the qca 2.0 api, in
             //   that if sasl data is received from the peer

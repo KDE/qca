@@ -742,7 +742,7 @@ public:
         list += _last_id;
 
         QCA_logTextMessage(
-            QString::asprintf("softstoreKeyStoreListContext::keyStores - return out.size()=%d", list.size()),
+            QString::asprintf("softstoreKeyStoreListContext::keyStores - return out.size()=%d", int(list.size())),
             Logger::Debug);
 
         return list;
@@ -760,7 +760,7 @@ public:
         }
 
         QCA_logTextMessage(
-            QString::asprintf("softstoreKeyStoreListContext::entryList - return out.size()=%d", list.size()),
+            QString::asprintf("softstoreKeyStoreListContext::entryList - return out.size()=%d", int(list.size())),
             Logger::Debug);
 
         return list;
@@ -957,7 +957,7 @@ private:
             QString::asprintf(
                 "softstoreKeyStoreListContext::_deserializeSoftStoreEntry - return ret=%d chain.size()=%d",
                 ret ? 1 : 0,
-                entry.chain.size()),
+                int(entry.chain.size())),
             Logger::Debug);
 
         return ret;

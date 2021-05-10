@@ -302,7 +302,7 @@ private Q_SLOTS:
     void sasl_readyRead()
     {
         QByteArray a = sasl->read();
-        printf("%d: Warning, client sent %d bytes unexpectedly.\n", id, a.size());
+        printf("%d: Warning, client sent %d bytes unexpectedly.\n", id, int(a.size()));
     }
 
     void sasl_readyReadOutgoing()
