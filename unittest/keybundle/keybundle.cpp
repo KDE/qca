@@ -140,7 +140,7 @@ void KeyBundleTest::privKey()
 }
 void KeyBundleTest::createBundle()
 {
-    QScopedPointer<QCA::KeyBundle> newBundle(new QCA::KeyBundle);
+    std::unique_ptr<QCA::KeyBundle> newBundle(new QCA::KeyBundle);
 
     QVERIFY(newBundle->isNull());
 

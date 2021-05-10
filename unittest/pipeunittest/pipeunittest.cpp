@@ -167,7 +167,7 @@ void PipeUnitTest::readWriteSecure()
 
 void PipeUnitTest::signalTests()
 {
-    QScopedPointer<QCA::QPipe> pipe(new QCA::QPipe);
+    std::unique_ptr<QCA::QPipe> pipe(new QCA::QPipe);
     pipe->create();
 
     QVERIFY(pipe->writeEnd().isValid());
@@ -214,7 +214,7 @@ void PipeUnitTest::signalTests()
 
 void PipeUnitTest::signalTestsSecure()
 {
-    QScopedPointer<QCA::QPipe> pipe(new QCA::QPipe);
+    std::unique_ptr<QCA::QPipe> pipe(new QCA::QPipe);
     pipe->create(true);
 
     QVERIFY(pipe->writeEnd().isValid());

@@ -58,8 +58,8 @@ void TLSUnitTest::testCipherList()
     if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
         QWARN("TLS not supported for qca-ossl");
     else {
-        QScopedPointer<QCA::TLS> tls(new QCA::TLS(QCA::TLS::Stream, nullptr, QStringLiteral("qca-ossl")));
-        QStringList              cipherList = tls->supportedCipherSuites(QCA::TLS::TLS_v1);
+        std::unique_ptr<QCA::TLS> tls(new QCA::TLS(QCA::TLS::Stream, nullptr, QStringLiteral("qca-ossl")));
+        QStringList               cipherList = tls->supportedCipherSuites(QCA::TLS::TLS_v1);
         QVERIFY(cipherList.contains(QStringLiteral("TLS_DHE_RSA_WITH_AES_256_CBC_SHA")));
         QVERIFY(cipherList.contains(QStringLiteral("TLS_RSA_WITH_AES_256_CBC_SHA")));
         QVERIFY(cipherList.contains(QStringLiteral("TLS_DHE_RSA_WITH_AES_128_CBC_SHA")));

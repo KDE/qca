@@ -22,7 +22,6 @@
 
 #include <QDebug>
 #include <QElapsedTimer>
-#include <QScopedPointer>
 #include <QtCrypto>
 #include <QtPlugin>
 #include <qcaprovider.h>
@@ -1606,32 +1605,28 @@ public:
 
 #ifndef OPENSSL_FIPS
 namespace {
-struct DsaDeleter
-{
-    static inline void cleanup(void *pointer)
-    {
-        if (pointer)
-            DSA_free((DSA *)pointer);
-    }
+static const auto DsaDeleter = [](DSA *pointer) {
+    if (pointer)
+        DSA_free((DSA *)pointer);
 };
 } // end of anonymous namespace
 
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
     int                             ret_counter;
-    QScopedPointer<DSA, DsaDeleter> dsa(DSA_new());
+    std::unique_ptr<DSA, decltype(DsaDeleter)> dsa(DSA_new(), DsaDeleter);
     if (!dsa)
         return false;
 
     if (DSA_generate_parameters_ex(
-            dsa.data(), bits, (const unsigned char *)seed.data(), seed.size(), &ret_counter, nullptr, nullptr) != 1)
+            dsa.get(), bits, (const unsigned char *)seed.data(), seed.size(), &ret_counter, nullptr, nullptr) != 1)
         return false;
 
     if (ret_counter != counter)
         return false;
 
     const BIGNUM *bnp, *bnq, *bng;
-    DSA_get0_pqg(dsa.data(), &bnp, &bnq, &bng);
+    DSA_get0_pqg(dsa.get(), &bnp, &bnq, &bng);
     params->p = bn2bi(bnp);
     params->q = bn2bi(bnq);
     params->g = bn2bi(bng);
@@ -1804,22 +1799,14 @@ private Q_SLOTS:
 // RSAKey
 //----------------------------------------------------------------------------
 namespace {
-struct RsaDeleter
-{
-    static inline void cleanup(void *pointer)
-    {
-        if (pointer)
-            RSA_free((RSA *)pointer);
-    }
+static const auto RsaDeleter = [](RSA *pointer) {
+    if (pointer)
+        RSA_free((RSA *)pointer);
 };
 
-struct BnDeleter
-{
-    static inline void cleanup(void *pointer)
-    {
-        if (pointer)
-            BN_free((BIGNUM *)pointer);
-    }
+static const auto BnDeleter = [](BIGNUM *pointer) {
+    if (pointer)
+        BN_free((BIGNUM *)pointer);
 };
 } // end of anonymous namespace
 
@@ -1847,22 +1834,22 @@ public:
 
     void run() override
     {
-        QScopedPointer<RSA, RsaDeleter> rsa(RSA_new());
+        std::unique_ptr<RSA, decltype(RsaDeleter)> rsa(RSA_new(), RsaDeleter);
         if (!rsa)
             return;
 
-        QScopedPointer<BIGNUM, BnDeleter> e(BN_new());
+        std::unique_ptr<BIGNUM, decltype(BnDeleter)> e(BN_new(), BnDeleter);
         if (!e)
             return;
 
-        BN_clear(e.data());
-        if (BN_set_word(e.data(), exp) != 1)
+        BN_clear(e.get());
+        if (BN_set_word(e.get(), exp) != 1)
             return;
 
-        if (RSA_generate_key_ex(rsa.data(), bits, e.data(), nullptr) == 0)
+        if (RSA_generate_key_ex(rsa.get(), bits, e.get(), nullptr) == 0)
             return;
 
-        result = rsa.take();
+        result = rsa.release();
     }
 
     RSA *takeResult()
