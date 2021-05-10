@@ -112,7 +112,11 @@ public:
         sock = new QTcpSocket;
         connect(sock, &QTcpSocket::connected, this, &SecureTest::sock_connected);
         connect(sock, &QTcpSocket::readyRead, this, &SecureTest::sock_readyRead);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        connect(sock, &QTcpSocket::errorOccurred, this, &SecureTest::sock_error);
+#else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureTest::sock_error);
+#endif
 
         ssl = new QCA::TLS;
         connect(ssl, &QCA::TLS::certificateRequested, this, &SecureTest::ssl_certificateRequested);

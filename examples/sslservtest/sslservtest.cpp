@@ -160,7 +160,11 @@ private Q_SLOTS:
         sock = server->nextPendingConnection();
         connect(sock, &QTcpSocket::readyRead, this, &SecureServer::sock_readyRead);
         connect(sock, &QTcpSocket::disconnected, this, &SecureServer::sock_disconnected);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        connect(sock, &QTcpSocket::errorOccurred, this, &SecureServer::sock_error);
+#else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureServer::sock_error);
+#endif
         connect(sock, &QTcpSocket::bytesWritten, this, &SecureServer::sock_bytesWritten);
 
         qDebug() << "Connection received!  Starting TLS handshake.";

@@ -150,7 +150,11 @@ public:
         sock = new QTcpSocket(this);
         connect(sock, &QTcpSocket::connected, this, &ClientTest::sock_connected);
         connect(sock, &QTcpSocket::readyRead, this, &ClientTest::sock_readyRead);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        connect(sock, &QTcpSocket::errorOccurred, this, &ClientTest::sock_error);
+#else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &ClientTest::sock_error);
+#endif
 
         sasl = new QCA::SASL(this);
         connect(sasl, &QCA::SASL::clientStarted, this, &ClientTest::sasl_clientFirstStep);
