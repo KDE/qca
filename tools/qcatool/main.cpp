@@ -85,14 +85,14 @@ public:
 
     void logTextMessage(const QString &message, enum QCA::Logger::Severity severity) override
     {
-        _stream << now() << " " << severityName(severity) << " " << message << endl;
+        _stream << now() << " " << severityName(severity) << " " << message << Qt::endl;
     }
 
     void logBinaryMessage(const QByteArray &blob, enum QCA::Logger::Severity severity) override
     {
         Q_UNUSED(blob);
         _stream << now() << " " << severityName(severity) << " "
-                << "Binary blob not implemented yet" << endl;
+                << "Binary blob not implemented yet" << Qt::endl;
     }
 
 private:
