@@ -838,8 +838,9 @@ static QStringList get_cert_policies(X509_EXTENSION *ex)
     for (int n = 0; n < sk_POLICYINFO_num(pols); ++n) {
         POLICYINFO *pol = sk_POLICYINFO_value(pols, n);
         QByteArray  buf(128, 0);
-        OBJ_obj2txt((char *)buf.data(), buf.size(), pol->policyid, 1); // 1 = only accept dotted input
-        out += QString::fromLatin1(buf);
+        const auto  len = OBJ_obj2txt((char *)buf.data(), buf.size(), pol->policyid, 1); // 1 = only accept dotted input
+        if (len > 0)
+            out += QString::fromLatin1(buf.left(len));
     }
     sk_POLICYINFO_pop_free(pols, POLICYINFO_free);
     return out;
