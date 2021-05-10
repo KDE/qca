@@ -34,8 +34,10 @@ public:
 #ifdef Q_OS_UNIX
     void setInheritPipeList(const QList<int> &);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 protected:
     void setupChildProcess() override;
+#endif
 
 private:
     QList<int> pipeList;

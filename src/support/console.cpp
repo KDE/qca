@@ -848,7 +848,7 @@ public:
                 result.resize(at * sizeof(ushort));
             }
             return true;
-        } else if (c < 0x20)
+        } else if (c.unicode() < 0x20)
             return true;
 
         if (at >= CONSOLEPROMPT_INPUT_MAX)

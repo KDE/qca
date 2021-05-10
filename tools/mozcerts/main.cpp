@@ -23,6 +23,7 @@
 
 #include <QCoreApplication>
 #include <QFile>
+#include <QRegExp>
 #include <QTextStream>
 
 QStringList splitWithQuotes(const QString &in, char c);

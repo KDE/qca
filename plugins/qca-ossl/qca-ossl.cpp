@@ -334,8 +334,12 @@ static CertificateInfo get_cert_name(X509_NAME *name)
     {
         CertificateInfo p9_info;
         try_get_name_item(name, NID_pkcs9_emailAddress, EmailLegacy, &p9_info);
-        const QList<QString>                       emails = info.values(Email);
+        const QList<QString> emails = info.values(Email);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QMultiMapIterator<CertificateInfoType, QString> it(p9_info);
+#else
         QMapIterator<CertificateInfoType, QString> it(p9_info);
+#endif
         while (it.hasNext()) {
             it.next();
             if (!emails.contains(it.value()))
@@ -1613,7 +1617,7 @@ static const auto DsaDeleter = [](DSA *pointer) {
 
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
-    int                             ret_counter;
+    int                                        ret_counter;
     std::unique_ptr<DSA, decltype(DsaDeleter)> dsa(DSA_new(), DsaDeleter);
     if (!dsa)
         return false;

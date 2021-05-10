@@ -541,7 +541,12 @@ static bool configIsValid(const QVariantMap &config)
     while (it.hasNext()) {
         it.next();
         const QVariant &v = it.value();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (v.typeId() != QMetaType::QString && v.typeId() != QMetaType::Int && v.typeId() != QMetaType::Bool)
+#else
         if (v.type() != QVariant::String && v.type() != QVariant::Int && v.type() != QVariant::Bool)
+
+#endif
             return false;
     }
     return true;

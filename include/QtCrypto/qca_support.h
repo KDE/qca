@@ -98,9 +98,13 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
    \relates SyncThread
 */
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+QCA_EXPORT int methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> &argTypes);
+#else
 QCA_EXPORT QByteArray methodReturnType(const QMetaObject *     obj,
                                        const QByteArray &      method,
                                        const QList<QByteArray> argTypes);
+#endif
 
 /**
    Convenience method to invoke a method by name, using a variant
