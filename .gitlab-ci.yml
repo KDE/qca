@@ -1,12 +1,12 @@
-build_ubuntu_18_04:
+build_ubuntu_20_10:
   stage: build
-  image: ubuntu:bionic
+  image: ubuntu:groovy
   before_script:
     - sed -i -e 's/# deb-src/deb-src/g' /etc/apt/sources.list
-    - apt-get update
-    - apt-get install --yes eatmydata
-    - eatmydata apt-get build-dep --yes --no-install-recommends qca-qt5
-    - eatmydata apt-get install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
+    - apt update
+    - apt install --yes eatmydata
+    - eatmydata apt build-dep --yes --no-install-recommends qca2
+    - eatmydata apt install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
   script:
     - mkdir -p build && cd build
     - cmake -G Ninja ..
