@@ -13,6 +13,17 @@ build_ubuntu_20_10:
     - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
+build_fedora_34:
+  stage: build
+  image: fedora:34
+  before_script:
+    - dnf -y --setopt=install_weak_deps=False install git gcc-c++ make cmake ninja-build qt6-qtbase-devel qt6-qt5compat-devel botan2-devel cyrus-sasl-devel nss-devel libgcrypt-devel pkcs11-helper-devel gnupg
+  script:
+    - mkdir -p build && cd build
+    - cmake -G Ninja -DQT6=ON ..
+    - ninja
+    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt6/ ctest -V
+
 build_clazy_clang_tidy:
   stage: build
   image: debian:unstable
