@@ -107,7 +107,7 @@ public:
     {
         SecureArray buf(size);
         for (int n = 0; n < (int)buf.size(); ++n)
-            buf[n] = (char)qrand();
+            buf[n] = (char)std::rand();
         return buf;
     }
 };
@@ -1253,7 +1253,7 @@ public:
         uint t = now.toSecsSinceEpoch();
         if (now.time().msec() > 0)
             t /= now.time().msec();
-        qsrand(t);
+        std::srand(t);
     }
 
     int version() const override

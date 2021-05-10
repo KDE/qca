@@ -6576,10 +6576,10 @@ public:
 
         // seed the RNG if it's not seeded yet
         if (RAND_status() == 0) {
-            qsrand(time(nullptr));
+            std::srand(time(nullptr));
             char buf[128];
             for (char &n : buf)
-                n = qrand();
+                n = std::rand();
             RAND_seed(buf, 128);
         }
 
