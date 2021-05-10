@@ -1250,7 +1250,7 @@ public:
     {
         const QDateTime now = QDateTime::currentDateTime();
 
-        uint t = now.toTime_t();
+        uint t = now.toSecsSinceEpoch();
         if (now.time().msec() > 0)
             t /= now.time().msec();
         qsrand(t);

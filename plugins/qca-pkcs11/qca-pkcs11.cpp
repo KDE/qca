@@ -1048,7 +1048,7 @@ private:
 
         Certificate cert = Certificate::fromDER(QByteArray((char *)blob, blob_size));
 
-        *expiration = cert.notValidAfter().toTime_t();
+        *expiration = cert.notValidAfter().toSecsSinceEpoch();
 
         return TRUE; // krazy:exclude=captruefalse
     }

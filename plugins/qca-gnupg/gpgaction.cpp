@@ -35,9 +35,7 @@ static QDateTime getTimestamp(const QString &s)
     if (s.contains(QLatin1Char('T'))) {
         return QDateTime::fromString(s, Qt::ISODate);
     } else {
-        QDateTime dt;
-        dt.setTime_t(s.toInt());
-        return dt;
+        return QDateTime::fromSecsSinceEpoch(s.toInt());
     }
 }
 

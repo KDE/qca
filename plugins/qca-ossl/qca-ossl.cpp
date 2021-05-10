@@ -3432,8 +3432,8 @@ public:
         BN_free(bn);
 
         // validity period
-        ASN1_TIME_set(X509_get_notBefore(x), opts.notValidBefore().toTime_t());
-        ASN1_TIME_set(X509_get_notAfter(x), opts.notValidAfter().toTime_t());
+        ASN1_TIME_set(X509_get_notBefore(x), opts.notValidBefore().toSecsSinceEpoch());
+        ASN1_TIME_set(X509_get_notAfter(x), opts.notValidAfter().toSecsSinceEpoch());
 
         // public key
         X509_set_pubkey(x, pk);
@@ -3836,8 +3836,8 @@ public:
         BN_free(bn);
 
         // validity period
-        ASN1_TIME_set(X509_get_notBefore(x), QDateTime::currentDateTimeUtc().toTime_t());
-        ASN1_TIME_set(X509_get_notAfter(x), notValidAfter.toTime_t());
+        ASN1_TIME_set(X509_get_notBefore(x), QDateTime::currentDateTimeUtc().toSecsSinceEpoch());
+        ASN1_TIME_set(X509_get_notAfter(x), notValidAfter.toSecsSinceEpoch());
 
         X509_set_pubkey(x, static_cast<const MyPKeyContext *>(req.subjectPublicKey())->get_pkey());
         X509_set_subject_name(x, subjectName);
