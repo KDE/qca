@@ -667,12 +667,12 @@ void GpgAction::processStatusLine(const QString &line)
         output.verifyResult = GpgOp::VerifyBad;
     } else if (s == QLatin1String("ERRSIG")) {
         output.wasSigned       = true;
-        const QStringList list = rest.split(QLatin1Char(' '), QString::SkipEmptyParts);
+        const QStringList list = rest.split(QLatin1Char(' '), Qt::SkipEmptyParts);
         output.signerId        = list[0];
         output.timestamp       = getTimestamp(list[4]);
         output.verifyResult    = GpgOp::VerifyNoKey;
     } else if (s == QLatin1String("VALIDSIG")) {
-        const QStringList list = rest.split(QLatin1Char(' '), QString::SkipEmptyParts);
+        const QStringList list = rest.split(QLatin1Char(' '), Qt::SkipEmptyParts);
         output.timestamp       = getTimestamp(list[2]);
     }
 }

@@ -353,7 +353,7 @@ bool isSupported(const QStringList &features, const QString &provider)
 
 bool isSupported(const char *features, const QString &provider)
 {
-    return isSupported(QString::fromLatin1(features).split(QLatin1Char(','), QString::SkipEmptyParts), provider);
+    return isSupported(QString::fromLatin1(features).split(QLatin1Char(','), Qt::SkipEmptyParts), provider);
 }
 
 QStringList supportedFeatures()
