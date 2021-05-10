@@ -15,7 +15,11 @@ if(SASL2_FOUND)
     set_property(TARGET qca-cyrus-sasl PROPERTY SUFFIX ".dylib")
   endif()
 
-  target_link_libraries(qca-cyrus-sasl Qt5::Core ${QCA_LIB_NAME} ${SASL2_LIBRARIES})
+  if(QT6)
+    target_link_libraries(qca-cyrus-sasl Qt6::Core ${QCA_LIB_NAME} ${SASL2_LIBRARIES})
+  else()
+    target_link_libraries(qca-cyrus-sasl Qt5::Core ${QCA_LIB_NAME} ${SASL2_LIBRARIES})
+  endif()
 
   if(NOT DEVELOPER_MODE)
     install(TARGETS qca-cyrus-sasl

@@ -10,7 +10,11 @@ if(NSS_FOUND)
 
   set(QCA_NSS_SOURCES qca-nss.cpp)
   add_library(qca-nss ${PLUGIN_TYPE} ${QCA_NSS_SOURCES})
-  target_link_libraries(qca-nss Qt5::Core ${QCA_LIB_NAME} PkgConfig::NSS)
+  if(QT6)
+    target_link_libraries(qca-nss Qt6::Core ${QCA_LIB_NAME} PkgConfig::NSS)
+  else()
+    target_link_libraries(qca-nss Qt5::Core ${QCA_LIB_NAME} PkgConfig::NSS)
+  endif()
 
   if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
     set_property(TARGET qca-nss PROPERTY SUFFIX ".dylib")

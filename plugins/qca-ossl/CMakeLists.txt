@@ -55,7 +55,11 @@ if(OPENSSL_FOUND)
     set_property(TARGET qca-ossl PROPERTY SUFFIX ".dylib")
   endif()
 
-  target_link_libraries(qca-ossl Qt5::Core)
+  if(QT6)
+    target_link_libraries(qca-ossl Qt6::Core)
+  else()
+    target_link_libraries(qca-ossl Qt5::Core)
+  endif()
   target_link_libraries(qca-ossl ${QCA_LIB_NAME})
   target_link_libraries(qca-ossl OpenSSL::SSL OpenSSL::Crypto)
 

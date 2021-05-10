@@ -1,6 +1,10 @@
 
-MACRO(SETUP_QT5_DIRS)
-  GET_TARGET_PROPERTY(QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} LOCATION)
+MACRO(SETUP_QT_DIRS)
+  if(QT6)
+    GET_TARGET_PROPERTY(QMAKE_EXECUTABLE Qt6::qmake LOCATION)
+  else()
+    GET_TARGET_PROPERTY(QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} LOCATION)
+  endif()
   EXEC_PROGRAM( ${QMAKE_EXECUTABLE} ARGS "-query QT_INSTALL_LIBS" OUTPUT_VARIABLE QT_LIBRARY_DIR )
   EXEC_PROGRAM( ${QMAKE_EXECUTABLE} ARGS "-query QT_INSTALL_PREFIX" OUTPUT_VARIABLE QT_PREFIX_DIR )
   EXEC_PROGRAM( ${QMAKE_EXECUTABLE} ARGS "-query QT_INSTALL_PLUGINS" OUTPUT_VARIABLE QT_PLUGINS_DIR )
@@ -10,7 +14,7 @@ MACRO(SETUP_QT5_DIRS)
   EXEC_PROGRAM( ${QMAKE_EXECUTABLE} ARGS "-query QT_INSTALL_DATA" OUTPUT_VARIABLE QT_DATA_DIR )
   EXEC_PROGRAM( ${QMAKE_EXECUTABLE} ARGS "-query QT_HOST_DATA" OUTPUT_VARIABLE QT_ARCHDATA_DIR )
   SET( QT_MKSPECS_DIR "${QT_ARCHDATA_DIR}/mkspecs" )
-ENDMACRO(SETUP_QT5_DIRS)
+ENDMACRO(SETUP_QT_DIRS)
 
 macro(set_enabled_plugin PLUGIN ENABLED)
   # To nice looks
@@ -50,7 +54,11 @@ endmacro(target_link_qca_libraries)
 # it used to build unittests
 macro(target_link_qca_test_libraries TARGET)
   target_link_qca_libraries(${TARGET})
-  target_link_libraries(${TARGET} Qt5::Test)
+  if(QT6)
+    target_link_libraries(${TARGET} Qt6::Test)
+  else()
+    target_link_libraries(${TARGET} Qt5::Test)
+  endif()
 endmacro(target_link_qca_test_libraries)
 
 # it used to build unittests

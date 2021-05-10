@@ -11,7 +11,11 @@ endif()
 
 add_definitions(${SOFTSTOREH_DEFINITIONS})
 include_directories(${SOFTSTOREH_INCLUDE_DIR})
-target_link_libraries(qca-softstore Qt5::Core)
+if(QT6)
+  target_link_libraries(qca-softstore Qt6::Core)
+else()
+  target_link_libraries(qca-softstore Qt5::Core)
+endif()
 target_link_libraries(qca-softstore ${QCA_LIB_NAME})
 
 if(NOT DEVELOPER_MODE)

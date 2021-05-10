@@ -42,7 +42,11 @@ if(APPLE AND ${PLUGIN_TYPE} STREQUAL "MODULE")
 endif()
 
 include_directories(gpgproc)
-target_link_libraries(qca-gnupg Qt5::Core ${QCA_LIB_NAME})
+if(QT6)
+  target_link_libraries(qca-gnupg Qt6::Core ${QCA_LIB_NAME})
+else()
+  target_link_libraries(qca-gnupg Qt5::Core ${QCA_LIB_NAME})
+endif()
 
 if (WIN32)
   target_link_libraries(qca-gnupg advapi32)
