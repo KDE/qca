@@ -537,7 +537,11 @@ int main(int argc, char **argv)
     int at = hostinput.indexOf(QLatin1Char(':'));
     if (at != -1) {
         host = hostinput.mid(0, at);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+        port = QStringView(hostinput).mid(at + 1).toInt();
+#else
         port = hostinput.midRef(at + 1).toInt();
+#endif
     } else
         host = hostinput;
 

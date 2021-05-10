@@ -1016,7 +1016,11 @@ private:
             QChar c = from[i];
 
             if (c == QLatin1Char('\\')) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+                to += QChar((ushort)QStringView(from).mid(i + 2, 4).toInt(nullptr, 16));
+#else
                 to += QChar((ushort)from.midRef(i + 2, 4).toInt(nullptr, 16));
+#endif
                 i += 5;
             } else {
                 to += c;

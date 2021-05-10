@@ -139,7 +139,11 @@ public:
         int port;
         if (n != -1) {
             host = _host.mid(0, n);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+            port = QStringView(_host).mid(n + 1).toInt();
+#else
             port = _host.midRef(n + 1).toInt();
+#endif
         } else {
             host = _host;
             port = 443;

@@ -1330,7 +1330,11 @@ public:
             int  x  = s.indexOf(QLatin1Char(':'));
             bool ok = false;
             if (x != -1)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+                (void)QStringView(s).mid(x + 1).toInt(&ok);
+#else
                 s.midRef(x + 1).toInt(&ok);
+#endif
             if (!ok) {
                 plugin_priorities.removeAt(n);
                 --n;
