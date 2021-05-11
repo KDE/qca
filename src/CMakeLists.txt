@@ -52,7 +52,7 @@ SET( SOURCES
 
 IF (WIN32)
   SET( SOURCES ${SOURCES} qca_systemstore_win.cpp )
-elseif(APPLE)
+elseif(APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES iOS)
   set( SOURCES ${SOURCES} qca_systemstore_mac.cpp)
 else()
   SET( SOURCES ${SOURCES} qca_systemstore_flatfile.cpp )
