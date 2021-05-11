@@ -125,7 +125,7 @@ public:
     QList<Item>                 items;
     QString                     dtext;
     bool                        startedAll;
-    bool                        busy;
+    std::atomic<bool>           busy;
 
     QMutex updateMutex;
 
@@ -161,7 +161,6 @@ public:
     // thread-safe
     bool isBusy()
     {
-        QMutexLocker locker(&m);
         return busy;
     }
 
@@ -202,6 +201,14 @@ public Q_SLOTS:
         QAbstractEventDispatcher::instance()->processEvents(QEventLoop::AllEvents);
     }
 
+    void notifyIfNotBusy()
+    {
+        if (busySources.isEmpty()) {
+            busy = false;
+            emit updated_p();
+        }
+    }
+
     void start()
     {
         // grab providers (and default)
@@ -215,6 +222,7 @@ public Q_SLOTS:
         }
 
         startedAll = true;
+        notifyIfNotBusy();
     }
 
     void start(const QString &provider)
@@ -233,14 +241,6 @@ public Q_SLOTS:
 
         if (p && p->features().contains(QStringLiteral("keystorelist")) && !haveProviderSource(p))
             startProvider(p);
-        else {
-            if (busySources.isEmpty()) {
-                m.lock();
-                busy = false;
-                m.unlock();
-                emit updated_p();
-            }
-        }
     }
 
     void scan()
@@ -518,9 +518,7 @@ private Q_SLOTS:
         const bool any_busy = !busySources.isEmpty();
 
         if (!any_busy) {
-            m.lock();
             busy = false;
-            m.unlock();
         }
 
         if (!any_busy || changed) {
@@ -1610,6 +1608,7 @@ void KeyStoreManager::waitForBusyFinished()
     d->busy = KeyStoreTracker::instance()->isBusy();
     if (d->busy) {
         d->waiting = true;
+        QMetaObject::invokeMethod(KeyStoreTracker::instance(), "notifyIfNotBusy", Qt::QueuedConnection);
         d->w.wait(&d->m);
         d->waiting = false;
     }
