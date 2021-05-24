@@ -115,7 +115,7 @@ public:
        Provide a random character (byte)
 
        This is the normal way of obtaining a single random char
-       (ie. 8 bit byte), as shown below:
+       (i.e. 8 bit byte), as shown below:
        \code
 myRandomChar = QCA::Random::randomChar();
        \endcode

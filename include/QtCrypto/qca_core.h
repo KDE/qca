@@ -1310,26 +1310,26 @@ class QCA_EXPORT InitializationVector : public SecureArray
 {
 public:
     /**
-       Construct an empty (zero length) initisation vector
+       Construct an empty (zero length) initialization vector
     */
     InitializationVector();
 
     /**
-       Construct an initialisation vector of the specified size
+       Construct an initialization vector of the specified size
 
-       \param size the length of the initialisation vector, in bytes
+       \param size the length of the initialization vector, in bytes
     */
     InitializationVector(int size);
 
     /**
-       Construct an initialisation vector from a provided byte array
+       Construct an initialization vector from a provided byte array
 
        \param a the byte array to copy
     */
     InitializationVector(const SecureArray &a);
 
     /**
-       Construct an initialisation vector from a provided byte array
+       Construct an initialization vector from a provided byte array
 
        \param a the byte array to copy
     */

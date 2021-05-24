@@ -1023,9 +1023,9 @@ CertificateInfoOrdered info = cert.subjectInfoOrdered();
     PublicKey subjectPublicKey() const;
 
     /**
-       Test if the Certificate is valid as a Certificate Authority
+       Test if the Certificate is valid as a %Certificate Authority
 
-       \return true if the Certificate is valid as a Certificate Authority
+       \return true if the Certificate is valid as a %Certificate Authority
     */
     bool isCA() const;
 
@@ -1212,7 +1212,7 @@ private:
    The normal use of a CertificateChain is from a end-user Certificate (called
    the primary, equivalent to QList::first()) through some intermediate
    Certificates to some other Certificate (QList::last()), which might be a
-   root Certificate Authority, but does not need to be.
+   root %Certificate Authority, but does not need to be.
 
    You can build up the chain using normal QList operations, such as
    QList::append().
@@ -1431,7 +1431,7 @@ public:
     PublicKey subjectPublicKey() const;
 
     /**
-       Test if this Certificate Request is for a Certificate Authority
+       Test if this %Certificate Request is for a %Certificate Authority
        certificate
 
        \note this only applies to PKCS#10 format certificate requests
@@ -1439,7 +1439,7 @@ public:
     bool isCA() const;
 
     /**
-       The path limit for the certificate in this Certificate Request
+       The path limit for the certificate in this %Certificate Request
 
        \note this only applies to PKCS#10 format certificate requests
     */
@@ -1476,14 +1476,14 @@ public:
     }
 
     /**
-       Export the Certificate Request into a DER format
+       Export the %Certificate Request into a DER format
 
        \note this only applies to PKCS#10 format certificate requests
     */
     QByteArray toDER() const;
 
     /**
-       Export the Certificate Request into a PEM format
+       Export the %Certificate Request into a PEM format
 
        \note this only applies to PKCS#10 format certificate requests
     */
@@ -1760,7 +1760,7 @@ public:
     /**
        Test if the CRL is empty
 
-       \return true if the CRL is entry, otherwise return false
+       \return true if the CRL is empty, otherwise return false
     */
     bool isNull() const;
 
@@ -2129,7 +2129,7 @@ public:
     Certificate createCertificate(const PublicKey &key, const CertificateOptions &opts) const;
 
     /**
-       Create a new Certificate Revocation List (CRL)
+       Create a new %Certificate Revocation List (CRL)
 
        \param nextUpdate the date that the CRL will be updated
 

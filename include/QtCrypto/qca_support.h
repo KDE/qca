@@ -266,9 +266,6 @@ int x = thread->call(thread->counter, "value").toInt();
 delete thread;
 \endcode
 
-   Do you see a mutex anywhere?  I didn't think so.<br>
-   ---
-
    Even without the call() function, SyncThread is still very useful
    for preparing objects in another thread, which you can then
    QObject::connect() to and use signals and slots like normal.
@@ -434,7 +431,7 @@ public:
 Q_SIGNALS:
     /**
        The changed signal is emitted when the directory is
-       changed (e.g. modified by addition or deletion of a
+       changed (e.g.\ modified by addition or deletion of a
        file within the directory, or the deletion of the
        directory)
     */
