@@ -246,10 +246,12 @@ if(NOT WIN32)
     set(PKGCONFIG_LIBS "-L\${libdir} -l${QCA_LIB_NAME}")
   endif()
 
-  # qca2.pc uses absolute paths. So it must be there. Don't rellocate this.
-  configure_file("qca2.pc.cmake" "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pkgconfig/${QCA_PC_NAME}" @ONLY)
-  if(NOT DEVELOPER_MODE)
-    install(FILES "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pkgconfig/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
+  if(NOT QT6)
+    # qca2.pc uses absolute paths. So it must be there. Don't rellocate this.
+    configure_file("qca2.pc.cmake" "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pkgconfig/${QCA_PC_NAME}" @ONLY)
+    if(NOT DEVELOPER_MODE)
+      install(FILES "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pkgconfig/${QCA_PC_NAME}" DESTINATION ${PKGCONFIG_INSTALL_PREFIX})
+    endif()
   endif()
 endif()
 
