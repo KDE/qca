@@ -151,13 +151,11 @@ public:
         connect(sock, &QTcpSocket::connected, this, &ClientTest::sock_connected);
         connect(sock, &QTcpSocket::readyRead, this, &ClientTest::sock_readyRead);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock,
-                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
-                this,
-                &ClientTest::sock_error);
+        connect(sock, &QTcpSocket::errorOccurred, this, &ClientTest::sock_error);
 #else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &ClientTest::sock_error);
 #endif
+
         sasl = new QCA::SASL(this);
         connect(sasl, &QCA::SASL::clientStarted, this, &ClientTest::sasl_clientFirstStep);
         connect(sasl, &QCA::SASL::nextStep, this, &ClientTest::sasl_nextStep);
@@ -225,7 +223,7 @@ private Q_SLOTS:
         if (mode == 2) // app mode
         {
             QByteArray a = sock->readAll();
-            printf("Read %d bytes\n", a.size());
+            printf("Read %d bytes\n", int(a.size()));
 
             // there is a possible flaw in the qca 2.0 api, in
             //   that if sasl data is received from the peer
@@ -539,7 +537,11 @@ int main(int argc, char **argv)
     int at = hostinput.indexOf(QLatin1Char(':'));
     if (at != -1) {
         host = hostinput.mid(0, at);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+        port = QStringView(hostinput).mid(at + 1).toInt();
+#else
         port = hostinput.midRef(at + 1).toInt();
+#endif
     } else
         host = hostinput;
 

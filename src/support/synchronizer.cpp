@@ -342,7 +342,7 @@ public:
         , loop(nullptr)
         , agent(nullptr)
         , fixer(nullptr)
-        , m(QMutex::NonRecursive)
+        , m()
         , w()
         , orig_thread(nullptr)
     {

@@ -337,7 +337,7 @@ QStringList BaseOsslTLSContext::supportedCipherSuites(const TLS::Version &versio
             if (limits[i].ver == version) {
                 auto method = (limits[i].ver >= TLS::DTLS_v1 && limits[i].ver <= TLS::DTLS_vMAX) ? DTLS_client_method()
                                                                                                  : TLS_client_method();
-                ctx = SSL_CTX_new(method);
+                ctx         = SSL_CTX_new(method);
                 SSL_CTX_set_min_proto_version(ctx, limits[i].ssl_ver);
                 SSL_CTX_set_max_proto_version(ctx, limits[i].ssl_ver);
                 break;

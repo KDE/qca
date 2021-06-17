@@ -741,9 +741,13 @@ int ProviderManager::get_default_priority(const QString &name) const
     const QStringList list = plugin_priorities(def);
     foreach (const QString &s, list) {
         // qca_default already sanity checks the strings
-        const int     n         = s.indexOf(QLatin1Char(':'));
-        const QString sname     = s.mid(0, n);
-        const int     spriority = s.midRef(n + 1).toInt();
+        const int     n     = s.indexOf(QLatin1Char(':'));
+        const QString sname = s.mid(0, n);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+        const int spriority = QStringView(s).mid(n + 1).toInt();
+#else
+        const int spriority = s.midRef(n + 1).toInt();
+#endif
         if (sname == name)
             return spriority;
     }

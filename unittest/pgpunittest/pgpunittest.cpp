@@ -290,12 +290,12 @@ void PgpUnitTest::testMessageSign()
 #if 0
         QString str = QCA::KeyStoreManager::diagnosticText();
         QCA::KeyStoreManager::clearDiagnosticText();
-        QStringList lines = str.split('\n', QString::SkipEmptyParts);
+        QStringList lines = str.split('\n', Qt::SkipEmptyParts);
         for(int n = 0; n < lines.count(); ++n)
                 fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
 
         QString out = msg.diagnosticText();
-        QStringList msglines = out.split('\n', QString::SkipEmptyParts);
+        QStringList msglines = out.split('\n', Qt::SkipEmptyParts);
         for(int n = 0; n < msglines.count(); ++n)
                 fprintf(stderr, "message: %s\n", qPrintable(msglines[n]));
 #endif
@@ -418,12 +418,12 @@ void PgpUnitTest::testClearsign()
 #if 0
         QString str = QCA::KeyStoreManager::diagnosticText();
         QCA::KeyStoreManager::clearDiagnosticText();
-        QStringList lines = str.split('\n', QString::SkipEmptyParts);
+        QStringList lines = str.split('\n', Qt::SkipEmptyParts);
         for(int n = 0; n < lines.count(); ++n)
                 fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
 
         QString out = msg.diagnosticText();
-        QStringList msglines = out.split('\n', QString::SkipEmptyParts);
+        QStringList msglines = out.split('\n', Qt::SkipEmptyParts);
         for(int n = 0; n < msglines.count(); ++n)
                 fprintf(stderr, "message: %s\n", qPrintable(msglines[n]));
 #endif
@@ -529,12 +529,12 @@ void PgpUnitTest::testDetachedSign()
 #if 0
         QString str = QCA::KeyStoreManager::diagnosticText();
         QCA::KeyStoreManager::clearDiagnosticText();
-        QStringList lines = str.split('\n', QString::SkipEmptyParts);
+        QStringList lines = str.split('\n', Qt::SkipEmptyParts);
         for(int n = 0; n < lines.count(); ++n)
                 fprintf(stderr, "keystore: %s\n", qPrintable(lines[n]));
 
         QString out = msg.diagnosticText();
-        QStringList msglines = out.split('\n', QString::SkipEmptyParts);
+        QStringList msglines = out.split('\n', Qt::SkipEmptyParts);
         for(int n = 0; n < msglines.count(); ++n)
                 fprintf(stderr, "message: %s\n", qPrintable(msglines[n]));
 #endif

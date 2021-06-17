@@ -1,17 +1,28 @@
-build_ubuntu_18_04:
+build_ubuntu_20_10:
   stage: build
-  image: ubuntu:bionic
+  image: ubuntu:groovy
   before_script:
     - sed -i -e 's/# deb-src/deb-src/g' /etc/apt/sources.list
-    - apt-get update
-    - apt-get install --yes eatmydata
-    - eatmydata apt-get build-dep --yes --no-install-recommends qca-qt5
-    - eatmydata apt-get install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
+    - apt update
+    - apt install --yes eatmydata
+    - eatmydata apt build-dep --yes --no-install-recommends qca2
+    - eatmydata apt install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
   script:
     - mkdir -p build && cd build
     - cmake -G Ninja ..
     - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
+
+build_fedora_34:
+  stage: build
+  image: fedora:34
+  before_script:
+    - dnf -y --setopt=install_weak_deps=False install git gcc-c++ make cmake ninja-build qt6-qtbase-devel qt6-qt5compat-devel botan2-devel cyrus-sasl-devel nss-devel libgcrypt-devel pkcs11-helper-devel gnupg
+  script:
+    - mkdir -p build && cd build
+    - cmake -G Ninja -DQT6=ON ..
+    - ninja
+    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt6/ ctest -V
 
 build_clazy_clang_tidy:
   stage: build

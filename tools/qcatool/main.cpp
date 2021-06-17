@@ -3513,7 +3513,7 @@ int main(int argc, char **argv)
             if (key.isNull())
                 return 1;
 
-            printf("Keybundle contains %d certificates.  Displaying primary:\n", key.certificateChain().count());
+            printf("Keybundle contains %d certificates.  Displaying primary:\n", int(key.certificateChain().count()));
             print_cert(key.certificateChain().primary(), ordered);
         } else if (args[1] == QLatin1String("pgp")) {
             if (args.count() < 3) {

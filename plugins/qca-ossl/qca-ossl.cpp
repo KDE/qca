@@ -31,8 +31,6 @@
 
 #include <QDebug>
 #include <QElapsedTimer>
-#include <QQueue>
-#include <QScopedPointer>
 #include <QtCrypto>
 #include <QtPlugin>
 
@@ -47,6 +45,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -127,37 +126,37 @@ static Constraints ext_only(const Constraints &list)
 // logic from Botan
 /*static Constraints find_constraints(const PKeyContext &key, const Constraints &orig)
 {
-        Constraints constraints;
+    Constraints constraints;
 
-        if(key.key()->type() == PKey::RSA)
-                constraints += KeyEncipherment;
+    if(key.key()->type() == PKey::RSA)
+        constraints += KeyEncipherment;
 
-        if(key.key()->type() == PKey::DH)
-                constraints += KeyAgreement;
+    if(key.key()->type() == PKey::DH)
+        constraints += KeyAgreement;
 
-        if(key.key()->type() == PKey::RSA || key.key()->type() == PKey::DSA)
+    if(key.key()->type() == PKey::RSA || key.key()->type() == PKey::DSA)
+    {
+        constraints += DigitalSignature;
+        constraints += NonRepudiation;
+    }
+
+    Constraints limits = basic_only(orig);
+    Constraints the_rest = ext_only(orig);
+
+    if(!limits.isEmpty())
+    {
+        Constraints reduced;
+        for(int n = 0; n < constraints.count(); ++n)
         {
-                constraints += DigitalSignature;
-                constraints += NonRepudiation;
+            if(limits.contains(constraints[n]))
+                reduced += constraints[n];
         }
+        constraints = reduced;
+    }
 
-        Constraints limits = basic_only(orig);
-        Constraints the_rest = ext_only(orig);
+    constraints += the_rest;
 
-        if(!limits.isEmpty())
-        {
-                Constraints reduced;
-                for(int n = 0; n < constraints.count(); ++n)
-                {
-                        if(limits.contains(constraints[n]))
-                                reduced += constraints[n];
-                }
-                constraints = reduced;
-        }
-
-        constraints += the_rest;
-
-        return constraints;
+    return constraints;
 }*/
 
 class opensslHashContext : public HashContext
@@ -556,7 +555,7 @@ protected:
 //----------------------------------------------------------------------------
 // clang-format off
 // IETF primes from Botan
-static const char* IETF_1024_PRIME =
+static const char *IETF_1024_PRIME =
     "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
     "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
     "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
@@ -564,7 +563,7 @@ static const char* IETF_1024_PRIME =
     "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381"
     "FFFFFFFF FFFFFFFF";
 
-static const char* IETF_2048_PRIME =
+static const char *IETF_2048_PRIME =
     "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
     "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
     "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
@@ -577,7 +576,7 @@ static const char* IETF_2048_PRIME =
     "DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
     "15728E5A 8AACAA68 FFFFFFFF FFFFFFFF";
 
-static const char* IETF_4096_PRIME =
+static const char *IETF_4096_PRIME =
     "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
     "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
     "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
@@ -644,32 +643,28 @@ public:
 
 #ifndef OPENSSL_FIPS
 namespace {
-struct DsaDeleter
-{
-    static inline void cleanup(void *pointer)
-    {
-        if (pointer)
-            DSA_free((DSA *)pointer);
-    }
+static const auto DsaDeleter = [](DSA *pointer) {
+    if (pointer)
+        DSA_free((DSA *)pointer);
 };
 } // end of anonymous namespace
 
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
-    int                             ret_counter;
-    QScopedPointer<DSA, DsaDeleter> dsa(DSA_new());
+    int                                        ret_counter;
+    std::unique_ptr<DSA, decltype(DsaDeleter)> dsa(DSA_new(), DsaDeleter);
     if (!dsa)
         return false;
 
     if (DSA_generate_parameters_ex(
-            dsa.data(), bits, (const unsigned char *)seed.data(), seed.size(), &ret_counter, nullptr, nullptr) != 1)
+            dsa.get(), bits, (const unsigned char *)seed.data(), seed.size(), &ret_counter, nullptr, nullptr) != 1)
         return false;
 
     if (ret_counter != counter)
         return false;
 
     const BIGNUM *bnp, *bnq, *bng;
-    DSA_get0_pqg(dsa.data(), &bnp, &bnq, &bng);
+    DSA_get0_pqg(dsa.get(), &bnp, &bnq, &bng);
     params->p = bn2bi(bnp);
     params->q = bn2bi(bnq);
     params->g = bn2bi(bng);
@@ -2045,9 +2040,9 @@ public:
             for (char &n : buf)
                 n = static_cast<char>(rg.bounded(256));
 #else
-            qsrand(static_cast<uint>(time(nullptr)));
+            std::srand(static_cast<uint>(time(nullptr)));
             for (char &n : buf)
-                n = static_cast<char>(qrand());
+                n = static_cast<char>(std::rand());
 #endif
             RAND_seed(buf, 128);
         }

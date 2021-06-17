@@ -25,6 +25,8 @@
 #include "qcaprovider.h"
 
 #include <QFile>
+#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextStream>
 #include <QUrl>
 
@@ -1351,7 +1353,7 @@ static bool cert_match_domain(const QString &certname, const QString &acedomain)
     name = name.toLower();
 
     // ensure the cert field contains valid characters only
-    if (QRegExp(QLatin1String("[^a-z0-9\\.\\*\\-]")).indexIn(name) >= 0)
+    if (QRegularExpression(QStringLiteral("[^a-z0-9\\.\\*\\-]")).match(name).hasMatch())
         return false;
 
         // hack into parts, and require at least 1 part

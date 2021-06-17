@@ -1,8 +1,12 @@
 ENABLE_TESTING()
-find_package(Qt5 REQUIRED Test)
+if(QT6)
+  find_package(Qt6 REQUIRED Test)
+else()
+  find_package(Qt5 REQUIRED Test)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
+endif()
 # QTEST_MAIN is using QApplication when QT_GUI_LIB is defined
 remove_definitions(-DQT_GUI_LIB)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
 
 add_subdirectory(base64unittest)
 add_subdirectory(bigintunittest)

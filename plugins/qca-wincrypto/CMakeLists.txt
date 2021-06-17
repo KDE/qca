@@ -5,7 +5,11 @@ IF (WIN32)
 
    ADD_LIBRARY (qca-wincrypto MODULE ${QCA_WINCRYPTO_SOURCES})
    # use win32 includes
-   TARGET_LINK_LIBRARIES (qca-wincrypto Qt5::core)
+   if(QT6)
+     target_link_libraries(qca-wincrypto Qt6::Core)
+   else()
+     target_link_libraries(qca-wincrypto Qt5::Core)
+   endif()
    TARGET_LINK_LIBRARIES (qca-wincrypto ${QCA_LIB_NAME})
    TARGET_LINK_LIBRARIES (qca-wincrypto advapi32)
 

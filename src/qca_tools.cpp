@@ -914,6 +914,7 @@ QString BigInteger::toString() const
     if (d->n.is_negative())
         str += QLatin1Char('-');
     str += QString::fromLatin1(cs);
+    str.remove(QChar::Null);
     return str;
 }
 

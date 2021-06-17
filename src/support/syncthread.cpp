@@ -27,11 +27,15 @@
 
 namespace QCA {
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+int methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> &argTypes)
+#else
 QByteArray methodReturnType(
     const QMetaObject *     obj,
     const QByteArray &      method,
     const QList<QByteArray> argTypes) // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param)
                                       // TODO make argTypes const & when we break ABI
+#endif
 {
     for (int n = 0; n < obj->methodCount(); ++n) {
         QMetaMethod      m      = obj->method(n);
@@ -45,9 +49,17 @@ QByteArray methodReturnType(
         if (m.parameterTypes() != argTypes)
             continue;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        return m.returnType();
+#else
         return m.typeName();
+#endif
     }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return QMetaType::UnknownType;
+#else
     return QByteArray();
+#endif
 }
 
 bool invokeMethodWithVariants(QObject *           obj,
@@ -61,10 +73,17 @@ bool invokeMethodWithVariants(QObject *           obj,
         return false;
 
     QList<QByteArray> argTypes;
-    for (int n = 0; n < args.count(); ++n)
+    for (int n = 0; n < args.count(); ++n) {
         argTypes += args[n].typeName();
+    }
 
     // get return type
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    const auto metatype = methodReturnType(obj->metaObject(), method, argTypes);
+    if (metatype == QMetaType::UnknownType) {
+        return false;
+    }
+#else
     int              metatype    = QMetaType::Void;
     const QByteArray retTypeName = methodReturnType(obj->metaObject(), method, argTypes);
     if (!retTypeName.isEmpty() && retTypeName != "void") {
@@ -72,6 +91,7 @@ bool invokeMethodWithVariants(QObject *           obj,
         if (metatype == QMetaType::UnknownType) // lookup failed
             return false;
     }
+#endif
 
     QGenericArgument arg[10];
     for (int n = 0; n < args.count(); ++n)
@@ -81,7 +101,11 @@ bool invokeMethodWithVariants(QObject *           obj,
     QVariant               retval;
 
     if (metatype != QMetaType::Void) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        retval = QVariant(QMetaType {metatype}, (const void *)nullptr);
+#else
         retval = QVariant(metatype, (const void *)nullptr);
+#endif
         retarg = QGenericReturnArgument(retval.typeName(), retval.data());
     }
 

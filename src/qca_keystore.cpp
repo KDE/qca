@@ -989,13 +989,13 @@ protected:
         else if (type == WriteEntry) {
             QVariant arg;
             if (wentry.type == KeyStoreWriteEntry::TypeKeyBundle)
-                arg.setValue<KeyBundle>(wentry.keyBundle);
+                arg = QVariant::fromValue<KeyBundle>(wentry.keyBundle);
             else if (wentry.type == KeyStoreWriteEntry::TypeCertificate)
-                arg.setValue<Certificate>(wentry.cert);
+                arg = QVariant::fromValue<Certificate>(wentry.cert);
             else if (wentry.type == KeyStoreWriteEntry::TypeCRL)
-                arg.setValue<CRL>(wentry.crl);
+                arg = QVariant::fromValue<CRL>(wentry.crl);
             else if (wentry.type == KeyStoreWriteEntry::TypePGPKey)
-                arg.setValue<PGPKey>(wentry.pgpKey);
+                arg = QVariant::fromValue<PGPKey>(wentry.pgpKey);
 
             // note: each variant in the argument list is resolved
             //   to its native type.  so even though it looks like
@@ -1246,8 +1246,7 @@ QString KeyStore::writeEntry(const KeyBundle &kb)
         d->async_writeEntry(KeyStoreWriteEntry(kb));
         return QString();
     } else {
-        QVariant arg;
-        arg.setValue<KeyBundle>(kb);
+        const auto arg = QVariant::fromValue<KeyBundle>(kb);
         return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
     }
 }
@@ -1258,8 +1257,7 @@ QString KeyStore::writeEntry(const Certificate &cert)
         d->async_writeEntry(KeyStoreWriteEntry(cert));
         return QString();
     } else {
-        QVariant arg;
-        arg.setValue<Certificate>(cert);
+        const auto arg = QVariant::fromValue<Certificate>(cert);
         return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
     }
 }
@@ -1270,8 +1268,7 @@ QString KeyStore::writeEntry(const CRL &crl)
         d->async_writeEntry(KeyStoreWriteEntry(crl));
         return QString();
     } else {
-        QVariant arg;
-        arg.setValue<CRL>(crl);
+        const auto arg = QVariant::fromValue<CRL>(crl);
         return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
     }
 }
@@ -1282,8 +1279,7 @@ QString KeyStore::writeEntry(const PGPKey &key)
         d->async_writeEntry(KeyStoreWriteEntry(key));
         return QString();
     } else {
-        QVariant arg;
-        arg.setValue<PGPKey>(key);
+        const auto arg = QVariant::fromValue<PGPKey>(key);
         return trackercall("writeEntry", QVariantList() << d->trackerId << arg).toString();
     }
 }

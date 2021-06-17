@@ -26,6 +26,8 @@
 #include <QtCrypto>
 #include <QtTest/QtTest>
 
+#include <memory>
+
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"
 #endif
@@ -140,7 +142,7 @@ void KeyBundleTest::privKey()
 }
 void KeyBundleTest::createBundle()
 {
-    QScopedPointer<QCA::KeyBundle> newBundle(new QCA::KeyBundle);
+    std::unique_ptr<QCA::KeyBundle> newBundle(new QCA::KeyBundle);
 
     QVERIFY(newBundle->isNull());
 

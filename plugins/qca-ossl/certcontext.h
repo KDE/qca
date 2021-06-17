@@ -142,7 +142,7 @@ public:
     void         setup(const CertContext &cert, const PKeyContext &priv) override;
     CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const override;
     CRLContext *
-                       updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const override;
+    updateCRL(const CRLContext &crl, const QList<CRLEntry> &entries, const QDateTime &nextUpdate) const override;
     Provider::Context *clone() const override;
 };
 

@@ -163,10 +163,7 @@ private Q_SLOTS:
         connect(sock, &QTcpSocket::readyRead, this, &SecureServer::sock_readyRead);
         connect(sock, &QTcpSocket::disconnected, this, &SecureServer::sock_disconnected);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock,
-                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
-                this,
-                &SecureServer::sock_error);
+        connect(sock, &QTcpSocket::errorOccurred, this, &SecureServer::sock_error);
 #else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureServer::sock_error);
 #endif

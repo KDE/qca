@@ -98,9 +98,13 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
    \relates SyncThread
 */
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+QCA_EXPORT int methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> &argTypes);
+#else
 QCA_EXPORT QByteArray methodReturnType(const QMetaObject *     obj,
                                        const QByteArray &      method,
                                        const QList<QByteArray> argTypes);
+#endif
 
 /**
    Convenience method to invoke a method by name, using a variant
@@ -265,9 +269,6 @@ int x = thread->call(thread->counter, "value").toInt();
 // we're done with this thing
 delete thread;
 \endcode
-
-   Do you see a mutex anywhere?  I didn't think so.<br>
-   ---
 
    Even without the call() function, SyncThread is still very useful
    for preparing objects in another thread, which you can then
@@ -434,7 +435,7 @@ public:
 Q_SIGNALS:
     /**
        The changed signal is emitted when the directory is
-       changed (e.g. modified by addition or deletion of a
+       changed (e.g.\ modified by addition or deletion of a
        file within the directory, or the deletion of the
        directory)
     */

@@ -638,8 +638,9 @@ public:
 
         _clearSign();
 
-        QCA_logTextMessage(QString::asprintf("pkcs11RSAContext::endSign - return result.size ()=%d", result.size()),
-                           Logger::Debug);
+        QCA_logTextMessage(
+            QString::asprintf("pkcs11RSAContext::endSign - return result.size ()=%d", int(result.size())),
+            Logger::Debug);
 
         return result;
     }
@@ -1047,7 +1048,7 @@ private:
 
         Certificate cert = Certificate::fromDER(QByteArray((char *)blob, blob_size));
 
-        *expiration = cert.notValidAfter().toTime_t();
+        *expiration = cert.notValidAfter().toSecsSinceEpoch();
 
         return TRUE; // krazy:exclude=captruefalse
     }
@@ -1317,8 +1318,9 @@ QList<int> pkcs11KeyStoreListContext::keyStores()
         pkcs11h_token_freeTokenIdList(tokens);
     }
 
-    QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::keyStores - return out.size()=%d", out.size()),
-                       Logger::Debug);
+    QCA_logTextMessage(
+        QString::asprintf("pkcs11KeyStoreListContext::keyStores - return out.size()=%d", int(out.size())),
+        Logger::Debug);
 
     return out;
 }
@@ -1420,8 +1422,9 @@ QList<KeyStoreEntryContext *> pkcs11KeyStoreListContext::entryList(int id)
         pkcs11h_certificate_freeCertificateIdList(certs);
     }
 
-    QCA_logTextMessage(QString::asprintf("pkcs11KeyStoreListContext::entryList - return out.size()=%d", out.size()),
-                       Logger::Debug);
+    QCA_logTextMessage(
+        QString::asprintf("pkcs11KeyStoreListContext::entryList - return out.size()=%d", int(out.size())),
+        Logger::Debug);
 
     return out;
 }
@@ -1601,7 +1604,7 @@ pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId(const pkcs11h_certifica
                                          "certificate_id=%p, has_private=%d, chain.size()=%d",
                                          (void *)certificate_id,
                                          has_private ? 1 : 0,
-                                         chain.size()),
+                                         int(chain.size())),
                        Logger::Debug);
 
     if (certificate_id == nullptr) {
@@ -1804,7 +1807,7 @@ void pkcs11KeyStoreListContext::_deserializeCertificate(const QString &         
         QString::asprintf(
             "pkcs11KeyStoreListContext::_deserializeCertificate - return *p_certificate_id=%p, chain.size()=%d",
             (void *)*p_certificate_id,
-            chain.size()),
+            int(chain.size())),
         Logger::Debug);
 }
 
@@ -1831,7 +1834,11 @@ QString pkcs11KeyStoreListContext::_unescapeString(const QString &from) const
         QChar c = from[i];
 
         if (c == QLatin1Char('\\')) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 2)
+            to += QChar((ushort)QStringView(from).mid(i + 2, 4).toInt(nullptr, 16));
+#else
             to += QChar((ushort)from.midRef(i + 2, 4).toInt(nullptr, 16));
+#endif
             i += 5;
         } else {
             to += c;

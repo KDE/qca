@@ -255,7 +255,7 @@ private Q_SLOTS:
         DTLS_DEBUG("dtls ready read outgoing");
         QByteArray buf;
         while ((buf = tls->readOutgoing()).size() > 0) {
-            DTLS_DEBUG("%d bytes\n", buf.size());
+            DTLS_DEBUG("%d bytes\n", int(buf.size()));
             sock->writeDatagram(buf, dstHost, dstPort);
         }
     }
@@ -311,7 +311,7 @@ QByteArray DTLSSocket::readDatagram()
 
 void DTLSSocket::writeDatagram(const QByteArray &data)
 {
-    DTLS_DEBUG("write %d bytes\n", data.size());
+    DTLS_DEBUG("write %d bytes\n", int(data.size()));
     d->tls->write(data);
 }
 

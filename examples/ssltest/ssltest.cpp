@@ -118,10 +118,7 @@ public:
         connect(sock, &QTcpSocket::connected, this, &SecureTest::sock_connected);
         connect(sock, &QTcpSocket::readyRead, this, &SecureTest::sock_readyRead);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        connect(sock,
-                QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
-                this,
-                &SecureTest::sock_error);
+        connect(sock, &QTcpSocket::errorOccurred, this, &SecureTest::sock_error);
 #else
         connect(sock, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, &SecureTest::sock_error);
 #endif
@@ -147,7 +144,11 @@ public:
         int port;
         if (n != -1) {
             host = _host.mid(0, n);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+            port = QStringView(_host).mid(n + 1).toInt();
+#else
             port = _host.midRef(n + 1).toInt();
+#endif
         } else {
             host = _host;
             port = 443;

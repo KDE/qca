@@ -379,7 +379,7 @@ public:
        \param secret the secret part (typically password)
        \param salt the salt / initialization vector
        \param keyLength the length of the key to be produced
-       \param iterationCount the number of iterations of the derivation algorith,
+       \param iterationCount the number of iterations of the derivation algorithm
     */
     virtual SymmetricKey makeKey(const SecureArray &         secret,
                                  const InitializationVector &salt,
@@ -393,7 +393,7 @@ public:
        \param salt the salt / initialization vector
        \param keyLength the length of the key to be produced
        \param msecInterval the maximum time to compute the key, in milliseconds
-       \param iterationCount a pointer to store the number of iterations of the derivation algorithm,
+       \param iterationCount a pointer to store the number of iterations of the derivation algorithm
     */
     virtual SymmetricKey makeKey(const SecureArray &         secret,
                                  const InitializationVector &salt,

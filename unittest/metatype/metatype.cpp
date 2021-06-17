@@ -105,6 +105,43 @@ void MetaTypeUnitTest::returnTypeTest()
     TestClass1        testClass1;
     QList<QByteArray> args;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    // returns a null type name because that is what void does...
+    QCOMPARE(QMetaType::Void, QCA::methodReturnType(testClass1.metaObject(), QByteArray("voidMethod"), args));
+    QCOMPARE(QMetaType::QString, QCA::methodReturnType(testClass1.metaObject(), QByteArray("qstringMethod"), args));
+
+    // returns a null type, because args don't match
+    QCOMPARE(QMetaType::UnknownType, QCA::methodReturnType(testClass1.metaObject(), QByteArray("boolMethod"), args));
+
+    args << "QString";
+    QCOMPARE(QMetaType::QString, QCA::methodReturnType(testClass1.metaObject(), QByteArray("returnArg"), args));
+    QCOMPARE(QMetaType::Bool, QCA::methodReturnType(testClass1.metaObject(), QByteArray("boolMethod"), args));
+    args.clear();
+
+    args << "QByteArray";
+    QCOMPARE(QMetaType::QByteArray, QCA::methodReturnType(testClass1.metaObject(), QByteArray("returnArg"), args));
+    args.clear();
+
+    args << "QString"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int"
+         << "int";
+
+    // wrong number of arguments - has 9, needs 10
+    QCOMPARE(QMetaType::UnknownType, QCA::methodReturnType(testClass1.metaObject(), QByteArray("tenArgs"), args));
+
+    // match
+    args << "int";
+    QCOMPARE(QMetaType::QString, QCA::methodReturnType(testClass1.metaObject(), QByteArray("tenArgs"), args));
+
+    args << "int";
+    QCOMPARE(QMetaType::QString, QCA::methodReturnType(testClass1.metaObject(), QByteArray("elevenArgs"), args));
+#else
     // returns a null type name because that is what void does...
     QCOMPARE(QByteArray("void"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("voidMethod"), args));
     QCOMPARE(QByteArray("QString"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("qstringMethod"), args));
@@ -140,6 +177,7 @@ void MetaTypeUnitTest::returnTypeTest()
 
     args << "int";
     QCOMPARE(QByteArray("QString"), QCA::methodReturnType(testClass1.metaObject(), QByteArray("elevenArgs"), args));
+#endif
 }
 
 void MetaTypeUnitTest::invokeMethodTest()

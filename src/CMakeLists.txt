@@ -124,7 +124,11 @@ ENDIF(WIN32)
 SET( SOURCES ${SOURCES} ${botan_SOURCES})
 
 add_library(${QCA_LIB_NAME} ${SOURCES}  ${public_HEADERS})
-TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} Qt5::Core)
+if(QT6)
+  target_link_libraries(${QCA_LIB_NAME} Qt6::Core Qt6::Core5Compat)
+else()
+  target_link_libraries(${QCA_LIB_NAME} Qt5::Core)
+endif()
 
 if(WIN32)
     TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} crypt32 ws2_32)

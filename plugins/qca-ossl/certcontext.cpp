@@ -194,8 +194,12 @@ static CertificateInfo get_cert_name(X509_NAME *name)
     {
         CertificateInfo p9_info;
         try_get_name_item(name, NID_pkcs9_emailAddress, EmailLegacy, &p9_info);
-        const QList<QString>                       emails = info.values(Email);
+        const QList<QString> emails = info.values(Email);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QMultiMapIterator<CertificateInfoType, QString> it(p9_info);
+#else
         QMapIterator<CertificateInfoType, QString> it(p9_info);
+#endif
         while (it.hasNext()) {
             it.next();
             if (!emails.contains(it.value()))
@@ -671,8 +675,9 @@ static QStringList get_cert_policies(X509_EXTENSION *ex)
     for (int n = 0; n < sk_POLICYINFO_num(pols); ++n) {
         POLICYINFO *pol = sk_POLICYINFO_value(pols, n);
         QByteArray  buf(128, 0);
-        OBJ_obj2txt((char *)buf.data(), buf.size(), pol->policyid, 1); // 1 = only accept dotted input
-        out += QString::fromLatin1(buf);
+        const auto  len = OBJ_obj2txt((char *)buf.data(), buf.size(), pol->policyid, 1); // 1 = only accept dotted input
+        if (len > 0)
+            out += QString::fromLatin1(buf.left(len));
     }
     sk_POLICYINFO_pop_free(pols, POLICYINFO_free);
     return out;
@@ -834,8 +839,8 @@ bool MyCertContext::createSelfSigned(const CertificateOptions &opts, const PKeyC
     BN_free(bn);
 
     // validity period
-    ASN1_TIME_set(X509_getm_notBefore(x), opts.notValidBefore().toTime_t());
-    ASN1_TIME_set(X509_getm_notAfter(x), opts.notValidAfter().toTime_t());
+    ASN1_TIME_set(X509_getm_notBefore(x), opts.notValidBefore().toSecsSinceEpoch());
+    ASN1_TIME_set(X509_getm_notAfter(x), opts.notValidAfter().toSecsSinceEpoch());
 
     // public key
     X509_set_pubkey(x, pk);
@@ -1724,8 +1729,8 @@ CertContext *MyCAContext::signRequest(const CSRContext &req, const QDateTime &no
     BN_free(bn);
 
     // validity period
-    ASN1_TIME_set(X509_getm_notBefore(x), QDateTime::currentDateTimeUtc().toTime_t());
-    ASN1_TIME_set(X509_getm_notAfter(x), notValidAfter.toTime_t());
+    ASN1_TIME_set(X509_getm_notBefore(x), QDateTime::currentDateTimeUtc().toSecsSinceEpoch());
+    ASN1_TIME_set(X509_getm_notAfter(x), notValidAfter.toSecsSinceEpoch());
 
     X509_set_pubkey(x, static_cast<const MyPKeyContext *>(req.subjectPublicKey())->get_pkey());
     X509_set_subject_name(x, subjectName);

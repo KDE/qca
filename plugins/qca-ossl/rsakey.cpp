@@ -23,28 +23,22 @@
 #include "rsakey.h"
 #include "utils.h"
 
+#include <memory>
+
 namespace opensslQCAPlugin {
 
 //----------------------------------------------------------------------------
 // RSAKey
 //----------------------------------------------------------------------------
 namespace {
-struct RsaDeleter
-{
-    static inline void cleanup(void *pointer)
-    {
-        if (pointer)
-            RSA_free((RSA *)pointer);
-    }
+static const auto RsaDeleter = [](RSA *pointer) {
+    if (pointer)
+        RSA_free((RSA *)pointer);
 };
 
-struct BnDeleter
-{
-    static inline void cleanup(void *pointer)
-    {
-        if (pointer)
-            BN_free((BIGNUM *)pointer);
-    }
+static const auto BnDeleter = [](BIGNUM *pointer) {
+    if (pointer)
+        BN_free((BIGNUM *)pointer);
 };
 } // end of anonymous namespace
 
@@ -72,22 +66,22 @@ public:
 
     void run() override
     {
-        QScopedPointer<RSA, RsaDeleter> rsa(RSA_new());
+        std::unique_ptr<RSA, decltype(RsaDeleter)> rsa(RSA_new(), RsaDeleter);
         if (!rsa)
             return;
 
-        QScopedPointer<BIGNUM, BnDeleter> e(BN_new());
+        std::unique_ptr<BIGNUM, decltype(BnDeleter)> e(BN_new(), BnDeleter);
         if (!e)
             return;
 
-        BN_clear(e.data());
-        if (BN_set_word(e.data(), exp) != 1)
+        BN_clear(e.get());
+        if (BN_set_word(e.get(), exp) != 1)
             return;
 
-        if (RSA_generate_key_ex(rsa.data(), bits, e.data(), nullptr) == 0)
+        if (RSA_generate_key_ex(rsa.get(), bits, e.get(), nullptr) == 0)
             return;
 
-        result = rsa.take();
+        result = rsa.release();
     }
 
     RSA *takeResult()

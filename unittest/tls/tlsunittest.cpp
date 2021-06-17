@@ -30,6 +30,8 @@
 #include "import_plugins.h"
 #endif
 
+#include <memory>
+
 class TLSUnitTest : public QObject
 {
     Q_OBJECT
@@ -58,7 +60,7 @@ void TLSUnitTest::testCipherList()
     if (!QCA::isSupported("tls", QStringLiteral("qca-ossl")))
         QWARN("TLS not supported for qca-ossl");
     else {
-        QScopedPointer<QCA::TLS> tls(new QCA::TLS(QCA::TLS::Stream, nullptr, QStringLiteral("qca-ossl")));
+        std::unique_ptr<QCA::TLS> tls(new QCA::TLS(QCA::TLS::Stream, nullptr, QStringLiteral("qca-ossl")));
 
         // It seems recent openssl removed some insecure TLS<=1.1 ciphers suites. So no tests.
         QStringList cipherList = tls->supportedCipherSuites(QCA::TLS::TLS_v1_2);
