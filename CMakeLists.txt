@@ -51,7 +51,7 @@ if(QT6)
 else()
   message(STATUS "Building Qt 5 version")
   set(Qt5_NO_LINK_QTMAIN ON)
-  find_package(Qt5 5.14 REQUIRED Core)
+  find_package(Qt5 5.9 REQUIRED Core)
 endif()
 
 set(CMAKE_AUTOMOC ON)
