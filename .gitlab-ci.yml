@@ -39,6 +39,24 @@ build_clazy_clang_tidy:
     - "run-clang-tidy -header-filter='.*/qca/.*' -checks='-*,performance-*,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,modernize-use-nullptr,-performance-no-automatic-move' -config=\"{WarningsAsErrors: '*'}\""
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
+build_openssl3:
+  stage: build
+  image: debian:unstable
+  before_script:
+    - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+    - apt-get update
+    - apt-get install --yes eatmydata
+    - eatmydata apt-get build-dep --yes --no-install-recommends qca2
+    - eatmydata apt-get install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
+    - echo 'deb http://deb.debian.org/debian experimental main' >> /etc/apt/sources.list
+    - apt-get update
+    - eatmydata apt-get -t experimental install --yes libssl-dev
+  script:
+    - mkdir -p build && cd build
+    - cmake -G Ninja ..
+    - ninja
+    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
+
 clang_format:
   stage: build
   image: debian:testing

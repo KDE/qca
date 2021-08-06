@@ -34,15 +34,26 @@
 #include <iostream>
 
 #include <openssl/err.h>
+#include <openssl/opensslv.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
+#ifdef OPENSSL_VERSION_MAJOR
+#include <openssl/provider.h>
+#endif
 
 #include <openssl/kdf.h>
 
 using namespace QCA;
+
+namespace {
+static const auto DsaDeleter = [](DSA *pointer) {
+    if (pointer)
+        DSA_free((DSA *)pointer);
+};
+} // end of anonymous namespace
 
 namespace opensslQCAPlugin {
 
@@ -1266,9 +1277,9 @@ public:
         EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, nullptr);
         EVP_PKEY_derive_init(pctx);
         EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_sha256());
-        EVP_PKEY_CTX_set1_hkdf_salt(pctx, salt.data(), int(salt.size()));
-        EVP_PKEY_CTX_set1_hkdf_key(pctx, secret.data(), int(secret.size()));
-        EVP_PKEY_CTX_add1_hkdf_info(pctx, info.data(), int(info.size()));
+        EVP_PKEY_CTX_set1_hkdf_salt(pctx, (const unsigned char *)salt.data(), int(salt.size()));
+        EVP_PKEY_CTX_set1_hkdf_key(pctx, (const unsigned char *)secret.data(), int(secret.size()));
+        EVP_PKEY_CTX_add1_hkdf_info(pctx, (const unsigned char *)info.data(), int(info.size()));
         size_t outlen = out.size();
         EVP_PKEY_derive(pctx, reinterpret_cast<unsigned char *>(out.data()), &outlen);
         EVP_PKEY_CTX_free(pctx);
@@ -1442,11 +1453,11 @@ public:
                 int type = EVP_PKEY_id(pkey);
 
                 if (type == EVP_PKEY_RSA) {
-                    RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+                    const RSA *rsa = EVP_PKEY_get0_RSA(pkey);
                     if (RSA_private_encrypt(raw.size(),
                                             (unsigned char *)raw.data(),
                                             (unsigned char *)out.data(),
-                                            rsa,
+                                            (RSA *)rsa,
                                             RSA_PKCS1_PADDING) == -1) {
                         state = SignError;
                         return SecureArray();
@@ -1481,11 +1492,11 @@ public:
                 int type = EVP_PKEY_id(pkey);
 
                 if (type == EVP_PKEY_RSA) {
-                    RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+                    const RSA *rsa = EVP_PKEY_get0_RSA(pkey);
                     if ((len = RSA_public_decrypt(sig.size(),
                                                   (unsigned char *)sig.data(),
                                                   (unsigned char *)out.data(),
-                                                  rsa,
+                                                  (RSA *)rsa,
                                                   RSA_PKCS1_PADDING)) == -1) {
                         state = VerifyError;
                         return false;
@@ -1608,12 +1619,6 @@ public:
 };
 
 #ifndef OPENSSL_FIPS
-namespace {
-static const auto DsaDeleter = [](DSA *pointer) {
-    if (pointer)
-        DSA_free((DSA *)pointer);
-};
-} // end of anonymous namespace
 
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
@@ -1850,8 +1855,9 @@ public:
         if (BN_set_word(e.get(), exp) != 1)
             return;
 
-        if (RSA_generate_key_ex(rsa.get(), bits, e.get(), nullptr) == 0)
+        if (RSA_generate_key_ex(rsa.get(), bits, e.get(), nullptr) == 0) {
             return;
+        }
 
         result = rsa.release();
     }
@@ -1924,7 +1930,7 @@ public:
             return;
 
         // extract the public key into DER format
-        RSA *          rsa_pkey = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA *    rsa_pkey = EVP_PKEY_get0_RSA(evp.pkey);
         int            len      = i2d_RSAPublicKey(rsa_pkey, nullptr);
         SecureArray    result(len);
         unsigned char *p = (unsigned char *)result.data();
@@ -1946,8 +1952,8 @@ public:
 
     int maximumEncryptSize(EncryptionAlgorithm alg) const override
     {
-        RSA *rsa  = EVP_PKEY_get0_RSA(evp.pkey);
-        int  size = 0;
+        const RSA *rsa  = EVP_PKEY_get0_RSA(evp.pkey);
+        int        size = 0;
         switch (alg) {
         case EME_PKCS1v15:
             size = RSA_size(rsa) - 11 - 1;
@@ -1968,7 +1974,7 @@ public:
 
     SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg) override
     {
-        RSA *       rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA * rsa = EVP_PKEY_get0_RSA(evp.pkey);
         SecureArray buf = in;
         int         max = maximumEncryptSize(alg);
 
@@ -1984,9 +1990,13 @@ public:
         case EME_PKCS1_OAEP:
             pad = RSA_PKCS1_OAEP_PADDING;
             break;
+// OPENSSL_VERSION_MAJOR is only defined on openssl > 3.0
+// that doesn't have RSA_SSLV23_PADDING so we can use it negatively here
+#ifndef OPENSSL_VERSION_MAJOR
         case EME_PKCS1v15_SSL:
             pad = RSA_SSLV23_PADDING;
             break;
+#endif
         case EME_NO_PADDING:
             pad = RSA_NO_PADDING;
             break;
@@ -1997,10 +2007,11 @@ public:
 
         int ret;
         if (isPrivate())
-            ret =
-                RSA_private_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
+            ret = RSA_private_encrypt(
+                buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
         else
-            ret = RSA_public_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
+            ret = RSA_public_encrypt(
+                buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
 
         if (ret < 0)
             return SecureArray();
@@ -2011,7 +2022,7 @@ public:
 
     bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg) override
     {
-        RSA *       rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA * rsa = EVP_PKEY_get0_RSA(evp.pkey);
         SecureArray result(RSA_size(rsa));
         int         pad;
 
@@ -2022,9 +2033,13 @@ public:
         case EME_PKCS1_OAEP:
             pad = RSA_PKCS1_OAEP_PADDING;
             break;
+// OPENSSL_VERSION_MAJOR is only defined on openssl > 3.0
+// that doesn't have RSA_SSLV23_PADDING so we can use it negatively here
+#ifndef OPENSSL_VERSION_MAJOR
         case EME_PKCS1v15_SSL:
             pad = RSA_SSLV23_PADDING;
             break;
+#endif
         case EME_NO_PADDING:
             pad = RSA_NO_PADDING;
             break;
@@ -2035,9 +2050,11 @@ public:
 
         int ret;
         if (isPrivate())
-            ret = RSA_private_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
+            ret = RSA_private_decrypt(
+                in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
         else
-            ret = RSA_public_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
+            ret = RSA_public_decrypt(
+                in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
 
         if (ret < 0)
             return false;
@@ -2174,7 +2191,7 @@ public:
 
     BigInteger n() const override
     {
-        RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnn;
         RSA_get0_key(rsa, &bnn, nullptr, nullptr);
         return bn2bi(bnn);
@@ -2182,7 +2199,7 @@ public:
 
     BigInteger e() const override
     {
-        RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bne;
         RSA_get0_key(rsa, nullptr, &bne, nullptr);
         return bn2bi(bne);
@@ -2190,7 +2207,7 @@ public:
 
     BigInteger p() const override
     {
-        RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnp;
         RSA_get0_factors(rsa, &bnp, nullptr);
         return bn2bi(bnp);
@@ -2198,7 +2215,7 @@ public:
 
     BigInteger q() const override
     {
-        RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnq;
         RSA_get0_factors(rsa, nullptr, &bnq);
         return bn2bi(bnq);
@@ -2206,7 +2223,7 @@ public:
 
     BigInteger d() const override
     {
-        RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnd;
         RSA_get0_key(rsa, nullptr, nullptr, &bnd);
         return bn2bi(bnd);
@@ -2259,14 +2276,45 @@ public:
 
     void run() override
     {
-        DSA *   dsa = DSA_new();
+        std::unique_ptr<DSA, decltype(DsaDeleter)> dsa(DSA_new(), DsaDeleter);
         BIGNUM *pne = bi2bn(domain.p()), *qne = bi2bn(domain.q()), *gne = bi2bn(domain.g());
 
-        if (!DSA_set0_pqg(dsa, pne, qne, gne) || !DSA_generate_key(dsa)) {
-            DSA_free(dsa);
+        if (!DSA_set0_pqg(dsa.get(), pne, qne, gne)) {
             return;
         }
-        result = dsa;
+        if (!DSA_generate_key(dsa.get())) {
+            // OPENSSL_VERSION_MAJOR is only defined in openssl3
+#ifdef OPENSSL_VERSION_MAJOR
+            // HACK
+            // in openssl3 there is an internal flag for "legacy" values
+            //      bits < 2048 && seed_len <= 20
+            // set in ossl_ffc_params_FIPS186_2_generate (called by DSA_generate_parameters_ex)
+            // that we have no way to get or set, so if the bits are smaller than 2048 we generate
+            // a dsa from a dummy seed and then override the p/q/g with the ones we want
+            // so we can reuse the internal flag
+            if (BN_num_bits(pne) < 2048) {
+                int dummy;
+                dsa.reset(DSA_new());
+                if (DSA_generate_parameters_ex(
+                        dsa.get(), 512, (const unsigned char *)"THIS_IS_A_DUMMY_SEED", 20, &dummy, nullptr, nullptr) !=
+                    1) {
+                    return;
+                }
+                pne = bi2bn(domain.p());
+                qne = bi2bn(domain.q());
+                gne = bi2bn(domain.g());
+                if (!DSA_set0_pqg(dsa.get(), pne, qne, gne)) {
+                    return;
+                }
+                if (!DSA_generate_key(dsa.get())) {
+                    return;
+                }
+            }
+#else
+            return;
+#endif
+        }
+        result = dsa.release();
     }
 
     DSA *takeResult()
@@ -2339,7 +2387,7 @@ public:
             return;
 
         // extract the public key into DER format
-        DSA *          dsa_pkey = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA *    dsa_pkey = EVP_PKEY_get0_DSA(evp.pkey);
         int            len      = i2d_DSAPublicKey(dsa_pkey, nullptr);
         SecureArray    result(len);
         unsigned char *p = (unsigned char *)result.data();
@@ -2463,7 +2511,7 @@ public:
 
     DLGroup domain() const override
     {
-        DSA *         dsa = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA *   dsa = EVP_PKEY_get0_DSA(evp.pkey);
         const BIGNUM *bnp, *bnq, *bng;
         DSA_get0_pqg(dsa, &bnp, &bnq, &bng);
         return DLGroup(bn2bi(bnp), bn2bi(bnq), bn2bi(bng));
@@ -2471,7 +2519,7 @@ public:
 
     BigInteger y() const override
     {
-        DSA *         dsa = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA *   dsa = EVP_PKEY_get0_DSA(evp.pkey);
         const BIGNUM *bnpub_key;
         DSA_get0_key(dsa, &bnpub_key, nullptr);
         return bn2bi(bnpub_key);
@@ -2479,7 +2527,7 @@ public:
 
     BigInteger x() const override
     {
-        DSA *         dsa = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA *   dsa = EVP_PKEY_get0_DSA(evp.pkey);
         const BIGNUM *bnpriv_key;
         DSA_get0_key(dsa, nullptr, &bnpriv_key);
         return bn2bi(bnpriv_key);
@@ -2609,7 +2657,7 @@ public:
         if (!sec)
             return;
 
-        DH *          orig = EVP_PKEY_get0_DH(evp.pkey);
+        const DH *    orig = EVP_PKEY_get0_DH(evp.pkey);
         DH *          dh   = DH_new();
         const BIGNUM *bnp, *bng, *bnpub_key;
         DH_get0_pqg(orig, &bnp, nullptr, &bng);
@@ -2632,13 +2680,13 @@ public:
 
     SymmetricKey deriveKey(const PKeyBase &theirs) override
     {
-        DH *          dh   = EVP_PKEY_get0_DH(evp.pkey);
-        DH *          them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
+        const DH *    dh   = EVP_PKEY_get0_DH(evp.pkey);
+        const DH *    them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
         const BIGNUM *bnpub_key;
         DH_get0_key(them, &bnpub_key, nullptr);
 
         SecureArray result(DH_size(dh));
-        int         ret = DH_compute_key((unsigned char *)result.data(), bnpub_key, dh);
+        int         ret = DH_compute_key((unsigned char *)result.data(), bnpub_key, (DH *)dh);
         if (ret <= 0)
             return SymmetricKey();
         result.resize(ret);
@@ -2701,7 +2749,7 @@ public:
 
     DLGroup domain() const override
     {
-        DH *          dh = EVP_PKEY_get0_DH(evp.pkey);
+        const DH *    dh = EVP_PKEY_get0_DH(evp.pkey);
         const BIGNUM *bnp, *bng;
         DH_get0_pqg(dh, &bnp, nullptr, &bng);
         return DLGroup(bn2bi(bnp), bn2bi(bng));
@@ -2709,7 +2757,7 @@ public:
 
     BigInteger y() const override
     {
-        DH *          dh = EVP_PKEY_get0_DH(evp.pkey);
+        const DH *    dh = EVP_PKEY_get0_DH(evp.pkey);
         const BIGNUM *bnpub_key;
         DH_get0_key(dh, &bnpub_key, nullptr);
         return bn2bi(bnpub_key);
@@ -2717,7 +2765,7 @@ public:
 
     BigInteger x() const override
     {
-        DH *          dh = EVP_PKEY_get0_DH(evp.pkey);
+        const DH *    dh = EVP_PKEY_get0_DH(evp.pkey);
         const BIGNUM *bnpriv_key;
         DH_get0_key(dh, nullptr, &bnpriv_key);
         return bn2bi(bnpriv_key);
@@ -6565,6 +6613,22 @@ public:
     {
         OpenSSL_add_all_algorithms();
         ERR_load_crypto_strings();
+
+// OPENSSL_VERSION_MAJOR is only defined in openssl3
+#ifdef OPENSSL_VERSION_MAJOR
+        /* Load Multiple providers into the default (NULL) library context */
+        OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(NULL, "legacy");
+        if (legacy == NULL) {
+            printf("Failed to load Legacy provider\n");
+            exit(EXIT_FAILURE);
+        }
+        OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(NULL, "default");
+        if (deflt == NULL) {
+            printf("Failed to load Default provider\n");
+            OSSL_PROVIDER_unload(legacy);
+            exit(EXIT_FAILURE);
+        }
+#endif
 
         // seed the RNG if it's not seeded yet
         if (RAND_status() == 0) {
