@@ -2574,7 +2574,7 @@ void CipherUnitTest::des_cbc_pkcs7()
 {
     bool anyProviderTested = false;
     foreach (const QString provider, providersToTest) {
-        if (!QCA::isSupported("des-cbc-pkcs7", provider)) {
+        if (QCA::isSupported("des-cbc-pkcs7", provider)) {
             anyProviderTested = true;
             QFETCH(QString, plainText);
             QFETCH(QString, cipherText);
