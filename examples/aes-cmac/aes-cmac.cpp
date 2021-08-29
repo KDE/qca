@@ -243,6 +243,7 @@ int main(int argc, char **argv)
 
     if (!QCA::isSupported("aes128-ecb")) {
         qDebug() << "AES not supported!";
+        return 0; // our ClientSideProvider doesn't provide it either
     }
 
     if (QCA::insertProvider(new ClientSideProvider, 0))

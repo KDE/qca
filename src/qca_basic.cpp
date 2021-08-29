@@ -367,8 +367,11 @@ AuthTag Cipher::tag() const
 
 void Cipher::clear()
 {
-    d->done = false;
-    static_cast<CipherContext *>(context())->setup(d->dir, d->key, d->iv, d->tag);
+    d->done  = false;
+    auto ctx = static_cast<CipherContext *>(context());
+    if (ctx) { // Can be called from constructor. So we need an explicit check
+        ctx->setup(d->dir, d->key, d->iv, d->tag);
+    }
 }
 
 MemoryRegion Cipher::update(const MemoryRegion &a)
@@ -376,7 +379,8 @@ MemoryRegion Cipher::update(const MemoryRegion &a)
     SecureArray out;
     if (d->done)
         return out;
-    d->ok = static_cast<CipherContext *>(context())->update(a, &out);
+    auto ctx = static_cast<CipherContext *>(context());
+    d->ok    = ctx && ctx->update(a, &out);
     return out;
 }
 
