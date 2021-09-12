@@ -2309,6 +2309,8 @@ public:
                 if (!DSA_generate_key(dsa.get())) {
                     return;
                 }
+            } else {
+                return;
             }
 #else
             return;
