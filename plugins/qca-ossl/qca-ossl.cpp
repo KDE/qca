@@ -1582,6 +1582,7 @@ static const char *IETF_4096_PRIME =
     "93B4EA98 8D8FDDC1 86FFB7DC 90A6C08F 4DF435C9 34063199"
     "FFFFFFFF FFFFFFFF";
 
+#ifndef OPENSSL_FIPS
 // JCE seeds from Botan
 static const char *JCE_512_SEED    = "B869C82B 35D70E1B 1FF91B28 E37A62EC DC34409B";
 static const int   JCE_512_COUNTER = 123;
@@ -1591,6 +1592,7 @@ static const int   JCE_768_COUNTER = 263;
 
 static const char *JCE_1024_SEED    = "8D515589 4229D5E6 89EE01E6 018A237E 2CAE64CD";
 static const int   JCE_1024_COUNTER = 92;
+#endif
 
 static QByteArray dehex(const QByteArray &hex)
 {
