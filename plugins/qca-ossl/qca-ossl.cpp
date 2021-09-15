@@ -49,9 +49,13 @@
 using namespace QCA;
 
 namespace {
-static const auto DsaDeleter = [](DSA *pointer) {
-    if (pointer)
-        DSA_free((DSA *)pointer);
+struct DsaDeleter
+{
+    void operator()(DSA *pointer)
+    {
+        if (pointer)
+            DSA_free(pointer);
+    }
 };
 } // end of anonymous namespace
 
@@ -1622,8 +1626,8 @@ public:
 
 static bool make_dlgroup(const QByteArray &seed, int bits, int counter, DLParams *params)
 {
-    int                                        ret_counter;
-    std::unique_ptr<DSA, decltype(DsaDeleter)> dsa(DSA_new(), DsaDeleter);
+    int                              ret_counter;
+    std::unique_ptr<DSA, DsaDeleter> dsa(DSA_new());
     if (!dsa)
         return false;
 
@@ -2276,8 +2280,8 @@ public:
 
     void run() override
     {
-        std::unique_ptr<DSA, decltype(DsaDeleter)> dsa(DSA_new(), DsaDeleter);
-        BIGNUM *pne = bi2bn(domain.p()), *qne = bi2bn(domain.q()), *gne = bi2bn(domain.g());
+        std::unique_ptr<DSA, DsaDeleter> dsa(DSA_new());
+        BIGNUM *                         pne = bi2bn(domain.p()), *qne = bi2bn(domain.q()), *gne = bi2bn(domain.g());
 
         if (!DSA_set0_pqg(dsa.get(), pne, qne, gne)) {
             return;
