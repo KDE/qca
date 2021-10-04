@@ -7,7 +7,7 @@ if(NOT CMAKE_INSTALL_PREFIX)
 endif()
 
 # The cmake min. version should be set before calling project(...) too
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.16)
 
 project(qca)
 
