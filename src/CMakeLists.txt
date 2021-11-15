@@ -52,7 +52,7 @@ SET( SOURCES
 
 IF (WIN32)
   SET( SOURCES ${SOURCES} qca_systemstore_win.cpp )
-elseif(APPLE)
+elseif(APPLE AND NOT IOS)
   set( SOURCES ${SOURCES} qca_systemstore_mac.cpp)
 else()
   SET( SOURCES ${SOURCES} qca_systemstore_flatfile.cpp )
@@ -134,7 +134,7 @@ if(WIN32)
 	TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} crypt32 ws2_32)
 endif()
 
-if(APPLE)
+if(APPLE AND NOT IOS)
   set(COREFOUNDATION_LIBRARY "-framework CoreFoundation")
   set(COREFOUNDATION_LIBRARY_SECURITY "-framework Security")
   TARGET_LINK_LIBRARIES(${QCA_LIB_NAME} ${COREFOUNDATION_LIBRARY} ${COREFOUNDATION_LIBRARY_SECURITY})
