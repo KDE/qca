@@ -30,6 +30,8 @@
 #include "import_plugins.h"
 #endif
 
+#include <memory>
+
 class KeyBundleTest : public QObject
 {
     Q_OBJECT

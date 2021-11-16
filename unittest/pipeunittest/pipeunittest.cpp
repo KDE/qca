@@ -30,6 +30,8 @@
 #include "import_plugins.h"
 #endif
 
+#include <memory>
+
 class PipeUnitTest : public QObject
 {
     Q_OBJECT

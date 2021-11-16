@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
