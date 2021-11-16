@@ -337,7 +337,6 @@ set( public_HEADERS
   ${qca_INCLUDEDIR}/QtCrypto/qca.h
   ${qca_INCLUDEDIR}/QtCrypto/qcaprovider.h
   ${qca_INCLUDEDIR}/QtCrypto/QtCrypto
-  ${qca_INCLUDEDIR}/QtCrypto/qca_export.h
   ${qca_INCLUDEDIR}/QtCrypto/qca_support.h
   ${qca_INCLUDEDIR}/QtCrypto/qca_tools.h
   ${qca_INCLUDEDIR}/QtCrypto/qca_core.h
@@ -372,6 +371,12 @@ set(QCA_CRYPTO_INSTALL_DIR "${QCA_PLUGINS_INSTALL_DIR}/crypto")
 
 add_subdirectory(src)
 add_subdirectory(plugins)
+
+include(GenerateExportHeader)
+generate_export_header(${QCA_LIB_NAME} BASE_NAME qca)
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/qca_export.h DESTINATION ${QCA_FULL_INCLUDE_INSTALL_DIR}
+)
 
 if(STATIC_PLUGINS)
   # Generate header with static plugins list
