@@ -30,6 +30,8 @@
 #include "qca_systemstore.h"
 #endif
 
+#include <cstdlib>
+
 #define FRIENDLY_NAMES
 
 namespace QCA {
