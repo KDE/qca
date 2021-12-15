@@ -305,7 +305,7 @@ static void md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
              * data without copying it. On arm do copying always
              */
 #ifndef Q_PROCESSOR_ARM
-            if (!((data - static_cast<const md5_byte_t *>(nullptr)) & 3)) {
+            if (!(reinterpret_cast<uintptr_t>(data) & 3)) {
                 /* data are properly aligned */
                 X = reinterpret_cast<const md5_word_t *>(data);
             } else
