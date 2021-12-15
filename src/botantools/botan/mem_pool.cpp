@@ -181,8 +181,8 @@ void Pooling_Allocator::destroy()
 
     blocks.clear();
 
-    for (u32bit j = 0; j != allocated.size(); ++j)
-        dealloc_block(allocated[j].first, allocated[j].second);
+    for (const std::pair<void *, u32bit> &p : allocated)
+        dealloc_block(p.first, p.second);
     allocated.clear();
 }
 
