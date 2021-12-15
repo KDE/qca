@@ -46,7 +46,7 @@ build_clazy_clang_tidy:
   script:
     - srcdir=`pwd` && mkdir -p /tmp/qca_build && cd /tmp/qca_build && CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja $srcdir && cat compile_commands.json | jq  '[.[] | select(.file | contains("'"$srcdir"'"))]' > compile_commands.aux.json && mv compile_commands.aux.json compile_commands.json
     - CLAZY_CHECKS="level0,level1,level2,no-copyable-polymorphic,no-ctor-missing-parent-argument,isempty-vs-count,qhash-with-char-pointer-key,qproperty-type-mismatch,qrequiredresult-candidates,signal-with-return-value,thread-with-slots,tr-non-literal,unneeded-cast" ninja
-    - "run-clang-tidy-13 -header-filter='.*/qca/.*' -checks='-*,performance-*,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,modernize-use-nullptr,-performance-no-automatic-move' -config=\"{WarningsAsErrors: '*'}\""
+    - "run-clang-tidy-13 -header-filter='.*/qca/.*' -checks='-*,performance-*,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,modernize-use-nullptr,-performance-no-automatic-move,-performance-no-int-to-ptr' -config=\"{WarningsAsErrors: '*'}\""
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
 build_openssl3:
