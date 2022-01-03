@@ -9,6 +9,8 @@ build_ubuntu_20_10:
     - merge_requests
   before_script:
     - sed -i -e 's/# deb-src/deb-src/g' /etc/apt/sources.list
+    - sed -i -e 's/archive/old-releases/g' /etc/apt/sources.list
+    - sed -i -e 's/security.ubuntu/old-releases.ubuntu/g' /etc/apt/sources.list
     - apt update
     - apt install --yes eatmydata
     - eatmydata apt build-dep --yes --no-install-recommends qca2
