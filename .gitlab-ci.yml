@@ -2,9 +2,9 @@ include:
   - https://invent.kde.org/sysadmin/ci-utilities/raw/master/gitlab-templates/linux.yml
   - https://invent.kde.org/sysadmin/ci-utilities/raw/master/gitlab-templates/freebsd.yml
 
-build_ubuntu_21_10:
+build_ubuntu_20_10:
   stage: build
-  image: ubuntu:impish
+  image: ubuntu:groovy
   only:
     - merge_requests
   before_script:
