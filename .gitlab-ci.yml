@@ -11,6 +11,7 @@ build_ubuntu_20_10:
     - sed -i -e 's/# deb-src/deb-src/g' /etc/apt/sources.list
     - sed -i -e 's/archive/old-releases/g' /etc/apt/sources.list
     - sed -i -e 's/security.ubuntu/old-releases.ubuntu/g' /etc/apt/sources.list
+    - echo "91.189.91.124 old-releases.ubuntu.com" >> /etc/hosts
     - apt update
     - apt install --yes eatmydata
     - eatmydata apt build-dep --yes --no-install-recommends qca2
