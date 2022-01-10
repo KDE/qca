@@ -13,7 +13,6 @@ add_subdirectory(bigintunittest)
 add_subdirectory(certunittest)
 add_subdirectory(cipherunittest)
 add_subdirectory(clientplugin)
-add_subdirectory(cms)
 add_subdirectory(dsaunittest)
 add_subdirectory(filewatchunittest)
 add_subdirectory(hashunittest)
@@ -35,3 +34,10 @@ add_subdirectory(staticunittest)
 add_subdirectory(symmetrickeyunittest)
 add_subdirectory(tls)
 add_subdirectory(velox)
+
+#Tests that require OpenSSL
+#Remove once we stop supporting openssl < 1.1.1i
+find_package(OpenSSL 1.1.1)
+if(OPENSSL_FOUND)
+  add_subdirectory(cms)
+endif()
