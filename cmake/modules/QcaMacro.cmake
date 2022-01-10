@@ -1,6 +1,6 @@
 
 MACRO(SETUP_QT_DIRS)
-  if(QT6)
+  if(BUILD_WITH_QT6)
     GET_TARGET_PROPERTY(QMAKE_EXECUTABLE Qt6::qmake LOCATION)
   else()
     GET_TARGET_PROPERTY(QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} LOCATION)
@@ -54,11 +54,7 @@ endmacro(target_link_qca_libraries)
 # it used to build unittests
 macro(target_link_qca_test_libraries TARGET)
   target_link_qca_libraries(${TARGET})
-  if(QT6)
-    target_link_libraries(${TARGET} Qt6::Test)
-  else()
-    target_link_libraries(${TARGET} Qt5::Test)
-  endif()
+  target_link_libraries(${TARGET} Qt${QT_MAJOR_VERSION}::Test)
 endmacro(target_link_qca_test_libraries)
 
 # it used to build unittests

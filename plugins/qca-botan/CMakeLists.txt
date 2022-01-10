@@ -15,11 +15,7 @@ if(BOTAN_FOUND)
     set_property(TARGET qca-botan  PROPERTY SUFFIX ".dylib")
   endif()
 
-  if(QT6)
-    target_link_libraries(qca-botan Qt6::Core ${QCA_LIB_NAME} PkgConfig::BOTAN)
-  else()
-    target_link_libraries(qca-botan Qt5::Core ${QCA_LIB_NAME} PkgConfig::BOTAN)
-  endif()
+  target_link_libraries(qca-botan Qt${QT_MAJOR_VERSION}::Core ${QCA_LIB_NAME} PkgConfig::BOTAN)
 
   if(NOT DEVELOPER_MODE)
     install(TARGETS qca-botan

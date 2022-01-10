@@ -1,8 +1,6 @@
 ENABLE_TESTING()
-if(QT6)
-  find_package(Qt6 REQUIRED Test)
-else()
-  find_package(Qt5 REQUIRED Test)
+find_package(Qt${QT_MAJOR_VERSION} REQUIRED Test)
+if(NOT BUILD_WITH_QT6)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
 endif()
 # QTEST_MAIN is using QApplication when QT_GUI_LIB is defined

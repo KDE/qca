@@ -31,7 +31,7 @@ build_fedora_34:
     - dnf -y --setopt=install_weak_deps=False install git gcc-c++ make cmake ninja-build qt6-qtbase-devel qt6-qt5compat-devel botan2-devel cyrus-sasl-devel nss-devel libgcrypt-devel pkcs11-helper-devel gnupg
   script:
     - mkdir -p build && cd build
-    - cmake -G Ninja -DQT6=ON ..
+    - cmake -G Ninja -DBUILD_WITH_QT6=ON ..
     - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt6/ ctest -V
 

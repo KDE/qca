@@ -25,11 +25,7 @@ if(LIBGCRYPT_FOUND)
       set_property(TARGET qca-gcrypt PROPERTY SUFFIX ".dylib")
     endif()
 
-    if(QT6)
-      target_link_libraries(qca-gcrypt Qt6::Core ${QCA_LIB_NAME} ${LIBGCRYPT_LIBRARIES})
-    else()
-      target_link_libraries(qca-gcrypt Qt5::Core ${QCA_LIB_NAME} ${LIBGCRYPT_LIBRARIES})
-    endif()
+    target_link_libraries(qca-gcrypt Qt${QT_MAJOR_VERSION}::Core ${QCA_LIB_NAME} ${LIBGCRYPT_LIBRARIES})
 
     if(NOT DEVELOPER_MODE)
       install(TARGETS qca-gcrypt

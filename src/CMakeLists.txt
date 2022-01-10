@@ -124,10 +124,9 @@ ENDIF(WIN32)
 SET( SOURCES ${SOURCES} ${botan_SOURCES})
 
 add_library(${QCA_LIB_NAME} ${SOURCES}  ${public_HEADERS})
-if(QT6)
-  target_link_libraries(${QCA_LIB_NAME} Qt6::Core Qt6::Core5Compat)
-else()
-  target_link_libraries(${QCA_LIB_NAME} Qt5::Core)
+target_link_libraries(${QCA_LIB_NAME} Qt${QT_MAJOR_VERSION}::Core)
+if(BUILD_WITH_QT6)
+  target_link_libraries(${QCA_LIB_NAME} Qt6::Core5Compat)
 endif()
 
 if(WIN32)
