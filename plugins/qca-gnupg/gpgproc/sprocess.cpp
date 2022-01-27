@@ -32,12 +32,14 @@ namespace gpgQCAPlugin {
 SProcess::SProcess(QObject *parent)
     : QProcess(parent)
 {
+#ifdef Q_OS_UNIX
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     setChildProcessModifier([this]() {
         // set the pipes to be inheritable
         for (int n = 0; n < pipeList.count(); ++n)
             ::fcntl(pipeList[n], F_SETFD, (::fcntl(pipeList[n], F_GETFD) & ~FD_CLOEXEC));
     });
+#endif
 #endif
 }
 
