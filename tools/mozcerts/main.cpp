@@ -23,7 +23,7 @@
 
 #include <QCoreApplication>
 #include <QFile>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextStream>
 
 QStringList splitWithQuotes(const QString &in, char c);
@@ -55,14 +55,14 @@ int main(int argc, char **argv)
     QTextStream ts(&infile);
     while (!ts.atEnd()) {
         QString line = ts.readLine();
-        if (QRegExp(QLatin1String("^#")).indexIn(line) != -1)
-            continue;
-        if (QRegExp(QLatin1String("^\\s*$")).indexIn(line) != -1)
+        if (line.startsWith(QLatin1Char('#')))
             continue;
         line = line.trimmed();
+        if (line.isEmpty())
+            continue;
 
-        if (QRegExp(QLatin1String("CKA_LABEL")).indexIn(line) != -1) {
-            QStringList list = splitWithQuotes(line, ' ');
+        if (line.startsWith(QLatin1String("CKA_LABEL"))) {
+            const QStringList list = splitWithQuotes(line, ' ');
             if (list.count() != 3)
                 continue;
 
@@ -73,20 +73,21 @@ int main(int argc, char **argv)
             //    .replace(QRegExp("[()]"), "=")
             //    .replace(QRegExp(","), "_") + ".pem";
             continue;
-        } else if (QRegExp(QLatin1String("CKA_VALUE MULTILINE_OCTAL")).indexIn(line) != -1) {
+        } else if (line == QLatin1String("CKA_VALUE MULTILINE_OCTAL")) {
             QByteArray buf;
             while (!ts.atEnd()) {
-                line = ts.readLine();
-                if (QRegExp(QLatin1String("^END")).indexIn(line) != -1)
+                line = ts.readLine().trimmed();
+                if (line == QLatin1String("END"))
                     break;
-                line = line.trimmed();
-                QRegExp rx(QLatin1String("\\\\([0-3][0-7][0-7])"));
-                int     pos = 0;
-                while ((pos = rx.indexIn(line, pos)) != -1) {
-                    QString str = rx.capturedTexts().at(1);
+                static const QRegularExpression rx(QStringLiteral("\\\\([0-3][0-7][0-7])"));
+                int                             pos   = 0;
+                QRegularExpressionMatch         match = rx.match(line, pos);
+                while (match.hasMatch()) {
+                    QString str = match.captured(1);
                     uchar   c   = str.toInt(nullptr, 8);
                     buf.append(c);
-                    pos += rx.matchedLength();
+                    pos += match.capturedLength();
+                    match = rx.match(line, pos);
                 }
             }
 

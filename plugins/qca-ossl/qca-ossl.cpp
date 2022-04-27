@@ -210,7 +210,7 @@ public:
 
 protected:
     const EVP_MD *m_algorithm;
-    EVP_MD_CTX *  m_context;
+    EVP_MD_CTX   *m_context;
 };
 
 class opensslPbkdf1Context : public KDFContext
@@ -243,7 +243,7 @@ public:
         return new opensslPbkdf1Context(*this);
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          unsigned int                iterationCount) override
@@ -292,11 +292,11 @@ public:
         return a;
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          int                         msecInterval,
-                         unsigned int *              iterationCount) override
+                         unsigned int               *iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QElapsedTimer timer;
@@ -353,7 +353,7 @@ public:
 
 protected:
     const EVP_MD *m_algorithm;
-    EVP_MD_CTX *  m_context;
+    EVP_MD_CTX   *m_context;
 };
 
 class opensslPbkdf2Context : public KDFContext
@@ -370,7 +370,7 @@ public:
         return new opensslPbkdf2Context(*this);
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          unsigned int                iterationCount) override
@@ -386,11 +386,11 @@ public:
         return out;
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          int                         msecInterval,
-                         unsigned int *              iterationCount) override
+                         unsigned int               *iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QElapsedTimer timer;
@@ -437,7 +437,7 @@ public:
         return new opensslHkdfContext(*this);
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          const InitializationVector &info,
                          unsigned int                keyLength) override
@@ -546,7 +546,7 @@ public:
     }
 
 protected:
-    HMAC_CTX *    m_context;
+    HMAC_CTX     *m_context;
     const EVP_MD *m_algorithm;
 };
 
@@ -924,10 +924,10 @@ public:
         return nullptr;
     }
 
-    QByteArray toPKCS12(const QString &                   name,
+    QByteArray toPKCS12(const QString                    &name,
                         const QList<const CertContext *> &chain,
-                        const PKeyContext &               priv,
-                        const SecureArray &               passphrase) const override
+                        const PKeyContext                &priv,
+                        const SecureArray                &passphrase) const override
     {
         if (chain.count() < 1)
             return QByteArray();
@@ -942,7 +942,7 @@ public:
             }
         }
         const MyPKeyContext &pk  = static_cast<const MyPKeyContext &>(priv);
-        PKCS12 *             p12 = PKCS12_create(
+        PKCS12              *p12 = PKCS12_create(
             (char *)passphrase.data(), (char *)name.toLatin1().data(), pk.get_pkey(), cert, ca, 0, 0, 0, 0, 0);
         sk_X509_pop_free(ca, X509_free);
 
@@ -955,11 +955,11 @@ public:
         return out;
     }
 
-    ConvertResult fromPKCS12(const QByteArray &    in,
-                             const SecureArray &   passphrase,
-                             QString *             name,
+    ConvertResult fromPKCS12(const QByteArray     &in,
+                             const SecureArray    &passphrase,
+                             QString              *name,
                              QList<CertContext *> *chain,
-                             PKeyContext **        priv) const override
+                             PKeyContext         **priv) const override
     {
         BIO *bi = BIO_new(BIO_s_mem());
         BIO_write(bi, in.data(), in.size());
@@ -969,7 +969,7 @@ public:
             return ErrorDecode;
 
         EVP_PKEY *pkey;
-        X509 *    cert;
+        X509     *cert;
         STACK_OF(X509) *ca = nullptr;
         if (!PKCS12_parse(p12, passphrase.data(), &pkey, &cert, &ca)) {
             PKCS12_free(p12);
@@ -993,7 +993,7 @@ public:
         *name           = QString::fromLatin1(aliasData, aliasLength);
 
         MyPKeyContext *pk = new MyPKeyContext(provider());
-        PKeyBase *     k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+        PKeyBase      *k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
         if (!k) {
             delete pk;
             if (cert)
@@ -1103,9 +1103,9 @@ public:
     Certificate             cert;
     PrivateKey              key;
     STACK_OF(X509) * other_certs;
-    BIO *      bi;
+    BIO       *bi;
     int        flags;
-    PKCS7 *    p7;
+    PKCS7     *p7;
     bool       ok;
     QByteArray out, sig;
 
@@ -1128,8 +1128,8 @@ protected:
     {
         MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
         MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
-        X509 *         cx = cc->item.cert;
-        EVP_PKEY *     kx = kc->get_pkey();
+        X509          *cx = cc->item.cert;
+        EVP_PKEY      *kx = kc->get_pkey();
 
         p7 = PKCS7_sign(cx, kx, other_certs, bi, flags);
 
@@ -1169,7 +1169,7 @@ class MyMessageContext : public MessageContext
 {
     Q_OBJECT
 public:
-    CMSContext *            cms;
+    CMSContext             *cms;
     SecureMessageKey        signer;
     SecureMessageKeyList    to;
     SecureMessage::SignMode signMode;
@@ -1305,7 +1305,7 @@ public:
 
                 // make a new private key object to hold it
                 MyPKeyContext *pk = new MyPKeyContext(provider());
-                PKeyBase *     k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+                PKeyBase      *k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
                 pk->k             = k;
                 key.change(pk);
             }
@@ -1369,7 +1369,7 @@ public:
             Certificate target = to.first().x509CertificateChain().primary();
 
             STACK_OF(X509) * other_certs;
-            BIO *  bi;
+            BIO   *bi;
             int    flags;
             PKCS7 *p7;
 
@@ -1479,19 +1479,19 @@ public:
 
             signerChain = chain;
 
-            X509_STORE *             store     = X509_STORE_new();
+            X509_STORE              *store     = X509_STORE_new();
             const QList<Certificate> cert_list = cms->trustedCerts.certificates();
             QList<CRL>               crl_list  = cms->trustedCerts.crls();
             for (int n = 0; n < cert_list.count(); ++n) {
                 // printf("trusted: [%s]\n", qPrintable(cert_list[n].commonName()));
                 const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
-                X509 *               x  = cc->item.cert;
+                X509                *x  = cc->item.cert;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
                 X509_STORE_add_cert(store, x);
             }
             for (int n = 0; n < crl_list.count(); ++n) {
                 const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
-                X509_CRL *          x  = cc->item.crl;
+                X509_CRL           *x  = cc->item.crl;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
                 X509_STORE_add_crl(store, x);
             }
@@ -1499,7 +1499,7 @@ public:
             crl_list = untrusted_crls;
             for (int n = 0; n < crl_list.count(); ++n) {
                 const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
-                X509_CRL *          x  = cc->item.crl;
+                X509_CRL           *x  = cc->item.crl;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
                 X509_STORE_add_crl(store, x);
             }
@@ -1535,7 +1535,7 @@ public:
                 MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
                 MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
 
-                X509 *    cx = cc->item.cert;
+                X509     *cx = cc->item.cert;
                 EVP_PKEY *kx = kc->get_pkey();
 
                 BIO *bi = BIO_new(BIO_s_mem());
@@ -1817,7 +1817,7 @@ public:
     }
 
 protected:
-    EVP_CIPHER_CTX *  m_context;
+    EVP_CIPHER_CTX   *m_context;
     const EVP_CIPHER *m_cryptoAlgorithm;
     Direction         m_direction;
     int               m_pad;

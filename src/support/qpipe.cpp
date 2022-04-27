@@ -1075,7 +1075,7 @@ public Q_SLOTS:
 #endif
     }
 
-    void sn_read_activated(int)
+    void sn_read_activated()
     {
 #ifdef Q_OS_UNIX
         if (blockReadNotify)
@@ -1086,7 +1086,7 @@ public Q_SLOTS:
 #endif
     }
 
-    void sn_write_activated(int)
+    void sn_write_activated()
     {
 #ifdef Q_OS_UNIX
         writeResult = 0;

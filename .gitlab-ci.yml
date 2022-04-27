@@ -1,8 +1,17 @@
+include:
+  - https://invent.kde.org/sysadmin/ci-utilities/raw/master/gitlab-templates/linux.yml
+  - https://invent.kde.org/sysadmin/ci-utilities/raw/master/gitlab-templates/freebsd.yml
+
 build_ubuntu_20_10:
   stage: build
   image: ubuntu:groovy
+  only:
+    - merge_requests
   before_script:
     - sed -i -e 's/# deb-src/deb-src/g' /etc/apt/sources.list
+    - sed -i -e 's/archive/old-releases/g' /etc/apt/sources.list
+    - sed -i -e 's/security.ubuntu/old-releases.ubuntu/g' /etc/apt/sources.list
+    - echo "91.189.91.124 old-releases.ubuntu.com" >> /etc/hosts
     - apt update
     - apt install --yes eatmydata
     - eatmydata apt build-dep --yes --no-install-recommends qca2
@@ -16,17 +25,21 @@ build_ubuntu_20_10:
 build_fedora_34:
   stage: build
   image: fedora:34
+  only:
+    - merge_requests
   before_script:
     - dnf -y --setopt=install_weak_deps=False install git gcc-c++ make cmake ninja-build qt6-qtbase-devel qt6-qt5compat-devel botan2-devel cyrus-sasl-devel nss-devel libgcrypt-devel pkcs11-helper-devel gnupg
   script:
     - mkdir -p build && cd build
-    - cmake -G Ninja -DQT6=ON ..
+    - cmake -G Ninja -DBUILD_WITH_QT6=ON ..
     - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt6/ ctest -V
 
 build_clazy_clang_tidy:
   stage: build
   image: debian:unstable
+  only:
+    - merge_requests
   before_script:
     - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
     - apt-get update
@@ -36,12 +49,34 @@ build_clazy_clang_tidy:
   script:
     - srcdir=`pwd` && mkdir -p /tmp/qca_build && cd /tmp/qca_build && CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja $srcdir && cat compile_commands.json | jq  '[.[] | select(.file | contains("'"$srcdir"'"))]' > compile_commands.aux.json && mv compile_commands.aux.json compile_commands.json
     - CLAZY_CHECKS="level0,level1,level2,no-copyable-polymorphic,no-ctor-missing-parent-argument,isempty-vs-count,qhash-with-char-pointer-key,qproperty-type-mismatch,qrequiredresult-candidates,signal-with-return-value,thread-with-slots,tr-non-literal,unneeded-cast" ninja
-    - "run-clang-tidy -header-filter='.*/qca/.*' -checks='-*,performance-*,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,modernize-use-nullptr,-performance-no-automatic-move' -config=\"{WarningsAsErrors: '*'}\""
+    - "run-clang-tidy-13 -header-filter='.*/qca/.*' -checks='-*,performance-*,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,modernize-use-nullptr,-performance-no-automatic-move,-performance-no-int-to-ptr' -config=\"{WarningsAsErrors: '*'}\""
+    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
+
+build_openssl3:
+  stage: build
+  image: debian:unstable
+  only:
+    - merge_requests
+  before_script:
+    - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+    - apt-get update
+    - apt-get install --yes eatmydata
+    - eatmydata apt-get build-dep --yes --no-install-recommends qca2
+    - eatmydata apt-get install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
+    - echo 'deb http://deb.debian.org/debian experimental main' >> /etc/apt/sources.list
+    - apt-get update
+    - eatmydata apt-get -t experimental install --yes libssl-dev
+  script:
+    - mkdir -p build && cd build
+    - cmake -G Ninja ..
+    - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
 clang_format:
   stage: build
   image: debian:testing
+  only:
+    - merge_requests
   before_script:
     - apt-get update
     - apt-get install --yes --no-install-recommends git clang-format-11

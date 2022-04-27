@@ -1,2 +1,8 @@
+/.clang-format
+/compile_commands.json
+.clangd
+.cache
+.idea
+/cmake-build*
 /CMakeLists.txt.user
 *.swp

@@ -84,6 +84,7 @@ void HashUnitTest::initTestCase()
     const auto providers = QCA::providers();
     for (QCA::Provider *provider : providers)
         providersToTest << provider->name();
+    providersToTest << QCA::defaultProvider()->name();
 }
 
 void HashUnitTest::cleanupTestCase()

@@ -33,7 +33,7 @@ class SafeSocketNotifier : public QObject
 {
     Q_OBJECT
 public:
-    SafeSocketNotifier(int socket, QSocketNotifier::Type type, QObject *parent = nullptr);
+    SafeSocketNotifier(qintptr socket, QSocketNotifier::Type type, QObject *parent = nullptr);
 
     ~SafeSocketNotifier() override;
 
@@ -41,7 +41,7 @@ public:
     {
         return sn->isEnabled();
     }
-    int socket() const
+    qintptr socket() const
     {
         return sn->socket();
     }
@@ -57,7 +57,7 @@ public Q_SLOTS:
     }
 
 Q_SIGNALS:
-    void activated(int socket);
+    void activated();
 
 private:
     QSocketNotifier *sn;

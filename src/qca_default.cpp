@@ -34,6 +34,8 @@
 #include "qca_systemstore.h"
 #endif
 
+#include <cstdlib>
+
 #define FRIENDLY_NAMES
 
 namespace QCA {
@@ -78,7 +80,7 @@ public:
     }
 
     void set(bool               use_system,
-             const QString &    roots_file,
+             const QString     &roots_file,
              const QStringList &skip_plugins,
              const QStringList &plugin_priorities)
     {
@@ -311,7 +313,7 @@ static void md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
              * data without copying it. On arm do copying always
              */
 #ifndef Q_PROCESSOR_ARM
-            if (!((data - static_cast<const md5_byte_t *>(nullptr)) & 3)) {
+            if (!(reinterpret_cast<uintptr_t>(data) & 3)) {
                 /* data are properly aligned */
                 X = reinterpret_cast<const md5_word_t *>(data);
             } else
@@ -880,12 +882,12 @@ static QString entry_serialize(const QString &storeId,
 }
 
 static bool entry_deserialize(const QString &in,
-                              QString *      storeId,
-                              QString *      storeName,
-                              QString *      entryId,
-                              QString *      entryName,
-                              QString *      entryType,
-                              QString *      data)
+                              QString       *storeId,
+                              QString       *storeName,
+                              QString       *entryId,
+                              QString       *entryName,
+                              QString       *entryType,
+                              QString       *data)
 {
     QStringList list;
     if (!unescape_stringlist(in, &list))
