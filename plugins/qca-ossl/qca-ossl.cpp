@@ -1929,11 +1929,13 @@ static QStringList all_cipher_types()
     list += QStringLiteral("des-cbc-pkcs7");
     list += QStringLiteral("des-cfb");
     list += QStringLiteral("des-ofb");
+#ifndef OPENSSL_NO_CAST
     list += QStringLiteral("cast5-ecb");
     list += QStringLiteral("cast5-cbc");
     list += QStringLiteral("cast5-cbc-pkcs7");
     list += QStringLiteral("cast5-cfb");
     list += QStringLiteral("cast5-ofb");
+#endif
     return list;
 }
 
@@ -2299,6 +2301,7 @@ public:
             return new opensslCipherContext(EVP_des_cfb(), 0, this, type);
         else if (type == QLatin1String("des-ofb"))
             return new opensslCipherContext(EVP_des_ofb(), 0, this, type);
+#ifndef OPENSSL_NO_CAST
         else if (type == QLatin1String("cast5-ecb"))
             return new opensslCipherContext(EVP_cast5_ecb(), 0, this, type);
         else if (type == QLatin1String("cast5-cbc"))
@@ -2309,6 +2312,7 @@ public:
             return new opensslCipherContext(EVP_cast5_cfb(), 0, this, type);
         else if (type == QLatin1String("cast5-ofb"))
             return new opensslCipherContext(EVP_cast5_ofb(), 0, this, type);
+#endif
         else if (type == QLatin1String("pkey"))
             return new MyPKeyContext(this);
         else if (type == QLatin1String("dlgroup"))
