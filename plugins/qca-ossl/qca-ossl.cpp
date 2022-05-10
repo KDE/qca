@@ -48,11 +48,15 @@
 #include <memory>
 
 #include <openssl/err.h>
+#include <openssl/opensslv.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
+#ifdef OPENSSL_VERSION_MAJOR
+#include <openssl/provider.h>
+#endif
 
 #ifndef LIBRESSL_VERSION_NUMBER
 #include <openssl/kdf.h>
@@ -447,9 +451,9 @@ public:
         EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, nullptr);
         EVP_PKEY_derive_init(pctx);
         EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_sha256());
-        EVP_PKEY_CTX_set1_hkdf_salt(pctx, salt.data(), int(salt.size()));
-        EVP_PKEY_CTX_set1_hkdf_key(pctx, secret.data(), int(secret.size()));
-        EVP_PKEY_CTX_add1_hkdf_info(pctx, info.data(), int(info.size()));
+        EVP_PKEY_CTX_set1_hkdf_salt(pctx, (const unsigned char *)salt.data(), int(salt.size()));
+        EVP_PKEY_CTX_set1_hkdf_key(pctx, (const unsigned char *)secret.data(), int(secret.size()));
+        EVP_PKEY_CTX_add1_hkdf_info(pctx, (const unsigned char *)info.data(), int(info.size()));
         size_t outlen = out.size();
         EVP_PKEY_derive(pctx, reinterpret_cast<unsigned char *>(out.data()), &outlen);
         EVP_PKEY_CTX_free(pctx);

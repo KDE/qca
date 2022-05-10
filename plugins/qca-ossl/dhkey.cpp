@@ -33,7 +33,7 @@ class DHKeyMaker : public QThread
     Q_OBJECT
 public:
     DLGroup domain;
-    DH *    result;
+    DH     *result;
 
     DHKeyMaker(const DLGroup &_domain, QObject *parent = nullptr)
         : QThread(parent)
@@ -51,7 +51,7 @@ public:
 
     void run() override
     {
-        DH *    dh  = DH_new();
+        DH     *dh  = DH_new();
         BIGNUM *bnp = bi2bn(domain.p());
         BIGNUM *bng = bi2bn(domain.g());
         if (!DH_set0_pqg(dh, bnp, nullptr, bng) || !DH_generate_key(dh)) {
@@ -119,8 +119,8 @@ void DHKey::convertToPublic()
     if (!sec)
         return;
 
-    DH *          orig = EVP_PKEY_get0_DH(evp.pkey);
-    DH *          dh   = DH_new();
+    const DH     *orig = EVP_PKEY_get0_DH(evp.pkey);
+    DH           *dh   = DH_new();
     const BIGNUM *bnp, *bng, *bnpub_key;
     DH_get0_pqg(orig, &bnp, nullptr, &bng);
     DH_get0_key(orig, &bnpub_key, nullptr);
@@ -142,13 +142,13 @@ int DHKey::bits() const
 
 SymmetricKey DHKey::deriveKey(const PKeyBase &theirs)
 {
-    DH *          dh   = EVP_PKEY_get0_DH(evp.pkey);
-    DH *          them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
+    const DH     *dh   = EVP_PKEY_get0_DH(evp.pkey);
+    const DH     *them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
     const BIGNUM *bnpub_key;
     DH_get0_key(them, &bnpub_key, nullptr);
 
     SecureArray result(DH_size(dh));
-    int         ret = DH_compute_key((unsigned char *)result.data(), bnpub_key, dh);
+    int         ret = DH_compute_key((unsigned char *)result.data(), bnpub_key, (DH *)dh);
     if (ret <= 0)
         return SymmetricKey();
     result.resize(ret);
@@ -174,7 +174,7 @@ void DHKey::createPrivate(const DLGroup &domain, const BigInteger &y, const BigI
 {
     evp.reset();
 
-    DH *    dh         = DH_new();
+    DH     *dh         = DH_new();
     BIGNUM *bnp        = bi2bn(domain.p());
     BIGNUM *bng        = bi2bn(domain.g());
     BIGNUM *bnpub_key  = bi2bn(y);
@@ -194,7 +194,7 @@ void DHKey::createPublic(const DLGroup &domain, const BigInteger &y)
 {
     evp.reset();
 
-    DH *    dh        = DH_new();
+    DH     *dh        = DH_new();
     BIGNUM *bnp       = bi2bn(domain.p());
     BIGNUM *bng       = bi2bn(domain.g());
     BIGNUM *bnpub_key = bi2bn(y);
@@ -211,7 +211,7 @@ void DHKey::createPublic(const DLGroup &domain, const BigInteger &y)
 
 DLGroup DHKey::domain() const
 {
-    DH *          dh = EVP_PKEY_get0_DH(evp.pkey);
+    const DH     *dh = EVP_PKEY_get0_DH(evp.pkey);
     const BIGNUM *bnp, *bng;
     DH_get0_pqg(dh, &bnp, nullptr, &bng);
     return DLGroup(bn2bi(bnp), bn2bi(bng));
@@ -219,7 +219,7 @@ DLGroup DHKey::domain() const
 
 BigInteger DHKey::y() const
 {
-    DH *          dh = EVP_PKEY_get0_DH(evp.pkey);
+    const DH     *dh = EVP_PKEY_get0_DH(evp.pkey);
     const BIGNUM *bnpub_key;
     DH_get0_key(dh, &bnpub_key, nullptr);
     return bn2bi(bnpub_key);
@@ -227,7 +227,7 @@ BigInteger DHKey::y() const
 
 BigInteger DHKey::x() const
 {
-    DH *          dh = EVP_PKEY_get0_DH(evp.pkey);
+    const DH     *dh = EVP_PKEY_get0_DH(evp.pkey);
     const BIGNUM *bnpriv_key;
     DH_get0_key(dh, nullptr, &bnpriv_key);
     return bn2bi(bnpriv_key);

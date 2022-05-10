@@ -78,8 +78,9 @@ public:
         if (BN_set_word(e.get(), exp) != 1)
             return;
 
-        if (RSA_generate_key_ex(rsa.get(), bits, e.get(), nullptr) == 0)
+        if (RSA_generate_key_ex(rsa.get(), bits, e.get(), nullptr) == 0) {
             return;
+        }
 
         result = rsa.release();
     }
@@ -143,7 +144,7 @@ void RSAKey::convertToPublic()
         return;
 
     // extract the public key into DER format
-    RSA *          rsa_pkey = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA     *rsa_pkey = EVP_PKEY_get0_RSA(evp.pkey);
     int            len      = i2d_RSAPublicKey(rsa_pkey, nullptr);
     SecureArray    result(len);
     unsigned char *p = (unsigned char *)result.data();
@@ -165,8 +166,8 @@ int RSAKey::bits() const
 
 int RSAKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 {
-    RSA *rsa  = EVP_PKEY_get0_RSA(evp.pkey);
-    int  size = 0;
+    const RSA *rsa  = EVP_PKEY_get0_RSA(evp.pkey);
+    int        size = 0;
     switch (alg) {
     case EME_PKCS1v15:
         size = RSA_size(rsa) - 11 - 1;
@@ -187,7 +188,7 @@ int RSAKey::maximumEncryptSize(EncryptionAlgorithm alg) const
 
 SecureArray RSAKey::encrypt(const SecureArray &in, EncryptionAlgorithm alg)
 {
-    RSA *       rsa = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA  *rsa = EVP_PKEY_get0_RSA(evp.pkey);
     SecureArray buf = in;
     int         max = maximumEncryptSize(alg);
 
@@ -203,9 +204,11 @@ SecureArray RSAKey::encrypt(const SecureArray &in, EncryptionAlgorithm alg)
     case EME_PKCS1_OAEP:
         pad = RSA_PKCS1_OAEP_PADDING;
         break;
+#ifdef RSA_SSLV23_PADDING
     case EME_PKCS1v15_SSL:
         pad = RSA_SSLV23_PADDING;
         break;
+#endif
     case EME_NO_PADDING:
         pad = RSA_NO_PADDING;
         break;
@@ -216,9 +219,11 @@ SecureArray RSAKey::encrypt(const SecureArray &in, EncryptionAlgorithm alg)
 
     int ret;
     if (isPrivate())
-        ret = RSA_private_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
+        ret = RSA_private_encrypt(
+            buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
     else
-        ret = RSA_public_encrypt(buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), rsa, pad);
+        ret = RSA_public_encrypt(
+            buf.size(), (unsigned char *)buf.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
 
     if (ret < 0)
         return SecureArray();
@@ -229,7 +234,7 @@ SecureArray RSAKey::encrypt(const SecureArray &in, EncryptionAlgorithm alg)
 
 bool RSAKey::decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg)
 {
-    RSA *       rsa = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA  *rsa = EVP_PKEY_get0_RSA(evp.pkey);
     SecureArray result(RSA_size(rsa));
     int         pad;
 
@@ -240,9 +245,11 @@ bool RSAKey::decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorith
     case EME_PKCS1_OAEP:
         pad = RSA_PKCS1_OAEP_PADDING;
         break;
+#ifdef RSA_SSLV23_PADDING
     case EME_PKCS1v15_SSL:
         pad = RSA_SSLV23_PADDING;
         break;
+#endif
     case EME_NO_PADDING:
         pad = RSA_NO_PADDING;
         break;
@@ -253,9 +260,11 @@ bool RSAKey::decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorith
 
     int ret;
     if (isPrivate())
-        ret = RSA_private_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
+        ret =
+            RSA_private_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
     else
-        ret = RSA_public_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), rsa, pad);
+        ret =
+            RSA_public_decrypt(in.size(), (unsigned char *)in.data(), (unsigned char *)result.data(), (RSA *)rsa, pad);
 
     if (ret < 0)
         return false;
@@ -396,7 +405,7 @@ void RSAKey::createPublic(const BigInteger &n, const BigInteger &e)
 
 BigInteger RSAKey::n() const
 {
-    RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
     const BIGNUM *bnn;
     RSA_get0_key(rsa, &bnn, nullptr, nullptr);
     return bn2bi(bnn);
@@ -404,7 +413,7 @@ BigInteger RSAKey::n() const
 
 BigInteger RSAKey::e() const
 {
-    RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
     const BIGNUM *bne;
     RSA_get0_key(rsa, nullptr, &bne, nullptr);
     return bn2bi(bne);
@@ -412,7 +421,7 @@ BigInteger RSAKey::e() const
 
 BigInteger RSAKey::p() const
 {
-    RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
     const BIGNUM *bnp;
     RSA_get0_factors(rsa, &bnp, nullptr);
     return bn2bi(bnp);
@@ -420,7 +429,7 @@ BigInteger RSAKey::p() const
 
 BigInteger RSAKey::q() const
 {
-    RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
     const BIGNUM *bnq;
     RSA_get0_factors(rsa, nullptr, &bnq);
     return bn2bi(bnq);
@@ -428,7 +437,7 @@ BigInteger RSAKey::q() const
 
 BigInteger RSAKey::d() const
 {
-    RSA *         rsa = EVP_PKEY_get0_RSA(evp.pkey);
+    const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
     const BIGNUM *bnd;
     RSA_get0_key(rsa, nullptr, nullptr, &bnd);
     return bn2bi(bnd);
