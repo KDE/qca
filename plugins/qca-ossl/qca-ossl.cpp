@@ -6628,13 +6628,13 @@ public:
 // OPENSSL_VERSION_MAJOR is only defined in openssl3
 #ifdef OPENSSL_VERSION_MAJOR
         /* Load Multiple providers into the default (NULL) library context */
-        OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(NULL, "legacy");
-        if (legacy == NULL) {
+        OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(nullptr, "legacy");
+        if (legacy == nullptr) {
             printf("Failed to load Legacy provider\n");
             exit(EXIT_FAILURE);
         }
-        OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(NULL, "default");
-        if (deflt == NULL) {
+        OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(nullptr, "default");
+        if (deflt == nullptr) {
             printf("Failed to load Default provider\n");
             OSSL_PROVIDER_unload(legacy);
             exit(EXIT_FAILURE);
