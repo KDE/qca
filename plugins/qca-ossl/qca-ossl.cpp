@@ -6310,6 +6310,9 @@ public:
                 int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
                 EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
             }
+            if (m_type.endsWith(QLatin1String("ccm"))) {
+                EVP_CIPHER_CTX_ctrl(m_context, EVP_CTRL_CCM_SET_TAG, m_tag.size(), NULL);
+            }
             EVP_EncryptInit_ex(
                 m_context, nullptr, nullptr, (const unsigned char *)(key.data()), (const unsigned char *)(iv.data()));
         } else {
@@ -6318,6 +6321,9 @@ public:
             if (m_type.endsWith(QLatin1String("gcm")) || m_type.endsWith(QLatin1String("ccm"))) {
                 int parameter = m_type.endsWith(QLatin1String("gcm")) ? EVP_CTRL_GCM_SET_IVLEN : EVP_CTRL_CCM_SET_IVLEN;
                 EVP_CIPHER_CTX_ctrl(m_context, parameter, iv.size(), nullptr);
+            }
+            if (m_type.endsWith(QLatin1String("ccm"))) {
+                EVP_CIPHER_CTX_ctrl(m_context, EVP_CTRL_CCM_SET_TAG, m_tag.size(), m_tag.data());
             }
             EVP_DecryptInit_ex(
                 m_context, nullptr, nullptr, (const unsigned char *)(key.data()), (const unsigned char *)(iv.data()));

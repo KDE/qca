@@ -531,11 +531,83 @@ void CipherUnitTest::aes128_gcm()
 
 void CipherUnitTest::aes128_ccm_data()
 {
+    QTest::addColumn<QString>("plainText");
+    QTest::addColumn<QString>("payload");
+    QTest::addColumn<QString>("tag");
+    QTest::addColumn<QString>("keyText");
+    QTest::addColumn<QString>("ivText");
+
+    QTest::newRow("short") << QStringLiteral("873f2c5935cc3eaf") << QStringLiteral("626afa9f19e8a9d0")
+                           << QStringLiteral("f55d34915a2de5ea27146f7a58b08a30")
+                           << QStringLiteral("319539519a851a56d084b23f7f6452f3")
+                           << QStringLiteral("1b77c3ef2d466ddf0145ab166369cfbc");
+
+    QTest::newRow("long") << QStringLiteral(
+                                 "27b952e5673b5a9e2a8a6e73aaa5557e34940b3cd183d52f38d838bc315c7a18e4bfb62d170e2fe8e5bc0"
+                                 "76474bf739ecf0e520d2593ecefade19ebe38c7")
+                          << QStringLiteral(
+                                 "fa9ab7f7ea9b0e0eda15ce1846c76936c9e45ea07cc99fbda31fdc7748bcece53793b8481631e4e574c13"
+                                 "ce29a352fe308827c128f642270817109c7be47")
+                          << QStringLiteral("835684aacaf751d45bb91ec4b7fee5bb")
+                          << QStringLiteral("f556f06c00842c84936787606002b5ff")
+                          << QStringLiteral("508af01db860958fe9fc33ffe5729890");
+
+    QTest::newRow("wrongtag") << QStringLiteral("873f2c5935cc3eaf") << QStringLiteral("626afa9f19e8a9d0")
+                              << QStringLiteral("07eca61d318f9bfd8f77ea3fe1576e91")
+                              << QStringLiteral("319539519a851a56d084b23f7f6452f3")
+                              << QStringLiteral("1b77c3ef2d466ddf0145ab166369cfbc");
 }
 
 void CipherUnitTest::aes128_ccm()
 {
-    // For future implementation
+    bool anyProviderTested = false;
+    foreach (const QString &provider, providersToTest) {
+        if (QCA::isSupported("aes128-ccm", provider)) {
+            anyProviderTested = true;
+            QFETCH(QString, plainText);
+            QFETCH(QString, payload);
+            QFETCH(QString, tag);
+            QFETCH(QString, keyText);
+            QFETCH(QString, ivText);
+
+            QCA::SymmetricKey         key(QCA::hexToArray(keyText));
+            QCA::InitializationVector iv(QCA::hexToArray(ivText));
+            QCA::AuthTag              authTag(16);
+            QCA::Cipher               forwardCipher(QStringLiteral("aes128"),
+                                      QCA::Cipher::CCM,
+                                      QCA::Cipher::NoPadding,
+                                      QCA::Encode,
+                                      key,
+                                      iv,
+                                      authTag,
+                                      provider);
+            QString encryptedText = QCA::arrayToHex(forwardCipher.process(QCA::hexToArray(plainText)).toByteArray());
+           
+            QVERIFY(forwardCipher.ok());
+            authTag = forwardCipher.tag();
+            QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+            QCOMPARE(QCA::arrayToHex(authTag.toByteArray()), tag);
+            QCOMPARE(encryptedText, payload);
+
+            QCA::Cipher reverseCipher(QStringLiteral("aes128"),
+                                      QCA::Cipher::CCM,
+                                      QCA::Cipher::NoPadding,
+                                      QCA::Decode,
+                                      key,
+                                      iv,
+                                      QCA::AuthTag(QCA::hexToArray(tag)),
+                                      provider);
+
+            QString decryptedText = QCA::arrayToHex(reverseCipher.process(QCA::hexToArray(encryptedText)).toByteArray());
+            QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+            QVERIFY(reverseCipher.ok());
+            
+            QEXPECT_FAIL("wrongtag", "It's OK", Continue);
+            QCOMPARE(decryptedText, plainText);
+        }
+    }
+    if (!anyProviderTested)
+        qWarning() << "NONE of the providers supports AES128 CCM:" << providersToTest;
 }
 
 void CipherUnitTest::aes192_data()
