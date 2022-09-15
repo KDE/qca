@@ -4064,6 +4064,8 @@ int main(int argc, char **argv)
                     return 1;
                 }
 
+                ksm_start_and_wait();
+
                 sms = new QCA::OpenPGP;
                 pgp = true;
             } else if (args[2] == QLatin1String("smime")) {
