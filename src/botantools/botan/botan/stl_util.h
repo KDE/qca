@@ -77,7 +77,7 @@ inline R search_map(const std::map<K, V> &mapping, const K &key, const R &null_r
 /*************************************************
  * Function adaptor for delete operation          *
  *************************************************/
-template<class T> class del_fun : public std::unary_function<T, void>
+template<class T> class del_fun
 {
 public:
     void operator()(T *ptr)
