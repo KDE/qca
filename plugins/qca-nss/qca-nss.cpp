@@ -126,7 +126,7 @@ public:
 private:
     PK11SlotInfo *m_slot;
     int           m_status;
-    PK11Context * m_context;
+    PK11Context  *m_context;
     SECOidTag     m_hashAlgo;
 };
 
@@ -252,11 +252,11 @@ public:
     }
 
 private:
-    PK11SlotInfo *    m_slot;
+    PK11SlotInfo     *m_slot;
     int               m_status;
-    PK11Context *     m_context;
+    PK11Context      *m_context;
     CK_MECHANISM_TYPE m_macAlgo;
-    PK11SymKey *      m_nssKey;
+    PK11SymKey       *m_nssKey;
 };
 
 //-----------------------------------------------------------
@@ -292,9 +292,9 @@ public:
     }
 
     void setup(QCA::Direction                   dir,
-               const QCA::SymmetricKey &        key,
+               const QCA::SymmetricKey         &key,
                const QCA::InitializationVector &iv,
-               const QCA::AuthTag &             tag) override
+               const QCA::AuthTag              &tag) override
     {
         Q_UNUSED(tag);
         /* Get a slot to use for the crypto operations */
@@ -405,11 +405,11 @@ public:
     }
 
 private:
-    PK11SymKey *      m_nssKey;
+    PK11SymKey       *m_nssKey;
     CK_MECHANISM_TYPE m_cipherMechanism;
-    PK11SlotInfo *    m_slot;
-    PK11Context *     m_context;
-    SECItem *         m_params;
+    PK11SlotInfo     *m_slot;
+    PK11Context      *m_context;
+    SECItem          *m_params;
 };
 
 //==========================================================

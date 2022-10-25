@@ -103,28 +103,28 @@ typedef struct _FIXED_SECURITY_FUNCTION_TABLEW
     QUERY_CREDENTIALS_ATTRIBUTES_FN_W QueryCredentialsAttributesW;
     ACQUIRE_CREDENTIALS_HANDLE_FN_W   AcquireCredentialsHandleW;
     FREE_CREDENTIALS_HANDLE_FN        FreeCredentialsHandle;
-    void SEC_FAR *                   Reserved2;
-    INITIALIZE_SECURITY_CONTEXT_FN_W InitializeSecurityContextW;
-    ACCEPT_SECURITY_CONTEXT_FN       AcceptSecurityContext;
-    COMPLETE_AUTH_TOKEN_FN           CompleteAuthToken;
-    DELETE_SECURITY_CONTEXT_FN       DeleteSecurityContext;
-    APPLY_CONTROL_TOKEN_FN_W         ApplyControlTokenW;
-    QUERY_CONTEXT_ATTRIBUTES_FN_W    QueryContextAttributesW;
-    IMPERSONATE_SECURITY_CONTEXT_FN  ImpersonateSecurityContext;
-    REVERT_SECURITY_CONTEXT_FN       RevertSecurityContext;
-    MAKE_SIGNATURE_FN                MakeSignature;
-    VERIFY_SIGNATURE_FN              VerifySignature;
-    FREE_CONTEXT_BUFFER_FN           FreeContextBuffer;
-    QUERY_SECURITY_PACKAGE_INFO_FN_W QuerySecurityPackageInfoW;
-    void SEC_FAR *Reserved3;
-    void SEC_FAR *Reserved4;
-    void SEC_FAR *Unknown1;
-    void SEC_FAR *Unknown2;
-    void SEC_FAR *Unknown3;
-    void SEC_FAR *Unknown4;
-    void SEC_FAR *     Unknown5;
-    ENCRYPT_MESSAGE_FN EncryptMessage;
-    DECRYPT_MESSAGE_FN DecryptMessage;
+    void SEC_FAR                     *Reserved2;
+    INITIALIZE_SECURITY_CONTEXT_FN_W  InitializeSecurityContextW;
+    ACCEPT_SECURITY_CONTEXT_FN        AcceptSecurityContext;
+    COMPLETE_AUTH_TOKEN_FN            CompleteAuthToken;
+    DELETE_SECURITY_CONTEXT_FN        DeleteSecurityContext;
+    APPLY_CONTROL_TOKEN_FN_W          ApplyControlTokenW;
+    QUERY_CONTEXT_ATTRIBUTES_FN_W     QueryContextAttributesW;
+    IMPERSONATE_SECURITY_CONTEXT_FN   ImpersonateSecurityContext;
+    REVERT_SECURITY_CONTEXT_FN        RevertSecurityContext;
+    MAKE_SIGNATURE_FN                 MakeSignature;
+    VERIFY_SIGNATURE_FN               VerifySignature;
+    FREE_CONTEXT_BUFFER_FN            FreeContextBuffer;
+    QUERY_SECURITY_PACKAGE_INFO_FN_W  QuerySecurityPackageInfoW;
+    void SEC_FAR                     *Reserved3;
+    void SEC_FAR                     *Reserved4;
+    void SEC_FAR                     *Unknown1;
+    void SEC_FAR                     *Unknown2;
+    void SEC_FAR                     *Unknown3;
+    void SEC_FAR                     *Unknown4;
+    void SEC_FAR                     *Unknown5;
+    ENCRYPT_MESSAGE_FN                EncryptMessage;
+    DECRYPT_MESSAGE_FN                DecryptMessage;
 } FixedSecurityFunctionTableW, *PFixedSecurityFunctionTableW;
 
 typedef FixedSecurityFunctionTableW  MySecurityFunctionTableW;
@@ -197,13 +197,13 @@ Q_GLOBAL_STATIC(QMutex, sspi_logger_mutex)
 union SecurityFunctionTableUnion {
     PMySecurityFunctionTableW W;
     PSecurityFunctionTableA   A;
-    void *                    ptr;
+    void                     *ptr;
 };
 
-static QLibrary *                 sspi_lib = 0;
+static QLibrary                  *sspi_lib = 0;
 static SecurityFunctionTableUnion sspi;
 static sspi_logger_func           sspi_logger;
-static QList<SspiPackage> *       sspi_packagelist = 0;
+static QList<SspiPackage>        *sspi_packagelist = 0;
 
 void sspi_log(const QString &str)
 {
@@ -285,7 +285,7 @@ bool sspi_load()
     union {
         INIT_SECURITY_INTERFACE_W W;
         INIT_SECURITY_INTERFACE_A A;
-        void *                    ptr;
+        void                     *ptr;
     } pInitSecurityInterface;
     pInitSecurityInterface.ptr = 0;
 
@@ -302,7 +302,7 @@ bool sspi_load()
     union {
         PMySecurityFunctionTableW W;
         PSecurityFunctionTableA   A;
-        void *                    ptr;
+        void                     *ptr;
     } funcs;
     funcs.ptr = 0;
 
@@ -336,7 +336,7 @@ static QList<SspiPackage> sspi_get_packagelist_direct()
     QList<SspiPackage> out;
 
     ULONG           cPackages;
-    SecPkgInfoW *   pPackageInfo;
+    SecPkgInfoW    *pPackageInfo;
     SECURITY_STATUS ret = sspi.W->EnumerateSecurityPackagesW(&cPackages, &pPackageInfo);
     sspi_log(QString("EnumerateSecurityPackages() = %1\n").arg(SECURITY_STATUS_toString(ret)));
     if (ret != SEC_E_OK)
@@ -1167,7 +1167,7 @@ class SaslWinGss : public SASLContext
     Q_OBJECT
 
 public:
-    SaslGssapiSession * sess;
+    SaslGssapiSession  *sess;
     bool                authed;
     Result              _result;
     SASL::AuthCondition _authCondition;
@@ -1213,11 +1213,11 @@ public:
         opt_authzid.clear();
     }
 
-    virtual void setup(const QString & service,
-                       const QString & host,
+    virtual void setup(const QString  &service,
+                       const QString  &host,
                        const HostPort *local,
                        const HostPort *remote,
-                       const QString & ext_id,
+                       const QString  &ext_id,
                        int             ext_ssf)
     {
         // unused by this provider
@@ -1597,11 +1597,11 @@ public:
         serverInit_mechlist.clear();
     }
 
-    virtual void setup(const QString & service,
-                       const QString & host,
+    virtual void setup(const QString  &service,
+                       const QString  &host,
                        const HostPort *local,
                        const HostPort *remote,
-                       const QString & ext_id,
+                       const QString  &ext_id,
                        int             ext_ssf)
     {
         opt_service     = service;
@@ -1681,10 +1681,10 @@ public:
         s->setup(opt_service, opt_host, pLocal, pRemote, opt_ext_id, opt_ext_ssf);
         s->setConstraints(opt_flags, opt_minssf, opt_maxssf);
 
-        const QString *    pUser    = 0;
-        const QString *    pAuthzid = 0;
+        const QString     *pUser    = 0;
+        const QString     *pAuthzid = 0;
         const SecureArray *pPass    = 0;
-        const QString *    pRealm   = 0;
+        const QString     *pRealm   = 0;
         if (have_opt_user)
             pUser = &opt_user;
         if (have_opt_authzid)

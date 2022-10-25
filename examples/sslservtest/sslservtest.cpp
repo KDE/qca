@@ -247,9 +247,9 @@ private Q_SLOTS:
 
 private:
     quint16          port;
-    QTcpServer *     server;
-    QTcpSocket *     sock;
-    QCA::TLS *       ssl;
+    QTcpServer      *server;
+    QTcpSocket      *sock;
+    QCA::TLS        *ssl;
     QCA::Certificate cert;
     QCA::PrivateKey  privkey;
 

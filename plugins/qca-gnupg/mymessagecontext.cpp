@@ -366,7 +366,7 @@ void MyMessageContext::gpg_needPassphrase(const QString &in_keyId)
     QString serialized = out.join(QStringLiteral(":"));
 
     KeyStoreEntry         kse;
-    MyKeyStoreList *      keyStoreList = MyKeyStoreList::instance();
+    MyKeyStoreList       *keyStoreList = MyKeyStoreList::instance();
     KeyStoreEntryContext *c            = keyStoreList->entryPassive(serialized);
     if (c)
         kse.change(c);

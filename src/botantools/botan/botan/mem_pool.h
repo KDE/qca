@@ -103,7 +103,7 @@ private:
         static const u32bit BLOCK_SIZE;
 
         bitmap_type bitmap;
-        byte *      buffer, *buffer_end;
+        byte       *buffer, *buffer_end;
     };
 
     const u32bit PREF_SIZE;
@@ -111,7 +111,7 @@ private:
     std::vector<Memory_Block>              blocks;
     std::vector<Memory_Block>::iterator    last_used;
     std::vector<std::pair<void *, u32bit>> allocated;
-    Mutex *                                mutex;
+    Mutex                                 *mutex;
 };
 
 }

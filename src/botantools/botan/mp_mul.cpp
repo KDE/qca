@@ -72,8 +72,8 @@ void karatsuba_mul(word z[], const word x[], const word y[], u32bit N, word work
         const word *x1 = x + N2;
         const word *y0 = y;
         const word *y1 = y + N2;
-        word *      z0 = z;
-        word *      z1 = z + N;
+        word       *z0 = z;
+        word       *z1 = z + N;
 
         const s32bit cmp0 = bigint_cmp(x0, N2, x1, N2);
         const s32bit cmp1 = bigint_cmp(y1, N2, y0, N2);

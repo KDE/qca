@@ -41,10 +41,10 @@ public:
     }
 
     InfoType(QCA::CertificateInfoType _type,
-             const QString &          _varname,
-             const QString &          _shortname,
-             const QString &          _name,
-             const QString &          _desc)
+             const QString           &_varname,
+             const QString           &_shortname,
+             const QString           &_name,
+             const QString           &_desc)
         : type(_type)
         , varname(_varname)
         , shortname(_shortname)
@@ -129,7 +129,7 @@ class CertViewDlg::Private : public QObject
 {
     Q_OBJECT
 public:
-    CertViewDlg *         q;
+    CertViewDlg          *q;
     Ui_CertView           ui;
     QCA::CertificateChain chain;
 

@@ -44,23 +44,23 @@ bool         arrayToFile(const QString &fileName, const QByteArray &content);
 bool         arrayFromFile(const QString &fileName, QByteArray *a);
 bool         ask_passphrase(const QString &fname, void *ptr, SecureArray *answer);
 ProviderList allProviders();
-Provider *   providerForName(const QString &name);
+Provider    *providerForName(const QString &name);
 bool         use_asker_fallback(ConvertResult r);
 
 // last 3 arguments must be valid, and chain must be empty
-static bool get_pkcs12_der(const QByteArray & der,
-                           const QString &    fileName,
-                           void *             ptr,
+static bool get_pkcs12_der(const QByteArray  &der,
+                           const QString     &fileName,
+                           void              *ptr,
                            const SecureArray &passphrase,
-                           ConvertResult *    result,
-                           const QString &    provider,
-                           QString *          name,
-                           CertificateChain * chain,
-                           PrivateKey *       key)
+                           ConvertResult     *result,
+                           const QString     &provider,
+                           QString           *name,
+                           CertificateChain  *chain,
+                           PrivateKey        *key)
 {
     QString              _name;
     QList<CertContext *> list;
-    PKeyContext *        kc = nullptr;
+    PKeyContext         *kc = nullptr;
 
     PKCS12Context *pix = static_cast<PKCS12Context *>(getContext(QStringLiteral("pkcs12"), provider));
     ConvertResult  r   = pix->fromPKCS12(der, passphrase, &_name, &list, &kc);
@@ -1633,7 +1633,7 @@ bool Certificate::toPEMFile(const QString &fileName) const
 Certificate Certificate::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
     Certificate   c;
-    CertContext * cc = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
+    CertContext  *cc = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
     ConvertResult r  = cc->fromDER(a);
     if (result)
         *result = r;
@@ -1647,7 +1647,7 @@ Certificate Certificate::fromDER(const QByteArray &a, ConvertResult *result, con
 Certificate Certificate::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
     Certificate   c;
-    CertContext * cc = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
+    CertContext  *cc = static_cast<CertContext *>(getContext(QStringLiteral("cert"), provider));
     ConvertResult r  = cc->fromPEM(s);
     if (result)
         *result = r;
@@ -1739,9 +1739,9 @@ void Certificate::change(CertContext *c)
     d->update(static_cast<CertContext *>(context()));
 }
 
-Validity Certificate::chain_validate(const CertificateChain &     chain,
+Validity Certificate::chain_validate(const CertificateChain      &chain,
                                      const CertificateCollection &trusted,
-                                     const QList<CRL> &           untrusted_crls,
+                                     const QList<CRL>            &untrusted_crls,
                                      UsageMode                    u,
                                      ValidateFlags                vf) const
 {
@@ -1963,7 +1963,7 @@ bool CertificateRequest::toPEMFile(const QString &fileName) const
 CertificateRequest CertificateRequest::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
     CertificateRequest c;
-    CSRContext *       csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
+    CSRContext        *csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
     ConvertResult      r   = csr->fromDER(a);
     if (result)
         *result = r;
@@ -1977,7 +1977,7 @@ CertificateRequest CertificateRequest::fromDER(const QByteArray &a, ConvertResul
 CertificateRequest CertificateRequest::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
     CertificateRequest c;
-    CSRContext *       csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
+    CSRContext        *csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
     ConvertResult      r   = csr->fromPEM(s);
     if (result)
         *result = r;
@@ -2008,7 +2008,7 @@ QString CertificateRequest::toString() const
 CertificateRequest CertificateRequest::fromString(const QString &s, ConvertResult *result, const QString &provider)
 {
     CertificateRequest c;
-    CSRContext *       csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
+    CSRContext        *csr = static_cast<CSRContext *>(getContext(QStringLiteral("csr"), provider));
     ConvertResult      r   = csr->fromSPKAC(s);
     if (result)
         *result = r;
@@ -2228,7 +2228,7 @@ bool CRL::operator==(const CRL &otherCrl) const
 CRL CRL::fromDER(const QByteArray &a, ConvertResult *result, const QString &provider)
 {
     CRL           c;
-    CRLContext *  cc = static_cast<CRLContext *>(getContext(QStringLiteral("crl"), provider));
+    CRLContext   *cc = static_cast<CRLContext *>(getContext(QStringLiteral("crl"), provider));
     ConvertResult r  = cc->fromDER(a);
     if (result)
         *result = r;
@@ -2242,7 +2242,7 @@ CRL CRL::fromDER(const QByteArray &a, ConvertResult *result, const QString &prov
 CRL CRL::fromPEM(const QString &s, ConvertResult *result, const QString &provider)
 {
     CRL           c;
-    CRLContext *  cc = static_cast<CRLContext *>(getContext(QStringLiteral("crl"), provider));
+    CRLContext   *cc = static_cast<CRLContext *>(getContext(QStringLiteral("crl"), provider));
     ConvertResult r  = cc->fromPEM(s);
     if (result)
         *result = r;
@@ -2652,10 +2652,10 @@ KeyBundle::fromArray(const QByteArray &a, const SecureArray &passphrase, Convert
     return bundle;
 }
 
-KeyBundle KeyBundle::fromFile(const QString &    fileName,
+KeyBundle KeyBundle::fromFile(const QString     &fileName,
                               const SecureArray &passphrase,
-                              ConvertResult *    result,
-                              const QString &    provider)
+                              ConvertResult     *result,
+                              const QString     &provider)
 {
     QByteArray der;
     if (!arrayFromFile(fileName, &der)) {
@@ -2865,7 +2865,7 @@ public:
     KeyLoader *q;
 
     bool                 active;
-    KeyLoaderThread *    thread;
+    KeyLoaderThread     *thread;
     KeyLoaderThread::In  in;
     KeyLoaderThread::Out out;
 

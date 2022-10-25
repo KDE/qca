@@ -31,8 +31,8 @@ namespace QCA {
 int methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> &argTypes)
 #else
 QByteArray methodReturnType(
-    const QMetaObject *     obj,
-    const QByteArray &      method,
+    const QMetaObject      *obj,
+    const QByteArray       &method,
     const QList<QByteArray> argTypes) // clazy:exclude=function-args-by-ref NOLINT(performance-unnecessary-value-param)
                                       // TODO make argTypes const & when we break ABI
 #endif
@@ -62,10 +62,10 @@ QByteArray methodReturnType(
 #endif
 }
 
-bool invokeMethodWithVariants(QObject *           obj,
-                              const QByteArray &  method,
+bool invokeMethodWithVariants(QObject            *obj,
+                              const QByteArray   &method,
                               const QVariantList &args,
-                              QVariant *          ret,
+                              QVariant           *ret,
                               Qt::ConnectionType  type)
 {
     // QMetaObject::invokeMethod() has a 10 argument maximum
@@ -139,10 +139,10 @@ class SyncThread::Private : public QObject
 {
     Q_OBJECT
 public:
-    SyncThread *     q;
+    SyncThread      *q;
     QMutex           m;
     QWaitCondition   w;
-    QEventLoop *     loop;
+    QEventLoop      *loop;
     SyncThreadAgent *agent;
     bool             last_success;
     QVariant         last_ret;

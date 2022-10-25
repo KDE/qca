@@ -261,8 +261,8 @@ class CertItemStorePrivate : public QObject
 {
     Q_OBJECT
 public:
-    CertItemStore * q;
-    MyPrompter *    prompter;
+    CertItemStore  *q;
+    MyPrompter     *prompter;
     QList<CertItem> list;
     QList<int>      idList;
     CertItemIconset iconset;
@@ -624,8 +624,8 @@ class CertItemPrivateLoaderPrivate : public QObject
     Q_OBJECT
 public:
     CertItemPrivateLoader *q;
-    CertItemStore *        store;
-    QCA::KeyLoader *       loader;
+    CertItemStore         *store;
+    QCA::KeyLoader        *loader;
     QString                fileName;
     QCA::PrivateKey        key;
 

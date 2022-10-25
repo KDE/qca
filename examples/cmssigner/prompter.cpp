@@ -44,7 +44,7 @@ public:
     QCA::EventHandler handler;
     QList<Item>       pending;
     bool              prompting;
-    QMessageBox *     token_prompt;
+    QMessageBox      *token_prompt;
     bool              auto_accept;
 
     QCA::KeyStoreManager   ksm;
@@ -91,8 +91,8 @@ private Q_SLOTS:
 
         prompting = true;
 
-        const Item &      i     = pending.first();
-        const int &       id    = i.id;
+        const Item       &i     = pending.first();
+        const int        &id    = i.id;
         const QCA::Event &event = i.event;
 
         if (event.type() == QCA::Event::Password) {

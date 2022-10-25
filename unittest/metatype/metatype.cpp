@@ -182,7 +182,7 @@ void MetaTypeUnitTest::returnTypeTest()
 
 void MetaTypeUnitTest::invokeMethodTest()
 {
-    TestClass1 * testClass1 = new TestClass1;
+    TestClass1  *testClass1 = new TestClass1;
     QVariantList args;
 
     bool ret;

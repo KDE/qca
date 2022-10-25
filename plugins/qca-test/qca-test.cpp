@@ -426,7 +426,7 @@ public:
 
     virtual Validity validate(const QList<CertContext *> &trusted,
                               const QList<CertContext *> &untrusted,
-                              const QList<CRLContext *> & crls,
+                              const QList<CRLContext *>  &crls,
                               UsageMode                   u,
                               ValidateFlags               vf) const
     {
@@ -440,7 +440,7 @@ public:
 
     virtual Validity validate_chain(const QList<CertContext *> &chain,
                                     const QList<CertContext *> &trusted,
-                                    const QList<CRLContext *> & crls,
+                                    const QList<CRLContext *>  &crls,
                                     UsageMode                   u,
                                     ValidateFlags               vf) const
     {
@@ -560,7 +560,7 @@ public:
         cc1->_props.subject += CertificateInfoPair(CertificateInfoType(CommonName), "Test Cert 1");
         pub1.change(cc1);
         PrivateKey       sec1;
-        TestRSAContext * rsa1 = new TestRSAContext(provider());
+        TestRSAContext  *rsa1 = new TestRSAContext(provider());
         TestPKeyContext *kc1  = new TestPKeyContext(provider());
         kc1->setKey(rsa1);
         sec1.change(kc1);
@@ -684,7 +684,7 @@ public:
     virtual KeyStoreEntryContext *entryPassive(const QString &serialized)
     {
         if (serialized == "qca-test-1/fake_serialized") {
-            TestKeyStore &            store = data.stores[0];
+            TestKeyStore             &store = data.stores[0];
             TestKeyStoreEntryContext *kse   = new TestKeyStoreEntryContext(provider());
             kse->_id                        = QString::number(0);
             kse->_name                      = store.certs[0].certificateChain().primary().commonName();

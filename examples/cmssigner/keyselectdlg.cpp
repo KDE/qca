@@ -88,7 +88,7 @@ public:
     Type                _type;
     KeyStoreItemShared *_shared;
 
-    QCA::KeyStore *    keyStore;
+    QCA::KeyStore     *keyStore;
     QCA::KeyStoreEntry keyStoreEntry;
 
     KeyStoreItem(Type type, KeyStoreItemShared *shared)
@@ -204,7 +204,7 @@ private Q_SLOTS:
     void ks_updated()
     {
         QCA::KeyStore *ks         = (QCA::KeyStore *)sender();
-        KeyStoreItem * store_item = itemFromStore(ks);
+        KeyStoreItem  *store_item = itemFromStore(ks);
         Q_ASSERT(store_item);
 
         QList<QCA::KeyStoreEntry> newEntries = ks->entryList();
@@ -276,7 +276,7 @@ private Q_SLOTS:
     void ks_unavailable()
     {
         QCA::KeyStore *ks         = (QCA::KeyStore *)sender();
-        KeyStoreItem * store_item = itemFromStore(ks);
+        KeyStoreItem  *store_item = itemFromStore(ks);
         Q_ASSERT(store_item);
 
         store_item->removeRows(0, store_item->rowCount());
@@ -289,11 +289,11 @@ class KeySelectDlg::Private : public QObject
 {
     Q_OBJECT
 public:
-    KeySelectDlg *     q;
+    KeySelectDlg      *q;
     Ui_KeySelect       ui;
-    KeyStoreModel *    model;
+    KeyStoreModel     *model;
     QCA::KeyStoreEntry cur_entry;
-    QAction *          actionView;
+    QAction           *actionView;
 
     Private(KeySelectDlg *_q)
         : QObject(_q)

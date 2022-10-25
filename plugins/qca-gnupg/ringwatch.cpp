@@ -138,7 +138,7 @@ void RingWatch::handleChanged()
     if (at == -1)
         return;
 
-    DirWatch *    dirWatch = dirs[at].dirWatch;
+    DirWatch     *dirWatch = dirs[at].dirWatch;
     const QString dir      = dirWatch->dirName();
 
     // see which files changed

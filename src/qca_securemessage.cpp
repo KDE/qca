@@ -188,7 +188,7 @@ SecureMessageSignature::SecureMessageSignature()
 SecureMessageSignature::SecureMessageSignature(IdentityResult          r,
                                                Validity                v,
                                                const SecureMessageKey &key,
-                                               const QDateTime &       ts)
+                                               const QDateTime        &ts)
     : d(new Private)
 {
     d->r   = r;
@@ -246,8 +246,8 @@ class SecureMessage::Private : public QObject
 {
     Q_OBJECT
 public:
-    SecureMessage *      q;
-    MessageContext *     c;
+    SecureMessage       *q;
+    MessageContext      *c;
     SecureMessageSystem *system;
 
     bool                  bundleSigner, smime;

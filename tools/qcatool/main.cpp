@@ -113,7 +113,7 @@ private:
 
 private:
     static const char *s_severityNames[];
-    QTextStream &      _stream;
+    QTextStream       &_stream;
 };
 
 const char *StreamLogger::s_severityNames[] = {"Q", "M", "A", "C", "E", "W", "N", "I", "D", "U"};
@@ -172,7 +172,7 @@ private:
     QCA::PKey::Type   type;
     int               bits;
     QCA::DLGroupSet   set;
-    QEventLoop *      eventLoop;
+    QEventLoop       *eventLoop;
     QCA::KeyGenerator gen;
     QCA::DLGroup      group;
     QCA::PrivateKey   key;
@@ -256,10 +256,10 @@ public:
     }
 
 private:
-    QEventLoop *           eventLoop;
-    QCA::KeyStoreManager * ksm;
+    QEventLoop            *eventLoop;
+    QCA::KeyStoreManager  *ksm;
     QList<QCA::KeyStore *> keyStores;
-    QCA::ConsolePrompt *   prompt;
+    QCA::ConsolePrompt    *prompt;
 
 private Q_SLOTS:
     void start()
@@ -778,10 +778,10 @@ public:
     }
 
     InfoType(const QCA::CertificateInfoType &_type,
-             const QString &                 _varname,
-             const QString &                 _shortname,
-             const QString &                 _name,
-             const QString &                 _desc)
+             const QString                  &_varname,
+             const QString                  &_shortname,
+             const QString                  &_name,
+             const QString                  &_desc)
         : type(_type)
         , varname(_varname)
         , shortname(_shortname)
@@ -879,9 +879,9 @@ public:
     }
 
     MyConstraintType(const QCA::ConstraintType &_type,
-                     const QString &            _varname,
-                     const QString &            _name,
-                     const QString &            _desc)
+                     const QString             &_varname,
+                     const QString             &_name,
+                     const QString             &_desc)
         : type(_type)
         , varname(_varname)
         , name(_name)
@@ -3612,7 +3612,7 @@ int main(int argc, char **argv)
                 return 1;
             }
 
-            QCA::SecureMessageSystem *   sms;
+            QCA::SecureMessageSystem    *sms;
             QCA::SecureMessageKey        skey;
             QCA::SecureMessage::SignMode mode;
             bool                         pgp = false;

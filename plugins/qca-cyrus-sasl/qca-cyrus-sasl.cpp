@@ -49,7 +49,7 @@ public:
     QString     name() const override;
     QString     credit() const override;
     QStringList features() const override;
-    Context *   createContext(const QString &type) override;
+    Context    *createContext(const QString &type) override;
 
     bool    client_init;
     bool    server_init;
@@ -179,7 +179,7 @@ public:
             return;
         const QByteArray cs  = s.toUtf8();
         const int        len = cs.length();
-        char *           p   = new char[len + 1];
+        char            *p   = new char[len + 1];
         memcpy(p, cs.data(), len);
         p[len]    = 0;
         i->result = p;
@@ -226,7 +226,7 @@ class saslContext : public SASLContext
     QString ext_authid;
     int     ext_ssf;
 
-    sasl_conn_t *    con;
+    sasl_conn_t     *con;
     sasl_interact_t *need;
     int              maxoutbuf;
     sasl_callback_t *callbacks;
@@ -311,7 +311,7 @@ private:
 
         if (!ext_authid.isEmpty()) {
             const QByteArray ext_authidBA = ext_authid.toLatin1();
-            const char *     authid       = ext_authidBA.data();
+            const char      *authid       = ext_authidBA.data();
             sasl_ssf_t       ssf          = ext_ssf;
             r                             = sasl_setprop(con, SASL_SSF_EXTERNAL, &ssf);
             if (r != SASL_OK)
@@ -387,7 +387,7 @@ private:
     }
 
     static int scb_checkauth(sasl_conn_t *,
-                             void *      context,
+                             void       *context,
                              const char *requested_user,
                              unsigned,
                              const char *auth_identity,
@@ -408,7 +408,7 @@ private:
         result_haveClientInit = false;
 
         if (step == 0) {
-            const char * clientout, *m;
+            const char  *clientout, *m;
             unsigned int clientoutlen;
 
             need               = nullptr;
@@ -453,7 +453,7 @@ private:
             result_result = Continue;
             return;
         } else {
-            const char * clientout;
+            const char  *clientout;
             unsigned int clientoutlen;
             int          r;
             while (true) {
@@ -492,13 +492,13 @@ private:
     {
         if (step == 0) {
             if (!ca_skip) {
-                const char * clientin    = nullptr;
+                const char  *clientin    = nullptr;
                 unsigned int clientinlen = 0;
                 if (in_useClientInit) {
                     clientin    = in_clientInit.data();
                     clientinlen = in_clientInit.size();
                 }
-                const char * serverout;
+                const char  *serverout;
                 unsigned int serveroutlen;
                 ca_flag = false;
                 const int r =
@@ -529,7 +529,7 @@ private:
             return;
         } else {
             if (!ca_skip) {
-                const char * serverout;
+                const char  *serverout;
                 unsigned int serveroutlen;
                 const int    r = sasl_server_step(con, in_buf.data(), in_buf.size(), &serverout, &serveroutlen);
                 if (r != SASL_OK && r != SASL_CONTINUE) {
@@ -631,11 +631,11 @@ public:
         resetParams();
     }
 
-    void setup(const QString & _service,
-               const QString & _host,
+    void setup(const QString  &_service,
+               const QString  &_host,
                const HostPort *local,
                const HostPort *remote,
-               const QString & ext_id,
+               const QString  &ext_id,
                int             _ext_ssf) override
     {
         service    = _service;

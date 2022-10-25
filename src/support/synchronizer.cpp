@@ -57,10 +57,10 @@ public:
         }
     };
 
-    TimerFixer *        fixerParent;
+    TimerFixer         *fixerParent;
     QList<TimerFixer *> fixerChildren;
 
-    QObject *                 target;
+    QObject                  *target;
     QAbstractEventDispatcher *ed;
     QList<TimerInfo>          timers;
 
@@ -179,7 +179,7 @@ private Q_SLOTS:
         for (int n = 0; n < timers.count(); ++n) {
             TimerInfo &info = timers[n];
 
-            QThread *                 objectThread = target->thread();
+            QThread                  *objectThread = target->thread();
             QAbstractEventDispatcher *ed           = QAbstractEventDispatcher::instance(objectThread);
 
             const int timeLeft = qMax(info.interval - static_cast<int>(info.time.elapsed()), 0);
@@ -324,13 +324,13 @@ public:
     bool do_quit;
     bool cond_met;
 
-    QObject *          obj;
-    QEventLoop *       loop;
+    QObject           *obj;
+    QEventLoop        *loop;
     SynchronizerAgent *agent;
-    TimerFixer *       fixer;
+    TimerFixer        *fixer;
     QMutex             m;
     QWaitCondition     w;
-    QThread *          orig_thread;
+    QThread           *orig_thread;
 
     Private(QObject *_obj, Synchronizer *_q)
         : QThread(_q)

@@ -694,7 +694,7 @@ if( pubkey.canVerify() )
        \return true if the signature is valid for the message
     */
     bool verifyMessage(const MemoryRegion &a,
-                       const QByteArray &  sig,
+                       const QByteArray   &sig,
                        SignatureAlgorithm  alg,
                        SignatureFormat     format = DefaultFormat);
 
@@ -1031,7 +1031,7 @@ public:
        \sa fromPEM provides an inverse of toPEM, converting the PEM
        encoded key back to a PrivateKey
     */
-    bool toPEMFile(const QString &    fileName,
+    bool toPEMFile(const QString     &fileName,
                    const SecureArray &passphrase = SecureArray(),
                    PBEAlgorithm       pbe        = PBEDefault) const;
 
@@ -1055,8 +1055,8 @@ public:
     */
     static PrivateKey fromDER(const SecureArray &a,
                               const SecureArray &passphrase = SecureArray(),
-                              ConvertResult *    result     = nullptr,
-                              const QString &    provider   = QString());
+                              ConvertResult     *result     = nullptr,
+                              const QString     &provider   = QString());
 
     /**
        Import the key from Privacy Enhanced Mail (PEM) format
@@ -1076,10 +1076,10 @@ public:
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static PrivateKey fromPEM(const QString &    s,
+    static PrivateKey fromPEM(const QString     &s,
                               const SecureArray &passphrase = SecureArray(),
-                              ConvertResult *    result     = nullptr,
-                              const QString &    provider   = QString());
+                              ConvertResult     *result     = nullptr,
+                              const QString     &provider   = QString());
 
     /**
        Import the key in Privacy Enhanced Mail (PEM) format from a file
@@ -1103,10 +1103,10 @@ public:
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static PrivateKey fromPEMFile(const QString &    fileName,
+    static PrivateKey fromPEMFile(const QString     &fileName,
                                   const SecureArray &passphrase = SecureArray(),
-                                  ConvertResult *    result     = nullptr,
-                                  const QString &    provider   = QString());
+                                  ConvertResult     *result     = nullptr,
+                                  const QString     &provider   = QString());
 
 protected:
     /**
@@ -1347,7 +1347,7 @@ public:
                   const BigInteger &p,
                   const BigInteger &q,
                   const BigInteger &d,
-                  const QString &   provider = QString());
+                  const QString    &provider = QString());
 
     /**
        The public key value

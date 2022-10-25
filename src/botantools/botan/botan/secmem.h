@@ -188,7 +188,7 @@ private:
         alloc->deallocate(p, sizeof(T) * n);
     }
 
-    mutable T *        buf;
+    mutable T         *buf;
     mutable u32bit     used;
     mutable u32bit     allocated;
     mutable Allocator *alloc;

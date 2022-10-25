@@ -252,7 +252,7 @@ public:
         return new BotanPBKDFContext(provider(), type());
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               unsigned int                     keyLength,
                               unsigned int                     iterationCount) override
@@ -267,11 +267,11 @@ public:
         return QCA::SymmetricKey(retval);
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               unsigned int                     keyLength,
                               int                              msecInterval,
-                              unsigned int *                   iterationCount) override
+                              unsigned int                    *iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         Botan::OctetString key;
@@ -308,7 +308,7 @@ public:
         : QCA::HKDFContext(p, type)
     {
         const QString hashName = qcaHkdfToBotanHkdf(type);
-        Botan::HMAC * hashObj;
+        Botan::HMAC  *hashObj;
         hashObj = new Botan::HMAC(Botan::HashFunction::create_or_throw(hashName.toStdString()).release());
         m_hkdf  = new Botan::HKDF(hashObj);
     }
@@ -323,7 +323,7 @@ public:
         return new BotanHKDFContext(provider(), type());
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               const QCA::InitializationVector &info,
                               unsigned int                     keyLength) override
@@ -466,9 +466,9 @@ public:
     }
 
     void setup(QCA::Direction                   dir,
-               const QCA::SymmetricKey &        key,
+               const QCA::SymmetricKey         &key,
                const QCA::InitializationVector &iv,
-               const QCA::AuthTag &             tag) override
+               const QCA::AuthTag              &tag) override
     {
         Q_UNUSED(tag);
         try {
@@ -567,7 +567,7 @@ protected:
     std::string          m_algoMode;
     std::string          m_algoPadding;
     Botan::Keyed_Filter *m_cipher;
-    Botan::Pipe *        m_crypter;
+    Botan::Pipe         *m_crypter;
 };
 
 //==========================================================

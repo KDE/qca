@@ -364,8 +364,8 @@ public:
     Console::Type         type;
     Console::ChannelMode  cmode;
     Console::TerminalMode mode;
-    ConsoleThread *       thread;
-    ConsoleReference *    ref;
+    ConsoleThread        *thread;
+    ConsoleReference     *ref;
     Q_PIPE_ID             in_id;
 
 #ifdef Q_OS_WIN
@@ -574,8 +574,8 @@ class ConsoleReferencePrivate : public QObject
 public:
     ConsoleReference *q;
 
-    Console *                      console;
-    ConsoleThread *                thread;
+    Console                       *console;
+    ConsoleThread                 *thread;
     ConsoleReference::SecurityMode smode;
     SafeTimer                      lateTrigger;
     bool                           late_read, late_close;
@@ -737,7 +737,7 @@ public:
     ConsolePrompt *q;
 
     Synchronizer                sync;
-    Console *                   con;
+    Console                    *con;
     bool                        own_con;
     ConsoleReference            console;
     QString                     promptStr;
@@ -746,7 +746,7 @@ public:
     int                         at;
     bool                        done;
     bool                        charMode;
-    QTextCodec *                codec;
+    QTextCodec                 *codec;
     QTextCodec::ConverterState *encstate, *decstate;
 
     Private(ConsolePrompt *_q)
@@ -871,10 +871,10 @@ public:
     void convertToUtf8()
     {
         // convert result from utf16 to utf8, securely
-        QTextCodec *               codec = QTextCodec::codecForMib(106);
+        QTextCodec                *codec = QTextCodec::codecForMib(106);
         QTextCodec::ConverterState cstate(QTextCodec::IgnoreHeader);
         SecureArray                out;
-        const ushort *             ustr = reinterpret_cast<ushort *>(result.data());
+        const ushort              *ustr = reinterpret_cast<ushort *>(result.data());
         const int                  len  = result.size() / sizeof(ushort);
         for (int n = 0; n < len; ++n) {
             QChar c(ustr[n]);

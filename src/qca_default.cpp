@@ -76,7 +76,7 @@ public:
     }
 
     void set(bool               use_system,
-             const QString &    roots_file,
+             const QString     &roots_file,
              const QStringList &skip_plugins,
              const QStringList &plugin_priorities)
     {
@@ -934,12 +934,12 @@ static QString entry_serialize(const QString &storeId,
 }
 
 static bool entry_deserialize(const QString &in,
-                              QString *      storeId,
-                              QString *      storeName,
-                              QString *      entryId,
-                              QString *      entryName,
-                              QString *      entryType,
-                              QString *      data)
+                              QString       *storeId,
+                              QString       *storeName,
+                              QString       *entryId,
+                              QString       *entryName,
+                              QString       *entryType,
+                              QString       *data)
 {
     QStringList list;
     if (!unescape_stringlist(in, &list))

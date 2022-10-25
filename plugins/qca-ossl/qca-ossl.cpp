@@ -136,7 +136,7 @@ static SecureArray bn2fixedbuf(const BIGNUM *n, int size)
 
 static SecureArray dsasig_der_to_raw(const SecureArray &in)
 {
-    DSA_SIG *            sig = DSA_SIG_new();
+    DSA_SIG             *sig = DSA_SIG_new();
     const unsigned char *inp = (const unsigned char *)in.data();
     d2i_DSA_SIG(&sig, &inp, in.size());
 
@@ -158,11 +158,11 @@ static SecureArray dsasig_raw_to_der(const SecureArray &in)
     if (in.size() != 40)
         return SecureArray();
 
-    DSA_SIG *   sig = DSA_SIG_new();
+    DSA_SIG    *sig = DSA_SIG_new();
     SecureArray part_r(20);
-    BIGNUM *    bnr;
+    BIGNUM     *bnr;
     SecureArray part_s(20);
-    BIGNUM *    bns;
+    BIGNUM     *bns;
     memcpy(part_r.data(), in.data(), 20);
     memcpy(part_s.data(), in.data() + 20, 20);
     bnr = BN_bin2bn((const unsigned char *)part_r.data(), part_r.size(), nullptr);
@@ -308,7 +308,7 @@ static void try_get_name_item(X509_NAME *name, int nid, const CertificateInfoTyp
     loc = -1;
     while ((loc = X509_NAME_get_index_by_NID(name, nid, loc)) != -1) {
         X509_NAME_ENTRY *ne   = X509_NAME_get_entry(name, loc);
-        ASN1_STRING *    data = X509_NAME_ENTRY_get_data(ne);
+        ASN1_STRING     *data = X509_NAME_ENTRY_get_data(ne);
         QByteArray       cs((const char *)data->data, data->length);
         info->insert(t, QString::fromLatin1(cs));
     }
@@ -325,7 +325,7 @@ try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, const Certific
     loc = -1;
     while ((loc = X509_NAME_get_index_by_OBJ(name, oid, loc)) != -1) {
         X509_NAME_ENTRY *ne   = X509_NAME_get_entry(name, loc);
-        ASN1_STRING *    data = X509_NAME_ENTRY_get_data(ne);
+        ASN1_STRING     *data = X509_NAME_ENTRY_get_data(ne);
         QByteArray       cs((const char *)data->data, data->length);
         info->insert(t, QString::fromLatin1(cs));
         qDebug() << "oid: " << oidText << ",  result: " << cs;
@@ -642,7 +642,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 static CertificateInfo get_cert_alt_name(X509_EXTENSION *ex)
 {
     CertificateInfo info;
-    GENERAL_NAMES * gn = (GENERAL_NAMES *)X509V3_EXT_d2i(ex);
+    GENERAL_NAMES  *gn = (GENERAL_NAMES *)X509V3_EXT_d2i(ex);
     try_get_general_name(gn, Email, &info);
     try_get_general_name(gn, URI, &info);
     try_get_general_name(gn, DNS, &info);
@@ -833,7 +833,7 @@ static X509_EXTENSION *new_cert_policies(const QStringList &policies)
     STACK_OF(POLICYINFO) *pols = nullptr;
     for (int n = 0; n < policies.count(); ++n) {
         const QByteArray cs  = policies[n].toLatin1();
-        ASN1_OBJECT *    obj = OBJ_txt2obj(cs.data(), 1); // 1 = only accept dotted input
+        ASN1_OBJECT     *obj = OBJ_txt2obj(cs.data(), 1); // 1 = only accept dotted input
         if (!obj)
             continue;
         if (!pols)
@@ -1046,7 +1046,7 @@ public:
 
 protected:
     const EVP_MD *m_algorithm;
-    EVP_MD_CTX *  m_context;
+    EVP_MD_CTX   *m_context;
 };
 
 class opensslPbkdf1Context : public KDFContext
@@ -1079,7 +1079,7 @@ public:
         return new opensslPbkdf1Context(*this);
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          unsigned int                iterationCount) override
@@ -1128,11 +1128,11 @@ public:
         return a;
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          int                         msecInterval,
-                         unsigned int *              iterationCount) override
+                         unsigned int               *iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QElapsedTimer timer;
@@ -1189,7 +1189,7 @@ public:
 
 protected:
     const EVP_MD *m_algorithm;
-    EVP_MD_CTX *  m_context;
+    EVP_MD_CTX   *m_context;
 };
 
 class opensslPbkdf2Context : public KDFContext
@@ -1206,7 +1206,7 @@ public:
         return new opensslPbkdf2Context(*this);
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          unsigned int                iterationCount) override
@@ -1222,11 +1222,11 @@ public:
         return out;
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          int                         msecInterval,
-                         unsigned int *              iterationCount) override
+                         unsigned int               *iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QElapsedTimer timer;
@@ -1273,7 +1273,7 @@ public:
         return new opensslHkdfContext(*this);
     }
 
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          const InitializationVector &info,
                          unsigned int                keyLength) override
@@ -1345,7 +1345,7 @@ public:
     }
 
 protected:
-    HMAC_CTX *    m_context;
+    HMAC_CTX     *m_context;
     const EVP_MD *m_algorithm;
 };
 
@@ -1365,7 +1365,7 @@ public:
         VerifyActive,
         VerifyError
     };
-    EVP_PKEY *  pkey;
+    EVP_PKEY   *pkey;
     EVP_MD_CTX *mdctx;
     State       state;
     bool        raw_type;
@@ -1937,7 +1937,7 @@ public:
             return;
 
         // extract the public key into DER format
-        const RSA *    rsa_pkey = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA     *rsa_pkey = EVP_PKEY_get0_RSA(evp.pkey);
         int            len      = i2d_RSAPublicKey(rsa_pkey, nullptr);
         SecureArray    result(len);
         unsigned char *p = (unsigned char *)result.data();
@@ -1981,7 +1981,7 @@ public:
 
     SecureArray encrypt(const SecureArray &in, EncryptionAlgorithm alg) override
     {
-        const RSA * rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA  *rsa = EVP_PKEY_get0_RSA(evp.pkey);
         SecureArray buf = in;
         int         max = maximumEncryptSize(alg);
 
@@ -2029,7 +2029,7 @@ public:
 
     bool decrypt(const SecureArray &in, SecureArray *out, EncryptionAlgorithm alg) override
     {
-        const RSA * rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA  *rsa = EVP_PKEY_get0_RSA(evp.pkey);
         SecureArray result(RSA_size(rsa));
         int         pad;
 
@@ -2198,7 +2198,7 @@ public:
 
     BigInteger n() const override
     {
-        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnn;
         RSA_get0_key(rsa, &bnn, nullptr, nullptr);
         return bn2bi(bnn);
@@ -2206,7 +2206,7 @@ public:
 
     BigInteger e() const override
     {
-        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bne;
         RSA_get0_key(rsa, nullptr, &bne, nullptr);
         return bn2bi(bne);
@@ -2214,7 +2214,7 @@ public:
 
     BigInteger p() const override
     {
-        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnp;
         RSA_get0_factors(rsa, &bnp, nullptr);
         return bn2bi(bnp);
@@ -2222,7 +2222,7 @@ public:
 
     BigInteger q() const override
     {
-        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnq;
         RSA_get0_factors(rsa, nullptr, &bnq);
         return bn2bi(bnq);
@@ -2230,7 +2230,7 @@ public:
 
     BigInteger d() const override
     {
-        const RSA *   rsa = EVP_PKEY_get0_RSA(evp.pkey);
+        const RSA    *rsa = EVP_PKEY_get0_RSA(evp.pkey);
         const BIGNUM *bnd;
         RSA_get0_key(rsa, nullptr, nullptr, &bnd);
         return bn2bi(bnd);
@@ -2265,7 +2265,7 @@ class DSAKeyMaker : public QThread
     Q_OBJECT
 public:
     DLGroup domain;
-    DSA *   result;
+    DSA    *result;
 
     DSAKeyMaker(const DLGroup &_domain, QObject *parent = nullptr)
         : QThread(parent)
@@ -2284,7 +2284,7 @@ public:
     void run() override
     {
         std::unique_ptr<DSA, DsaDeleter> dsa(DSA_new());
-        BIGNUM *                         pne = bi2bn(domain.p()), *qne = bi2bn(domain.q()), *gne = bi2bn(domain.g());
+        BIGNUM                          *pne = bi2bn(domain.p()), *qne = bi2bn(domain.q()), *gne = bi2bn(domain.g());
 
         if (!DSA_set0_pqg(dsa.get(), pne, qne, gne)) {
             return;
@@ -2396,7 +2396,7 @@ public:
             return;
 
         // extract the public key into DER format
-        const DSA *    dsa_pkey = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA     *dsa_pkey = EVP_PKEY_get0_DSA(evp.pkey);
         int            len      = i2d_DSAPublicKey(dsa_pkey, nullptr);
         SecureArray    result(len);
         unsigned char *p = (unsigned char *)result.data();
@@ -2481,7 +2481,7 @@ public:
     {
         evp.reset();
 
-        DSA *   dsa        = DSA_new();
+        DSA    *dsa        = DSA_new();
         BIGNUM *bnp        = bi2bn(domain.p());
         BIGNUM *bnq        = bi2bn(domain.q());
         BIGNUM *bng        = bi2bn(domain.g());
@@ -2502,7 +2502,7 @@ public:
     {
         evp.reset();
 
-        DSA *   dsa       = DSA_new();
+        DSA    *dsa       = DSA_new();
         BIGNUM *bnp       = bi2bn(domain.p());
         BIGNUM *bnq       = bi2bn(domain.q());
         BIGNUM *bng       = bi2bn(domain.g());
@@ -2520,7 +2520,7 @@ public:
 
     DLGroup domain() const override
     {
-        const DSA *   dsa = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA    *dsa = EVP_PKEY_get0_DSA(evp.pkey);
         const BIGNUM *bnp, *bnq, *bng;
         DSA_get0_pqg(dsa, &bnp, &bnq, &bng);
         return DLGroup(bn2bi(bnp), bn2bi(bnq), bn2bi(bng));
@@ -2528,7 +2528,7 @@ public:
 
     BigInteger y() const override
     {
-        const DSA *   dsa = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA    *dsa = EVP_PKEY_get0_DSA(evp.pkey);
         const BIGNUM *bnpub_key;
         DSA_get0_key(dsa, &bnpub_key, nullptr);
         return bn2bi(bnpub_key);
@@ -2536,7 +2536,7 @@ public:
 
     BigInteger x() const override
     {
-        const DSA *   dsa = EVP_PKEY_get0_DSA(evp.pkey);
+        const DSA    *dsa = EVP_PKEY_get0_DSA(evp.pkey);
         const BIGNUM *bnpriv_key;
         DSA_get0_key(dsa, nullptr, &bnpriv_key);
         return bn2bi(bnpriv_key);
@@ -2571,7 +2571,7 @@ class DHKeyMaker : public QThread
     Q_OBJECT
 public:
     DLGroup domain;
-    DH *    result;
+    DH     *result;
 
     DHKeyMaker(const DLGroup &_domain, QObject *parent = nullptr)
         : QThread(parent)
@@ -2589,7 +2589,7 @@ public:
 
     void run() override
     {
-        DH *    dh  = DH_new();
+        DH     *dh  = DH_new();
         BIGNUM *bnp = bi2bn(domain.p());
         BIGNUM *bng = bi2bn(domain.g());
         if (!DH_set0_pqg(dh, bnp, nullptr, bng) || !DH_generate_key(dh)) {
@@ -2666,8 +2666,8 @@ public:
         if (!sec)
             return;
 
-        const DH *    orig = EVP_PKEY_get0_DH(evp.pkey);
-        DH *          dh   = DH_new();
+        const DH     *orig = EVP_PKEY_get0_DH(evp.pkey);
+        DH           *dh   = DH_new();
         const BIGNUM *bnp, *bng, *bnpub_key;
         DH_get0_pqg(orig, &bnp, nullptr, &bng);
         DH_get0_key(orig, &bnpub_key, nullptr);
@@ -2689,8 +2689,8 @@ public:
 
     SymmetricKey deriveKey(const PKeyBase &theirs) override
     {
-        const DH *    dh   = EVP_PKEY_get0_DH(evp.pkey);
-        const DH *    them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
+        const DH     *dh   = EVP_PKEY_get0_DH(evp.pkey);
+        const DH     *them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
         const BIGNUM *bnpub_key;
         DH_get0_key(them, &bnpub_key, nullptr);
 
@@ -2721,7 +2721,7 @@ public:
     {
         evp.reset();
 
-        DH *    dh         = DH_new();
+        DH     *dh         = DH_new();
         BIGNUM *bnp        = bi2bn(domain.p());
         BIGNUM *bng        = bi2bn(domain.g());
         BIGNUM *bnpub_key  = bi2bn(y);
@@ -2741,7 +2741,7 @@ public:
     {
         evp.reset();
 
-        DH *    dh        = DH_new();
+        DH     *dh        = DH_new();
         BIGNUM *bnp       = bi2bn(domain.p());
         BIGNUM *bng       = bi2bn(domain.g());
         BIGNUM *bnpub_key = bi2bn(y);
@@ -2758,7 +2758,7 @@ public:
 
     DLGroup domain() const override
     {
-        const DH *    dh = EVP_PKEY_get0_DH(evp.pkey);
+        const DH     *dh = EVP_PKEY_get0_DH(evp.pkey);
         const BIGNUM *bnp, *bng;
         DH_get0_pqg(dh, &bnp, nullptr, &bng);
         return DLGroup(bn2bi(bnp), bn2bi(bng));
@@ -2766,7 +2766,7 @@ public:
 
     BigInteger y() const override
     {
-        const DH *    dh = EVP_PKEY_get0_DH(evp.pkey);
+        const DH     *dh = EVP_PKEY_get0_DH(evp.pkey);
         const BIGNUM *bnpub_key;
         DH_get0_key(dh, &bnpub_key, nullptr);
         return bn2bi(bnpub_key);
@@ -2774,7 +2774,7 @@ public:
 
     BigInteger x() const override
     {
-        const DH *    dh = EVP_PKEY_get0_DH(evp.pkey);
+        const DH     *dh = EVP_PKEY_get0_DH(evp.pkey);
         const BIGNUM *bnpriv_key;
         DH_get0_key(dh, nullptr, &bnpriv_key);
         return bn2bi(bnpriv_key);
@@ -3049,7 +3049,7 @@ public:
         k = nullptr;
 
         const QByteArray in = s.toLatin1();
-        BIO *            bi = BIO_new(BIO_s_mem());
+        BIO             *bi = BIO_new(BIO_s_mem());
         BIO_write(bi, in.data(), in.size());
         EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, nullptr, passphrase_cb, nullptr);
         BIO_free(bi);
@@ -3151,7 +3151,7 @@ public:
         k = nullptr;
 
         const QByteArray in = s.toLatin1();
-        BIO *            bi = BIO_new(BIO_s_mem());
+        BIO             *bi = BIO_new(BIO_s_mem());
         BIO_write(bi, in.data(), in.size());
         EVP_PKEY *pkey;
         if (!passphrase.isEmpty())
@@ -3177,7 +3177,7 @@ public:
 class X509Item
 {
 public:
-    X509 *    cert;
+    X509     *cert;
     X509_REQ *req;
     X509_CRL *crl;
 
@@ -3303,7 +3303,7 @@ public:
         reset();
 
         const QByteArray in = s.toLatin1();
-        BIO *            bi = BIO_new(BIO_s_mem());
+        BIO             *bi = BIO_new(BIO_s_mem());
         BIO_write(bi, in.data(), in.size());
 
         if (t == TypeCert)
@@ -3329,7 +3329,7 @@ public:
 QDateTime ASN1_UTCTIME_QDateTime(const ASN1_UTCTIME *tm, int *isGmt)
 {
     QDateTime qdt;
-    char *    v;
+    char     *v;
     int       gmt = 0;
     int       i;
     int       y = 0, M = 0, d = 0, h = 0, m = 0, s = 0;
@@ -3460,7 +3460,7 @@ public:
         else
             constraints = find_constraints(priv, opts.constraints());*/
 
-        EVP_PKEY *      pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
+        EVP_PKEY       *pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
         X509_EXTENSION *ex;
 
         const EVP_MD *md;
@@ -3579,8 +3579,8 @@ public:
     PKeyContext *subjectPublicKey() const override
     {
         MyPKeyContext *kc   = new MyPKeyContext(provider());
-        EVP_PKEY *     pkey = X509_get_pubkey(item.cert);
-        PKeyBase *     kb   = kc->pkeyToBase(pkey, false);
+        EVP_PKEY      *pkey = X509_get_pubkey(item.cert);
+        PKeyBase      *kb   = kc->pkeyToBase(pkey, false);
         kc->setKey(kb);
         return kc;
     }
@@ -3591,12 +3591,12 @@ public:
         STACK_OF(X509) *untrusted_list = sk_X509_new_null();
 
         const MyCertContext *our_cc = this;
-        X509 *               x      = our_cc->item.cert;
+        X509                *x      = our_cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(untrusted_list, x);
 
         const MyCertContext *other_cc = static_cast<const MyCertContext *>(other);
-        X509 *               ox       = other_cc->item.cert;
+        X509                *ox       = other_cc->item.cert;
 
         X509_STORE *store = X509_STORE_new();
 
@@ -3629,26 +3629,26 @@ public:
     // implemented later because it depends on MyCRLContext
     Validity validate(const QList<CertContext *> &trusted,
                       const QList<CertContext *> &untrusted,
-                      const QList<CRLContext *> & crls,
+                      const QList<CRLContext *>  &crls,
                       UsageMode                   u,
                       ValidateFlags               vf) const override;
 
     Validity validate_chain(const QList<CertContext *> &chain,
                             const QList<CertContext *> &trusted,
-                            const QList<CRLContext *> & crls,
+                            const QList<CRLContext *>  &crls,
                             UsageMode                   u,
                             ValidateFlags               vf) const override;
 
     void make_props()
     {
-        X509 *           x = item.cert;
+        X509            *x = item.cert;
         CertContextProps p;
 
         p.version = X509_get_version(x);
 
         ASN1_INTEGER *ai = X509_get_serialNumber(x);
         if (ai) {
-            char *  rep = i2s_ASN1_INTEGER(nullptr, ai);
+            char   *rep = i2s_ASN1_INTEGER(nullptr, ai);
             QString str = QString::fromLatin1(rep);
             OPENSSL_free(rep);
             p.serial.fromString(str);
@@ -3855,13 +3855,13 @@ public:
 
     CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const override
     {
-        MyCertContext *         cert  = nullptr;
-        const EVP_MD *          md    = nullptr;
-        X509 *                  x     = nullptr;
+        MyCertContext          *cert  = nullptr;
+        const EVP_MD           *md    = nullptr;
+        X509                   *x     = nullptr;
         const CertContextProps &props = *req.props();
         CertificateOptions      subjectOpts;
-        X509_NAME *             subjectName = nullptr;
-        X509_EXTENSION *        ex          = nullptr;
+        X509_NAME              *subjectName = nullptr;
+        X509_EXTENSION         *ex          = nullptr;
 
         if (privateKey->key()->type() == PKey::RSA)
             md = EVP_sha1();
@@ -4042,7 +4042,7 @@ public:
         else
             constraints = find_constraints(priv, opts.constraints());*/
 
-        EVP_PKEY *      pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
+        EVP_PKEY       *pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
         X509_EXTENSION *ex;
 
         const EVP_MD *md;
@@ -4135,8 +4135,8 @@ public:
     PKeyContext *subjectPublicKey() const override // does a new
     {
         MyPKeyContext *kc   = new MyPKeyContext(provider());
-        EVP_PKEY *     pkey = X509_REQ_get_pubkey(item.req);
-        PKeyBase *     kb   = kc->pkeyToBase(pkey, false);
+        EVP_PKEY      *pkey = X509_REQ_get_pubkey(item.req);
+        PKeyBase      *kb   = kc->pkeyToBase(pkey, false);
         kc->setKey(kb);
         return kc;
     }
@@ -4154,7 +4154,7 @@ public:
 
     void make_props()
     {
-        X509_REQ *       x = item.req;
+        X509_REQ        *x = item.req;
         CertContextProps p;
 
         // TODO: QString challenge;
@@ -4353,7 +4353,7 @@ public:
         STACK_OF(X509_REVOKED) *revokeStack = X509_CRL_get_REVOKED(x);
 
         for (int i = 0; i < sk_X509_REVOKED_num(revokeStack); ++i) {
-            X509_REVOKED *        rev    = sk_X509_REVOKED_value(revokeStack, i);
+            X509_REVOKED         *rev    = sk_X509_REVOKED_value(revokeStack, i);
             BigInteger            serial = bn2bi_free(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
             QDateTime             time   = ASN1_UTCTIME_QDateTime(X509_REVOKED_get0_revocationDate(rev), nullptr);
             QCA::CRLEntry::Reason reason = QCA::CRLEntry::Unspecified;
@@ -4584,7 +4584,7 @@ static bool usage_check(const MyCertContext &cc, UsageMode u)
 
 Validity MyCertContext::validate(const QList<CertContext *> &trusted,
                                  const QList<CertContext *> &untrusted,
-                                 const QList<CRLContext *> & crls,
+                                 const QList<CRLContext *>  &crls,
                                  UsageMode                   u,
                                  ValidateFlags               vf) const
 {
@@ -4598,25 +4598,25 @@ Validity MyCertContext::validate(const QList<CertContext *> &trusted,
     int n;
     for (n = 0; n < trusted.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(trusted[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(trusted_list, x);
     }
     for (n = 0; n < untrusted.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(untrusted[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(untrusted_list, x);
     }
     for (n = 0; n < crls.count(); ++n) {
         const MyCRLContext *cc = static_cast<const MyCRLContext *>(crls[n]);
-        X509_CRL *          x  = cc->item.crl;
+        X509_CRL           *x  = cc->item.crl;
         X509_CRL_up_ref(x);
         crl_list.append(x);
     }
 
     const MyCertContext *cc = this;
-    X509 *               x  = cc->item.cert;
+    X509                *x  = cc->item.cert;
 
     // verification happens through a store "context"
     X509_STORE_CTX *ctx = X509_STORE_CTX_new();
@@ -4658,7 +4658,7 @@ Validity MyCertContext::validate(const QList<CertContext *> &trusted,
 
 Validity MyCertContext::validate_chain(const QList<CertContext *> &chain,
                                        const QList<CertContext *> &trusted,
-                                       const QList<CRLContext *> & crls,
+                                       const QList<CRLContext *>  &crls,
                                        UsageMode                   u,
                                        ValidateFlags               vf) const
 {
@@ -4672,25 +4672,25 @@ Validity MyCertContext::validate_chain(const QList<CertContext *> &chain,
     int n;
     for (n = 0; n < trusted.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(trusted[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(trusted_list, x);
     }
     for (n = 1; n < chain.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(chain[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(untrusted_list, x);
     }
     for (n = 0; n < crls.count(); ++n) {
         const MyCRLContext *cc = static_cast<const MyCRLContext *>(crls[n]);
-        X509_CRL *          x  = cc->item.crl;
+        X509_CRL           *x  = cc->item.crl;
         X509_CRL_up_ref(x);
         crl_list.append(x);
     }
 
     const MyCertContext *cc = static_cast<const MyCertContext *>(chain[0]);
-    X509 *               x  = cc->item.cert;
+    X509                *x  = cc->item.cert;
 
     // verification happens through a store "context"
     X509_STORE_CTX *ctx = X509_STORE_CTX_new();
@@ -4764,10 +4764,10 @@ public:
         return nullptr;
     }
 
-    QByteArray toPKCS12(const QString &                   name,
+    QByteArray toPKCS12(const QString                    &name,
                         const QList<const CertContext *> &chain,
-                        const PKeyContext &               priv,
-                        const SecureArray &               passphrase) const override
+                        const PKeyContext                &priv,
+                        const SecureArray                &passphrase) const override
     {
         if (chain.count() < 1)
             return QByteArray();
@@ -4782,7 +4782,7 @@ public:
             }
         }
         const MyPKeyContext &pk  = static_cast<const MyPKeyContext &>(priv);
-        PKCS12 *             p12 = PKCS12_create(
+        PKCS12              *p12 = PKCS12_create(
             (char *)passphrase.data(), (char *)name.toLatin1().data(), pk.get_pkey(), cert, ca, 0, 0, 0, 0, 0);
         sk_X509_pop_free(ca, X509_free);
 
@@ -4795,11 +4795,11 @@ public:
         return out;
     }
 
-    ConvertResult fromPKCS12(const QByteArray &    in,
-                             const SecureArray &   passphrase,
-                             QString *             name,
+    ConvertResult fromPKCS12(const QByteArray     &in,
+                             const SecureArray    &passphrase,
+                             QString              *name,
                              QList<CertContext *> *chain,
-                             PKeyContext **        priv) const override
+                             PKeyContext         **priv) const override
     {
         BIO *bi = BIO_new(BIO_s_mem());
         BIO_write(bi, in.data(), in.size());
@@ -4809,7 +4809,7 @@ public:
             return ErrorDecode;
 
         EVP_PKEY *pkey;
-        X509 *    cert;
+        X509     *cert;
         STACK_OF(X509) *ca = nullptr;
         if (!PKCS12_parse(p12, passphrase.data(), &pkey, &cert, &ca)) {
             PKCS12_free(p12);
@@ -4833,7 +4833,7 @@ public:
         *name           = QString::fromLatin1(aliasData, aliasLength);
 
         MyPKeyContext *pk = new MyPKeyContext(provider());
-        PKeyBase *     k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+        PKeyBase      *k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
         if (!k) {
             delete pk;
             if (cert)
@@ -4920,10 +4920,10 @@ public:
     int        result_encoded;
     QByteArray result_plain;
 
-    SSL *             ssl;
+    SSL              *ssl;
     const SSL_METHOD *method;
-    SSL_CTX *         context;
-    BIO *             rbio, *wbio;
+    SSL_CTX          *context;
+    BIO              *rbio, *wbio;
     Validity          vr;
     bool              v_eof;
 
@@ -5447,19 +5447,19 @@ public:
 
         // setup the cert store
         {
-            X509_STORE *             store     = SSL_CTX_get_cert_store(context);
+            X509_STORE              *store     = SSL_CTX_get_cert_store(context);
             const QList<Certificate> cert_list = trusted.certificates();
             const QList<CRL>         crl_list  = trusted.crls();
             int                      n;
             for (n = 0; n < cert_list.count(); ++n) {
                 const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
-                X509 *               x  = cc->item.cert;
+                X509                *x  = cc->item.cert;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
                 X509_STORE_add_cert(store, x);
             }
             for (n = 0; n < crl_list.count(); ++n) {
                 const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
-                X509_CRL *          x  = cc->item.crl;
+                X509_CRL           *x  = cc->item.crl;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
                 X509_STORE_add_crl(store, x);
             }
@@ -5506,7 +5506,7 @@ public:
 
                 // make a new private key object to hold it
                 MyPKeyContext *pk = new MyPKeyContext(provider());
-                PKeyBase *     k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+                PKeyBase      *k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
                 pk->k             = k;
                 nkey.change(pk);
             }
@@ -5544,7 +5544,7 @@ public:
             CertificateChain chain;
 
             if (serv) {
-                X509 *         x  = SSL_get_peer_certificate(ssl);
+                X509          *x  = SSL_get_peer_certificate(ssl);
                 MyCertContext *cc = new MyCertContext(provider());
                 cc->fromX509(x);
                 Certificate cert;
@@ -5553,7 +5553,7 @@ public:
             }
 
             for (int n = 0; n < sk_X509_num(x_chain); ++n) {
-                X509 *         x  = sk_X509_value(x_chain, n);
+                X509          *x  = sk_X509_value(x_chain, n);
                 MyCertContext *cc = new MyCertContext(provider());
                 cc->fromX509(x);
                 Certificate cert;
@@ -5714,9 +5714,9 @@ public:
     Certificate             cert;
     PrivateKey              key;
     STACK_OF(X509) * other_certs;
-    BIO *      bi;
+    BIO       *bi;
     int        flags;
-    PKCS7 *    p7;
+    PKCS7     *p7;
     bool       ok;
     QByteArray out, sig;
 
@@ -5731,8 +5731,8 @@ protected:
     {
         MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
         MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
-        X509 *         cx = cc->item.cert;
-        EVP_PKEY *     kx = kc->get_pkey();
+        X509          *cx = cc->item.cert;
+        EVP_PKEY      *kx = kc->get_pkey();
 
         p7 = PKCS7_sign(cx, kx, other_certs, bi, flags);
 
@@ -5772,7 +5772,7 @@ class MyMessageContext : public MessageContext
 {
     Q_OBJECT
 public:
-    CMSContext *            cms;
+    CMSContext             *cms;
     SecureMessageKey        signer;
     SecureMessageKeyList    to;
     SecureMessage::SignMode signMode;
@@ -5908,7 +5908,7 @@ public:
 
                 // make a new private key object to hold it
                 MyPKeyContext *pk = new MyPKeyContext(provider());
-                PKeyBase *     k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+                PKeyBase      *k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
                 pk->k             = k;
                 key.change(pk);
             }
@@ -5972,7 +5972,7 @@ public:
             Certificate target = to.first().x509CertificateChain().primary();
 
             STACK_OF(X509) * other_certs;
-            BIO *  bi;
+            BIO   *bi;
             int    flags;
             PKCS7 *p7;
 
@@ -6082,19 +6082,19 @@ public:
 
             signerChain = chain;
 
-            X509_STORE *             store     = X509_STORE_new();
+            X509_STORE              *store     = X509_STORE_new();
             const QList<Certificate> cert_list = cms->trustedCerts.certificates();
             QList<CRL>               crl_list  = cms->trustedCerts.crls();
             for (int n = 0; n < cert_list.count(); ++n) {
                 // printf("trusted: [%s]\n", qPrintable(cert_list[n].commonName()));
                 const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
-                X509 *               x  = cc->item.cert;
+                X509                *x  = cc->item.cert;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
                 X509_STORE_add_cert(store, x);
             }
             for (int n = 0; n < crl_list.count(); ++n) {
                 const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
-                X509_CRL *          x  = cc->item.crl;
+                X509_CRL           *x  = cc->item.crl;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
                 X509_STORE_add_crl(store, x);
             }
@@ -6102,7 +6102,7 @@ public:
             crl_list = untrusted_crls;
             for (int n = 0; n < crl_list.count(); ++n) {
                 const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
-                X509_CRL *          x  = cc->item.crl;
+                X509_CRL           *x  = cc->item.crl;
                 // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
                 X509_STORE_add_crl(store, x);
             }
@@ -6138,7 +6138,7 @@ public:
                 MyCertContext *cc = static_cast<MyCertContext *>(cert.context());
                 MyPKeyContext *kc = static_cast<MyPKeyContext *>(key.context());
 
-                X509 *    cx = cc->item.cert;
+                X509     *cx = cc->item.cert;
                 EVP_PKEY *kx = kc->get_pkey();
 
                 BIO *bi = BIO_new(BIO_s_mem());
@@ -6420,7 +6420,7 @@ public:
     }
 
 protected:
-    EVP_CIPHER_CTX *  m_context;
+    EVP_CIPHER_CTX   *m_context;
     const EVP_CIPHER *m_cryptoAlgorithm;
     Direction         m_direction;
     int               m_pad;

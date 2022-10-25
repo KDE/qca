@@ -57,8 +57,8 @@ public:
 
     QList<QCA::KeyStoreEntry::Type>    entryTypes(int) const override;
     QList<QCA::KeyStoreEntryContext *> entryList(int) override;
-    QCA::KeyStoreEntryContext *        entry(int, const QString &entryId) override;
-    QCA::KeyStoreEntryContext *        entryPassive(const QString &serialized) override;
+    QCA::KeyStoreEntryContext         *entry(int, const QString &entryId) override;
+    QCA::KeyStoreEntryContext         *entryPassive(const QString &serialized) override;
     QString                            writeEntry(int, const QCA::PGPKey &key) override;
     bool                               removeEntry(int, const QString &entryId) override;
 

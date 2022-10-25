@@ -628,13 +628,13 @@ public:
        \note Padding only applies to CBC and ECB modes.  CFB and OFB
        ciphertext is always the length of the plaintext.
     */
-    Cipher(const QString &             type,
+    Cipher(const QString              &type,
            Mode                        mode,
            Padding                     pad      = DefaultPadding,
            Direction                   dir      = Encode,
-           const SymmetricKey &        key      = SymmetricKey(),
+           const SymmetricKey         &key      = SymmetricKey(),
            const InitializationVector &iv       = InitializationVector(),
-           const QString &             provider = QString());
+           const QString              &provider = QString());
 
     /**
        Standard constructor
@@ -653,14 +653,14 @@ public:
        \note Padding only applies to CBC and ECB modes.  CFB and OFB
        ciphertext is always the length of the plaintext.
     */
-    Cipher(const QString &             type,
+    Cipher(const QString              &type,
            Mode                        mode,
            Padding                     pad,
            Direction                   dir,
-           const SymmetricKey &        key,
+           const SymmetricKey         &key,
            const InitializationVector &iv,
-           const AuthTag &             tag,
-           const QString &             provider = QString());
+           const AuthTag              &tag,
+           const QString              &provider = QString());
 
     /**
        Standard copy constructor
@@ -984,7 +984,7 @@ public:
 
        \return the derived key
     */
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          unsigned int                iterationCount);
@@ -1002,11 +1002,11 @@ public:
 
        \return the derived key
     */
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          unsigned int                keyLength,
                          int                         msecInterval,
-                         unsigned int *              iterationCount);
+                         unsigned int               *iterationCount);
 
     /**
        Construct the name of the algorithm
@@ -1139,7 +1139,7 @@ public:
 
        \return the derived key
     */
-    SymmetricKey makeKey(const SecureArray &         secret,
+    SymmetricKey makeKey(const SecureArray          &secret,
                          const InitializationVector &salt,
                          const InitializationVector &info,
                          unsigned int                keyLength);

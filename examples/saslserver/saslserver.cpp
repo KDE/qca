@@ -156,15 +156,15 @@ class ServerTestHandler : public QObject
 private:
     ServerTest *serverTest;
     QTcpSocket *sock;
-    QCA::SASL * sasl;
+    QCA::SASL  *sasl;
     int         id;
     QString     host, proto, realm, str;
     int         mode; // 0 = receive mechanism list, 1 = sasl negotiation, 2 = app
     int         toWrite;
 
 public:
-    ServerTestHandler(ServerTest *   _serverTest,
-                      QTcpSocket *   _sock,
+    ServerTestHandler(ServerTest    *_serverTest,
+                      QTcpSocket    *_sock,
                       const QString &_host,
                       const QString &_proto,
                       const QString &_realm,

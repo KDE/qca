@@ -29,13 +29,13 @@
 namespace QCA {
 
 // from qca_core.cpp
-QMutex *           global_random_mutex();
-Random *           global_random();
+QMutex            *global_random_mutex();
+Random            *global_random();
 Provider::Context *getContext(const QString &type, Provider *p);
 
 // from qca_publickey.cpp
 ProviderList allProviders();
-Provider *   providerForName(const QString &name);
+Provider    *providerForName(const QString &name);
 
 static void mergeList(QStringList *a, const QStringList &b)
 {
@@ -264,13 +264,13 @@ public:
     bool ok, done;
 };
 
-Cipher::Cipher(const QString &             type,
+Cipher::Cipher(const QString              &type,
                Mode                        mode,
                Padding                     pad,
                Direction                   dir,
-               const SymmetricKey &        key,
+               const SymmetricKey         &key,
                const InitializationVector &iv,
-               const QString &             provider)
+               const QString              &provider)
     : Algorithm(withAlgorithms(type, mode, pad), provider)
 {
     d       = new Private;
@@ -281,14 +281,14 @@ Cipher::Cipher(const QString &             type,
         setup(dir, key, iv);
 }
 
-Cipher::Cipher(const QString &             type,
+Cipher::Cipher(const QString              &type,
                Cipher::Mode                mode,
                Cipher::Padding             pad,
                Direction                   dir,
-               const SymmetricKey &        key,
+               const SymmetricKey         &key,
                const InitializationVector &iv,
-               const AuthTag &             tag,
-               const QString &             provider)
+               const AuthTag              &tag,
+               const QString              &provider)
     : Algorithm(withAlgorithms(type, mode, pad), provider)
 {
     d       = new Private;
@@ -472,9 +472,9 @@ public:
     MemoryRegion buf;
 };
 
-MessageAuthenticationCode::MessageAuthenticationCode(const QString &     type,
+MessageAuthenticationCode::MessageAuthenticationCode(const QString      &type,
                                                      const SymmetricKey &key,
-                                                     const QString &     provider)
+                                                     const QString      &provider)
     : Algorithm(type, provider)
 {
     d = new Private;
@@ -573,7 +573,7 @@ KeyDerivationFunction &KeyDerivationFunction::operator=(const KeyDerivationFunct
     return *this;
 }
 
-SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &         secret,
+SymmetricKey KeyDerivationFunction::makeKey(const SecureArray          &secret,
                                             const InitializationVector &salt,
                                             unsigned int                keyLength,
                                             unsigned int                iterationCount)
@@ -581,11 +581,11 @@ SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &         secret,
     return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, iterationCount);
 }
 
-SymmetricKey KeyDerivationFunction::makeKey(const SecureArray &         secret,
+SymmetricKey KeyDerivationFunction::makeKey(const SecureArray          &secret,
                                             const InitializationVector &salt,
                                             unsigned int                keyLength,
                                             int                         msecInterval,
-                                            unsigned int *              iterationCount)
+                                            unsigned int               *iterationCount)
 {
     return static_cast<KDFContext *>(context())->makeKey(secret, salt, keyLength, msecInterval, iterationCount);
 }
@@ -618,7 +618,7 @@ HKDF &HKDF::operator=(const HKDF &from)
     return *this;
 }
 
-SymmetricKey HKDF::makeKey(const SecureArray &         secret,
+SymmetricKey HKDF::makeKey(const SecureArray          &secret,
                            const InitializationVector &salt,
                            const InitializationVector &info,
                            unsigned int                keyLength)

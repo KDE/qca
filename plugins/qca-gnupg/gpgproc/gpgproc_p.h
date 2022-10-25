@@ -105,11 +105,11 @@ class GPGProc::Private : public QObject
 {
     Q_OBJECT
 public:
-    GPGProc *            q;
+    GPGProc             *q;
     QString              bin;
     QStringList          args;
     GPGProc::Mode        mode;
-    SProcess *           proc;
+    SProcess            *proc;
     QProcessSignalRelay *proc_relay;
     QCA::QPipe           pipeAux, pipeCommand, pipeStatus;
     QByteArray           statusBuf;
