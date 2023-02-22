@@ -1087,7 +1087,7 @@ public:
         /* from RFC2898:
            Steps:
 
-           1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
+           1. If dkLen > 16 for MD5, or dkLen > 20 for SHA-1, output
            "derived key too long" and stop.
         */
         if (keyLength > (unsigned int)EVP_MD_size(m_algorithm)) {
@@ -1140,7 +1140,7 @@ public:
         /* from RFC2898:
            Steps:
 
-           1. If dkLen > 16 for MD2 and MD5, or dkLen > 20 for SHA-1, output
+           1. If dkLen > 16 for MD5, or dkLen > 20 for SHA-1, output
            "derived key too long" and stop.
         */
         if (keyLength > (unsigned int)EVP_MD_size(m_algorithm)) {
@@ -2078,10 +2078,6 @@ public:
             md = EVP_sha1();
         else if (alg == EMSA3_MD5)
             md = EVP_md5();
-#ifdef HAVE_OPENSSL_MD2
-        else if (alg == EMSA3_MD2)
-            md = EVP_md2();
-#endif
         else if (alg == EMSA3_RIPEMD160)
             md = EVP_ripemd160();
         else if (alg == EMSA3_SHA224)
@@ -2105,10 +2101,6 @@ public:
             md = EVP_sha1();
         else if (alg == EMSA3_MD5)
             md = EVP_md5();
-#ifdef HAVE_OPENSSL_MD2
-        else if (alg == EMSA3_MD2)
-            md = EVP_md2();
-#endif
         else if (alg == EMSA3_RIPEMD160)
             md = EVP_ripemd160();
         else if (alg == EMSA3_SHA224)
@@ -3724,11 +3716,6 @@ public:
         case NID_md5WithRSAEncryption:
             p.sigalgo = QCA::EMSA3_MD5;
             break;
-#ifdef HAVE_OPENSSL_MD2
-        case NID_md2WithRSAEncryption:
-            p.sigalgo = QCA::EMSA3_MD2;
-            break;
-#endif
         case NID_ripemd160WithRSA:
             p.sigalgo = QCA::EMSA3_RIPEMD160;
             break;
@@ -4222,11 +4209,6 @@ public:
         case NID_md5WithRSAEncryption:
             p.sigalgo = QCA::EMSA3_MD5;
             break;
-#ifdef HAVE_OPENSSL_MD2
-        case NID_md2WithRSAEncryption:
-            p.sigalgo = QCA::EMSA3_MD2;
-            break;
-#endif
         case NID_ripemd160WithRSA:
             p.sigalgo = QCA::EMSA3_RIPEMD160;
             break;
@@ -4420,11 +4402,6 @@ public:
         case NID_md5WithRSAEncryption:
             p.sigalgo = QCA::EMSA3_MD5;
             break;
-#ifdef HAVE_OPENSSL_MD2
-        case NID_md2WithRSAEncryption:
-            p.sigalgo = QCA::EMSA3_MD2;
-            break;
-#endif
         case NID_ripemd160WithRSA:
             p.sigalgo = QCA::EMSA3_RIPEMD160;
             break;
@@ -6399,19 +6376,24 @@ public:
     // Change cipher names
     KeyLength keyLength() const override
     {
+#ifdef OPENSSL3_NO_LEGACY
         if (m_type.left(4) == QLatin1String("des-")) {
             return KeyLength(8, 8, 1);
-        } else if (m_type.left(6) == QLatin1String("aes128")) {
+        } else
+#endif
+        if (m_type.left(6) == QLatin1String("aes128")) {
             return KeyLength(16, 16, 1);
         } else if (m_type.left(6) == QLatin1String("aes192")) {
             return KeyLength(24, 24, 1);
         } else if (m_type.left(6) == QLatin1String("aes256")) {
             return KeyLength(32, 32, 1);
+#ifdef OPENSSL3_NO_LEGACY
         } else if (m_type.left(5) == QLatin1String("cast5")) {
             return KeyLength(5, 16, 1);
         } else if (m_type.left(8) == QLatin1String("blowfish")) {
             // Don't know - TODO
             return KeyLength(1, 32, 1);
+#endif
         } else if (m_type.left(9) == QLatin1String("tripledes")) {
             return KeyLength(16, 24, 1);
         } else {
@@ -6432,14 +6414,10 @@ static QStringList all_hash_types()
 {
     QStringList list;
     list += QStringLiteral("sha1");
-#ifdef HAVE_OPENSSL_SHA0
-    list += QStringLiteral("sha0");
-#endif
     list += QStringLiteral("ripemd160");
-#ifdef HAVE_OPENSSL_MD2
-    list += QStringLiteral("md2");
-#endif
+#ifndef OPENSSL3_NO_LEGACY
     list += QStringLiteral("md4");
+#endif
     list += QStringLiteral("md5");
 #ifdef SHA224_DIGEST_LENGTH
     list += QStringLiteral("sha224");
@@ -6453,8 +6431,10 @@ static QStringList all_hash_types()
 #ifdef SHA512_DIGEST_LENGTH
     list += QStringLiteral("sha512");
 #endif
+#ifndef OPENSSL3_NO_LEGACY
 #ifdef OBJ_whirlpool
     list += QStringLiteral("whirlpool");
+#endif
 #endif
     return list;
 }
@@ -6504,19 +6484,23 @@ static QStringList all_cipher_types()
 #ifdef HAVE_OPENSSL_AES_CCM
     list += QStringLiteral("aes256-ccm");
 #endif
+#ifndef OPENSSL3_NO_LEGACY
     list += QStringLiteral("blowfish-ecb");
     list += QStringLiteral("blowfish-cbc-pkcs7");
     list += QStringLiteral("blowfish-cbc");
     list += QStringLiteral("blowfish-cfb");
     list += QStringLiteral("blowfish-ofb");
+#endif
     list += QStringLiteral("tripledes-ecb");
     list += QStringLiteral("tripledes-cbc");
+#ifndef OPENSSL_NO_CAST
     list += QStringLiteral("des-ecb");
     list += QStringLiteral("des-ecb-pkcs7");
     list += QStringLiteral("des-cbc");
     list += QStringLiteral("des-cbc-pkcs7");
     list += QStringLiteral("des-cfb");
     list += QStringLiteral("des-ofb");
+#endif
 #ifndef OPENSSL_NO_CAST
     list += QStringLiteral("cast5-ecb");
     list += QStringLiteral("cast5-cbc");
@@ -6544,7 +6528,9 @@ static QStringList all_mac_types()
 #ifdef SHA512_DIGEST_LENGTH
     list += QStringLiteral("hmac(sha512)");
 #endif
+#ifndef OPENSSL_NO_CAST
     list += QStringLiteral("hmac(ripemd160)");
+#endif
     return list;
 }
 
@@ -6628,15 +6614,19 @@ public:
 // OPENSSL_VERSION_MAJOR is only defined in openssl3
 #ifdef OPENSSL_VERSION_MAJOR
         /* Load Multiple providers into the default (NULL) library context */
+#ifndef OPENSSL3_NO_LEGACY
         OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(nullptr, "legacy");
         if (legacy == nullptr) {
             printf("Failed to load Legacy provider\n");
             exit(EXIT_FAILURE);
         }
+#endif
         OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(nullptr, "default");
         if (deflt == nullptr) {
             printf("Failed to load Default provider\n");
+#ifndef OPENSSL3_NO_LEGACY
             OSSL_PROVIDER_unload(legacy);
+#endif
             exit(EXIT_FAILURE);
         }
 #endif
@@ -6691,9 +6681,6 @@ public:
         list += all_hash_types();
         list += all_mac_types();
         list += all_cipher_types();
-#ifdef HAVE_OPENSSL_MD2
-        list += QStringLiteral("pbkdf1(md2)");
-#endif
         list += QStringLiteral("pbkdf1(sha1)");
         list += QStringLiteral("pbkdf2(sha1)");
         list += QStringLiteral("hkdf(sha256)");
@@ -6723,18 +6710,12 @@ public:
             return new opensslInfoContext(this);
         else if (type == QLatin1String("sha1"))
             return new opensslHashContext(EVP_sha1(), this, type);
-#ifdef HAVE_OPENSSL_SHA0
-        else if (type == QLatin1String("sha0"))
-            return new opensslHashContext(EVP_sha(), this, type);
-#endif
         else if (type == QLatin1String("ripemd160"))
             return new opensslHashContext(EVP_ripemd160(), this, type);
-#ifdef HAVE_OPENSSL_MD2
-        else if (type == QLatin1String("md2"))
-            return new opensslHashContext(EVP_md2(), this, type);
-#endif
+#ifndef OPENSSL3_NO_LEGACY
         else if (type == QLatin1String("md4"))
             return new opensslHashContext(EVP_md4(), this, type);
+#endif
         else if (type == QLatin1String("md5"))
             return new opensslHashContext(EVP_md5(), this, type);
 #ifdef SHA224_DIGEST_LENGTH
@@ -6759,10 +6740,6 @@ public:
 #endif
         else if (type == QLatin1String("pbkdf1(sha1)"))
             return new opensslPbkdf1Context(EVP_sha1(), this, type);
-#ifdef HAVE_OPENSSL_MD2
-        else if (type == QLatin1String("pbkdf1(md2)"))
-            return new opensslPbkdf1Context(EVP_md2(), this, type);
-#endif
         else if (type == QLatin1String("pbkdf2(sha1)"))
             return new opensslPbkdf2Context(this, type);
         else if (type == QLatin1String("hkdf(sha256)"))
@@ -6881,6 +6858,7 @@ public:
             return new opensslCipherContext(EVP_des_cfb(), 0, this, type);
         else if (type == QLatin1String("des-ofb"))
             return new opensslCipherContext(EVP_des_ofb(), 0, this, type);
+#ifndef OPENSSL3_NO_LEGACY
 #ifndef OPENSSL_NO_CAST
         else if (type == QLatin1String("cast5-ecb"))
             return new opensslCipherContext(EVP_cast5_ecb(), 0, this, type);
@@ -6892,6 +6870,7 @@ public:
             return new opensslCipherContext(EVP_cast5_cfb(), 0, this, type);
         else if (type == QLatin1String("cast5-ofb"))
             return new opensslCipherContext(EVP_cast5_ofb(), 0, this, type);
+#endif
 #endif
         else if (type == QLatin1String("pkey"))
             return new MyPKeyContext(this);

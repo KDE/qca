@@ -6,17 +6,16 @@ else()
   find_package(OpenSSL 1.1.1)
 endif()
 
+option(OSSL3_NO_LEGACY "Disable algorithms in the legacy provider of OpenSSL 3" OFF)
+if(OSSL3_NO_LEGACY)
+  add_definitions(-DOPENSSL3_NO_LEGACY)
+endif()
+
 if(OPENSSL_FOUND)
   enable_plugin("ossl")
 
   include(CheckFunctionExists)
   set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
-  check_function_exists(EVP_md2 HAVE_OPENSSL_MD2)
-  if(HAVE_OPENSSL_MD2)
-    add_definitions(-DHAVE_OPENSSL_MD2)
-  else()
-    message(WARNING "qca-ossl will be compiled without MD2 digest algorithm support")
-  endif()
 
   check_function_exists(EVP_aes_128_ctr HAVE_OPENSSL_AES_CTR)
   if(HAVE_OPENSSL_AES_CTR)
@@ -37,13 +36,6 @@ if(OPENSSL_FOUND)
     add_definitions(-DHAVE_OPENSSL_AES_CCM)
   else()
     message(WARNING "qca-ossl will be compiled without AES CCM mode encryption support")
-  endif()
-
-  check_function_exists(EVP_sha HAVE_OPENSSL_SHA0)
-  if(HAVE_OPENSSL_SHA0)
-    add_definitions(-DHAVE_OPENSSL_SHA0)
-  else()
-    message(WARNING "qca-ossl will be compiled without SHA-0 digest algorithm support")
   endif()
 
   set(QCA_OSSL_SOURCES
