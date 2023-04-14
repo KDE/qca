@@ -65,9 +65,6 @@ build_openssl3:
     - apt-get install --yes eatmydata
     - eatmydata apt-get build-dep --yes --no-install-recommends qca2
     - eatmydata apt-get install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
-    - echo 'deb http://deb.debian.org/debian experimental main' >> /etc/apt/sources.list
-    - apt-get update
-    - eatmydata apt-get -t experimental install --yes libssl-dev
   script:
     - mkdir -p build && cd build
     - cmake -G Ninja ..
