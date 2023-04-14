@@ -54,7 +54,7 @@ build_clazy_clang_tidy:
     - "run-clang-tidy-14 -header-filter='.*/qca/.*' -checks='-*,performance-*,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,modernize-use-nullptr,-performance-no-automatic-move,-performance-no-int-to-ptr' -config=\"{WarningsAsErrors: '*'}\""
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
-build_openssl3:
+build_openssl3_botan3:
   stage: build
   image: debian:unstable
   only:
@@ -64,8 +64,14 @@ build_openssl3:
     - apt-get update
     - apt-get install --yes eatmydata
     - eatmydata apt-get build-dep --yes --no-install-recommends qca2
-    - eatmydata apt-get install --yes --no-install-recommends ninja-build libbotan-2-dev libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg
+    - eatmydata apt-get install --yes --no-install-recommends ninja-build libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg wget libz-dev
   script:
+    - wget https://github.com/randombit/botan/archive/refs/tags/3.0.0.tar.gz
+    - tar xvfh 3.0.0.tar.gz
+    - cd botan-3.0.0
+    - ./configure.py --prefix="/usr" --with-zlib
+    - time make -j `nproc` install
+    - cd ..
     - mkdir -p build && cd build
     - cmake -G Ninja ..
     - ninja
