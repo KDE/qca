@@ -22,6 +22,7 @@
 
 #include <Security/SecCertificate.h>
 #include <Security/SecTrust.h>
+#include <AvailabilityMacros.h>
 
 namespace QCA {
 
@@ -38,10 +39,16 @@ CertificateCollection qca_get_systemstore(const QString &provider)
         return col;
     for (int n = 0; n < CFArrayGetCount(anchors); ++n) {
         SecCertificateRef cr     = (SecCertificateRef)CFArrayGetValueAtIndex(anchors, n);
+    #if MAC_OS_X_VERSION_MIN_REQUIRED < 1070
+        CSSM_DATA cssm;
+        SecCertificateGetData(cr, &cssm);
+        QByteArray der(cssm.Length, 0);
+        memcpy(der.data(), cssm.Data, cssm.Length);
+    #else
         CFDataRef         derRef = SecCertificateCopyData(cr);
         QByteArray        der((const char *)CFDataGetBytePtr(derRef), CFDataGetLength(derRef));
         CFRelease(derRef);
-
+    #endif
         Certificate cert = Certificate::fromDER(der, 0, provider);
         if (!cert.isNull())
             col.addCertificate(cert);
