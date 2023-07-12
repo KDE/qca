@@ -6630,12 +6630,12 @@ public:
         /* Load Multiple providers into the default (NULL) library context */
         OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(nullptr, "legacy");
         if (legacy == nullptr) {
-            printf("Failed to load Legacy provider\n");
+            printf("Failed to load Legacy provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
             exit(EXIT_FAILURE);
         }
         OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(nullptr, "default");
         if (deflt == nullptr) {
-            printf("Failed to load Default provider\n");
+            printf("Failed to load Default provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
             OSSL_PROVIDER_unload(legacy);
             exit(EXIT_FAILURE);
         }
