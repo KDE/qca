@@ -76,6 +76,10 @@ build_openssl3_botan3:
     - cmake -G Ninja ..
     - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
+    - echo "Now test without the legacy provider"
+    - ls /usr/lib/x86_64-linux-gnu/ossl-modules/legacy.so
+    - rm -f /usr/lib/x86_64-linux-gnu/ossl-modules/legacy.so
+    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
 clang_format:
   stage: build
