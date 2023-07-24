@@ -3470,10 +3470,8 @@ public:
         X509_EXTENSION *ex;
 
         const EVP_MD *md;
-        if (priv.key()->type() == PKey::RSA)
-            md = EVP_sha1();
-        else if (priv.key()->type() == PKey::DSA)
-            md = EVP_sha1();
+        if (priv.key()->type() == PKey::RSA || priv.key()->type() == PKey::DSA)
+            md = EVP_sha256();
         else
             return false;
 
