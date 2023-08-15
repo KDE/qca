@@ -30,12 +30,8 @@
 #ifdef Q_OS_WIN
 #include <windows.h>
 #else
-#ifdef Q_OS_ANDROID
-#include <termios.h>
-#else
-#include <sys/termios.h>
-#endif
 #include <fcntl.h>
+#include <termios.h>
 #include <unistd.h>
 #endif
 
