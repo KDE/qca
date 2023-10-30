@@ -43,9 +43,9 @@ class TLSSocket::Private : public QObject
 {
     Q_OBJECT
 public:
-    TLSSocket *       q;
-    QTcpSocket *      sock;
-    QCA::TLS *        tls;
+    TLSSocket        *q;
+    QTcpSocket       *sock;
+    QCA::TLS         *tls;
     QString           host;
     bool              encrypted;
     bool              error, done;

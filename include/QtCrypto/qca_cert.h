@@ -1203,9 +1203,9 @@ private:
     QSharedDataPointer<Private> d;
 
     friend class CertificateChain;
-    Validity chain_validate(const CertificateChain &     chain,
+    Validity chain_validate(const CertificateChain      &chain,
                             const CertificateCollection &trusted,
-                            const QList<CRL> &           untrusted_crls,
+                            const QList<CRL>            &untrusted_crls,
                             UsageMode                    u,
                             ValidateFlags                vf) const;
     CertificateChain
@@ -1277,7 +1277,7 @@ public:
        \sa Certificate::validate()
     */
     inline Validity validate(const CertificateCollection &trusted,
-                             const QList<CRL> &           untrusted_crls = QList<CRL>(),
+                             const QList<CRL>            &untrusted_crls = QList<CRL>(),
                              UsageMode                    u              = UsageAny,
                              ValidateFlags                vf             = ValidateAll) const;
 
@@ -1305,11 +1305,11 @@ public:
        \sa validate
     */
     inline CertificateChain complete(const QList<Certificate> &issuers = QList<Certificate>(),
-                                     Validity *                result  = nullptr) const;
+                                     Validity                 *result  = nullptr) const;
 };
 
 inline Validity CertificateChain::validate(const CertificateCollection &trusted,
-                                           const QList<CRL> &           untrusted_crls,
+                                           const QList<CRL>            &untrusted_crls,
                                            UsageMode                    u,
                                            ValidateFlags                vf) const
 {
@@ -2356,10 +2356,10 @@ else
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static KeyBundle fromArray(const QByteArray & a,
+    static KeyBundle fromArray(const QByteArray  &a,
                                const SecureArray &passphrase = SecureArray(),
-                               ConvertResult *    result     = nullptr,
-                               const QString &    provider   = QString());
+                               ConvertResult     *result     = nullptr,
+                               const QString     &provider   = QString());
 
     /**
        Import the key bundle from a file in PKCS12 (.p12) format
@@ -2391,10 +2391,10 @@ else
        \note This synchronous operation may require event handling, and so
        it must not be called from the same thread as an EventHandler.
     */
-    static KeyBundle fromFile(const QString &    fileName,
+    static KeyBundle fromFile(const QString     &fileName,
                               const SecureArray &passphrase = SecureArray(),
-                              ConvertResult *    result     = nullptr,
-                              const QString &    provider   = QString());
+                              ConvertResult     *result     = nullptr,
+                              const QString     &provider   = QString());
 
 private:
     class Private;

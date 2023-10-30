@@ -476,7 +476,7 @@ public:
     QMutex         m;
     QWaitCondition w;
     bool           do_quit;
-    const char *   data;
+    const char    *data;
     int            size;
 
     QPipeWriterThread(Q_PIPE_ID id, QObject *parent = nullptr)
@@ -873,7 +873,7 @@ class QPipeDevice::Private : public QObject
 {
     Q_OBJECT
 public:
-    QPipeDevice *     q;
+    QPipeDevice      *q;
     Q_PIPE_ID         pipe;
     QPipeDevice::Type type;
     bool              enabled;
@@ -885,11 +885,11 @@ public:
 #ifdef Q_OS_WIN
     bool          atEnd, atError, forceNotify;
     int           readAhead;
-    SafeTimer *   readTimer;
+    SafeTimer    *readTimer;
     QTextDecoder *dec;
     bool          consoleMode;
-    QPipeWriter * pipeWriter;
-    QPipeReader * pipeReader;
+    QPipeWriter  *pipeWriter;
+    QPipeReader  *pipeReader;
 #endif
 #ifdef Q_OS_UNIX
     SafeSocketNotifier *sn_read, *sn_write;
@@ -1272,7 +1272,7 @@ int QPipeDevice::read(char *data, int maxsize)
         if (ret != -1) {
             // for security, encode one character at a time without
             //   performing a QString conversion of the whole thing
-            QTextCodec *               codec = QTextCodec::codecForMib(106);
+            QTextCodec                *codec = QTextCodec::codecForMib(106);
             QTextCodec::ConverterState cstate(QTextCodec::IgnoreHeader);
             int                        at = 0;
             for (int n = 0; n < ret; ++n) {
@@ -1432,7 +1432,7 @@ class QPipeEnd::Private : public QObject
 {
     Q_OBJECT
 public:
-    QPipeEnd *        q;
+    QPipeEnd         *q;
     QPipeDevice       pipe;
     QPipeDevice::Type type;
     QByteArray        buf;
@@ -1543,7 +1543,7 @@ public:
 
     void takeArray(QByteArray *a, int len)
     {
-        char *    p       = a->data();
+        char     *p       = a->data();
         const int newsize = a->size() - len;
         memmove(p, p + len, newsize);
         a->resize(newsize);
@@ -1552,7 +1552,7 @@ public:
 #ifdef QPIPE_SECURE
     void takeArray(SecureArray *a, int len)
     {
-        char *    p       = a->data();
+        char     *p       = a->data();
         const int newsize = a->size() - len;
         memmove(p, p + len, newsize);
         a->resize(newsize);

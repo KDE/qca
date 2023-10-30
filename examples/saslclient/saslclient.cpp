@@ -120,7 +120,7 @@ private:
     bool        no_authzid, no_realm;
     int         mode; // 0 = receive mechanism list, 1 = sasl negotiation, 2 = app
     QTcpSocket *sock;
-    QCA::SASL * sasl;
+    QCA::SASL  *sasl;
     QByteArray  inbuf;
     bool        sock_done;
     int         waitCycles;

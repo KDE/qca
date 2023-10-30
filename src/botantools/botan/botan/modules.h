@@ -55,7 +55,7 @@ class Modules
 public:
     virtual class Mutex_Factory *mutex_factory() const = 0;
 #ifndef BOTAN_TOOLS_ONLY
-    virtual class Timer *             timer() const      = 0;
+    virtual class Timer              *timer() const      = 0;
     virtual class Charset_Transcoder *transcoder() const = 0;
 #endif
 
@@ -80,7 +80,7 @@ class Builtin_Modules : public Modules
 public:
     class Mutex_Factory *mutex_factory() const override;
 #ifndef BOTAN_TOOLS_ONLY
-    class Timer *             timer() const;
+    class Timer              *timer() const;
     class Charset_Transcoder *transcoder() const;
 #endif
 

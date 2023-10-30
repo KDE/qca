@@ -161,22 +161,22 @@ private:
 
     class Mutex_Factory *mutex_factory;
 #ifndef BOTAN_TOOLS_ONLY
-    class Timer *           timer;
-    class Config *          config_obj;
+    class Timer            *timer;
+    class Config           *config_obj;
     class X509_GlobalState *x509_state_obj;
 #endif
 
     std::map<std::string, class Mutex *> locks;
     std::map<std::string, Allocator *>   alloc_factory;
-    mutable Allocator *                  cached_default_allocator;
+    mutable Allocator                   *cached_default_allocator;
 #ifdef BOTAN_TOOLS_ONLY
     std::string default_allocator_type;
 #endif
 
 #ifndef BOTAN_TOOLS_ONLY
-    UI *                      ui;
+    UI                       *ui;
     class Charset_Transcoder *transcoder;
-    RandomNumberGenerator *   rng;
+    RandomNumberGenerator    *rng;
 #endif
     std::vector<Allocator *> allocators;
 #ifndef BOTAN_TOOLS_ONLY

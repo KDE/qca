@@ -146,7 +146,7 @@ private:
             }
         }
 
-        pkcs11KeyStoreItem(const pkcs11KeyStoreItem &) = delete;
+        pkcs11KeyStoreItem(const pkcs11KeyStoreItem &)            = delete;
         pkcs11KeyStoreItem &operator=(const pkcs11KeyStoreItem &) = delete;
 
         inline int id() const
@@ -233,19 +233,19 @@ private:
 
     pkcs11KeyStoreEntryContext *_keyStoreEntryByCertificateId(const pkcs11h_certificate_id_t certificate_id,
                                                               const bool                     has_private,
-                                                              const CertificateChain &       chain,
-                                                              const QString &                description) const;
+                                                              const CertificateChain        &chain,
+                                                              const QString                 &description) const;
 
     QString _tokenId2storeId(const pkcs11h_token_id_t token_id) const;
 
     QString _serializeCertificate(const pkcs11h_certificate_id_t certificate_id,
-                                  const CertificateChain &       chain,
+                                  const CertificateChain        &chain,
                                   const bool                     has_private) const;
 
-    void _deserializeCertificate(const QString &                 from,
+    void _deserializeCertificate(const QString                  &from,
                                  pkcs11h_certificate_id_t *const p_certificate_id,
                                  bool *const                     p_has_private,
-                                 CertificateChain &              chain) const;
+                                 CertificateChain               &chain) const;
 
     QString _escapeString(const QString &from) const;
 
@@ -304,7 +304,7 @@ private:
     struct _sign_data_s
     {
         SignatureAlgorithm alg;
-        Hash *             hash;
+        Hash              *hash;
         QByteArray         raw;
 
         _sign_data_s()
@@ -314,10 +314,10 @@ private:
     } _sign_data;
 
 public:
-    pkcs11RSAContext(Provider *                     p,
+    pkcs11RSAContext(Provider                      *p,
                      const pkcs11h_certificate_id_t pkcs11h_certificate_id,
-                     const QString &                serialized,
-                     const RSAPublicKey &           pubkey)
+                     const QString                 &serialized,
+                     const RSAPublicKey            &pubkey)
         : RSAContext(p)
     {
         CK_RV rv;
@@ -916,11 +916,11 @@ private:
 
 public:
     pkcs11KeyStoreEntryContext(const Certificate &cert,
-                               const QString &    storeId,
-                               const QString &    serialized,
-                               const QString &    storeName,
-                               const QString &    name,
-                               Provider *         p)
+                               const QString     &storeId,
+                               const QString     &serialized,
+                               const QString     &storeName,
+                               const QString     &name,
+                               Provider          *p)
         : KeyStoreEntryContext(p)
     {
         _item_type  = KeyStoreEntry::TypeCertificate;
@@ -933,11 +933,11 @@ public:
     }
 
     pkcs11KeyStoreEntryContext(const KeyBundle &key,
-                               const QString &  storeId,
-                               const QString &  serialized,
-                               const QString &  storeName,
-                               const QString &  name,
-                               Provider *       p)
+                               const QString   &storeId,
+                               const QString   &serialized,
+                               const QString   &storeName,
+                               const QString   &name,
+                               Provider        *p)
         : KeyStoreEntryContext(p)
     {
         _item_type = KeyStoreEntry::TypeKeyBundle;
@@ -1174,7 +1174,7 @@ KeyStoreEntryContext *pkcs11KeyStoreListContext::entry(int id, const QString &en
 
 KeyStoreEntryContext *pkcs11KeyStoreListContext::entryPassive(const QString &serialized)
 {
-    KeyStoreEntryContext *   entry          = nullptr;
+    KeyStoreEntryContext    *entry          = nullptr;
     pkcs11h_certificate_id_t certificate_id = nullptr;
 
     QCA_logTextMessage(
@@ -1595,8 +1595,8 @@ void pkcs11KeyStoreListContext::_clearStores()
 pkcs11KeyStoreEntryContext *
 pkcs11KeyStoreListContext::_keyStoreEntryByCertificateId(const pkcs11h_certificate_id_t certificate_id,
                                                          const bool                     has_private,
-                                                         const CertificateChain &       chain,
-                                                         const QString &                _description) const
+                                                         const CertificateChain        &chain,
+                                                         const QString                 &_description) const
 {
     pkcs11KeyStoreEntryContext *entry = nullptr;
 
@@ -1685,7 +1685,7 @@ QString pkcs11KeyStoreListContext::_tokenId2storeId(const pkcs11h_token_id_t tok
 }
 
 QString pkcs11KeyStoreListContext::_serializeCertificate(const pkcs11h_certificate_id_t certificate_id,
-                                                         const CertificateChain &       chain,
+                                                         const CertificateChain        &chain,
                                                          const bool                     has_private) const
 {
     QString serialized;
@@ -1728,10 +1728,10 @@ QString pkcs11KeyStoreListContext::_serializeCertificate(const pkcs11h_certifica
     return serialized;
 }
 
-void pkcs11KeyStoreListContext::_deserializeCertificate(const QString &                 from,
+void pkcs11KeyStoreListContext::_deserializeCertificate(const QString                  &from,
                                                         pkcs11h_certificate_id_t *const p_certificate_id,
                                                         bool *const                     p_has_private,
-                                                        CertificateChain &              chain) const
+                                                        CertificateChain               &chain) const
 {
     pkcs11h_certificate_id_t certificate_id = nullptr;
     chain.clear();

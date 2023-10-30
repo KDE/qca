@@ -84,7 +84,7 @@ private:
 
 private:
     static const char *s_severityNames[];
-    QTextStream &      _stream;
+    QTextStream       &_stream;
 };
 
 const char *StreamLogger::s_severityNames[] = {"Q", "M", "A", "C", "E", "W", "N", "I", "D", "U"};

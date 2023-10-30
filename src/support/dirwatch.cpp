@@ -65,8 +65,8 @@ class DirWatch::Private : public QObject
 {
     Q_OBJECT
 public:
-    DirWatch *               q;
-    QFileSystemWatcher *     watcher;
+    DirWatch                *q;
+    QFileSystemWatcher      *watcher;
     QFileSystemWatcherRelay *watcher_relay;
     QString                  dirName;
 
@@ -131,8 +131,8 @@ class FileWatch::Private : public QObject
 {
     Q_OBJECT
 public:
-    FileWatch *              q;
-    QFileSystemWatcher *     watcher;
+    FileWatch               *q;
+    QFileSystemWatcher      *watcher;
     QFileSystemWatcherRelay *watcher_relay;
     QString                  fileName; // file (optionally w/ path) as provided by user
     QString                  filePath; // absolute path of file, calculated by us

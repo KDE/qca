@@ -30,6 +30,8 @@
 
 namespace opensslQCAPlugin {
 
+extern bool s_legacyProviderAvailable;
+
 // If you get any more crashes in this code, please provide a copy
 // of the cert to bradh AT frogmouth.net
 static QByteArray get_cert_issuer_key_id(X509_EXTENSION *ex)
@@ -152,7 +154,7 @@ static void try_get_name_item(X509_NAME *name, int nid, const CertificateInfoTyp
     loc = -1;
     while ((loc = X509_NAME_get_index_by_NID(name, nid, loc)) != -1) {
         X509_NAME_ENTRY *ne   = X509_NAME_get_entry(name, loc);
-        ASN1_STRING *    data = X509_NAME_ENTRY_get_data(ne);
+        ASN1_STRING     *data = X509_NAME_ENTRY_get_data(ne);
         QByteArray       cs((const char *)data->data, data->length);
         info->insert(t, QString::fromLatin1(cs));
     }
@@ -169,7 +171,7 @@ try_get_name_item_by_oid(X509_NAME *name, const QString &oidText, const Certific
     loc = -1;
     while ((loc = X509_NAME_get_index_by_OBJ(name, oid, loc)) != -1) {
         X509_NAME_ENTRY *ne   = X509_NAME_get_entry(name, loc);
-        ASN1_STRING *    data = X509_NAME_ENTRY_get_data(ne);
+        ASN1_STRING     *data = X509_NAME_ENTRY_get_data(ne);
         QByteArray       cs((const char *)data->data, data->length);
         info->insert(t, QString::fromLatin1(cs));
         qDebug() << "oid: " << oidText << ",  result: " << cs;
@@ -335,7 +337,7 @@ static void try_get_general_name(GENERAL_NAMES *names, const CertificateInfoType
 static CertificateInfo get_cert_alt_name(X509_EXTENSION *ex)
 {
     CertificateInfo info;
-    GENERAL_NAMES * gn = (GENERAL_NAMES *)X509V3_EXT_d2i(ex);
+    GENERAL_NAMES  *gn = (GENERAL_NAMES *)X509V3_EXT_d2i(ex);
     try_get_general_name(gn, Email, &info);
     try_get_general_name(gn, URI, &info);
     try_get_general_name(gn, DNS, &info);
@@ -524,14 +526,14 @@ static Constraints get_cert_key_usage(X509_EXTENSION *ex)
 {
     Constraints constraints;
     int         bit_table[9] = {DigitalSignature,
-                        NonRepudiation,
-                        KeyEncipherment,
-                        DataEncipherment,
-                        KeyAgreement,
-                        KeyCertificateSign,
-                        CRLSign,
-                        EncipherOnly,
-                        DecipherOnly};
+                                NonRepudiation,
+                                KeyEncipherment,
+                                DataEncipherment,
+                                KeyAgreement,
+                                KeyCertificateSign,
+                                CRLSign,
+                                EncipherOnly,
+                                DecipherOnly};
 
     ASN1_BIT_STRING *keyusage = (ASN1_BIT_STRING *)X509V3_EXT_d2i(ex);
     for (int n = 0; n < 9; ++n) {
@@ -651,7 +653,7 @@ static X509_EXTENSION *new_cert_policies(const QStringList &policies)
     STACK_OF(POLICYINFO) *pols = nullptr;
     for (int n = 0; n < policies.count(); ++n) {
         const QByteArray cs  = policies[n].toLatin1();
-        ASN1_OBJECT *    obj = OBJ_txt2obj(cs.data(), 1); // 1 = only accept dotted input
+        ASN1_OBJECT     *obj = OBJ_txt2obj(cs.data(), 1); // 1 = only accept dotted input
         if (!obj)
             continue;
         if (!pols)
@@ -818,7 +820,7 @@ bool MyCertContext::createSelfSigned(const CertificateOptions &opts, const PKeyC
         else
                 constraints = find_constraints(priv, opts.constraints());*/
 
-    EVP_PKEY *      pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
+    EVP_PKEY       *pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
     X509_EXTENSION *ex;
 
     const EVP_MD *md;
@@ -936,8 +938,8 @@ bool MyCertContext::compare(const CertContext *other) const
 PKeyContext *MyCertContext::subjectPublicKey() const
 {
     MyPKeyContext *kc   = new MyPKeyContext(provider());
-    EVP_PKEY *     pkey = X509_get_pubkey(item.cert);
-    PKeyBase *     kb   = kc->pkeyToBase(pkey, false);
+    EVP_PKEY      *pkey = X509_get_pubkey(item.cert);
+    PKeyBase      *kb   = kc->pkeyToBase(pkey, false);
     kc->setKey(kb);
     return kc;
 }
@@ -948,12 +950,12 @@ bool MyCertContext::isIssuerOf(const CertContext *other) const
     STACK_OF(X509) *untrusted_list = sk_X509_new_null();
 
     const MyCertContext *our_cc = this;
-    X509 *               x      = our_cc->item.cert;
+    X509                *x      = our_cc->item.cert;
     X509_up_ref(x);
     sk_X509_push(untrusted_list, x);
 
     const MyCertContext *other_cc = static_cast<const MyCertContext *>(other);
-    X509 *               ox       = other_cc->item.cert;
+    X509                *ox       = other_cc->item.cert;
 
     X509_STORE *store = X509_STORE_new();
 
@@ -985,14 +987,14 @@ bool MyCertContext::isIssuerOf(const CertContext *other) const
 
 void MyCertContext::make_props()
 {
-    X509 *           x = item.cert;
+    X509            *x = item.cert;
     CertContextProps p;
 
     p.version = X509_get_version(x);
 
     ASN1_INTEGER *ai = X509_get_serialNumber(x);
     if (ai) {
-        char *  rep = i2s_ASN1_INTEGER(nullptr, ai);
+        char   *rep = i2s_ASN1_INTEGER(nullptr, ai);
         QString str = QString::fromLatin1(rep);
         OPENSSL_free(rep);
         p.serial.fromString(str);
@@ -1071,11 +1073,11 @@ void MyCertContext::make_props()
         break;
 #ifdef HAVE_OPENSSL_MD2
     case NID_md2WithRSAEncryption:
-        p.sigalgo = QCA::EMSA3_MD2;
+        p.sigalgo = s_legacyProviderAvailable ? QCA::EMSA3_MD2 : QCA::SignatureUnknown;
         break;
 #endif
     case NID_ripemd160WithRSA:
-        p.sigalgo = QCA::EMSA3_RIPEMD160;
+        p.sigalgo = s_legacyProviderAvailable ? QCA::EMSA3_RIPEMD160 : QCA::SignatureUnknown;
         break;
     case NID_dsaWithSHA1:
         p.sigalgo = QCA::EMSA1_SHA1;
@@ -1243,7 +1245,7 @@ ConvertResult X509Item::fromPEM(const QString &s, X509Item::Type t)
     reset();
 
     const QByteArray in = s.toLatin1();
-    BIO *            bi = BIO_new(BIO_s_mem());
+    BIO             *bi = BIO_new(BIO_s_mem());
     BIO_write(bi, in.data(), in.size());
 
     if (t == TypeCert)
@@ -1263,7 +1265,7 @@ ConvertResult X509Item::fromPEM(const QString &s, X509Item::Type t)
 
 Validity MyCertContext::validate(const QList<CertContext *> &trusted,
                                  const QList<CertContext *> &untrusted,
-                                 const QList<CRLContext *> & crls,
+                                 const QList<CRLContext *>  &crls,
                                  UsageMode                   u,
                                  ValidateFlags               vf) const
 {
@@ -1277,25 +1279,25 @@ Validity MyCertContext::validate(const QList<CertContext *> &trusted,
     int n;
     for (n = 0; n < trusted.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(trusted[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(trusted_list, x);
     }
     for (n = 0; n < untrusted.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(untrusted[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(untrusted_list, x);
     }
     for (n = 0; n < crls.count(); ++n) {
         const MyCRLContext *cc = static_cast<const MyCRLContext *>(crls[n]);
-        X509_CRL *          x  = cc->item.crl;
+        X509_CRL           *x  = cc->item.crl;
         X509_CRL_up_ref(x);
         crl_list.append(x);
     }
 
     const MyCertContext *cc = this;
-    X509 *               x  = cc->item.cert;
+    X509                *x  = cc->item.cert;
 
     // verification happens through a store "context"
     X509_STORE_CTX *ctx = X509_STORE_CTX_new();
@@ -1337,7 +1339,7 @@ Validity MyCertContext::validate(const QList<CertContext *> &trusted,
 
 Validity MyCertContext::validate_chain(const QList<CertContext *> &chain,
                                        const QList<CertContext *> &trusted,
-                                       const QList<CRLContext *> & crls,
+                                       const QList<CRLContext *>  &crls,
                                        UsageMode                   u,
                                        ValidateFlags               vf) const
 {
@@ -1351,25 +1353,25 @@ Validity MyCertContext::validate_chain(const QList<CertContext *> &chain,
     int n;
     for (n = 0; n < trusted.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(trusted[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(trusted_list, x);
     }
     for (n = 1; n < chain.count(); ++n) {
         const MyCertContext *cc = static_cast<const MyCertContext *>(chain[n]);
-        X509 *               x  = cc->item.cert;
+        X509                *x  = cc->item.cert;
         X509_up_ref(x);
         sk_X509_push(untrusted_list, x);
     }
     for (n = 0; n < crls.count(); ++n) {
         const MyCRLContext *cc = static_cast<const MyCRLContext *>(crls[n]);
-        X509_CRL *          x  = cc->item.crl;
+        X509_CRL           *x  = cc->item.crl;
         X509_CRL_up_ref(x);
         crl_list.append(x);
     }
 
     const MyCertContext *cc = static_cast<const MyCertContext *>(chain[0]);
-    X509 *               x  = cc->item.cert;
+    X509                *x  = cc->item.cert;
 
     // verification happens through a store "context"
     X509_STORE_CTX *ctx = X509_STORE_CTX_new();
@@ -1524,7 +1526,7 @@ void MyCRLContext::make_props()
     STACK_OF(X509_REVOKED) *revokeStack = X509_CRL_get_REVOKED(x);
 
     for (int i = 0; i < sk_X509_REVOKED_num(revokeStack); ++i) {
-        X509_REVOKED *        rev    = sk_X509_REVOKED_value(revokeStack, i);
+        X509_REVOKED         *rev    = sk_X509_REVOKED_value(revokeStack, i);
         BigInteger            serial = bn2bi_free(ASN1_INTEGER_to_BN(X509_REVOKED_get0_serialNumber(rev), nullptr));
         QDateTime             time   = ASN1_UTCTIME_QDateTime(X509_REVOKED_get0_revocationDate(rev));
         QCA::CRLEntry::Reason reason = QCA::CRLEntry::Unspecified;
@@ -1593,11 +1595,11 @@ void MyCRLContext::make_props()
         break;
 #ifdef HAVE_OPENSSL_MD2
     case NID_md2WithRSAEncryption:
-        p.sigalgo = QCA::EMSA3_MD2;
+        p.sigalgo = s_legacyProviderAvailable ? QCA::EMSA3_MD2 : QCA::SignatureUnknown;
         break;
 #endif
     case NID_ripemd160WithRSA:
-        p.sigalgo = QCA::EMSA3_RIPEMD160;
+        p.sigalgo = s_legacyProviderAvailable ? QCA::EMSA3_RIPEMD160 : QCA::SignatureUnknown;
         break;
     case NID_dsaWithSHA1:
         p.sigalgo = QCA::EMSA1_SHA1;
@@ -1699,13 +1701,13 @@ void MyCAContext::setup(const CertContext &cert, const PKeyContext &priv)
 
 CertContext *MyCAContext::signRequest(const CSRContext &req, const QDateTime &notValidAfter) const
 {
-    MyCertContext *         cert  = nullptr;
-    const EVP_MD *          md    = nullptr;
-    X509 *                  x     = nullptr;
+    MyCertContext          *cert  = nullptr;
+    const EVP_MD           *md    = nullptr;
+    X509                   *x     = nullptr;
     const CertContextProps &props = *req.props();
     CertificateOptions      subjectOpts;
-    X509_NAME *             subjectName = nullptr;
-    X509_EXTENSION *        ex          = nullptr;
+    X509_NAME              *subjectName = nullptr;
+    X509_EXTENSION         *ex          = nullptr;
 
     if (privateKey->key()->type() == PKey::RSA)
         md = EVP_sha1();
@@ -1878,7 +1880,7 @@ bool MyCSRContext::createRequest(const CertificateOptions &opts, const PKeyConte
         else
                 constraints = find_constraints(priv, opts.constraints());*/
 
-    EVP_PKEY *      pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
+    EVP_PKEY       *pk = static_cast<const MyPKeyContext *>(&priv)->get_pkey();
     X509_EXTENSION *ex;
 
     const EVP_MD *md;
@@ -1970,8 +1972,8 @@ bool MyCSRContext::compare(const CSRContext *other) const
 PKeyContext *MyCSRContext::subjectPublicKey() const // does a new
 {
     MyPKeyContext *kc   = new MyPKeyContext(provider());
-    EVP_PKEY *     pkey = X509_REQ_get_pubkey(item.req);
-    PKeyBase *     kb   = kc->pkeyToBase(pkey, false);
+    EVP_PKEY      *pkey = X509_REQ_get_pubkey(item.req);
+    PKeyBase      *kb   = kc->pkeyToBase(pkey, false);
     kc->setKey(kb);
     return kc;
 }
@@ -1989,7 +1991,7 @@ ConvertResult MyCSRContext::fromSPKAC(const QString &s)
 
 void MyCSRContext::make_props()
 {
-    X509_REQ *       x = item.req;
+    X509_REQ        *x = item.req;
     CertContextProps p;
 
     // TODO: QString challenge;

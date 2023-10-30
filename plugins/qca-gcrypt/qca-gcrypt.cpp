@@ -81,7 +81,7 @@ public:
 
     QCA::MemoryRegion final() override
     {
-        unsigned char *  md;
+        unsigned char   *md;
         QCA::SecureArray a(gcry_md_get_algo_dlen(m_hashAlgorithm));
         md = gcry_md_read(context, m_hashAlgorithm);
         memcpy(a.data(), md, a.size());
@@ -143,7 +143,7 @@ public:
     void final(QCA::MemoryRegion *out) override
     {
         QCA::SecureArray sa(gcry_md_get_algo_dlen(m_hashAlgorithm), 0);
-        unsigned char *  md;
+        unsigned char   *md;
         md = gcry_md_read(context, m_hashAlgorithm);
         memcpy(sa.data(), md, sa.size());
         *out = sa;
@@ -168,9 +168,9 @@ public:
     }
 
     void setup(QCA::Direction                   dir,
-               const QCA::SymmetricKey &        key,
+               const QCA::SymmetricKey         &key,
                const QCA::InitializationVector &iv,
-               const QCA::AuthTag &             tag) override
+               const QCA::AuthTag              &tag) override
     {
         Q_UNUSED(tag);
         m_direction = dir;
@@ -300,7 +300,7 @@ public:
         return new pbkdf1Context(m_hashAlgorithm, provider(), type());
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               unsigned int                     keyLength,
                               unsigned int                     iterationCount) override
@@ -352,11 +352,11 @@ public:
         return a;
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               unsigned int                     keyLength,
                               int                              msecInterval,
-                              unsigned int *                   iterationCount) override
+                              unsigned int                    *iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QElapsedTimer timer;
@@ -436,7 +436,7 @@ public:
         return new pbkdf2Context(*this);
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               unsigned int                     keyLength,
                               unsigned int                     iterationCount) override
@@ -458,11 +458,11 @@ public:
         }
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               unsigned int                     keyLength,
                               int                              msecInterval,
-                              unsigned int *                   iterationCount) override
+                              unsigned int                    *iterationCount) override
     {
         Q_ASSERT(iterationCount != nullptr);
         QCA::SymmetricKey result(keyLength);
@@ -499,7 +499,7 @@ public:
         return new hkdfContext(*this);
     }
 
-    QCA::SymmetricKey makeKey(const QCA::SecureArray &         secret,
+    QCA::SymmetricKey makeKey(const QCA::SecureArray          &secret,
                               const QCA::InitializationVector &salt,
                               const QCA::InitializationVector &info,
                               unsigned int                     keyLength) override

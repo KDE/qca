@@ -306,8 +306,8 @@ private Q_SLOTS:
 
 private:
     QString          host;
-    QTcpSocket *     sock;
-    QCA::TLS *       ssl;
+    QTcpSocket      *sock;
+    QCA::TLS        *ssl;
     QCA::Certificate cert;
     bool             sock_done, ssl_done;
 };

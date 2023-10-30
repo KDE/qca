@@ -32,7 +32,7 @@ using namespace QCA;
 namespace opensslQCAPlugin {
 
 int        passphrase_cb(char *buf, int size, int rwflag, void *u);
-RSA *      createFromExisting(const RSAPrivateKey &key);
+RSA       *createFromExisting(const RSAPrivateKey &key);
 Validity   convert_verify_error(int err);
 X509_NAME *new_cert_name(const CertificateInfo &info);
 QByteArray bio2ba(BIO *b);

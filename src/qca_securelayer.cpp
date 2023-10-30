@@ -196,7 +196,7 @@ public:
         }
     };
 
-    TLS *       q;
+    TLS        *q;
     TLSContext *c;
     TLS::Mode   mode;
 
@@ -1282,7 +1282,7 @@ public:
         }
     };
 
-    SASL *       q;
+    SASL        *q;
     SASLContext *c;
 
     // persistent settings (survives ResetSessionAndData)
@@ -1408,10 +1408,10 @@ public:
         c->setup(service, host, localSet ? &local : nullptr, remoteSet ? &remote : nullptr, ext_authid, ext_ssf);
         c->setConstraints(auth_flags, ssfmin, ssfmax);
 
-        QString *    p_username = nullptr;
-        QString *    p_authzid  = nullptr;
+        QString     *p_username = nullptr;
+        QString     *p_authzid  = nullptr;
         SecureArray *p_password = nullptr;
-        QString *    p_realm    = nullptr;
+        QString     *p_realm    = nullptr;
 
         if (set_username)
             p_username = &username;

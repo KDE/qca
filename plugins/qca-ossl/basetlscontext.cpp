@@ -440,19 +440,19 @@ bool BaseOsslTLSContext::init()
 
     // setup the cert store
     {
-        X509_STORE *             store     = SSL_CTX_get_cert_store(context);
+        X509_STORE              *store     = SSL_CTX_get_cert_store(context);
         const QList<Certificate> cert_list = trusted.certificates();
         const QList<CRL>         crl_list  = trusted.crls();
         int                      n;
         for (n = 0; n < cert_list.count(); ++n) {
             const MyCertContext *cc = static_cast<const MyCertContext *>(cert_list[n].context());
-            X509 *               x  = cc->item.cert;
+            X509                *x  = cc->item.cert;
             // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509);
             X509_STORE_add_cert(store, x);
         }
         for (n = 0; n < crl_list.count(); ++n) {
             const MyCRLContext *cc = static_cast<const MyCRLContext *>(crl_list[n].context());
-            X509_CRL *          x  = cc->item.crl;
+            X509_CRL           *x  = cc->item.crl;
             // CRYPTO_add(&x->references, 1, CRYPTO_LOCK_X509_CRL);
             X509_STORE_add_crl(store, x);
         }
@@ -499,7 +499,7 @@ bool BaseOsslTLSContext::init()
 
             // make a new private key object to hold it
             MyPKeyContext *pk = new MyPKeyContext(provider());
-            PKeyBase *     k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
+            PKeyBase      *k  = pk->pkeyToBase(pkey, true); // does an EVP_PKEY_free()
             pk->k             = k;
             nkey.change(pk);
         }
@@ -551,7 +551,7 @@ void BaseOsslTLSContext::getCert()
         }
 
         for (int n = 0; n < sk_X509_num(x_chain); ++n) {
-            X509 *         x  = sk_X509_value(x_chain, n);
+            X509          *x  = sk_X509_value(x_chain, n);
             MyCertContext *cc = new MyCertContext(provider());
             cc->fromX509(x);
             Certificate cert;

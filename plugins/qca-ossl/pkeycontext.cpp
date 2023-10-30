@@ -259,7 +259,7 @@ ConvertResult MyPKeyContext::publicFromPEM(const QString &s)
     k = nullptr;
 
     const QByteArray in = s.toLatin1();
-    BIO *            bi = BIO_new(BIO_s_mem());
+    BIO             *bi = BIO_new(BIO_s_mem());
     BIO_write(bi, in.data(), in.size());
     EVP_PKEY *pkey = PEM_read_bio_PUBKEY(bi, nullptr, passphrase_cb, nullptr);
     BIO_free(bi);
@@ -361,7 +361,7 @@ ConvertResult MyPKeyContext::privateFromPEM(const QString &s, const SecureArray 
     k = nullptr;
 
     const QByteArray in = s.toLatin1();
-    BIO *            bi = BIO_new(BIO_s_mem());
+    BIO             *bi = BIO_new(BIO_s_mem());
     BIO_write(bi, in.data(), in.size());
     EVP_PKEY *pkey;
     if (!passphrase.isEmpty())

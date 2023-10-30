@@ -31,8 +31,8 @@ class GpgOp::Private : public QObject
     Q_OBJECT
 public:
     QCA::Synchronizer   sync;
-    GpgOp *             q;
-    GpgAction *         act;
+    GpgOp              *q;
+    GpgAction          *act;
     QString             bin;
     GpgOp::Type         op;
     GpgAction::Output   output;

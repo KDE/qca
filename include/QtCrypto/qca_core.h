@@ -493,7 +493,7 @@ QCA_EXPORT Logger *logger();
 #define QCA_logTextMessage(message, severity)                                                                          \
     do {                                                                                                               \
         QCA::Logger::Severity s = severity;                                                                            \
-        QCA::Logger *         l = QCA::logger();                                                                       \
+        QCA::Logger          *l = QCA::logger();                                                                       \
         if (s <= l->level()) {                                                                                         \
             l->logTextMessage(message, s);                                                                             \
         }                                                                                                              \
@@ -512,7 +512,7 @@ QCA_EXPORT Logger *logger();
 #define QCA_logBinaryMessage(blob, severity)                                                                           \
     do {                                                                                                               \
         QCA::Logger::Severity s = severity;                                                                            \
-        QCA::Logger *         l = QCA::logger();                                                                       \
+        QCA::Logger          *l = QCA::logger();                                                                       \
         if (s <= l->level()) {                                                                                         \
             l->logBinaryMessage(blob, s);                                                                              \
         }                                                                                                              \
@@ -669,7 +669,7 @@ public:
     explicit Initializer(MemoryMode m = Practical, int prealloc = 64);
     ~Initializer();
 
-    Initializer(const Initializer &) = delete;
+    Initializer(const Initializer &)            = delete;
     Initializer &operator=(const Initializer &) = delete;
 };
 
@@ -1523,9 +1523,9 @@ public:
        \param ptr opaque data
     */
     void setPasswordKeyStore(PasswordStyle        pstyle,
-                             const KeyStoreInfo & keyStoreInfo,
+                             const KeyStoreInfo  &keyStoreInfo,
                              const KeyStoreEntry &keyStoreEntry,
-                             void *               ptr);
+                             void                *ptr);
 
     /**
        Set the values for this Event

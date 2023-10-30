@@ -1,8 +1,6 @@
 Installing QCA
 --------------
 
-QCA requires Qt 5.5 or greater.
-
 For Unix/Linux/Mac/Windows:
 
   cmake .

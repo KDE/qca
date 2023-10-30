@@ -88,7 +88,7 @@ class DTLSServer : public QObject
     Q_OBJECT
 public:
     DTLSServer(QObject *parent = nullptr);
-    bool start(const QHostAddress &      address,
+    bool start(const QHostAddress       &address,
                quint16                   port = 0,
                QAbstractSocket::BindMode mode = QAbstractSocket::DefaultForPlatform);
 Q_SIGNALS:
@@ -98,7 +98,7 @@ private Q_SLOTS:
     void sock_readyRead();
 
 private:
-    QUdpSocket *                       socket;
+    QUdpSocket                        *socket;
     QHash<SourceAddress, DTLSSocket *> clientSockets;
 };
 

@@ -105,8 +105,8 @@ private Q_SLOTS:
 
 private:
     QString            host;
-    QTcpSocket *       sock;
-    QCA::TLS *         ssl;
+    QTcpSocket        *sock;
+    QCA::TLS          *ssl;
     QCA::Certificate   cert;
     QCA::Synchronizer *sync;
 };
@@ -126,7 +126,7 @@ private Q_SLOTS:
     void sniIvan();
 
 private:
-    QCA::Initializer *         m_init;
+    QCA::Initializer          *m_init;
     QCA::CertificateCollection rootCerts;
 };
 

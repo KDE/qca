@@ -584,7 +584,7 @@ void HashUnitTest::sha384longtest()
     fillerString.fill('a', 1000);
 
     foreach (QString provider, providersToTest) {
-        if (!QCA::isSupported("sha384", provider)) {
+        if (QCA::isSupported("sha384", provider)) {
             // QTime t;
             // t.start();
             QCA::Hash shaHash(QStringLiteral("sha384"), provider);

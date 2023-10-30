@@ -32,7 +32,7 @@ namespace opensslQCAPlugin {
 class X509Item
 {
 public:
-    X509 *    cert;
+    X509     *cert;
     X509_REQ *req;
     X509_CRL *crl;
 
@@ -112,12 +112,12 @@ public:
     // implemented later because it depends on MyCRLContext
     Validity validate(const QList<CertContext *> &trusted,
                       const QList<CertContext *> &untrusted,
-                      const QList<CRLContext *> & crls,
+                      const QList<CRLContext *>  &crls,
                       UsageMode                   u,
                       ValidateFlags               vf) const override;
     Validity validate_chain(const QList<CertContext *> &chain,
                             const QList<CertContext *> &trusted,
-                            const QList<CRLContext *> & crls,
+                            const QList<CRLContext *>  &crls,
                             UsageMode                   u,
                             ValidateFlags               vf) const override;
     void     make_props();
@@ -138,7 +138,7 @@ public:
 
     CertContext *certificate() const override;
     CertContext *createCertificate(const PKeyContext &pub, const CertificateOptions &opts) const override;
-    CRLContext * createCRL(const QDateTime &nextUpdate) const override;
+    CRLContext  *createCRL(const QDateTime &nextUpdate) const override;
     void         setup(const CertContext &cert, const PKeyContext &priv) override;
     CertContext *signRequest(const CSRContext &req, const QDateTime &notValidAfter) const override;
     CRLContext *
@@ -156,7 +156,7 @@ public:
     MyCSRContext(Provider *p);
     MyCSRContext(const MyCSRContext &from);
 
-    Provider::Context *     clone() const override;
+    Provider::Context      *clone() const override;
     QByteArray              toDER() const override;
     QString                 toPEM() const override;
     ConvertResult           fromDER(const QByteArray &a) override;
@@ -165,7 +165,7 @@ public:
     bool                    createRequest(const CertificateOptions &opts, const PKeyContext &priv) override;
     const CertContextProps *props() const override;
     bool                    compare(const CSRContext *other) const override;
-    PKeyContext *           subjectPublicKey() const override;
+    PKeyContext            *subjectPublicKey() const override;
     QString                 toSPKAC() const override;
     ConvertResult           fromSPKAC(const QString &s) override;
     void                    make_props();

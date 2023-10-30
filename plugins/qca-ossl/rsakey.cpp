@@ -27,6 +27,8 @@
 
 namespace opensslQCAPlugin {
 
+extern bool s_legacyProviderAvailable;
+
 //----------------------------------------------------------------------------
 // RSAKey
 //----------------------------------------------------------------------------
@@ -281,12 +283,6 @@ void RSAKey::startSign(SignatureAlgorithm alg, SignatureFormat)
         md = EVP_sha1();
     else if (alg == EMSA3_MD5)
         md = EVP_md5();
-#ifdef HAVE_OPENSSL_MD2
-    else if (alg == EMSA3_MD2)
-        md = EVP_md2();
-#endif
-    else if (alg == EMSA3_RIPEMD160)
-        md = EVP_ripemd160();
     else if (alg == EMSA3_SHA224)
         md = EVP_sha224();
     else if (alg == EMSA3_SHA256)
@@ -301,6 +297,13 @@ void RSAKey::startSign(SignatureAlgorithm alg, SignatureFormat)
 #endif
     else if (alg == EMSA3_Raw) {
         // md = 0
+    } else if (s_legacyProviderAvailable) {
+        if (alg == EMSA3_RIPEMD160)
+            md = EVP_ripemd160();
+#ifdef HAVE_OPENSSL_MD2
+        else if (alg == EMSA3_MD2)
+            md = EVP_md2();
+#endif
     }
     evp.startSign(md);
 }
@@ -312,12 +315,6 @@ void RSAKey::startVerify(SignatureAlgorithm alg, SignatureFormat)
         md = EVP_sha1();
     else if (alg == EMSA3_MD5)
         md = EVP_md5();
-#ifdef HAVE_OPENSSL_MD2
-    else if (alg == EMSA3_MD2)
-        md = EVP_md2();
-#endif
-    else if (alg == EMSA3_RIPEMD160)
-        md = EVP_ripemd160();
     else if (alg == EMSA3_SHA224)
         md = EVP_sha224();
     else if (alg == EMSA3_SHA256)
@@ -328,6 +325,13 @@ void RSAKey::startVerify(SignatureAlgorithm alg, SignatureFormat)
         md = EVP_sha512();
     else if (alg == EMSA3_Raw) {
         // md = 0
+    } else if (s_legacyProviderAvailable) {
+        if (alg == EMSA3_RIPEMD160)
+            md = EVP_ripemd160();
+#ifdef HAVE_OPENSSL_MD2
+        else if (alg == EMSA3_MD2)
+            md = EVP_md2();
+#endif
     }
     evp.startVerify(md);
 }

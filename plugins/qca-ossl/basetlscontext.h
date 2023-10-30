@@ -60,10 +60,10 @@ public:
     Result result_result;
     int    result_encoded;
 
-    SSL *             ssl;
+    SSL              *ssl;
     const SSL_METHOD *method;
-    SSL_CTX *         context;
-    BIO *             rbio, *wbio;
+    SSL_CTX          *context;
+    BIO              *rbio, *wbio;
     Validity          vr;
     bool              v_eof;
 

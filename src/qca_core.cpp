@@ -87,11 +87,11 @@ public:
     bool                       first_scan;
     QString                    app_name;
     QMutex                     name_mutex;
-    ProviderManager *          manager;
+    ProviderManager           *manager;
     QMutex                     scan_mutex;
-    Random *                   rng;
+    Random                    *rng;
     QMutex                     rng_mutex;
-    Logger *                   logger;
+    Logger                    *logger;
     QVariantMap                properties;
     QMutex                     prop_mutex;
     QMap<QString, QVariantMap> config;
@@ -1156,7 +1156,7 @@ bool KeyStoreListContext::isReadOnly(int) const
 
 KeyStoreEntryContext *KeyStoreListContext::entry(int id, const QString &entryId)
 {
-    KeyStoreEntryContext *        out  = nullptr;
+    KeyStoreEntryContext         *out  = nullptr;
     QList<KeyStoreEntryContext *> list = entryList(id);
     for (int n = 0; n < list.count(); ++n) {
         if (list[n]->id() == entryId) {
@@ -1541,7 +1541,7 @@ public:
     KeyStoreInfo  ksi;
     KeyStoreEntry kse;
     QString       fname;
-    void *        ptr;
+    void         *ptr;
 };
 
 Event::Event()
@@ -1604,9 +1604,9 @@ void *Event::ptr() const
 }
 
 void Event::setPasswordKeyStore(PasswordStyle        pstyle,
-                                const KeyStoreInfo & keyStoreInfo,
+                                const KeyStoreInfo  &keyStoreInfo,
                                 const KeyStoreEntry &keyStoreEntry,
-                                void *               ptr)
+                                void                *ptr)
 {
     if (!d)
         d = new Private;
@@ -2018,7 +2018,7 @@ public:
 
     Type           type;
     PasswordAsker *passwordAsker;
-    TokenAsker *   tokenAsker;
+    TokenAsker    *tokenAsker;
 
     QMutex         m;
     QWaitCondition w;
@@ -2132,9 +2132,9 @@ PasswordAsker::~PasswordAsker()
 }
 
 void PasswordAsker::ask(Event::PasswordStyle pstyle,
-                        const KeyStoreInfo & keyStoreInfo,
+                        const KeyStoreInfo  &keyStoreInfo,
                         const KeyStoreEntry &keyStoreEntry,
-                        void *               ptr)
+                        void                *ptr)
 {
     Event e;
     e.setPasswordKeyStore(pstyle, keyStoreInfo, keyStoreEntry, ptr);

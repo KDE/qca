@@ -42,7 +42,7 @@ public:
         VerifyActive,
         VerifyError
     };
-    EVP_PKEY *  pkey;
+    EVP_PKEY   *pkey;
     EVP_MD_CTX *mdctx;
     State       state;
     bool        raw_type;

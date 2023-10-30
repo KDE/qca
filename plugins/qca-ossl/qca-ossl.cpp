@@ -70,61 +70,63 @@ using namespace QCA;
 
 namespace opensslQCAPlugin {
 
+bool s_legacyProviderAvailable = false;
+
 //----------------------------------------------------------------------------
 // Util
 //----------------------------------------------------------------------------
 
 /*static bool is_basic_constraint(const ConstraintType &t)
 {
-        bool basic = false;
-        switch(t.known())
-        {
-                case DigitalSignature:
-                case NonRepudiation:
-                case KeyEncipherment:
-                case DataEncipherment:
-                case KeyAgreement:
-                case KeyCertificateSign:
-                case CRLSign:
-                case EncipherOnly:
-                case DecipherOnly:
-                        basic = true;
-                        break;
+    bool basic = false;
+    switch(t.known())
+    {
+        case DigitalSignature:
+        case NonRepudiation:
+        case KeyEncipherment:
+        case DataEncipherment:
+        case KeyAgreement:
+        case KeyCertificateSign:
+        case CRLSign:
+        case EncipherOnly:
+        case DecipherOnly:
+            basic = true;
+            break;
 
-                case ServerAuth:
-                case ClientAuth:
-                case CodeSigning:
-                case EmailProtection:
-                case IPSecEndSystem:
-                case IPSecTunnel:
-                case IPSecUser:
-                case TimeStamping:
-                case OCSPSigning:
-                        break;
-        }
-        return basic;
+        case ServerAuth:
+        case ClientAuth:
+        case CodeSigning:
+        case EmailProtection:
+        case IPSecEndSystem:
+        case IPSecTunnel:
+        case IPSecUser:
+        case TimeStamping:
+        case OCSPSigning:
+            break;
+    }
+    return basic;
 }
 
 static Constraints basic_only(const Constraints &list)
 {
-        Constraints out;
-        for(int n = 0; n < list.count(); ++n)
-        {
-                if(is_basic_constraint(list[n]))
-                        out += list[n];
-        }
-        return out;
+    Constraints out;
+    for(int n = 0; n < list.count(); ++n)
+    {
+        if(is_basic_constraint(list[n]))
+            out += list[n];
+    }
+    return out;
 }
 
 static Constraints ext_only(const Constraints &list)
 {
-        Constraints out;
-        for(int n = 0; n < list.count(); ++n)
-        {
-                if(!is_basic_constraint(list[n]))
-                        out += list[n];
-        }
-        return out;
+    Constraints out;
+    for(int n = 0; n < list.count(); ++n)
+    {
+        if(!is_basic_constraint(list[n]))
+            out += list[n];
+    }
+    return out;
 }*/
 
 // logic from Botan
@@ -224,6 +226,7 @@ public:
     opensslPbkdf1Context(const EVP_MD *algorithm, Provider *p, const QString &type)
         : KDFContext(p, type)
     {
+        Q_ASSERT(s_legacyProviderAvailable);
         m_algorithm = algorithm;
         m_context   = EVP_MD_CTX_new();
         EVP_DigestInit(m_context, m_algorithm);
@@ -605,6 +608,7 @@ static const char *IETF_4096_PRIME =
     "FFFFFFFF FFFFFFFF";
 // clang-format on
 
+#ifndef OPENSSL_FIPS
 // JCE seeds from Botan
 static const char *JCE_512_SEED    = "B869C82B 35D70E1B 1FF91B28 E37A62EC DC34409B";
 static const int   JCE_512_COUNTER = 123;
@@ -614,6 +618,7 @@ static const int   JCE_768_COUNTER = 263;
 
 static const char *JCE_1024_SEED    = "8D515589 4229D5E6 89EE01E6 018A237E 2CAE64CD";
 static const int   JCE_1024_COUNTER = 92;
+#endif
 
 static QByteArray dehex(const QByteArray &hex)
 {
@@ -917,6 +922,7 @@ public:
     MyPKCS12Context(Provider *p)
         : PKCS12Context(p)
     {
+        Q_ASSERT(s_legacyProviderAvailable);
     }
 
     ~MyPKCS12Context() override
@@ -1800,24 +1806,26 @@ public:
     // Change cipher names
     KeyLength keyLength() const override
     {
-        if (m_type.left(4) == QLatin1String("des-")) {
-            return KeyLength(8, 8, 1);
-        } else if (m_type.left(6) == QLatin1String("aes128")) {
+        if (s_legacyProviderAvailable) {
+            if (m_type.left(4) == QLatin1String("des-")) {
+                return KeyLength(8, 8, 1);
+            } else if (m_type.left(5) == QLatin1String("cast5")) {
+                return KeyLength(5, 16, 1);
+            } else if (m_type.left(8) == QLatin1String("blowfish")) {
+                // Don't know - TODO
+                return KeyLength(1, 32, 1);
+            }
+        }
+        if (m_type.left(6) == QLatin1String("aes128")) {
             return KeyLength(16, 16, 1);
         } else if (m_type.left(6) == QLatin1String("aes192")) {
             return KeyLength(24, 24, 1);
         } else if (m_type.left(6) == QLatin1String("aes256")) {
             return KeyLength(32, 32, 1);
-        } else if (m_type.left(5) == QLatin1String("cast5")) {
-            return KeyLength(5, 16, 1);
-        } else if (m_type.left(8) == QLatin1String("blowfish")) {
-            // Don't know - TODO
-            return KeyLength(1, 32, 1);
         } else if (m_type.left(9) == QLatin1String("tripledes")) {
             return KeyLength(16, 24, 1);
-        } else {
-            return KeyLength(0, 1, 1);
         }
+        return KeyLength(0, 1, 1);
     }
 
 protected:
@@ -1836,11 +1844,6 @@ static QStringList all_hash_types()
 #ifdef HAVE_OPENSSL_SHA0
     list += QStringLiteral("sha0");
 #endif
-    list += QStringLiteral("ripemd160");
-#ifdef HAVE_OPENSSL_MD2
-    list += QStringLiteral("md2");
-#endif
-    list += QStringLiteral("md4");
     list += QStringLiteral("md5");
 #ifdef SHA224_DIGEST_LENGTH
     list += QStringLiteral("sha224");
@@ -1866,12 +1869,20 @@ static QStringList all_hash_types()
 #ifdef HAVE_OPENSSL_SHA3_512
     list += QStringLiteral("sha3_512");
 #endif
-#ifdef OBJ_whirlpool
-    list += QStringLiteral("whirlpool");
-#endif
 #ifdef HAVE_OPENSSL_BLAKE2B_512
     list += QStringLiteral("blake2b_512");
 #endif
+    if (s_legacyProviderAvailable) {
+        list += QStringLiteral("ripemd160");
+#ifdef HAVE_OPENSSL_MD2
+        list += QStringLiteral("md2");
+#endif
+        list += QStringLiteral("md4");
+#ifdef OBJ_whirlpool
+        list += QStringLiteral("whirlpool");
+#endif
+    }
+
     return list;
 }
 
@@ -1920,26 +1931,28 @@ static QStringList all_cipher_types()
 #ifdef HAVE_OPENSSL_AES_CCM
     list += QStringLiteral("aes256-ccm");
 #endif
-    list += QStringLiteral("blowfish-ecb");
-    list += QStringLiteral("blowfish-cbc-pkcs7");
-    list += QStringLiteral("blowfish-cbc");
-    list += QStringLiteral("blowfish-cfb");
-    list += QStringLiteral("blowfish-ofb");
-    list += QStringLiteral("tripledes-ecb");
-    list += QStringLiteral("tripledes-cbc");
-    list += QStringLiteral("des-ecb");
-    list += QStringLiteral("des-ecb-pkcs7");
-    list += QStringLiteral("des-cbc");
-    list += QStringLiteral("des-cbc-pkcs7");
-    list += QStringLiteral("des-cfb");
-    list += QStringLiteral("des-ofb");
+    if (s_legacyProviderAvailable) {
+        list += QStringLiteral("blowfish-ecb");
+        list += QStringLiteral("blowfish-cbc-pkcs7");
+        list += QStringLiteral("blowfish-cbc");
+        list += QStringLiteral("blowfish-cfb");
+        list += QStringLiteral("blowfish-ofb");
+        list += QStringLiteral("tripledes-ecb");
+        list += QStringLiteral("tripledes-cbc");
+        list += QStringLiteral("des-ecb");
+        list += QStringLiteral("des-ecb-pkcs7");
+        list += QStringLiteral("des-cbc");
+        list += QStringLiteral("des-cbc-pkcs7");
+        list += QStringLiteral("des-cfb");
+        list += QStringLiteral("des-ofb");
 #ifndef OPENSSL_NO_CAST
-    list += QStringLiteral("cast5-ecb");
-    list += QStringLiteral("cast5-cbc");
-    list += QStringLiteral("cast5-cbc-pkcs7");
-    list += QStringLiteral("cast5-cfb");
-    list += QStringLiteral("cast5-ofb");
+        list += QStringLiteral("cast5-ecb");
+        list += QStringLiteral("cast5-cbc");
+        list += QStringLiteral("cast5-cbc-pkcs7");
+        list += QStringLiteral("cast5-cfb");
+        list += QStringLiteral("cast5-ofb");
 #endif
+    }
     return list;
 }
 
@@ -1960,7 +1973,9 @@ static QStringList all_mac_types()
 #ifdef SHA512_DIGEST_LENGTH
     list += QStringLiteral("hmac(sha512)");
 #endif
-    list += QStringLiteral("hmac(ripemd160)");
+    if (s_legacyProviderAvailable) {
+        list += QStringLiteral("hmac(ripemd160)");
+    }
     return list;
 }
 
@@ -2034,10 +2049,33 @@ public:
     opensslProvider()
     {
         openssl_initted = false;
+#ifdef OPENSSL_VERSION_MAJOR
+        s_legacyProviderAvailable = OSSL_PROVIDER_available(nullptr, "legacy");
+#else
+        s_legacyProviderAvailable = true;
+#endif
     }
 
     void init() override
     {
+// OPENSSL_VERSION_MAJOR is only defined in openssl3
+#ifdef OPENSSL_VERSION_MAJOR
+        /* Load Multiple providers into the default (NULL) library context */
+        OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(nullptr, "legacy");
+        if (s_legacyProviderAvailable && !legacy) {
+            printf("Failed to load Legacy provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
+            exit(EXIT_FAILURE);
+        }
+        OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(nullptr, "default");
+        if (deflt == nullptr) {
+            printf("Failed to load Default provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
+            if (legacy) {
+                OSSL_PROVIDER_unload(legacy);
+            }
+            exit(EXIT_FAILURE);
+        }
+#endif
+
         // seed the RNG if it's not seeded yet
         if (RAND_status() == 0) {
             char buf[128];
@@ -2061,7 +2099,7 @@ public:
         // FIXME: ?  for now we never deinit, in case other libs/code
         //   are using openssl
         /*if(!openssl_initted)
-                return;
+            return;
         // todo: any other shutdown?
         EVP_cleanup();
         //ENGINE_cleanup();
@@ -2094,10 +2132,13 @@ public:
         list += all_hash_types();
         list += all_mac_types();
         list += all_cipher_types();
+        if (s_legacyProviderAvailable) {
 #ifdef HAVE_OPENSSL_MD2
-        list += QStringLiteral("pbkdf1(md2)");
+            list += QStringLiteral("pbkdf1(md2)");
 #endif
-        list += QStringLiteral("pbkdf1(sha1)");
+            list += QStringLiteral("pbkdf1(sha1)");
+            list += QStringLiteral("pkcs12");
+        }
         list += QStringLiteral("pbkdf2(sha1)");
         list += QStringLiteral("hkdf(sha256)");
         list += QStringLiteral("pkey");
@@ -2109,7 +2150,6 @@ public:
         list += QStringLiteral("csr");
         list += QStringLiteral("crl");
         list += QStringLiteral("certcollection");
-        list += QStringLiteral("pkcs12");
         list += QStringLiteral("tls");
         list += QStringLiteral("dtls");
         list += QStringLiteral("cms");
@@ -2131,14 +2171,6 @@ public:
         else if (type == QLatin1String("sha0"))
             return new opensslHashContext(EVP_sha(), this, type);
 #endif
-        else if (type == QLatin1String("ripemd160"))
-            return new opensslHashContext(EVP_ripemd160(), this, type);
-#ifdef HAVE_OPENSSL_MD2
-        else if (type == QLatin1String("md2"))
-            return new opensslHashContext(EVP_md2(), this, type);
-#endif
-        else if (type == QLatin1String("md4"))
-            return new opensslHashContext(EVP_md4(), this, type);
         else if (type == QLatin1String("md5"))
             return new opensslHashContext(EVP_md5(), this, type);
 #ifdef SHA224_DIGEST_LENGTH
@@ -2173,19 +2205,9 @@ public:
         else if (type == QLatin1String("sha3_512"))
             return new opensslHashContext(EVP_sha3_512(), this, type);
 #endif
-#ifdef OBJ_whirlpool
-        else if (type == QLatin1String("whirlpool"))
-            return new opensslHashContext(EVP_whirlpool(), this, type);
-#endif
 #ifdef HAVE_OPENSSL_BLAKE2B_512
         else if (type == QLatin1String("blake2b_512"))
             return new opensslHashContext(EVP_blake2b512(), this, type);
-#endif
-        else if (type == QLatin1String("pbkdf1(sha1)"))
-            return new opensslPbkdf1Context(EVP_sha1(), this, type);
-#ifdef HAVE_OPENSSL_MD2
-        else if (type == QLatin1String("pbkdf1(md2)"))
-            return new opensslPbkdf1Context(EVP_md2(), this, type);
 #endif
         else if (type == QLatin1String("pbkdf2(sha1)"))
             return new opensslPbkdf2Context(this, type);
@@ -2211,8 +2233,6 @@ public:
         else if (type == QLatin1String("hmac(sha512)"))
             return new opensslHMACContext(EVP_sha512(), this, type);
 #endif
-        else if (type == QLatin1String("hmac(ripemd160)"))
-            return new opensslHMACContext(EVP_ripemd160(), this, type);
         else if (type == QLatin1String("aes128-ecb"))
             return new opensslCipherContext(EVP_aes_128_ecb(), 0, this, type);
         else if (type == QLatin1String("aes128-cfb"))
@@ -2279,44 +2299,6 @@ public:
         else if (type == QLatin1String("aes256-ccm"))
             return new opensslCipherContext(EVP_aes_256_ccm(), 0, this, type);
 #endif
-        else if (type == QLatin1String("blowfish-ecb"))
-            return new opensslCipherContext(EVP_bf_ecb(), 0, this, type);
-        else if (type == QLatin1String("blowfish-cfb"))
-            return new opensslCipherContext(EVP_bf_cfb(), 0, this, type);
-        else if (type == QLatin1String("blowfish-ofb"))
-            return new opensslCipherContext(EVP_bf_ofb(), 0, this, type);
-        else if (type == QLatin1String("blowfish-cbc"))
-            return new opensslCipherContext(EVP_bf_cbc(), 0, this, type);
-        else if (type == QLatin1String("blowfish-cbc-pkcs7"))
-            return new opensslCipherContext(EVP_bf_cbc(), 1, this, type);
-        else if (type == QLatin1String("tripledes-ecb"))
-            return new opensslCipherContext(EVP_des_ede3(), 0, this, type);
-        else if (type == QLatin1String("tripledes-cbc"))
-            return new opensslCipherContext(EVP_des_ede3_cbc(), 0, this, type);
-        else if (type == QLatin1String("des-ecb"))
-            return new opensslCipherContext(EVP_des_ecb(), 0, this, type);
-        else if (type == QLatin1String("des-ecb-pkcs7"))
-            return new opensslCipherContext(EVP_des_ecb(), 1, this, type);
-        else if (type == QLatin1String("des-cbc"))
-            return new opensslCipherContext(EVP_des_cbc(), 0, this, type);
-        else if (type == QLatin1String("des-cbc-pkcs7"))
-            return new opensslCipherContext(EVP_des_cbc(), 1, this, type);
-        else if (type == QLatin1String("des-cfb"))
-            return new opensslCipherContext(EVP_des_cfb(), 0, this, type);
-        else if (type == QLatin1String("des-ofb"))
-            return new opensslCipherContext(EVP_des_ofb(), 0, this, type);
-#ifndef OPENSSL_NO_CAST
-        else if (type == QLatin1String("cast5-ecb"))
-            return new opensslCipherContext(EVP_cast5_ecb(), 0, this, type);
-        else if (type == QLatin1String("cast5-cbc"))
-            return new opensslCipherContext(EVP_cast5_cbc(), 0, this, type);
-        else if (type == QLatin1String("cast5-cbc-pkcs7"))
-            return new opensslCipherContext(EVP_cast5_cbc(), 1, this, type);
-        else if (type == QLatin1String("cast5-cfb"))
-            return new opensslCipherContext(EVP_cast5_cfb(), 0, this, type);
-        else if (type == QLatin1String("cast5-ofb"))
-            return new opensslCipherContext(EVP_cast5_ofb(), 0, this, type);
-#endif
         else if (type == QLatin1String("pkey"))
             return new MyPKeyContext(this);
         else if (type == QLatin1String("dlgroup"))
@@ -2335,8 +2317,6 @@ public:
             return new MyCRLContext(this);
         else if (type == QLatin1String("certcollection"))
             return new MyCertCollectionContext(this);
-        else if (type == QLatin1String("pkcs12"))
-            return new MyPKCS12Context(this);
         else if (type == QLatin1String("tls"))
             return new OsslTLSContext(this);
         else if (type == QLatin1String("dtls"))
@@ -2345,6 +2325,68 @@ public:
             return new CMSContext(this);
         else if (type == QLatin1String("ca"))
             return new MyCAContext(this);
+
+        else if (s_legacyProviderAvailable) {
+            if (type == QLatin1String("blowfish-ecb"))
+                return new opensslCipherContext(EVP_bf_ecb(), 0, this, type);
+            else if (type == QLatin1String("blowfish-cfb"))
+                return new opensslCipherContext(EVP_bf_cfb(), 0, this, type);
+            else if (type == QLatin1String("blowfish-ofb"))
+                return new opensslCipherContext(EVP_bf_ofb(), 0, this, type);
+            else if (type == QLatin1String("blowfish-cbc"))
+                return new opensslCipherContext(EVP_bf_cbc(), 0, this, type);
+            else if (type == QLatin1String("blowfish-cbc-pkcs7"))
+                return new opensslCipherContext(EVP_bf_cbc(), 1, this, type);
+            else if (type == QLatin1String("tripledes-ecb"))
+                return new opensslCipherContext(EVP_des_ede3(), 0, this, type);
+            else if (type == QLatin1String("tripledes-cbc"))
+                return new opensslCipherContext(EVP_des_ede3_cbc(), 0, this, type);
+            else if (type == QLatin1String("des-ecb"))
+                return new opensslCipherContext(EVP_des_ecb(), 0, this, type);
+            else if (type == QLatin1String("des-ecb-pkcs7"))
+                return new opensslCipherContext(EVP_des_ecb(), 1, this, type);
+            else if (type == QLatin1String("des-cbc"))
+                return new opensslCipherContext(EVP_des_cbc(), 0, this, type);
+            else if (type == QLatin1String("des-cbc-pkcs7"))
+                return new opensslCipherContext(EVP_des_cbc(), 1, this, type);
+            else if (type == QLatin1String("des-cfb"))
+                return new opensslCipherContext(EVP_des_cfb(), 0, this, type);
+            else if (type == QLatin1String("des-ofb"))
+                return new opensslCipherContext(EVP_des_ofb(), 0, this, type);
+#ifndef OPENSSL_NO_CAST
+            else if (type == QLatin1String("cast5-ecb"))
+                return new opensslCipherContext(EVP_cast5_ecb(), 0, this, type);
+            else if (type == QLatin1String("cast5-cbc"))
+                return new opensslCipherContext(EVP_cast5_cbc(), 0, this, type);
+            else if (type == QLatin1String("cast5-cbc-pkcs7"))
+                return new opensslCipherContext(EVP_cast5_cbc(), 1, this, type);
+            else if (type == QLatin1String("cast5-cfb"))
+                return new opensslCipherContext(EVP_cast5_cfb(), 0, this, type);
+            else if (type == QLatin1String("cast5-ofb"))
+                return new opensslCipherContext(EVP_cast5_ofb(), 0, this, type);
+#endif
+            else if (type == QLatin1String("hmac(ripemd160)"))
+                return new opensslHMACContext(EVP_ripemd160(), this, type);
+            else if (type == QLatin1String("ripemd160"))
+                return new opensslHashContext(EVP_ripemd160(), this, type);
+#ifdef HAVE_OPENSSL_MD2
+            else if (type == QLatin1String("md2"))
+                return new opensslHashContext(EVP_md2(), this, type);
+            else if (type == QLatin1String("pbkdf1(md2)"))
+                return new opensslPbkdf1Context(EVP_md2(), this, type);
+#endif
+            else if (type == QLatin1String("md4"))
+                return new opensslHashContext(EVP_md4(), this, type);
+#ifdef OBJ_whirlpool
+            else if (type == QLatin1String("whirlpool"))
+                return new opensslHashContext(EVP_whirlpool(), this, type);
+#endif
+            else if (type == QLatin1String("pbkdf1(sha1)"))
+                return new opensslPbkdf1Context(EVP_sha1(), this, type);
+            else if (type == QLatin1String("pkcs12"))
+                return new MyPKCS12Context(this);
+        }
+
         return nullptr;
     }
 };

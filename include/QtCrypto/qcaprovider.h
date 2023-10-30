@@ -381,7 +381,7 @@ public:
        \param keyLength the length of the key to be produced
        \param iterationCount the number of iterations of the derivation algorithm
     */
-    virtual SymmetricKey makeKey(const SecureArray &         secret,
+    virtual SymmetricKey makeKey(const SecureArray          &secret,
                                  const InitializationVector &salt,
                                  unsigned int                keyLength,
                                  unsigned int                iterationCount) = 0;
@@ -395,11 +395,11 @@ public:
        \param msecInterval the maximum time to compute the key, in milliseconds
        \param iterationCount a pointer to store the number of iterations of the derivation algorithm
     */
-    virtual SymmetricKey makeKey(const SecureArray &         secret,
+    virtual SymmetricKey makeKey(const SecureArray          &secret,
                                  const InitializationVector &salt,
                                  unsigned int                keyLength,
                                  int                         msecInterval,
-                                 unsigned int *              iterationCount) = 0;
+                                 unsigned int               *iterationCount) = 0;
 };
 
 /**
@@ -435,7 +435,7 @@ public:
        \param info the info / initialization vector
        \param keyLength the length of the key to be produced
     */
-    virtual SymmetricKey makeKey(const SecureArray &         secret,
+    virtual SymmetricKey makeKey(const SecureArray          &secret,
                                  const InitializationVector &salt,
                                  const InitializationVector &info,
                                  unsigned int                keyLength) = 0;
@@ -1388,7 +1388,7 @@ public:
     */
     virtual Validity validate(const QList<CertContext *> &trusted,
                               const QList<CertContext *> &untrusted,
-                              const QList<CRLContext *> & crls,
+                              const QList<CRLContext *>  &crls,
                               UsageMode                   u,
                               ValidateFlags               vf) const = 0;
 
@@ -1409,7 +1409,7 @@ public:
     */
     virtual Validity validate_chain(const QList<CertContext *> &chain,
                                     const QList<CertContext *> &trusted,
-                                    const QList<CRLContext *> & crls,
+                                    const QList<CRLContext *>  &crls,
                                     UsageMode                   u,
                                     ValidateFlags               vf) const = 0;
 };
@@ -1704,10 +1704,10 @@ public:
        \param priv the private key to store
        \param passphrase the passphrase to encrypt the PKCS#12 data with
     */
-    virtual QByteArray toPKCS12(const QString &                   name,
+    virtual QByteArray toPKCS12(const QString                    &name,
                                 const QList<const CertContext *> &chain,
-                                const PKeyContext &               priv,
-                                const SecureArray &               passphrase) const = 0;
+                                const PKeyContext                &priv,
+                                const SecureArray                &passphrase) const = 0;
 
     /**
        Read PKCS#12 DER input and convert it into a set of output items
@@ -1723,11 +1723,11 @@ public:
        \param chain the destination list for the certificate chain
        \param priv address of a pointer to accept the private key
     */
-    virtual ConvertResult fromPKCS12(const QByteArray &    in,
-                                     const SecureArray &   passphrase,
-                                     QString *             name,
+    virtual ConvertResult fromPKCS12(const QByteArray     &in,
+                                     const SecureArray    &passphrase,
+                                     QString              *name,
                                      QList<CertContext *> *chain,
-                                     PKeyContext **        priv) const = 0;
+                                     PKeyContext         **priv) const = 0;
 };
 
 /**
@@ -2673,11 +2673,11 @@ public:
        \param ext_ssf the SSF of the external authentication channel
        (client only)
     */
-    virtual void setup(const QString & service,
-                       const QString & host,
+    virtual void setup(const QString  &service,
+                       const QString  &host,
                        const HostPort *local,
                        const HostPort *remote,
-                       const QString & ext_id,
+                       const QString  &ext_id,
                        int             ext_ssf) = 0;
 
     /**

@@ -38,7 +38,7 @@ public:
     class DirItem
     {
     public:
-        QCA::DirWatch * dirWatch;
+        QCA::DirWatch  *dirWatch;
         QCA::SafeTimer *changeTimer;
     };
 

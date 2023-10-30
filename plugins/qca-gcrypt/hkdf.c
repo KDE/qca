@@ -29,16 +29,16 @@ static gcry_error_t gcry_hkdf(int         algo,
                               size_t      n_salt,
                               const char *info,
                               size_t      n_info,
-                              char *      output,
+                              char       *output,
                               size_t      n_output)
 {
-    void *       alloc  = nullptr;
-    void *       buffer = nullptr;
+    void        *alloc  = nullptr;
+    void        *buffer = nullptr;
     gcry_md_hd_t md1, md2;
     unsigned int hash_len;
     int          i;
     size_t       step, n_buffer;
-    char *       at;
+    char        *at;
     gcry_error_t gcry;
 
     hash_len = gcry_md_get_algo_dlen(algo);

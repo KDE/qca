@@ -80,7 +80,7 @@ bool botan_init(int prealloc, bool mmap)
 
     try {
         Botan::Builtin_Modules modules;
-        Botan::Library_State * libstate = new Botan::Library_State(modules.mutex_factory());
+        Botan::Library_State  *libstate = new Botan::Library_State(modules.mutex_factory());
         libstate->prealloc_size         = prealloc * 1024;
         Botan::set_global_state(libstate);
         Botan::global_state().load(modules);
@@ -187,7 +187,7 @@ struct alloc_info
 
     // internal
     Botan::SecureVector<Botan::byte> *sbuf;
-    QByteArray *                      qbuf;
+    QByteArray                       *qbuf;
 };
 
 // note: these functions don't return error if memory allocation/resizing

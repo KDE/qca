@@ -101,8 +101,8 @@ myTypeName = QCA::methodReturnType( testClass.metaObject(), QByteArray( "boolMet
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 QCA_EXPORT int methodReturnType(const QMetaObject *obj, const QByteArray &method, const QList<QByteArray> &argTypes);
 #else
-QCA_EXPORT QByteArray methodReturnType(const QMetaObject *     obj,
-                                       const QByteArray &      method,
+QCA_EXPORT QByteArray methodReturnType(const QMetaObject      *obj,
+                                       const QByteArray       &method,
                                        const QList<QByteArray> argTypes);
 #endif
 
@@ -147,10 +147,10 @@ ret = QCA::invokeMethodWithVariants( testClass1, QByteArray( "boolMethod" ), arg
 
    \relates SyncThread
 */
-QCA_EXPORT bool invokeMethodWithVariants(QObject *           obj,
-                                         const QByteArray &  method,
+QCA_EXPORT bool invokeMethodWithVariants(QObject            *obj,
+                                         const QByteArray   &method,
                                          const QVariantList &args,
-                                         QVariant *          ret,
+                                         QVariant           *ret,
                                          Qt::ConnectionType  type = Qt::AutoConnection);
 
 /**

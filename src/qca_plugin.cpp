@@ -93,7 +93,7 @@ class PluginInstance
 {
 private:
     QPluginLoader *_loader;
-    QObject *      _instance;
+    QObject       *_instance;
     bool           _ownInstance;
 
     PluginInstance()
@@ -154,7 +154,7 @@ public:
         }
     }
 
-    PluginInstance(const PluginInstance &) = delete;
+    PluginInstance(const PluginInstance &)            = delete;
     PluginInstance &operator=(const PluginInstance &) = delete;
 
     void claim()
@@ -212,7 +212,7 @@ public:
     static ProviderItem *loadStatic(QObject *instance, QString *errstr = nullptr)
     {
         PluginInstance *i      = PluginInstance::fromStatic(instance);
-        QCAPlugin *     plugin = qobject_cast<QCAPlugin *>(i->instance());
+        QCAPlugin      *plugin = qobject_cast<QCAPlugin *>(i->instance());
         if (!plugin) {
             if (errstr)
                 *errstr = QStringLiteral("does not offer QCAPlugin interface");
@@ -316,7 +316,7 @@ void ProviderManager::scan()
         if (list.isEmpty())
             logDebug(QStringLiteral("  (none)"));
         for (int n = 0; n < list.count(); ++n) {
-            QObject *     instance  = list[n];
+            QObject      *instance  = list[n];
             const QString className = QString::fromLatin1(instance->metaObject()->className());
 
             QString       errstr;
@@ -518,7 +518,7 @@ void ProviderManager::setDefault(Provider *p)
 Provider *ProviderManager::find(Provider *_p) const
 {
     ProviderItem *i = nullptr;
-    Provider *    p = nullptr;
+    Provider     *p = nullptr;
 
     providerMutex.lock();
     if (_p == def) {
@@ -543,7 +543,7 @@ Provider *ProviderManager::find(Provider *_p) const
 Provider *ProviderManager::find(const QString &name) const
 {
     ProviderItem *i = nullptr;
-    Provider *    p = nullptr;
+    Provider     *p = nullptr;
 
     providerMutex.lock();
     if (def && name == def->name()) {

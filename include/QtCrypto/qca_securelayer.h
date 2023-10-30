@@ -1062,8 +1062,8 @@ public:
        \param mechlist the list of mechanisms which can be used
        \param mode the mode to use on the client side
     */
-    void startClient(const QString &    service,
-                     const QString &    host,
+    void startClient(const QString     &service,
+                     const QString     &host,
                      const QStringList &mechlist,
                      ClientSendMode     mode = AllowClientSendFirst);
 

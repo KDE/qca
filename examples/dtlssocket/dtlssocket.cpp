@@ -144,9 +144,9 @@ class DTLSSocket::Private : public QObject
 {
     Q_OBJECT
 public:
-    DTLSSocket *     q;
-    QUdpSocket *     sock = nullptr;
-    QCA::TLS *       tls;
+    DTLSSocket      *q;
+    QUdpSocket      *sock = nullptr;
+    QCA::TLS        *tls;
     QCA::Certificate cert;
     QCA::PrivateKey  privkey;
     QHostAddress     dstHost;

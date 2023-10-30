@@ -255,7 +255,7 @@ public Q_SLOTS:
         int                  at = findItem(trackerId);
         if (at == -1)
             return out;
-        Item &                              i    = items[at];
+        Item                               &i    = items[at];
         const QList<KeyStoreEntryContext *> list = i.owner->entryList(i.storeContextId);
         for (int n = 0; n < list.count(); ++n) {
             KeyStoreEntry entry;
@@ -632,7 +632,7 @@ public:
         delete thread;
     }
 
-    KeyStoreManagerGlobal(const KeyStoreManagerGlobal &) = delete;
+    KeyStoreManagerGlobal(const KeyStoreManagerGlobal &)            = delete;
     KeyStoreManagerGlobal &operator=(const KeyStoreManagerGlobal &) = delete;
 };
 
@@ -694,7 +694,7 @@ KeyStoreEntry::~KeyStoreEntry()
 KeyStoreEntry &KeyStoreEntry::operator=(const KeyStoreEntry &from)
 {
     Algorithm::operator=(from);
-    *d                 = *from.d;
+    *d = *from.d;
     return *this;
 }
 
@@ -810,7 +810,7 @@ public:
     KeyStoreManager       ksm;
     KeyStoreEntry         entry;
     QString               storeId, entryId;
-    KeyStore *            ks;
+    KeyStore             *ks;
     bool                  avail;
 
     Private(KeyStoreEntryWatcher *_q)
@@ -1017,8 +1017,8 @@ class KeyStorePrivate : public QObject
 {
     Q_OBJECT
 public:
-    KeyStore *                 q;
-    KeyStoreManager *          ksm;
+    KeyStore                  *q;
+    KeyStoreManager           *ksm;
     int                        trackerId;
     KeyStoreTracker::Item      item;
     bool                       async;

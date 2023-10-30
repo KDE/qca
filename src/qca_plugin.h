@@ -43,9 +43,9 @@ public:
     bool         unload(const QString &name);
     void         unloadAll();
     void         setDefault(Provider *p);
-    Provider *   find(Provider *p) const;
-    Provider *   find(const QString &name) const;
-    Provider *   findFor(const QString &name, const QString &type) const;
+    Provider    *find(Provider *p) const;
+    Provider    *find(const QString &name) const;
+    Provider    *findFor(const QString &name, const QString &type) const;
     void         changePriority(const QString &name, int priority);
     int          getPriority(const QString &name);
     QStringList  allFeatures() const;
@@ -62,7 +62,7 @@ private:
     QString               dtext;
     QList<ProviderItem *> providerItemList;
     ProviderList          providerList;
-    Provider *            def;
+    Provider             *def;
     bool                  scanned_static;
     void                  addItem(ProviderItem *i, int priority);
     bool                  haveAlready(const QString &name) const;

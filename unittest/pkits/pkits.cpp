@@ -256,6 +256,9 @@ void Pkits::pkits4_1_4()
 
 void Pkits::pkits4_1_5()
 {
+    // openssl has decided that they don't want to support this ¯\_(ツ)_/¯
+    // https://github.com/openssl/openssl/issues/20233
+#if 0
     QStringList providersToTest;
     providersToTest.append(QStringLiteral("qca-ossl"));
 
@@ -298,6 +301,7 @@ void Pkits::pkits4_1_5()
             QCOMPARE(cert.validate(trusted, untrusted), QCA::ValidityGood);
         }
     }
+#endif
 }
 
 void Pkits::pkits4_1_6()

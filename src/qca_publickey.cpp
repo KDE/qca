@@ -127,7 +127,7 @@ public:
     static QList<PBEAlgorithm> getList(Provider *p)
     {
         QList<PBEAlgorithm> list;
-        const PKeyContext * c = static_cast<const PKeyContext *>(getContext(QStringLiteral("pkey"), p));
+        const PKeyContext  *c = static_cast<const PKeyContext *>(getContext(QStringLiteral("pkey"), p));
         if (!c)
             return list;
         list = c->supportedPBEAlgorithms();
@@ -348,11 +348,11 @@ PBEAlgorithm get_pbe_default()
 }
 
 static PrivateKey get_privatekey_der(const SecureArray &der,
-                                     const QString &    fileName,
-                                     void *             ptr,
+                                     const QString     &fileName,
+                                     void              *ptr,
                                      const SecureArray &passphrase,
-                                     ConvertResult *    result,
-                                     const QString &    provider)
+                                     ConvertResult     *result,
+                                     const QString     &provider)
 {
     PrivateKey    out;
     ConvertResult r;
@@ -369,12 +369,12 @@ static PrivateKey get_privatekey_der(const SecureArray &der,
     return out;
 }
 
-static PrivateKey get_privatekey_pem(const QString &    pem,
-                                     const QString &    fileName,
-                                     void *             ptr,
+static PrivateKey get_privatekey_pem(const QString     &pem,
+                                     const QString     &fileName,
+                                     void              *ptr,
                                      const SecureArray &passphrase,
-                                     ConvertResult *    result,
-                                     const QString &    provider)
+                                     ConvertResult     *result,
+                                     const QString     &provider)
 {
     PrivateKey    out;
     ConvertResult r;
@@ -561,7 +561,7 @@ PKey::~PKey()
 PKey &PKey::operator=(const PKey &from)
 {
     Algorithm::operator=(from);
-    *d                 = *from.d;
+    *d = *from.d;
     return *this;
 }
 
@@ -850,7 +850,7 @@ bool PublicKey::validSignature(const QByteArray &sig)
 }
 
 bool PublicKey::verifyMessage(const MemoryRegion &a,
-                              const QByteArray &  sig,
+                              const QByteArray   &sig,
                               SignatureAlgorithm  alg,
                               SignatureFormat     format)
 {
@@ -863,7 +863,7 @@ QByteArray PublicKey::toDER() const
 {
     QByteArray         out;
     const PKeyContext *cur = static_cast<const PKeyContext *>(context());
-    Provider *         p   = providerForIOType(type(), cur);
+    Provider          *p   = providerForIOType(type(), cur);
     if (!p)
         return out;
     if (cur->provider() == p) {
@@ -1041,7 +1041,7 @@ SecureArray PrivateKey::toDER(const SecureArray &passphrase, PBEAlgorithm pbe) c
     if (pbe == PBEDefault)
         pbe = get_pbe_default();
     const PKeyContext *cur = static_cast<const PKeyContext *>(context());
-    Provider *         p   = providerForPBE(pbe, type(), cur);
+    Provider          *p   = providerForPBE(pbe, type(), cur);
     if (!p)
         return out;
     if (cur->provider() == p) {
@@ -1061,7 +1061,7 @@ QString PrivateKey::toPEM(const SecureArray &passphrase, PBEAlgorithm pbe) const
     if (pbe == PBEDefault)
         pbe = get_pbe_default();
     const PKeyContext *cur = static_cast<const PKeyContext *>(context());
-    Provider *         p   = providerForPBE(pbe, type(), cur);
+    Provider          *p   = providerForPBE(pbe, type(), cur);
     if (!p)
         return out;
     if (cur->provider() == p) {
@@ -1092,10 +1092,10 @@ PrivateKey::fromPEM(const QString &s, const SecureArray &passphrase, ConvertResu
     return get_privatekey_pem(s, QString(), (void *)&s, passphrase, result, provider);
 }
 
-PrivateKey PrivateKey::fromPEMFile(const QString &    fileName,
+PrivateKey PrivateKey::fromPEMFile(const QString     &fileName,
                                    const SecureArray &passphrase,
-                                   ConvertResult *    result,
-                                   const QString &    provider)
+                                   ConvertResult     *result,
+                                   const QString     &provider)
 {
     QString pem;
     if (!stringFromFile(fileName, &pem)) {
@@ -1118,8 +1118,8 @@ public:
     PrivateKey    key;
     DLGroup       group;
 
-    PKeyBase *      k;
-    PKeyContext *   dest;
+    PKeyBase       *k;
+    PKeyContext    *dest;
     DLGroupContext *dc;
 
     Private(KeyGenerator *_parent)
@@ -1356,7 +1356,7 @@ RSAPrivateKey::RSAPrivateKey(const BigInteger &n,
                              const BigInteger &p,
                              const BigInteger &q,
                              const BigInteger &d,
-                             const QString &   provider)
+                             const QString    &provider)
 {
     RSAContext *k = static_cast<RSAContext *>(getContext(QStringLiteral("rsa"), provider));
     k->createPrivate(n, e, p, q, d);

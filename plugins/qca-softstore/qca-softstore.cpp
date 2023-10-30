@@ -515,10 +515,10 @@ private:
     QString             _serialized;
 
 public:
-    softstoreKeyStoreEntryContext(const KeyBundle &     key,
+    softstoreKeyStoreEntryContext(const KeyBundle      &key,
                                   const SoftStoreEntry &entry,
-                                  const QString &       serialized,
-                                  Provider *            p)
+                                  const QString        &serialized,
+                                  Provider             *p)
         : KeyStoreEntryContext(p)
     {
         _item_type  = KeyStoreEntry::TypeKeyBundle;

@@ -102,7 +102,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
         const QStringList f = (*it).split(QLatin1Char(':'));
         if (f.count() < 1)
             continue;
-        QString type = f[0];
+        const QString &type = f[0];
 
         bool key     = false; // key or not
         bool primary = false; // primary key or sub key
@@ -126,13 +126,13 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
             if (primary) {
                 keyList += GpgOp::Key();
 
-                QString trust = f[1];
+                const QString &trust = f[1];
                 if (trust == QLatin1String("f") || trust == QLatin1String("u"))
                     keyList.last().isTrusted = true;
             }
 
-            const int     key_type = f[3].toInt();
-            const QString caps     = f[11];
+            const int      key_type = f[3].toInt();
+            const QString &caps     = f[11];
 
             GpgOp::KeyItem item;
             item.bits = f[2].toInt();
@@ -161,7 +161,7 @@ static bool stringToKeyList(const QString &outstr, GpgOp::KeyList *_keylist, QSt
             const QByteArray uid = getCString(f[9].toUtf8());
             keyList.last().userIds.append(QString::fromUtf8(uid));
         } else if (type == QLatin1String("fpr")) {
-            QString s                                  = f[9];
+            const QString &s                           = f[9];
             keyList.last().keyItems.last().fingerprint = s;
         }
     }

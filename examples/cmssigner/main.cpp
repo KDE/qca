@@ -172,11 +172,11 @@ class SignOperation : public Operation
     Q_OBJECT
 private:
     QByteArray             in;
-    CertItemStore *        store;
+    CertItemStore         *store;
     int                    id;
-    QCA::CMS *             cms;
+    QCA::CMS              *cms;
     CertItemPrivateLoader *loader;
-    QCA::SecureMessage *   msg;
+    QCA::SecureMessage    *msg;
     int                    pending;
 
 public:
@@ -266,7 +266,7 @@ class VerifyOperation : public Operation
     Q_OBJECT
 private:
     QByteArray          in, sig;
-    QCA::CMS *          cms;
+    QCA::CMS           *cms;
     QCA::SecureMessage *msg;
     int                 pending;
 
@@ -356,10 +356,10 @@ class MainWin : public QMainWindow
     Q_OBJECT
 private:
     Ui_MainWin       ui;
-    CertItemStore *  users, *roots;
-    QCA::CMS *       cms;
-    Operation *      op;
-    QAction *        actionView, *actionRename, *actionRemove;
+    CertItemStore   *users, *roots;
+    QCA::CMS        *cms;
+    Operation       *op;
+    QAction         *actionView, *actionRename, *actionRemove;
     QCA::Certificate self_signed_verify_cert;
     int              auto_import_req_id;
 

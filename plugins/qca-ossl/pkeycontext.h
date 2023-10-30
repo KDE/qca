@@ -47,12 +47,12 @@ public:
     QList<PKey::Type>   supportedIOTypes() const override;
     QList<PBEAlgorithm> supportedPBEAlgorithms() const override;
 
-    PKeyBase *      key() override;
+    PKeyBase       *key() override;
     const PKeyBase *key() const override;
     void            setKey(PKeyBase *key) override;
     bool            importKey(const PKeyBase *key) override;
-    EVP_PKEY *      get_pkey() const;
-    PKeyBase *      pkeyToBase(EVP_PKEY *pkey, bool sec) const;
+    EVP_PKEY       *get_pkey() const;
+    PKeyBase       *pkeyToBase(EVP_PKEY *pkey, bool sec) const;
     QByteArray      publicToDER() const override;
     QString         publicToPEM() const override;
     ConvertResult   publicFromDER(const QByteArray &in) override;
