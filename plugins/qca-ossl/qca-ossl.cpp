@@ -430,6 +430,7 @@ public:
 protected:
 };
 
+#ifndef LIBRESSL_VERSION_NUMBER
 class opensslHkdfContext : public HKDFContext
 {
     Q_OBJECT
@@ -499,6 +500,7 @@ public:
         return out;
     }
 };
+#endif // LIBRESSL_VERSION_NUMBER
 
 class opensslHMACContext : public MACContext
 {
@@ -2140,7 +2142,9 @@ public:
             list += QStringLiteral("pkcs12");
         }
         list += QStringLiteral("pbkdf2(sha1)");
+#ifndef LIBRESSL_VERSION_NUMBER
         list += QStringLiteral("hkdf(sha256)");
+#endif // LIBRESSL_VERSION_NUMBER
         list += QStringLiteral("pkey");
         list += QStringLiteral("dlgroup");
         list += QStringLiteral("rsa");
@@ -2211,8 +2215,10 @@ public:
 #endif
         else if (type == QLatin1String("pbkdf2(sha1)"))
             return new opensslPbkdf2Context(this, type);
+#ifndef LIBRESSL_VERSION_NUMBER
         else if (type == QLatin1String("hkdf(sha256)"))
             return new opensslHkdfContext(this, type);
+#endif // LIBRESSL_VERSION_NUMBER
         else if (type == QLatin1String("hmac(md5)"))
             return new opensslHMACContext(EVP_md5(), this, type);
         else if (type == QLatin1String("hmac(sha1)"))
