@@ -4757,7 +4757,6 @@ public:
     MyPKCS12Context(Provider *p)
         : PKCS12Context(p)
     {
-        Q_ASSERT(s_legacyProviderAvailable);
     }
 
     ~MyPKCS12Context() override
@@ -6717,8 +6716,8 @@ public:
             list += QStringLiteral("pbkdf1(md2)");
 #endif
             list += QStringLiteral("pbkdf1(sha1)");
-            list += QStringLiteral("pkcs12");
         }
+        list += QStringLiteral("pkcs12");
         list += QStringLiteral("pbkdf2(sha1)");
         list += QStringLiteral("hkdf(sha256)");
         list += QStringLiteral("pkey");
@@ -6882,6 +6881,12 @@ public:
             return new CMSContext(this);
         else if (type == QLatin1String("ca"))
             return new MyCAContext(this);
+        else if (type == QLatin1String("tripledes-ecb"))
+            return new opensslCipherContext(EVP_des_ede3(), 0, this, type);
+        else if (type == QLatin1String("tripledes-cbc"))
+            return new opensslCipherContext(EVP_des_ede3_cbc(), 0, this, type);
+        else if (type == QLatin1String("pkcs12"))
+            return new MyPKCS12Context(this);
 
         else if (s_legacyProviderAvailable) {
             if (type == QLatin1String("blowfish-ecb"))
@@ -6894,10 +6899,6 @@ public:
                 return new opensslCipherContext(EVP_bf_cbc(), 0, this, type);
             else if (type == QLatin1String("blowfish-cbc-pkcs7"))
                 return new opensslCipherContext(EVP_bf_cbc(), 1, this, type);
-            else if (type == QLatin1String("tripledes-ecb"))
-                return new opensslCipherContext(EVP_des_ede3(), 0, this, type);
-            else if (type == QLatin1String("tripledes-cbc"))
-                return new opensslCipherContext(EVP_des_ede3_cbc(), 0, this, type);
             else if (type == QLatin1String("des-ecb"))
                 return new opensslCipherContext(EVP_des_ecb(), 0, this, type);
             else if (type == QLatin1String("des-ecb-pkcs7"))
@@ -6940,8 +6941,6 @@ public:
 #endif
             else if (type == QLatin1String("pbkdf1(sha1)"))
                 return new opensslPbkdf1Context(EVP_sha1(), this, type);
-            else if (type == QLatin1String("pkcs12"))
-                return new MyPKCS12Context(this);
         }
 
         return nullptr;
