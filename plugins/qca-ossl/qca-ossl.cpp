@@ -6631,8 +6631,12 @@ public:
     opensslProvider()
     {
         openssl_initted = false;
+// OPENSSL_VERSION_MAJOR is only defined in openssl3
 #ifdef OPENSSL_VERSION_MAJOR
-        s_legacyProviderAvailable = OSSL_PROVIDER_available(nullptr, "legacy");
+        /* Load the legacy providers into the default (NULL) library context */
+        if (OSSL_PROVIDER_try_load(nullptr, "legacy", 1)) {
+            s_legacyProviderAvailable = true;
+        }
 #else
         s_legacyProviderAvailable = true;
 #endif
@@ -6642,24 +6646,6 @@ public:
     {
         OpenSSL_add_all_algorithms();
         ERR_load_crypto_strings();
-
-// OPENSSL_VERSION_MAJOR is only defined in openssl3
-#ifdef OPENSSL_VERSION_MAJOR
-        /* Load Multiple providers into the default (NULL) library context */
-        OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(nullptr, "legacy");
-        if (s_legacyProviderAvailable && !legacy) {
-            printf("Failed to load Legacy provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
-            exit(EXIT_FAILURE);
-        }
-        OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(nullptr, "default");
-        if (deflt == nullptr) {
-            printf("Failed to load Default provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
-            if (legacy) {
-                OSSL_PROVIDER_unload(legacy);
-            }
-            exit(EXIT_FAILURE);
-        }
-#endif
 
         // seed the RNG if it's not seeded yet
         if (RAND_status() == 0) {
