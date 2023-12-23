@@ -6513,14 +6513,14 @@ static QStringList all_cipher_types()
 #ifdef HAVE_OPENSSL_AES_CCM
     list += QStringLiteral("aes256-ccm");
 #endif
+    list += QStringLiteral("tripledes-ecb");
+    list += QStringLiteral("tripledes-cbc");
     if (s_legacyProviderAvailable) {
         list += QStringLiteral("blowfish-ecb");
         list += QStringLiteral("blowfish-cbc-pkcs7");
         list += QStringLiteral("blowfish-cbc");
         list += QStringLiteral("blowfish-cfb");
         list += QStringLiteral("blowfish-ofb");
-        list += QStringLiteral("tripledes-ecb");
-        list += QStringLiteral("tripledes-cbc");
         list += QStringLiteral("des-ecb");
         list += QStringLiteral("des-ecb-pkcs7");
         list += QStringLiteral("des-cbc");
