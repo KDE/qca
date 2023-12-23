@@ -561,7 +561,7 @@ PKey::~PKey()
 PKey &PKey::operator=(const PKey &from)
 {
     Algorithm::operator=(from);
-    *d                 = *from.d;
+    *d = *from.d;
     return *this;
 }
 

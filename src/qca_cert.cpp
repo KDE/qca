@@ -1482,7 +1482,7 @@ Certificate::~Certificate()
 Certificate &Certificate::operator=(const Certificate &from)
 {
     Algorithm::operator=(from);
-    d                  = from.d;
+    d = from.d;
     return *this;
 }
 
@@ -1859,7 +1859,7 @@ CertificateRequest::~CertificateRequest()
 CertificateRequest &CertificateRequest::operator=(const CertificateRequest &from)
 {
     Algorithm::operator=(from);
-    d                  = from.d;
+    d = from.d;
     return *this;
 }
 
@@ -2152,7 +2152,7 @@ CRL::~CRL()
 CRL &CRL::operator=(const CRL &from)
 {
     Algorithm::operator=(from);
-    d                  = from.d;
+    d = from.d;
     return *this;
 }
 

@@ -315,7 +315,7 @@ Cipher::~Cipher()
 Cipher &Cipher::operator=(const Cipher &from)
 {
     Algorithm::operator=(from);
-    *d                 = *from.d;
+    *d = *from.d;
     return *this;
 }
 
@@ -496,7 +496,7 @@ MessageAuthenticationCode::~MessageAuthenticationCode()
 MessageAuthenticationCode &MessageAuthenticationCode::operator=(const MessageAuthenticationCode &from)
 {
     Algorithm::operator=(from);
-    *d                 = *from.d;
+    *d = *from.d;
     return *this;
 }
 

@@ -669,7 +669,7 @@ public:
     explicit Initializer(MemoryMode m = Practical, int prealloc = 64);
     ~Initializer();
 
-    Initializer(const Initializer &) = delete;
+    Initializer(const Initializer &)            = delete;
     Initializer &operator=(const Initializer &) = delete;
 };
 

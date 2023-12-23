@@ -154,7 +154,7 @@ public:
         }
     }
 
-    PluginInstance(const PluginInstance &) = delete;
+    PluginInstance(const PluginInstance &)            = delete;
     PluginInstance &operator=(const PluginInstance &) = delete;
 
     void claim()

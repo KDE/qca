@@ -146,7 +146,7 @@ private:
             }
         }
 
-        pkcs11KeyStoreItem(const pkcs11KeyStoreItem &) = delete;
+        pkcs11KeyStoreItem(const pkcs11KeyStoreItem &)            = delete;
         pkcs11KeyStoreItem &operator=(const pkcs11KeyStoreItem &) = delete;
 
         inline int id() const

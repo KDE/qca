@@ -29,7 +29,7 @@
 #include <QPair>
 #include <QWaitCondition>
 
-//#define TIMERFIXER_DEBUG
+// #define TIMERFIXER_DEBUG
 
 #ifdef TIMERFIXER_DEBUG
 #include <stdio.h>

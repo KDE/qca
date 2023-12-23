@@ -708,14 +708,14 @@ static Constraints get_cert_key_usage(X509_EXTENSION *ex)
 {
     Constraints constraints;
     int         bit_table[9] = {DigitalSignature,
-                        NonRepudiation,
-                        KeyEncipherment,
-                        DataEncipherment,
-                        KeyAgreement,
-                        KeyCertificateSign,
-                        CRLSign,
-                        EncipherOnly,
-                        DecipherOnly};
+                                NonRepudiation,
+                                KeyEncipherment,
+                                DataEncipherment,
+                                KeyAgreement,
+                                KeyCertificateSign,
+                                CRLSign,
+                                EncipherOnly,
+                                DecipherOnly};
 
     ASN1_BIT_STRING *keyusage = (ASN1_BIT_STRING *)X509V3_EXT_d2i(ex);
     for (int n = 0; n < 9; ++n) {

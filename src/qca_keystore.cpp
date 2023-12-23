@@ -625,7 +625,7 @@ public:
         delete thread;
     }
 
-    KeyStoreManagerGlobal(const KeyStoreManagerGlobal &) = delete;
+    KeyStoreManagerGlobal(const KeyStoreManagerGlobal &)            = delete;
     KeyStoreManagerGlobal &operator=(const KeyStoreManagerGlobal &) = delete;
 };
 
@@ -687,7 +687,7 @@ KeyStoreEntry::~KeyStoreEntry()
 KeyStoreEntry &KeyStoreEntry::operator=(const KeyStoreEntry &from)
 {
     Algorithm::operator=(from);
-    *d                 = *from.d;
+    *d = *from.d;
     return *this;
 }
 
