@@ -38,6 +38,7 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void testrsa();
+    void testAsymmetricEncryption_data();
     void testAsymmetricEncryption();
 
 private:
@@ -148,6 +149,18 @@ void RSAUnitTest::testrsa()
     }
 }
 
+Q_DECLARE_METATYPE(QCA::EncryptionAlgorithm)
+
+void RSAUnitTest::testAsymmetricEncryption_data()
+{
+    QTest::addColumn<QCA::EncryptionAlgorithm>("algorithm");
+    QTest::addColumn<bool>("errorOnFailure");
+    QTest::addColumn<bool>("encryptWithPrivate");
+
+    QTest::newRow("PKCS1v15") << QCA::EME_PKCS1v15 << false << true;
+    QTest::newRow("PKCS1_OAEP") << QCA::EME_PKCS1_OAEP << true << false;
+}
+
 void RSAUnitTest::testAsymmetricEncryption()
 {
     if (!QCA::isSupported("pkey", QStringLiteral("qca-ossl")) ||
@@ -156,6 +169,11 @@ void RSAUnitTest::testAsymmetricEncryption()
         QWARN("RSA not supported");
         QSKIP("RSA not supported. skipping");
     }
+
+    QFETCH(QCA::EncryptionAlgorithm, algorithm);
+    QFETCH(bool, errorOnFailure);
+    QFETCH(bool, encryptWithPrivate);
+
     QCA::RSAPrivateKey rsaPrivKey1 = QCA::KeyGenerator().createRSA(512, 65537, QStringLiteral("qca-ossl")).toRSA();
     QCA::RSAPublicKey  rsaPubKey1  = rsaPrivKey1.toPublicKey().toRSA();
 
@@ -167,26 +185,34 @@ void RSAUnitTest::testAsymmetricEncryption()
     QCA::SecureArray       cipherText;
 
     // Test keys #1: Enc with public, dec with private
-    QVERIFY(rsaPubKey1.maximumEncryptSize(QCA::EME_PKCS1v15) >= clearText.size());
-    cipherText = rsaPubKey1.encrypt(clearText, QCA::EME_PKCS1v15);
-    QVERIFY(rsaPrivKey1.decrypt(cipherText, &testText, QCA::EME_PKCS1v15));
+    QVERIFY(rsaPubKey1.maximumEncryptSize(algorithm) >= clearText.size());
+    cipherText = rsaPubKey1.encrypt(clearText, algorithm);
+    QVERIFY(rsaPrivKey1.decrypt(cipherText, &testText, algorithm));
     QCOMPARE(clearText, testText);
     testText.clear();
     // ---
 
     // Test keys #2 to decipher key #1
-    QVERIFY(!rsaPrivKey2.decrypt(cipherText, &testText, QCA::EME_PKCS1v15));
-    QVERIFY(testText.isEmpty());
+    const bool success = rsaPrivKey2.decrypt(cipherText, &testText, algorithm);
+    if (errorOnFailure) {
+        QVERIFY(!success);
+        QVERIFY(testText.isEmpty());
+    } else {
+        QVERIFY(testText != clearText);
+        testText.clear();
+    }
     // ---
 
-    // Test keys #2: Enc with private, dec with public
-    cipherText.clear();
-    QVERIFY(rsaPrivKey1.maximumEncryptSize(QCA::EME_PKCS1v15) >= clearText.size());
-    cipherText = rsaPrivKey1.encrypt(clearText, QCA::EME_PKCS1v15);
-    QVERIFY(rsaPubKey1.decrypt(cipherText, &testText, QCA::EME_PKCS1v15));
-    QCOMPARE(clearText, testText);
-    testText.clear();
-    // ---
+    if (encryptWithPrivate) {
+        // Test keys #2: Enc with private, dec with public
+        cipherText.clear();
+        QVERIFY(rsaPrivKey1.maximumEncryptSize(algorithm) >= clearText.size());
+        cipherText = rsaPrivKey1.encrypt(clearText, algorithm);
+        QVERIFY(rsaPubKey1.decrypt(cipherText, &testText, algorithm));
+        QCOMPARE(clearText, testText);
+        testText.clear();
+        // ---
+    }
 }
 
 QTEST_MAIN(RSAUnitTest)
