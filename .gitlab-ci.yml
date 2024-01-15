@@ -5,6 +5,8 @@ include:
       - /gitlab-templates/linux-qt6.yml
       - /gitlab-templates/freebsd.yml
       - /gitlab-templates/freebsd-qt6.yml
+      - /gitlab-templates/android.yml
+      - /gitlab-templates/android-qt6.yml
 
 build_ubuntu_20_10:
   stage: build
