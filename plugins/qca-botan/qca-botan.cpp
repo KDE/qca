@@ -34,6 +34,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <utility>
 
 //-----------------------------------------------------------
 class botanRandomContext : public QCA::RandomContext
@@ -631,7 +632,7 @@ public:
             list += QStringLiteral("sha512");
             list += QStringLiteral("ripemd160");
 
-            for (const QString &hash : qAsConst(list)) {
+            for (const QString &hash : std::as_const(list)) {
                 std::unique_ptr<BotanHashContext> hashContext(new BotanHashContext(nullptr, hash));
                 if (hashContext->isOk()) {
                     supported << hash;
@@ -671,7 +672,7 @@ public:
             list += QStringLiteral("blowfish-cfb");
             list += QStringLiteral("blowfish-ofb");
 
-            for (const QString &cipher : qAsConst(list)) {
+            for (const QString &cipher : std::as_const(list)) {
                 const std::string bothanCipher = qcaCipherToBotanCipher(cipher);
                 try {
                     std::unique_ptr<Botan::Keyed_Filter> enc(
