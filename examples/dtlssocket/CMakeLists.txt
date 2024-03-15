@@ -1,8 +1,6 @@
-add_executable(dtlssocket dtlssocket.cpp main.cpp)
+set(dtlssocket_bin_SRCS dtlssocket.cpp main.cpp)
+
+add_executable(dtlssocket ${dtlssocket_bin_SRCS})
 
 target_link_qca_libraries(dtlssocket)
-if(QT6)
-  target_link_libraries(dtlssocket Qt6::Network)
-else()
-  target_link_libraries(dtlssocket Qt5::Network)
-endif()
+target_link_libraries(dtlssocket Qt${QT_MAJOR_VERSION}::Network)

@@ -924,7 +924,6 @@ public:
     MyPKCS12Context(Provider *p)
         : PKCS12Context(p)
     {
-        Q_ASSERT(s_legacyProviderAvailable);
     }
 
     ~MyPKCS12Context() override
@@ -1933,14 +1932,14 @@ static QStringList all_cipher_types()
 #ifdef HAVE_OPENSSL_AES_CCM
     list += QStringLiteral("aes256-ccm");
 #endif
+    list += QStringLiteral("tripledes-ecb");
+    list += QStringLiteral("tripledes-cbc");
     if (s_legacyProviderAvailable) {
         list += QStringLiteral("blowfish-ecb");
         list += QStringLiteral("blowfish-cbc-pkcs7");
         list += QStringLiteral("blowfish-cbc");
         list += QStringLiteral("blowfish-cfb");
         list += QStringLiteral("blowfish-ofb");
-        list += QStringLiteral("tripledes-ecb");
-        list += QStringLiteral("tripledes-cbc");
         list += QStringLiteral("des-ecb");
         list += QStringLiteral("des-ecb-pkcs7");
         list += QStringLiteral("des-cbc");
@@ -2051,8 +2050,12 @@ public:
     opensslProvider()
     {
         openssl_initted = false;
+// OPENSSL_VERSION_MAJOR is only defined in openssl3
 #ifdef OPENSSL_VERSION_MAJOR
-        s_legacyProviderAvailable = OSSL_PROVIDER_available(nullptr, "legacy");
+        /* Load the legacy providers into the default (NULL) library context */
+        if (OSSL_PROVIDER_try_load(nullptr, "legacy", 1)) {
+            s_legacyProviderAvailable = true;
+        }
 #else
         s_legacyProviderAvailable = true;
 #endif
@@ -2060,24 +2063,6 @@ public:
 
     void init() override
     {
-// OPENSSL_VERSION_MAJOR is only defined in openssl3
-#ifdef OPENSSL_VERSION_MAJOR
-        /* Load Multiple providers into the default (NULL) library context */
-        OSSL_PROVIDER *legacy = OSSL_PROVIDER_load(nullptr, "legacy");
-        if (s_legacyProviderAvailable && !legacy) {
-            printf("Failed to load Legacy provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
-            exit(EXIT_FAILURE);
-        }
-        OSSL_PROVIDER *deflt = OSSL_PROVIDER_load(nullptr, "default");
-        if (deflt == nullptr) {
-            printf("Failed to load Default provider: %s\n", ERR_error_string(ERR_get_error(), nullptr));
-            if (legacy) {
-                OSSL_PROVIDER_unload(legacy);
-            }
-            exit(EXIT_FAILURE);
-        }
-#endif
-
         // seed the RNG if it's not seeded yet
         if (RAND_status() == 0) {
             char buf[128];
@@ -2139,8 +2124,8 @@ public:
             list += QStringLiteral("pbkdf1(md2)");
 #endif
             list += QStringLiteral("pbkdf1(sha1)");
-            list += QStringLiteral("pkcs12");
         }
+        list += QStringLiteral("pkcs12");
         list += QStringLiteral("pbkdf2(sha1)");
 #ifndef LIBRESSL_VERSION_NUMBER
         list += QStringLiteral("hkdf(sha256)");
@@ -2331,6 +2316,12 @@ public:
             return new CMSContext(this);
         else if (type == QLatin1String("ca"))
             return new MyCAContext(this);
+        else if (type == QLatin1String("tripledes-ecb"))
+            return new opensslCipherContext(EVP_des_ede3(), 0, this, type);
+        else if (type == QLatin1String("tripledes-cbc"))
+            return new opensslCipherContext(EVP_des_ede3_cbc(), 0, this, type);
+        else if (type == QLatin1String("pkcs12"))
+            return new MyPKCS12Context(this);
 
         else if (s_legacyProviderAvailable) {
             if (type == QLatin1String("blowfish-ecb"))
@@ -2343,10 +2334,6 @@ public:
                 return new opensslCipherContext(EVP_bf_cbc(), 0, this, type);
             else if (type == QLatin1String("blowfish-cbc-pkcs7"))
                 return new opensslCipherContext(EVP_bf_cbc(), 1, this, type);
-            else if (type == QLatin1String("tripledes-ecb"))
-                return new opensslCipherContext(EVP_des_ede3(), 0, this, type);
-            else if (type == QLatin1String("tripledes-cbc"))
-                return new opensslCipherContext(EVP_des_ede3_cbc(), 0, this, type);
             else if (type == QLatin1String("des-ecb"))
                 return new opensslCipherContext(EVP_des_ecb(), 0, this, type);
             else if (type == QLatin1String("des-ecb-pkcs7"))
@@ -2389,8 +2376,6 @@ public:
 #endif
             else if (type == QLatin1String("pbkdf1(sha1)"))
                 return new opensslPbkdf1Context(EVP_sha1(), this, type);
-            else if (type == QLatin1String("pkcs12"))
-                return new MyPKCS12Context(this);
         }
 
         return nullptr;

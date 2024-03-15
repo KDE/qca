@@ -1,4 +1,5 @@
 rootcerts.pem is created by qca/tools/mozcerts
 
 File: https://hg.mozilla.org/mozilla-central/log/tip/security/nss/lib/ckfw/builtins/certdata.txt
-Date: April 22, 2023
+Date: January 1, 2024
+

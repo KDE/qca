@@ -121,7 +121,7 @@ void *MemoryMapping_Allocator::alloc_block(u32bit n)
             Q_ASSERT_X(fd == -1 || close(fd) != -1, "~TemporaryFile()", "Could not close file");
         }
 
-        TemporaryFile(const TemporaryFile &) = delete;
+        TemporaryFile(const TemporaryFile &)            = delete;
         TemporaryFile &operator=(const TemporaryFile &) = delete;
 
     private:

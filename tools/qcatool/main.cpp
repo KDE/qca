@@ -1760,7 +1760,7 @@ static QString get_fingerprint(const QCA::Certificate &cert, const QString &hash
 {
     QString hex = QCA::Hash(hashType).hashToString(cert.toDER());
     QString out;
-    for (int n = 0; n < hex.count(); ++n) {
+    for (int n = 0; n < hex.size(); ++n) {
         if (n != 0 && n % 2 == 0)
             out += QLatin1Char(':');
         out += hex[n];
