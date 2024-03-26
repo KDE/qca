@@ -125,9 +125,6 @@ SET( SOURCES ${SOURCES} ${botan_SOURCES})
 
 add_library(${QCA_LIB_NAME} ${SOURCES}  ${public_HEADERS})
 target_link_libraries(${QCA_LIB_NAME} PUBLIC Qt${QT_MAJOR_VERSION}::Core)
-if(BUILD_WITH_QT6)
-  target_link_libraries(${QCA_LIB_NAME} PRIVATE Qt6::Core5Compat)
-endif()
 
 if(WIN32)
   target_link_libraries(${QCA_LIB_NAME} PRIVATE crypt32 ws2_32)
