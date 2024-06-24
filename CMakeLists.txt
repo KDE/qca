@@ -13,7 +13,7 @@ project(qca)
 
 set(QCA_LIB_MAJOR_VERSION "2")
 set(QCA_LIB_MINOR_VERSION "3")
-set(QCA_LIB_PATCH_VERSION "8")
+set(QCA_LIB_PATCH_VERSION "9")
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 OLD)
