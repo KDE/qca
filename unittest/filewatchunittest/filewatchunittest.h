@@ -25,8 +25,8 @@
 #ifndef FILEWATCHUNITTEST_H
 #define FILEWATCHUNITTEST_H
 
+#include <QTest>
 #include <QtCrypto>
-#include <QtTest/QtTest>
 
 class FileWatchUnitTest : public QObject
 {

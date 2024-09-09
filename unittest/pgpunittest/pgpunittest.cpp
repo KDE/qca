@@ -23,8 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <QTest>
 #include <QtCrypto>
-#include <QtTest/QtTest>
 
 #include <cstdlib>
 

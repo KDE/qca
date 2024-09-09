@@ -25,8 +25,8 @@
 #ifndef CLIENTPLUGIN_H
 #define CLIENTPLUGIN_H
 
+#include <QTest>
 #include <QtCrypto>
-#include <QtTest/QtTest>
 
 class ClientPlugin : public QObject
 {

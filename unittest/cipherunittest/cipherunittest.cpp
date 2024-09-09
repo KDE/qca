@@ -26,8 +26,8 @@
 
 #include "cipherunittest.h"
 
+#include <QTest>
 #include <QtCrypto>
-#include <QtTest/QtTest>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"

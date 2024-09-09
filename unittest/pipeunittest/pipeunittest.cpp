@@ -23,8 +23,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <QSignalSpy>
+#include <QTest>
 #include <QtCrypto>
-#include <QtTest/QtTest>
 
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"

@@ -24,6 +24,9 @@
  */
 #include "filewatchunittest.h"
 
+#include <QSignalSpy>
+#include <QTemporaryFile>
+
 #ifdef QT_STATICPLUGIN
 #include "import_plugins.h"
 #endif
