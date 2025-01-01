@@ -45,7 +45,7 @@ namespace Botan {
 /*************************************************
  * Variable Length Memory Buffer                  *
  *************************************************/
-template<typename T> class MemoryRegion
+template<typename T> class MemoryRegion // clazy:exclude=rule-of-three
 {
 public:
     u32bit size() const
