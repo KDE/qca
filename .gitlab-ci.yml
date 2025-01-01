@@ -6,6 +6,7 @@ include:
       - /gitlab-templates/freebsd.yml
       - /gitlab-templates/freebsd-qt6.yml
       - /gitlab-templates/android-qt6.yml
+      - /gitlab-templates/clang-format.yml
 
 build_ubuntu_20_10:
   stage: build
@@ -96,16 +97,3 @@ build_openssl3_botan3:
     - echo "Make sure there is a difference without the legacy provider"
     - "! diff -u features-with-legacy features-without-legacy"
 
-clang_format:
-  stage: build
-  image: debian:testing
-  tags:
-    - Linux
-  only:
-    - merge_requests
-  before_script:
-    - apt-get update
-    - apt-get install --yes --no-install-recommends git clang-format-16
-  script:
-    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format-16 -i {} \;
-    - git diff --exit-code
