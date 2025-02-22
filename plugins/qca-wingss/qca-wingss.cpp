@@ -1010,7 +1010,7 @@ public:
 
             obuf[1] = (unsigned char)((_max_dec_size >> 16) & 0xff);
             obuf[2] = (unsigned char)((_max_dec_size >> 8) & 0xff);
-            obuf[3] = (unsigned char)((_max_dec_size)&0xff);
+            obuf[3] = (unsigned char)((_max_dec_size) & 0xff);
 
             if (!authzid.isEmpty())
                 obuf += authzid.toUtf8();
@@ -1077,7 +1077,7 @@ public:
             sasl_out[0] = (unsigned char)((len >> 24) & 0xff);
             sasl_out[1] = (unsigned char)((len >> 16) & 0xff);
             sasl_out[2] = (unsigned char)((len >> 8) & 0xff);
-            sasl_out[3] = (unsigned char)((len)&0xff);
+            sasl_out[3] = (unsigned char)((len) & 0xff);
 
             memcpy(sasl_out.data() + 4, kerb_out.data(), kerb_out.size());
 

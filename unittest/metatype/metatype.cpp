@@ -37,12 +37,12 @@ class TestClass1 : public QObject
     Q_OBJECT
 
 public:
-    TestClass1() {};
+    TestClass1() { };
     TestClass1(const TestClass1 &)
-        : QObject(nullptr) {};
+        : QObject(nullptr) { };
 
 public Q_SLOTS:
-    void    voidMethod() {};
+    void    voidMethod() { };
     QString qstringMethod()
     {
         return QString();

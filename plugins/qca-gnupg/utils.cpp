@@ -123,7 +123,7 @@ QString find_bin()
         return bin;
 #endif
 
-        // Look up at PATH environment
+    // Look up at PATH environment
 #ifdef Q_OS_WIN
     const QString pathSep = QStringLiteral(";");
 #else

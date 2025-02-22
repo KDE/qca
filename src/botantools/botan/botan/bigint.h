@@ -93,7 +93,7 @@ public:
     BigInt &operator*=(const BigInt &);
     BigInt &operator/=(const BigInt &);
     BigInt &operator%=(const BigInt &);
-    word operator%=(word);
+    word    operator%=(word);
     BigInt &operator<<=(u32bit);
     BigInt &operator>>=(u32bit);
 

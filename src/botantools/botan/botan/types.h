@@ -59,7 +59,7 @@ typedef unsigned char  byte;
 typedef unsigned short u16bit;
 typedef unsigned int   u32bit;
 
-typedef signed int       s32bit;
+typedef signed int s32bit;
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 typedef unsigned __int64 u64bit;
