@@ -123,13 +123,13 @@ QString find_bin()
         return bin;
 #endif
 
-    // Look up at PATH environment
 #ifdef Q_OS_WIN
     const QString pathSep = QStringLiteral(";");
 #else
     const QString pathSep = QStringLiteral(":");
 #endif
 
+    // Look up at PATH environment
     QStringList paths = QString::fromLocal8Bit(qgetenv("PATH")).split(pathSep, Qt::SkipEmptyParts);
 
 #ifdef Q_OS_MAC
