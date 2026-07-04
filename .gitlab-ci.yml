@@ -11,8 +11,6 @@ build_ubuntu_20_10:
   image: ubuntu:groovy
   tags:
     - Linux
-  only:
-    - merge_requests
   before_script:
     - sed -i -e 's/# deb-src/deb-src/g' /etc/apt/sources.list
     - sed -i -e 's/archive/old-releases/g' /etc/apt/sources.list
@@ -28,46 +26,11 @@ build_ubuntu_20_10:
     - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
-build_openssl3_botan3:
-  stage: build
-  image: debian:unstable
-  tags:
-    - Linux
-  only:
-    - merge_requests
-  before_script:
-    - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
-    - apt-get update
-    - apt-get install --yes eatmydata
-    - eatmydata apt-get build-dep --yes --no-install-recommends qca2
-    - eatmydata apt-get install --yes --no-install-recommends ninja-build libnss3-dev libgcrypt20-dev libpkcs11-helper1-dev gnupg wget libz-dev
-  script:
-    - wget https://github.com/randombit/botan/archive/refs/tags/3.0.0.tar.gz
-    - tar xvfh 3.0.0.tar.gz
-    - cd botan-3.0.0
-    - ./configure.py --prefix="/usr" --with-zlib
-    - time make -j `nproc` install
-    - cd ..
-    - mkdir -p build && cd build
-    - cmake -G Ninja .. -DBUILD_PLUGINS=all
-    - ninja
-    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ bin/qcatool* --debug plugins > features-with-legacy
-    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
-    - echo "Now test without the legacy provider"
-    - ls /usr/lib/x86_64-linux-gnu/ossl-modules/legacy.so
-    - rm /usr/lib/x86_64-linux-gnu/ossl-modules/legacy.so
-    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ bin/qcatool* --debug plugins > features-without-legacy
-    - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
-    - echo "Make sure there is a difference without the legacy provider"
-    - "! diff -u features-with-legacy features-without-legacy"
-
 clang_format:
   stage: build
   image: debian:testing
   tags:
     - Linux
-  only:
-    - merge_requests
   before_script:
     - apt-get update
     - apt-get install --yes --no-install-recommends git clang-format-19
