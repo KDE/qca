@@ -26,6 +26,20 @@ build_ubuntu_20_10:
     - ninja
     - QT_PLUGIN_PATH=`pwd`/lib/qca-qt5/ ctest -V
 
+
+build_fedora_rawhide_openssl4:
+  stage: build
+  image: fedora:rawhide
+  tags:
+    - Linux
+  before_script:
+    - dnf -y --setopt=install_weak_deps=False install git gcc-c++ make cmake ninja-build qt6-qtbase-devel qt6-qt5compat-devel botan3-devel cyrus-sasl-devel nss-devel libgcrypt-devel pkcs11-helper-devel gnupg
+  script:
+    - mkdir -p build && cd build
+    - cmake -G Ninja -DBUILD_WITH_QT6=ON .. -DBUILD_PLUGINS=all
+    - ninja
+    - OPENSSL_ENABLE_SHA1_SIGNATURES=1 QT_PLUGIN_PATH=`pwd`/lib/qca-qt6/ ctest -V
+
 clang_format:
   stage: build
   image: debian:testing
