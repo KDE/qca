@@ -40,6 +40,7 @@ private Q_SLOTS:
     void testRSA();
     void testDSA();
     void testDH();
+    void testDHDeriveKey();
 
 private:
     QCA::Initializer *m_init;
@@ -129,8 +130,10 @@ void KeyGenUnitTest::testDH()
     QCOMPARE(keygen.isBusy(), false);
     QCOMPARE(keygen.blockingEnabled(), true);
 
-    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DH) ||
-        !QCA::PKey::supportedIOTypes().contains(QCA::PKey::DH))
+    // Only key generation is exercised here, so do not require DH to appear in
+    // supportedIOTypes() - DH keys are not serialisable, which made this test
+    // skip unconditionally.
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DH))
         QSKIP("DH not supported!");
 
     QCA::DLGroup      group = keygen.createDLGroup(QCA::IETF_1024);
@@ -144,6 +147,32 @@ void KeyGenUnitTest::testDH()
     dh1   = priv3.toDH();
     QCOMPARE(dh1.isNull(), false);
     QCOMPARE(dh1.bitSize(), 2048);
+}
+
+void KeyGenUnitTest::testDHDeriveKey()
+{
+    QCA::KeyGenerator keygen;
+
+    if (!QCA::isSupported("pkey") || !QCA::PKey::supportedTypes().contains(QCA::PKey::DH))
+        QSKIP("DH not supported!");
+
+    const QCA::DLGroup group = keygen.createDLGroup(QCA::IETF_1024);
+    QCOMPARE(group.isNull(), false);
+
+    QCA::PrivateKey ours   = keygen.createDH(group);
+    QCA::PrivateKey theirs = keygen.createDH(group);
+    QCOMPARE(ours.isNull(), false);
+    QCOMPARE(theirs.isNull(), false);
+
+    // Key agreement is what consumers such as the Secret Service DH-AES session
+    // actually use. A key that failed to generate reaches this call looking
+    // valid, so exercise it rather than only inspecting the generated keys.
+    const QCA::SymmetricKey shared = ours.deriveKey(theirs.toPublicKey());
+    QCOMPARE(shared.isEmpty(), false);
+
+    // Both sides must arrive at the same secret.
+    const QCA::SymmetricKey otherSide = theirs.deriveKey(ours.toPublicKey());
+    QCOMPARE(shared, otherSide);
 }
 
 QTEST_MAIN(KeyGenUnitTest)

@@ -2721,8 +2721,16 @@ public:
 
     SymmetricKey deriveKey(const PKeyBase &theirs) override
     {
-        const DH     *dh   = EVP_PKEY_get0_DH(evp.pkey);
-        const DH     *them = EVP_PKEY_get0_DH(static_cast<const DHKey *>(&theirs)->evp.pkey);
+        // Not const: OpenSSL 1.1 takes a non-const EVP_PKEY * here.
+        EVP_PKEY *theirPkey = static_cast<const DHKey *>(&theirs)->evp.pkey;
+        if (!evp.pkey || !theirPkey)
+            return SymmetricKey();
+
+        const DH *dh   = EVP_PKEY_get0_DH(evp.pkey);
+        const DH *them = EVP_PKEY_get0_DH(theirPkey);
+        if (!dh || !them)
+            return SymmetricKey();
+
         const BIGNUM *bnpub_key;
         DH_get0_key(them, &bnpub_key, nullptr);
 
