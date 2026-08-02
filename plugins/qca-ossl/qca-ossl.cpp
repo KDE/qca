@@ -6667,6 +6667,11 @@ public:
         openssl_initted = false;
 // OPENSSL_VERSION_MAJOR is only defined in openssl3
 #ifdef OPENSSL_VERSION_MAJOR
+        /* Activating a provider explicitly disables the implicit loading of
+           the default one, so make sure it is present before asking for the
+           legacy provider below. Loading it again is a no-op. */
+        OSSL_PROVIDER_try_load(nullptr, "default", 1);
+
         /* Load the legacy providers into the default (NULL) library context */
         if (OSSL_PROVIDER_try_load(nullptr, "legacy", 1)) {
             s_legacyProviderAvailable = true;
